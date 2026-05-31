@@ -138,7 +138,37 @@ Watch the **slope** in the HTML report — latency drifting upward over the 4 ho
 
 ## SLO-shaped assertions (thresholds)
 
-NBomber expresses thresholds via `Scenario.WithLoadSimulations(...).WithInit(...)` plus post-run assertions in `NBomberRunner`. The idiomatic gate uses the **stats API** at the end of the run:
+NBomber has **two** ways to turn a run into a pass/fail gate. Use both: runtime thresholds for early-abort + report visibility, and a post-run stats check for the deterministic CI exit code.
+
+### Runtime thresholds — `.WithThresholds` (NBomber ≥ 5.8)
+
+Runtime thresholds are evaluated **every 5 seconds during the test**, surface in the HTML report, and can abort a doomed run early. Attach them to the scenario:
+
+```csharp
+return Scenario.Create("orders_average", async ctx => { /* ... */ })
+    .WithLoadSimulations(
+        Simulation.Inject(rate: 50, interval: TimeSpan.FromSeconds(1), during: TimeSpan.FromMinutes(5)))
+    .WithThresholds(
+        // Fail if error rate exceeds 0.5%
+        Threshold.Create(stats => stats.Fail.Request.Percent < 0.5),
+
+        // Fail if p95 latency exceeds 300ms
+        Threshold.Create(stats => stats.Ok.Latency.Percent95 < 300),
+
+        // RPS floor — but only start checking after the 30s warm-up window
+        Threshold.Create(stats => stats.Ok.Request.RPS > 100,
+                         startCheckAfter: TimeSpan.FromSeconds(30)),
+
+        // Abort the whole test after 5 consecutive checks see 503s
+        Threshold.Create(stats => !stats.Fail.StatusCodes.Exists("503"),
+                         abortWhenErrorCount: 5));
+```
+
+`Threshold.Create` also reads custom metrics (`stats => stats.Counters.Get("retries").Value < 100`) when a scenario records them.
+
+### Post-run stats check — the CI exit code
+
+Runtime thresholds influence the report, but the **deterministic build gate** is a post-run check against the final stats, with a non-zero `Environment.Exit`:
 
 ```csharp
 var result = NBomberRunner
@@ -153,7 +183,7 @@ if (p95 > 300)           Environment.Exit(1);   // p95 latency SLO
 if (fail > 0.005)        Environment.Exit(1);   // error-rate SLO
 ```
 
-Wrap in a small helper and call from `Program.cs`. Non-zero exit fails the pipeline step.
+Wrap in a small helper and call from `Program.cs`. Non-zero exit fails the pipeline step. Prefer the post-run check for the build gate because it's explicit and unit-testable; use runtime thresholds for fail-fast and report annotations.
 
 ## Step types (multi-step scenarios)
 
@@ -227,16 +257,60 @@ finally
 
 Namespace fixture ids per run (`perf-<guid>`) so parallel runs don't collide.
 
-## Tool version pinning
+## Data feeders
 
-Pin every NuGet reference in `PerfTests.csproj`:
+When each iteration needs different input — a unique user, a different product id, a randomized payload — use `DataFeed`. The source can be a CSV/JSON file (via the `NBomber.Data` package), an in-memory collection, or anything `IEnumerable<T>`.
 
-```xml
-<PackageReference Include="NBomber"      Version="5.7.0" />
-<PackageReference Include="NBomber.Http" Version="5.4.0" />
+```csharp
+// dotnet add package NBomber.Data
+using NBomber.Data;
+
+public record User(int Id, string Email, string Token);
+
+var users    = Data.LoadCsv<User>("test-data/users.csv");   // local path or https:// URL
+var userFeed = DataFeed.Constant(users);
+
+var scenario = Scenario.Create("authenticated_request", async ctx =>
+{
+    var user = userFeed.GetNextItem(ctx.ScenarioInfo);
+
+    var req = Http.CreateRequest("GET", $"{Env.BaseUrl}/users/{user.Id}/orders")
+                  .WithHeader("Authorization", $"Bearer {user.Token}");
+
+    var resp = await Http.Send(http, req);
+    return resp.IsError ? Response.Fail() : Response.Ok();
+});
 ```
 
-Never use floating-version (`5.*`).
+Three feed types — picking the right one matters more than people expect:
+
+| Feed | Semantics | Use when |
+|------|-----------|----------|
+| `DataFeed.Random(items)` | random pick per call | data needn't be unique per iteration (product ids, search terms) |
+| `DataFeed.Constant(items)` | **one item per virtual user**, stable for that VU's whole life | each VU needs a stable identity — the login case. VU #5 always logs in as `users[5]`. **Need ≥ as many items as `copies`** or NBomber recycles. |
+| `DataFeed.Circular(items)` | round-robin, restarts at the end | predictable ordered replay; every datum gets exercised |
+
+`Constant` is the trap: if you `Random` the user on every iteration of a stateful API you thrash session state and get unrealistic numbers. For a per-VU stable session, use `Constant` and read once at the top of the lambda.
+
+**Per-iteration uniqueness without a file** — combine the VU index and the per-VU iteration counter:
+
+```csharp
+var email = $"loadtest+{ctx.ScenarioInfo.InstanceNumber}-{ctx.InvocationNumber}@example.com";
+```
+
+`InstanceNumber` is the VU index, `InvocationNumber` the per-VU iteration count — together they're unique with no shared state. For realistic synthetic data, `Bogus` works inside a scenario (`new Faker<NewUser>().RuleFor(...)`). Use `ctx.Random` (per-VU, seeded → reproducible) for random values, never `Random.Shared` if you need determinism across runs.
+
+## Tool version pinning
+
+Pin every NuGet reference in `PerfTests.csproj` to an exact version (check NuGet for the current patch — NBomber is on **6.x** as of 2026):
+
+```xml
+<PackageReference Include="NBomber"      Version="6.0.1" />
+<PackageReference Include="NBomber.Http" Version="6.0.0" />
+<PackageReference Include="NBomber.Data" Version="6.0.0" />  <!-- only if using DataFeed -->
+```
+
+Never use a floating version (`6.*`). Note: runtime `.WithThresholds` requires NBomber **≥ 5.8** — 6.x covers it.
 
 ## CI integration
 
@@ -304,7 +378,10 @@ Grafana dashboards (`observability/grafana-dashboards`) then show client and ser
 - **`Http.CreateRequest` + `Http.Send`** instead of raw `HttpClient.SendAsync` so per-request metrics land in the report.
 - **Async all the way** in scenario bodies — `.Result` / `.Wait()` deadlocks the runner under load.
 - **Per-step latency** via `Step.Run` when a scenario has multiple HTTP hops — without it you can't tell which hop is slow.
-- **`Environment.Exit(non-zero)`** on threshold breach so CI fails the build.
+- **`Environment.Exit(non-zero)`** on threshold breach so CI fails the build — pair the post-run stats check with runtime `.WithThresholds` for fail-fast + report annotations.
+- **Keep the default 30s warm-up** for production-shape runs (JIT, connection pools, caches settle). Only `.WithoutWarmUp()` for fast local iteration — warm-up numbers are noise.
+- **`DataFeed.Constant` for per-VU identity, `Random`/`Circular` otherwise** — and supply at least as many items as VU `copies`, or NBomber recycles them.
+- **`ctx.ScenarioInfo.InstanceNumber` + `ctx.InvocationNumber`** for per-iteration uniqueness without shared state; `ctx.Random` (seeded) for reproducible randomness.
 - **`WithReportFolder("perf-reports")`** — never write into the repo root; publish as a CI artifact.
 - **Constructor-injection-friendly fixtures**: production clients consumed via DI live in `Fixtures.cs`, not constructed inline in scenarios.
 - **Pin every NuGet package version** in `PerfTests.csproj`.
@@ -323,6 +400,9 @@ Grafana dashboards (`observability/grafana-dashboards`) then show client and ser
 - No `Step.Run` per single-HTTP-call scenario — adds overhead without insight.
 - No NUnit `[Test]` wrapper around NBomber scenarios — NBomber is its own runner; you'll fight two orchestrators.
 - No mixing `NBomber.Http` with `RestSharp` in the same scenario — pick one HTTP path.
+- No `Random.Shared` for data you need reproducible across runs — use `ctx.Random` (per-VU, seeded).
+- No `DataFeed.Random` on a stateful API where each VU should hold one identity — that thrashes session state; use `DataFeed.Constant`.
+- No ignoring NBomber's default **restart-iteration-on-fail**: a failing `Step.Run` restarts the whole iteration by default, which can mask problems — set `.WithRestartIterationOnFail(false)` when you want failed iterations counted and the run to continue.
 
 ## Generation steps
 
@@ -348,3 +428,4 @@ Grafana dashboards (`observability/grafana-dashboards`) then show client and ser
 ## Changelog
 
 - 2026-05-29: Split from monolithic `qa/performance/SKILL.md` into the NBomber-specific .NET 8 sibling. Adds NBomber-specific guidance: standalone console-app runner (not NUnit fixture), open-loop `Inject` / `RampingInject` default, single `HttpClient` via `HttpClientFactory.Create`, `Step.Run` for multi-hop scenarios, post-run threshold gate via `Environment.Exit`, HTML / CSV / MD reports as CI artifacts, NuGet version pinning policy.
+- 2026-05-31: **Folded in coverage from the now-deleted legacy `nbomber-perf-tests.skill` bundle** (verified it held material the live file lacked before removing it). Added: a full **Data feeders** section (`NBomber.Data` `Data.LoadCsv`/`LoadJson`, `DataFeed.Random`/`Constant`/`Circular` with per-VU vs per-iteration semantics, `InstanceNumber`+`InvocationNumber` uniqueness, `ctx.Random`, Bogus); **runtime `.WithThresholds` / `Threshold.Create`** (`startCheckAfter`, `abortWhenErrorCount`, custom-metric thresholds) alongside the existing post-run gate; warm-up (`WithoutWarmUp`) and `WithRestartIterationOnFail` gotchas; bumped the version-pin example to NBomber 6.x + `NBomber.Data`. Sources synthesized: [NBomber Data docs](https://nbomber.com/docs/nbomber/data/), [NBomber Asserts & Thresholds docs](https://nbomber.com/docs/nbomber/asserts_and_thresholds/), [NBomber v5.8.0 runtime-thresholds release notes](https://nbomber.com/blog/2024/10/28/nbomber-v5.8.0/).
