@@ -1,0 +1,564 @@
+---
+name: qa-file-storage-testing-s3-java
+description: >-
+  Object-storage assertions against AWS S3 in Java 21 (TestNG) with the AWS SDK v2 (`software.amazon.awssdk:s3`
+  `S3Client`, `s3-transfer-manager` `S3TransferManager`, `S3Presigner`): prove the system-under-test
+  **uploaded** object X (it exists in the bucket with the right key / content / metadata / content-type), or
+  **consumed/processed** an object and produced side-effect Y (a row written, a derived object, a notification)
+  — where the side-effect is **eventually consistent**, so you wait on a condition with **Awaitility**, never
+  `Thread.sleep`. `S3Client.builder().endpointOverride(uri).forcePathStyle(true)...build()`, `putObject` /
+  `getObject` / `headObject` (HEAD) / `listObjectsV2` / `deleteObject` / `deleteObjects`, **multipart upload**
+  via `S3TransferManager`, **presigned URLs** (`S3Presigner.presignGetObject`), **versioning**
+  (`putBucketVersioning` → `listObjectVersions`), **lifecycle rules** (assert the *config*, not slow
+  execution), and **S3 → SQS/SNS event notifications** (an upload fires an event — assert the downstream
+  message), with a **local store for tests** via **LocalStack S3** (Testcontainers `LocalStackContainer`,
+  **force path-style**). Triggers: "assert our service uploaded the invoice PDF to the bucket with the right
+  content-type", "verify the worker wrote a thumbnail object after the original landed", "check the object
+  metadata / ETag / content matches", "generate a presigned URL and prove a client can use it", "assert
+  versioning kept both versions of the key", "the upload fired an S3 event onto the SQS queue", "stand up a
+  local S3 for these tests". Do NOT use for: Azure Blob Storage (use qa-file-storage-testing-azure-blob-java), a
+  pure message-queue assertion with no object store (use qa-messaging-testing-sqs-java), DB-only assertions
+  (use qa-db-testing-client-java), mocking a downstream HTTP dependency (use qa-api-mocking-wiremock-java), the
+  .NET stack (use qa-file-storage-testing-s3-dotnet), or the TypeScript stack (use
+  qa-file-storage-testing-s3-typescript).
+---
+
+# File-Storage Testing — AWS S3 (Java 21 / TestNG)
+
+This is the **Java sibling** of the `qa/java/skills/file-storage-testing/s3/` node, **ported** from the canonical .NET
+stack (`qa-file-storage-testing-s3-dotnet`, **.NET-led by the user's choice**). It **opens the
+`qa/java/skills/file-storage-testing/` family** (#32 s3 → #33 azure-blob) in this stack. All three AWS SDKs mirror the same
+put / get / head / list / delete + presign + multipart model, so this is a true translate-the-concepts port,
+not a redesign.
+
+It is **not** a port of the `messaging-testing` family — object storage is a different model — but it **reuses
+the same verification-inside-tests lineage**: the LocalStack-via-Testcontainers fixture discipline from
+`qa-messaging-testing-sqs-java` (#29) and `qa-test-environments-java` (#14), and the **eventual-consistency
+condition-wait** (Awaitility) from `qa-db-testing-client-java` (#3).
+
+File-storage tests assert one of two things about an object flow:
+
+- **Upload-assert** — the SUT, when exercised, **uploaded** object X (it now exists in the bucket at the
+  expected key, with the expected content, content-type, and metadata).
+- **Process-assert** — the SUT **consumed/processed** an object and produced an observable **side-effect Y**
+  (a row written, a *derived* object — a thumbnail, a transcoded file — or a notification sent).
+
+> **The boundary that shapes this skill — eventual consistency.** S3 is strongly read-after-write consistent
+> for a single PUT/GET today, but the things tests usually assert are *not* synchronous: a worker that
+> processes an uploaded object runs on its own schedule, an **S3 event notification** lands on a queue "soon",
+> a derived object appears after the worker finishes. So the core discipline matches #3 / #29: **wait on a
+> condition** for the effect to appear, with a bounded timeout — **never `Thread.sleep`**. Use **Awaitility**.
+> (Listing is the one place to stay alert to lag — `listObjectsV2` can momentarily lag a just-written key;
+> assert the object via `headObject`/`getObject` rather than scanning a list when you can.)
+
+## Decision matrix — S3 vs the rest of `file-storage-testing` (and adjacent skills)
+
+| Need | Use | Why |
+|------|-----|-----|
+| Assert against **AWS S3** (buckets/keys, multipart, presigned URLs, versioning, lifecycle, S3→SQS events) | **S3 (this skill)** | AWS-native object store; `software.amazon.awssdk:s3` is the first-class JVM client; LocalStack runs it locally |
+| Assert against **Azure Blob Storage** (containers/blobs, SAS tokens, blob tiers, Event Grid → Storage Queue) | `qa-file-storage-testing-azure-blob-java` (#33) | Azure-native; container/blob not bucket/key, SAS not presigned, Azurite not LocalStack |
+| Assert a **message** was produced/consumed, no object store in the flow | `qa-messaging-testing-sqs-java` (#29) | Pure queue assertion; here SQS appears only as the *downstream* of an S3 event |
+| Assert a **DB row** was written, no object store | `qa-db-testing-client-java` (#3) | Pure DB verification; reuse its Awaitility wait for the eventual side here |
+| Mock a downstream **HTTP** dependency the SUT calls | `qa-api-mocking-wiremock-java` (#22) | Not storage — a synchronous request/response fake |
+
+**Rule of thumb:** *AWS bucket + keys, presigned URLs, S3 events?* → S3. *Azure container + blobs, SAS?* →
+azure-blob. *A queue with no object?* → messaging. *A row with no object?* → db-testing.
+
+> **The #32-vs-#33 boundary in one line.** S3 is **buckets + keys**, addressed path-style against **LocalStack**,
+> with **presigned URLs**, a `putBucketNotificationConfiguration` → SQS/SNS event bridge, and `forcePathStyle`.
+> Azure Blob is **containers + blobs** against **Azurite**, with **SAS tokens** (the presigned-URL analogue),
+> **Event Grid → Storage Queue** notifications, and blob **access tiers**. Same two assertion shapes, different
+> store.
+
+## Stack
+
+- Java 21, TestNG — async work joined to a result; no busy-waiting beyond Awaitility
+- `software.amazon.awssdk:s3` — `S3Client` (object CRUD, bucket config, versioning, lifecycle, notifications);
+  `software.amazon.awssdk:s3-transfer-manager` — `S3TransferManager` (multipart upload of large objects, over
+  an `S3AsyncClient`); `S3Presigner` for presigned URLs. `software.amazon.awssdk:sqs` only for the
+  S3-event-notification bridge (cross-link #29).
+- `org.testcontainers:localstack` (`LocalStackContainer`) — boots **LocalStack** (the local AWS emulator) and
+  surfaces the endpoint the S3 client points at via `endpointOverride(...)` + **`forcePathStyle(true)`**
+  (cross-link `qa-test-environments-java`)
+- `org.awaitility:awaitility` — the bounded condition-wait for processing side-effects
+- The SUT's storage gateway is **constructor-injected** with the `S3Client` (or a typed wrapper) and the
+  bucket name — never a static client or a bucket/endpoint read inside a `@Test`
+
+```
+src/test/java/integration/
+├── fixtures/
+│   └── S3Fixture.java          ← boots LocalStack, creates the bucket(s), exposes the S3 client + bucket name
+└── InvoiceUploadTest.java
+```
+
+## The S3 model — buckets/keys, multipart, presigned, versioning, lifecycle, S3→SQS
+
+- **Bucket + key** — objects live in a flat keyspace; the `/`-delimited "folders" are a listing convention
+  (`prefix` + `delimiter`), not real directories. `putObject` writes; `getObject` reads the body + headers;
+  **`headObject` is the HEAD** (existence + metadata + content-type + size + ETag, no body — the cheap "does it
+  exist with the right shape" probe); `listObjectsV2` lists by prefix; `deleteObject` / `deleteObjects`
+  (batch) remove.
+- **Content-type + metadata** — set `contentType(...)` on the request (S3 does *not* infer it from the key
+  extension — a common bug to assert against); user metadata goes in `metadata(Map)` (round-tripped with an
+  `x-amz-meta-` prefix the SDK hides). The **ETag** is an opaque content fingerprint (MD5 for single-part
+  uploads; *not* MD5 for multipart — don't assert ETag==MD5 on multipart objects).
+- **Multipart upload** — large objects are uploaded in parts and assembled server-side. Use the high-level
+  **`S3TransferManager`** (`upload`/`uploadFile`) rather than hand-driving
+  `createMultipartUpload`/`uploadPart`/`completeMultipartUpload`; it parallelises and retries parts. The
+  assertion is the same: the assembled object exists with the expected size/content.
+- **Presigned URLs** — `S3Presigner.presignGetObject` / `presignPutObject` mints a time-limited URL that
+  embeds the auth, so a client with **no AWS credentials** can `GET`/`PUT` directly. The test generates one
+  (`signatureDuration`) and exercises it with a plain `HttpClient` to prove it works — and asserts an *expired*
+  one is rejected.
+- **Versioning** — `putBucketVersioning(ENABLED)` makes every PUT to a key create a new **version** (each with
+  a `versionId`) instead of overwriting; `listObjectVersions` enumerates them; `getObject` with a `versionId`
+  fetches a specific one. Delete becomes a *delete marker* you can also assert.
+- **Lifecycle rules** — `putBucketLifecycleConfiguration` sets expiration/transition rules. **You assert the
+  *configuration* round-trips** with `getBucketLifecycleConfiguration` — lifecycle **execution** runs on a
+  daily cadence and is far too slow to assert in a test.
+- **S3 → SQS/SNS event notifications** — `putBucketNotificationConfiguration` wires bucket events
+  (`s3:ObjectCreated:*`, `s3:ObjectRemoved:*`) to an SQS queue / SNS topic / Lambda. An upload fires an event;
+  the test asserts the **downstream message** arrives (the bridge to `qa-messaging-testing-sqs-java` #29 —
+  reuse its long-poll receive). LocalStack wires the send policy when the notification is configured.
+
+## Local store for tests — LocalStack S3 (force path-style!)
+
+There is no in-memory S3. For deterministic local + CI tests, run **LocalStack** (`localstack/localstack`) —
+the same emulator the #29 sqs node used — serving S3 (and SQS/SNS for the event bridge) on a single endpoint
+(default `:4566`). Point the S3 client at that endpoint via `endpointOverride(...)` **and call
+`forcePathStyle(true)`** — the headline LocalStack S3 gotcha: the default *virtual-hosted–style* addressing
+(`<bucket>.s3.amazonaws.com`) doesn't resolve against a container, so you **must** force *path-style*
+(`<endpoint>/<bucket>/<key>`). The `org.testcontainers:localstack` module boots the container, owns the
+readiness wait, and surfaces the endpoint. Reuse the fixture discipline from `qa-test-environments-java` (boot
+once per fixture; **never `Thread.sleep` for readiness**). **Create the bucket in fixture setup** through the
+SDK.
+
+```java
+package integration.fixtures;
+
+import org.testcontainers.containers.localstack.LocalStackContainer;
+import org.testcontainers.containers.localstack.LocalStackContainer.Service;
+import org.testcontainers.utility.DockerImageName;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
+import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.*;
+
+import java.net.URI;
+import java.util.List;
+import java.util.UUID;
+
+public abstract class S3Fixture {
+
+    // Pin the image tag, never `latest`. The module declares its own readiness wait strategy.
+    private final LocalStackContainer localstack = new LocalStackContainer(
+            DockerImageName.parse("localstack/localstack:3.5"))
+            .withServices(Service.S3, Service.SQS);
+
+    protected S3Client s3;
+    protected String bucket;
+    protected URI endpoint;
+
+    @BeforeClass(alwaysRun = true)
+    public void startStore() {
+        localstack.start();
+        endpoint = localstack.getEndpointOverride(Service.S3);
+
+        // LocalStack accepts any creds; surfaced for the client, never logged.
+        s3 = S3Client.builder()
+                .endpointOverride(endpoint)
+                .forcePathStyle(true)        // ← the LocalStack S3 gotcha: path-style, not virtual-hosted
+                .region(Region.of(localstack.getRegion()))
+                .credentialsProvider(StaticCredentialsProvider.create(
+                        AwsBasicCredentials.create(localstack.getAccessKey(), localstack.getSecretKey())))
+                .build();
+
+        // Uniquely named bucket per fixture → independent, parallel-safe.
+        bucket = "orders-" + UUID.randomUUID().toString().replace("-", "");
+        s3.createBucket(b -> b.bucket(bucket));
+    }
+
+    @AfterClass(alwaysRun = true)
+    public void stopStore() {
+        if (s3 != null) s3.close();
+        localstack.stop();
+    }
+
+    // Independent tests: empty the bucket (objects + versions) so each starts clean.
+    protected void emptyBucket() {
+        List<ObjectVersion> versions = s3.listObjectVersions(b -> b.bucket(bucket)).versions();
+        if (versions.isEmpty()) return;
+        s3.deleteObjects(b -> b.bucket(bucket).delete(d -> d.objects(
+                versions.stream()
+                        .map(v -> ObjectIdentifier.builder().key(v.key()).versionId(v.versionId()).build())
+                        .toList())));
+    }
+}
+```
+
+> **Cloud test bucket alternative.** If your org runs against a real **test** AWS account instead of LocalStack,
+> drop the `endpointOverride` + `forcePathStyle` and let the SDK resolve the real endpoint (virtual-hosted
+> style); read the region from env and the credentials from the **default credential provider chain**
+> (`DefaultCredentialsProvider` — instance role / SSO / env vars) — never hard-code an access key, never log it
+> (cross-link `qa-auth0-test-tokens-java`). LocalStack is the default for CI determinism; a shared cloud bucket
+> makes tests order-dependent unless each uses a **uniquely named bucket** or empties it in `@BeforeMethod`.
+
+## Core pattern 1 — upload-assert (the SUT uploaded object X)
+
+The SUT uploads; the test asserts the object **exists** at the expected key with the right content-type and
+metadata (HEAD via `headObject`), then reads the body to assert content. `headObject` throws
+`NoSuchKeyException` when the key is absent — so a clean "does it exist" check is a HEAD that doesn't throw.
+
+```java
+public class InvoiceUploadTest extends S3Fixture {
+
+    private InvoiceStore sut;   // production code, constructor-injected with the S3 client + bucket
+
+    @BeforeMethod(alwaysRun = true)
+    public void setUp() {
+        emptyBucket();                          // independent tests — start from empty
+        sut = new InvoiceStore(s3, bucket);     // constructor injection — no static client
+    }
+
+    @Test
+    public void Should_store_the_invoice_pdf_When_an_invoice_is_finalised() {
+        Invoice invoice = Invoices.finalised().withNumber("INV-1001").build();   // builder (qa/java/skills/test-data-builder)
+
+        sut.save(invoice);                                                       // SUT uploads the object
+
+        // HEAD = the cheap existence + shape probe.
+        HeadObjectResponse head = s3.headObject(b -> b.bucket(bucket).key("invoices/INV-1001.pdf"));
+        assertThat(head.contentType()).isEqualTo("application/pdf");             // S3 does NOT infer this
+        assertThat(head.metadata()).containsEntry("invoice-number", "INV-1001"); // SDK strips the x-amz-meta- prefix
+    }
+
+    @Test
+    public void Should_write_the_exact_pdf_bytes_When_storing() {
+        Invoice invoice = Invoices.finalised().withNumber("INV-1002").build();
+
+        sut.save(invoice);
+
+        byte[] stored = s3.getObjectAsBytes(b -> b.bucket(bucket).key("invoices/INV-1002.pdf")).asByteArray();
+        assertThat(stored).isEqualTo(invoice.renderedPdf());   // one logical assertion: the stored bytes
+    }
+}
+```
+
+## Core pattern 2 — process-assert (the SUT processed an object → side-effect Y)
+
+Here the SUT is a **worker**: it watches a bucket (or is driven by an S3 event), processes an uploaded object,
+and produces an observable side-effect — a DB row, a *derived* object (a thumbnail), or a notification. The
+side-effect is eventually consistent, so **seed the input object, then wait on a condition with Awaitility**.
+This reuses `qa-db-testing-client-java`'s discipline.
+
+```java
+@Test
+public void Should_produce_a_thumbnail_object_When_an_image_is_uploaded() {
+    // 1. Seed the input object the worker watches.
+    s3.putObject(b -> b.bucket(bucket).key("uploads/cat.png").contentType("image/png"),
+            RequestBody.fromBytes(SampleImages.png1024()));
+
+    // 2. The SUT worker picks it up and writes a derived object.
+
+    // 3. Wait on the SIDE-EFFECT, not on a clock. Awaitility polls until the derived key exists (or times out).
+    await().atMost(Duration.ofSeconds(10)).pollInterval(Duration.ofMillis(200))
+           .until(() -> headOrNull("thumbnails/cat.png") != null);
+
+    HeadObjectResponse thumb = s3.headObject(b -> b.bucket(bucket).key("thumbnails/cat.png"));
+    assertThat(thumb.contentType()).isEqualTo("image/png");   // one logical assertion: the derived object
+}
+
+// HEAD-or-null probe: returns the metadata if the key exists, null otherwise (so Awaitility keeps waiting).
+private HeadObjectResponse headOrNull(String key) {
+    try { return s3.headObject(b -> b.bucket(bucket).key(key)); }
+    catch (NoSuchKeyException e) { return null; }
+}
+```
+
+> `Awaitility` polls *until the condition holds*, then returns; it **fails** if the condition never holds inside
+> the timeout. That is the difference from a bare `Thread.sleep(5000)`, which races the worker and is slow even
+> when the work finished early. **No `Thread.sleep` as an assertion wait — ever.**
+
+## Multipart upload (large objects) — `S3TransferManager`
+
+For large objects, use the high-level **`S3TransferManager`** (over an `S3AsyncClient` pointed at LocalStack):
+it splits the stream into parts, uploads them in parallel with retries, and completes the multipart upload. The
+assertion is unchanged: the assembled object exists with the expected size.
+
+```java
+@Test
+public void Should_upload_a_large_object_in_parts_When_using_the_transfer_manager() throws Exception {
+    byte[] bytes = LargePayloads.ofSize(12 * 1024 * 1024);   // 12 MB → multiple parts
+
+    try (S3AsyncClient async = S3AsyncClient.builder()
+                 .endpointOverride(endpoint).forcePathStyle(true)
+                 .region(Region.US_EAST_1)
+                 .credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create("test", "test")))
+                 .build();
+         S3TransferManager transfer = S3TransferManager.builder().s3Client(async).build()) {
+
+        transfer.upload(b -> b
+                .putObjectRequest(p -> p.bucket(bucket).key("backups/db-2026-06.dump")
+                        .contentType("application/octet-stream"))
+                .requestBody(AsyncRequestBody.fromBytes(bytes)))
+            .completionFuture().join();        // join the async upload to a result — no busy-wait
+    }
+
+    HeadObjectResponse head = s3.headObject(b -> b.bucket(bucket).key("backups/db-2026-06.dump"));
+    assertThat(head.contentLength()).isEqualTo((long) bytes.length);   // assembled object is the full size
+    // NB: don't assert eTag() == MD5(bytes) here — multipart ETags are NOT the object's MD5.
+}
+```
+
+## Presigned URLs — mint one, prove a credential-less client can use it
+
+`S3Presigner.presignGetObject` builds a time-limited, signed URL. The test mints one and exercises it with the
+JDK **`HttpClient`** (no AWS creds) to prove the round-trip — then asserts an **expired** one is rejected.
+
+```java
+@Test
+public void Should_let_a_client_download_via_a_presigned_get_url() throws Exception {
+    s3.putObject(b -> b.bucket(bucket).key("reports/q2.csv").contentType("text/csv"),
+            RequestBody.fromString("id,total\n1,1999"));
+
+    try (S3Presigner presigner = S3Presigner.builder()
+                 .endpointOverride(endpoint).region(Region.US_EAST_1)
+                 .credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create("test", "test")))
+                 .build()) {
+
+        URL url = presigner.presignGetObject(b -> b
+                .signatureDuration(Duration.ofMinutes(5))
+                .getObjectRequest(g -> g.bucket(bucket).key("reports/q2.csv"))).url();
+
+        HttpResponse<String> resp = HttpClient.newHttpClient().send(
+                HttpRequest.newBuilder(url.toURI()).GET().build(), HttpResponse.BodyHandlers.ofString());
+        assertThat(resp.body()).contains("1,1999");   // credential-less client used the signed URL
+    }
+}
+
+@Test
+public void Should_reject_an_expired_presigned_url() throws Exception {
+    s3.putObject(b -> b.bucket(bucket).key("reports/q2.csv"), RequestBody.fromString("x"));
+
+    try (S3Presigner presigner = S3Presigner.builder()
+                 .endpointOverride(endpoint).region(Region.US_EAST_1)
+                 .credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create("test", "test")))
+                 .build()) {
+
+        URL url = presigner.presignGetObject(b -> b
+                .signatureDuration(Duration.ofSeconds(1))   // expires almost immediately
+                .getObjectRequest(g -> g.bucket(bucket).key("reports/q2.csv"))).url();
+
+        // Awaitility waits past expiry on a CONDITION (a 403), not a fixed sleep.
+        await().atMost(Duration.ofSeconds(5)).pollInterval(Duration.ofMillis(200)).until(() ->
+                HttpClient.newHttpClient().send(HttpRequest.newBuilder(url.toURI()).GET().build(),
+                        HttpResponse.BodyHandlers.discarding()).statusCode() == 403);
+    }
+}
+```
+
+## Versioning — assert multiple versions of a key
+
+Enable versioning, write the same key twice, and assert both versions are retained and individually
+retrievable.
+
+```java
+@Test
+public void Should_keep_both_versions_When_a_versioned_key_is_overwritten() {
+    s3.putBucketVersioning(b -> b.bucket(bucket)
+            .versioningConfiguration(v -> v.status(BucketVersioningStatus.ENABLED)));
+
+    PutObjectResponse v1 = s3.putObject(b -> b.bucket(bucket).key("config/app.json"),
+            RequestBody.fromString("{\"v\":1}"));
+    s3.putObject(b -> b.bucket(bucket).key("config/app.json"), RequestBody.fromString("{\"v\":2}"));
+
+    List<ObjectVersion> versions = s3.listObjectVersions(b -> b.bucket(bucket).prefix("config/app.json")).versions();
+    assertThat(versions).hasSize(2);    // both retained, not overwritten
+
+    // The older version is still fetchable by its versionId.
+    String old = s3.getObjectAsBytes(b -> b.bucket(bucket).key("config/app.json").versionId(v1.versionId()))
+            .asUtf8String();
+    assertThat(old).isEqualTo("{\"v\":1}");
+}
+```
+
+## Lifecycle rules — assert the configuration, not the (slow) execution
+
+Lifecycle **execution** runs on a roughly daily cadence — far too slow for a test. So assert the rule
+**round-trips**: set it, read it back, assert the shape.
+
+```java
+@Test
+public void Should_configure_a_30_day_expiration_rule() {
+    s3.putBucketLifecycleConfiguration(b -> b.bucket(bucket).lifecycleConfiguration(c -> c.rules(
+            LifecycleRule.builder()
+                    .id("expire-temp")
+                    .filter(f -> f.prefix("tmp/"))
+                    .status(ExpirationStatus.ENABLED)
+                    .expiration(e -> e.days(30))
+                    .build())));
+
+    List<LifecycleRule> rules = s3.getBucketLifecycleConfiguration(b -> b.bucket(bucket)).rules();
+    LifecycleRule rule = rules.get(0);
+    assertThat(rule.id()).isEqualTo("expire-temp");
+    assertThat(rule.expiration().days()).isEqualTo(30);
+    // Do NOT try to assert an object actually got expired — that runs daily; it's out of a test's reach.
+}
+```
+
+## S3 → SQS event notifications (the bridge to #29)
+
+Wire bucket events to an SQS queue, upload an object, and assert the **downstream message** arrives — using the
+long-poll receive from `qa-messaging-testing-sqs-java`. This is the cross-family bridge.
+
+```java
+@Test
+public void Should_fire_an_sqs_event_When_an_object_is_created() {
+    try (SqsClient sqs = SqsClient.builder()
+                 .endpointOverride(localstack.getEndpointOverride(Service.SQS))
+                 .region(Region.US_EAST_1)
+                 .credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create("test", "test")))
+                 .build()) {
+
+        String queueUrl = sqs.createQueue(b -> b.queueName("s3-events")).queueUrl();
+        String queueArn = sqs.getQueueAttributes(b -> b.queueUrl(queueUrl)
+                .attributeNames(QueueAttributeName.QUEUE_ARN)).attributes().get(QueueAttributeName.QUEUE_ARN);
+
+        s3.putBucketNotificationConfiguration(b -> b.bucket(bucket).notificationConfiguration(n -> n
+                .queueConfigurations(QueueConfiguration.builder()
+                        .queueArn(queueArn).events(Event.S3_OBJECT_CREATED).build())));
+
+        // Upload → fires the event.
+        s3.putObject(p -> p.bucket(bucket).key("incoming/order.json"), RequestBody.fromString("{}"));
+
+        // Long-poll the queue (the condition-wait, NOT a sleep) and assert the event names our key.
+        ReceiveMessageResponse received = sqs.receiveMessage(b -> b.queueUrl(queueUrl)
+                .waitTimeSeconds(10).maxNumberOfMessages(1));
+        assertThat(received.messages()).isNotEmpty();
+        assertThat(received.messages().get(0).body()).contains("incoming/order.json");
+        sqs.deleteMessage(d -> d.queueUrl(queueUrl).receiptHandle(received.messages().get(0).receiptHandle()));
+    }
+}
+```
+
+## Anti-patterns
+
+- **`Thread.sleep(5000)` before asserting a processed/derived object or an S3 event.** Races the worker and the
+  event delivery; slow and flaky. *Fix:* Awaitility polling the HEAD/probe for the side-effect; long-poll the
+  queue for the S3 event. Never a bare sleep.
+- **Asserting content-type without setting it.** S3 stores whatever `contentType` you sent and does **not**
+  infer it from the `.pdf`/`.png` key suffix; a missing one defaults to `application/octet-stream`. *Fix:* set
+  `contentType` on the PUT, assert it on the HEAD.
+- **Asserting `eTag() == MD5(bytes)` on a multipart object.** Multipart ETags are a hash-of-part-hashes with a
+  `-<partcount>` suffix, **not** the object's MD5. *Fix:* assert `contentLength()` and/or download-and-compare
+  bytes; only single-part PUTs have an MD5 ETag.
+- **Forgetting `forcePathStyle(true)` against LocalStack.** Virtual-hosted addressing
+  (`<bucket>.s3.amazonaws.com`) doesn't resolve to the container → connection/DNS errors. *Fix:*
+  `endpointOverride` + `forcePathStyle(true)`. Drop both only for a real cloud test account.
+- **Trying to assert lifecycle *execution*.** Expiration/transition runs on a ~daily cadence; a test can't wait
+  for it. *Fix:* assert the lifecycle **configuration** round-trips via `getBucketLifecycleConfiguration`.
+- **Sharing one bucket across parallel test classes.** Cross-talk: one suite's objects/deletes leak into
+  another's listings and asserts. *Fix:* a **uniquely named bucket per fixture** (as in `S3Fixture`) or
+  `emptyBucket()` in `@BeforeMethod`; keep the storage fixtures single-threaded unless verified isolated.
+- **Deleting a bucket without emptying it.** `deleteBucket` fails on a non-empty bucket (and a *versioned*
+  bucket needs every version + delete-marker removed). *Fix:* `emptyBucket()` deletes objects **and** versions
+  first.
+- **Scanning `listObjectsV2` to check a single key exists.** A list can momentarily lag a just-written key and
+  it's O(bucket). *Fix:* `headObject` — strongly consistent for the object, cheap, throws `NoSuchKeyException`
+  cleanly when absent.
+- **Hard-coding the endpoint / an AWS access key in a `@Test`.** *Fix:* surface the LocalStack endpoint from
+  the fixture; for a cloud test account use the default credential provider chain + region from env; never log
+  secrets.
+- **Reaching for S3 when the store is Azure Blob.** *Fix:* `qa-file-storage-testing-azure-blob-java`.
+
+## Examples
+
+**End-to-end: an upload → process → derived-object flow.**
+
+```java
+public class ImageProcessingTest extends S3Fixture {
+
+    @BeforeMethod(alwaysRun = true)
+    public void setUp() { emptyBucket(); }   // independent tests — start from empty
+
+    @Test
+    public void Should_write_a_thumbnail_When_an_image_is_uploaded() {
+        // The SUT worker is wired: S3 ObjectCreated → SQS → worker → writes thumbnails/<key>.
+        s3.putObject(b -> b.bucket(bucket).key("uploads/photo.png").contentType("image/png"),
+                RequestBody.fromBytes(SampleImages.png1024()));
+
+        // Wait on the derived object (the condition-wait) — the worker runs async.
+        await().atMost(Duration.ofSeconds(15)).pollInterval(Duration.ofMillis(250))
+               .until(() -> headOrNull("thumbnails/photo.png") != null);
+
+        HeadObjectResponse thumb = s3.headObject(b -> b.bucket(bucket).key("thumbnails/photo.png"));
+        assertThat(thumb.contentType()).isEqualTo("image/png");   // derived object produced
+    }
+}
+```
+
+Lifecycle for this test:
+1. `@BeforeClass` (in `S3Fixture`) boots LocalStack once and creates a **uniquely named bucket**; the S3 client
+   (path-style) + bucket name are surfaced.
+2. `@BeforeMethod` empties the bucket so the test starts clean — tests stay independent and order-free.
+3. The test seeds an input object; the running SUT worker produces a derived object; the test **polls the HEAD
+   of the derived key with Awaitility** and asserts it exists with the right content-type.
+4. `@AfterClass` closes the client and stops the container.
+
+**Test-data builder for object payloads (4+ fields → builder, per the global rules).**
+
+```java
+public final class Invoices {
+    public static InvoiceBuilder finalised() { return new InvoiceBuilder().withStatus("Finalised"); }
+}
+// InvoiceBuilder.withNumber(...).withTotal(...).withCustomer(...).withRenderedPdf(...).build()
+// — see qa/java/skills/test-data-builder
+```
+
+## Rules (hard constraints)
+
+- **Eventual consistency = wait on a condition, never a sleep.** Awaitility polling a HEAD/DB probe for
+  processed/derived objects; long-poll (`waitTimeSeconds`) the queue for S3 events. **No `Thread.sleep`** as an
+  assertion wait.
+- The SUT's storage gateway is **constructor-injected** with the `S3Client` + bucket name — never a static
+  client or a bucket/endpoint read inside a `@Test`.
+- **LocalStack S3 requires `forcePathStyle(true)`** + `endpointOverride` + region. A cloud test account drops
+  the override and uses the **default credential provider chain + region from env**, read lazily, never logged.
+- **Set `contentType` explicitly** on uploads (S3 doesn't infer it); assert it on the HEAD. Don't assert
+  `eTag() == MD5` on multipart objects.
+- **Independent tests:** a **uniquely named bucket per fixture** (or `emptyBucket()` in `@BeforeMethod`); empty
+  objects **and versions** before deleting a bucket; keep storage fixtures single-threaded unless verified
+  isolated.
+- **Assert lifecycle *config*, not execution** (round-trip via `getBucketLifecycleConfiguration`).
+- Prefer `headObject` over scanning `listObjectsV2` for single-key existence.
+- Join async work to a result (`completionFuture().join()`); `close()` clients and presigner; no busy-waiting.
+- Test names `Should_X_When_Y`; one logical assertion per test; builders for 4+-field payloads; structured
+  logging; no secrets in code.
+
+## Cross-references
+
+- `qa-file-storage-testing-s3-dotnet` — the **canonical** stack this is ported from (.NET 8 / NUnit,
+  `AWSSDK.S3` `AmazonS3Client` + `TransferUtility` + `GetPreSignedURLAsync`, `Testcontainers.LocalStack`,
+  `WaitFor.Async`). Structure ported, not code.
+- `qa-file-storage-testing-s3-typescript` — same skill, Node 20 + TS (`@aws-sdk/client-s3`:
+  `new S3Client({ endpoint, forcePathStyle: true })`, `@aws-sdk/lib-storage` `Upload`,
+  `@aws-sdk/s3-request-presigner` `getSignedUrl`, `expect.poll`, `@testcontainers/localstack`).
+- `qa-file-storage-testing-azure-blob-java` (#33, **the sibling that closes this family**) — Azure Blob via
+  Azurite; the **#32-vs-#33 boundary**: buckets/keys + presigned URLs + LocalStack + `forcePathStyle` vs
+  containers/blobs + SAS tokens + Azurite + Event Grid→Storage Queue.
+- `qa-messaging-testing-sqs-java` (#29) — **the S3→SQS event-notification bridge AND the LocalStack reuse**:
+  read it for the LocalStack-via-Testcontainers fixture, the cloud-account alternative, and the long-poll
+  receive used to assert the S3 event.
+- `qa-db-testing-client-java` (#3) — the Awaitility wait and the seeder/probe split reused for the
+  processed-object side-effect assertions; the **eventual-consistency lineage** this skill leans on.
+- `qa-test-environments-java` (#14) — booting the LocalStack container; the per-fixture lifecycle and
+  readiness-wait discipline (never `Thread.sleep`) mirrored here.
+- `qa-auth0-test-tokens-java` (#16) — when running against a cloud test account; the
+  default-credential-provider-chain + secrets-from-env discipline.
+- `qa-api-mocking-wiremock-java` (#22) — the *synchronous* counterpart: fake an HTTP dependency the SUT calls.
+- `qa-allure-reporting-java` — attach the uploaded/derived object's key + metadata (or the S3-event body) to
+  the Allure result.
+- `qa-test-data-builder-java` — builders/ObjectMother for object payloads with 4+ fields.

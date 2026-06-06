@@ -1,0 +1,646 @@
+---
+name: qa-file-storage-testing-s3-dotnet
+description: >-
+  Object-storage assertions against AWS S3 in .NET 8 (NUnit) with `AWSSDK.S3` (`AmazonS3Client`,
+  `TransferUtility`): prove the system-under-test **uploaded** object X (it exists in the bucket with the right
+  key / content / metadata / content-type), or **consumed/processed** an object and produced side-effect Y
+  (a row written, a derived object, a notification) — where the side-effect is **eventually consistent**, so
+  you wait on a condition, never `Task.Delay`. `new AmazonS3Client(creds, new AmazonS3Config { ServiceURL =
+  endpoint, ForcePathStyle = true })`, `PutObjectAsync` / `GetObjectAsync` / `GetObjectMetadataAsync` (HEAD) /
+  `ListObjectsV2Async` / `DeleteObjectAsync` / `DeleteObjectsAsync`, **multipart upload** via `TransferUtility`,
+  **presigned URLs** (`GetPreSignedURLAsync`), **versioning** (`PutBucketVersioningAsync` →
+  `ListVersionsAsync`), **lifecycle rules** (assert the *config*, not slow execution), and **S3 → SQS/SNS
+  event notifications** (an upload fires an event — assert the downstream message), with a **local store for
+  tests** via **LocalStack S3** (Testcontainers `LocalStackContainer`, **force path-style**). Triggers: "assert
+  our service uploaded the invoice PDF to the bucket with the right content-type", "verify the worker wrote a
+  thumbnail object after the original landed", "check the object metadata / ETag / content matches", "generate
+  a presigned URL and prove a client can use it", "assert versioning kept both versions of the key", "the
+  upload fired an S3 event onto the SQS queue", "stand up a local S3 for these tests". Do NOT use for: Azure
+  Blob Storage (use qa-file-storage-testing-azure-blob-dotnet), a pure message-queue assertion with no object
+  store (use qa-messaging-testing-sqs-dotnet), DB-only assertions (use qa-db-testing-client-dotnet), mocking a
+  downstream HTTP dependency (use qa-api-mocking-wiremock-dotnet), the Java stack (use
+  qa-file-storage-testing-s3-java), or the TypeScript stack (use qa-file-storage-testing-s3-typescript).
+---
+
+# File-Storage Testing — AWS S3 (.NET 8 / NUnit)
+
+This **opens the `qa/dotnet/skills/file-storage-testing/` family** (#32 s3 → #33 azure-blob). It is **not** a port of the
+`messaging-testing` family — object storage is a different model — but it **reuses the same
+verification-inside-tests lineage**: the LocalStack-via-Testcontainers fixture discipline from
+`qa-messaging-testing-sqs-dotnet` (#29) and `qa-test-environments-dotnet` (#14), and the
+**eventual-consistency condition-wait** from `qa-db-testing-client-dotnet` (#3).
+
+**.NET leads this node by the user's choice.** The AWS SDK is first-class across all three stacks (no single
+"native" runtime), so the house default would have been TypeScript; .NET was picked — the same kind of
+canonical-choice judgment #28/#29 stated explicitly, and it keeps the recent Phase-3 nodes .NET-led. This file
+is the **canonical** `s3` stack; the `java` (`software.amazon.awssdk:s3`) and `typescript`
+(`@aws-sdk/client-s3`) siblings are **ported** from it — all three SDKs mirror the same put / get / head / list
+/ delete + presign + multipart model, so this is a true translate-the-concepts port, not a redesign.
+
+File-storage tests assert one of two things about an object flow:
+
+- **Upload-assert** — the SUT, when exercised, **uploaded** object X (it now exists in the bucket at the
+  expected key, with the expected content, content-type, and metadata).
+- **Process-assert** — the SUT **consumed/processed** an object and produced an observable **side-effect Y**
+  (a row written, a *derived* object produced — a thumbnail, a transcoded file — or a notification sent).
+
+> **The boundary that shapes this skill — eventual consistency.** S3 is strongly read-after-write consistent
+> for a single PUT/GET of an object today, but the things tests usually assert are *not* synchronous: a worker
+> that processes an uploaded object runs on its own schedule, an **S3 event notification** lands on a queue
+> "soon", a derived object appears after the worker finishes. So the core discipline matches #3 / #29: **wait
+> on a condition** for the effect to appear, with a bounded timeout — **never `Task.Delay` / `Thread.Sleep`**.
+> Reuse `qa-db-testing-client-dotnet`'s `WaitFor.Async` poll. (Listing is the one place to stay alert to lag —
+> `ListObjectsV2` can momentarily lag a just-written key on some backends; assert the object via
+> `GetObjectMetadataAsync`/`GetObjectAsync` rather than scanning a list when you can.)
+
+## Decision matrix — S3 vs the rest of `file-storage-testing` (and adjacent skills)
+
+| Need | Use | Why |
+|------|-----|-----|
+| Assert against **AWS S3** (buckets/keys, multipart, presigned URLs, versioning, lifecycle, S3→SQS events) | **S3 (this skill)** | AWS-native object store; `AWSSDK.S3` is the first-class .NET client; LocalStack runs it locally |
+| Assert against **Azure Blob Storage** (containers/blobs, SAS tokens, blob tiers, Event Grid → Storage Queue) | `qa-file-storage-testing-azure-blob-dotnet` (#33) | Azure-native; container/blob not bucket/key, SAS not presigned, Azurite not LocalStack |
+| Assert a **message** was produced/consumed, no object store in the flow | `qa-messaging-testing-sqs-dotnet` (#29) | Pure queue assertion; here SQS appears only as the *downstream* of an S3 event |
+| Assert a **DB row** was written, no object store | `qa-db-testing-client-dotnet` (#3) | Pure DB verification; reuse its `WaitFor.Async` for the eventual side here |
+| Mock a downstream **HTTP** dependency the SUT calls | `qa-api-mocking-wiremock-dotnet` (#22) | Not storage — a synchronous request/response fake |
+
+**Rule of thumb:** *AWS bucket + keys, presigned URLs, S3 events?* → S3. *Azure container + blobs, SAS?* →
+azure-blob. *A queue with no object?* → messaging. *A row with no object?* → db-testing.
+
+> **The #32-vs-#33 boundary in one line.** S3 is **buckets + keys**, addressed path-style against **LocalStack**,
+> with **presigned URLs**, a **redrive-free `PutBucketNotification` → SQS/SNS** event bridge, and
+> `ForcePathStyle`. Azure Blob is **containers + blobs** against **Azurite**, with **SAS tokens** (the
+> presigned-URL analogue), **Event Grid → Storage Queue** notifications, and blob **access tiers**. Same two
+> assertion shapes, different store.
+
+## Stack
+
+- .NET 8, C# (nullable reference types on), NUnit 4.x — **async all the way** (`PutObjectAsync`,
+  `GetObjectAsync`, `GetObjectMetadataAsync`, `ListObjectsV2Async`, `DeleteObjectAsync`; never `.Result` /
+  `.Wait()`)
+- `AWSSDK.S3` — `AmazonS3Client` (object CRUD, bucket config, versioning, lifecycle, notifications),
+  `Amazon.S3.Transfer.TransferUtility` (multipart upload of large objects). `GetPreSignedURLAsync` for
+  presigned URLs. `AWSSDK.SQS` only for the S3-event-notification bridge (cross-link #29).
+- `Testcontainers.LocalStack` (`LocalStackBuilder`) — boots **LocalStack** (the local AWS emulator) and
+  surfaces an endpoint URL the S3 client points at via `ServiceURL` + **`ForcePathStyle = true`** (cross-link
+  `qa-test-environments-dotnet`)
+- The SUT's storage gateway is **constructor-injected** with the `IAmazonS3` client (or a typed wrapper) and
+  the bucket name — never a static client or a bucket/endpoint read inside a `[Test]`
+
+```
+IntegrationTests/
+├── Fixtures/
+│   └── S3Fixture.cs            ← boots LocalStack, creates the bucket(s), exposes the S3 client + bucket name
+├── Storage/
+│   └── WaitFor.cs              ← bounded condition-wait for processing side-effects (reused from qa-db-testing)
+└── InvoiceUploadTests.cs
+```
+
+## The S3 model — buckets/keys, multipart, presigned, versioning, lifecycle, S3→SQS
+
+- **Bucket + key** — objects live in a flat keyspace inside a bucket; the `/`-delimited "folders" are a
+  listing convention (`Prefix` + `Delimiter`), not real directories. `PutObjectAsync` writes; `GetObjectAsync`
+  reads the body + headers; **`GetObjectMetadataAsync` is the HEAD** (existence + metadata + content-type +
+  size + ETag, no body — the cheap "does it exist with the right shape" probe); `ListObjectsV2Async` lists by
+  prefix; `DeleteObjectAsync` / `DeleteObjectsAsync` (batch) remove.
+- **Content-type + metadata** — set `ContentType` on the request (S3 does *not* infer it from the key
+  extension — a common bug to assert against); user metadata goes in `Metadata` (round-tripped with an
+  `x-amz-meta-` prefix the SDK hides). The **ETag** is an opaque content fingerprint (MD5 for single-part
+  uploads; *not* MD5 for multipart — don't assert ETag==MD5 on multipart objects).
+- **Multipart upload** — large objects are uploaded in parts and assembled server-side. Use the
+  **`TransferUtility`** high-level helper (`UploadAsync` with a `PartSize`) rather than hand-driving
+  `InitiateMultipartUpload`/`UploadPart`/`CompleteMultipartUpload`; it parallelises and retries parts. The
+  assertion is the same: the assembled object exists with the expected size/content.
+- **Presigned URLs** — `GetPreSignedURLAsync` mints a time-limited URL that embeds the auth, so a client with
+  **no AWS credentials** can `GET` (download) or `PUT` (upload) directly. The test generates one (`Verb`,
+  `Expires`) and exercises it with a plain `HttpClient` to prove it works — and asserts an *expired* one is
+  rejected.
+- **Versioning** — `PutBucketVersioningAsync(Enabled)` makes every PUT to a key create a new **version** (each
+  with a `VersionId`) instead of overwriting; `ListVersionsAsync` enumerates them; `GetObjectAsync` with a
+  `VersionId` fetches a specific one. Delete becomes a *delete marker* you can also assert.
+- **Lifecycle rules** — `PutLifecycleConfigurationAsync` sets expiration/transition rules (delete after N
+  days, move to a colder storage class). **You assert the *configuration* round-trips** with
+  `GetLifecycleConfigurationAsync` — lifecycle **execution** runs on a daily cadence and is far too slow to
+  assert in a test. (Don't try to "wait for" an object to expire.)
+- **S3 → SQS/SNS event notifications** — `PutBucketNotificationAsync` wires bucket events
+  (`s3:ObjectCreated:*`, `s3:ObjectRemoved:*`) to an SQS queue / SNS topic / Lambda. An upload fires an event;
+  the test asserts the **downstream message** arrives (the bridge to `qa-messaging-testing-sqs-dotnet` #29 —
+  reuse its long-poll receive). The queue needs a policy letting S3 send to it; LocalStack handles this when
+  the notification is configured.
+
+## Local store for tests — LocalStack S3 (force path-style!)
+
+There is no in-memory S3. For deterministic local + CI tests, run **LocalStack** (`localstack/localstack`) —
+the same emulator the #29 sqs node used — which serves S3 (and SQS/SNS for the event bridge) on a single
+endpoint (default `:4566`). Point the S3 client at that endpoint via `ServiceURL` **and set
+`ForcePathStyle = true`** — the headline LocalStack S3 gotcha: the default *virtual-hosted–style* addressing
+(`<bucket>.s3.amazonaws.com`) doesn't resolve against a container, so you **must** force *path-style*
+(`<endpoint>/<bucket>/<key>`). The `Testcontainers.LocalStack` module boots the container, owns the readiness
+wait, and surfaces the endpoint. Reuse the fixture discipline from `qa-test-environments-dotnet` (boot once
+per fixture; **never `Task.Delay` for readiness** — the module owns the wait). **Create the bucket in fixture
+setup** through the SDK.
+
+```csharp
+using Amazon.Runtime;
+using Amazon.S3;
+using Amazon.S3.Model;
+using NUnit.Framework;
+using Testcontainers.LocalStack;
+
+namespace IntegrationTests.Fixtures;
+
+public abstract class S3Fixture
+{
+    private LocalStackContainer _localstack = null!;
+
+    protected IAmazonS3 S3 { get; private set; } = null!;
+    protected string Bucket { get; private set; } = null!;
+    protected string Endpoint { get; private set; } = null!;
+
+    [OneTimeSetUp]
+    public async Task StartStoreAsync()
+    {
+        // Pin the image tag, never `latest`. The module declares its own readiness wait strategy.
+        _localstack = new LocalStackBuilder()
+            .WithImage("localstack/localstack:3.5")
+            .Build();
+        await _localstack.StartAsync();
+
+        Endpoint = _localstack.GetConnectionString();   // e.g. http://127.0.0.1:<mappedPort>
+        // LocalStack accepts any creds; surfaced for the client, never logged.
+        S3 = new AmazonS3Client(
+            new BasicAWSCredentials("test", "test"),
+            new AmazonS3Config
+            {
+                ServiceURL = Endpoint,
+                ForcePathStyle = true,          // ← the LocalStack S3 gotcha: path-style, not virtual-hosted
+                AuthenticationRegion = "us-east-1",
+            });
+
+        // Uniquely named bucket per fixture → independent, parallel-safe (no cross-talk between suites).
+        Bucket = $"orders-{Guid.NewGuid():N}";
+        await S3.PutBucketAsync(Bucket);
+    }
+
+    [OneTimeTearDown]
+    public async Task StopStoreAsync()
+    {
+        S3?.Dispose();
+        await _localstack.DisposeAsync();
+    }
+
+    // Independent tests: empty the bucket (objects + versions) so each starts clean.
+    protected async Task EmptyBucketAsync()
+    {
+        var versions = await S3.ListVersionsAsync(Bucket);
+        var toDelete = new List<KeyVersion>();
+        toDelete.AddRange(versions.Versions.Select(v => new KeyVersion { Key = v.Key, VersionId = v.VersionId }));
+        if (toDelete.Count > 0)
+            await S3.DeleteObjectsAsync(new DeleteObjectsRequest { BucketName = Bucket, Objects = toDelete });
+    }
+}
+```
+
+> **Cloud test bucket alternative.** If your org runs against a real **test** AWS account instead of LocalStack,
+> drop the `ServiceURL` + `ForcePathStyle` override and let the SDK resolve the real endpoint (virtual-hosted
+> style); read the region from env and the credentials from the **default AWS credential chain** (instance
+> role / SSO / env vars) — never hard-code an access key, never log it (cross-link `qa-auth0-test-tokens-dotnet`
+> for the secrets-from-env discipline). LocalStack is the default for CI determinism; a shared cloud bucket
+> makes tests order-dependent unless each uses a **uniquely named bucket** (as above) or empties it in `[SetUp]`.
+
+## Core pattern 1 — upload-assert (the SUT uploaded object X)
+
+The SUT uploads; the test asserts the object **exists** at the expected key with the right content-type and
+metadata (HEAD via `GetObjectMetadataAsync`), then reads the body to assert content. HEAD throws
+`AmazonS3Exception` with `StatusCode == NotFound` when the key is absent — so a clean "does it exist" check is
+a HEAD that doesn't throw.
+
+```csharp
+public class InvoiceUploadTests : S3Fixture
+{
+    private InvoiceStore _sut = null!;   // production code, constructor-injected with the S3 client + bucket
+
+    [SetUp]
+    public async Task SetUp()
+    {
+        await EmptyBucketAsync();              // independent tests — start from empty
+        _sut = new InvoiceStore(S3, Bucket);   // constructor injection — no static client
+    }
+
+    [Test]
+    public async Task Should_store_the_invoice_pdf_When_an_invoice_is_finalised()
+    {
+        var invoice = Invoices.Finalised().WithNumber("INV-1001").Build();   // builder (qa/dotnet/skills/test-data-builder)
+
+        await _sut.SaveAsync(invoice);                                       // SUT uploads the object
+
+        // HEAD = the cheap existence + shape probe. Asserts key, content-type, and user metadata in one behaviour.
+        var head = await S3.GetObjectMetadataAsync(Bucket, "invoices/INV-1001.pdf");
+        Assert.Multiple(() =>
+        {
+            Assert.That(head.Headers.ContentType, Is.EqualTo("application/pdf"));   // S3 does NOT infer this
+            Assert.That(head.Metadata["x-amz-meta-invoice-number"], Is.EqualTo("INV-1001"));
+        });
+    }
+
+    [Test]
+    public async Task Should_write_the_exact_pdf_bytes_When_storing()
+    {
+        var invoice = Invoices.Finalised().WithNumber("INV-1002").Build();
+
+        await _sut.SaveAsync(invoice);
+
+        using var obj = await S3.GetObjectAsync(Bucket, "invoices/INV-1002.pdf");
+        using var ms = new MemoryStream();
+        await obj.ResponseStream.CopyToAsync(ms);
+        Assert.That(ms.ToArray(), Is.EqualTo(invoice.RenderedPdf));    // one logical assertion: the stored bytes
+    }
+}
+```
+
+## Core pattern 2 — process-assert (the SUT processed an object → side-effect Y)
+
+Here the SUT is a **worker**: it watches a bucket (or is driven by an S3 event), processes an uploaded object,
+and produces an observable side-effect — a DB row, a *derived* object (a thumbnail), or a notification. The
+side-effect is eventually consistent, so **seed the input object, then poll a probe on a condition**. This
+reuses `qa-db-testing-client-dotnet`'s `WaitFor.Async` verbatim.
+
+```csharp
+[Test]
+public async Task Should_produce_a_thumbnail_object_When_an_image_is_uploaded()
+{
+    // 1. Seed the input object the worker watches.
+    await S3.PutObjectAsync(new PutObjectRequest
+    {
+        BucketName = Bucket,
+        Key = "uploads/cat.png",
+        InputStream = new MemoryStream(SampleImages.Png1024),
+        ContentType = "image/png",
+    });
+
+    // 2. The SUT worker picks it up and writes a derived object.
+
+    // 3. Wait on the SIDE-EFFECT, not on a clock. Poll the HEAD of the derived key until it exists (or time out).
+    var thumb = await WaitFor.Async(
+        probe:     async ct => await TryHeadAsync("thumbnails/cat.png", ct),
+        predicate: h  => h.ContentLength > 0,
+        timeout:   TimeSpan.FromSeconds(10),
+        interval:  TimeSpan.FromMilliseconds(200));
+
+    Assert.That(thumb.Headers.ContentType, Is.EqualTo("image/png"));   // one logical assertion: the derived object
+}
+
+// HEAD-or-null probe: returns the metadata if the key exists, null otherwise (so the poll keeps waiting).
+private async Task<GetObjectMetadataResponse?> TryHeadAsync(string key, CancellationToken ct)
+{
+    try { return await S3.GetObjectMetadataAsync(Bucket, key, ct); }
+    catch (AmazonS3Exception e) when (e.StatusCode == System.Net.HttpStatusCode.NotFound) { return null; }
+}
+```
+
+The `WaitFor.Async` helper is the same bounded poll as `qa-db-testing-client-dotnet`, `#28` Service Bus, and
+`#29` SQS — included so the node is self-contained:
+
+```csharp
+public static class WaitFor
+{
+    public static async Task<T> Async<T>(
+        Func<CancellationToken, Task<T?>> probe,
+        Func<T, bool>                     predicate,
+        TimeSpan                          timeout,
+        TimeSpan                          interval,
+        CancellationToken                 ct = default) where T : class
+    {
+        using var cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
+        cts.CancelAfter(timeout);
+        while (!cts.IsCancellationRequested)
+        {
+            var value = await probe(cts.Token);
+            if (value is not null && predicate(value)) return value;
+            await Task.Delay(interval, cts.Token);   // poll cadence INSIDE the helper, not an assertion sleep
+        }
+        throw new TimeoutException($"Side-effect did not satisfy the predicate within {timeout}.");
+    }
+}
+```
+
+> `Task.Delay` appears **only** as the poll cadence *inside* the bounded helper — never as a bare
+> `await Task.Delay(5000)` standing in for "the worker probably finished by now". The helper returns the
+> instant the condition holds and *fails* if it never does; a bare sleep races the worker.
+
+## Multipart upload (large objects) — `TransferUtility`
+
+For large objects, use the high-level **`TransferUtility`**: it splits the stream into parts, uploads them in
+parallel with retries, and completes the multipart upload — you don't hand-drive
+`InitiateMultipartUpload`/`UploadPart`/`CompleteMultipartUpload`. The assertion is unchanged: the assembled
+object exists with the expected size.
+
+```csharp
+[Test]
+public async Task Should_upload_a_large_object_in_parts_When_using_the_transfer_utility()
+{
+    var bytes = LargePayloads.OfSize(12 * 1024 * 1024);   // 12 MB → multiple parts
+    using var transfer = new TransferUtility(S3);
+
+    using (var ms = new MemoryStream(bytes))
+    {
+        await transfer.UploadAsync(new TransferUtilityUploadRequest
+        {
+            BucketName  = Bucket,
+            Key         = "backups/db-2026-06.dump",
+            InputStream = ms,
+            ContentType = "application/octet-stream",
+            PartSize    = 5 * 1024 * 1024,   // 5 MB parts (the S3 minimum part size)
+        });
+    }
+
+    var head = await S3.GetObjectMetadataAsync(Bucket, "backups/db-2026-06.dump");
+    Assert.That(head.ContentLength, Is.EqualTo(bytes.Length));   // assembled object is the full size
+    // NB: don't assert ETag == MD5(bytes) here — multipart ETags are NOT the object's MD5.
+}
+```
+
+## Presigned URLs — mint one, prove a credential-less client can use it
+
+`GetPreSignedURLAsync` builds a time-limited, signed URL. The test mints one and exercises it with a **plain
+`HttpClient`** (no AWS creds) to prove the round-trip — then asserts an **expired** URL is rejected.
+
+```csharp
+[Test]
+public async Task Should_let_a_client_download_via_a_presigned_get_url()
+{
+    await S3.PutObjectAsync(new PutObjectRequest
+    {
+        BucketName = Bucket, Key = "reports/q2.csv",
+        ContentBody = "id,total\n1,1999", ContentType = "text/csv",
+    });
+
+    var url = await S3.GetPreSignedURLAsync(new GetPreSignedUrlRequest
+    {
+        BucketName = Bucket,
+        Key        = "reports/q2.csv",
+        Verb       = HttpVerb.GET,
+        Expires    = DateTime.UtcNow.AddMinutes(5),
+    });
+
+    using var http = new HttpClient();
+    var body = await http.GetStringAsync(url);            // credential-less client uses the signed URL
+    Assert.That(body, Does.Contain("1,1999"));
+}
+
+[Test]
+public async Task Should_reject_an_expired_presigned_url()
+{
+    await S3.PutObjectAsync(new PutObjectRequest { BucketName = Bucket, Key = "reports/q2.csv", ContentBody = "x" });
+
+    var url = await S3.GetPreSignedURLAsync(new GetPreSignedUrlRequest
+    {
+        BucketName = Bucket, Key = "reports/q2.csv", Verb = HttpVerb.GET,
+        Expires = DateTime.UtcNow.AddSeconds(-1),         // already expired
+    });
+
+    using var http = new HttpClient();
+    var response = await http.GetAsync(url);
+    Assert.That(response.StatusCode, Is.EqualTo(System.Net.HttpStatusCode.Forbidden));   // signature expired
+}
+```
+
+## Versioning — assert multiple versions of a key
+
+Enable versioning, write the same key twice, and assert both versions are retained and individually
+retrievable.
+
+```csharp
+[Test]
+public async Task Should_keep_both_versions_When_a_versioned_key_is_overwritten()
+{
+    await S3.PutBucketVersioningAsync(new PutBucketVersioningRequest
+    {
+        BucketName       = Bucket,
+        VersioningConfig = new S3BucketVersioningConfig { Status = VersionStatus.Enabled },
+    });
+
+    var v1 = await S3.PutObjectAsync(new PutObjectRequest
+        { BucketName = Bucket, Key = "config/app.json", ContentBody = """{"v":1}""" });
+    var v2 = await S3.PutObjectAsync(new PutObjectRequest
+        { BucketName = Bucket, Key = "config/app.json", ContentBody = """{"v":2}""" });
+
+    var versions = await S3.ListVersionsAsync(new ListVersionsRequest { BucketName = Bucket, Prefix = "config/app.json" });
+    Assert.That(versions.Versions, Has.Count.EqualTo(2));     // both retained, not overwritten
+
+    // The older version is still fetchable by its VersionId.
+    using var old = await S3.GetObjectAsync(new GetObjectRequest
+        { BucketName = Bucket, Key = "config/app.json", VersionId = v1.VersionId });
+    using var reader = new StreamReader(old.ResponseStream);
+    Assert.That(await reader.ReadToEndAsync(), Is.EqualTo("""{"v":1}"""));
+}
+```
+
+## Lifecycle rules — assert the configuration, not the (slow) execution
+
+Lifecycle **execution** runs on a roughly daily cadence — far too slow for a test. So assert the rule
+**round-trips**: set it with `PutLifecycleConfigurationAsync`, read it back with
+`GetLifecycleConfigurationAsync`, assert the shape.
+
+```csharp
+[Test]
+public async Task Should_configure_a_30_day_expiration_rule()
+{
+    await S3.PutLifecycleConfigurationAsync(new PutLifecycleConfigurationRequest
+    {
+        BucketName    = Bucket,
+        Configuration = new LifecycleConfiguration
+        {
+            Rules =
+            [
+                new LifecycleRule
+                {
+                    Id         = "expire-temp",
+                    Filter     = new LifecycleFilter { LifecycleFilterPredicate = new LifecyclePrefixPredicate { Prefix = "tmp/" } },
+                    Status     = LifecycleRuleStatus.Enabled,
+                    Expiration = new LifecycleRuleExpiration { Days = 30 },
+                },
+            ],
+        },
+    });
+
+    var config = await S3.GetLifecycleConfigurationAsync(Bucket);
+    var rule = config.Configuration.Rules.Single();
+    Assert.Multiple(() =>                                    // one behaviour: the rule round-trips
+    {
+        Assert.That(rule.Id, Is.EqualTo("expire-temp"));
+        Assert.That(rule.Expiration.Days, Is.EqualTo(30));
+    });
+    // Do NOT try to assert an object actually got expired — that runs daily; it's out of a test's reach.
+}
+```
+
+## S3 → SQS event notifications (the bridge to #29)
+
+Wire bucket events to an SQS queue, upload an object, and assert the **downstream message** arrives — using
+the long-poll receive from `qa-messaging-testing-sqs-dotnet`. This is the cross-family bridge.
+
+```csharp
+[Test]
+public async Task Should_fire_an_sqs_event_When_an_object_is_created()
+{
+    // 1. Create the SQS queue (LocalStack runs SQS on the same endpoint) and wire the bucket → queue notification.
+    using var sqs = new AmazonSQSClient(new BasicAWSCredentials("test", "test"),
+        new AmazonSQSConfig { ServiceURL = Endpoint, AuthenticationRegion = "us-east-1" });
+    var queueUrl = (await sqs.CreateQueueAsync("s3-events")).QueueUrl;
+    var queueArn = (await sqs.GetQueueAttributesAsync(new GetQueueAttributesRequest
+        { QueueUrl = queueUrl, AttributeNames = ["QueueArn"] })).QueueARN;
+
+    await S3.PutBucketNotificationAsync(new PutBucketNotificationRequest
+    {
+        BucketName = Bucket,
+        QueueConfigurations =
+        [
+            new QueueConfiguration { Queue = queueArn, Events = [EventType.ObjectCreatedAll] },
+        ],
+    });
+
+    // 2. Upload an object → fires the event.
+    await S3.PutObjectAsync(new PutObjectRequest { BucketName = Bucket, Key = "incoming/order.json", ContentBody = "{}" });
+
+    // 3. Long-poll the queue (the condition-wait, NOT a sleep) and assert the event names our key.
+    var received = await sqs.ReceiveMessageAsync(new ReceiveMessageRequest
+        { QueueUrl = queueUrl, WaitTimeSeconds = 10, MaxNumberOfMessages = 1 });
+
+    Assert.That(received.Messages, Is.Not.Empty, "no S3 event landed on the SQS queue");
+    Assert.That(received.Messages[0].Body, Does.Contain("incoming/order.json"));   // the S3 event record names the key
+    await sqs.DeleteMessageAsync(queueUrl, received.Messages[0].ReceiptHandle);
+}
+```
+
+## Anti-patterns
+
+- **`await Task.Delay(5000)` before asserting a processed/derived object or an S3 event.** Races the worker
+  and the event delivery; slow and flaky. *Fix:* `WaitFor.Async` polling the HEAD/probe for the side-effect;
+  long-poll the queue for the S3 event. Never a bare sleep.
+- **Asserting content-type without setting it.** S3 stores whatever `ContentType` you sent and does **not**
+  infer it from the `.pdf`/`.png` key suffix. A missing `ContentType` defaults to
+  `application/octet-stream`. *Fix:* set `ContentType` on the PUT, assert it on the HEAD.
+- **Asserting `ETag == MD5(bytes)` on a multipart object.** Multipart ETags are a hash-of-part-hashes with a
+  `-<partcount>` suffix, **not** the object's MD5. *Fix:* assert `ContentLength` and/or download-and-compare
+  bytes; only single-part PUTs have an MD5 ETag.
+- **Forgetting `ForcePathStyle = true` against LocalStack.** Virtual-hosted addressing
+  (`<bucket>.s3.amazonaws.com`) doesn't resolve to the container → connection/DNS errors. *Fix:* `ServiceURL` +
+  `ForcePathStyle = true` (and `AuthenticationRegion`). Drop both only for a real cloud test account.
+- **Trying to assert lifecycle *execution*.** Expiration/transition runs on a ~daily cadence; a test can't wait
+  for it. *Fix:* assert the lifecycle **configuration** round-trips via `GetLifecycleConfigurationAsync`.
+- **Sharing one bucket across parallel test classes.** Cross-talk: one suite's objects/deletes leak into
+  another's listings and asserts. *Fix:* a **uniquely named bucket per fixture** (as in `S3Fixture`) or
+  `EmptyBucketAsync` in `[SetUp]`; `[Parallelizable(ParallelScope.None)]` on the storage fixtures unless
+  verified isolated.
+- **Deleting a bucket without emptying it.** `DeleteBucket` fails on a non-empty bucket (and a *versioned*
+  bucket needs every version + delete-marker removed). *Fix:* `EmptyBucketAsync` deletes objects **and**
+  versions first.
+- **Scanning `ListObjectsV2` to check a single key exists.** A list can momentarily lag a just-written key and
+  it's O(bucket). *Fix:* `GetObjectMetadataAsync` (HEAD) — strongly consistent for the object, cheap, and
+  throws `NotFound` cleanly when absent.
+- **Hard-coding the endpoint / an AWS access key in a `[Test]`.** *Fix:* surface the LocalStack endpoint from
+  the fixture; for a cloud test account use the default credential chain + region from env; never log secrets.
+- **Reaching for S3 when the store is Azure Blob.** *Fix:* `qa-file-storage-testing-azure-blob-dotnet` — Azurite,
+  containers/blobs, SAS tokens, not LocalStack/buckets/presigned-URLs.
+
+## Examples
+
+**End-to-end: an upload → process → derived-object flow, with the S3 event asserted on SQS.**
+
+```csharp
+public class ImageProcessingTests : S3Fixture
+{
+    [SetUp]
+    public async Task SetUp() => await EmptyBucketAsync();   // independent tests — start from empty
+
+    [Test]
+    public async Task Should_write_a_thumbnail_And_fire_an_event_When_an_image_is_uploaded()
+    {
+        // The SUT worker is wired: S3 ObjectCreated → SQS → worker → writes thumbnails/<key>.
+        await S3.PutObjectAsync(new PutObjectRequest
+        {
+            BucketName = Bucket, Key = "uploads/photo.png",
+            InputStream = new MemoryStream(SampleImages.Png1024), ContentType = "image/png",
+        });
+
+        // Wait on the derived object (the condition-wait) — the worker runs async.
+        var thumb = await WaitFor.Async(
+            probe:     ct => TryHeadAsync("thumbnails/photo.png", ct),
+            predicate: h  => h.ContentLength > 0,
+            timeout:   TimeSpan.FromSeconds(15),
+            interval:  TimeSpan.FromMilliseconds(250));
+
+        Assert.That(thumb.Headers.ContentType, Is.EqualTo("image/png"));   // derived object produced
+    }
+}
+```
+
+Lifecycle for this test:
+1. `[OneTimeSetUp]` (in `S3Fixture`) boots LocalStack once and creates a **uniquely named bucket**; the S3
+   client (path-style) + bucket name are surfaced.
+2. `[SetUp]` empties the bucket so the test starts clean — tests stay independent and order-free.
+3. The test seeds an input object; the running SUT worker produces a derived object; the test **polls the HEAD
+   of the derived key** (the condition-wait) and asserts it exists with the right content-type.
+4. `[OneTimeTearDown]` disposes the client and the container.
+
+**Test-data builder for object payloads (4+ fields → builder, per the global rules).**
+
+```csharp
+public static class Invoices
+{
+    public static InvoiceBuilder Finalised() => new InvoiceBuilder().WithStatus("Finalised");
+}
+// InvoiceBuilder.WithNumber(...).WithTotal(...).WithCustomer(...).WithRenderedPdf(...).Build()
+// — see qa/dotnet/skills/test-data-builder
+```
+
+## Rules (hard constraints)
+
+- **Eventual consistency = wait on a condition, never a sleep.** `WaitFor.Async` polling a HEAD/DB probe for
+  processed/derived objects; long-poll (`WaitTimeSeconds`) the queue for S3 events. **No bare `Task.Delay` /
+  `Thread.Sleep`** as an assertion wait — `Task.Delay` only as the poll cadence inside the bounded helper.
+- The SUT's storage gateway is **constructor-injected** with the `IAmazonS3` client + bucket name — never a
+  static client or a bucket/endpoint read inside a `[Test]`.
+- **LocalStack S3 requires `ForcePathStyle = true`** + `ServiceURL` + `AuthenticationRegion`. A cloud test
+  account drops the override and uses the **default credential chain + region from env**, read lazily, never
+  logged.
+- **Set `ContentType` explicitly** on uploads (S3 doesn't infer it); assert it on the HEAD. Don't assert
+  `ETag == MD5` on multipart objects.
+- **Independent tests:** a **uniquely named bucket per fixture** (or `EmptyBucketAsync` in `[SetUp]`); empty
+  objects **and versions** before deleting a bucket; integration fixtures `[Parallelizable(ParallelScope.None)]`
+  unless verified isolated.
+- **Assert lifecycle *config*, not execution** (round-trip via `GetLifecycleConfigurationAsync`).
+- Prefer `GetObjectMetadataAsync` (HEAD) over scanning `ListObjectsV2` for single-key existence.
+- **Async all the way** — `await` every S3/SQS call; `Dispose` clients and `GetObject` response streams; never
+  `.Result` / `.Wait()`.
+- Test names `Should_X_When_Y`; one logical assertion per test; builders for 4+-field payloads; structured
+  logging; no secrets in code.
+
+## Cross-references
+
+- `qa-file-storage-testing-s3-java` — same skill, Java 21 / TestNG (`software.amazon.awssdk:s3`:
+  `S3Client.builder().endpointOverride(...).forcePathStyle(true)`, `putObject`/`getObject`/`headObject`/
+  `listObjectsV2`, `S3TransferManager` for multipart, `S3Presigner` for presigned URLs, Awaitility for the
+  side-effect wait, `org.testcontainers:localstack` `LocalStackContainer.withServices(S3)`). Structure ported,
+  not code.
+- `qa-file-storage-testing-s3-typescript` — same skill, Node 20 + TS (`@aws-sdk/client-s3`:
+  `new S3Client({ endpoint, forcePathStyle: true })`, `PutObjectCommand`/`GetObjectCommand`/`HeadObjectCommand`/
+  `ListObjectsV2Command`, `@aws-sdk/lib-storage` `Upload` for multipart, `@aws-sdk/s3-request-presigner`
+  `getSignedUrl`, `expect.poll` for the side-effect wait, `@testcontainers/localstack`).
+- `qa-file-storage-testing-azure-blob-dotnet` (#33, **the sibling that closes this family**) — Azure Blob via
+  Azurite; the **#32-vs-#33 boundary**: buckets/keys + presigned URLs + LocalStack + `ForcePathStyle` vs
+  containers/blobs + SAS tokens + Azurite + Event Grid→Storage Queue.
+- `qa-messaging-testing-sqs-dotnet` (#29) — **the S3→SQS event-notification bridge AND the LocalStack reuse**:
+  read it for the LocalStack-via-Testcontainers fixture, the cloud-account alternative, and the long-poll
+  receive used to assert the S3 event.
+- `qa-db-testing-client-dotnet` (#3) — the `WaitFor.Async` poll helper and the seeder/probe split reused for
+  the processed-object side-effect assertions; the **eventual-consistency lineage** this skill leans on.
+- `qa-test-environments-dotnet` (#14) — booting the LocalStack container; the per-fixture lifecycle and
+  readiness-wait discipline (never `Task.Delay`) mirrored here.
+- `qa-auth0-test-tokens-dotnet` (#16) — when running against a cloud test account; the default-credential-chain
+  + secrets-from-env discipline.
+- `qa-api-mocking-wiremock-dotnet` (#22) — the *synchronous* counterpart: fake an HTTP dependency the SUT
+  calls. The boundary: WireMock = request/response fake; S3 = object-store assertions.
+- `qa-allure-reporting-dotnet` — attach the uploaded/derived object's key + metadata (or the S3-event body) to
+  the Allure result.
+- `qa-test-data-builder-dotnet` — builders/ObjectMother for object payloads with 4+ fields.

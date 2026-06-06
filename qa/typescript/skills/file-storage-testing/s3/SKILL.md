@@ -1,0 +1,572 @@
+---
+name: qa-file-storage-testing-s3-typescript
+description: >-
+  Object-storage assertions against AWS S3 in Node 20 + TypeScript (strict) with Vitest and the AWS SDK v3
+  (`@aws-sdk/client-s3`, `@aws-sdk/lib-storage` for multipart, `@aws-sdk/s3-request-presigner` for presigned
+  URLs): prove the system-under-test **uploaded** object X (it exists in the bucket with the right key /
+  content / metadata / content-type), or **consumed/processed** an object and produced side-effect Y (a row
+  written, a derived object, a notification) — where the side-effect is **eventually consistent**, so you wait
+  on a condition with `expect.poll`, never `setTimeout`/`waitForTimeout`. `new S3Client({ endpoint,
+  forcePathStyle: true })`, `PutObjectCommand` / `GetObjectCommand` / `HeadObjectCommand` (HEAD) /
+  `ListObjectsV2Command` / `DeleteObjectCommand` / `DeleteObjectsCommand`, **multipart upload** via
+  `lib-storage` `Upload`, **presigned URLs** (`getSignedUrl`), **versioning** (`PutBucketVersioningCommand` →
+  `ListObjectVersionsCommand`), **lifecycle rules** (assert the *config*, not slow execution), and **S3 →
+  SQS/SNS event notifications** (an upload fires an event — assert the downstream message), with a **local
+  store for tests** via **LocalStack S3** (Testcontainers `LocalStackContainer`, **force path-style**).
+  Triggers: "assert our service uploaded the invoice PDF to the bucket with the right content-type", "verify
+  the worker wrote a thumbnail object after the original landed", "check the object metadata / ETag / content
+  matches", "generate a presigned URL and prove a client can use it", "assert versioning kept both versions of
+  the key", "the upload fired an S3 event onto the SQS queue", "stand up a local S3 for these tests". Do NOT use
+  for: Azure Blob Storage (use qa-file-storage-testing-azure-blob-typescript), a pure message-queue assertion
+  with no object store (use qa-messaging-testing-sqs-typescript), DB-only assertions (use
+  qa-db-testing-client-typescript), mocking a downstream HTTP dependency (use qa-api-mocking-msw-typescript),
+  the .NET stack (use qa-file-storage-testing-s3-dotnet), or the Java stack (use
+  qa-file-storage-testing-s3-java).
+---
+
+# File-Storage Testing — AWS S3 (Node 20 + TypeScript / Vitest)
+
+This is the **TypeScript sibling** of the `qa/typescript/skills/file-storage-testing/s3/` node, **ported** from the canonical
+.NET stack (`qa-file-storage-testing-s3-dotnet`, **.NET-led by the user's choice** — the AWS SDK is first-class
+everywhere, so this is the house-default language but not the canonical one for this node). It **opens the
+`qa/typescript/skills/file-storage-testing/` family** (#32 s3 → #33 azure-blob) in this stack. All three AWS SDKs mirror the same
+put / get / head / list / delete + presign + multipart model, so this is a true translate-the-concepts port,
+not a redesign.
+
+It is **not** a port of the `messaging-testing` family — object storage is a different model — but it **reuses
+the same verification-inside-tests lineage**: the LocalStack-via-Testcontainers fixture discipline from
+`qa-messaging-testing-sqs-typescript` (#29) and `qa-test-environments-typescript` (#14), and the
+**eventual-consistency condition-wait** (`expect.poll`) from `qa-db-testing-client-typescript` (#3).
+
+File-storage tests assert one of two things about an object flow:
+
+- **Upload-assert** — the SUT, when exercised, **uploaded** object X (it now exists in the bucket at the
+  expected key, with the expected content, content-type, and metadata).
+- **Process-assert** — the SUT **consumed/processed** an object and produced an observable **side-effect Y**
+  (a row written, a *derived* object — a thumbnail, a transcoded file — or a notification sent).
+
+> **The boundary that shapes this skill — eventual consistency.** S3 is strongly read-after-write consistent
+> for a single PUT/GET today, but the things tests usually assert are *not* synchronous: a worker that
+> processes an uploaded object runs on its own schedule, an **S3 event notification** lands on a queue "soon",
+> a derived object appears after the worker finishes. So the core discipline matches #3 / #29: **wait on a
+> condition** for the effect to appear, with a bounded timeout — **never `setTimeout` / `waitForTimeout`**. Use
+> Vitest's `expect.poll`. (Listing is the one place to stay alert to lag — `ListObjectsV2` can momentarily lag
+> a just-written key; assert the object via `HeadObjectCommand`/`GetObjectCommand` rather than scanning a list
+> when you can.)
+
+## Decision matrix — S3 vs the rest of `file-storage-testing` (and adjacent skills)
+
+| Need | Use | Why |
+|------|-----|-----|
+| Assert against **AWS S3** (buckets/keys, multipart, presigned URLs, versioning, lifecycle, S3→SQS events) | **S3 (this skill)** | AWS-native object store; `@aws-sdk/client-s3` is the first-class Node client; LocalStack runs it locally |
+| Assert against **Azure Blob Storage** (containers/blobs, SAS tokens, blob tiers, Event Grid → Storage Queue) | `qa-file-storage-testing-azure-blob-typescript` (#33) | Azure-native; container/blob not bucket/key, SAS not presigned, Azurite not LocalStack |
+| Assert a **message** was produced/consumed, no object store in the flow | `qa-messaging-testing-sqs-typescript` (#29) | Pure queue assertion; here SQS appears only as the *downstream* of an S3 event |
+| Assert a **DB row** was written, no object store | `qa-db-testing-client-typescript` (#3) | Pure DB verification; reuse its `expect.poll` for the eventual side here |
+| Mock a downstream **HTTP** dependency the SUT calls | `qa-api-mocking-msw-typescript` (#23) | Not storage — a synchronous request/response fake |
+
+**Rule of thumb:** *AWS bucket + keys, presigned URLs, S3 events?* → S3. *Azure container + blobs, SAS?* →
+azure-blob. *A queue with no object?* → messaging. *A row with no object?* → db-testing.
+
+> **The #32-vs-#33 boundary in one line.** S3 is **buckets + keys**, addressed path-style against **LocalStack**,
+> with **presigned URLs**, a `PutBucketNotificationConfigurationCommand` → SQS/SNS event bridge, and
+> `forcePathStyle`. Azure Blob is **containers + blobs** against **Azurite**, with **SAS tokens** (the
+> presigned-URL analogue), **Event Grid → Storage Queue** notifications, and blob **access tiers**. Same two
+> assertion shapes, different store.
+
+## Stack
+
+- Node 20, TypeScript (`strict: true`), Vitest — async all the way (`await` every command send)
+- `@aws-sdk/client-s3` — `S3Client` + command objects (`PutObjectCommand`, `GetObjectCommand`,
+  `HeadObjectCommand`, `ListObjectsV2Command`, `DeleteObjectCommand`, `DeleteObjectsCommand`, bucket config,
+  versioning, lifecycle, notifications); `@aws-sdk/lib-storage` `Upload` for multipart;
+  `@aws-sdk/s3-request-presigner` `getSignedUrl` for presigned URLs. `@aws-sdk/client-sqs` only for the
+  S3-event-notification bridge (cross-link #29).
+- `@testcontainers/localstack` (`LocalStackContainer`) — boots **LocalStack** (the local AWS emulator) and
+  surfaces the endpoint the S3 client points at via `endpoint` + **`forcePathStyle: true`** (cross-link
+  `qa-test-environments-typescript`)
+- Vitest's `expect.poll` — the bounded condition-wait for processing side-effects
+- The SUT's storage gateway takes the `S3Client` (or a typed wrapper) and the bucket name via its
+  **constructor** — never a module-level client or a bucket/endpoint read inside an `it()`
+
+```
+test/integration/
+├── fixtures/
+│   └── s3-fixture.ts           ← boots LocalStack, creates the bucket(s), exposes the S3 client + bucket name
+└── invoice-upload.test.ts
+```
+
+## The S3 model — buckets/keys, multipart, presigned, versioning, lifecycle, S3→SQS
+
+- **Bucket + key** — objects live in a flat keyspace; the `/`-delimited "folders" are a listing convention
+  (`Prefix` + `Delimiter`), not real directories. `PutObjectCommand` writes; `GetObjectCommand` reads the body
+  + headers; **`HeadObjectCommand` is the HEAD** (existence + metadata + content-type + size + ETag, no body —
+  the cheap "does it exist with the right shape" probe); `ListObjectsV2Command` lists by prefix;
+  `DeleteObjectCommand` / `DeleteObjectsCommand` (batch) remove.
+- **Content-type + metadata** — set `ContentType` on the command (S3 does *not* infer it from the key
+  extension — a common bug to assert against); user metadata goes in `Metadata` (round-tripped with an
+  `x-amz-meta-` prefix the SDK hides). The **ETag** is an opaque content fingerprint (MD5 for single-part
+  uploads; *not* MD5 for multipart — don't assert ETag==MD5 on multipart objects).
+- **Multipart upload** — large objects are uploaded in parts and assembled server-side. Use the
+  **`@aws-sdk/lib-storage` `Upload`** helper rather than hand-driving
+  `CreateMultipartUpload`/`UploadPart`/`CompleteMultipartUpload`; it parallelises and retries parts. The
+  assertion is the same: the assembled object exists with the expected size/content.
+- **Presigned URLs** — `getSignedUrl(client, command, { expiresIn })` from `@aws-sdk/s3-request-presigner`
+  mints a time-limited URL that embeds the auth, so a client with **no AWS credentials** can `GET`/`PUT`
+  directly. The test generates one and exercises it with `fetch` to prove it works — and asserts an *expired*
+  one is rejected.
+- **Versioning** — `PutBucketVersioningCommand({ Status: "Enabled" })` makes every PUT to a key create a new
+  **version** (each with a `VersionId`) instead of overwriting; `ListObjectVersionsCommand` enumerates them;
+  `GetObjectCommand` with a `VersionId` fetches a specific one. Delete becomes a *delete marker*.
+- **Lifecycle rules** — `PutBucketLifecycleConfigurationCommand` sets expiration/transition rules. **You assert
+  the *configuration* round-trips** with `GetBucketLifecycleConfigurationCommand` — lifecycle **execution**
+  runs on a daily cadence and is far too slow to assert in a test.
+- **S3 → SQS/SNS event notifications** — `PutBucketNotificationConfigurationCommand` wires bucket events
+  (`s3:ObjectCreated:*`, `s3:ObjectRemoved:*`) to an SQS queue / SNS topic / Lambda. An upload fires an event;
+  the test asserts the **downstream message** arrives (the bridge to `qa-messaging-testing-sqs-typescript` #29
+  — reuse its long-poll receive). LocalStack wires the send policy when the notification is configured.
+
+## Local store for tests — LocalStack S3 (force path-style!)
+
+There is no in-memory S3. For deterministic local + CI tests, run **LocalStack** (`localstack/localstack`) —
+the same emulator the #29 sqs node used — serving S3 (and SQS/SNS for the event bridge) on a single endpoint
+(default `:4566`). Point the S3 client at that endpoint via `endpoint` **and set `forcePathStyle: true`** — the
+headline LocalStack S3 gotcha: the default *virtual-hosted–style* addressing (`<bucket>.s3.amazonaws.com`)
+doesn't resolve against a container, so you **must** force *path-style* (`<endpoint>/<bucket>/<key>`). The
+`@testcontainers/localstack` module boots the container, owns the readiness wait, and surfaces the endpoint.
+Reuse the fixture discipline from `qa-test-environments-typescript` (boot once per suite; **never `setTimeout`
+for readiness**). **Create the bucket in fixture setup** through the SDK.
+
+```typescript
+import { LocalStackContainer, StartedLocalStackContainer } from "@testcontainers/localstack";
+import {
+  S3Client, CreateBucketCommand, ListObjectVersionsCommand, DeleteObjectsCommand,
+} from "@aws-sdk/client-s3";
+import { randomUUID } from "node:crypto";
+
+export interface S3Fixture {
+  s3: S3Client;
+  bucket: string;
+  endpoint: string;
+  emptyBucket: () => Promise<void>;
+  stop: () => Promise<void>;
+}
+
+export async function startS3Fixture(): Promise<S3Fixture> {
+  // Pin the image tag, never `latest`. The module declares its own readiness wait strategy.
+  const container: StartedLocalStackContainer = await new LocalStackContainer(
+    "localstack/localstack:3.5",
+  ).start();
+
+  const endpoint = container.getConnectionUri(); // e.g. http://127.0.0.1:<mappedPort>
+  // LocalStack accepts any creds; surfaced for the client, never logged.
+  const s3 = new S3Client({
+    endpoint,
+    forcePathStyle: true, // ← the LocalStack S3 gotcha: path-style, not virtual-hosted
+    region: "us-east-1",
+    credentials: { accessKeyId: "test", secretAccessKey: "test" },
+  });
+
+  // Uniquely named bucket per suite → independent, parallel-safe.
+  const bucket = `orders-${randomUUID().replace(/-/g, "")}`;
+  await s3.send(new CreateBucketCommand({ Bucket: bucket }));
+
+  // Independent tests: empty the bucket (objects + versions) so each starts clean.
+  const emptyBucket = async (): Promise<void> => {
+    const { Versions, DeleteMarkers } = await s3.send(new ListObjectVersionsCommand({ Bucket: bucket }));
+    const objects = [...(Versions ?? []), ...(DeleteMarkers ?? [])].map((v) => ({
+      Key: v.Key!,
+      VersionId: v.VersionId,
+    }));
+    if (objects.length > 0) {
+      await s3.send(new DeleteObjectsCommand({ Bucket: bucket, Delete: { Objects: objects } }));
+    }
+  };
+
+  return { s3, bucket, endpoint, emptyBucket, stop: async () => { s3.destroy(); await container.stop(); } };
+}
+```
+
+> **Cloud test bucket alternative.** If your org runs against a real **test** AWS account instead of LocalStack,
+> drop the `endpoint` + `forcePathStyle` and let the SDK resolve the real endpoint (virtual-hosted style); read
+> the region from `process.env` and let the SDK use the **default credential provider chain** (instance role /
+> SSO / env vars) — never hard-code an access key, never log it (cross-link `qa-auth0-test-tokens-typescript`).
+> LocalStack is the default for CI determinism; a shared cloud bucket makes tests order-dependent unless each
+> uses a **uniquely named bucket** or empties it in `beforeEach`.
+
+## Core pattern 1 — upload-assert (the SUT uploaded object X)
+
+The SUT uploads; the test asserts the object **exists** at the expected key with the right content-type and
+metadata (HEAD via `HeadObjectCommand`), then reads the body to assert content. `HeadObjectCommand` rejects
+with a `NotFound` error when the key is absent — so a clean "does it exist" check is a HEAD that doesn't reject.
+
+```typescript
+import { describe, it, expect, beforeAll, beforeEach, afterAll } from "vitest";
+import { HeadObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
+
+describe("invoice upload", () => {
+  let fx: S3Fixture;
+  let sut: InvoiceStore;
+
+  beforeAll(async () => { fx = await startS3Fixture(); });
+  afterAll(async () => { await fx.stop(); });
+  beforeEach(async () => {
+    await fx.emptyBucket();                       // independent tests — start from empty
+    sut = new InvoiceStore(fx.s3, fx.bucket);     // constructor injection — no module-level client
+  });
+
+  it("should store the invoice pdf when an invoice is finalised", async () => {
+    const invoice = invoices.finalised().withNumber("INV-1001").build(); // builder (qa/typescript/skills/test-data-builder)
+
+    await sut.save(invoice);                                             // SUT uploads the object
+
+    // HEAD = the cheap existence + shape probe.
+    const head = await fx.s3.send(new HeadObjectCommand({ Bucket: fx.bucket, Key: "invoices/INV-1001.pdf" }));
+    expect(head.ContentType).toBe("application/pdf");                    // S3 does NOT infer this
+    expect(head.Metadata?.["invoice-number"]).toBe("INV-1001");         // SDK lower-cases & strips x-amz-meta-
+  });
+
+  it("should write the exact pdf bytes when storing", async () => {
+    const invoice = invoices.finalised().withNumber("INV-1002").build();
+
+    await sut.save(invoice);
+
+    const obj = await fx.s3.send(new GetObjectCommand({ Bucket: fx.bucket, Key: "invoices/INV-1002.pdf" }));
+    const stored = await obj.Body!.transformToByteArray();
+    expect(Buffer.from(stored)).toEqual(invoice.renderedPdf);            // one logical assertion: the stored bytes
+  });
+});
+```
+
+## Core pattern 2 — process-assert (the SUT processed an object → side-effect Y)
+
+Here the SUT is a **worker**: it watches a bucket (or is driven by an S3 event), processes an uploaded object,
+and produces an observable side-effect — a DB row, a *derived* object (a thumbnail), or a notification. The
+side-effect is eventually consistent, so **seed the input object, then wait on a condition with
+`expect.poll`**. This reuses `qa-db-testing-client-typescript`'s discipline.
+
+```typescript
+import { PutObjectCommand } from "@aws-sdk/client-s3";
+
+it("should produce a thumbnail object when an image is uploaded", async () => {
+  // 1. Seed the input object the worker watches.
+  await fx.s3.send(new PutObjectCommand({
+    Bucket: fx.bucket, Key: "uploads/cat.png", Body: sampleImages.png1024, ContentType: "image/png",
+  }));
+
+  // 2. The SUT worker picks it up and writes a derived object.
+
+  // 3. Wait on the SIDE-EFFECT, not on a clock. expect.poll re-runs until the derived key exists (or times out).
+  await expect
+    .poll(() => headOrNull(fx, "thumbnails/cat.png").then((h) => h?.ContentLength ?? 0), {
+      timeout: 10_000,
+      interval: 200,
+    })
+    .toBeGreaterThan(0);
+
+  const thumb = await fx.s3.send(new HeadObjectCommand({ Bucket: fx.bucket, Key: "thumbnails/cat.png" }));
+  expect(thumb.ContentType).toBe("image/png");   // one logical assertion: the derived object
+});
+
+// HEAD-or-null probe: resolves to the metadata if the key exists, null otherwise (so expect.poll keeps waiting).
+async function headOrNull(fx: S3Fixture, key: string): Promise<HeadObjectCommandOutput | null> {
+  try {
+    return await fx.s3.send(new HeadObjectCommand({ Bucket: fx.bucket, Key: key }));
+  } catch (e) {
+    if (e instanceof Error && e.name === "NotFound") return null;
+    throw e;
+  }
+}
+```
+
+> `expect.poll` re-evaluates *until the matcher passes*, then returns; it **fails** if the matcher never passes
+> inside the timeout. That is the difference from a bare `await new Promise((r) => setTimeout(r, 5000))`, which
+> races the worker and is slow even when the work finished early. **No `setTimeout` / `waitForTimeout` as an
+> assertion wait — ever.**
+
+## Multipart upload (large objects) — `@aws-sdk/lib-storage` `Upload`
+
+For large objects, use the high-level **`Upload`** from `@aws-sdk/lib-storage`: it splits the stream into
+parts, uploads them in parallel with retries, and completes the multipart upload. The assertion is unchanged:
+the assembled object exists with the expected size.
+
+```typescript
+import { Upload } from "@aws-sdk/lib-storage";
+
+it("should upload a large object in parts when using lib-storage", async () => {
+  const bytes = largePayloads.ofSize(12 * 1024 * 1024); // 12 MB → multiple parts
+
+  await new Upload({
+    client: fx.s3,
+    params: {
+      Bucket: fx.bucket,
+      Key: "backups/db-2026-06.dump",
+      Body: bytes,
+      ContentType: "application/octet-stream",
+    },
+    partSize: 5 * 1024 * 1024, // 5 MB parts (the S3 minimum part size)
+  }).done();
+
+  const head = await fx.s3.send(new HeadObjectCommand({ Bucket: fx.bucket, Key: "backups/db-2026-06.dump" }));
+  expect(head.ContentLength).toBe(bytes.length); // assembled object is the full size
+  // NB: don't assert ETag === md5(bytes) here — multipart ETags are NOT the object's MD5.
+});
+```
+
+## Presigned URLs — mint one, prove a credential-less client can use it
+
+`getSignedUrl` builds a time-limited, signed URL. The test mints one and exercises it with `fetch` (no AWS
+creds) to prove the round-trip — then asserts an **expired** one is rejected.
+
+```typescript
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+
+it("should let a client download via a presigned get url", async () => {
+  await fx.s3.send(new PutObjectCommand({
+    Bucket: fx.bucket, Key: "reports/q2.csv", Body: "id,total\n1,1999", ContentType: "text/csv",
+  }));
+
+  const url = await getSignedUrl(
+    fx.s3,
+    new GetObjectCommand({ Bucket: fx.bucket, Key: "reports/q2.csv" }),
+    { expiresIn: 300 }, // seconds
+  );
+
+  const res = await fetch(url);          // credential-less client uses the signed URL
+  expect(await res.text()).toContain("1,1999");
+});
+
+it("should reject an expired presigned url", async () => {
+  await fx.s3.send(new PutObjectCommand({ Bucket: fx.bucket, Key: "reports/q2.csv", Body: "x" }));
+
+  const url = await getSignedUrl(
+    fx.s3,
+    new GetObjectCommand({ Bucket: fx.bucket, Key: "reports/q2.csv" }),
+    { expiresIn: 1 }, // expires after 1s
+  );
+
+  // expect.poll waits past expiry on a CONDITION (a 403), not a fixed sleep.
+  await expect.poll(() => fetch(url).then((r) => r.status), { timeout: 5_000, interval: 200 }).toBe(403);
+});
+```
+
+## Versioning — assert multiple versions of a key
+
+Enable versioning, write the same key twice, and assert both versions are retained and individually
+retrievable.
+
+```typescript
+import { PutBucketVersioningCommand, ListObjectVersionsCommand } from "@aws-sdk/client-s3";
+
+it("should keep both versions when a versioned key is overwritten", async () => {
+  await fx.s3.send(new PutBucketVersioningCommand({
+    Bucket: fx.bucket, VersioningConfiguration: { Status: "Enabled" },
+  }));
+
+  const v1 = await fx.s3.send(new PutObjectCommand({ Bucket: fx.bucket, Key: "config/app.json", Body: '{"v":1}' }));
+  await fx.s3.send(new PutObjectCommand({ Bucket: fx.bucket, Key: "config/app.json", Body: '{"v":2}' }));
+
+  const { Versions } = await fx.s3.send(
+    new ListObjectVersionsCommand({ Bucket: fx.bucket, Prefix: "config/app.json" }),
+  );
+  expect(Versions).toHaveLength(2); // both retained, not overwritten
+
+  // The older version is still fetchable by its VersionId.
+  const old = await fx.s3.send(
+    new GetObjectCommand({ Bucket: fx.bucket, Key: "config/app.json", VersionId: v1.VersionId }),
+  );
+  expect(await old.Body!.transformToString()).toBe('{"v":1}');
+});
+```
+
+## Lifecycle rules — assert the configuration, not the (slow) execution
+
+Lifecycle **execution** runs on a roughly daily cadence — far too slow for a test. So assert the rule
+**round-trips**: set it, read it back, assert the shape.
+
+```typescript
+import {
+  PutBucketLifecycleConfigurationCommand, GetBucketLifecycleConfigurationCommand,
+} from "@aws-sdk/client-s3";
+
+it("should configure a 30 day expiration rule", async () => {
+  await fx.s3.send(new PutBucketLifecycleConfigurationCommand({
+    Bucket: fx.bucket,
+    LifecycleConfiguration: {
+      Rules: [
+        { ID: "expire-temp", Filter: { Prefix: "tmp/" }, Status: "Enabled", Expiration: { Days: 30 } },
+      ],
+    },
+  }));
+
+  const { Rules } = await fx.s3.send(new GetBucketLifecycleConfigurationCommand({ Bucket: fx.bucket }));
+  expect(Rules?.[0]?.ID).toBe("expire-temp");
+  expect(Rules?.[0]?.Expiration?.Days).toBe(30);
+  // Do NOT try to assert an object actually got expired — that runs daily; it's out of a test's reach.
+});
+```
+
+## S3 → SQS event notifications (the bridge to #29)
+
+Wire bucket events to an SQS queue, upload an object, and assert the **downstream message** arrives — using the
+long-poll receive from `qa-messaging-testing-sqs-typescript`. This is the cross-family bridge.
+
+```typescript
+import {
+  SQSClient, CreateQueueCommand, GetQueueAttributesCommand, ReceiveMessageCommand, DeleteMessageCommand,
+} from "@aws-sdk/client-sqs";
+import { PutBucketNotificationConfigurationCommand } from "@aws-sdk/client-s3";
+
+it("should fire an sqs event when an object is created", async () => {
+  const sqs = new SQSClient({
+    endpoint: fx.endpoint, forcePathStyle: true, region: "us-east-1",
+    credentials: { accessKeyId: "test", secretAccessKey: "test" },
+  });
+  const { QueueUrl } = await sqs.send(new CreateQueueCommand({ QueueName: "s3-events" }));
+  const { Attributes } = await sqs.send(
+    new GetQueueAttributesCommand({ QueueUrl, AttributeNames: ["QueueArn"] }),
+  );
+
+  await fx.s3.send(new PutBucketNotificationConfigurationCommand({
+    Bucket: fx.bucket,
+    NotificationConfiguration: {
+      QueueConfigurations: [{ QueueArn: Attributes!.QueueArn, Events: ["s3:ObjectCreated:*"] }],
+    },
+  }));
+
+  // Upload → fires the event.
+  await fx.s3.send(new PutObjectCommand({ Bucket: fx.bucket, Key: "incoming/order.json", Body: "{}" }));
+
+  // Long-poll the queue (the condition-wait, NOT a sleep) and assert the event names our key.
+  const received = await sqs.send(
+    new ReceiveMessageCommand({ QueueUrl, WaitTimeSeconds: 10, MaxNumberOfMessages: 1 }),
+  );
+  expect(received.Messages).toBeDefined();
+  expect(received.Messages![0].Body).toContain("incoming/order.json");
+  await sqs.send(new DeleteMessageCommand({ QueueUrl, ReceiptHandle: received.Messages![0].ReceiptHandle }));
+  sqs.destroy();
+});
+```
+
+## Anti-patterns
+
+- **`await new Promise((r) => setTimeout(r, 5000))` (or `page.waitForTimeout`) before asserting a
+  processed/derived object or an S3 event.** Races the worker and the event delivery; slow and flaky. *Fix:*
+  `expect.poll` on the HEAD/probe for the side-effect; long-poll the queue for the S3 event. Never a bare sleep.
+- **Asserting content-type without setting it.** S3 stores whatever `ContentType` you sent and does **not**
+  infer it from the `.pdf`/`.png` key suffix; a missing one defaults to `application/octet-stream`. *Fix:* set
+  `ContentType` on the PUT, assert it on the HEAD.
+- **Asserting `ETag === md5(bytes)` on a multipart object.** Multipart ETags are a hash-of-part-hashes with a
+  `-<partcount>` suffix, **not** the object's MD5. *Fix:* assert `ContentLength` and/or download-and-compare
+  bytes; only single-part PUTs have an MD5 ETag.
+- **Forgetting `forcePathStyle: true` against LocalStack.** Virtual-hosted addressing
+  (`<bucket>.s3.amazonaws.com`) doesn't resolve to the container → connection/DNS errors. *Fix:* `endpoint` +
+  `forcePathStyle: true`. Drop both only for a real cloud test account.
+- **Trying to assert lifecycle *execution*.** Expiration/transition runs on a ~daily cadence; a test can't wait
+  for it. *Fix:* assert the lifecycle **configuration** round-trips via `GetBucketLifecycleConfigurationCommand`.
+- **Sharing one bucket across parallel test files.** Cross-talk: one file's objects/deletes leak into another's
+  listings and asserts. *Fix:* a **uniquely named bucket per fixture** (as in `startS3Fixture`) or
+  `emptyBucket()` in `beforeEach`; or `test.describe.configure({ mode: "serial" })`-equivalent isolation.
+- **Deleting a bucket without emptying it.** `DeleteBucket` fails on a non-empty bucket (and a *versioned*
+  bucket needs every version + delete-marker removed). *Fix:* `emptyBucket()` deletes objects **and** versions
+  first.
+- **Scanning `ListObjectsV2` to check a single key exists.** A list can momentarily lag a just-written key and
+  it's O(bucket). *Fix:* `HeadObjectCommand` — strongly consistent for the object, cheap, rejects with
+  `NotFound` cleanly when absent.
+- **Not consuming the `GetObject` `Body` stream.** Leaving the response body unread can leak sockets. *Fix:*
+  always `transformToByteArray()` / `transformToString()` the `Body`.
+- **Hard-coding the endpoint / an AWS access key in an `it()`.** *Fix:* surface the LocalStack endpoint from
+  the fixture; for a cloud test account use the default credential chain + region from env; never log secrets.
+- **Reaching for S3 when the store is Azure Blob.** *Fix:* `qa-file-storage-testing-azure-blob-typescript`.
+
+## Examples
+
+**End-to-end: an upload → process → derived-object flow.**
+
+```typescript
+describe("image processing worker", () => {
+  let fx: S3Fixture;
+
+  beforeAll(async () => { fx = await startS3Fixture(); });
+  afterAll(async () => { await fx.stop(); });
+  beforeEach(async () => { await fx.emptyBucket(); }); // independent tests — start from empty
+
+  it("should write a thumbnail when an image is uploaded", async () => {
+    // The SUT worker is wired: S3 ObjectCreated → SQS → worker → writes thumbnails/<key>.
+    await fx.s3.send(new PutObjectCommand({
+      Bucket: fx.bucket, Key: "uploads/photo.png", Body: sampleImages.png1024, ContentType: "image/png",
+    }));
+
+    // Wait on the derived object (the condition-wait) — the worker runs async.
+    await expect
+      .poll(() => headOrNull(fx, "thumbnails/photo.png").then((h) => h?.ContentLength ?? 0), {
+        timeout: 15_000,
+        interval: 250,
+      })
+      .toBeGreaterThan(0);
+
+    const thumb = await fx.s3.send(new HeadObjectCommand({ Bucket: fx.bucket, Key: "thumbnails/photo.png" }));
+    expect(thumb.ContentType).toBe("image/png"); // derived object produced
+  });
+});
+```
+
+Lifecycle for this test:
+1. `beforeAll` (`startS3Fixture`) boots LocalStack once and creates a **uniquely named bucket**; the S3 client
+   (path-style) + bucket name are surfaced.
+2. `beforeEach` empties the bucket so the test starts clean — tests stay independent and order-free.
+3. The test seeds an input object; the running SUT worker produces a derived object; the test **polls the HEAD
+   of the derived key with `expect.poll`** and asserts it exists with the right content-type.
+4. `afterAll` destroys the client and stops the container.
+
+**Test-data builder for object payloads (4+ fields → builder, per the global rules).**
+
+```typescript
+export const invoices = {
+  finalised: () => new InvoiceBuilder().withStatus("Finalised"),
+};
+// InvoiceBuilder.withNumber(...).withTotal(...).withCustomer(...).withRenderedPdf(...).build()
+// — see qa/typescript/skills/test-data-builder
+```
+
+## Rules (hard constraints)
+
+- **Eventual consistency = wait on a condition, never a sleep.** `expect.poll` on a HEAD/DB probe for
+  processed/derived objects; long-poll (`WaitTimeSeconds`) the queue for S3 events. **No `setTimeout` /
+  `waitForTimeout`** as an assertion wait.
+- The SUT's storage gateway takes the `S3Client` + bucket name via its **constructor** — never a module-level
+  client or a bucket/endpoint read inside an `it()`.
+- **LocalStack S3 requires `forcePathStyle: true`** + `endpoint` + region. A cloud test account drops the
+  override and uses the **default credential provider chain + region from env**, read lazily, never logged.
+- **Set `ContentType` explicitly** on uploads (S3 doesn't infer it); assert it on the HEAD. Don't assert
+  `ETag === md5` on multipart objects. Always consume the `GetObject` `Body` stream.
+- **Independent tests:** a **uniquely named bucket per fixture** (or `emptyBucket()` in `beforeEach`); empty
+  objects **and versions** before deleting a bucket.
+- **Assert lifecycle *config*, not execution** (round-trip via `GetBucketLifecycleConfigurationCommand`).
+- Prefer `HeadObjectCommand` over scanning `ListObjectsV2` for single-key existence.
+- **Async all the way** — `await` every command send; `destroy()` clients; consume response streams.
+- Test names describe behavior (`should …`); one logical assertion per test; builders for 4+-field payloads;
+  structured logging; no secrets in code; `strict: true`.
+
+## Cross-references
+
+- `qa-file-storage-testing-s3-dotnet` — the **canonical** stack this is ported from (.NET 8 / NUnit,
+  `AWSSDK.S3` `AmazonS3Client` + `TransferUtility` + `GetPreSignedURLAsync`, `Testcontainers.LocalStack`,
+  `WaitFor.Async`). Structure ported, not code.
+- `qa-file-storage-testing-s3-java` — same skill, Java 21 / TestNG (`software.amazon.awssdk:s3` `S3Client`
+  `forcePathStyle(true)`, `S3TransferManager`, `S3Presigner`, Awaitility, `org.testcontainers:localstack`).
+- `qa-file-storage-testing-azure-blob-typescript` (#33, **the sibling that closes this family**) — Azure Blob
+  via Azurite; the **#32-vs-#33 boundary**: buckets/keys + presigned URLs + LocalStack + `forcePathStyle` vs
+  containers/blobs + SAS tokens + Azurite + Event Grid→Storage Queue.
+- `qa-messaging-testing-sqs-typescript` (#29) — **the S3→SQS event-notification bridge AND the LocalStack
+  reuse**: read it for the LocalStack-via-Testcontainers fixture, the cloud-account alternative, and the
+  long-poll receive used to assert the S3 event.
+- `qa-db-testing-client-typescript` (#3) — the `expect.poll` wait and the seeder/probe split reused for the
+  processed-object side-effect assertions; the **eventual-consistency lineage** this skill leans on.
+- `qa-test-environments-typescript` (#14) — booting the LocalStack container; the per-suite lifecycle and
+  readiness-wait discipline (never `setTimeout`) mirrored here.
+- `qa-auth0-test-tokens-typescript` (#16) — when running against a cloud test account; the
+  default-credential-provider-chain + secrets-from-env discipline.
+- `qa-api-mocking-msw-typescript` (#23) — the *synchronous* counterpart: fake an HTTP dependency the SUT calls.
+- `qa-allure-reporting-typescript` — attach the uploaded/derived object's key + metadata (or the S3-event body)
+  to the Allure result.
+- `qa-test-data-builder-typescript` — builders/ObjectMother for object payloads with 4+ fields.
