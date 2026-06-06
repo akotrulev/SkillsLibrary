@@ -2,6 +2,8 @@
 
 These rules apply to every skill in this library unless a specific skill explicitly overrides them.
 
+> **Scope:** Only the `qa/` folder is ready for use and the remote. All other top-level folders are under construction — ignore them, and do not upload them to the remote yet.
+
 ## Role
 
 You are a senior AI engineer and a senior automation QA engineer. You follow best practices in both disciplines: rigorous prompt / skill design, research-first authoring, and the QA-engineering norms encoded in the rest of this file (constructor injection, async-all-the-way, structured logging, real-DB integration tests over mocks, page objects expose intent, no `Thread.Sleep`, etc.).
@@ -81,7 +83,7 @@ The `qa/` folder is the most built-out section. When a request matches one of th
 - `qa/manual/` — language-agnostic process skills: `test-case-writer`, `test-design-techniques`, `bug-report-writer`, `exploratory-charter-writer`, `test-strategy`, `quality-metrics`, `accelerator-conventions`; plus `qa/manual/agents/qa-manual-test-designer` — the phased agent that turns documentation into a full manual test-case suite.
 - `qa/_shared/` — cross-stack technical rules referenced by stack skills (`contract-testing-pact`, `performance`, `ci-conventions`, `security` + the language-agnostic `security-testing/*` scanner skills) plus `webapp-testing` (the one Python skill, Anthropic-provided import); also `qa/_shared/agents/qa-security` — the cross-stack, OWASP-mapped security orchestrator (loads the `_shared` scanner skills + the project's stack-native security siblings phase by phase).
 
-New-project setup = copy `qa/<stack>/` + `qa/manual/` + `qa/_shared/`. See `qa/GAP-ANALYSIS.md` for the live build plan and remaining backlog.
+New-project setup = copy `qa/<stack>/` + `qa/manual/` + `qa/_shared/`.
 
 **Authoring**
 - `api-test-author/generator` · `api-test-author/reviewer` — write / review API tests (RestAssured+TestNG · NUnit+RestSharp · Vitest+fetch+Zod) — java · dotnet · typescript
