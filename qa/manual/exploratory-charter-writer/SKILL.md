@@ -251,6 +251,7 @@ Pick the two or three that fit the area. A charter that says "look for bugs" pro
 ## Handoffs
 
 - Bugs found during the session → `qa/manual/bug-report-writer`
+- Distill docs into a test-basis document when they exist → `qa/manual/test-basis-analyzer`
 - Strategy that includes exploratory effort → `qa/manual/test-strategy`
 - Automation candidates → `qa/<stack>/skills/api-test-author/generator/<stack>` / `qa/<stack>/skills/ui-test-author/<stack>`
 - Cross-team status update → `communication/stakeholder-updates`

@@ -101,6 +101,20 @@ At the end, include a coverage table:
 | AC3: Account locks after 5 failed attempts | TC-LOGIN-004, TC-LOGIN-005, TC-LOGIN-006 | ✅ |
 ```
 
+## Writing the case text well
+
+Deriving the *right* cases is `test-design-techniques`' job; writing each one so a **different tester executes it identically** is this skill's. Four rules govern the prose — they're what separates a case that's run once by its author from one that survives in a regression suite.
+
+**Step altitude — intent, not selectors.** Write steps at the level of *user intent*, not UI mechanics, so a case survives a button relabel or a layout change. "Open the login page" — not "Click the hamburger → Account → the blue Sign-in button top-right". Pin an exact selector, path, or shortcut *only* where that mechanic is the thing under test (a masked-field reveal toggle, a deep link, a keyboard accelerator). This is the manual mirror of CLAUDE.md's page-object rule — *expose intent, not selectors* — and it leaves room for exploratory discretion instead of scripting the tester's hands.
+
+**One behavior per case; keep it short.** A case verifies **one** behavior and reads in ≈3–8 steps (hard ceiling ~15). The 30-step "log in → browse → add to cart → checkout → pay → email → refund" script is the *long-sequence anti-pattern*: unmaintainable, and when step 4 breaks you can't tell which behavior failed. Split end-to-end journeys into per-flow use-case cases that **chain via preconditions** ("starts where `TC-…-003` left off") or lean on the shared Setup — don't inline the whole world into one row.
+
+**Expected results are observable and specific.** "System works correctly" / "login succeeds" is *not* an expected result — it can't be falsified. State the **observable** outcome: visible text, URL, HTTP status, a persisted record, an element state. "Redirected to `/dashboard`; header shows 'Hello, Jordan'; session cookie set" — every clause is something a tester can see and a reviewer can check. When a flow asserts at several points, **attach the check to the step** (`3. Submit → 400, body {error:"email_taken"}`) rather than collapsing everything into one final cell.
+
+**Consistency.** One verb per action, one name per field, one ID scheme — and use the product's **real UI labels**, not paraphrases. A suite that says "Sign in" / "Log in" / "Authenticate" for the same button reads as written by three people and slows every execution. If the team has a test-case style guide, follow it; if not, the first suite sets the house style.
+
+**Self-review pass before emitting.** Reread each case as a tester seeing the feature for the first time: can you execute it without guessing? Strip the weasel words that hide missing detail — *valid, appropriate, correctly, as expected, etc., and so on*. Each one is either a concrete value you haven't written down yet or an assertion you haven't made observable.
+
 ## Quality bar
 
 The **suite** must:
@@ -112,12 +126,14 @@ The **suite** must:
 Every generated **test case** must:
 
 - [ ] Have an unambiguous title that describes the behavior, not the implementation
+- [ ] Cover **one behavior** in ≈3–8 steps (≤15) — split long journeys, don't inline them
 - [ ] List only its **delta** preconditions (what differs from Setup) — `—` if none
-- [ ] Have numbered, atomic steps — one user action per step
-- [ ] Have a single, verifiable expected result
+- [ ] Have numbered, atomic steps written at **intent altitude** (one user action per step; selectors only where the mechanic is under test)
+- [ ] Have an **observable, verifiable** expected result — concrete state a reviewer can check, never "works correctly"
 - [ ] Specify test data — concrete values, not "valid email"
 - [ ] Name the **technique** it was derived from
 - [ ] Be traceable back to at least one acceptance criterion
+- [ ] Contain no weasel words (`valid`, `appropriate`, `correctly`, `etc.`) — survive the self-review pass
 
 Negative tests must use realistic invalid inputs, not just "invalid". `password: "''"` is better than `password: "<invalid>"`.
 
@@ -207,8 +223,25 @@ Bad response: a single test case "click login button → user logs in" — too c
 
 Good response: ask "do you have the acceptance criteria for login? If not, I'll generate cases for the obvious happy path and common negatives, and flag what I assumed."
 
+### Vague vs. observable case text
+
+Same intent — "verify a returning user can log in" — written two ways:
+
+```markdown
+<!-- BAD: every cell is unfalsifiable or over-scripted -->
+| Steps | Expected Result | Test Data |
+| 1. Open app and authenticate correctly | User logs in and everything works as expected | valid credentials |
+
+<!-- GOOD: intent-altitude steps, observable result, concrete data -->
+| Steps | Expected Result | Test Data |
+| 1. Open the login page<br>2. Sign in with the seeded credentials | Redirected to `/dashboard`; header shows "Hello, Jordan"; session cookie `sid` set. | `jordan@test.com` / `Valid123!` |
+```
+
+Why the first row fails every rule in *Writing the case text well*: **"authenticate correctly"** scripts nothing a tester can repeat (no page, no fields) yet hides a weasel word (*correctly*); **"logs in and everything works as expected"** can't be falsified — there's no URL, text, or state to check; **"valid credentials"** isn't data. A different tester runs it three different ways and none of them can fail it.
+
 ## Handoffs
 
+- Distill the source docs into a concise, sourced test-basis document first → `qa/manual/test-basis-analyzer`
 - Decide *which* cases to write (partitions, boundaries, rules, transitions) → `qa/manual/test-design-techniques`
 - Orchestrate the full documentation → suite flow → `qa/manual/agents/qa-manual-test-designer`
 - Size the test investment by risk first → `qa/manual/test-strategy`

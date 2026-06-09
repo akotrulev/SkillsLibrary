@@ -85,14 +85,14 @@ Work **one phase at a time**. Do not start phase N+1 until phase N's exit gate p
 
 | # | Phase | Goal | Skills to load | Exit gate |
 |---|-------|------|----------------|-----------|
-| 1 | **Analyze the test basis** | Read the docs; extract actors, preconditions, triggers, expected outcomes, business rules, states, and a data dictionary; enumerate **test conditions**; list ambiguities. *(Live-page input → run Exploration mode instead: charter, explore via Playwright CLI, file defects, derive `#observed` conditions.)* | `qa/manual/test-strategy/SKILL.md` *(risk-rank the conditions — depth follows risk)*, `qa/manual/accelerator-conventions/SKILL.md` *(house ID / naming conventions)*; exploration mode adds `qa/manual/exploratory-charter-writer/SKILL.md` + `qa/manual/bug-report-writer/SKILL.md` | A written **test-basis analysis**: numbered test conditions, each tagged with its risk and the doc line (or `#observed` evidence) it traces to; open questions listed; exploration mode also requires the charter + session report written and every defect filed |
+| 1 | **Analyze the test basis** | Distill the docs into a concise test-basis document (business logic, validations, restrictions, observable implementation notes, data dictionary, states); then enumerate **test conditions** and risk-rank them. *(Live-page input → run Exploration mode instead: charter, explore via Playwright CLI, file defects, derive `#observed` conditions.)* | `qa/manual/test-basis-analyzer/SKILL.md` *(produce the distilled test-basis document — the source of truth for the rest)*, `qa/manual/test-strategy/SKILL.md` *(risk-rank the conditions — depth follows risk)*, `qa/manual/accelerator-conventions/SKILL.md` *(house ID / naming conventions)*; exploration mode adds `qa/manual/exploratory-charter-writer/SKILL.md` + `qa/manual/bug-report-writer/SKILL.md` | A written **test-basis document** (per `test-basis-analyzer`) plus numbered test conditions, each tagged with its risk and the doc line (or `#observed` evidence) it traces to; open questions listed; exploration mode also requires the charter + session report written and every defect filed |
 | 2 | **Design — apply techniques** | For each test condition, pick and apply the right ISTQB technique; enumerate coverage items | `qa/manual/test-design-techniques/SKILL.md` | A **coverage-item list**: each condition mapped to a technique (EP / BVA / decision table / state transition / use-case / pairwise / error-guessing) with the coverage target stated |
 | 3 | **Assemble the suite** | Factor shared preconditions into one **Setup**; format lean per-case steps; write the mandatory **Cleanup**; assign IDs, priorities, technique tags | `qa/manual/test-case-writer/SKILL.md` | A complete **Setup → Cases → Cleanup** suite in the requested format; every case has a single verifiable expected result and concrete data |
 | 4 | **Review & coverage** | Self-review as a hostile senior reviewer; build the coverage matrix; flag gaps and assumptions | `qa/manual/test-case-writer/SKILL.md` *(quality bar)*, `qa/manual/quality-metrics/SKILL.md` *(coverage framing)* | A **coverage matrix** (every AC/requirement → its TC-IDs, gaps marked ⚠️); review table with no unresolved blocker/major rows; assumptions + questions listed |
 
 ### Phase 1 — Analyze the test basis (detail)
 
-Produce, before designing a single case:
+Load `qa/manual/test-basis-analyzer/SKILL.md` and produce its **test-basis document** first — a concise, sourced distillation of business logic, validations, restrictions, observable implementation notes, the data dictionary, and any state model, with every silent/contradictory/untestable item flagged. That document is the source of truth the remaining phases consume. From it, derive the items below:
 
 - **Actors & roles** — who acts (and with what permissions).
 - **Preconditions** — and **which are shared** across most conditions (these become Setup).
@@ -154,6 +154,7 @@ At the end of a full run, deliver the suite file plus a summary:
 
 ## Handoffs
 
+- Distill the docs into the test-basis document → `qa/manual/test-basis-analyzer`
 - Technique depth & coverage criteria → `qa/manual/test-design-techniques`
 - Suite formatting (Setup/Cases/Cleanup) → `qa/manual/test-case-writer`
 - Risk-first sizing before designing → `qa/manual/test-strategy`

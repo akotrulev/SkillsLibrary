@@ -80,7 +80,7 @@ The `qa/` folder is the most built-out section. When a request matches one of th
 
 - `qa/{java,dotnet,typescript}/skills/{node}/SKILL.md` — the per-stack skill implementations (C# → `dotnet/`); pick the stack from the Stack defaults above or the user's project. Tool-bound skills exist only under the stack(s) the tool supports (e.g. `performance/nbomber` only in `dotnet/`).
 - `qa/{java,dotnet,typescript}/agents/` — phased orchestrator agents for that stack (senior automation QA per focus: api / ui / mobile / performance); they load the stack's skills phase by phase.
-- `qa/manual/` — language-agnostic process skills: `test-case-writer`, `test-design-techniques`, `bug-report-writer`, `exploratory-charter-writer`, `test-strategy`, `quality-metrics`, `accelerator-conventions`; plus `qa/manual/agents/qa-manual-test-designer` — the phased agent that turns documentation into a full manual test-case suite.
+- `qa/manual/` — language-agnostic process skills: `test-basis-analyzer`, `test-case-writer`, `test-design-techniques`, `bug-report-writer`, `exploratory-charter-writer`, `test-strategy`, `quality-metrics`, `accelerator-conventions`; plus `qa/manual/agents/qa-manual-test-designer` — the phased agent that turns documentation into a full manual test-case suite.
 - `qa/_shared/` — cross-stack technical rules referenced by stack skills (`contract-testing-pact`, `performance`, `ci-conventions`, `security` + the language-agnostic `security-testing/*` scanner skills) plus `webapp-testing` (the one Python skill, Anthropic-provided import); also `qa/_shared/agents/qa-security` — the cross-stack, OWASP-mapped security orchestrator (loads the `_shared` scanner skills + the project's stack-native security siblings phase by phase).
 
 New-project setup = copy `qa/<stack>/` + `qa/manual/` + `qa/_shared/`.
@@ -131,6 +131,7 @@ New-project setup = copy `qa/<stack>/` + `qa/manual/` + `qa/_shared/`.
 - `test-data-builder` — builders / ObjectMother — java · dotnet · typescript
 
 **Language-agnostic (`qa/manual/`)**
+- `test-basis-analyzer` — distills a story / BRD / API contract / partial feature description into one concise, sourced **test-basis document** (business logic, validations, restrictions, observable implementation notes, data dictionary, states) with every silent/contradictory/untestable item flagged; the source-of-truth artifact that feeds `test-design-techniques` + `test-case-writer` (backs the agent's Phase 1)
 - `test-case-writer` · `bug-report-writer` · `exploratory-charter-writer` — manual-QA writing workflows (test-case suites are Setup → Cases → Cleanup)
 - `test-design-techniques` — ISTQB black-box technique deep dive (EP, BVA 2/3-value, decision tables, state transition n-switch, use-case, pairwise, classification tree, error guessing) with coverage criteria and a selection matrix; `test-case-writer` defers technique choice here
 - `test-strategy` · `quality-metrics` · `accelerator-conventions` — process / planning

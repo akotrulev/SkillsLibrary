@@ -270,6 +270,7 @@ State the achieved coverage explicitly in the deliverable (e.g. "BVA 3-value on 
 
 ## Handoffs
 
+- Distill the source docs into the test-basis these techniques run against → `qa/manual/test-basis-analyzer`
 - Format the derived cases into a suite with shared setup + cleanup → `qa/manual/test-case-writer`
 - Orchestrate the whole doc → suite flow → `qa/manual/agents/qa-manual-test-designer`
 - Size the test investment by risk first → `qa/manual/test-strategy`
