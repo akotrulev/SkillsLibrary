@@ -1,6 +1,6 @@
 ---
 name: qa-allure-reporting-java
-description: Use when the user asks to set up Allure reporting for a Java test suite (TestNG + RestAssured, TestNG + Playwright Java, TestNG + Selenium Java, TestNG + Appium Java, JUnit 5) — install `allure-testng` / `allure-junit5` via Gradle, wire failure attachments (request/response body, screenshots, traces), feature/story/severity hierarchy with `@Feature` / `@Story` / `@Severity`, AspectJ weaver, and publish to GitHub Pages / GitLab Pages / Azure Pipelines. Triggers: "set up Allure for our Gradle TestNG project", "wire Allure attachments in Java", "publish Allure report from our Java CI", "design Allure feature/story for TestNG tests". Do NOT use for .NET reporting (use `qa/dotnet/skills/allure-reporting`), TypeScript reporting (use `qa/typescript/skills/allure-reporting`), writing tests (use the matching `qa/<topic>` skill), or test strategy (use `qa/manual/test-strategy`).
+description: Use when the user asks to set up Allure reporting for a Java test suite (TestNG + RestAssured, TestNG + Playwright Java, TestNG + Selenium Java, TestNG + Appium Java, JUnit 5). Triggers: "set up Allure for our Gradle TestNG project", "wire Allure attachments in Java", "publish Allure report from our Java CI".
 ---
 
 # QA — Allure Reporting (Java / TestNG & JUnit 5)

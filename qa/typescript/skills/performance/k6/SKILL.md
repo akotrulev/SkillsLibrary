@@ -1,6 +1,6 @@
 ---
 name: qa-performance-k6-typescript
-description: Use when the user asks to design or author k6 (Grafana k6) performance / load tests in JavaScript/TypeScript — scenarios, executors (arrival-rate / VUs), thresholds tied to SLOs, per-route tags, ramp profiles for smoke / average / stress / spike / soak / capacity, seeded fixtures, env-driven config, Grafana Cloud k6 / local runner, CI smoke gates. Triggers: "write a k6 script for endpoint X", "design a k6 average load test", "spike test in k6", "k6 thresholds for our latency SLO", "perf gate in CI with k6". Do NOT use for NBomber tests (use `qa/dotnet/skills/performance/nbomber`), Gatling tests (use `qa/java/skills/performance/gatling`), functional tests, or unit benchmarks. Load `qa/_shared/performance` alongside this skill for workload models, environment policy, and the reporting template.
+description: Use when the user asks to design or author k6 (Grafana k6) performance / load tests in JavaScript/TypeScript. Triggers: "write a k6 script for endpoint X", "design a k6 average load test", "spike test in k6".
 ---
 
 # QA — Performance Testing with k6 (TypeScript / JavaScript)

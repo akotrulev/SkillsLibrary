@@ -1,6 +1,6 @@
 ---
 name: qa-db-testing-query-author-typescript
-description: Use when the user asks to write a safe verification query for tests in Node 20 + TypeScript, assert this row exists from a test, review my test SQL for guardrails, add a `COUNT(*)` check from an integration test, or wait for an eventually-consistent row — `node-postgres` (`pg`) `$1` placeholders / Knex `?`-`??` bindings, explicit column projection, safe `LIKE` escaping, `BIGINT`-as-string handling, `assertRowExists` / `assertNoRowMatches` / `countWhere` helpers, a `waitFor` poll around a query, refusal patterns for `DROP` / `TRUNCATE` / no-WHERE `DELETE` outside cleanup helpers. Do NOT use for .NET (`qa/dotnet/skills/db-testing/query-author`), Java (`qa/java/skills/db-testing/query-author`), opening the pool / fixture lifecycle (`qa/typescript/skills/db-testing/client`), or container boot (`qa/typescript/skills/db-testing/testcontainers`).
+description: Use when the user asks to write a safe verification query for tests in Node 20 + TypeScript, assert this row exists from a test, review my test SQL for guardrails, add a `COUNT(*)` check from an integration test, or wait for an eventually-consistent row.
 ---
 
 # QA — DB Testing Query Author (TypeScript / Node 20)

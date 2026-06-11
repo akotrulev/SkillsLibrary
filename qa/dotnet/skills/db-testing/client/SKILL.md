@@ -1,6 +1,6 @@
 ---
 name: qa-db-testing-client-dotnet
-description: Use when the user asks to connect from .NET 8 tests to a real database (Postgres / SQL Server / SQLite / Mongo) to seed fixtures, run read-only assertion queries, and clean up safely — Dapper, Npgsql/SqlClient, EF Core (read-only), Respawn / transactional rollback / TRUNCATE … CASCADE. Triggers: "connect from these tests to Postgres", "assert the row was written in SQL", "seed and clean a SQL fixture without leaks", "wait for eventual consistency in DB tests". Do NOT use for production DB code (use the relevant `design-patterns/dotnet/generator`), Testcontainers lifecycle (use `qa/dotnet/skills/db-testing/testcontainers`), query-author guardrails on the SQL itself (use `qa/dotnet/skills/db-testing/query-author`), or non-.NET stacks (use `qa/{java,typescript}/skills/db-testing/client`).
+description: Use when the user asks to connect from .NET 8 tests to a real database (Postgres / SQL Server / SQLite / Mongo) to seed fixtures, run read-only assertion queries, and clean up safely. Triggers: "connect from these tests to Postgres", "assert the row was written in SQL", "seed and clean a SQL fixture without leaks".
 ---
 
 # QA — DB Testing Client (.NET 8)

@@ -1,6 +1,6 @@
 ---
 name: qa-api-client-writer-dotnet
-description: Use when the user asks to create a new API client or `*Client.cs` file in the Accelerator `ApiTests` project (RestSharp, .NET 8). Triggers: "write an API client for X", "add a Client.cs for the {resource} endpoints", "scaffold {Resource}Client". Do NOT use for writing the test fixtures themselves (use `qa/dotnet/skills/api-test-author/generator`), for the Java stack (use `qa/java/skills/api-client-writer`), for the TypeScript stack (use `qa/typescript/skills/api-client-writer`), or for non-Accelerator / non-RestSharp .NET projects.
+description: Use when the user asks to create a new API client or `*Client.cs` file in the Accelerator `ApiTests` project (RestSharp, .NET 8). Triggers: "write an API client for X", "add a Client.cs for the {resource} endpoints", "scaffold {Resource}Client".
 ---
 
 # qa-api-client-writer-dotnet

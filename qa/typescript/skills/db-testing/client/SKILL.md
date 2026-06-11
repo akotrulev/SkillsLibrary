@@ -1,6 +1,6 @@
 ---
 name: qa-db-testing-client-typescript
-description: Use when the user asks to connect from Node 20 + TypeScript tests to a real database (Postgres / MySQL / Mongo) to seed fixtures, run read-only assertion queries, and clean up safely — `node-postgres` / Knex / Prisma client, raw SQL via tagged templates, per-test truncation or transactional rollback. Triggers: "connect from our Vitest tests to Postgres", "node-postgres probe for the orders table", "seed and clean a SQL fixture without leaks", "wait for eventual consistency in DB tests". Do NOT use for production DB code (use `design-patterns/typescript/generator`), Testcontainers lifecycle (use `qa/typescript/skills/db-testing/testcontainers`), query-author guardrails on the SQL itself (use `qa/typescript/skills/db-testing/query-author`), or non-TypeScript stacks (use `qa/{dotnet,java}/skills/db-testing/client`).
+description: Use when the user asks to connect from Node 20 + TypeScript tests to a real database (Postgres / MySQL / Mongo) to seed fixtures, run read-only assertion queries, and clean up safely. Triggers: "connect from our Vitest tests to Postgres", "node-postgres probe for the orders table", "seed and clean a SQL fixture without leaks".
 ---
 
 # QA — DB Testing Client (TypeScript / Node 20)

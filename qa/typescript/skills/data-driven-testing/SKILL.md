@@ -1,22 +1,6 @@
 ---
 name: qa-data-driven-testing-typescript
-description: >-
-  Run one Node 20 / TypeScript test body against **many rows of data sourced from an external file** — CSV,
-  JSON, or Excel — so coverage scales by adding rows, not by copy-pasting tests. Covers Vitest `test.for` /
-  `test.each` / `describe.each` for unit-level data-driving, the **test-per-row loop** in Playwright (read
-  the file at module scope, generate one `test()` per row), reading rows with a **real parser**
-  (`csv-parse/sync` with `columns:true`, native `JSON.parse`, the `xlsx`/SheetJS lib for `.xlsx`), validating
-  and coercing each parsed row into a **typed object with Zod** (CSV is all strings — `z.coerce` turns them
-  into numbers/dates and fails loudly on a bad row), naming each row so a failure reports the input that broke
-  it, and choosing the right source for the data's shape. Triggers: "run this test for every row in a CSV /
-  spreadsheet", "data-drive these tests from a JSON file", "parameterize these Playwright/Vitest tests with
-  external data", "load test cases from Excel", "I'm copy-pasting the same test with different inputs". Do
-  NOT use for: the Java stack (use qa-data-driven-testing-java), the .NET stack (use
-  qa-data-driven-testing-dotnet), constructing one complex object in code (use qa-test-data-builder-typescript
-  — a builder makes one object, this feeds many rows; they compose), sourcing rows from a live database query
-  (use qa-db-testing-query-author-typescript), a cross-browser/-device environment matrix (use
-  qa-cloud-grid-config-typescript), or eventual-consistency waits inside a test (use the condition-wait /
-  `expect.poll` in qa-db-testing-client-typescript).
+description: Run one Node 20 / TypeScript test body against **many rows of data sourced from an external file**. Triggers: "run this test for every row in a CSV / spreadsheet", "data-drive these tests from a JSON file", "parameterize these Playwright/Vitest tests with external data".
 ---
 
 # Data-Driven Testing (Node 20 / TypeScript — Vitest + Playwright)
@@ -359,10 +343,10 @@ test.for(loadCsvOrderCases(ordersCsv))("applies discount for $region", (row) => 
 - `qa-test-data-builder-typescript` — the **boundary**: a builder constructs **one** complex object in code
   with defaults; data-driven feeds **many** rows from a file. They **compose** — a row drives a builder's
   varying fields (see the last example).
-- `qa-db-testing-query-author-typescript` (#3) — when rows come from a **live database** at test time rather
+- `qa-db-testing-query-author-typescript` — when rows come from a **live database** at test time rather
   than a static file; the assertion-query counterpart to file-sourced data.
-- `qa-cloud-grid-config-typescript` (#15) — parameterizing the **environment** (browser/device matrix) via
+- `qa-cloud-grid-config-typescript` — parameterizing the **environment** (browser/device matrix) via
   Playwright projects rather than the **data**; orthogonal matrices that can multiply.
 - `qa-ui-test-author-playwright-typescript` — the page objects the data-driven journey reuses; this skill
-  supplies their rows. `qa-flaky-test-quarantine-typescript` (#36) — per-row retry/flaky handling for the
+  supplies their rows. `qa-flaky-test-quarantine-typescript` — per-row retry/flaky handling for the
   generated tests. `qa-allure-reporting-typescript` — each row renders as a separate, named result.

@@ -1,6 +1,6 @@
 ---
 name: qa-ui-test-author-reviewer-java
-description: Use when the user asks to review existing Java UI test code or page objects — Playwright Java, Selenium Java, or Appium Java. Triggers: "review this Playwright Java spec", "look at this Selenium page object", "is this Appium Java test any good", "what's wrong with this @FindBy class". Do NOT use for .NET UI reviews (use `qa/dotnet/skills/ui-test-author/reviewer`), TypeScript UI reviews (use `qa/typescript/skills/ui-test-author/reviewer`), generating new Java tests (use `qa/java/skills/ui-test-author/playwright`, `qa/java/skills/ui-test-author/selenium`, or `qa/java/skills/ui-test-author/appium`), or POM architecture work (use `qa/java/skills/page-object-architect`).
+description: Use when the user asks to review existing Java UI test code or page objects. Triggers: "review this Playwright Java spec", "look at this Selenium page object", "is this Appium Java test any good".
 ---
 
 # QA — UI Test & Page Object Reviewer (Java)

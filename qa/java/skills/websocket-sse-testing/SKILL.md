@@ -1,24 +1,6 @@
 ---
 name: qa-websocket-sse-testing-java
-description: >-
-  Test real-time **WebSocket** and **Server-Sent-Events (SSE)** streams in Java 21 / TestNG — from test code
-  directly (protocol-client) and through the browser (Playwright). Covers **OkHttp `WebSocket`**
-  (`newWebSocket` + a `WebSocketListener` draining frames into a `BlockingQueue`, `send`, `close(1000, …)`),
-  Java-WebSocket (`WebSocketClient`) and Spring `WebSocketStompClient` when the endpoint speaks STOMP, SSE via
-  **OkHttp-SSE** (`EventSources` + `EventSourceListener`) or Spring `WebClient` `Flux<ServerSentEvent<T>>` +
-  reactor-test `StepVerifier`, **awaiting a message on a CONDITION with Awaitility (`await().atMost().until(...)`)
-  or `queue.poll(timeout)` — never `Thread.sleep`**, asserting the full lifecycle (101 handshake → frames →
-  clean close code), reconnection/backoff, message fragmentation/backpressure, auth on the socket (token in
-  query string / `Sec-WebSocket-Protocol` subprotocol / first frame), ping/pong heartbeat, and the **browser
-  surface** — Playwright `page.waitForWebSocket` + `ws.onFrameReceived` to OBSERVE frames and
-  `page.routeWebSocket` (Playwright ≥ 1.48) to MOCK them. Triggers: "test our WebSocket chat endpoint",
-  "assert the server pushes N SSE events then closes", "wait for a websocket frame without a sleep", "test
-  STOMP-over-WebSocket reconnection", "mock the websocket the UI opens in Playwright", "verify the live-feed
-  stream over SSE". Do NOT use for: the .NET stack (use qa-websocket-sse-testing-dotnet), the TypeScript stack
-  (use qa-websocket-sse-testing-typescript), async **broker** messaging — queues/topics (use
-  qa-messaging-testing-service-bus-java / -sqs / -kafka / -rabbitmq), mocking a plain request/response **HTTP**
-  dependency (use qa-api-mocking-wiremock-java or qa-network-monitoring-playwright-routes-java), or authoring
-  the page objects the browser tests reuse (use qa-ui-test-author-playwright-java).
+description: Use when testing WebSocket or SSE streams in Java 21 / TestNG — protocol clients (OkHttp WebSocket/SSE, Spring STOMP, WebClient + StepVerifier) draining frames into a queue and asserting on conditions (Awaitility, never sleeps), plus Playwright for in-browser frames. Triggers: "test our WebSocket endpoint", "assert the SSE stream emits X", "real-time updates test".
 ---
 
 # WebSocket & SSE Testing (Java 21 / TestNG) — **ported from the canonical `qa-websocket-sse-testing-dotnet`**
@@ -46,7 +28,7 @@ synchronous return you can assert on the next line:
 >    schedule. Drain frames into a `BlockingQueue` and **await the expected frame / count with a bounded
 >    timeout** (Awaitility `await().atMost(...).until(...)` or `queue.poll(5, SECONDS)`) — never
 >    `Thread.sleep(2000)` standing in for "it probably arrived". The *exact* eventual-consistency lineage of
->    `qa-messaging-testing-service-bus-java` (a stream frame is a message that arrives later).
+>    `qa-messaging-testing-java` (a stream frame is a message that arrives later).
 > 2. **Drain BEFORE you act.** Register the `WebSocketListener` / arm `page.waitForWebSocket` **before** the
 >    action that triggers the first frames, or you race the server and lose them.
 > 3. **Assert the whole lifecycle, not just a payload.** The open handshake (HTTP **101 Switching Protocols**
@@ -68,8 +50,8 @@ synchronous return you can assert on the next line:
 | The app's **UI** opens a WS and you assert what crosses the wire | WebSocket | **browser** — Playwright `waitForWebSocket` + `onFrameReceived` (OBSERVE) |
 | The UI opens a WS and you want **deterministic** frames (no real server) | WebSocket | **browser** — Playwright `routeWebSocket` (MOCK) |
 | The UI consumes an SSE feed and you want it deterministic | SSE | **browser** — `page.route` returning a chunked `text/event-stream` body |
-| Async **queue/topic** (OrderPlaced lands on a queue, a consumer reacts) | — | **not this skill** → `qa-messaging-testing-service-bus-java` (#28) etc. |
-| A plain request/response **HTTP** dependency to fake | — | **not this skill** → `qa-api-mocking-wiremock-java` (#22) / `qa-network-monitoring-playwright-routes-java` (#8) |
+| Async **queue/topic** (OrderPlaced lands on a queue, a consumer reacts) | — | **not this skill** → `qa-messaging-testing-java` etc. |
+| A plain request/response **HTTP** dependency to fake | — | **not this skill** → `qa-api-mocking-java` / `qa-network-monitoring-java` |
 
 **Rule of thumb:** *bidirectional, interactive?* → WebSocket. *Server-push-only feed?* → SSE. *Testing the
 protocol contract?* → protocol-client. *Testing the UI's use of the stream?* → browser (observe if the real
@@ -119,7 +101,7 @@ src/test/java/realtime/
 A frame arrives whenever the server sends it. The test must **await the condition** with a **timeout**. The
 listener pushes frames into a `BlockingQueue`; the test either `poll(timeout)` for the next one or uses
 **Awaitility** for the "until N frames / until subscribed" gate. This is the WS/SSE analogue of
-`qa-messaging-testing-service-bus-java`'s long-poll receive + Awaitility side-effect wait.
+`qa-messaging-testing-java`'s long-poll receive + Awaitility side-effect wait.
 
 ```java
 import java.util.concurrent.BlockingQueue;
@@ -149,95 +131,9 @@ public final class AwaitFrame {
 > condition holds and *fail* if it never does. A fixed sleep races the server — slow when the frame is fast,
 > flaky when it's slow.
 
-## Protocol-client 1 — raw WebSocket (OkHttp `WebSocket`)
+## Deep-dive reference
 
-The test **is** a WebSocket client. OkHttp's `WebSocketListener` delivers `onOpen` / `onMessage` /
-`onClosing` / `onClosed` / `onFailure` callbacks — push each message into a `BlockingQueue` so the test can
-await on a condition. **Register the listener before sending** (it's wired at `newWebSocket`, so this is
-automatic), and OkHttp **reassembles fragments for you** — `onMessage(String)` gives a whole logical message
-(unlike .NET's raw `ReceiveAsync`).
-
-```java
-import okhttp3.*;
-import okio.ByteString;
-import java.util.concurrent.*;
-
-public final class WebSocketProbe implements AutoCloseable {
-
-    private final OkHttpClient client = new OkHttpClient.Builder().pingInterval(java.time.Duration.ofSeconds(20)).build();
-    private final BlockingQueue<String> frames = new LinkedBlockingQueue<>();
-    private final CompletableFuture<Boolean> opened = new CompletableFuture<>();
-    private volatile int closeCode = -1;
-    private volatile String closeReason;
-    private WebSocket socket;
-
-    public BlockingQueue<String> frames() { return frames; }
-    public int closeCode() { return closeCode; }            // assert the close code
-    public String closeReason() { return closeReason; }
-
-    /** Connect and start draining. {@code configure} can add auth headers / subprotocol to the request. */
-    public void connect(String url, java.util.function.Consumer<Request.Builder> configure) {
-        Request.Builder builder = new Request.Builder().url(url);
-        if (configure != null) configure.accept(builder);   // auth: header / Sec-WebSocket-Protocol go here
-        socket = client.newWebSocket(builder.build(), new WebSocketListener() {
-            @Override public void onOpen(WebSocket ws, Response response) {
-                opened.complete(response.code() == 101);     // 101 Switching Protocols = the upgrade succeeded
-            }
-            @Override public void onMessage(WebSocket ws, String text) { frames.add(text); }           // reassembled
-            @Override public void onMessage(WebSocket ws, ByteString bytes) { frames.add(bytes.utf8()); }
-            @Override public void onClosing(WebSocket ws, int code, String reason) {
-                closeCode = code; closeReason = reason;
-                ws.close(1000, "ack");                        // echo the close handshake — clean on both ends
-            }
-            @Override public void onFailure(WebSocket ws, Throwable t, Response r) { opened.completeExceptionally(t); }
-        });
-    }
-
-    /** Await the 101 upgrade on a condition before the test sends. */
-    public void awaitOpen(int timeoutSeconds) throws Exception {
-        if (!opened.get(timeoutSeconds, TimeUnit.SECONDS)) throw new AssertionError("WS did not upgrade (101)");
-    }
-
-    public void send(String text) { socket.send(text); }
-
-    @Override public void close() {
-        if (socket != null) socket.close(1000, "bye");        // clean close, code 1000
-        client.dispatcher().executorService().shutdown();
-    }
-}
-```
-
-```java
-import org.testng.annotations.*;
-import static org.assertj.core.api.Assertions.assertThat;
-
-public class ChatWebSocketTest extends AppFixture {   // AppFixture exposes baseWsUri() on a real port
-
-    @Test
-    public void should_broadcast_a_message_to_a_connected_client() throws Exception {
-        try (WebSocketProbe probe = new WebSocketProbe()) {
-            probe.connect(baseWsUri() + "/ws/chat", null);
-            probe.awaitOpen(5);                                       // condition: the 101 upgrade
-
-            probe.send("{ \"type\": \"say\", \"text\": \"hello\" }");
-
-            String frame = AwaitFrame.next(probe.frames(), 5);        // await the broadcast on a condition
-            assertThat(frame).contains("\"text\":\"hello\"");          // one logical assertion: the broadcast fact
-        }
-    }
-
-    @Test
-    public void should_emit_three_ticks_then_close_cleanly() throws Exception {
-        WebSocketProbe probe = new WebSocketProbe();
-        probe.connect(baseWsUri() + "/ws/ticker?count=3", null);
-        probe.awaitOpen(5);
-
-        AwaitFrame.untilCount(probe.frames(), 3, 5);                  // the N frames…
-        probe.close();                                               // …then the close handshake
-        await().atMost(ofSeconds(2)).until(() -> probe.closeCode() == 1000);   // …and the clean close
-    }
-}
-```
+These sections live in `references/details.md` — **read it when the task touches them**: **Protocol-client 1 — raw WebSocket (OkHttp `WebSocket`)**; **Protocol-client 3 — SSE (OkHttp-SSE / `WebClient` `Flux`)**.
 
 ## Protocol-client 2 — STOMP-over-WebSocket (Spring `WebSocketStompClient`)
 
@@ -265,55 +161,6 @@ assertThat(message.text()).isEqualTo("hi");
 
 > Configure heartbeats via `stomp.setDefaultHeartbeat(...)` + a `TaskScheduler` and assert reconnect behaviour
 > by closing the session and re-subscribing — the STOMP layer absorbs the protocol so you assert *behaviour*.
-
-## Protocol-client 3 — SSE (OkHttp-SSE / `WebClient` `Flux`)
-
-SSE is **plain HTTP** — a `GET` whose body streams `text/event-stream`. With **OkHttp-SSE**, an
-`EventSourceListener` delivers `onEvent(id, type, data)`; push each into a `BlockingQueue` and await. (OkHttp
-streams the body — there's no "buffer the whole response" trap to avoid, unlike a naive `HttpClient`.)
-
-```java
-import okhttp3.sse.*;
-
-public final class SseProbe implements AutoCloseable {
-    private final OkHttpClient client = new OkHttpClient.Builder()
-            .readTimeout(java.time.Duration.ZERO).build();           // an open-ended stream: no read timeout
-    private final BlockingQueue<Sse> events = new LinkedBlockingQueue<>();
-    private EventSource source;
-
-    public record Sse(String type, String data, String id) {}
-    public BlockingQueue<Sse> events() { return events; }
-
-    public void subscribe(String url) {
-        Request request = new Request.Builder().url(url).header("Accept", "text/event-stream").build();
-        source = EventSources.createFactory(client).newEventSource(request, new EventSourceListener() {
-            @Override public void onEvent(EventSource es, String id, String type, String data) {
-                events.add(new Sse(type == null ? "message" : type, data, id));
-            }
-        });
-    }
-
-    @Override public void close() { if (source != null) source.cancel(); }
-}
-```
-
-```java
-@Test
-public void should_stream_three_progress_events_then_a_done_event() throws Exception {
-    try (SseProbe probe = new SseProbe()) {
-        probe.subscribe(baseUri() + "/sse/progress?job=42");
-
-        AwaitFrame.untilCount(probe.events(), 4, 5);
-
-        var types = probe.events().stream().map(SseProbe.Sse::type).toList();
-        assertThat(types).containsExactly("progress", "progress", "progress", "done");   // the event sequence
-    }
-}
-```
-
-> **Reactive SUT alternative:** a Spring `WebClient` returning `Flux<ServerSentEvent<String>>` is asserted
-> with **reactor-test** `StepVerifier` — `.expectNextCount(3).expectNextMatches(e -> e.event().equals("done")).thenCancel().verify(Duration.ofSeconds(5))`.
-> Use whichever matches the SUT; both express "N events then done" as a *condition*, never a sleep.
 
 ## Browser surface 1 — OBSERVE WebSocket frames (Playwright-Java)
 
@@ -414,7 +261,7 @@ public void should_render_the_alert_banner_when_the_socket_pushes_an_outage() {
 - **Using OkHttp raw `WebSocket` for a STOMP endpoint.** You'd re-implement STOMP framing. *Fix:*
   `WebSocketStompClient`.
 - **Reaching for this skill for a queue/topic.** A discrete message on a broker is *not* an open stream. *Fix:*
-  `qa-messaging-testing-service-bus-java` (#28) and siblings.
+  `qa-messaging-testing-java` and siblings.
 - **Token hard-coded or logged.** *Fix:* env, read lazily, never logged (`qa-auth0-test-tokens-java`).
 
 ## Examples
@@ -480,15 +327,15 @@ probe.send(new ObjectMapper().writeValueAsString(payload));
 - `qa-websocket-sse-testing-typescript` — same four ideas, the **`ws`** lib / native `WebSocket` (the Node-22
   boundary), a promise-with-timeout + Vitest `vi.waitFor`, native `EventSource` / the `eventsource` package,
   Playwright-TS (`waitForEvent('websocket')`, `on('framereceived')`, `routeWebSocket`).
-- `qa-messaging-testing-service-bus-java` (#28) — the **eventual-consistency lineage** (a stream frame is a
+- `qa-messaging-testing-java` — the **eventual-consistency lineage** (a stream frame is a
   message that arrives later) and the **boundary**: messaging = discrete queue/topic messages with a consumer;
-  this skill = an open WS/SSE stream. (Plus `-sqs` #29 / `-kafka` #30 / `-rabbitmq` #31.)
-- `qa-network-monitoring-playwright-routes-java` (#8) — the **HTTP** mock counterpart and the "register before
+  this skill = an open WS/SSE stream. (Plus `-sqs` `sqs` / `-kafka` `kafka` / `-rabbitmq` `rabbitmq`.)
+- `qa-network-monitoring-java` — the **HTTP** mock counterpart and the "register before
   the action" ordering rule; SSE-in-the-browser mocking reuses its `page.route`.
-- `qa-api-mocking-wiremock-java` (#22) — fake a *synchronous* HTTP dependency; not a stream.
+- `qa-api-mocking-java` — fake a *synchronous* HTTP dependency; not a stream.
 - `qa-ui-test-author-playwright-java` — the `BasePage`/`BaseTest` model the **browser-surface** tests layer on;
   the no-`waitForTimeout` discipline originates there.
-- `qa-auth0-test-tokens-java` (#16) — tokens for an authenticated socket, read from env, never logged.
-- `qa-test-environments-java` (#14) — booting the SUT on a real port with the readiness-wait discipline.
+- `qa-auth0-test-tokens-java` — tokens for an authenticated socket, read from env, never logged.
+- `qa-test-environments-java` — booting the SUT on a real port with the readiness-wait discipline.
   `qa-allure-reporting-java` — attach captured frames / the event sequence. `qa-test-data-builder-java` —
   frame payloads with 4+ fields.

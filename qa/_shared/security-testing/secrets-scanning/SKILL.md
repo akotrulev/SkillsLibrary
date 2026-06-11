@@ -1,18 +1,6 @@
 ---
 name: qa-security-testing-secrets-scanning
-description: >-
-  Detect **hardcoded secrets / leaked credentials** in source **and git history** — as a fast pre-commit
-  hook AND a low-noise CI gate. Two complementary language-agnostic binaries: **Gitleaks** (Go; fast regex;
-  scans full git **history**; `.gitleaks.toml` allowlist; SARIF/JSON/junit reports; `--baseline-path`;
-  official `gitleaks-action`) for the pre-commit + history sweep, and **TruffleHog** (uniquely **verifies**
-  credentials by live-auth — `--results=verified` cuts false positives ~90%; scans non-git surfaces: Docker
-  images, S3/GCS, CI logs, filesystem) for the verified CI gate. Use when a pipeline must catch an AWS key,
-  Auth0 client secret, DB password, or token committed to source — including one already "removed" but still
-  in history. Covers the **rotate-not-delete** rule, the ticketed `.gitleaks.toml` + `--baseline-path`
-  allowlist, SARIF → code-scanning + JSON/junit → Allure, GitHub Actions + pre-commit wiring. Do NOT use for:
-  vulnerable **dependencies** (see qa-security-testing-dependency-scanning-{java,dotnet,typescript} — that
-  reads your build graph), insecure **code patterns / taint flows** (see qa-security-testing-sast), the OWASP
-  map / triage discipline / SARIF spine (see qa-security-shared — load it alongside this skill).
+description: Use when scanning a repo and its git history for committed secrets — Gitleaks as the fast PR gate, TruffleHog to verify whether leaked credentials are live — blocking new leaks via pre-commit + CI. Language-agnostic (CLI/Docker). Triggers: "scan for leaked secrets", "add Gitleaks to CI", "a key was committed to the repo".
 ---
 
 # Security Testing — Secrets Scanning (Shared)
@@ -211,10 +199,10 @@ Standardize on **SARIF** for inline PR findings and a human report for the run (
 - **TruffleHog** → `--json` for a machine-readable artifact; the verified findings are the ones that gate.
 - Upload SARIF via `github/codeql-action/upload-sarif` so each leak shows **inline on the PR diff**,
   de-duplicates run-over-run, and tracks fixed/new state (cross-link `qa-allure-reporting-{stack}`,
-  `qa-ci-pipelines-github-actions-{stack}`).
+  `qa-ci-pipelines-{stack}`).
 
 ```yaml
-# .github/workflows/secrets-scan.yml — cross-link qa-ci-pipelines-github-actions-*
+# .github/workflows/secrets-scan.yml — cross-link qa-ci-pipelines-*
 name: Secrets Scan
 on: [pull_request]
 
@@ -301,7 +289,7 @@ jobs:
   structure; secrets scanning reads for literal credentials — orthogonal).
 - `qa-security-testing-dependency-scanning-{java,dotnet,typescript}` — the **SCA** sibling (reads your
   **build graph** for vulnerable deps; secrets scanning reads your **source + history** for credentials).
-- `qa-ci-pipelines-github-actions-{stack}` (+ `qa/_shared/ci-conventions`) — the gate step, full-history
+- `qa-ci-pipelines-{stack}` (+ `qa/_shared/ci-conventions`) — the gate step, full-history
   checkout, SARIF + artifact upload.
 - `qa-allure-reporting-{stack}` — attach the junit/JSON report to the run.
 - `qa/manual/bug-report-writer` — write up a confirmed leaked-credential finding (with the rotation step as

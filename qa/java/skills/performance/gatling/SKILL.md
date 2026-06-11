@@ -1,6 +1,6 @@
 ---
 name: qa-performance-gatling-java
-description: Use when the user asks to design or author Gatling performance / load tests in Java 21 (Gatling 3.11+ Java DSL) — simulations, injection profiles (constantUsersPerSec / rampUsersPerSec / atOnceUsers), assertions tied to SLOs, request groups, HTTP protocol config, feeders for parameterized data, Gradle wiring, and Gatling Enterprise (FrontLine) integration. Triggers: "write a Gatling simulation for X", "Gatling spike test for our Java service", "ramp profile in Gatling Java DSL", "Gatling assertions for our latency SLO", "publish Gatling report from CI". Do NOT use for k6 tests (use `qa/typescript/skills/performance/k6`), NBomber tests (use `qa/dotnet/skills/performance/nbomber`), functional tests, or microbenchmarks (use JMH). Load `qa/_shared/performance` alongside this skill for workload models, environment policy, and the reporting template.
+description: Use when the user asks to design or author Gatling performance / load tests in Java 21 (Gatling 3.11+ Java DSL). Triggers: "write a Gatling simulation for X", "Gatling spike test for our Java service", "ramp profile in Gatling Java DSL".
 ---
 
 # QA — Performance Testing with Gatling (Java 21)

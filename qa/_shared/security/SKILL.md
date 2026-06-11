@@ -1,17 +1,6 @@
 ---
 name: qa-security-shared
-description: >-
-  Cross-stack reference for **security testing in CI** — the OWASP backbone (Top 10:2025, API Security Top
-  10:2023, WSTG v4.2 test-IDs, ASVS 5.0 levels), the **automatable-in-CI vs needs-manual-pentest** boundary,
-  the layer map (SAST · secrets · SCA · DAST · API-fuzzing · container/IaC · TLS · functional access-control),
-  the **ticketed-triage / suppression** discipline, SARIF → code-scanning consolidation, and the
-  **authorization-to-scan** rules (never run an active/attack scan against prod or a shared environment).
-  Load this **alongside** one of the tool skills in `qa/_shared/security-testing/<tool>` (zap-automation-framework,
-  sast, secrets-scanning, container-iac-scanning, api-fuzzing, nuclei, tls-scanning) or the stack-native
-  `qa/<stack>/skills/security-testing/{access-control-testing,zap-baseline,dependency-scanning}`; it is the
-  spine the `qa-security` agent always carries. Do NOT load standalone to produce tool-specific code — pair it
-  with the tool sibling. Do NOT use it to define functional acceptance tests (that is `qa/<stack>/skills/api-test-author`)
-  or the SLO/quality bar itself (`qa/manual/quality-metrics`).
+description: Cross-stack security-testing backbone — maps OWASP Top 10 (2025) and API Security Top 10 (2023) risks to this library's scanner gates and stack-native security skills, with severity/gating policy and triage discipline. Load when planning security coverage or choosing which security skill applies; the `qa-security` agent drives it phase by phase.
 ---
 
 # QA — Security Testing (Shared / OWASP backbone)

@@ -1,30 +1,6 @@
 ---
 name: qa-chaos-testing-dotnet
-description: >-
-  Write **fault-injection / resilience** tests in .NET 8 with **Toxiproxy** (Shopify's TCP fault-injection proxy)
-  + the **Testcontainers `ToxiproxyContainer`** (`Testcontainers.Toxiproxy`) + the **Toxiproxy.Net** client +
-  **NUnit**, proving the app under test **degrades gracefully** when a dependency (DB, HTTP API, broker, cache)
-  misbehaves. Covers the trait that makes a chaos test the inverse of every other test: **you do NOT assert the
-  dependency works — you INJECT a fault into the connection (latency, bandwidth cap, connection drop, timeout,
-  partial/sliced response) and assert the app RETRIES / TRIPS A CIRCUIT BREAKER / HONORS A TIMEOUT / FALLS BACK
-  instead of hanging, crashing, or corrupting state** ("assert the call succeeded" is the wrong reflex here). The
-  mechanism: **Toxiproxy sits as a TCP proxy BETWEEN the app and its dependency — you point the app's connection
-  string at the proxy listen port, not the real dependency** — and **toxics are added/removed at runtime over the
-  REST API** so each test runs a lifecycle: **steady-state → inject the toxic → assert degraded behaviour → remove
-  the toxic → assert recovery.** Covers the toxic types (`Latency`+jitter, `Bandwidth`, `Timeout`, `ResetPeer`,
-  `SlowClose`, `Slicer`, `LimitData`), the upstream/downstream **`ToxicDirection`**, the **`Toxicity`** probability,
-  asserting the **resilience pattern** (retry count, circuit-breaker Closed/Open/HalfOpen via **Polly**, timeout
-  honored, fallback served) not the fault, partial failures via `Slicer`/`LimitData`, and standing the dependency +
-  proxy up with Testcontainers on a shared `Network`. Triggers: "test our .NET app survives the database going
-  slow", "inject latency / a connection drop and assert the Polly circuit breaker opens", "assert the retry/fallback
-  fires when the API times out", "Toxiproxy resilience test in C#", "add a fault-injection test with Testcontainers
-  .NET". Do NOT use for: the Java stack (use qa-chaos-testing-java), the TypeScript stack (use
-  qa-chaos-testing-typescript), merely **observing/mocking** out-of-browser requests (use
-  qa-network-monitoring-proxy-dotnet — observe vs inject), conditioning the **device / client** network in a
-  UI/mobile run (use qa-cloud-grid-config-dotnet), standing dependencies up without faulting them (use
-  qa-test-environments-dotnet), **load/volume** testing (use qa-performance-nbomber-dotnet), or **production chaos
-  engineering** on a live cluster (Gremlin / Litmus / Chaos Mesh — out of scope; this skill is functional
-  fault-injection in a test).
+description: Use when writing fault-injection / resilience tests in .NET 8 / NUnit with Toxiproxy via Testcontainers (`Toxiproxy.Net`) — inject latency, drops, and bandwidth caps on a dependency (DB, API, broker, cache) and assert the app degrades gracefully. Triggers: "test the app survives a slow database", "inject a connection drop", "assert the circuit breaker opens".
 ---
 
 # QA — Chaos / Fault-Injection Testing (.NET 8 / Toxiproxy + Testcontainers + NUnit)
@@ -56,7 +32,7 @@ resilience library (**Polly**), and the runner (NUnit) change.
 >    degrades under fault **and** that it heals once the fault clears.
 > 4. **Assert the resilience PATTERN, not the fault.** Assert the **behaviour it provokes**: the retry count, the
 >    Polly circuit-breaker state transition (Closed → Open → HalfOpen → Closed), the honored timeout (fails *fast*,
->    not hangs), the fallback payload served. This is what `qa-network-monitoring-proxy-dotnet` can *observe* but
+>    not hangs), the fallback payload served. This is what `qa-network-monitoring-dotnet` can *observe* but
 >    never *inject* — observe vs break.
 
 ## Decision matrix — fault scenario → toxic → what you assert
@@ -98,147 +74,15 @@ resilience library (**Polly**), and the runner (NUnit) change.
 </ItemGroup>
 ```
 
-> **Why a proxy and not a mock?** A mock (`qa-api-mocking-wiremock-dotnet`) makes the *dependency* return a canned
+> **Why a proxy and not a mock?** A mock (`qa-api-mocking-dotnet`) makes the *dependency* return a canned
 > error at the application layer; a Toxiproxy toxic faults the *transport* — latency, a dropped TCP connection, a
 > half-sent response — the failures that exercise socket timeouts, connection pools, and Polly's retry/circuit
 > pipelines. Mock when you control the contract and want a specific status; **fault-inject when you want to prove
 > the app survives the network/dependency misbehaving**. They compose.
 
-## The mechanism — proxy BETWEEN app and dependency (idea #2)
+## Deep-dive reference
 
-Stand the dependency and Toxiproxy up on a **shared Docker `Network`**, create a proxy whose **upstream** is the
-dependency and whose **listen** side is what the app connects to, then **point the app at the proxy's mapped
-port**.
-
-```csharp
-namespace Tests.Support.Chaos;
-
-using DotNet.Testcontainers.Builders;
-using DotNet.Testcontainers.Networks;
-using Testcontainers.PostgreSql;
-using Testcontainers.Toxiproxy;
-using Toxiproxy.Net;
-using Toxiproxy.Net.Toxics;
-
-public abstract class BaseChaosTest
-{
-    private static readonly INetwork Network = new NetworkBuilder().Build();
-
-    protected static PostgreSqlContainer Dependency = null!;   // the dependency under fault (example)
-    protected static ToxiproxyContainer Toxiproxy = null!;
-    protected ChaosProxy Chaos = null!;                        // the intent-named toxic helper
-
-    [OneTimeSetUp]
-    public async Task StartInfrastructure()
-    {
-        Dependency = new PostgreSqlBuilder()
-            .WithImage("postgres:16-alpine")
-            .WithNetwork(Network)
-            .WithNetworkAliases("db")                          // the upstream host on the shared network
-            .Build();
-        Toxiproxy = new ToxiproxyBuilder()
-            .WithImage("ghcr.io/shopify/toxiproxy:2.11.0")
-            .WithNetwork(Network)
-            .Build();
-        await Dependency.StartAsync();
-        await Toxiproxy.StartAsync();
-
-        var connection = new Connection(Toxiproxy.Hostname, Toxiproxy.GetMappedPublicPort(ToxiproxyBuilder.ControlPort));
-        var client = connection.Client();
-        var proxy = client.Add(new Proxy
-        {
-            Name = "db",
-            Listen = "0.0.0.0:8666",                           // proxy listen side
-            Upstream = "db:5432",                              // the dependency by its network alias + internal port
-            Enabled = true,
-        });
-
-        // The app connects HERE — the proxy's mapped listen port, NOT the real dependency's port.
-        var proxiedHost = Toxiproxy.Hostname;
-        var proxiedPort = Toxiproxy.GetMappedPublicPort(8666);
-        Chaos = new ChaosProxy(proxy, proxiedHost, proxiedPort);
-    }
-
-    [OneTimeTearDown]
-    public async Task StopInfrastructure()
-    {
-        if (Toxiproxy is not null) await Toxiproxy.DisposeAsync();
-        if (Dependency is not null) await Dependency.DisposeAsync();
-    }
-}
-```
-
-> The app under test must be configured to talk to `Chaos.Host:Chaos.Port` (the connection string / base URL /
-> bootstrap server pointed at the proxy), **not** the dependency directly. That redirection *is* the chaos setup.
-
-## The toxic helper — `Support/Chaos/ChaosProxy.cs`
-
-One helper owns the proxy handle and exposes **intent-named** fault operations and a **heal** for the lifecycle, so
-tests read `Chaos.InjectLatency(...)`, `Chaos.CutConnection()`, `Chaos.Healed()` — never raw `proxy.Add(new
-TimeoutToxic { ... })` scattered across `[Test]` methods. Each injected toxic is named so it can be removed.
-
-```csharp
-namespace Tests.Support.Chaos;
-
-using Toxiproxy.Net;
-using Toxiproxy.Net.Toxics;
-
-/// Intent-named fault injection over a single Toxiproxy proxy, with a remove-all "heal" for the lifecycle.
-public sealed class ChaosProxy(Proxy proxy, string host, int port)
-{
-    private readonly List<string> _injected = [];
-
-    public string Host => host;   // the app points its connection string here…
-    public int Port => port;      // …and at this port
-
-    /// Slow every response by `millis` (+ jitter) — the "dependency is slow" fault.
-    public ToxicBase InjectLatency(int millis, int jitter) =>
-        Add(new LatencyToxic { Name = "latency", Stream = ToxicDirection.DownStream,
-            Attributes = { Latency = millis, Jitter = jitter } });
-
-    /// Stop all data and close the connection after `millis` — the "dependency hangs then drops" fault.
-    public ToxicBase InjectTimeout(int millis) =>
-        Add(new TimeoutToxic { Name = "timeout", Stream = ToxicDirection.UpStream,
-            Attributes = { Timeout = millis } });
-
-    /// Reset the TCP peer after `millis` — the "connection dropped" fault that exercises retry/breaker code.
-    public ToxicBase CutConnection(int millis) =>
-        Add(new ResetPeerToxic { Name = "reset", Stream = ToxicDirection.DownStream,
-            Attributes = { Timeout = millis } });
-
-    /// Throttle the backend dependency to `rateKbps` KB/s — bandwidth starvation (NOT device conditioning).
-    public ToxicBase Throttle(int rateKbps) =>
-        Add(new BandwidthToxic { Name = "bw", Stream = ToxicDirection.DownStream,
-            Attributes = { Rate = rateKbps } });
-
-    /// Cut the response after `bytes` — a partial/truncated response the app must not persist as valid.
-    public ToxicBase TruncateAfter(int bytes) =>
-        Add(new LimitDataToxic { Name = "limit", Stream = ToxicDirection.DownStream,
-            Attributes = { Bytes = bytes } });
-
-    /// Make a toxic probabilistic (0..1) for an intermittent/flappy fault.
-    public ToxicBase WithToxicity(ToxicBase toxic, double toxicity)
-    {
-        toxic.Toxicity = toxicity;
-        proxy.UpdateToxic(toxic.Name, toxic);
-        return toxic;
-    }
-
-    /// Remove ALL injected toxics — the dependency is "healed" (lifecycle step: assert recovery after this).
-    public void Healed()
-    {
-        foreach (var name in _injected) proxy.RemoveToxic(name);
-        _injected.Clear();
-    }
-
-    private ToxicBase Add(ToxicBase toxic)
-    {
-        proxy.Add(toxic);
-        _injected.Add(toxic.Name);
-        return toxic;
-    }
-}
-```
+These sections live in `references/details.md` — **read it when the task touches them**: **The toxic helper — `Support/Chaos/ChaosProxy.cs`**; **The mechanism — proxy BETWEEN app and dependency (idea #2)**.
 
 ## Inject-a-fault, assert-degradation (idea #1)
 
@@ -431,7 +275,7 @@ cluster", that is out of scope — flag it and point at the chaos-engineering pl
 - **Treating this as production chaos engineering.** *Fix:* deterministic toxic in a test ≠ GameDay on a live
   cluster — route prod-chaos requests to Gremlin/Litmus/Chaos Mesh.
 - **Using a toxic where a mock fits.** Want a specific HTTP 503 from a contract? *Fix:*
-  `qa-api-mocking-wiremock-dotnet`. Toxiproxy is for **transport** faults, not application-layer canned responses.
+  `qa-api-mocking-dotnet`. Toxiproxy is for **transport** faults, not application-layer canned responses.
 
 ## Examples
 
@@ -442,7 +286,7 @@ failing?*
 
 **Composing with the dependency families.** The thing you fault is stood up by `qa-test-environments-dotnet`
 (`ToxiproxyContainer` next to a `PostgreSqlContainer` on a shared `Network`); the dependency itself is exercised
-happy-path by `qa-db-testing-dotnet` / `qa-messaging-testing-service-bus-dotnet`. Chaos adds the proxy in front and
+happy-path by `qa-db-testing-dotnet` / `qa-messaging-testing-dotnet`. Chaos adds the proxy in front and
 asserts the resilience layer — it **composes**. A data-driven fault matrix binds via `qa-data-driven-testing-dotnet`.
 
 ## Rules (hard constraints)
@@ -468,17 +312,17 @@ asserts the resilience layer — it **composes**. A data-driven fault matrix bin
 - `qa-chaos-testing-java` · `qa-chaos-testing-typescript` — the sibling stacks (Toxiproxy + Testcontainers +
   resilience4j · toxiproxy-node-client + Vitest); this is the **port of the Java canonical**. Same four ideas, same
   lifecycle, different client lib + resilience library (Polly).
-- `qa-network-monitoring-proxy-dotnet` (#10) — the **closest neighbor and the inverse**: that stands up a MITM proxy
+- `qa-network-monitoring-dotnet` — the **closest neighbor and the inverse**: that stands up a MITM proxy
   (`Titanium.Web.Proxy`) to **observe/mock** out-of-browser requests; this stands up Toxiproxy to **inject transport
   faults**. Observe vs break.
-- `qa-test-environments-dotnet` (#14) — the **Testcontainers spine** the `ToxiproxyContainer` plugs into.
-- `qa-api-mocking-wiremock-dotnet` (#22) — **application-layer** canned responses vs **transport** faults. They
+- `qa-test-environments-dotnet` — the **Testcontainers spine** the `ToxiproxyContainer` plugs into.
+- `qa-api-mocking-dotnet` — **application-layer** canned responses vs **transport** faults. They
   compose: a WireMock upstream behind a Toxiproxy listener.
-- `qa-data-driven-testing-dotnet` (#39) — drive a **fault matrix** (toxic × parameter × expected pattern) via
+- `qa-data-driven-testing-dotnet` — drive a **fault matrix** (toxic × parameter × expected pattern) via
   `[TestCaseSource]` instead of copy-pasted `[Test]` methods.
-- `qa-db-testing-dotnet` · `qa-messaging-testing-service-bus-dotnet` — the dependencies you fault (DB / broker
+- `qa-db-testing-dotnet` · `qa-messaging-testing-dotnet` — the dependencies you fault (DB / broker
   connections through the proxy); they cover the happy path this inverts.
-- `qa-websocket-sse-testing-dotnet` (#37) — shares the **lifecycle discipline** (steady → perturb → assert →
+- `qa-websocket-sse-testing-dotnet` — shares the **lifecycle discipline** (steady → perturb → assert →
   recover) and bounded-condition waits (never `Task.Delay`-as-a-wait).
 - `qa-performance-nbomber-dotnet` — behaviour under **load/volume** vs behaviour under **fault** (this skill).
 - `qa-allure-reporting-dotnet` — render each fault scenario as a named result.

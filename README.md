@@ -84,21 +84,18 @@ See [`qa/GAP-ANALYSIS.md`](qa/GAP-ANALYSIS.md) for the live build/audit plan and
 | `db-testing/client` | java · dotnet · typescript | Connect, seed, query-assert, clean up |
 | `db-testing/testcontainers` | java · dotnet · typescript | Postgres/SQL Server/Mongo/Redis lifecycle |
 | `db-testing/query-author` | java · dotnet · typescript | Safe, parameterized assertion SQL |
-| `email-testing/mailpit` | java · dotnet · typescript | Capture/assert email via local SMTP sink |
-| `email-testing/mailosaur` | java · dotnet · typescript | Hosted per-test inbox + SMS OTP |
-| `email-testing/gmail-imap` | java · dotnet · typescript | Real Gmail mailbox over IMAP |
-| `email-testing/sendgrid-sandbox` | java · dotnet · typescript | Validate-send-only via SendGrid sandbox |
-| `network-monitoring/playwright-routes` | java · dotnet · typescript | `page.route`, mocking, HAR |
-| `network-monitoring/cdp` | java · dotnet · typescript | Raw CDP throttling/cache/security audit (Chromium) |
-| `network-monitoring/proxy` | java · dotnet · typescript | Out-of-browser MITM for non-Playwright stacks |
+| `email-testing` | java · dotnet · typescript | Capture/assert email — tool picked inside via `references/` (mailpit · mailosaur · gmail-imap · sendgrid-sandbox) |
+| `messaging-testing` | java · dotnet · typescript | Produce/consume/assert against brokers — broker picked inside via `references/` (kafka · sqs · rabbitmq · service-bus) |
+| `file-storage-testing` | java · dotnet · typescript | Object-storage assertions — store picked inside via `references/` (s3/LocalStack · azure-blob/Azurite) |
+| `api-mocking` | java · dotnet · typescript | Stub/mock HTTP dependencies — mock server picked inside via `references/` (wiremock · msw · prism · mountebank) |
+| `network-monitoring` | java · dotnet · typescript | Intercept/mock/throttle browser traffic — layer picked inside via `references/` (playwright-routes · cdp · proxy) |
+| `websocket-sse-testing` | java · dotnet · typescript | Real-time WebSocket + SSE assertions |
 
 ### Pipelines & environments
 
 | Skill | Stacks | What it does |
 |-------|--------|--------------|
-| `ci-pipelines/github-actions` | java · dotnet · typescript | Shard matrix, Allure publish, perf gate, OIDC |
-| `ci-pipelines/azure-pipelines` | java · dotnet · typescript | Same patterns, Azure idioms |
-| `ci-pipelines/gitlab-ci` | java · dotnet · typescript | Same patterns, GitLab idioms |
+| `ci-pipelines` | java · dotnet · typescript | Shard matrix, Allure publish, perf gate, OIDC — CI host picked inside via `references/` (github-actions · azure-pipelines · gitlab-ci) |
 | `test-environments` | java · dotnet · typescript | Testcontainers + docker-compose multi-service spin-up |
 | `cloud-grid-config` | java · dotnet · typescript | BrowserStack / Sauce / LambdaTest / Device Farm wiring |
 | `auth0-test-tokens` | java · dotnet · typescript | M2M / ROPG / device-code tokens for test users |
@@ -107,7 +104,8 @@ See [`qa/GAP-ANALYSIS.md`](qa/GAP-ANALYSIS.md) for the live build/audit plan and
 
 | Skill | Stacks | What it does |
 |-------|--------|--------------|
-| `visual-regression/playwright-snapshots` | java · dotnet · typescript | Built-in Playwright pixel-diff regression |
+| `visual-regression` | java · dotnet · typescript | Pixel-diff / visual review — tool picked inside via `references/` (playwright-snapshots · percy · applitools) |
+| `accessibility-testing` | java · dotnet · typescript | A11y scans + budgets — tool picked inside via `references/` (axe-playwright · lighthouse-ci) |
 | `allure-reporting` | java · dotnet · typescript | Allure results integration |
 | `test-data-builder` | java · dotnet · typescript | Builders / ObjectMother for test data |
 

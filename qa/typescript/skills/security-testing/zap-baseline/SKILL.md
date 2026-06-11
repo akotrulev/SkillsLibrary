@@ -1,19 +1,6 @@
 ---
 name: qa-security-testing-zap-baseline-typescript
-description: >-
-  OWASP ZAP **baseline** DAST scan as a CI build gate in TypeScript: spider a **running** app for a
-  bounded time and run ZAP's **passive** rules (no attack payloads — safe in CI), then **fail the build**
-  when alerts cross a threshold. Run it via the `zaproxy/action-baseline` GitHub Action or by invoking the
-  `ghcr.io/zaproxy/zaproxy:stable` Docker image — `zap-baseline.py -t <url> -c rules.tsv -J report.json` —
-  from `node:child_process` and parsing the JSON report in Vitest. Use when a pipeline must catch missing
-  security headers / cookie flags / info leaks against a deployed or Testcontainers-spun app, gate **new**
-  findings while triaging known ones, or wire a shift-left DAST step. Covers the exit-code → build-fail
-  semantics (`0`/`1`/`2`/`3`), the `-c rules.tsv` rule-config (`IGNORE`/`WARN`/`FAIL` + `OUTOFSCOPE`) for
-  ticketed false-positive triage, `-J`/`-r`/`-x` reports into Allure, and the baseline-vs-full-scan
-  boundary. Do NOT use for: SCA / dependency-vulnerability scanning (see
-  qa-security-testing-dependency-scanning-typescript), the **full active** attack scan `zap-full-scan.py`
-  (sends payloads — never against prod), .NET (see qa-security-testing-zap-baseline-dotnet), or Java (see
-  qa-security-testing-zap-baseline-java).
+description: OWASP ZAP **baseline** DAST scan as a CI build gate in TypeScript: spider a **running** app for a bounded time and run ZAP's **passive** rules (no attack payloads.
 ---
 
 # Security Testing — OWASP ZAP Baseline Scan (TypeScript)
@@ -37,7 +24,7 @@ in the pipeline*: fast, safe to run against a deployed/ephemeral env, and CI-nat
 > **Tool-invoked-via-Docker, not a library — the shape of this node.** ZAP's baseline scan is a **Docker
 > invocation**, language-agnostic. There is **no in-process ZAP SDK** you embed. TypeScript is the
 > **canonical** stack here only because it's the house default — the scan itself is `docker run … 
-> zap-baseline.py`. So this node is **CLI/Docker-driven** (the same port shape as #21 lighthouse-ci): the
+> zap-baseline.py`. So this node is **CLI/Docker-driven** (the same port shape as lighthouse-ci): the
 > three stacks differ only in how they (a) stand up the target app, (b) invoke the `zaproxy` image, and
 > (c) parse the JSON report and assert. The `.NET`/`Java` siblings re-express the *same Docker
 > choreography* with `Process`/`ProcessBuilder` + their JSON parser. See them for that.
@@ -48,12 +35,12 @@ in the pipeline*: fast, safe to run against a deployed/ephemeral env, and CI-nat
 |------|-----|-----|
 | Passive DAST gate on a **running** app in every PR (headers, cookie flags, info leaks) | **this skill** | Safe (no payloads), fast, CI-native; exits non-zero to fail the build |
 | Deep active attack testing (SQLi/XSS/traversal payloads) on a throwaway env | `zap-full-scan.py` (out of scope here) | Active scanner mutates state — never prod/shared; slower cadence |
-| **Dependency / library** CVEs (vulnerable npm packages, transitive CVEs) | dependency-scanning (#27) | SCA reads your lockfile; ZAP scans running HTTP — orthogonal layers |
-| Per-component **accessibility** rule assertions | axe-playwright (#20) | Different concern; same *ticketed-baseline triage* discipline applies |
-| API contract / spec conformance of mocked endpoints | api-mocking/prism (#25) | Prism validates against an OpenAPI spec; ZAP probes a live deployed app |
+| **Dependency / library** CVEs (vulnerable npm packages, transitive CVEs) | dependency-scanning | SCA reads your lockfile; ZAP scans running HTTP — orthogonal layers |
+| Per-component **accessibility** rule assertions | axe-playwright | Different concern; same *ticketed-baseline triage* discipline applies |
+| API contract / spec conformance of mocked endpoints | `api-mocking` (prism reference) | Prism validates against an OpenAPI spec; ZAP probes a live deployed app |
 
 **Rule of thumb:** ZAP baseline is your **passive DAST PR gate** against a running app. It complements —
-does not replace — SCA dependency scanning (#27): they are different layers (running-app HTTP surface vs
+does not replace — SCA dependency scanning: they are different layers (running-app HTTP surface vs
 your dependency tree). Run both; together they close Phase 2's `security-testing` family.
 
 ## Setup — no SDK, just Docker (and optionally the GitHub Action)
@@ -112,12 +99,12 @@ meaningful with the **rules config** (`-c`): promote the rules you care about to
 the build) and demote known/accepted ones to `IGNORE`. Treat exit `2` per your policy — many teams pass
 on `2` (warnings tracked, not blocking) and hard-fail only on `1`.
 
-## The triage gate — `-c rules.tsv` (front and center, like #20's ticketed baseline)
+## The triage gate — `-c rules.tsv` (front and center, like `axe-playwright`'s ticketed baseline)
 
 A real app's first ZAP run lights up with WARNs. Gating on *every* alert trains the team to ignore the
 gate. The disciplined approach is the **ticketed rules config**: a tab-separated file that sets each ZAP
 rule-id to `IGNORE`, `WARN`, or `FAIL`, with **every `IGNORE` carrying a ticket + reason** — the exact
-same allow-list discipline as `qa-accessibility-testing-axe-playwright-typescript` (#20), ported to ZAP.
+same allow-list discipline as `qa-accessibility-testing-typescript`, ported to ZAP.
 
 ```tsv
 # .zap/rules.tsv — tab-separated: <rule-id>	<IGNORE|WARN|FAIL>	(reason)
@@ -135,7 +122,7 @@ same allow-list discipline as `qa-accessibility-testing-axe-playwright-typescrip
 - `IGNORE` → not reported. `WARN` → reported, doesn't fail (exit 2). `FAIL` → reported and **fails the
   build** (exit 1). Use `*` as the rule-id to apply to all rules.
 - `OUTOFSCOPE` with a **regex** excludes URLs (third-party embeds you can't fix).
-- **Discipline (reuse #20's framing):** gate **new** findings — promote the rules you've fixed to `FAIL`
+- **Discipline (reuse `axe-playwright`'s framing):** gate **new** findings — promote the rules you've fixed to `FAIL`
   so they can never regress; every `IGNORE` is a *documented, ticketed* accepted risk, not a silent
   suppression. Shrink the IGNORE list over time; never grow it to make a real failure go away.
 
@@ -143,7 +130,7 @@ same allow-list discipline as `qa-accessibility-testing-axe-playwright-typescrip
 
 The natural home is CI. The official Action wraps the image, runs the baseline, uploads the report
 artifact, and (optionally) opens a tracking GitHub issue (cross-link
-`qa-ci-pipelines-github-actions-typescript`):
+`qa-ci-pipelines-typescript`):
 
 ```yaml
 # .github/workflows/zap-baseline.yml
@@ -328,7 +315,7 @@ export function attachZapReport(result: ZapResult): void {
 
 - **Allure** — attach the HTML + a readable alert summary (rule id, risk, count).
 - **CI artifact** — the Action's `artifact_name` upload, or upload the work dir yourself (cross-link
-  `qa-ci-pipelines-github-actions-typescript`).
+  `qa-ci-pipelines-typescript`).
 - **Tracking issue** — `allow_issue_writing: true` opens/updates a GitHub issue with the WARN/FAIL set.
 
 ## Anti-patterns
@@ -345,53 +332,16 @@ export function attachZapReport(result: ZapResult): void {
 - **Gating on every alert with no rules config.** Every run exits 2; the team mutes the gate. *Fix:* a
   ticketed `-c rules.tsv` — promote what matters to `FAIL`, `IGNORE` documented accepted risks.
 - **Blanket-`IGNORE`ing to make it green.** That hides real findings. *Fix:* `IGNORE` only with a ticket +
-  reason in the file; shrink the list over time (the #20 discipline).
+  reason in the file; shrink the list over time (the `axe-playwright` discipline).
 - **Treating a clean baseline as "secure."** Passive scanning sees only what's on the wire — no business
-  logic, no injection. *Fix:* pair with SCA (#27), the full active scan on a safe env, and manual pentest.
+  logic, no injection. *Fix:* pair with SCA, the full active scan on a safe env, and manual pentest.
 - **Committing auth credentials in the context file / `cmd_options`.** *Fix:* env vars, read lazily.
 - **`numberOfRuns`-style flakiness ignored — spider time too short for a SPA.** A 1-minute spider may miss
   JS routes. *Fix:* `-j` (Ajax spider) and bump `-m` for SPAs; still bounded, still passive.
 
-## Examples
+## Deep-dive reference
 
-**End-to-end: a passive DAST PR gate that fails on regressed security headers, triages known noise, and
-attaches the report.**
-
-```tsv
-# .zap/rules.tsv — the ticketed triage gate
-10038	FAIL	(CSP header missing — must ship; gate any regression)
-10063	FAIL	(Permissions-Policy header missing)
-10015	IGNORE	(No Cache-control on public marketing pages — JIRA-3101, accepted)
-10096	IGNORE	(Timestamp disclosure false-positive on asset hashes — JIRA-3102)
-```
-
-```yaml
-# .github/workflows/zap-baseline.yml
-name: ZAP Baseline DAST
-on: [pull_request]
-jobs:
-  zap_baseline:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v5
-      - run: docker compose up -d --wait        # ready on healthchecks, not a sleep
-      - uses: zaproxy/action-baseline@v0.15.0
-        with:
-          target: 'http://localhost:3000'
-          rules_file_name: '.zap/rules.tsv'
-          cmd_options: '-a -j -m 2'             # alpha rules, Ajax spider, 2-min spider for the SPA
-          fail_action: false                    # rely on rules→FAIL (exit 1) for the gate
-          artifact_name: zap_baseline_report
-          token: ${{ secrets.GITHUB_TOKEN }}
-```
-
-Lifecycle for this gate:
-1. A dev ships a change that drops the `Content-Security-Policy` header on the app shell.
-2. The PR runs the baseline scan against the compose-spun app (ready on healthchecks).
-3. Rule `10038` is promoted to `FAIL` in `rules.tsv` → ZAP exits **1** → **the job fails**, with the
-   alert (rule id, risk, affected URLs) in the uploaded report artifact and the tracking issue.
-4. The dev restores the header; the scan exits 0/2; the gate goes green. The two `IGNORE`d rules stay
-   tracked by their JIRA tickets, shrinking over time — never grown to silence a real finding.
+These sections live in `references/details.md` — **read it when the task touches them**: **Examples**.
 
 ## Rules (hard constraints)
 
@@ -404,14 +354,14 @@ Lifecycle for this gate:
   Testcontainers wait strategy), never `sleep`/`waitForTimeout`.
 - Triage with a **ticketed `-c rules.tsv`**: promote real rules to `FAIL`, `IGNORE` only *documented,
   ticketed* accepted risks; `OUTOFSCOPE <regex>` third-party URLs. Gate **new** findings; shrink the
-  IGNORE list, never grow it (the #20 discipline).
+  IGNORE list, never grow it (the `axe-playwright` discipline).
 - Solve **container→target reachability** explicitly (`--network host` on Linux CI /
   `host.docker.internal` on Mac/Windows / shared Docker network) — don't let a `localhost` target silently
   resolve to the ZAP container.
 - **No secrets in code**: any auth context/credentials via env vars, read lazily — never in the committed
   context file or `cmd_options`.
 - Attach the JSON/HTML report to **Allure** + upload as a CI artifact. A clean baseline ≠ "secure" — pair
-  with SCA (#27), a safe-env full scan, and manual pentest.
+  with SCA, a safe-env full scan, and manual pentest.
 
 ## Cross-references
 
@@ -419,15 +369,15 @@ Lifecycle for this gate:
   `Process` + `System.Text.Json` report parsing.
 - `qa-security-testing-zap-baseline-java` — same skill, Java / TestNG. Same shape via `ProcessBuilder` +
   Jackson.
-- `qa-security-testing-dependency-scanning-typescript` (#27, next) — the **SCA** sibling that closes the
+- `qa-security-testing-dependency-scanning-typescript` — the **SCA** sibling that closes the
   `security-testing` family: dependency/library CVEs from your lockfile vs ZAP's running-app HTTP surface.
   Different layers — run both.
-- `qa-accessibility-testing-axe-playwright-typescript` (#20) — the **ticketed-baseline triage** discipline
+- `qa-accessibility-testing-typescript` — the **ticketed-baseline triage** discipline
   reused here for `-c rules.tsv` (gate new findings, document every suppression with a ticket).
-- `qa-accessibility-testing-lighthouse-ci-typescript` (#21) — the closest **port-shape precedent**: a
+- `qa-accessibility-testing-typescript` — the closest **port-shape precedent**: a
   CLI/Docker tool invoked from each stack with the report parsed as JSON.
 - `qa-test-environments-typescript` — spin the target app the scan points at (Testcontainers /
   docker-compose, ready on a wait strategy).
-- `qa-ci-pipelines-github-actions-typescript` — the `zaproxy/action-baseline` job, `fail_action`, artifact
+- `qa-ci-pipelines-typescript` — the `zaproxy/action-baseline` job, `fail_action`, artifact
   upload, Docker availability on the runner.
 - `qa-allure-reporting-typescript` — attach the ZAP HTML/JSON report and alert summary to the run.

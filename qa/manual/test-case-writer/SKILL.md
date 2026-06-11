@@ -1,6 +1,6 @@
 ---
 name: qa-test-case-writer
-description: Use when the user asks to write, derive, or generate formal test cases from requirements, user stories, acceptance criteria, or feature specs. Triggers: "write test cases for X", "derive test scenarios from these ACs", "create a test plan for feature Y", "generate negative test cases". Do NOT use for exploratory test charters (use qa/manual/exploratory-charter-writer), for filing bug reports (use qa/manual/bug-report-writer), or for writing automation code (use qa/<stack>/skills/api-test-author or qa/<stack>/skills/ui-test-author).
+description: Use when the user asks to write, derive, or generate formal test cases from requirements, user stories, acceptance criteria, or feature specs. Triggers: "write test cases for X", "derive test scenarios from these ACs", "create a test plan for feature Y".
 ---
 
 # QA Test Case Writer

@@ -1,6 +1,6 @@
 ---
 name: qa-test-data-builder-dotnet
-description: Use when the user asks to create test data builders or ObjectMothers in a .NET 8 test project to replace duplicated inline literals across tests with named, intention-revealing factories. Triggers: "create a builder for User in C#", "set up test data for X in .NET", "extract this fixture into an OrderBuilder", "ObjectMother for Y in NUnit", "stop copy-pasting test setup in our .NET tests". Do NOT use for Java test data (use `qa/java/skills/test-data-builder`), TypeScript test data (use `qa/typescript/skills/test-data-builder`), or production-code builders (use `design-patterns/dotnet/generator`).
+description: Use when the user asks to create test data builders or ObjectMothers in a .NET 8 test project to replace duplicated inline literals across tests with named, intention-revealing factories. Triggers: "create a builder for User in C#", "set up test data for X in .NET", "extract this fixture into an OrderBuilder".
 ---
 
 # QA — Test Data Builder / ObjectMother (.NET 8)

@@ -1,6 +1,6 @@
 ---
 name: qa-appium-page-object-java
-description: Use when the user wants a Java Appium page object created or updated from elements already discovered on a live screen — typically right after qa/java/skills/appium-explore has enumerated the screen. Emits/updates a BaseAppiumPage subclass under src/main/java/pom/mobile/ with accessibility-id-first locator constants, a verifyPageLoaded() landmark, and intent-named action/query methods. Triggers: "create a page object for the Login screen", "add a page for the … screen", "implement the … page", "update the LoginPage from what we found". Do NOT use for discovering elements on the device (use qa/java/skills/appium-explore first), writing the tests (use qa/java/skills/ui-test-author/appium), web POMs (use qa/java/skills/pom-builder), or other stacks (use qa/dotnet/skills/appium-page-object / qa/typescript/skills/appium-page-object).
+description: Use when the user wants a Java Appium page object created or updated from elements already discovered on a live screen. Triggers: "create a page object for the Login screen", "add a page for the … screen", "implement the … page".
 ---
 
 # QA — Appium Page Object Builder (Java)

@@ -1,6 +1,6 @@
 ---
 name: qa-test-design-techniques
-description: Use when deriving test cases systematically from a specification using formal black-box test design techniques — equivalence partitioning, boundary value analysis, decision tables, state transition testing, pairwise/combinatorial, classification trees, use-case testing, and error guessing. This is the ISTQB-grounded reference the test-case-writer and the qa-manual-test-designer agent lean on to decide WHICH technique to apply and HOW to measure coverage. Triggers: "what technique applies here", "derive partitions and boundaries", "build a decision table for these rules", "state-transition coverage for this workflow", "how many cases do I need". Do NOT use to format the final test cases (use `qa/manual/test-case-writer`) or to plan a release (use `qa/manual/test-strategy`).
+description: Use when deriving test cases systematically from a specification using formal black-box test design techniques. Triggers: "what technique applies here", "derive partitions and boundaries", "build a decision table for these rules".
 ---
 
 # QA — Test Design Techniques (ISTQB)

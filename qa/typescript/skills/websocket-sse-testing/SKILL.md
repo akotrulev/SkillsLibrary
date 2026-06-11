@@ -1,24 +1,6 @@
 ---
 name: qa-websocket-sse-testing-typescript
-description: >-
-  Test real-time **WebSocket** and **Server-Sent-Events (SSE)** streams in Node 20 + TypeScript (Vitest /
-  Playwright) — from test code directly (protocol-client) and through the browser (Playwright). Covers the
-  **`ws`** library / native global `WebSocket` (the **Node-22** boundary — polyfill via `undici` on Node 20),
-  draining frames into a queue exposed by a client harness and **awaiting a message on a CONDITION** with a
-  promise-plus-timeout or Vitest **`vi.waitFor`** — **never `setTimeout`/`await page.waitForTimeout`**,
-  asserting the full lifecycle (101 handshake → frames → clean close code), reconnection/backoff, message
-  fragmentation/backpressure, auth on the socket (token in query string / `Sec-WebSocket-Protocol`
-  subprotocol / first frame), ping/pong heartbeat, SSE via native `EventSource` / the **`eventsource`**
-  package (`onmessage` / `addEventListener(type)` / `Last-Event-ID`), and the **browser surface** — Playwright
-  `page.waitForEvent('websocket')` + `ws.on('framereceived')` to OBSERVE frames and `page.routeWebSocket`
-  (Playwright ≥ 1.48) to MOCK them. Triggers: "test our WebSocket chat endpoint with ws", "assert the server
-  pushes N SSE events then closes", "wait for a websocket frame without a setTimeout", "test the reconnect
-  logic", "mock the websocket the UI opens in Playwright", "verify the live-feed EventSource stream". Do NOT
-  use for: the .NET stack (use qa-websocket-sse-testing-dotnet), the Java stack (use
-  qa-websocket-sse-testing-java), async **broker** messaging — queues/topics (use
-  qa-messaging-testing-service-bus-typescript / -sqs / -kafka / -rabbitmq), mocking a plain request/response
-  **HTTP** dependency (use qa-api-mocking-msw-typescript or qa-network-monitoring-playwright-routes-typescript),
-  or authoring the page objects the browser tests reuse (use qa-ui-test-author-playwright-typescript).
+description: Test real-time **WebSocket** and **Server-Sent-Events (SSE)** streams in Node 20 + TypeScript (Vitest / Playwright). Triggers: "test our WebSocket chat endpoint with ws", "assert the server pushes N SSE events then closes", "wait for a websocket frame without a setTimeout".
 ---
 
 # WebSocket & SSE Testing (Node 20 + TypeScript) — **ported from the canonical `qa-websocket-sse-testing-dotnet`**
@@ -46,7 +28,7 @@ synchronous return you can `await` and assert on the next line:
 >    schedule. Drain frames into a queue and **await the expected frame / count with a bounded timeout** (a
 >    promise that rejects on a timer, or Vitest `vi.waitFor(() => expect(received).toHaveLength(n))`) — never
 >    `await new Promise(r => setTimeout(r, 2000))` standing in for "it probably arrived". The *exact*
->    eventual-consistency lineage of `qa-messaging-testing-service-bus-typescript` (a stream frame is a
+>    eventual-consistency lineage of `qa-messaging-testing-typescript` (a stream frame is a
 >    message that arrives later).
 > 2. **Drain BEFORE you act.** Attach the `'message'` handler / arm `page.waitForEvent('websocket')` **before**
 >    the action that triggers the first frames, or you race the server and lose them.
@@ -68,8 +50,8 @@ synchronous return you can `await` and assert on the next line:
 | The app's **UI** opens a WS and you assert what crosses the wire | WebSocket | **browser** — Playwright `waitForEvent('websocket')` + `on('framereceived')` (OBSERVE) |
 | The UI opens a WS and you want **deterministic** frames (no real server) | WebSocket | **browser** — Playwright `routeWebSocket` (MOCK) |
 | The UI consumes an SSE feed and you want it deterministic | SSE | **browser** — `page.route` returning a chunked `text/event-stream` body |
-| Async **queue/topic** (OrderPlaced lands on a queue, a consumer reacts) | — | **not this skill** → `qa-messaging-testing-service-bus-typescript` (#28) etc. |
-| A plain request/response **HTTP** dependency to fake | — | **not this skill** → `qa-api-mocking-msw-typescript` (#23) / `qa-network-monitoring-playwright-routes-typescript` (#8) |
+| Async **queue/topic** (OrderPlaced lands on a queue, a consumer reacts) | — | **not this skill** → `qa-messaging-testing-typescript` etc. |
+| A plain request/response **HTTP** dependency to fake | — | **not this skill** → `qa-api-mocking-typescript` / `qa-network-monitoring-typescript` |
 
 **Rule of thumb:** *bidirectional, interactive?* → WebSocket. *Server-push-only feed?* → SSE. *Testing the
 protocol contract?* → protocol-client. *Testing the UI's use of the stream?* → browser (observe if the real
@@ -118,7 +100,7 @@ tests/realtime/
 A frame arrives whenever the server sends it. The test must **await the condition** with a **timeout**,
 returning the instant it holds and *failing* if it never does. A **client harness** queues incoming frames and
 exposes a sequential `waitForNextMessage()` (a promise raced against a timer) plus `takeMessages(n)` — this is
-the WS/SSE analogue of `qa-messaging-testing-service-bus-typescript`'s `receiveMessages` long-poll + `expect.poll`.
+the WS/SSE analogue of `qa-messaging-testing-typescript`'s `receiveMessages` long-poll + `expect.poll`.
 
 ```ts
 // tests/realtime/ws-harness.ts
@@ -173,46 +155,9 @@ export class WsHarness {
 > *rejects* if none does within the window — the opposite of `await sleep(2000)` which races the server. No
 > bare `setTimeout`-as-wait, no `page.waitForTimeout`, anywhere.
 
-## Protocol-client 1 — raw WebSocket (`ws` lib / native `WebSocket`)
+## Deep-dive reference
 
-The test **is** a WebSocket client. The `'open'` event fires after the **101 upgrade**; `'message'` delivers a
-**reassembled** logical message (the `ws` lib handles fragmentation, unlike .NET's raw `ReceiveAsync`); `'close'`
-carries the close code. Drain into the harness queue, await on a condition.
-
-```ts
-// tests/realtime/chat.ws.test.ts
-import { describe, it, expect } from 'vitest';
-import { WsHarness } from './ws-harness';
-import { baseWsUrl } from './app-fixture';   // points at the booted SUT on a real port
-
-describe('chat websocket', () => {
-  it('should broadcast a message to a connected client', async () => {
-    const ws = new WsHarness(`${baseWsUrl()}/ws/chat`);
-    await ws.opened;                                            // condition: the 101 upgrade
-
-    ws.send(JSON.stringify({ type: 'say', text: 'hello' }));
-
-    const frame = await ws.waitForNextMessage();               // await the broadcast on a condition
-    expect(frame).toContain('"text":"hello"');                 // one logical assertion: the broadcast fact
-    ws.close();
-  });
-
-  it('should emit three ticks then close cleanly', async () => {
-    const ws = new WsHarness(`${baseWsUrl()}/ws/ticker?count=3`);
-    await ws.opened;
-
-    const ticks = await ws.takeMessages(3);                    // the N frames…
-    expect(ticks).toHaveLength(3);
-
-    ws.close();                                                // …then the close handshake
-    await vi.waitFor(() => expect(ws.closeCode).toBe(1000));   // …and the clean close (code 1000)
-  });
-});
-```
-
-> **Node-20 vs Node-22:** the harness uses the **`ws`** lib so it runs on Node 20 unchanged. On Node 22 you
-> can drop `ws` and `new globalThis.WebSocket(url)`; on Node 20 the native global isn't available — either keep
-> `ws` (recommended) or polyfill `globalThis.WebSocket = (await import('undici')).WebSocket` once in setup.
+These sections live in `references/details.md` — **read it when the task touches them**: **Protocol-client 1 — raw WebSocket (`ws` lib / native `WebSocket`)**; **Protocol-client 3 — SSE (native `EventSource` / the `eventsource` package)**.
 
 ## Protocol-client 2 — a higher-level client (socket.io / SignalR-JS)
 
@@ -238,53 +183,6 @@ socket.close();
 
 > socket.io reconnects natively (`io(url, { reconnection: true })`); assert reconnect behaviour by killing the
 > server and awaiting the `'reconnect'` event — never `sleep` to "let it reconnect".
-
-## Protocol-client 3 — SSE (native `EventSource` / the `eventsource` package)
-
-SSE is **plain HTTP** — a `GET` whose body streams `text/event-stream`. `EventSource` (native on Node 22+, the
-`eventsource` package on Node 20) handles the streaming, parsing, and reconnect; subscribe with `onmessage` /
-`addEventListener(type)` and drain into the harness queue. Auth note: a browser `EventSource` **can't set
-headers**, but the Node `eventsource` package accepts a `fetch` override / headers for server-side tests.
-
-```ts
-// tests/realtime/sse-harness.ts
-import { EventSource } from 'eventsource';   // Node 20; on Node 22 use the global EventSource
-
-export interface SseEvent { type: string; data: string; lastEventId: string; }
-
-export class SseHarness {
-  private readonly es: EventSource;
-  private readonly queue: SseEvent[] = [];
-
-  constructor(url: string, headers?: Record<string, string>) {
-    this.es = new EventSource(url, headers ? { fetch: (u, init) => fetch(u, { ...init, headers }) } : undefined);
-    const push = (e: MessageEvent, type: string) =>
-      this.queue.push({ type, data: e.data as string, lastEventId: (e as any).lastEventId });
-    this.es.onmessage = (e) => push(e, 'message');
-    for (const t of ['progress', 'done']) this.es.addEventListener(t, (e) => push(e as MessageEvent, t));
-  }
-
-  get events(): readonly SseEvent[] { return this.queue; }
-  close(): void { this.es.close(); }
-}
-```
-
-```ts
-import { vi } from 'vitest';
-
-it('should stream three progress events then a done event', async () => {
-  const sse = new SseHarness(`${baseUrl()}/sse/progress?job=42`);
-
-  await vi.waitFor(() => expect(sse.events).toHaveLength(4), { timeout: 5000 });   // condition, not a sleep
-
-  expect(sse.events.map((e) => e.type)).toEqual(['progress', 'progress', 'progress', 'done']);   // the sequence
-  sse.close();
-});
-```
-
-> **Reconnect / `Last-Event-ID`:** `EventSource` reconnects automatically honoring the server's `retry:` and
-> resends the last `id:` as `Last-Event-ID` so the server resumes — assert that missed events replay from that
-> id after a drop. This is free with SSE and is the main reason to choose it over WS for one-way feeds.
 
 ## Browser surface 1 — OBSERVE WebSocket frames (Playwright)
 
@@ -388,7 +286,7 @@ test('should render the alert banner when the socket pushes an outage', async ({
 - **Using raw `ws` for a socket.io / SignalR endpoint.** You'd re-implement their framing/heartbeat. *Fix:* use
   the real client.
 - **Reaching for this skill for a queue/topic.** A discrete message on a broker is *not* an open stream. *Fix:*
-  `qa-messaging-testing-service-bus-typescript` (#28) and siblings.
+  `qa-messaging-testing-typescript` and siblings.
 - **Token hard-coded or logged.** *Fix:* env, read lazily, never logged (`qa-auth0-test-tokens-typescript`).
 
 ## Examples
@@ -451,16 +349,16 @@ ws.send(JSON.stringify(payload));
 - `qa-websocket-sse-testing-java` — same four ideas, OkHttp `WebSocket` + a `WebSocketListener`/`BlockingQueue`,
   Awaitility as the condition-wait, OkHttp-SSE / `WebClient` `Flux<ServerSentEvent>` + `StepVerifier`,
   Spring `WebSocketStompClient` for STOMP, Playwright-Java (`waitForWebSocket`, `onFrameReceived`, `routeWebSocket`).
-- `qa-messaging-testing-service-bus-typescript` (#28) — the **eventual-consistency lineage** (a stream frame is
+- `qa-messaging-testing-typescript` — the **eventual-consistency lineage** (a stream frame is
   a message that arrives later) and the **boundary**: messaging = discrete queue/topic messages with a consumer;
-  this skill = an open WS/SSE stream. (Plus `-sqs` #29 / `-kafka` #30 / `-rabbitmq` #31.)
-- `qa-network-monitoring-playwright-routes-typescript` (#8) — the **HTTP** mock counterpart and the "register
+  this skill = an open WS/SSE stream. (Plus `-sqs` `sqs` / `-kafka` `kafka` / `-rabbitmq` `rabbitmq`.)
+- `qa-network-monitoring-typescript` — the **HTTP** mock counterpart and the "register
   before the action" ordering rule; SSE-in-the-browser mocking reuses its `page.route`.
-- `qa-api-mocking-msw-typescript` (#23) — fake a *synchronous* HTTP dependency; not a stream. (MSW also has a
+- `qa-api-mocking-typescript` — fake a *synchronous* HTTP dependency; not a stream. (MSW also has a
   WebSocket-mocking API for service-level interception — distinct from Playwright's browser-level `routeWebSocket`.)
 - `qa-ui-test-author-playwright-typescript` — the page-object model the **browser-surface** tests layer on; the
   no-`waitForTimeout` discipline originates there.
-- `qa-auth0-test-tokens-typescript` (#16) — tokens for an authenticated socket, read from env, never logged.
-- `qa-test-environments-typescript` (#14) — booting the SUT on a real server (Testcontainers) with the
+- `qa-auth0-test-tokens-typescript` — tokens for an authenticated socket, read from env, never logged.
+- `qa-test-environments-typescript` — booting the SUT on a real server (Testcontainers) with the
   readiness-wait discipline. `qa-allure-reporting-typescript` — attach captured frames / the event sequence.
   `qa-test-data-builder-typescript` — frame payloads with 4+ fields.

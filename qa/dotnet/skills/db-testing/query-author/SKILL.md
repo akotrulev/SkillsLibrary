@@ -1,6 +1,6 @@
 ---
 name: qa-db-testing-query-author-dotnet
-description: Use when the user asks to write a safe verification query for tests in .NET 8, assert this row exists from a test, review my test SQL for guardrails, add a `COUNT(*)` check from an integration test, or wait for an eventually-consistent row — Dapper + Npgsql / `Microsoft.Data.SqlClient` parameter-only patterns, explicit column projection, safe `LIKE` escaping, integer / `Guid` parsing, `assertRowExists` / `assertNoRowMatches` / `countWhere` helpers, poll-around-a-query for eventual consistency, refusal patterns for `DROP` / `TRUNCATE` / no-WHERE `DELETE` outside cleanup helpers. Do NOT use for Java (`qa/java/skills/db-testing/query-author`), TypeScript (`qa/typescript/skills/db-testing/query-author`), opening the connection / fixture lifecycle (`qa/dotnet/skills/db-testing/client`), or container boot (`qa/dotnet/skills/db-testing/testcontainers`).
+description: Use when the user asks to write a safe verification query for tests in .NET 8, assert this row exists from a test, review my test SQL for guardrails, add a `COUNT(*)` check from an integration test, or wait for an eventually-consistent row.
 ---
 
 # QA — DB Testing Query Author (.NET 8)

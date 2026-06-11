@@ -1,6 +1,6 @@
 ---
 name: qa-ui-test-author-playwright-dotnet
-description: Use when the user asks to scaffold Playwright UI tests in C# / .NET — new test classes, page objects under `Tests/Pages/`, or a specific scenario (login, form, accessibility, visual). Triggers: "write a Playwright test for X in C#", "add a Playwright .NET page object for screen Y", "scaffold a Playwright C# spec". Do NOT use for Playwright TypeScript (use `qa/typescript/skills/ui-test-author/playwright`), Playwright Java (use `qa/java/skills/ui-test-author/playwright`), Appium/mobile (use `qa/dotnet/skills/ui-test-author/appium`), Selenium C# (use `qa/dotnet/skills/ui-test-author/selenium`), Selenium-Java (use `qa/java/skills/ui-test-author/selenium`), Accelerator tests (use `qa/manual/accelerator-conventions`), or reviewing existing tests (use `qa/dotnet/skills/ui-test-author/reviewer`).
+description: Use when the user asks to scaffold Playwright UI tests in C# / .NET. Triggers: "write a Playwright test for X in C#", "add a Playwright .NET page object for screen Y", "scaffold a Playwright C# spec".
 ---
 
 # QA — Playwright Test & Page Object Generator (C# / .NET)

@@ -1,6 +1,6 @@
 ---
 name: qa-test-data-builder-typescript
-description: Use when the user asks to create test data factories or ObjectMothers in a Node 20 + TypeScript test project (Vitest primary, Playwright/WebdriverIO OK) to replace duplicated inline literals across tests with named, intention-revealing factories. Triggers: "create a builder for User in TS", "set up test data for X in Vitest", "extract this fixture into a factory", "ObjectMother for Y", "stop copy-pasting test setup in our TS tests". Do NOT use for .NET test data (use `qa/dotnet/skills/test-data-builder`), Java test data (use `qa/java/skills/test-data-builder`), or production-code builders (use `design-patterns/typescript/generator`).
+description: Use when the user asks to create test data factories or ObjectMothers in a Node 20 + TypeScript test project (Vitest primary, Playwright/WebdriverIO OK) to replace duplicated inline literals across tests with named, intention-revealing factories. Triggers: "create a builder for User in TS", "set up test data for X in Vitest", "extract this fixture into a factory".
 ---
 
 # QA — Test Data Builder / ObjectMother (TypeScript / Node 20)

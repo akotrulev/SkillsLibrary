@@ -1,29 +1,6 @@
 ---
 name: qa-chaos-testing-java
-description: >-
-  Write **fault-injection / resilience** tests in Java 21 with **Toxiproxy** (Shopify's TCP fault-injection
-  proxy) + the **Testcontainers `ToxiproxyContainer`** + **toxiproxy-java** client + TestNG, proving the app under
-  test **degrades gracefully** when a dependency (DB, HTTP API, broker, cache) misbehaves. Covers the trait that
-  makes a chaos test the inverse of every other test: **you do NOT assert the dependency works — you INJECT a fault
-  into the connection (latency, bandwidth cap, connection drop, timeout, partial/sliced response) and assert the
-  app RETRIES / TRIPS A CIRCUIT BREAKER / HONORS A TIMEOUT / FALLS BACK instead of hanging, crashing, or corrupting
-  state** ("assert the call succeeded" is the wrong reflex here). The mechanism: **Toxiproxy sits as a TCP proxy
-  BETWEEN the app and its dependency — you point the app's connection string at the proxy listen port, not the real
-  dependency** — and **toxics are added/removed at runtime over the REST API** so each test runs a lifecycle:
-  **steady-state → inject the toxic → assert degraded behaviour → remove the toxic → assert recovery.** Covers the
-  toxic types (`latency`+jitter, `bandwidth`, `timeout`, `reset_peer`, `slow_close`, `slicer`, `limitData`), the
-  upstream/downstream **`ToxicDirection`**, the **`toxicity`** probability, asserting the **resilience pattern**
-  (retry count, circuit-breaker open/half-open/closed via resilience4j, timeout honored, fallback served) not the
-  fault, partial failures via `slicer`/`limitData`, and standing the dependency + proxy up with Testcontainers on a
-  shared `Network`. Triggers: "test our app survives the database going slow", "inject latency / a connection drop
-  and assert the circuit breaker opens", "assert the retry/fallback fires when the API times out", "Toxiproxy
-  resilience test in Java", "add a fault-injection test with Testcontainers". Do NOT use for: the .NET stack (use
-  qa-chaos-testing-dotnet), the TypeScript stack (use qa-chaos-testing-typescript), merely **observing/mocking**
-  out-of-browser requests (use qa-network-monitoring-proxy-java — observe vs inject), conditioning the **device /
-  client** network in a UI/mobile run (use qa-cloud-grid-config-java / qa-mobile-device-farm-java), standing
-  dependencies up without faulting them (use qa-test-environments-java), **load/volume** testing (use
-  qa-performance-gatling-java), or **production chaos engineering** on a live cluster (Gremlin / Litmus / Chaos Mesh
-  — out of scope; this skill is functional fault-injection in a test).
+description: Use when writing fault-injection / resilience tests in Java 21 / TestNG with Toxiproxy via Testcontainers — inject latency, drops, and bandwidth caps on a dependency (DB, API, broker, cache) and assert the app degrades gracefully. Triggers: "test the app survives a slow database", "inject a connection drop", "assert the circuit breaker opens".
 ---
 
 # QA — Chaos / Fault-Injection Testing (Java 21 / Toxiproxy + Testcontainers + TestNG)
@@ -55,7 +32,7 @@ happy-path skill in this library: the REST/gRPC authors assert *the dependency a
 > 4. **Assert the resilience PATTERN, not the fault.** The toxic is the *given*, not the assertion. Assert the
 >    **behaviour it provokes**: the retry count, the circuit-breaker state transition (closed → open → half-open →
 >    closed via resilience4j), the honored timeout (fails *fast*, not hangs), the fallback payload served. This is
->    what `qa-network-monitoring-proxy-java` can *observe* but never *inject* — observe vs break.
+>    what `qa-network-monitoring-java` can *observe* but never *inject* — observe vs break.
 
 ## Decision matrix — fault scenario → toxic → what you assert
 
@@ -99,148 +76,16 @@ dependencies {
 }
 ```
 
-> **Why a proxy and not a mock?** A mock (`qa-api-mocking-wiremock-java`) makes the *dependency* return a canned
+> **Why a proxy and not a mock?** A mock (`qa-api-mocking-java`) makes the *dependency* return a canned
 > error at the application layer; a Toxiproxy toxic faults the *transport* — latency, a dropped TCP connection, a
 > half-sent response — the failures that exercise socket timeouts, connection pools, and retry/circuit code. Mock
 > when you control the contract and want a specific status; **fault-inject when you want to prove the app survives
 > the network/dependency misbehaving**. They compose: a WireMock upstream behind a Toxiproxy listener faults the
 > transport to a controllable contract.
 
-## The mechanism — proxy BETWEEN app and dependency (idea #2)
+## Deep-dive reference
 
-Stand the dependency and Toxiproxy up on a **shared Docker `Network`**, create a proxy whose **upstream** is the
-dependency and whose **listen** side is what the app connects to, then **point the app at the proxy's mapped
-port**. Everything downstream flows through the fault point.
-
-```java
-package support.chaos;
-
-import eu.rekawek.toxiproxy.Proxy;
-import eu.rekawek.toxiproxy.ToxiproxyClient;
-import org.testcontainers.containers.Network;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.containers.ToxiproxyContainer;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
-
-import java.io.IOException;
-
-/** Stands the dependency + Toxiproxy up on one Network and exposes the proxied connection point. */
-public abstract class BaseChaosTest {
-    private static final Network NETWORK = Network.newNetwork();
-
-    protected static PostgreSQLContainer<?> dependency;       // the dependency under fault (example)
-    protected static ToxiproxyContainer toxiproxy;
-    protected ChaosProxy chaos;                               // the intent-named toxic helper
-
-    @BeforeClass(alwaysRun = true)
-    public void startInfrastructure() throws IOException {
-        dependency = new PostgreSQLContainer<>("postgres:16-alpine")
-                .withNetwork(NETWORK)
-                .withNetworkAliases("db");                    // the upstream host on the shared network
-        toxiproxy = new ToxiproxyContainer("ghcr.io/shopify/toxiproxy:2.11.0")
-                .withNetwork(NETWORK);
-        dependency.start();
-        toxiproxy.start();
-
-        ToxiproxyClient client = new ToxiproxyClient(toxiproxy.getHost(), toxiproxy.getControlPort());
-        // listen on 8666 inside the proxy; upstream = the dependency by its network alias + internal port.
-        Proxy proxy = client.createProxy("db", "0.0.0.0:8666", "db:5432");
-
-        // The app connects HERE — the proxy's mapped listen port, NOT the real dependency's port.
-        String proxiedHost = toxiproxy.getHost();
-        int proxiedPort = toxiproxy.getMappedPort(8666);
-        chaos = new ChaosProxy(proxy, proxiedHost, proxiedPort);
-    }
-
-    @AfterClass(alwaysRun = true)
-    public void stopInfrastructure() {
-        if (toxiproxy != null) toxiproxy.stop();
-        if (dependency != null) dependency.stop();
-    }
-}
-```
-
-> The app under test must be configured to talk to `chaos.host():chaos.port()` (the JDBC URL / base URL / broker
-> bootstrap server pointed at the proxy), **not** the dependency directly. That redirection *is* the chaos setup —
-> if the app bypasses the proxy, no toxic can reach it.
-
-## The toxic helper — `support/chaos/ChaosProxy.java`
-
-One helper owns the proxy handle and exposes **intent-named** fault operations and a **lifecycle** primitive, so
-tests read `chaos.injectLatency(...)`, `chaos.cutConnection()`, `chaos.healed()` — never raw
-`proxy.toxics().timeout(...)` scattered across `@Test` methods. Each injected toxic is named so it can be removed.
-
-```java
-package support.chaos;
-
-import eu.rekawek.toxiproxy.Proxy;
-import eu.rekawek.toxiproxy.model.Toxic;
-import eu.rekawek.toxiproxy.model.ToxicDirection;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
-/** Intent-named fault injection over a single Toxiproxy proxy, with a remove-all "heal" for the lifecycle. */
-public final class ChaosProxy {
-    private final Proxy proxy;
-    private final String host;
-    private final int port;
-    private final List<String> injected = new ArrayList<>();
-
-    public ChaosProxy(Proxy proxy, String host, int port) {
-        this.proxy = proxy; this.host = host; this.port = port;
-    }
-
-    public String host() { return host; }   // the app points its connection string here…
-    public int port()    { return port; }   // …and at this port
-
-    /** Slow every response by `millis` (+ jitter) — the "dependency is slow" fault. */
-    public Toxic injectLatency(long millis, long jitter) throws IOException {
-        Toxic t = proxy.toxics().latency("latency", ToxicDirection.DOWNSTREAM, millis).setJitter(jitter);
-        injected.add("latency");
-        return t;
-    }
-
-    /** Stop all data and close the connection after `millis` — the "dependency hangs then drops" fault. */
-    public void injectTimeout(long millis) throws IOException {
-        proxy.toxics().timeout("timeout", ToxicDirection.UPSTREAM, millis);
-        injected.add("timeout");
-    }
-
-    /** Reset the TCP peer after `millis` — the "connection dropped" fault that exercises retry/breaker code. */
-    public Toxic cutConnection(long millis) throws IOException {
-        Toxic t = proxy.toxics().resetPeer("reset", ToxicDirection.DOWNSTREAM, millis);
-        injected.add("reset");
-        return t;
-    }
-
-    /** Throttle the backend dependency to `rateKbps` KB/s — bandwidth starvation (NOT device conditioning). */
-    public void throttle(long rateKbps) throws IOException {
-        proxy.toxics().bandwidth("bw", ToxicDirection.DOWNSTREAM, rateKbps);
-        injected.add("bw");
-    }
-
-    /** Cut the response after `bytes` — a partial/truncated response the app must not persist as valid. */
-    public void truncateAfter(long bytes) throws IOException {
-        proxy.toxics().limitData("limit", ToxicDirection.DOWNSTREAM, bytes);
-        injected.add("limit");
-    }
-
-    /** Make a toxic probabilistic (0..1) for an intermittent/flappy fault. */
-    public Toxic withToxicity(Toxic toxic, float toxicity) throws IOException {
-        toxic.setToxicity(toxicity);
-        return toxic;
-    }
-
-    /** Remove ALL injected toxics — the dependency is "healed" (lifecycle step: assert recovery after this). */
-    public void healed() throws IOException {
-        for (String name : injected) proxy.toxics().get(name).remove();
-        injected.clear();
-    }
-}
-```
+These sections live in `references/details.md` — **read it when the task touches them**: **The mechanism — proxy BETWEEN app and dependency (idea #2)**; **The toxic helper — `support/chaos/ChaosProxy.java`**.
 
 ## Inject-a-fault, assert-degradation (idea #1)
 
@@ -449,7 +294,7 @@ chaos-engineering platforms.
   `@BeforeClass` on a shared `Network`; reset toxics (`healed()`) between tests, not the containers.
 - **Treating this as production chaos engineering.** *Fix:* deterministic toxic in a test ≠ GameDay on a live
   cluster — see the boundary note; route prod-chaos requests to Gremlin/Litmus/Chaos Mesh.
-- **Using a toxic where a mock fits.** Want a specific HTTP 503 from a contract? *Fix:* `qa-api-mocking-wiremock-java`.
+- **Using a toxic where a mock fits.** Want a specific HTTP 503 from a contract? *Fix:* `qa-api-mocking-java`.
   Toxiproxy is for **transport** faults (latency/drop/partial), not application-layer canned responses.
 
 ## Examples
@@ -461,7 +306,7 @@ failing?*
 
 **Composing with the dependency families.** The thing you fault is stood up by `qa-test-environments-java`
 (`ToxiproxyContainer` next to a `PostgreSQLContainer` / `KafkaContainer` on a shared `Network`); the dependency
-itself is exercised happy-path by `qa-db-testing-java` / `qa-messaging-testing-kafka-java`. Chaos adds the proxy in
+itself is exercised happy-path by `qa-db-testing-java` / `qa-messaging-testing-java`. Chaos adds the proxy in
 front and asserts the resilience layer — it **composes** with those skills, it doesn't replace them. A
 data-driven fault matrix (toxic × parameter) binds cleanly via `qa-data-driven-testing-java`.
 
@@ -489,18 +334,18 @@ data-driven fault matrix (toxic × parameter) binds cleanly via `qa-data-driven-
 
 - `qa-chaos-testing-dotnet` · `qa-chaos-testing-typescript` — the sibling stacks (`Toxiproxy.Net` + Polly ·
   `toxiproxy-node-client` + Vitest); same four ideas, same lifecycle, different client lib + resilience library.
-- `qa-network-monitoring-proxy-java` (#10) — the **closest neighbor and the inverse**: that stands up a MITM proxy
+- `qa-network-monitoring-java` — the **closest neighbor and the inverse**: that stands up a MITM proxy
   to **observe/mock** out-of-browser requests; this stands up Toxiproxy to **inject transport faults**. Observe vs
   break. Read it for the proxy-in-the-middle model; draw the boundary cleanly.
-- `qa-test-environments-java` (#14) — the **Testcontainers spine** the `ToxiproxyContainer` plugs into: stand the
+- `qa-test-environments-java` — the **Testcontainers spine** the `ToxiproxyContainer` plugs into: stand the
   dependency up, put the proxy in front on a shared `Network`, point the app at the proxy port.
-- `qa-api-mocking-wiremock-java` (#22) — **application-layer** canned responses (a specific 503) vs **transport**
+- `qa-api-mocking-java` — **application-layer** canned responses (a specific 503) vs **transport**
   faults (latency/drop/partial). They compose: a WireMock upstream behind a Toxiproxy listener.
-- `qa-data-driven-testing-java` (#39) — drive a **fault matrix** (toxic × parameter × expected pattern) via
+- `qa-data-driven-testing-java` — drive a **fault matrix** (toxic × parameter × expected pattern) via
   row-binding instead of copy-pasted `@Test` methods.
-- `qa-db-testing-java` · `qa-messaging-testing-kafka-java` · `qa-messaging-testing-rabbitmq-java` — the
+- `qa-db-testing-java` · `qa-messaging-testing-java` · `qa-messaging-testing-java` — the
   dependencies you fault (DB / broker connections through the proxy); they cover the happy path this inverts.
-- `qa-websocket-sse-testing-java` (#37) — shares the **lifecycle discipline** (steady → perturb → assert → recover)
+- `qa-websocket-sse-testing-java` — shares the **lifecycle discipline** (steady → perturb → assert → recover)
   and bounded-condition waits (Awaitility, never sleep).
 - `qa-performance-gatling-java` — behaviour under **load/volume** vs behaviour under **fault** (this skill); they
   answer different questions.

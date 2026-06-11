@@ -1,6 +1,6 @@
 ---
 name: qa-appium-page-object-dotnet
-description: Use when the user wants a .NET (C#) Appium page object created or updated from elements already discovered on a live screen — typically right after qa/dotnet/skills/appium-explore has enumerated the screen. Emits/updates a BaseAppiumPage subclass under AppiumTests/Pages/ with accessibility-id-first locator constants, a VerifyPageLoaded() landmark, and intent-named action/query methods. Triggers: "create a page object for the Login screen", "add a page for the … screen", "implement the … page", "update the LoginPage from what we found". Do NOT use for discovering elements on the device (use qa/dotnet/skills/appium-explore first), writing the tests (use qa/dotnet/skills/ui-test-author/appium), web POMs (use qa/dotnet/skills/pom-builder), or other stacks (use qa/java/skills/appium-page-object / qa/typescript/skills/appium-page-object).
+description: Use when the user wants a .NET (C#) Appium page object created or updated from elements already discovered on a live screen. Triggers: "create a page object for the Login screen", "add a page for the … screen", "implement the … page".
 ---
 
 # QA — Appium Page Object Builder (.NET)

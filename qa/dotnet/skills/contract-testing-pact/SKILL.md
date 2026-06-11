@@ -1,6 +1,6 @@
 ---
 name: qa-contract-testing-pact-dotnet
-description: Use when the user asks to set up consumer-driven contract testing with Pact in a .NET 8 service (PactNet v5+) — consumer tests with NUnit, provider verification, Pact Broker publish, can-i-deploy, state handlers. Triggers: "set up Pact for our .NET service", "PactNet consumer test for X", "verify our .NET provider against Y's contract", "wire can-i-deploy in our .NET deploy". Do NOT use for Java/JVM consumers or providers (use `qa/java/skills/contract-testing-pact`), TypeScript/Node consumers or providers (use `qa/typescript/skills/contract-testing-pact`), live-service API tests (use `qa/dotnet/skills/api-test-author/generator`), or OpenAPI-only validation. Load `qa/_shared/contract-testing-pact` alongside this skill for the Broker / matchers / can-i-deploy concepts.
+description: Use when the user asks to set up consumer-driven contract testing with Pact in a .NET 8 service (PactNet v5+). Triggers: "set up Pact for our .NET service", "PactNet consumer test for X", "verify our .NET provider against Y's contract".
 ---
 
 # QA — Contract Testing with Pact (.NET / PactNet)

@@ -1,20 +1,6 @@
 ---
 name: qa-security-testing-nuclei
-description: >-
-  Nuclei (ProjectDiscovery) **template-based** vulnerability / exposure scanner as a CI gate: match 7,000+
-  community YAML templates (known **CVEs**, **exposures**, **misconfigurations**, **default-credentials**,
-  **tech-detection**) against a running app or host list — `nuclei -u https://app.example.com -t cves/ -t
-  exposures/ -t misconfiguration/ -s critical,high`. Language-agnostic single shared skill (Go binary /
-  `projectdiscovery/nuclei` Docker image / Go SDK `github.com/projectdiscovery/nuclei/v3/lib`). Use when a
-  pipeline must catch a known CVE / leaked `.env` / exposed `/.git` / default-cred panel / outdated component
-  at the HTTP layer, add org-specific exposure templates, or wire a fast known-bad gate alongside a crawler.
-  **⚠️ Nuclei is a template MATCHER, not a crawler** — it does **not** spider, discover params/forms, or
-  inject into them; pair it with a DAST crawler. **⚠️ Gating caveat:** there is no clean documented
-  "fail-CI-on-match" exit code — **gate by parsing `-jsonl`/`-je`/`-se` output** (a non-empty file at/above a
-  severity fails the job). Do NOT use for: spidering an app + discovering/injecting into params/forms (that
-  is the DAST crawler qa-security-testing-zap-automation-framework — Nuclei won't find what it isn't pointed
-  at), OpenAPI/GraphQL property-level fuzzing (qa-security-testing-api-fuzzing), or the OWASP map /
-  authorization-to-scan / triage discipline (load qa-security-shared alongside this skill).
+description: Nuclei (ProjectDiscovery) **template-based** vulnerability / exposure scanner as a CI gate: match 7,000+ community YAML templates (known **CVEs**, **exposures**, **misconfigurations**, **default-credentials**, **tech-detection**) against a running app or host list.
 ---
 
 # Security Testing — Nuclei (template-based scanner, shared)

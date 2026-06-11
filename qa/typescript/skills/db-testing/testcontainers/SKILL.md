@@ -1,6 +1,6 @@
 ---
 name: qa-db-testing-testcontainers-typescript
-description: Use when the user asks to scaffold TypeScript (Vitest / Jest) integration tests backed by a real database (Postgres / SQL Server / MongoDB / Redis) via the `testcontainers` npm package — global setup with migration, per-test reset, `pg` / Prisma / Knex / Drizzle wiring. Triggers: "spin up Postgres for these tests", "Testcontainers fixture in Vitest", "stop using in-memory pg-mem", "integration test against Mongo in CI". Do NOT use for unit tests with mocks, for .NET (`qa/dotnet/skills/db-testing/testcontainers`), for JVM (`qa/java/skills/db-testing/testcontainers`), or for SQL query authoring guardrails (use `qa/typescript/skills/db-testing/query-author`).
+description: Use when the user asks to scaffold TypeScript (Vitest / Jest) integration tests backed by a real database (Postgres / SQL Server / MongoDB / Redis) via the `testcontainers` npm package. Triggers: "spin up Postgres for these tests", "Testcontainers fixture in Vitest", "stop using in-memory pg-mem". Not for SQL query authoring guardrails → `db-testing/query-author`.
 ---
 
 # QA — DB Testing with Testcontainers (TypeScript)
@@ -233,5 +233,5 @@ const c = await new GenericContainer('ghcr.io/myco/legacy-app:1.4.0')
 - **`qa/typescript/skills/db-testing/query-author`** — assertion-query SQL guardrails.
 - **`qa/typescript/skills/test-data-builder`** — seed builders (preferred over inline literals).
 - **`qa/typescript/skills/test-environments`** — multi-container orchestration via docker-compose.
-- **`qa/typescript/skills/ci-pipelines/azure-pipelines`** — DinD enablement and reporter wiring.
+- **`qa/typescript/skills/ci-pipelines`** — DinD enablement and reporter wiring.
 - **`qa/typescript/skills/allure-reporting`** — attach container logs on failure.

@@ -1,6 +1,6 @@
 ---
 name: qa-contract-testing-pact-java
-description: Use when the user asks to set up consumer-driven contract testing with Pact in a Java 21 + Spring Boot 3 service (Pact-JVM, JUnit 5) — consumer tests, provider verification, Pact Broker publish, can-i-deploy, state handlers. Triggers: "set up Pact-JVM for our Spring Boot service", "consumer Pact test in Java for X", "verify our Java provider against Y's contract", "wire can-i-deploy in the Gradle deploy". Do NOT use for .NET consumers or providers (use `qa/dotnet/skills/contract-testing-pact`), TypeScript/Node consumers or providers (use `qa/typescript/skills/contract-testing-pact`), live-service API tests (use `qa/java/skills/api-test-author/generator`), or OpenAPI-only validation. Load `qa/_shared/contract-testing-pact` alongside this skill for the Broker / matchers / can-i-deploy concepts.
+description: Use when the user asks to set up consumer-driven contract testing with Pact in a Java 21 + Spring Boot 3 service (Pact-JVM, JUnit 5). Triggers: "set up Pact-JVM for our Spring Boot service", "consumer Pact test in Java for X", "verify our Java provider against Y's contract".
 ---
 
 # QA — Contract Testing with Pact (Java / Pact-JVM)

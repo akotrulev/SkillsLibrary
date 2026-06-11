@@ -1,6 +1,6 @@
 ---
 name: qa-contract-testing-pact-typescript
-description: Use when the user asks to set up consumer-driven contract testing with Pact in a Node 20 + TypeScript service (`@pact-foundation/pact` PactV3+) — consumer tests with Vitest, provider verification, Pact Broker publish, can-i-deploy, state handlers. Triggers: "set up Pact for our Node service", "PactV3 consumer test in TS for X", "verify our TS provider against Y's contract", "wire can-i-deploy in our Node deploy". Do NOT use for .NET consumers or providers (use `qa/dotnet/skills/contract-testing-pact`), Java consumers or providers (use `qa/java/skills/contract-testing-pact`), live-service API tests (use `qa/typescript/skills/api-test-author/generator`), or OpenAPI-only validation. Load `qa/_shared/contract-testing-pact` alongside this skill for the Broker / matchers / can-i-deploy concepts.
+description: Use when the user asks to set up consumer-driven contract testing with Pact in a Node 20 + TypeScript service (`@pact-foundation/pact` PactV3+). Triggers: "set up Pact for our Node service", "PactV3 consumer test in TS for X", "verify our TS provider against Y's contract".
 ---
 
 # QA — Contract Testing with Pact (TypeScript / `@pact-foundation/pact`)

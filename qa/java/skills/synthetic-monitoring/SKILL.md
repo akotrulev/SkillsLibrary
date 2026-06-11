@@ -1,27 +1,6 @@
 ---
 name: qa-synthetic-monitoring-java
-description: >-
-  Author **synthetic monitoring as code** in the JVM stack — scripted checks that run on a schedule against a
-  LIVE environment (staging/prod) to catch outages and regressions in production, the "is it up and working
-  *right now*" layer, distinct from CI pre-merge tests. **JVM/observability-native tool: Grafana Cloud
-  Synthetic Monitoring** (because Checkly — the family's canonical — has **no Java SDK**, and Grafana matches
-  this library's observability default of Loki/Prometheus/Tempo). Covers the **two check types** (cheap
-  **HTTP/ping/DNS/TCP probe checks** = uptime + SLA, declared as config-as-code via the Grafana Terraform
-  provider `grafana_synthetic_monitoring_check`; and **scripted/browser checks** — either k6 scripts run by
-  Grafana Synthetic Monitoring, or the **Java-native** route: a Spring Boot `@Scheduled` Playwright-Java probe
-  that reuses the page objects from `qa/java/skills/ui-test-author/playwright` and publishes a success/duration gauge
-  via Micrometer → Prometheus); **monitoring-as-code** (Terraform + a scheduled probe, deployed by a pipeline);
-  **alerting + SLA/latency thresholds** (Grafana alert rules / Prometheus Alertmanager on `probe_success` +
-  duration, contact points → email/Slack/PagerDuty); **wait on a condition, never a sleep**; and **secrets
-  from env, never logged** (Grafana SM token / target creds from env, read lazily). Triggers: "set up
-  synthetic monitoring for our JVM app", "add a Grafana synthetic check as code", "monitor our login journey
-  on a schedule with Playwright-Java and alert via Prometheus", "Terraform grafana_synthetic_monitoring_check",
-  "assert an SLA on a live endpoint with Grafana". Do NOT use for: the TypeScript/Checkly stack (use
-  qa-synthetic-monitoring-typescript — the canonical), the .NET stack (use qa-synthetic-monitoring-dotnet —
-  Azure App Insights availability tests), pre-merge CI tests against an ephemeral env (use qa-ci-pipelines-* —
-  synthetics run *post-deploy* against a live target), load testing (use qa-performance-gatling/k6 — synthetics
-  check uptime, not throughput), authoring the Playwright journey itself (use qa-ui-test-author-playwright-java
-  — this skill *reuses* those page objects), or full Allure result wiring (use qa-allure-reporting-java).
+description: Use when authoring synthetic monitoring as code from the JVM stack — scheduled probe checks (HTTP/ping/DNS/TCP) and scripted checks against live staging/prod via Grafana Cloud Synthetic Monitoring + Terraform. The "is it up right now" layer, distinct from CI pre-merge tests. Triggers: "add a prod uptime check", "synthetic monitor for the login flow", "monitoring as code".
 ---
 
 # Synthetic Monitoring as Code (Grafana Cloud Synthetic Monitoring · Java 21) — **ported from the TypeScript/Checkly canonical**
@@ -135,7 +114,7 @@ resource "grafana_synthetic_monitoring_check" "storefront_health" {
 
 The check's **`frequency`** (set on the check / inherited) is the cadence; the emitted
 **`probe_http_duration_seconds`** metric is the latency the alert gates on (the SLA). Deploy from the pipeline
-(`terraform apply`) — cross-link `qa-ci-pipelines-gitlab-ci`. This is the synthetic-vs-CI boundary: this check
+(`terraform apply`) — cross-link `qa-ci-pipelines`. This is the synthetic-vs-CI boundary: this check
 runs **forever, against the live target**, not as a pre-merge gate.
 
 ## Check type 1 — HTTP/ping/TCP probe checks (status + latency + content)
@@ -348,11 +327,11 @@ objects are exercised by the CI TestNG suite (the gate) and the probe (the monit
 - `qa-performance-k6` (#?) — the k6 muscle Grafana SM's **scripted/browser checks** reuse (Route A), and the
   load-vs-uptime overlap: k6 *can* run as a synthetic via Grafana SM. Synthetics check "is it working"; k6 checks
   "how much can it take". `qa-performance-gatling` is the JVM load tool (also not a synthetic).
-- `qa-ci-pipelines-gitlab-ci` (#13) / `-github-actions` / `-azure-pipelines` — the **pre-merge gate against
+- `qa-ci-pipelines` (gitlab-ci / github-actions / azure-pipelines references) — the **pre-merge gate against
   ephemeral envs** boundary; also where `terraform apply` for the checks + the probe-app deploy are wired.
-- `qa-auth0-test-tokens-java` (#16) — M2M / test-user tokens for checks hitting an **authenticated** live
+- `qa-auth0-test-tokens-java` — M2M / test-user tokens for checks hitting an **authenticated** live
   endpoint (mint in the probe / multihttp setup; creds from env, lazily).
-- `qa-flaky-test-quarantine-java` (#36) — a check that needs `for` widened to stay green is *flaky*; fix the
+- `qa-flaky-test-quarantine-java` — a check that needs `for` widened to stay green is *flaky*; fix the
   root cause rather than masking the alert.
 - `qa-allure-reporting-java` — surfacing probe-verification runs; and `observability` (the Grafana / Loki /
   Prometheus / Tempo stack) the synthetic metrics natively feed.

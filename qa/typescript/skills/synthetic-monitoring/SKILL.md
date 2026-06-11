@@ -1,25 +1,6 @@
 ---
 name: qa-synthetic-monitoring-typescript
-description: >-
-  Author **synthetic monitoring as code** — scripted checks that run on a schedule against a LIVE
-  environment (staging/prod) to catch outages and regressions in production, the "is it up and working
-  *right now*" layer, distinct from CI pre-merge tests. Canonical stack: **Checkly `@checkly/cli`** (Node
-  20 + TypeScript) — monitoring-as-code in versioned TS, deployed to Checkly's cloud and run continuously
-  from global locations. Covers the **two check types** (API/uptime checks via `ApiCheck` + `AssertionBuilder`,
-  and browser checks via `BrowserCheck` wrapping a `@playwright/test` spec that reuses the page objects from
-  `qa/typescript/skills/ui-test-author/playwright`); **monitoring-as-code** (`checkly.config.ts`, `logicalId`,
-  `checkly test` dry-run vs `checkly deploy`); **alerting + SLA/latency thresholds** (`degradedResponseTime`/
-  `maxResponseTime`, `EmailAlertChannel`/`SlackAlertChannel`/`PagerdutyAlertChannel`, `RetryStrategyBuilder`);
-  **wait on a condition, never a sleep**; and **secrets from env, never logged** (`environmentVariables` with
-  `secret: true`, `CHECKLY_API_KEY`). Triggers: "set up synthetic monitoring for our prod app", "add a Checkly
-  uptime check / browser check as code", "monitor our login journey on a schedule and alert on failure",
-  "monitoring-as-code with Checkly", "assert an SLA/latency budget on a live endpoint". Do NOT use for: the
-  .NET stack (use qa-synthetic-monitoring-dotnet — Azure App Insights availability tests), the Java/JVM stack
-  (use qa-synthetic-monitoring-java — Grafana Cloud Synthetic Monitoring), pre-merge CI tests against an
-  ephemeral env (use qa-ci-pipelines-* — synthetics run *post-deploy* against a live target, not as a merge
-  gate), load/stress testing (use qa-performance-k6 — synthetics check uptime/correctness, not throughput),
-  authoring the Playwright journey itself (use qa-ui-test-author-playwright-typescript — this skill *reuses*
-  those page objects as the check body), or full Allure result wiring (use qa-allure-reporting-typescript).
+description: Use when authoring synthetic monitoring as code in Node 20 / TypeScript — scheduled API and Playwright-based browser checks against live staging/prod via Checkly (`@checkly/cli`). The "is it up right now" layer, distinct from CI pre-merge tests. Triggers: "add a prod uptime check", "synthetic monitor for the login flow", "monitoring as code".
 ---
 
 # Synthetic Monitoring as Code (Checkly · Node 20 / TypeScript) — **canonical stack**
@@ -213,60 +194,9 @@ test('user can log in and add an item to the cart', async ({ page }) => {
 });
 ```
 
-## Alerting + SLA thresholds — the part that makes it a monitor
+## Deep-dive reference
 
-A check that fails into the void is useless. **Alert channels** are shared constructs attached to checks;
-the **retry strategy** absorbs a single transient blip so on-call isn't paged for nothing, while a *sustained*
-failure does page.
-
-```typescript
-// monitoring/src/alert-channels.ts
-import { EmailAlertChannel, SlackAlertChannel, PagerdutyAlertChannel } from 'checkly/constructs';
-
-export const emailChannel = new EmailAlertChannel('email-oncall', {
-  address: 'oncall@acme.example',
-  sendFailure: true,
-  sendRecovery: true,
-  sendDegraded: true,       // the SLA-breach (degradedResponseTime) signal — slow-but-up is still worth knowing
-  sslExpiry: true,
-  sslExpiryThreshold: 30,   // also alert 30 days before the TLS cert expires
-});
-
-export const slackChannel = new SlackAlertChannel('slack-alerts', {
-  url: process.env.SLACK_WEBHOOK_URL!,   // secret from env, NEVER committed
-  channel: '#storefront-alerts',
-});
-
-export const pagerdutyChannel = new PagerdutyAlertChannel('pd-oncall', {
-  serviceKey: process.env.PAGERDUTY_KEY!,
-});
-```
-
-```typescript
-// Retry strategy — bounded, so a flake doesn't page, but a real outage does. Attach per-check or per-group.
-import { RetryStrategyBuilder } from 'checkly/constructs';
-
-const retryStrategy = RetryStrategyBuilder.linearStrategy({
-  maxRetries: 2,            // bounded — like the flaky-quarantine cap, this is a SAFETY knob, not a mask
-  baseBackoffSeconds: 30,
-  sameRegion: false,        // retry from a DIFFERENT region — distinguishes a regional blip from a real outage
-});
-```
-
-Share schedule + locations + alerts across a set of checks with a **`CheckGroup`**:
-
-```typescript
-import { CheckGroup, Frequency } from 'checkly/constructs';
-
-export const storefrontGroup = new CheckGroup('storefront-group', {
-  name: 'Storefront',
-  frequency: Frequency.EVERY_5M,
-  locations: ['us-east-1', 'eu-west-1'],
-  alertChannels: [emailChannel, slackChannel],
-  retryStrategy,
-});
-// then on a check: new ApiCheck('...', { group: storefrontGroup, ... })
-```
+These sections live in `references/details.md` — **read it when the task touches them**: **Alerting + SLA thresholds — the part that makes it a monitor**.
 
 ## Secrets from env, never logged
 
@@ -306,7 +236,7 @@ and a separate monitor. The CI pipeline runs `checkly test --record` to gate the
 main, after deploy) runs `checkly deploy --force` to promote the monitoring config:
 
 ```yaml
-# .github/workflows — cross-link qa-ci-pipelines-github-actions for the full pipeline
+# .github/workflows — cross-link qa-ci-pipelines for the full pipeline
 - name: Synthetic dry-run (gate the PR)
   run: npx checkly test --record --reporter=github
   env: { CHECKLY_API_KEY: ${{ secrets.CHECKLY_API_KEY }}, CHECKLY_ACCOUNT_ID: ${{ secrets.CHECKLY_ACCOUNT_ID }} }
@@ -413,11 +343,11 @@ deployed with `checkly deploy`, both runnable as a PR gate with `checkly test --
   reuse**. This skill schedules and alerts on them; it does not author them. Mirror its intent-not-selectors discipline.
 - `qa-performance-k6` — load testing (throughput), NOT uptime. The overlap: k6 *can* run as a synthetic via
   Grafana Synthetic Monitoring (the Java sibling). Synthetics check "is it working"; k6 checks "how much can it take".
-- `qa-ci-pipelines-github-actions` / `-azure-pipelines` / `-gitlab-ci` (#11–#13) — the **pre-merge gate against
+- `qa-ci-pipelines` (github-actions / azure-pipelines / gitlab-ci references) — the **pre-merge gate against
   ephemeral envs** boundary; also where `checkly test --record` (gate) + `checkly deploy` (promote) are wired.
-- `qa-auth0-test-tokens-typescript` (#16) — M2M / test-user tokens for checks that hit an **authenticated** live
+- `qa-auth0-test-tokens-typescript` — M2M / test-user tokens for checks that hit an **authenticated** live
   endpoint (setup script mints the token; creds from env, lazily).
-- `qa-flaky-test-quarantine-typescript` (#36) — a synthetic that needs `maxRetries` cranked to stay green is
+- `qa-flaky-test-quarantine-typescript` — a synthetic that needs `maxRetries` cranked to stay green is
   *flaky*; bound the retries and fix the root cause rather than masking the alert.
 - `qa-allure-reporting-typescript` — surfacing `checkly test --record` run results / traces (the synthetic's
   reporting layer beyond the Checkly dashboard).

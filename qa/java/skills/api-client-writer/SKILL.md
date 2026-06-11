@@ -1,6 +1,6 @@
 ---
 name: qa-api-client-writer-java
-description: Use when the user asks to create a new API client class (`{Resource}Client.java`) in a Java API test project (RestAssured + TestNG + Gradle, Java 21). Triggers: "write an API client for X", "add a {Resource}Client", "scaffold the Java client for /api/{path}". Do NOT use for writing the test classes themselves (use `qa/java/skills/api-test-author/generator`), for the .NET stack (use `qa/dotnet/skills/api-client-writer`), for the TypeScript stack (use `qa/typescript/skills/api-client-writer`), or for non-RestAssured JVM stacks.
+description: Use when the user asks to create a new API client class (`{Resource}Client.java`) in a Java API test project (RestAssured + TestNG + Gradle, Java 21). Triggers: "write an API client for X", "add a {Resource}Client", "scaffold the Java client for /api/{path}".
 ---
 
 # qa-api-client-writer-java

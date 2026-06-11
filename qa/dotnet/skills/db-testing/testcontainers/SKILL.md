@@ -1,6 +1,6 @@
 ---
 name: qa-db-testing-testcontainers-dotnet
-description: Use when the user asks to scaffold .NET integration tests backed by a real database (Postgres / SQL Server / Mongo / Redis) via Testcontainers — fixture setup, EF migrations on startup, Respawn reset between tests, WebApplicationFactory wiring. Triggers: "spin up a real Postgres for these tests", "Testcontainers fixture for X", "stop mocking the DB in IntegrationTests", "integration test against SQL Server in CI". Do NOT use for unit tests with InMemory provider (that's not a db-testing concern), for non-.NET stacks (use the `java` or `typescript` sibling), or for query authoring guardrails (use `qa/dotnet/skills/db-testing/query-author`).
+description: Use when the user asks to scaffold .NET integration tests backed by a real database (Postgres / SQL Server / Mongo / Redis) via Testcontainers. Triggers: "spin up a real Postgres for these tests", "Testcontainers fixture for X", "stop mocking the DB in IntegrationTests". Not for query authoring guardrails → `db-testing/query-author`.
 ---
 
 # QA — DB Testing with Testcontainers (.NET)
@@ -274,5 +274,5 @@ new ContainerBuilder()
 - **`qa/dotnet/skills/db-testing/query-author`** — SQL guardrails for assertion queries inside these tests.
 - **`qa/dotnet/skills/test-data-builder`** — builders for seed data (preferred over inline literals).
 - **`qa/dotnet/skills/test-environments`** — when you need *more* than one container (DB + queue + mailcatcher) per job, switch to docker-compose orchestration.
-- **`qa/dotnet/skills/ci-pipelines/azure-pipelines`** — Docker-in-Docker enablement, container caching, and Allure publish for integration test stages.
+- **`qa/dotnet/skills/ci-pipelines`** — Docker-in-Docker enablement, container caching, and Allure publish for integration test stages.
 - **`qa/dotnet/skills/allure-reporting`** — attach container logs on failure.

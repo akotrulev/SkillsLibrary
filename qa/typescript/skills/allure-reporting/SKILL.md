@@ -1,6 +1,6 @@
 ---
 name: qa-allure-reporting-typescript
-description: Use when the user asks to set up Allure reporting for a TypeScript test suite (Vitest + native fetch, Playwright TS, WebdriverIO TS) — install `allure-vitest` / `allure-playwright` / `@wdio/allure-reporter`, wire failure attachments (request/response body, screenshots, traces), feature/story/severity hierarchy via the `allure` runtime API, and publish to GitHub Pages / GitLab Pages / Azure Pipelines. Triggers: "set up Allure for our Vitest project", "wire Allure in Playwright config", "publish Allure report from our Node CI", "design Allure feature/story for TS tests". Do NOT use for .NET reporting (use `qa/dotnet/skills/allure-reporting`), Java reporting (use `qa/java/skills/allure-reporting`), writing tests (use the matching `qa/<topic>` skill), or test strategy (use `qa/manual/test-strategy`).
+description: Use when the user asks to set up Allure reporting for a TypeScript test suite (Vitest + native fetch, Playwright TS, WebdriverIO TS). Triggers: "set up Allure for our Vitest project", "wire Allure in Playwright config", "publish Allure report from our Node CI".
 ---
 
 # QA — Allure Reporting (TypeScript / Vitest, Playwright, WebdriverIO)

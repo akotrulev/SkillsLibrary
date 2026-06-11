@@ -1,6 +1,6 @@
 ---
 name: qa-test-basis-analyzer
-description: Use when the user hands over a story, BRD, acceptance criteria, API contract, state diagram, design doc, or even a loose description of part of a feature and wants it distilled into a concise, structured test-basis document before any test cases are written. Triggers: "summarize the business logic of this story", "turn this spec into a testable feature breakdown", "what are the rules/validations/restrictions in this doc", "distill these requirements for test design", "build the test basis for this feature". The output captures business logic, high-level implementation details, validations, and restrictions, and feeds qa/manual/test-design-techniques + qa/manual/test-case-writer. Do NOT use to write the cases themselves (that's test-case-writer), to derive coverage items/techniques (test-design-techniques), for release-level risk planning (test-strategy), or for exploratory charters (exploratory-charter-writer).
+description: Use when the user hands over a story, BRD, acceptance criteria, API contract, or a loose feature description and wants it distilled into a structured, sourced test-basis document before any test cases are written. Triggers: "summarize the business logic of this story", "turn this spec into a testable breakdown", "what are the rules/validations in this doc".
 ---
 
 # QA Test Basis Analyzer

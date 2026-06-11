@@ -1,20 +1,6 @@
 ---
 name: qa-security-testing-zap-baseline-dotnet
-description: >-
-  OWASP ZAP **baseline** DAST scan as a CI build gate from a .NET / NUnit pipeline: spider a **running**
-  app for a bounded time and run ZAP's **passive** rules (no attack payloads — safe in CI), then **fail
-  the build** when alerts cross a threshold. ZAP's baseline is a **Docker invocation** (no .NET SDK), so
-  this skill runs it via the `zaproxy/action-baseline` GitHub Action or by invoking the
-  `ghcr.io/zaproxy/zaproxy:stable` image — `zap-baseline.py -t <url> -c rules.tsv -J report.json` — from
-  `System.Diagnostics.Process` and parsing the JSON report with `System.Text.Json`, asserting in NUnit.
-  Use when a pipeline must catch missing security headers / cookie flags / info leaks against a deployed or
-  Testcontainers-spun app, gate **new** findings while triaging known ones, or wire a shift-left DAST step.
-  Covers the exit-code → build-fail semantics (`0`/`1`/`2`/`3`), the `-c rules.tsv` rule-config
-  (`IGNORE`/`WARN`/`FAIL` + `OUTOFSCOPE`) for ticketed triage, `-J`/`-r`/`-x` reports into Allure, and the
-  baseline-vs-full-scan boundary. Do NOT use for: SCA / dependency-vulnerability scanning (see
-  qa-security-testing-dependency-scanning-dotnet), the **full active** attack scan `zap-full-scan.py`
-  (sends payloads — never against prod), TypeScript (see qa-security-testing-zap-baseline-typescript), or
-  Java (see qa-security-testing-zap-baseline-java).
+description: OWASP ZAP **baseline** DAST scan as a CI build gate from a .NET / NUnit pipeline: spider a **running** app for a bounded time and run ZAP's **passive** rules (no attack payloads.
 ---
 
 # Security Testing — OWASP ZAP Baseline Scan (.NET / NUnit)
@@ -38,9 +24,9 @@ pipeline*: fast, safe against a deployed/ephemeral env, CI-native.
 > scan only against a throwaway env you own, on a slower cadence.
 
 > **⚠️ Tool-invoked-via-Docker — there is no .NET ZAP SDK.** ZAP's baseline scan is a **Docker
-> invocation**, language-agnostic. Unlike axe-playwright (#20) where `Deque.AxeCore.Playwright` was a
+> invocation**, language-agnostic. Unlike axe-playwright where `Deque.AxeCore.Playwright` was a
 > first-class NuGet, here there is **no NuGet to embed ZAP**. So .NET is a **CLI/Docker-driven** stack
-> (the same port shape as #21 lighthouse-ci): you **invoke the `zaproxy` image as a subprocess**
+> (the same port shape as lighthouse-ci): you **invoke the `zaproxy` image as a subprocess**
 > (`System.Diagnostics.Process` → `docker run … zap-baseline.py`) and **parse the JSON report**
 > (`System.Text.Json`) to gate the pipeline. The structure (spin app → scan → assert on exit code/report)
 > ports from the TS canonical; the *invocation* is a `Process`, not an SDK call. Say so plainly to anyone
@@ -52,12 +38,12 @@ pipeline*: fast, safe against a deployed/ephemeral env, CI-native.
 |------|-----|-----|
 | Passive DAST gate on a **running** app in every PR (headers, cookie flags, info leaks) | **this skill** | Safe (no payloads), fast, CI-native; exits non-zero to fail the build |
 | Deep active attack testing (SQLi/XSS/traversal payloads) on a throwaway env | `zap-full-scan.py` (out of scope here) | Active scanner mutates state — never prod/shared; slower cadence |
-| **Dependency / library** CVEs (vulnerable NuGet packages, transitive CVEs) | dependency-scanning (#27) | SCA reads your project/lockfile; ZAP scans running HTTP — orthogonal layers |
-| Per-component **accessibility** rule assertions | axe-playwright (#20) | Different concern; same *ticketed-baseline triage* discipline applies |
-| API contract / spec conformance of mocked endpoints | api-mocking/prism (#25) | Prism validates against an OpenAPI spec; ZAP probes a live deployed app |
+| **Dependency / library** CVEs (vulnerable NuGet packages, transitive CVEs) | dependency-scanning | SCA reads your project/lockfile; ZAP scans running HTTP — orthogonal layers |
+| Per-component **accessibility** rule assertions | axe-playwright | Different concern; same *ticketed-baseline triage* discipline applies |
+| API contract / spec conformance of mocked endpoints | `api-mocking` (prism reference) | Prism validates against an OpenAPI spec; ZAP probes a live deployed app |
 
 **Rule of thumb:** ZAP baseline is your **passive DAST PR gate** against a running app. It complements —
-does not replace — SCA dependency scanning (#27): different layers (running-app HTTP surface vs your
+does not replace — SCA dependency scanning: different layers (running-app HTTP surface vs your
 dependency tree). Run both; together they close Phase 2's `security-testing` family.
 
 ## Setup — no NuGet, just Docker (and optionally the GitHub Action)
@@ -120,12 +106,12 @@ By default ZAP reports **every** alert as `WARN` → an unconfigured run exits *
 meaningful with the **rules config** (`-c`): promote what matters to `FAIL` (→ exit 1, fail the build),
 demote known/accepted ones to `IGNORE`. Many teams pass on `2` (warnings tracked) and hard-fail on `1`.
 
-## The triage gate — `-c rules.tsv` (front and center, like #20's ticketed baseline)
+## The triage gate — `-c rules.tsv` (front and center, like `axe-playwright`'s ticketed baseline)
 
 A real app's first run lights up with WARNs; gating on *every* alert mutes the gate. Use the **ticketed
 rules config**: tab-separated, each ZAP rule-id set to `IGNORE`/`WARN`/`FAIL`, **every `IGNORE` carrying a
-ticket + reason** — the same allow-list discipline as `qa-accessibility-testing-axe-playwright-dotnet`
-(#20), ported to ZAP.
+ticket + reason** — the same allow-list discipline as `qa-accessibility-testing-dotnet`
+(`axe-playwright`), ported to ZAP.
 
 ```tsv
 # .zap/rules.tsv — tab-separated: <rule-id>	<IGNORE|WARN|FAIL>	(reason)
@@ -142,14 +128,14 @@ ticket + reason** — the same allow-list discipline as `qa-accessibility-testin
 - Columns are **tab-separated**: `<rule-id>` ⇥ `<IGNORE|WARN|FAIL>` ⇥ `(reason)`. Use `*` for all rules.
 - `IGNORE` → not reported. `WARN` → reported, doesn't fail (exit 2). `FAIL` → reported and **fails the
   build** (exit 1). `OUTOFSCOPE <regex>` excludes URLs.
-- **Discipline (reuse #20's framing):** gate **new** findings — promote fixed rules to `FAIL` so they
+- **Discipline (reuse `axe-playwright`'s framing):** gate **new** findings — promote fixed rules to `FAIL` so they
   can't regress; every `IGNORE` is a *documented, ticketed* accepted risk, not a silent suppression.
   Shrink the IGNORE list over time; never grow it to silence a real failure.
 
 ## Running the scan — the CI-first path (`zaproxy/action-baseline`)
 
 The natural home is CI. The official Action wraps the image, runs the baseline, uploads the report, and
-optionally opens a tracking issue (cross-link `qa-ci-pipelines-github-actions-dotnet`):
+optionally opens a tracking issue (cross-link `qa-ci-pipelines-dotnet`):
 
 ```yaml
 # .github/workflows/zap-baseline.yml
@@ -339,7 +325,7 @@ public static class ZapReportAttachment
 
 - **Allure** — attach the HTML + a readable alert summary (rule id, risk, count).
 - **CI artifact** — the Action's `artifact_name` upload, or upload the work dir (cross-link
-  `qa-ci-pipelines-github-actions-dotnet`).
+  `qa-ci-pipelines-dotnet`).
 - **Tracking issue** — `allow_issue_writing: true` opens/updates a GitHub issue.
 
 ## Anti-patterns
@@ -358,43 +344,14 @@ public static class ZapReportAttachment
 - **Gating on every alert with no rules config.** Every run exits 2; the gate gets muted. *Fix:* a ticketed
   `-c rules.tsv` — promote what matters to `FAIL`, `IGNORE` documented accepted risks.
 - **Blanket-`IGNORE`ing to make it green.** Hides real findings. *Fix:* `IGNORE` only with a ticket +
-  reason; shrink the list over time (the #20 discipline).
+  reason; shrink the list over time (the `axe-playwright` discipline).
 - **Treating a clean baseline as "secure."** Passive scanning sees only what's on the wire. *Fix:* pair
-  with SCA (#27), the full active scan on a safe env, and manual pentest.
+  with SCA, the full active scan on a safe env, and manual pentest.
 - **Committing auth credentials in the context file / `cmd_options`.** *Fix:* env vars, read lazily.
 
-## Examples
+## Deep-dive reference
 
-**End-to-end: a passive DAST PR gate that fails on regressed security headers, triages known noise, and
-attaches the report.**
-
-```tsv
-# .zap/rules.tsv — the ticketed triage gate
-10038	FAIL	(CSP header missing — must ship; gate any regression)
-10063	FAIL	(Permissions-Policy header missing)
-10015	IGNORE	(No Cache-control on public marketing pages — JIRA-3101, accepted)
-10096	IGNORE	(Timestamp disclosure false-positive on asset hashes — JIRA-3102)
-```
-
-```csharp
-// Tests/HeaderRegressionTests.cs — the parsed-report gate variant
-[Test]
-public async Task Should_fail_baseline_When_csp_header_dropped()
-{
-    var result = await ZapBaseline.RunAsync(_target, Path.GetFullPath(".zap/rules.tsv"));
-    ZapReportAttachment.Attach(result);
-    // Rule 10038 (CSP) is promoted to FAIL in rules.tsv → exit 1 when it fires.
-    Assert.That(result.ExitCode, Is.Not.EqualTo(1), "A FAIL-level alert fired — see the attached ZAP report");
-}
-```
-
-Lifecycle for this gate:
-1. A dev ships a change that drops the `Content-Security-Policy` header on the app shell.
-2. The PR runs the baseline scan against the compose-spun app (ready on healthchecks).
-3. Rule `10038` is promoted to `FAIL` → ZAP exits **1** → **the job fails**, with the alert (rule id,
-   risk, affected URLs) in the uploaded report artifact and the tracking issue.
-4. The dev restores the header; the scan exits 0/2; the gate goes green. The two `IGNORE`d rules stay
-   tracked by their JIRA tickets, shrinking over time — never grown to silence a real finding.
+These sections live in `references/details.md` — **read it when the task touches them**: **Examples**.
 
 ## Rules (hard constraints)
 
@@ -409,12 +366,12 @@ Lifecycle for this gate:
   Testcontainers wait strategy), never `Task.Delay`/`Thread.Sleep`.
 - Triage with a **ticketed `-c rules.tsv`**: promote real rules to `FAIL`, `IGNORE` only *documented,
   ticketed* accepted risks; `OUTOFSCOPE <regex>` third-party URLs. Gate **new** findings; shrink the
-  IGNORE list (the #20 discipline).
+  IGNORE list (the `axe-playwright` discipline).
 - Solve **container→target reachability** explicitly (`--network host` / `host.docker.internal` / shared
   Docker network).
 - **No secrets in code**: any auth context/credentials via env vars, read lazily.
 - Attach the JSON/HTML report to **Allure** + upload as a CI artifact. A clean baseline ≠ "secure" — pair
-  with SCA (#27), a safe-env full scan, and manual pentest.
+  with SCA, a safe-env full scan, and manual pentest.
 
 ## Cross-references
 
@@ -422,15 +379,15 @@ Lifecycle for this gate:
   language-agnostic `docker run`). This .NET sibling is the `Process` + `System.Text.Json` port of it.
 - `qa-security-testing-zap-baseline-java` — same skill, Java / TestNG. Same Docker choreography via
   `ProcessBuilder` + Jackson.
-- `qa-security-testing-dependency-scanning-dotnet` (#27, next) — the **SCA** sibling that closes the
+- `qa-security-testing-dependency-scanning-dotnet` — the **SCA** sibling that closes the
   `security-testing` family: NuGet/transitive CVEs from your project vs ZAP's running-app HTTP surface.
   Different layers — run both.
-- `qa-accessibility-testing-axe-playwright-dotnet` (#20) — the **ticketed-baseline triage** discipline
+- `qa-accessibility-testing-dotnet` — the **ticketed-baseline triage** discipline
   reused here for `-c rules.tsv`.
-- `qa-accessibility-testing-lighthouse-ci-dotnet` (#21) — the closest **port-shape precedent**: a
+- `qa-accessibility-testing-dotnet` — the closest **port-shape precedent**: a
   CLI/Docker tool invoked via `Process` from .NET with the report parsed as JSON.
 - `qa-test-environments-dotnet` — spin the target app the scan points at (Testcontainers / docker-compose,
   ready on a wait strategy).
-- `qa-ci-pipelines-github-actions-dotnet` — the `zaproxy/action-baseline` job, `fail_action`, artifact
+- `qa-ci-pipelines-dotnet` — the `zaproxy/action-baseline` job, `fail_action`, artifact
   upload, Docker availability.
 - `qa-allure-reporting-dotnet` — attach the ZAP HTML/JSON report and alert summary.

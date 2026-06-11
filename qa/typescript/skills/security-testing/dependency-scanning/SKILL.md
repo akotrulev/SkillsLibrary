@@ -1,36 +1,24 @@
 ---
 name: qa-security-testing-dependency-scanning-typescript
-description: >-
-  SCA (Software Composition Analysis) — dependency-vulnerability scanning — as a CI build gate in
-  TypeScript: scan the project's **dependency tree** (direct + **transitive**, from
-  `package-lock.json`) against a CVE feed (GitHub Advisory / OSV / NVD) and **fail the build** above a
-  severity threshold. Lead with built-in **`npm audit`** (`--audit-level=high`, `--json`, the exit-code
-  gate, `npm audit fix`, `overrides`/`.nsprc`) — with `pnpm audit` / `yarn npm audit` variants and OWASP
-  Dependency-Check / OSV-Scanner as cross-stack options. Use when a pipeline must catch vulnerable npm
-  packages, gate **new** CVEs while triaging known/transitive ones, or wire a shift-left SCA step. Covers
-  the severity → build-fail gate, ticketed `overrides`/`.nsprc` suppression + the transitive-dep reality,
-  JSON report into Allure + SARIF, and the SCA-vs-DAST boundary. Do NOT use for: DAST / running-app scanning
-  (see qa-security-testing-zap-baseline-typescript — that probes the live HTTP surface; SCA reads your
-  lockfile), Java (see qa-security-testing-dependency-scanning-java, Dependency-Check Gradle plugin), or
-  .NET (see qa-security-testing-dependency-scanning-dotnet, `dotnet list package --vulnerable`).
+description: Use when wiring SCA (dependency-vulnerability scanning) as a CI gate for a TypeScript build — `npm audit` (lockfile-driven) as the native gate over the direct + transitive tree, failing above a severity threshold, with a ticketed suppression path. Triggers: "fail the build on vulnerable dependencies", "add dependency scanning", "gate new CVEs". Not for runtime DAST → `security-testing/zap-baseline`.
 ---
 
 # Security Testing — Dependency Scanning / SCA (TypeScript)
 
 **Software Composition Analysis (SCA)** answers a different security question from DAST: not "is the
-running app exploitable over HTTP?" (that's ZAP, #26) but **"does my dependency tree contain package
+running app exploitable over HTTP?" (that's ZAP, `zap-baseline`) but **"does my dependency tree contain package
 versions with known CVEs?"** It reads your **`package-lock.json`** — direct *and* **transitive**
 dependencies — matches each package+version against a vulnerability feed (the **GitHub Advisory Database**
 that backs `npm audit`, plus OSV / NVD), and **fails the build** when a finding crosses a severity
-threshold. It needs **no running app** (contrast #26 DAST): it's a static, fast, every-PR pipeline gate.
+threshold. It needs **no running app** (contrast DAST): it's a static, fast, every-PR pipeline gate.
 
-> **⚠️ SCA (#27) vs DAST (#26) — two orthogonal layers, run both.** #26 ZAP scans the **running app's HTTP
-> surface** (missing headers, cookie flags, info leaks). #27 SCA scans your **dependency tree** (a
+> **⚠️ SCA vs DAST — two orthogonal layers, run both.** ZAP scans the **running app's HTTP
+> surface** (missing headers, cookie flags, info leaks). SCA scans your **dependency tree** (a
 > vulnerable `lodash`, a transitive `minimist`…). A clean ZAP baseline says nothing about a prototype
 > pollution in a transitive package; a clean SCA says nothing about a missing CSP header. **Together they
 > close Phase 2's `security-testing` family — wire both gates.**
 
-> **Stack-native first.** Unlike #26 (one language-agnostic Docker tool), SCA is **stack-native**: each
+> **Stack-native first.** Unlike `zap-baseline` (one language-agnostic Docker tool), SCA is **stack-native**: each
 > ecosystem has its own first-class auditor. TypeScript's is **`npm audit`** — built in, no install, reads
 > the lockfile, exit-code gate — so this skill leads with it. **OWASP Dependency-Check** is the cross-stack
 > common denominator (its richest form is the Gradle plugin — the Java sibling is canonical for this node);
@@ -43,19 +31,19 @@ threshold. It needs **no running app** (contrast #26 DAST): it's a static, fast,
 | Need | Use | Why |
 |------|-----|-----|
 | Gate the **dependency tree** (direct + transitive CVEs) in every PR | **this skill** (`npm audit`) | Built in, static, fast, no running app; exits non-zero above `--audit-level` |
-| Scan the **running app's HTTP surface** (headers, cookies, info leaks) | zap-baseline (#26) | DAST probes live traffic — orthogonal layer; run both |
+| Scan the **running app's HTTP surface** (headers, cookies, info leaks) | zap-baseline | DAST probes live traffic — orthogonal layer; run both |
 | **Remediate** vulnerable deps automatically | `npm audit fix` / Dependabot / Renovate | They *bump*; `npm audit` *gates*. Complementary — gate + auto-fix |
 | Gate only the deps a PR **adds/changes** (diff-scoped) | `dependency-review-action` | PR-diff gate on GitHub; pairs with the full-tree audit |
 | **Cross-stack** parity in a polyglot monorepo | OWASP Dependency-Check / OSV-Scanner | One tool over npm + Maven + NuGet; otherwise `npm audit` is simpler for pure-TS |
 
 **Rule of thumb:** SCA is your **dependency-tree CVE gate**; it complements — does not replace — DAST
-(#26). Pair the gate with a *remediation* tool (`npm audit fix` / Dependabot / Renovate) so findings get
+(`zap-baseline`). Pair the gate with a *remediation* tool (`npm audit fix` / Dependabot / Renovate) so findings get
 fixed, not just flagged.
 
 ## Setup — nothing to install
 
 `npm audit` ships with npm. The lockfile (`package-lock.json`) is the input — commit it. There's no SDK and
-no separate server (contrast #26's Docker image).
+no separate server (contrast `zap-baseline`'s Docker image).
 
 ```bash
 npm audit                                   # human-readable report of the whole tree
@@ -78,13 +66,13 @@ ones you never declared**. Each is graded **info / low / moderate / high / criti
 - **Transitive coverage is the whole point.** You declared `express`; it dragged in dozens of transitive
   packages. SCA flags a CVE in a transitive `qs` or `minimist` you never typed. (Contrast eyeballing
   `package.json` — that misses exactly the deps you didn't choose.)
-- **No running app.** Lockfile-driven; runs in seconds. Contrast #26 DAST, which needs a deployed target.
+- **No running app.** Lockfile-driven; runs in seconds. Contrast DAST, which needs a deployed target.
 - **The gate is a severity threshold** — `--audit-level=high` exits non-zero on High+ findings. Pick it
   deliberately: start at `critical`, ratchet to `high` as you clear the backlog.
 
 ## The build-fail gate — `--audit-level` + the exit code
 
-The gate is the **process exit code** — same build-fail mechanism as #26's ZAP exit code. `npm audit
+The gate is the **process exit code** — same build-fail mechanism as `zap-baseline`'s ZAP exit code. `npm audit
 --audit-level=<level>` exits **non-zero** if any vulnerability is **at or above** that level, **zero**
 otherwise:
 
@@ -103,12 +91,12 @@ npm audit --audit-level=high --omit=dev
 The npm severity map mirrors the Java sibling's CVSS thresholds (`failBuildOnCVSS`) and the .NET sibling's
 `NuGetAuditLevel`. Start at `critical`, clear the backlog, ratchet down to `high`.
 
-## The triage gate — ticketed `overrides` / `.nsprc` (like #20 / #26)
+## The triage gate — ticketed `overrides` / `.nsprc` (like `axe-playwright` / `zap-baseline`)
 
 A real project's first audit lights up — including findings you **cannot fix today** because they're in a
 **transitive** package or are false positives. Gating on *everything* with no triage trains the team to
 mute the gate. The disciplined approach is the **ticketed allow-list** — same discipline as
-`qa-accessibility-testing-axe-playwright-typescript` (#20) and #26's `rules.tsv`, ported to SCA.
+`qa-accessibility-testing-typescript` and `zap-baseline`'s `rules.tsv`, ported to SCA.
 
 `npm audit` itself has no native suppression file; the two real options:
 
@@ -145,7 +133,7 @@ ticketed allow-list:
 npx audit-ci --high --config audit-ci.jsonc
 ```
 
-- **Discipline (reuse #20 / #26):** gate **new** CVEs; allow-list only *documented, ticketed*
+- **Discipline (reuse `axe-playwright` / `zap-baseline`):** gate **new** CVEs; allow-list only *documented, ticketed*
   accepted-risk; **shrink** the list over time, never grow it to silence a real finding. Every entry names
   a ticket; prefer an **`override` (the real fix)** over an allow-list entry (a tracked deferral).
 
@@ -194,12 +182,12 @@ export function runNpmAudit(level: 'low' | 'moderate' | 'high' | 'critical' = 'h
 - **SARIF → GitHub code-scanning** — convert `npm audit --json` to SARIF (e.g. a converter step) and feed
   `github/codeql-action/upload-sarif` so each CVE shows inline on the PR diff. OSV-Scanner emits SARIF
   natively if you prefer.
-- **CI artifact** — upload the JSON (cross-link `qa-ci-pipelines-github-actions-typescript`).
+- **CI artifact** — upload the JSON (cross-link `qa-ci-pipelines-typescript`).
 
 ## Optional parse-and-assert test (the programmatic path)
 
 SCA is primarily a **CI gate** (`npm audit --audit-level=high`). When you want a test-level assertion — a
-custom threshold, or to surface the count in your test report — parse the JSON (Vitest, mirroring #26's
+custom threshold, or to surface the count in your test report — parse the JSON (Vitest, mirroring `zap-baseline`'s
 parsed-report gate):
 
 ```ts
@@ -224,7 +212,7 @@ The Java/.NET siblings parse their own tool's JSON (`dependency-check-report.jso
 ## CI wiring — the gate, the remediation complement
 
 ```yaml
-# .github/workflows/sca.yml — cross-link qa-ci-pipelines-github-actions-typescript
+# .github/workflows/sca.yml — cross-link qa-ci-pipelines-typescript
 name: Dependency Scan (SCA)
 on: [pull_request]
 
@@ -264,7 +252,7 @@ jobs:
 
 - **Treating SCA as a substitute for DAST (or vice-versa).** A clean dependency tree says nothing about a
   missing security header; a clean ZAP baseline says nothing about a vulnerable transitive package. *Fix:*
-  run **both** #26 + #27 — orthogonal layers.
+  run **both** `zap-baseline` + `dependency-scanning` — orthogonal layers.
 - **`npm audit fix --force` blindly in CI.** Major bumps can break the build / change behavior unreviewed.
   *Fix:* `--force` is for a reviewed PR, not the gate; let Dependabot raise reviewable bumps.
 - **Auditing only `package.json` by eye.** Most real CVEs are **transitive**. *Fix:* `npm audit` reads the
@@ -322,14 +310,14 @@ Lifecycle for this gate:
 - The gate is the **process exit code** of `npm audit --audit-level=<level>`, optionally plus a
   **parsed-report** assertion. One logical assertion per test; test names `Should_X_When_Y`.
 - Scan **direct + transitive** deps against a CVE feed — transitive coverage is the point. SCA reads the
-  **lockfile** (no running app — contrast #26 DAST). Commit `package-lock.json`; `npm ci` in CI.
+  **lockfile** (no running app — contrast DAST). Commit `package-lock.json`; `npm ci` in CI.
 - Triage with a **ticketed allow-list** (`overrides` for the real fix; `.nsprc`/`audit-ci` for a deferral):
   scope to the specific advisory, name a ticket + re-review date. Gate **new** CVEs; shrink the list, never
-  grow it (the #20/#26 discipline). Prefer **`overrides` (the fix)** over an allow-list (a deferral).
+  grow it (the `axe-playwright`/`zap-baseline` discipline). Prefer **`overrides` (the fix)** over an allow-list (a deferral).
 - Emit **JSON**: attach to **Allure**, upload as a CI artifact, optionally convert to **SARIF** for GitHub
   code-scanning.
 - Pair the **gate** with **remediation** (`npm audit fix` / Dependabot / Renovate) and the
-  **`dependency-review-action`** PR-diff gate. A clean SCA ≠ "secure" — **run DAST (#26) too**: orthogonal
+  **`dependency-review-action`** PR-diff gate. A clean SCA ≠ "secure" — **run DAST too**: orthogonal
   layers.
 
 ## Cross-references
@@ -339,11 +327,11 @@ Lifecycle for this gate:
   throughline.
 - `qa-security-testing-dependency-scanning-dotnet` — same skill, .NET / `dotnet list package --vulnerable
   --include-transitive` + NuGet audit (`<NuGetAudit>`, `NuGetAuditLevel`).
-- `qa-security-testing-zap-baseline-typescript` (#26) — the **DAST** sibling that opened the
+- `qa-security-testing-zap-baseline-typescript` — the **DAST** sibling that opened the
   `security-testing` family: ZAP probes the **running app's HTTP surface**; SCA reads your **lockfile**.
   Orthogonal layers — **run both** (together they close Phase 2).
-- `qa-accessibility-testing-axe-playwright-typescript` (#20) — the **ticketed-baseline triage** discipline
+- `qa-accessibility-testing-typescript` — the **ticketed-baseline triage** discipline
   reused here for the allow-list (gate new findings, document every suppression with a ticket).
-- `qa-ci-pipelines-github-actions-typescript` — the gate step, `dependency-review-action`, artifact upload.
+- `qa-ci-pipelines-typescript` — the gate step, `dependency-review-action`, artifact upload.
 - `qa-allure-reporting-typescript` — attach the `npm audit --json` report and summary to the run.
-- `qa/GAP-ANALYSIS.md` — #27 **closes Phase 2**; Phase 3 is the next backlog.
+- `qa/GAP-ANALYSIS.md` — `dependency-scanning` **closes Phase 2**; Phase 3 is the next backlog.

@@ -1,25 +1,6 @@
 ---
 name: qa-api-test-author-grpc-typescript
-description: >-
-  Scaffold black-box **gRPC** API tests in Node 20 / TypeScript with Vitest + `@grpc/grpc-js` +
-  `@grpc/proto-loader` against a deployed, proto-defined HTTP/2 service — load the `.proto`, call the RPC, and
-  assert on the **typed response message**, the **gRPC `status` code**, and **metadata**. Covers the trait that
-  makes gRPC testing different from REST/GraphQL: **there is no HTTP status to read — the result lives in the gRPC
-  `status` (code + details)**, and the callback client surfaces a non-OK status as a **`ServiceError`** (not a
-  resolved value), so the call is **promisified into a result the test can assert on for success OR failure** (the
-  gRPC analogue of the GraphQL skill's "never throw on errors — return the envelope"). Covers the **four RPC
-  types**, each tested differently — **unary** (assert message + status), **server-streaming** (`for await` the
-  `ClientReadableStream` into a buffer + assert the sequence — a bounded async-iterate, never a sleep →
-  `qa-websocket-sse-testing-typescript`), **client-streaming** (`call.write`/`call.end`), and **bidi-streaming**.
-  Also covers **rich error details** (`grpc-status-details-bin` → `google.rpc.Status` / `ErrorInfo` — the GraphQL
-  `extensions.code` analogue), **deadlines** as the sanctioned bounded-wait (assert `status.DEADLINE_EXCEEDED`),
-  leading/trailing **metadata**, a per-call **bearer**, and standing the service up with Testcontainers. Triggers:
-  "write a gRPC test for RPC X", "assert the ServiceError code", "test a server-streaming RPC", "assert gRPC
-  trailing metadata / error details", "add a Vitest spec for a gRPC service". Do NOT use for: REST/JSON endpoints
-  (use qa-api-test-author-generator-typescript), GraphQL endpoints (use qa-api-test-author-graphql-typescript),
-  the Java stack (use qa-api-test-author-grpc-java), the .NET stack (use qa-api-test-author-grpc-dotnet), gRPC
-  **load** testing (use qa-performance-k6-typescript), Protobuf **contract** tests (use
-  qa-contract-testing-pact-typescript), or generating the proto types in isolation (use qa-api-dto-writer-typescript).
+description: Scaffold black-box **gRPC** API tests in Node 20 / TypeScript with Vitest + `@grpc/grpc-js` + `@grpc/proto-loader` against a deployed, proto-defined HTTP/2 service. Triggers: "write a gRPC test for RPC X", "assert the ServiceError code", "test a server-streaming RPC".
 ---
 
 # QA — gRPC API Test Writer (TypeScript / Vitest + @grpc/grpc-js)
@@ -105,156 +86,9 @@ siblings, but the contract is the **`.proto`** (load + type the messages + clien
 > holding **the message OR the status + metadata** — it never rejects on a gRPC error. This is the exact gRPC
 > analogue of the GraphQL skill's thin `fetch` client that *never throws on `errors` and returns the raw envelope*.
 
-## The contract + two layers
+## Deep-dive reference
 
-### 1. Proto — `tests/proto/user.proto`
-
-The `.proto` is the contract. `proto-loader-gen-types` produces the typings for the messages **and** the client;
-tests assert on the **typed message**, never on bytes.
-
-```protobuf
-syntax = "proto3";
-package user.v1;
-
-service UserService {
-  rpc GetUser     (GetUserRequest)    returns (User);              // unary (read)
-  rpc CreateUser  (CreateUserRequest) returns (User);              // unary (write)
-  rpc ListUsers   (ListUsersRequest)  returns (stream User);       // server-streaming
-  rpc ImportUsers (stream CreateUserRequest) returns (ImportSummary); // client-streaming
-}
-
-message GetUserRequest    { string id = 1; }
-message CreateUserRequest { string email = 1; string first_name = 2; string last_name = 3; }
-message User              { string id = 1; string email = 2; string first_name = 3; string last_name = 4; }
-message ListUsersRequest  { int32 page_size = 1; }
-message ImportSummary     { int32 imported = 1; }
-```
-
-### 2. Client — `tests/clients/grpcResult.ts` + `UserGrpcClient.ts`
-
-`GrpcCallResult<T>` is the **uniform outcome** for *any* unary call — the message on `OK`, or the status code +
-trailing metadata on a failure. `callUnary` promisifies the callback API and **never rejects on a gRPC error**.
-
-```typescript
-// tests/clients/grpcResult.ts
-import { ServiceError, Metadata, status as GrpcStatus } from '@grpc/grpc-js';
-
-export type GrpcCallResult<T> = {
-  ok: boolean;
-  value?: T;                  // the typed response message on OK
-  code: GrpcStatus;           // status.OK on success; the failure status code otherwise — the gate
-  metadata?: Metadata;        // trailing metadata / rich-error details
-  error?: ServiceError;
-};
-
-// Promisify a callback-style unary RPC; resolve a result for BOTH outcomes — never reject on a gRPC error.
-export function callUnary<Req, Res>(
-  invoke: (req: Req, md: Metadata, cb: (err: ServiceError | null, res?: Res) => void) => void,
-  req: Req,
-  md: Metadata,
-): Promise<GrpcCallResult<Res>> {
-  return new Promise((resolve) => {
-    invoke(req, md, (err, res) =>
-      resolve(
-        err
-          ? { ok: false, code: err.code ?? GrpcStatus.UNKNOWN, metadata: err.metadata, error: err }
-          : { ok: true, value: res, code: GrpcStatus.OK },
-      ),
-    );
-  });
-}
-```
-
-```typescript
-// tests/clients/UserGrpcClient.ts
-import * as grpc from '@grpc/grpc-js';
-import * as protoLoader from '@grpc/proto-loader';
-import path from 'node:path';
-import { callUnary, GrpcCallResult } from './grpcResult';
-import type { ProtoGrpcType } from '../proto/gen/user';                 // generated by proto-loader-gen-types
-import type { UserServiceClient } from '../proto/gen/user/v1/UserService';
-import type { User__Output } from '../proto/gen/user/v1/User';
-import type { ImportSummary__Output } from '../proto/gen/user/v1/ImportSummary';
-
-const pkgDef = protoLoader.loadSync(path.join(__dirname, '../proto/user.proto'), {
-  keepCase: false, longs: String, enums: String, defaults: true, oneofs: true,
-});
-const proto = grpc.loadPackageDefinition(pkgDef) as unknown as ProtoGrpcType;
-
-export class UserGrpcClient {
-  private readonly client: UserServiceClient;
-  private readonly md = new grpc.Metadata();
-
-  constructor(authenticated: boolean) {
-    // target from Testcontainers / env — never hardcoded. insecure creds only for a local test broker.
-    this.client = new proto.user.v1.UserService(
-      process.env.GRPC_TARGET!, grpc.credentials.createInsecure());
-    if (authenticated) this.md.set('authorization', `Bearer ${process.env.GRPC_TOKEN!}`);
-  }
-
-  getUser(id: string): Promise<GrpcCallResult<User__Output>> {
-    return callUnary((req, md, cb) => this.client.getUser(req, md, cb), { id }, this.md);
-  }
-
-  createUser(email: string, firstName: string, lastName: string): Promise<GrpcCallResult<User__Output>> {
-    return callUnary((req, md, cb) => this.client.createUser(req, md, cb),
-      { email, firstName, lastName }, this.md);
-  }
-
-  // Server-streaming: return the readable call; the spec drains it (see streaming section).
-  listUsers(pageSize: number): grpc.ClientReadableStream<User__Output> {
-    return this.client.listUsers({ pageSize }, this.md);
-  }
-
-  raw(): UserServiceClient { return this.client; }   // exposed for the client-/bidi-streaming specs
-  close(): void { this.client.close(); }
-}
-```
-
-### 3. Spec — `tests/specs/user.spec.ts`
-
-Assert `res.ok` (or the failure `res.code`) **first** — that's the gate — then the typed message fields. The
-client target points at the service stood up by `qa-test-environments-typescript`.
-
-```typescript
-import { describe, it, expect, afterAll } from 'vitest';
-import { status } from '@grpc/grpc-js';
-import { UserGrpcClient } from '../clients/UserGrpcClient';
-
-describe('UserService unary RPCs', () => {
-  const authed = new UserGrpcClient(true);
-  afterAll(() => authed.close());
-
-  it('GetUser returns the user with an OK status when it exists', async () => {
-    const res = await authed.getUser('1');
-
-    expect(res.ok).toBe(true);                          // THE gate: the gRPC status, not an HTTP code
-    expect(res.value?.email).toBe('george.bluth@example.com');
-  });
-
-  it('GetUser returns NOT_FOUND for an unknown id', async () => {
-    const res = await authed.getUser('999999');
-
-    expect(res.ok).toBe(false);
-    expect(res.code).toBe(status.NOT_FOUND);            // the outcome lives in the status code
-    expect(res.value).toBeUndefined();                  // no message on a non-OK result
-  });
-
-  it('CreateUser returns INVALID_ARGUMENT for a blank email', async () => {
-    const res = await authed.createUser('', 'A', 'B');
-
-    expect(res.code).toBe(status.INVALID_ARGUMENT);
-  });
-
-  it('GetUser returns UNAUTHENTICATED when the bearer is missing', async () => {
-    const anon = new UserGrpcClient(false);             // no bearer metadata
-    const res = await anon.getUser('1');
-    anon.close();
-
-    expect(res.code).toBe(status.UNAUTHENTICATED);
-  });
-});
-```
+These sections live in `references/details.md` — **read it when the task touches them**: **The contract + two layers**.
 
 ## Rich error details — assert `ErrorInfo`, not just the code (idea #2)
 
@@ -424,7 +258,7 @@ beforeAll(() => {
 gRPC-correct version asserts `res.code === status.NOT_FOUND` — same outcome, third location: the REST status line,
 the GraphQL `errors` envelope, the gRPC `status`. One family, three result-location conventions.
 
-**Composing with the protocol-trio siblings.** REST `generator` is status-driven over HTTP+JSON; GraphQL `#44` is
+**Composing with the protocol-trio siblings.** REST `generator` is status-driven over HTTP+JSON; GraphQL ``api-test-author/graphql`` is
 one HTTP 200 carrying `{ data, errors }`; gRPC is proto/HTTP2 with the result in the `status`. All three share the
 **Client + Spec** spine and the "wrap the call so the test asserts success *or* failure uniformly" move (the gRPC
 `GrpcCallResult` is the GraphQL raw-envelope analogue). Only the transport, the codegen, and where-the-result-lives
@@ -459,13 +293,13 @@ differ.
 - `qa-api-test-author-generator-typescript` · `qa-api-test-author-graphql-typescript` — the **protocol-trio
   siblings**: REST (HTTP+JSON status-driven) and GraphQL (HTTP 200 `{ data, errors }` envelope). Three protocols,
   three result-location conventions, one `api-test-author` family + shared Client + Spec spine.
-- `qa-websocket-sse-testing-typescript` (#37) — gRPC **streaming** reuses its
+- `qa-websocket-sse-testing-typescript` — gRPC **streaming** reuses its
   drain-then-assert-on-a-bounded-condition discipline; cross-link for deep stream-lifecycle assertions, don't
   duplicate.
 - `qa-api-dto-writer-typescript` — generate/type the proto messages (the DTO analogue) in isolation; this skill
   consumes them.
 - `qa-contract-testing-pact-typescript` — the **Protobuf contract** boundary vs the functional test this skill
   writes. `qa-performance-k6-typescript` — gRPC **load**.
-- `qa-auth0-test-tokens-typescript` (#16) — obtain the per-call **bearer** carried in leading metadata.
-- `qa-test-environments-typescript` (#14) — stand the gRPC service up via Testcontainers and feed `GRPC_TARGET`.
+- `qa-auth0-test-tokens-typescript` — obtain the per-call **bearer** carried in leading metadata.
+- `qa-test-environments-typescript` — stand the gRPC service up via Testcontainers and feed `GRPC_TARGET`.
 - `qa-allure-reporting-typescript` — each RPC renders as a named result.

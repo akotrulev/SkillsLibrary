@@ -1,20 +1,6 @@
 ---
 name: qa-security-testing-sast
-description: >-
-  SAST (Static Application Security Testing) — scan **YOUR source code** for insecure code patterns and
-  taint flows as a CI gate, language-agnostic (the tool/invocation is identical regardless of test stack;
-  the rulesets target the **language of the codebase being scanned**, not the test framework). Lead with
-  **Opengrep** (the LGPL-2.1 Semgrep fork — truly-OSS SAST default for 2025/2026; CLI is
-  invocation-compatible with `semgrep`) running the OWASP/security registry packs, gating on
-  `--error`/`semgrep ci`, with diff-aware `--baseline-commit` scanning, `.semgrepignore`/`nosemgrep`
-  ticketed triage, brief YAML custom rules, and SARIF → code-scanning + Allure reporting. Use when a
-  pipeline must catch source-pattern flaws (injection sinks, hardcoded crypto, unsafe deserialization,
-  SSRF/insecure-design patterns) on every PR. Do NOT use for: scanning the **dependency tree** for known
-  CVEs (see qa-security-testing-dependency-scanning-{java,dotnet,typescript} — SCA reads your build graph,
-  not your source), probing a **running app** over HTTP (see qa-security-testing-zap-automation-framework —
-  DAST; SAST never runs the app), finding **leaked credentials** in source/git history (see
-  qa-security-testing-secrets-scanning), or the OWASP map / triage discipline / scan-authorization rules
-  themselves (see qa-security-shared — load it alongside this skill).
+description: Use when adding static application security testing (SAST) with Opengrep/Semgrep rulesets as a PR gate — scan source for injection, crypto, and auth flaws; language-agnostic CLI/Docker, no running app needed. Triggers: "add SAST", "run Semgrep in CI", "static security scan". Not for dependency CVEs → the stack's `security-testing/dependency-scanning`.
 ---
 
 # Security Testing — SAST (Static Application Security Testing, shared)
@@ -224,7 +210,7 @@ semgrep scan --config p/owasp-top-ten --error \
   the findings without re-scanning.
 
 ```yaml
-# .github/workflows/sast.yml — cross-link qa-ci-pipelines-github-actions-{stack}, qa-_shared/ci-conventions
+# .github/workflows/sast.yml — cross-link qa-ci-pipelines-{stack}, qa-_shared/ci-conventions
 name: SAST
 on: [pull_request]
 

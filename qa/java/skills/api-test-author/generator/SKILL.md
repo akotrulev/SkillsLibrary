@@ -1,6 +1,6 @@
 ---
 name: qa-api-test-author-generator-java
-description: Use when the user asks to write Java API tests using RestAssured + TestNG against a REST backend — from an OpenAPI/Swagger spec, a formal test-case document, or a verbal scenario list. Triggers: "write a Java API test for X", "add a TestNG test method", "automate these test cases in Java", "generate API tests from this swagger". Do NOT use for UI tests (use `qa/java/skills/ui-test-author/selenium`), for the .NET stack (use `qa/dotnet/skills/api-test-author/generator`), for GraphQL/gRPC (use the protocol siblings), or for writing the DTO / client layers themselves (use `qa/java/skills/api-dto-writer` / `qa/java/skills/api-client-writer`).
+description: Use when the user asks to write Java API tests using RestAssured + TestNG against a REST backend. Triggers: "write a Java API test for X", "add a TestNG test method", "automate these test cases in Java".
 ---
 
 # QA — API Test Writer (Java / RestAssured + TestNG)

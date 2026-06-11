@@ -1,6 +1,6 @@
 ---
 name: qa-api-test-author-generator-typescript
-description: Use when the user asks to write TypeScript API tests using Vitest + native fetch + Zod against a REST backend — from an OpenAPI/Swagger spec, a formal test-case document, or a verbal scenario list. Triggers: "write a TS API test for X", "add a Vitest spec for endpoint Y", "automate these test cases in TypeScript", "generate API tests from this swagger". Do NOT use for UI tests (use `qa/typescript/skills/ui-test-author/playwright`), for the .NET / Java stacks (use the matching generator subdir), for GraphQL/gRPC (use the protocol siblings), or for writing the schema/DTO or client layers themselves (use `qa/typescript/skills/api-dto-writer` / `qa/typescript/skills/api-client-writer`).
+description: Use when the user asks to write TypeScript API tests using Vitest + native fetch + Zod against a REST backend. Triggers: "write a TS API test for X", "add a Vitest spec for endpoint Y", "automate these test cases in TypeScript".
 ---
 
 # QA — API Test Writer (TypeScript / Vitest + fetch + Zod)

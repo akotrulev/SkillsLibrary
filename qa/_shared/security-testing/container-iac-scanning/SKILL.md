@@ -1,21 +1,6 @@
 ---
 name: qa-security-testing-container-iac-scanning
-description: >-
-  Trivy (Aqua) as a CI build gate for the layers application-SCA can't see: **container images**
-  (OS packages + app deps + secrets + misconfig in a built image — `trivy image`), the **filesystem /
-  repo** (`trivy fs .`, `trivy repo <url>`), **IaC misconfiguration** (`trivy config` over
-  Terraform / CloudFormation / Kubernetes / Helm / Dockerfile), live **clusters** (`trivy k8s`), and an
-  existing **SBOM** (`trivy sbom`). Covers the gating flags (`--exit-code 1`, `--severity HIGH,CRITICAL`,
-  `--ignore-unfixed`, `--exit-on-eol 1`), the two-pass informational+gating pattern, **SBOM generation**
-  (`--format cyclonedx`/`spdx-json`) tied to **A03 Software Supply Chain Failures**, IaC config scanning
-  (A02 Misconfiguration), ticketed `.trivyignore`/`.trivyignore.yaml` triage, and `--format sarif` →
-  code-scanning + `aquasecurity/trivy-action` CI. Use when a pipeline must gate the **base OS image**, the
-  **container as shipped**, or **IaC** templates, or emit/scan an SBOM for supply-chain provenance. Do NOT
-  use for: **application** dependency CVEs from the build graph / lockfile — that is
-  `qa-security-testing-dependency-scanning-{java,dotnet,typescript}` (Trivy `fs`/`image` *can* read app
-  lockfiles, but let the per-stack SCA skill own app-dep gating to avoid double-gating); DAST / running-app
-  HTTP scanning (`qa-security-testing-zap-automation-framework`); the OWASP map / triage / SARIF backbone
-  (`qa-security-shared` — load alongside, don't duplicate).
+description: Trivy (Aqua) as a CI build gate for the layers application-SCA can't see: **container images** (OS packages + app deps + secrets + misconfig in a built image.
 ---
 
 # Security Testing — Container & IaC Scanning (Trivy)
@@ -240,14 +225,14 @@ trivy image --format template --template "@contrib/html.tpl" --output trivy.html
 ```
 
 - **SARIF** → `github/codeql-action/upload-sarif` so each finding shows inline on the PR (cross-link
-  `qa-ci-pipelines-github-actions-*`).
+  `qa-ci-pipelines-*`).
 - **HTML/JSON** → attach to **Allure** + upload as a CI artifact so a failing run names the findings without
   re-scanning (cross-link `qa-allure-reporting-*`).
 
 ### CI wiring — the official `aquasecurity/trivy-action`
 
 ```yaml
-# .github/workflows/container-scan.yml — cross-link qa-ci-pipelines-github-actions-*
+# .github/workflows/container-scan.yml — cross-link qa-ci-pipelines-*
 name: Container & IaC Scan
 on: [pull_request]
 

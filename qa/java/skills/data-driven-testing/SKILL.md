@@ -1,27 +1,12 @@
 ---
 name: qa-data-driven-testing-java
-description: >-
-  Run one Java 21 / TestNG test body against **many rows of data sourced from an external file** —
-  CSV, JSON, or Excel — so coverage scales by adding rows, not by copy-pasting test methods. Covers the
-  TestNG `@DataProvider` (returning `Object[][]` or a lazy `Iterator<Object[]>`, in-class or via
-  `dataProviderClass`), reading rows with a **real parser** (OpenCSV `CsvToBean` with `@CsvBindByName`,
-  Jackson `ObjectMapper` + `TypeReference` for nested JSON, Apache POI `WorkbookFactory` for `.xlsx`),
-  **binding each row to a typed record** (not a raw `Object[]` of strings), naming each row so a failure
-  reports the input that broke it, parallel data rows (`@DataProvider(parallel = true)`), and choosing the
-  right source for the data's shape. Triggers: "run this test for every row in a CSV / spreadsheet",
-  "data-drive these tests from a JSON file", "parameterize this test with external test data", "load test
-  cases from Excel", "I'm copy-pasting the same test with different inputs". Do NOT use for: the .NET stack
-  (use qa-data-driven-testing-dotnet), the TypeScript stack (use qa-data-driven-testing-typescript),
-  constructing one complex object in code (use qa-test-data-builder-java — a builder makes one object, this
-  feeds many rows; they compose), sourcing rows from a live database query (use qa-db-testing-query-author-java),
-  a cross-browser/-device environment matrix (use qa-cloud-grid-config-java), or eventual-consistency waits
-  inside a test (use the condition-wait in qa-db-testing-client-java).
+description: Run one Java 21 / TestNG test body against **many rows of data sourced from an external file**. Triggers: "run this test for every row in a CSV / spreadsheet", "data-drive these tests from a JSON file", "parameterize this test with external test data".
 ---
 
 # Data-Driven Testing (Java 21 / TestNG) — **canonical stack**
 
 This is the **canonical** stack of the `qa/java/skills/data-driven-testing/` family, and it leads by judgment (the
-"lead where the tool is most authentic" call #22 WireMock / #30 Kafka / #36 flaky-quarantine made):
+"lead where the tool is most authentic" call WireMock / Kafka / flaky-quarantine made):
 TestNG's `@DataProvider` is the **archetypal** data-driven mechanism — a first-class language feature
 returning rows to a test method, with native support for separate provider classes, lazy iterators, and
 parallel rows. The `dotnet` (NUnit `[TestCaseSource]`) and `typescript` (Vitest `test.for` / a
@@ -394,9 +379,9 @@ public void shouldApplyDiscount(OrderCase row) {
 - `qa-test-data-builder-java` — the **boundary**: a builder/ObjectMother constructs **one** complex object in
   code with defaults; data-driven feeds **many** rows from a file. They **compose** — a row drives a builder's
   varying fields (see the last example).
-- `qa-db-testing-query-author-java` (#3) — when the rows come from a **live database** at test time rather
+- `qa-db-testing-query-author-java` — when the rows come from a **live database** at test time rather
   than a static file; the safe assertion-SQL counterpart to file-sourced data.
-- `qa-cloud-grid-config-java` (#15) — parameterizing the **environment** (browser/device matrix) rather than
+- `qa-cloud-grid-config-java` — parameterizing the **environment** (browser/device matrix) rather than
   the **data**; the two matrices are orthogonal and can multiply.
 - `qa-api-test-author-generator-java` / `qa-ui-test-author-playwright-java` — where the data-driven test
   *bodies* are authored; this skill supplies their rows.

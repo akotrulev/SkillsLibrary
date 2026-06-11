@@ -1,6 +1,6 @@
 ---
 name: qa-page-object-architect-java
-description: Use when the user is designing the page object structure for a Java UI test project — Playwright Java, Selenium Java, or Appium Java — what becomes a page, what becomes a component, where `BasePage` lives, how to split a giant page object, and how to share code across platforms. Triggers: "design page objects for app X in Java", "how should I structure pom/ for TestNG", "split this giant page", "where does the shared helper go in the Playwright Java suite". Do NOT use for individual page code (use `qa/java/skills/ui-test-author/playwright`, `qa/java/skills/ui-test-author/selenium`, or `qa/java/skills/ui-test-author/appium`), reviewing one file (use `qa/java/skills/ui-test-author/reviewer`), .NET POM architecture (use `qa/dotnet/skills/page-object-architect`), or TypeScript POM architecture (use `qa/typescript/skills/page-object-architect`).
+description: Use when the user is designing the page object structure for a Java UI test project. Triggers: "design page objects for app X in Java", "how should I structure pom/ for TestNG", "split this giant page".
 ---
 
 # QA — Page Object Architect (Java)

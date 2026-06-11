@@ -1,6 +1,6 @@
 ---
 name: qa-test-environments-java
-description: Use when the user asks to spin up a whole multi-service environment (not just one database) for Java 21 + Spring Boot 3 integration/E2E tests via Testcontainers — `ComposeContainer` (Compose V2) driving a committed `docker-compose.test.yml` (app + DB + queue/cache/mailcatcher) with `withExposedService` + per-service wait strategies, or a hand-built `GenericContainer` topology sharing a `Network.newNetwork()` with `withNetworkAliases` for inter-container DNS, explicit waits (`Wait.forHttp` / `forListeningPort` / `forLogMessage` / `forHealthcheck` — never a `Thread.sleep`), `withReuse(true)` for fast local loops vs fresh-per-suite in CI, the Ryuk reaper, and surfacing host+mapped-port connection details to tests through a TestNG fixture. Triggers: "spin up the whole stack (api + postgres + kafka) for these tests", "Testcontainers ComposeContainer in TestNG", "boot app + DB + Kafka together and wait for all of them", "give my service a network alias so the container can reach the DB", "reuse the containers between local test runs". Do NOT use for a single database container with Flyway migrations + row reset (use `qa/java/skills/db-testing/testcontainers`), for TypeScript (`qa/typescript/skills/test-environments`), for .NET (`qa/dotnet/skills/test-environments`), for the CI runner that hosts these tests (`qa/java/skills/ci-pipelines/github-actions`), or for in-browser network mocking (`qa/java/skills/network-monitoring/playwright-routes`).
+description: Use when the user asks to spin up a whole multi-service environment (not just one database) for Java 21 + Spring Boot 3 integration/E2E tests via Testcontainers. Triggers: "spin up the whole stack (api + postgres + kafka) for these tests", "Testcontainers ComposeContainer in TestNG", "boot app + DB + Kafka together and wait for all of them".
 ---
 
 # QA — Test Environments with Testcontainers + docker-compose (Java)
@@ -15,7 +15,7 @@ Every service is waited on by an **explicit readiness condition**, never a `Thre
 - `org.testcontainers:testcontainers` (≥ 1.20 — `ComposeContainer`, `Network`, `Wait`, `withReuse`) + module artifacts (`:postgresql`, `:kafka`, …) where one exists
 - TestNG — **manual** lifecycle via `@BeforeSuite`/`@AfterSuite` (no `@Testcontainers` extension; that is JUnit 5 only)
 - Compose files under `src/test/resources/compose/`, fixtures under `src/test/java/.../fixtures/`
-- These suites run on `ubuntu-latest` (Docker pre-installed) under `qa/java/skills/ci-pipelines/github-actions`
+- These suites run on `ubuntu-latest` (Docker pre-installed) under `qa/java/skills/ci-pipelines`
 
 ## When to use
 
@@ -29,8 +29,8 @@ Every service is waited on by an **explicit readiness condition**, never a `Thre
 
 - A single DB with Flyway migrations + per-test reset → `qa/java/skills/db-testing/testcontainers`
 - TypeScript / .NET stacks → `qa/{typescript,dotnet}/skills/test-environments`
-- The CI workflow that runs these (Docker enablement, artifact upload) → `qa/java/skills/ci-pipelines/github-actions`
-- In-browser HTTP mocking/interception (no real services) → `qa/java/skills/network-monitoring/playwright-routes`
+- The CI workflow that runs these (Docker enablement, artifact upload) → `qa/java/skills/ci-pipelines`
+- In-browser HTTP mocking/interception (no real services) → `qa/java/skills/network-monitoring`
 - Pure unit tests with no out-of-process dependency
 
 ## Inputs needed
@@ -345,6 +345,6 @@ GenericContainer<?> broker = new GenericContainer<>("confluentinc/cp-kafka:7.6.1
 - **`qa/typescript/skills/test-environments`** (canonical) + **`qa/dotnet/skills/test-environments`** — the sibling stacks; this file ports the canonical TS skill into `org.testcontainers`/TestNG idioms.
 - **`qa/java/skills/db-testing/testcontainers`** — the narrower skill for a *single* DB container with Flyway migrations + per-test reset; this environment skill is what you graduate to when the suite needs the app + DB + other services together. It cross-links back here for multi-container orchestration.
 - **`qa/java/skills/db-testing/client`** — the DB client/query wiring that runs against the `databaseUrl()` this fixture surfaces.
-- **`qa/java/skills/ci-pipelines/github-actions`** — runs these suites on `ubuntu-latest` (Docker pre-installed, Ryuk works out of the box); uploads JUnit + logs.
+- **`qa/java/skills/ci-pipelines`** — runs these suites on `ubuntu-latest` (Docker pre-installed, Ryuk works out of the box); uploads JUnit + logs.
 - **`qa/java/skills/test-data-builder`** — seeds data into the booted services.
 - **`qa/java/skills/allure-reporting`** — attach per-service container logs on failure.

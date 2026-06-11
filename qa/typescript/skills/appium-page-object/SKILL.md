@@ -1,6 +1,6 @@
 ---
 name: qa-appium-page-object-typescript
-description: Use when the user wants a TypeScript (WebdriverIO) Appium page object created or updated from elements already discovered on a live screen — typically right after qa/typescript/skills/appium-explore has enumerated the screen. Emits/updates a BasePage subclass under src/pages/mobile/ with accessibility-id-first locator constants, a verifyPageLoaded() landmark, and intent-named action/query methods. Triggers: "create a page object for the Login screen", "add a page for the … screen", "implement the … page", "update the LoginPage from what we found". Do NOT use for discovering elements on the device (use qa/typescript/skills/appium-explore first), writing the tests (use qa/typescript/skills/ui-test-author/appium), web POMs (use qa/typescript/skills/pom-builder), or other stacks (use qa/java/skills/appium-page-object / qa/dotnet/skills/appium-page-object).
+description: Use when the user wants a TypeScript (WebdriverIO) Appium page object created or updated from elements already discovered on a live screen. Triggers: "create a page object for the Login screen", "add a page for the … screen", "implement the … page".
 ---
 
 # QA — Appium Page Object Builder (TypeScript)

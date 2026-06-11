@@ -1,6 +1,6 @@
 ---
 name: qa-ui-test-author-selenium-dotnet
-description: Use when the user asks to scaffold a C# / .NET 8 + Selenium 4 page object or NUnit UI test, following the BasePage / DriverFactory / NUnit pattern. Triggers: "create a Selenium page object for X in C#", "add a .NET page for screen Y", "write a Selenium NUnit test for Z". Do NOT use for Selenium Java (use `qa/java/skills/ui-test-author/selenium`), Selenium TypeScript (use `qa/typescript/skills/ui-test-author/selenium`), Playwright (use `qa/dotnet/skills/ui-test-author/playwright`), Appium / mobile (use `qa/dotnet/skills/ui-test-author/appium`), or Accelerator tests (use `qa/manual/accelerator-conventions`).
+description: Use when the user asks to scaffold a C# / .NET 8 + Selenium 4 page object or NUnit UI test, following the BasePage / DriverFactory / NUnit pattern. Triggers: "create a Selenium page object for X in C#", "add a .NET page for screen Y", "write a Selenium NUnit test for Z".
 ---
 
 # QA — Selenium .NET Page Object & Test Generator

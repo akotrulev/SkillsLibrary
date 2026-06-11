@@ -1,6 +1,6 @@
 ---
 name: qa-appium-explore-dotnet
-description: Use when the user wants to explore the currently open Android/iOS app on a real device or emulator through the Appium MCP server — enumerate interactable and visible elements, find/verify locators, check UI state, reveal a screen's elements, or walk an app flow — so a .NET (C#) page object can be built next. Triggers: "explore this screen", "what's on the current screen", "find the locators for X", "what testIDs are missing here", "walk through the login flow on the device". Do NOT use for emitting the page object itself (use qa/dotnet/skills/appium-page-object), writing the tests (use qa/dotnet/skills/ui-test-author/appium), web pages in a browser (use qa/dotnet/skills/pom-builder), or other stacks (use qa/java/skills/appium-explore / qa/typescript/skills/appium-explore).
+description: Use when the user wants to explore the currently open Android/iOS app on a real device or emulator through the Appium MCP server. Triggers: "explore this screen", "what's on the current screen", "find the locators for X".
 ---
 
 # QA — Appium Live-App Explorer (.NET)

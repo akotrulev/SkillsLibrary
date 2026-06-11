@@ -1,6 +1,6 @@
 ---
 name: qa-ui-test-author-reviewer-typescript
-description: Use when the user asks to review existing TypeScript UI test code or page objects — Playwright TypeScript, Selenium WebDriverJS (TS), or WebdriverIO/Appium (TS). Triggers: "review this Playwright spec", "look at this page object class", "is this WebdriverIO test any good", "what's wrong with this TS POM". Do NOT use for .NET UI reviews (use `qa/dotnet/skills/ui-test-author/reviewer`), Java UI reviews (use `qa/java/skills/ui-test-author/reviewer`), generating new TypeScript tests (use `qa/typescript/skills/ui-test-author/playwright`, `qa/typescript/skills/ui-test-author/selenium`, or `qa/typescript/skills/ui-test-author/appium`), or POM architecture work (use `qa/typescript/skills/page-object-architect`).
+description: Use when the user asks to review existing TypeScript UI test code or page objects. Triggers: "review this Playwright spec", "look at this page object class", "is this WebdriverIO test any good".
 ---
 
 # QA — UI Test & Page Object Reviewer (TypeScript)

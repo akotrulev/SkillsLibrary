@@ -1,6 +1,6 @@
 ---
 name: qa-test-environments-typescript
-description: Use when the user asks to spin up a whole multi-service environment (not just one database) for Node 20 + TypeScript integration/E2E tests via Testcontainers — `DockerComposeEnvironment` driving a committed `docker-compose.test.yml` (app + DB + queue/cache/mailcatcher), or a hand-built `GenericContainer` topology sharing a user-defined `Network` with `withNetworkAliases` for inter-container DNS, explicit per-service wait strategies (`Wait.forHttp` / `forListeningPorts` / `forLogMessage` / `forHealthCheck` — never a sleep), `withReuse()` for fast local loops vs fresh-per-suite in CI, the Ryuk reaper, and surfacing host+mapped-port connection details to tests through a fixture. Triggers: "spin up the whole stack (api + postgres + redis) for these tests", "Testcontainers docker-compose environment in Vitest", "boot app + DB + Kafka together and wait for all of them", "give my service a network alias so the container can reach the DB", "reuse the containers between local test runs". Do NOT use for a single database container with migrations + row reset (use `qa/typescript/skills/db-testing/testcontainers`), for .NET (`qa/dotnet/skills/test-environments`), for JVM (`qa/java/skills/test-environments`), for the CI runner that hosts these tests (`qa/typescript/skills/ci-pipelines/github-actions`), or for in-browser network mocking (`qa/typescript/skills/network-monitoring/playwright-routes`).
+description: Use when the user asks to spin up a whole multi-service environment (not just one database) for Node 20 + TypeScript integration/E2E tests via Testcontainers. Triggers: "spin up the whole stack (api + postgres + redis) for these tests", "Testcontainers docker-compose environment in Vitest", "boot app + DB + Kafka together and wait for all of them".
 ---
 
 # QA — Test Environments with Testcontainers + docker-compose (TypeScript)
@@ -15,7 +15,7 @@ Every service is waited on by an **explicit readiness condition**, never a fixed
 - `testcontainers` (≥ 10.x — `DockerComposeEnvironment`, `Network`, `Wait`, `withReuse`)
 - Vitest (`globalSetup` boots the environment once per test process); Jest is a drop-in for the same pattern
 - Environment fixtures under `tests/fixtures/environment/`, compose files under `tests/fixtures/compose/`
-- These suites run on `ubuntu-latest` (Docker pre-installed) under `qa/typescript/skills/ci-pipelines/github-actions`
+- These suites run on `ubuntu-latest` (Docker pre-installed) under `qa/typescript/skills/ci-pipelines`
 
 ## When to use
 
@@ -29,8 +29,8 @@ Every service is waited on by an **explicit readiness condition**, never a fixed
 
 - A single DB with migrations + per-test reset (Respawn-style) → `qa/typescript/skills/db-testing/testcontainers`
 - .NET / JVM stacks → `qa/{dotnet,java}/skills/test-environments`
-- The CI workflow that runs these (Docker enablement, artifact upload) → `qa/typescript/skills/ci-pipelines/github-actions`
-- In-browser HTTP mocking/interception (no real services) → `qa/typescript/skills/network-monitoring/playwright-routes`
+- The CI workflow that runs these (Docker enablement, artifact upload) → `qa/typescript/skills/ci-pipelines`
+- In-browser HTTP mocking/interception (no real services) → `qa/typescript/skills/network-monitoring`
 - Pure unit tests with no out-of-process dependency
 
 ## Inputs needed
@@ -336,6 +336,6 @@ const broker = await new GenericContainer('confluentinc/cp-kafka:7.6.1')
 - **`qa/dotnet/skills/test-environments`** + **`qa/java/skills/test-environments`** — the sibling stacks porting this canonical TS skill into `Testcontainers`/NUnit and `org.testcontainers`/TestNG idioms.
 - **`qa/typescript/skills/db-testing/testcontainers`** — the narrower skill for a *single* DB container with migrations + per-test reset; this environment skill is what you graduate to when the suite needs the app + DB + other services together. It cross-links back here for multi-container orchestration.
 - **`qa/typescript/skills/db-testing/client`** — the DB client/query wiring that runs against the `databaseUrl` this fixture surfaces.
-- **`qa/typescript/skills/ci-pipelines/github-actions`** — runs these suites on `ubuntu-latest` (Docker pre-installed, Ryuk works out of the box); uploads JUnit + logs.
+- **`qa/typescript/skills/ci-pipelines`** — runs these suites on `ubuntu-latest` (Docker pre-installed, Ryuk works out of the box); uploads JUnit + logs.
 - **`qa/typescript/skills/test-data-builder`** — seeds data into the booted services.
 - **`qa/typescript/skills/allure-reporting`** — attach per-service container logs on failure.

@@ -1,6 +1,6 @@
 ---
 name: qa-ui-test-author-playwright-typescript
-description: Use when the user asks to scaffold Playwright UI tests in TypeScript — new spec files, page objects under `tests/pages/`, or a specific scenario (login, form, accessibility, visual). Triggers: "write a Playwright test for X in TypeScript", "add a Playwright TS page object for screen Y", "scaffold a Playwright spec (TS)". Do NOT use for Playwright Java (use `qa/java/skills/ui-test-author/playwright`), Playwright .NET (use `qa/dotnet/skills/ui-test-author/playwright`), Appium/mobile (use `qa/typescript/skills/ui-test-author/appium`), Selenium-Java (use `qa/java/skills/ui-test-author/selenium`), Accelerator tests (use `qa/manual/accelerator-conventions`), or reviewing existing tests (use `qa/typescript/skills/ui-test-author/reviewer`).
+description: Use when the user asks to scaffold Playwright UI tests in TypeScript — new spec files, page objects under `tests/pages/`, or a specific scenario (login, form, accessibility, visual). Triggers: "write a Playwright test for X in TypeScript", "add a Playwright TS page object for screen Y", "scaffold a Playwright spec (TS)".
 ---
 
 # QA — Playwright Test & Page Object Generator (TypeScript)

@@ -1,36 +1,24 @@
 ---
 name: qa-security-testing-dependency-scanning-dotnet
-description: >-
-  SCA (Software Composition Analysis) — dependency-vulnerability scanning — as a CI build gate in .NET:
-  scan the project's **dependency tree** (direct + **transitive**) against a CVE feed (GitHub Advisory /
-  NVD) and **fail the build** above a severity threshold. Lead with the native **`dotnet list package
-  --vulnerable --include-transitive`** (`--format json`, parse-and-assert) plus **NuGet audit**
-  (`<NuGetAudit>`, `NuGetAuditLevel`, `NuGetAuditMode`, warnings-as-errors gate) — with OWASP
-  Dependency-Check noted as the cross-stack option. Use when a pipeline must catch vulnerable NuGet
-  packages, gate **new** CVEs while triaging known/transitive ones, or wire a shift-left SCA step. Covers
-  the severity → build-fail gate, ticketed `NuGetAuditSuppress`/`NoWarn` suppression + the transitive-dep
-  reality, JSON report into Allure + SARIF, and the SCA-vs-DAST boundary. Do NOT use for: DAST / running-app
-  scanning (see qa-security-testing-zap-baseline-dotnet — that probes the live HTTP surface; SCA reads your
-  build graph), Java (see qa-security-testing-dependency-scanning-java, Dependency-Check Gradle plugin), or
-  TypeScript (see qa-security-testing-dependency-scanning-typescript, `npm audit`).
+description: Use when wiring SCA (dependency-vulnerability scanning) as a CI gate for a .NET build — `dotnet list package --vulnerable` as the native gate over the direct + transitive tree, failing above a severity threshold, with a ticketed suppression path. Triggers: "fail the build on vulnerable dependencies", "add dependency scanning", "gate new CVEs". Not for runtime DAST → `security-testing/zap-baseline`.
 ---
 
 # Security Testing — Dependency Scanning / SCA (.NET)
 
 **Software Composition Analysis (SCA)** answers a different security question from DAST: not "is the
-running app exploitable over HTTP?" (that's ZAP, #26) but **"does my dependency tree contain package
+running app exploitable over HTTP?" (that's ZAP, `zap-baseline`) but **"does my dependency tree contain package
 versions with known CVEs?"** It reads your **build graph / lockfile** — direct *and* **transitive**
 dependencies — matches each package+version against a vulnerability feed (the **GitHub Advisory Database**
 that backs NuGet audit, plus NVD), and **fails the build** when a finding crosses a severity threshold. It
-needs **no running app** (contrast #26 DAST): it's a static, fast, every-PR pipeline gate.
+needs **no running app** (contrast DAST): it's a static, fast, every-PR pipeline gate.
 
-> **⚠️ SCA (#27) vs DAST (#26) — two orthogonal layers, run both.** #26 ZAP scans the **running app's HTTP
-> surface** (missing headers, cookie flags, info leaks). #27 SCA scans your **dependency tree** (a
+> **⚠️ SCA vs DAST — two orthogonal layers, run both.** ZAP scans the **running app's HTTP
+> surface** (missing headers, cookie flags, info leaks). SCA scans your **dependency tree** (a
 > vulnerable `Newtonsoft.Json`, a transitive `System.*` package…). A clean ZAP baseline says nothing about
 > a deserialization CVE in a transitive package; a clean SCA says nothing about a missing CSP header.
 > **Together they close Phase 2's `security-testing` family — wire both gates.**
 
-> **Stack-native first.** Unlike #26 (one language-agnostic Docker tool), SCA is **stack-native**: each
+> **Stack-native first.** Unlike `zap-baseline` (one language-agnostic Docker tool), SCA is **stack-native**: each
 > ecosystem has its own first-class auditor. .NET's are **`dotnet list package --vulnerable`** (the CLI,
 > parse-and-assert) and **NuGet audit** (`<NuGetAudit>` — a build-integrated gate, warnings on restore) —
 > so this skill leads with them. **OWASP Dependency-Check** is the cross-stack common denominator (its
@@ -44,13 +32,13 @@ needs **no running app** (contrast #26 DAST): it's a static, fast, every-PR pipe
 |------|-----|-----|
 | Gate the **dependency tree** (direct + transitive CVEs) in every PR | **this skill** | Native, static, fast, no running app; fails the build above a severity threshold |
 | Build-integrated gate (warnings on every `restore`/`build`) | **NuGet audit** (`<NuGetAudit>`) | No separate step — `NuGetAuditLevel` + warnings-as-errors |
-| Scan the **running app's HTTP surface** (headers, cookies, info leaks) | zap-baseline (#26) | DAST probes live traffic — orthogonal layer; run both |
+| Scan the **running app's HTTP surface** (headers, cookies, info leaks) | zap-baseline | DAST probes live traffic — orthogonal layer; run both |
 | **Remediate** vulnerable deps automatically | Dependabot / Renovate | They *bump*; SCA *gates*. Complementary — gate + auto-fix |
 | Gate only the deps a PR **adds/changes** (diff-scoped) | `dependency-review-action` | PR-diff gate on GitHub; pairs with the full-tree scan |
 | **Cross-stack** parity in a polyglot monorepo | OWASP Dependency-Check | One tool over NuGet + Maven + npm; otherwise the native tools are simpler |
 
 **Rule of thumb:** SCA is your **dependency-tree CVE gate**; it complements — does not replace — DAST
-(#26). Pair the gate with a *remediation* tool (Dependabot/Renovate) so findings get fixed, not just
+(`zap-baseline`). Pair the gate with a *remediation* tool (Dependabot/Renovate) so findings get fixed, not just
 flagged.
 
 ## Setup — the two native paths
@@ -97,7 +85,7 @@ high / critical). The defining traits:
 
 - **Transitive coverage is the whole point.** You declared `Microsoft.AspNetCore.*`; it dragged in
   transitive packages. SCA flags a CVE in a transitive `System.Text.Encodings.Web` you never typed.
-- **No running app.** Build-graph-driven; runs in seconds. Contrast #26 DAST, which needs a deployed
+- **No running app.** Build-graph-driven; runs in seconds. Contrast DAST, which needs a deployed
   target.
 - **The gate is a severity threshold** — `NuGetAuditLevel` / your parse-and-assert filter. Pick it
   deliberately: start at `critical`, ratchet to `high` as you clear the backlog.
@@ -117,12 +105,12 @@ high / critical). The defining traits:
 The severity threshold (`NuGetAuditLevel=high`) mirrors the Java sibling's `failBuildOnCVSS = 7.0f` and the
 TS sibling's `npm audit --audit-level=high`.
 
-## The triage gate — ticketed `NuGetAuditSuppress` / `NoWarn` (like #20 / #26)
+## The triage gate — ticketed `NuGetAuditSuppress` / `NoWarn` (like `axe-playwright` / `zap-baseline`)
 
 A real project's first scan lights up — including findings you **cannot fix today** because they're in a
 **transitive** package or are false positives. Gating on *everything* with no triage trains the team to
 mute the gate. The disciplined approach is the **ticketed suppression** — same discipline as
-`qa-accessibility-testing-axe-playwright-dotnet` (#20) and #26's `rules.tsv`, ported to SCA.
+`qa-accessibility-testing-dotnet` and `zap-baseline`'s `rules.tsv`, ported to SCA.
 
 ```xml
 <!-- Directory.Build.props (or the .csproj) — ticketed, per-advisory suppression -->
@@ -140,7 +128,7 @@ mute the gate. The disciplined approach is the **ticketed suppression** — same
 - .NET has **no native `until=` expiry** like Dependency-Check; emulate it by putting the re-review date in
   the comment + a tracking ticket, and audit the suppression list each release. (Track the date in the
   ticket; the comment is the reminder.)
-- **Discipline (reuse #20 / #26):** gate **new** CVEs; suppress only *documented, ticketed* accepted-risk;
+- **Discipline (reuse `axe-playwright` / `zap-baseline`):** gate **new** CVEs; suppress only *documented, ticketed* accepted-risk;
   **shrink** the list over time, never grow it to silence a real finding. Every suppression names a ticket.
 
 ### The transitive-dep reality
@@ -197,12 +185,12 @@ public static class DependencyScanReport
 - **SARIF → GitHub code-scanning** — convert the JSON to SARIF (a converter step) and feed
   `github/codeql-action/upload-sarif` so each CVE shows inline on the PR. (OWASP Dependency-Check emits
   SARIF natively if you use it for cross-stack parity.)
-- **CI artifact** — upload the JSON (cross-link `qa-ci-pipelines-github-actions-dotnet`).
+- **CI artifact** — upload the JSON (cross-link `qa-ci-pipelines-dotnet`).
 
 ## Optional parse-and-assert test (the programmatic path)
 
 Because `dotnet list package --vulnerable` **doesn't gate on its own**, the parse-and-assert test is often
-*the* gate, not just an optional extra (NUnit, async all the way, mirroring #26's parsed-report gate):
+*the* gate, not just an optional extra (NUnit, async all the way, mirroring `zap-baseline`'s parsed-report gate):
 
 ```csharp
 // Tests/DependencyVulnerabilityTests.cs
@@ -244,7 +232,7 @@ The Java/TS siblings parse their own tool's JSON the same way. Test name `Should
 ## CI wiring — the gate, the remediation complement
 
 ```yaml
-# .github/workflows/sca.yml — cross-link qa-ci-pipelines-github-actions-dotnet
+# .github/workflows/sca.yml — cross-link qa-ci-pipelines-dotnet
 name: Dependency Scan (SCA)
 on: [pull_request]
 
@@ -286,7 +274,7 @@ jobs:
   code.
 - **Treating SCA as a substitute for DAST (or vice-versa).** A clean dependency tree says nothing about a
   missing security header; a clean ZAP baseline says nothing about a vulnerable transitive package. *Fix:*
-  run **both** #26 + #27 — orthogonal layers.
+  run **both** `zap-baseline` + `dependency-scanning` — orthogonal layers.
 - **Scanning without `--include-transitive`.** Misses most real CVEs. *Fix:* always
   `--include-transitive`; `NuGetAuditMode=all`.
 - **Blanket `<NoWarn>NU1901;NU1902;...</NoWarn>` to go green.** Mutes every future CVE. *Fix:* a scoped,
@@ -300,39 +288,9 @@ jobs:
 - **`NuGetAuditLevel=low` on day one of a legacy tree.** Everything fails; the gate gets bypassed. *Fix:*
   start at `critical`, clear the backlog, ratchet to `high`.
 
-## Examples
+## Deep-dive reference
 
-**End-to-end: a PR SCA gate that fails on a new High CVE via NuGet audit, fixes the fixable transitive one
-with a direct pin, and defers the unfixable one with a ticketed suppression.**
-
-```xml
-<!-- Directory.Build.props -->
-<Project>
-  <PropertyGroup>
-    <NuGetAudit>true</NuGetAudit>
-    <NuGetAuditMode>all</NuGetAuditMode>
-    <NuGetAuditLevel>high</NuGetAuditLevel>
-    <WarningsAsErrors>$(WarningsAsErrors);NU1901;NU1902;NU1903;NU1904</WarningsAsErrors>
-  </PropertyGroup>
-  <ItemGroup>
-    <!-- Real fix: pin the patched transitive version directly (the preferred response). -->
-    <PackageReference Include="System.Text.Json" Version="8.0.5" />
-    <!-- Deferral: not-yet-fixable transitive CVE, ticketed + dated for re-review. -->
-    <!-- JIRA-4211: GHSA-yyyy (high); no upstream patch yet, re-review 2026-09-01. -->
-    <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-yyyy-yyyy-yyyy" />
-  </ItemGroup>
-</Project>
-```
-
-Lifecycle for this gate:
-1. A dev bumps a package; it pulls in a transitive `System.Text.Json` with a **High** CVE.
-2. The PR runs `dotnet restore`; NuGet audit emits `NU1903` (high) → `WarningsAsErrors` turns it into a
-   build error → **the build fails**, with the advisory in the uploaded JSON report.
-3. The dev adds a **direct `<PackageReference>`** pinning patched `System.Text.Json` (the real fix) → the
-   audit passes. A *second*, currently-unfixable transitive CVE is `<NuGetAuditSuppress>`ed with a JIRA
-   ticket + re-review date — tracked, not silently muted.
-4. Dependabot later raises the parent bump that removes the suppressed CVE; the suppression is deleted at
-   its review — the list shrinks, never grows.
+These sections live in `references/details.md` — **read it when the task touches them**: **Examples**.
 
 ## Rules (hard constraints)
 
@@ -341,14 +299,14 @@ Lifecycle for this gate:
   assertion per test; test names `Should_X_When_Y`; **async all the way** when shelling out (no
   `.Result`/`.Wait()`).
 - Scan **direct + transitive** deps (`--include-transitive` / `NuGetAuditMode=all`) against a CVE feed —
-  transitive coverage is the point. SCA reads the **build graph** (no running app — contrast #26 DAST).
+  transitive coverage is the point. SCA reads the **build graph** (no running app — contrast DAST).
 - Triage with a **ticketed `<NuGetAuditSuppress>`** scoped to the specific advisory URL (never blanket
   `NoWarn`), with a ticket + re-review date. Gate **new** CVEs; shrink the list, never grow it (the
-  #20/#26 discipline). Prefer a **direct pin to the patched (transitive) version** over suppressing.
+  `axe-playwright`/`zap-baseline` discipline). Prefer a **direct pin to the patched (transitive) version** over suppressing.
 - Emit **JSON**: attach to **Allure**, upload as a CI artifact, optionally convert to **SARIF** for GitHub
   code-scanning.
 - Pair the **gate** with **remediation** (Dependabot/Renovate) and the **`dependency-review-action`**
-  PR-diff gate. A clean SCA ≠ "secure" — **run DAST (#26) too**: orthogonal layers.
+  PR-diff gate. A clean SCA ≠ "secure" — **run DAST too**: orthogonal layers.
 
 ## Cross-references
 
@@ -357,12 +315,12 @@ Lifecycle for this gate:
   throughline.
 - `qa-security-testing-dependency-scanning-typescript` — same skill, TS / `npm audit` (`--audit-level`,
   `--json`, `overrides`/`.nsprc`).
-- `qa-security-testing-zap-baseline-dotnet` (#26) — the **DAST** sibling that opened the `security-testing`
+- `qa-security-testing-zap-baseline-dotnet` — the **DAST** sibling that opened the `security-testing`
   family: ZAP probes the **running app's HTTP surface**; SCA reads your **build graph**. Orthogonal layers
   — **run both** (together they close Phase 2).
-- `qa-accessibility-testing-axe-playwright-dotnet` (#20) — the **ticketed-baseline triage** discipline
+- `qa-accessibility-testing-dotnet` — the **ticketed-baseline triage** discipline
   reused here for the suppression list (gate new findings, document every suppression with a ticket).
-- `qa-ci-pipelines-github-actions-dotnet` — the gate step, `dependency-review-action`, artifact upload.
+- `qa-ci-pipelines-dotnet` — the gate step, `dependency-review-action`, artifact upload.
 - `qa-allure-reporting-dotnet` — attach the `dotnet list package --vulnerable --format json` report to the
   run.
-- `qa/GAP-ANALYSIS.md` — #27 **closes Phase 2**; Phase 3 is the next backlog.
+- `qa/GAP-ANALYSIS.md` — `dependency-scanning` **closes Phase 2**; Phase 3 is the next backlog.

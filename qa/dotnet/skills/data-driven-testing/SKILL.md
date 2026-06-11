@@ -1,22 +1,6 @@
 ---
 name: qa-data-driven-testing-dotnet
-description: >-
-  Run one .NET 8 / NUnit test body against **many rows of data sourced from an external file** — CSV, JSON,
-  or Excel — so coverage scales by adding rows, not by copy-pasting `[Test]` methods. Covers
-  `[TestCaseSource]` (a static method/property returning `IEnumerable<TestCaseData>`, named with
-  `.SetName(...)`, in-class or via `[TestCaseSource(typeof(X), nameof(X.Cases))]`), reading rows with a
-  **real parser** (CsvHelper `GetRecords<T>()` with a `ClassMap`, `System.Text.Json` for nested JSON,
-  ClosedXML `XLWorkbook` for `.xlsx`), **binding each row to a typed record** (not loose `object[]` columns),
-  naming each row so a failure reports the input that broke it, the `[TestCase]` / `[Values]` inline forms,
-  and choosing the right source for the data's shape. Triggers: "run this test for every row in a CSV /
-  spreadsheet", "data-drive these tests from a JSON file", "parameterize this NUnit test with external test
-  data", "load test cases from Excel", "I'm copy-pasting the same test with different inputs". Do NOT use
-  for: the Java stack (use qa-data-driven-testing-java), the TypeScript stack (use
-  qa-data-driven-testing-typescript), constructing one complex object in code (use qa-test-data-builder-dotnet
-  — a builder makes one object, this feeds many rows; they compose), sourcing rows from a live database
-  query (use qa-db-testing-query-author-dotnet), a cross-browser/-device environment matrix (use
-  qa-cloud-grid-config-dotnet), or eventual-consistency waits inside a test (use the condition-wait in
-  qa-db-testing-client-dotnet).
+description: Run one .NET 8 / NUnit test body against **many rows of data sourced from an external file**. Triggers: "run this test for every row in a CSV / spreadsheet", "data-drive these tests from a JSON file", "parameterize this NUnit test with external test data".
 ---
 
 # Data-Driven Testing (.NET 8 / NUnit)
@@ -366,9 +350,9 @@ public void Should_ApplyDiscount(OrderCase row)
 - `qa-test-data-builder-dotnet` — the **boundary**: a builder/ObjectMother constructs **one** complex object
   in code with defaults; data-driven feeds **many** rows from a file. They **compose** — a row drives a
   builder's varying fields (see the last example).
-- `qa-db-testing-query-author-dotnet` (#3) — when rows come from a **live database** at test time rather than
+- `qa-db-testing-query-author-dotnet` — when rows come from a **live database** at test time rather than
   a static file; the safe assertion-SQL counterpart to file-sourced data.
-- `qa-cloud-grid-config-dotnet` (#15) — parameterizing the **environment** (browser/device matrix) rather
+- `qa-cloud-grid-config-dotnet` — parameterizing the **environment** (browser/device matrix) rather
   than the **data**; orthogonal matrices that can multiply.
 - `qa-api-test-author-generator-dotnet` / `qa-ui-test-author-playwright-dotnet` — where the data-driven test
   *bodies* are authored; this skill supplies their rows. `qa-allure-reporting-dotnet` — each row renders as a

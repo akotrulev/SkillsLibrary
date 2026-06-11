@@ -1,6 +1,6 @@
 ---
 name: qa-ui-test-author-reviewer-dotnet
-description: Use when the user asks to review existing .NET UI test code or page objects — Playwright .NET (NUnit), Selenium .NET, or Appium .NET (C#). Triggers: "review this Playwright C# spec", "look at this NUnit page object", "is this Appium .NET test any good", "what's wrong with this ILocator class". Do NOT use for Java UI reviews (use `qa/java/skills/ui-test-author/reviewer`), TypeScript UI reviews (use `qa/typescript/skills/ui-test-author/reviewer`), generating new .NET tests (use `qa/dotnet/skills/ui-test-author/playwright`, `qa/dotnet/skills/ui-test-author/selenium`, or `qa/dotnet/skills/ui-test-author/appium`), or POM architecture work (use `qa/dotnet/skills/page-object-architect`).
+description: Use when the user asks to review existing .NET UI test code or page objects. Triggers: "review this Playwright C# spec", "look at this NUnit page object", "is this Appium .NET test any good".
 ---
 
 # QA — UI Test & Page Object Reviewer (.NET / C#)

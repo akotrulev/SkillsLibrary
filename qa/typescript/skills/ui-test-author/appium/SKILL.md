@@ -1,6 +1,6 @@
 ---
 name: qa-ui-test-author-appium-typescript
-description: Use when the user asks to scaffold a TypeScript + WebdriverIO (Appium service) page object or Mocha/Vitest mobile UI test. Triggers: "create an Appium page object for X in TS", "add a WebdriverIO mobile page for screen Y", "write an Appium TS test for Z". Do NOT use for Appium .NET (use `qa/dotnet/skills/ui-test-author/appium`), Appium Java (use `qa/java/skills/ui-test-author/appium`), Selenium / web (use `qa/typescript/skills/ui-test-author/selenium` or `qa/typescript/skills/ui-test-author/playwright`), or Accelerator tests (use `qa/manual/accelerator-conventions`).
+description: Use when the user asks to scaffold a TypeScript + WebdriverIO (Appium service) page object or Mocha/Vitest mobile UI test. Triggers: "create an Appium page object for X in TS", "add a WebdriverIO mobile page for screen Y", "write an Appium TS test for Z".
 ---
 
 # QA — Appium TypeScript Page Object & Test Generator

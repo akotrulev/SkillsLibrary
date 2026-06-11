@@ -1,6 +1,6 @@
 ---
 name: qa-db-testing-testcontainers-java
-description: Use when the user asks to scaffold Java 21 + Spring Boot 3 + TestNG (or JUnit 5) integration tests backed by a real database (Postgres / SQL Server / MongoDB / Redis) via Testcontainers-Java — `@Container` lifecycle, Flyway / Liquibase migrations on startup, per-test cleanup via Spring's `@Sql` or db-rider. Triggers: "spin up Postgres for the integration tests", "Testcontainers for the Spring Boot tests", "stop using H2 in tests", "integration test against SQL Server in CI". Do NOT use for unit tests with mocks, .NET (`qa/dotnet/skills/db-testing/testcontainers`), TS (`qa/typescript/skills/db-testing/testcontainers`), or SQL guardrails (`qa/java/skills/db-testing/query-author`).
+description: Use when the user asks to scaffold Java 21 + Spring Boot 3 + TestNG (or JUnit 5) integration tests backed by a real database (Postgres / SQL Server / MongoDB / Redis) via Testcontainers-Java. Triggers: "spin up Postgres for the integration tests", "Testcontainers for the Spring Boot tests", "stop using H2 in tests".
 ---
 
 # QA — DB Testing with Testcontainers (Java)
@@ -243,5 +243,5 @@ new GenericContainer<>("ghcr.io/myco/legacy-app:1.4.0")
 - **`qa/java/skills/db-testing/query-author`** — SQL guardrails for assertion queries.
 - **`qa/java/skills/test-data-builder`** — builders / ObjectMother for seed data.
 - **`qa/java/skills/test-environments`** — multi-container orchestration.
-- **`qa/java/skills/ci-pipelines/azure-pipelines`** — DinD enablement and Allure publish.
+- **`qa/java/skills/ci-pipelines`** — DinD enablement and Allure publish.
 - **`qa/java/skills/allure-reporting`** — attach container logs on failure.

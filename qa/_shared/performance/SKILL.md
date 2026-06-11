@@ -1,6 +1,6 @@
 ---
 name: qa-performance-shared
-description: Cross-stack reference for performance / load testing — workload models (smoke / average / stress / spike / soak / capacity), SLO-shaped thresholds, test data seeding & cleanup, environment policy, observability correlation, CI integration patterns, and reporting. Load alongside one of `qa/<stack>/skills/performance/{k6/typescript,nbomber/dotnet,gatling/java}` when designing or authoring perf tests. Do NOT load standalone to write tool-specific code — pair it with the tool sibling. Do NOT use for functional tests (`qa/<stack>/skills/api-test-author/<stack>` / `qa/<stack>/skills/ui-test-author/<stack>`), unit benchmarks (BenchmarkDotNet / JMH / Vitest bench), or defining the SLO itself (`qa/manual/quality-metrics`).
+description: Cross-stack reference for performance / load testing — workload models (smoke / average / stress / spike / soak / capacity), SLO-shaped thresholds, test data seeding & cleanup, environment policy, observability correlation, CI integration patterns, and reporting. Load alongside one of `qa/<stack>/skills/performance/{k6/typescript,nbomber/dotnet,gatling/java}` when designing or authoring perf tests. Do NOT load standalone to write tool-specific code — pair it with the tool sibling.
 ---
 
 # QA — Performance Testing (Shared)

@@ -1,5 +1,12 @@
 # QA skills reorganization plan
 
+> **Status (2026-06):** Phases 0, 1, 2, and 3A are **implemented** (Phase 1 found nothing left to
+> hoist — the duplication lived in the families Phase 3A consolidated). Phase 4 deliberately skipped.
+> Results: 62 → 45 registered skills per stack; library-wide description load ~21.9k → ~7.2k words;
+> all SKILL.mds ≤ ~420 lines with deep dives in `references/` (`<tool>.md` for families,
+> `details.md` for split singles); marketplace regenerated (65 skills + 6 agents per stack plugin)
+> and `claude plugin validate .` passing. Revert point: commit 3125862.
+
 Analysis of `qa/java/skills/` (2026-06-11). The three stacks are fully mirrored (identical node
 trees and section skeletons), so every change below applies ×3 (java / dotnet / typescript) and the
 effort estimates assume that. Each phase is independently shippable — tick what to implement.

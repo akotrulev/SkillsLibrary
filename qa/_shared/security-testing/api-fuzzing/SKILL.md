@@ -1,22 +1,6 @@
 ---
 name: qa-security-testing-api-fuzzing
-description: >-
-  **Property-based API fuzzing with Schemathesis** — generate thousands of test cases from an
-  **OpenAPI / GraphQL schema** and run them against a **RUNNING** app, asserting **properties** (does the
-  response conform to the declared schema? does malformed/boundary input get rejected cleanly, or does it
-  500 / leak?) rather than exact responses. Language-agnostic: it targets the running app's HTTP surface +
-  its spec, so it ships as one shared skill (Python CLI / `schemathesis/schemathesis` Docker image /
-  `schemathesis/action@v3` GitHub Action). Use when you want to catch **schema-conformance** drift,
-  **negative-input / validation-bypass** crashes, status-code & content-type conformance, or **stateful**
-  create→get→delete sequences — gated by Schemathesis's **non-zero exit on any detected failure** with a
-  **JUnit XML** report fed into the CI test report + Allure. ⚠️ Fuzzing **sends generated requests and can
-  mutate state** → run only against a **throwaway env you own** (cross-link `qa-test-environments-*`), never
-  prod/shared. Do NOT use for: the **full active attack scan** (SQLi/XSS payload injection — that is DAST,
-  `qa-security-testing-zap-automation-framework`; this is spec-driven *property* fuzzing); **example-based
-  functional contract / conformance** tests (`qa-{stack}-api-test-author` — hand-written, not generative);
-  the **access-control matrix** (BOLA/BFLA/IDOR authz logic — fuzzing is blind to it, see
-  `qa-{stack}-security-testing-access-control-testing`); or the OWASP backbone / scan-authorization /
-  triage discipline itself (master ref `qa-security-shared`, load alongside).
+description: Use when fuzzing an API from its OpenAPI/GraphQL schema with Schemathesis — property-based generated requests that catch 5xx crashes and contract violations, wired as a CI gate. Language-agnostic (CLI/Docker), any stack. Triggers: "fuzz our API", "schema-based negative testing", "run Schemathesis in CI".
 ---
 
 # Security Testing — API Fuzzing (Schemathesis, shared)
@@ -223,7 +207,7 @@ jobs:
 
 The job: **spin the app** (`compose up --wait`) → **fuzz** (`schemathesis/action`, exit non-zero gates the
 job) → **publish** the JUnit XML to the test report + Allure and upload the VCR/HAR repro as an artifact.
-Cross-link `qa-ci-pipelines-github-actions-*` for the OIDC-secret + artifact wiring.
+Cross-link `qa-ci-pipelines-*` for the OIDC-secret + artifact wiring.
 
 ## OWASP mapping (what it covers — and what it does NOT)
 
@@ -292,5 +276,5 @@ Cross-link `qa-ci-pipelines-github-actions-*` for the OIDC-secret + artifact wir
 - `qa-{stack}-auth0-test-tokens` — acquire the M2M/ROPG token (for a seeded test user) injected via
   `--header`, read lazily from env.
 - `qa-allure-reporting-*` — attach the JUnit XML + VCR/HAR repro.
-- `qa-ci-pipelines-github-actions-*` + `qa-_shared-ci-conventions` — wire the `schemathesis/action` job,
+- `qa-ci-pipelines-*` + `qa-_shared-ci-conventions` — wire the `schemathesis/action` job,
   OIDC secrets, artifact upload.

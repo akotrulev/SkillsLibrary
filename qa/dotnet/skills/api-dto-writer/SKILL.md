@@ -1,6 +1,6 @@
 ---
 name: qa-api-dto-writer-dotnet
-description: Use when the user asks to create a new DTO, model class, or response object in the Accelerator `ApiTests` (.NET 8 / System.Text.Json) project. Triggers: "add a {Resource}Dto", "create the InDto / ModDto for the {resource} endpoint", "scaffold the wrapper DTO for paginated {resource}". Do NOT use for Java or TypeScript DTOs (use the sibling skills) or for non-test production models.
+description: Use when the user asks to create a new DTO, model class, or response object in the Accelerator `ApiTests` (.NET 8 / System.Text.Json) project. Triggers: "add a {Resource}Dto", "create the InDto / ModDto for the {resource} endpoint", "scaffold the wrapper DTO for paginated {resource}".
 ---
 
 # qa-api-dto-writer-dotnet

@@ -1,22 +1,6 @@
 ---
 name: qa-flaky-test-quarantine-typescript
-description: >-
-  Detect, retry, **quarantine**, and report flaky tests in a Node 20 + TypeScript suite (Playwright for
-  e2e, Vitest for unit) — so an intermittently-failing test stops blocking the merge gate **without** being
-  silently `test.skip`-d or retried-to-green forever. Covers Playwright `retries` → the built-in **"flaky"**
-  status (failed-then-passed-on-retry, the strongest native flaky detection of the three stacks) and Vitest
-  `retry`; **quarantine** via Playwright **tags** (`{ tag: '@flaky' }`) + `--grep-invert @flaky` on the gate
-  vs a separate **non-gating** project/`--grep @flaky` lane; and the **Allure flaky flag** — Allure's
-  **history-based auto-detection** (failed→passed→failed across the last 5 launches, identical across stacks)
-  plus `allure.tag('flaky')` + `allure.issue(...)` for the ticket (allure-playwright has no first-class
-  `@Flaky` decorator — but Playwright's own "flaky" status already detects it). Triggers: "this Playwright
-  test is flaky, stop it blocking CI", "quarantine our flaky e2e tests but keep running them", "retry failed
-  tests in Playwright/Vitest", "make Allure flag our flaky tests in TypeScript". Do NOT use for: the Java
-  stack (use qa-flaky-test-quarantine-java), the .NET stack (use qa-flaky-test-quarantine-dotnet), fixing a
-  genuinely-broken test (a deterministic failure is a bug, not flakiness), writing the tests themselves (use
-  qa-ui-test-author-playwright-typescript / qa-api-test-author-generator-typescript), eventual-consistency
-  waits inside one test (use Playwright auto-wait / expect.poll), or full Allure setup (use
-  qa-allure-reporting-typescript).
+description: Detect, retry, **quarantine**, and report flaky tests in a Node 20 + TypeScript suite (Playwright for e2e, Vitest for unit). Triggers: "this Playwright test is flaky, stop it blocking CI", "quarantine our flaky e2e tests but keep running them", "retry failed tests in Playwright/Vitest".
 ---
 
 # Flaky-Test Quarantine (Node 20 + TypeScript / Playwright + Vitest)
@@ -142,7 +126,7 @@ export default defineConfig({
 ```
 
 CI runs them as **two lanes** — the quarantine lane never blocks (cross-link
-`qa-ci-pipelines-github-actions`):
+`qa-ci-pipelines`):
 
 ```yaml
 - name: Gate suite (blocks merge)
@@ -288,5 +272,5 @@ is reported in Allure (flaky-flagged, history-tracked) but **never** fails the p
 - `qa-ui-test-author-playwright-typescript` — where the quarantined tests are authored; flakiness is best
   fixed at the source: auto-waiting locators, web-first assertions, **no `waitForTimeout`**,
   intent-not-selectors page objects. Fix the wait and the test leaves quarantine.
-- `qa-ci-pipelines-github-actions` / `-azure-pipelines` / `-gitlab-ci` — the gate-lane vs quarantine-lane job
+- `qa-ci-pipelines` (github-actions / azure-pipelines / gitlab-ci references) — the gate-lane vs quarantine-lane job
   wiring (`continue-on-error` on the non-gating lane); sharding the gate project across runners.

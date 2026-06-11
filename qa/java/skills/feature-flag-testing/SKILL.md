@@ -1,32 +1,6 @@
 ---
 name: qa-feature-flag-testing-java
-description: >-
-  Write **feature-flag** tests in Java 21 with **OpenFeature** (`dev.openfeature:sdk` + its built-in
-  **`InMemoryProvider`**) as the vendor-neutral spine and **LaunchDarkly** (`launchdarkly-java-server-sdk` +
-  its first-class **`TestData`** fixture) as the named real-provider path + TestNG, proving code whose behavior
-  **branches on a flag** is correct on EVERY branch. Covers the trait that makes a flag test deterministic:
-  **you NEVER evaluate the flag against a live/remote flag service — you PIN the flag state inside the test**
-  (an in-memory/test data source wired in setup; the production SDK key never appears in a test run), because
-  "run against whatever the environment's flags say" makes the test nondeterministic, environment-coupled, and
-  incapable of exercising the *other* branch. The discipline: **a flag is a branch — test BOTH sides** (and every
-  variation of a multivariate flag) as a matrix; **targeting rules are tested via the evaluation context**
-  (user/segment attributes in `EvaluationContext` / `LDContext` → assert the right variation lands, incl. the
-  fallthrough/default); **flag lifecycle is part of the test** (flip a kill-switch mid-test via `td.update(...)`
-  and assert the degradation path engages without a restart; clean flag state between tests so it never leaks).
-  Covers OpenFeature `Flag.builder()` variants + `contextEvaluator`, `setProviderAndWait`, domain-scoped clients,
-  `InMemoryProvider.updateFlags`, LaunchDarkly `TestData.dataSource()`, `FlagBuilder`
-  (`booleanFlag`/`variations`/`variationForKey`/`ifMatch`/`fallthroughVariation`), `Components.noEvents()`, and
-  the LaunchDarkly OpenFeature provider bridging both. Triggers: "test a feature flag / feature toggle", "test
-  both sides of a flag", "pin a flag state in tests", "test LaunchDarkly targeting rules", "OpenFeature
-  InMemoryProvider test", "test the kill-switch path", "our test fails depending on which flags are on in the
-  environment". Do NOT use for: the .NET stack (use qa-feature-flag-testing-dotnet), the TypeScript stack (use
-  qa-feature-flag-testing-typescript), stubbing the flag service's **HTTP endpoint** with WireMock (use the
-  SDK's test data source instead — mocking the wire is the anti-pattern here, see qa-api-mocking-wiremock-java
-  only for dependencies that have no test fixture), standing the flag service up as a **container** (flag state
-  is pinned in-process, not via qa-test-environments-java), **dependency-fault** resilience (a broken DB/API is
-  qa-chaos-testing-java; a kill-switch *flag* flip is this skill), the generic **parameterized-matrix mechanics**
-  (qa-data-driven-testing-java — the on/off table binds through it), or flag **management/rollout strategy**
-  (percentage rollouts, experimentation/A-B analytics, dashboard ops — out of scope).
+description: Use when testing feature-flagged code in Java 21 / TestNG — pin flag state in-process with OpenFeature's `InMemoryProvider` or LaunchDarkly's `TestData` fixture (never a live flag service), cover BOTH sides of every flag, drive targeting through the evaluation context. Triggers: "test a feature flag", "test both sides of a flag", "pin a flag state in tests".
 ---
 
 # QA — Feature-Flag Testing (Java 21 / OpenFeature + LaunchDarkly `TestData` + TestNG) — **canonical stack**
@@ -37,7 +11,7 @@ Scaffolds **deterministic feature-flag tests** in Java for code whose behavior b
 **`TestData`** fixture as the named real-provider path (the two compose: production code talks OpenFeature, the
 LaunchDarkly OpenFeature provider sits behind it, and `TestData` pins what that provider sees). This is the
 **canonical** stack of the 3-stack `feature-flag-testing` family by the user's explicit choice: it pairs with the
-TestNG spine the way #36/#39 do, and the OpenFeature Java SDK + LaunchDarkly Java server SDK story is mature and
+TestNG spine the way `flaky-test-quarantine`/`data-driven-testing` do, and the OpenFeature Java SDK + LaunchDarkly Java server SDK story is mature and
 first-class. The `dotnet` and `typescript` siblings are **ported** from this file — the moves are identical; only
 the SDK surface changes.
 
@@ -109,254 +83,9 @@ dependencies {
 > per-key target / fallthrough exactly as production would (idea #3). They compose via the LD OpenFeature
 > provider. Either way the production SDK key and the live flag service are **absent from the test**.
 
-## Path A — OpenFeature `InMemoryProvider` (the vendor-neutral spine, idea #1)
+## Deep-dive reference
 
-The provider is the seam. Production code asks an OpenFeature `Client` for flag values; the test swaps in an
-`InMemoryProvider` holding exactly the flags the scenario pins. **Use a domain-scoped provider + client**
-(`setProviderAndWait("checkout", ...)` / `getClient("checkout")`) — `OpenFeatureAPI` is a global singleton, and a
-domain keeps parallel test classes from clobbering each other's provider (no static mutable state leaking across
-tests).
-
-```java
-package support.flags;
-
-import dev.openfeature.sdk.Client;
-import dev.openfeature.sdk.OpenFeatureAPI;
-import dev.openfeature.sdk.providers.memory.Flag;
-import dev.openfeature.sdk.providers.memory.InMemoryProvider;
-
-import java.util.HashMap;
-import java.util.Map;
-
-/** Pins flag state for one test: a fresh InMemoryProvider per fixture, bound to a domain-scoped client. */
-public final class FlagFixture {
-    private final String domain;
-    private final Map<String, Flag<?>> flags = new HashMap<>();
-
-    public FlagFixture(String domain) { this.domain = domain; }
-
-    /** Pin a boolean flag to a fixed state — the simplest "pin, don't fetch". */
-    public FlagFixture withBooleanFlag(String key, boolean enabled) {
-        flags.put(key, Flag.builder()
-                .variant("on", true).variant("off", false)
-                .defaultVariant(enabled ? "on" : "off")
-                .build());
-        return this;
-    }
-
-    /** Pin a multivariate flag to one named variant (test EVERY variant via the matrix, idea #2). */
-    public FlagFixture withVariant(String key, Map<String, Object> variants, String selected) {
-        Flag.FlagBuilder<Object> builder = Flag.builder();
-        variants.forEach(builder::variant);
-        flags.put(key, builder.defaultVariant(selected).build());
-        return this;
-    }
-
-    /** Pin a context-aware rule: the evaluator routes by EvaluationContext attributes (idea #3). */
-    public FlagFixture withRule(String key, dev.openfeature.sdk.providers.memory.ContextEvaluator<Object> rule,
-                                Map<String, Object> variants, String defaultVariant) {
-        Flag.FlagBuilder<Object> builder = Flag.builder();
-        variants.forEach(builder::variant);
-        flags.put(key, builder.defaultVariant(defaultVariant).contextEvaluator(rule).build());
-        return this;
-    }
-
-    /** Wire the pinned flags in and return the client the code under test should use. */
-    public Client client() {
-        OpenFeatureAPI api = OpenFeatureAPI.getInstance();
-        api.setProviderAndWait(domain, new InMemoryProvider(flags));   // blocks until READY — no race on first read
-        return api.getClient(domain);
-    }
-}
-```
-
-### Both sides of the branch — the on/off matrix (idea #2)
-
-One parameterized test per flag-touching behavior; one row per flag state. The rows pin the flag; the assertions
-verify **each branch's own contract** — the off-row asserts the *legacy* behavior, not merely "no error".
-
-```java
-package flags;
-
-import dev.openfeature.sdk.Client;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
-import support.flags.FlagFixture;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
-public class CheckoutFlagTest {
-
-    @DataProvider(name = "newCheckoutFlagStates")
-    public Object[][] newCheckoutFlagStates() {
-        return new Object[][] {
-            // flagState | expectedFlow      — BOTH sides, every run (idea #2)
-            { true,        "express-checkout" },
-            { false,       "classic-checkout" },
-        };
-    }
-
-    @Test(dataProvider = "newCheckoutFlagStates")
-    public void shouldRouteToTheFlowContractedForEachFlagState(boolean enabled, String expectedFlow) {
-        Client flags = new FlagFixture("checkout")
-                .withBooleanFlag("new-checkout", enabled)        // PINNED — not fetched (idea #1)
-                .client();
-
-        CheckoutService checkout = new CheckoutService(flags);   // constructor injection — the client is a dependency
-
-        assertThat(checkout.startCheckout("sku-1").flow())
-                .as("flag %s routes to its contracted flow", enabled ? "on" : "off")
-                .isEqualTo(expectedFlow);
-    }
-}
-```
-
-> The off-row is **not** a formality: it is the only coverage of the path every un-migrated user is on, and the
-> only proof a rollback is safe. A multivariate flag gets one row per variation — exhaustively (`control` /
-> `treatment-a` / `treatment-b`), via the same `@DataProvider` mechanics as `qa-data-driven-testing-java`.
-
-### Targeting via the evaluation context (idea #3)
-
-The rule lives in the fixture; the test varies the **context** and asserts three cases — matching, non-matching,
-and **the fallthrough/default** (the case targeting bugs hide in).
-
-```java
-@Test
-public void shouldServeTheNewCheckoutOnlyToBetaTierUsers() {
-    Client flags = new FlagFixture("checkout")
-            .withRule("new-checkout",
-                    (flag, ctx) -> "beta".equals(ctx.getValue("tier").asString())
-                            ? flag.getVariants().get("on")
-                            : flag.getVariants().get("off"),
-                    java.util.Map.of("on", true, "off", false), "off")
-            .client();
-
-    var betaUser    = new dev.openfeature.sdk.MutableContext("user-1").add("tier", "beta");
-    var freeUser    = new dev.openfeature.sdk.MutableContext("user-2").add("tier", "free");
-    var anonNoTier  = new dev.openfeature.sdk.MutableContext("user-3");          // the forgotten third case
-
-    assertThat(flags.getBooleanValue("new-checkout", false, betaUser)).as("matching context").isTrue();
-    assertThat(flags.getBooleanValue("new-checkout", false, freeUser)).as("non-matching context").isFalse();
-    assertThat(flags.getBooleanValue("new-checkout", false, anonNoTier)).as("fallthrough/default").isFalse();
-}
-```
-
-## Path B — LaunchDarkly `TestData` (the named real-provider path)
-
-`TestData.dataSource()` replaces LaunchDarkly's streaming connection with a programmable in-process source — the
-**real LD evaluation engine** runs your targeting rules against it. Wire it into `LDConfig` with
-`Components.noEvents()` (no analytics leave the test) — the SDK key is a placeholder, never the production key.
-
-```java
-package support.flags;
-
-import com.launchdarkly.sdk.server.Components;
-import com.launchdarkly.sdk.server.LDClient;
-import com.launchdarkly.sdk.server.LDConfig;
-import com.launchdarkly.sdk.server.integrations.TestData;
-
-/** A deterministic LDClient: TestData replaces the stream; no events; placeholder key. */
-public final class LaunchDarklyFixture {
-    private final TestData td = TestData.dataSource();
-    private final LDClient client;
-
-    public LaunchDarklyFixture() {
-        LDConfig config = new LDConfig.Builder()
-                .dataSource(td)                       // PINNED in-process — never the live service (idea #1)
-                .events(Components.noEvents())        // no analytics calls leave the test run
-                .build();
-        client = new LDClient("test-sdk-key-not-real", config);
-    }
-
-    public TestData data()     { return td; }         // mutate flags mid-test via td.update(...) (idea #4)
-    public LDClient client()   { return client; }
-    public void close() throws java.io.IOException { client.close(); }
-}
-```
-
-### Targeting with the real rule engine — `ifMatch` / `variationForKey` / fallthrough
-
-```java
-package flags;
-
-import com.launchdarkly.sdk.ContextKind;
-import com.launchdarkly.sdk.LDContext;
-import com.launchdarkly.sdk.LDValue;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
-import support.flags.LaunchDarklyFixture;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
-public class BetaTargetingTest {
-    private LaunchDarklyFixture ld;
-
-    @BeforeMethod(alwaysRun = true)
-    public void freshFlagState() { ld = new LaunchDarklyFixture(); }     // no leakage between tests (idea #4)
-
-    @AfterMethod(alwaysRun = true)
-    public void closeClient() throws Exception { ld.close(); }
-
-    @Test
-    public void shouldTargetBetaTierAndOneNamedUserAndFallThroughForEveryoneElse() {
-        ld.data().update(ld.data().flag("new-checkout")
-                .booleanFlag()
-                .variationForKey(ContextKind.DEFAULT, "qa-canary", true)        // a per-key target
-                .ifMatch("tier", LDValue.of("beta")).thenReturn(true)           // a rule — evaluated by the REAL engine
-                .fallthroughVariation(false));                                  // the explicit default
-
-        LDContext canary = LDContext.builder("qa-canary").build();
-        LDContext beta   = LDContext.builder("user-7").set("tier", "beta").build();
-        LDContext free   = LDContext.builder("user-9").set("tier", "free").build();
-
-        assertThat(ld.client().boolVariation("new-checkout", canary, false)).as("named key targeted").isTrue();
-        assertThat(ld.client().boolVariation("new-checkout", beta, false)).as("rule match").isTrue();
-        assertThat(ld.client().boolVariation("new-checkout", free, false)).as("fallthrough").isFalse();
-    }
-}
-```
-
-### The kill-switch lifecycle — flip mid-flight, assert graceful degradation (idea #4)
-
-`td.update(...)` propagates to the live client **as if LaunchDarkly streamed the change** — so one test proves
-the off-path engages *without a restart*. This is the flag analogue of `qa-chaos-testing-java`'s
-steady → perturb → assert-degraded lifecycle (and the boundary: a *flag* flip is this skill; a *dependency fault*
-is chaos).
-
-```java
-@Test
-public void shouldEngageTheRecommendationsFallbackWhenTheKillSwitchFlipsMidFlight() {
-    ld.data().update(ld.data().flag("recommendations-enabled").booleanFlag().variationForAll(true));
-    ProductPageService page = new ProductPageService(ld.client());
-
-    // 1. steady state — the feature is on and serving.
-    assertThat(page.render("sku-1").hasRecommendations()).isTrue();
-
-    // 2. flip the kill-switch — no restart, no redeploy; propagates like a streamed change.
-    ld.data().update(ld.data().flag("recommendations-enabled").booleanFlag().variationForAll(false));
-
-    // 3. assert the DEGRADED path: the page still renders, recommendations replaced by the contracted fallback.
-    var degraded = page.render("sku-1");
-    assertThat(degraded.isRendered()).as("page survives the kill").isTrue();
-    assertThat(degraded.hasRecommendations()).as("feature is off").isFalse();
-    assertThat(degraded.fallbackMessage()).isEqualTo("Recommendations are temporarily unavailable");
-}
-```
-
-### Bridging both — prod code on OpenFeature, `TestData` behind the LD provider
-
-When production talks OpenFeature but the org runs LaunchDarkly, compose the two: the test builds the
-`TestData`-backed `LDClient`, wraps it in the LD OpenFeature provider, and the code under test stays
-vendor-neutral.
-
-```java
-import com.launchdarkly.openfeature.serverprovider.Provider;
-
-OpenFeatureAPI api = OpenFeatureAPI.getInstance();
-api.setProviderAndWait("checkout", new Provider(ld.client()));   // LD provider over the TestData-backed client
-Client flags = api.getClient("checkout");                        // prod-shaped: pure OpenFeature
-```
+These sections live in `references/details.md` — **read it when the task touches them**: **Path A — OpenFeature `InMemoryProvider` (the vendor-neutral spine, idea #1)**; **Path B — LaunchDarkly `TestData` (the named real-provider path)**.
 
 ## The code default — the third state every flag has
 
@@ -392,7 +121,7 @@ behavior* (this skill) vs a *dependency fault* behind it (`qa-chaos-testing-java
   *Fix:* `InMemoryProvider` / `TestData` wired in setup; the live service and real key never appear (idea #1).
 - **Stubbing the flag service's HTTP endpoint with WireMock.** You'd be reverse-engineering the SDK's wire
   protocol (polling/streaming payload shapes) — brittle and pointless when the SDK ships a **first-class test
-  fixture**. *Fix:* the SDK's own test source; reserve `qa-api-mocking-wiremock-java` for dependencies without one.
+  fixture**. *Fix:* the SDK's own test source; reserve `qa-api-mocking-java` for dependencies without one.
 - **Testing only the flag-on path.** Zero coverage of the branch your un-migrated users run, zero proof the
   rollback is safe. *Fix:* the on/off (or all-variations) matrix — every flag-touching behavior, both sides (idea #2).
 - **Asserting only "no error" on the off-row.** The legacy branch has its *own* contract. *Fix:* the off-row
@@ -422,7 +151,7 @@ a two-row matrix asserting `express-checkout` *and* `classic-checkout`, a contex
 fallthrough asserted, and a kill-switch flip test. Same flag, deterministic — and **both** branches covered.
 
 **Composing with the neighbors.** The branch under test often *contains* the things other skills assert — the
-on-path writes a new table (`qa-db-testing-client-java`), emits a new event (`qa-messaging-testing-kafka-java`),
+on-path writes a new table (`qa-db-testing-client-java`), emits a new event (`qa-messaging-testing-java`),
 or renders a new page (`qa-ui-test-author-playwright-java`). This skill pins which branch runs; those skills
 assert what the branch does. The variation matrix binds through `qa-data-driven-testing-java`; the kill-switch
 degradation assertion borders `qa-chaos-testing-java` (flag flip vs dependency fault — adjacent, not the same).
@@ -451,16 +180,16 @@ degradation assertion borders `qa-chaos-testing-java` (flag flip vs dependency f
 - `qa-feature-flag-testing-dotnet` · `qa-feature-flag-testing-typescript` — the sibling stacks (`OpenFeature`
   NuGet + `LaunchDarkly.ServerSdk` `TestData` + NUnit · `@openfeature/server-sdk` + `@launchdarkly/node-server-sdk`
   `TestData` + Vitest); same four ideas, same fixtures, different SDK surface.
-- `qa-data-driven-testing-java` (#39) — the **matrix mechanics** the on/off/variation table binds through
+- `qa-data-driven-testing-java` — the **matrix mechanics** the on/off/variation table binds through
   (`@DataProvider` row-binding); this skill defines *what* the rows are, that one defines *how* rows drive tests.
-- `qa-chaos-testing-java` (#48) — the **kill-switch boundary**: the off-path of a flag flip is this skill; a
+- `qa-chaos-testing-java` — the **kill-switch boundary**: the off-path of a flag flip is this skill; a
   faulted dependency behind the feature is chaos. The lifecycle shape (steady → perturb → assert-degraded) is shared.
-- `qa-api-mocking-wiremock-java` (#22) — what **not** to reach for here: the flag SDKs ship first-class test
+- `qa-api-mocking-java` — what **not** to reach for here: the flag SDKs ship first-class test
   sources, so stubbing their wire protocol is the anti-pattern; WireMock covers dependencies without a fixture.
-- `qa-test-environments-java` (#14) — stands real dependencies up in containers; flag state is pinned
+- `qa-test-environments-java` — stands real dependencies up in containers; flag state is pinned
   **in-process**, no container needed — don't stand up a flag service to test a branch.
 - `qa-api-test-author-generator-java` · `qa-ui-test-author-playwright-java` — the branch under test is usually an
   API or UI behavior; those skills own the assertion style inside each pinned branch.
-- `qa-auth0-test-tokens-java` (#16) — the same "test fixture over live service" posture applied to auth; pairs
+- `qa-auth0-test-tokens-java` — the same "test fixture over live service" posture applied to auth; pairs
   when targeting rules key off claims-derived attributes.
 - `qa-allure-reporting-java` — render the flag matrix as named results (one per variation row).

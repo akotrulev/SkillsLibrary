@@ -1,6 +1,6 @@
 ---
 name: qa-page-object-architect-dotnet
-description: Use when the user is designing the page object structure for a .NET UI test project — Playwright .NET, Selenium .NET, or Appium .NET — what becomes a page, what becomes a component, where `BasePage` lives, how to split a giant page object, and how to share code across platforms. Triggers: "design page objects for app X in C#", "how should I structure Pages/ for our NUnit suite", "split this giant ILocator-heavy page", "where does this shared helper go in our Playwright .NET project". Do NOT use for individual page code (use `qa/dotnet/skills/ui-test-author/playwright`, `qa/dotnet/skills/ui-test-author/selenium`, or `qa/dotnet/skills/ui-test-author/appium`), reviewing one file (use `qa/dotnet/skills/ui-test-author/reviewer`), Java POM architecture (use `qa/java/skills/page-object-architect`), or TypeScript POM architecture (use `qa/typescript/skills/page-object-architect`).
+description: Use when the user is designing the page object structure for a .NET UI test project. Triggers: "design page objects for app X in C#", "how should I structure Pages/ for our NUnit suite", "split this giant ILocator-heavy page".
 ---
 
 # QA — Page Object Architect (.NET / C#)

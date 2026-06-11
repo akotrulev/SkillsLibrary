@@ -1,26 +1,6 @@
 ---
 name: qa-synthetic-monitoring-dotnet
-description: >-
-  Author **synthetic monitoring as code** in the .NET / Azure stack — scripted checks that run on a schedule
-  against a LIVE environment (staging/prod) to catch outages and regressions in production, the "is it up and
-  working *right now*" layer, distinct from CI pre-merge tests. **.NET-native tool: Azure Application Insights
-  availability tests** (because Checkly — the family's canonical — has **no .NET SDK**). Covers the **two check
-  types** (**Standard availability tests** = single-request HTTP uptime + SLA checks declared as
-  config-as-code via Bicep/Terraform `azurerm_application_insights_standard_web_test`, and **custom
-  `TrackAvailability`** = a scheduled .NET worker / Azure Function running a Playwright-.NET browser journey or
-  `HttpClient` flow and pushing the verdict to App Insights via `TelemetryClient.TrackAvailability`, reusing the
-  page objects from `qa/dotnet/skills/ui-test-author/playwright`); **monitoring-as-code** (Bicep/Terraform + a
-  Timer-triggered Function, deployed by an IaC pipeline); **alerting + SLA/latency thresholds**
-  (`azurerm_monitor_metric_alert` on availability % + duration, action groups → email/SMS/webhook/PagerDuty);
-  **wait on a condition, never a sleep**; and **secrets from env, never logged** (connection string from env /
-  Key Vault, read lazily). Triggers: "set up synthetic monitoring for our .NET/Azure app", "add an Application
-  Insights availability test as code", "monitor our login journey on a schedule with TrackAvailability and
-  alert", "Bicep/Terraform standard web test", "assert an SLA on a live endpoint in Azure". Do NOT use for: the
-  TypeScript/Checkly stack (use qa-synthetic-monitoring-typescript — the canonical), the Java/JVM stack (use
-  qa-synthetic-monitoring-java — Grafana Cloud Synthetic Monitoring), pre-merge CI tests against an ephemeral
-  env (use qa-ci-pipelines-* — synthetics run *post-deploy* against a live target), load testing (use
-  qa-performance-nbomber), authoring the Playwright journey itself (use qa-ui-test-author-playwright-dotnet —
-  this skill *reuses* those page objects), or full Allure result wiring (use qa-allure-reporting-dotnet).
+description: Use when authoring synthetic monitoring as code from the .NET / Azure stack — scheduled availability tests and scripted checks against live staging/prod via Azure Application Insights. The "is it up right now" layer, distinct from CI pre-merge tests. Triggers: "add a prod uptime check", "synthetic monitor for the login flow", "monitoring as code".
 ---
 
 # Synthetic Monitoring as Code (Azure App Insights · .NET 8) — **ported from the TypeScript/Checkly canonical**
@@ -141,7 +121,7 @@ resource healthTest 'Microsoft.Insights/webtests@2022-06-15' = {
 ```
 
 Deploy it from the pipeline (`az deployment group create` / `terraform apply`) — cross-link
-`qa-ci-pipelines-azure-pipelines`. This is the synthetic-vs-CI boundary: this resource runs **forever, against
+`qa-ci-pipelines`. This is the synthetic-vs-CI boundary: this resource runs **forever, against
 the live target**, not as a pre-merge gate.
 
 ## Check type 1 — Standard availability tests (status + latency + content)
@@ -379,12 +359,12 @@ a user can't check out — and the same `LoginPage`/`CartPage` page objects are 
   This skill schedules and alerts on them; it does not author them. Mirror its intent-not-selectors discipline.
 - `qa-performance-nbomber` — load testing (throughput), NOT uptime. Synthetics check "is it working"; NBomber
   checks "how much can it take".
-- `qa-ci-pipelines-azure-pipelines` (#12) / `-github-actions` / `-gitlab-ci` — the **pre-merge gate against
+- `qa-ci-pipelines` / `-github-actions` / `-gitlab-ci` — the **pre-merge gate against
   ephemeral envs** boundary; also where `az deployment` / `terraform apply` for the Standard tests + Function
   deploy are wired.
-- `qa-auth0-test-tokens-dotnet` (#16) — M2M / test-user tokens for probes hitting an **authenticated** live
+- `qa-auth0-test-tokens-dotnet` — M2M / test-user tokens for probes hitting an **authenticated** live
   endpoint (mint in the probe; creds from env, lazily).
-- `qa-flaky-test-quarantine-dotnet` (#36) — a probe that needs the alert window widened to stay green is
+- `qa-flaky-test-quarantine-dotnet` — a probe that needs the alert window widened to stay green is
   *flaky*; fix the root cause rather than masking the alert.
 - `qa-allure-reporting-dotnet` — surfacing probe-verification runs (the synthetic's reporting layer beyond the
   App Insights availability dashboard); also `observability` for the Azure Monitor / dashboards the

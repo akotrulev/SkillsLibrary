@@ -1,6 +1,6 @@
 ---
 name: qa-ui-test-author-playwright-java
-description: Use when the user asks to scaffold Playwright UI tests in Java — new test classes, page objects under `src/test/java/<pkg>/pages/`, or a specific scenario (login, form, accessibility, visual). Triggers: "write a Playwright test for X in Java", "add a Playwright Java page object for screen Y", "scaffold a Playwright Java spec". Do NOT use for Playwright TypeScript (use `qa/typescript/skills/ui-test-author/playwright`), Playwright .NET (use `qa/dotnet/skills/ui-test-author/playwright`), Appium/mobile (use `qa/java/skills/ui-test-author/appium`), Selenium-Java (use `qa/java/skills/ui-test-author/selenium`), Accelerator tests (use `qa/manual/accelerator-conventions`), or reviewing existing tests (use `qa/java/skills/ui-test-author/reviewer`).
+description: Use when the user asks to scaffold Playwright UI tests in Java — new test classes, page objects under `src/test/java/<pkg>/pages/`, or a specific scenario (login, form, accessibility, visual). Triggers: "write a Playwright test for X in Java", "add a Playwright Java page object for screen Y", "scaffold a Playwright Java spec".
 ---
 
 # QA — Playwright Test & Page Object Generator (Java)

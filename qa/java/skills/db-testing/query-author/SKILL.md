@@ -1,6 +1,6 @@
 ---
 name: qa-db-testing-query-author-java
-description: Use when the user asks to write a safe verification query for tests in Java 21 / Spring Boot 3, assert this row exists from a test, review my test SQL for guardrails, add a `COUNT(*)` check from an integration test, or wait for an eventually-consistent row — `NamedParameterJdbcTemplate` + a tasteful jOOQ subset, explicit column projection, safe `LIKE` escaping, `Long` / `UUID` parsing, `assertRowExists` / `assertNoRowMatches` / `countWhere` helpers, Awaitility-based poll around a query, refusal patterns for `DROP` / `TRUNCATE` / no-WHERE `DELETE` outside cleanup helpers. Do NOT use for .NET (`qa/dotnet/skills/db-testing/query-author`), TypeScript (`qa/typescript/skills/db-testing/query-author`), opening the connection / fixture lifecycle (`qa/java/skills/db-testing/client`), or container boot (`qa/java/skills/db-testing/testcontainers`).
+description: Use when the user asks to write a safe verification query for tests in Java 21 / Spring Boot 3, assert this row exists from a test, review my test SQL for guardrails, add a `COUNT(*)` check from an integration test, or wait for an eventually-consistent row.
 ---
 
 # QA — DB Testing Query Author (Java 21 + Spring Boot 3)

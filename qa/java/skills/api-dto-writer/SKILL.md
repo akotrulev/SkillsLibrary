@@ -1,6 +1,6 @@
 ---
 name: qa-api-dto-writer-java
-description: Use when the user asks to create a new DTO / model class / response object in a Java test project (Java 21 + Jackson, typically alongside RestAssured). Triggers: "add a {Resource}Dto in Java", "create the InDto / ModDto record", "scaffold the wrapper DTO for paginated {resource} in Java". Do NOT use for C# or TypeScript DTOs (use the sibling skills) or for production domain models.
+description: Use when the user asks to create a new DTO / model class / response object in a Java test project (Java 21 + Jackson, typically alongside RestAssured). Triggers: "add a {Resource}Dto in Java", "create the InDto / ModDto record", "scaffold the wrapper DTO for paginated {resource} in Java".
 ---
 
 # qa-api-dto-writer-java

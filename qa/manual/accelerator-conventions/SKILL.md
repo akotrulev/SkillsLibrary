@@ -1,6 +1,6 @@
 ---
 name: qa-accelerator-conventions
-description: Use when working in the Accelerator test automation framework or any consumer of it. Triggers: "add a test to Accelerator", "scaffold a screen for the Appium suite", "create a Playwright page object for X", "add an API test using TestCore", "set up Allure reporting", "is this Accelerator-idiomatic". Do NOT use for generic Playwright/Appium/RestSharp advice outside the Accelerator (use the generic ui-test-author or api-test-author skills).
+description: Use when working in the Accelerator test automation framework or any consumer of it. Triggers: "add a test to Accelerator", "scaffold a screen for the Appium suite", "create a Playwright page object for X".
 ---
 
 # Accelerator Conventions

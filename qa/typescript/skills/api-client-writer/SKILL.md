@@ -1,6 +1,6 @@
 ---
 name: qa-api-client-writer-typescript
-description: Use when the user asks to create a new API client module (`{resource}Client.ts`) in a TypeScript API test project (Vitest + native `fetch` + Zod, Node 20, strict TS). Triggers: "write an API client for X", "add a {resource}Client", "scaffold the TS client for /api/{path}". Do NOT use for writing the test files themselves (use `qa/typescript/skills/api-test-author/generator`), for the .NET stack (use `qa/dotnet/skills/api-client-writer`), for the Java stack (use `qa/java/skills/api-client-writer`), or for non-fetch HTTP libraries (axios, got, supertest).
+description: Use when the user asks to create a new API client module (`{resource}Client.ts`) in a TypeScript API test project (Vitest + native `fetch` + Zod, Node 20, strict TS). Triggers: "write an API client for X", "add a {resource}Client", "scaffold the TS client for /api/{path}".
 ---
 
 # qa-api-client-writer-typescript

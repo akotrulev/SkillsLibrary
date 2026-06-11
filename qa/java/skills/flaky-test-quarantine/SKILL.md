@@ -1,28 +1,12 @@
 ---
 name: qa-flaky-test-quarantine-java
-description: >-
-  Detect, retry, **quarantine**, and report flaky tests in a Java 21 / TestNG suite — so an
-  intermittently-failing test stops blocking the merge gate **without** being silently deleted or
-  retried-to-green forever. Covers the TestNG `IRetryAnalyzer` (bounded re-run of a failed test) applied
-  suite-wide via an `IAnnotationTransformer` listener (no per-test edits); Maven Surefire
-  `rerunFailingTestsCount` as the build-tool alternative; **quarantine** via TestNG groups
-  (`@Test(groups = "flaky")`) excluded from the gate suite and run in a separate **non-gating** job; and the
-  **Allure flaky flag** two ways — the explicit `io.qameta.allure.Flaky` annotation (paired with `@Issue`
-  for the tracking ticket) and Allure's **history-based auto-detection** (failed→passed→failed across the
-  last 5 launches). Triggers: "this test is flaky, stop it blocking the pipeline", "quarantine the flaky
-  tests but keep running them", "retry failed tests a couple of times in TestNG", "make Allure flag our
-  flaky tests", "set up a flaky-test quarantine lane in CI". Do NOT use for: the .NET stack (use
-  qa-flaky-test-quarantine-dotnet), the TypeScript stack (use qa-flaky-test-quarantine-typescript), fixing a
-  genuinely-broken test (a deterministic failure is a bug, not flakiness — fix it), writing the tests
-  themselves (use qa-ui-test-author-* / qa-api-test-author-*), eventual-consistency waits inside one test
-  (use the condition-wait in qa-db-testing-client-java / qa-messaging-testing-*), or full Allure setup (use
-  qa-allure-reporting-java).
+description: Detect, retry, **quarantine**, and report flaky tests in a Java 21 / TestNG suite. Triggers: "this test is flaky, stop it blocking the pipeline", "quarantine the flaky tests but keep running them", "retry failed tests a couple of times in TestNG".
 ---
 
 # Flaky-Test Quarantine (Java 21 / TestNG) — **canonical stack**
 
 This is the **canonical** stack of the single-node `qa/java/skills/flaky-test-quarantine/` family, and it leads by
-judgment (the "lead where the tool is most authentic" call #22 WireMock / #27 dependency-scanning / #30
+judgment (the "lead where the tool is most authentic" call WireMock / dependency-scanning / `kafka`
 Kafka made): TestNG's `IRetryAnalyzer` + `IAnnotationTransformer` is the **richest, most first-class
 flaky-handling surface** of the three runners — a suite-wide retry policy with zero per-test edits, plus
 native group-based quarantine. The `dotnet` (NUnit `[Retry]` + a custom `IRepeatTest` attribute) and
@@ -302,55 +286,9 @@ tagging faster than you're fixing.
 - **One global retry cap of 3 on the gate "to be safe".** That's the masking knob in disguise. *Fix:* 1 on
   the gate; reserve the higher cap for the non-gating lane where the result doesn't block anyone.
 
-## Examples
+## Deep-dive reference
 
-**End-to-end: a transient on the gate (auto-retried once) vs a known flaky (quarantined + tracked).**
-
-```java
-public class PaymentFlowTests {
-
-    // GATE test — normally deterministic. If a true transient (a cold-start 503) reddens it,
-    // RetryAnalyzer (cap 1, applied suite-wide by RetryListener) gives it exactly one more shot.
-    @Test
-    public void shouldAuthorizePaymentWhenCardIsValid() {
-        var result = gateway.authorize(Cards.valid().withAmount(1999).build());  // test-data-builder/java
-        assertThat(result.status()).isEqualTo(AuthStatus.APPROVED);              // one logical assertion
-    }
-
-    // QUARANTINED test — known to race against the gateway's async settlement webhook.
-    // Off the gate (group "flaky"), still run in the quarantine lane, flagged in Allure, ticketed.
-    @Test(groups = "flaky")
-    @Flaky
-    @Issue("PAY-1204")
-    public void shouldMarkSettledWhenWebhookArrivesWithinSla() {
-        gateway.authorize(Cards.valid().build());
-        // the de-flake (PAY-1204) is to wait on the settlement condition, not a fixed window — until then,
-        // this lives in quarantine so it can't redden a clean PR.
-        var settlement = await().atMost(Duration.ofSeconds(10))
-            .until(() -> ledger.settlementFor(orderId), s -> s.state() == SettlementState.SETTLED);
-        assertThat(settlement.state()).isEqualTo(SettlementState.SETTLED);
-    }
-}
-```
-
-CI shape (two lanes — cross-link `qa-ci-pipelines-github-actions` for the full workflow):
-
-```yaml
-- name: Gate suite (blocks merge)
-  run: ./gradlew test                       # testng-gate.xml — excludes "flaky", retry cap 1
-
-- name: Quarantine lane (visibility only)
-  if: always()
-  run: ./gradlew flakyQuarantine            # testng-quarantine.xml — ignoreFailures, never blocks
-
-- name: Upload Allure results               # both lanes write build/allure-results/
-  if: always()
-  uses: actions/upload-artifact@v4
-  with: { name: allure-results, path: '**/build/allure-results/' }
-```
-
-The gate is green if the non-flaky tests pass (one retry absorbed any transient); the quarantine lane's
-result is reported in Allure (flaky-flagged, history-tracked) but **never** fails the pipeline.
+These sections live in `references/details.md` — **read it when the task touches them**: **Examples**.
 
 ## Rules (hard constraints)
 
@@ -384,10 +322,10 @@ result is reported in Allure (flaky-flagged, history-tracked) but **never** fail
   skill only adds the flaky/quarantine pieces; do the base setup there.
 - `qa-_shared-quality-metrics` — track **flaky-rate over time**; a quarantine group that grows is the metric
   to watch. Flaky-rate ÷ total, trending down, is the goal.
-- `qa-db-testing-client-java` (#3) / `qa-messaging-testing-service-bus-java` (#28) — the **condition-wait**
+- `qa-db-testing-client-java` / `qa-messaging-testing-java` — the **condition-wait**
   (Awaitility) that *prevents* the eventual-consistency flakiness this skill quarantines. Most flaky tests
   are sleep/timing tests in disguise; fix the wait and they leave quarantine.
 - `qa-ui-test-author-playwright-java` / `qa-api-test-author-generator-java` — where the tests being
   quarantined are authored; flakiness is best fixed at the source (stable locators, intent-not-selectors).
-- `qa-ci-pipelines-github-actions` / `-azure-pipelines` / `-gitlab-ci` — the gate-lane vs quarantine-lane
+- `qa-ci-pipelines` (github-actions / azure-pipelines / gitlab-ci references) — the gate-lane vs quarantine-lane
   job wiring (a non-gating job with `continue-on-error` / `ignoreFailures`).

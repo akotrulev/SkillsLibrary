@@ -1,6 +1,6 @@
 ---
 name: qa-allure-reporting-dotnet
-description: Use when the user asks to set up Allure reporting for a .NET test suite (NUnit + RestSharp, NUnit + Playwright .NET, NUnit + Appium .NET, xUnit) — install `Allure.NUnit` / `Allure.XUnit`, configure `allureConfig.json`, wire failure attachments (request/response body, screenshots, traces), feature/story/severity hierarchy, and publish to GitHub Pages / GitLab Pages / Azure Pipelines. Triggers: "set up Allure for our NUnit project", "wire Allure attachments in .NET", "publish Allure report from our .NET CI", "design Allure feature/story for NUnit tests". Do NOT use for Java reporting (use `qa/java/skills/allure-reporting`), TypeScript reporting (use `qa/typescript/skills/allure-reporting`), writing tests (use the matching `qa/<topic>` skill), or test strategy (use `qa/manual/test-strategy`).
+description: Use when the user asks to set up Allure reporting for a .NET test suite (NUnit + RestSharp, NUnit + Playwright .NET, NUnit + Appium .NET, xUnit). Triggers: "set up Allure for our NUnit project", "wire Allure attachments in .NET", "publish Allure report from our .NET CI".
 ---
 
 # QA — Allure Reporting (.NET / NUnit & xUnit)

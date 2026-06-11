@@ -1,6 +1,6 @@
 ---
 name: qa-api-test-author-reviewer-java
-description: Use when the user asks to review existing Java API test code (RestAssured + TestNG) for quality. Triggers: "review this RestAssured test", "look at OrderTest.java", "spot issues in this {Resource}Client class", "is this TestNG API test any good". Do NOT use for generating new tests (use `qa/java/skills/api-test-author/generator`), for the .NET sibling (use `qa/dotnet/skills/api-test-author/reviewer`), for the TypeScript sibling (use `qa/typescript/skills/api-test-author/reviewer`), or for UI tests (use `qa/java/skills/ui-test-author/reviewer`).
+description: Use when the user asks to review existing Java API test code (RestAssured + TestNG) for quality. Triggers: "review this RestAssured test", "look at OrderTest.java", "spot issues in this {Resource}Client class". Not for generating new tests → `api-test-author/generator`.
 ---
 
 # QA — API Test Reviewer (Java / RestAssured + TestNG)

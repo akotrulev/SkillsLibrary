@@ -1,6 +1,6 @@
 ---
 name: qa-appium-explore-typescript
-description: Use when the user wants to explore the currently open Android/iOS app on a real device or emulator through the Appium MCP server — enumerate interactable and visible elements, find/verify locators, check UI state, reveal a screen's elements, or walk an app flow — so a TypeScript (WebdriverIO) page object can be built next. Triggers: "explore this screen", "what's on the current screen", "find the locators for X", "what testIDs are missing here", "walk through the login flow on the device". Do NOT use for emitting the page object itself (use qa/typescript/skills/appium-page-object), writing the tests (use qa/typescript/skills/ui-test-author/appium), web pages in a browser (use qa/typescript/skills/pom-builder), or other stacks (use qa/java/skills/appium-explore / qa/dotnet/skills/appium-explore).
+description: Use when the user wants to explore the currently open Android/iOS app on a real device or emulator through the Appium MCP server. Triggers: "explore this screen", "what's on the current screen", "find the locators for X".
 ---
 
 # QA — Appium Live-App Explorer (TypeScript)

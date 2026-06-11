@@ -1,30 +1,6 @@
 ---
 name: qa-chaos-testing-typescript
-description: >-
-  Write **fault-injection / resilience** tests in TypeScript (Node 20, strict) with **Toxiproxy** (Shopify's TCP
-  fault-injection proxy) + the **Testcontainers `ToxiProxyContainer`** (`@testcontainers/toxiproxy`) +
-  **toxiproxy-node-client** + **Vitest**, proving the app under test **degrades gracefully** when a dependency (DB,
-  HTTP API, broker, cache) misbehaves. Covers the trait that makes a chaos test the inverse of every other test:
-  **you do NOT assert the dependency works — you INJECT a fault into the connection (latency, bandwidth cap,
-  connection drop, timeout, partial/sliced response) and assert the app RETRIES / TRIPS A CIRCUIT BREAKER / HONORS A
-  TIMEOUT / FALLS BACK instead of hanging, crashing, or corrupting state** ("assert the call succeeded" is the wrong
-  reflex here). The mechanism: **Toxiproxy sits as a TCP proxy BETWEEN the app and its dependency — you point the
-  app's connection string at the proxy listen port, not the real dependency** — and **toxics are added/removed at
-  runtime over the REST API** so each test runs a lifecycle: **steady-state → inject the toxic → assert degraded
-  behaviour → remove the toxic → assert recovery.** Covers the toxic types (`latency`+jitter, `bandwidth`, `timeout`,
-  `reset_peer`, `slow_close`, `slicer`, `limit_data`), the upstream/downstream **stream direction**, the **toxicity**
-  probability, asserting the **resilience pattern** (retry count, circuit-breaker open/half-open/closed via cockatiel,
-  timeout honored, fallback served) not the fault, partial failures via `slicer`/`limit_data`, and standing the
-  dependency + proxy up with Testcontainers on a shared `Network`. Triggers: "test our app survives the database
-  going slow", "inject latency / a connection drop and assert the circuit breaker opens", "assert the retry/fallback
-  fires when the API times out", "Toxiproxy resilience test in TypeScript", "add a fault-injection test with
-  Testcontainers". Do NOT use for: the Java stack (use qa-chaos-testing-java), the .NET stack (use
-  qa-chaos-testing-dotnet), merely **observing/mocking** out-of-browser requests (use qa-network-monitoring-proxy-typescript
-  — observe vs inject), conditioning the **device / client** network in a UI/mobile run (use
-  qa-cloud-grid-config-typescript / qa-mobile-device-farm-typescript), standing dependencies up without faulting them
-  (use qa-test-environments-typescript), **load/volume** testing (use qa-performance-k6-typescript), or **production
-  chaos engineering** on a live cluster (Gremlin / Litmus / Chaos Mesh — out of scope; this skill is functional
-  fault-injection in a test).
+description: Use when writing fault-injection / resilience tests in Node 20 / TypeScript / Vitest with Toxiproxy via Testcontainers (toxiproxy-node-client) — inject latency, drops, and bandwidth caps on a dependency (DB, API, broker, cache) and assert the app degrades gracefully. Triggers: "test the app survives a slow database", "inject a connection drop", "assert the circuit breaker opens".
 ---
 
 # QA — Chaos / Fault-Injection Testing (TypeScript / Toxiproxy + Testcontainers + Vitest)
@@ -56,7 +32,7 @@ happy-path skill in this library: the REST/gRPC authors assert *the dependency a
 > 4. **Assert the resilience PATTERN, not the fault.** The toxic is the *given*, not the assertion. Assert the
 >    **behaviour it provokes**: the retry count, the circuit-breaker state transition (Closed → Open → HalfOpen →
 >    Closed via cockatiel), the honored timeout (fails *fast*, not hangs), the fallback payload served. This is what
->    `qa-network-monitoring-proxy-typescript` can *observe* but never *inject* — observe vs break.
+>    `qa-network-monitoring-typescript` can *observe* but never *inject* — observe vs break.
 
 ## Decision matrix — fault scenario → toxic → what you assert
 
@@ -99,127 +75,16 @@ happy-path skill in this library: the REST/gRPC authors assert *the dependency a
 }
 ```
 
-> **Why a proxy and not a mock?** A mock (`qa-api-mocking-msw-typescript`) makes the *dependency* return a canned
+> **Why a proxy and not a mock?** A mock (`qa-api-mocking-typescript`) makes the *dependency* return a canned
 > error at the application layer; a Toxiproxy toxic faults the *transport* — latency, a dropped TCP connection, a
 > half-sent response — the failures that exercise socket timeouts, connection pools, and retry/circuit code. Mock
 > when you control the contract and want a specific status; **fault-inject when you want to prove the app survives
 > the network/dependency misbehaving**. They compose: an MSW/WireMock upstream behind a Toxiproxy listener faults
 > the transport to a controllable contract.
 
-## The mechanism — proxy BETWEEN app and dependency (idea #2)
+## Deep-dive reference
 
-Stand the dependency and Toxiproxy up on a **shared Docker `Network`**, create a proxy whose **upstream** is the
-dependency and whose **listen** side is what the app connects to, then **point the app at the proxy's mapped
-port**. Everything downstream flows through the fault point.
-
-```ts
-// tests/support/chaos/startChaos.ts
-import { Network, type StartedNetwork } from 'testcontainers';
-import { PostgreSqlContainer, type StartedPostgreSqlContainer } from '@testcontainers/postgresql';
-import { ToxiProxyContainer, type StartedToxiProxyContainer } from '@testcontainers/toxiproxy';
-import { ChaosProxy } from './ChaosProxy.js';
-
-export interface ChaosFixture {
-  chaos: ChaosProxy;            // the intent-named toxic helper; app points at chaos.host():chaos.port()
-  stop: () => Promise<void>;
-}
-
-/** Stands the dependency + Toxiproxy up on one Network and exposes the proxied connection point. */
-export async function startChaos(): Promise<ChaosFixture> {
-  const network: StartedNetwork = await new Network().start();
-
-  const dependency: StartedPostgreSqlContainer = await new PostgreSqlContainer('postgres:16-alpine')
-    .withNetwork(network)
-    .withNetworkAliases('db')             // the upstream host on the shared network
-    .start();
-
-  const toxiproxy: StartedToxiProxyContainer = await new ToxiProxyContainer('ghcr.io/shopify/toxiproxy:2.11.0')
-    .withNetwork(network)
-    .start();
-
-  // upstream = the dependency by its network alias + internal port; listen side is mapped to a host port.
-  const proxy = await toxiproxy.createProxy({ name: 'db', upstream: 'db:5432' });
-
-  // The app connects HERE — the proxy's mapped listen host/port, NOT the real dependency's port.
-  const chaos = new ChaosProxy(proxy.instance, proxy.host, proxy.port);
-
-  return {
-    chaos,
-    stop: async () => { await toxiproxy.stop(); await dependency.stop(); await network.stop(); },
-  };
-}
-```
-
-> The app under test must be configured to talk to `chaos.host():chaos.port()` (the connection string / base URL /
-> broker bootstrap pointed at the proxy), **not** the dependency directly. That redirection *is* the chaos setup —
-> if the app bypasses the proxy, no toxic can reach it.
-
-## The toxic helper — `tests/support/chaos/ChaosProxy.ts`
-
-One helper owns the proxy handle and exposes **intent-named** fault operations and a **lifecycle** primitive, so
-tests read `chaos.injectLatency(...)`, `chaos.cutConnection()`, `chaos.healed()` — never raw `proxy.addToxic({...})`
-scattered across `it(...)` blocks. Each injected toxic is named so it can be removed.
-
-```ts
-// tests/support/chaos/ChaosProxy.ts
-import type { Proxy } from 'toxiproxy-node-client';
-
-/** Intent-named fault injection over a single Toxiproxy proxy, with a remove-all "heal" for the lifecycle. */
-export class ChaosProxy {
-  private readonly injected: string[] = [];
-
-  constructor(
-    private readonly proxy: Proxy,
-    private readonly proxyHost: string,
-    private readonly proxyPort: number,
-  ) {}
-
-  host(): string { return this.proxyHost; }   // the app points its connection string here…
-  port(): number { return this.proxyPort; }   // …and at this port
-
-  /** Slow every response by `ms` (+ jitter) — the "dependency is slow" fault. */
-  async injectLatency(ms: number, jitter = 0, toxicity = 1): Promise<void> {
-    await this.add('latency', 'latency', 'downstream', { latency: ms, jitter }, toxicity);
-  }
-
-  /** Stop all data and close the connection after `ms` — the "dependency hangs then drops" fault. */
-  async injectTimeout(ms: number): Promise<void> {
-    await this.add('timeout', 'timeout', 'upstream', { timeout: ms });
-  }
-
-  /** Reset the TCP peer after `ms` — the "connection dropped" fault that exercises retry/breaker code. */
-  async cutConnection(ms = 0, toxicity = 1): Promise<void> {
-    await this.add('reset', 'reset_peer', 'downstream', { timeout: ms }, toxicity);
-  }
-
-  /** Throttle the backend dependency to `rateKbps` KB/s — bandwidth starvation (NOT device conditioning). */
-  async throttle(rateKbps: number): Promise<void> {
-    await this.add('bw', 'bandwidth', 'downstream', { rate: rateKbps });
-  }
-
-  /** Cut the response after `bytes` — a partial/truncated response the app must not persist as valid. */
-  async truncateAfter(bytes: number): Promise<void> {
-    await this.add('limit', 'limit_data', 'downstream', { bytes });
-  }
-
-  /** Remove ALL injected toxics — the dependency is "healed" (lifecycle step: assert recovery after this). */
-  async healed(): Promise<void> {
-    for (const name of this.injected) await this.proxy.removeToxic(name);
-    this.injected.length = 0;
-  }
-
-  private async add(
-    name: string,
-    type: string,
-    stream: 'upstream' | 'downstream',
-    attributes: Record<string, number>,
-    toxicity = 1,
-  ): Promise<void> {
-    await this.proxy.addToxic({ name, type, stream, toxicity, attributes } as never);
-    this.injected.push(name);
-  }
-}
-```
+These sections live in `references/details.md` — **read it when the task touches them**: **The mechanism — proxy BETWEEN app and dependency (idea #2)**; **The toxic helper — `tests/support/chaos/ChaosProxy.ts`**.
 
 ## Inject-a-fault, assert-degradation (idea #1)
 
@@ -434,7 +299,7 @@ chaos-engineering platforms.
   shared `Network`; reset toxics (`healed()`) between tests, not the containers.
 - **Treating this as production chaos engineering.** *Fix:* deterministic toxic in a test ≠ GameDay on a live
   cluster — see the boundary note; route prod-chaos requests to Gremlin/Litmus/Chaos Mesh.
-- **Using a toxic where a mock fits.** Want a specific HTTP 503 from a contract? *Fix:* `qa-api-mocking-msw-typescript`.
+- **Using a toxic where a mock fits.** Want a specific HTTP 503 from a contract? *Fix:* `qa-api-mocking-typescript`.
   Toxiproxy is for **transport** faults (latency/drop/partial), not application-layer canned responses.
 
 ## Examples
@@ -446,7 +311,7 @@ failing?*
 
 **Composing with the dependency families.** The thing you fault is stood up by `qa-test-environments-typescript`
 (`ToxiProxyContainer` next to a `PostgreSqlContainer` / `KafkaContainer` on a shared `Network`); the dependency
-itself is exercised happy-path by `qa-db-testing-typescript` / `qa-messaging-testing-kafka-typescript`. Chaos adds
+itself is exercised happy-path by `qa-db-testing-typescript` / `qa-messaging-testing-typescript`. Chaos adds
 the proxy in front and asserts the resilience layer — it **composes** with those skills, it doesn't replace them. A
 data-driven fault matrix (toxic × parameter) binds cleanly via `qa-data-driven-testing-typescript` (`it.each`).
 
@@ -474,18 +339,18 @@ data-driven fault matrix (toxic × parameter) binds cleanly via `qa-data-driven-
 
 - `qa-chaos-testing-java` · `qa-chaos-testing-dotnet` — the sibling stacks (`toxiproxy-java` + resilience4j ·
   `Toxiproxy.Net` + Polly); same four ideas, same lifecycle, different client lib + resilience library.
-- `qa-network-monitoring-proxy-typescript` (#10) — the **closest neighbor and the inverse**: that stands up a MITM
+- `qa-network-monitoring-typescript` — the **closest neighbor and the inverse**: that stands up a MITM
   proxy to **observe/mock** out-of-browser requests; this stands up Toxiproxy to **inject transport faults**.
   Observe vs break. Read it for the proxy-in-the-middle model; draw the boundary cleanly.
-- `qa-test-environments-typescript` (#14) — the **Testcontainers spine** the `ToxiProxyContainer` plugs into: stand
+- `qa-test-environments-typescript` — the **Testcontainers spine** the `ToxiProxyContainer` plugs into: stand
   the dependency up, put the proxy in front on a shared `Network`, point the app at the proxy port.
-- `qa-api-mocking-msw-typescript` (#23) — **application-layer** canned responses (a specific 503) vs **transport**
+- `qa-api-mocking-typescript` — **application-layer** canned responses (a specific 503) vs **transport**
   faults (latency/drop/partial). They compose: an MSW upstream behind a Toxiproxy listener.
-- `qa-data-driven-testing-typescript` (#39) — drive a **fault matrix** (toxic × parameter × expected pattern) via
+- `qa-data-driven-testing-typescript` — drive a **fault matrix** (toxic × parameter × expected pattern) via
   `it.each` instead of copy-pasted tests.
-- `qa-db-testing-typescript` · `qa-messaging-testing-kafka-typescript` · `qa-messaging-testing-rabbitmq-typescript` —
+- `qa-db-testing-typescript` · `qa-messaging-testing-typescript` · `qa-messaging-testing-typescript` —
   the dependencies you fault (DB / broker connections through the proxy); they cover the happy path this inverts.
-- `qa-websocket-sse-testing-typescript` (#37) — shares the **lifecycle discipline** (steady → perturb → assert →
+- `qa-websocket-sse-testing-typescript` — shares the **lifecycle discipline** (steady → perturb → assert →
   recover) and bounded-condition waits (`vi.waitFor`, never sleep).
 - `qa-performance-k6-typescript` — behaviour under **load/volume** vs behaviour under **fault** (this skill); they
   answer different questions.

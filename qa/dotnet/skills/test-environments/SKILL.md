@@ -1,6 +1,6 @@
 ---
 name: qa-test-environments-dotnet
-description: Use when the user asks to spin up a whole multi-service environment (not just one database) for .NET 8 integration/E2E tests via Testcontainers — a hand-built topology of `ContainerBuilder` services sharing a user-defined `INetwork` (`NetworkBuilder`) with `WithNetworkAliases` for inter-container DNS (app + DB + queue/cache/mailcatcher), explicit per-service wait strategies (`Wait.ForUnixContainer().UntilHttpRequestIsSucceeded` / `UntilPortIsAvailable` / `UntilMessageIsLogged` — never a `Task.Delay`), `WithReuse(true)` for fast local loops vs fresh-per-fixture in CI, the Ryuk reaper, and surfacing hostname+mapped-port connection details to tests through an NUnit fixture base. Triggers: "spin up the whole stack (api + postgres + redis) for these tests", "Testcontainers multi-container network in NUnit", "boot app + DB + RabbitMQ together and wait for all of them", "give my service a network alias so the container can reach the DB", "reuse the containers between local test runs". Do NOT use for a single database container with EF migrations + Respawn reset (use `qa/dotnet/skills/db-testing/testcontainers`), for TypeScript (`qa/typescript/skills/test-environments`), for JVM (`qa/java/skills/test-environments`), for the CI runner that hosts these tests (`qa/dotnet/skills/ci-pipelines/github-actions`), or for in-browser network mocking (`qa/dotnet/skills/network-monitoring/playwright-routes`).
+description: Use when the user asks to spin up a whole multi-service environment (not just one database) for .NET 8 integration/E2E tests via Testcontainers. Triggers: "spin up the whole stack (api + postgres + redis) for these tests", "Testcontainers multi-container network in NUnit", "boot app + DB + RabbitMQ together and wait for all of them".
 ---
 
 # QA — Test Environments with Testcontainers (.NET)
@@ -15,7 +15,7 @@ Testcontainers for .NET has **no docker-compose driver** (unlike the Node/Java b
 - `Testcontainers` core (`ContainerBuilder`, `NetworkBuilder`, `Wait`, `WithReuse`) + module packages (`Testcontainers.PostgreSql`, `.Redis`, …) where a module exists
 - NUnit (`[OneTimeSetUp]`/`[OneTimeTearDown]` — NUnit has no `IAsyncLifetime`), async all the way
 - `Microsoft.AspNetCore.Mvc.Testing` when the app surface is exercised over HTTP
-- These suites run on `ubuntu-latest` (Docker pre-installed) under `qa/dotnet/skills/ci-pipelines/github-actions`
+- These suites run on `ubuntu-latest` (Docker pre-installed) under `qa/dotnet/skills/ci-pipelines`
 
 ## When to use
 
@@ -28,8 +28,8 @@ Testcontainers for .NET has **no docker-compose driver** (unlike the Node/Java b
 
 - A single DB with EF migrations + per-test Respawn reset → `qa/dotnet/skills/db-testing/testcontainers`
 - TypeScript / JVM stacks → `qa/{typescript,java}/skills/test-environments`
-- The CI workflow that runs these (Docker enablement, artifact upload) → `qa/dotnet/skills/ci-pipelines/github-actions`
-- In-browser HTTP mocking/interception (no real services) → `qa/dotnet/skills/network-monitoring/playwright-routes`
+- The CI workflow that runs these (Docker enablement, artifact upload) → `qa/dotnet/skills/ci-pipelines`
+- In-browser HTTP mocking/interception (no real services) → `qa/dotnet/skills/network-monitoring`
 - Pure unit tests with no out-of-process dependency
 
 ## Inputs needed
@@ -281,6 +281,6 @@ IContainer broker = new ContainerBuilder()
 - **`qa/typescript/skills/test-environments`** (canonical) + **`qa/java/skills/test-environments`** — the sibling stacks; this file ports the canonical TS skill into `Testcontainers`/NUnit idioms.
 - **`qa/dotnet/skills/db-testing/testcontainers`** — the narrower skill for a *single* DB container with EF migrations + Respawn reset; this environment skill is what you graduate to when the suite needs the app + DB + other services together. It cross-links back here for multi-container orchestration.
 - **`qa/dotnet/skills/db-testing/client`** — the DB client/query wiring that runs against the `DatabaseConnectionString` this fixture surfaces.
-- **`qa/dotnet/skills/ci-pipelines/github-actions`** — runs these suites on `ubuntu-latest` (Docker pre-installed, Ryuk works out of the box); uploads TRX + logs.
+- **`qa/dotnet/skills/ci-pipelines`** — runs these suites on `ubuntu-latest` (Docker pre-installed, Ryuk works out of the box); uploads TRX + logs.
 - **`qa/dotnet/skills/test-data-builder`** — seeds data into the booted services.
 - **`qa/dotnet/skills/allure-reporting`** — attach per-service container logs on failure.

@@ -1,6 +1,6 @@
 ---
 name: qa-ui-test-author-appium-java
-description: Use when the user asks to scaffold a Java + Appium 2.x page object or TestNG mobile UI test, following the BasePage / DriverFactory / TestNG pattern. Triggers: "create an Appium page object for X in Java", "add a Java mobile page for screen Y", "write an Appium TestNG test for Z". Do NOT use for Appium .NET (use `qa/dotnet/skills/ui-test-author/appium`), Appium TypeScript / WebdriverIO (use `qa/typescript/skills/ui-test-author/appium`), Selenium / web tests (use `qa/java/skills/ui-test-author/selenium` or `qa/java/skills/ui-test-author/playwright`), or Accelerator tests (use `qa/manual/accelerator-conventions`).
+description: Use when the user asks to scaffold a Java + Appium 2.x page object or TestNG mobile UI test, following the BasePage / DriverFactory / TestNG pattern. Triggers: "create an Appium page object for X in Java", "add a Java mobile page for screen Y", "write an Appium TestNG test for Z".
 ---
 
 # QA — Appium Java Page Object & Test Generator

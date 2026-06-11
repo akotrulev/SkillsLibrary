@@ -1,19 +1,6 @@
 ---
 name: qa-security-testing-access-control-testing-typescript
-description: >-
-  Author **functional access-control tests** in TypeScript (Vitest + fetch) that cover the OWASP scanner
-  blind spot — **Broken Object Level Authorization (BOLA/IDOR, API1:2023)**, **Broken Object Property Level
-  Authorization (API3:2023)**, and **Broken Function Level Authorization (BFLA, API5:2023)** — i.e. A01:2025
-  Broken Access Control. The model is an **authorization matrix**: seed multiple users/roles (via
-  `qa/typescript/skills/auth0-test-tokens`), then assert each caller × target-object × endpoint resolves to
-  the right outcome — owner/authorized → 200, cross-tenant/under-privileged → **403/404**, anonymous → 401 —
-  reusing the project's `{resource}Client`. Use when the user wants IDOR / BOLA / privilege-escalation /
-  horizontal-or-vertical access-control coverage, an authz test matrix, or to prove tenant isolation.
-  DAST/scanners cannot find these (well-formed requests, logic flaws) — this is a functional test, not a scan.
-  Do NOT use for: scanner-based DAST (see qa-security-testing-zap-automation-framework), spec-driven fuzzing
-  (qa-security-testing-api-fuzzing — won't find BOLA), generic functional API tests
-  (qa/typescript/skills/api-test-author), business-logic abuse (manual pentest), or the .NET / Java stacks
-  (qa/{dotnet,java}/skills/security-testing/access-control-testing). Load qa/_shared/security alongside.
+description: Author **functional access-control tests** in TypeScript (Vitest + fetch) that cover the OWASP scanner blind spot.
 ---
 
 # Security Testing — Access Control / Authorization Matrix (TypeScript / Vitest)

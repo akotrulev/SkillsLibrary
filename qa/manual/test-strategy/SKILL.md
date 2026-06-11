@@ -1,6 +1,6 @@
 ---
 name: qa-test-strategy
-description: Use when the user asks for help building a test strategy, risk-based test plan, coverage matrix, test-pyramid sizing, or release quality gates — across any combination of .NET / Java / TypeScript / React / Blazor / mobile services. Triggers: "build a test strategy for X", "what tests should we have for this release", "risk-based plan for the migration", "set up quality gates", "what's the right test pyramid here". Do NOT use for individual test cases (use `qa/manual/test-case-writer`), bug reports (use `qa/manual/bug-report-writer`), or specific framework setup (use the matching `qa/<topic>` skill).
+description: Use when the user asks for help building a test strategy, risk-based test plan, coverage matrix, test-pyramid sizing, or release quality gates. Triggers: "build a test strategy for X", "what tests should we have for this release", "risk-based plan for the migration".
 ---
 
 # QA — Test Strategy

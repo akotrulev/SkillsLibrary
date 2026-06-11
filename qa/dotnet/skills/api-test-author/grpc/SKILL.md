@@ -1,25 +1,6 @@
 ---
 name: qa-api-test-author-grpc-dotnet
-description: >-
-  Scaffold black-box **gRPC** API tests in .NET 8 with Grpc.Net.Client + NUnit against a deployed, proto-defined
-  HTTP/2 service — `Grpc.Tools` codegen a typed client from the `.proto`, call the RPC, and assert on the **typed
-  response message**, the **gRPC `StatusCode`**, and **metadata**. Covers the trait that makes gRPC testing
-  different from REST/GraphQL: **there is no HTTP status to read — the result lives in the gRPC `Status` (code +
-  detail + details)**, and the generated async client **throws `RpcException` on any non-OK status**, so the call
-  must be wrapped to return a result the test can assert on for success OR failure (the gRPC analogue of the
-  GraphQL skill's "never throw on errors — return the envelope"). Covers the **four RPC types**, each tested
-  differently — **unary** (assert message + status), **server-streaming** (`ResponseStream.ReadAllAsync()` drained
-  into a buffer + assert the sequence — a bounded async-await, never a sleep → `qa-websocket-sse-testing-dotnet`),
-  **client-streaming** (`RequestStream.WriteAsync`), and **bidi-streaming**. Also covers **rich error details**
-  (`RpcException.GetRpcStatus()` → `google.rpc.Status` / `ErrorInfo` — the GraphQL `extensions.code` analogue),
-  **deadlines** as the sanctioned bounded-wait (assert `StatusCode.DeadlineExceeded`), leading/trailing
-  **metadata**, a per-call **bearer**, and standing the service up with Testcontainers. Triggers: "write a gRPC
-  test for RPC X", "assert the RpcException StatusCode", "test a server-streaming RPC", "assert gRPC trailing
-  metadata / error details", "add an NUnit test for a gRPC service". Do NOT use for: REST/JSON endpoints (use
-  qa-api-test-author-generator-dotnet), GraphQL endpoints (use qa-api-test-author-graphql-dotnet), the Java stack
-  (use qa-api-test-author-grpc-java), the TypeScript stack (use qa-api-test-author-grpc-typescript), gRPC **load**
-  testing (use qa-performance-nbomber-dotnet), Protobuf **contract** tests (use qa-contract-testing-pact-dotnet),
-  or generating the proto messages in isolation (use qa-api-dto-writer-dotnet).
+description: Scaffold black-box **gRPC** API tests in .NET 8 with Grpc.Net.Client + NUnit against a deployed, proto-defined HTTP/2 service. Triggers: "write a gRPC test for RPC X", "assert the RpcException StatusCode", "test a server-streaming RPC".
 ---
 
 # QA — gRPC API Test Writer (.NET 8 / Grpc.Net.Client + NUnit)
@@ -107,176 +88,9 @@ the gRPC `StatusCode`**, never an HTTP status code.
 > trailers** — never letting the throw escape into the assertion path. This is the exact gRPC analogue of the
 > GraphQL skill's thin client that *never throws on `errors` and returns the raw envelope*.
 
-## The contract + two layers
+## Deep-dive reference
 
-### 1. Proto — `Protos/user.proto`
-
-The `.proto` is the contract. `Grpc.Tools` codegen produces the messages **and** the client; tests assert on the
-**typed message**, never on bytes.
-
-```protobuf
-syntax = "proto3";
-package user.v1;
-option csharp_namespace = "Example.User.V1";
-
-service UserService {
-  rpc GetUser     (GetUserRequest)    returns (User);              // unary (read)
-  rpc CreateUser  (CreateUserRequest) returns (User);              // unary (write)
-  rpc ListUsers   (ListUsersRequest)  returns (stream User);       // server-streaming
-  rpc ImportUsers (stream CreateUserRequest) returns (ImportSummary); // client-streaming
-}
-
-message GetUserRequest    { string id = 1; }
-message CreateUserRequest { string email = 1; string first_name = 2; string last_name = 3; }
-message User              { string id = 1; string email = 2; string first_name = 3; string last_name = 4; }
-message ListUsersRequest  { int32 page_size = 1; }
-message ImportSummary     { int32 imported = 1; }
-```
-
-### 2. Action — `Actions/GrpcCallResult.cs` + `UserGrpcAction.cs`
-
-`GrpcCallResult<T>` is the **uniform outcome** for *any* unary call — it holds the message on `OK` or the
-`RpcException` (carrying status + trailers) on a failure. The action wraps each RPC so the test never has to
-`try/catch`.
-
-```csharp
-using Grpc.Core;
-
-namespace Tests.Actions;
-
-/// <summary>Uniform outcome of a unary gRPC call: the message on OK, or the status (+ trailers) on a non-OK result.</summary>
-public sealed record GrpcCallResult<T>(T? Value, RpcException? Exception)
-{
-    public static GrpcCallResult<T> Ok(T value) => new(value, null);
-    public static GrpcCallResult<T> Error(RpcException ex) => new(default, ex);
-
-    public bool IsOk => Exception is null;
-    public StatusCode Code => Exception?.StatusCode ?? StatusCode.OK;   // the gRPC status code — the gate
-    public Metadata? Trailers => Exception?.Trailers;                   // trailing metadata / rich-error details
-}
-```
-
-```csharp
-using Grpc.Core;
-
-namespace Tests.Actions;
-
-/// <summary>Base for client wrappers: runs a unary RPC and converts the throw-on-non-OK contract into a GrpcCallResult.</summary>
-public abstract class GrpcAction
-{
-    /// <summary>Leading metadata carrying the bearer — attached per call when authenticated.</summary>
-    protected static Metadata Bearer(string token) => new() { { "authorization", $"Bearer {token}" } };
-
-    /// <summary>Await a unary RPC; never let RpcException escape — return it as a GrpcCallResult.</summary>
-    protected static async Task<GrpcCallResult<T>> CallAsync<T>(Func<Task<T>> rpc)
-    {
-        try
-        {
-            return GrpcCallResult<T>.Ok(await rpc());
-        }
-        catch (RpcException ex)
-        {
-            return GrpcCallResult<T>.Error(ex);
-        }
-    }
-}
-```
-
-```csharp
-using Example.User.V1;
-using Grpc.Core;
-using Grpc.Net.Client;
-
-namespace Tests.Actions;
-
-public sealed class UserGrpcAction : GrpcAction
-{
-    private readonly UserService.UserServiceClient _client;
-    private readonly Metadata _headers;
-
-    public UserGrpcAction(GrpcChannel channel, bool authenticated)
-    {
-        _client = new UserService.UserServiceClient(channel);
-        _headers = authenticated ? Bearer(Env.GrpcToken) : new Metadata();
-    }
-
-    public Task<GrpcCallResult<User>> GetUserAsync(string id) =>
-        CallAsync(async () => await _client.GetUserAsync(
-            new GetUserRequest { Id = id }, headers: _headers));
-
-    public Task<GrpcCallResult<User>> CreateUserAsync(string email, string first, string last) =>
-        CallAsync(async () => await _client.CreateUserAsync(
-            new CreateUserRequest { Email = email, FirstName = first, LastName = last }, headers: _headers));
-
-    // Server-streaming: hand the call back; the test drains ResponseStream (see streaming section).
-    public AsyncServerStreamingCall<User> ListUsers(int pageSize) =>
-        _client.ListUsers(new ListUsersRequest { PageSize = pageSize }, headers: _headers);
-
-    public UserService.UserServiceClient Client => _client;   // exposed for the streaming tests
-}
-```
-
-### 3. Test — `Tests/UserGrpcTests.cs`
-
-Assert `IsOk` (or the failure `Code`) **first** — that's the gate — then the typed message fields. The channel
-points at the service stood up by `qa-test-environments-dotnet`. Tests are `async Task` — **async all the way, no
-`.Result`/`.Wait()`**.
-
-```csharp
-using Example.User.V1;
-using Grpc.Core;
-using NUnit.Framework;
-using Tests.Actions;
-
-namespace Tests;
-
-[TestFixture]
-public class UserGrpcTests : BaseGrpcTest        // owns the GrpcChannel lifecycle (see Testcontainers section)
-{
-    [Test]
-    public async Task GetUser_WhenExists_ReturnsUserWithOkStatus()
-    {
-        var action = new UserGrpcAction(Channel, authenticated: true);
-
-        GrpcCallResult<User> result = await action.GetUserAsync("1");
-
-        Assert.That(result.IsOk, Is.True);                       // THE gate: the gRPC status, not an HTTP code
-        Assert.That(result.Value!.Email, Is.EqualTo("george.bluth@example.com"));
-    }
-
-    [Test]
-    public async Task GetUser_WhenUnknownId_ReturnsNotFound()
-    {
-        var action = new UserGrpcAction(Channel, authenticated: true);
-
-        GrpcCallResult<User> result = await action.GetUserAsync("999999");
-
-        Assert.That(result.IsOk, Is.False);
-        Assert.That(result.Code, Is.EqualTo(StatusCode.NotFound));   // the outcome lives in the status code
-        Assert.That(result.Value, Is.Null);                          // no message on a non-OK result
-    }
-
-    [Test]
-    public async Task CreateUser_WhenEmailBlank_ReturnsInvalidArgument()
-    {
-        var action = new UserGrpcAction(Channel, authenticated: true);
-
-        GrpcCallResult<User> result = await action.CreateUserAsync("", "A", "B");
-
-        Assert.That(result.Code, Is.EqualTo(StatusCode.InvalidArgument));
-    }
-
-    [Test]
-    public async Task GetUser_WhenNoBearer_ReturnsUnauthenticated()
-    {
-        var action = new UserGrpcAction(Channel, authenticated: false);   // no bearer metadata
-
-        GrpcCallResult<User> result = await action.GetUserAsync("1");
-
-        Assert.That(result.Code, Is.EqualTo(StatusCode.Unauthenticated));
-    }
-}
-```
+These sections live in `references/details.md` — **read it when the task touches them**: **The contract + two layers**.
 
 ## Rich error details — assert `ErrorInfo`, not just the code (idea #2)
 
@@ -481,7 +295,7 @@ public abstract class BaseGrpcTest
 `result.Code == StatusCode.NotFound` — same outcome, third location: the REST status line, the GraphQL `errors`
 envelope, the gRPC `Status`. One family, three result-location conventions.
 
-**Composing with the protocol-trio siblings.** REST `generator` is status-driven over HTTP+JSON; GraphQL `#44` is
+**Composing with the protocol-trio siblings.** REST `generator` is status-driven over HTTP+JSON; GraphQL ``api-test-author/graphql`` is
 one HTTP 200 carrying `{ data, errors }`; gRPC is proto/HTTP2 with the result in the `Status`. All three share the
 **Action + Test** spine and the "wrap the call so the test asserts success *or* failure uniformly" move (the gRPC
 `GrpcCallResult` is the GraphQL raw-envelope analogue). Only the transport, the codegen, and where-the-result-lives
@@ -516,13 +330,13 @@ differ.
 - `qa-api-test-author-generator-dotnet` · `qa-api-test-author-graphql-dotnet` — the **protocol-trio siblings**:
   REST (HTTP+JSON status-driven) and GraphQL (HTTP 200 `{ data, errors }` envelope). Three protocols, three
   result-location conventions, one `api-test-author` family + shared Action + Test spine.
-- `qa-websocket-sse-testing-dotnet` (#37) — gRPC **streaming** reuses its
+- `qa-websocket-sse-testing-dotnet` — gRPC **streaming** reuses its
   drain-then-assert-on-a-bounded-condition discipline; cross-link for deep stream-lifecycle assertions, don't
   duplicate.
 - `qa-api-dto-writer-dotnet` — generate/model the proto messages (the DTO analogue) in isolation; this skill
   consumes them.
 - `qa-contract-testing-pact-dotnet` — the **Protobuf contract** boundary vs the functional test this skill writes.
   `qa-performance-nbomber-dotnet` — gRPC **load**.
-- `qa-auth0-test-tokens-dotnet` (#16) — obtain the per-call **bearer** carried in leading metadata.
-- `qa-test-environments-dotnet` (#14) — stand the gRPC service up via Testcontainers and feed the channel target.
+- `qa-auth0-test-tokens-dotnet` — obtain the per-call **bearer** carried in leading metadata.
+- `qa-test-environments-dotnet` — stand the gRPC service up via Testcontainers and feed the channel target.
 - `qa-allure-reporting-dotnet` — each RPC renders as a named result.

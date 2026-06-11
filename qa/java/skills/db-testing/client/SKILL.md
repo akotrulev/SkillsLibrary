@@ -1,6 +1,6 @@
 ---
 name: qa-db-testing-client-java
-description: Use when the user asks to connect from Java 21 tests to a real database (Postgres / MySQL / SQL Server / Mongo) to seed fixtures, run read-only assertion queries, and clean up safely — Spring `JdbcTemplate` / jOOQ for assertion queries, Flyway for schema, transactional rollback / per-test truncation. Triggers: "connect from our TestNG tests to Postgres", "JdbcTemplate probe for the orders table", "seed and clean a SQL fixture without leaks", "wait for eventual consistency in DB tests". Do NOT use for production DB code (use `design-patterns/java/generator`), Testcontainers lifecycle (use `qa/java/skills/db-testing/testcontainers`), query-author guardrails on the SQL itself (use `qa/java/skills/db-testing/query-author`), or non-Java stacks (use `qa/{dotnet,typescript}/skills/db-testing/client`).
+description: Use when the user asks to connect from Java 21 tests to a real database (Postgres / MySQL / SQL Server / Mongo) to seed fixtures, run read-only assertion queries, and clean up safely. Triggers: "connect from our TestNG tests to Postgres", "JdbcTemplate probe for the orders table", "seed and clean a SQL fixture without leaks".
 ---
 
 # QA — DB Testing Client (Java 21 + Spring Boot 3)

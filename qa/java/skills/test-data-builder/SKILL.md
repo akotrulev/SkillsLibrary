@@ -1,6 +1,6 @@
 ---
 name: qa-test-data-builder-java
-description: Use when the user asks to create test data builders or ObjectMothers in a Java 21 test project (TestNG primary, JUnit 5 OK) to replace duplicated inline literals across tests with named, intention-revealing factories. Triggers: "create a builder for User in Java", "set up test data for X in Gradle TestNG", "extract this fixture into an OrderBuilder", "ObjectMother for Y", "stop copy-pasting test setup in our Java tests". Do NOT use for .NET test data (use `qa/dotnet/skills/test-data-builder`), TypeScript test data (use `qa/typescript/skills/test-data-builder`), or production-code builders (use `design-patterns/java/generator`).
+description: Use when the user asks to create test data builders or ObjectMothers in a Java 21 test project (TestNG primary, JUnit 5 OK) to replace duplicated inline literals across tests with named, intention-revealing factories. Triggers: "create a builder for User in Java", "set up test data for X in Gradle TestNG", "extract this fixture into an OrderBuilder".
 ---
 
 # QA — Test Data Builder / ObjectMother (Java 21)

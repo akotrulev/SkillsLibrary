@@ -1,6 +1,6 @@
 ---
 name: qa-page-object-architect-typescript
-description: Use when the user is designing the page object structure for a TypeScript UI test project — Playwright TS, WebdriverIO (web), or WebdriverIO + Appium (mobile) — what becomes a page, what becomes a component, where the base page lives, how to split a giant page object, and how to share code across platforms. Triggers: "design page objects for app X in TypeScript", "how should I structure pages/ for Playwright TS", "split this giant POM module", "where do shared helpers live in the WebdriverIO project". Do NOT use for individual page code (use `qa/typescript/skills/ui-test-author/playwright`, `qa/typescript/skills/ui-test-author/selenium`, or `qa/typescript/skills/ui-test-author/appium`), reviewing one file (use `qa/typescript/skills/ui-test-author/reviewer`), .NET POM architecture (use `qa/dotnet/skills/page-object-architect`), or Java POM architecture (use `qa/java/skills/page-object-architect`).
+description: Use when the user is designing the page object structure for a TypeScript UI test project. Triggers: "design page objects for app X in TypeScript", "how should I structure pages/ for Playwright TS", "split this giant POM module".
 ---
 
 # QA — Page Object Architect (TypeScript)

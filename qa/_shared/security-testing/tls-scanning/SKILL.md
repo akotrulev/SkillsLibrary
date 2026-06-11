@@ -1,21 +1,6 @@
 ---
 name: qa-security-testing-tls-scanning
-description: >-
-  TLS/SSL **transport-layer** configuration scanning as a CI gate (single language-agnostic CLI skill):
-  probe a TLS endpoint's **handshake** to flag deprecated protocols (SSLv2/3, TLS1.0/1.1), weak/insecure
-  cipher suites (RC4, 3DES, EXPORT), broken forward secrecy, certificate validity/chain/expiry, and known
-  issues (ROBOT, Heartbleed). Two tools: **sslyze** (LEAD — `sslyze --mozilla_config=intermediate
-  --json_out out.json host:443`; checks against the **Mozilla recommended TLS configurations** and
-  **exits non-zero on non-compliance** — the cleaner native CI gate) and **testssl.sh** (Bash, no deps —
-  `testssl.sh --jsonfile out.json --severity HIGH https://example.com`; gate by **parsing JSON severity**,
-  no built-in policy). Maps to OWASP **A04 Cryptographic Failures** (transport) + **A02 Misconfiguration**
-  (protocol/cipher) and a common **PCI-DSS** bar. Use when a pipeline must gate TLS posture pre-release /
-  on a schedule. A TLS scan is a **read-only handshake probe** → **safe even against production** (unlike
-  active DAST). Do NOT use for: app-layer active attack scanning / injection (see
-  qa-security-testing-zap-automation-framework); HTTP security **headers** including **HSTS** as the
-  primary gate — that is the passive header baseline (see qa-security-testing-zap-baseline-{java,dotnet,typescript},
-  which owns headers; this owns the TLS handshake/cipher layer below the headers); the OWASP map /
-  triage / authorization spine (see qa-security-shared, load alongside).
+description: TLS/SSL **transport-layer** configuration scanning as a CI gate (single language-agnostic CLI skill): probe a TLS endpoint's **handshake** to flag deprecated protocols (SSLv2/3, TLS1.0/1.1), weak/insecure cipher suites (RC4, 3DES, EXPORT), broken forward secrecy, certificate validity/chain/expiry, and known issues (ROBOT, Heartbleed). Two tools: **sslyze** (LEAD.
 ---
 
 # Security Testing — TLS / SSL Configuration Scanning (shared)

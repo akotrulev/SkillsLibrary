@@ -1,6 +1,6 @@
 ---
 name: qa-pom-builder-java
-description: Use when the user gives a website URL or an HTML page and wants a Page Object Model extracted/built/updated from it for a Java Playwright suite — enumerate interactable and visible elements via the Playwright MCP server, locate by data-testid, report missing test ids to the dev team, then emit or update the page object. Triggers: "build a POM from this URL", "extract locators from this page", "update the LoginPage object from the live site", "generate page objects for these screens". Do NOT use for designing the overall POM hierarchy (use qa/java/skills/page-object-architect), writing the tests themselves (use qa/java/skills/ui-test-author/playwright), other stacks (use qa/dotnet/skills/pom-builder / qa/typescript/skills/pom-builder), or pages you cannot reach and have no HTML for (ask the user for access first).
+description: Use when the user gives a website URL or an HTML page and wants a Page Object Model extracted/built/updated from it for a Java Playwright suite. Triggers: "build a POM from this URL", "extract locators from this page", "update the LoginPage object from the live site".
 ---
 
 # QA — POM Builder from Live Page (Java)

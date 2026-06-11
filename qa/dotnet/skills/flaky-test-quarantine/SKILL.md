@@ -1,22 +1,6 @@
 ---
 name: qa-flaky-test-quarantine-dotnet
-description: >-
-  Detect, retry, **quarantine**, and report flaky tests in a .NET 8 / NUnit suite — so an
-  intermittently-failing test stops blocking the merge gate **without** being silently `[Ignore]`-d or
-  retried-to-green forever. Covers NUnit's built-in `[Retry(n)]` (and its real limits — method-level only,
-  no fixture/assembly scope, historically no retry-on-exception) plus a **custom `IRepeatTest` attribute**
-  that retries on errors too; **quarantine** via `[Category("Flaky")]` excluded from the gate with
-  `dotnet test --filter "TestCategory!=Flaky"` and run in a separate **non-gating** filtered lane; and the
-  **Allure flaky flag** — Allure's **history-based auto-detection** (failed→passed→failed across the last 5
-  launches, identical across stacks) plus marking a result flaky via the `AllureLifecycle` API + an
-  `[AllureIssue]` ticket (Allure.NUnit has no first-class `@Flaky` attribute — the honest .NET divergence
-  from Java). Triggers: "this NUnit test is flaky, stop it blocking CI", "quarantine our flaky tests but
-  keep running them", "retry failed tests in NUnit including on exceptions", "make Allure flag our flaky
-  tests in .NET". Do NOT use for: the Java stack (use qa-flaky-test-quarantine-java), the TypeScript stack
-  (use qa-flaky-test-quarantine-typescript), fixing a genuinely-broken test (a deterministic failure is a
-  bug, not flakiness), writing the tests themselves (use qa-ui-test-author-* / qa-api-test-author-*),
-  eventual-consistency waits inside one test (use the condition-wait in qa-db-testing-client-dotnet /
-  qa-messaging-testing-*), or full Allure setup (use qa-allure-reporting-dotnet).
+description: Detect, retry, **quarantine**, and report flaky tests in a .NET 8 / NUnit suite. Triggers: "this NUnit test is flaky, stop it blocking CI", "quarantine our flaky tests but keep running them", "retry failed tests in NUnit including on exceptions".
 ---
 
 # Flaky-Test Quarantine (.NET 8 / NUnit)
@@ -189,7 +173,7 @@ public class CheckoutTests : FlakyMarkBase   // base marks Flaky-category result
 ```
 
 **The gate excludes the category; the quarantine lane includes only it and never blocks** — driven entirely
-by the `--filter` (cross-link `qa-ci-pipelines-github-actions`):
+by the `--filter` (cross-link `qa-ci-pipelines`):
 
 ```yaml
 - name: Gate suite (blocks merge)
@@ -354,9 +338,9 @@ result is reported in Allure (flaky-flagged, history-tracked) but **never** fail
   history/trends (required for auto-flaky detection), `categories.json`, CI publish. Base setup lives there.
 - `qa-_shared-quality-metrics` — track **flaky-rate over time**; a quarantine category that grows is the
   metric to watch.
-- `qa-db-testing-client-dotnet` (#3) / `qa-messaging-testing-service-bus-dotnet` (#28) — the
+- `qa-db-testing-client-dotnet` / `qa-messaging-testing-dotnet` — the
   `WaitForAsync` **condition-wait** that *prevents* the eventual-consistency flakiness this skill quarantines.
 - `qa-ui-test-author-playwright-dotnet` / `qa-api-test-author-generator-dotnet` — where the quarantined tests
   are authored; flakiness is best fixed at the source (stable locators, intent-not-selectors).
-- `qa-ci-pipelines-github-actions` / `-azure-pipelines` / `-gitlab-ci` — the gate-lane vs quarantine-lane job
+- `qa-ci-pipelines` (github-actions / azure-pipelines / gitlab-ci references) — the gate-lane vs quarantine-lane job
   wiring (`continue-on-error` on the non-gating lane).

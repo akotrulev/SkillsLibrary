@@ -1,25 +1,6 @@
 ---
 name: qa-api-test-author-grpc-java
-description: >-
-  Scaffold black-box **gRPC** API tests in Java 21 with grpc-java + TestNG against a deployed, proto-defined
-  HTTP/2 service — codegen a typed stub from the `.proto`, call the RPC, and assert on the **typed response
-  message**, the **gRPC status code**, and **metadata**. Covers the trait that makes gRPC testing different from
-  REST/GraphQL: **there is no HTTP status to read — the result lives in the gRPC `status` (code + message +
-  details)**, and the generated blocking stub **throws `StatusRuntimeException` on any non-OK status**, so the
-  call must be wrapped to return a result the test can assert on for success OR failure (the gRPC analogue of the
-  GraphQL skill's "never throw on errors — return the envelope"). Covers the **four RPC types**, each tested
-  differently — **unary** (assert message + status), **server-streaming** (drain the stream into a buffer + assert
-  the sequence — a bounded condition-wait, never a sleep → `qa-websocket-sse-testing-java`), **client-streaming**,
-  and **bidi-streaming** (async stub + bounded latch). Also covers **rich error details** (`google.rpc.Status` /
-  `ErrorInfo` in the trailers — the GraphQL `extensions.code` analogue), **deadlines** as the sanctioned
-  bounded-wait (assert `DEADLINE_EXCEEDED`), leading/trailing **metadata**, a per-call **bearer** via metadata,
-  and standing the service up with Testcontainers. Triggers: "write a gRPC test for RPC X", "assert the
-  StatusRuntimeException status code", "test a server-streaming RPC", "assert gRPC trailing metadata / error
-  details", "add a TestNG test for a gRPC service". Do NOT use for: REST/JSON endpoints (use
-  qa-api-test-author-generator-java), GraphQL endpoints (use qa-api-test-author-graphql-java), the .NET stack (use
-  qa-api-test-author-grpc-dotnet), the TypeScript stack (use qa-api-test-author-grpc-typescript), gRPC **load**
-  testing (use qa-performance-gatling-java), Protobuf **contract** tests (use qa-contract-testing-pact-java), or
-  generating the proto messages in isolation (use qa-api-dto-writer-java).
+description: Scaffold black-box **gRPC** API tests in Java 21 with grpc-java + TestNG against a deployed, proto-defined HTTP/2 service. Triggers: "write a gRPC test for RPC X", "assert the StatusRuntimeException status code", "test a server-streaming RPC".
 ---
 
 # QA — gRPC API Test Writer (Java 21 / grpc-java + TestNG)
@@ -112,194 +93,9 @@ protobuf {
 > trailers** — never letting the throw escape into the assertion path. This is the exact gRPC analogue of the
 > GraphQL skill's thin client that *never throws on `errors` and returns the raw envelope*.
 
-## The contract + two layers
+## Deep-dive reference
 
-### 1. Proto — `src/main/proto/user.proto`
-
-The `.proto` is the contract. Codegen produces the messages **and** the stub; tests assert on the **typed
-message**, never on bytes.
-
-```protobuf
-syntax = "proto3";
-package user.v1;
-option java_package = "com.example.user.v1";
-option java_multiple_files = true;
-
-service UserService {
-  rpc GetUser     (GetUserRequest)    returns (User);              // unary (read)
-  rpc CreateUser  (CreateUserRequest) returns (User);              // unary (write)
-  rpc ListUsers   (ListUsersRequest)  returns (stream User);       // server-streaming
-  rpc ImportUsers (stream CreateUserRequest) returns (ImportSummary); // client-streaming
-}
-
-message GetUserRequest    { string id = 1; }
-message CreateUserRequest { string email = 1; string first_name = 2; string last_name = 3; }
-message User              { string id = 1; string email = 2; string first_name = 3; string last_name = 4; }
-message ListUsersRequest  { int32 page_size = 1; }
-message ImportSummary     { int32 imported = 1; }
-```
-
-### 2. Action — `src/main/java/action/GrpcCallResult.java` + `UserGrpcAction.java`
-
-`GrpcCallResult<T>` is the **uniform outcome** for *any* unary call — it holds the message on `OK` or the
-`Status` + trailers on a failure. The action wraps each RPC so the test never has to `try/catch`.
-
-```java
-package action;
-
-import io.grpc.Metadata;
-import io.grpc.Status;
-
-/** Uniform outcome of a unary gRPC call: the message on OK, or the status (+ trailers) on a non-OK result. */
-public final class GrpcCallResult<T> {
-    private final T value;
-    private final Status status;
-    private final Metadata trailers;
-
-    private GrpcCallResult(T value, Status status, Metadata trailers) {
-        this.value = value; this.status = status; this.trailers = trailers;
-    }
-
-    public static <T> GrpcCallResult<T> ok(T value)               { return new GrpcCallResult<>(value, Status.OK, null); }
-    public static <T> GrpcCallResult<T> error(Status s, Metadata t) { return new GrpcCallResult<>(null, s, t); }
-
-    public boolean isOk()           { return status.getCode() == Status.Code.OK; }
-    public T value()                { return value; }            // null on a non-OK result
-    public Status.Code code()       { return status.getCode(); } // the gRPC status code — the gate
-    public Status status()          { return status; }
-    public Metadata trailers()      { return trailers; }         // trailing metadata / rich-error details
-}
-```
-
-```java
-package action;
-
-import io.grpc.Channel;
-import io.grpc.Metadata;
-import io.grpc.StatusRuntimeException;
-import io.grpc.stub.MetadataUtils;
-import java.util.function.Supplier;
-
-/** Base for stub wrappers: runs a unary RPC and converts the throw-on-non-OK contract into a GrpcCallResult. */
-public abstract class GrpcAction {
-    protected static final Metadata.Key<String> AUTHORIZATION =
-        Metadata.Key.of("authorization", Metadata.ASCII_STRING_MARSHALLER);
-
-    /** Build a leading-metadata interceptor carrying the bearer — attach to the stub when authenticated. */
-    protected static io.grpc.ClientInterceptor bearer(String token) {
-        Metadata md = new Metadata();
-        md.put(AUTHORIZATION, "Bearer " + token);
-        return MetadataUtils.newAttachHeadersInterceptor(md);
-    }
-
-    /** Invoke a unary RPC; never let StatusRuntimeException escape — return it as a GrpcCallResult. */
-    protected <T> GrpcCallResult<T> call(Supplier<T> rpc) {
-        try {
-            return GrpcCallResult.ok(rpc.get());
-        } catch (StatusRuntimeException e) {
-            return GrpcCallResult.error(e.getStatus(), e.getTrailers());
-        }
-    }
-}
-```
-
-```java
-package action;
-
-import com.example.user.v1.*;
-import io.grpc.Channel;
-import io.grpc.ClientInterceptors;
-import utility.SystemPropertyUtil;
-
-public class UserGrpcAction extends GrpcAction {
-    private final UserServiceGrpc.UserServiceBlockingStub blocking;
-    private final UserServiceGrpc.UserServiceStub async;   // for client-/bidi-streaming
-
-    public UserGrpcAction(Channel channel, boolean authenticated) {
-        Channel ch = authenticated
-            ? ClientInterceptors.intercept(channel, bearer(SystemPropertyUtil.getGrpcToken()))
-            : channel;
-        this.blocking = UserServiceGrpc.newBlockingStub(ch);
-        this.async    = UserServiceGrpc.newStub(ch);
-    }
-
-    public GrpcCallResult<User> getUser(String id) {
-        return call(() -> blocking.getUser(GetUserRequest.newBuilder().setId(id).build()));
-    }
-
-    public GrpcCallResult<User> createUser(String email, String first, String last) {
-        return call(() -> blocking.createUser(CreateUserRequest.newBuilder()
-            .setEmail(email).setFirstName(first).setLastName(last).build()));
-    }
-
-    // Server-streaming: the blocking stub returns an Iterator — drained by the test (see streaming section).
-    public java.util.Iterator<User> listUsers(int pageSize) {
-        return blocking.listUsers(ListUsersRequest.newBuilder().setPageSize(pageSize).build());
-    }
-
-    UserServiceGrpc.UserServiceStub async() { return async; }   // exposed for the streaming tests
-}
-```
-
-### 3. Test — `src/test/java/user/UserGrpcTest.java`
-
-Assert `isOk()` (or the failure `code()`) **first** — that's the gate — then the typed message fields. The
-channel points at the service stood up by `qa-test-environments-java`.
-
-```java
-package user;
-
-import action.GrpcCallResult;
-import action.UserGrpcAction;
-import base.BaseGrpcTest;            // owns the ManagedChannel lifecycle (see Testcontainers section)
-import com.example.user.v1.User;
-import io.grpc.Status;
-import org.testng.annotations.Test;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
-public class UserGrpcTest extends BaseGrpcTest {
-
-    @Test
-    public void getUserWhenExistsReturnsUserWithOkStatus() {
-        UserGrpcAction action = new UserGrpcAction(channel, true);
-
-        GrpcCallResult<User> result = action.getUser("1");
-
-        assertThat(result.isOk()).isTrue();                       // THE gate: the gRPC status, not an HTTP code
-        assertThat(result.value().getEmail()).isEqualTo("george.bluth@example.com");
-    }
-
-    @Test
-    public void getUserWhenUnknownIdReturnsNotFound() {
-        UserGrpcAction action = new UserGrpcAction(channel, true);
-
-        GrpcCallResult<User> result = action.getUser("999999");
-
-        assertThat(result.isOk()).isFalse();
-        assertThat(result.code()).isEqualTo(Status.Code.NOT_FOUND);   // the outcome lives in the status code
-        assertThat(result.value()).isNull();                          // no message on a non-OK result
-    }
-
-    @Test
-    public void createUserWhenEmailBlankReturnsInvalidArgument() {
-        UserGrpcAction action = new UserGrpcAction(channel, true);
-
-        GrpcCallResult<User> result = action.createUser("", "A", "B");
-
-        assertThat(result.code()).isEqualTo(Status.Code.INVALID_ARGUMENT);
-    }
-
-    @Test
-    public void getUserWhenNoBearerReturnsUnauthenticated() {
-        UserGrpcAction action = new UserGrpcAction(channel, false);   // no bearer metadata
-
-        GrpcCallResult<User> result = action.getUser("1");
-
-        assertThat(result.code()).isEqualTo(Status.Code.UNAUTHENTICATED);
-    }
-}
-```
+These sections live in `references/details.md` — **read it when the task touches them**: **The contract + two layers**.
 
 ## Rich error details — assert `ErrorInfo`, not just the code (idea #2)
 
@@ -523,7 +319,7 @@ public abstract class BaseGrpcTest {
 `result.code() == Status.Code.NOT_FOUND` — same outcome, third location: the REST status line, the GraphQL
 `errors` envelope, the gRPC `status`. One family, three result-location conventions.
 
-**Composing with the protocol-trio siblings.** REST `generator` is status-driven over HTTP+JSON; GraphQL `#44` is
+**Composing with the protocol-trio siblings.** REST `generator` is status-driven over HTTP+JSON; GraphQL ``api-test-author/graphql`` is
 one HTTP 200 carrying `{ data, errors }`; gRPC is proto/HTTP2 with the result in the `status`. All three share the
 **Action + Test** spine and the "wrap the call so the test asserts success *or* failure uniformly" move (the gRPC
 `GrpcCallResult` is the GraphQL raw-envelope analogue). Only the transport, the codegen, and where-the-result-lives
@@ -559,12 +355,12 @@ differ.
 - `qa-api-test-author-generator-java` · `qa-api-test-author-graphql-java` — the **protocol-trio siblings**: REST
   (HTTP+JSON status-driven) and GraphQL (HTTP 200 `{ data, errors }` envelope). Three protocols, three
   result-location conventions, one `api-test-author` family + shared Action + Test spine.
-- `qa-websocket-sse-testing-java` (#37) — gRPC **streaming** reuses its drain-then-assert-on-a-bounded-condition
+- `qa-websocket-sse-testing-java` — gRPC **streaming** reuses its drain-then-assert-on-a-bounded-condition
   discipline; cross-link for deep stream-lifecycle (ordering, mid-stream close) assertions, don't duplicate.
 - `qa-api-dto-writer-java` — generate/model the proto messages (the DTO analogue) in isolation; this skill
   consumes them.
 - `qa-contract-testing-pact-java` — the **Protobuf contract** boundary (Pact's Protobuf/gRPC plugin) vs the
   functional test this skill writes. `qa-performance-gatling-java` — gRPC **load**.
-- `qa-auth0-test-tokens-java` (#16) — obtain the per-call **bearer** carried in leading metadata.
-- `qa-test-environments-java` (#14) — stand the gRPC service up via Testcontainers and feed the channel target.
+- `qa-auth0-test-tokens-java` — obtain the per-call **bearer** carried in leading metadata.
+- `qa-test-environments-java` — stand the gRPC service up via Testcontainers and feed the channel target.
 - `qa-allure-reporting-java` — each RPC renders as a named result.

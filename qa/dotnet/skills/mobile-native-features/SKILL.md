@@ -1,31 +1,6 @@
 ---
 name: qa-mobile-native-features-dotnet
-description: >-
-  Use when the user needs to test the **device-native, OS-level capabilities** a mobile app uses that a normal
-  Appium page-object UI test doesn't exercise — in .NET 8 (C#) with `Appium.WebDriver` 8.x + NUnit. Covers the
-  trait that makes native-feature testing its own discipline: **a native feature lives OUTSIDE your app's own
-  DOM/UI — it is an OS-level surface (a deep-link/intent, a runtime permission dialog, the biometric prompt, a push
-  notification, the app's background/foreground lifecycle) — so you drive it through Appium's device/driver APIs and
-  `Driver.ExecuteScript("mobile: …")` commands, NEVER through page-object selectors on your app's screens** (the
-  "find the element and tap it" reflex is wrong for an OS dialog the same way `Assert.That(status, Is.EqualTo(404))`
-  is wrong for a gRPC call). Covers the four native surfaces, each tested differently — **deep / universal links**
-  (launch via `mobile: deepLink` / a URL → assert the app *routed* to the right screen via your page object, not by
-  tapping through the UI), **runtime permission dialogs** (the OS dialog is not your UI → `autoGrantPermissions` /
-  `autoAcceptAlerts` caps for determinism, OR drive the real system dialog / Springboard when the *flow itself* is
-  under test), **biometric auth** (`AndroidDriver.FingerPrint(int)` / iOS `mobile: sendBiometricMatch` — on the
-  emulator/simulator injection APIs ONLY, never a real fingerprint), and **push notifications + backgrounding /
-  resume** (`Driver.BackgroundApp(TimeSpan)` / `mobile: backgroundApp` → assert state restored on resume;
-  `OpenNotifications` / `mobile: pushNotification`). Plus app lifecycle (`TerminateApp` / `ActivateApp` /
-  `GetAppState`), clipboard (`SetClipboardText`/`GetClipboardText`), camera/file pickers (`PushFile`), device
-  orientation (`Driver.Orientation`), and the boundary with network conditioning. Triggers: "test our deep link
-  opens the right screen in Appium C#", "handle the camera/location permission dialog", "test Face ID / fingerprint
-  login on the simulator", "assert app state is restored after backgrounding", "test our push notification opens the
-  app". Do NOT use for: driving YOUR app's own screens via page objects (use qa/dotnet/skills/ui-test-author/appium — this
-  skill builds ON it and adds the OS-surface layer), the real-device-cloud layer + GPS/network/biometric cap
-  *injection plumbing* (use qa/dotnet/skills/mobile-device-farm — #45 is *what* you assert, #40 is *where* it runs),
-  asserting the network requests an app makes (use qa/dotnet/skills/network-monitoring/*), the Java stack (use
-  qa/java/skills/mobile-native-features), the TypeScript/WebdriverIO stack (use qa/typescript/skills/mobile-native-features), or
-  token-based auth (use qa/dotnet/skills/auth0-test-tokens).
+description: Use when the user needs to test the **device-native, OS-level capabilities** a mobile app uses that a normal Appium page-object UI test doesn't exercise. Triggers: "test our deep link opens the right screen in Appium C#", "handle the camera/location permission dialog", "test Face ID / fingerprint login on the simulator".
 ---
 
 # QA — Mobile Native Features (.NET: Appium.WebDriver + NUnit)
@@ -113,9 +88,9 @@ the layer that drives the OS surfaces *around* your screens.
 
 - Driving **your app's own screens** via page objects → `qa/dotnet/skills/ui-test-author/appium` (this skill builds **on** it)
 - The **real-device-cloud** layer + GPS/network/biometric **cap-injection plumbing** → `qa/dotnet/skills/mobile-device-farm`
-  (#40 = *where* the test runs + how caps are injected on a farm; #45 = *what* you assert on those caps — they
+  (`mobile-device-farm` = *where* the test runs + how caps are injected on a farm; `mobile-native-features` = *what* you assert on those caps — they
   compose)
-- Asserting the **network requests** an app makes → `qa/dotnet/skills/network-monitoring/*` (#45 = the app's *reaction* to airplane
+- Asserting the **network requests** an app makes → `qa/dotnet/skills/network-monitoring/*` (`mobile-native-features` = the app's *reaction* to airplane
   mode / a permission; network-monitoring = asserting the requests)
 - The Java / TypeScript native-feature stacks → `qa/{java,typescript}/skills/mobile-native-features`
 - **Token-based** auth → `qa/dotnet/skills/auth0-test-tokens` (biometric *unlock* vs token *auth* are different surfaces)
@@ -303,75 +278,14 @@ new NativeFeatures(Driver).SendIosBiometric("faceId", true);    // match
 
 > **Real-device biometric is a farm concern, not this skill's.** On a real device you can't inject a sensor read
 > locally — that's BrowserStack/Sauce sensor instrumentation (`enableBiometric` + `browserstack_executor
-> performBiometric`), which `qa/dotnet/skills/mobile-device-farm` (#40) owns. They **compose**: write the approve/reject
+> performBiometric`), which `qa/dotnet/skills/mobile-device-farm` owns. They **compose**: write the approve/reject
 > *assertions* here, run them on the farm's injected biometric there. Never wire a real fingerprint into a test.
 
 ---
 
-## 4. Push notifications + backgrounding / resume — assert state, never sleep through it (idea #4)
+## Deep-dive reference
 
-**App lifecycle.** Backgrounding and resuming is a real user behavior that breaks fragile apps (lost form state,
-re-auth loops). Drive it with the driver, then **wait on the restored screen** — a bounded `WebDriverWait`, never a
-`Thread.Sleep` guessing how long the OS takes.
-
-```csharp
-[Test]
-public void Should_PreserveCart_When_AppBackgroundedAndResumed()
-{
-    var cart = new CartPage(Driver);
-    cart.AddItem("SKU-42");
-    Assert.That(cart.ItemCount(), Is.EqualTo(1));
-
-    var os = new NativeFeatures(Driver);
-    os.BackgroundFor(TimeSpan.FromSeconds(3));   // home → wait → return to foreground
-
-    cart.VerifyPageLoaded();                     // explicit wait on the restored screen (no sleep)
-    Assert.That(cart.ItemCount(), Is.EqualTo(1));// STATE survived the lifecycle event
-}
-```
-
-```csharp
-// Cold relaunch: terminate then activate; GetAppState confirms the transition deterministically
-[Test]
-public void Should_RequireLogin_When_AppTerminatedAndRelaunched()
-{
-    var bundle = Env.AppBundleId;
-    var os = new NativeFeatures(Driver);
-
-    os.Terminate(bundle);
-    Assert.That(Driver.GetAppState(bundle), Is.EqualTo(AppState.NotRunning));
-
-    os.Activate(bundle);                         // cold start
-    var login = new LoginPage(Driver);
-    login.VerifyPageLoaded();                    // session did NOT survive a cold start — by design
-}
-```
-
-**Push notifications.** Open the OS notification surface — *not* your app's UI — assert the notification, then tap
-it and assert the deep-linked screen (this composes with idea #2's routing assertion).
-
-```csharp
-// Android: open the notification shade via the driver, assert + tap the notification
-[Test]
-public void Should_OpenMessage_When_PushTapped()
-{
-    ((AndroidDriver)Driver).OpenNotifications();
-
-    var wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(10));
-    var push = wait.Until(d => d.FindElement(AppiumBy.AndroidUIAutomator(
-        "new UiSelector().textContains(\"New message from\")")));
-    push.Click();
-
-    new MessageThreadPage(Driver).VerifyPageLoaded();     // the push routed into the right screen
-}
-```
-
-> **iOS push on the simulator** is simulated with `mobile: pushNotification` (wraps `simctl push`) carrying an APNs
-> payload; then open **Notification Center** and tap it. Asserting the *server actually sent* a push is a backend
-> concern (your push provider's sandbox), not Appium's — this skill asserts the **app's reaction** to a push, the
-> same boundary as `qa/dotnet/skills/network-monitoring/*` for requests.
-
----
+These sections live in `references/details.md` — **read it when the task touches them**: **4. Push notifications + backgrounding / resume — assert state, never sleep through it (idea #4)**.
 
 ## Clipboard, pickers, orientation — the smaller OS surfaces
 
@@ -416,8 +330,8 @@ Home → Orders → search → row to reach order detail. The native-correct ver
 which the tap-through test never does. Same destination screen, two completely different things proven: the OS
 surface (the link) vs your in-app navigation.
 
-**Composing with `mobile-device-farm` (#40).** This skill writes the *assertions* — "approved fingerprint reaches
-the dashboard", "denied location degrades gracefully". #40 owns *where they run and how the cap is injected* on a
+**Composing with `mobile-device-farm`.** This skill writes the *assertions* — "approved fingerprint reaches
+the dashboard", "denied location degrades gracefully". `mobile-device-farm` owns *where they run and how the cap is injected* on a
 real-device cloud. They compose: the biometric reject test you write here runs on the farm's injected sensor there.
 The boundary mirrors gRPC's "assert the typed message" vs Testcontainers' "stand the service up" — *what you assert*
 vs *where it runs*.
@@ -449,18 +363,18 @@ vs *where it runs*.
 - **`qa/dotnet/skills/ui-test-author/appium`** — the **foundation this skill builds on**: `BaseAppiumPage` /
   `AppiumDriverFactory` / `BaseMobileTest` / `Env`, the `AppiumOptions` capability idioms, `ExecuteScript("mobile:
   …")` gesture commands, explicit waits, native↔WEBVIEW context switching. The page objects + driver lifecycle run
-  **unchanged**; #45 adds the OS-surface layer. Mirror its locator/wait idioms exactly.
-- **`qa/dotnet/skills/mobile-device-farm`** (#40) — the **real-device-cloud layer** + GPS/network/biometric **cap-injection
-  plumbing**. #40 = *where* the test runs + *how* the cap is injected; #45 = *what* you assert on those caps. They
+  **unchanged**; `mobile-native-features` adds the OS-surface layer. Mirror its locator/wait idioms exactly.
+- **`qa/dotnet/skills/mobile-device-farm`** — the **real-device-cloud layer** + GPS/network/biometric **cap-injection
+  plumbing**. `mobile-device-farm` = *where* the test runs + *how* the cap is injected; `mobile-native-features` = *what* you assert on those caps. They
   compose. Don't duplicate the farm wiring.
 - **`qa/java/skills/mobile-native-features`** + **`qa/typescript/skills/mobile-native-features`** — the sibling stacks (java-client
   `InteractsWithApps`/`fingerPrint` · WebdriverIO `driver.execute('mobile: …')`); same four ideas, different client
   idioms. Structure ported, not redesigned.
-- **`qa/dotnet/skills/network-monitoring/*`** — the **boundary** on network conditioning/requests: #45 tests the app's *reaction*;
+- **`qa/dotnet/skills/network-monitoring/*`** — the **boundary** on network conditioning/requests: `mobile-native-features` tests the app's *reaction*;
   network-monitoring asserts the *requests*.
-- **`qa/dotnet/skills/data-driven-testing`** (#39) — drive a **device / permission / locale matrix** via `[TestCaseSource]`
+- **`qa/dotnet/skills/data-driven-testing`** — drive a **device / permission / locale matrix** via `[TestCaseSource]`
   (one independent named case per row); this skill supplies the rows, that one the data-driven discipline.
-- **`qa/dotnet/skills/cloud-grid-config`** (#15) — the grid/session wiring the device session connects through (under #40).
-- **`qa/dotnet/skills/auth0-test-tokens`** (#16) — token-based auth, the boundary vs biometric *unlock*.
+- **`qa/dotnet/skills/cloud-grid-config`** — the grid/session wiring the device session connects through (under `mobile-device-farm`).
+- **`qa/dotnet/skills/auth0-test-tokens`** — token-based auth, the boundary vs biometric *unlock*.
 - **`qa/dotnet/skills/allure-reporting`** — attach a screenshot of the deep-linked / restored / unlocked screen per
   native-flow result.
