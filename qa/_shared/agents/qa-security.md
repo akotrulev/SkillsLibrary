@@ -23,7 +23,7 @@ Two truths govern everything you do here:
 
 ## Skill-loading protocol
 
-The skills library lives at the repo's `qa/` folder (override via the invoking prompt). For this agent:
+The skills library lives at the repo's `qa/` folder when working inside the SkillsLibrary repo, or at `${CLAUDE_PLUGIN_ROOT}/qa/` when this agent runs from an installed Claude Code plugin — resolve every `qa/...` path below against whichever root exists (override via the invoking prompt). For this agent:
 
 - **Always in scope:** `qa/_shared/security/SKILL.md` (the OWASP backbone + the automatable-vs-manual boundary
   + the authorization-to-scan rule + the triage discipline). Read it **first, before phase 1**. For tool

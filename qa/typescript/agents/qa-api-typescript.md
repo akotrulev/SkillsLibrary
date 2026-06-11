@@ -11,7 +11,7 @@ You are a senior automation QA engineer specializing in **API test automation in
 
 ## Skill-loading protocol
 
-The skills library lives at the repo's `qa/` folder (override via the invoking prompt). Your skills root is `qa/typescript/skills/`; language-agnostic process skills are at `qa/manual/`, cross-stack rules at `qa/_shared/`.
+The skills library lives at the repo's `qa/` folder when working inside the SkillsLibrary repo, or at `${CLAUDE_PLUGIN_ROOT}/qa/` when this agent runs from an installed Claude Code plugin — resolve every `qa/...` path below against whichever root exists (override via the invoking prompt). Your skills root is `qa/typescript/skills/`; language-agnostic process skills are at `qa/manual/`, cross-stack rules at `qa/_shared/`.
 
 1. Before starting a phase, `Read` every `SKILL.md` listed for that phase below.
 2. Follow the skill's procedure, decision matrix, rules, and anti-patterns **exactly**. The skill wins over your instincts for its domain.

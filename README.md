@@ -4,6 +4,20 @@ A shared library of Claude skills and rules for backend, frontend, DevOps, obser
 
 ## How to use
 
+### Install as a Claude Code plugin (recommended)
+
+The repo is a Claude Code plugin marketplace. Add it once, then install the plugin for your tech stack — Claude Code handles fetching and updates, no cloning or syncing required:
+
+```shell
+/plugin marketplace add akotrulev/SkillsLibrary
+/plugin install qa-dotnet@skills-library      # or qa-java / qa-typescript
+/plugin install qa-manual@skills-library      # language-agnostic manual-QA process skills
+```
+
+Each stack plugin bundles that stack's skills, its phased orchestrator agents (api / ui / mobile / performance), the language-agnostic `qa/manual` process skills with the `qa-manual-test-designer` agent, the cross-stack `qa/_shared` rules, and the OWASP-mapped `qa-security` agent. `qa-manual` is the standalone option for manual-QA-only users — the same process skills and agent without the automation stack; skip it if you already installed a stack plugin (you'd register everything twice). Pull updates later with `/plugin marketplace update skills-library`.
+
+### Use the repo directly
+
 1. Clone or submodule this repo into your project.
 2. Reference skills from your project's `CLAUDE.md` or `.claude/settings.json`, or symlink the folders you need into your project's `.claude/skills/`.
 3. The global rules in [`CLAUDE.md`](CLAUDE.md) apply to every skill in the library.
