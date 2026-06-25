@@ -40,7 +40,6 @@ pipeline*: fast, safe against a deployed/ephemeral env, CI-native.
 | Deep active attack testing (SQLi/XSS/traversal payloads) on a throwaway env | `zap-full-scan.py` (out of scope here) | Active scanner mutates state — never prod/shared; slower cadence |
 | **Dependency / library** CVEs (vulnerable NuGet packages, transitive CVEs) | dependency-scanning | SCA reads your project/lockfile; ZAP scans running HTTP — orthogonal layers |
 | Per-component **accessibility** rule assertions | axe-playwright | Different concern; same *ticketed-baseline triage* discipline applies |
-| API contract / spec conformance of mocked endpoints | `api-mocking` (prism reference) | Prism validates against an OpenAPI spec; ZAP probes a live deployed app |
 
 **Rule of thumb:** ZAP baseline is your **passive DAST PR gate** against a running app. It complements —
 does not replace — SCA dependency scanning: different layers (running-app HTTP surface vs your
@@ -254,7 +253,7 @@ public class ZapBaselineTests
     [OneTimeSetUp]
     public async Task StartApp()
     {
-        // Stand up the SUT (cross-link qa-test-environments-dotnet). Wait on a readiness condition.
+        // Stand up the SUT. Wait on a readiness condition.
         _app = new ContainerBuilder()
             .WithImage("myorg/web:latest")
             .WithPortBinding(5000, true)
@@ -386,8 +385,6 @@ These sections live in `references/details.md` — **read it when the task touch
   reused here for `-c rules.tsv`.
 - `qa-accessibility-testing-dotnet` — the closest **port-shape precedent**: a
   CLI/Docker tool invoked via `Process` from .NET with the report parsed as JSON.
-- `qa-test-environments-dotnet` — spin the target app the scan points at (Testcontainers / docker-compose,
-  ready on a wait strategy).
 - `qa-ci-pipelines-dotnet` — the `zaproxy/action-baseline` job, `fail_action`, artifact
   upload, Docker availability.
 - `qa-allure-reporting-dotnet` — attach the ZAP HTML/JSON report and alert summary.

@@ -17,7 +17,7 @@ Runs Java Appium tests against a **managed real-device cloud** — BrowserStack 
 - **Remote-run farm**: AWS SDK for Java v2 `software.amazon.awssdk:devicefarm` (`DeviceFarmClient`)
 - **Condition waits**: `org.awaitility:awaitility` for upload-status / run-result polling — never `Thread.sleep`
 - Farm support code under `src/test/java/.../support/farm/`; credentials via **env vars only** (`BROWSERSTACK_USERNAME` / `BROWSERSTACK_ACCESS_KEY`; AWS creds via the default provider chain / OIDC)
-- Runs in CI under `qa/java/skills/ci-pipelines`; the page objects come from `qa/java/skills/ui-test-author/appium` and run **unchanged** on the farm
+- Runs in CI under `qa/cicd/java/skills/ci-pipelines`; the page objects come from `qa/java/skills/ui-test-author/appium` and run **unchanged** on the farm
 
 ## When to use
 
@@ -32,7 +32,7 @@ Runs Java Appium tests against a **managed real-device cloud** — BrowserStack 
 - The connect / capability-block / parallelism / tunnel / session-status wiring → `qa/java/skills/cloud-grid-config` (this skill assumes it)
 - The TypeScript / .NET device-farm stacks → `qa/{typescript,dotnet}/skills/mobile-device-farm`
 - Writing the mobile page objects / tests → `qa/java/skills/ui-test-author/appium`
-- CI shard/worker mechanics (matrix fan-out, sharding props, Allure merge) → `qa/java/skills/ci-pipelines/*` — cross-link, don't duplicate
+- CI shard/worker mechanics (matrix fan-out, sharding props, Allure merge) → `qa/cicd/java/skills/ci-pipelines/*` — cross-link, don't duplicate
 - Web (Playwright) cloud runs → `qa/java/skills/cloud-grid-config`; this node is mobile real-device only
 
 ## Pick a paradigm — the choice that shapes everything
@@ -110,7 +110,7 @@ public final class DeviceFarmRunner {
 }
 ```
 
-> **Device Farm specifics:** the test package type for a TestNG Appium suite is `APPIUM_JAVA_TESTNG_TEST_PACKAGE` (+ an `APPIUM_JAVA_TESTNG_TEST_SPEC` YAML to control the run); the app type is `ANDROID_APP` / `IOS_APP`. A **device pool** is created once (in the console or via `createDevicePool` with a device-selection rule) and referenced by ARN. AWS auth comes from the **default credential provider chain** — in CI prefer **OIDC role assumption** over a long-lived access key (see `qa/java/skills/ci-pipelines`). Artifacts (logs, video, screenshots) are fetched per-job via `listArtifacts(runArn)` after the run completes.
+> **Device Farm specifics:** the test package type for a TestNG Appium suite is `APPIUM_JAVA_TESTNG_TEST_PACKAGE` (+ an `APPIUM_JAVA_TESTNG_TEST_SPEC` YAML to control the run); the app type is `ANDROID_APP` / `IOS_APP`. A **device pool** is created once (in the console or via `createDevicePool` with a device-selection rule) and referenced by ARN. AWS auth comes from the **default credential provider chain** — in CI prefer **OIDC role assumption** over a long-lived access key (see `qa/cicd/java/skills/ci-pipelines`). Artifacts (logs, video, screenshots) are fetched per-job via `listArtifacts(runArn)` after the run completes.
 
 ---
 
@@ -217,5 +217,5 @@ public final class FarmCredentials {
 - **`qa/typescript/skills/mobile-device-farm`** + **`qa/dotnet/skills/mobile-device-farm`** — sibling device-farm stacks. Same four moves (app lifecycle → device selection → real-device features → remote-run), different SDKs. Structure ported, not code.
 - **`qa/java/skills/ui-test-author/appium`** — writes the mobile page objects / tests that run **unchanged** on the farm; this skill only swaps the local session for a farm one.
 - **`qa/java/skills/data-driven-testing`** — the `@DataProvider` device-matrix mechanics (one independent case per device); this skill supplies the device list, that one the data-driven discipline.
-- **`qa/java/skills/ci-pipelines`** — build-then-upload job, OIDC for AWS, sharding the matrix across runners (cross-link; don't duplicate).
-- **`qa/java/skills/allure-reporting`** — attach the session/run dashboard URL + device name to the report so a farm failure is one click from the replay.
+- **`qa/cicd/java/skills/ci-pipelines`** — build-then-upload job, OIDC for AWS, sharding the matrix across runners (cross-link; don't duplicate).
+- **`qa/reporting/java/skills/allure-reporting`** — attach the session/run dashboard URL + device name to the report so a farm failure is one click from the replay.

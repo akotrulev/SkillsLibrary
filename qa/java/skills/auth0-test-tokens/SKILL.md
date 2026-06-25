@@ -96,7 +96,7 @@ These sections live in `references/details.md` — **read it when the task touch
 - Guard the refresh with `synchronized` so TestNG parallel tests don't stampede the token endpoint.
 
 ### Secrets
-- `clientSecret`, test-user passwords, `AUTH0_DOMAIN`, `AUTH0_AUDIENCE`, `realm` via **env vars only**, read **lazily** (methods, not static field initializers). Never logged, never committed. In CI, source them per `qa/java/skills/ci-pipelines`.
+- `clientSecret`, test-user passwords, `AUTH0_DOMAIN`, `AUTH0_AUDIENCE`, `realm` via **env vars only**, read **lazily** (methods, not static field initializers). Never logged, never committed. In CI, source them per `qa/cicd/java/skills/ci-pipelines`.
 - Never log a token. Treat the access token as a secret in flight.
 
 ### Stashing
@@ -126,4 +126,4 @@ These sections live in `references/details.md` — **read it when the task touch
 - **`qa/java/skills/api-test-author/generator`** — the M2M consumer: where the `Bearer` header lands on the RestAssured client.
 - **`qa/java/skills/ui-test-author/playwright`** — the ROPG consumer: storage-state / fixture patterns for seeding auth without the login UI.
 - **`qa/java/skills/test-data-builder`** — provisioning/seeding the test users that ROPG authenticates as.
-- **`qa/java/skills/ci-pipelines`** — where the Auth0 secrets are sourced in CI (OIDC / encrypted secrets), never hardcoded.
+- **`qa/cicd/java/skills/ci-pipelines`** — where the Auth0 secrets are sourced in CI (OIDC / encrypted secrets), never hardcoded.

@@ -29,7 +29,6 @@ Scaffolds WebdriverIO + Appium page objects and Mocha (or Vitest) mobile UI test
 - Appium .NET → `qa/dotnet/skills/ui-test-author/appium`
 - Appium Java → `qa/java/skills/ui-test-author/appium`
 - Selenium / web TS → `qa/typescript/skills/ui-test-author/selenium` or `qa/typescript/skills/ui-test-author/playwright`
-- Accelerator → `qa/manual/accelerator-conventions`
 - Reviewing an existing page object → `qa/typescript/skills/ui-test-author/reviewer`
 - POM architecture → `qa/typescript/skills/page-object-architect`
 
@@ -249,4 +248,4 @@ WDIO owns the driver session via `wdio.conf.ts`; one session per worker is autom
 - POM architecture (capabilities profiles, sub-folders, base classes) → `qa/typescript/skills/page-object-architect`
 - Test data builders → `qa/typescript/skills/test-data-builder`
 - Reviewing a page object → `qa/typescript/skills/ui-test-author/reviewer`
-- Allure reporting → `qa/typescript/skills/allure-reporting`
+- Allure reporting → `qa/reporting/typescript/skills/allure-reporting`

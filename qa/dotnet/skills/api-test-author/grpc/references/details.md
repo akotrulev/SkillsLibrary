@@ -114,7 +114,7 @@ public sealed class UserGrpcAction : GrpcAction
 ### 3. Test — `Tests/UserGrpcTests.cs`
 
 Assert `IsOk` (or the failure `Code`) **first** — that's the gate — then the typed message fields. The channel
-points at the service stood up by `qa-test-environments-dotnet`. Tests are `async Task` — **async all the way, no
+points at the service stood up by Testcontainers. Tests are `async Task` — **async all the way, no
 `.Result`/`.Wait()`**.
 
 ```csharp

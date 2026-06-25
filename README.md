@@ -10,11 +10,15 @@ The repo is a Claude Code plugin marketplace. Add it once, then install the plug
 
 ```shell
 /plugin marketplace add akotrulev/SkillsLibrary
-/plugin install qa-dotnet@skills-library      # or qa-java / qa-typescript
-/plugin install qa-manual@skills-library      # language-agnostic manual-QA process skills
+/plugin install qa-api-dotnet@skills-library   # .NET API tests — also qa-ui-dotnet / qa-mobile-dotnet / qa-performance-dotnet
+/plugin install qa-security@skills-library      # cross-stack OWASP-mapped security gates (peer)
+/plugin install qa-manual@skills-library        # language-agnostic manual-QA process skills (peer)
+/plugin install qa-java@skills-library          # Java full-stack bundle (java/typescript not yet split per discipline)
 ```
 
-Each stack plugin bundles that stack's skills, its phased orchestrator agents (api / ui / mobile / performance), the language-agnostic `qa/manual` process skills with the `qa-manual-test-designer` agent, the cross-stack `qa/_shared` rules, and the OWASP-mapped `qa-security` agent. `qa-manual` is the standalone option for manual-QA-only users — the same process skills and agent without the automation stack; skip it if you already installed a stack plugin (you'd register everything twice). Pull updates later with `/plugin marketplace update skills-library`.
+**.NET is split into self-contained discipline plugins** — `qa-{api,ui,mobile,performance}-dotnet`. Each one scaffolds a complete runnable .NET 8 test solution **from zero** (pinned tool/library versions, local setup, project layout) and then authors + verifies that discipline's suite; the standalone solutions share a `src/TestCore` seam so you can fold several disciplines into one solution later (see each plugin's `*-project-scaffold` skill). Install the peers alongside as needed: `qa-manual` (test design), `qa-security` (OWASP gates), `qa-cicd-dotnet` (pipelines), `qa-reporting-dotnet` (Allure + flake quarantine).
+
+`qa-java` and `qa-typescript` are still **stack-bundled** (every discipline in one plugin) pending the same discipline split; each bundles its skills, the api/ui/mobile/performance agents, `qa/manual`, `qa/_shared`, and the `qa-security` agent. Pull updates later with `/plugin marketplace update skills-library`.
 
 ### Use the repo directly
 
@@ -87,26 +91,31 @@ See [`qa/GAP-ANALYSIS.md`](qa/GAP-ANALYSIS.md) for the live build/audit plan and
 | `email-testing` | java · dotnet · typescript | Capture/assert email — tool picked inside via `references/` (mailpit · mailosaur · gmail-imap · sendgrid-sandbox) |
 | `messaging-testing` | java · dotnet · typescript | Produce/consume/assert against brokers — broker picked inside via `references/` (kafka · sqs · rabbitmq · service-bus) |
 | `file-storage-testing` | java · dotnet · typescript | Object-storage assertions — store picked inside via `references/` (s3/LocalStack · azure-blob/Azurite) |
-| `api-mocking` | java · dotnet · typescript | Stub/mock HTTP dependencies — mock server picked inside via `references/` (wiremock · msw · prism · mountebank) |
 | `network-monitoring` | java · dotnet · typescript | Intercept/mock/throttle browser traffic — layer picked inside via `references/` (playwright-routes · cdp · proxy) |
 | `websocket-sse-testing` | java · dotnet · typescript | Real-time WebSocket + SSE assertions |
 
-### Pipelines & environments
+### Grids & access
 
 | Skill | Stacks | What it does |
 |-------|--------|--------------|
-| `ci-pipelines` | java · dotnet · typescript | Shard matrix, Allure publish, perf gate, OIDC — CI host picked inside via `references/` (github-actions · azure-pipelines · gitlab-ci) |
-| `test-environments` | java · dotnet · typescript | Testcontainers + docker-compose multi-service spin-up |
 | `cloud-grid-config` | java · dotnet · typescript | BrowserStack / Sauce / LambdaTest / Device Farm wiring |
 | `auth0-test-tokens` | java · dotnet · typescript | M2M / ROPG / device-code tokens for test users |
 
-### Visual, reporting & test data
+### Reporting & CI/CD (`qa/reporting/`, `qa/cicd/` — own folders, own agents)
+
+| Skill | Stacks | What it does |
+|-------|--------|--------------|
+| `reporting/<stack>/skills/allure-reporting` | java · dotnet · typescript | Allure results integration — loaded by `qa-reporting-<stack>` |
+| `reporting/<stack>/skills/flaky-test-quarantine` | java · dotnet · typescript | Detect/quarantine flaky tests, tag tests by finding — loaded by `qa-reporting-<stack>` |
+| `cicd/<stack>/skills/ci-pipelines` | java · dotnet · typescript | Shard matrix, Allure-publish step, perf gate, OIDC — CI host picked inside via `references/` (github-actions · azure-pipelines · gitlab-ci) — loaded by `qa-cicd-<stack>` |
+| `cicd/ci-conventions` | language-agnostic | Pipeline conventions every `ci-pipelines` implementation references |
+
+### Visual & test data
 
 | Skill | Stacks | What it does |
 |-------|--------|--------------|
 | `visual-regression` | java · dotnet · typescript | Pixel-diff / visual review — tool picked inside via `references/` (playwright-snapshots · percy · applitools) |
 | `accessibility-testing` | java · dotnet · typescript | A11y scans + budgets — tool picked inside via `references/` (axe-playwright · lighthouse-ci) |
-| `allure-reporting` | java · dotnet · typescript | Allure results integration |
 | `test-data-builder` | java · dotnet · typescript | Builders / ObjectMother for test data |
 
 ### Process / planning (single-folder)
@@ -116,7 +125,6 @@ See [`qa/GAP-ANALYSIS.md`](qa/GAP-ANALYSIS.md) for the live build/audit plan and
 | `test-case-writer` | Write structured test cases |
 | `bug-report-writer` | Write actionable bug reports |
 | `exploratory-charter-writer` | Write exploratory testing charters |
-| `accelerator-conventions` | In-house Accelerator framework rules |
 | `_shared/test-strategy` | Test strategy guidance |
 | `_shared/quality-metrics` | Quality metrics guidance |
 | `webapp-testing` | UI automation with Python — Playwright web-app testing toolkit (Anthropic-provided import) |

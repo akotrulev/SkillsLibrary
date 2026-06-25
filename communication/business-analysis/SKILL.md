@@ -33,6 +33,23 @@ Ask only what's missing:
 
 If the user can't answer "why" or "how will we know it worked", surface that as the first risk — it usually predicts the work will need to be redone.
 
+## Eliciting the inputs (when the stakeholder is available)
+
+When the inputs above don't exist yet and a stakeholder can be asked, drive the discovery — don't wait for a brief. One question at a time; verbatim answers go in the notes (`communication/meeting-notes` for the session writeup).
+
+**Question bank by gap:**
+
+| Missing | Ask |
+|---|---|
+| The *why* | "Walk me through the last time this problem cost you something — what happened?" Then five-whys until the answer is a business outcome, not a feature. |
+| Users | "Who touches this on a bad day? Who complains when it breaks?" (roles → named people) |
+| Scope | "If we shipped only one slice this quarter, which? What would you happily never get?" |
+| Success | "Six months from now, what number or behavior proves this worked?" Push for baseline → target. |
+| Constraints | "What's fixed — date, budget, compliance, systems we must keep?" |
+| Risks | "What's the way this most plausibly fails or gets cancelled?" |
+
+**Technique notes:** five-whys for the problem statement (stop at a business outcome, not at "we need the feature"); walk the current workflow end-to-end before discussing the future one (a lightweight event-storming pass — events, actors, pain points — beats abstract requirement talk); ask for the last concrete instance, never the general case ("usually" hides the edge cases that become Open questions).
+
 ## Procedure
 
 1. **Separate observation from inference.** Quote the stakeholder verbatim in one section; your interpretation goes in a separate "Analysis" section. Reviewers must be able to challenge the interpretation without re-reading the original.
@@ -105,3 +122,4 @@ If the user can't answer "why" or "how will we know it worked", surface that as 
 - Tight enough to refine? → `communication/user-story-writer`
 - Engineering needs a contract? → API/DTO skills under `qa/<stack>/skills/api-dto-writer`
 - Stakeholder update needed? → `communication/stakeholder-updates`
+- QA needs the testable distillation (business logic, validations, observable implementation notes)? → `qa/manual/test-basis-analyzer` — don't re-derive it here; the BA writeup is one of its inputs

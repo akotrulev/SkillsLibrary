@@ -378,5 +378,5 @@ vs *where it runs*.
 - **`qa/typescript/skills/cloud-grid-config`** — the grid/session wiring the device session connects through (under
   `mobile-device-farm`).
 - **`qa/typescript/skills/auth0-test-tokens`** — token-based auth, the boundary vs biometric *unlock*.
-- **`qa/typescript/skills/allure-reporting`** — attach a screenshot of the deep-linked / restored / unlocked screen per
+- **`qa/reporting/typescript/skills/allure-reporting`** — attach a screenshot of the deep-linked / restored / unlocked screen per
   native-flow result.

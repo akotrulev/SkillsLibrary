@@ -11,7 +11,7 @@ This is the **Java port of the canonical** `qa/typescript/skills/network-monitor
 - AssertJ for non-locator assertions; Jackson (`com.fasterxml.jackson`) for JSON payload parsing
 - Network helpers under `src/test/java/<pkg>/support/network/`, HAR archives under `src/test/resources/har/`
 - Page objects under `src/test/java/<pkg>/pages/`, tests under `src/test/java/<pkg>/tests/` (see the UI sibling)
-- These tests run sharded in CI under `qa/java/skills/ci-pipelines`
+- These tests run sharded in CI under `qa/cicd/java/skills/ci-pipelines`
 
 ## When to use
 
@@ -395,6 +395,6 @@ For real bandwidth/latency emulation (not just per-request delay) use CDP `Netwo
 - **`qa/java/skills/ui-test-author/playwright`** — the base-test / page-object model these network helpers layer on; `waitForResponse` ordering and the no-`waitForTimeout` discipline originate there.
 - **`qa/java/skills/network-monitoring`** — low-level CDP (`Network.emulateNetworkConditions` for real throttling) when `page.route` isn't enough.
 - **`qa/java/skills/network-monitoring`** — out-of-browser HTTP capture for multi-process or non-browser traffic.
-- **`qa/java/skills/ci-pipelines`** — runs these tests sharded; HAR archives and traces are uploaded as artifacts there.
+- **`qa/cicd/java/skills/ci-pipelines`** — runs these tests sharded; HAR archives and traces are uploaded as artifacts there.
 - **`qa/java/skills/test-data-builder`** — builds the shapes you serialize into `route.fulfill(...setBody(...))`.
 - **`qa/java/skills/api-test-author/generator`** — when the test needs no browser, assert against the API directly.

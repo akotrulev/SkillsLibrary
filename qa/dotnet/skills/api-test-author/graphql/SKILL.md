@@ -284,5 +284,3 @@ for a status" discipline, different envelope.
 - `qa-websocket-sse-testing-dotnet` — **GraphQL subscriptions** (graphql-ws over WebSocket) live here.
 - `qa-api-dto-writer-dotnet` — generate the typed `Data` records / operation models in isolation.
 - `qa-auth0-test-tokens-dotnet` — obtain the bearer token for authenticated operations.
-- `qa-api-mocking-dotnet` — **mock** a GraphQL dependency the SUT calls; this skill **tests** a
-  real backend. `qa-performance-nbomber-dotnet` — GraphQL **load** + the N+1 pitfall. `qa-allure-reporting-dotnet`.

@@ -28,7 +28,6 @@ Scaffolds Appium 2.x page objects and TestNG mobile UI tests in Java, mirroring 
 - Appium .NET → `qa/dotnet/skills/ui-test-author/appium`
 - Appium TypeScript / WebdriverIO → `qa/typescript/skills/ui-test-author/appium`
 - Selenium / web → `qa/java/skills/ui-test-author/selenium` or `qa/java/skills/ui-test-author/playwright`
-- Accelerator-owned tests → `qa/manual/accelerator-conventions`
 - Reviewing an existing page object → `qa/java/skills/ui-test-author/reviewer`
 - Designing the whole POM architecture → `qa/java/skills/page-object-architect`
 
@@ -262,4 +261,4 @@ public class AuthenticationTest extends BaseMobileTest {
 - Architecting the POM structure (sub-packages, base classes, capabilities) → `qa/java/skills/page-object-architect`
 - Test data builders → `qa/java/skills/test-data-builder`
 - Reviewing a page object → `qa/java/skills/ui-test-author/reviewer`
-- Allure reporting → `qa/java/skills/allure-reporting`
+- Allure reporting → `qa/reporting/java/skills/allure-reporting`

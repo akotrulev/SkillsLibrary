@@ -366,5 +366,5 @@ public async Task GenerateInvoice_SendsPdfAttachment()
 
 - **`qa/dotnet/skills/test-data-builder`** — generate unique per-test email addresses through a builder rather than inline `Guid.NewGuid`.
 - **`qa/dotnet/skills/db-testing/testcontainers`** — pairs with this skill: signup test creates a DB row *and* sends an email; assert both.
-- **`qa/dotnet/skills/ci-pipelines`** — Mailpit as a service container in the pipeline (`services:` block) or via Testcontainers.
-- **`qa/dotnet/skills/allure-reporting`** — attach the raw email source (`GET /api/v1/message/{id}/raw`) to Allure on failure for fast diagnosis.
+- **`qa/cicd/dotnet/skills/ci-pipelines`** — Mailpit as a service container in the pipeline (`services:` block) or via Testcontainers.
+- **`qa/reporting/dotnet/skills/allure-reporting`** — attach the raw email source (`GET /api/v1/message/{id}/raw`) to Allure on failure for fast diagnosis.

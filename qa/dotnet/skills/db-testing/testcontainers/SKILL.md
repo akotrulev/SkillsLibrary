@@ -246,7 +246,7 @@ new ContainerBuilder()
 
 ### Diagnostics
 - On test failure, attach the container's stdout/stderr to Allure: `await Container.GetLogsAsync()` → `AllureLifecycle.Instance.AddAttachment("postgres.log", "text/plain", bytes)`.
-- Pair with `qa/dotnet/skills/allure-reporting` for the publish step.
+- Pair with `qa/reporting/dotnet/skills/allure-reporting` for the publish step.
 
 ### What NOT to do
 - No `Task.Delay` / `Thread.Sleep` waiting for the DB. Use the module's built-in wait strategy.
@@ -273,6 +273,5 @@ new ContainerBuilder()
 
 - **`qa/dotnet/skills/db-testing/query-author`** — SQL guardrails for assertion queries inside these tests.
 - **`qa/dotnet/skills/test-data-builder`** — builders for seed data (preferred over inline literals).
-- **`qa/dotnet/skills/test-environments`** — when you need *more* than one container (DB + queue + mailcatcher) per job, switch to docker-compose orchestration.
-- **`qa/dotnet/skills/ci-pipelines`** — Docker-in-Docker enablement, container caching, and Allure publish for integration test stages.
-- **`qa/dotnet/skills/allure-reporting`** — attach container logs on failure.
+- **`qa/cicd/dotnet/skills/ci-pipelines`** — Docker-in-Docker enablement, container caching, and Allure publish for integration test stages.
+- **`qa/reporting/dotnet/skills/allure-reporting`** — attach container logs on failure.

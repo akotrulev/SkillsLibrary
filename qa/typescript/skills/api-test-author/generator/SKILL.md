@@ -193,4 +193,4 @@ describe('POST /api/users', () => {
 - Test data builders → `qa/typescript/skills/test-data-builder`
 - Parameterized matrices → `qa/typescript/skills/data-driven-testing`
 - Reviewing tests → `qa/typescript/skills/api-test-author/reviewer`
-- Allure reporting setup → `qa/typescript/skills/allure-reporting`
+- Allure reporting setup → `qa/reporting/typescript/skills/allure-reporting`

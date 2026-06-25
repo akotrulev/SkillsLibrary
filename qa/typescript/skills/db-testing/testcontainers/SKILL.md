@@ -203,7 +203,7 @@ const c = await new GenericContainer('ghcr.io/myco/legacy-app:1.4.0')
 - If parallelising integration files: one container *per file* via `beforeAll`, not the shared `globalSetup` pattern.
 
 ### Diagnostics
-- On failure, dump container logs to the test reporter: `await container.logs().then(stream => …)` in a Vitest `onTestFailed` hook. Pair with `qa/typescript/skills/allure-reporting`.
+- On failure, dump container logs to the test reporter: `await container.logs().then(stream => …)` in a Vitest `onTestFailed` hook. Pair with `qa/reporting/typescript/skills/allure-reporting`.
 
 ### What NOT to do
 - No `setTimeout` waiting for the DB — use the built-in wait strategy.
@@ -232,6 +232,5 @@ const c = await new GenericContainer('ghcr.io/myco/legacy-app:1.4.0')
 
 - **`qa/typescript/skills/db-testing/query-author`** — assertion-query SQL guardrails.
 - **`qa/typescript/skills/test-data-builder`** — seed builders (preferred over inline literals).
-- **`qa/typescript/skills/test-environments`** — multi-container orchestration via docker-compose.
-- **`qa/typescript/skills/ci-pipelines`** — DinD enablement and reporter wiring.
-- **`qa/typescript/skills/allure-reporting`** — attach container logs on failure.
+- **`qa/cicd/typescript/skills/ci-pipelines`** — DinD enablement and reporter wiring.
+- **`qa/reporting/typescript/skills/allure-reporting`** — attach container logs on failure.

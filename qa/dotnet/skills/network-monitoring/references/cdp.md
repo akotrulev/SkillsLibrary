@@ -12,7 +12,7 @@ This is the **.NET port of the canonical** `qa/typescript/skills/network-monitor
 - NUnit 4.x + `Microsoft.Playwright` + `Microsoft.Playwright.NUnit` (Playwright ≥ 1.49)
 - CDP helpers under `Tests/Support/Cdp/`
 - Page objects under `Tests/Pages/`, test classes under `Tests/Specs/` (see the UI sibling)
-- These tests run **only against Chromium**, sharded in CI under `qa/dotnet/skills/ci-pipelines`. No new secrets — CDP needs none.
+- These tests run **only against Chromium**, sharded in CI under `qa/cicd/dotnet/skills/ci-pipelines`. No new secrets — CDP needs none.
 
 ## When to use
 
@@ -357,4 +357,4 @@ Sample metrics **after** a user-visible "ready" signal, never after a delay.
 - **`qa/java/skills/network-monitoring`** — the sibling Java port (`CDPSession.send`, Gson `JsonObject`, `client.on(event, …)`).
 - **`qa/dotnet/skills/network-monitoring`** — out-of-browser MITM capture for cross-browser or non-Playwright stacks.
 - **`qa/dotnet/skills/ui-test-author/playwright`** — the `PageTest` base-class / page-object model these CDP helpers layer on; the no-`WaitForTimeoutAsync` discipline originates there.
-- **`qa/dotnet/skills/ci-pipelines`** — runs these tests (Chromium only) sharded; traces on failure show throttled timings.
+- **`qa/cicd/dotnet/skills/ci-pipelines`** — runs these tests (Chromium only) sharded; traces on failure show throttled timings.

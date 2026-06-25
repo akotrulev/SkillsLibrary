@@ -13,7 +13,7 @@ This is the **Java port of the canonical** `qa/typescript/skills/network-monitor
 - Gson (`com.google.gson`) for CDP params and event payloads; AssertJ for non-locator assertions
 - CDP helpers under `src/test/java/<pkg>/support/cdp/`
 - Page objects under `src/test/java/<pkg>/pages/`, tests under `src/test/java/<pkg>/tests/` (see the UI sibling)
-- These tests run **only against Chromium**, sharded in CI under `qa/java/skills/ci-pipelines`. No new secrets — CDP needs none.
+- These tests run **only against Chromium**, sharded in CI under `qa/cicd/java/skills/ci-pipelines`. No new secrets — CDP needs none.
 
 ## When to use
 
@@ -391,4 +391,4 @@ Sample metrics **after** a user-visible "ready" signal, never after a sleep.
 - **`qa/dotnet/skills/network-monitoring`** — the sibling .NET port (`ICDPSession.SendAsync`, `JsonElement`, `session.Event(...).OnEvent +=`).
 - **`qa/java/skills/network-monitoring`** — out-of-browser MITM capture for cross-browser or non-Playwright stacks.
 - **`qa/java/skills/ui-test-author/playwright`** — the base-test / page-object model these CDP helpers layer on; the no-`waitForTimeout` discipline originates there.
-- **`qa/java/skills/ci-pipelines`** — runs these tests (Chromium only) sharded; traces on failure show throttled timings.
+- **`qa/cicd/java/skills/ci-pipelines`** — runs these tests (Chromium only) sharded; traces on failure show throttled timings.

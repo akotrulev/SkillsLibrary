@@ -52,7 +52,7 @@ happy-path skill in this library: the REST/gRPC authors assert *the dependency a
 
 - Node 20 + TypeScript (strict), **Vitest** (the global default TS runner) + Allure via `allure-vitest` where used
 - **Testcontainers for Node** — `testcontainers` + `@testcontainers/toxiproxy` (the `ToxiProxyContainer` module) +
-  the dependency module (e.g. `@testcontainers/postgresql`, `@testcontainers/kafka`) — `qa-test-environments-typescript`
+  the dependency module (e.g. `@testcontainers/postgresql`, `@testcontainers/kafka`)
 - **toxiproxy-node-client** — the REST client the container module returns as `proxy.instance` (`addToxic`,
   `removeToxic`, `getToxics`); toxic `type` + `stream` (`upstream` / `downstream`) + `toxicity`
 - **cockatiel** — the resilience patterns under test (`circuitBreaker`, `retry`, `timeout`, `fallback`,
@@ -75,7 +75,7 @@ happy-path skill in this library: the REST/gRPC authors assert *the dependency a
 }
 ```
 
-> **Why a proxy and not a mock?** A mock (`qa-api-mocking-typescript`) makes the *dependency* return a canned
+> **Why a proxy and not a mock?** A mock (e.g. MSW) makes the *dependency* return a canned
 > error at the application layer; a Toxiproxy toxic faults the *transport* — latency, a dropped TCP connection, a
 > half-sent response — the failures that exercise socket timeouts, connection pools, and retry/circuit code. Mock
 > when you control the contract and want a specific status; **fault-inject when you want to prove the app survives
@@ -299,8 +299,6 @@ chaos-engineering platforms.
   shared `Network`; reset toxics (`healed()`) between tests, not the containers.
 - **Treating this as production chaos engineering.** *Fix:* deterministic toxic in a test ≠ GameDay on a live
   cluster — see the boundary note; route prod-chaos requests to Gremlin/Litmus/Chaos Mesh.
-- **Using a toxic where a mock fits.** Want a specific HTTP 503 from a contract? *Fix:* `qa-api-mocking-typescript`.
-  Toxiproxy is for **transport** faults (latency/drop/partial), not application-layer canned responses.
 
 ## Examples
 
@@ -309,7 +307,7 @@ writes: inject `timeout`, then `expect(result.isFallback).toBe(true)` **and**
 `expect(breaker.state).toBe(CircuitState.Open)`. Same dependency, opposite question — *does the app survive it
 failing?*
 
-**Composing with the dependency families.** The thing you fault is stood up by `qa-test-environments-typescript`
+**Composing with the dependency families.** The thing you fault is stood up by Testcontainers
 (`ToxiProxyContainer` next to a `PostgreSqlContainer` / `KafkaContainer` on a shared `Network`); the dependency
 itself is exercised happy-path by `qa-db-testing-typescript` / `qa-messaging-testing-typescript`. Chaos adds
 the proxy in front and asserts the resilience layer — it **composes** with those skills, it doesn't replace them. A
@@ -342,10 +340,6 @@ data-driven fault matrix (toxic × parameter) binds cleanly via `qa-data-driven-
 - `qa-network-monitoring-typescript` — the **closest neighbor and the inverse**: that stands up a MITM
   proxy to **observe/mock** out-of-browser requests; this stands up Toxiproxy to **inject transport faults**.
   Observe vs break. Read it for the proxy-in-the-middle model; draw the boundary cleanly.
-- `qa-test-environments-typescript` — the **Testcontainers spine** the `ToxiProxyContainer` plugs into: stand
-  the dependency up, put the proxy in front on a shared `Network`, point the app at the proxy port.
-- `qa-api-mocking-typescript` — **application-layer** canned responses (a specific 503) vs **transport**
-  faults (latency/drop/partial). They compose: an MSW upstream behind a Toxiproxy listener.
 - `qa-data-driven-testing-typescript` — drive a **fault matrix** (toxic × parameter × expected pattern) via
   `it.each` instead of copy-pasted tests.
 - `qa-db-testing-typescript` · `qa-messaging-testing-typescript` · `qa-messaging-testing-typescript` —

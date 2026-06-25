@@ -59,8 +59,7 @@ assumption SQS and Service Bus baked in:
 - Node 20 + TypeScript (strict) + Vitest
 - `kafkajs` (`new Kafka(...)` → `producer()` / `consumer()` / `admin()`). Callback-driven consumer: `run({
   eachMessage })`, **no synchronous poll**.
-- `@testcontainers/kafka` (`KafkaContainer`) — boots a **local broker** and surfaces `getBootstrapServers()`
-  (cross-link `qa-test-environments-typescript`). A Redpanda image (Kafka-API-compatible, ~2× faster start) is
+- `@testcontainers/kafka` (`KafkaContainer`) — boots a **local broker** and surfaces `getBootstrapServers()`. A Redpanda image (Kafka-API-compatible, ~2× faster start) is
   a drop-in alternative when you boot a fresh broker per suite.
 - The SUT's typed producer/consumer is **constructor-injected** with the brokers (or an injected `Producer`/
   `Consumer`) — never a static client or a brokers string read inside a test
@@ -76,8 +75,7 @@ test/
 
 There is no in-memory Kafka. For deterministic local + CI tests, run a **real broker in a container** and point
 the client at `getBootstrapServers()`. Use the **`@testcontainers/kafka`** module (`confluentinc/cp-kafka`); a
-Redpanda image is the lighter, faster-starting Kafka-API-compatible alternative. Reuse the fixture discipline
-from `qa-test-environments-typescript` (boot once per suite; **never `setTimeout` for readiness** — the module
+Redpanda image is the lighter, faster-starting Kafka-API-compatible alternative. Reuse the fixture discipline (boot once per suite; **never `setTimeout` for readiness** — the module
 owns the wait strategy). **Create topics up front** with a known partition count (via `admin()`) so partition
 assertions are deterministic.
 
@@ -386,8 +384,6 @@ await collector.stop();
   the assert. *Fix:* `await producer.send(...)` — a confirm, not a sleep.
 - **Hard-coding brokers / SASL creds in a test.** *Fix:* surface brokers from the fixture (container) or
   `process.env` (shared cluster); never log secrets.
-- **Reaching for Kafka when the dependency is an HTTP call.** *Fix:* `qa-api-mocking-typescript` —
-  messaging is for async topics, not request/response fakes.
 
 ## Examples
 
@@ -475,11 +471,7 @@ export const anOrder = () => new OrderBuilder().status("Pending");
   + app-level DLT. Same condition-wait discipline, different broker model.
 - `qa-db-testing-client-typescript` — the `expect.poll` and seeder/probe split reused for the consumer
   side-effect assertions; the **eventual-consistency lineage** this skill leans on hardest.
-- `qa-test-environments-typescript` — booting the Kafka container (it already runs `confluentinc/cp-kafka`
-  in its multi-service topology); the per-suite lifecycle and readiness-wait discipline (never `setTimeout`).
 - `qa-auth0-test-tokens-typescript` — when running against a shared cloud cluster with SASL/OAuth creds;
   the secrets-from-env discipline.
-- `qa-api-mocking-typescript` — the *synchronous* counterpart: fake the app's outbound HTTP
-  in-runtime. The boundary: MSW = request/response fake; Kafka = async topic assertions.
 - `qa-allure-reporting-typescript` — attach the consumed record value / DLT payload to the Allure result.
 - `qa-test-data-builder-typescript` — builders for record payloads with 4+ fields.

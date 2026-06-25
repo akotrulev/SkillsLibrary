@@ -17,7 +17,8 @@ Produces async, skim-first updates for non-engineering audiences. Optimized for 
 ## When NOT to use
 
 - Engineering-only changelog or commit summary → out of scope
-- Bug report or incident postmortem → `qa/manual/bug-report-writer` / incident skill
+- Bug report → `qa/manual/bug-report-writer`; incident postmortem → `communication/incident-postmortem`
+- Meeting minutes / decision capture → `communication/meeting-notes`
 - Initial scoping of a new initiative → `communication/business-analysis`
 
 ## Inputs needed
@@ -107,4 +108,5 @@ Produces async, skim-first updates for non-engineering audiences. Optimized for 
 ## Handoffs
 
 - New initiative needs scoping → `communication/business-analysis`
-- Incident debrief → incident postmortem skill (out of scope here)
+- Incident debrief → `communication/incident-postmortem`
+- Decisions behind this update need a durable record → `communication/meeting-notes`

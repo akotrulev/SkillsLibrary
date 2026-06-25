@@ -26,7 +26,6 @@ shared by every tool in the family.
 | Assert against **Azure Blob Storage** (containers/blobs, SAS tokens, blob tiers, Event Grid → Storage Queue) | `references/azure-blob.md` | Azure-native; container/blob not bucket/key, SAS not presigned, Azurite not LocalStack |
 | Assert a **message** was produced/consumed, no object store in the flow | `qa-messaging-testing-dotnet` | Pure queue assertion; here SQS appears only as the *downstream* of an S3 event |
 | Assert a **DB row** was written, no object store | `qa-db-testing-client-dotnet` | Pure DB verification; reuse its `WaitFor.Async` for the eventual side here |
-| Mock a downstream **HTTP** dependency the SUT calls | `qa-api-mocking-dotnet` | Not storage — a synchronous request/response fake |
 
 **Rule of thumb:** *AWS bucket + keys, presigned URLs, S3 events?* → S3. *Azure container + blobs, SAS?* →
 azure-blob. *A queue with no object?* → messaging. *A row with no object?* → db-testing.

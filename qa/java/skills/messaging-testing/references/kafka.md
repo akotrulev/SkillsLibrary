@@ -65,8 +65,7 @@ assumption SQS and Service Bus baked in:
   **Spring Kafka** (`org.springframework.kafka:spring-kafka`) is noted **only** for the DLT/retry convention
   (`DeadLetterPublishingRecoverer` / `@RetryableTopic`) — the assertion code stays on plain `kafka-clients`.
 - `org.testcontainers:kafka` (`ConfluentKafkaContainer`) **or** `org.testcontainers:redpanda`
-  (`RedpandaContainer`) — boots a **local broker** and surfaces `getBootstrapServers()` (cross-link
-  `qa-test-environments-java`, which already boots a Kafka container in its multi-service topology)
+  (`RedpandaContainer`) — boots a **local broker** and surfaces `getBootstrapServers()`
 - The SUT's typed producer/consumer is **constructor-injected** with the bootstrap servers (or an injected
   `KafkaProducer`/`KafkaConsumer`) — never a static client or a bootstrap string read inside an `@Test`
 
@@ -88,7 +87,7 @@ point the clients at `getBootstrapServers()`. Two good options:
 - **`org.testcontainers:redpanda` `RedpandaContainer`** — a **Kafka-API-compatible** single binary that
   **starts ~2× faster**; ideal when you boot a fresh broker per suite for isolation. Same `getBootstrapServers()`.
 
-Reuse the fixture discipline from `qa-test-environments-java` (boot once per class; **never `Thread.sleep` for
+Reuse the standard Testcontainers fixture discipline (boot once per class; **never `Thread.sleep` for
 readiness** — the container owns the wait strategy). **Create topics up front** (auto-create is off in a real
 broker config) via an `AdminClient`, or let the test produce to a topic and rely on the broker default — but
 explicit creation with a known partition count makes partition assertions deterministic.
@@ -402,8 +401,6 @@ assertThat(drained).hasSize(3);                  // SUT produced exactly 3
   the assert. *Fix:* block on the send future (`.get()`) or `producer.flush()` — a confirm, not a sleep.
 - **Hard-coding `bootstrap.servers` / SASL creds in an `@Test`.** *Fix:* surface bootstrap servers from the
   base class (container) or env (shared cluster); never log secrets.
-- **Reaching for Kafka when the dependency is an HTTP call.** *Fix:* `qa-api-mocking-java` — messaging
-  is for async topics, not request/response fakes.
 
 ## Examples
 
@@ -489,11 +486,7 @@ public final class Orders {
   DLT. Same condition-wait discipline, different broker model.
 - `qa-db-testing-client-java` — the Awaitility poll and seeder/probe split reused for the consumer
   side-effect assertions; the **eventual-consistency lineage** this skill leans on hardest.
-- `qa-test-environments-java` — booting the Kafka container (it already runs `confluentinc/cp-kafka` in
-  its multi-service topology); the per-class lifecycle and readiness-wait discipline (never `Thread.sleep`).
 - `qa-auth0-test-tokens-java` — when running against a shared cloud cluster with SASL/OAuth creds; the
   secrets-from-env discipline.
-- `qa-api-mocking-java` — the *synchronous* counterpart: fake an HTTP dependency the SUT calls.
-  The boundary: WireMock = request/response fake; Kafka = async topic assertions.
 - `qa-allure-reporting-java` — attach the consumed record value / DLT payload to the Allure result.
 - `qa-test-data-builder-java` — builders/ObjectMother for record payloads with 4+ fields.

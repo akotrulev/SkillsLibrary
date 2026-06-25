@@ -120,7 +120,7 @@ behavior* (this skill) vs a *dependency fault* behind it (`qa-chaos-testing-type
   *Fix:* `InMemoryProvider` / `TestData` wired in setup; the live service and real key never appear (idea #1).
 - **Stubbing the flag service's HTTP endpoint with MSW.** You'd be reverse-engineering the SDK's wire protocol
   (polling/streaming payload shapes) — brittle and pointless when the SDK ships a **first-class test fixture**.
-  *Fix:* the SDK's own test source; reserve `qa-api-mocking-typescript` for dependencies without one.
+  *Fix:* the SDK's own test source.
 - **Testing only the flag-on path.** Zero coverage of the branch your un-migrated users run, zero proof the
   rollback is safe. *Fix:* the on/off (or all-variations) matrix — every flag-touching behavior, both sides (idea #2).
 - **Asserting only "no error" on the off-row.** The legacy branch has its *own* contract. *Fix:* the off-row
@@ -193,10 +193,6 @@ skill pins which branch runs; those skills assert what the branch does. The vari
   (`it.each` row-binding); this skill defines *what* the rows are, that one defines *how* rows drive tests.
 - `qa-chaos-testing-typescript` — the **kill-switch boundary**: the off-path of a flag flip is this skill;
   a faulted dependency behind the feature is chaos. The lifecycle shape (steady → perturb → assert-degraded) is shared.
-- `qa-api-mocking-typescript` — what **not** to reach for here: the flag SDKs ship first-class test
-  sources, so stubbing their wire protocol is the anti-pattern; MSW covers dependencies without a fixture.
-- `qa-test-environments-typescript` — stands real dependencies up in containers; flag state is pinned
-  **in-process**, no container needed — don't stand up a flag service to test a branch.
 - `qa-api-test-author-generator-typescript` · `qa-ui-test-author-playwright-typescript` — the branch under test
   is usually an API or UI behavior; those skills own the assertion style inside each pinned branch.
 - `qa-auth0-test-tokens-typescript` — the same "test fixture over live service" posture applied to auth;

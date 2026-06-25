@@ -281,7 +281,7 @@ public async Task Should_AttachPdfInvoice_When_InvoiceEmailed()
 - Validate content type **and** magic bytes for binaries. Check `Length` before downloading large files.
 
 ### Secrets
-- `MAILOSAUR_API_KEY` + `MAILOSAUR_SERVER_ID` are secrets. Read from env / user-secrets / secret store; never in code or committed `appsettings`. In CI pull them per `qa/dotnet/skills/ci-pipelines` (OIDC / encrypted secrets).
+- `MAILOSAUR_API_KEY` + `MAILOSAUR_SERVER_ID` are secrets. Read from env / user-secrets / secret store; never in code or committed `appsettings`. In CI pull them per `qa/cicd/dotnet/skills/ci-pipelines` (OIDC / encrypted secrets).
 
 ### What NOT to do
 - No hardcoded API key or server ID.
@@ -306,6 +306,6 @@ public async Task Should_AttachPdfInvoice_When_InvoiceEmailed()
 
 - **`qa/dotnet/skills/email-testing`** — the self-hosted SMTP-sink sibling. Pick Mailpit for offline CI and zero external deps; pick Mailosaur (here) for real-delivery and SMS. See the comparison table above.
 - **`qa/typescript/skills/email-testing`** (canonical), **`qa/java/skills/email-testing`** — sibling stacks; same wrapper shape, same `GetAsync` wait.
-- **`qa/dotnet/skills/ci-pipelines`** — where these tests run in CI and where the `MAILOSAUR_API_KEY` / `MAILOSAUR_SERVER_ID` secrets are sourced (OIDC / encrypted secrets), never hardcoded.
+- **`qa/cicd/dotnet/skills/ci-pipelines`** — where these tests run in CI and where the `MAILOSAUR_API_KEY` / `MAILOSAUR_SERVER_ID` secrets are sourced (OIDC / encrypted secrets), never hardcoded.
 - **`qa/dotnet/skills/test-data-builder`** — generate unique per-test recipients through a builder.
 - **`qa/dotnet/skills/db-testing/testcontainers`** — signup creates a DB row *and* sends an email; assert both.

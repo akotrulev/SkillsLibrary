@@ -256,7 +256,7 @@ it('Should_AttachPdfInvoice_When_InvoiceEmailed', async () => {
 - Validate content type **and** magic bytes for binaries (`%PDF`, `PK`, `\x89PNG`). Check `length` before downloading large files.
 
 ### Secrets
-- `MAILOSAUR_API_KEY` + `MAILOSAUR_SERVER_ID` are secrets. Read from env / secret store; never in code, `.env` committed to git, or test fixtures. In CI pull them per `qa/typescript/skills/ci-pipelines` (OIDC / encrypted secrets).
+- `MAILOSAUR_API_KEY` + `MAILOSAUR_SERVER_ID` are secrets. Read from env / secret store; never in code, `.env` committed to git, or test fixtures. In CI pull them per `qa/cicd/typescript/skills/ci-pipelines` (OIDC / encrypted secrets).
 
 ### What NOT to do
 - No hardcoded API key or server ID.
@@ -280,6 +280,6 @@ it('Should_AttachPdfInvoice_When_InvoiceEmailed', async () => {
 
 - **`qa/typescript/skills/email-testing`** — the self-hosted SMTP-sink sibling. Pick Mailpit for offline CI and zero external deps; pick Mailosaur (here) for real-delivery and SMS. See the comparison table above.
 - **`qa/dotnet/skills/email-testing`**, **`qa/java/skills/email-testing`** — the sibling stacks; same wrapper shape, same `messages.get` wait.
-- **`qa/typescript/skills/ci-pipelines`** — where these specs run in CI and where the `MAILOSAUR_API_KEY` / `MAILOSAUR_SERVER_ID` secrets are sourced (OIDC / encrypted secrets), never hardcoded.
+- **`qa/cicd/typescript/skills/ci-pipelines`** — where these specs run in CI and where the `MAILOSAUR_API_KEY` / `MAILOSAUR_SERVER_ID` secrets are sourced (OIDC / encrypted secrets), never hardcoded.
 - **`qa/typescript/skills/test-data-builder`** — generate unique per-test recipients through a builder.
 - **`qa/typescript/skills/db-testing/testcontainers`** — signup creates a DB row *and* sends an email; assert both.

@@ -75,7 +75,7 @@ is unique and it's where most test mistakes happen:
   `AsyncEventingBasicConsumer`). v7 renamed `IModel` → `IChannel` and made the surface fully async; if you're
   on v6 the methods are the synchronous `IModel.BasicPublish` / `BasicAck` — prefer v7 for the async rule.
 - `Testcontainers.RabbitMq` (`RabbitMqBuilder`) — boots a **local RabbitMQ broker** and surfaces an AMQP
-  connection string (cross-link `qa-test-environments-dotnet`)
+  connection string
 - The SUT's typed publisher/consumer is **constructor-injected** with the connection string (or an injected
   `IConnection`) — never a static connection string read inside a `[Test]`
 
@@ -93,8 +93,7 @@ IntegrationTests/
 
 There is no in-memory RabbitMQ. For deterministic local + CI tests, run a **real broker in a container** and
 point the client at its connection string. The `Testcontainers.RabbitMq` module wires it up, waits for
-readiness, and hands you the AMQP URI via `GetConnectionString()`. Reuse the fixture discipline from
-`qa-test-environments-dotnet` (boot once per fixture; **never `Task.Delay` for readiness** — the module owns
+readiness, and hands you the AMQP URI via `GetConnectionString()`. Reuse the fixture discipline (boot once per fixture; **never `Task.Delay` for readiness** — the module owns
 the wait strategy). **Declare the topology — exchanges, queues, bindings — up front in the fixture** (RabbitMQ
 auto-declares nothing, and routing happens at publish time, so the bindings must pre-exist).
 
@@ -445,8 +444,6 @@ Assert.That(batch, Has.Count.EqualTo(3));                   // SUT produced exac
   on the messaging fixtures), and drain leftovers in `[SetUp]`.
 - **Reading the connection string inside a `[Test]` / hard-coding it.** *Fix:* surface it from the fixture
   (container) or env (shared broker), inject it; never log it.
-- **Reaching for RabbitMQ when the dependency is an HTTP call.** *Fix:* `qa-api-mocking-dotnet` —
-  messaging is for async queues/exchanges, not request/response fakes.
 
 ## Examples
 
@@ -560,11 +557,7 @@ public static class Orders
   Kafka log + offsets + app-level DLT vs RabbitMQ queue + manual ack + broker-native DLX.
 - `qa-db-testing-client-dotnet` — the `WaitFor.Async` poll helper and the seeder/probe split reused for
   the consumer side-effect assertions; the **eventual-consistency lineage** this skill leans on hardest.
-- `qa-test-environments-dotnet` — booting the RabbitMQ container; the per-fixture lifecycle and
-  readiness-wait discipline (never `Task.Delay`) mirrored here.
 - `qa-auth0-test-tokens-dotnet` — when authing to a shared cloud broker with credentials from env; the
   secrets-from-env discipline.
-- `qa-api-mocking-dotnet` — the *synchronous* counterpart: fake an HTTP dependency the SUT
-  calls. The boundary: WireMock = request/response fake; RabbitMQ = async exchange/queue assertions.
 - `qa-allure-reporting-dotnet` — attach the received message body / DLQ `x-death` reason to the Allure result.
 - `qa-test-data-builder-dotnet` — builders/ObjectMother for message payloads with 4+ fields.

@@ -182,7 +182,7 @@ carries a ticket + reason + expiry · shrink the list). For TLS specifically:
   small transform if you want the findings inline on the PR. State this plainly — don't assume
   `upload-sarif` will accept the raw output.
 
-Cross-link `qa/<stack>/skills/allure-reporting` for the attachment mechanics.
+Cross-link `qa/reporting/<stack>/skills/allure-reporting` for the attachment mechanics.
 
 ```yaml
 # .github/workflows/tls-scan.yml — sslyze native gate (preferred), schedulable + prod-safe
@@ -266,7 +266,6 @@ jobs:
 - `qa-security-testing-zap-automation-framework` — the app-layer **active** DAST scan (payloads, never
   prod). Contrast: the TLS scan never sends a payload and is prod-safe.
 - `qa/<stack>/skills/security-testing/dependency-scanning` — SCA (A03); orthogonal layer.
-- `qa/<stack>/skills/allure-reporting` — attach the sslyze JSON / testssl.sh HTML report.
-- `qa/<stack>/skills/ci-pipelines/*` + `qa/_shared/ci-conventions` — wire the scheduled/PR job and
+- `qa/reporting/<stack>/skills/allure-reporting` — attach the sslyze JSON / testssl.sh HTML report.
+- `qa/cicd/<stack>/skills/ci-pipelines/*` + `qa/cicd/ci-conventions` — wire the scheduled/PR job and
   artifact upload.
-- `qa/<stack>/skills/test-environments` — spin an ephemeral endpoint matching prod TLS for per-PR runs.

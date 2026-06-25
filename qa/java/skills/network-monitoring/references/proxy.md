@@ -15,7 +15,7 @@ Built on the same wrapper discipline as `qa/java/skills/network-monitoring` and 
 - TestNG 7.x + `org.seleniumhq.selenium:selenium-java` (or the Appium Java client) as the **client under test**
 - AssertJ for non-locator assertions; `Har` model from the BrowserUp dependency
 - Proxy helpers under `src/test/java/<pkg>/support/proxy/`, recorded HARs under `build/artifacts/har/`
-- These tests run in CI under `qa/java/skills/ci-pipelines`: the job starts/stops the proxy and the client must **trust the per-run CA** (no long-lived secret — generated/trusted fresh each run)
+- These tests run in CI under `qa/cicd/java/skills/ci-pipelines`: the job starts/stops the proxy and the client must **trust the per-run CA** (no long-lived secret — generated/trusted fresh each run)
 
 ## When to use
 
@@ -351,4 +351,4 @@ har.writeTo(new java.io.File("build/artifacts/har/checkout.har"));
 - **`qa/java/skills/network-monitoring`** — raw CDP hooks below routing (Playwright + Chromium only); the proxy covers the cross-client case CDP can't.
 - **`qa/typescript/skills/network-monitoring`** — the **canonical** skill this ports the *structure* from (`mockttp`); consult it for the conceptual model and the three-way pick.
 - **`qa/dotnet/skills/network-monitoring`** — the sibling .NET port (`Titanium.Web.Proxy`, `BeforeRequest`/`BeforeResponse`).
-- **`qa/java/skills/ci-pipelines`** — runs these tests; the job starts/stops the proxy and trusts the per-run CA before the client launches (no long-lived secret).
+- **`qa/cicd/java/skills/ci-pipelines`** — runs these tests; the job starts/stops the proxy and trusts the per-run CA before the client launches (no long-lived secret).

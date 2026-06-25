@@ -5,7 +5,7 @@ from the canonical `s3` stack** (`references/s3.md`, `s3`) — **same two assert
 eventual-consistency condition-wait discipline**; only the store SDK and its primitives change. Where S3 has
 buckets/keys, presigned URLs, multipart upload, and LocalStack, Azure Blob has containers/blobs, SAS tokens,
 block-blob staging, and Azurite. It reuses the same verification-inside-tests lineage: the
-Testcontainers fixture discipline from `qa-test-environments-dotnet` and the **eventual-consistency
+standard Testcontainers fixture discipline and the **eventual-consistency
 condition-wait** (`WaitFor.Async`) from `qa-db-testing-client-dotnet`.
 
 **.NET leads this node by the user's choice.** The Azure SDK is first-class across all three stacks (no single
@@ -42,7 +42,6 @@ File-storage tests assert one of two things about a blob flow:
   `Azure.Storage.Queues` only for the Event-Grid → Storage-Queue notification bridge (cross-link `service-bus`).
 - `Testcontainers.Azurite` (`AzuriteBuilder`) — boots **Azurite** (the local Azure Storage emulator) and
   surfaces the **well-known `devstoreaccount1` connection string** the `BlobServiceClient` is built from
-  (cross-link `qa-test-environments-dotnet`)
 - The SUT's storage gateway is **constructor-injected** with the `BlobServiceClient` (or a `BlobContainerClient`
   / typed wrapper) and the container name — never a static client or a connection string read inside a `[Test]`
 
@@ -107,7 +106,7 @@ serves Blob (and Queue/Table) storage. Build the `BlobServiceClient` from the **
 container-mapped blob endpoint). Unlike S3 against LocalStack there is **no force-path-style gotcha** — the
 emulator's endpoint is already path-style; the connection string carries it. The `Testcontainers.Azurite`
 module boots the container, owns the readiness wait, and surfaces the connection string. Reuse the fixture
-discipline from `qa-test-environments-dotnet` (boot once per fixture; **never `Task.Delay` for readiness** — the
+discipline (boot once per fixture; **never `Task.Delay` for readiness** — the
 module owns the wait). **Create the container in fixture setup** through the SDK.
 
 ```csharp
@@ -573,14 +572,10 @@ public static class Invoices
   `@testcontainers/azurite`).
 - `qa-db-testing-client-dotnet` — the `WaitFor.Async` poll helper and the seeder/probe split reused for the
   processed-blob side-effect assertions; the **eventual-consistency lineage** this skill leans on.
-- `qa-test-environments-dotnet` — booting the Azurite container; the per-fixture lifecycle and
-  readiness-wait discipline (never `Task.Delay`) mirrored here.
 - `qa-messaging-testing-dotnet` — Azure-native messaging, the natural downstream for the Event
   Grid → Storage Queue bridge (the Azure parallel to `s3`'s S3 → SQS).
 - `qa-auth0-test-tokens-dotnet` — when running against a cloud test account; the `DefaultAzureCredential`
   / secrets-from-env discipline.
-- `qa-api-mocking-dotnet` — the *synchronous* counterpart: fake an HTTP dependency the SUT calls.
-  The boundary: WireMock = request/response fake; Azure Blob = object-store assertions.
 - `qa-allure-reporting-dotnet` — attach the uploaded/derived blob's name + metadata (or the queue-message body)
   to the Allure result.
 - `qa-test-data-builder-dotnet` — builders/ObjectMother for blob payloads with 4+ fields.

@@ -7,7 +7,7 @@ azure-blob) in this stack. It is the sibling **ported from the `s3` node's struc
 **same two assertion shapes, same eventual-consistency condition-wait discipline**; only the store SDK and its
 primitives change. Where S3 has buckets/keys, presigned URLs, multipart upload, and LocalStack, Azure Blob has
 containers/blobs, SAS tokens, block-blob staging, and Azurite. It reuses the same verification-inside-tests
-lineage: the Testcontainers fixture discipline from `qa-test-environments-java` and the
+lineage: the standard Testcontainers fixture discipline and the
 **eventual-consistency condition-wait** (Awaitility) from `qa-db-testing-client-java`. All three Azure SDKs
 mirror the same upload / download / exists / get-properties / list / delete + SAS + block-staging model, so this
 is a true translate-the-concepts port, not a redesign.
@@ -36,7 +36,6 @@ File-storage tests assert one of two things about a blob flow:
   (cross-link `service-bus`).
 - `org.testcontainers:azure` (`AzuriteContainer`) — boots **Azurite** (the local Azure Storage emulator) and
   surfaces the **well-known `devstoreaccount1` connection string** the `BlobServiceClient` is built from
-  (cross-link `qa-test-environments-java`)
 - `org.awaitility:awaitility` — the bounded condition-wait for processing side-effects
 - The SUT's storage gateway is **constructor-injected** with the `BlobServiceClient` (or a `BlobContainerClient`
   / typed wrapper) and the container name — never a static client or a connection string read inside a `@Test`
@@ -100,7 +99,7 @@ serves Blob (and Queue/Table) storage. Build the `BlobServiceClient` from the **
 `devstoreaccount1` connection string** the Testcontainers module surfaces. Unlike S3 against LocalStack there is
 **no force-path-style gotcha** — the connection string already carries the path-style emulator endpoint. The
 `org.testcontainers:azure` module's `AzuriteContainer` boots the container, owns the readiness wait, and
-surfaces the connection string. Reuse the fixture discipline from `qa-test-environments-java` (boot once per
+surfaces the connection string. Reuse the standard Testcontainers fixture discipline (boot once per
 fixture; **never `Thread.sleep` for readiness**). **Create the container in fixture setup** through the SDK.
 
 ```java
@@ -516,13 +515,10 @@ public final class Invoices {
   `forcePathStyle` vs containers/blobs + SAS tokens + block-staging + Azurite + Event Grid→Storage Queue.
 - `qa-db-testing-client-java` — the Awaitility wait and the seeder/probe split reused for the
   processed-blob side-effect assertions; the **eventual-consistency lineage** this skill leans on.
-- `qa-test-environments-java` — booting the Azurite container; the per-fixture lifecycle and
-  readiness-wait discipline (never `Thread.sleep`) mirrored here.
 - `qa-messaging-testing-java` — Azure-native messaging, the natural downstream for the Event
   Grid → Storage Queue bridge (the Azure parallel to `s3`'s S3 → SQS).
 - `qa-auth0-test-tokens-java` — when running against a cloud test account; the `DefaultAzureCredential` /
   secrets-from-env discipline.
-- `qa-api-mocking-java` — the *synchronous* counterpart: fake an HTTP dependency the SUT calls.
 - `qa-allure-reporting-java` — attach the uploaded/derived blob's name + metadata (or the queue-message body) to
   the Allure result.
 - `qa-test-data-builder-java` — builders/ObjectMother for blob payloads with 4+ fields.

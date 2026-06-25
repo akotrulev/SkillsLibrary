@@ -26,7 +26,6 @@ Scaffolds Selenium 4 page objects and TestNG UI tests in Java, modeled on [`akot
 
 - Playwright / Node / .NET → `qa/java/skills/ui-test-author/playwright`
 - Appium mobile → `qa/java/skills/ui-test-author/appium`
-- Accelerator-owned tests → `qa/manual/accelerator-conventions`
 - Reviewing a page object → `qa/java/skills/ui-test-author/reviewer`
 - Designing the whole POM architecture → `qa/java/skills/page-object-architect`
 
@@ -221,4 +220,4 @@ public class AuthenticationTest extends BaseTest {
 - Architecting the POM structure (sub-packages, base classes) → `qa/java/skills/page-object-architect`
 - Test data builders → `qa/java/skills/test-data-builder`
 - Reviewing a page object → `qa/java/skills/ui-test-author/reviewer`
-- Allure reporting → `qa/java/skills/allure-reporting`
+- Allure reporting → `qa/reporting/java/skills/allure-reporting`

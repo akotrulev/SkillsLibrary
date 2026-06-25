@@ -65,7 +65,6 @@ siblings, but the contract is the **`.proto`** (load + type the messages + clien
 - **`proto-loader-gen-types`** generates the `*.ts` typings for the loaded package (the typed-client path); or
   **`ts-proto`** for fully static generated clients — pick one and keep it
 - **`google-proto-files`** / generated `google.rpc` types to decode the `grpc-status-details-bin` rich error
-- **Testcontainers** to stand the service under test up (`qa-test-environments-typescript`); target via env, never hardcoded
 - Layout: `tests/proto/` (the `.proto` + generated types), `tests/clients/`, `tests/specs/`, `tests/setup.ts`
 
 ```jsonc
@@ -212,7 +211,7 @@ it('a slow call exceeding its deadline returns DEADLINE_EXCEEDED', async () => {
 
 ## Standing the service up — Testcontainers + the client lifecycle
 
-The client target points at the service under test, stood up via `qa-test-environments-typescript`. Create the
+The client target points at the service under test, stood up via Testcontainers. Create the
 client once per spec file and `close()` it in `afterAll` — no per-test client churn.
 
 ```typescript
@@ -281,8 +280,6 @@ differ.
   (server-streaming) or await the response callback after `call.end()` (client-streaming); bound unbounded streams
   with `{ deadline }`. **No `setTimeout`/`waitForTimeout`.** Deep stream-lifecycle assertions →
   `qa-websocket-sse-testing-typescript`.
-- **One client per spec file** (`close()` in `afterAll`); service stood up via `qa-test-environments-typescript`.
-  **Target + token via env**, lazy, never logged. `strict: true`. Vitest + `@grpc/grpc-js`.
 
 ## Cross-references
 
@@ -301,5 +298,4 @@ differ.
 - `qa-contract-testing-pact-typescript` — the **Protobuf contract** boundary vs the functional test this skill
   writes. `qa-performance-k6-typescript` — gRPC **load**.
 - `qa-auth0-test-tokens-typescript` — obtain the per-call **bearer** carried in leading metadata.
-- `qa-test-environments-typescript` — stand the gRPC service up via Testcontainers and feed `GRPC_TARGET`.
 - `qa-allure-reporting-typescript` — each RPC renders as a named result.

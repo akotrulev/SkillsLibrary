@@ -19,8 +19,7 @@ Messaging tests assert one of two things about an **async** flow:
 > no synchronous return you can assert on the next line. The message is in flight; the consumer runs on its
 > own schedule; the side-effect lands "soon". So the core discipline is: **wait on a condition** for the
 > message (or its effect) to appear, with a bounded timeout — **never `Task.Delay` / `Thread.Sleep`**. This
-> is the exact lineage of `qa-db-testing-client-dotnet`'s `WaitForAsync` poll helper and
-> `qa-api-mocking-dotnet`'s Scenario + condition-wait pattern. Service Bus gives you a *better*
+> is the exact lineage of `qa-db-testing-client-dotnet`'s `WaitForAsync` poll helper. Service Bus gives you a *better*
 > primitive than polling for the receive side: `ReceiveMessageAsync(maxWaitTime)` **long-polls** — it
 > blocks up to a bounded window for a message to arrive, then returns it or `null`. That bounded wait *is*
 > the condition-wait; a fixed sleep is not.
@@ -34,8 +33,7 @@ Messaging tests assert one of two things about an **async** flow:
   **create/clear entities** the emulator config didn't pre-declare (most tests don't — entities are declared
   in the emulator `Config.json`)
 - `Testcontainers.ServiceBus` (`ServiceBusBuilder`) — boots the **Azure Service Bus emulator** plus its
-  required **SQL Edge** sidecar and surfaces a ready connection string (cross-link
-  `qa-test-environments-dotnet`)
+  required **SQL Edge** sidecar and surfaces a ready connection string
 - The SUT's typed publisher/consumer is **constructor-injected** with the connection string (or an injected
   `ServiceBusClient`) — never a static connection string read inside a `[Test]`
 
@@ -77,8 +75,7 @@ declares the namespace, queues, topics and subscriptions up front (limits: **1 n
 queues/topics**). The connection string carries `UseDevelopmentEmulator=true`.
 
 The cleanest path in .NET is the **`Testcontainers.ServiceBus`** module — it wires the emulator + SQL Edge
-sidecar together, waits for readiness, and hands you a connection string. Reuse the fixture-base discipline
-from `qa-test-environments-dotnet` (boot once per fixture; **never `Task.Delay` for readiness** — the
+sidecar together, waits for readiness, and hands you a connection string. Reuse the fixture-base discipline (boot once per fixture; **never `Task.Delay` for readiness** — the
 module owns the wait strategy).
 
 ```csharp
@@ -391,8 +388,6 @@ Assert.That(batch, Has.Count.EqualTo(3));                  // SUT produced exact
   window — that's a failed produce, not a pass. *Fix:* `Assert.That(message, Is.Not.Null, ...)` first.
 - **Using `ReceiveAndDelete` to test the consumer's settlement logic.** You can't assert Complete vs
   Abandon vs DeadLetter if the broker already deleted it. *Fix:* peek-lock when settlement is under test.
-- **Reaching for Service Bus when the dependency is an HTTP call.** *Fix:* `qa-api-mocking-dotnet`
-  — messaging is for async queues/topics, not request/response fakes.
 
 ## Examples
 
@@ -495,11 +490,7 @@ public static class Orders
   RabbitMQ (`rabbitmq`, AMQP exchanges) close the family.
 - `qa-db-testing-client-dotnet` — the `WaitFor.Async` poll helper and the seeder/probe split reused for
   the consumer side-effect assertions; the **eventual-consistency lineage** this skill leans on hardest.
-- `qa-test-environments-dotnet` — booting the emulator + SQL Edge sidecar over a shared network; the
-  per-fixture lifecycle and readiness-wait discipline (never `Task.Delay`) mirrored here.
 - `qa-auth0-test-tokens-dotnet` — when authing to a cloud test namespace with an Azure AD token
   (`DefaultAzureCredential`) instead of the emulator connection string; secrets-from-env discipline.
-- `qa-api-mocking-dotnet` — the *synchronous* counterpart: fake an HTTP dependency the SUT
-  calls. The boundary: WireMock = request/response fake; Service Bus = async queue/topic assertions.
 - `qa-allure-reporting-dotnet` — attach the received message body / DLQ reason to the Allure result.
 - `qa-test-data-builder-dotnet` — builders/ObjectMother for message payloads with 4+ fields.

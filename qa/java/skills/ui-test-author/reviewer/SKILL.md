@@ -163,4 +163,4 @@ Code that looks well-written in this stack tends to share these traits:
 - Architecture is the real problem (not the code) → `qa/java/skills/page-object-architect`
 - Test data shape is wrong → `qa/java/skills/test-data-builder`
 - API tests in the same PR → `qa/java/skills/api-test-author/reviewer`
-- Allure reporting questions → `qa/java/skills/allure-reporting`
+- Allure reporting questions → `qa/reporting/java/skills/allure-reporting`

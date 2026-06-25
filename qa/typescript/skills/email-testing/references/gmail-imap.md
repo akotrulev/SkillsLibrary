@@ -313,7 +313,7 @@ it('Should_AttachPdfInvoice_When_InvoiceEmailed', async () => {
 - Validate content type **and** magic bytes for binaries (`%PDF`, `PK`, `\x89PNG`). Check `size` before trusting large payloads.
 
 ### Secrets
-- `IMAP_USER` + `IMAP_PASSWORD` are secrets. The password is a Gmail **App Password** (2FA required; "less secure app access" is gone) — the pragmatic CI choice. **OAuth2 XOAUTH2** is the more-secure option for long-lived setups. Read from env / secret store; never in code or a committed `.env`. In CI pull them per `qa/typescript/skills/ci-pipelines`.
+- `IMAP_USER` + `IMAP_PASSWORD` are secrets. The password is a Gmail **App Password** (2FA required; "less secure app access" is gone) — the pragmatic CI choice. **OAuth2 XOAUTH2** is the more-secure option for long-lived setups. Read from env / secret store; never in code or a committed `.env`. In CI pull them per `qa/cicd/typescript/skills/ci-pipelines`.
 
 ### What NOT to do
 - No hardcoded mailbox address or App Password.
@@ -338,6 +338,6 @@ it('Should_AttachPdfInvoice_When_InvoiceEmailed', async () => {
 
 - **`qa/typescript/skills/email-testing`**, **`qa/typescript/skills/email-testing`** — the other two email siblings. See the three-way pick table above: real provider (here) vs hosted SaaS vs self-hosted sink.
 - **`qa/dotnet/skills/email-testing`** (MailKit), **`qa/java/skills/email-testing`** (Jakarta Mail) — sibling stacks; same wrapper shape, same poll-with-deadline wait.
-- **`qa/typescript/skills/ci-pipelines`** — where these specs run in CI and where the `IMAP_PASSWORD` App Password secret is sourced (OIDC / encrypted secrets), never hardcoded.
+- **`qa/cicd/typescript/skills/ci-pipelines`** — where these specs run in CI and where the `IMAP_PASSWORD` App Password secret is sourced (OIDC / encrypted secrets), never hardcoded.
 - **`qa/typescript/skills/test-data-builder`** — generate per-test `+tag` aliases through a builder.
 - **`qa/typescript/skills/db-testing/testcontainers`** — signup creates a DB row *and* sends an email; assert both.

@@ -51,7 +51,6 @@ synchronous return you can `await` and assert on the next line:
 | The UI opens a WS and you want **deterministic** frames (no real server) | WebSocket | **browser** — Playwright `routeWebSocket` (MOCK) |
 | The UI consumes an SSE feed and you want it deterministic | SSE | **browser** — `page.route` returning a chunked `text/event-stream` body |
 | Async **queue/topic** (OrderPlaced lands on a queue, a consumer reacts) | — | **not this skill** → `qa-messaging-testing-typescript` etc. |
-| A plain request/response **HTTP** dependency to fake | — | **not this skill** → `qa-api-mocking-typescript` / `qa-network-monitoring-typescript` |
 
 **Rule of thumb:** *bidirectional, interactive?* → WebSocket. *Server-push-only feed?* → SSE. *Testing the
 protocol contract?* → protocol-client. *Testing the UI's use of the stream?* → browser (observe if the real
@@ -266,7 +265,7 @@ test('should render the alert banner when the socket pushes an outage', async ({
 - **Heartbeat (ping/pong):** `ws` exposes `'ping'`/`'pong'` events; assert the app-level heartbeat / that a
   missed pong triggers the SUT's reconnect.
 - **WS upgrade in tests** needs the SUT booted on a **real HTTP server** (the upgrade can't happen against an
-  in-process mock) — boot it in `beforeAll` / via Testcontainers (`qa-test-environments-typescript`).
+  in-process mock) — boot it in `beforeAll` / via Testcontainers.
 
 ## Anti-patterns
 
@@ -354,11 +353,6 @@ ws.send(JSON.stringify(payload));
   this skill = an open WS/SSE stream. (Plus `-sqs` `sqs` / `-kafka` `kafka` / `-rabbitmq` `rabbitmq`.)
 - `qa-network-monitoring-typescript` — the **HTTP** mock counterpart and the "register
   before the action" ordering rule; SSE-in-the-browser mocking reuses its `page.route`.
-- `qa-api-mocking-typescript` — fake a *synchronous* HTTP dependency; not a stream. (MSW also has a
-  WebSocket-mocking API for service-level interception — distinct from Playwright's browser-level `routeWebSocket`.)
 - `qa-ui-test-author-playwright-typescript` — the page-object model the **browser-surface** tests layer on; the
   no-`waitForTimeout` discipline originates there.
 - `qa-auth0-test-tokens-typescript` — tokens for an authenticated socket, read from env, never logged.
-- `qa-test-environments-typescript` — booting the SUT on a real server (Testcontainers) with the
-  readiness-wait discipline. `qa-allure-reporting-typescript` — attach captured frames / the event sequence.
-  `qa-test-data-builder-typescript` — frame payloads with 4+ fields.

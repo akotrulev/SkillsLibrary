@@ -256,5 +256,5 @@ See `qa/_shared/contract-testing-pact` for the shared `can-i-deploy` and `record
 - TypeScript consumer/provider → `qa/typescript/skills/contract-testing-pact`
 - Live-service API tests → `qa/dotnet/skills/api-test-author/generator`
 - DTOs → `qa/dotnet/skills/api-dto-writer`
-- CI pipeline syntax → `qa/dotnet/skills/ci-pipelines/{github-actions,azure-pipelines,gitlab-ci}` or `devops/<ci>`
-- Allure publishing for contract test results → `qa/dotnet/skills/allure-reporting`
+- CI pipeline syntax → `qa/cicd/dotnet/skills/ci-pipelines/{github-actions,azure-pipelines,gitlab-ci}` or `devops/<ci>`
+- Allure publishing for contract test results → `qa/reporting/dotnet/skills/allure-reporting`

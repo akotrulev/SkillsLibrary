@@ -32,7 +32,7 @@ export const lambdatest = () => ({
 });
 ```
 
-In CI these env vars come from the runner's secret store; for cloud auth (e.g. an OIDC-minted token used to reach AWS Device Farm) prefer OIDC over a long-lived PAT — see `qa/typescript/skills/ci-pipelines`.
+In CI these env vars come from the runner's secret store; for cloud auth (e.g. an OIDC-minted token used to reach AWS Device Farm) prefer OIDC over a long-lived PAT — see `qa/cicd/typescript/skills/ci-pipelines`.
 
 ### Web — Playwright on BrowserStack via `chromium.connect`
 
@@ -214,7 +214,7 @@ export default defineConfig({
 });
 ```
 
-For WDIO it's `maxInstances` (shown above). The **sharding mechanics** (matrix fan-out, `--shard`, merging blob reports) belong to `qa/typescript/skills/ci-pipelines` — cross-link it; don't re-derive it here. The rule: `total runner shards × workers-per-shard ≤ plan session cap`.
+For WDIO it's `maxInstances` (shown above). The **sharding mechanics** (matrix fan-out, `--shard`, merging blob reports) belong to `qa/cicd/typescript/skills/ci-pipelines` — cross-link it; don't re-derive it here. The rule: `total runner shards × workers-per-shard ≤ plan session cap`.
 
 ### Artifacts — surface the session URL on failure
 

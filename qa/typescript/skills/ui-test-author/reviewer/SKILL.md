@@ -172,4 +172,4 @@ Code that looks well-written in this stack tends to share these traits:
 - Architecture is the real problem (not the code) → `qa/typescript/skills/page-object-architect`
 - Test data shape is wrong → `qa/typescript/skills/test-data-builder`
 - API tests in the same PR → `qa/typescript/skills/api-test-author/reviewer`
-- Allure reporting questions → `qa/typescript/skills/allure-reporting`
+- Allure reporting questions → `qa/reporting/typescript/skills/allure-reporting`

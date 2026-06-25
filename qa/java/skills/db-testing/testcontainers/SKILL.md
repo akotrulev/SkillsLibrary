@@ -242,6 +242,5 @@ new GenericContainer<>("ghcr.io/myco/legacy-app:1.4.0")
 
 - **`qa/java/skills/db-testing/query-author`** — SQL guardrails for assertion queries.
 - **`qa/java/skills/test-data-builder`** — builders / ObjectMother for seed data.
-- **`qa/java/skills/test-environments`** — multi-container orchestration.
-- **`qa/java/skills/ci-pipelines`** — DinD enablement and Allure publish.
-- **`qa/java/skills/allure-reporting`** — attach container logs on failure.
+- **`qa/cicd/java/skills/ci-pipelines`** — DinD enablement and Allure publish.
+- **`qa/reporting/java/skills/allure-reporting`** — attach container logs on failure.

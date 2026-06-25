@@ -87,7 +87,7 @@ Two viable flows (combine both):
 1. **Smoke on every PR** — 1-minute smoke against staging, verifies SLO threshold on a happy-path endpoint; fast feedback, low cost.
 2. **Full average / spike / soak on release** — scheduled or release-triggered; results published as artifacts + dashboard.
 
-Wire perf gates into the same `qa/<stack>/skills/ci-pipelines/<ci>` pipelines as functional tests.
+Wire perf gates into the same `qa/cicd/<stack>/skills/ci-pipelines/<ci>` pipelines as functional tests.
 
 ## Observability during the test
 
@@ -179,6 +179,6 @@ A clean review = no blocker or major rows after fixes, plus a per-scenario PASS/
 - Grafana dashboards for server-side correlation → `observability/grafana-dashboards`
 - LogQL / PromQL for queries during the test → `observability/logql-promql`
 - Test strategy that calls out where perf testing fits → `qa/manual/test-strategy`
-- Pipeline integration → `qa/<stack>/skills/ci-pipelines/{github-actions,azure-pipelines,gitlab-ci}` or `devops/<ci>`
-- Allure publishing for perf reports → `qa/<stack>/skills/allure-reporting/<stack>`
+- Pipeline integration → `qa/cicd/<stack>/skills/ci-pipelines/{github-actions,azure-pipelines,gitlab-ci}` or `devops/<ci>`
+- Allure publishing for perf reports → `qa/reporting/<stack>/skills/allure-reporting/<stack>`
 - Bug filings discovered during perf → `qa/manual/bug-report-writer`

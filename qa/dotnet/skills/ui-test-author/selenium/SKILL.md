@@ -27,7 +27,6 @@ Scaffolds Selenium 4 page objects and NUnit UI tests in C# / .NET 8, mirroring t
 - Selenium TypeScript → `qa/typescript/skills/ui-test-author/selenium`
 - Playwright .NET → `qa/dotnet/skills/ui-test-author/playwright`
 - Appium .NET → `qa/dotnet/skills/ui-test-author/appium`
-- Accelerator-owned tests → `qa/manual/accelerator-conventions`
 - Reviewing a page object → `qa/dotnet/skills/ui-test-author/reviewer`
 - POM architecture → `qa/dotnet/skills/page-object-architect`
 
@@ -224,4 +223,4 @@ public sealed class AuthenticationTests : BaseTest
 - POM architecture → `qa/dotnet/skills/page-object-architect`
 - Test data builders → `qa/dotnet/skills/test-data-builder`
 - Reviewing a page object → `qa/dotnet/skills/ui-test-author/reviewer`
-- Allure reporting → `qa/dotnet/skills/allure-reporting`
+- Allure reporting → `qa/reporting/dotnet/skills/allure-reporting`

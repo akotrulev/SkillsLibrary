@@ -34,7 +34,7 @@ Messaging tests assert one of two things about an **async** flow:
 - `AWSSDK.SQS` (`AmazonSQSClient` — send / receive / delete / queue attributes) and
   `AWSSDK.SimpleNotificationService` (`AmazonSimpleNotificationServiceClient`) for SNS→SQS fan-out
 - `Testcontainers.LocalStack` (`LocalStackBuilder`) — boots **LocalStack** (the local AWS emulator) and
-  surfaces an endpoint URL the SDK clients point at via `ServiceURL` (cross-link `qa-test-environments-dotnet`)
+  surfaces an endpoint URL the SDK clients point at via `ServiceURL`
 - The SUT's typed publisher/consumer is **constructor-injected** with the `IAmazonSQS` client (or the
   resolved queue URL) — never a static client or an endpoint read inside a `[Test]`
 
@@ -78,8 +78,7 @@ There is no in-memory SQS. For deterministic local + CI tests, run **LocalStack*
 which emulates SQS + SNS on a single endpoint (default `:4566`). Point every SDK client at that endpoint via
 `ServiceURL`; LocalStack accepts any credentials (`test`/`test` by convention) and the account id is
 `000000000000`. The cleanest path in .NET is the **`Testcontainers.LocalStack`** module — it boots the
-container, owns the readiness wait, and surfaces the endpoint. Reuse the fixture discipline from
-`qa-test-environments-dotnet` (boot once per fixture; **never `Task.Delay` for readiness** — the module owns
+container, owns the readiness wait, and surfaces the endpoint. Reuse the fixture discipline (boot once per fixture; **never `Task.Delay` for readiness** — the module owns
 the wait strategy). **Create the queues in fixture setup** (there is no `Config.json` equivalent — you declare
 them through the SDK).
 
@@ -485,8 +484,6 @@ Assert.That(drained, Has.Count.EqualTo(3));    // SUT produced exactly 3
   `MessageGroupId`; supply a `MessageDeduplicationId` unless `ContentBasedDeduplication=true`.
 - **Hard-coding the endpoint / an AWS access key in a `[Test]`.** *Fix:* surface the LocalStack endpoint from
   the fixture; for a cloud test account use the default credential chain + region from env; never log secrets.
-- **Reaching for SQS when the dependency is an HTTP call.** *Fix:* `qa-api-mocking-dotnet` — messaging
-  is for async queues, not request/response fakes.
 
 ## Examples
 
@@ -587,11 +584,7 @@ public static class Orders
   Kafka (`kafka`, offset-based) and RabbitMQ (`rabbitmq`, AMQP exchanges) close the family.
 - `qa-db-testing-client-dotnet` — the `WaitFor.Async` poll helper and the seeder/probe split reused for
   the consumer side-effect assertions; the **eventual-consistency lineage** this skill leans on hardest.
-- `qa-test-environments-dotnet` — booting the LocalStack container; the per-fixture lifecycle and
-  readiness-wait discipline (never `Task.Delay`) mirrored here.
 - `qa-auth0-test-tokens-dotnet` — when running against a cloud test account; the default-credential-chain
   + secrets-from-env discipline.
-- `qa-api-mocking-dotnet` — the *synchronous* counterpart: fake an HTTP dependency the SUT
-  calls. The boundary: WireMock = request/response fake; SQS = async queue assertions.
 - `qa-allure-reporting-dotnet` — attach the received message body / DLQ payload to the Allure result.
 - `qa-test-data-builder-dotnet` — builders/ObjectMother for message payloads with 4+ fields.

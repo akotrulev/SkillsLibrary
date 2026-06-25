@@ -28,7 +28,6 @@ shared by every tool in the family.
 | Assert against an **Azure Service Bus** queue/topic (peek-lock, DLQ sub-queue, sessions, SQL filters) | `references/service-bus.md` | Azure-native queue/topic; explicit peek-lock settlement + DLQ sub-queue — not offsets |
 | Assert against **AWS SQS / SNS** (visibility timeout, redrive-policy DLQ, FIFO dedup, SNS fan-out) | `references/sqs.md` | AWS-native queue; delete-to-ack + visibility timeout — not a log you re-read |
 | Assert against **RabbitMQ** (exchanges, routing keys, manual `basicAck`/`nack`, DLX) | `references/rabbitmq.md` | AMQP broker; exchange/binding topology + per-message ack |
-| Mock a downstream **HTTP** dependency the SUT calls | `qa-api-mocking-java` | Not messaging — a synchronous request/response fake |
 | Assert a row was written, with no broker in the flow | `qa-db-testing-client-java` | Pure DB verification; reuse its Awaitility wait for the eventual-consistency side here |
 
 **Rule of thumb:** *A partitioned log you read by offset, with consumer groups and an app-level DLT?* → Kafka.

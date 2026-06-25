@@ -323,6 +323,6 @@ Configure the remote-write endpoint via `K6_PROMETHEUS_RW_SERVER_URL`. The metri
 - SLO targets the test validates → `qa/manual/quality-metrics`
 - Grafana dashboards for server-side correlation → `observability/grafana-dashboards`
 - LogQL / PromQL for queries → `observability/logql-promql`
-- Pipeline integration → `qa/typescript/skills/ci-pipelines/{github-actions,azure-pipelines,gitlab-ci}` or `devops/<ci>`
-- Allure publishing for perf reports → `qa/typescript/skills/allure-reporting`
+- Pipeline integration → `qa/cicd/typescript/skills/ci-pipelines/{github-actions,azure-pipelines,gitlab-ci}` or `devops/<ci>`
+- Allure publishing for perf reports → `qa/reporting/typescript/skills/allure-reporting`
 - Bug filings discovered during perf → `qa/manual/bug-report-writer`

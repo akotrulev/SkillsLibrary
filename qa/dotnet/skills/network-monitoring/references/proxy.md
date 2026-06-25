@@ -14,7 +14,7 @@ Built on the same wrapper discipline as `qa/dotnet/skills/network-monitoring` an
 - [`Titanium.Web.Proxy`](https://www.nuget.org/packages/Titanium.Web.Proxy) — `ProxyServer`, `ExplicitProxyEndPoint`, `BeforeRequest`/`BeforeResponse` events, `CertificateManager`
 - NUnit 4.x + `Selenium.WebDriver` (or Appium .NET client) as the **client under test**; a bare `HttpClient` through a `WebProxy` also works
 - Proxy helpers under `Tests/Support/Proxy/`, recorded archives under `Tests/Artifacts/Har/`
-- These tests run in CI under `qa/dotnet/skills/ci-pipelines`: the job starts/stops the proxy and the client must **trust the per-run root certificate** (no long-lived secret — generated/trusted fresh each run)
+- These tests run in CI under `qa/cicd/dotnet/skills/ci-pipelines`: the job starts/stops the proxy and the client must **trust the per-run root certificate** (no long-lived secret — generated/trusted fresh each run)
 
 ## When to use
 
@@ -336,4 +336,4 @@ To **abort** instead of rewrite, call `e.TerminateSession()` in `BeforeRequest` 
 - **`qa/dotnet/skills/network-monitoring`** — raw CDP hooks below routing (Playwright + Chromium only); the proxy covers the cross-client case CDP can't.
 - **`qa/typescript/skills/network-monitoring`** — the **canonical** skill this ports the *structure* from (`mockttp`); consult it for the conceptual model and the three-way pick.
 - **`qa/java/skills/network-monitoring`** — the sibling Java port (`BrowserUp Proxy` + Selenium, native HAR).
-- **`qa/dotnet/skills/ci-pipelines`** — runs these tests; the job starts/stops the proxy and trusts the per-run root cert before the client launches (no long-lived secret).
+- **`qa/cicd/dotnet/skills/ci-pipelines`** — runs these tests; the job starts/stops the proxy and trusts the per-run root cert before the client launches (no long-lived secret).

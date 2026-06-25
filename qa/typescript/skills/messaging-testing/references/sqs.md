@@ -30,8 +30,7 @@ Messaging tests assert one of two things about an **async** flow:
 - `@aws-sdk/client-sqs` (`SQSClient` + command objects — send / receive / delete / queue attributes) and
   `@aws-sdk/client-sns` (`SNSClient`) for SNS→SQS fan-out
 - `@testcontainers/localstack` (`LocalstackContainer`) — boots **LocalStack** (the local AWS emulator) and
-  surfaces a connection URI the SDK clients point at via `endpoint` (cross-link
-  `qa-test-environments-typescript`)
+  surfaces a connection URI the SDK clients point at via `endpoint`
 - The SUT's typed publisher/consumer is **constructor-injected** with the `SQSClient` (or the resolved queue
   URL) — never a static client or an endpoint read inside a test
 
@@ -73,7 +72,7 @@ There is no in-memory SQS. For deterministic local + CI tests, run **LocalStack*
 which emulates SQS + SNS on a single endpoint. Point every SDK client at that endpoint via `endpoint`;
 LocalStack accepts any credentials (`test`/`test` by convention) and the account id is `000000000000`. Use the
 **`@testcontainers/localstack`** module — it boots the container, owns the readiness wait, and surfaces the
-URI. Reuse the fixture discipline from `qa-test-environments-typescript` (boot once per suite; **never
+URI. Reuse the standard Testcontainers fixture discipline (boot once per suite; **never
 `setTimeout` for readiness** — the module owns the wait strategy). **Create the queues in the fixture** (there
 is no `Config.json` equivalent — you declare them through the SDK).
 
@@ -430,8 +429,6 @@ expect(drained).toHaveLength(3); // SUT produced exactly 3
 - **Hard-coding the endpoint / an AWS access key in a test.** *Fix:* surface the LocalStack endpoint from the
   fixture; for a cloud test account use the default credential chain + region from `process.env`; never log
   secrets.
-- **Reaching for SQS when the dependency is an HTTP call.** *Fix:* `qa-api-mocking-typescript` — messaging
-  is for async queues, not request/response fakes.
 
 ## Examples
 
@@ -525,11 +522,7 @@ export const anOrder = () => new OrderBuilder().status("Pending");
   Kafka (`kafka`, offset-based) and RabbitMQ (`rabbitmq`, AMQP exchanges) close the family.
 - `qa-db-testing-client-typescript` — the `expect.poll` and seeder/probe split reused for the consumer
   side-effect assertions; the **eventual-consistency lineage** this skill leans on hardest.
-- `qa-test-environments-typescript` — booting the LocalStack container; the per-suite lifecycle and
-  readiness-wait discipline (never `setTimeout`) mirrored here.
 - `qa-auth0-test-tokens-typescript` — when running against a cloud test account; the default-credential
   -chain + secrets-from-env discipline.
-- `qa-api-mocking-typescript` — the *synchronous* counterpart: fake the app's outbound HTTP
-  in-runtime. The boundary: MSW = request/response fake; SQS = async queue assertions.
 - `qa-allure-reporting-typescript` — attach the received message body / DLQ payload to the Allure result.
 - `qa-test-data-builder-typescript` — builders for message payloads with 4+ fields.

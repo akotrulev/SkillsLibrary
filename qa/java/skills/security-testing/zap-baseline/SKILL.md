@@ -41,7 +41,6 @@ pipeline*: fast, safe against a deployed/ephemeral env, CI-native.
 | Deep active attack testing (SQLi/XSS/traversal payloads) on a throwaway env | `zap-full-scan.py` (out of scope here) | Active scanner mutates state — never prod/shared; slower cadence |
 | **Dependency / library** CVEs (vulnerable JARs, transitive CVEs) | dependency-scanning | SCA reads your build graph; ZAP scans running HTTP — orthogonal layers |
 | Per-component **accessibility** rule assertions | axe-playwright | Different concern; same *ticketed-baseline triage* discipline applies |
-| API contract / spec conformance of mocked endpoints | `api-mocking` (prism reference) | Prism validates against an OpenAPI spec; ZAP probes a live deployed app |
 
 **Rule of thumb:** ZAP baseline is your **passive DAST PR gate** against a running app. It complements —
 does not replace — SCA dependency scanning: different layers (running-app HTTP surface vs your
@@ -250,7 +249,7 @@ public class ZapBaselineTest {
 
     @BeforeClass
     public void startApp() {
-        // Stand up the SUT (cross-link qa-test-environments-java). Wait on a readiness condition.
+        // Stand up the SUT. Wait on a readiness condition.
         app = new GenericContainer<>("myorg/web:latest")
             .withExposedPorts(8080)
             .waitingFor(Wait.forHttp("/health").forPort(8080));
@@ -381,8 +380,6 @@ These sections live in `references/details.md` — **read it when the task touch
   here for `-c rules.tsv`.
 - `qa-accessibility-testing-java` — the closest **port-shape precedent**: a CLI/Docker
   tool invoked via `ProcessBuilder` from Java with the report parsed as JSON.
-- `qa-test-environments-java` — spin the target app the scan points at (Testcontainers / docker-compose,
-  ready on a wait strategy).
 - `qa-ci-pipelines-java` — the `zaproxy/action-baseline` job, `fail_action`, artifact
   upload, Docker availability.
 - `qa-allure-reporting-java` — attach the ZAP HTML/JSON report and alert summary.

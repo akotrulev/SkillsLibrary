@@ -261,7 +261,5 @@ transport contract differs.
 - `qa-api-dto-writer-typescript` — generate the typed `data` Zod schema / operation types (GraphQL Code Generator)
   in isolation; this skill consumes them.
 - `qa-auth0-test-tokens-typescript` — obtain the `GRAPHQL_TOKEN` bearer for authenticated operations.
-- `qa-api-mocking-typescript` — MSW's `graphql.query`/`graphql.mutation` handlers **mock** a GraphQL
-  dependency the app under test calls; this skill **tests** a real GraphQL backend. Inverse jobs.
 - `qa-performance-k6-typescript` — GraphQL **load** + the **N+1 / DataLoader** performance pitfall; out of scope for this
   functional skill. `qa-allure-reporting-typescript` — each operation renders as a named result.

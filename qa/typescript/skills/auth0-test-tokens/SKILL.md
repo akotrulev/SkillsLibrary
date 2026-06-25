@@ -89,7 +89,7 @@ These sections live in `references/details.md` — **read it when the task touch
 - One token per worker — in parallel runs each worker gets its own cached token; that's fine and avoids contention.
 
 ### Secrets
-- `client_secret`, test-user passwords, `AUTH0_DOMAIN`, `AUTH0_AUDIENCE`, `realm` via **env vars only**, read **lazily** (functions, not module-top consts). Never logged, never committed. In CI, source them per `qa/typescript/skills/ci-pipelines`.
+- `client_secret`, test-user passwords, `AUTH0_DOMAIN`, `AUTH0_AUDIENCE`, `realm` via **env vars only**, read **lazily** (functions, not module-top consts). Never logged, never committed. In CI, source them per `qa/cicd/typescript/skills/ci-pipelines`.
 - Never log a token. Treat the `access_token` as a secret in flight.
 
 ### Stashing
@@ -119,4 +119,4 @@ These sections live in `references/details.md` — **read it when the task touch
 - **`qa/typescript/skills/api-test-author/generator`** — the M2M consumer: where the `Bearer` header lands on the API client.
 - **`qa/typescript/skills/ui-test-author/playwright`** — the ROPG consumer: `storageState` / fixture patterns for seeding auth without the login UI.
 - **`qa/typescript/skills/test-data-builder`** — provisioning/seeding the test users that ROPG authenticates as.
-- **`qa/typescript/skills/ci-pipelines`** — where the Auth0 secrets are sourced in CI (OIDC / encrypted secrets), never hardcoded.
+- **`qa/cicd/typescript/skills/ci-pipelines`** — where the Auth0 secrets are sourced in CI (OIDC / encrypted secrets), never hardcoded.

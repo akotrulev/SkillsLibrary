@@ -53,7 +53,7 @@ resilience library (**Polly**), and the runner (NUnit) change.
 
 - .NET 8, **NUnit** (the global default .NET runner) + **FluentAssertions** + **Allure.NUnit**
 - **Testcontainers .NET** — `Testcontainers` + `Testcontainers.Toxiproxy` (the `ToxiproxyContainer`) + the
-  dependency module (e.g. `Testcontainers.PostgreSql`) — `qa-test-environments-dotnet`
+  dependency module (e.g. `Testcontainers.PostgreSql`)
 - **Toxiproxy.Net** — `Connection`, `Client`, `Proxy`, the typed toxics (`LatencyToxic`, `TimeoutToxic`,
   `ResetPeerToxic`, `BandwidthToxic`, `LimitDataToxic`, `SlicerToxic`), `ToxicDirection`
 - **Polly** (`Polly` / `Microsoft.Extensions.Http.Resilience`) — the resilience patterns under test; assert their
@@ -74,7 +74,7 @@ resilience library (**Polly**), and the runner (NUnit) change.
 </ItemGroup>
 ```
 
-> **Why a proxy and not a mock?** A mock (`qa-api-mocking-dotnet`) makes the *dependency* return a canned
+> **Why a proxy and not a mock?** A mock (e.g. WireMock.Net) makes the *dependency* return a canned
 > error at the application layer; a Toxiproxy toxic faults the *transport* — latency, a dropped TCP connection, a
 > half-sent response — the failures that exercise socket timeouts, connection pools, and Polly's retry/circuit
 > pipelines. Mock when you control the contract and want a specific status; **fault-inject when you want to prove
@@ -274,8 +274,6 @@ cluster", that is out of scope — flag it and point at the chaos-engineering pl
   a shared `Network`; reset toxics (`Healed()`) between tests, not the containers.
 - **Treating this as production chaos engineering.** *Fix:* deterministic toxic in a test ≠ GameDay on a live
   cluster — route prod-chaos requests to Gremlin/Litmus/Chaos Mesh.
-- **Using a toxic where a mock fits.** Want a specific HTTP 503 from a contract? *Fix:*
-  `qa-api-mocking-dotnet`. Toxiproxy is for **transport** faults, not application-layer canned responses.
 
 ## Examples
 
@@ -284,7 +282,7 @@ writes: inject `Timeout`, then `result.IsFallback.Should().BeTrue()` **and**
 `app.CircuitState.Should().Be(CircuitState.Open)`. Same dependency, opposite question — *does the app survive it
 failing?*
 
-**Composing with the dependency families.** The thing you fault is stood up by `qa-test-environments-dotnet`
+**Composing with the dependency families.** The thing you fault is stood up by Testcontainers
 (`ToxiproxyContainer` next to a `PostgreSqlContainer` on a shared `Network`); the dependency itself is exercised
 happy-path by `qa-db-testing-dotnet` / `qa-messaging-testing-dotnet`. Chaos adds the proxy in front and
 asserts the resilience layer — it **composes**. A data-driven fault matrix binds via `qa-data-driven-testing-dotnet`.
@@ -315,9 +313,6 @@ asserts the resilience layer — it **composes**. A data-driven fault matrix bin
 - `qa-network-monitoring-dotnet` — the **closest neighbor and the inverse**: that stands up a MITM proxy
   (`Titanium.Web.Proxy`) to **observe/mock** out-of-browser requests; this stands up Toxiproxy to **inject transport
   faults**. Observe vs break.
-- `qa-test-environments-dotnet` — the **Testcontainers spine** the `ToxiproxyContainer` plugs into.
-- `qa-api-mocking-dotnet` — **application-layer** canned responses vs **transport** faults. They
-  compose: a WireMock upstream behind a Toxiproxy listener.
 - `qa-data-driven-testing-dotnet` — drive a **fault matrix** (toxic × parameter × expected pattern) via
   `[TestCaseSource]` instead of copy-pasted `[Test]` methods.
 - `qa-db-testing-dotnet` · `qa-messaging-testing-dotnet` — the dependencies you fault (DB / broker

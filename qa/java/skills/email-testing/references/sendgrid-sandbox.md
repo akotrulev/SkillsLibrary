@@ -378,7 +378,7 @@ public class SendGridSandboxIT {
 - `should_x_when_y` test names; one logical assertion per test.
 
 ### Secrets
-- `SENDGRID_API_KEY` is the **only** secret and is needed **only** for the live sandbox round-trip. Read it lazily (`SendGridConfig.apiKey()`), never in a `@BeforeClass` / field initializer, so the payload check stays key-free. Never commit it; in CI pull it per `qa/java/skills/ci-pipelines`.
+- `SENDGRID_API_KEY` is the **only** secret and is needed **only** for the live sandbox round-trip. Read it lazily (`SendGridConfig.apiKey()`), never in a `@BeforeClass` / field initializer, so the payload check stays key-free. Never commit it; in CI pull it per `qa/cicd/java/skills/ci-pipelines`.
 
 ### What NOT to do
 - No hardcoded API key.
@@ -403,5 +403,5 @@ public class SendGridSandboxIT {
 
 - **`qa/java/skills/email-testing`**, **`qa/java/skills/email-testing`**, **`qa/java/skills/email-testing`** — the three inbox siblings. See the four-way pick table: this skill validates the **send request** and delivers nothing; those three assert on a **received** message (real provider / hosted SaaS / self-hosted sink).
 - **`qa/typescript/skills/email-testing`** (canonical, `@sendgrid/mail`), **`qa/dotnet/skills/email-testing`** (`SendGrid` NuGet) — the sibling stacks; same builder + `Notifier` shape, same `200`-under-sandbox assertion.
-- **`qa/java/skills/ci-pipelines`** — where these tests run in CI and where the `SENDGRID_API_KEY` secret is sourced (OIDC / encrypted secrets), never hardcoded.
+- **`qa/cicd/java/skills/ci-pipelines`** — where these tests run in CI and where the `SENDGRID_API_KEY` secret is sourced (OIDC / encrypted secrets), never hardcoded.
 - **`qa/java/skills/test-data-builder`** — build the dynamic-template-data through a builder when it grows past 4 fields.

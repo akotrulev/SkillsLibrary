@@ -10,7 +10,7 @@ Drives the raw **Chrome DevTools Protocol** from a Playwright `@playwright/test`
 - `@playwright/test` (Playwright ≥ 1.49) — `page.context().newCDPSession(page)` → `client.send(method, params)` + `client.on(event, …)`
 - CDP helpers under `tests/fixtures/cdp/`
 - Page objects under `tests/pages/`, specs under `tests/specs/` (see the UI sibling)
-- These tests run **only in the `chromium` project**, sharded in CI under `qa/typescript/skills/ci-pipelines` (`--shard`, `blob` reporter, traces on failure). No new secrets — CDP needs none.
+- These tests run **only in the `chromium` project**, sharded in CI under `qa/cicd/typescript/skills/ci-pipelines` (`--shard`, `blob` reporter, traces on failure). No new secrets — CDP needs none.
 
 ## When to use
 
@@ -315,4 +315,4 @@ Sample metrics **after** a user-visible "ready" signal, never after a sleep — 
 - **`qa/dotnet/skills/network-monitoring`** + **`qa/java/skills/network-monitoring`** — the sibling stacks porting this canonical TS skill into Playwright-for-.NET / -Java idioms.
 - **`qa/typescript/skills/network-monitoring`** — out-of-browser MITM capture for cross-browser or non-Playwright (Appium/Selenium/native) stacks.
 - **`qa/typescript/skills/ui-test-author/playwright`** — the fixture/page-object model these CDP fixtures layer on; the no-`waitForTimeout` discipline originates there.
-- **`qa/typescript/skills/ci-pipelines`** — runs these specs (Chromium project only) sharded; traces on failure show throttled network timings.
+- **`qa/cicd/typescript/skills/ci-pipelines`** — runs these specs (Chromium project only) sharded; traces on failure show throttled network timings.

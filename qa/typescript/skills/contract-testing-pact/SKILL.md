@@ -253,5 +253,5 @@ See `qa/_shared/contract-testing-pact` for the shared `can-i-deploy` and `record
 - Java consumer/provider → `qa/java/skills/contract-testing-pact`
 - Live-service API tests → `qa/typescript/skills/api-test-author/generator`
 - DTOs / Zod schemas → `qa/typescript/skills/api-dto-writer`
-- CI pipeline syntax → `qa/typescript/skills/ci-pipelines/{github-actions,azure-pipelines,gitlab-ci}` or `devops/<ci>`
-- Allure publishing for contract test results → `qa/typescript/skills/allure-reporting`
+- CI pipeline syntax → `qa/cicd/typescript/skills/ci-pipelines/{github-actions,azure-pipelines,gitlab-ci}` or `devops/<ci>`
+- Allure publishing for contract test results → `qa/reporting/typescript/skills/allure-reporting`

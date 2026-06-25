@@ -17,7 +17,7 @@ Wires .NET tests to a **hosted device/browser grid** — BrowserStack, Sauce Lab
 - NUnit as the runner; parallelism via `[Parallelizable]` + `LevelOfParallelism`
 - Tunnels: `BrowserStackLocal` (NuGet `BrowserStack.Local` `Local` class), Sauce Connect 5 (`sc` binary), LambdaTest Tunnel (`LT` binary)
 - Grid config under `Tests/Support/Grid/`; credentials via **env vars only** (`BROWSERSTACK_USERNAME` / `BROWSERSTACK_ACCESS_KEY`, `SAUCE_USERNAME` / `SAUCE_ACCESS_KEY`, `LT_USERNAME` / `LT_ACCESS_KEY`)
-- These suites run in CI under `qa/dotnet/skills/ci-pipelines` — secrets injected via the runner's secret store / OIDC, sharding driven by the runner (see § Parallelism)
+- These suites run in CI under `qa/cicd/dotnet/skills/ci-pipelines` — secrets injected via the runner's secret store / OIDC, sharding driven by the runner (see § Parallelism)
 
 ## When to use
 
@@ -32,7 +32,7 @@ Wires .NET tests to a **hosted device/browser grid** — BrowserStack, Sauce Lab
 
 - The TypeScript / Java grid stacks → `qa/{typescript,java}/skills/cloud-grid-config`
 - Writing the page objects / tests → `qa/dotnet/skills/ui-test-author/playwright`, `qa/dotnet/skills/ui-test-author/appium`
-- CI shard/worker mechanics (matrix, `--shard`, artifact upload) → `qa/dotnet/skills/ci-pipelines/*` — this skill maps the cap *onto* those, it doesn't re-derive them
+- CI shard/worker mechanics (matrix, `--shard`, artifact upload) → `qa/cicd/dotnet/skills/ci-pipelines/*` — this skill maps the cap *onto* those, it doesn't re-derive them
 - Deep AWS Device Farm device-pool / ARN orchestration → `qa/dotnet/skills/mobile-device-farm`; this node covers the wiring, that one the farm specifics
 
 ## Pick a vendor — quick orientation
@@ -77,7 +77,7 @@ These sections live in `references/details.md` — **read it when the task touch
 
 ### Parallelism
 - Read the concurrent-session cap from **one env var** (`GRID_CONCURRENCY`) and map it onto `LevelOfParallelism`. Never hard-code silently.
-- `total CI shards × LevelOfParallelism ≤ plan session cap`. Sharding mechanics live in `qa/dotnet/skills/ci-pipelines/*` — cross-link, don't duplicate.
+- `total CI shards × LevelOfParallelism ≤ plan session cap`. Sharding mechanics live in `qa/cicd/dotnet/skills/ci-pipelines/*` — cross-link, don't duplicate.
 
 ### Secrets
 - Username + access key via **env vars only** (`Required(...)` helper). Never a literal, never in a committed config file.
@@ -109,7 +109,7 @@ These sections live in `references/details.md` — **read it when the task touch
 1. Confirm **web vs mobile**, **vendor** (+ region for Sauce/Device Farm), **private target?** (tunnel), and the **session cap**.
 2. Add `Tests/Support/Grid/GridCredentials.cs` with the `Required(...)` env reads — no literals.
 3. **Web**: add `PlaywrightGridConnector` (BrowserStack flat-cap `ConnectAsync`) + a `GridWebTestBase` that yields an `IPage` and marks status in `[TearDown]`; or scaffold `.sauce/config.yml` (Sauce) / the LambdaTest connect. **Mobile**: add `AppiumGridDriverFactory` — `AppiumOptions` + `AddAdditionalAppiumOption("bstack:options", …)` + `new AndroidDriver(new Uri(hubUrl), options)`.
-4. Map the session cap onto `LevelOfParallelism` from `GRID_CONCURRENCY`; note the `shards × parallelism ≤ cap` rule and cross-link `qa/dotnet/skills/ci-pipelines/*`.
+4. Map the session cap onto `LevelOfParallelism` from `GRID_CONCURRENCY`; note the `shards × parallelism ≤ cap` rule and cross-link `qa/cicd/dotnet/skills/ci-pipelines/*`.
 5. Wire artifacts (`Artifacts.AttachSessionUrl`) + session status (`SessionStatus.Mark…`) into `[TearDown]`.
 6. If the target is private, add the tunnel lifecycle (`GridTunnel` in a `SetUpFixture`) and tie sessions via the cap.
 7. Run a single test against the grid first (one worker) to confirm the connection + caps before fanning out. Confirm the session appears on the dashboard with the right build/project tags.
@@ -119,6 +119,6 @@ These sections live in `references/details.md` — **read it when the task touch
 - **`qa/typescript/skills/cloud-grid-config`** + **`qa/java/skills/cloud-grid-config`** — sibling grid stacks. Same five moves (connect → caps → parallelism → artifacts/status → tunnel), different SDKs (`chromium.connect`/`@wdio/*-service`; Playwright Java `connect`/`UiAutomator2Options`). Structure ported, not code.
 - **`qa/dotnet/skills/ui-test-author/playwright`** — writes the web tests/page objects this skill runs on a grid (connection patterns to extend).
 - **`qa/dotnet/skills/ui-test-author/appium`** — writes the mobile tests/page objects; this skill swaps the local Appium session for a grid one (same `AppiumDriverFactory` discipline).
-- **`qa/dotnet/skills/ci-pipelines`** — sharding/`--where`-modulo + OIDC secret injection; this skill maps the plan cap onto those shards (don't duplicate the mechanics).
+- **`qa/cicd/dotnet/skills/ci-pipelines`** — sharding/`--where`-modulo + OIDC secret injection; this skill maps the plan cap onto those shards (don't duplicate the mechanics).
 - **`qa/dotnet/skills/mobile-device-farm`** — deeper cloud-Appium / device-pool specifics; this node is config/wiring, that one is the farm.
 - **`qa/dotnet/skills/network-monitoring`** — when a grid run also needs out-of-browser traffic capture (the proxy + tunnel combine).

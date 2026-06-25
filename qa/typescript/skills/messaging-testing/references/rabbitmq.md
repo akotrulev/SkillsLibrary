@@ -69,7 +69,7 @@ is unique and it's where most test mistakes happen:
 - `amqplib` (the AMQP client — `connect` / `Connection` / `Channel`). Use the promise API
   (`import amqp from 'amqplib'`), not the callback variant.
 - `@testcontainers/rabbitmq` (`RabbitMQContainer`) — boots a **local RabbitMQ broker** and surfaces
-  `getAmqpUrl()` (cross-link `qa-test-environments-typescript`)
+  `getAmqpUrl()`
 - The SUT's typed publisher/consumer takes the AMQP URL (or an injected `Connection`) via its **constructor /
   factory** — never a module-level URL read inside a test
 
@@ -84,7 +84,7 @@ test/messaging/
 
 There is no in-memory RabbitMQ. For deterministic local + CI tests, run a **real broker in a container** and
 point the client at `getAmqpUrl()`. The `@testcontainers/rabbitmq` module wires it up, waits for readiness,
-and exposes the AMQP URL. Reuse the fixture discipline from `qa-test-environments-typescript` (boot once per
+and exposes the AMQP URL. Reuse the standard Testcontainers fixture discipline (boot once per
 suite; **never `setTimeout` for readiness** — the container owns the wait strategy). **Declare the topology —
 exchanges, queues, bindings — up front** (RabbitMQ auto-declares nothing, and routing happens at publish time,
 so the bindings must pre-exist).
@@ -396,8 +396,6 @@ expect(batch).toHaveLength(3); // SUT produced exactly 3
   single-threaded), and drain leftovers in `beforeEach`.
 - **Reading the AMQP URL at module scope / hard-coding it.** *Fix:* surface it from the fixture (container) or
   `process.env` (shared broker), inject it; never log it.
-- **Reaching for RabbitMQ when the dependency is an HTTP call.** *Fix:* `qa-api-mocking-typescript` —
-  messaging is for async queues/exchanges, not request/response fakes.
 
 ## Examples
 
@@ -509,11 +507,7 @@ export const orders = {
   probe is the cleaner `expect.poll` loop.)
 - `qa-db-testing-client-typescript` — the `expect.poll` and seeder/probe split reused for the consumer
   side-effect assertions; the **eventual-consistency lineage** this skill leans on hardest.
-- `qa-test-environments-typescript` — booting the RabbitMQ container; the per-suite lifecycle and
-  readiness-wait discipline (never `setTimeout`) mirrored here.
 - `qa-auth0-test-tokens-typescript` — when authing to a shared cloud broker with credentials from env;
   the secrets-from-env discipline.
-- `qa-api-mocking-typescript` — the *synchronous* counterpart: fake an HTTP dependency the SUT calls.
-  The boundary: MSW = request/response fake; RabbitMQ = async exchange/queue assertions.
 - `qa-allure-reporting-typescript` — attach the consumed message body / DLQ `x-death` reason to the Allure result.
 - `qa-test-data-builder-typescript` — builders/ObjectMother for message payloads with 4+ fields.

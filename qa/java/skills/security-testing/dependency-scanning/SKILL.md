@@ -36,7 +36,6 @@ running app** (contrast DAST): it's a static, fast, every-PR pipeline gate.
 | Scan the **running app's HTTP surface** (headers, cookies, info leaks) | zap-baseline | DAST probes live traffic — orthogonal layer; run both |
 | **Remediate** an out-of-date / vulnerable dep automatically | Dependabot / Renovate | They *raise PRs to bump*; SCA *gates*. Complementary — gate + auto-fix |
 | Gate only the deps a PR **adds/changes** (diff-scoped) | `dependency-review-action` | PR-diff gate on GitHub; pairs with the full-tree scan here |
-| Verify a **mocked** API matches its OpenAPI spec | `api-mocking` (prism reference) | Contract conformance, not vulnerability scanning |
 
 **Rule of thumb:** SCA is your **dependency-tree CVE gate**; it complements — does not replace — DAST
 (`zap-baseline`). Pair the gate with a *remediation* tool (Dependabot/Renovate) so findings get fixed, not just

@@ -37,7 +37,6 @@ in the pipeline*: fast, safe to run against a deployed/ephemeral env, and CI-nat
 | Deep active attack testing (SQLi/XSS/traversal payloads) on a throwaway env | `zap-full-scan.py` (out of scope here) | Active scanner mutates state — never prod/shared; slower cadence |
 | **Dependency / library** CVEs (vulnerable npm packages, transitive CVEs) | dependency-scanning | SCA reads your lockfile; ZAP scans running HTTP — orthogonal layers |
 | Per-component **accessibility** rule assertions | axe-playwright | Different concern; same *ticketed-baseline triage* discipline applies |
-| API contract / spec conformance of mocked endpoints | `api-mocking` (prism reference) | Prism validates against an OpenAPI spec; ZAP probes a live deployed app |
 
 **Rule of thumb:** ZAP baseline is your **passive DAST PR gate** against a running app. It complements —
 does not replace — SCA dependency scanning: they are different layers (running-app HTTP surface vs
@@ -143,7 +142,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5          # needed so the Action can read .zap/rules.tsv
 
-      # Stand up the target app first (cross-link qa-test-environments-typescript).
+      # Stand up the target app first.
       - name: Start the app
         run: docker compose up -d --wait    # --wait blocks on healthchecks, NOT a sleep
 
@@ -249,7 +248,7 @@ describe('ZAP baseline DAST gate', () => {
   let target: string;
 
   beforeAll(async () => {
-    // Stand up the SUT (cross-link qa-test-environments-typescript). Wait on a readiness LOG/condition.
+    // Stand up the SUT. Wait on a readiness LOG/condition.
     app = await new GenericContainer('myorg/web:latest')
       .withExposedPorts(3000)
       .withWaitStrategy(/* Wait.forHttp('/health', 3000) */ undefined as never)
@@ -376,8 +375,6 @@ These sections live in `references/details.md` — **read it when the task touch
   reused here for `-c rules.tsv` (gate new findings, document every suppression with a ticket).
 - `qa-accessibility-testing-typescript` — the closest **port-shape precedent**: a
   CLI/Docker tool invoked from each stack with the report parsed as JSON.
-- `qa-test-environments-typescript` — spin the target app the scan points at (Testcontainers /
-  docker-compose, ready on a wait strategy).
 - `qa-ci-pipelines-typescript` — the `zaproxy/action-baseline` job, `fail_action`, artifact
   upload, Docker availability on the runner.
 - `qa-allure-reporting-typescript` — attach the ZAP HTML/JSON report and alert summary to the run.

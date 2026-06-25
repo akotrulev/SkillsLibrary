@@ -174,6 +174,7 @@ The pattern: **WHO** + **CAN DO WHAT** + **SO THAT MEASURABLE CHANGE**. If any o
 
 - Up-stream (vague requirement) → `communication/business-analysis`
 - Down-stream (story refinement) → `communication/user-story-writer`
+- Epics/stories authored elsewhere need a readiness audit → `communication/backlog-reviewer`
 - Stakeholder update during execution → `communication/stakeholder-updates`
 - Test plan for the epic → `qa/manual/test-strategy`
 - API/DTO contracts that the epic depends on → `qa/<stack>/skills/api-dto-writer`

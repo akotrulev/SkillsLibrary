@@ -13,7 +13,7 @@ Built on the same wrapper discipline as `qa/typescript/skills/network-monitoring
 - `selenium-webdriver` (or `webdriverio` for Appium) as the **client under test**; a plain `fetch`/`got` client also works
 - Proxy helpers under `tests/support/proxy/`, recorded HARs under `tests/artifacts/har/`
 - Vitest (or any runner) drives the lifecycle — the proxy is runner-agnostic; this skill uses Vitest hooks
-- These tests run in CI under `qa/typescript/skills/ci-pipelines`: the job starts/stops the proxy as an in-process resource and the client must **trust the per-run generated CA** (no long-lived secret — the CA is generated fresh each run)
+- These tests run in CI under `qa/cicd/typescript/skills/ci-pipelines`: the job starts/stops the proxy as an in-process resource and the client must **trust the per-run generated CA** (no long-lived secret — the CA is generated fresh each run)
 
 ## When to use
 
@@ -343,4 +343,4 @@ export function recordHar(server: Mockttp): { save: (path: string) => Promise<vo
 - **`qa/typescript/skills/network-monitoring`** — in-Playwright routing; reach for it first **if** you have a `page`. The proxy is for when you don't.
 - **`qa/typescript/skills/network-monitoring`** — raw CDP hooks below routing (Playwright + Chromium only); the proxy covers the cross-client case CDP can't.
 - **`qa/dotnet/skills/network-monitoring`** + **`qa/java/skills/network-monitoring`** — the sibling proxy stacks (`Titanium.Web.Proxy`, `BrowserUp Proxy`). Same five moves (start → point client → record → assert → fault → trust CA), different libraries — structure ported, not code.
-- **`qa/typescript/skills/ci-pipelines`** — runs these specs; the job starts/stops the proxy and trusts the per-run generated CA before the client launches (no long-lived secret).
+- **`qa/cicd/typescript/skills/ci-pipelines`** — runs these specs; the job starts/stops the proxy and trusts the per-run generated CA before the client launches (no long-lived secret).

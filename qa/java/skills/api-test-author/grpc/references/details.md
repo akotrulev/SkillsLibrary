@@ -134,7 +134,7 @@ public class UserGrpcAction extends GrpcAction {
 ### 3. Test — `src/test/java/user/UserGrpcTest.java`
 
 Assert `isOk()` (or the failure `code()`) **first** — that's the gate — then the typed message fields. The
-channel points at the service stood up by `qa-test-environments-java`.
+channel points at the service stood up by Testcontainers.
 
 ```java
 package user;

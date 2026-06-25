@@ -309,5 +309,5 @@ public class SignupEmailIT extends IntegrationTestBase {
 
 - **`qa/java/skills/test-data-builder`** — unique-email builder.
 - **`qa/java/skills/db-testing/testcontainers`** — signup creates a DB row *and* sends an email.
-- **`qa/java/skills/ci-pipelines`** — Mailpit as a service container.
-- **`qa/java/skills/allure-reporting`** — attach raw email source on failure.
+- **`qa/cicd/java/skills/ci-pipelines`** — Mailpit as a service container.
+- **`qa/reporting/java/skills/allure-reporting`** — attach raw email source on failure.

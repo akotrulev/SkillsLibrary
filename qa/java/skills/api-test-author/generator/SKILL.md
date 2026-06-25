@@ -216,4 +216,4 @@ public class PostUserTest extends BaseTest {
 - Test data builders → `qa/java/skills/test-data-builder`
 - Parameterized matrices → `qa/java/skills/data-driven-testing`
 - Reviewing tests → `qa/java/skills/api-test-author/reviewer`
-- Allure reporting setup → `qa/java/skills/allure-reporting`
+- Allure reporting setup → `qa/reporting/java/skills/allure-reporting`

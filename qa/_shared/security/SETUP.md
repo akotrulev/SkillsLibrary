@@ -23,7 +23,6 @@ invoke).
 |---|---|---|
 | **Docker** | Most scanners run as a Docker image (no language SDK) | `docker --version` · daemon running on the CI runner |
 | **The repo checked out** | SAST / secrets / SCA / IaC read the source & git history | `actions/checkout@v5` **with `fetch-depth: 0`** for full-history secrets scans |
-| **A running target** *(dynamic layers only)* | DAST / API-fuzzing / Nuclei / TLS probe a live app | `docker compose up -d --wait` (wait on healthchecks — never `sleep`) — see `qa/<stack>/skills/test-environments` |
 | **CI code-scanning surface** *(recommended)* | SARIF → inline PR findings | GitHub `github/codeql-action/upload-sarif` · GitLab security reports |
 | **A secret store** | Tokens/keys for authenticated scans & access-control | CI secrets (`${{ secrets.* }}`) → env vars at runtime |
 
@@ -182,5 +181,5 @@ ZAP **baseline**. Add the active layers (ZAP-AF, fuzzing, Nuclei) on a safe env 
 - `qa/_shared/security-testing/*/SKILL.md` — per-scanner full flag/gating/triage detail.
 - `qa/<stack>/skills/security-testing/{access-control-testing,dependency-scanning,zap-baseline}` — stack-native.
 - `qa/_shared/agents/qa-security.md` — the orchestrator.
-- `qa/<stack>/skills/{auth0-test-tokens,test-environments,api-client-writer,api-dto-writer,ci-pipelines/*,allure-reporting}` + `qa/_shared/ci-conventions` — the supporting setup.
+- `qa/<stack>/skills/{auth0-test-tokens,api-client-writer,api-dto-writer,ci-pipelines/*,allure-reporting}` + `qa/cicd/ci-conventions` — the supporting setup.
 </content>

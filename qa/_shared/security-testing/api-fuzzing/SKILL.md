@@ -22,8 +22,7 @@ an undeclared status." It finds the request you didn't think to write.
 > `DELETE` with generated bodies — it can create, corrupt, and delete data. It is an **active** tool. Per
 > the master ref's authorization-to-scan rule (`qa-security-shared`): **never run it against production or
 > a shared environment.** Point it only at a **throwaway env you own and are authorized to attack** — a
-> Testcontainers/compose-spun ephemeral app, ready on a wait strategy (cross-link
-> `qa-test-environments-*`). Use a **seeded test tenant** and **clean up after**. See the safe-env callout
+> Testcontainers/compose-spun ephemeral app, ready on a wait strategy. Use a **seeded test tenant** and **clean up after**. See the safe-env callout
 > below.
 
 ## Decision matrix — where Schemathesis property-fuzzing fits
@@ -140,8 +139,7 @@ schemathesis run https://app.example.com/openapi.json \
 **Run only against a throwaway env you own.** Per `qa-security-shared`'s authorization-to-scan rule, an
 active tool that sends generated mutating requests must never touch prod or a shared environment. Concretely:
 
-- **Spin an ephemeral target** — Testcontainers / `docker compose up --wait` (cross-link
-  `qa-test-environments-*`). Wait on a **readiness condition** (healthcheck / `--wait`), never a sleep
+- **Spin an ephemeral target** — Testcontainers / `docker compose up --wait`. Wait on a **readiness condition** (healthcheck / `--wait`), never a sleep
   (global rule). Scanning before the app is ready gives false-clean or connection-error noise.
 - **Use a seeded test tenant** and **clean up after** — fuzzing creates/mutates/deletes data; isolate it to
   a disposable tenant and tear it down (or recreate the env per run) so runs are independent and repeatable.
@@ -271,8 +269,6 @@ Cross-link `qa-ci-pipelines-*` for the OIDC-secret + artifact wiring.
   fuzzer **cannot** find; the highest-value layer most teams miss.
 - `qa-{stack}-api-test-author` — **example-based** functional contract/conformance tests (hand-written,
   deterministic) — the non-generative counterpart.
-- `qa-test-environments-*` — spin the **throwaway** target (Testcontainers / docker-compose, ready on a wait
-  strategy) the fuzzer points at.
 - `qa-{stack}-auth0-test-tokens` — acquire the M2M/ROPG token (for a seeded test user) injected via
   `--header`, read lazily from env.
 - `qa-allure-reporting-*` — attach the JUnit XML + VCR/HAR repro.

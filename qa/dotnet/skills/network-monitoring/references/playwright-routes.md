@@ -10,7 +10,7 @@ This is the **.NET port of the canonical** `qa/typescript/skills/network-monitor
 - NUnit 4.x + `Microsoft.Playwright` + `Microsoft.Playwright.NUnit` (Playwright ≥ 1.49)
 - Network helpers under `Tests/Support/Network/`, HAR archives under `Tests/Fixtures/Har/`
 - Page objects under `Tests/Pages/`, test classes under `Tests/Specs/` (see the UI sibling)
-- These tests run sharded in CI under `qa/dotnet/skills/ci-pipelines`
+- These tests run sharded in CI under `qa/cicd/dotnet/skills/ci-pipelines`
 
 ## When to use
 
@@ -375,6 +375,6 @@ For real bandwidth/latency emulation (not just per-request delay) use CDP `Netwo
 - **`qa/dotnet/skills/ui-test-author/playwright`** — the `PageTest` base-class / page-object model these network helpers layer on; `RunAndWaitForResponseAsync` ordering and the no-`WaitForTimeoutAsync` discipline originate there.
 - **`qa/dotnet/skills/network-monitoring`** — low-level CDP (`Network.emulateNetworkConditions` for real throttling) when `RouteAsync` isn't enough.
 - **`qa/dotnet/skills/network-monitoring`** — out-of-browser HTTP capture for multi-process or non-browser traffic.
-- **`qa/dotnet/skills/ci-pipelines`** — runs these tests sharded; HAR archives and traces are uploaded as artifacts there.
+- **`qa/cicd/dotnet/skills/ci-pipelines`** — runs these tests sharded; HAR archives and traces are uploaded as artifacts there.
 - **`qa/dotnet/skills/test-data-builder`** — builds the shapes you stub into `route.FulfillAsync(new() { Json = ... })`.
 - **`qa/dotnet/skills/api-test-author/generator`** — when the test needs no browser, assert against the API directly.

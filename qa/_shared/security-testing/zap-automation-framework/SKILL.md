@@ -78,7 +78,7 @@ These sections live in `references/details.md` — **read it when the task touch
 - Active → a **throwaway environment you own and are explicitly authorized to attack**: a
   Testcontainers/docker-compose ephemeral stack, or a dedicated, isolated security-test environment. Spin it
   on a **readiness condition** (compose `--wait` / a Testcontainers wait strategy / an HTTP-health poll loop)
-  — **never a fixed sleep** (global rule). Cross-link `qa-test-environments-{java,dotnet,typescript}`.
+  — **never a fixed sleep** (global rule).
 - Confirm the target and authorization **before the first active run**; get it in writing for any hosted
   target. Pointing an active scan at a third party's infrastructure is an attack.
 - Exclude destructive paths (logout, account-delete, payment-capture) via `excludePaths` so the spider and
@@ -262,8 +262,6 @@ Emit **two** reports from the AF `report` jobs (shown in the plan): a **SARIF** 
 - `qa-security-testing-api-fuzzing` — Schemathesis schema-driven property fuzzing (generate cases from the
   spec) — complementary to ZAP's attack-rule DAST.
 - `qa-security-testing-nuclei` — template/known-CVE host scanning — a different layer again.
-- `qa-test-environments-{java,dotnet,typescript}` — spin the **throwaway, authorized** env the active scan
-  targets (Testcontainers / docker-compose, ready on a wait strategy).
 - `qa-auth0-test-tokens-{java,dotnet,typescript}` — acquire the bearer/user tokens the `replacer` job injects.
 - `qa-ci-pipelines-{java,dotnet,typescript}` + `qa-security-shared` — the `zaproxy/action-af`
   job, SARIF upload, artifact, slower cadence (nightly/pre-release, not per-PR).

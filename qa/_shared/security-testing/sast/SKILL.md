@@ -315,8 +315,8 @@ map in `qa-security-shared`.
   source concern from insecure-code-pattern SAST).
 - `qa/<stack>/skills/security-testing/access-control-testing` — the **functional** BOLA/IDOR/BFLA matrix for
   A01, the access-control flaw SAST is blind to.
-- `qa/<stack>/skills/ci-pipelines/{github-actions,azure-pipelines,gitlab-ci}` + `qa/_shared/ci-conventions` —
+- `qa/cicd/<stack>/skills/ci-pipelines/{github-actions,azure-pipelines,gitlab-ci}` + `qa/cicd/ci-conventions` —
   wire the gate step, SARIF upload, and artifact.
-- `qa/<stack>/skills/allure-reporting` — attach the parsed JSON finding summary to the run.
+- `qa/reporting/<stack>/skills/allure-reporting` — attach the parsed JSON finding summary to the run.
 - `qa/_shared/agents/qa-security.md` — the phased orchestrator that runs SAST in the per-PR static-gates
   phase (Phase 2) alongside secrets + SCA.

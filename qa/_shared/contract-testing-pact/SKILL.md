@@ -18,6 +18,25 @@ Cross-stack concepts shared by `qa/{dotnet,java,typescript}/skills/contract-test
 
 The Broker is the source of truth. Pact files in Git are dev-time only.
 
+## Contract types (pick before writing any code)
+
+The mental model above describes the default — **CDCT over HTTP**. Two variants share the same Broker, publish, and `can-i-deploy` machinery but change what the consumer test and provider verification look like:
+
+| Type | Interaction | Consumer side | Provider side |
+|---|---|---|---|
+| **CDCT — HTTP** (default) | sync request/response | mock HTTP provider in-process | replay interactions against the **real running** provider |
+| **CDCT — message** | async event over a broker (Kafka/SQS/RabbitMQ/Service Bus) | drive the **real message handler** with the contracted payload; no broker | a `@PactVerifyProvider`-style method returns the **produced message**; mock message target, no HTTP |
+| **BDCT** (bi-directional) | sync HTTP, provider not under your test control | publish the pact as usual | provider publishes its **OpenAPI spec** as its contract; the Broker cross-checks the pact against the spec — **no replay** |
+
+Rules of thumb (all stacks):
+
+- **CDCT is the default and the stronger guarantee** — the provider replays the consumer's real expectations, catching behavioural drift a spec can't. Use it for both sync and async whenever you own the provider's tests.
+- **Message pacts contract the message shape only.** The broker is mocked on both sides; its plumbing belongs to the stack's `messaging-testing` skill, not Pact.
+- **BDCT is the fallback** when you can't add Pact verification to the provider but it ships a trustworthy OpenAPI spec. A spec describes *intent*; CDCT proves *behaviour*. BDCT is additive, never a replacement where CDCT is possible.
+- **GraphQL** is just CDCT — HTTP with the query in the request body and the `{ data, errors }` envelope matched by type.
+
+Stack-specific DSL for each type lives in the sibling skills (`qa/{java,dotnet,typescript}/skills/contract-testing-pact`).
+
 ## Inputs needed (regardless of stack)
 
 1. **Consumer + provider names** as they'll appear in the Broker (slug-stable)
@@ -159,5 +178,5 @@ Tag every pact and every verification with the **consumer's commit SHA + branch*
 - Consumer / provider code on TypeScript → `qa/typescript/skills/contract-testing-pact`
 - Live-service API tests → `qa/<stack>/skills/api-test-author/generator/<stack>`
 - DTO authoring → `qa/<stack>/skills/api-dto-writer/<stack>`
-- CI pipeline syntax → `qa/<stack>/skills/ci-pipelines/{github-actions,azure-pipelines,gitlab-ci}` or `devops/<ci>`
+- CI pipeline syntax → `qa/cicd/<stack>/skills/ci-pipelines/{github-actions,azure-pipelines,gitlab-ci}` or `devops/<ci>`
 - Test strategy decisions (when contract vs E2E) → `qa/manual/test-strategy`

@@ -360,6 +360,6 @@ Pair with Grafana for service-side correlation (`observability/grafana-dashboard
 - NBomber (.NET) → `qa/dotnet/skills/performance/nbomber`
 - SLO targets the test validates → `qa/manual/quality-metrics`
 - Grafana dashboards for server-side correlation → `observability/grafana-dashboards`
-- Pipeline integration → `qa/java/skills/ci-pipelines/{github-actions,azure-pipelines,gitlab-ci}` or `devops/<ci>`
-- Allure publishing for perf reports → `qa/java/skills/allure-reporting`
+- Pipeline integration → `qa/cicd/java/skills/ci-pipelines/{github-actions,azure-pipelines,gitlab-ci}` or `devops/<ci>`
+- Allure publishing for perf reports → `qa/reporting/java/skills/allure-reporting`
 - Bug filings discovered during perf → `qa/manual/bug-report-writer`

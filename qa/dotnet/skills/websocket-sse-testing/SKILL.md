@@ -57,7 +57,6 @@ single synchronous return you can assert on the next line:
 | The UI opens a WS and you want **deterministic** frames (no real server) | WebSocket | **browser** — Playwright `RouteWebSocketAsync` (MOCK) |
 | The UI consumes an SSE feed and you want it deterministic | SSE | **browser** — `Page.RouteAsync` returning a chunked `text/event-stream` body |
 | Async **queue/topic** (OrderPlaced lands on a queue, a consumer reacts) | — | **not this skill** → `qa-messaging-testing-dotnet` etc. |
-| A plain request/response **HTTP** dependency to fake | — | **not this skill** → `qa-api-mocking-dotnet` / `qa-network-monitoring-dotnet` |
 
 **Rule of thumb:** *bidirectional, interactive?* → WebSocket. *Server-push-only feed?* → SSE (cheaper, plain
 HTTP, free reconnect). *Testing the protocol contract?* → protocol-client. *Testing the UI's use of the
@@ -388,11 +387,7 @@ await probe.SendAsync(JsonSerializer.Serialize(payload));
 - `qa-network-monitoring-dotnet` — the **HTTP** request/mock counterpart and the
   source of the "register before the action" ordering rule; use it for plain request/response, this skill for
   the open socket. (SSE-in-the-browser mocking reuses its `Page.RouteAsync`.)
-- `qa-api-mocking-dotnet` — fake a *synchronous* HTTP dependency; not a stream.
 - `qa-ui-test-author-playwright-dotnet` — the `PageTest` base / page objects the **browser-surface** tests
   layer on; the no-`WaitForTimeoutAsync` discipline originates there.
 - `qa-auth0-test-tokens-dotnet` — tokens for an authenticated socket (query / subprotocol / first-frame),
   read from env, never logged.
-- `qa-test-environments-dotnet` — booting the SUT (`WebApplicationFactory` on a real Kestrel port, or a
-  containerised stream server) with the readiness-wait discipline. `qa-allure-reporting-dotnet` — attach the
-  captured frames / event sequence to the result. `qa-test-data-builder-dotnet` — frame payloads with 4+ fields.

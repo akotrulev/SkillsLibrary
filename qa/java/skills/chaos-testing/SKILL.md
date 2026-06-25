@@ -52,7 +52,7 @@ happy-path skill in this library: the REST/gRPC authors assert *the dependency a
 
 - Java 21, Gradle (Kotlin DSL), **TestNG** (the global default Java runner) + **AssertJ** + **Allure TestNG**
 - **Testcontainers** — `org.testcontainers:testcontainers` + `org.testcontainers:toxiproxy` (the
-  `ToxiproxyContainer` module) + the dependency module (e.g. `:postgresql`, `:kafka`) — `qa-test-environments-java`
+  `ToxiproxyContainer` module) + the dependency module (e.g. `:postgresql`, `:kafka`)
 - **toxiproxy-java** (`eu.rekawek.toxiproxy:toxiproxy-java`) — `ToxiproxyClient`, `Proxy`, `proxy.toxics()`,
   `ToxicDirection`
 - **resilience4j** (`io.github.resilience4j:resilience4j-circuitbreaker` / `-retry` / `-timelimiter`) — the
@@ -76,7 +76,7 @@ dependencies {
 }
 ```
 
-> **Why a proxy and not a mock?** A mock (`qa-api-mocking-java`) makes the *dependency* return a canned
+> **Why a proxy and not a mock?** A mock (e.g. WireMock) makes the *dependency* return a canned
 > error at the application layer; a Toxiproxy toxic faults the *transport* — latency, a dropped TCP connection, a
 > half-sent response — the failures that exercise socket timeouts, connection pools, and retry/circuit code. Mock
 > when you control the contract and want a specific status; **fault-inject when you want to prove the app survives
@@ -294,8 +294,6 @@ chaos-engineering platforms.
   `@BeforeClass` on a shared `Network`; reset toxics (`healed()`) between tests, not the containers.
 - **Treating this as production chaos engineering.** *Fix:* deterministic toxic in a test ≠ GameDay on a live
   cluster — see the boundary note; route prod-chaos requests to Gremlin/Litmus/Chaos Mesh.
-- **Using a toxic where a mock fits.** Want a specific HTTP 503 from a contract? *Fix:* `qa-api-mocking-java`.
-  Toxiproxy is for **transport** faults (latency/drop/partial), not application-layer canned responses.
 
 ## Examples
 
@@ -304,7 +302,7 @@ chaos author writes: inject `timeout`, then `assertThat(result.isFallback()).isT
 `assertThat(breaker.getState()).isEqualTo(OPEN)`. Same dependency, opposite question — *does the app survive it
 failing?*
 
-**Composing with the dependency families.** The thing you fault is stood up by `qa-test-environments-java`
+**Composing with the dependency families.** The thing you fault is stood up by Testcontainers
 (`ToxiproxyContainer` next to a `PostgreSQLContainer` / `KafkaContainer` on a shared `Network`); the dependency
 itself is exercised happy-path by `qa-db-testing-java` / `qa-messaging-testing-java`. Chaos adds the proxy in
 front and asserts the resilience layer — it **composes** with those skills, it doesn't replace them. A
@@ -337,10 +335,6 @@ data-driven fault matrix (toxic × parameter) binds cleanly via `qa-data-driven-
 - `qa-network-monitoring-java` — the **closest neighbor and the inverse**: that stands up a MITM proxy
   to **observe/mock** out-of-browser requests; this stands up Toxiproxy to **inject transport faults**. Observe vs
   break. Read it for the proxy-in-the-middle model; draw the boundary cleanly.
-- `qa-test-environments-java` — the **Testcontainers spine** the `ToxiproxyContainer` plugs into: stand the
-  dependency up, put the proxy in front on a shared `Network`, point the app at the proxy port.
-- `qa-api-mocking-java` — **application-layer** canned responses (a specific 503) vs **transport**
-  faults (latency/drop/partial). They compose: a WireMock upstream behind a Toxiproxy listener.
 - `qa-data-driven-testing-java` — drive a **fault matrix** (toxic × parameter × expected pattern) via
   row-binding instead of copy-pasted `@Test` methods.
 - `qa-db-testing-java` · `qa-messaging-testing-java` · `qa-messaging-testing-java` — the

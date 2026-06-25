@@ -73,7 +73,7 @@ is unique and it's where most test mistakes happen:
   (`RabbitTemplate`, `@RabbitListener`, `QueueBuilder.deadLetterExchange(...)`) — the assertion code stays on
   plain `amqp-client`.
 - `org.testcontainers:rabbitmq` (`RabbitMQContainer`) — boots a **local RabbitMQ broker** and surfaces
-  `getAmqpUrl()` (cross-link `qa-test-environments-java`)
+  `getAmqpUrl()`
 - The SUT's typed publisher/consumer is **constructor-injected** with the AMQP URL (or an injected
   `Connection`) — never a static URL read inside an `@Test`
 
@@ -88,7 +88,7 @@ src/test/java/.../messaging/
 
 There is no in-memory RabbitMQ. For deterministic local + CI tests, run a **real broker in a container** and
 point the client at `getAmqpUrl()`. The `org.testcontainers:rabbitmq` module wires it up, waits for readiness,
-and exposes the AMQP URL. Reuse the fixture discipline from `qa-test-environments-java` (boot once per class;
+and exposes the AMQP URL. Reuse the standard Testcontainers fixture discipline (boot once per class;
 **never `Thread.sleep` for readiness** — the container owns the wait strategy). **Declare the topology —
 exchanges, queues, bindings — up front** (RabbitMQ auto-declares nothing, and routing happens at publish time,
 so the bindings must pre-exist).
@@ -405,8 +405,6 @@ assertThat(batch).hasSize(3);                  // SUT produced exactly 3
   parallel group), and drain leftovers in `@BeforeMethod`.
 - **Reading the AMQP URL inside an `@Test` / hard-coding it.** *Fix:* surface it from the base class
   (container) or env (shared broker), inject it; never log it.
-- **Reaching for RabbitMQ when the dependency is an HTTP call.** *Fix:* `qa-api-mocking-java` —
-  messaging is for async queues/exchanges, not request/response fakes.
 
 ## Examples
 
@@ -512,11 +510,7 @@ public final class Orders {
   Kafka log + offsets + app-level DLT vs RabbitMQ queue + manual ack + broker-native DLX.
 - `qa-db-testing-client-java` — the Awaitility poll and seeder/probe split reused for the consumer
   side-effect assertions; the **eventual-consistency lineage** this skill leans on hardest.
-- `qa-test-environments-java` — booting the RabbitMQ container; the per-class lifecycle and
-  readiness-wait discipline (never `Thread.sleep`) mirrored here.
 - `qa-auth0-test-tokens-java` — when authing to a shared cloud broker with credentials from env; the
   secrets-from-env discipline.
-- `qa-api-mocking-java` — the *synchronous* counterpart: fake an HTTP dependency the SUT calls.
-  The boundary: WireMock = request/response fake; RabbitMQ = async exchange/queue assertions.
 - `qa-allure-reporting-java` — attach the consumed message body / DLQ `x-death` reason to the Allure result.
 - `qa-test-data-builder-java` — builders/ObjectMother for message payloads with 4+ fields.

@@ -16,7 +16,7 @@ Wires TypeScript tests to a **hosted device/browser grid** — BrowserStack, Sau
 - **Mobile**: WebdriverIO 9.x + Appium 2.x with `@wdio/browserstack-service` / `@wdio/sauce-service` (or raw `bstack:options`/`sauce:options`/`LT:Options` caps)
 - Tunnels: `browserstack-local` (npm), Sauce Connect 5 (`sc` binary), LambdaTest Tunnel (`LT` binary)
 - Grid config under `tests/support/grid/`; credentials via **env vars only** (`BROWSERSTACK_USERNAME` / `BROWSERSTACK_ACCESS_KEY`, `SAUCE_USERNAME` / `SAUCE_ACCESS_KEY`, `LT_USERNAME` / `LT_ACCESS_KEY`)
-- These suites run in CI under `qa/typescript/skills/ci-pipelines` — secrets injected via the runner's secret store / OIDC, sharding driven by the runner (see § Parallelism)
+- These suites run in CI under `qa/cicd/typescript/skills/ci-pipelines` — secrets injected via the runner's secret store / OIDC, sharding driven by the runner (see § Parallelism)
 
 ## When to use
 
@@ -31,7 +31,7 @@ Wires TypeScript tests to a **hosted device/browser grid** — BrowserStack, Sau
 
 - The .NET / Java grid stacks → `qa/{dotnet,java}/skills/cloud-grid-config`
 - Writing the page objects / specs → `qa/typescript/skills/ui-test-author/playwright`, `qa/typescript/skills/ui-test-author/appium`
-- CI shard/worker mechanics (matrix, `--shard`, artifact upload) → `qa/typescript/skills/ci-pipelines/*` — this skill maps the cap *onto* those, it doesn't re-derive them
+- CI shard/worker mechanics (matrix, `--shard`, artifact upload) → `qa/cicd/typescript/skills/ci-pipelines/*` — this skill maps the cap *onto* those, it doesn't re-derive them
 - Deep AWS Device Farm device-pool / ARN orchestration → `qa/typescript/skills/mobile-device-farm`; this node covers the wiring, that one the farm specifics
 
 ## Pick a vendor — quick orientation
@@ -76,7 +76,7 @@ These sections live in `references/details.md` — **read it when the task touch
 
 ### Parallelism
 - Read the concurrent-session cap from **one env var** (`GRID_CONCURRENCY`) and map it onto `workers` / `maxInstances`. Never hard-code.
-- `total CI shards × workers-per-shard ≤ plan session cap`. Sharding mechanics live in `qa/typescript/skills/ci-pipelines/*` — cross-link, don't duplicate.
+- `total CI shards × workers-per-shard ≤ plan session cap`. Sharding mechanics live in `qa/cicd/typescript/skills/ci-pipelines/*` — cross-link, don't duplicate.
 
 ### Secrets
 - Username + access key via **env vars only** (`required(...)` helper). Never a literal, never in `wdio.conf.ts`/`browserstack.yml`/`.sauce/config.yml` committed to the repo.
@@ -108,7 +108,7 @@ These sections live in `references/details.md` — **read it when the task touch
 1. Confirm **web vs mobile**, **vendor** (+ region for Sauce/Device Farm), **private target?** (tunnel), and the **session cap**.
 2. Add `tests/support/grid/credentials.ts` with the `required(...)` env reads — no literals.
 3. **Web**: add `playwrightConnect.ts` (BrowserStack flat-cap `connect`) + a `gridFixture` that yields a `page` and marks status in teardown; or scaffold `.sauce/config.yml` (Sauce) / the LambdaTest connect. **Mobile**: edit `wdio.conf.ts` — `user`/`key`/`hostname` + vendor service + `bstack:options`/`sauce:options`/`LT:Options` caps.
-4. Map the session cap onto `workers` / `maxInstances` from `GRID_CONCURRENCY`; note the `shards × workers ≤ cap` rule and cross-link `qa/typescript/skills/ci-pipelines/*`.
+4. Map the session cap onto `workers` / `maxInstances` from `GRID_CONCURRENCY`; note the `shards × workers ≤ cap` rule and cross-link `qa/cicd/typescript/skills/ci-pipelines/*`.
 5. Wire artifacts (`attachSessionUrl`) + session status (`markSessionStatus`) into the fixture teardown.
 6. If the target is private, add the tunnel lifecycle (`GridTunnel` start/stop in global setup/teardown) and tie sessions via the cap.
 7. Run a single spec against the grid first (one worker) to confirm the connection + caps before fanning out. Confirm the session appears on the dashboard with the right build/project tags.
@@ -118,6 +118,6 @@ These sections live in `references/details.md` — **read it when the task touch
 - **`qa/dotnet/skills/cloud-grid-config`** + **`qa/java/skills/cloud-grid-config`** — sibling grid stacks. Same five moves (connect → caps → parallelism → artifacts/status → tunnel), different SDKs (`BrowserType.ConnectAsync`/`AppiumOptions`; Playwright Java `connect`/`UiAutomator2Options`). Structure ported, not code.
 - **`qa/typescript/skills/ui-test-author/playwright`** — writes the web specs/page objects this skill runs on a grid (connection patterns to extend).
 - **`qa/typescript/skills/ui-test-author/appium`** — writes the mobile specs/page objects; this skill swaps the local Appium session for a grid one.
-- **`qa/typescript/skills/ci-pipelines`** — sharding/`--shard`/blob-merge + OIDC secret injection; this skill maps the plan cap onto those shards (don't duplicate the mechanics).
+- **`qa/cicd/typescript/skills/ci-pipelines`** — sharding/`--shard`/blob-merge + OIDC secret injection; this skill maps the plan cap onto those shards (don't duplicate the mechanics).
 - **`qa/typescript/skills/mobile-device-farm`** — deeper cloud-Appium / device-pool specifics; this node is config/wiring, that one is the farm.
 - **`qa/typescript/skills/network-monitoring`** — when a grid run also needs out-of-browser traffic capture (the proxy + tunnel combine).

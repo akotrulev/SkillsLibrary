@@ -51,7 +51,6 @@ synchronous return you can assert on the next line:
 | The UI opens a WS and you want **deterministic** frames (no real server) | WebSocket | **browser** — Playwright `routeWebSocket` (MOCK) |
 | The UI consumes an SSE feed and you want it deterministic | SSE | **browser** — `page.route` returning a chunked `text/event-stream` body |
 | Async **queue/topic** (OrderPlaced lands on a queue, a consumer reacts) | — | **not this skill** → `qa-messaging-testing-java` etc. |
-| A plain request/response **HTTP** dependency to fake | — | **not this skill** → `qa-api-mocking-java` / `qa-network-monitoring-java` |
 
 **Rule of thumb:** *bidirectional, interactive?* → WebSocket. *Server-push-only feed?* → SSE. *Testing the
 protocol contract?* → protocol-client. *Testing the UI's use of the stream?* → browser (observe if the real
@@ -332,10 +331,6 @@ probe.send(new ObjectMapper().writeValueAsString(payload));
   this skill = an open WS/SSE stream. (Plus `-sqs` `sqs` / `-kafka` `kafka` / `-rabbitmq` `rabbitmq`.)
 - `qa-network-monitoring-java` — the **HTTP** mock counterpart and the "register before
   the action" ordering rule; SSE-in-the-browser mocking reuses its `page.route`.
-- `qa-api-mocking-java` — fake a *synchronous* HTTP dependency; not a stream.
 - `qa-ui-test-author-playwright-java` — the `BasePage`/`BaseTest` model the **browser-surface** tests layer on;
   the no-`waitForTimeout` discipline originates there.
 - `qa-auth0-test-tokens-java` — tokens for an authenticated socket, read from env, never logged.
-- `qa-test-environments-java` — booting the SUT on a real port with the readiness-wait discipline.
-  `qa-allure-reporting-java` — attach captured frames / the event sequence. `qa-test-data-builder-java` —
-  frame payloads with 4+ fields.

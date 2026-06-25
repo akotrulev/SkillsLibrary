@@ -99,7 +99,7 @@ These sections live in `references/details.md` — **read it when the task touch
 - Async all the way: `await GetTokenAsync(...)`. **Never** `.Result` / `.Wait()` / `.GetAwaiter().GetResult()` on a token call.
 
 ### Secrets
-- `ClientSecret`, test-user passwords, `AUTH0_DOMAIN`, `AUTH0_AUDIENCE`, `Realm` via **env vars only**, read **lazily** (methods, not static field initializers). Never logged, never committed. In CI, source them per `qa/dotnet/skills/ci-pipelines`.
+- `ClientSecret`, test-user passwords, `AUTH0_DOMAIN`, `AUTH0_AUDIENCE`, `Realm` via **env vars only**, read **lazily** (methods, not static field initializers). Never logged, never committed. In CI, source them per `qa/cicd/dotnet/skills/ci-pipelines`.
 - Never log a token. Treat the `AccessToken` as a secret in flight.
 
 ### Stashing
@@ -130,4 +130,4 @@ These sections live in `references/details.md` — **read it when the task touch
 - **`qa/dotnet/skills/api-test-author/generator`** — the M2M consumer: where the `Bearer` header lands on the API client.
 - **`qa/dotnet/skills/ui-test-author/playwright`** — the ROPG consumer: `StorageState` / fixture patterns for seeding auth without the login UI.
 - **`qa/dotnet/skills/test-data-builder`** — provisioning/seeding the test users that ROPG authenticates as.
-- **`qa/dotnet/skills/ci-pipelines`** — where the Auth0 secrets are sourced in CI (OIDC / encrypted secrets), never hardcoded.
+- **`qa/cicd/dotnet/skills/ci-pipelines`** — where the Auth0 secrets are sourced in CI (OIDC / encrypted secrets), never hardcoded.

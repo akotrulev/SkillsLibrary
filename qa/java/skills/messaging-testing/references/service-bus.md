@@ -17,8 +17,7 @@ Messaging tests assert one of two things about an **async** flow:
 > no synchronous return you can assert on the next line. The message is in flight; the consumer runs on its
 > own schedule; the side-effect lands "soon". So the core discipline is: **wait on a condition** for the
 > message (or its effect) to appear, with a bounded timeout — **never `Thread.sleep`**. This is the exact
-> lineage of `qa-db-testing-client-java`'s Awaitility usage and `qa-api-mocking-java`'s Scenario +
-> Awaitility condition-wait. Service Bus gives you a *better* primitive than polling for the receive side:
+> lineage of `qa-db-testing-client-java`'s Awaitility usage. Service Bus gives you a *better* primitive than polling for the receive side:
 > `receiveMessages(maxMessages, maxWaitTime)` **long-polls** — it blocks up to a bounded window for messages,
 > then returns what arrived (possibly empty). That bounded wait *is* the condition-wait; a fixed sleep is not.
 
@@ -30,8 +29,7 @@ Messaging tests assert one of two things about an **async** flow:
 - `com.azure:azure-messaging-servicebus` administration client (`ServiceBusAdministrationClient`) only when a
   test must **create/clear entities** the emulator config didn't pre-declare (most tests don't)
 - `org.testcontainers:azure` (`ServiceBusEmulatorContainer`) — boots the **Azure Service Bus emulator** wired
-  to its required **MS SQL** sidecar and surfaces a ready connection string (cross-link
-  `qa-test-environments-java`)
+  to its required **MS SQL** sidecar and surfaces a ready connection string
 - The SUT's typed publisher/consumer is **constructor-injected** with the connection string (or an injected
   client) — never a static connection string read inside an `@Test`
 
@@ -71,7 +69,7 @@ queues/topics**). The connection string carries `UseDevelopmentEmulator=true`.
 
 The cleanest path in Java is Testcontainers' **`ServiceBusEmulatorContainer`** — it wires the emulator to a
 linked SQL container, waits for readiness, and hands you a connection string. Reuse the fixture-base
-discipline from `qa-test-environments-java` (boot once per class; **never `Thread.sleep` for readiness** —
+discipline (boot once per class; **never `Thread.sleep` for readiness** —
 the container owns the wait strategy).
 
 ```java
@@ -371,8 +369,6 @@ try (ServiceBusReceiverClient receiver = builder.receiver()
   a pass. *Fix:* `assertThat(message).isNotNull()` first.
 - **Using `RECEIVE_AND_DELETE` to test the consumer's settlement logic.** You can't assert complete vs abandon
   vs deadLetter if the broker already deleted it. *Fix:* peek-lock when settlement is under test.
-- **Reaching for Service Bus when the dependency is an HTTP call.** *Fix:* `qa-api-mocking-java` —
-  messaging is for async queues/topics, not request/response fakes.
 
 ## Examples
 
@@ -469,11 +465,7 @@ public final class Orders {
   RabbitMQ (`rabbitmq`, AMQP exchanges) close the family.
 - `qa-db-testing-client-java` — the Awaitility poll and seeder/probe split reused for the consumer
   side-effect assertions; the **eventual-consistency lineage** this skill leans on hardest.
-- `qa-test-environments-java` — booting the emulator + MS SQL sidecar; the per-class lifecycle and
-  readiness-wait discipline (never `Thread.sleep`) mirrored here.
 - `qa-auth0-test-tokens-java` — when authing to a cloud test namespace with an Azure AD token
   (`DefaultAzureCredential`) instead of the emulator connection string; secrets-from-env discipline.
-- `qa-api-mocking-java` — the *synchronous* counterpart: fake an HTTP dependency the SUT calls.
-  The boundary: WireMock = request/response fake; Service Bus = async queue/topic assertions.
 - `qa-allure-reporting-java` — attach the received message body / DLQ reason to the Allure result.
 - `qa-test-data-builder-java` — builders/ObjectMother for message payloads with 4+ fields.

@@ -314,7 +314,7 @@ public void should_attach_pdf_invoice_when_invoice_emailed() throws Exception {
 - Validate content type **and** magic bytes for binaries. Check `length()` before downloading large files.
 
 ### Secrets
-- `MAILOSAUR_API_KEY` + `MAILOSAUR_SERVER_ID` are secrets. Read from env / secret store; never in code or committed `application-test.yml`. In CI pull them per `qa/java/skills/ci-pipelines` (OIDC / encrypted secrets).
+- `MAILOSAUR_API_KEY` + `MAILOSAUR_SERVER_ID` are secrets. Read from env / secret store; never in code or committed `application-test.yml`. In CI pull them per `qa/cicd/java/skills/ci-pipelines` (OIDC / encrypted secrets).
 
 ### What NOT to do
 - No hardcoded API key or server ID.
@@ -339,6 +339,6 @@ public void should_attach_pdf_invoice_when_invoice_emailed() throws Exception {
 
 - **`qa/java/skills/email-testing`** — the self-hosted SMTP-sink sibling. Pick Mailpit for offline CI and zero external deps; pick Mailosaur (here) for real-delivery and SMS. See the comparison table above.
 - **`qa/typescript/skills/email-testing`** (canonical), **`qa/dotnet/skills/email-testing`** — sibling stacks; same wrapper shape, same `messages().get` wait.
-- **`qa/java/skills/ci-pipelines`** — where these tests run in CI and where the `MAILOSAUR_API_KEY` / `MAILOSAUR_SERVER_ID` secrets are sourced (OIDC / encrypted secrets), never hardcoded.
+- **`qa/cicd/java/skills/ci-pipelines`** — where these tests run in CI and where the `MAILOSAUR_API_KEY` / `MAILOSAUR_SERVER_ID` secrets are sourced (OIDC / encrypted secrets), never hardcoded.
 - **`qa/java/skills/test-data-builder`** — generate unique per-test recipients through a builder.
 - **`qa/java/skills/db-testing/testcontainers`** — signup creates a DB row *and* sends an email; assert both.

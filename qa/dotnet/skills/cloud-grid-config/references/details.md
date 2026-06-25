@@ -32,7 +32,7 @@ public static class GridCredentials
 }
 ```
 
-In CI these env vars come from the runner's secret store; for cloud auth (e.g. an OIDC-minted token used to reach AWS Device Farm) prefer OIDC over a long-lived PAT — see `qa/dotnet/skills/ci-pipelines`.
+In CI these env vars come from the runner's secret store; for cloud auth (e.g. an OIDC-minted token used to reach AWS Device Farm) prefer OIDC over a long-lived PAT — see `qa/cicd/dotnet/skills/ci-pipelines`.
 
 ### Web — Playwright .NET on BrowserStack via `ConnectAsync`
 
@@ -259,7 +259,7 @@ public sealed class GridParallelismGuard
 }
 ```
 
-The **sharding mechanics** (matrix fan-out, `--where` modulo shard predicate, merging results) belong to `qa/dotnet/skills/ci-pipelines` — cross-link it; don't re-derive it here. The rule: `total runner shards × LevelOfParallelism ≤ plan session cap`.
+The **sharding mechanics** (matrix fan-out, `--where` modulo shard predicate, merging results) belong to `qa/cicd/dotnet/skills/ci-pipelines` — cross-link it; don't re-derive it here. The rule: `total runner shards × LevelOfParallelism ≤ plan session cap`.
 
 ### Artifacts — surface the session URL on failure
 

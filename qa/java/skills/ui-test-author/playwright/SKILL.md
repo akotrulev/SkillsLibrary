@@ -30,7 +30,6 @@ Scaffolds Playwright tests and page objects in **Java 21 + Gradle + TestNG** usi
 - Playwright .NET → `qa/dotnet/skills/ui-test-author/playwright`
 - Mobile / Appium → `qa/java/skills/ui-test-author/appium`
 - Java Selenium → `qa/java/skills/ui-test-author/selenium`
-- Accelerator-owned tests → `qa/manual/accelerator-conventions`
 - Reviewing existing Playwright code → `qa/java/skills/ui-test-author/reviewer`
 - Designing the overall page-object hierarchy → `qa/java/skills/page-object-architect`
 
@@ -334,4 +333,4 @@ public void seedOrder() {
 - Designing the page-object hierarchy → `qa/java/skills/page-object-architect`
 - Reviewing existing Playwright tests → `qa/java/skills/ui-test-author/reviewer`
 - Test data builders → `qa/java/skills/test-data-builder`
-- Allure reporter setup → `qa/java/skills/allure-reporting`
+- Allure reporter setup → `qa/reporting/java/skills/allure-reporting`

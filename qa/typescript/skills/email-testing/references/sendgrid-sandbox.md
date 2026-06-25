@@ -287,7 +287,7 @@ describe('SendGrid sandbox validation', () => {
 - Don't assert on rendered HTML or links — nothing rendered. That's an inbox-sibling concern.
 
 ### Secrets
-- `SENDGRID_API_KEY` is the **only** secret and is needed **only** for the live sandbox round-trip. Read it lazily (`sendgridApiKey()`), never at module top-level, so the payload check stays key-free. Never commit it; in CI pull it per `qa/typescript/skills/ci-pipelines`.
+- `SENDGRID_API_KEY` is the **only** secret and is needed **only** for the live sandbox round-trip. Read it lazily (`sendgridApiKey()`), never at module top-level, so the payload check stays key-free. Never commit it; in CI pull it per `qa/cicd/typescript/skills/ci-pipelines`.
 
 ### What NOT to do
 - No hardcoded API key.
@@ -312,5 +312,5 @@ describe('SendGrid sandbox validation', () => {
 
 - **`qa/typescript/skills/email-testing`**, **`qa/typescript/skills/email-testing`**, **`qa/typescript/skills/email-testing`** — the three inbox siblings. See the four-way pick table: this skill validates the **send request** and delivers nothing; those three assert on a **received** message (real provider / hosted SaaS / self-hosted sink).
 - **`qa/dotnet/skills/email-testing`** (`SendGrid` NuGet), **`qa/java/skills/email-testing`** (`com.sendgrid:sendgrid-java`) — the sibling stacks; same builder + `Notifier` shape, same `200`-under-sandbox assertion.
-- **`qa/typescript/skills/ci-pipelines`** — where these tests run in CI and where the `SENDGRID_API_KEY` secret is sourced (OIDC / encrypted secrets), never hardcoded.
+- **`qa/cicd/typescript/skills/ci-pipelines`** — where these tests run in CI and where the `SENDGRID_API_KEY` secret is sourced (OIDC / encrypted secrets), never hardcoded.
 - **`qa/typescript/skills/test-data-builder`** — build the `dynamicTemplateData` objects through a builder when they grow past 4 fields.

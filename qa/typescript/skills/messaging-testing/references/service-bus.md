@@ -17,8 +17,7 @@ Messaging tests assert one of two things about an **async** flow:
 > no synchronous return you can assert on the next line. The message is in flight; the consumer runs on its
 > own schedule; the side-effect lands "soon". So the core discipline is: **wait on a condition** for the
 > message (or its effect) to appear, with a bounded timeout — **never `setTimeout` / `page.waitForTimeout`**.
-> This is the exact lineage of `qa-db-testing-client-typescript`'s `expect.poll` usage and
-> `qa-api-mocking-typescript`'s condition-wait. Service Bus gives you a *better* primitive than
+> This is the exact lineage of `qa-db-testing-client-typescript`'s `expect.poll` usage. Service Bus gives you a *better* primitive than
 > polling for the receive side: `receiveMessages(maxCount, { maxWaitTimeInMs })` **long-polls** — it waits up
 > to a bounded window for messages, then returns what arrived (possibly an empty array). That bounded wait
 > *is* the condition-wait; a fixed sleep is not.
@@ -30,9 +29,8 @@ Messaging tests assert one of two things about an **async** flow:
 - `@azure/service-bus` `ServiceBusAdministrationClient` only when a test must **create/clear entities** the
   emulator config didn't pre-declare (most tests don't)
 - `testcontainers` (`GenericContainer`, `Network`, `Wait`) — boots the **Azure Service Bus emulator** plus
-  its required **MS SQL** sidecar on a shared network and surfaces the connection string (cross-link
-  `qa-test-environments-typescript`). The Node Testcontainers binding has **no dedicated Service Bus module**,
-  so wire the two `GenericContainer`s by hand (the same pattern `qa-test-environments-typescript` uses)
+  its required **MS SQL** sidecar on a shared network and surfaces the connection string. The Node Testcontainers binding has **no dedicated Service Bus module**,
+  so wire the two `GenericContainer`s by hand
 - The SUT's typed publisher/consumer is **constructor-injected** with the connection string (or an injected
   `ServiceBusClient`) — never a static connection string read inside a test
 
@@ -70,7 +68,7 @@ that declares the namespace, queues, topics and subscriptions up front (limits: 
 queues/topics**). The connection string carries `UseDevelopmentEmulator=true`.
 
 There's no Node Service Bus Testcontainers module, so wire the emulator + SQL sidecar by hand on a shared
-network (the pattern from `qa-test-environments-typescript`). **Never `setTimeout` for readiness** — use a
+network. **Never `setTimeout` for readiness** — use a
 `Wait` strategy.
 
 ```typescript
@@ -370,8 +368,6 @@ expect(batch).toHaveLength(3); // SUT produced exactly 3
   pass. *Fix:* `expect(message).toBeDefined()` first.
 - **Using `receiveAndDelete` to test the consumer's settlement logic.** You can't assert complete vs abandon
   vs deadLetter if the broker already deleted it. *Fix:* peek-lock when settlement is under test.
-- **Reaching for Service Bus when the dependency is an HTTP call.** *Fix:* `qa-api-mocking-typescript` —
-  messaging is for async queues/topics, not request/response fakes.
 
 ## Examples
 
@@ -467,11 +463,7 @@ export const anOrder = () => new OrderBuilder().status("Pending");
   RabbitMQ (`rabbitmq`, AMQP exchanges) close the family.
 - `qa-db-testing-client-typescript` — the `expect.poll` and seeder/probe split reused for the consumer
   side-effect assertions; the **eventual-consistency lineage** this skill leans on hardest.
-- `qa-test-environments-typescript` — wiring the emulator + MS SQL sidecar on a shared `Network` with
-  `Wait` strategies (never `setTimeout`); the hand-built-topology pattern reused here.
 - `qa-auth0-test-tokens-typescript` — when authing to a cloud test namespace with an Azure AD token
   (`@azure/identity` `DefaultAzureCredential`) instead of the emulator connection string; secrets-from-env.
-- `qa-api-mocking-typescript` — the *synchronous* counterpart: fake the app's outbound HTTP
-  in-runtime. The boundary: MSW = request/response fake; Service Bus = async queue/topic assertions.
 - `qa-allure-reporting-typescript` — attach the received message body / DLQ reason to the Allure result.
 - `qa-test-data-builder-typescript` — builders for message payloads with 4+ fields.

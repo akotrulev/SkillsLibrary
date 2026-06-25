@@ -71,6 +71,24 @@ SSRF — note the edition explicitly.)
 > (core devs joined Checkmarx, Sept 2024). It remains free/open-source (Apache 2.0). Refer to it as
 > **"ZAP by Checkmarx (formerly OWASP ZAP)"** — it is no longer an OWASP project.
 
+### OWASP Top 10 for LLM Applications:2025 — *if and only if the app has an LLM feature*
+
+A chatbot / RAG answer / summarizer / tool-using agent has an attack surface the web/API Top 10 above does **not**
+describe: prompt injection, system-prompt leakage, excessive agency, PII disclosure under attack. That surface is
+the **OWASP Top 10 for LLM Applications:2025** (genai.owasp.org): LLM01 Prompt Injection · LLM02 Sensitive
+Information Disclosure · LLM03 Supply Chain · LLM04 Data & Model Poisoning · LLM05 Improper Output Handling ·
+LLM06 Excessive Agency · LLM07 System Prompt Leakage · LLM08 Vector & Embedding Weaknesses · LLM09 Misinformation
+· LLM10 Unbounded Consumption.
+
+> **This agent does not own model-behavior red-teaming — the `qa-llm-{stack}` agents do.** The scanner gates here
+> are blind to model behavior exactly as they are blind to BOLA: a jailbreak is well-formed HTTP. **LLM red-
+> teaming lives in `qa/<stack>/skills/llm-app-testing/references/red-teaming.md`** (promptfoo `redteam` with the
+> `owasp:llm` preset, or DeepTeam), owned by the `qa-llm-{stack}` agents — generate adversarial variants and
+> assert an attack-success **rate** per LLM-Top-10 item. The seam is two-way: a few LLM items still route back
+> *here* — **LLM03** supply chain → this agent's `dependency-scanning` (SCA); **LLM05** improper output handling →
+> SAST/DAST on the downstream sink; **LLM10** resource consumption → rate-limit tests. Run an LLM app's security
+> as **both** agents in parallel; map each finding to its own framework (web/API Top 10 *and* LLM Top 10).
+
 ## What is automatable in CI vs what needs a human
 
 This is the single most important judgement in security testing. **Scanners find syntax flaws; they are
@@ -87,6 +105,7 @@ blind to logic flaws.**
 | TLS/crypto configuration | A04 | TLS scanning | ✅ scheduled / pre-release |
 | **Broken access control: BOLA / IDOR / BFLA** | **A01 / API1 / API3 / API5** | **functional authz-matrix tests** | ✅ **but in your test suite, not a scanner** |
 | Business-logic abuse, chained-authz, sensitive-flow abuse | A01 / API6 | **manual penetration testing** | ❌ human |
+| **Model-behavior attacks: jailbreak, prompt injection, system-prompt/PII leakage, excessive agency** | **LLM01/02/06/07** | **LLM red-teaming** — `llm-app-testing` `red-teaming.md`, owned by `qa-llm-{stack}` | ✅ **but in the LLM eval suite (nightly), not this agent's scanners** |
 
 > **⚠️ The scanner blind spot — own access control as a functional test.** A scanner authenticated as User A
 > has no way to know that invoice `42` belongs to User B; the malicious request is *perfectly well-formed
@@ -155,7 +174,7 @@ Most modern tools emit **SARIF** (Static Analysis Results Interchange Format). S
   security reports) so findings show **inline on the PR diff**, de-duplicate run-over-run, and track
   fixed/new state automatically.
 - Attach the human report to **Allure** + as a CI artifact so a failing run names the findings without
-  re-scanning. Cross-link `qa/<stack>/skills/allure-reporting`.
+  re-scanning. Cross-link `qa/reporting/<stack>/skills/allure-reporting`.
 
 ## The phased model (what the `qa-security` agent runs)
 
@@ -199,8 +218,7 @@ abuse still needs a manual pentest. State that in every report.
   per-stack skills this family already shipped.
 - `qa/_shared/agents/qa-security.md` — the phased orchestrator that loads this reference + the tool skills.
 - `qa/<stack>/skills/auth0-test-tokens` — multi-user/role token acquisition the access-control matrix needs.
-- `qa/<stack>/skills/test-environments` — spin the throwaway env active scans target.
-- `qa/<stack>/skills/ci-pipelines/*` + `qa/_shared/ci-conventions` — wire the gates and SARIF upload.
-- `qa/<stack>/skills/allure-reporting` — attach the human reports.
+- `qa/cicd/<stack>/skills/ci-pipelines/*` + `qa/cicd/ci-conventions` — wire the gates and SARIF upload.
+- `qa/reporting/<stack>/skills/allure-reporting` — attach the human reports.
 - `qa/manual/{bug-report-writer,exploratory-charter-writer}` — write up a confirmed vuln / charter a manual
   security exploration for the layers CI can't reach.

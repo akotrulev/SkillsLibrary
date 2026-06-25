@@ -376,6 +376,6 @@ Grafana dashboards (`observability/grafana-dashboards`) then show client and ser
 - Gatling (Java) → `qa/java/skills/performance/gatling`
 - SLO targets the test validates → `qa/manual/quality-metrics`
 - Grafana dashboards for server-side correlation → `observability/grafana-dashboards`
-- Pipeline integration → `qa/dotnet/skills/ci-pipelines/{github-actions,azure-pipelines,gitlab-ci}` or `devops/<ci>`
-- Allure publishing for perf reports → `qa/dotnet/skills/allure-reporting`
+- Pipeline integration → `qa/cicd/dotnet/skills/ci-pipelines/{github-actions,azure-pipelines,gitlab-ci}` or `devops/<ci>`
+- Allure publishing for perf reports → `qa/reporting/dotnet/skills/allure-reporting`
 - Bug filings discovered during perf → `qa/manual/bug-report-writer`

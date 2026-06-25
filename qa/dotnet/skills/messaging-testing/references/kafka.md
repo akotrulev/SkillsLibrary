@@ -62,7 +62,7 @@ assumption SQS and Service Bus baked in:
   bounded by the `TimeSpan` you pass.
 - `Confluent.Kafka` (`ProducerBuilder` / `ConsumerBuilder` / `Message<,>` / `ConsumeResult<,>` / `AdminClient`)
 - `Testcontainers.Kafka` (`KafkaBuilder` → `KafkaContainer`) — boots a **local broker** and surfaces
-  `GetBootstrapAddress()` (cross-link `qa-test-environments-dotnet`). A Redpanda image (Kafka-API-compatible,
+  `GetBootstrapAddress()`. A Redpanda image (Kafka-API-compatible,
   ~2× faster start) is a drop-in alternative when you boot a fresh broker per suite.
 - The SUT's typed producer/consumer is **constructor-injected** with the bootstrap servers (or an injected
   `IProducer`/`IConsumer`) — never a static client or a bootstrap string read inside a `[Test]`
@@ -82,7 +82,7 @@ IntegrationTests/
 There is no in-memory Kafka. For deterministic local + CI tests, run a **real broker in a container** and point
 the clients at `GetBootstrapAddress()`. The cleanest path in .NET is the **`Testcontainers.Kafka`** module
 (`confluentinc/cp-kafka`); a Redpanda image is the lighter, faster-starting Kafka-API-compatible alternative.
-Reuse the fixture discipline from `qa-test-environments-dotnet` (boot once per fixture; **never `Task.Delay`
+Reuse the standard Testcontainers fixture discipline (boot once per fixture; **never `Task.Delay`
 for readiness** — the module owns the wait strategy). **Create topics up front** with a known partition count
 (via `AdminClient`) so partition assertions are deterministic.
 
@@ -426,8 +426,6 @@ Assert.That(drained, Has.Count.EqualTo(3));      // SUT produced exactly 3
   assert. *Fix:* `await ProduceAsync(...)` (or `producer.Flush(timeout)`) — a confirm, not a sleep.
 - **Hard-coding `BootstrapServers` / SASL creds in a `[Test]`.** *Fix:* surface bootstrap servers from the
   fixture (container) or env (shared cluster); never log secrets.
-- **Reaching for Kafka when the dependency is an HTTP call.** *Fix:* `qa-api-mocking-dotnet` —
-  messaging is for async topics, not request/response fakes.
 
 ## Examples
 
@@ -518,11 +516,7 @@ public static class Orders
   DLT. Same condition-wait discipline, different broker model.
 - `qa-db-testing-client-dotnet` — the `WaitFor.Async` poll helper and the seeder/probe split reused for
   the consumer side-effect assertions; the **eventual-consistency lineage** this skill leans on hardest.
-- `qa-test-environments-dotnet` — booting the Kafka container; the per-fixture lifecycle and
-  readiness-wait discipline (never `Task.Delay`) mirrored here.
 - `qa-auth0-test-tokens-dotnet` — when running against a shared cloud cluster with SASL/OAuth creds; the
   secrets-from-env discipline.
-- `qa-api-mocking-dotnet` — the *synchronous* counterpart: fake an HTTP dependency the SUT
-  calls. The boundary: WireMock = request/response fake; Kafka = async topic assertions.
 - `qa-allure-reporting-dotnet` — attach the consumed record value / DLT payload to the Allure result.
 - `qa-test-data-builder-dotnet` — builders/ObjectMother for record payloads with 4+ fields.

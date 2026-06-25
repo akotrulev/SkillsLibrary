@@ -1,6 +1,6 @@
 ---
 name: qa-llm-app-testing-typescript
-description: Use when testing LLM-generated output (chatbot, RAG answer, summarizer, extraction, tool-using agent) from a Node 20 / TypeScript suite — property, rubric (LLM-as-judge), and grounding assertions with promptfoo as the eval spine; never exact-string equality. Triggers: "test our chatbot/RAG feature", "eval prompt outputs", "assert the answer is grounded in the retrieved context".
+description: Use when testing LLM-generated output (chatbot, RAG answer, summarizer, extraction, tool-using agent) from a Node 20 / TypeScript suite — property, rubric (LLM-as-judge), and grounding assertions with promptfoo (default) or DeepEval (RAG/agent/red-team metrics) as the eval spine; never exact-string equality. Triggers: "test our chatbot/RAG feature", "eval prompt outputs", "assert the answer is grounded in the retrieved context", "deepeval / G-Eval / faithfulness metric".
 ---
 
 # LLM-App Testing (Node 20 / TypeScript — promptfoo + Anthropic SDK)
@@ -150,9 +150,23 @@ npx promptfoo@latest eval -c evals/promptfooconfig.yaml -o results.json
 > CLI-from-every-stack shape of `qa-security-testing-zap-baseline-typescript` and
 > `qa-accessibility-testing-typescript`. The SDK path below is the second half of the hybrid.
 
+## Choosing the spine — promptfoo (default) vs DeepEval
+
+**promptfoo is the default spine** (above): declarative YAML, deterministic-first, provider-matrixing,
+language-agnostic. Reach for **DeepEval** instead — the pytest-native, metric-rich spine — when the suite needs
+**research-backed RAG metrics** (faithfulness, contextual precision/recall/relevancy), **agent metrics**
+(tool-correctness, task-completion), **multi-turn conversational** metrics, **G-Eval** custom criteria, or
+**red-teaming** (DeepTeam). DeepEval is **Python** (no npm package) — driven as a subprocess (`execa` →
+`deepeval test run`, JSON parsed) exactly like promptfoo. The four ideas are identical; only the implementation of
+each is pre-built. **Pick one spine per eval suite** — don't double-run the same cases. Full guidance + code:
+`references/deepeval.md`.
+
 ## Deep-dive reference
 
-These sections live in `references/details.md` — **read it when the task touches them**: **The SDK path — Anthropic SDK in Vitest (the second half of the hybrid)**.
+These sections live in `references/` — **read the one the task touches**:
+- `references/details.md` — **The SDK path — Anthropic SDK in Vitest** (the in-code half of the hybrid).
+- `references/deepeval.md` — **DeepEval as the eval spine** (the metric-rich alternative to promptfoo: RAG/agent/conversational metrics, G-Eval; invoked as a subprocess).
+- `references/red-teaming.md` — **Adversarial safety, OWASP-LLM-mapped** (the adversarial half of this skill — promptfoo `redteam` with the `owasp:llm` preset, or DeepTeam; assert an attack-success RATE per OWASP LLM Top 10 item). Read it when the task is "red-team / jailbreak / prompt-injection / will it leak under attack", **not** "eval a benign output".
 
 ## Idea #1 — assert a property, not a string (the assertion ladder)
 

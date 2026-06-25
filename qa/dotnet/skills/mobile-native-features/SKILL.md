@@ -376,5 +376,5 @@ vs *where it runs*.
   (one independent named case per row); this skill supplies the rows, that one the data-driven discipline.
 - **`qa/dotnet/skills/cloud-grid-config`** — the grid/session wiring the device session connects through (under `mobile-device-farm`).
 - **`qa/dotnet/skills/auth0-test-tokens`** — token-based auth, the boundary vs biometric *unlock*.
-- **`qa/dotnet/skills/allure-reporting`** — attach a screenshot of the deep-linked / restored / unlocked screen per
+- **`qa/reporting/dotnet/skills/allure-reporting`** — attach a screenshot of the deep-linked / restored / unlocked screen per
   native-flow result.

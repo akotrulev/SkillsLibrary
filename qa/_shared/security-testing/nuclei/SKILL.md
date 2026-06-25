@@ -184,8 +184,8 @@ login* with default credentials, send payloads or mutate state. Those are **atta
 
 > **Defer to `qa-security-shared`'s authorization-to-scan rule:** intrusive templates (`-tags dast,fuzz`,
 > default-cred attempts, anything that sends payloads) **must never run against production or a shared
-> environment** — only against a throwaway env you own and are authorized to attack
-> (`qa/<stack>/skills/test-environments`). For a per-PR gate, prefer the **passive detection / CVE-match**
+> environment** — only against a throwaway env you own and are authorized to attack.
+> For a per-PR gate, prefer the **passive detection / CVE-match**
 > template set (e.g. `cves/`, `exposures/`, `misconfiguration/`, `technologies/`) and exclude intrusive tags
 > (`-etags dast,fuzz`). Get authorization in writing for any hosted target.
 
@@ -194,7 +194,7 @@ login* with default credentials, send payloads or mutate state. Those are **atta
 - **`-se report.sarif`** → upload to the platform's **code-scanning** surface
   (`github/codeql-action/upload-sarif`) so findings appear inline on the PR diff and de-duplicate
   run-over-run (see `qa-security-shared`'s SARIF consolidation).
-- **`-je results.json`** → attach to **Allure** (`qa/<stack>/skills/allure-reporting`) and upload as a CI
+- **`-je results.json`** → attach to **Allure** (`qa/reporting/<stack>/skills/allure-reporting`) and upload as a CI
   artifact so a failing run names the findings (template id, severity, matched-at) without re-scanning.
 
 ```yaml
@@ -305,9 +305,7 @@ covers the **known-signature** slice of A02/A03/A05 — never the access-control
   Nuclei's `misconfiguration/` exposure templates; different engine).
 - `qa/<stack>/skills/security-testing/dependency-scanning` — **SCA** (build-graph CVEs); Nuclei detects an
   *exposed/running* vulnerable component at the HTTP layer. Orthogonal — run both.
-- `qa/<stack>/skills/test-environments` — spin the throwaway env intrusive templates target (ready on a wait
-  strategy).
-- `qa/<stack>/skills/ci-pipelines/*` + `qa/_shared/ci-conventions` — wire the job, the jq gate, and the SARIF
+- `qa/cicd/<stack>/skills/ci-pipelines/*` + `qa/cicd/ci-conventions` — wire the job, the jq gate, and the SARIF
   upload.
-- `qa/<stack>/skills/allure-reporting` — attach the JSON report and a finding summary.
+- `qa/reporting/<stack>/skills/allure-reporting` — attach the JSON report and a finding summary.
 - `qa/manual/bug-report-writer` — write up a confirmed Nuclei finding for the dev team.

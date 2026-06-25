@@ -436,7 +436,7 @@ public void should_attach_pdf_invoice_when_invoice_emailed() throws Exception {
 - Validate content type **and** magic bytes for binaries. Read via `getInputStream()`.
 
 ### Secrets
-- `IMAP_USER` + `IMAP_PASSWORD` are secrets. The password is a Gmail **App Password** (2FA required; "less secure app access" is gone) — the pragmatic CI choice. **OAuth2 XOAUTH2** (via `mail.imaps.sasl.mechanisms=XOAUTH2`) is the more-secure option for long-lived setups. Read from env / secret store; never in code or committed `application-test.yml`. In CI pull them per `qa/java/skills/ci-pipelines`.
+- `IMAP_USER` + `IMAP_PASSWORD` are secrets. The password is a Gmail **App Password** (2FA required; "less secure app access" is gone) — the pragmatic CI choice. **OAuth2 XOAUTH2** (via `mail.imaps.sasl.mechanisms=XOAUTH2`) is the more-secure option for long-lived setups. Read from env / secret store; never in code or committed `application-test.yml`. In CI pull them per `qa/cicd/java/skills/ci-pipelines`.
 
 ### What NOT to do
 - No hardcoded mailbox address or App Password.
@@ -462,6 +462,6 @@ public void should_attach_pdf_invoice_when_invoice_emailed() throws Exception {
 
 - **`qa/java/skills/email-testing`**, **`qa/java/skills/email-testing`** — the other two email siblings. See the three-way pick table above: real provider (here) vs hosted SaaS vs self-hosted sink.
 - **`qa/typescript/skills/email-testing`** (canonical, `imapflow`), **`qa/dotnet/skills/email-testing`** (MailKit) — sibling stacks; same wrapper shape, same poll-with-deadline wait.
-- **`qa/java/skills/ci-pipelines`** — where these tests run in CI and where the `IMAP_PASSWORD` App Password secret is sourced (OIDC / encrypted secrets), never hardcoded.
+- **`qa/cicd/java/skills/ci-pipelines`** — where these tests run in CI and where the `IMAP_PASSWORD` App Password secret is sourced (OIDC / encrypted secrets), never hardcoded.
 - **`qa/java/skills/test-data-builder`** — generate per-test `+tag` aliases through a builder.
 - **`qa/java/skills/db-testing/testcontainers`** — signup creates a DB row *and* sends an email; assert both.

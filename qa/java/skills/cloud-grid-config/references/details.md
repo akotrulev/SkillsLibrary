@@ -42,7 +42,7 @@ public final class GridCredentials {
 }
 ```
 
-In CI these env vars come from the runner's secret store; for cloud auth (e.g. an OIDC-minted token used to reach AWS Device Farm) prefer OIDC over a long-lived PAT — see `qa/java/skills/ci-pipelines`.
+In CI these env vars come from the runner's secret store; for cloud auth (e.g. an OIDC-minted token used to reach AWS Device Farm) prefer OIDC over a long-lived PAT — see `qa/cicd/java/skills/ci-pipelines`.
 
 ### Web — Playwright Java on BrowserStack via `connect`
 
@@ -266,7 +266,7 @@ tasks.test {
 }
 ```
 
-The **sharding mechanics** (matrix fan-out, `-PshardIndex`/`-PshardTotal`, merging Allure results) belong to `qa/java/skills/ci-pipelines` — cross-link it; don't re-derive it here. The rule: `total runner shards × thread-count ≤ plan session cap`.
+The **sharding mechanics** (matrix fan-out, `-PshardIndex`/`-PshardTotal`, merging Allure results) belong to `qa/cicd/java/skills/ci-pipelines` — cross-link it; don't re-derive it here. The rule: `total runner shards × thread-count ≤ plan session cap`.
 
 ### Artifacts — surface the session URL on failure
 

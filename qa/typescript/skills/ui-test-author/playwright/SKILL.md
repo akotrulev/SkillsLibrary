@@ -27,7 +27,6 @@ Scaffolds Playwright `@playwright/test` specs and page objects in TypeScript. Us
 
 - Mobile / Appium → `qa/typescript/skills/ui-test-author/appium`
 - Java Selenium → `qa/java/skills/ui-test-author/selenium`
-- Accelerator-owned tests → `qa/manual/accelerator-conventions`
 - Reviewing existing Playwright code → `qa/typescript/skills/ui-test-author/reviewer`
 - Designing the overall page-object hierarchy → `qa/typescript/skills/page-object-architect`
 
@@ -264,4 +263,4 @@ export const test = base.extend<{ seededOrder: Order }>({
 - Designing the page-object hierarchy → `qa/typescript/skills/page-object-architect`
 - Reviewing existing Playwright tests → `qa/typescript/skills/ui-test-author/reviewer`
 - Test data builders → `qa/typescript/skills/test-data-builder`
-- Allure reporter setup → `qa/typescript/skills/allure-reporting`
+- Allure reporter setup → `qa/reporting/typescript/skills/allure-reporting`

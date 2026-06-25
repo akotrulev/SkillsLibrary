@@ -30,7 +30,6 @@ Scaffolds Playwright tests and page objects in **.NET 8 + NUnit** using `Microso
 - Mobile / Appium → `qa/dotnet/skills/ui-test-author/appium`
 - Selenium C# → `qa/dotnet/skills/ui-test-author/selenium`
 - Java Selenium → `qa/java/skills/ui-test-author/selenium`
-- Accelerator-owned tests → `qa/manual/accelerator-conventions`
 - Reviewing existing Playwright code → `qa/dotnet/skills/ui-test-author/reviewer`
 - Designing the overall page-object hierarchy → `qa/dotnet/skills/page-object-architect`
 
@@ -315,4 +314,4 @@ public async Task SeedOrder()
 - Designing the page-object hierarchy → `qa/dotnet/skills/page-object-architect`
 - Reviewing existing Playwright tests → `qa/dotnet/skills/ui-test-author/reviewer`
 - Test data builders → `qa/dotnet/skills/test-data-builder`
-- Allure reporter setup → `qa/dotnet/skills/allure-reporting`
+- Allure reporter setup → `qa/reporting/dotnet/skills/allure-reporting`

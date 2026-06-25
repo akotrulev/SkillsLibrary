@@ -29,7 +29,6 @@ Scaffolds Selenium 4 page objects and Mocha (or Vitest) UI tests in TypeScript s
 - Selenium .NET → `qa/dotnet/skills/ui-test-author/selenium`
 - Playwright TS → `qa/typescript/skills/ui-test-author/playwright`
 - Appium TS → `qa/typescript/skills/ui-test-author/appium`
-- Accelerator → `qa/manual/accelerator-conventions`
 - Reviewing → `qa/typescript/skills/ui-test-author/reviewer`
 - POM architecture → `qa/typescript/skills/page-object-architect`
 
@@ -233,4 +232,4 @@ describe("Authentication", () => {
 - POM architecture → `qa/typescript/skills/page-object-architect`
 - Test data builders → `qa/typescript/skills/test-data-builder`
 - Reviewing → `qa/typescript/skills/ui-test-author/reviewer`
-- Allure → `qa/typescript/skills/allure-reporting`
+- Allure → `qa/reporting/typescript/skills/allure-reporting`

@@ -31,8 +31,7 @@ Messaging tests assert one of two things about an **async** flow:
 - `software.amazon.awssdk:sqs` (`SqsClient` — send / receive / delete / queue attributes) and
   `software.amazon.awssdk:sns` (`SnsClient`) for SNS→SQS fan-out
 - `org.testcontainers:localstack` (`LocalStackContainer`) — boots **LocalStack** (the local AWS emulator) and
-  surfaces an endpoint URI / region / credentials the SDK clients point at (cross-link
-  `qa-test-environments-java`)
+  surfaces an endpoint URI / region / credentials the SDK clients point at
 - The SUT's typed publisher/consumer is **constructor-injected** with the `SqsClient` (or the resolved queue
   URL) — never a static client or an endpoint read inside an `@Test`
 
@@ -73,7 +72,7 @@ There is no in-memory SQS. For deterministic local + CI tests, run **LocalStack*
 which emulates SQS + SNS on a single endpoint. Point every SDK client at that endpoint via `endpointOverride`;
 the container surfaces the region and (placeholder) credentials, and the account id is `000000000000`. The
 cleanest path in Java is Testcontainers' **`LocalStackContainer`** — it boots the container, owns the
-readiness wait, and surfaces the endpoint. Reuse the fixture discipline from `qa-test-environments-java` (boot
+readiness wait, and surfaces the endpoint. Reuse the standard Testcontainers fixture discipline (boot
 once per class; **never `Thread.sleep` for readiness** — the container owns the wait strategy). **Create the
 queues in `@BeforeClass`** (there is no `Config.json` equivalent — you declare them through the SDK).
 
@@ -406,8 +405,6 @@ assertThat(drained).hasSize(3);                 // SUT produced exactly 3
 - **Hard-coding the endpoint / an AWS access key in an `@Test`.** *Fix:* surface the LocalStack endpoint from
   the base class; for a cloud test account use `DefaultCredentialsProvider` + region from env; never log
   secrets.
-- **Reaching for SQS when the dependency is an HTTP call.** *Fix:* `qa-api-mocking-java` — messaging
-  is for async queues, not request/response fakes.
 
 ## Examples
 
@@ -496,11 +493,7 @@ public final class Orders {
   Kafka (`kafka`, offset-based) and RabbitMQ (`rabbitmq`, AMQP exchanges) close the family.
 - `qa-db-testing-client-java` — the Awaitility poll and seeder/probe split reused for the consumer
   side-effect assertions; the **eventual-consistency lineage** this skill leans on hardest.
-- `qa-test-environments-java` — booting the LocalStack container; the per-class lifecycle and
-  readiness-wait discipline (never `Thread.sleep`) mirrored here.
 - `qa-auth0-test-tokens-java` — when running against a cloud test account; the
   default-credential-provider-chain + secrets-from-env discipline.
-- `qa-api-mocking-java` — the *synchronous* counterpart: fake an HTTP dependency the SUT calls.
-  The boundary: WireMock = request/response fake; SQS = async queue assertions.
 - `qa-allure-reporting-java` — attach the received message body / DLQ payload to the Allure result.
 - `qa-test-data-builder-java` — builders/ObjectMother for message payloads with 4+ fields.

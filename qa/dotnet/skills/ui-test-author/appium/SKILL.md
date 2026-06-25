@@ -29,7 +29,6 @@ Scaffolds Appium 2.x page objects and NUnit mobile UI tests in C#, mirroring the
 - Appium Java → `qa/java/skills/ui-test-author/appium`
 - Appium TypeScript / WebdriverIO → `qa/typescript/skills/ui-test-author/appium`
 - Selenium / web → `qa/dotnet/skills/ui-test-author/selenium` or `qa/dotnet/skills/ui-test-author/playwright`
-- Accelerator-owned tests → `qa/manual/accelerator-conventions`
 - Reviewing an existing page object → `qa/dotnet/skills/ui-test-author/reviewer`
 - Designing the whole POM architecture → `qa/dotnet/skills/page-object-architect`
 
@@ -382,7 +381,7 @@ public class AuthenticationTest : BaseMobileTest
 - Test data builders → `qa/dotnet/skills/test-data-builder`
 - Reviewing a page object → `qa/dotnet/skills/ui-test-author/reviewer`
 - Authoring the test that uses this page object → `qa/manual/test-case-writer`
-- Allure reporting → `qa/dotnet/skills/allure-reporting`
+- Allure reporting → `qa/reporting/dotnet/skills/allure-reporting`
 
 ## Cross-references
 

@@ -383,5 +383,5 @@ the typed message" vs Testcontainers' "stand the service up" — *what you asser
   (one independent named case per row); this skill supplies the rows, that one the data-driven discipline.
 - **`qa/java/skills/cloud-grid-config`** — the grid/session wiring the device session connects through (under `mobile-device-farm`).
 - **`qa/java/skills/auth0-test-tokens`** — token-based auth, the boundary vs biometric *unlock*.
-- **`qa/java/skills/allure-reporting`** — attach a screenshot of the deep-linked / restored / unlocked screen per
+- **`qa/reporting/java/skills/allure-reporting`** — attach a screenshot of the deep-linked / restored / unlocked screen per
   native-flow result so a failure is one click from the replay.

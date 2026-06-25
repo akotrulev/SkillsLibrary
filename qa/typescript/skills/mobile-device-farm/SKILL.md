@@ -18,7 +18,7 @@ Runs TypeScript + WebdriverIO Appium tests against a **managed real-device cloud
 - **Condition waits**: `browser.waitUntil(...)` for the app; a bounded `pollUntil` (deadline + check interval) for AWS — never `browser.pause` / `setTimeout` *as* a wait
 - Test runner: Vitest or WDIO's Mocha (`describe`/`it`); device matrix via `describe.each`
 - Farm support code under `test/support/farm/`; credentials via **env vars only** (`BROWSERSTACK_USERNAME` / `BROWSERSTACK_ACCESS_KEY`; AWS creds via the default credential provider chain / OIDC)
-- Runs in CI under `qa/typescript/skills/ci-pipelines`; the page objects come from `qa/typescript/skills/ui-test-author/appium` and run **unchanged** on the farm
+- Runs in CI under `qa/cicd/typescript/skills/ci-pipelines`; the page objects come from `qa/typescript/skills/ui-test-author/appium` and run **unchanged** on the farm
 
 ## When to use
 
@@ -33,7 +33,7 @@ Runs TypeScript + WebdriverIO Appium tests against a **managed real-device cloud
 - The connect / capability-block / parallelism / tunnel / session-status wiring → `qa/typescript/skills/cloud-grid-config` (this skill assumes it)
 - The Java / .NET device-farm stacks → `qa/{java,dotnet}/skills/mobile-device-farm`
 - Writing the mobile page objects / tests → `qa/typescript/skills/ui-test-author/appium`
-- CI shard/worker mechanics (matrix fan-out, sharding props, Allure merge) → `qa/typescript/skills/ci-pipelines/*` — cross-link, don't duplicate
+- CI shard/worker mechanics (matrix fan-out, sharding props, Allure merge) → `qa/cicd/typescript/skills/ci-pipelines/*` — cross-link, don't duplicate
 - Web (Playwright) cloud runs → `qa/typescript/skills/cloud-grid-config`; this node is mobile real-device only
 
 ## Pick a paradigm — the choice that shapes everything
@@ -280,7 +280,7 @@ async function pollUntil(timeoutMs: number, intervalMs: number, condition: () =>
 }
 ```
 
-> **Device Farm specifics:** the test package type matches your suite (`APPIUM_JAVA_TESTNG_TEST_PACKAGE` + an `APPIUM_JAVA_TESTNG_TEST_SPEC` YAML; Device Farm runs the *uploaded* package, the JS `DeviceFarmClient` only orchestrates); the app type is `ANDROID_APP` / `IOS_APP`. A **device pool** is created once (in the console or via `CreateDevicePoolCommand` with a device-selection rule) and referenced by ARN. AWS auth comes from the **default credential provider chain** — in CI prefer **OIDC role assumption** over a long-lived access key (see `qa/typescript/skills/ci-pipelines`). Artifacts (logs, video, screenshots) are fetched per-job via `ListArtifactsCommand(runArn)` after the run completes.
+> **Device Farm specifics:** the test package type matches your suite (`APPIUM_JAVA_TESTNG_TEST_PACKAGE` + an `APPIUM_JAVA_TESTNG_TEST_SPEC` YAML; Device Farm runs the *uploaded* package, the JS `DeviceFarmClient` only orchestrates); the app type is `ANDROID_APP` / `IOS_APP`. A **device pool** is created once (in the console or via `CreateDevicePoolCommand` with a device-selection rule) and referenced by ARN. AWS auth comes from the **default credential provider chain** — in CI prefer **OIDC role assumption** over a long-lived access key (see `qa/cicd/typescript/skills/ci-pipelines`). Artifacts (logs, video, screenshots) are fetched per-job via `ListArtifactsCommand(runArn)` after the run completes.
 
 ---
 
@@ -383,5 +383,5 @@ export function browserStackCreds(): BrowserStackCreds {
 - **`qa/java/skills/mobile-device-farm`** (canonical) + **`qa/dotnet/skills/mobile-device-farm`** — sibling device-farm stacks. Same four moves (app lifecycle → device selection → real-device features → remote-run), different SDKs. Structure ported, not code.
 - **`qa/typescript/skills/ui-test-author/appium`** — writes the mobile page objects / tests that run **unchanged** on the farm; this skill only swaps the local session for a farm one.
 - **`qa/typescript/skills/data-driven-testing`** — the `describe.each` device-matrix mechanics (one independent case per device); this skill supplies the device list, that one the data-driven discipline.
-- **`qa/typescript/skills/ci-pipelines`** — build-then-upload job, OIDC for AWS, sharding the matrix across runners (cross-link; don't duplicate).
-- **`qa/typescript/skills/allure-reporting`** — attach the session/run dashboard URL + device name to the report so a farm failure is one click from the replay.
+- **`qa/cicd/typescript/skills/ci-pipelines`** — build-then-upload job, OIDC for AWS, sharding the matrix across runners (cross-link; don't duplicate).
+- **`qa/reporting/typescript/skills/allure-reporting`** — attach the session/run dashboard URL + device name to the report so a farm failure is one click from the replay.

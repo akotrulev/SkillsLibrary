@@ -63,7 +63,6 @@ the gRPC `StatusCode`**, never an HTTP status code.
 - **`Grpc.Tools`** — `.csproj` `<Protobuf>` codegen of messages + client from `.proto`; **`Google.Protobuf`**
 - **`Grpc.StatusProto`** (+ `Google.Api.CommonProtos`) for `RpcException.GetRpcStatus()` rich-error details
 - **NUnit** (`NUnit` + `NUnit3TestAdapter` + `Microsoft.NET.Test.Sdk`); **Allure.NUnit** for reporting
-- **Testcontainers** to stand the service under test up (`qa-test-environments-dotnet`); target via env, never hardcoded
 - Layout: `Protos/` (the `.proto`), `Actions/` (client wrappers), `Tests/`
 
 ```xml
@@ -233,7 +232,7 @@ public Task<GrpcCallResult<User>> GetUserWithDeadlineAsync(string id, int millis
 
 ## Standing the service up — Testcontainers + the channel lifecycle
 
-The channel points at the service under test, stood up via `qa-test-environments-dotnet`. The `BaseGrpcTest`
+The channel points at the service under test, stood up via Testcontainers. The `BaseGrpcTest`
 opens one `GrpcChannel` for the fixture and disposes it after — no per-test channel churn.
 
 ```csharp
@@ -319,7 +318,7 @@ differ.
   `Task.Delay`/`Thread.Sleep`, async all the way (no `.Result`).** Deep stream-lifecycle assertions →
   `qa-websocket-sse-testing-dotnet`.
 - **One `GrpcChannel` per fixture** (`[OneTimeSetUp]` open, `[OneTimeTearDown]` shutdown + dispose); service stood
-  up via `qa-test-environments-dotnet`. **Target + token via env**, lazy, never logged. NUnit + Grpc.Net.Client.
+  up via Testcontainers. **Target + token via env**, lazy, never logged. NUnit + Grpc.Net.Client.
 
 ## Cross-references
 
@@ -338,5 +337,4 @@ differ.
 - `qa-contract-testing-pact-dotnet` — the **Protobuf contract** boundary vs the functional test this skill writes.
   `qa-performance-nbomber-dotnet` — gRPC **load**.
 - `qa-auth0-test-tokens-dotnet` — obtain the per-call **bearer** carried in leading metadata.
-- `qa-test-environments-dotnet` — stand the gRPC service up via Testcontainers and feed the channel target.
 - `qa-allure-reporting-dotnet` — each RPC renders as a named result.

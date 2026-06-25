@@ -35,7 +35,7 @@ The skills library lives at the repo's `qa/` folder when working inside the Skil
   `dependency-scanning`, `zap-baseline`) where `<stack>` ∈ {`typescript`, `dotnet`, `java`}. **Determine the
   project's stack first** (the test project's language / build file) and load the matching siblings; if the
   project is multi-stack or unclear, ask one question. The stack also picks `auth0-test-tokens`,
-  `test-environments`, `ci-pipelines/*`, and `allure-reporting`.
+  `ci-pipelines/*`, and `allure-reporting`.
 
 1. Before starting a phase, `Read` every `SKILL.md` listed for that phase below.
 2. Follow the skill's procedure, decision matrix, rules, and anti-patterns **exactly**. The skill wins over
@@ -81,9 +81,9 @@ The skills library lives at the repo's `qa/` folder when working inside the Skil
 | 1 | **Threat model & OWASP scope** | Decide what's in scope and what's safe to run | `qa/_shared/security/SKILL.md`, `qa/manual/test-strategy/SKILL.md` *(scope/risk)*, `qa/manual/exploratory-charter-writer/SKILL.md` *(charter the manual-only items)* | Written scope: the Top-10/API-10 items + ASVS level targeted, the layer set chosen, **the target environment + written authorization for any active scan**, and the explicit manual-pentest carve-out |
 | 2 | **Static gates** *(fast, safe, every PR)* | Catch source/dep/secret flaws before anything runs | `qa/_shared/security-testing/sast/SKILL.md`, `qa/_shared/security-testing/secrets-scanning/SKILL.md`, `qa/<stack>/skills/security-testing/dependency-scanning/SKILL.md` | SAST + secrets + SCA run; each gates NEW findings via a ticketed baseline; SARIF uploaded; existing noise triaged with tickets |
 | 3 | **Functional access control** *(the scanner blind spot)* | Prove BOLA/IDOR/BFLA + tenant isolation | `qa/<stack>/skills/security-testing/access-control-testing/SKILL.md`, `qa/<stack>/skills/auth0-test-tokens/SKILL.md` *(multi-user/role tokens)*, the project's `api-client-writer`/`api-dto-writer` *(reuse clients/DTOs)* | An authz matrix (≥2 peers + 1 elevated role) covering API1/API3/API5 across verbs, with positive controls, asserting the project's 403/404 leak policy + no body leak; green |
-| 4 | **Dynamic gates** *(passive every PR; active only on an authorized safe env)* | Probe the running app | `qa/<stack>/skills/security-testing/zap-baseline/SKILL.md` *(passive, every PR)*, then **on a confirmed safe env:** `qa/_shared/security-testing/zap-automation-framework/SKILL.md` *(active/AF + API scan)*, `qa/_shared/security-testing/api-fuzzing/SKILL.md` *(Schemathesis)*, `qa/_shared/security-testing/nuclei/SKILL.md`, `qa/_shared/security-testing/tls-scanning/SKILL.md`; `qa/<stack>/skills/test-environments/SKILL.md` *(spin the throwaway target, ready on a wait strategy)* | Passive baseline gates new alerts; active scan + fuzzing + nuclei run **only against the authorized env**; TLS meets the pinned Mozilla profile; reports attached |
+| 4 | **Dynamic gates** *(passive every PR; active only on an authorized safe env)* | Probe the running app | `qa/<stack>/skills/security-testing/zap-baseline/SKILL.md` *(passive, every PR)*, then **on a confirmed safe env:** `qa/_shared/security-testing/zap-automation-framework/SKILL.md` *(active/AF + API scan)*, `qa/_shared/security-testing/api-fuzzing/SKILL.md` *(Schemathesis)*, `qa/_shared/security-testing/nuclei/SKILL.md`, `qa/_shared/security-testing/tls-scanning/SKILL.md` | Passive baseline gates new alerts; active scan + fuzzing + nuclei run **only against the authorized env**; TLS meets the pinned Mozilla profile; reports attached |
 | 5 | **Build-artifact gates** *(per build / pre-release)* | The container & infra layer | `qa/_shared/security-testing/container-iac-scanning/SKILL.md` *(Trivy: image + IaC + SBOM)* | Image + IaC scanned, gated on HIGH/CRITICAL fixable findings; SBOM emitted (A03 supply chain); triaged |
-| 6 | **Review, gate & report** | Consolidate, wire CI, report coverage | `qa/<stack>/skills/ci-pipelines/{github-actions\|azure-pipelines\|gitlab-ci}/SKILL.md` + `qa/_shared/ci-conventions/SKILL.md`, `qa/<stack>/skills/allure-reporting/SKILL.md`, `qa/manual/bug-report-writer/SKILL.md` *(write up confirmed vulns)* | Pipeline lints; each gate fails the build on NEW findings (verified by injecting one); SARIF consolidated to code-scanning; an **OWASP coverage report** maps each item to PASS/FAIL/manual-only |
+| 6 | **Review, gate & report** | Consolidate, wire CI, report coverage | `qa/cicd/<stack>/skills/ci-pipelines/{github-actions\|azure-pipelines\|gitlab-ci}/SKILL.md` + `qa/cicd/ci-conventions/SKILL.md`, `qa/reporting/<stack>/skills/allure-reporting/SKILL.md`, `qa/manual/bug-report-writer/SKILL.md` *(write up confirmed vulns)* | Pipeline lints; each gate fails the build on NEW findings (verified by injecting one); SARIF consolidated to code-scanning; an **OWASP coverage report** maps each item to PASS/FAIL/manual-only |
 
 Phases 2 and 3 are cheap and safe — wire them into every PR. Phase 4-active and phase 5 need an authorized safe
 target and may run on a slower cadence (nightly / pre-release).
@@ -115,6 +115,12 @@ manual penetration test** (business-logic abuse, API6 sensitive-flow abuse, anyt
 - A pattern doesn't fit the target project → state the deviation once and use the project's convention.
 - The user asks for something a different agent owns (functional/performance/UI testing) → say so and name the
   right agent; do not improvise outside your focus.
+- **LLM model-behavior red-teaming** (jailbreaks, prompt injection, system-prompt/PII leakage under attack,
+  excessive agency — OWASP **LLM** Top 10:2025) → **not this agent.** Your scanners are blind to model behavior
+  the same way they're blind to BOLA. Name the **`qa-llm-{stack}`** agent + `llm-app-testing`
+  `references/red-teaming.md`. Stay involved only for the items that route back here — **LLM03** supply chain
+  (SCA), **LLM05** improper output handling (SAST/DAST on the sink), **LLM10** resource consumption (rate limits).
+  Run both agents in parallel on an LLM app; map each finding to its own framework (web/API Top 10 *and* LLM Top 10).
 - Multi-stack or unclear project stack → ask one question to pick the `<stack>` siblings; the `_shared`
   scanner skills are stack-independent and can proceed meanwhile.
 </content>

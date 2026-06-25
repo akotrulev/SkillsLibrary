@@ -59,7 +59,6 @@ the gRPC status**, never an HTTP status code.
 - **`com.google.protobuf` Gradle plugin** (`protobuf-gradle-plugin`) — codegen the messages + stubs from `.proto`
 - **`proto-google-common-protos`** + `io.grpc:grpc-protobuf` for `google.rpc.Status` rich-error details
 - **AssertJ** (`assertThat(...)`) for fluent assertions; **Allure TestNG** for reporting
-- **Testcontainers** to stand the service under test up (`qa-test-environments-java`); endpoint via env / `SystemPropertyUtil`, never hardcoded
 - Layout: `src/main/proto/` (the `.proto` contract), `src/main/java/action/` (stub wrappers), `src/test/java/<service>/`
 
 ```kotlin
@@ -253,7 +252,7 @@ public GrpcCallResult<User> getUserWithDeadline(String id, long millis) {
 
 ## Standing the service up — Testcontainers + the channel lifecycle
 
-The channel points at the service under test, stood up via `qa-test-environments-java`. The `BaseGrpcTest`
+The channel points at the service under test, stood up via Testcontainers. The `BaseGrpcTest`
 opens one `ManagedChannel` for the suite and shuts it down after — no per-test channel churn.
 
 ```java
@@ -344,7 +343,7 @@ differ.
   `withDeadlineAfter`. **No `Thread.sleep`, no unbounded `await()`.** Deep stream-lifecycle assertions →
   `qa-websocket-sse-testing-java`.
 - **One `ManagedChannel` per suite** (`@BeforeClass` open, `@AfterClass(alwaysRun=true)` shutdown); service stood
-  up via `qa-test-environments-java`. **Target + token via `SystemPropertyUtil`/env**, lazy, never logged. TestNG +
+  up via Testcontainers. **Target + token via `SystemPropertyUtil`/env**, lazy, never logged. TestNG +
   grpc-java + AssertJ.
 
 ## Cross-references
@@ -362,5 +361,4 @@ differ.
 - `qa-contract-testing-pact-java` — the **Protobuf contract** boundary (Pact's Protobuf/gRPC plugin) vs the
   functional test this skill writes. `qa-performance-gatling-java` — gRPC **load**.
 - `qa-auth0-test-tokens-java` — obtain the per-call **bearer** carried in leading metadata.
-- `qa-test-environments-java` — stand the gRPC service up via Testcontainers and feed the channel target.
 - `qa-allure-reporting-java` — each RPC renders as a named result.

@@ -289,7 +289,7 @@ jobs:
   structure; secrets scanning reads for literal credentials — orthogonal).
 - `qa-security-testing-dependency-scanning-{java,dotnet,typescript}` — the **SCA** sibling (reads your
   **build graph** for vulnerable deps; secrets scanning reads your **source + history** for credentials).
-- `qa-ci-pipelines-{stack}` (+ `qa/_shared/ci-conventions`) — the gate step, full-history
+- `qa-ci-pipelines-{stack}` (+ `qa/cicd/ci-conventions`) — the gate step, full-history
   checkout, SARIF + artifact upload.
 - `qa-allure-reporting-{stack}` — attach the junit/JSON report to the run.
 - `qa/manual/bug-report-writer` — write up a confirmed leaked-credential finding (with the rotation step as

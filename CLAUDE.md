@@ -76,14 +76,16 @@ Do not rewrite code during review. Point to the fix and let the human apply it.
 
 ## QA skills catalog
 
-The `qa/` folder is the most built-out section. When a request matches one of these, prefer the matching skill over improvising. The folder is organized **stack-first** so a new project copies one stack folder plus the agnostic ones:
+The `qa/` folder is the most built-out section. When a request matches one of these, prefer the matching skill over improvising. The folder is organized **stack-first** so a new project copies one stack folder plus the agnostic ones, and **domain-encapsulated**: each top-level folder owns a domain, and *its skills are loaded only by its own agents*. Stack agents author + verify; test design (`qa/manual/`), reporting (`qa/reporting/`), CI/CD (`qa/cicd/`), and security (`qa/_shared/agents/qa-security`) are **peer agents** the orchestrator (you, or the human) invokes alongside the stack agent — a stack agent never reaches into another folder's skills.
 
-- `qa/{java,dotnet,typescript}/skills/{node}/SKILL.md` — the per-stack skill implementations (C# → `dotnet/`); pick the stack from the Stack defaults above or the user's project. Tool-bound skills exist only under the stack(s) the tool supports (e.g. `performance/nbomber` only in `dotnet/`). One-of-N tool families (messaging, email, api-mocking, network-monitoring, ci-pipelines, visual-regression, accessibility, file-storage) are **one registered skill per family**: SKILL.md routes via a decision matrix, the per-tool deep dive lives in `references/<tool>.md`. Oversized skills keep their deep sections in `references/details.md`.
-- `qa/{java,dotnet,typescript}/agents/` — phased orchestrator agents for that stack (senior automation QA per focus: api / ui / mobile / performance); they load the stack's skills phase by phase.
-- `qa/manual/` — language-agnostic process skills: `test-basis-analyzer`, `test-case-writer`, `test-design-techniques`, `bug-report-writer`, `exploratory-charter-writer`, `test-strategy`, `quality-metrics`, `accelerator-conventions`; plus `qa/manual/agents/qa-manual-test-designer` — the phased agent that turns documentation into a full manual test-case suite.
-- `qa/_shared/` — cross-stack technical rules referenced by stack skills (`contract-testing-pact`, `performance`, `ci-conventions`, `security` + the language-agnostic `security-testing/*` scanner skills) plus `webapp-testing` (the one Python skill, Anthropic-provided import); also `qa/_shared/agents/qa-security` — the cross-stack, OWASP-mapped security orchestrator (loads the `_shared` scanner skills + the project's stack-native security siblings phase by phase).
+- `qa/{java,dotnet,typescript}/skills/{node}/SKILL.md` — the per-stack skill implementations (C# → `dotnet/`); pick the stack from the Stack defaults above or the user's project. Tool-bound skills exist only under the stack(s) the tool supports (e.g. `performance/nbomber` only in `dotnet/`). One-of-N tool families (messaging, email, network-monitoring, visual-regression, accessibility, file-storage) are **one registered skill per family**: SKILL.md routes via a decision matrix, the per-tool deep dive lives in `references/<tool>.md`. Oversized skills keep their deep sections in `references/details.md`.
+- `qa/{java,dotnet,typescript}/agents/` — phased orchestrator agents for that stack (senior automation QA per focus: api / ui / mobile / performance / llm); they load **only the stack's own skills** (foundations → author → deep verification → review), and name the manual / reporting / cicd / security agents as related peers to run separately. The **`qa-llm-{stack}`** agent owns LLM-app eval suites end-to-end (choose spine → build dataset → author property/rubric/grounding assertions → stochastic pass-rate + red-team → review) and loads `llm-app-testing` (+ `data-driven-testing`, `api-dto-writer`, `auth0-test-tokens`).
+- `qa/manual/` — language-agnostic process skills: `test-basis-analyzer`, `test-case-writer`, `test-design-techniques`, `bug-report-writer`, `exploratory-charter-writer`, `test-strategy`, `quality-metrics`; loaded only by `qa/manual/agents/qa-manual-test-designer` — the phased agent that turns documentation into a full manual test-case suite.
+- `qa/reporting/{java,dotnet,typescript}/skills/` — `allure-reporting` (Allure results) + `flaky-test-quarantine` (tag/quarantine tests by finding); per-stack agents `qa/reporting/agents/qa-reporting-{java,dotnet,typescript}` wire Allure, tag tests, and detect/quarantine flakes.
+- `qa/cicd/` — `ci-pipelines` per stack (`qa/cicd/{java,dotnet,typescript}/skills/ci-pipelines`, a one-of-N family routing to `references/<host>.md`: github-actions · azure-pipelines · gitlab-ci) + the language-agnostic `qa/cicd/ci-conventions`; per-stack agents `qa/cicd/agents/qa-cicd-{java,dotnet,typescript}` build the pipeline (shard matrix, Allure-publish step, perf gate, OIDC secrets).
+- `qa/_shared/` — cross-stack technical rules referenced by stack skills (`contract-testing-pact`, `performance`, `security` + the language-agnostic `security-testing/*` scanner skills) plus `webapp-testing` (the one Python skill, Anthropic-provided import); also `qa/_shared/agents/qa-security` — the cross-stack, OWASP-mapped security orchestrator (loads the `_shared` scanner skills + the project's stack-native security siblings, incl. `dependency-scanning`, phase by phase).
 
-New-project setup = copy `qa/<stack>/` + `qa/manual/` + `qa/_shared/`.
+New-project setup = copy `qa/<stack>/` + `qa/manual/` + `qa/reporting/` + `qa/cicd/` + `qa/_shared/`.
 
 **Authoring**
 - `api-test-author/generator` · `api-test-author/reviewer` — write / review API tests (RestAssured+TestNG · NUnit+RestSharp · Vitest+fetch+Zod) — java · dotnet · typescript
@@ -105,11 +107,8 @@ New-project setup = copy `qa/<stack>/` + `qa/manual/` + `qa/_shared/`.
 - `messaging-testing` — produce/consume/assert against brokers; one skill, broker picked inside via `references/` (kafka · sqs · rabbitmq · service-bus) — java · dotnet · typescript
 - `file-storage-testing` — object-storage assertions; one skill, store picked inside via `references/` (s3/LocalStack · azure-blob/Azurite) — java · dotnet · typescript
 - `websocket-sse-testing` — real-time WS + SSE assertions — java · dotnet · typescript
-- `api-mocking` — stub/mock HTTP dependencies; one skill, mock server picked inside via `references/` (wiremock · msw · prism · mountebank) — java · dotnet · typescript
 
-**Pipelines & environments**
-- `ci-pipelines` — shard matrix, Allure publish, perf gate, OIDC secrets; one skill, CI host picked inside via `references/` (github-actions · azure-pipelines · gitlab-ci) — java · dotnet · typescript · shared rules at `qa/_shared/ci-conventions`
-- `test-environments` — Testcontainers + docker-compose multi-service spin-up — java · dotnet · typescript
+**Grids & access**
 - `cloud-grid-config` — BrowserStack / Sauce / LambdaTest / Device Farm wiring — java · dotnet · typescript
 - `auth0-test-tokens` — M2M / ROPG / device-code tokens for test users — java · dotnet · typescript
 
@@ -121,22 +120,29 @@ New-project setup = copy `qa/<stack>/` + `qa/manual/` + `qa/_shared/`.
   - **Stack-native skills** — `security-testing/access-control-testing` (functional **BOLA/IDOR/BFLA** authz matrix — the OWASP scanner blind spot; A01:2025 / API1·3·5:2023), `security-testing/zap-baseline` (passive DAST), `security-testing/dependency-scanning` (SCA) — java · dotnet · typescript
 - `i18n-testing` — locale-pinned assertions by key, pseudo-localization, RTL — java · dotnet · typescript
 - `data-driven-testing` — parameterized test matrices — java · dotnet · typescript
-- `flaky-test-quarantine` — detect/quarantine flaky tests — java · dotnet · typescript
 - `synthetic-monitoring` — production probes from test code — java · dotnet · typescript
 - `chaos-testing` — Toxiproxy fault injection, assert graceful degradation — java · dotnet · typescript
 - `feature-flag-testing` — pin flag state in-process (OpenFeature `InMemoryProvider` / LaunchDarkly `TestData`), test BOTH sides of every flag, targeting via the evaluation context — java · dotnet · typescript
-- `llm-app-testing` — property/rubric/grounding assertions for LLM features — java · dotnet · typescript
+- `llm-app-testing` — property/rubric/grounding assertions for LLM features (chatbot/RAG/summarizer/extraction/agent); a one-of-N spine family: SKILL.md routes **promptfoo** (default, declarative YAML, deterministic-first) vs **DeepEval** (`references/deepeval.md` — pytest-native, research-backed RAG/agent/conversational metrics, G-Eval) vs the in-code SDK path (`references/details.md`); its **adversarial half** is `references/red-teaming.md` — **OWASP LLM Top 10:2025** red-teaming (promptfoo `redteam` `owasp:llm` preset / DeepTeam), assert an attack-success **rate** per item; the model-behavior attack surface `qa-security`'s scanners can't reach (the LLM-Top-10 complement to its web/API-Top-10 map). Owned by the dedicated `qa-llm-{java,dotnet,typescript}` agents — java · dotnet · typescript
+- `rag-testing` — RAG (retrieval-augmented generation) eval; the RAG **specialization** of `llm-app-testing` (inherits its four ideas + judge-pinning). Core discipline: **decompose retrieval from generation** so a bad answer is localized, assert the **RAG triad** (context relevance · groundedness/faithfulness · answer relevance) + **deterministic retrieval-ranking metrics** (recall@k/MRR/NDCG) when labels exist, on a **golden set carrying reference contexts**. Spine routes **Ragas** (`references/ragas.md` — RAG-native, the four canonical metrics + corpus→test-set generator, evaluator LLM pinned to Claude) vs DeepEval contextual metrics vs promptfoo `context-*`; owned by the `qa-llm-{stack}` agents — java · dotnet · typescript
 - `mobile-device-farm` · `mobile-native-features` — device-cloud runs · OS-surface (permissions, push, deep links) — java · dotnet · typescript
-- `allure-reporting` — Allure results — java · dotnet · typescript
 - `test-data-builder` — builders / ObjectMother — java · dotnet · typescript
+
+**Reporting & CI/CD (`qa/reporting/`, `qa/cicd/` — own agents, own skills)**
+- `reporting/<stack>/skills/allure-reporting` — Allure results — java · dotnet · typescript
+- `reporting/<stack>/skills/flaky-test-quarantine` — detect/quarantine flaky tests, tag tests by finding — java · dotnet · typescript
+- `agents/qa-reporting-{java,dotnet,typescript}` — wire Allure → tag tests by finding → detect/quarantine flakes → review
+- `cicd/<stack>/skills/ci-pipelines` — shard matrix, Allure-publish step, perf gate, OIDC secrets; one skill, CI host picked inside via `references/` (github-actions · azure-pipelines · gitlab-ci) — java · dotnet · typescript
+- `cicd/ci-conventions` — language-agnostic pipeline conventions every `ci-pipelines` implementation references
+- `agents/qa-cicd-{java,dotnet,typescript}` — pipeline skeleton → shard/parallelize → gates & secrets (Allure-publish owned by qa-reporting, SCA gate owned by qa-security) → review
 
 **Language-agnostic (`qa/manual/`)**
 - `test-basis-analyzer` — distills a story / BRD / API contract / partial feature description into one concise, sourced **test-basis document** (business logic, validations, restrictions, observable implementation notes, data dictionary, states) with every silent/contradictory/untestable item flagged; the source-of-truth artifact that feeds `test-design-techniques` + `test-case-writer` (backs the agent's Phase 1)
 - `test-case-writer` · `bug-report-writer` · `exploratory-charter-writer` — manual-QA writing workflows (test-case suites are Setup → Cases → Cleanup)
 - `test-design-techniques` — ISTQB black-box technique deep dive (EP, BVA 2/3-value, decision tables, state transition n-switch, use-case, pairwise, classification tree, error guessing) with coverage criteria and a selection matrix; `test-case-writer` defers technique choice here
-- `test-strategy` · `quality-metrics` · `accelerator-conventions` — process / planning
+- `test-strategy` · `quality-metrics` — process / planning
 - `agents/qa-manual-test-designer` — phased orchestrator: documentation → systematically-derived manual test-case suite (analyze basis → apply techniques → assemble Setup/Cases/Cleanup → review & coverage); **Exploration mode** builds the test basis from a live web page via the Playwright CLI when docs are thin (charter → explore → file bugs → `#observed` conditions)
 
 **Cross-stack (`qa/_shared/`)**
-- `contract-testing-pact` · `performance` · `ci-conventions` — rules every stack implementation references (performance also carries the perf-suite review checklist agents use in their review phase)
+- `contract-testing-pact` · `performance` — rules every stack implementation references (performance also carries the perf-suite review checklist agents use in their review phase)
 - `webapp-testing` — UI automation with Python (Playwright web-app testing toolkit, Anthropic-provided import) — the one Python-based skill; all other skills target Java / C# / TypeScript

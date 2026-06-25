@@ -270,5 +270,3 @@ the error shape, don't settle for a status" discipline, different envelope.
 - `qa-websocket-sse-testing-java` — **GraphQL subscriptions** (graphql-ws over WebSocket) live here.
 - `qa-api-dto-writer-java` — generate the typed `data` POJOs / operation models in isolation.
 - `qa-auth0-test-tokens-java` — obtain the bearer token for authenticated operations.
-- `qa-api-mocking-java` — **mock** a GraphQL dependency the SUT calls; this skill **tests** a real
-  backend. `qa-performance-gatling-java` — GraphQL **load** + the N+1 pitfall. `qa-allure-reporting-java`.

@@ -111,7 +111,7 @@ export class UserGrpcClient {
 ### 3. Spec — `tests/specs/user.spec.ts`
 
 Assert `res.ok` (or the failure `res.code`) **first** — that's the gate — then the typed message fields. The
-client target points at the service stood up by `qa-test-environments-typescript`.
+client target points at the service stood up by Testcontainers.
 
 ```typescript
 import { describe, it, expect, afterAll } from 'vitest';

@@ -8,7 +8,7 @@ Intercepts, mocks, asserts, and shapes HTTP traffic in Playwright `@playwright/t
 - `@playwright/test` (Playwright ≥ 1.48 — `routeWebSocket`, the post-1.43 glob semantics, `routeFromHAR` update modes)
 - Network helpers under `tests/fixtures/network/`, HAR archives under `tests/fixtures/har/`
 - Page objects under `tests/pages/`, specs under `tests/specs/` (see the UI sibling)
-- These tests run sharded in CI under `qa/typescript/skills/ci-pipelines` (`--shard`, `blob` reporter, traces on failure)
+- These tests run sharded in CI under `qa/cicd/typescript/skills/ci-pipelines` (`--shard`, `blob` reporter, traces on failure)
 
 ## When to use
 
@@ -333,6 +333,6 @@ For real bandwidth/latency emulation (not just per-request delay) use CDP `Netwo
 - **`qa/dotnet/skills/network-monitoring`** + **`qa/java/skills/network-monitoring`** — the sibling stacks porting this canonical TS skill into Playwright-for-.NET / -Java idioms.
 - **`qa/typescript/skills/network-monitoring`** — low-level CDP (`Network.emulateNetworkConditions` for real throttling, protocol-level tracing) when `route` isn't enough.
 - **`qa/typescript/skills/network-monitoring`** — out-of-browser HTTP capture (mitmproxy / system proxy) for multi-process or non-browser traffic.
-- **`qa/typescript/skills/ci-pipelines`** — runs these specs sharded; HAR archives and traces are uploaded as artifacts there.
+- **`qa/cicd/typescript/skills/ci-pipelines`** — runs these specs sharded; HAR archives and traces are uploaded as artifacts there.
 - **`qa/typescript/skills/test-data-builder`** — builds the shapes you stub into `route.fulfill({ json })`.
 - **`qa/typescript/skills/api-test-author/generator`** — when the test needs no browser, assert against the API directly instead of intercepting.
