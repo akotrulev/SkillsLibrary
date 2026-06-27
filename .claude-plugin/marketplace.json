@@ -6,13 +6,13 @@
     "email": "alexandur.kotrulev@gmail.com"
   },
   "metadata": {
-    "description": "Stack-first QA automation skills library: install one plugin per tech stack (Java / .NET / TypeScript), plus language-agnostic plugins for manual-QA process, CI/CD pipelines, and test reporting.",
-    "version": "1.1.0"
+    "description": "Stack-first QA automation skills library: install one self-contained plugin per tech stack (Java / .NET / TypeScript). Each plugin bundles every discipline — API/UI/mobile/performance/LLM/BDD authoring and verification — plus the language-agnostic manual-QA process, CI/CD pipelines, test reporting, and the cross-stack OWASP-mapped security skills.",
+    "version": "2.0.0"
   },
   "plugins": [
     {
       "name": "qa-java",
-      "description": "Senior automation-QA skills and phased orchestrator agents for Java 21 (RestAssured + TestNG, Selenium/Playwright/Appium, Gatling) — API/UI/mobile/performance test authoring, deep verification (DB, messaging, email, files, websockets), CI pipelines, security gates, and cross-stack QA rules. Bundles the language-agnostic qa/manual process skills, the cross-stack qa/_shared rules, and the OWASP-mapped qa-security agent.",
+      "description": "Self-contained senior automation-QA plugin for Java 21 (RestAssured + TestNG, Selenium/Playwright/Appium, Gatling, Cucumber-JVM). Covers every discipline end-to-end: API/UI/mobile/performance/LLM test authoring and review, BDD living documentation, deep verification (DB, messaging, email, files, websockets), Pact contracts, chaos and feature-flag testing. Bundles the language-agnostic manual-QA process skills, CI/CD pipeline skills, test reporting (Allure + flaky-test quarantine), and the cross-stack OWASP-mapped security skills and qa-security agent — install just this one plugin for a complete Java QA toolkit.",
       "source": "./",
       "strict": false,
       "author": {
@@ -28,6 +28,21 @@
       ],
       "category": "testing",
       "skills": [
+        "./qa/_shared/bdd/gherkin-authoring",
+        "./qa/_shared/contract-testing-pact",
+        "./qa/_shared/performance",
+        "./qa/_shared/security",
+        "./qa/_shared/security-testing/api-fuzzing",
+        "./qa/_shared/security-testing/container-iac-scanning",
+        "./qa/_shared/security-testing/nuclei",
+        "./qa/_shared/security-testing/sast",
+        "./qa/_shared/security-testing/secrets-scanning",
+        "./qa/_shared/security-testing/tls-scanning",
+        "./qa/_shared/security-testing/zap-automation-framework",
+        "./qa/_shared/webapp-testing",
+        "./qa/cicd/ci-conventions",
+        "./qa/cicd/java/skills/ci-pipelines",
+        "./qa/java/skills/accelerator-conventions",
         "./qa/java/skills/accessibility-testing",
         "./qa/java/skills/api-client-writer",
         "./qa/java/skills/api-dto-writer",
@@ -38,6 +53,9 @@
         "./qa/java/skills/appium-explore",
         "./qa/java/skills/appium-page-object",
         "./qa/java/skills/auth0-test-tokens",
+        "./qa/java/skills/bdd-project-scaffold",
+        "./qa/java/skills/bdd-reviewer",
+        "./qa/java/skills/bdd-step-bindings",
         "./qa/java/skills/chaos-testing",
         "./qa/java/skills/cloud-grid-config",
         "./qa/java/skills/contract-testing-pact",
@@ -53,6 +71,7 @@
         "./qa/java/skills/messaging-testing",
         "./qa/java/skills/mobile-device-farm",
         "./qa/java/skills/mobile-native-features",
+        "./qa/java/skills/mutation-testing",
         "./qa/java/skills/network-monitoring",
         "./qa/java/skills/page-object-architect",
         "./qa/java/skills/performance/gatling",
@@ -69,6 +88,48 @@
         "./qa/java/skills/ui-test-author/selenium",
         "./qa/java/skills/visual-regression",
         "./qa/java/skills/websocket-sse-testing",
+        "./qa/manual/bug-report-writer",
+        "./qa/manual/exploratory-charter-writer",
+        "./qa/manual/quality-metrics",
+        "./qa/manual/test-basis-analyzer",
+        "./qa/manual/test-case-writer",
+        "./qa/manual/test-design-techniques",
+        "./qa/manual/test-strategy",
+        "./qa/reporting/java/skills/allure-reporting",
+        "./qa/reporting/java/skills/flaky-test-quarantine"
+      ],
+      "agents": [
+        "./qa/_shared/agents/qa-security.md",
+        "./qa/cicd/agents/qa-cicd-java.md",
+        "./qa/java/agents/qa-api-java.md",
+        "./qa/java/agents/qa-bdd-java.md",
+        "./qa/java/agents/qa-llm-java.md",
+        "./qa/java/agents/qa-mobile-java.md",
+        "./qa/java/agents/qa-performance-java.md",
+        "./qa/java/agents/qa-ui-java.md",
+        "./qa/manual/agents/qa-manual-test-designer.md",
+        "./qa/reporting/agents/qa-reporting-java.md"
+      ]
+    },
+    {
+      "name": "qa-dotnet",
+      "description": "Self-contained senior automation-QA plugin for .NET 8 / C# (NUnit + RestSharp, Playwright/Selenium/Appium, NBomber, Reqnroll). Covers every discipline end-to-end: project scaffolding from zero (API/UI/mobile/performance/BDD), API/UI/mobile/performance/LLM test authoring and review, BDD living documentation, deep verification (DB, messaging, email, files, websockets), Pact contracts, chaos and feature-flag testing. Bundles the language-agnostic manual-QA process skills, CI/CD pipeline skills, test reporting (Allure + flaky-test quarantine), and the cross-stack OWASP-mapped security skills and qa-security agent — install just this one plugin for a complete .NET QA toolkit.",
+      "source": "./",
+      "strict": false,
+      "author": {
+        "name": "Aleksandar Kotrulev",
+        "email": "alexandur.kotrulev@gmail.com"
+      },
+      "license": "MIT",
+      "keywords": [
+        "qa",
+        "testing",
+        "test-automation",
+        "dotnet"
+      ],
+      "category": "testing",
+      "skills": [
+        "./qa/_shared/bdd/gherkin-authoring",
         "./qa/_shared/contract-testing-pact",
         "./qa/_shared/performance",
         "./qa/_shared/security",
@@ -80,236 +141,83 @@
         "./qa/_shared/security-testing/tls-scanning",
         "./qa/_shared/security-testing/zap-automation-framework",
         "./qa/_shared/webapp-testing",
+        "./qa/cicd/ci-conventions",
+        "./qa/cicd/dotnet/skills/ci-pipelines",
+        "./qa/dotnet/skills/accelerator-conventions",
+        "./qa/dotnet/skills/accessibility-testing",
+        "./qa/dotnet/skills/api-client-writer",
+        "./qa/dotnet/skills/api-dto-writer",
+        "./qa/dotnet/skills/api-project-scaffold",
+        "./qa/dotnet/skills/api-test-author/generator",
+        "./qa/dotnet/skills/api-test-author/graphql",
+        "./qa/dotnet/skills/api-test-author/grpc",
+        "./qa/dotnet/skills/api-test-author/reviewer",
+        "./qa/dotnet/skills/appium-explore",
+        "./qa/dotnet/skills/appium-page-object",
+        "./qa/dotnet/skills/auth0-test-tokens",
+        "./qa/dotnet/skills/bdd-project-scaffold",
+        "./qa/dotnet/skills/bdd-reviewer",
+        "./qa/dotnet/skills/bdd-step-bindings",
+        "./qa/dotnet/skills/chaos-testing",
+        "./qa/dotnet/skills/cloud-grid-config",
+        "./qa/dotnet/skills/contract-testing-pact",
+        "./qa/dotnet/skills/data-driven-testing",
+        "./qa/dotnet/skills/db-testing/client",
+        "./qa/dotnet/skills/db-testing/query-author",
+        "./qa/dotnet/skills/db-testing/testcontainers",
+        "./qa/dotnet/skills/email-testing",
+        "./qa/dotnet/skills/feature-flag-testing",
+        "./qa/dotnet/skills/file-storage-testing",
+        "./qa/dotnet/skills/i18n-testing",
+        "./qa/dotnet/skills/llm-app-testing",
+        "./qa/dotnet/skills/messaging-testing",
+        "./qa/dotnet/skills/mobile-device-farm",
+        "./qa/dotnet/skills/mobile-native-features",
+        "./qa/dotnet/skills/mobile-project-scaffold",
+        "./qa/dotnet/skills/network-monitoring",
+        "./qa/dotnet/skills/page-object-architect",
+        "./qa/dotnet/skills/performance-project-scaffold",
+        "./qa/dotnet/skills/performance/nbomber",
+        "./qa/dotnet/skills/pom-builder",
+        "./qa/dotnet/skills/rag-testing",
+        "./qa/dotnet/skills/security-testing/access-control-testing",
+        "./qa/dotnet/skills/security-testing/dependency-scanning",
+        "./qa/dotnet/skills/security-testing/zap-baseline",
+        "./qa/dotnet/skills/synthetic-monitoring",
+        "./qa/dotnet/skills/test-data-builder",
+        "./qa/dotnet/skills/ui-project-scaffold",
+        "./qa/dotnet/skills/ui-test-author/appium",
+        "./qa/dotnet/skills/ui-test-author/playwright",
+        "./qa/dotnet/skills/ui-test-author/reviewer",
+        "./qa/dotnet/skills/ui-test-author/selenium",
+        "./qa/dotnet/skills/visual-regression",
+        "./qa/dotnet/skills/websocket-sse-testing",
         "./qa/manual/bug-report-writer",
         "./qa/manual/exploratory-charter-writer",
         "./qa/manual/quality-metrics",
         "./qa/manual/test-basis-analyzer",
         "./qa/manual/test-case-writer",
         "./qa/manual/test-design-techniques",
-        "./qa/manual/test-strategy"
+        "./qa/manual/test-strategy",
+        "./qa/reporting/dotnet/skills/allure-reporting",
+        "./qa/reporting/dotnet/skills/flaky-test-quarantine"
       ],
       "agents": [
-        "./qa/java/agents/qa-api-java.md",
-        "./qa/java/agents/qa-llm-java.md",
-        "./qa/java/agents/qa-mobile-java.md",
-        "./qa/java/agents/qa-performance-java.md",
-        "./qa/java/agents/qa-ui-java.md",
         "./qa/_shared/agents/qa-security.md",
-        "./qa/manual/agents/qa-manual-test-designer.md"
-      ]
-    },
-    {
-      "name": "qa-api-dotnet",
-      "description": "Self-contained API test-automation plugin for .NET 8 / C# (NUnit + RestSharp). Scaffolds a complete runnable API test solution from zero (pinned versions, local setup, layout), then authors and verifies the suite — typed clients, DTOs, builders, deep verification (DB, messaging, email, files, websockets), Pact contracts, chaos. Install qa-manual / qa-security / qa-cicd-dotnet / qa-reporting-dotnet as peers for test design, security gates, pipelines, and reporting.",
-      "source": "./",
-      "strict": false,
-      "author": {
-        "name": "Aleksandar Kotrulev",
-        "email": "alexandur.kotrulev@gmail.com"
-      },
-      "license": "MIT",
-      "keywords": [
-        "qa",
-        "testing",
-        "test-automation",
-        "api",
-        "dotnet"
-      ],
-      "category": "testing",
-      "skills": [
-        "./qa/dotnet/skills/api-project-scaffold",
-        "./qa/dotnet/skills/api-client-writer",
-        "./qa/dotnet/skills/api-dto-writer",
-        "./qa/dotnet/skills/api-test-author/generator",
-        "./qa/dotnet/skills/api-test-author/graphql",
-        "./qa/dotnet/skills/api-test-author/grpc",
-        "./qa/dotnet/skills/api-test-author/reviewer",
-        "./qa/dotnet/skills/auth0-test-tokens",
-        "./qa/dotnet/skills/test-data-builder",
-        "./qa/dotnet/skills/data-driven-testing",
-        "./qa/dotnet/skills/db-testing/client",
-        "./qa/dotnet/skills/db-testing/query-author",
-        "./qa/dotnet/skills/db-testing/testcontainers",
-        "./qa/dotnet/skills/messaging-testing",
-        "./qa/dotnet/skills/email-testing",
-        "./qa/dotnet/skills/file-storage-testing",
-        "./qa/dotnet/skills/websocket-sse-testing",
-        "./qa/dotnet/skills/contract-testing-pact",
-        "./qa/dotnet/skills/chaos-testing",
-        "./qa/dotnet/skills/feature-flag-testing",
-        "./qa/dotnet/skills/llm-app-testing",
-        "./qa/dotnet/skills/rag-testing",
-        "./qa/dotnet/skills/synthetic-monitoring",
-        "./qa/_shared/contract-testing-pact"
-      ],
-      "agents": [
+        "./qa/cicd/agents/qa-cicd-dotnet.md",
         "./qa/dotnet/agents/qa-api-dotnet.md",
-        "./qa/dotnet/agents/qa-llm-dotnet.md"
-      ]
-    },
-    {
-      "name": "qa-ui-dotnet",
-      "description": "Self-contained web-UI test-automation plugin for .NET 8 / C# (Playwright default, Selenium optional). Scaffolds a complete runnable UI test solution from zero (pinned versions, browser install, local setup, layout), then authors and verifies the suite — page objects, POM extraction, network mocking, visual regression, accessibility, i18n. Install qa-manual / qa-security / qa-cicd-dotnet / qa-reporting-dotnet as peers.",
-      "source": "./",
-      "strict": false,
-      "author": {
-        "name": "Aleksandar Kotrulev",
-        "email": "alexandur.kotrulev@gmail.com"
-      },
-      "license": "MIT",
-      "keywords": [
-        "qa",
-        "testing",
-        "test-automation",
-        "ui",
-        "playwright",
-        "dotnet"
-      ],
-      "category": "testing",
-      "skills": [
-        "./qa/dotnet/skills/ui-project-scaffold",
-        "./qa/dotnet/skills/page-object-architect",
-        "./qa/dotnet/skills/pom-builder",
-        "./qa/dotnet/skills/ui-test-author/playwright",
-        "./qa/dotnet/skills/ui-test-author/selenium",
-        "./qa/dotnet/skills/ui-test-author/reviewer",
-        "./qa/dotnet/skills/auth0-test-tokens",
-        "./qa/dotnet/skills/test-data-builder",
-        "./qa/dotnet/skills/data-driven-testing",
-        "./qa/dotnet/skills/cloud-grid-config",
-        "./qa/dotnet/skills/network-monitoring",
-        "./qa/dotnet/skills/visual-regression",
-        "./qa/dotnet/skills/accessibility-testing",
-        "./qa/dotnet/skills/i18n-testing",
-        "./qa/dotnet/skills/db-testing/client",
-        "./qa/dotnet/skills/email-testing",
-        "./qa/dotnet/skills/feature-flag-testing",
-        "./qa/dotnet/skills/synthetic-monitoring",
-        "./qa/_shared/webapp-testing"
-      ],
-      "agents": [
-        "./qa/dotnet/agents/qa-ui-dotnet.md"
-      ]
-    },
-    {
-      "name": "qa-mobile-dotnet",
-      "description": "Self-contained mobile (iOS/Android) test-automation plugin for .NET 8 / C# (Appium). Scaffolds a complete runnable mobile test solution from zero (pinned versions, Appium server/driver/emulator setup, layout), then authors and verifies the suite — live-app exploration, screen objects, native features (permissions, push, deep links), device-farm wiring. Install qa-manual / qa-security / qa-cicd-dotnet / qa-reporting-dotnet as peers.",
-      "source": "./",
-      "strict": false,
-      "author": {
-        "name": "Aleksandar Kotrulev",
-        "email": "alexandur.kotrulev@gmail.com"
-      },
-      "license": "MIT",
-      "keywords": [
-        "qa",
-        "testing",
-        "test-automation",
-        "mobile",
-        "appium",
-        "dotnet"
-      ],
-      "category": "testing",
-      "skills": [
-        "./qa/dotnet/skills/mobile-project-scaffold",
-        "./qa/dotnet/skills/page-object-architect",
-        "./qa/dotnet/skills/appium-explore",
-        "./qa/dotnet/skills/appium-page-object",
-        "./qa/dotnet/skills/ui-test-author/appium",
-        "./qa/dotnet/skills/ui-test-author/reviewer",
-        "./qa/dotnet/skills/mobile-device-farm",
-        "./qa/dotnet/skills/mobile-native-features",
-        "./qa/dotnet/skills/cloud-grid-config",
-        "./qa/dotnet/skills/auth0-test-tokens",
-        "./qa/dotnet/skills/test-data-builder",
-        "./qa/dotnet/skills/data-driven-testing",
-        "./qa/dotnet/skills/network-monitoring",
-        "./qa/dotnet/skills/db-testing/client",
-        "./qa/dotnet/skills/email-testing"
-      ],
-      "agents": [
-        "./qa/dotnet/agents/qa-mobile-dotnet.md"
-      ]
-    },
-    {
-      "name": "qa-performance-dotnet",
-      "description": "Self-contained load/performance test plugin for .NET 8 / C# (NBomber). Scaffolds a complete runnable NBomber console solution from zero (pinned versions, local setup, layout), then defines the workload model and SLOs, authors scenarios, baselines, and reviews against thresholds — reusing the API typed clients. Install qa-manual / qa-security / qa-cicd-dotnet / qa-reporting-dotnet as peers.",
-      "source": "./",
-      "strict": false,
-      "author": {
-        "name": "Aleksandar Kotrulev",
-        "email": "alexandur.kotrulev@gmail.com"
-      },
-      "license": "MIT",
-      "keywords": [
-        "qa",
-        "testing",
-        "performance",
-        "load-testing",
-        "nbomber",
-        "dotnet"
-      ],
-      "category": "testing",
-      "skills": [
-        "./qa/dotnet/skills/performance-project-scaffold",
-        "./qa/dotnet/skills/performance/nbomber",
-        "./qa/dotnet/skills/api-client-writer",
-        "./qa/dotnet/skills/api-dto-writer",
-        "./qa/dotnet/skills/auth0-test-tokens",
-        "./qa/dotnet/skills/test-data-builder",
-        "./qa/dotnet/skills/db-testing/client",
-        "./qa/dotnet/skills/db-testing/query-author",
-        "./qa/_shared/performance"
-      ],
-      "agents": [
-        "./qa/dotnet/agents/qa-performance-dotnet.md"
-      ]
-    },
-    {
-      "name": "qa-security",
-      "description": "Cross-stack, OWASP-mapped security-testing plugin — the qa-security orchestrator agent plus the language-agnostic scanner gates (ZAP active/AF DAST, SAST via Opengrep/Semgrep, secrets scanning, container/IaC + SBOM, API fuzzing, Nuclei, TLS scanning) and the stack-native security skills for Java / .NET / TypeScript (functional BOLA/IDOR/BFLA access-control matrix, passive ZAP baseline, SCA dependency scanning). Peer to the discipline plugins.",
-      "source": "./",
-      "strict": false,
-      "author": {
-        "name": "Aleksandar Kotrulev",
-        "email": "alexandur.kotrulev@gmail.com"
-      },
-      "license": "MIT",
-      "keywords": [
-        "qa",
-        "security",
-        "owasp",
-        "dast",
-        "sast",
-        "sca"
-      ],
-      "category": "testing",
-      "skills": [
-        "./qa/_shared/security",
-        "./qa/_shared/security-testing/api-fuzzing",
-        "./qa/_shared/security-testing/container-iac-scanning",
-        "./qa/_shared/security-testing/nuclei",
-        "./qa/_shared/security-testing/sast",
-        "./qa/_shared/security-testing/secrets-scanning",
-        "./qa/_shared/security-testing/tls-scanning",
-        "./qa/_shared/security-testing/zap-automation-framework",
-        "./qa/dotnet/skills/security-testing/access-control-testing",
-        "./qa/dotnet/skills/security-testing/dependency-scanning",
-        "./qa/dotnet/skills/security-testing/zap-baseline",
-        "./qa/java/skills/security-testing/access-control-testing",
-        "./qa/java/skills/security-testing/dependency-scanning",
-        "./qa/java/skills/security-testing/zap-baseline",
-        "./qa/typescript/skills/security-testing/access-control-testing",
-        "./qa/typescript/skills/security-testing/dependency-scanning",
-        "./qa/typescript/skills/security-testing/zap-baseline"
-      ],
-      "agents": [
-        "./qa/_shared/agents/qa-security.md"
+        "./qa/dotnet/agents/qa-bdd-dotnet.md",
+        "./qa/dotnet/agents/qa-llm-dotnet.md",
+        "./qa/dotnet/agents/qa-mobile-dotnet.md",
+        "./qa/dotnet/agents/qa-performance-dotnet.md",
+        "./qa/dotnet/agents/qa-ui-dotnet.md",
+        "./qa/manual/agents/qa-manual-test-designer.md",
+        "./qa/reporting/agents/qa-reporting-dotnet.md"
       ]
     },
     {
       "name": "qa-typescript",
-      "description": "Senior automation-QA skills and phased orchestrator agents for TypeScript (Vitest + fetch + Zod, Playwright/Appium, k6) — API/UI/mobile/performance test authoring, deep verification (DB, messaging, email, files, websockets), CI pipelines, security gates, and cross-stack QA rules. Bundles the language-agnostic qa/manual process skills, the cross-stack qa/_shared rules, and the OWASP-mapped qa-security agent.",
+      "description": "Self-contained senior automation-QA plugin for TypeScript (Vitest + fetch + Zod, Playwright/Appium, k6, playwright-bdd / CucumberJS). Covers every discipline end-to-end: API/UI/mobile/performance/LLM test authoring and review, BDD living documentation, deep verification (DB, messaging, email, files, websockets), Pact contracts, chaos and feature-flag testing. Bundles the language-agnostic manual-QA process skills, CI/CD pipeline skills, test reporting (Allure + flaky-test quarantine), and the cross-stack OWASP-mapped security skills and qa-security agent — install just this one plugin for a complete TypeScript QA toolkit.",
       "source": "./",
       "strict": false,
       "author": {
@@ -325,6 +233,30 @@
       ],
       "category": "testing",
       "skills": [
+        "./qa/_shared/bdd/gherkin-authoring",
+        "./qa/_shared/contract-testing-pact",
+        "./qa/_shared/performance",
+        "./qa/_shared/security",
+        "./qa/_shared/security-testing/api-fuzzing",
+        "./qa/_shared/security-testing/container-iac-scanning",
+        "./qa/_shared/security-testing/nuclei",
+        "./qa/_shared/security-testing/sast",
+        "./qa/_shared/security-testing/secrets-scanning",
+        "./qa/_shared/security-testing/tls-scanning",
+        "./qa/_shared/security-testing/zap-automation-framework",
+        "./qa/_shared/webapp-testing",
+        "./qa/cicd/ci-conventions",
+        "./qa/cicd/typescript/skills/ci-pipelines",
+        "./qa/manual/bug-report-writer",
+        "./qa/manual/exploratory-charter-writer",
+        "./qa/manual/quality-metrics",
+        "./qa/manual/test-basis-analyzer",
+        "./qa/manual/test-case-writer",
+        "./qa/manual/test-design-techniques",
+        "./qa/manual/test-strategy",
+        "./qa/reporting/typescript/skills/allure-reporting",
+        "./qa/reporting/typescript/skills/flaky-test-quarantine",
+        "./qa/typescript/skills/accelerator-conventions",
         "./qa/typescript/skills/accessibility-testing",
         "./qa/typescript/skills/api-client-writer",
         "./qa/typescript/skills/api-dto-writer",
@@ -335,6 +267,9 @@
         "./qa/typescript/skills/appium-explore",
         "./qa/typescript/skills/appium-page-object",
         "./qa/typescript/skills/auth0-test-tokens",
+        "./qa/typescript/skills/bdd-project-scaffold",
+        "./qa/typescript/skills/bdd-reviewer",
+        "./qa/typescript/skills/bdd-step-bindings",
         "./qa/typescript/skills/chaos-testing",
         "./qa/typescript/skills/cloud-grid-config",
         "./qa/typescript/skills/contract-testing-pact",
@@ -365,128 +300,19 @@
         "./qa/typescript/skills/ui-test-author/reviewer",
         "./qa/typescript/skills/ui-test-author/selenium",
         "./qa/typescript/skills/visual-regression",
-        "./qa/typescript/skills/websocket-sse-testing",
-        "./qa/_shared/contract-testing-pact",
-        "./qa/_shared/performance",
-        "./qa/_shared/security",
-        "./qa/_shared/security-testing/api-fuzzing",
-        "./qa/_shared/security-testing/container-iac-scanning",
-        "./qa/_shared/security-testing/nuclei",
-        "./qa/_shared/security-testing/sast",
-        "./qa/_shared/security-testing/secrets-scanning",
-        "./qa/_shared/security-testing/tls-scanning",
-        "./qa/_shared/security-testing/zap-automation-framework",
-        "./qa/_shared/webapp-testing",
-        "./qa/manual/bug-report-writer",
-        "./qa/manual/exploratory-charter-writer",
-        "./qa/manual/quality-metrics",
-        "./qa/manual/test-basis-analyzer",
-        "./qa/manual/test-case-writer",
-        "./qa/manual/test-design-techniques",
-        "./qa/manual/test-strategy"
+        "./qa/typescript/skills/websocket-sse-testing"
       ],
       "agents": [
+        "./qa/_shared/agents/qa-security.md",
+        "./qa/cicd/agents/qa-cicd-typescript.md",
+        "./qa/manual/agents/qa-manual-test-designer.md",
+        "./qa/reporting/agents/qa-reporting-typescript.md",
         "./qa/typescript/agents/qa-api-typescript.md",
+        "./qa/typescript/agents/qa-bdd-typescript.md",
         "./qa/typescript/agents/qa-llm-typescript.md",
         "./qa/typescript/agents/qa-mobile-typescript.md",
         "./qa/typescript/agents/qa-performance-typescript.md",
-        "./qa/typescript/agents/qa-ui-typescript.md",
-        "./qa/_shared/agents/qa-security.md",
-        "./qa/manual/agents/qa-manual-test-designer.md"
-      ]
-    },
-    {
-      "name": "qa-manual",
-      "description": "Language-agnostic manual-QA process skills — test-basis analysis, ISTQB test-design techniques, test-case/bug-report/exploratory-charter writing, test strategy, quality metrics — plus the qa-manual-test-designer agent that turns documentation into a full manual test-case suite.",
-      "source": "./",
-      "strict": false,
-      "author": {
-        "name": "Aleksandar Kotrulev",
-        "email": "alexandur.kotrulev@gmail.com"
-      },
-      "license": "MIT",
-      "keywords": [
-        "qa",
-        "testing",
-        "manual-testing",
-        "test-design",
-        "istqb"
-      ],
-      "category": "testing",
-      "skills": [
-        "./qa/manual/bug-report-writer",
-        "./qa/manual/exploratory-charter-writer",
-        "./qa/manual/quality-metrics",
-        "./qa/manual/test-basis-analyzer",
-        "./qa/manual/test-case-writer",
-        "./qa/manual/test-design-techniques",
-        "./qa/manual/test-strategy"
-      ],
-      "agents": [
-        "./qa/manual/agents/qa-manual-test-designer.md"
-      ]
-    },
-    {
-      "name": "qa-cicd",
-      "description": "CI/CD pipeline skills and per-stack orchestrator agents for QA test suites (GitHub Actions / Azure Pipelines / GitLab CI) — shard matrix, Allure-publish step, performance gate, OIDC secrets — plus the language-agnostic ci-conventions every pipeline references. Peer plugin; pair with the qa discipline/stack plugins (qa-{api,ui,mobile,performance}-dotnet, qa-java, qa-typescript).",
-      "source": "./",
-      "strict": false,
-      "author": {
-        "name": "Aleksandar Kotrulev",
-        "email": "alexandur.kotrulev@gmail.com"
-      },
-      "license": "MIT",
-      "keywords": [
-        "qa",
-        "ci-cd",
-        "pipelines",
-        "github-actions",
-        "azure-pipelines",
-        "gitlab-ci"
-      ],
-      "category": "testing",
-      "skills": [
-        "./qa/cicd/ci-conventions",
-        "./qa/cicd/java/skills/ci-pipelines",
-        "./qa/cicd/dotnet/skills/ci-pipelines",
-        "./qa/cicd/typescript/skills/ci-pipelines"
-      ],
-      "agents": [
-        "./qa/cicd/agents/qa-cicd-java.md",
-        "./qa/cicd/agents/qa-cicd-dotnet.md",
-        "./qa/cicd/agents/qa-cicd-typescript.md"
-      ]
-    },
-    {
-      "name": "qa-reporting",
-      "description": "Test-reporting skills and per-stack orchestrator agents — Allure results wiring plus flaky-test detection and quarantine (tag/quarantine tests by finding). Peer plugin; pair with the qa discipline/stack plugins (qa-{api,ui,mobile,performance}-dotnet, qa-java, qa-typescript).",
-      "source": "./",
-      "strict": false,
-      "author": {
-        "name": "Aleksandar Kotrulev",
-        "email": "alexandur.kotrulev@gmail.com"
-      },
-      "license": "MIT",
-      "keywords": [
-        "qa",
-        "reporting",
-        "allure",
-        "flaky-tests",
-        "quarantine"
-      ],
-      "category": "testing",
-      "skills": [
-        "./qa/reporting/java/skills/allure-reporting",
-        "./qa/reporting/java/skills/flaky-test-quarantine",
-        "./qa/reporting/dotnet/skills/allure-reporting",
-        "./qa/reporting/dotnet/skills/flaky-test-quarantine",
-        "./qa/reporting/typescript/skills/allure-reporting",
-        "./qa/reporting/typescript/skills/flaky-test-quarantine"
-      ],
-      "agents": [
-        "./qa/reporting/agents/qa-reporting-java.md",
-        "./qa/reporting/agents/qa-reporting-dotnet.md",
-        "./qa/reporting/agents/qa-reporting-typescript.md"
+        "./qa/typescript/agents/qa-ui-typescript.md"
       ]
     }
   ]

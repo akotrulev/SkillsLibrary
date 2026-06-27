@@ -6,19 +6,23 @@ A shared library of Claude skills and rules for backend, frontend, DevOps, obser
 
 ### Install as a Claude Code plugin (recommended)
 
-The repo is a Claude Code plugin marketplace. Add it once, then install the plugin for your tech stack — Claude Code handles fetching and updates, no cloning or syncing required:
+The repo is a Claude Code plugin marketplace. Add it once, then install the one plugin for your tech stack — Claude Code handles fetching and updates, no cloning or syncing required:
 
 ```shell
 /plugin marketplace add akotrulev/SkillsLibrary
-/plugin install qa-api-dotnet@skills-library   # .NET API tests — also qa-ui-dotnet / qa-mobile-dotnet / qa-performance-dotnet
-/plugin install qa-security@skills-library      # cross-stack OWASP-mapped security gates (peer)
-/plugin install qa-manual@skills-library        # language-agnostic manual-QA process skills (peer)
-/plugin install qa-java@skills-library          # Java full-stack bundle (java/typescript not yet split per discipline)
+/plugin install qa-java@skills-library         # complete Java 21 QA toolkit
+/plugin install qa-dotnet@skills-library        # complete .NET 8 / C# QA toolkit
+/plugin install qa-typescript@skills-library    # complete TypeScript QA toolkit
 ```
 
-**.NET is split into self-contained discipline plugins** — `qa-{api,ui,mobile,performance}-dotnet`. Each one scaffolds a complete runnable .NET 8 test solution **from zero** (pinned tool/library versions, local setup, project layout) and then authors + verifies that discipline's suite; the standalone solutions share a `src/TestCore` seam so you can fold several disciplines into one solution later (see each plugin's `*-project-scaffold` skill). Install the peers alongside as needed: `qa-manual` (test design), `qa-security` (OWASP gates), `qa-cicd-dotnet` (pipelines), `qa-reporting-dotnet` (Allure + flake quarantine).
+**One self-contained plugin per language** — `qa-java`, `qa-dotnet`, `qa-typescript`. Each is a complete QA toolkit for its stack: it bundles every discipline (API / UI / mobile / performance / LLM authoring and review, BDD living documentation, deep verification, contracts, chaos, feature flags) **plus** the shared, cross-cutting capabilities that used to be separate peer plugins:
 
-`qa-java` and `qa-typescript` are still **stack-bundled** (every discipline in one plugin) pending the same discipline split; each bundles its skills, the api/ui/mobile/performance agents, `qa/manual`, `qa/_shared`, and the `qa-security` agent. Pull updates later with `/plugin marketplace update skills-library`.
+- **Manual QA** — the language-agnostic `qa/manual` process skills and the `qa-manual-test-designer` agent (test-basis analysis, ISTQB design techniques, test-case / bug-report / charter writing).
+- **Security** — the cross-stack, OWASP-mapped `qa/_shared` scanner gates (ZAP, SAST, secrets, container/IaC, API fuzzing, Nuclei, TLS), the stack-native security skills (BOLA/IDOR/BFLA access-control matrix, ZAP baseline, SCA), and the `qa-security` orchestrator agent.
+- **CI/CD** — the stack's `ci-pipelines` skill (GitHub Actions / Azure Pipelines / GitLab CI), the language-agnostic `ci-conventions`, and the `qa-cicd-<stack>` agent.
+- **Reporting** — Allure results wiring + flaky-test detection/quarantine and the `qa-reporting-<stack>` agent.
+
+So installing a single plugin gives you the stack's authoring/verification skills, its api/ui/mobile/performance/llm/bdd agents, and the manual / security / cicd / reporting skills and agents — no peer plugins to add. (.NET additionally ships `*-project-scaffold` skills that stand up a complete runnable .NET 8 test solution from zero.) Pull updates later with `/plugin marketplace update skills-library`.
 
 ### Use the repo directly
 
