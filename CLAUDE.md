@@ -2,7 +2,7 @@
 
 These rules apply to every skill in this library unless a specific skill explicitly overrides them.
 
-> **Scope:** Only the `qa/` folder is ready for use and the remote. All other top-level folders are under construction — ignore them, and do not upload them to the remote yet.
+> **Scope:** The `qa/` folder **and `frontend/blazor/`** (with the `design/` and `auth/auth0-blazor` skills it depends on) are ready for use and the remote. All other top-level folders are under construction — ignore them, and do not upload them to the remote yet.
 
 ## Role
 
@@ -90,6 +90,7 @@ New-project setup = copy `qa/<stack>/` + `qa/manual/` + `qa/reporting/` + `qa/ci
 
 **Authoring**
 - `api-test-author/generator` · `api-test-author/reviewer` — write / review API tests (RestAssured+TestNG · NUnit+RestSharp · Vitest+fetch+Zod) — java · dotnet · typescript
+- `api-test-author/playwright` — API tests through Playwright's `APIRequestContext` **instead of** the generator's HTTP stack, when the project already runs Playwright for UI (one dependency/runner/report; context-per-identity auth, same DTO+Client+Test layering) — java · dotnet · typescript
 - `api-client-writer` — typed API clients — java · dotnet · typescript
 - `api-dto-writer` — request/response DTOs — java · dotnet · typescript
 - `ui-test-author/playwright` · `ui-test-author/selenium` · `ui-test-author/appium` · `ui-test-author/reviewer` — write / review UI + mobile tests — java · dotnet · typescript
@@ -122,6 +123,7 @@ New-project setup = copy `qa/<stack>/` + `qa/manual/` + `qa/reporting/` + `qa/ci
 **Visual, quality gates & test data**
 - `visual-regression` — pixel-diff / hosted visual review; one skill, tool picked inside via `references/` (playwright-snapshots · percy · applitools) — java · dotnet · typescript
 - `accessibility-testing` — a11y scans + budgets; one skill, tool picked inside via `references/` (axe-playwright · lighthouse-ci) — java · dotnet · typescript
+- `responsive-testing` — breakpoint/viewport layout testing via Playwright: breakpoints read from the app's own token/theme source (never guessed), BVA at bp−1/bp per breakpoint, structural `boundingBox` assertions (variant swap both sides, alignment, column reflow, no overlap, no horizontal overflow), live-resize both directions; pairs with `visual-regression`, loaded by `qa-ui-{stack}` Phase 3 — java · dotnet · typescript
 - **`security-testing`** (OWASP-mapped family; backbone at `qa/_shared/security`, orchestrated by the `qa-security` agent at `qa/_shared/agents/`):
   - **Language-agnostic scanner gates** (single skills at `qa/_shared/security-testing/` — most security tools are Docker/CLI binaries, so they are NOT triplicated): `zap-automation-framework` (active/AF DAST + API scan), `sast` (Opengrep/Semgrep), `secrets-scanning` (Gitleaks + TruffleHog), `container-iac-scanning` (Trivy + SBOM, A03 supply chain), `api-fuzzing` (Schemathesis), `nuclei` (template/CVE), `tls-scanning` (sslyze + testssl.sh)
   - **Stack-native skills** — `security-testing/access-control-testing` (functional **BOLA/IDOR/BFLA** authz matrix — the OWASP scanner blind spot; A01:2025 / API1·3·5:2023), `security-testing/zap-baseline` (passive DAST), `security-testing/dependency-scanning` (SCA) — java · dotnet · typescript
@@ -153,3 +155,36 @@ New-project setup = copy `qa/<stack>/` + `qa/manual/` + `qa/reporting/` + `qa/ci
 **Cross-stack (`qa/_shared/`)**
 - `contract-testing-pact` · `performance` — rules every stack implementation references (performance also carries the perf-suite review checklist agents use in their review phase)
 - `webapp-testing` — UI automation with Python (Playwright web-app testing toolkit, Anthropic-provided import) — the one Python-based skill; all other skills target Java / C# / TypeScript
+
+## Frontend dev catalog
+
+The `frontend/blazor/` folder is the frontend **development** stack (distinct from `qa/`, which tests it). It is organized like the QA domain — stack-first, domain-encapsulated, one phased orchestrator agent per stack — and shares the aesthetic-craft layer in `design/` and the auth skills in `auth/`. The **`fe-blazor`** agent (`frontend/blazor/agents/fe-blazor.md`) owns a Blazor Web App build end-to-end across six phases: scaffold → architecture foundations (with a **design-critique loop**) → feature build → quality layers → bUnit component tests → hostile self-review (with a **visual self-critique pass**). It loads **only** `frontend/blazor/skills/*` plus the named `design/*` and `auth/auth0-blazor` skills; QA (`qa-ui-dotnet`, `qa-manual-test-designer`, `qa-security`, `qa-cicd-dotnet`) are **peers** it invokes separately, connected by the `data-testid` / `missing-testids.md` handshake.
+
+**Skills** (`frontend/blazor/skills/`, `fe-blazor-*`):
+- **Foundations** — `reference` (concept lookup, atomic-design taxonomy) · `project-scaffold` (Blazor Web App from zero, render-mode decision matrix, TFM detection) · `state-management` (scoped state containers, `Changed` events) · `component-library` (one-of-N: MudBlazor · Fluent UI · Radzen · enterprise · none) · `styling` (CSS isolation + `::deep`, design tokens, type scale, dark mode) · `responsive-design` (breakpoint contract + C# mirror, intrinsic-first, container queries; QA handshake to `responsive-testing`)
+- **Feature build** — `generator` (pages/components/forms per the patterns) · `forms` (`EditForm` + FluentValidation) · `data-access` (request/response transport lane — WASM/HTTP vs interactive-SSR service injection, `[PersistentState]`, streaming) · `realtime` (server→client push — circuit-as-WebSocket, SignalR client, raw WS/SSE) · `testability` (`data-testid` authoring + audit; consumes `missing-testids.md`) · `ui-conventions` (cross-cutting UI-correctness: display/table/CRUD/confirmation/IA rules) · `motion` (CSS-first mechanics, `prefers-reduced-motion` hard floor, view transitions)
+- **Quality layers** — `accessibility` (semantic-first, focus under enhanced nav, ARIA in custom components) · `performance` (render perf, WASM startup, Server scale, budgets) · `error-resilience` (`ErrorBoundary`, reconnection UX, three-state regions, Polly) · `seo-discoverability` (static SSR for public pages, meta/OG, real 404, sitemap)
+- **Test + review** — `component-testing` (bUnit v2, logic-bearing components only; E2E is the `qa-ui-dotnet` peer) · `reviewer` (hostile senior review, standard severity table)
+
+**Loaded (not owned) by the agent** — `auth/auth0-blazor` (+ `auth/_shared/auth0-concepts`) for Phase 1/2 auth; and the stack-agnostic design-craft layer: `design/frontend-design` (**primary theme authority** — per-brief token system feeding `styling`, + the three-AI-look critique) · `design/design-tokens` (the semantic-tier token discipline `frontend-design`/`styling` build on) · `design/brand-intake` (brownfield path — an existing brand book → normalized token system) · `design/dataviz` (chart/data-viz design system) · `design/iconography` (icon family + OG/social-image craft) · `design/theme-factory` (optional quick-start) · `design/ux-writing` (microcopy voice filling the slots `ui-conventions`/`error-resilience`/`generator` define) · `design/web-design-guidelines` (Phase 5 **code-level** audit) · `design/ux-heuristics` (Phase 5 **experience-level** review — Nielsen heuristics, flow-friction, IA; also seeds `qa-manual-test-designer`'s exploration mode).
+
+New-project setup = copy `frontend/blazor/` + the `design/` skills + `auth/auth0-blazor` (+ `auth/_shared/auth0-concepts`).
+
+### Frontend code rules
+
+- Components are **render-mode-agnostic** — `@rendermode` is set by the consumer, never hardcoded inside a reusable component.
+- `[PersistentState]` (net10) / `PersistentComponentState` (net8/9) over manual prerender persistence — no double-fetch across prerender → interactive.
+- **Semantic HTML before ARIA.** Reach for ARIA only when no semantic element fits.
+- **No JS interop where C# suffices.** Interop is a last resort, disposed (`IAsyncDisposable` / `_module.DisposeAsync()`), and never called in `OnInitializedAsync`.
+- Forms use `EditForm` + FluentValidation (or DataAnnotations); `OnValidSubmit`, `<ValidationMessage For>` per field.
+- **CSS isolation** (`.razor.css` + `::deep`), no global-stylesheet dumping; a component library's theme system owns the library, your CSS layers on top.
+- Every **interactive element and list/grid container ships a `data-testid`** — PascalCase dot-separated, static row locators, never numeric ids / GUIDs / array indexes / state values in the locator.
+- **In-app navigation is a real anchor** (`href` / `NavLink`), never a click-handler-only `NavigateTo` button.
+- Every **data region has explicit loading / loaded / failed states**; a failure never collapses into a blank section.
+- **Background→UI updates only via `InvokeAsync`** (circuit / renderer sync context) — a background thread never touches component state directly.
+- Constructor injection only; no static mutable state; async all the way; structured logging; HTTP through `IHttpClientFactory` typed clients.
+- **bUnit for logic-bearing components** (dev-side); E2E / user journeys belong to the `qa-ui-dotnet` peer.
+
+### Version policy (`frontend/blazor/`)
+
+.NET **8, 9, and 10 are all supported; .NET 10 is primary.** Every skill is version-aware — the agent's first act on an existing project is to detect the `TargetFramework` and apply the guidance keyed to it: net10 primary recipes (`[PersistentState]`, `NotFoundPage` / `NavigationManager.NotFound()`, `AddValidation()`, `ReconnectModal`) with net8/net9 fallbacks (manual `PersistentComponentState`, `UseStatusCodePagesWithReExecute`, DataAnnotations). Never apply a net10-only API to a down-level project, and never flag a down-level project for lacking one.

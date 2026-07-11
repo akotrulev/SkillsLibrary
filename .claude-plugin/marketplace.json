@@ -7,7 +7,7 @@
   },
   "metadata": {
     "description": "Stack-first QA automation skills library: install one self-contained plugin per tech stack (Java / .NET / TypeScript). Each plugin bundles every discipline — API/UI/mobile/performance/LLM/BDD authoring and verification — plus the language-agnostic manual-QA process, CI/CD pipelines, test reporting, and the cross-stack OWASP-mapped security skills.",
-    "version": "2.0.0"
+    "version": "2.5.0"
   },
   "plugins": [
     {
@@ -49,6 +49,7 @@
         "./qa/java/skills/api-test-author/generator",
         "./qa/java/skills/api-test-author/graphql",
         "./qa/java/skills/api-test-author/grpc",
+        "./qa/java/skills/api-test-author/playwright",
         "./qa/java/skills/api-test-author/reviewer",
         "./qa/java/skills/appium-explore",
         "./qa/java/skills/appium-page-object",
@@ -77,6 +78,7 @@
         "./qa/java/skills/performance/gatling",
         "./qa/java/skills/pom-builder",
         "./qa/java/skills/rag-testing",
+        "./qa/java/skills/responsive-testing",
         "./qa/java/skills/security-testing/access-control-testing",
         "./qa/java/skills/security-testing/dependency-scanning",
         "./qa/java/skills/security-testing/zap-baseline",
@@ -151,6 +153,7 @@
         "./qa/dotnet/skills/api-test-author/generator",
         "./qa/dotnet/skills/api-test-author/graphql",
         "./qa/dotnet/skills/api-test-author/grpc",
+        "./qa/dotnet/skills/api-test-author/playwright",
         "./qa/dotnet/skills/api-test-author/reviewer",
         "./qa/dotnet/skills/appium-explore",
         "./qa/dotnet/skills/appium-page-object",
@@ -180,6 +183,7 @@
         "./qa/dotnet/skills/performance/nbomber",
         "./qa/dotnet/skills/pom-builder",
         "./qa/dotnet/skills/rag-testing",
+        "./qa/dotnet/skills/responsive-testing",
         "./qa/dotnet/skills/security-testing/access-control-testing",
         "./qa/dotnet/skills/security-testing/dependency-scanning",
         "./qa/dotnet/skills/security-testing/zap-baseline",
@@ -263,6 +267,7 @@
         "./qa/typescript/skills/api-test-author/generator",
         "./qa/typescript/skills/api-test-author/graphql",
         "./qa/typescript/skills/api-test-author/grpc",
+        "./qa/typescript/skills/api-test-author/playwright",
         "./qa/typescript/skills/api-test-author/reviewer",
         "./qa/typescript/skills/appium-explore",
         "./qa/typescript/skills/appium-page-object",
@@ -290,6 +295,7 @@
         "./qa/typescript/skills/performance/k6",
         "./qa/typescript/skills/pom-builder",
         "./qa/typescript/skills/rag-testing",
+        "./qa/typescript/skills/responsive-testing",
         "./qa/typescript/skills/security-testing/access-control-testing",
         "./qa/typescript/skills/security-testing/dependency-scanning",
         "./qa/typescript/skills/security-testing/zap-baseline",
@@ -313,6 +319,59 @@
         "./qa/typescript/agents/qa-mobile-typescript.md",
         "./qa/typescript/agents/qa-performance-typescript.md",
         "./qa/typescript/agents/qa-ui-typescript.md"
+      ]
+    },
+    {
+      "name": "fe-blazor",
+      "description": "Self-contained senior frontend Blazor developer plugin for .NET 8/9/10 (Blazor Web App, unified render modes). Covers the full FE build lifecycle end-to-end: project scaffold and render-mode strategy, architecture foundations (state, component library, styling, responsive design), feature build (pages/components/forms, API + live/realtime data, motion, UX writing, data-testids), quality layers (accessibility, performance, error resilience, SEO), and bUnit v2 component tests — plus a distinctive-visual-design critique loop. Bundles the Auth0 Blazor auth skills and the stack-agnostic design-craft skills (frontend-design, design-tokens, dataviz, brand-intake, iconography, ux-heuristics, theme-factory, ux-writing, web-design-guidelines) and the phased fe-blazor orchestrator agent — install just this one plugin for a complete Blazor frontend toolkit.",
+      "source": "./",
+      "strict": false,
+      "author": {
+        "name": "Aleksandar Kotrulev",
+        "email": "alexandur.kotrulev@gmail.com"
+      },
+      "license": "MIT",
+      "keywords": [
+        "blazor",
+        "dotnet",
+        "frontend",
+        "web-ui"
+      ],
+      "category": "development",
+      "skills": [
+        "./frontend/blazor/skills/accessibility",
+        "./frontend/blazor/skills/component-library",
+        "./frontend/blazor/skills/component-testing",
+        "./frontend/blazor/skills/data-access",
+        "./frontend/blazor/skills/error-resilience",
+        "./frontend/blazor/skills/forms",
+        "./frontend/blazor/skills/generator",
+        "./frontend/blazor/skills/motion",
+        "./frontend/blazor/skills/performance",
+        "./frontend/blazor/skills/project-scaffold",
+        "./frontend/blazor/skills/realtime",
+        "./frontend/blazor/skills/reference",
+        "./frontend/blazor/skills/responsive-design",
+        "./frontend/blazor/skills/reviewer",
+        "./frontend/blazor/skills/seo-discoverability",
+        "./frontend/blazor/skills/state-management",
+        "./frontend/blazor/skills/styling",
+        "./frontend/blazor/skills/testability",
+        "./frontend/blazor/skills/ui-conventions",
+        "./auth/auth0-blazor",
+        "./auth/_shared/auth0-concepts",
+        "./design/frontend-design",
+        "./design/design-tokens",
+        "./design/dataviz",
+        "./design/brand-intake",
+        "./design/iconography",
+        "./design/ux-heuristics",
+        "./design/web-design-guidelines",
+        "./design/theme-factory",
+        "./design/ux-writing"
+      ],
+      "agents": [
+        "./frontend/blazor/agents/fe-blazor.md"
       ]
     }
   ]
