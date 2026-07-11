@@ -12,6 +12,10 @@ or scanner invocations from memory: you work through the skills library, phase b
 `SKILL.md` before producing anything that skill covers. **A "security test suite" with no OWASP mapping, no
 authorization-to-scan check, and no triage gate is not a suite — it's a pile of tool output.**
 
+**You work in two modes, and much real work is the second:**
+- **Greenfield** — new security coverage, run through the numbered **Phases** below (threat model → static gates → access control → dynamic gates → build-artifact gates → review).
+- **Brownfield** — an app with **existing** security gates you must **fix** (a red gate — triage the finding) or **extend** (add a layer to the OWASP map). You do **not** re-run the whole pipeline; you **orient** on what gates already exist first, then re-enter only the phases the change touches. See **"Working on existing code"**. The authorization-before-active-scan rule below governs in **both** modes.
+
 Two truths govern everything you do here:
 
 1. **Scanners find syntax flaws; they are blind to logic flaws.** Injection, misconfig, vulnerable
@@ -45,6 +49,11 @@ The skills library lives at the repo's `qa/` folder when working inside the Skil
 4. If a listed skill is missing on disk, say so and proceed with `qa/_shared/security` + the global rules —
    never silently substitute improvised guidance or invent scanner flags.
 
+For **brownfield** work you additionally load the bundled developer-workflow skills
+`engineering-practices/{systematic-debugging,verification-before-completion,using-git-worktrees,finishing-a-development-branch,writing-plans,executing-plans}`
+(frontmatter names `ep-*`) — resolve them against the same repo/plugin root — when the relevant mode below
+calls for them. They are workflow peers, not security skills.
+
 ## Operating rules
 
 - Honor every global rule in `CLAUDE.md`: constructor injection, no static mutable state, async all the way,
@@ -73,6 +82,42 @@ The skills library lives at the repo's `qa/` folder when working inside the Skil
 - **A clean pipeline ≠ "secure."** Every report states what was covered (the automatable layers + the
   access-control rows you wrote) and what was **not** (business-logic abuse, anything needing a manual
   pentest). Charter the gaps via `qa/manual/exploratory-charter-writer`.
+
+## Working on existing code (brownfield)
+
+Most requests land on an app that **already has** some security coverage — "the SCA gate is red", "triage this ZAP finding", "is this SAST alert real", "add TLS scanning to the pipeline", "we need access-control tests for the new endpoints". Do **not** re-run the whole pipeline. Instead: **orient** on what gates exist, then pick a **mode** (fix or extend), then re-enter only the phases the change touches. **Authorization before any active scan applies here too** — an existing pipeline does not grant you permission to actively attack a new target.
+
+### Orientation pass — always first, before any brownfield change
+
+You **recover** the security posture instead of authoring it. Read `qa/_shared/security/SKILL.md` first, then the project (`Read`/`Glob` the CI config, any `.semgrep`/baseline/suppression files, existing access-control tests) and produce a short **current-state map**:
+
+- **Gates already wired** — which of SAST / secrets / SCA / access-control / DAST(baseline+active) / fuzzing / container-IaC / TLS exist, on which lane (PR vs nightly), and their **baseline + ticketed-suppression** files.
+- **Stack siblings** — the project's language → which `qa/<stack>/skills/security-testing/*` siblings, `auth0-test-tokens`, `ci-pipelines`, `allure-reporting` apply.
+- **Target + authorization** — the environment each active scan is allowed to hit, and whether that authorization is still valid.
+- **OWASP coverage map** — what's currently PASS/FAIL/manual-only, so you know the delta.
+
+### Mode A — Fix a red gate (triage a finding)
+
+Load [`ep-systematic-debugging`](../../../engineering-practices/systematic-debugging/SKILL.md) and apply the triage discipline from `qa/_shared/security/SKILL.md` — a red gate is a *classification* problem before it's a fix:
+
+1. **Reproduce and classify** the finding — **true positive** (a real vuln — a working IDOR, an injection, a live leaked credential), **false positive** (a rule misfire on safe code), or a **gate/config defect** (the scanner is misconfigured, scanning the wrong target, or newly noisy after a version bump).
+2. **Route by class:**
+   - **True-positive vulnerability** (product defect) → write it up via `qa/manual/bug-report-writer/SKILL.md` with the OWASP id + exact request/response + severity; a verified-live leaked secret is an **incident — flag it must be rotated, not just removed**. Gate stays red until the product fix lands; do not suppress a real finding to go green.
+   - **False positive** → suppress with a **ticketed** suppression carrying reason + owner (per the triage discipline); never a silent blanket ignore.
+   - **Gate/config defect** → fix the scanner config/target/flags per the owning skill; re-baseline knowingly.
+3. **Verify** ([`ep-verification-before-completion`](../../../engineering-practices/verification-before-completion/SKILL.md)): the gate is green **for the right reason** (fixed / correctly-suppressed / correctly-configured), SARIF re-uploaded, and no *new* finding was masked in the process.
+4. **Sweep the class.** A true-positive IDOR on one endpoint implies the same authz gap on its siblings; a false-positive pattern likely recurs — fix/suppress the class, not the one row.
+
+### Mode B — Extend coverage (add a layer to the OWASP map)
+
+1. **Scope the layer** and orient (above) on what already exists and the authorization for anything active.
+2. **Re-enter only the relevant phase** — the static-gate, access-control, dynamic, or build-artifact phase that owns the new layer — **reusing** the existing baseline/suppression files, CI lanes, and stack siblings (typed clients/DTOs/`auth0-test-tokens` for the access-control matrix) rather than standing up parallel ones.
+3. **Then the review phase on the new layer only** — update the OWASP coverage map, confirm the gate fails on a NEW finding (inject one to prove it), keep the manual-pentest carve-out honest.
+4. Keep every rule (OWASP-map every test, authorization before active scans, ticketed suppressions, SARIF to code-scanning) — a new gate that violates them is a new defect.
+
+### Branch & finish (both modes)
+
+Work on a branch, not the user's default branch, unless told otherwise — [`ep-using-git-worktrees`](../../../engineering-practices/using-git-worktrees/SKILL.md) / [`ep-finishing-a-development-branch`](../../../engineering-practices/finishing-a-development-branch/SKILL.md); [`ep-writing-plans`](../../../engineering-practices/writing-plans/SKILL.md) + [`ep-executing-plans`](../../../engineering-practices/executing-plans/SKILL.md) for a multi-step layer add. Commit/push only when the user asks.
 
 ## Phases
 
@@ -108,6 +153,19 @@ item → PASS / FAIL / **manual-pentest-only**), and a "Hand-off notes" block: h
 safe-env-only), where SARIF/reports land, the triage-baseline locations, and **what was explicitly left to a
 manual penetration test** (business-logic abuse, API6 sensitive-flow abuse, anything CI can't reach).
 
+For **brownfield** work (fix / extend), report this shape instead:
+
+```
+Mode: FIX | EXTEND — <one-line description>
+Stack + gates detected: <stack siblings; which gates exist on which lane; baseline/suppression locations>
+Finding class (fix) / Layer scope (extend): <true-positive-vuln | false-positive | gate/config-defect — with OWASP id / the layer added>
+Changed: <path> — <one line each>
+Class swept (fix): <sibling endpoints/rules fixed or suppressed, or "instance-only, none">
+Gate evidence: <gate now green for the right reason; e.g. "semgrep ci → 0 new; suppression ticketed"; NEW-finding injection still fails the build>
+Authorization: <for any active scan: target env + who authorized it>
+Left to manual pentest: <what remains out of automatable reach>
+```
+
 ## When uncertain
 
 - Scope/authorization ambiguity (especially: is this target safe to actively scan?) → **ask before running an
@@ -123,4 +181,3 @@ manual penetration test** (business-logic abuse, API6 sensitive-flow abuse, anyt
   Run both agents in parallel on an LLM app; map each finding to its own framework (web/API Top 10 *and* LLM Top 10).
 - Multi-stack or unclear project stack → ask one question to pick the `<stack>` siblings; the `_shared`
   scanner skills are stack-independent and can proceed meanwhile.
-</content>

@@ -7,7 +7,7 @@
   },
   "metadata": {
     "description": "Stack-first QA automation skills library: install one self-contained plugin per tech stack (Java / .NET / TypeScript). Each plugin bundles every discipline — API/UI/mobile/performance/LLM/BDD authoring and verification — plus the language-agnostic manual-QA process, CI/CD pipelines, test reporting, and the cross-stack OWASP-mapped security skills.",
-    "version": "2.5.0"
+    "version": "2.8.0"
   },
   "plugins": [
     {
@@ -98,7 +98,17 @@
         "./qa/manual/test-design-techniques",
         "./qa/manual/test-strategy",
         "./qa/reporting/java/skills/allure-reporting",
-        "./qa/reporting/java/skills/flaky-test-quarantine"
+        "./qa/reporting/java/skills/flaky-test-quarantine",
+        "./engineering-practices/brainstorming",
+        "./engineering-practices/writing-plans",
+        "./engineering-practices/executing-plans",
+        "./engineering-practices/systematic-debugging",
+        "./engineering-practices/test-driven-development",
+        "./engineering-practices/using-git-worktrees",
+        "./engineering-practices/verification-before-completion",
+        "./engineering-practices/finishing-a-development-branch",
+        "./engineering-practices/subagent-driven-development",
+        "./engineering-practices/dispatching-parallel-agents"
       ],
       "agents": [
         "./qa/_shared/agents/qa-security.md",
@@ -204,7 +214,17 @@
         "./qa/manual/test-design-techniques",
         "./qa/manual/test-strategy",
         "./qa/reporting/dotnet/skills/allure-reporting",
-        "./qa/reporting/dotnet/skills/flaky-test-quarantine"
+        "./qa/reporting/dotnet/skills/flaky-test-quarantine",
+        "./engineering-practices/brainstorming",
+        "./engineering-practices/writing-plans",
+        "./engineering-practices/executing-plans",
+        "./engineering-practices/systematic-debugging",
+        "./engineering-practices/test-driven-development",
+        "./engineering-practices/using-git-worktrees",
+        "./engineering-practices/verification-before-completion",
+        "./engineering-practices/finishing-a-development-branch",
+        "./engineering-practices/subagent-driven-development",
+        "./engineering-practices/dispatching-parallel-agents"
       ],
       "agents": [
         "./qa/_shared/agents/qa-security.md",
@@ -306,7 +326,17 @@
         "./qa/typescript/skills/ui-test-author/reviewer",
         "./qa/typescript/skills/ui-test-author/selenium",
         "./qa/typescript/skills/visual-regression",
-        "./qa/typescript/skills/websocket-sse-testing"
+        "./qa/typescript/skills/websocket-sse-testing",
+        "./engineering-practices/brainstorming",
+        "./engineering-practices/writing-plans",
+        "./engineering-practices/executing-plans",
+        "./engineering-practices/systematic-debugging",
+        "./engineering-practices/test-driven-development",
+        "./engineering-practices/using-git-worktrees",
+        "./engineering-practices/verification-before-completion",
+        "./engineering-practices/finishing-a-development-branch",
+        "./engineering-practices/subagent-driven-development",
+        "./engineering-practices/dispatching-parallel-agents"
       ],
       "agents": [
         "./qa/_shared/agents/qa-security.md",
@@ -346,9 +376,12 @@
         "./frontend/blazor/skills/error-resilience",
         "./frontend/blazor/skills/forms",
         "./frontend/blazor/skills/generator",
+        "./frontend/blazor/skills/js-interop",
+        "./frontend/blazor/skills/localization",
         "./frontend/blazor/skills/motion",
         "./frontend/blazor/skills/performance",
         "./frontend/blazor/skills/project-scaffold",
+        "./frontend/blazor/skills/pwa-offline",
         "./frontend/blazor/skills/realtime",
         "./frontend/blazor/skills/reference",
         "./frontend/blazor/skills/responsive-design",
@@ -368,7 +401,17 @@
         "./design/ux-heuristics",
         "./design/web-design-guidelines",
         "./design/theme-factory",
-        "./design/ux-writing"
+        "./design/ux-writing",
+        "./engineering-practices/brainstorming",
+        "./engineering-practices/writing-plans",
+        "./engineering-practices/executing-plans",
+        "./engineering-practices/systematic-debugging",
+        "./engineering-practices/test-driven-development",
+        "./engineering-practices/using-git-worktrees",
+        "./engineering-practices/verification-before-completion",
+        "./engineering-practices/finishing-a-development-branch",
+        "./engineering-practices/subagent-driven-development",
+        "./engineering-practices/dispatching-parallel-agents"
       ],
       "agents": [
         "./frontend/blazor/agents/fe-blazor.md"

@@ -5,6 +5,11 @@ description: Toolkit for interacting with and testing local web applications usi
 
 # Web Application Testing
 
+> **Scope / when to use this vs the stack-native Playwright skills.** This is an Anthropic-provided **Python** toolkit for *ad-hoc, throwaway* browser automation — quickly driving a local web app to verify frontend behavior, debug UI, capture screenshots, or read browser logs *inside a Claude session*. It is **not** the way to author a maintained UI test suite. For a project's actual regression/E2E suite, use the **stack-native** skills instead, which produce page-objects, fixtures, and CI-runnable tests in the project's own language and runner:
+> - `qa/typescript/skills/ui-test-author/playwright` · `qa/dotnet/skills/ui-test-author/playwright` · `qa/java/skills/ui-test-author/playwright` — the maintained web UI suites (owned by the `qa-ui-{stack}` agents), plus `page-object-architect` / `pom-builder` for POMs.
+>
+> **Rule of thumb:** reach for *this* skill when you need Claude to poke a running app once and report back; reach for the stack skill when you're writing tests that live in the repo and run in the pipeline. This one is intentionally the library's single Python skill.
+
 To test local web applications, write native Python Playwright scripts.
 
 **Helper Scripts Available**:

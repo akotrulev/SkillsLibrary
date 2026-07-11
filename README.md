@@ -41,10 +41,10 @@ observability/          # Grafana, OpenTelemetry, structured logging
 qa/                     # Test authoring (API/UI/perf), DB/email/network verification, CI pipelines, reporting (see QA skills below)
 engineering-practices/  # TDD, debugging, code review, git worktrees, planning (from obra/superpowers)
 meta/                   # Authoring skills themselves (writing-skills, skill-creator)
-documents/              # Office document generation (docx, pdf, pptx, xlsx) — from anthropics/skills
 design/                 # Visual/UX: frontend-design, design-tokens, dataviz, brand-intake, iconography, ux-heuristics, theme-factory, ux-writing, web-design-guidelines
 communication/          # BA, user stories, stakeholder updates, internal comms
 ai-development/         # claude-api, mcp-builder
+extras/                 # Off-mission, kept available: algorithmic-art, Office document generation (docx, pdf, pptx, xlsx)
 ```
 
 
