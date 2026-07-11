@@ -7,7 +7,7 @@
   },
   "metadata": {
     "description": "Stack-first QA automation skills library: install one self-contained plugin per tech stack (Java / .NET / TypeScript). Each plugin bundles every discipline — API/UI/mobile/performance/LLM/BDD authoring and verification — plus the language-agnostic manual-QA process, CI/CD pipelines, test reporting, and the cross-stack OWASP-mapped security skills.",
-    "version": "2.8.0"
+    "version": "2.9.0"
   },
   "plugins": [
     {
@@ -415,6 +415,41 @@
       ],
       "agents": [
         "./frontend/blazor/agents/fe-blazor.md"
+      ]
+    },
+    {
+      "name": "data",
+      "description": "Self-contained senior data / database engineer plugin across 8 engines — PostgreSQL, SQL Server / Azure SQL, MySQL / MariaDB / Aurora, MongoDB, Redis / Valkey, DynamoDB, Cosmos DB, Elasticsearch / OpenSearch. Covers the full data lifecycle end-to-end: engine selection and version detection, schema / document / container modeling, security (roles / RLS / encryption / fine-grained IAM / DLS-FLS / audit), safe expand-contract online migrations, indexing, and query tuning — from a .NET 10 / Java 21 / Node 24 backend. Each engine skill is version-aware; the four cross-engine _shared skills (schema-design, migrations, caching-patterns, query-optimization) own the cross-engine decisions while the engine skills own the mechanics. Bundles the phased data-architect orchestrator agent — install just this one plugin for a complete database-engineering toolkit.",
+      "source": "./",
+      "strict": false,
+      "author": {
+        "name": "Aleksandar Kotrulev",
+        "email": "alexandur.kotrulev@gmail.com"
+      },
+      "license": "MIT",
+      "keywords": [
+        "database",
+        "data",
+        "sql",
+        "nosql"
+      ],
+      "category": "development",
+      "skills": [
+        "./data/_shared/schema-design",
+        "./data/_shared/migrations",
+        "./data/_shared/caching-patterns",
+        "./data/_shared/query-optimization",
+        "./data/postgresql",
+        "./data/sqlserver",
+        "./data/mysql",
+        "./data/mongodb",
+        "./data/redis",
+        "./data/dynamodb",
+        "./data/cosmosdb",
+        "./data/elasticsearch"
+      ],
+      "agents": [
+        "./data/agents/data-architect.md"
       ]
     }
   ]

@@ -13,6 +13,8 @@ The repo is a Claude Code plugin marketplace. Add it once, then install the one 
 /plugin install qa-java@skills-library         # complete Java 21 QA toolkit
 /plugin install qa-dotnet@skills-library        # complete .NET 8 / C# QA toolkit
 /plugin install qa-typescript@skills-library    # complete TypeScript QA toolkit
+/plugin install fe-blazor@skills-library        # complete Blazor (.NET 8/9/10) frontend toolkit
+/plugin install data@skills-library             # complete database-engineering toolkit (8 engines)
 ```
 
 **One self-contained plugin per language** — `qa-java`, `qa-dotnet`, `qa-typescript`. Each is a complete QA toolkit for its stack: it bundles every discipline (API / UI / mobile / performance / LLM authoring and review, BDD living documentation, deep verification, contracts, chaos, feature flags) **plus** the shared, cross-cutting capabilities that used to be separate peer plugins:
@@ -34,7 +36,7 @@ So installing a single plugin gives you the stack's authoring/verification skill
 
 ```
 design-patterns/        # Per-stack pattern reference, generators, reviewers
-data/                   # Per-database skills (Postgres, SQL Server, MySQL, Mongo, Redis, DynamoDB, Cosmos) + shared (migrations, caching, query opt, schema design)
+data/                   # Per-engine skills (Postgres, SQL Server, MySQL, Mongo, Redis, DynamoDB, Cosmos, Elasticsearch) + shared (migrations, caching, query opt, schema design) + data-architect agent
 auth/                   # Auth0 setup per stack
 devops/                 # Pipelines (GH Actions / GitLab CI / Azure Pipelines), deployment, env config, IaC
 observability/          # Grafana, OpenTelemetry, structured logging
@@ -142,9 +144,9 @@ See [`CONTRIBUTING.md`](CONTRIBUTING.md) and the templates in [`.skill-template/
 | Section               | State |
 |-----------------------|-------|
 | design-patterns       | scaffolding (react/reference imported from Vercel) |
-| data                  | 3 authored (postgresql, mongodb, redis) + 4 db stubs + 4 shared stubs |
+| data                  | authored + shipped — 8 version-aware per-engine skills (postgresql, sqlserver, mysql, mongodb, redis, dynamodb, cosmosdb, elasticsearch) + 4 cross-engine `_shared` skills + the `data-architect` agent; `data` plugin |
 | auth                  | scaffolding |
-| devops                | scaffolding (gh-actions / gitlab-ci / azure-pipelines authored; vercel-deployment imported) |
+| devops                | scaffolding (gh-actions / gitlab-ci / azure-pipelines authored; vercel-deployment moved to extras/) |
 | observability         | scaffolding |
 | qa                    | authored — 30 code-producing nodes (mostly ×3 stacks) + 7 process skills; Phase 1 complete, Phase 2 in progress (see qa/GAP-ANALYSIS.md) |
 | engineering-practices | imported from obra/superpowers |

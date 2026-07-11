@@ -2,7 +2,7 @@
 
 These rules apply to every skill in this library unless a specific skill explicitly overrides them.
 
-> **Scope:** The `qa/` folder, `frontend/blazor/` (with the `design/` and `auth/auth0-blazor` skills it depends on), and the 10 in-scope `engineering-practices/` developer-workflow skills (the `ep-*` set — the 8 core skills plus `ep-subagent-driven-development` and `ep-dispatching-parallel-agents`) are ready for use and the remote. The 2 excluded `engineering-practices/` skills (`requesting-code-review`, `receiving-code-review`) and all other top-level folders are under construction — ignore them, and do not upload them to the remote yet.
+> **Scope:** The `qa/` folder, `frontend/blazor/` (with the `design/` and `auth/auth0-blazor` skills it depends on), the `data/` folder (8 per-engine skills + 4 cross-engine `_shared` skills + the `data-architect` agent), and the 10 in-scope `engineering-practices/` developer-workflow skills (the `ep-*` set — the 8 core skills plus `ep-subagent-driven-development` and `ep-dispatching-parallel-agents`) are ready for use and the remote. The 2 excluded `engineering-practices/` skills (`requesting-code-review`, `receiving-code-review`) and all other top-level folders are under construction — ignore them, and do not upload them to the remote yet.
 
 ## Role
 
@@ -10,10 +10,10 @@ You are a senior AI engineer and a senior automation QA engineer. You follow bes
 
 ## Stack defaults
 
-- **Backend**: .NET 8 unless told otherwise
+- **Backend**: .NET — 10 primary, 8/9 supported (version-aware: detect the project's TFM and match; never up-level a down-level project)
 - **Frontend SPA**: React 18 + TypeScript (strict mode), or Blazor when specified
 - **JVM backend**: Java 21 + Spring Boot 3.x
-- **Node backend**: Node 20 + TypeScript + NestJS or Express
+- **Node backend**: Node 24 (active LTS; 22 maintenance — Node 20 is EOL since Apr 2026) + TypeScript + NestJS or Express
 - **Test runners**: NUnit (.NET), TestNG (Java), Vitest or Jest (TS), Playwright (UI), Appium (mobile)
 - **JVM build tool**: Gradle (Kotlin DSL) for new projects
 - **Auth**: Auth0 — Authorization Code + PKCE for SPAs, Client Credentials for service-to-service
@@ -188,6 +188,28 @@ New-project setup = copy `frontend/blazor/` + the `design/` skills + `auth/auth0
 ### Version policy (`frontend/blazor/`)
 
 .NET **8, 9, and 10 are all supported; .NET 10 is primary.** Every skill is version-aware — the agent's first act on an existing project is to detect the `TargetFramework` and apply the guidance keyed to it: net10 primary recipes (`[PersistentState]`, `NotFoundPage` / `NavigationManager.NotFound()`, `AddValidation()`, `ReconnectModal`) with net8/net9 fallbacks (manual `PersistentComponentState`, `UseStatusCodePagesWithReExecute`, DataAnnotations). Never apply a net10-only API to a down-level project, and never flag a down-level project for lacking one.
+
+## Data catalog
+
+The `data/` folder is the **database-engineering** stack (distinct from `qa/`, which tests the data this designs, and from the backends that consume it). It is organized like the QA and Frontend domains — **engine-first, domain-encapsulated, one phased orchestrator agent, one marketplace plugin** — and shipped as the self-contained `data` plugin. The **`data-architect`** agent (`data/agents/data-architect.md`) owns a data design end-to-end across six phases: discover (engine + version detection, workload shape) → model → secure → implement (DDL + migration) → tune (indexing/query) → hostile review. It loads **only** `data/*` skills; QA (`qa-api-{stack}` db-testing, `qa-security` for the cross-tenant leak test, `qa-performance-{stack}`) and `auth/*` (tenant claims → session context) are **peers** it names, not loads.
+
+**Skill shapes.** Two, like the rest of the library:
+- **Router + topic references** (`postgresql`, `sqlserver`, `mysql`, `mongodb`, `redis`) — the `SKILL.md` routes and holds the shared rules (version policy, connections/pooling, hard rules); depth lives in `references/<topic>.md` split by **topic** (`data-modeling` · `security` · `indexing` · `performance` · `caching`; Redis: `data-structures` · `patterns` · `security` · `operations`). Unlike qa's one-of-N families, a task may need **two** references at once (a new multi-tenant schema = `data-modeling.md` + `security.md`). **Read the router first, then the matching reference end-to-end before writing code.**
+- **Single-file** (`dynamodb`, `cosmosdb`, `elasticsearch`) — their models don't decompose the same way, so each is one file with topic sections.
+
+**Engines** (`data/<engine>/`, skill name `data-<engine>`): `postgresql` · `sqlserver` (Azure SQL) · `mysql` (MariaDB / Aurora) · `mongodb` · `redis` (Valkey) · `dynamodb` · `cosmosdb` · `elasticsearch` (OpenSearch). Fork-divergence is called out where it matters — MariaDB↔MySQL · Valkey↔Redis · OpenSearch↔Elasticsearch.
+
+**Cross-engine `_shared/`** (`data/_shared/<skill>/`): `schema-design` (id strategy / money / soft-delete / multi-tenant pattern choice / embed-vs-reference) · `migrations` (expand-contract universal pattern + tool-selection table) · `caching-patterns` (cache-aside / stampede / TTL & key policy) · `query-optimization` (universal triage / ESR / keyset / N+1).
+
+**The scope-fence contract** (checked every design): `_shared` owns the cross-engine **decision/pattern**, the engine skill owns the **mechanics**. Modeling — `_shared/schema-design` decides id strategy (UUIDv7 default), tenancy pattern, embed-vs-reference; the engine `data-modeling` executes the DDL / native generator / modeling mechanics. Migrations — `_shared/migrations` owns expand-contract + the tool table; the engine owns online-safe DDL (`CONCURRENTLY`, `NOT VALID`, pt-osc/gh-ost). Caching — `_shared/caching-patterns` owns the strategy; the engine `caching` (and Redis command mechanics) own the invalidation/change-channel seam. Query tuning — `_shared/query-optimization` owns universal triage; the engine `performance`/`indexing` own plan-reading and index types.
+
+**Peer handshakes** (named, not loaded): `qa-api-{java,dotnet,typescript}` `db-testing/{client,testcontainers,query-author}` seed/assert/clean against the schema; **`qa-security` owns the cross-tenant leak test** (BOLA/IDOR/BFLA) that proves Phase-3 isolation holds — MySQL/Mongo app-enforced tenancy makes this leak test *mandatory*, since there is no RLS to fall back on; `qa-performance-{stack}` validates Phase-5 tuning under load; `auth/auth0-{stack}` + `auth/_shared/auth0-concepts` supply the tenant/user claims feeding the RLS / app-enforced session context.
+
+### Version policy (`data/`)
+
+Every engine skill is **version-aware** (Blazor-style): the agent's first act on a live database is the version probe, then it keys every recipe to the detected version and never up-levels a down-level server. Supported versions: **PostgreSQL 18 primary / 15–17** · **SQL Server 2025 primary / 2022 / 2019 / Azure SQL evergreen** · **MySQL 8.4 LTS primary / 9.x / 8.0** · **MongoDB 8.0 LTS primary / 7.0** · **Redis 8.x primary / 7.2–7.4 + Valkey fork** · **Elasticsearch 9.x / 8.x + OpenSearch 3.x fork**; cloud stores (DynamoDB, Cosmos DB) track SDK majors + creation-time-immutable constraints. Backend samples match the Stack defaults — **.NET 10 / Java 21 / Node 24** — version-aware where the driver surface differs.
+
+New-project setup = copy `data/` (the engine you need + the four `_shared` skills).
 
 ## Engineering-practices catalog
 
