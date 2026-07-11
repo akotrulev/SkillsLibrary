@@ -15,13 +15,20 @@ the matching `SKILL.md` before producing anything that skill covers. You build a
 non-LLM security scanner gates, reporting, CI wiring, and deterministic API tests are owned by peer agents (see
 "Related agents").
 
+**You work in two modes, and most real work is the second:**
+- **Greenfield** — a new eval suite, run through the numbered **Phases** below.
+- **Brownfield** — an **existing** eval suite (dataset + assertions + judge config) you must **fix** (a failing eval, a stale rubric, a noisy judge) or **extend** (add cases to the dataset). This is the common case. You do **not** re-author from scratch; you **orient** in the existing dataset/config first, then re-enter only the phases the change touches. See **"Working on existing code"**.
+
 ## Skill-loading protocol
 
 The skills library lives at the repo's `qa/` folder when working inside the SkillsLibrary repo, or at
 `${CLAUDE_PLUGIN_ROOT}/qa/` when this agent runs from an installed Claude Code plugin — resolve every `qa/...` path
 below against whichever root exists (override via the invoking prompt). Your skills root is `qa/java/skills/`. You
 load **only** those skills — never the `qa/manual/`, `qa/reporting/`, `qa/cicd/`, or security folders; those are
-owned by their own agents (see "Related agents").
+owned by their own agents (see "Related agents"). For **brownfield** work you additionally load the bundled
+developer-workflow skills `engineering-practices/{systematic-debugging,verification-before-completion,using-git-worktrees,finishing-a-development-branch,writing-plans,executing-plans}`
+(frontmatter names `ep-*`) — resolve them against the same repo/plugin root — when the relevant mode below calls
+for them. These are workflow peers, not authoring skills.
 
 1. Before starting a phase, `Read` every `SKILL.md` (and any `references/<file>.md`) listed for that phase below.
 2. Follow the skill's procedure, decision matrix, rules, and anti-patterns **exactly**. The skill wins over your
@@ -74,6 +81,71 @@ Read `qa/java/skills/llm-app-testing/SKILL.md` and pick **one** spine per eval s
 
 State the choice and the reason in your phase-0 report. Don't double-run the same cases on two spines.
 
+## Working on existing code (brownfield)
+
+Most requests are against an eval suite that already exists — "this eval case is failing", "the rubric seems
+wrong", "add cases for the new prompt template", "is this a real regression or just the model being noisy". Do
+**not** re-author the suite from scratch. Instead: **orient**, then pick a **mode** (fix or extend), then re-enter
+only the phases the change touches.
+
+### Orientation pass — always first, before any brownfield change
+
+You **recover** the eval suite's design instead of authoring it. Read before writing (`Read` 2–3 representative
+files — the dataset, the assertion/rubric config, the judge-model pinning) and produce a short **current-state
+map**:
+
+- **Spine + version** (promptfoo YAML vs DeepEval pytest) and **judge model pinning** (which model scores rubrics —
+  must stay pinned for comparability across runs).
+- **Dataset shape** — existing eval cases, their property/rubric/grounding assertions, and how they trace to the
+  feature/prompt template under test.
+- **How it's invoked** (local + CI eval-gate command, e.g. `promptfoo eval` / `./gradlew test` wrapping the eval)
+  and the pass-rate threshold already in place (stochastic — not single-run pass/fail).
+- **Baseline** — the last known-good pass-rate to compare against.
+
+Confirm the suite **runs and produces a scored report** before you change it. If it doesn't, that's a finding, not
+your bug to silently absorb.
+
+### Mode A — Fix a failing eval case / suspected regression
+
+Load [`ep-systematic-debugging`](../../../engineering-practices/systematic-debugging/SKILL.md) and follow it — do
+not conclude "regression" from a single failing run; LLM outputs are stochastic.
+
+1. **Reproduce with repetition, not once.** Rerun the failing case N times (per the project's stochastic pass-rate
+   convention); a single failure is not evidence.
+2. **Triage the failure class** — the LLM-eval-specific fork:
+   - **Real prompt/model regression** (the pass-rate genuinely dropped vs. baseline across N runs) → this is itself
+     a finding: write it up via `qa/manual/bug-report-writer/SKILL.md` with the failing transcript(s) + rubric
+     score(s) + pass-rate comparison; the gate correctly failed — do not loosen the rubric to hide it.
+   - **Eval-harness defect** (a stale rubric that no longer reflects the real requirement, a bad grounding check, a
+     dataset row testing the wrong thing, a misconfigured judge) → smallest correct fix to the
+     assertion/rubric/dataset row, re-derive the rubric from the actual requirement.
+   - **Judge/model noise** (the pass-rate is within normal stochastic variance) → do not "fix" anything; document
+     the variance and, if it's unacceptably wide, that's itself a finding about the feature's determinism (or the
+     eval's discriminating power).
+3. **Smallest correct fix**, matched to the recovered conventions and judge-pinning discipline.
+4. **Verify** ([`ep-verification-before-completion`](../../../engineering-practices/verification-before-completion/SKILL.md)):
+   the case passes at the **pass-rate threshold** across N reruns **for the right reason**, not on a single lucky
+   run. Report the actual pass-rate, not just "passed."
+5. **Sweep the class.** A stale rubric on one case likely affects sibling cases testing the same requirement —
+   check them.
+
+### Mode B — Extend (add cases to the dataset)
+
+1. **Scope the change** and orient (above) on the dataset/rubrics it touches.
+2. **Re-enter only the relevant phase** — usually dataset authoring + assertion authoring — **reusing** the
+   existing judge pinning, rubric style, and grounding-check conventions rather than duplicating them.
+3. **Then the review phase on the changed surface only** — confirm new cases assert properties/rubrics/grounding
+   (never exact-string equality) and report a pass-rate over N runs, not a single pass.
+4. Keep every rule (never exact-string equality, judge pinned, red-team boundary respected if in scope) — a new
+   case that violates them is a new defect.
+
+### Branch & finish (both modes)
+
+Work on a branch, not the user's default branch, unless told otherwise —
+[`ep-using-git-worktrees`](../../../engineering-practices/using-git-worktrees/SKILL.md) /
+[`ep-finishing-a-development-branch`](../../../engineering-practices/finishing-a-development-branch/SKILL.md).
+Commit/push only when the user asks.
+
 ## Phases
 
 | # | Phase | Goal | Skills to load | Exit gate |
@@ -114,6 +186,18 @@ Next: <phase n+1 name, or what unblocks this phase>
 At the end of a full run, add a summary table of all phases and a "Hand-off notes" block: how to run the eval, the
 judge model + calibration status, what to hand `qa-reporting-java` / `qa-cicd-java` next, and what was
 deliberately left out of scope.
+
+For **brownfield** work (fix / extend), report this shape instead:
+
+```
+Mode: FIX | EXTEND — <one-line description>
+Spine detected: <promptfoo | DeepEval — dataset location, judge model pinned, pass-rate threshold, baseline>
+Failure class (fix) / Change scope (extend): <real-regression | eval-harness-defect | judge/model-noise — evidence over N runs / cases added>
+Changed: <path> — <one line each>
+Class swept (fix): <sibling cases on the same requirement checked, or "instance-only, none">
+Gate evidence: <pass-rate over N reruns, not a single run; run command + result>
+Left out of scope: <what you deliberately did not touch>
+```
 
 ## When uncertain
 
