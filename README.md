@@ -10,11 +10,13 @@ The repo is a Claude Code plugin marketplace. Add it once, then install the one 
 
 ```shell
 /plugin marketplace add akotrulev/SkillsLibrary
-/plugin install qa-java@skills-library         # complete Java 21 QA toolkit
-/plugin install qa-dotnet@skills-library        # complete .NET 8 / C# QA toolkit
-/plugin install qa-typescript@skills-library    # complete TypeScript QA toolkit
-/plugin install fe-blazor@skills-library        # complete Blazor (.NET 8/9/10) frontend toolkit
-/plugin install data@skills-library             # complete database-engineering toolkit (8 engines)
+/plugin install qa-java@skills-library             # complete Java 21 QA toolkit
+/plugin install qa-dotnet@skills-library           # complete .NET 8 / C# QA toolkit
+/plugin install qa-typescript@skills-library       # complete TypeScript QA toolkit
+/plugin install fe-blazor@skills-library           # complete Blazor (.NET 8/9/10) frontend toolkit
+/plugin install fe-react@skills-library            # complete React 19/18 (Next.js App Router / Vite) frontend toolkit
+/plugin install data@skills-library                # complete database-engineering toolkit (8 engines)
+/plugin install business-analysis@skills-library   # cross-feature business-flow analysis toolkit
 ```
 
 **One self-contained plugin per language** — `qa-java`, `qa-dotnet`, `qa-typescript`. Each is a complete QA toolkit for its stack: it bundles every discipline (API / UI / mobile / performance / LLM authoring and review, BDD living documentation, deep verification, contracts, chaos, feature flags) **plus** the shared, cross-cutting capabilities that used to be separate peer plugins:
@@ -24,7 +26,16 @@ The repo is a Claude Code plugin marketplace. Add it once, then install the one 
 - **CI/CD** — the stack's `ci-pipelines` skill (GitHub Actions / Azure Pipelines / GitLab CI), the language-agnostic `ci-conventions`, and the `qa-cicd-<stack>` agent.
 - **Reporting** — Allure results wiring + flaky-test detection/quarantine and the `qa-reporting-<stack>` agent.
 
-So installing a single plugin gives you the stack's authoring/verification skills, its api/ui/mobile/performance/llm/bdd agents, and the manual / security / cicd / reporting skills and agents — no peer plugins to add. (.NET additionally ships `*-project-scaffold` skills that stand up a complete runnable .NET 8 test solution from zero.) Pull updates later with `/plugin marketplace update skills-library`.
+So installing a single plugin gives you the stack's authoring/verification skills, its api/ui/mobile/performance/llm/bdd agents, and the manual / security / cicd / reporting skills and agents — no peer plugins to add. (.NET additionally ships `*-project-scaffold` skills that stand up a complete runnable .NET 8 test solution from zero.)
+
+**The other plugins:**
+
+- **`fe-blazor`** — the Blazor (.NET 8/9/10) frontend **development** stack: 22 `fe-blazor-*` skills (scaffold, state, styling, forms, data access, realtime, quality layers, bUnit tests, hostile reviewer), the phased `fe-blazor` orchestrator agent, plus the bundled `design/*` craft skills and `auth/auth0-blazor`.
+- **`fe-react`** — the React 19/18 + TypeScript frontend **development** stack (Next.js 15 App Router / RSC primary, Vite SPA fallback, MUI default): 21 `fe-react-*` skills, the phased `fe-react` orchestrator agent, plus the bundled `design/*` craft skills and `auth/auth0-react`.
+- **`data`** — the database-engineering stack: 8 version-aware per-engine skills (PostgreSQL, SQL Server / Azure SQL, MySQL, MongoDB, Redis / Valkey, DynamoDB, Cosmos DB, Elasticsearch / OpenSearch), 4 cross-engine `_shared` skills (schema-design, migrations, caching-patterns, query-optimization), and the phased `data-architect` agent.
+- **`business-analysis`** — cross-feature business-flow reasoning: 5 `ba-*` skills (persistent project knowledge base, flow mapping, state modeling, decision modeling, the 11-class feature-conflict sweep) and the `business-analyst` agent (analyze / model / audit modes).
+
+Every stack plugin (`qa-*`, `fe-*`) also bundles the 10 `ep-*` engineering-practices developer-workflow skills (brainstorm → plan → execute → verify → finish, TDD, systematic debugging, worktrees, agent dispatch). Pull updates later with `/plugin marketplace update skills-library`.
 
 ### Use the repo directly
 
@@ -35,8 +46,10 @@ So installing a single plugin gives you the stack's authoring/verification skill
 ## Layout
 
 ```
-design-patterns/        # Per-stack pattern reference, generators, reviewers
+code-patterns/        # Per-stack pattern reference, generators, reviewers
 data/                   # Per-engine skills (Postgres, SQL Server, MySQL, Mongo, Redis, DynamoDB, Cosmos, Elasticsearch) + shared (migrations, caching, query opt, schema design) + data-architect agent
+frontend/               # Frontend dev stacks: blazor/ (fe-blazor skills + agent) and react/ (fe-react skills + agent)
+business-analysis/      # Cross-feature business-flow reasoning: ba-* skills + business-analyst agent
 auth/                   # Auth0 setup per stack
 devops/                 # Pipelines (GH Actions / GitLab CI / Azure Pipelines), deployment, env config, IaC
 observability/          # Grafana, OpenTelemetry, structured logging
@@ -143,8 +156,10 @@ See [`CONTRIBUTING.md`](CONTRIBUTING.md) and the templates in [`.skill-template/
 
 | Section               | State |
 |-----------------------|-------|
-| design-patterns       | scaffolding (react/reference imported from Vercel) |
+| code-patterns       | scaffolding (react/reference imported from Vercel) |
 | data                  | authored + shipped — 8 version-aware per-engine skills (postgresql, sqlserver, mysql, mongodb, redis, dynamodb, cosmosdb, elasticsearch) + 4 cross-engine `_shared` skills + the `data-architect` agent; `data` plugin |
+| frontend              | authored + shipped — `frontend/blazor/` (22 skills + `fe-blazor` agent; `fe-blazor` plugin) and `frontend/react/` (21 skills + `fe-react` agent; `fe-react` plugin) |
+| business-analysis     | authored + shipped — 5 `ba-*` skills + the `business-analyst` agent; `business-analysis` plugin |
 | auth                  | scaffolding |
 | devops                | scaffolding (gh-actions / gitlab-ci / azure-pipelines authored; vercel-deployment moved to extras/) |
 | observability         | scaffolding |

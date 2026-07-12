@@ -7,7 +7,7 @@
   },
   "metadata": {
     "description": "Stack-first QA automation skills library: install one self-contained plugin per tech stack (Java / .NET / TypeScript). Each plugin bundles every discipline — API/UI/mobile/performance/LLM/BDD authoring and verification — plus the language-agnostic manual-QA process, CI/CD pipelines, test reporting, and the cross-stack OWASP-mapped security skills.",
-    "version": "2.11.0"
+    "version": "2.12.0"
   },
   "plugins": [
     {
@@ -454,7 +454,7 @@
     },
     {
       "name": "business-analysis",
-      "description": "Self-contained senior business-analyst plugin for cross-feature business-flow reasoning. Covers the full analysis loop end-to-end: a persistent per-project business-model knowledge base (docs/business-model/ — read-first / update-after, stable IDs, source traceability), BPMN-disciplined Mermaid flow mapping, one state × event lifecycle grid per business entity with all features overlaid, merged DMN-style decision tables with declared hit policies and mechanical completeness/overlap checks, and the taxonomy-driven feature-conflict sweep (11 conflict classes, mandatory boundary conditions, severity-tabled findings, resolutions recorded as business decisions). Sits upstream of QA test design — its artifacts and boundary conditions are first-class test-basis inputs. Bundles the phased business-analyst orchestrator agent (analyze / model / audit modes) — install just this one plugin for a complete business-analysis toolkit.",
+      "description": "Self-contained senior business-analysis plugin covering the whole upstream requirements lifecycle in two lanes. The AUTHORING lane turns a vague stakeholder ask into refinement-ready artifacts: a single-initiative scoping writeup, outcome-shaped epics, INVEST user stories with Gherkin acceptance criteria, and a review-only backlog readiness audit for stories authored elsewhere. The REASONING lane checks features against the WHOLE project: a persistent per-project business-model knowledge base (docs/business-model/ — read-first / update-after, stable IDs, source traceability), BPMN-disciplined Mermaid flow mapping, one state × event lifecycle grid per business entity with all features overlaid, merged DMN-style decision tables with declared hit policies and mechanical completeness/overlap checks, and the taxonomy-driven feature-conflict sweep (11 conflict classes, mandatory boundary conditions, severity-tabled findings, resolutions recorded as business decisions). Sits upstream of QA test design — its artifacts and boundary conditions are first-class test-basis inputs. Bundles two phased orchestrator agents: requirements-author (scope → epics → stories → audit) and business-analyst (analyze / model / audit modes) — install just this one plugin for a complete business-analysis toolkit.",
       "source": "./",
       "strict": false,
       "author": {
@@ -465,11 +465,16 @@
       "keywords": [
         "business-analysis",
         "requirements",
+        "user-stories",
         "feature-interaction",
         "modeling"
       ],
       "category": "development",
       "skills": [
+        "./business-analysis/skills/ba-initiative-scoping",
+        "./business-analysis/skills/ba-epic-writer",
+        "./business-analysis/skills/ba-story-writer",
+        "./business-analysis/skills/ba-backlog-auditor",
         "./business-analysis/skills/ba-project-knowledge",
         "./business-analysis/skills/ba-flow-mapper",
         "./business-analysis/skills/ba-state-modeler",
@@ -477,6 +482,7 @@
         "./business-analysis/skills/ba-feature-conflict-sweep"
       ],
       "agents": [
+        "./business-analysis/agents/requirements-author.md",
         "./business-analysis/agents/business-analyst.md"
       ]
     },

@@ -18,7 +18,7 @@ Guardrails for the **SQL string itself** when a .NET 8 integration test reaches 
 
 - Opening connections / fixture lifecycle / Respawn cleanup → `qa/dotnet/skills/db-testing/client`.
 - Container boot, schema migrations on startup → `qa/dotnet/skills/db-testing/testcontainers`.
-- Production data-access SQL → `design-patterns/dotnet/generator`.
+- Production data-access SQL → `code-patterns/dotnet/generator`.
 - Java SQL guardrails → `qa/java/skills/db-testing/query-author`.
 - TypeScript SQL guardrails → `qa/typescript/skills/db-testing/query-author`.
 - Pure unit tests with no SQL surface — keep them mock-driven.
@@ -333,5 +333,5 @@ Assert.That(order.Customer.Name, Is.EqualTo("Alice"));            // second quer
 - Test data builders feeding seeders → `qa/dotnet/skills/test-data-builder`
 - Java SQL guardrails → `qa/java/skills/db-testing/query-author`
 - TypeScript SQL guardrails → `qa/typescript/skills/db-testing/query-author`
-- Production data access SQL → `design-patterns/dotnet/generator`
+- Production data access SQL → `code-patterns/dotnet/generator`
 - Test strategy where DB tests fit → `qa/manual/test-strategy`

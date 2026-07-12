@@ -1,9 +1,9 @@
 ---
-name: communication-business-analysis
-description: Use when the user needs to turn a vague business problem, stakeholder request, or feature idea into a structured analysis — capturing goals, scope, stakeholders, constraints, risks, and success metrics. Triggers: "analyze this requirement", "do a BA writeup for X", "what's missing from this brief", "help me scope this initiative", "turn this stakeholder ask into something engineering can act on". Do NOT use for writing user stories (use communication/user-story-writer), bug reports (use qa/manual/bug-report-writer), or test cases (use qa/manual/test-case-writer).
+name: ba-initiative-scoping
+description: Use when the user needs to turn a vague business problem, stakeholder request, or feature idea into a structured single-initiative scoping writeup — capturing goals, scope, stakeholders, constraints, risks, and success metrics. Triggers: "do a BA writeup for X", "what's missing from this brief", "help me scope this initiative", "turn this stakeholder ask into something engineering can act on". Do NOT use for writing user stories (use business-analysis/skills/ba-story-writer), checking a feature against the WHOLE project's business model (use ba-feature-conflict-sweep — that's cross-feature, this is one initiative), the testable distillation of a single doc (use qa/manual/test-basis-analyzer), bug reports (use qa/manual/bug-report-writer), or test cases (use qa/manual/test-case-writer).
 ---
 
-# Business Analysis
+# Initiative Scoping
 
 Converts an ambiguous business request into a structured artifact engineering and product can act on. Output is decision-ready: scope, stakeholders, constraints, risks, success metrics, and open questions — separated and labeled.
 
@@ -16,7 +16,7 @@ Converts an ambiguous business request into a structured artifact engineering an
 
 ## When NOT to use
 
-- The requirement is already crisp and just needs user stories → `communication/user-story-writer`
+- The requirement is already crisp and just needs user stories → `business-analysis/skills/ba-story-writer`
 - The user wants a technical design / ADR → out of scope (use a design doc skill)
 - The user wants meeting minutes or a status update → `communication/stakeholder-updates`
 
@@ -119,7 +119,7 @@ When the inputs above don't exist yet and a stakeholder can be asked, drive the 
 
 ## Handoffs
 
-- Tight enough to refine? → `communication/user-story-writer`
+- Tight enough to refine? → `business-analysis/skills/ba-story-writer`
 - Engineering needs a contract? → API/DTO skills under `qa/<stack>/skills/api-dto-writer`
 - Stakeholder update needed? → `communication/stakeholder-updates`
 - QA needs the testable distillation (business logic, validations, observable implementation notes)? → `qa/manual/test-basis-analyzer` — don't re-derive it here; the BA writeup is one of its inputs

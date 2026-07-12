@@ -1,6 +1,6 @@
 ---
 name: fe-blazor-reviewer
-description: Use when the user asks to review Blazor code (.NET 8/9/10) for component misuse, lifecycle bugs, missing dispose, double-fetch on prerender, `Action` instead of `EventCallback`, mis-scoped or hardcoded render modes, missing data-testids, UI-correctness smells, or JS interop pitfalls. Triggers: "review this Blazor page", "why does this fetch twice", "spot smells in this state container", "audit JS interop", "audit the testids". Do NOT use for explanations (use `frontend/blazor/skills/reference`), generating code (use `frontend/blazor/skills/generator`), non-Blazor .NET (use `design-patterns/dotnet/reviewer`), or auth (use `auth/auth0-blazor`).
+description: Use when the user asks to review Blazor code (.NET 8/9/10) for component misuse, lifecycle bugs, missing dispose, double-fetch on prerender, `Action` instead of `EventCallback`, mis-scoped or hardcoded render modes, missing data-testids, UI-correctness smells, or JS interop pitfalls. Triggers: "review this Blazor page", "why does this fetch twice", "spot smells in this state container", "audit JS interop", "audit the testids". Do NOT use for explanations (use `frontend/blazor/skills/reference`), generating code (use `frontend/blazor/skills/generator`), non-Blazor .NET (use `code-patterns/dotnet/reviewer`), or auth (use `auth/auth0-blazor`).
 ---
 
 # Blazor Design Patterns — Reviewer
@@ -20,7 +20,7 @@ Reviews Blazor code (.NET 8/9/10 — Static SSR / Server / WASM / Interactive Au
 
 - Conceptual lookup → `frontend/blazor/skills/reference`
 - Generating new code → `frontend/blazor/skills/generator`
-- Non-Blazor .NET review → `design-patterns/dotnet/reviewer`
+- Non-Blazor .NET review → `code-patterns/dotnet/reviewer`
 - Auth wiring review → `auth/auth0-blazor` + general code review
 
 ## Review checklist
@@ -182,5 +182,5 @@ Severities per `CLAUDE.md`.
 
 - Rewrite → `frontend/blazor/skills/generator`
 - Conceptual lookup → `frontend/blazor/skills/reference`
-- Non-Blazor .NET review → `design-patterns/dotnet/reviewer`
+- Non-Blazor .NET review → `code-patterns/dotnet/reviewer`
 - Auth0 wiring review → `auth/auth0-blazor`

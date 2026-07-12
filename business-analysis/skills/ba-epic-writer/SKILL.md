@@ -1,9 +1,9 @@
 ---
-name: communication-epic-writer
-description: Use when the user needs to convert a scoped business-analysis writeup into one or more epics — sized for a release / quarter, sliced into user stories, with measurable outcomes. Triggers: "write an epic for X", "slice this BA writeup into epics", "size this initiative into a quarter", "what should the epic shape look like for Y". Do NOT use for high-level scoping (use `communication/business-analysis`), individual stories with AC (use `communication/user-story-writer`), or status updates (use `communication/stakeholder-updates`).
+name: ba-epic-writer
+description: Use when the user needs to convert a scoped business-analysis writeup into one or more epics — sized for a release / quarter, sliced into user stories, with measurable outcomes. Triggers: "write an epic for X", "slice this BA writeup into epics", "size this initiative into a quarter", "what should the epic shape look like for Y". Do NOT use for high-level scoping (use `business-analysis/skills/ba-initiative-scoping`), individual stories with AC (use `business-analysis/skills/ba-story-writer`), or status updates (use `communication/stakeholder-updates`).
 ---
 
-# Communication — Epic Writer
+# Epic Writer
 
 Closes the **BA → Epic → Story** chain. Takes a scoped business-analysis writeup and produces one or more epics: each sized for a release or quarter, with a clear outcome, a slicing strategy, an enumeration of child stories, and explicit out-of-scope. Epics are the negotiation surface with product and engineering leadership — bigger than a sprint, smaller than a roadmap.
 
@@ -16,8 +16,8 @@ Closes the **BA → Epic → Story** chain. Takes a scoped business-analysis wri
 
 ## When NOT to use
 
-- Vague requirement, no scope yet → `communication/business-analysis` first
-- Scoped requirement, ready for stories → `communication/user-story-writer`
+- Vague requirement, no scope yet → `business-analysis/skills/ba-initiative-scoping` first
+- Scoped requirement, ready for stories → `business-analysis/skills/ba-story-writer`
 - Status update to stakeholders → `communication/stakeholder-updates`
 - A single sprint-sized piece of work → write a story, not an epic
 
@@ -71,7 +71,7 @@ When this epic is done, **<who>** can **<do what>** so that **<measurable change
 | 3 | Bulk operations | Data variation | S2 |
 | ... | ... | ... | ... |
 
-These are enumerated, not committed — refinement will produce the real INVEST stories via `communication/user-story-writer`.
+These are enumerated, not committed — refinement will produce the real INVEST stories via `business-analysis/skills/ba-story-writer`.
 
 ## 6. In scope / out of scope / deferred
 | In scope | Out of scope | Deferred (next epic) |
@@ -97,7 +97,7 @@ These are enumerated, not committed — refinement will produce the real INVEST 
 - [ ] Stakeholder update posted
 
 ## 11. Handoffs
-- Per-story refinement → `communication/user-story-writer`
+- Per-story refinement → `business-analysis/skills/ba-story-writer`
 - Release / steerco update → `communication/stakeholder-updates`
 - API contract scaffolds → `qa/<stack>/skills/api-dto-writer`
 - Test strategy for the epic → `qa/manual/test-strategy`
@@ -161,20 +161,20 @@ The pattern: **WHO** + **CAN DO WHAT** + **SO THAT MEASURABLE CHANGE**. If any o
 
 ## Generation steps
 
-1. Read the BA writeup; refuse to start if the BA is unscoped or has no measurable success criterion (point user back to `communication/business-analysis`)
+1. Read the BA writeup; refuse to start if the BA is unscoped or has no measurable success criterion (point user back to `business-analysis/skills/ba-initiative-scoping`)
 2. Draft the one-sentence outcome — iterate with the user until WHO / DO WHAT / SO THAT MEASURABLE CHANGE all pass the sniff test
 3. Pick the slicing strategy
 4. Enumerate child stories (titles + slice + rough sprint guess) — note these are anticipated, not committed
 5. Mark in-scope / out-of-scope / deferred with rationale
 6. Surface epic-level risks and dependencies
 7. Write the Definition of Done as a binary checklist
-8. Hand off to `communication/user-story-writer` for the first 2–3 stories
+8. Hand off to `business-analysis/skills/ba-story-writer` for the first 2–3 stories
 
 ## Handoffs
 
-- Up-stream (vague requirement) → `communication/business-analysis`
-- Down-stream (story refinement) → `communication/user-story-writer`
-- Epics/stories authored elsewhere need a readiness audit → `communication/backlog-reviewer`
+- Up-stream (vague requirement) → `business-analysis/skills/ba-initiative-scoping`
+- Down-stream (story refinement) → `business-analysis/skills/ba-story-writer`
+- Epics/stories authored elsewhere need a readiness audit → `business-analysis/skills/ba-backlog-auditor`
 - Stakeholder update during execution → `communication/stakeholder-updates`
 - Test plan for the epic → `qa/manual/test-strategy`
 - API/DTO contracts that the epic depends on → `qa/<stack>/skills/api-dto-writer`

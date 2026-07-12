@@ -22,7 +22,7 @@ Owns making a Blazor app fast and keeping it fast across three cost centers that
 
 - Writing the CSS / bundling static assets → [`styling`](../styling/SKILL.md) (its static-asset note points *here* for the perf side)
 - SignalR as a *feature* (live push, hubs, streams) → [`realtime`](../realtime/SKILL.md); this skill owns SignalR only as a *scale* concern
-- Server-side query/DB tuning → `data/*`, `design-patterns/dotnet/persistence`
+- Server-side query/DB tuning → `data/*`, `code-patterns/dotnet/persistence`
 - Caching read-heavy fetches (`HybridCache`) → [`data-access`](../data-access/SKILL.md)
 - Load/stress/soak testing the deployed app → `qa/dotnet/skills/performance/nbomber` (peer)
 
@@ -252,6 +252,6 @@ Set explicit budgets and fail CI when they regress — an unmeasured perf rule r
 - Static-asset bundling/serving mechanics → [`styling`](../styling/SKILL.md)
 - SignalR as a live-data feature (not scale) → [`realtime`](../realtime/SKILL.md)
 - Caching slow reads (`HybridCache`) → [`data-access`](../data-access/SKILL.md)
-- Server-side query/DB tuning → `data/*`, `design-patterns/dotnet/persistence`
+- Server-side query/DB tuning → `data/*`, `code-patterns/dotnet/persistence`
 - OTel meter export to Grafana → `observability/opentelemetry-dotnet`, `observability/grafana-dashboards`
 - Load/stress/soak of the deployed app → `qa/dotnet/skills/performance/nbomber` (peer)

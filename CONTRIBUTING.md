@@ -18,7 +18,7 @@ Each skill lives in its own directory and contains a single `SKILL.md`:
 
 ```
 qa/test-case-writer/SKILL.md
-design-patterns/dotnet/generator/SKILL.md
+code-patterns/dotnet/generator/SKILL.md
 ```
 
 Supporting templates or examples go alongside:
@@ -44,6 +44,12 @@ Every skill follows the same outline. Copy the right file from `.skill-template/
 5. **Procedure** — numbered steps Claude follows.
 6. **Output format** — exact shape of what gets produced.
 7. **Examples** — at least one good example, ideally one bad example with rationale.
+
+## Agent structure
+
+Phased orchestrator agents live in `<domain>/agents/<name>.md`. Copy `.skill-template/agent.md` and keep its section skeleton: role + **two-modes note** → Skill-loading protocol → Operating rules → **Working on existing \<X\> (brownfield)** → Phases → Related agents → Output contract (both shapes) → When uncertain.
+
+**The brownfield structure is mandatory.** Every agent must be able to orient in an existing codebase/suite/schema, fix (Mode A: reproduce → triage → smallest correct change → verify → sweep the class), and extend (Mode B: reuse existing seams, re-enter only the touched phases) — not just author from zero. That means: the two-modes note up top, the four-part `## Working on existing <X> (brownfield)` section, the `Mode: FIX | EXTEND` brownfield output contract, and the `ep-*` loading sentence (or the inlined-discipline variant when the agent's plugin doesn't bundle `engineering-practices/` — see `data-architect`). An agent PR without this section is incomplete.
 
 ## Writing a good `description`
 

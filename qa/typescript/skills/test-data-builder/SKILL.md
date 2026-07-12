@@ -19,7 +19,7 @@ Eliminates repeated inline test data literals in TypeScript test projects (Vites
 
 - .NET test data → `qa/dotnet/skills/test-data-builder`
 - Java test data → `qa/java/skills/test-data-builder`
-- Production-code builders → `design-patterns/typescript/generator`
+- Production-code builders → `code-patterns/typescript/generator`
 - Test data for performance scenarios (volume) → `qa/typescript/skills/performance/k6`
 - One-off fixture used by a single test → inline is fine; only extract on duplication
 
@@ -249,4 +249,4 @@ Don't build "an order in the DB" inside the factory — that couples the factory
 - UI tests where they back form-fill helpers → `qa/typescript/skills/ui-test-author/playwright` / `qa/typescript/skills/ui-test-author/selenium` / `qa/typescript/skills/ui-test-author/appium`
 - Test reviewers (verify factories used, not literals) → `qa/typescript/skills/api-test-author/reviewer` / `qa/typescript/skills/ui-test-author/reviewer`
 - Test strategy / pyramid → `qa/manual/test-strategy`
-- Production-code builders → `design-patterns/typescript/generator`
+- Production-code builders → `code-patterns/typescript/generator`

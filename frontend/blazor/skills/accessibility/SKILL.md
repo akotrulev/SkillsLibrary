@@ -1,6 +1,6 @@
 ---
 name: fe-blazor-accessibility
-description: Use when making a Blazor app (.NET 8/9/10) accessible as you build — semantic-first markup (lean on the platform before ARIA), focus management under enhanced navigation (`FocusOnNavigate`, focus-after-nav, dialog focus traps + restore), keyboard + ARIA in custom widgets (ARIA APG, roving tabindex), live-region announcements for route changes and async results, skip links, plus display-level a11y: a label on every icon-only button, never state by color/icon alone, contrast on muted/active colors vs actual backgrounds. Triggers: "make this Blazor component accessible", "keyboard nav for a custom widget", "focus isn't announced after navigation", "the icon buttons have no label", "focus trap in my dialog". Do NOT use to SCAN/audit for violations (axe/Lighthouse are qa's `accessibility-testing`, a peer — not loaded here), form-field validation a11y (use `frontend/blazor/skills/forms`), CSS contrast token setup (use `frontend/blazor/skills/styling`), or React (use `design-patterns/react/accessibility`).
+description: Use when making a Blazor app (.NET 8/9/10) accessible as you build — semantic-first markup (lean on the platform before ARIA), focus management under enhanced navigation (`FocusOnNavigate`, focus-after-nav, dialog focus traps + restore), keyboard + ARIA in custom widgets (ARIA APG, roving tabindex), live-region announcements for route changes and async results, skip links, plus display-level a11y: a label on every icon-only button, never state by color/icon alone, contrast on muted/active colors vs actual backgrounds. Triggers: "make this Blazor component accessible", "keyboard nav for a custom widget", "focus isn't announced after navigation", "the icon buttons have no label", "focus trap in my dialog". Do NOT use to SCAN/audit for violations (axe/Lighthouse are qa's `accessibility-testing`, a peer — not loaded here), form-field validation a11y (use `frontend/blazor/skills/forms`), CSS contrast token setup (use `frontend/blazor/skills/styling`), or React (use `code-patterns/react/accessibility`).
 ---
 
 # Blazor — Accessibility
@@ -26,7 +26,7 @@ Standardizes **authoring** accessible Blazor UIs. Targets **WCAG 2.2 AA** as the
 - Form input labels + validation-message a11y → [`forms`](../forms/SKILL.md)
 - Contrast *token* setup / `focus-visible` styling mechanics → [`styling`](../styling/SKILL.md) (this skill owns *whether* contrast passes; styling owns *how* the tokens are defined)
 - Component-library primitives that already ship a11y (MudBlazor dialog, Fluent tabs) → [`component-library`](../component-library/SKILL.md) (use them instead of hand-rolling)
-- React → `design-patterns/react/accessibility`
+- React → `code-patterns/react/accessibility`
 
 ## Lean on the platform
 

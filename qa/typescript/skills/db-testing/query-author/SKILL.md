@@ -18,7 +18,7 @@ Guardrails for the **SQL string itself** when a Node 20 + TypeScript Vitest inte
 
 - Pool / fixture lifecycle / cleanup wiring → `qa/typescript/skills/db-testing/client`.
 - Container boot, migrations on startup → `qa/typescript/skills/db-testing/testcontainers`.
-- Production data-access SQL → `design-patterns/typescript/generator`.
+- Production data-access SQL → `code-patterns/typescript/generator`.
 - .NET SQL guardrails → `qa/dotnet/skills/db-testing/query-author`.
 - Java SQL guardrails → `qa/java/skills/db-testing/query-author`.
 - Pure unit tests with no SQL surface — keep them mock-driven.
@@ -352,5 +352,5 @@ expect(order!.customer.name).toBe('Alice');   // extra query, surprise
 - Test data factories feeding seeders → `qa/typescript/skills/test-data-builder`
 - .NET SQL guardrails → `qa/dotnet/skills/db-testing/query-author`
 - Java SQL guardrails → `qa/java/skills/db-testing/query-author`
-- Production data access SQL → `design-patterns/typescript/generator`
+- Production data access SQL → `code-patterns/typescript/generator`
 - Test strategy where DB tests fit → `qa/manual/test-strategy`

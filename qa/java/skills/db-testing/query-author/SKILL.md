@@ -18,7 +18,7 @@ Guardrails for the **SQL string itself** when a Java 21 TestNG integration test 
 
 - Spring `DataSource` wiring / fixture lifecycle / `@Rollback` cleanup → `qa/java/skills/db-testing/client`.
 - Container boot, Flyway migrations on startup → `qa/java/skills/db-testing/testcontainers`.
-- Production data-access SQL (Spring Data JPA, jOOQ in production) → `design-patterns/java/generator`.
+- Production data-access SQL (Spring Data JPA, jOOQ in production) → `code-patterns/java/generator`.
 - .NET SQL guardrails → `qa/dotnet/skills/db-testing/query-author`.
 - TypeScript SQL guardrails → `qa/typescript/skills/db-testing/query-author`.
 - Pure unit tests with no SQL surface — keep them mock-driven.
@@ -368,5 +368,5 @@ assertThat(order.getCustomer().getName()).isEqualTo("Alice");     // second quer
 - Test data builders feeding seeders → `qa/java/skills/test-data-builder`
 - .NET SQL guardrails → `qa/dotnet/skills/db-testing/query-author`
 - TypeScript SQL guardrails → `qa/typescript/skills/db-testing/query-author`
-- Production data access SQL → `design-patterns/java/generator`
+- Production data access SQL → `code-patterns/java/generator`
 - Test strategy where DB tests fit → `qa/manual/test-strategy`

@@ -203,16 +203,19 @@ Left out of scope: <what you deliberately did not touch>
 - The user wants **unscripted exploration** rather than scripted cases → point to `qa/manual/exploratory-charter-writer`.
 - The user wants a **release plan / risk strategy** rather than cases → point to `qa/manual/test-strategy`.
 
-## Handoffs
+## Related agents (peers — invoke separately, do not load their skills)
 
 - Cross-feature analysis *upstream*: if the project keeps a business model (`docs/business-model/`), the `business-analysis/agents/business-analyst` peer runs first — its flow/state/decision artifacts and conflict boundary conditions are first-class test basis (the boundary conditions are BVA seeds)
+- Automating the designed cases → `qa/<stack>/agents/qa-api-<stack>` / `qa-ui-<stack>` / `qa-mobile-<stack>`
+
+Internal skill routing (these are `qa/manual/*` skills this agent loads itself, listed here as the map of which phase hands to which):
+
 - Distill the docs into the test-basis document → `qa/manual/test-basis-analyzer`
 - Technique depth & coverage criteria → `qa/manual/test-design-techniques`
 - Suite formatting (Setup/Cases/Cleanup) → `qa/manual/test-case-writer`
 - Risk-first sizing before designing → `qa/manual/test-strategy`
 - Defects found while reasoning about the docs → `qa/manual/bug-report-writer`
 - Unscripted probing of the gaps → `qa/manual/exploratory-charter-writer`
-- Automating the designed cases → `qa/<stack>/agents/qa-api-<stack>` / `qa-ui-<stack>` / `qa-mobile-<stack>`
 
 ## Session memory
 

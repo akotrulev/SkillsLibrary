@@ -224,3 +224,4 @@ Good response: the structured document above — concise, sourced, with the genu
 - Build the basis from a live app when docs are thin → Exploration mode in `qa/manual/agents/qa-manual-test-designer` + `qa/manual/exploratory-charter-writer`
 - File defects noticed while analyzing → `qa/manual/bug-report-writer`
 - Cross-feature conflicts / the whole-project business model (this skill is single-feature) → `business-analysis/skills/ba-feature-conflict-sweep` + `business-analysis/agents/business-analyst`
+- The doc is a vague initiative that needs scoping (not testing) → `business-analysis/skills/ba-initiative-scoping` + `business-analysis/agents/requirements-author`

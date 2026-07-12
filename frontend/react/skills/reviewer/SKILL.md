@@ -5,7 +5,7 @@ description: Use when the user asks to review React code (React 19/18 + TypeScri
 
 # React Design Patterns — Reviewer (TypeScript)
 
-Reviews React code (React 19/18 + TypeScript — Next.js App Router / RSC primary, Vite SPA fallback) against the patterns enforced by [`generator`](../generator/SKILL.md), the Vercel rule set vendored at `design-patterns/react/reference/`, and the global + FE code rules in `CLAUDE.md`. Findings in the standard severity table; does **not** rewrite — hands off to [`generator`](../generator/SKILL.md).
+Reviews React code (React 19/18 + TypeScript — Next.js App Router / RSC primary, Vite SPA fallback) against the patterns enforced by [`generator`](../generator/SKILL.md), the Vercel rule set vendored at `code-patterns/react/reference/`, and the global + FE code rules in `CLAUDE.md`. Findings in the standard severity table; does **not** rewrite — hands off to [`generator`](../generator/SKILL.md).
 
 **Version rule:** detect the installed React (and Next.js) major from `package.json` before flagging. `forwardRef` is a finding only on React 19 (where `ref` is a plain prop); on 18 it's correct. Hand-rolled `useMemo`/`useCallback` are a finding on a **React Compiler**-enabled project (auto-memoization) but correct where the compiler is off. Manual `isPending`/rollback is correct on 18 (where `useActionState`/`useOptimistic` don't exist). Never flag a down-level project for lacking an API it doesn't have.
 
@@ -170,7 +170,7 @@ Reviews React code (React 19/18 + TypeScript — Next.js App Router / RSC primar
 
 1. Identify the **render target** (App Router RSC / Vite SPA) and, for each file, whether it's a Server or Client Component — half the findings depend on it.
 2. Walk the checklists. The top offenders, in order: misplaced `'use client'`, `useEffect`-to-derive/sync-state, index keys, missing cleanup, un-memoized context, server-data-in-a-client-store.
-3. Cross-reference the vendored Vercel rules (`design-patterns/react/reference/`) for perf / Next.js specifics.
+3. Cross-reference the vendored Vercel rules (`code-patterns/react/reference/`) for perf / Next.js specifics.
 4. For each finding: file + line, concrete issue, one-sentence fix.
 5. **Do not rewrite.** Hand off to [`generator`](../generator/SKILL.md).
 
@@ -213,8 +213,8 @@ Severities per `CLAUDE.md`:
 
 - Rewrite → [`generator`](../generator/SKILL.md)
 - Conceptual lookup → [`reference`](../reference/SKILL.md)
-- Vercel rule deep-dive → `design-patterns/react/reference/`
-- Composition deep-dive → `design-patterns/react/composition-patterns`
+- Vercel rule deep-dive → `code-patterns/react/reference/`
+- Composition deep-dive → `code-patterns/react/composition-patterns`
 - Component tests to lock a fix → [`component-testing`](../component-testing/SKILL.md)
 - UI test-code review → **peer** `qa/typescript/skills/ui-test-author/reviewer`
 - Auth0 wiring review → `auth/auth0-react`

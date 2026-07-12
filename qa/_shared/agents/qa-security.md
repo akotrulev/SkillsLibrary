@@ -133,6 +133,14 @@ Work on a branch, not the user's default branch, unless told otherwise — [`ep-
 Phases 2 and 3 are cheap and safe — wire them into every PR. Phase 4-active and phase 5 need an authorized safe
 target and may run on a slower cadence (nightly / pre-release).
 
+## Related agents (peers — invoke separately, do not load their skills)
+
+- **`qa-api-<stack>`** — owns the functional API suite whose clients/DTOs/token helpers Phase 3 reuses; hand functional (non-security) coverage gaps to it.
+- **`qa-cicd-<stack>`** — owns the pipeline itself; Phase 6 wires security gates into the lanes it defines (the SCA gate is yours, the pipeline shape is theirs).
+- **`qa-reporting-<stack>`** — owns Allure wiring and flake/quarantine mechanics for any security tests that run as part of the suite.
+- **`qa-manual-test-designer`** — owns bug reports; confirmed vulnerabilities that need a written defect go through its `bug-report-writer` discipline.
+- **`qa-llm-<stack>`** — owns LLM model-behavior red-teaming (OWASP LLM Top 10); hand off anything conversational/model-shaped (see "When uncertain").
+
 ## Output contract
 
 At the end of every phase, report:

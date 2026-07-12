@@ -1,6 +1,6 @@
 ---
-name: communication-user-story-writer
-description: Use when the user wants to convert a scoped requirement or BA writeup into INVEST user stories with acceptance criteria. Triggers: "write user stories for X", "turn this into stories the team can pick up", "add acceptance criteria to this story", "split this epic". Do NOT use for high-level scoping (use communication/business-analysis), test cases (use qa/manual/test-case-writer), or bug reports (use qa/manual/bug-report-writer).
+name: ba-story-writer
+description: Use when the user wants to convert a scoped requirement or BA writeup into INVEST user stories with acceptance criteria. Triggers: "write user stories for X", "turn this into stories the team can pick up", "add acceptance criteria to this story", "split this epic". Do NOT use for high-level scoping (use business-analysis/skills/ba-initiative-scoping), test cases (use qa/manual/test-case-writer), or bug reports (use qa/manual/bug-report-writer).
 ---
 
 # User Story Writer
@@ -15,8 +15,8 @@ Turns a scoped requirement into a set of INVEST-quality user stories with Gherki
 
 ## When NOT to use
 
-- Requirement is still vague → `communication/business-analysis` first
-- Stories were authored elsewhere and need a review-only readiness audit → `communication/backlog-reviewer` (this skill *fixes* stories; that one only *finds*)
+- Requirement is still vague → `business-analysis/skills/ba-initiative-scoping` first
+- Stories were authored elsewhere and need a review-only readiness audit → `business-analysis/skills/ba-backlog-auditor` (this skill *fixes* stories; that one only *finds*)
 - User wants test scripts → `qa/manual/test-case-writer`
 - User wants a defect filed → `qa/manual/bug-report-writer`
 

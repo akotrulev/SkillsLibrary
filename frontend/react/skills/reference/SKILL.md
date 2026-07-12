@@ -122,7 +122,7 @@ Default: components are **controlled** — value in via props, changes out via a
 
 ### Composition over configuration
 
-Prefer composing small components (pass `children`/slot props) over one component with 20 boolean props and mode flags. A `Card` with `header`/`children`/`footer` slots beats a `Card` with `showHeader`/`headerText`/`showFooter` booleans — the global "composition over inheritance/configuration" rule applied to the render tree, and what keeps atoms/molecules domain-free (they expose slots; the organism fills them). See `design-patterns/react/composition-patterns` for the deep treatment (compound components, explicit variants over booleans).
+Prefer composing small components (pass `children`/slot props) over one component with 20 boolean props and mode flags. A `Card` with `header`/`children`/`footer` slots beats a `Card` with `showHeader`/`headerText`/`showFooter` booleans — the global "composition over inheritance/configuration" rule applied to the render tree, and what keeps atoms/molecules domain-free (they expose slots; the organism fills them). See `code-patterns/react/composition-patterns` for the deep treatment (compound components, explicit variants over booleans).
 
 ## Hooks — the lifecycle, and the rules
 

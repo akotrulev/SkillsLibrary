@@ -1,6 +1,6 @@
 ---
 name: ba-feature-conflict-sweep
-description: Use when checking a new or changed feature against the WHOLE project's business model for conflicts — normalize its requirements into trigger/actor/action/data/constraint/state tuples, sweep pairwise against the KB with an 11-class conflict taxonomy, give every finding a concrete boundary condition, and rank findings in a severity table; resolutions are recorded business decisions. Triggers: "does this feature conflict with anything", "sweep this story against the model", "will the new discount clash with loyalty points", "cross-feature impact check". Do NOT use for single-document ambiguity flagging (qa/manual/test-basis-analyzer), code-level impact analysis, or building the models themselves (ba-flow-mapper / ba-state-modeler / ba-decision-modeler).
+description: Use when checking a new or changed feature against the WHOLE project's business model for conflicts — normalize its requirements into trigger/actor/action/data/constraint/state tuples, sweep pairwise against the KB with an 11-class conflict taxonomy, give every finding a concrete boundary condition, and rank findings in a severity table; resolutions are recorded business decisions. Triggers: "does this feature conflict with anything", "sweep this story against the model", "will the new discount clash with loyalty points", "cross-feature impact check". Do NOT use for single-document ambiguity flagging (qa/manual/test-basis-analyzer), scoping one vague initiative into a writeup (ba-initiative-scoping — that's one initiative, this is cross-feature), code-level impact analysis, or building the models themselves (ba-flow-mapper / ba-state-modeler / ba-decision-modeler).
 ---
 
 # BA — Feature Conflict Sweep
@@ -19,6 +19,7 @@ Without the KB there is nothing to sweep against — the value scales with what 
 ## When NOT to use
 
 - No KB and no wish for one — single-story flagging is `qa/manual/test-basis-analyzer`
+- The input is a vague, unscoped initiative rather than concrete requirements — scope it first with `business-analysis/skills/ba-initiative-scoping`
 - The conflict is already visible and localized — go straight to the owning model skill
 - Code-level dependency/impact analysis — this is requirements-level
 
