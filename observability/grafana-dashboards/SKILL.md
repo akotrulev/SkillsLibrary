@@ -19,7 +19,7 @@ Designs and builds Grafana dashboards on top of the library's standard stack (Lo
 
 - Instrumenting code → `observability/opentelemetry-{dotnet,java,node}`
 - Writing the LogQL / PromQL itself → `observability/logql-promql`
-- Designing the SLO / SLI math → `qa/_shared/quality-metrics` for product-side SLIs; this skill for the panel
+- Designing the SLO / SLI math → `qa/manual/quality-metrics` for product-side SLIs; this skill for the panel
 
 ## Inputs needed
 
@@ -194,4 +194,4 @@ Safe `by`/`group by` dimensions: `service`, `env`, `http_route`, `http_method`, 
 - Instrumentation (what shapes the data) → `observability/opentelemetry-{dotnet,java,node}`
 - Structured logging fields → `observability/structured-logging-{dotnet,java,node}`
 - Pipeline-side deploy annotations → `devops/{github-actions,gitlab-ci,azure-pipelines}`
-- SLO math / quality KPIs → `qa/_shared/quality-metrics`
+- SLO math / quality KPIs → `qa/manual/quality-metrics`

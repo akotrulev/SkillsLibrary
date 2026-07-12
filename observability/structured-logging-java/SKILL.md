@@ -88,11 +88,14 @@ dependencies {
     </encoder>
   </appender>
 
-  <!-- Bridge OTel span context (traceId, spanId) into MDC for every log -->
-  <turboFilter class="io.opentelemetry.instrumentation.logback.mdc.v1_0.OpenTelemetryAppender"/>
+  <!-- Bridge OTel span context (traceId, spanId) into MDC for every log.
+       OpenTelemetryAppender is a WRAPPER appender: it decorates the real appender. -->
+  <appender name="OTEL" class="io.opentelemetry.instrumentation.logback.mdc.v1_0.OpenTelemetryAppender">
+    <appender-ref ref="JSON"/>
+  </appender>
 
   <root level="INFO">
-    <appender-ref ref="JSON"/>
+    <appender-ref ref="OTEL"/>
   </root>
 
   <!-- Tame chatty libraries -->
@@ -187,7 +190,7 @@ The exception **must be the last argument**, not a placeholder substitution — 
 
 ## Correlation with traces
 
-The `OpenTelemetryAppender` turbo-filter copies `trace_id` / `span_id` from the active OTel context into MDC. Every log emitted inside an active span gets `traceId` and `spanId` JSON fields. Loki + Tempo wire these to "Jump to trace" in Grafana.
+The `OpenTelemetryAppender` wrapper appender copies `trace_id` / `span_id` from the active OTel context into MDC. Every log emitted inside an active span gets `traceId` and `spanId` JSON fields. Loki + Tempo wire these to "Jump to trace" in Grafana.
 
 No code changes needed in callers once the appender is registered.
 
@@ -227,7 +230,7 @@ Or filter at the source — pass DTO projections to the logger, never the entity
 - Output is JSON in every environment except `local` (where colorized console is allowed)
 - Service name / version / environment as static fields in every log line
 - `<mdc/>` provider in the encoder so MDC keys are top-level JSON fields
-- `OpenTelemetryAppender` turbo-filter wired up so `traceId` / `spanId` ride every log
+- `OpenTelemetryAppender` wrapper appender wired up so `traceId` / `spanId` ride every log
 - Loki labels are low-cardinality (`service`, `environment`, `level`)
 - Chatty namespaces (`org.springframework.*`, `org.hibernate.*`, `org.apache.kafka.*`) capped at `WARN`
 - MDC keys cleared at the end of every request via try-with-resources / `MDCCloseable`
@@ -252,7 +255,7 @@ Or filter at the source — pass DTO projections to the logger, never the entity
 2. Add the encoder + OTel MDC dependencies.
 3. Create `src/main/resources/logback-spring.xml` from the template; tune `<springProperty>` to match the project's properties.
 4. Add the `RequestIdFilter` (or equivalent) to populate `requestId` for every request.
-5. If OTel is in the project, the `OpenTelemetryAppender` turbo-filter is mandatory.
+5. If OTel is in the project, the `OpenTelemetryAppender` wrapper appender is mandatory.
 6. Sweep the codebase for `+` concatenation in log calls and `e.toString()`; convert to placeholders + exception arg.
 7. Smoke locally — `curl` a few endpoints, confirm JSON includes `traceId`, `spanId`, `requestId`, `service.name`.
 

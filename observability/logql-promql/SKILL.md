@@ -18,7 +18,7 @@ The query layer of the Loki + Prometheus + Tempo stack. Covers PromQL for metric
 
 - Dashboard layout / panel design → `observability/grafana-dashboards`
 - Generating metrics in code → `observability/opentelemetry-{dotnet,java,node}`
-- Designing SLI/SLO targets (the math, not the query) → `qa/_shared/quality-metrics`
+- Designing SLI/SLO targets (the math, not the query) → `qa/manual/quality-metrics`
 
 ## Inputs needed
 
@@ -290,5 +290,5 @@ The log itself carries `user_id`, `tenant_id`, etc. as JSON fields:
 
 - Dashboard layout → `observability/grafana-dashboards`
 - What's in the metrics / log streams → `observability/opentelemetry-{stack}` + `observability/structured-logging-{stack}`
-- SLO math / KPI definitions → `qa/_shared/quality-metrics`
+- SLO math / KPI definitions → `qa/manual/quality-metrics`
 - Adding new metrics / fields needed for a query → instrumentation skill for the stack

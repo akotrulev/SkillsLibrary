@@ -149,7 +149,7 @@ export async function processOrder(orderId: string, tenantId: string): Promise<v
 }
 ```
 
-`startActiveSpan` makes the new span the current one so any auto-instrumented call inside `doWork()` becomes a child span. Always end the span (the callback flavor handles this for you on the success path; the manual flavor needs `finally`).
+`startActiveSpan` makes the new span the current one so any auto-instrumented call inside `doWork()` becomes a child span. `startActiveSpan` only scopes the context — it never ends the span for you. Always call `span.end()` in a `finally` block, in both the callback and manual flavors.
 
 ### Custom metrics
 

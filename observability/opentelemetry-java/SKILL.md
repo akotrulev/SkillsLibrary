@@ -11,7 +11,7 @@ Instruments a Java 21 + Spring Boot 3 service with OpenTelemetry. Default is the
 
 - **Java 21 + Spring Boot 3.x**
 - **OpenTelemetry Java agent** (`opentelemetry-javaagent.jar`) — recommended default; one JAR, no code changes for HTTP / JDBC / Kafka / Redis / Mongo / gRPC instrumentation
-- **`io.opentelemetry:opentelemetry-api`** + **`opentelemetry-extension-annotations`** — for custom spans and `@WithSpan`
+- **`io.opentelemetry:opentelemetry-api`** + **`opentelemetry-instrumentation-annotations`** — for custom spans and `@WithSpan`
 - **Micrometer + OpenTelemetry bridge** (`io.opentelemetry:opentelemetry-micrometer1-shim`) — Spring Boot's `MeterRegistry` flows through OTel
 - Log correlation via the SLF4J/Logback bridge from `observability/structured-logging-java`
 - Resource attributes follow OTel semantic conventions
@@ -138,7 +138,7 @@ The bridge applies OTel naming conventions automatically (`orders.created` → P
 
 ### Log correlation
 
-The `OpenTelemetryAppender` turbo-filter from `observability/structured-logging-java` injects `traceId` / `spanId` into MDC for every log emitted inside an active span. No additional wiring here.
+The `OpenTelemetryAppender` wrapper appender (see `observability/structured-logging-java`) injects `traceId` / `spanId` into MDC for every log emitted inside an active span. No additional wiring here.
 
 ## Sampling
 
@@ -179,7 +179,7 @@ For SDK-only, use `io.opentelemetry:opentelemetry-sdk-extension-autoconfigure` a
 - Span names are operation names (`order.process`), not values
 - Metric names lowercase dot.case (`orders.created`, `orders.processing.duration`)
 - Use Micrometer for metrics in Spring Boot apps (don't bypass to raw OTel meters); the bridge handles the rest
-- Exclude `/actuator/health` / `/actuator/prometheus` from server-span sampling via `OTEL_INSTRUMENTATION_COMMON_DEFAULT_ENABLED=true` + per-instrumentation filters
+- Exclude `/actuator/health` and `/actuator/prometheus` spans at the Collector via a filter processor on `http.route` (the agent has no stable per-URL exclusion env var); see the tail_sampling/filter examples in `observability/loki-tempo-setup`
 - Sampling capped at 10% in production; raise per env if volume permits
 - Logs flow via stdout JSON (`OTEL_LOGS_EXPORTER=none`); only switch to OTel logs export if the log pipeline truly needs OTLP
 
@@ -202,7 +202,7 @@ For SDK-only, use `io.opentelemetry:opentelemetry-sdk-extension-autoconfigure` a
 2. Add the agent JAR to the Dockerfile (or to the deployment manifest) with the env vars above.
 3. Add the annotation library + Micrometer bridge dependencies in `build.gradle`.
 4. Add `@WithSpan` to ~5 high-value domain methods (the ones you'd want to debug in prod first).
-5. Confirm `observability/structured-logging-java` is in place; `OpenTelemetryAppender` provides `traceId`/`spanId` MDC.
+5. Confirm `observability/structured-logging-java` is in place; the `OpenTelemetryAppender` wrapper appender (see `observability/structured-logging-java`) provides `traceId`/`spanId` MDC.
 6. Local smoke: docker-compose with the app + Collector + Tempo + Prometheus + Grafana; hit a few endpoints; confirm spans in Tempo, metrics in Prometheus, logs linked by trace ID in Grafana.
 
 ## Handoffs

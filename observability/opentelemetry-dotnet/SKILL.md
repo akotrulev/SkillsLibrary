@@ -12,7 +12,6 @@ Instruments a .NET 8 service with OpenTelemetry: traces via `Activity` / `System
 - **.NET 8**
 - `OpenTelemetry.Extensions.Hosting`, `OpenTelemetry.Exporter.OpenTelemetryProtocol`
 - Instrumentation libraries: `OpenTelemetry.Instrumentation.AspNetCore`, `Http`, `EntityFrameworkCore` (community), `SqlClient`, `StackExchangeRedis`
-- `OpenTelemetry.Extensions.Hosting.Internal.LogToActivityEventConversionExtensions` for ILogger → span events when needed
 - Resource attributes follow **OTel semantic conventions** (`service.name`, `service.version`, `deployment.environment`)
 - Sampler default: `ParentBased(TraceIdRatioBased)` — head-based sampling at the edge, tail-based at the Collector if needed
 
@@ -62,19 +61,16 @@ using OpenTelemetry.Metrics;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var resource = ResourceBuilder.CreateDefault()
-    .AddService(
-        serviceName:    builder.Configuration["Service:Name"]!,
-        serviceVersion: builder.Configuration["Service:Version"]!)
-    .AddAttributes(new KeyValuePair<string, object>[]
-    {
-        new("deployment.environment", builder.Environment.EnvironmentName)
-    });
-
 builder.Services.AddOpenTelemetry()
-    .ConfigureResource(r => r.AddService(builder.Configuration["Service:Name"]!))
+    .ConfigureResource(r => r
+        .AddService(
+            serviceName:    builder.Configuration["Service:Name"]!,
+            serviceVersion: builder.Configuration["Service:Version"]!)
+        .AddAttributes(new KeyValuePair<string, object>[]
+        {
+            new("deployment.environment", builder.Environment.EnvironmentName)
+        }))
     .WithTracing(t => t
-        .SetResourceBuilder(resource)
         .SetSampler(builder.Environment.IsProduction()
             ? new ParentBasedSampler(new TraceIdRatioBasedSampler(0.1))
             : new AlwaysOnSampler())
@@ -97,7 +93,6 @@ builder.Services.AddOpenTelemetry()
             o.Protocol = OtlpExportProtocol.Grpc;
         }))
     .WithMetrics(m => m
-        .SetResourceBuilder(resource)
         .AddAspNetCoreInstrumentation()
         .AddHttpClientInstrumentation()
         .AddRuntimeInstrumentation()                 // GC, threadpool, exceptions
@@ -133,7 +128,7 @@ public sealed class OrderProcessor
         catch (Exception ex)
         {
             activity?.SetStatus(ActivityStatusCode.Error, ex.Message);
-            activity?.AddException(ex);
+            activity?.RecordException(ex);
             throw;
         }
     }
@@ -206,7 +201,7 @@ Propagators.DefaultTextMapPropagator.Inject(new PropagationContext(ctx ?? defaul
 - One `Meter` per subsystem with the same naming pattern
 - Span names are **operation names**, not user data: `order.process`, `payment.charge`, `user.fetch` — not `process_order_42`
 - Metric names are `lowercase.dot.case`; use `{unit}` curly-brace notation per OTel spec
-- Set `activity.SetStatus(...)` and `AddException(...)` on the exception path — without it, error spans look successful
+- Set `activity.SetStatus(...)` and `RecordException(...)` on the exception path (`Activity.AddException` is .NET 9+ only) — without it, error spans look successful
 - Exclude `/health` / `/metrics` / `/swagger` from instrumentation via the `Filter` callback — they otherwise dominate sampling
 - Resource attributes include `service.name`, `service.version`, `deployment.environment` — required for cross-service queries
 - OTLP endpoint comes from configuration / env vars; never hardcoded
