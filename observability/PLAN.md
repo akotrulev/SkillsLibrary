@@ -201,20 +201,22 @@ Grafana deprecated Promtail (announced Feb 2025, EOL ~Mar 2026) in favor of **Gr
 
 ## Phase 5 — Agent + packaging (do this LAST; needs human review before publishing)
 
-### 5.1 Author the `observability-engineer` agent
+### 5.1 Author the `observability-engineer` agent(s)
 
-- [ ] Read `.skill-template/agent.md` (the mandatory brownfield-capable template) and one existing agent for shape (`data/agents/data-architect.md` is the closest analog: one agent over a mixed skill set).
-- [ ] Create `observability/agents/observability-engineer.md`:
-  - **Phases:** 1 Discover (detect stack + versions of each service, existing telemetry, what's already shipped where) → 2 Backend setup (loki-tempo-setup + prometheus-mimir-setup) → 3 Instrument (per-stack opentelemetry-* + structured-logging-*, chosen by detected stack) → 4 Query & dashboards (logql-promql + grafana-dashboards) → 5 Hostile review (cardinality audit, cross-store nav actually wired, no direct-to-Tempo exporters).
-  - **Brownfield:** orient first (what telemetry exists, what's broken), then FIX or EXTEND re-entering only the touched phase — copy the discipline wording from the template.
-  - Loads **only** `observability/*` skills. Names as **peers** (not loads): `qa-cicd-{stack}` (CI wiring), `devops/kubernetes` + `devops/iac-bicep-terraform` (cluster/IaC), `qa/manual/quality-metrics` (SLO math).
-- [ ] **STOP for human check-in before 5.2** — packaging shape (standalone `observability` plugin vs bundling into `be-*` plugins) is a product decision the user must confirm.
+**Decision (2026-07-12): per-stack agents, bundled into the `be-*` plugins.** The user chose to bundle observability into the backend plugins rather than ship a standalone plugin. Because `be-*` is strictly per-stack, the single cross-stack agent the plan first envisioned became three per-stack agents.
 
-### 5.2 Publish (only after explicit user approval)
+- [x] Read `.skill-template/agent.md` (the mandatory brownfield-capable template) and `backend/dotnet/agents/be-dotnet.md` for shape (the observability agents are siblings in the same plugin).
+- [x] Create `observability/agents/observability-engineer-{dotnet,java,node}.md` (three files):
+  - **Phases:** 1 Discover (detect stack + version, existing telemetry, what's shipped where) → 2 Backend setup (loki-tempo-setup + prometheus-mimir-setup) → 3 Instrument (the stack's opentelemetry-* + structured-logging-*) → 4 Query & dashboards (logql-promql + grafana-dashboards) → 5 Hostile review (cardinality audit, cross-store nav actually wired, no direct-to-backend exporters).
+  - **Brownfield:** orient first, then FIX or EXTEND re-entering only the touched phase — discipline wording from the template.
+  - Loads **only** `observability/*` skills. Names as **peers** (not loads): `be-{stack}` (the instrumented service, sibling in-plugin), `qa-cicd-{stack}` (CI wiring), `devops/kubernetes` + `devops/iac-bicep-terraform` (cluster/IaC), `qa/manual/quality-metrics` (SLO math).
+- [x] **Human check-in done** — packaging shape confirmed: **bundle into `be-*`** (not standalone).
 
-- [ ] Add the `observability` plugin to `.claude-plugin/marketplace.json` (mirror the `data` plugin entry: all skills + the agent, self-contained).
-- [ ] Update root `CLAUDE.md`: add observability to the in-scope list in the Scope blockquote, add an "Observability catalog" section (mirror the Data catalog section's length/shape), and update the published-plugins line.
-- [ ] Commit: `Ship observability/ domain: observability-engineer agent + plugin`.
+### 5.2 Publish (bundle into `be-*`)
+
+- [x] Add the 6 `observability/*` skills + the stack's `observability-engineer-{stack}` agent to each `be-dotnet` / `be-java` / `be-node` entry in `.claude-plugin/marketplace.json`; refresh each plugin's description to mention observability. (No standalone `observability` plugin.)
+- [x] Update root `CLAUDE.md`: add observability to the in-scope list in the Scope blockquote, add an "Observability catalog" section, and update the published-plugins line (observability bundled into `be-*`).
+- [x] Commit: `Ship observability/ domain: bundle observability-engineer agents + skills into be-*`.
 
 ---
 

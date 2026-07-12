@@ -556,7 +556,7 @@
     },
     {
       "name": "be-dotnet",
-      "description": "Self-contained senior .NET backend developer plugin (.NET 10 primary, 8/9 supported) for design-pattern application, EF Core persistence, and Auth0/Cognito service-side auth. Covers explaining patterns (Strategy, Decorator, Repository, CQRS/MediatR, Factory, Specification, Options, Pipeline, Saga, Outbox), scaffolding them into a codebase with constructor injection / async-all-the-way / nullable reference types, EF Core persistence (DbContext design, configurations, migrations, query patterns, optimistic concurrency, bulk operations), Auth0/Cognito JWT bearer validation + RBAC + Client Credentials M2M, and reviewing existing code for pattern misuse, DI/async violations, and layering bleeds — end-to-end or any single phase. Bundles the language-agnostic pattern reference/reviewer, the Auth0/Cognito concepts skills, and the developer-workflow (ep-*) skills, plus the phased be-dotnet orchestrator agent — install just this one plugin for a complete .NET backend toolkit.",
+      "description": "Self-contained senior .NET backend developer plugin (.NET 10 primary, 8/9 supported) for design-pattern application, EF Core persistence, and Auth0/Cognito service-side auth. Covers explaining patterns (Strategy, Decorator, Repository, CQRS/MediatR, Factory, Specification, Options, Pipeline, Saga, Outbox), scaffolding them into a codebase with constructor injection / async-all-the-way / nullable reference types, EF Core persistence (DbContext design, configurations, migrations, query patterns, optimistic concurrency, bulk operations), Auth0/Cognito JWT bearer validation + RBAC + Client Credentials M2M, and reviewing existing code for pattern misuse, DI/async violations, and layering bleeds — end-to-end or any single phase. Bundles the language-agnostic pattern reference/reviewer, the Auth0/Cognito concepts skills, the developer-workflow (ep-*) skills, and the full observability toolkit (OpenTelemetry + Serilog structured logging + Loki/Tempo/Prometheus-Mimir backend + LogQL/PromQL + Grafana dashboards), plus the phased be-dotnet orchestrator and observability-engineer-dotnet agents — install just this one plugin for a complete .NET backend toolkit.",
       "source": "./",
       "strict": false,
       "author": {
@@ -591,15 +591,22 @@
         "./engineering-practices/verification-before-completion",
         "./engineering-practices/finishing-a-development-branch",
         "./engineering-practices/subagent-driven-development",
-        "./engineering-practices/dispatching-parallel-agents"
+        "./engineering-practices/dispatching-parallel-agents",
+        "./observability/opentelemetry-dotnet",
+        "./observability/structured-logging-dotnet",
+        "./observability/loki-tempo-setup",
+        "./observability/prometheus-mimir-setup",
+        "./observability/logql-promql",
+        "./observability/grafana-dashboards"
       ],
       "agents": [
-        "./backend/dotnet/agents/be-dotnet.md"
+        "./backend/dotnet/agents/be-dotnet.md",
+        "./observability/agents/observability-engineer-dotnet.md"
       ]
     },
     {
       "name": "be-java",
-      "description": "Self-contained senior Java backend developer plugin (Java 21 + Spring Boot 3.x) for design-pattern application, JPA/Hibernate persistence, and Auth0/Cognito service-side auth. Covers explaining patterns (Strategy, Decorator, Repository, CQRS/mediator, Factory, Specification, Options/`@ConfigurationProperties`, Pipeline, Saga, Outbox), scaffolding them into a codebase with constructor injection / virtual-threads-async / modern-Java idioms (records, sealed types), JPA/Hibernate + Spring Data persistence (entity design, Flyway migrations, `@Transactional` boundaries, `@Version` optimistic locking, N+1 prevention), Auth0/Cognito Spring Security resource server + method-level RBAC + Client Credentials M2M, and reviewing existing code for pattern misuse, threading/DI violations, and layering bleeds — end-to-end or any single phase. Bundles the language-agnostic pattern reference/reviewer, the Auth0/Cognito concepts skills, and the developer-workflow (ep-*) skills, plus the phased be-java orchestrator agent — install just this one plugin for a complete Java backend toolkit.",
+      "description": "Self-contained senior Java backend developer plugin (Java 21 + Spring Boot 3.x) for design-pattern application, JPA/Hibernate persistence, and Auth0/Cognito service-side auth. Covers explaining patterns (Strategy, Decorator, Repository, CQRS/mediator, Factory, Specification, Options/`@ConfigurationProperties`, Pipeline, Saga, Outbox), scaffolding them into a codebase with constructor injection / virtual-threads-async / modern-Java idioms (records, sealed types), JPA/Hibernate + Spring Data persistence (entity design, Flyway migrations, `@Transactional` boundaries, `@Version` optimistic locking, N+1 prevention), Auth0/Cognito Spring Security resource server + method-level RBAC + Client Credentials M2M, and reviewing existing code for pattern misuse, threading/DI violations, and layering bleeds — end-to-end or any single phase. Bundles the language-agnostic pattern reference/reviewer, the Auth0/Cognito concepts skills, the developer-workflow (ep-*) skills, and the full observability toolkit (OpenTelemetry Java agent + SLF4J/Logback structured logging + Loki/Tempo/Prometheus-Mimir backend + LogQL/PromQL + Grafana dashboards), plus the phased be-java orchestrator and observability-engineer-java agents — install just this one plugin for a complete Java backend toolkit.",
       "source": "./",
       "strict": false,
       "author": {
@@ -634,15 +641,22 @@
         "./engineering-practices/verification-before-completion",
         "./engineering-practices/finishing-a-development-branch",
         "./engineering-practices/subagent-driven-development",
-        "./engineering-practices/dispatching-parallel-agents"
+        "./engineering-practices/dispatching-parallel-agents",
+        "./observability/opentelemetry-java",
+        "./observability/structured-logging-java",
+        "./observability/loki-tempo-setup",
+        "./observability/prometheus-mimir-setup",
+        "./observability/logql-promql",
+        "./observability/grafana-dashboards"
       ],
       "agents": [
-        "./backend/java/agents/be-java.md"
+        "./backend/java/agents/be-java.md",
+        "./observability/agents/observability-engineer-java.md"
       ]
     },
     {
       "name": "be-node",
-      "description": "Self-contained senior Node backend developer plugin (Node 24 active LTS primary, 22 maintenance supported; TypeScript strict) for design-pattern application and Prisma/Drizzle persistence. Covers explaining patterns (discriminated-union strategy, `Result<T,E>` vs throwing, branded ids, higher-order-function decorators, repository, lightweight CQRS command handlers, Options config via Zod), scaffolding them into a Node/NestJS/Express codebase with constructor injection or closures / async-all-the-way / TypeScript strict mode, Prisma (default) / Drizzle / TypeORM persistence (schema design, migrations, query patterns, optimistic concurrency, bulk operations), and reviewing existing code for type-safety leaks, pattern misuse, and async/DI violations — end-to-end or any single phase. Bundles the language-agnostic pattern reference/reviewer and the developer-workflow (ep-*) skills, plus the phased be-node orchestrator agent — install just this one plugin for a complete Node backend-patterns toolkit.",
+      "description": "Self-contained senior Node backend developer plugin (Node 24 active LTS primary, 22 maintenance supported; TypeScript strict) for design-pattern application and Prisma/Drizzle persistence. Covers explaining patterns (discriminated-union strategy, `Result<T,E>` vs throwing, branded ids, higher-order-function decorators, repository, lightweight CQRS command handlers, Options config via Zod), scaffolding them into a Node/NestJS/Express codebase with constructor injection or closures / async-all-the-way / TypeScript strict mode, Prisma (default) / Drizzle / TypeORM persistence (schema design, migrations, query patterns, optimistic concurrency, bulk operations), and reviewing existing code for type-safety leaks, pattern misuse, and async/DI violations — end-to-end or any single phase. Bundles the language-agnostic pattern reference/reviewer, the developer-workflow (ep-*) skills, and the full observability toolkit (OpenTelemetry sdk-node + pino structured logging + Loki/Tempo/Prometheus-Mimir backend + LogQL/PromQL + Grafana dashboards), plus the phased be-node orchestrator and observability-engineer-node agents — install just this one plugin for a complete Node backend-patterns toolkit.",
       "source": "./",
       "strict": false,
       "author": {
@@ -673,10 +687,17 @@
         "./engineering-practices/verification-before-completion",
         "./engineering-practices/finishing-a-development-branch",
         "./engineering-practices/subagent-driven-development",
-        "./engineering-practices/dispatching-parallel-agents"
+        "./engineering-practices/dispatching-parallel-agents",
+        "./observability/opentelemetry-node",
+        "./observability/structured-logging-node",
+        "./observability/loki-tempo-setup",
+        "./observability/prometheus-mimir-setup",
+        "./observability/logql-promql",
+        "./observability/grafana-dashboards"
       ],
       "agents": [
-        "./backend/node/agents/be-node.md"
+        "./backend/node/agents/be-node.md",
+        "./observability/agents/observability-engineer-node.md"
       ]
     }
   ]
