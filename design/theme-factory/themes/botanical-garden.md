@@ -13,6 +13,7 @@ A fresh and organic theme featuring vibrant garden-inspired colors for lively pr
 
 - **Headers**: DejaVu Serif Bold
 - **Body Text**: DejaVu Sans
+- **Web font suggestion** (web-app lane): headings `"Bitter", Georgia, serif`; body `"Source Sans 3", system-ui, sans-serif`
 
 ## Best Used For
 

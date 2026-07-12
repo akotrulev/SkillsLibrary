@@ -5,7 +5,7 @@ description: Use when writing or reviewing the words inside a UI — button and 
 
 # UX Writing — voice & microcopy
 
-Owns the **words** in a UI and the voice they share. Interface copy is design material, not decoration: it exists to make the product easier to understand and therefore easier to use. This skill supplies the *voice*; the engineering stack owns the *slots* that voice fills — and the two are deliberately split so the copy discipline is written once and reused across stacks (Blazor today, React next).
+Owns the **words** in a UI and the voice they share. Interface copy is design material, not decoration: it exists to make the product easier to understand and therefore easier to use. This skill supplies the *voice*; the engineering stack owns the *slots* that voice fills — and the two are deliberately split so the copy discipline is written once and reused across stacks (Blazor, React).
 
 **The slot/voice split — who owns what:**
 
@@ -27,8 +27,8 @@ Never duplicate the structural rules back into this skill, and never restate voi
 ## When NOT to use
 
 - The visual/aesthetic direction of the page → [`design/frontend-design`](../frontend-design/SKILL.md)
-- The *structure* of empty states/confirmations + IA rules → the stack's `ui-conventions` ([Blazor](../../frontend/blazor/skills/ui-conventions/SKILL.md))
-- Error → message *mapping/categorization* mechanics → the stack's `error-resilience` ([Blazor](../../frontend/blazor/skills/error-resilience/SKILL.md))
+- The *structure* of empty states/confirmations + IA rules → the stack's `ui-conventions` ([Blazor](../../frontend/blazor/skills/ui-conventions/SKILL.md) · [React](../../frontend/react/skills/ui-conventions/SKILL.md))
+- Error → message *mapping/categorization* mechanics → the stack's `error-resilience` ([Blazor](../../frontend/blazor/skills/error-resilience/SKILL.md) · [React](../../frontend/react/skills/error-resilience/SKILL.md))
 - Translating copy / locale-formatting / pseudo-localization → qa `i18n-testing` + a localization skill
 
 ## The five rules
@@ -108,7 +108,7 @@ Copy is read aloud by screen readers and out of visual context — never lean on
 ## Handoffs
 
 - Visual/aesthetic direction (this discipline's design-side summary) → [`design/frontend-design`](../frontend-design/SKILL.md)
-- Empty-state/confirmation **structure**, IA "one verb per operation" rule → stack `ui-conventions` ([Blazor](../../frontend/blazor/skills/ui-conventions/SKILL.md))
-- Error **categorization/mapping**, three-state regions, correlation id → stack `error-resilience` ([Blazor](../../frontend/blazor/skills/error-resilience/SKILL.md))
+- Empty-state/confirmation **structure**, IA "one verb per operation" rule → stack `ui-conventions` ([Blazor](../../frontend/blazor/skills/ui-conventions/SKILL.md) · [React](../../frontend/react/skills/ui-conventions/SKILL.md))
+- Error **categorization/mapping**, three-state regions, correlation id → stack `error-resilience` ([Blazor](../../frontend/blazor/skills/error-resilience/SKILL.md) · [React](../../frontend/react/skills/error-resilience/SKILL.md))
 - The markup that *carries* these labels (buttons, `<PageTitle>`, real anchors) → stack `generator`
 - Translation, locale formatting, pseudo-localization → qa `i18n-testing` + a localization skill

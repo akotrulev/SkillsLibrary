@@ -13,6 +13,7 @@ A soft and sophisticated theme with dusty, muted tones perfect for elegant prese
 
 - **Headers**: FreeSans Bold
 - **Body Text**: FreeSans
+- **Web font suggestion** (web-app lane): `"Nunito Sans", system-ui, sans-serif` (headings and body)
 
 ## Best Used For
 

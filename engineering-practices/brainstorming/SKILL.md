@@ -7,6 +7,8 @@ description: Use when turning an ad-hoc idea or feature request into an approved
 
 Help turn ideas into fully formed designs and specs through natural collaborative dialogue.
 
+**Announce at start:** "I'm using the `ep-brainstorming` skill to turn this idea into an approved design."
+
 Start by understanding the current project context, then ask questions one at a time to refine the idea. Once you understand what you're building, present the design and get user approval.
 
 <HARD-GATE>
@@ -107,6 +109,8 @@ digraph brainstorming {
 - Write the validated design (spec) to `docs/specs/YYYY-MM-DD-<topic>-design.md`
   - (User preferences for spec location override this default)
 - Commit the design document to git
+
+> **Branch boundary:** committing the *spec document* to the current branch is fine even if that's `main` — a design doc is not implementation. *Implementation* commits are different: they belong on a feature branch/worktree created at execution time via `ep-using-git-worktrees` (`ep-executing-plans` forbids implementing on `main`/`master` without explicit consent). Writing the spec here does not start implementation.
 
 **Spec Self-Review:**
 After writing the spec document, look at it with fresh eyes:

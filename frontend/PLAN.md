@@ -58,10 +58,13 @@ Run phases in order; each is independently committable. Phases 1–3 are quick h
 - [ ] `react/skills/generator/SKILL.md`: add the `vendor/composition-patterns` deep-dive pointer in the compound-component and container/presentation sections (mirror `reference` L125's phrasing)
 - [ ] `react/skills/testability/SKILL.md`: add either a short "hybrid/static-HTML surfaces" appendix (rows-by-index rule, hardcoded parent locator consts — mirror blazor's `references/static-html.md`) **or** an explicit out-of-scope statement; the current silence is the only unexplained blazor↔react delta
 
-### Phase 5 — react-native adaptation (F10 — future, gated; do not start without a session dedicated to it)
-- [ ] Decide target shape: adapt the Vercel rules into a proper `fe-react-native` stack (agent + `fe-react-native-*` skills, mirroring the react port pattern: one node per session, HANDOFF.md between sessions) **or** keep it as a vendored seed under a future `fe-react-native` stack the way `react/vendor/*` seeds feed `fe-react`
-- [ ] Until then: leave unregistered (verified: no plugin references it) and keep it listed as under-construction in CLAUDE.md's scope fence
-- [ ] When built, update CLAUDE.md scope + catalog, marketplace.json, and the new-project-setup line
+### Phase 5 — react-native adaptation (F10 — IN PROGRESS, multi-session; tracked in `frontend/react-native/PLAN.md`)
+- [x] **Decision (2026-07-12):** adapt the Vercel rules into a proper **`fe-react-native` stack** (agent + `fe-react-native-*` skills), mirroring the react port pattern — one node per session, `HANDOFF.md` between sessions. Build plan + node breakdown live in `frontend/react-native/PLAN.md`.
+- [x] Node 0 (groundwork): restructured the raw Vercel import into `frontend/react-native/vendor/react-native-guidelines/` (fenced seed — "Do NOT use directly" clause, `organization → "Vercel Engineering"`, this closes the F8 parity + F10 fencing items for RN).
+- [x] Node 1 (foundations A): `reference` + `project-scaffold` skills authored (Expo SDK 56 / New-Architecture version policy locked).
+- [ ] Nodes 2–7: remaining skills, phased `fe-react-native` agent, marketplace + CLAUDE.md wiring, verification — see `frontend/react-native/PLAN.md`.
+- [ ] Until Node 7: stays **unregistered** (no plugin references it) and listed as under-construction in CLAUDE.md's scope fence.
+- [ ] When built (Node 7): update CLAUDE.md scope + catalog, marketplace.json, and the new-project-setup line.
 
 ### Verification (after Phases 1–4)
 - [ ] `python3` length check: all frontend descriptions ≤ 1000 chars

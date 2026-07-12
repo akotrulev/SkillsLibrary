@@ -145,6 +145,17 @@ Return: Summary of what you found and what you fixed.
 **Exploratory debugging:** You don't know what's broken yet
 **Shared state:** Agents would interfere (editing same files, using same resources)
 
+> **Working-tree conflicts ≠ abandon parallelism.** If the domains are genuinely
+> independent but the agents would touch the *same working tree* (edit files that
+> collide, race on the same build output), don't drop back to sequential — give
+> each agent an **isolated worktree** instead. Use the harness's native
+> `isolation: worktree` when dispatching, or set one up per `ep-using-git-worktrees`.
+> The shared-state exclusion above is about *logical* coupling (they need each
+> other's state to reason), not merely a shared checkout — a shared checkout is a
+> tooling problem worktrees solve. (`ep-subagent-driven-development` bans parallel
+> *implementers* for exactly this filesystem-collision reason; worktrees are the
+> escape hatch when the work is truly independent.)
+
 ## Real Example from Session
 
 **Scenario:** 6 test failures across 3 files after major refactoring

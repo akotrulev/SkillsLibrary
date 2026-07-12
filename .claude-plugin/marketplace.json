@@ -108,7 +108,9 @@
         "./engineering-practices/verification-before-completion",
         "./engineering-practices/finishing-a-development-branch",
         "./engineering-practices/subagent-driven-development",
-        "./engineering-practices/dispatching-parallel-agents"
+        "./engineering-practices/dispatching-parallel-agents",
+        "./engineering-practices/requesting-code-review",
+        "./engineering-practices/receiving-code-review"
       ],
       "agents": [
         "./qa/_shared/agents/qa-security.md",
@@ -125,7 +127,7 @@
     },
     {
       "name": "qa-dotnet",
-      "description": "Self-contained senior automation-QA plugin for .NET 8 / C# (NUnit + RestSharp, Playwright/Selenium/Appium, NBomber, Reqnroll). Covers every discipline end-to-end: project scaffolding from zero (API/UI/mobile/performance/BDD), API/UI/mobile/performance/LLM test authoring and review, BDD living documentation, deep verification (DB, messaging, email, files, websockets), Pact contracts, chaos and feature-flag testing. Bundles the language-agnostic manual-QA process skills, CI/CD pipeline skills, test reporting (Allure + flaky-test quarantine), and the cross-stack OWASP-mapped security skills and qa-security agent — install just this one plugin for a complete .NET QA toolkit.",
+      "description": "Self-contained senior automation-QA plugin for .NET 10 / C#, 8-9 supported and version-aware (NUnit + RestSharp, Playwright/Selenium/Appium, NBomber, Reqnroll). Covers every discipline end-to-end: project scaffolding from zero (API/UI/mobile/performance/BDD), API/UI/mobile/performance/LLM test authoring and review, BDD living documentation, deep verification (DB, messaging, email, files, websockets), Pact contracts, chaos and feature-flag testing, mutation testing (Stryker.NET). Bundles the language-agnostic manual-QA process skills, CI/CD pipeline skills, test reporting (Allure + flaky-test quarantine), and the cross-stack OWASP-mapped security skills and qa-security agent — install just this one plugin for a complete .NET QA toolkit.",
       "source": "./",
       "strict": false,
       "author": {
@@ -187,6 +189,7 @@
         "./qa/dotnet/skills/mobile-device-farm",
         "./qa/dotnet/skills/mobile-native-features",
         "./qa/dotnet/skills/mobile-project-scaffold",
+        "./qa/dotnet/skills/mutation-testing",
         "./qa/dotnet/skills/network-monitoring",
         "./qa/dotnet/skills/page-object-architect",
         "./qa/dotnet/skills/performance-project-scaffold",
@@ -224,7 +227,9 @@
         "./engineering-practices/verification-before-completion",
         "./engineering-practices/finishing-a-development-branch",
         "./engineering-practices/subagent-driven-development",
-        "./engineering-practices/dispatching-parallel-agents"
+        "./engineering-practices/dispatching-parallel-agents",
+        "./engineering-practices/requesting-code-review",
+        "./engineering-practices/receiving-code-review"
       ],
       "agents": [
         "./qa/_shared/agents/qa-security.md",
@@ -336,7 +341,9 @@
         "./engineering-practices/verification-before-completion",
         "./engineering-practices/finishing-a-development-branch",
         "./engineering-practices/subagent-driven-development",
-        "./engineering-practices/dispatching-parallel-agents"
+        "./engineering-practices/dispatching-parallel-agents",
+        "./engineering-practices/requesting-code-review",
+        "./engineering-practices/receiving-code-review"
       ],
       "agents": [
         "./qa/_shared/agents/qa-security.md",
@@ -411,7 +418,9 @@
         "./engineering-practices/verification-before-completion",
         "./engineering-practices/finishing-a-development-branch",
         "./engineering-practices/subagent-driven-development",
-        "./engineering-practices/dispatching-parallel-agents"
+        "./engineering-practices/dispatching-parallel-agents",
+        "./engineering-practices/requesting-code-review",
+        "./engineering-practices/receiving-code-review"
       ],
       "agents": [
         "./frontend/blazor/agents/fe-blazor.md"
@@ -548,7 +557,9 @@
         "./engineering-practices/verification-before-completion",
         "./engineering-practices/finishing-a-development-branch",
         "./engineering-practices/subagent-driven-development",
-        "./engineering-practices/dispatching-parallel-agents"
+        "./engineering-practices/dispatching-parallel-agents",
+        "./engineering-practices/requesting-code-review",
+        "./engineering-practices/receiving-code-review"
       ],
       "agents": [
         "./frontend/react/agents/fe-react.md"
@@ -592,6 +603,8 @@
         "./engineering-practices/finishing-a-development-branch",
         "./engineering-practices/subagent-driven-development",
         "./engineering-practices/dispatching-parallel-agents",
+        "./engineering-practices/requesting-code-review",
+        "./engineering-practices/receiving-code-review",
         "./observability/opentelemetry-dotnet",
         "./observability/structured-logging-dotnet",
         "./observability/loki-tempo-setup",
@@ -642,6 +655,8 @@
         "./engineering-practices/finishing-a-development-branch",
         "./engineering-practices/subagent-driven-development",
         "./engineering-practices/dispatching-parallel-agents",
+        "./engineering-practices/requesting-code-review",
+        "./engineering-practices/receiving-code-review",
         "./observability/opentelemetry-java",
         "./observability/structured-logging-java",
         "./observability/loki-tempo-setup",
@@ -688,6 +703,8 @@
         "./engineering-practices/finishing-a-development-branch",
         "./engineering-practices/subagent-driven-development",
         "./engineering-practices/dispatching-parallel-agents",
+        "./engineering-practices/requesting-code-review",
+        "./engineering-practices/receiving-code-review",
         "./observability/opentelemetry-node",
         "./observability/structured-logging-node",
         "./observability/loki-tempo-setup",

@@ -7,6 +7,8 @@ description: Use only when the user has explicitly asked to execute an implement
 
 Execute a plan by delegating self-contained tasks to subagents, reviewing each result before moving on. This is the **opt-in, cost-aware** alternative to inline `ep-executing-plans` — reach for it only when delegation clearly pays for itself.
 
+**Announce at start:** "I'm using the `ep-subagent-driven-development` skill to execute this plan via subagents."
+
 **Why subagents:** you delegate a task to a specialized agent with isolated context. By precisely crafting its instructions and context, you keep it focused. It should never inherit your session's history — you construct exactly what it needs. This preserves your own context for coordination.
 
 ## Conservative agent-spawning policy (governs this whole skill)
@@ -273,6 +275,10 @@ Done!
 
 **Subagents should use:**
 - **`ep-test-driven-development`** - Subagents follow TDD for each task
+
+**Code review:**
+- **`ep-requesting-code-review`** - the controller's **inline** review (spec-then-quality, above) is the default per-task path. A *dedicated reviewer subagent* is the permission-gated escalation — it pushes you past the 2-agent gate (implementer + reviewer), so ask the user first. This skill carries the reviewer prompt + native-command-first guidance.
+- **`ep-receiving-code-review`** - how the controller (or a re-dispatched implementer) acts on the findings: verify before implementing, fix by severity, push back with reasoning.
 
 **Default / alternative workflow:**
 - **`ep-executing-plans`** - the default inline execution path; use this unless subagent delegation clearly pays for itself

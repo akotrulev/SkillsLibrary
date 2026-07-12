@@ -4,7 +4,8 @@ description:
   React Native and Expo best practices for building performant mobile apps. Use
   when building React Native components, optimizing list performance,
   implementing animations, or working with native modules. Triggers on tasks
-  involving React Native, Expo, mobile performance, or native platform APIs.
+  involving React Native, Expo, mobile performance, or native platform APIs. Do
+  NOT use directly — load via the house skills `frontend/react-native/skills/{performance,motion,ui-conventions,navigation,reference}`, the curated skills this deep-dive seed routes into.
 metadata:
   author: vercel
   version: '1.0.0'

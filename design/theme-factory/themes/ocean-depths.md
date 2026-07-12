@@ -13,6 +13,7 @@ A professional and calming maritime theme that evokes the serenity of deep ocean
 
 - **Headers**: DejaVu Sans Bold
 - **Body Text**: DejaVu Sans
+- **Web font suggestion** (web-app lane): `"Source Sans 3", system-ui, sans-serif` (headings and body)
 
 ## Best Used For
 

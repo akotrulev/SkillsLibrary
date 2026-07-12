@@ -93,4 +93,4 @@ A dashboard is read top-left first, in an F/Z scan. Compose to that, not as a un
 - [`design/ux-writing`](../ux-writing/SKILL.md) — the microcopy for empty/error states, stat-tile labels, and annotations.
 - [`observability/grafana-dashboards`](../../observability/grafana-dashboards/SKILL.md) — **ops/service** dashboards (RED / USE / golden signals). This skill owns *product* dashboards; that one owns operational ones.
 - [`qa/manual/quality-metrics`](../../qa/manual/quality-metrics/SKILL.md) — *defines* the metrics and SLO targets a dashboard then visualizes.
-- A stack's `error-resilience` (e.g. [`fe-blazor-error-resilience`](../../frontend/blazor/skills/error-resilience/SKILL.md)) — the loading/empty/error state *structure* this skill's composition rule depends on.
+- A stack's `error-resilience` ([Blazor](../../frontend/blazor/skills/error-resilience/SKILL.md) · [React](../../frontend/react/skills/error-resilience/SKILL.md)) — the loading/empty/error state *structure* this skill's composition rule depends on.

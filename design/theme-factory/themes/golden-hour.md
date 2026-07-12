@@ -13,6 +13,7 @@ A rich and warm autumnal palette that creates an inviting and sophisticated atmo
 
 - **Headers**: FreeSans Bold
 - **Body Text**: FreeSans
+- **Web font suggestion** (web-app lane): `"Work Sans", system-ui, sans-serif` (headings and body)
 
 ## Best Used For
 

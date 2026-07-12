@@ -77,6 +77,6 @@ Beyond the ten, walk each primary task end to end and measure the *path*:
 - [`design/web-design-guidelines`](../web-design-guidelines/SKILL.md) — the **code-level** UI audit one layer below this; this reviews the experience, that reviews the implementation.
 - [`design/ux-writing`](../ux-writing/SKILL.md) — owns the **wording** of labels, errors, and confirmations this review judges the *structure* of; shares the one-name-one-concept rule.
 - [`design/frontend-design`](../frontend-design/SKILL.md) — owns **visual taste**; heuristic #8 (minimalism) is the usability face of its restraint discipline.
-- A stack's [`ui-conventions`](../../frontend/blazor/skills/ui-conventions/SKILL.md) — owns the confirmation-by-object-name and empty-state *mechanics* this review defers to.
+- A stack's `ui-conventions` ([Blazor](../../frontend/blazor/skills/ui-conventions/SKILL.md) · [React](../../frontend/react/skills/ui-conventions/SKILL.md)) — owns the confirmation-by-object-name and empty-state *mechanics* this review defers to.
 - A stack's / qa `accessibility-testing` — runs the **automated** a11y scans; this only flags usability heuristics a scanner can't see.
 - qa `exploratory-charter-writer` — charters an exploratory session to find **defects**; this judges the **experience** of a build that already works.

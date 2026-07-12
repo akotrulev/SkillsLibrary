@@ -88,4 +88,4 @@ Dark mode and brand variants are a **semantic remap only — primitives never fo
 - [`design/frontend-design`](../frontend-design/SKILL.md) — the taste that *chooses* the palette/type values this system gives structure to (primary theming authority; its per-brief token system feeds this skill's tiers).
 - [`design/brand-intake`](../brand-intake/SKILL.md) — the brownfield path: an existing brand book normalized into this tier model.
 - [`design/theme-factory`](../theme-factory/SKILL.md) — preset themes; their palettes are **primitive-tier starting values** you assign semantic roles to.
-- A stack's `styling` (e.g. [`fe-blazor-styling`](../../frontend/blazor/skills/styling/SKILL.md)) — consumes this structure and owns the CSS mechanics (isolation, `clamp()` type sizing, `var(--token)` application). It defers the tier/naming rules here.
+- A stack's `styling` ([Blazor](../../frontend/blazor/skills/styling/SKILL.md) · [React](../../frontend/react/skills/styling/SKILL.md)) — consumes this structure and owns the CSS mechanics (isolation, `clamp()` type sizing, `var(--token)` application). It defers the tier/naming rules here.

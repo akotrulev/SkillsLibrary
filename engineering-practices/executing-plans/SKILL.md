@@ -9,7 +9,7 @@ description: Use when you have a written implementation plan (from `ep-writing-p
 
 Load plan, review critically, execute task-by-task, report at each checkpoint, and report when complete.
 
-**Announce at start:** "I'm using the ep-executing-plans skill to implement this plan."
+**Announce at start:** "I'm using the `ep-executing-plans` skill to implement this plan."
 
 **This is the default execution path (inline, cost before speed).** A subagent-based alternative — `ep-subagent-driven-development` — exists for the rare case where delegation clearly pays for itself and the user asks for it; it carries a hard 2-agent gate. Unless both are true, stay here.
 

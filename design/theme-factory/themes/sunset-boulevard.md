@@ -13,6 +13,7 @@ A warm and vibrant theme inspired by golden hour sunsets, perfect for energetic 
 
 - **Headers**: DejaVu Serif Bold
 - **Body Text**: DejaVu Sans
+- **Web font suggestion** (web-app lane): headings `"Fraunces", Georgia, serif`; body `"Source Sans 3", system-ui, sans-serif`
 
 ## Best Used For
 

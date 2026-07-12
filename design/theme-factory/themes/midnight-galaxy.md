@@ -13,6 +13,7 @@ A dramatic and cosmic theme with deep purples and mystical tones for impactful p
 
 - **Headers**: FreeSans Bold
 - **Body Text**: FreeSans
+- **Web font suggestion** (web-app lane): `"Sora", system-ui, sans-serif` (headings and body)
 
 ## Best Used For
 

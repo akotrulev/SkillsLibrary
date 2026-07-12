@@ -11,7 +11,7 @@ Guide completion of development work by presenting clear options and handling ch
 
 **Core principle:** Verify tests → Detect environment → Present options → Execute choice → Clean up.
 
-**Announce at start:** "I'm using the finishing-a-development-branch skill to complete this work."
+**Announce at start:** "I'm using the `ep-finishing-a-development-branch` skill to complete this work."
 
 ## The Process
 
@@ -249,3 +249,14 @@ git worktree prune  # Self-healing: clean up any stale registrations
 - Clean up worktree for Options 1 & 4 only
 - `cd` to main repo root before worktree removal
 - Run `git worktree prune` after removal
+
+## Related skills
+
+- **`ep-requesting-code-review`** — before Option 1 (merge) or Option 2 (PR) on a
+  substantial change, a review pass is worthwhile. Prefer a native review command
+  (e.g. `/code-review`), then inline self-review, then a reviewer subagent only if it
+  earns its cost (mind the 2-agent gate). Reviewing before you merge/open the PR is
+  cheaper than reviewing after.
+- **`ep-receiving-code-review`** — route whatever the review surfaces through this skill
+  (verify before implementing, push back with reasoning) before you finish.
+- **`ep-using-git-worktrees`** — the skill whose worktree this one tears down.
