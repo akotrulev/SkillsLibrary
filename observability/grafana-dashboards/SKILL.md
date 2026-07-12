@@ -84,7 +84,7 @@ To enable:
 2. Tempo data source linked via the exemplar config
 3. Panel uses a histogram query (`histogram_quantile(0.95, sum by (le) (rate(http_server_request_duration_seconds_bucket[5m])))`) — exemplars surface automatically
 
-Without exemplars, latency spikes are observable but not investigable. Always wire them.
+Without exemplars, latency spikes are observable but not investigable. Always wire them. The same principle extends to tables: any table keyed by `service`/`http_route` should carry a **data link** into Tempo search with those fields pre-filled, so every row is one click from its traces.
 
 ## Logs → traces via derived fields
 
@@ -108,13 +108,39 @@ For every service, generate a dashboard with these panels (queries here are illu
 | Panel | Query (conceptual) | Type |
 |---|---|---|
 | Requests / sec (by route) | `sum by (http_route) (rate(http_server_requests_total{service="$service",env="$env"}[5m]))` | Time-series |
-| Error rate % (by route) | `sum by (http_route) (rate(http_server_requests_total{status=~"5.."}[5m])) / sum by (http_route) (rate(http_server_requests_total[5m])) * 100` | Time-series |
+| 5xx rate % (by route) | `sum by (http_route) (rate(http_server_requests_total{status=~"5.."}[5m])) / sum by (http_route) (rate(http_server_requests_total[5m])) * 100` | Time-series |
+| 4xx rate % (by route) | same shape with `status=~"4.."` — separate panel, separate mental bucket | Time-series |
 | Latency p95 / p99 | `histogram_quantile(0.95, ...)`, `histogram_quantile(0.99, ...)` | Time-series |
-| Top slow routes | sort by p95 desc, limit 10 | Table |
+| Top slow routes | sort by p95 desc, limit 10; **data link into Tempo search** (`service` + `http_route` pre-filled) | Table |
 | Active alerts | `ALERTS{service="$service",env="$env"}` | Stat |
 | Recent errors (logs) | `{service="$service",env="$env"} \|= "ERROR"` | Logs |
 
+### 4xx vs 5xx discipline
+
+Never lump them into one "errors" series — they mean different things and get different treatment:
+
+- **5xx = the server failed.** Your fault, your page. This is the numerator of the error-budget SLO and the input to burn-rate alerts.
+- **4xx = the client misbehaved (or your contract broke).** Observe on the dashboard, don't page on the baseline — every public API has a steady 4xx hum. What IS alert-worthy about 4xx is a **change in shape**: a 401/403 surge (credential stuffing, a broken auth deploy), a 404 spike right after a deploy (broken route or dead link), or an overall 4xx rate jumping far above its baseline (a client integration just broke). Wire those as tactical Grafana-managed alerts, not SLO rules.
+
+Canonical queries for both live in `observability/logql-promql` (error-ratio recipes).
+
 Save the JSON model in source control under `observability/dashboards/<service>.json` — dashboards are code.
+
+## Fleet overview (multi-service)
+
+The per-service RED dashboard answers "how is *this* service"; the **fleet overview** answers "*which* service is unhealthy right now". Every deployment gets both, linked both ways — the two-tier model.
+
+| Panel | Query (conceptual) | Type |
+|---|---|---|
+| RED by service | one row per service: req/s, 5xx %, 4xx %, p95 — `sum by (service) (...)` variants; sorted by 5xx % desc; threshold coloring (green/amber/red) | Table |
+| Top-N error rate | `topk(10, <5xx-ratio by service>)` | Time-series |
+| Service graph | Tempo `nodeGraph` panel fed by the `metrics_generator.service_graphs` processor (enabled in `observability/loki-tempo-setup`) — shows calls between services with error-rate edges | Node graph |
+| Unhealthy targets | `up == 0` or `sum by (service) (up) == 0` | Stat / table |
+| Active alerts by service | `ALERTS{env="$env"}` grouped by `service` | Table |
+
+- On the fleet dashboard, `$service` is **multi-value** (`includeAll: true`); the per-service dashboard keeps it single-value.
+- **Drill-down data link**: the service-name cell links to the per-service dashboard — `/d/<per-service-uid>?var-service=${__data.fields.service}&var-env=$env`. One click from "payments is red" to its RED dashboard; from there exemplars and log links take you to the trace.
+- Keep it above the fold: a fleet table + top-N errors + service graph is enough. Detail lives one click down.
 
 ## Alerts
 
@@ -156,7 +182,9 @@ Safe `by`/`group by` dimensions: `service`, `env`, `http_route`, `http_method`, 
 
 ## Rules
 
+- **Two-tier model** — one fleet overview (which service is unhealthy) + one RED dashboard per service (why), linked both ways via data links
 - **One method per dashboard** — RED for services, USE for resources, Four-Golden-Signals for SRE overviews
+- **4xx and 5xx are separate series** — 5xx feeds SLO/burn-rate alerts; 4xx is observed, alerted only on shape changes (401/403 surge, post-deploy 404 spike)
 - **Header row stat panels** answer "is it on fire" at a glance
 - **Variables** for env / service / route so one dashboard serves all
 - **Exemplars wired** → click latency to jump to trace
@@ -181,9 +209,9 @@ Safe `by`/`group by` dimensions: `service`, `env`, `http_route`, `http_method`, 
 
 ## Generation steps
 
-1. Confirm service, audience, method (RED default), and SLO targets.
-2. Create variables: `$env`, `$service`, optional `$instance` / `$route`.
-3. Add the standard RED panel set (rate / errors / latency / top slow / alerts / logs).
+1. Confirm service(s), audience, method (RED default), and SLO targets; decide fleet overview + per-service, or per-service only.
+2. Create variables: `$env`, `$service` (multi-value on the fleet dashboard), optional `$instance` / `$route`.
+3. Add the standard RED panel set (rate / 5xx / 4xx / latency / top slow / alerts / logs); for the fleet dashboard add the RED-by-service table, top-N errors, and the Tempo service-graph panel, with drill-down data links to the per-service dashboards.
 4. Wire exemplars on the latency histogram → Tempo.
 5. Wire Loki derived fields on `trace_id` → Tempo.
 6. Add annotations from deploys + incidents.

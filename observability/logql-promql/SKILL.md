@@ -71,12 +71,29 @@ sum by (service) (rate(http_server_requests_total[5m]))
 
 Read: `rate(error count) / rate(total count) * 100` = error percentage.
 
-For 5xx-only:
+Keep 5xx and 4xx as **separate queries** — they answer different questions (5xx = server fault → SLO/paging; 4xx = client behavior → observe, alert only on shape changes; see the discipline note in `observability/grafana-dashboards`):
 
 ```promql
+# 5xx ratio — the SLO numerator, feeds burn-rate alerts
 sum by (service) (rate(http_server_requests_total{status=~"5.."}[5m]))
 /
 sum by (service) (rate(http_server_requests_total[5m]))
+
+# 4xx ratio, excluding the expected auth noise — "did a client integration break?"
+sum by (service) (rate(http_server_requests_total{status=~"4..", status!~"401|403"}[5m]))
+/
+sum by (service) (rate(http_server_requests_total[5m]))
+
+# The inverse security watch — 401/403 surge (credential stuffing / broken auth deploy)
+sum by (service) (rate(http_server_requests_total{status=~"401|403"}[5m]))
+```
+
+For apps whose only signal is logs, the LogQL equivalent:
+
+```logql
+sum by (service) (count_over_time({env="prod"} | json | status=~"5.." [5m]))
+/
+sum by (service) (count_over_time({env="prod"} | json [5m]))
 ```
 
 ### Latency histograms — `histogram_quantile`

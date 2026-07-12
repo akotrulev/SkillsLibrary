@@ -260,23 +260,23 @@ Currently only logs→traces (derived fields) and metrics→traces (exemplars) a
 
 ### 7.1 Fleet / multi-service overview dashboard
 
-- [ ] **File:** `observability/grafana-dashboards/SKILL.md` — add a "**Fleet overview (multi-service)**" section after the standard RED template:
+- [x] **File:** `observability/grafana-dashboards/SKILL.md` — add a "**Fleet overview (multi-service)**" section after the standard RED template:
   - Purpose: one dashboard answering "which service is unhealthy right now" across all services; drill into the per-service RED dashboard via **data links** on the service name.
   - Panel set: RED-by-service **table** (req/s, 5xx %, p95 — one row per service, sorted by error rate desc, thresholds coloring); top-N error-rate time-series; **Tempo service-graph panel** (`nodeGraph`, fed by the `metrics_generator.service_graphs` processor already enabled in `loki-tempo-setup`); active-alerts panel grouped by service.
   - `$service` becomes multi-value (`includeAll: true`) on the fleet dashboard; per-service dashboard keeps single-value.
   - Data-link pattern: table cell → `/d/<per-service-uid>?var-service=${__data.fields.service}`.
-- [ ] Update Generation steps + Rules to name the two-tier model: **one fleet overview + one RED dashboard per service**, linked both ways.
+- [x] Update Generation steps + Rules to name the two-tier model: **one fleet overview + one RED dashboard per service**, linked both ways.
 
 ### 7.2 4xx vs 5xx discipline
 
-- [ ] **File:** `observability/grafana-dashboards/SKILL.md` — RED template table: split the single error panel into **5xx rate %** and **4xx rate %** (separate series, separate panels or one panel with two queries). Add the discipline note: **5xx = server fault → alert; 4xx = client behavior → observe, don't page** — except a 4xx *spike* (rate anomaly vs baseline, or 401/403 surge = credential-stuffing / broken-auth signal → tactical alert, and a 404 surge after deploy = broken route/link).
-- [ ] **File:** `observability/logql-promql/SKILL.md` — add canonical recipes near the existing error-ratio idiom: 5xx ratio by service/route, 4xx ratio excluding expected noise (`status!~"401|403"` variant and the opposite security-watch variant), and the equivalent LogQL for apps whose only signal is logs.
-- [ ] **Verify:** `grep -rn '4\.\.' observability/` hits grafana-dashboards + logql-promql recipes (not just the old single line).
+- [x] **File:** `observability/grafana-dashboards/SKILL.md` — RED template table: split the single error panel into **5xx rate %** and **4xx rate %** (separate series, separate panels or one panel with two queries). Add the discipline note: **5xx = server fault → alert; 4xx = client behavior → observe, don't page** — except a 4xx *spike* (rate anomaly vs baseline, or 401/403 surge = credential-stuffing / broken-auth signal → tactical alert, and a 404 surge after deploy = broken route/link).
+- [x] **File:** `observability/logql-promql/SKILL.md` — add canonical recipes near the existing error-ratio idiom: 5xx ratio by service/route, 4xx ratio excluding expected noise (`status!~"401|403"` variant and the opposite security-watch variant), and the equivalent LogQL for apps whose only signal is logs.
+- [x] **Verify:** `grep -rn '4\.\.' observability/` hits grafana-dashboards + logql-promql recipes (not just the old single line).
 
 ### 7.3 Traceability column on tables
 
-- [ ] **File:** `observability/grafana-dashboards/SKILL.md` — "Top slow routes" and fleet tables gain a data-link column into Tempo search (`service` + `http_route` pre-filled) so table rows are one click from traces. State the loop explicitly in one sentence in the Exemplars section.
-- [ ] Commit: `Fleet overview dashboards + 4xx/5xx discipline`.
+- [x] **File:** `observability/grafana-dashboards/SKILL.md` — "Top slow routes" and fleet tables gain a data-link column into Tempo search (`service` + `http_route` pre-filled) so table rows are one click from traces. State the loop explicitly in one sentence in the Exemplars section.
+- [x] Commit: `Fleet overview dashboards + 4xx/5xx discipline`.
 
 ---
 
