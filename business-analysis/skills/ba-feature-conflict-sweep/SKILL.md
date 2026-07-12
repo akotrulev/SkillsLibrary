@@ -29,6 +29,8 @@ Per `business-analysis/skills/ba-project-knowledge`: **read first** — `INDEX.m
 
 ## Procedure
 
+> **Audit form (no new feature).** On the "periodic audit / refresh the model" trigger there is no feature to normalize, so **§1 is skipped** and the pair list (§2) is the KB's own **open surface** rather than a feature × KB cross: unresolved `CONF-` entries, `?` cells in entity grids, `[TBD]`/undeclared hit policies in decision tables, and unverified `#inferred` items. §3 (taxonomy), §4 (boundary condition per finding), and §5 (severity table + recorded resolutions) are unchanged. Pair the refresh procedure in `ba-project-knowledge` first (reconcile drift, prune, re-verify `#inferred`), then sweep that open surface.
+
 ### 1. Normalize the new feature
 
 Decompose each of its requirements into the comparison tuple (the FSARC port):
