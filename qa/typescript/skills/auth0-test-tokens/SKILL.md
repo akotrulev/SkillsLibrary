@@ -28,7 +28,7 @@ Two cross-cutting rules shape every example:
 
 ## When NOT to use
 
-- Wiring Auth0 into the **application under test** (login redirect, callback handling, JWT middleware) → `auth/auth0-react` / `auth/auth0-dotnet` / `auth/auth0-java` / `auth/auth0-blazor`
+- Wiring Auth0 into the **application under test** (login redirect, callback handling, JWT middleware) → `auth/auth0-react` / `backend/dotnet/skills/auth0` / `backend/java/skills/auth0` / `auth/auth0-blazor`
 - Understanding the Auth0 entity/flow model conceptually → `auth/_shared/auth0-concepts`
 - Validating JWTs *inside* your backend → that's app-side; see the backend `auth/auth0-*` skills
 - .NET or JVM test suites → `qa/{dotnet,java}/skills/auth0-test-tokens`
@@ -115,7 +115,7 @@ These sections live in `references/details.md` — **read it when the task touch
 
 - **`qa/dotnet/skills/auth0-test-tokens`** (`Auth0.AuthenticationApi` `AuthenticationApiClient.GetTokenAsync`), **`qa/java/skills/auth0-test-tokens`** (`com.auth0:auth0` `AuthAPI`) — the sibling stacks; same three grants, same cache + stash shape.
 - **`auth/_shared/auth0-concepts`** — the entity/flow model (Tenant / Application / API / audience / grant types) this skill assumes. Read it to understand *why* M2M vs ROPG.
-- **`auth/auth0-react`**, **`auth/auth0-dotnet`**, **`auth/auth0-java`**, **`auth/auth0-blazor`** — the **app-side** login flows this skill complements. This skill never implements user-facing login; those do.
+- **`auth/auth0-react`**, **`backend/dotnet/skills/auth0`**, **`backend/java/skills/auth0`**, **`auth/auth0-blazor`** — the **app-side** login flows this skill complements. This skill never implements user-facing login; those do.
 - **`qa/typescript/skills/api-test-author/generator`** — the M2M consumer: where the `Bearer` header lands on the API client.
 - **`qa/typescript/skills/ui-test-author/playwright`** — the ROPG consumer: `storageState` / fixture patterns for seeding auth without the login UI.
 - **`qa/typescript/skills/test-data-builder`** — provisioning/seeding the test users that ROPG authenticates as.

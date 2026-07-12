@@ -6,8 +6,8 @@
     "email": "alexandur.kotrulev@gmail.com"
   },
   "metadata": {
-    "description": "Stack-first QA automation skills library: install one self-contained plugin per tech stack (Java / .NET / TypeScript). Each plugin bundles every discipline — API/UI/mobile/performance/LLM/BDD authoring and verification — plus the language-agnostic manual-QA process, CI/CD pipelines, test reporting, and the cross-stack OWASP-mapped security skills.",
-    "version": "2.12.0"
+    "description": "Stack-first skills library covering QA, frontend, backend, data, and business-analysis: install one self-contained plugin per tech stack. `qa-{java,dotnet,typescript}` bundle every QA discipline — API/UI/mobile/performance/LLM/BDD authoring and verification, manual-QA process, CI/CD, reporting, and OWASP-mapped security. `fe-{blazor,react}` are phased frontend dev-stack agents (scaffold → architecture → features → quality → tests → review). `be-{dotnet,java,node}` are phased backend dev-stack agents for design-pattern application, ORM persistence, and Auth0/Cognito service-side auth. `data` and `business-analysis` round out the database-engineering and cross-feature requirements domains.",
+    "version": "2.13.0"
   },
   "plugins": [
     {
@@ -525,6 +525,9 @@
         "./frontend/react/skills/styling",
         "./frontend/react/skills/testability",
         "./frontend/react/skills/ui-conventions",
+        "./frontend/react/vendor/reference",
+        "./frontend/react/vendor/composition-patterns",
+        "./frontend/react/vendor/view-transitions",
         "./auth/auth0-react",
         "./auth/_shared/auth0-concepts",
         "./design/frontend-design",
@@ -549,6 +552,131 @@
       ],
       "agents": [
         "./frontend/react/agents/fe-react.md"
+      ]
+    },
+    {
+      "name": "be-dotnet",
+      "description": "Self-contained senior .NET backend developer plugin (.NET 10 primary, 8/9 supported) for design-pattern application, EF Core persistence, and Auth0/Cognito service-side auth. Covers explaining patterns (Strategy, Decorator, Repository, CQRS/MediatR, Factory, Specification, Options, Pipeline, Saga, Outbox), scaffolding them into a codebase with constructor injection / async-all-the-way / nullable reference types, EF Core persistence (DbContext design, configurations, migrations, query patterns, optimistic concurrency, bulk operations), Auth0/Cognito JWT bearer validation + RBAC + Client Credentials M2M, and reviewing existing code for pattern misuse, DI/async violations, and layering bleeds — end-to-end or any single phase. Bundles the language-agnostic pattern reference/reviewer, the Auth0/Cognito concepts skills, and the developer-workflow (ep-*) skills, plus the phased be-dotnet orchestrator agent — install just this one plugin for a complete .NET backend toolkit.",
+      "source": "./",
+      "strict": false,
+      "author": {
+        "name": "Aleksandar Kotrulev",
+        "email": "alexandur.kotrulev@gmail.com"
+      },
+      "license": "MIT",
+      "keywords": [
+        "dotnet",
+        "csharp",
+        "backend",
+        "design-patterns"
+      ],
+      "category": "development",
+      "skills": [
+        "./backend/dotnet/skills/reference",
+        "./backend/dotnet/skills/generator",
+        "./backend/dotnet/skills/reviewer",
+        "./backend/dotnet/skills/persistence",
+        "./backend/dotnet/skills/auth0",
+        "./backend/dotnet/skills/cognito",
+        "./backend/_shared/reference",
+        "./backend/_shared/reviewer",
+        "./auth/_shared/auth0-concepts",
+        "./auth/_shared/oidc-concepts",
+        "./engineering-practices/brainstorming",
+        "./engineering-practices/writing-plans",
+        "./engineering-practices/executing-plans",
+        "./engineering-practices/systematic-debugging",
+        "./engineering-practices/test-driven-development",
+        "./engineering-practices/using-git-worktrees",
+        "./engineering-practices/verification-before-completion",
+        "./engineering-practices/finishing-a-development-branch",
+        "./engineering-practices/subagent-driven-development",
+        "./engineering-practices/dispatching-parallel-agents"
+      ],
+      "agents": [
+        "./backend/dotnet/agents/be-dotnet.md"
+      ]
+    },
+    {
+      "name": "be-java",
+      "description": "Self-contained senior Java backend developer plugin (Java 21 + Spring Boot 3.x) for design-pattern application, JPA/Hibernate persistence, and Auth0/Cognito service-side auth. Covers explaining patterns (Strategy, Decorator, Repository, CQRS/mediator, Factory, Specification, Options/`@ConfigurationProperties`, Pipeline, Saga, Outbox), scaffolding them into a codebase with constructor injection / virtual-threads-async / modern-Java idioms (records, sealed types), JPA/Hibernate + Spring Data persistence (entity design, Flyway migrations, `@Transactional` boundaries, `@Version` optimistic locking, N+1 prevention), Auth0/Cognito Spring Security resource server + method-level RBAC + Client Credentials M2M, and reviewing existing code for pattern misuse, threading/DI violations, and layering bleeds — end-to-end or any single phase. Bundles the language-agnostic pattern reference/reviewer, the Auth0/Cognito concepts skills, and the developer-workflow (ep-*) skills, plus the phased be-java orchestrator agent — install just this one plugin for a complete Java backend toolkit.",
+      "source": "./",
+      "strict": false,
+      "author": {
+        "name": "Aleksandar Kotrulev",
+        "email": "alexandur.kotrulev@gmail.com"
+      },
+      "license": "MIT",
+      "keywords": [
+        "java",
+        "spring-boot",
+        "backend",
+        "design-patterns"
+      ],
+      "category": "development",
+      "skills": [
+        "./backend/java/skills/reference",
+        "./backend/java/skills/generator",
+        "./backend/java/skills/reviewer",
+        "./backend/java/skills/persistence",
+        "./backend/java/skills/auth0",
+        "./backend/java/skills/cognito",
+        "./backend/_shared/reference",
+        "./backend/_shared/reviewer",
+        "./auth/_shared/auth0-concepts",
+        "./auth/_shared/oidc-concepts",
+        "./engineering-practices/brainstorming",
+        "./engineering-practices/writing-plans",
+        "./engineering-practices/executing-plans",
+        "./engineering-practices/systematic-debugging",
+        "./engineering-practices/test-driven-development",
+        "./engineering-practices/using-git-worktrees",
+        "./engineering-practices/verification-before-completion",
+        "./engineering-practices/finishing-a-development-branch",
+        "./engineering-practices/subagent-driven-development",
+        "./engineering-practices/dispatching-parallel-agents"
+      ],
+      "agents": [
+        "./backend/java/agents/be-java.md"
+      ]
+    },
+    {
+      "name": "be-node",
+      "description": "Self-contained senior Node backend developer plugin (Node 24 active LTS primary, 22 maintenance supported; TypeScript strict) for design-pattern application and Prisma/Drizzle persistence. Covers explaining patterns (discriminated-union strategy, `Result<T,E>` vs throwing, branded ids, higher-order-function decorators, repository, lightweight CQRS command handlers, Options config via Zod), scaffolding them into a Node/NestJS/Express codebase with constructor injection or closures / async-all-the-way / TypeScript strict mode, Prisma (default) / Drizzle / TypeORM persistence (schema design, migrations, query patterns, optimistic concurrency, bulk operations), and reviewing existing code for type-safety leaks, pattern misuse, and async/DI violations — end-to-end or any single phase. Bundles the language-agnostic pattern reference/reviewer and the developer-workflow (ep-*) skills, plus the phased be-node orchestrator agent — install just this one plugin for a complete Node backend-patterns toolkit.",
+      "source": "./",
+      "strict": false,
+      "author": {
+        "name": "Aleksandar Kotrulev",
+        "email": "alexandur.kotrulev@gmail.com"
+      },
+      "license": "MIT",
+      "keywords": [
+        "node",
+        "typescript",
+        "backend",
+        "design-patterns"
+      ],
+      "category": "development",
+      "skills": [
+        "./backend/node/skills/reference",
+        "./backend/node/skills/generator",
+        "./backend/node/skills/reviewer",
+        "./backend/node/skills/persistence",
+        "./backend/_shared/reference",
+        "./backend/_shared/reviewer",
+        "./engineering-practices/brainstorming",
+        "./engineering-practices/writing-plans",
+        "./engineering-practices/executing-plans",
+        "./engineering-practices/systematic-debugging",
+        "./engineering-practices/test-driven-development",
+        "./engineering-practices/using-git-worktrees",
+        "./engineering-practices/verification-before-completion",
+        "./engineering-practices/finishing-a-development-branch",
+        "./engineering-practices/subagent-driven-development",
+        "./engineering-practices/dispatching-parallel-agents"
+      ],
+      "agents": [
+        "./backend/node/agents/be-node.md"
       ]
     }
   ]

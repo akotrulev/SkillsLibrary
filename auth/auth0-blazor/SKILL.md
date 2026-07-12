@@ -1,6 +1,6 @@
 ---
 name: auth-auth0-blazor
-description: Use when the user asks to set up or modify Auth0 in Blazor Server or Blazor WebAssembly — `Microsoft.AspNetCore.Authentication.OpenIdConnect` for Server (Authorization Code + PKCE), `Microsoft.AspNetCore.Components.WebAssembly.Authentication` for WASM — including Blazor Server session lifecycle (revalidating auth-state provider, session registry, refresh tokens on circuits, logout/reset revocation). Triggers: "add Auth0 to Blazor Server", "Blazor WASM Auth0 login", "protect a Blazor route", "call a protected API from Blazor", "user stays logged in after logout/expiry", "refresh tokens in Blazor Server". Do NOT use for plain ASP.NET Core APIs (use `auth/auth0-dotnet`), React (use `auth/auth0-react`), or concepts (use `auth/_shared/auth0-concepts`).
+description: Use when the user asks to set up or modify Auth0 in Blazor Server or Blazor WebAssembly — `Microsoft.AspNetCore.Authentication.OpenIdConnect` for Server (Authorization Code + PKCE), `Microsoft.AspNetCore.Components.WebAssembly.Authentication` for WASM — including Blazor Server session lifecycle (revalidating auth-state provider, session registry, refresh tokens on circuits, logout/reset revocation). Triggers: "add Auth0 to Blazor Server", "Blazor WASM Auth0 login", "protect a Blazor route", "call a protected API from Blazor", "user stays logged in after logout/expiry", "refresh tokens in Blazor Server". Do NOT use for plain ASP.NET Core APIs (use `backend/dotnet/skills/auth0`), React (use `auth/auth0-react`), or concepts (use `auth/_shared/auth0-concepts`).
 ---
 
 # Auth — Auth0 in Blazor (Server & WebAssembly)
@@ -12,7 +12,7 @@ Wires Auth0 into Blazor Server and Blazor WebAssembly. Server uses Authorization
 - **.NET 8** + Blazor (Server, WASM, or interactive Auto)
 - **Blazor Server**: `Microsoft.AspNetCore.Authentication.OpenIdConnect` + cookie auth (acts like a Regular Web App in Auth0)
 - **Blazor WASM**: `Microsoft.AspNetCore.Components.WebAssembly.Authentication` (acts like a SPA in Auth0)
-- Backend Web API (if separate) uses `auth/auth0-dotnet`
+- Backend Web API (if separate) uses `backend/dotnet/skills/auth0`
 
 ## When to use
 
@@ -23,9 +23,9 @@ Wires Auth0 into Blazor Server and Blazor WebAssembly. Server uses Authorization
 
 ## When NOT to use
 
-- Plain ASP.NET Core API → `auth/auth0-dotnet`
+- Plain ASP.NET Core API → `backend/dotnet/skills/auth0`
 - React SPA → `auth/auth0-react`
-- Java backend → `auth/auth0-java`
+- Java backend → `backend/java/skills/auth0`
 - Concepts → `auth/_shared/auth0-concepts`
 
 ## Inputs needed
@@ -350,8 +350,8 @@ public class CustomAuthorizationMessageHandler : AuthorizationMessageHandler
 ## Handoffs
 
 - Concepts → `auth/_shared/auth0-concepts`
-- Backend API validation → `auth/auth0-dotnet`
+- Backend API validation → `backend/dotnet/skills/auth0`
 - React equivalent → `auth/auth0-react`
-- Java backend → `auth/auth0-java`
+- Java backend → `backend/java/skills/auth0`
 - Storing secrets → `devops/environment-config` (when authored) + Key Vault
 - E2E auth with Playwright → `qa/ui-test-author/playwright`

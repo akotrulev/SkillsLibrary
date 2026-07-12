@@ -197,6 +197,7 @@ These are the most-missed rules and they scale badly through shared components �
 - No icon-only button without a label; no state shown by color/icon alone; no contrast checked only against white when it renders on a tinted/dark surface.
 - No `<img>` without `alt`; no placeholder-as-label; no `<select>` re-implemented as a `<div>`.
 - No defensive `'use client'` dragging semantic content client-side.
+- No reliance on `:hover` alone to reveal important info (tooltips, truncated-value reveals) — keyboard and touch users never trigger it; pair with focus or make it visible by default.
 - **Do not run axe/Lighthouse here** — hand that to qa `accessibility-testing`.
 
 ## Validation
@@ -206,6 +207,8 @@ These are the most-missed rules and they scale badly through shared components �
 - **Open/close a dialog**: focus enters it, Tab wraps inside, `Esc` closes, focus returns to the trigger.
 - **Trigger an async result**: the polite region announces it once, without stealing focus.
 - Every **icon-only button** has an audible label; toggle a **state** — it's conveyed by text, not color alone.
+- **Zoom to 200%** — layout stays usable, no clipped content, no horizontal scroll trap.
+- **High-contrast / forced-colors mode** — the page stays readable (borders/focus rings don't vanish when custom colors are overridden).
 - Then hand off to qa `accessibility-testing` for the automated WCAG scan gate.
 
 ## Handoffs

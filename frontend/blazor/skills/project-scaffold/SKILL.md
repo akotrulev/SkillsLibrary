@@ -23,7 +23,7 @@ Stands up a **Blazor Web App** (.NET 8/9/10) from zero: the interactivity choice
 - Live/push data → `frontend/blazor/skills/realtime`
 - Component library + theming → `frontend/blazor/skills/component-library`, `frontend/blazor/skills/styling`
 - Auth0 wiring → `auth/auth0-blazor`
-- Non-Blazor .NET project layout → `code-patterns/dotnet/*`
+- Non-Blazor .NET project layout → the `backend/dotnet` dev stack, if installed
 
 ## Inputs needed
 

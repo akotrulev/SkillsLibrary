@@ -16,7 +16,7 @@ Wires Node 20 + TypeScript Vitest tests to talk to a **real** database — seed 
 
 ## When NOT to use
 
-- Production data-access code → `code-patterns/typescript/generator`.
+- Production data-access code → the `backend/node` dev stack's generator, if installed.
 - Container booting itself → `qa/typescript/skills/db-testing/testcontainers`.
 - SQL guardrails (parameterization, no `SELECT *` in assertions) → `qa/typescript/skills/db-testing/query-author`.
 - Pure unit tests with no SQL surface — keep them mock-driven.
@@ -292,4 +292,4 @@ Order the deletes by FK dependency.
 - Java DB testing client → `qa/java/skills/db-testing/client`
 - API tests that own the SUT call → `qa/typescript/skills/api-test-author/generator`
 - Test strategy where DB tests fit → `qa/manual/test-strategy`
-- Production data access patterns → `code-patterns/typescript/generator`
+- Production data access patterns → the `backend/node` dev stack's generator, if installed

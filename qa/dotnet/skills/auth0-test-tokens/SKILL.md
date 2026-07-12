@@ -36,7 +36,7 @@ Two cross-cutting rules shape every example:
 
 ## When NOT to use
 
-- Wiring Auth0 into the **application under test** (auth middleware, JWT validation, login redirect) → `auth/auth0-dotnet` / `auth/auth0-blazor`
+- Wiring Auth0 into the **application under test** (auth middleware, JWT validation, login redirect) → `backend/dotnet/skills/auth0` / `auth/auth0-blazor`
 - Understanding the Auth0 entity/flow model conceptually → `auth/_shared/auth0-concepts`
 - TypeScript or JVM test suites → `qa/{typescript,java}/skills/auth0-test-tokens`
 
@@ -126,7 +126,7 @@ These sections live in `references/details.md` — **read it when the task touch
 
 - **`qa/typescript/skills/auth0-test-tokens`** (`auth0` npm `AuthenticationClient`), **`qa/java/skills/auth0-test-tokens`** (`com.auth0:auth0` `AuthAPI`) — the sibling stacks; same three grants, same cache + stash shape.
 - **`auth/_shared/auth0-concepts`** — the entity/flow model (Tenant / Application / API / audience / grant types) this skill assumes.
-- **`auth/auth0-dotnet`**, **`auth/auth0-blazor`** — the **app-side** login flows this skill complements. This skill never implements user-facing login; those do.
+- **`backend/dotnet/skills/auth0`**, **`auth/auth0-blazor`** — the **app-side** login flows this skill complements. This skill never implements user-facing login; those do.
 - **`qa/dotnet/skills/api-test-author/generator`** — the M2M consumer: where the `Bearer` header lands on the API client.
 - **`qa/dotnet/skills/ui-test-author/playwright`** — the ROPG consumer: `StorageState` / fixture patterns for seeding auth without the login UI.
 - **`qa/dotnet/skills/test-data-builder`** — provisioning/seeding the test users that ROPG authenticates as.

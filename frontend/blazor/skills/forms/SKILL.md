@@ -1,6 +1,6 @@
 ---
 name: fe-blazor-forms
-description: Use when the user asks to build or improve a Blazor form (.NET 8/9/10) — `EditForm`, `DataAnnotationsValidator`, `AddValidation()` + `[ValidatableType]` nested validation (net10), `FluentValidationValidator`, async validation, server-side error mapping (ProblemDetails), file uploads, multi-step wizards, accessibility. Triggers: "build a Blazor form for X", "wire FluentValidation in Blazor", "validate nested objects in a Blazor form", "server-side errors on Blazor form", "multi-step wizard in Blazor", "accessible Blazor inputs". Do NOT use for state management (use `frontend/blazor/skills/state-management`), component scaffolding (use `frontend/blazor/skills/generator`), or React (use `code-patterns/react/forms`).
+description: Use when the user asks to build or improve a Blazor form (.NET 8/9/10) — `EditForm`, `DataAnnotationsValidator`, `AddValidation()` + `[ValidatableType]` nested validation (net10), `FluentValidationValidator`, async validation, server-side error mapping (ProblemDetails), file uploads, multi-step wizards, accessibility. Triggers: "build a Blazor form for X", "wire FluentValidation in Blazor", "validate nested objects in a Blazor form", "server-side errors on Blazor form", "multi-step wizard in Blazor", "accessible Blazor inputs". Do NOT use for state management (use `frontend/blazor/skills/state-management`), component scaffolding (use `frontend/blazor/skills/generator`), or React (use `frontend/react/skills/forms`).
 ---
 
 # Blazor Forms
@@ -19,7 +19,7 @@ The house pattern: **`EditForm` + `FluentValidation` (default)** or **`DataAnnot
 
 - State management at large → `frontend/blazor/skills/state-management`
 - Component scaffolding → `frontend/blazor/skills/generator`
-- React → `code-patterns/react/forms`
+- React → `frontend/react/skills/forms`
 - Auth UI specifics (login / signup) → `auth/auth0-blazor`
 
 ## Default stack
@@ -385,4 +385,4 @@ For large files, upload to a signed URL (S3 presigned / Azure Blob SAS) directly
 - Component scaffolding → `frontend/blazor/skills/generator`
 - Auth-protected forms → `auth/auth0-blazor`
 - API contract → `qa/api-test-author/generator/dotnet`
-- React equivalent → `code-patterns/react/forms`
+- React equivalent → `frontend/react/skills/forms`

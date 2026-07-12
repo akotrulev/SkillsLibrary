@@ -1,6 +1,6 @@
 ---
 name: auth-auth0-concepts
-description: Use when the user asks to understand Auth0-specific concepts before picking a stack recipe — tenants, applications, APIs, the `audience` parameter, RBAC, organizations, namespaced custom claims, Actions, social/enterprise connections. The Auth0 layer on top of the provider-agnostic `auth/_shared/oidc-concepts`. Triggers: "what's an Auth0 API vs application", "why is my Auth0 token opaque", "RBAC with Auth0", "Auth0 organizations", "namespaced custom claims", "Auth0 connections". Do NOT use for generic OAuth/OIDC theory shared across providers (use `auth/_shared/oidc-concepts`), AWS Cognito (use the `cognito-*` skills), or stack-specific implementation (use `auth/auth0-dotnet`, `auth/auth0-java`, `auth/auth0-react`, `auth/auth0-blazor`).
+description: Use when the user asks to understand Auth0-specific concepts before picking a stack recipe — tenants, applications, APIs, the `audience` parameter, RBAC, organizations, namespaced custom claims, Actions, social/enterprise connections. The Auth0 layer on top of the provider-agnostic `auth/_shared/oidc-concepts`. Triggers: "what's an Auth0 API vs application", "why is my Auth0 token opaque", "RBAC with Auth0", "Auth0 organizations", "namespaced custom claims", "Auth0 connections". Do NOT use for generic OAuth/OIDC theory shared across providers (use `auth/_shared/oidc-concepts`), AWS Cognito (use the `cognito-*` skills), or stack-specific implementation (use `backend/dotnet/skills/auth0`, `backend/java/skills/auth0`, `auth/auth0-react`, `auth/auth0-blazor`).
 ---
 
 # Auth0 — Concepts (Shared)
@@ -17,7 +17,7 @@ Conceptual reference for **Auth0** used across every stack in this library. This
 
 ## When NOT to use
 
-- Wiring code in a specific stack → `auth/auth0-dotnet` / `auth/auth0-java` / `auth/auth0-react` / `auth/auth0-blazor`
+- Wiring code in a specific stack → `backend/dotnet/skills/auth0` / `backend/java/skills/auth0` / `auth/auth0-react` / `auth/auth0-blazor`
 - Generic OAuth/OIDC theory (flows, tokens, JWT validation) shared across providers → [`auth/_shared/oidc-concepts`](../oidc-concepts/SKILL.md)
 - AWS Cognito → the `cognito-*` skills
 
@@ -125,9 +125,9 @@ Generic pitfalls (ID token to the API, long-lived access tokens, Implicit Flow) 
 ## Handoffs
 
 - Provider-agnostic OAuth/OIDC model (flows, tokens, JWT validation, Auth0-vs-Cognito) → [`auth/_shared/oidc-concepts`](../oidc-concepts/SKILL.md)
-- .NET / ASP.NET Core API or web → `auth/auth0-dotnet`
+- .NET / ASP.NET Core API or web → `backend/dotnet/skills/auth0`
 - React SPA → `auth/auth0-react`
-- Java / Spring Boot backend → `auth/auth0-java`
+- Java / Spring Boot backend → `backend/java/skills/auth0`
 - Blazor Server / WASM → `auth/auth0-blazor`
 - Storing / rotating client secrets → `devops/environment-config` (when authored) + Key Vault / Secrets Manager
 - Roles + permissions in tests → use seeded users in the test tenant; document in `qa/_shared/test-strategy` (when authored)

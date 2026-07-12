@@ -1,6 +1,6 @@
 ---
 name: fe-blazor-state-management
-description: Use when the user asks how to manage state in Blazor (.NET 8/9/10 — Server / WASM / Interactive Auto) — scoped DI services, CascadingValue, `[PersistentState]` / PersistentComponentState, circuit-eviction persistence, Fluxor / Blazor-State for Redux-style, server-side caching, prerender → interactive state hand-off. Triggers: "where should this state live in Blazor", "share state across components", "CascadingValue vs scoped service", "Fluxor or just events", "persist data across prerender + WASM", "keep state through a circuit pause". Do NOT use for component scaffolding (use `frontend/blazor/skills/generator`), for forms (use `frontend/blazor/skills/forms`), or React (use `code-patterns/react/state-management`).
+description: Use when the user asks how to manage state in Blazor (.NET 8/9/10 — Server / WASM / Interactive Auto) — scoped DI services, CascadingValue, `[PersistentState]` / PersistentComponentState, circuit-eviction persistence, Fluxor / Blazor-State for Redux-style, server-side caching, prerender → interactive state hand-off. Triggers: "where should this state live in Blazor", "share state across components", "CascadingValue vs scoped service", "Fluxor or just events", "persist data across prerender + WASM", "keep state through a circuit pause". Do NOT use for component scaffolding (use `frontend/blazor/skills/generator`), for forms (use `frontend/blazor/skills/forms`), or React (use `frontend/react/skills/state-management`).
 ---
 
 # Blazor State Management
@@ -20,7 +20,7 @@ The right place for state in Blazor (.NET 8/9/10) depends on lifetime + scope + 
 - Component scaffolding → `frontend/blazor/skills/generator`
 - Forms specifically → `frontend/blazor/skills/forms`
 - Render mode trade-offs → `frontend/blazor/skills/reference`
-- React → `code-patterns/react/state-management`
+- React → `frontend/react/skills/state-management`
 - Auth state from Auth0 → `auth/auth0-blazor`
 
 ## Lifetime / scope mental model
@@ -287,4 +287,4 @@ This isn't UI state; it's server-side memoization. Keep it out of the components
 - Render-mode and lifecycle background → `frontend/blazor/skills/reference`
 - Forms specifically → `frontend/blazor/skills/forms`
 - Auth state from Auth0 → `auth/auth0-blazor`
-- React equivalent → `code-patterns/react/state-management`
+- React equivalent → `frontend/react/skills/state-management`

@@ -16,7 +16,7 @@ Wires Java 21 TestNG tests to talk to a **real** database — seed fixtures via 
 
 ## When NOT to use
 
-- Production data-access code → `code-patterns/java/generator` (Spring Data JPA, jOOQ patterns).
+- Production data-access code → the `backend/java` dev stack's generator, if installed (Spring Data JPA, jOOQ patterns).
 - Container booting itself → `qa/java/skills/db-testing/testcontainers`.
 - SQL guardrails (parameterization, no `SELECT *` in assertions) → `qa/java/skills/db-testing/query-author`.
 - Pure unit tests with no SQL surface — keep them mock-driven.
@@ -266,4 +266,4 @@ List tables explicitly. Don't loop over `information_schema.tables` — that tou
 - TypeScript DB testing client → `qa/typescript/skills/db-testing/client`
 - API tests that own the SUT call → `qa/java/skills/api-test-author/generator`
 - Test strategy where DB tests fit → `qa/manual/test-strategy`
-- Production data access patterns → `code-patterns/java/generator`
+- Production data access patterns → the `backend/java` dev stack's generator, if installed

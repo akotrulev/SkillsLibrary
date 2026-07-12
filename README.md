@@ -15,6 +15,9 @@ The repo is a Claude Code plugin marketplace. Add it once, then install the one 
 /plugin install qa-typescript@skills-library       # complete TypeScript QA toolkit
 /plugin install fe-blazor@skills-library           # complete Blazor (.NET 8/9/10) frontend toolkit
 /plugin install fe-react@skills-library            # complete React 19/18 (Next.js App Router / Vite) frontend toolkit
+/plugin install be-dotnet@skills-library           # .NET 10 backend design-pattern + EF Core + Auth0/Cognito toolkit
+/plugin install be-java@skills-library             # Java 21 / Spring Boot backend design-pattern + JPA + Auth0/Cognito toolkit
+/plugin install be-node@skills-library             # Node 24 / TypeScript backend design-pattern + Prisma toolkit
 /plugin install data@skills-library                # complete database-engineering toolkit (8 engines)
 /plugin install business-analysis@skills-library   # cross-feature business-flow analysis toolkit
 ```
@@ -31,11 +34,14 @@ So installing a single plugin gives you the stack's authoring/verification skill
 **The other plugins:**
 
 - **`fe-blazor`** — the Blazor (.NET 8/9/10) frontend **development** stack: 22 `fe-blazor-*` skills (scaffold, state, styling, forms, data access, realtime, quality layers, bUnit tests, hostile reviewer), the phased `fe-blazor` orchestrator agent, plus the bundled `design/*` craft skills and `auth/auth0-blazor`.
-- **`fe-react`** — the React 19/18 + TypeScript frontend **development** stack (Next.js 15 App Router / RSC primary, Vite SPA fallback, MUI default): 21 `fe-react-*` skills, the phased `fe-react` orchestrator agent, plus the bundled `design/*` craft skills and `auth/auth0-react`.
+- **`fe-react`** — the React 19/18 + TypeScript frontend **development** stack (Next.js 15 App Router / RSC primary, Vite SPA fallback, MUI default): 21 `fe-react-*` skills, the phased `fe-react` orchestrator agent, plus the bundled `design/*` craft skills, `auth/auth0-react`, and the vendored Vercel performance/composition/view-transitions seeds.
+- **`be-dotnet`** — the .NET (10 primary / 8-9 supported) backend **design-pattern + persistence** stack: `reference`/`generator`/`reviewer`/`persistence` (EF Core) + `auth0`/`cognito` (JWT bearer validation, RBAC, Client Credentials M2M), the phased `be-dotnet` orchestrator agent, plus the bundled `backend/_shared` pattern cards and `auth/_shared/{auth0-concepts,oidc-concepts}`.
+- **`be-java`** — the Java 21 + Spring Boot 3.x backend **design-pattern + persistence** stack: the same five skills, Spring-idiomatic (JPA/Hibernate + Spring Data, Spring Security OAuth2 Resource Server for `auth0`/`cognito`), the phased `be-java` orchestrator agent, plus `backend/_shared` and `auth/_shared/{auth0-concepts,oidc-concepts}`.
+- **`be-node`** — the Node (24 primary / 22 maintenance) + TypeScript strict backend **design-pattern + persistence** stack: `reference`/`generator`/`reviewer`/`persistence` (Prisma default / Drizzle / TypeORM), the phased `be-node` orchestrator agent, plus `backend/_shared` (no `auth0`/`cognito` skill yet — a known gap).
 - **`data`** — the database-engineering stack: 8 version-aware per-engine skills (PostgreSQL, SQL Server / Azure SQL, MySQL, MongoDB, Redis / Valkey, DynamoDB, Cosmos DB, Elasticsearch / OpenSearch), 4 cross-engine `_shared` skills (schema-design, migrations, caching-patterns, query-optimization), and the phased `data-architect` agent.
 - **`business-analysis`** — cross-feature business-flow reasoning: 5 `ba-*` skills (persistent project knowledge base, flow mapping, state modeling, decision modeling, the 11-class feature-conflict sweep) and the `business-analyst` agent (analyze / model / audit modes).
 
-Every stack plugin (`qa-*`, `fe-*`) also bundles the 10 `ep-*` engineering-practices developer-workflow skills (brainstorm → plan → execute → verify → finish, TDD, systematic debugging, worktrees, agent dispatch). Pull updates later with `/plugin marketplace update skills-library`.
+Every stack plugin (`qa-*`, `fe-*`, `be-*`) also bundles the 10 `ep-*` engineering-practices developer-workflow skills (brainstorm → plan → execute → verify → finish, TDD, systematic debugging, worktrees, agent dispatch). Pull updates later with `/plugin marketplace update skills-library`.
 
 ### Use the repo directly
 
@@ -46,9 +52,9 @@ Every stack plugin (`qa-*`, `fe-*`) also bundles the 10 `ep-*` engineering-pract
 ## Layout
 
 ```
-code-patterns/        # Per-stack pattern reference, generators, reviewers
+backend/                # Backend dev stacks: dotnet/java/node pattern reference, generators, reviewers, persistence + be-* agents; _shared cross-stack pattern cards
 data/                   # Per-engine skills (Postgres, SQL Server, MySQL, Mongo, Redis, DynamoDB, Cosmos, Elasticsearch) + shared (migrations, caching, query opt, schema design) + data-architect agent
-frontend/               # Frontend dev stacks: blazor/ (fe-blazor skills + agent) and react/ (fe-react skills + agent)
+frontend/               # Frontend dev stacks: blazor/ (fe-blazor skills + agent), react/ (fe-react skills + agent + vendored Vercel seeds), react-native/ (parked seed)
 business-analysis/      # Cross-feature business-flow reasoning: ba-* skills + business-analyst agent
 auth/                   # Auth0 setup per stack
 devops/                 # Pipelines (GH Actions / GitLab CI / Azure Pipelines), deployment, env config, IaC
@@ -156,9 +162,9 @@ See [`CONTRIBUTING.md`](CONTRIBUTING.md) and the templates in [`.skill-template/
 
 | Section               | State |
 |-----------------------|-------|
-| code-patterns       | scaffolding (react/reference imported from Vercel) |
+| backend               | authored + shipped — `backend/_shared/` (2 pattern-card skills) + `backend/{dotnet,java,node}/` (4 skills each: reference/generator/reviewer/persistence) + a phased `be-*` agent per stack; `be-dotnet` / `be-java` / `be-node` plugins |
 | data                  | authored + shipped — 8 version-aware per-engine skills (postgresql, sqlserver, mysql, mongodb, redis, dynamodb, cosmosdb, elasticsearch) + 4 cross-engine `_shared` skills + the `data-architect` agent; `data` plugin |
-| frontend              | authored + shipped — `frontend/blazor/` (22 skills + `fe-blazor` agent; `fe-blazor` plugin) and `frontend/react/` (21 skills + `fe-react` agent; `fe-react` plugin) |
+| frontend              | authored + shipped — `frontend/blazor/` (22 skills + `fe-blazor` agent; `fe-blazor` plugin) and `frontend/react/` (21 skills + `fe-react` agent + vendored Vercel seeds; `fe-react` plugin); `frontend/react-native/` parked, under construction |
 | business-analysis     | authored + shipped — 5 `ba-*` skills + the `business-analyst` agent; `business-analysis` plugin |
 | auth                  | scaffolding |
 | devops                | scaffolding (gh-actions / gitlab-ci / azure-pipelines authored; vercel-deployment moved to extras/) |

@@ -1,6 +1,6 @@
 ---
 name: fe-blazor-generator
-description: Use when the user asks to scaffold a Blazor pattern in .NET 8/9/10 — Static SSR / Server / WASM / Interactive Auto — into the active repo. Triggers: "scaffold a Blazor component for X", "create a state container for Y", "wire a CascadingValue", "convert this to an interactive component", "add a [PersistentState] fetch", "compound component for tabs in Blazor", "add a NotFound page", "customize the reconnect modal", "add an external link that opens in a new tab". Do NOT use for explanations (use `frontend/blazor/skills/reference`), reviews (use `frontend/blazor/skills/reviewer`), or non-Blazor patterns (use `code-patterns/dotnet/generator`).
+description: Use when the user asks to scaffold a Blazor pattern in .NET 8/9/10 — Static SSR / Server / WASM / Interactive Auto — into the active repo. Triggers: "scaffold a Blazor component for X", "create a state container for Y", "wire a CascadingValue", "convert this to an interactive component", "add a [PersistentState] fetch", "compound component for tabs in Blazor", "add a NotFound page", "customize the reconnect modal", "add an external link that opens in a new tab". Do NOT use for explanations (use `frontend/blazor/skills/reference`), reviews (use `frontend/blazor/skills/reviewer`), or non-Blazor patterns (use the `backend/dotnet` dev stack's generator, if installed).
 ---
 
 # Blazor Design Patterns — Generator
@@ -22,8 +22,8 @@ Scaffolds Blazor components, services, and patterns into the active repo (.NET 8
 
 - Explanation → `frontend/blazor/skills/reference`
 - Review → `frontend/blazor/skills/reviewer`
-- Plain .NET backend patterns → `code-patterns/dotnet/generator`
-- React → `code-patterns/react/generator`
+- Plain .NET backend patterns → the `backend/dotnet` dev stack's generator, if installed
+- React → `frontend/react/skills/generator`
 - Auth0 in Blazor → `auth/auth0-blazor`
 
 ## Inputs needed
@@ -419,5 +419,5 @@ For every component:
 - Conceptual lookup → `frontend/blazor/skills/reference`
 - Reviewing the result → `frontend/blazor/skills/reviewer`
 - Auth wiring → `auth/auth0-blazor`
-- Non-component .NET patterns → `code-patterns/dotnet/generator`
+- Non-component .NET patterns → the `backend/dotnet` dev stack's generator, if installed
 - API DTOs the components consume → `qa/api-dto-writer/dotnet`

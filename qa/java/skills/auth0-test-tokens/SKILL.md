@@ -5,7 +5,7 @@ description: Use when the user asks to obtain Auth0 access tokens *for automated
 
 # QA — Auth0 Test Tokens (Java / TestNG)
 
-Scaffolds **programmatic Auth0 token acquisition for automated tests** in Java. The goal is narrow: get a valid `access_token` into a test's API client or browser session **without driving the interactive `/authorize` login UI** on every run. This is the *test-token slice* — it complements, and does not replace, the app-side login skill in `auth/auth0-java` (which implements the real user-facing flows).
+Scaffolds **programmatic Auth0 token acquisition for automated tests** in Java. The goal is narrow: get a valid `access_token` into a test's API client or browser session **without driving the interactive `/authorize` login UI** on every run. This is the *test-token slice* — it complements, and does not replace, the app-side login skill in `backend/java/skills/auth0` (which implements the real user-facing flows).
 
 Three grants cover what a QA org actually needs:
 
@@ -36,7 +36,7 @@ Two cross-cutting rules shape every example:
 
 ## When NOT to use
 
-- Wiring Auth0 into the **application under test** (Spring Security resource server, JWT validation, login redirect) → `auth/auth0-java`
+- Wiring Auth0 into the **application under test** (Spring Security resource server, JWT validation, login redirect) → `backend/java/skills/auth0`
 - Understanding the Auth0 entity/flow model conceptually → `auth/_shared/auth0-concepts`
 - TypeScript or .NET test suites → `qa/{typescript,dotnet}/skills/auth0-test-tokens`
 
@@ -122,7 +122,7 @@ These sections live in `references/details.md` — **read it when the task touch
 
 - **`qa/typescript/skills/auth0-test-tokens`** (`auth0` npm `AuthenticationClient`), **`qa/dotnet/skills/auth0-test-tokens`** (`Auth0.AuthenticationApi` `GetTokenAsync`) — the sibling stacks; same three grants, same cache + stash shape.
 - **`auth/_shared/auth0-concepts`** — the entity/flow model (Tenant / Application / API / audience / grant types) this skill assumes.
-- **`auth/auth0-java`** — the **app-side** login flow (Spring Security resource server) this skill complements. This skill never implements user-facing login; that does.
+- **`backend/java/skills/auth0`** — the **app-side** login flow (Spring Security resource server) this skill complements. This skill never implements user-facing login; that does.
 - **`qa/java/skills/api-test-author/generator`** — the M2M consumer: where the `Bearer` header lands on the RestAssured client.
 - **`qa/java/skills/ui-test-author/playwright`** — the ROPG consumer: storage-state / fixture patterns for seeding auth without the login UI.
 - **`qa/java/skills/test-data-builder`** — provisioning/seeding the test users that ROPG authenticates as.

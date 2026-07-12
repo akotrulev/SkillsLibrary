@@ -16,7 +16,7 @@ Wires .NET 8 NUnit tests to talk to a **real** database — seed fixtures via bu
 
 ## When NOT to use
 
-- Production data-access code → `code-patterns/dotnet/generator` (Repository / EF Core / Dapper patterns).
+- Production data-access code → the `backend/dotnet` dev stack's generator, if installed (Repository / EF Core / Dapper patterns).
 - Container booting itself → `qa/dotnet/skills/db-testing/testcontainers`.
 - SQL guardrails (parameterization, no `SELECT *` in assertions) → `qa/dotnet/skills/db-testing/query-author`.
 - Pure unit tests with no SQL surface — keep them mock-driven.
@@ -271,4 +271,4 @@ Redis: `FLUSHDB` is fine in test mode; never in shared environments.
 - TypeScript DB testing client → `qa/typescript/skills/db-testing/client`
 - API tests that own the SUT call → `qa/dotnet/skills/api-test-author/generator`
 - Test strategy where DB tests fit → `qa/manual/test-strategy`
-- Production data access patterns → `code-patterns/dotnet/generator`
+- Production data access patterns → the `backend/dotnet` dev stack's generator, if installed

@@ -1,6 +1,6 @@
 ---
 name: fe-blazor-reference
-description: Use when the user asks to explain a Blazor pattern (.NET 8/9/10 — Static SSR / Server / WASM / Interactive Auto) — component lifecycle, render modes, state containers, `[PersistentState]` / PersistentComponentState, parameter cascading, JS interop, EventCallback vs Action, CascadingValue, and the component-architecture / atomic-design taxonomy (atom/molecule/organism naming, prop-drilling limits, when a component should own state). Triggers: "what's the right Blazor state container pattern", "when to use `RenderMode` X", "EventCallback vs Action", "CascadingValue vs DI", "what does [PersistentState] do", "atom or organism / how should I layer components", "how deep is too deep to prop-drill", "should this component own its state". Do NOT use for scaffolding (use `frontend/blazor/skills/generator`), reviewing (use `frontend/blazor/skills/reviewer`), where component files go on disk (use `frontend/blazor/skills/project-scaffold`), or non-Blazor .NET patterns (use `code-patterns/dotnet/reference`).
+description: Use when the user asks to explain a Blazor pattern (.NET 8/9/10 — Static SSR / Server / WASM / Interactive Auto) — component lifecycle, render modes, state containers, `[PersistentState]` / PersistentComponentState, parameter cascading, JS interop, EventCallback vs Action, CascadingValue, and the component-architecture / atomic-design taxonomy (atom/molecule/organism naming, prop-drilling limits, when a component should own state). Triggers: "what's the right Blazor state container pattern", "when to use `RenderMode` X", "EventCallback vs Action", "CascadingValue vs DI", "what does [PersistentState] do", "atom or organism / how should I layer components", "how deep is too deep to prop-drill", "should this component own its state". Do NOT use for scaffolding (use `frontend/blazor/skills/generator`), reviewing (use `frontend/blazor/skills/reviewer`), where component files go on disk (use `frontend/blazor/skills/project-scaffold`), or non-Blazor .NET patterns (use the `backend/dotnet` dev stack's reference, if installed).
 ---
 
 # Blazor Design Patterns — Reference
@@ -31,8 +31,8 @@ Conceptual reference for design patterns in Blazor on .NET 8, 9, and 10 — Stat
 
 - Scaffolding → `frontend/blazor/skills/generator`
 - Reviewing → `frontend/blazor/skills/reviewer`
-- Plain .NET back-end patterns → `code-patterns/dotnet/reference`
-- React → `code-patterns/react/reference`
+- Plain .NET back-end patterns → the `backend/dotnet` dev stack's reference, if installed
+- React → `frontend/react/skills/reference`
 - Auth0 in Blazor → `auth/auth0-blazor`
 
 ---
@@ -312,5 +312,5 @@ Two-way binding: `@bind-Value` on `InputText`/`InputNumber`/`InputCheckbox` — 
 
 - Scaffolding Blazor components / patterns → `frontend/blazor/skills/generator`
 - Reviewing Blazor code → `frontend/blazor/skills/reviewer`
-- Non-Blazor .NET patterns → `code-patterns/dotnet/reference`
+- Non-Blazor .NET patterns → the `backend/dotnet` dev stack's reference, if installed
 - Auth0 wiring in Blazor → `auth/auth0-blazor`

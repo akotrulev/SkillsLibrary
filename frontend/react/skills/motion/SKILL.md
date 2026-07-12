@@ -190,7 +190,7 @@ import { AnimatePresence, motion } from 'motion/react';
 }
 ```
 
-- **App Router client navigation** doesn't reload the document, so `@view-transition`'s `navigation: auto` doesn't fire on `<Link>` clicks. For animated client-side route transitions use **React's `<ViewTransition>`** (wrap the animating region; drive the swap through `startTransition`) behind Next's `experimental.viewTransition` flag — treat it as experimental — or `motion` keyed on `usePathname()`. See the vendored seed [`code-patterns/react/view-transitions`](../../../../code-patterns/react/view-transitions/SKILL.md) for the full pattern catalogue (shared element, Suspense reveal, list reorder, directional nav).
+- **App Router client navigation** doesn't reload the document, so `@view-transition`'s `navigation: auto` doesn't fire on `<Link>` clicks. For animated client-side route transitions use **React's `<ViewTransition>`** (wrap the animating region; drive the swap through `startTransition`) behind Next's `experimental.viewTransition` flag — treat it as experimental — or `motion` keyed on `usePathname()`. See the vendored seed [`frontend/react/vendor/view-transitions`](../../vendor/view-transitions/SKILL.md) for the full pattern catalogue (shared element, Suspense reveal, list reorder, directional nav).
 - **Shared-element** transitions: give the source and destination elements the same `view-transition-name` (CSS) or the same `name` prop (`<ViewTransition name="...">`); the browser tweens between them across the swap.
 - If the browser lacks the API, navigation still works — it swaps instantly. **No JS fallback needed**; the motion is pure enhancement.
 
@@ -242,5 +242,5 @@ Anything using `motion` is a **Client Component** (`'use client'`) and adds to t
 - Focus movement + announcement on client-side navigation (not visual motion) → [`accessibility`](../accessibility/SKILL.md)
 - Component-library transition components (use before hand-rolling) → [`component-library`](../component-library/SKILL.md)
 - `useDeferredValue`/`useTransition` scheduling, keeping the client bundle lean → [`performance`](../performance/SKILL.md)
-- The full View Transitions pattern catalogue (shared element, Suspense reveal, directional nav) → the vendored seed [`code-patterns/react/view-transitions`](../../../../code-patterns/react/view-transitions/SKILL.md)
+- The full View Transitions pattern catalogue (shared element, Suspense reveal, directional nav) → the vendored seed [`frontend/react/vendor/view-transitions`](../../vendor/view-transitions/SKILL.md)
 - Effect-cleanup / subscription-teardown discipline (same rule) → [`realtime`](../realtime/SKILL.md)

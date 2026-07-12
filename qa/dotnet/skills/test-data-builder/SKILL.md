@@ -19,7 +19,7 @@ Eliminates repeated inline test data literals in .NET 8 test projects (NUnit pri
 
 - Java test data → `qa/java/skills/test-data-builder`
 - TypeScript test data → `qa/typescript/skills/test-data-builder`
-- Production-code builders → `code-patterns/dotnet/generator`
+- Production-code builders → the `backend/dotnet` dev stack's generator, if installed
 - Test data for performance scenarios (volume) → `qa/dotnet/skills/performance/nbomber`
 - One-off fixture used by a single test → inline is fine; only extract on duplication
 
@@ -204,4 +204,4 @@ Don't build "an order in the DB" inside the builder — that couples the builder
 - UI tests where they back form-fill helpers → `qa/dotnet/skills/ui-test-author/playwright` / `qa/dotnet/skills/ui-test-author/selenium` / `qa/dotnet/skills/ui-test-author/appium`
 - Test reviewers (verify builders used, not literals) → `qa/dotnet/skills/api-test-author/reviewer` / `qa/dotnet/skills/ui-test-author/reviewer`
 - Test strategy / pyramid → `qa/manual/test-strategy`
-- Production-code builders → `code-patterns/dotnet/generator`
+- Production-code builders → the `backend/dotnet` dev stack's generator, if installed
