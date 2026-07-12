@@ -31,9 +31,9 @@ Imported skills from third-party repos. Each upstream directory was copied verba
 | react-view-transitions      | `design-patterns/react/view-transitions/`        |
 | composition-patterns        | `design-patterns/react/composition-patterns/`    |
 | react-native-skills         | `design-patterns/react-native/`                  |
-| deploy-to-vercel            | `devops/vercel-deployment/deploy/`               |
-| vercel-cli-with-tokens      | `devops/vercel-deployment/cli-tokens/`           |
-| vercel-optimize             | `devops/vercel-deployment/optimize/`             |
+| deploy-to-vercel            | `extras/vercel-deployment/deploy/`               |
+| vercel-cli-with-tokens      | `extras/vercel-deployment/cli-tokens/`           |
+| vercel-optimize             | `extras/vercel-deployment/optimize/`             |
 | web-design-guidelines       | `design/web-design-guidelines/`                  |
 
 ## obra/superpowers — https://github.com/obra/superpowers

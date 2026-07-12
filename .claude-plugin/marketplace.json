@@ -7,7 +7,7 @@
   },
   "metadata": {
     "description": "Stack-first QA automation skills library: install one self-contained plugin per tech stack (Java / .NET / TypeScript). Each plugin bundles every discipline — API/UI/mobile/performance/LLM/BDD authoring and verification — plus the language-agnostic manual-QA process, CI/CD pipelines, test reporting, and the cross-stack OWASP-mapped security skills.",
-    "version": "2.9.0"
+    "version": "2.10.0"
   },
   "plugins": [
     {
@@ -450,6 +450,71 @@
       ],
       "agents": [
         "./data/agents/data-architect.md"
+      ]
+    },
+    {
+      "name": "fe-react",
+      "description": "Self-contained senior frontend React developer plugin for React 19/18 + TypeScript (Next.js App Router / RSC primary, Vite SPA fallback; MUI default). Covers the full FE build lifecycle end-to-end: project scaffold and rendering-strategy choice, architecture foundations (RSC/'use client' boundary, state, component library, styling, responsive design), feature build (pages/components/forms with React Hook Form + Zod, API + live/realtime data via RSC fetch/Server Actions/TanStack Query/SSE/WebSocket, motion, UX writing, data-testids), quality layers (accessibility, performance, error resilience, SEO, i18n, PWA/offline), and Vitest + React Testing Library component tests — plus a distinctive-visual-design critique loop. Bundles the Auth0 React auth skills and the stack-agnostic design-craft skills (frontend-design, design-tokens, dataviz, brand-intake, iconography, ux-heuristics, theme-factory, ux-writing, web-design-guidelines) and the phased fe-react orchestrator agent — install just this one plugin for a complete React frontend toolkit.",
+      "source": "./",
+      "strict": false,
+      "author": {
+        "name": "Aleksandar Kotrulev",
+        "email": "alexandur.kotrulev@gmail.com"
+      },
+      "license": "MIT",
+      "keywords": [
+        "react",
+        "nextjs",
+        "frontend",
+        "web-ui"
+      ],
+      "category": "development",
+      "skills": [
+        "./frontend/react/skills/accessibility",
+        "./frontend/react/skills/component-library",
+        "./frontend/react/skills/component-testing",
+        "./frontend/react/skills/data-access",
+        "./frontend/react/skills/error-resilience",
+        "./frontend/react/skills/forms",
+        "./frontend/react/skills/generator",
+        "./frontend/react/skills/localization",
+        "./frontend/react/skills/motion",
+        "./frontend/react/skills/performance",
+        "./frontend/react/skills/project-scaffold",
+        "./frontend/react/skills/pwa-offline",
+        "./frontend/react/skills/realtime",
+        "./frontend/react/skills/reference",
+        "./frontend/react/skills/responsive-design",
+        "./frontend/react/skills/reviewer",
+        "./frontend/react/skills/seo-discoverability",
+        "./frontend/react/skills/state-management",
+        "./frontend/react/skills/styling",
+        "./frontend/react/skills/testability",
+        "./frontend/react/skills/ui-conventions",
+        "./auth/auth0-react",
+        "./auth/_shared/auth0-concepts",
+        "./design/frontend-design",
+        "./design/design-tokens",
+        "./design/dataviz",
+        "./design/brand-intake",
+        "./design/iconography",
+        "./design/ux-heuristics",
+        "./design/web-design-guidelines",
+        "./design/theme-factory",
+        "./design/ux-writing",
+        "./engineering-practices/brainstorming",
+        "./engineering-practices/writing-plans",
+        "./engineering-practices/executing-plans",
+        "./engineering-practices/systematic-debugging",
+        "./engineering-practices/test-driven-development",
+        "./engineering-practices/using-git-worktrees",
+        "./engineering-practices/verification-before-completion",
+        "./engineering-practices/finishing-a-development-branch",
+        "./engineering-practices/subagent-driven-development",
+        "./engineering-practices/dispatching-parallel-agents"
+      ],
+      "agents": [
+        "./frontend/react/agents/fe-react.md"
       ]
     }
   ]
