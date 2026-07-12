@@ -1,6 +1,6 @@
 ---
 name: observability-opentelemetry-dotnet
-description: Use when the user asks to instrument a .NET 8 service with OpenTelemetry — traces, metrics, log correlation — and export via OTLP to Tempo / Prometheus / Loki (or an OTel Collector). Triggers: "instrument this with OTel", "add traces / metrics", "wire OTLP exporter", "add a custom span / counter / histogram", "what spans am I missing". Do NOT use for Java (use `observability/opentelemetry-java`), Node (use `observability/opentelemetry-node`), or for log shaping (use `observability/serilog-structured-logging`).
+description: Use when the user asks to instrument a .NET 8 service with OpenTelemetry — traces, metrics, log correlation — and export via OTLP to Tempo / Prometheus / Loki (or an OTel Collector). Triggers: "instrument this with OTel", "add traces / metrics", "wire OTLP exporter", "add a custom span / counter / histogram", "what spans am I missing". Do NOT use for Java (use `observability/opentelemetry-java`), Node (use `observability/opentelemetry-node`), or for log shaping (use `observability/structured-logging-dotnet`).
 ---
 
 # Observability — OpenTelemetry (.NET 8)
@@ -27,7 +27,7 @@ Instruments a .NET 8 service with OpenTelemetry: traces via `Activity` / `System
 
 - Java service → `observability/opentelemetry-java`
 - Node service → `observability/opentelemetry-node`
-- Log shape / sinks → `observability/serilog-structured-logging`
+- Log shape / sinks → `observability/structured-logging-dotnet`
 - Dashboards / queries → `observability/grafana-dashboards` + `observability/logql-promql`
 
 ## Inputs needed
@@ -162,7 +162,7 @@ Use `Counter` for monotonic counts, `Histogram` for durations, `UpDownCounter` f
 
 ### Log correlation
 
-Wire `Enrich.WithSpan()` into Serilog (see `observability/serilog-structured-logging`). Every log line emitted inside an active span gets `TraceId` / `SpanId` fields, which Loki uses to link to the trace in Tempo.
+Wire `Enrich.WithSpan()` into Serilog (see `observability/structured-logging-dotnet`). Every log line emitted inside an active span gets `TraceId` / `SpanId` fields, which Loki uses to link to the trace in Tempo.
 
 ## Sampling
 
@@ -226,14 +226,14 @@ Propagators.DefaultTextMapPropagator.Inject(new PropagationContext(ctx ?? defaul
 1. Confirm service name/version/env, Collector endpoint, sampling strategy, and which instrumentations are needed.
 2. Install the package set above; pin all OTel packages to the same version.
 3. Add the `AddOpenTelemetry().WithTracing(...).WithMetrics(...)` block to `Program.cs`.
-4. Add Serilog `Enrich.WithSpan()` if structured logging is in scope (see `observability/serilog-structured-logging`).
+4. Add Serilog `Enrich.WithSpan()` if structured logging is in scope (see `observability/structured-logging-dotnet`).
 5. Create one `ActivitySource` + one `Meter` per business subsystem; wire instrumentation into the code that should emit spans/metrics.
 6. Configure the Collector (separate concern) to receive OTLP and route to Tempo / Prometheus / Loki.
 7. Smoke locally with a docker-compose stack (Collector + Tempo + Prometheus + Grafana). Confirm `traceparent` rides outbound HTTP, spans appear in Tempo, metrics appear in Prometheus.
 
 ## Handoffs
 
-- Log shape and sinks → `observability/serilog-structured-logging`
+- Log shape and sinks → `observability/structured-logging-dotnet`
 - LogQL / PromQL query patterns → `observability/logql-promql`
 - Dashboard layout → `observability/grafana-dashboards`
 - Java equivalent → `observability/opentelemetry-java`

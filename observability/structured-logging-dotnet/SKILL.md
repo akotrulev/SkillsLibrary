@@ -1,5 +1,5 @@
 ---
-name: observability-serilog-structured-logging
+name: observability-structured-logging-dotnet
 description: Use when the user asks to set up or refactor logging in a .NET 8 service using Serilog — message templates, enrichers, sinks to console / Loki / Seq / Application Insights, scope / correlation, sensitive-data masking. Triggers: "set up Serilog", "configure structured logging in .NET", "ship logs to Loki", "add correlation IDs", "this log line is wrong". Do NOT use for Java (use `observability/structured-logging-java`) or Node (use `observability/structured-logging-node`), or for tracing/metrics (use `observability/opentelemetry-dotnet`).
 ---
 

@@ -1,6 +1,6 @@
 ---
 name: observability-structured-logging-java
-description: Use when the user asks to set up or refactor logging in a Java 21 / Spring Boot 3 service — SLF4J + Logback with JSON encoding, MDC for correlation, sinks to console / Loki / Elastic. Triggers: "set up structured logging in Spring Boot", "Logback JSON config", "ship logs to Loki", "add MDC correlation IDs", "this log line is wrong". Do NOT use for .NET (use `observability/serilog-structured-logging`) or Node (use `observability/structured-logging-node`), or for tracing/metrics (use `observability/opentelemetry-java`).
+description: Use when the user asks to set up or refactor logging in a Java 21 / Spring Boot 3 service — SLF4J + Logback with JSON encoding, MDC for correlation, sinks to console / Loki / Elastic. Triggers: "set up structured logging in Spring Boot", "Logback JSON config", "ship logs to Loki", "add MDC correlation IDs", "this log line is wrong". Do NOT use for .NET (use `observability/structured-logging-dotnet`) or Node (use `observability/structured-logging-node`), or for tracing/metrics (use `observability/opentelemetry-java`).
 ---
 
 # Observability — Structured Logging (Java 21 / Spring Boot 3)
@@ -26,7 +26,7 @@ Sets up SLF4J + Logback as the logging stack in a Java 21 + Spring Boot 3 servic
 
 ## When NOT to use
 
-- .NET service → `observability/serilog-structured-logging`
+- .NET service → `observability/structured-logging-dotnet`
 - Node service → `observability/structured-logging-node`
 - Distributed tracing or metrics → `observability/opentelemetry-java`
 - LogQL query authoring → `observability/logql-promql`
@@ -264,5 +264,5 @@ Or filter at the source — pass DTO projections to the logger, never the entity
 - Distributed tracing + metrics → `observability/opentelemetry-java`
 - LogQL queries against Loki → `observability/logql-promql`
 - Dashboard layout → `observability/grafana-dashboards`
-- .NET equivalent → `observability/serilog-structured-logging`
+- .NET equivalent → `observability/structured-logging-dotnet`
 - Node equivalent → `observability/structured-logging-node`

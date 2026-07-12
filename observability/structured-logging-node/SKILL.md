@@ -1,6 +1,6 @@
 ---
 name: observability-structured-logging-node
-description: Use when the user asks to set up or refactor logging in a Node 20 + TypeScript service — pino (preferred) or winston, JSON output, correlation IDs via AsyncLocalStorage, shipping to Loki / Datadog. Triggers: "set up structured logging in Node", "use pino in NestJS / Express", "ship logs to Loki", "add a request ID middleware", "redact secrets from logs". Do NOT use for .NET (use `observability/serilog-structured-logging`) or Java (use `observability/structured-logging-java`), or for tracing/metrics (use `observability/opentelemetry-node`).
+description: Use when the user asks to set up or refactor logging in a Node 20 + TypeScript service — pino (preferred) or winston, JSON output, correlation IDs via AsyncLocalStorage, shipping to Loki / Datadog. Triggers: "set up structured logging in Node", "use pino in NestJS / Express", "ship logs to Loki", "add a request ID middleware", "redact secrets from logs". Do NOT use for .NET (use `observability/structured-logging-dotnet`) or Java (use `observability/structured-logging-java`), or for tracing/metrics (use `observability/opentelemetry-node`).
 ---
 
 # Observability — Structured Logging (Node 20 / TypeScript)
@@ -28,7 +28,7 @@ Winston is acceptable when an upstream framework already configures it (NestJS w
 
 ## When NOT to use
 
-- .NET service → `observability/serilog-structured-logging`
+- .NET service → `observability/structured-logging-dotnet`
 - Java / Spring Boot service → `observability/structured-logging-java`
 - Distributed tracing or metrics → `observability/opentelemetry-node`
 - LogQL query authoring → `observability/logql-promql`
@@ -289,5 +289,5 @@ Loki labels are categorical (`service`, `environment`, `level`). `orderId`, `req
 - Distributed tracing + metrics → `observability/opentelemetry-node`
 - LogQL queries against Loki → `observability/logql-promql`
 - Dashboard layout → `observability/grafana-dashboards`
-- .NET equivalent → `observability/serilog-structured-logging`
+- .NET equivalent → `observability/structured-logging-dotnet`
 - Java equivalent → `observability/structured-logging-java`
