@@ -59,7 +59,7 @@ digraph brainstorming {
 }
 ```
 
-**The terminal state is invoking `ep-writing-plans`.** Do NOT invoke `frontend-design`, `mcp-builder`, or any other implementation skill. The ONLY skill you invoke after brainstorming is `ep-writing-plans`.
+**The terminal state is invoking `ep-writing-plans`.** Do NOT invoke `frontend-design`, a `qa-*`/`fe-*`/`be-*` generator, or any other implementation skill. The ONLY skill you invoke after brainstorming is `ep-writing-plans`.
 
 ## The Process
 
@@ -117,6 +117,8 @@ After writing the spec document, look at it with fresh eyes:
 4. **Ambiguity check:** Could any requirement be interpreted two different ways? If so, pick one and make it explicit.
 
 Fix any issues inline. No need to re-review — just fix and move on.
+
+**Escalation (permission-gated):** the self-review above is the default. For a large or high-stakes spec, and **with the user's OK**, you may dispatch a dedicated reviewer subagent using the template at `./spec-document-reviewer-prompt.md` (it checks completeness, consistency, clarity, scope, YAGNI). This is one extra agent — it counts toward the conservative 2-agent gate in `ep-subagent-driven-development`, so ask before spawning it; don't dispatch it by reflex.
 
 **User Review Gate:**
 After the spec review loop passes, ask the user to review the written spec before proceeding:

@@ -91,4 +91,4 @@ When you do shard, the **shard key is the decision that can't be easily undone**
 - ESR principle, keyset pagination, N+1 across engines → `data/_shared/query-optimization`
 - Reducing document size / bucketing → `references/data-modeling.md`
 - Offloading reads to a cache instead of the primary → `references/caching.md` + `data/redis`
-- Latency dashboards / slow-op telemetry → `observability/*` once authored
+- Latency dashboards / slow-op telemetry → `observability/*` skills (via the `observability-engineer-{dotnet,java,node}` peer bundled in the matching `be-*` plugin)

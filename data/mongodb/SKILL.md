@@ -1,6 +1,6 @@
 ---
 name: data-mongodb
-description: Use when designing collections/documents, modeling relationships (embed vs reference mechanics), securing data (auth/roles/field-level encryption), writing queries or aggregation pipelines, choosing indexes, caching, or tuning performance on MongoDB from a .NET / Java / Node backend. Triggers: "design a Mongo collection", "write an aggregation pipeline", "this Mongo query is slow", "add an index", "queryable encryption", "embed or reference?", "set up the Mongo client". Pick the topic in the routing table, then read its reference file end-to-end. Do NOT use for relational engines (`data/postgresql` / `data/sqlserver` / `data/mysql`), Redis (`data/redis`), DynamoDB/Cosmos DB (their skills), cross-engine modeling decisions (`data/_shared/schema-design`), or writing DB tests (`qa/<stack>/db-testing`).
+description: Use when designing collections/documents, modeling relationships (embed vs reference mechanics), securing data (auth/roles/field-level encryption), writing queries or aggregation pipelines, choosing indexes, caching, or tuning performance on MongoDB from a .NET / Java / Node backend. Triggers: "design a Mongo collection", "write an aggregation pipeline", "this Mongo query is slow", "add an index", "queryable encryption", "embed or reference?", "set up the Mongo client". Pick the topic in the routing table, then read its reference file end-to-end. Do NOT use for relational engines (`data/postgresql` / `data/sqlserver` / `data/mysql`), Redis (`data/redis`), DynamoDB/Cosmos DB (their skills), cross-engine modeling decisions (`data/_shared/schema-design`), or writing DB tests (`qa/<stack>/skills/db-testing`).
 ---
 
 # Data — MongoDB
@@ -151,5 +151,5 @@ Mongo has no native migration engine, so pick one tool per stack and use it cons
 - Universal query triage (ESR, N+1, pagination) → `data/_shared/query-optimization`
 - Testing the schema/queries (seed/assert/clean, Testcontainers, safe queries) → `qa/{java,dotnet,typescript}/skills/db-testing/*`
 - Tenant/user claims feeding access control → `auth/auth0-{stack}` + `auth/_shared/auth0-concepts`
-- Query-latency telemetry → `observability/*` once authored
+- Query-latency telemetry → `observability/*` skills (via the `observability-engineer-{dotnet,java,node}` peer bundled in the matching `be-*` plugin)
 - Relational / KV equivalents → `data/postgresql` · `data/sqlserver` · `data/mysql` · `data/redis`

@@ -331,6 +331,5 @@ Session consistency is the right default. Bump to Strong only when you've measur
 - Cross-engine query patterns → `data/_shared/query-optimization`
 - Caching → `data/_shared/caching-patterns` + `data/redis`
 - Schema evolution → `data/_shared/migrations`
-- Azure deployment for the account → `devops/azure-deployment`
-- Change-feed-driven pipelines → Azure Functions recipes in `devops/azure-deployment`
-- Observability — diagnostic settings → Log Analytics; Cosmos metrics in Azure Monitor
+- Azure deployment for the account / change-feed-driven Azure Functions → cloud provisioning / IaC for the store itself has no owning skill in this library yet; out of this domain's scope
+- Observability — diagnostic settings → Log Analytics; Cosmos metrics in Azure Monitor → `observability/*` skills (via the `observability-engineer-{dotnet,java,node}` peer bundled in the matching `be-*` plugin)

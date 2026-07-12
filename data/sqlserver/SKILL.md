@@ -1,6 +1,6 @@
 ---
 name: data-sqlserver
-description: Use when designing tables, modeling relationships, securing data (roles/RLS/Always Encrypted/Ledger/audit), writing T-SQL queries or migrations, choosing indexes, caching, or tuning performance on Microsoft SQL Server / Azure SQL from a .NET / Java / Node backend. Triggers: "design a SQL Server schema", "row-level security in SQL Server", "this T-SQL is slow", "add an index", "Always Encrypted vs TDE", "force a plan in Query Store", "Azure SQL tier choice". Pick the topic in the routing table, then read its reference file end-to-end. Do NOT use for PostgreSQL (`data/postgresql`), MySQL (`data/mysql`), NoSQL stores, cross-engine modeling decisions (`data/_shared/schema-design`), or writing DB tests (`qa/<stack>/db-testing`).
+description: Use when designing tables, modeling relationships, securing data (roles/RLS/Always Encrypted/Ledger/audit), writing T-SQL queries or migrations, choosing indexes, caching, or tuning performance on Microsoft SQL Server / Azure SQL from a .NET / Java / Node backend. Triggers: "design a SQL Server schema", "row-level security in SQL Server", "this T-SQL is slow", "add an index", "Always Encrypted vs TDE", "force a plan in Query Store", "Azure SQL tier choice". Pick the topic in the routing table, then read its reference file end-to-end. Do NOT use for PostgreSQL (`data/postgresql`), MySQL (`data/mysql`), NoSQL stores, cross-engine modeling decisions (`data/_shared/schema-design`), or writing DB tests (`qa/<stack>/skills/db-testing`).
 ---
 
 # Data — SQL Server / Azure SQL
@@ -157,5 +157,6 @@ Parameterize every query: `pool.request().input('id', sql.BigInt, id).query('SEL
 - Universal query triage (ESR, N+1, pagination) → `data/_shared/query-optimization`
 - Testing the schema/queries → `qa/{java,dotnet,typescript}/skills/db-testing/*`
 - Tenant/user claims feeding the RLS `SESSION_CONTEXT` → `auth/auth0-{stack}` + `auth/_shared/auth0-concepts`
-- Azure deployment of the DB itself → `devops/*`; query-latency telemetry → `observability/*`
+- Azure deployment of the DB itself → cloud provisioning / IaC for the store itself has no owning skill in this library yet; out of this domain's scope
+- Query-latency telemetry → `observability/*` skills (via the `observability-engineer-{dotnet,java,node}` peer bundled in the matching `be-*` plugin)
 - Postgres / MySQL equivalents → `data/postgresql` · `data/mysql`

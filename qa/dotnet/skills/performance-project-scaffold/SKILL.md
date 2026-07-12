@@ -1,11 +1,13 @@
 ---
 name: qa-performance-project-scaffold-dotnet
-description: Use when starting a load/performance test project from zero in C# / .NET 8 — solution layout, exact package versions, local setup, and run commands for a standalone NBomber console suite. Triggers: "scaffold a performance test project", "set up an NBomber suite from scratch", "what versions for a C# load test framework", "create the solution structure for load tests". Composable: explains how to fold in api/ui/mobile dotnet modules later.
+description: Use when starting a load/performance test project from zero in C# / .NET 10 (8-9 supported) — solution layout, exact package versions, local setup, and run commands for a standalone NBomber console suite. Triggers: "scaffold a performance test project", "set up an NBomber suite from scratch", "what versions for a C# load test framework", "create the solution structure for load tests". Composable: explains how to fold in api/ui/mobile dotnet modules later.
 ---
 
-# Performance Test Project Scaffold (C# / .NET 8)
+# Performance Test Project Scaffold (C# / .NET 10)
 
 This skill stands up a **complete, runnable load-test solution from zero**: directory layout, exact tool/library versions, local setup, and the commands to create and run it. It is **standalone** and **composable** — one project in a flat solution sharing a `TestCore` library with the api / ui / mobile modules (see *Expanding into a multi-module solution*).
+
+**Version rule:** new projects target **net10.0** (the library primary); net8 (LTS) / net9 (STS) are supported fallbacks — target them only to match an existing solution's `TargetFramework`, never up-level a down-level repo. Substitute your chosen TFM for `net10.0` everywhere below.
 
 NBomber runs as a **console application**, not an NUnit test project — it has its own runner, scenario model, and HTML/CSV report output. In the flat solution it sits alongside the test projects but simply **does not reference NUnit / `Microsoft.NET.Test.Sdk`** (CPM lists those versions, but only the test projects reference them). Scenario design, thresholds, and the perf-suite review checklist are owned by the `qa-performance-dotnet` skills + `qa/_shared/performance` — this skill owns the **project shell**.
 
@@ -26,7 +28,7 @@ Versions are pinned **once** in `Directory.Packages.props` (CPM); csprojs refere
 
 | Concern | Package / tool | Version | Notes |
 |---|---|---|---|
-| SDK | .NET SDK | **8.0 (LTS)** | `global.json`, C# 12. |
+| SDK | .NET SDK | **10.0 (LTS)** | `global.json`, C# 14. On a down-level repo pin 8.0/9.0 to match. |
 | Project type | console app | — | `dotnet new console`, **not** `nunit`. NBomber owns the runner. |
 | Load engine | `NBomber` | **6.0.0** | Scenario/step model + HTML/CSV/markdown reports. |
 | HTTP plugin | `NBomber.Http` | **6.0.0** | Must match the NBomber major (v6). |
@@ -79,11 +81,11 @@ Performance has the lightest local toolchain (no browsers, no emulators) but the
 ```bash
 mkdir <Product> && cd <Product>
 git init
-dotnet new globaljson --sdk-version 8.0.100 --roll-forward latestFeature
+dotnet new globaljson --sdk-version 10.0.100 --roll-forward latestFeature
 dotnet new sln -n <Product>
 
-dotnet new classlib -o TestCore  -f net8.0
-dotnet new console  -o PerfTests -f net8.0
+dotnet new classlib -o TestCore  -f net10.0
+dotnet new console  -o PerfTests -f net10.0
 dotnet sln add TestCore PerfTests
 dotnet add PerfTests reference TestCore
 
@@ -135,7 +137,7 @@ Flat solution + shared `TestCore` + CPM make this purely additive. The most comm
 
 ## Setup checklist
 
-- [ ] `global.json` pins SDK 8.0; `Directory.Packages.props` (CPM) is the only version source; csprojs versionless
+- [ ] `global.json` pins SDK 10.0 (or the repo's 8.0/9.0); `Directory.Packages.props` (CPM) is the only version source; csprojs versionless
 - [ ] `Directory.Build.props` carries settings only
 - [ ] `TestCore` is a shared library; `PerfTests` references it
 - [ ] `PerfTests` is a **console app** and references **no** NUnit / `Microsoft.NET.Test.Sdk` packages

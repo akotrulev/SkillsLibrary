@@ -25,6 +25,34 @@ First-pass schema decisions that apply across SQL and document engines. Identifi
 - Query tuning → `data/_shared/query-optimization`
 - Caching → `data/_shared/caching-patterns`
 
+## Engine selection
+
+Before any DDL, confirm the **engine fits the workload** — this is the cross-engine *decision* the scope fence puts here (the engine skill owns the mechanics once the engine is picked). The rule the `data-architect` agent enforces: **justify the engine against the workload shape; never silently default to Postgres — but know when Postgres genuinely suffices.** Adding a second store is a real operational tax (backups, failover, another on-call surface); earn it.
+
+**Workload-shape → engine:**
+
+| Workload shape | Reach for | Not when |
+|---|---|---|
+| Transactional system of record, relational integrity, ad-hoc queries | **PostgreSQL** (`data/postgresql`) — the default. Also absorbs many "I need another store" cases (below) | Access is a single known key at massive scale, or you need managed global multi-region writes |
+| Same, but the shop is Microsoft / Azure-first | **SQL Server / Azure SQL** (`data/sqlserver`) | No Microsoft alignment — Postgres is cheaper and as capable |
+| Same, but MySQL/MariaDB/Aurora is mandated or already in place | **MySQL** (`data/mysql`) — note: **no row-level security**, tenant isolation is app-enforced + mandatory leak test | Greenfield with a free engine choice — prefer Postgres for RLS + richer types |
+| Flexible/evolving documents, embed-heavy aggregates, per-document schema variance | **MongoDB** (`data/mongodb`) | The data is relational and you're reaching for Mongo to "avoid migrations" — you'll rebuild joins in app code |
+| Cache / rate limiter / lock / session / leaderboard / ephemeral queue — a **second-tier** store in front of a system of record | **Redis / Valkey** (`data/redis`) | You need it to be the durable source of truth |
+| Single-digit-ms KV/wide-column at scale with **known access patterns**, AWS-native, serverless ops | **DynamoDB** (`data/dynamodb`) | Access patterns are unknown/ad-hoc, or you need rich server-side queries — model-first rigidity bites |
+| Globally distributed, multi-region writes, tunable consistency, Azure-native | **Cosmos DB** (`data/cosmosdb`) | A single-region relational store would do — Cosmos's partition/consistency model + RU pricing is overhead you don't need |
+| Full-text / relevance ranking, faceted search, aggregations over event data, hybrid + vector (kNN) search at dedicated scale | **Elasticsearch / OpenSearch** (`data/elasticsearch`) | It's the *only* store — ES is a search/index layer beside a system of record, not the record itself; and for logs use Loki, not ES |
+
+**"Postgres suffices" — reach for a feature before a store.** Before adding Mongo / Redis / a dedicated search or vector DB to a Postgres-backed app, check whether Postgres already covers it:
+
+| Tempting second store | Postgres feature that often removes the need |
+|---|---|
+| MongoDB for "flexible documents" | `jsonb` columns + GIN indexes — schemaless fields on a relational row |
+| Elasticsearch for "search" | `tsvector` full-text search (+ `pg_trgm` fuzzy) for moderate corpora |
+| Redis/SQS for "a job queue" | `SELECT … FOR UPDATE SKIP LOCKED` — a correct, transactional queue on a table |
+| A dedicated vector DB for "embeddings / RAG" | **pgvector** — a `vector(n)` column next to the row it embeds, HNSW index (see `data/postgresql/references/indexing.md`) |
+
+Cross the line to a second store when the Postgres feature stops paying off — corpus/relevance beyond `tsvector`, queue throughput beyond a single table, embedding volume/filtered-ANN recall beyond pgvector, or the data doesn't live in Postgres in the first place. Qualify each with the workload's **consistency / latency SLO / scale** needs, and record the decision in the agent's Phase 1 (engine + version + why-this-engine). If none of the eight catalog engines fits (local-first/embedded, OLAP/analytics at column-store scale, a dedicated vector DB), say so plainly — it's out of this catalog's current scope, not a silent Postgres default.
+
 ## Identifiers
 
 | Choice | Pros | Cons | When |

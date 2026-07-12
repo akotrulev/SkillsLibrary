@@ -1,11 +1,13 @@
 ---
 name: qa-ui-project-scaffold-dotnet
-description: Use when starting a web-UI test-automation project from zero in C# / .NET 8 — solution layout, exact package versions, browser/local setup, and run commands for a standalone Playwright (default) or Selenium NUnit suite. Triggers: "scaffold a UI test project", "set up a .NET Playwright suite from scratch", "what versions for a C# web UI test framework", "create the solution structure for UI tests". Composable: explains how to fold in api/mobile/performance dotnet modules later.
+description: Use when starting a web-UI test-automation project from zero in C# / .NET 10 (8-9 supported) — solution layout, exact package versions, browser/local setup, and run commands for a standalone Playwright (default) or Selenium NUnit suite. Triggers: "scaffold a UI test project", "set up a .NET Playwright suite from scratch", "what versions for a C# web UI test framework", "create the solution structure for UI tests". Composable: explains how to fold in api/mobile/performance dotnet modules later.
 ---
 
-# UI Test Project Scaffold (C# / .NET 8)
+# UI Test Project Scaffold (C# / .NET 10)
 
 This skill stands up a **complete, runnable web-UI test solution from zero**: directory layout, exact tool/library versions, the local setup (including browser binaries), and the commands to create and run it. It is **standalone** and **composable** — one project in a flat solution sharing a `TestCore` library with the api / mobile / performance modules (see *Expanding into a multi-module solution*).
+
+**Version rule:** new projects target **net10.0** (the library primary); net8 (LTS) / net9 (STS) are supported fallbacks — target them only to match an existing solution's `TargetFramework`, never up-level a down-level repo. Substitute your chosen TFM for `net10.0` everywhere below.
 
 Default driver is **Playwright** (auto-waiting, trace viewer, fastest to stand up); use **Selenium** only when the project mandates it or needs a Grid/browser Playwright doesn't support. The structure follows the dotnet layout: **flat projects at the solution root**, **per-project config** so each suite is independently configurable/dockerizable, a shared **`TestCore`**, and **Central Package Management (CPM)**. Page-object and test-authoring conventions are owned by the `qa-ui-dotnet` skills — this skill owns the **project shell**.
 
@@ -25,13 +27,13 @@ Versions are pinned **once** in `Directory.Packages.props` (CPM); csprojs refere
 
 | Concern | Package / tool | Version | Notes |
 |---|---|---|---|
-| SDK | .NET SDK | **8.0 (LTS)** | `global.json`, C# 12. |
-| Test runner | `NUnit` | **4.2.2** | Use `Assert.That`; classic asserts in `NUnit.Framework.Legacy`. |
-| Test adapter | `NUnit3TestAdapter` | **4.6.0** | |
-| Test host | `Microsoft.NET.Test.Sdk` | **17.11.1** | |
-| Browser driver (default) | `Microsoft.Playwright.NUnit` | **1.50.0** | Pulls `Microsoft.Playwright`; provides `PageTest` base + fixtures. |
+| SDK | .NET SDK | **10.0 (LTS)** | `global.json`, C# 14. On a down-level repo pin 8.0/9.0 to match. |
+| Test runner | `NUnit` | **4.3.2** | Use `Assert.That`; classic asserts in `NUnit.Framework.Legacy`. |
+| Test adapter | `NUnit3TestAdapter` | **5.0.0** | |
+| Test host | `Microsoft.NET.Test.Sdk` | **17.14.1** | |
+| Browser driver (default) | `Microsoft.Playwright.NUnit` | **1.55.0** | Pulls `Microsoft.Playwright`; provides `PageTest` base + fixtures. |
 | Browser driver (alt) | `Selenium.WebDriver` + `Selenium.Support` | **4.44.0** | Use only when mandated; Selenium Manager auto-resolves drivers. |
-| Assertions | `FluentAssertions` | **6.12.1** | Pinned to 6.12.x (pre-commercial-license). Prefer Playwright web-first `Expect(...)` for UI state. |
+| Assertions | `FluentAssertions` | **6.12.1** | **Deliberately pinned to 6.12.x** (last pre-commercial-license line). Prefer Playwright web-first `Expect(...)` for UI state. |
 | Reporting | `Allure.NUnit` | **2.12.1** | Wiring owned by `qa-reporting-dotnet`. |
 | Accessibility (opt) | `Deque.AxeCore.Playwright` | **4.*** | Only if a11y is in scope. |
 
@@ -40,11 +42,11 @@ Optional: `PercyIO.Playwright` 1.* / `Applitools.Playwright` 3.* (visual regress
 ## Prerequisites & local setup
 
 ```bash
-dotnet --version            # expect 8.0.x
+dotnet --version            # expect 10.0.x (or the repo's pinned 8.0.x / 9.0.x)
 
 # Playwright browsers — REQUIRED after first build (downloads Chromium/Firefox/WebKit).
-# playwright.ps1 appears under the project's bin/ after a build:
-pwsh PlaywrightTests/bin/Debug/net8.0/playwright.ps1 install
+# playwright.ps1 appears under the project's bin/ after a build (path uses your TFM):
+pwsh PlaywrightTests/bin/Debug/net10.0/playwright.ps1 install
 # (no pwsh? dotnet tool install Microsoft.Playwright.CLI && playwright install)
 ```
 
@@ -88,11 +90,11 @@ CI must run `playwright install` after restore, or every test errors with "brows
 ```bash
 mkdir <Product> && cd <Product>
 git init
-dotnet new globaljson --sdk-version 8.0.100 --roll-forward latestFeature
+dotnet new globaljson --sdk-version 10.0.100 --roll-forward latestFeature
 dotnet new sln -n <Product>
 
-dotnet new classlib -o TestCore -f net8.0
-dotnet new nunit    -o PlaywrightTests -f net8.0
+dotnet new classlib -o TestCore -f net10.0
+dotnet new nunit    -o PlaywrightTests -f net10.0
 dotnet sln add TestCore PlaywrightTests
 dotnet add PlaywrightTests reference TestCore
 
@@ -105,7 +107,7 @@ dotnet add PlaywrightTests package FluentAssertions
 dotnet add PlaywrightTests package Allure.NUnit
 
 dotnet build                                            # generates playwright.ps1 under bin/
-pwsh PlaywrightTests/bin/Debug/net8.0/playwright.ps1 install   # download browsers
+pwsh PlaywrightTests/bin/Debug/net10.0/playwright.ps1 install   # download browsers
 dotnet test                                             # exit gate: green
 ```
 
@@ -142,7 +144,7 @@ Flat solution + shared `TestCore` + CPM make this purely additive. To add a sibl
 
 ## Setup checklist
 
-- [ ] `global.json` pins SDK 8.0; `Directory.Packages.props` (CPM) is the only version source; csprojs versionless
+- [ ] `global.json` pins SDK 10.0 (or the repo's 8.0/9.0); `Directory.Packages.props` (CPM) is the only version source; csprojs versionless
 - [ ] `Directory.Build.props` carries settings only
 - [ ] `TestCore` is a shared library; the UI project references it
 - [ ] Driver chosen deliberately (Playwright default; Selenium only if mandated)

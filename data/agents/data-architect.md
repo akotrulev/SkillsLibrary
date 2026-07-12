@@ -101,7 +101,8 @@ Work on a branch, not the user's default branch, unless told otherwise. Commit/p
 - **`qa-security`** — owns the cross-tenant **leak test** (BOLA/IDOR/BFLA access-control matrix) that proves the Phase-3 isolation holds, plus the DAST/SAST/secrets/SCA scan gates. The design closes the hole; `qa-security` proves it.
 - **`qa-performance-{java,dotnet,typescript}`** — load/stress/soak suites that validate the Phase-5 tuning under real traffic (the design makes the query fast in isolation; the perf suite proves it stays fast under load).
 - **Loaded by peers, not here:** `auth/auth0-{stack}` + `auth/_shared/auth0-concepts` supply the tenant/user claims that feed the RLS/app-enforced session context Phase 3 wires — name them when the isolation depends on the identity token's claims.
-- **No agent yet (point the human at the skills):** `observability/*` for query-latency telemetry once authored.
+- **`qa-cicd-{java,dotnet,typescript}`** — wires the migration step (the expand-contract migration Phase 4 authors) into the pipeline the migrations skill requires run pre-deploy.
+- **`observability-engineer-{dotnet,java,node}`** (bundled in the matching `be-*` plugin) — query-latency telemetry, slow-query dashboards, and DB-metric alert rules for the schema this agent designs; pick the stack matching the backend.
 
 ## Output contract
 

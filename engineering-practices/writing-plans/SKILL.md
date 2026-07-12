@@ -133,6 +133,8 @@ After writing the complete plan, look at the spec with fresh eyes and check the 
 
 If you find issues, fix them inline. No need to re-review — just fix and move on. If you find a spec requirement with no task, add the task.
 
+**Escalation (permission-gated):** the self-review above is the default. For a large or high-stakes plan, and **with the user's OK**, you may dispatch a dedicated reviewer subagent using the template at `./plan-document-reviewer-prompt.md` (it checks completeness, spec alignment, task decomposition, buildability). This is one extra agent — it counts toward the conservative 2-agent gate in `ep-subagent-driven-development`, so ask before spawning it; don't dispatch it by reflex.
+
 ## Execution Handoff
 
 After saving the plan, hand off to execution. **Default to inline execution — cost before speed.**

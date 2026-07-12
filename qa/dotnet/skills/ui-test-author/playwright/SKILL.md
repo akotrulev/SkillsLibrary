@@ -5,11 +5,11 @@ description: Use when the user asks to scaffold Playwright UI tests in C# / .NET
 
 # QA — Playwright Test & Page Object Generator (C# / .NET)
 
-Scaffolds Playwright tests and page objects in **.NET 8 + NUnit** using `Microsoft.Playwright` and `Microsoft.Playwright.NUnit`. Uses a **base-test class pattern**: tests inherit from `PageTest` (which Microsoft's package ships) and a project-local `BaseTest` that exposes page objects via `[SetUp]`. Tests do not instantiate browsers themselves. Locators use `GetByTestId` first (`data-testid` is the standing contract with the dev team — see `qa/dotnet/skills/pom-builder` for extraction and the missing-testid report), falling back to role/label semantics — never raw CSS where anything better exists.
+Scaffolds Playwright tests and page objects in **.NET 10 + NUnit** (net8/9 supported — match the project's TFM) using `Microsoft.Playwright` and `Microsoft.Playwright.NUnit`. Uses a **base-test class pattern**: tests inherit from `PageTest` (which Microsoft's package ships) and a project-local `BaseTest` that exposes page objects via `[SetUp]`. Tests do not instantiate browsers themselves. Locators use `GetByTestId` first (`data-testid` is the standing contract with the dev team — see `qa/dotnet/skills/pom-builder` for extraction and the missing-testid report), falling back to role/label semantics — never raw CSS where anything better exists.
 
 ## Stack
 
-- .NET 8, C# (nullable reference types enabled)
+- .NET 10 (net8/9 supported — match the project's TFM), C# (nullable reference types enabled)
 - NUnit 4.x
 - `Microsoft.Playwright` + `Microsoft.Playwright.NUnit`
 - Page objects under `Tests/Pages/`, test classes under `Tests/Specs/`
@@ -48,7 +48,7 @@ Scaffolds Playwright tests and page objects in **.NET 8 + NUnit** using `Microso
 ```xml
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>   <!-- or net8.0 / net9.0 to match the project -->
     <Nullable>enable</Nullable>
     <LangVersion>latest</LangVersion>
     <IsPackable>false</IsPackable>
@@ -306,7 +306,7 @@ public async Task SeedOrder()
    - `[TestFixture]` per feature
    - One `[Test]` per scenario
 5. For authenticated flows, ensure an `AuthSetup` `[SetUpFixture]` exists and the test inherits `AuthenticatedBaseTest`.
-6. Install Playwright browsers once via `pwsh bin/Debug/net8.0/playwright.ps1 install` (or the project's bootstrap script).
+6. Install Playwright browsers once via `pwsh bin/Debug/net10.0/playwright.ps1 install` (use the project's TFM in the path; or the project's bootstrap script).
 7. Run `dotnet test` — expect 0 failures. Run with `HEADED=1` (via `LaunchOptions`) to debug visually.
 
 ## Handoffs

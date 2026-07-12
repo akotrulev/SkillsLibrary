@@ -182,7 +182,7 @@ Split read and write contexts when their consumers differ, so readers don't re-r
 
 ### Compound component
 
-For parts with a strict ownership relationship, so the markup reads like the UI (`<Tabs>` + `<Tabs.Trigger>` + `<Tabs.Panel>`). Implemented via internal context — no prop drilling. `useId` gives SSR-safe ids; a11y attributes are part of the contract, generated alongside the markup.
+For parts with a strict ownership relationship, so the markup reads like the UI (`<Tabs>` + `<Tabs.Trigger>` + `<Tabs.Panel>`). Implemented via internal context — no prop drilling. `useId` gives SSR-safe ids; a11y attributes are part of the contract, generated alongside the markup. See `frontend/react/vendor/composition-patterns` for the deep treatment (compound components, explicit variants over booleans).
 
 ```tsx
 // src/components/Tabs.tsx
@@ -236,7 +236,7 @@ Tabs.Panel = function Panel({ value, children }: { value: string; children: Reac
 
 ### Container / presentation split
 
-Only when the presenter is reused with different data sources, or the container's state coordination would obscure the markup. Otherwise one component is fine. In App Router, prefer a **Server Component container** that fetches and passes serializable props to a `'use client'` presenter — marks `'use client'` only on the interactive leaf.
+Only when the presenter is reused with different data sources, or the container's state coordination would obscure the markup. Otherwise one component is fine. In App Router, prefer a **Server Component container** that fetches and passes serializable props to a `'use client'` presenter — marks `'use client'` only on the interactive leaf. See `frontend/react/vendor/composition-patterns` for the deep treatment (lifting state, composing internals over prop proliferation).
 
 ```tsx
 // features/orders/OrdersList.presenter.tsx  — 'use client' only if it has handlers

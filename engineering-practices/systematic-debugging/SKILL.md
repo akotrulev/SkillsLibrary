@@ -283,6 +283,12 @@ These techniques are part of systematic debugging and available in this director
 - **`defense-in-depth.md`** - Add validation at multiple layers after finding root cause
 - **`condition-based-waiting.md`** - Replace arbitrary timeouts with condition polling
 
+> **Stack note:** `condition-based-waiting-example.ts` (TypeScript) and `find-polluter.sh`
+> (a shell/glob loop) are illustrations of the *technique*, not required tooling. Port
+> the idea to your stack — the .NET, Java, or Node equivalent — rather than the literal
+> code. (Same "port the idea, not the code" stance as `ep-test-driven-development`'s and
+> `ep-writing-plans`' Stack-defaults notes.)
+
 **Related skills:**
 - **`ep-test-driven-development`** - For creating failing test case (Phase 4, Step 1)
 - **`ep-verification-before-completion`** - Verify fix worked before claiming success

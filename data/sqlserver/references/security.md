@@ -75,7 +75,7 @@ Per stack: EF Core — a `DbConnectionInterceptor` that runs `sp_set_session_con
 - `sysadmin` and the db owner **bypass** RLS entirely — another reason the app role is neither.
 - **Performance**: the predicate is `AND`-ed into every query. Keep it a plain indexed comparison and make sure **every index leads with `TenantId`** (`references/indexing.md`) so the predicate is a seek, not a scan. Check the actual plan for the added predicate.
 - `SCHEMABINDING` on the function is required and pins the referenced objects.
-- Test it like code: a `qa` integration test that sets tenant A's context and asserts tenant B's rows are invisible *and unwritable* (`qa/{stack}/skills/db-testing/*`).
+- Test it like code: a `qa` integration test that sets tenant A's context and asserts tenant B's rows are invisible *and unwritable* (`qa/{java,dotnet,typescript}/skills/db-testing/*`).
 
 ## Encryption — Always Encrypted vs TDE vs column-level
 

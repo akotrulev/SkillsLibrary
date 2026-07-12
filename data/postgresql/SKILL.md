@@ -1,6 +1,6 @@
 ---
 name: data-postgresql
-description: Use when designing tables, modeling relationships, securing data (roles/RLS/audit), writing queries or migrations, choosing indexes, caching, or tuning performance on PostgreSQL from a .NET / Java / Node backend. Triggers: "design a Postgres schema", "multi-tenant RLS", "this query is slow", "add an index", "audit who changed this row", "set up Postgres pooling". Pick the topic in the routing table, then read its reference file end-to-end. Do NOT use for SQL Server (`data/sqlserver`), MySQL (`data/mysql`), NoSQL stores, cross-engine modeling decisions (`data/_shared/schema-design`), or writing DB tests (`qa/<stack>/db-testing`).
+description: Use when designing tables, modeling relationships, securing data (roles/RLS/audit), writing queries or migrations, choosing indexes, caching, or tuning performance on PostgreSQL from a .NET / Java / Node backend. Triggers: "design a Postgres schema", "multi-tenant RLS", "this query is slow", "add an index", "audit who changed this row", "set up Postgres pooling". Pick the topic in the routing table, then read its reference file end-to-end. Do NOT use for SQL Server (`data/sqlserver`), MySQL (`data/mysql`), NoSQL stores, cross-engine modeling decisions (`data/_shared/schema-design`), or writing DB tests (`qa/<stack>/skills/db-testing`).
 ---
 
 # Data — PostgreSQL

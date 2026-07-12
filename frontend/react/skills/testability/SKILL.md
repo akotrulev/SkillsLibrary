@@ -253,6 +253,10 @@ When QA's `pom-builder` hands over a report of elements it could not locate test
 | Array index reused as both React `key` and testid qualifier | `key` = stable domain id; testid = static role — different concerns |
 | `aria-label` added to mirror a testid | One attribute only — a11y labels belong to [`accessibility`](../accessibility/SKILL.md) |
 
+## Out of scope
+
+Non-React surfaces (a static-HTML admin tool, a jQuery-era template UI, a raw `innerHTML` widget) are **not** covered here — this skill owns `.tsx` component markup only. A React app renders everything through React, so there is no in-app hybrid surface to address (this is the deliberate delta from `frontend/blazor/skills/testability`, whose `references/static-html.md` exists because a Blazor app can ship a non-Blazor page beside it). If a project genuinely mixes a non-React island in, apply the same rules — naming (Rule 2), const prefix (Rule 3), static row locators (Rule 6), data derivation (Rule 7) — with a plain inline `data-testid` attribute and a hardcoded parent-locator `const` for JS-rendered rows.
+
 ## Handoffs
 
 - Page objects / UI tests against these locators → `qa-ui-typescript` (peer agent; `pom-builder` locates data-testid-first)

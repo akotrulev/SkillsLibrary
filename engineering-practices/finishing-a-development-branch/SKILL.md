@@ -20,8 +20,8 @@ Guide completion of development work by presenting clear options and handling ch
 **Before presenting options, verify tests pass:**
 
 ```bash
-# Run project's test suite
-npm test / cargo test / pytest / go test ./...
+# Run the project's test suite (see the Stack defaults in CLAUDE.md)
+dotnet test  |  ./gradlew test  |  npm test   # or the project's own test command
 ```
 
 **If tests fail:**

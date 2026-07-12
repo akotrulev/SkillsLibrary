@@ -1,15 +1,15 @@
 ---
 name: qa-contract-testing-pact-dotnet
-description: Use when the user asks to set up consumer-driven contract testing with Pact in a .NET 8 service (PactNet v5+). Triggers: "set up Pact for our .NET service", "PactNet consumer test for X", "verify our .NET provider against Y's contract".
+description: Use when the user asks to set up consumer-driven contract testing with Pact in a .NET 10 (8-9 supported) service (PactNet v5+). Triggers: "set up Pact for our .NET service", "PactNet consumer test for X", "verify our .NET provider against Y's contract".
 ---
 
 # QA — Contract Testing with Pact (.NET / PactNet)
 
-Wires Pact V4 into a .NET 8 service via **PactNet v5+** for consumer-driven contract testing with NUnit. Covers the consumer test, provider verification, state handlers, and CI publish. Load `qa/_shared/contract-testing-pact` for the Broker model, matchers reference, and `can-i-deploy` gate that are shared across all stacks.
+Wires Pact V4 into a .NET service via **PactNet v5+** for consumer-driven contract testing with NUnit. Covers the consumer test, provider verification, state handlers, and CI publish. Load `qa/_shared/contract-testing-pact` for the Broker model, matchers reference, and `can-i-deploy` gate that are shared across all stacks.
 
 ## When to use
 
-- A .NET 8 service consumes or produces an HTTP API and needs contract coverage.
+- A .NET service consumes or produces an HTTP API and needs contract coverage.
 - Replacing brittle multi-service E2E tests with PactNet verification.
 - Catching breaking changes at the .NET producer side before they ship.
 - Pairing with `qa/_shared/contract-testing-pact` for Broker / `can-i-deploy` wiring.
@@ -23,7 +23,7 @@ Wires Pact V4 into a .NET 8 service via **PactNet v5+** for consumer-driven cont
 
 ## Stack
 
-- **Runtime**: .NET 8
+- **Runtime**: .NET 10 (net8/9 supported — match the service's TFM)
 - **Test runner**: NUnit 4.x
 - **Pact lib**: `PactNet` v5+ (`PactNet.Output.Xunit` not required for NUnit; the core lib is runner-agnostic)
 - **Broker CLI**: `pactfoundation/pact-cli:latest` (containerized — language-independent)
@@ -190,7 +190,7 @@ dotnet test tests/CartService.ContractTests/CartService.ContractTests.csproj \
   --logger "trx;LogFileName=contract.trx"
 
 docker run --rm \
-  -v "$PWD/tests/CartService.ContractTests/bin/Debug/net8.0/pacts:/pacts" \
+  -v "$PWD/tests/CartService.ContractTests/bin/Debug/net10.0/pacts:/pacts" \   # use the service's TFM in the path
   -e PACT_BROKER_BASE_URL=$PACT_BROKER_BASE_URL \
   -e PACT_BROKER_TOKEN=$PACT_BROKER_TOKEN \
   pactfoundation/pact-cli:latest \

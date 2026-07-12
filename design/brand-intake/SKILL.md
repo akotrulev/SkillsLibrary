@@ -77,7 +77,7 @@ So the handoff is: this skill produces the token system from the brand → front
 
 ## Example-brand fixture
 
-When you need a worked example or a stand-in brand to demonstrate the pipeline, use the **Anthropic brand** (from Anthropic's `brand-guidelines` skill) as the fixture: primitives `#141413` (dark), `#faf9f5` (light), `#b0aea5` / `#e8e6dc` (grays), accents `#d97757` / `#6a9bcc` / `#788c5d`; **Poppins** (Arial fallback) for headings ≥24pt, **Lora** (Georgia fallback) for body. It's a realistic brownfield case — three accents but no status set, faces but no scale, no dark mode — so it exercises every gap-fill branch. (Provenance noted in `ATTRIBUTIONS.md`.)
+When you need a worked example or a stand-in brand to demonstrate the pipeline, use the **Anthropic brand** (from Anthropic's `brand-guidelines` skill) as the fixture: primitives `#141413` (dark), `#faf9f5` (light), `#b0aea5` / `#e8e6dc` (grays), accents `#d97757` / `#6a9bcc` / `#788c5d`; **Poppins** (Arial fallback) for headings ≥24pt, **Lora** (Georgia fallback) for body. It's a realistic brownfield case — three accents but no status set, faces but no scale, no dark mode — so it exercises every gap-fill branch. (Provenance noted in [`../ATTRIBUTIONS.md`](../ATTRIBUTIONS.md).)
 
 ## Review checklist
 

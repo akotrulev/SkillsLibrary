@@ -33,7 +33,7 @@ Version-aware rule: on a project still on SDK v3 / .NET 8–9, keep the v3 shape
 
 - Single-table design driven by enumerated access patterns
 - Partition / sort key choice; GSI / LSI design
-- SDK setup (.NET v3 / Java v2 / Node v3) with the Document / Enhanced client
+- SDK setup (.NET v4 (v3 down-level) / Java v2 / Node v3) with the Document / Enhanced client
 - Capacity mode (on-demand vs provisioned + autoscaling)
 - DynamoDB Streams + Lambda for change capture
 - TTL, conditional writes, `TransactWriteItems`
@@ -328,7 +328,6 @@ Streams give you Mongo-style change feeds; combine with Lambda for serverless re
 - Cross-engine query patterns → `data/_shared/query-optimization`
 - Caching layer → `data/_shared/caching-patterns` + `data/redis`
 - Schema evolution / migration patterns → `data/_shared/migrations`
-- AWS deployment of the table + IAM → `devops/aws-deployment`
+- AWS deployment of the table + IAM / Streams-driven Lambda handlers → cloud provisioning / IaC for the store itself has no owning skill in this library yet; out of this domain's scope
 - Verifying `LeadingKeys` tenant isolation actually holds (cross-tenant BOLA/IDOR matrix) → the `qa-security` peer + `qa/<stack>/skills/security-testing/access-control-testing`
-- Streams-driven event handlers → AWS Lambda recipes in `devops/aws-deployment`
-- Observability — CloudWatch metrics for `ConsumedRead/WriteCapacityUnits`, `Throttled*`
+- Observability — CloudWatch metrics for `ConsumedRead/WriteCapacityUnits`, `Throttled*` → `observability/*` skills (via the `observability-engineer-{dotnet,java,node}` peer bundled in the matching `be-*` plugin)

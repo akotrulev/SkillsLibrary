@@ -1,6 +1,6 @@
 ---
 name: data-mysql
-description: Use when designing tables, modeling relationships, securing data (privileges/tenancy/encryption/audit), writing queries or migrations, choosing indexes, caching, or tuning performance on MySQL / MariaDB / Aurora MySQL from a .NET / Java / Node backend. Triggers: "design a MySQL schema", "multi-tenant isolation without RLS", "this MySQL query is slow", "add an index", "InnoDB tuning", "online DDL on a huge table", "Aurora vs RDS MySQL". Pick the topic in the routing table, then read its reference file end-to-end. Do NOT use for PostgreSQL (`data/postgresql`), SQL Server (`data/sqlserver`), NoSQL stores, cross-engine modeling decisions (`data/_shared/schema-design`), or writing DB tests (`qa/<stack>/db-testing`).
+description: Use when designing tables, modeling relationships, securing data (privileges/tenancy/encryption/audit), writing queries or migrations, choosing indexes, caching, or tuning performance on MySQL / MariaDB / Aurora MySQL from a .NET / Java / Node backend. Triggers: "design a MySQL schema", "multi-tenant isolation without RLS", "this MySQL query is slow", "add an index", "InnoDB tuning", "online DDL on a huge table", "Aurora vs RDS MySQL". Pick the topic in the routing table, then read its reference file end-to-end. Do NOT use for PostgreSQL (`data/postgresql`), SQL Server (`data/sqlserver`), NoSQL stores, cross-engine modeling decisions (`data/_shared/schema-design`), or writing DB tests (`qa/<stack>/skills/db-testing`).
 ---
 
 # Data — MySQL / MariaDB / Aurora MySQL
@@ -162,5 +162,6 @@ Use `pool.execute('SELECT ... WHERE id = ?', [id])` — parameterized via the dr
 - Universal query triage (ESR, N+1, pagination) → `data/_shared/query-optimization`
 - Testing the schema/queries → `qa/{java,dotnet,typescript}/skills/db-testing/*`
 - Tenant/user claims feeding app-enforced tenancy → `auth/auth0-{stack}` + `auth/_shared/auth0-concepts`
-- AWS (RDS/Aurora) / Azure (Flexible Server) deployment → `devops/*`; query-latency telemetry → `observability/*`
+- AWS (RDS/Aurora) / Azure (Flexible Server) deployment → cloud provisioning / IaC for the store itself has no owning skill in this library yet; out of this domain's scope
+- Query-latency telemetry → `observability/*` skills (via the `observability-engineer-{dotnet,java,node}` peer bundled in the matching `be-*` plugin)
 - Postgres / SQL Server equivalents → `data/postgresql` · `data/sqlserver`

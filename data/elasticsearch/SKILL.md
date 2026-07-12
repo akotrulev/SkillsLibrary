@@ -7,7 +7,7 @@ description: Use when the user asks to design indexes, set up clients, secure a 
 
 Index design, client setup, ingest, query shape, security, and operational concerns for **Elasticsearch 9** and **OpenSearch 3** from the library's three backend stacks. Use for **full-text search**, **structured queries on semi-structured documents**, **aggregations on event data**, and **vector / kNN search**. Logs are handled by Loki (`observability/loki-tempo-setup`); only use ES for logs if you have a strong reason (rich aggregations / wildcards that LogQL struggles with).
 
-This is also the **destination for two inbound handoffs** authored elsewhere in `data/`: `data/mongodb/indexing.md` routes *self-hosted* full-text / semantic search here (Atlas Search / Vector Search is Atlas-only, so self-hosted Mongo that needs real relevance ranking projects into ES); `data/redis/data-structures.md` routes *vector search beyond a cache* here (Redis's vector module is fine as a fast KV-adjacent ANN cache, but a durable, filterable, reindexable vector store is an ES/OpenSearch `dense_vector` job).
+This is also the **destination for two inbound handoffs** authored elsewhere in `data/`: `data/mongodb/references/indexing.md` routes *self-hosted* full-text / semantic search here (Atlas Search / Vector Search is Atlas-only, so self-hosted Mongo that needs real relevance ranking projects into ES); `data/redis/references/data-structures.md` routes *vector search beyond a cache* here (Redis's vector module is fine as a fast KV-adjacent ANN cache, but a durable, filterable, reindexable vector store is an ES/OpenSearch `dense_vector` job).
 
 ## Version & distribution policy
 
@@ -391,7 +391,6 @@ PUT /_security/role/tenant_42_reader
 - Source of record alongside ES → `data/postgresql` / `data/mongodb`
 - Caching in front of ES → `data/_shared/caching-patterns` + `data/redis`
 - Vector embeddings producer → application code; this skill consumes them
-- **Inbound** (this skill is the destination): self-hosted full-text/semantic search from `data/mongodb/indexing.md`; vector search beyond a cache from `data/redis/data-structures.md`
+- **Inbound** (this skill is the destination): self-hosted full-text/semantic search from `data/mongodb/references/indexing.md`; vector search beyond a cache from `data/redis/references/data-structures.md`
 - Verifying tenant DLS actually isolates (cross-tenant leak matrix) → the `qa-security` peer + `qa/<stack>/skills/security-testing/access-control-testing`
-- IaC for the cluster → `devops/iac-bicep-terraform`
-- AWS / Azure deploy → `devops/aws-deployment` (OpenSearch Service) / `devops/azure-deployment` (Elastic Cloud on Azure)
+- IaC / cloud deploy for the cluster (OpenSearch Service, Elastic Cloud) → cloud provisioning / IaC for the store itself has no owning skill in this library yet; out of this domain's scope
