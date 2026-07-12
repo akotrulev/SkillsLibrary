@@ -114,18 +114,15 @@ All 8 tasks checked; every `grep` verification passes; `git diff --stat` touches
 
 Restores sibling symmetry (`structured-logging-{dotnet,java,node}`) and fixes inbound references elsewhere in the repo that already point at `observability/structured-logging-dotnet`.
 
-- [ ] `git mv observability/serilog-structured-logging observability/structured-logging-dotnet`
-- [ ] In the moved `SKILL.md`, change frontmatter `name: observability-serilog-structured-logging` → `name: observability-structured-logging-dotnet`. Keep "Serilog" prominent in the `description` (it is a trigger keyword) — e.g. start it "Use when the user asks to set up or refactor logging in a .NET service using Serilog — …".
-- [ ] Update every reference across the whole repo:
+- [x] `git mv observability/serilog-structured-logging observability/structured-logging-dotnet`
+- [x] In the moved `SKILL.md`, change frontmatter `name: observability-serilog-structured-logging` → `name: observability-structured-logging-dotnet`. Keep "Serilog" prominent in the `description` (it is a trigger keyword) — e.g. start it "Use when the user asks to set up or refactor logging in a .NET service using Serilog — …".
+- [x] Update every reference across the whole repo:
   - Run `grep -rln "serilog-structured-logging" .` (from repo root, excluding `.git`).
   - In each hit, replace `observability/serilog-structured-logging` → `observability/structured-logging-dotnet` and `observability-serilog-structured-logging` → `observability-structured-logging-dotnet`.
   - Expected hit locations: the other 8 observability SKILL.md files (When NOT to use / Handoffs sections), possibly `devops/` and `backend/` skills.
-- [ ] **Verify:** `grep -rn "serilog-structured-logging" . --exclude-dir=.git` returns nothing; `grep -rn "observability/structured-logging-dotnet" . --exclude-dir=.git` shows the old inbound refs from devops/backend now resolving to a folder that exists.
-- [ ] Commit: `Rename serilog-structured-logging to structured-logging-dotnet`.
-
----
-
-## Phase 3 — Version-policy rewrite (one skill per task; needs care, follow the patterns exactly)
+- [x] **Verify:** `grep -rn "serilog-structured-logging" . --exclude-dir=.git` returns nothing; `grep -rn "observability/structured-logging-dotnet" . --exclude-dir=.git` shows the old inbound refs from devops/backend now resolving to a folder that exists.
+- [x] Commit: `Rename serilog-structured-logging to structured-logging-dotnet`.
+ — Version-policy rewrite (one skill per task; needs care, follow the patterns exactly)
 
 Goal: every stack-bound skill becomes **version-aware** like the rest of the library — the skill's first instruction is "detect the project's version, key every recipe to it, never up-level a down-level project."
 
