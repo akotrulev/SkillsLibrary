@@ -13,6 +13,7 @@ Wires the **metrics** backend of the Grafana stack. This library's default inges
 - Wiring the OTel Collector's metrics pipeline to a store (remote-write or OTLP)
 - Enabling **exemplar storage** so latency histograms link to traces in Tempo
 - Deploying recording / alerting **rules** (the rules themselves come from `observability/logql-promql`)
+- Wiring **Alertmanager** — routing tree, grouping, inhibition, dead-man's-switch, on-call receivers
 - Outgrowing single-node Prometheus — retention, HA, or multi-cluster forces Mimir
 - Setting retention + per-tenant cardinality limits
 
@@ -22,7 +23,7 @@ Wires the **metrics** backend of the Grafana stack. This library's default inges
 - Dashboard layout, panel exemplar config → `observability/grafana-dashboards`
 - Logs (Loki) + traces (Tempo) + the shared OTel Collector → `observability/loki-tempo-setup`
 - App-side metric emission (`Meter` / `Counter` / `Histogram`) → `observability/opentelemetry-{dotnet,java,node}`
-- Alertmanager routing / on-call escalation — out of scope here (deploy alongside; rules link to it)
+- Alert rule *expressions* (the health-alert pack, burn rates) → `observability/logql-promql`; this skill owns rule *deployment* + Alertmanager *routing*
 
 ## Inputs needed
 
@@ -126,6 +127,44 @@ spec:
           expr: histogram_quantile(0.95, sum by (le, job) (rate(http_server_request_duration_seconds_bucket[5m])))
 ```
 
+## Alertmanager (routing the alerts)
+
+Rules only *fire*; **Alertmanager** decides who hears about it. `kube-prometheus-stack` deploys it alongside Prometheus; Mimir ships a built-in multi-tenant Alertmanager (configs loaded per tenant with `mimirtool alertmanager load`). The alert *expressions* (service-health pack, burn rates) live in `observability/logql-promql`; this section owns the routing.
+
+```yaml
+# alertmanager.yaml (kube-prometheus-stack: alertmanager.config)
+route:
+  group_by: [alertname, service]        # one notification per incident, not per instance
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 4h
+  receiver: slack-warnings              # default catch-all
+  routes:
+    - matchers: [severity = page]
+      receiver: pagerduty-oncall
+    - matchers: [alertname = Watchdog]
+      receiver: deadmans-switch         # see below
+      repeat_interval: 1m
+
+inhibit_rules:
+  # A critical alert on a service silences its own warnings — no double noise
+  - source_matchers: [severity = page]
+    target_matchers: [severity = warn]
+    equal: [service, env]
+
+receivers:
+  - name: pagerduty-oncall
+    pagerduty_configs: [{ routing_key_file: /etc/am/pd-key }]
+  - name: slack-warnings
+    slack_configs: [{ channel: "#alerts", api_url_file: /etc/am/slack-url }]
+  - name: deadmans-switch
+    webhook_configs: [{ url: https://deadmanssnitch-or-healthchecks-io/... }]
+```
+
+**Dead-man's-switch (non-negotiable):** `kube-prometheus-stack` ships a `Watchdog` alert that fires *always*. Route it to an external heartbeat service (Healthchecks.io / Dead Man's Snitch / PagerDuty heartbeat) that pages when the signal **stops** — the only thing that catches "Prometheus/Alertmanager itself is down", which no internal alert can.
+
+Routing keys off the `severity` + `service` labels — which is why every rule in the health-alert pack carries them. `severity: page` → on-call; `severity: warn` → chat/ticket. Config lives in Git like everything else (Helm values / `mimirtool`), secrets via `*_file` references — never inline.
+
 ## Retention + cardinality
 
 - **Retention** is the top cost knob. Prometheus: `--storage.tsdb.retention.time=30d` (disk-bound — this is what pushes you to Mimir). Mimir: `compactor.blocks_retention_period` per tenant, cheap on object storage.
@@ -187,6 +226,7 @@ Grafana Cloud Metrics is hosted Mimir — same PromQL, same remote-write / OTLP 
 - Mimir per-tenant limits set (`max_global_series_per_user`, `ingestion_rate`) — never run a tenant unbounded
 - Object storage on the cloud's native service; IRSA / Workload Identity for auth
 - No `:latest` image tags for Prometheus / Mimir
+- Alertmanager routes on `severity` + `service`; inhibition wired; `Watchdog` dead-man's-switch to an external heartbeat — silence itself must page
 
 ## What NOT to do
 
@@ -208,6 +248,7 @@ Grafana Cloud Metrics is hosted Mimir — same PromQL, same remote-write / OTLP 
 5. Point the OTel Collector's metrics exporter at the backend endpoint (add `X-Scope-OrgID` for Mimir multi-tenant).
 6. Set **retention** and (Mimir) **per-tenant limits**.
 7. Deploy **rules** from the Git-tracked directory (`PrometheusRule` CRDs / `mimirtool rules load`); expressions come from `observability/logql-promql`.
+7a. Configure **Alertmanager**: routing by `severity`/`service`, inhibition, receivers, and the `Watchdog` dead-man's-switch to an external heartbeat.
 8. Wire the **Grafana data source** (Prometheus/Mimir) declaratively; confirm exemplars link to Tempo (see `observability/grafana-dashboards`).
 9. Smoke: emit a metric from an app, confirm it lands via PromQL, confirm a histogram shows exemplar dots that jump to a trace.
 

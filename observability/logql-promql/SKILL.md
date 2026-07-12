@@ -168,7 +168,74 @@ For a 99.9% SLO with a 30-day budget, a "fast burn" alert (consume 5% of budget 
 ) > (14.4 * (1 - 0.999))
 ```
 
-`14.4 * (1 - SLO)` is the fast-burn threshold from Google's SRE workbook for 1h windows. Use multi-window alerts for noise reduction.
+`14.4 * (1 - SLO)` is the fast-burn threshold from Google's SRE workbook for 1h windows. Use multi-window alerts for noise reduction: pair the fast burn (1h window, pages) with a slow burn (6h window, `6 * (1 - SLO)`, tickets).
+
+### Service-health alert pack
+
+The rules that say "this service is unhealthy" before users tell you. Deploy them via the rule-deployment path in `observability/prometheus-mimir-setup`; route them via its Alertmanager section.
+
+```yaml
+groups:
+  - name: service-health
+    rules:
+      # Scrape target down — the service is up but Prometheus can't reach it (or it crashed)
+      - alert: TargetDown
+        expr: up{env="prod"} == 0
+        for: 3m
+        labels: { severity: page }
+        annotations:
+          summary: "{{ $labels.service }} target {{ $labels.instance }} is down"
+          runbook_url: https://runbooks.yourco.com/target-down
+
+      # Target VANISHED — the alert everyone forgets. `up == 0` can't fire if the
+      # series no longer exists (service deleted, scrape config broken, label renamed).
+      - alert: TargetAbsent
+        expr: absent(up{service="orders", env="prod"})
+        for: 5m
+        labels: { severity: page }
+        annotations:
+          summary: "No scrape target for orders in prod — service gone or scrape config broken"
+          runbook_url: https://runbooks.yourco.com/target-absent
+
+      # Restart loop (kube-state-metrics)
+      - alert: PodRestartLoop
+        expr: increase(kube_pod_container_status_restarts_total{namespace="prod"}[15m]) > 3
+        for: 5m
+        labels: { severity: page }
+        annotations:
+          summary: "{{ $labels.pod }} restarted {{ $value }} times in 15m"
+          runbook_url: https://runbooks.yourco.com/restart-loop
+
+      # Pods stuck not-ready
+      - alert: PodNotReady
+        expr: sum by (namespace, pod) (kube_pod_status_ready{condition="true", namespace="prod"}) == 0
+        for: 10m
+        labels: { severity: page }
+        annotations:
+          summary: "{{ $labels.pod }} not ready for 10m"
+          runbook_url: https://runbooks.yourco.com/pod-not-ready
+
+      # Deployment running fewer replicas than desired
+      - alert: DeploymentReplicasMismatch
+        expr: kube_deployment_status_replicas_available < kube_deployment_spec_replicas
+        for: 10m
+        labels: { severity: warn }
+        annotations:
+          summary: "{{ $labels.deployment }} has {{ $value }} available replicas (below spec)"
+          runbook_url: https://runbooks.yourco.com/replicas-mismatch
+
+      # Outside-in check (blackbox exporter) — catches what inside-out metrics can't:
+      # DNS, TLS, load balancer, ingress
+      - alert: ProbeFailed
+        expr: probe_success{job="blackbox"} == 0
+        for: 3m
+        labels: { severity: page }
+        annotations:
+          summary: "Blackbox probe failing for {{ $labels.instance }}"
+          runbook_url: https://runbooks.yourco.com/probe-failed
+```
+
+Add the 5xx **burn-rate pair** (above) per service on top — `TargetDown`/`ProbeFailed` catch hard-down, burn rate catches degraded. Rule hygiene, no exceptions: every alert has `for:` (no instant blips), a `severity` label (drives Alertmanager routing), and a `runbook_url` annotation. Alert on **symptoms** (down, erroring, not ready), not causes — the trace and logs explain the cause after you click through.
 
 ## LogQL — log queries
 

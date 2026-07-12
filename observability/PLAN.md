@@ -284,25 +284,25 @@ Currently only logs→traces (derived fields) and metrics→traces (exemplars) a
 
 ### 8.1 Health-alert pack (rule syntax)
 
-- [ ] **File:** `observability/logql-promql/SKILL.md` — add a "**Service-health alert pack**" section (PromQL rules, YAML shape ready for the rule deployment path in `prometheus-mimir-setup`):
+- [x] **File:** `observability/logql-promql/SKILL.md` — add a "**Service-health alert pack**" section (PromQL rules, YAML shape ready for the rule deployment path in `prometheus-mimir-setup`):
   - `up == 0` (scrape target down) **and** `absent(up{service="X"})` (target vanished — the alert people forget).
   - Kubernetes: restart loops (`increase(kube_pod_container_status_restarts_total[15m]) > 3`), pods not ready (`kube_pod_status_ready{condition="true"} == 0` sustained), deployment replica mismatch.
   - Blackbox probe failure (`probe_success == 0`) as the outside-in check.
   - 5xx burn-rate pair (fast 1h / slow 6h) — reference the existing burn-rate row in grafana-dashboards, keep the math here.
   - Rule hygiene: every rule has `for:`, `severity` label, `runbook_url` annotation; alert on symptoms, not causes.
-- [ ] **Verify:** `grep -n "absent(" observability/logql-promql/SKILL.md` hits.
+- [x] **Verify:** `grep -n "absent(" observability/logql-promql/SKILL.md` hits.
 
 ### 8.2 Alertmanager (routing) in `prometheus-mimir-setup`
 
-- [ ] **File:** `observability/prometheus-mimir-setup/SKILL.md` — replace the "Alertmanager routing / on-call escalation — out of scope" line (~line 25) with a new "**Alertmanager**" section: deployed by `kube-prometheus-stack` (or Mimir's built-in multi-tenant Alertmanager), routing tree by `severity` + `service` labels, grouping (`group_by: [alertname, service]`), inhibition (critical inhibits warning for same service), and a **dead-man's-switch** (`Watchdog` always-firing alert → external heartbeat) so silence itself alerts. Receivers (Slack / PagerDuty / Opsgenie) shown as config shape, not vendor tutorials.
-- [ ] Keep the scope fence: rule *syntax* stays in `logql-promql`; this skill owns rule/router *deployment*.
-- [ ] **Verify:** `grep -rn "out of scope" observability/prometheus-mimir-setup/SKILL.md` returns nothing about Alertmanager.
+- [x] **File:** `observability/prometheus-mimir-setup/SKILL.md` — replace the "Alertmanager routing / on-call escalation — out of scope" line (~line 25) with a new "**Alertmanager**" section: deployed by `kube-prometheus-stack` (or Mimir's built-in multi-tenant Alertmanager), routing tree by `severity` + `service` labels, grouping (`group_by: [alertname, service]`), inhibition (critical inhibits warning for same service), and a **dead-man's-switch** (`Watchdog` always-firing alert → external heartbeat) so silence itself alerts. Receivers (Slack / PagerDuty / Opsgenie) shown as config shape, not vendor tutorials.
+- [x] Keep the scope fence: rule *syntax* stays in `logql-promql`; this skill owns rule/router *deployment*.
+- [x] **Verify:** `grep -rn "out of scope" observability/prometheus-mimir-setup/SKILL.md` returns nothing about Alertmanager.
 
 ### 8.3 Sweep the agents + handoffs
 
-- [ ] **Files:** `observability/agents/observability-engineer-{dotnet,java,node}.md` — Phase 4 (Query & dashboards) wording gains "fleet overview + per-service RED dashboards, health-alert pack, Alertmanager routing"; Phase 5 review checklist gains "trace→logs leg wired; derived-field regex matches this stack's actual field name; 4xx/5xx split; dead-man's-switch present".
-- [ ] Cross-check Handoffs sections across the 6 stack-agnostic/setup skills still resolve (run the global verification loops below).
-- [ ] Commit: `Unhealthy-service alerting: health-alert pack + Alertmanager routing`.
+- [x] **Files:** `observability/agents/observability-engineer-{dotnet,java,node}.md` — Phase 4 (Query & dashboards) wording gains "fleet overview + per-service RED dashboards, health-alert pack, Alertmanager routing"; Phase 5 review checklist gains "trace→logs leg wired; derived-field regex matches this stack's actual field name; 4xx/5xx split; dead-man's-switch present".
+- [x] Cross-check Handoffs sections across the 6 stack-agnostic/setup skills still resolve (run the global verification loops below).
+- [x] Commit: `Unhealthy-service alerting: health-alert pack + Alertmanager routing`.
 
 ---
 
