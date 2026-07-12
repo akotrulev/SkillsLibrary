@@ -1,15 +1,19 @@
 ---
 name: observability-opentelemetry-dotnet
-description: Use when the user asks to instrument a .NET 8 service with OpenTelemetry — traces, metrics, log correlation — and export via OTLP to Tempo / Prometheus / Loki (or an OTel Collector). Triggers: "instrument this with OTel", "add traces / metrics", "wire OTLP exporter", "add a custom span / counter / histogram", "what spans am I missing". Do NOT use for Java (use `observability/opentelemetry-java`), Node (use `observability/opentelemetry-node`), or for log shaping (use `observability/structured-logging-dotnet`).
+description: Use when the user asks to instrument a .NET service (10 primary, 8/9 supported) with OpenTelemetry — traces, metrics, log correlation — and export via OTLP to Tempo / Prometheus / Loki (or an OTel Collector). Triggers: "instrument this with OTel", "add traces / metrics", "wire OTLP exporter", "add a custom span / counter / histogram", "what spans am I missing". Do NOT use for Java (use `observability/opentelemetry-java`), Node (use `observability/opentelemetry-node`), or for log shaping (use `observability/structured-logging-dotnet`).
 ---
 
-# Observability — OpenTelemetry (.NET 8)
+# Observability — OpenTelemetry (.NET 10 primary / 8-9 supported)
 
-Instruments a .NET 8 service with OpenTelemetry: traces via `Activity` / `System.Diagnostics.DiagnosticSource`, metrics via `System.Diagnostics.Metrics.Meter`, and log correlation via Serilog's `Enrich.WithSpan()`. Exports OTLP/gRPC to a local **OpenTelemetry Collector**, which forwards to Tempo (traces), Prometheus (metrics), and Loki (logs).
+Instruments a .NET service with OpenTelemetry: traces via `Activity` / `System.Diagnostics.DiagnosticSource`, metrics via `System.Diagnostics.Metrics.Meter`, and log correlation via Serilog's `Enrich.WithSpan()`. Exports OTLP/gRPC to a local **OpenTelemetry Collector**, which forwards to Tempo (traces), Prometheus (metrics), and Loki (logs).
+
+## Version detection
+
+First act on an existing project: read the `TargetFramework` from the `.csproj` and key every recipe below to it. **.NET 10 is primary; 8 and 9 are supported.** Never apply a net10/net9-only API to a down-level project, and never flag a down-level project for lacking one. The one version-gated call in this skill is exception recording — use the portable `RecordException` extension (works on all TFMs) rather than `Activity.AddException` (net9+ native); see the Rules section.
 
 ## Stack
 
-- **.NET 8**
+- **.NET (10 primary, 8/9 supported)**
 - `OpenTelemetry.Extensions.Hosting`, `OpenTelemetry.Exporter.OpenTelemetryProtocol`
 - Instrumentation libraries: `OpenTelemetry.Instrumentation.AspNetCore`, `Http`, `EntityFrameworkCore` (community), `SqlClient`, `StackExchangeRedis`
 - Resource attributes follow **OTel semantic conventions** (`service.name`, `service.version`, `deployment.environment`)

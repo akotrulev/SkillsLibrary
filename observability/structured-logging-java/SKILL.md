@@ -7,6 +7,10 @@ description: Use when the user asks to set up or refactor logging in a Java 21 /
 
 Sets up SLF4J + Logback as the logging stack in a Java 21 + Spring Boot 3 service. Logs are JSON via `logstash-logback-encoder`, written with placeholder logging (never `+` concatenation or `String.format`), enriched with MDC (`traceId`, `spanId`, `tenantId`, `requestId`), and shipped to Loki for prod / stdout JSON for everywhere.
 
+## Version detection
+
+First act on an existing project: confirm the Java release (`java -version` / the toolchain in `build.gradle`) and the Spring Boot BOM version (`build.gradle` / `pom.xml`). **Java 21 + Spring Boot 3.x is the target.** Match `logstash-logback-encoder` and the OTel Logback MDC appender to your Spring Boot / OTel release lines; the recipes below apply as-is on any Spring Boot 3.x line.
+
 ## Stack
 
 - **Java 21 + Spring Boot 3.x**
@@ -14,7 +18,7 @@ Sets up SLF4J + Logback as the logging stack in a Java 21 + Spring Boot 3 servic
 - **Logback** as the implementation (Spring Boot default)
 - **`net.logstash.logback:logstash-logback-encoder`** for JSON output
 - **`io.opentelemetry.instrumentation:opentelemetry-logback-mdc-1.0`** to bridge OTel trace context → MDC
-- Shipping: stdout JSON → container runtime → Promtail / Fluent Bit / Vector → Loki. Direct Loki appenders exist (`com.github.loki4j:loki-logback-appender`) but stdout-first is the portable default.
+- Shipping: stdout JSON → container runtime → Alloy / Fluent Bit / Vector → Loki. Direct Loki appenders exist (`com.github.loki4j:loki-logback-appender`) but stdout-first is the portable default.
 
 ## When to use
 
@@ -46,10 +50,12 @@ Sets up SLF4J + Logback as the logging stack in a Java 21 + Spring Boot 3 servic
 ```groovy
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter'
-    implementation 'net.logstash.logback:logstash-logback-encoder:7.4'
-    implementation 'io.opentelemetry.instrumentation:opentelemetry-logback-mdc-1.0:2.7.0-alpha'
+    implementation 'net.logstash.logback:logstash-logback-encoder:9.0'
+    implementation 'io.opentelemetry.instrumentation:opentelemetry-logback-mdc-1.0:2.28.1-alpha'
 }
 ```
+
+Pin the OTel Logback MDC appender to the same release train as the rest of your OTel artifacts (see `observability/opentelemetry-java`); check the latest `logstash-logback-encoder` on [Maven Central](https://central.sonatype.com/artifact/net.logstash.logback/logstash-logback-encoder) and the OTel appender at the [OpenTelemetry releases page](https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases).
 
 ### `src/main/resources/logback-spring.xml`
 

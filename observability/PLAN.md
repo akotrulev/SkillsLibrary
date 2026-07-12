@@ -122,7 +122,7 @@ Restores sibling symmetry (`structured-logging-{dotnet,java,node}`) and fixes in
   - Expected hit locations: the other 8 observability SKILL.md files (When NOT to use / Handoffs sections), possibly `devops/` and `backend/` skills.
 - [x] **Verify:** `grep -rn "serilog-structured-logging" . --exclude-dir=.git` returns nothing; `grep -rn "observability/structured-logging-dotnet" . --exclude-dir=.git` shows the old inbound refs from devops/backend now resolving to a folder that exists.
 - [x] Commit: `Rename serilog-structured-logging to structured-logging-dotnet`.
- — Version-policy rewrite (one skill per task; needs care, follow the patterns exactly)
+## Phase 3 — Version-policy rewrite (one skill per task; needs care, follow the patterns exactly)
 
 Goal: every stack-bound skill becomes **version-aware** like the rest of the library — the skill's first instruction is "detect the project's version, key every recipe to it, never up-level a down-level project."
 
@@ -130,46 +130,46 @@ Goal: every stack-bound skill becomes **version-aware** like the rest of the lib
 
 ### 3.1 `opentelemetry-dotnet` — .NET 10 primary / 8-9 supported
 
-- [ ] Frontmatter description: change ".NET 8 service" → ".NET service (10 primary, 8/9 supported)".
-- [ ] Title + intro: same change. Add a **Version detection** note right after the intro: "First act on an existing project: read the `TargetFramework` from the `.csproj` and key every recipe below to it. Never apply a net10-only API to a net8/net9 project."
-- [ ] Body sweep: replace every standalone ".NET 8" with ".NET 10 primary / 8-9 supported" or just ".NET" where version doesn't matter.
-- [ ] Add one version-keyed note where behavior differs: `RecordException` (OTel extension, works on all TFMs) vs `Activity.AddException` (net9+ native) — recommend `RecordException` as the portable default (Phase 1.2 already set the code this way).
+- [x] Frontmatter description: change ".NET 8 service" → ".NET service (10 primary, 8/9 supported)".
+- [x] Title + intro: same change. Add a **Version detection** note right after the intro: "First act on an existing project: read the `TargetFramework` from the `.csproj` and key every recipe below to it. Never apply a net10-only API to a net8/net9 project."
+- [x] Body sweep: replace every standalone ".NET 8" with ".NET 10 primary / 8-9 supported" or just ".NET" where version doesn't matter.
+- [x] Add one version-keyed note where behavior differs: `RecordException` (OTel extension, works on all TFMs) vs `Activity.AddException` (net9+ native) — recommend `RecordException` as the portable default (Phase 1.2 already set the code this way).
 
 ### 3.2 `structured-logging-dotnet` — same treatment
 
-- [ ] Frontmatter + title + intro: ".NET 8" → ".NET (10 primary, 8/9 supported)". Add the same Version detection note.
-- [ ] No API in this skill is version-gated (Serilog surface is stable across TFMs) — state that explicitly in the Version detection note so down-level projects aren't flagged.
+- [x] Frontmatter + title + intro: ".NET 8" → ".NET (10 primary, 8/9 supported)". Add the same Version detection note.
+- [x] No API in this skill is version-gated (Serilog surface is stable across TFMs) — state that explicitly in the Version detection note so down-level projects aren't flagged.
 
 ### 3.3 `opentelemetry-node` — Node 24 primary / 22 maintenance
 
-- [ ] Frontmatter description: "Node 20 + TypeScript" → "Node 24 (22 maintenance) + TypeScript". Title + intro + Stack section: same.
-- [ ] Add Version detection note: "Check `engines.node` in package.json / the CI matrix. Node 24 is active LTS, 22 is maintenance; **Node 20 is EOL since April 2026 — flag it, don't target it.**"
-- [ ] Sweep the body for "Node 20" — replace all.
+- [x] Frontmatter description: "Node 20 + TypeScript" → "Node 24 (22 maintenance) + TypeScript". Title + intro + Stack section: same.
+- [x] Add Version detection note: "Check `engines.node` in package.json / the CI matrix. Node 24 is active LTS, 22 is maintenance; **Node 20 is EOL since April 2026 — flag it, don't target it.**"
+- [x] Sweep the body for "Node 20" — replace all.
 
 ### 3.4 `structured-logging-node` — same treatment as 3.3.
 
 ### 3.5 `opentelemetry-java` + `structured-logging-java` — already Java 21 + Spring Boot 3 (correct)
 
-- [ ] Add only the Version detection note (Java release + Spring Boot BOM version) to each, for consistency with the rest of the library. No version changes.
+- [x] Add only the Version detection note (Java release + Spring Boot BOM version) to each, for consistency with the rest of the library. No version changes.
 
 ### 3.6 Refresh stale hard-pinned artifact versions
 
 Do a web search for the current stable version of each before editing (do NOT guess):
 
-- [ ] `observability/opentelemetry-java/SKILL.md`: OTel java agent `2.7.0` (Dockerfile ARG + Gradle annotation lib), `opentelemetry-micrometer1-shim:1.40.0-alpha`.
-- [ ] `observability/structured-logging-java/SKILL.md`: `logstash-logback-encoder:7.4` (current major is 8.x), `opentelemetry-logback-mdc-1.0:2.7.0-alpha`.
-- [ ] After updating, add a one-line note near each snippet: "Pin all OTel artifacts to one release train; check the latest at the OpenTelemetry releases page."
-- [ ] `observability/logql-promql/SKILL.md` ~line 95: update "Native histograms (Prometheus 2.40+)" to note Prometheus 3.x is current and native histograms are stable there.
+- [x] `observability/opentelemetry-java/SKILL.md`: OTel java agent `2.7.0` (Dockerfile ARG + Gradle annotation lib), `opentelemetry-micrometer1-shim:1.40.0-alpha`.
+- [x] `observability/structured-logging-java/SKILL.md`: `logstash-logback-encoder:7.4` (current major is 8.x), `opentelemetry-logback-mdc-1.0:2.7.0-alpha`.
+- [x] After updating, add a one-line note near each snippet: "Pin all OTel artifacts to one release train; check the latest at the OpenTelemetry releases page."
+- [x] `observability/logql-promql/SKILL.md` ~line 95: update "Native histograms (Prometheus 2.40+)" to note Prometheus 3.x is current and native histograms are stable there.
 
 ### 3.7 Promtail → Grafana Alloy (currency fix)
 
 Grafana deprecated Promtail (announced Feb 2025, EOL ~Mar 2026) in favor of **Grafana Alloy**. Web-search "Grafana Alloy Loki logs Kubernetes Helm" for the current config shape before writing.
 
-- [ ] **File:** `observability/loki-tempo-setup/SKILL.md`
+- [x] **File:** `observability/loki-tempo-setup/SKILL.md`
   - Forwarder decision table (Inputs needed ~line 33 and the "Log forwarders" section ~lines 140–172): make **Grafana Alloy** the recommended default; keep Vector and Fluent Bit as alternatives; demote Promtail to a "legacy — deprecated by Grafana, EOL 2026; migrate with `alloy convert`" note.
   - Replace the Promtail Helm sample with an equivalent Alloy sample (`grafana/alloy` chart; `loki.source.kubernetes` / `discovery.kubernetes` + `loki.write` river config) achieving the same thing: tail pod logs, parse JSON, attach only the low-cardinality labels (`service`, `environment`, `level`, `namespace`), push to Loki.
   - Sweep the file (and the architecture diagram) for "Promtail" — every remaining mention should be in the legacy note only.
-- [ ] Also sweep the other 8 skills: `grep -rn "Promtail" observability/` — replace incidental mentions ("Promtail / Vector / Fluent Bit") with "Alloy / Vector / Fluent Bit".
+- [x] Also sweep the other 8 skills: `grep -rn "Promtail" observability/` — replace incidental mentions ("Promtail / Vector / Fluent Bit") with "Alloy / Vector / Fluent Bit".
 
 ### Phase 3 exit criteria
 `grep -rn "\.NET 8\b\|Node 20" observability/` returns only tagged-fallback/EOL-note mentions; `grep -rn "Promtail" observability/` returns only the legacy note; every stack skill has a Version detection note. Commit: `Version-policy rewrite for observability/ (.NET 10, Node 24, Alloy)`.

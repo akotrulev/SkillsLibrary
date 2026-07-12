@@ -92,7 +92,7 @@ histogram_quantile(0.95,
 Rules:
 - **Sum `_bucket` first**, **then** apply `histogram_quantile` — order matters
 - Use `le` in `by (...)` — it's the bucket label
-- Native histograms (Prometheus 2.40+) use `histogram_quantile` slightly differently — check the Prometheus docs
+- Native histograms (experimental since Prometheus 2.40, **stable as of Prometheus 3.8** — 3.x is current) don't have `_bucket` series: call `histogram_quantile(0.95, rate(http_server_request_duration_seconds[5m]))` directly on the metric. Scraping them still requires explicit opt-in (`scrape_native_histograms` in the scrape config) — check the Prometheus docs
 
 ### Top-N
 

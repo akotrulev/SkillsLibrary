@@ -1,15 +1,19 @@
 ---
 name: observability-opentelemetry-node
-description: Use when the user asks to instrument a Node 20 + TypeScript service (NestJS / Express / Fastify) with OpenTelemetry — traces, metrics, log correlation — and export OTLP to a Collector. Triggers: "instrument this Node service with OTel", "add a custom span / counter", "auto-instrument http and pg", "wire OTLP gRPC exporter", "trace context propagation". Do NOT use for .NET (use `observability/opentelemetry-dotnet`), Java (use `observability/opentelemetry-java`), or log shaping (use `observability/structured-logging-node`).
+description: Use when the user asks to instrument a Node 24 (22 maintenance) + TypeScript service (NestJS / Express / Fastify) with OpenTelemetry — traces, metrics, log correlation — and export OTLP to a Collector. Triggers: "instrument this Node service with OTel", "add a custom span / counter", "auto-instrument http and pg", "wire OTLP gRPC exporter", "trace context propagation". Do NOT use for .NET (use `observability/opentelemetry-dotnet`), Java (use `observability/opentelemetry-java`), or log shaping (use `observability/structured-logging-node`).
 ---
 
-# Observability — OpenTelemetry (Node 20 / TypeScript)
+# Observability — OpenTelemetry (Node 24 / TypeScript)
 
-Instruments a Node 20 + TypeScript service with OpenTelemetry. Bootstraps via a `-r` preload that registers auto-instrumentations **before** application code requires anything, exposes a `tracer` and `meter` API for custom spans/metrics, and ships OTLP/gRPC to a Collector that forwards to Tempo / Prometheus / Loki.
+Instruments a Node 24 + TypeScript service with OpenTelemetry. Bootstraps via a `-r` preload that registers auto-instrumentations **before** application code requires anything, exposes a `tracer` and `meter` API for custom spans/metrics, and ships OTLP/gRPC to a Collector that forwards to Tempo / Prometheus / Loki.
+
+## Version detection
+
+First act on an existing project: check `engines.node` in `package.json` and the CI matrix. **Node 24 is active LTS (primary); 22 is maintenance (supported); Node 20 is EOL since April 2026 — flag it, don't target it.** The OTel SDK surface is stable across these majors, so the recipes below apply as-is; the only version concern is not running on an EOL runtime.
 
 ## Stack
 
-- **Node 20 + TypeScript** (strict mode)
+- **Node 24 (22 maintenance) + TypeScript** (strict mode)
 - **`@opentelemetry/sdk-node`** + **`@opentelemetry/auto-instrumentations-node`** — auto-instruments `http`, `express`, `fastify`, `pg`, `mysql2`, `mongodb`, `redis`/`ioredis`, `aws-sdk`, `grpc`, ~80 libraries
 - **`@opentelemetry/exporter-trace-otlp-grpc`** + **`@opentelemetry/exporter-metrics-otlp-grpc`**
 - **`@opentelemetry/instrumentation-pino`** — bridges OTel context → pino logs (see `observability/structured-logging-node`)

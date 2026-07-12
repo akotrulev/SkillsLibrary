@@ -1,15 +1,19 @@
 ---
 name: observability-structured-logging-dotnet
-description: Use when the user asks to set up or refactor logging in a .NET 8 service using Serilog — message templates, enrichers, sinks to console / Loki / Seq / Application Insights, scope / correlation, sensitive-data masking. Triggers: "set up Serilog", "configure structured logging in .NET", "ship logs to Loki", "add correlation IDs", "this log line is wrong". Do NOT use for Java (use `observability/structured-logging-java`) or Node (use `observability/structured-logging-node`), or for tracing/metrics (use `observability/opentelemetry-dotnet`).
+description: Use when the user asks to set up or refactor logging in a .NET service (10 primary, 8/9 supported) using Serilog — message templates, enrichers, sinks to console / Loki / Seq / Application Insights, scope / correlation, sensitive-data masking. Triggers: "set up Serilog", "configure structured logging in .NET", "ship logs to Loki", "add correlation IDs", "this log line is wrong". Do NOT use for Java (use `observability/structured-logging-java`) or Node (use `observability/structured-logging-node`), or for tracing/metrics (use `observability/opentelemetry-dotnet`).
 ---
 
-# Observability — Serilog Structured Logging (.NET 8)
+# Observability — Serilog Structured Logging (.NET 10 primary / 8-9 supported)
 
-Sets up Serilog as the **only** logging stack in a .NET 8 service. Logs are JSON, written via message templates (never `$"interpolated"`), enriched with correlation/trace IDs from the active OpenTelemetry activity, and shipped to Loki for prod / Seq for local dev.
+Sets up Serilog as the **only** logging stack in a .NET service. Logs are JSON, written via message templates (never `$"interpolated"`), enriched with correlation/trace IDs from the active OpenTelemetry activity, and shipped to Loki for prod / Seq for local dev.
+
+## Version detection
+
+First act on an existing project: read the `TargetFramework` from the `.csproj`. **.NET 10 is primary; 8 and 9 are supported.** No API in this skill is version-gated — the Serilog surface (message templates, enrichers, sinks) is stable across net8/9/10 — so every recipe below applies as-is on any supported TFM. Do not flag a down-level project for lacking a newer API here; there is none to lack.
 
 ## Stack
 
-- **.NET 8**
+- **.NET (10 primary, 8/9 supported)**
 - **Serilog** (`Serilog.AspNetCore`) — replaces `Microsoft.Extensions.Logging` providers
 - Enrichers: `Serilog.Enrichers.Environment`, `Serilog.Enrichers.Thread`, `Serilog.Enrichers.Span` (OTel activity → log)
 - Sinks: `Serilog.Sinks.Console` (always, JSON formatted), `Serilog.Sinks.Grafana.Loki` (prod), `Serilog.Sinks.Seq` (local dev)
@@ -18,7 +22,7 @@ Sets up Serilog as the **only** logging stack in a .NET 8 service. Logs are JSON
 
 ## When to use
 
-- New .NET 8 service needs logging
+- New .NET service needs logging
 - Logs are unstructured (`Console.WriteLine`, `_logger.LogInformation($"...")`) and need to become structured
 - Adding correlation IDs / trace propagation to logs
 - Pointing logs at Loki / Seq / Application Insights

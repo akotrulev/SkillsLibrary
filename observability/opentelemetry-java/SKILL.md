@@ -7,6 +7,10 @@ description: Use when the user asks to instrument a Java 21 / Spring Boot 3 serv
 
 Instruments a Java 21 + Spring Boot 3 service with OpenTelemetry. Default is the **OpenTelemetry Java agent** for auto-instrumentation (zero code changes), plus the SDK for custom spans and metrics. Exports OTLP/gRPC to a local Collector that forwards to Tempo / Prometheus / Loki.
 
+## Version detection
+
+First act on an existing project: confirm the Java release (`java -version` / the toolchain in `build.gradle`) and the Spring Boot BOM version (`build.gradle` / `pom.xml`). **Java 21 + Spring Boot 3.x is the target.** Pin all OTel artifacts (agent, annotations, shim) to one release train — check the latest at the OpenTelemetry releases page. The recipes below apply as-is on any Spring Boot 3.x line.
+
 ## Stack
 
 - **Java 21 + Spring Boot 3.x**
@@ -47,12 +51,14 @@ The agent is a separate `-javaagent` JAR. App code only needs the annotation lib
 
 ```groovy
 dependencies {
-    implementation 'io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:2.7.0'
+    implementation 'io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:2.28.1'
     // Micrometer bridge if Spring Boot's MeterRegistry is in use:
-    implementation 'io.opentelemetry:opentelemetry-micrometer1-shim:1.40.0-alpha'
+    implementation 'io.opentelemetry:opentelemetry-micrometer1-shim:1.62.0-alpha'
     // Spring Boot starter sets up Micrometer; OTel exporter is wired below
 }
 ```
+
+Pin all OTel artifacts to one release train (the annotations/agent version and the SDK-aligned `-alpha` shim version move together); check the latest at the [OpenTelemetry releases page](https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases).
 
 ### Agent launch
 
@@ -60,7 +66,7 @@ Download once during image build:
 
 ```dockerfile
 FROM eclipse-temurin:21-jre
-ARG OTEL_AGENT_VERSION=2.7.0
+ARG OTEL_AGENT_VERSION=2.28.1
 ADD https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v${OTEL_AGENT_VERSION}/opentelemetry-javaagent.jar /opt/otel/agent.jar
 
 ENV JAVA_TOOL_OPTIONS="-javaagent:/opt/otel/agent.jar"

@@ -1,20 +1,24 @@
 ---
 name: observability-structured-logging-node
-description: Use when the user asks to set up or refactor logging in a Node 20 + TypeScript service — pino (preferred) or winston, JSON output, correlation IDs via AsyncLocalStorage, shipping to Loki / Datadog. Triggers: "set up structured logging in Node", "use pino in NestJS / Express", "ship logs to Loki", "add a request ID middleware", "redact secrets from logs". Do NOT use for .NET (use `observability/structured-logging-dotnet`) or Java (use `observability/structured-logging-java`), or for tracing/metrics (use `observability/opentelemetry-node`).
+description: Use when the user asks to set up or refactor logging in a Node 24 (22 maintenance) + TypeScript service — pino (preferred) or winston, JSON output, correlation IDs via AsyncLocalStorage, shipping to Loki / Datadog. Triggers: "set up structured logging in Node", "use pino in NestJS / Express", "ship logs to Loki", "add a request ID middleware", "redact secrets from logs". Do NOT use for .NET (use `observability/structured-logging-dotnet`) or Java (use `observability/structured-logging-java`), or for tracing/metrics (use `observability/opentelemetry-node`).
 ---
 
-# Observability — Structured Logging (Node 20 / TypeScript)
+# Observability — Structured Logging (Node 24 / TypeScript)
 
-Sets up **pino** as the default logging stack for Node 20 + TypeScript services (NestJS or Express). Logs are JSON to stdout, enriched with `requestId`, `traceId`, `spanId` via `AsyncLocalStorage`, with built-in `redact` for secrets. Winston is documented as a fallback when an ecosystem dependency forces it.
+Sets up **pino** as the default logging stack for Node 24 + TypeScript services (NestJS or Express). Logs are JSON to stdout, enriched with `requestId`, `traceId`, `spanId` via `AsyncLocalStorage`, with built-in `redact` for secrets. Winston is documented as a fallback when an ecosystem dependency forces it.
+
+## Version detection
+
+First act on an existing project: check `engines.node` in `package.json` and the CI matrix. **Node 24 is active LTS (primary); 22 is maintenance (supported); Node 20 is EOL since April 2026 — flag it, don't target it.** The pino/winston surface is stable across these majors, so the recipes below apply as-is; the only version concern is not running on an EOL runtime.
 
 ## Stack
 
-- **Node 20** + TypeScript (strict mode)
+- **Node 24 (22 maintenance)** + TypeScript (strict mode)
 - **pino** — chosen for speed (10–50× faster than winston in benchmarks), built-in `redact`, child-logger composition, first-class JSON
 - **`pino-http`** for Express; **`nestjs-pino`** for NestJS
 - **`@opentelemetry/instrumentation-pino`** to inject trace context into every log
 - **`pino-pretty`** in `NODE_ENV=development` for human-friendly local console output (never enabled in prod)
-- Shipping: stdout JSON → container runtime → Promtail / Vector / Fluent Bit → Loki
+- Shipping: stdout JSON → container runtime → Alloy / Vector / Fluent Bit → Loki
 
 Winston is acceptable when an upstream framework already configures it (NestJS without `nestjs-pino`); the rules below port over with different syntax.
 
