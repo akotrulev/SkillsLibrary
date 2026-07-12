@@ -205,6 +205,7 @@ Left out of scope: <what you deliberately did not touch>
 
 ## Handoffs
 
+- Cross-feature analysis *upstream*: if the project keeps a business model (`docs/business-model/`), the `business-analysis/agents/business-analyst` peer runs first — its flow/state/decision artifacts and conflict boundary conditions are first-class test basis (the boundary conditions are BVA seeds)
 - Distill the docs into the test-basis document → `qa/manual/test-basis-analyzer`
 - Technique depth & coverage criteria → `qa/manual/test-design-techniques`
 - Suite formatting (Setup/Cases/Cleanup) → `qa/manual/test-case-writer`

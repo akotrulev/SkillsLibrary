@@ -2,7 +2,7 @@
 
 These rules apply to every skill in this library unless a specific skill explicitly overrides them.
 
-> **Scope:** The `qa/` folder, `frontend/blazor/` and `frontend/react/` (each with the `design/` and `auth/auth0-{blazor,react}` skills it depends on), the `data/` folder (8 per-engine skills + 4 cross-engine `_shared` skills + the `data-architect` agent), and the 10 in-scope `engineering-practices/` developer-workflow skills (the `ep-*` set — the 8 core skills plus `ep-subagent-driven-development` and `ep-dispatching-parallel-agents`) are ready for use and the remote. The 2 excluded `engineering-practices/` skills (`requesting-code-review`, `receiving-code-review`) and all other top-level folders are under construction — ignore them, and do not upload them to the remote yet.
+> **Scope:** The `qa/` folder, `frontend/blazor/` and `frontend/react/` (each with the `design/` and `auth/auth0-{blazor,react}` skills it depends on), the `data/` folder (8 per-engine skills + 4 cross-engine `_shared` skills + the `data-architect` agent), the `business-analysis/` folder (5 `ba-*` skills + the `business-analyst` agent), and the 10 in-scope `engineering-practices/` developer-workflow skills (the `ep-*` set — the 8 core skills plus `ep-subagent-driven-development` and `ep-dispatching-parallel-agents`) are ready for use and the remote. The 2 excluded `engineering-practices/` skills (`requesting-code-review`, `receiving-code-review`) and all other top-level folders are under construction — ignore them, and do not upload them to the remote yet.
 
 ## Role
 
@@ -266,3 +266,22 @@ The `engineering-practices/` folder is the **developer-workflow spine** — the 
 - **The policy (both skills):** *cost before speed* — inline/sequential is the default; spawn only when it pays for itself; and a **hard gate — more than 2 agents (concurrent, or as the plan for one step) requires the user's permission first.** This deliberately inverts the upstream speed-first defaults ("fresh subagent per task", "3+ failures → one agent each"). It aligns with the harness's own guidance to spawn agents conservatively.
 
 **Reconciliation with global rules:** where a process skill and a global rule touch — `ep-test-driven-development` vs the Test code rules, the `ep-brainstorming` HARD-GATE vs the phased-agent design phases, `ep-verification-before-completion` vs "report outcomes faithfully" — the existing "skill wins for its domain" rule already governs; the skills are written to agree with the global rules, so no override is triggered in practice.
+
+## Business-analysis catalog
+
+The `business-analysis/` folder is the **cross-feature business-flow reasoning** domain — it sits *upstream* of `qa/manual/` (which distills one feature for testing) and owns what nothing else does: detecting conflicts **between features** and keeping a **persistent per-project business model** so later sessions reason with whole-project context. Ready for use and shipped as the self-contained `business-analysis` plugin. Organized like the other domains: language-agnostic skills + one phased orchestrator agent.
+
+**The KB (`docs/business-model/` in the target project)** — versioned, diffable, Cline-Memory-Bank-shaped: `INDEX.md` (read first, every session) · `glossary.md` · `flows/` · `entities/` · `decisions/` · `interaction-map.md` (resolved conflicts + rationale) · `active-context.md` (dynamic tier). Contract: **read-first / update-after**; stable IDs (`FLOW-`/`ENT-`/`DEC-`/`CONF-`) + source traceability; annotation grammar `[TBD - reason]` · `⚠️ Assumption:` · `#confirmed`/`#inferred`/`#observed`.
+
+**Skills** (`business-analysis/skills/`, `ba-*`):
+- `ba-project-knowledge` — the KB protocol every other skill loads (layout, contract, authoring rules, init)
+- `ba-flow-mapper` — requirements → BPMN-disciplined Mermaid flow (named actors/swimlanes, every decision exit incl. failure labeled, boundary events, precondition→action→postcondition steps, event-timeline pass)
+- `ba-state-modeler` — **one state × event grid per business entity**, all features overlaid, transitions annotated with owning feature; conflict surfaces: double-fire, state interference, orphan transitions, silent `—` assumptions
+- `ba-decision-modeler` — **one merged decision table per shared decision point** with a declared DMN hit policy (U/A/F/P/C); completeness check = gaps, overlap check = contradictions, missing Collect operator = missing stacking rule; precedence is a *business decision to escalate, never invent*
+- `ba-feature-conflict-sweep` — the quality gate: normalize the new feature into trigger/actor/action/data/constraint/state tuples → pairwise sweep against the KB with the **11-class conflict taxonomy** (contradictory rules · trigger overlap · state interference · resource contention · ordering/race · circular dependency · policy stacking · permission/authority · duplication/subsumption · terminology drift · boundary divergence) → **every finding gets a concrete boundary condition** → severity table; resolutions recorded in `interaction-map.md`
+
+**Agent** — `business-analysis/agents/business-analyst`: three modes (analyze / model / audit), six phases (Orient → Normalize → Model per selection matrix → Sweep → Resolve & persist → Report). Loads **only** `business-analysis/*` skills.
+
+**Scope fence vs `qa/manual/*`:** `test-basis-analyzer` keeps single-story distillation; `test-design-techniques` keeps decision-/state-table *test-design mechanics* (rule coverage, n-switch); this domain owns the cross-feature models + the sweep and **never produces test cases**. Handshakes: KB artifacts are first-class test-basis inputs; sweep boundary conditions are BVA seeds; `qa-manual-test-designer` names `business-analyst` as the upstream peer.
+
+New-project setup = copy `business-analysis/` (all 5 skills + the agent).

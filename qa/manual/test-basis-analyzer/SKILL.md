@@ -54,6 +54,7 @@ Confirm before analyzing. Ask only what's missing, at most 2–3 questions:
    | Requirements / BRD | numbered requirements | rules, restrictions, dependencies between requirements |
    | API contract (OpenAPI/Swagger) | endpoints + schemas | per-field validations, required/optional, formats, auth/restrictions, status codes |
    | State diagram / workflow | states + events | the state model, legal/illegal transitions, guards |
+   | Business-model KB artifact (`docs/business-model/` flow/entity/decision file) | the artifact's tables + IDs | rules/transitions with sources already traced; open questions + `⚠️ Assumption` items carry over as flags |
    | Business-rules table | the rules | the rule set (candidate decision table) |
    | Loose description / partial feature | the prose | best-effort extraction; gaps become Open questions — heaviest flagging |
 
@@ -222,3 +223,4 @@ Good response: the structured document above — concise, sourced, with the genu
 - Risk-rank the conditions before designing → `qa/manual/test-strategy`
 - Build the basis from a live app when docs are thin → Exploration mode in `qa/manual/agents/qa-manual-test-designer` + `qa/manual/exploratory-charter-writer`
 - File defects noticed while analyzing → `qa/manual/bug-report-writer`
+- Cross-feature conflicts / the whole-project business model (this skill is single-feature) → `business-analysis/skills/ba-feature-conflict-sweep` + `business-analysis/agents/business-analyst`

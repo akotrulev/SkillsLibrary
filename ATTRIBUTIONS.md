@@ -69,6 +69,7 @@ The remaining 2 obra/superpowers skills in `engineering-practices/` (`requesting
 | communication-user-story-writer             | `communication/user-story-writer/`         |
 | communication-stakeholder-updates           | `communication/stakeholder-updates/`       |
 | design-brand-intake                          | `design/brand-intake/`                     |
+| ba-* (5 skills) + business-analyst agent     | `business-analysis/`                       |
 | design-iconography                           | `design/iconography/`                      |
 
 ## Refreshed from installed plugins
@@ -78,6 +79,8 @@ The remaining 2 obra/superpowers skills in `engineering-practices/` (`requesting
 | `design/frontend-design/`  | `claude-plugins-official/frontend-design` (installed plugin `frontend-design/skills/frontend-design`) | 2026-07-11 | Session F (frontend design-craft). The vendored copy was a superseded 41-line version of the anthropics/skills original; refreshed against the newer installed-plugin content (three-AI-look calibration, signature-element, hero-as-thesis, brainstorm→critique→build→critique two-pass token system, full "writing in design" section, subject-grounding) and folded in a Composition & atmosphere section (design gap #7). Repo frontmatter conventions preserved (repo-style trigger/anti-trigger `description`, ≤1024 chars; upstream `license:` line not carried over — original authors retain copyright per the tables above). |
 
 ## Notes
+
+- `business-analysis/` (locally authored, 2026-07-12) borrows *structure and ideas*, no copied text: the KB protocol ports Cline's [Memory Bank](https://docs.cline.bot/features/memory-bank) shape (read-all-first / update-on-trigger / stable-vs-dynamic tiers); the workflow→atomic→quality layering echoes [45ck/business-analysis-skills](https://github.com/45ck/business-analysis-skills); the `[TBD]`/`⚠️ Assumption` annotation grammar and ID-prefix traceability follow [saruno/business-analyst-skills](https://github.com/saruno/business-analyst-skills)' brd-agent conventions; the conflict taxonomy derives from the published feature-interaction literature (FSARC, Shehata/Eberlein, KAOS — cited in `business-analysis/RESEARCH.md`).
 
 - Imported skill `name:` fields in frontmatter were left unchanged — they keep their upstream identifiers (e.g., `vercel-react-best-practices`, `test-driven-development`). If you adopt the project's `<domain>-<skill>` convention, rename in a follow-up pass.
 - If any upstream skill conflicts with the global rules in `CLAUDE.md`, the global rules win — call out the conflict in usage.
