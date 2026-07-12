@@ -220,6 +220,92 @@ Grafana deprecated Promtail (announced Feb 2025, EOL ~Mar 2026) in favor of **Gr
 
 ---
 
+## Phase 6 — Trace-ID correlation contract (parsing correctness)
+
+The three stacks emit three different trace-id JSON field names (Serilog `TraceId` · Logback MDC `traceId`? · pino `trace_id`), and the two derived-field regexes in `loki-tempo-setup` (`"trace_id":"(\w+)"`) and `grafana-dashboards` (`"traceId":"(\w+)"`) contradict each other — each matches at most one stack. Fix by declaring **one canonical contract** and making every regex match every stack.
+
+### 6.1 Verify the actual emitted field names (web search — do NOT guess)
+
+- [x] Web-verify the exact default JSON field names each stack emits:
+  - Serilog `Enrich.WithSpan()` / `Serilog.Enrichers.Span` — expected `TraceId` / `SpanId` (PascalCase).
+  - `io.opentelemetry.instrumentation.logback.mdc.v1_0.OpenTelemetryAppender` — verify whether the MDC keys are `trace_id`/`span_id` (snake_case) or `traceId`/`spanId`. The Java skill currently claims **both** in different sentences (~lines 8, 75, 199) — fix whichever is wrong.
+  - `@opentelemetry/instrumentation-pino` — expected `trace_id` / `span_id`.
+- [x] **File:** each `structured-logging-{dotnet,java,node}/SKILL.md` — add a short "**Trace-correlation contract**" note stating the exact JSON field name that stack emits (verified, not assumed), and that this is the name the Loki derived field must match.
+
+### 6.2 One canonical derived-field regex everywhere
+
+- [x] Decide the canonical regex that matches all three stacks' emissions, e.g.:
+  ```
+  Regex: "(?:trace_?[iI]d|TraceId)"\s*:\s*"([0-9a-fA-F]{32})"
+  ```
+  (W3C trace ids are 32 hex chars — `\w+` is too loose and can capture garbage.) Adjust to whatever 6.1 verified.
+- [x] **File:** `observability/loki-tempo-setup/SKILL.md` — "Loki derived fields (logs → traces)" section (~line 314): replace the regex with the canonical one; add a per-stack field-name table (dotnet → `TraceId`, java → …, node → `trace_id`); note the derived field is configured with an **internal link** (`datasourceUid` of Tempo, query `${__value.raw}`).
+- [x] **File:** `observability/grafana-dashboards/SKILL.md` — "Logs → traces via derived fields" section (~line 91): same canonical regex + point at `loki-tempo-setup` as the owning definition (link, don't duplicate the table).
+- [x] **File:** `observability/logql-promql/SKILL.md` (~line 178 `line_format`, ~line 249): make the field-name usage consistent with the per-stack table (`| json` field names differ per stack — say so once).
+- [x] **Verify:** `grep -rn 'Regex' observability/` shows the identical canonical regex in both files; no bare `"trace_id":"(\w+)"` / `"traceId":"(\w+)"` remains.
+
+### 6.3 Close the traceability loop: Tempo trace → logs
+
+Currently only logs→traces (derived fields) and metrics→traces (exemplars) are wired. The third leg — **trace → logs** — is missing.
+
+- [x] **File:** `observability/loki-tempo-setup/SKILL.md` — in "Cross-store navigation", add a third wiring: Tempo data source **`tracesToLogsV2`** config (target Loki datasource, `tags: [service]` mapped to the Loki `service` label, `spanStartTimeShift: -5m` / `spanEndTimeShift: 5m`, `filterByTraceID: true`). Show the provisioned-datasource YAML shape (data sources are declared via Helm/Terraform per the existing rule).
+- [x] **File:** `observability/grafana-dashboards/SKILL.md` — mention the third leg so the "complete loop" reads: alert → dashboard → exemplar → trace → logs → (derived field) back to trace.
+- [x] Also add `tracesToMetrics` as a one-line optional mention (span → RED metrics of that service).
+- [x] **Verify:** `grep -rn "tracesToLogs" observability/` hits both files.
+- [x] Commit: `Trace-ID correlation contract: canonical derived-field regex + trace→logs leg`.
+
+---
+
+## Phase 7 — Multi-service dashboards + 4xx/5xx discipline
+
+### 7.1 Fleet / multi-service overview dashboard
+
+- [ ] **File:** `observability/grafana-dashboards/SKILL.md` — add a "**Fleet overview (multi-service)**" section after the standard RED template:
+  - Purpose: one dashboard answering "which service is unhealthy right now" across all services; drill into the per-service RED dashboard via **data links** on the service name.
+  - Panel set: RED-by-service **table** (req/s, 5xx %, p95 — one row per service, sorted by error rate desc, thresholds coloring); top-N error-rate time-series; **Tempo service-graph panel** (`nodeGraph`, fed by the `metrics_generator.service_graphs` processor already enabled in `loki-tempo-setup`); active-alerts panel grouped by service.
+  - `$service` becomes multi-value (`includeAll: true`) on the fleet dashboard; per-service dashboard keeps single-value.
+  - Data-link pattern: table cell → `/d/<per-service-uid>?var-service=${__data.fields.service}`.
+- [ ] Update Generation steps + Rules to name the two-tier model: **one fleet overview + one RED dashboard per service**, linked both ways.
+
+### 7.2 4xx vs 5xx discipline
+
+- [ ] **File:** `observability/grafana-dashboards/SKILL.md` — RED template table: split the single error panel into **5xx rate %** and **4xx rate %** (separate series, separate panels or one panel with two queries). Add the discipline note: **5xx = server fault → alert; 4xx = client behavior → observe, don't page** — except a 4xx *spike* (rate anomaly vs baseline, or 401/403 surge = credential-stuffing / broken-auth signal → tactical alert, and a 404 surge after deploy = broken route/link).
+- [ ] **File:** `observability/logql-promql/SKILL.md` — add canonical recipes near the existing error-ratio idiom: 5xx ratio by service/route, 4xx ratio excluding expected noise (`status!~"401|403"` variant and the opposite security-watch variant), and the equivalent LogQL for apps whose only signal is logs.
+- [ ] **Verify:** `grep -rn '4\.\.' observability/` hits grafana-dashboards + logql-promql recipes (not just the old single line).
+
+### 7.3 Traceability column on tables
+
+- [ ] **File:** `observability/grafana-dashboards/SKILL.md` — "Top slow routes" and fleet tables gain a data-link column into Tempo search (`service` + `http_route` pre-filled) so table rows are one click from traces. State the loop explicitly in one sentence in the Exemplars section.
+- [ ] Commit: `Fleet overview dashboards + 4xx/5xx discipline`.
+
+---
+
+## Phase 8 — Unhealthy-service alerting
+
+### 8.1 Health-alert pack (rule syntax)
+
+- [ ] **File:** `observability/logql-promql/SKILL.md` — add a "**Service-health alert pack**" section (PromQL rules, YAML shape ready for the rule deployment path in `prometheus-mimir-setup`):
+  - `up == 0` (scrape target down) **and** `absent(up{service="X"})` (target vanished — the alert people forget).
+  - Kubernetes: restart loops (`increase(kube_pod_container_status_restarts_total[15m]) > 3`), pods not ready (`kube_pod_status_ready{condition="true"} == 0` sustained), deployment replica mismatch.
+  - Blackbox probe failure (`probe_success == 0`) as the outside-in check.
+  - 5xx burn-rate pair (fast 1h / slow 6h) — reference the existing burn-rate row in grafana-dashboards, keep the math here.
+  - Rule hygiene: every rule has `for:`, `severity` label, `runbook_url` annotation; alert on symptoms, not causes.
+- [ ] **Verify:** `grep -n "absent(" observability/logql-promql/SKILL.md` hits.
+
+### 8.2 Alertmanager (routing) in `prometheus-mimir-setup`
+
+- [ ] **File:** `observability/prometheus-mimir-setup/SKILL.md` — replace the "Alertmanager routing / on-call escalation — out of scope" line (~line 25) with a new "**Alertmanager**" section: deployed by `kube-prometheus-stack` (or Mimir's built-in multi-tenant Alertmanager), routing tree by `severity` + `service` labels, grouping (`group_by: [alertname, service]`), inhibition (critical inhibits warning for same service), and a **dead-man's-switch** (`Watchdog` always-firing alert → external heartbeat) so silence itself alerts. Receivers (Slack / PagerDuty / Opsgenie) shown as config shape, not vendor tutorials.
+- [ ] Keep the scope fence: rule *syntax* stays in `logql-promql`; this skill owns rule/router *deployment*.
+- [ ] **Verify:** `grep -rn "out of scope" observability/prometheus-mimir-setup/SKILL.md` returns nothing about Alertmanager.
+
+### 8.3 Sweep the agents + handoffs
+
+- [ ] **Files:** `observability/agents/observability-engineer-{dotnet,java,node}.md` — Phase 4 (Query & dashboards) wording gains "fleet overview + per-service RED dashboards, health-alert pack, Alertmanager routing"; Phase 5 review checklist gains "trace→logs leg wired; derived-field regex matches this stack's actual field name; 4xx/5xx split; dead-man's-switch present".
+- [ ] Cross-check Handoffs sections across the 6 stack-agnostic/setup skills still resolve (run the global verification loops below).
+- [ ] Commit: `Unhealthy-service alerting: health-alert pack + Alertmanager routing`.
+
+---
+
 ## Global verification (run after every phase)
 
 ```bash

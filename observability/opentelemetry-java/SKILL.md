@@ -144,7 +144,7 @@ The bridge applies OTel naming conventions automatically (`orders.created` → P
 
 ### Log correlation
 
-The `OpenTelemetryAppender` wrapper appender (see `observability/structured-logging-java`) injects `traceId` / `spanId` into MDC for every log emitted inside an active span. No additional wiring here.
+The `OpenTelemetryAppender` wrapper appender (see `observability/structured-logging-java`) injects `trace_id` / `span_id` into MDC (its default keys) for every log emitted inside an active span. No additional wiring here.
 
 ## Sampling
 
@@ -208,7 +208,7 @@ For SDK-only, use `io.opentelemetry:opentelemetry-sdk-extension-autoconfigure` a
 2. Add the agent JAR to the Dockerfile (or to the deployment manifest) with the env vars above.
 3. Add the annotation library + Micrometer bridge dependencies in `build.gradle`.
 4. Add `@WithSpan` to ~5 high-value domain methods (the ones you'd want to debug in prod first).
-5. Confirm `observability/structured-logging-java` is in place; the `OpenTelemetryAppender` wrapper appender (see `observability/structured-logging-java`) provides `traceId`/`spanId` MDC.
+5. Confirm `observability/structured-logging-java` is in place; the `OpenTelemetryAppender` wrapper appender (see `observability/structured-logging-java`) provides `trace_id`/`span_id` MDC.
 6. Local smoke: docker-compose with the app + Collector + Tempo + Prometheus + Grafana; hit a few endpoints; confirm spans in Tempo, metrics in Prometheus, logs linked by trace ID in Grafana.
 
 ## Handoffs

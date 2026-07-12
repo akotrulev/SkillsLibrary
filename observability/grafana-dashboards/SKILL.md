@@ -88,16 +88,18 @@ Without exemplars, latency spikes are observable but not investigable. Always wi
 
 ## Logs → traces via derived fields
 
-In the Loki data source config, define **derived fields** that turn `traceId="..."` (or `trace_id`) in a log line into a clickable link:
+In the Loki data source config, define a **derived field** turning the trace id in a log line into a clickable link. The three stacks emit different field names (dotnet `TraceId` · java/node `trace_id`), so use the **canonical cross-stack regex** — owned and explained in `observability/loki-tempo-setup` (trace-correlation contract):
 
 ```
 Field name: trace_id
-Regex:      "traceId":"(\w+)"
+Regex:      "(?:TraceId|trace_id)"\s*:\s*"([0-9a-f]{32})"
 URL:        ${__value.raw}
-Datasource: Tempo
+Datasource: Tempo   (internal link — datasourceUid)
 ```
 
 Now every error log → one click → the failing trace. This is the single biggest force-multiplier in the stack.
+
+The reverse leg — **trace → logs** via the Tempo data source's `tracesToLogsV2` — is wired in `observability/loki-tempo-setup`. With exemplars + derived fields + `tracesToLogsV2` all present, the loop closes: alert → dashboard → exemplar → trace → that span's logs → back to the trace.
 
 ## Standard RED dashboard (template)
 

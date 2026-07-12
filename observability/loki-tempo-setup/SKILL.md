@@ -305,22 +305,55 @@ The Collector lets you change sampling, batching, and routing **without redeploy
 
 ## Cross-store navigation
 
-Two wirings turn three independent stores into one investigative loop:
+Three wirings turn three independent stores into one investigative loop:
 
 ### Exemplars (metrics → traces)
 
-Prometheus stores exemplars (a `trace_id` per histogram sample). Grafana renders dots on latency histograms; clicking jumps to that trace in Tempo. Wire by setting the Tempo data source's exemplar link config (a one-time Grafana config — see `observability/grafana-dashboards`).
+Prometheus stores exemplars (a `trace_id` per histogram sample). Grafana renders dots on latency histograms; clicking jumps to that trace in Tempo. Wire by setting the Tempo data source's exemplar link config (a one-time Grafana config — see `observability/grafana-dashboards`). Requires exemplar storage enabled on the metrics backend (`observability/prometheus-mimir-setup`).
 
 ### Loki derived fields (logs → traces)
 
+**The trace-correlation contract.** The three stacks emit the trace id under different JSON field names — the derived-field regex must match all of them, or "jump to trace" silently breaks for the stacks it misses:
+
+| Stack | Emitting library | JSON field |
+|---|---|---|
+| dotnet | Serilog + `Serilog.Enrichers.Span` | `TraceId` |
+| java | OTel `logback-mdc-1.0` (default MDC keys) | `trace_id` |
+| node | pino + `@opentelemetry/instrumentation-pino` | `trace_id` |
+
+The **canonical cross-stack regex** (use exactly this in the Loki data source's derived field — one config serves all stacks):
+
 ```
-Field name: trace_id
-Regex: "trace_id":"(\w+)"
-URL:   ${__value.raw}
-Datasource: Tempo
+Name:  trace_id
+Regex: "(?:TraceId|trace_id)"\s*:\s*"([0-9a-f]{32})"
 ```
 
-Every log line with a `trace_id` becomes a clickable link to the trace. Combined with `observability/structured-logging-{stack}` (which emits `trace_id` on every log), the experience is: click an error → see the trace → click a span → see the slow DB query.
+W3C trace ids are exactly 32 lowercase hex chars — anchor on that, not `\w+` (which happily captures request ids and other garbage). Configure it as an **internal link**: set `datasourceUid` to the Tempo data source and the query to `${__value.raw}` (in provisioning YAML: `derivedFields: [{ name: trace_id, matcherRegex: ..., datasourceUid: tempo, url: "${__value.raw}" }]`).
+
+Every log line with a trace id becomes a clickable link to the trace. Combined with `observability/structured-logging-{stack}` (which emits the field per the contract table), the experience is: click an error → see the trace → click a span → see the slow DB query.
+
+### Tempo trace → logs (`tracesToLogsV2`)
+
+The third leg — from a span back to the logs that service wrote during that span. Configure on the **Tempo data source**:
+
+```yaml
+# grafana datasource provisioning (Helm values / Terraform)
+- name: Tempo
+  type: tempo
+  uid: tempo
+  url: http://tempo-query-frontend:3100
+  jsonData:
+    tracesToLogsV2:
+      datasourceUid: loki
+      spanStartTimeShift: "-5m"      # pad the window — logs can lag the span
+      spanEndTimeShift: "5m"
+      tags: [{ key: "service.name", value: "service" }]   # span attr → Loki label
+      filterByTraceID: true          # narrow to lines carrying this trace id
+    tracesToMetrics:                 # optional: span → that service's RED metrics
+      datasourceUid: prometheus
+```
+
+`tags` maps the span's `service.name` resource attribute to the Loki `service` stream label — the only join key needed because the label set is low-cardinality by design. With all three legs wired the loop closes in both directions: metric exemplar → trace → logs → (derived field) back to trace.
 
 ## Multi-tenant
 
@@ -356,7 +389,7 @@ The skill's recipes work against self-hosted or Grafana Cloud — only the endpo
 - High-cardinality stuff in the log body, parsed with `| json`
 - OTel Collector is the central hub; configurable sampling/batching/routing without app changes
 - Tempo `metrics_generator` enabled — free RED metrics + service graphs
-- Exemplars + Loki derived fields wired so cross-store navigation works
+- All three cross-store legs wired: exemplars (metrics→traces), Loki derived fields with the canonical cross-stack regex (logs→traces), `tracesToLogsV2` (traces→logs)
 - One log forwarder per cluster (Grafana Alloy / Vector / Fluent Bit) — never two
 - Grafana data sources defined declaratively via Helm / Terraform — reviewable in PR
 
@@ -380,8 +413,8 @@ The skill's recipes work against self-hosted or Grafana Cloud — only the endpo
 3. Deploy **Tempo** (Helm `grafana/tempo`); point to object storage; enable `metrics_generator`.
 4. Deploy **OTel Collector** with receivers + processors + exporters config; route traces → Tempo, metrics → Prometheus.
 5. Deploy the log forwarder; restrict labels to the low-cardinality set; ship stdout JSON to Loki.
-6. Wire **Grafana data sources** (Loki, Tempo, Prometheus); set up **exemplars** on Prom→Tempo and **derived fields** on Loki→Tempo.
-7. Smoke: hit an app, find its logs in Loki by `{service=..., env=...}`, click `trace_id` to jump to Tempo, see metrics with exemplars.
+6. Wire **Grafana data sources** (Loki, Tempo, Prometheus); set up **exemplars** on Prom→Tempo, **derived fields** (canonical cross-stack regex) on Loki→Tempo, and **`tracesToLogsV2`** on Tempo→Loki.
+7. Smoke the full loop: hit an app, find its logs in Loki by `{service=..., env=...}`, click the trace id to jump to Tempo, jump from a span back to its logs, see metrics with exemplars.
 8. Add **retention monitoring** + **cardinality monitoring** queries to a "stack health" dashboard.
 
 ## Handoffs

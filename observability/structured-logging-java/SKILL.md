@@ -5,7 +5,7 @@ description: Use when the user asks to set up or refactor logging in a Java 21 /
 
 # Observability — Structured Logging (Java 21 / Spring Boot 3)
 
-Sets up SLF4J + Logback as the logging stack in a Java 21 + Spring Boot 3 service. Logs are JSON via `logstash-logback-encoder`, written with placeholder logging (never `+` concatenation or `String.format`), enriched with MDC (`traceId`, `spanId`, `tenantId`, `requestId`), and shipped to Loki for prod / stdout JSON for everywhere.
+Sets up SLF4J + Logback as the logging stack in a Java 21 + Spring Boot 3 service. Logs are JSON via `logstash-logback-encoder`, written with placeholder logging (never `+` concatenation or `String.format`), enriched with MDC (`trace_id`, `span_id`, `tenantId`, `requestId`), and shipped to Loki for prod / stdout JSON for everywhere.
 
 ## Version detection
 
@@ -72,7 +72,7 @@ Pin the OTel Logback MDC appender to the same release train as the rest of your 
         <logLevel><fieldName>level</fieldName></logLevel>
         <loggerName><fieldName>logger</fieldName></loggerName>
         <threadName><fieldName>thread</fieldName></threadName>
-        <mdc/>                                  <!-- emits MDC keys flat: traceId, spanId, tenantId, ... -->
+        <mdc/>                                  <!-- emits MDC keys flat: trace_id, span_id, tenantId, ... -->
         <stackTrace>
           <throwableConverter class="net.logstash.logback.stacktrace.ShortenedThrowableConverter">
             <maxDepthPerThrowable>30</maxDepthPerThrowable>
@@ -94,7 +94,7 @@ Pin the OTel Logback MDC appender to the same release train as the rest of your 
     </encoder>
   </appender>
 
-  <!-- Bridge OTel span context (traceId, spanId) into MDC for every log.
+  <!-- Bridge OTel span context (trace_id, span_id) into MDC for every log.
        OpenTelemetryAppender is a WRAPPER appender: it decorates the real appender. -->
   <appender name="OTEL" class="io.opentelemetry.instrumentation.logback.mdc.v1_0.OpenTelemetryAppender">
     <appender-ref ref="JSON"/>
@@ -121,7 +121,7 @@ For local dev a colorized console pattern is nicer than JSON. Use a Spring profi
 ```xml
 <springProfile name="local">
   <appender name="PRETTY" class="ch.qos.logback.core.ConsoleAppender">
-    <encoder><pattern>%d{HH:mm:ss.SSS} %-5level [%X{traceId:-}] %logger{20} - %msg%n</pattern></encoder>
+    <encoder><pattern>%d{HH:mm:ss.SSS} %-5level [%X{trace_id:-}] %logger{20} - %msg%n</pattern></encoder>
   </appender>
   <root level="INFO"><appender-ref ref="PRETTY"/></root>
 </springProfile>
@@ -196,7 +196,9 @@ The exception **must be the last argument**, not a placeholder substitution — 
 
 ## Correlation with traces
 
-The `OpenTelemetryAppender` wrapper appender copies `trace_id` / `span_id` from the active OTel context into MDC. Every log emitted inside an active span gets `traceId` and `spanId` JSON fields. Loki + Tempo wire these to "Jump to trace" in Grafana.
+The `OpenTelemetryAppender` wrapper appender copies the active OTel span context into MDC under its **default keys `trace_id`, `span_id`, `trace_flags`** (snake_case — customizable via `<traceIdKey>`/`<spanIdKey>`, but don't: the defaults are the library-wide contract). With `<mdc/>` in the encoder, every log emitted inside an active span gets `trace_id` and `span_id` JSON fields. Loki + Tempo wire these to "Jump to trace" in Grafana.
+
+**Trace-correlation contract:** this stack emits the trace id as the JSON field **`trace_id`** (32 lowercase hex chars). The Loki derived-field regex in `observability/loki-tempo-setup` must match this exact name — it does, via the canonical cross-stack regex defined there.
 
 No code changes needed in callers once the appender is registered.
 
@@ -236,7 +238,7 @@ Or filter at the source — pass DTO projections to the logger, never the entity
 - Output is JSON in every environment except `local` (where colorized console is allowed)
 - Service name / version / environment as static fields in every log line
 - `<mdc/>` provider in the encoder so MDC keys are top-level JSON fields
-- `OpenTelemetryAppender` wrapper appender wired up so `traceId` / `spanId` ride every log
+- `OpenTelemetryAppender` wrapper appender wired up so `trace_id` / `span_id` ride every log (default MDC keys — never rename them)
 - Loki labels are low-cardinality (`service`, `environment`, `level`)
 - Chatty namespaces (`org.springframework.*`, `org.hibernate.*`, `org.apache.kafka.*`) capped at `WARN`
 - MDC keys cleared at the end of every request via try-with-resources / `MDCCloseable`
@@ -263,7 +265,7 @@ Or filter at the source — pass DTO projections to the logger, never the entity
 4. Add the `RequestIdFilter` (or equivalent) to populate `requestId` for every request.
 5. If OTel is in the project, the `OpenTelemetryAppender` wrapper appender is mandatory.
 6. Sweep the codebase for `+` concatenation in log calls and `e.toString()`; convert to placeholders + exception arg.
-7. Smoke locally — `curl` a few endpoints, confirm JSON includes `traceId`, `spanId`, `requestId`, `service.name`.
+7. Smoke locally — `curl` a few endpoints, confirm JSON includes `trace_id`, `span_id`, `requestId`, `service.name`.
 
 ## Handoffs
 

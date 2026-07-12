@@ -162,6 +162,8 @@ _logger.LogInformation("Processing payment for {OrderId}", id);
 // Emitted JSON includes: "TraceId":"a1b2c3...", "SpanId":"d4e5f6..."
 ```
 
+**Trace-correlation contract:** this stack emits the trace id as the JSON field **`TraceId`** (PascalCase — `Serilog.Enrichers.Span`'s default; 32 lowercase hex chars). Do not rename it. The Loki derived-field regex in `observability/loki-tempo-setup` is the canonical cross-stack regex and matches `TraceId` alongside the other stacks' `trace_id`.
+
 ## Levels & cardinality
 
 | Level | When |

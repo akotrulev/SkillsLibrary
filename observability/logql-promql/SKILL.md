@@ -175,10 +175,10 @@ Always start with a tight `{...}` selector. Loki streams are cheap when scoped t
 {service="orders", env="prod"}
   | json
   | level="error"
-  | line_format "{{.timestamp}} {{.message}} traceId={{.trace_id}}"
+  | line_format "{{.timestamp}} {{.message}} trace_id={{.trace_id}}"
 ```
 
-`| json` parses the JSON body and exposes keys as filterable labels for the rest of the query. `line_format` reshapes the output for the panel.
+`| json` parses the JSON body and exposes keys as filterable labels for the rest of the query. `line_format` reshapes the output for the panel. Field names are whatever the stack's logging skill emits — trace id is `trace_id` on java/node but `TraceId` on dotnet (see the trace-correlation contract in `observability/loki-tempo-setup`); match your filter to the stack.
 
 ### Metric queries from logs
 
@@ -193,7 +193,7 @@ Useful when no metric exists for the thing you want to count, **but** consider e
 
 ### Cross-store: log → trace
 
-When a log line has `trace_id`, the dashboard's derived field (set in `observability/grafana-dashboards`) turns it into a Tempo link. The LogQL itself doesn't need anything special — just emit `trace_id` in the structured log (which `observability/structured-logging-{stack}` already does).
+When a log line has a trace id, the Loki data source's derived field (the canonical cross-stack regex — owned by `observability/loki-tempo-setup`) turns it into a Tempo link. The LogQL itself doesn't need anything special — the structured-logging skills already emit the field per the contract.
 
 ### Filtering noisy patterns
 

@@ -5,7 +5,7 @@ description: Use when the user asks to set up or refactor logging in a Node 24 (
 
 # Observability — Structured Logging (Node 24 / TypeScript)
 
-Sets up **pino** as the default logging stack for Node 24 + TypeScript services (NestJS or Express). Logs are JSON to stdout, enriched with `requestId`, `traceId`, `spanId` via `AsyncLocalStorage`, with built-in `redact` for secrets. Winston is documented as a fallback when an ecosystem dependency forces it.
+Sets up **pino** as the default logging stack for Node 24 + TypeScript services (NestJS or Express). Logs are JSON to stdout, enriched with `requestId`, `trace_id`, `span_id` via `AsyncLocalStorage`, with built-in `redact` for secrets. Winston is documented as a fallback when an ecosystem dependency forces it.
 
 ## Version detection
 
@@ -174,6 +174,8 @@ registerInstrumentations({
 ```
 
 With this registered, every log emitted inside an active span gets `trace_id` and `span_id` injected automatically.
+
+**Trace-correlation contract:** this stack emits the trace id as the JSON field **`trace_id`** (`@opentelemetry/instrumentation-pino`'s default; 32 lowercase hex chars). Do not rename it. The Loki derived-field regex in `observability/loki-tempo-setup` is the canonical cross-stack regex and matches it.
 
 ## Writing logs
 
