@@ -1,6 +1,6 @@
 ---
 name: data-postgresql
-description: Use when designing tables, modeling relationships, securing data (roles/RLS/audit), writing queries or migrations, choosing indexes, caching, or tuning performance on PostgreSQL from a .NET / Java / Node backend. Triggers: "design a Postgres schema", "multi-tenant RLS", "this query is slow", "add an index", "audit who changed this row", "set up Postgres pooling". Pick the topic in the routing table, then read its reference file end-to-end. Do NOT use for SQL Server (`data/sqlserver`), MySQL (`data/mysql`), NoSQL stores, cross-engine modeling decisions (`data/_shared/schema-design`), or writing DB tests (`qa/<stack>/skills/db-testing`).
+description: Use when designing tables, modeling relationships, securing data (roles/RLS/audit), writing queries or migrations, choosing indexes (incl. pgvector / vector search for embeddings & RAG), caching, or tuning performance on PostgreSQL from a .NET / Java / Node backend. Triggers: "design a Postgres schema", "multi-tenant RLS", "this query is slow", "add an index", "pgvector", "vector search", "store embeddings in Postgres", "audit who changed this row", "set up Postgres pooling". Pick the topic in the routing table, then read its reference file end-to-end. Do NOT use for SQL Server (`data/sqlserver`), MySQL (`data/mysql`), NoSQL stores, cross-engine modeling decisions (`data/_shared/schema-design`), or writing DB tests (`qa/<stack>/skills/db-testing`).
 ---
 
 # Data — PostgreSQL
@@ -13,7 +13,7 @@ One registered skill, five topic references. This file routes and holds the rule
 |------|----------|
 | `references/data-modeling.md` | New tables/schemas, relationships, foreign keys, constraints, enum strategy, `jsonb` boundaries, history/temporal tables |
 | `references/security.md` | Roles & grants, row-level security / multi-tenant isolation, encryption, TLS, audit logging / edit trails |
-| `references/indexing.md` | Choosing or fixing indexes, composite ordering, partial/covering/expression indexes, index maintenance & bloat |
+| `references/indexing.md` | Choosing or fixing indexes, composite ordering, partial/covering/expression indexes, **vector search / pgvector (HNSW·IVFFlat, embeddings, RAG)**, index maintenance & bloat |
 | `references/performance.md` | Slow queries, EXPLAIN reading, vacuum/autovacuum, partitioning, memory config, lock contention |
 | `references/caching.md` | Materialized views, LISTEN/NOTIFY invalidation, prepared-statement/plan caching, buffer-cache mental model |
 

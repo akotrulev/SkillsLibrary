@@ -1,6 +1,6 @@
 ---
 name: data-schema-design
-description: Use when the user is designing a data model across any SQL or document engine — entities, relationships, identifiers, timestamps, soft delete, multi-tenancy, audit trails, money, enums — before reaching for engine-specific DDL. Triggers: "design a schema for X", "embed or reference", "natural vs surrogate key", "soft delete strategy", "multi-tenant model", "audit trail design", "money in a DB". Do NOT use for engine-specific syntax (use `data/<db>`) or query optimization (use `data/_shared/query-optimization`).
+description: Use when the user is choosing which database engine fits a workload, or designing a data model across any SQL or document engine — engine selection, entities, relationships, identifiers, timestamps, soft delete, multi-tenancy, audit trails, money, enums — before reaching for engine-specific DDL. Triggers: "which database for this workload", "do I need Mongo / Redis / a vector DB or does Postgres suffice", "design a schema for X", "embed or reference", "natural vs surrogate key", "soft delete strategy", "multi-tenant model", "audit trail design", "money in a DB". Do NOT use for engine-specific syntax (use `data/<db>`) or query optimization (use `data/_shared/query-optimization`).
 ---
 
 # Data — Schema Design (cross-engine)
@@ -9,6 +9,7 @@ First-pass schema decisions that apply across SQL and document engines. Identifi
 
 ## When to use
 
+- **Engine selection** — which database fits this workload (or whether Postgres already suffices) before committing to one
 - New entity model before picking engine DDL
 - Identifier choice (surrogate vs natural; autoincrement vs UUID vs ULID/UUIDv7)
 - Timestamp conventions (`created_at`, `updated_at`, time zones, event time vs ingest time)
