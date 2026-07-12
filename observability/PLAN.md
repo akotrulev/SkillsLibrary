@@ -182,20 +182,20 @@ Grafana deprecated Promtail (announced Feb 2025, EOL ~Mar 2026) in favor of **Gr
 
 **Before writing: research existing skills first** (per repo policy) — web-search for well-regarded Prometheus/Mimir setup guides and skill implementations and borrow structure. Then mirror the structure of `observability/loki-tempo-setup/SKILL.md` exactly (same section order: frontmatter → intro → When to use → When NOT to use → Inputs needed → Architecture → main content → Rules → What NOT to do → Generation steps → Handoffs).
 
-- [ ] Create `observability/prometheus-mimir-setup/SKILL.md` with frontmatter `name: observability-prometheus-mimir-setup` and a description in the house format (Use when… Triggers: … Do NOT use for…).
-- [ ] Required content:
+- [x] Create `observability/prometheus-mimir-setup/SKILL.md` with frontmatter `name: observability-prometheus-mimir-setup` and a description in the house format (Use when… Triggers: … Do NOT use for…).
+- [x] Required content:
   - Prometheus (single-cluster default) vs **Mimir** (multi-cluster / long-retention / HA) decision table.
   - Scrape config vs OTLP remote-write from the OTel Collector (this library's default path — the Collector already exports `prometheusremotewrite`; align with the config in `loki-tempo-setup`).
   - **Exemplar storage** enablement (`--enable-feature=exemplar-storage` / Mimir equivalent) — required by the exemplar wiring `grafana-dashboards` depends on.
   - Recording/alerting **rule deployment** (rule files in Git, loaded via Helm/sidecar; the rules themselves are `logql-promql`'s domain — link, don't duplicate).
   - Retention + cardinality limits; object storage for Mimir.
   - Kubernetes Helm sample values (`prometheus-community/kube-prometheus-stack` or `grafana/mimir-distributed`) in the same style as the Loki/Tempo samples.
-- [ ] Handoffs must link: `observability/logql-promql` (query/rule syntax), `observability/grafana-dashboards` (panels/exemplar config), `observability/loki-tempo-setup` (Collector hub), `devops/kubernetes` + `devops/iac-bicep-terraform`.
-- [ ] Update the other skills to point at it:
+- [x] Handoffs must link: `observability/logql-promql` (query/rule syntax), `observability/grafana-dashboards` (panels/exemplar config), `observability/loki-tempo-setup` (Collector hub), `devops/kubernetes` + `devops/iac-bicep-terraform`.
+- [x] Update the other skills to point at it:
   - `loki-tempo-setup` "When NOT to use" ~line 24: replace "(related but separate skill)" with "→ `observability/prometheus-mimir-setup`".
   - `grafana-dashboards` and `logql-promql`: add it to Handoffs.
-- [ ] **Verify:** `grep -rn "separate skill" observability/` returns nothing; new SKILL.md is ≤ ~350 lines (match siblings).
-- [ ] Commit: `Add prometheus-mimir-setup skill`.
+- [x] **Verify:** `grep -rn "separate skill" observability/` returns nothing; new SKILL.md is ≤ ~350 lines (match siblings).
+- [x] Commit: `Add prometheus-mimir-setup skill`.
 
 ---
 

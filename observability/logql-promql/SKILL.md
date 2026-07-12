@@ -288,6 +288,7 @@ The log itself carries `user_id`, `tenant_id`, etc. as JSON fields:
 
 ## Handoffs
 
+- Metrics backend setup + recording/alerting-rule deployment → `observability/prometheus-mimir-setup`
 - Dashboard layout → `observability/grafana-dashboards`
 - What's in the metrics / log streams → `observability/opentelemetry-{stack}` + `observability/structured-logging-{stack}`
 - SLO math / KPI definitions → `qa/manual/quality-metrics`

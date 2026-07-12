@@ -21,7 +21,7 @@ Wires the **log and trace** halves of the Grafana stack — Loki for logs, Tempo
 - Dashboard layout → `observability/grafana-dashboards`
 - App-side log shape → `observability/structured-logging-{dotnet,java,node}`
 - App-side instrumentation → `observability/opentelemetry-{stack}`
-- Prometheus / Mimir for metrics — out of scope here (related but separate skill)
+- Prometheus / Mimir for metrics → `observability/prometheus-mimir-setup`
 
 ## Inputs needed
 

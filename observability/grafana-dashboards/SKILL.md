@@ -191,6 +191,7 @@ Safe `by`/`group by` dimensions: `service`, `env`, `http_route`, `http_method`, 
 ## Handoffs
 
 - LogQL / PromQL queries → `observability/logql-promql`
+- Metrics backend + exemplar-storage enablement → `observability/prometheus-mimir-setup`
 - Instrumentation (what shapes the data) → `observability/opentelemetry-{dotnet,java,node}`
 - Structured logging fields → `observability/structured-logging-{dotnet,java,node}`
 - Pipeline-side deploy annotations → `devops/{github-actions,gitlab-ci,azure-pipelines}`
