@@ -1,6 +1,6 @@
 ---
 name: qa-security-testing-zap-automation-framework
-description: **ZAP by Checkmarx (formerly OWASP ZAP)** **ACTIVE / full DAST** scan driven by the modern **YAML Automation Framework**.
+description: Use when running an ACTIVE / full DAST scan against a running app you own — injecting SQLi, XSS, and path-traversal payloads to confirm injection-class vulnerabilities — driven by the modern YAML Automation Framework of ZAP by Checkmarx (formerly OWASP ZAP), including authenticated API scans imported from an OpenAPI, GraphQL, SOAP, or Postman spec. Language-agnostic (`docker run` over a declarative plan.yaml), any stack. Never run against production or a shared environment. Triggers "run an active DAST scan", "set up a ZAP full scan", "attack our API from its OpenAPI spec", "add a pre-release DAST gate". Do NOT use for the passive per-PR gate (use `qa-security-testing-zap-baseline-*`), known-CVE matching (use `qa-security-testing-nuclei`), schema-driven fuzzing (use `qa-security-testing-api-fuzzing`), or BOLA/IDOR authorization logic (use the stack's `security-testing/access-control-testing`). The phased `qa-security` agent orchestrates this gate alongside the others.
 ---
 
 # Security Testing — ZAP Automation Framework (active / full DAST, shared)

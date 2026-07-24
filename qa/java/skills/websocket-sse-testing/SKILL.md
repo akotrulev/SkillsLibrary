@@ -1,6 +1,6 @@
 ---
 name: qa-websocket-sse-testing-java
-description: Use when testing WebSocket or SSE streams in Java 21 / TestNG — protocol clients (OkHttp WebSocket/SSE, Spring STOMP, WebClient + StepVerifier) draining frames into a queue and asserting on conditions (Awaitility, never sleeps), plus Playwright for in-browser frames. Triggers: "test our WebSocket endpoint", "assert the SSE stream emits X", "real-time updates test".
+description: Use when testing WebSocket or SSE streams in Java 21 / TestNG — protocol clients (OkHttp WebSocket/SSE, Spring STOMP, WebClient + StepVerifier) draining frames into a queue and asserting on conditions (Awaitility, never sleeps), plus Playwright for in-browser frames. Triggers: "test our WebSocket endpoint", "assert the SSE stream emits X", "real-time updates test". For end-to-end suite work prefer the phased agent `qa-api-java` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
 ---
 
 # WebSocket & SSE Testing (Java 21 / TestNG) — **ported from the canonical `qa-websocket-sse-testing-dotnet`**

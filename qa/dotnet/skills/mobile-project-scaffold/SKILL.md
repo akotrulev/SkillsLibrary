@@ -1,6 +1,6 @@
 ---
 name: qa-mobile-project-scaffold-dotnet
-description: Use when starting a mobile (iOS/Android) test-automation project from zero in C# / .NET 10 (8-9 supported) — solution layout, exact package versions, Appium server + driver + emulator setup, and run commands for a standalone Appium NUnit suite. Triggers: "scaffold a mobile test project", "set up a .NET Appium suite from scratch", "what versions for a C# mobile test framework", "create the solution structure for mobile tests". Composable: explains how to fold in api/ui/performance dotnet modules later.
+description: Use when starting a mobile (iOS/Android) test-automation project from zero in C# / .NET 10 (8-9) — solution layout, exact package versions, Appium server + driver + emulator setup, run commands for a standalone Appium NUnit suite. Triggers: "scaffold a mobile test project", "set up a .NET Appium suite from scratch". Composable: explains how to fold in api/ui/performance dotnet modules later. For end-to-end suite work prefer the phased agent `qa-mobile-dotnet` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
 ---
 
 # Mobile Test Project Scaffold (C# / .NET 10)

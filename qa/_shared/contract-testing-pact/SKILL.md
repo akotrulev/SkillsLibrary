@@ -1,6 +1,6 @@
 ---
 name: qa-contract-testing-pact-shared
-description: Cross-stack reference for Pact consumer-driven contract testing — mental model, Pact Broker setup, matchers, can-i-deploy, record-deployment, versioning, and global rules that apply to .NET, Java, and TypeScript consumer/provider implementations. Load alongside one of `qa/{dotnet,java,typescript}/skills/contract-testing-pact` when configuring Pact. Do NOT load standalone to write Pact code — pair it with the stack-specific sibling.
+description: Cross-stack reference for Pact consumer-driven contract testing — mental model, Pact Broker setup, matchers, can-i-deploy, record-deployment, versioning, and global rules that apply to .NET, Java, and TypeScript consumer/provider implementations. Load alongside one of `qa/{dotnet,java,typescript}/skills/contract-testing-pact` when configuring Pact. Triggers (always alongside the stack sibling) "set up contract testing", "how does the Pact Broker fit our pipeline", "wire can-i-deploy", "version our pacts". Do NOT load standalone to write Pact code — pair it with the stack-specific sibling.
 ---
 
 # QA — Contract Testing with Pact (Shared)

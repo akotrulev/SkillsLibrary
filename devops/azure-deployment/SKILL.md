@@ -7,10 +7,12 @@ description: Use when the user asks to deploy a service to Azure — Container A
 
 Deploys services to Azure using the right primitive for the workload. Default for long-running container services is **Azure Container Apps** (serverless containers on KEDA + Envoy, no AKS to operate). For event-driven / per-request, **Azure Functions**. For SPAs, **Static Web Apps** (or **Storage + Front Door** if SWA's free Functions tier isn't enough). **AKS** only when the team has earned the Kubernetes overhead.
 
+**Version policy:** detect the project's versions (TFM / `engines` / toolchain) and match — never assume. .NET 10 is primary, 8/9 supported (8 LTS ends Nov 2026). Node 20 is EOL (Apr 2026) — 24 is active LTS, 22 maintenance. Java 21 LTS is the default. **Managed runtimes lag the language**: pin to the newest runtime the platform actually offers for the project's major, and never silently up-level the app to reach one.
+
 ## Stack
 
 - **Azure**: Container Apps, Functions, App Service, Static Web Apps, AKS, Container Registry (ACR), Key Vault, Managed Identity, Application Gateway / Front Door, Log Analytics, Application Insights
-- **Backends**: .NET 8 / Java 21 / Node 20 — Linux container images or native Functions runtimes
+- **Backends**: .NET 10 (8/9 supported) / Java 21 / Node 24 (22 maintenance) — Linux container images or native Functions runtimes
 - **Frontend**: React SPA → Static Web Apps; Blazor WASM → Static Web Apps or App Service; Blazor Server → App Service / Container Apps
 - Identity via **Managed Identity** (system-assigned for single-resource, user-assigned for cross-resource) — no service principal secrets in apps
 - IaC via Bicep (preferred for Azure-only stacks) or Terraform — see `devops/iac-bicep-terraform`
@@ -28,7 +30,7 @@ Deploys services to Azure using the right primitive for the workload. Default fo
 - AWS → `devops/aws-deployment`
 - IaC syntax → `devops/iac-bicep-terraform`
 - Pipeline YAML → `devops/github-actions` / `devops/gitlab-ci` / `devops/azure-pipelines`
-- App-level config / secrets injection → `devops/environment-config` (when authored)
+- App-level config / secrets injection → `devops/environment-config`
 
 ## Picking the right target
 
@@ -118,7 +120,7 @@ KEDA scalers built in. Common patterns:
 
 Prefer **Flex Consumption** for new HTTP triggers needing VNet + low cold start. Premium when you can't tolerate any cold start.
 
-### Function basics (Node 20 + TypeScript example, v4 programming model)
+### Function basics (Node 22 + TypeScript example, v4 programming model)
 
 ```typescript
 import { app, HttpRequest, InvocationContext } from '@azure/functions';
@@ -150,7 +152,7 @@ az webapp create \
   --name orders-api \
   --resource-group rg-yourco-prod \
   --plan asp-yourco-prod \
-  --runtime "DOTNETCORE:8.0"
+  --runtime "DOTNETCORE:10.0"   # match the project TFM; App Service runtimes lag — use the newest offered for that major
 az webapp identity assign --name orders-api --resource-group rg-yourco-prod
 az webapp config appsettings set --name orders-api --resource-group rg-yourco-prod \
   --settings DB_PASSWORD='@Microsoft.KeyVault(SecretUri=https://kv-orders.vault.azure.net/secrets/db-password/)'
@@ -245,7 +247,7 @@ Same logic as EKS — only when k8s expertise + workload complexity justify it. 
 
 - IaC (Bicep / Terraform) → `devops/iac-bicep-terraform`
 - Pipelines → `devops/azure-pipelines` / `devops/github-actions` / `devops/gitlab-ci`
-- App-level config & secrets injection → `devops/environment-config` (when authored)
+- App-level config & secrets injection → `devops/environment-config`
 - Logging → `observability/structured-logging-{dotnet,java,node}`
 - Tracing/metrics → `observability/opentelemetry-{dotnet,java,node}`
 - AWS equivalent → `devops/aws-deployment`

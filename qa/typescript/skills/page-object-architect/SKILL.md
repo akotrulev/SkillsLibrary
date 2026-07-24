@@ -1,6 +1,6 @@
 ---
 name: qa-page-object-architect-typescript
-description: Use when the user is designing the page object structure for a TypeScript UI test project. Triggers: "design page objects for app X in TypeScript", "how should I structure pages/ for Playwright TS", "split this giant POM module".
+description: Use when the user is designing the page object structure for a TypeScript UI test project. Triggers: "design page objects for app X in TypeScript", "how should I structure pages/ for Playwright TS", "split this giant POM module". For end-to-end suite work prefer the phased agent `qa-ui-typescript` / `qa-mobile-typescript` / `qa-bdd-typescript` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
 ---
 
 # QA — Page Object Architect (TypeScript)

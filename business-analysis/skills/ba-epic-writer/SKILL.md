@@ -1,6 +1,6 @@
 ---
 name: ba-epic-writer
-description: Use when the user needs to convert a scoped business-analysis writeup into one or more epics — sized for a release / quarter, sliced into user stories, with measurable outcomes. Triggers: "write an epic for X", "slice this BA writeup into epics", "size this initiative into a quarter", "what should the epic shape look like for Y". Do NOT use for high-level scoping (use `business-analysis/skills/ba-initiative-scoping`), individual stories with AC (use `business-analysis/skills/ba-story-writer`), or status updates (use `communication/stakeholder-updates`).
+description: Use when converting a scoped business-analysis writeup into one or more epics — sized for a release/quarter, sliced into user stories, with measurable outcomes. Triggers: "write an epic for X", "slice this BA writeup into epics", "size this initiative into a quarter". Do NOT use for high-level scoping (`ba-initiative-scoping`) or individual stories with AC (`ba-story-writer`).
 ---
 
 # Epic Writer

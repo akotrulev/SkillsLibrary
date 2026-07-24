@@ -7,10 +7,12 @@ description: Use when the user asks to deploy a service to AWS — ECS Fargate (
 
 Deploys services to AWS using the right primitive for the workload. Default for long-running container services is **ECS Fargate** (serverless containers, no nodes to patch). For event-driven / per-request workloads, **Lambda** behind API Gateway or directly via a Function URL. For SPAs, **S3 + CloudFront with OAC**. EKS only when the team has earned the Kubernetes overhead.
 
+**Version policy:** detect the project's versions (TFM / `engines` / toolchain) and match — never assume. .NET 10 is primary, 8/9 supported (8 LTS ends Nov 2026). Node 20 is EOL (Apr 2026) — 24 is active LTS, 22 maintenance. Java 21 LTS is the default. **Managed runtimes lag the language**: pin to the newest runtime the platform actually offers for the project's major, and never silently up-level the app to reach one.
+
 ## Stack
 
 - **AWS**: ECS Fargate, Lambda, App Runner, S3, CloudFront, ECR, IAM, CloudWatch Logs, Secrets Manager / Parameter Store, AWS Certificate Manager
-- **Backends**: .NET 8 / Java 21 / Node 20 — all targets are Linux container images or Lambda runtimes
+- **Backends**: .NET 10 (8/9 supported) / Java 21 / Node 24 (22 maintenance) — all targets are Linux container images or Lambda runtimes
 - **Frontend**: React SPA → S3 + CloudFront; Blazor WASM → same; Blazor Server → ECS Fargate
 - IAM via **roles**, not users — services authenticate via IRSA (EKS), Task Role (ECS), or Execution Role (Lambda)
 - IaC via Terraform (preferred) or AWS CDK — see `devops/iac-bicep-terraform`
@@ -28,7 +30,7 @@ Deploys services to AWS using the right primitive for the workload. Default for 
 - Azure → `devops/azure-deployment`
 - IaC syntax → `devops/iac-bicep-terraform`
 - Pipeline YAML → `devops/github-actions` / `devops/gitlab-ci` / `devops/azure-pipelines`
-- App-level config / secrets injection → `devops/environment-config` (when authored)
+- App-level config / secrets injection → `devops/environment-config`
 
 ## Picking the right target
 
@@ -138,7 +140,8 @@ Resources:
   OrdersFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Runtime: nodejs20.x          # or dotnet8 / java21
+      Runtime: nodejs22.x          # newest Lambda-managed runtime for the project's major;
+                                   # or dotnet8 / java21 — match the app, never up-level it to fit
       Architectures: [arm64]       # 20% cheaper than x86, slightly faster on ARM-friendly libs
       Handler: dist/handler.handler
       MemorySize: 512
@@ -221,7 +224,7 @@ Avoid for: a small number of services, a team new to k8s, or "we might need k8s 
 
 ## Observability
 
-- **CloudWatch Logs** is the default sink for ECS / Lambda. For Grafana/Loki, deploy the OTel Collector inside the VPC and route logs (stdout JSON) via a sidecar (FireLens) or daemon (Promtail/Vector).
+- **CloudWatch Logs** is the default sink for ECS / Lambda. For Grafana/Loki, deploy the OTel Collector inside the VPC and route logs (stdout JSON) via a sidecar (FireLens) or daemon (Grafana Alloy/Vector).
 - **X-Ray** is fine for AWS-native traces; for cross-stack uniformity, prefer OTel via the Collector (see `observability/opentelemetry-{dotnet,java,node}`)
 - **CloudWatch Alarms** on ECS service `CPUUtilization`, `MemoryUtilization`, ALB `HTTPCode_Target_5XX_Count`, Lambda `Errors` / `Throttles` / `Duration` p95
 
@@ -261,7 +264,7 @@ Avoid for: a small number of services, a team new to k8s, or "we might need k8s 
 
 - IaC (Terraform/CDK) → `devops/iac-bicep-terraform`
 - Pipelines → `devops/github-actions` / `devops/gitlab-ci` / `devops/azure-pipelines`
-- App-level config & secrets injection → `devops/environment-config` (when authored)
+- App-level config & secrets injection → `devops/environment-config`
 - Logging → `observability/structured-logging-{dotnet,java,node}`
 - Tracing/metrics → `observability/opentelemetry-{dotnet,java,node}`
 - Azure equivalent → `devops/azure-deployment`

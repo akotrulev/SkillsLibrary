@@ -1,6 +1,6 @@
 ---
 name: qa-i18n-testing-typescript
-description: Use when writing i18n/localization tests in Node 20 / TypeScript — Playwright pinned to a locale, asserting via the app's i18next/FormatJS catalog by key (never hardcoded literals), native `Intl` for number/date/currency formats, pseudo-localization and RTL checks. Triggers: "write an i18n test", "test German/Arabic rendering", "assert currency formatting per locale".
+description: Use when writing i18n/localization tests in Node 24 (22 supported) / TypeScript — Playwright pinned to a locale, asserting via the app's i18next/FormatJS catalog by key (never hardcoded literals), native `Intl` for number/date/currency formats, pseudo-localization and RTL checks. Triggers: "write an i18n test", "test German/Arabic rendering", "assert currency formatting per locale". For end-to-end suite work prefer the phased agent `qa-ui-typescript` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
 ---
 
 # QA — i18n / Localization Testing (TypeScript / Playwright + Vitest + Intl)

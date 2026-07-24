@@ -1,6 +1,6 @@
 ---
 name: be-java-cognito
-description: Use when the user asks to set up or modify AWS Cognito (user pools) in a Java 21 + Spring Boot 3 service — validating Cognito access-token JWTs with a Spring Security resource server (issuer-uri, no `aud`, `token_use=access`, `client_id`), scope + `cognito:groups` authorities, method-level `@PreAuthorize`, and Client Credentials for outbound M2M. Triggers: "add Cognito to my Spring Boot API", "validate Cognito JWTs in Java", "Cognito token has no audience in Spring", "map cognito:groups to authorities", "Cognito client_credentials WebClient". Do NOT use for the SPA flow (use `auth/cognito-react`), Blazor/.NET (use `auth/cognito-blazor` / `backend/dotnet/skills/cognito`), Auth0 (use `backend/java/skills/auth0`), Cognito **identity pools** (out of scope), or concepts (use `auth/_shared/oidc-concepts`).
+description: Use when setting up AWS Cognito (user pools) in a Java 21 + Spring Boot 3 service — validating Cognito access-token JWTs with a Spring Security resource server (issuer-uri, no `aud`, `token_use=access`), scope + `cognito:groups` authorities, `@PreAuthorize`, Client Credentials M2M. Triggers: "add Cognito to my Spring Boot API", "why does my Cognito token have no audience". Do NOT use for the React SPA flow (`auth/cognito-react`), Auth0 (the `auth0` sibling), or generic OIDC concepts.
 ---
 
 # Auth — AWS Cognito in Java 21 / Spring Boot 3

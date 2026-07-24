@@ -1,6 +1,6 @@
 ---
 name: auth-oidc-concepts
-description: Use when the user asks to understand OAuth 2.0 / OpenID Connect concepts that are the same across identity providers before picking a provider- and stack-specific recipe — roles (client/authorization-server/resource-server), Authorization Code + PKCE, Client Credentials, ID vs access vs refresh tokens, `token_use`, JWT validation, refresh-token rotation, public vs confidential clients, scopes vs RBAC vs ABAC. Also the provider-comparison layer (Auth0 vs AWS Cognito) that decides which provider skill to open. Triggers: "explain Authorization Code + PKCE", "ID token vs access token", "how do I validate a JWT", "why does my access token have no audience", "Auth0 vs Cognito differences", "what's a resource server scope". Do NOT use for provider-specific setup (use `auth/auth0-*` or `auth/cognito-*`) or stack code (use the stack skill).
+description: Use when explaining OAuth 2.0 / OpenID Connect concepts that are the same across providers — roles, Authorization Code + PKCE, Client Credentials, ID vs access vs refresh tokens, JWT validation, rotation, scopes vs RBAC — plus the Auth0-vs-Cognito comparison that picks the provider skill. Triggers: "explain Authorization Code + PKCE", "ID token vs access token", "Auth0 vs Cognito differences". Do NOT use for provider-specific setup (`auth/auth0-*` / `auth/cognito-*`).
 ---
 
 # Auth — OAuth 2.0 / OpenID Connect Concepts (Shared)

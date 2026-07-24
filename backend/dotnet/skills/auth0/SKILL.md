@@ -1,6 +1,6 @@
 ---
 name: be-dotnet-auth0
-description: Use when the user asks to set up or modify Auth0 in an ASP.NET Core service (.NET 10 primary, 8/9 supported) — JWT bearer validation, RBAC enforcement, Authorization Code + PKCE for server-rendered web, Client Credentials for outbound M2M, custom claim mapping. Triggers: "add Auth0 to my ASP.NET Core API", "validate Auth0 JWTs in .NET", "wire `[Authorize(Policy = ...)]` for permissions", "call another API with Client Credentials". Do NOT use for SPA-side flow (use `auth/auth0-react`), Blazor (use `auth/auth0-blazor`), Java (use `backend/java/skills/auth0`), AWS Cognito (use `backend/dotnet/skills/cognito`), or general concepts (use `auth/_shared/auth0-concepts`).
+description: Use when setting up or modifying Auth0 in an ASP.NET Core service (.NET 10 primary, 8/9) — JWT bearer validation, RBAC policies, Authorization Code + PKCE for server-rendered web, Client Credentials M2M, custom claim mapping. Triggers: "add Auth0 to my ASP.NET Core API", "validate Auth0 JWTs in .NET", "wire [Authorize(Policy=...)] for permissions". Do NOT use for SPA flows (`auth/auth0-react` / `auth/auth0-blazor`), Cognito (the `cognito` sibling), or concepts (`auth/_shared/auth0-concepts`).
 ---
 
 # Auth — Auth0 in ASP.NET Core (.NET 10 primary / 8-9 supported)

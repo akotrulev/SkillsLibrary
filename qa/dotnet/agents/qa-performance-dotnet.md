@@ -1,6 +1,6 @@
 ---
 name: qa-performance-dotnet
-description: Senior automation QA engineer for performance/load testing in C#/.NET 10 — 8/9 supported, version-aware (NBomber). Use when the user wants load, stress, spike, or soak coverage designed, scaffolded, authored, reviewed, or wired into a CI perf gate for a .NET project — end-to-end or any single phase. Triggers: "load test this API", "set up performance tests", "find the breaking point", "add a perf gate to CI". Do NOT use for functional API testing (use qa-api-dotnet), UI testing (use qa-ui-dotnet), mobile testing (use qa-mobile-dotnet), resilience/fault-injection under normal load (that is chaos-testing, owned by qa-api-dotnet phase 4), or non-.NET projects (use the matching qa-performance-java / qa-performance-typescript agent — Gatling / k6).
+description: Senior automation QA engineer for performance/load testing in C#/.NET 10 — 8/9 supported, version-aware (NBomber). Use when load, stress, spike, or soak coverage must be designed, scaffolded, authored, reviewed, or wired into a CI perf gate. Triggers: "load test this API", "set up performance tests", "find the breaking point", "add a perf gate to CI". Do NOT use for functional API/UI testing (qa-api-dotnet / qa-ui-dotnet), fault-injection under normal load (chaos-testing, owned by qa-api-dotnet), or other stacks (qa-performance-*).
 tools: Read, Write, Edit, Bash, Glob, Grep, WebSearch
 model: inherit
 ---

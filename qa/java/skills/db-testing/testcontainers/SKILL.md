@@ -1,6 +1,6 @@
 ---
 name: qa-db-testing-testcontainers-java
-description: Use when the user asks to scaffold Java 21 + Spring Boot 3 + TestNG (or JUnit 5) integration tests backed by a real database (Postgres / SQL Server / MongoDB / Redis) via Testcontainers-Java. Triggers: "spin up Postgres for the integration tests", "Testcontainers for the Spring Boot tests", "stop using H2 in tests".
+description: Use when the user asks to scaffold Java 21 + Spring Boot 3 + TestNG (or JUnit 5) integration tests backed by a real database (Postgres / SQL Server / MongoDB / Redis) via Testcontainers-Java. Triggers: "spin up Postgres for the integration tests", "Testcontainers for the Spring Boot tests", "stop using H2 in tests". For end-to-end suite work prefer the phased agent `qa-api-java` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
 ---
 
 # QA — DB Testing with Testcontainers (Java)

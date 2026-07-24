@@ -1,6 +1,6 @@
 ---
 name: qa-pom-builder-java
-description: Use when the user gives a website URL or an HTML page and wants a Page Object Model extracted/built/updated from it for a Java Playwright suite. Triggers: "build a POM from this URL", "extract locators from this page", "update the LoginPage object from the live site".
+description: Use when the user gives a website URL or an HTML page and wants a Page Object Model extracted/built/updated from it for a Java Playwright suite. Triggers: "build a POM from this URL", "extract locators from this page", "update the LoginPage object from the live site". For end-to-end suite work prefer the phased agent `qa-ui-java` / `qa-bdd-java` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
 ---
 
 # QA — POM Builder from Live Page (Java)

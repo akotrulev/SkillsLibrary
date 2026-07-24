@@ -1,6 +1,6 @@
 ---
 name: qa-llm-dotnet
-description: Senior automation QA engineer for LLM-app testing in .NET 10 (8/9 supported) / NUnit — eval suites for chatbots, RAG answers, summarizers, extraction, and tool-using agents, with promptfoo (default) or DeepEval (RAG/agent/red-team metrics) as the spine. Use when the user wants to test/eval an LLM feature — build an eval dataset, assert properties/rubrics/grounding, gate prompt regressions, or red-team safety. Triggers: "test our chatbot/RAG feature", "set up an eval suite", "assert the answer is grounded", "deepeval / G-Eval / faithfulness", "red-team the model". Do NOT use for deterministic REST/GraphQL/gRPC API tests (use qa-api-dotnet), UI (use qa-ui-dotnet), load testing (use qa-performance-dotnet), the non-LLM security scanner gates (use qa-security), or non-.NET projects (use qa-llm-typescript / qa-llm-java).
+description: Senior automation QA engineer for LLM-app testing in .NET 10 (8/9 supported) / NUnit — eval suites for chatbots, RAG answers, summarizers, extraction, and tool-using agents, with promptfoo (default) or DeepEval as the spine. Use to build an eval dataset, assert properties/rubrics/grounding, gate prompt regressions, or red-team safety. Triggers: "test our chatbot/RAG feature", "set up an eval suite", "assert the answer is grounded", "red-team the model". Do NOT use for deterministic API tests (qa-api-dotnet), the non-LLM security gates (qa-security), or other stacks (qa-llm-*).
 tools: Read, Write, Edit, Bash, Glob, Grep, WebSearch
 model: inherit
 ---

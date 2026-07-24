@@ -1,6 +1,6 @@
 ---
 name: data-redis
-description: Use for Redis (or Valkey) as a cache, rate limiter, distributed lock, queue, session store, leaderboard, or pub/sub from a .NET / Java / Node backend — engine mechanics, data structures, ACL/TLS security, persistence, replication/cluster, and eviction. Triggers: "set up Redis caching", "pick a Redis data type", "implement a rate limiter", "Redis ACL / TLS", "RDB vs AOF", "Redis cluster", "eviction policy", "Valkey vs Redis". Pick the topic in the routing table, then read its reference file end-to-end. The cross-engine caching *strategy* catalog (pattern choice, key design, stampede, TTL tiers) is `data/_shared/caching-patterns`; this skill owns the Redis *mechanics*. Do NOT use for a primary system of record, full-text search (`data/elasticsearch` / Atlas Search), or durable exactly-once messaging at scale (Kafka/Service Bus — broker selection/implementation has no owning skill in this library yet; `qa/<stack>/skills/messaging-testing` only *tests* an existing broker).
+description: Use for Redis (or Valkey) as a cache, rate limiter, distributed lock, queue, session store, leaderboard, or pub/sub from a .NET / Java / Node backend — data structures, ACL/TLS, persistence, replication/cluster, eviction. Pick the topic in the routing table, then read its reference. Triggers: "set up Redis caching", "implement a rate limiter", "RDB vs AOF", "Valkey vs Redis". Caching STRATEGY is `data/_shared/caching-patterns` — this owns the MECHANICS. Do NOT use for a system of record.
 ---
 
 # Data — Redis / Valkey

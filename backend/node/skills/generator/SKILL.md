@@ -1,6 +1,6 @@
 ---
 name: be-node-generator
-description: Use when the user asks to scaffold a TypeScript pattern (strict mode) into the active Node / NestJS / Express repo. Triggers: "scaffold a strategy with discriminated union", "create a Result type for X", "introduce branded types for ids", "extract this if-else into a tagged union", "type-safe config via Zod". Do NOT use for explanations (use `backend/node/skills/reference`), reviews (use `backend/node/skills/reviewer`), React (use `frontend/react/skills/generator`), or React Native (use `frontend/react-native`).
+description: Use when scaffolding a TypeScript pattern (strict mode) into the active Node / NestJS / Express repo. Triggers: "scaffold a strategy with discriminated union", "create a Result type for X", "introduce branded types for ids", "type-safe config via Zod". Do NOT use for explanations (`reference`), reviews (`reviewer`), or React (`frontend/react/skills/generator`).
 ---
 
 # TypeScript Design Patterns — Generator

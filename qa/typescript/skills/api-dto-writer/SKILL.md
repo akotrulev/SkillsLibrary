@@ -1,6 +1,6 @@
 ---
 name: qa-api-dto-writer-typescript
-description: Use when the user asks to create a new DTO / model / response interface in a TypeScript test project (Node 20 + TS strict, typically alongside supertest or axios). Triggers: "add a {Resource}Dto in TS", "create the InDto / ModDto types", "scaffold the wrapper DTO for paginated {resource} in TS".
+description: Use when the user asks to create a new DTO / model / response interface in a TypeScript test project (Node 24 (22 supported) + TS strict, typically alongside supertest or axios). Triggers: "add a {Resource}Dto in TS", "create the InDto / ModDto types", "scaffold the wrapper DTO for paginated {resource} in TS". For end-to-end suite work prefer the phased agent `qa-api-typescript` / `qa-llm-typescript` / `qa-performance-typescript` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
 ---
 
 # qa-api-dto-writer-typescript

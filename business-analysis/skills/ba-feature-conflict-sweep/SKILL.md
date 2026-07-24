@@ -1,6 +1,6 @@
 ---
 name: ba-feature-conflict-sweep
-description: Use when checking a new or changed feature against the WHOLE project's business model for conflicts — normalize its requirements into trigger/actor/action/data/constraint/state tuples, sweep pairwise against the KB with an 11-class conflict taxonomy, give every finding a concrete boundary condition, and rank findings in a severity table; resolutions are recorded business decisions. Triggers: "does this feature conflict with anything", "sweep this story against the model", "will the new discount clash with loyalty points", "cross-feature impact check". Do NOT use for single-document ambiguity flagging (qa/manual/test-basis-analyzer), scoping one vague initiative into a writeup (ba-initiative-scoping — that's one initiative, this is cross-feature), code-level impact analysis, or building the models themselves (ba-flow-mapper / ba-state-modeler / ba-decision-modeler).
+description: Use when checking a new or changed feature against the WHOLE project's business model for conflicts — normalize into trigger/actor/action/data/constraint/state tuples, sweep pairwise against the KB with the 11-class taxonomy; every finding gets a boundary condition. Triggers: "does this feature conflict with anything", "sweep this story against the model", "cross-feature impact check". Do NOT use for single-doc ambiguity flagging (`test-basis-analyzer`) or scoping (`ba-initiative-scoping`).
 ---
 
 # BA — Feature Conflict Sweep

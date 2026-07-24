@@ -1,6 +1,6 @@
 ---
 name: be-dotnet-cognito
-description: Use when the user asks to set up or modify AWS Cognito (user pools) in an ASP.NET Core service (.NET 10 primary, 8/9 supported) — validating Cognito access-token JWTs (issuer/JWKS, no `aud`, `token_use=access`, `client_id`), resource-server scope authorization policies, `cognito:groups` roles, and Client Credentials for outbound M2M. Triggers: "add Cognito to my ASP.NET Core API", "validate Cognito JWTs in .NET", "why does my Cognito token have no audience", "authorize by resource-server scope", "cognito:groups policy", "Cognito client_credentials from .NET". Do NOT use for the Blazor SPA/Server flow (use `auth/cognito-blazor`), Auth0 (use `backend/dotnet/skills/auth0`), Java (use `backend/java/skills/cognito`), Cognito **identity pools**/AWS-credential vending (out of scope), or generic OIDC concepts (use `auth/_shared/oidc-concepts`).
+description: Use when setting up AWS Cognito (user pools) in an ASP.NET Core service (.NET 10 primary, 8/9) — validating Cognito access-token JWTs (issuer/JWKS, no `aud`, `token_use=access`), resource-server scope policies, `cognito:groups` roles, Client Credentials M2M. Triggers: "add Cognito to my ASP.NET Core API", "why does my Cognito token have no audience". Do NOT use for the Blazor SPA flow (`auth/cognito-blazor`), Auth0 (the `auth0` sibling), or generic OIDC (`auth/_shared/oidc-concepts`).
 ---
 
 # Auth — AWS Cognito in ASP.NET Core (.NET 10 primary / 8-9 supported)

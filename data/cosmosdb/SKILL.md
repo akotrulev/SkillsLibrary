@@ -1,6 +1,6 @@
 ---
 name: data-cosmosdb
-description: Use when the user needs to design containers / partition keys, set up clients, secure an account (Entra data-plane RBAC, disable-local-auth, CMK, private endpoints), plan migrations, write queries, or tune performance on Azure Cosmos DB (NoSQL API, MongoDB API, Cassandra API) from a .NET 10 / Java 21 / Node 24 backend. Triggers: "design a Cosmos container for X", "pick a partition key", "this Cosmos query is expensive", "RU/s tuning", "autoscale vs provisioned vs serverless", "consistency level", "passwordless Cosmos with Entra ID", "disable Cosmos keys". Do NOT use for relational stores (use `data/postgresql` / `data/sqlserver` / `data/mysql`), Mongo Atlas (use `data/mongodb`), Redis (use `data/redis`), or DynamoDB (use `data/dynamodb`).
+description: Use when designing containers / partition keys, setting up clients, securing an account (Entra data-plane RBAC, CMK), planning migrations, writing queries, or tuning Azure Cosmos DB from a .NET / Java / Node backend. Triggers: "design a Cosmos container", "pick a partition key", "RU/s tuning", "autoscale vs provisioned vs serverless", "passwordless Cosmos with Entra ID". Do NOT use for relational stores, Mongo Atlas (`data/mongodb`), or DynamoDB (`data/dynamodb`).
 ---
 
 # Data — Azure Cosmos DB (NoSQL API)

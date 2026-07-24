@@ -1,6 +1,6 @@
 ---
 name: qa-ui-test-author-selenium-dotnet
-description: Use when the user asks to scaffold a C# / .NET 8 + Selenium 4 page object or NUnit UI test, following the BasePage / DriverFactory / NUnit pattern. Triggers: "create a Selenium page object for X in C#", "add a .NET page for screen Y", "write a Selenium NUnit test for Z".
+description: Use when the user asks to scaffold a C# / .NET 10 (8-9 supported) + Selenium 4 page object or NUnit UI test, following the BasePage / DriverFactory / NUnit pattern. Triggers: "create a Selenium page object for X in C#", "add a .NET page for screen Y", "write a Selenium NUnit test for Z". For end-to-end suite work prefer the phased agent `qa-ui-dotnet` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
 ---
 
 # QA — Selenium .NET Page Object & Test Generator

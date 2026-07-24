@@ -1,6 +1,6 @@
 ---
 name: ep-writing-plans
-description: Use when you have an approved spec or clear requirements for a multi-step task and need a detailed, bite-sized implementation plan before touching code. Triggers: after `ep-brainstorming` produces an approved design, "write the implementation plan", "break this spec into tasks", "plan out this feature". Chains into `ep-executing-plans`. Do NOT use to design or explore the idea itself (use `ep-brainstorming`), to execute an already-written plan (use `ep-executing-plans`), or for a single trivial edit that needs no plan.
+description: Use when you have an approved spec or clear requirements for a multi-step task and need a detailed, bite-sized implementation plan before touching code. Triggers: after `ep-brainstorming` produces an approved design, "write the implementation plan", "break this spec into tasks". Chains into `ep-executing-plans`. Do NOT use to design the idea itself (`ep-brainstorming`), to execute a written plan (`ep-executing-plans`), or for a single trivial edit.
 ---
 
 # Writing Plans
@@ -13,9 +13,10 @@ Assume they are a skilled developer, but know almost nothing about our toolset o
 
 **Announce at start:** "I'm using the `ep-writing-plans` skill to create the implementation plan."
 
-**Context:** If working in an isolated worktree, it should have been created via the `ep-using-git-worktrees` skill at execution time.
+**Context:** Write the plan on whatever branch you are already on — do not create or check out a branch or worktree to author it. Workspace isolation, if any, is `ep-executing-plans`' call at execution time.
 
-**Save plans to:** `docs/plans/YYYY-MM-DD-<feature-name>.md`
+**Save plans to:** `docs/plans/YY-MM-DD-HHmm-<feature-name>.md`
+- The prefix is the local date and 24-hour time the plan was written (e.g. `26-07-16-1430-billing-export.md`), so successive plans for one feature sort chronologically instead of colliding. Get it from `date +%y-%m-%d-%H%M` rather than guessing.
 - (User preferences for plan location override this default)
 
 **Test commands:** Where a step runs tests, lint, or build, use the command for the project's stack (see the Stack defaults in CLAUDE.md — `dotnet test`, `./gradlew test`, `npm test`, etc.). The pytest/npm snippets below are generic illustrations of plan *shape*, not the required runner.
@@ -51,7 +52,7 @@ This structure informs the task decomposition. Each task should produce self-con
 ```markdown
 # [Feature Name] Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use `ep-executing-plans` (inline, the default) to implement this plan task-by-task. Only if delegation clearly pays for itself and the user asks for it, use `ep-subagent-driven-development` (cost-aware, 2-agent gate). Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use `ep-executing-plans` (inline, the default) to implement this plan task-by-task. Only if delegation clearly pays for itself and the user asks for it, use `ep-subagent-driven-development` (cost-aware). Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** [One sentence describing what this builds]
 
@@ -133,7 +134,7 @@ After writing the complete plan, look at the spec with fresh eyes and check the 
 
 If you find issues, fix them inline. No need to re-review — just fix and move on. If you find a spec requirement with no task, add the task.
 
-**Escalation (permission-gated):** the self-review above is the default. For a large or high-stakes plan, and **with the user's OK**, you may dispatch a dedicated reviewer subagent using the template at `./plan-document-reviewer-prompt.md` (it checks completeness, spec alignment, task decomposition, buildability). This is one extra agent — it counts toward the conservative 2-agent gate in `ep-subagent-driven-development`, so ask before spawning it; don't dispatch it by reflex.
+**Escalation:** the self-review above is the default. For a large or high-stakes plan you may dispatch a dedicated reviewer subagent using the template at `./plan-document-reviewer-prompt.md` (it checks completeness, spec alignment, task decomposition, buildability). This is one extra invocation — weigh it against the plan's stakes per the cost-before-speed policy in `ep-subagent-driven-development`; don't dispatch it by reflex.
 
 ## Execution Handoff
 
@@ -142,6 +143,6 @@ After saving the plan, hand off to execution. **Default to inline execution — 
 **"Plan complete and saved to `docs/plans/<filename>.md`. Ready to implement it task-by-task with checkpoints for review?"**
 
 - **Default — Inline execution (recommended):** use `ep-executing-plans`. Batch execution with checkpoints for review. Cheaper and simpler; the right choice for almost every plan.
-- **Opt-in — Subagent execution:** use `ep-subagent-driven-development` **only** when the user asks for it and delegation clearly pays for itself (self-contained, context-heavy tasks). It is governed by a hard 2-agent gate — spawning more than 2 agents requires the user's permission first.
+- **Opt-in — Subagent execution:** use `ep-subagent-driven-development` **only** when the user asks for it and delegation clearly pays for itself (self-contained, context-heavy tasks). It is governed by the cost-before-speed policy — each extra agent is a deliberate spend, not a default.
 
 Do not offer the subagent path as "faster/better" — it is the cost-aware exception, not the default.

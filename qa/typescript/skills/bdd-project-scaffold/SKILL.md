@@ -1,6 +1,6 @@
 ---
 name: qa-bdd-project-scaffold-typescript
-description: Use when adding a BDD/Gherkin layer onto a TypeScript UI/mobile test project, or standing one up from zero. Web uses playwright-bdd (on the Playwright Test runner); mobile uses CucumberJS + WebdriverIO + Appium. Triggers: "set up playwright-bdd", "add a BDD layer to our Playwright tests in TS", "scaffold CucumberJS + WebdriverIO for our mobile tests", "wire bddgen and fixtures", "stand up a Gherkin project". Do NOT use to write feature files (use `qa/_shared/bdd/gherkin-authoring`), to generate step definitions (use `qa/typescript/skills/bdd-step-bindings`), or to build the page objects (use `qa/typescript/skills/page-object-architect`).
+description: Use when adding a BDD/Gherkin layer onto a TypeScript UI/mobile test project, or standing one up from zero — playwright-bdd (on the Playwright Test runner) for web, CucumberJS + WebdriverIO + Appium for mobile. Triggers: "set up playwright-bdd", "add a BDD layer to our Playwright tests in TS", "wire bddgen and fixtures". Do NOT use to write feature files (`gherkin-authoring`), generate step definitions (`bdd-step-bindings`), or build page objects (`page-object-architect`). For end-to-end suite work prefer the phased agent `qa-bdd-typescript` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
 ---
 
 # BDD Project Scaffold (TypeScript / Node 20)

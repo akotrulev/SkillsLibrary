@@ -1,6 +1,6 @@
 ---
 name: be-dotnet-persistence
-description: Use when the user asks to set up or refactor persistence in .NET (10 primary, 8-9 supported) — EF Core with `DbContext`, configurations, migrations, query patterns, transactions, optimistic concurrency, performance tuning. Triggers: "set up EF Core for X", "DbContext design", "AsNoTracking vs tracking", "EF migrations workflow", "row version concurrency", "this LINQ query is slow", "compiled queries". Do NOT use for non-EF data access (use `data/<db>` for raw SQL), for migrations across engines (use `data/_shared/migrations`), or for Java / Node persistence.
+description: Use when setting up or refactoring persistence in .NET (10 primary, 8-9) — EF Core `DbContext` design, configurations, migrations, query patterns, transactions, optimistic concurrency, tuning. Triggers: "set up EF Core for X", "AsNoTracking vs tracking", "EF migrations workflow", "row version concurrency", "this LINQ query is slow". Do NOT use for raw-SQL data access (`data/<db>`), cross-engine migrations (`data/_shared/migrations`), or Java / Node persistence.
 ---
 
 # .NET — Persistence with EF Core

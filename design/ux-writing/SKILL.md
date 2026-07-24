@@ -1,6 +1,6 @@
 ---
-name: ux-writing
-description: Use when writing or reviewing the words inside a UI — button and control labels, error and empty-state copy, confirmations, toasts, form hints, page and nav names — so they read in one consistent, active, user-side voice rather than system jargon. Stack-agnostic: the engineering stack defines the structural SLOTS (error regions, empty states, confirmations, IA), this skill supplies the voice that fills them. Triggers: "what should this button say", "write the error message for X", "the empty state is blank / unhelpful", "rename these labels consistently", "microcopy for this flow", "make this confirmation clearer", "our UI copy sounds like the database". Do NOT use for the visual design point of view (use `design/frontend-design`, which summarizes this), the empty-state/confirmation STRUCTURE and IA rules (use the stack's `ui-conventions`), error CATEGORIZATION/mapping mechanics (use the stack's `error-resilience`), or localization/translation (qa `i18n-testing` + a localization skill).
+name: design-ux-writing
+description: Use when writing or reviewing the words inside a UI — button labels, error and empty-state copy, confirmations, toasts, form hints, nav names — in one consistent, active, user-side voice. The stack defines the structural slots; this supplies the voice. Triggers: "what should this button say", "write the error message", "microcopy for this flow", "reword this label", "our UI wording is inconsistent", "this error message is unhelpful", "name these nav items". Do NOT use for empty-state/confirmation STRUCTURE (the stack's `ui-conventions`) or translation (qa `i18n-testing`).
 ---
 
 # UX Writing — voice & microcopy

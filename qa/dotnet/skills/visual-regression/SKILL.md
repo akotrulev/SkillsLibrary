@@ -1,6 +1,6 @@
 ---
 name: qa-visual-regression-dotnet
-description: Use when tests must catch unintended visual changes — Playwright's built-in pixel snapshots, Percy's hosted review workflow, or Applitools Eyes visual-AI. Triggers: "add visual regression tests", "screenshot diff this page", "the layout broke and no functional test caught it". Pick the tool in the decision matrix, then read its reference file.
+description: Use when a .NET 10 (8-9 supported) / NUnit test suite must catch unintended visual changes — Playwright's built-in pixel snapshots, Percy's hosted review workflow, or Applitools Eyes visual-AI. Triggers "add visual regression tests", "screenshot diff this page", "the layout broke and no functional test caught it". Pick the tool in the decision matrix, then read its reference file. Do NOT use for structural breakpoint/viewport assertions (use `qa-responsive-testing-dotnet`), for accessibility scans (use `qa-accessibility-testing-dotnet`), or for non-.NET projects (use `qa-visual-regression-{java,typescript}`). For end-to-end suite work prefer the phased agent `qa-ui-dotnet` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
 ---
 
 # QA — Visual Regression (.NET 8 / C#)

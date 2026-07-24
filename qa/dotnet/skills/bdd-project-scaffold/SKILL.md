@@ -1,6 +1,6 @@
 ---
 name: qa-bdd-project-scaffold-dotnet
-description: Use when adding the Reqnroll (SpecFlow successor) BDD layer onto a .NET 10 (8-9 supported) UI/mobile test project, or standing up a Reqnroll + NUnit project from zero. Triggers: "set up Reqnroll", "add a BDD layer to our Playwright/Appium tests in C#", "scaffold a Reqnroll feature project", "wire Reqnroll DI and hooks". Do NOT use to write feature files (use `qa/_shared/bdd/gherkin-authoring`), to generate step definitions (use `qa/dotnet/skills/bdd-step-bindings`), or to build the page objects (use `qa/dotnet/skills/page-object-architect`).
+description: Use when adding the Reqnroll (SpecFlow successor) BDD layer onto a .NET 10 (8-9) UI/mobile test project, or standing up a Reqnroll + NUnit project from zero. Triggers: "set up Reqnroll", "add a BDD layer to our Playwright/Appium tests in C#", "wire Reqnroll DI and hooks". Do NOT use to write feature files (`gherkin-authoring`), generate step definitions (`bdd-step-bindings`), or build page objects (`page-object-architect`). For end-to-end suite work prefer the phased agent `qa-bdd-dotnet` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
 ---
 
 # Reqnroll BDD Project Scaffold (C# / .NET 10)

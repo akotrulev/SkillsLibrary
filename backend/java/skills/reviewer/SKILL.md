@@ -1,6 +1,6 @@
 ---
 name: be-java-reviewer
-description: Use when the user asks to review Java 21 / Spring Boot 3 code for design-pattern misuse, over-abstraction, threading violations, transactional boundary bugs, DI anti-patterns, or modern-Java omissions (no records / no sealed types). Triggers: "review this for pattern misuse", "is this CQRS justified", "check for `@Transactional` misuse", "spot smells in this service", "is this code modern Java". Do NOT use for explanations (use `backend/java/skills/reference`) or for generating new code (use `backend/java/skills/generator`).
+description: Use when reviewing Java 21 / Spring Boot 3 code for design-pattern misuse, over-abstraction, threading violations, transactional boundary bugs, DI anti-patterns, or modern-Java omissions (no records / sealed types). Triggers: "review this for pattern misuse", "is this CQRS justified", "check for @Transactional misuse". Do NOT use for explanations (`reference`) or generating new code (`generator`).
 ---
 
 # Java Design Patterns — Reviewer

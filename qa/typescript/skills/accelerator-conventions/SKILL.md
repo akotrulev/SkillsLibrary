@@ -1,6 +1,6 @@
 ---
 name: qa-accelerator-conventions-typescript
-description: Use when working in the TypeScript Accelerator test automation framework (Node 20 + @playwright/test + WebdriverIO/Appium + Vitest, JSON-driven page objects) or any consumer of it. Triggers: "add a test to the TS Accelerator", "scaffold a screen for the WebdriverIO suite", "create a Playwright page object for X in Accelerator".
+description: Use when working in the TypeScript Accelerator test automation framework (Node 24 (22 supported) + @playwright/test + WebdriverIO/Appium + Vitest, JSON-driven page objects) or any consumer of it. Triggers: "add a test to the TS Accelerator", "scaffold a screen for the WebdriverIO suite", "create a Playwright page object for X in Accelerator".
 ---
 
 # Accelerator Conventions (TypeScript)

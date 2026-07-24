@@ -1,6 +1,6 @@
 ---
 name: data-schema-design
-description: Use when the user is choosing which database engine fits a workload, or designing a data model across any SQL or document engine — engine selection, entities, relationships, identifiers, timestamps, soft delete, multi-tenancy, audit trails, money, enums — before reaching for engine-specific DDL. Triggers: "which database for this workload", "do I need Mongo / Redis / a vector DB or does Postgres suffice", "design a schema for X", "embed or reference", "natural vs surrogate key", "soft delete strategy", "multi-tenant model", "audit trail design", "money in a DB". Do NOT use for engine-specific syntax (use `data/<db>`) or query optimization (use `data/_shared/query-optimization`).
+description: Use when choosing which database engine fits a workload, or designing a data model across any SQL or document engine — engine selection, entities, identifiers, soft delete, multi-tenancy, audit trails, money, enums — before engine-specific DDL. Triggers: "which database for this workload", "does Postgres suffice or do I need Mongo/Redis", "embed or reference", "multi-tenant model". Do NOT use for engine-specific syntax (`data/<db>`) or query optimization (`query-optimization`).
 ---
 
 # Data — Schema Design (cross-engine)

@@ -1,6 +1,6 @@
 ---
 name: qa-api-client-writer-dotnet
-description: Use when the user asks to create a new API client or `*Client.cs` file in the Accelerator `ApiTests` project (RestSharp, .NET 8). Triggers: "write an API client for X", "add a Client.cs for the {resource} endpoints", "scaffold {Resource}Client".
+description: Use when the user asks to create a new API client or `*Client.cs` file in the Accelerator `ApiTests` project (RestSharp, .NET 10 (8-9 supported)). Triggers: "write an API client for X", "add a Client.cs for the {resource} endpoints", "scaffold {Resource}Client". For end-to-end suite work prefer the phased agent `qa-api-dotnet` / `qa-performance-dotnet` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
 ---
 
 # qa-api-client-writer-dotnet

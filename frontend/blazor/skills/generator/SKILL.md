@@ -1,6 +1,6 @@
 ---
 name: fe-blazor-generator
-description: Use when the user asks to scaffold a Blazor pattern in .NET 8/9/10 — Static SSR / Server / WASM / Interactive Auto — into the active repo. Triggers: "scaffold a Blazor component for X", "create a state container for Y", "wire a CascadingValue", "convert this to an interactive component", "add a [PersistentState] fetch", "compound component for tabs in Blazor", "add a NotFound page", "customize the reconnect modal", "add an external link that opens in a new tab". Do NOT use for explanations (use `frontend/blazor/skills/reference`), reviews (use `frontend/blazor/skills/reviewer`), or non-Blazor patterns (use the `backend/dotnet` dev stack's generator, if installed).
+description: Use when scaffolding a Blazor pattern in .NET 8/9/10 — Static SSR / Server / WASM / Auto — into the active repo. Triggers: "scaffold a Blazor component for X", "create a state container", "wire a CascadingValue", "add a [PersistentState] fetch", "compound component for tabs", "add a NotFound page", "customize the reconnect modal". Do NOT use for explanations (`reference`), reviews (`reviewer`), or non-Blazor patterns (`backend/dotnet`'s generator).
 ---
 
 # Blazor Design Patterns — Generator

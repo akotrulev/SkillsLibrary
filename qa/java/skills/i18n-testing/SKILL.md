@@ -1,6 +1,6 @@
 ---
 name: qa-i18n-testing-java
-description: Write **internationalization (i18n) / localization tests** in Java 21 with Playwright-Java + TestNG, the app's own `ResourceBundle` (`.properties`) catalog, and **ICU4J** (`com.ibm.icu.text.*`) for formatting. Covers the trait that makes i18n testing its own discipline: **you never assert a hardcoded literal string. Triggers: "write an i18n test in Java", "test German/Arabic rendering with Playwright-Java", "assert currency/date formatting per locale with ICU4J".
+description: Use when writing i18n/localization tests in Java 21 — Playwright-Java + TestNG pinned to a locale, asserting via the app's own `ResourceBundle` (`.properties`) catalog **by key** (never a hardcoded literal string), ICU4J (`com.ibm.icu.text.*`) for number/date/currency formatting, plus pseudo-localization and RTL checks. Triggers "write an i18n test in Java", "test German/Arabic rendering with Playwright-Java", "assert currency/date formatting per locale with ICU4J", "pseudo-localization pass", "check RTL layout". Do NOT use for the frontend's own localization wiring (that is the `fe-*` stack's `localization` skill), for breakpoint/viewport layout (use `qa-responsive-testing-java`), or for non-Java projects (use `qa-i18n-testing-{dotnet,typescript}`). For end-to-end suite work prefer the phased agent `qa-ui-java` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
 ---
 
 # QA — i18n / Localization Testing (Java 21 / Playwright-Java + TestNG + ICU4J)

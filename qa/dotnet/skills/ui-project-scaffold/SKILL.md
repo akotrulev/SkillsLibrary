@@ -1,6 +1,6 @@
 ---
 name: qa-ui-project-scaffold-dotnet
-description: Use when starting a web-UI test-automation project from zero in C# / .NET 10 (8-9 supported) — solution layout, exact package versions, browser/local setup, and run commands for a standalone Playwright (default) or Selenium NUnit suite. Triggers: "scaffold a UI test project", "set up a .NET Playwright suite from scratch", "what versions for a C# web UI test framework", "create the solution structure for UI tests". Composable: explains how to fold in api/mobile/performance dotnet modules later.
+description: Use when starting a web-UI test-automation project from zero in C# / .NET 10 (8-9 supported) — solution layout, exact package versions, browser/local setup, and run commands for a standalone Playwright (default) or Selenium NUnit suite. Triggers: "scaffold a UI test project", "set up a .NET Playwright suite from scratch", "what versions for a C# web UI test framework", "create the solution structure for UI tests". Composable: explains how to fold in api/mobile/performance dotnet modules later. For end-to-end suite work prefer the phased agent `qa-ui-dotnet` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
 ---
 
 # UI Test Project Scaffold (C# / .NET 10)

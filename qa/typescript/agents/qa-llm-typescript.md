@@ -1,6 +1,6 @@
 ---
 name: qa-llm-typescript
-description: Senior automation QA engineer for LLM-app testing in TypeScript/Node 20 — eval suites for chatbots, RAG answers, summarizers, extraction, and tool-using agents, with promptfoo (default) or DeepEval (RAG/agent/red-team metrics) as the spine. Use when the user wants to test/eval an LLM feature — build an eval dataset, assert properties/rubrics/grounding, gate prompt regressions, or red-team safety. Triggers: "test our chatbot/RAG feature", "set up an eval suite", "assert the answer is grounded", "deepeval / G-Eval / faithfulness", "red-team the model". Do NOT use for deterministic REST/GraphQL/gRPC API tests (use qa-api-typescript), UI (qa-ui-typescript), load testing (qa-performance-typescript), the non-LLM security scanner gates (use qa-security), or non-TypeScript projects (use qa-llm-dotnet / qa-llm-java).
+description: Senior automation QA engineer for LLM-app testing in TypeScript/Node 20 — eval suites for chatbots, RAG answers, summarizers, extraction, and tool-using agents, with promptfoo (default) or DeepEval as the spine. Use to build an eval dataset, assert properties/rubrics/grounding, gate prompt regressions, or red-team safety. Triggers: "test our chatbot/RAG feature", "set up an eval suite", "assert the answer is grounded", "red-team the model". Do NOT use for deterministic API tests (qa-api-typescript), the non-LLM security gates (qa-security), or other stacks (qa-llm-*).
 tools: Read, Write, Edit, Bash, Glob, Grep, WebSearch
 model: inherit
 ---

@@ -1,6 +1,6 @@
 ---
 name: qa-ui-test-author-reviewer-dotnet
-description: Use when the user asks to review existing .NET UI test code or page objects. Triggers: "review this Playwright C# spec", "look at this NUnit page object", "is this Appium .NET test any good".
+description: Use when the user asks to review existing .NET UI test code or page objects. Triggers: "review this Playwright C# spec", "look at this NUnit page object", "is this Appium .NET test any good". For end-to-end suite work prefer the phased agent `qa-ui-dotnet` / `qa-mobile-dotnet` / `qa-bdd-dotnet` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
 ---
 
 # QA — UI Test & Page Object Reviewer (.NET / C#)

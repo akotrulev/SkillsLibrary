@@ -1,6 +1,6 @@
 ---
 name: ba-backlog-auditor
-description: Use when stories or epics were authored by someone else (client, another team, a PO) and need a review-only readiness audit before refinement or test design — INVEST, acceptance-criteria quality, testability, dependency hygiene. Triggers: "review these stories", "are these stories ready for the sprint", "we received this backlog from the client — check it", "audit this epic and its stories", "is this story ready for test design". Do NOT use to write or fix stories (use business-analysis/skills/ba-story-writer), to shape epics (use business-analysis/skills/ba-epic-writer), to scope a vague ask (use business-analysis/skills/ba-initiative-scoping), or to review test cases (out of scope — qa owns test artifacts).
+description: Use when stories or epics were authored by someone else (client, another team, a PO) and need a review-only readiness audit before refinement or test design — INVEST, AC quality, testability, dependency hygiene. Triggers: "review these stories", "are these stories ready for the sprint", "we received this backlog — check it", "prep these tickets for refinement/grooming", "is this Jira ticket good enough to build", "are these ACs testable", "check AC-to-story traceability". Do NOT use to write or fix stories (`ba-story-writer`), shape epics (`ba-epic-writer`), or scope a vague ask (`ba-initiative-scoping`).
 ---
 
 # Backlog Reviewer

@@ -1,6 +1,6 @@
 ---
 name: fe-react-state-management
-description: Use when the user asks to pick or set up state management in React 19 + TypeScript (Next.js App Router primary, Vite SPA fallback) — local state, lifted state, Context + reducer, Zustand, Redux Toolkit, Jotai, and the server-vs-client-state split (TanStack Query / RSC for server state). Triggers "what's the right state library here", "Redux Toolkit vs Zustand", "Context or store", "server state vs client state", "I'm prop-drilling everywhere", "where should this live in an App Router app". Do NOT use for component scaffolding (use `frontend/react/skills/generator`), for forms (use `frontend/react/skills/forms`), for data fetching itself (use `frontend/react/skills/data-access`), or for Blazor (use `frontend/blazor/skills/state-management`).
+description: Use when state has outgrown `useState` or lives in the wrong place — local state, lifted state, Context + reducer, Zustand, Redux Toolkit, Jotai, and the server-vs-client-state split (TanStack Query / RSC own server state); React 19 + TypeScript. Triggers: "what's the right state library here", "Redux Toolkit vs Zustand", "Context or store", "I'm prop-drilling everywhere", "this state is out of sync across pages". Do NOT use for component scaffolding (`generator`), forms (`forms`), data fetching itself (`data-access`), or Blazor (its sibling).
 ---
 
 # React — State Management

@@ -1,6 +1,6 @@
 ---
 name: qa-security-testing-tls-scanning
-description: TLS/SSL **transport-layer** configuration scanning as a CI gate (single language-agnostic CLI skill): probe a TLS endpoint's **handshake** to flag deprecated protocols (SSLv2/3, TLS1.0/1.1), weak/insecure cipher suites (RC4, 3DES, EXPORT), broken forward secrecy, certificate validity/chain/expiry, and known issues (ROBOT, Heartbleed). Two tools: **sslyze** (LEAD.
+description: Use when gating an endpoint's TLS/SSL handshake in CI — deprecated protocols (SSLv2/3, TLS 1.0/1.1), weak or insecure cipher suites (RC4, 3DES, EXPORT), broken forward secrecy, certificate validity/chain/expiry, and known issues (ROBOT, Heartbleed) — with sslyze as the lead tool (ships a native Mozilla-policy gate) or testssl.sh as the zero-dependency Bash alternative. Read-only and the one scan that is safe against production. Language-agnostic (CLI / Docker), any stack. Triggers "scan our TLS configuration", "check for weak ciphers", "is our certificate chain valid / when does it expire", "fail CI on deprecated TLS versions", "prove we are TLS 1.2+ only". Do NOT use for HTTP-layer security headers or cookie flags (use `qa-security-testing-zap-baseline-*`), for application CVEs (use `qa-security-testing-sast` or the stack's `security-testing/dependency-scanning`), or for active injection testing (use `qa-security-testing-zap-automation-framework`).
 ---
 
 # Security Testing — TLS / SSL Configuration Scanning (shared)

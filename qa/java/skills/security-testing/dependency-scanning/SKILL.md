@@ -1,6 +1,6 @@
 ---
 name: qa-security-testing-dependency-scanning-java
-description: Use when wiring SCA (dependency-vulnerability scanning) as a CI gate for a Java build — OWASP Dependency-Check Gradle plugin scanning the direct + transitive tree against CVE feeds, failing above a CVSS threshold, with a ticketed suppression file. Triggers: "fail the build on vulnerable dependencies", "add dependency scanning", "gate new CVEs". Not for runtime DAST → `security-testing/zap-baseline`.
+description: Use when wiring SCA (dependency-vulnerability scanning) as a CI gate for a Java build — OWASP Dependency-Check Gradle plugin scanning the direct + transitive tree against CVE feeds, failing above a CVSS threshold, with a ticketed suppression file. Triggers: "fail the build on vulnerable dependencies", "add dependency scanning", "gate new CVEs". Not for runtime DAST → `security-testing/zap-baseline`. For end-to-end suite work prefer the phased agent `qa-performance-java` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
 ---
 
 # Security Testing — Dependency Scanning / SCA (Java)

@@ -1,6 +1,6 @@
 ---
 name: qa-rag-testing-dotnet
-description: Use when testing a RAG (retrieval-augmented generation) feature from a .NET 8 / NUnit suite — decompose RETRIEVAL from GENERATION so a bad answer is localized, then assert the RAG triad (context relevance · groundedness/faithfulness · answer relevance) plus retrieval-ranking metrics; Ragas (default, RAG-native) / DeepEval contextual metrics / promptfoo context-* as the spine. Triggers: "test our RAG pipeline", "is the answer grounded in the retrieved chunks", "why is retrieval missing the right document", "evaluate context precision/recall", "build a RAG golden set". Builds on qa-llm-app-testing-dotnet (the four ideas, judge-pinning, dataset mechanics).
+description: Use when testing a RAG feature from a .NET / NUnit suite — decompose RETRIEVAL from GENERATION so a bad answer is localized, then assert the RAG triad (context relevance · groundedness · answer relevance) plus retrieval-ranking metrics; Ragas (default) / DeepEval / promptfoo context-* as the spine. Triggers: "test our RAG pipeline", "is the answer grounded in the retrieved chunks", "evaluate context precision/recall", "build a RAG golden set". Builds on the stack's llm-app-testing skill. For end-to-end suite work prefer the phased agent `qa-llm-dotnet` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
 ---
 
 # RAG Testing (.NET 8 / NUnit — retrieval ⊕ generation, Ragas-spined)

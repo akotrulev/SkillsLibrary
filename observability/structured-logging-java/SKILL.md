@@ -1,6 +1,6 @@
 ---
 name: observability-structured-logging-java
-description: Use when the user asks to set up or refactor logging in a Java 21 / Spring Boot 3 service — SLF4J + Logback with JSON encoding, MDC for correlation, sinks to console / Loki / Elastic. Triggers: "set up structured logging in Spring Boot", "Logback JSON config", "ship logs to Loki", "add MDC correlation IDs", "this log line is wrong". Do NOT use for .NET (use `observability/structured-logging-dotnet`) or Node (use `observability/structured-logging-node`), or for tracing/metrics (use `observability/opentelemetry-java`).
+description: Use when setting up or refactoring logging in a Java 21 / Spring Boot 3 service — SLF4J + Logback with JSON encoding, MDC for correlation, sinks to console/Loki/Elastic. Triggers: "set up structured logging in Spring Boot", "Logback JSON config", "add MDC correlation IDs". Do NOT use for .NET/Node (their siblings) or tracing/metrics (`opentelemetry-java`).
 ---
 
 # Observability — Structured Logging (Java 21 / Spring Boot 3)

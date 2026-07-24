@@ -1,6 +1,6 @@
 ---
 name: fe-react-generator
-description: Use when the user asks to scaffold a React pattern into the active repo (Next.js App Router primary, Vite SPA fallback; React 19 primary / 18 fallback) — a page/route, a reusable component, a form, a custom hook, a context+consumer, a compound component, container/presentation split, an error boundary, or a Suspense/lazy boundary. Triggers "scaffold a component/page for X", "extract this into a custom hook", "create a context provider for Y", "make a compound component for tabs", "split into container + presentation", "add a route with metadata", "wire a real Link instead of router.push". Do NOT use for explanations (use `frontend/react/skills/reference`), reviews (use `frontend/react/skills/reviewer`), form validation depth (use `frontend/react/skills/forms`), data-fetch mechanics (use `frontend/react/skills/data-access`), or Blazor (use `frontend/blazor/skills/generator`).
+description: Use when scaffolding a new page, component, hook, context, or boundary into the active repo (React 19/18, Next.js App Router or Vite) — reusable component, form, custom hook, context+consumer, compound component, container/presentation split, error or Suspense boundary. Triggers: "scaffold a component/page for X", "extract this into a custom hook", "create a context provider", "add a new screen". Do NOT use for explanations (`reference`), reviews (`reviewer`), route topology (`routing`), form-validation depth (`forms`), or Blazor (its sibling).
 ---
 
 # React — Generator

@@ -1,6 +1,6 @@
 ---
 name: data-mysql
-description: Use when designing tables, modeling relationships, securing data (privileges/tenancy/encryption/audit), writing queries or migrations, choosing indexes, caching, or tuning performance on MySQL / MariaDB / Aurora MySQL from a .NET / Java / Node backend. Triggers: "design a MySQL schema", "multi-tenant isolation without RLS", "this MySQL query is slow", "add an index", "InnoDB tuning", "online DDL on a huge table", "Aurora vs RDS MySQL". Pick the topic in the routing table, then read its reference file end-to-end. Do NOT use for PostgreSQL (`data/postgresql`), SQL Server (`data/sqlserver`), NoSQL stores, cross-engine modeling decisions (`data/_shared/schema-design`), or writing DB tests (`qa/<stack>/skills/db-testing`).
+description: Use when designing tables, securing data (privileges/tenancy/encryption), writing queries or migrations, choosing indexes, caching, or tuning MySQL / MariaDB / Aurora MySQL from a .NET / Java / Node backend. Pick the topic in the routing table, then read its reference. Triggers: "design a MySQL schema", "multi-tenant isolation without RLS", "this MySQL query is slow". Do NOT use for other engines, cross-engine modeling (`data/_shared/schema-design`), or DB tests (qa `db-testing`).
 ---
 
 # Data — MySQL / MariaDB / Aurora MySQL

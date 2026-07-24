@@ -1,6 +1,6 @@
 ---
 name: devops-github-actions
-description: Use when the user asks to write, review, or modify GitHub Actions workflows for build/test/deploy of Java, .NET, or TypeScript projects, with deploys to AWS or Azure. Triggers: "write a GitHub Actions workflow for X", "add a deploy job to .github/workflows/Y.yml", "set up CI for this repo", "add a release workflow". Do NOT use for GitLab CI (use `devops/gitlab-ci`), Azure Pipelines (use `devops/azure-pipelines`), or IaC scripts (use `devops/iac-bicep-terraform`).
+description: Use when the user asks to write, review, or modify GitHub Actions workflows for build/test/deploy of Java, .NET, or TypeScript projects, with deploys to AWS or Azure. Triggers: "write a GitHub Actions workflow for X", "add a deploy job to .github/workflows/Y.yml", "set up CI for this repo", "add a release workflow". Do NOT use for GitLab CI (use `devops/gitlab-ci`), Azure Pipelines (use `devops/azure-pipelines`), or IaC scripts (use `devops/iac-bicep-terraform`). Do NOT use for the **test-suite CI lane** — shard matrix, Allure publishing, perf gate, flake quarantine — that belongs to `qa-cicd-{java,dotnet,typescript}`; this skill owns the **build/deploy** lane.
 ---
 
 # DevOps — GitHub Actions
@@ -23,6 +23,7 @@ Authors GitHub Actions workflows for build, test, and deploy across the project'
 - Bicep / Terraform authoring → `devops/iac-bicep-terraform`
 - App-level env config → `devops/environment-config`
 
+- Test-suite CI lane (shard matrix, Allure publish, perf gate, flake quarantine) → `qa/cicd/agents/qa-cicd-{java,dotnet,typescript}`
 ## Inputs needed
 
 1. **Stack(s)**: .NET 8/9/10 / Java 21+Gradle / Node 22/24 + which package manager (pnpm/npm/yarn)
@@ -322,3 +323,5 @@ Upload the raw results as an artifact here; the **report generation/publishing p
 - Per-env secrets/config → `devops/environment-config`
 - AWS-specific deploy details → `devops/aws-deployment`
 - Azure-specific deploy details → `devops/azure-deployment`
+
+- Test-suite CI lane — shard matrix, Allure publish, perf gate, quarantine → `qa-cicd-{java,dotnet,typescript}`

@@ -1,6 +1,6 @@
 ---
 name: qa-cloud-grid-config-java
-description: Use when the user needs to run Java Playwright (web) or Appium java-client (mobile) tests on a **hosted cloud grid**. Triggers: "run our Playwright Java tests on BrowserStack", "wire Appium java-client to Sauce Labs", "set up LambdaTest caps for our TestNG Appium tests".
+description: Use when the user needs to run Java Playwright (web) or Appium java-client (mobile) tests on a **hosted cloud grid**. Triggers: "run our Playwright Java tests on BrowserStack", "wire Appium java-client to Sauce Labs", "set up LambdaTest caps for our TestNG Appium tests". For end-to-end suite work prefer the phased agent `qa-ui-java` / `qa-mobile-java` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
 ---
 
 # QA — Cloud Grid Config (Java: Playwright + Appium java-client)

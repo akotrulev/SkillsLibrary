@@ -1,6 +1,6 @@
 ---
 name: ba-story-writer
-description: Use when the user wants to convert a scoped requirement or BA writeup into INVEST user stories with acceptance criteria. Triggers: "write user stories for X", "turn this into stories the team can pick up", "add acceptance criteria to this story", "split this epic". Do NOT use for high-level scoping (use business-analysis/skills/ba-initiative-scoping), test cases (use qa/manual/test-case-writer), or bug reports (use qa/manual/bug-report-writer).
+description: Use when the user wants to convert a scoped requirement or BA writeup into INVEST user stories with acceptance criteria. Separates functional from non-functional acceptance criteria. Triggers: "write user stories for X", "turn this into stories the team can pick up", "add acceptance criteria to this story", "write the Jira tickets for this", "write this as an 'as a user, I want' story", "split this epic", "add the non-functional AC". Do NOT use for high-level scoping (`ba-initiative-scoping`), test cases (qa/manual/test-case-writer), or bug reports (qa/manual/bug-report-writer).
 ---
 
 # User Story Writer

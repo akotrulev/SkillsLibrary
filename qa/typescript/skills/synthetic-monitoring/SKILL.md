@@ -1,6 +1,6 @@
 ---
 name: qa-synthetic-monitoring-typescript
-description: Use when authoring synthetic monitoring as code in Node 20 / TypeScript — scheduled API and Playwright-based browser checks against live staging/prod via Checkly (`@checkly/cli`). The "is it up right now" layer, distinct from CI pre-merge tests. Triggers: "add a prod uptime check", "synthetic monitor for the login flow", "monitoring as code".
+description: Use when authoring synthetic monitoring as code in Node 24 (22 supported) / TypeScript — scheduled API and Playwright-based browser checks against live staging/prod via Checkly (`@checkly/cli`). The "is it up right now" layer, distinct from CI pre-merge tests. Triggers: "add a prod uptime check", "synthetic monitor for the login flow", "monitoring as code".
 ---
 
 # Synthetic Monitoring as Code (Checkly · Node 20 / TypeScript) — **canonical stack**

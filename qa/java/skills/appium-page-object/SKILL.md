@@ -1,6 +1,6 @@
 ---
 name: qa-appium-page-object-java
-description: Use when the user wants a Java Appium page object created or updated from elements already discovered on a live screen. Triggers: "create a page object for the Login screen", "add a page for the … screen", "implement the … page".
+description: Use when the user wants a Java Appium page object created or updated from elements already discovered on a live screen. Triggers: "create a page object for the Login screen", "add a page for the … screen", "implement the … page". For end-to-end suite work prefer the phased agent `qa-mobile-java` / `qa-bdd-java` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
 ---
 
 # QA — Appium Page Object Builder (Java)

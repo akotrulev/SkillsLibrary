@@ -1,6 +1,6 @@
 ---
 name: qa-db-testing-client-java
-description: Use when the user asks to connect from Java 21 tests to a real database (Postgres / MySQL / SQL Server / Mongo) to seed fixtures, run read-only assertion queries, and clean up safely. Triggers: "connect from our TestNG tests to Postgres", "JdbcTemplate probe for the orders table", "seed and clean a SQL fixture without leaks".
+description: Use when the user asks to connect from Java 21 tests to a real database (Postgres / MySQL / SQL Server / Mongo) to seed fixtures, run read-only assertion queries, and clean up safely. Triggers: "connect from our TestNG tests to Postgres", "JdbcTemplate probe for the orders table", "seed and clean a SQL fixture without leaks". For end-to-end suite work prefer the phased agent `qa-api-java` / `qa-ui-java` / `qa-mobile-java` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
 ---
 
 # QA — DB Testing Client (Java 21 + Spring Boot 3)

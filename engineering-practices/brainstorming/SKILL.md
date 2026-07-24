@@ -1,6 +1,6 @@
 ---
 name: ep-brainstorming
-description: Use when turning an ad-hoc idea or feature request into an approved design/spec before any code is written. Triggers: "let's build X", "add a feature that…", "I want to create…", "help me design…", before scaffolding or writing implementation code. Chains into `ep-writing-plans` once the design is approved. Do NOT use when a phased agent that owns its own design gate is driving the work (the `fe-blazor` Blazor build, the `qa-*` orchestrators), for pure Q&A or research, or once a design is already approved (go straight to `ep-writing-plans`).
+description: Use when turning an ad-hoc idea or feature request into an approved design/spec before any code is written. Triggers: "let's build X", "add a feature that…", "help me design…", "I want to add…", "how should we approach…", before scaffolding or implementation. Chains into `ep-writing-plans` once approved. Do NOT use while a phased agent is actively driving its own design gate (a `fe-*`/`be-*` build or a `qa-*` orchestrator already in its design phase — merely having one installed is not a reason to skip this), for pure Q&A, or once a design is already approved.
 ---
 
 # Brainstorming Ideas Into Designs
@@ -29,7 +29,7 @@ You MUST create a task for each of these items and complete them in order:
 2. **Ask clarifying questions** — one at a time, understand purpose/constraints/success criteria
 3. **Propose 2-3 approaches** — with trade-offs and your recommendation
 4. **Present design** — in sections scaled to their complexity, get user approval after each section
-5. **Write design doc** — save to `docs/specs/YYYY-MM-DD-<topic>-design.md` and commit
+5. **Write design doc** — save to `docs/specs/YY-MM-DD-HHmm-<topic>-design.md` and commit on the current branch
 6. **Spec self-review** — quick inline check for placeholders, contradictions, ambiguity, scope (see below)
 7. **User reviews written spec** — ask user to review the spec file before proceeding
 8. **Transition to implementation** — invoke `ep-writing-plans` skill to create implementation plan
@@ -106,11 +106,12 @@ digraph brainstorming {
 
 **Documentation:**
 
-- Write the validated design (spec) to `docs/specs/YYYY-MM-DD-<topic>-design.md`
+- Write the validated design (spec) to `docs/specs/YY-MM-DD-HHmm-<topic>-design.md`
+  - The prefix is the local date and 24-hour time the spec was written (e.g. `26-07-16-1430-billing-export-design.md`), so same-day specs on one topic sort chronologically instead of colliding. Get it from `date +%y-%m-%d-%H%M` rather than guessing.
   - (User preferences for spec location override this default)
 - Commit the design document to git
 
-> **Branch boundary:** committing the *spec document* to the current branch is fine even if that's `main` — a design doc is not implementation. *Implementation* commits are different: they belong on a feature branch/worktree created at execution time via `ep-using-git-worktrees` (`ep-executing-plans` forbids implementing on `main`/`master` without explicit consent). Writing the spec here does not start implementation.
+> **Branch boundary:** stay on the current branch — writing a spec never creates or checks out a branch or worktree, and committing the *spec document* is fine even on `main` (a design doc is not implementation). *Implementation* commits are different: `ep-executing-plans` decides the workspace at execution time and forbids implementing on `main`/`master` without explicit consent. Writing the spec here does not start implementation.
 
 **Spec Self-Review:**
 After writing the spec document, look at it with fresh eyes:
@@ -122,7 +123,7 @@ After writing the spec document, look at it with fresh eyes:
 
 Fix any issues inline. No need to re-review — just fix and move on.
 
-**Escalation (permission-gated):** the self-review above is the default. For a large or high-stakes spec, and **with the user's OK**, you may dispatch a dedicated reviewer subagent using the template at `./spec-document-reviewer-prompt.md` (it checks completeness, consistency, clarity, scope, YAGNI). This is one extra agent — it counts toward the conservative 2-agent gate in `ep-subagent-driven-development`, so ask before spawning it; don't dispatch it by reflex.
+**Escalation:** the self-review above is the default. For a large or high-stakes spec you may dispatch a dedicated reviewer subagent using the template at `./spec-document-reviewer-prompt.md` (it checks completeness, consistency, clarity, scope, YAGNI). This is one extra invocation — weigh it against the spec's stakes per the cost-before-speed policy in `ep-subagent-driven-development`; don't dispatch it by reflex.
 
 **User Review Gate:**
 After the spec review loop passes, ask the user to review the written spec before proceeding:

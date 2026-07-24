@@ -1,6 +1,6 @@
 ---
 name: qa-cloud-grid-config-dotnet
-description: Use when the user needs to run .NET Playwright (web) or Appium.WebDriver (mobile) tests on a **hosted cloud grid**. Triggers: "run our Playwright .NET tests on BrowserStack", "wire Appium .NET to Sauce Labs", "set up LambdaTest caps for our NUnit Appium tests".
+description: Use when the user needs to run .NET Playwright (web) or Appium.WebDriver (mobile) tests on a **hosted cloud grid**. Triggers: "run our Playwright .NET tests on BrowserStack", "wire Appium .NET to Sauce Labs", "set up LambdaTest caps for our NUnit Appium tests". For end-to-end suite work prefer the phased agent `qa-ui-dotnet` / `qa-mobile-dotnet` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
 ---
 
 # QA — Cloud Grid Config (.NET: Playwright + Appium.WebDriver)

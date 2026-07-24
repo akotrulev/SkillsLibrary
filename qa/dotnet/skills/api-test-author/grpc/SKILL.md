@@ -1,6 +1,6 @@
 ---
 name: qa-api-test-author-grpc-dotnet
-description: Scaffold black-box **gRPC** API tests in .NET 8 with Grpc.Net.Client + NUnit against a deployed, proto-defined HTTP/2 service. Triggers: "write a gRPC test for RPC X", "assert the RpcException StatusCode", "test a server-streaming RPC".
+description: Scaffold black-box **gRPC** API tests in .NET 10 (8-9 supported) with Grpc.Net.Client + NUnit against a deployed, proto-defined HTTP/2 service. Triggers: "write a gRPC test for RPC X", "assert the RpcException StatusCode", "test a server-streaming RPC". For end-to-end suite work prefer the phased agent `qa-api-dotnet` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
 ---
 
 # QA — gRPC API Test Writer (.NET 8 / Grpc.Net.Client + NUnit)

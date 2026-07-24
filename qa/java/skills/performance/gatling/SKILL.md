@@ -1,6 +1,6 @@
 ---
 name: qa-performance-gatling-java
-description: Use when the user asks to design or author Gatling performance / load tests in Java 21 (Gatling 3.11+ Java DSL). Triggers: "write a Gatling simulation for X", "Gatling spike test for our Java service", "ramp profile in Gatling Java DSL".
+description: Use when the user asks to design or author Gatling performance / load tests in Java 21 (Gatling 3.11+ Java DSL). Triggers: "write a Gatling simulation for X", "Gatling spike test for our Java service", "ramp profile in Gatling Java DSL". For end-to-end suite work prefer the phased agent `qa-performance-java` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
 ---
 
 # QA — Performance Testing with Gatling (Java 21)

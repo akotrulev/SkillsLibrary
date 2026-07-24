@@ -1,6 +1,6 @@
 ---
 name: fe-blazor-forms
-description: Use when the user asks to build or improve a Blazor form (.NET 8/9/10) — `EditForm`, `DataAnnotationsValidator`, `AddValidation()` + `[ValidatableType]` nested validation (net10), `FluentValidationValidator`, async validation, server-side error mapping (ProblemDetails), file uploads, multi-step wizards, accessibility. Triggers: "build a Blazor form for X", "wire FluentValidation in Blazor", "validate nested objects in a Blazor form", "server-side errors on Blazor form", "multi-step wizard in Blazor", "accessible Blazor inputs". Do NOT use for state management (use `frontend/blazor/skills/state-management`), component scaffolding (use `frontend/blazor/skills/generator`), or React (use `frontend/react/skills/forms`).
+description: Use when building or improving a Blazor form (.NET 8/9/10) — `EditForm`, `DataAnnotationsValidator`, `AddValidation()` + `[ValidatableType]` (net10), `FluentValidationValidator`, async validation, ProblemDetails error mapping, uploads, wizards, a11y. Triggers: "build a Blazor form for X", "wire FluentValidation in Blazor", "server-side errors on a Blazor form". Do NOT use for state management (`state-management`), component scaffolding (`generator`), or React (its sibling).
 ---
 
 # Blazor Forms

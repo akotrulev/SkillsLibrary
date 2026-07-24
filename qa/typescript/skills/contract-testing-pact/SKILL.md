@@ -1,6 +1,6 @@
 ---
 name: qa-contract-testing-pact-typescript
-description: Use when the user asks to set up consumer-driven contract testing with Pact in a Node 20 + TypeScript service (`@pact-foundation/pact` PactV3+). Triggers: "set up Pact for our Node service", "PactV3 consumer test in TS for X", "verify our TS provider against Y's contract".
+description: Use when the user asks to set up consumer-driven contract testing with Pact in a Node 24 (22 supported) + TypeScript service (`@pact-foundation/pact` PactV3+). Triggers: "set up Pact for our Node service", "PactV3 consumer test in TS for X", "verify our TS provider against Y's contract". For end-to-end suite work prefer the phased agent `qa-api-typescript` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
 ---
 
 # QA — Contract Testing with Pact (TypeScript / `@pact-foundation/pact`)

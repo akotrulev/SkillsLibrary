@@ -1,6 +1,6 @@
 ---
 name: ep-using-git-worktrees
-description: Use when starting feature work that needs isolation from the current workspace, or before executing an implementation plan — ensures an isolated workspace exists via native worktree tools (e.g. `EnterWorktree`) or a git-worktree fallback. Triggers: "work on this in a worktree", "set up an isolated workspace", before `ep-executing-plans` on non-trivial work. Pairs with `ep-finishing-a-development-branch` (which cleans the worktree up at the end). Do NOT use when already inside an isolated workspace (Step 0 detects this) or for a quick in-place edit the user does not want isolated.
+description: Use when starting feature work that needs isolation from the current workspace, or before executing an implementation plan — ensures an isolated workspace exists via native worktree tools (e.g. `EnterWorktree`) or a git-worktree fallback. Triggers: "work on this in a worktree", "set up an isolated workspace", before `ep-executing-plans` on non-trivial work. Do NOT use when already inside an isolated workspace or for a quick in-place edit the user does not want isolated.
 ---
 
 # Using Git Worktrees

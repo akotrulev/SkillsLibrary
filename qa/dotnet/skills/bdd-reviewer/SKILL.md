@@ -1,6 +1,6 @@
 ---
 name: qa-bdd-reviewer-dotnet
-description: Use when reviewing or auditing existing Gherkin .feature files and Reqnroll step definitions in C#/.NET for living-documentation quality, step reusability, and correct binding/DI/lifecycle. Triggers: "review these feature files", "audit our Reqnroll step definitions", "are these Gherkin scenarios good", "check our BDD layer". Do NOT use to generate features (use `qa/_shared/bdd/gherkin-authoring`) or step definitions (use `qa/dotnet/skills/bdd-step-bindings`).
+description: Use when reviewing or auditing existing Gherkin .feature files and Reqnroll step definitions in C#/.NET for living-documentation quality, step reusability, and correct binding/DI/lifecycle. Triggers: "review these feature files", "audit our Reqnroll step definitions", "are these Gherkin scenarios good", "check our BDD layer". Do NOT use to generate features (use `qa/_shared/bdd/gherkin-authoring`) or step definitions (use `qa/dotnet/skills/bdd-step-bindings`). For end-to-end suite work prefer the phased agent `qa-bdd-dotnet` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
 ---
 
 # Reqnroll / Gherkin Reviewer (C# / .NET 8)

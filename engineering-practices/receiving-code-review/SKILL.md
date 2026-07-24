@@ -1,6 +1,6 @@
 ---
 name: ep-receiving-code-review
-description: Use when acting on code-review feedback — from a human, a reviewer subagent (`ep-requesting-code-review`), or a native review command — before you implement any suggestion, especially when feedback seems unclear or technically questionable. Enforces verify-before-implementing and reasoned pushback over performative agreement or blind implementation. Triggers: "the reviewer said…", "apply this review feedback", "address these PR comments", after `ep-requesting-code-review` returns findings. Do NOT use to request/dispatch a review (use `ep-requesting-code-review`) or to author the review yourself.
+description: Use when acting on code-review feedback — from a human, a reviewer subagent, or a native review command — before implementing any suggestion, especially when feedback seems unclear or technically questionable. Enforces verify-before-implementing and reasoned pushback over performative agreement. Triggers: "the reviewer said…", "apply this review feedback", "address these PR comments". Do NOT use to request/dispatch a review (`ep-requesting-code-review`) or to author the review yourself.
 ---
 
 # Code Review Reception

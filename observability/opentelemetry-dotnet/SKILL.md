@@ -1,6 +1,6 @@
 ---
 name: observability-opentelemetry-dotnet
-description: Use when the user asks to instrument a .NET service (10 primary, 8/9 supported) with OpenTelemetry — traces, metrics, log correlation — and export via OTLP to Tempo / Prometheus / Loki (or an OTel Collector). Triggers: "instrument this with OTel", "add traces / metrics", "wire OTLP exporter", "add a custom span / counter / histogram", "what spans am I missing". Do NOT use for Java (use `observability/opentelemetry-java`), Node (use `observability/opentelemetry-node`), or for log shaping (use `observability/structured-logging-dotnet`).
+description: Use when instrumenting a .NET service (10 primary, 8/9) with OpenTelemetry — traces, metrics, log correlation — exporting OTLP to a Collector. Triggers: "instrument this with OTel", "add traces / metrics", "wire OTLP exporter", "add a custom span / counter / histogram". Do NOT use for Java/Node (their siblings) or log shaping (`structured-logging-dotnet`).
 ---
 
 # Observability — OpenTelemetry (.NET 10 primary / 8-9 supported)

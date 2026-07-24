@@ -1,6 +1,6 @@
 ---
 name: qa-data-driven-testing-dotnet
-description: Run one .NET 8 / NUnit test body against **many rows of data sourced from an external file**. Triggers: "run this test for every row in a CSV / spreadsheet", "data-drive these tests from a JSON file", "parameterize this NUnit test with external test data".
+description: Run one .NET 10 (8-9 supported) / NUnit test body against **many rows of data sourced from an external file**. Triggers: "run this test for every row in a CSV / spreadsheet", "data-drive these tests from a JSON file", "parameterize this NUnit test with external test data". For end-to-end suite work prefer the phased agent `qa-api-dotnet` / `qa-ui-dotnet` / `qa-mobile-dotnet` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
 ---
 
 # Data-Driven Testing (.NET 8 / NUnit)

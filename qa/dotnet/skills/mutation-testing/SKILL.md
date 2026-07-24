@@ -1,6 +1,6 @@
 ---
 name: qa-mutation-testing-dotnet
-description: Use when measuring TEST QUALITY (not code coverage) for a .NET 10 (8/9 supported) suite with mutation testing — run Stryker.NET (`dotnet stryker`) to seed faults into compiled C# and prove the tests detect them, fail the build on a mutation-score threshold, and turn surviving mutants into missing-assertion findings. Triggers: "add mutation testing", "run stryker", "is my coverage real", "tests pass but catch nothing", "mutation score gate". .NET-only tool; the JVM sibling is PIT/pitest, the TS sibling is StrykerJS.
+description: Use when measuring TEST QUALITY (not code coverage) for a .NET 10 (8/9) suite with mutation testing — run Stryker.NET (`dotnet stryker`) to seed faults and prove the tests detect them, fail the build on a mutation-score threshold, turn surviving mutants into missing-assertion findings. Triggers: "add mutation testing", "run stryker", "is my coverage real", "tests pass but catch nothing". .NET-only; the JVM sibling is PIT/pitest.
 ---
 
 # QA — Mutation Testing (Stryker.NET, C#)

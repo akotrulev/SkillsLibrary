@@ -1,6 +1,6 @@
 ---
 name: qa-security-shared
-description: Cross-stack security-testing backbone — maps OWASP Top 10 (2025) and API Security Top 10 (2023) risks to this library's scanner gates and stack-native security skills, with severity/gating policy and triage discipline. Load when planning security coverage or choosing which security skill applies; the `qa-security` agent drives it phase by phase.
+description: Cross-stack security-testing backbone — maps OWASP Top 10 (2025) and API Security Top 10 (2023) risks to this library's scanner gates and stack-native security skills, with severity/gating policy, the authorization-to-scan rule, ticketed-triage discipline, and SARIF consolidation. Load when planning security coverage or choosing which security skill applies; the `qa-security` agent drives it phase by phase. Triggers (as the planning layer, normally alongside a scanner sibling) "what security testing do we need", "map our coverage to OWASP", "which security skill applies here", "set the security gating policy", "triage these scanner findings". Do NOT load standalone to run a scan — pair it with the gate that does the work (`qa-security-testing-{sast,secrets-scanning,api-fuzzing,nuclei,tls-scanning,container-iac-scanning,zap-automation-framework}` or the stack's `security-testing/*`).
 ---
 
 # QA — Security Testing (Shared / OWASP backbone)

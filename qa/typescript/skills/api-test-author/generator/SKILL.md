@@ -1,6 +1,6 @@
 ---
 name: qa-api-test-author-generator-typescript
-description: Use when the user asks to write TypeScript API tests using Vitest + native fetch + Zod against a REST backend. Triggers: "write a TS API test for X", "add a Vitest spec for endpoint Y", "automate these test cases in TypeScript".
+description: Use when the user asks to write TypeScript API tests using Vitest + native fetch + Zod against a REST backend. Triggers: "write a TS API test for X", "add a Vitest spec for endpoint Y", "automate these test cases in TypeScript". For end-to-end suite work prefer the phased agent `qa-api-typescript` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
 ---
 
 # QA — API Test Writer (TypeScript / Vitest + fetch + Zod)

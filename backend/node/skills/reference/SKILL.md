@@ -1,6 +1,6 @@
 ---
 name: be-node-reference
-description: Use when the user asks to explain or look up a design pattern in TypeScript (strict mode) — for Node / NestJS / Express backends, or shared utilities. Triggers: "what is the strategy pattern in TS", "tagged union vs class hierarchy", "branded types for ids", "result type vs exceptions", "TS discriminated unions". Do NOT use for scaffolding (use `backend/node/skills/generator`), reviews (use `backend/node/skills/reviewer`), React-specific patterns (use `frontend/react/skills/reference`), or React Native (use `frontend/react-native`).
+description: Use when explaining or looking up a design pattern in TypeScript (strict mode) for Node / NestJS / Express backends. Triggers: "what is the strategy pattern in TS", "tagged union vs class hierarchy", "branded types for ids", "result type vs exceptions". Do NOT use for scaffolding (`generator`), reviews (`reviewer`), or React-specific patterns (`frontend/react/skills/reference`).
 ---
 
 # TypeScript Design Patterns — Reference

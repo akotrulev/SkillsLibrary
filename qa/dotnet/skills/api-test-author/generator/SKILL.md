@@ -1,6 +1,6 @@
 ---
 name: qa-api-test-author-generator-dotnet
-description: Use when the user asks to scaffold .NET API tests (NUnit + RestSharp) — new fixtures, new test methods on an existing `*Tests.cs` file, or a specific scenario (happy path, 4xx with ProblemDetails, 401). Triggers: "write an API test for X", "add a 404 test to YTests", "scaffold an ApiTests fixture for Z".
+description: Use when the user asks to scaffold .NET API tests (NUnit + RestSharp) — new fixtures, new test methods on an existing `*Tests.cs` file, or a specific scenario (happy path, 4xx with ProblemDetails, 401). Triggers: "write an API test for X", "add a 404 test to YTests", "scaffold an ApiTests fixture for Z". For end-to-end suite work prefer the phased agent `qa-api-dotnet` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
 ---
 
 # QA — API Test Writer (.NET)

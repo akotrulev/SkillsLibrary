@@ -1,6 +1,6 @@
 ---
 name: qa-appium-page-object-dotnet
-description: Use when the user wants a .NET (C#) Appium page object created or updated from elements already discovered on a live screen. Triggers: "create a page object for the Login screen", "add a page for the … screen", "implement the … page".
+description: Use when the user wants a .NET (C#) Appium page object created or updated from elements already discovered on a live screen. Triggers: "create a page object for the Login screen", "add a page for the … screen", "implement the … page". For end-to-end suite work prefer the phased agent `qa-mobile-dotnet` / `qa-bdd-dotnet` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
 ---
 
 # QA — Appium Page Object Builder (.NET)

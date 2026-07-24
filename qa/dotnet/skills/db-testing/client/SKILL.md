@@ -1,6 +1,6 @@
 ---
 name: qa-db-testing-client-dotnet
-description: Use when the user asks to connect from .NET 8 tests to a real database (Postgres / SQL Server / SQLite / Mongo) to seed fixtures, run read-only assertion queries, and clean up safely. Triggers: "connect from these tests to Postgres", "assert the row was written in SQL", "seed and clean a SQL fixture without leaks".
+description: Use when the user asks to connect from .NET 10 (8-9 supported) tests to a real database (Postgres / SQL Server / SQLite / Mongo) to seed fixtures, run read-only assertion queries, and clean up safely. Triggers: "connect from these tests to Postgres", "assert the row was written in SQL", "seed and clean a SQL fixture without leaks". For end-to-end suite work prefer the phased agent `qa-api-dotnet` / `qa-ui-dotnet` / `qa-mobile-dotnet` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
 ---
 
 # QA — DB Testing Client (.NET 8)

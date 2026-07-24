@@ -1,6 +1,6 @@
 ---
 name: be-node-persistence
-description: Use when the user asks to set up or refactor persistence in Node (24 primary, 22 maintenance) + TypeScript — Prisma (default), Drizzle, or TypeORM; schema design, migrations, query patterns, transactions, optimistic concurrency, performance tuning. Triggers: "set up Prisma for X", "Drizzle vs Prisma", "Prisma migration workflow", "transaction in Prisma", "this query is slow in Prisma", "raw SQL escape hatch". Do NOT use for non-ORM data access (use `data/<db>` for raw SQL), cross-engine migrations (use `data/_shared/migrations`), or .NET / Java persistence.
+description: Use when setting up or refactoring persistence in Node (24 primary, 22 maintenance) + TypeScript — Prisma (default), Drizzle, or TypeORM; schema, migrations, query patterns, transactions, optimistic concurrency, tuning. Triggers: "set up Prisma for X", "Drizzle vs Prisma", "transaction in Prisma", "raw SQL escape hatch". Do NOT use for non-ORM data access (`data/<db>`), cross-engine migrations (`data/_shared/migrations`), or .NET / Java persistence.
 ---
 
 # TypeScript — Persistence with Prisma (default), Drizzle, TypeORM

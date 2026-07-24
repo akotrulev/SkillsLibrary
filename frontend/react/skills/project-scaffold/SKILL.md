@@ -1,6 +1,6 @@
 ---
 name: fe-react-project-scaffold
-description: Use when the user asks to stand up a React app from zero — a Next.js 15 App Router project (primary) or a Vite SPA (fallback) — choose the rendering strategy per route, lay out the server/client component boundary and feature folders, and wire TypeScript strict, ESLint/Prettier, package manager, and typed env config. Triggers "create a new React/Next.js project", "scaffold a Next.js App Router app", "set up a Vite React SPA", "which rendering strategy should this route use", "should this be static or dynamic", "set up the folder structure / strict TS / env config". Do NOT use to scaffold components into an existing app (use `frontend/react/skills/generator`), to wire data fetching (use `frontend/react/skills/data-access`), to add a component library (use `frontend/react/skills/component-library`), or for auth wiring (use `auth/auth0-react`).
+description: Use when standing up a new app from zero — Next.js 15 App Router (primary) or Vite SPA (fallback) — rendering strategy per route, server/client boundary, feature folders, strict TS, ESLint/Prettier, typed env config. Triggers: "create a new React/Next.js project", "scaffold a Next.js App Router app", "which rendering strategy for this route", "set up the folder structure". Do NOT use to scaffold components into an existing app (`generator`), build out the route tree (`routing`), wire data fetching (`data-access`), or upgrade an existing app (`migration`).
 ---
 
 # React — Project Scaffold

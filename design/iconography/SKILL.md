@@ -1,6 +1,6 @@
 ---
-name: iconography
-description: Use when choosing, using, or auditing ICONS and social/OG imagery as a SYSTEM for a web app — one icon family per product (stroke vs fill, weight, grid), the library decision (Lucide default · Heroicons · Material Symbols · a component library's own set), inline-SVG discipline (`currentColor`, size via `em`/tokens, decorative-vs-labeled a11y), when an icon may stand alone vs needing a text label, and OG/social-image craft (dimensions, safe zones, thumbnail legibility). Stack-agnostic taste layer; rendering mechanics belong to the stack. Triggers "which icon library should we use", "our icons look inconsistent", "how do I size/color an inline SVG icon", "should this button have an icon or a label", "make an OG/social share image". Do NOT use for the token system (`design/design-tokens`), palette/type taste (`design/frontend-design`), a component library's setup (a stack's `component-library`), the accessible-label mechanics or icon-only-button rule (a stack's `accessibility` / `ui-conventions`), or a logo.
+name: design-iconography
+description: Use when choosing, using, or auditing icons and OG/social imagery as a SYSTEM — one icon family per product, the library decision (Lucide default · Heroicons · Material Symbols), inline-SVG discipline, icon-vs-label choice, OG-image craft. Triggers: "which icon library", "our icons look inconsistent", "make an OG/social image". Do NOT use for the token system (`design/design-tokens`), palette/type taste (`design/frontend-design`), or a logo.
 ---
 
 # Iconography — icons and social imagery as a system

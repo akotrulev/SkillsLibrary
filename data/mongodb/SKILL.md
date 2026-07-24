@@ -1,6 +1,6 @@
 ---
 name: data-mongodb
-description: Use when designing collections/documents, modeling relationships (embed vs reference mechanics), securing data (auth/roles/field-level encryption), writing queries or aggregation pipelines, choosing indexes, caching, or tuning performance on MongoDB from a .NET / Java / Node backend. Triggers: "design a Mongo collection", "write an aggregation pipeline", "this Mongo query is slow", "add an index", "queryable encryption", "embed or reference?", "set up the Mongo client". Pick the topic in the routing table, then read its reference file end-to-end. Do NOT use for relational engines (`data/postgresql` / `data/sqlserver` / `data/mysql`), Redis (`data/redis`), DynamoDB/Cosmos DB (their skills), cross-engine modeling decisions (`data/_shared/schema-design`), or writing DB tests (`qa/<stack>/skills/db-testing`).
+description: Use when designing collections/documents, embed-vs-reference, security (auth/roles/encryption), queries or aggregation pipelines, indexes, or tuning MongoDB from a .NET / Java / Node backend. Pick the topic in the routing table, then read its reference. Triggers: "design a Mongo collection", "write an aggregation pipeline", "this Mongo query is slow", "embed or reference?". Do NOT use for relational engines, cross-engine modeling (`data/_shared/schema-design`), or DB tests (qa `db-testing`).
 ---
 
 # Data — MongoDB

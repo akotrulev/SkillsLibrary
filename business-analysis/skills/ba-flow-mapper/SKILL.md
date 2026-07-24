@@ -1,6 +1,6 @@
 ---
 name: ba-flow-mapper
-description: Use when turning requirements (story, BRD, feature description) into a business-flow model — a BPMN-disciplined Mermaid flowchart with named actors, every decision exit labeled, and failure/timeout paths modeled — persisted to the project's business-model KB. Triggers: "map the flow for this feature", "diagram the checkout process from these requirements", "what are all the paths through X", "model the business flow". Do NOT use for entity lifecycles (ba-state-modeler), rule tables (ba-decision-modeler), code-level sequence design, or UI screen flows.
+description: Use when turning requirements (story, BRD, feature description) into a business-flow model — a BPMN-disciplined Mermaid flowchart with named actors, every decision exit labeled, failure/timeout paths modeled — persisted to the KB. Triggers: "map the flow for this feature", "diagram the checkout process", "map the user journey through X", "what are all the paths through X", "what happens when this step fails or times out". Do NOT use for entity lifecycles (`ba-state-modeler`), rule tables (`ba-decision-modeler`), or UI screen flows.
 ---
 
 # BA — Flow Mapper

@@ -1,6 +1,6 @@
 ---
 name: ba-state-modeler
-description: Use when modeling a business entity's lifecycle (Order, Subscription, User…) as one state × event table shared across ALL features, with each transition annotated by its owning feature — persisted to the project's business-model KB. Triggers: "what states can an order be in", "model the subscription lifecycle", "which feature moves it to Cancelled", "can feature X do this while it's Archived". Do NOT use for process/step flows (ba-flow-mapper), rule tables (ba-decision-modeler), or deriving state-transition TEST cases (qa/manual/test-design-techniques owns those mechanics).
+description: Use when modeling a business entity's lifecycle (Order, Subscription, User…) as one state × event table shared across ALL features, each transition annotated by its owning feature — persisted to the KB. Triggers: "what states can an order be in", "model the subscription lifecycle", "which feature moves it to Cancelled". Do NOT use for process/step flows (`ba-flow-mapper`), rule tables (`ba-decision-modeler`), or state-transition TEST design (`test-design-techniques`).
 ---
 
 # BA — State Modeler

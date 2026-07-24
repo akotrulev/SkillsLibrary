@@ -1,6 +1,6 @@
 ---
 name: qa-visual-regression-java
-description: Use when tests must catch unintended visual changes — Playwright's built-in pixel snapshots, Percy's hosted review workflow, or Applitools Eyes visual-AI. Triggers: "add visual regression tests", "screenshot diff this page", "the layout broke and no functional test caught it". Pick the tool in the decision matrix, then read its reference file.
+description: Use when a Java 21 / TestNG test suite must catch unintended visual changes — Playwright's built-in pixel snapshots, Percy's hosted review workflow, or Applitools Eyes visual-AI. Triggers "add visual regression tests", "screenshot diff this page", "the layout broke and no functional test caught it". Pick the tool in the decision matrix, then read its reference file. Do NOT use for structural breakpoint/viewport assertions (use `qa-responsive-testing-java`), for accessibility scans (use `qa-accessibility-testing-java`), or for non-Java projects (use `qa-visual-regression-{dotnet,typescript}`). For end-to-end suite work prefer the phased agent `qa-ui-java` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
 ---
 
 # QA — Visual Regression (Java 21)

@@ -1,6 +1,6 @@
 ---
 name: ba-decision-modeler
-description: Use when a business decision point (pricing, eligibility, access, fees, routing) is touched by rules from one or more features — build ONE merged DMN-style decision table per decision point with a declared hit policy, then run the completeness check (gaps) and overlap check (contradictions) — persisted to the project's business-model KB. Triggers: "what price does this order pay", "build a decision table for these rules", "do these discounts stack", "which rule wins when both match". Do NOT use for process flows (ba-flow-mapper), entity lifecycles (ba-state-modeler), or deriving decision-table TEST cases (qa/manual/test-design-techniques owns those mechanics).
+description: Use when a business decision point (pricing, eligibility, access, fees, routing) is touched by rules from one or more features — build ONE merged DMN-style decision table per decision point with a declared hit policy, run completeness and overlap checks, persist to the KB. Triggers: "what price does this order pay", "do these discounts stack", "which rule wins when both match". Do NOT use for process flows (`ba-flow-mapper`), entity lifecycles (`ba-state-modeler`), or decision-table TEST design.
 ---
 
 # BA — Decision Modeler

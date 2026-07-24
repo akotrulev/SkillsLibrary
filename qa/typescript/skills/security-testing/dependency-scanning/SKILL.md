@@ -1,6 +1,6 @@
 ---
 name: qa-security-testing-dependency-scanning-typescript
-description: Use when wiring SCA (dependency-vulnerability scanning) as a CI gate for a TypeScript build — `npm audit` (lockfile-driven) as the native gate over the direct + transitive tree, failing above a severity threshold, with a ticketed suppression path. Triggers: "fail the build on vulnerable dependencies", "add dependency scanning", "gate new CVEs". Not for runtime DAST → `security-testing/zap-baseline`.
+description: Use when wiring SCA (dependency-vulnerability scanning) as a CI gate for a TypeScript build — `npm audit` (lockfile-driven) as the native gate over the direct + transitive tree, failing above a severity threshold, with a ticketed suppression path. Triggers: "fail the build on vulnerable dependencies", "add dependency scanning", "gate new CVEs". Not for runtime DAST → `security-testing/zap-baseline`. For end-to-end suite work prefer the phased agent `qa-performance-typescript` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
 ---
 
 # Security Testing — Dependency Scanning / SCA (TypeScript)

@@ -1,6 +1,6 @@
 ---
 name: qa-performance-k6-typescript
-description: Use when the user asks to design or author k6 (Grafana k6) performance / load tests in JavaScript/TypeScript. Triggers: "write a k6 script for endpoint X", "design a k6 average load test", "spike test in k6".
+description: Use when the user asks to design or author k6 (Grafana k6) performance / load tests in JavaScript/TypeScript. Triggers: "write a k6 script for endpoint X", "design a k6 average load test", "spike test in k6". For end-to-end suite work prefer the phased agent `qa-performance-typescript` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
 ---
 
 # QA — Performance Testing with k6 (TypeScript / JavaScript)

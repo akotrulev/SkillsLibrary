@@ -1,6 +1,6 @@
 ---
-name: theme-factory
-description: Use to apply one of 10 preset color+font themes as primitive-tier starting values for an artifact (slide deck, doc, HTML page) or as a quick-start palette for a web app, or to generate a similar preset on-the-fly — when a brief does not warrant a bespoke identity. Each theme is a cohesive palette (hex codes) + a font pairing. Triggers "apply a preset theme", "style this deck/page with a theme", "pick a color theme for this artifact", "quick theme without a bespoke design". Do NOT use to INVENT a bespoke identity from a brief (use `design/frontend-design`, the primary theme authority), to match an EXISTING brand (use `design/brand-intake`), or for the token tier/naming discipline the theme feeds into (use `design/design-tokens`).
+name: design-theme-factory
+description: Use to apply one of 10 preset color+font themes as primitive-tier starting values for an artifact (deck, doc, HTML page) or a quick-start web-app palette — when a brief does not warrant a bespoke identity. Triggers: "apply a preset theme", "style this deck/page with a theme", "quick theme". Do NOT use to INVENT a bespoke identity (`design/frontend-design`), match an EXISTING brand (`design/brand-intake`), or for token tier discipline (`design/design-tokens`).
 metadata:
   version: "1.1.0"
 ---

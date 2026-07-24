@@ -1,6 +1,6 @@
 ---
 name: observability-loki-tempo-setup
-description: Use when the user asks to set up Grafana Loki (logs) and Grafana Tempo (traces) — wire OTel Collector to both, choose object storage (S3 / GCS / Azure Blob), retention, log shipping (Grafana Alloy / Vector / Fluent Bit), index labels, exemplar linking, multi-tenant. Triggers: "set up Loki", "ship logs to Loki", "Tempo configuration", "wire OTel Collector to Loki / Tempo", "what storage for Loki", "log retention strategy". Do NOT use for query syntax (use `observability/logql-promql`), dashboards (use `observability/grafana-dashboards`), or code instrumentation (use `observability/opentelemetry-{stack}` + `observability/structured-logging-{stack}`).
+description: Use when setting up Grafana Loki (logs) and Tempo (traces) — wire the OTel Collector to both, choose object storage (S3/GCS/Azure Blob), retention, log shipping (Grafana Alloy default), index labels, exemplar linking, multi-tenant. Triggers: "set up Loki", "ship logs to Loki", "Tempo configuration", "what storage for Loki". Do NOT use for query syntax (`logql-promql`), dashboards (`grafana-dashboards`), or code instrumentation (`opentelemetry-{stack}` + `structured-logging-{stack}`).
 ---
 
 # Observability — Loki + Tempo Setup

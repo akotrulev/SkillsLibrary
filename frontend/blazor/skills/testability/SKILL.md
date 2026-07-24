@@ -1,6 +1,6 @@
 ---
 name: fe-blazor-testability
-description: Use when the user asks to add, audit, or fix `data-testid` attributes in Blazor (.razor) pages and components so automated UI suites can target the app — including consuming a `missing-testids.md` report from QA's `pom-builder` / `appium-explore`. Triggers: "add testids to this page", "audit the data-testids", "QA sent a missing-testids report", "make this component targetable by Playwright". Do NOT use to write the UI tests themselves (use `qa-ui-dotnet` / `qa/dotnet/skills/ui-test-author`), to build page objects (use `qa/dotnet/skills/pom-builder`), or for non-Blazor UIs beyond the static-HTML appendix (`references/static-html.md`).
+description: Use when adding, auditing, or fixing `data-testid` attributes in Blazor (.razor) pages and components so UI suites can target the app — including consuming a `missing-testids.md` report from QA's `pom-builder` / `appium-explore`. Triggers: "add testids to this page", "audit the data-testids", "QA sent a missing-testids report". Do NOT use to write the UI tests (`qa-ui-dotnet`), build page objects (qa `pom-builder`), or for non-Blazor UIs beyond the static-HTML appendix.
 ---
 
 # Blazor Testability — `data-testid` Writer

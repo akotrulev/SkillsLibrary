@@ -1,6 +1,6 @@
 ---
 name: qa-email-testing-dotnet
-description: Use when tests must capture and assert email the SUT sends — local SMTP sink (Mailpit), hosted inbox (Mailosaur), real Gmail over IMAP, or SendGrid sandbox-send. Triggers: "assert the welcome email was sent", "extract the OTP/reset link from the email", "test email content/recipients". Pick the sink in the decision matrix, then read its reference file.
+description: Use when a .NET 10 (8-9 supported) / NUnit test suite must capture and assert email the SUT sends — local SMTP sink (Mailpit), hosted inbox (Mailosaur), real Gmail over IMAP, or SendGrid sandbox-send. Triggers "assert the welcome email was sent", "extract the OTP/reset link from the email", "test email content/recipients". Pick the sink in the decision matrix, then read its reference file. Do NOT use for broker messages (use `qa-messaging-testing-dotnet`), for in-app notification UI (use `qa-ui-test-author-playwright-dotnet`), or for non-.NET projects (use `qa-email-testing-{java,typescript}`). For end-to-end suite work prefer the phased agent `qa-api-dotnet` / `qa-ui-dotnet` / `qa-mobile-dotnet` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
 ---
 
 # QA — Email Testing (.NET 8 / C#)

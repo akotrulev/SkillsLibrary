@@ -1,6 +1,6 @@
 ---
 name: observability-prometheus-mimir-setup
-description: Use when the user asks to set up the metrics backend of the Grafana stack — Prometheus (single-cluster) or Grafana Mimir (multi-cluster / long-retention / HA) — ingest metrics from the OTel Collector (remote-write or OTLP), enable exemplar storage, deploy recording/alerting rules, and tune retention + cardinality. Triggers: "set up Prometheus", "deploy Mimir", "long-term metrics storage", "remote-write metrics to Mimir", "enable exemplars", "where do my OTLP metrics go", "how do I store metrics". Do NOT use for query/rule syntax (use `observability/logql-promql`), dashboards/panels (use `observability/grafana-dashboards`), logs + traces (use `observability/loki-tempo-setup`), or code instrumentation (use `observability/opentelemetry-{stack}`).
+description: Use when setting up the metrics backend of the Grafana stack — Prometheus (single-cluster) or Mimir (multi-cluster / long-retention) — ingest from the OTel Collector, exemplar storage, rule deployment, retention + cardinality tuning. Triggers: "set up Prometheus", "deploy Mimir", "long-term metrics storage", "enable exemplars". Do NOT use for query/rule syntax (`logql-promql`), dashboards (`grafana-dashboards`), logs+traces (`loki-tempo-setup`), or instrumentation (`opentelemetry-{stack}`).
 ---
 
 # Observability — Prometheus / Mimir Setup

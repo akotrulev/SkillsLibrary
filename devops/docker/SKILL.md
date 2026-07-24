@@ -22,7 +22,7 @@ Authors production-grade Dockerfiles for the library's three backend stacks (.NE
 - Kubernetes manifests / Helm → `devops/kubernetes`
 - Pipeline YAML → `devops/{github-actions,gitlab-ci,azure-pipelines}`
 - App deploy specifics → `devops/{aws,azure}-deployment`
-- Local docker-compose dev workflow → out of scope here (this skill is production-shaped images)
+- Local docker-compose dev workflow → out of scope here (this skill is production-shaped images). **No skill owns this yet** — the only deliberately unowned fence in the domain; improvise from the Dockerfile guidance below rather than looking for a sibling skill. (Test-fixture containers are a different thing and *are* owned: `qa-db-testing-testcontainers-{java,dotnet,typescript}`.)
 
 ## Inputs needed
 

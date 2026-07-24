@@ -11,7 +11,7 @@ Load plan, review critically, execute task-by-task, report at each checkpoint, a
 
 **Announce at start:** "I'm using the `ep-executing-plans` skill to implement this plan."
 
-**This is the default execution path (inline, cost before speed).** A subagent-based alternative — `ep-subagent-driven-development` — exists for the rare case where delegation clearly pays for itself and the user asks for it; it carries a hard 2-agent gate. Unless both are true, stay here.
+**This is the default execution path (inline, cost before speed).** A subagent-based alternative — `ep-subagent-driven-development` — exists for the rare case where delegation clearly pays for itself and the user asks for it; it is governed by the cost-before-speed policy. Unless both are true, stay here.
 
 ## The Process
 
@@ -88,4 +88,4 @@ After all tasks complete and verified:
 - **`ep-finishing-a-development-branch`** - Complete development after all tasks
 
 **Opt-in alternative:**
-- **`ep-subagent-driven-development`** - subagent execution when delegation pays for itself (cost-aware, 2-agent gate); not the default
+- **`ep-subagent-driven-development`** - subagent execution when delegation pays for itself (cost-aware); not the default

@@ -1,10 +1,9 @@
 ---
-name: web-design-guidelines
-description: Use for a CODE-level UI audit — read UI source files (markup, attributes, interaction handlers) and flag violations of the Web Interface Guidelines: missing aria-labels, `<div onClick>` navigation, unlabeled inputs, `transition: all`, images without dimensions, un-virtualized long lists, and the rest of the Vercel ruleset. Runs offline against a pinned vendored snapshot. Triggers "audit my UI code against web interface guidelines", "pre-ship UI code audit", "check this component's markup against best practices", "review these UI files for guideline violations". Do NOT use for experience-level review of flows/heuristics/IA (use `design/ux-heuristics`), automated a11y scanning with axe/Lighthouse (use qa `accessibility-testing`), visual taste / identity direction (use `design/frontend-design`), or copy wording (use `design/ux-writing`).
+name: design-web-guidelines
+description: Use for a CODE-level UI audit — read UI source files and flag violations of the vendored Vercel Web Interface Guidelines: missing aria-labels, `<div onClick>` navigation, unlabeled inputs, `transition: all`. Runs offline against the pinned snapshot. Triggers: "audit my UI code against web interface guidelines", "pre-ship UI code audit", "check these components for interface-guideline violations", "review this markup before we ship". Do NOT use for experience-level review (`design-ux-heuristics`), automated axe/Lighthouse scanning (qa `accessibility-testing`), or the visual direction itself (`design-frontend-design`).
 metadata:
   author: vercel
   version: "1.1.0"
-  argument-hint: <file-or-pattern>
 ---
 
 # Web Interface Guidelines — code-level UI audit

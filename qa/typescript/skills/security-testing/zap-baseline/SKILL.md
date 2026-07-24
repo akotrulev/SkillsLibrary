@@ -1,6 +1,6 @@
 ---
 name: qa-security-testing-zap-baseline-typescript
-description: OWASP ZAP **baseline** DAST scan as a CI build gate in TypeScript: spider a **running** app for a bounded time and run ZAP's **passive** rules (no attack payloads.
+description: Use when adding an OWASP ZAP **baseline** (passive) DAST scan as a CI build gate for a Node 24 (22 supported) / TypeScript / Vitest pipeline — spider a running app for a bounded time and run ZAP's passive rules (missing security headers, cookie flags, information leaks, mixed content) with **no attack payloads**, fail on new alerts above a threshold, and manage a false-positive baseline file. Fast and safe enough for every PR. Triggers "add a DAST gate to CI", "run ZAP against our running app", "scan for missing security headers", "passive security scan on every PR". Do NOT use for active/injection scanning (use `qa-security-testing-zap-automation-framework`), known-CVE or exposure matching (use `qa-security-testing-nuclei`), TLS handshake configuration (use `qa-security-testing-tls-scanning`), BOLA/IDOR authorization logic (use `qa-security-testing-access-control-testing-typescript`), or non-TypeScript pipelines (use `qa-security-testing-zap-baseline-{java,dotnet}`).
 ---
 
 # Security Testing — OWASP ZAP Baseline Scan (TypeScript)

@@ -1,6 +1,6 @@
 ---
 name: fe-blazor-project-scaffold
-description: Use when the user asks to stand up a Blazor Web App from zero in .NET 8/9/10 — choose the interactivity model, lay out the server + `.Client` split, pick a render mode per surface, and wire nullable/warnings-as-errors/central package management/`.editorconfig`. Triggers: "create a new Blazor project", "scaffold a Blazor Web App", "which render mode should this app use", "set up the server + Client split", "start a Blazor solution with CPM". Do NOT use to scaffold components into an existing solution (use `frontend/blazor/skills/generator`), to wire data fetching (use `frontend/blazor/skills/data-access`), to add a component library (use `frontend/blazor/skills/component-library`), or for auth wiring (use `auth/auth0-blazor`).
+description: Use when standing up a Blazor Web App from zero in .NET 8/9/10 — choose the interactivity model, lay out the server + `.Client` split, pick a render mode per surface, wire nullable/warnings-as-errors/CPM/`.editorconfig`. Triggers: "create a new Blazor project", "scaffold a Blazor Web App", "which render mode should this app use". Do NOT use to scaffold components into an existing solution (`generator`), wire data fetching (`data-access`), or add a component library (`component-library`).
 ---
 
 # Blazor — Project Scaffold

@@ -1,6 +1,6 @@
 ---
-name: brand-intake
-description: Use when a project starts from an EXISTING brand rather than a blank page — a brand book, style guide, logo, marketing site, or just "our colors are X and Y" that must become a working web-app token system. Owns the brownfield path: extract the brand's stated values, normalize them into `design/design-tokens`' primitive → semantic tiers, and gap-fill what a print/logo brand never specified (a danger red, a type scale, dark-mode surfaces, contrast pairs) IN THE BRAND'S VOICE without inventing a second identity. Covers the fidelity decision (strict compliance vs brand-inspired) and where per-brief taste still applies. Triggers "we have a brand book, turn it into tokens", "match our existing brand", "the client's colors are …", "convert these Pantone/CMYK values", "our brand has no danger color / no type scale". Do NOT use to INVENT an identity from scratch (`design/frontend-design`), for a preset theme (`design/theme-factory`), for the token tier/naming discipline (`design/design-tokens`), or to create a logo.
+name: design-brand-intake
+description: Use when a project starts from an EXISTING brand — a brand book, style guide, logo, or "our colors are X and Y" — that must become a working token system: normalize into primitive→semantic tiers, gap-fill what the brand never specified in its own voice. Triggers: "we have a brand book, turn it into tokens", "match our existing brand". Do NOT use to invent an identity (`design/frontend-design`), for presets (`design/theme-factory`), or token naming (`design/design-tokens`).
 ---
 
 # Brand Intake — an existing brand becomes a token system

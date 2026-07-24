@@ -1,6 +1,6 @@
 ---
 name: fe-blazor-js-interop
-description: Use when a Blazor component (.NET 8/9/10) genuinely needs JavaScript — the mechanics of calling JS from .NET and .NET from JS safely. Covers collocated `.razor.js` ES modules loaded as `IJSObjectReference` (never global functions/inline JS), `IJSInProcessObjectReference` for synchronous WASM, loading interop in `OnAfterRenderAsync` (never `OnInitializedAsync`/prerender), `IAsyncDisposable` teardown with the `JSDisconnectedException` trap on Server, `[JSInvokable]` + `DotNetObjectReference` callbacks with disposal, `IJSStreamReference`/byte-stream transfer, and the net10 constructor-invocation + JS-property read/write APIs. Triggers: "call this JS library from Blazor", "wrap a browser API (clipboard/geolocation/canvas)", "invoke a C# method from JS", "why does my JS interop throw during prerender". Do NOT use where C# suffices (interop is the last resort), for motion/observers (use `motion`), realtime hubs (use `realtime`), or CSS/`::deep` work (use `styling`).
+description: Use when a Blazor component (.NET 8/9/10) genuinely needs JavaScript — collocated `.razor.js` ES modules as `IJSObjectReference`, interop in `OnAfterRenderAsync` (never `OnInitializedAsync`), `IAsyncDisposable` teardown + the `JSDisconnectedException` trap, `[JSInvokable]` callbacks. Triggers: "call this JS library from Blazor", "wrap a browser API", "why does my JS interop throw during prerender". Do NOT use where C# suffices (interop is the last resort) or for motion/observers (`motion`).
 ---
 
 # Blazor — JavaScript Interop

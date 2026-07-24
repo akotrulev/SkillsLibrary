@@ -1,6 +1,6 @@
 ---
 name: fe-blazor-pwa-offline
-description: Use when making a Blazor **WebAssembly** app an installable PWA and/or work offline (.NET 8/9/10). Covers the web app manifest (`manifest.webmanifest`, icons, `display:standalone`), the two-service-worker model (`service-worker.js` dev no-op vs `service-worker.published.js` prod, `<ServiceWorker>`/`<ServiceWorkerAssetsManifest>` MSBuild items, content-hashed `service-worker-assets.js`), the default cache-first strategy, the notorious update lifecycle (installing→waiting→activated; updates apply only after ALL tabs close) and how to surface an update prompt, offline UX (`navigator.onLine`, banner, queued writes), and the hard truth that **API data isn't cached by the template** (needs response caching or IndexedDB). Triggers: "make this installable", "add offline support", "PWA won't update after deploy", "run without network". Do NOT use for interactive-Server apps (need the circuit — can't run offline), server-side caching (`data-access`), or reconnection UX (`error-resilience`).
+description: Use when making a Blazor WebAssembly app an installable PWA and/or offline-capable (.NET 8/9/10) — the manifest, the two-service-worker model, cache-first strategy, the update lifecycle (updates apply only after ALL tabs close — surface a prompt), offline UX, and that API data isn't cached by the template. Triggers: "make this installable", "add offline support", "PWA won't update after deploy". Do NOT use for interactive-Server apps (the circuit can't run offline).
 ---
 
 # Blazor — PWA & Offline

@@ -1,6 +1,6 @@
 ---
 name: ep-requesting-code-review
-description: Use when you want a completed change reviewed before it cascades — after a major feature, before a merge/PR, or when a subagent-driven task warrants deeper independent verification than the controller's inline review. Prefer the harness's native review command (e.g. `/code-review`) when one exists; otherwise this skill dispatches a reviewer subagent with precisely-crafted context. Triggers: "review this before I merge", "get a second pair of eyes on this diff", "code-review this feature". Governed by the conservative 2-agent gate — a reviewer subagent is a permission-gated escalation, not a reflex. Do NOT use as a mandatory per-task step in `ep-subagent-driven-development` (its default is the controller's inline review), to receive/act on review feedback (use `ep-receiving-code-review`), or when a native review command is available and sufficient.
+description: Use when you want a completed change reviewed before it cascades — after a major feature, before a merge/PR. Prefer the harness's native review command (e.g. `/code-review`); otherwise dispatch a reviewer subagent (a deliberate spend, not a reflex). Triggers: "review this before I merge", "second pair of eyes on this diff". Do NOT use as a per-task step in `ep-subagent-driven-development` (its default is inline review) or to act on feedback (`ep-receiving-code-review`).
 ---
 
 # Requesting Code Review
@@ -8,7 +8,7 @@ description: Use when you want a completed change reviewed before it cascades �
 Get a completed change reviewed before issues cascade into more work. Two paths, in preference order:
 
 1. **Native review command (preferred).** If the harness provides a review command (e.g. `/code-review`, `/review`), use it — same "never fight the harness" stance as `ep-using-git-worktrees`. It's cheaper than a subagent and integrates with the platform.
-2. **Reviewer subagent (permission-gated fallback).** When no native command fits — or you need independent verification with curated context — dispatch a reviewer subagent. The reviewer gets precisely-crafted context, never your session's history, which keeps it focused on the work product and preserves your own context.
+2. **Reviewer subagent (fallback).** When no native command fits — or you need independent verification with curated context — dispatch a reviewer subagent. The reviewer gets precisely-crafted context, never your session's history, which keeps it focused on the work product and preserves your own context.
 
 **Core principle:** Review before it compounds — but weigh the cost. A reviewer subagent is an extra invocation.
 
@@ -16,7 +16,7 @@ Get a completed change reviewed before issues cascade into more work. Two paths,
 
 This skill is governed by the library's conservative agent-spawning policy (see `ep-dispatching-parallel-agents` / `ep-subagent-driven-development`):
 
-- **In `ep-subagent-driven-development`, inline controller review is the default** — the controller reviews the implementer's diff itself (spec compliance THEN code quality, per that skill's rubric). A *separate* reviewer subagent is an **escalation that needs the user's permission** because implementer + reviewer trips the hard **2-agent gate**.
+- **In `ep-subagent-driven-development`, inline controller review is the default** — the controller reviews the implementer's diff itself (spec compliance THEN code quality, per that skill's rubric). A *separate* reviewer subagent is an **escalation** — one more invocation on top of the implementer, so spend it deliberately.
 - **For ad-hoc work** (no subagents in flight), a single reviewer subagent is one agent — fine to offer, but still weigh it against just reviewing inline yourself. When inline review would do, do it inline.
 - **Never** treat review-by-subagent as "mandatory after each task". It is not.
 
@@ -28,7 +28,7 @@ This skill is governed by the library's conservative agent-spawning policy (see 
 - After fixing a complex or subtle bug
 - When stuck and a fresh perspective would help
 
-**How to review it** (in preference order): native review command → inline self-review (controller rubric) → reviewer subagent (permission-gated when it pushes you past the 2-agent gate).
+**How to review it** (in preference order): native review command → inline self-review (controller rubric) → reviewer subagent (a deliberate extra invocation).
 
 ## How to Request (reviewer-subagent path)
 
@@ -65,7 +65,7 @@ HEAD_SHA=$(git rev-parse HEAD)
 
 [Dispatch reviewer subagent via ./code-reviewer.md]
   DESCRIPTION: Added verifyIndex() and repairIndex() with 4 issue types
-  PLAN_OR_REQUIREMENTS: Task 2 from docs/plans/2026-07-12-deployment.md
+  PLAN_OR_REQUIREMENTS: Task 2 from docs/plans/26-07-12-0930-deployment.md
   BASE_SHA: a7981ec
   HEAD_SHA: 3df7661
 
@@ -79,7 +79,7 @@ You: [Hand findings to ep-receiving-code-review; fix major, note minor, continue
 
 ## Integration with Workflows
 
-**`ep-subagent-driven-development`:** the controller reviews **inline** by default. Reach for this skill only as the permission-gated escalation to a dedicated reviewer subagent (implementer + reviewer = past the 2-agent gate → ask first).
+**`ep-subagent-driven-development`:** the controller reviews **inline** by default. Reach for this skill as the escalation to a dedicated reviewer subagent, when the task earns the extra invocation.
 
 **`ep-executing-plans`:** at a natural checkpoint or before finishing, review the accumulated diff — native command first, inline second, subagent only if it earns its cost.
 
@@ -94,7 +94,7 @@ You: [Hand findings to ep-receiving-code-review; fix major, note minor, continue
 - Ignore **blocker** issues
 - Proceed with unfixed **major** issues
 - Argue with valid technical feedback (evaluate it via `ep-receiving-code-review`)
-- Spawn a reviewer subagent that pushes you past the 2-agent gate **without asking the user first**
+- Spawn a reviewer subagent by reflex when the native command or an inline self-review would have done
 - Reach for a subagent when a native review command or your own inline review would do
 
 **If the reviewer is wrong:**

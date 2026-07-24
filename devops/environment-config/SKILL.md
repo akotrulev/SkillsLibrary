@@ -1,11 +1,13 @@
 ---
 name: devops-environment-config
-description: Use when the user asks how to manage environment configuration, secrets, and per-environment overrides across .NET 8 / Java 21 / Node 20 services — typed config classes, secret stores (Azure Key Vault, AWS Secrets Manager / Parameter Store, HashiCorp Vault), config layering (defaults → per-env → secrets), config schema validation, hot-reload. Triggers: "set up config for X", "where do secrets go", "how do we layer config per env", "validate config at startup", "Key Vault wiring in .NET". Do NOT use for pipeline authoring (use `devops/{github-actions,gitlab-ci,azure-pipelines}`) or for cloud-specific deploy (use `devops/{aws,azure}-deployment`).
+description: Use when the user asks how to manage environment configuration, secrets, and per-environment overrides across .NET 10 (8/9 supported) / Java 21 / Node 24 (22 maintenance) services — typed config classes, secret stores (Azure Key Vault, AWS Secrets Manager / Parameter Store, HashiCorp Vault), config layering (defaults → per-env → secrets), config schema validation, hot-reload. Triggers: "set up config for X", "where do secrets go", "how do we layer config per env", "validate config at startup", "Key Vault wiring in .NET". Do NOT use for pipeline authoring (use `devops/{github-actions,gitlab-ci,azure-pipelines}`) or for cloud-specific deploy (use `devops/{aws,azure}-deployment`).
 ---
 
 # DevOps — Environment Configuration & Secrets
 
 Standardizes how services across the library load configuration and secrets per environment. Defaults baked into code; per-environment values overlayed from a secret-free source; secrets pulled from a secret store at runtime via a Managed Identity / IAM role. Config schema validated at startup — a missing or wrong-shaped value should crash the service immediately, not surface as a 500 in production three days later.
+
+**Version policy:** detect the project's versions (TFM / `engines` / toolchain) and match — never assume. .NET 10 is primary, 8/9 supported (8 LTS ends Nov 2026). Node 20 is EOL (Apr 2026) — 24 is active LTS, 22 maintenance. Java 21 LTS is the default. The config patterns below are version-neutral; only the SDK/package surface differs.
 
 ## When to use
 
@@ -34,7 +36,7 @@ Everything else (timeouts, feature flags, log levels) is non-secret → layer 2.
 
 ## Per-stack recipes
 
-### .NET 8 — typed `IOptions<T>` + Key Vault binding
+### .NET (10 primary) — typed `IOptions<T>` + Key Vault binding
 
 ```csharp
 // Program.cs
@@ -104,7 +106,7 @@ Layer 3 wiring options:
 
 For both clouds, use a **Managed Identity / IAM Role** for auth — never client secret keys.
 
-### Node 20 + TypeScript — Zod + `dotenv-flow` + cloud SDK
+### Node 24 + TypeScript — Zod + `dotenv-flow` + cloud SDK
 
 ```typescript
 // src/shared/config.ts

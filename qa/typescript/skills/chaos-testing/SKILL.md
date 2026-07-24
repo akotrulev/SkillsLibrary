@@ -1,6 +1,6 @@
 ---
 name: qa-chaos-testing-typescript
-description: Use when writing fault-injection / resilience tests in Node 20 / TypeScript / Vitest with Toxiproxy via Testcontainers (toxiproxy-node-client) — inject latency, drops, and bandwidth caps on a dependency (DB, API, broker, cache) and assert the app degrades gracefully. Triggers: "test the app survives a slow database", "inject a connection drop", "assert the circuit breaker opens".
+description: Use when writing fault-injection / resilience tests in Node 24 (22 supported) / TypeScript / Vitest with Toxiproxy via Testcontainers (toxiproxy-node-client) — inject latency, drops, and bandwidth caps on a dependency (DB, API, broker, cache) and assert the app degrades gracefully. Triggers: "test the app survives a slow database", "inject a connection drop", "assert the circuit breaker opens". For end-to-end suite work prefer the phased agent `qa-api-typescript` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
 ---
 
 # QA — Chaos / Fault-Injection Testing (TypeScript / Toxiproxy + Testcontainers + Vitest)

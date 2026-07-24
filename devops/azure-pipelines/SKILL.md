@@ -1,11 +1,13 @@
 ---
 name: devops-azure-pipelines
-description: Use when the user asks to write, review, or modify Azure DevOps YAML pipelines (`azure-pipelines.yml`) for build/test/deploy of Java, .NET, or TypeScript projects, with deploys to AWS or Azure. Triggers: "write an Azure Pipelines YAML for X", "add a stage to my pipeline", "convert this classic build to YAML", "set up Azure DevOps CI". Do NOT use for GitHub Actions (use `devops/github-actions`), GitLab CI (use `devops/gitlab-ci`), or IaC scripts (use `devops/iac-bicep-terraform`).
+description: Use when the user asks to write, review, or modify Azure DevOps YAML pipelines (`azure-pipelines.yml`) for build/test/deploy of Java, .NET, or TypeScript projects, with deploys to AWS or Azure. Triggers: "write an Azure Pipelines YAML for X", "add a stage to my pipeline", "convert this classic build to YAML", "set up Azure DevOps CI". Do NOT use for GitHub Actions (use `devops/github-actions`), GitLab CI (use `devops/gitlab-ci`), or IaC scripts (use `devops/iac-bicep-terraform`). Do NOT use for the **test-suite CI lane** — shard matrix, Allure publishing, perf gate, flake quarantine — that belongs to `qa-cicd-{java,dotnet,typescript}`; this skill owns the **build/deploy** lane.
 ---
 
 # DevOps — Azure Pipelines
 
-Authors Azure DevOps YAML pipelines for build, test, and deploy across the project's stacks (Java 21 / .NET 8 / Node 20) and target clouds (AWS, Azure). Standardizes on multi-stage pipelines, template reuse, environment approvals, and Azure Service Connections (Workload Identity Federation — OIDC, not service principal secrets).
+Authors Azure DevOps YAML pipelines for build, test, and deploy across the project's stacks (Java 21 / .NET 10 primary with 8/9 supported / Node 24 LTS) and target clouds (AWS, Azure). Standardizes on multi-stage pipelines, template reuse, environment approvals, and Azure Service Connections (Workload Identity Federation — OIDC, not service principal secrets).
+
+**Version policy:** detect the project's versions (TFM / `engines` / toolchain) and match — never assume. .NET 10 is primary, 8/9 supported (8 LTS ends Nov 2026). Node 20 is EOL (Apr 2026) — 24 is active LTS, 22 maintenance. Java 21 LTS is the default. Never put a job on a newer SDK/runtime than the project targets.
 
 ## When to use
 
@@ -22,9 +24,10 @@ Authors Azure DevOps YAML pipelines for build, test, and deploy across the proje
 - Bicep / Terraform authoring → `devops/iac-bicep-terraform`
 - App-level env config → `devops/environment-config`
 
+- Test-suite CI lane (shard matrix, Allure publish, perf gate, flake quarantine) → `qa/cicd/agents/qa-cicd-{java,dotnet,typescript}`
 ## Inputs needed
 
-1. **Stack(s)**: .NET 8 / Java 21 + Gradle / Node 20 + which package manager
+1. **Stack(s)**: .NET 10 (8/9 supported) / Java 21 + Gradle / Node 24 (22 maintenance) + which package manager
 2. **Target cloud**: Azure (App Service, Container Apps, AKS, Static Web Apps, Functions) or AWS (ECS, Lambda, S3+CloudFront, EKS)
 3. **Agent pool**: Microsoft-hosted (`ubuntu-latest`, `windows-latest`) or self-hosted (which pool/demands?)
 4. **Trigger model**: branch CI (`main`, `release/*`), PR validation, tag, scheduled, manual
@@ -87,7 +90,7 @@ Approval gates live on the **Environment** (Pipelines → Environments → Appro
 
 ## Per-stack build/test jobs
 
-### .NET 8
+### .NET (10 primary; match the project's TFM)
 
 ```yaml
 - stage: Build
@@ -95,7 +98,7 @@ Approval gates live on the **Environment** (Pipelines → Environments → Appro
   - job: build
     steps:
     - task: UseDotNet@2
-      inputs: { packageType: sdk, version: '8.0.x' }
+      inputs: { packageType: sdk, version: '10.0.x' }   # match the TFM: '8.0.x' / '9.0.x' down-level
 
     - task: Cache@2
       inputs:
@@ -156,7 +159,7 @@ Approval gates live on the **Environment** (Pipelines → Environments → Appro
 
 The `Gradle@3` task auto-publishes JUnit + JaCoCo — don't reinvent that with manual `PublishTestResults@2` unless you need it.
 
-### Node 20 + pnpm (TypeScript)
+### Node 24 + pnpm (TypeScript)
 
 ```yaml
 - stage: Build
@@ -164,11 +167,11 @@ The `Gradle@3` task auto-publishes JUnit + JaCoCo — don't reinvent that with m
   - job: build
     steps:
     - task: NodeTool@0
-      inputs: { versionSpec: '20.x' }
+      inputs: { versionSpec: '24.x' }   # 22.x for maintenance LTS; 20 is EOL
 
     - script: |
         corepack enable
-        corepack prepare pnpm@9 --activate
+        corepack prepare --activate   # version from package.json `packageManager` — don't double-pin
       displayName: Enable pnpm
 
     - task: Cache@2
@@ -279,7 +282,7 @@ parameters:
   default: Release
 steps:
 - task: UseDotNet@2
-  inputs: { packageType: sdk, version: '8.0.x' }
+  inputs: { packageType: sdk, version: '10.0.x' }   # match the project's TFM
 - script: dotnet build --configuration ${{ parameters.configuration }}
 ```
 
@@ -317,12 +320,28 @@ Pin the `ref:` to a tag. A change in the templates repo should be a deliberate c
 
 Never define a secret in `variables:` at the top of the YAML (it leaks into every step's env).
 
+## Allure reporting
+
+Publish the raw results as a pipeline artifact here; the **report generation/publishing pipeline belongs to the QA domain** — `qa/cicd/<stack>/skills/ci-pipelines` (Allure-publish step) and `qa/reporting/<stack>` own it. Don't wire a third-party Allure publishing task into an app-deploy pipeline.
+
+```yaml
+- task: PublishPipelineArtifact@1
+  condition: always()
+  inputs:
+    targetPath: allure-results
+    artifact: allure-results
+
+- task: PublishTestResults@2      # native Azure DevOps test tab
+  condition: always()
+  inputs: { testResultsFormat: JUnit, testResultsFiles: '**/test-results.xml' }
+```
+
 ## Rules
 
 - Multi-stage with explicit `dependsOn:` — don't conflate `Build`, `Test`, and `Deploy`
 - One `deployment:` job per target environment; approvals live on the Environment, not in YAML
 - Pin all task versions explicitly (`UseDotNet@2`, `Cache@2`, `AzureCLI@2`) — `@*` floats
-- Pin language versions (`8.0.x`, `21`, `20.x`); pin package managers (`pnpm@9` via `corepack prepare`)
+- Pin language versions to what the project targets (`10.0.x`, `21`, `24.x`); take the pnpm version from `package.json` `packageManager` via `corepack prepare --activate` — never double-pin it in CI
 - Use `Cache@2` keyed on lockfile content — sticky caches mask broken installs
 - `condition: succeededOrFailed()` on result-publishing tasks so failed builds still upload reports
 - Service connections use Workload Identity Federation (Azure) / OIDC (AWS) — no service principal secrets
@@ -361,3 +380,5 @@ Never define a secret in `variables:` at the top of the YAML (it leaks into ever
 - Per-env secrets/config → `devops/environment-config`
 - Azure-specific deploy details → `devops/azure-deployment`
 - AWS-specific deploy details → `devops/aws-deployment`
+
+- Test-suite CI lane — shard matrix, Allure publish, perf gate, quarantine → `qa-cicd-{java,dotnet,typescript}`

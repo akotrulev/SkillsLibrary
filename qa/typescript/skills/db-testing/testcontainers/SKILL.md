@@ -1,6 +1,6 @@
 ---
 name: qa-db-testing-testcontainers-typescript
-description: Use when the user asks to scaffold TypeScript (Vitest / Jest) integration tests backed by a real database (Postgres / SQL Server / MongoDB / Redis) via the `testcontainers` npm package. Triggers: "spin up Postgres for these tests", "Testcontainers fixture in Vitest", "stop using in-memory pg-mem". Not for SQL query authoring guardrails → `db-testing/query-author`.
+description: Use when the user asks to scaffold TypeScript (Vitest / Jest) integration tests backed by a real database (Postgres / SQL Server / MongoDB / Redis) via the `testcontainers` npm package. Triggers: "spin up Postgres for these tests", "Testcontainers fixture in Vitest", "stop using in-memory pg-mem". Not for SQL query authoring guardrails → `db-testing/query-author`. For end-to-end suite work prefer the phased agent `qa-api-typescript` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
 ---
 
 # QA — DB Testing with Testcontainers (TypeScript)
