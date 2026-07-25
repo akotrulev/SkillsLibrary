@@ -33,6 +33,8 @@ Designs the **shape** of a Page Object Model in a .NET UI test project: page vs 
 5. **Team shape** — one team or many
 6. **Runner & report tooling** — NUnit (default) or xUnit; Allure or not
 
+7. **Screen map** (mobile, if one exists) — `docs/app-map/screen-map.md` from `qa/dotnet/skills/appium-app-crawler`. Its **Component candidates** table is counted evidence for the "reused on 2+ screens → component" call below; prefer it over guessing which elements recur.
+
 ## Core decisions
 
 ### Page vs component vs flow

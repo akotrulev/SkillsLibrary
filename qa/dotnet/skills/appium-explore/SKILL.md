@@ -18,6 +18,7 @@ This is the mobile counterpart of the web `qa/dotnet/skills/pom-builder`: live e
 
 ## When NOT to use
 
+- **Many screens / the whole app** — a systematic multi-screen walk with an accumulated screen map → `qa/dotnet/skills/appium-app-crawler` (it calls this skill once per screen; this skill stays single-screen)
 - Emitting / updating the C# page object class → `qa/dotnet/skills/appium-page-object`
 - Writing or tagging the NUnit tests → `qa/dotnet/skills/ui-test-author/appium`
 - Designing where screen objects / components / flows live → `qa/dotnet/skills/page-object-architect`
@@ -166,6 +167,7 @@ When reporting a screen:
 
 ## Handoffs
 
+- Crawl many screens and accumulate a persistent screen map → `qa/dotnet/skills/appium-app-crawler`
 - Emit / update the C# page object → `qa/dotnet/skills/appium-page-object`
 - Write / tag the NUnit tests → `qa/dotnet/skills/ui-test-author/appium`
 - Screen-object architecture (base classes, sub-packages) → `qa/dotnet/skills/page-object-architect`

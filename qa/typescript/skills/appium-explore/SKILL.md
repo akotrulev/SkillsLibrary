@@ -18,6 +18,7 @@ This is the mobile counterpart of the web `qa/typescript/skills/pom-builder`: li
 
 ## When NOT to use
 
+- **Many screens / the whole app** — a systematic multi-screen walk with an accumulated screen map → `qa/typescript/skills/appium-app-crawler` (it calls this skill once per screen; this skill stays single-screen)
 - Emitting / updating the WebdriverIO page object class → `qa/typescript/skills/appium-page-object`
 - Writing or tagging the Mocha/Vitest tests → `qa/typescript/skills/ui-test-author/appium`
 - Designing where screen objects / components / flows live → `qa/typescript/skills/page-object-architect`
@@ -166,6 +167,7 @@ When reporting a screen:
 
 ## Handoffs
 
+- Crawl many screens and accumulate a persistent screen map → `qa/typescript/skills/appium-app-crawler`
 - Emit / update the WebdriverIO page object → `qa/typescript/skills/appium-page-object`
 - Write / tag the Mocha/Vitest tests → `qa/typescript/skills/ui-test-author/appium`
 - Screen-object architecture (base classes, sub-packages) → `qa/typescript/skills/page-object-architect`

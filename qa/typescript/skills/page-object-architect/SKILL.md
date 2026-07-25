@@ -33,6 +33,8 @@ Designs the **shape** of a Page Object Model in a TypeScript UI test project: pa
 5. **Team shape** — one team or many
 6. **Runner & lint tooling** — Playwright Test (default for Playwright), WebdriverIO runner, Vitest for unit-on-pages; `eslint-plugin-playwright` / `eslint-plugin-wdio`; Allure or not
 
+7. **Screen map** (mobile, if one exists) — `docs/app-map/screen-map.md` from `qa/typescript/skills/appium-app-crawler`. Its **Component candidates** table is counted evidence for the "reused on 2+ screens → component" call below; prefer it over guessing which elements recur.
+
 ## Core decisions
 
 ### Page vs component vs flow

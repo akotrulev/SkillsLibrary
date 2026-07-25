@@ -33,6 +33,8 @@ Designs the **shape** of a Page Object Model in a Java UI test project (Gradle K
 5. **Team shape** — one team or many
 6. **Runner & build tool** — TestNG (default) or JUnit 5; Gradle (Kotlin DSL preferred) or Maven; Allure or not
 
+7. **Screen map** (mobile, if one exists) — `docs/app-map/screen-map.md` from `qa/java/skills/appium-app-crawler`. Its **Component candidates** table is counted evidence for the "reused on 2+ screens → component" call below; prefer it over guessing which elements recur.
+
 ## Core decisions
 
 ### Page vs component vs flow

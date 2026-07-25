@@ -18,6 +18,7 @@ This is the mobile counterpart of the web `qa/java/skills/pom-builder`: live ext
 
 ## When NOT to use
 
+- **Many screens / the whole app** — a systematic multi-screen walk with an accumulated screen map → `qa/java/skills/appium-app-crawler` (it calls this skill once per screen; this skill stays single-screen)
 - Emitting / updating the Java page object class → `qa/java/skills/appium-page-object`
 - Writing or tagging the TestNG tests → `qa/java/skills/ui-test-author/appium`
 - Designing where screen objects / components / flows live → `qa/java/skills/page-object-architect`
@@ -165,6 +166,7 @@ When reporting a screen:
 
 ## Handoffs
 
+- Crawl many screens and accumulate a persistent screen map → `qa/java/skills/appium-app-crawler`
 - Emit / update the Java page object → `qa/java/skills/appium-page-object`
 - Write / tag the TestNG tests → `qa/java/skills/ui-test-author/appium`
 - Screen-object architecture (base classes, sub-packages) → `qa/java/skills/page-object-architect`
