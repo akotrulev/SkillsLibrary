@@ -1,6 +1,6 @@
 ---
 name: be-java-persistence
-description: Use when the user asks to set up or refactor persistence in a Spring Boot 3 service — JPA / Hibernate, Spring Data, entity design (records vs classes), transactions, optimistic locking, query patterns, performance tuning. Triggers: "set up JPA for X", "Spring Data repository for Y", "@Transactional boundaries", "@Version optimistic locking", "N+1 in Hibernate", "JPQL vs Criteria", "this query is slow". Do NOT use for non-Spring-Data data access (use `data/<db>` for raw SQL), cross-engine migrations (use `data/_shared/migrations`), or .NET / Node persistence.
+description: Use when setting up or refactoring persistence in a Spring Boot 3 service — JPA/Hibernate, Spring Data, entity design, transactions, optimistic locking, query patterns, tuning. Triggers: "set up JPA for X", "Spring Data repository", "@Transactional boundaries", "@Version optimistic locking", "N+1 in Hibernate". Do NOT use for raw-SQL data access (`data/<db>`), cross-engine migrations (`data/_shared/migrations`), or .NET / Node persistence.
 ---
 
 # Java — Persistence with JPA / Hibernate + Spring Data

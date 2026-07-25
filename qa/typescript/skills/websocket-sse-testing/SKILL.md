@@ -1,6 +1,6 @@
 ---
 name: qa-websocket-sse-testing-typescript
-description: Test real-time **WebSocket** and **Server-Sent-Events (SSE)** streams in Node 20 + TypeScript (Vitest / Playwright). Triggers: "test our WebSocket chat endpoint with ws", "assert the server pushes N SSE events then closes", "wait for a websocket frame without a setTimeout".
+description: Test real-time **WebSocket** and **Server-Sent-Events (SSE)** streams in Node 24 (22 supported) + TypeScript (Vitest / Playwright). Triggers: "test our WebSocket chat endpoint with ws", "assert the server pushes N SSE events then closes", "wait for a websocket frame without a setTimeout". For end-to-end suite work prefer the phased agent `qa-api-typescript` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
 ---
 
 # WebSocket & SSE Testing (Node 20 + TypeScript) — **ported from the canonical `qa-websocket-sse-testing-dotnet`**

@@ -1,19 +1,26 @@
 ---
 name: auth-auth0-react
-description: Use when the user asks to set up or modify Auth0 in a React 18 + TypeScript SPA — `@auth0/auth0-react`, Authorization Code + PKCE, protected routes, calling a protected API with access tokens, silent refresh, organizations. Triggers: "add Auth0 login to my React app", "protect a route with Auth0", "attach the access token to fetch", "log out properly". Do NOT use for backend token validation (use `backend/dotnet/skills/auth0` / `backend/java/skills/auth0`), Blazor (use `auth/auth0-blazor`), or concepts (use `auth/_shared/auth0-concepts`).
+description: Use when setting up or modifying Auth0 in a React 19/18 + TypeScript app — two lanes: `@auth0/nextjs-auth0` for the Next.js App Router (middleware, server-side session in RSC/Actions/handlers) and `@auth0/auth0-react` for a Vite/CRA SPA (Auth Code + PKCE, protected routes). Triggers "add Auth0 login", "protect a route", "read the session in a Server Component", "attach the access token to fetch". Not for backend token validation or provider concepts (`auth0-concepts`).
 ---
 
-# Auth — Auth0 in React (SPA)
+# Auth — Auth0 in React
 
-Wires Auth0 into a React 18 + TypeScript SPA using `@auth0/auth0-react`. Authorization Code + PKCE flow, refresh-token rotation, route protection, access-token attachment to outbound `fetch`. Targets Vite or Next.js — App Router note: Auth0's `@auth0/nextjs-auth0` is the recommended Next.js path; this skill is for plain React SPAs and the SPA portions of Vite apps.
+Wires Auth0 into a React 19/18 + TypeScript app. **Pick the lane by render target — this is the first decision, and it is not a preference:**
 
-## Stack
+| Render target | SDK | Where the session lives |
+|---|---|---|
+| **Next.js App Router** (primary) | **`@auth0/nextjs-auth0`** | Encrypted **HTTP-only cookie**, read on the server |
+| **Vite / CRA SPA** (fallback) | **`@auth0/auth0-react`** | In-memory in the browser, refresh-token rotation |
 
-- **React 18 + TypeScript (strict)**
+The App Router lane is **not** the SPA lane with extra steps. A Server Component cannot call a React hook, so `useAuth0()` is unreachable from the majority of an App Router app — using the SPA SDK there forces `'use client'` across your whole tree and gives up server-side session checks. Read [The Next.js App Router lane](#the-nextjs-app-router-lane) for that path; the sections after it are the SPA pattern.
+
+## Stack (SPA lane)
+
+- **React 19/18 + TypeScript (strict)**
 - **`@auth0/auth0-react`** (the official SPA SDK)
 - Authorization Code + PKCE (no client secret in the browser)
 - Refresh token rotation enabled in the Auth0 SPA Application
-- For Next.js App Router prefer `@auth0/nextjs-auth0` — referenced at the end of this skill
+- **Next.js App Router → use the `@auth0/nextjs-auth0` lane below instead**
 
 ## When to use
 
@@ -28,7 +35,7 @@ Wires Auth0 into a React 18 + TypeScript SPA using `@auth0/auth0-react`. Authori
 - Backend JWT validation → `backend/dotnet/skills/auth0` / `backend/java/skills/auth0`
 - Blazor Server / WASM → `auth/auth0-blazor`
 - Concepts (audience, RBAC, organizations) → `auth/_shared/auth0-concepts`
-- Next.js App Router with server-side session management → use `@auth0/nextjs-auth0` (this skill is the SPA pattern)
+- Cognito instead of Auth0 → `auth/cognito-react`
 
 ## Inputs needed
 
@@ -249,14 +256,132 @@ For multi-org users, present a tenant picker and pass the chosen org_id to the n
 5. Create `useApi()` (or equivalent) that injects the access token into every outbound call.
 6. Smoke flow: visit a protected route while signed out, get redirected to Auth0, sign in, land back on the page, make an authenticated API call, sign out, confirm the SSO session is cleared.
 
-## Next.js App Router note
+## The Next.js App Router lane
 
-For Next.js with the App Router, prefer **`@auth0/nextjs-auth0`** for full coverage (server actions, route handlers, server components reading session). This skill's pattern still works inside `'use client'` boundaries, but the Next.js SDK better fits the framework's data-fetching model.
+`@auth0/nextjs-auth0` v4. The session is an **encrypted HTTP-only cookie** the server reads — so a Server Component, a Server Action, a route handler, and middleware can all check auth without shipping a token to the browser.
+
+### 1. Environment
+
+```bash
+# .env.local — NONE of these are NEXT_PUBLIC_; they must stay server-side
+AUTH0_SECRET=            # openssl rand -hex 32 — encrypts the session cookie
+APP_BASE_URL=http://localhost:3000
+AUTH0_DOMAIN=your-tenant.eu.auth0.com
+AUTH0_CLIENT_ID=
+AUTH0_CLIENT_SECRET=     # this is a REGULAR WEB APPLICATION in Auth0, not a SPA
+AUTH0_AUDIENCE=          # your API identifier, if you call a protected API
+```
+
+The Auth0 application type is **Regular Web Application** here, not SPA — the code exchange happens server-side with a client secret. Callback URL `http://localhost:3000/auth/callback`, logout URL `http://localhost:3000`. Per the global rules: secrets come from the environment + a secret store, never from committed files.
+
+### 2. The client + middleware
+
+```ts
+// src/lib/auth0.ts
+import { Auth0Client } from '@auth0/nextjs-auth0/server';
+
+export const auth0 = new Auth0Client({
+  authorizationParameters: {
+    scope: 'openid profile email',
+    audience: process.env.AUTH0_AUDIENCE,   // required to get an API access token
+  },
+});
+```
+
+```ts
+// middleware.ts  (project root)
+import type { NextRequest } from 'next/server';
+import { auth0 } from './src/lib/auth0';
+
+export async function middleware(request: NextRequest) {
+  return await auth0.middleware(request);   // mounts /auth/login, /auth/logout, /auth/callback
+}
+
+export const config = {
+  matcher: ['/((?!_next/static|_next/image|favicon.ico).*)'],
+};
+```
+
+The middleware mounts the auth routes **and** rolls the session cookie — it is required, not optional. See [`fe-react-routing`](../../frontend/react/skills/routing/SKILL.md) for the `matcher` rules.
+
+### 3. Reading the session
+
+```tsx
+// A Server Component — no hook, no 'use client'
+import { auth0 } from '@/lib/auth0';
+
+export default async function Page() {
+  const session = await auth0.getSession();
+  if (!session) return <a href="/auth/login">Sign in</a>;
+  return <p>Hello {session.user.name}</p>;
+}
+```
+
+```tsx
+// A Client Component that needs the user
+'use client';
+import { useUser } from '@auth0/nextjs-auth0';
+
+export function UserMenu() {
+  const { user, isLoading } = useUser();
+  if (isLoading) return <Spinner />;
+  return user ? <SignOut /> : <a href="/auth/login">Sign in</a>;
+}
+```
+
+Wrap the app in `<Auth0Provider>` (from `@auth0/nextjs-auth0`) in the root layout only if you use `useUser()`. **Login and logout are plain anchors to `/auth/login` and `/auth/logout`** — real navigations to server routes, not `router.push`.
+
+### 4. Protecting a route
+
+```tsx
+// Gate where the data is returned — middleware alone is not authorization
+import { redirect } from 'next/navigation';
+import { auth0 } from '@/lib/auth0';
+
+export default async function AdminPage() {
+  const session = await auth0.getSession();
+  if (!session) redirect('/auth/login');
+  if (!session.user['https://acme.com/roles']?.includes('admin')) redirect('/403');
+  return <Admin />;
+}
+```
+
+Namespaced custom claims (`https://acme.com/roles`) come from an Auth0 Action — see `auth/_shared/auth0-concepts`.
+
+### 5. Calling a protected API
+
+```ts
+// Server-side: get the access token and forward it
+import { auth0 } from '@/lib/auth0';
+
+export async function getOrders() {
+  const { token } = await auth0.getAccessToken();
+  const res = await fetch(`${process.env.API_URL}/orders`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) throw new Error(`Orders failed: ${res.status}`);
+  return res.json();
+}
+```
+
+Fetch on the **server** and pass serializable data down as props. Sending the access token to the browser so a Client Component can call the API defeats the point of the cookie-based session.
+
+### App Router anti-patterns
+
+| Anti-pattern | Why it's wrong | Do instead |
+|---|---|---|
+| `@auth0/auth0-react` in an App Router app | Hooks can't run in Server Components; forces `'use client'` everywhere | `@auth0/nextjs-auth0` |
+| `NEXT_PUBLIC_AUTH0_CLIENT_SECRET` | Ships the secret to every browser | Server-only env vars |
+| Middleware as the only auth check | Coarse and bypassable — it sees a cookie, not your rules | Re-check in the RSC / Action / handler that returns data |
+| `router.push('/auth/login')` | Client-side push to a server route | A real `<a href="/auth/login">` |
+| Access token handed to the client | Cookie-session model exists to avoid that | Fetch server-side, pass data as props |
+| Skipping `audience` | You get an opaque token, not a JWT your API can validate | Set `audience` in `authorizationParameters` |
 
 ## Handoffs
 
 - Concepts → `auth/_shared/auth0-concepts`
 - Backend validation → `backend/dotnet/skills/auth0` or `backend/java/skills/auth0`
 - Blazor → `auth/auth0-blazor`
+- Route topology + middleware mechanics → `frontend/react/skills/routing`
 - React patterns (custom hooks, providers) → `frontend/react/skills/generator`
 - E2E with auth → `qa/ui-test-author/playwright` (use `storageState` for an authenticated session)

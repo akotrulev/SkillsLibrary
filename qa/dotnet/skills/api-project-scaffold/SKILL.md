@@ -1,11 +1,13 @@
 ---
 name: qa-api-project-scaffold-dotnet
-description: Use when starting an API test-automation project from zero in C# / .NET 8 — solution layout, exact package versions, local setup, and run commands for a standalone RestSharp + NUnit suite. Triggers: "scaffold an API test project", "set up a .NET API test suite from scratch", "what versions for a C# API test framework", "create the solution structure for API tests". Composable: explains how to fold in ui/mobile/performance dotnet modules later.
+description: Use when starting an API test-automation project from zero in C# / .NET 10 (8-9) — solution layout, exact package versions, local setup, and run commands for a standalone RestSharp + NUnit suite. Composable with the ui/mobile/performance dotnet scaffolds. Triggers "scaffold an API test project", "set up a .NET API test suite from scratch", "create the solution structure for API tests". Not for adding tests to an existing suite (`api-test-author/generator`).
 ---
 
-# API Test Project Scaffold (C# / .NET 8)
+# API Test Project Scaffold (C# / .NET 10)
 
 This skill stands up a **complete, runnable API test solution from zero**: directory layout, the exact tool and library versions, the local-machine setup, and the commands to create and run it. It is **standalone** — the project it produces runs on its own — and **composable**: it is one project in a flat solution, sharing a `TestCore` class library with the UI / mobile / performance modules. Adding a sibling is purely additive (see *Expanding into a multi-module solution*).
+
+**Version rule:** new projects target **net10.0** (the library primary). net8 (LTS, supported to Nov 2026) and net9 (STS) are supported fallbacks — target them **only** to match an existing solution's `TargetFramework`; never up-level a down-level repo. When adding this suite into an existing solution, adopt that solution's TFM. Substitute your chosen TFM for `net10.0` everywhere below.
 
 The structure follows the established dotnet layout: **flat projects at the solution root** (no `src/`/`tests/` nesting), **per-project config** so each suite is independently configurable/dockerizable, a shared **`TestCore`**, and **Central Package Management (CPM)** so versions are pinned once. Authoring conventions (DTOs, typed clients, test bodies, builders, deep verification) live in the `qa-api-dotnet` skills — this skill owns the **project shell**.
 
@@ -26,13 +28,13 @@ Versions are pinned **once** in `Directory.Packages.props` (CPM) — each `.cspr
 
 | Concern | Package / tool | Version | Notes |
 |---|---|---|---|
-| SDK | .NET SDK | **8.0 (LTS)** | Pin in `global.json` (`rollForward: latestFeature`). C# 12. |
-| Test runner | `NUnit` | **4.2.2** | NUnit 4 — classic asserts live in `NUnit.Framework.Legacy`; use `Assert.That`. |
-| Test adapter | `NUnit3TestAdapter` | **4.6.0** | Required for `dotnet test` discovery. |
-| Test host | `Microsoft.NET.Test.Sdk` | **17.11.1** | |
+| SDK | .NET SDK | **10.0 (LTS)** | Pin in `global.json` (`rollForward: latestFeature`). C# 14. On a down-level repo pin 8.0/9.0 to match. |
+| Test runner | `NUnit` | **4.3.2** | NUnit 4 — classic asserts live in `NUnit.Framework.Legacy`; use `Assert.That`. |
+| Test adapter | `NUnit3TestAdapter` | **5.0.0** | Required for `dotnet test` discovery. |
+| Test host | `Microsoft.NET.Test.Sdk` | **17.14.1** | |
 | HTTP client | `RestSharp` | **112.1.0** | Post-v107 async-first fluent API (`RestClient` + `RestRequest`); no legacy `IRestResponse`. |
-| Assertions | `FluentAssertions` | **6.12.1** | Pinned to 6.12.x — last pre-commercial-license line. Do **not** bump to 7.x/8.x without a license review. |
-| JSON | `System.Text.Json` | **8.0.5** | Default serializer; no Newtonsoft unless a spec forces it. |
+| Assertions | `FluentAssertions` | **6.12.1** | **Deliberately pinned to 6.12.x** — the last pre-commercial-license line (v8 requires a paid license for commercial use). Do **not** bump to 7.x/8.x without a license review. |
+| JSON | `System.Text.Json` | **matches TFM** | Ships in the shared framework — reference explicitly only if a transitive pin is needed (`10.0.0` on net10, `8.0.5` on net8). Default serializer; no Newtonsoft unless a spec forces it. |
 | Reporting | `Allure.NUnit` | **2.12.1** | Wiring owned by `qa-reporting-dotnet`; this scaffold only leaves the per-project `allureConfig.json` hook. |
 | Allure CLI | `allure` tool | **local tool** | `dotnet tool install allure` in `.config/dotnet-tools.json`. |
 
@@ -41,7 +43,7 @@ Optional, add only when the spec demands it: `Testcontainers.PostgreSql` 4.1.0 (
 ## Prerequisites & local setup
 
 ```bash
-dotnet --version            # expect 8.0.x
+dotnet --version            # expect 10.0.x (or the repo's pinned 8.0.x / 9.0.x)
 docker --version            # only if you add Testcontainers-backed DB verification
 # Allure CLI installed as a repo-local tool in the create steps; or: brew install allure
 ```
@@ -53,8 +55,8 @@ No browsers or device emulators are needed for an API suite — the cheapest mod
 ```
 <Product>/                              # git repo root = solution root (flat projects)
 ├── <Product>.sln
-├── global.json                         # pins SDK 8.0          ┐
-├── Directory.Build.props               # net8.0, nullable,     │ solution-scoped,
+├── global.json                         # pins SDK 10.0         ┐
+├── Directory.Build.props               # net10.0, nullable,    │ solution-scoped,
 │                                       #   langversion, analyzers │ shared by every project
 ├── Directory.Packages.props            # CPM: every <PackageVersion> (the version table) │
 ├── nuget.config                        # single package source │
@@ -92,11 +94,11 @@ Why flat + per-project config: each test project owns its `appsettings`, `allure
 ```bash
 mkdir <Product> && cd <Product>
 git init
-dotnet new globaljson --sdk-version 8.0.100 --roll-forward latestFeature
+dotnet new globaljson --sdk-version 10.0.100 --roll-forward latestFeature
 dotnet new sln -n <Product>
 
-dotnet new classlib -o TestCore -f net8.0
-dotnet new nunit    -o ApiTests -f net8.0
+dotnet new classlib -o TestCore -f net10.0
+dotnet new nunit    -o ApiTests -f net10.0
 dotnet sln add TestCore ApiTests
 dotnet add ApiTests reference TestCore
 
@@ -124,12 +126,14 @@ dotnet build         # exit gate: 0 errors, 0 warnings
     <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
   </PropertyGroup>
   <ItemGroup>
-    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
-    <PackageVersion Include="NUnit" Version="4.2.2" />
-    <PackageVersion Include="NUnit3TestAdapter" Version="4.6.0" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
+    <PackageVersion Include="NUnit" Version="4.3.2" />
+    <PackageVersion Include="NUnit3TestAdapter" Version="5.0.0" />
     <PackageVersion Include="RestSharp" Version="112.1.0" />
+    <!-- FluentAssertions deliberately pinned to the last pre-commercial-license line; see the version table. -->
     <PackageVersion Include="FluentAssertions" Version="6.12.1" />
-    <PackageVersion Include="System.Text.Json" Version="8.0.5" />
+    <!-- System.Text.Json ships in the shared framework; pin explicitly only for a transitive fix (10.0.0 on net10, 8.0.5 on net8). -->
+    <PackageVersion Include="System.Text.Json" Version="10.0.0" />
     <PackageVersion Include="Allure.NUnit" Version="2.12.1" />
   </ItemGroup>
 </Project>
@@ -140,8 +144,8 @@ dotnet build         # exit gate: 0 errors, 0 warnings
 ```xml
 <Project>
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-    <LangVersion>12</LangVersion>
+    <TargetFramework>net10.0</TargetFramework>   <!-- or net8.0 / net9.0 to match an existing repo -->
+    <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
@@ -193,7 +197,7 @@ The same recipe folds in `AppiumTests` (Appium) and a `PerfTests` console projec
 
 ## Setup checklist
 
-- [ ] `global.json` pins SDK 8.0; `dotnet --version` agrees
+- [ ] `global.json` pins SDK 10.0 (or the repo's 8.0/9.0); `dotnet --version` agrees
 - [ ] `Directory.Packages.props` (CPM on) is the only version source; csprojs are versionless
 - [ ] `Directory.Build.props` carries settings only (`Nullable`/`TreatWarningsAsErrors` on)
 - [ ] `TestCore` exists as a shared library; `ApiTests` references it

@@ -1,6 +1,6 @@
 ---
 name: fe-react-data-access
-description: Use when the user asks how a React component should FETCH or WRITE request/response data (Next.js App Router primary, Vite SPA fallback) — Server Component `fetch`/DB reads with `cache`/`revalidate` vs client TanStack Query, Server Actions for mutations with `revalidatePath`/`revalidateTag`, ProblemDetails→UI error mapping, streaming with `<Suspense>`, the RSC "no double-fetch" story, and cancellation with `AbortSignal`. Triggers "how should this component load data", "fetch in a Server Component or with TanStack Query", "call my API from React", "Server Action to create/update X", "revalidate after a mutation", "stream slow data", "map ProblemDetails to a friendly error". Do NOT use for live/server-pushed data (use `frontend/react/skills/realtime`), forms/validation UX (use `frontend/react/skills/forms`), auth token wiring itself (use `auth/auth0-react`), or where fetched state lives (use `frontend/react/skills/state-management`).
+description: Use when a component must FETCH or WRITE request/response data — Server Component `fetch` with `cache`/`revalidate` vs client TanStack Query, Server Actions with `revalidatePath`/`revalidateTag`, ProblemDetails→UI mapping, Suspense streaming. Triggers "how should this component load data", "Server Action to create X", "revalidate after a mutation", "our fetches stopped being cached". Not for server-pushed data (`realtime`), forms UX (`forms`), or where fetched state lives (`state-management`).
 ---
 
 # React — Data Access (request/response lane)

@@ -1,6 +1,6 @@
 ---
 name: qa-security-testing-access-control-testing-dotnet
-description: Author **functional access-control tests** in .NET (NUnit + RestSharp) that cover the OWASP scanner blind spot.
+description: Use when authoring functional access-control tests in .NET (NUnit + RestSharp) that cover the OWASP scanner blind spot — BOLA/IDOR (object-level), BFLA (function-level), and property-level authorization — as an identity × endpoint × object matrix asserting 403/404. Maps to OWASP A01:2025 / API1·3·5:2023. Triggers "test for IDOR", "can user A read user B's records", "build an authorization matrix", "cross-tenant leak test". Not for scanner DAST (`zap-*`) or minting tokens (`auth0-test-tokens`).
 ---
 
 # Security Testing — Access Control / Authorization Matrix (.NET / NUnit)

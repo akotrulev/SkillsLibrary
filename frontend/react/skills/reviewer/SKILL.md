@@ -1,6 +1,6 @@
 ---
 name: fe-react-reviewer
-description: Use when the user asks to review React code (React 19/18 + TypeScript, Next.js App Router or Vite) for misplaced `'use client'`, hook-rule violations, `useEffect`-to-derive-state, missing effect cleanup, index keys on reorderable lists, hydration mismatches, un-memoized context, server data in a client store, controlled/uncontrolled mix, `<div onClick>` instead of a real button/link, missing data-testids, three-state data regions, or a sequential-await waterfall. Triggers "review this component/page", "why does this re-render / hydrate twice", "spot smells in this hook", "audit this context for perf", "audit the testids", "is this 'use client' in the right place". Do NOT use for explanations (use `frontend/react/skills/reference`), generating code (use `frontend/react/skills/generator`), UI-test-code review (use the `qa-ui-typescript` peer / `qa/typescript/skills/ui-test-author/reviewer`), or Blazor (use `frontend/blazor/skills/reviewer`).
+description: Use when reviewing React code — misplaced `'use client'`, hook-rule violations, `useEffect`-to-derive-state, missing cleanup, index keys, hydration mismatches, un-memoized context, server data in a client store, `<div onClick>` navigation, missing testids. Triggers "review this component/page", "why does this re-render", "is this 'use client' in the right place", "Rendered more hooks than during the previous render". Not for explanations (`reference`) or generating code (`generator`).
 ---
 
 # React Design Patterns — Reviewer (TypeScript)

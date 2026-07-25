@@ -1,6 +1,6 @@
 ---
 name: qa-accelerator-conventions-dotnet
-description: Use when working in the C# / .NET 8 Accelerator test automation framework (NUnit + RestSharp + Playwright + Appium, JSON-driven screens) or any consumer of it. Triggers: "add a test to the .NET Accelerator", "scaffold a screen for the C# Appium suite", "create a Playwright page object for X in Accelerator".
+description: Use when working in the C# / .NET 10 (8-9 supported) Accelerator test automation framework (NUnit + RestSharp + Playwright + Appium, JSON-driven screens) or any consumer of it. Triggers: "add a test to the .NET Accelerator", "scaffold a screen for the C# Appium suite", "create a Playwright page object for X in Accelerator".
 ---
 
 # Accelerator Conventions

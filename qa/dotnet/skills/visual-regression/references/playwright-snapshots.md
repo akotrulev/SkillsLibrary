@@ -46,7 +46,7 @@ retries). `ToMatchSnapshotAsync()` only for bytes you generated. Prefer **elemen
 ```
 
 ```bash
-pwsh bin/Debug/net8.0/playwright.ps1 install --with-deps chromium
+pwsh bin/Debug/net10.0/playwright.ps1 install --with-deps chromium   # use the project's TFM in the path
 ```
 
 Inheriting `PageTest` gives you `Page` and the `Expect` assertion entry point. There is no

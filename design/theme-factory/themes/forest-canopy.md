@@ -13,6 +13,7 @@ A natural and grounded theme featuring earth tones inspired by dense forest envi
 
 - **Headers**: FreeSerif Bold
 - **Body Text**: FreeSans
+- **Web font suggestion** (web-app lane): headings `"Lora", Georgia, serif`; body `"Inter", system-ui, sans-serif`
 
 ## Best Used For
 

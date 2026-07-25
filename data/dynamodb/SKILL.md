@@ -1,6 +1,6 @@
 ---
 name: data-dynamodb
-description: Use when the user needs to design tables / access patterns, set up clients, secure a table (fine-grained IAM, encryption, PITR), plan migrations, write queries, or tune performance on Amazon DynamoDB from a .NET 10 / Java 21 / Node 24 backend. Triggers: "design a DynamoDB table for X", "model an access pattern", "this Dynamo scan is slow", "set up a GSI", "on-demand vs provisioned capacity", "single-table design", "row-level tenant isolation with IAM", "encrypt a Dynamo table with a CMK". Do NOT use for relational stores (use `data/postgresql` / `data/sqlserver` / `data/mysql`), document stores with rich query (use `data/mongodb`), Redis (use `data/redis`), or Cosmos DB (use `data/cosmosdb`).
+description: Use when designing tables / access patterns, setting up clients, securing a table (fine-grained IAM, encryption, PITR), planning migrations, writing queries, or tuning Amazon DynamoDB from a .NET / Java / Node backend. Triggers: "design a DynamoDB table", "model an access pattern", "set up a GSI", "single-table design", "on-demand vs provisioned capacity". Do NOT use for relational stores, document stores with rich query (`data/mongodb`), Redis (`data/redis`), or Cosmos DB (`data/cosmosdb`).
 ---
 
 # Data — DynamoDB
@@ -33,7 +33,7 @@ Version-aware rule: on a project still on SDK v3 / .NET 8–9, keep the v3 shape
 
 - Single-table design driven by enumerated access patterns
 - Partition / sort key choice; GSI / LSI design
-- SDK setup (.NET v3 / Java v2 / Node v3) with the Document / Enhanced client
+- SDK setup (.NET v4 (v3 down-level) / Java v2 / Node v3) with the Document / Enhanced client
 - Capacity mode (on-demand vs provisioned + autoscaling)
 - DynamoDB Streams + Lambda for change capture
 - TTL, conditional writes, `TransactWriteItems`
@@ -328,7 +328,6 @@ Streams give you Mongo-style change feeds; combine with Lambda for serverless re
 - Cross-engine query patterns → `data/_shared/query-optimization`
 - Caching layer → `data/_shared/caching-patterns` + `data/redis`
 - Schema evolution / migration patterns → `data/_shared/migrations`
-- AWS deployment of the table + IAM → `devops/aws-deployment`
+- AWS deployment of the table + IAM / Streams-driven Lambda handlers → cloud provisioning / IaC for the store itself has no owning skill in this library yet; out of this domain's scope
 - Verifying `LeadingKeys` tenant isolation actually holds (cross-tenant BOLA/IDOR matrix) → the `qa-security` peer + `qa/<stack>/skills/security-testing/access-control-testing`
-- Streams-driven event handlers → AWS Lambda recipes in `devops/aws-deployment`
-- Observability — CloudWatch metrics for `ConsumedRead/WriteCapacityUnits`, `Throttled*`
+- Observability — CloudWatch metrics for `ConsumedRead/WriteCapacityUnits`, `Throttled*` → `observability/*` skills (via the `observability-engineer-{dotnet,java,node}` peer bundled in the matching `be-*` plugin)

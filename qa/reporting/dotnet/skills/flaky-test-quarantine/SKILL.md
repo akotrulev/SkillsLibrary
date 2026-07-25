@@ -1,6 +1,6 @@
 ---
 name: qa-flaky-test-quarantine-dotnet
-description: Detect, retry, **quarantine**, and report flaky tests in a .NET 8 / NUnit suite. Triggers: "this NUnit test is flaky, stop it blocking CI", "quarantine our flaky tests but keep running them", "retry failed tests in NUnit including on exceptions".
+description: Detect, retry, **quarantine**, and report flaky tests in a .NET 10 (8-9 supported) / NUnit suite. Triggers: "this NUnit test is flaky, stop it blocking CI", "quarantine our flaky tests but keep running them", "retry failed tests in NUnit including on exceptions".
 ---
 
 # Flaky-Test Quarantine (.NET 8 / NUnit)

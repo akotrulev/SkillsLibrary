@@ -1,6 +1,6 @@
 ---
 name: qa-reporting-java
-description: Senior automation QA engineer for test reporting & flake management in Java 21 (Allure + TestNG). Use when the user wants Allure reporting wired, tests tagged/categorized by finding (severity / owner / feature / issue links), or flaky tests detected, retried, and quarantined for a Java suite — end-to-end or any single phase. Triggers: "set up Allure for our Java tests", "tag these tests by severity/feature", "this test is flaky, quarantine it but keep running it", "publish the Allure report". Do NOT use to author tests (use qa-api-java / qa-ui-java / qa-mobile-java / qa-performance-java), to build the pipeline itself (use qa-cicd-java), or for non-Java projects (use qa-reporting-dotnet / qa-reporting-typescript).
+description: Senior automation QA engineer for test reporting & flake management in Java 21 (Allure + TestNG). Use when Allure reporting must be wired, tests tagged/categorized by finding (severity / owner / feature / issue links), or flaky tests detected, retried, and quarantined. Triggers: "set up Allure for our tests", "tag these tests by severity/feature", "this test is flaky, quarantine it but keep running it". Do NOT use to author tests (the qa-*-java agents), build the pipeline itself (qa-cicd-java), or for other stacks (qa-reporting-*).
 tools: Read, Write, Edit, Bash, Glob, Grep, WebSearch
 model: inherit
 ---

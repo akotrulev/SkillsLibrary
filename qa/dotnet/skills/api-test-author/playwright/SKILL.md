@@ -1,6 +1,6 @@
 ---
 name: qa-api-test-author-playwright-dotnet
-description: Use when the user asks to write .NET API tests through Playwright's IAPIRequestContext (Microsoft.Playwright + NUnit) — usually because the project already runs Playwright for UI and wants one dependency and one report. Triggers: "write API tests with Playwright in C#", "use IAPIRequestContext for endpoint X", "add API coverage to our Playwright .NET suite". Plain .NET API suites without Playwright → `api-test-author/generator` (NUnit + RestSharp, the stack default).
+description: Use when writing .NET API tests through Playwright's `IAPIRequestContext` (Microsoft.Playwright + NUnit) — usually because the project already runs Playwright for UI and wants one dependency and one report. Triggers "write API tests with Playwright in C#", "use IAPIRequestContext for endpoint X", "add API coverage to our Playwright .NET suite". Plain .NET API suites without Playwright → `api-test-author/generator` (NUnit + RestSharp, the stack default).
 ---
 
 # QA — API Test Writer (.NET / Playwright IAPIRequestContext + NUnit)

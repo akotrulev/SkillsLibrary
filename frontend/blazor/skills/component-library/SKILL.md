@@ -1,6 +1,6 @@
 ---
 name: fe-blazor-component-library
-description: Use when choosing or wiring a Blazor UI component library (.NET 8/9/10) — the decision between MudBlazor (default), Fluent UI Blazor, Radzen, a paid enterprise suite (Telerik/Syncfusion), or none (CSS-isolation only) — plus setup, theming/dark mode, DataGrid, dialog/snackbar services, and the render-mode gotchas each one has under a Blazor Web App. Triggers: "which Blazor component library should we use", "set up MudBlazor / Fluent UI / Radzen", "add a DataGrid", "wire a dialog/snackbar service", "why do my MudBlazor components not render under static SSR". Do NOT use for hand-rolled CSS / design tokens / `::deep` (use `frontend/blazor/skills/styling`), for `data-testid` mechanics per library (use `frontend/blazor/skills/testability`), for the component-layering taxonomy (use `frontend/blazor/skills/reference`), or for forms/validation (use `frontend/blazor/skills/forms`).
+description: Use when choosing or wiring a Blazor UI component library (.NET 8/9/10) — MudBlazor (default) vs Fluent UI vs Radzen vs enterprise vs none — plus setup, theming/dark mode, DataGrid, dialog/snackbar services, and each library's render-mode gotchas. Triggers: "which Blazor component library", "set up MudBlazor / Fluent UI / Radzen", "why don't my MudBlazor components render under static SSR". Do NOT use for hand-rolled CSS/tokens/`::deep` (`styling`) or `data-testid` mechanics (`testability`).
 ---
 
 # Blazor — Component Library (one-of-N family)

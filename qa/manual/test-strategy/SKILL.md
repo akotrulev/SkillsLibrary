@@ -20,8 +20,8 @@ Produces a stack-agnostic test strategy for a feature, release, or whole service
 - Writing the actual tests → `qa/<stack>/skills/api-test-author/generator/<stack>` / `qa/<stack>/skills/ui-test-author/<stack>` / `qa/manual/test-case-writer`
 - Reviewing existing tests → `qa/<stack>/skills/api-test-author/reviewer` / `qa/<stack>/skills/ui-test-author/reviewer`
 - Bug reports → `qa/manual/bug-report-writer`
-- Quality metrics dashboard → `qa/manual/quality-metrics` (when authored)
-- Performance plan → `qa/<stack>/skills/performance` (when authored)
+- Quality metrics dashboard → `qa/manual/quality-metrics`
+- Performance plan → `qa/<stack>/skills/performance` + `qa/_shared/performance`
 
 ## Inputs needed
 

@@ -1,6 +1,6 @@
 ---
 name: qa-chaos-testing-java
-description: Use when writing fault-injection / resilience tests in Java 21 / TestNG with Toxiproxy via Testcontainers — inject latency, drops, and bandwidth caps on a dependency (DB, API, broker, cache) and assert the app degrades gracefully. Triggers: "test the app survives a slow database", "inject a connection drop", "assert the circuit breaker opens".
+description: Use when writing fault-injection / resilience tests in Java 21 / TestNG with Toxiproxy via Testcontainers — inject latency, drops, and bandwidth caps on a dependency (DB, API, broker, cache) and assert the app degrades gracefully. Triggers: "test the app survives a slow database", "inject a connection drop", "assert the circuit breaker opens". For end-to-end suite work prefer the phased agent `qa-api-java` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
 ---
 
 # QA — Chaos / Fault-Injection Testing (Java 21 / Toxiproxy + Testcontainers + TestNG)

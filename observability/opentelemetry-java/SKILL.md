@@ -1,17 +1,21 @@
 ---
 name: observability-opentelemetry-java
-description: Use when the user asks to instrument a Java 21 / Spring Boot 3 service with OpenTelemetry — traces, metrics, log correlation — using the Java auto-instrumentation agent or the SDK, exporting OTLP to a Collector. Triggers: "instrument with OTel", "add Java auto-instrumentation agent", "add a custom @WithSpan", "Micrometer to OTel", "wire OTLP exporter". Do NOT use for .NET (use `observability/opentelemetry-dotnet`), Node (use `observability/opentelemetry-node`), or log shaping (use `observability/structured-logging-java`).
+description: Use when instrumenting a Java 21 / Spring Boot 3 service with OpenTelemetry — traces, metrics, log correlation — via the auto-instrumentation agent or the SDK, exporting OTLP to a Collector. Triggers: "instrument with OTel", "add Java auto-instrumentation agent", "add a custom @WithSpan", "Micrometer to OTel". Do NOT use for .NET/Node (their siblings) or log shaping (`structured-logging-java`).
 ---
 
 # Observability — OpenTelemetry (Java 21 / Spring Boot 3)
 
 Instruments a Java 21 + Spring Boot 3 service with OpenTelemetry. Default is the **OpenTelemetry Java agent** for auto-instrumentation (zero code changes), plus the SDK for custom spans and metrics. Exports OTLP/gRPC to a local Collector that forwards to Tempo / Prometheus / Loki.
 
+## Version detection
+
+First act on an existing project: confirm the Java release (`java -version` / the toolchain in `build.gradle`) and the Spring Boot BOM version (`build.gradle` / `pom.xml`). **Java 21 + Spring Boot 3.x is the target.** Pin all OTel artifacts (agent, annotations, shim) to one release train — check the latest at the OpenTelemetry releases page. The recipes below apply as-is on any Spring Boot 3.x line.
+
 ## Stack
 
 - **Java 21 + Spring Boot 3.x**
 - **OpenTelemetry Java agent** (`opentelemetry-javaagent.jar`) — recommended default; one JAR, no code changes for HTTP / JDBC / Kafka / Redis / Mongo / gRPC instrumentation
-- **`io.opentelemetry:opentelemetry-api`** + **`opentelemetry-extension-annotations`** — for custom spans and `@WithSpan`
+- **`io.opentelemetry:opentelemetry-api`** + **`opentelemetry-instrumentation-annotations`** — for custom spans and `@WithSpan`
 - **Micrometer + OpenTelemetry bridge** (`io.opentelemetry:opentelemetry-micrometer1-shim`) — Spring Boot's `MeterRegistry` flows through OTel
 - Log correlation via the SLF4J/Logback bridge from `observability/structured-logging-java`
 - Resource attributes follow OTel semantic conventions
@@ -47,12 +51,14 @@ The agent is a separate `-javaagent` JAR. App code only needs the annotation lib
 
 ```groovy
 dependencies {
-    implementation 'io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:2.7.0'
+    implementation 'io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:2.28.1'
     // Micrometer bridge if Spring Boot's MeterRegistry is in use:
-    implementation 'io.opentelemetry:opentelemetry-micrometer1-shim:1.40.0-alpha'
+    implementation 'io.opentelemetry:opentelemetry-micrometer1-shim:1.62.0-alpha'
     // Spring Boot starter sets up Micrometer; OTel exporter is wired below
 }
 ```
+
+Pin all OTel artifacts to one release train (the annotations/agent version and the SDK-aligned `-alpha` shim version move together); check the latest at the [OpenTelemetry releases page](https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases).
 
 ### Agent launch
 
@@ -60,7 +66,7 @@ Download once during image build:
 
 ```dockerfile
 FROM eclipse-temurin:21-jre
-ARG OTEL_AGENT_VERSION=2.7.0
+ARG OTEL_AGENT_VERSION=2.28.1
 ADD https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v${OTEL_AGENT_VERSION}/opentelemetry-javaagent.jar /opt/otel/agent.jar
 
 ENV JAVA_TOOL_OPTIONS="-javaagent:/opt/otel/agent.jar"
@@ -138,7 +144,7 @@ The bridge applies OTel naming conventions automatically (`orders.created` → P
 
 ### Log correlation
 
-The `OpenTelemetryAppender` turbo-filter from `observability/structured-logging-java` injects `traceId` / `spanId` into MDC for every log emitted inside an active span. No additional wiring here.
+The `OpenTelemetryAppender` wrapper appender (see `observability/structured-logging-java`) injects `trace_id` / `span_id` into MDC (its default keys) for every log emitted inside an active span. No additional wiring here.
 
 ## Sampling
 
@@ -179,7 +185,7 @@ For SDK-only, use `io.opentelemetry:opentelemetry-sdk-extension-autoconfigure` a
 - Span names are operation names (`order.process`), not values
 - Metric names lowercase dot.case (`orders.created`, `orders.processing.duration`)
 - Use Micrometer for metrics in Spring Boot apps (don't bypass to raw OTel meters); the bridge handles the rest
-- Exclude `/actuator/health` / `/actuator/prometheus` from server-span sampling via `OTEL_INSTRUMENTATION_COMMON_DEFAULT_ENABLED=true` + per-instrumentation filters
+- Exclude `/actuator/health` and `/actuator/prometheus` spans at the Collector via a filter processor on `http.route` (the agent has no stable per-URL exclusion env var); see the tail_sampling/filter examples in `observability/loki-tempo-setup`
 - Sampling capped at 10% in production; raise per env if volume permits
 - Logs flow via stdout JSON (`OTEL_LOGS_EXPORTER=none`); only switch to OTel logs export if the log pipeline truly needs OTLP
 
@@ -202,7 +208,7 @@ For SDK-only, use `io.opentelemetry:opentelemetry-sdk-extension-autoconfigure` a
 2. Add the agent JAR to the Dockerfile (or to the deployment manifest) with the env vars above.
 3. Add the annotation library + Micrometer bridge dependencies in `build.gradle`.
 4. Add `@WithSpan` to ~5 high-value domain methods (the ones you'd want to debug in prod first).
-5. Confirm `observability/structured-logging-java` is in place; `OpenTelemetryAppender` provides `traceId`/`spanId` MDC.
+5. Confirm `observability/structured-logging-java` is in place; the `OpenTelemetryAppender` wrapper appender (see `observability/structured-logging-java`) provides `trace_id`/`span_id` MDC.
 6. Local smoke: docker-compose with the app + Collector + Tempo + Prometheus + Grafana; hit a few endpoints; confirm spans in Tempo, metrics in Prometheus, logs linked by trace ID in Grafana.
 
 ## Handoffs

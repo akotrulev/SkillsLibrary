@@ -1,6 +1,6 @@
 ---
 name: qa-auth0-test-tokens-typescript
-description: Use when the user asks to obtain Auth0 access tokens *for automated tests* in TypeScript (Vitest / Jest / Playwright). Triggers: "get an Auth0 M2M token for my API tests", "log in a test user without the UI", "mint an Auth0 token for a test user".
+description: Use when the user asks to obtain Auth0 access tokens *for automated tests* in TypeScript (Vitest / Jest / Playwright). Triggers: "get an Auth0 M2M token for my API tests", "log in a test user without the UI", "mint an Auth0 token for a test user". For end-to-end suite work prefer the phased agent `qa-api-typescript` / `qa-ui-typescript` / `qa-mobile-typescript` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
 ---
 
 # QA — Auth0 Test Tokens (TypeScript)

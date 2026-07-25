@@ -5,7 +5,8 @@ description:
   boolean prop proliferation, building flexible component libraries, or
   designing reusable APIs. Triggers on tasks involving compound components,
   render props, context providers, or component architecture. Includes React 19
-  API changes.
+  API changes. Do NOT use directly — load via `frontend/react/skills/reference`
+  (or `generator`), the house skills this deep-dive seed routes into.
 metadata:
   author: vercel
   version: '1.0.0'

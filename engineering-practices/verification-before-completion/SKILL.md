@@ -1,6 +1,6 @@
 ---
 name: ep-verification-before-completion
-description: Use when about to claim work is complete, fixed, or passing, before committing or creating PRs — requires running verification commands and confirming output before making any success claim; evidence before assertions, always. Triggers: before saying "done"/"fixed"/"tests pass", before committing/pushing/opening a PR, before marking a task complete. Cross-cutting — pairs with `ep-executing-plans`, `ep-systematic-debugging`, and `ep-finishing-a-development-branch`. Do NOT skip it because a check "should" pass — that is exactly when it applies.
+description: Use when about to claim work is complete, fixed, or passing, before committing or creating PRs — requires running verification commands and confirming output before any success claim; evidence before assertions. Triggers: before saying "done"/"fixed"/"tests pass", before committing/pushing/opening a PR. Do NOT skip it because a check "should" pass — that is exactly when it applies.
 ---
 
 # Verification Before Completion

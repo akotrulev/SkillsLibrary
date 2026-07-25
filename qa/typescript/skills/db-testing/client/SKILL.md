@@ -1,6 +1,6 @@
 ---
 name: qa-db-testing-client-typescript
-description: Use when the user asks to connect from Node 20 + TypeScript tests to a real database (Postgres / MySQL / Mongo) to seed fixtures, run read-only assertion queries, and clean up safely. Triggers: "connect from our Vitest tests to Postgres", "node-postgres probe for the orders table", "seed and clean a SQL fixture without leaks".
+description: Use when the user asks to connect from Node 24 (22 supported) + TypeScript tests to a real database (Postgres / MySQL / Mongo) to seed fixtures, run read-only assertion queries, and clean up safely. Triggers: "connect from our Vitest tests to Postgres", "node-postgres probe for the orders table", "seed and clean a SQL fixture without leaks". For end-to-end suite work prefer the phased agent `qa-api-typescript` / `qa-ui-typescript` / `qa-mobile-typescript` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
 ---
 
 # QA — DB Testing Client (TypeScript / Node 20)

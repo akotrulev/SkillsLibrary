@@ -1,6 +1,6 @@
 ---
-name: iconography
-description: Use when choosing, using, or auditing ICONS and social/OG imagery as a SYSTEM for a web app — one icon family per product (stroke vs fill, weight, grid), the library decision (Lucide default · Heroicons · Material Symbols · a component library's own set), inline-SVG discipline (`currentColor`, size via `em`/tokens, decorative-vs-labeled a11y), when an icon may stand alone vs needing a text label, and OG/social-image craft (dimensions, safe zones, thumbnail legibility). Stack-agnostic taste layer; rendering mechanics belong to the stack. Triggers "which icon library should we use", "our icons look inconsistent", "how do I size/color an inline SVG icon", "should this button have an icon or a label", "make an OG/social share image". Do NOT use for the token system (`design/design-tokens`), palette/type taste (`design/frontend-design`), a component library's setup (a stack's `component-library`), the accessible-label mechanics or icon-only-button rule (a stack's `accessibility` / `ui-conventions`), or a logo.
+name: design-iconography
+description: Use when choosing, using, or auditing icons and OG/social imagery as a SYSTEM — one icon family per product, the library decision (Lucide default · Heroicons · Material Symbols), inline-SVG discipline, icon-vs-label choice, OG-image craft. Triggers: "which icon library", "our icons look inconsistent", "make an OG/social image". Do NOT use for the token system (`design/design-tokens`), palette/type taste (`design/frontend-design`), or a logo.
 ---
 
 # Iconography — icons and social imagery as a system
@@ -35,7 +35,7 @@ Prefer one well-maintained open library over hand-drawing. Default order:
 | **Lucide** (default) | General web apps. Large, consistent 24px stroke set, permissive license, framework-agnostic SVG, tree-shakeable per-icon imports. The safe default when nothing else decides. |
 | **Heroicons** | Tailwind-flavored projects; ships matched **outline + solid** variants (clean stroke↔fill selected-state pairing) at 24px and a 20px micro set. |
 | **Material Symbols** | Material-design apps or when you need the huge coverage / variable-font axes (weight, fill, grade) — heavier, opinionated look. |
-| **The component library's own set** | When a stack's [`component-library`](../../frontend/blazor/skills/component-library/SKILL.md) is in play (MudBlazor, Fluent, Radzen) and ships a coherent icon set — use it rather than layering a second pack on top. One library's chrome + another's icons rarely aligns. |
+| **The component library's own set** | When a stack's `component-library` ([Blazor](../../frontend/blazor/skills/component-library/SKILL.md) · [React](../../frontend/react/skills/component-library/SKILL.md)) is in play (MudBlazor, Fluent, Radzen; MUI, Mantine, Chakra) and ships a coherent icon set — use it rather than layering a second pack on top. One library's chrome + another's icons rarely aligns. |
 
 **Rule: one library, chosen once.** Mixing packs reintroduces exactly the inconsistency the family rule forbids. If the chosen library is missing an icon, draw the one-off to match — don't import a second pack for a single glyph.
 
@@ -48,7 +48,7 @@ Ship icons as inline SVG (or the framework's per-icon component), not `<img>` or
 - **Import from one place.** A single icon module/package, tree-shaken — no `.svg` files copy-pasted ad hoc across the codebase.
 - **Accessibility: decorative vs meaningful.**
   - *Decorative* (an icon beside a text label that already says it) → hide from assistive tech (`aria-hidden="true"` / `role="presentation"`, `focusable="false"`). It adds nothing to announce.
-  - *Meaningful* (the icon *is* the control's only label — an icon-only button) → it must carry an accessible name. **The label mechanics and the icon-only-button rule are a stack's [`accessibility`](../../frontend/blazor/skills/accessibility/SKILL.md) / [`ui-conventions`](../../frontend/blazor/skills/ui-conventions/SKILL.md)** — this skill defers there and does not restate them.
+  - *Meaningful* (the icon *is* the control's only label — an icon-only button) → it must carry an accessible name. **The label mechanics and the icon-only-button rule are a stack's `accessibility` ([Blazor](../../frontend/blazor/skills/accessibility/SKILL.md) · [React](../../frontend/react/skills/accessibility/SKILL.md)) / `ui-conventions` ([Blazor](../../frontend/blazor/skills/ui-conventions/SKILL.md) · [React](../../frontend/react/skills/ui-conventions/SKILL.md))** — this skill defers there and does not restate them.
 
 ## Icon + label
 
@@ -81,7 +81,7 @@ The Open Graph image is the app's thumbnail in every link preview (social, chat,
 - [`design/frontend-design`](../frontend-design/SKILL.md) — the color/character taste icons inherit (they don't set palette); the color-not-alone rule.
 - [`design/design-tokens`](../design-tokens/SKILL.md) — the semantic color tokens that flow into `currentColor` and the size tokens icons use.
 - [`design/brand-intake`](../brand-intake/SKILL.md) — supplies the brand tokens an OG image and icon color follow when the brand is fixed.
-- A stack's [`component-library`](../../frontend/blazor/skills/component-library/SKILL.md) — its bundled icon set is the preferred family when the library is in play.
-- A stack's [`ui-conventions`](../../frontend/blazor/skills/ui-conventions/SKILL.md) — owns the **icon-only-button** decision rule this skill applies.
-- A stack's [`accessibility`](../../frontend/blazor/skills/accessibility/SKILL.md) — owns the accessible-name **mechanics** for meaningful icons.
-- A stack's [`seo-discoverability`](../../frontend/blazor/skills/seo-discoverability/SKILL.md) — emits the `og:image` / `twitter:card` tags for the social image designed here.
+- A stack's `component-library` ([Blazor](../../frontend/blazor/skills/component-library/SKILL.md) · [React](../../frontend/react/skills/component-library/SKILL.md)) — its bundled icon set is the preferred family when the library is in play.
+- A stack's `ui-conventions` ([Blazor](../../frontend/blazor/skills/ui-conventions/SKILL.md) · [React](../../frontend/react/skills/ui-conventions/SKILL.md)) — owns the **icon-only-button** decision rule this skill applies.
+- A stack's `accessibility` ([Blazor](../../frontend/blazor/skills/accessibility/SKILL.md) · [React](../../frontend/react/skills/accessibility/SKILL.md)) — owns the accessible-name **mechanics** for meaningful icons.
+- A stack's `seo-discoverability` ([Blazor](../../frontend/blazor/skills/seo-discoverability/SKILL.md) · [React](../../frontend/react/skills/seo-discoverability/SKILL.md)) — emits the `og:image` / `twitter:card` tags for the social image designed here.

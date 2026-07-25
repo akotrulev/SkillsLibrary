@@ -1,6 +1,6 @@
 ---
 name: fe-blazor-reviewer
-description: Use when the user asks to review Blazor code (.NET 8/9/10) for component misuse, lifecycle bugs, missing dispose, double-fetch on prerender, `Action` instead of `EventCallback`, mis-scoped or hardcoded render modes, missing data-testids, UI-correctness smells, or JS interop pitfalls. Triggers: "review this Blazor page", "why does this fetch twice", "spot smells in this state container", "audit JS interop", "audit the testids". Do NOT use for explanations (use `frontend/blazor/skills/reference`), generating code (use `frontend/blazor/skills/generator`), non-Blazor .NET (use the `backend/dotnet` dev stack's reviewer, if installed), or auth (use `auth/auth0-blazor`).
+description: Use when reviewing Blazor code (.NET 8/9/10) — component misuse, lifecycle bugs, missing dispose, double-fetch on prerender, `Action` instead of `EventCallback`, mis-scoped or hardcoded render modes, missing data-testids, UI-correctness smells, JS interop pitfalls. Triggers: "review this Blazor page", "why does this fetch twice", "audit JS interop", "audit the testids". Do NOT use for explanations (`reference`), generating code (`generator`), or non-Blazor .NET (`backend/dotnet`'s reviewer).
 ---
 
 # Blazor Design Patterns — Reviewer

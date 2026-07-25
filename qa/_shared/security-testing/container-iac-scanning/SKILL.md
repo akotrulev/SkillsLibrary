@@ -1,6 +1,6 @@
 ---
 name: qa-security-testing-container-iac-scanning
-description: Trivy (Aqua) as a CI build gate for the layers application-SCA can't see: **container images** (OS packages + app deps + secrets + misconfig in a built image.
+description: Use when scanning the layers application SCA cannot see — base-OS packages inside a container image, the image as shipped (embedded secrets, `USER root`), and IaC (Terraform, Kubernetes manifests, Helm, Dockerfiles) — with Trivy as a CI build gate. Language-agnostic, any stack. Triggers "scan our image for CVEs", "add Trivy to the pipeline", "scan our Terraform/K8s manifests", "generate an SBOM". Not for lockfile CVEs (`dependency-scanning`), a running app (`zap-*`), or source flaws (`sast`).
 ---
 
 # Security Testing — Container & IaC Scanning (Trivy)

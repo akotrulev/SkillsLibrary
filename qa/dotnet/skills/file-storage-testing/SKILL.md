@@ -1,6 +1,6 @@
 ---
 name: qa-file-storage-testing-dotnet
-description: Use when tests must assert object-storage side-effects — AWS S3 via LocalStack or Azure Blob via Azurite: uploads, downloads, presigned/SAS URLs, multipart/block staging, storage-triggered events. Triggers: "assert the export landed in the bucket", "test the presigned-URL flow", "verify blob metadata/tier". Pick the store in the decision matrix, then read its reference file.
+description: Use when a .NET / NUnit test suite must assert object-storage side-effects — AWS S3 via LocalStack or Azure Blob via Azurite: uploads, downloads, presigned/SAS URLs, multipart/block staging, storage-triggered events. Triggers "assert the export landed in the bucket", "test the presigned-URL flow", "verify blob metadata/tier". Pick the store in the matrix, then read its reference file. Not for database assertions (`db-testing/client`) or broker messages (`messaging-testing`).
 ---
 
 # QA — File Storage Testing (.NET 8 / C#)

@@ -94,5 +94,5 @@ Redis can publish events when keys change or expire (`notify-keyspace-events`). 
 - Bounding structures so O(N) ops and big keys don't stall the single thread → `references/data-structures.md`
 - Why sessions need `noeviction` and locks are async-fragile → `references/patterns.md`
 - Securing the persistence files, ACLs, TLS → `references/security.md`
-- Hit-ratio/memory/latency dashboards → `observability/*` once authored
+- Hit-ratio/memory/latency dashboards → `observability/*` skills (via the `observability-engineer-{dotnet,java,node}` peer bundled in the matching `be-*` plugin)
 - Behavior under sustained cache load → `qa/<stack>/skills/performance/*`

@@ -1,6 +1,6 @@
 ---
 name: qa-auth0-test-tokens-java
-description: Use when the user asks to obtain Auth0 access tokens *for automated tests* in Java (TestNG). Triggers: "get an Auth0 M2M token for my RestAssured tests", "log in a test user without the UI in Java", "mint an Auth0 token for a test user".
+description: Use when the user asks to obtain Auth0 access tokens *for automated tests* in Java (TestNG). Triggers: "get an Auth0 M2M token for my RestAssured tests", "log in a test user without the UI in Java", "mint an Auth0 token for a test user". For end-to-end suite work prefer the phased agent `qa-api-java` / `qa-ui-java` / `qa-mobile-java` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
 ---
 
 # QA — Auth0 Test Tokens (Java / TestNG)

@@ -84,6 +84,36 @@ Plus `pg_stat_statements` ordered by `total_exec_time` for the queries that dese
 
 Heavily-updated indexes bloat (dead entries). Rebuild online: `REINDEX INDEX CONCURRENTLY idx_name;` (PG 12+). Schedule for chronically bloated ones rather than reacting.
 
+## Vector search (pgvector)
+
+`pgvector` is the reason an existing Postgres app rarely needs a separate vector DB for embeddings / RAG: store the vector on the row it describes and index it for approximate-nearest-neighbour (ANN) search. It's an **extension**, not core — probe it before assuming it's there:
+
+```sql
+SELECT extversion FROM pg_extension WHERE extname = 'vector';  -- null → CREATE EXTENSION vector;
+```
+
+Available on RDS/Aurora PostgreSQL, Azure Database for PostgreSQL Flexible Server, and Cloud SQL (recent versions) — check the provider's version floor, since HNSW needs pgvector ≥ 0.5.0.
+
+**Column + index:**
+
+```sql
+ALTER TABLE documents ADD COLUMN embedding vector(1536);  -- dimension pinned to the model
+
+-- HNSW: default choice — best recall/latency, builds without the data present
+CREATE INDEX ON documents USING hnsw (embedding vector_cosine_ops);
+
+-- IVFFlat: smaller/faster to build, lower recall; needs representative data at build time
+CREATE INDEX ON documents USING ivfflat (embedding vector_cosine_ops) WITH (lists = 100);
+```
+
+- **Operator class = the distance metric your model uses**: `vector_cosine_ops` (`<=>`, normalized embeddings — the common case), `vector_l2_ops` (`<->`, Euclidean), `vector_ip_ops` (`<#>`, inner product). The class must match the operator the query uses or the index is ignored.
+- **HNSW vs IVFFlat**: prefer **HNSW** (default) — it doesn't need the data present to build and degrades gracefully. Reach for IVFFlat only when build time / index size dominates and you can rebuild as data grows (its `lists` must be re-tuned as row count changes; a stale `lists` silently loses recall).
+- **Tuning at a rules level** (don't hardcode — measure recall against a labeled set): HNSW build `m` / `ef_construction` trade build cost for recall; query-time `SET hnsw.ef_search` (default 40) raises recall at latency cost. IVFFlat: `lists ≈ rows/1000` up to ~1M rows, and `SET ivfflat.probes` at query time is the recall/latency dial.
+- **Filtered ANN is the trap**: `WHERE tenant_id = $1 ORDER BY embedding <=> $2 LIMIT 10` post-filters the ANN candidate list, so a selective filter can starve the result below `LIMIT` (recall loss). Mitigations: a **partial index per high-selectivity filter** (`... WHERE tenant_id = 1`), raising `ef_search`/`probes`, or pgvector ≥ 0.8's **iterative scan** (`SET hnsw.iterative_scan = relaxed_order`) which keeps scanning until the filter is satisfied. Always index the filter column too — the ANN index doesn't serve the `tenant_id` predicate.
+- Modeling side (dimension pinning, re-embedding as a backfill, when to normalize the vector out to its own table) → `references/data-modeling.md`.
+
+When pgvector stops paying off — dedicated relevance/hybrid ranking, independent scaling of the search tier, or embeddings that don't live in Postgres — that's the handoff to `data/elasticsearch` (`dense_vector` + kNN), not before.
+
 ## Anti-patterns
 
 - Unindexed FK columns (`references/data-modeling.md` — Postgres doesn't auto-index them).

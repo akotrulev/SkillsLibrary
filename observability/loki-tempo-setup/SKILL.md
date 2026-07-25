@@ -1,18 +1,18 @@
 ---
 name: observability-loki-tempo-setup
-description: Use when the user asks to set up Grafana Loki (logs) and Grafana Tempo (traces) — wire OTel Collector to both, choose object storage (S3 / GCS / Azure Blob), retention, log shipping (Promtail / Vector / Fluent Bit), index labels, exemplar linking, multi-tenant. Triggers: "set up Loki", "ship logs to Loki", "Tempo configuration", "wire OTel Collector to Loki / Tempo", "what storage for Loki", "log retention strategy". Do NOT use for query syntax (use `observability/logql-promql`), dashboards (use `observability/grafana-dashboards`), or code instrumentation (use `observability/opentelemetry-{stack}` + `observability/structured-logging-{stack}`).
+description: Use when setting up Grafana Loki (logs) and Tempo (traces) — wire the OTel Collector to both, choose object storage (S3/GCS/Azure Blob), retention, log shipping (Grafana Alloy default), index labels, exemplar linking, multi-tenant. Triggers: "set up Loki", "ship logs to Loki", "Tempo configuration", "what storage for Loki". Do NOT use for query syntax (`logql-promql`), dashboards (`grafana-dashboards`), or code instrumentation (`opentelemetry-{stack}` + `structured-logging-{stack}`).
 ---
 
 # Observability — Loki + Tempo Setup
 
-Wires the **log and trace** halves of the Grafana stack — Loki for logs, Tempo for traces. Standardizes on: **stdout JSON from apps → log forwarder (Promtail / Vector / Fluent Bit) → Loki → object storage**; **OTel SDKs → OTel Collector → Tempo (OTLP gRPC) → object storage**; **exemplars + Loki derived fields** to make navigation between logs, metrics, and traces seamless.
+Wires the **log and trace** halves of the Grafana stack — Loki for logs, Tempo for traces. Standardizes on: **stdout JSON from apps → log forwarder (Grafana Alloy / Vector / Fluent Bit) → Loki → object storage**; **OTel SDKs → OTel Collector → Tempo (OTLP gRPC) → object storage**; **exemplars + Loki derived fields** to make navigation between logs, metrics, and traces seamless.
 
 ## When to use
 
 - New cluster / environment needs the Grafana stack
 - Migrating from a vendor (Datadog / Splunk / New Relic) to self-hosted Grafana
 - Designing log retention / cardinality strategy
-- Wiring a log forwarder (Promtail / Vector / Fluent Bit)
+- Wiring a log forwarder (Grafana Alloy / Vector / Fluent Bit)
 - Setting up multi-tenant Loki / Tempo (one cluster, many teams)
 
 ## When NOT to use
@@ -21,7 +21,7 @@ Wires the **log and trace** halves of the Grafana stack — Loki for logs, Tempo
 - Dashboard layout → `observability/grafana-dashboards`
 - App-side log shape → `observability/structured-logging-{dotnet,java,node}`
 - App-side instrumentation → `observability/opentelemetry-{stack}`
-- Prometheus / Mimir for metrics — out of scope here (related but separate skill)
+- Prometheus / Mimir for metrics → `observability/prometheus-mimir-setup`
 
 ## Inputs needed
 
@@ -30,7 +30,7 @@ Wires the **log and trace** halves of the Grafana stack — Loki for logs, Tempo
 3. **Retention**: 7d / 30d / 90d / 1y by class
 4. **Object storage**: S3 / GCS / Azure Blob — pick by cloud
 5. **Multi-tenant**: one shared cluster + tenant headers, or one cluster per tenant
-6. **Log forwarder**: Promtail (simplest), Vector (flexible), Fluent Bit (battle-tested) — pick one
+6. **Log forwarder**: Grafana Alloy (recommended default), Vector (flexible), Fluent Bit (battle-tested) — pick one
 
 ## Architecture
 
@@ -40,7 +40,7 @@ App (stdout JSON, OTel SDK)
    ▼
 Pod / container runtime
    │
-   ├──► Log forwarder (Promtail / Vector / Fluent Bit) ──► Loki ──► Object Storage (S3 / GCS / Blob)
+   ├──► Log forwarder (Grafana Alloy / Vector / Fluent Bit) ──► Loki ──► Object Storage (S3 / GCS / Blob)
    │
    └──► OTel Collector (in-cluster sidecar or DaemonSet) ──► Tempo (OTLP gRPC) ──► Object Storage
                                           │
@@ -139,27 +139,61 @@ High-cardinality stuff (`trace_id`, `user_id`, `request_id`, `order_id`) lives *
 
 ## Log forwarders
 
-### Promtail (simplest)
+### Grafana Alloy (recommended default)
+
+Alloy is Grafana's OpenTelemetry-based collector distribution and the **successor to Promtail** (Grafana deprecated Promtail in Feb 2025, EOL ~Mar 2026). Deploy it as a DaemonSet via the `grafana/alloy` Helm chart; the pipeline is declared in Alloy's River config — discover pods, tail their logs, parse JSON, attach only the low-cardinality labels, push to Loki.
 
 ```yaml
-# promtail-values.yaml (Helm chart `grafana/promtail`)
-config:
-  clients:
-    - url: http://loki-gateway/loki/api/v1/push
-  snippets:
-    pipelineStages:
-      - cri: {}                          # parse container runtime metadata
-      - json:
-          expressions:
-            level: level
-            trace_id: trace_id
-            service: service.name
-      - labels:
-          level:
-          service:
+# alloy-values.yaml (Helm chart `grafana/alloy`)
+controller:
+  type: daemonset            # one Alloy per node, tails that node's pod logs
+alloy:
+  configMap:
+    content: |
+      // 1. Discover pods on this node
+      discovery.kubernetes "pods" {
+        role = "pod"
+      }
+
+      // 2. Keep only low-cardinality labels as Loki stream labels
+      discovery.relabel "pod_logs" {
+        targets = discovery.kubernetes.pods.targets
+        rule {
+          source_labels = ["__meta_kubernetes_namespace"]
+          target_label  = "namespace"
+        }
+        rule {
+          source_labels = ["__meta_kubernetes_pod_label_app"]
+          target_label  = "service"
+        }
+      }
+
+      // 3. Tail the discovered pods' logs
+      loki.source.kubernetes "pods" {
+        targets    = discovery.relabel.pod_logs.output
+        forward_to = [loki.process.parse.receiver]
+      }
+
+      // 4. Parse the JSON line; promote ONLY level + service to labels
+      loki.process "parse" {
+        stage.json {
+          expressions = { level = "level", service = "service.name" }
+        }
+        stage.labels {
+          values = { level = "", service = "" }
+        }
+        forward_to = [loki.write.default.receiver]
+      }
+
+      // 5. Push to Loki
+      loki.write "default" {
+        endpoint {
+          url = "http://loki-gateway/loki/api/v1/push"
+        }
+      }
 ```
 
-DaemonSet on each node tails `/var/log/pods/*` and ships to Loki. Built-in Kubernetes service discovery.
+Keep `environment` as a static external label (set once per cluster) rather than relabeling it per stream. Everything high-cardinality (`trace_id`, `user_id`, `request_id`) stays inside the log line and is parsed with `| json` at query time.
 
 ### Vector (more flexible)
 
@@ -168,6 +202,10 @@ Vector handles routing, filtering, dropping noisy logs, batching, multiple sinks
 ### Fluent Bit (lightweight, broad community)
 
 CNCF-graduated; less footprint than Fluentd. Solid alternative if your org standardizes on it.
+
+### Promtail (legacy — deprecated)
+
+Promtail was the classic Loki forwarder but is **deprecated by Grafana (announced Feb 2025, EOL ~Mar 2026)** in favor of Grafana Alloy. Do not pick it for new clusters; for existing Promtail setups migrate with `alloy convert --source-format=promtail`.
 
 Pick **one** per cluster and stay consistent. Don't run two.
 
@@ -267,22 +305,55 @@ The Collector lets you change sampling, batching, and routing **without redeploy
 
 ## Cross-store navigation
 
-Two wirings turn three independent stores into one investigative loop:
+Three wirings turn three independent stores into one investigative loop:
 
 ### Exemplars (metrics → traces)
 
-Prometheus stores exemplars (a `trace_id` per histogram sample). Grafana renders dots on latency histograms; clicking jumps to that trace in Tempo. Wire by setting the Tempo data source's exemplar link config (a one-time Grafana config — see `observability/grafana-dashboards`).
+Prometheus stores exemplars (a `trace_id` per histogram sample). Grafana renders dots on latency histograms; clicking jumps to that trace in Tempo. Wire by setting the Tempo data source's exemplar link config (a one-time Grafana config — see `observability/grafana-dashboards`). Requires exemplar storage enabled on the metrics backend (`observability/prometheus-mimir-setup`).
 
 ### Loki derived fields (logs → traces)
 
+**The trace-correlation contract.** The three stacks emit the trace id under different JSON field names — the derived-field regex must match all of them, or "jump to trace" silently breaks for the stacks it misses:
+
+| Stack | Emitting library | JSON field |
+|---|---|---|
+| dotnet | Serilog + `Serilog.Enrichers.Span` | `TraceId` |
+| java | OTel `logback-mdc-1.0` (default MDC keys) | `trace_id` |
+| node | pino + `@opentelemetry/instrumentation-pino` | `trace_id` |
+
+The **canonical cross-stack regex** (use exactly this in the Loki data source's derived field — one config serves all stacks):
+
 ```
-Field name: trace_id
-Regex: "trace_id":"(\w+)"
-URL:   ${__value.raw}
-Datasource: Tempo
+Name:  trace_id
+Regex: "(?:TraceId|trace_id)"\s*:\s*"([0-9a-f]{32})"
 ```
 
-Every log line with a `trace_id` becomes a clickable link to the trace. Combined with `observability/structured-logging-{stack}` (which emits `trace_id` on every log), the experience is: click an error → see the trace → click a span → see the slow DB query.
+W3C trace ids are exactly 32 lowercase hex chars — anchor on that, not `\w+` (which happily captures request ids and other garbage). Configure it as an **internal link**: set `datasourceUid` to the Tempo data source and the query to `${__value.raw}` (in provisioning YAML: `derivedFields: [{ name: trace_id, matcherRegex: ..., datasourceUid: tempo, url: "${__value.raw}" }]`).
+
+Every log line with a trace id becomes a clickable link to the trace. Combined with `observability/structured-logging-{stack}` (which emits the field per the contract table), the experience is: click an error → see the trace → click a span → see the slow DB query.
+
+### Tempo trace → logs (`tracesToLogsV2`)
+
+The third leg — from a span back to the logs that service wrote during that span. Configure on the **Tempo data source**:
+
+```yaml
+# grafana datasource provisioning (Helm values / Terraform)
+- name: Tempo
+  type: tempo
+  uid: tempo
+  url: http://tempo-query-frontend:3100
+  jsonData:
+    tracesToLogsV2:
+      datasourceUid: loki
+      spanStartTimeShift: "-5m"      # pad the window — logs can lag the span
+      spanEndTimeShift: "5m"
+      tags: [{ key: "service.name", value: "service" }]   # span attr → Loki label
+      filterByTraceID: true          # narrow to lines carrying this trace id
+    tracesToMetrics:                 # optional: span → that service's RED metrics
+      datasourceUid: prometheus
+```
+
+`tags` maps the span's `service.name` resource attribute to the Loki `service` stream label — the only join key needed because the label set is low-cardinality by design. With all three legs wired the loop closes in both directions: metric exemplar → trace → logs → (derived field) back to trace.
 
 ## Multi-tenant
 
@@ -318,8 +389,8 @@ The skill's recipes work against self-hosted or Grafana Cloud — only the endpo
 - High-cardinality stuff in the log body, parsed with `| json`
 - OTel Collector is the central hub; configurable sampling/batching/routing without app changes
 - Tempo `metrics_generator` enabled — free RED metrics + service graphs
-- Exemplars + Loki derived fields wired so cross-store navigation works
-- One log forwarder per cluster (Promtail / Vector / Fluent Bit) — never two
+- All three cross-store legs wired: exemplars (metrics→traces), Loki derived fields with the canonical cross-stack regex (logs→traces), `tracesToLogsV2` (traces→logs)
+- One log forwarder per cluster (Grafana Alloy / Vector / Fluent Bit) — never two
 - Grafana data sources defined declaratively via Helm / Terraform — reviewable in PR
 
 ## What NOT to do
@@ -342,8 +413,8 @@ The skill's recipes work against self-hosted or Grafana Cloud — only the endpo
 3. Deploy **Tempo** (Helm `grafana/tempo`); point to object storage; enable `metrics_generator`.
 4. Deploy **OTel Collector** with receivers + processors + exporters config; route traces → Tempo, metrics → Prometheus.
 5. Deploy the log forwarder; restrict labels to the low-cardinality set; ship stdout JSON to Loki.
-6. Wire **Grafana data sources** (Loki, Tempo, Prometheus); set up **exemplars** on Prom→Tempo and **derived fields** on Loki→Tempo.
-7. Smoke: hit an app, find its logs in Loki by `{service=..., env=...}`, click `trace_id` to jump to Tempo, see metrics with exemplars.
+6. Wire **Grafana data sources** (Loki, Tempo, Prometheus); set up **exemplars** on Prom→Tempo, **derived fields** (canonical cross-stack regex) on Loki→Tempo, and **`tracesToLogsV2`** on Tempo→Loki.
+7. Smoke the full loop: hit an app, find its logs in Loki by `{service=..., env=...}`, click the trace id to jump to Tempo, jump from a span back to its logs, see metrics with exemplars.
 8. Add **retention monitoring** + **cardinality monitoring** queries to a "stack health" dashboard.
 
 ## Handoffs

@@ -1,11 +1,13 @@
 ---
 name: qa-mobile-project-scaffold-dotnet
-description: Use when starting a mobile (iOS/Android) test-automation project from zero in C# / .NET 8 — solution layout, exact package versions, Appium server + driver + emulator setup, and run commands for a standalone Appium NUnit suite. Triggers: "scaffold a mobile test project", "set up a .NET Appium suite from scratch", "what versions for a C# mobile test framework", "create the solution structure for mobile tests". Composable: explains how to fold in api/ui/performance dotnet modules later.
+description: Use when starting a mobile (iOS/Android) test-automation project from zero in C# / .NET 10 (8-9) — solution layout, exact package versions, Appium server + driver + emulator setup, run commands for a standalone Appium NUnit suite. Composable with the api/ui/performance dotnet scaffolds. Triggers "scaffold a mobile test project", "set up a .NET Appium suite from scratch". Not for authoring screens or tests (`ui-test-author/appium`).
 ---
 
-# Mobile Test Project Scaffold (C# / .NET 8)
+# Mobile Test Project Scaffold (C# / .NET 10)
 
 This skill stands up a **complete, runnable mobile test solution from zero**: directory layout, exact tool/library versions, the local Appium + driver + emulator setup, and the commands to create and run it. It is **standalone** and **composable** — one project in a flat solution sharing a `TestCore` library with the api / ui / performance modules (see *Expanding into a multi-module solution*).
+
+**Version rule:** new projects target **net10.0** (the library primary); net8 (LTS) / net9 (STS) are supported fallbacks — target them only to match an existing solution's `TargetFramework`, never up-level a down-level repo. Substitute your chosen TFM for `net10.0` everywhere below.
 
 Mobile has the heaviest local setup of any module (Appium server, platform drivers, an emulator/simulator or real device). The structure follows the dotnet layout: **flat projects at the solution root**, **per-project config** so each suite is independently configurable/dockerizable, a shared **`TestCore`**, and **Central Package Management (CPM)**. Screen-object and test-authoring conventions are owned by the `qa-mobile-dotnet` skills — this skill owns the **project shell** and the **environment**.
 
@@ -25,13 +27,13 @@ Versions are pinned **once** in `Directory.Packages.props` (CPM); csprojs refere
 
 | Concern | Package / tool | Version | Notes |
 |---|---|---|---|
-| SDK | .NET SDK | **8.0 (LTS)** | `global.json`, C# 12. |
-| Test runner | `NUnit` | **4.2.2** | `Assert.That`. |
-| Test adapter | `NUnit3TestAdapter` | **4.6.0** | |
-| Test host | `Microsoft.NET.Test.Sdk` | **17.11.1** | |
+| SDK | .NET SDK | **10.0 (LTS)** | `global.json`, C# 14. On a down-level repo pin 8.0/9.0 to match. |
+| Test runner | `NUnit` | **4.3.2** | `Assert.That`. |
+| Test adapter | `NUnit3TestAdapter` | **5.0.0** | |
+| Test host | `Microsoft.NET.Test.Sdk` | **17.14.1** | |
 | Appium client | `Appium.WebDriver` | **8.0.0** | W3C `AppiumOptions`; depends on Selenium ≥4.36 (pulled transitively). |
 | Selenium base | `Selenium.WebDriver` / `Selenium.Support` | **4.44.0** | Transitive via Appium; pin explicitly to control wait helpers. |
-| Assertions | `FluentAssertions` | **6.12.1** | Pinned to 6.12.x (pre-commercial-license). |
+| Assertions | `FluentAssertions` | **6.12.1** | **Deliberately pinned to 6.12.x** (last pre-commercial-license line). |
 | Reporting | `Allure.NUnit` | **2.12.1** | Wiring owned by `qa-reporting-dotnet`. |
 | Appium server | `appium` (npm) | **2.x** | `npm i -g appium`; v2 needs drivers installed separately. |
 | Android driver | `appium-uiautomator2-driver` | **latest 2.x** | `appium driver install uiautomator2`. |
@@ -96,11 +98,11 @@ A booted emulator/simulator (or a connected device) and a running `appium` serve
 ```bash
 mkdir <Product> && cd <Product>
 git init
-dotnet new globaljson --sdk-version 8.0.100 --roll-forward latestFeature
+dotnet new globaljson --sdk-version 10.0.100 --roll-forward latestFeature
 dotnet new sln -n <Product>
 
-dotnet new classlib -o TestCore -f net8.0
-dotnet new nunit    -o AppiumTests -f net8.0
+dotnet new classlib -o TestCore -f net10.0
+dotnet new nunit    -o AppiumTests -f net10.0
 dotnet sln add TestCore AppiumTests
 dotnet add AppiumTests reference TestCore
 
@@ -152,7 +154,7 @@ Flat solution + shared `TestCore` + CPM make this purely additive. To add a sibl
 
 ## Setup checklist
 
-- [ ] `global.json` pins SDK 8.0; `Directory.Packages.props` (CPM) is the only version source; csprojs versionless
+- [ ] `global.json` pins SDK 10.0 (or the repo's 8.0/9.0); `Directory.Packages.props` (CPM) is the only version source; csprojs versionless
 - [ ] `Directory.Build.props` carries settings only
 - [ ] `TestCore` is a shared library; `AppiumTests` references it
 - [ ] Appium 2 server installed; uiautomator2 (and/or xcuitest) driver installed; `driver doctor` clean

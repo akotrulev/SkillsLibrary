@@ -1,6 +1,6 @@
 ---
 name: auth-auth0-blazor
-description: Use when the user asks to set up or modify Auth0 in Blazor Server or Blazor WebAssembly — `Microsoft.AspNetCore.Authentication.OpenIdConnect` for Server (Authorization Code + PKCE), `Microsoft.AspNetCore.Components.WebAssembly.Authentication` for WASM — including Blazor Server session lifecycle (revalidating auth-state provider, session registry, refresh tokens on circuits, logout/reset revocation). Triggers: "add Auth0 to Blazor Server", "Blazor WASM Auth0 login", "protect a Blazor route", "call a protected API from Blazor", "user stays logged in after logout/expiry", "refresh tokens in Blazor Server". Do NOT use for plain ASP.NET Core APIs (use `backend/dotnet/skills/auth0`), React (use `auth/auth0-react`), or concepts (use `auth/_shared/auth0-concepts`).
+description: Use when setting up or modifying Auth0 in Blazor Server or WASM — OpenIdConnect for Server (Authorization Code + PKCE), `WebAssembly.Authentication` for WASM — including Server session lifecycle (revalidating auth-state provider, refresh tokens on circuits, logout revocation). Triggers: "add Auth0 to Blazor Server", "Blazor WASM Auth0 login", "user stays logged in after logout". Do NOT use for plain APIs (`backend/dotnet/skills/auth0`), React (`auth/auth0-react`), or concepts (`auth0-concepts`).
 ---
 
 # Auth — Auth0 in Blazor (Server & WebAssembly)
@@ -353,5 +353,5 @@ public class CustomAuthorizationMessageHandler : AuthorizationMessageHandler
 - Backend API validation → `backend/dotnet/skills/auth0`
 - React equivalent → `auth/auth0-react`
 - Java backend → `backend/java/skills/auth0`
-- Storing secrets → `devops/environment-config` (when authored) + Key Vault
+- Storing secrets → `devops/environment-config` + Key Vault
 - E2E auth with Playwright → `qa/ui-test-author/playwright`

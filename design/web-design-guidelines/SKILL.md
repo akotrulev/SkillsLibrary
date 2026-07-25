@@ -1,39 +1,59 @@
 ---
-name: web-design-guidelines
-description: Review UI code for Web Interface Guidelines compliance. Use when asked to "review my UI", "check accessibility", "audit design", "review UX", or "check my site against best practices".
+name: design-web-guidelines
+description: Use for a CODE-level UI audit — read UI source files and flag violations of the vendored Vercel Web Interface Guidelines: missing aria-labels, `<div onClick>` navigation, unlabeled inputs, `transition: all`. Runs offline against the pinned snapshot. Triggers "audit my UI code against web interface guidelines", "pre-ship UI code audit", "review this markup before we ship". Not for experience-level review (`design-ux-heuristics`) or axe/Lighthouse scanning (qa `accessibility-testing`).
 metadata:
   author: vercel
-  version: "1.0.0"
-  argument-hint: <file-or-pattern>
+  version: "1.1.0"
 ---
 
-# Web Interface Guidelines
+# Web Interface Guidelines — code-level UI audit
 
-Review files for compliance with Web Interface Guidelines.
+Reviews UI **source files** against the Vercel Web Interface Guidelines and
+reports terse `file:line` findings. This is the **code-level** altitude — it
+reads markup, attributes, and interaction handlers in the files you point it at
+(is the icon button missing `aria-label`, is navigation a `<div onClick>`, does
+the animation honor `prefers-reduced-motion`). It does **not** judge flows,
+information architecture, or visual taste — those are other skills (see the
+fence below).
 
-## How It Works
+## How it works — local-first
 
-1. Fetch the latest guidelines from the source URL below
-2. Read the specified files (or prompt user for files/pattern)
-3. Check against all rules in the fetched guidelines
-4. Output findings in the terse `file:line` format
+The ruleset is vendored at [`references/guidelines.md`](references/guidelines.md)
+— a pinned snapshot of Vercel's upstream `command.md` (provenance in the file
+header and in [`../ATTRIBUTIONS.md`](../ATTRIBUTIONS.md)). The audit works with
+no network.
 
-## Guidelines Source
+1. **Read `references/guidelines.md`** — the pinned baseline. This always works.
+2. *Optional freshness step:* if the network is available, WebFetch the upstream
+   URL below and prefer it **only if it parses cleanly**. On any failure
+   (offline, fetch error, unexpected content) fall back **silently** to the
+   vendored copy. Never hard-fail on the fetch — a missing network is normal.
+   ```
+   https://raw.githubusercontent.com/vercel-labs/web-interface-guidelines/main/command.md
+   ```
+3. **Read the target files** (the `<file-or-pattern>` argument). If none was
+   given, ask which files/pattern to review.
+4. **Apply every rule** from the guidelines to each file.
+5. **Output findings** in the guidelines' terse `file:line` format — grouped by
+   file, one issue + location per line, `✓ pass` for a clean file, no preamble.
 
-Fetch fresh guidelines before each review:
+## What it checks
 
-```
-https://raw.githubusercontent.com/vercel-labs/web-interface-guidelines/main/command.md
-```
+The vendored ruleset covers, per file: accessibility (semantic HTML before ARIA,
+labeled controls, keyboard handlers), focus states, forms, animation
+(`prefers-reduced-motion`, compositor-friendly properties), typography, content
+handling and empty states, image dimensions (CLS), performance (list
+virtualization, no layout reads in render), navigation & URL state, touch,
+safe-area/layout, dark-mode/theming, i18n formatting, hydration safety, hover
+states, copy, and an explicit anti-pattern list to flag.
 
-Use WebFetch to retrieve the latest rules. The fetched content contains all the rules and output format instructions.
+## Do NOT use for
 
-## Usage
-
-When a user provides a file or pattern argument:
-1. Fetch guidelines from the source URL above
-2. Read the specified files
-3. Apply all rules from the fetched guidelines
-4. Output findings using the format specified in the guidelines
-
-If no files specified, ask the user which files to review.
+- **Experience-level review** — flows, friction, Nielsen heuristics, IA →
+  [`design/ux-heuristics`](../ux-heuristics/SKILL.md). This skill audits the
+  code; ux-heuristics audits the experience.
+- **Automated a11y scanning** (axe / Lighthouse, per-state WCAG scans, CI
+  budgets) → qa `accessibility-testing`. This skill reads source statically; it
+  does not run a scanner against a live page.
+- **Visual taste / identity** — palette, type, composition → [`design/frontend-design`](../frontend-design/SKILL.md).
+- **Copy wording** — the words inside the UI → [`design/ux-writing`](../ux-writing/SKILL.md).

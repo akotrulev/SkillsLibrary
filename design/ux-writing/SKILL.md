@@ -1,11 +1,11 @@
 ---
-name: ux-writing
-description: Use when writing or reviewing the words inside a UI — button and control labels, error and empty-state copy, confirmations, toasts, form hints, page and nav names — so they read in one consistent, active, user-side voice rather than system jargon. Stack-agnostic: the engineering stack defines the structural SLOTS (error regions, empty states, confirmations, IA), this skill supplies the voice that fills them. Triggers: "what should this button say", "write the error message for X", "the empty state is blank / unhelpful", "rename these labels consistently", "microcopy for this flow", "make this confirmation clearer", "our UI copy sounds like the database". Do NOT use for the visual design point of view (use `design/frontend-design`, which summarizes this), the empty-state/confirmation STRUCTURE and IA rules (use the stack's `ui-conventions`), error CATEGORIZATION/mapping mechanics (use the stack's `error-resilience`), or localization/translation (qa `i18n-testing` + a localization skill).
+name: design-ux-writing
+description: Use when writing or reviewing the words inside a UI — button labels, error and empty-state copy, confirmations, toasts, form hints, nav names — in one consistent, active, user-side voice. The stack defines the structural slots; this supplies the voice. Triggers "what should this button say", "write the error message", "microcopy for this flow", "our UI wording is inconsistent". Not for empty-state/confirmation STRUCTURE (the stack's `ui-conventions`).
 ---
 
 # UX Writing — voice & microcopy
 
-Owns the **words** in a UI and the voice they share. Interface copy is design material, not decoration: it exists to make the product easier to understand and therefore easier to use. This skill supplies the *voice*; the engineering stack owns the *slots* that voice fills — and the two are deliberately split so the copy discipline is written once and reused across stacks (Blazor today, React next).
+Owns the **words** in a UI and the voice they share. Interface copy is design material, not decoration: it exists to make the product easier to understand and therefore easier to use. This skill supplies the *voice*; the engineering stack owns the *slots* that voice fills — and the two are deliberately split so the copy discipline is written once and reused across stacks (Blazor, React).
 
 **The slot/voice split — who owns what:**
 
@@ -27,8 +27,8 @@ Never duplicate the structural rules back into this skill, and never restate voi
 ## When NOT to use
 
 - The visual/aesthetic direction of the page → [`design/frontend-design`](../frontend-design/SKILL.md)
-- The *structure* of empty states/confirmations + IA rules → the stack's `ui-conventions` ([Blazor](../../frontend/blazor/skills/ui-conventions/SKILL.md))
-- Error → message *mapping/categorization* mechanics → the stack's `error-resilience` ([Blazor](../../frontend/blazor/skills/error-resilience/SKILL.md))
+- The *structure* of empty states/confirmations + IA rules → the stack's `ui-conventions` ([Blazor](../../frontend/blazor/skills/ui-conventions/SKILL.md) · [React](../../frontend/react/skills/ui-conventions/SKILL.md))
+- Error → message *mapping/categorization* mechanics → the stack's `error-resilience` ([Blazor](../../frontend/blazor/skills/error-resilience/SKILL.md) · [React](../../frontend/react/skills/error-resilience/SKILL.md))
 - Translating copy / locale-formatting / pseudo-localization → qa `i18n-testing` + a localization skill
 
 ## The five rules
@@ -108,7 +108,7 @@ Copy is read aloud by screen readers and out of visual context — never lean on
 ## Handoffs
 
 - Visual/aesthetic direction (this discipline's design-side summary) → [`design/frontend-design`](../frontend-design/SKILL.md)
-- Empty-state/confirmation **structure**, IA "one verb per operation" rule → stack `ui-conventions` ([Blazor](../../frontend/blazor/skills/ui-conventions/SKILL.md))
-- Error **categorization/mapping**, three-state regions, correlation id → stack `error-resilience` ([Blazor](../../frontend/blazor/skills/error-resilience/SKILL.md))
+- Empty-state/confirmation **structure**, IA "one verb per operation" rule → stack `ui-conventions` ([Blazor](../../frontend/blazor/skills/ui-conventions/SKILL.md) · [React](../../frontend/react/skills/ui-conventions/SKILL.md))
+- Error **categorization/mapping**, three-state regions, correlation id → stack `error-resilience` ([Blazor](../../frontend/blazor/skills/error-resilience/SKILL.md) · [React](../../frontend/react/skills/error-resilience/SKILL.md))
 - The markup that *carries* these labels (buttons, `<PageTitle>`, real anchors) → stack `generator`
 - Translation, locale formatting, pseudo-localization → qa `i18n-testing` + a localization skill

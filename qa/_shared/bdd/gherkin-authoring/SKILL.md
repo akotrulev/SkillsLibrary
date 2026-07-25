@@ -1,6 +1,6 @@
 ---
 name: qa-gherkin-authoring
-description: Use when turning a manual test-case suite (or raw acceptance criteria) into clean, reusable Gherkin feature files for living documentation — framework-agnostic. Triggers: "convert these test cases to Gherkin", "write feature files for this suite", "structure these scenarios with a Background", "make these steps reusable / declarative", "build living documentation from our test cases". Do NOT use to generate step-definition/glue code (use the stack's `bdd-step-bindings`), to scaffold the BDD project (use the stack's `bdd-project-scaffold`), or to design the test cases themselves (use `qa/manual/test-case-writer`).
+description: Use when turning a manual test-case suite (or raw acceptance criteria) into clean, reusable Gherkin feature files for living documentation — framework-agnostic. Triggers: "convert these test cases to Gherkin", "write feature files for this suite", "structure these scenarios with a Background", "make these steps declarative". Do NOT use to generate step-definition code (the stack's `bdd-step-bindings`), scaffold the BDD project (`bdd-project-scaffold`), or design test cases (`test-case-writer`).
 ---
 
 # Gherkin Authoring — Test Cases → Living-Documentation Feature Files

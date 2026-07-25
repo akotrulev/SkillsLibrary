@@ -1,6 +1,6 @@
 ---
 name: be-node-reviewer
-description: Use when the user asks to review TypeScript code (Node / NestJS / Express, strict mode) for type-safety leaks, async correctness, pattern misuse, missing discriminated-union exhaustiveness, or runtime-validation gaps. Triggers: "review this TS service", "spot smells in this handler", "audit for `any` usage", "is this CQRS justified", "check runtime validation at boundaries". Do NOT use for explanations (use `backend/node/skills/reference`), generating code (use `backend/node/skills/generator`), React (use `frontend/react/skills/reviewer`), or React Native.
+description: Use when reviewing TypeScript code (Node / NestJS / Express, strict mode) for type-safety leaks, async correctness, pattern misuse, missing discriminated-union exhaustiveness, or runtime-validation gaps. Triggers: "review this TS service", "audit for `any` usage", "is this CQRS justified", "check runtime validation at boundaries". Do NOT use for explanations (`reference`), generating code (`generator`), or React (`frontend/react/skills/reviewer`).
 ---
 
 # TypeScript Design Patterns — Reviewer

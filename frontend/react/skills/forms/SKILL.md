@@ -1,6 +1,6 @@
 ---
 name: fe-react-forms
-description: Use when the user asks to build or improve a React form (Next.js App Router primary, Vite SPA fallback) — React Hook Form + Zod (default), the React 19 Server-Actions lane (`<form action>` + `useActionState` + `useFormStatus` + `useOptimistic`), controlled vs uncontrolled inputs, async/server-side validation, ProblemDetails→field-error mapping, multi-step wizards, file uploads, and accessibility. Triggers "build a form for X", "validate this with Zod", "wire a Server Action form", "server errors aren't landing on the fields", "optimistic submit", "multi-step wizard", "accessible inputs". Do NOT use for state management at large (use `frontend/react/skills/state-management`), the data-fetch/mutation mechanics themselves (use `frontend/react/skills/data-access`), broad accessibility (use `frontend/react/skills/accessibility`), or Blazor (use `frontend/blazor/skills/forms`).
+description: Use when building or fixing a form — React Hook Form + Zod (default), the React 19 Server-Actions lane (`<form action>` + `useActionState` + `useOptimistic`), async/server validation, ProblemDetails→field-error mapping, wizards, uploads, a11y. Triggers "build a form for X", "validate with Zod", "server errors aren't landing on the fields", "my input loses focus on every keystroke". Not for state management (`state-management`) or fetch mechanics (`data-access`).
 ---
 
 # React — Forms

@@ -342,4 +342,4 @@ Either way: **one resource per env** — don't try to "deploy the same module tw
 - Pipelines that run plan/apply → `devops/{github-actions,gitlab-ci,azure-pipelines}`
 - App deploy specifics built on these resources → `devops/{aws,azure}-deployment`
 - App-level secrets binding → `devops/environment-config`
-- Cost/budget alerts → `observability/grafana-dashboards` (when authored)
+- Cost/budget alerts → AWS Budgets / Azure Cost Management, per the Rules in `devops/{aws,azure}-deployment`

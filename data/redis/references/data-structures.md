@@ -110,4 +110,4 @@ Version/flavor fences: on **7.x** these need Redis Stack installed separately (m
 - Building a rate limiter / lock / queue / session on these structures → `references/patterns.md`
 - TTL as a mandatory rule + eviction interaction → the router + `references/operations.md`
 - Which caching strategy wraps the value → `data/_shared/caching-patterns`
-- Vector search beyond a cache → `data/elasticsearch` / a dedicated vector store
+- Vector search beyond a cache → `pgvector` on the Postgres you already run (`data/postgresql/references/indexing.md`) if the embeddings belong to relational data; `data/elasticsearch` / a dedicated vector store when you need relevance/hybrid ranking, independent scaling, or non-Postgres data

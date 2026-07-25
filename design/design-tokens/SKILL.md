@@ -1,6 +1,6 @@
 ---
 name: design-tokens
-description: Use when defining or auditing a design-token SYSTEM for a web app — the tier model (primitive → semantic → component), purpose-based naming, the token categories an app needs (color, type scale, spacing, radius, elevation, motion, breakpoints), theming and dark mode as a semantic swap set, and the delivery shape (CSS custom properties by default, W3C DTCG JSON only with a Style Dictionary pipeline). Stack-agnostic: owns the token DISCIPLINE that `design/frontend-design`'s per-brief palette / type CHOICES feed into and a stack's `styling` consumes as CSS. Triggers "set up design tokens", "structure our tokens into tiers", "name these tokens by purpose", "dark mode as a token swap", "should tokens be DTCG JSON", "primitive vs semantic vs component". Do NOT use for the visual CHOICE of palette / type (`design/frontend-design`), the CSS application mechanics per stack (the stack's `styling`), a preset quick-start theme (`design/theme-factory`), or consuming an existing brand book (`design/brand-intake`).
+description: Use when building or auditing the variable layer a design system runs on — primitive → semantic → component token tiers, the color/type/spacing/radius/elevation scales, dark mode as a semantic swap. Owns the discipline `design-frontend-design` feeds and `styling` consumes. Triggers "set up design tokens", "define the spacing/type scale", "hardcoded hex values everywhere". Not for palette/type CHOICE (`design-frontend-design`) or CSS mechanics (the stack's `styling`).
 ---
 
 # Design Tokens — the token system discipline
@@ -88,4 +88,4 @@ Dark mode and brand variants are a **semantic remap only — primitives never fo
 - [`design/frontend-design`](../frontend-design/SKILL.md) — the taste that *chooses* the palette/type values this system gives structure to (primary theming authority; its per-brief token system feeds this skill's tiers).
 - [`design/brand-intake`](../brand-intake/SKILL.md) — the brownfield path: an existing brand book normalized into this tier model.
 - [`design/theme-factory`](../theme-factory/SKILL.md) — preset themes; their palettes are **primitive-tier starting values** you assign semantic roles to.
-- A stack's `styling` (e.g. [`fe-blazor-styling`](../../frontend/blazor/skills/styling/SKILL.md)) — consumes this structure and owns the CSS mechanics (isolation, `clamp()` type sizing, `var(--token)` application). It defers the tier/naming rules here.
+- A stack's `styling` ([Blazor](../../frontend/blazor/skills/styling/SKILL.md) · [React](../../frontend/react/skills/styling/SKILL.md)) — consumes this structure and owns the CSS mechanics (isolation, `clamp()` type sizing, `var(--token)` application). It defers the tier/naming rules here.

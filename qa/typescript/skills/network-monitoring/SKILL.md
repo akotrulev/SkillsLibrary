@@ -1,6 +1,6 @@
 ---
 name: qa-network-monitoring-typescript
-description: Use when UI tests must intercept, mock, throttle, or assert browser network traffic — Playwright routes, raw CDP (throttling/offline), or an out-of-browser MITM proxy (HAR capture, non-Playwright drivers). Triggers: "mock this XHR in the UI test", "simulate slow 3G/offline", "capture a HAR", "assert the page called endpoint X". Pick the layer, then read its reference file.
+description: Use when Node 24 (22 supported) / TypeScript / Vitest UI tests must intercept, mock, throttle, or assert browser network traffic — Playwright routes, raw CDP (throttling/offline), or an out-of-browser MITM proxy (HAR capture, non-Playwright drivers). Triggers "mock this XHR in the UI test", "simulate slow 3G/offline", "capture a HAR", "assert the page called endpoint X". Pick the layer, then read its reference file. Do NOT use for direct API testing without a browser (use `qa-api-test-author-generator-typescript`), for load-level throttling (use the stack's `performance` skill), for WebSocket/SSE streams (use `qa-websocket-sse-testing-typescript`), or for non-TypeScript projects (use `qa-network-monitoring-{java,dotnet}`). For end-to-end suite work prefer the phased agent `qa-ui-typescript` / `qa-mobile-typescript` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
 ---
 
 # QA — Network Monitoring (TypeScript)

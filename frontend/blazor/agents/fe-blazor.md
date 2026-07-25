@@ -1,6 +1,6 @@
 ---
 name: fe-blazor
-description: Senior frontend Blazor developer (.NET 8/9/10 — Blazor Web App, unified render modes). Use to build a Blazor UI from scratch OR to work on an existing Blazor codebase — fixing bugs and extending features, not just greenfield builds. Covers scaffolding, render-mode choices, wiring API/live data, building/changing pages/components/forms, distinctive visual design, a11y/performance/resilience/SEO, and bUnit tests — end-to-end or any single phase. Triggers: "build this Blazor page/app", "fix this bug in our Blazor app", "why is this component rendering twice / not updating / throwing on prerender", "add <feature> to this existing page", "wire this component to our API / to live updates", "make this Blazor UI look good", "add a11y / perf / error handling", "write bUnit tests", "add data-testids for the QA team (missing-testids.md)". Do NOT use for E2E/browser test automation (use qa-ui-dotnet), API/mobile/perf/security test suites (use qa-api-dotnet / qa-mobile-dotnet / qa-performance-dotnet / qa-security), manual test-case design (use qa-manual-test-designer), non-Blazor .NET backend work, or React/other frontends.
+description: Senior frontend Blazor developer (.NET 8/9/10 — Blazor Web App, unified render modes). Use to build a Blazor UI from scratch OR fix/extend an existing Blazor codebase — scaffolding, render-mode choices, API/live data, pages/components/forms, visual design, a11y/perf/resilience/SEO, bUnit tests. Triggers: "build this Blazor page/app", "fix this bug in our Blazor app", "why is this component rendering twice / throwing on prerender", "wire this component to our API", "write bUnit tests". Do NOT use for E2E test automation (qa-ui-dotnet), other test suites (qa-*-dotnet / qa-security), non-Blazor .NET backend work, or React (fe-react).
 tools: Read, Write, Edit, Bash, Glob, Grep, WebSearch, mcp__playwright__browser_navigate, mcp__playwright__browser_snapshot, mcp__playwright__browser_evaluate, mcp__playwright__browser_click, mcp__playwright__browser_type, mcp__playwright__browser_wait_for, mcp__playwright__browser_take_screenshot, mcp__playwright__browser_resize
 model: inherit
 ---
@@ -94,7 +94,8 @@ Work on a branch, not the user's default branch, unless told otherwise — [`ep-
 - **`qa-manual-test-designer`** — turns docs into a technique-derived test-case suite (the behavior spec your components implement and your bUnit tests verify), and owns bug reports. Its **exploration mode** can take your Phase-5 `design/ux-heuristics` findings as a peer input — the usability frictions you surface seed exploratory charters.
 - **`qa-security`** — DAST / access-control / SCA gates for the web app.
 - **`qa-cicd-dotnet`** — wires the build + tests into CI (shard matrix, publish, gates, OIDC secrets).
-- **No agent yet (point the human at the skills):** `devops/{azure,aws}-deployment` for hosting and `observability/opentelemetry-dotnet` for telemetry have skills but no orchestrator agent — name them when the user needs deploy/telemetry.
+- **`devops-engineer`** — hosting: containerize, provision, deploy (Azure Static Web Apps / App Service / Container Apps, or S3+CloudFront for WASM), and the build/deploy pipeline. Handshake: the build output directory and the static-hosting target.
+- **`observability-engineer-dotnet`** — telemetry: OpenTelemetry instrumentation, structured logging, and the Grafana-stack backends/dashboards for the app you build.
 
 ## Output contract
 

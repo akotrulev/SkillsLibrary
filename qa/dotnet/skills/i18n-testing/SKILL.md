@@ -1,6 +1,6 @@
 ---
 name: qa-i18n-testing-dotnet
-description: Use when writing i18n/localization tests in .NET 8 — Playwright .NET + NUnit pinned to a locale, asserting via the app's own `.resx`/`IStringLocalizer` catalog by key (never hardcoded literals), `CultureInfo` for number/date/currency formats, pseudo-localization and RTL checks. Triggers: "write an i18n test in C#", "test German/Arabic rendering", "assert currency formatting per culture".
+description: Use when writing i18n/localization tests in .NET 10 (8-9) — Playwright .NET + NUnit pinned to a locale, asserting via the app's own `.resx`/`IStringLocalizer` catalog by key (never hardcoded literals), `CultureInfo` for number/date/currency formats, pseudo-localization and RTL checks. Triggers "write an i18n test in C#", "test German/Arabic rendering", "assert currency formatting per culture". Not for the app's own localization wiring (the `fe-*` stack's `localization`).
 ---
 
 # QA — i18n / Localization Testing (.NET 8 / Playwright .NET + NUnit + CultureInfo)

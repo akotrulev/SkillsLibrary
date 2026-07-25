@@ -1,6 +1,6 @@
 ---
 name: ep-dispatching-parallel-agents
-description: Use only when you have genuinely independent problem domains (no shared state, no sequential dependencies) AND running them concurrently clearly pays for itself — a cost-aware exception to sequential/inline work. Triggers: "investigate these unrelated failures in parallel", "fan these independent fixes out". Governed by a hard 2-agent gate: more than 2 concurrent agents needs the user's permission first. Do NOT use for related failures (fix one may fix others), work needing shared context, exploratory debugging, or as a reflex for speed — sequential is the default.
+description: Use only when you have genuinely independent problem domains (no shared state, no sequential dependencies) AND running them concurrently clearly pays for itself — a cost-aware exception to sequential/inline work. Triggers: "investigate these unrelated failures in parallel", "fan these independent fixes out". Do NOT use for related failures, work needing shared context, or as a reflex for speed — sequential is the default.
 ---
 
 # Dispatching Parallel Agents (cost-aware)
@@ -15,9 +15,9 @@ Parallel dispatch can save wall-clock time when failures are truly independent �
 
 **Cost before speed.** Default to investigating sequentially / inline. Parallelize only when the domains are genuinely independent *and* the time saved is worth the extra invocations. When sequential and parallel both work, choose sequential.
 
-**Hard gate — never run more than 2 agents concurrently without asking.** The upstream "3+ failures → dispatch one agent each" reflex is exactly what this gate blocks. If you would fan out to more than 2 agents at once, **STOP and ask the user first**, listing the domains and the cost/benefit; proceed only with their go-ahead. With their permission you may exceed 2.
+**Scale the fan-out to the work, not to the reflex.** The upstream "3+ failures → dispatch one agent each" habit is what this policy tempers: dispatch as many agents as there are genuinely independent domains, but make it a deliberate call each time — every additional agent is another expensive invocation. When the count climbs, say what you're spawning and why rather than fanning out silently.
 
-**Core principle:** at most one agent per independent problem domain, at most 2 concurrent without asking, cost weighed before speed.
+**Core principle:** at most one agent per independent problem domain, cost weighed before speed.
 
 ## When to Use
 
@@ -27,18 +27,13 @@ digraph when_to_use {
     "Are they independent?" [shape=diamond];
     "Worth the extra invocations?" [shape=diamond];
     "Single agent / inline (default)" [shape=box];
-    "More than 2 concurrent?" [shape=diamond];
-    "Ask user for permission first" [shape=box];
-    "Parallel dispatch (≤2)" [shape=box];
+    "One agent per independent domain" [shape=box];
 
     "Multiple failures?" -> "Are they independent?" [label="yes"];
     "Are they independent?" -> "Single agent / inline (default)" [label="no - related"];
     "Are they independent?" -> "Worth the extra invocations?" [label="yes"];
     "Worth the extra invocations?" -> "Single agent / inline (default)" [label="no - cost>benefit"];
-    "Worth the extra invocations?" -> "More than 2 concurrent?" [label="yes"];
-    "More than 2 concurrent?" -> "Ask user for permission first" [label="yes"];
-    "More than 2 concurrent?" -> "Parallel dispatch (≤2)" [label="no"];
-    "Ask user for permission first" -> "Parallel dispatch (≤2)" [label="approved"];
+    "Worth the extra invocations?" -> "One agent per independent domain" [label="yes"];
 }
 ```
 
@@ -46,13 +41,13 @@ digraph when_to_use {
 - Genuinely independent problems with different root causes and no shared state
 - Each problem can be understood without context from the others
 - The wall-clock saving is worth the extra agent invocations
-- ≤2 concurrent agents — or the user has approved more
+- No more agents than there are independent domains
 
 **Don't use when:**
 - Failures are related (fix one might fix others)
 - Need to understand full system state
 - Agents would interfere with each other
-- You're reaching for it purely for speed, or it would exceed 2 agents without asking
+- You're reaching for it purely for speed
 
 ## The Pattern
 
@@ -73,19 +68,18 @@ Each agent gets:
 - **Constraints:** Don't change other code
 - **Expected output:** Summary of what you found and fixed
 
-### 3. Dispatch (respecting the 2-agent gate)
+### 3. Dispatch
 
-Dispatch at most 2 concurrent agents by default. **Three or more domains means stopping to ask the user first** — present the domains and the cost/benefit, dispatch only on their go-ahead.
+Dispatch one agent per independent domain. Weigh the invocation cost before each addition, and name what you're spawning so the fan-out is visible rather than silent.
 
 ```
-# ≤2 domains — proceed
 Agent("Fix agent-tool-abort.test.ts failures")
 Agent("Fix batch-completion-behavior.test.ts failures")
+Agent("Fix tool-approval-race-conditions.test.ts failures")
 
-# A 3rd independent domain exists → do NOT auto-dispatch:
-# "There's a third independent failure (tool-approval-race-conditions.test.ts).
-#  Running all three in parallel means 3 agents. Want me to spawn the third, or
-#  handle it sequentially after these two?"
+# Say what you did and why:
+# "Three independent failure domains, so three agents in parallel —
+#  no shared state between them, and the sequential path would be ~3x the wall clock."
 ```
 
 ### 4. Review and Integrate
@@ -145,6 +139,17 @@ Return: Summary of what you found and what you fixed.
 **Exploratory debugging:** You don't know what's broken yet
 **Shared state:** Agents would interfere (editing same files, using same resources)
 
+> **Working-tree conflicts ≠ abandon parallelism.** If the domains are genuinely
+> independent but the agents would touch the *same working tree* (edit files that
+> collide, race on the same build output), don't drop back to sequential — give
+> each agent an **isolated worktree** instead. Use the harness's native
+> `isolation: worktree` when dispatching, or set one up per `ep-using-git-worktrees`.
+> The shared-state exclusion above is about *logical* coupling (they need each
+> other's state to reason), not merely a shared checkout — a shared checkout is a
+> tooling problem worktrees solve. (`ep-subagent-driven-development` bans parallel
+> *implementers* for exactly this filesystem-collision reason; worktrees are the
+> escape hatch when the work is truly independent.)
+
 ## Real Example from Session
 
 **Scenario:** 6 test failures across 3 files after major refactoring
@@ -156,9 +161,9 @@ Return: Summary of what you found and what you fixed.
 
 **Decision:** Independent domains - abort logic separate from batch completion separate from race conditions
 
-**Gate check:** three domains means three concurrent agents — **above the 2-agent cap**, so this is exactly the case where you STOP and ask the user before dispatching. Assume they approved:
+**Cost check:** three domains means three concurrent agents. Independent root causes, no shared state, and sequential investigation would triple the wall clock — the extra invocations earn their keep here.
 
-**Dispatch (after permission):**
+**Dispatch:**
 ```
 Agent 1 → Fix agent-tool-abort.test.ts
 Agent 2 → Fix batch-completion-behavior.test.ts
@@ -172,9 +177,9 @@ Agent 3 → Fix tool-approval-race-conditions.test.ts
 
 **Integration:** All fixes independent, no conflicts, full suite green
 
-**Without permission:** handle two in parallel and the third sequentially — no gate breach, most of the saving.
+**If the third domain hadn't been worth an agent:** two in parallel and the third inline captures most of the saving for one fewer invocation.
 
-## Key Benefits (when the gates pass)
+## Key Benefits (when the cost check passes)
 
 1. **Focus** - Each agent has narrow scope, less context to track
 2. **Independence** - Agents don't interfere with each other
@@ -193,12 +198,12 @@ After agents return:
 
 From a debugging session:
 - 6 failures across 3 files
-- 3 independent domains — above the 2-agent cap, so dispatch is permission-gated
-- With approval: 3 agents run concurrently, all fixes integrated, zero conflicts
-- Without: 2 in parallel + 1 sequential captures most of the saving, no gate breach
+- 3 independent domains, each worth its own invocation
+- 3 agents run concurrently, all fixes integrated, zero conflicts
+- The cheaper alternative — 2 in parallel + 1 inline — captures most of the saving for one fewer agent
 
 ## Related skills
 
 - **`ep-systematic-debugging`** — the per-domain investigation each agent runs; use it inline when there's only one domain (the common case)
-- **`ep-subagent-driven-development`** — the plan-execution counterpart; same cost-before-speed policy and 2-agent gate
+- **`ep-subagent-driven-development`** — the plan-execution counterpart; same cost-before-speed policy
 - **`ep-verification-before-completion`** — run the full suite and verify before claiming the parallel fixes worked

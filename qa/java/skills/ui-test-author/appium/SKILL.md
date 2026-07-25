@@ -1,6 +1,6 @@
 ---
 name: qa-ui-test-author-appium-java
-description: Use when the user asks to scaffold a Java + Appium 2.x page object or TestNG mobile UI test, following the BasePage / DriverFactory / TestNG pattern. Triggers: "create an Appium page object for X in Java", "add a Java mobile page for screen Y", "write an Appium TestNG test for Z".
+description: Use when the user asks to scaffold a Java + Appium 2.x page object or TestNG mobile UI test, following the BasePage / DriverFactory / TestNG pattern. Triggers: "create an Appium page object for X in Java", "add a Java mobile page for screen Y", "write an Appium TestNG test for Z". For end-to-end suite work prefer the phased agent `qa-mobile-java` / `qa-bdd-java` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
 ---
 
 # QA — Appium Java Page Object & Test Generator

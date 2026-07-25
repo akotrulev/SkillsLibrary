@@ -6,8 +6,8 @@
     "email": "alexandur.kotrulev@gmail.com"
   },
   "metadata": {
-    "description": "Stack-first skills library covering QA, frontend, backend, data, and business-analysis: install one self-contained plugin per tech stack. `qa-{java,dotnet,typescript}` bundle every QA discipline — API/UI/mobile/performance/LLM/BDD authoring and verification, manual-QA process, CI/CD, reporting, and OWASP-mapped security. `fe-{blazor,react}` are phased frontend dev-stack agents (scaffold → architecture → features → quality → tests → review). `be-{dotnet,java,node}` are phased backend dev-stack agents for design-pattern application, ORM persistence, and Auth0/Cognito service-side auth. `data` and `business-analysis` round out the database-engineering and cross-feature requirements domains.",
-    "version": "2.13.0"
+    "description": "Stack-first skills library covering QA, frontend, backend, data, and business-analysis: install one self-contained plugin per tech stack. `qa-{java,dotnet,typescript}` bundle every QA discipline — API/UI/mobile/performance/LLM/BDD authoring and verification, manual-QA process, CI/CD, reporting, and OWASP-mapped security. `fe-{blazor,react}` are phased frontend dev-stack agents (scaffold → architecture → features → quality → tests → review). `be-{dotnet,java,node}` are phased backend dev-stack agents for design-pattern application, ORM persistence, and Auth0/Cognito service-side auth. `devops` ships the platform lane — container images, IaC, cloud deploys, and build/deploy pipelines. `data` and `business-analysis` round out the database-engineering and cross-feature requirements domains.",
+    "version": "2.14.0"
   },
   "plugins": [
     {
@@ -108,7 +108,24 @@
         "./engineering-practices/verification-before-completion",
         "./engineering-practices/finishing-a-development-branch",
         "./engineering-practices/subagent-driven-development",
-        "./engineering-practices/dispatching-parallel-agents"
+        "./engineering-practices/dispatching-parallel-agents",
+        "./engineering-practices/requesting-code-review",
+        "./engineering-practices/receiving-code-review",
+        "./engineering-practices/spec-compliance-audit",
+        "./engineering-practices/feature-audit"
+      ],
+      "commands": [
+        "./engineering-practices/commands/code-auditor.md",
+        "./qa/_shared/commands/qa-security.md",
+        "./qa/cicd/commands/qa-cicd-java.md",
+        "./qa/java/commands/qa-api-java.md",
+        "./qa/java/commands/qa-bdd-java.md",
+        "./qa/java/commands/qa-llm-java.md",
+        "./qa/java/commands/qa-mobile-java.md",
+        "./qa/java/commands/qa-performance-java.md",
+        "./qa/java/commands/qa-ui-java.md",
+        "./qa/manual/commands/qa-manual-test-designer.md",
+        "./qa/reporting/commands/qa-reporting-java.md"
       ],
       "agents": [
         "./qa/_shared/agents/qa-security.md",
@@ -120,12 +137,13 @@
         "./qa/java/agents/qa-performance-java.md",
         "./qa/java/agents/qa-ui-java.md",
         "./qa/manual/agents/qa-manual-test-designer.md",
-        "./qa/reporting/agents/qa-reporting-java.md"
+        "./qa/reporting/agents/qa-reporting-java.md",
+        "./engineering-practices/agents/code-auditor.md"
       ]
     },
     {
       "name": "qa-dotnet",
-      "description": "Self-contained senior automation-QA plugin for .NET 8 / C# (NUnit + RestSharp, Playwright/Selenium/Appium, NBomber, Reqnroll). Covers every discipline end-to-end: project scaffolding from zero (API/UI/mobile/performance/BDD), API/UI/mobile/performance/LLM test authoring and review, BDD living documentation, deep verification (DB, messaging, email, files, websockets), Pact contracts, chaos and feature-flag testing. Bundles the language-agnostic manual-QA process skills, CI/CD pipeline skills, test reporting (Allure + flaky-test quarantine), and the cross-stack OWASP-mapped security skills and qa-security agent — install just this one plugin for a complete .NET QA toolkit.",
+      "description": "Self-contained senior automation-QA plugin for .NET 10 / C#, 8-9 supported and version-aware (NUnit + RestSharp, Playwright/Selenium/Appium, NBomber, Reqnroll). Covers every discipline end-to-end: project scaffolding from zero (API/UI/mobile/performance/BDD), API/UI/mobile/performance/LLM test authoring and review, BDD living documentation, deep verification (DB, messaging, email, files, websockets), Pact contracts, chaos and feature-flag testing, mutation testing (Stryker.NET). Bundles the language-agnostic manual-QA process skills, CI/CD pipeline skills, test reporting (Allure + flaky-test quarantine), and the cross-stack OWASP-mapped security skills and qa-security agent, plus a one-call read-only conformance audit (/qa-dotnet-audit) that sweeps an existing test suite against every convention above into a saved, re-runnable findings report — install just this one plugin for a complete .NET QA toolkit.",
       "source": "./",
       "strict": false,
       "author": {
@@ -173,6 +191,7 @@
         "./qa/dotnet/skills/bdd-step-bindings",
         "./qa/dotnet/skills/chaos-testing",
         "./qa/dotnet/skills/cloud-grid-config",
+        "./qa/dotnet/skills/conformance-audit",
         "./qa/dotnet/skills/contract-testing-pact",
         "./qa/dotnet/skills/data-driven-testing",
         "./qa/dotnet/skills/db-testing/client",
@@ -187,6 +206,7 @@
         "./qa/dotnet/skills/mobile-device-farm",
         "./qa/dotnet/skills/mobile-native-features",
         "./qa/dotnet/skills/mobile-project-scaffold",
+        "./qa/dotnet/skills/mutation-testing",
         "./qa/dotnet/skills/network-monitoring",
         "./qa/dotnet/skills/page-object-architect",
         "./qa/dotnet/skills/performance-project-scaffold",
@@ -224,7 +244,26 @@
         "./engineering-practices/verification-before-completion",
         "./engineering-practices/finishing-a-development-branch",
         "./engineering-practices/subagent-driven-development",
-        "./engineering-practices/dispatching-parallel-agents"
+        "./engineering-practices/dispatching-parallel-agents",
+        "./engineering-practices/requesting-code-review",
+        "./engineering-practices/receiving-code-review",
+        "./engineering-practices/spec-compliance-audit",
+        "./engineering-practices/feature-audit",
+        "./engineering-practices/conformance-audit"
+      ],
+      "commands": [
+        "./engineering-practices/commands/code-auditor.md",
+        "./qa/_shared/commands/qa-security.md",
+        "./qa/cicd/commands/qa-cicd-dotnet.md",
+        "./qa/dotnet/commands/qa-api-dotnet.md",
+        "./qa/dotnet/commands/qa-bdd-dotnet.md",
+        "./qa/dotnet/commands/qa-dotnet-audit.md",
+        "./qa/dotnet/commands/qa-llm-dotnet.md",
+        "./qa/dotnet/commands/qa-mobile-dotnet.md",
+        "./qa/dotnet/commands/qa-performance-dotnet.md",
+        "./qa/dotnet/commands/qa-ui-dotnet.md",
+        "./qa/manual/commands/qa-manual-test-designer.md",
+        "./qa/reporting/commands/qa-reporting-dotnet.md"
       ],
       "agents": [
         "./qa/_shared/agents/qa-security.md",
@@ -236,7 +275,8 @@
         "./qa/dotnet/agents/qa-performance-dotnet.md",
         "./qa/dotnet/agents/qa-ui-dotnet.md",
         "./qa/manual/agents/qa-manual-test-designer.md",
-        "./qa/reporting/agents/qa-reporting-dotnet.md"
+        "./qa/reporting/agents/qa-reporting-dotnet.md",
+        "./engineering-practices/agents/code-auditor.md"
       ]
     },
     {
@@ -336,7 +376,24 @@
         "./engineering-practices/verification-before-completion",
         "./engineering-practices/finishing-a-development-branch",
         "./engineering-practices/subagent-driven-development",
-        "./engineering-practices/dispatching-parallel-agents"
+        "./engineering-practices/dispatching-parallel-agents",
+        "./engineering-practices/requesting-code-review",
+        "./engineering-practices/receiving-code-review",
+        "./engineering-practices/spec-compliance-audit",
+        "./engineering-practices/feature-audit"
+      ],
+      "commands": [
+        "./engineering-practices/commands/code-auditor.md",
+        "./qa/_shared/commands/qa-security.md",
+        "./qa/cicd/commands/qa-cicd-typescript.md",
+        "./qa/manual/commands/qa-manual-test-designer.md",
+        "./qa/reporting/commands/qa-reporting-typescript.md",
+        "./qa/typescript/commands/qa-api-typescript.md",
+        "./qa/typescript/commands/qa-bdd-typescript.md",
+        "./qa/typescript/commands/qa-llm-typescript.md",
+        "./qa/typescript/commands/qa-mobile-typescript.md",
+        "./qa/typescript/commands/qa-performance-typescript.md",
+        "./qa/typescript/commands/qa-ui-typescript.md"
       ],
       "agents": [
         "./qa/_shared/agents/qa-security.md",
@@ -348,7 +405,8 @@
         "./qa/typescript/agents/qa-llm-typescript.md",
         "./qa/typescript/agents/qa-mobile-typescript.md",
         "./qa/typescript/agents/qa-performance-typescript.md",
-        "./qa/typescript/agents/qa-ui-typescript.md"
+        "./qa/typescript/agents/qa-ui-typescript.md",
+        "./engineering-practices/agents/code-auditor.md"
       ]
     },
     {
@@ -411,10 +469,20 @@
         "./engineering-practices/verification-before-completion",
         "./engineering-practices/finishing-a-development-branch",
         "./engineering-practices/subagent-driven-development",
-        "./engineering-practices/dispatching-parallel-agents"
+        "./engineering-practices/dispatching-parallel-agents",
+        "./engineering-practices/requesting-code-review",
+        "./engineering-practices/receiving-code-review",
+        "./engineering-practices/spec-compliance-audit",
+        "./engineering-practices/feature-audit",
+        "./qa/manual/test-basis-analyzer"
+      ],
+      "commands": [
+        "./engineering-practices/commands/code-auditor.md",
+        "./frontend/blazor/commands/fe-blazor.md"
       ],
       "agents": [
-        "./frontend/blazor/agents/fe-blazor.md"
+        "./frontend/blazor/agents/fe-blazor.md",
+        "./engineering-practices/agents/code-auditor.md"
       ]
     },
     {
@@ -447,6 +515,9 @@
         "./data/dynamodb",
         "./data/cosmosdb",
         "./data/elasticsearch"
+      ],
+      "commands": [
+        "./data/commands/data-architect.md"
       ],
       "agents": [
         "./data/agents/data-architect.md"
@@ -481,6 +552,10 @@
         "./business-analysis/skills/ba-decision-modeler",
         "./business-analysis/skills/ba-feature-conflict-sweep"
       ],
+      "commands": [
+        "./business-analysis/commands/business-analyst.md",
+        "./business-analysis/commands/requirements-author.md"
+      ],
       "agents": [
         "./business-analysis/agents/requirements-author.md",
         "./business-analysis/agents/business-analyst.md"
@@ -488,7 +563,7 @@
     },
     {
       "name": "fe-react",
-      "description": "Self-contained senior frontend React developer plugin for React 19/18 + TypeScript (Next.js App Router / RSC primary, Vite SPA fallback; MUI default). Covers the full FE build lifecycle end-to-end: project scaffold and rendering-strategy choice, architecture foundations (RSC/'use client' boundary, state, component library, styling, responsive design), feature build (pages/components/forms with React Hook Form + Zod, API + live/realtime data via RSC fetch/Server Actions/TanStack Query/SSE/WebSocket, motion, UX writing, data-testids), quality layers (accessibility, performance, error resilience, SEO, i18n, PWA/offline), and Vitest + React Testing Library component tests — plus a distinctive-visual-design critique loop. Bundles the Auth0 React auth skills and the stack-agnostic design-craft skills (frontend-design, design-tokens, dataviz, brand-intake, iconography, ux-heuristics, theme-factory, ux-writing, web-design-guidelines) and the phased fe-react orchestrator agent — install just this one plugin for a complete React frontend toolkit.",
+      "description": "Self-contained senior frontend React developer plugin for React 19/18 + TypeScript (Next.js App Router / RSC primary, Vite SPA fallback; MUI default). Covers the full FE build lifecycle end-to-end: project scaffold and rendering-strategy choice, architecture foundations (RSC/'use client' boundary, App Router route topology, state, component library, styling, responsive design), feature build (pages/components/forms with React Hook Form + Zod, API + live/realtime data via RSC fetch/Server Actions/TanStack Query/SSE/WebSocket, motion, UX writing, data-testids), quality layers (accessibility, performance, error resilience, SEO, i18n, PWA/offline), and Vitest + React Testing Library component tests — plus version migration (React 18→19, Next 14→15, Pages→App Router), a distinctive-visual-design critique loop, and a one-call read-only conformance audit (/fe-react-audit) that sweeps an existing codebase against every convention above into a saved, re-runnable findings report. Bundles the Auth0 React auth skills and the stack-agnostic design-craft skills (frontend-design, design-tokens, dataviz, brand-intake, iconography, ux-heuristics, theme-factory, ux-writing, web-design-guidelines) and the phased fe-react orchestrator agent — install just this one plugin for a complete React frontend toolkit.",
       "source": "./",
       "strict": false,
       "author": {
@@ -507,6 +582,7 @@
         "./frontend/react/skills/accessibility",
         "./frontend/react/skills/component-library",
         "./frontend/react/skills/component-testing",
+        "./frontend/react/skills/conformance-audit",
         "./frontend/react/skills/data-access",
         "./frontend/react/skills/error-resilience",
         "./frontend/react/skills/forms",
@@ -519,15 +595,14 @@
         "./frontend/react/skills/realtime",
         "./frontend/react/skills/reference",
         "./frontend/react/skills/responsive-design",
+        "./frontend/react/skills/routing",
+        "./frontend/react/skills/migration",
         "./frontend/react/skills/reviewer",
         "./frontend/react/skills/seo-discoverability",
         "./frontend/react/skills/state-management",
         "./frontend/react/skills/styling",
         "./frontend/react/skills/testability",
         "./frontend/react/skills/ui-conventions",
-        "./frontend/react/vendor/reference",
-        "./frontend/react/vendor/composition-patterns",
-        "./frontend/react/vendor/view-transitions",
         "./auth/auth0-react",
         "./auth/_shared/auth0-concepts",
         "./design/frontend-design",
@@ -548,15 +623,26 @@
         "./engineering-practices/verification-before-completion",
         "./engineering-practices/finishing-a-development-branch",
         "./engineering-practices/subagent-driven-development",
-        "./engineering-practices/dispatching-parallel-agents"
+        "./engineering-practices/dispatching-parallel-agents",
+        "./engineering-practices/requesting-code-review",
+        "./engineering-practices/receiving-code-review",
+        "./engineering-practices/spec-compliance-audit",
+        "./engineering-practices/feature-audit",
+        "./qa/manual/test-basis-analyzer"
+      ],
+      "commands": [
+        "./engineering-practices/commands/code-auditor.md",
+        "./frontend/react/commands/fe-react.md",
+        "./frontend/react/commands/fe-react-audit.md"
       ],
       "agents": [
-        "./frontend/react/agents/fe-react.md"
+        "./frontend/react/agents/fe-react.md",
+        "./engineering-practices/agents/code-auditor.md"
       ]
     },
     {
       "name": "be-dotnet",
-      "description": "Self-contained senior .NET backend developer plugin (.NET 10 primary, 8/9 supported) for design-pattern application, EF Core persistence, and Auth0/Cognito service-side auth. Covers explaining patterns (Strategy, Decorator, Repository, CQRS/MediatR, Factory, Specification, Options, Pipeline, Saga, Outbox), scaffolding them into a codebase with constructor injection / async-all-the-way / nullable reference types, EF Core persistence (DbContext design, configurations, migrations, query patterns, optimistic concurrency, bulk operations), Auth0/Cognito JWT bearer validation + RBAC + Client Credentials M2M, and reviewing existing code for pattern misuse, DI/async violations, and layering bleeds — end-to-end or any single phase. Bundles the language-agnostic pattern reference/reviewer, the Auth0/Cognito concepts skills, and the developer-workflow (ep-*) skills, plus the phased be-dotnet orchestrator agent — install just this one plugin for a complete .NET backend toolkit.",
+      "description": "Self-contained senior .NET backend developer plugin (.NET 10 primary, 8/9 supported) for design-pattern application, EF Core persistence, and Auth0/Cognito service-side auth. Covers explaining patterns (Strategy, Decorator, Repository, CQRS/MediatR, Factory, Specification, Options, Pipeline, Saga, Outbox), scaffolding them into a codebase with constructor injection / async-all-the-way / nullable reference types, EF Core persistence (DbContext design, configurations, migrations, query patterns, optimistic concurrency, bulk operations), Auth0/Cognito JWT bearer validation + RBAC + Client Credentials M2M, and reviewing existing code for pattern misuse, DI/async violations, and layering bleeds — end-to-end or any single phase. Bundles the language-agnostic pattern reference/reviewer, the Auth0/Cognito concepts skills, the developer-workflow + read-only audit (ep-*) skills and the code-auditor agent, and the full observability toolkit (OpenTelemetry + Serilog structured logging + Loki/Tempo/Prometheus-Mimir backend + LogQL/PromQL + Grafana dashboards), plus the phased be-dotnet orchestrator and observability-engineer-dotnet agents and a one-call read-only conformance audit (/be-dotnet-audit) that sweeps an existing service against every convention above into a saved, re-runnable findings report — install just this one plugin for a complete .NET backend toolkit.",
       "source": "./",
       "strict": false,
       "author": {
@@ -578,6 +664,7 @@
         "./backend/dotnet/skills/persistence",
         "./backend/dotnet/skills/auth0",
         "./backend/dotnet/skills/cognito",
+        "./backend/dotnet/skills/conformance-audit",
         "./backend/_shared/reference",
         "./backend/_shared/reviewer",
         "./auth/_shared/auth0-concepts",
@@ -591,15 +678,35 @@
         "./engineering-practices/verification-before-completion",
         "./engineering-practices/finishing-a-development-branch",
         "./engineering-practices/subagent-driven-development",
-        "./engineering-practices/dispatching-parallel-agents"
+        "./engineering-practices/dispatching-parallel-agents",
+        "./engineering-practices/requesting-code-review",
+        "./engineering-practices/receiving-code-review",
+        "./engineering-practices/spec-compliance-audit",
+        "./engineering-practices/feature-audit",
+        "./engineering-practices/conformance-audit",
+        "./observability/opentelemetry-dotnet",
+        "./observability/structured-logging-dotnet",
+        "./observability/loki-tempo-setup",
+        "./observability/prometheus-mimir-setup",
+        "./observability/logql-promql",
+        "./observability/grafana-dashboards",
+        "./qa/manual/test-basis-analyzer"
+      ],
+      "commands": [
+        "./backend/dotnet/commands/be-dotnet.md",
+        "./backend/dotnet/commands/be-dotnet-audit.md",
+        "./engineering-practices/commands/code-auditor.md",
+        "./observability/commands/observability-engineer-dotnet.md"
       ],
       "agents": [
-        "./backend/dotnet/agents/be-dotnet.md"
+        "./backend/dotnet/agents/be-dotnet.md",
+        "./observability/agents/observability-engineer-dotnet.md",
+        "./engineering-practices/agents/code-auditor.md"
       ]
     },
     {
       "name": "be-java",
-      "description": "Self-contained senior Java backend developer plugin (Java 21 + Spring Boot 3.x) for design-pattern application, JPA/Hibernate persistence, and Auth0/Cognito service-side auth. Covers explaining patterns (Strategy, Decorator, Repository, CQRS/mediator, Factory, Specification, Options/`@ConfigurationProperties`, Pipeline, Saga, Outbox), scaffolding them into a codebase with constructor injection / virtual-threads-async / modern-Java idioms (records, sealed types), JPA/Hibernate + Spring Data persistence (entity design, Flyway migrations, `@Transactional` boundaries, `@Version` optimistic locking, N+1 prevention), Auth0/Cognito Spring Security resource server + method-level RBAC + Client Credentials M2M, and reviewing existing code for pattern misuse, threading/DI violations, and layering bleeds — end-to-end or any single phase. Bundles the language-agnostic pattern reference/reviewer, the Auth0/Cognito concepts skills, and the developer-workflow (ep-*) skills, plus the phased be-java orchestrator agent — install just this one plugin for a complete Java backend toolkit.",
+      "description": "Self-contained senior Java backend developer plugin (Java 21 + Spring Boot 3.x) for design-pattern application, JPA/Hibernate persistence, and Auth0/Cognito service-side auth. Covers explaining patterns (Strategy, Decorator, Repository, CQRS/mediator, Factory, Specification, Options/`@ConfigurationProperties`, Pipeline, Saga, Outbox), scaffolding them into a codebase with constructor injection / virtual-threads-async / modern-Java idioms (records, sealed types), JPA/Hibernate + Spring Data persistence (entity design, Flyway migrations, `@Transactional` boundaries, `@Version` optimistic locking, N+1 prevention), Auth0/Cognito Spring Security resource server + method-level RBAC + Client Credentials M2M, and reviewing existing code for pattern misuse, threading/DI violations, and layering bleeds — end-to-end or any single phase. Bundles the language-agnostic pattern reference/reviewer, the Auth0/Cognito concepts skills, the developer-workflow + read-only audit (ep-*) skills and the code-auditor agent, and the full observability toolkit (OpenTelemetry Java agent + SLF4J/Logback structured logging + Loki/Tempo/Prometheus-Mimir backend + LogQL/PromQL + Grafana dashboards), plus the phased be-java orchestrator and observability-engineer-java agents — install just this one plugin for a complete Java backend toolkit.",
       "source": "./",
       "strict": false,
       "author": {
@@ -634,15 +741,33 @@
         "./engineering-practices/verification-before-completion",
         "./engineering-practices/finishing-a-development-branch",
         "./engineering-practices/subagent-driven-development",
-        "./engineering-practices/dispatching-parallel-agents"
+        "./engineering-practices/dispatching-parallel-agents",
+        "./engineering-practices/requesting-code-review",
+        "./engineering-practices/receiving-code-review",
+        "./engineering-practices/spec-compliance-audit",
+        "./engineering-practices/feature-audit",
+        "./observability/opentelemetry-java",
+        "./observability/structured-logging-java",
+        "./observability/loki-tempo-setup",
+        "./observability/prometheus-mimir-setup",
+        "./observability/logql-promql",
+        "./observability/grafana-dashboards",
+        "./qa/manual/test-basis-analyzer"
+      ],
+      "commands": [
+        "./backend/java/commands/be-java.md",
+        "./engineering-practices/commands/code-auditor.md",
+        "./observability/commands/observability-engineer-java.md"
       ],
       "agents": [
-        "./backend/java/agents/be-java.md"
+        "./backend/java/agents/be-java.md",
+        "./observability/agents/observability-engineer-java.md",
+        "./engineering-practices/agents/code-auditor.md"
       ]
     },
     {
       "name": "be-node",
-      "description": "Self-contained senior Node backend developer plugin (Node 24 active LTS primary, 22 maintenance supported; TypeScript strict) for design-pattern application and Prisma/Drizzle persistence. Covers explaining patterns (discriminated-union strategy, `Result<T,E>` vs throwing, branded ids, higher-order-function decorators, repository, lightweight CQRS command handlers, Options config via Zod), scaffolding them into a Node/NestJS/Express codebase with constructor injection or closures / async-all-the-way / TypeScript strict mode, Prisma (default) / Drizzle / TypeORM persistence (schema design, migrations, query patterns, optimistic concurrency, bulk operations), and reviewing existing code for type-safety leaks, pattern misuse, and async/DI violations — end-to-end or any single phase. Bundles the language-agnostic pattern reference/reviewer and the developer-workflow (ep-*) skills, plus the phased be-node orchestrator agent — install just this one plugin for a complete Node backend-patterns toolkit.",
+      "description": "Self-contained senior Node backend developer plugin (Node 24 active LTS primary, 22 maintenance supported; TypeScript strict) for design-pattern application and Prisma/Drizzle persistence. Covers explaining patterns (discriminated-union strategy, `Result<T,E>` vs throwing, branded ids, higher-order-function decorators, repository, lightweight CQRS command handlers, Options config via Zod), scaffolding them into a Node/NestJS/Express codebase with constructor injection or closures / async-all-the-way / TypeScript strict mode, Prisma (default) / Drizzle / TypeORM persistence (schema design, migrations, query patterns, optimistic concurrency, bulk operations), and reviewing existing code for type-safety leaks, pattern misuse, and async/DI violations — end-to-end or any single phase. Bundles the language-agnostic pattern reference/reviewer, the developer-workflow + read-only audit (ep-*) skills and the code-auditor agent, and the full observability toolkit (OpenTelemetry sdk-node + pino structured logging + Loki/Tempo/Prometheus-Mimir backend + LogQL/PromQL + Grafana dashboards), plus the phased be-node orchestrator and observability-engineer-node agents — install just this one plugin for a complete Node backend-patterns toolkit.",
       "source": "./",
       "strict": false,
       "author": {
@@ -673,10 +798,82 @@
         "./engineering-practices/verification-before-completion",
         "./engineering-practices/finishing-a-development-branch",
         "./engineering-practices/subagent-driven-development",
-        "./engineering-practices/dispatching-parallel-agents"
+        "./engineering-practices/dispatching-parallel-agents",
+        "./engineering-practices/requesting-code-review",
+        "./engineering-practices/receiving-code-review",
+        "./engineering-practices/spec-compliance-audit",
+        "./engineering-practices/feature-audit",
+        "./observability/opentelemetry-node",
+        "./observability/structured-logging-node",
+        "./observability/loki-tempo-setup",
+        "./observability/prometheus-mimir-setup",
+        "./observability/logql-promql",
+        "./observability/grafana-dashboards",
+        "./qa/manual/test-basis-analyzer"
+      ],
+      "commands": [
+        "./backend/node/commands/be-node.md",
+        "./engineering-practices/commands/code-auditor.md",
+        "./observability/commands/observability-engineer-node.md"
       ],
       "agents": [
-        "./backend/node/agents/be-node.md"
+        "./backend/node/agents/be-node.md",
+        "./observability/agents/observability-engineer-node.md",
+        "./engineering-practices/agents/code-auditor.md"
+      ]
+    },
+    {
+      "name": "devops",
+      "description": "Self-contained senior DevOps / platform engineer plugin — the path from a built service to a running one: production-shaped container images (multi-stage, pinned, non-root, healthchecked), Infrastructure as Code (Bicep for Azure, Terraform for AWS/multi-cloud), cloud deploy primitives (AWS ECS Fargate / Lambda / App Runner / S3+CloudFront / EKS and Azure Container Apps / Functions / App Service / Static Web Apps / AKS), Kubernetes manifests and Helm/Kustomize, build-and-deploy pipelines on GitHub Actions / GitLab CI / Azure Pipelines, and per-environment configuration and secrets. Cloud-keyed rather than stack-triplicated, and version-aware across .NET 10 (8/9 supported) / Java 21 / Node 24 (22 maintenance). OIDC and Workload Identity Federation throughout — no static cloud credentials anywhere. Bundles the phased devops-engineer orchestrator agent plus the ep-* developer-workflow skills and the code-auditor agent — install just this one plugin for a complete deploy toolkit.",
+      "source": "./",
+      "strict": false,
+      "author": {
+        "name": "Aleksandar Kotrulev",
+        "email": "alexandur.kotrulev@gmail.com"
+      },
+      "license": "MIT",
+      "keywords": [
+        "devops",
+        "docker",
+        "kubernetes",
+        "terraform",
+        "ci-cd",
+        "aws",
+        "azure"
+      ],
+      "category": "development",
+      "skills": [
+        "./devops/docker",
+        "./devops/kubernetes",
+        "./devops/iac-bicep-terraform",
+        "./devops/aws-deployment",
+        "./devops/azure-deployment",
+        "./devops/github-actions",
+        "./devops/gitlab-ci",
+        "./devops/azure-pipelines",
+        "./devops/environment-config",
+        "./engineering-practices/brainstorming",
+        "./engineering-practices/writing-plans",
+        "./engineering-practices/executing-plans",
+        "./engineering-practices/systematic-debugging",
+        "./engineering-practices/test-driven-development",
+        "./engineering-practices/using-git-worktrees",
+        "./engineering-practices/verification-before-completion",
+        "./engineering-practices/finishing-a-development-branch",
+        "./engineering-practices/subagent-driven-development",
+        "./engineering-practices/dispatching-parallel-agents",
+        "./engineering-practices/requesting-code-review",
+        "./engineering-practices/receiving-code-review",
+        "./engineering-practices/spec-compliance-audit",
+        "./engineering-practices/feature-audit"
+      ],
+      "commands": [
+        "./devops/commands/devops-engineer.md",
+        "./engineering-practices/commands/code-auditor.md"
+      ],
+      "agents": [
+        "./devops/agents/devops-engineer.md",
+        "./engineering-practices/agents/code-auditor.md"
       ]
     }
   ]

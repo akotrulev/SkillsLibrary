@@ -18,7 +18,7 @@ The query layer of the Loki + Prometheus + Tempo stack. Covers PromQL for metric
 
 - Dashboard layout / panel design → `observability/grafana-dashboards`
 - Generating metrics in code → `observability/opentelemetry-{dotnet,java,node}`
-- Designing SLI/SLO targets (the math, not the query) → `qa/_shared/quality-metrics`
+- Designing SLI/SLO targets (the math, not the query) → `qa/manual/quality-metrics`
 
 ## Inputs needed
 
@@ -71,12 +71,29 @@ sum by (service) (rate(http_server_requests_total[5m]))
 
 Read: `rate(error count) / rate(total count) * 100` = error percentage.
 
-For 5xx-only:
+Keep 5xx and 4xx as **separate queries** — they answer different questions (5xx = server fault → SLO/paging; 4xx = client behavior → observe, alert only on shape changes; see the discipline note in `observability/grafana-dashboards`):
 
 ```promql
+# 5xx ratio — the SLO numerator, feeds burn-rate alerts
 sum by (service) (rate(http_server_requests_total{status=~"5.."}[5m]))
 /
 sum by (service) (rate(http_server_requests_total[5m]))
+
+# 4xx ratio, excluding the expected auth noise — "did a client integration break?"
+sum by (service) (rate(http_server_requests_total{status=~"4..", status!~"401|403"}[5m]))
+/
+sum by (service) (rate(http_server_requests_total[5m]))
+
+# The inverse security watch — 401/403 surge (credential stuffing / broken auth deploy)
+sum by (service) (rate(http_server_requests_total{status=~"401|403"}[5m]))
+```
+
+For apps whose only signal is logs, the LogQL equivalent:
+
+```logql
+sum by (service) (count_over_time({env="prod"} | json | status=~"5.." [5m]))
+/
+sum by (service) (count_over_time({env="prod"} | json [5m]))
 ```
 
 ### Latency histograms — `histogram_quantile`
@@ -92,7 +109,7 @@ histogram_quantile(0.95,
 Rules:
 - **Sum `_bucket` first**, **then** apply `histogram_quantile` — order matters
 - Use `le` in `by (...)` — it's the bucket label
-- Native histograms (Prometheus 2.40+) use `histogram_quantile` slightly differently — check the Prometheus docs
+- Native histograms (experimental since Prometheus 2.40, **stable as of Prometheus 3.8** — 3.x is current) don't have `_bucket` series: call `histogram_quantile(0.95, rate(http_server_request_duration_seconds[5m]))` directly on the metric. Scraping them still requires explicit opt-in (`scrape_native_histograms` in the scrape config) — check the Prometheus docs
 
 ### Top-N
 
@@ -151,7 +168,74 @@ For a 99.9% SLO with a 30-day budget, a "fast burn" alert (consume 5% of budget 
 ) > (14.4 * (1 - 0.999))
 ```
 
-`14.4 * (1 - SLO)` is the fast-burn threshold from Google's SRE workbook for 1h windows. Use multi-window alerts for noise reduction.
+`14.4 * (1 - SLO)` is the fast-burn threshold from Google's SRE workbook for 1h windows. Use multi-window alerts for noise reduction: pair the fast burn (1h window, pages) with a slow burn (6h window, `6 * (1 - SLO)`, tickets).
+
+### Service-health alert pack
+
+The rules that say "this service is unhealthy" before users tell you. Deploy them via the rule-deployment path in `observability/prometheus-mimir-setup`; route them via its Alertmanager section.
+
+```yaml
+groups:
+  - name: service-health
+    rules:
+      # Scrape target down — the service is up but Prometheus can't reach it (or it crashed)
+      - alert: TargetDown
+        expr: up{env="prod"} == 0
+        for: 3m
+        labels: { severity: page }
+        annotations:
+          summary: "{{ $labels.service }} target {{ $labels.instance }} is down"
+          runbook_url: https://runbooks.yourco.com/target-down
+
+      # Target VANISHED — the alert everyone forgets. `up == 0` can't fire if the
+      # series no longer exists (service deleted, scrape config broken, label renamed).
+      - alert: TargetAbsent
+        expr: absent(up{service="orders", env="prod"})
+        for: 5m
+        labels: { severity: page }
+        annotations:
+          summary: "No scrape target for orders in prod — service gone or scrape config broken"
+          runbook_url: https://runbooks.yourco.com/target-absent
+
+      # Restart loop (kube-state-metrics)
+      - alert: PodRestartLoop
+        expr: increase(kube_pod_container_status_restarts_total{namespace="prod"}[15m]) > 3
+        for: 5m
+        labels: { severity: page }
+        annotations:
+          summary: "{{ $labels.pod }} restarted {{ $value }} times in 15m"
+          runbook_url: https://runbooks.yourco.com/restart-loop
+
+      # Pods stuck not-ready
+      - alert: PodNotReady
+        expr: sum by (namespace, pod) (kube_pod_status_ready{condition="true", namespace="prod"}) == 0
+        for: 10m
+        labels: { severity: page }
+        annotations:
+          summary: "{{ $labels.pod }} not ready for 10m"
+          runbook_url: https://runbooks.yourco.com/pod-not-ready
+
+      # Deployment running fewer replicas than desired
+      - alert: DeploymentReplicasMismatch
+        expr: kube_deployment_status_replicas_available < kube_deployment_spec_replicas
+        for: 10m
+        labels: { severity: warn }
+        annotations:
+          summary: "{{ $labels.deployment }} has {{ $value }} available replicas (below spec)"
+          runbook_url: https://runbooks.yourco.com/replicas-mismatch
+
+      # Outside-in check (blackbox exporter) — catches what inside-out metrics can't:
+      # DNS, TLS, load balancer, ingress
+      - alert: ProbeFailed
+        expr: probe_success{job="blackbox"} == 0
+        for: 3m
+        labels: { severity: page }
+        annotations:
+          summary: "Blackbox probe failing for {{ $labels.instance }}"
+          runbook_url: https://runbooks.yourco.com/probe-failed
+```
+
+Add the 5xx **burn-rate pair** (above) per service on top — `TargetDown`/`ProbeFailed` catch hard-down, burn rate catches degraded. Rule hygiene, no exceptions: every alert has `for:` (no instant blips), a `severity` label (drives Alertmanager routing), and a `runbook_url` annotation. Alert on **symptoms** (down, erroring, not ready), not causes — the trace and logs explain the cause after you click through.
 
 ## LogQL — log queries
 
@@ -175,10 +259,10 @@ Always start with a tight `{...}` selector. Loki streams are cheap when scoped t
 {service="orders", env="prod"}
   | json
   | level="error"
-  | line_format "{{.timestamp}} {{.message}} traceId={{.trace_id}}"
+  | line_format "{{.timestamp}} {{.message}} trace_id={{.trace_id}}"
 ```
 
-`| json` parses the JSON body and exposes keys as filterable labels for the rest of the query. `line_format` reshapes the output for the panel.
+`| json` parses the JSON body and exposes keys as filterable labels for the rest of the query. `line_format` reshapes the output for the panel. Field names are whatever the stack's logging skill emits — trace id is `trace_id` on java/node but `TraceId` on dotnet (see the trace-correlation contract in `observability/loki-tempo-setup`); match your filter to the stack.
 
 ### Metric queries from logs
 
@@ -193,7 +277,7 @@ Useful when no metric exists for the thing you want to count, **but** consider e
 
 ### Cross-store: log → trace
 
-When a log line has `trace_id`, the dashboard's derived field (set in `observability/grafana-dashboards`) turns it into a Tempo link. The LogQL itself doesn't need anything special — just emit `trace_id` in the structured log (which `observability/structured-logging-{stack}` already does).
+When a log line has a trace id, the Loki data source's derived field (the canonical cross-stack regex — owned by `observability/loki-tempo-setup`) turns it into a Tempo link. The LogQL itself doesn't need anything special — the structured-logging skills already emit the field per the contract.
 
 ### Filtering noisy patterns
 
@@ -288,7 +372,8 @@ The log itself carries `user_id`, `tenant_id`, etc. as JSON fields:
 
 ## Handoffs
 
+- Metrics backend setup + recording/alerting-rule deployment → `observability/prometheus-mimir-setup`
 - Dashboard layout → `observability/grafana-dashboards`
 - What's in the metrics / log streams → `observability/opentelemetry-{stack}` + `observability/structured-logging-{stack}`
-- SLO math / KPI definitions → `qa/_shared/quality-metrics`
+- SLO math / KPI definitions → `qa/manual/quality-metrics`
 - Adding new metrics / fields needed for a query → instrumentation skill for the stack

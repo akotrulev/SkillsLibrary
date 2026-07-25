@@ -1,17 +1,19 @@
 ---
 name: qa-bdd-project-scaffold-dotnet
-description: Use when adding the Reqnroll (SpecFlow successor) BDD layer onto a .NET 8 UI/mobile test project, or standing up a Reqnroll + NUnit project from zero. Triggers: "set up Reqnroll", "add a BDD layer to our Playwright/Appium tests in C#", "scaffold a Reqnroll feature project", "wire Reqnroll DI and hooks". Do NOT use to write feature files (use `qa/_shared/bdd/gherkin-authoring`), to generate step definitions (use `qa/dotnet/skills/bdd-step-bindings`), or to build the page objects (use `qa/dotnet/skills/page-object-architect`).
+description: Use when adding the Reqnroll (SpecFlow successor) BDD layer onto a .NET 10 (8-9) UI/mobile test project, or standing up a Reqnroll + NUnit project from zero. Triggers "set up Reqnroll", "add a BDD layer to our Playwright/Appium tests in C#", "wire Reqnroll DI and hooks". Not for writing feature files (`gherkin-authoring`), step definitions (`bdd-step-bindings`), or page objects (`page-object-architect`).
 ---
 
-# Reqnroll BDD Project Scaffold (C# / .NET 8)
+# Reqnroll BDD Project Scaffold (C# / .NET 10)
 
-Wires **Reqnroll** (the maintained SpecFlow successor) into a .NET 8 test project: packages, `reqnroll.json`, the `Features/` folder, the DI container (`[ScenarioDependencies]` via `Reqnroll.Microsoft.Extensions.DependencyInjection`), the per-scenario browser/driver lifecycle hooks, and the shared scenario-context object that step definitions inject. It produces the **empty rig** — no feature files, no step logic; those come from `gherkin-authoring` and `bdd-step-bindings`.
+Wires **Reqnroll** (the maintained SpecFlow successor) into a .NET test project: packages, `reqnroll.json`, the `Features/` folder, the DI container (`[ScenarioDependencies]` via `Reqnroll.Microsoft.Extensions.DependencyInjection`), the per-scenario browser/driver lifecycle hooks, and the shared scenario-context object that step definitions inject. It produces the **empty rig** — no feature files, no step logic; those come from `gherkin-authoring` and `bdd-step-bindings`.
+
+**Version rule:** this layer is added onto an existing UI/mobile project — **match that project's `TargetFramework`**. For a from-zero rig, target **net10.0** (the library primary); net8 (LTS) / net9 (STS) are supported fallbacks. Never up-level the host project.
 
 This is the BDD analogue of `ui-project-scaffold`; it assumes a Playwright (web) or Appium (mobile) page-object project either exists or will be built by `qa-ui-dotnet` / `qa-mobile-dotnet`.
 
 ## Stack (pinned, verify latest at author time)
 
-- .NET 8, C# (nullable enabled), NUnit 4.x
+- .NET 10 (or the host project's TFM — 8/9 supported), C# (nullable enabled), NUnit 4.x
 - `Reqnroll.NUnit` (core + NUnit integration; latest line **3.3.x**)
 - `Reqnroll.Microsoft.Extensions.DependencyInjection` (MS DI plugin; needs `Microsoft.Extensions.DependencyInjection` ≥ 6)
 - Web: `Microsoft.Playwright` (≥ 1.49) — there is **no** first-party Reqnroll+Playwright package; wire it by hand
@@ -56,7 +58,7 @@ Confirm at most 2–3.
 ```xml
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>   <!-- match the host UI/mobile project (net8.0 / net9.0 / net10.0) -->
     <Nullable>enable</Nullable>
     <LangVersion>latest</LangVersion>
     <IsPackable>false</IsPackable>

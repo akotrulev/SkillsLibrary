@@ -1,6 +1,6 @@
 ---
 name: ep-finishing-a-development-branch
-description: Use when implementation is complete, all tests pass, and you need to decide how to integrate the work — guides completion by presenting structured options for merge, PR, keep, or discard, then handles the chosen workflow and worktree cleanup. Triggers: "wrap up this branch", "finish this work", "merge or open a PR", after `ep-executing-plans` completes all tasks. Pairs with `ep-using-git-worktrees` (whose worktree it tears down). Do NOT use before tests pass (fix them first) or mid-implementation.
+description: Use when implementation is complete, all tests pass, and you need to decide how to integrate the work — presents structured options for merge, PR, keep, or discard, then handles the chosen workflow and worktree cleanup. Triggers: "wrap up this branch", "finish this work", "merge or open a PR". Pairs with `ep-using-git-worktrees`. Do NOT use before tests pass (fix them first) or mid-implementation.
 ---
 
 # Finishing a Development Branch
@@ -11,7 +11,7 @@ Guide completion of development work by presenting clear options and handling ch
 
 **Core principle:** Verify tests → Detect environment → Present options → Execute choice → Clean up.
 
-**Announce at start:** "I'm using the finishing-a-development-branch skill to complete this work."
+**Announce at start:** "I'm using the `ep-finishing-a-development-branch` skill to complete this work."
 
 ## The Process
 
@@ -20,8 +20,8 @@ Guide completion of development work by presenting clear options and handling ch
 **Before presenting options, verify tests pass:**
 
 ```bash
-# Run project's test suite
-npm test / cargo test / pytest / go test ./...
+# Run the project's test suite (see the Stack defaults in CLAUDE.md)
+dotnet test  |  ./gradlew test  |  npm test   # or the project's own test command
 ```
 
 **If tests fail:**
@@ -249,3 +249,14 @@ git worktree prune  # Self-healing: clean up any stale registrations
 - Clean up worktree for Options 1 & 4 only
 - `cd` to main repo root before worktree removal
 - Run `git worktree prune` after removal
+
+## Related skills
+
+- **`ep-requesting-code-review`** — before Option 1 (merge) or Option 2 (PR) on a
+  substantial change, a review pass is worthwhile. Prefer a native review command
+  (e.g. `/code-review`), then inline self-review, then a reviewer subagent only if it
+  earns its cost. Reviewing before you merge/open the PR is
+  cheaper than reviewing after.
+- **`ep-receiving-code-review`** — route whatever the review surfaces through this skill
+  (verify before implementing, push back with reasoning) before you finish.
+- **`ep-using-git-worktrees`** — the skill whose worktree this one tears down.

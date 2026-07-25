@@ -1,6 +1,6 @@
 ---
 name: ep-test-driven-development
-description: Use when implementing any feature or bugfix, before writing implementation code — the dev-side red-green-refactor inner loop (write the failing test first, watch it fail, minimal code to pass). Triggers: "implement X", "add this feature", "fix this bug", "write the code for…". Pairs with `ep-systematic-debugging` (reproduce a bug as a failing test) and `ep-verification-before-completion`. Do NOT use for test-suite architecture, page objects, or data builders — those norms live in the QA plugins (`qa-*` skills); this skill owns only the inner loop.
+description: Use when implementing any feature or bugfix, before writing implementation code — the dev-side red-green-refactor inner loop (write the failing test first, watch it fail, minimal code to pass). Triggers "implement X", "add this feature", "fix this bug", "do this test-first". Pairs with `ep-systematic-debugging` and `ep-verification-before-completion`. Not for suite architecture, page objects, or data builders — those live in the QA plugins.
 ---
 
 # Test-Driven Development (TDD)

@@ -13,6 +13,7 @@ A clean and contemporary theme with a sophisticated grayscale palette for maximu
 
 - **Headers**: DejaVu Sans Bold
 - **Body Text**: DejaVu Sans
+- **Web font suggestion** (web-app lane): `"Inter", system-ui, sans-serif` (headings and body)
 
 ## Best Used For
 

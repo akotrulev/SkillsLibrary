@@ -1,6 +1,6 @@
 ---
 name: qa-bdd-step-bindings-dotnet
-description: Use when turning Gherkin .feature files into Reqnroll step definitions in C#/.NET and implementing each step against existing Page Object Models. Triggers: "generate Reqnroll step definitions for these features", "bind these Gherkin steps to our page objects", "implement the steps for this .feature", "split the step definitions by domain". Do NOT use to write/refactor the .feature files (use `qa/_shared/bdd/gherkin-authoring`), to scaffold the Reqnroll project/hooks/DI (use `qa/dotnet/skills/bdd-project-scaffold`), or to build the page objects themselves (use `qa/dotnet/skills/page-object-architect`).
+description: Use when turning Gherkin `.feature` files into Reqnroll step definitions in C#/.NET, implementing each step against existing Page Object Models. Triggers "generate Reqnroll step definitions for these features", "bind these Gherkin steps to our page objects", "split the step definitions by domain". Not for writing the `.feature` files (`gherkin-authoring`), scaffolding Reqnroll DI/hooks (`bdd-project-scaffold`), or building page objects (`page-object-architect`).
 ---
 
 # Reqnroll Step Bindings + POM Implementation (C# / .NET 8)

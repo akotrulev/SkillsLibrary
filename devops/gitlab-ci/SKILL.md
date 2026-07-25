@@ -1,11 +1,13 @@
 ---
 name: devops-gitlab-ci
-description: Use when the user asks to write, review, or modify a GitLab CI/CD pipeline (`.gitlab-ci.yml`) for build/test/deploy of Java, .NET, or TypeScript projects, with deploys to AWS or Azure. Triggers: "write a `.gitlab-ci.yml` for X", "add a deploy stage to my GitLab pipeline", "set up CI on GitLab for this repo". Do NOT use for GitHub Actions (use `devops/github-actions`), Azure Pipelines (use `devops/azure-pipelines`), or IaC scripts (use `devops/iac-bicep-terraform`).
+description: Use when the user asks to write, review, or modify a GitLab CI/CD pipeline (`.gitlab-ci.yml`) for build/test/deploy of Java, .NET, or TypeScript projects, with deploys to AWS or Azure. Triggers: "write a `.gitlab-ci.yml` for X", "add a deploy stage to my GitLab pipeline", "set up CI on GitLab for this repo". Do NOT use for GitHub Actions (use `devops/github-actions`), Azure Pipelines (use `devops/azure-pipelines`), or IaC scripts (use `devops/iac-bicep-terraform`). Do NOT use for the **test-suite CI lane** — shard matrix, Allure publishing, perf gate, flake quarantine — that belongs to `qa-cicd-{java,dotnet,typescript}`; this skill owns the **build/deploy** lane.
 ---
 
 # DevOps — GitLab CI/CD
 
-Authors `.gitlab-ci.yml` pipelines for build, test, and deploy across the project's stacks (Java 21 / .NET 8 / Node 20) and target clouds (AWS, Azure). Standardizes on `extends:` templates, `include:` reuse, OIDC for cloud auth (`id_tokens`), and protected-environment gates.
+Authors `.gitlab-ci.yml` pipelines for build, test, and deploy across the project's stacks (Java 21 / .NET 10 primary with 8/9 supported / Node 24 LTS) and target clouds (AWS, Azure). Standardizes on `extends:` templates, `include:` reuse, OIDC for cloud auth (`id_tokens`), and protected-environment gates.
+
+**Version policy:** detect the project's versions (TFM / `engines` / toolchain) and match — never assume. .NET 10 is primary, 8/9 supported (8 LTS ends Nov 2026). Node 20 is EOL (Apr 2026) — 24 is active LTS, 22 maintenance. Java 21 LTS is the default. Never put a job on a newer SDK/runtime than the project targets.
 
 ## When to use
 
@@ -21,9 +23,10 @@ Authors `.gitlab-ci.yml` pipelines for build, test, and deploy across the projec
 - Bicep / Terraform authoring → `devops/iac-bicep-terraform`
 - App-level env config → `devops/environment-config`
 
+- Test-suite CI lane (shard matrix, Allure publish, perf gate, flake quarantine) → `qa/cicd/agents/qa-cicd-{java,dotnet,typescript}`
 ## Inputs needed
 
-1. **Stack(s)**: .NET 8 / Java 21 + Gradle / Node 20 + which package manager
+1. **Stack(s)**: .NET 10 (8/9 supported) / Java 21 + Gradle / Node 24 (22 maintenance) + which package manager
 2. **Target cloud**: AWS (ECS, Lambda, S3+CloudFront, EKS) or Azure (App Service, Container Apps, AKS, Static Web Apps)
 3. **Runner model**: GitLab.com SaaS runners, self-hosted runners (which tags?), Kubernetes executor
 4. **Environments**: dev / staging / prod, and which are *protected* + need manual approval
@@ -55,11 +58,11 @@ Set `interruptible: true` on jobs that are safe to cancel (build/test, never dep
 
 ## Per-stack build/test jobs
 
-### .NET 8
+### .NET (10 primary; match the project's TFM)
 
 ```yaml
 .dotnet:
-  image: mcr.microsoft.com/dotnet/sdk:8.0
+  image: mcr.microsoft.com/dotnet/sdk:10.0   # match the TFM: sdk:8.0 / sdk:9.0 for down-level projects
   cache:
     key:
       files: ['**/*.csproj']
@@ -82,6 +85,8 @@ test:dotnet:
   extends: .dotnet
   needs: [build:dotnet]
   script:
+    # `junit` logger requires the JUnitXml.TestLogger NuGet package in the test project;
+    # without it no file is written and the MR test report is silently empty.
     - dotnet test --configuration Release --no-build --logger "junit;LogFilePath=test-results.xml" --collect:"XPlat Code Coverage"
   artifacts:
     when: always
@@ -129,26 +134,26 @@ test:java:
 
 `--no-daemon` matters on ephemeral runners — the daemon caches between jobs in ways that surface as flakiness.
 
-### Node 20 + pnpm (TypeScript)
+### Node 24 + pnpm (TypeScript)
 
 ```yaml
 .node:
-  image: node:20-alpine
+  image: node:24-alpine       # 22-alpine for a maintenance-LTS project; 20 is EOL
   before_script:
     - corepack enable
-    - corepack prepare pnpm@9 --activate
+    - corepack prepare --activate   # version comes from package.json `packageManager` — don't double-pin
   cache:
     key:
       files: [pnpm-lock.yaml]
     paths: [.pnpm-store/]
   variables:
-    PNPM_HOME: $CI_PROJECT_DIR/.pnpm-store
+    PNPM_STORE: $CI_PROJECT_DIR/.pnpm-store
 
 install:
   stage: build
   extends: .node
   script:
-    - pnpm config set store-dir $PNPM_HOME
+    - pnpm config set store-dir $PNPM_STORE
     - pnpm install --frozen-lockfile
 
 lint:
@@ -286,36 +291,24 @@ Pin `ref:` to a tag, never `main` — a template change should be a deliberate c
 
 ## Allure reporting
 
+Upload the raw results as an artifact here; the **report generation/publishing pipeline belongs to the QA domain** — `qa/cicd/<stack>/skills/ci-pipelines` (Allure-publish step) and `qa/reporting/<stack>` own it. Don't wire a third-party Allure publishing job into an app-deploy pipeline.
+
 ```yaml
 test:
   artifacts:
     when: always
     paths: [allure-results/]
     expire_in: 14 days
-
-publish:allure:
-  stage: package
-  image: timbru31/java-node
-  needs: [test]
-  rules:
-    - if: $CI_COMMIT_BRANCH == "main"
-  script:
-    - npx allure-commandline generate allure-results --clean -o allure-report
-  artifacts:
-    paths: [allure-report/]
-  environment:
-    name: allure-report
-    url: $CI_JOB_URL/artifacts/file/allure-report/index.html
+    reports:
+      junit: test-results.xml   # GitLab parses this for the MR test view
 ```
-
-GitLab Pages is also a fine target — publish `allure-report/` to a `pages` job and link from the MR.
 
 ## Rules
 
 - One responsibility per job — don't fold `build && test && deploy` into a single `script:`. `needs:` makes them parallelize anyway.
 - Pipeline DAG via `needs:` — declare actual dependencies, don't rely on stage order alone (it under-parallelizes)
-- Pin all base images by tag (`node:20-alpine`, `eclipse-temurin:21-jdk`) — never `:latest`
-- Pin language versions and package managers (`corepack prepare pnpm@9`, `dotnet-version: '8.0.x'`)
+- Pin all base images by tag (`node:24-alpine`, `eclipse-temurin:21-jdk`) — never `:latest`
+- Pin language versions to what the project targets (`dotnet-version: '10.0.x'`); take the pnpm version from `package.json` `packageManager` via `corepack prepare --activate` — never double-pin it in CI
 - Mask & protect secrets in **CI/CD variables** (group-level when shared); protected = only runs from protected branches
 - Use `reports:` (`junit`, `coverage_report`, `dotenv`, `sast`) — they make the MR view useful
 - `artifacts: when: always` for test results so failed builds still publish them
@@ -352,3 +345,5 @@ GitLab Pages is also a fine target — publish `allure-report/` to a `pages` job
 - IaC for the underlying resources → `devops/iac-bicep-terraform`
 - Per-env secrets/config → `devops/environment-config`
 - Cloud deploy specifics → `devops/aws-deployment` / `devops/azure-deployment`
+
+- Test-suite CI lane — shard matrix, Allure publish, perf gate, quarantine → `qa-cicd-{java,dotnet,typescript}`

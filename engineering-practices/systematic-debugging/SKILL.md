@@ -1,6 +1,6 @@
 ---
 name: ep-systematic-debugging
-description: Use when encountering any bug, test failure, or unexpected behavior, before proposing fixes — find root cause first, fix the cause not the symptom. Triggers: "this test is failing", "debug this", "why is X breaking", "the fix didn't work", "I've tried several things and it's still broken". Pairs with `ep-test-driven-development` (write the failing test in Phase 4) and `ep-verification-before-completion` (confirm the fix). Do NOT use for designing new work (use `ep-brainstorming`) or for known-cause changes that need no investigation.
+description: Use when encountering any bug, test failure, or unexpected behavior, before proposing fixes — find root cause first, fix the cause not the symptom. Triggers: "this test is failing", "debug this", "why is X breaking", "the fix didn't work". Pairs with `ep-test-driven-development` (write the failing test) and `ep-verification-before-completion` (confirm the fix). Do NOT use for designing new work (`ep-brainstorming`) or known-cause changes needing no investigation.
 ---
 
 # Systematic Debugging
@@ -282,6 +282,12 @@ These techniques are part of systematic debugging and available in this director
 - **`root-cause-tracing.md`** - Trace bugs backward through call stack to find original trigger
 - **`defense-in-depth.md`** - Add validation at multiple layers after finding root cause
 - **`condition-based-waiting.md`** - Replace arbitrary timeouts with condition polling
+
+> **Stack note:** `condition-based-waiting-example.ts` (TypeScript) and `find-polluter.sh`
+> (a shell/glob loop) are illustrations of the *technique*, not required tooling. Port
+> the idea to your stack — the .NET, Java, or Node equivalent — rather than the literal
+> code. (Same "port the idea, not the code" stance as `ep-test-driven-development`'s and
+> `ep-writing-plans`' Stack-defaults notes.)
 
 **Related skills:**
 - **`ep-test-driven-development`** - For creating failing test case (Phase 4, Step 1)

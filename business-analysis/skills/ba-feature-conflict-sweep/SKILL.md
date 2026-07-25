@@ -1,6 +1,6 @@
 ---
 name: ba-feature-conflict-sweep
-description: Use when checking a new or changed feature against the WHOLE project's business model for conflicts — normalize its requirements into trigger/actor/action/data/constraint/state tuples, sweep pairwise against the KB with an 11-class conflict taxonomy, give every finding a concrete boundary condition, and rank findings in a severity table; resolutions are recorded business decisions. Triggers: "does this feature conflict with anything", "sweep this story against the model", "will the new discount clash with loyalty points", "cross-feature impact check". Do NOT use for single-document ambiguity flagging (qa/manual/test-basis-analyzer), scoping one vague initiative into a writeup (ba-initiative-scoping — that's one initiative, this is cross-feature), code-level impact analysis, or building the models themselves (ba-flow-mapper / ba-state-modeler / ba-decision-modeler).
+description: Use when checking a new or changed feature against the WHOLE project's business model for conflicts — normalize into trigger/actor/action/data/constraint/state tuples, sweep pairwise against the KB with the 11-class taxonomy; every finding gets a boundary condition. Triggers: "does this feature conflict with anything", "sweep this story against the model", "cross-feature impact check". Do NOT use for single-doc ambiguity flagging (`test-basis-analyzer`) or scoping (`ba-initiative-scoping`).
 ---
 
 # BA — Feature Conflict Sweep
@@ -28,6 +28,8 @@ Without the KB there is nothing to sweep against — the value scales with what 
 Per `business-analysis/skills/ba-project-knowledge`: **read first** — `INDEX.md`, `interaction-map.md` (don't re-litigate resolved conflicts), `glossary.md`, and every flow/entity/decision file the new feature plausibly touches. **Update after** — findings and resolutions into `interaction-map.md`, plus `active-context.md` + INDEX.
 
 ## Procedure
+
+> **Audit form (no new feature).** On the "periodic audit / refresh the model" trigger there is no feature to normalize, so **§1 is skipped** and the pair list (§2) is the KB's own **open surface** rather than a feature × KB cross: unresolved `CONF-` entries, `?` cells in entity grids, `[TBD]`/undeclared hit policies in decision tables, and unverified `#inferred` items. §3 (taxonomy), §4 (boundary condition per finding), and §5 (severity table + recorded resolutions) are unchanged. Pair the refresh procedure in `ba-project-knowledge` first (reconcile drift, prune, re-verify `#inferred`), then sweep that open surface.
 
 ### 1. Normalize the new feature
 

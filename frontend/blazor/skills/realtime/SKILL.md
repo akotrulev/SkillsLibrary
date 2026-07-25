@@ -1,6 +1,6 @@
 ---
 name: fe-blazor-realtime
-description: Use when a Blazor surface (.NET 8/9/10) needs LIVE / server-pushed data — dashboards that update themselves, chat, presence, progress, notifications, streaming — across render modes. Covers interactive-Server circuit push (`InvokeAsync(StateHasChanged)`), the WASM SignalR client (`HubConnection`, `WithStatefulReconnect`, `IAsyncDisposable`), raw WebSocket/SSE for non-SignalR feeds, and the prerender-snapshot→live-channel handoff. Triggers: "push updates to the UI", "SignalR in Blazor", "live dashboard/ticker/chat", "background job updates a component", "stream from a hub", "connection status + reconnect UX". Do NOT use for request/response fetching (use `frontend/blazor/skills/data-access`), the reconnect *modal* UI itself (use `error-resilience`), or hub authentication wiring (use `auth/auth0-blazor`).
+description: Use when a Blazor surface (.NET 8/9/10) needs LIVE / server-pushed data — interactive-Server circuit push (`InvokeAsync(StateHasChanged)`), the WASM SignalR client (`HubConnection`, `WithStatefulReconnect`), raw WebSocket/SSE feeds, the prerender-snapshot→live-channel handoff. Triggers: "push updates to the UI", "SignalR in Blazor", "live dashboard/chat", "background job updates a component". Do NOT use for request/response fetching (`data-access`) or the reconnect modal UI (`error-resilience`).
 ---
 
 # Blazor — Realtime (live / push lane)

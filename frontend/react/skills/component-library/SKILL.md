@@ -1,6 +1,6 @@
 ---
 name: fe-react-component-library
-description: Use when choosing or wiring a React UI component library (Next.js App Router primary, Vite SPA fallback) — the decision between MUI / Material UI (default), Mantine, Chakra UI, shadcn/ui, or none (headless + your own CSS) — plus setup, the theme/`ThemeProvider` + dark mode wiring, DataGrid, dialog/snackbar/toast surface, and the RSC `'use client'` boundary each one forces under the App Router. Triggers: "which React component library should we use", "set up MUI / Mantine / Chakra / shadcn", "add a DataGrid", "wire a dialog/toast/snackbar", "why do MUI components error in a Server Component", "where does 'use client' go for the library". Do NOT use for hand-written CSS / design tokens / CSS Modules (use `frontend/react/skills/styling`), for `data-testid` mechanics per library (use `frontend/react/skills/testability`), for the component-layering taxonomy (use `frontend/react/skills/reference`), or for forms/validation (use `frontend/react/skills/forms`).
+description: Use when picking or wiring the UI component library an app is built on — MUI (default) vs Mantine vs Chakra vs shadcn/ui vs none — plus theme/`ThemeProvider` + dark mode, DataGrid, dialog/toast surface, and the RSC `'use client'` boundary each forces. Triggers "which component library", "set up MUI/Mantine/Chakra/shadcn", "why do MUI components error in a Server Component". Not for hand-written CSS/tokens (`styling`) or forms (`forms`).
 ---
 
 # React — Component Library (one-of-N family)

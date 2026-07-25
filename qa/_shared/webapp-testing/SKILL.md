@@ -1,6 +1,6 @@
 ---
-name: webapp-testing
-description: Toolkit for interacting with and testing local web applications using Playwright. Supports verifying frontend functionality, debugging UI behavior, capturing browser screenshots, and viewing browser logs.
+name: qa-webapp-testing
+description: Use when driving a locally running web app through Playwright from Python to verify frontend behavior interactively — browser screenshots, console logs, ad-hoc UI debugging. The library's one Python-based skill. Triggers "open the local app and check X", "screenshot this page", "what is the browser console showing", "debug this UI behavior with Python". Not for authoring a maintained UI suite, page objects, or a POM from a URL (`ui-test-author/playwright`, `pom-builder`).
 ---
 
 # Web Application Testing

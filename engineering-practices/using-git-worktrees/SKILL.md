@@ -1,6 +1,6 @@
 ---
 name: ep-using-git-worktrees
-description: Use when starting feature work that needs isolation from the current workspace, or before executing an implementation plan — ensures an isolated workspace exists via native worktree tools (e.g. `EnterWorktree`) or a git-worktree fallback. Triggers: "work on this in a worktree", "set up an isolated workspace", before `ep-executing-plans` on non-trivial work. Pairs with `ep-finishing-a-development-branch` (which cleans the worktree up at the end). Do NOT use when already inside an isolated workspace (Step 0 detects this) or for a quick in-place edit the user does not want isolated.
+description: Use when starting feature work that needs isolation from the current workspace, or before executing an implementation plan — ensures an isolated workspace exists via native worktree tools (e.g. `EnterWorktree`) or a git-worktree fallback. Triggers: "work on this in a worktree", "set up an isolated workspace", before `ep-executing-plans` on non-trivial work. Do NOT use when already inside an isolated workspace or for a quick in-place edit the user does not want isolated.
 ---
 
 # Using Git Worktrees
@@ -11,7 +11,7 @@ Ensure work happens in an isolated workspace. Prefer your platform's native work
 
 **Core principle:** Detect existing isolation first. Then use native tools. Then fall back to git. Never fight the harness.
 
-**Announce at start:** "I'm using the using-git-worktrees skill to set up an isolated workspace."
+**Announce at start:** "I'm using the `ep-using-git-worktrees` skill to set up an isolated workspace."
 
 ## Step 0: Detect Existing Isolation
 
@@ -99,30 +99,28 @@ cd "$path"
 
 ## Step 2: Project Setup
 
-Auto-detect and run appropriate setup:
+Auto-detect and run appropriate setup for the library's stacks:
 
 ```bash
-# Node.js
+# .NET (primary) — solution or project file
+if ls *.sln >/dev/null 2>&1 || ls **/*.csproj >/dev/null 2>&1; then dotnet restore; fi
+
+# Java / Gradle (Kotlin DSL for new projects)
+if [ -f build.gradle.kts ] || [ -f build.gradle ] || [ -f gradlew ]; then ./gradlew build -x test; fi
+
+# Node.js / TypeScript
 if [ -f package.json ]; then npm install; fi
-
-# Rust
-if [ -f Cargo.toml ]; then cargo build; fi
-
-# Python
-if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-if [ -f pyproject.toml ]; then poetry install; fi
-
-# Go
-if [ -f go.mod ]; then go mod download; fi
 ```
+
+**Other stacks:** run the project's own setup command (e.g. Python `pip install -r requirements.txt` / `poetry install`, Go `go mod download`). Detect it from the project's manifest — don't assume a stack the repo doesn't use.
 
 ## Step 3: Verify Clean Baseline
 
 Run tests to ensure workspace starts clean:
 
 ```bash
-# Use project-appropriate command
-npm test / cargo test / pytest / go test ./...
+# Use the project's runner (see the Stack defaults in CLAUDE.md)
+dotnet test  |  ./gradlew test  |  npm test   # or the project's own test command
 ```
 
 **If tests fail:** Report failures, ask whether to proceed or investigate.
@@ -152,7 +150,7 @@ Ready to implement <feature-name>
 | Directory not ignored | Add to .gitignore + commit |
 | Permission error on create | Sandbox fallback, work in place |
 | Tests fail during baseline | Report failures + ask |
-| No package.json/Cargo.toml | Skip dependency install |
+| No recognized manifest (`.sln`/`.csproj`/Gradle/`package.json`) | Skip dependency install |
 
 ## Common Mistakes
 

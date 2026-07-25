@@ -1,6 +1,6 @@
 ---
 name: qa-accessibility-testing-typescript
-description: Use when tests must scan for accessibility violations — axe-core inside Playwright flows (per-state WCAG scans) or Lighthouse CI (page-level scores with budgets). Triggers: "add a11y tests", "scan for WCAG violations", "fail CI on accessibility regressions", "set an accessibility budget". Pick the tool in the decision matrix, then read its reference file.
+description: Use when a Node 24 (22 supported) / TypeScript / Vitest test suite must scan for accessibility violations — axe-core inside Playwright flows (per-state WCAG scans) or Lighthouse CI (page-level scores with budgets). Triggers "add a11y tests", "scan for WCAG violations", "fail CI on accessibility regressions", "set an accessibility budget". Pick the tool in the decision matrix, then read its reference file. Do NOT use for the application's own accessibility implementation (that is the `fe-*` stack's `accessibility` skill), for pixel diffs (use `qa-visual-regression-typescript`), for breakpoint layout (use `qa-responsive-testing-typescript`), or for non-TypeScript projects (use `qa-accessibility-testing-{java,dotnet}`). For end-to-end suite work prefer the phased agent `qa-ui-typescript` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
 ---
 
 # QA — Accessibility Testing (TypeScript)

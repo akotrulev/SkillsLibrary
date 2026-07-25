@@ -1,6 +1,6 @@
 ---
-name: dataviz
-description: Use when designing the VISUAL of a product dashboard, chart, or report — picking the chart type for the question (comparison / trend / distribution / part-of-whole / relationship / flow) and avoiding the do-not list (pie >5 slices, dual axes, 3D, truncated bar baselines), the viz color system (categorical / sequential / diverging, colorblind-safe, kept SEPARATE from the brand accent and disjoint from status colors), dashboard composition (headline KPIs → charts → detail, stat-tile anatomy, density), and axis / legend / tooltip / direct-labeling discipline. Stack-agnostic taste layer. Triggers "design a dashboard", "which chart for this data", "pick chart colors", "categorical vs sequential palette", "stat-tile / KPI layout". Do NOT use for charting-library code (a stack concern), the queries behind a chart (`data/`), OPS/service dashboards (`observability/grafana-dashboards` — RED/USE), metric DEFINITIONS (`qa/manual/quality-metrics`), or the brand token system (`design/design-tokens`).
+name: design-dataviz
+description: Use when charts live INSIDE a product UI that already has a brand — an analytics screen or embedded dashboard. Adds a viz palette deliberately disjoint from the app's brand and status colors so a series never reads as "error", the do-not list (pie >5 slices, dual axes, 3D), and stat-tile/KPI-row layout. Triggers "design our analytics screen", "add charts to this dashboard", "our chart colors clash with the brand". Not for ops/RED-USE dashboards (`grafana-dashboards`).
 ---
 
 # Data Visualization — chart & dashboard design
@@ -93,4 +93,4 @@ A dashboard is read top-left first, in an F/Z scan. Compose to that, not as a un
 - [`design/ux-writing`](../ux-writing/SKILL.md) — the microcopy for empty/error states, stat-tile labels, and annotations.
 - [`observability/grafana-dashboards`](../../observability/grafana-dashboards/SKILL.md) — **ops/service** dashboards (RED / USE / golden signals). This skill owns *product* dashboards; that one owns operational ones.
 - [`qa/manual/quality-metrics`](../../qa/manual/quality-metrics/SKILL.md) — *defines* the metrics and SLO targets a dashboard then visualizes.
-- A stack's `error-resilience` (e.g. [`fe-blazor-error-resilience`](../../frontend/blazor/skills/error-resilience/SKILL.md)) — the loading/empty/error state *structure* this skill's composition rule depends on.
+- A stack's `error-resilience` ([Blazor](../../frontend/blazor/skills/error-resilience/SKILL.md) · [React](../../frontend/react/skills/error-resilience/SKILL.md)) — the loading/empty/error state *structure* this skill's composition rule depends on.

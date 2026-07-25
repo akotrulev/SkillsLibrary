@@ -1,6 +1,6 @@
 ---
 name: fe-react-performance
-description: Use when a React app (Next.js App Router primary / Vite SPA fallback; React 19 / 18) is slow or you want to keep it fast — render throughput (`key`, derive-don't-effect, `React.memo`/the Compiler, no inline components, split contexts, `useDeferredValue`/`useTransition`), bundle & startup (RSC ships no JS, push `'use client'` to leaves, `next/dynamic`/`lazy` code-split, barrel + third-party import costs), server render (parallel not waterfall fetches, streaming Suspense), plus diagnostics (Profiler, web-vitals, bundle analyzer) and Core-Web-Vitals budgets. Triggers "this list re-renders too much", "the bundle is huge / TTI is slow", "typing in the filter lags", "code-split this heavy component", "my fetches waterfall". Do NOT use for CSS/layout (use `frontend/react/skills/styling`, `responsive-design`), live-data mechanics (use `frontend/react/skills/realtime`), server DB tuning (use `data/*`), or load-testing the deployed app (use `qa/typescript/skills/performance/k6`, a peer).
+description: Use when the UI is slow, janky, or heavy — render throughput (`key`, derive-don't-effect, memo/Compiler, split contexts), bundle & startup (push `'use client'` to leaves, code-split, import costs), server render (parallel fetches, streaming), Core-Web-Vitals budgets. Triggers "this list re-renders too much", "the bundle is huge", "typing lags", "my fetches waterfall", "Maximum update depth exceeded". Not for CSS/layout (`styling`, `responsive-design`) or load testing (a qa peer).
 ---
 
 # React — Performance

@@ -1,6 +1,6 @@
 ---
 name: qa-flaky-test-quarantine-typescript
-description: Detect, retry, **quarantine**, and report flaky tests in a Node 20 + TypeScript suite (Playwright for e2e, Vitest for unit). Triggers: "this Playwright test is flaky, stop it blocking CI", "quarantine our flaky e2e tests but keep running them", "retry failed tests in Playwright/Vitest".
+description: Detect, retry, **quarantine**, and report flaky tests in a Node 24 (22 supported) + TypeScript suite (Playwright for e2e, Vitest for unit). Triggers: "this Playwright test is flaky, stop it blocking CI", "quarantine our flaky e2e tests but keep running them", "retry failed tests in Playwright/Vitest".
 ---
 
 # Flaky-Test Quarantine (Node 20 + TypeScript / Playwright + Vitest)

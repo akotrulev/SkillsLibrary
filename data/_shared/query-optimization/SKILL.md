@@ -114,7 +114,7 @@ Fixes:
 - **Batched fetches**: load all parents, then load all children with `WHERE parent_id IN (...)`, then assemble in app code
 - **Dataloaders** (graphql-style): batch + dedupe within a request scope
 
-Tracing (OTel) shows N+1 as a fan of identical short queries on a span — quick to spot. Add it to your `qa/api-test-author/reviewer` checklist.
+Tracing (OTel) shows N+1 as a fan of identical short queries on a span — quick to spot. Add it to your `qa/<stack>/skills/api-test-author/reviewer` checklist.
 
 ## Filtering & sorting
 
@@ -188,7 +188,7 @@ The universal triage above is the frame. Each engine's plan-reading, index types
 2. Walk the universal triage and identify the symptom (scan vs seek, missing projection, missing index, N+1, deep page, wrong stats).
 3. Propose the smallest fix that addresses the symptom; reach for the engine's specific feature only when the universal one doesn't apply.
 4. Confirm with a re-run plan; measure latency before/after.
-5. Add a test (`qa/api-test-author/generator/<stack>`) that asserts the response shape so the optimization doesn't regress the contract.
+5. Add a test (`qa/<stack>/skills/api-test-author/generator`) that asserts the response shape so the optimization doesn't regress the contract.
 
 ## Handoffs
 

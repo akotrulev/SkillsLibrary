@@ -1,6 +1,6 @@
 ---
 name: fe-blazor-motion
-description: Use when adding animation/motion to a Blazor app (.NET 8/9/10) — the implementation mechanics for reveals, transitions, and page-to-page motion. Covers CSS transitions/keyframes in `.razor.css` isolation over hand-written JS, `prefers-reduced-motion` as a hard floor, staggered `animation-delay` entrance reveals, scroll reveals (CSS `animation-timeline: view()` first, IntersectionObserver via JS interop as fallback), the enhanced-navigation View Transitions API, and when motion is worth a JS-interop hop vs pure CSS. Triggers: "animate this component / page-load sequence", "fade/slide elements in on scroll", "add a page transition under enhanced navigation", "stagger these list items in", "respect reduced-motion in Blazor". Do NOT use to decide WHETHER/WHERE motion serves the design (taste is `design/frontend-design`), CSS-isolation/token setup (use `frontend/blazor/skills/styling`), reconnection/circuit UX (`error-resilience`), or focus/announcement mechanics (`accessibility`).
+description: Use when adding animation/motion to a Blazor app (.NET 8/9/10) — CSS transitions/keyframes in `.razor.css` isolation over JS, `prefers-reduced-motion` as a hard floor, staggered reveals, scroll reveals (CSS `animation-timeline` first), View Transitions. Triggers: "animate this component / page-load sequence", "fade elements in on scroll", "add a page transition". Do NOT use to decide WHETHER motion serves the design (`design/frontend-design`) or CSS-isolation setup (`styling`).
 ---
 
 # Blazor — Motion

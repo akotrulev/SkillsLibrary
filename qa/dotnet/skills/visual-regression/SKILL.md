@@ -1,6 +1,6 @@
 ---
 name: qa-visual-regression-dotnet
-description: Use when tests must catch unintended visual changes — Playwright's built-in pixel snapshots, Percy's hosted review workflow, or Applitools Eyes visual-AI. Triggers: "add visual regression tests", "screenshot diff this page", "the layout broke and no functional test caught it". Pick the tool in the decision matrix, then read its reference file.
+description: Use when a .NET / NUnit test suite must catch unintended visual changes — Playwright's built-in pixel snapshots, Percy's hosted review workflow, or Applitools Eyes visual-AI. Triggers "add visual regression tests", "screenshot diff this page", "the layout broke and no functional test caught it". Pick the tool in the matrix, then read its reference file. Not for structural breakpoint assertions (`responsive-testing`) or a11y scans (`accessibility-testing`).
 ---
 
 # QA — Visual Regression (.NET 8 / C#)

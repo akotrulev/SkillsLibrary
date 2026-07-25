@@ -1,6 +1,6 @@
 ---
 name: qa-performance-nbomber-dotnet
-description: Use when the user asks to design or author NBomber performance / load tests in .NET 8 (C#). Triggers: "write an NBomber scenario for X", "NBomber load test for our .NET API", "ramp profile for spike in NBomber".
+description: Use when the user asks to design or author NBomber performance / load tests in .NET 10 (8-9 supported) (C#). Triggers: "write an NBomber scenario for X", "NBomber load test for our .NET API", "ramp profile for spike in NBomber".
 ---
 
 # QA — Performance Testing with NBomber (.NET 8)

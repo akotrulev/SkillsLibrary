@@ -1,6 +1,6 @@
 ---
 name: qa-api-test-author-graphql-typescript
-description: Scaffold black-box **GraphQL** API tests in Node 20 / TypeScript with Vitest, native `fetch`, and Zod. Triggers: "write a GraphQL test for query/mutation X", "assert the errors array on a GraphQL response", "test partial GraphQL data + errors".
+description: Scaffold black-box **GraphQL** API tests in Node 24 (22 supported) / TypeScript with Vitest, native `fetch`, and Zod. Triggers: "write a GraphQL test for query/mutation X", "assert the errors array on a GraphQL response", "test partial GraphQL data + errors". For end-to-end suite work prefer the phased agent `qa-api-typescript` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
 ---
 
 # QA — GraphQL API Test Writer (TypeScript / Vitest + fetch + Zod)

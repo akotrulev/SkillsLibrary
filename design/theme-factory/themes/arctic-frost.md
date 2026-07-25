@@ -13,6 +13,7 @@ A cool and crisp winter-inspired theme that conveys clarity, precision, and prof
 
 - **Headers**: DejaVu Sans Bold
 - **Body Text**: DejaVu Sans
+- **Web font suggestion** (web-app lane): `"IBM Plex Sans", system-ui, sans-serif` (headings and body)
 
 ## Best Used For
 

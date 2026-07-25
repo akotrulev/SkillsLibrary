@@ -1,6 +1,6 @@
 ---
 name: qa-responsive-testing-dotnet
-description: Use when testing responsive layout/breakpoint behavior in .NET 8 / C# with Playwright .NET + NUnit — drive the viewport across the app's real CSS breakpoints (read from its token/theme source — MudBlazor, Bootstrap, Tailwind — never guessed), assert the layout variant at breakpoint−1 and breakpoint (BVA on the media-query boundary), and verify structural geometry via BoundingBoxAsync (alignment, containment, no overlap, no horizontal overflow). Triggers: "test the responsive design", "shrink the browser and check the layout", "assert the nav collapses to a hamburger", "elements misalign on tablet", "test around the breakpoints". Do NOT use for pixel-diff screenshots (use qa-visual-regression-dotnet — pairs with this), real-device mobile UX (device profiles in ui-test-author/playwright), native apps (qa-mobile-dotnet), or RTL/locale layout (qa-i18n-testing-dotnet).
+description: Use when testing responsive layout/breakpoint behavior in .NET 10 (8-9) with Playwright .NET + NUnit — drive the viewport across the app's real CSS breakpoints (read from its token/theme source, never guessed), assert the layout variant at breakpoint−1 and breakpoint (BVA), verify geometry via bounding boxes. Triggers "test the responsive design", "assert the nav collapses to a hamburger", "test around the breakpoints". Not for pixel diffs (`visual-regression`).
 ---
 
 # QA — Responsive / Breakpoint Testing (.NET / Playwright + NUnit)

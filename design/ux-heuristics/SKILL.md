@@ -1,6 +1,6 @@
 ---
-name: ux-heuristics
-description: Use when reviewing a design or built UI at EXPERIENCE altitude — Nielsen's 10 usability heuristics as review questions, flow-friction review (steps-to-goal, dead ends, back-button safety, undo-over-confirm), and IA sanity (nav depth, label predictability). Output is a findings table (severity / location / heuristic / fix) on the house severity scale — NO rewrites, same review contract as the rest of the library. Stack-agnostic; reviews the experience, not the code. Triggers "review the UX", "run a heuristic evaluation", "is this flow confusing", "usability audit", "why does this feel clunky", "too many steps to do X", "check this against Nielsen's heuristics". Do NOT use for code-level UI-guideline audit (`design/web-design-guidelines` stays code-level), automated a11y scanning (qa `accessibility-testing`), exploratory BUG hunting (qa `exploratory-charter-writer` — that hunts defects, this judges the experience of a working build), copy voice (`design/ux-writing`), or visual taste (`design/frontend-design`).
+name: design-ux-heuristics
+description: Use when reviewing a built UI, screenshot, mockup, or Figma flow at EXPERIENCE altitude — Nielsen's 10 heuristics, flow friction (steps-to-goal, dead ends), IA sanity — output is a severity-tabled findings list, no rewrites. Triggers "review the UX", "heuristic evaluation", "is this flow confusing", "usability audit", "why does this feel clunky". Not for code-level UI audit (`design-web-guidelines`), a11y scans (qa `accessibility-testing`), or copy voice (`design-ux-writing`).
 ---
 
 # UX heuristics — experience-level review
@@ -77,6 +77,6 @@ Beyond the ten, walk each primary task end to end and measure the *path*:
 - [`design/web-design-guidelines`](../web-design-guidelines/SKILL.md) — the **code-level** UI audit one layer below this; this reviews the experience, that reviews the implementation.
 - [`design/ux-writing`](../ux-writing/SKILL.md) — owns the **wording** of labels, errors, and confirmations this review judges the *structure* of; shares the one-name-one-concept rule.
 - [`design/frontend-design`](../frontend-design/SKILL.md) — owns **visual taste**; heuristic #8 (minimalism) is the usability face of its restraint discipline.
-- A stack's [`ui-conventions`](../../frontend/blazor/skills/ui-conventions/SKILL.md) — owns the confirmation-by-object-name and empty-state *mechanics* this review defers to.
+- A stack's `ui-conventions` ([Blazor](../../frontend/blazor/skills/ui-conventions/SKILL.md) · [React](../../frontend/react/skills/ui-conventions/SKILL.md)) — owns the confirmation-by-object-name and empty-state *mechanics* this review defers to.
 - A stack's / qa `accessibility-testing` — runs the **automated** a11y scans; this only flags usability heuristics a scanner can't see.
 - qa `exploratory-charter-writer` — charters an exploratory session to find **defects**; this judges the **experience** of a build that already works.

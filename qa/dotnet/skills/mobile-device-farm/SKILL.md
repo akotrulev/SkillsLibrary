@@ -1,6 +1,6 @@
 ---
 name: qa-mobile-device-farm-dotnet
-description: Use when the user needs the **real-device-cloud specifics** of running .NET (C#) Appium tests on a mobile device farm. Triggers: "upload our app to BrowserStack App Automate and run the C# Appium tests", "run our NUnit mobile suite across a real-device matrix", "test biometric login on a real device in .NET".
+description: Use when running .NET (C#) Appium tests on a real-device cloud — app upload, device matrix, cloud capabilities, parallel runs. Triggers "upload our app to BrowserStack App Automate and run the C# Appium tests", "run our NUnit mobile suite across a real-device matrix", "test biometric login on a real device". Not for local emulator runs or OS-surface features (`mobile-native-features`).
 ---
 
 # QA — Mobile Device Farm (.NET: Appium.WebDriver on a real-device cloud)

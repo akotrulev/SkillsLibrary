@@ -1,6 +1,6 @@
 ---
 name: qa-db-testing-query-author-dotnet
-description: Use when the user asks to write a safe verification query for tests in .NET 8, assert this row exists from a test, review my test SQL for guardrails, add a `COUNT(*)` check from an integration test, or wait for an eventually-consistent row.
+description: Use when writing or reviewing a safe verification query for tests in .NET 10 (8-9) — assert a row exists, add a `COUNT(*)` check from an integration test, review test SQL for guardrails, or poll for an eventually-consistent row. Triggers "write a verification query for this test", "assert this row exists", "review my test SQL", "wait for an eventually-consistent row". Not for connection/seeding/cleanup (`db-testing/client`) or schema design (the `data-architect` peer).
 ---
 
 # QA — DB Testing Query Author (.NET 8)

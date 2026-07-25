@@ -1,6 +1,6 @@
 ---
 name: be-shared-reference
-description: Use when the user asks to explain a design pattern in language-agnostic terms — its intent, when to use, when not to, trade-offs, and what it looks like across stacks. Triggers: "what is the Strategy pattern", "when should I use Repository", "compare CQRS to plain service+repo", "what does Decorator solve", "should I use the Saga pattern here". Do NOT use for stack-specific code (use `backend/<stack>/skills/reference`), scaffolding (use `backend/<stack>/skills/generator`), or reviewing (use `backend/<stack>/skills/reviewer`).
+description: Use when explaining a design pattern in language-agnostic terms — intent, when to use, when not to, trade-offs, what it looks like across stacks. Triggers: "what is the Strategy pattern", "when should I use Repository", "compare CQRS to plain service+repo", "should I use the Saga pattern here". Do NOT use for stack-specific code, scaffolding, or reviewing (`backend/<stack>/skills/{reference,generator,reviewer}`).
 ---
 
 # Design Patterns — Shared Reference (language-agnostic)

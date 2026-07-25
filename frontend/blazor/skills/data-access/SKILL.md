@@ -1,6 +1,6 @@
 ---
 name: fe-blazor-data-access
-description: Use when the user asks how a Blazor component should FETCH or WRITE request/response data (.NET 8/9/10) — typed `HttpClient` for WASM vs server-direct services / `IDbContextFactory` for interactive SSR, behind one render-mode-agnostic interface — plus ProblemDetails→UI error mapping, `[PersistentState]` to kill the prerender double-fetch, streaming rendering, `HybridCache`, and cancellation on navigation. Triggers: "how should this component load data", "call my API from Blazor", "avoid the double fetch on prerender", "IDbContextFactory in Blazor", "one data interface for Server and WASM", "map ProblemDetails to a friendly error". Do NOT use for live/server-pushed data (use `frontend/blazor/skills/realtime`), forms/validation (use `frontend/blazor/skills/forms`), auth token wiring itself (use `auth/auth0-blazor`), or writing the API/DTOs (use `qa/dotnet/skills/api-dto-writer`).
+description: Use when a Blazor component must FETCH or WRITE data (.NET 8/9/10) — typed `HttpClient` for WASM vs server-direct services/`IDbContextFactory` for interactive SSR behind one render-mode-agnostic interface, ProblemDetails→UI mapping, `[PersistentState]` to kill the prerender double-fetch. Triggers: "how should this component load data", "avoid the double fetch on prerender", "one data interface for Server and WASM". Do NOT use for live data (`realtime`) or auth wiring (`auth/auth0-blazor`).
 ---
 
 # Blazor — Data Access (request/response lane)

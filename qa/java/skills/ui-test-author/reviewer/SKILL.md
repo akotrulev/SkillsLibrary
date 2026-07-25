@@ -1,6 +1,6 @@
 ---
 name: qa-ui-test-author-reviewer-java
-description: Use when the user asks to review existing Java UI test code or page objects. Triggers: "review this Playwright Java spec", "look at this Selenium page object", "is this Appium Java test any good".
+description: Use when the user asks to review existing Java UI test code or page objects. Triggers: "review this Playwright Java spec", "look at this Selenium page object", "is this Appium Java test any good". For end-to-end suite work prefer the phased agent `qa-ui-java` / `qa-mobile-java` / `qa-bdd-java` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
 ---
 
 # QA — UI Test & Page Object Reviewer (Java)

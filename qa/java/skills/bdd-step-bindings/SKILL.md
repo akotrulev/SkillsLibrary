@@ -1,6 +1,6 @@
 ---
 name: qa-bdd-step-bindings-java
-description: Use when turning Gherkin .feature files into Cucumber-JVM step definitions in Java and implementing each step against existing Page Object Models. Triggers: "generate Cucumber step definitions for these features", "bind these Gherkin steps to our page objects", "implement the steps for this .feature", "split the step definitions by domain". Do NOT use to write/refactor the .feature files (use `qa/_shared/bdd/gherkin-authoring`), to scaffold the Cucumber project/hooks/DI (use `qa/java/skills/bdd-project-scaffold`), or to build the page objects themselves (use `qa/java/skills/page-object-architect`).
+description: Use when turning Gherkin .feature files into Cucumber-JVM step definitions in Java, implementing each step against existing Page Object Models. Triggers: "generate Cucumber step definitions for these features", "bind these Gherkin steps to our page objects", "split the step definitions by domain". Do NOT use to write the .feature files (`gherkin-authoring`), scaffold the Cucumber project/hooks/DI (`bdd-project-scaffold`), or build page objects (`page-object-architect`). For end-to-end suite work prefer the phased agent `qa-bdd-java` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
 ---
 
 # Cucumber-JVM Step Bindings + POM Implementation (Java 21)

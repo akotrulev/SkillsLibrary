@@ -88,6 +88,15 @@ Requires a `UNIQUE (tenant_id, id)` on the parent. This is the cheapest cross-ta
 - Index with GIN only for the operators you actually use (`@>`, `?`) — `references/indexing.md`.
 - Never `jsonb` as a substitute for a junction table or a column you'd otherwise design.
 
+## Embeddings / vector columns (pgvector)
+
+An embedding lives **next to the row it embeds** — a `vector(n)` column on the same table as the source text, not a bolted-on parallel store:
+
+- **Pin the dimension to the model** — `vector(1536)` for `text-embedding-3-small`, `vector(3072)` for `-large`, etc. It's part of the column type; changing models means a new column, not an `ALTER`.
+- **Normalize the vector out to its own table** only when the embedding lifecycle diverges from the row (multiple embeddings per row for different models/chunks, or the base row churns while the embedding is stable) — otherwise keep it inline, `NULL` until embedded.
+- **Re-embedding is a backfill**, not an in-place migration: add the new column, backfill in batches (a new model, or a re-chunk), then cut over reads and drop the old column — the batched-backfill + expand-contract discipline in `data/_shared/migrations`. A synchronous "re-embed every row in one migration" locks the table and hammers the embedding API.
+- Index + ANN mechanics (HNSW/IVFFlat, operator class, `ef_search`, filtered-ANN recall) → `references/indexing.md`.
+
 ## Constraint catalog
 
 - `CHECK` for value rules — cheap, always on: `CHECK (total_minor >= 0)`, `CHECK (paid_at IS NULL OR paid_at >= placed_at)`.

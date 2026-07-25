@@ -1,6 +1,6 @@
 # Code Quality Reviewer Prompt Template
 
-Use this template **only** when the user has approved escalating to a dedicated reviewer subagent (it pushes you past the 2-agent gate). By default the controller runs this review inline instead — see the inline review rubric in `SKILL.md`.
+Use this template when escalating to a dedicated reviewer subagent (one more invocation on top of the implementer). By default the controller runs this review inline instead — see the inline review rubric in `SKILL.md`.
 
 **Purpose:** Verify implementation is well-built (clean, tested, maintainable)
 

@@ -1,18 +1,21 @@
 ---
 name: observability-opentelemetry-dotnet
-description: Use when the user asks to instrument a .NET 8 service with OpenTelemetry — traces, metrics, log correlation — and export via OTLP to Tempo / Prometheus / Loki (or an OTel Collector). Triggers: "instrument this with OTel", "add traces / metrics", "wire OTLP exporter", "add a custom span / counter / histogram", "what spans am I missing". Do NOT use for Java (use `observability/opentelemetry-java`), Node (use `observability/opentelemetry-node`), or for log shaping (use `observability/serilog-structured-logging`).
+description: Use when instrumenting a .NET service (10 primary, 8/9) with OpenTelemetry — traces, metrics, log correlation — exporting OTLP to a Collector. Triggers: "instrument this with OTel", "add traces / metrics", "wire OTLP exporter", "add a custom span / counter / histogram". Do NOT use for Java/Node (their siblings) or log shaping (`structured-logging-dotnet`).
 ---
 
-# Observability — OpenTelemetry (.NET 8)
+# Observability — OpenTelemetry (.NET 10 primary / 8-9 supported)
 
-Instruments a .NET 8 service with OpenTelemetry: traces via `Activity` / `System.Diagnostics.DiagnosticSource`, metrics via `System.Diagnostics.Metrics.Meter`, and log correlation via Serilog's `Enrich.WithSpan()`. Exports OTLP/gRPC to a local **OpenTelemetry Collector**, which forwards to Tempo (traces), Prometheus (metrics), and Loki (logs).
+Instruments a .NET service with OpenTelemetry: traces via `Activity` / `System.Diagnostics.DiagnosticSource`, metrics via `System.Diagnostics.Metrics.Meter`, and log correlation via Serilog's `Enrich.WithSpan()`. Exports OTLP/gRPC to a local **OpenTelemetry Collector**, which forwards to Tempo (traces), Prometheus (metrics), and Loki (logs).
+
+## Version detection
+
+First act on an existing project: read the `TargetFramework` from the `.csproj` and key every recipe below to it. **.NET 10 is primary; 8 and 9 are supported.** Never apply a net10/net9-only API to a down-level project, and never flag a down-level project for lacking one. The one version-gated call in this skill is exception recording — use the portable `RecordException` extension (works on all TFMs) rather than `Activity.AddException` (net9+ native); see the Rules section.
 
 ## Stack
 
-- **.NET 8**
+- **.NET (10 primary, 8/9 supported)**
 - `OpenTelemetry.Extensions.Hosting`, `OpenTelemetry.Exporter.OpenTelemetryProtocol`
 - Instrumentation libraries: `OpenTelemetry.Instrumentation.AspNetCore`, `Http`, `EntityFrameworkCore` (community), `SqlClient`, `StackExchangeRedis`
-- `OpenTelemetry.Extensions.Hosting.Internal.LogToActivityEventConversionExtensions` for ILogger → span events when needed
 - Resource attributes follow **OTel semantic conventions** (`service.name`, `service.version`, `deployment.environment`)
 - Sampler default: `ParentBased(TraceIdRatioBased)` — head-based sampling at the edge, tail-based at the Collector if needed
 
@@ -28,7 +31,7 @@ Instruments a .NET 8 service with OpenTelemetry: traces via `Activity` / `System
 
 - Java service → `observability/opentelemetry-java`
 - Node service → `observability/opentelemetry-node`
-- Log shape / sinks → `observability/serilog-structured-logging`
+- Log shape / sinks → `observability/structured-logging-dotnet`
 - Dashboards / queries → `observability/grafana-dashboards` + `observability/logql-promql`
 
 ## Inputs needed
@@ -62,19 +65,16 @@ using OpenTelemetry.Metrics;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var resource = ResourceBuilder.CreateDefault()
-    .AddService(
-        serviceName:    builder.Configuration["Service:Name"]!,
-        serviceVersion: builder.Configuration["Service:Version"]!)
-    .AddAttributes(new KeyValuePair<string, object>[]
-    {
-        new("deployment.environment", builder.Environment.EnvironmentName)
-    });
-
 builder.Services.AddOpenTelemetry()
-    .ConfigureResource(r => r.AddService(builder.Configuration["Service:Name"]!))
+    .ConfigureResource(r => r
+        .AddService(
+            serviceName:    builder.Configuration["Service:Name"]!,
+            serviceVersion: builder.Configuration["Service:Version"]!)
+        .AddAttributes(new KeyValuePair<string, object>[]
+        {
+            new("deployment.environment", builder.Environment.EnvironmentName)
+        }))
     .WithTracing(t => t
-        .SetResourceBuilder(resource)
         .SetSampler(builder.Environment.IsProduction()
             ? new ParentBasedSampler(new TraceIdRatioBasedSampler(0.1))
             : new AlwaysOnSampler())
@@ -97,7 +97,6 @@ builder.Services.AddOpenTelemetry()
             o.Protocol = OtlpExportProtocol.Grpc;
         }))
     .WithMetrics(m => m
-        .SetResourceBuilder(resource)
         .AddAspNetCoreInstrumentation()
         .AddHttpClientInstrumentation()
         .AddRuntimeInstrumentation()                 // GC, threadpool, exceptions
@@ -133,7 +132,7 @@ public sealed class OrderProcessor
         catch (Exception ex)
         {
             activity?.SetStatus(ActivityStatusCode.Error, ex.Message);
-            activity?.AddException(ex);
+            activity?.RecordException(ex);
             throw;
         }
     }
@@ -167,7 +166,7 @@ Use `Counter` for monotonic counts, `Histogram` for durations, `UpDownCounter` f
 
 ### Log correlation
 
-Wire `Enrich.WithSpan()` into Serilog (see `observability/serilog-structured-logging`). Every log line emitted inside an active span gets `TraceId` / `SpanId` fields, which Loki uses to link to the trace in Tempo.
+Wire `Enrich.WithSpan()` into Serilog (see `observability/structured-logging-dotnet`). Every log line emitted inside an active span gets `TraceId` / `SpanId` fields, which Loki uses to link to the trace in Tempo.
 
 ## Sampling
 
@@ -206,7 +205,7 @@ Propagators.DefaultTextMapPropagator.Inject(new PropagationContext(ctx ?? defaul
 - One `Meter` per subsystem with the same naming pattern
 - Span names are **operation names**, not user data: `order.process`, `payment.charge`, `user.fetch` — not `process_order_42`
 - Metric names are `lowercase.dot.case`; use `{unit}` curly-brace notation per OTel spec
-- Set `activity.SetStatus(...)` and `AddException(...)` on the exception path — without it, error spans look successful
+- Set `activity.SetStatus(...)` and `RecordException(...)` on the exception path (`Activity.AddException` is .NET 9+ only) — without it, error spans look successful
 - Exclude `/health` / `/metrics` / `/swagger` from instrumentation via the `Filter` callback — they otherwise dominate sampling
 - Resource attributes include `service.name`, `service.version`, `deployment.environment` — required for cross-service queries
 - OTLP endpoint comes from configuration / env vars; never hardcoded
@@ -231,14 +230,14 @@ Propagators.DefaultTextMapPropagator.Inject(new PropagationContext(ctx ?? defaul
 1. Confirm service name/version/env, Collector endpoint, sampling strategy, and which instrumentations are needed.
 2. Install the package set above; pin all OTel packages to the same version.
 3. Add the `AddOpenTelemetry().WithTracing(...).WithMetrics(...)` block to `Program.cs`.
-4. Add Serilog `Enrich.WithSpan()` if structured logging is in scope (see `observability/serilog-structured-logging`).
+4. Add Serilog `Enrich.WithSpan()` if structured logging is in scope (see `observability/structured-logging-dotnet`).
 5. Create one `ActivitySource` + one `Meter` per business subsystem; wire instrumentation into the code that should emit spans/metrics.
 6. Configure the Collector (separate concern) to receive OTLP and route to Tempo / Prometheus / Loki.
 7. Smoke locally with a docker-compose stack (Collector + Tempo + Prometheus + Grafana). Confirm `traceparent` rides outbound HTTP, spans appear in Tempo, metrics appear in Prometheus.
 
 ## Handoffs
 
-- Log shape and sinks → `observability/serilog-structured-logging`
+- Log shape and sinks → `observability/structured-logging-dotnet`
 - LogQL / PromQL query patterns → `observability/logql-promql`
 - Dashboard layout → `observability/grafana-dashboards`
 - Java equivalent → `observability/opentelemetry-java`

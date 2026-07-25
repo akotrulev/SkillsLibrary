@@ -1,11 +1,15 @@
 ---
 name: observability-structured-logging-java
-description: Use when the user asks to set up or refactor logging in a Java 21 / Spring Boot 3 service — SLF4J + Logback with JSON encoding, MDC for correlation, sinks to console / Loki / Elastic. Triggers: "set up structured logging in Spring Boot", "Logback JSON config", "ship logs to Loki", "add MDC correlation IDs", "this log line is wrong". Do NOT use for .NET (use `observability/serilog-structured-logging`) or Node (use `observability/structured-logging-node`), or for tracing/metrics (use `observability/opentelemetry-java`).
+description: Use when setting up or refactoring logging in a Java 21 / Spring Boot 3 service — SLF4J + Logback with JSON encoding, MDC for correlation, sinks to console/Loki/Elastic. Triggers: "set up structured logging in Spring Boot", "Logback JSON config", "add MDC correlation IDs". Do NOT use for .NET/Node (their siblings) or tracing/metrics (`opentelemetry-java`).
 ---
 
 # Observability — Structured Logging (Java 21 / Spring Boot 3)
 
-Sets up SLF4J + Logback as the logging stack in a Java 21 + Spring Boot 3 service. Logs are JSON via `logstash-logback-encoder`, written with placeholder logging (never `+` concatenation or `String.format`), enriched with MDC (`traceId`, `spanId`, `tenantId`, `requestId`), and shipped to Loki for prod / stdout JSON for everywhere.
+Sets up SLF4J + Logback as the logging stack in a Java 21 + Spring Boot 3 service. Logs are JSON via `logstash-logback-encoder`, written with placeholder logging (never `+` concatenation or `String.format`), enriched with MDC (`trace_id`, `span_id`, `tenantId`, `requestId`), and shipped to Loki for prod / stdout JSON for everywhere.
+
+## Version detection
+
+First act on an existing project: confirm the Java release (`java -version` / the toolchain in `build.gradle`) and the Spring Boot BOM version (`build.gradle` / `pom.xml`). **Java 21 + Spring Boot 3.x is the target.** Match `logstash-logback-encoder` and the OTel Logback MDC appender to your Spring Boot / OTel release lines; the recipes below apply as-is on any Spring Boot 3.x line.
 
 ## Stack
 
@@ -14,7 +18,7 @@ Sets up SLF4J + Logback as the logging stack in a Java 21 + Spring Boot 3 servic
 - **Logback** as the implementation (Spring Boot default)
 - **`net.logstash.logback:logstash-logback-encoder`** for JSON output
 - **`io.opentelemetry.instrumentation:opentelemetry-logback-mdc-1.0`** to bridge OTel trace context → MDC
-- Shipping: stdout JSON → container runtime → Promtail / Fluent Bit / Vector → Loki. Direct Loki appenders exist (`com.github.loki4j:loki-logback-appender`) but stdout-first is the portable default.
+- Shipping: stdout JSON → container runtime → Alloy / Fluent Bit / Vector → Loki. Direct Loki appenders exist (`com.github.loki4j:loki-logback-appender`) but stdout-first is the portable default.
 
 ## When to use
 
@@ -26,7 +30,7 @@ Sets up SLF4J + Logback as the logging stack in a Java 21 + Spring Boot 3 servic
 
 ## When NOT to use
 
-- .NET service → `observability/serilog-structured-logging`
+- .NET service → `observability/structured-logging-dotnet`
 - Node service → `observability/structured-logging-node`
 - Distributed tracing or metrics → `observability/opentelemetry-java`
 - LogQL query authoring → `observability/logql-promql`
@@ -46,10 +50,12 @@ Sets up SLF4J + Logback as the logging stack in a Java 21 + Spring Boot 3 servic
 ```groovy
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter'
-    implementation 'net.logstash.logback:logstash-logback-encoder:7.4'
-    implementation 'io.opentelemetry.instrumentation:opentelemetry-logback-mdc-1.0:2.7.0-alpha'
+    implementation 'net.logstash.logback:logstash-logback-encoder:9.0'
+    implementation 'io.opentelemetry.instrumentation:opentelemetry-logback-mdc-1.0:2.28.1-alpha'
 }
 ```
+
+Pin the OTel Logback MDC appender to the same release train as the rest of your OTel artifacts (see `observability/opentelemetry-java`); check the latest `logstash-logback-encoder` on [Maven Central](https://central.sonatype.com/artifact/net.logstash.logback/logstash-logback-encoder) and the OTel appender at the [OpenTelemetry releases page](https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases).
 
 ### `src/main/resources/logback-spring.xml`
 
@@ -66,7 +72,7 @@ dependencies {
         <logLevel><fieldName>level</fieldName></logLevel>
         <loggerName><fieldName>logger</fieldName></loggerName>
         <threadName><fieldName>thread</fieldName></threadName>
-        <mdc/>                                  <!-- emits MDC keys flat: traceId, spanId, tenantId, ... -->
+        <mdc/>                                  <!-- emits MDC keys flat: trace_id, span_id, tenantId, ... -->
         <stackTrace>
           <throwableConverter class="net.logstash.logback.stacktrace.ShortenedThrowableConverter">
             <maxDepthPerThrowable>30</maxDepthPerThrowable>
@@ -88,11 +94,14 @@ dependencies {
     </encoder>
   </appender>
 
-  <!-- Bridge OTel span context (traceId, spanId) into MDC for every log -->
-  <turboFilter class="io.opentelemetry.instrumentation.logback.mdc.v1_0.OpenTelemetryAppender"/>
+  <!-- Bridge OTel span context (trace_id, span_id) into MDC for every log.
+       OpenTelemetryAppender is a WRAPPER appender: it decorates the real appender. -->
+  <appender name="OTEL" class="io.opentelemetry.instrumentation.logback.mdc.v1_0.OpenTelemetryAppender">
+    <appender-ref ref="JSON"/>
+  </appender>
 
   <root level="INFO">
-    <appender-ref ref="JSON"/>
+    <appender-ref ref="OTEL"/>
   </root>
 
   <!-- Tame chatty libraries -->
@@ -112,7 +121,7 @@ For local dev a colorized console pattern is nicer than JSON. Use a Spring profi
 ```xml
 <springProfile name="local">
   <appender name="PRETTY" class="ch.qos.logback.core.ConsoleAppender">
-    <encoder><pattern>%d{HH:mm:ss.SSS} %-5level [%X{traceId:-}] %logger{20} - %msg%n</pattern></encoder>
+    <encoder><pattern>%d{HH:mm:ss.SSS} %-5level [%X{trace_id:-}] %logger{20} - %msg%n</pattern></encoder>
   </appender>
   <root level="INFO"><appender-ref ref="PRETTY"/></root>
 </springProfile>
@@ -187,7 +196,9 @@ The exception **must be the last argument**, not a placeholder substitution — 
 
 ## Correlation with traces
 
-The `OpenTelemetryAppender` turbo-filter copies `trace_id` / `span_id` from the active OTel context into MDC. Every log emitted inside an active span gets `traceId` and `spanId` JSON fields. Loki + Tempo wire these to "Jump to trace" in Grafana.
+The `OpenTelemetryAppender` wrapper appender copies the active OTel span context into MDC under its **default keys `trace_id`, `span_id`, `trace_flags`** (snake_case — customizable via `<traceIdKey>`/`<spanIdKey>`, but don't: the defaults are the library-wide contract). With `<mdc/>` in the encoder, every log emitted inside an active span gets `trace_id` and `span_id` JSON fields. Loki + Tempo wire these to "Jump to trace" in Grafana.
+
+**Trace-correlation contract:** this stack emits the trace id as the JSON field **`trace_id`** (32 lowercase hex chars). The Loki derived-field regex in `observability/loki-tempo-setup` must match this exact name — it does, via the canonical cross-stack regex defined there.
 
 No code changes needed in callers once the appender is registered.
 
@@ -227,7 +238,7 @@ Or filter at the source — pass DTO projections to the logger, never the entity
 - Output is JSON in every environment except `local` (where colorized console is allowed)
 - Service name / version / environment as static fields in every log line
 - `<mdc/>` provider in the encoder so MDC keys are top-level JSON fields
-- `OpenTelemetryAppender` turbo-filter wired up so `traceId` / `spanId` ride every log
+- `OpenTelemetryAppender` wrapper appender wired up so `trace_id` / `span_id` ride every log (default MDC keys — never rename them)
 - Loki labels are low-cardinality (`service`, `environment`, `level`)
 - Chatty namespaces (`org.springframework.*`, `org.hibernate.*`, `org.apache.kafka.*`) capped at `WARN`
 - MDC keys cleared at the end of every request via try-with-resources / `MDCCloseable`
@@ -252,14 +263,14 @@ Or filter at the source — pass DTO projections to the logger, never the entity
 2. Add the encoder + OTel MDC dependencies.
 3. Create `src/main/resources/logback-spring.xml` from the template; tune `<springProperty>` to match the project's properties.
 4. Add the `RequestIdFilter` (or equivalent) to populate `requestId` for every request.
-5. If OTel is in the project, the `OpenTelemetryAppender` turbo-filter is mandatory.
+5. If OTel is in the project, the `OpenTelemetryAppender` wrapper appender is mandatory.
 6. Sweep the codebase for `+` concatenation in log calls and `e.toString()`; convert to placeholders + exception arg.
-7. Smoke locally — `curl` a few endpoints, confirm JSON includes `traceId`, `spanId`, `requestId`, `service.name`.
+7. Smoke locally — `curl` a few endpoints, confirm JSON includes `trace_id`, `span_id`, `requestId`, `service.name`.
 
 ## Handoffs
 
 - Distributed tracing + metrics → `observability/opentelemetry-java`
 - LogQL queries against Loki → `observability/logql-promql`
 - Dashboard layout → `observability/grafana-dashboards`
-- .NET equivalent → `observability/serilog-structured-logging`
+- .NET equivalent → `observability/structured-logging-dotnet`
 - Node equivalent → `observability/structured-logging-node`

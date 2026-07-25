@@ -1,13 +1,13 @@
 ---
 name: data-elasticsearch
-description: Use when the user asks to design indexes, set up clients, secure a cluster (native realm / API keys / document- & field-level security / TLS), plan migrations, or write queries on Elasticsearch / OpenSearch from a .NET 10 / Java 21 / Node 24 backend — full-text search, structured search, aggregations, log search (off the OTel/Loki path), vector search (kNN). Also the destination for self-hosted full-text/semantic search handed off from `data/mongodb`, and vector search beyond a cache handed off from `data/redis`. Triggers: "design an Elasticsearch index for X", "build a search query", "reindex strategy", "OpenSearch on AWS vs Elastic Cloud", "vector search for embeddings", "document-level security per tenant". Do NOT use for log shipping (use `observability/loki-tempo-setup`), relational stores (use `data/<sql-db>`), or operational metrics (use Prometheus / Mimir).
+description: Use when designing indexes, setting up clients, securing a cluster (API keys / DLS·FLS / TLS), planning migrations, or writing queries on Elasticsearch / OpenSearch from a .NET / Java / Node backend — full-text, aggregations, vector/kNN. The destination when search outgrows Mongo, Redis, or pgvector. Triggers: "design an Elasticsearch index", "build a search query", "reindex strategy", "vector search for embeddings". Do NOT use for log shipping (`observability/loki-tempo-setup`).
 ---
 
 # Data — Elasticsearch / OpenSearch
 
 Index design, client setup, ingest, query shape, security, and operational concerns for **Elasticsearch 9** and **OpenSearch 3** from the library's three backend stacks. Use for **full-text search**, **structured queries on semi-structured documents**, **aggregations on event data**, and **vector / kNN search**. Logs are handled by Loki (`observability/loki-tempo-setup`); only use ES for logs if you have a strong reason (rich aggregations / wildcards that LogQL struggles with).
 
-This is also the **destination for two inbound handoffs** authored elsewhere in `data/`: `data/mongodb/indexing.md` routes *self-hosted* full-text / semantic search here (Atlas Search / Vector Search is Atlas-only, so self-hosted Mongo that needs real relevance ranking projects into ES); `data/redis/data-structures.md` routes *vector search beyond a cache* here (Redis's vector module is fine as a fast KV-adjacent ANN cache, but a durable, filterable, reindexable vector store is an ES/OpenSearch `dense_vector` job).
+This is also the **destination for two inbound handoffs** authored elsewhere in `data/`: `data/mongodb/references/indexing.md` routes *self-hosted* full-text / semantic search here (Atlas Search / Vector Search is Atlas-only, so self-hosted Mongo that needs real relevance ranking projects into ES); `data/redis/references/data-structures.md` routes *vector search beyond a cache* here (Redis's vector module is fine as a fast KV-adjacent ANN cache, but a durable, filterable, reindexable vector store is an ES/OpenSearch `dense_vector` job). **First check the cheaper stop:** if the embeddings belong to data already in Postgres, a `pgvector` column on that row (`data/postgresql/references/indexing.md`) beats standing up a second cluster — ES/OpenSearch earns its place only when relevance/hybrid ranking, independent scaling, or non-Postgres data justify it.
 
 ## Version & distribution policy
 
@@ -391,7 +391,6 @@ PUT /_security/role/tenant_42_reader
 - Source of record alongside ES → `data/postgresql` / `data/mongodb`
 - Caching in front of ES → `data/_shared/caching-patterns` + `data/redis`
 - Vector embeddings producer → application code; this skill consumes them
-- **Inbound** (this skill is the destination): self-hosted full-text/semantic search from `data/mongodb/indexing.md`; vector search beyond a cache from `data/redis/data-structures.md`
+- **Inbound** (this skill is the destination): self-hosted full-text/semantic search from `data/mongodb/references/indexing.md`; vector search beyond a cache from `data/redis/references/data-structures.md`
 - Verifying tenant DLS actually isolates (cross-tenant leak matrix) → the `qa-security` peer + `qa/<stack>/skills/security-testing/access-control-testing`
-- IaC for the cluster → `devops/iac-bicep-terraform`
-- AWS / Azure deploy → `devops/aws-deployment` (OpenSearch Service) / `devops/azure-deployment` (Elastic Cloud on Azure)
+- IaC / cloud deploy for the cluster (OpenSearch Service, Elastic Cloud) → cloud provisioning / IaC for the store itself has no owning skill in this library yet; out of this domain's scope

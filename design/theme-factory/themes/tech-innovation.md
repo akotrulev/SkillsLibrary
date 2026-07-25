@@ -13,6 +13,7 @@ A bold and modern theme with high-contrast colors perfect for cutting-edge techn
 
 - **Headers**: DejaVu Sans Bold
 - **Body Text**: DejaVu Sans
+- **Web font suggestion** (web-app lane): headings `"Space Grotesk", system-ui, sans-serif`; body `"Inter", system-ui, sans-serif`
 
 ## Best Used For
 

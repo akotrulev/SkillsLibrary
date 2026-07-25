@@ -1,6 +1,6 @@
 ---
 name: qa-accessibility-testing-dotnet
-description: Use when tests must scan for accessibility violations — axe-core inside Playwright flows (per-state WCAG scans) or Lighthouse CI (page-level scores with budgets). Triggers: "add a11y tests", "scan for WCAG violations", "fail CI on accessibility regressions", "set an accessibility budget". Pick the tool in the decision matrix, then read its reference file.
+description: Use when a .NET / NUnit test suite must scan for accessibility violations — axe-core inside Playwright flows (per-state WCAG scans) or Lighthouse CI. Triggers "add a11y tests", "scan for WCAG violations", "fail CI on accessibility regressions", "set an accessibility budget". Pick the tool in the matrix, then read its reference file. Not for the app's own a11y implementation (the `fe-*` stack's `accessibility`), pixel diffs (`visual-regression`), or breakpoints (`responsive-testing`).
 ---
 
 # QA — Accessibility Testing (.NET 8 / C#)

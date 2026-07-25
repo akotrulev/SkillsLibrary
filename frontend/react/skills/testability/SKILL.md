@@ -1,6 +1,6 @@
 ---
 name: fe-react-testability
-description: Use when the user asks to add, audit, or fix `data-testid` attributes in React (.tsx) pages and components so automated UI suites can target the app — including consuming a `missing-testids.md` report from QA's `pom-builder`. Covers the per-library attribute mechanics (MUI `slotProps`, Mantine/Chakra rest-props/compound parts, shadcn/none inline or a `testId` prop) that the `component-library` references promise. Triggers "add testids to this page", "audit the data-testids", "QA sent a missing-testids report", "make this component targetable by Playwright", "where does data-testid go on this MUI/Mantine control". Do NOT use to write the UI tests themselves (use `qa-ui-typescript`), to build page objects (use `qa/typescript/skills/pom-builder`), or for Blazor (use `frontend/blazor/skills/testability`).
+description: Use when adding, auditing, or fixing `data-testid` attributes in pages/components so UI suites can target the app — including consuming a `missing-testids.md` report from QA's `pom-builder`. Covers per-library attribute mechanics (MUI `slotProps`, Mantine/Chakra rest-props, shadcn/none). Triggers "add testids to this page", "audit the data-testids", "the E2E test can't find this element". Not for writing the UI tests (`qa-ui-typescript`).
 ---
 
 # React — Testability (`data-testid` writer)
@@ -252,6 +252,10 @@ When QA's `pom-builder` hands over a report of elements it could not locate test
 | Locators containing numeric ids, GUIDs, or array indexes | Use enum/field names; rows are addressed by index over a shared static locator |
 | Array index reused as both React `key` and testid qualifier | `key` = stable domain id; testid = static role — different concerns |
 | `aria-label` added to mirror a testid | One attribute only — a11y labels belong to [`accessibility`](../accessibility/SKILL.md) |
+
+## Out of scope
+
+Non-React surfaces (a static-HTML admin tool, a jQuery-era template UI, a raw `innerHTML` widget) are **not** covered here — this skill owns `.tsx` component markup only. A React app renders everything through React, so there is no in-app hybrid surface to address (this is the deliberate delta from `frontend/blazor/skills/testability`, whose `references/static-html.md` exists because a Blazor app can ship a non-Blazor page beside it). If a project genuinely mixes a non-React island in, apply the same rules — naming (Rule 2), const prefix (Rule 3), static row locators (Rule 6), data derivation (Rule 7) — with a plain inline `data-testid` attribute and a hardcoded parent-locator `const` for JS-rendered rows.
 
 ## Handoffs
 

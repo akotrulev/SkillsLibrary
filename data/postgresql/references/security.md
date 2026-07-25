@@ -72,7 +72,7 @@ Per stack: EF Core — open the transaction, issue `SET LOCAL` via an intercepto
 - `current_setting('app.tenant_id')` with no second argument **throws** when unset — good: an unset context fails closed. `current_setting(..., true)` returns NULL and fails open; don't use it in policies.
 - **Performance**: the policy predicate is added to every query. Keep it a plain indexed comparison (`tenant_id = ...`). Every multi-tenant index leads with `tenant_id`. Policies that call subqueries or non-`LEAKPROOF` functions block index/qual pushdown and can wreck plans — check `EXPLAIN` output for the policy qual.
 - RLS composes with composite FKs (`references/data-modeling.md`) — engine-level row visibility + engine-level cross-table tenant integrity.
-- Test it like code: a `qa` integration test that sets tenant A's context and asserts tenant B's rows are invisible *and unwritable* (`qa/{stack}/skills/db-testing/*`).
+- Test it like code: a `qa` integration test that sets tenant A's context and asserts tenant B's rows are invisible *and unwritable* (`qa/{java,dotnet,typescript}/skills/db-testing/*`).
 
 ## Column privileges & encryption
 

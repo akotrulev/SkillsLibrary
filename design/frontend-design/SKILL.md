@@ -1,6 +1,6 @@
 ---
-name: frontend-design
-description: Guidance for distinctive, intentional visual design when building or reshaping any web UI — the taste layer above the engineering stack. Use when choosing aesthetic direction, palette, typography, layout composition, motion intent, and UX copy voice so the result reads as deliberately designed, not templated AI defaults. Stack-agnostic; owns the visual point of view — the per-brief token system (color / type / layout / signature) is the primary theming authority feeding a stack's CSS custom properties. Triggers: "design a landing page / dashboard", "make this UI not look AI-generated", "give this a visual identity", "pick a palette and type pairing", "write / critique a design plan". Do NOT use for the CSS mechanics of applying tokens (stack's `styling`), motion implementation code (stack's `motion`), accessibility mechanics (stack's `accessibility`), a quick preset theme for slides/docs (`design/theme-factory`), or the pre-ship UX audit checklist (`design/web-design-guidelines`).
+name: design-frontend-design
+description: The authority for a SHIPPING web app's visual identity — invents one per-brief design direction (palette, type scale, spacing, layout, motion) and hands it down as a token system a stack's `styling` consumes. Triggers "give this app a look", "make this UI not look AI-generated", "pick a palette and fonts", "restyle this app". Not for CSS mechanics (the stack's `styling`), token naming (`design-tokens`), a brand book (`design-brand-intake`), or presets (`design-theme-factory`).
 ---
 
 # Frontend Design

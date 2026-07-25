@@ -1,6 +1,6 @@
 ---
 name: fe-react-realtime
-description: Use when a React surface (Next.js App Router primary, Vite SPA fallback) needs LIVE / server-pushed data — dashboards that update themselves, chat, presence, progress, notifications, streaming. Covers Server-Sent Events (SSE) from a route handler + an `EventSource`/`useSSE` client hook, a WebSocket client hook with backoff reconnection, raw/third-party feeds with dedupe, the initial-snapshot→live-channel handoff, connection-status affordance, and integrating pushes with TanStack Query (invalidate on message). Triggers "push updates to the UI", "SSE / WebSocket in React", "live dashboard/ticker/chat", "server events update a component", "stream from an endpoint", "connection status + reconnect UX". Do NOT use for request/response fetching (use `frontend/react/skills/data-access`), the error/reconnect UI itself (use `frontend/react/skills/error-resilience`), or hub/socket authentication wiring (use `auth/auth0-react`).
+description: Use when a surface needs LIVE / server-pushed data — SSE from a route handler + `EventSource` hook, a WebSocket hook with backoff reconnection, the snapshot→live-channel handoff, connection-status affordance, TanStack Query invalidate-on-message. Triggers: "push updates to the UI", "SSE / WebSocket in React", "live dashboard/chat", "reconnect UX", "the socket reconnects in a loop". Do NOT use for request/response fetching (`data-access`) or the error/reconnect UI itself (`error-resilience`).
 ---
 
 # React — Realtime (live / push lane)
