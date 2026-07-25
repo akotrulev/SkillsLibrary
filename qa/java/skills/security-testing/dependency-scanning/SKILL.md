@@ -344,4 +344,3 @@ These sections live in `references/details.md` — **read it when the task touch
 - `qa-ci-pipelines-java` — the gate step, `dependency-review-action`, NVD-cache, artifact +
   SARIF upload.
 - `qa-allure-reporting-java` — attach the Dependency-Check HTML/JSON report to the run.
-- `qa/GAP-ANALYSIS.md` — `dependency-scanning` **closes Phase 2**; Phase 3 is the next backlog.

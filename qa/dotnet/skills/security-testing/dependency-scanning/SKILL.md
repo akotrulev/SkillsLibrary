@@ -323,4 +323,3 @@ These sections live in `references/details.md` — **read it when the task touch
 - `qa-ci-pipelines-dotnet` — the gate step, `dependency-review-action`, artifact upload.
 - `qa-allure-reporting-dotnet` — attach the `dotnet list package --vulnerable --format json` report to the
   run.
-- `qa/GAP-ANALYSIS.md` — `dependency-scanning` **closes Phase 2**; Phase 3 is the next backlog.

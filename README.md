@@ -139,8 +139,6 @@ DevOps and Auth0 skills are mostly procedural, so they typically have one combin
 
 The `qa/` section is the most fully built-out part of the library. Most code-producing skills ship **three sibling stacks** — `java/`, `dotnet/`, and `typescript/` — each as its own `SKILL.md`. Shared cross-stack rules live in a `_shared/SKILL.md`. Process/non-code skills stay single-folder. Tool-bound skills ship only the stack(s) the tool supports.
 
-See [`qa/GAP-ANALYSIS.md`](qa/GAP-ANALYSIS.md) for the live build/audit plan and remaining backlog.
-
 ### Authoring
 
 | Skill | Stacks | What it does |
@@ -223,7 +221,7 @@ See [`CONTRIBUTING.md`](CONTRIBUTING.md) and the templates in [`.skill-template/
 | auth                  | scaffolding |
 | devops                | authored + shipped — 9 cloud/CI-keyed skills (docker, kubernetes, iac-bicep-terraform, aws-deployment, azure-deployment, github-actions, gitlab-ci, azure-pipelines, environment-config) + the `devops-engineer` agent; `devops` plugin |
 | observability         | authored + shipped — 6 skills (per-stack `opentelemetry-*` / `structured-logging-*` + stack-agnostic loki-tempo, prometheus-mimir, logql-promql, grafana-dashboards) + `observability-engineer-{dotnet,java,node}` agents; bundled into the `be-*` plugins |
-| qa                    | authored — 30 code-producing nodes (mostly ×3 stacks) + 7 process skills; Phase 1 complete, Phase 2 in progress (see qa/GAP-ANALYSIS.md). `qa-dotnet` additionally ships the `conformance-audit` self-audit skill + `/qa-dotnet-audit` |
+| qa                    | authored — 30 code-producing nodes (mostly ×3 stacks) + 7 process skills. `qa-dotnet` additionally ships the `conformance-audit` self-audit skill + `/qa-dotnet-audit` |
 | engineering-practices | imported from obra/superpowers |
 | meta                  | imported (writing-skills, skill-creator) |
 | documents             | imported from anthropics/skills |

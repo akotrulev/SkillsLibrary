@@ -334,4 +334,3 @@ Lifecycle for this gate:
   reused here for the allow-list (gate new findings, document every suppression with a ticket).
 - `qa-ci-pipelines-typescript` — the gate step, `dependency-review-action`, artifact upload.
 - `qa-allure-reporting-typescript` — attach the `npm audit --json` report and summary to the run.
-- `qa/GAP-ANALYSIS.md` — `dependency-scanning` **closes Phase 2**; Phase 3 is the next backlog.
