@@ -1,6 +1,6 @@
 ---
 name: fe-react-forms
-description: Use when building or fixing a form — React Hook Form + Zod (default), the React 19 Server-Actions lane (`<form action>` + `useActionState` + `useOptimistic`), async/server validation, ProblemDetails→field-error mapping, wizards, uploads, a11y. Triggers: "build a form for X", "validate with Zod", "wire a Server Action form", "server errors aren't landing on the fields", "my input loses focus on every keystroke". Do NOT use for state management (`state-management`) or fetch/mutation mechanics (`data-access`).
+description: Use when building or fixing a form — React Hook Form + Zod (default), the React 19 Server-Actions lane (`<form action>` + `useActionState` + `useOptimistic`), async/server validation, ProblemDetails→field-error mapping, wizards, uploads, a11y. Triggers "build a form for X", "validate with Zod", "server errors aren't landing on the fields", "my input loses focus on every keystroke". Not for state management (`state-management`) or fetch mechanics (`data-access`).
 ---
 
 # React — Forms

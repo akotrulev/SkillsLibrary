@@ -1,6 +1,6 @@
 ---
 name: fe-react-performance
-description: Use when the UI is slow, janky, or heavy — render throughput (`key`, derive-don't-effect, memo/Compiler, split contexts), bundle & startup (push `'use client'` to leaves, code-split, import costs), server render (parallel fetches, streaming), diagnostics + Core-Web-Vitals budgets; React/Next. Triggers: "this list re-renders too much", "the bundle is huge", "typing lags", "my fetches waterfall", "Maximum update depth exceeded". Do NOT use for CSS/layout (`styling`, `responsive-design`) or load-testing (qa `performance/k6`, a peer).
+description: Use when the UI is slow, janky, or heavy — render throughput (`key`, derive-don't-effect, memo/Compiler, split contexts), bundle & startup (push `'use client'` to leaves, code-split, import costs), server render (parallel fetches, streaming), Core-Web-Vitals budgets. Triggers "this list re-renders too much", "the bundle is huge", "typing lags", "my fetches waterfall", "Maximum update depth exceeded". Not for CSS/layout (`styling`, `responsive-design`) or load testing (a qa peer).
 ---
 
 # React — Performance

@@ -1,6 +1,6 @@
 ---
 name: fe-react-reference
-description: Use when explaining how React 19 / the Next.js App Router actually works — Server vs Client Components and the `'use client'` boundary, hydration, hooks, `use()`/Actions/`useActionState`/`useOptimistic`, Context vs store, `ref` as a prop, Suspense, keys, effects, atomic-design taxonomy. Triggers: "Server or Client Component here", "where does 'use client' go", "Context vs Zustand", "Hydration failed because the server rendered HTML didn't match the client", "You're importing a component that needs useState", "Event handlers cannot be passed to Client Component props". Do NOT use for scaffolding (`generator`), reviewing (`reviewer`), route files (`routing`), or Blazor (its sibling).
+description: Use when explaining how React 19 / the Next.js App Router actually works — Server vs Client Components and the `'use client'` boundary, hydration, hooks, `use()`/Actions/`useActionState`/`useOptimistic`, Context vs store, `ref` as a prop. Triggers "Server or Client Component here", "where does 'use client' go", "Context vs Zustand", "Hydration failed because the server rendered HTML didn't match". Not for scaffolding (`generator`), reviewing (`reviewer`), or route files (`routing`).
 ---
 
 # React Design Patterns — Reference

@@ -1,6 +1,6 @@
 ---
 name: fe-react-component-library
-description: Use when picking or wiring the UI component library an app is built on — MUI (default) vs Mantine vs Chakra vs shadcn/ui vs none — plus theme/`ThemeProvider` + dark mode, DataGrid, dialog/toast surface, and the RSC `'use client'` boundary each forces. Triggers: "which component library", "set up MUI/Mantine/Chakra/shadcn", "why do MUI components error in a Server Component", "createContext is not a function". Do NOT use for hand-written CSS/tokens (`styling`), `data-testid` mechanics (`testability`), or forms (`forms`).
+description: Use when picking or wiring the UI component library an app is built on — MUI (default) vs Mantine vs Chakra vs shadcn/ui vs none — plus theme/`ThemeProvider` + dark mode, DataGrid, dialog/toast surface, and the RSC `'use client'` boundary each forces. Triggers "which component library", "set up MUI/Mantine/Chakra/shadcn", "why do MUI components error in a Server Component". Not for hand-written CSS/tokens (`styling`) or forms (`forms`).
 ---
 
 # React — Component Library (one-of-N family)

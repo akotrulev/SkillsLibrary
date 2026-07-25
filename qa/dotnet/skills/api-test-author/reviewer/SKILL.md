@@ -1,6 +1,6 @@
 ---
 name: qa-api-test-author-reviewer-dotnet
-description: Use when the user asks to review existing .NET API test code (NUnit + RestSharp) for quality. Triggers: "review this API test", "look at OrderTests.cs", "spot issues in this *Action / client class". Not for generating new tests → `api-test-author/generator`. For end-to-end suite work prefer the phased agent `qa-api-dotnet` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
+description: Use when the user asks to review existing .NET API test code (NUnit + RestSharp) for quality. Triggers: "review this API test", "look at OrderTests.cs", "spot issues in this *Action / client class". Not for generating new tests → `api-test-author/generator`.
 ---
 
 # QA — API Test Reviewer (.NET / NUnit + RestSharp)

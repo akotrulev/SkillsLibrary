@@ -1,6 +1,6 @@
 ---
 name: fe-react-data-access
-description: Use when a component must FETCH or WRITE request/response data — Server Component `fetch` with `cache`/`revalidate` vs client TanStack Query, Server Actions with `revalidatePath`/`revalidateTag`, ProblemDetails→UI mapping, Suspense streaming, `AbortSignal`; React/Next. Triggers: "how should this component load data", "Server Action to create X", "revalidate after a mutation", "Dynamic server usage — route couldn't be rendered statically", "our fetches stopped being cached". Do NOT use for live/server-pushed data (`realtime`), forms UX (`forms`), or where fetched state lives (`state-management`).
+description: Use when a component must FETCH or WRITE request/response data — Server Component `fetch` with `cache`/`revalidate` vs client TanStack Query, Server Actions with `revalidatePath`/`revalidateTag`, ProblemDetails→UI mapping, Suspense streaming. Triggers "how should this component load data", "Server Action to create X", "revalidate after a mutation", "our fetches stopped being cached". Not for server-pushed data (`realtime`), forms UX (`forms`), or where fetched state lives (`state-management`).
 ---
 
 # React — Data Access (request/response lane)

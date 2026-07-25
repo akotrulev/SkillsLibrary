@@ -1,6 +1,6 @@
 ---
 name: ep-feature-audit
-description: Use when ONE feature or area of an existing codebase must be traced with no spec in hand — what it actually does, which validations and gates it enforces, what it integrates with, and where it is defective. Triggers: "how does feature X actually work", "what validations does the checkout flow have", "map this module's integrations", "find the defects in this area", "explain this feature before we rewrite it". For an audit spanning several features, persisting to `docs/audits/`, or getting re-run in later rounds, invoke the `code-auditor` agent instead — this skill is its FEATURE lane. Do NOT use to verify a written spec against code (`ep-spec-compliance-audit`), for a security scan (`qa-security`), or to fix what the audit finds (the owning stack agent).
+description: Use when ONE feature or area of an existing codebase must be traced with no spec in hand — what it does, which validations and gates it enforces, and where it is defective. Triggers "how does feature X actually work", "what validations does the checkout flow have", "map this module's integrations", "find the defects in this area". Multi-feature and saved to `docs/audits/` → the `code-auditor` agent (its FEATURE lane). Not for verifying a written spec (`ep-spec-compliance-audit`).
 ---
 
 # Feature Audit

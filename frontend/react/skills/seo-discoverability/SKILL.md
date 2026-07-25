@@ -1,6 +1,6 @@
 ---
 name: fe-react-seo-discoverability
-description: Use when public/crawlable pages must rank and preview correctly — server/static rendering for public routes (client-only is blank to crawlers), per-route `metadata`/`generateMetadata` (title, canonical, OG/Twitter), a real 404 (`not-found.tsx`), `sitemap.ts`, `robots.ts`, JSON-LD. Triggers: "make these pages crawlable / SEO-friendly", "set per-page meta and OG tags", "my page shows blank to Google", "the link preview is empty when shared". Do NOT use for the tab-title convention (`ui-conventions`), route files themselves (`routing`), or load perf (`performance`).
+description: Use when public/crawlable pages must rank and preview correctly — server/static rendering for public routes (client-only is blank to crawlers), per-route `metadata`/`generateMetadata`, a real 404 (`not-found.tsx`), `sitemap.ts`, `robots.ts`, JSON-LD. Triggers "make these pages crawlable", "set per-page meta and OG tags", "my page shows blank to Google", "the link preview is empty when shared". Not for the tab-title convention (`ui-conventions`) or route files (`routing`).
 ---
 
 # React — SEO & Discoverability

@@ -1,6 +1,6 @@
 ---
 name: fe-react-motion
-description: Use when an element must animate — CSS transitions/keyframes in CSS Modules first, `prefers-reduced-motion` as a hard floor, staggered and scroll reveals, the React exit-animation gap (`motion` `AnimatePresence` or View Transitions), route transitions. Triggers: "animate this page-load sequence", "fade elements in on scroll", "animate a list item leaving", "the exit animation never plays". Do NOT use to decide WHETHER motion serves the design (`design-frontend-design`) or CSS-Module setup (`styling`).
+description: Use when an element must animate — CSS transitions/keyframes in CSS Modules first, `prefers-reduced-motion` as a hard floor, staggered and scroll reveals, the React exit-animation gap (`motion` `AnimatePresence` or View Transitions), route transitions. Triggers "animate this page-load sequence", "fade elements in on scroll", "the exit animation never plays". Not for deciding WHETHER motion serves the design (`design-frontend-design`).
 ---
 
 # React — Motion

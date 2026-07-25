@@ -1,6 +1,6 @@
 ---
 name: qa-auth0-test-tokens-dotnet
-description: Use when the user asks to obtain Auth0 access tokens *for automated tests* in .NET (NUnit). Triggers: "get an Auth0 M2M token for my .NET API tests", "log in a test user without the UI in C#", "mint an Auth0 token for a test user". For end-to-end suite work prefer the phased agent `qa-api-dotnet` / `qa-ui-dotnet` / `qa-mobile-dotnet` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
+description: Use when the user asks to obtain Auth0 access tokens *for automated tests* in .NET (NUnit). Triggers: "get an Auth0 M2M token for my .NET API tests", "log in a test user without the UI in C#", "mint an Auth0 token for a test user".
 ---
 
 # QA — Auth0 Test Tokens (.NET / NUnit)

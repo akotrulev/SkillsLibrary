@@ -1,6 +1,6 @@
 ---
 name: qa-webapp-testing
-description: Use when driving a **locally running** web application through Playwright **from Python** to verify frontend behavior interactively — capturing browser screenshots, reading browser console logs, and debugging UI behavior in an ad-hoc session. The library's one Python-based skill (Anthropic-provided import); every other UI skill here targets Java / C# / TypeScript. Triggers "open the local app and check X", "screenshot this page", "what is the browser console showing", "debug this UI behavior with Python". Do NOT use to author a maintained UI test suite or page objects (use `qa-ui-test-author-playwright-{java,dotnet,typescript}` and `qa-page-object-architect-*`), to extract a POM from a URL (use `qa-pom-builder-*`), or for mobile (use `qa-ui-test-author-appium-*`).
+description: Use when driving a locally running web app through Playwright from Python to verify frontend behavior interactively — browser screenshots, console logs, ad-hoc UI debugging. The library's one Python-based skill. Triggers "open the local app and check X", "screenshot this page", "what is the browser console showing", "debug this UI behavior with Python". Not for authoring a maintained UI suite, page objects, or a POM from a URL (`ui-test-author/playwright`, `pom-builder`).
 ---
 
 # Web Application Testing

@@ -1,6 +1,6 @@
 ---
 name: qa-security-testing-nuclei
-description: Use when matching a running app or host list against known signatures — CVEs, exposures (leaked `.env`, exposed `/.git`, open dashboards), misconfigurations, default-credential checks, and technology/version detection — using Nuclei (ProjectDiscovery) and its 7,000+ community YAML templates as a fast CI gate. Language-agnostic (Go binary / Docker image), any stack. Triggers "scan for known CVEs", "add Nuclei to CI", "check for an exposed .git or .env", "default-credentials scan", "what technology is this host running". Do NOT treat it as a crawler or injection scanner — Nuclei never spiders the app, discovers endpoints/params, or injects into discovered inputs (use `qa-security-testing-zap-automation-framework` for active DAST, `qa-security-testing-api-fuzzing` for schema-driven fuzzing, the stack's `security-testing/access-control-testing` for BOLA/IDOR); not for source code (use `qa-security-testing-sast`).
+description: Use when matching a running app or host list against known signatures — CVEs, exposures (leaked `.env`, exposed `/.git`), misconfigurations, and default credentials — using Nuclei's community YAML templates as a fast CI gate. Language-agnostic, any stack. Triggers "scan for known CVEs", "add Nuclei to CI", "check for an exposed .git or .env", "default-credentials scan". Nuclei never spiders or injects — for that use `zap-automation-framework`, `api-fuzzing`, or `access-control-testing`.
 ---
 
 # Security Testing — Nuclei (template-based scanner, shared)

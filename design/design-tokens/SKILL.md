@@ -1,6 +1,6 @@
 ---
 name: design-tokens
-description: Use when building or auditing the variable layer a **design system** runs on — primitive → semantic → component token tiers, purpose-based naming, the color/type/**spacing**/radius/elevation scales, dark mode as a semantic swap, CSS custom properties by default. Owns the token DISCIPLINE that `design-frontend-design`'s choices feed and a stack's `styling` consumes. Triggers: "set up design tokens", "start a design system", "define the spacing/type scale", "our colors and spacing are inconsistent everywhere", "hardcoded hex values all over the codebase", "dark mode as a token swap", "primitive vs semantic tokens", "name these CSS variables". Do NOT use for palette/type CHOICE (`design-frontend-design`), an existing brand book (`design-brand-intake`), or per-stack CSS mechanics (the stack's `styling`).
+description: Use when building or auditing the variable layer a design system runs on — primitive → semantic → component token tiers, the color/type/spacing/radius/elevation scales, dark mode as a semantic swap. Owns the discipline `design-frontend-design` feeds and `styling` consumes. Triggers "set up design tokens", "define the spacing/type scale", "hardcoded hex values everywhere". Not for palette/type CHOICE (`design-frontend-design`) or CSS mechanics (the stack's `styling`).
 ---
 
 # Design Tokens — the token system discipline

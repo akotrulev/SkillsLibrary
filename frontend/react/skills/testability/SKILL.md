@@ -1,6 +1,6 @@
 ---
 name: fe-react-testability
-description: Use when adding, auditing, or fixing `data-testid` attributes in pages/components so UI suites can target the app — including consuming a `missing-testids.md` report from QA's `pom-builder`. Covers per-library attribute mechanics (MUI `slotProps`, Mantine/Chakra rest-props, shadcn/none). Triggers: "add testids to this page", "audit the data-testids", "QA sent a missing-testids report", "the E2E test can't find this element". Do NOT use to write the UI tests (`qa-ui-typescript`) or build page objects (qa `pom-builder`).
+description: Use when adding, auditing, or fixing `data-testid` attributes in pages/components so UI suites can target the app — including consuming a `missing-testids.md` report from QA's `pom-builder`. Covers per-library attribute mechanics (MUI `slotProps`, Mantine/Chakra rest-props, shadcn/none). Triggers "add testids to this page", "audit the data-testids", "the E2E test can't find this element". Not for writing the UI tests (`qa-ui-typescript`).
 ---
 
 # React — Testability (`data-testid` writer)

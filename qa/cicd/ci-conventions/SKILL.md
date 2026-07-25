@@ -1,6 +1,6 @@
 ---
 name: qa-ci-conventions-shared
-description: Cross-stack, cross-CI rules every `ci-pipelines` skill enforces — pipeline shape (PR lane vs nightly), shard defaults, OIDC-only secrets, dual reporters (native + Allure), no-retry policy, artifact retention, the perf-gate contract, runner/container rules. Load alongside the per-CI tool reference, never standalone for platform YAML syntax. Triggers (always alongside `qa-ci-pipelines-{java,dotnet,typescript}`) "what shape should our test pipeline be", "PR lane vs nightly", "how many shards", "why is retry banned in CI", "artifact retention policy". Do NOT load standalone to write platform YAML (use the stack's `ci-pipelines`), and do NOT use for deploy pipelines (that is the `devops/{github-actions,gitlab-ci,azure-pipelines}` lane).
+description: Cross-stack, cross-CI rules every `ci-pipelines` skill enforces — pipeline shape (PR lane vs nightly), shard defaults, OIDC-only secrets, dual reporters (native + Allure), no-retry policy, artifact retention. Load alongside the per-CI tool reference. Triggers (always with `ci-pipelines`) "what shape should our test pipeline be", "PR lane vs nightly", "how many shards", "why is retry banned in CI". Not for platform YAML (the stack's `ci-pipelines`) or deploy pipelines (the `devops` plugin).
 ---
 
 # QA — CI Conventions (Shared)

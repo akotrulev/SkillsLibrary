@@ -1,6 +1,6 @@
 ---
 name: qa-db-testing-testcontainers-dotnet
-description: Use when the user asks to scaffold .NET integration tests backed by a real database (Postgres / SQL Server / Mongo / Redis) via Testcontainers. Triggers: "spin up a real Postgres for these tests", "Testcontainers fixture for X", "stop mocking the DB in IntegrationTests". Not for query authoring guardrails → `db-testing/query-author`. For end-to-end suite work prefer the phased agent `qa-api-dotnet` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
+description: Use when scaffolding .NET integration tests backed by a real database (Postgres / SQL Server / Mongo / Redis) via Testcontainers. Triggers "spin up a real Postgres for these tests", "Testcontainers fixture for X", "stop mocking the DB in IntegrationTests". Not for query guardrails (`db-testing/query-author`) or connect/seed/clean against an existing DB (`db-testing/client`).
 ---
 
 # QA — DB Testing with Testcontainers (.NET)

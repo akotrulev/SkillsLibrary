@@ -1,6 +1,6 @@
 ---
 name: qa-messaging-testing-dotnet
-description: Use when a .NET 10 (8-9 supported) / NUnit test suite must produce, consume, or assert messages against the project's broker — Kafka/Redpanda, AWS SQS/SNS, RabbitMQ, or Azure Service Bus. Triggers "assert the service published event X", "test the consumer's side-effect", "DLQ/DLT assertions", "seed a topic/queue in a test". Pick the broker in the decision matrix, then read its reference file. Do NOT use for synchronous HTTP API assertions (use `qa-api-test-author-generator-dotnet`), for message-contract verification (use `qa-contract-testing-pact-dotnet`), for email (use `qa-email-testing-dotnet`), or for non-.NET projects (use `qa-messaging-testing-{java,typescript}`). For end-to-end suite work prefer the phased agent `qa-api-dotnet` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
+description: Use when a .NET / NUnit test suite must produce, consume, or assert messages against the project's broker — Kafka/Redpanda, AWS SQS/SNS, RabbitMQ, or Azure Service Bus. Triggers "assert the service published event X", "test the consumer's side-effect", "DLQ/DLT assertions", "seed a topic/queue in a test". Pick the broker in the matrix, then read its reference file. Not for HTTP APIs (`api-test-author/generator`), message contracts (`contract-testing-pact`), or email (`email-testing`).
 ---
 
 # QA — Messaging Testing (.NET 8 / C#)

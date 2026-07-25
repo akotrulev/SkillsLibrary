@@ -1,6 +1,6 @@
 ---
 name: fe-react-state-management
-description: Use when state has outgrown `useState` or lives in the wrong place — local state, lifted state, Context + reducer, Zustand, Redux Toolkit, Jotai, and the server-vs-client-state split (TanStack Query / RSC own server state); React 19 + TypeScript. Triggers: "what's the right state library here", "Redux Toolkit vs Zustand", "Context or store", "I'm prop-drilling everywhere", "this state is out of sync across pages". Do NOT use for component scaffolding (`generator`), forms (`forms`), data fetching itself (`data-access`), or Blazor (its sibling).
+description: Use when state has outgrown `useState` or lives in the wrong place — local state, lifted state, Context + reducer, Zustand, Redux Toolkit, Jotai, and the server-vs-client-state split (TanStack Query / RSC own server state). Triggers "what's the right state library here", "Redux Toolkit vs Zustand", "Context or store", "I'm prop-drilling everywhere", "this state is out of sync across pages". Not for forms (`forms`) or data fetching itself (`data-access`).
 ---
 
 # React — State Management

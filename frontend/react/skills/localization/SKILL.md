@@ -1,6 +1,6 @@
 ---
 name: fe-react-localization
-description: Use when the UI must ship in more than one language or culture — next-intl on the App Router (`[locale]` routing, `useTranslations` vs `getTranslations`) vs react-i18next on Vite, message catalogs as source of truth, locale switch, number/date/money via `Intl`, RTL via `dir`. Triggers: "add multi-language support", "translate the UI", "dates in the wrong locale", "locale routing", "hardcoded strings everywhere". Do NOT use for display-format policy (`ui-conventions`) or i18n test assertions (the qa `i18n-testing` peer).
+description: Use when the UI must ship in more than one language or culture — next-intl on the App Router (`[locale]` routing, `useTranslations` vs `getTranslations`) vs react-i18next on Vite, message catalogs as source of truth, locale switch, number/date/money via `Intl`, RTL via `dir`. Triggers "add multi-language support", "dates in the wrong locale", "locale routing", "hardcoded strings everywhere". Not for display-format policy (`ui-conventions`).
 ---
 
 # React — Localization & Globalization

@@ -1,6 +1,6 @@
 ---
 name: design-dataviz
-description: Use when charts live INSIDE a product UI that already has a brand — the in-app analytics screen, reporting page, or embedded dashboard. Adds what generic chart guidance leaves out: a viz palette **deliberately disjoint from the app's brand and status colors** so a series never reads as "error", chart-type selection driven by the question asked, the do-not list (pie >5 slices, dual axes, 3D), multi-chart dashboard composition, and stat-tile/KPI-row layout. Read it alongside any general chart-design skill when the target is a product screen. Triggers: "design our analytics/reporting screen", "add charts to this dashboard", "which chart answers this question", "our chart colors clash with the brand", "stat-tile / KPI row layout", "the dashboard is unreadable". Do NOT use for charting-library code, ops/RED-USE dashboards (`observability/grafana-dashboards`), or metric definitions.
+description: Use when charts live INSIDE a product UI that already has a brand — an analytics screen or embedded dashboard. Adds a viz palette deliberately disjoint from the app's brand and status colors so a series never reads as "error", the do-not list (pie >5 slices, dual axes, 3D), and stat-tile/KPI-row layout. Triggers "design our analytics screen", "add charts to this dashboard", "our chart colors clash with the brand". Not for ops/RED-USE dashboards (`grafana-dashboards`).
 ---
 
 # Data Visualization — chart & dashboard design

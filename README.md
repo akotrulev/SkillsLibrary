@@ -41,13 +41,13 @@ So installing a single plugin gives you the stack's authoring/verification skill
 - **`data`** — the database-engineering stack: 8 version-aware per-engine skills (PostgreSQL, SQL Server / Azure SQL, MySQL, MongoDB, Redis / Valkey, DynamoDB, Cosmos DB, Elasticsearch / OpenSearch), 4 cross-engine `_shared` skills (schema-design, migrations, caching-patterns, query-optimization), and the phased `data-architect` agent.
 - **`business-analysis`** — the upstream requirements domain in two lanes: 9 `ba-*` skills and 2 agents. The **authoring** lane (`ba-initiative-scoping`, `ba-epic-writer`, `ba-story-writer`, `ba-backlog-auditor` + the `requirements-author` agent) turns a vague stakeholder ask into refinement-ready artifacts; the **reasoning** lane (`ba-project-knowledge`, `ba-flow-mapper`, `ba-state-modeler`, `ba-decision-modeler`, the 11-class `ba-feature-conflict-sweep` + the `business-analyst` agent) keeps a persistent per-project business model and detects conflicts between features.
 
-Every stack plugin (`qa-*`, `fe-*`, `be-*`) also bundles the 14 `ep-*` engineering-practices skills (brainstorm → plan → execute → verify → finish, TDD, systematic debugging, worktrees, agent dispatch, code-review pair, and the spec-compliance/feature audit pair) plus the read-only `code-auditor` agent. Pull updates later with `/plugin marketplace update skills-library`.
+Every stack plugin (`qa-*`, `fe-*`, `be-*`) also bundles the 14 `ep-*` engineering-practices skills (brainstorm → plan → execute → verify → finish, TDD, systematic debugging, worktrees, agent dispatch, code-review pair, and the spec-compliance/feature audit pair) plus the read-only `code-auditor` agent. A 15th, `ep-conformance-audit`, is the shared engine behind the per-stack conformance audits — it ships only in the plugins whose stack audit exists so far (`qa-dotnet`, `be-dotnet`; `fe-react` carries its own copy pending the extraction), and rolls out with each remaining stack per `CONFORMANCE-AUDIT-PLAN.md`. Pull updates later with `/plugin marketplace update skills-library`.
 
 ### Slash commands
 
 **Every agent ships a matching slash command.** Agents are normally picked up by description match, which is probabilistic; the command is the deterministic entry point for when you would rather *name* the workflow than hope for it. Each command loads its agent definition and runs that agent's phased workflow **inline in the current session** — no subagent is spawned unless you ask for one. Called bare with no argument, it runs the agent's orientation pass against the current repo and asks what you need.
 
-**`qa-java` · `qa-dotnet` · `qa-typescript`** — 11 commands each; substitute your stack for `<stack>`:
+**`qa-java` · `qa-dotnet` · `qa-typescript`** — 11 commands each (`qa-dotnet` has 12 — see `/qa-dotnet-audit` below); substitute your stack for `<stack>`:
 
 | Command | Argument | Runs |
 |---|---|---|
@@ -61,6 +61,7 @@ Every stack plugin (`qa-*`, `fe-*`, `be-*`) also bundles the 14 `ep-*` engineeri
 | `/qa-reporting-<stack>` | what to wire, tag, or quarantine | wire Allure, tag tests by finding, detect and quarantine flakes |
 | `/qa-manual-test-designer` | doc, story, contract, or URL | documentation (or a live page) → a systematically-derived test-case suite |
 | `/qa-security` | app, API, or layer | OWASP-mapped SAST, secrets, SCA, access-control, DAST, fuzzing, container/IaC, TLS gates |
+| `/qa-dotnet-audit` *(qa-dotnet only so far)* | *(none — or a path/section limiter)* | read-only sweep of the **test suite** against the `qa-dotnet` conventions → findings report in `docs/audits/` |
 | `/code-auditor` | spec, stories, feature, or area | read-only audit engagement, saved to `docs/audits/` |
 
 **`fe-blazor`** — 2 commands · **`fe-react`** — 3:
@@ -72,12 +73,13 @@ Every stack plugin (`qa-*`, `fe-*`, `be-*`) also bundles the 14 `ep-*` engineeri
 | `/fe-react-audit` | *(none — or a path/section limiter)* | read-only sweep of the repo against the `fe-react` conventions → findings report in `docs/audits/` |
 | `/code-auditor` | spec, stories, feature, or area | read-only audit engagement, saved to `docs/audits/` |
 
-**`be-dotnet` · `be-java` · `be-node`** — 3 commands each (note the backend stacks are `dotnet` / `java` / **`node`**, not the QA triplet):
+**`be-dotnet` · `be-java` · `be-node`** — 3 commands each (`be-dotnet` has 4 — see `/be-dotnet-audit` below; note the backend stacks are `dotnet` / `java` / **`node`**, not the QA triplet):
 
 | Command | Argument | Runs |
 |---|---|---|
 | `/be-dotnet` · `/be-java` · `/be-node` | what to build, fix, or extend | apply a design pattern, the persistence layer, or service-side auth |
 | `/observability-engineer-dotnet` · `-java` · `-node` | what to instrument, query, or dashboard | OTel, structured logging, Grafana backends, dashboards |
+| `/be-dotnet-audit` *(be-dotnet only so far)* | *(none — or a project/section limiter)* | read-only sweep of the service against the `be-dotnet` conventions (incl. the observability invariants) → findings report in `docs/audits/` |
 | `/code-auditor` | spec, stories, feature, or area | read-only audit engagement, saved to `docs/audits/` |
 
 **`data`** — 1 command:
@@ -214,14 +216,14 @@ See [`CONTRIBUTING.md`](CONTRIBUTING.md) and the templates in [`.skill-template/
 
 | Section               | State |
 |-----------------------|-------|
-| backend               | authored + shipped — `backend/_shared/` (2 pattern-card skills) + `backend/{dotnet,java,node}/` (4 skills each: reference/generator/reviewer/persistence) + a phased `be-*` agent per stack; `be-dotnet` / `be-java` / `be-node` plugins |
+| backend               | authored + shipped — `backend/_shared/` (2 pattern-card skills) + `backend/{dotnet,java,node}/` (4 skills each: reference/generator/reviewer/persistence) + a phased `be-*` agent per stack; `be-dotnet` additionally ships the `conformance-audit` self-audit skill + `/be-dotnet-audit`; `be-dotnet` / `be-java` / `be-node` plugins |
 | data                  | authored + shipped — 8 version-aware per-engine skills (postgresql, sqlserver, mysql, mongodb, redis, dynamodb, cosmosdb, elasticsearch) + 4 cross-engine `_shared` skills + the `data-architect` agent; `data` plugin |
 | frontend              | authored + shipped — `frontend/blazor/` (22 skills + `fe-blazor` agent; `fe-blazor` plugin) and `frontend/react/` (24 skills incl. the `conformance-audit` self-audit + `fe-react` agent + vendored Vercel seeds; `fe-react` plugin); `frontend/react-native/` parked, under construction |
 | business-analysis     | authored + shipped — 9 `ba-*` skills (authoring + reasoning lanes) + the `requirements-author` and `business-analyst` agents; `business-analysis` plugin |
 | auth                  | scaffolding |
 | devops                | authored + shipped — 9 cloud/CI-keyed skills (docker, kubernetes, iac-bicep-terraform, aws-deployment, azure-deployment, github-actions, gitlab-ci, azure-pipelines, environment-config) + the `devops-engineer` agent; `devops` plugin |
 | observability         | authored + shipped — 6 skills (per-stack `opentelemetry-*` / `structured-logging-*` + stack-agnostic loki-tempo, prometheus-mimir, logql-promql, grafana-dashboards) + `observability-engineer-{dotnet,java,node}` agents; bundled into the `be-*` plugins |
-| qa                    | authored — 30 code-producing nodes (mostly ×3 stacks) + 7 process skills; Phase 1 complete, Phase 2 in progress (see qa/GAP-ANALYSIS.md) |
+| qa                    | authored — 30 code-producing nodes (mostly ×3 stacks) + 7 process skills; Phase 1 complete, Phase 2 in progress (see qa/GAP-ANALYSIS.md). `qa-dotnet` additionally ships the `conformance-audit` self-audit skill + `/qa-dotnet-audit` |
 | engineering-practices | imported from obra/superpowers |
 | meta                  | imported (writing-skills, skill-creator) |
 | documents             | imported from anthropics/skills |

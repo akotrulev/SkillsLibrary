@@ -1,6 +1,6 @@
 ---
 name: qa-page-object-architect-dotnet
-description: Use when the user is designing the page object structure for a .NET UI test project. Triggers: "design page objects for app X in C#", "how should I structure Pages/ for our NUnit suite", "split this giant ILocator-heavy page". For end-to-end suite work prefer the phased agent `qa-ui-dotnet` / `qa-mobile-dotnet` / `qa-bdd-dotnet` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
+description: Use when the user is designing the page object structure for a .NET UI test project. Triggers: "design page objects for app X in C#", "how should I structure Pages/ for our NUnit suite", "split this giant ILocator-heavy page".
 ---
 
 # QA — Page Object Architect (.NET / C#)

@@ -1,6 +1,6 @@
 ---
 name: fe-react-error-resilience
-description: Use when a failure must not blank the screen — error boundary placement (`error.tsx` + `global-error.tsx`, `react-error-boundary`), retry with backoff on idempotent calls only, offline UX, client-error reporting, three-state data regions with inline retry, actionable empty states; React/Next. Triggers: "an unhandled error blanks my app", "add error boundaries", "the grid shows empty when the API 500s", "Application error — a client-side exception has occurred". Do NOT use to PRODUCE the categorized error (`data-access` — this RENDERS it) or for forms (`forms`).
+description: Use when a failure must not blank the screen — error boundary placement (`error.tsx` + `global-error.tsx`, `react-error-boundary`), retry with backoff on idempotent calls only, three-state data regions with inline retry, actionable empty states. Triggers "an unhandled error blanks my app", "add error boundaries", "the grid shows empty when the API 500s", "Application error — a client-side exception has occurred". Not for PRODUCING the categorized error (`data-access` — this RENDERS it).
 ---
 
 # React — Error Resilience

@@ -1,6 +1,6 @@
 ---
 name: qa-websocket-sse-testing-dotnet
-description: Use when testing WebSocket or SSE streams in .NET 10 (8-9 supported) / NUnit — protocol clients (`ClientWebSocket`, SignalR `HubConnection`, SSE over `HttpClient`) draining frames into a channel and asserting on conditions (never sleeps), plus Playwright .NET for in-browser frames. Triggers: "test our WebSocket endpoint", "assert the SSE stream emits X", "SignalR hub test". For end-to-end suite work prefer the phased agent `qa-api-dotnet` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
+description: Use when testing WebSocket or SSE streams in .NET 10 (8-9) / NUnit — protocol clients (`ClientWebSocket`, SignalR `HubConnection`, SSE over `HttpClient`) draining frames into a channel and asserting on conditions (never sleeps), plus Playwright .NET for in-browser frames. Triggers "test our WebSocket endpoint", "assert the SSE stream emits X", "SignalR hub test". Not for request/response HTTP (`api-test-author/generator`).
 ---
 
 # WebSocket & SSE Testing (.NET 8 / NUnit) — **canonical stack**

@@ -1,6 +1,6 @@
 ---
 name: fe-react-component-testing
-description: Use when a component or custom hook needs a dev-side test — Vitest + React Testing Library (React 19/18): config, role/label queries over testids, `userEvent`, async `findBy*`/`waitFor`, `vi.mock`/MSW, `renderHook`, and the limit that Vitest can't render async Server Components (extract the fetch, E2E the rest). Triggers: "unit-test this component", "write Vitest + RTL tests", "test my custom hook", "an update was not wrapped in act". Do NOT use for E2E/browser journeys (the `qa-ui-typescript` peer) or Blazor (its sibling).
+description: Use when a component or custom hook needs a dev-side test — Vitest + React Testing Library: config, role/label queries over testids, `userEvent`, async `findBy*`/`waitFor`, `vi.mock`/MSW, `renderHook`, and the limit that Vitest can't render async Server Components (extract the fetch, E2E the rest). Triggers "unit-test this component", "test my custom hook", "an update was not wrapped in act". Not for E2E journeys (the `qa-ui-typescript` peer).
 ---
 
 # React — Component Testing (Vitest + React Testing Library)

@@ -1,6 +1,6 @@
 ---
 name: ep-brainstorming
-description: Use when turning an ad-hoc idea or feature request into an approved design/spec before any code is written. Triggers: "let's build X", "add a feature that…", "help me design…", "I want to add…", "how should we approach…", before scaffolding or implementation. Chains into `ep-writing-plans` once approved. Do NOT use while a phased agent is actively driving its own design gate (a `fe-*`/`be-*` build or a `qa-*` orchestrator already in its design phase — merely having one installed is not a reason to skip this), for pure Q&A, or once a design is already approved.
+description: Use when turning an ad-hoc idea or feature request into an approved design/spec before any code is written. Triggers "let's build X", "add a feature that…", "help me design…", "how should we approach…", before scaffolding or implementation. Chains into `ep-writing-plans` once approved. Do NOT use while a phased agent is driving its own design gate (merely having one installed is not a reason to skip this), for pure Q&A, or once a design is approved.
 ---
 
 # Brainstorming Ideas Into Designs

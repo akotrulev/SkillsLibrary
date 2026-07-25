@@ -1,6 +1,6 @@
 ---
 name: fe-react-conformance-audit
-description: Use to audit a whole React/Next.js codebase against the fe-react plugin's own conventions and flows, producing a saved, re-runnable findings report in `docs/audits/`. Read-only — it never fixes. Triggers: "audit our codebase against the plugin conventions", "does this app follow the fe-react rules", "conformance/compliance audit of our React app", "give me a findings .md for our frontend", "re-audit — what did we fix since last round". Do NOT use to review one diff or a handful of files (`fe-react-reviewer`), to verify code against a product spec or story set (`ep-spec-compliance-audit` / the `code-auditor` agent), to trace one feature's behaviour (`ep-feature-audit`), or to fix anything (the `fe-react` agent).
+description: Use to audit a whole React/Next.js codebase against the fe-react plugin's own conventions, producing a saved, re-runnable findings report in `docs/audits/`. Read-only — it never fixes. Triggers "audit our codebase against the plugin conventions", "does this app follow the fe-react rules", "re-audit — what did we fix since last round". Not for one diff (`fe-react-reviewer`), code vs a product spec (`ep-spec-compliance-audit`), or fixing anything (the `fe-react` agent).
 ---
 
 # fe-react Conformance Audit

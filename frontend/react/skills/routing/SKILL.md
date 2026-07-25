@@ -1,6 +1,6 @@
 ---
 name: fe-react-routing
-description: Use when adding, nesting, or debugging routes in a Next.js App Router app — file conventions (`page`/`layout`/`template`/`loading`/`not-found`/`route`), route groups, dynamic + catch-all segments, parallel (`@slot`) and intercepting (`(.)`) routes for modal routes, `middleware.ts` gating, and the `useRouter`/`usePathname`/`useSearchParams` triad. Triggers: "add a route/page for X", "make this a modal route", "my layout remounts on every navigation", "protect these routes with middleware", "params is a Promise now". Do NOT use for the initial project/rendering-strategy setup (`project-scaffold`), fetching inside a route (`data-access`), or crawlability/metadata (`seo-discoverability`).
+description: Use when adding, nesting, or debugging routes in a Next.js App Router app — file conventions (`page`/`layout`/`template`/`loading`/`not-found`/`route`), parallel (`@slot`) and intercepting (`(.)`) modal routes, `middleware.ts` gating. Triggers "add a route/page for X", "make this a modal route", "my layout remounts on every navigation", "protect these routes with middleware". Not for project setup (`project-scaffold`), fetching in a route (`data-access`), or metadata (`seo-discoverability`).
 ---
 
 # React — Routing & Navigation (Next.js App Router)

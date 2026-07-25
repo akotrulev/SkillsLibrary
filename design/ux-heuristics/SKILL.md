@@ -1,6 +1,6 @@
 ---
 name: design-ux-heuristics
-description: Use when reviewing a built UI, a screenshot, a mockup/wireframe, or a Figma flow at EXPERIENCE altitude — Nielsen's 10 heuristics, flow friction (steps-to-goal, dead ends, undo-over-confirm), IA sanity — output is a severity-tabled findings list, no rewrites. Stack-agnostic; works from images or code. Triggers: "review the UX", "heuristic evaluation", "is this flow confusing", "usability audit", "review this mockup/wireframe/screenshot", "why does this feel clunky", "too many steps to do X". Do NOT use for code-level UI audit (`design-web-guidelines`), automated a11y scans (qa `accessibility-testing`), copy voice (`design-ux-writing`), or inventing the visual direction (`design-frontend-design`).
+description: Use when reviewing a built UI, screenshot, mockup, or Figma flow at EXPERIENCE altitude — Nielsen's 10 heuristics, flow friction (steps-to-goal, dead ends), IA sanity — output is a severity-tabled findings list, no rewrites. Triggers "review the UX", "heuristic evaluation", "is this flow confusing", "usability audit", "why does this feel clunky". Not for code-level UI audit (`design-web-guidelines`), a11y scans (qa `accessibility-testing`), or copy voice (`design-ux-writing`).
 ---
 
 # UX heuristics — experience-level review

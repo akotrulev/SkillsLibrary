@@ -1,6 +1,6 @@
 ---
 name: qa-ui-test-author-playwright-dotnet
-description: Use when the user asks to scaffold Playwright UI tests in C# / .NET. Triggers: "write a Playwright test for X in C#", "add a Playwright .NET page object for screen Y", "scaffold a Playwright C# spec". For end-to-end suite work prefer the phased agent `qa-ui-dotnet` / `qa-bdd-dotnet` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
+description: Use when the user asks to scaffold Playwright UI tests in C# / .NET. Triggers: "write a Playwright test for X in C#", "add a Playwright .NET page object for screen Y", "scaffold a Playwright C# spec".
 ---
 
 # QA — Playwright Test & Page Object Generator (C# / .NET)

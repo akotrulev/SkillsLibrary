@@ -1,6 +1,6 @@
 ---
 name: qa-test-data-builder-dotnet
-description: Use when the user asks to create test data builders or ObjectMothers in a .NET 10 (8-9 supported) test project to replace duplicated inline literals across tests with named, intention-revealing factories. Triggers: "create a builder for User in C#", "set up test data for X in .NET", "extract this fixture into an OrderBuilder". For end-to-end suite work prefer the phased agent `qa-api-dotnet` / `qa-ui-dotnet` / `qa-mobile-dotnet` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
+description: Use when creating test data builders or ObjectMothers in a .NET 10 (8-9) test project to replace duplicated inline literals across tests with named, intention-revealing factories. Triggers "create a builder for User in C#", "set up test data for X in .NET", "extract this fixture into an OrderBuilder". Not for driving one test from an external data file (`data-driven-testing`).
 ---
 
 # QA — Test Data Builder / ObjectMother (.NET 8)

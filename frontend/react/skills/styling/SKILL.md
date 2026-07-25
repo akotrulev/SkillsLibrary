@@ -1,6 +1,6 @@
 ---
 name: fe-react-styling
-description: Use when writing the CSS yourself — CSS Modules + `composes`, design tokens as CSS custom properties bridged to the library theme, type scale (`clamp()`, `next/font`), dark mode via next-themes, and the follow-the-library authority decision (MUI `theme`+`sx` vs Tailwind vs CSS Modules — never two at once). Triggers: "scope this component's CSS", "set up design tokens", "dark mode with next-themes", "my styles leak between components". Do NOT use for the library's own theme object (`component-library`).
+description: Use when writing the CSS yourself — CSS Modules + `composes`, design tokens as CSS custom properties bridged to the library theme, type scale (`clamp()`, `next/font`), dark mode via next-themes, and the follow-the-library authority decision (MUI `theme`+`sx` vs Tailwind vs CSS Modules — never two at once). Triggers "scope this component's CSS", "dark mode with next-themes", "my styles leak between components". Not for the library's own theme object (`component-library`).
 ---
 
 # React — Styling (CSS Modules, tokens, dark mode, the styling authority)

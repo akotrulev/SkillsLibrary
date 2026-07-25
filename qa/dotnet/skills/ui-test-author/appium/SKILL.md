@@ -1,6 +1,6 @@
 ---
 name: qa-ui-test-author-appium-dotnet
-description: Use when the user asks to scaffold a .NET (C#) + Appium 2.x page object or NUnit mobile UI test, following the BaseAppiumPage / AppiumDriverFactory pattern. Triggers: "create a C# Appium page object for X", "add a .NET mobile page for screen Y", "write an Appium NUnit test for Z". For end-to-end suite work prefer the phased agent `qa-mobile-dotnet` / `qa-bdd-dotnet` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
+description: Use when scaffolding a .NET (C#) + Appium 2.x page object or NUnit mobile UI test, following the BaseAppiumPage / AppiumDriverFactory pattern. Triggers "create a C# Appium page object for X", "add a .NET mobile page for screen Y", "write an Appium NUnit test for Z". Not for exploring a live screen (`appium-explore`) or OS-surface features (`mobile-native-features`).
 ---
 
 # QA — Appium .NET Page Object & Test Generator

@@ -1,6 +1,6 @@
 ---
 name: qa-api-project-scaffold-dotnet
-description: Use when starting an API test-automation project from zero in C# / .NET 10 (8-9 supported) — solution layout, exact package versions, local setup, and run commands for a standalone RestSharp + NUnit suite. Triggers: "scaffold an API test project", "set up a .NET API test suite from scratch", "what versions for a C# API test framework", "create the solution structure for API tests". Composable: explains how to fold in ui/mobile/performance dotnet modules later. For end-to-end suite work prefer the phased agent `qa-api-dotnet` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
+description: Use when starting an API test-automation project from zero in C# / .NET 10 (8-9) — solution layout, exact package versions, local setup, and run commands for a standalone RestSharp + NUnit suite. Composable with the ui/mobile/performance dotnet scaffolds. Triggers "scaffold an API test project", "set up a .NET API test suite from scratch", "create the solution structure for API tests". Not for adding tests to an existing suite (`api-test-author/generator`).
 ---
 
 # API Test Project Scaffold (C# / .NET 10)

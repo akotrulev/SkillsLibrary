@@ -1,6 +1,6 @@
 ---
 name: design-frontend-design
-description: The house authority for a SHIPPING web app's visual identity — invents one per-brief design direction (palette, type scale, spacing rhythm, layout, motion intent) and hands it down as a **token system** that a stack's `styling` skill consumes, so every screen stays one system instead of per-page taste. Use it over any generic visual-design guidance whenever the output is a real front-end codebase rather than a one-off page. Triggers: "design a landing page / dashboard / marketing site", "give this app a look", "make this UI not look AI-generated or templated", "pick a palette and fonts", "make this look better / more modern / more polished", "our UI looks generic", "set up the design system's visual direction", "restyle this app". Do NOT use for CSS mechanics (the stack's `styling`), token tier/naming discipline (`design-tokens`), an existing brand book (`design-brand-intake`), presets (`design-theme-factory`), or code audits (`design-web-guidelines`).
+description: The authority for a SHIPPING web app's visual identity — invents one per-brief design direction (palette, type scale, spacing, layout, motion) and hands it down as a token system a stack's `styling` consumes. Triggers "give this app a look", "make this UI not look AI-generated", "pick a palette and fonts", "restyle this app". Not for CSS mechanics (the stack's `styling`), token naming (`design-tokens`), a brand book (`design-brand-intake`), or presets (`design-theme-factory`).
 ---
 
 # Frontend Design

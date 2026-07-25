@@ -1,6 +1,6 @@
 ---
 name: qa-performance-project-scaffold-dotnet
-description: Use when starting a load/performance test project from zero in C# / .NET 10 (8-9 supported) — solution layout, exact package versions, local setup, and run commands for a standalone NBomber console suite. Triggers: "scaffold a performance test project", "set up an NBomber suite from scratch", "what versions for a C# load test framework", "create the solution structure for load tests". Composable: explains how to fold in api/ui/mobile dotnet modules later. For end-to-end suite work prefer the phased agent `qa-performance-dotnet` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
+description: Use when starting a load/performance test project from zero in C# / .NET 10 (8-9) — solution layout, exact package versions, local setup, and run commands for a standalone NBomber console suite. Composable with the api/ui/mobile dotnet scaffolds. Triggers "scaffold a performance test project", "set up an NBomber suite from scratch", "what versions for a C# load test framework". Not for authoring the load scenarios (`performance/nbomber`).
 ---
 
 # Performance Test Project Scaffold (C# / .NET 10)

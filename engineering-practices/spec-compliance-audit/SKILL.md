@@ -1,6 +1,6 @@
 ---
 name: ep-spec-compliance-audit
-description: Use when a written spec — or a pile of user stories / ACs / tickets — must be consolidated into one deduped requirement register and each requirement verdicted against the actual code (Met / Partial / Missing / Divergent / Unverifiable) with `file:line` evidence. Triggers: "check the implementation against this spec", "which acceptance criteria are not built yet", "build a requirement register from these tickets", "is this story actually implemented", "compare the PRD to what we shipped". For an audit spanning several specs, persisting to `docs/audits/`, or getting re-run in later rounds, invoke the `code-auditor` agent instead — this skill is its SPEC lane. Do NOT use to distill a spec for test design (`test-basis-analyzer`), to audit spec-less features (`ep-feature-audit`), or to check story readiness before implementation (`ba-backlog-auditor`).
+description: Use when a written spec — or a pile of user stories / ACs / tickets — must become one deduped requirement register, each verdicted against the code (Met/Partial/Missing/Divergent/Unverifiable) with `file:line` evidence. Triggers "check the implementation against this spec", "which acceptance criteria are not built yet", "build a requirement register from these tickets". Multi-spec, saved to `docs/audits/` → the `code-auditor` agent (SPEC lane). Not for spec-less features (`ep-feature-audit`).
 ---
 
 # Spec-Compliance Audit

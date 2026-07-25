@@ -1,6 +1,6 @@
 ---
 name: fe-react-migration
-description: Use when upgrading a React or Next.js codebase across a major — React 18→19 (removed APIs, `forwardRef`, `useFormState`→`useActionState`, React Compiler) or Next 14→15 (async `params`/`searchParams`/`cookies()`, caching defaults flipped) — or migrating Pages Router→App Router incrementally. Covers the official codemods and what they miss. Triggers: "upgrade us to React 19", "migrate to Next 15", "move off the Pages Router", "params is a Promise now", "defaultProps stopped working", "our fetches aren't cached anymore". Do NOT use for a fresh project (`project-scaffold`) or for a single-component refactor (`generator`, `reviewer`).
+description: Use when upgrading a React or Next.js codebase across a major — React 18→19 (removed APIs, `forwardRef`, React Compiler) or Next 14→15 (async `params`/`searchParams`/`cookies()`, caching defaults flipped) — or porting Pages Router→App Router incrementally. Covers the official codemods and what they miss. Triggers "upgrade us to React 19", "migrate to Next 15", "move off the Pages Router", "params is a Promise now". Not for a fresh project (`project-scaffold`).
 ---
 
 # React — Version Migration

@@ -1,6 +1,6 @@
 ---
 name: auth-auth0-react
-description: Use when setting up or modifying Auth0 in a React 19/18 + TypeScript app — two lanes: `@auth0/nextjs-auth0` for the **Next.js App Router** (middleware, server-side session, RSC/Server Actions/route handlers) and `@auth0/auth0-react` for a **Vite/CRA SPA** (Authorization Code + PKCE, protected routes, silent refresh); plus attaching access tokens to API calls, and organizations. Triggers: "add Auth0 login to my React/Next app", "protect a route with Auth0", "read the session in a Server Component", "attach the access token to fetch". Do NOT use for backend token validation (`backend/<stack>/skills/auth0`), Blazor (`auth/auth0-blazor`), or concepts (`auth/_shared/auth0-concepts`).
+description: Use when setting up or modifying Auth0 in a React 19/18 + TypeScript app — two lanes: `@auth0/nextjs-auth0` for the Next.js App Router (middleware, server-side session in RSC/Actions/handlers) and `@auth0/auth0-react` for a Vite/CRA SPA (Auth Code + PKCE, protected routes). Triggers "add Auth0 login", "protect a route", "read the session in a Server Component", "attach the access token to fetch". Not for backend token validation or provider concepts (`auth0-concepts`).
 ---
 
 # Auth — Auth0 in React

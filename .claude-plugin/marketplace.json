@@ -143,7 +143,7 @@
     },
     {
       "name": "qa-dotnet",
-      "description": "Self-contained senior automation-QA plugin for .NET 10 / C#, 8-9 supported and version-aware (NUnit + RestSharp, Playwright/Selenium/Appium, NBomber, Reqnroll). Covers every discipline end-to-end: project scaffolding from zero (API/UI/mobile/performance/BDD), API/UI/mobile/performance/LLM test authoring and review, BDD living documentation, deep verification (DB, messaging, email, files, websockets), Pact contracts, chaos and feature-flag testing, mutation testing (Stryker.NET). Bundles the language-agnostic manual-QA process skills, CI/CD pipeline skills, test reporting (Allure + flaky-test quarantine), and the cross-stack OWASP-mapped security skills and qa-security agent — install just this one plugin for a complete .NET QA toolkit.",
+      "description": "Self-contained senior automation-QA plugin for .NET 10 / C#, 8-9 supported and version-aware (NUnit + RestSharp, Playwright/Selenium/Appium, NBomber, Reqnroll). Covers every discipline end-to-end: project scaffolding from zero (API/UI/mobile/performance/BDD), API/UI/mobile/performance/LLM test authoring and review, BDD living documentation, deep verification (DB, messaging, email, files, websockets), Pact contracts, chaos and feature-flag testing, mutation testing (Stryker.NET). Bundles the language-agnostic manual-QA process skills, CI/CD pipeline skills, test reporting (Allure + flaky-test quarantine), and the cross-stack OWASP-mapped security skills and qa-security agent, plus a one-call read-only conformance audit (/qa-dotnet-audit) that sweeps an existing test suite against every convention above into a saved, re-runnable findings report — install just this one plugin for a complete .NET QA toolkit.",
       "source": "./",
       "strict": false,
       "author": {
@@ -191,6 +191,7 @@
         "./qa/dotnet/skills/bdd-step-bindings",
         "./qa/dotnet/skills/chaos-testing",
         "./qa/dotnet/skills/cloud-grid-config",
+        "./qa/dotnet/skills/conformance-audit",
         "./qa/dotnet/skills/contract-testing-pact",
         "./qa/dotnet/skills/data-driven-testing",
         "./qa/dotnet/skills/db-testing/client",
@@ -247,7 +248,8 @@
         "./engineering-practices/requesting-code-review",
         "./engineering-practices/receiving-code-review",
         "./engineering-practices/spec-compliance-audit",
-        "./engineering-practices/feature-audit"
+        "./engineering-practices/feature-audit",
+        "./engineering-practices/conformance-audit"
       ],
       "commands": [
         "./engineering-practices/commands/code-auditor.md",
@@ -255,6 +257,7 @@
         "./qa/cicd/commands/qa-cicd-dotnet.md",
         "./qa/dotnet/commands/qa-api-dotnet.md",
         "./qa/dotnet/commands/qa-bdd-dotnet.md",
+        "./qa/dotnet/commands/qa-dotnet-audit.md",
         "./qa/dotnet/commands/qa-llm-dotnet.md",
         "./qa/dotnet/commands/qa-mobile-dotnet.md",
         "./qa/dotnet/commands/qa-performance-dotnet.md",
@@ -639,7 +642,7 @@
     },
     {
       "name": "be-dotnet",
-      "description": "Self-contained senior .NET backend developer plugin (.NET 10 primary, 8/9 supported) for design-pattern application, EF Core persistence, and Auth0/Cognito service-side auth. Covers explaining patterns (Strategy, Decorator, Repository, CQRS/MediatR, Factory, Specification, Options, Pipeline, Saga, Outbox), scaffolding them into a codebase with constructor injection / async-all-the-way / nullable reference types, EF Core persistence (DbContext design, configurations, migrations, query patterns, optimistic concurrency, bulk operations), Auth0/Cognito JWT bearer validation + RBAC + Client Credentials M2M, and reviewing existing code for pattern misuse, DI/async violations, and layering bleeds — end-to-end or any single phase. Bundles the language-agnostic pattern reference/reviewer, the Auth0/Cognito concepts skills, the developer-workflow + read-only audit (ep-*) skills and the code-auditor agent, and the full observability toolkit (OpenTelemetry + Serilog structured logging + Loki/Tempo/Prometheus-Mimir backend + LogQL/PromQL + Grafana dashboards), plus the phased be-dotnet orchestrator and observability-engineer-dotnet agents — install just this one plugin for a complete .NET backend toolkit.",
+      "description": "Self-contained senior .NET backend developer plugin (.NET 10 primary, 8/9 supported) for design-pattern application, EF Core persistence, and Auth0/Cognito service-side auth. Covers explaining patterns (Strategy, Decorator, Repository, CQRS/MediatR, Factory, Specification, Options, Pipeline, Saga, Outbox), scaffolding them into a codebase with constructor injection / async-all-the-way / nullable reference types, EF Core persistence (DbContext design, configurations, migrations, query patterns, optimistic concurrency, bulk operations), Auth0/Cognito JWT bearer validation + RBAC + Client Credentials M2M, and reviewing existing code for pattern misuse, DI/async violations, and layering bleeds — end-to-end or any single phase. Bundles the language-agnostic pattern reference/reviewer, the Auth0/Cognito concepts skills, the developer-workflow + read-only audit (ep-*) skills and the code-auditor agent, and the full observability toolkit (OpenTelemetry + Serilog structured logging + Loki/Tempo/Prometheus-Mimir backend + LogQL/PromQL + Grafana dashboards), plus the phased be-dotnet orchestrator and observability-engineer-dotnet agents and a one-call read-only conformance audit (/be-dotnet-audit) that sweeps an existing service against every convention above into a saved, re-runnable findings report — install just this one plugin for a complete .NET backend toolkit.",
       "source": "./",
       "strict": false,
       "author": {
@@ -661,6 +664,7 @@
         "./backend/dotnet/skills/persistence",
         "./backend/dotnet/skills/auth0",
         "./backend/dotnet/skills/cognito",
+        "./backend/dotnet/skills/conformance-audit",
         "./backend/_shared/reference",
         "./backend/_shared/reviewer",
         "./auth/_shared/auth0-concepts",
@@ -679,6 +683,7 @@
         "./engineering-practices/receiving-code-review",
         "./engineering-practices/spec-compliance-audit",
         "./engineering-practices/feature-audit",
+        "./engineering-practices/conformance-audit",
         "./observability/opentelemetry-dotnet",
         "./observability/structured-logging-dotnet",
         "./observability/loki-tempo-setup",
@@ -689,6 +694,7 @@
       ],
       "commands": [
         "./backend/dotnet/commands/be-dotnet.md",
+        "./backend/dotnet/commands/be-dotnet-audit.md",
         "./engineering-practices/commands/code-auditor.md",
         "./observability/commands/observability-engineer-dotnet.md"
       ],

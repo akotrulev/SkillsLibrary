@@ -1,6 +1,6 @@
 ---
 name: qa-api-dto-writer-dotnet
-description: Use when the user asks to create a new DTO, model class, or response object in the Accelerator `ApiTests` (.NET 10 (8-9 supported) / System.Text.Json) project. Triggers: "add a {Resource}Dto", "create the InDto / ModDto for the {resource} endpoint", "scaffold the wrapper DTO for paginated {resource}". For end-to-end suite work prefer the phased agent `qa-api-dotnet` / `qa-llm-dotnet` / `qa-performance-dotnet` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
+description: Use when creating a new DTO, model class, or response object in a .NET 10 (8-9) / System.Text.Json API test project. Triggers "add a {Resource}Dto", "create the InDto / ModDto for the {resource} endpoint", "scaffold the wrapper DTO for paginated {resource}". Not for the client that calls the endpoint (`api-client-writer`) or the test itself (`api-test-author/generator`).
 ---
 
 # qa-api-dto-writer-dotnet

@@ -1,6 +1,6 @@
 ---
 name: qa-contract-testing-pact-dotnet
-description: Use when the user asks to set up consumer-driven contract testing with Pact in a .NET 10 (8-9 supported) service (PactNet v5+). Triggers: "set up Pact for our .NET service", "PactNet consumer test for X", "verify our .NET provider against Y's contract". For end-to-end suite work prefer the phased agent `qa-api-dotnet` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
+description: Use when the user asks to set up consumer-driven contract testing with Pact in a .NET 10 (8-9 supported) service (PactNet v5+). Triggers: "set up Pact for our .NET service", "PactNet consumer test for X", "verify our .NET provider against Y's contract".
 ---
 
 # QA — Contract Testing with Pact (.NET / PactNet)
