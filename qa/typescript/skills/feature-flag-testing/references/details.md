@@ -76,7 +76,7 @@ describe('beta targeting for the new checkout', () => {
 ### The kill-switch lifecycle — flip mid-flight, assert graceful degradation (idea #4)
 
 `td.update(...)` propagates to the live client **as if LaunchDarkly streamed the change** — so one test proves
-the off-path engages *without a restart*. This is the flag analogue of `qa-chaos-testing-typescript`'s
+the off-path engages *without a restart*. This is the flag analogue of `qa-failure-injection-testing-typescript`'s
 steady → perturb → assert-degraded lifecycle (and the boundary: a *flag* flip is this skill; a *dependency fault*
 is chaos).
 

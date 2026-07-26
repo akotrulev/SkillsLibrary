@@ -1,5 +1,5 @@
 ---
-name: qa-api-test-author-playwright-java
+name: qa-api-test-playwright-java
 description: Use when the user asks to write Java API tests through Playwright's APIRequestContext (playwright-java + TestNG + Jackson) — usually because the project already runs Playwright-Java for UI and wants one dependency and one report. Triggers: "write API tests with Playwright in Java", "use APIRequestContext for endpoint X", "add API coverage to our Playwright Java suite". Plain Java API suites without Playwright → `api-test-author/generator` (RestAssured + TestNG, the stack default). For end-to-end suite work prefer the phased agent `qa-api-java` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
 ---
 
@@ -7,7 +7,7 @@ description: Use when the user asks to write Java API tests through Playwright's
 
 Authors `*Test` classes that test a REST backend through **playwright-java's HTTP client** —
 `APIRequestContext` — instead of RestAssured. It reuses the **DTO + Client + Test** layering of the RestAssured
-sibling (`qa-api-test-author-generator-java`): record DTOs from `qa/java/skills/api-dto-writer`, a
+sibling (`qa-api-test-writer-java`): record DTOs from `qa/java/skills/api-models`, a
 `{Resource}Client` with dual raw + typed overloads, test classes that own scenarios and assertions. Only the
 HTTP transport changes; the discipline does not.
 
@@ -48,7 +48,7 @@ HTTP transport changes; the discipline does not.
 
 | Layer | Owner skill | Responsibility |
 |-------|-------------|----------------|
-| `models/{api}/{resource}/{Resource}Dto.java` (records) | `qa/java/skills/api-dto-writer` | Body shapes, `@JsonProperty` mapping |
+| `models/{api}/{resource}/{Resource}Dto.java` (records) | `qa/java/skills/api-models` | Body shapes, `@JsonProperty` mapping |
 | `clients/{api}/{Resource}Client.java` — constructor takes `APIRequestContext` | `qa/java/skills/api-client-writer` conventions, context-based variant | Request building on the context; raw `APIResponse` overload + typed overload (asserts exact status, Jackson-deserializes) |
 | `base/BaseApiTest.java` | **this skill** | `Playwright` + per-identity context lifecycle (`@BeforeClass`/`@AfterClass`), `newContext(token)` helper, config via `ConfigurationLoader` |
 | `tests/{api}/{resource}/{Operation}{Resource}Test.java` | **this skill** | Scenario choice, arrange/act/assert, test data, cleanup |
@@ -65,11 +65,11 @@ test to avoid creating a client.
 
 ## When NOT to use
 
-- No Playwright in the project → `qa/java/skills/api-test-author/generator` (RestAssured + TestNG, the stack default)
+- No Playwright in the project → `qa/java/skills/api-test-author/writer` (RestAssured + TestNG, the stack default)
 - API calls **inside a UI test** (seed data, then drive the browser) → the UI suite's arrange phase; conventions in `qa/java/skills/ui-test-author/playwright`
-- Mocking/intercepting the browser's network traffic (`page.route`) → `qa/java/skills/network-monitoring`
+- Mocking/intercepting the browser's network traffic (`page.route`) → `qa/java/skills/network-mocking`
 - GraphQL / gRPC → the protocol siblings under `qa/java/skills/api-test-author/`
-- Reviewing existing tests → `qa/java/skills/api-test-author/reviewer` (cross-stack checklist applies; add this skill's anti-patterns below)
+- Reviewing existing tests → `qa/java/skills/api-test-author/review` (cross-stack checklist applies; add this skill's anti-patterns below)
 
 ## Base class template — the lifecycle lives here once
 
@@ -239,7 +239,7 @@ Create/update flows keep the RestAssured sibling's cleanup discipline: track cre
    verbal scenarios.
 3. Ensure `BaseApiTest` exists with the `Playwright`/context lifecycle above; create it if missing.
 4. For each resource in scope, verify the record DTOs and the context-based `{Resource}Client` exist — create
-   missing ones via `api-dto-writer`, then the client following `api-client-writer` conventions with the
+   missing ones via `api-models`, then the client following `api-client-writer` conventions with the
    `(APIRequestContext)` constructor.
 5. Author one test class per operation from the scenario matrix, one client field per identity in `@BeforeClass`.
 6. Verify every test name follows `Should_X_When_Y` and every TC-ID maps to a test or is explicitly deferred.
@@ -247,14 +247,14 @@ Create/update flows keep the RestAssured sibling's cleanup discipline: track cre
 
 ## Cross-references
 
-- `qa-api-test-author-generator-java` — the **stack default** (RestAssured + TestNG); this skill is the variant
+- `qa-api-test-writer-java` — the **stack default** (RestAssured + TestNG); this skill is the variant
   for Playwright-first projects. Shared spine: DTO + Client + Test, dual raw/typed overloads, cleanup discipline.
-- `qa-api-test-author-playwright-typescript` · `qa-api-test-author-playwright-dotnet` — the sibling stacks
+- `qa-api-test-playwright-typescript` · `qa-api-test-playwright-dotnet` — the sibling stacks
   (@playwright/test `request` fixture · Microsoft.Playwright + NUnit); same four ideas, different bindings.
-- `qa-api-dto-writer-java` / `qa-api-client-writer-java` — DTOs / the client layer this skill consumes.
-- `qa-ui-test-author-playwright-java` — the UI suite this skill shares the Playwright dependency with.
-- `qa-network-monitoring-java` — `page.route` mocking/asserting of browser traffic (not API testing).
-- `qa-api-test-author-reviewer-java` — review; its cross-stack checklist applies verbatim, plus this skill's
+- `qa-api-models-java` / `qa-api-client-writer-java` — DTOs / the client layer this skill consumes.
+- `qa-ui-test-writer-playwright-java` — the UI suite this skill shares the Playwright dependency with.
+- `qa-network-mocking-java` — `page.route` mocking/asserting of browser traffic (not API testing).
+- `qa-api-test-review-java` — review; its cross-stack checklist applies verbatim, plus this skill's
   What-NOT-to-do list as Playwright-specific findings.
-- `qa-auth0-test-tokens-java` — the tokens `newContext(token)` injects.
-- `qa-allure-reporting-java` — Allure TestNG wiring shared with the UI suite.
+- `qa-test-login-tokens-java` — the tokens `newContext(token)` injects.
+- `qa-test-reports-java` — Allure TestNG wiring shared with the UI suite.

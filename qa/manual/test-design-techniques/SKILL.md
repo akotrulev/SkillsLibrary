@@ -222,7 +222,7 @@ Pick by the **shape of the requirement**, then combine:
 | Many dimensions needing a clear coverage picture | **Classification tree** | Pairwise as the combination rule |
 | "What did we miss" / known-fragile areas | **Error guessing** | Always layer on top of the systematic set |
 
-**Default recipe for a feature from documentation:** EP → BVA → decision table for the rule combos → state transition for any workflow → use-case for end-to-end flows → error-guessing sweep → (pairwise only if a config matrix appears). The `qa-manual-test-designer` agent runs exactly this order.
+**Default recipe for a feature from documentation:** EP → BVA → decision table for the rule combos → state transition for any workflow → use-case for end-to-end flows → error-guessing sweep → (pairwise only if a config matrix appears). The `qa-test-case-designer` agent runs exactly this order.
 
 ## Combining techniques (the part people skip)
 
@@ -270,9 +270,9 @@ State the achieved coverage explicitly in the deliverable (e.g. "BVA 3-value on 
 
 ## Handoffs
 
-- Distill the source docs into the test-basis these techniques run against → `qa/manual/test-basis-analyzer`
+- Distill the source docs into the test-basis these techniques run against → `qa/manual/requirements-breakdown`
 - Format the derived cases into a suite with shared setup + cleanup → `qa/manual/test-case-writer`
-- Orchestrate the whole doc → suite flow → `qa/manual/agents/qa-manual-test-designer`
+- Orchestrate the whole doc → suite flow → `qa/manual/agents/qa-test-case-designer`
 - Size the test investment by risk first → `qa/manual/test-strategy`
 - Unscripted probing of the gaps these techniques leave → `qa/manual/exploratory-charter-writer`
 - Automate the resulting cases → `qa/<stack>/skills/api-test-author/...` / `qa/<stack>/skills/ui-test-author/...`

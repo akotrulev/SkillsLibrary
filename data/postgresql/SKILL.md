@@ -149,6 +149,6 @@ Pool sizing: 20 per instance behind PgBouncer; 10 without it. Never crank app po
 - Cross-engine modeling decisions (id strategy, money, soft-delete, tenancy pattern *choice*) → `data/_shared/schema-design`
 - Expand-contract pattern + migration tool selection → `data/_shared/migrations`
 - Cache-aside/stampede/TTL pattern catalog → `data/_shared/caching-patterns` + `data/redis`
-- Universal query triage (ESR, N+1, pagination) → `data/_shared/query-optimization`
+- Universal query triage (ESR, N+1, pagination) → `data/_shared/slow-query-fixes`
 - Testing the schema/queries (seed/assert/clean, Testcontainers, safe SQL) → `qa/{java,dotnet,typescript}/skills/db-testing/*`
 - Tenant/user claims feeding the RLS session context → `auth/auth0-{stack}` + `auth/_shared/auth0-concepts`

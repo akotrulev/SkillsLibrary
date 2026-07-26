@@ -24,10 +24,10 @@ The **primary source** for the concrete recipes is the Vercel React/Next perform
 
 - CSS / layout / asset styling → [`styling`](../styling/SKILL.md), [`responsive-design`](../responsive-design/SKILL.md)
 - Live/server-pushed data as a *feature* → [`realtime`](../realtime/SKILL.md)
-- Fetch/cache *correctness* (revalidate, dedup, `cache`) → [`data-access`](../data-access/SKILL.md) (this skill owns the *shape* of fetching for speed; that skill owns caching semantics)
+- Fetch/cache *correctness* (revalidate, dedup, `cache`) → [`data-fetching`](../data-fetching/SKILL.md) (this skill owns the *shape* of fetching for speed; that skill owns caching semantics)
 - Server-side query/DB tuning → `data/*`
-- Load/stress/soak of the deployed app → `qa/typescript/skills/performance/k6` (peer)
-- Deep conceptual "why does this re-render/hydrate" → [`reference`](../reference/SKILL.md)
+- Load/stress/soak of the deployed app → `qa/typescript/skills/load-testing` (peer)
+- Deep conceptual "why does this re-render/hydrate" → [`basics`](../basics/SKILL.md)
 
 ## Cost-center routing — where is my slowness?
 
@@ -58,7 +58,7 @@ React re-renders a component when its state changes, its parent re-renders, or a
 
 ### Keys — stable identity in lists
 
-Every item in a rendered list gets a **stable domain-id `key`** (`order.id`), never the array index. An index key makes React match old→new by position, so inserting/reordering corrupts child state, focus, and inputs and forces needless remounts ([`reference`](../reference/SKILL.md), [`testability`](../testability/SKILL.md) share this rule). Key on the entity id.
+Every item in a rendered list gets a **stable domain-id `key`** (`order.id`), never the array index. An index key makes React match old→new by position, so inserting/reordering corrupts child state, focus, and inputs and forces needless remounts ([`basics`](../basics/SKILL.md), [`test-ids`](../test-ids/SKILL.md) share this rule). Key on the entity id.
 
 ### Derive during render — don't store derived state in an effect
 
@@ -73,13 +73,13 @@ useEffect(() => setFullName(`${first} ${last}`), [first, last]);
 const fullName = `${first} ${last}`;
 ```
 
-Never `setState` in an effect purely to react to a prop change — derive it, or reset with a `key` remount. (`rerender-derived-state-no-effect`; also a [`generator`](../generator/SKILL.md) rule.)
+Never `setState` in an effect purely to react to a prop change — derive it, or reset with a `key` remount. (`rerender-derived-state-no-effect`; also a [`component-writer`](../component-writer/SKILL.md) rule.)
 
 ### Memoization — Compiler first, then by hand
 
 - **React 19 + Compiler on:** most `useMemo`/`useCallback`/`React.memo` is inserted automatically — don't scatter them. Add manual memo only where the Compiler can't prove safety (a value handed to a non-React API, a measured hot path).
 - **React 18 / Compiler off:** `React.memo` a pure child that re-renders under an unchanged-props parent; `useMemo` an expensive computation; `useCallback` a callback passed to a memoized child. Memo only pays when the memoized value is **actually consumed** by something that skips work — a `useMemo` whose result feeds a non-memoized child is pure cost.
-- **Never allocate a fresh object/array/lambda inline** for a prop consumed by a memoized child or a Context value — it defeats the memo every render (hoist it, `useMemo` it, or `useCallback` it). Context `value=` is always `useMemo`'d ([`reference`](../reference/SKILL.md)).
+- **Never allocate a fresh object/array/lambda inline** for a prop consumed by a memoized child or a Context value — it defeats the memo every render (hoist it, `useMemo` it, or `useCallback` it). Context `value=` is always `useMemo`'d ([`basics`](../basics/SKILL.md)).
 
 ### Don't define components inside components
 
@@ -87,11 +87,11 @@ A component declared inside another's body is a **new type every render** — Re
 
 ### Split Contexts and combined hooks
 
-A Context re-renders **every** consumer when its value changes. Split a read Context from a write Context so components that only dispatch don't re-render on data churn ([`state-management`](../state-management/SKILL.md), [`reference`](../reference/SKILL.md)). Likewise, split a combined `useState` object when unrelated fields update independently (`rerender-split-combined-hooks`), and use **functional `setState`** (`setX(x => …)`) to drop a dependency and avoid stale closures.
+A Context re-renders **every** consumer when its value changes. Split a read Context from a write Context so components that only dispatch don't re-render on data churn ([`state-management`](../state-management/SKILL.md), [`basics`](../basics/SKILL.md)). Likewise, split a combined `useState` object when unrelated fields update independently (`rerender-split-combined-hooks`), and use **functional `setState`** (`setX(x => …)`) to drop a dependency and avoid stale closures.
 
 ### Large lists — virtualize
 
-Past ~100 rows, render only the viewport with `@tanstack/react-virtual` (or `react-window`). Pair with server-side paging ([`ui-conventions`](../ui-conventions/SKILL.md) table ergonomics) for large/remote sets — don't ship 10k rows to the client to then virtualize.
+Past ~100 rows, render only the viewport with `@tanstack/react-virtual` (or `react-window`). Pair with server-side paging ([`ui-rules`](../ui-rules/SKILL.md) table ergonomics) for large/remote sets — don't ship 10k rows to the client to then virtualize.
 
 ### Render anti-patterns
 
@@ -131,7 +131,7 @@ The startup cost is JS **downloaded, parsed, and hydrated** before interactivity
 
 ### 1. RSC ships no JS — push `'use client'` to the leaves
 
-The biggest lever on the App Router: a **Server Component ships zero JS to the browser**. Every leaf you leave as a Server Component is bundle you don't pay for. The classic regression is defensive `'use client'` creeping up the tree until the whole route hydrates — mark the directive on the **smallest interactive leaf**, pass server-rendered output through client shells as `children`, and keep static content server-side ([`reference`](../reference/SKILL.md) owns the boundary model; this is its *bundle* consequence). This is the App-Router analog of Blazor's "static SSR default, interactivity per island."
+The biggest lever on the App Router: a **Server Component ships zero JS to the browser**. Every leaf you leave as a Server Component is bundle you don't pay for. The classic regression is defensive `'use client'` creeping up the tree until the whole route hydrates — mark the directive on the **smallest interactive leaf**, pass server-rendered output through client shells as `children`, and keep static content server-side ([`basics`](../basics/SKILL.md) owns the boundary model; this is its *bundle* consequence). This is the App-Router analog of Blazor's "static SSR default, interactivity per island."
 
 ### 2. Code-split heavy, non-critical components
 
@@ -158,7 +158,7 @@ Use `ssr: false` for genuinely client-only widgets so they never prerender. (`bu
 
 ### 5. Avoid the hydration double-cost
 
-Reading `window`/`Date.now()`/`localStorage` in render causes a hydration mismatch → React throws away the server HTML and re-renders ([`reference`](../reference/SKILL.md) hydration trap). Keep those in effects. A mismatch is a correctness *and* a performance bug.
+Reading `window`/`Date.now()`/`localStorage` in render causes a hydration mismatch → React throws away the server HTML and re-renders ([`basics`](../basics/SKILL.md) hydration trap). Keep those in effects. A mismatch is a correctness *and* a performance bug.
 
 ---
 
@@ -182,7 +182,7 @@ For independent sections, prefer **separate Suspense boundaries** over one big `
 
 ### Stream with strategic Suspense boundaries
 
-Don't block the whole page on the slowest section. Return the shell immediately and wrap each slow region in `<Suspense fallback={<Skeleton/>}>` so it streams into the same response — the wrapper (sidebar, header, nav) paints first ([`data-access`](../data-access/SKILL.md) owns the fetch mechanics; this owns *where the boundaries go* for speed). The skeleton **approximates the final layout** (height/columns) so there's no layout shift (a generic spinner shifts — hurts CLS). (`async-suspense-boundaries`.) Keep server-side work off the request path where possible (`after()` for non-blocking post-response work — `server-after-nonblocking`).
+Don't block the whole page on the slowest section. Return the shell immediately and wrap each slow region in `<Suspense fallback={<Skeleton/>}>` so it streams into the same response — the wrapper (sidebar, header, nav) paints first ([`data-fetching`](../data-fetching/SKILL.md) owns the fetch mechanics; this owns *where the boundaries go* for speed). The skeleton **approximates the final layout** (height/columns) so there's no layout shift (a generic spinner shifts — hurts CLS). (`async-suspense-boundaries`.) Keep server-side work off the request path where possible (`after()` for non-blocking post-response work — `server-after-nonblocking`).
 
 ---
 
@@ -212,7 +212,7 @@ Set explicit budgets and fail CI when they regress — an unmeasured perf rule r
 | INP | ≤ 200 ms | Lighthouse CI + `web-vitals` field data |
 | CLS | ≤ 0.1 | Lighthouse CI |
 | Initial route JS (First Load JS) | ≤ ~130–170 KB gzipped per route | bundle analyzer check in CI |
-| Largest list without virtualization | ≤ 100 rows | [`reviewer`](../reviewer/SKILL.md) rule |
+| Largest list without virtualization | ≤ 100 rows | [`code-review`](../code-review/SKILL.md) rule |
 | Re-renders on a key interaction | no unbounded growth per interaction | React DevTools Profiler |
 
 ---
@@ -255,10 +255,10 @@ Set explicit budgets and fail CI when they regress — an unmeasured perf rule r
 
 ## Handoffs
 
-- Conceptual "why does this re-render / hydrate" → [`reference`](../reference/SKILL.md); the full Vercel rule files → `frontend/react/vendor/reference/rules/`
+- Conceptual "why does this re-render / hydrate" → [`basics`](../basics/SKILL.md); the full Vercel rule files → `frontend/react/vendor/reference/rules/`
 - CSS/layout/asset styling → [`styling`](../styling/SKILL.md); breakpoint/layout perf → [`responsive-design`](../responsive-design/SKILL.md)
-- Fetch/cache correctness (revalidate, dedup, `cache`) → [`data-access`](../data-access/SKILL.md)
+- Fetch/cache correctness (revalidate, dedup, `cache`) → [`data-fetching`](../data-fetching/SKILL.md)
 - Live-data as a feature (not perf) → [`realtime`](../realtime/SKILL.md)
 - Server-side query/DB tuning → `data/*`
 - `web-vitals`/OTel export to Grafana → `observability/opentelemetry-node`
-- Load/stress/soak of the deployed app → `qa/typescript/skills/performance/k6` (peer)
+- Load/stress/soak of the deployed app → `qa/typescript/skills/load-testing` (peer)

@@ -1,6 +1,6 @@
 ---
 name: qa-file-storage-testing-java
-description: Use when a Java 21 / TestNG test suite must assert object-storage side-effects — AWS S3 via LocalStack or Azure Blob via Azurite: uploads, downloads, presigned/SAS URLs, multipart/block staging, storage-triggered events. Triggers "assert the export landed in the bucket", "test the presigned-URL flow", "verify blob metadata/tier". Pick the store in the decision matrix, then read its reference file. Do NOT use for database assertions (use `qa-db-testing-client-java`), for broker messages (use `qa-messaging-testing-java`), or for non-Java projects (use `qa-file-storage-testing-{dotnet,typescript}`). For end-to-end suite work prefer the phased agent `qa-api-java` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
+description: Use when a Java 21 / TestNG test suite must assert object-storage side-effects — AWS S3 via LocalStack or Azure Blob via Azurite: uploads, downloads, presigned/SAS URLs, multipart/block staging, storage-triggered events. Triggers "assert the export landed in the bucket", "test the presigned-URL flow", "verify blob metadata/tier". Pick the store in the decision matrix, then read its reference file. Do NOT use for database assertions (use `qa-db-connection-java`), for broker messages (use `qa-messaging-testing-java`), or for non-Java projects (use `qa-file-storage-testing-{dotnet,typescript}`). For end-to-end suite work prefer the phased agent `qa-api-java` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
 ---
 
 # QA — File Storage Testing (Java 21)
@@ -25,7 +25,7 @@ shared by every tool in the family.
 | Assert against **AWS S3** (buckets/keys, multipart, presigned URLs, versioning, lifecycle, S3→SQS events) | **`references/s3.md`** | AWS-native object store; `software.amazon.awssdk:s3` is the first-class JVM client; LocalStack runs it locally |
 | Assert against **Azure Blob Storage** (containers/blobs, SAS tokens, blob tiers, Event Grid → Storage Queue) | `references/azure-blob.md` | Azure-native; container/blob not bucket/key, SAS not presigned, Azurite not LocalStack |
 | Assert a **message** was produced/consumed, no object store in the flow | `qa-messaging-testing-java` | Pure queue assertion; here SQS appears only as the *downstream* of an S3 event |
-| Assert a **DB row** was written, no object store | `qa-db-testing-client-java` | Pure DB verification; reuse its Awaitility wait for the eventual side here |
+| Assert a **DB row** was written, no object store | `qa-db-connection-java` | Pure DB verification; reuse its Awaitility wait for the eventual side here |
 
 **Rule of thumb:** *AWS bucket + keys, presigned URLs, S3 events?* → S3. *Azure container + blobs, SAS?* →
 azure-blob. *A queue with no object?* → messaging. *A row with no object?* → db-testing.

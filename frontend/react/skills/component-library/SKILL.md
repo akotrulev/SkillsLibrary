@@ -19,10 +19,10 @@ Picks and wires the UI component library that supplies your grids, dialogs, inpu
 ## When NOT to use
 
 - Hand-written styling, CSS Modules, design tokens, dark-mode CSS → [`styling`](../styling/SKILL.md)
-- `data-testid` placement mechanics per library → [`testability`](../testability/SKILL.md) (its per-library attribute matrix is the companion to this one)
-- Atom/molecule/organism layering + when a molecule owns state → [`reference`](../reference/SKILL.md)
+- `data-testid` placement mechanics per library → [`test-ids`](../test-ids/SKILL.md) (its per-library attribute matrix is the companion to this one)
+- Atom/molecule/organism layering + when a molecule owns state → [`basics`](../basics/SKILL.md)
 - Forms + validation → [`forms`](../forms/SKILL.md)
-- Rendering-strategy / `'use client'` placement per route → [`project-scaffold`](../project-scaffold/SKILL.md)
+- Rendering-strategy / `'use client'` placement per route → [`project-setup`](../project-setup/SKILL.md)
 
 ## The decision
 
@@ -57,10 +57,10 @@ These hold regardless of which reference you read:
 
 - **One library per app.** Two libraries = two CSS resets fighting, two theme systems, two JS bundles. Migrate wholesale, never surface-by-surface.
 - **The theme provider is a `'use client'` island mounted once at the root, not per page.** MUI's `ThemeProvider`, Mantine's `MantineProvider`, Chakra's `Provider` (and their dialog/toast portals) go once in a client `Providers` component rendered from `app/layout.tsx`. Because they rely on React Context + Emotion/CSS-in-JS runtime, they **cannot** render inside a Server Component — a `<Button onClick>` dropped into an RSC is a build/runtime error, not a no-op. This is the #1 App-Router gotcha; each reference states its exact form (and the Vite SPA lane has no RSC, so the provider just wraps `<App>`).
-- **Interactive components live in Client Components.** A library button/menu/dialog with an `onClick`/state must sit under a `'use client'` boundary. Server Components render library components only when they're purely presentational (no hooks, no handlers). Decide the boundary in [`project-scaffold`](../project-scaffold/SKILL.md) — push `'use client'` to the leaves, never blanket a route.
-- **Theme once, centrally.** One theme object / token set at the root; per-component color overrides are a smell. Dark mode is a theme concern — drive it from one toggle + system-preference detection (`next-themes` or the library's color-mode API), never per-component `dark:` guessing. The design source (palette, fonts) comes from [`design/frontend-design`](../../../../design/frontend-design/SKILL.md); [`styling`](../styling/SKILL.md) owns mapping it into the theme + CSS variables.
-- **`data-testid` on library controls forwards through the component's rest-props / slot props** to the rendered root. The exact prop per library (`data-testid` passthrough, `slotProps`, `component`) and the caveats live in [`testability`](../testability/SKILL.md)'s matrix — this skill and that one are kept consistent on purpose.
-- **DataGrid: server-side paging/sort/filter by default.** Every library's grid can drive paging/sorting/filtering off a server callback — use it for anything past a few hundred rows; client-side load of a full table is the default anti-pattern. The grid calls a [`data-access`](../data-access/SKILL.md) function — it's a consumer, not a data owner. Deterministic default sort with a unique tiebreaker is a [`ui-conventions`](../ui-conventions/SKILL.md) rule.
+- **Interactive components live in Client Components.** A library button/menu/dialog with an `onClick`/state must sit under a `'use client'` boundary. Server Components render library components only when they're purely presentational (no hooks, no handlers). Decide the boundary in [`project-setup`](../project-setup/SKILL.md) — push `'use client'` to the leaves, never blanket a route.
+- **Theme once, centrally.** One theme object / token set at the root; per-component color overrides are a smell. Dark mode is a theme concern — drive it from one toggle + system-preference detection (`next-themes` or the library's color-mode API), never per-component `dark:` guessing. The design source (palette, fonts) comes from [`design/visual-identity`](../../../../design/visual-identity/SKILL.md); [`styling`](../styling/SKILL.md) owns mapping it into the theme + CSS variables.
+- **`data-testid` on library controls forwards through the component's rest-props / slot props** to the rendered root. The exact prop per library (`data-testid` passthrough, `slotProps`, `component`) and the caveats live in [`test-ids`](../test-ids/SKILL.md)'s matrix — this skill and that one are kept consistent on purpose.
+- **DataGrid: server-side paging/sort/filter by default.** Every library's grid can drive paging/sorting/filtering off a server callback — use it for anything past a few hundred rows; client-side load of a full table is the default anti-pattern. The grid calls a [`data-fetching`](../data-fetching/SKILL.md) function — it's a consumer, not a data owner. Deterministic default sort with a unique tiebreaker is a [`ui-rules`](../ui-rules/SKILL.md) rule.
 - **Don't wrap library controls in `App*` wrappers** just to set defaults or carry test ids — pass `data-testid` inline (testability Rule 1); use the theme for defaults.
 
 ## Anti-patterns
@@ -71,17 +71,17 @@ These hold regardless of which reference you read:
 | Library `<Button onClick>` / `useDialog` in a Server Component | Move it under a `'use client'` boundary; provider is a client island |
 | `ThemeProvider`/`MantineProvider` added per page | Once, in a client `Providers` component off the root layout |
 | Per-component color overrides scattered across pages | One central theme / token set; dark mode from one toggle |
-| Full table loaded client-side, then paged in the browser | Server-side callback (`onPaginationModelChange`/`onSortChange`) → `data-access` query |
+| Full table loaded client-side, then paged in the browser | Server-side callback (`onPaginationModelChange`/`onSortChange`) → `data-fetching` query |
 | `AppButton` wrapper introduced to carry a `data-testid` | Inline `data-testid` on the library control (testability Rule 1) |
 | Tailwind utility classes mixed *with* a CSS-in-JS library's theme | Pick one styling authority — library theme *or* Tailwind (see [`styling`](../styling/SKILL.md)) |
 | Library major not pinned to the React/Next line | Pin the major; read the reference's version notes |
 
 ## Workflow
 
-1. **Choose** via the decision tree. State the reason (one line) in the architecture decision record ([`project-scaffold`](../project-scaffold/SKILL.md) Phase-1 output).
+1. **Choose** via the decision tree. State the reason (one line) in the architecture decision record ([`project-setup`](../project-setup/SKILL.md) Phase-1 output).
 2. **Read the one `references/<library>.md`** — packages, provider/`'use client'` wiring, theme + dark mode, DataGrid, dialog/toast services, RSC gotchas.
 3. **Wire the provider once** as a client island off the root layout; register the Next integration where the library ships one (MUI).
-4. **Theme centrally** from the [`design/frontend-design`](../../../../design/frontend-design/SKILL.md) output via [`styling`](../styling/SKILL.md); wire the dark-mode toggle + system-preference watch.
+4. **Theme centrally** from the [`design/visual-identity`](../../../../design/visual-identity/SKILL.md) output via [`styling`](../styling/SKILL.md); wire the dark-mode toggle + system-preference watch.
 5. **Verify:** a themed page renders; a dialog/toast fires from a client island; the DataGrid pages server-side; dark mode toggles cleanly; `data-testid`s land on rendered roots (testability).
 
 ## Validation
@@ -95,10 +95,10 @@ These hold regardless of which reference you read:
 ## Handoffs
 
 - CSS Modules, design tokens as CSS vars, dark-mode CSS plumbing, Tailwind-vs-library → [`styling`](../styling/SKILL.md)
-- `data-testid` per-library mechanics → [`testability`](../testability/SKILL.md)
-- Component layering (atom/molecule/organism), prop-drilling limits, when a molecule owns state → [`reference`](../reference/SKILL.md)
-- `'use client'` boundary + rendering strategy per route, provider placement → [`project-scaffold`](../project-scaffold/SKILL.md)
-- The grid's data function (server-side paging/sort/filter) → [`data-access`](../data-access/SKILL.md)
+- `data-testid` per-library mechanics → [`test-ids`](../test-ids/SKILL.md)
+- Component layering (atom/molecule/organism), prop-drilling limits, when a molecule owns state → [`basics`](../basics/SKILL.md)
+- `'use client'` boundary + rendering strategy per route, provider placement → [`project-setup`](../project-setup/SKILL.md)
+- The grid's data function (server-side paging/sort/filter) → [`data-fetching`](../data-fetching/SKILL.md)
 - Forms/validation with library inputs → [`forms`](../forms/SKILL.md)
-- Theme palette/fonts source → [`design/frontend-design`](../../../../design/frontend-design/SKILL.md) (primary), `design/theme-factory` (quick-start)
+- Theme palette/fonts source → [`design/visual-identity`](../../../../design/visual-identity/SKILL.md) (primary), `design/theme-presets` (quick-start)
 - Breakpoint contract, grids, cross-breakpoint alignment → [`responsive-design`](../responsive-design/SKILL.md)

@@ -53,7 +53,7 @@ Applies to whichever files survive Phase 2.
 - [ ] 3.2 Delete the personal-skills-directory note (`~/.claude/skills`, `~/.agents/skills/` Codex path) — irrelevant to this repo's layout.
 - [ ] 3.3 Delete the deployment-checklist items "push to your fork" / "contribute back via PR" — upstream leftovers; replace with the library's actual finish step (update the domain plan/handoff docs, commit).
 - [ ] 3.4 Fix the `@`-link self-contradiction: `@graphviz-conventions.dot` and `@testing-skills-with-subagents.md` use the force-load syntax the same skill forbids. Change to plain-name references with "read when…" guidance.
-- [ ] 3.5 Reframe the Iron Law: subagent pressure-testing becomes a **recommended verification step**, subject to the library's cost-before-speed spawning policy (each extra agent is a deliberate spend, per `ep-subagent-driven-development` / `ep-dispatching-parallel-agents`). Remove the "delete it, start over" absolutism for edits; keep the core insight (untested skills fail in ways you won't predict — verify before shipping).
+- [ ] 3.5 Reframe the Iron Law: subagent pressure-testing becomes a **recommended verification step**, subject to the library's cost-before-speed spawning policy (each extra agent is a deliberate spend, per `ep-delegate-to-subagents` / `ep-parallel-agents`). Remove the "delete it, start over" absolutism for edits; keep the core insight (untested skills fail in ways you won't predict — verify before shipping).
 - [ ] 3.6 Grep sweep: `grep -rn "superpowers\|~/.agents\|your fork" meta/` returns nothing.
 - [ ] 3.7 Commit: `meta: purge superpowers-upstream leftovers, gate subagent testing behind spawning policy`.
 

@@ -274,7 +274,7 @@ public class CognitoAuthorizationMessageHandler : AuthorizationMessageHandler
 }
 ```
 
-This handler is what the frontend [`data-access`](../../frontend/blazor/skills/data-access/SKILL.md) and [`realtime`](../../frontend/blazor/skills/realtime/SKILL.md) skills consume as their **IdP-neutral** token source — they don't care that it's Cognito rather than Auth0.
+This handler is what the frontend [`data-access`](../../frontend/blazor/skills/data-fetching/SKILL.md) and [`realtime`](../../frontend/blazor/skills/realtime/SKILL.md) skills consume as their **IdP-neutral** token source — they don't care that it's Cognito rather than Auth0.
 
 ## Rules
 
@@ -327,6 +327,6 @@ This handler is what the frontend [`data-access`](../../frontend/blazor/skills/d
 - Generic OIDC concepts + Auth0-vs-Cognito comparison → [`auth/_shared/oidc-concepts`](../_shared/oidc-concepts/SKILL.md)
 - Auth0 equivalent → [`auth/auth0-blazor`](../auth0-blazor/SKILL.md) (session-lifecycle rationale in full)
 - Backend API validating Cognito JWTs → `backend/dotnet/skills/cognito` · `backend/java/skills/cognito`
-- Blazor data/realtime consuming the token → [`frontend/blazor/skills/data-access`](../../frontend/blazor/skills/data-access/SKILL.md), [`realtime`](../../frontend/blazor/skills/realtime/SKILL.md) (IdP-neutral)
+- Blazor data/realtime consuming the token → [`frontend/blazor/skills/data-fetching`](../../frontend/blazor/skills/data-fetching/SKILL.md), [`realtime`](../../frontend/blazor/skills/realtime/SKILL.md) (IdP-neutral)
 - Storing the client secret → `devops/environment-config` + AWS Secrets Manager / Key Vault
 - E2E auth with Playwright → `qa/dotnet/skills/ui-test-author/playwright`

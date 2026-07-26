@@ -1,6 +1,6 @@
 ---
 name: ep-feature-audit
-description: Use when ONE feature or area of an existing codebase must be traced with no spec in hand — what it does, which validations and gates it enforces, and where it is defective. Triggers "how does feature X actually work", "what validations does the checkout flow have", "map this module's integrations", "find the defects in this area". Multi-feature and saved to `docs/audits/` → the `code-auditor` agent (its FEATURE lane). Not for verifying a written spec (`ep-spec-compliance-audit`).
+description: Use when ONE feature or area of an existing codebase must be traced with no spec in hand — what it does, which validations and gates it enforces, and where it is defective. Triggers "how does feature X actually work", "what validations does the checkout flow have", "map this module's integrations", "find the defects in this area". Multi-feature and saved to `docs/audits/` → the `code-auditor` agent (its FEATURE lane). Not for verifying a written spec (`ep-spec-vs-code-audit`).
 ---
 
 # Feature Audit
@@ -18,7 +18,7 @@ This is **read-only analysis** on product code. The audit points; owners fix. Th
 | Work | The three inventories → findings | Re-trace each finding + sweep its defect family |
 | Output | `…-audit-r1.md` | `…-audit-r<N>.md` — every finding prefixed **Resolved** / **Still open**, every surface closed with a rollup |
 
-Where `ep-spec-compliance-audit` persists a requirement register, this skill's **report is its own register**: the surface letters, finding IDs, and defect families are the stable spine every later round reuses. That is why the report is saved to a file, not just narrated.
+Where `ep-spec-vs-code-audit` persists a requirement register, this skill's **report is its own register**: the surface letters, finding IDs, and defect families are the stable spine every later round reuses. That is why the report is saved to a file, not just narrated.
 
 **Announce at start:** "I'm using the `ep-feature-audit` skill in Mode A (baseline) / Mode B (re-audit) on <feature>."
 
@@ -40,18 +40,18 @@ This skill is the **FEATURE lane** of the `code-auditor` agent, and carries both
 
 ## When NOT to use
 
-- A spec exists and the ask is "does the code meet it" → `ep-spec-compliance-audit`
+- A spec exists and the ask is "does the code meet it" → `ep-spec-vs-code-audit`
 - The ask is really "find security vulnerabilities" → `qa-security` agent (this audit *inventories* authz gates; it doesn't attack them)
 - The ask is whole-codebase health, not one feature → decompose first; audit one area at a time
 - The user wants the findings fixed → the owning `be-*`/`fe-*` agent; never edit product code here
 
 ## Evidence policy — static-first, execute opt-in
 
-Same policy as `ep-spec-compliance-audit`: evidence is **read code** by default; running builds/tests or probing a live app is an explicit per-audit opt-in that corroborates a code trace but never replaces it.
+Same policy as `ep-spec-vs-code-audit`: evidence is **read code** by default; running builds/tests or probing a live app is an explicit per-audit opt-in that corroborates a code trace but never replaces it.
 
 ## Evidence rules (non-negotiable)
 
-Identical to `ep-spec-compliance-audit` — keep the two skills' discipline aligned:
+Identical to `ep-spec-vs-code-audit` — keep the two skills' discipline aligned:
 
 1. Every claim cites `file:line` you actually read; a grep hit is a lead, not evidence.
 2. Tag `#confirmed` (path traced end-to-end) vs `#inferred` (naming/config/convention); an inference chain of more than one link is a guess — say so.
@@ -165,7 +165,7 @@ Read the prior report. Inventory its surface letters, finding IDs, severities, d
 
 ### 2. Re-verify — fresh, then sweep the family
 
-**Re-trace each finding's code path from scratch.** A "we fixed that" claim, a linked commit, a green test: leads, not evidence (`ep-verification-before-completion` discipline). Read the code as if round N−1 never happened; then compare.
+**Re-trace each finding's code path from scratch.** A "we fixed that" claim, a linked commit, a green test: leads, not evidence (`ep-verify-before-done` discipline). Read the code as if round N−1 never happened; then compare.
 
 Then **sweep the defect family** of every finding that moved. A fix applied at one site routinely misses its siblings, and the family grouping in the prior report exists precisely to make that sweep cheap. Family siblings found now are new findings continuing the sequence — not "the old finding, still open".
 
@@ -269,4 +269,4 @@ The rollup under each surface is the deliverable stakeholders actually read. Rul
 - Unknowns are legitimate: what you couldn't settle goes in *Open questions*, never silently guessed (an audit that admits its limits is trusted; one that doesn't is checked).
 - A red build/test state on arrival is a finding, not yours to fix.
 - Sequencing is by leverage, not severity — say why each item is where it is.
-- The report is a first-class test-basis input: write findings so `qa/manual/test-basis-analyzer` can consume them (observable behavior, boundaries, states — boundary conditions in findings are BVA seeds).
+- The report is a first-class test-basis input: write findings so `qa/manual/requirements-breakdown` can consume them (observable behavior, boundaries, states — boundary conditions in findings are BVA seeds).

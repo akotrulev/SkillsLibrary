@@ -1,17 +1,17 @@
 ---
-name: qa-api-test-author-graphql-dotnet
+name: qa-api-test-graphql-dotnet
 description: Use when scaffolding black-box GraphQL API tests in .NET 10 (8-9) with NUnit + `HttpClient` + `System.Text.Json` — POST /graphql, assert on the `{data, errors}` envelope (status is 200 even on error), typed records per selection set. Triggers "write GraphQL API tests", "test this mutation", "assert the errors envelope". Not for REST (`api-test-author/generator`) or gRPC (`api-test-author/grpc`).
 ---
 
 # QA — GraphQL API Test Writer (.NET 8 / NUnit + HttpClient + System.Text.Json)
 
-> **Ported from the canonical `qa-api-test-author-graphql-typescript`.** The four ideas and the section order
+> **Ported from the canonical `qa-api-test-graphql-typescript`.** The four ideas and the section order
 > are identical; only the runner (NUnit instead of Vitest), the client (`HttpClient`, async-all-the-way), and
 > the typing (`System.Text.Json` records + tightened `Assert.That` instead of Zod `parse`) change. See the
 > TypeScript file for the family rationale.
 
 Scaffolds black-box API tests in .NET against a deployed **GraphQL** backend. It reuses the **Operation + Client
-+ Model + Test** layering of the REST sibling (`qa-api-test-author-generator-dotnet`) but adapts every layer to
++ Model + Test** layering of the REST sibling (`qa-api-test-writer-dotnet`) but adapts every layer to
 the one fact that makes GraphQL testing its own discipline: **a GraphQL response is one HTTP 200 carrying a
 `{ data, errors }` envelope, and the assertion lives in that envelope, not in `response.StatusCode`.**
 
@@ -32,7 +32,7 @@ the one fact that makes GraphQL testing its own discipline: **a GraphQL response
 >    `errors[]` envelope once and reuse it.
 > 4. **Pick the operation type deliberately.** A **query** asserts shape + values. A **mutation** asserts the
 >    returned payload **and round-trips a read** to prove the change persisted. A **subscription** is a
->    long-lived stream over WebSocket (`graphql-ws`) — that's `qa-websocket-sse-testing-dotnet`; cross-link,
+>    long-lived stream over WebSocket (`graphql-ws`) — that's `qa-realtime-stream-testing-dotnet`; cross-link,
 >    don't reimplement.
 
 ## Decision matrix — operation type → test shape
@@ -44,7 +44,7 @@ the one fact that makes GraphQL testing its own discipline: **a GraphQL response
 | **Query — partial** | Partial success is handled | one resolved field asserted on `Data` **and** the failing field's `Errors[]` entry asserted by `Path` |
 | **Mutation** (write) | The change happened and persisted | assert the mutation payload → **round-trip a query** → assert the new state is readable |
 | **Mutation — input validation** | Bad input rejected cleanly | `Errors` non-empty with `Extensions.Code == "BAD_USER_INPUT"`; `Data.<field>` null |
-| **Subscription** (stream) | Server pushes events over time | **not this skill** → `qa-websocket-sse-testing-dotnet` |
+| **Subscription** (stream) | Server pushes events over time | **not this skill** → `qa-realtime-stream-testing-dotnet` |
 | **Introspection** | Schema exposes the expected types/fields | query `__schema`/`__type` → assert presence; in prod assert introspection **disabled** |
 | **Persisted queries (APQ)** | Only registered hashes execute | hash-only → `PERSISTED_QUERY_NOT_FOUND` → register (query+hash) → hash-only now resolves |
 
@@ -239,9 +239,9 @@ public async Task PersistedQuery_RejectsUnregisteredHash_ThenResolvesOnceRegiste
   the specific `Extensions.Code` and `Path`.
 - **`var`, `Newtonsoft.Json`, FluentAssertions, `Thread.Sleep`, `.Result`/`.Wait()`.** All banned by CLAUDE.md.
   *Fix:* explicit types, `System.Text.Json`, `Assert.That`/`Assert.Multiple`, async-all-the-way.
-- **Reaching for this skill for subscriptions.** *Fix:* `qa-websocket-sse-testing-dotnet`.
+- **Reaching for this skill for subscriptions.** *Fix:* `qa-realtime-stream-testing-dotnet`.
 - **Hardcoding the endpoint / committing the token.** *Fix:* `ConfigurationLoader` / env, read lazily; secrets
-  via `qa-auth0-test-tokens-dotnet`.
+  via `qa-test-login-tokens-dotnet`.
 
 ## Examples
 
@@ -270,17 +270,17 @@ for a status" discipline, different envelope.
 - **A mutation test round-trips a read** to prove persistence; data created in a test is cleaned up in
   `[TearDown]`/`try-finally` (cleanup in `try/catch`).
 - **NUnit + `System.Text.Json` only** (no FluentAssertions, no Newtonsoft, no `var`). Subscriptions →
-  `qa-websocket-sse-testing-dotnet`. Endpoint + token via `ConfigurationLoader`/env, lazy, never logged. No
+  `qa-realtime-stream-testing-dotnet`. Endpoint + token via `ConfigurationLoader`/env, lazy, never logged. No
   `Thread.Sleep`.
 
 ## Cross-references
 
-- `qa-api-test-author-graphql-typescript` — **the canonical file**: same four ideas, Vitest + native `fetch` +
+- `qa-api-test-graphql-typescript` — **the canonical file**: same four ideas, Vitest + native `fetch` +
   Zod (`GetUserDataSchema.parse` / `GraphQLErrorsSchema`). Read it for the family rationale.
-- `qa-api-test-author-graphql-java` — the Java sibling (RestAssured + TestNG treating `/graphql` as a POST,
+- `qa-api-test-graphql-java` — the Java sibling (RestAssured + TestNG treating `/graphql` as a POST,
   Jackson POJOs); same four ideas, different libs.
-- `qa-api-test-author-generator-dotnet` — the **REST sibling** this extends: the Client + Model + Test layering,
+- `qa-api-test-writer-dotnet` — the **REST sibling** this extends: the Client + Model + Test layering,
   NUnit conventions, `ProblemDetailsDto` (the REST analogue of `GraphQLError`), and the cleanup discipline.
-- `qa-websocket-sse-testing-dotnet` — **GraphQL subscriptions** (graphql-ws over WebSocket) live here.
-- `qa-api-dto-writer-dotnet` — generate the typed `Data` records / operation models in isolation.
-- `qa-auth0-test-tokens-dotnet` — obtain the bearer token for authenticated operations.
+- `qa-realtime-stream-testing-dotnet` — **GraphQL subscriptions** (graphql-ws over WebSocket) live here.
+- `qa-api-models-dotnet` — generate the typed `Data` records / operation models in isolation.
+- `qa-test-login-tokens-dotnet` — obtain the bearer token for authenticated operations.

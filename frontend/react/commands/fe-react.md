@@ -15,4 +15,4 @@ Run it **inline in this session** — do not spawn a subagent unless the user as
 
 $ARGUMENTS
 
-If no task was given above, run the brownfield **orientation pass** against the current repo (detect render target, React/Next majors, the `'use client'` boundary, component library, styling authority, state and data-access lanes, `data-testid` coverage), report the current-state map, and ask what to build, fix, or extend.
+If no task was given above, run the brownfield **orientation pass** against the current repo (detect render target, React/Next majors, the `'use client'` boundary, component library, styling authority, state and data-fetching lanes, `data-testid` coverage), report the current-state map, and ask what to build, fix, or extend.

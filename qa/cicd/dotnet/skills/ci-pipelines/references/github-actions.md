@@ -443,7 +443,7 @@ jobs:
 - **`qa/cicd/dotnet/skills/ci-pipelines`** — the canonical sibling this ports from; consult it for the variable-group / service-connection variant.
 - **`qa/dotnet/skills/db-testing/testcontainers`** — the integration-tests job runs these.
 - **`qa/dotnet/skills/email-testing`** — pair Mailpit as a `services:` container or inline Testcontainers run.
-- **`qa/reporting/dotnet/skills/allure-reporting`** — adapter wiring inside the test project that produces `allure-results/`.
-- **`qa/dotnet/skills/performance/nbomber`** + **`qa/typescript/skills/performance/k6`** — perf-job scripts; SLO contract in `qa/_shared/performance`.
+- **`qa/reporting/dotnet/skills/test-reports`** — adapter wiring inside the test project that produces `allure-results/`.
+- **`qa/dotnet/skills/load-testing`** + **`qa/typescript/skills/load-testing`** — perf-job scripts; SLO contract in `qa/_shared/performance`.
 - **`devops/github-actions`** — non-QA workflow patterns (deploy, infra) live here.
 - **`qa/cicd/ci-conventions`** — cross-stack rules (artifact retention, OIDC) this skill enforces.

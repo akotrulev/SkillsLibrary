@@ -356,8 +356,8 @@ k6-perf:
 - **`qa/cicd/typescript/skills/ci-pipelines`** — the Azure sibling; the `strategy: parallel` / service-connection variant.
 - **`qa/typescript/skills/ui-test-author/playwright`** — the `playwright.config.ts` (`blob`/`allure-playwright` reporters, `--shard`, traces) this pipeline runs.
 - **`qa/typescript/skills/db-testing/testcontainers`** — the integration-tests job runs these (needs the `docker:dind` service shown above).
-- **`qa/typescript/skills/network-monitoring`** + **`qa/typescript/skills/network-monitoring`** — in-process network specs the `e2e` job runs with no extra pipeline plumbing.
-- **`qa/typescript/skills/network-monitoring`** — runs an **external MITM proxy** the job must start/stop, and whose **CA the browser/client must trust** (generated per run — no stored secret). When the suite includes proxy specs, the `e2e` job needs a step to launch the proxy and inject its per-run CA before the tests, unlike the in-process `playwright-routes`/`cdp` specs.
-- **`qa/reporting/typescript/skills/allure-reporting`** — adapter wiring inside the test project that produces `allure-results/`.
-- **`qa/typescript/skills/performance/k6`** — perf-job scripts; SLO contract in `qa/_shared/performance`.
+- **`qa/typescript/skills/network-mocking`** + **`qa/typescript/skills/network-mocking`** — in-process network specs the `e2e` job runs with no extra pipeline plumbing.
+- **`qa/typescript/skills/network-mocking`** — runs an **external MITM proxy** the job must start/stop, and whose **CA the browser/client must trust** (generated per run — no stored secret). When the suite includes proxy specs, the `e2e` job needs a step to launch the proxy and inject its per-run CA before the tests, unlike the in-process `playwright-routes`/`cdp` specs.
+- **`qa/reporting/typescript/skills/test-reports`** — adapter wiring inside the test project that produces `allure-results/`.
+- **`qa/typescript/skills/load-testing`** — perf-job scripts; SLO contract in `qa/_shared/performance`.
 - **`qa/cicd/ci-conventions`** — cross-stack rules (artifact retention, OIDC) this skill enforces.

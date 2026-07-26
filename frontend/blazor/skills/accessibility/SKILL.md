@@ -35,15 +35,15 @@ Most a11y bugs come from re-implementing in `<div>` what the browser gives free.
 | Want | Use — not |
 |---|---|
 | Click **and** keyboard activation | `<button>` — never `<div @onclick>` (no focus, no Enter/Space, no role) |
-| Navigate to a URL | `<a href>` / `<NavLink>` — never a click-handler-only `NavigateTo` button (also a [`generator`](../generator/SKILL.md) rule) |
+| Navigate to a URL | `<a href>` / `<NavLink>` — never a click-handler-only `NavigateTo` button (also a [`component-writer`](../component-writer/SKILL.md) rule) |
 | Submit a form | `<button type="submit">` inside `<EditForm>` |
 | Modal dialog | native `<dialog>` or a library dialog (focus trap + Esc for free) — never a `<div>` overlay |
 | Label a control | `<label for>` / wrap — never placeholder-as-label |
 | Loading | `aria-busy="true"` + a visible indicator |
 | Page regions | `<nav>` / `<main>` (one) / `<footer>` — the `navigation` / `main` / `contentinfo` landmarks let a screen reader jump between regions; never rebuild them from `<div>`s |
-| A link that opens a new tab | real `<a target="_blank" rel="noopener">` **plus** a visible "opens in new tab" cue and an `aria-label` suffix ("… (opens in new tab)") — the emission is [`generator`](../generator/SKILL.md)'s |
+| A link that opens a new tab | real `<a target="_blank" rel="noopener">` **plus** a visible "opens in new tab" cue and an `aria-label` suffix ("… (opens in new tab)") — the emission is [`component-writer`](../component-writer/SKILL.md)'s |
 
-**Landmarks come from the elements.** Wrapping the header nav in `<nav>`, the primary content in a single `<main>`, and the site footer in `<footer>` gives screen-reader users a region map for free (and satisfies the [`ui-conventions`](../ui-conventions/SKILL.md) footer/nav conventions). Add `aria-label` to distinguish multiple `<nav>`s ("Primary", "Breadcrumb").
+**Landmarks come from the elements.** Wrapping the header nav in `<nav>`, the primary content in a single `<main>`, and the site footer in `<footer>` gives screen-reader users a region map for free (and satisfies the [`ui-rules`](../ui-rules/SKILL.md) footer/nav conventions). Add `aria-label` to distinguish multiple `<nav>`s ("Primary", "Breadcrumb").
 
 **First rule of ARIA: don't use ARIA if a semantic element will do.** ARIA is a patch for missing semantics — a wrong `role`/`aria-*` is worse than none. Reach for it only for custom widgets with no native equivalent, live regions, and relationships (`aria-describedby`/`aria-controls`/`aria-labelledby`). When you must, follow the **ARIA Authoring Practices Guide (APG)** patterns verbatim.
 
@@ -112,12 +112,12 @@ If you can't use a library primitive, follow the **APG** for the widget: correct
 
 Baseline for **every** interactive element: reachable by `Tab`, activates on `Enter` (links/buttons) or `Space` (buttons/checkboxes), a visible **focus indicator** (never `outline:none` without a replacement — [`styling`](../styling/SKILL.md) owns `:focus-visible`), and logical DOM tab order (avoid `tabindex > 0`). Use **roving tabindex** for composite widgets — one stop for the group, arrows move within — never make every child tabbable.
 
-## Display-level a11y (ui-conventions seed §16)
+## Display-level a11y (ui-rules seed §16)
 
 These are the most-missed rules and they scale badly through shared renderers — one omission multiplies across every grid:
 
-- **Every icon-only button gets an accessible label.** A bare `<MudIconButton Icon="@Icons.Delete" />` announces nothing. Add `Title`/`aria-label` (`"Delete order"`). The **shared grid renderer's built-in row actions** are the highest-leverage spot: one missing label there un-labels *every* grid in the app — fix it on the renderer, per [`ui-conventions`](../ui-conventions/SKILL.md) renderer unification. (Note: this label is a **separate** attribute from the `data-testid` [`testability`](../testability/SKILL.md) owns — never mirror one into the other.)
-- **Never signal state by color or icon alone** (a red dot, a green check). ~1 in 12 men can't distinguish red/green; a screen reader sees nothing. Pair every color/icon state with **text or a labeled tooltip** ("Active", "Failed"). The **current nav location** is a state too — mark the active item with more than color (weight, an indicator, and `aria-current="page"` on the `NavLink`), never a color change alone (the IA requirement to *show* current location is [`ui-conventions`](../ui-conventions/SKILL.md)'s).
+- **Every icon-only button gets an accessible label.** A bare `<MudIconButton Icon="@Icons.Delete" />` announces nothing. Add `Title`/`aria-label` (`"Delete order"`). The **shared grid renderer's built-in row actions** are the highest-leverage spot: one missing label there un-labels *every* grid in the app — fix it on the renderer, per [`ui-rules`](../ui-rules/SKILL.md) renderer unification. (Note: this label is a **separate** attribute from the `data-testid` [`test-ids`](../test-ids/SKILL.md) owns — never mirror one into the other.)
+- **Never signal state by color or icon alone** (a red dot, a green check). ~1 in 12 men can't distinguish red/green; a screen reader sees nothing. Pair every color/icon state with **text or a labeled tooltip** ("Active", "Failed"). The **current nav location** is a state too — mark the active item with more than color (weight, an indicator, and `aria-current="page"` on the `NavLink`), never a color change alone (the IA requirement to *show* current location is [`ui-rules`](../ui-rules/SKILL.md)'s).
 - **Contrast** — check muted/secondary text and active/hover/selected-row colors against the **actual backgrounds** they render on (a token that passes on white can fail on the striped-row or brand-tinted surface). WCAG 2.2 AA: **4.5:1** body text, **3:1** large text (≥24px, or ≥19px bold) and UI-component/graphic boundaries (input borders, icons, focus rings); AAA is 7:1 if the brief targets it. **Re-verify every pair in dark mode** — a ratio that passes on a light surface routinely fails on a dark one, so dark tokens get their own check, not a reuse. Token *definition* is [`styling`](../styling/SKILL.md)'s; *whether it passes* is this skill's.
 - **Consistency within a control group** — if one row action has a tooltip, its siblings must too; if one is icon+label, the group is.
 
@@ -156,5 +156,5 @@ These are the most-missed rules and they scale badly through shared renderers �
 - Contrast **token** definition + `:focus-visible` styling → [`styling`](../styling/SKILL.md)
 - Form-input labels + validation-message a11y → [`forms`](../forms/SKILL.md)
 - Accessible library primitives (dialog/tabs/menu that ship a11y) → [`component-library`](../component-library/SKILL.md)
-- `data-testid` on the same elements (separate attribute) → [`testability`](../testability/SKILL.md)
-- Icon-button labels / color-not-alone as a *display-correctness* concern → [`ui-conventions`](../ui-conventions/SKILL.md) (owns the convention; this skill owns the a11y mechanics)
+- `data-testid` on the same elements (separate attribute) → [`test-ids`](../test-ids/SKILL.md)
+- Icon-button labels / color-not-alone as a *display-correctness* concern → [`ui-rules`](../ui-rules/SKILL.md) (owns the convention; this skill owns the a11y mechanics)

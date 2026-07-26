@@ -255,6 +255,6 @@ In the app, **don't cache secrets indefinitely**. Either:
 
 - Pipeline YAML setup → `devops/{github-actions,gitlab-ci,azure-pipelines}`
 - Cloud deploy specifics → `devops/{aws,azure}-deployment`
-- IaC for the secret store + identity → `devops/iac-bicep-terraform`
+- IaC for the secret store + identity → `devops/infrastructure-as-code`
 - App-level Options pattern → `backend/{dotnet,java,node}/skills/generator`
 - Auth0 client secrets specifically → `auth/auth0-{stack}`

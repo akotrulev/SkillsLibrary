@@ -1,6 +1,6 @@
 # SQL Server — Indexing
 
-Index selection, composition, and maintenance. Universal predicate triage / ESR rule / pagination → `data/_shared/query-optimization`; reading plans to find the missing index → `references/performance.md`; the clustered-index *design* decision → `references/data-modeling.md`.
+Index selection, composition, and maintenance. Universal predicate triage / ESR rule / pagination → `data/_shared/slow-query-fixes`; reading plans to find the missing index → `references/performance.md`; the clustered-index *design* decision → `references/data-modeling.md`.
 
 ## The two-level model (SQL Server-specific)
 

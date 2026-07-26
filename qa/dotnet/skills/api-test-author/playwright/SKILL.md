@@ -1,5 +1,5 @@
 ---
-name: qa-api-test-author-playwright-dotnet
+name: qa-api-test-playwright-dotnet
 description: Use when writing .NET API tests through Playwright's `IAPIRequestContext` (Microsoft.Playwright + NUnit) — usually because the project already runs Playwright for UI and wants one dependency and one report. Triggers "write API tests with Playwright in C#", "use IAPIRequestContext for endpoint X", "add API coverage to our Playwright .NET suite". Plain .NET API suites without Playwright → `api-test-author/generator` (NUnit + RestSharp, the stack default).
 ---
 
@@ -7,7 +7,7 @@ description: Use when writing .NET API tests through Playwright's `IAPIRequestCo
 
 Authors NUnit fixtures that test a REST backend through **Microsoft.Playwright's HTTP client** —
 `IAPIRequestContext` — instead of RestSharp. It reuses the layering and templates of the RestSharp sibling
-(`qa-api-test-author-generator-dotnet`): DTOs from `qa/dotnet/skills/api-dto-writer`, a `{Resource}Client` with
+(`qa-api-test-writer-dotnet`): DTOs from `qa/dotnet/skills/api-models`, a `{Resource}Client` with
 dual raw + typed overloads, fixtures that own scenarios, the rich happy-path template for 2xx and the strict
 `ProblemDetails` template for 4xx. Only the HTTP transport changes; the discipline does not.
 
@@ -46,7 +46,7 @@ dual raw + typed overloads, fixtures that own scenarios, the rich happy-path tem
 
 | Layer | Owner skill | Responsibility |
 |-------|-------------|----------------|
-| `Models/{Resource}Dto.cs` | `qa/dotnet/skills/api-dto-writer` | Body shapes, `JsonPropertyName` mapping, `ProblemDetailsDto` |
+| `Models/{Resource}Dto.cs` | `qa/dotnet/skills/api-models` | Body shapes, `JsonPropertyName` mapping, `ProblemDetailsDto` |
 | `Clients/{Resource}Client.cs` — constructor takes `IAPIRequestContext` | `qa/dotnet/skills/api-client-writer` conventions, context-based variant | Request building on the context; raw `IAPIResponse` overload + typed overload (asserts exact status, deserializes) |
 | `Base/BasePlaywrightApiTest.cs` | **this skill** | `IPlaywright` + per-identity context lifecycle (`[OneTimeSetUp]`/`[OneTimeTearDown]`), `NewContextAsync(token)` helper, `AuthToken`, `Deserialize<T>`, `AttachBody` |
 | `Tests/{Resource}Tests.cs` | **this skill** | Scenario choice, arrange/act/assert, test data, cleanup |
@@ -62,11 +62,11 @@ inline in a test to avoid creating a client.
 
 ## When NOT to use
 
-- No Playwright in the project → `qa/dotnet/skills/api-test-author/generator` (NUnit + RestSharp, the stack default)
+- No Playwright in the project → `qa/dotnet/skills/api-test-author/writer` (NUnit + RestSharp, the stack default)
 - API calls **inside a UI test** (seed data, then drive the browser) → the UI suite's arrange phase; conventions in `qa/dotnet/skills/ui-test-author/playwright`
-- Mocking/intercepting the browser's network traffic (`page.RouteAsync`) → `qa/dotnet/skills/network-monitoring`
+- Mocking/intercepting the browser's network traffic (`page.RouteAsync`) → `qa/dotnet/skills/network-mocking`
 - GraphQL / gRPC → the protocol siblings under `qa/dotnet/skills/api-test-author/`
-- Reviewing existing tests → `qa/dotnet/skills/api-test-author/reviewer` (cross-stack checklist applies; add this skill's anti-patterns below)
+- Reviewing existing tests → `qa/dotnet/skills/api-test-author/review` (cross-stack checklist applies; add this skill's anti-patterns below)
 
 ## Base class template — the lifecycle lives here once
 
@@ -242,7 +242,7 @@ fields + server-generated fields + `GetById` round-trip in `Assert.Multiple`), p
    traceability), or verbal scenarios.
 3. Ensure `BasePlaywrightApiTest` exists with the lifecycle above (plus `Deserialize<T>` / `AttachBody`); create it if missing.
 4. For each resource in scope, verify the DTOs and the context-based `{Resource}Client` exist — create missing
-   ones via `api-dto-writer`, then the client following `api-client-writer` conventions with the
+   ones via `api-models`, then the client following `api-client-writer` conventions with the
    `(IAPIRequestContext)` constructor.
 5. Author one fixture per resource from the scenario matrix: rich happy-path template for 2xx, strict
    `ProblemDetails` template for 4xx, single status assert for 401.
@@ -251,15 +251,15 @@ fields + server-generated fields + `GetById` round-trip in `Assert.Multiple`), p
 
 ## Cross-references
 
-- `qa-api-test-author-generator-dotnet` — the **stack default** (NUnit + RestSharp); this skill is the variant
+- `qa-api-test-writer-dotnet` — the **stack default** (NUnit + RestSharp); this skill is the variant
   for Playwright-first projects. Shared spine: layering, dual raw/typed overloads, rich happy-path + strict
   `ProblemDetails` templates, cleanup discipline.
-- `qa-api-test-author-playwright-typescript` · `qa-api-test-author-playwright-java` — the sibling stacks
+- `qa-api-test-playwright-typescript` · `qa-api-test-playwright-java` — the sibling stacks
   (@playwright/test `request` fixture · playwright-java + TestNG); same four ideas, different bindings.
-- `qa-api-dto-writer-dotnet` / `qa-api-client-writer-dotnet` — DTOs / the client layer this skill consumes.
-- `qa-ui-test-author-playwright-dotnet` — the UI suite this skill shares the Playwright dependency with.
-- `qa-network-monitoring-dotnet` — `page.RouteAsync` mocking/asserting of browser traffic (not API testing).
-- `qa-api-test-author-reviewer-dotnet` — review; its cross-stack checklist applies verbatim, plus this skill's
+- `qa-api-models-dotnet` / `qa-api-client-writer-dotnet` — DTOs / the client layer this skill consumes.
+- `qa-ui-test-writer-playwright-dotnet` — the UI suite this skill shares the Playwright dependency with.
+- `qa-network-mocking-dotnet` — `page.RouteAsync` mocking/asserting of browser traffic (not API testing).
+- `qa-api-test-review-dotnet` — review; its cross-stack checklist applies verbatim, plus this skill's
   What-NOT-to-do list as Playwright-specific findings.
-- `qa-auth0-test-tokens-dotnet` — the tokens `NewContextAsync(token)` injects.
-- `qa-allure-reporting-dotnet` — Allure NUnit wiring shared with the UI suite.
+- `qa-test-login-tokens-dotnet` — the tokens `NewContextAsync(token)` injects.
+- `qa-test-reports-dotnet` — Allure NUnit wiring shared with the UI suite.

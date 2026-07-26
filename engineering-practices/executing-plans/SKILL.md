@@ -1,6 +1,6 @@
 ---
 name: ep-executing-plans
-description: Use when you have a written implementation plan (from `ep-writing-plans`) to execute task-by-task with review checkpoints. Triggers: "execute this plan", "implement the plan", "work through docs/plans/…", after a plan is approved. Chains into `ep-finishing-a-development-branch` when all tasks are done. Do NOT use to write the plan (use `ep-writing-plans`), to design the feature (use `ep-brainstorming`), or for ad-hoc edits that have no plan.
+description: Use when you have a written implementation plan (from `ep-writing-plans`) to execute task-by-task with review checkpoints. Triggers: "execute this plan", "implement the plan", "work through docs/plans/…", after a plan is approved. Chains into `ep-finish-branch` when all tasks are done. Do NOT use to write the plan (use `ep-writing-plans`), to design the feature (use `ep-brainstorming`), or for ad-hoc edits that have no plan.
 ---
 
 # Executing Plans
@@ -11,7 +11,7 @@ Load plan, review critically, execute task-by-task, report at each checkpoint, a
 
 **Announce at start:** "I'm using the `ep-executing-plans` skill to implement this plan."
 
-**This is the default execution path (inline, cost before speed).** A subagent-based alternative — `ep-subagent-driven-development` — exists for the rare case where delegation clearly pays for itself and the user asks for it; it is governed by the cost-before-speed policy. Unless both are true, stay here.
+**This is the default execution path (inline, cost before speed).** A subagent-based alternative — `ep-delegate-to-subagents` — exists for the rare case where delegation clearly pays for itself and the user asks for it; it is governed by the cost-before-speed policy. Unless both are true, stay here.
 
 ## The Process
 
@@ -49,8 +49,8 @@ every 3 tasks"); honor whatever they asked for. When in doubt, checkpoint per ta
 ### Step 3: Complete Development
 
 After all tasks complete and verified:
-- Announce: "I'm using the ep-finishing-a-development-branch skill to complete this work."
-- **REQUIRED SUB-SKILL:** Use `ep-finishing-a-development-branch`
+- Announce: "I'm using the ep-finish-branch skill to complete this work."
+- **REQUIRED SUB-SKILL:** Use `ep-finish-branch`
 - Follow that skill to verify tests, present options, execute choice
 
 ## When to Stop and Ask for Help
@@ -83,9 +83,9 @@ After all tasks complete and verified:
 ## Integration
 
 **Required workflow skills:**
-- **`ep-using-git-worktrees`** - Ensures isolated workspace (creates one or verifies existing)
+- **`ep-worktrees`** - Ensures isolated workspace (creates one or verifies existing)
 - **`ep-writing-plans`** - Creates the plan this skill executes
-- **`ep-finishing-a-development-branch`** - Complete development after all tasks
+- **`ep-finish-branch`** - Complete development after all tasks
 
 **Opt-in alternative:**
-- **`ep-subagent-driven-development`** - subagent execution when delegation pays for itself (cost-aware); not the default
+- **`ep-delegate-to-subagents`** - subagent execution when delegation pays for itself (cost-aware); not the default

@@ -201,4 +201,4 @@ Always invalidate **both** layers when invalidating; the in-process layer is the
 - Redis commands & data types → `data/redis`
 - Engine-specific perf → `data/postgresql` / `data/mongodb` / `data/sqlserver` / etc.
 - Migration of cache key shape → bump version prefix; the rest follows TTL
-- Observability for hit ratio / latency → `observability/grafana-dashboards` + `observability/logql-promql`
+- Observability for hit ratio / latency → `observability/dashboards` + `observability/queries`

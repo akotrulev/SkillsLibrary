@@ -1,6 +1,6 @@
 # MySQL — Indexing (InnoDB)
 
-Index selection, composition, and maintenance for InnoDB. Universal predicate triage / ESR rule / pagination → `data/_shared/query-optimization`; reading plans to find the missing index → `references/performance.md`; the clustered-PK *design* decision → `references/data-modeling.md`.
+Index selection, composition, and maintenance for InnoDB. Universal predicate triage / ESR rule / pagination → `data/_shared/slow-query-fixes`; reading plans to find the missing index → `references/performance.md`; the clustered-PK *design* decision → `references/data-modeling.md`.
 
 ## The clustered-PK model (drives everything)
 

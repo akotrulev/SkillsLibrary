@@ -179,6 +179,6 @@ NoSQL engines lack `ALTER`. Migration moves:
 ## Handoffs
 
 - Engine-specific syntax → `data/<db>`
-- Cross-engine query optimization → `data/_shared/query-optimization`
+- Cross-engine query optimization → `data/_shared/slow-query-fixes`
 - Caching layer (often affected by schema changes) → `data/_shared/caching-patterns`
 - Pipeline integration (running the migration as a pre-deploy step) → `qa-cicd-{java,dotnet,typescript}` (`qa/cicd/<stack>/skills/ci-pipelines`), which owns the CI wiring the "migrations run from the pipeline" rule requires

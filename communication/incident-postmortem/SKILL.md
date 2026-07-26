@@ -21,7 +21,7 @@ A postmortem is a learning artifact, not a punishment. Its value is measured by 
 - The incident is still live → respond first; this skill starts after resolution
 - You need to file the underlying defect → `qa/manual/bug-report-writer`
 - You need to tell stakeholders about status/impact mid-incident → `communication/stakeholder-updates`
-- You want monitoring/probes so it's caught earlier next time → that's an action item; implementation lives in `qa/<stack>/skills/synthetic-monitoring` / `chaos-testing`
+- You want monitoring/probes so it's caught earlier next time → that's an action item; implementation lives in `qa/<stack>/skills/production-uptime-checks` / `failure-injection-testing`
 
 ## Inputs needed
 
@@ -113,4 +113,4 @@ Ask only what's missing, at most 2–3 questions:
 - Underlying defect needs filing → `qa/manual/bug-report-writer`
 - Stakeholder/customer communication during or right after the incident → `communication/stakeholder-updates`
 - Postmortem review meeting minutes + decision tracking → `communication/meeting-notes`
-- Prevent/detect action items that are test work → `qa/<stack>/skills/synthetic-monitoring`, `chaos-testing`, or the matching `qa/<stack>` agent
+- Prevent/detect action items that are test work → `qa/<stack>/skills/production-uptime-checks`, `failure-injection-testing`, or the matching `qa/<stack>` agent

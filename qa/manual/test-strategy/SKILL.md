@@ -159,8 +159,8 @@ Avoid testing the *same* thing at three layers — that's not safety, that's tax
 - API tests → qa/<stack>/skills/api-test-author/generator/<stack>
 - UI tests → qa/<stack>/skills/ui-test-author/<stack>
 - Test data → qa/<stack>/skills/test-data-builder
-- Contract testing → qa/<stack>/skills/contract-testing-pact
-- Allure reporting → qa/reporting/<stack>/skills/allure-reporting
+- Contract testing → qa/<stack>/skills/api-contract-testing
+- Allure reporting → qa/reporting/<stack>/skills/test-reports
 - Bug intake → qa/manual/bug-report-writer
 ```
 
@@ -200,8 +200,8 @@ Avoid testing the *same* thing at three layers — that's not safety, that's tax
 - API test generation → `qa/<stack>/skills/api-test-author/generator/<stack>`
 - UI test generation → `qa/<stack>/skills/ui-test-author/<stack>`
 - Test data → `qa/<stack>/skills/test-data-builder`
-- Contract testing → `qa/<stack>/skills/contract-testing-pact`
+- Contract testing → `qa/<stack>/skills/api-contract-testing`
 - Exploratory charters → `qa/manual/exploratory-charter-writer`
 - Bug intake → `qa/manual/bug-report-writer`
-- Allure reporting → `qa/reporting/<stack>/skills/allure-reporting`
+- Allure reporting → `qa/reporting/<stack>/skills/test-reports`
 - Metrics & dashboards → `qa/manual/quality-metrics`

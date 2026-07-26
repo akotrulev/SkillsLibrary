@@ -2,7 +2,7 @@
 
 axe-core is the de-facto accessibility rule engine; `@axe-core/playwright` runs it **inside your
 Playwright run**, against the live DOM, and returns structured `violations[]` you assert on. This is an
-**assertion layer** on top of the page objects and specs the `qa-ui-test-author-playwright-typescript`
+**assertion layer** on top of the page objects and specs the `qa-ui-test-writer-playwright-typescript`
 skill already authored — you inject an axe scan into an already-authored flow. You do **not** write new
 page objects here.
 
@@ -229,7 +229,7 @@ Never `await page.waitForTimeout(...)` before a scan — a sleep races the DOM a
 
 axe gives you everything to make a failure actionable: rule id, impact, helpUrl, and the failing
 selector + fix summary. Attach the JSON and a readable summary to Allure so the report names the rule
-without anyone re-running locally (cross-link `qa-allure-reporting-typescript`):
+without anyone re-running locally (cross-link `qa-test-reports-typescript`):
 
 ```typescript
 // support/a11y-report.ts
@@ -351,9 +351,9 @@ Lifecycle for this gate:
 - `references/lighthouse-ci.md` — the audit/score sibling: full-page
   perf/SEO/PWA + a11y **score** threshold, a separate Lighthouse pass. Run both: axe gates, Lighthouse
   trends.
-- `qa-ui-test-author-playwright-typescript` — the page objects/specs the axe scan is injected into.
+- `qa-ui-test-writer-playwright-typescript` — the page objects/specs the axe scan is injected into.
   Author the flow there; add the a11y scan here.
 - `qa-ci-pipelines-typescript` — where the job fails on the assertion and the violations
   JSON is uploaded as an artifact. Note: **no secret to inject** (contrast `percy`/`applitools`).
-- `qa-allure-reporting-typescript` — attach the violations JSON + readable summary to the report.
+- `qa-test-reports-typescript` — attach the violations JSON + readable summary to the report.
 - `qa-exploratory-charter-writer` — the manual/assistive-tech testing that covers the ~60% axe can't.

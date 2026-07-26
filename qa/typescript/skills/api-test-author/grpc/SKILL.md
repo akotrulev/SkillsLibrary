@@ -1,18 +1,18 @@
 ---
-name: qa-api-test-author-grpc-typescript
+name: qa-api-test-grpc-typescript
 description: Scaffold black-box **gRPC** API tests in Node 24 (22 supported) / TypeScript with Vitest + `@grpc/grpc-js` + `@grpc/proto-loader` against a deployed, proto-defined HTTP/2 service. Triggers: "write a gRPC test for RPC X", "assert the ServiceError code", "test a server-streaming RPC". For end-to-end suite work prefer the phased agent `qa-api-typescript` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
 ---
 
 # QA — gRPC API Test Writer (TypeScript / Vitest + @grpc/grpc-js)
 
-> **Ported from the canonical `qa-api-test-author-grpc-java`.** The four ideas and the section order are
+> **Ported from the canonical `qa-api-test-grpc-java`.** The four ideas and the section order are
 > identical; only the runner (Vitest instead of TestNG), the client (`@grpc/grpc-js` + `@grpc/proto-loader`
 > instead of grpc-java), the typing (`proto-loader-gen-types` / `ts-proto` instead of `protobuf-gradle-plugin`),
 > and the promise-based style change. See the Java file for the family rationale.
 
 Scaffolds black-box API tests in TypeScript against a deployed **gRPC** service. It completes the
-`api-test-author` **protocol trio** — REST (`qa-api-test-author-generator-typescript`, HTTP+JSON, status-driven) →
-GraphQL (`qa-api-test-author-graphql-typescript`, one HTTP 200 carrying a `{ data, errors }` envelope) → **gRPC
+`api-test-author` **protocol trio** — REST (`qa-api-test-writer-typescript`, HTTP+JSON, status-driven) →
+GraphQL (`qa-api-test-graphql-typescript`, one HTTP 200 carrying a `{ data, errors }` envelope) → **gRPC
 (this skill, proto-defined HTTP/2 binary Protobuf, result carried in the gRPC `status`)**. Three protocols, three
 places the result lives, one family. It reuses the **(contract) + Client + Spec** layering of the REST/GraphQL
 siblings, but the contract is the **`.proto`** (load + type the messages + client) and the assertion targets the
@@ -35,11 +35,11 @@ siblings, but the contract is the **`.proto`** (load + type the messages + clien
 > 3. **Assert on the typed generated message — never hand-parse bytes.** The `.proto` is the contract;
 >    `proto-loader-gen-types` (or `ts-proto`) types the messages + client; assert on the **typed message fields**
 >    (`res.value.email`). A gRPC test never touches the wire bytes — that's the GraphQL "query-shaped typed `data`"
->    analogue, and the messages are the DTO (`qa-api-dto-writer-typescript`).
+>    analogue, and the messages are the DTO (`qa-api-models-typescript`).
 > 4. **Pick the RPC type deliberately — unary / server- / client- / bidi-streaming each test differently.** A
 >    **unary** call asserts the message + status. A **server-streaming** call **`for await`s the
 >    `ClientReadableStream` into a buffer, then asserts the sequence** — a *bounded async-iterate* (the stream's
->    `end` + a deadline), **never a `setTimeout`** → it reuses `qa-websocket-sse-testing-typescript`'s
+>    `end` + a deadline), **never a `setTimeout`** → it reuses `qa-realtime-stream-testing-typescript`'s
 >    drain-then-assert discipline. A **client-streaming** call `write`s a stream of requests → one response.
 >    **Bidi-streaming** interleaves both.
 
@@ -53,7 +53,7 @@ siblings, but the contract is the **`.proto`** (load + type the messages + clien
 | **Unary — write** | The change happened and persisted | call the mutating RPC → assert the payload → **round-trip a read RPC** → assert the new state |
 | **Server-streaming** (req→stream) | The right sequence of messages arrives | `for await (const m of call)` into an array (bounded by `end` + deadline) → assert size + order + values |
 | **Client-streaming** (stream→resp) | The aggregate response is right | `call.write(req)` N times → `call.end()` → await the single response in the callback |
-| **Bidi-streaming** (stream↔stream) | Interleaved exchange works | write + `for await` the read side concurrently; assert the received sequence → also `qa-websocket-sse-testing-typescript` |
+| **Bidi-streaming** (stream↔stream) | Interleaved exchange works | write + `for await` the read side concurrently; assert the received sequence → also `qa-realtime-stream-testing-typescript` |
 | **Deadline** | A slow call fails deterministically | call with `{ deadline: Date.now() + d }` → `res.code === status.DEADLINE_EXCEEDED` |
 | **Auth** | A call without credentials is rejected | client **without** the bearer metadata → `UNAUTHENTICATED`; with it → `OK` |
 
@@ -141,7 +141,7 @@ it('CreateUser persists and the change is readable', async () => {
 A server-streaming RPC pushes a *sequence* of messages and then ends. `@grpc/grpc-js` returns a
 `ClientReadableStream`, which is a Node `Readable` and therefore **async-iterable** — `for await (const m of call)`
 completes on the stream's `end` (or the deadline trips), **never a `setTimeout`**. Drain into a buffer, then
-assert size + order + values. Same drain-then-assert discipline as `qa-websocket-sse-testing-typescript`.
+assert size + order + values. Same drain-then-assert discipline as `qa-realtime-stream-testing-typescript`.
 
 ```typescript
 import type { User__Output } from '../proto/gen/user/v1/User';
@@ -185,7 +185,7 @@ it('ImportUsers aggregates all sent requests', async () => {
 
 > Bidi-streaming follows the same shape — `for await` the read side in one promise while writing to the call, then
 > await both. For richer bidi-stream-lifecycle assertions (ordering, mid-stream close), cross-link
-> `qa-websocket-sse-testing-typescript` — gRPC streaming and WebSocket/SSE share the
+> `qa-realtime-stream-testing-typescript` — gRPC streaming and WebSocket/SSE share the
 > drain-then-assert-on-a-bounded-condition discipline.
 
 ## Deadlines — the sanctioned bounded-wait, asserted as `DEADLINE_EXCEEDED`
@@ -242,13 +242,13 @@ beforeAll(() => {
   `for await` the `ClientReadableStream` (ends on the stream's `end`) or await the response callback; bound
   unbounded streams with `{ deadline }`.
 - **Hand-decoding the response bytes / using an untyped `any` message.** *Fix:* assert on the typed generated
-  message; the `.proto` is the contract. Generate types via `proto-loader-gen-types` / `qa-api-dto-writer-typescript`.
+  message; the `.proto` is the contract. Generate types via `proto-loader-gen-types` / `qa-api-models-typescript`.
 - **Trusting a write RPC's echoed payload as proof of persistence.** *Fix:* round-trip a read RPC and assert state.
 - **Creating a client per test (or never calling `close()`).** Leaks HTTP/2 connections and can hang Vitest's
   exit. *Fix:* one client per spec file, `close()` in `afterAll`.
 - **Hardcoding the target / committing the token.** *Fix:* `process.env.GRPC_TARGET` / `GRPC_TOKEN`, read lazily,
-  never logged; bearer via `qa-auth0-test-tokens-typescript`. Reaching for this skill for **load** →
-  `qa-performance-k6-typescript`; for a **Protobuf contract** → `qa-contract-testing-pact-typescript`.
+  never logged; bearer via `qa-test-login-tokens-typescript`. Reaching for this skill for **load** →
+  `qa-load-testing-typescript`; for a **Protobuf contract** → `qa-api-contract-testing-typescript`.
 
 ## Examples
 
@@ -273,29 +273,29 @@ differ.
 - **Rich errors assert the `google.rpc.Status` details** (`ErrorInfo.reason`/`domain`, `BadRequest` field
   violations) decoded from `grpc-status-details-bin` — not a bare `status` code.
 - **Assert on the typed generated message** — never hand-decode bytes; the `.proto` is the contract. Types via
-  `proto-loader-gen-types` / `qa-api-dto-writer-typescript`.
+  `proto-loader-gen-types` / `qa-api-models-typescript`.
 - **A write RPC test round-trips a read** to prove persistence; data created in a spec is cleaned up in
   `afterEach`/`afterAll` (cleanup in `try/catch`).
 - **Streaming = drain-then-assert on a bounded condition** — `for await` the `ClientReadableStream`
   (server-streaming) or await the response callback after `call.end()` (client-streaming); bound unbounded streams
   with `{ deadline }`. **No `setTimeout`/`waitForTimeout`.** Deep stream-lifecycle assertions →
-  `qa-websocket-sse-testing-typescript`.
+  `qa-realtime-stream-testing-typescript`.
 
 ## Cross-references
 
-- `qa-api-test-author-grpc-java` — **the canonical file**: same four ideas, grpc-java + TestNG +
+- `qa-api-test-grpc-java` — **the canonical file**: same four ideas, grpc-java + TestNG +
   `GrpcCallResult`/`StatusRuntimeException`. Read it for the family rationale.
-- `qa-api-test-author-grpc-dotnet` — the .NET sibling (`Grpc.Net.Client` + `Grpc.Tools`); same four ideas,
+- `qa-api-test-grpc-dotnet` — the .NET sibling (`Grpc.Net.Client` + `Grpc.Tools`); same four ideas,
   different codegen/client libs.
-- `qa-api-test-author-generator-typescript` · `qa-api-test-author-graphql-typescript` — the **protocol-trio
+- `qa-api-test-writer-typescript` · `qa-api-test-graphql-typescript` — the **protocol-trio
   siblings**: REST (HTTP+JSON status-driven) and GraphQL (HTTP 200 `{ data, errors }` envelope). Three protocols,
   three result-location conventions, one `api-test-author` family + shared Client + Spec spine.
-- `qa-websocket-sse-testing-typescript` — gRPC **streaming** reuses its
+- `qa-realtime-stream-testing-typescript` — gRPC **streaming** reuses its
   drain-then-assert-on-a-bounded-condition discipline; cross-link for deep stream-lifecycle assertions, don't
   duplicate.
-- `qa-api-dto-writer-typescript` — generate/type the proto messages (the DTO analogue) in isolation; this skill
+- `qa-api-models-typescript` — generate/type the proto messages (the DTO analogue) in isolation; this skill
   consumes them.
-- `qa-contract-testing-pact-typescript` — the **Protobuf contract** boundary vs the functional test this skill
-  writes. `qa-performance-k6-typescript` — gRPC **load**.
-- `qa-auth0-test-tokens-typescript` — obtain the per-call **bearer** carried in leading metadata.
-- `qa-allure-reporting-typescript` — each RPC renders as a named result.
+- `qa-api-contract-testing-typescript` — the **Protobuf contract** boundary vs the functional test this skill
+  writes. `qa-load-testing-typescript` — gRPC **load**.
+- `qa-test-login-tokens-typescript` — obtain the per-call **bearer** carried in leading metadata.
+- `qa-test-reports-typescript` — each RPC renders as a named result.

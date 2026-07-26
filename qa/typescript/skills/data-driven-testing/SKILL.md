@@ -17,7 +17,7 @@ case; you never copy-paste a test to cover a new input.
 
 It is *not*: a **builder** constructing one richly-configured object in code (`qa-test-data-builder-typescript`
 — one object well, vs many rows; they **compose**); rows pulled from a **live database**
-(`qa-db-testing-query-author-typescript`); or a **cross-browser/-device matrix** (`qa-cloud-grid-config-typescript`
+(`qa-db-verification-queries-typescript`); or a **cross-browser/-device matrix** (`qa-browser-cloud-setup-typescript`
 — parameterizing the *environment*, not the *data*).
 
 > **The discipline this skill encodes** — four ideas, identical across all three stacks:
@@ -43,7 +43,7 @@ It is *not*: a **builder** constructing one richly-configured object in code (`q
 | Nested / hierarchical cases (a row has sub-objects or lists) | **JSON file** | `JSON.parse` → `z.array(RowSchema).parse(...)` |
 | Tabular data **owned/edited by non-technical stakeholders** | **Excel `.xlsx`** | `xlsx` (SheetJS) `sheet_to_json` → Zod-validated `Row[]` |
 | Huge dataset (don't hold it all in memory) | CSV, **streaming** | `csv-parse` async iterator (`for await (const row of parse(...))`) |
-| Rows from a **live DB / API** at test time | not this skill | `qa-db-testing-query-author-typescript` (DB), `fetch` (HTTP) |
+| Rows from a **live DB / API** at test time | not this skill | `qa-db-verification-queries-typescript` (DB), `fetch` (HTTP) |
 | Each row is a whole complex domain object built in code | not this skill | `qa-test-data-builder-typescript` (the builder can consume one row) |
 
 **Rule of thumb:** *prefer CSV or JSON in git* (diffable, reviewable, mergeable). Reach for **Excel only**
@@ -293,7 +293,7 @@ order independence is preserved.)
 - **Money as floating-point.** JS `number` is a double; `0.1 + 0.2` corrupts totals. *Fix:* **integer cents**;
   assert on those.
 - **Secrets or real PII in a committed data file.** It's in git history forever. *Fix:* synthetic data; real
-  secrets via env (cross-link `qa-auth0-test-tokens-typescript`).
+  secrets via env (cross-link `qa-test-login-tokens-typescript`).
 
 ## Examples
 
@@ -329,7 +329,7 @@ test.for(loadCsvOrderCases(ordersCsv))("applies discount for $region", (row) => 
   stakeholder-owned sheets, inline for a few. Prefer diffable CSV/JSON in git over binary Excel.
 - **Money is integer cents, never float**; a malformed row **throws at load** (Zod), it does not flow through
   as `NaN`. No secrets or real PII in committed data files (synthetic; secrets via env —
-  `qa-auth0-test-tokens-typescript`).
+  `qa-test-login-tokens-typescript`).
 - **Streaming async-iterator for huge datasets**. No `waitForTimeout`; `strict: true`; page objects expose
   intent, not selectors.
 
@@ -343,10 +343,10 @@ test.for(loadCsvOrderCases(ordersCsv))("applies discount for $region", (row) => 
 - `qa-test-data-builder-typescript` — the **boundary**: a builder constructs **one** complex object in code
   with defaults; data-driven feeds **many** rows from a file. They **compose** — a row drives a builder's
   varying fields (see the last example).
-- `qa-db-testing-query-author-typescript` — when rows come from a **live database** at test time rather
+- `qa-db-verification-queries-typescript` — when rows come from a **live database** at test time rather
   than a static file; the assertion-query counterpart to file-sourced data.
-- `qa-cloud-grid-config-typescript` — parameterizing the **environment** (browser/device matrix) via
+- `qa-browser-cloud-setup-typescript` — parameterizing the **environment** (browser/device matrix) via
   Playwright projects rather than the **data**; orthogonal matrices that can multiply.
-- `qa-ui-test-author-playwright-typescript` — the page objects the data-driven journey reuses; this skill
+- `qa-ui-test-writer-playwright-typescript` — the page objects the data-driven journey reuses; this skill
   supplies their rows. `qa-flaky-test-quarantine-typescript` — per-row retry/flaky handling for the
-  generated tests. `qa-allure-reporting-typescript` — each row renders as a separate, named result.
+  generated tests. `qa-test-reports-typescript` — each row renders as a separate, named result.

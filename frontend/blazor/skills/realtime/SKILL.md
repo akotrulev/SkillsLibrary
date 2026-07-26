@@ -1,11 +1,11 @@
 ---
 name: fe-blazor-realtime
-description: Use when a Blazor surface (.NET 8/9/10) needs LIVE / server-pushed data — interactive-Server circuit push (`InvokeAsync(StateHasChanged)`), the WASM SignalR client (`HubConnection`, `WithStatefulReconnect`), raw WebSocket/SSE feeds, the prerender-snapshot→live-channel handoff. Triggers: "push updates to the UI", "SignalR in Blazor", "live dashboard/chat", "background job updates a component". Do NOT use for request/response fetching (`data-access`) or the reconnect modal UI (`error-resilience`).
+description: Use when a Blazor surface (.NET 8/9/10) needs LIVE / server-pushed data — interactive-Server circuit push (`InvokeAsync(StateHasChanged)`), the WASM SignalR client (`HubConnection`, `WithStatefulReconnect`), raw WebSocket/SSE feeds, the prerender-snapshot→live-channel handoff. Triggers: "push updates to the UI", "SignalR in Blazor", "live dashboard/chat", "background job updates a component". Do NOT use for request/response fetching (`data-fetching`) or the reconnect modal UI (`error-handling`).
 ---
 
 # Blazor — Realtime (live / push lane)
 
-Owns the **live/push transport lane**: data arrives at the component *without it asking*. The **request/response lane** — the component asks, the server answers once — is [`data-access`](../data-access/SKILL.md)'s. Both skills open with the same routing decision.
+Owns the **live/push transport lane**: data arrives at the component *without it asking*. The **request/response lane** — the component asks, the server answers once — is [`data-fetching`](../data-fetching/SKILL.md)'s. Both skills open with the same routing decision.
 
 ## Transport routing — which lane am I in?
 
@@ -13,17 +13,17 @@ Owns the **live/push transport lane**: data arrives at the component *without it
 Is the data pushed by the server (it arrives without the component asking)?
   YES → live / push / stream  → THIS skill (realtime)
 Is the data pulled by the component (it asks, the server answers once per request)?
-  YES → request/response      → `data-access`
+  YES → request/response      → `data-fetching`
 ```
 
 | Signal | Lane | Skill |
 |---|---|---|
 | Dashboard tile updates itself; ticker; chat; presence; progress; server notifications | live/push | **realtime** (here) |
-| Load a list/detail; submit a form; paginate; search | request/response | [`data-access`](../data-access/SKILL.md) |
-| Long query streamed in chunks to first paint (`[StreamRendering]`) | request/response | [`data-access`](../data-access/SKILL.md) |
+| Load a list/detail; submit a form; paginate; search | request/response | [`data-fetching`](../data-fetching/SKILL.md) |
+| Long query streamed in chunks to first paint (`[StreamRendering]`) | request/response | [`data-fetching`](../data-fetching/SKILL.md) |
 | Third-party feed over WebSocket/SSE | live/push | **realtime** (here) |
 
-Most live surfaces do **both**: [`data-access`](../data-access/SKILL.md) fetches the initial state, then this skill's live channel takes over. The **prerender-snapshot handoff** (below) is the seam.
+Most live surfaces do **both**: [`data-fetching`](../data-fetching/SKILL.md) fetches the initial state, then this skill's live channel takes over. The **prerender-snapshot handoff** (below) is the seam.
 
 **Version rule:** detect the `TargetFramework` first. `WithStatefulReconnect`, the `ReconnectModal`, and circuit pause/resume are net8+/net10 as noted; net8/net9 fallbacks are tagged. Never emit a net10-only API into a down-level project.
 
@@ -126,7 +126,7 @@ A WASM component has no circuit, so it opens a `HubConnection` to a hub. Build i
 - **Transport fallback** is automatic: WebSockets → Server-Sent Events → long polling. Prefer WebSockets (lower latency, reliable); only pin the transport when a proxy forces it.
 - **Streaming** a server method: `await foreach (var item in _hub.StreamAsync<T>("Feed", ct)) { ... }` for continuous server output, distinct from one-shot invocations.
 - **Hub auth is provider-neutral** — the `AccessTokenProvider` supplies whatever OIDC token the auth layer minted (**Auth0 or AWS Cognito**); wiring lives in `auth/auth0-blazor` · `auth/cognito-blazor`.
-- **Connection-status affordance** is mandatory: surface `HubConnectionState` (Connected / Reconnecting / Disconnected) so the user knows the data may be stale. The full reconnection *modal* UX is [`error-resilience`](../error-resilience/SKILL.md)'s.
+- **Connection-status affordance** is mandatory: surface `HubConnectionState` (Connected / Reconnecting / Disconnected) so the user knows the data may be stale. The full reconnection *modal* UX is [`error-handling`](../error-handling/SKILL.md)'s.
 
 ## Raw WebSocket / SSE — non-SignalR feeds
 
@@ -140,11 +140,11 @@ Same disposal + `InvokeAsync` marshalling rules as the SignalR lane.
 
 ## Prerender-snapshot → live-channel handoff
 
-Fetch the initial state via [`data-access`](../data-access/SKILL.md) and persist it with `[PersistentState]` (net10) so prerender shows real data with no flash and no double-fetch; then start the live channel and let it take over:
+Fetch the initial state via [`data-fetching`](../data-fetching/SKILL.md) and persist it with `[PersistentState]` (net10) so prerender shows real data with no flash and no double-fetch; then start the live channel and let it take over:
 
 ```razor
 @implements IAsyncDisposable
-@inject IDashboardData Data   @* data-access: initial state *@
+@inject IDashboardData Data   @* data-fetching: initial state *@
 
 @code {
     [PersistentState] public DashboardSnapshot? Snapshot { get; set; }   // net10; net8/9 → PersistentComponentState
@@ -158,20 +158,20 @@ Fetch the initial state via [`data-access`](../data-access/SKILL.md) and persist
 }
 ```
 
-This is the exact seam between the two lanes: **data-access owns the snapshot, realtime owns the stream.**
+This is the exact seam between the two lanes: **data-fetching owns the snapshot, realtime owns the stream.**
 
 ## Rules
 
-- **Open every live feature with the transport routing decision**: push → here; pull → [`data-access`](../data-access/SKILL.md).
+- **Open every live feature with the transport routing decision**: push → here; pull → [`data-fetching`](../data-fetching/SKILL.md).
 - **Interactive Server: no SignalR client** — subscribe to a server broker; the circuit is the channel.
 - **Every background→UI update is marshalled through `InvokeAsync(StateHasChanged)`** — a background thread never touches component state directly (circuit *and* renderer sync context).
 - **Every subscription/connection is torn down** — `IDisposable`/`IAsyncDisposable`, unsubscribe from singleton brokers, `DisposeAsync` the `HubConnection`.
 - **WASM: build `HubConnection` in `OnInitializedAsync`**, `WithAutomaticReconnect()` + `WithStatefulReconnect()` (net8+), Reconnecting/Reconnected/Closed handlers, and a **connection-status affordance**.
 - **Prefer WebSockets**; rely on automatic transport fallback rather than pinning.
-- **Prerender a `[PersistentState]` snapshot** via [`data-access`](../data-access/SKILL.md), then hand off to the live channel — no flash, no double-fetch.
+- **Prerender a `[PersistentState]` snapshot** via [`data-fetching`](../data-fetching/SKILL.md), then hand off to the live channel — no flash, no double-fetch.
 - **Hub auth token is IdP-agnostic** (Auth0 / Cognito), sourced from the auth skill.
 - **Scale-out (Server): sticky sessions + Azure SignalR/Redis backplane.**
-- **Every live element carries a `data-testid`** per [`testability`](../testability/SKILL.md); connection-status control included.
+- **Every live element carries a `data-testid`** per [`test-ids`](../test-ids/SKILL.md); connection-status control included.
 
 ## What NOT to do
 
@@ -194,8 +194,8 @@ This is the exact seam between the two lanes: **data-access owns the snapshot, r
 
 ## Handoffs
 
-- Initial-state fetch + the shared routing matrix → [`data-access`](../data-access/SKILL.md)
-- Reconnection modal, circuit pause/resume, three-state failure UX → [`error-resilience`](../error-resilience/SKILL.md)
+- Initial-state fetch + the shared routing matrix → [`data-fetching`](../data-fetching/SKILL.md)
+- Reconnection modal, circuit pause/resume, three-state failure UX → [`error-handling`](../error-handling/SKILL.md)
 - Hub auth token (Auth0 / Cognito) → `auth/auth0-blazor` · `auth/cognito-blazor`
-- Testids on live elements → [`testability`](../testability/SKILL.md)
-- **Testing** these streams → `qa/dotnet/skills/websocket-sse-testing` (peer); **connection-count load** → `qa-performance-dotnet` (peer)
+- Testids on live elements → [`test-ids`](../test-ids/SKILL.md)
+- **Testing** these streams → `qa/dotnet/skills/realtime-stream-testing` (peer); **connection-count load** → `qa-performance-dotnet` (peer)

@@ -1,6 +1,6 @@
 ---
 name: fe-blazor-forms
-description: Use when building or improving a Blazor form (.NET 8/9/10) — `EditForm`, `DataAnnotationsValidator`, `AddValidation()` + `[ValidatableType]` (net10), `FluentValidationValidator`, async validation, ProblemDetails error mapping, uploads, wizards, a11y. Triggers: "build a Blazor form for X", "wire FluentValidation in Blazor", "server-side errors on a Blazor form". Do NOT use for state management (`state-management`), component scaffolding (`generator`), or React (its sibling).
+description: Use when building or improving a Blazor form (.NET 8/9/10) — `EditForm`, `DataAnnotationsValidator`, `AddValidation()` + `[ValidatableType]` (net10), `FluentValidationValidator`, async validation, ProblemDetails error mapping, uploads, wizards, a11y. Triggers: "build a Blazor form for X", "wire FluentValidation in Blazor", "server-side errors on a Blazor form". Do NOT use for state management (`state-management`), component scaffolding (`component-writer`), or React (its sibling).
 ---
 
 # Blazor Forms
@@ -18,7 +18,7 @@ The house pattern: **`EditForm` + `FluentValidation` (default)** or **`DataAnnot
 ## When NOT to use
 
 - State management at large → `frontend/blazor/skills/state-management`
-- Component scaffolding → `frontend/blazor/skills/generator`
+- Component scaffolding → `frontend/blazor/skills/component-writer`
 - React → `frontend/react/skills/forms`
 - Auth UI specifics (login / signup) → `auth/auth0-blazor`
 
@@ -261,7 +261,7 @@ Helper for "move focus to first error":
 }
 ```
 
-(Better: a small `focus-first-invalid.js` collocated module — see `frontend/blazor/skills/generator` for the collocated JS pattern.)
+(Better: a small `focus-first-invalid.js` collocated module — see `frontend/blazor/skills/component-writer` for the collocated JS pattern.)
 
 ## Custom `<ValidationMessage>` with `role="alert"`
 
@@ -382,7 +382,7 @@ For large files, upload to a signed URL (S3 presigned / Azure Blob SAS) directly
 ## Handoffs
 
 - State management → `frontend/blazor/skills/state-management`
-- Component scaffolding → `frontend/blazor/skills/generator`
+- Component scaffolding → `frontend/blazor/skills/component-writer`
 - Auth-protected forms → `auth/auth0-blazor`
 - API contract → `qa/api-test-author/generator/dotnet`
 - React equivalent → `frontend/react/skills/forms`

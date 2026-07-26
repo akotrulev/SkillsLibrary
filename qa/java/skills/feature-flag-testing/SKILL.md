@@ -36,7 +36,7 @@ the SDK surface changes.
 >    evaluation engine runs your rule — you're testing the targeting semantics, not a hand-rolled stub of them.
 > 4. **Flag lifecycle is part of the discipline.** A kill-switch only earns its name if flipping it **mid-flight**
 >    actually degrades gracefully — `td.update(...)` propagates to a live client like a streamed change, so one
->    test proves the off-path engages *without a restart* (the flag analogue of `qa-chaos-testing-java`'s
+>    test proves the off-path engages *without a restart* (the flag analogue of `qa-failure-injection-testing-java`'s
 >    heal-and-recover). And flag state is **cleaned between tests** (fresh provider/fixture per test or
 >    rebuilt in `@BeforeMethod`) so a pinned flag never leaks into the next test — test independence.
 
@@ -112,7 +112,7 @@ management or rollout strategy: creating flags in the dashboard, percentage roll
 experimentation/A-B *analytics*, or flag-cleanup tooling are platform ops, out of scope. Two adjacent boundaries
 worth drawing every time: stale-flag hygiene (a flag whose both-sides tests have asserted the same behavior for
 months is a removal candidate — flag it in review, don't let the matrix rot), and the kill-switch *off-path
-behavior* (this skill) vs a *dependency fault* behind it (`qa-chaos-testing-java`).
+behavior* (this skill) vs a *dependency fault* behind it (`qa-failure-injection-testing-java`).
 
 ## Anti-patterns
 
@@ -151,10 +151,10 @@ a two-row matrix asserting `express-checkout` *and* `classic-checkout`, a contex
 fallthrough asserted, and a kill-switch flip test. Same flag, deterministic — and **both** branches covered.
 
 **Composing with the neighbors.** The branch under test often *contains* the things other skills assert — the
-on-path writes a new table (`qa-db-testing-client-java`), emits a new event (`qa-messaging-testing-java`),
-or renders a new page (`qa-ui-test-author-playwright-java`). This skill pins which branch runs; those skills
+on-path writes a new table (`qa-db-connection-java`), emits a new event (`qa-messaging-testing-java`),
+or renders a new page (`qa-ui-test-writer-playwright-java`). This skill pins which branch runs; those skills
 assert what the branch does. The variation matrix binds through `qa-data-driven-testing-java`; the kill-switch
-degradation assertion borders `qa-chaos-testing-java` (flag flip vs dependency fault — adjacent, not the same).
+degradation assertion borders `qa-failure-injection-testing-java` (flag flip vs dependency fault — adjacent, not the same).
 
 ## Rules (hard constraints)
 
@@ -182,10 +182,10 @@ degradation assertion borders `qa-chaos-testing-java` (flag flip vs dependency f
   `TestData` + Vitest); same four ideas, same fixtures, different SDK surface.
 - `qa-data-driven-testing-java` — the **matrix mechanics** the on/off/variation table binds through
   (`@DataProvider` row-binding); this skill defines *what* the rows are, that one defines *how* rows drive tests.
-- `qa-chaos-testing-java` — the **kill-switch boundary**: the off-path of a flag flip is this skill; a
+- `qa-failure-injection-testing-java` — the **kill-switch boundary**: the off-path of a flag flip is this skill; a
   faulted dependency behind the feature is chaos. The lifecycle shape (steady → perturb → assert-degraded) is shared.
-- `qa-api-test-author-generator-java` · `qa-ui-test-author-playwright-java` — the branch under test is usually an
+- `qa-api-test-writer-java` · `qa-ui-test-writer-playwright-java` — the branch under test is usually an
   API or UI behavior; those skills own the assertion style inside each pinned branch.
-- `qa-auth0-test-tokens-java` — the same "test fixture over live service" posture applied to auth; pairs
+- `qa-test-login-tokens-java` — the same "test fixture over live service" posture applied to auth; pairs
   when targeting rules key off claims-derived attributes.
-- `qa-allure-reporting-java` — render the flag matrix as named results (one per variation row).
+- `qa-test-reports-java` — render the flag matrix as named results (one per variation row).

@@ -1,6 +1,6 @@
 # MongoDB — Performance
 
-Reading `.explain('executionStats')`, the working-set/WiredTiger cache model, aggregation-pipeline tuning, read/write concern trade-offs, the profiler, and when (and only when) to shard. Engine index mechanics are in `references/indexing.md`; universal triage (ESR, N+1, pagination) is in `data/_shared/query-optimization`.
+Reading `.explain('executionStats')`, the working-set/WiredTiger cache model, aggregation-pipeline tuning, read/write concern trade-offs, the profiler, and when (and only when) to shard. Engine index mechanics are in `references/indexing.md`; universal triage (ESR, N+1, pagination) is in `data/_shared/slow-query-fixes`.
 
 ## The single best predictor: working set vs RAM
 
@@ -88,7 +88,7 @@ When you do shard, the **shard key is the decision that can't be easily undone**
 ## Handoffs
 
 - Index type/order to fix a COLLSCAN or over-fetch → `references/indexing.md`
-- ESR principle, keyset pagination, N+1 across engines → `data/_shared/query-optimization`
+- ESR principle, keyset pagination, N+1 across engines → `data/_shared/slow-query-fixes`
 - Reducing document size / bucketing → `references/data-modeling.md`
 - Offloading reads to a cache instead of the primary → `references/caching.md` + `data/redis`
 - Latency dashboards / slow-op telemetry → `observability/*` skills (via the `observability-engineer-{dotnet,java,node}` peer bundled in the matching `be-*` plugin)

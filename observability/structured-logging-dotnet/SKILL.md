@@ -33,8 +33,8 @@ First act on an existing project: read the `TargetFramework` from the `.csproj`.
 - Java service → `observability/structured-logging-java`
 - Node / TypeScript service → `observability/structured-logging-node`
 - Distributed tracing or metrics (different concern) → `observability/opentelemetry-dotnet`
-- LogQL/PromQL query authoring → `observability/logql-promql`
-- Dashboard layout → `observability/grafana-dashboards`
+- LogQL/PromQL query authoring → `observability/queries`
+- Dashboard layout → `observability/dashboards`
 
 ## Inputs needed
 
@@ -162,7 +162,7 @@ _logger.LogInformation("Processing payment for {OrderId}", id);
 // Emitted JSON includes: "TraceId":"a1b2c3...", "SpanId":"d4e5f6..."
 ```
 
-**Trace-correlation contract:** this stack emits the trace id as the JSON field **`TraceId`** (PascalCase — `Serilog.Enrichers.Span`'s default; 32 lowercase hex chars). Do not rename it. The Loki derived-field regex in `observability/loki-tempo-setup` is the canonical cross-stack regex and matches `TraceId` alongside the other stacks' `trace_id`.
+**Trace-correlation contract:** this stack emits the trace id as the JSON field **`TraceId`** (PascalCase — `Serilog.Enrichers.Span`'s default; 32 lowercase hex chars). Do not rename it. The Loki derived-field regex in `observability/logs-traces-setup` is the canonical cross-stack regex and matches `TraceId` alongside the other stacks' `trace_id`.
 
 ## Levels & cardinality
 
@@ -231,7 +231,7 @@ Cardinality rule: **Loki labels are not log fields.** Labels are coarse (service
 ## Handoffs
 
 - Distributed tracing + metrics → `observability/opentelemetry-dotnet`
-- LogQL queries against Loki → `observability/logql-promql`
-- Dashboard layout → `observability/grafana-dashboards`
+- LogQL queries against Loki → `observability/queries`
+- Dashboard layout → `observability/dashboards`
 - Java equivalent → `observability/structured-logging-java`
 - Node equivalent → `observability/structured-logging-node`

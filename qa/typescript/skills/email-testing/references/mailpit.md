@@ -301,4 +301,4 @@ it('emails a PDF invoice', async () => {
 - **`qa/typescript/skills/test-data-builder`** — unique-email builder.
 - **`qa/typescript/skills/db-testing/testcontainers`** — signup creates a DB row *and* sends an email.
 - **`qa/cicd/typescript/skills/ci-pipelines`** — Mailpit as a service container in the pipeline.
-- **`qa/reporting/typescript/skills/allure-reporting`** — attach raw email source on failure.
+- **`qa/reporting/typescript/skills/test-reports`** — attach raw email source on failure.

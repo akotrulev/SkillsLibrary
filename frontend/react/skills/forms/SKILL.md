@@ -1,6 +1,6 @@
 ---
 name: fe-react-forms
-description: Use when building or fixing a form — React Hook Form + Zod (default), the React 19 Server-Actions lane (`<form action>` + `useActionState` + `useOptimistic`), async/server validation, ProblemDetails→field-error mapping, wizards, uploads, a11y. Triggers "build a form for X", "validate with Zod", "server errors aren't landing on the fields", "my input loses focus on every keystroke". Not for state management (`state-management`) or fetch mechanics (`data-access`).
+description: Use when building or fixing a form — React Hook Form + Zod (default), the React 19 Server-Actions lane (`<form action>` + `useActionState` + `useOptimistic`), async/server validation, ProblemDetails→field-error mapping, wizards, uploads, a11y. Triggers "build a form for X", "validate with Zod", "server errors aren't landing on the fields", "my input loses focus on every keystroke". Not for state management (`state-management`) or fetch mechanics (`data-fetching`).
 ---
 
 # React — Forms
@@ -20,9 +20,9 @@ House pattern: **React Hook Form (RHF) + Zod** validated against a strongly-type
 
 - A single search input or filter — `useState` (or URL state) is fine, no library
 - State management at large → [`state-management`](../state-management/SKILL.md)
-- The fetch/mutation mechanics + caching/revalidation → [`data-access`](../data-access/SKILL.md)
+- The fetch/mutation mechanics + caching/revalidation → [`data-fetching`](../data-fetching/SKILL.md)
 - Broad accessibility audit → [`accessibility`](../accessibility/SKILL.md)
-- Component scaffolding → [`generator`](../generator/SKILL.md)
+- Component scaffolding → [`component-writer`](../component-writer/SKILL.md)
 - Auth UI (login/signup) → `auth/auth0-react`
 
 ## Which lane?
@@ -160,7 +160,7 @@ export async function createOrder(_prev: FormState, formData: FormData): Promise
   }
   try { await db.orders.create(parsed.data); }
   catch { return { errors: { root: 'Submission failed. Try again.' } }; }
-  revalidateTag('orders');                           // reflect the write — see data-access
+  revalidateTag('orders');                           // reflect the write — see data-fetching
   redirect('/orders');
 }
 ```
@@ -192,7 +192,7 @@ Per-field server errors then look identical to client validation errors — neve
 
 ## Accessibility — non-negotiable
 
-Every input: (1) `<label htmlFor>` matched to `id` (or a documented `aria-label`); (2) `aria-invalid` when in error; (3) `aria-describedby` pointing at the error message `id`; (4) the error message rendered with `role="alert"` so it's announced; (5) submit `disabled` while submitting + `aria-busy` on the form; (6) on submission failure, **focus moves to the first invalid field** (`setFocus` in RHF, or a focusing effect in the actions lane). Without these the form fails screen-reader users — [`accessibility`](../accessibility/SKILL.md) and [`reviewer`](../reviewer/SKILL.md) check them.
+Every input: (1) `<label htmlFor>` matched to `id` (or a documented `aria-label`); (2) `aria-invalid` when in error; (3) `aria-describedby` pointing at the error message `id`; (4) the error message rendered with `role="alert"` so it's announced; (5) submit `disabled` while submitting + `aria-busy` on the form; (6) on submission failure, **focus moves to the first invalid field** (`setFocus` in RHF, or a focusing effect in the actions lane). Without these the form fails screen-reader users — [`accessibility`](../accessibility/SKILL.md) and [`code-review`](../code-review/SKILL.md) check them.
 
 ## Controlled inputs — `Controller`
 
@@ -236,7 +236,7 @@ Hold accumulated state in a parent (or a scoped store); validate per step; call 
 - **Uncontrolled by default**; `Controller` for 3rd-party controls; MUI `Select`/`Autocomplete`/`DatePicker` via `Controller`.
 - **Multi-step:** schema-per-step + merged final; accumulated state in a parent/store.
 - **Large uploads bypass the server** via signed URLs.
-- Every form + interactive control carries a `data-testid` per [`testability`](../testability/SKILL.md).
+- Every form + interactive control carries a `data-testid` per [`test-ids`](../test-ids/SKILL.md).
 
 ## What NOT to do
 
@@ -262,9 +262,9 @@ Hold accumulated state in a parent (or a scoped store); validate per step; call 
 ## Handoffs
 
 - State management at large → [`state-management`](../state-management/SKILL.md)
-- Fetch/mutation mechanics, caching, revalidation → [`data-access`](../data-access/SKILL.md)
+- Fetch/mutation mechanics, caching, revalidation → [`data-fetching`](../data-fetching/SKILL.md)
 - Accessibility deep dive → [`accessibility`](../accessibility/SKILL.md)
-- Component scaffolding → [`generator`](../generator/SKILL.md)
+- Component scaffolding → [`component-writer`](../component-writer/SKILL.md)
 - Auth-protected forms → `auth/auth0-react`
 - API contract (ProblemDetails fields must match) → `qa/typescript/skills/api-test-author` (peer)
 - Blazor forms → `frontend/blazor/skills/forms`

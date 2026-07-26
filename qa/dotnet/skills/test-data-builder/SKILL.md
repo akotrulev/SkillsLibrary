@@ -20,7 +20,7 @@ Eliminates repeated inline test data literals in .NET 8 test projects (NUnit pri
 - Java test data → `qa/java/skills/test-data-builder`
 - TypeScript test data → `qa/typescript/skills/test-data-builder`
 - Production-code builders → the `backend/dotnet` dev stack's generator, if installed
-- Test data for performance scenarios (volume) → `qa/dotnet/skills/performance/nbomber`
+- Test data for performance scenarios (volume) → `qa/dotnet/skills/load-testing`
 - One-off fixture used by a single test → inline is fine; only extract on duplication
 
 ## Builder vs ObjectMother
@@ -200,8 +200,8 @@ Don't build "an order in the DB" inside the builder — that couples the builder
 
 - Java test data → `qa/java/skills/test-data-builder`
 - TypeScript test data → `qa/typescript/skills/test-data-builder`
-- API tests where these feed into request bodies → `qa/dotnet/skills/api-test-author/generator`
+- API tests where these feed into request bodies → `qa/dotnet/skills/api-test-author/writer`
 - UI tests where they back form-fill helpers → `qa/dotnet/skills/ui-test-author/playwright` / `qa/dotnet/skills/ui-test-author/selenium` / `qa/dotnet/skills/ui-test-author/appium`
-- Test reviewers (verify builders used, not literals) → `qa/dotnet/skills/api-test-author/reviewer` / `qa/dotnet/skills/ui-test-author/reviewer`
+- Test reviewers (verify builders used, not literals) → `qa/dotnet/skills/api-test-author/review` / `qa/dotnet/skills/ui-test-author/review`
 - Test strategy / pyramid → `qa/manual/test-strategy`
 - Production-code builders → the `backend/dotnet` dev stack's generator, if installed

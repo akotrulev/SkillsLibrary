@@ -1,5 +1,5 @@
 ---
-name: qa-ui-test-author-appium-java
+name: qa-ui-test-writer-appium-java
 description: Use when the user asks to scaffold a Java + Appium 2.x page object or TestNG mobile UI test, following the BasePage / DriverFactory / TestNG pattern. Triggers: "create an Appium page object for X in Java", "add a Java mobile page for screen Y", "write an Appium TestNG test for Z". For end-to-end suite work prefer the phased agent `qa-mobile-java` / `qa-bdd-java` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
 ---
 
@@ -28,8 +28,8 @@ Scaffolds Appium 2.x page objects and TestNG mobile UI tests in Java, mirroring 
 - Appium .NET → `qa/dotnet/skills/ui-test-author/appium`
 - Appium TypeScript / WebdriverIO → `qa/typescript/skills/ui-test-author/appium`
 - Selenium / web → `qa/java/skills/ui-test-author/selenium` or `qa/java/skills/ui-test-author/playwright`
-- Reviewing an existing page object → `qa/java/skills/ui-test-author/reviewer`
-- Designing the whole POM architecture → `qa/java/skills/page-object-architect`
+- Reviewing an existing page object → `qa/java/skills/ui-test-author/review`
+- Designing the whole POM architecture → `qa/java/skills/page-object-design`
 
 ## Inputs needed
 
@@ -258,7 +258,7 @@ public class AuthenticationTest extends BaseMobileTest {
 
 ## Handoffs
 
-- Architecting the POM structure (sub-packages, base classes, capabilities) → `qa/java/skills/page-object-architect`
+- Architecting the POM structure (sub-packages, base classes, capabilities) → `qa/java/skills/page-object-design`
 - Test data builders → `qa/java/skills/test-data-builder`
-- Reviewing a page object → `qa/java/skills/ui-test-author/reviewer`
-- Allure reporting → `qa/reporting/java/skills/allure-reporting`
+- Reviewing a page object → `qa/java/skills/ui-test-author/review`
+- Allure reporting → `qa/reporting/java/skills/test-reports`

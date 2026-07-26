@@ -44,7 +44,7 @@ The skills library lives at `{{skills-library-path}}` (default: the repo's `qa/`
 
 <!-- Phase design rules:
   - Every phase lists concrete SKILL.md paths, e.g.
-    `qa/dotnet/skills/api-test-author/generator/SKILL.md` or `qa/manual/test-case-writer/SKILL.md`.
+    `qa/dotnet/skills/api-test-author/writer/SKILL.md` or `qa/manual/test-case-writer/SKILL.md`.
   - Exit gates are observable: "dotnet test passes", "client compiles with zero
     warnings", "review table has no blocker/major rows", "Allure report generated".
   - Conditional skills are marked: "(if the suite touches the DB)", "(if auth required)".

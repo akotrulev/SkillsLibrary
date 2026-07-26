@@ -15,7 +15,7 @@ regardless of tool or stack.
 > Schemathesis, sslyze). Wrapping them does not gain anything from a three-language split — so they live as
 > **single skills in `qa/_shared/security-testing/`**, invoked the same way from any pipeline. The work that
 > *is* genuinely stack-bound is **functional access-control testing** (real tests in your API framework
-> reusing your clients/DTOs/tokens) and **SCA / dependency-scanning** (different package managers per stack) —
+> reusing your clients/DTOs/tokens) and **SCA / dependency-scan** (different package managers per stack) —
 > those keep per-stack siblings. Don't triplicate a `docker run`.
 
 ## The OWASP backbone (pin to these versions)
@@ -82,10 +82,10 @@ LLM06 Excessive Agency · LLM07 System Prompt Leakage · LLM08 Vector & Embeddin
 
 > **This agent does not own model-behavior red-teaming — the `qa-llm-{stack}` agents do.** The scanner gates here
 > are blind to model behavior exactly as they are blind to BOLA: a jailbreak is well-formed HTTP. **LLM red-
-> teaming lives in `qa/<stack>/skills/llm-app-testing/references/red-teaming.md`** (promptfoo `redteam` with the
+> teaming lives in `qa/<stack>/skills/ai-feature-testing/references/red-teaming.md`** (promptfoo `redteam` with the
 > `owasp:llm` preset, or DeepTeam), owned by the `qa-llm-{stack}` agents — generate adversarial variants and
 > assert an attack-success **rate** per LLM-Top-10 item. The seam is two-way: a few LLM items still route back
-> *here* — **LLM03** supply chain → this agent's `dependency-scanning` (SCA); **LLM05** improper output handling →
+> *here* — **LLM03** supply chain → this agent's `dependency-scan` (SCA); **LLM05** improper output handling →
 > SAST/DAST on the downstream sink; **LLM10** resource consumption → rate-limit tests. Run an LLM app's security
 > as **both** agents in parallel; map each finding to its own framework (web/API Top 10 *and* LLM Top 10).
 
@@ -98,21 +98,21 @@ blind to logic flaws.**
 |---------|-------|--------------|--------|
 | Injection (SQLi/XSS/cmd/traversal) | A05 / API8 | DAST active scan, API fuzzing | ✅ (against a safe env) |
 | Security misconfig, missing headers, cookie flags, info leaks | A02 / API8 | DAST passive baseline | ✅ every PR |
-| Vulnerable/outdated components, transitive CVEs | A03 | **SCA** (dependency-scanning) | ✅ every PR |
-| Hardcoded secrets / leaked credentials | A02 / A07 | secrets-scanning | ✅ every PR (+ pre-commit) |
+| Vulnerable/outdated components, transitive CVEs | A03 | **SCA** (dependency-scan) | ✅ every PR |
+| Hardcoded secrets / leaked credentials | A02 / A07 | secrets-scan | ✅ every PR (+ pre-commit) |
 | Insecure code patterns, taint flows | A05 / A06 | **SAST** | ✅ every PR |
 | Container/base-image CVEs, IaC misconfig | A02 / A03 | container/IaC scanning | ✅ every build |
 | TLS/crypto configuration | A04 | TLS scanning | ✅ scheduled / pre-release |
 | **Broken access control: BOLA / IDOR / BFLA** | **A01 / API1 / API3 / API5** | **functional authz-matrix tests** | ✅ **but in your test suite, not a scanner** |
 | Business-logic abuse, chained-authz, sensitive-flow abuse | A01 / API6 | **manual penetration testing** | ❌ human |
-| **Model-behavior attacks: jailbreak, prompt injection, system-prompt/PII leakage, excessive agency** | **LLM01/02/06/07** | **LLM red-teaming** — `llm-app-testing` `red-teaming.md`, owned by `qa-llm-{stack}` | ✅ **but in the LLM eval suite (nightly), not this agent's scanners** |
+| **Model-behavior attacks: jailbreak, prompt injection, system-prompt/PII leakage, excessive agency** | **LLM01/02/06/07** | **LLM red-teaming** — `ai-feature-testing` `red-teaming.md`, owned by `qa-llm-{stack}` | ✅ **but in the LLM eval suite (nightly), not this agent's scanners** |
 
 > **⚠️ The scanner blind spot — own access control as a functional test.** A scanner authenticated as User A
 > has no way to know that invoice `42` belongs to User B; the malicious request is *perfectly well-formed
 > HTTP*. DAST tools find IDOR/BOLA only when hand-configured with multi-user accounts and cross-user object
 > maps — which is exactly what a functional **access-control test matrix** already does, written in your
 > normal API framework (multi-user × object-ID × endpoint → assert **403/404**), reusing the project's API
-> clients, DTOs, and `auth0-test-tokens`. See `qa/<stack>/skills/security-testing/access-control-testing`.
+> clients, DTOs, and `test-login-tokens`. See `qa/<stack>/skills/security-testing/permission-testing`.
 > This is the highest-value security testing most teams are missing. Deep business-logic abuse still needs a
 > manual pentest — say so; never imply a green pipeline means "secure."
 
@@ -121,15 +121,15 @@ blind to logic flaws.**
 | Layer | Skill | Reads | OWASP |
 |-------|-------|-------|-------|
 | **SAST** | `_shared/security-testing/sast` | your source | A05/A06 |
-| **Secrets** | `_shared/security-testing/secrets-scanning` | source + git history | A02/A07 |
-| **SCA** | `<stack>/skills/security-testing/dependency-scanning` | dependency tree | **A03** |
-| **DAST (passive)** | `<stack>/skills/security-testing/zap-baseline` | running app, no payloads | A02/A08 |
-| **DAST (active/API)** | `_shared/security-testing/zap-automation-framework` | running app, **payloads** | A05/API8 |
+| **Secrets** | `_shared/security-testing/secrets-scan` | source + git history | A02/A07 |
+| **SCA** | `<stack>/skills/security-testing/dependency-scan` | dependency tree | **A03** |
+| **DAST (passive)** | `<stack>/skills/security-testing/passive-scan` | running app, no payloads | A02/A08 |
+| **DAST (active/API)** | `_shared/security-testing/active-scan` | running app, **payloads** | A05/API8 |
 | **API fuzzing** | `_shared/security-testing/api-fuzzing` | running app + OpenAPI/GraphQL | A05/API4 |
 | **Templates/CVE** | `_shared/security-testing/nuclei` | running app / hosts | A02/A05 |
-| **Container/IaC** | `_shared/security-testing/container-iac-scanning` | images, fs, Terraform/K8s | A02/A03 |
-| **TLS** | `_shared/security-testing/tls-scanning` | the TLS endpoint | A04 |
-| **Access control** | `<stack>/skills/security-testing/access-control-testing` | your API, multi-user | **A01/API1/3/5** |
+| **Container/IaC** | `_shared/security-testing/image-infra-scan` | images, fs, Terraform/K8s | A02/A03 |
+| **TLS** | `_shared/security-testing/certificate-scan` | the TLS endpoint | A04 |
+| **Access control** | `<stack>/skills/security-testing/permission-testing` | your API, multi-user | **A01/API1/3/5** |
 
 A clean run in one layer says **nothing** about the others. A passing ZAP baseline does not mean your
 dependencies are clean; a clean SCA does not mean your access control works. Run the full set.
@@ -174,7 +174,7 @@ Most modern tools emit **SARIF** (Static Analysis Results Interchange Format). S
   security reports) so findings show **inline on the PR diff**, de-duplicate run-over-run, and track
   fixed/new state automatically.
 - Attach the human report to **Allure** + as a CI artifact so a failing run names the findings without
-  re-scanning. Cross-link `qa/reporting/<stack>/skills/allure-reporting`.
+  re-scanning. Cross-link `qa/reporting/<stack>/skills/test-reports`.
 
 ## The phased model (what the `qa-security` agent runs)
 
@@ -210,15 +210,15 @@ abuse still needs a manual pentest. State that in every report.
 
 - `qa/_shared/security/SETUP.md` — **setup & prerequisites** (per-tool install, env vars, target requirements,
   how to invoke the agent vs a single skill, the pre-flight checklist). The *how* to this skill's *why*.
-- `qa/_shared/security-testing/{zap-automation-framework,sast,secrets-scanning,container-iac-scanning,api-fuzzing,nuclei,tls-scanning}`
+- `qa/_shared/security-testing/{active-scan,sast,secrets-scan,image-infra-scan,api-fuzzing,nuclei,certificate-scan}`
   — the language-agnostic scanner skills this reference frames.
-- `qa/<stack>/skills/security-testing/access-control-testing` — the **stack-native** functional authz-matrix
+- `qa/<stack>/skills/security-testing/permission-testing` — the **stack-native** functional authz-matrix
   skill (the scanner blind spot; TS canonical).
-- `qa/<stack>/skills/security-testing/{zap-baseline,dependency-scanning}` — the existing passive-DAST and SCA
+- `qa/<stack>/skills/security-testing/{passive-scan,dependency-scan}` — the existing passive-DAST and SCA
   per-stack skills this family already shipped.
 - `qa/_shared/agents/qa-security.md` — the phased orchestrator that loads this reference + the tool skills.
-- `qa/<stack>/skills/auth0-test-tokens` — multi-user/role token acquisition the access-control matrix needs.
+- `qa/<stack>/skills/test-login-tokens` — multi-user/role token acquisition the access-control matrix needs.
 - `qa/cicd/<stack>/skills/ci-pipelines/*` + `qa/cicd/ci-conventions` — wire the gates and SARIF upload.
-- `qa/reporting/<stack>/skills/allure-reporting` — attach the human reports.
+- `qa/reporting/<stack>/skills/test-reports` — attach the human reports.
 - `qa/manual/{bug-report-writer,exploratory-charter-writer}` — write up a confirmed vuln / charter a manual
   security exploration for the layers CI can't reach.

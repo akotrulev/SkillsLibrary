@@ -18,8 +18,8 @@ Scaffolds TestNG fixtures (per CLAUDE.md default) or JUnit 5 classes that boot a
 
 - Unit tests with no SQL surface
 - Non-JVM stacks — see siblings
-- Performance against the DB → `qa/java/skills/performance/gatling`
-- SQL safety review → `qa/java/skills/db-testing/query-author`
+- Performance against the DB → `qa/java/skills/load-testing`
+- SQL safety review → `qa/java/skills/db-testing/verification-queries`
 
 ## Inputs needed
 
@@ -240,7 +240,7 @@ new GenericContainer<>("ghcr.io/myco/legacy-app:1.4.0")
 
 ## Cross-references
 
-- **`qa/java/skills/db-testing/query-author`** — SQL guardrails for assertion queries.
+- **`qa/java/skills/db-testing/verification-queries`** — SQL guardrails for assertion queries.
 - **`qa/java/skills/test-data-builder`** — builders / ObjectMother for seed data.
 - **`qa/cicd/java/skills/ci-pipelines`** — DinD enablement and Allure publish.
-- **`qa/reporting/java/skills/allure-reporting`** — attach container logs on failure.
+- **`qa/reporting/java/skills/test-reports`** — attach container logs on failure.

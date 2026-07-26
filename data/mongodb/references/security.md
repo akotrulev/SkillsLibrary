@@ -110,4 +110,4 @@ Feed `tenantId` from the authenticated principal's claims (`auth/_shared/auth0-c
 - Which fields are sensitive / the tenancy *pattern choice* → `data/_shared/schema-design`
 - Tenant/user claims feeding `tenantId` and roles → `auth/auth0-{stack}` + `auth/_shared/auth0-concepts`
 - Change-stream capture for an app-level audit trail → `references/caching.md`
-- Verifying tenant isolation (the mandatory leak test) → `qa/{java,dotnet,typescript}/skills/db-testing/*` + `qa/{java,dotnet,typescript}/skills/security-testing/access-control-testing`
+- Verifying tenant isolation (the mandatory leak test) → `qa/{java,dotnet,typescript}/skills/db-testing/*` + `qa/{java,dotnet,typescript}/skills/security-testing/permission-testing`

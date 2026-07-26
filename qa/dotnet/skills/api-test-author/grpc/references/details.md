@@ -1,4 +1,4 @@
-# Deep-dive details — `qa-api-test-author-grpc-dotnet`
+# Deep-dive details — `qa-api-test-grpc-dotnet`
 
 Sections moved out of SKILL.md for on-demand loading. Read what the task needs.
 

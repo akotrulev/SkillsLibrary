@@ -1,18 +1,18 @@
 ---
-name: qa-api-test-author-grpc-dotnet
+name: qa-api-test-grpc-dotnet
 description: Scaffold black-box **gRPC** API tests in .NET 10 (8-9 supported) with Grpc.Net.Client + NUnit against a deployed, proto-defined HTTP/2 service. Triggers: "write a gRPC test for RPC X", "assert the RpcException StatusCode", "test a server-streaming RPC".
 ---
 
 # QA — gRPC API Test Writer (.NET 8 / Grpc.Net.Client + NUnit)
 
-> **Ported from the canonical `qa-api-test-author-grpc-java`.** The four ideas and the section order are
+> **Ported from the canonical `qa-api-test-grpc-java`.** The four ideas and the section order are
 > identical; only the runner (NUnit instead of TestNG), the client (`Grpc.Net.Client` instead of grpc-java), the
 > codegen (`Grpc.Tools` `.csproj` `<Protobuf>` items instead of `protobuf-gradle-plugin`), and the
 > async-all-the-way style change. See the Java file for the family rationale.
 
 Scaffolds black-box API tests in .NET against a deployed **gRPC** service. It completes the `api-test-author`
-**protocol trio** — REST (`qa-api-test-author-generator-dotnet`, HTTP+JSON, status-driven) → GraphQL
-(`qa-api-test-author-graphql-dotnet`, one HTTP 200 carrying a `{ data, errors }` envelope) → **gRPC (this skill,
+**protocol trio** — REST (`qa-api-test-writer-dotnet`, HTTP+JSON, status-driven) → GraphQL
+(`qa-api-test-graphql-dotnet`, one HTTP 200 carrying a `{ data, errors }` envelope) → **gRPC (this skill,
 proto-defined HTTP/2 binary Protobuf, result carried in the gRPC `Status`)**. Three protocols, three places the
 result lives, one family. It reuses the **(contract) + Action + Test** layering of the REST/GraphQL siblings, but
 the contract is the **`.proto`** (codegen the messages + client) and the assertion targets the **typed message +
@@ -34,12 +34,12 @@ the gRPC `StatusCode`**, never an HTTP status code.
 > 3. **Assert on the typed generated message — never hand-parse bytes.** The `.proto` is the contract; `Grpc.Tools`
 >    codegen the messages + client; assert on the **typed message fields** (`response.Email`). A gRPC test never
 >    touches the wire bytes — that's the GraphQL "query-shaped typed `data`" analogue, and the messages are the DTO
->    (`qa-api-dto-writer-dotnet`).
+>    (`qa-api-models-dotnet`).
 > 4. **Pick the RPC type deliberately — unary / server- / client- / bidi-streaming each test differently.** A
 >    **unary** call asserts the message + status. A **server-streaming** call **drains
 >    `ResponseStream.ReadAllAsync()` into a buffer, then asserts the sequence** — a *bounded async-await* (the
 >    server's stream completion + a deadline), **never a `Task.Delay`** → it reuses
->    `qa-websocket-sse-testing-dotnet`'s drain-then-assert discipline. A **client-streaming** call writes a stream
+>    `qa-realtime-stream-testing-dotnet`'s drain-then-assert discipline. A **client-streaming** call writes a stream
 >    of requests → one response. **Bidi-streaming** interleaves both.
 
 ## Decision matrix — RPC type / scenario → test shape
@@ -52,7 +52,7 @@ the gRPC `StatusCode`**, never an HTTP status code.
 | **Unary — write** | The change happened and persisted | call the mutating RPC → assert the payload → **round-trip a read RPC** → assert the new state |
 | **Server-streaming** (req→stream) | The right sequence of messages arrives | `await foreach (var m in call.ResponseStream.ReadAllAsync())` into a `List` (bounded by completion + deadline) → assert |
 | **Client-streaming** (stream→resp) | The aggregate response is right | `RequestStream.WriteAsync` N times → `CompleteAsync()` → `await call.ResponseAsync` |
-| **Bidi-streaming** (stream↔stream) | Interleaved exchange works | write + drain `ResponseStream.ReadAllAsync()` concurrently; assert the received sequence → also `qa-websocket-sse-testing-dotnet` |
+| **Bidi-streaming** (stream↔stream) | Interleaved exchange works | write + drain `ResponseStream.ReadAllAsync()` concurrently; assert the received sequence → also `qa-realtime-stream-testing-dotnet` |
 | **Deadline** | A slow call fails deterministically | `GetUserAsync(req, deadline: DateTime.UtcNow.AddMilliseconds(d))` → `StatusCode.DeadlineExceeded` |
 | **Auth** | A call without credentials is rejected | client **without** the bearer metadata → `Unauthenticated`; with it → `OK` |
 
@@ -152,7 +152,7 @@ public async Task CreateUser_WhenValid_PersistsAndIsReadable()
 A server-streaming RPC pushes a *sequence* of messages and then completes. The call exposes
 `ResponseStream.ReadAllAsync()` (an `IAsyncEnumerable<T>`); **`await foreach` over it completes when the server
 finishes** (or the deadline trips) — a *bounded async-await*, **never a `Task.Delay`**. Drain into a buffer, then
-assert size + order + values. Same drain-then-assert discipline as `qa-websocket-sse-testing-dotnet`.
+assert size + order + values. Same drain-then-assert discipline as `qa-realtime-stream-testing-dotnet`.
 
 ```csharp
 using Grpc.Core;
@@ -202,7 +202,7 @@ public async Task ImportUsers_AggregatesAllSentRequests()
 
 > Bidi-streaming follows the same shape — kick off a `Task` draining `ResponseStream.ReadAllAsync()` while writing
 > to `RequestStream`, then `await` both. For richer bidi-stream-lifecycle assertions (ordering, mid-stream close),
-> cross-link `qa-websocket-sse-testing-dotnet` — gRPC streaming and WebSocket/SSE share the
+> cross-link `qa-realtime-stream-testing-dotnet` — gRPC streaming and WebSocket/SSE share the
 > drain-then-assert-on-a-bounded-condition discipline.
 
 ## Deadlines — the sanctioned bounded-wait, asserted as `DeadlineExceeded`
@@ -278,13 +278,13 @@ public abstract class BaseGrpcTest
 - **`.Result` / `.Wait()` / `.GetAwaiter().GetResult()` anywhere.** Banned by CLAUDE.md. *Fix:* tests are
   `async Task`, every RPC is `await`ed.
 - **Hand-parsing the response bytes / using a dynamic message.** *Fix:* assert on the typed generated message; the
-  `.proto` is the contract. Model/generate messages via `qa-api-dto-writer-dotnet`.
+  `.proto` is the contract. Model/generate messages via `qa-api-models-dotnet`.
 - **Trusting a write RPC's echoed payload as proof of persistence.** *Fix:* round-trip a read RPC and assert state.
 - **Re-creating the channel per test (or never disposing it).** *Fix:* one `GrpcChannel` per fixture in
   `[OneTimeSetUp]`, `ShutdownAsync()` + `Dispose()` in `[OneTimeTearDown]`.
 - **Hardcoding the target / committing the token.** *Fix:* env, read lazily, never logged; bearer via
-  `qa-auth0-test-tokens-dotnet`. Reaching for this skill for **load** → `qa-performance-nbomber-dotnet`; for a
-  **Protobuf contract** → `qa-contract-testing-pact-dotnet`.
+  `qa-test-login-tokens-dotnet`. Reaching for this skill for **load** → `qa-load-testing-dotnet`; for a
+  **Protobuf contract** → `qa-api-contract-testing-dotnet`.
 
 ## Examples
 
@@ -310,31 +310,31 @@ differ.
 - **Rich errors assert the `google.rpc.Status` details** (`ErrorInfo.Reason`/`Domain`, `BadRequest` field
   violations) via `GetRpcStatus()` — not a bare `StatusCode`.
 - **Assert on the typed generated message** — never hand-parse bytes; the `.proto` is the contract. Messages via
-  `qa-api-dto-writer-dotnet`.
+  `qa-api-models-dotnet`.
 - **A write RPC test round-trips a read** to prove persistence; data created in a test is cleaned up in
   `[TearDown]` (guarded so it can't mask a failure).
 - **Streaming = drain-then-assert on a bounded condition** — `await foreach` over `ResponseStream.ReadAllAsync()`
   (server-streaming) or `await ResponseAsync` (client-streaming); bound unbounded streams with `deadline:`. **No
   `Task.Delay`/`Thread.Sleep`, async all the way (no `.Result`).** Deep stream-lifecycle assertions →
-  `qa-websocket-sse-testing-dotnet`.
+  `qa-realtime-stream-testing-dotnet`.
 - **One `GrpcChannel` per fixture** (`[OneTimeSetUp]` open, `[OneTimeTearDown]` shutdown + dispose); service stood
   up via Testcontainers. **Target + token via env**, lazy, never logged. NUnit + Grpc.Net.Client.
 
 ## Cross-references
 
-- `qa-api-test-author-grpc-java` — **the canonical file**: same four ideas, grpc-java + TestNG +
+- `qa-api-test-grpc-java` — **the canonical file**: same four ideas, grpc-java + TestNG +
   `GrpcCallResult`/`StatusRuntimeException`. Read it for the family rationale.
-- `qa-api-test-author-grpc-typescript` — the TypeScript sibling (`@grpc/grpc-js` + `@grpc/proto-loader`); same four
+- `qa-api-test-grpc-typescript` — the TypeScript sibling (`@grpc/grpc-js` + `@grpc/proto-loader`); same four
   ideas, different codegen/client libs.
-- `qa-api-test-author-generator-dotnet` · `qa-api-test-author-graphql-dotnet` — the **protocol-trio siblings**:
+- `qa-api-test-writer-dotnet` · `qa-api-test-graphql-dotnet` — the **protocol-trio siblings**:
   REST (HTTP+JSON status-driven) and GraphQL (HTTP 200 `{ data, errors }` envelope). Three protocols, three
   result-location conventions, one `api-test-author` family + shared Action + Test spine.
-- `qa-websocket-sse-testing-dotnet` — gRPC **streaming** reuses its
+- `qa-realtime-stream-testing-dotnet` — gRPC **streaming** reuses its
   drain-then-assert-on-a-bounded-condition discipline; cross-link for deep stream-lifecycle assertions, don't
   duplicate.
-- `qa-api-dto-writer-dotnet` — generate/model the proto messages (the DTO analogue) in isolation; this skill
+- `qa-api-models-dotnet` — generate/model the proto messages (the DTO analogue) in isolation; this skill
   consumes them.
-- `qa-contract-testing-pact-dotnet` — the **Protobuf contract** boundary vs the functional test this skill writes.
-  `qa-performance-nbomber-dotnet` — gRPC **load**.
-- `qa-auth0-test-tokens-dotnet` — obtain the per-call **bearer** carried in leading metadata.
-- `qa-allure-reporting-dotnet` — each RPC renders as a named result.
+- `qa-api-contract-testing-dotnet` — the **Protobuf contract** boundary vs the functional test this skill writes.
+  `qa-load-testing-dotnet` — gRPC **load**.
+- `qa-test-login-tokens-dotnet` — obtain the per-call **bearer** carried in leading metadata.
+- `qa-test-reports-dotnet` — each RPC renders as a named result.

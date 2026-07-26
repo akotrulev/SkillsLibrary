@@ -46,7 +46,7 @@ Individual interactive components (`Dialog`, `DropdownMenu`, `Select`) are Radix
 
 ## Theming + dark mode
 
-Tailwind design tokens as **CSS variables** in `globals.css` — the single source, fed from [`design/frontend-design`](../../../../../design/frontend-design/SKILL.md) ([`styling`](../../styling/SKILL.md) owns the mapping and the Tailwind-as-authority rules):
+Tailwind design tokens as **CSS variables** in `globals.css` — the single source, fed from [`design/visual-identity`](../../../../../design/visual-identity/SKILL.md) ([`styling`](../../styling/SKILL.md) owns the mapping and the Tailwind-as-authority rules):
 
 ```css
 /* globals.css */
@@ -58,7 +58,7 @@ Tailwind design tokens as **CSS variables** in `globals.css` — the single sour
 
 ## DataGrid — compose with TanStack Table
 
-The `data-table` component wires shadcn's `<Table>` markup to **TanStack Table** (headless). For real data set `manualPagination`/`manualSorting`/`manualFiltering` true so it drives a [`data-access`](../../data-access/SKILL.md) server query — never load a full table:
+The `data-table` component wires shadcn's `<Table>` markup to **TanStack Table** (headless). For real data set `manualPagination`/`manualSorting`/`manualFiltering` true so it drives a [`data-fetching`](../../data-fetching/SKILL.md) server query — never load a full table:
 
 ```tsx
 'use client';
@@ -72,7 +72,7 @@ const table = useReactTable({
 });
 ```
 
-Render `table.getRowModel().rows` into shadcn's `<Table>`; add `data-testid="Orders.Grid"` on the table root and stable ids on rows ([`testability`](../../testability/SKILL.md)).
+Render `table.getRowModel().rows` into shadcn's `<Table>`; add `data-testid="Orders.Grid"` on the table root and stable ids on rows ([`test-ids`](../../test-ids/SKILL.md)).
 
 ## Dialog + toast (sonner)
 
@@ -108,15 +108,15 @@ function DeleteDialog({ order }: { order: OrderDto }) {
 | Hook/Context error when using `Dialog`/`Select`/`onClick` | Your wrapping component isn't `'use client'` | Add `'use client'` to *your* component (the shadcn part already has it) |
 | Dark class flash on load | `next-themes` not wired / no `suppressHydrationWarning` | Wrap in the `next-themes` provider, add `suppressHydrationWarning` on `<html>` |
 | Two styling systems fighting | Tailwind here *and* a CSS-in-JS library present | shadcn's authority is Tailwind — don't also run MUI/Chakra ([`styling`](../../styling/SKILL.md)) |
-| Grid pages in the browser | TanStack Table `manual*` flags not set | Set `manualPagination`/`manualSorting`/`manualFiltering` and drive `data-access` |
+| Grid pages in the browser | TanStack Table `manual*` flags not set | Set `manualPagination`/`manualSorting`/`manualFiltering` and drive `data-fetching` |
 | Copied component drifts from upstream | You own the code; there's no version | Re-run `add` and diff intentionally |
 
-**`data-testid`:** trivial — the component source is yours; add `data-testid` directly on the JSX, or thread a `testId` prop. Full rules in [`testability`](../../testability/SKILL.md).
+**`data-testid`:** trivial — the component source is yours; add `data-testid` directly on the JSX, or thread a `testId` prop. Full rules in [`test-ids`](../../test-ids/SKILL.md).
 
 ## Validation
 
 - `init` wired Tailwind v4 + CSS-variable tokens; components live in `components/ui/` (your code).
 - Dark mode via `next-themes` toggles the `.dark` class, follows OS, no flash.
 - A `Dialog` and a `sonner` toast fire from a client component.
-- The composed TanStack Table grid pages/sorts **server-side** (`manual*` true → `data-access`).
+- The composed TanStack Table grid pages/sorts **server-side** (`manual*` true → `data-fetching`).
 - Tailwind is the **only** styling authority (no CSS-in-JS library alongside).

@@ -1,6 +1,6 @@
 ---
 name: qa-messaging-testing-typescript
-description: Use when a Node 24 (22 supported) / TypeScript / Vitest test suite must produce, consume, or assert messages against the project's broker — Kafka/Redpanda, AWS SQS/SNS, RabbitMQ, or Azure Service Bus. Triggers "assert the service published event X", "test the consumer's side-effect", "DLQ/DLT assertions", "seed a topic/queue in a test". Pick the broker in the decision matrix, then read its reference file. Do NOT use for synchronous HTTP API assertions (use `qa-api-test-author-generator-typescript`), for message-contract verification (use `qa-contract-testing-pact-typescript`), for email (use `qa-email-testing-typescript`), or for non-TypeScript projects (use `qa-messaging-testing-{java,dotnet}`). For end-to-end suite work prefer the phased agent `qa-api-typescript` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
+description: Use when a Node 24 (22 supported) / TypeScript / Vitest test suite must produce, consume, or assert messages against the project's broker — Kafka/Redpanda, AWS SQS/SNS, RabbitMQ, or Azure Service Bus. Triggers "assert the service published event X", "test the consumer's side-effect", "DLQ/DLT assertions", "seed a topic/queue in a test". Pick the broker in the decision matrix, then read its reference file. Do NOT use for synchronous HTTP API assertions (use `qa-api-test-writer-typescript`), for message-contract verification (use `qa-api-contract-testing-typescript`), for email (use `qa-email-testing-typescript`), or for non-TypeScript projects (use `qa-messaging-testing-{java,dotnet}`). For end-to-end suite work prefer the phased agent `qa-api-typescript` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
 ---
 
 # QA — Messaging Testing (TypeScript)
@@ -28,7 +28,7 @@ shared by every tool in the family.
 | Assert against an **Azure Service Bus** queue/topic (peek-lock, DLQ sub-queue, sessions, SQL filters) | `references/service-bus.md` | Azure-native queue/topic; explicit peek-lock settlement + DLQ sub-queue — not offsets |
 | Assert against **AWS SQS / SNS** (visibility timeout, redrive-policy DLQ, FIFO dedup, SNS fan-out) | `references/sqs.md` | AWS-native queue; delete-to-ack + visibility timeout — not a log you re-read |
 | Assert against **RabbitMQ** (exchanges, routing keys, manual ack/nack, DLX) | `references/rabbitmq.md` | AMQP broker; exchange/binding topology + per-message ack |
-| Assert a row was written, with no broker in the flow | `qa-db-testing-client-typescript` | Pure DB verification; reuse its `expect.poll` for the eventual-consistency side here |
+| Assert a row was written, with no broker in the flow | `qa-db-connection-typescript` | Pure DB verification; reuse its `expect.poll` for the eventual-consistency side here |
 
 **Rule of thumb:** *A partitioned log you read by offset, with consumer groups and an app-level DLT?* → Kafka.
 *A different broker?* → the matching sibling. *No broker at all?* → DB/API-mocking. All four messaging

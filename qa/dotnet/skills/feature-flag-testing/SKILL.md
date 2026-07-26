@@ -34,7 +34,7 @@ section order; the SDK surface is the `OpenFeature` NuGet + `LaunchDarkly.Server
 >    evaluation engine runs your rule — you're testing the targeting semantics, not a hand-rolled stub of them.
 > 4. **Flag lifecycle is part of the discipline.** A kill-switch only earns its name if flipping it **mid-flight**
 >    actually degrades gracefully — `td.Update(...)` propagates to a live client like a streamed change, so one
->    test proves the off-path engages *without a restart* (the flag analogue of `qa-chaos-testing-dotnet`'s
+>    test proves the off-path engages *without a restart* (the flag analogue of `qa-failure-injection-testing-dotnet`'s
 >    heal-and-recover). And flag state is **cleaned between tests** (fresh provider/fixture per test or rebuilt
 >    in `[SetUp]`) so a pinned flag never leaks into the next test — test independence.
 
@@ -110,7 +110,7 @@ management or rollout strategy: creating flags in the dashboard, percentage roll
 experimentation/A-B *analytics*, or flag-cleanup tooling are platform ops, out of scope. Two adjacent boundaries
 worth drawing every time: stale-flag hygiene (a flag whose both-sides tests have asserted the same behavior for
 months is a removal candidate — flag it in review, don't let the matrix rot), and the kill-switch *off-path
-behavior* (this skill) vs a *dependency fault* behind it (`qa-chaos-testing-dotnet`).
+behavior* (this skill) vs a *dependency fault* behind it (`qa-failure-injection-testing-dotnet`).
 
 ## Anti-patterns
 
@@ -152,10 +152,10 @@ rule with the fallthrough asserted, and a kill-switch flip test. Same flag, dete
 covered.
 
 **Composing with the neighbors.** The branch under test often *contains* the things other skills assert — the
-on-path writes a new table (`qa-db-testing-client-dotnet`), emits a new event
-(`qa-messaging-testing-dotnet`), or renders a new page (`qa-ui-test-author-playwright-dotnet`). This
+on-path writes a new table (`qa-db-connection-dotnet`), emits a new event
+(`qa-messaging-testing-dotnet`), or renders a new page (`qa-ui-test-writer-playwright-dotnet`). This
 skill pins which branch runs; those skills assert what the branch does. The variation matrix binds through
-`qa-data-driven-testing-dotnet`; the kill-switch degradation assertion borders `qa-chaos-testing-dotnet` (flag
+`qa-data-driven-testing-dotnet`; the kill-switch degradation assertion borders `qa-failure-injection-testing-dotnet` (flag
 flip vs dependency fault — adjacent, not the same).
 
 ## Rules (hard constraints)
@@ -187,10 +187,10 @@ flip vs dependency fault — adjacent, not the same).
 - `qa-data-driven-testing-dotnet` — the **matrix mechanics** the on/off/variation table binds through
   (`[TestCase]`/`[TestCaseSource]` row-binding); this skill defines *what* the rows are, that one defines *how*
   rows drive tests.
-- `qa-chaos-testing-dotnet` — the **kill-switch boundary**: the off-path of a flag flip is this skill; a
+- `qa-failure-injection-testing-dotnet` — the **kill-switch boundary**: the off-path of a flag flip is this skill; a
   faulted dependency behind the feature is chaos. The lifecycle shape (steady → perturb → assert-degraded) is shared.
-- `qa-api-test-author-generator-dotnet` · `qa-ui-test-author-playwright-dotnet` — the branch under test is
+- `qa-api-test-writer-dotnet` · `qa-ui-test-writer-playwright-dotnet` — the branch under test is
   usually an API or UI behavior; those skills own the assertion style inside each pinned branch.
-- `qa-auth0-test-tokens-dotnet` — the same "test fixture over live service" posture applied to auth; pairs
+- `qa-test-login-tokens-dotnet` — the same "test fixture over live service" posture applied to auth; pairs
   when targeting rules key off claims-derived attributes.
-- `qa-allure-reporting-dotnet` — render the flag matrix as named results (one per variation row).
+- `qa-test-reports-dotnet` — render the flag matrix as named results (one per variation row).

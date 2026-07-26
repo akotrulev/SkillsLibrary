@@ -195,7 +195,7 @@ public class BetaTargetingTests
 ### The kill-switch lifecycle — flip mid-flight, assert graceful degradation (idea #4)
 
 `td.Update(...)` propagates to the live client **as if LaunchDarkly streamed the change** — so one test proves
-the off-path engages *without a restart*. This is the flag analogue of `qa-chaos-testing-dotnet`'s
+the off-path engages *without a restart*. This is the flag analogue of `qa-failure-injection-testing-dotnet`'s
 steady → perturb → assert-degraded lifecycle (and the boundary: a *flag* flip is this skill; a *dependency fault*
 is chaos).
 

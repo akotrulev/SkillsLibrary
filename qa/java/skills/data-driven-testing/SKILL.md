@@ -24,9 +24,9 @@ It is *not*:
 - a **builder** constructing one richly-configured object in code (that's `qa-test-data-builder-java`; a
   builder makes **one** object well — data-driven feeds **many** rows; they **compose**: a row can drive a
   builder);
-- rows pulled from a **live database** at test time (that's `qa-db-testing-query-author-java` — a different
+- rows pulled from a **live database** at test time (that's `qa-db-verification-queries-java` — a different
   *source*; this skill is about **static files** that are part of the test's arranged world);
-- a **cross-browser / cross-device matrix** (that's `qa-cloud-grid-config-java` — parameterizing the
+- a **cross-browser / cross-device matrix** (that's `qa-browser-cloud-setup-java` — parameterizing the
   *environment*, not the *data*).
 
 > **The discipline this skill encodes** — four ideas, identical across all three stacks:
@@ -52,7 +52,7 @@ It is *not*:
 | Nested / hierarchical cases (a row has sub-objects or lists) | **JSON file** | Jackson `readValue(…, new TypeReference<List<Row>>(){})` |
 | Tabular data **owned/edited by non-technical stakeholders** | **Excel `.xlsx`** | Apache POI `WorkbookFactory` → bind cells → `List<Row>` |
 | Huge dataset (don't hold it all in memory) | any of the above, **lazy** | `@DataProvider` returns `Iterator<Object[]>`, reads row-by-row |
-| Rows from a **live DB / API** at test time | not this skill | `qa-db-testing-query-author-java` (DB), an API client (HTTP) |
+| Rows from a **live DB / API** at test time | not this skill | `qa-db-verification-queries-java` (DB), an API client (HTTP) |
 | Each row is a whole complex domain object built in code | not this skill | `qa-test-data-builder-java` (the builder can consume one row) |
 
 **Rule of thumb:** *prefer CSV or JSON in git* (diffable, reviewable, mergeable). Reach for **Excel only**
@@ -304,7 +304,7 @@ hold **no shared mutable state** (CLAUDE.md: no static mutable state) — each i
 - **Loading a 100k-row file into `Object[][]`.** Memory blows up at discovery. *Fix:* return
   `Iterator<Object[]>` and read lazily.
 - **Secrets or real PII in a committed data file.** It's in git history forever. *Fix:* synthetic data; real
-  secrets via env (cross-link `qa-auth0-test-tokens-java`).
+  secrets via env (cross-link `qa-test-login-tokens-java`).
 
 ## Examples
 
@@ -363,7 +363,7 @@ public void shouldApplyDiscount(OrderCase row) {
 - **Pick the source for the shape** — CSV for flat tabular, JSON for nested, Excel **only** for
   stakeholder-owned sheets, inline for a few. Prefer diffable CSV/JSON in git over binary Excel.
 - **Money is integer cents / `BigDecimal`, never float** (Excel/CSV round-off corrupts it). No secrets or
-  real PII in committed data files (synthetic data; secrets via env — `qa-auth0-test-tokens-java`).
+  real PII in committed data files (synthetic data; secrets via env — `qa-test-login-tokens-java`).
 - **Lazy `Iterator<Object[]>` for huge datasets**; `@DataProvider(parallel = true)` + suite
   `data-provider-thread-count` for independent rows. No `Thread.sleep`; structured logging; constructor
   injection.
@@ -379,11 +379,11 @@ public void shouldApplyDiscount(OrderCase row) {
 - `qa-test-data-builder-java` — the **boundary**: a builder/ObjectMother constructs **one** complex object in
   code with defaults; data-driven feeds **many** rows from a file. They **compose** — a row drives a builder's
   varying fields (see the last example).
-- `qa-db-testing-query-author-java` — when the rows come from a **live database** at test time rather
+- `qa-db-verification-queries-java` — when the rows come from a **live database** at test time rather
   than a static file; the safe assertion-SQL counterpart to file-sourced data.
-- `qa-cloud-grid-config-java` — parameterizing the **environment** (browser/device matrix) rather than
+- `qa-browser-cloud-setup-java` — parameterizing the **environment** (browser/device matrix) rather than
   the **data**; the two matrices are orthogonal and can multiply.
-- `qa-api-test-author-generator-java` / `qa-ui-test-author-playwright-java` — where the data-driven test
+- `qa-api-test-writer-java` / `qa-ui-test-writer-playwright-java` — where the data-driven test
   *bodies* are authored; this skill supplies their rows.
-- `qa-allure-reporting-java` — each row renders as a separate, named Allure result; parameters show the
+- `qa-test-reports-java` — each row renders as a separate, named Allure result; parameters show the
   per-row input. `qa-_shared-quality-metrics` — coverage that scales by rows, not methods.

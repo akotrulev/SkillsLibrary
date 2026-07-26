@@ -32,7 +32,7 @@ First act on an existing project: check `engines.node` in `package.json` and the
 - .NET service → `observability/opentelemetry-dotnet`
 - Java service → `observability/opentelemetry-java`
 - Log shape / sinks → `observability/structured-logging-node`
-- Dashboards / queries → `observability/grafana-dashboards` + `observability/logql-promql`
+- Dashboards / queries → `observability/dashboards` + `observability/queries`
 
 ## Inputs needed
 
@@ -265,7 +265,7 @@ context.with(parentCtx, () => {
 ## Handoffs
 
 - Log shape and sinks → `observability/structured-logging-node`
-- LogQL / PromQL query patterns → `observability/logql-promql`
-- Dashboard layout → `observability/grafana-dashboards`
+- LogQL / PromQL query patterns → `observability/queries`
+- Dashboard layout → `observability/dashboards`
 - .NET equivalent → `observability/opentelemetry-dotnet`
 - Java equivalent → `observability/opentelemetry-java`

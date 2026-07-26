@@ -22,14 +22,14 @@ The skills live at the repo's `observability/` folder when working inside the Sk
 
 - `observability/opentelemetry-node/SKILL.md` — sdk-node preload + auto-instrumentations + custom spans/metrics + OTLP export
 - `observability/structured-logging-node/SKILL.md` — pino JSON + `AsyncLocalStorage` trace correlation
-- `observability/loki-tempo-setup/SKILL.md` — logs + traces backend + the OTel Collector hub
-- `observability/prometheus-mimir-setup/SKILL.md` — metrics backend + exemplar storage + rule deployment
-- `observability/logql-promql/SKILL.md` — query + recording/alert rule syntax
-- `observability/grafana-dashboards/SKILL.md` — dashboard layout + cross-store nav wiring
+- `observability/logs-traces-setup/SKILL.md` — logs + traces backend + the OTel Collector hub
+- `observability/metrics-setup/SKILL.md` — metrics backend + exemplar storage + rule deployment
+- `observability/queries/SKILL.md` — query + recording/alert rule syntax
+- `observability/dashboards/SKILL.md` — dashboard layout + cross-store nav wiring
 
 Load **only** these; peer domains (`qa/`, `devops/`) are invoked as agents, never loaded as skills.
 
-For **brownfield** work, additionally load the bundled developer-workflow skills `engineering-practices/{systematic-debugging,test-driven-development,verification-before-completion,using-git-worktrees,finishing-a-development-branch,writing-plans,executing-plans}` (frontmatter names `ep-*`) — same root — when the relevant mode below calls for them.
+For **brownfield** work, additionally load the bundled developer-workflow skills `engineering-practices/{systematic-debugging,test-driven-development,verify-before-done,worktrees,finish-branch,writing-plans,executing-plans}` (frontmatter names `ep-*`) — same root — when the relevant mode below calls for them.
 
 ## Operating rules
 
@@ -53,7 +53,7 @@ Recover, don't author. Detect the Node major, then map **what telemetry already 
 
 ### Mode A — Fix a telemetry defect
 
-Load `ep-systematic-debugging` (or apply its discipline inline). Do not jump to a fix: **reproduce first** (the missing span in Tempo — often a preload-ordering bug or an un-`end()`-ed span, the exploding series in Prometheus, the log line with no `traceId`, the dead exemplar link), then **triage the failure class** — preload/instrumentation gap vs leaked span (no `finally` `end()`) vs cardinality bomb (per-record metric label) vs correlation break (pino not context-bridged / Collector dropping context) vs backend misconfig (exemplar storage off, direct-to-backend export). Make the **smallest correct change** per the owning skill's rules — never silence a noisy signal by dropping the whole instrumentation. Then **verify** (`ep-verification-before-completion`: the span/metric/log actually appears in the right store *for the right reason*, the build still clean) and **sweep the class** — does the same leaked span or un-bridged logger appear in sibling services?
+Load `ep-systematic-debugging` (or apply its discipline inline). Do not jump to a fix: **reproduce first** (the missing span in Tempo — often a preload-ordering bug or an un-`end()`-ed span, the exploding series in Prometheus, the log line with no `traceId`, the dead exemplar link), then **triage the failure class** — preload/instrumentation gap vs leaked span (no `finally` `end()`) vs cardinality bomb (per-record metric label) vs correlation break (pino not context-bridged / Collector dropping context) vs backend misconfig (exemplar storage off, direct-to-backend export). Make the **smallest correct change** per the owning skill's rules — never silence a noisy signal by dropping the whole instrumentation. Then **verify** (`ep-verify-before-done`: the span/metric/log actually appears in the right store *for the right reason*, the build still clean) and **sweep the class** — does the same leaked span or un-bridged logger appear in sibling services?
 
 ### Mode B — Extend (add a span/metric, a dashboard, a service to the backend)
 
@@ -61,16 +61,16 @@ Scope the slice, orient on the surfaces it touches, then **re-enter only the rel
 
 ### Branch & finish (both modes)
 
-Work on a branch (`ep-using-git-worktrees` for larger/parallel work); `ep-writing-plans` + `ep-executing-plans` for a multi-step rollout; `ep-finishing-a-development-branch` to wrap. Commit/push only when asked.
+Work on a branch (`ep-worktrees` for larger/parallel work); `ep-writing-plans` + `ep-executing-plans` for a multi-step rollout; `ep-finish-branch` to wrap. Commit/push only when asked.
 
 ## Phases
 
 | # | Phase | Goal | Skills to load | Exit gate |
 |---|-------|------|-----------------|-----------|
 | 1 | Discover | Detect the Node major + what telemetry exists and ships where; confirm the target backend (self-hosted Grafana vs Grafana Cloud) and Collector presence | — (orientation; read the preload/bootstrap, existing OTel/pino config, Collector config) | Current-state telemetry map produced; Node major detected (flag Node 20 EOL); gaps named |
-| 2 | Backend setup | Stand up / confirm the Collector hub, Loki + Tempo, and the metrics backend with exemplar storage | `observability/loki-tempo-setup/SKILL.md`, `observability/prometheus-mimir-setup/SKILL.md` | Collector receives OTLP and routes traces→Tempo, metrics→Prom/Mimir, logs→Loki; exemplar storage enabled |
+| 2 | Backend setup | Stand up / confirm the Collector hub, Loki + Tempo, and the metrics backend with exemplar storage | `observability/logs-traces-setup/SKILL.md`, `observability/metrics-setup/SKILL.md` | Collector receives OTLP and routes traces→Tempo, metrics→Prom/Mimir, logs→Loki; exemplar storage enabled |
 | 3 | Instrument | Wire the sdk-node preload + auto-instrumentations + custom spans/metrics, and pino structured logging with trace correlation | `observability/opentelemetry-node/SKILL.md`, `observability/structured-logging-node/SKILL.md` | Build clean; preload runs before app code; app exports OTLP to the Collector; logs carry `traceId`/`spanId`; spans always `end()` |
-| 4 | Query & dashboards | Author the LogQL/PromQL queries, the service-health alert pack + burn-rate rules, and the Grafana dashboards (fleet overview + per-service RED, 4xx/5xx split) with cross-store nav; Alertmanager routing wired | `observability/logql-promql/SKILL.md`, `observability/grafana-dashboards/SKILL.md` | Dashboards render; exemplars link metrics→traces; Loki derived fields link logs→traces; `tracesToLogsV2` links traces→logs; rules + Alertmanager config deployed declaratively |
+| 4 | Query & dashboards | Author the LogQL/PromQL queries, the service-health alert pack + burn-rate rules, and the Grafana dashboards (fleet overview + per-service RED, 4xx/5xx split) with cross-store nav; Alertmanager routing wired | `observability/queries/SKILL.md`, `observability/dashboards/SKILL.md` | Dashboards render; exemplars link metrics→traces; Loki derived fields link logs→traces; `tracesToLogsV2` links traces→logs; rules + Alertmanager config deployed declaratively |
 | 5 | Hostile review | Cardinality audit; all three cross-store legs actually wired (derived-field regex matches this stack's emitted trace-id field, `tracesToLogsV2` present); 4xx/5xx split on dashboards; health-alert pack + `Watchdog` dead-man's-switch present; no direct-to-backend exporters, no leaked spans, sane production sampling | all six skills' Rules/What-NOT-to-do sections | Standard severity table (`CLAUDE.md` format); no blocker/major rows after fixes |
 
 A brownfield run re-enters only the phase(s) the change touches — see the modes above.
@@ -79,9 +79,9 @@ A brownfield run re-enters only the phase(s) the change touches — see the mode
 
 - **`be-node`** — the backend service this agent instruments (patterns, Prisma/Drizzle persistence). Sibling in the same plugin.
 - **`qa-cicd-typescript`** — wires the telemetry-emitting build/tests into CI; owns the pipeline, not the instrumentation.
-- **`qa/manual/quality-metrics`** (via `qa-manual-test-designer`) — the SLO/KPI math the recording rules and dashboards encode; this agent implements the signals, that skill defines the targets.
+- **`qa/manual/quality-metrics`** (via `qa-test-case-designer`) — the SLO/KPI math the recording rules and dashboards encode; this agent implements the signals, that skill defines the targets.
 - **`devops/kubernetes`** — cluster manifests for the Collector / Loki / Tempo / Prometheus-Mimir stack.
-- **`devops/iac-bicep-terraform`** — object-storage buckets + IAM (Loki/Tempo/Mimir backends) and Grafana data sources as code.
+- **`devops/infrastructure-as-code`** — object-storage buckets + IAM (Loki/Tempo/Mimir backends) and Grafana data sources as code.
 - **`observability-engineer-dotnet`** / **`observability-engineer-java`** — the .NET / Java siblings for a mixed-stack system; run each against its own service.
 
 ## Output contract

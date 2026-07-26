@@ -1,11 +1,11 @@
 ---
 name: fe-react-realtime
-description: Use when a surface needs LIVE / server-pushed data — SSE from a route handler + `EventSource` hook, a WebSocket hook with backoff reconnection, the snapshot→live-channel handoff, connection-status affordance, TanStack Query invalidate-on-message. Triggers: "push updates to the UI", "SSE / WebSocket in React", "live dashboard/chat", "reconnect UX", "the socket reconnects in a loop". Do NOT use for request/response fetching (`data-access`) or the error/reconnect UI itself (`error-resilience`).
+description: Use when a surface needs LIVE / server-pushed data — SSE from a route handler + `EventSource` hook, a WebSocket hook with backoff reconnection, the snapshot→live-channel handoff, connection-status affordance, TanStack Query invalidate-on-message. Triggers: "push updates to the UI", "SSE / WebSocket in React", "live dashboard/chat", "reconnect UX", "the socket reconnects in a loop". Do NOT use for request/response fetching (`data-fetching`) or the error/reconnect UI itself (`error-handling`).
 ---
 
 # React — Realtime (live / push lane)
 
-Owns the **live/push transport lane**: data arrives at the component *without it asking*. The **request/response lane** — the component asks, the server answers once — is [`data-access`](../data-access/SKILL.md)'s. Both skills open with the same routing decision.
+Owns the **live/push transport lane**: data arrives at the component *without it asking*. The **request/response lane** — the component asks, the server answers once — is [`data-fetching`](../data-fetching/SKILL.md)'s. Both skills open with the same routing decision.
 
 ## Transport routing — which lane am I in?
 
@@ -13,17 +13,17 @@ Owns the **live/push transport lane**: data arrives at the component *without it
 Is the data pushed by the server (it arrives without the component asking)?
   YES → live / push / stream  → THIS skill (realtime)
 Is the data pulled by the component (it asks, the server answers once per request)?
-  YES → request/response      → `data-access`
+  YES → request/response      → `data-fetching`
 ```
 
 | Signal | Lane | Skill |
 |---|---|---|
 | Dashboard tile updates itself; ticker; chat; presence; progress; notifications | live/push | **realtime** (here) |
-| Load a list/detail; submit a form; paginate; search | request/response | [`data-access`](../data-access/SKILL.md) |
-| Slow query streamed below a shell (`<Suspense>`) | request/response | [`data-access`](../data-access/SKILL.md) |
+| Load a list/detail; submit a form; paginate; search | request/response | [`data-fetching`](../data-fetching/SKILL.md) |
+| Slow query streamed below a shell (`<Suspense>`) | request/response | [`data-fetching`](../data-fetching/SKILL.md) |
 | Third-party feed over WebSocket/SSE | live/push | **realtime** (here) |
 
-Most live surfaces do **both**: [`data-access`](../data-access/SKILL.md) fetches the initial state (server-side, once), then this skill's live channel takes over. The **snapshot→live handoff** (below) is the seam.
+Most live surfaces do **both**: [`data-fetching`](../data-fetching/SKILL.md) fetches the initial state (server-side, once), then this skill's live channel takes over. The **snapshot→live handoff** (below) is the seam.
 
 ## Live data is always a Client Component
 
@@ -91,7 +91,7 @@ export function useSSE<T>(url: string, onMessage: (data: T) => void) {
 
 ```tsx
 'use client';
-export function PriceTicker({ initial }: { initial: PriceTick }) {   // initial = server snapshot (data-access)
+export function PriceTicker({ initial }: { initial: PriceTick }) {   // initial = server snapshot (data-fetching)
   const [price, setPrice] = useState(initial.price);
   const status = useSSE<PriceTick>('/api/prices', (t) => setPrice(t.price));
   return (
@@ -147,7 +147,7 @@ export function useWebSocket(url: string, onMessage: (data: unknown) => void) {
 
 ## Snapshot → live handoff
 
-Fetch the initial state server-side via [`data-access`](../data-access/SKILL.md) so first paint shows real data (no flash, no client waterfall), pass it as a prop, and let the client channel take over:
+Fetch the initial state server-side via [`data-fetching`](../data-fetching/SKILL.md) so first paint shows real data (no flash, no client waterfall), pass it as a prop, and let the client channel take over:
 
 ```tsx
 // app/dashboard/page.tsx — Server Component
@@ -158,7 +158,7 @@ export default async function DashboardPage() {
 }
 ```
 
-This is the exact seam between the lanes: **data-access owns the snapshot, realtime owns the stream.**
+This is the exact seam between the lanes: **data-fetching owns the snapshot, realtime owns the stream.**
 
 ## Integrating with TanStack Query
 
@@ -170,16 +170,16 @@ SSE and WebSocket connections are **stateful and pinned to one server instance**
 
 ## Rules
 
-- **Open every live feature with the transport routing decision**: push → here; pull → [`data-access`](../data-access/SKILL.md).
+- **Open every live feature with the transport routing decision**: push → here; pull → [`data-fetching`](../data-fetching/SKILL.md).
 - **Live data is a small `'use client'` island** — the channel opens in an effect and is **always torn down on unmount** (`es.close()` / `ws.close()`, and stop the WS retry loop).
 - **Default to SSE** for one-directional push; WebSocket only when the client must send.
-- **The RSC fetches the initial snapshot**, passes it as a prop; the client island subscribes — no flash, no double-fetch (the [`data-access`](../data-access/SKILL.md) handoff).
-- **Connection-status affordance is mandatory** — surface connecting/open/closed so the user knows data may be stale (the full reconnect UX is [`error-resilience`](../error-resilience/SKILL.md)'s).
+- **The RSC fetches the initial snapshot**, passes it as a prop; the client island subscribes — no flash, no double-fetch (the [`data-fetching`](../data-fetching/SKILL.md) handoff).
+- **Connection-status affordance is mandatory** — surface connecting/open/closed so the user knows data may be stale (the full reconnect UX is [`error-handling`](../error-handling/SKILL.md)'s).
 - **Dedupe at-least-once feeds by key; throttle high-rate updates.**
 - **If TanStack Query is in play, push invalidates/patches the cache** — don't keep a parallel copy.
 - **Auth is IdP-neutral** — cookie via `withCredentials`, or a same-origin proxy route that attaches the bearer token server-side.
 - **Scale-out: sticky sessions + a pub/sub backplane**; a managed provider on serverless/edge.
-- **Every live element carries a `data-testid`** per [`testability`](../testability/SKILL.md); the connection-status control included.
+- **Every live element carries a `data-testid`** per [`test-ids`](../test-ids/SKILL.md); the connection-status control included.
 
 ## What NOT to do
 
@@ -202,8 +202,8 @@ SSE and WebSocket connections are **stateful and pinned to one server instance**
 
 ## Handoffs
 
-- Initial-state fetch + the shared routing matrix → [`data-access`](../data-access/SKILL.md)
-- Reconnect UX, three-state failure region → [`error-resilience`](../error-resilience/SKILL.md)
+- Initial-state fetch + the shared routing matrix → [`data-fetching`](../data-fetching/SKILL.md)
+- Reconnect UX, three-state failure region → [`error-handling`](../error-handling/SKILL.md)
 - Channel auth token (Auth0 / Cognito) → `auth/auth0-react`
-- Testids on live elements → [`testability`](../testability/SKILL.md)
-- **Testing** these streams → `qa/typescript/skills/websocket-sse-testing` (peer); **connection-count load** → `qa-performance-typescript` (peer)
+- Testids on live elements → [`test-ids`](../test-ids/SKILL.md)
+- **Testing** these streams → `qa/typescript/skills/realtime-stream-testing` (peer); **connection-count load** → `qa-performance-typescript` (peer)

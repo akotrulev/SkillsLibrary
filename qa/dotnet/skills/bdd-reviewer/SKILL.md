@@ -1,6 +1,6 @@
 ---
 name: qa-bdd-reviewer-dotnet
-description: Use when reviewing or auditing existing Gherkin `.feature` files and Reqnroll step definitions in C#/.NET for living-documentation quality, step reusability, and correct binding/DI/lifecycle. Triggers "review these feature files", "audit our Reqnroll step definitions", "are these Gherkin scenarios good", "check our BDD layer". Not for generating features (`gherkin-authoring`) or step definitions (`bdd-step-bindings`).
+description: Use when reviewing or auditing existing Gherkin `.feature` files and Reqnroll step definitions in C#/.NET for living-documentation quality, step reusability, and correct binding/DI/lifecycle. Triggers "review these feature files", "audit our Reqnroll step definitions", "are these Gherkin scenarios good", "check our BDD layer". Not for generating features (`feature-file-writer`) or step definitions (`gherkin-step-code`).
 ---
 
 # Reqnroll / Gherkin Reviewer (C# / .NET 8)
@@ -15,8 +15,8 @@ Audits a BDD layer across **two surfaces** — the `.feature` files (Gherkin qua
 
 ## When NOT to use
 
-- "Write feature files" → `qa/_shared/bdd/gherkin-authoring`
-- "Generate / implement step definitions" → `qa/dotnet/skills/bdd-step-bindings`
+- "Write feature files" → `qa/_shared/bdd/feature-file-writer`
+- "Generate / implement step definitions" → `qa/dotnet/skills/gherkin-step-code`
 - Code is pseudocode / incomplete → ask for the real files.
 
 ## Procedure

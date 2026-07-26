@@ -1,5 +1,5 @@
 ---
-name: qa-ui-test-author-selenium-java
+name: qa-ui-test-writer-selenium-java
 description: Use when the user asks to scaffold a Java + Selenium 4 page object or TestNG UI test, following the BasePage / DriverFactory / TestNG pattern. Triggers: "create a Selenium page object for X", "add a Java page for screen Y", "write a Selenium UI test for Z". For end-to-end suite work prefer the phased agent `qa-ui-java` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
 ---
 
@@ -26,8 +26,8 @@ Scaffolds Selenium 4 page objects and TestNG UI tests in Java, modeled on [`akot
 
 - Playwright / Node / .NET → `qa/java/skills/ui-test-author/playwright`
 - Appium mobile → `qa/java/skills/ui-test-author/appium`
-- Reviewing a page object → `qa/java/skills/ui-test-author/reviewer`
-- Designing the whole POM architecture → `qa/java/skills/page-object-architect`
+- Reviewing a page object → `qa/java/skills/ui-test-author/review`
+- Designing the whole POM architecture → `qa/java/skills/page-object-design`
 
 ## Inputs needed
 
@@ -217,7 +217,7 @@ public class AuthenticationTest extends BaseTest {
 
 ## Handoffs
 
-- Architecting the POM structure (sub-packages, base classes) → `qa/java/skills/page-object-architect`
+- Architecting the POM structure (sub-packages, base classes) → `qa/java/skills/page-object-design`
 - Test data builders → `qa/java/skills/test-data-builder`
-- Reviewing a page object → `qa/java/skills/ui-test-author/reviewer`
-- Allure reporting → `qa/reporting/java/skills/allure-reporting`
+- Reviewing a page object → `qa/java/skills/ui-test-author/review`
+- Allure reporting → `qa/reporting/java/skills/test-reports`

@@ -1,6 +1,6 @@
 ---
 name: devops-azure-deployment
-description: Use when the user asks to deploy a service to Azure — Container Apps (default for long-running containers), Functions (event-driven), App Service (Windows/Linux web apps), Static Web Apps (SPA + Functions), or AKS (Kubernetes). Triggers: "deploy this .NET service to Azure Container Apps", "ship an Azure Function from a Node TS handler", "host the React SPA on Static Web Apps", "switch this from App Service to Container Apps". Do NOT use for AWS (use `devops/aws-deployment`), IaC scripts (use `devops/iac-bicep-terraform`), or pipeline YAML (use `devops/{github-actions,gitlab-ci,azure-pipelines}`).
+description: Use when the user asks to deploy a service to Azure — Container Apps (default for long-running containers), Functions (event-driven), App Service (Windows/Linux web apps), Static Web Apps (SPA + Functions), or AKS (Kubernetes). Triggers: "deploy this .NET service to Azure Container Apps", "ship an Azure Function from a Node TS handler", "host the React SPA on Static Web Apps", "switch this from App Service to Container Apps". Do NOT use for AWS (use `devops/aws-deployment`), IaC scripts (use `devops/infrastructure-as-code`), or pipeline YAML (use `devops/{github-actions,gitlab-ci,azure-pipelines}`).
 ---
 
 # DevOps — Azure Deployment
@@ -15,7 +15,7 @@ Deploys services to Azure using the right primitive for the workload. Default fo
 - **Backends**: .NET 10 (8/9 supported) / Java 21 / Node 24 (22 maintenance) — Linux container images or native Functions runtimes
 - **Frontend**: React SPA → Static Web Apps; Blazor WASM → Static Web Apps or App Service; Blazor Server → App Service / Container Apps
 - Identity via **Managed Identity** (system-assigned for single-resource, user-assigned for cross-resource) — no service principal secrets in apps
-- IaC via Bicep (preferred for Azure-only stacks) or Terraform — see `devops/iac-bicep-terraform`
+- IaC via Bicep (preferred for Azure-only stacks) or Terraform — see `devops/infrastructure-as-code`
 - Pipelines via Azure Pipelines / GitHub Actions / GitLab CI with **Workload Identity Federation** — no client secrets
 
 ## When to use
@@ -28,7 +28,7 @@ Deploys services to Azure using the right primitive for the workload. Default fo
 ## When NOT to use
 
 - AWS → `devops/aws-deployment`
-- IaC syntax → `devops/iac-bicep-terraform`
+- IaC syntax → `devops/infrastructure-as-code`
 - Pipeline YAML → `devops/github-actions` / `devops/gitlab-ci` / `devops/azure-pipelines`
 - App-level config / secrets injection → `devops/environment-config`
 
@@ -238,14 +238,14 @@ Same logic as EKS — only when k8s expertise + workload complexity justify it. 
 ## Generation steps
 
 1. Confirm workload shape and pick the target (Container Apps / Functions / App Service / Static Web Apps / AKS).
-2. Ensure prerequisite infra exists (RG, VNet, ACR, Key Vault, Log Analytics) — hand off to `devops/iac-bicep-terraform` for Bicep.
+2. Ensure prerequisite infra exists (RG, VNet, ACR, Key Vault, Log Analytics) — hand off to `devops/infrastructure-as-code` for Bicep.
 3. Produce the deployable artifact: Dockerfile + image push (Container Apps), Function code (Functions), zip / code (App Service), SPA build output (Static Web Apps).
 4. Wire the pipeline (`devops/azure-pipelines` / `devops/github-actions` / `devops/gitlab-ci`) with WIF + the deploy step (`az containerapp update`, `func azure functionapp publish`, `swa deploy`, slot swap).
 5. Smoke: hit `/health` after deploy; confirm Log Analytics receives logs; confirm Application Insights or OTel Collector receives traces/metrics.
 
 ## Handoffs
 
-- IaC (Bicep / Terraform) → `devops/iac-bicep-terraform`
+- IaC (Bicep / Terraform) → `devops/infrastructure-as-code`
 - Pipelines → `devops/azure-pipelines` / `devops/github-actions` / `devops/gitlab-ci`
 - App-level config & secrets injection → `devops/environment-config`
 - Logging → `observability/structured-logging-{dotnet,java,node}`

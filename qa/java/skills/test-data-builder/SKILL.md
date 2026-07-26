@@ -20,7 +20,7 @@ Eliminates repeated inline test data literals in Java 21 test projects (Gradle K
 - .NET test data → `qa/dotnet/skills/test-data-builder`
 - TypeScript test data → `qa/typescript/skills/test-data-builder`
 - Production-code builders → the `backend/java` dev stack's generator, if installed
-- Test data for performance scenarios (volume) → `qa/java/skills/performance/gatling`
+- Test data for performance scenarios (volume) → `qa/java/skills/load-testing`
 - One-off fixture used by a single test → inline is fine; only extract on duplication
 
 ## Builder vs ObjectMother
@@ -220,8 +220,8 @@ Don't build "an order in the DB" inside the builder — that couples the builder
 
 - .NET test data → `qa/dotnet/skills/test-data-builder`
 - TypeScript test data → `qa/typescript/skills/test-data-builder`
-- API tests where these feed into request bodies → `qa/java/skills/api-test-author/generator`
+- API tests where these feed into request bodies → `qa/java/skills/api-test-author/writer`
 - UI tests where they back form-fill helpers → `qa/java/skills/ui-test-author/playwright` / `qa/java/skills/ui-test-author/selenium` / `qa/java/skills/ui-test-author/appium`
-- Test reviewers (verify builders used, not literals) → `qa/java/skills/api-test-author/reviewer` / `qa/java/skills/ui-test-author/reviewer`
+- Test reviewers (verify builders used, not literals) → `qa/java/skills/api-test-author/review` / `qa/java/skills/ui-test-author/review`
 - Test strategy / pyramid → `qa/manual/test-strategy`
 - Production-code builders → the `backend/java` dev stack's generator, if installed

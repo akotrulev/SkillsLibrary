@@ -11,7 +11,7 @@ elements **aligned with each other when a breakpoint flips**. [`styling`](../sty
 mechanics this rides on (isolation, tokens, mobile-first); this skill owns the responsive *strategy and layout*.
 
 **Version rule:** everything here is CSS/markup-level and identical across net8/net9/net10. The one
-version-sensitive edge: render modes (below) follow the project's TFM per [`reference`](../reference/SKILL.md).
+version-sensitive edge: render modes (below) follow the project's TFM per [`basics`](../basics/SKILL.md).
 
 ## When to use / NOT use
 
@@ -95,9 +95,9 @@ media queries** instead of one parent owning the geometry. The fix is structural
 
 | Pattern | Recipe |
 |---|---|
-| **Nav collapse** (full bar ⇄ hamburger/drawer) | The **hamburger is a small-screen affordance, not a default** — show the top-level items as a visible horizontal bar wherever there's room ([`ui-conventions`](../ui-conventions/SKILL.md): don't hide nav when you can show it), collapse to the drawer only **below** the nav breakpoint. Both variants in markup, CSS swaps visibility at the breakpoint (works under static SSR); the drawer open state is the only interactive part. Library: `MudAppBar` + `MudDrawer` with its `Breakpoint` prop. |
+| **Nav collapse** (full bar ⇄ hamburger/drawer) | The **hamburger is a small-screen affordance, not a default** — show the top-level items as a visible horizontal bar wherever there's room ([`ui-rules`](../ui-rules/SKILL.md): don't hide nav when you can show it), collapse to the drawer only **below** the nav breakpoint. Both variants in markup, CSS swaps visibility at the breakpoint (works under static SSR); the drawer open state is the only interactive part. Library: `MudAppBar` + `MudDrawer` with its `Breakpoint` prop. |
 | **Sticky header** | `position: sticky; top: 0` on the header (pure CSS, static-SSR-safe) improves reach to nav/actions on long pages; keep the sticky bar **short** and consider shrinking it on scroll (a class toggled from an `IntersectionObserver`/scroll interop — interactive-only, disposed like any resize interop). Don't make it so tall it eats the mobile viewport. |
-| **Table → cards** on narrow | Prefer one structure restyled with CSS (grid-areas per row); a genuinely different mobile DOM is a per-surface decision — mind duplicate-content cost below. Library grids: column `Hidden`/breakpoint props drop low-value columns first ([`ui-conventions`](../ui-conventions/SKILL.md) owns which columns matter). |
+| **Table → cards** on narrow | Prefer one structure restyled with CSS (grid-areas per row); a genuinely different mobile DOM is a per-surface decision — mind duplicate-content cost below. Library grids: column `Hidden`/breakpoint props drop low-value columns first ([`ui-rules`](../ui-rules/SKILL.md) owns which columns matter). |
 | **Sidebar → drawer / stacked** | Grid container swaps `grid-template-areas` at the breakpoint; the sidebar component itself is unchanged. |
 | **Form density** | Multi-column `MudGrid`/CSS grid collapsing to one column; labels stay above inputs at all widths (no layout-dependent label position). |
 | **Images/media** | `max-width: 100%; height: auto;` always; `srcset`/`sizes` for weight → [`performance`](../performance/SKILL.md). |
@@ -109,11 +109,11 @@ services** — `MudBreakpointProvider`/`IBreakpointService`, Fluent's viewport c
 `matchMedia` JS interop. They are **interactive-only**:
 
 - **Static SSR renders once on the server and knows nothing about the viewport.** On static-SSR surfaces (the
-  default per [`project-scaffold`](../project-scaffold/SKILL.md)) responsive behavior must be **pure CSS**. A
+  default per [`project-setup`](../project-setup/SKILL.md)) responsive behavior must be **pure CSS**. A
   `MudHidden` on a static page silently renders its default state.
 - **Prerendering**: an interactive component branching on width renders its default breakpoint state first, then
   swaps on interactivity → a layout flash. Pick the mobile-first default variant for prerender, or gate the
-  width-dependent region on first interactive render (`reference`'s lifecycle patterns).
+  width-dependent region on first interactive render (`basics`'s lifecycle patterns).
 - **CSS-swap duplicates DOM; C#-swap runs only when interactive.** Duplicate both variants in markup (CSS swap)
   when the region is small (nav links); for big surfaces (two table layouts) prefer one restyled structure, and
   only reach for a C# swap on an already-interactive surface.
@@ -129,7 +129,7 @@ Make that possible:
   suite imports; changing a breakpoint without telling QA breaks the boundary matrix, so it lives in one
   reviewed place.
 - **Both variants of a swap carry stable, variant-suffixed testids** (`nav-desktop` / `nav-hamburger`) — per
-  [`testability`](../testability/SKILL.md). QA asserts the visible one **and** the hidden one; unlabeled
+  [`test-ids`](../test-ids/SKILL.md). QA asserts the visible one **and** the hidden one; unlabeled
   variants make that impossible.
 - Every width must hold the invariant QA checks everywhere: **no horizontal overflow**.
 
@@ -166,7 +166,7 @@ Make that possible:
 
 - CSS isolation mechanics, tokens, mobile-first authority → [`styling`](../styling/SKILL.md)
 - Library grid component APIs, theming → [`component-library`](../component-library/SKILL.md)
-- Which table columns/actions survive narrow widths → [`ui-conventions`](../ui-conventions/SKILL.md)
+- Which table columns/actions survive narrow widths → [`ui-rules`](../ui-rules/SKILL.md)
 - Zoom/reflow (WCAG 1.4.10), touch targets, DOM-order-vs-visual-order → [`accessibility`](../accessibility/SKILL.md)
 - Responsive image weight, circuit leaks from resize interop → [`performance`](../performance/SKILL.md)
 - Verifying all of it by shrinking the browser → qa `responsive-testing` (peer agent's Phase 3)

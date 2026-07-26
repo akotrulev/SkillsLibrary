@@ -109,7 +109,7 @@ only). This is the same gate as the TS canonical — reach for it whenever you'r
 ## Shelling out to `npx lighthouse` — auditing a stateful page driven by Playwright .NET
 
 For authenticated/stateful pages, drive the app with the page objects the
-`qa-ui-test-author-playwright-dotnet` skill already authored, then run Lighthouse against the page's
+`qa-ui-test-writer-playwright-dotnet` skill already authored, then run Lighthouse against the page's
 **remote-debugging port** and assert the parsed score. Launch Chromium with the port, drive to state,
 then shell out — **async all the way down** (no `.Result`/`.Wait()`):
 
@@ -204,7 +204,7 @@ SEO, and best-practices categories are **deterministic** (a11y is axe-powered ru
 `lhci autorun` writes reports under `.lighthouseci/` (HTML + JSON + `manifest.json` naming the median
 run) and prints a public report URL with `temporary-public-storage`. The shell-out path writes the JSON
 you parsed. Attach it to Allure so a failing gate names the dropped category without re-running
-(cross-link `qa-allure-reporting-dotnet`):
+(cross-link `qa-test-reports-dotnet`):
 
 ```csharp
 // Support/LighthouseReportAttachment.cs
@@ -336,10 +336,10 @@ Lifecycle for this gate:
 - `references/axe-playwright.md` — the **per-component assertion** sibling: gate
   on `Violations` empty **inside** the E2E run (`Deque.AxeCore.Playwright`, a real NuGet). Run both — axe
   to *fix* nodes, Lighthouse to *trend* whole-page scores + gate perf/SEO/PWA.
-- `qa-ui-test-author-playwright-dotnet` — the page objects the shell-out audit reuses to reach a stateful
+- `qa-ui-test-writer-playwright-dotnet` — the page objects the shell-out audit reuses to reach a stateful
   page. Author the flow there; add the audit here.
 - `qa-ci-pipelines-dotnet` — the `lhci autorun` job (the .NET pipeline calls the Node CLI),
   artifact upload, and LHCI status check.
-- `qa-allure-reporting-dotnet` — attach the Lighthouse HTML + JSON report to the run.
+- `qa-test-reports-dotnet` — attach the Lighthouse HTML + JSON report to the run.
 - `qa-exploratory-charter-writer` — the manual/assistive-tech testing that covers the ~60% no automated
   a11y score can.

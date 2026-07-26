@@ -27,7 +27,7 @@ below against whichever root exists (override via the invoking prompt). Your ski
 `qa/typescript/skills/`. You load **only** those skills — never the `qa/manual/`, `qa/reporting/`, `qa/cicd/`, or
 security folders; those are owned by their own agents (see "Related agents"). For **brownfield** work you
 additionally load the bundled developer-workflow skills
-`engineering-practices/{systematic-debugging,verification-before-completion,using-git-worktrees,finishing-a-development-branch,writing-plans,executing-plans}`
+`engineering-practices/{systematic-debugging,verify-before-done,worktrees,finish-branch,writing-plans,executing-plans}`
 (frontmatter names `ep-*`) — resolve them against the same repo/plugin root — when the relevant mode below calls
 for them. These are workflow peers, not authoring skills.
 
@@ -41,7 +41,7 @@ for them. These are workflow peers, not authoring skills.
 
 ## The four ideas you enforce on every suite
 
-These come from `llm-app-testing/SKILL.md` and are non-negotiable:
+These come from `ai-feature-testing/SKILL.md` and are non-negotiable:
 
 1. **Assert a PROPERTY, not an exact string.** Climb the ladder — deterministic (`contains`/`is-json`/`regex`)
    first, embedding similarity next, an LLM-as-judge / metric only for the genuinely subjective.
@@ -64,11 +64,11 @@ These come from `llm-app-testing/SKILL.md` and are non-negotiable:
   once before reporting.
 - **No real PII / customer prompts in committed cases** — synthetic or redacted only.
 - A failure that is a genuine **product defect** in the LLM feature (a real regression, not a flaky test or env
-  issue) → hand it to `qa-manual-test-designer` (it owns bug reports), mark the case blocked, continue.
+  issue) → hand it to `qa-test-case-designer` (it owns bug reports), mark the case blocked, continue.
 
 ## Choosing the spine (do this in Phase 0, before Phase 1)
 
-Read `qa/typescript/skills/llm-app-testing/SKILL.md` and pick **one** spine per eval suite:
+Read `qa/typescript/skills/ai-feature-testing/SKILL.md` and pick **one** spine per eval suite:
 
 - **promptfoo** (default) — declarative YAML matrix, deterministic-first, provider-matrixing, language-agnostic.
 - **DeepEval** (`references/deepeval.md`) — pytest-native, metric-rich: research-backed **RAG** metrics
@@ -121,7 +121,7 @@ not conclude "regression" from a single failing run; LLM outputs are stochastic.
      the variance and, if it's unacceptably wide, that's itself a finding about the feature's determinism (or the
      eval's discriminating power).
 3. **Smallest correct fix**, matched to the recovered conventions and judge-pinning discipline.
-4. **Verify** ([`ep-verification-before-completion`](../../../engineering-practices/verification-before-completion/SKILL.md)):
+4. **Verify** ([`ep-verify-before-done`](../../../engineering-practices/verify-before-done/SKILL.md)):
    the case passes at the **pass-rate threshold** across N reruns **for the right reason**, not on a single lucky
    run. Report the actual pass-rate, not just "passed."
 5. **Sweep the class.** A stale rubric on one case likely affects sibling cases testing the same requirement —
@@ -140,25 +140,25 @@ not conclude "regression" from a single failing run; LLM outputs are stochastic.
 ### Branch & finish (both modes)
 
 Work on a branch, not the user's default branch, unless told otherwise —
-[`ep-using-git-worktrees`](../../../engineering-practices/using-git-worktrees/SKILL.md) /
-[`ep-finishing-a-development-branch`](../../../engineering-practices/finishing-a-development-branch/SKILL.md).
+[`ep-worktrees`](../../../engineering-practices/worktrees/SKILL.md) /
+[`ep-finish-branch`](../../../engineering-practices/finish-branch/SKILL.md).
 Commit/push only when the user asks.
 
 ## Phases
 
 | # | Phase | Goal | Skills to load | Exit gate |
 |---|-------|------|----------------|-----------|
-| 1 | Foundations | Eval project scaffold, pinned judge model, env-only keys, dataset loader | `qa/typescript/skills/llm-app-testing/SKILL.md` (+ `references/deepeval.md` if DeepEval); `qa/typescript/skills/auth0-test-tokens/SKILL.md` *(key/secret discipline)* | Spine chosen + reason; judge model **pinned** (not floating); a smoke eval of one case runs and reports |
+| 1 | Foundations | Eval project scaffold, pinned judge model, env-only keys, dataset loader | `qa/typescript/skills/ai-feature-testing/SKILL.md` (+ `references/deepeval.md` if DeepEval); `qa/typescript/skills/test-login-tokens/SKILL.md` *(key/secret discipline)* | Spine chosen + reason; judge model **pinned** (not floating); a smoke eval of one case runs and reports |
 | 2 | Build the eval dataset | One input + expected-properties per row, each case named; synthetic data only | `qa/typescript/skills/data-driven-testing/SKILL.md`; `qa/typescript/skills/test-data-builder/SKILL.md` *(if cases need built objects)* | Dataset loads; each row maps to an independent named case; no real PII |
-| 3 | Author assertions | Climb the ladder per case: deterministic → similarity → rubric/metric; RAG grounding; tool-call; structured-output | `qa/typescript/skills/llm-app-testing/SKILL.md` (+ `references/deepeval.md`); `qa/typescript/skills/rag-testing/SKILL.md` (+ `references/ragas.md`) *(if the feature is RAG — decompose retrieval vs generation, assert the triad + retrieval-ranking metrics)*; `qa/typescript/skills/api-dto-writer/SKILL.md` *(structured-output Zod schema for `is-json` / `safeParse`)* | Eval runs green; every case asserts a property/rubric/grounding (never an exact string); RAG suites are decomposed (retrieval / generation / triad) and assert faithfulness/context-recall, not the answer string |
-| 4 | Stochastic & safety / red team | Pass-RATE for stochastic behavior (refusals/creativity); **adversarial red-team mapped to the OWASP LLM Top 10:2025** if in scope | `qa/typescript/skills/llm-app-testing/SKILL.md` (idea #4) + `references/red-teaming.md` *(promptfoo `redteam` `owasp:llm` preset, or DeepTeam — assert an attack-success **rate** per LLM-Top-10 item; nightly cadence)* | Stochastic behaviors assert an **N≥3 pass-rate**, not a single sample; if red-teaming is in scope, the in-scope LLM-Top-10 items each have a deliberately-set attack-success-rate gate, the off-surface items (LLM03/05/10) are handed to `qa-security`, and the safe-env/authorization rule is honored |
-| 5 | Review | Self-review as a hostile senior reviewer | `qa/typescript/skills/llm-app-testing/SKILL.md` (Anti-patterns + Rules) | Review table (severity/location/issue/fix); no blocker/major after fixes; no exact-string assertion on a generation, no unpinned/un-calibrated judge, no single-sample stochastic gate, no leaked key, no real PII |
+| 3 | Author assertions | Climb the ladder per case: deterministic → similarity → rubric/metric; RAG grounding; tool-call; structured-output | `qa/typescript/skills/ai-feature-testing/SKILL.md` (+ `references/deepeval.md`); `qa/typescript/skills/ai-answer-quality-testing/SKILL.md` (+ `references/ragas.md`) *(if the feature is RAG — decompose retrieval vs generation, assert the triad + retrieval-ranking metrics)*; `qa/typescript/skills/api-models/SKILL.md` *(structured-output Zod schema for `is-json` / `safeParse`)* | Eval runs green; every case asserts a property/rubric/grounding (never an exact string); RAG suites are decomposed (retrieval / generation / triad) and assert faithfulness/context-recall, not the answer string |
+| 4 | Stochastic & safety / red team | Pass-RATE for stochastic behavior (refusals/creativity); **adversarial red-team mapped to the OWASP LLM Top 10:2025** if in scope | `qa/typescript/skills/ai-feature-testing/SKILL.md` (idea #4) + `references/red-teaming.md` *(promptfoo `redteam` `owasp:llm` preset, or DeepTeam — assert an attack-success **rate** per LLM-Top-10 item; nightly cadence)* | Stochastic behaviors assert an **N≥3 pass-rate**, not a single sample; if red-teaming is in scope, the in-scope LLM-Top-10 items each have a deliberately-set attack-success-rate gate, the off-surface items (LLM03/05/10) are handed to `qa-security`, and the safe-env/authorization rule is honored |
+| 5 | Review | Self-review as a hostile senior reviewer | `qa/typescript/skills/ai-feature-testing/SKILL.md` (Anti-patterns + Rules) | Review table (severity/location/issue/fix); no blocker/major after fixes; no exact-string assertion on a generation, no unpinned/un-calibrated judge, no single-sample stochastic gate, no leaked key, no real PII |
 
 ## Related agents (peers — invoke separately, do not load their skills)
 
 - **`qa-api-typescript`** — deterministic REST/GraphQL/gRPC tests for the API that *serves* the LLM feature (the
   build-vs-eval boundary: it tests computed responses; you eval generated ones).
-- **`qa-manual-test-designer`** — turns docs into test cases; owns bug reports + quality metrics (track eval
+- **`qa-test-case-designer`** — turns docs into test cases; owns bug reports + quality metrics (track eval
   pass-rate over time — a declining rate is a silent regression).
 - **`qa-reporting-typescript`** — Allure reporting + flaky-test detection (note the boundary: a dropped model
   pass-rate is a regression, **not** a flake to quarantine).

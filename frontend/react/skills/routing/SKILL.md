@@ -1,13 +1,13 @@
 ---
 name: fe-react-routing
-description: Use when adding, nesting, or debugging routes in a Next.js App Router app — file conventions (`page`/`layout`/`template`/`loading`/`not-found`/`route`), parallel (`@slot`) and intercepting (`(.)`) modal routes, `middleware.ts` gating. Triggers "add a route/page for X", "make this a modal route", "my layout remounts on every navigation", "protect these routes with middleware". Not for project setup (`project-scaffold`), fetching in a route (`data-access`), or metadata (`seo-discoverability`).
+description: Use when adding, nesting, or debugging routes in a Next.js App Router app — file conventions (`page`/`layout`/`template`/`loading`/`not-found`/`route`), parallel (`@slot`) and intercepting (`(.)`) modal routes, `middleware.ts` gating. Triggers "add a route/page for X", "make this a modal route", "my layout remounts on every navigation", "protect these routes with middleware". Not for project setup (`project-setup`), fetching in a route (`data-fetching`), or metadata (`seo`).
 ---
 
 # React — Routing & Navigation (Next.js App Router)
 
 Owns the **URL → UI mapping**: which file makes a route, how routes nest and share chrome, how a segment reads its params, how you move between routes, and what runs before a route renders. Blazor's `@page` directive collapses this into one line; the App Router spreads it across a file-convention system, so it gets its own skill.
 
-**The seam with siblings.** [`project-scaffold`](../project-scaffold/SKILL.md) picks the **render target and per-route rendering strategy** at setup time; this skill owns the **route topology** you build inside that choice. [`data-access`](../data-access/SKILL.md) owns what a route *fetches* once it renders; [`seo-discoverability`](../seo-discoverability/SKILL.md) owns the `metadata` hung off a route; [`error-resilience`](../error-resilience/SKILL.md) owns what `error.tsx` *renders*. This skill owns only the files, the segments, and the navigation between them.
+**The seam with siblings.** [`project-setup`](../project-setup/SKILL.md) picks the **render target and per-route rendering strategy** at setup time; this skill owns the **route topology** you build inside that choice. [`data-fetching`](../data-fetching/SKILL.md) owns what a route *fetches* once it renders; [`seo`](../seo/SKILL.md) owns the `metadata` hung off a route; [`error-handling`](../error-handling/SKILL.md) owns what `error.tsx` *renders*. This skill owns only the files, the segments, and the navigation between them.
 
 **Version rule.** In **Next 15**, `params` and `searchParams` are **Promises** — `await` them (or `use()` them in a Client Component). In **Next 14** they are plain objects. This is the single most common upgrade break; check the Next major before writing either. Route groups, parallel/intercepting routes, `middleware.ts`, and `generateStaticParams` are stable on both. The **Vite SPA** lane uses **React Router 7** instead — the file conventions below do not exist there; see "The Vite / React Router lane".
 
@@ -22,13 +22,13 @@ Owns the **URL → UI mapping**: which file makes a route, how routes nest and s
 
 ## When NOT to use
 
-- Choosing App Router vs Pages Router vs Vite at project setup → [`project-scaffold`](../project-scaffold/SKILL.md)
-- Fetching/mutating data inside a route → [`data-access`](../data-access/SKILL.md)
-- `metadata` / `generateMetadata` / `sitemap.ts` content → [`seo-discoverability`](../seo-discoverability/SKILL.md)
-- What the error / loading UI *looks like* → [`error-resilience`](../error-resilience/SKILL.md)
-- Locale-prefixed routing mechanics → [`localization`](../localization/SKILL.md) (it owns the `[locale]` segment; this skill owns the rest of the tree)
+- Choosing App Router vs Pages Router vs Vite at project setup → [`project-setup`](../project-setup/SKILL.md)
+- Fetching/mutating data inside a route → [`data-fetching`](../data-fetching/SKILL.md)
+- `metadata` / `generateMetadata` / `sitemap.ts` content → [`seo`](../seo/SKILL.md)
+- What the error / loading UI *looks like* → [`error-handling`](../error-handling/SKILL.md)
+- Locale-prefixed routing mechanics → [`languages`](../languages/SKILL.md) (it owns the `[locale]` segment; this skill owns the rest of the tree)
 - Auth *provider* wiring → `auth/auth0-react`; this skill only owns the middleware **gate**
-- Blazor → `frontend/blazor/skills/reference` (`@page` routing)
+- Blazor → `frontend/blazor/skills/basics` (`@page` routing)
 
 ## The file conventions
 
@@ -207,7 +207,7 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
-  const body = await req.json();               // validate with Zod — see `forms` / `data-access`
+  const body = await req.json();               // validate with Zod — see `forms` / `data-fetching`
   return NextResponse.json(await create(body), { status: 201 });
 }
 ```
@@ -228,7 +228,7 @@ No file conventions — routes are declared in code with **React Router 7**. The
 | `middleware.ts` | a guard component / loader wrapping the routes |
 | parallel + intercepting | no equivalent — hold modal state in the URL query yourself |
 
-There is no server render in a plain Vite SPA, so no route is crawlable — see [`seo-discoverability`](../seo-discoverability/SKILL.md).
+There is no server render in a plain Vite SPA, so no route is crawlable — see [`seo`](../seo/SKILL.md).
 
 ## Anti-patterns
 
@@ -248,9 +248,9 @@ There is no server render in a plain Vite SPA, so no route is crawlable — see 
 
 ## Related skills
 
-- [`project-scaffold`](../project-scaffold/SKILL.md) — render target + per-route rendering strategy (this skill builds inside that decision)
-- [`data-access`](../data-access/SKILL.md) — what a route fetches once matched
-- [`seo-discoverability`](../seo-discoverability/SKILL.md) — `metadata` per route, `sitemap.ts`, real 404 content
-- [`error-resilience`](../error-resilience/SKILL.md) — what `error.tsx` / `not-found.tsx` render
-- [`localization`](../localization/SKILL.md) — the `[locale]` segment and locale middleware
-- [`reference`](../reference/SKILL.md) — the RSC / `'use client'` boundary these files sit on
+- [`project-setup`](../project-setup/SKILL.md) — render target + per-route rendering strategy (this skill builds inside that decision)
+- [`data-fetching`](../data-fetching/SKILL.md) — what a route fetches once matched
+- [`seo`](../seo/SKILL.md) — `metadata` per route, `sitemap.ts`, real 404 content
+- [`error-handling`](../error-handling/SKILL.md) — what `error.tsx` / `not-found.tsx` render
+- [`languages`](../languages/SKILL.md) — the `[locale]` segment and locale middleware
+- [`basics`](../basics/SKILL.md) — the RSC / `'use client'` boundary these files sit on

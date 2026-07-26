@@ -5,7 +5,7 @@ argument-hint: [optional: path, app, or sections to limit the sweep to]
 
 Run a **fe-react conformance audit** on this repository: sweep the codebase against the conventions and flows this plugin defines, and save a findings report.
 
-1. `Read` the skill at `${CLAUDE_PLUGIN_ROOT}/frontend/react/skills/conformance-audit/SKILL.md` (fall back to `frontend/react/skills/conformance-audit/SKILL.md` when working inside the SkillsLibrary repo itself), then its `references/conformance-checklist.md` **end-to-end** and `references/report-template.md`.
+1. `Read` the skill at `${CLAUDE_PLUGIN_ROOT}/frontend/react/skills/standards-audit/SKILL.md` (fall back to `frontend/react/skills/standards-audit/SKILL.md` when working inside the SkillsLibrary repo itself), then its `references/conformance-checklist.md` **end-to-end** and `references/report-template.md`.
 2. Follow it exactly — the version gate, the applicability matrix, the section-by-section sweep, the evidence rules, the report template, and the hostile self-review all apply.
 3. Check `docs/audits/` first: a prior `…-fe-react-conformance-r<N>.md` means **Mode B (re-audit)** — reuse its section letters and finding IDs verbatim, never renumber. Otherwise **Mode A (baseline)**.
 4. Load the owning `frontend/react/skills/<skill>/SKILL.md` whenever a check is ambiguous, version-keyed, or you are about to write its fix direction.

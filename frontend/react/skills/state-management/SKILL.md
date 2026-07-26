@@ -1,6 +1,6 @@
 ---
 name: fe-react-state-management
-description: Use when state has outgrown `useState` or lives in the wrong place — local state, lifted state, Context + reducer, Zustand, Redux Toolkit, Jotai, and the server-vs-client-state split (TanStack Query / RSC own server state). Triggers "what's the right state library here", "Redux Toolkit vs Zustand", "Context or store", "I'm prop-drilling everywhere", "this state is out of sync across pages". Not for forms (`forms`) or data fetching itself (`data-access`).
+description: Use when state has outgrown `useState` or lives in the wrong place — local state, lifted state, Context + reducer, Zustand, Redux Toolkit, Jotai, and the server-vs-client-state split (TanStack Query / RSC own server state). Triggers "what's the right state library here", "Redux Toolkit vs Zustand", "Context or store", "I'm prop-drilling everywhere", "this state is out of sync across pages". Not for forms (`forms`) or data fetching itself (`data-fetching`).
 ---
 
 # React — State Management
@@ -17,10 +17,10 @@ Picks the right state primitive for the job. House style: **local first, lift on
 
 ## When NOT to use
 
-- New component scaffolding → [`generator`](../generator/SKILL.md)
+- New component scaffolding → [`component-writer`](../component-writer/SKILL.md)
 - Form state specifically → [`forms`](../forms/SKILL.md)
-- The data-fetching mechanics themselves (RSC fetch, Server Actions, TanStack Query setup) → [`data-access`](../data-access/SKILL.md)
-- Conceptual lookup → [`reference`](../reference/SKILL.md)
+- The data-fetching mechanics themselves (RSC fetch, Server Actions, TanStack Query setup) → [`data-fetching`](../data-fetching/SKILL.md)
+- Conceptual lookup → [`basics`](../basics/SKILL.md)
 - Blazor → `frontend/blazor/skills/state-management`
 
 ## Inputs needed
@@ -68,7 +68,7 @@ Stale unless refreshed Always current
 Needs caching          Doesn't need caching
 ```
 
-**Don't store server data in Redux / Zustand / Context.** That re-invents caching, refetch, invalidation, and optimistic updates — and always loses against the tools built for it. On the App Router, the *first* answer for server state is **not a client library at all**: fetch in a Server Component and pass props; mutate with a Server Action and `revalidate`. Reach for TanStack Query when a **Client Component** needs client-side caching/refetch/optimism. [`data-access`](../data-access/SKILL.md) owns the fetch mechanics; this skill owns *which bucket the state belongs in*.
+**Don't store server data in Redux / Zustand / Context.** That re-invents caching, refetch, invalidation, and optimistic updates — and always loses against the tools built for it. On the App Router, the *first* answer for server state is **not a client library at all**: fetch in a Server Component and pass props; mutate with a Server Action and `revalidate`. Reach for TanStack Query when a **Client Component** needs client-side caching/refetch/optimism. [`data-fetching`](../data-fetching/SKILL.md) owns the fetch mechanics; this skill owns *which bucket the state belongs in*.
 
 ```tsx
 // ✅ Client-side server state via TanStack Query (a Client Component that needs caching)
@@ -291,7 +291,7 @@ On the App Router, URL state also lets a **Server Component** read `searchParams
 
 1. Confirm the kind of state (server / URL / UI / session / form) and sharing scope.
 2. Walk the decision tree; recommend the lightest fit.
-3. Server state → RSC fetch + Server Action, or a TanStack Query hook per resource ([`data-access`](../data-access/SKILL.md)).
+3. Server state → RSC fetch + Server Action, or a TanStack Query hook per resource ([`data-fetching`](../data-fetching/SKILL.md)).
 4. UI state → `useState`/`useReducer`, or Context if shared; app-wide client state → a Zustand store with selectors (+ per-request scope on the App Router).
 5. Move URL-derivable state into `searchParams`.
 6. Sweep prop-drilling chains the new Context/store replaces; remove dead props.
@@ -299,9 +299,9 @@ On the App Router, URL state also lets a **Server Component** read `searchParams
 
 ## Handoffs
 
-- Component scaffolding using the new state → [`generator`](../generator/SKILL.md)
+- Component scaffolding using the new state → [`component-writer`](../component-writer/SKILL.md)
 - Form state → [`forms`](../forms/SKILL.md)
-- Data-fetching mechanics (RSC fetch, Server Actions, TanStack Query setup, streaming) → [`data-access`](../data-access/SKILL.md)
-- Conceptual lookup (Context vs store, hooks) → [`reference`](../reference/SKILL.md)
+- Data-fetching mechanics (RSC fetch, Server Actions, TanStack Query setup, streaming) → [`data-fetching`](../data-fetching/SKILL.md)
+- Conceptual lookup (Context vs store, hooks) → [`basics`](../basics/SKILL.md)
 - Auth-driven state (current user) → `auth/auth0-react`
 - Blazor equivalent → `frontend/blazor/skills/state-management`

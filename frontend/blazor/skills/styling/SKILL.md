@@ -1,6 +1,6 @@
 ---
 name: fe-blazor-styling
-description: Use when styling a Blazor app (.NET 8/9/10) with CSS — CSS isolation (`.razor.css`) and `::deep`, design tokens as CSS custom properties, a type scale (`clamp()`), dark mode, and the CSS-isolation-vs-Tailwind decision. Triggers: "scope this component's CSS", "why doesn't my `::deep` selector work", "set up design tokens in Blazor", "dark mode with CSS". Do NOT use for a component library's own theme system (`component-library`) or the palette/font design itself (`design/frontend-design`).
+description: Use when styling a Blazor app (.NET 8/9/10) with CSS — CSS isolation (`.razor.css`) and `::deep`, design tokens as CSS custom properties, a type scale (`clamp()`), dark mode, and the CSS-isolation-vs-Tailwind decision. Triggers: "scope this component's CSS", "why doesn't my `::deep` selector work", "set up design tokens in Blazor", "dark mode with CSS". Do NOT use for a component library's own theme system (`component-library`) or the palette/font design itself (`design/visual-identity`).
 ---
 
 # Blazor — Styling (CSS isolation, tokens, dark mode)
@@ -13,16 +13,16 @@ Owns how a Blazor app is styled with **CSS you write**: component-scoped isolati
 
 - Scoping a component's CSS so it can't leak or collide
 - Reaching a child element's DOM from scoped CSS (`::deep`)
-- Setting up design tokens (CSS custom properties) from a `design/theme-factory` palette
+- Setting up design tokens (CSS custom properties) from a `design/theme-presets` palette
 - Dark mode, responsive breakpoints
 - Deciding CSS isolation vs Tailwind (or how they coexist)
 
 ## When NOT to use
 
 - A component library's theme/token system (MudBlazor `MudTheme`, Fluent tokens, Radzen `--rz-*`) → [`component-library`](../component-library/SKILL.md)
-- Picking the palette, fonts, visual direction, type *treatment* → [`design/frontend-design`](../../../../design/frontend-design/SKILL.md) (primary theming authority), `design/theme-factory` (optional quick-start)
+- Picking the palette, fonts, visual direction, type *treatment* → [`design/visual-identity`](../../../../design/visual-identity/SKILL.md) (primary theming authority), `design/theme-presets` (optional quick-start)
 - Contrast/WCAG auditing of the colors you chose → [`accessibility`](../accessibility/SKILL.md)
-- Layout *component* structure (templates, slots) → [`reference`](../reference/SKILL.md) layering
+- Layout *component* structure (templates, slots) → [`basics`](../basics/SKILL.md) layering
 
 ## The styling authority decision
 
@@ -77,7 +77,7 @@ Rules + gotchas:
 
 ## Design tokens — the theming backbone
 
-Define the palette/spacing/typography once as **CSS custom properties**, and reference `var(--token)` everywhere (isolated files and global). This is the seam where the visual direction enters the codebase — map [`design/frontend-design`](../../../../design/frontend-design/SKILL.md)'s per-brief token system (the primary authority; or a `design/theme-factory` preset for a quick-start) — palette hex + font pairing — to tokens. The *system* rules below (tier model, purpose-naming, categories, theming-as-swap-set) are the stack-agnostic discipline owned by [`design/design-tokens`](../../../../design/design-tokens/SKILL.md) — this section is the Blazor **mechanics** that render that system as CSS; defer the structure questions (how many tiers, how to name, DTCG-or-not) there and keep only CSS-isolation specifics here:
+Define the palette/spacing/typography once as **CSS custom properties**, and reference `var(--token)` everywhere (isolated files and global). This is the seam where the visual direction enters the codebase — map [`design/visual-identity`](../../../../design/visual-identity/SKILL.md)'s per-brief token system (the primary authority; or a `design/theme-presets` preset for a quick-start) — palette hex + font pairing — to tokens. The *system* rules below (tier model, purpose-naming, categories, theming-as-swap-set) are the stack-agnostic discipline owned by [`design/design-tokens`](../../../../design/design-tokens/SKILL.md) — this section is the Blazor **mechanics** that render that system as CSS; defer the structure questions (how many tiers, how to name, DTCG-or-not) there and keep only CSS-isolation specifics here:
 
 ```css
 /* app.css (global) — the ONLY thing that legitimately lives global */
@@ -94,13 +94,13 @@ Define the palette/spacing/typography once as **CSS custom properties**, and ref
 
 Rules:
 - **Isolated component CSS consumes tokens, never hardcoded hex.** `color: var(--color-text)` — a literal `#333` in a `.razor.css` is a token that escaped.
-- **Name functional tokens by purpose, not value.** `--color-danger` / `--color-surface-raised` / `--color-action-primary`, never `--color-red` / `--color-blue-500`. Purpose-named tokens keep meaning stable when the theme changes and make an accessibility fix a one-line edit; a value-named token is a literal wearing a variable's clothes. Keep the semantic set (success / warning / danger / info) separate from brand tokens so the two can't collide (the brand-vs-functional split is [`design/frontend-design`](../../../../design/frontend-design/SKILL.md)'s decision).
+- **Name functional tokens by purpose, not value.** `--color-danger` / `--color-surface-raised` / `--color-action-primary`, never `--color-red` / `--color-blue-500`. Purpose-named tokens keep meaning stable when the theme changes and make an accessibility fix a one-line edit; a value-named token is a literal wearing a variable's clothes. Keep the semantic set (success / warning / danger / info) separate from brand tokens so the two can't collide (the brand-vs-functional split is [`design/visual-identity`](../../../../design/visual-identity/SKILL.md)'s decision).
 - **One token set app-wide.** No per-feature palette forks.
 - When a component library is present, **bridge**: set your tokens *from* the library's variables (or vice-versa) at `:root` so there's one source of truth, not two color systems (see [`component-library`](../component-library/SKILL.md)).
 
 ## Type scale & hierarchy
 
-Typography is where `design/frontend-design`'s taste ("the type treatment is a memorable part of the design") becomes tokens. That skill decides the *treatment* — the display/body pairing, the personality; this section is the *mechanics* that encode it: a scale, a hierarchy, responsive sizing, and weight/tracking discipline. Layer it on the `--font-*` seam the token block already has — a single `--font-body` value is a font, not a type *system*.
+Typography is where `design/visual-identity`'s taste ("the type treatment is a memorable part of the design") becomes tokens. That skill decides the *treatment* — the display/body pairing, the personality; this section is the *mechanics* that encode it: a scale, a hierarchy, responsive sizing, and weight/tracking discipline. Layer it on the `--font-*` seam the token block already has — a single `--font-body` value is a font, not a type *system*.
 
 **A modular scale as tokens.** Pick one ratio (1.2 minor-third for dense UI, 1.25 major-third, 1.333 perfect-fourth for editorial) and generate steps from one base, so every size is a deliberate rung, not an ad-hoc `px`:
 
@@ -163,7 +163,7 @@ Dark mode is a **token swap**, not a per-component `dark:` sprinkle. Toggle a `d
 ```
 
 Rules:
-- **Dark mode is a second palette, not an inversion.** Never programmatically flip the light values (`filter: invert()`, or an algorithm that negates each hex). Author the dark tokens deliberately: **desaturate accents** (fully-saturated brand colors vibrate on dark surfaces), **avoid pure `#000`** surfaces (a very dark neutral like `#1a1a27` reads better and lets shadows show), and **re-verify every contrast pair** — a ratio that passes on white routinely fails on a dark surface, so this needs its own [`accessibility`](../accessibility/SKILL.md) pass, not a reuse of the light-mode result. (The *taste* decision that dark mode is a separate palette is [`design/frontend-design`](../../../../design/frontend-design/SKILL.md)'s; this is the mechanics.)
+- **Dark mode is a second palette, not an inversion.** Never programmatically flip the light values (`filter: invert()`, or an algorithm that negates each hex). Author the dark tokens deliberately: **desaturate accents** (fully-saturated brand colors vibrate on dark surfaces), **avoid pure `#000`** surfaces (a very dark neutral like `#1a1a27` reads better and lets shadows show), and **re-verify every contrast pair** — a ratio that passes on white routinely fails on a dark surface, so this needs its own [`accessibility`](../accessibility/SKILL.md) pass, not a reuse of the light-mode result. (The *taste* decision that dark mode is a separate palette is [`design/visual-identity`](../../../../design/visual-identity/SKILL.md)'s; this is the mechanics.)
 - **Follow OS preference by default (`prefers-color-scheme`), let the user override, persist the override.** The persisted choice wins over the media query (hence `:not([data-theme="light"])`).
 - **Set the attribute before first paint** to avoid a light→dark flash — a tiny inline script in `App.razor` `<head>` that reads localStorage/`prefers-color-scheme` and stamps `data-theme` synchronously. (This is the one place a pre-render inline script is justified.)
 - Because everything reads tokens, dark mode needs **zero** changes in component CSS — if a component needs a `dark:`-specific rule, its color escaped into a literal. Fix the token, not the component.
@@ -178,7 +178,7 @@ This skill owns only the CSS *authority* rules responsive design rides on: **mob
 - **One styling authority** (library theme · CSS isolation+tokens · Tailwind) — never Tailwind *and* a component library.
 - **CSS isolation by default**; global stylesheet holds *only* tokens + a minimal reset, never component styles.
 - **`::deep` only off an element you own**, and prefer a child `Class`/CSS-var API over reaching in.
-- **Design tokens as CSS custom properties**, sourced from `design/frontend-design` (primary) / `design/theme-factory` (quick-start); isolated CSS consumes `var(--token)`, never literals; functional tokens **named by purpose** (`--color-danger`), not value (`--color-red`), and kept distinct from brand tokens.
+- **Design tokens as CSS custom properties**, sourced from `design/visual-identity` (primary) / `design/theme-presets` (quick-start); isolated CSS consumes `var(--token)`, never literals; functional tokens **named by purpose** (`--color-danger`), not value (`--color-red`), and kept distinct from brand tokens.
 - **Type as a system, not a font** — one modular scale + one base as tokens, headings carry hierarchy globally (`<h1>`–`<h4>`, one `<h1>` per page), display sizes fluid via `clamp()`, two–three weights, sizes from scale tokens never literal `px`.
 - **Dark mode = a deliberately-authored second palette** (desaturated accents, no pure black, contrast re-verified) swapped via `data-theme` + `prefers-color-scheme` — never an inversion; set before first paint, user override persisted and winning.
 - **Mobile-first responsive**, breakpoints consistent app-wide (the breakpoint contract itself → [`responsive-design`](../responsive-design/SKILL.md)).
@@ -206,8 +206,8 @@ This skill owns only the CSS *authority* rules responsive design rides on: **mob
 ## Handoffs
 
 - Component library's own theme (MudTheme, Fluent tokens, Radzen themes) → [`component-library`](../component-library/SKILL.md)
-- Palette, fonts, visual direction, the *type treatment* (which faces, what personality) → [`design/frontend-design`](../../../../design/frontend-design/SKILL.md) (primary), `design/theme-factory` (quick-start)
+- Palette, fonts, visual direction, the *type treatment* (which faces, what personality) → [`design/visual-identity`](../../../../design/visual-identity/SKILL.md) (primary), `design/theme-presets` (quick-start)
 - Contrast/WCAG check of chosen colors, focus-visible styling → [`accessibility`](../accessibility/SKILL.md)
 - Breakpoint contract, grids, cross-breakpoint alignment, container queries → [`responsive-design`](../responsive-design/SKILL.md)
 - Static-asset fingerprinting/compression of the styles bundle → [`performance`](../performance/SKILL.md)
-- Component/layout structure (templates, slots) → [`reference`](../reference/SKILL.md)
+- Component/layout structure (templates, slots) → [`basics`](../basics/SKILL.md)

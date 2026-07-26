@@ -1,6 +1,6 @@
 ---
 name: communication-meeting-notes
-description: Use when the user needs a meeting written up as decisions and action items — refinement sessions, steercos, workshops, postmortem reviews — from rough notes, a transcript, or a recap dictated after the fact. Triggers: "write up the minutes", "capture the decisions from this refinement", "turn this transcript into action items", "start a decision log for the project". Do NOT use for status updates to stakeholders (use communication/stakeholder-updates), scoping an initiative raised in the meeting (use business-analysis/skills/ba-initiative-scoping), or the postmortem document itself (use communication/incident-postmortem — this skill only captures its review meeting).
+description: Use when the user needs a meeting written up as decisions and action items — refinement sessions, steercos, workshops, postmortem reviews — from rough notes, a transcript, or a recap dictated after the fact. Triggers: "write up the minutes", "capture the decisions from this refinement", "turn this transcript into action items", "start a decision log for the project". Do NOT use for status updates to stakeholders (use communication/stakeholder-updates), scoping an initiative raised in the meeting (use business-analysis/skills/ba-scoping-writeup), or the postmortem document itself (use communication/incident-postmortem — this skill only captures its review meeting).
 ---
 
 # Meeting Notes & Decision Log
@@ -19,8 +19,8 @@ Turns a meeting — rough notes, a transcript, or a dictated recap — into the 
 ## When NOT to use
 
 - Reporting status outward → `communication/stakeholder-updates`
-- The meeting raised a new initiative that needs scoping → `business-analysis/skills/ba-initiative-scoping` (link it from the notes, don't scope it inside them)
-- Requirements elicited in the meeting need structuring → `business-analysis/skills/ba-initiative-scoping` (its elicitation guide)
+- The meeting raised a new initiative that needs scoping → `business-analysis/skills/ba-scoping-writeup` (link it from the notes, don't scope it inside them)
+- Requirements elicited in the meeting need structuring → `business-analysis/skills/ba-scoping-writeup` (its elicitation guide)
 - The artifact is the postmortem itself → `communication/incident-postmortem`
 
 ## Inputs needed
@@ -88,7 +88,7 @@ For a running **decision log**, append the Decisions rows to the project's `DECI
 ## Handoffs
 
 - Communicate the outcomes outward → `communication/stakeholder-updates`
-- A new initiative surfaced → `business-analysis/skills/ba-initiative-scoping`
-- Refinement outcomes change stories → `business-analysis/skills/ba-story-writer` (ours) or `business-analysis/skills/ba-backlog-auditor` (theirs)
-- Decisions that change tested behavior → flag to `qa/manual/test-basis-analyzer` (the basis may be stale)
+- A new initiative surfaced → `business-analysis/skills/ba-scoping-writeup`
+- Refinement outcomes change stories → `business-analysis/skills/ba-story-writer` (ours) or `business-analysis/skills/ba-story-quality-review` (theirs)
+- Decisions that change tested behavior → flag to `qa/manual/requirements-breakdown` (the basis may be stale)
 - Postmortem review actions → tracked in the postmortem's action table (`communication/incident-postmortem`)

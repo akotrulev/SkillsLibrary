@@ -1,6 +1,6 @@
 ---
 name: fe-blazor-component-testing
-description: Use when writing dev-side component tests for Blazor (.NET 8/9/10) with bUnit v2 — `.razor` test files, `MarkupMatches`, fake services, cascading parameters, the bUnit `JSInterop` mock, `AddTestAuthorization()`, `EventCallback` + re-render assertions, `WaitForState`/`WaitForAssertion`. Triggers: "unit-test this Blazor component", "write bUnit tests", "mock IJSRuntime in a component test". Do NOT use for E2E/browser journeys (the `qa-ui-dotnet` peer) or data-testid authoring (`testability`).
+description: Use when writing dev-side component tests for Blazor (.NET 8/9/10) with bUnit v2 — `.razor` test files, `MarkupMatches`, fake services, cascading parameters, the bUnit `JSInterop` mock, `AddTestAuthorization()`, `EventCallback` + re-render assertions, `WaitForState`/`WaitForAssertion`. Triggers: "unit-test this Blazor component", "write bUnit tests", "mock IJSRuntime in a component test". Do NOT use for E2E/browser journeys (the `qa-ui-dotnet` peer) or data-testid authoring (`test-ids`).
 ---
 
 # Blazor — Component Testing (bUnit v2)
@@ -33,7 +33,7 @@ bUnit **v2 was a rewrite** — the API moved. Detect the bUnit package version b
 - **Markup-only components** (a static card, a layout shell with no branching) — a snapshot of hand-written markup asserts nothing but tautology. Test *logic-bearing* components only.
 - **End-to-end journeys / real navigation / real backend** → `qa-ui-dotnet` (peer). bUnit fakes `NavigationManager`; it does not actually route.
 - **Pure C# logic** with no rendering (a formatter, a validator class) → a plain NUnit/xUnit test on the class, no bUnit.
-- **Authoring `data-testid`s** → `frontend/blazor/skills/testability`. (Tests here *consume* those testids as stable selectors — `cut.Find("[data-testid='Orders.Row']")`.)
+- **Authoring `data-testid`s** → `frontend/blazor/skills/test-ids`. (Tests here *consume* those testids as stable selectors — `cut.Find("[data-testid='Orders.Row']")`.)
 
 ## Test what has behavior — the selection matrix
 
@@ -116,7 +116,7 @@ Renders and interop are async. Assert on a **condition**, never a delay (global 
 
 - Inherit `BunitContext`; render with `Render<T>` / `Render(@<T/>)`; dispose with `DisposeComponentsAsync` when a test needs mid-test disposal (the context disposes at test end automatically).
 - **Semantic assertions only** — `MarkupMatches` / `Find(...).TextContent`, never brittle full-string equality on rendered HTML.
-- **Select by `data-testid`** (authored per `testability`), not by tag/class/nth-child — the same stable contract the E2E suite uses.
+- **Select by `data-testid`** (authored per `test-ids`), not by tag/class/nth-child — the same stable contract the E2E suite uses.
 - **One behavior per test**, `Should_X_When_Y` / `Given_When_Then` naming, no `if`/`for` driving assertions (parameterize with `[Theory]`/`[TestCase]` instead) — the global test rules apply here.
 - **Fakes/stubs over mocks-of-everything**; constructor-injected into `Services`. Fake the service the component depends on; don't reconstruct the whole app graph.
 - **JS interop in Strict mode** so unasserted interop fails loudly.
@@ -135,8 +135,8 @@ Renders and interop are async. Assert on a **condition**, never a delay (global 
 
 ## Handoffs
 
-- Data-testid authoring/audit → `frontend/blazor/skills/testability`
+- Data-testid authoring/audit → `frontend/blazor/skills/test-ids`
 - End-to-end / real-browser journeys, POM → **peer** `qa-ui-dotnet`
 - Visual/pixel regression → **peer** `qa/dotnet/skills/visual-regression`
-- Component code smells / rewrites → `frontend/blazor/skills/reviewer` / `generator`
-- What a component *should* do (behavior spec) → the test-case suite from **peer** `qa-manual-test-designer`
+- Component code smells / rewrites → `frontend/blazor/skills/code-review` / `component-writer`
+- What a component *should* do (behavior spec) → the test-case suite from **peer** `qa-test-case-designer`

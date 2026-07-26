@@ -91,12 +91,12 @@ dependencies {
 
 - Driving **your app's own screens** via page objects → `qa/java/skills/ui-test-author/appium` (this skill builds **on** it)
 - The **real-device-cloud** layer (BrowserStack/Sauce/Device Farm) + GPS/network/biometric **cap-injection plumbing**
-  → `qa/java/skills/mobile-device-farm` (`mobile-device-farm` is *where* the test runs + how caps are injected on a farm; `mobile-native-features` is *what* you
-  assert on those caps — they compose: run `mobile-native-features`'s biometric/permission tests on `mobile-device-farm`'s real-device cloud)
-- Asserting the **network requests** an app makes → `qa/java/skills/network-monitoring/*` (draw the line: `mobile-native-features` = the app's
-  *reaction* to airplane mode / a permission; network-monitoring = asserting the requests)
+  → `qa/java/skills/device-cloud` (`device-cloud` is *where* the test runs + how caps are injected on a farm; `mobile-native-features` is *what* you
+  assert on those caps — they compose: run `mobile-native-features`'s biometric/permission tests on `device-cloud`'s real-device cloud)
+- Asserting the **network requests** an app makes → `qa/java/skills/network-mocking/*` (draw the line: `mobile-native-features` = the app's
+  *reaction* to airplane mode / a permission; network-mocking = asserting the requests)
 - The .NET / TypeScript native-feature stacks → `qa/{dotnet,typescript}/skills/mobile-native-features`
-- **Token-based** auth → `qa/java/skills/auth0-test-tokens` (biometric *unlock* vs token *auth* are different surfaces)
+- **Token-based** auth → `qa/java/skills/test-login-tokens` (biometric *unlock* vs token *auth* are different surfaces)
 
 ---
 
@@ -286,7 +286,7 @@ new NativeFeatures(driver).sendIosBiometric("faceId", true);    // match
 
 > **Real-device biometric is a farm concern, not this skill's.** On a real device you can't inject a sensor read
 > locally — that's BrowserStack/Sauce sensor instrumentation (`enableBiometric` + `browserstack_executor
-> performBiometric`), which `qa/java/skills/mobile-device-farm` owns. They **compose**: write the approve/reject
+> performBiometric`), which `qa/java/skills/device-cloud` owns. They **compose**: write the approve/reject
 > *assertions* here, run them on the farm's injected biometric there. Never wire a real fingerprint into a test.
 
 ---
@@ -338,8 +338,8 @@ Home → Orders → search → row to reach order detail. The native-correct ver
 which the tap-through test never does. Same destination screen, two completely different things proven: the OS
 surface (the link) vs your in-app navigation.
 
-**Composing with `mobile-device-farm`.** This skill writes the *assertions* — "approved fingerprint reaches
-the dashboard", "denied location degrades gracefully". `mobile-device-farm` owns *where they run and how the cap is injected* on a
+**Composing with `device-cloud`.** This skill writes the *assertions* — "approved fingerprint reaches
+the dashboard", "denied location degrades gracefully". `device-cloud` owns *where they run and how the cap is injected* on a
 real-device cloud (`enableBiometric` + `performBiometric`, `gpsLocation`, `networkProfile`). They compose: the
 biometric reject test you write here runs on the farm's injected sensor there. The boundary mirrors gRPC's "assert
 the typed message" vs Testcontainers' "stand the service up" — *what you assert* vs *where it runs*.
@@ -356,7 +356,7 @@ the typed message" vs Testcontainers' "stand the service up" — *what you asser
   `autoAcceptAlerts` / `mobile: changePermissions` for feature tests; drive the **real** OS dialog only when the
   grant/deny flow itself is under test, and exercise the **deny** path.
 - **Biometric is injected on emulator/simulator only** (`fingerPrint(int)` / `mobile: sendBiometricMatch`), never a
-  real sensor; test **both** approve and reject. Real-device biometric injection → `qa/java/skills/mobile-device-farm`.
+  real sensor; test **both** approve and reject. Real-device biometric injection → `qa/java/skills/device-cloud`.
 - **Lifecycle events assert restored state on a bounded wait.** `runAppInBackground` / `terminateApp` /
   `activateApp` / `queryAppState`, each followed by a `WebDriverWait` on the observable result. **No `Thread.sleep`**
   anywhere — including for OS animations, dialog appearance, or push delivery.
@@ -371,17 +371,17 @@ the typed message" vs Testcontainers' "stand the service up" — *what you asser
   `AppiumDriverFactory` / `BaseMobileTest` / `SystemPropertyUtil`, the capability/`mobile:`-command idioms, explicit
   waits, native↔WEBVIEW context switching. The page objects + driver lifecycle run **unchanged**; `mobile-native-features` adds the
   OS-surface layer. Mirror its locator/wait idioms exactly.
-- **`qa/java/skills/mobile-device-farm`** — the **real-device-cloud layer** + GPS/network/biometric **cap-injection
-  plumbing**. `mobile-device-farm` = *where* the test runs + *how* the cap is injected; `mobile-native-features` = *what* you assert on those caps. They
-  compose (run `mobile-native-features`'s biometric/permission tests on `mobile-device-farm`'s farm). Don't duplicate the farm wiring.
+- **`qa/java/skills/device-cloud`** — the **real-device-cloud layer** + GPS/network/biometric **cap-injection
+  plumbing**. `device-cloud` = *where* the test runs + *how* the cap is injected; `mobile-native-features` = *what* you assert on those caps. They
+  compose (run `mobile-native-features`'s biometric/permission tests on `device-cloud`'s farm). Don't duplicate the farm wiring.
 - **`qa/typescript/skills/mobile-native-features`** + **`qa/dotnet/skills/mobile-native-features`** — the sibling stacks
   (WebdriverIO + `driver.execute('mobile: …')` · Appium .NET + `driver.ExecuteScript("mobile: …")`); same four
   ideas, different client idioms. Structure ported, not redesigned.
-- **`qa/java/skills/network-monitoring/*`** — the **boundary** on network conditioning/requests: `mobile-native-features` tests the app's *reaction*
-  to airplane mode / a network flip; network-monitoring asserts the *requests*.
+- **`qa/java/skills/network-mocking/*`** — the **boundary** on network conditioning/requests: `mobile-native-features` tests the app's *reaction*
+  to airplane mode / a network flip; network-mocking asserts the *requests*.
 - **`qa/java/skills/data-driven-testing`** — drive a **device / permission / locale matrix** via a `@DataProvider`
   (one independent named case per row); this skill supplies the rows, that one the data-driven discipline.
-- **`qa/java/skills/cloud-grid-config`** — the grid/session wiring the device session connects through (under `mobile-device-farm`).
-- **`qa/java/skills/auth0-test-tokens`** — token-based auth, the boundary vs biometric *unlock*.
-- **`qa/reporting/java/skills/allure-reporting`** — attach a screenshot of the deep-linked / restored / unlocked screen per
+- **`qa/java/skills/browser-cloud-setup`** — the grid/session wiring the device session connects through (under `device-cloud`).
+- **`qa/java/skills/test-login-tokens`** — token-based auth, the boundary vs biometric *unlock*.
+- **`qa/reporting/java/skills/test-reports`** — attach a screenshot of the deep-linked / restored / unlocked screen per
   native-flow result so a failure is one click from the replay.

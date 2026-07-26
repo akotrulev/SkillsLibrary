@@ -16,7 +16,7 @@ diff, baselines live in your repo, you own the flakiness budget. Reach for Percy
 
 Visual regression is an **assertion layer** on top of your existing page objects and specs. You do
 not author new page objects here — you add a screenshot assertion to a flow
-`qa-ui-test-author-playwright-java` already built.
+`qa-ui-test-writer-playwright-java` already built.
 
 ## Decision matrix — which assertion, which tool
 
@@ -274,7 +274,7 @@ output. Upload them as artifacts and attach to the report:
     retention-days: 7
 ```
 
-Attach the diff into Allure so reviewers see it inline (cross-link `qa-allure-reporting-java`):
+Attach the diff into Allure so reviewers see it inline (cross-link `qa-test-reports-java`):
 
 ```java
 @AfterMethod
@@ -360,9 +360,9 @@ Baseline lifecycle for this test:
   (`@playwright/test` `toHaveScreenshot()`, `--update-snapshots`, `playwright.config.ts` defaults).
 - `qa-visual-regression-dotnet` — the .NET / NUnit sibling
   (`Expect(...).ToHaveScreenshotAsync()`).
-- `qa-ui-test-author-playwright-java` — the page objects/specs these assertions layer on top of.
+- `qa-ui-test-writer-playwright-java` — the page objects/specs these assertions layer on top of.
 - `references/percy.md` (`percy`, next) — hosted baseline management + PR review UI.
 - `references/applitools.md` — visual-AI diffing + cross-browser grid.
 - `qa-ci-pipelines-java` — artifact upload, the container-baseline discipline, the
   gated `update-baselines` job.
-- `qa-allure-reporting-java` — attach `-diff.png` images to the test report.
+- `qa-test-reports-java` — attach `-diff.png` images to the test report.

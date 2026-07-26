@@ -328,7 +328,7 @@ Session consistency is the right default. Bump to Strong only when you've measur
 
 ## Handoffs
 
-- Cross-engine query patterns → `data/_shared/query-optimization`
+- Cross-engine query patterns → `data/_shared/slow-query-fixes`
 - Caching → `data/_shared/caching-patterns` + `data/redis`
 - Schema evolution → `data/_shared/migrations`
 - Azure deployment for the account / change-feed-driven Azure Functions → cloud provisioning / IaC for the store itself has no owning skill in this library yet; out of this domain's scope

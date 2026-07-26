@@ -9,7 +9,7 @@ Layout / Content / Ignore-colors). That match-level control is the real differen
 server-side **pixel** diff and the built-in **byte/pixel** diff.
 
 This is an **assertion layer** on top of the page objects and specs
-`qa-ui-test-author-playwright-dotnet` already authored. You do not write new page objects here — you
+`qa-ui-test-writer-playwright-dotnet` already authored. You do not write new page objects here — you
 add `Eyes.Open` / `Eyes.Check` / `Eyes.Close` around an existing flow.
 
 ## Why graduate from Percy (pixel) to Applitools (visual-AI)
@@ -251,7 +251,7 @@ the cloud directly, so CI just runs `dotnet test` with `APPLITOOLS_API_KEY` in e
 ```
 
 Link the dashboard batch URL into Allure so reviewers jump straight to it (cross-link
-`qa-allure-reporting-dotnet`):
+`qa-test-reports-dotnet`):
 
 ```csharp
 [OneTimeTearDown]
@@ -382,6 +382,6 @@ Lifecycle for this test:
   server-side pixel diff + review UI. Applitools is the "graduate to visual-AI + match levels + grid" step.
 - `references/playwright-snapshots.md` — the **free** sibling: in-repo baselines you
   diff yourself, with the CI-container discipline both Percy and Applitools remove.
-- `qa-ui-test-author-playwright-dotnet` — the page objects/specs `Eyes.Check` is called inside.
+- `qa-ui-test-writer-playwright-dotnet` — the page objects/specs `Eyes.Check` is called inside.
 - `qa-ci-pipelines-dotnet` — where `APPLITOOLS_API_KEY` is sourced; no agent wrapper needed.
-- `qa-allure-reporting-dotnet` — link the Applitools dashboard batch URL into the report.
+- `qa-test-reports-dotnet` — link the Applitools dashboard batch URL into the report.

@@ -1,11 +1,11 @@
 ---
-name: qa-ui-test-author-playwright-dotnet
+name: qa-ui-test-writer-playwright-dotnet
 description: Use when the user asks to scaffold Playwright UI tests in C# / .NET. Triggers: "write a Playwright test for X in C#", "add a Playwright .NET page object for screen Y", "scaffold a Playwright C# spec".
 ---
 
 # QA — Playwright Test & Page Object Generator (C# / .NET)
 
-Scaffolds Playwright tests and page objects in **.NET 10 + NUnit** (net8/9 supported — match the project's TFM) using `Microsoft.Playwright` and `Microsoft.Playwright.NUnit`. Uses a **base-test class pattern**: tests inherit from `PageTest` (which Microsoft's package ships) and a project-local `BaseTest` that exposes page objects via `[SetUp]`. Tests do not instantiate browsers themselves. Locators use `GetByTestId` first (`data-testid` is the standing contract with the dev team — see `qa/dotnet/skills/pom-builder` for extraction and the missing-testid report), falling back to role/label semantics — never raw CSS where anything better exists.
+Scaffolds Playwright tests and page objects in **.NET 10 + NUnit** (net8/9 supported — match the project's TFM) using `Microsoft.Playwright` and `Microsoft.Playwright.NUnit`. Uses a **base-test class pattern**: tests inherit from `PageTest` (which Microsoft's package ships) and a project-local `BaseTest` that exposes page objects via `[SetUp]`. Tests do not instantiate browsers themselves. Locators use `GetByTestId` first (`data-testid` is the standing contract with the dev team — see `qa/dotnet/skills/page-objects-from-url` for extraction and the missing-testid report), falling back to role/label semantics — never raw CSS where anything better exists.
 
 ## Stack
 
@@ -30,14 +30,14 @@ Scaffolds Playwright tests and page objects in **.NET 10 + NUnit** (net8/9 suppo
 - Mobile / Appium → `qa/dotnet/skills/ui-test-author/appium`
 - Selenium C# → `qa/dotnet/skills/ui-test-author/selenium`
 - Java Selenium → `qa/java/skills/ui-test-author/selenium`
-- Reviewing existing Playwright code → `qa/dotnet/skills/ui-test-author/reviewer`
-- Designing the overall page-object hierarchy → `qa/dotnet/skills/page-object-architect`
+- Reviewing existing Playwright code → `qa/dotnet/skills/ui-test-author/review`
+- Designing the overall page-object hierarchy → `qa/dotnet/skills/page-object-design`
 
 ## Inputs needed
 
 1. **Feature / page** under test (e.g. `Login`, `CheckoutCart`)
 2. **User journey** — concrete steps + the user-visible outcome to assert
-3. **Locators** — for each element: `GetByTestId` whenever the element has a `data-testid`; otherwise `GetByRole` / `GetByLabel`, then `GetByText`; CSS only as last resort. Missing testids are reported via `qa/dotnet/skills/pom-builder`'s `missing-testids.md`
+3. **Locators** — for each element: `GetByTestId` whenever the element has a `data-testid`; otherwise `GetByRole` / `GetByLabel`, then `GetByText`; CSS only as last resort. Missing testids are reported via `qa/dotnet/skills/page-objects-from-url`'s `missing-testids.md`
 4. **Auth requirement** — anonymous, or signed-in (which user role + how the session is established)
 5. **Test data** — seeded by API, by helper, or inline
 
@@ -224,7 +224,7 @@ public async Task SeedOrder()
 
 ### Locator preference order (strict)
 
-1. `page.GetByTestId("...")` — **preferred whenever the element carries a `data-testid`**; the attribute is the agreed contract with the app team. Elements missing it go in the `missing-testids.md` dev-team report (extraction workflow: `qa/dotnet/skills/pom-builder`) and use a fallback below with `// TODO: missing data-testid '<suggested>'`
+1. `page.GetByTestId("...")` — **preferred whenever the element carries a `data-testid`**; the attribute is the agreed contract with the app team. Elements missing it go in the `missing-testids.md` dev-team report (extraction workflow: `qa/dotnet/skills/page-objects-from-url`) and use a fallback below with `// TODO: missing data-testid '<suggested>'`
 2. `page.GetByRole(AriaRole.X, new() { Name = "..." })` — best fallback
 3. `page.GetByLabel("...")` — for form inputs
 4. `page.GetByPlaceholder("...")` — only when there is no label
@@ -311,7 +311,7 @@ public async Task SeedOrder()
 
 ## Handoffs
 
-- Designing the page-object hierarchy → `qa/dotnet/skills/page-object-architect`
-- Reviewing existing Playwright tests → `qa/dotnet/skills/ui-test-author/reviewer`
+- Designing the page-object hierarchy → `qa/dotnet/skills/page-object-design`
+- Reviewing existing Playwright tests → `qa/dotnet/skills/ui-test-author/review`
 - Test data builders → `qa/dotnet/skills/test-data-builder`
-- Allure reporter setup → `qa/reporting/dotnet/skills/allure-reporting`
+- Allure reporter setup → `qa/reporting/dotnet/skills/test-reports`

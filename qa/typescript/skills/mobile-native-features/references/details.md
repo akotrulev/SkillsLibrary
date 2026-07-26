@@ -56,6 +56,6 @@ it("opens the message thread when the push is tapped", async () => {
 > **iOS push on the simulator** is simulated with `mobile: pushNotification` (wraps `simctl push`) carrying an APNs
 > payload; then open **Notification Center** and tap it. Asserting the *server actually sent* a push is a backend
 > concern (your push provider's sandbox), not Appium's — this skill asserts the **app's reaction** to a push, the
-> same boundary as `qa/typescript/skills/network-monitoring/*` for requests.
+> same boundary as `qa/typescript/skills/network-mocking/*` for requests.
 
 ---

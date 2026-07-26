@@ -15,4 +15,4 @@ Run it **inline in this session** — do not spawn a subagent unless the user as
 
 $ARGUMENTS
 
-If no task was given above, run the brownfield **orientation pass** against the current repo (detect the TFM, render modes, component library, styling authority, state containers, data-access lane, `data-testid` coverage), report the current-state map, and ask what to build, fix, or extend.
+If no task was given above, run the brownfield **orientation pass** against the current repo (detect the TFM, render modes, component library, styling authority, state containers, data-fetching lane, `data-testid` coverage), report the current-state map, and ask what to build, fix, or extend.

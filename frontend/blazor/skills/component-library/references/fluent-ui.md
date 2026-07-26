@@ -53,7 +53,7 @@ Fluent UI theming is **token-first**: you set a few global tokens (accent base c
 }
 ```
 
-`DesignThemeModes.System` follows the OS light/dark automatically; `StorageName` persists the user's choice to localStorage. Map your `design/theme-factory` accent to `OfficeColor`/a custom accent base; [`styling`](../styling/SKILL.md) owns any further CSS-variable overrides on top of the derived tokens. **Don't hand-set component colors** — set the token, let the system derive.
+`DesignThemeModes.System` follows the OS light/dark automatically; `StorageName` persists the user's choice to localStorage. Map your `design/theme-presets` accent to `OfficeColor`/a custom accent base; [`styling`](../../styling/SKILL.md) owns any further CSS-variable overrides on top of the derived tokens. **Don't hand-set component colors** — set the token, let the system derive.
 
 ## DataGrid — server-side by default
 
@@ -78,7 +78,7 @@ Fluent UI theming is **token-first**: you set a few global tokens (accent base c
 }
 ```
 
-The `ItemsProvider` calls a [`data-access`](../../data-access/SKILL.md) method — server-side paging, render-mode-agnostic.
+The `ItemsProvider` calls a [`data-fetching`](../../data-fetching/SKILL.md) method — server-side paging, render-mode-agnostic.
 
 ## Dialog + toast services
 
@@ -109,7 +109,7 @@ async Task Delete(OrderDto o)
 | Services missing in `.Client` under Auto | `AddFluentUIComponents()` only in Server | Register in both `Program.cs` |
 | Icons/emoji packages huge in WASM payload | Full icon/emoji assemblies pulled in | Reference only the icon sizes/sets you use; trim (see `performance`, Session D) |
 
-**`data-testid` on Fluent controls:** inline `data-testid="..."` forwards via `AdditionalAttributes` (`FluentComponentBase`) to the rendered root/host element. Full rules in [`testability`](../../testability/SKILL.md).
+**`data-testid` on Fluent controls:** inline `data-testid="..."` forwards via `AdditionalAttributes` (`FluentComponentBase`) to the rendered root/host element. Full rules in [`test-ids`](../../test-ids/SKILL.md).
 
 ## Validation
 

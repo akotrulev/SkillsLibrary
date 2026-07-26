@@ -159,7 +159,7 @@ Use `pool.execute('SELECT ... WHERE id = ?', [id])` — parameterized via the dr
 - Cross-engine modeling decisions (id strategy, money, soft-delete, tenancy pattern *choice*) → `data/_shared/schema-design`
 - Expand-contract pattern + migration tool selection → `data/_shared/migrations`
 - Cache-aside/stampede/TTL pattern catalog → `data/_shared/caching-patterns` + `data/redis`
-- Universal query triage (ESR, N+1, pagination) → `data/_shared/query-optimization`
+- Universal query triage (ESR, N+1, pagination) → `data/_shared/slow-query-fixes`
 - Testing the schema/queries → `qa/{java,dotnet,typescript}/skills/db-testing/*`
 - Tenant/user claims feeding app-enforced tenancy → `auth/auth0-{stack}` + `auth/_shared/auth0-concepts`
 - AWS (RDS/Aurora) / Azure (Flexible Server) deployment → cloud provisioning / IaC for the store itself has no owning skill in this library yet; out of this domain's scope

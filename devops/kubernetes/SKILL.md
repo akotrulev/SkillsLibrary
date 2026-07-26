@@ -20,7 +20,7 @@ Authors Kubernetes manifests, Helm charts, and Kustomize overlays for the librar
 - ECS Fargate / Lambda / Container Apps / Static Web Apps → `devops/{aws,azure}-deployment`
 - Container build / Dockerfile → `devops/docker`
 - Pipeline YAML → `devops/{github-actions,gitlab-ci,azure-pipelines}`
-- IaC for the cluster itself → `devops/iac-bicep-terraform`
+- IaC for the cluster itself → `devops/infrastructure-as-code`
 
 ## Inputs needed
 
@@ -441,7 +441,7 @@ GitOps replaces `kubectl apply` from CI. Pipelines author the change; the cluste
 ## Handoffs
 
 - Container image build → `devops/docker`
-- IaC for the cluster itself → `devops/iac-bicep-terraform`
+- IaC for the cluster itself → `devops/infrastructure-as-code`
 - Pipeline that builds + pushes + reconciles → `devops/{github-actions,gitlab-ci,azure-pipelines}`
 - Cloud deploy alternatives (Container Apps / ECS / App Service / Static Web Apps) → `devops/{aws,azure}-deployment`
 - App-side config / secrets → `devops/environment-config`

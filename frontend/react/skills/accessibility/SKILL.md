@@ -25,7 +25,7 @@ Standardizes **authoring** accessible React UIs. Targets **WCAG 2.2 AA** as the 
 - Scanning/auditing for violations (axe / Lighthouse / Pa11y CI gate) → qa `accessibility-testing` (peer, not loaded)
 - Form input labels + validation-message a11y → [`forms`](../forms/SKILL.md)
 - Contrast *token* setup / `:focus-visible` styling mechanics → [`styling`](../styling/SKILL.md) (this skill owns *whether* contrast passes; styling owns *how* the tokens are defined)
-- `prefers-reduced-motion` mechanics on animations → [`motion`](../motion/SKILL.md) (this skill owns *that* motion must respect it; motion owns the how)
+- `prefers-reduced-motion` mechanics on animations → [`animation`](../animation/SKILL.md) (this skill owns *that* motion must respect it; motion owns the how)
 - Component-library primitives that already ship a11y (MUI Dialog, Mantine Tabs) → [`component-library`](../component-library/SKILL.md) (use them instead of hand-rolling)
 - Blazor → `frontend/blazor/skills/accessibility`
 
@@ -36,15 +36,15 @@ Most a11y bugs come from re-implementing in `<div>` what the browser gives free.
 | Want | Use — not |
 |---|---|
 | Click **and** keyboard activation | `<button>` — never `<div onClick>` (no focus, no Enter/Space, no role) |
-| Navigate to a URL | `<a href>` / `<Link href>` / `<NavLink>` — never a click-handler-only `router.push` on a `<div>` (also a [`generator`](../generator/SKILL.md) rule) |
+| Navigate to a URL | `<a href>` / `<Link href>` / `<NavLink>` — never a click-handler-only `router.push` on a `<div>` (also a [`component-writer`](../component-writer/SKILL.md) rule) |
 | Submit a form | `<button type="submit">` inside `<form>` |
 | Modal dialog | native `<dialog>` or a Radix/React Aria/library dialog (focus trap + Esc for free) — never a `<div>` overlay |
 | Label a control | `<label htmlFor>` / wrap — never placeholder-as-label |
 | Loading | `aria-busy="true"` + a visible indicator |
 | Page regions | `<nav>` / `<main>` (one) / `<footer>` — the `navigation`/`main`/`contentinfo` landmarks let a screen reader jump between regions; never rebuild them from `<div>`s |
-| A link that opens a new tab | real `<a target="_blank" rel="noopener">` **plus** a visible "opens in new tab" cue and an `aria-label` suffix ("… (opens in new tab)") — emission is [`generator`](../generator/SKILL.md)'s |
+| A link that opens a new tab | real `<a target="_blank" rel="noopener">` **plus** a visible "opens in new tab" cue and an `aria-label` suffix ("… (opens in new tab)") — emission is [`component-writer`](../component-writer/SKILL.md)'s |
 
-**Landmarks come from the elements.** Wrap the header nav in `<nav>`, the primary content in a single `<main id="main-content">`, and the footer in `<footer>` — that gives screen-reader users a region map for free (and satisfies the [`ui-conventions`](../ui-conventions/SKILL.md) footer/nav conventions). Add `aria-label` to distinguish multiple `<nav>`s ("Primary", "Breadcrumb").
+**Landmarks come from the elements.** Wrap the header nav in `<nav>`, the primary content in a single `<main id="main-content">`, and the footer in `<footer>` — that gives screen-reader users a region map for free (and satisfies the [`ui-rules`](../ui-rules/SKILL.md) footer/nav conventions). Add `aria-label` to distinguish multiple `<nav>`s ("Primary", "Breadcrumb").
 
 **First rule of ARIA: don't use ARIA if a semantic element will do.** ARIA is a patch for missing semantics — a wrong `role`/`aria-*` is worse than none. Reach for it only for custom widgets with no native equivalent, live regions, and relationships (`aria-describedby`/`aria-controls`/`aria-labelledby`). When you must, follow the **ARIA Authoring Practices Guide (APG)** patterns verbatim.
 
@@ -155,15 +155,15 @@ Baseline for **every** interactive element: reachable by `Tab`, activates on `En
 | Icon paired with visible text | `<svg aria-hidden="true">` (the text is the label) |
 | Icon-only button | `<button aria-label="Delete order"><TrashIcon aria-hidden="true"/></button>` |
 
-## Display-level a11y (ui-conventions cross-cut)
+## Display-level a11y (ui-rules cross-cut)
 
 These are the most-missed rules and they scale badly through shared components — one omission multiplies across every grid:
 
-- **Every icon-only button gets an accessible label** (`aria-label`). A bare `<IconButton><TrashIcon/></IconButton>` announces nothing. The **shared grid's row actions** are the highest-leverage spot: one missing label there un-labels *every* grid — fix it on the shared component ([`ui-conventions`](../ui-conventions/SKILL.md) renderer unification). This label is a **separate** attribute from the `data-testid` [`testability`](../testability/SKILL.md) owns — never mirror one into the other.
+- **Every icon-only button gets an accessible label** (`aria-label`). A bare `<IconButton><TrashIcon/></IconButton>` announces nothing. The **shared grid's row actions** are the highest-leverage spot: one missing label there un-labels *every* grid — fix it on the shared component ([`ui-rules`](../ui-rules/SKILL.md) renderer unification). This label is a **separate** attribute from the `data-testid` [`test-ids`](../test-ids/SKILL.md) owns — never mirror one into the other.
 - **Never signal state by color or icon alone** (a red dot, a green check). ~1 in 12 men can't distinguish red/green; a screen reader sees nothing. Pair every color/icon state with **text or a labeled tooltip** ("Active", "Failed"). The **current nav location** is a state too — mark the active item with more than color (weight, an indicator, and `aria-current="page"` on the active `<Link>`).
 - **Contrast** — check muted/secondary text and active/hover/selected-row colors against the **actual backgrounds** they render on (a token that passes on white can fail on a striped-row or brand-tinted surface). WCAG 2.2 AA: **4.5:1** body text, **3:1** large text (≥24px, or ≥19px bold) and UI-component/graphic boundaries (input borders, icons, focus rings). **Re-verify every pair in dark mode** — a ratio that passes on a light surface routinely fails on a dark one, so dark tokens get their own check, not a reuse. Token *definition* is [`styling`](../styling/SKILL.md)'s; *whether it passes* is this skill's.
 - **Consistency within a control group** — if one row action has a tooltip, its siblings must too; if one is icon+label, the group is.
-- **`prefers-reduced-motion`** must be honored on non-essential animation ([`motion`](../motion/SKILL.md) owns the mechanics; this skill owns that it's required).
+- **`prefers-reduced-motion`** must be honored on non-essential animation ([`animation`](../animation/SKILL.md) owns the mechanics; this skill owns that it's required).
 
 ## React-specific traps
 
@@ -216,7 +216,7 @@ These are the most-missed rules and they scale badly through shared components �
 - Automated axe/Lighthouse WCAG scan + CI gate → qa `accessibility-testing` (**peer**, not loaded)
 - Contrast **token** definition + `:focus-visible` styling → [`styling`](../styling/SKILL.md)
 - Form-input labels + validation-message a11y → [`forms`](../forms/SKILL.md)
-- `prefers-reduced-motion` animation mechanics → [`motion`](../motion/SKILL.md)
+- `prefers-reduced-motion` animation mechanics → [`animation`](../animation/SKILL.md)
 - Accessible library primitives (dialog/tabs/menu that ship a11y) → [`component-library`](../component-library/SKILL.md)
-- `data-testid` on the same elements (separate attribute) → [`testability`](../testability/SKILL.md)
-- Icon-button labels / color-not-alone as a *display-correctness* concern → [`ui-conventions`](../ui-conventions/SKILL.md) (owns the convention; this skill owns the a11y mechanics)
+- `data-testid` on the same elements (separate attribute) → [`test-ids`](../test-ids/SKILL.md)
+- Icon-button labels / color-not-alone as a *display-correctness* concern → [`ui-rules`](../ui-rules/SKILL.md) (owns the convention; this skill owns the a11y mechanics)

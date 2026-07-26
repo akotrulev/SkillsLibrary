@@ -1,6 +1,6 @@
 # MySQL — Performance (EXPLAIN, buffer pool, Performance Schema, locking, partitioning)
 
-Engine-side tuning for InnoDB. Universal query triage (ESR, N+1, projection, keyset pagination) → `data/_shared/query-optimization`; index design → `references/indexing.md`.
+Engine-side tuning for InnoDB. Universal query triage (ESR, N+1, projection, keyset pagination) → `data/_shared/slow-query-fixes`; index design → `references/indexing.md`.
 
 ## EXPLAIN — the deep dive
 
@@ -108,7 +108,7 @@ ALTER TABLE events PARTITION BY RANGE (TO_DAYS(occurred_at)) (
 1. `sys.statement_analysis` top-by-latency → tune those.
 2. Missing index on the filtered column (check SARGability + collation/type match).
 3. Make the hot read covering (`Using index`) — put projected columns in the key (`references/indexing.md`).
-4. Keyset pagination replacing deep `OFFSET` (`data/_shared/query-optimization`).
+4. Keyset pagination replacing deep `OFFSET` (`data/_shared/slow-query-fixes`).
 5. `innodb_buffer_pool_size` ~70–80% RAM (self-hosted).
 6. Hunt long-running transactions (`information_schema.innodb_trx`); set lock-wait + statement timeouts.
 7. Consider `READ COMMITTED` if gap-lock contention dominates.

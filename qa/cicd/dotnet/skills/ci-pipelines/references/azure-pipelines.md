@@ -406,7 +406,7 @@ jobs:
 
 - **`qa/dotnet/skills/db-testing/testcontainers`** — integration-tests stage runs these.
 - **`qa/dotnet/skills/email-testing`** — pair Mailpit as a `services` definition or inline Testcontainers run.
-- **`qa/reporting/dotnet/skills/allure-reporting`** — adapter wiring inside the test project that produces `allure-results/`.
-- **`qa/dotnet/skills/performance/nbomber`** + **`qa/typescript/skills/performance/k6`** — perf-stage scripts.
+- **`qa/reporting/dotnet/skills/test-reports`** — adapter wiring inside the test project that produces `allure-results/`.
+- **`qa/dotnet/skills/load-testing`** + **`qa/typescript/skills/load-testing`** — perf-stage scripts.
 - **`devops/azure-pipelines`** — non-QA pipeline patterns (deploy, infra) live here.
 - **`qa/cicd/ci-conventions`** — cross-stack rules (artifact retention, OIDC) that this skill enforces.

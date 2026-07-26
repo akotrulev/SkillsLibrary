@@ -1,6 +1,6 @@
 ---
 name: qa-bdd-reviewer-java
-description: Use when reviewing or auditing existing Gherkin .feature files and Cucumber-JVM step definitions in Java for living-documentation quality, step reusability, and correct binding/DI/lifecycle. Triggers: "review these feature files", "audit our Cucumber step definitions", "are these Gherkin scenarios good", "check our BDD layer". Do NOT use to generate features (use `qa/_shared/bdd/gherkin-authoring`) or step definitions (use `qa/java/skills/bdd-step-bindings`). For end-to-end suite work prefer the phased agent `qa-bdd-java` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
+description: Use when reviewing or auditing existing Gherkin .feature files and Cucumber-JVM step definitions in Java for living-documentation quality, step reusability, and correct binding/DI/lifecycle. Triggers: "review these feature files", "audit our Cucumber step definitions", "are these Gherkin scenarios good", "check our BDD layer". Do NOT use to generate features (use `qa/_shared/bdd/feature-file-writer`) or step definitions (use `qa/java/skills/gherkin-step-code`). For end-to-end suite work prefer the phased agent `qa-bdd-java` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
 ---
 
 # Cucumber-JVM / Gherkin Reviewer (Java 21)
@@ -15,8 +15,8 @@ Audits a BDD layer across **two surfaces** — the `.feature` files (Gherkin qua
 
 ## When NOT to use
 
-- "Write feature files" → `qa/_shared/bdd/gherkin-authoring`
-- "Generate / implement step definitions" → `qa/java/skills/bdd-step-bindings`
+- "Write feature files" → `qa/_shared/bdd/feature-file-writer`
+- "Generate / implement step definitions" → `qa/java/skills/gherkin-step-code`
 - Code is pseudocode / incomplete → ask for the real files.
 
 ## Procedure

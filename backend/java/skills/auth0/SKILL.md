@@ -242,4 +242,4 @@ public class OrdersDownstream {
 - AWS Cognito equivalent → `backend/java/skills/cognito`
 - Pattern/persistence scaffolding for the rest of the service → `backend/java/skills/{generator,persistence}`
 - Storing secrets → `devops/environment-config` + Vault
-- API tests with auth → `qa/java/skills/api-test-author/generator` + `qa/java/skills/auth0-test-tokens`
+- API tests with auth → `qa/java/skills/api-test-author/writer` + `qa/java/skills/test-login-tokens`

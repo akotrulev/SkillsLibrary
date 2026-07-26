@@ -5,8 +5,8 @@ argument-hint: [optional: project, path, or sections to limit the sweep to]
 
 Run a **be-dotnet conformance audit** on this repository: sweep the service against the conventions and flows this plugin defines, and save a findings report.
 
-1. `Read` the engine at `${CLAUDE_PLUGIN_ROOT}/engineering-practices/conformance-audit/SKILL.md` (fall back to `engineering-practices/conformance-audit/SKILL.md` inside the SkillsLibrary repo) — it owns Mode A/B, the artifact contract, evidence rules, severity, and the report templates.
-2. `Read` the stack skill at `${CLAUDE_PLUGIN_ROOT}/backend/dotnet/skills/conformance-audit/SKILL.md` (fall back to `backend/dotnet/skills/conformance-audit/SKILL.md`), then its `references/conformance-checklist.md` **end-to-end**.
+1. `Read` the engine at `${CLAUDE_PLUGIN_ROOT}/engineering-practices/standards-audit-engine/SKILL.md` (fall back to `engineering-practices/standards-audit-engine/SKILL.md` inside the SkillsLibrary repo) — it owns Mode A/B, the artifact contract, evidence rules, severity, and the report templates.
+2. `Read` the stack skill at `${CLAUDE_PLUGIN_ROOT}/backend/dotnet/skills/standards-audit/SKILL.md` (fall back to `backend/dotnet/skills/standards-audit/SKILL.md`), then its `references/conformance-checklist.md` **end-to-end**.
 3. Follow them exactly — the TFM/version gate, the applicability matrix, the section-by-section sweep (A–N), the evidence rules, the report template, and the hostile self-review all apply.
 4. Check `docs/audits/` first: a prior `…-be-dotnet-conformance-r<N>.md` means **Mode B (re-audit)** — reuse its section letters and finding IDs verbatim, never renumber. Otherwise **Mode A (baseline)**.
 5. Load the owning `backend/dotnet/skills/<skill>/SKILL.md` (or the bundled `observability/*` skill for section L) whenever a check is ambiguous, version-keyed, or you are about to write its fix direction.

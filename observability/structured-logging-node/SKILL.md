@@ -35,8 +35,8 @@ Winston is acceptable when an upstream framework already configures it (NestJS w
 - .NET service → `observability/structured-logging-dotnet`
 - Java / Spring Boot service → `observability/structured-logging-java`
 - Distributed tracing or metrics → `observability/opentelemetry-node`
-- LogQL query authoring → `observability/logql-promql`
-- Dashboard layout → `observability/grafana-dashboards`
+- LogQL query authoring → `observability/queries`
+- Dashboard layout → `observability/dashboards`
 
 ## Inputs needed
 
@@ -175,7 +175,7 @@ registerInstrumentations({
 
 With this registered, every log emitted inside an active span gets `trace_id` and `span_id` injected automatically.
 
-**Trace-correlation contract:** this stack emits the trace id as the JSON field **`trace_id`** (`@opentelemetry/instrumentation-pino`'s default; 32 lowercase hex chars). Do not rename it. The Loki derived-field regex in `observability/loki-tempo-setup` is the canonical cross-stack regex and matches it.
+**Trace-correlation contract:** this stack emits the trace id as the JSON field **`trace_id`** (`@opentelemetry/instrumentation-pino`'s default; 32 lowercase hex chars). Do not rename it. The Loki derived-field regex in `observability/logs-traces-setup` is the canonical cross-stack regex and matches it.
 
 ## Writing logs
 
@@ -293,7 +293,7 @@ Loki labels are categorical (`service`, `environment`, `level`). `orderId`, `req
 ## Handoffs
 
 - Distributed tracing + metrics → `observability/opentelemetry-node`
-- LogQL queries against Loki → `observability/logql-promql`
-- Dashboard layout → `observability/grafana-dashboards`
+- LogQL queries against Loki → `observability/queries`
+- Dashboard layout → `observability/dashboards`
 - .NET equivalent → `observability/structured-logging-dotnet`
 - Java equivalent → `observability/structured-logging-java`

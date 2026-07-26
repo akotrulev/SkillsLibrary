@@ -7,7 +7,7 @@ Playwright-Java + TestNG idioms. Percy (by BrowserStack) **uploads a DOM snapsho
 reviewed/approved in a web UI. The build is gated on that review, not on a local artifact.
 
 This is an **assertion layer** on top of the page objects and specs
-`qa-ui-test-author-playwright-java` already authored. You do not write new page objects here — you add
+`qa-ui-test-writer-playwright-java` already authored. You do not write new page objects here — you add
 a `percy.snapshot(name)` call and wrap your build's test command in `percy exec`.
 
 ## Why graduate from built-in snapshots to Percy
@@ -244,7 +244,7 @@ snapshots.
 
 Contrast with built-in snapshots: there is **no `-diff.png` artifact to upload** — the diff lives in
 Percy's UI. Link the Percy build URL into Allure so reviewers jump straight to it (cross-link
-`qa-allure-reporting-java`):
+`qa-test-reports-java`):
 
 ```java
 import io.qameta.allure.Allure;
@@ -365,7 +365,7 @@ Lifecycle for this test:
   diff yourself, with the CI-container discipline Percy removes. Start here; graduate to Percy.
 - `references/applitools.md` (`applitools`, next) — the visual-AI sibling: AI diff tolerance + a
   cross-browser rendering grid.
-- `qa-ui-test-author-playwright-java` — the page objects/specs `percy.snapshot` is called inside.
+- `qa-ui-test-writer-playwright-java` — the page objects/specs `percy.snapshot` is called inside.
 - `qa-ci-pipelines-java` — where `PERCY_TOKEN` is sourced and `percy exec` wraps the
   Gradle/Maven test step.
-- `qa-allure-reporting-java` — link the Percy build URL into the report.
+- `qa-test-reports-java` — link the Percy build URL into the report.

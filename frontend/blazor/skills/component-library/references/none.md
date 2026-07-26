@@ -8,9 +8,9 @@ No component library. You build a small set of primitives (Button, TextField, Di
 
 | Library gives you | Here you use |
 |---|---|
-| Styled controls | Raw HTML + **CSS isolation** (`.razor.css`) per component — [`styling`](../styling/SKILL.md) owns this |
-| Theme + dark mode | Your own **design tokens** as CSS custom properties on `:root` / `[data-theme]`, from `design/theme-factory` — [`styling`](../styling/SKILL.md) |
-| DataGrid | `<table>` + Blazor **`<Virtualize>`** for long lists; server-side paging via a [`data-access`](../../data-access/SKILL.md) call; you write sort/filter |
+| Styled controls | Raw HTML + **CSS isolation** (`.razor.css`) per component — [`styling`](../../styling/SKILL.md) owns this |
+| Theme + dark mode | Your own **design tokens** as CSS custom properties on `:root` / `[data-theme]`, from `design/theme-presets` — [`styling`](../../styling/SKILL.md) |
+| DataGrid | `<table>` + Blazor **`<Virtualize>`** for long lists; server-side paging via a [`data-fetching`](../../data-fetching/SKILL.md) call; you write sort/filter |
 | Dialog service | A `Dialog` primitive using the native `<dialog>` element + a small scoped service, or a cascaded overlay host |
 | Snackbar/toast | A `ToastService` (scoped) + a host component rendered once in the interactive layout |
 
@@ -42,7 +42,7 @@ public sealed class ToastService
 }
 ```
 
-The host subscribes in `OnInitialized` and **unsubscribes in `Dispose`** (`@implements IDisposable`) — the state-container pattern from [`reference`](../reference/SKILL.md).
+The host subscribes in `OnInitialized` and **unsubscribes in `Dispose`** (`@implements IDisposable`) — the state-container pattern from [`basics`](../../basics/SKILL.md).
 
 ## Dialog with the native `<dialog>` element
 
@@ -54,7 +54,7 @@ The host subscribes in `OnInitialized` and **unsubscribes in `Dispose`** (`@impl
 </dialog>
 ```
 
-Use `showModal()` via minimal JS interop (`.razor.js` collocated module) — native `<dialog>` gives you the focus trap and `Escape`-to-close for free, which is most of the accessibility win. Name the object in destructive confirms (ui-conventions).
+Use `showModal()` via minimal JS interop (`.razor.js` collocated module) — native `<dialog>` gives you the focus trap and `Escape`-to-close for free, which is most of the accessibility win. Name the object in destructive confirms (ui-rules).
 
 ## DataTable with server-side paging + Virtualize
 
@@ -71,17 +71,17 @@ Use `showModal()` via minimal JS interop (`.razor.js` collocated module) — nat
 @code {
     async ValueTask<ItemsProviderResult<OrderDto>> LoadAsync(ItemsProviderRequest req)
     {
-        var page = await Data.GetOrdersAsync(req.StartIndex, req.Count);   // server-side — data-access
+        var page = await Data.GetOrdersAsync(req.StartIndex, req.Count);   // server-side — data-fetching
         return new ItemsProviderResult<OrderDto>(page.Items, page.Total);
     }
 }
 ```
 
-`<Virtualize>` is built into Blazor — no library needed for windowed rendering. You still write sort/filter yourself and push them into the `data-access` query.
+`<Virtualize>` is built into Blazor — no library needed for windowed rendering. You still write sort/filter yourself and push them into the `data-fetching` query.
 
 ## Theming + dark mode
 
-Design tokens as CSS custom properties, toggled by a `data-theme` attribute on `<html>`; a one-line JS snippet reads `prefers-color-scheme` and any persisted choice. This is entirely [`styling`](../styling/SKILL.md)'s domain — read it. No component theme system to configure because there are no library components.
+Design tokens as CSS custom properties, toggled by a `data-theme` attribute on `<html>`; a one-line JS snippet reads `prefers-color-scheme` and any persisted choice. This is entirely [`styling`](../../styling/SKILL.md)'s domain — read it. No component theme system to configure because there are no library components.
 
 ## Render-mode gotchas
 
@@ -92,11 +92,11 @@ Design tokens as CSS custom properties, toggled by a `data-theme` attribute on `
 | Focus escapes the dialog | Not using native `<dialog>`/`showModal()` and no manual focus trap | Native `<dialog>`, or implement a focus trap (`accessibility` sibling, Session E) |
 | Table janky at thousands of rows | Full list rendered without windowing | `<Virtualize>` + server-side paging |
 
-**`data-testid`:** trivial — it's raw HTML, so inline `data-testid="..."` directly. Your own components take a `[Parameter] string? TestId` prefix and compose suffixes ([`testability`](../../testability/SKILL.md) Rule for custom components).
+**`data-testid`:** trivial — it's raw HTML, so inline `data-testid="..."` directly. Your own components take a `[Parameter] string? TestId` prefix and compose suffixes ([`test-ids`](../../test-ids/SKILL.md) Rule for custom components).
 
 ## Validation
 
 - Toast + dialog services scoped and hosts mounted interactively (in both `Program.cs` for Auto).
 - Dialog uses native `<dialog>`/`showModal()` (focus trap + Escape for free) or a verified manual trap.
-- Long lists use `<Virtualize>` with server-side paging via `data-access`.
-- Dark mode toggles via `data-theme` + tokens ([`styling`](../styling/SKILL.md)); keyboard-only pass on dialog + table (a11y is on you here).
+- Long lists use `<Virtualize>` with server-side paging via `data-fetching`.
+- Dark mode toggles via `data-theme` + tokens ([`styling`](../../styling/SKILL.md)); keyboard-only pass on dialog + table (a11y is on you here).

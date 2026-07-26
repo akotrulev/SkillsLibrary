@@ -1,6 +1,6 @@
 ---
 name: qa-db-testing-testcontainers-typescript
-description: Use when the user asks to scaffold TypeScript (Vitest / Jest) integration tests backed by a real database (Postgres / SQL Server / MongoDB / Redis) via the `testcontainers` npm package. Triggers: "spin up Postgres for these tests", "Testcontainers fixture in Vitest", "stop using in-memory pg-mem". Not for SQL query authoring guardrails → `db-testing/query-author`. For end-to-end suite work prefer the phased agent `qa-api-typescript` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
+description: Use when the user asks to scaffold TypeScript (Vitest / Jest) integration tests backed by a real database (Postgres / SQL Server / MongoDB / Redis) via the `testcontainers` npm package. Triggers: "spin up Postgres for these tests", "Testcontainers fixture in Vitest", "stop using in-memory pg-mem". Not for SQL query authoring guardrails → `db-testing/verification-queries`. For end-to-end suite work prefer the phased agent `qa-api-typescript` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
 ---
 
 # QA — DB Testing with Testcontainers (TypeScript)
@@ -18,8 +18,8 @@ Scaffolds Vitest global-setup files that boot a real database container per test
 
 - Pure unit tests with no SQL surface
 - .NET / JVM stacks — see siblings
-- Performance/load against the DB → `qa/typescript/skills/performance/k6`
-- SQL safety review of assertion queries → `qa/typescript/skills/db-testing/query-author`
+- Performance/load against the DB → `qa/typescript/skills/load-testing`
+- SQL safety review of assertion queries → `qa/typescript/skills/db-testing/verification-queries`
 
 ## Inputs needed
 
@@ -203,7 +203,7 @@ const c = await new GenericContainer('ghcr.io/myco/legacy-app:1.4.0')
 - If parallelising integration files: one container *per file* via `beforeAll`, not the shared `globalSetup` pattern.
 
 ### Diagnostics
-- On failure, dump container logs to the test reporter: `await container.logs().then(stream => …)` in a Vitest `onTestFailed` hook. Pair with `qa/reporting/typescript/skills/allure-reporting`.
+- On failure, dump container logs to the test reporter: `await container.logs().then(stream => …)` in a Vitest `onTestFailed` hook. Pair with `qa/reporting/typescript/skills/test-reports`.
 
 ### What NOT to do
 - No `setTimeout` waiting for the DB — use the built-in wait strategy.
@@ -230,7 +230,7 @@ const c = await new GenericContainer('ghcr.io/myco/legacy-app:1.4.0')
 
 ## Cross-references
 
-- **`qa/typescript/skills/db-testing/query-author`** — assertion-query SQL guardrails.
+- **`qa/typescript/skills/db-testing/verification-queries`** — assertion-query SQL guardrails.
 - **`qa/typescript/skills/test-data-builder`** — seed builders (preferred over inline literals).
 - **`qa/cicd/typescript/skills/ci-pipelines`** — DinD enablement and reporter wiring.
-- **`qa/reporting/typescript/skills/allure-reporting`** — attach container logs on failure.
+- **`qa/reporting/typescript/skills/test-reports`** — attach container logs on failure.

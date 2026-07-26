@@ -1,4 +1,4 @@
-# Deep-dive details — `qa-ui-test-author-appium-dotnet`
+# Deep-dive details — `qa-ui-test-writer-appium-dotnet`
 
 Sections moved out of SKILL.md for on-demand loading. Read what the task needs.
 

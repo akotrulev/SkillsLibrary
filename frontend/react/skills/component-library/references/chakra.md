@@ -46,7 +46,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
 ## Theming + dark mode
 
-v3 theming is `createSystem` + `defaultConfig` — define tokens (colors, fonts, semantic tokens) in the config, fed from [`design/frontend-design`](../../../../../design/frontend-design/SKILL.md) ([`styling`](../../styling/SKILL.md) maps them):
+v3 theming is `createSystem` + `defaultConfig` — define tokens (colors, fonts, semantic tokens) in the config, fed from [`design/visual-identity`](../../../../../design/visual-identity/SKILL.md) ([`styling`](../../styling/SKILL.md) maps them):
 
 ```tsx
 // theme.ts
@@ -64,7 +64,7 @@ export const system = createSystem(defaultConfig, config);
 
 ## DataGrid — Chakra has none; compose or bring one
 
-Chakra ships primitives (`Table`, `Pagination` in v3), **not** a feature-complete DataGrid. For a real grid, pair Chakra's `Table` markup with **TanStack Table** (headless) for sort/filter/pagination logic, server-driven off a [`data-access`](../../data-access/SKILL.md) call:
+Chakra ships primitives (`Table`, `Pagination` in v3), **not** a feature-complete DataGrid. For a real grid, pair Chakra's `Table` markup with **TanStack Table** (headless) for sort/filter/pagination logic, server-driven off a [`data-fetching`](../../data-fetching/SKILL.md) call:
 
 ```tsx
 'use client';
@@ -88,7 +88,7 @@ function DeleteDialog({ order }: { order: OrderDto }) {
     <Dialog.Root>
       <Dialog.Trigger asChild><Button colorPalette="red" data-testid="Orders.Delete">Delete</Button></Dialog.Trigger>
       <Dialog.Content data-testid="Orders.DeleteDialog">
-        <Dialog.Header>Delete order {order.number}?</Dialog.Header>   {/* name the object — ui-conventions */}
+        <Dialog.Header>Delete order {order.number}?</Dialog.Header>   {/* name the object — ui-rules */}
         <Dialog.Body>This cannot be undone.</Dialog.Body>
         <Dialog.Footer>
           <Dialog.ActionTrigger asChild><Button variant="outline">Cancel</Button></Dialog.ActionTrigger>
@@ -114,12 +114,12 @@ Mount `<Toaster />` once inside the client `Provider` island.
 | v2 snippets don't compile | v3 is a rewrite — different imports/theming API | Read v3 docs; `createSystem`, not `extendTheme` |
 | Missing a real DataGrid | Chakra has primitives only | Compose `Table` + TanStack Table (server-driven) or pick Mantine |
 
-**`data-testid` on Chakra controls:** inline `data-testid="..."` forwards to the rendered root; for compound parts, put it on the specific part (`Dialog.Content`, `Table.Row`). Full rules in [`testability`](../../testability/SKILL.md).
+**`data-testid` on Chakra controls:** inline `data-testid="..."` forwards to the rendered root; for compound parts, put it on the specific part (`Dialog.Content`, `Table.Row`). Full rules in [`test-ids`](../../test-ids/SKILL.md).
 
 ## Validation
 
 - `ChakraProvider value={system}` + `next-themes` mount once in a client island; no color-mode flash (`suppressHydrationWarning` on `<html>`).
 - A `Dialog` and a toast fire from a client island.
-- The composed grid pages/sorts **server-side** (TanStack Table `manual*` true → `data-access` query).
+- The composed grid pages/sorts **server-side** (TanStack Table `manual*` true → `data-fetching` query).
 - Dark mode toggles via `useTheme()` and follows OS.
 - `data-testid` set inline appears on the rendered root in DevTools.

@@ -51,7 +51,7 @@ pixel-level diffing is `visual-regression`'s job and pairs with this skill, it d
 ## Stack
 
 - .NET 8, **Microsoft.Playwright.NUnit** (`PageTest`), NUnit
-- **The app's own breakpoint source** — mirrored into one `Breakpoints` class (the analogue of i18n-testing's
+- **The app's own breakpoint source** — mirrored into one `Breakpoints` class (the analogue of language-testing's
   supported-culture list). Where the app defines them:
 
 | App uses | Breakpoints live in | Defaults (px) |
@@ -234,7 +234,7 @@ public async Task Should_Swap_Nav_On_Live_Shrink_And_Restore_On_Grow()
 
 - `qa-responsive-testing-typescript` · `qa-responsive-testing-java` — sibling stacks (Playwright Test ·
   Playwright-Java + TestNG); same four ideas, different APIs.
-- `qa-ui-test-author-playwright-dotnet` — base fixture/POM conventions; responsive adds the width dimension.
+- `qa-ui-test-writer-playwright-dotnet` — base fixture/POM conventions; responsive adds the width dimension.
   Page objects expose variant intent (`Navigation.IsCollapsedAsync()`), not boxes — geometry helpers live beside
   the tests.
 - `qa-visual-regression-dotnet` — the pixel complement: one baseline per viewport, after the structural checks

@@ -1,6 +1,6 @@
 ---
 name: design-ux-writing
-description: Use when writing or reviewing the words inside a UI — button labels, error and empty-state copy, confirmations, toasts, form hints, nav names — in one consistent, active, user-side voice. The stack defines the structural slots; this supplies the voice. Triggers "what should this button say", "write the error message", "microcopy for this flow", "our UI wording is inconsistent". Not for empty-state/confirmation STRUCTURE (the stack's `ui-conventions`).
+description: Use when writing or reviewing the words inside a UI — button labels, error and empty-state copy, confirmations, toasts, form hints, nav names — in one consistent, active, user-side voice. The stack defines the structural slots; this supplies the voice. Triggers "what should this button say", "write the error message", "microcopy for this flow", "our UI wording is inconsistent". Not for empty-state/confirmation STRUCTURE (the stack's `ui-rules`).
 ---
 
 # UX Writing — voice & microcopy
@@ -11,11 +11,11 @@ Owns the **words** in a UI and the voice they share. Interface copy is design ma
 
 | The stack skill defines the slot | This skill supplies the voice |
 |---|---|
-| `ui-conventions` — empty-state taxonomy (no-records vs no-filter vs filter-matched-nothing), confirmations by object name, "one name → one concept, one verb per operation" IA | the actual wording of each empty state, confirm button, and label; the rule that a name persists through a flow |
+| `ui-rules` — empty-state taxonomy (no-records vs no-filter vs filter-matched-nothing), confirmations by object name, "one name → one concept, one verb per operation" IA | the actual wording of each empty state, confirm button, and label; the rule that a name persists through a flow |
 | `error-resilience` — error *categorization* (ProblemDetails → friendly message + correlation id), three-state regions | how the friendly message reads: what went wrong + how to fix it, in the interface's voice |
 | `generator` — *emits* the button/label/`<PageTitle>` markup | the text those emitted labels carry |
 
-Never duplicate the structural rules back into this skill, and never restate voice rules in those skills — cross-link. `design/frontend-design` carries a design-side *summary* of this discipline (its "writing in design" section); the depth lives here.
+Never duplicate the structural rules back into this skill, and never restate voice rules in those skills — cross-link. `design/visual-identity` carries a design-side *summary* of this discipline (its "writing in design" section); the depth lives here.
 
 ## When to use
 
@@ -26,10 +26,10 @@ Never duplicate the structural rules back into this skill, and never restate voi
 
 ## When NOT to use
 
-- The visual/aesthetic direction of the page → [`design/frontend-design`](../frontend-design/SKILL.md)
-- The *structure* of empty states/confirmations + IA rules → the stack's `ui-conventions` ([Blazor](../../frontend/blazor/skills/ui-conventions/SKILL.md) · [React](../../frontend/react/skills/ui-conventions/SKILL.md))
-- Error → message *mapping/categorization* mechanics → the stack's `error-resilience` ([Blazor](../../frontend/blazor/skills/error-resilience/SKILL.md) · [React](../../frontend/react/skills/error-resilience/SKILL.md))
-- Translating copy / locale-formatting / pseudo-localization → qa `i18n-testing` + a localization skill
+- The visual/aesthetic direction of the page → [`design/visual-identity`](../visual-identity/SKILL.md)
+- The *structure* of empty states/confirmations + IA rules → the stack's `ui-rules` ([Blazor](../../frontend/blazor/skills/ui-rules/SKILL.md) · [React](../../frontend/react/skills/ui-rules/SKILL.md))
+- Error → message *mapping/categorization* mechanics → the stack's `error-resilience` ([Blazor](../../frontend/blazor/skills/error-handling/SKILL.md) · [React](../../frontend/react/skills/error-handling/SKILL.md))
+- Translating copy / locale-formatting / pseudo-localization → qa `language-testing` + a localization skill
 
 ## The five rules
 
@@ -55,14 +55,14 @@ The vocabulary of an interface is the signposting people use to learn their way 
 
 - A **"Publish"** button produces a **"Published"** toast — never a "Post" button that yields a "Your content is now live" message.
 - The label in a nav, the page `<PageTitle>`, the breadcrumb segment, and the heading for the same destination all match.
-- One concept has one name app-wide (this is the copy face of `ui-conventions`' "one name → one concept, one verb per operation" IA rule — same principle, applied to the words).
+- One concept has one name app-wide (this is the copy face of `ui-rules`' "one name → one concept, one verb per operation" IA rule — same principle, applied to the words).
 
 Renaming for consistency is high-leverage: a single concept called three things ("Client" / "Customer" / "Account") across screens makes the product feel like three products.
 
 ### 4. Failure and emptiness are direction, not mood
 
 - **Errors** explain **what went wrong and how to fix it**, in the interface's voice — not a person's. They don't apologize ("Sorry!"), don't blame the user, and are never vague. Structure: *what happened → what to do → (optional) a reference id for support.* `error-resilience` categorizes the error and hands you a friendly slot + correlation id; you write the sentence. Example: *"Couldn't upload — the file is over 10 MB. Try a smaller file."* (id shown quietly for support, never as the whole message).
-- **Empty states are invitations to act**, and they match the three cases `ui-conventions` distinguishes:
+- **Empty states are invitations to act**, and they match the three cases `ui-rules` distinguishes:
   - *Nothing created yet* → invite + primary action: "No projects yet. Create your first project."
   - *A filter matched nothing* → say so + offer to clear: "No results for 'archived'. Clear filters."
   - *Genuinely empty by design* → a calm statement, no false call to action.
@@ -103,12 +103,12 @@ Copy is read aloud by screen readers and out of visual context — never lean on
 - No blank empty state, and no single generic empty message for all three empty cases.
 - No name drift — a concept called different things on different screens, or an action that changes its name mid-flow.
 - No Title Case / ALL CAPS labels, no filler ("please simply just").
-- Do not invent the *structure* here — the slots (which errors, which empty states, which confirmations) come from `ui-conventions` / `error-resilience`; you fill them.
+- Do not invent the *structure* here — the slots (which errors, which empty states, which confirmations) come from `ui-rules` / `error-resilience`; you fill them.
 
 ## Handoffs
 
-- Visual/aesthetic direction (this discipline's design-side summary) → [`design/frontend-design`](../frontend-design/SKILL.md)
-- Empty-state/confirmation **structure**, IA "one verb per operation" rule → stack `ui-conventions` ([Blazor](../../frontend/blazor/skills/ui-conventions/SKILL.md) · [React](../../frontend/react/skills/ui-conventions/SKILL.md))
-- Error **categorization/mapping**, three-state regions, correlation id → stack `error-resilience` ([Blazor](../../frontend/blazor/skills/error-resilience/SKILL.md) · [React](../../frontend/react/skills/error-resilience/SKILL.md))
+- Visual/aesthetic direction (this discipline's design-side summary) → [`design/visual-identity`](../visual-identity/SKILL.md)
+- Empty-state/confirmation **structure**, IA "one verb per operation" rule → stack `ui-rules` ([Blazor](../../frontend/blazor/skills/ui-rules/SKILL.md) · [React](../../frontend/react/skills/ui-rules/SKILL.md))
+- Error **categorization/mapping**, three-state regions, correlation id → stack `error-resilience` ([Blazor](../../frontend/blazor/skills/error-handling/SKILL.md) · [React](../../frontend/react/skills/error-handling/SKILL.md))
 - The markup that *carries* these labels (buttons, `<PageTitle>`, real anchors) → stack `generator`
-- Translation, locale formatting, pseudo-localization → qa `i18n-testing` + a localization skill
+- Translation, locale formatting, pseudo-localization → qa `language-testing` + a localization skill

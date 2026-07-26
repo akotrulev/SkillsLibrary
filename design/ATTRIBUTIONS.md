@@ -6,9 +6,9 @@ file ships wherever the borrowed material ships. One section per artifact.
 
 ---
 
-## Anthropic brand fixture (`brand-intake`)
+## Anthropic brand fixture (`brand-import`)
 
-`brand-intake/SKILL.md` §"Example-brand fixture" uses the Anthropic brand as a
+`brand-import/SKILL.md` §"Example-brand fixture" uses the Anthropic brand as a
 worked brownfield stand-in to exercise every gap-fill branch of the pipeline:
 
 - Primitives: `#141413` (dark), `#faf9f5` (light), `#b0aea5` / `#e8e6dc` (grays),
@@ -23,9 +23,9 @@ endorsement.
 
 ---
 
-## `web-design-guidelines` — Vercel Web Interface Guidelines
+## `ui-code-audit` — Vercel Web Interface Guidelines
 
-The review ruleset vendored at `web-design-guidelines/references/guidelines.md`
+The review ruleset vendored at `ui-code-audit/references/guidelines.md`
 is imported from Vercel.
 
 - Upstream: `vercel-labs/web-interface-guidelines`,
@@ -42,9 +42,9 @@ in its `version`.
 
 ---
 
-## `theme-factory` — theme showcase + preset themes
+## `theme-presets` — theme showcase + preset themes
 
-The `theme-factory` skill (the `theme-showcase.pdf` and the 10 preset theme
+The `theme-presets` skill (the `theme-showcase.pdf` and the 10 preset theme
 files under `themes/`) is an Anthropic-provided import.
 
 - Origin: Anthropic-provided theme showcase (PDF) + 10 theme definition files.
@@ -54,4 +54,4 @@ The preset palettes and font pairings are used as primitive-tier starting
 values for artifacts (slides, docs, HTML pages) and as a web-app quick-start.
 The theme files' original PDF-rendering typefaces (DejaVu / Free* families) are
 retained for the slide/doc lane; each theme additionally carries a web-font
-substitution for the web-app lane (see `theme-factory/themes/*.md`).
+substitution for the web-app lane (see `theme-presets/themes/*.md`).

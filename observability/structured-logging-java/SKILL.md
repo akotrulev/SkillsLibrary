@@ -33,8 +33,8 @@ First act on an existing project: confirm the Java release (`java -version` / th
 - .NET service → `observability/structured-logging-dotnet`
 - Node service → `observability/structured-logging-node`
 - Distributed tracing or metrics → `observability/opentelemetry-java`
-- LogQL query authoring → `observability/logql-promql`
-- Dashboard layout → `observability/grafana-dashboards`
+- LogQL query authoring → `observability/queries`
+- Dashboard layout → `observability/dashboards`
 
 ## Inputs needed
 
@@ -198,7 +198,7 @@ The exception **must be the last argument**, not a placeholder substitution — 
 
 The `OpenTelemetryAppender` wrapper appender copies the active OTel span context into MDC under its **default keys `trace_id`, `span_id`, `trace_flags`** (snake_case — customizable via `<traceIdKey>`/`<spanIdKey>`, but don't: the defaults are the library-wide contract). With `<mdc/>` in the encoder, every log emitted inside an active span gets `trace_id` and `span_id` JSON fields. Loki + Tempo wire these to "Jump to trace" in Grafana.
 
-**Trace-correlation contract:** this stack emits the trace id as the JSON field **`trace_id`** (32 lowercase hex chars). The Loki derived-field regex in `observability/loki-tempo-setup` must match this exact name — it does, via the canonical cross-stack regex defined there.
+**Trace-correlation contract:** this stack emits the trace id as the JSON field **`trace_id`** (32 lowercase hex chars). The Loki derived-field regex in `observability/logs-traces-setup` must match this exact name — it does, via the canonical cross-stack regex defined there.
 
 No code changes needed in callers once the appender is registered.
 
@@ -270,7 +270,7 @@ Or filter at the source — pass DTO projections to the logger, never the entity
 ## Handoffs
 
 - Distributed tracing + metrics → `observability/opentelemetry-java`
-- LogQL queries against Loki → `observability/logql-promql`
-- Dashboard layout → `observability/grafana-dashboards`
+- LogQL queries against Loki → `observability/queries`
+- Dashboard layout → `observability/dashboards`
 - .NET equivalent → `observability/structured-logging-dotnet`
 - Node equivalent → `observability/structured-logging-node`

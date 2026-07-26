@@ -63,7 +63,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
 ## Theming + dark mode
 
-One `theme` from `createTheme`, fed by the [`design/frontend-design`](../../../../../design/frontend-design/SKILL.md) tokens ([`styling`](../../styling/SKILL.md) maps them). Mantine emits **CSS variables** from the theme, so your CSS Modules can read `var(--mantine-color-*)`:
+One `theme` from `createTheme`, fed by the [`design/visual-identity`](../../../../../design/visual-identity/SKILL.md) tokens ([`styling`](../../styling/SKILL.md) maps them). Mantine emits **CSS variables** from the theme, so your CSS Modules can read `var(--mantine-color-*)`:
 
 ```tsx
 // theme.ts
@@ -79,7 +79,7 @@ export const theme = createTheme({
 
 ## DataTable — server-side by default
 
-`mantine-datatable` is the free grid; drive paging/sort from a [`data-access`](../../data-access/SKILL.md) call, never load a full table:
+`mantine-datatable` is the free grid; drive paging/sort from a [`data-fetching`](../../data-fetching/SKILL.md) call, never load a full table:
 
 ```tsx
 'use client';
@@ -88,7 +88,7 @@ import { DataTable } from 'mantine-datatable';
 export function OrdersTable() {
   const [page, setPage] = useState(1);
   const [sort, setSort] = useState({ columnAccessor: 'number', direction: 'asc' as const });
-  const { rows, total, fetching } = useOrders({ page, pageSize: 25, sort });   // TanStack Query — data-access
+  const { rows, total, fetching } = useOrders({ page, pageSize: 25, sort });   // TanStack Query — data-fetching
   return (
     <DataTable
       records={rows} totalRecords={total} recordsPerPage={25} page={page} onPageChange={setPage}
@@ -116,12 +116,12 @@ import { notifications } from '@mantine/notifications';
 
 function deleteOrder(order: OrderDto) {
   modals.openConfirmModal({
-    title: `Delete order ${order.number}?`,               // name the object — ui-conventions
+    title: `Delete order ${order.number}?`,               // name the object — ui-rules
     children: 'This cannot be undone.',
     labels: { confirm: 'Delete', cancel: 'Cancel' },
     confirmProps: { color: 'red', 'data-testid': 'Orders.DeleteConfirm' },
     onConfirm: async () => {
-      await deleteOrderAction(order.id);                  // Server Action / mutation — data-access
+      await deleteOrderAction(order.id);                  // Server Action / mutation — data-fetching
       notifications.show({ color: 'green', message: `Order ${order.number} deleted` });
     },
   });
@@ -138,9 +138,9 @@ Mount `<ModalsProvider>` (from `@mantine/modals`) and `<Notifications />` once i
 | Color-scheme flash on load | `ColorSchemeScript` missing from `<head>` | Add `<ColorSchemeScript>` (App Router) so the scheme is stamped pre-paint |
 | Styles missing / components unstyled | `@mantine/core/styles.css` (and family stylesheets) not imported | Import the core stylesheet once in the root layout |
 | PostCSS mixins (`light-dark`, breakpoints) don't resolve | `postcss-preset-mantine` not configured | Add the preset to `postcss.config.cjs` |
-| Grid loads whole table then pages client-side | `page`/`sortStatus` not wired to a server query | Control them and translate to a `data-access` call |
+| Grid loads whole table then pages client-side | `page`/`sortStatus` not wired to a server query | Control them and translate to a `data-fetching` call |
 
-**`data-testid` on Mantine controls:** inline `data-testid="..."` forwards to the rendered root (Mantine spreads rest props). Full rules in [`testability`](../../testability/SKILL.md).
+**`data-testid` on Mantine controls:** inline `data-testid="..."` forwards to the rendered root (Mantine spreads rest props). Full rules in [`test-ids`](../../test-ids/SKILL.md).
 
 ## Validation
 

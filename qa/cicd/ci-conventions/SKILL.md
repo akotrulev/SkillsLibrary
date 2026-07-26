@@ -92,6 +92,6 @@ The same convention, three spellings. Use this table to translate, not to choose
 
 - Platform YAML, templates, generation steps → `qa/cicd/<stack>/skills/ci-pipelines/{azure-pipelines,github-actions,gitlab-ci}` for the project's stack and CI
 - Flake quarantine policy the retry rules defer to → `qa/reporting/<stack>/skills/flaky-test-quarantine`
-- Allure adapter wiring inside the test project → `qa/reporting/<stack>/skills/allure-reporting`
+- Allure adapter wiring inside the test project → `qa/reporting/<stack>/skills/test-reports`
 - Workload models and threshold semantics behind the perf gate → `qa/_shared/performance`
 - Non-QA pipelines (deploy, infra) → `devops/`

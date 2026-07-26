@@ -1,6 +1,6 @@
 ---
 name: devops-aws-deployment
-description: Use when the user asks to deploy a service to AWS — ECS Fargate (default for long-running containers), Lambda (event-driven / API Gateway), App Runner (simplest container option), S3 + CloudFront (static frontends / SPAs), or EKS (Kubernetes). Triggers: "deploy this .NET service to ECS", "ship a Lambda from a Node TS handler", "host the React SPA on S3 + CloudFront", "switch this from App Runner to ECS". Do NOT use for Azure (use `devops/azure-deployment`), IaC scripts (use `devops/iac-bicep-terraform`), or pipeline YAML (use `devops/{github-actions,gitlab-ci,azure-pipelines}`).
+description: Use when the user asks to deploy a service to AWS — ECS Fargate (default for long-running containers), Lambda (event-driven / API Gateway), App Runner (simplest container option), S3 + CloudFront (static frontends / SPAs), or EKS (Kubernetes). Triggers: "deploy this .NET service to ECS", "ship a Lambda from a Node TS handler", "host the React SPA on S3 + CloudFront", "switch this from App Runner to ECS". Do NOT use for Azure (use `devops/azure-deployment`), IaC scripts (use `devops/infrastructure-as-code`), or pipeline YAML (use `devops/{github-actions,gitlab-ci,azure-pipelines}`).
 ---
 
 # DevOps — AWS Deployment
@@ -15,7 +15,7 @@ Deploys services to AWS using the right primitive for the workload. Default for 
 - **Backends**: .NET 10 (8/9 supported) / Java 21 / Node 24 (22 maintenance) — all targets are Linux container images or Lambda runtimes
 - **Frontend**: React SPA → S3 + CloudFront; Blazor WASM → same; Blazor Server → ECS Fargate
 - IAM via **roles**, not users — services authenticate via IRSA (EKS), Task Role (ECS), or Execution Role (Lambda)
-- IaC via Terraform (preferred) or AWS CDK — see `devops/iac-bicep-terraform`
+- IaC via Terraform (preferred) or AWS CDK — see `devops/infrastructure-as-code`
 - Pipelines via GitHub Actions / GitLab CI / Azure Pipelines using OIDC (no long-lived keys)
 
 ## When to use
@@ -28,7 +28,7 @@ Deploys services to AWS using the right primitive for the workload. Default for 
 ## When NOT to use
 
 - Azure → `devops/azure-deployment`
-- IaC syntax → `devops/iac-bicep-terraform`
+- IaC syntax → `devops/infrastructure-as-code`
 - Pipeline YAML → `devops/github-actions` / `devops/gitlab-ci` / `devops/azure-pipelines`
 - App-level config / secrets injection → `devops/environment-config`
 
@@ -255,14 +255,14 @@ Avoid for: a small number of services, a team new to k8s, or "we might need k8s 
 ## Generation steps
 
 1. Confirm workload shape and pick the target (ECS / Lambda / App Runner / S3+CF / EKS).
-2. Ensure prerequisite infra exists (VPC, ECR repo, ALB, certs, secrets) — hand off to `devops/iac-bicep-terraform` for the Terraform.
+2. Ensure prerequisite infra exists (VPC, ECR repo, ALB, certs, secrets) — hand off to `devops/infrastructure-as-code` for the Terraform.
 3. Produce the deployable artifact: Dockerfile + task definition (ECS), Lambda zip / container image, or `npm run build` output (SPA).
 4. Wire the pipeline (`devops/github-actions` / `gitlab-ci` / `azure-pipelines`) with OIDC role assumption + the appropriate deploy step (`ecs update-service` / `lambda update-function-code` / `s3 sync` + invalidation).
 5. Smoke: hit `/health` after deploy; verify CloudWatch Logs receive logs; verify metrics arrive in Prometheus via the Collector.
 
 ## Handoffs
 
-- IaC (Terraform/CDK) → `devops/iac-bicep-terraform`
+- IaC (Terraform/CDK) → `devops/infrastructure-as-code`
 - Pipelines → `devops/github-actions` / `devops/gitlab-ci` / `devops/azure-pipelines`
 - App-level config & secrets injection → `devops/environment-config`
 - Logging → `observability/structured-logging-{dotnet,java,node}`

@@ -96,9 +96,9 @@ media queries** instead of one parent owning the geometry. The fix is structural
 
 | Pattern | Recipe |
 |---|---|
-| **Nav collapse** (full bar ⇄ hamburger/drawer) | The **hamburger is a small-screen affordance, not a default** — show top-level items as a visible horizontal bar wherever there's room ([`ui-conventions`](../ui-conventions/SKILL.md): don't hide nav when you can show it), collapse to the drawer only **below** the nav breakpoint. Prefer a **CSS visibility swap** (both variants in markup, media query flips them) so it works in a Server Component with no JS; the drawer open state is the only `'use client'` part. Library: MUI `Drawer` + `useMediaQuery`, Mantine `Burger` + `Drawer`. |
+| **Nav collapse** (full bar ⇄ hamburger/drawer) | The **hamburger is a small-screen affordance, not a default** — show top-level items as a visible horizontal bar wherever there's room ([`ui-rules`](../ui-rules/SKILL.md): don't hide nav when you can show it), collapse to the drawer only **below** the nav breakpoint. Prefer a **CSS visibility swap** (both variants in markup, media query flips them) so it works in a Server Component with no JS; the drawer open state is the only `'use client'` part. Library: MUI `Drawer` + `useMediaQuery`, Mantine `Burger` + `Drawer`. |
 | **Sticky header** | `position: sticky; top: 0` (pure CSS, SSR-safe) improves reach to nav/actions on long pages; keep it **short**, optionally shrink on scroll (an `IntersectionObserver` in a `'use client'` component, listener cleaned up in the effect's return). Don't make it so tall it eats the mobile viewport. |
-| **Table → cards** on narrow | Prefer one structure restyled with CSS (grid-areas per row); a genuinely different mobile DOM is a per-surface decision — mind duplicate-content cost. Library grids: hide low-value columns first per breakpoint ([`ui-conventions`](../ui-conventions/SKILL.md) owns which columns matter). |
+| **Table → cards** on narrow | Prefer one structure restyled with CSS (grid-areas per row); a genuinely different mobile DOM is a per-surface decision — mind duplicate-content cost. Library grids: hide low-value columns first per breakpoint ([`ui-rules`](../ui-rules/SKILL.md) owns which columns matter). |
 | **Sidebar → drawer / stacked** | Grid container swaps `grid-template-areas` at the breakpoint; the sidebar component itself is unchanged. |
 | **Form density** | Multi-column library/CSS grid collapsing to one column; labels stay above inputs at all widths (no layout-dependent label position). |
 | **Images/media** | Next `<Image>` with `sizes` (or `max-width: 100%; height: auto` for plain `<img>`); weight/`srcset` → [`performance`](../performance/SKILL.md). |
@@ -132,7 +132,7 @@ Make that possible:
   suite imports (or reads from `theme.breakpoints.values`); changing a breakpoint without telling QA breaks the
   boundary matrix, so it lives in one reviewed place.
 - **Both variants of a swap carry stable, variant-suffixed testids** (`Nav.Desktop` / `Nav.Hamburger`) — per
-  [`testability`](../testability/SKILL.md). QA asserts the visible one **and** the hidden one; unlabeled variants
+  [`test-ids`](../test-ids/SKILL.md). QA asserts the visible one **and** the hidden one; unlabeled variants
   make that impossible.
 - Every width must hold the invariant QA checks everywhere: **no horizontal overflow**.
 
@@ -170,7 +170,7 @@ Make that possible:
 
 - CSS Modules mechanics, tokens, mobile-first authority → [`styling`](../styling/SKILL.md)
 - Library grid component APIs, theming, `useMediaQuery` setup → [`component-library`](../component-library/SKILL.md)
-- Which table columns/actions survive narrow widths → [`ui-conventions`](../ui-conventions/SKILL.md)
+- Which table columns/actions survive narrow widths → [`ui-rules`](../ui-rules/SKILL.md)
 - Zoom/reflow (WCAG 1.4.10), touch targets, DOM-order-vs-visual-order → [`accessibility`](../accessibility/SKILL.md)
 - Responsive image weight, listener leaks from resize hooks → [`performance`](../performance/SKILL.md)
 - Verifying all of it by shrinking the browser → qa `responsive-testing` (peer agent's Phase 3)

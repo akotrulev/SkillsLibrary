@@ -1,13 +1,13 @@
 ---
-name: qa-bdd-project-scaffold-typescript
-description: Use when adding a BDD/Gherkin layer onto a TypeScript UI/mobile test project, or standing one up from zero — playwright-bdd (on the Playwright Test runner) for web, CucumberJS + WebdriverIO + Appium for mobile. Triggers: "set up playwright-bdd", "add a BDD layer to our Playwright tests in TS", "wire bddgen and fixtures". Do NOT use to write feature files (`gherkin-authoring`), generate step definitions (`bdd-step-bindings`), or build page objects (`page-object-architect`). For end-to-end suite work prefer the phased agent `qa-bdd-typescript` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
+name: qa-bdd-project-setup-typescript
+description: Use when adding a BDD/Gherkin layer onto a TypeScript UI/mobile test project, or standing one up from zero — playwright-bdd (on the Playwright Test runner) for web, CucumberJS + WebdriverIO + Appium for mobile. Triggers: "set up playwright-bdd", "add a BDD layer to our Playwright tests in TS", "wire bddgen and fixtures". Do NOT use to write feature files (`feature-file-writer`), generate step definitions (`gherkin-step-code`), or build page objects (`page-object-design`). For end-to-end suite work prefer the phased agent `qa-bdd-typescript` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
 ---
 
 # BDD Project Scaffold (TypeScript / Node 20)
 
-Wires a **BDD/Gherkin layer** onto a TypeScript test project: packages, runner config, the `features/` folder, the state/driver-sharing mechanism, the per-scenario lifecycle, and the smoke `.feature` that proves the rig parses and runs. It produces the **empty rig** — no feature files, no step logic; those come from `gherkin-authoring` and `bdd-step-bindings`.
+Wires a **BDD/Gherkin layer** onto a TypeScript test project: packages, runner config, the `features/` folder, the state/driver-sharing mechanism, the per-scenario lifecycle, and the smoke `.feature` that proves the rig parses and runs. It produces the **empty rig** — no feature files, no step logic; those come from `feature-file-writer` and `gherkin-step-code`.
 
-This is the BDD analogue of `ui-project-scaffold`; it assumes a Playwright (web) or WebdriverIO+Appium (mobile) page-object project either exists or will be built by `qa-ui-typescript` / `qa-mobile-typescript`.
+This is the BDD analogue of `ui-project-setup`; it assumes a Playwright (web) or WebdriverIO+Appium (mobile) page-object project either exists or will be built by `qa-ui-typescript` / `qa-mobile-typescript`.
 
 ## The TypeScript split (read this first)
 
@@ -18,7 +18,7 @@ TypeScript has **no single BDD framework** that spans web and mobile — the run
 | **Web** | **playwright-bdd** (by vitalets) | Playwright Test (via `bddgen` codegen) | **Playwright fixtures** — no World, no DI container |
 | **Mobile** | **@cucumber/cucumber (CucumberJS) + WebdriverIO + @wdio/appium-service** | CucumberJS via `@wdio/cucumber-framework` | **custom `World`** (`setWorldConstructor`), driver built in a `Before` hook |
 
-The two paths never share a runner. A project that tests **both** scaffolds both rigs side by side (a `web/` and a `mobile/` folder), not one merged config. The central difference downstream — **fixtures vs World** — is taught in full by `bdd-step-bindings`.
+The two paths never share a runner. A project that tests **both** scaffolds both rigs side by side (a `web/` and a `mobile/` folder), not one merged config. The central difference downstream — **fixtures vs World** — is taught in full by `gherkin-step-code`.
 
 ## Stack (pinned, verify latest at author time)
 
@@ -41,10 +41,10 @@ The two paths never share a runner. A project that tests **both** scaffolds both
 
 ## When NOT to use
 
-- Writing `.feature` files → `qa/_shared/bdd/gherkin-authoring`
-- Generating step definitions → `qa/typescript/skills/bdd-step-bindings`
-- Building page objects → `qa/typescript/skills/page-object-architect` / `pom-builder` / `appium-page-object`
-- BDD in .NET/Java → `qa/{dotnet,java}/skills/bdd-project-scaffold` (Reqnroll / Cucumber-JVM)
+- Writing `.feature` files → `qa/_shared/bdd/feature-file-writer`
+- Generating step definitions → `qa/typescript/skills/gherkin-step-code`
+- Building page objects → `qa/typescript/skills/page-object-design` / `page-objects-from-url` / `mobile-screen-objects`
+- BDD in .NET/Java → `qa/{dotnet,java}/skills/bdd-project-setup` (Reqnroll / Cucumber-JVM)
 
 ## Inputs needed
 
@@ -62,7 +62,7 @@ Confirm at most 2–3.
 4. Create the state/lifecycle layer — web: a `test` fixture extending page objects (no World); mobile: a `CustomWorld` + `Before`/`After` hooks that own the driver **with teardown**.
 5. Create the empty `features/` folder and one throwaway smoke `.feature` to prove the rig parses and runs.
 6. Run the toolchain (web: `npx bddgen && npx playwright test`; mobile: `npx wdio run`), confirm the smoke scenario is green.
-7. Report files created and hand off to `gherkin-authoring` (features) + `bdd-step-bindings` (steps).
+7. Report files created and hand off to `feature-file-writer` (features) + `gherkin-step-code` (steps).
 
 ## Templates — Web (playwright-bdd)
 
@@ -130,7 +130,7 @@ export const test = base.extend<Fixtures>({
 export const { Given, When, Then, Before, After } = createBdd(test);
 ```
 
-> Teardown is **fixture teardown** — anything after the `await use(...)` line, plus Playwright's per-test `page`/`context` disposal. There is no `[AfterScenario]` hook to write; the Cleanup handoff from `gherkin-authoring` becomes a fixture teardown (or a `bdd-step-bindings` `After` from `createBdd`), never Gherkin.
+> Teardown is **fixture teardown** — anything after the `await use(...)` line, plus Playwright's per-test `page`/`context` disposal. There is no `[AfterScenario]` hook to write; the Cleanup handoff from `feature-file-writer` becomes a fixture teardown (or a `gherkin-step-code` `After` from `createBdd`), never Gherkin.
 
 ### `features/smoke.feature` — throwaway rig check
 
@@ -231,7 +231,7 @@ After(async function (this: CustomWorld, scenario: ITestCaseHookParameter) {
   if (scenario.result?.status === 'FAILED') {
     await browser.takeScreenshot(); // attach to Allure in the reporter
   }
-  // Cleanup handoff from gherkin-authoring is implemented HERE, never as Gherkin.
+  // Cleanup handoff from feature-file-writer is implemented HERE, never as Gherkin.
 });
 ```
 
@@ -259,8 +259,8 @@ Feature: BDD rig smoke
 
 ## Handoffs
 
-- Feature files → `qa/_shared/bdd/gherkin-authoring`
-- Step definitions + POM wiring → `qa/typescript/skills/bdd-step-bindings`
-- Page objects → `qa/typescript/skills/page-object-architect` / `pom-builder` / `appium-page-object`
-- Allure reporting → `qa/reporting/typescript/skills/allure-reporting`
+- Feature files → `qa/_shared/bdd/feature-file-writer`
+- Step definitions + POM wiring → `qa/typescript/skills/gherkin-step-code`
+- Page objects → `qa/typescript/skills/page-object-design` / `page-objects-from-url` / `mobile-screen-objects`
+- Allure reporting → `qa/reporting/typescript/skills/test-reports`
 - CI (feature shard, publish report) → `qa/cicd/typescript/skills/ci-pipelines`

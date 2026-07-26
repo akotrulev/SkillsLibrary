@@ -7,7 +7,7 @@ description: Use when the user asks to write, derive, or generate formal test ca
 
 Generates formal, implementation-agnostic test cases from requirements. Output is structured Markdown suitable for use as manual test scripts, as input to test management tools, or as guides for later automation.
 
-This skill **assembles and formats** the suite: it factors shared preconditions into a single **Setup**, writes lean per-case steps, and always closes with a **Cleanup** so the environment is left as it was found. The *derivation* of which cases to write — partitions, boundaries, decision-table rules, state transitions — is the job of `qa/manual/test-design-techniques`; load that to decide the cases, then format them here. The full doc→suite flow is orchestrated by the `qa/manual/agents/qa-manual-test-designer` agent.
+This skill **assembles and formats** the suite: it factors shared preconditions into a single **Setup**, writes lean per-case steps, and always closes with a **Cleanup** so the environment is left as it was found. The *derivation* of which cases to write — partitions, boundaries, decision-table rules, state transitions — is the job of `qa/manual/test-design-techniques`; load that to decide the cases, then format them here. The full doc→suite flow is orchestrated by the `qa/manual/agents/qa-test-case-designer` agent.
 
 ## When to use
 
@@ -241,9 +241,9 @@ Why the first row fails every rule in *Writing the case text well*: **"authentic
 
 ## Handoffs
 
-- Distill the source docs into a concise, sourced test-basis document first → `qa/manual/test-basis-analyzer`
+- Distill the source docs into a concise, sourced test-basis document first → `qa/manual/requirements-breakdown`
 - Decide *which* cases to write (partitions, boundaries, rules, transitions) → `qa/manual/test-design-techniques`
-- Orchestrate the full documentation → suite flow → `qa/manual/agents/qa-manual-test-designer`
+- Orchestrate the full documentation → suite flow → `qa/manual/agents/qa-test-case-designer`
 - Size the test investment by risk first → `qa/manual/test-strategy`
 - Unscripted probing beyond the scripted cases → `qa/manual/exploratory-charter-writer`
 - File defects found while authoring/executing → `qa/manual/bug-report-writer`

@@ -15,9 +15,9 @@ Generator skill. Scaffolds a single `{resource}Client.ts` file in the TypeScript
 
 ## When NOT to use
 
-- Writing the test spec — use `qa/typescript/skills/api-test-author/generator`.
-- Reviewing an existing client for convention drift — use `qa/typescript/skills/api-test-author/reviewer`.
-- Authoring Zod schemas / DTO types — use `qa/typescript/skills/api-dto-writer` first.
+- Writing the test spec — use `qa/typescript/skills/api-test-author/writer`.
+- Reviewing an existing client for convention drift — use `qa/typescript/skills/api-test-author/review`.
+- Authoring Zod schemas / DTO types — use `qa/typescript/skills/api-models` first.
 - .NET stack (RestSharp) — use `qa/dotnet/skills/api-client-writer`.
 - Java stack (RestAssured) — use `qa/java/skills/api-client-writer`.
 - Projects standardized on axios / got / supertest — these conventions assume native `fetch`.
@@ -313,7 +313,7 @@ Only add these overloads when the test plan requires them — not by default.
 1. Ask the user: which **API group** does this client belong to? (user / assessment / legal / reference / auth)
 2. Ask the user: resource name (noun) and base URL path segment (e.g. `users`).
 3. Ask which **operations** are needed, and whether they are user-facing, admin, or both. Default to full CRUD on the user-facing surface.
-4. Ensure the required Zod schemas and inferred types exist under `src/models/{api}/{resource}/`. If not, run `qa/typescript/skills/api-dto-writer` first.
+4. Ensure the required Zod schemas and inferred types exist under `src/models/{api}/{resource}/`. If not, run `qa/typescript/skills/api-models` first.
 5. Generate the file at `src/clients/{api}/{resource}Client.ts`.
 6. Run `pnpm exec tsc --noEmit` (or `npm run typecheck`) — expect 0 errors.
 7. Run `pnpm exec eslint src/clients/{api}/{resource}Client.ts` — expect 0 errors.

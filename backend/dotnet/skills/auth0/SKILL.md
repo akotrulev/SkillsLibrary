@@ -265,4 +265,4 @@ Log out via `/v2/logout?client_id=...&returnTo=...` on the Auth0 side **and** cl
 - AWS Cognito equivalent → `backend/dotnet/skills/cognito`
 - Pattern/persistence scaffolding for the rest of the service → `backend/dotnet/skills/{generator,persistence}`
 - Storing client secrets → `devops/environment-config` + Key Vault
-- API contract tests with auth → `qa/dotnet/skills/api-test-author/generator` + `qa/dotnet/skills/auth0-test-tokens` (use a seeded test user; document tenant in `qa/manual/test-strategy`)
+- API contract tests with auth → `qa/dotnet/skills/api-test-author/writer` + `qa/dotnet/skills/test-login-tokens` (use a seeded test user; document tenant in `qa/manual/test-strategy`)

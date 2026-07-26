@@ -47,7 +47,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
 ## Theming + dark mode
 
-One `theme` object at the root; feed its palette from the [`design/frontend-design`](../../../../../design/frontend-design/SKILL.md) token system ([`styling`](../../styling/SKILL.md) owns the mapping). MUI v7's `createTheme` supports a **CSS-variables** color-scheme mode so dark mode is a class/attribute swap with no flash:
+One `theme` object at the root; feed its palette from the [`design/visual-identity`](../../../../../design/visual-identity/SKILL.md) token system ([`styling`](../../styling/SKILL.md) owns the mapping). MUI v7's `createTheme` supports a **CSS-variables** color-scheme mode so dark mode is a class/attribute swap with no flash:
 
 ```tsx
 // theme.ts
@@ -64,7 +64,7 @@ Toggle with the `useColorScheme()` hook (`{ mode, setMode }`) from a client cont
 
 ## DataGrid — server-side by default
 
-`<DataGrid>` (MUI X) with server-side paging/sort/filter — never load a full table client-side. The grid is a client component; drive it from a [`data-access`](../../data-access/SKILL.md) call:
+`<DataGrid>` (MUI X) with server-side paging/sort/filter — never load a full table client-side. The grid is a client component; drive it from a [`data-fetching`](../../data-fetching/SKILL.md) call:
 
 ```tsx
 'use client';
@@ -77,7 +77,7 @@ const columns: GridColDef<OrderDto>[] = [
 
 export function OrdersGrid() {
   const [model, setModel] = useState<GridPaginationModel>({ page: 0, pageSize: 25 });
-  const { rows, rowCount, loading } = useOrders(model);   // TanStack Query hook — data-access
+  const { rows, rowCount, loading } = useOrders(model);   // TanStack Query hook — data-fetching
   return (
     <DataGrid
       columns={columns} rows={rows} rowCount={rowCount} loading={loading}
@@ -90,7 +90,7 @@ export function OrdersGrid() {
 }
 ```
 
-`paginationMode="server"` (plus `sortingMode`/`filterMode`) makes the grid emit callbacks instead of slicing in the browser; translate the model/sort/filter into the `data-access` query. Row virtualization on huge grids is a **Pro** feature.
+`paginationMode="server"` (plus `sortingMode`/`filterMode`) makes the grid emit callbacks instead of slicing in the browser; translate the model/sort/filter into the `data-fetching` query. Row virtualization on huge grids is a **Pro** feature.
 
 ## Dialog + snackbar
 
@@ -105,7 +105,7 @@ function DeleteButton({ order }: { order: OrderDto }) {
   const [open, setOpen] = useState(false);
   const { enqueueSnackbar } = useSnackbar();
   async function confirm() {
-    await deleteOrder(order.id);                          // Server Action / mutation — data-access
+    await deleteOrder(order.id);                          // Server Action / mutation — data-fetching
     setOpen(false);
     enqueueSnackbar(`Order ${order.number} deleted`, { variant: 'success' });
   }
@@ -113,7 +113,7 @@ function DeleteButton({ order }: { order: OrderDto }) {
     <>
       <Button color="error" onClick={() => setOpen(true)} data-testid="Orders.Delete">Delete</Button>
       <Dialog open={open} onClose={() => setOpen(false)} data-testid="Orders.DeleteDialog">
-        <DialogTitle>Delete order {order.number}?</DialogTitle>       {/* name the object — ui-conventions */}
+        <DialogTitle>Delete order {order.number}?</DialogTitle>       {/* name the object — ui-rules */}
         <DialogContent>This cannot be undone.</DialogContent>
         <DialogActions>
           <Button onClick={() => setOpen(false)}>Cancel</Button>
@@ -134,10 +134,10 @@ Mount `<SnackbarProvider>` (notistack) once inside the client `Providers` island
 | `useContext`/`createContext` error, or "hooks can only be used in Client Components" | An interactive MUI component (Button with `onClick`, Dialog, Menu) rendered in a Server Component | Move it under a `'use client'` boundary; the provider is a client island |
 | Unstyled flash then styled on hydrate (App Router) | Emotion styles not flushed during SSR | Wrap in `AppRouterCacheProvider` from `@mui/material-nextjs` |
 | Theme flashes light then dark on load | Color scheme applied after first paint | `cssVariables` + `InitColorSchemeScript` in `<head>` to stamp before paint |
-| Grid loads the whole table then pages in the browser | `paginationMode`/`sortingMode`/`filterMode` left at `client` | Set them to `server` and wire the callbacks to a `data-access` query |
+| Grid loads the whole table then pages in the browser | `paginationMode`/`sortingMode`/`filterMode` left at `client` | Set them to `server` and wire the callbacks to a `data-fetching` query |
 | `sx`/`styled` types error | `@emotion/react`/`@emotion/styled` missing | Install both Emotion peers |
 
-**`data-testid` on MUI controls:** inline `data-testid="..."` forwards to the rendered root for most components; for slotted internals use `slotProps` (e.g. `slotProps={{ root: { 'data-testid': '...' } }}`). Full rules in [`testability`](../../testability/SKILL.md).
+**`data-testid` on MUI controls:** inline `data-testid="..."` forwards to the rendered root for most components; for slotted internals use `slotProps` (e.g. `slotProps={{ root: { 'data-testid': '...' } }}`). Full rules in [`test-ids`](../../test-ids/SKILL.md).
 
 ## Validation
 

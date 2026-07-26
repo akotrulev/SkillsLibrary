@@ -1,6 +1,6 @@
 # MongoDB — Indexing
 
-Index type selection, the ESR rule for compound indexes, covered queries, the specialty indexes (multikey/partial/TTL/wildcard), full-text (`$text` vs Atlas Search / Vector Search), and build discipline. Universal query triage (ESR as a cross-engine idea, keyset pagination, N+1) is in `data/_shared/query-optimization`; this is the MongoDB mechanics.
+Index type selection, the ESR rule for compound indexes, covered queries, the specialty indexes (multikey/partial/TTL/wildcard), full-text (`$text` vs Atlas Search / Vector Search), and build discipline. Universal query triage (ESR as a cross-engine idea, keyset pagination, N+1) is in `data/_shared/slow-query-fixes`; this is the MongoDB mechanics.
 
 ## The mental model
 
@@ -121,6 +121,6 @@ For genuinely unknown/variable key names (a `metadata` sub-document of user-defi
 ## Handoffs
 
 - Reading `explain` output / diagnosing why an index isn't used → `references/performance.md`
-- ESR as a cross-engine principle, keyset pagination, N+1 → `data/_shared/query-optimization`
+- ESR as a cross-engine principle, keyset pagination, N+1 → `data/_shared/slow-query-fixes`
 - The document shapes these indexes serve → `references/data-modeling.md`
 - Self-hosted full-text/semantic search that outgrows `$text` → `data/elasticsearch`

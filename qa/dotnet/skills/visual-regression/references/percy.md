@@ -7,7 +7,7 @@ server-side**; baselines live in Percy's cloud, keyed by git branch, and are rev
 web UI. The build is gated on that review, not on a local artifact.
 
 This is an **assertion layer** on top of the page objects and specs
-`qa-ui-test-author-playwright-dotnet` already authored. You do not write new page objects here — you
+`qa-ui-test-writer-playwright-dotnet` already authored. You do not write new page objects here — you
 add a `Percy.Snapshot(page, name)` call and wrap `dotnet test` in `percy exec`.
 
 ## Why graduate from built-in snapshots to Percy
@@ -218,7 +218,7 @@ auto-establish from the **base branch**, so a PR diffs against `main`'s last app
 
 Contrast with built-in snapshots: there is **no `-diff.png` artifact to upload** — the diff lives in
 Percy's UI. Link the Percy build URL into Allure so reviewers jump straight to it (cross-link
-`qa-allure-reporting-dotnet`):
+`qa-test-reports-dotnet`):
 
 ```csharp
 [OneTimeTearDown]
@@ -318,7 +318,7 @@ Lifecycle for this test:
   you diff yourself, with the CI-container discipline Percy removes. Start here; graduate to Percy.
 - `references/applitools.md` (`applitools`, next) — the visual-AI sibling: AI diff tolerance +
   a cross-browser rendering grid.
-- `qa-ui-test-author-playwright-dotnet` — the page objects/specs `Percy.Snapshot` is called inside.
+- `qa-ui-test-writer-playwright-dotnet` — the page objects/specs `Percy.Snapshot` is called inside.
 - `qa-ci-pipelines-dotnet` — where `PERCY_TOKEN` is sourced and `percy exec` wraps
   `dotnet test`.
-- `qa-allure-reporting-dotnet` — link the Percy build URL into the report.
+- `qa-test-reports-dotnet` — link the Percy build URL into the report.

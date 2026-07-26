@@ -1,11 +1,11 @@
 ---
-name: qa-bdd-project-scaffold-java
-description: Use when adding the Cucumber-JVM BDD layer onto a Java 21 UI/mobile test project, or standing up a Cucumber-JVM + JUnit 5 project from zero. Triggers: "set up Cucumber", "add a BDD layer to our Playwright/Selenium/Appium tests in Java", "wire Cucumber DI and hooks". Do NOT use to write feature files (`gherkin-authoring`), generate step definitions (`bdd-step-bindings`), or build page objects (`page-object-architect`). For end-to-end suite work prefer the phased agent `qa-bdd-java` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
+name: qa-bdd-project-setup-java
+description: Use when adding the Cucumber-JVM BDD layer onto a Java 21 UI/mobile test project, or standing up a Cucumber-JVM + JUnit 5 project from zero. Triggers: "set up Cucumber", "add a BDD layer to our Playwright/Selenium/Appium tests in Java", "wire Cucumber DI and hooks". Do NOT use to write feature files (`feature-file-writer`), generate step definitions (`gherkin-step-code`), or build page objects (`page-object-design`). For end-to-end suite work prefer the phased agent `qa-bdd-java` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
 ---
 
 # Cucumber-JVM BDD Project Scaffold (Java 21)
 
-Wires **Cucumber-JVM** into a Java 21 + Gradle (Kotlin DSL) test project: the `io.cucumber:*` BOM and packages, the **JUnit 5 Platform** runner (a `@Suite` class + `junit-platform.properties`), the `features/` resource folder, the DI container (**PicoContainer**, zero-config), the per-scenario browser/driver lifecycle hooks, and the shared per-scenario context object that step classes inject. It produces the **empty rig** — no feature files, no step logic; those come from `gherkin-authoring` and `bdd-step-bindings`.
+Wires **Cucumber-JVM** into a Java 21 + Gradle (Kotlin DSL) test project: the `io.cucumber:*` BOM and packages, the **JUnit 5 Platform** runner (a `@Suite` class + `junit-platform.properties`), the `features/` resource folder, the DI container (**PicoContainer**, zero-config), the per-scenario browser/driver lifecycle hooks, and the shared per-scenario context object that step classes inject. It produces the **empty rig** — no feature files, no step logic; those come from `feature-file-writer` and `gherkin-step-code`.
 
 This is the BDD analogue of the UI project scaffold; it assumes a Playwright (web), Selenium (web), or Appium (mobile) page-object project either exists or will be built by `qa-ui-java` / `qa-mobile-java`.
 
@@ -30,10 +30,10 @@ This is the BDD analogue of the UI project scaffold; it assumes a Playwright (we
 
 ## When NOT to use
 
-- Writing `.feature` files → `qa/_shared/bdd/gherkin-authoring`
-- Generating step-definition classes → `qa/java/skills/bdd-step-bindings`
-- Building page objects → `qa/java/skills/page-object-architect` / `pom-builder`
-- BDD in .NET/TS → `qa/{dotnet,typescript}/skills/bdd-project-scaffold` (those use Reqnroll / playwright-bdd)
+- Writing `.feature` files → `qa/_shared/bdd/feature-file-writer`
+- Generating step-definition classes → `qa/java/skills/gherkin-step-code`
+- Building page objects → `qa/java/skills/page-object-design` / `page-objects-from-url`
+- BDD in .NET/TS → `qa/{dotnet,typescript}/skills/bdd-project-setup` (those use Reqnroll / playwright-bdd)
 
 ## Inputs needed
 
@@ -51,7 +51,7 @@ Confirm at most 2–3.
 4. Create `support/` : the per-scenario `TestContext` (holds the Playwright `Page` / Selenium `WebDriver` + lazily-built page objects), and the lifecycle `Hooks` class (`@Before`/`@After` that own the browser/driver — **with teardown**). PicoContainer is zero-config — adding the dependency is the whole wiring step.
 5. Create the empty `src/test/resources/features/` folder and one throwaway smoke `.feature` to prove the rig parses and runs.
 6. `./gradlew test` (the engine must discover the feature and bind the smoke step) and run the smoke scenario.
-7. Report files created and hand off to `gherkin-authoring` (features) + `bdd-step-bindings` (steps).
+7. Report files created and hand off to `feature-file-writer` (features) + `gherkin-step-code` (steps).
 
 ## Templates
 
@@ -228,7 +228,7 @@ Feature: BDD rig smoke
     Then it runs a scenario
 ```
 
-A one-line `SmokeSteps` class (in `bdd-step-bindings`) binds these two steps; the goal is only to prove the engine discovers features, the glue path resolves, and PicoContainer builds the graph.
+A one-line `SmokeSteps` class (in `gherkin-step-code`) binds these two steps; the goal is only to prove the engine discovers features, the glue path resolves, and PicoContainer builds the graph.
 
 ### Mobile variant (`TestContext` + hook)
 
@@ -246,8 +246,8 @@ For Appium, `TestContext` holds an `AppiumDriver` built in `@Before("@mobile")` 
 
 ## Handoffs
 
-- Feature files → `qa/_shared/bdd/gherkin-authoring`
-- Step definitions + POM wiring → `qa/java/skills/bdd-step-bindings`
-- Page objects → `qa/java/skills/page-object-architect` / `pom-builder` / `appium-page-object`
-- Allure reporting → `qa/reporting/java/skills/allure-reporting`
+- Feature files → `qa/_shared/bdd/feature-file-writer`
+- Step definitions + POM wiring → `qa/java/skills/gherkin-step-code`
+- Page objects → `qa/java/skills/page-object-design` / `page-objects-from-url` / `mobile-screen-objects`
+- Allure reporting → `qa/reporting/java/skills/test-reports`
 - CI (feature/tag shard, publish report) → `qa/cicd/java/skills/ci-pipelines`

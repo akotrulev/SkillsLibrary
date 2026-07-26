@@ -1,11 +1,11 @@
 ---
-name: qa-ui-test-author-playwright-typescript
+name: qa-ui-test-writer-playwright-typescript
 description: Use when the user asks to scaffold Playwright UI tests in TypeScript — new spec files, page objects under `tests/pages/`, or a specific scenario (login, form, accessibility, visual). Triggers: "write a Playwright test for X in TypeScript", "add a Playwright TS page object for screen Y", "scaffold a Playwright spec (TS)". For end-to-end suite work prefer the phased agent `qa-ui-typescript` / `qa-bdd-typescript` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
 ---
 
 # QA — Playwright Test & Page Object Generator (TypeScript)
 
-Scaffolds Playwright `@playwright/test` specs and page objects in TypeScript. Uses the **fixture-driven page object pattern**: page objects are exposed as Playwright fixtures, not constructed manually in every test. Locators use `getByTestId` first (`data-testid` is the standing contract with the dev team — see `qa/typescript/skills/pom-builder` for extraction and the missing-testid report), falling back to role/label semantics — never raw CSS where anything better exists.
+Scaffolds Playwright `@playwright/test` specs and page objects in TypeScript. Uses the **fixture-driven page object pattern**: page objects are exposed as Playwright fixtures, not constructed manually in every test. Locators use `getByTestId` first (`data-testid` is the standing contract with the dev team — see `qa/typescript/skills/page-objects-from-url` for extraction and the missing-testid report), falling back to role/label semantics — never raw CSS where anything better exists.
 
 ## Stack
 
@@ -27,14 +27,14 @@ Scaffolds Playwright `@playwright/test` specs and page objects in TypeScript. Us
 
 - Mobile / Appium → `qa/typescript/skills/ui-test-author/appium`
 - Java Selenium → `qa/java/skills/ui-test-author/selenium`
-- Reviewing existing Playwright code → `qa/typescript/skills/ui-test-author/reviewer`
-- Designing the overall page-object hierarchy → `qa/typescript/skills/page-object-architect`
+- Reviewing existing Playwright code → `qa/typescript/skills/ui-test-author/review`
+- Designing the overall page-object hierarchy → `qa/typescript/skills/page-object-design`
 
 ## Inputs needed
 
 1. **Feature / page** under test (e.g. `Login`, `CheckoutCart`)
 2. **User journey** — concrete steps + the user-visible outcome to assert
-3. **Locators** — for each element: `getByTestId` whenever the element has a `data-testid`; otherwise `getByRole` / `getByLabel`, then `getByText`; CSS only as last resort. Missing testids are reported via `qa/typescript/skills/pom-builder`'s `missing-testids.md`
+3. **Locators** — for each element: `getByTestId` whenever the element has a `data-testid`; otherwise `getByRole` / `getByLabel`, then `getByText`; CSS only as last resort. Missing testids are reported via `qa/typescript/skills/page-objects-from-url`'s `missing-testids.md`
 4. **Auth requirement** — anonymous, or signed-in (which user role + how the session is established)
 5. **Test data** — seeded by API, by fixture, or inline
 
@@ -170,7 +170,7 @@ export const test = base.extend<{ seededOrder: Order }>({
 
 ### Locator preference order (strict)
 
-1. `getByTestId(id)` — **preferred whenever the element carries a `data-testid`**; the attribute is the agreed contract with the app team. Elements missing it go in the `missing-testids.md` dev-team report (extraction workflow: `qa/typescript/skills/pom-builder`) and use a fallback below with `// TODO: missing data-testid '<suggested>'`
+1. `getByTestId(id)` — **preferred whenever the element carries a `data-testid`**; the attribute is the agreed contract with the app team. Elements missing it go in the `missing-testids.md` dev-team report (extraction workflow: `qa/typescript/skills/page-objects-from-url`) and use a fallback below with `// TODO: missing data-testid '<suggested>'`
 2. `getByRole(role, { name })` — best fallback; matches the accessibility tree
 3. `getByLabel(text)` — for form inputs
 4. `getByPlaceholder(text)` — only when there is no label
@@ -260,7 +260,7 @@ export const test = base.extend<{ seededOrder: Order }>({
 
 ## Handoffs
 
-- Designing the page-object hierarchy → `qa/typescript/skills/page-object-architect`
-- Reviewing existing Playwright tests → `qa/typescript/skills/ui-test-author/reviewer`
+- Designing the page-object hierarchy → `qa/typescript/skills/page-object-design`
+- Reviewing existing Playwright tests → `qa/typescript/skills/ui-test-author/review`
 - Test data builders → `qa/typescript/skills/test-data-builder`
-- Allure reporter setup → `qa/reporting/typescript/skills/allure-reporting`
+- Allure reporter setup → `qa/reporting/typescript/skills/test-reports`

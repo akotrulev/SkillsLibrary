@@ -343,8 +343,8 @@ k6-perf:
 - **`qa/cicd/dotnet/skills/ci-pipelines`** — the structural template this ports from; the `strategy.matrix` / `dorny/test-reporter` (TRX) variant.
 - **`qa/cicd/dotnet/skills/ci-pipelines`** — the Azure sibling; the `strategy: parallel` / service-connection variant.
 - **`qa/dotnet/skills/db-testing/testcontainers`** — the integration-tests job runs these (needs the `docker:dind` service shown above).
-- **`qa/dotnet/skills/network-monitoring`** — runs an **external MITM proxy** (`Titanium.Web.Proxy`) the job must start/stop, whose **CA the client must trust** (per-run — no stored secret); the in-process `playwright-routes`/`cdp` specs need no extra plumbing.
-- **`qa/dotnet/skills/network-monitoring`** — in-process CDP specs the `ui-tests` job runs directly.
-- **`qa/reporting/dotnet/skills/allure-reporting`** — adapter wiring that produces `allure-results/`.
-- **`qa/dotnet/skills/performance/nbomber`** + **`qa/typescript/skills/performance/k6`** — perf-job scripts; SLO contract in `qa/_shared/performance`.
+- **`qa/dotnet/skills/network-mocking`** — runs an **external MITM proxy** (`Titanium.Web.Proxy`) the job must start/stop, whose **CA the client must trust** (per-run — no stored secret); the in-process `playwright-routes`/`cdp` specs need no extra plumbing.
+- **`qa/dotnet/skills/network-mocking`** — in-process CDP specs the `ui-tests` job runs directly.
+- **`qa/reporting/dotnet/skills/test-reports`** — adapter wiring that produces `allure-results/`.
+- **`qa/dotnet/skills/load-testing`** + **`qa/typescript/skills/load-testing`** — perf-job scripts; SLO contract in `qa/_shared/performance`.
 - **`qa/cicd/ci-conventions`** — cross-stack rules (artifact retention, OIDC) this skill enforces.

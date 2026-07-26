@@ -13,16 +13,16 @@ Owns how a React app is styled with **CSS you write**: component-scoped CSS Modu
 
 - Scoping a component's CSS so it can't leak or collide (CSS Modules)
 - Sharing rules between modules (`composes`) without a global dump
-- Setting up design tokens (CSS custom properties) from a `design/frontend-design` palette
+- Setting up design tokens (CSS custom properties) from a `design/visual-identity` palette
 - Dark mode, responsive breakpoints (the CSS mechanics)
 - Deciding the styling authority: library `sx`/`theme` vs Tailwind vs CSS Modules
 
 ## When NOT to use
 
 - A component library's theme/token object (MUI `createTheme`, Mantine/Chakra `createSystem`/tokens) → [`component-library`](../component-library/SKILL.md)
-- Picking the palette, fonts, visual direction, type *treatment* → [`design/frontend-design`](../../../../design/frontend-design/SKILL.md) (primary theming authority), `design/theme-factory` (optional quick-start)
+- Picking the palette, fonts, visual direction, type *treatment* → [`design/visual-identity`](../../../../design/visual-identity/SKILL.md) (primary theming authority), `design/theme-presets` (optional quick-start)
 - Contrast/WCAG auditing of the colors you chose → [`accessibility`](../accessibility/SKILL.md)
-- Layout *component* structure (composition, slots) → [`reference`](../reference/SKILL.md); the breakpoint contract + grids → [`responsive-design`](../responsive-design/SKILL.md)
+- Layout *component* structure (composition, slots) → [`basics`](../basics/SKILL.md); the breakpoint contract + grids → [`responsive-design`](../responsive-design/SKILL.md)
 
 ## The styling authority decision
 
@@ -82,7 +82,7 @@ Rules + gotchas:
 
 ## Design tokens — the theming backbone
 
-Define the palette/spacing/typography once as **CSS custom properties**, and reference `var(--token)` everywhere (modules, Tailwind config, and the library theme). This is the seam where the visual direction enters the codebase — map [`design/frontend-design`](../../../../design/frontend-design/SKILL.md)'s per-brief token system (the primary authority; or a `design/theme-factory` preset for a quick-start) — palette hex + font pairing — to tokens. The *system* rules (tier model, purpose-naming, categories, theming-as-swap-set) are the stack-agnostic discipline owned by [`design/design-tokens`](../../../../design/design-tokens/SKILL.md) — this section is the React **mechanics**; defer the structure questions there.
+Define the palette/spacing/typography once as **CSS custom properties**, and reference `var(--token)` everywhere (modules, Tailwind config, and the library theme). This is the seam where the visual direction enters the codebase — map [`design/visual-identity`](../../../../design/visual-identity/SKILL.md)'s per-brief token system (the primary authority; or a `design/theme-presets` preset for a quick-start) — palette hex + font pairing — to tokens. The *system* rules (tier model, purpose-naming, categories, theming-as-swap-set) are the stack-agnostic discipline owned by [`design/design-tokens`](../../../../design/design-tokens/SKILL.md) — this section is the React **mechanics**; defer the structure questions there.
 
 ```css
 /* app/globals.css — the ONLY thing that legitimately lives global */
@@ -100,13 +100,13 @@ Define the palette/spacing/typography once as **CSS custom properties**, and ref
 
 Rules:
 - **Modules consume tokens, never hardcoded hex.** `color: var(--color-text)` — a literal `#333` in a `.module.css` is a token that escaped.
-- **Name functional tokens by purpose, not value.** `--color-danger` / `--color-surface-raised` / `--color-action-primary`, never `--color-red` / `--color-blue-500`. Purpose-named tokens keep meaning stable across a theme change and make an accessibility fix a one-line edit. Keep the semantic set (success / warning / danger / info) separate from brand tokens (the brand-vs-functional split is [`design/frontend-design`](../../../../design/frontend-design/SKILL.md)'s decision).
+- **Name functional tokens by purpose, not value.** `--color-danger` / `--color-surface-raised` / `--color-action-primary`, never `--color-red` / `--color-blue-500`. Purpose-named tokens keep meaning stable across a theme change and make an accessibility fix a one-line edit. Keep the semantic set (success / warning / danger / info) separate from brand tokens (the brand-vs-functional split is [`design/visual-identity`](../../../../design/visual-identity/SKILL.md)'s decision).
 - **One token set app-wide.** No per-feature palette forks.
 - **Bridge to the library, one source of truth.** With MUI/Mantine/Chakra, set the *library theme* from these CSS vars (`palette.primary.main: 'var(--color-action-primary)'`) — or emit the library's CSS vars and have your modules read *those*. Never run two diverging color systems ([`component-library`](../component-library/SKILL.md)). With Tailwind/shadcn, the tokens *are* the theme (`--primary` in `globals.css`, referenced by Tailwind).
 
 ## Type scale & hierarchy
 
-Typography is where `design/frontend-design`'s taste becomes tokens. That skill decides the *treatment* (the display/body pairing, the personality); this section is the *mechanics*: a scale, a hierarchy, responsive sizing, weight/tracking discipline. A single `--font-body` value is a font, not a type *system*.
+Typography is where `design/visual-identity`'s taste becomes tokens. That skill decides the *treatment* (the display/body pairing, the personality); this section is the *mechanics*: a scale, a hierarchy, responsive sizing, weight/tracking discipline. A single `--font-body` value is a font, not a type *system*.
 
 **A modular scale as tokens.** Pick one ratio (1.2 minor-third for dense UI, 1.25 major-third, 1.333 perfect-fourth for editorial) and generate steps from one base:
 
@@ -156,7 +156,7 @@ Dark mode is a **token swap**, not a per-component `dark:` sprinkle. Toggle a cl
 ```
 
 Rules:
-- **Dark mode is a deliberately-authored second palette, not an inversion.** Never `filter: invert()` or algorithmically negate hex. **Desaturate accents** (saturated brand colors vibrate on dark surfaces), **avoid pure `#000`** (a very dark neutral reads better and lets shadows show), and **re-verify every contrast pair** — a ratio that passes on white routinely fails on dark, so it needs its own [`accessibility`](../accessibility/SKILL.md) pass. (The taste decision is [`design/frontend-design`](../../../../design/frontend-design/SKILL.md)'s; this is mechanics.)
+- **Dark mode is a deliberately-authored second palette, not an inversion.** Never `filter: invert()` or algorithmically negate hex. **Desaturate accents** (saturated brand colors vibrate on dark surfaces), **avoid pure `#000`** (a very dark neutral reads better and lets shadows show), and **re-verify every contrast pair** — a ratio that passes on white routinely fails on dark, so it needs its own [`accessibility`](../accessibility/SKILL.md) pass. (The taste decision is [`design/visual-identity`](../../../../design/visual-identity/SKILL.md)'s; this is mechanics.)
 - **Follow OS by default (`prefers-color-scheme`), let the user override, persist it.** `next-themes` with `defaultTheme="system"` does exactly this; the persisted choice wins over the media query.
 - **Stamp the class before first paint.** `next-themes` injects a tiny pre-hydration script and you set `suppressHydrationWarning` on `<html>` — this is what prevents the light→dark flash. Don't hand-roll it.
 - **Zero component changes.** Because everything reads tokens, dark mode needs no per-component CSS — if a component needs a dark-specific rule, its color escaped into a literal. Fix the token.
@@ -171,7 +171,7 @@ This skill owns only the CSS *authority* rules responsive design rides on: **mob
 - **One styling authority** (library style API · Tailwind · CSS Modules) — never Tailwind *and* a CSS-in-JS library; [`component-library`](../component-library/SKILL.md) picks it.
 - **CSS Modules by default for hand-written CSS**; `globals.css` holds *only* tokens + a minimal reset, never component styles.
 - **Share via `composes` or a `className` prop**, never a descendant selector reaching a child's internals; use `:global` sparingly.
-- **Design tokens as CSS custom properties**, sourced from `design/frontend-design` (primary) / `design/theme-factory` (quick-start); modules consume `var(--token)`, never literals; functional tokens **named by purpose** (`--color-danger`), distinct from brand tokens; **bridged to one source** with the library theme.
+- **Design tokens as CSS custom properties**, sourced from `design/visual-identity` (primary) / `design/theme-presets` (quick-start); modules consume `var(--token)`, never literals; functional tokens **named by purpose** (`--color-danger`), distinct from brand tokens; **bridged to one source** with the library theme.
 - **Type as a system, not a font** — one modular scale + base as tokens, headings carry hierarchy globally, display sizes fluid via `clamp()`, fonts via `next/font`, two–three weights, sizes from scale tokens.
 - **Dark mode = a deliberately-authored second palette** (desaturated accents, no pure black, contrast re-verified) swapped via `next-themes`/the library toggle — never an inversion; stamped before paint, user override persisted and winning.
 - **Mobile-first responsive** (the breakpoint contract itself → [`responsive-design`](../responsive-design/SKILL.md)).
@@ -198,8 +198,8 @@ This skill owns only the CSS *authority* rules responsive design rides on: **mob
 ## Handoffs
 
 - Component library's own theme object (MUI `createTheme`, Mantine/Chakra tokens, Tailwind-as-authority for shadcn) → [`component-library`](../component-library/SKILL.md)
-- Palette, fonts, visual direction, the *type treatment* → [`design/frontend-design`](../../../../design/frontend-design/SKILL.md) (primary), `design/theme-factory` (quick-start)
+- Palette, fonts, visual direction, the *type treatment* → [`design/visual-identity`](../../../../design/visual-identity/SKILL.md) (primary), `design/theme-presets` (quick-start)
 - Contrast/WCAG check of chosen colors, focus-visible styling → [`accessibility`](../accessibility/SKILL.md)
 - Breakpoint contract, grids, cross-breakpoint alignment, container queries → [`responsive-design`](../responsive-design/SKILL.md)
 - Font/static-asset performance, bundle → [`performance`](../performance/SKILL.md)
-- Component/layout structure (composition, slots) → [`reference`](../reference/SKILL.md)
+- Component/layout structure (composition, slots) → [`basics`](../basics/SKILL.md)

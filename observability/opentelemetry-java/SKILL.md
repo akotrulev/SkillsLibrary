@@ -33,7 +33,7 @@ First act on an existing project: confirm the Java release (`java -version` / th
 - .NET service → `observability/opentelemetry-dotnet`
 - Node service → `observability/opentelemetry-node`
 - Log shape / sinks → `observability/structured-logging-java`
-- Dashboards / queries → `observability/grafana-dashboards` + `observability/logql-promql`
+- Dashboards / queries → `observability/dashboards` + `observability/queries`
 
 ## Inputs needed
 
@@ -185,7 +185,7 @@ For SDK-only, use `io.opentelemetry:opentelemetry-sdk-extension-autoconfigure` a
 - Span names are operation names (`order.process`), not values
 - Metric names lowercase dot.case (`orders.created`, `orders.processing.duration`)
 - Use Micrometer for metrics in Spring Boot apps (don't bypass to raw OTel meters); the bridge handles the rest
-- Exclude `/actuator/health` and `/actuator/prometheus` spans at the Collector via a filter processor on `http.route` (the agent has no stable per-URL exclusion env var); see the tail_sampling/filter examples in `observability/loki-tempo-setup`
+- Exclude `/actuator/health` and `/actuator/prometheus` spans at the Collector via a filter processor on `http.route` (the agent has no stable per-URL exclusion env var); see the tail_sampling/filter examples in `observability/logs-traces-setup`
 - Sampling capped at 10% in production; raise per env if volume permits
 - Logs flow via stdout JSON (`OTEL_LOGS_EXPORTER=none`); only switch to OTel logs export if the log pipeline truly needs OTLP
 
@@ -214,7 +214,7 @@ For SDK-only, use `io.opentelemetry:opentelemetry-sdk-extension-autoconfigure` a
 ## Handoffs
 
 - Log shape and sinks → `observability/structured-logging-java`
-- LogQL / PromQL query patterns → `observability/logql-promql`
-- Dashboard layout → `observability/grafana-dashboards`
+- LogQL / PromQL query patterns → `observability/queries`
+- Dashboard layout → `observability/dashboards`
 - .NET equivalent → `observability/opentelemetry-dotnet`
 - Node equivalent → `observability/opentelemetry-node`

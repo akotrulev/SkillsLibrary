@@ -1,6 +1,6 @@
 ---
 name: fe-blazor-component-library
-description: Use when choosing or wiring a Blazor UI component library (.NET 8/9/10) — MudBlazor (default) vs Fluent UI vs Radzen vs enterprise vs none — plus setup, theming/dark mode, DataGrid, dialog/snackbar services, and each library's render-mode gotchas. Triggers: "which Blazor component library", "set up MudBlazor / Fluent UI / Radzen", "why don't my MudBlazor components render under static SSR". Do NOT use for hand-rolled CSS/tokens/`::deep` (`styling`) or `data-testid` mechanics (`testability`).
+description: Use when choosing or wiring a Blazor UI component library (.NET 8/9/10) — MudBlazor (default) vs Fluent UI vs Radzen vs enterprise vs none — plus setup, theming/dark mode, DataGrid, dialog/snackbar services, and each library's render-mode gotchas. Triggers: "which Blazor component library", "set up MudBlazor / Fluent UI / Radzen", "why don't my MudBlazor components render under static SSR". Do NOT use for hand-rolled CSS/tokens/`::deep` (`styling`) or `data-testid` mechanics (`test-ids`).
 ---
 
 # Blazor — Component Library (one-of-N family)
@@ -19,10 +19,10 @@ Picks and wires the UI component library that supplies your grids, dialogs, inpu
 ## When NOT to use
 
 - Hand-rolled styling, CSS isolation, `::deep`, design tokens → [`styling`](../styling/SKILL.md)
-- `data-testid` placement mechanics per library → [`testability`](../testability/SKILL.md) (its per-library attribute matrix is the companion to this one)
-- Atom/molecule/organism layering + when a molecule owns state → [`reference`](../reference/SKILL.md)
+- `data-testid` placement mechanics per library → [`test-ids`](../test-ids/SKILL.md) (its per-library attribute matrix is the companion to this one)
+- Atom/molecule/organism layering + when a molecule owns state → [`basics`](../basics/SKILL.md)
 - Forms + validation → [`forms`](../forms/SKILL.md)
-- Render-mode selection per surface → [`project-scaffold`](../project-scaffold/SKILL.md)
+- Render-mode selection per surface → [`project-setup`](../project-setup/SKILL.md)
 
 ## The decision
 
@@ -57,10 +57,10 @@ These hold regardless of which reference you read:
 
 - **One library per app.** Two component libraries = two CSS resets fighting, two theme systems, two JS bundles. If you must migrate, do it wholesale, not surface-by-surface.
 - **Providers render at the interactive root, not per page.** `MudThemeProvider`/`MudDialogProvider`/`MudSnackbarProvider` (and the Radzen/Fluent equivalents) go once in the layout under an interactive render mode. Dialog/snackbar **services** only work when their provider is alive in an interactive context — calling `DialogService.Show(...)` from a static-SSR page throws or no-ops. This is the #1 render-mode gotcha; each reference states its exact form.
-- **Interactive components need an interactive render mode.** A `MudButton`/`RadzenButton` with an `@onclick` on a static-SSR page renders but does nothing — the island must be `@rendermode InteractiveServer/WebAssembly/Auto`. Static SSR gets you library-styled *markup*, not interactivity. Decide the render mode in [`project-scaffold`](../project-scaffold/SKILL.md), not here.
-- **Theme once, centrally.** One theme object / token set at the root; per-component color overrides are a smell. Dark mode is a theme concern — drive it from one toggle + system-preference detection, never per-component `dark:` guessing. The design source (palette, fonts) comes from `design/theme-factory`; [`styling`](../styling/SKILL.md) owns mapping it to CSS variables the library theme reads.
-- **`data-testid` on library controls uses the library's unmatched-attribute capture** — inline `data-testid="..."` on the component tag forwards to the rendered root. The exact parameter name per library (`Attributes`/`UserAttributes`/`AdditionalAttributes`) and the `MudTabPanel` caveat live in [`testability`](../testability/SKILL.md)'s matrix — this skill and that one are kept consistent on purpose.
-- **DataGrid: server-side paging/sort by default.** Every library's grid can bind an `IQueryable`/`LoadData` callback for server-side paging, filtering, and sorting — use it for anything past a few hundred rows; client-side load of a full table is the default anti-pattern. Deterministic default sort with a unique tiebreaker is a [`ui-conventions`](../ui-conventions/SKILL.md) rule; the grid *mechanics* are in each reference.
+- **Interactive components need an interactive render mode.** A `MudButton`/`RadzenButton` with an `@onclick` on a static-SSR page renders but does nothing — the island must be `@rendermode InteractiveServer/WebAssembly/Auto`. Static SSR gets you library-styled *markup*, not interactivity. Decide the render mode in [`project-setup`](../project-setup/SKILL.md), not here.
+- **Theme once, centrally.** One theme object / token set at the root; per-component color overrides are a smell. Dark mode is a theme concern — drive it from one toggle + system-preference detection, never per-component `dark:` guessing. The design source (palette, fonts) comes from `design/theme-presets`; [`styling`](../styling/SKILL.md) owns mapping it to CSS variables the library theme reads.
+- **`data-testid` on library controls uses the library's unmatched-attribute capture** — inline `data-testid="..."` on the component tag forwards to the rendered root. The exact parameter name per library (`Attributes`/`UserAttributes`/`AdditionalAttributes`) and the `MudTabPanel` caveat live in [`test-ids`](../test-ids/SKILL.md)'s matrix — this skill and that one are kept consistent on purpose.
+- **DataGrid: server-side paging/sort by default.** Every library's grid can bind an `IQueryable`/`LoadData` callback for server-side paging, filtering, and sorting — use it for anything past a few hundred rows; client-side load of a full table is the default anti-pattern. Deterministic default sort with a unique tiebreaker is a [`ui-rules`](../ui-rules/SKILL.md) rule; the grid *mechanics* are in each reference.
 - **Don't wrap library controls in `App*` wrappers** just to set defaults or carry test ids — set attributes inline (testability Rule 1); use the theme for defaults.
 
 ## Anti-patterns
@@ -78,10 +78,10 @@ These hold regardless of which reference you read:
 
 ## Workflow
 
-1. **Choose** via the decision tree above. State the reason (one line) in the architecture decision record ([`project-scaffold`](../project-scaffold/SKILL.md) Phase-1 output).
+1. **Choose** via the decision tree above. State the reason (one line) in the architecture decision record ([`project-setup`](../project-setup/SKILL.md) Phase-1 output).
 2. **Read the one `references/<library>.md`** for the chosen library — setup packages, provider wiring, theme + dark mode, DataGrid, dialog/snackbar services, render-mode gotchas.
 3. **Wire providers once** at the interactive layout root; register services in DI per the reference.
-4. **Theme centrally** from the `design/theme-factory` output via [`styling`](../styling/SKILL.md); wire the dark-mode toggle + system-preference watch.
+4. **Theme centrally** from the `design/theme-presets` output via [`styling`](../styling/SKILL.md); wire the dark-mode toggle + system-preference watch.
 5. **Verify:** a themed page renders; dialog/snackbar fire from an interactive island; the DataGrid pages server-side; dark mode toggles cleanly; `data-testid`s land on rendered roots (testability).
 
 ## Validation
@@ -95,8 +95,8 @@ These hold regardless of which reference you read:
 ## Handoffs
 
 - CSS isolation, `::deep`, design tokens, dark-mode CSS plumbing, Tailwind-vs-isolation → [`styling`](../styling/SKILL.md)
-- `data-testid` per-library mechanics → [`testability`](../testability/SKILL.md)
-- Component layering (atom/molecule/organism), prop-drilling limits, when a molecule owns state → [`reference`](../reference/SKILL.md)
-- Render-mode selection per surface, provider placement in the layout → [`project-scaffold`](../project-scaffold/SKILL.md)
+- `data-testid` per-library mechanics → [`test-ids`](../test-ids/SKILL.md)
+- Component layering (atom/molecule/organism), prop-drilling limits, when a molecule owns state → [`basics`](../basics/SKILL.md)
+- Render-mode selection per surface, provider placement in the layout → [`project-setup`](../project-setup/SKILL.md)
 - Forms/validation with library inputs → [`forms`](../forms/SKILL.md)
-- Theme palette/fonts source → `design/theme-factory` (loaded in agent Phase 1)
+- Theme palette/fonts source → `design/theme-presets` (loaded in agent Phase 1)

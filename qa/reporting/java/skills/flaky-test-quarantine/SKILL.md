@@ -6,7 +6,7 @@ description: Detect, retry, **quarantine**, and report flaky tests in a Java 21 
 # Flaky-Test Quarantine (Java 21 / TestNG) — **canonical stack**
 
 This is the **canonical** stack of the single-node `qa/reporting/java/skills/flaky-test-quarantine/` family, and it leads by
-judgment (the "lead where the tool is most authentic" call WireMock / dependency-scanning / `kafka`
+judgment (the "lead where the tool is most authentic" call WireMock / dependency-scan / `kafka`
 Kafka made): TestNG's `IRetryAnalyzer` + `IAnnotationTransformer` is the **richest, most first-class
 flaky-handling surface** of the three runners — a suite-wide retry policy with zero per-test edits, plus
 native group-based quarantine. The `dotnet` (NUnit `[Retry]` + a custom `IRepeatTest` attribute) and
@@ -48,10 +48,10 @@ non-gating lane. *Deterministic failure* → it's a bug, fix it. **Never** crank
 ## Stack
 
 - Java 21, TestNG 7.x — **no `Thread.sleep`** anywhere (flakiness is usually *caused* by sleeps; don't fight
-  it with more; cross-link the condition-wait in `qa-db-testing-client-java` / `qa-messaging-testing-*`)
+  it with more; cross-link the condition-wait in `qa-db-connection-java` / `qa-messaging-testing-*`)
 - `org.testng:testng` — `IRetryAnalyzer` (the retry hook) + `IAnnotationTransformer` (apply it suite-wide)
 - `io.qameta.allure:allure-testng` — the **Retries** tab + the `@Flaky` annotation + history-based detection
-  (cross-link `qa-allure-reporting-java` for the full Allure wiring; this skill only adds the flaky pieces)
+  (cross-link `qa-test-reports-java` for the full Allure wiring; this skill only adds the flaky pieces)
 - Gradle Kotlin DSL — a **gate** `test` task (excludes `flaky`) + a **`flakyQuarantine`** task (`ignoreFailures`)
 - Maven Surefire `rerunFailingTestsCount` shown as the **build-tool-level alternative** to `IRetryAnalyzer`
 
@@ -239,7 +239,7 @@ report. Note `@Flaky` takes **no message** (allure2 issue #338) — pair it with
 and the tracking ticket travel with it (shown in Move 3).
 
 **(b) Automatic — history-based detection.** With Allure **history enabled** (the `history/` folder carried
-across runs — see `qa-allure-reporting-java`), Allure auto-adds the **Flaky** mark when, across the latest
+across runs — see `qa-test-reports-java`), Allure auto-adds the **Flaky** mark when, across the latest
 **5 launches**, a test:
 
 1. got **Failed** at some point within those 5 launches, **and**
@@ -252,7 +252,7 @@ Allure tracks **5 stability marks** off history: **Flaky**, **Retried**, **Fixed
 quarantine *candidate* list, and **Fixed** as the signal to lift a test *out* of quarantine.
 
 **A triage bucket in `categories.json`** keeps quarantined/flaky failures from polluting "real" failures.
-Drop this into `src/test/resources/categories.json` (the adapter picks it up — see `qa-allure-reporting-java`):
+Drop this into `src/test/resources/categories.json` (the adapter picks it up — see `qa-test-reports-java`):
 
 ```json
 [
@@ -281,7 +281,7 @@ tagging faster than you're fixing.
 - **Treating a green retry as proof the test is fine.** A test that needed a retry to pass is, by
   definition, flaky. *Fix:* let Allure mark it (Retries tab / history) and add it to the candidate list.
 - **Fighting a sleep-induced flake with more retries.** A `Thread.sleep`-based wait is the *cause*; retries
-  paper over it. *Fix:* replace the sleep with a condition-wait (`qa-db-testing-client-java` /
+  paper over it. *Fix:* replace the sleep with a condition-wait (`qa-db-connection-java` /
   `qa-messaging-testing-*` use Awaitility), then most "flakiness" disappears.
 - **One global retry cap of 3 on the gate "to be safe".** That's the masking knob in disguise. *Fix:* 1 on
   the gate; reserve the higher cap for the non-gating lane where the result doesn't block anyone.
@@ -317,15 +317,15 @@ These sections live in `references/details.md` — **read it when the task touch
 - `qa-flaky-test-quarantine-typescript` — same four moves, Playwright/Vitest: Playwright `retries` → the
   built-in **"flaky"** status (passed-on-retry) + `test.fixme`/tag + `--grep-invert @flaky` or a separate
   project for the quarantine lane; Vitest `retry`; allure-playwright flaky + history.
-- `qa-allure-reporting-java` (#?) — the **full** Allure wiring this skill layers on: `allure-testng`,
+- `qa-test-reports-java` (#?) — the **full** Allure wiring this skill layers on: `allure-testng`,
   `aspectjWeaver`, history/trends (required for auto-flaky detection), `categories.json`, CI publish. This
   skill only adds the flaky/quarantine pieces; do the base setup there.
 - `qa-_shared-quality-metrics` — track **flaky-rate over time**; a quarantine group that grows is the metric
   to watch. Flaky-rate ÷ total, trending down, is the goal.
-- `qa-db-testing-client-java` / `qa-messaging-testing-java` — the **condition-wait**
+- `qa-db-connection-java` / `qa-messaging-testing-java` — the **condition-wait**
   (Awaitility) that *prevents* the eventual-consistency flakiness this skill quarantines. Most flaky tests
   are sleep/timing tests in disguise; fix the wait and they leave quarantine.
-- `qa-ui-test-author-playwright-java` / `qa-api-test-author-generator-java` — where the tests being
+- `qa-ui-test-writer-playwright-java` / `qa-api-test-writer-java` — where the tests being
   quarantined are authored; flakiness is best fixed at the source (stable locators, intent-not-selectors).
 - `qa-ci-pipelines` (github-actions / azure-pipelines / gitlab-ci references) — the gate-lane vs quarantine-lane
   job wiring (a non-gating job with `continue-on-error` / `ignoreFailures`).

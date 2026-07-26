@@ -19,8 +19,8 @@ Names the metrics worth tracking, defines each precisely, and prescribes a dashb
 
 - Writing tests → `qa/<topic>` generators
 - Strategy / what-to-test → `qa/manual/test-strategy`
-- Building the panels themselves → `observability/grafana-dashboards`
-- LogQL / PromQL syntax for the queries → `observability/logql-promql`
+- Building the panels themselves → `observability/dashboards`
+- LogQL / PromQL syntax for the queries → `observability/queries`
 - Stakeholder narrative around metrics → `communication/stakeholder-updates`
 
 ## The metric pyramid
@@ -64,7 +64,7 @@ For each user-facing service, define a small number of **SLIs** (Service Level I
 | Checkout flow | % completed checkouts that don't error in the next 1h | 99.5% over 30 days |
 | Background worker | % jobs completed in ≤ 5 min | 99% over 30 days |
 
-Each SLO has an **error budget** (1 − SLO over the window). Burn-rate alerts fire when the budget consumes faster than expected (see `observability/logql-promql` for burn-rate query recipes).
+Each SLO has an **error budget** (1 − SLO over the window). Burn-rate alerts fire when the budget consumes faster than expected (see `observability/queries` for burn-rate query recipes).
 
 Rules:
 - Pick **SLIs that reflect user pain**, not internal mechanics. "Request error rate < X" is user-pain; "GC pause < Y" is mechanics.
@@ -125,7 +125,7 @@ Drop these from dashboards; they survive in many corporate templates and activel
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
-Build with `observability/grafana-dashboards` patterns. Use the **trend** view as the primary lens — week-over-week change beats absolute values for decisions.
+Build with `observability/dashboards` patterns. Use the **trend** view as the primary lens — week-over-week change beats absolute values for decisions.
 
 ## Per-stack instrumentation pointers
 
@@ -158,7 +158,7 @@ Build with `observability/grafana-dashboards` patterns. Use the **trend** view a
 - Every flaky test gets a root-cause fix or a retire-reason; no indefinite quarantine
 - Coverage tracked on **changed lines**, not global
 - SLOs per service, ≤ 5; aligned with user pain
-- Burn-rate alerts on SLOs (multi-window) — see `observability/logql-promql`
+- Burn-rate alerts on SLOs (multi-window) — see `observability/queries`
 - Trend lens dominates absolute values
 - Dashboards built from outcome-down, not metric-up
 - Vanity metrics dropped from dashboards
@@ -183,15 +183,15 @@ Build with `observability/grafana-dashboards` patterns. Use the **trend** view a
 3. Define 3–5 SLIs + SLOs per service with the team
 4. Pick the quality outcomes (escape, hotfix, MTTD) and label conventions in the bug tracker
 5. Pick the diagnostics (flake, coverage on changed lines, CI p95) and instrument
-6. Build the dashboard via `observability/grafana-dashboards` (or extend the existing one)
+6. Build the dashboard via `observability/dashboards` (or extend the existing one)
 7. Add burn-rate alerts on the SLOs
 8. Establish the reporting cadence; align to `communication/stakeholder-updates`
 9. Iterate after one release; drop metrics that didn't drive a decision
 
 ## Handoffs
 
-- Dashboards → `observability/grafana-dashboards`
-- Queries → `observability/logql-promql`
+- Dashboards → `observability/dashboards`
+- Queries → `observability/queries`
 - Test strategy that the metrics inform → `qa/manual/test-strategy`
 - Stakeholder narrative → `communication/stakeholder-updates`
-- SLO-tied alerts (Prometheus rules) → `observability/logql-promql`
+- SLO-tied alerts (Prometheus rules) → `observability/queries`

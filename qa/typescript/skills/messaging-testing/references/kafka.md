@@ -18,7 +18,7 @@ the JVM/.NET clients worth flagging up front: **there is no synchronous `poll()`
 > synchronous return you can assert on the next line. The record is in flight; the consumer runs on its own
 > schedule; the side-effect lands "soon". So the core discipline is: **wait on a condition** for the record
 > (or its effect) to appear, with a bounded timeout — **never `setTimeout` / `page.waitForTimeout`**. This is
-> the exact lineage of `qa-db-testing-client-typescript`'s `expect.poll` usage and
+> the exact lineage of `qa-db-connection-typescript`'s `expect.poll` usage and
 > `references/service-bus.md`'s condition-wait. Because kafkajs delivers records to an
 > `eachMessage` callback, the test collects them into a **buffer** and **`expect.poll`s the buffer** until the
 > records it expects arrive. That bounded poll *is* the condition-wait; a fixed sleep is not.
@@ -153,7 +153,7 @@ export async function startKafkaBroker(): Promise<Broker> {
 
 > **Cloud / shared test cluster alternative.** If your org runs against a real **test** Kafka cluster instead
 > of a container, read the brokers and the SASL/SSL credentials **from `process.env`, lazily** — never
-> hard-code them, never log them (cross-link `qa-auth0-test-tokens-typescript` for the secrets-from-env
+> hard-code them, never log them (cross-link `qa-test-login-tokens-typescript` for the secrets-from-env
 > discipline). A container is the default for CI determinism; a shared cluster makes tests order-dependent
 > unless each uses a **uniquely named topic** and a **fresh consumer group** (the log isn't drained between
 > tests).
@@ -225,7 +225,7 @@ describe("order publishing", () => {
 
 Here the SUT is a **consumer**. The test **produces an input record**, lets the consumer run, and waits for the
 observable side-effect — eventually consistent, so use `expect.poll` to wait on a condition. This reuses
-`qa-db-testing-client-typescript`'s discipline.
+`qa-db-connection-typescript`'s discipline.
 
 ```typescript
 import { randomUUID } from "node:crypto";
@@ -469,9 +469,9 @@ export const anOrder = () => new OrderBuilder().status("Pending");
 - `references/sqs.md` (`sqs`, the immediately prior sibling) — AWS SQS; **the `kafka`-vs-`sqs`
   boundary**: delete-to-ack + visibility timeout + redrive-policy DLQ vs Kafka commit-offset + re-readable log
   + app-level DLT. Same condition-wait discipline, different broker model.
-- `qa-db-testing-client-typescript` — the `expect.poll` and seeder/probe split reused for the consumer
+- `qa-db-connection-typescript` — the `expect.poll` and seeder/probe split reused for the consumer
   side-effect assertions; the **eventual-consistency lineage** this skill leans on hardest.
-- `qa-auth0-test-tokens-typescript` — when running against a shared cloud cluster with SASL/OAuth creds;
+- `qa-test-login-tokens-typescript` — when running against a shared cloud cluster with SASL/OAuth creds;
   the secrets-from-env discipline.
-- `qa-allure-reporting-typescript` — attach the consumed record value / DLT payload to the Allure result.
+- `qa-test-reports-typescript` — attach the consumed record value / DLT payload to the Allure result.
 - `qa-test-data-builder-typescript` — builders for record payloads with 4+ fields.

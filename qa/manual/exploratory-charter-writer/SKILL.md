@@ -164,7 +164,7 @@ The session report is the **deliverable**. A charter without a report is half a 
 
 ## Execution tooling & evidence (web sessions)
 
-When the session target is a web page, drive and evidence it with the **Playwright CLI** via `npx` — `npx playwright open <url>` (headed exploration), `npx playwright codegen <url>` (record an interaction that reproduces a finding), `npx playwright screenshot <url> <file.png>` (evidence). Throwaway probe scripts go in `specs/`. Prefer the CLI over the Playwright MCP server for exploration — same observations, far cheaper; the MCP server is for `pom-builder`-style extraction workflows. During the session, keep the **console and network tabs in scope**: JS errors, failed/slow requests, and unexpected redirects are findings even when the UI looks fine.
+When the session target is a web page, drive and evidence it with the **Playwright CLI** via `npx` — `npx playwright open <url>` (headed exploration), `npx playwright codegen <url>` (record an interaction that reproduces a finding), `npx playwright screenshot <url> <file.png>` (evidence). Throwaway probe scripts go in `specs/`. Prefer the CLI over the Playwright MCP server for exploration — same observations, far cheaper; the MCP server is for `page-objects-from-url`-style extraction workflows. During the session, keep the **console and network tabs in scope**: JS errors, failed/slow requests, and unexpected redirects are findings even when the UI looks fine.
 
 ## Time-boxes
 
@@ -251,7 +251,7 @@ Pick the two or three that fit the area. A charter that says "look for bugs" pro
 ## Handoffs
 
 - Bugs found during the session → `qa/manual/bug-report-writer`
-- Distill docs into a test-basis document when they exist → `qa/manual/test-basis-analyzer`
+- Distill docs into a test-basis document when they exist → `qa/manual/requirements-breakdown`
 - Strategy that includes exploratory effort → `qa/manual/test-strategy`
 - Automation candidates → `qa/<stack>/skills/api-test-author/generator/<stack>` / `qa/<stack>/skills/ui-test-author/<stack>`
 - Cross-team status update → `communication/stakeholder-updates`

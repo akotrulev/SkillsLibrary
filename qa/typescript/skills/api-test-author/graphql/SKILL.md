@@ -1,12 +1,12 @@
 ---
-name: qa-api-test-author-graphql-typescript
+name: qa-api-test-graphql-typescript
 description: Scaffold black-box **GraphQL** API tests in Node 24 (22 supported) / TypeScript with Vitest, native `fetch`, and Zod. Triggers: "write a GraphQL test for query/mutation X", "assert the errors array on a GraphQL response", "test partial GraphQL data + errors". For end-to-end suite work prefer the phased agent `qa-api-typescript` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
 ---
 
 # QA — GraphQL API Test Writer (TypeScript / Vitest + fetch + Zod)
 
 Scaffolds black-box API tests in TypeScript against a deployed **GraphQL** backend. It reuses the
-**Operation + Client + Spec** layering of the REST sibling (`qa-api-test-author-generator-typescript`) — Zod
+**Operation + Client + Spec** layering of the REST sibling (`qa-api-test-writer-typescript`) — Zod
 schemas model the response and double as runtime validators, a thin client wraps `fetch`, `*.spec.ts` files own
 the assertions — but adapts every layer to the one fact that makes GraphQL testing its own discipline: **a
 GraphQL response is one HTTP 200 carrying a `{ data, errors }` envelope, and the assertion lives in that
@@ -31,7 +31,7 @@ envelope, not in the status line.**
 > 4. **Pick the operation type deliberately — query / mutation / subscription test differently.** A **query**
 >    asserts shape + values. A **mutation** asserts the returned payload **and round-trips a read** to prove the
 >    change persisted. A **subscription** is a long-lived stream over WebSocket (`graphql-ws`) — that's
->    `qa-websocket-sse-testing-typescript`'s job; cross-link, don't reimplement.
+>    `qa-realtime-stream-testing-typescript`'s job; cross-link, don't reimplement.
 
 ## Decision matrix — operation type → test shape
 
@@ -42,7 +42,7 @@ envelope, not in the status line.**
 | **Query — partial** | Partial success is handled | one resolved field asserted on `data` **and** the failing field's `errors[]` entry asserted by `path` |
 | **Mutation** (write) | The change happened and persisted | assert the mutation payload → **round-trip a query** → assert the new state is readable |
 | **Mutation — input validation** | Bad input is rejected cleanly | `errors[]` present with `extensions.code === 'BAD_USER_INPUT'` (or the server's code); `data.<field>` null |
-| **Subscription** (stream) | Server pushes events over time | **not this skill** → `qa-websocket-sse-testing-typescript` (graphql-ws over WebSocket) |
+| **Subscription** (stream) | Server pushes events over time | **not this skill** → `qa-realtime-stream-testing-typescript` (graphql-ws over WebSocket) |
 | **Introspection** | The schema exposes the expected types/fields | query `__schema`/`__type` → assert type & field presence; in prod, assert introspection is **disabled** |
 | **Persisted queries (APQ)** | Only registered query hashes execute | hash-only → `PERSISTED_QUERY_NOT_FOUND` → register (query+hash) → hash-only now resolves |
 
@@ -213,9 +213,9 @@ it('rejects an unregistered persisted-query hash, then resolves once registered'
 - **`expect(res.errors).toBeDefined()` and stopping there.** "Some error happened" is not a contract. *Fix:*
   assert the specific `extensions.code` and `path`.
 - **Reaching for this skill for subscriptions.** A subscription is a WebSocket stream. *Fix:*
-  `qa-websocket-sse-testing-typescript` (graphql-ws transport).
+  `qa-realtime-stream-testing-typescript` (graphql-ws transport).
 - **Hardcoding the endpoint / committing the token.** *Fix:* `process.env.GRAPHQL_ENDPOINT` / `GRAPHQL_TOKEN`,
-  read lazily; secrets via `qa-auth0-test-tokens-typescript`.
+  read lazily; secrets via `qa-test-login-tokens-typescript`.
 
 ## Examples
 
@@ -246,20 +246,20 @@ transport contract differs.
   `path`, never a bare `errors` presence.
 - **A mutation test round-trips a read** to prove persistence; data created in a spec is cleaned up in
   `afterEach`/`afterAll` (cleanup in `try/catch`).
-- **Subscriptions are out of scope** → `qa-websocket-sse-testing-typescript`. **Endpoint + token via env**, read
+- **Subscriptions are out of scope** → `qa-realtime-stream-testing-typescript`. **Endpoint + token via env**, read
   lazily, never logged. No `waitForTimeout`/sleeps; `strict: true`.
 
 ## Cross-references
 
-- `qa-api-test-author-generator-typescript` — the **REST sibling** this extends: the Schema + Client + Spec
+- `qa-api-test-writer-typescript` — the **REST sibling** this extends: the Schema + Client + Spec
   layering, `BaseClient`-over-`fetch`, `ProblemDetailsSchema` (the REST analogue of `GraphQLErrorSchema`), and
   the env/cleanup discipline. Read it for the shared spine.
-- `qa-api-test-author-graphql-java` · `qa-api-test-author-graphql-dotnet` — the sibling stacks (RestAssured+TestNG
+- `qa-api-test-graphql-java` · `qa-api-test-graphql-dotnet` — the sibling stacks (RestAssured+TestNG
   treating `/graphql` as a POST · NUnit+RestSharp); same four ideas, different runner/client/assertion libs.
-- `qa-websocket-sse-testing-typescript` — **GraphQL subscriptions** (graphql-ws over WebSocket) live here;
+- `qa-realtime-stream-testing-typescript` — **GraphQL subscriptions** (graphql-ws over WebSocket) live here;
   this skill stops at queries + mutations.
-- `qa-api-dto-writer-typescript` — generate the typed `data` Zod schema / operation types (GraphQL Code Generator)
+- `qa-api-models-typescript` — generate the typed `data` Zod schema / operation types (GraphQL Code Generator)
   in isolation; this skill consumes them.
-- `qa-auth0-test-tokens-typescript` — obtain the `GRAPHQL_TOKEN` bearer for authenticated operations.
-- `qa-performance-k6-typescript` — GraphQL **load** + the **N+1 / DataLoader** performance pitfall; out of scope for this
-  functional skill. `qa-allure-reporting-typescript` — each operation renders as a named result.
+- `qa-test-login-tokens-typescript` — obtain the `GRAPHQL_TOKEN` bearer for authenticated operations.
+- `qa-load-testing-typescript` — GraphQL **load** + the **N+1 / DataLoader** performance pitfall; out of scope for this
+  functional skill. `qa-test-reports-typescript` — each operation renders as a named result.

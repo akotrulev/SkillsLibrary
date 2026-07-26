@@ -34,7 +34,7 @@ React 19 idioms are primary; React 18 equivalents are tagged fallbacks (not obso
 - **Async Server Components** (an `async function` component that `await`s data) — **Vitest cannot render them** (React's RSC runtime isn't available in the test runner; the render throws the moment you `await`). Pull the data fetch into a plain async function and unit-test *that*; render the resulting **synchronous** presentational component with RTL; hand the assembled async page to the `qa-ui-typescript` peer (E2E). This is the official Next.js guidance.
 - **End-to-end journeys / real navigation / real backend** → `qa-ui-typescript` (peer). RTL fakes nothing about routing — there is no route.
 - **Pure TS logic** with no rendering (a Zod schema, a formatter, a mapper) → a plain Vitest test on the function, no RTL.
-- **Authoring `data-testid`s** → [`testability`](../testability/SKILL.md). Tests here *consume* testids as a last-resort selector — prefer role/label.
+- **Authoring `data-testid`s** → [`test-ids`](../test-ids/SKILL.md). Tests here *consume* testids as a last-resort selector — prefer role/label.
 
 ## Test what has behavior — the selection matrix
 
@@ -152,7 +152,7 @@ Wrap state-mutating calls in `act(...)`; pass a `wrapper` for hooks that read co
 
 ## Rules
 
-- **Query by role/label first, `getByTestId` last** — testids are the E2E contract ([`testability`](../testability/SKILL.md)); in unit tests they're a fallback when no accessible query fits.
+- **Query by role/label first, `getByTestId` last** — testids are the E2E contract ([`test-ids`](../test-ids/SKILL.md)); in unit tests they're a fallback when no accessible query fits.
 - **`userEvent.setup()` + `await`** every interaction — never `fireEvent` for user actions (it skips the real event sequence). `fireEvent` only for events users can't do (a raw `scroll`, a synthetic `change` on a non-input).
 - **Semantic assertions** via `jest-dom` matchers (`toBeInTheDocument`, `toBeDisabled`, `toHaveAccessibleName`) — never snapshot a whole component's markup.
 - **One behavior per test**, `Should_X_When_Y` / `renders X when Y` naming; no `if`/`for` driving assertions — parameterize with `it.each`.
@@ -174,9 +174,9 @@ Wrap state-mutating calls in `act(...)`; pass a `wrapper` for hooks that read co
 
 ## Handoffs
 
-- `data-testid` authoring/audit → [`testability`](../testability/SKILL.md)
+- `data-testid` authoring/audit → [`test-ids`](../test-ids/SKILL.md)
 - End-to-end / real-browser journeys, POM → **peer** `qa-ui-typescript`
 - Visual/pixel regression → **peer** `qa/typescript/skills/visual-regression`
-- Component code smells / rewrites → [`reviewer`](../reviewer/SKILL.md) / [`generator`](../generator/SKILL.md)
-- What a component *should* do (behavior spec) → the test-case suite from **peer** `qa-manual-test-designer`
-- Async data fetch to extract & test → [`data-access`](../data-access/SKILL.md)
+- Component code smells / rewrites → [`code-review`](../code-review/SKILL.md) / [`component-writer`](../component-writer/SKILL.md)
+- What a component *should* do (behavior spec) → the test-case suite from **peer** `qa-test-case-designer`
+- Async data fetch to extract & test → [`data-fetching`](../data-fetching/SKILL.md)

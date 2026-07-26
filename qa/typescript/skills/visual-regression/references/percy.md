@@ -8,7 +8,7 @@ cloud, keyed by git branch, and are reviewed/approved in a **web UI**. The build
 review, not on a local artifact.
 
 This is an **assertion layer** on top of the page objects and specs the
-`qa-ui-test-author-playwright-typescript` skill already authored. You do not write new page objects
+`qa-ui-test-writer-playwright-typescript` skill already authored. You do not write new page objects
 here — you add a `percySnapshot(page, name)` call to an existing flow and wrap the test command in
 `percy exec`.
 
@@ -213,7 +213,7 @@ against `main`'s last approved snapshots.
 
 Contrast with built-in snapshots: there is **no `-diff.png` artifact to upload** — the diff lives in
 Percy's UI. Link the Percy build URL into Allure so reviewers jump straight to it (cross-link
-`qa-allure-reporting-typescript`):
+`qa-test-reports-typescript`):
 
 ```typescript
 import { test } from '@playwright/test';
@@ -312,8 +312,8 @@ Lifecycle for this test:
   Percy when it becomes a bottleneck.
 - `references/applitools.md` (`applitools`, next) — the visual-AI sibling: AI diff tolerance
   + a cross-browser rendering grid.
-- `qa-ui-test-author-playwright-typescript` — the page objects/specs `percySnapshot` is called inside.
+- `qa-ui-test-writer-playwright-typescript` — the page objects/specs `percySnapshot` is called inside.
   Author the flow there; add the visual snapshot here.
 - `qa-ci-pipelines-typescript` — where `PERCY_TOKEN` is sourced (secrets/OIDC) and
   `percy exec` wraps the test step.
-- `qa-allure-reporting-typescript` — link the Percy build URL into the report.
+- `qa-test-reports-typescript` — link the Percy build URL into the report.

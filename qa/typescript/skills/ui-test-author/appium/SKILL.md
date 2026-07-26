@@ -1,5 +1,5 @@
 ---
-name: qa-ui-test-author-appium-typescript
+name: qa-ui-test-writer-appium-typescript
 description: Use when the user asks to scaffold a TypeScript + WebdriverIO (Appium service) page object or Mocha/Vitest mobile UI test. Triggers: "create an Appium page object for X in TS", "add a WebdriverIO mobile page for screen Y", "write an Appium TS test for Z". For end-to-end suite work prefer the phased agent `qa-mobile-typescript` / `qa-bdd-typescript` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
 ---
 
@@ -29,8 +29,8 @@ Scaffolds WebdriverIO + Appium page objects and Mocha (or Vitest) mobile UI test
 - Appium .NET → `qa/dotnet/skills/ui-test-author/appium`
 - Appium Java → `qa/java/skills/ui-test-author/appium`
 - Selenium / web TS → `qa/typescript/skills/ui-test-author/selenium` or `qa/typescript/skills/ui-test-author/playwright`
-- Reviewing an existing page object → `qa/typescript/skills/ui-test-author/reviewer`
-- POM architecture → `qa/typescript/skills/page-object-architect`
+- Reviewing an existing page object → `qa/typescript/skills/ui-test-author/review`
+- POM architecture → `qa/typescript/skills/page-object-design`
 
 ## Inputs needed
 
@@ -185,7 +185,7 @@ WDIO owns the driver session via `wdio.conf.ts`; one session per worker is autom
 ### Page object rules
 - Extend `BasePage`; pages do not take a `driver` parameter — WDIO's `browser` is implicit
 - Element accessors return `ChainablePromiseElement` (no `await` needed at the accessor — chaining handles it)
-- **Selector preference order**: `~accessibility-id` → `id=…` → `-ios predicate string:…` / `android=…` → XPath (last resort, leave a `// TODO`). Per the Appium team, treat a working XPath as **proof the node exists, not the final locator** — downgrade to a native strategy (`android=…` / `-ios class chain:…`) once the source exposes one, and drop the TODO. On iOS, `id` / `name` / `accessibility id` are synonyms over the element's `name` attribute. **Discover and verify these selectors against the live app via `qa/typescript/skills/appium-explore` before hand-writing them**, and let `qa/typescript/skills/appium-page-object` emit the class from that inventory — this skill owns the conventions both of those defer to.
+- **Selector preference order**: `~accessibility-id` → `id=…` → `-ios predicate string:…` / `android=…` → XPath (last resort, leave a `// TODO`). Per the Appium team, treat a working XPath as **proof the node exists, not the final locator** — downgrade to a native strategy (`android=…` / `-ios class chain:…`) once the source exposes one, and drop the TODO. On iOS, `id` / `name` / `accessibility id` are synonyms over the element's `name` attribute. **Discover and verify these selectors against the live app via `qa/typescript/skills/mobile-screen-explorer` before hand-writing them**, and let `qa/typescript/skills/mobile-screen-objects` emit the class from that inventory — this skill owns the conventions both of those defer to.
 - **Selector constants** — declare each as `private static readonly` at the top of the class. Never inline a selector string inside an action method.
 - One class per screen; multi-step flows live in a sub-folder
 - Reusable components take a parent element in their constructor and query inside it
@@ -243,9 +243,9 @@ WDIO owns the driver session via `wdio.conf.ts`; one session per worker is autom
 
 ## Handoffs
 
-- Discovering / verifying selectors on the live app → `qa/typescript/skills/appium-explore`
-- Emitting / updating the page object from a discovered inventory → `qa/typescript/skills/appium-page-object`
-- POM architecture (capabilities profiles, sub-folders, base classes) → `qa/typescript/skills/page-object-architect`
+- Discovering / verifying selectors on the live app → `qa/typescript/skills/mobile-screen-explorer`
+- Emitting / updating the page object from a discovered inventory → `qa/typescript/skills/mobile-screen-objects`
+- POM architecture (capabilities profiles, sub-folders, base classes) → `qa/typescript/skills/page-object-design`
 - Test data builders → `qa/typescript/skills/test-data-builder`
-- Reviewing a page object → `qa/typescript/skills/ui-test-author/reviewer`
-- Allure reporting → `qa/reporting/typescript/skills/allure-reporting`
+- Reviewing a page object → `qa/typescript/skills/ui-test-author/review`
+- Allure reporting → `qa/reporting/typescript/skills/test-reports`

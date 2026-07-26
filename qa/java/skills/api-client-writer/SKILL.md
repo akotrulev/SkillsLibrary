@@ -15,9 +15,9 @@ Generator skill. Scaffolds a single `{Resource}Client.java` file in the Java API
 
 ## When NOT to use
 
-- Writing the test fixture / `@Test` methods — use `qa/java/skills/api-test-author/generator`.
-- Reviewing an existing client for convention drift — use `qa/java/skills/api-test-author/reviewer`.
-- Authoring DTOs the client returns — use `qa/java/skills/api-dto-writer` first.
+- Writing the test fixture / `@Test` methods — use `qa/java/skills/api-test-author/writer`.
+- Reviewing an existing client for convention drift — use `qa/java/skills/api-test-author/review`.
+- Authoring DTOs the client returns — use `qa/java/skills/api-models` first.
 - .NET stack (RestSharp) — use `qa/dotnet/skills/api-client-writer`.
 - TypeScript stack (`fetch` + Zod) — use `qa/typescript/skills/api-client-writer`.
 - Any non-RestAssured / non-Java stack not covered by the siblings above.
@@ -312,6 +312,6 @@ Only add these overloads when the test plan requires them — not by default.
 1. Ask the user: which **API group** does this client belong to? (user / assessment / legal / reference / auth)
 2. Ask the user: resource name (noun) and base URL path segment (e.g. `users`).
 3. Ask which **operations** are needed, and whether they are user-facing, admin, or both. Default to full CRUD on the user-facing surface.
-4. Ensure the required DTOs exist under `models/{api}/{resource}/`. If not, run `qa/java/skills/api-dto-writer` first.
+4. Ensure the required DTOs exist under `models/{api}/{resource}/`. If not, run `qa/java/skills/api-models` first.
 5. Generate the file at `src/test/java/com/{org}/apitests/clients/{api}/{Resource}Client.java`.
 6. Run `./gradlew :apitests:compileTestJava` — expect 0 errors.

@@ -19,7 +19,7 @@ You work in **two modes**; most real work is the second:
 
 The skills live at the repo's `<domain>/<stack>/skills/` folder when working inside the SkillsLibrary repo, or at `${CLAUDE_PLUGIN_ROOT}/<domain>/<stack>/skills/` when this agent runs from an installed Claude Code plugin — resolve every skill path below against whichever root exists. Load **only** the skills this agent owns plus the cross-cutting skills named here; peer domains are invoked as agents, never loaded as skills.
 
-For **brownfield** work, additionally load the bundled developer-workflow skills `engineering-practices/{systematic-debugging,test-driven-development,verification-before-completion,using-git-worktrees,finishing-a-development-branch,writing-plans,executing-plans}` (frontmatter names `ep-*`) — same root — when the relevant mode below calls for them. *(Only if this agent's plugin bundles the `ep-*` skills — `qa-*` and `fe-*` do. If it does not — `data`, `business-analysis` — inline the same discipline into the mode text instead, as `data-architect` does; do not reference skills the installed plugin cannot resolve.)*
+For **brownfield** work, additionally load the bundled developer-workflow skills `engineering-practices/{systematic-debugging,test-driven-development,verify-before-done,worktrees,finish-branch,writing-plans,executing-plans}` (frontmatter names `ep-*`) — same root — when the relevant mode below calls for them. *(Only if this agent's plugin bundles the `ep-*` skills — `qa-*` and `fe-*` do. If it does not — `data`, `business-analysis` — inline the same discipline into the mode text instead, as `data-architect` does; do not reference skills the installed plugin cannot resolve.)*
 
 ## Operating rules
 
@@ -39,7 +39,7 @@ Recover, don't author. Detect the version(s), map the layout, and inventory the 
 
 ### Mode A — Fix a <failing test / defect / red gate / slow query / stale case>
 
-Load `ep-systematic-debugging` (or apply its discipline inline). Do not jump to a fix: **reproduce first**, then **triage the failure class** (<family-specific fork — e.g. product defect vs test defect vs flake; true-positive vs false-positive; data vs schema>). Make the **smallest correct change** per the owning skill's rules — never paper over a failure by weakening an assertion or suppressing without a ticket. Then **verify** (`ep-verification-before-completion`: green *for the right reason*, whole suite/build still passes) and **sweep the class** (does the same defect pattern exist elsewhere?).
+Load `ep-systematic-debugging` (or apply its discipline inline). Do not jump to a fix: **reproduce first**, then **triage the failure class** (<family-specific fork — e.g. product defect vs test defect vs flake; true-positive vs false-positive; data vs schema>). Make the **smallest correct change** per the owning skill's rules — never paper over a failure by weakening an assertion or suppressing without a ticket. Then **verify** (`ep-verify-before-done`: green *for the right reason*, whole suite/build still passes) and **sweep the class** (does the same defect pattern exist elsewhere?).
 
 ### Mode B — Extend (<add coverage / add a feature / add a lane / add a table>)
 
@@ -47,7 +47,7 @@ Scope the slice, orient on the surfaces it touches, consider test-first (`ep-tes
 
 ### Branch & finish (both modes)
 
-Work on a branch (`ep-using-git-worktrees` for larger/parallel work); `ep-writing-plans` + `ep-executing-plans` for a multi-step extension; `ep-finishing-a-development-branch` to wrap. Commit/push only when asked.
+Work on a branch (`ep-worktrees` for larger/parallel work); `ep-writing-plans` + `ep-executing-plans` for a multi-step extension; `ep-finish-branch` to wrap. Commit/push only when asked.
 
 ## Phases
 

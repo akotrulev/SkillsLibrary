@@ -32,7 +32,7 @@ First act on an existing project: read the `TargetFramework` from the `.csproj` 
 - Java service → `observability/opentelemetry-java`
 - Node service → `observability/opentelemetry-node`
 - Log shape / sinks → `observability/structured-logging-dotnet`
-- Dashboards / queries → `observability/grafana-dashboards` + `observability/logql-promql`
+- Dashboards / queries → `observability/dashboards` + `observability/queries`
 
 ## Inputs needed
 
@@ -238,7 +238,7 @@ Propagators.DefaultTextMapPropagator.Inject(new PropagationContext(ctx ?? defaul
 ## Handoffs
 
 - Log shape and sinks → `observability/structured-logging-dotnet`
-- LogQL / PromQL query patterns → `observability/logql-promql`
-- Dashboard layout → `observability/grafana-dashboards`
+- LogQL / PromQL query patterns → `observability/queries`
+- Dashboard layout → `observability/dashboards`
 - Java equivalent → `observability/opentelemetry-java`
 - Node equivalent → `observability/opentelemetry-node`

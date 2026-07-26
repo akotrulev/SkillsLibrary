@@ -1,13 +1,13 @@
 ---
-name: qa-api-test-author-grpc-java
+name: qa-api-test-grpc-java
 description: Scaffold black-box **gRPC** API tests in Java 21 with grpc-java + TestNG against a deployed, proto-defined HTTP/2 service. Triggers: "write a gRPC test for RPC X", "assert the StatusRuntimeException status code", "test a server-streaming RPC". For end-to-end suite work prefer the phased agent `qa-api-java` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
 ---
 
 # QA — gRPC API Test Writer (Java 21 / grpc-java + TestNG)
 
 Scaffolds black-box API tests in Java against a deployed **gRPC** service. It completes the `api-test-author`
-**protocol trio** — REST (`qa-api-test-author-generator-java`, HTTP+JSON, status-driven) → GraphQL
-(`qa-api-test-author-graphql-java`, one HTTP 200 carrying a `{ data, errors }` envelope) → **gRPC (this skill,
+**protocol trio** — REST (`qa-api-test-writer-java`, HTTP+JSON, status-driven) → GraphQL
+(`qa-api-test-graphql-java`, one HTTP 200 carrying a `{ data, errors }` envelope) → **gRPC (this skill,
 proto-defined HTTP/2 binary Protobuf, result carried in the gRPC `status`)**. Three protocols, three places the
 result lives, one family. It reuses the **(contract) + Action + Test** layering of the REST/GraphQL siblings, but
 the contract is the **`.proto`** (codegen the messages + stub) and the assertion targets the **typed message +
@@ -29,11 +29,11 @@ the gRPC status**, never an HTTP status code.
 > 3. **Assert on the typed generated message — never hand-parse bytes.** The `.proto` is the contract; codegen the
 >    messages + stub; assert on the **typed message fields** (`response.getEmail()`). A gRPC test never touches the
 >    wire bytes — that's the GraphQL "query-shaped typed `data`" analogue, and the messages are the DTO
->    (`qa-api-dto-writer-java`).
+>    (`qa-api-models-java`).
 > 4. **Pick the RPC type deliberately — unary / server- / client- / bidi-streaming each test differently.** A
 >    **unary** call asserts the message + status. A **server-streaming** call **drains the response stream into a
 >    buffer, then asserts the sequence** — a *bounded condition-wait* (the server's `onCompleted` + a deadline),
->    **never a `Thread.sleep`** → it reuses `qa-websocket-sse-testing-java`'s drain-then-assert discipline. A
+>    **never a `Thread.sleep`** → it reuses `qa-realtime-stream-testing-java`'s drain-then-assert discipline. A
 >    **client-streaming** call sends a stream of requests → one response. **Bidi-streaming** interleaves both (the
 >    async stub + a bounded latch).
 
@@ -47,7 +47,7 @@ the gRPC status**, never an HTTP status code.
 | **Unary — write** | The change happened and persisted | call the mutating RPC → assert the payload → **round-trip a read RPC** → assert the new state |
 | **Server-streaming** (req→stream) | The right sequence of messages arrives | drain the `Iterator<T>` into a `List` (bounded by `onCompleted` + a deadline) → assert size + order + values |
 | **Client-streaming** (stream→resp) | The aggregate response is right | async stub: send N requests via `requestObserver` → `onCompleted()` → await one response on a bounded latch |
-| **Bidi-streaming** (stream↔stream) | Interleaved exchange works | async stub: send + collect on a bounded latch; assert the received sequence → also `qa-websocket-sse-testing-java` |
+| **Bidi-streaming** (stream↔stream) | Interleaved exchange works | async stub: send + collect on a bounded latch; assert the received sequence → also `qa-realtime-stream-testing-java` |
 | **Deadline** | A slow call fails deterministically | `stub.withDeadlineAfter(d).slowRpc(req)` → `result.getStatus().getCode() == DEADLINE_EXCEEDED` |
 | **Auth** | A call without credentials is rejected | stub **without** the bearer metadata → `UNAUTHENTICATED`; with it → `OK` |
 
@@ -154,7 +154,7 @@ public void createUserWhenValidPersistsAndIsReadable() {
 A server-streaming RPC pushes a *sequence* of messages and then completes. The blocking stub hands back an
 `Iterator<T>`; **draining it blocks until the server calls `onCompleted`** (or the deadline trips) — a *bounded
 condition-wait*, **never a `Thread.sleep`**. Drain into a buffer, then assert size + order + values. This is the
-same drain-then-assert discipline as `qa-websocket-sse-testing-java`.
+same drain-then-assert discipline as `qa-realtime-stream-testing-java`.
 
 ```java
 import java.util.ArrayList;
@@ -222,7 +222,7 @@ public void importUsersAggregatesAllSentRequests() throws InterruptedException {
 
 > Bidi-streaming follows the same shape — interleave `requestObserver.onNext(...)` with messages collected in
 > `onNext`, all gated by a bounded latch. For richer bidi-stream-lifecycle assertions (ordering, mid-stream close
-> codes), cross-link `qa-websocket-sse-testing-java` — gRPC streaming and WebSocket/SSE share the
+> codes), cross-link `qa-realtime-stream-testing-java` — gRPC streaming and WebSocket/SSE share the
 > drain-then-assert-on-a-bounded-condition discipline.
 
 ## Deadlines — the sanctioned bounded-wait, asserted as `DEADLINE_EXCEEDED`
@@ -302,13 +302,13 @@ public abstract class BaseGrpcTest {
 - **An unbounded `latch.await()` with no timeout.** A hung server hangs the whole suite. *Fix:* always
   `await(timeout, unit)` and assert it returned `true`.
 - **Hand-parsing the response bytes / using a dynamic `Struct`.** *Fix:* assert on the typed generated message;
-  the `.proto` is the contract. Model/generate messages via `qa-api-dto-writer-java`.
+  the `.proto` is the contract. Model/generate messages via `qa-api-models-java`.
 - **Trusting a write RPC's echoed payload as proof of persistence.** *Fix:* round-trip a read RPC and assert state.
 - **Re-using one channel per test method (or never shutting it down).** *Fix:* one `ManagedChannel` per suite in
   `@BeforeClass`, `shutdownNow().awaitTermination(...)` in `@AfterClass(alwaysRun = true)`.
 - **Hardcoding the target / committing the token.** *Fix:* `SystemPropertyUtil` / env, read lazily, never logged;
-  bearer via `qa-auth0-test-tokens-java`. Reaching for this skill for **load** → `qa-performance-gatling-java`; for
-  a **Protobuf contract** → `qa-contract-testing-pact-java`.
+  bearer via `qa-test-login-tokens-java`. Reaching for this skill for **load** → `qa-load-testing-java`; for
+  a **Protobuf contract** → `qa-api-contract-testing-java`.
 
 ## Examples
 
@@ -335,30 +335,30 @@ differ.
 - **Rich errors assert the `google.rpc.Status` details** (`ErrorInfo.reason`/`domain`, `BadRequest` field
   violations) from the trailers — not a bare `Status.Code`.
 - **Assert on the typed generated message** — never hand-parse bytes; the `.proto` is the contract. Messages via
-  `qa-api-dto-writer-java`.
+  `qa-api-models-java`.
 - **A write RPC test round-trips a read** to prove persistence; data created in a test is cleaned up in
   `@AfterMethod` (guarded so it can't mask a failure).
 - **Streaming = drain-then-assert on a bounded condition** — drain the `Iterator` (server-streaming) or await a
   `CountDownLatch` with `await(timeout, unit)` (client-/bidi-streaming); bound unbounded streams with
   `withDeadlineAfter`. **No `Thread.sleep`, no unbounded `await()`.** Deep stream-lifecycle assertions →
-  `qa-websocket-sse-testing-java`.
+  `qa-realtime-stream-testing-java`.
 - **One `ManagedChannel` per suite** (`@BeforeClass` open, `@AfterClass(alwaysRun=true)` shutdown); service stood
   up via Testcontainers. **Target + token via `SystemPropertyUtil`/env**, lazy, never logged. TestNG +
   grpc-java + AssertJ.
 
 ## Cross-references
 
-- `qa-api-test-author-grpc-typescript` · `qa-api-test-author-grpc-dotnet` — the sibling stacks (`@grpc/grpc-js` +
+- `qa-api-test-grpc-typescript` · `qa-api-test-grpc-dotnet` — the sibling stacks (`@grpc/grpc-js` +
   `@grpc/proto-loader` · `Grpc.Net.Client` + `Grpc.Tools`); same four ideas, different codegen/client/assertion
   libs.
-- `qa-api-test-author-generator-java` · `qa-api-test-author-graphql-java` — the **protocol-trio siblings**: REST
+- `qa-api-test-writer-java` · `qa-api-test-graphql-java` — the **protocol-trio siblings**: REST
   (HTTP+JSON status-driven) and GraphQL (HTTP 200 `{ data, errors }` envelope). Three protocols, three
   result-location conventions, one `api-test-author` family + shared Action + Test spine.
-- `qa-websocket-sse-testing-java` — gRPC **streaming** reuses its drain-then-assert-on-a-bounded-condition
+- `qa-realtime-stream-testing-java` — gRPC **streaming** reuses its drain-then-assert-on-a-bounded-condition
   discipline; cross-link for deep stream-lifecycle (ordering, mid-stream close) assertions, don't duplicate.
-- `qa-api-dto-writer-java` — generate/model the proto messages (the DTO analogue) in isolation; this skill
+- `qa-api-models-java` — generate/model the proto messages (the DTO analogue) in isolation; this skill
   consumes them.
-- `qa-contract-testing-pact-java` — the **Protobuf contract** boundary (Pact's Protobuf/gRPC plugin) vs the
-  functional test this skill writes. `qa-performance-gatling-java` — gRPC **load**.
-- `qa-auth0-test-tokens-java` — obtain the per-call **bearer** carried in leading metadata.
-- `qa-allure-reporting-java` — each RPC renders as a named result.
+- `qa-api-contract-testing-java` — the **Protobuf contract** boundary (Pact's Protobuf/gRPC plugin) vs the
+  functional test this skill writes. `qa-load-testing-java` — gRPC **load**.
+- `qa-test-login-tokens-java` — obtain the per-call **bearer** carried in leading metadata.
+- `qa-test-reports-java` — each RPC renders as a named result.

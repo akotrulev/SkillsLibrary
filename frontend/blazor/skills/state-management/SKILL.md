@@ -1,6 +1,6 @@
 ---
 name: fe-blazor-state-management
-description: Use when managing state in Blazor (.NET 8/9/10 — Server / WASM / Auto) — scoped DI services, CascadingValue, `[PersistentState]`, circuit-eviction persistence, Fluxor for Redux-style, prerender → interactive hand-off. Triggers: "where should this state live in Blazor", "share state across components", "CascadingValue vs scoped service", "persist data across prerender". Do NOT use for component scaffolding (`generator`), forms (`forms`), or React (its sibling).
+description: Use when managing state in Blazor (.NET 8/9/10 — Server / WASM / Auto) — scoped DI services, CascadingValue, `[PersistentState]`, circuit-eviction persistence, Fluxor for Redux-style, prerender → interactive hand-off. Triggers: "where should this state live in Blazor", "share state across components", "CascadingValue vs scoped service", "persist data across prerender". Do NOT use for component scaffolding (`component-writer`), forms (`forms`), or React (its sibling).
 ---
 
 # Blazor State Management
@@ -17,9 +17,9 @@ The right place for state in Blazor (.NET 8/9/10) depends on lifetime + scope + 
 
 ## When NOT to use
 
-- Component scaffolding → `frontend/blazor/skills/generator`
+- Component scaffolding → `frontend/blazor/skills/component-writer`
 - Forms specifically → `frontend/blazor/skills/forms`
-- Render mode trade-offs → `frontend/blazor/skills/reference`
+- Render mode trade-offs → `frontend/blazor/skills/basics`
 - React → `frontend/react/skills/state-management`
 - Auth state from Auth0 → `auth/auth0-blazor`
 
@@ -139,7 +139,7 @@ Consumer:
 }
 ```
 
-Rules from `frontend/blazor/skills/reference`:
+Rules from `frontend/blazor/skills/basics`:
 - Split by concern (no god `AppState` carrying everything)
 - `IsFixed="true"` when the reference doesn't change — cheaper re-renders
 
@@ -283,8 +283,8 @@ This isn't UI state; it's server-side memoization. Keep it out of the components
 
 ## Handoffs
 
-- Component scaffolding using this state → `frontend/blazor/skills/generator`
-- Render-mode and lifecycle background → `frontend/blazor/skills/reference`
+- Component scaffolding using this state → `frontend/blazor/skills/component-writer`
+- Render-mode and lifecycle background → `frontend/blazor/skills/basics`
 - Forms specifically → `frontend/blazor/skills/forms`
 - Auth state from Auth0 → `auth/auth0-blazor`
 - React equivalent → `frontend/react/skills/state-management`

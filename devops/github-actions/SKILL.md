@@ -1,6 +1,6 @@
 ---
 name: devops-github-actions
-description: Use when the user asks to write, review, or modify GitHub Actions workflows for build/test/deploy of Java, .NET, or TypeScript projects, with deploys to AWS or Azure. Triggers: "write a GitHub Actions workflow for X", "add a deploy job to .github/workflows/Y.yml", "set up CI for this repo", "add a release workflow". Do NOT use for GitLab CI (use `devops/gitlab-ci`), Azure Pipelines (use `devops/azure-pipelines`), or IaC scripts (use `devops/iac-bicep-terraform`). Do NOT use for the **test-suite CI lane** — shard matrix, Allure publishing, perf gate, flake quarantine — that belongs to `qa-cicd-{java,dotnet,typescript}`; this skill owns the **build/deploy** lane.
+description: Use when the user asks to write, review, or modify GitHub Actions workflows for build/test/deploy of Java, .NET, or TypeScript projects, with deploys to AWS or Azure. Triggers: "write a GitHub Actions workflow for X", "add a deploy job to .github/workflows/Y.yml", "set up CI for this repo", "add a release workflow". Do NOT use for GitLab CI (use `devops/gitlab-ci`), Azure Pipelines (use `devops/azure-pipelines`), or IaC scripts (use `devops/infrastructure-as-code`). Do NOT use for the **test-suite CI lane** — shard matrix, Allure publishing, perf gate, flake quarantine — that belongs to `qa-cicd-{java,dotnet,typescript}`; this skill owns the **build/deploy** lane.
 ---
 
 # DevOps — GitHub Actions
@@ -20,7 +20,7 @@ Authors GitHub Actions workflows for build, test, and deploy across the project'
 
 - GitLab CI/CD → `devops/gitlab-ci`
 - Azure DevOps Pipelines → `devops/azure-pipelines`
-- Bicep / Terraform authoring → `devops/iac-bicep-terraform`
+- Bicep / Terraform authoring → `devops/infrastructure-as-code`
 - App-level env config → `devops/environment-config`
 
 - Test-suite CI lane (shard matrix, Allure publish, perf gate, flake quarantine) → `qa/cicd/agents/qa-cicd-{java,dotnet,typescript}`
@@ -319,7 +319,7 @@ Upload the raw results as an artifact here; the **report generation/publishing p
 
 - GitLab equivalent → `devops/gitlab-ci`
 - Azure DevOps equivalent → `devops/azure-pipelines`
-- IaC for the underlying cloud resources → `devops/iac-bicep-terraform`
+- IaC for the underlying cloud resources → `devops/infrastructure-as-code`
 - Per-env secrets/config → `devops/environment-config`
 - AWS-specific deploy details → `devops/aws-deployment`
 - Azure-specific deploy details → `devops/azure-deployment`

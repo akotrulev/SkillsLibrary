@@ -17,7 +17,7 @@ same produce / subscribe / poll model.
 > synchronous return you can assert on the next line. The record is in flight; the consumer runs on its own
 > schedule; the side-effect lands "soon". So the core discipline is: **wait on a condition** for the record
 > (or its effect) to appear, with a bounded timeout — **never `Task.Delay` / `Thread.Sleep`**. This is the
-> exact lineage of `qa-db-testing-client-dotnet`'s `WaitForAsync` poll and
+> exact lineage of `qa-db-connection-dotnet`'s `WaitForAsync` poll and
 > `references/service-bus.md`'s condition-wait. Kafka gives you **`consumer.Consume(TimeSpan)`**
 > as the receive-side primitive: it blocks up to a bounded window for a record, then returns it or `null`. A
 > **bounded poll loop** (consume until you have the records you expect, or a deadline passes) *is* the
@@ -134,7 +134,7 @@ public abstract class KafkaFixture
 
 > **Cloud / shared test cluster alternative.** If your org runs against a real **test** Kafka cluster instead
 > of a container, read `BootstrapServers` and the SASL/SSL credentials **from env, lazily** — never hard-code
-> them, never log them (cross-link `qa-auth0-test-tokens-dotnet` for the secrets-from-env discipline). A
+> them, never log them (cross-link `qa-test-login-tokens-dotnet` for the secrets-from-env discipline). A
 > container is the default for CI determinism; a shared cluster makes tests order-dependent unless each uses a
 > **uniquely named topic** and a **fresh consumer group** (because the log isn't drained between tests).
 
@@ -241,7 +241,7 @@ public class OrderPublishingTests : KafkaFixture
 
 Here the SUT is a **consumer**. The test **produces an input record**, lets the consumer run, and waits for the
 observable side-effect — eventually consistent, so poll a probe on a condition. This reuses
-`qa-db-testing-client-dotnet`'s `WaitForAsync` verbatim.
+`qa-db-connection-dotnet`'s `WaitForAsync` verbatim.
 
 ```csharp
 [Test]
@@ -272,7 +272,7 @@ public async Task Should_write_a_shipment_row_When_an_OrderPaid_record_is_consum
 }
 ```
 
-The `WaitFor.Async` helper is the same bounded poll as `qa-db-testing-client-dotnet` and `service-bus`/`sqs` — included so
+The `WaitFor.Async` helper is the same bounded poll as `qa-db-connection-dotnet` and `service-bus`/`sqs` — included so
 the node is self-contained:
 
 ```csharp
@@ -514,9 +514,9 @@ public static class Orders
 - `references/sqs.md` (`sqs`, the immediately prior sibling) — AWS SQS; **the `kafka`-vs-`sqs` boundary**:
   delete-to-ack + visibility timeout + redrive-policy DLQ vs Kafka commit-offset + re-readable log + app-level
   DLT. Same condition-wait discipline, different broker model.
-- `qa-db-testing-client-dotnet` — the `WaitFor.Async` poll helper and the seeder/probe split reused for
+- `qa-db-connection-dotnet` — the `WaitFor.Async` poll helper and the seeder/probe split reused for
   the consumer side-effect assertions; the **eventual-consistency lineage** this skill leans on hardest.
-- `qa-auth0-test-tokens-dotnet` — when running against a shared cloud cluster with SASL/OAuth creds; the
+- `qa-test-login-tokens-dotnet` — when running against a shared cloud cluster with SASL/OAuth creds; the
   secrets-from-env discipline.
-- `qa-allure-reporting-dotnet` — attach the consumed record value / DLT payload to the Allure result.
+- `qa-test-reports-dotnet` — attach the consumed record value / DLT payload to the Allure result.
 - `qa-test-data-builder-dotnet` — builders/ObjectMother for record payloads with 4+ fields.

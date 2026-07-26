@@ -36,13 +36,13 @@ Three cost layers: (1) **always-on** — every registered skill's `description` 
 Rewrite every `description` > 800 chars down to ≤ 500, preserving: (a) the "Use when" sentence, (b) 3–5 quoted trigger phrases, (c) the one-line "Do NOT use → sibling" fence. Cut: enumerated feature lists, multi-sentence scope prose, per-version details (all live in the body).
 
 Batches (59 files — ✅ all done 2026-07-16):
-- [x] `design/` (8): ux-heuristics, brand-intake, iconography, design-tokens, dataviz, ux-writing, frontend-design, web-design-guidelines
-- [x] `frontend/react/skills/` (20): ui-conventions, pwa-offline, motion, error-resilience, reference, performance, seo-discoverability, accessibility, component-testing, component-library, localization, responsive-design, reviewer, styling, data-access, realtime, generator, forms, project-scaffold, testability
-- [x] `frontend/blazor/skills/` (16): reference, pwa-offline, ui-conventions, motion, accessibility, seo-discoverability, component-testing, localization, js-interop, responsive-design, error-resilience, styling, data-access, performance, component-library, realtime
+- [x] `design/` (8): ux-review, brand-import, iconography, design-tokens, charts, ux-writing, visual-identity, ui-code-audit
+- [x] `frontend/react/skills/` (20): ui-rules, installable-offline-app, animation, error-handling, basics, performance, seo, accessibility, component-testing, component-library, languages, responsive-design, code-review, styling, data-fetching, realtime, component-writer, forms, project-setup, testability
+- [x] `frontend/blazor/skills/` (16): basics, installable-offline-app, ui-rules, animation, accessibility, seo, component-testing, languages, javascript-calls, responsive-design, error-handling, styling, data-fetching, performance, component-library, realtime
 - [x] `data/` (3): elasticsearch, redis, mongodb
 - [x] `qa/*/skills/responsive-testing` (3: dotnet, java, typescript)
-- [x] `engineering-practices/` (3): requesting-code-review, spec-compliance-audit, feature-audit
-- [x] misc (6): business-analysis/ba-feature-conflict-sweep, backend/{dotnet,java}/skills/cognito, auth/_shared/oidc-concepts (extras/xlsx out of plugin scope — skipped)
+- [x] `engineering-practices/` (3): requesting-code-review, spec-vs-code-audit, feature-audit
+- [x] misc (6): business-analysis/ba-feature-conflict-check, backend/{dotnet,java}/skills/cognito, auth/_shared/oidc-concepts (extras/xlsx out of plugin scope — skipped)
 
 **Result:** always-on desc tokens — fe-react 10,055→6,426 · fe-blazor 9,597→6,467 (−33%/−36%); qa-* −4%; data −16%. 67 files remain in the 500–800 band (next node).
 
@@ -76,18 +76,18 @@ Both plugins are **green** on descriptions. Untouched: `qa-java`, `qa-typescript
 151 bodies > 12KB. Work worst-first; one stack-triple per node (matches the sibling-parity discipline). Keep in the body: decision matrix, hard rules, core recipe, references-routing table. Move out: per-scenario deep dives, long code listings for secondary paths, appendix-grade tables.
 
 Priority order (top band, >18KB):
-- [ ] llm-app-testing (ts 28.4K, dotnet 23.3K, java 23.0K)
-- [ ] mobile-native-features (java 26.0K, ts 24.9K, dotnet 24.7K) + mobile-device-farm (ts 27.2K, dotnet 18.1K, java 17.1K)
-- [ ] ui-conventions (react 25.7K, blazor 24.7K)
-- [ ] websocket-sse-testing (dotnet 24.4K, ts 22.0K, java 21.5K)
-- [ ] chaos-testing (java 21.6K, ts 21.4K, dotnet 18.8K)
+- [ ] ai-feature-testing (ts 28.4K, dotnet 23.3K, java 23.0K)
+- [ ] mobile-native-features (java 26.0K, ts 24.9K, dotnet 24.7K) + device-cloud (ts 27.2K, dotnet 18.1K, java 17.1K)
+- [ ] ui-rules (react 25.7K, blazor 24.7K)
+- [ ] realtime-stream-testing (dotnet 24.4K, ts 22.0K, java 21.5K)
+- [ ] failure-injection-testing (java 21.6K, ts 21.4K, dotnet 18.8K)
 - [ ] api-test-author/grpc (java 21.4K, dotnet 20.1K, ts 19.2K)
-- [ ] security-testing/zap-baseline ×3 (~21K) + `_shared/security-testing/*` (container-iac 20.3K, sast 19.8K, nuclei 19.3K, zap-af 17.9K, secrets 17.8K, tls 17.1K, api-fuzzing 17.0K)
-- [ ] synthetic-monitoring ×3 (~20–21K), data-driven-testing ×3 (~18–21K), i18n-testing ×3 (~18–19K)
-- [ ] contract-testing-pact (java 22.1K), dependency-scanning ×3 (~18–19K), access-control-testing (dotnet/java ~18.7K)
+- [ ] security-testing/passive-scan ×3 (~21K) + `_shared/security-testing/*` (container-iac 20.3K, sast 19.8K, nuclei 19.3K, zap-af 17.9K, secrets 17.8K, tls 17.1K, api-fuzzing 17.0K)
+- [ ] production-uptime-checks ×3 (~20–21K), data-driven-testing ×3 (~18–21K), language-testing ×3 (~18–19K)
+- [ ] api-contract-testing (java 22.1K), dependency-scan ×3 (~18–19K), permission-testing (dotnet/java ~18.7K)
 - [ ] data/dynamodb 20.6K, data/elasticsearch 19.4K, data/cosmosdb 18.2K
 - [ ] frontend reference (blazor 19.1K, react 18.6K), react accessibility 18.7K, react performance 18.1K
-- [ ] flaky-test-quarantine (java/dotnet ~18.4K), mutation-testing java 18.6K, qa/manual/{test-case-writer 18.9K, test-design-techniques 18.1K}
+- [ ] flaky-test-quarantine (java/dotnet ~18.4K), test-quality-check java 18.6K, qa/manual/{test-case-writer 18.9K, test-design-techniques 18.1K}
 - [ ] remaining 12–18KB band (~100 files) — sweep by folder in later nodes
 
 ## Phase 3 — Slim agents
@@ -108,7 +108,7 @@ Note: steps 2–5 are worth ~1 KB combined. **If an agent is >3 KB over budget, 
 - [x] `qa-performance-dotnet` 14,900 → **13,768** (−8%)
 
 **Still over budget (partially compressed — steps 1–5 applied, phase tables not yet trimmed):**
-- [ ] `qa-manual-test-designer` 22,910 → 22,568 — needs a **38% cut**; a genuine restructure, not squeezing. Its 5.4 KB phases block and 4.1 KB brownfield block both need rewriting
+- [ ] `qa-test-case-designer` 22,910 → 22,568 — needs a **38% cut**; a genuine restructure, not squeezing. Its 5.4 KB phases block and 4.1 KB brownfield block both need rewriting
 - [ ] `qa-security` 18,967 → 18,514 — needs 24%; the OWASP layer map is the bulk
 - [ ] `qa-ui-dotnet` 18,822 → 17,041 — needs 18%
 - [ ] `qa-mobile-dotnet` 17,395 → 14,522 — needs 4% (the Appium-MCP operational section is the remaining bulk)
@@ -121,7 +121,7 @@ Note: steps 2–5 are worth ~1 KB combined. **If an agent is >3 KB over budget, 
 ## Phase 4 — Packaging & install guidance
 
 - [ ] README + marketplace docs: install **one** stack plugin per project; siblings buy nothing and double the shared-skill catalog tax
-- [ ] Decision (user call): split `ep-*` (+ code-auditor + test-basis-analyzer) into a tiny shared plugin the stack plugins depend on, to kill duplicate registration on multi-plugin installs — currently CLAUDE.md mandates bundling into all eight
+- [ ] Decision (user call): split `ep-*` (+ code-auditor + requirements-breakdown) into a tiny shared plugin the stack plugins depend on, to kill duplicate registration on multi-plugin installs — currently CLAUDE.md mandates bundling into all eight
 
 ## Phase 5 — Verify
 

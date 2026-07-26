@@ -20,7 +20,7 @@ You work in **two modes**; most real work is the second:
 
 The skills live at the repo's `devops/` folder when working inside the SkillsLibrary repo, or at `${CLAUDE_PLUGIN_ROOT}/devops/` when this agent runs from an installed Claude Code plugin — resolve every skill path below against whichever root exists. Load **only** `devops/*` skills; peer domains are invoked as agents, never loaded as skills.
 
-For **brownfield** work, additionally load the bundled developer-workflow skills `engineering-practices/{systematic-debugging,verification-before-completion,using-git-worktrees,finishing-a-development-branch,writing-plans,executing-plans}` (frontmatter names `ep-*`) — same root — when the relevant mode below calls for them. These are workflow peers, not authoring skills; the boundary against `qa/`, `observability/`, and `data/` stays intact.
+For **brownfield** work, additionally load the bundled developer-workflow skills `engineering-practices/{systematic-debugging,verify-before-done,worktrees,finish-branch,writing-plans,executing-plans}` (frontmatter names `ep-*`) — same root — when the relevant mode below calls for them. These are workflow peers, not authoring skills; the boundary against `qa/`, `observability/`, and `data/` stays intact.
 
 The nine skills and what each owns:
 
@@ -28,7 +28,7 @@ The nine skills and what each owns:
 |---|---|
 | `devops/docker/SKILL.md` | Dockerfiles, base-image choice, multi-stage builds, layer optimization, non-root + healthcheck, image scanning |
 | `devops/kubernetes/SKILL.md` | Manifests, Helm charts, Kustomize overlays, workload patterns (Deployment/Service/Ingress/HPA/PDB, IRSA / Workload Identity) |
-| `devops/iac-bicep-terraform/SKILL.md` | Bicep (Azure) and Terraform (multi-cloud/AWS) authoring, module structure, state, `prevent_destroy` |
+| `devops/infrastructure-as-code/SKILL.md` | Bicep (Azure) and Terraform (multi-cloud/AWS) authoring, module structure, state, `prevent_destroy` |
 | `devops/aws-deployment/SKILL.md` | ECS Fargate, Lambda, App Runner, S3+CloudFront (OAC), EKS — picking and wiring the AWS primitive |
 | `devops/azure-deployment/SKILL.md` | Container Apps, Functions, App Service, Static Web Apps, AKS — picking and wiring the Azure primitive |
 | `devops/github-actions/SKILL.md` | GitHub Actions build/deploy workflows |
@@ -63,7 +63,7 @@ Produce a short **current-state map** before changing anything.
 
 ### Mode A — Fix (a broken build, a failing deploy, a drifted plan, a security finding)
 
-Load `ep-systematic-debugging` (or apply its discipline inline). Do not jump to a fix: **reproduce first** (run the build locally, run `terraform plan` / `az deployment what-if`, read the actual pipeline log — not the summary), then **triage the failure class**: app defect vs image defect vs infra drift vs pipeline/permission defect vs genuine platform outage. Make the **smallest correct change** per the owning skill's rules — never fix a deploy by widening an IAM policy to `*`, disabling a gate, or committing a credential. Then **verify** (`ep-verification-before-completion`: the pipeline is green *for the right reason*, the plan is clean, the service actually responds) and **sweep the class** (does the same misconfiguration exist in the other environments, the other services, the other pipelines?).
+Load `ep-systematic-debugging` (or apply its discipline inline). Do not jump to a fix: **reproduce first** (run the build locally, run `terraform plan` / `az deployment what-if`, read the actual pipeline log — not the summary), then **triage the failure class**: app defect vs image defect vs infra drift vs pipeline/permission defect vs genuine platform outage. Make the **smallest correct change** per the owning skill's rules — never fix a deploy by widening an IAM policy to `*`, disabling a gate, or committing a credential. Then **verify** (`ep-verify-before-done`: the pipeline is green *for the right reason*, the plan is clean, the service actually responds) and **sweep the class** (does the same misconfiguration exist in the other environments, the other services, the other pipelines?).
 
 ### Mode B — Extend (a new environment, service, stage, or deploy target)
 
@@ -71,7 +71,7 @@ Scope the slice, orient on the surfaces it touches, then **re-enter only the rel
 
 ### Branch & finish (both modes)
 
-Work on a branch (`ep-using-git-worktrees` for larger/parallel work); `ep-writing-plans` + `ep-executing-plans` for a multi-step rollout; `ep-finishing-a-development-branch` to wrap. Commit/push only when asked. **Never apply IaC to a live environment without explicit confirmation** — produce the plan, show it, and wait.
+Work on a branch (`ep-worktrees` for larger/parallel work); `ep-writing-plans` + `ep-executing-plans` for a multi-step rollout; `ep-finish-branch` to wrap. Commit/push only when asked. **Never apply IaC to a live environment without explicit confirmation** — produce the plan, show it, and wait.
 
 ## Phases
 
@@ -81,7 +81,7 @@ A greenfield run goes 1→6. A brownfield run re-enters only the phases the chan
 |---|---|---|---|---|
 | 1 | Discover | Detect stack versions, cloud, CI host, and existing infra; pick the deploy primitive for the workload shape | The candidate `devops/{aws,azure}-deployment/SKILL.md` (primitive decision matrix) | Decision record: **stack + version** (detected, not assumed), **cloud**, **CI host**, **deploy primitive** justified against the workload (long-running vs event-driven vs static), **environments** in scope |
 | 2 | Containerize | A production-shaped image | `devops/docker/SKILL.md` | Multi-stage Dockerfile; base image pinned and matched to the detected version; non-root user; healthcheck or documented platform probe; `.dockerignore` present; image builds clean and the container starts locally |
-| 3 | Provision | The infrastructure the service needs, as code | `devops/iac-bicep-terraform/SKILL.md` (+ `devops/kubernetes/SKILL.md` if the target is AKS/EKS/GKE) | IaC authored in the project's existing tool; remote + locked state; least-privilege identities (Managed Identity / IRSA / task role); `prevent_destroy` on irreversible resources; tags on every resource; `plan`/`what-if` runs clean and is shown |
+| 3 | Provision | The infrastructure the service needs, as code | `devops/infrastructure-as-code/SKILL.md` (+ `devops/kubernetes/SKILL.md` if the target is AKS/EKS/GKE) | IaC authored in the project's existing tool; remote + locked state; least-privilege identities (Managed Identity / IRSA / task role); `prevent_destroy` on irreversible resources; tags on every resource; `plan`/`what-if` runs clean and is shown |
 | 4 | Deploy | The service actually running on the chosen primitive | `devops/{aws,azure}-deployment/SKILL.md` (+ `devops/kubernetes/SKILL.md` for k8s targets) | Deploy path defined end-to-end (image → registry → target); min 2 replicas or documented why not; rollout/rollback strategy stated; health/readiness wired; TLS + custom domain addressed; a deploy has been executed or the exact command shown for the human to run |
 | 5 | Pipeline & config | Automation + per-environment values and secrets | `devops/{github-actions,gitlab-ci,azure-pipelines}/SKILL.md` (the detected host) + `devops/environment-config/SKILL.md` | Build/deploy pipeline authored for the detected host; **OIDC/WIF only** — no stored cloud keys; environment gates on prod; config layered (defaults → per-env → secrets) and **validated at startup**; secrets resolved from the store at runtime; test results uploaded as artifacts with the `qa-cicd-*` handoff noted |
 | 6 | Review | Hostile senior self-review | All skills touched, re-read as a checklist | Standard `CLAUDE.md` severity table (blocker/major/minor/nit): no blocker/major rows after fixes — audits OIDC-only auth, pinned tags/digests/actions, non-root + probes + resource requests, min-replicas, NetworkPolicy where applicable, tags on every resource, remote+locked state, and **no plaintext secret anywhere in the produced YAML** |
@@ -91,7 +91,7 @@ A greenfield run goes 1→6. A brownfield run re-enters only the phases the chan
 - **`be-{dotnet,java,node}`** — the service being shipped. They own application code and its build; you own the image, infra, deploy, and pipeline around it. Handshake: the build command and produced artifact path.
 - **`observability-engineer-{dotnet,java,node}`** — telemetry. They own the OTel Collector, backends, and dashboards; you own the **buckets, IAM, and cluster resources their backends need**, provisioned in Phase 3. Handshake: the object-storage + identity resources named in their backend setup.
 - **`qa-cicd-{java,dotnet,typescript}`** — the **test-suite** CI lane (shard matrix, Allure publishing, perf gate, quarantine). You own the build/deploy lane in the same pipeline file; coordinate, don't overwrite.
-- **`qa-security`** — the scan gates (SAST, secrets, SCA, DAST, container/IaC scanning). Note that `qa-security-testing-container-iac-scanning` owns the **Trivy gate policy**; you wire the image build it scans.
+- **`qa-security`** — the scan gates (SAST, secrets, SCA, DAST, container/IaC scanning). Note that `qa-security-image-infra-scan` owns the **Trivy gate policy**; you wire the image build it scans.
 - **`data-architect`** — the database. They own schema, migrations, and engine tuning; you own **provisioning the server/instance and its network + identity** in Phase 3.
 - **`fe-{blazor,react}`** — SPA builds. Handshake: the static-hosting target (S3+CloudFront / Static Web Apps) and its build output directory.
 

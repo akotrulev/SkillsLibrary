@@ -15,9 +15,9 @@ Generator skill. Scaffolds a single `{Resource}Client.cs` file in the Accelerato
 
 ## When NOT to use
 
-- Writing the test fixture or test cases — that's `qa/dotnet/skills/api-test-author/generator`.
+- Writing the test fixture or test cases — that's `qa/dotnet/skills/api-test-author/writer`.
 - Reviewing an existing client for convention drift — that's a reviewer skill.
-- Authoring DTOs the client returns — use `qa/dotnet/skills/api-dto-writer` first, then come back here.
+- Authoring DTOs the client returns — use `qa/dotnet/skills/api-models` first, then come back here.
 - Java stack (RestAssured) — use `qa/java/skills/api-client-writer`.
 - TypeScript stack (native `fetch` + Zod) — use `qa/typescript/skills/api-client-writer`.
 - Any non-.NET / non-RestSharp stack not covered by the siblings above.
@@ -279,6 +279,6 @@ Only add these overloads when the test plan requires them — not by default.
 1. Ask the user: which **API group** does this client belong to? (User / Assessment / Legal / Reference / Auth)
 2. Ask the user: resource name (noun) and base URL path segment (e.g. `users`).
 3. Ask which **operations** are needed, and whether they are user-facing, admin, or both. Default to full CRUD on the user-facing surface.
-4. Ensure the required DTOs exist in `Models/{Api}/{Resource}Models/`. If not, run the `api-dto-writer` skill first.
+4. Ensure the required DTOs exist in `Models/{Api}/{Resource}Models/`. If not, run the `api-models` skill first.
 5. Generate the file at `ApiTests/Clients/{Api}/{Resource}Client.cs`.
 6. Run `dotnet build ApiTests/ApiTests.csproj` — expect 0 errors.

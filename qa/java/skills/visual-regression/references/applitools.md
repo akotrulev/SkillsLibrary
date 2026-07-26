@@ -9,7 +9,7 @@ sub-pixel noise — plus **match levels** (Strict / Layout / Content / Ignore-co
 control is the real differentiator versus Percy's server-side **pixel** diff and the built-in
 **byte/pixel** diff.
 
-This is an **assertion layer** on top of the page objects and specs `qa-ui-test-author-playwright-java`
+This is an **assertion layer** on top of the page objects and specs `qa-ui-test-writer-playwright-java`
 already authored. You do not write new page objects here — you add `eyes.open` / `eyes.check` /
 `eyes.close` around an existing flow.
 
@@ -273,7 +273,7 @@ the dashboard.
 ```
 
 Link the dashboard batch URL into Allure so reviewers jump straight to it (cross-link
-`qa-allure-reporting-java`):
+`qa-test-reports-java`):
 
 ```java
 import com.applitools.eyes.TestResultsSummary;
@@ -424,6 +424,6 @@ Lifecycle for this test:
   server-side pixel diff + review UI. Applitools is the "graduate to visual-AI + match levels + grid" step.
 - `references/playwright-snapshots.md` — the **free** sibling: in-repo baselines you
   diff yourself, with the CI-container discipline both Percy and Applitools remove.
-- `qa-ui-test-author-playwright-java` — the page objects/specs `eyes.check` is called inside.
+- `qa-ui-test-writer-playwright-java` — the page objects/specs `eyes.check` is called inside.
 - `qa-ci-pipelines-java` — where `APPLITOOLS_API_KEY` is sourced; no agent wrapper needed.
-- `qa-allure-reporting-java` — link the Applitools dashboard batch URL into the report.
+- `qa-test-reports-java` — link the Applitools dashboard batch URL into the report.

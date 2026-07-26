@@ -21,7 +21,7 @@ producers publish to an **exchange** with a **routing key**, and **bindings** ro
 > no synchronous return you can assert on the next line. The message is in flight; the consumer runs on its
 > own schedule; the side-effect lands "soon". So the core discipline is: **wait on a condition** for the
 > message (or its effect) to appear, with a bounded timeout — **never `setTimeout` / `page.waitForTimeout`**.
-> This is the exact lineage of `qa-db-testing-client-typescript`'s `expect.poll` usage and
+> This is the exact lineage of `qa-db-connection-typescript`'s `expect.poll` usage and
 > `references/service-bus.md`'s condition-wait. RabbitMQ's pull primitive,
 > `channel.get(queue, { noAck })`, resolves to a message **or `false` immediately** — so wrapping it in
 > `expect.poll` (get until a message appears, or a deadline passes) *is* the condition-wait; a fixed sleep
@@ -137,7 +137,7 @@ async function declareTopology(amqpUrl: string): Promise<void> {
 
 > **Cloud / shared test broker alternative.** If your org runs against a real **test** RabbitMQ broker instead
 > of a container, read the AMQP URI (and credentials) from `process.env`, **lazily** — never hard-code it,
-> never log it (cross-link `qa-auth0-test-tokens-typescript` for the secrets-from-env discipline). A container
+> never log it (cross-link `qa-test-login-tokens-typescript` for the secrets-from-env discipline). A container
 > is the default for CI determinism; a shared broker makes tests order-dependent unless each uses a
 > **uniquely named queue** (since a queue retains messages until they're consumed).
 
@@ -248,7 +248,7 @@ describe("OrderPublisher", () => {
 
 Here the SUT is a **consumer** (a `channel.consume` callback). The test **publishes an input message**, lets
 the consumer run, and waits for the observable side-effect (a DB row, another message) — eventually
-consistent, so use **`expect.poll`** on a probe. This reuses `qa-db-testing-client-typescript`'s discipline.
+consistent, so use **`expect.poll`** on a probe. This reuses `qa-db-connection-typescript`'s discipline.
 
 ```typescript
 it("Should_write_a_shipment_row_When_an_OrderPaid_message_is_consumed", async () => {
@@ -505,9 +505,9 @@ export const orders = {
   Kafka log + offsets + app-level DLT vs RabbitMQ queue + manual ack + broker-native DLX. (Note: kafkajs has
   no synchronous poll, so its probe is a collector buffer; RabbitMQ's `channel.get` is a real pull, so the
   probe is the cleaner `expect.poll` loop.)
-- `qa-db-testing-client-typescript` — the `expect.poll` and seeder/probe split reused for the consumer
+- `qa-db-connection-typescript` — the `expect.poll` and seeder/probe split reused for the consumer
   side-effect assertions; the **eventual-consistency lineage** this skill leans on hardest.
-- `qa-auth0-test-tokens-typescript` — when authing to a shared cloud broker with credentials from env;
+- `qa-test-login-tokens-typescript` — when authing to a shared cloud broker with credentials from env;
   the secrets-from-env discipline.
-- `qa-allure-reporting-typescript` — attach the consumed message body / DLQ `x-death` reason to the Allure result.
+- `qa-test-reports-typescript` — attach the consumed message body / DLQ `x-death` reason to the Allure result.
 - `qa-test-data-builder-typescript` — builders/ObjectMother for message payloads with 4+ fields.

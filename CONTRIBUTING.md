@@ -18,7 +18,7 @@ Each skill lives in its own directory and contains a single `SKILL.md`:
 
 ```
 qa/test-case-writer/SKILL.md
-backend/dotnet/skills/generator/SKILL.md
+backend/dotnet/skills/pattern-writer/SKILL.md
 ```
 
 Supporting templates or examples go alongside:

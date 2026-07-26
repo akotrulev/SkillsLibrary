@@ -63,6 +63,6 @@ public void Should_OpenMessage_When_PushTapped()
 > **iOS push on the simulator** is simulated with `mobile: pushNotification` (wraps `simctl push`) carrying an APNs
 > payload; then open **Notification Center** and tap it. Asserting the *server actually sent* a push is a backend
 > concern (your push provider's sandbox), not Appium's — this skill asserts the **app's reaction** to a push, the
-> same boundary as `qa/dotnet/skills/network-monitoring/*` for requests.
+> same boundary as `qa/dotnet/skills/network-mocking/*` for requests.
 
 ---

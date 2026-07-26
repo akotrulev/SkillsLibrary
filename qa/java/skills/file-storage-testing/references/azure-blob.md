@@ -8,7 +8,7 @@ azure-blob) in this stack. It is the sibling **ported from the `s3` node's struc
 primitives change. Where S3 has buckets/keys, presigned URLs, multipart upload, and LocalStack, Azure Blob has
 containers/blobs, SAS tokens, block-blob staging, and Azurite. It reuses the same verification-inside-tests
 lineage: the standard Testcontainers fixture discipline and the
-**eventual-consistency condition-wait** (Awaitility) from `qa-db-testing-client-java`. All three Azure SDKs
+**eventual-consistency condition-wait** (Awaitility) from `qa-db-connection-java`. All three Azure SDKs
 mirror the same upload / download / exists / get-properties / list / delete + SAS + block-staging model, so this
 is a true translate-the-concepts port, not a redesign.
 
@@ -163,7 +163,7 @@ public abstract class BlobFixture {
 > Azurite, drop the connection string and build the client from the account endpoint +
 > **`DefaultAzureCredential`** (`new BlobServiceClientBuilder().endpoint("https://<acct>.blob.core.windows.net")
 > .credential(new DefaultAzureCredentialBuilder().build()).buildClient()`); read the account name/endpoint from
-> env, never hard-code a key, never log it (cross-link `qa-auth0-test-tokens-java`). Azurite is the default for
+> env, never hard-code a key, never log it (cross-link `qa-test-login-tokens-java`). Azurite is the default for
 > CI determinism; a shared cloud account makes tests order-dependent unless each uses a **uniquely named
 > container** or empties it in `@BeforeMethod`. (Note: `generateSas` with a shared key needs the
 > connection-string client; with `DefaultAzureCredential` mint a **user-delegation SAS** via
@@ -216,7 +216,7 @@ public class InvoiceUploadTest extends BlobFixture {
 Here the SUT is a **worker**: it watches a container (or is driven by a blob event), processes an uploaded blob,
 and produces an observable side-effect — a DB row, a *derived* blob (a thumbnail), or a notification. The
 side-effect is eventually consistent, so **seed the input blob, then wait on a condition with Awaitility**.
-This reuses `qa-db-testing-client-java`'s discipline.
+This reuses `qa-db-connection-java`'s discipline.
 
 ```java
 @Test
@@ -513,12 +513,12 @@ public final class Invoices {
 - `references/s3.md` — **the node whose structure this is ported from** AND the
   **`s3`-vs-`azure-blob` boundary**: buckets/keys + presigned URLs + multipart (`S3TransferManager`) + LocalStack +
   `forcePathStyle` vs containers/blobs + SAS tokens + block-staging + Azurite + Event Grid→Storage Queue.
-- `qa-db-testing-client-java` — the Awaitility wait and the seeder/probe split reused for the
+- `qa-db-connection-java` — the Awaitility wait and the seeder/probe split reused for the
   processed-blob side-effect assertions; the **eventual-consistency lineage** this skill leans on.
 - `qa-messaging-testing-java` — Azure-native messaging, the natural downstream for the Event
   Grid → Storage Queue bridge (the Azure parallel to `s3`'s S3 → SQS).
-- `qa-auth0-test-tokens-java` — when running against a cloud test account; the `DefaultAzureCredential` /
+- `qa-test-login-tokens-java` — when running against a cloud test account; the `DefaultAzureCredential` /
   secrets-from-env discipline.
-- `qa-allure-reporting-java` — attach the uploaded/derived blob's name + metadata (or the queue-message body) to
+- `qa-test-reports-java` — attach the uploaded/derived blob's name + metadata (or the queue-message body) to
   the Allure result.
 - `qa-test-data-builder-java` — builders/ObjectMother for blob payloads with 4+ fields.

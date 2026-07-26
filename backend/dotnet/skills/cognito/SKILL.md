@@ -229,4 +229,4 @@ Attach via a `DelegatingHandler` on the typed downstream client (same shape as `
 - Concepts → `auth/_shared/oidc-concepts`
 - Pattern/persistence scaffolding for the rest of the service → `backend/dotnet/skills/{generator,persistence}`
 - Storing secrets → `devops/environment-config` + Secrets Manager / Key Vault
-- API contract tests with auth → `qa/dotnet/skills/api-test-author/generator` (seed a test user / M2M client)
+- API contract tests with auth → `qa/dotnet/skills/api-test-author/writer` (seed a test user / M2M client)

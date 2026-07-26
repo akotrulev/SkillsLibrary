@@ -1,6 +1,6 @@
 ---
 name: ep-systematic-debugging
-description: Use when encountering any bug, test failure, or unexpected behavior, before proposing fixes — find root cause first, fix the cause not the symptom. Triggers: "this test is failing", "debug this", "why is X breaking", "the fix didn't work". Pairs with `ep-test-driven-development` (write the failing test) and `ep-verification-before-completion` (confirm the fix). Do NOT use for designing new work (`ep-brainstorming`) or known-cause changes needing no investigation.
+description: Use when encountering any bug, test failure, or unexpected behavior, before proposing fixes — find root cause first, fix the cause not the symptom. Triggers: "this test is failing", "debug this", "why is X breaking", "the fix didn't work". Pairs with `ep-test-driven-development` (write the failing test) and `ep-verify-before-done` (confirm the fix). Do NOT use for designing new work (`ep-brainstorming`) or known-cause changes needing no investigation.
 ---
 
 # Systematic Debugging
@@ -291,7 +291,7 @@ These techniques are part of systematic debugging and available in this director
 
 **Related skills:**
 - **`ep-test-driven-development`** - For creating failing test case (Phase 4, Step 1)
-- **`ep-verification-before-completion`** - Verify fix worked before claiming success
+- **`ep-verify-before-done`** - Verify fix worked before claiming success
 
 ## Real-World Impact
 

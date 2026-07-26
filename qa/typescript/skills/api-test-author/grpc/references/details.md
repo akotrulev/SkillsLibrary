@@ -1,4 +1,4 @@
-# Deep-dive details — `qa-api-test-author-grpc-typescript`
+# Deep-dive details — `qa-api-test-grpc-typescript`
 
 Sections moved out of SKILL.md for on-demand loading. Read what the task needs.
 

@@ -1,4 +1,4 @@
-# Deep-dive details — `qa-api-test-author-grpc-java`
+# Deep-dive details — `qa-api-test-grpc-java`
 
 Sections moved out of SKILL.md for on-demand loading. Read what the task needs.
 

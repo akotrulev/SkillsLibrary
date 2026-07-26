@@ -1,6 +1,6 @@
 ---
 name: fe-react-migration
-description: Use when upgrading a React or Next.js codebase across a major — React 18→19 (removed APIs, `forwardRef`, React Compiler) or Next 14→15 (async `params`/`searchParams`/`cookies()`, caching defaults flipped) — or porting Pages Router→App Router incrementally. Covers the official codemods and what they miss. Triggers "upgrade us to React 19", "migrate to Next 15", "move off the Pages Router", "params is a Promise now". Not for a fresh project (`project-scaffold`).
+description: Use when upgrading a React or Next.js codebase across a major — React 18→19 (removed APIs, `forwardRef`, React Compiler) or Next 14→15 (async `params`/`searchParams`/`cookies()`, caching defaults flipped) — or porting Pages Router→App Router incrementally. Covers the official codemods and what they miss. Triggers "upgrade us to React 19", "migrate to Next 15", "move off the Pages Router", "params is a Promise now". Not for a fresh project (`project-setup`).
 ---
 
 # React — Version Migration
@@ -20,8 +20,8 @@ Owns getting an **existing** codebase from one major to the next: what breaks, w
 
 ## When NOT to use
 
-- New project on current versions → [`project-scaffold`](../project-scaffold/SKILL.md)
-- Refactoring one component without changing versions → [`generator`](../generator/SKILL.md) / [`reviewer`](../reviewer/SKILL.md)
+- New project on current versions → [`project-setup`](../project-setup/SKILL.md)
+- Refactoring one component without changing versions → [`component-writer`](../component-writer/SKILL.md) / [`code-review`](../code-review/SKILL.md)
 - Minor/patch bumps — those are dependency hygiene, not migration
 - Component-library majors (MUI 5→6, etc.) → [`component-library`](../component-library/SKILL.md)
 
@@ -56,10 +56,10 @@ npm i react@19 react-dom@19 && npm i -D @types/react@19 @types/react-dom@19
 - **`forwardRef` is no longer needed.** `ref` is a normal prop on function components. Existing `forwardRef` still works — don't churn the whole codebase; drop it as you touch files.
 - **Ref callbacks may return a cleanup function.** A callback ref that used to *implicitly* return something (an arrow body like `ref={el => (map[id] = el)}`) is now interpreted as returning a cleanup. Give those arrows a block body: `ref={el => { map[id] = el; }}`.
 - **`useReducer` / `useState` init typing tightened** — some previously-inferred generics now need annotating.
-- **Errors are no longer re-thrown to `window.onerror` by default** — hook `onUncaughtError` / `onCaughtError` on `createRoot` if you report client errors ([`error-resilience`](../error-resilience/SKILL.md)).
+- **Errors are no longer re-thrown to `window.onerror` by default** — hook `onUncaughtError` / `onCaughtError` on `createRoot` if you report client errors ([`error-handling`](../error-handling/SKILL.md)).
 - **Hydration mismatch messages changed shape.** Existing log-scraping or error-grouping rules will miss them.
 
-**New capability you can now adopt** (incrementally — the upgrade doesn't require it): `use()`, Actions + `useActionState` + `useOptimistic` ([`forms`](../forms/SKILL.md)), `<title>`/`<meta>` hoisting ([`seo-discoverability`](../seo-discoverability/SKILL.md)), and the **React Compiler** for auto-memoization.
+**New capability you can now adopt** (incrementally — the upgrade doesn't require it): `use()`, Actions + `useActionState` + `useOptimistic` ([`forms`](../forms/SKILL.md)), `<title>`/`<meta>` hoisting ([`seo`](../seo/SKILL.md)), and the **React Compiler** for auto-memoization.
 
 > **React Compiler is a separate decision, not part of the upgrade.** Turn it on only after React 19 has shipped and is stable in production, and only on a codebase that follows the Rules of React — it is a build-time optimizer, and a component that mutates props or reads refs during render will behave differently under it. Enable it, run the full suite, and check [`performance`](../performance/SKILL.md) before assuming a win.
 
@@ -119,7 +119,7 @@ Re-opt in explicitly where you relied on it: `fetch(url, { cache: 'force-cache' 
 | `getInitialProps` | — (no equivalent; restructure) |
 | `pages/api/x.ts` | `app/api/x/route.ts` exporting `GET`/`POST` |
 | `next/router` (`useRouter().query`) | `next/navigation` (`useParams`, `useSearchParams`, `usePathname`) |
-| `next/head` | the Metadata API ([`seo-discoverability`](../seo-discoverability/SKILL.md)) |
+| `next/head` | the Metadata API ([`seo`](../seo/SKILL.md)) |
 
 **The migration order that works:**
 
@@ -129,11 +129,11 @@ Re-opt in explicitly where you relied on it: `fetch(url, { cache: 'force-cache' 
 4. Move API routes to route handlers **last** — the Pages Router versions keep working, and nothing forces the move.
 5. Delete `pages/` only when it is empty.
 
-**The trap:** the reflex port is to paste `'use client'` at the top of every migrated page so the old hooks and event handlers keep working. That produces an App Router app with none of its benefits — one giant client bundle, no RSC. Port the page as a **Server Component**, then push `'use client'` down to the leaves that genuinely need interactivity ([`reference`](../reference/SKILL.md), [`performance`](../performance/SKILL.md)).
+**The trap:** the reflex port is to paste `'use client'` at the top of every migrated page so the old hooks and event handlers keep working. That produces an App Router app with none of its benefits — one giant client bundle, no RSC. Port the page as a **Server Component**, then push `'use client'` down to the leaves that genuinely need interactivity ([`basics`](../basics/SKILL.md), [`performance`](../performance/SKILL.md)).
 
 ## Verification (every migration, non-negotiable)
 
-Per [`ep-verification-before-completion`](../../../../engineering-practices/verification-before-completion/SKILL.md) — an upgrade you haven't run is not done:
+Per [`ep-verify-before-done`](../../../../engineering-practices/verify-before-done/SKILL.md) — an upgrade you haven't run is not done:
 
 1. `<pm> build` clean · `tsc --noEmit` 0 errors · lint 0 warnings
 2. `<pm> test` green (Vitest) — plus the `qa-ui-typescript` peer's E2E suite if one exists; a major upgrade is exactly when E2E earns its cost
@@ -156,7 +156,7 @@ Per [`ep-verification-before-completion`](../../../../engineering-practices/veri
 ## Related skills
 
 - [`routing`](../routing/SKILL.md) — the async `params`/`searchParams` model you migrate *to*
-- [`reference`](../reference/SKILL.md) — the RSC boundary a Pages→App migration has to get right
-- [`data-access`](../data-access/SKILL.md) — caching/`revalidate` semantics the Next 15 defaults changed
+- [`basics`](../basics/SKILL.md) — the RSC boundary a Pages→App migration has to get right
+- [`data-fetching`](../data-fetching/SKILL.md) — caching/`revalidate` semantics the Next 15 defaults changed
 - [`performance`](../performance/SKILL.md) — verifying the upgrade didn't regress bundle/render cost
 - [`component-testing`](../component-testing/SKILL.md) — the suite that proves the migration held

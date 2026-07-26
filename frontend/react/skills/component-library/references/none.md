@@ -9,8 +9,8 @@ No component library. You build a small set of primitives (Button, TextField, Di
 | Library gives you | Here you use |
 |---|---|
 | Styled controls | **Your primitives** — Radix/React Aria behavior + **CSS Modules** ([`styling`](../../styling/SKILL.md) owns this) |
-| Theme + dark mode | **Design tokens** as CSS custom properties on `:root` / `.dark`, from [`design/frontend-design`](../../../../../design/frontend-design/SKILL.md) — [`styling`](../../styling/SKILL.md) |
-| DataGrid | `<table>` + **TanStack Table** (headless: sort/filter/pagination logic) + server paging via [`data-access`](../../data-access/SKILL.md); virtualize long lists with `@tanstack/react-virtual` |
+| Theme + dark mode | **Design tokens** as CSS custom properties on `:root` / `.dark`, from [`design/visual-identity`](../../../../../design/visual-identity/SKILL.md) — [`styling`](../../styling/SKILL.md) |
+| DataGrid | `<table>` + **TanStack Table** (headless: sort/filter/pagination logic) + server paging via [`data-fetching`](../../data-fetching/SKILL.md); virtualize long lists with `@tanstack/react-virtual` |
 | Dialog service | **Radix Dialog** (or React Aria) — focus trap + `Escape` + ARIA free — as a `'use client'` primitive |
 | Snackbar/toast | **`sonner`** (or Radix Toast) — one `<Toaster />` mounted client-side |
 
@@ -49,7 +49,7 @@ export function ConfirmDialog({ order, onConfirm }: { order: OrderDto; onConfirm
       <Dialog.Portal>
         <Dialog.Overlay className={styles.overlay} />
         <Dialog.Content className={styles.content} data-testid="Orders.DeleteDialog">
-          <Dialog.Title>Delete order {order.number}?</Dialog.Title>     {/* name the object — ui-conventions */}
+          <Dialog.Title>Delete order {order.number}?</Dialog.Title>     {/* name the object — ui-rules */}
           <Dialog.Description>This cannot be undone.</Dialog.Description>
           <Dialog.Close>Cancel</Dialog.Close>
           <button onClick={onConfirm} data-testid="Orders.DeleteConfirm">Delete</button>
@@ -70,14 +70,14 @@ import { useReactTable, getCoreRowModel, flexRender } from '@tanstack/react-tabl
 
 const table = useReactTable({
   data: rows, columns, rowCount: total,
-  manualPagination: true, manualSorting: true,        // server-driven — data-access owns the query
+  manualPagination: true, manualSorting: true,        // server-driven — data-fetching owns the query
   state: { pagination, sorting }, onPaginationChange: setPagination, onSortingChange: setSorting,
   getCoreRowModel: getCoreRowModel(),
 });
 // render table.getRowModel().rows into <table data-testid="Orders.Grid">; sortable <th> are <button>s, not click-divs.
 ```
 
-Windowing for thousands of rows is `@tanstack/react-virtual`; you still push sort/filter/page into the `data-access` query. You write the filter UI yourself.
+Windowing for thousands of rows is `@tanstack/react-virtual`; you still push sort/filter/page into the `data-fetching` query. You write the filter UI yourself.
 
 ## Theming + dark mode
 
@@ -89,15 +89,15 @@ Design tokens as CSS custom properties, toggled by a `.dark` class (or `data-the
 |---|---|---|
 | Hook/Context error | A Radix/React Aria primitive (or your stateful component) rendered without `'use client'` | `'use client'` on the interactive primitive/component |
 | Focus escapes the dialog | Hand-rolled dialog instead of Radix/React Aria, no focus trap | Use Radix Dialog / React Aria — trap + Escape are free |
-| Table janky at thousands of rows | Full list rendered without windowing | `@tanstack/react-virtual` + server paging via `data-access` |
+| Table janky at thousands of rows | Full list rendered without windowing | `@tanstack/react-virtual` + server paging via `data-fetching` |
 | Toast does nothing | `<Toaster/>` not mounted, or called from the server | Mount `<Toaster/>` once client-side; call `toast()` from a client component |
 
-**`data-testid`:** trivial — it's your JSX. Inline `data-testid="..."` directly; your primitives take a `testId` prop and compose suffixes ([`testability`](../../testability/SKILL.md) rule for custom components).
+**`data-testid`:** trivial — it's your JSX. Inline `data-testid="..."` directly; your primitives take a `testId` prop and compose suffixes ([`test-ids`](../../test-ids/SKILL.md) rule for custom components).
 
 ## Validation
 
 - Interactive primitives are `'use client'`; the toast host mounts once.
 - Dialog uses Radix/React Aria (focus trap + Escape + ARIA verified with a keyboard-only pass — a11y is on you here).
-- Long lists use TanStack Table + `react-virtual` with server paging via `data-access`.
+- Long lists use TanStack Table + `react-virtual` with server paging via `data-fetching`.
 - Dark mode toggles via `next-themes` + tokens ([`styling`](../../styling/SKILL.md)), no flash.
 - `data-testid` set inline appears on the rendered root in DevTools.

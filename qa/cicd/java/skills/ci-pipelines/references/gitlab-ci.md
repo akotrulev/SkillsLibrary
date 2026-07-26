@@ -359,8 +359,8 @@ gatling-perf:
 - **`qa/cicd/java/skills/ci-pipelines`** — the structural template this ports from; the `strategy.matrix` / `dorny/test-reporter` (`java-junit`) variant.
 - **`qa/cicd/java/skills/ci-pipelines`** — the Azure sibling; the `strategy: parallel` / service-connection variant.
 - **`qa/java/skills/db-testing/testcontainers`** — the integration-tests job runs these (needs the `docker:dind` service shown above).
-- **`qa/java/skills/network-monitoring`** — runs an **external MITM proxy** (BrowserUp) the job must start/stop, whose **CA the client must trust** (per-run — no stored secret); the in-process `playwright-routes`/`cdp` specs need no extra plumbing.
-- **`qa/java/skills/network-monitoring`** — in-process CDP specs the `ui-tests` job runs directly.
-- **`qa/reporting/java/skills/allure-reporting`** — Allure-TestNG adapter wiring that produces `build/allure-results/`.
-- **`qa/java/skills/performance/gatling`** — perf-job simulations; SLO contract in `qa/_shared/performance`.
+- **`qa/java/skills/network-mocking`** — runs an **external MITM proxy** (BrowserUp) the job must start/stop, whose **CA the client must trust** (per-run — no stored secret); the in-process `playwright-routes`/`cdp` specs need no extra plumbing.
+- **`qa/java/skills/network-mocking`** — in-process CDP specs the `ui-tests` job runs directly.
+- **`qa/reporting/java/skills/test-reports`** — Allure-TestNG adapter wiring that produces `build/allure-results/`.
+- **`qa/java/skills/load-testing`** — perf-job simulations; SLO contract in `qa/_shared/performance`.
 - **`qa/cicd/ci-conventions`** — cross-stack rules (artifact retention, OIDC) this skill enforces.

@@ -1,6 +1,6 @@
 # PostgreSQL — Performance (EXPLAIN, vacuum, partitioning, memory, locks)
 
-Engine-side tuning. Universal query triage (ESR, N+1, projection, keyset pagination) → `data/_shared/query-optimization`; index design → `references/indexing.md`.
+Engine-side tuning. Universal query triage (ESR, N+1, projection, keyset pagination) → `data/_shared/slow-query-fixes`; index design → `references/indexing.md`.
 
 ## EXPLAIN — the deep-dive
 
@@ -114,7 +114,7 @@ JOIN pg_stat_activity blocking
 
 1. `pg_stat_statements` top-10 by `total_exec_time` — tune those.
 2. Missing index on the filtered column (check for function-wrapped or type-mismatched predicates).
-3. Keyset pagination replacing `OFFSET` (`data/_shared/query-optimization`).
+3. Keyset pagination replacing `OFFSET` (`data/_shared/slow-query-fixes`).
 4. Drop unused + INVALID indexes (`references/indexing.md`).
 5. `statement_timeout` + `idle_in_transaction_session_timeout` per app role.
 6. Per-table autovacuum tuning on the churn tables.

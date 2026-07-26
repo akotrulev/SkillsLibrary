@@ -485,7 +485,7 @@ jobs:
 - **`qa/typescript/skills/ui-test-author/playwright`** — the `playwright.config.ts` (`blob`/`allure-playwright` reporters, `--shard`, traces) this workflow runs.
 - **`qa/typescript/skills/db-testing/testcontainers`** — the integration-tests job runs these.
 - **`qa/typescript/skills/email-testing`** — pair Mailpit as a `services:` container or inline Testcontainers run.
-- **`qa/reporting/typescript/skills/allure-reporting`** — adapter wiring inside the test project that produces `allure-results/`.
-- **`qa/typescript/skills/performance/k6`** — perf-job scripts; SLO contract in `qa/_shared/performance`.
+- **`qa/reporting/typescript/skills/test-reports`** — adapter wiring inside the test project that produces `allure-results/`.
+- **`qa/typescript/skills/load-testing`** — perf-job scripts; SLO contract in `qa/_shared/performance`.
 - **`devops/github-actions`** — non-QA workflow patterns (deploy, infra) live here.
 - **`qa/cicd/ci-conventions`** — cross-stack rules (artifact retention, OIDC) this skill enforces.

@@ -47,7 +47,7 @@ The providers must live under an **interactive** render mode (they run JS and ho
 
 ## Theming + dark mode
 
-One `MudTheme` object at the root; feed its palette from the `design/theme-factory` output (map palette hex → `PaletteLight`/`PaletteDark`).
+One `MudTheme` object at the root; feed its palette from the `design/theme-presets` output (map palette hex → `PaletteLight`/`PaletteDark`).
 
 ```csharp
 private readonly MudTheme _theme = new()
@@ -97,7 +97,7 @@ private bool _isDark;
 }
 ```
 
-The `LoadAsync` calls a [`data-access`](../../data-access/SKILL.md) interface method — the grid is a consumer, not a data owner.
+The `LoadAsync` calls a [`data-fetching`](../../data-fetching/SKILL.md) interface method — the grid is a consumer, not a data owner.
 
 ## Dialog + snackbar services
 
@@ -108,7 +108,7 @@ The `LoadAsync` calls a [`data-access`](../../data-access/SKILL.md) interface me
 private async Task Delete(OrderDto o)
 {
     var ok = await DialogService.ShowMessageBox("Delete order",
-        $"Delete order {o.Number}? This cannot be undone.",   // name the specific object — ui-conventions
+        $"Delete order {o.Number}? This cannot be undone.",   // name the specific object — ui-rules
         yesText: "Delete", cancelText: "Cancel");
     if (ok == true) { await Data.DeleteAsync(o.Id); Snackbar.Add($"Order {o.Number} deleted", Severity.Success); }
 }
@@ -123,11 +123,11 @@ Both services require their provider alive under an interactive render mode (see
 | `DialogService.Show` / `Snackbar.Add` throws or nothing appears | Called from static SSR, or providers not in an interactive layout | Providers under an interactive render mode; the calling island interactive |
 | `MudButton` `@onclick` does nothing | Button on a static-SSR page (styled markup, no interactivity) | Make the island `@rendermode InteractiveServer/WebAssembly/Auto` |
 | Popovers/menus mis-position | `MudPopoverProvider` missing | Add it alongside the other providers |
-| `data-testid` on `MudTabPanel` doesn't land in DOM | `MudTabPanel` doesn't render captured `UserAttributes` | Tag an inner element — [`testability`](../../testability/SKILL.md) matrix caveat |
+| `data-testid` on `MudTabPanel` doesn't land in DOM | `MudTabPanel` doesn't render captured `UserAttributes` | Tag an inner element — [`test-ids`](../../test-ids/SKILL.md) matrix caveat |
 | Theme flashes light then dark on load | System-preference read only after first render | Read `GetSystemPreference()` in `OnAfterRenderAsync(firstRender)`; acceptable, or persist last choice server-side |
 | Services not found in `.Client` under Auto | `AddMudServices()` only registered in Server | Register in **both** `Program.cs` files |
 
-**`data-testid` on MudBlazor controls:** inline `data-testid="..."` forwards via `UserAttributes` (`MudComponentBase`) to the rendered root for most components — the `MudTabPanel` exception above is the one to remember. Full rules in [`testability`](../../testability/SKILL.md).
+**`data-testid` on MudBlazor controls:** inline `data-testid="..."` forwards via `UserAttributes` (`MudComponentBase`) to the rendered root for most components — the `MudTabPanel` exception above is the one to remember. Full rules in [`test-ids`](../../test-ids/SKILL.md).
 
 ## Validation
 

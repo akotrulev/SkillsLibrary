@@ -1,6 +1,6 @@
 ---
 name: ba-epic-writer
-description: Use when converting a scoped business-analysis writeup into one or more epics — sized for a release/quarter, sliced into user stories, with measurable outcomes. Triggers: "write an epic for X", "slice this BA writeup into epics", "size this initiative into a quarter". Do NOT use for high-level scoping (`ba-initiative-scoping`) or individual stories with AC (`ba-story-writer`).
+description: Use when converting a scoped business-analysis writeup into one or more epics — sized for a release/quarter, sliced into user stories, with measurable outcomes. Triggers: "write an epic for X", "slice this BA writeup into epics", "size this initiative into a quarter". Do NOT use for high-level scoping (`ba-scoping-writeup`) or individual stories with AC (`ba-story-writer`).
 ---
 
 # Epic Writer
@@ -16,7 +16,7 @@ Closes the **BA → Epic → Story** chain. Takes a scoped business-analysis wri
 
 ## When NOT to use
 
-- Vague requirement, no scope yet → `business-analysis/skills/ba-initiative-scoping` first
+- Vague requirement, no scope yet → `business-analysis/skills/ba-scoping-writeup` first
 - Scoped requirement, ready for stories → `business-analysis/skills/ba-story-writer`
 - Status update to stakeholders → `communication/stakeholder-updates`
 - A single sprint-sized piece of work → write a story, not an epic
@@ -99,7 +99,7 @@ These are enumerated, not committed — refinement will produce the real INVEST 
 ## 11. Handoffs
 - Per-story refinement → `business-analysis/skills/ba-story-writer`
 - Release / steerco update → `communication/stakeholder-updates`
-- API contract scaffolds → `qa/<stack>/skills/api-dto-writer`
+- API contract scaffolds → `qa/<stack>/skills/api-models`
 - Test strategy for the epic → `qa/manual/test-strategy`
 ```
 
@@ -161,7 +161,7 @@ The pattern: **WHO** + **CAN DO WHAT** + **SO THAT MEASURABLE CHANGE**. If any o
 
 ## Generation steps
 
-1. Read the BA writeup; refuse to start if the BA is unscoped or has no measurable success criterion (point user back to `business-analysis/skills/ba-initiative-scoping`)
+1. Read the BA writeup; refuse to start if the BA is unscoped or has no measurable success criterion (point user back to `business-analysis/skills/ba-scoping-writeup`)
 2. Draft the one-sentence outcome — iterate with the user until WHO / DO WHAT / SO THAT MEASURABLE CHANGE all pass the sniff test
 3. Pick the slicing strategy
 4. Enumerate child stories (titles + slice + rough sprint guess) — note these are anticipated, not committed
@@ -172,9 +172,9 @@ The pattern: **WHO** + **CAN DO WHAT** + **SO THAT MEASURABLE CHANGE**. If any o
 
 ## Handoffs
 
-- Up-stream (vague requirement) → `business-analysis/skills/ba-initiative-scoping`
+- Up-stream (vague requirement) → `business-analysis/skills/ba-scoping-writeup`
 - Down-stream (story refinement) → `business-analysis/skills/ba-story-writer`
-- Epics/stories authored elsewhere need a readiness audit → `business-analysis/skills/ba-backlog-auditor`
+- Epics/stories authored elsewhere need a readiness audit → `business-analysis/skills/ba-story-quality-review`
 - Stakeholder update during execution → `communication/stakeholder-updates`
 - Test plan for the epic → `qa/manual/test-strategy`
-- API/DTO contracts that the epic depends on → `qa/<stack>/skills/api-dto-writer`
+- API/DTO contracts that the epic depends on → `qa/<stack>/skills/api-models`

@@ -1,5 +1,5 @@
 ---
-name: qa-api-test-author-playwright-typescript
+name: qa-api-test-playwright-typescript
 description: Use when the user asks to write TypeScript API tests on the Playwright runner (@playwright/test `request` fixture / APIRequestContext + Zod) — usually because the project already runs Playwright for UI and wants one runner, one report, one trace. Triggers: "write API tests with Playwright", "use the request fixture for endpoint X", "add API coverage to our Playwright suite". Plain Node API suites without Playwright → `api-test-author/generator` (Vitest + fetch). For end-to-end suite work prefer the phased agent `qa-api-typescript` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
 ---
 
@@ -7,7 +7,7 @@ description: Use when the user asks to write TypeScript API tests on the Playwri
 
 Authors `*.spec.ts` files that test a REST backend through **Playwright's own HTTP client** —
 `APIRequestContext` — instead of a browser. It reuses the **Schema/types + Client + Spec** layering of the
-Vitest sibling (`qa-api-test-author-generator-typescript`): Zod schemas from `qa/typescript/skills/api-dto-writer`,
+Vitest sibling (`qa-api-test-writer-typescript`): Zod schemas from `qa/typescript/skills/api-models`,
 a `{resource}Client` factory with dual raw + typed methods, spec files that own scenarios and assertions. Only
 the transport and the runner change; the discipline does not.
 
@@ -39,7 +39,7 @@ the transport and the runner change; the discipline does not.
 - **@playwright/test** as the test runner — API specs live beside the UI specs, same `playwright.config.ts`
 - **`APIRequestContext`** for HTTP — the built-in `request` fixture for the default identity, fixture-created
   contexts for other identities; no `fetch`/axios/supertest in a Playwright project
-- **Zod** for request/response schemas and runtime validation (`qa/typescript/skills/api-dto-writer`)
+- **Zod** for request/response schemas and runtime validation (`qa/typescript/skills/api-models`)
 - **Allure** via `allure-playwright` where the project uses Allure
 - Project layout: `src/clients/{api}/`, `src/models/{api}/{resource}/`, `tests/api/{resource}/`,
   `tests/fixtures.ts`, `playwright.config.ts` (a dedicated `api` project with `use.baseURL` pointing at the API)
@@ -48,7 +48,7 @@ the transport and the runner change; the discipline does not.
 
 | Layer | Owner skill | Responsibility |
 |-------|-------------|----------------|
-| `models/{api}/{resource}/{resource}.schema.ts` (Zod) + `.types.ts` (`z.infer`) | `qa/typescript/skills/api-dto-writer` | Body shapes, JSON-key mapping, runtime validation |
+| `models/{api}/{resource}/{resource}.schema.ts` (Zod) + `.types.ts` (`z.infer`) | `qa/typescript/skills/api-models` | Body shapes, JSON-key mapping, runtime validation |
 | `clients/{api}/{resource}Client.ts` — `create{Resource}Client(ctx: APIRequestContext)` | `qa/typescript/skills/api-client-writer` conventions, context-based variant | Request building on the context; raw method returns `APIResponse` unasserted; typed method asserts exact status + `Schema.parse(await res.json())` |
 | `tests/fixtures.ts` | **this skill** | Identity fixtures: token via `authHelper` → `request.newContext({ extraHTTPHeaders })` → yield client → `dispose()` |
 | `tests/api/{resource}/{operation}{Resource}.spec.ts` | **this skill** | Scenario choice, arrange/act/assert, test data, cleanup |
@@ -64,11 +64,11 @@ inline in a spec to avoid generating a client.
 
 ## When NOT to use
 
-- No Playwright in the project → `qa/typescript/skills/api-test-author/generator` (Vitest + fetch + Zod, the stack default)
+- No Playwright in the project → `qa/typescript/skills/api-test-author/writer` (Vitest + fetch + Zod, the stack default)
 - API calls **inside a UI test** (seed data, then drive the browser) → that is the UI suite's arrange phase; conventions in `qa/typescript/skills/ui-test-author/playwright`
-- Mocking/intercepting the browser's network traffic → `qa/typescript/skills/network-monitoring` (`page.route` is not API testing)
+- Mocking/intercepting the browser's network traffic → `qa/typescript/skills/network-mocking` (`page.route` is not API testing)
 - GraphQL / gRPC → the protocol siblings under `qa/typescript/skills/api-test-author/`
-- Reviewing existing tests → `qa/typescript/skills/api-test-author/reviewer` (cross-stack checklist applies; add this skill's anti-patterns below)
+- Reviewing existing tests → `qa/typescript/skills/api-test-author/review` (cross-stack checklist applies; add this skill's anti-patterns below)
 
 ## Fixtures template — identities as contexts
 
@@ -216,7 +216,7 @@ test.describe('POST /api/users', () => {
 - No `fetch` / axios / supertest inside a Playwright project — one HTTP client, one trace.
 - No token threading per call — identity lives in the context (`extraHTTPHeaders` at creation) or in
   `storageState` for cookie-auth apps (share the UI suite's logged-in state file; see
-  `qa/typescript/skills/auth0-test-tokens`).
+  `qa/typescript/skills/test-login-tokens`).
 - No undisposed contexts — every `newContext()` has a `dispose()` in the fixture teardown.
 - No `toBeOK()` as the status assertion; no `failOnStatusCode: true`.
 - No hardcoded base URLs or tokens — `baseURL` from the config/env, tokens via `authHelper`.
@@ -231,7 +231,7 @@ test.describe('POST /api/users', () => {
    id in the title), or verbal scenarios.
 3. Ensure the `api` project exists in `playwright.config.ts` (`use.baseURL`, no browser); add it if missing.
 4. For each resource in scope, verify the Zod schema + types and the context-based `{resource}Client` exist —
-   create missing ones via `api-dto-writer`, then the client following `api-client-writer` conventions with the
+   create missing ones via `api-models`, then the client following `api-client-writer` conventions with the
    `(ctx: APIRequestContext)` factory signature.
 5. Add the identity fixtures the planned scenarios need (standard / admin / anonymous / wrong-role) to
    `tests/fixtures.ts`.
@@ -240,15 +240,15 @@ test.describe('POST /api/users', () => {
 
 ## Cross-references
 
-- `qa-api-test-author-generator-typescript` — the **stack default** (Vitest + fetch + Zod); this skill is the
+- `qa-api-test-writer-typescript` — the **stack default** (Vitest + fetch + Zod); this skill is the
   variant for Playwright-first projects. Shared spine: Schema + Client + Spec, dual raw/typed methods,
   `ProblemDetails` discipline, builder-based test data.
-- `qa-api-test-author-playwright-java` · `qa-api-test-author-playwright-dotnet` — the sibling stacks
+- `qa-api-test-playwright-java` · `qa-api-test-playwright-dotnet` — the sibling stacks
   (playwright-java + TestNG · Microsoft.Playwright + NUnit); same four ideas, different bindings.
-- `qa-api-dto-writer-typescript` / `qa-api-client-writer-typescript` — schemas / the client layer this skill consumes.
-- `qa-ui-test-author-playwright-typescript` — the UI suite this skill shares a runner with; API-as-arrange lives there.
-- `qa-network-monitoring-typescript` — `page.route` mocking/asserting of browser traffic (not API testing).
-- `qa-api-test-author-reviewer-typescript` — review; its cross-stack checklist applies verbatim, plus this
+- `qa-api-models-typescript` / `qa-api-client-writer-typescript` — schemas / the client layer this skill consumes.
+- `qa-ui-test-writer-playwright-typescript` — the UI suite this skill shares a runner with; API-as-arrange lives there.
+- `qa-network-mocking-typescript` — `page.route` mocking/asserting of browser traffic (not API testing).
+- `qa-api-test-review-typescript` — review; its cross-stack checklist applies verbatim, plus this
   skill's What-NOT-to-do list as Playwright-specific findings.
-- `qa-auth0-test-tokens-typescript` — the tokens the identity fixtures inject.
-- `qa-allure-reporting-typescript` — `allure-playwright` wiring so API and UI results land in one report.
+- `qa-test-login-tokens-typescript` — the tokens the identity fixtures inject.
+- `qa-test-reports-typescript` — `allure-playwright` wiring so API and UI results land in one report.

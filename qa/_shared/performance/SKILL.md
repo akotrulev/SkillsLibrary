@@ -11,9 +11,9 @@ Cross-stack concepts shared by `qa/<stack>/skills/performance/{k6/typescript,nbo
 
 | Tool | Sibling | When |
 |---|---|---|
-| **k6** (Grafana k6) | `qa/typescript/skills/performance/k6` | Default for new perf work. JS scripts, single binary, great OSS + Grafana Cloud story. |
-| **NBomber** | `qa/dotnet/skills/performance/nbomber` | .NET-only teams that prefer to write tests in C#. |
-| **Gatling** | `qa/java/skills/performance/gatling` | JVM-heavy teams that want a Scala / Java DSL. |
+| **k6** (Grafana k6) | `qa/typescript/skills/load-testing` | Default for new perf work. JS scripts, single binary, great OSS + Grafana Cloud story. |
+| **NBomber** | `qa/dotnet/skills/load-testing` | .NET-only teams that prefer to write tests in C#. |
+| **Gatling** | `qa/java/skills/load-testing` | JVM-heavy teams that want a Scala / Java DSL. |
 | Apache JMeter | — | Legacy. Avoid for new work. |
 
 For this library, **k6 is the default**. Reach for NBomber when the team strongly prefers C# and the test is .NET-resident; Gatling for JVM-heavy teams.
@@ -94,7 +94,7 @@ Wire perf gates into the same `qa/cicd/<stack>/skills/ci-pipelines/<ci>` pipelin
 The perf test by itself only knows what the **caller** sees. To diagnose, correlate with server-side metrics:
 
 - **Pre-test:** snapshot baseline metrics (CPU, memory, DB pool, GC).
-- **During-test:** watch the service's RED dashboard (`observability/grafana-dashboards`).
+- **During-test:** watch the service's RED dashboard (`observability/dashboards`).
 - **Post-test:** capture the time-window in the dashboard for the report.
 
 If client p95 says 800ms and server p95 says 50ms, the bottleneck is the network / proxy / client setup — not the service. Always capture both sides.
@@ -167,18 +167,18 @@ A clean review = no blocker or major rows after fixes, plus a per-scenario PASS/
 
 - Functional behavior tests → `qa/<stack>/skills/api-test-author/generator/<stack>` / `qa/<stack>/skills/ui-test-author/<stack>`
 - Unit / microbenchmarks (loop bodies, parsing speed) → BenchmarkDotNet (.NET) / JMH (Java) / Vitest bench (TS)
-- Production-side observability → `observability/grafana-dashboards`
+- Production-side observability → `observability/dashboards`
 - Defining the SLO itself → `qa/manual/quality-metrics`
 
 ## Handoffs
 
-- k6 / TypeScript recipes → `qa/typescript/skills/performance/k6`
-- NBomber / .NET recipes → `qa/dotnet/skills/performance/nbomber`
-- Gatling / Java recipes → `qa/java/skills/performance/gatling`
+- k6 / TypeScript recipes → `qa/typescript/skills/load-testing`
+- NBomber / .NET recipes → `qa/dotnet/skills/load-testing`
+- Gatling / Java recipes → `qa/java/skills/load-testing`
 - SLO targets the test validates → `qa/manual/quality-metrics`
-- Grafana dashboards for server-side correlation → `observability/grafana-dashboards`
-- LogQL / PromQL for queries during the test → `observability/logql-promql`
+- Grafana dashboards for server-side correlation → `observability/dashboards`
+- LogQL / PromQL for queries during the test → `observability/queries`
 - Test strategy that calls out where perf testing fits → `qa/manual/test-strategy`
 - Pipeline integration → `qa/cicd/<stack>/skills/ci-pipelines/{github-actions,azure-pipelines,gitlab-ci}` or `devops/<ci>`
-- Allure publishing for perf reports → `qa/reporting/<stack>/skills/allure-reporting/<stack>`
+- Allure publishing for perf reports → `qa/reporting/<stack>/skills/test-reports/<stack>`
 - Bug filings discovered during perf → `qa/manual/bug-report-writer`

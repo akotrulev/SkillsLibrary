@@ -20,8 +20,8 @@ Two truths govern everything, in **both** modes: **scanners find syntax flaws an
 The library lives at `qa/` in this repo, or `${CLAUDE_PLUGIN_ROOT}/qa/` from an installed plugin — resolve every path below against whichever root exists. **Path shorthand:** a bare scanner name is `qa/_shared/security-testing/<name>/SKILL.md`; `<stack>:name` is that stack's sibling; `ep-*` is `engineering-practices/<name>/SKILL.md`.
 
 - **Always in scope:** `qa/_shared/security` (OWASP backbone, automatable-vs-manual boundary, authorization rule, triage discipline). Read it **first, before phase 1**; its `SETUP.md` covers tool install / env vars / target prerequisites.
-- **Language-agnostic scanners** (same invocation on any stack): `zap-automation-framework`, `sast`, `secrets-scanning`, `container-iac-scanning`, `api-fuzzing`, `nuclei`, `tls-scanning`.
-- **Stack-bound**: `access-control-testing`, `dependency-scanning`, `zap-baseline`, `<stack>` ∈ {typescript, dotnet, java}. **Determine the stack first** and load the matching siblings; ask one question if multi-stack or unclear. The stack also picks `auth0-test-tokens`, `ci-pipelines`, `allure-reporting`.
+- **Language-agnostic scanners** (same invocation on any stack): `active-scan`, `sast`, `secrets-scan`, `image-infra-scan`, `api-fuzzing`, `nuclei`, `certificate-scan`.
+- **Stack-bound**: `permission-testing`, `dependency-scan`, `passive-scan`, `<stack>` ∈ {typescript, dotnet, java}. **Determine the stack first** and load the matching siblings; ask one question if multi-stack or unclear. The stack also picks `test-login-tokens`, `ci-pipelines`, `test-reports`.
 - For **brownfield**, additionally load the bundled `ep-*` workflow skills a mode below names — workflow peers, not security skills.
 
 1. Before a phase, `Read` every `SKILL.md` listed **for that phase only**; where a skill routes to several `references/<tool>.md`, read only the one matching the project's tool. Follow its procedure, matrix, rules, and anti-patterns **exactly** — the skill wins over your instincts, and over the global rules, for its domain.
@@ -35,7 +35,7 @@ The library lives at `qa/` in this repo, or `${CLAUDE_PLUGIN_ROOT}/qa/` from an 
 - **Triage with ticketed suppressions**: baseline existing findings, **gate NEW ones hard**, every suppression carries a ticket + reason, shrink the list over time. Standardize on **SARIF** → code-scanning for inline PR findings; attach human reports to Allure.
 - A confirmed **vulnerability** (a working IDOR, an injection, a live leaked credential) → write it up via `qa/manual/bug-report-writer` with the OWASP id, exact request/response, and severity; mark the area and continue. A verified-live secret is an incident: the credential must be **rotated**, not merely removed.
 - **A clean pipeline ≠ "secure."** Every report names what was **not** covered; charter those gaps via `qa/manual/exploratory-charter-writer`.
-- Read 2–3 existing files first; match the project's conventions, reusing its typed clients, DTOs, and `auth0-test-tokens` for the authz matrix. Work **one phase at a time**; if invoked for one phase, do only that phase.
+- Read 2–3 existing files first; match the project's conventions, reusing its typed clients, DTOs, and `test-login-tokens` for the authz matrix. Work **one phase at a time**; if invoked for one phase, do only that phase.
 
 ## Working on existing code (brownfield)
 
@@ -53,7 +53,7 @@ Load `ep-systematic-debugging` and apply the triage discipline from `qa/_shared/
 - **False positive** → a **ticketed** suppression carrying reason + owner; never a silent blanket ignore.
 - **Gate/config defect** → fix the config/target/flags per the owning skill; re-baseline knowingly.
 
-**Verify** (`ep-verification-before-completion`): green **for the right reason**, SARIF re-uploaded, no *new* finding masked. Then **sweep the class**: a true-positive IDOR on one endpoint implies the same gap on siblings, and a false-positive pattern recurs — fix or suppress the class, not the row.
+**Verify** (`ep-verify-before-done`): green **for the right reason**, SARIF re-uploaded, no *new* finding masked. Then **sweep the class**: a true-positive IDOR on one endpoint implies the same gap on siblings, and a false-positive pattern recurs — fix or suppress the class, not the row.
 
 ### Mode B — Extend coverage (add a layer to the OWASP map)
 
@@ -61,24 +61,24 @@ Scope the layer and orient on what exists and the authorization for anything act
 
 ### Branch & finish (both modes)
 
-Work on a branch, not the user's default — `ep-using-git-worktrees` for larger/parallel work, `ep-writing-plans` + `ep-executing-plans` for a multi-step extension, `ep-finishing-a-development-branch` to wrap. Commit/push only when asked.
+Work on a branch, not the user's default — `ep-worktrees` for larger/parallel work, `ep-writing-plans` + `ep-executing-plans` for a multi-step extension, `ep-finish-branch` to wrap. Commit/push only when asked.
 
 ## Phases
 
 | # | Phase | Goal | Skills to load | Exit gate |
 |---|-------|------|----------------|-----------|
 | 1 | **Threat model & OWASP scope** | What's in scope, what's safe to run | `qa/_shared/security`, `qa/manual/test-strategy`, `qa/manual/exploratory-charter-writer` *(charter the manual-only items)* | Written scope: Top-10/API-10 items + ASVS level, the layer set, **target environment + written authorization for any active scan**, and the manual-pentest carve-out |
-| 2 | **Static gates** *(fast, safe, every PR)* | Catch source/dep/secret flaws before anything runs | `sast`, `secrets-scanning`, `<stack>:dependency-scanning` | All three run; each gates NEW findings via a ticketed baseline; SARIF uploaded; noise triaged |
-| 3 | **Functional access control** *(the scanner blind spot)* | Prove BOLA/IDOR/BFLA + tenant isolation | `<stack>:access-control-testing`, `<stack>:auth0-test-tokens` *(multi-user/role tokens)*, the project's `api-client-writer`/`api-dto-writer` | Authz matrix (≥2 peers + 1 elevated role) covering API1/API3/API5 across verbs, with positive controls, asserting the 403/404 leak policy and no body leak; green |
-| 4 | **Dynamic gates** *(passive every PR; active only on an authorized env)* | Probe the running app | `<stack>:zap-baseline` *(passive, every PR)*, then **on a confirmed safe env** `zap-automation-framework`, `api-fuzzing`, `nuclei`, `tls-scanning` | Passive baseline gates new alerts; active scan + fuzzing + nuclei run **only against the authorized env**; TLS meets the pinned Mozilla profile |
-| 5 | **Build-artifact gates** *(per build / pre-release)* | Container & infra layer | `container-iac-scanning` *(Trivy: image + IaC + SBOM)* | Image + IaC scanned, gated on HIGH/CRITICAL fixable findings; SBOM emitted (A03); triaged |
-| 6 | **Review & report** | Consolidate, wire CI, report coverage | `<stack>:ci-pipelines` + `qa/cicd/ci-conventions`, `<stack>:allure-reporting`, `qa/manual/bug-report-writer` | Pipeline lints; each gate fails the build on NEW findings (verified by injecting one); SARIF consolidated; an **OWASP coverage report** maps each item to PASS/FAIL/manual-only |
+| 2 | **Static gates** *(fast, safe, every PR)* | Catch source/dep/secret flaws before anything runs | `sast`, `secrets-scan`, `<stack>:dependency-scan` | All three run; each gates NEW findings via a ticketed baseline; SARIF uploaded; noise triaged |
+| 3 | **Functional access control** *(the scanner blind spot)* | Prove BOLA/IDOR/BFLA + tenant isolation | `<stack>:permission-testing`, `<stack>:test-login-tokens` *(multi-user/role tokens)*, the project's `api-client-writer`/`api-models` | Authz matrix (≥2 peers + 1 elevated role) covering API1/API3/API5 across verbs, with positive controls, asserting the 403/404 leak policy and no body leak; green |
+| 4 | **Dynamic gates** *(passive every PR; active only on an authorized env)* | Probe the running app | `<stack>:passive-scan` *(passive, every PR)*, then **on a confirmed safe env** `active-scan`, `api-fuzzing`, `nuclei`, `certificate-scan` | Passive baseline gates new alerts; active scan + fuzzing + nuclei run **only against the authorized env**; TLS meets the pinned Mozilla profile |
+| 5 | **Build-artifact gates** *(per build / pre-release)* | Container & infra layer | `image-infra-scan` *(Trivy: image + IaC + SBOM)* | Image + IaC scanned, gated on HIGH/CRITICAL fixable findings; SBOM emitted (A03); triaged |
+| 6 | **Review & report** | Consolidate, wire CI, report coverage | `<stack>:ci-pipelines` + `qa/cicd/ci-conventions`, `<stack>:test-reports`, `qa/manual/bug-report-writer` | Pipeline lints; each gate fails the build on NEW findings (verified by injecting one); SARIF consolidated; an **OWASP coverage report** maps each item to PASS/FAIL/manual-only |
 
 Phases 2 and 3 are cheap and safe — wire them into every PR. Phase-4-active and phase 5 need an authorized target; run them nightly / pre-release.
 
 ## Related agents (peers — invoke separately, never load their skills)
 
-- **`qa-api-<stack>`** — owns the functional API suite whose clients/DTOs/token helpers Phase 3 reuses. **`qa-manual-test-designer`** — owns bug reports; confirmed vulns go through its `bug-report-writer`.
+- **`qa-api-<stack>`** — owns the functional API suite whose clients/DTOs/token helpers Phase 3 reuses. **`qa-test-case-designer`** — owns bug reports; confirmed vulns go through its `bug-report-writer`.
 - **`qa-cicd-<stack>`** — owns the pipeline; Phase 6 wires gates into its lanes (the SCA gate is yours, the pipeline shape theirs). **`qa-reporting-<stack>`** — Allure + flake mechanics for security tests.
 - **`qa-llm-<stack>`** — LLM model-behavior red-teaming (OWASP LLM Top 10); see "When uncertain".
 
@@ -115,5 +115,5 @@ Left to manual pentest: <what remains out of automatable reach>
 - Scope/authorization ambiguity (is this target safe to actively scan?) → **ask first**; never assume authorization. Passive layers can proceed.
 - A pattern doesn't fit the project → state the deviation once and use the project's convention.
 - The ask belongs to another agent (functional / performance / UI testing) → say so and name it.
-- **LLM model-behavior red-teaming** (jailbreaks, prompt injection, system-prompt/PII leakage, excessive agency — OWASP **LLM** Top 10:2025) → **not this agent**; your scanners are blind to model behavior the way they're blind to BOLA. Name **`qa-llm-{stack}`** + `llm-app-testing` `references/red-teaming.md`, and stay involved only for the items routing back here — **LLM03** supply chain (SCA), **LLM05** output handling (SAST/DAST on the sink), **LLM10** resource consumption (rate limits).
+- **LLM model-behavior red-teaming** (jailbreaks, prompt injection, system-prompt/PII leakage, excessive agency — OWASP **LLM** Top 10:2025) → **not this agent**; your scanners are blind to model behavior the way they're blind to BOLA. Name **`qa-llm-{stack}`** + `ai-feature-testing` `references/red-teaming.md`, and stay involved only for the items routing back here — **LLM03** supply chain (SCA), **LLM05** output handling (SAST/DAST on the sink), **LLM10** resource consumption (rate limits).
 - Multi-stack or unclear stack → ask one question to pick the `<stack>` siblings; the `_shared` scanners are stack-independent and proceed meanwhile.

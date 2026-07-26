@@ -58,7 +58,7 @@ builder.Services.AddRadzenComponents();   // includes ThemeService
 @code { void Dark() => ThemeService.SetTheme("material-dark", saveThemeToLocalStorage: true); }
 ```
 
-Feed brand colors by referencing the theme's CSS custom properties and overriding them in your own isolated CSS ([`styling`](../styling/SKILL.md) owns the token mapping from `design/theme-factory`). Radzen themes expose `--rz-*` variables — override those, don't fork the theme file.
+Feed brand colors by referencing the theme's CSS custom properties and overriding them in your own isolated CSS ([`styling`](../../styling/SKILL.md) owns the token mapping from `design/theme-presets`). Radzen themes expose `--rz-*` variables — override those, don't fork the theme file.
 
 ## DataGrid — server-side by default
 
@@ -83,7 +83,7 @@ Feed brand colors by referencing the theme's CSS custom properties and overridin
 }
 ```
 
-`LoadDataArgs` gives you `Skip`/`Top`/`OrderBy`/`Filter` strings ready to translate to your query. Radzen's grid also supports an `IQueryable` for EF-friendly auto server-side execution — but going through a [`data-access`](../../data-access/SKILL.md) interface keeps the grid render-mode-agnostic.
+`LoadDataArgs` gives you `Skip`/`Top`/`OrderBy`/`Filter` strings ready to translate to your query. Radzen's grid also supports an `IQueryable` for EF-friendly auto server-side execution — but going through a [`data-fetching`](../../data-fetching/SKILL.md) interface keeps the grid render-mode-agnostic.
 
 ## Dialog + notification services
 
@@ -94,7 +94,7 @@ Feed brand colors by referencing the theme's CSS custom properties and overridin
 async Task Delete(OrderDto o)
 {
     var ok = await DialogService.Confirm(
-        $"Delete order {o.Number}? This cannot be undone.", "Delete order",   // name the object — ui-conventions
+        $"Delete order {o.Number}? This cannot be undone.", "Delete order",   // name the object — ui-rules
         new ConfirmOptions { OkButtonText = "Delete", CancelButtonText = "Cancel" });
     if (ok == true)
     {
@@ -114,7 +114,7 @@ async Task Delete(OrderDto o)
 | Theme not applied | Theme CSS `<link>` missing or two theme stylesheets included | Exactly one theme base stylesheet |
 | Services missing in `.Client` under Auto | `AddRadzenComponents()` only in Server | Register in both `Program.cs` |
 
-**`data-testid` on Radzen controls:** inline `data-testid="..."` forwards via `Attributes` (`RadzenComponent`, `CaptureUnmatchedValues`) to the rendered root. Full rules in [`testability`](../../testability/SKILL.md).
+**`data-testid` on Radzen controls:** inline `data-testid="..."` forwards via `Attributes` (`RadzenComponent`, `CaptureUnmatchedValues`) to the rendered root. Full rules in [`test-ids`](../../test-ids/SKILL.md).
 
 ## Validation
 

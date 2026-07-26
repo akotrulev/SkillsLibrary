@@ -359,6 +359,6 @@ jobs:
 
 - **`qa/java/skills/db-testing/testcontainers`** — integration-tests stage runs these.
 - **`qa/java/skills/email-testing`** — Mailpit as a service container.
-- **`qa/reporting/java/skills/allure-reporting`** — Allure-TestNG adapter wiring inside test modules.
-- **`qa/java/skills/performance/gatling`** — perf-stage simulations.
+- **`qa/reporting/java/skills/test-reports`** — Allure-TestNG adapter wiring inside test modules.
+- **`qa/java/skills/load-testing`** — perf-stage simulations.
 - **`devops/azure-pipelines`** — non-QA pipeline patterns.

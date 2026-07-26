@@ -16,7 +16,7 @@ case; you never copy-paste a `[Test]` to cover a new input.
 
 It is *not*: a **builder** constructing one richly-configured object in code (`qa-test-data-builder-dotnet`
 — one object well, vs many rows; they **compose**); rows pulled from a **live database**
-(`qa-db-testing-query-author-dotnet`); or a **cross-browser/-device matrix** (`qa-cloud-grid-config-dotnet`
+(`qa-db-verification-queries-dotnet`); or a **cross-browser/-device matrix** (`qa-browser-cloud-setup-dotnet`
 — parameterizing the *environment*, not the *data*).
 
 > **The discipline this skill encodes** — four ideas, identical across all three stacks:
@@ -41,7 +41,7 @@ It is *not*: a **builder** constructing one richly-configured object in code (`q
 | Nested / hierarchical cases (a row has sub-objects or lists) | **JSON file** | `JsonSerializer.Deserialize<List<Row>>(…)` |
 | Tabular data **owned/edited by non-technical stakeholders** | **Excel `.xlsx`** | ClosedXML `XLWorkbook` → bind cells → `IEnumerable<Row>` |
 | Huge dataset (don't hold it all in memory) | any of the above, **lazy** | source method `yield return`s one `TestCaseData` per row |
-| Rows from a **live DB / API** at test time | not this skill | `qa-db-testing-query-author-dotnet` (DB), an API client (HTTP) |
+| Rows from a **live DB / API** at test time | not this skill | `qa-db-verification-queries-dotnet` (DB), an API client (HTTP) |
 | Each row is a whole complex domain object built in code | not this skill | `qa-test-data-builder-dotnet` (the builder can consume one row) |
 
 **Rule of thumb:** *prefer CSV or JSON in git* (diffable, reviewable, mergeable). Reach for **Excel only**
@@ -280,7 +280,7 @@ shared mutable state** (CLAUDE.md: no static mutable state) — each case must s
 - **Instance state in a `[TestCaseSource]`.** It resolves at discovery before `[SetUp]`; an instance
   dependency is null. *Fix:* keep the source **static** and self-contained.
 - **Secrets or real PII in a committed data file.** It's in git history forever. *Fix:* synthetic data; real
-  secrets via env (cross-link `qa-auth0-test-tokens-dotnet`).
+  secrets via env (cross-link `qa-test-login-tokens-dotnet`).
 
 ## Examples
 
@@ -335,7 +335,7 @@ public void Should_ApplyDiscount(OrderCase row)
   stakeholder-owned sheets, inline for a few. Prefer diffable CSV/JSON in git over binary Excel.
 - **Money is integer cents / `decimal`, never `double`** (round-off corrupts it); `CultureInfo.InvariantCulture`
   for CsvHelper. No secrets or real PII in committed data files (synthetic; secrets via env —
-  `qa-auth0-test-tokens-dotnet`).
+  `qa-test-login-tokens-dotnet`).
 - **Lazy `yield return` for huge datasets**; `[Parallelizable]` + `[assembly: LevelOfParallelism]` for
   independent rows. No `Thread.Sleep`; structured logging; constructor injection; nullable enabled.
 
@@ -350,10 +350,10 @@ public void Should_ApplyDiscount(OrderCase row)
 - `qa-test-data-builder-dotnet` — the **boundary**: a builder/ObjectMother constructs **one** complex object
   in code with defaults; data-driven feeds **many** rows from a file. They **compose** — a row drives a
   builder's varying fields (see the last example).
-- `qa-db-testing-query-author-dotnet` — when rows come from a **live database** at test time rather than
+- `qa-db-verification-queries-dotnet` — when rows come from a **live database** at test time rather than
   a static file; the safe assertion-SQL counterpart to file-sourced data.
-- `qa-cloud-grid-config-dotnet` — parameterizing the **environment** (browser/device matrix) rather
+- `qa-browser-cloud-setup-dotnet` — parameterizing the **environment** (browser/device matrix) rather
   than the **data**; orthogonal matrices that can multiply.
-- `qa-api-test-author-generator-dotnet` / `qa-ui-test-author-playwright-dotnet` — where the data-driven test
-  *bodies* are authored; this skill supplies their rows. `qa-allure-reporting-dotnet` — each row renders as a
+- `qa-api-test-writer-dotnet` / `qa-ui-test-writer-playwright-dotnet` — where the data-driven test
+  *bodies* are authored; this skill supplies their rows. `qa-test-reports-dotnet` — each row renders as a
   separate, named result.

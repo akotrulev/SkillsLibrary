@@ -226,5 +226,5 @@ const scopes = (auth.user?.scope ?? '').split(' ');
 - Backend validation → `backend/dotnet/skills/cognito` / `backend/java/skills/cognito`
 - Blazor → [`auth/cognito-blazor`](../cognito-blazor/SKILL.md)
 - Auth0 equivalent → [`auth/auth0-react`](../auth0-react/SKILL.md)
-- React patterns (providers, custom hooks) → `frontend/react/skills/generator`
+- React patterns (providers, custom hooks) → `frontend/react/skills/component-writer`
 - E2E with auth → `qa/typescript/skills/ui-test-author/playwright` (use `storageState` for an authenticated session)

@@ -48,9 +48,9 @@ non-gating lane. *Deterministic failure* → it's a bug, fix it. **Never** crank
 - Node 20, TypeScript (strict), Playwright Test (e2e — where flakiness mostly lives) + Vitest (unit)
 - **No `await page.waitForTimeout(...)` / `setTimeout` as a wait** — sleeps *cause* flakiness; use Playwright
   **auto-waiting** locators + web-first assertions + `expect.poll` (cross-link
-  `qa-ui-test-author-playwright-typescript`)
+  `qa-ui-test-writer-playwright-typescript`)
 - `allure-playwright` — the Allure **Retries** view + **history-based** flaky detection + `allure.tag` /
-  `allure.issue` (cross-link `qa-allure-reporting-typescript` for the full Allure wiring)
+  `allure.issue` (cross-link `qa-test-reports-typescript` for the full Allure wiring)
 
 ```
 e2e/
@@ -163,7 +163,7 @@ stacks — it needs no history and no extra tool. Use it as the live candidate l
 
 **(b) Allure's history-based auto-detection** — identical across every stack (a *report* feature, not a
 language one). With Allure **history enabled** (the `history/` folder carried across runs — see
-`qa-allure-reporting-typescript`), Allure auto-adds the **Flaky** mark when, across the latest **5
+`qa-test-reports-typescript`), Allure auto-adds the **Flaky** mark when, across the latest **5
 launches**, a test:
 
 1. got **Failed** at some point within those 5 launches, **and**
@@ -180,7 +180,7 @@ quarantine *candidate* list, and **Fixed** as the signal to lift a test *out* of
 > native "flaky" status and Allure history, which catch flakiness you haven't tagged yet.
 
 **A triage bucket in `categories.json`** keeps quarantined/flaky failures out of "real" failures (the
-reporter picks it up — see `qa-allure-reporting-typescript`):
+reporter picks it up — see `qa-test-reports-typescript`):
 
 ```json
 [
@@ -265,11 +265,11 @@ is reported in Allure (flaky-flagged, history-tracked) but **never** fails the p
   first-class `@Flaky` annotation. Same four moves.
 - `qa-flaky-test-quarantine-dotnet` — same four moves, NUnit: `[Retry]` (method-level only) + a custom
   `IRepeatTest` attribute; `[Category("Flaky")]` + `dotnet test --filter` for the gate vs non-gating lane.
-- `qa-allure-reporting-typescript` (#?) — the **full** allure-playwright wiring this layers on: the reporter,
+- `qa-test-reports-typescript` (#?) — the **full** allure-playwright wiring this layers on: the reporter,
   history/trends (required for auto-flaky detection), `categories.json`, CI publish. Base setup lives there.
 - `qa-_shared-quality-metrics` — track **flaky-rate over time**; a `@flaky` tag set that grows is the metric
   to watch.
-- `qa-ui-test-author-playwright-typescript` — where the quarantined tests are authored; flakiness is best
+- `qa-ui-test-writer-playwright-typescript` — where the quarantined tests are authored; flakiness is best
   fixed at the source: auto-waiting locators, web-first assertions, **no `waitForTimeout`**,
   intent-not-selectors page objects. Fix the wait and the test leaves quarantine.
 - `qa-ci-pipelines` (github-actions / azure-pipelines / gitlab-ci references) — the gate-lane vs quarantine-lane job

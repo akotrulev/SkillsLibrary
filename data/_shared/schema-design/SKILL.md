@@ -1,6 +1,6 @@
 ---
 name: data-schema-design
-description: Use when choosing which database engine fits a workload, or designing a data model across any SQL or document engine — engine selection, entities, identifiers, soft delete, multi-tenancy, audit trails, money, enums — before engine-specific DDL. Triggers: "which database for this workload", "does Postgres suffice or do I need Mongo/Redis", "embed or reference", "multi-tenant model". Do NOT use for engine-specific syntax (`data/<db>`) or query optimization (`query-optimization`).
+description: Use when choosing which database engine fits a workload, or designing a data model across any SQL or document engine — engine selection, entities, identifiers, soft delete, multi-tenancy, audit trails, money, enums — before engine-specific DDL. Triggers: "which database for this workload", "does Postgres suffice or do I need Mongo/Redis", "embed or reference", "multi-tenant model". Do NOT use for engine-specific syntax (`data/<db>`) or query optimization (`slow-query-fixes`).
 ---
 
 # Data — Schema Design (cross-engine)
@@ -23,7 +23,7 @@ First-pass schema decisions that apply across SQL and document engines. Identifi
 
 - Engine-specific DDL → `data/<db>`
 - Migration mechanics → `data/_shared/migrations`
-- Query tuning → `data/_shared/query-optimization`
+- Query tuning → `data/_shared/slow-query-fixes`
 - Caching → `data/_shared/caching-patterns`
 
 ## Engine selection
@@ -232,6 +232,6 @@ This table is the **decision**. The modeling *mechanics* that flow from it — e
 
 - Engine DDL → `data/<db>`
 - Migration shape (expand-contract, online-safe) → `data/_shared/migrations`
-- Query patterns / indexing → `data/_shared/query-optimization`
+- Query patterns / indexing → `data/_shared/slow-query-fixes`
 - Caching layer in front of the schema → `data/_shared/caching-patterns`
 - Tenant identity in tokens → `auth/_shared/auth0-concepts`

@@ -1,6 +1,6 @@
 ---
-name: qa-ui-test-author-appium-dotnet
-description: Use when scaffolding a .NET (C#) + Appium 2.x page object or NUnit mobile UI test, following the BaseAppiumPage / AppiumDriverFactory pattern. Triggers "create a C# Appium page object for X", "add a .NET mobile page for screen Y", "write an Appium NUnit test for Z". Not for exploring a live screen (`appium-explore`) or OS-surface features (`mobile-native-features`).
+name: qa-ui-test-writer-appium-dotnet
+description: Use when scaffolding a .NET (C#) + Appium 2.x page object or NUnit mobile UI test, following the BaseAppiumPage / AppiumDriverFactory pattern. Triggers "create a C# Appium page object for X", "add a .NET mobile page for screen Y", "write an Appium NUnit test for Z". Not for exploring a live screen (`mobile-screen-explorer`) or OS-surface features (`mobile-native-features`).
 ---
 
 # QA — Appium .NET Page Object & Test Generator
@@ -29,8 +29,8 @@ Scaffolds Appium 2.x page objects and NUnit mobile UI tests in C#, mirroring the
 - Appium Java → `qa/java/skills/ui-test-author/appium`
 - Appium TypeScript / WebdriverIO → `qa/typescript/skills/ui-test-author/appium`
 - Selenium / web → `qa/dotnet/skills/ui-test-author/selenium` or `qa/dotnet/skills/ui-test-author/playwright`
-- Reviewing an existing page object → `qa/dotnet/skills/ui-test-author/reviewer`
-- Designing the whole POM architecture → `qa/dotnet/skills/page-object-architect`
+- Reviewing an existing page object → `qa/dotnet/skills/ui-test-author/review`
+- Designing the whole POM architecture → `qa/dotnet/skills/page-object-design`
 
 ## Inputs needed
 
@@ -56,7 +56,7 @@ Pick the highest row that applies. Lower rows are progressively more brittle.
 | Android UiAutomator | `AppiumBy.AndroidUIAutomator("new UiSelector().text(\"Submit\")")` | Android-only, no accessibility id, need scroll-into-view | ❌ Android only |
 | XPath | `By.XPath("//android.widget.Button[@text='Submit']")` | **Last resort.** Leave a `// TODO: replace with AccessibilityId` | ✅ but slow + fragile |
 
-Per the Appium team, treat a working XPath as **proof the node exists, not the final locator** — use it to learn the tree, then downgrade to a native strategy (`AppiumBy.AndroidUIAutomator` / `AppiumBy.IosClassChain`) the moment the source exposes one, and drop the TODO. On iOS, `id` / `name` / `accessibility id` are synonyms over the element's `name` attribute. **Discover and verify these locators against the live app via `qa/dotnet/skills/appium-explore` before hand-writing them**, and let `qa/dotnet/skills/appium-page-object` emit the class from that inventory — this skill owns the conventions both of those defer to.
+Per the Appium team, treat a working XPath as **proof the node exists, not the final locator** — use it to learn the tree, then downgrade to a native strategy (`AppiumBy.AndroidUIAutomator` / `AppiumBy.IosClassChain`) the moment the source exposes one, and drop the TODO. On iOS, `id` / `name` / `accessibility id` are synonyms over the element's `name` attribute. **Discover and verify these locators against the live app via `qa/dotnet/skills/mobile-screen-explorer` before hand-writing them**, and let `qa/dotnet/skills/mobile-screen-objects` emit the class from that inventory — this skill owns the conventions both of those defer to.
 
 ## Deep-dive reference
 
@@ -375,18 +375,18 @@ public class AuthenticationTest : BaseMobileTest
 
 ## Handoffs
 
-- Discovering / verifying locators on the live app → `qa/dotnet/skills/appium-explore`
-- Emitting / updating the page object from a discovered inventory → `qa/dotnet/skills/appium-page-object`
-- Architecting the POM structure (sub-namespaces, base classes, capabilities) → `qa/dotnet/skills/page-object-architect`
+- Discovering / verifying locators on the live app → `qa/dotnet/skills/mobile-screen-explorer`
+- Emitting / updating the page object from a discovered inventory → `qa/dotnet/skills/mobile-screen-objects`
+- Architecting the POM structure (sub-namespaces, base classes, capabilities) → `qa/dotnet/skills/page-object-design`
 - Test data builders → `qa/dotnet/skills/test-data-builder`
-- Reviewing a page object → `qa/dotnet/skills/ui-test-author/reviewer`
+- Reviewing a page object → `qa/dotnet/skills/ui-test-author/review`
 - Authoring the test that uses this page object → `qa/manual/test-case-writer`
-- Allure reporting → `qa/reporting/dotnet/skills/allure-reporting`
+- Allure reporting → `qa/reporting/dotnet/skills/test-reports`
 
 ## Cross-references
 
 - Java sibling (TestNG + `io.appium:java-client`) → `qa/java/skills/ui-test-author/appium`
 - TypeScript sibling (WebdriverIO + `@wdio/appium-service`) → `qa/typescript/skills/ui-test-author/appium`
 - Web UI (.NET) → `qa/dotnet/skills/ui-test-author/selenium`, `qa/dotnet/skills/ui-test-author/playwright`
-- Cloud device grid (BrowserStack / Sauce / Device Farm) → `qa/dotnet/skills/cloud-grid-config` (Phase 2)
-- Network capture for non-Playwright stacks → `qa/dotnet/skills/network-monitoring`
+- Cloud device grid (BrowserStack / Sauce / Device Farm) → `qa/dotnet/skills/browser-cloud-setup` (Phase 2)
+- Network capture for non-Playwright stacks → `qa/dotnet/skills/network-mocking`

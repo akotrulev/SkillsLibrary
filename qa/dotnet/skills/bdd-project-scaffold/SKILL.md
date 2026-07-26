@@ -1,15 +1,15 @@
 ---
-name: qa-bdd-project-scaffold-dotnet
-description: Use when adding the Reqnroll (SpecFlow successor) BDD layer onto a .NET 10 (8-9) UI/mobile test project, or standing up a Reqnroll + NUnit project from zero. Triggers "set up Reqnroll", "add a BDD layer to our Playwright/Appium tests in C#", "wire Reqnroll DI and hooks". Not for writing feature files (`gherkin-authoring`), step definitions (`bdd-step-bindings`), or page objects (`page-object-architect`).
+name: qa-bdd-project-setup-dotnet
+description: Use when adding the Reqnroll (SpecFlow successor) BDD layer onto a .NET 10 (8-9) UI/mobile test project, or standing up a Reqnroll + NUnit project from zero. Triggers "set up Reqnroll", "add a BDD layer to our Playwright/Appium tests in C#", "wire Reqnroll DI and hooks". Not for writing feature files (`feature-file-writer`), step definitions (`gherkin-step-code`), or page objects (`page-object-design`).
 ---
 
 # Reqnroll BDD Project Scaffold (C# / .NET 10)
 
-Wires **Reqnroll** (the maintained SpecFlow successor) into a .NET test project: packages, `reqnroll.json`, the `Features/` folder, the DI container (`[ScenarioDependencies]` via `Reqnroll.Microsoft.Extensions.DependencyInjection`), the per-scenario browser/driver lifecycle hooks, and the shared scenario-context object that step definitions inject. It produces the **empty rig** — no feature files, no step logic; those come from `gherkin-authoring` and `bdd-step-bindings`.
+Wires **Reqnroll** (the maintained SpecFlow successor) into a .NET test project: packages, `reqnroll.json`, the `Features/` folder, the DI container (`[ScenarioDependencies]` via `Reqnroll.Microsoft.Extensions.DependencyInjection`), the per-scenario browser/driver lifecycle hooks, and the shared scenario-context object that step definitions inject. It produces the **empty rig** — no feature files, no step logic; those come from `feature-file-writer` and `gherkin-step-code`.
 
 **Version rule:** this layer is added onto an existing UI/mobile project — **match that project's `TargetFramework`**. For a from-zero rig, target **net10.0** (the library primary); net8 (LTS) / net9 (STS) are supported fallbacks. Never up-level the host project.
 
-This is the BDD analogue of `ui-project-scaffold`; it assumes a Playwright (web) or Appium (mobile) page-object project either exists or will be built by `qa-ui-dotnet` / `qa-mobile-dotnet`.
+This is the BDD analogue of `ui-project-setup`; it assumes a Playwright (web) or Appium (mobile) page-object project either exists or will be built by `qa-ui-dotnet` / `qa-mobile-dotnet`.
 
 ## Stack (pinned, verify latest at author time)
 
@@ -28,10 +28,10 @@ This is the BDD analogue of `ui-project-scaffold`; it assumes a Playwright (web)
 
 ## When NOT to use
 
-- Writing `.feature` files → `qa/_shared/bdd/gherkin-authoring`
-- Generating `[Binding]` step classes → `qa/dotnet/skills/bdd-step-bindings`
-- Building page objects → `qa/dotnet/skills/page-object-architect` / `pom-builder`
-- Reqnroll in Java/TS → `qa/{java,typescript}/skills/bdd-project-scaffold` (those use Cucumber-JVM / playwright-bdd)
+- Writing `.feature` files → `qa/_shared/bdd/feature-file-writer`
+- Generating `[Binding]` step classes → `qa/dotnet/skills/gherkin-step-code`
+- Building page objects → `qa/dotnet/skills/page-object-design` / `page-objects-from-url`
+- Reqnroll in Java/TS → `qa/{java,typescript}/skills/bdd-project-setup` (those use Cucumber-JVM / playwright-bdd)
 
 ## Inputs needed
 
@@ -49,7 +49,7 @@ Confirm at most 2–3.
 4. Create `Support/` : the DI registration (`[ScenarioDependencies]`), the scenario-context object, and the lifecycle hooks (`[BeforeScenario]`/`[AfterScenario]` that own the Playwright page or Appium driver — **with teardown**).
 5. Create the empty `Features/` folder and one throwaway smoke `.feature` to prove the rig parses and runs.
 6. `dotnet build` (the source generator must produce code-behind) and run the smoke scenario.
-7. Report files created and hand off to `gherkin-authoring` (features) + `bdd-step-bindings` (steps).
+7. Report files created and hand off to `feature-file-writer` (features) + `gherkin-step-code` (steps).
 
 ## Templates
 
@@ -189,8 +189,8 @@ For Appium, `ScenarioState` holds an `AppiumDriver` (sync API) built in `[Before
 
 ## Handoffs
 
-- Feature files → `qa/_shared/bdd/gherkin-authoring`
-- Step definitions + POM wiring → `qa/dotnet/skills/bdd-step-bindings`
-- Page objects → `qa/dotnet/skills/page-object-architect` / `pom-builder` / `appium-page-object`
-- Allure reporting → `qa/reporting/dotnet/skills/allure-reporting`
+- Feature files → `qa/_shared/bdd/feature-file-writer`
+- Step definitions + POM wiring → `qa/dotnet/skills/gherkin-step-code`
+- Page objects → `qa/dotnet/skills/page-object-design` / `page-objects-from-url` / `mobile-screen-objects`
+- Allure reporting → `qa/reporting/dotnet/skills/test-reports`
 - CI (feature shard, publish report) → `qa/cicd/dotnet/skills/ci-pipelines`

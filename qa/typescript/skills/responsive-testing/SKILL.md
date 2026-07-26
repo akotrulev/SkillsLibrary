@@ -51,7 +51,7 @@ pixel-level diffing is `visual-regression`'s job and pairs with this skill, it d
 
 - Node 20 + TypeScript (strict mode), **Playwright Test**
 - **The app's own breakpoint source** — imported or mirrored into one `BREAKPOINTS` module (the analogue of
-  i18n-testing's supported-locale list). Where the app defines them:
+  language-testing's supported-locale list). Where the app defines them:
 
 | App uses | Breakpoints live in | Defaults (px) |
 |---|---|---|
@@ -210,7 +210,7 @@ test('nav swaps to hamburger on live shrink and back on grow', async ({ page }) 
 
 - `qa-responsive-testing-java` · `qa-responsive-testing-dotnet` — sibling stacks (Playwright-Java + TestNG ·
   Playwright .NET + NUnit); same four ideas, different APIs.
-- `qa-ui-test-author-playwright-typescript` — base fixture/POM conventions; responsive adds the width dimension.
+- `qa-ui-test-writer-playwright-typescript` — base fixture/POM conventions; responsive adds the width dimension.
   Page objects expose variant intent (`navigation().isCollapsed()`), not boxes — geometry helpers live beside
   the specs.
 - `qa-visual-regression-typescript` — the pixel complement: one baseline per viewport project, after the

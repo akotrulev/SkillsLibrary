@@ -1,6 +1,6 @@
 ---
 name: qa-db-testing-testcontainers-dotnet
-description: Use when scaffolding .NET integration tests backed by a real database (Postgres / SQL Server / Mongo / Redis) via Testcontainers. Triggers "spin up a real Postgres for these tests", "Testcontainers fixture for X", "stop mocking the DB in IntegrationTests". Not for query guardrails (`db-testing/query-author`) or connect/seed/clean against an existing DB (`db-testing/client`).
+description: Use when scaffolding .NET integration tests backed by a real database (Postgres / SQL Server / Mongo / Redis) via Testcontainers. Triggers "spin up a real Postgres for these tests", "Testcontainers fixture for X", "stop mocking the DB in IntegrationTests". Not for query guardrails (`db-testing/verification-queries`) or connect/seed/clean against an existing DB (`db-testing/client`).
 ---
 
 # QA — DB Testing with Testcontainers (.NET)
@@ -17,8 +17,8 @@ Scaffolds NUnit fixtures that boot a real database container per fixture (or per
 ## When NOT to use
 
 - Pure unit tests with no SQL surface — keep them mock-driven
-- Performance/load runs against the DB — use `qa/dotnet/skills/performance/nbomber`
-- SQL safety review of assertion queries — use `qa/dotnet/skills/db-testing/query-author`
+- Performance/load runs against the DB — use `qa/dotnet/skills/load-testing`
+- SQL safety review of assertion queries — use `qa/dotnet/skills/db-testing/verification-queries`
 - Non-.NET stacks — use `qa/{java,typescript}/skills/db-testing/testcontainers`
 
 ## Inputs needed
@@ -246,7 +246,7 @@ new ContainerBuilder()
 
 ### Diagnostics
 - On test failure, attach the container's stdout/stderr to Allure: `await Container.GetLogsAsync()` → `AllureLifecycle.Instance.AddAttachment("postgres.log", "text/plain", bytes)`.
-- Pair with `qa/reporting/dotnet/skills/allure-reporting` for the publish step.
+- Pair with `qa/reporting/dotnet/skills/test-reports` for the publish step.
 
 ### What NOT to do
 - No `Task.Delay` / `Thread.Sleep` waiting for the DB. Use the module's built-in wait strategy.
@@ -267,11 +267,11 @@ new ContainerBuilder()
    - `IntegrationTests/Fixtures/{Resource}IntegrationTests.cs` (concrete fixture) inheriting from the base.
    - `IntegrationTests/IntegrationTests.csproj` updates: add `Testcontainers.PostgreSql` / `.MsSql` / `.MongoDb`, `Respawn`, `Microsoft.AspNetCore.Mvc.Testing` if HTTP surface is exercised.
 4. Run `dotnet test IntegrationTests/IntegrationTests.csproj --filter "FullyQualifiedName~{Resource}IntegrationTests"` — expect green or a real assertion failure (not a setup crash).
-5. Cross-link: in the fixture file's header comment, point to `qa/dotnet/skills/db-testing/query-author` for assertion-query rules and `qa/dotnet/skills/test-data-builder` for seed builders.
+5. Cross-link: in the fixture file's header comment, point to `qa/dotnet/skills/db-testing/verification-queries` for assertion-query rules and `qa/dotnet/skills/test-data-builder` for seed builders.
 
 ## Cross-references
 
-- **`qa/dotnet/skills/db-testing/query-author`** — SQL guardrails for assertion queries inside these tests.
+- **`qa/dotnet/skills/db-testing/verification-queries`** — SQL guardrails for assertion queries inside these tests.
 - **`qa/dotnet/skills/test-data-builder`** — builders for seed data (preferred over inline literals).
 - **`qa/cicd/dotnet/skills/ci-pipelines`** — Docker-in-Docker enablement, container caching, and Allure publish for integration test stages.
-- **`qa/reporting/dotnet/skills/allure-reporting`** — attach container logs on failure.
+- **`qa/reporting/dotnet/skills/test-reports`** — attach container logs on failure.

@@ -1,6 +1,6 @@
 ---
 name: devops-azure-pipelines
-description: Use when the user asks to write, review, or modify Azure DevOps YAML pipelines (`azure-pipelines.yml`) for build/test/deploy of Java, .NET, or TypeScript projects, with deploys to AWS or Azure. Triggers: "write an Azure Pipelines YAML for X", "add a stage to my pipeline", "convert this classic build to YAML", "set up Azure DevOps CI". Do NOT use for GitHub Actions (use `devops/github-actions`), GitLab CI (use `devops/gitlab-ci`), or IaC scripts (use `devops/iac-bicep-terraform`). Do NOT use for the **test-suite CI lane** — shard matrix, Allure publishing, perf gate, flake quarantine — that belongs to `qa-cicd-{java,dotnet,typescript}`; this skill owns the **build/deploy** lane.
+description: Use when the user asks to write, review, or modify Azure DevOps YAML pipelines (`azure-pipelines.yml`) for build/test/deploy of Java, .NET, or TypeScript projects, with deploys to AWS or Azure. Triggers: "write an Azure Pipelines YAML for X", "add a stage to my pipeline", "convert this classic build to YAML", "set up Azure DevOps CI". Do NOT use for GitHub Actions (use `devops/github-actions`), GitLab CI (use `devops/gitlab-ci`), or IaC scripts (use `devops/infrastructure-as-code`). Do NOT use for the **test-suite CI lane** — shard matrix, Allure publishing, perf gate, flake quarantine — that belongs to `qa-cicd-{java,dotnet,typescript}`; this skill owns the **build/deploy** lane.
 ---
 
 # DevOps — Azure Pipelines
@@ -21,7 +21,7 @@ Authors Azure DevOps YAML pipelines for build, test, and deploy across the proje
 
 - GitHub Actions → `devops/github-actions`
 - GitLab CI/CD → `devops/gitlab-ci`
-- Bicep / Terraform authoring → `devops/iac-bicep-terraform`
+- Bicep / Terraform authoring → `devops/infrastructure-as-code`
 - App-level env config → `devops/environment-config`
 
 - Test-suite CI lane (shard matrix, Allure publish, perf gate, flake quarantine) → `qa/cicd/agents/qa-cicd-{java,dotnet,typescript}`
@@ -376,7 +376,7 @@ Publish the raw results as a pipeline artifact here; the **report generation/pub
 
 - GitHub equivalent → `devops/github-actions`
 - GitLab equivalent → `devops/gitlab-ci`
-- IaC for underlying resources → `devops/iac-bicep-terraform`
+- IaC for underlying resources → `devops/infrastructure-as-code`
 - Per-env secrets/config → `devops/environment-config`
 - Azure-specific deploy details → `devops/azure-deployment`
 - AWS-specific deploy details → `devops/aws-deployment`

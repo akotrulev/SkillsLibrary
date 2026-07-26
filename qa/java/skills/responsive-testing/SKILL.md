@@ -50,7 +50,7 @@ pixel-level diffing is `visual-regression`'s job and pairs with this skill, it d
 ## Stack
 
 - Java 21, **Playwright-Java** (`com.microsoft.playwright`), **TestNG**, `PlaywrightAssertions.assertThat`
-- **The app's own breakpoint source** — mirrored into one `Breakpoints` class (the analogue of i18n-testing's
+- **The app's own breakpoint source** — mirrored into one `Breakpoints` class (the analogue of language-testing's
   supported-locale list). Where the app defines them:
 
 | App uses | Breakpoints live in | Defaults (px) |
@@ -230,7 +230,7 @@ public void shouldSwapNavOnLiveShrinkAndRestoreOnGrow() {
 
 - `qa-responsive-testing-typescript` · `qa-responsive-testing-dotnet` — sibling stacks (Playwright Test ·
   Playwright .NET + NUnit); same four ideas, different APIs.
-- `qa-ui-test-author-playwright-java` — base fixture/POM conventions; responsive adds the width dimension.
+- `qa-ui-test-writer-playwright-java` — base fixture/POM conventions; responsive adds the width dimension.
   Page objects expose variant intent (`navigation().isCollapsed()`), not boxes — geometry helpers live beside
   the tests.
 - `qa-visual-regression-java` — the pixel complement: one baseline per viewport, after the structural checks

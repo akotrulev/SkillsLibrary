@@ -23,8 +23,8 @@ Owns making a Blazor app fast and keeping it fast across three cost centers that
 - Writing the CSS / bundling static assets → [`styling`](../styling/SKILL.md) (its static-asset note points *here* for the perf side)
 - SignalR as a *feature* (live push, hubs, streams) → [`realtime`](../realtime/SKILL.md); this skill owns SignalR only as a *scale* concern
 - Server-side query/DB tuning → `data/*`, the `backend/dotnet` dev stack's persistence skill if installed
-- Caching read-heavy fetches (`HybridCache`) → [`data-access`](../data-access/SKILL.md)
-- Load/stress/soak testing the deployed app → `qa/dotnet/skills/performance/nbomber` (peer)
+- Caching read-heavy fetches (`HybridCache`) → [`data-fetching`](../data-fetching/SKILL.md)
+- Load/stress/soak testing the deployed app → `qa/dotnet/skills/load-testing` (peer)
 
 ## Cost-center routing — where is my slowness?
 
@@ -91,7 +91,7 @@ For any list past ~100 rows, `<Virtualize>` renders only the rows in (and near) 
 </Virtualize>
 ```
 
-For large/remote datasets use the **`ItemsProvider`** overload so you fetch a window per scroll instead of loading everything client-side (pairs with server-side paging — [`ui-conventions`](../ui-conventions/SKILL.md) table ergonomics). Set `ItemSize` to the real row height to avoid scroll-jump.
+For large/remote datasets use the **`ItemsProvider`** overload so you fetch a window per scroll instead of loading everything client-side (pairs with server-side paging — [`ui-rules`](../ui-rules/SKILL.md) table ergonomics). Set `ItemSize` to the real row height to avoid scroll-jump.
 
 ### Parameter churn & `CascadingValue IsFixed`
 
@@ -161,7 +161,7 @@ Best for large, rarely-visited areas (admin, reporting, charts).
 
 ### 5. Prerender the shell
 
-Prerender (static SSR) the first paint so the user sees content while WASM downloads — pair with `[PersistentState]` so the interactive run doesn't refetch ([`data-access`](../data-access/SKILL.md)). Prerender improves *perceived* startup, not actual download.
+Prerender (static SSR) the first paint so the user sees content while WASM downloads — pair with `[PersistentState]` so the interactive run doesn't refetch ([`data-fetching`](../data-fetching/SKILL.md)). Prerender improves *perceived* startup, not actual download.
 
 ---
 
@@ -169,10 +169,10 @@ Prerender (static SSR) the first paint so the user sees content while WASM downl
 
 Interactive Server holds a **circuit** (server-side component state + a SignalR connection) per connected user. Memory and SignalR are the ceilings:
 
-- **Circuit memory** is roughly the component tree + captured state per user. Keep component state lean; **`IDisposable`/`IAsyncDisposable`** everything that holds resources (see [`realtime`](../realtime/SKILL.md), [`error-resilience`](../error-resilience/SKILL.md)) — a leaked subscription or `DbContext` (never inject one — [`data-access`](../data-access/SKILL.md)) multiplies by user count.
+- **Circuit memory** is roughly the component tree + captured state per user. Keep component state lean; **`IDisposable`/`IAsyncDisposable`** everything that holds resources (see [`realtime`](../realtime/SKILL.md), [`error-handling`](../error-handling/SKILL.md)) — a leaked subscription or `DbContext` (never inject one — [`data-fetching`](../data-fetching/SKILL.md)) multiplies by user count.
 - **`DisconnectedCircuitMaxRetained`** / retention timeout bound how many evicted circuits stay in memory for reconnection — lower them under memory pressure.
 - **SignalR scale-out needs sticky sessions** (a circuit is stateful, pinned to one server) and a backplane: **Azure SignalR Service** (offloads connections from your app servers — the default at scale) or a **Redis backplane**. Without one, a load-balanced deployment drops circuits on the wrong node.
-- **Right-size before scaling out:** transfer size per interaction, render batch size, and `MaxBufferedUnacknowledgedRenderBatches` affect throughput. Measure circuits/CPU/RAM under real concurrency with `qa/dotnet/skills/performance/nbomber` (peer) before adding servers.
+- **Right-size before scaling out:** transfer size per interaction, render batch size, and `MaxBufferedUnacknowledgedRenderBatches` affect throughput. Measure circuits/CPU/RAM under real concurrency with `qa/dotnet/skills/load-testing` (peer) before adding servers.
 
 WASM has **no** server circuit — it scales like static files + your API. That's the trade against Server's zero-download interactivity.
 
@@ -180,7 +180,7 @@ WASM has **no** server circuit — it scales like static files + your API. That'
 
 ## Diagnostics
 
-Measure before optimizing. Wire the **net10 component OTel meters** into the observability stack (documented in [`reference`](../reference/SKILL.md)):
+Measure before optimizing. Wire the **net10 component OTel meters** into the observability stack (documented in [`basics`](../basics/SKILL.md)):
 
 | Meter source | Watches |
 |---|---|
@@ -195,7 +195,7 @@ builder.Services.AddOpenTelemetry().WithMetrics(m => m
               "Microsoft.AspNetCore.Components.Server.Circuits"));
 ```
 
-Feed them into the Grafana stack (`observability/opentelemetry-dotnet` + `observability/grafana-dashboards`, external skills). net8/net9: no built-in component meters — use the **`<CascadingValue>`-free** render-count trick (`Interlocked.Increment` in `OnAfterRender`) on suspect components, browser DevTools **Performance**, and the WASM startup trace in the browser console.
+Feed them into the Grafana stack (`observability/opentelemetry-dotnet` + `observability/dashboards`, external skills). net8/net9: no built-in component meters — use the **`<CascadingValue>`-free** render-count trick (`Interlocked.Increment` in `OnAfterRender`) on suspect components, browser DevTools **Performance**, and the WASM startup trace in the browser console.
 
 **Client-side (both modes):** browser DevTools — **Network** (asset sizes, Brotli applied, one-not-two fetches on prerender), **Performance** (long tasks, layout thrash), Lighthouse for a startup score.
 
@@ -210,7 +210,7 @@ Set explicit budgets and fail CI when they regress — an unmeasured perf rule r
 | WASM published `_framework` transfer (Brotli) | ≤ 2.5 MB initial, lazy-load the rest | build check on publish output size |
 | First Contentful Paint (prerendered shell) | ≤ 1.5 s on mid-tier / throttled | Lighthouse CI |
 | Time to Interactive (WASM) | ≤ 3.5 s on mid-tier / throttled | Lighthouse CI |
-| Largest grid without `Virtualize` | ≤ 100 rows | `reviewer` rule |
+| Largest grid without `Virtualize` | ≤ 100 rows | `code-review` rule |
 | Circuit memory / active user (Server) | measured baseline; alert on +30% | OTel circuit meter + Grafana alert |
 | Component render count on a key interaction | no unbounded growth per interaction | OTel component meter |
 
@@ -235,7 +235,7 @@ Set explicit budgets and fail CI when they regress — an unmeasured perf rule r
 - No `StateHasChanged()` per stream item / in a render loop (batch — [`realtime`](../realtime/SKILL.md)).
 - No AOT "for speed" on a data/CRUD UI (bigger download, slower startup).
 - No net10-only asset API emitted into a net8/net9 project.
-- No injected/captured `DbContext` or leaked subscription inflating circuit memory ([`data-access`](../data-access/SKILL.md), [`realtime`](../realtime/SKILL.md)).
+- No injected/captured `DbContext` or leaked subscription inflating circuit memory ([`data-fetching`](../data-fetching/SKILL.md), [`realtime`](../realtime/SKILL.md)).
 - No `async void` handlers; no heavy work in `OnParametersSet`/render.
 - No "we optimized it" without a before/after measurement.
 
@@ -251,7 +251,7 @@ Set explicit budgets and fail CI when they regress — an unmeasured perf rule r
 
 - Static-asset bundling/serving mechanics → [`styling`](../styling/SKILL.md)
 - SignalR as a live-data feature (not scale) → [`realtime`](../realtime/SKILL.md)
-- Caching slow reads (`HybridCache`) → [`data-access`](../data-access/SKILL.md)
+- Caching slow reads (`HybridCache`) → [`data-fetching`](../data-fetching/SKILL.md)
 - Server-side query/DB tuning → `data/*`, the `backend/dotnet` dev stack's persistence skill if installed
-- OTel meter export to Grafana → `observability/opentelemetry-dotnet`, `observability/grafana-dashboards`
-- Load/stress/soak of the deployed app → `qa/dotnet/skills/performance/nbomber` (peer)
+- OTel meter export to Grafana → `observability/opentelemetry-dotnet`, `observability/dashboards`
+- Load/stress/soak of the deployed app → `qa/dotnet/skills/load-testing` (peer)

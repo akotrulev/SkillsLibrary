@@ -1,5 +1,5 @@
 ---
-name: qa-ui-test-author-selenium-dotnet
+name: qa-ui-test-writer-selenium-dotnet
 description: Use when the user asks to scaffold a C# / .NET 10 (8-9 supported) + Selenium 4 page object or NUnit UI test, following the BasePage / DriverFactory / NUnit pattern. Triggers: "create a Selenium page object for X in C#", "add a .NET page for screen Y", "write a Selenium NUnit test for Z".
 ---
 
@@ -27,8 +27,8 @@ Scaffolds Selenium 4 page objects and NUnit UI tests in C# / .NET 8, mirroring t
 - Selenium TypeScript → `qa/typescript/skills/ui-test-author/selenium`
 - Playwright .NET → `qa/dotnet/skills/ui-test-author/playwright`
 - Appium .NET → `qa/dotnet/skills/ui-test-author/appium`
-- Reviewing a page object → `qa/dotnet/skills/ui-test-author/reviewer`
-- POM architecture → `qa/dotnet/skills/page-object-architect`
+- Reviewing a page object → `qa/dotnet/skills/ui-test-author/review`
+- POM architecture → `qa/dotnet/skills/page-object-design`
 
 ## Inputs needed
 
@@ -220,7 +220,7 @@ public sealed class AuthenticationTests : BaseTest
 
 ## Handoffs
 
-- POM architecture → `qa/dotnet/skills/page-object-architect`
+- POM architecture → `qa/dotnet/skills/page-object-design`
 - Test data builders → `qa/dotnet/skills/test-data-builder`
-- Reviewing a page object → `qa/dotnet/skills/ui-test-author/reviewer`
-- Allure reporting → `qa/reporting/dotnet/skills/allure-reporting`
+- Reviewing a page object → `qa/dotnet/skills/ui-test-author/review`
+- Allure reporting → `qa/reporting/dotnet/skills/test-reports`

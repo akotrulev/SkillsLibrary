@@ -1,5 +1,5 @@
 ---
-name: qa-ui-test-author-selenium-typescript
+name: qa-ui-test-writer-selenium-typescript
 description: Use when the user asks to scaffold a TypeScript + Selenium 4 page object or Mocha/Vitest UI test, following the BasePage / DriverFactory pattern. Triggers: "create a Selenium page object for X in TS", "add a TypeScript Selenium page for screen Y", "write a Selenium TS UI test for Z". For end-to-end suite work prefer the phased agent `qa-ui-typescript` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
 ---
 
@@ -29,8 +29,8 @@ Scaffolds Selenium 4 page objects and Mocha (or Vitest) UI tests in TypeScript s
 - Selenium .NET → `qa/dotnet/skills/ui-test-author/selenium`
 - Playwright TS → `qa/typescript/skills/ui-test-author/playwright`
 - Appium TS → `qa/typescript/skills/ui-test-author/appium`
-- Reviewing → `qa/typescript/skills/ui-test-author/reviewer`
-- POM architecture → `qa/typescript/skills/page-object-architect`
+- Reviewing → `qa/typescript/skills/ui-test-author/review`
+- POM architecture → `qa/typescript/skills/page-object-design`
 
 ## Inputs needed
 
@@ -229,7 +229,7 @@ describe("Authentication", () => {
 
 ## Handoffs
 
-- POM architecture → `qa/typescript/skills/page-object-architect`
+- POM architecture → `qa/typescript/skills/page-object-design`
 - Test data builders → `qa/typescript/skills/test-data-builder`
-- Reviewing → `qa/typescript/skills/ui-test-author/reviewer`
-- Allure → `qa/reporting/typescript/skills/allure-reporting`
+- Reviewing → `qa/typescript/skills/ui-test-author/review`
+- Allure → `qa/reporting/typescript/skills/test-reports`

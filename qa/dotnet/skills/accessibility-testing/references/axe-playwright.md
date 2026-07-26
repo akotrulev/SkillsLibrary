@@ -6,7 +6,7 @@ engine, same `violations`-as-the-gate model, same triage discipline — re-expre
 
 axe-core is the de-facto accessibility rule engine; `Deque.AxeCore.Playwright` runs it **inside your
 Playwright run**, against the live DOM, and returns a structured `AxeResult` you assert on. This is an
-**assertion layer** on top of the page objects and specs `qa-ui-test-author-playwright-dotnet` already
+**assertion layer** on top of the page objects and specs `qa-ui-test-writer-playwright-dotnet` already
 authored — you inject an axe scan into an already-authored flow. You do **not** write new page objects
 here.
 
@@ -240,7 +240,7 @@ flaky.
 
 axe gives you everything to make a failure actionable: rule id, impact, helpUrl, and the failing
 selector + fix summary. Attach the JSON and a readable summary to Allure so the report names the rule
-without anyone re-running locally (cross-link `qa-allure-reporting-dotnet`):
+without anyone re-running locally (cross-link `qa-test-reports-dotnet`):
 
 ```csharp
 // Support/A11yReport.cs
@@ -380,9 +380,9 @@ Lifecycle for this gate:
 - `references/lighthouse-ci.md` — the audit/score sibling: full-page
   perf/SEO/PWA + a11y **score** threshold, a separate Lighthouse pass. Run both: axe gates, Lighthouse
   trends.
-- `qa-ui-test-author-playwright-dotnet` — the page objects/specs the axe scan is injected into. Author
+- `qa-ui-test-writer-playwright-dotnet` — the page objects/specs the axe scan is injected into. Author
   the flow there; add the a11y scan here.
 - `qa-ci-pipelines-dotnet` — where the job fails on the assertion and the violations JSON
   is uploaded as an artifact. Note: **no secret to inject** (contrast `percy`/`applitools`).
-- `qa-allure-reporting-dotnet` — attach the violations JSON + readable summary to the report.
+- `qa-test-reports-dotnet` — attach the violations JSON + readable summary to the report.
 - `qa-exploratory-charter-writer` — the manual/assistive-tech testing that covers the ~60% axe can't.

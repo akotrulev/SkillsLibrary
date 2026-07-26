@@ -1,6 +1,6 @@
 ---
 name: devops-gitlab-ci
-description: Use when the user asks to write, review, or modify a GitLab CI/CD pipeline (`.gitlab-ci.yml`) for build/test/deploy of Java, .NET, or TypeScript projects, with deploys to AWS or Azure. Triggers: "write a `.gitlab-ci.yml` for X", "add a deploy stage to my GitLab pipeline", "set up CI on GitLab for this repo". Do NOT use for GitHub Actions (use `devops/github-actions`), Azure Pipelines (use `devops/azure-pipelines`), or IaC scripts (use `devops/iac-bicep-terraform`). Do NOT use for the **test-suite CI lane** — shard matrix, Allure publishing, perf gate, flake quarantine — that belongs to `qa-cicd-{java,dotnet,typescript}`; this skill owns the **build/deploy** lane.
+description: Use when the user asks to write, review, or modify a GitLab CI/CD pipeline (`.gitlab-ci.yml`) for build/test/deploy of Java, .NET, or TypeScript projects, with deploys to AWS or Azure. Triggers: "write a `.gitlab-ci.yml` for X", "add a deploy stage to my GitLab pipeline", "set up CI on GitLab for this repo". Do NOT use for GitHub Actions (use `devops/github-actions`), Azure Pipelines (use `devops/azure-pipelines`), or IaC scripts (use `devops/infrastructure-as-code`). Do NOT use for the **test-suite CI lane** — shard matrix, Allure publishing, perf gate, flake quarantine — that belongs to `qa-cicd-{java,dotnet,typescript}`; this skill owns the **build/deploy** lane.
 ---
 
 # DevOps — GitLab CI/CD
@@ -20,7 +20,7 @@ Authors `.gitlab-ci.yml` pipelines for build, test, and deploy across the projec
 
 - GitHub Actions → `devops/github-actions`
 - Azure DevOps Pipelines → `devops/azure-pipelines`
-- Bicep / Terraform authoring → `devops/iac-bicep-terraform`
+- Bicep / Terraform authoring → `devops/infrastructure-as-code`
 - App-level env config → `devops/environment-config`
 
 - Test-suite CI lane (shard matrix, Allure publish, perf gate, flake quarantine) → `qa/cicd/agents/qa-cicd-{java,dotnet,typescript}`
@@ -342,7 +342,7 @@ test:
 
 - GitHub equivalent → `devops/github-actions`
 - Azure DevOps equivalent → `devops/azure-pipelines`
-- IaC for the underlying resources → `devops/iac-bicep-terraform`
+- IaC for the underlying resources → `devops/infrastructure-as-code`
 - Per-env secrets/config → `devops/environment-config`
 - Cloud deploy specifics → `devops/aws-deployment` / `devops/azure-deployment`
 

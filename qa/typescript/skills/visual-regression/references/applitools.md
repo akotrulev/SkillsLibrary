@@ -9,7 +9,7 @@ differentiator versus Percy's server-side **pixel** diff and the built-in **byte
 (`playwright-snapshots`).
 
 This is an **assertion layer** on top of the page objects and specs the
-`qa-ui-test-author-playwright-typescript` skill already authored. You do not write new page objects
+`qa-ui-test-writer-playwright-typescript` skill already authored. You do not write new page objects
 here — you add `eyes.open` / `eyes.check` / `eyes.close` around an existing flow.
 
 ## Why graduate from Percy (pixel) to Applitools (visual-AI)
@@ -225,7 +225,7 @@ dashboard.
 ```
 
 Link the dashboard batch URL into Allure so reviewers jump straight to it (cross-link
-`qa-allure-reporting-typescript`):
+`qa-test-reports-typescript`):
 
 ```typescript
 import { test } from '@playwright/test';
@@ -349,8 +349,8 @@ Lifecycle for this test:
   server-side pixel diff + review UI. Applitools is the "graduate to visual-AI + match levels + grid" step.
 - `references/playwright-snapshots.md` — the **free** sibling: in-repo baselines
   you diff yourself, with the CI-container discipline both Percy and Applitools remove.
-- `qa-ui-test-author-playwright-typescript` — the page objects/specs `eyes.check` is called inside.
+- `qa-ui-test-writer-playwright-typescript` — the page objects/specs `eyes.check` is called inside.
   Author the flow there; add the visual checkpoint here.
 - `qa-ci-pipelines-typescript` — where `APPLITOOLS_API_KEY` is sourced (secrets/OIDC); no
   agent wrapper needed.
-- `qa-allure-reporting-typescript` — link the Applitools dashboard batch URL into the report.
+- `qa-test-reports-typescript` — link the Applitools dashboard batch URL into the report.

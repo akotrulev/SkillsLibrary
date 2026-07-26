@@ -1,6 +1,6 @@
 ---
 name: communication-stakeholder-updates
-description: Use when the user needs to write a status update, weekly report, or async stakeholder summary aimed at non-engineers (PM, leadership, customers). Triggers: "write the weekly update", "summarize this sprint for leadership", "draft the customer-facing release note", "what should I tell the steerco". Do NOT use for engineering changelogs / commit summaries, or for formal BA writeups (use business-analysis/skills/ba-initiative-scoping).
+description: Use when the user needs to write a status update, weekly report, or async stakeholder summary aimed at non-engineers (PM, leadership, customers). Triggers: "write the weekly update", "summarize this sprint for leadership", "draft the customer-facing release note", "what should I tell the steerco". Do NOT use for engineering changelogs / commit summaries, or for formal BA writeups (use business-analysis/skills/ba-scoping-writeup).
 ---
 
 # Stakeholder Updates
@@ -19,7 +19,7 @@ Produces async, skim-first updates for non-engineering audiences. Optimized for 
 - Engineering-only changelog or commit summary → out of scope
 - Bug report → `qa/manual/bug-report-writer`; incident postmortem → `communication/incident-postmortem`
 - Meeting minutes / decision capture → `communication/meeting-notes`
-- Initial scoping of a new initiative → `business-analysis/skills/ba-initiative-scoping`
+- Initial scoping of a new initiative → `business-analysis/skills/ba-scoping-writeup`
 
 ## Inputs needed
 
@@ -107,6 +107,6 @@ Produces async, skim-first updates for non-engineering audiences. Optimized for 
 
 ## Handoffs
 
-- New initiative needs scoping → `business-analysis/skills/ba-initiative-scoping`
+- New initiative needs scoping → `business-analysis/skills/ba-scoping-writeup`
 - Incident debrief → `communication/incident-postmortem`
 - Decisions behind this update need a durable record → `communication/meeting-notes`

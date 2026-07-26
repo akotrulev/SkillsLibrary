@@ -1,11 +1,11 @@
 ---
-name: qa-contract-testing-pact-shared
-description: Cross-stack reference for Pact consumer-driven contract testing — mental model, Pact Broker setup, matchers, can-i-deploy, record-deployment, versioning, and the global rules every stack implementation follows. Load alongside the stack's `contract-testing-pact` sibling. Triggers (always with that sibling) "set up contract testing", "how does the Pact Broker fit our pipeline", "wire can-i-deploy", "version our pacts". Do NOT load standalone to write Pact code.
+name: qa-api-contract-testing-shared
+description: Cross-stack reference for Pact consumer-driven contract testing — mental model, Pact Broker setup, matchers, can-i-deploy, record-deployment, versioning, and the global rules every stack implementation follows. Load alongside the stack's `api-contract-testing` sibling. Triggers (always with that sibling) "set up contract testing", "how does the Pact Broker fit our pipeline", "wire can-i-deploy", "version our pacts". Do NOT load standalone to write Pact code.
 ---
 
 # QA — Contract Testing with Pact (Shared)
 
-Cross-stack concepts shared by `qa/{dotnet,java,typescript}/skills/contract-testing-pact`. The stack siblings carry the consumer + provider code recipes; this skill carries the model, Broker wiring, matchers, and the CI gate pattern.
+Cross-stack concepts shared by `qa/{dotnet,java,typescript}/skills/api-contract-testing`. The stack siblings carry the consumer + provider code recipes; this skill carries the model, Broker wiring, matchers, and the CI gate pattern.
 
 ## Mental model
 
@@ -35,7 +35,7 @@ Rules of thumb (all stacks):
 - **BDCT is the fallback** when you can't add Pact verification to the provider but it ships a trustworthy OpenAPI spec. A spec describes *intent*; CDCT proves *behaviour*. BDCT is additive, never a replacement where CDCT is possible.
 - **GraphQL** is just CDCT — HTTP with the query in the request body and the `{ data, errors }` envelope matched by type.
 
-Stack-specific DSL for each type lives in the sibling skills (`qa/{java,dotnet,typescript}/skills/contract-testing-pact`).
+Stack-specific DSL for each type lives in the sibling skills (`qa/{java,dotnet,typescript}/skills/api-contract-testing`).
 
 ## Inputs needed (regardless of stack)
 
@@ -173,10 +173,10 @@ Tag every pact and every verification with the **consumer's commit SHA + branch*
 
 ## Handoffs
 
-- Consumer / provider code on .NET → `qa/dotnet/skills/contract-testing-pact`
-- Consumer / provider code on Java → `qa/java/skills/contract-testing-pact`
-- Consumer / provider code on TypeScript → `qa/typescript/skills/contract-testing-pact`
+- Consumer / provider code on .NET → `qa/dotnet/skills/api-contract-testing`
+- Consumer / provider code on Java → `qa/java/skills/api-contract-testing`
+- Consumer / provider code on TypeScript → `qa/typescript/skills/api-contract-testing`
 - Live-service API tests → `qa/<stack>/skills/api-test-author/generator/<stack>`
-- DTO authoring → `qa/<stack>/skills/api-dto-writer/<stack>`
+- DTO authoring → `qa/<stack>/skills/api-models/<stack>`
 - CI pipeline syntax → `qa/cicd/<stack>/skills/ci-pipelines/{github-actions,azure-pipelines,gitlab-ci}` or `devops/<ci>`
 - Test strategy decisions (when contract vs E2E) → `qa/manual/test-strategy`

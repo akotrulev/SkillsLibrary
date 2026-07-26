@@ -332,6 +332,6 @@ jobs:
 
 - **`qa/typescript/skills/db-testing/testcontainers`** — integration-tests stage runs these.
 - **`qa/typescript/skills/email-testing`** — Mailpit as a service container.
-- **`qa/reporting/typescript/skills/allure-reporting`** — adapter wiring inside the test project.
-- **`qa/typescript/skills/performance/k6`** — perf-stage scripts.
+- **`qa/reporting/typescript/skills/test-reports`** — adapter wiring inside the test project.
+- **`qa/typescript/skills/load-testing`** — perf-stage scripts.
 - **`devops/azure-pipelines`** — non-QA pipeline patterns.

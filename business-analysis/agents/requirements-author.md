@@ -41,7 +41,7 @@ Decide the entry phase from what the invoking prompt supplies, before starting. 
 
 **Mode C — epic(s) provided, stories wanted** (an epic with an outcome and slicing intent). Skip Phases 1–2; start at **Phase 3**, one INVEST story set per epic.
 
-**Mode E — stories provided, authored elsewhere** (a client, another team, or an existing tracker supplied the stories/epics; we did not write them). Start at **Phase 3R** — review-only, never silently rewrite someone else's backlog. Then route by verdict: findings the user wants fixed → Phase 3 (`ba-story-writer`) for the flagged stories only; epic-shape findings → Phase 2 for the flagged epics only; ready stories → hand off downstream (default: `qa/manual/test-basis-analyzer`).
+**Mode E — stories provided, authored elsewhere** (a client, another team, or an existing tracker supplied the stories/epics; we did not write them). Start at **Phase 3R** — review-only, never silently rewrite someone else's backlog. Then route by verdict: findings the user wants fixed → Phase 3 (`ba-story-writer`) for the flagged stories only; epic-shape findings → Phase 2 for the flagged epics only; ready stories → hand off downstream (default: `qa/manual/requirements-breakdown`).
 
 If the input is mid-chain but missing its upstream hook (e.g. an epic with no success metric), name the gap and fix only that gap in the owning skill before proceeding — do not silently re-derive the whole upstream artifact.
 
@@ -49,17 +49,17 @@ If the input is mid-chain but missing its upstream hook (e.g. an epic with no su
 
 | # | Phase | Goal | Skills to load | Exit gate |
 |---|-------|------|----------------|-----------|
-| 1 | Initiative scoping | Turn the ambiguous ask into a scoped, decision-ready writeup | `business-analysis/skills/ba-initiative-scoping/SKILL.md` | Writeup has a problem statement (the *why*), ≥1 measurable success metric (baseline → target or explicitly qualitative), a named decision-maker, scope split in/out/deferred, and assumptions + open questions separated from risks |
+| 1 | Initiative scoping | Turn the ambiguous ask into a scoped, decision-ready writeup | `business-analysis/skills/ba-scoping-writeup/SKILL.md` | Writeup has a problem statement (the *why*), ≥1 measurable success metric (baseline → target or explicitly qualitative), a named decision-maker, scope split in/out/deferred, and assumptions + open questions separated from risks |
 | 2 | Epic shaping | Size the scoped problem into one or more epics, each a shippable outcome | `business-analysis/skills/ba-epic-writer/SKILL.md` | Each epic has a one-sentence WHO / DO WHAT / SO THAT MEASURABLE outcome, a named slicing strategy, anticipated child stories, explicit out-of-scope, and an epic-level DoD; no god-epic, no tech-only outcome |
 | 3 | Story refinement | Slice each epic into INVEST stories with verifiable AC | `business-analysis/skills/ba-story-writer/SKILL.md` | Every story passes INVEST, uses As-a / I-want / So-that, has Gherkin AC (one behavior per scenario, no hidden `And` chains), separates functional from non-functional AC, and lists out-of-scope + dependencies |
-| 3R | Backlog audit *(intake / on-demand)* | Audit stories/epics authored elsewhere for readiness — review-only | `business-analysis/skills/ba-backlog-auditor/SKILL.md` | Every story has a verdict (Ready / Needs work / Split candidate / Not a story); every finding has severity + location + suggested fix and names the owning skill; testability blockers for `qa/manual/test-basis-analyzer` are listed explicitly; nothing was rewritten during review |
+| 3R | Backlog audit *(intake / on-demand)* | Audit stories/epics authored elsewhere for readiness — review-only | `business-analysis/skills/ba-story-quality-review/SKILL.md` | Every story has a verdict (Ready / Needs work / Split candidate / Not a story); every finding has severity + location + suggested fix and names the owning skill; testability blockers for `qa/manual/requirements-breakdown` are listed explicitly; nothing was rewritten during review |
 
 Phase 3R is not gated behind 1–3: invoke it whenever externally-authored stories arrive (Mode E, or mid-chain when a user supplies extra stories).
 
 ## Related agents & skills (peers — invoke separately, do not load their skills)
 
 - **`business-analyst`** (`business-analysis/agents/`) — the reasoning lane: sweeps your story sets against the project's business-model KB for cross-feature conflicts (contradictory rules, state interference, stacking, races) and keeps the KB current. The natural next step after Phase 3 when the stories add or change business rules.
-- **`qa-manual-test-designer`** (`qa/manual/agents/`) — turns ready stories into a manual test-case suite; `qa/manual/test-basis-analyzer` is its first phase and consumes your Phase-3/3R output directly.
+- **`qa-test-case-designer`** (`qa/manual/agents/`) — turns ready stories into a manual test-case suite; `qa/manual/requirements-breakdown` is its first phase and consumes your Phase-3/3R output directly.
 - **`communication/stakeholder-updates` · `communication/incident-postmortem` · `communication/meeting-notes`** — standalone writing skills for reporting out, incident reviews, and session capture; load them directly, no agent needed.
 
 ## Output contract
@@ -74,7 +74,7 @@ Gate evidence: <which gate criteria are met, e.g. "outcome one-liner + slicing a
 Next: <phase n+1 name, or what unblocks this phase>
 ```
 
-At the end of a full run, add a summary table of all phases and a "Hand-off notes" block: where each artifact lives, what was deliberately deferred, and which downstream skill/agent picks up next. The default QA pickup after Phase 3 is `qa/manual/test-basis-analyzer` (it distills the stories into the test basis — business logic, validations, observable implementation notes — that test design consumes), or `qa/manual/agents/qa-manual-test-designer` for the full doc → basis → suite flow; when the stories touch shared business rules, name the `business-analyst` conflict sweep first. Other common destinations are `qa/manual/test-strategy` and `qa/<stack>/skills/api-dto-writer`.
+At the end of a full run, add a summary table of all phases and a "Hand-off notes" block: where each artifact lives, what was deliberately deferred, and which downstream skill/agent picks up next. The default QA pickup after Phase 3 is `qa/manual/requirements-breakdown` (it distills the stories into the test basis — business logic, validations, observable implementation notes — that test design consumes), or `qa/manual/agents/qa-test-case-designer` for the full doc → basis → suite flow; when the stories touch shared business rules, name the `business-analyst` conflict sweep first. Other common destinations are `qa/manual/test-strategy` and `qa/<stack>/skills/api-models`.
 
 ## When uncertain
 

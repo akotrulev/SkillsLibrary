@@ -325,9 +325,9 @@ Streams give you Mongo-style change feeds; combine with Lambda for serverless re
 
 ## Handoffs
 
-- Cross-engine query patterns → `data/_shared/query-optimization`
+- Cross-engine query patterns → `data/_shared/slow-query-fixes`
 - Caching layer → `data/_shared/caching-patterns` + `data/redis`
 - Schema evolution / migration patterns → `data/_shared/migrations`
 - AWS deployment of the table + IAM / Streams-driven Lambda handlers → cloud provisioning / IaC for the store itself has no owning skill in this library yet; out of this domain's scope
-- Verifying `LeadingKeys` tenant isolation actually holds (cross-tenant BOLA/IDOR matrix) → the `qa-security` peer + `qa/<stack>/skills/security-testing/access-control-testing`
+- Verifying `LeadingKeys` tenant isolation actually holds (cross-tenant BOLA/IDOR matrix) → the `qa-security` peer + `qa/<stack>/skills/security-testing/permission-testing`
 - Observability — CloudWatch metrics for `ConsumedRead/WriteCapacityUnits`, `Throttled*` → `observability/*` skills (via the `observability-engineer-{dotnet,java,node}` peer bundled in the matching `be-*` plugin)

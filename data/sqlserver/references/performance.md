@@ -1,6 +1,6 @@
 # SQL Server — Performance (Query Store, plans, parameter sniffing, tempdb, locks)
 
-Engine-side tuning. Universal query triage (ESR, N+1, projection, keyset pagination) → `data/_shared/query-optimization`; index design → `references/indexing.md`.
+Engine-side tuning. Universal query triage (ESR, N+1, projection, keyset pagination) → `data/_shared/slow-query-fixes`; index design → `references/indexing.md`.
 
 ## Query Store first — the tuning system of record
 
@@ -95,7 +95,7 @@ WHERE r.blocking_session_id <> 0;
 1. Query Store top consumers → tune those; force plans for regressions.
 2. Missing index on the filtered column (check SARGability: no function wrap, no implicit convert).
 3. Eliminate key lookups with `INCLUDE` (`references/indexing.md`).
-4. Keyset pagination replacing deep `OFFSET` (`data/_shared/query-optimization`).
+4. Keyset pagination replacing deep `OFFSET` (`data/_shared/slow-query-fixes`).
 5. `READ_COMMITTED_SNAPSHOT ON` to end reader-writer blocking.
 6. `UPDATE STATISTICS WITH FULLSCAN` after bulk loads.
 7. Address parameter sniffing (PSP optimization → `OPTIMIZE FOR UNKNOWN` → `RECOMPILE`).

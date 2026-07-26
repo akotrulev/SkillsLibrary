@@ -1,11 +1,11 @@
 ---
-name: qa-ui-test-author-playwright-java
+name: qa-ui-test-writer-playwright-java
 description: Use when the user asks to scaffold Playwright UI tests in Java — new test classes, page objects under `src/test/java/<pkg>/pages/`, or a specific scenario (login, form, accessibility, visual). Triggers: "write a Playwright test for X in Java", "add a Playwright Java page object for screen Y", "scaffold a Playwright Java spec". For end-to-end suite work prefer the phased agent `qa-ui-java` / `qa-bdd-java` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
 ---
 
 # QA — Playwright Test & Page Object Generator (Java)
 
-Scaffolds Playwright tests and page objects in **Java 21 + Gradle + TestNG** using the official `com.microsoft.playwright` library (sync API). Uses a **base-test class pattern**: a `BaseTest` constructs `Browser` / `BrowserContext` / `Page` in `@BeforeMethod` and exposes page objects to subclasses; tests do not instantiate browsers themselves. Locators use `getByTestId` first (`data-testid` is the standing contract with the dev team — see `qa/java/skills/pom-builder` for extraction and the missing-testid report), falling back to role/label semantics — never raw CSS where anything better exists.
+Scaffolds Playwright tests and page objects in **Java 21 + Gradle + TestNG** using the official `com.microsoft.playwright` library (sync API). Uses a **base-test class pattern**: a `BaseTest` constructs `Browser` / `BrowserContext` / `Page` in `@BeforeMethod` and exposes page objects to subclasses; tests do not instantiate browsers themselves. Locators use `getByTestId` first (`data-testid` is the standing contract with the dev team — see `qa/java/skills/page-objects-from-url` for extraction and the missing-testid report), falling back to role/label semantics — never raw CSS where anything better exists.
 
 ## Stack
 
@@ -30,14 +30,14 @@ Scaffolds Playwright tests and page objects in **Java 21 + Gradle + TestNG** usi
 - Playwright .NET → `qa/dotnet/skills/ui-test-author/playwright`
 - Mobile / Appium → `qa/java/skills/ui-test-author/appium`
 - Java Selenium → `qa/java/skills/ui-test-author/selenium`
-- Reviewing existing Playwright code → `qa/java/skills/ui-test-author/reviewer`
-- Designing the overall page-object hierarchy → `qa/java/skills/page-object-architect`
+- Reviewing existing Playwright code → `qa/java/skills/ui-test-author/review`
+- Designing the overall page-object hierarchy → `qa/java/skills/page-object-design`
 
 ## Inputs needed
 
 1. **Feature / page** under test (e.g. `Login`, `CheckoutCart`)
 2. **User journey** — concrete steps + the user-visible outcome to assert
-3. **Locators** — for each element: `getByTestId` whenever the element has a `data-testid`; otherwise `getByRole` / `getByLabel`, then `getByText`; CSS only as last resort. Missing testids are reported via `qa/java/skills/pom-builder`'s `missing-testids.md`
+3. **Locators** — for each element: `getByTestId` whenever the element has a `data-testid`; otherwise `getByRole` / `getByLabel`, then `getByText`; CSS only as last resort. Missing testids are reported via `qa/java/skills/page-objects-from-url`'s `missing-testids.md`
 4. **Auth requirement** — anonymous, or signed-in (which user role + how the session is established)
 5. **Test data** — seeded by API, by helper, or inline
 
@@ -245,7 +245,7 @@ public void seedOrder() {
 
 ### Locator preference order (strict)
 
-1. `page.getByTestId("...")` — **preferred whenever the element carries a `data-testid`**; the attribute is the agreed contract with the app team. Elements missing it go in the `missing-testids.md` dev-team report (see `qa/java/skills/pom-builder`) and use a fallback below with `// TODO: missing data-testid '<suggested>'`
+1. `page.getByTestId("...")` — **preferred whenever the element carries a `data-testid`**; the attribute is the agreed contract with the app team. Elements missing it go in the `missing-testids.md` dev-team report (see `qa/java/skills/page-objects-from-url`) and use a fallback below with `// TODO: missing data-testid '<suggested>'`
 2. `page.getByRole(AriaRole.X, new Page.GetByRoleOptions().setName(...))` — best fallback
 3. `page.getByLabel("...")` — for form inputs
 4. `page.getByPlaceholder("...")` — only when there is no label
@@ -330,7 +330,7 @@ public void seedOrder() {
 
 ## Handoffs
 
-- Designing the page-object hierarchy → `qa/java/skills/page-object-architect`
-- Reviewing existing Playwright tests → `qa/java/skills/ui-test-author/reviewer`
+- Designing the page-object hierarchy → `qa/java/skills/page-object-design`
+- Reviewing existing Playwright tests → `qa/java/skills/ui-test-author/review`
 - Test data builders → `qa/java/skills/test-data-builder`
-- Allure reporter setup → `qa/reporting/java/skills/allure-reporting`
+- Allure reporter setup → `qa/reporting/java/skills/test-reports`

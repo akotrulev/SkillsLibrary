@@ -47,11 +47,11 @@ assumption, an order dependency, a real-but-rare backend hiccup. It is *not*:
 
 - .NET 8, C# (nullable reference types on), NUnit 4.x — **async all the way** in the tests; **no
   `Thread.Sleep` / `Task.Delay`-as-wait** (sleeps *cause* flakiness — cross-link the condition-wait in
-  `qa-db-testing-client-dotnet` / `qa-messaging-testing-*`)
+  `qa-db-connection-dotnet` / `qa-messaging-testing-*`)
 - `NUnit` — `[Retry(n)]` (built-in) + a custom `RetryOnFailureAttribute : IRepeatTest` (retries on errors too)
 - `[Category("Flaky")]` + `dotnet test --filter "TestCategory!=Flaky"` (gate) vs `"TestCategory=Flaky"` (lane)
 - `Allure.NUnit` — Allure's **Retries** tab + **history-based** flaky detection + the `AllureLifecycle` API
-  to mark a result flaky (cross-link `qa-allure-reporting-dotnet` for the full Allure wiring)
+  to mark a result flaky (cross-link `qa-test-reports-dotnet` for the full Allure wiring)
 
 ```
 Tests/
@@ -59,7 +59,7 @@ Tests/
 │   └── RetryOnFailureAttribute.cs   ← custom IRepeatTest: retries on failure AND exception
 ├── Support/
 │   └── FlakyMarkBase.cs             ← base fixture: marks [Category("Flaky")] results flaky in Allure
-├── allureConfig.json                ← Allure config (see qa-allure-reporting-dotnet)
+├── allureConfig.json                ← Allure config (see qa-test-reports-dotnet)
 └── categories.json                  ← an Allure "Known flaky (quarantined)" triage bucket
 ```
 
@@ -199,7 +199,7 @@ by the `--filter` (cross-link `qa-ci-pipelines`):
 
 Allure surfaces flakiness, and the **history-based auto-detection is identical across every stack** — it's a
 *report* feature, not a language one. With Allure **history enabled** (the `history/` folder carried across
-runs — see `qa-allure-reporting-dotnet`), Allure auto-adds the **Flaky** mark when, across the latest **5
+runs — see `qa-test-reports-dotnet`), Allure auto-adds the **Flaky** mark when, across the latest **5
 launches**, a test:
 
 1. got **Failed** at some point within those 5 launches, **and**
@@ -234,7 +234,7 @@ public abstract class FlakyMarkBase
 
 Add `[AllureIssue("CHECKOUT-871")]` (or the `[Property("Issue", …)]` above) so the **ticket** travels with
 the flagged test in the report. **A triage bucket in `categories.json`** keeps quarantined/flaky failures out
-of "real" failures (the adapter picks it up — see `qa-allure-reporting-dotnet`):
+of "real" failures (the adapter picks it up — see `qa-test-reports-dotnet`):
 
 ```json
 [
@@ -263,7 +263,7 @@ metric that matters is *flaky-rate* (flaky marks ÷ total) trending **down** —
   `[Category("Flaky")]` carries `[AllureIssue]`/`[Property("Issue",…)]`; review each sprint; it must **shrink**.
 - **Stacking `[RetryOnFailure]` *and* a CI rerun.** Caps multiply; you're back to masking. *Fix:* one mechanism.
 - **Fighting a `Task.Delay`-induced flake with more retries.** The sleep is the *cause*. *Fix:* replace it
-  with a condition-wait (`WaitForAsync` from `qa-db-testing-client-dotnet`), then most "flakiness" disappears.
+  with a condition-wait (`WaitForAsync` from `qa-db-connection-dotnet`), then most "flakiness" disappears.
 
 ## Examples
 
@@ -334,13 +334,13 @@ result is reported in Allure (flaky-flagged, history-tracked) but **never** fail
   quarantine + the first-class `@Flaky` annotation — the surface NUnit is thinner than. Same four moves.
 - `qa-flaky-test-quarantine-typescript` — same four moves, Playwright/Vitest: Playwright `retries` → the
   built-in **"flaky"** status + tag/`--grep-invert @flaky` or a separate project for the lane; Vitest `retry`.
-- `qa-allure-reporting-dotnet` (#?) — the **full** Allure.NUnit wiring this layers on: the adapter,
+- `qa-test-reports-dotnet` (#?) — the **full** Allure.NUnit wiring this layers on: the adapter,
   history/trends (required for auto-flaky detection), `categories.json`, CI publish. Base setup lives there.
 - `qa-_shared-quality-metrics` — track **flaky-rate over time**; a quarantine category that grows is the
   metric to watch.
-- `qa-db-testing-client-dotnet` / `qa-messaging-testing-dotnet` — the
+- `qa-db-connection-dotnet` / `qa-messaging-testing-dotnet` — the
   `WaitForAsync` **condition-wait** that *prevents* the eventual-consistency flakiness this skill quarantines.
-- `qa-ui-test-author-playwright-dotnet` / `qa-api-test-author-generator-dotnet` — where the quarantined tests
+- `qa-ui-test-writer-playwright-dotnet` / `qa-api-test-writer-dotnet` — where the quarantined tests
   are authored; flakiness is best fixed at the source (stable locators, intent-not-selectors).
 - `qa-ci-pipelines` (github-actions / azure-pipelines / gitlab-ci references) — the gate-lane vs quarantine-lane job
   wiring (`continue-on-error` on the non-gating lane).

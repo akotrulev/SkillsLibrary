@@ -1,6 +1,6 @@
 ---
 name: ba-story-writer
-description: Use when the user wants to convert a scoped requirement or BA writeup into INVEST user stories with acceptance criteria. Separates functional from non-functional acceptance criteria. Triggers: "write user stories for X", "turn this into stories the team can pick up", "add acceptance criteria to this story", "write the Jira tickets for this", "write this as an 'as a user, I want' story", "split this epic", "add the non-functional AC". Do NOT use for high-level scoping (`ba-initiative-scoping`), test cases (qa/manual/test-case-writer), or bug reports (qa/manual/bug-report-writer).
+description: Use when the user wants to convert a scoped requirement or BA writeup into INVEST user stories with acceptance criteria. Separates functional from non-functional acceptance criteria. Triggers: "write user stories for X", "turn this into stories the team can pick up", "add acceptance criteria to this story", "write the Jira tickets for this", "write this as an 'as a user, I want' story", "split this epic", "add the non-functional AC". Do NOT use for high-level scoping (`ba-scoping-writeup`), test cases (qa/manual/test-case-writer), or bug reports (qa/manual/bug-report-writer).
 ---
 
 # User Story Writer
@@ -15,8 +15,8 @@ Turns a scoped requirement into a set of INVEST-quality user stories with Gherki
 
 ## When NOT to use
 
-- Requirement is still vague → `business-analysis/skills/ba-initiative-scoping` first
-- Stories were authored elsewhere and need a review-only readiness audit → `business-analysis/skills/ba-backlog-auditor` (this skill *fixes* stories; that one only *finds*)
+- Requirement is still vague → `business-analysis/skills/ba-scoping-writeup` first
+- Stories were authored elsewhere and need a review-only readiness audit → `business-analysis/skills/ba-story-quality-review` (this skill *fixes* stories; that one only *finds*)
 - User wants test scripts → `qa/manual/test-case-writer`
 - User wants a defect filed → `qa/manual/bug-report-writer`
 
@@ -88,6 +88,6 @@ Turns a scoped requirement into a set of INVEST-quality user stories with Gherki
 
 ## Handoffs
 
-- Tests next → `qa/manual/test-basis-analyzer` first (distills the stories' business logic, validations, and observable implementation notes into the test basis), then `qa/manual/test-case-writer`; or hand the whole flow to `qa/manual/agents/qa-manual-test-designer`
-- API contracts next → `qa/<stack>/skills/api-dto-writer`
-- Page objects / UI tests → `qa/<stack>/skills/page-object-architect` then `qa/<stack>/skills/ui-test-author`
+- Tests next → `qa/manual/requirements-breakdown` first (distills the stories' business logic, validations, and observable implementation notes into the test basis), then `qa/manual/test-case-writer`; or hand the whole flow to `qa/manual/agents/qa-test-case-designer`
+- API contracts next → `qa/<stack>/skills/api-models`
+- Page objects / UI tests → `qa/<stack>/skills/page-object-design` then `qa/<stack>/skills/ui-test-author`

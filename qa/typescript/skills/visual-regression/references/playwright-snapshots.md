@@ -11,7 +11,7 @@ cross-browser diffing — see the decision matrix.
 
 Visual regression is an **assertion layer** that sits *on top of* your existing page objects and
 specs. You do not write new page objects here — you add a screenshot assertion to a flow the
-`qa-ui-test-author-playwright-typescript` skill already authored.
+`qa-ui-test-writer-playwright-typescript` skill already authored.
 
 ## Decision matrix — which assertion, which tool
 
@@ -239,7 +239,7 @@ On a normal CI failure Playwright emits three PNGs — `*-actual.png`, `*-expect
     retention-days: 7
 ```
 
-Attach the diff into Allure so reviewers see it inline (cross-link `qa-allure-reporting-typescript`):
+Attach the diff into Allure so reviewers see it inline (cross-link `qa-test-reports-typescript`):
 
 ```typescript
 import { test } from '@playwright/test';
@@ -327,7 +327,7 @@ Baseline lifecycle for this test:
   (`Expect(...).ToHaveScreenshotAsync()`).
 - `qa-visual-regression-java` — same skill, Java / TestNG
   (`assertThat(page).hasScreenshot()`).
-- `qa-ui-test-author-playwright-typescript` — the page objects/specs these assertions layer on top
+- `qa-ui-test-writer-playwright-typescript` — the page objects/specs these assertions layer on top
   of. Author the flow there; add the visual gate here.
 - `references/percy.md` (`percy`, next) — hosted baseline management + PR review UI
   when in-repo baselines become a bottleneck.
@@ -335,4 +335,4 @@ Baseline lifecycle for this test:
   grid.
 - `qa-ci-pipelines-typescript` — artifact upload, the container-baseline discipline,
   and the gated `update-baselines` job.
-- `qa-allure-reporting-typescript` — attach `-diff.png` images to the test report.
+- `qa-test-reports-typescript` — attach `-diff.png` images to the test report.

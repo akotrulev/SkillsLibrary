@@ -1,11 +1,11 @@
 ---
 name: data-elasticsearch
-description: Use when designing indexes, setting up clients, securing a cluster (API keys / DLS·FLS / TLS), planning migrations, or writing queries on Elasticsearch / OpenSearch from a .NET / Java / Node backend — full-text, aggregations, vector/kNN. The destination when search outgrows Mongo, Redis, or pgvector. Triggers: "design an Elasticsearch index", "build a search query", "reindex strategy", "vector search for embeddings". Do NOT use for log shipping (`observability/loki-tempo-setup`).
+description: Use when designing indexes, setting up clients, securing a cluster (API keys / DLS·FLS / TLS), planning migrations, or writing queries on Elasticsearch / OpenSearch from a .NET / Java / Node backend — full-text, aggregations, vector/kNN. The destination when search outgrows Mongo, Redis, or pgvector. Triggers: "design an Elasticsearch index", "build a search query", "reindex strategy", "vector search for embeddings". Do NOT use for log shipping (`observability/logs-traces-setup`).
 ---
 
 # Data — Elasticsearch / OpenSearch
 
-Index design, client setup, ingest, query shape, security, and operational concerns for **Elasticsearch 9** and **OpenSearch 3** from the library's three backend stacks. Use for **full-text search**, **structured queries on semi-structured documents**, **aggregations on event data**, and **vector / kNN search**. Logs are handled by Loki (`observability/loki-tempo-setup`); only use ES for logs if you have a strong reason (rich aggregations / wildcards that LogQL struggles with).
+Index design, client setup, ingest, query shape, security, and operational concerns for **Elasticsearch 9** and **OpenSearch 3** from the library's three backend stacks. Use for **full-text search**, **structured queries on semi-structured documents**, **aggregations on event data**, and **vector / kNN search**. Logs are handled by Loki (`observability/logs-traces-setup`); only use ES for logs if you have a strong reason (rich aggregations / wildcards that LogQL struggles with).
 
 This is also the **destination for two inbound handoffs** authored elsewhere in `data/`: `data/mongodb/references/indexing.md` routes *self-hosted* full-text / semantic search here (Atlas Search / Vector Search is Atlas-only, so self-hosted Mongo that needs real relevance ranking projects into ES); `data/redis/references/data-structures.md` routes *vector search beyond a cache* here (Redis's vector module is fine as a fast KV-adjacent ANN cache, but a durable, filterable, reindexable vector store is an ES/OpenSearch `dense_vector` job). **First check the cheaper stop:** if the embeddings belong to data already in Postgres, a `pgvector` column on that row (`data/postgresql/references/indexing.md`) beats standing up a second cluster — ES/OpenSearch earns its place only when relevance/hybrid ranking, independent scaling, or non-Postgres data justify it.
 
@@ -40,7 +40,7 @@ Elasticsearch and OpenSearch share a Lucene core and a common ancestor but have 
 
 ## When NOT to use
 
-- Logs / observability — `observability/loki-tempo-setup`
+- Logs / observability — `observability/logs-traces-setup`
 - Transactional store of record — use Postgres / Mongo / SQL Server / etc.
 - Operational metrics — Prometheus / Mimir
 - Strongly-relational queries with joins — Postgres
@@ -382,15 +382,15 @@ PUT /_security/role/tenant_42_reader
 5. Generate ingest helpers (bulk-only).
 6. Generate query helpers per use case (search, filter, aggregation, kNN).
 7. Define roles + per-service API keys; add DLS (+ FLS) where the index is multi-tenant or holds sensitive fields.
-8. Add observability — slow-log thresholds + Grafana dashboards from `observability/grafana-dashboards`.
+8. Add observability — slow-log thresholds + Grafana dashboards from `observability/dashboards`.
 9. Plan reindex strategy + snapshot (encrypted) retention; document the runbook.
 
 ## Handoffs
 
-- Log search → `observability/loki-tempo-setup` (use Loki, not ES, for logs)
+- Log search → `observability/logs-traces-setup` (use Loki, not ES, for logs)
 - Source of record alongside ES → `data/postgresql` / `data/mongodb`
 - Caching in front of ES → `data/_shared/caching-patterns` + `data/redis`
 - Vector embeddings producer → application code; this skill consumes them
 - **Inbound** (this skill is the destination): self-hosted full-text/semantic search from `data/mongodb/references/indexing.md`; vector search beyond a cache from `data/redis/references/data-structures.md`
-- Verifying tenant DLS actually isolates (cross-tenant leak matrix) → the `qa-security` peer + `qa/<stack>/skills/security-testing/access-control-testing`
+- Verifying tenant DLS actually isolates (cross-tenant leak matrix) → the `qa-security` peer + `qa/<stack>/skills/security-testing/permission-testing`
 - IaC / cloud deploy for the cluster (OpenSearch Service, Elastic Cloud) → cloud provisioning / IaC for the store itself has no owning skill in this library yet; out of this domain's scope

@@ -47,7 +47,7 @@ anti-patterns.
 - **Env vars:** none required for the OSS rulesets. `SEMGREP_APP_TOKEN` only if using the hosted platform.
 - **Config files:** `.semgrepignore` (ticketed), inline `// nosemgrep: <rule>` with a ticket.
 
-### Secrets — `secrets-scanning` (Gitleaks + TruffleHog)
+### Secrets — `secrets-scan` (Gitleaks + TruffleHog)
 - **Install:** Gitleaks — binary / `brew install gitleaks` / Docker `zricethezav/gitleaks` / `gitleaks/gitleaks-action`.
   TruffleHog — `trufflesecurity/trufflehog` Docker / action.
 - **Target:** the repo **including git history** (checkout with `fetch-depth: 0`).
@@ -57,9 +57,9 @@ anti-patterns.
   isn't enough — it's in history).
 - **Config files:** `.gitleaks.toml` (allowlist) + `--baseline-path`. Add a pre-commit hook for Gitleaks.
 
-### SCA — `dependency-scanning` *(stack-native — §2)*
+### SCA — `dependency-scan` *(stack-native — §2)*
 
-### Container / IaC — `container-iac-scanning` (Trivy)
+### Container / IaC — `image-infra-scan` (Trivy)
 - **Install:** `brew install trivy` / Docker `aquasecurity/trivy` / Action `aquasecurity/trivy-action`.
 - **Target:** a **built image** (`trivy image myorg/app:tag`), the filesystem (`trivy fs .`), or IaC
   (`trivy config ./infra`).
@@ -68,7 +68,7 @@ anti-patterns.
 - **Env vars:** none required. `GITHUB_TOKEN` raises the DB rate limit on busy runners.
 - **Config files:** `.trivyignore` (CVE/check IDs, ticketed, with expiry).
 
-### DAST (active) — `zap-automation-framework` (ZAP by Checkmarx)
+### DAST (active) — `active-scan` (ZAP by Checkmarx)
 - **Install:** `docker pull ghcr.io/zaproxy/zaproxy:stable` · Action `zaproxy/action-af`.
 - **⚠️ Target:** a **running app on an authorized throwaway env only** — it injects attack payloads.
 - **Run/gate:** write a YAML automation plan, then
@@ -95,7 +95,7 @@ anti-patterns.
   non-deterministic run-over-run).
 - **Env vars:** none required.
 
-### TLS — `tls-scanning` (sslyze + testssl.sh)
+### TLS — `certificate-scan` (sslyze + testssl.sh)
 - **Install:** `pip install sslyze` · testssl.sh — clone / Docker `drwetter/testssl.sh`.
 - **Target:** a TLS endpoint — **prod-safe** (a read-only handshake probe), good as a pre-release/scheduled gate.
 - **Run/gate:** `sslyze --mozilla_config=intermediate --json_out tls.json example.com:443` (non-zero exit on
@@ -108,15 +108,15 @@ anti-patterns.
 
 These are real test code in your project, so they need the project's test stack wired up.
 
-### `access-control-testing` — the BOLA/IDOR/BFLA authorization matrix (the centerpiece)
+### `permission-testing` — the BOLA/IDOR/BFLA authorization matrix (the centerpiece)
 
 This is the highest-setup, highest-value skill. It needs:
 
 1. **The project's API client + DTO layer** — reuses `{resource}Client` (raw + typed overloads) and DTOs from
-   `qa/<stack>/skills/api-client-writer` + `api-dto-writer`. Build those first if absent.
+   `qa/<stack>/skills/api-client-writer` + `api-models`. Build those first if absent.
 2. **Multiple seeded test identities** — at minimum **two peer users** (same role, different ownership — for
    horizontal/BOLA) **+ one elevated role** (admin — for vertical/BFLA). Seed them in the target env.
-3. **Per-actor tokens via `qa/<stack>/skills/auth0-test-tokens`** — typically ROPG to mint a token *as a
+3. **Per-actor tokens via `qa/<stack>/skills/test-login-tokens`** — typically ROPG to mint a token *as a
    specific seeded user*. Requires these env vars (never committed):
 
    | Env var | Purpose |
@@ -126,18 +126,18 @@ This is the highest-setup, highest-value skill. It needs:
    | `AUTH0_AUDIENCE` | the API audience |
    | `ALICE_USERNAME` / `ALICE_PASSWORD`, `BOB_*`, `ADMIN_*` | the seeded test users (ROPG) |
 
-   (ROPG must be explicitly enabled on the tenant — see the `auth0-test-tokens` skill's security caveat.)
+   (ROPG must be explicitly enabled on the tenant — see the `test-login-tokens` skill's security caveat.)
 4. **The project's 403-vs-404 leak policy decided** — does cross-tenant access return `403` (confirms
    existence) or `404` (hides it)? The `expectDenied(status)` helper codifies whichever you choose.
 5. **Run:** it's just your test runner — `npx vitest` / `dotnet test` / `./gradlew test`. No external service.
 
-### `dependency-scanning` — SCA (per package manager)
+### `dependency-scan` — SCA (per package manager)
 - **TypeScript:** `npm audit` (+ the skill's gating wrapper). **.NET:** `dotnet list package --vulnerable`.
   **Java:** OWASP Dependency-Check Gradle/Maven plugin (`dependencyCheckAnalyze`, `failBuildOnCVSS`).
 - **Env vars:** Dependency-Check benefits from an `NVD_API_KEY` to avoid NVD rate limits.
 - **Config:** a ticketed suppression file per tool.
 
-### `zap-baseline` — passive DAST (already in the library)
+### `passive-scan` — passive DAST (already in the library)
 - Same `ghcr.io/zaproxy/zaproxy:stable` image; passive only (safe every PR). See its per-stack skill for the
   `ProcessBuilder`/`Process`/`child_process` wrapper.
 
@@ -151,8 +151,8 @@ Give it: the **target app/API**, the **environment + written authorization** for
 access-control → dynamic gates → container/IaC → review + CI + OWASP coverage report), loading each skill as it
 goes, and asks before any active scan.
 
-**To run one layer** — load just that skill's `SKILL.md` and follow it. E.g. "set up a secrets-scanning gate" →
-`qa/_shared/security-testing/secrets-scanning`; "test for IDOR" → `qa/<stack>/skills/security-testing/access-control-testing`
+**To run one layer** — load just that skill's `SKILL.md` and follow it. E.g. "set up a secrets-scan gate" →
+`qa/_shared/security-testing/secrets-scan`; "test for IDOR" → `qa/<stack>/skills/security-testing/permission-testing`
 (+ `qa/_shared/security` alongside).
 
 **Minimal every-PR baseline** (cheap + safe, no authorization needed): SAST + secrets + SCA + access-control +
@@ -163,7 +163,7 @@ ZAP **baseline**. Add the active layers (ZAP-AF, fuzzing, Nuclei) on a safe env 
 ## 4. Pre-flight checklist
 
 - [ ] Docker available on the runner; repo checked out with `fetch-depth: 0` for secrets.
-- [ ] Stack identified; `api-client-writer`/`api-dto-writer`/`auth0-test-tokens` present for access-control.
+- [ ] Stack identified; `api-client-writer`/`api-models`/`test-login-tokens` present for access-control.
 - [ ] All tokens/keys/passwords in the secret store → env vars (nothing committed).
 - [ ] For **any active scan**: target is a disposable env you own, **authorization confirmed** (in writing for
       a hosted target), app is **ready** (wait strategy, not `sleep`).
@@ -179,7 +179,7 @@ ZAP **baseline**. Add the active layers (ZAP-AF, fuzzing, Nuclei) on a safe env 
 
 - `qa/_shared/security/SKILL.md` — the OWASP backbone & rationale (read first).
 - `qa/_shared/security-testing/*/SKILL.md` — per-scanner full flag/gating/triage detail.
-- `qa/<stack>/skills/security-testing/{access-control-testing,dependency-scanning,zap-baseline}` — stack-native.
+- `qa/<stack>/skills/security-testing/{permission-testing,dependency-scan,passive-scan}` — stack-native.
 - `qa/_shared/agents/qa-security.md` — the orchestrator.
-- `qa/<stack>/skills/{auth0-test-tokens,api-client-writer,api-dto-writer,ci-pipelines/*,allure-reporting}` + `qa/cicd/ci-conventions` — the supporting setup.
+- `qa/<stack>/skills/{test-login-tokens,api-client-writer,api-models,ci-pipelines/*,test-reports}` + `qa/cicd/ci-conventions` — the supporting setup.
 </content>

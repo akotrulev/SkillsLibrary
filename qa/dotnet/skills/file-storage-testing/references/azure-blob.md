@@ -6,7 +6,7 @@ eventual-consistency condition-wait discipline**; only the store SDK and its pri
 buckets/keys, presigned URLs, multipart upload, and LocalStack, Azure Blob has containers/blobs, SAS tokens,
 block-blob staging, and Azurite. It reuses the same verification-inside-tests lineage: the
 standard Testcontainers fixture discipline and the **eventual-consistency
-condition-wait** (`WaitFor.Async`) from `qa-db-testing-client-dotnet`.
+condition-wait** (`WaitFor.Async`) from `qa-db-connection-dotnet`.
 
 **.NET leads this node by the user's choice.** The Azure SDK is first-class across all three stacks (no single
 "native" runtime), so the house default would have been TypeScript; .NET was picked — and it is an especially
@@ -28,7 +28,7 @@ File-storage tests assert one of two things about a blob flow:
 > a worker that processes an uploaded blob runs on its own schedule, a **Blob → Event Grid → Storage Queue**
 > notification lands "soon", a derived blob appears after the worker finishes. So the core discipline matches
 > `db-testing/client` / `s3`: **wait on a condition** for the effect to appear, with a bounded timeout — **never `Task.Delay` /
-> `Thread.Sleep`**. Reuse `qa-db-testing-client-dotnet`'s `WaitFor.Async` poll. (Listing is the one place to
+> `Thread.Sleep`**. Reuse `qa-db-connection-dotnet`'s `WaitFor.Async` poll. (Listing is the one place to
 > stay alert to lag — `GetBlobs` can momentarily lag a just-written blob on some backends; assert the blob via
 > `ExistsAsync`/`GetPropertiesAsync` rather than scanning a list when you can.)
 
@@ -161,7 +161,7 @@ public abstract class BlobFixture
 > Azurite, drop the connection string and build the client from the account endpoint + **`DefaultAzureCredential`**
 > (`new BlobServiceClient(new Uri("https://<acct>.blob.core.windows.net"), new DefaultAzureCredential())`);
 > read the account name/endpoint from env, never hard-code a key, never log it (cross-link
-> `qa-auth0-test-tokens-dotnet` for the secrets-from-env discipline). Azurite is the default for CI determinism;
+> `qa-test-login-tokens-dotnet` for the secrets-from-env discipline). Azurite is the default for CI determinism;
 > a shared cloud account makes tests order-dependent unless each uses a **uniquely named container** (as above)
 > or empties it in `[SetUp]`. (Note: `GenerateSasUri` with a shared key needs the connection-string client; with
 > `DefaultAzureCredential` mint a **user-delegation SAS** via `GetUserDelegationKeyAsync` instead.)
@@ -219,7 +219,7 @@ public class InvoiceUploadTests : BlobFixture
 Here the SUT is a **worker**: it watches a container (or is driven by a blob event), processes an uploaded blob,
 and produces an observable side-effect — a DB row, a *derived* blob (a thumbnail), or a notification. The
 side-effect is eventually consistent, so **seed the input blob, then poll a probe on a condition**. This reuses
-`qa-db-testing-client-dotnet`'s `WaitFor.Async` verbatim.
+`qa-db-connection-dotnet`'s `WaitFor.Async` verbatim.
 
 ```csharp
 [Test]
@@ -250,7 +250,7 @@ private async Task<BlobProperties?> TryGetPropertiesAsync(string name, Cancellat
 }
 ```
 
-The `WaitFor.Async` helper is the same bounded poll as `qa-db-testing-client-dotnet`, ``service-bus`` Service Bus, and
+The `WaitFor.Async` helper is the same bounded poll as `qa-db-connection-dotnet`, ``service-bus`` Service Bus, and
 ``s3`` S3 — included so the node is self-contained:
 
 ```csharp
@@ -570,12 +570,12 @@ public static class Invoices
   `BlobServiceClient.fromConnectionString`, `BlockBlobClient.uploadData`/`download`/`exists`/`getProperties`,
   `stageBlock`/`commitBlockList`, `generateSasUrl`, `expect.poll` for the side-effect wait,
   `@testcontainers/azurite`).
-- `qa-db-testing-client-dotnet` — the `WaitFor.Async` poll helper and the seeder/probe split reused for the
+- `qa-db-connection-dotnet` — the `WaitFor.Async` poll helper and the seeder/probe split reused for the
   processed-blob side-effect assertions; the **eventual-consistency lineage** this skill leans on.
 - `qa-messaging-testing-dotnet` — Azure-native messaging, the natural downstream for the Event
   Grid → Storage Queue bridge (the Azure parallel to `s3`'s S3 → SQS).
-- `qa-auth0-test-tokens-dotnet` — when running against a cloud test account; the `DefaultAzureCredential`
+- `qa-test-login-tokens-dotnet` — when running against a cloud test account; the `DefaultAzureCredential`
   / secrets-from-env discipline.
-- `qa-allure-reporting-dotnet` — attach the uploaded/derived blob's name + metadata (or the queue-message body)
+- `qa-test-reports-dotnet` — attach the uploaded/derived blob's name + metadata (or the queue-message body)
   to the Allure result.
 - `qa-test-data-builder-dotnet` — builders/ObjectMother for blob payloads with 4+ fields.

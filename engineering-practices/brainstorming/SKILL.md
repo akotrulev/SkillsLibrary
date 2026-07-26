@@ -124,7 +124,7 @@ After writing the spec document, look at it with fresh eyes:
 
 Fix any issues inline. No need to re-review — just fix and move on.
 
-**Escalation:** the self-review above is the default. For a large or high-stakes spec you may dispatch a dedicated reviewer subagent using the template at `./spec-document-reviewer-prompt.md` (it checks completeness, consistency, clarity, scope, YAGNI). This is one extra invocation — weigh it against the spec's stakes per the cost-before-speed policy in `ep-subagent-driven-development`; don't dispatch it by reflex.
+**Escalation:** the self-review above is the default. For a large or high-stakes spec you may dispatch a dedicated reviewer subagent using the template at `./spec-document-reviewer-prompt.md` (it checks completeness, consistency, clarity, scope, YAGNI). This is one extra invocation — weigh it against the spec's stakes per the cost-before-speed policy in `ep-delegate-to-subagents`; don't dispatch it by reflex.
 
 **User Review Gate:**
 After the spec review loop passes, ask the user to review the written spec before proceeding:

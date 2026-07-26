@@ -466,7 +466,7 @@ jobs:
 - **`qa/cicd/java/skills/ci-pipelines`** — the Azure sibling this ports from; consult it for the variable-group / service-connection variant of the same Gradle/TestNG patterns.
 - **`qa/java/skills/db-testing/testcontainers`** — the integration-tests job runs these.
 - **`qa/java/skills/email-testing`** — pair Mailpit as a `services:` container or inline Testcontainers run.
-- **`qa/reporting/java/skills/allure-reporting`** — Allure-TestNG adapter wiring inside the test module that produces `build/allure-results/`.
-- **`qa/java/skills/performance/gatling`** — perf-job simulations; SLO contract in `qa/_shared/performance`.
+- **`qa/reporting/java/skills/test-reports`** — Allure-TestNG adapter wiring inside the test module that produces `build/allure-results/`.
+- **`qa/java/skills/load-testing`** — perf-job simulations; SLO contract in `qa/_shared/performance`.
 - **`devops/github-actions`** — non-QA workflow patterns (deploy, infra) live here.
 - **`qa/cicd/ci-conventions`** — cross-stack rules (artifact retention, OIDC) this skill enforces.
