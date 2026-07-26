@@ -1,6 +1,6 @@
 ---
 description: Audit this .NET test suite against the qa-dotnet plugin conventions — read-only, saves a findings report to docs/audits/
-argument-hint: [optional: test project, path, or sections to limit the sweep to]
+argument-hint: [optional: scope api|ui|mobile|all (default all), plus a test project, path, or sections to limit the sweep to]
 ---
 
 Run a **qa-dotnet conformance audit** on this repository: sweep the **test suite** against the conventions this plugin defines, and save a findings report.
@@ -21,10 +21,12 @@ Run a **qa-dotnet conformance audit** on this repository: sweep the **test suite
 
 Run it **inline in this session** — do not spawn a subagent unless the user asks for one.
 
-**Scope limiter (optional):**
+**Discipline scope:** if the task below says `api`, `ui`/`fe`/`frontend`, or `mobile`, resolve that to `scope: api | ui | mobile` per the stack skill's **Discipline scope** section and sweep only that discipline's sections (plus the universal ones). Otherwise `scope: all`. State the resolved scope in the announcement and as the first line of the report's §2 Scope & coverage.
+
+**Scope limiter (optional, additional to the discipline scope above):**
 
 $ARGUMENTS
 
-If nothing was given above, audit every test project in the repository: detect the suite lane, build the applicability matrix, and sweep every applicable section A–N.
+If nothing was given above, audit every test project in the repository at `scope: all`: detect the suite lane, build the applicability matrix, and sweep every applicable section A–N.
 
 When done, report the engine's output contract (detected lane · applicability · coverage · report path · finding counts by severity · highest-leverage item) and the path to the saved report.

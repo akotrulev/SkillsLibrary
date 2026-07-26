@@ -284,19 +284,21 @@ rg -n "<pattern>" --glob '*.cs' $TESTS
 
 ## Section index — for the report's applicability matrix
 
-| Letter | Section | Conditional? |
-|---|---|---|
-| A | Build health & suite lane | always |
-| B | Test naming & structure | always |
-| C | Independence & isolation | always |
-| D | Waits & timing | always (tool-tagged rows follow the driver) |
-| E | Page / screen objects | UI or mobile suite present |
-| F | Locator hygiene | UI or mobile suite present |
-| G | Test data | always |
-| H | API test layering | API suite present |
-| I | Assertion quality | always |
-| J | External verification | suite touches a DB / broker / storage / mail |
-| K | Config, secrets & environments | always |
-| L | Reporting & flake management | always — **absence is L1**, not N/A |
-| M | CI wiring | always — **absence is M1**, not N/A |
-| N | Coverage shape | always (mutation row needs Stryker.NET) |
+`Discipline` is which `scope:` value (see the skill's Discipline scope section) keeps this section in play. `all` means every scope runs it; `api`/`ui`/`mobile` means it's skipped by choice outside that scope (on top of the tool-presence probe in `Conditional?`).
+
+| Letter | Section | Conditional? | Discipline |
+|---|---|---|---|
+| A | Build health & suite lane | always | all |
+| B | Test naming & structure | always | all |
+| C | Independence & isolation | always | all |
+| D | Waits & timing | always (tool-tagged rows follow the driver) | all — but PW/Sel-tagged rows only run under `ui`/`all`, Appium-tagged rows only under `mobile`/`all` |
+| E | Page / screen objects | UI or mobile suite present | `ui`, `mobile` — E14 **[Appium]** only under `mobile`/`all`; E13 **[Sel]** only under `ui`/`all` |
+| F | Locator hygiene | UI or mobile suite present | `ui`, `mobile` — F2 **[PW]**, F7 **[Sel]** only under `ui`/`all` |
+| G | Test data | always | all |
+| H | API test layering | API suite present | `api` only |
+| I | Assertion quality | always | all — I3 **[PW]** only under `ui`/`all` |
+| J | External verification | suite touches a DB / broker / storage / mail | all — discipline-independent, gated only by its own probe |
+| K | Config, secrets & environments | always | all |
+| L | Reporting & flake management | always — **absence is L1**, not N/A | all |
+| M | CI wiring | always — **absence is M1**, not N/A | all |
+| N | Coverage shape | always (mutation row needs Stryker.NET) | all |

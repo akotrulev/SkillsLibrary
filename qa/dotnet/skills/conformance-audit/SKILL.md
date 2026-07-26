@@ -1,6 +1,6 @@
 ---
 name: qa-dotnet-conformance-audit
-description: Use to audit a whole .NET test suite against the qa-dotnet plugin's conventions — NUnit structure, waits, page objects, locators, API layering, DB verification, secrets, Allure, CI wiring — producing a saved, re-runnable findings report in `docs/audits/`. Read-only; it never fixes. Triggers "audit our test suite against the conventions", "re-audit — what did we fix since last round". Not for one test file (a `reviewer` skill) or fixing anything (the `qa-*-dotnet` agents).
+description: Use to audit a .NET test suite against the qa-dotnet plugin's conventions — NUnit structure, waits, page objects, locators, API layering, DB verification, secrets, Allure, CI wiring — producing a saved, re-runnable findings report in `docs/audits/`. Scopeable to the whole suite or to just one discipline. Read-only; it never fixes. Triggers "audit our test suite against the conventions", "re-audit — what did we fix since last round", "audit just our API tests", "check only the UI/mobile automation against the conventions". Not for one test file (a `reviewer` skill) or fixing anything (the `qa-*-dotnet` agents).
 ---
 
 # qa-dotnet Conformance Audit
@@ -9,7 +9,7 @@ Audit an existing **.NET test suite** against the conventions this plugin define
 
 **Read-only analysis on test code.** The audit points; the `qa-*-dotnet` agents fix.
 
-**Announce at start:** "I'm using the `qa-dotnet-conformance-audit` skill in Mode A (baseline) / Mode B (re-audit) on `<repo/path>`."
+**Announce at start:** "I'm using the `qa-dotnet-conformance-audit` skill in Mode A (baseline) / Mode B (re-audit) on `<repo/path>`, scope: api | ui | mobile | all."
 
 ## THE SCOPE FENCE — this audits the test suite, not the application
 
@@ -20,6 +20,25 @@ Every finding must be about **test code**: the suite's own structure, layering, 
 - Application design smells you notice while reading tests get **named in the handoff section**, never scored as findings here.
 
 If the user actually wants the app audited, say so and name the right skill instead of quietly widening scope.
+
+## Discipline scope — whole suite, or just API / UI / mobile
+
+By default this audits the **whole suite**. The user may narrow it to one automation discipline instead — useful when a repo owns multiple suites (e.g. an API project and a Playwright project) and only one changed:
+
+| Scope | Sections in play | Sections skipped | D/E/F/I rows skipped |
+|---|---|---|---|
+| `api` | A, B, C, G, H, I, J\*, K, L, M, N | E, F | D3, D5, D6, D9, D10 **[PW]** · D4 **[Sel]** · D12 **[Appium]** · I3 **[PW]** |
+| `ui` | A, B, C, E, F, G, I, J\*, K, L, M, N | H | D12 **[Appium]** · E14 **[Appium]** — keep D3–D6/D9/D10 **[PW/Sel]**, I3 **[PW]** |
+| `mobile` | A, B, C, E, F, G, I, J\*, K, L, M, N | H | D3–D6, D9, D10 **[PW/Sel]** · E13 **[Sel]**, F2 **[PW]**, F7 **[Sel]** — keep D12 **[Appium]**, E14 **[Appium]** |
+| `all` (default) | every section the Phase-1 probes find applicable | — | — |
+
+\* **J is discipline-independent** — it stays gated by its own probe (does the suite touch a DB/broker/storage/mail), in every scope. An API, UI, or mobile suite can all do external verification.
+
+A, B, C, G, I (minus the tagged rows above), K, L, M, N are **universal** — every scope runs them, because suite hygiene, secrets, reporting, and CI wiring aren't discipline-specific.
+
+**State the resolved scope** in the start announcement and as the first line of the report's **§2 Scope & coverage** (`**Discipline scope:** api | ui | mobile | all`), ahead of the `In scope: <dirs>` line. If the task doesn't say, ask: *"Audit the whole suite, or just API / UI / mobile automation?"*
+
+**Round comparability:** a scope-limited round is not comparable section-for-section to a whole-suite round. If the scope changed since the prior round, say so explicitly in the Round-N delta (§1 Movement / lane changes), and never report a section as "regressed" or "resolved" when it simply wasn't in this round's scope — it's **untouched**, not closed.
 
 ## Read before sweeping
 
@@ -63,11 +82,13 @@ Then read 2–3 representative files (a test fixture, a page object or API clien
 
 ## Phase 1 — applicability
 
+Two filters stack: the **tool-presence probes** below (a section is N/A when its tool isn't in the repo at all), and the **discipline scope** from the section above (a section is *skipped by user choice*, not N/A, when it's outside the requested `api`/`ui`/`mobile` scope). Record which reason applied — "N/A: no Appium" and "Skipped: scope=api" are different things and the applicability matrix must say which.
+
 | Section | Applies when | Probe |
 |---|---|---|
-| E, F (page objects, locators) | A UI or mobile suite exists | `rg -l "Playwright\|Selenium\|Appium" --glob '*.csproj'` |
-| H (API layering) | An API suite exists | `rg -l "RestSharp\|HttpClient\|APIRequestContext" --glob '*.cs'` |
-| J (external verification) | The suite touches a DB / broker / storage / mail | `rg -l "Npgsql\|SqlConnection\|Testcontainers\|Dapper\|Kafka\|ServiceBus" --glob '*.csproj'` |
+| E, F (page objects, locators) | A UI or mobile suite exists, **and** scope is `ui`, `mobile`, or `all` | `rg -l "Playwright\|Selenium\|Appium" --glob '*.csproj'` |
+| H (API layering) | An API suite exists, **and** scope is `api` or `all` | `rg -l "RestSharp\|HttpClient\|APIRequestContext" --glob '*.cs'` |
+| J (external verification) | The suite touches a DB / broker / storage / mail — independent of scope | `rg -l "Npgsql\|SqlConnection\|Testcontainers\|Dapper\|Kafka\|ServiceBus" --glob '*.csproj'` |
 | L (reporting & flake) | Allure is wired — **absent is finding L1**, not N/A | `rg -l "Allure" --glob '*.csproj'` |
 | M (CI wiring) | A pipeline definition exists — **absent is finding M1** | `ls .github/workflows azure-pipelines.yml .gitlab-ci.yml` |
 | N-mutation row | Stryker.NET configured (dotnet has the tool; TS does not) | `ls stryker-config.json`; `rg -l "dotnet-stryker" .` |
