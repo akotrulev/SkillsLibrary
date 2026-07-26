@@ -73,6 +73,8 @@ Mode B needs only the **prior report's path** (plus any new driving question). I
 
 `docs/audits/<NNN>-<slug>-audit-r<N>.md`, on the current branch. Round 1 from Mode A; `r2`, `r3`… from each Mode B run. **Rounds are never overwritten** — the trend ("9 open at r1 → 3 at r2") only exists if the old rounds survive.
 
+**Naming — `<NNN>-<slug>`, the library-wide artifact convention.** `<NNN>` is a zero-padded sequential number scoped to `docs/audits/`: list the folder, take the highest existing `NNN` prefix, and use `highest + 1` (start at `001` if the folder is empty or absent). It is minted **once per audit subject**, at the `r1` report, and **every later round reuses that same `NNN`**; never renumbered, never reused for a different subject. `<slug>` is a short kebab-case title naming the feature or area audited (`checkout-flow`, `notification-fanout`). Create `docs/audits/` if absent; if the repo already uses a different audits convention, follow it and say so.
+
 ## Procedure — Mode A (baseline)
 
 ### 1. Scope

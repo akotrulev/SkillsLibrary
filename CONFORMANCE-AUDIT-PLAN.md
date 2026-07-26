@@ -2,7 +2,7 @@
 
 **Date:** 2026-07-25
 **Goal:** every shipped stack plugin gets the same one-call, read-only **conformance audit** that `fe-react` now has — sweep an existing codebase against *that plugin's own* conventions and save a re-runnable findings report to `docs/audits/`.
-**Status:** in progress. **Done:** the shared engine (`ep-standards-audit-engine`), **Phase 3 — `be-dotnet`**, and **Phase 7 — `qa-dotnet`** (all built 2026-07-25, Option B). **Deferred from Phase 1:** the `fe-react` refactor onto the engine, and registering the engine in the remaining six stack plugins — so `fe-react` still carries its own procedure copy + report template, a known temporary duplication. **Remaining:** Phase 2 (`fe-blazor`), Phases 4–5 (`be-java`, `be-node`), Phases 6+8 (`qa-java`, `qa-typescript`), Phase 9 (cross-cutting sweep).
+**Status:** in progress. **Done:** the shared engine (`ep-standards-audit-engine`), **Phase 3 — `be-dotnet`**, and **Phase 7 — `qa-dotnet`** (all built 2026-07-25, Option B). **Deferred from Phase 1:** the `fe-react` refactor onto the engine — so `fe-react` still carries its own procedure copy + report template, a known temporary duplication. *(Engine registration is no longer deferred: as of 2026-07-26 it ships in all nine `qa-*` / `fe-*` / `be-*` / `devops` plugins.)* **Remaining:** Phase 2 (`fe-blazor`), Phases 4–5 (`be-java`, `be-node`), Phases 6+8 (`qa-java`, `qa-typescript`), Phase 9 (cross-cutting sweep). **Known gaps in the lane as it stands are tracked in §8** — including the five plugins that now carry the engine with no rule set behind it, and the two domains (`data`, `business-analysis`) deliberately left without a conformance lane.
 **Scope:** `qa/` (java · dotnet · typescript) · `frontend/` (blazor; react done) · `backend/` (dotnet · java · node). **Out of scope:** `frontend/react-native/` (under construction), `data/`, `business-analysis/`, `observability/` as a standalone (its rules ride inside the backend audits — see Phase 3).
 
 ---
@@ -171,11 +171,11 @@ One phase per session (per the established handoff loop). Each phase is independ
 - [x] Write the stack-agnostic report templates at `engineering-practices/standards-audit-engine/references/report-template.md` (react's copy left in place for now → **duplication to resolve**)
 - [ ] Slim `frontend/react/skills/standards-audit/SKILL.md` to the stack layer: announce, load-the-engine pointer, React/Next version-gate probes, applicability matrix, section index, fence table, handoffs
 - [x] Register `./engineering-practices/standards-audit-engine` in `qa-dotnet` + `be-dotnet`
-- [ ] Register it in the remaining **six** stack plugins (as each stack's audit lands)
+- [x] Register it in the remaining stack plugins — **done 2026-07-26**, ahead of their audits landing: it now ships in all nine of `qa-{java,dotnet,typescript}` · `fe-{blazor,react}` · `be-{dotnet,java,node}` · `devops`. Harmless where no stack audit exists yet (the engine's description forbids direct routing, so it sits inert until a `standards-audit` skill loads it) and it removes a wiring step from every remaining phase. Excluded from `data` and `business-analysis`, which bundle no `ep-*` skills at all
 - [ ] Delete `frontend/react/skills/standards-audit/references/report-template.md` once react points at the engine's copy
 - [ ] Verify `/fe-react-audit` still resolves end-to-end and the public surface is unchanged (skill name, command, report path, ID grammar)
 - [x] `ep-*` count 14 → 15 noted in `CLAUDE.md` + `README.md`, with the partial-rollout caveat stated
-- [ ] Revisit that caveat once all eight plugins carry the engine
+- [x] Revisit that caveat once all plugins carry the engine — **done 2026-07-26**; the caveat now reads "ships in all nine, inert until a stack audit loads it" rather than "only where an audit exists"
 - **Gate:** react audit reads engine + checklist and nothing is lost from the 202-line original.
 
 ### Phase 2 — `fe-blazor`
@@ -251,12 +251,28 @@ Per stack the deliverable is ~3 files / ~450 lines (SKILL.md ~90 · checklist ~3
 3. **be-node section I** — mark auth N/A with a pointer, or author `backend/node/skills/{auth0,cognito}` first (`backend/PLAN.md` F2)?
 4. **QA trigger placement** — `qa-api` + `qa-ui` only (recommended), or all six stack agents?
 5. **Section-count ceiling** — react landed at 19/143 and reads well. Cap the others at ~20/150, or let backend/qa run leaner (14/110 as designed)?
-6. **`data` and `business-analysis`** — out of scope now. Worth a follow-up plan later? (`data` would audit schema/DDL/index conformance per engine; `business-analysis` would audit KB health.) Note it or drop it.
+6. **`data` and `business-analysis`** — out of scope now, and tracked as **gap G2** (§8). Worth a follow-up plan later? (`data` would audit schema/DDL/index conformance per engine; `business-analysis` would audit KB health.) Note that adding the engine to those two plugins would not help on its own — they'd still have no rule set, and it would be the only `engineering-practices/` entry either one carries.
 7. **`frontend/react-native`** — confirm it stays deferred until the stack itself ships.
 
 ---
 
-## 8. Risks & fences
+## 8. Known gaps in the CONVENTION lane *(as of 2026-07-26)*
+
+The engine now ships everywhere it can, which makes the remaining gaps purely about **rules**, not wiring. Each row says what is missing, what it costs today, and what closes it.
+
+| # | Gap | Where it bites | Closes when |
+|---|---|---|---|
+| **G1** | **Five plugins carry the engine but have no rule set** — `qa-java`, `qa-typescript`, `fe-blazor`, `be-java`, `be-node` ship `ep-standards-audit-engine` with no `standards-audit` skill to supply sections. The engine is inert there (no rules, no command, description forbids direct routing), so the failure mode is *absence*, not misfire: a user on those stacks has no conformance lane and nothing tells them why | A `be-java` user asking "audit my service against the plugin conventions" gets the `code-auditor` SPEC/FEATURE lanes or a one-diff `code-review` — neither answers the question asked | Phases 2, 4, 5, 6, 8 land their `standards-audit` skills. Wiring is already done for all of them |
+| **G2** | **`data` and `business-analysis` have no conformance lane at all** — deliberately excluded from the engine because neither plugin bundles any `ep-*` skill (`business-analysis` inlines the brownfield discipline instead of referencing skills its plugin can't resolve). Adding the engine alone would not help: they'd still have no rules, and it would be the only `engineering-practices/` entry in those plugins | `data` has 8 engines' worth of hard rules (id strategy, tenancy isolation, index shape, migration safety) and no way to sweep a repo against them; `business-analysis` has no KB-health check | A follow-up plan decides scope — see open question §7.6. Until then this is a **stated non-goal**, not an oversight |
+| **G3** | **`fe-react` still duplicates the engine** — it carries its own copy of the procedure *and* `references/report-template.md`, predating the extraction. Two copies of one contract can drift, and a fix to the engine silently misses react | A future engine change (severity semantics, ID grammar, rollup rule) applies to 3 of the 4 authored audits | Phase 1's remaining items: slim the skill to the stack layer, delete the duplicate template, re-verify `/fe-react-audit` end-to-end |
+| **G4** | **`devops` diverges in shape** — its 12 rule sections live inside the `devops-auditor` **agent**, not a `standards-audit` skill, because devops is outside this plan's scope (§ Scope) and its "which rules apply" question is answered by the same tool-stack confirmation gate the `devops-engineer` sibling runs. Correct for devops, but it means the lane has two shapes | Anyone generalising "every conformance audit is a skill named `<plugin>-standards-audit`" is wrong once. Section-to-owning-skill traceability still holds; only the container differs | Left as-is unless devops joins the plan. If it does, extract the sections to `devops/standards-audit/` and keep the agent as the entry point |
+| **G5** | **No validation target for any audit** — open question §7.2 is still unanswered, so every checklist's grep recipes and severity calls are unproven against a real repo | A section can look rigorous and produce zero or garbage findings on first contact; the react/dotnet/qa checklists have never produced a Round-1 report on real code | A repo per stack is named at Phase 0 and each phase gains a real Round-1 report as acceptance evidence |
+
+**The through-line:** G1 and G3 are scheduled work with owners (the phases). G2 and G4 are deliberate scope decisions that should stay written down so they aren't rediscovered as bugs. G5 is the one that could invalidate work already marked done.
+
+---
+
+## 9. Risks & fences
 
 | Risk | Mitigation |
 |---|---|
@@ -271,7 +287,7 @@ Per stack the deliverable is ~3 files / ~450 lines (SKILL.md ~90 · checklist ~3
 
 ---
 
-## 9. Definition of done
+## 10. Definition of done
 
 - [ ] `/qa-java-audit` · `/qa-dotnet-audit` · `/qa-typescript-audit` · `/fe-blazor-audit` · `/fe-react-audit` · `/be-dotnet-audit` · `/be-java-audit` · `/be-node-audit` all run one-call, read-only, and save a report to `docs/audits/`
 - [ ] All eight share one procedure (Option B), one severity table, one evidence policy, one ID grammar, and Mode A/B rounds

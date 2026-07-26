@@ -38,10 +38,11 @@ So installing a single plugin gives you the stack's authoring/verification skill
 - **`be-dotnet`** — the .NET (10 primary / 8-9 supported) backend **design-pattern + persistence** stack: `pattern-guide`/`pattern-writer`/`code-review`/`database-code` (EF Core) + `auth0`/`cognito` (JWT bearer validation, RBAC, Client Credentials M2M), the phased `be-dotnet` orchestrator agent, plus the bundled `backend/_shared` pattern cards and `auth/_shared/{auth0-concepts,oidc-concepts}`.
 - **`be-java`** — the Java 21 + Spring Boot 3.x backend **design-pattern + persistence** stack: the same five skills, Spring-idiomatic (JPA/Hibernate + Spring Data, Spring Security OAuth2 Resource Server for `auth0`/`cognito`), the phased `be-java` orchestrator agent, plus `backend/_shared` and `auth/_shared/{auth0-concepts,oidc-concepts}`.
 - **`be-node`** — the Node (24 primary / 22 maintenance) + TypeScript strict backend **design-pattern + persistence** stack: `pattern-guide`/`pattern-writer`/`code-review`/`database-code` (Prisma default / Drizzle / TypeORM), the phased `be-node` orchestrator agent, plus `backend/_shared` (no `auth0`/`cognito` skill yet — a known gap).
+- **`devops`** — the platform / delivery lane, the path from a built service to a running one: 9 cloud/CI-keyed skills (docker, kubernetes, infrastructure-as-code, aws-deployment, azure-deployment, github-actions, gitlab-ci, azure-pipelines, environment-config) and two stack-agnostic agents — **`devops-engineer`** builds, **`devops-auditor`** audits read-only. Unlike the stack-first plugins these skills are keyed to *tools* rather than languages, so picking which to load **is** the design decision: both agents inspect the repo, derive what the workload requires, and **confirm the tool stack (or the audit scope) with you before loading a single skill**. `/devops-auditor` is the read-only conformance sweep of an existing setup — image, IaC, k8s, deploy target, pipeline, identity, secrets — saved as a re-runnable findings report in `docs/audits/`. OIDC / Workload Identity Federation throughout; no static cloud credentials anywhere.
 - **`data`** — the database-engineering stack: 8 version-aware per-engine skills (PostgreSQL, SQL Server / Azure SQL, MySQL, MongoDB, Redis / Valkey, DynamoDB, Cosmos DB, Elasticsearch / OpenSearch), 4 cross-engine `_shared` skills (schema-design, migrations, caching-patterns, slow-query-fixes), and the phased `data-architect` agent.
 - **`business-analysis`** — the upstream requirements domain in two lanes: 9 `ba-*` skills and 2 agents. The **authoring** lane (`ba-scoping-writeup`, `ba-epic-writer`, `ba-story-writer`, `ba-story-quality-review` + the `requirements-author` agent) turns a vague stakeholder ask into refinement-ready artifacts; the **reasoning** lane (`ba-project-memory`, `ba-process-flow-diagram`, `ba-entity-state-grid`, `ba-decision-table`, the 11-class `ba-feature-conflict-check` + the `business-analyst` agent) keeps a persistent per-project business model and detects conflicts between features.
 
-Every stack plugin (`qa-*`, `fe-*`, `be-*`) also bundles the 14 `ep-*` engineering-practices skills (brainstorm → plan → execute → verify → finish, TDD, systematic debugging, worktrees, agent dispatch, code-review pair, and the spec-compliance/feature audit pair) plus the read-only `code-auditor` agent. A 15th, `ep-standards-audit-engine`, is the shared engine behind the per-stack conformance audits — it ships only in the plugins whose stack audit exists so far (`qa-dotnet`, `be-dotnet`; `fe-react` carries its own copy pending the extraction), and rolls out with each remaining stack per `CONFORMANCE-AUDIT-PLAN.md`. Pull updates later with `/plugin marketplace update skills-library`.
+Every stack plugin (`qa-*`, `fe-*`, `be-*`) also bundles the 14 `ep-*` engineering-practices skills (brainstorm → plan → execute → verify → finish, TDD, systematic debugging, worktrees, agent dispatch, code-review pair, and the spec-compliance/feature audit pair) plus the read-only `code-auditor` agent. A 15th, `ep-standards-audit-engine`, is the shared engine behind the per-stack conformance audits — it ships in **all nine** `qa-*` / `fe-*` / `be-*` / `devops` plugins. Where a stack's own conformance audit is not authored yet it simply sits inert — the engine carries no rules and its description forbids routing a request to it directly — so nothing needs rewiring when that audit lands. Authored so far: `/qa-dotnet-audit`, `/be-dotnet-audit`, `/fe-react-audit`, and `/devops-auditor` (whose agent supplies its own rule sections, since devops is outside `CONFORMANCE-AUDIT-PLAN.md`'s scope); `fe-react` carries its own copy of the procedure pending the extraction. The rest roll out per `CONFORMANCE-AUDIT-PLAN.md`. Pull updates later with `/plugin marketplace update skills-library`.
 
 ### Slash commands
 
@@ -99,14 +100,15 @@ Every stack plugin (`qa-*`, `fe-*`, `be-*`) also bundles the 14 `ep-*` engineeri
 
 …plus `/qa-requirements-breakdown` and the 5 `ep-*` process commands listed under **Shared across plugins** below.
 
-**`devops`** — 7 commands:
+**`devops`** — 8 commands:
 
 | Command | Argument | Runs |
 |---|---|---|
-| `/devops-engineer` | what to containerize, provision, deploy, or wire | the phased containerize → provision → deploy → pipeline → review workflow |
+| `/devops-engineer` | what to containerize, provision, deploy, or wire | discover → **confirm the tool stack with you** → containerize → provision → deploy → pipeline → review |
+| `/devops-auditor` | *(none — or a service/path/section limiter)* | discover → **confirm the audit scope with you** → read-only sweep of the existing image, IaC, k8s, deploy target, pipeline, identity and secrets against the `devops` conventions → findings report in `docs/audits/` |
 | `/code-auditor` | spec, stories, feature, or area | read-only audit engagement, saved to `docs/audits/` |
 
-…plus the 5 `ep-*` process commands listed under **Shared across plugins** below. The 9 `devops-*` skills (docker, IaC, kubernetes, the three CI hosts, the two cloud deployments, environment-config) are reached through `/devops-engineer`.
+…plus the 5 `ep-*` process commands listed under **Shared across plugins** below. The 9 `devops-*` skills (docker, IaC, kubernetes, the three CI hosts, the two cloud deployments, environment-config) are reached through the two agents — and because devops skills are keyed to *tools* rather than stacks, both agents inspect the repo and **confirm the tool stack with you before loading a single skill**, then load only what that answer selects.
 
 **`data`** — 1 command:
 
@@ -159,7 +161,7 @@ data/                   # Per-engine skills (Postgres, SQL Server, MySQL, Mongo,
 frontend/               # Frontend dev stacks: blazor/ (fe-blazor skills + agent), react/ (fe-react skills + agent + vendored Vercel seeds), react-native/ (parked seed)
 business-analysis/      # Cross-feature business-flow reasoning: ba-* skills + business-analyst agent
 auth/                   # Auth0 setup per stack
-devops/                 # Platform lane: docker, kubernetes, IaC (Bicep/Terraform), AWS/Azure deploy, CI pipelines, env config + devops-engineer agent
+devops/                 # Platform lane: docker, kubernetes, IaC (Bicep/Terraform), AWS/Azure deploy, CI pipelines, env config + devops-engineer & devops-auditor agents
 observability/          # Grafana, OpenTelemetry, structured logging
 qa/                     # Test authoring (API/UI/perf), DB/email/network verification, CI pipelines, reporting (see QA skills below)
 engineering-practices/  # TDD, debugging, code review, git worktrees, planning (from obra/superpowers)
@@ -267,7 +269,7 @@ See [`CONTRIBUTING.md`](CONTRIBUTING.md) and the templates in [`.skill-template/
 | frontend              | authored + shipped — `frontend/blazor/` (22 skills + `fe-blazor` agent; `fe-blazor` plugin) and `frontend/react/` (24 skills incl. the `standards-audit` self-audit + `fe-react` agent + vendored Vercel seeds; `fe-react` plugin); `frontend/react-native/` parked, under construction |
 | business-analysis     | authored + shipped — 9 `ba-*` skills (authoring + reasoning lanes) + the `requirements-author` and `business-analyst` agents; `business-analysis` plugin |
 | auth                  | scaffolding |
-| devops                | authored + shipped — 9 cloud/CI-keyed skills (docker, kubernetes, infrastructure-as-code, aws-deployment, azure-deployment, github-actions, gitlab-ci, azure-pipelines, environment-config) + the `devops-engineer` agent; `devops` plugin |
+| devops                | authored + shipped — 9 cloud/CI-keyed skills (docker, kubernetes, infrastructure-as-code, aws-deployment, azure-deployment, github-actions, gitlab-ci, azure-pipelines, environment-config) + the `devops-engineer` (build) and `devops-auditor` (read-only conformance audit, `/devops-auditor`) agents, both gated on a tool-stack confirmation before any skill loads; `devops` plugin |
 | observability         | authored + shipped — 6 skills (per-stack `opentelemetry-*` / `structured-logging-*` + stack-agnostic loki-tempo, prometheus-mimir, queries, dashboards) + `observability-engineer-{dotnet,java,node}` agents; bundled into the `be-*` plugins |
 | qa                    | authored — 30 code-producing nodes (mostly ×3 stacks) + 7 process skills. `qa-dotnet` additionally ships the `standards-audit` self-audit skill + `/qa-dotnet-audit` |
 | engineering-practices | imported from obra/superpowers |

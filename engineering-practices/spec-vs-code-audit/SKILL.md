@@ -84,6 +84,8 @@ Both live beside the project's other process docs, on the current branch:
 | `docs/audits/<NNN>-<slug>-requirements.md` | Mode A, step 1 | **Never** — amended in place only (§1.4) |
 | `docs/audits/<NNN>-<slug>-audit-r<N>.md` | Mode A (`r1`) and every Mode B run (`r2`, `r3`…) | Never — each round is a new file |
 
+**Naming — `<NNN>-<slug>`, the library-wide artifact convention.** `<NNN>` is a zero-padded sequential number scoped to `docs/audits/`: list the folder, take the highest existing `NNN` prefix, and use `highest + 1` (start at `001` if the folder is empty or absent). It is minted **once per audit subject**, at whichever file is written first for it — here the `requirements.md` — and **every later round reuses that same `NNN`**; never renumbered, never reused for a different subject. `<slug>` is a short kebab-case title naming the subject (`checkout-rewrite`, `billing-stories`). Create `docs/audits/` if absent; if the repo already uses a different audits convention, follow it and say so.
+
 Rounds are additive so the trend is diffable: "12 open at r1 → 4 at r2 → 4 at r3" is the sentence a stakeholder actually wants, and it only exists if old rounds survive.
 
 ## Procedure — Mode A (baseline)
