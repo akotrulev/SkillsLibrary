@@ -43,10 +43,12 @@ A stack skill **must** name, per section, the skill that owns the rule — so a 
 Every run writes one file to `docs/audits/` on the current branch:
 
 ```
-docs/audits/<YY-MM-DD-HHmm>-<plugin>-conformance-r<N>.md
+docs/audits/<NNN>-<plugin>-conformance-r<N>.md
 ```
 
 `<plugin>` is the stack plugin's name (`fe-react`, `be-dotnet`, `qa-dotnet`, …). Rounds are additive — never overwrite or regenerate a previous round. **The report is its own register:** section letters, finding IDs, and defect families are the stable spine every later round reuses. There is no separate requirements file — the requirements here *are* the plugin's rules.
+
+`<NNN>` is a zero-padded sequential number, scoped to `docs/audits/`: list the folder, take the highest existing `NNN` prefix, use `highest + 1` (start at `001` if the folder is empty or doesn't exist yet). It is minted **once per plugin lineage** at `r1` and every later round for that plugin reuses the same `NNN` — never renumbered, never reused for a different lineage.
 
 Create `docs/audits/` if absent. If the repo already uses a different audits convention, follow it and say so.
 

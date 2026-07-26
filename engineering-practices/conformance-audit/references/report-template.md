@@ -2,7 +2,7 @@
 
 Two skeletons: **Round 1** (Mode A, baseline) and **Round N** (Mode B, re-audit). Fill them literally — the section order, the rollups, and the ID grammar are what make rounds comparable.
 
-Saved to `docs/audits/<YY-MM-DD-HHmm>-<plugin>-conformance-r<N>.md`. Never overwrite a previous round.
+Saved to `docs/audits/<NNN>-<plugin>-conformance-r<N>.md`, resolved under the project being audited (never this skills-library checkout or a global config directory, unless the user explicitly asks for a global copy). Never overwrite a previous round.
 
 **ID grammar:** `<SectionLetter><CheckNumber>` from the stack's checklist — `B3`, `M1`, `G7`. The number *is* the check number, so an ID names the rule it breaks and stays stable forever. Two distinct findings from one check get suffixes (`B3a`, `B3b`), never a new number.
 

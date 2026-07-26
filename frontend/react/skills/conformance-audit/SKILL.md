@@ -48,10 +48,12 @@ Load the **owning skill's `SKILL.md`** (named per section in the checklist) when
 Every run writes one file to `docs/audits/` on the current branch:
 
 ```
-docs/audits/<YY-MM-DD-HHmm>-fe-react-conformance-r<N>.md
+docs/audits/<NNN>-fe-react-conformance-r<N>.md
 ```
 
 Rounds are additive — never overwrite or regenerate a previous round. **The report is its own register:** section letters, finding IDs, and defect families are the stable spine every later round reuses. There is no separate requirements file (that belongs to the SPEC lane of `code-auditor`), because the requirements here *are* the plugin's rules.
+
+`<NNN>` is a zero-padded sequential number, scoped to `docs/audits/`: list the folder, take the highest existing `NNN` prefix, use `highest + 1` (start at `001` if the folder is empty or doesn't exist yet). It is minted once, at `r1`, and every later round reuses that same `NNN` — never renumbered.
 
 Create `docs/audits/` if absent. If the repo has a different audits convention already in use, follow it and say so.
 

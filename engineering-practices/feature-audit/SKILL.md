@@ -71,7 +71,7 @@ Mode B needs only the **prior report's path** (plus any new driving question). I
 
 ## Artifacts
 
-`docs/audits/<YY-MM-DD-HHmm>-<slug>-audit-r<N>.md`, on the current branch. Round 1 from Mode A; `r2`, `r3`… from each Mode B run. **Rounds are never overwritten** — the trend ("9 open at r1 → 3 at r2") only exists if the old rounds survive.
+`docs/audits/<NNN>-<slug>-audit-r<N>.md`, on the current branch. Round 1 from Mode A; `r2`, `r3`… from each Mode B run. **Rounds are never overwritten** — the trend ("9 open at r1 → 3 at r2") only exists if the old rounds survive.
 
 ## Procedure — Mode A (baseline)
 
@@ -110,6 +110,7 @@ Keep signal high: cap detailed findings at ~30; aggregate the rest in one overfl
 # AUDIT — <feature>: <sub-areas covered> — Round 1
 
 **Date:** <YYYY-MM-DD>  **Scope:** <in / out, named>  **Evidence mode:** static | static + <commands run>
+**Written by:** `ep-feature-audit` (via `code-auditor`)
 **Question driving the audit:** <the driving question, verbatim>
 
 ## Summary
@@ -194,6 +195,7 @@ Same surface structure and section order as round 1, plus status prefixes and a 
 # AUDIT — <feature> — Round <N>
 
 **Date:** <YYYY-MM-DD>  **Previous round:** `<path>` (<date>)  **Evidence mode:** static | static + <commands run>
+**Written by:** `ep-feature-audit` (via `code-auditor`)
 **Question driving the audit:** <verbatim — restated, or the new one if it changed>
 **Re-verify scope:** <"prior findings + defect families" | "+ surface B re-traced, narrative had changed">
 

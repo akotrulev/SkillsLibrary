@@ -29,7 +29,7 @@ If the user actually wants the app audited, say so and name the right skill inst
 
 Load the **owning skill** (named per section in the checklist) whenever a check is ambiguous, tool-keyed, or you are about to write its fix direction. When checklist and skill disagree, **the skill wins** — and report the disagreement.
 
-Report path: `docs/audits/<YY-MM-DD-HHmm>-qa-dotnet-conformance-r<N>.md`.
+Report path: `docs/audits/<NNN>-qa-dotnet-conformance-r<N>.md`.
 
 ## The fence — what this is not
 

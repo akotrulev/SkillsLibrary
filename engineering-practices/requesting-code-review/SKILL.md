@@ -65,7 +65,7 @@ HEAD_SHA=$(git rev-parse HEAD)
 
 [Dispatch reviewer subagent via ./code-reviewer.md]
   DESCRIPTION: Added verifyIndex() and repairIndex() with 4 issue types
-  PLAN_OR_REQUIREMENTS: Task 2 from docs/plans/26-07-12-0930-deployment.md
+  PLAN_OR_REQUIREMENTS: Task 2 from docs/plans/014-deployment.md
   BASE_SHA: a7981ec
   HEAD_SHA: 3df7661
 

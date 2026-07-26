@@ -2,7 +2,7 @@
 
 Two skeletons: **Round 1** (Mode A, baseline) and **Round N** (Mode B, re-audit). Fill them literally — the section order, the rollups, and the ID grammar are what make rounds comparable.
 
-Saved to `docs/audits/<YY-MM-DD-HHmm>-fe-react-conformance-r<N>.md`. Never overwrite a previous round.
+Saved to `docs/audits/<NNN>-fe-react-conformance-r<N>.md`. Never overwrite a previous round.
 
 **ID grammar:** `<SectionLetter><n>` — `B3`, `M1`, `K7`. The number is the **check number** from the checklist, so a finding's ID says exactly which rule it breaks and stays stable forever. If one check produces two genuinely distinct findings, suffix them (`B3a`, `B3b`) rather than inventing a new number.
 

@@ -66,7 +66,7 @@ Work on a branch, not the user's default — `ep-using-git-worktrees` for larger
 
 **Single-phase trigger — the QA handshake:** when QA hands over a `missing-testids.md` (from the peer `pom-builder`), load `testability` **alone**, add the listed `data-testid`s per the convention, and report locator counts + collisions. No other phase runs.
 
-**Single-skill trigger — the conformance audit:** when the ask is "audit our codebase against these conventions" / "give me a findings report", load `conformance-audit` **alone**, read-only — it sweeps the repo against the plugin's rules (sections A–S) and saves `docs/audits/<ts>-fe-react-conformance-r<N>.md`. No phase runs and **you fix nothing**; remediation is a separate FIX/EXTEND run driven by the report's priority table. Also reachable as `/fe-react-audit`. Use `reviewer` for a single diff; hand to `code-auditor` for a spec/story set or a non-React stack.
+**Single-skill trigger — the conformance audit:** when the ask is "audit our codebase against these conventions" / "give me a findings report", load `conformance-audit` **alone**, read-only — it sweeps the repo against the plugin's rules (sections A–S) and saves `docs/audits/<NNN>-fe-react-conformance-r<N>.md`. No phase runs and **you fix nothing**; remediation is a separate FIX/EXTEND run driven by the report's priority table. Also reachable as `/fe-react-audit`. Use `reviewer` for a single diff; hand to `code-auditor` for a spec/story set or a non-React stack.
 
 ## Related agents (peers — invoke separately, do not load their skills)
 

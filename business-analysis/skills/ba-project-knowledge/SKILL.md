@@ -24,7 +24,7 @@ The shape is a deliberate port of Cline's Memory Bank (read-all-first, update-on
 
 ## The KB layout
 
-Lives **in the target repo**, versioned with the code, diffable and PR-reviewable:
+Lives **in the target repo**, versioned with the code, diffable and PR-reviewable — i.e. under the project root of whatever repo the session is actually working in (resolve `docs/business-model/` against the current working directory), **never** under this skills-library checkout or a global config directory (`~/.claude/...`), unless the user explicitly asks for a shared/global copy:
 
 ```
 docs/business-model/
@@ -75,6 +75,7 @@ Re-read **all** files, reconcile drift against the current requirements/codebase
   - Confidence tags: `#confirmed` (sourced to a requirement/stakeholder decision) · `#inferred` (derived by analysis, plausible but unverified) · `#observed` (seen in the live system, not in any doc)
 - **Record decisions with rationale.** A conflict resolution in `interaction-map.md` is a *business decision* — record who/what decided and why, not just the outcome.
 - **Skip what the repo already records.** Code structure, API shapes derivable from contracts in-repo, git history. The KB records what the software must *do* and how features *interact* — nothing else.
+- **Header on every artifact file.** Each `flows/<flow>.md`, `entities/<entity>.md`, `decisions/<point>.md` file opens with `**Created:** <YYYY-MM-DD>` and `**Owned by:** \`<the ba-* skill>\`` (e.g. `ba-flow-mapper`); on every later update, add `**Last updated:** <YYYY-MM-DD> by \`<skill>\`` beneath it rather than overwriting the creation line.
 
 ## INDEX.md format
 

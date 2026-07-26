@@ -64,7 +64,7 @@ The **procedure** (modes, artifacts, evidence rules, severity, report templates,
 | Checklist | `references/conformance-checklist.md` | — |
 | Command file | `<domain>/<stack>/commands/<plugin>-audit.md` | `qa/java/commands/qa-java-audit.md` |
 | Command name | `/<plugin>-audit` | `/qa-java-audit`, `/fe-blazor-audit`, `/be-dotnet-audit` |
-| Report path (in the target repo) | `docs/audits/<YY-MM-DD-HHmm>-<plugin>-conformance-r<N>.md` | `docs/audits/26-08-02-1430-be-java-conformance-r1.md` |
+| Report path (in the target repo) | `docs/audits/<NNN>-<plugin>-conformance-r<N>.md` | `docs/audits/007-be-java-conformance-r1.md` |
 | Finding ID | `<SectionLetter><CheckNumber>` — permanent across rounds | `G7`, `M1` |
 | Engine skill | `engineering-practices/conformance-audit/` → `ep-conformance-audit` | loaded, never invoked directly |
 

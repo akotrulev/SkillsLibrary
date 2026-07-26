@@ -15,8 +15,9 @@ Assume they are a skilled developer, but know almost nothing about our toolset o
 
 **Context:** Write the plan on whatever branch you are already on — do not create or check out a branch or worktree to author it. Workspace isolation, if any, is `ep-executing-plans`' call at execution time.
 
-**Save plans to:** `docs/plans/YY-MM-DD-HHmm-<feature-name>.md`
-- The prefix is the local date and 24-hour time the plan was written (e.g. `26-07-16-1430-billing-export.md`), so successive plans for one feature sort chronologically instead of colliding. Get it from `date +%y-%m-%d-%H%M` rather than guessing.
+**Save plans to:** `docs/plans/NNN-<feature-name>.md`
+- `NNN` is a zero-padded sequential number, scoped to `docs/plans/`: list the folder, take the highest existing `NNN` prefix, use `highest + 1` (start at `001` if the folder is empty or doesn't exist yet). Never reuse or renumber an existing file's number.
+- Resolve this path under the current project's root — the repo the session is actually working in — never this skills-library checkout or a global config directory, unless the user explicitly asks for a global copy.
 - (User preferences for plan location override this default)
 
 **Test commands:** Where a step runs tests, lint, or build, use the command for the project's stack (see the Stack defaults in CLAUDE.md — `dotnet test`, `./gradlew test`, `npm test`, etc.). The pytest/npm snippets below are generic illustrations of plan *shape*, not the required runner.
@@ -51,6 +52,8 @@ This structure informs the task decomposition. Each task should produce self-con
 
 ```markdown
 # [Feature Name] Implementation Plan
+
+**Date:** [YYYY-MM-DD] · **Written by:** `ep-writing-plans`
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use `ep-executing-plans` (inline, the default) to implement this plan task-by-task. Only if delegation clearly pays for itself and the user asks for it, use `ep-subagent-driven-development` (cost-aware). Steps use checkbox (`- [ ]`) syntax for tracking.
 

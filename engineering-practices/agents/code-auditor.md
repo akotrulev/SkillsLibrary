@@ -47,12 +47,16 @@ Skill paths below are relative to the SkillsLibrary repo root when working insid
 
 ## Artifacts — MANDATORY SECTION
 
-Audits recur, so they must persist. Every run writes to `docs/audits/` on the current branch:
+Audits recur, so they must persist. Every run writes to `docs/audits/` on the current branch — resolved under the project actually being audited (the repo the session is working in), never this skills-library checkout or a global config directory, unless the user explicitly asks for a global copy:
 
 | File | When | Rewritten? |
 |---|---|---|
-| `<YY-MM-DD-HHmm>-<slug>-requirements.md` | Mode A, SPEC lane — **before any product code is read** | Never. Appended to on EXTEND, never regenerated, never renumbered |
-| `<YY-MM-DD-HHmm>-<slug>-audit-r<N>.md` | Every run — `r1` from Mode A, `r2`/`r3`… from each Mode B | Never — each round is its own file |
+| `<NNN>-<slug>-requirements.md` | Mode A, SPEC lane — **before any product code is read** | Never. Appended to on EXTEND, never regenerated, never renumbered |
+| `<NNN>-<slug>-audit-r<N>.md` | Every run — `r1` from Mode A, `r2`/`r3`… from each Mode B | Never — each round is its own file |
+
+`NNN` is a zero-padded sequential number, scoped to `docs/audits/`: list the folder, take the highest existing `NNN` prefix, use `highest + 1` (start at `001` if the folder is empty or doesn't exist yet). It is minted **once per audit subject**, at whichever file is written first for that subject (the `requirements.md` in SPEC lane, or the `r1` audit file in FEATURE lane), and every later round for the same subject reuses that same `NNN` — never renumbered, never reused for a different subject.
+
+Every artifact opens with a header giving `**Date:** <YYYY-MM-DD>` and `**Auditor:** \`code-auditor\`` (SPEC lane also names the `ep-spec-compliance-audit` skill it drove; FEATURE lane names `ep-feature-audit`).
 
 Rounds are additive because the trend is the point: "12 open at r1 → 4 at r2" is what a stakeholder acts on, and it only exists if old rounds survive. **IDs are permanent** — requirement IDs, surface letters, and finding numbers continue across rounds forever; renumbering silently invalidates every comparison the reports make.
 

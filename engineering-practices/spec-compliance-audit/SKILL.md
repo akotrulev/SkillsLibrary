@@ -81,8 +81,8 @@ Both live beside the project's other process docs, on the current branch:
 
 | File | Written by | Rewritten? |
 |---|---|---|
-| `docs/audits/<YY-MM-DD-HHmm>-<slug>-requirements.md` | Mode A, step 1 | **Never** — amended in place only (§1.4) |
-| `docs/audits/<YY-MM-DD-HHmm>-<slug>-audit-r<N>.md` | Mode A (`r1`) and every Mode B run (`r2`, `r3`…) | Never — each round is a new file |
+| `docs/audits/<NNN>-<slug>-requirements.md` | Mode A, step 1 | **Never** — amended in place only (§1.4) |
+| `docs/audits/<NNN>-<slug>-audit-r<N>.md` | Mode A (`r1`) and every Mode B run (`r2`, `r3`…) | Never — each round is a new file |
 
 Rounds are additive so the trend is diffable: "12 open at r1 → 4 at r2 → 4 at r3" is the sentence a stakeholder actually wants, and it only exists if old rounds survive.
 
@@ -124,6 +124,7 @@ Later amendments (a new story arrives, a requirement is descoped) **append** to 
 ```markdown
 # Requirement Register — <feature>
 **Sources:** <each doc/story + version/date>  **Created:** <YYYY-MM-DD>  **Rounds:** r1 <date>, r2 <date>
+**Written by:** `ep-spec-compliance-audit` (via `code-auditor`)
 **Requirements:** <n> verdicted · <n> out of scope · <n> conflicts open
 
 ## A. Orders
@@ -171,6 +172,7 @@ Organized **by register section**, each closed with a rollup — the same shape 
 # Spec-Compliance Audit — <feature> — Round 1
 
 **Register:** `docs/audits/<...>-requirements.md`  **Scope:** <repo/service audited>  **Date:** <YYYY-MM-DD>
+**Written by:** `ep-spec-compliance-audit` (via `code-auditor`)
 **Evidence mode:** static | static + <commands run>
 **Requirements:** <n> verdicted · <n> out of audit scope
 
@@ -252,6 +254,7 @@ Same section structure, plus per-section rollups and a delta header.
 # Spec-Compliance Audit — <feature> — Round <N>
 
 **Register:** `<path>`  **Previous round:** `<path>` (<date>)  **Date:** <YYYY-MM-DD>
+**Written by:** `ep-spec-compliance-audit` (via `code-auditor`)
 **Evidence mode:** static | static + <commands run>
 **Re-verify scope:** all non-Met · their sections · previously-Met touched by the diff
 **Register changes this round:** <"none" | "+3 requirements (D1–D3), 1 descoped">

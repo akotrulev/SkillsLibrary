@@ -19,7 +19,7 @@ Audit an existing **.NET service** against the conventions this plugin defines �
 
 Load the **owning skill** (named per section in the checklist) whenever a check is ambiguous, version-keyed, or you are about to write its fix direction. When checklist and skill disagree, **the skill wins** — and report the disagreement.
 
-Report path: `docs/audits/<YY-MM-DD-HHmm>-be-dotnet-conformance-r<N>.md`.
+Report path: `docs/audits/<NNN>-be-dotnet-conformance-r<N>.md`.
 
 ## The fence — what this is not
 

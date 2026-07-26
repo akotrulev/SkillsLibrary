@@ -29,7 +29,7 @@ You MUST create a task for each of these items and complete them in order:
 2. **Ask clarifying questions** — one at a time, understand purpose/constraints/success criteria
 3. **Propose 2-3 approaches** — with trade-offs and your recommendation
 4. **Present design** — in sections scaled to their complexity, get user approval after each section
-5. **Write design doc** — save to `docs/specs/YY-MM-DD-HHmm-<topic>-design.md` and commit on the current branch
+5. **Write design doc** — save to `docs/specs/NNN-<topic>-design.md` (resolved under the current project's root — the repo the session is working in — never this skills-library checkout or a global config directory, unless the user explicitly asks for a global copy) and commit on the current branch
 6. **Spec self-review** — quick inline check for placeholders, contradictions, ambiguity, scope (see below)
 7. **User reviews written spec** — ask user to review the spec file before proceeding
 8. **Transition to implementation** — invoke `ep-writing-plans` skill to create implementation plan
@@ -106,9 +106,10 @@ digraph brainstorming {
 
 **Documentation:**
 
-- Write the validated design (spec) to `docs/specs/YY-MM-DD-HHmm-<topic>-design.md`
-  - The prefix is the local date and 24-hour time the spec was written (e.g. `26-07-16-1430-billing-export-design.md`), so same-day specs on one topic sort chronologically instead of colliding. Get it from `date +%y-%m-%d-%H%M` rather than guessing.
+- Write the validated design (spec) to `docs/specs/NNN-<topic>-design.md`
+  - `NNN` is a zero-padded sequential number, scoped to `docs/specs/`: list the folder, take the highest existing `NNN` prefix, use `highest + 1` (start at `001` if the folder is empty or doesn't exist yet). Never reuse or renumber an existing file's number.
   - (User preferences for spec location override this default)
+  - The document opens with `# [Topic] Design` followed by `**Date:** [YYYY-MM-DD] · **Written by:** \`ep-brainstorming\`` before the rest of the spec content.
 - Commit the design document to git
 
 > **Branch boundary:** stay on the current branch — writing a spec never creates or checks out a branch or worktree, and committing the *spec document* is fine even on `main` (a design doc is not implementation). *Implementation* commits are different: `ep-executing-plans` decides the workspace at execution time and forbids implementing on `main`/`master` without explicit consent. Writing the spec here does not start implementation.
