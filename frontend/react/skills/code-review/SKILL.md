@@ -126,6 +126,32 @@ Reviews React code (React 19/18 + TypeScript — Next.js App Router / RSC primar
 | Friendly error text; never leak `error.message`/response body | Raw exception rendered to the user | major |
 | No swallowed rejections | `try {…} catch { /* nothing */ }`; `void fetchX()` with no error path | major |
 | Retry only idempotent requests | Blind retry of a POST/mutation | major |
+| Failure scoped to the data-dependent subtree | `if (isError) return <Error/>` in a container that also renders the search bar/filters/toolbar — the chrome and the user's typed filter state vanish with the rows | major |
+| Persistent error notification alongside the inline state | Error toast with an auto-dismiss timeout / no close button / not top-right — or no notification at all | major |
+| A drifted/unparseable response fails, not empties | `safeParse` or `catch` falling through to `[]` so a contract break reads as "no records" | major |
+| Every request has a timeout budget | `fetch`/query with no `AbortSignal.timeout` — the region can spin forever; or a timeout signal replacing the library's cancel signal instead of `AbortSignal.any` | major |
+| `TimeoutError` vs `AbortError` distinguished | A user-cancelled/unmounted request rendered as a failure or notified | minor |
+| Refetch failure keeps the data | `isError` branch returning the error panel unconditionally — a failed poll wipes the table the user is reading; no stale marker, no "as of" | major |
+| No skeleton flash over existing data | Page/filter change dropping to `isPending` with no `keepPreviousData` | minor |
+| A 401 recovers before it redirects | `loginWithRedirect()`/`router.push('/login')` fired straight from a 401 interceptor — unsaved work discarded; no silent refresh, no replay, no in-place re-auth | blocker |
+| Refresh is single-flight and non-recursive | Each failing request refreshing independently (rotation stampede), or a replayed request re-entering the ladder (refresh→401 loop) | major |
+| 401 vs 403 distinguished | A permission failure triggering a refresh/logout, or rendering as "session expired" | major |
+| Version skew is handled | New lazy route/`dynamic()` added with no `ChunkLoadError` recovery anywhere and no `deploymentId` — a deploy breaks open tabs | major |
+| Skew reload is guarded and once-only | `window.location.reload()` in a chunk-error handler with no `sessionStorage` guard — reload loop on a genuinely broken build | blocker |
+| Responses can't land out of order | Effect fetch → `setState` with no ignore/abort cleanup; a query key missing a parameter the request uses — a stale answer silently wins | major |
+| Optional calls can't fail the page | `Promise.all` spanning a critical read and an enrichment read | major |
+| Dependent queries gated and resolvable | Child query firing with an `undefined` parent id, or skeleton-forever when the parent failed | major |
+| **[App]** Failable reads scoped below the segment | Every read throwing to `error.tsx`, replacing the route (and its filters) on one failed fetch | major |
+| **[App]** Server Actions return typed errors | Action `throw`ing on an expected/validation failure — no field mapping, no correlation id client-side | major |
+| Submit disabled while pending | Handler with no `isPending` disable — a second click duplicates the write | major |
+| Retryable writes carry an idempotency key | A POST configured with `retry` and no `Idempotency-Key` | major |
+| Optimistic rollback notifies | `onError` reverting the cache silently — the user believes it saved | major |
+| 409/412 handed back, not retried | Conflict auto-retried or silently overwriting the other edit | major |
+| `Retry-After` honoured; retries bounded | Client backing off less than the server asked; auto-retry with no attempt cap or manual-only fallback | major |
+| Third-party failure contained + correctly silent-or-loud | Widget crash reaching the route boundary; analytics failure toasted; flag provider gating first paint or without defaults | major |
+| Storage access guarded | Bare `localStorage`/`JSON.parse` of storage — throws on quota/private mode and breaks the render | major |
+| Stale-tab restore revalidates | `refetchOnWindowFocus: false` set globally to quiet refetches | major |
+| A missing record reads as "gone" | 404 on a detail route rendered as a generic failure with a pointless retry | minor |
 
 ### TypeScript / strict mode
 

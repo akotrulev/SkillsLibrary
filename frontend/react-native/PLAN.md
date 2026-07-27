@@ -65,7 +65,27 @@ Each skill is marked with its **seed source** in the vendored `vendor/react-nati
 ### Quality layers (4)
 - `accessibility` — `accessibilityRole/Label/State/Hint`, VoiceOver/TalkBack, focus order, dynamic type, min touch target; hands a11y scan to QA. —
 - `performance` — the CRITICAL seed: list virtualization (FlashList/LegendList over FlatList), item memoization, stable callbacks/refs, no inline objects, image perf, scroll-position-without-state, the RN cost centers. **S** (list-performance-* — 8 rules, scroll-position-no-state)
-- `error-resilience` — error boundaries, network-failure UX, three-state regions, idempotent retry, crash reporting handoff (Sentry). —
+- `error-resilience` — error boundaries, network-failure UX, three-state regions, idempotent retry, crash reporting handoff (Sentry). **Author it against the full React rule set — don't inherit the gaps.** `frontend/react/skills/error-handling/{SKILL.md,references/*}` (+ `data-fetching`, `state-management`) is the source; `frontend/PLAN.md` Phases 6–7 record why each rule exists. What must be carried, and the RN delta for each:
+
+  | Rule (React) | RN delta |
+  |---|---|
+  | **Failure scoped** to the response-dependent subtree | Same, and easier to get wrong: a `FlatList`/`FlashList` with `ListHeaderComponent` carrying the search + filters means an early `return <Error/>` unmounts the header too — scope to `ListEmptyComponent`/the list body |
+  | **Persistent, user-dismissed notification** | No viewport "top-right" — a **top-anchored banner inside the safe area** (clear of status bar/notch, translucent headers, and the keyboard), close control at the 44pt touch target, no auto-dismiss for errors |
+  | Drifted/unparseable response is a **failed** state, never empty | Same |
+  | **Stale fourth state** (failed refetch keeps its data) | Same — and more visible, since pull-to-refresh is the canonical refetch: a failed pull must not wipe the list, it marks it stale |
+  | **Timeout budgets** | `AbortSignal.timeout`/`any` are available in Hermes on current RN, but **mobile networks make this the highest-value rule in the set** — a request on a dying cell connection hangs far longer than on wifi. Longer budgets than web, per endpoint class |
+  | **Session expiry ladder** (refresh → replay → re-auth in place) | Re-auth in place is a modal screen, not a route redirect; biometric re-auth is often the right rung 3. Tokens live in `expo-secure-store`, not `localStorage` |
+  | **Version skew** | Becomes **OTA-update skew** (`expo-updates`): a JS bundle can swap under a running app, and a native-module mismatch after an OTA is the RN form of `ChunkLoadError`. Same rules — detect, prompt, one guarded reload (`Updates.reloadAsync`), never over unsaved work |
+  | **Mutation failures** (double-submit, idempotency key, announced rollback, 409, per-item bulk) | Same, plus: **app backgrounding mid-write is routine**, so the indeterminate-outcome state is the common case, not the edge case |
+  | `Retry-After`, bounded retries, **stop-auto-retrying circuit** | Stronger — retries on a metered/low-battery device are a real cost; pair with NetInfo so the app doesn't retry at all while offline |
+  | Notification volume cap + roll-up | Stronger — a phone viewport fits ~1–2 banners |
+  | **Third-party dependency failure** (silent-or-loud table) | Map SDKs, payment SDKs, push, analytics; a native module that fails to link is a crash, not a degraded region |
+  | **Storage failures degrade to memory** | MMKV/AsyncStorage throw on full-disk (common on phones) and are wiped by the OS under storage pressure; `offline-first` owns the persistence, this owns the degradation |
+  | Stale-tab restore | Becomes **app-resume**: `AppState` `active` transition + NetInfo reconnect → revalidate rather than showing yesterday's data |
+  | Gone-not-broken (404 on a record) | Same |
+  | Multi-tab | **N/A** — no tabs. The analog is multi-device, which is a server concern |
+  | Hydration mismatch reporting | **N/A** — no SSR/hydration in the Expo lane |
+  —
 - `offline-first` — MMKV/AsyncStorage, TanStack Query persistence, optimistic mutation queue, connectivity (`expo-network`/NetInfo), conflict strategy. —
 
 ### Test + review (2)
@@ -81,7 +101,7 @@ Each skill is marked with its **seed source** in the vendored `vendor/react-nati
 - [ ] **Node 2 — Foundations B**: `state-management` + `component-library` + `styling` + `responsive-design`.
 - [ ] **Node 3 — Feature build A**: `generator` + `forms` + `data-access` + `realtime`.
 - [ ] **Node 4 — Feature build B**: `navigation` + `testability` + `ui-conventions` + `motion` + `localization`.
-- [ ] **Node 5 — Quality layers**: `accessibility` + `performance` + `error-resilience` + `offline-first`.
+- [ ] **Node 5 — Quality layers**: `accessibility` + `performance` + `error-resilience` + `offline-first`. **`error-resilience` is now the largest skill in this node** — see its delta table above; budget for a `references/` split from the start (the React sibling needed one at ~470 lines) and expect `offline-first` to absorb the persistence half of the storage-failure and app-resume rules.
 - [ ] **Node 6 — Test + review + agent**: `component-testing` + `reviewer` + the phased `fe-react-native` agent (mirror `fe-react.md`, six phases, brownfield section per `.skill-template/agent.md`).
 - [ ] **Node 7 — Wiring + docs**: marketplace `fe-react-native` plugin entry (skills + agent + vendor seed + design/* + auth/auth0-react); update root `CLAUDE.md` (scope fence, new "Frontend-React-Native dev catalog" section, new-project-setup line, remove from under-construction list); run the verification checklist below.
 

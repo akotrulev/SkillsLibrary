@@ -97,6 +97,8 @@ Two acceptable resolutions — pick one and implement it, don't leave it to chan
 1. **Prompt the user (recommended).** Keep `skipWaiting: false`; register a listener for a waiting worker, show a non-blocking "A new version is available — Reload" toast, and on click `postMessage({type:'SKIP_WAITING'})` → the worker calls `self.skipWaiting()` → reload. Best UX; the user isn't surprised by a mid-session swap. `vite-plugin-pwa`'s `useRegisterSW` hook and Serwist both expose the waiting-worker signal.
 2. **Auto-update on next launch.** Accept that updates land on the next cold start (all tabs closed). Simpler, but a long-lived tab can run a stale build for days — document that trade-off.
 
+**Share one affordance with version skew.** A non-PWA app has the same problem without a service worker — a tab open across a deploy hits `ChunkLoadError` on the next lazy route ([`error-handling`](../error-handling/SKILL.md) owns that recovery: `deploymentId`, a once-only guarded reload, the same "A new version is available — Reload" prompt). Wire **one** update prompt for the user, fed by whichever signal fires; two competing "new version" messages is a bug.
+
 Never pretend a redeploy is instantly live for installed users. If a change is **critical** (a broken API contract), you need the prompt path plus a server-side version check that forces it.
 
 ## Offline for *data*, not just the shell

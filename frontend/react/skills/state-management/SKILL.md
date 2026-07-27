@@ -236,6 +236,21 @@ Atom-based primitives for fine-grained reactive UI (complex calculators, canvas 
 | **URL search params** | shareable/deep-linkable state (filter, page, tab) |
 | **Cookie** | server-readable (auth/session — see `auth/auth0-react`) |
 
+### Storage can fail — degrade, never crash
+
+`localStorage` is not a reliable dependency. It **throws** on quota exceeded (`QuotaExceededError`), in Safari private mode, and where the browser blocks storage for embedded/third-party contexts; IndexedDB can be blocked outright. Every one of those throws is a *write* — which means a Zustand `persist` store, a persisted TanStack Query cache, or a `useLocalStorage` hook can take down a render that had nothing to do with persistence.
+
+- **Route all storage access through one guarded wrapper** (`try/catch` on read, write, *and* `JSON.parse`) that **falls back to in-memory** and logs once. Persistence is an optimization; losing it degrades the session, it must never break it.
+- **A parse failure is a corrupt entry** — discard the key and continue with defaults, rather than throwing on every subsequent read.
+- **Don't persist what you can't afford to lose or leak.** No tokens, no PII, no server data (that's the query cache's job). Prune what you do persist — an unbounded "recently viewed" list is how you hit quota in the first place.
+- **Storage is shared across tabs** — see multi-tab below.
+
+### Multi-tab coordination
+
+Two tabs of one app are two copies of your client state with one shared origin. The failure is silent divergence: a user signs out in tab A and tab B keeps rendering as signed-in; tab A refreshes the token and tab B holds a dead one; both write the same persisted key and last-writer-wins.
+
+Broadcast the transitions that matter — `BroadcastChannel` (or the `storage` event as the fallback) for **auth state changes, logout, and "your session ended"** — so sibling tabs re-render or show the re-auth affordance rather than failing on the next call ([`error-handling`](../error-handling/SKILL.md) session ladder; `auth/auth0-react` owns the token side). Cross-tab sync for ordinary UI state is usually *not* wanted — two tabs are allowed to show different filters. Sync identity and session; leave view state alone.
+
 **URL state is underused.** Encode filters/pagination/selected-tab in the URL so pages are shareable and the back button works:
 
 ```tsx
@@ -272,7 +287,8 @@ On the App Router, URL state also lets a **Server Component** read `searchParams
 - **URL-derivable state lives in the URL.**
 - **One store / one Context per concern** — no god stores.
 - **Selectors** for store subscriptions; **memoize** Context values; **split** read/write Contexts under write churn.
-- **Persist deliberately** — pick the right storage; wrap `localStorage` in a hook.
+- **Persist deliberately** — pick the right storage; wrap `localStorage` in a hook, and route every access through a **guarded wrapper that degrades to in-memory** (quota/private-mode/blocked-context throws must never break a render); discard corrupt entries; persist no tokens, PII, or server data; prune what grows.
+- **Broadcast session/auth transitions across tabs** (`BroadcastChannel`/`storage`) so a logout or refresh in one tab doesn't leave a sibling live; don't sync ordinary view state.
 - **App Router**: providers/stores behind `'use client'`; per-request store scope for server-rendered trees.
 - **Devtools** middleware on stores in development.
 
@@ -283,6 +299,8 @@ On the App Router, URL state also lets a **Server Component** read `searchParams
 - No giant `AppContext` carrying user + theme + cart + flags.
 - No `useEffect` syncing two states that could be one derived value.
 - No mutation of immutable state outside Immer / RTK.
+- No unguarded `localStorage`/`sessionStorage`/IndexedDB access (it throws — quota, private mode, blocked context) and no unguarded `JSON.parse` of what comes back; no token/PII/server data persisted; no unbounded persisted list.
+- No app that keeps rendering as signed-in in one tab after a logout in another.
 - No `localStorage` in render (hydration mismatch) — wrap in a hook read in an effect.
 - No Redux setup for a new small app — Zustand + TanStack Query is the modern default.
 - No `useReducer` for a single boolean; no `'use client'` on a whole route just because one leaf needs a store.

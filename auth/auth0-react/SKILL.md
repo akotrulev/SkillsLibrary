@@ -185,7 +185,9 @@ const { data: orders } = useQuery({
 });
 ```
 
-`getAccessTokenSilently` handles refresh transparently; if refresh fails (revoked, expired beyond refresh), it throws and you redirect to `loginWithRedirect`.
+`getAccessTokenSilently` handles refresh transparently; if refresh fails (revoked, expired beyond refresh), it throws.
+
+**What happens next is a UX decision, and redirecting straight to `loginWithRedirect` is the wrong default** — it unmounts the app and destroys any unsaved work on screen. The recovery ladder (single-flight refresh → replay the original request once → **re-authenticate in place** via a modal/`loginWithPopup` → redirect only from a surface with nothing to lose, and only with `returnTo` the exact route) is owned by `frontend/react/skills/error-handling`. This skill owns the token mechanics; that one owns what the user sees. Note also that a **403 must not run this ladder** — it is a permission outcome, not an expired session.
 
 ### Reading custom claims & permissions
 

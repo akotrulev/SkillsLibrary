@@ -138,6 +138,7 @@ The highest-severity defect class: an edit that **looks** like it worked and sil
 - **Select-all scopes to the visible, filtered page** when filtering/paging is server-side — never silently select rows the user isn't looking at. Tooltip it: "Select all visible rows (respects current filters)."
 - **Where users grind row-by-row** (approve/cancel/resolve backlogs), provide **batch endpoints + bulk UI** — thirty click-confirm cycles for one logical operation is a workflow defect.
 - **Stable `data-testid` on selection controls** so UI automation can drive bulk flows ([`test-ids`](../test-ids/SKILL.md)).
+- **A bulk write reports per item.** "12 of 15 archived — 3 failed" with the three named, still selected, and retryable. A blanket success toast over a partial failure is the worse half of the defect (the user believes all 15 went through); a blanket failure hiding the 12 that worked is the other half ([`error-handling`](../error-handling/SKILL.md) owns the failure rendering).
 
 ---
 
@@ -194,6 +195,7 @@ Ask in order:
 This is *why* the rules above are keepable at scale, not one-offs.
 
 - **Most app-wide inconsistency traces to renderer divergence.** N grid/cell renderers (a MUI DataGrid here, a hand-rolled `<table>` there, a config-driven list elsewhere) means every display rule — enums, formats, links, loading, truncation — is implemented **0–1 times instead of once**. Consolidate to **one cell-renderer + one grid config** that hand-written pages *compose* rather than reimplement.
+- **The shared grid/region component owns the three states** (loading / failed / loaded) and takes the response-dependent body only — the search bar, filters and toolbar are the *page's*, above it, so a failed load empties the rows without unmounting the controls. Bind once there and every list gets correct failure scoping for free ([`error-handling`](../error-handling/SKILL.md) owns the states and the persistent top-right notification that accompanies them).
 - **Fix at the highest-leverage point, in order:** (1) safety-critical gaps (missing confirmations, raw error dumps); (2) **one-change-fixes-all shared bindings** (loading state, lookup resolution, route titles, action labels); (3) per-page standardization (filters, page sizes, vocabulary).
 - **Treat a config-driven patch layer as a bug report against the framework component.** The patch fixes today's page; the framework fix kills the defect *class*.
 - **Sweep, don't spot-fix.** Every hand-found defect ("this page crashes on a missing lookup key") is a *class* ("which other pages index that key?"). Audit the class before closing the ticket.
@@ -215,6 +217,7 @@ This is *why* the rules above are keepable at scale, not one-offs.
 - **Footer is semantic `<footer>`** with explicitly-labeled columns and utility/doormat links, sized to the site.
 - **Pick the surface deliberately** — modal only when the interruption is the value, a route (or intercepting route) when it needs a URL, same tab by default; no unrequested modals.
 - **Unify renderers; fix at the highest leverage; treat config-patch layers as framework bugs; sweep the class.**
+- **Bind loading/failed on the shared grid/region component**, with the page's search/filters/toolbar rendered above it so a failed load never unmounts them.
 
 ## What NOT to do
 

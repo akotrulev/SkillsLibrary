@@ -133,6 +133,7 @@ Apply to:
 - Interactive elements: `<button>`, `<a>` used as nav, `<input>`, `<select>`, `<textarea>`, library buttons/inputs/dropdowns/switches/date pickers, menu items.
 - List/grid containers: `<table>`, library data grids, custom list roots.
 - Read anchors: status badges, computed totals, toast/error banners, empty states, dynamic text a test must read.
+- The states of every data region and the app notification surface — `<Region>.Loading`, `<Region>.Error`, `<Region>.Retry`, `<Region>.Empty`, `<Region>.Stale` (data held after a failed refetch), plus `Notifications.Region`, `Notifications.Error`, `Notifications.Error.Close`, `Notifications.Error.CorrelationId`. Without these a test can't tell a *failed* region from an *empty* one, or assert the error notification never auto-dismisses ([`error-handling`](../error-handling/SKILL.md)).
 
 Skip:
 - Decorative `<div>`/`<span>` wrappers, layout containers.
