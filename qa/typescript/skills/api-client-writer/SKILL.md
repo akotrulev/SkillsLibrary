@@ -18,6 +18,7 @@ Generator skill. Scaffolds a single `{resource}Client.ts` file in the TypeScript
 - Writing the test spec — use `qa/typescript/skills/api-test-author/writer`.
 - Reviewing an existing client for convention drift — use `qa/typescript/skills/api-test-author/review`.
 - Authoring Zod schemas / DTO types — use `qa/typescript/skills/api-models` first.
+- Reacting to a **new version of a swagger/OpenAPI spec** — start at `qa/_shared/api-spec-assets` (`qa-api-spec-assets-shared`): it replaces the stored spec asset in place and derives from `git diff` exactly which client methods changed. Come back here for those methods only.
 - .NET stack (RestSharp) — use `qa/dotnet/skills/api-client-writer`.
 - Java stack (RestAssured) — use `qa/java/skills/api-client-writer`.
 - Projects standardized on axios / got / supertest — these conventions assume native `fetch`.

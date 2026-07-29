@@ -76,6 +76,7 @@ No browsers or device emulators are needed for an API suite — the cheapest mod
     ├── TestData/                       # per-domain builders / fixtures
     ├── Helpers/
     ├── Tests/                          # grouped by service / feature
+    ├── Specs/                          # stored OpenAPI assets: {service}-openapi-YYYY-MM-DD.json
     ├── Tools/                          # one-off scripts / spec downloaders
     ├── Config/
     ├── allureConfig.json               # ┐ per-project config — keeps the

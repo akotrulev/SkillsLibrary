@@ -15,6 +15,8 @@ Generator skill. Scaffolds a single DTO file in the TypeScript `apitests/` packa
 
 ## When NOT to use
 
+- Reacting to a **new version of a swagger/OpenAPI spec** — start at `qa-api-spec-assets-shared`: it replaces the stored spec asset in place, derives the changed-schema work list from `git diff`, and comes back here for only the files that list names. Do not re-generate every schema because the spec moved.
+
 - C# or Java DTOs — use `qa-api-models-dotnet` / `qa-api-models-java`.
 - Runtime validation (parsing untrusted JSON, contract verification) — define a Zod/Valibot schema instead and infer the type from it.
 - Writing the client itself — use the TS API client skill.
