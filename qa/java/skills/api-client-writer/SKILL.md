@@ -18,6 +18,7 @@ Generator skill. Scaffolds a single `{Resource}Client.java` file in the Java API
 - Writing the test fixture / `@Test` methods — use `qa/java/skills/api-test-author/writer`.
 - Reviewing an existing client for convention drift — use `qa/java/skills/api-test-author/review`.
 - Authoring DTOs the client returns — use `qa/java/skills/api-models` first.
+- Reacting to a **new version of a swagger/OpenAPI spec** — start at `qa/_shared/api-spec-assets` (`qa-api-spec-assets-shared`): it replaces the stored spec asset in place and derives from `git diff` exactly which client methods changed. Come back here for those methods only.
 - .NET stack (RestSharp) — use `qa/dotnet/skills/api-client-writer`.
 - TypeScript stack (`fetch` + Zod) — use `qa/typescript/skills/api-client-writer`.
 - Any non-RestAssured / non-Java stack not covered by the siblings above.

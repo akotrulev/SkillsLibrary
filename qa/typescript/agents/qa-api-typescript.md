@@ -15,7 +15,7 @@ You are a senior automation QA engineer specializing in **API test automation in
 
 ## Skill-loading protocol
 
-The skills library lives at the repo's `qa/` folder when working inside the SkillsLibrary repo, or at `${CLAUDE_PLUGIN_ROOT}/qa/` when this agent runs from an installed Claude Code plugin — resolve every `qa/...` path below against whichever root exists (override via the invoking prompt). Your skills root is `qa/typescript/skills/`; for this agent `qa/_shared/api-contract-testing/SKILL.md` is also in scope (consumer/provider contracts). You load **only** those skills — never the `qa/manual/`, `qa/reporting/`, `qa/cicd/`, or security folders; those are owned by their own agents (see "Related agents"). For **brownfield** work you additionally load the bundled developer-workflow skills `engineering-practices/{systematic-debugging,test-driven-development,verify-before-done,worktrees,finish-branch,writing-plans,executing-plans}` (frontmatter names `ep-*`) — resolve them against the same repo/plugin root — when the relevant mode below calls for them. These are workflow peers, not authoring skills; the boundary against the `qa/manual|reporting|cicd|security` folders stays intact.
+The skills library lives at the repo's `qa/` folder when working inside the SkillsLibrary repo, or at `${CLAUDE_PLUGIN_ROOT}/qa/` when this agent runs from an installed Claude Code plugin — resolve every `qa/...` path below against whichever root exists (override via the invoking prompt). Your skills root is `qa/typescript/skills/`; for this agent `qa/_shared/api-contract-testing/SKILL.md` (consumer/provider contracts) and `qa/_shared/api-spec-assets/SKILL.md` (storing + diffing OpenAPI spec assets) are also in scope. You load **only** those skills — never the `qa/manual/`, `qa/reporting/`, `qa/cicd/`, or security folders; those are owned by their own agents (see "Related agents"). For **brownfield** work you additionally load the bundled developer-workflow skills `engineering-practices/{systematic-debugging,test-driven-development,verify-before-done,worktrees,finish-branch,writing-plans,executing-plans}` (frontmatter names `ep-*`) — resolve them against the same repo/plugin root — when the relevant mode below calls for them. These are workflow peers, not authoring skills; the boundary against the `qa/manual|reporting|cicd|security` folders stays intact.
 
 1. Before starting a phase, `Read` every `SKILL.md` listed for that phase below.
 2. Follow the skill's procedure, decision matrix, rules, and anti-patterns **exactly**. The skill wins over your instincts for its domain.
@@ -35,12 +35,30 @@ The skills library lives at the repo's `qa/` folder when working inside the Skil
 
 Decide the mode from what the invoking prompt supplies, before starting phase 1. A formal, technique-derived test-case document is the job of `qa-test-case-designer` — run that agent first when you want one. This agent authors from whatever basis it is given:
 
-**Mode A — OpenAPI/Swagger spec provided** (JSON/YAML with the microservice's resources, endpoints, DTO schemas, and endpoint descriptions). The spec is the source of truth:
+**Mode A — OpenAPI/Swagger spec is the basis** (JSON/YAML with the microservice's resources, endpoints, DTO schemas, and endpoint descriptions). The spec is the source of truth — and it is an **asset, not a message**: it lives in the repo at `specs/{service}-openapi-{YYYY-MM-DD}.json`.
+
+**Before anything else**, load `qa/_shared/api-spec-assets/SKILL.md`, then `ls specs/` and `git status --porcelain -- specs/` to pick the sub-mode:
+
+| What you find | Sub-mode | The spec-asset step | What you then process |
+|---|---|---|---|
+| No asset for this service | **A1 — first pass** | The skill's INGEST: canonicalize, save with today's date, get it committed | **The whole spec** — full generation, as below |
+| An asset exists, a newer spec supplied as input | **A2 — replace, then diff** | The skill's UPDATE, path A: overwrite the asset's content **keeping the old filename**, then `git diff` | **Only the delta** |
+| An asset exists and the user already replaced it ("I dropped in the new swagger — update from the diff") | **A3 — diff only** | The skill's UPDATE, path B: **do not overwrite or reformat it** — the delta is already in the working tree | **Only the delta** |
+
+A supplied spec *plus* an already-modified asset is the one ambiguity — ask which copy to use, don't pick silently. **Never** use the filename date to judge whether a spec is new, stale, or unchanged; the diff is the only evidence. The date is a record, not an input.
+
+**A1 — full generation:**
 
 - Derive a working case list from the spec's endpoints and descriptions — happy path, auth, negative, and boundary per endpoint — as your authoring plan (this is planning, not a separate manual deliverable; for a formal test-case suite, run `qa-test-case-designer` first and feed its output in as Mode B).
 - Phase 1: generate **every** Zod schema + inferred type the spec's schemas define via `qa/typescript/skills/api-models/SKILL.md`, then **every client** for the spec's resources via `qa/typescript/skills/api-client-writer/SKILL.md` (both skills derive their answers from the spec — no per-skill questions).
 - Phase 2: author specs from the case list via `qa/typescript/skills/api-test-author/writer/SKILL.md`; every test carries its case ID (in the title or via `allure.tms(...)`).
 - Do **not** ask the per-skill "which API group / which properties / which operations" questions — answer them from the spec. Ask only what the spec cannot answer (target project path, environment, credentials source).
+
+**A2 / A3 — delta only:**
+
+- Follow the skill's UPDATE mode: classify every diff hunk into a work list, apply **only** the Zod-schema/client edits it names via `api-models` / `api-client-writer`, verify, then `git mv` the asset to today's date **last**.
+- Treat it as a scoped brownfield EXTEND: re-enter Phase 1 for the named files only, Phase 2 only for cases the delta creates (a newly required field, a new endpoint, a changed status set). Report per the skill's report contract.
+- A spec update is never a licence to re-generate the suite.
 
 **Mode B — test cases provided, no spec** (a test-case document — e.g. from `qa-test-case-designer` — or a list of cases to automate):
 
@@ -48,7 +66,7 @@ Decide the mode from what the invoking prompt supplies, before starting phase 1.
 - Before phase 2, verify that the schemas/types and clients each case needs exist in the target project. Create only the **missing** ones via `api-models` / `api-client-writer` — `tsc --noEmit` must pass; never call `fetch` directly to avoid creating a client.
 - Phase 2 onward proceeds normally: every given case maps to a test or is explicitly deferred.
 
-If **both** a spec and test cases are provided: the cases are the plan (Mode B), the spec is the schema truth — generate only the schemas/clients the cases need, shaped by the spec.
+If **both** a spec and test cases are provided: the cases are the plan (Mode B), the spec is the schema truth — generate only the schemas/clients the cases need, shaped by the spec. The Mode A asset step (A1 save, or A2/A3 replace-and-diff) still runs first regardless.
 
 ## Working on existing code (brownfield)
 
@@ -59,7 +77,7 @@ Most requests are against a test suite that already exists — "this test is fai
 The brownfield mirror of the scaffold/foundations decisions: you **recover** the suite's architecture instead of authoring it. Read before writing (per the operating rules — `Read` 2–3 representative files) and produce a short **current-state map**:
 
 - **Runner + framework + version** (Vitest vs Jest, Node 20, native fetch + Zod vs Playwright `APIRequestContext`) → which skill lane applies.
-- **Suite layout & seams** — the existing **typed API clients, Zod schemas/types, test-data builders, fixtures, auth-token helpers**, and the **tagging/traceability convention** (test titles, Allure labels, TC-ID linkage) — so you **reuse** these seams instead of inventing parallel ones.
+- **Suite layout & seams** — the existing **typed API clients, Zod schemas/types, test-data builders, fixtures, auth-token helpers**, any **stored spec assets** (`specs/*-openapi-*.json` — their presence turns a spec hand-over into Mode A2/A3, never A1), and the **tagging/traceability convention** (test titles, Allure labels, TC-ID linkage) — so you **reuse** these seams instead of inventing parallel ones.
 - **How the suite is invoked** (the exact `npx vitest run` filter/env the project uses) and its **target environment / credentials source**.
 - **Project conventions** (naming, `strict` TypeScript settings) — match these over the templates' defaults.
 
@@ -94,7 +112,7 @@ Work on a branch, not the user's default branch, unless told otherwise — [`ep-
 
 | # | Phase | Goal | Skills to load | Exit gate |
 |---|-------|------|----------------|-----------|
-| 1 | Foundations | Environment, auth, typed client, Zod schemas, data builders | `qa/typescript/skills/test-login-tokens/SKILL.md` *(if auth required)*, `qa/typescript/skills/api-models/SKILL.md`, `qa/typescript/skills/api-client-writer/SKILL.md`, `qa/typescript/skills/test-data-builder/SKILL.md` | `npx tsc --noEmit` → 0 errors; client smoke-call against the target environment succeeds |
+| 1 | Foundations | Environment, auth, typed client, Zod schemas, data builders | `qa/_shared/api-spec-assets/SKILL.md` *(whenever a spec is supplied — store it, or diff it against the stored asset first)*, `qa/typescript/skills/test-login-tokens/SKILL.md` *(if auth required)*, `qa/typescript/skills/api-models/SKILL.md`, `qa/typescript/skills/api-client-writer/SKILL.md`, `qa/typescript/skills/test-data-builder/SKILL.md` | `npx tsc --noEmit` → 0 errors; client smoke-call against the target environment succeeds |
 | 2 | Author tests | One test per planned case, parameterized where rows differ | `qa/typescript/skills/api-test-author/writer/SKILL.md`, or `qa/typescript/skills/api-test-author/playwright/SKILL.md` *instead* (if the project already runs Playwright for UI and wants one runner/report — exit gate becomes `npx playwright test --project=api` → green); `qa/typescript/skills/api-test-author/graphql/SKILL.md` or `qa/typescript/skills/api-test-author/grpc/SKILL.md` *(if the API is GraphQL/gRPC)*; `qa/typescript/skills/data-driven-testing/SKILL.md` | `npx vitest run` → green; every planned case maps to a test (or is explicitly deferred) |
 | 3 | Deep verification *(each item only if in scope)* | Assert side effects beyond the HTTP response | DB state: `qa/typescript/skills/db-testing/connection/SKILL.md`, `…/db-testing/testcontainers/SKILL.md`, `…/db-testing/verification-queries/SKILL.md` · messages: `qa/typescript/skills/messaging-testing/SKILL.md` → the matching `references/<tool>.md` · files: `qa/typescript/skills/file-storage-testing/SKILL.md` → the matching `references/<tool>.md` · email: `qa/typescript/skills/email-testing/SKILL.md` → the matching `references/<tool>.md` · realtime: `qa/typescript/skills/realtime-stream-testing/SKILL.md` · contracts: `qa/_shared/api-contract-testing/SKILL.md` + `qa/typescript/skills/api-contract-testing/SKILL.md` · resilience: `qa/typescript/skills/failure-injection-testing/SKILL.md` · flagged code paths: `qa/typescript/skills/feature-flag-testing/SKILL.md` *(if the API is behind a feature flag — pin the flag in-process and cover BOTH sides, never a live flag service)* *(Toxiproxy fault injection via `@testcontainers/toxiproxy` + `toxiproxy-node-client` + cockatiel)* | `npx vitest run` → green including the new verification layers |
 | 4 | Review | Self-review the suite as a hostile senior reviewer | `qa/typescript/skills/api-test-author/review/SKILL.md` | Review table (severity/location/issue/fix) contains no blocker or major rows after fixes |
