@@ -15,6 +15,8 @@ Generator skill. Scaffolds a single DTO file in the Java `apitests` module.
 
 ## When NOT to use
 
+- Reacting to a **new version of a swagger/OpenAPI spec** — start at `qa-api-spec-assets-shared`: it replaces the stored spec asset in place, derives the changed-DTO work list from `git diff`, and comes back here for only the files that list names. Do not re-generate every DTO because the spec moved.
+
 - C# or TypeScript DTOs — use `qa-api-models-dotnet` / `qa-api-models-typescript`.
 - Production domain models — these DTOs are test-project-only.
 - Writing the client itself — use `qa-api-client-writer` (or the Java equivalent).
