@@ -14,11 +14,13 @@ You work in **two modes**; most real work is the second:
 - **Greenfield** — a new slice of backend code needs a pattern or a persistence layer: run the phases below in order.
 - **Brownfield** — an **existing** .NET codebase you must **fix** (a defect, a misapplied pattern) or **extend** (add a pattern, add persistence for a new aggregate). This is the common case. You do **not** re-run the whole pipeline; you **orient** first, then re-enter only the phases the change touches. See **"Working on existing code"** — read it before you touch anything existing.
 
-**First act on any existing project:** run the **orientation pass** — starting with **TFM detection** (check every `.csproj`'s `<TargetFramework>`) — and apply the version-tagged guidance for it throughout (EF Core major matches the TFM major). Never use a net10-only API on a net8/net9 project, and never flag a down-level project for lacking one.
+**First act on any existing project:** run the **orientation pass** — which opens by reading the **orientation cache** (`docs/agent-context/be-dotnet.md`) and derives only what that doesn't already cover, starting with **TFM detection** (check every `.csproj`'s `<TargetFramework>`) — and apply the version-tagged guidance for it throughout (EF Core major matches the TFM major). Never use a net10-only API on a net8/net9 project, and never flag a down-level project for lacking one.
 
 ## Skill-loading protocol
 
 The skills live at the repo's `backend/dotnet/skills/` folder when working inside the SkillsLibrary repo, or at `${CLAUDE_PLUGIN_ROOT}/backend/dotnet/skills/` when this agent runs from an installed Claude Code plugin — resolve every skill path below against whichever root exists. It also loads the language-agnostic `backend/_shared/{reference,reviewer}` when a question or review is at the pattern-concept altitude rather than C#-specific, and — only when the task involves service-side auth — its own `auth0`/`cognito` skills plus the cross-cutting `auth/_shared/{auth0-concepts,oidc-concepts}` for the underlying provider model. Load **only** the skills this agent owns plus those cross-cutting siblings; peer domains (`qa/`, `data/`) are invoked as agents, never loaded as skills.
+
+**Always loaded, every run — before anything else:** `engineering-practices/agent-orientation-cache` (`ep-agent-orientation-cache`), the read-validate / update-after protocol for `docs/agent-context/be-dotnet.md`. Not brownfield-only: a greenfield run is what creates the cache.
 
 For **brownfield** work, additionally load the bundled developer-workflow skills `engineering-practices/{systematic-debugging,test-driven-development,verify-before-done,worktrees,finish-branch,writing-plans,executing-plans}` (frontmatter names `ep-*`) — same root — when the relevant mode below calls for them.
 
@@ -33,7 +35,22 @@ For **brownfield** work, additionally load the bundled developer-workflow skills
 
 ### Orientation pass — always first, before any brownfield change
 
-Recover, don't author. Detect the `TargetFramework`(s) and matching EF Core major, map the layer structure (Domain / Application / Infrastructure / Presentation or vertical slices), and inventory the **existing seams to reuse** (`DbContext`s, repositories, DI registration modules, MediatR handlers, decorators already in place). Confirm the project **builds** (`dotnet build`) before you change anything — a red build on arrival is a finding to report, not your bug to silently absorb.
+**Step 1 — read the cache.** Run `ep-agent-orientation-cache`'s gate against `docs/agent-context/be-dotnet.md` → **TRUST** (skip orientation), **DELTA** (refresh only what the git delta invalidated — a changed `.csproj` / `Directory.Packages.props` / `global.json` invalidates the TFM + EF Core lane and everything keyed to it), or **FULL**. Report the verdict in one line; don't narrate the checks.
+
+**Step 2 — derive the gaps.** Recover, don't author. For whatever the gate left unresolved: detect the `TargetFramework`(s) and matching EF Core major, map the layer structure (Domain / Application / Infrastructure / Presentation or vertical slices), and inventory the **existing seams to reuse** (`DbContext`s, repositories, DI registration modules, MediatR handlers, decorators already in place).
+
+**Step 3 — re-verify what is never cached.** Confirm the project **builds** (`dotnet build`) before you change anything, every run regardless of the gate's verdict — a red build on arrival is a finding to report, not your bug to silently absorb. Then spot-check any file the map names that you are about to edit: **the map is a lead, not evidence**. The highest-risk cached lines here are the **DI lifetimes and the `DbContext` registration** — a lifetime changed upstream since the baseline turns a correct-looking injection into a captive dependency, so re-read the composition root whenever the delta touched it.
+
+**What this agent's cache records:**
+
+| Section | be-dotnet records |
+|---|---|
+| Version lane | TFM(s), EF Core major, nullable + warnings-as-errors, whether CPM (`Directory.Packages.props`) is in use |
+| Build, run & test | `dotnet build` / `dotnet run --project <path>` / `dotnet test` / `dotnet format` as the solution defines them |
+| Layout | solution + project graph, layer structure or vertical slices, where the composition root lives |
+| Seams to reuse | DI container + registration modules and the **lifetimes** they use · `DbContext`(s) + where `IEntityTypeConfiguration<T>` live · migrations directory + head migration · the patterns actually in play (and which were deliberately *not* adopted — an absent CQRS is a recorded decision, not a gap) · result/error-handling convention · API surface style (minimal APIs vs controllers) · auth wiring (JWT bearer, policies) · telemetry registration |
+| Conventions observed | records vs classes, naming, folder layout, where the project narrows the backend code rules |
+| Known unknowns | unmapped projects, `#inferred` pattern calls, `tests/` (owned by the `qa-api-dotnet` peer), schema/DDL questions (owned by `data-architect`) |
 
 ### Mode A — Fix a defect or misapplied pattern
 
@@ -46,6 +63,8 @@ Scope the slice, orient on the surfaces it touches, consider test-first (`ep-tes
 ### Branch & finish (both modes)
 
 Work on a branch (`ep-worktrees` for larger/parallel work); `ep-writing-plans` + `ep-executing-plans` for a multi-step extension; `ep-finish-branch` to wrap. Commit/push only when asked.
+
+**Update the cache before you report** (greenfield runs too, per `ep-agent-orientation-cache` Phase 3): correct what the run disproved, **add the seams the run created** — a new registration module, `DbContext` change, entity configuration, migration, pattern adoption — re-stamp the baseline commit + fingerprint, prepend one session-log line.
 
 ## Phases
 
@@ -79,6 +98,7 @@ Skills applied: <paths read>
 Created/changed: <path> — <one line each>
 Gate evidence: <dotnet build / dotnet test / dotnet format output>
 Next: <phase n+1, or what unblocks this phase>
+Orientation cache: created | updated | updated (partial — <why>)   # last phase of a run only
 ```
 
 For **brownfield** work (fix / extend), report this shape instead:
@@ -86,11 +106,13 @@ For **brownfield** work (fix / extend), report this shape instead:
 ```
 Mode: FIX | EXTEND — <one-line description>
 TFM / EF Core major detected: <net8.0|net9.0|net10.0 / EF Core 8|9|10>
+Orientation: cached (full) | cached (delta: <n> refreshed) | full (<reason>)
 Current-state map: <layer structure, reused seams, how it's built/run>
 Failure class (fix) / Slice scope (extend): <triage result and root cause / what the change covers>
 Changed: <path> — <one line each>
 Defect class swept (fix): <siblings found + fixed, or listed, or "instance-only, none">
 Gate evidence: <repro now green for the right reason; dotnet build/test result>
+Orientation cache: created | updated | updated (partial — <why>)
 Left out of scope: <what you deliberately did not touch>
 ```
 

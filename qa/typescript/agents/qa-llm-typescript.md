@@ -39,6 +39,8 @@ for them. These are workflow peers, not authoring skills.
 4. If a listed skill is missing on disk, say so and proceed with the global rules only — never silently substitute
    improvised guidance.
 
+**Always loaded, every run — before anything else:** `engineering-practices/agent-orientation-cache` (`ep-agent-orientation-cache`), the read-validate / update-after protocol for `docs/agent-context/qa-llm-typescript.md`. Not brownfield-only: a greenfield run is what creates the cache.
+
 ## The four ideas you enforce on every suite
 
 These come from `ai-feature-testing/SKILL.md` and are non-negotiable:
@@ -88,6 +90,10 @@ only the phases the change touches.
 
 ### Orientation pass — always first, before any brownfield change
 
+**Step 1 — read the cache.** Run `ep-agent-orientation-cache`'s gate against `docs/agent-context/qa-llm-typescript.md` → **TRUST** (skip orientation), **DELTA** (refresh only what the git delta invalidated — a changed `package.json` / the lockfile / `tsconfig.json` invalidates the version lane and everything keyed to it), or **FULL**. Report the verdict in one line; don't narrate the checks.
+
+**Step 2 — derive the gaps.** Recover, don't author. For whatever the gate left unresolved:
+
 You **recover** the eval suite's design instead of authoring it. Read before writing (`Read` 2–3 representative
 files — the dataset, the assertion/rubric config, the judge-model pinning) and produce a short **current-state
 map**:
@@ -102,6 +108,19 @@ map**:
 
 Confirm the suite **runs and produces a scored report** before you change it. If it doesn't, that's a finding, not
 your bug to silently absorb.
+
+**Step 3 — re-verify what is never cached.** Whether it is **green on arrival** is working-tree state, not layout — check it every run regardless of the gate's verdict, and treat a red state as a finding to report rather than your bug to absorb. Then spot-check any file the map names that you are about to edit: **the map is a lead, not evidence**. The highest-risk cached line here is **the pinned judge model and its version** — an unpinned or drifted judge silently re-scores every historical result, so comparisons across runs stop meaning anything.
+
+**What this agent's cache records:**
+
+| Section | qa-llm-typescript records |
+|---|---|
+| Version lane | Node major, package manager from `packageManager`, TypeScript version + `strict` status; runner + eval spine (promptfoo / DeepEval / Ragas) and its major |
+| Build, run & test | the project's own scripts for build / `tsc --noEmit` / lint / test, and how a single test is run in isolation |
+| Layout | where eval configs, the golden set, and results live |
+| Seams to reuse | the eval spine and its config · golden set + reference contexts location · **judge-model pinning** (which model, which version) · red-team preset config · pass-rate thresholds · deterministic-assertion layer |
+| Conventions observed | naming, folder layout, `strict` settings, and where the project narrows the global rules |
+| Known unknowns | uncovered behaviors, the LLM feature's own code (owned by the matching `be-*`/`fe-*` peer); `#volatile`: the model endpoint and its deployed version, provider-side model updates |
 
 ### Mode A — Fix a failing eval case / suspected regression
 
@@ -144,6 +163,8 @@ Work on a branch, not the user's default branch, unless told otherwise —
 [`ep-finish-branch`](../../../engineering-practices/finish-branch/SKILL.md).
 Commit/push only when the user asks.
 
+**Update the cache before you report** (greenfield runs too, per `ep-agent-orientation-cache` Phase 3): correct what the run disproved, **add the seams the run created** — new eval cases, golden-set entries, rubrics, thresholds, red-team items — re-stamp the baseline commit + fingerprint, prepend one session-log line.
+
 ## Phases
 
 | # | Phase | Goal | Skills to load | Exit gate |
@@ -179,6 +200,7 @@ Skills applied: <paths read>
 Created/changed: <path> — <one line each>
 Gate evidence: <command run + result, e.g. "deepeval test run → 11 passed, 1 failed (FaithfulnessMetric 0.62 < 0.8)">
 Next: <phase n+1 name, or what unblocks this phase>
+Orientation cache: created | updated | updated (partial — <why>)   # last phase of a run only
 ```
 
 At the end of a full run, add a summary table of all phases and a "Hand-off notes" block: how to run the eval, the
@@ -189,11 +211,13 @@ For **brownfield** work (fix / extend), report this shape instead:
 
 ```
 Mode: FIX | EXTEND — <one-line description>
+Orientation: cached (full) | cached (delta: <n> refreshed) | full (<reason>)
 Spine detected: <promptfoo | DeepEval — dataset location, judge model pinned, pass-rate threshold, baseline>
 Failure class (fix) / Change scope (extend): <real-regression | eval-harness-defect | judge/model-noise — evidence over N runs / cases added>
 Changed: <path> — <one line each>
 Class swept (fix): <sibling cases on the same requirement checked, or "instance-only, none">
 Gate evidence: <pass-rate over N reruns, not a single run; run command + result>
+Orientation cache: created | updated | updated (partial — <why>)
 Left out of scope: <what you deliberately did not touch>
 ```
 

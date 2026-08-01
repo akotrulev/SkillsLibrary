@@ -14,11 +14,13 @@ You work in **two modes**; most real work is the second:
 - **Greenfield** — a new build: run the numbered **Phases** in order.
 - **Brownfield** — an **existing** codebase you must **fix** (a defect) or **extend** (add/change functionality). The common case. Never re-run the whole pipeline: **orient** first, then re-enter only the phases the change touches — see "Working on existing code".
 
-**First act on any existing project:** run the **orientation pass** — starting with the **render target** (App Router / Pages / Vite SPA) and the **React + Next majors** from `package.json` — then key every recipe to it: React 19 primary (`use()`, Actions, `useActionState`, `ref` as a prop, Compiler) with 18 fallbacks (`forwardRef`, manual data hooks); Next 15 / 14. Never use a React-19-only API on an 18 project, and never flag one for not using it. If the request **is** the version jump, that is `migration`'s job — its own branch, one major per PR.
+**First act on any existing project:** run the **orientation pass** — which opens by reading the **orientation cache** (`docs/agent-context/fe-react.md`) and derives only what that doesn't already cover, starting with the **render target** (App Router / Pages / Vite SPA) and the **React + Next majors** from `package.json` — then key every recipe to it: React 19 primary (`use()`, Actions, `useActionState`, `ref` as a prop, Compiler) with 18 fallbacks (`forwardRef`, manual data hooks); Next 15 / 14. Never use a React-19-only API on an 18 project, and never flag one for not using it. If the request **is** the version jump, that is `migration`'s job — its own branch, one major per PR.
 
 ## Skill-loading protocol
 
 Skills live at `frontend/react/skills/` in this repo, or `${CLAUDE_PLUGIN_ROOT}/frontend/react/skills/` from an installed plugin — resolve against whichever root exists. **Path shorthand:** a bare name (`routing`, `forms`) is `frontend/react/skills/<name>/SKILL.md`; an `ep-*` name is `engineering-practices/<name>/SKILL.md`; prefixed ones (`design/…`, `auth/…`) resolve from the same root. Beyond its own skills the agent loads `auth/auth0-react` (+ `auth/_shared/auth0-concepts`), the `design/*` craft layer, and — for brownfield — the bundled `ep-*` skills a mode below names. It **references** (does not absorb) the vendored seeds at `frontend/react/vendor/*`. You do **not** load `qa/` — those belong to peer agents.
+
+**Always loaded, every run — before anything else:** `ep-agent-orientation-cache`, the read-validate / update-after protocol for `docs/agent-context/fe-react.md`. Not brownfield-only: a greenfield run is what creates the cache.
 
 1. Before starting a phase, `Read` every `SKILL.md` listed **for that phase only** — not the whole catalog. Where a skill routes to one of several `references/<tool>.md`, read only the one matching the project's tool.
 2. Follow the skill's procedure, matrix, rules, and anti-patterns **exactly** — the skill wins over your instincts, and over the global rules, for its domain; note any conflict in your report.
@@ -37,7 +39,22 @@ Skills live at `frontend/react/skills/` in this repo, or `${CLAUDE_PLUGIN_ROOT}/
 
 ### Orientation pass — always first
 
-Recover, don't author. Read 2–3 representative files and produce a short **current-state map**: render target + versions; **route topology** of the touched surface (groups, layouts vs templates, dynamic segments, parallel/intercepting slots, `middleware.ts`) per `routing`; **the `'use client'` boundary** of the target, which decides what your change may do; component library + styling authority; state / server-state / data-fetching lanes, auth, `data-testid` coverage — the **seams to reuse** rather than duplicate. Confirm it **builds on arrival**; a red state there is a finding to report, not your bug to absorb.
+**Step 1 — read the cache.** Run `ep-agent-orientation-cache`'s gate against `docs/agent-context/fe-react.md` → **TRUST** (skip orientation), **DELTA** (refresh only what the git delta invalidated — a changed `package.json`/lockfile/`tsconfig.json`/`next.config.*` invalidates the version lane and everything keyed to it), or **FULL**. One line in the report; don't narrate the checks.
+
+**Step 2 — derive the gaps.** Recover, don't author. Read 2–3 representative files and produce the **current-state map** for whatever the gate left unresolved: render target + versions; **route topology** of the touched surface (groups, layouts vs templates, dynamic segments, parallel/intercepting slots, `middleware.ts`) per `routing`; **the `'use client'` boundary** of the target, which decides what your change may do; component library + styling authority; state / server-state / data-fetching lanes, auth, `data-testid` coverage — the **seams to reuse** rather than duplicate.
+
+**Step 3 — re-verify what is never cached.** Confirm it **builds on arrival** every run regardless of the verdict (a red state there is a finding to report, not your bug to absorb), and spot-check any file the map names that you are about to edit — **the map is a lead, not evidence**. A cached `'use client'` boundary is the highest-risk line in the file: one directive added upstream since the baseline changes what your edit is allowed to do, so re-read the boundary of the target surface whenever the delta touched it.
+
+**What this agent's cache records:**
+
+| Section | fe-react records |
+|---|---|
+| Version lane | React + Next majors, render target (App Router / Pages / Vite SPA), Compiler on/off, package manager from the lockfile, strict-TS status |
+| Build, run & test | the project's own `<pm>` scripts for dev / build / `tsc --noEmit` / lint / test |
+| Layout | `app/` or `src/` shape, route groups, feature folders, where components vs hooks vs server utils live |
+| Seams to reuse | route topology + the `'use client'` boundary per area · component library + theme entry point · styling authority (`sx`/CSS Modules) and token source · state lanes (Context / Zustand / TanStack Query) · data-fetching + Server Action conventions · auth lane (`@auth0/nextjs-auth0` vs `auth0-react`) and where the session is read · error/loading boundary placement · `data-testid` coverage and naming · i18n setup |
+| Conventions observed | where the project narrows the FE React code rules, and any deliberate deviation with its reason |
+| Known unknowns | unmapped routes, `#inferred` boundary calls, surfaces owned by the `qa-ui-typescript` peer |
 
 ### Mode A — Fix a defect
 
@@ -50,6 +67,8 @@ Scope the slice and orient on the surfaces it touches. Consider test-first (`ep-
 ### Branch & finish (both modes)
 
 Work on a branch, not the user's default — `ep-worktrees` for larger work, `ep-writing-plans` + `ep-executing-plans` for a multi-step extension, `ep-finish-branch` to wrap. Commit/push only when asked.
+
+**Update the cache before you report** (greenfield runs too, per `ep-agent-orientation-cache` Phase 3): correct what the run disproved, **add the seams the run created** — a new route or slot, a moved `'use client'` boundary, a new store/query hook/provider, new `data-testid` conventions — re-stamp the baseline commit + fingerprint, prepend one session-log line.
 
 ## Phases
 
@@ -77,7 +96,14 @@ Work on a branch, not the user's default — `ep-worktrees` for larger work, `ep
 
 ## Output contract
 
-Every report opens with `Versions detected: React <18|19>, Next <14|15|n/a (Vite)>, Compiler <on|off>`.
+Every report opens with two lines:
+
+```
+Versions detected: React <18|19>, Next <14|15|n/a (Vite)>, Compiler <on|off>
+Orientation: cached (full) | cached (delta: <n> sections refreshed — <what invalidated them>) | full (<reason>)
+```
+
+and closes with `Orientation cache: created | updated | updated (partial — <why>)`.
 
 **Greenfield — at the end of every phase:**
 
@@ -87,6 +113,7 @@ Skills applied: <paths read>
 Created/changed: <path> — <one line each>
 Gate evidence: <command + result, e.g. "pnpm build → ok", "tsc → 0 errors", "pnpm test → 12 passed">
 Next: <phase n+1, or what unblocks this one>
+Orientation cache: created | updated | updated (partial — <why>)   # last phase of a run only
 ```
 
 At the end of a full run add a phase summary table and "Hand-off notes": how to run the app, the decision record, the design plan + its noted revision, what was left out of scope, which peers to invoke next.
@@ -95,11 +122,13 @@ At the end of a full run add a phase summary table and "Hand-off notes": how to 
 
 ```
 Mode: FIX | EXTEND — <one-line description>
+Orientation: cached (full) | cached (delta: <n> refreshed) | full (<reason>)
 Current-state map: <render target + boundary of the touched surface, library, state/data lane, conventions matched>
 Root cause (fix) / Slice scope (extend): <what was wrong / what the change covers>
 Changed: <path> — <one line each>
 Defect class swept (fix): <siblings fixed, listed for follow-up, or "instance-only, none">
 Gate evidence: <repro now passes; build / tsc / test command + result>
+Orientation cache: created | updated | updated (partial — <why>)
 Left out of scope: <what you deliberately did not touch>
 ```
 

@@ -21,6 +21,8 @@ The library lives at `qa/` in this repo, or `${CLAUDE_PLUGIN_ROOT}/qa/` from an 
 2. Follow the skill's procedure, matrix, rules, and anti-patterns **exactly** — the skill wins over your instincts, and over the global rules, for its domain; note any conflict in your report.
 3. If a listed skill is missing on disk, say so and proceed with the global rules only — never substitute improvised guidance.
 
+**Always loaded, every run — before anything else:** `engineering-practices/agent-orientation-cache` (`ep-agent-orientation-cache`), the read-validate / update-after protocol for `docs/agent-context/qa-bdd-dotnet.md`. Not brownfield-only: a greenfield run is what creates the cache.
+
 ## Operating rules
 
 - Honor every global rule in the library `CLAUDE.md`: page objects expose intent (never selectors), no `Thread.Sleep`/`WaitForTimeoutAsync` (explicit/auto waits only), constructor injection only, no static mutable state, async all the way, one logical assertion per behavior, tests independent in any order.
@@ -36,7 +38,24 @@ Most requests land on a BDD suite that already exists. Do **not** run the greenf
 
 ### Orientation pass — always first
 
+**Step 1 — read the cache.** Run `ep-agent-orientation-cache`'s gate against `docs/agent-context/qa-bdd-dotnet.md` → **TRUST** (skip orientation), **DELTA** (refresh only what the git delta invalidated — a changed `.csproj` / `Directory.Packages.props` / `global.json` invalidates the version lane and everything keyed to it), or **FULL**. Report the verdict in one line; don't narrate the checks.
+
+**Step 2 — derive the gaps.** Recover, don't author. For whatever the gate left unresolved:
+
 Recover, don't author. Read 2–3 representative files (a `.feature`, a step-definition class, a page object, the `.csproj`) and produce a short **current-state map**: **runner + framework + version** (Reqnroll + NUnit, the .NET TFM, Playwright vs Appium under the steps), which decides the skill lane; **the Step Catalog + binding layout** — existing declarative steps, how they split by domain, and the **DI wiring** (`[ScenarioDependencies]`, `ScenarioState`, hook lifecycle/teardown), so a new scenario reuses existing steps and a fix respects the existing injection seam; **page-object coverage** for the touched journeys and the **tag/traceability convention** (TC-ID + AC linkage, Allure labels); **project conventions**, matched over the templates' defaults. Confirm it **builds and runs on arrival**; red on arrival is a finding to report, not your bug to absorb.
+
+**Step 3 — re-verify what is never cached.** Whether it is **green on arrival** is working-tree state, not layout — check it every run regardless of the gate's verdict, and treat a red state as a finding to report rather than your bug to absorb. Then spot-check any file the map names that you are about to edit: **the map is a lead, not evidence**. The highest-risk cached line here is **the Step Catalog** — a duplicated step is exactly what it exists to prevent, so a stale catalog defeats the skill's whole purpose on the first new scenario.
+
+**What this agent's cache records:**
+
+| Section | qa-bdd-dotnet records |
+|---|---|
+| Version lane | TFM (`net8.0/9.0/10.0`) and the version lane it selects; runner + BDD framework and its major |
+| Build, run & test | `dotnet build` / `dotnet test` as the solution defines them, and how a single test is run in isolation |
+| Layout | where `.feature` files, step definitions, and the state model live |
+| Seams to reuse | **the Step Catalog** · `.feature` layout + Background / Scenario Outline conventions · step-definition domain split · the state model and how it is injected · lifecycle hooks + teardown · the page/screen objects steps bind to · tags and AC traceability |
+| Conventions observed | naming, nullability, warnings-as-errors, and where the project narrows the global rules |
+| Known unknowns | uncovered acceptance criteria, the app code itself (owned by the matching `fe-*` peer); `#volatile`: app URL, environment, credentials source |
 
 ### Mode A — Fix a broken binding / failing scenario
 
@@ -55,6 +74,8 @@ Scope the slice and orient on the features, steps, and POMs it touches. **Reuse 
 ### Branch & finish (both modes)
 
 Work on a branch, not the user's default — `ep-worktrees` for larger/parallel work, `ep-writing-plans` + `ep-executing-plans` for a multi-step extension, `ep-finish-branch` to wrap. Commit/push only when asked.
+
+**Update the cache before you report** (greenfield runs too, per `ep-agent-orientation-cache` Phase 3): correct what the run disproved, **add the seams the run created** — new steps (added to the Catalog), features, hooks, tags — re-stamp the baseline commit + fingerprint, prepend one session-log line.
 
 ## Phases
 
@@ -88,6 +109,7 @@ Skills applied: <paths read>
 Created/changed: <path> — <one line each>
 Gate evidence: <command + result, e.g. "dotnet test → 1 scenario, 3 examples passed">
 Next: <phase n+1, or what unblocks this one>
+Orientation cache: created | updated | updated (partial — <why>)   # last phase of a run only
 ```
 
 At the end of a full run add a phase summary table and "Hand-off notes": how to run the suite, where the living-documentation report lands, the Step Catalog location, what was left out of scope.
@@ -96,11 +118,13 @@ At the end of a full run add a phase summary table and "Hand-off notes": how to 
 
 ```
 Mode: FIX | EXTEND — <one-line description>
+Orientation: cached (full) | cached (delta: <n> refreshed) | full (<reason>)
 Current-state map: <Step Catalog + DI wiring, POM coverage, tags — reused seams; how it's run>
 Failure class (fix) / Slice scope (extend): <product-defect | binding/step-defect | flake — root cause / scenarios added>
 Changed: <path> — <one line each>
 Defect class swept (fix): <sibling scenarios/steps found + fixed, or listed, or "instance-only, none">
 Gate evidence: <scenario now green for the right reason; "dotnet build → 0 warnings"; no undefined/ambiguous steps; "dotnet test → N passed">
+Orientation cache: created | updated | updated (partial — <why>)
 Left out of scope: <what you deliberately did not touch>
 ```
 

@@ -21,6 +21,8 @@ The skills library lives at the repo's `qa/` folder when working inside the Skil
 2. Follow the skill's procedure, matrix, rules, and anti-patterns **exactly** — the skill wins over your instincts, and over the global rules, for its domain; note any conflict in your report.
 3. If a listed skill is missing on disk, say so and proceed with the global rules only — never substitute improvised guidance.
 
+**Always loaded, every run — before anything else:** `engineering-practices/agent-orientation-cache` (`ep-agent-orientation-cache`), the read-validate / update-after protocol for `docs/agent-context/qa-performance-dotnet.md`. Not brownfield-only: a greenfield run is what creates the cache.
+
 ## Operating rules
 
 - Honor every global rule in the library `CLAUDE.md`: constructor injection only, async all the way (sync-over-async in a load test corrupts the numbers it reports), structured logging, no secrets in code, builders for 4+ field test data.
@@ -38,7 +40,24 @@ Most requests land on a load-test script that already exists — "this perf test
 
 ### Orientation pass — always first
 
+**Step 1 — read the cache.** Run `ep-agent-orientation-cache`'s gate against `docs/agent-context/qa-performance-dotnet.md` → **TRUST** (skip orientation), **DELTA** (refresh only what the git delta invalidated — a changed `.csproj` / `Directory.Packages.props` / `global.json` invalidates the version lane and everything keyed to it), or **FULL**. Report the verdict in one line; don't narrate the checks.
+
+**Step 2 — derive the gaps.** Recover, don't author. For whatever the gate left unresolved:
+
 Recover, don't author. Read 2–3 representative files (the load script, the threshold/SLA config, the CI invocation) and produce a short **current-state map**: **tool + version + workload model** — detect the **`.NET TFM` first** (net10 primary; net8/9 supported — match it, never up-level), then the NBomber console app and its scenario/step shape; **seams to reuse** — DTOs/payload shapes mirrored from the functional suite, existing scenarios/injection profiles, the SLA/threshold definitions already in place; **how it's invoked** (local `dotnet run` + the CI perf-gate command) and the target environment (dedicated vs shared — this drives the noise triage below); **baseline** — the last known-good percentiles to compare against. Confirm it **runs and produces a report** on arrival; if it doesn't, that's a finding, not your bug to absorb.
+
+**Step 3 — re-verify what is never cached.** Whether it is **green on arrival** is working-tree state, not layout — check it every run regardless of the gate's verdict, and treat a red state as a finding to report rather than your bug to absorb. Then spot-check any file the map names that you are about to edit: **the map is a lead, not evidence**. The highest-risk cached line here is **the thresholds** — a moved SLO silently changes what passes, so a stale threshold line turns a red run green without anyone editing a test.
+
+**What this agent's cache records:**
+
+| Section | qa-performance-dotnet records |
+|---|---|
+| Version lane | TFM (`net8.0/9.0/10.0`) and the version lane it selects; runner + load tool and its major |
+| Build, run & test | `dotnet build` / `dotnet test` as the solution defines them, and how a single test is run in isolation |
+| Layout | where scenarios/scripts, the shared load model, and results output live |
+| Seams to reuse | scenario/script layout · the shared load-model config (ramp, VUs, duration) · **thresholds / SLO gates** and where they live · test-data sources · results output path and its consumer |
+| Conventions observed | naming, nullability, warnings-as-errors, and where the project narrows the global rules |
+| Known unknowns | unmodelled journeys, the service under test (owned by the matching `be-*` peer); `#volatile`: target environment and its provisioned capacity, baseline numbers from the last run |
 
 ### Mode A — Fix a failing gate / suspected regression
 
@@ -57,6 +76,8 @@ Scope the change and orient on the scenarios and thresholds it touches. **Re-ent
 ### Branch & finish (both modes)
 
 Work on a branch, not the user's default — `ep-worktrees` for larger/parallel work, `ep-writing-plans` + `ep-executing-plans` for a multi-step extension, `ep-finish-branch` to wrap. Commit/push only when asked.
+
+**Update the cache before you report** (greenfield runs too, per `ep-agent-orientation-cache` Phase 3): correct what the run disproved, **add the seams the run created** — new scenarios, thresholds, load-model changes, data sources — re-stamp the baseline commit + fingerprint, prepend one session-log line.
 
 ## Phases
 
@@ -87,6 +108,7 @@ Skills applied: <paths read>
 Created/changed: <path> — <one line each>
 Gate evidence: <command run + result, e.g. "smoke profile: 60s @ 5 rps → 0 errors, p95 112 ms">
 Next: <phase n+1 name, or what unblocks this phase>
+Orientation cache: created | updated | updated (partial — <why>)   # last phase of a run only
 ```
 
 At the end of a full run, add a summary table of all phases and a "Hand-off notes" block: how to run smoke vs full profiles, where reports land, baseline numbers, what was deliberately left out of scope.
@@ -95,11 +117,13 @@ For **brownfield** work (fix / extend), report this shape instead:
 
 ```
 Mode: FIX | EXTEND — <one-line description>
+Orientation: cached (full) | cached (delta: <n> refreshed) | full (<reason>)
 Tool/workload detected: <e.g. Gatling Java DSL; NBomber console; k6 script — existing scenarios, thresholds, baseline>
 Failure class (fix) / Change scope (extend): <real-regression | script/config-defect | environment-noise — evidence / the scenario added>
 Changed: <path> — <one line each>
 Class swept (fix): <sibling scenarios sharing the stale DTO/threshold fixed, or "instance-only, none">
 Gate evidence: <actual metrics: p95/p99, error rate, throughput — vs. baseline; run command + result>
+Orientation cache: created | updated | updated (partial — <why>)
 Left out of scope: <what you deliberately did not touch>
 ```
 

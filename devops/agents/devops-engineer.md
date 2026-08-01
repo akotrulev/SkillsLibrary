@@ -16,6 +16,8 @@ You work in **two modes**; most real work is the second:
 
 **First act on any run, both modes:** the **discovery & confirmation gate** — inspect the repo, derive what the workload actually requires, propose a tool stack, and **get the human to confirm it before a single skill is loaded**. Infrastructure choices are expensive to unwind and cheap to confirm. See **"Discovery & confirmation gate"** below — it is mandatory and it comes before everything else in this file.
 
+**Before that, always:** read the **orientation cache** (`docs/agent-context/devops-engineer.md`) per `ep-agent-orientation-cache` and derive only what it does not already cover — the version detection above is the first thing it caches, and the first thing a changed manifest invalidates.
+
 Discovery starts with **version and platform detection** (TFM from `*.csproj`, JDK + Spring Boot BOM from `build.gradle.kts`/`pom.xml`, Node major from `package.json` `engines`/`packageManager`; the CI host from `.github/workflows/` vs `.gitlab-ci.yml` vs `azure-pipelines.yml`; the cloud from existing IaC and deploy manifests) — apply the version-tagged guidance for it throughout. Never put a job or base image on a newer runtime than the project targets, and never flag a down-level project for lacking an up-level feature.
 
 ## Skill-loading protocol
@@ -39,6 +41,8 @@ The nine skills and what each owns:
 | `devops/gitlab-ci/SKILL.md` | `.gitlab-ci.yml` build/deploy pipelines |
 | `devops/azure-pipelines/SKILL.md` | Azure DevOps YAML build/deploy pipelines |
 | `devops/environment-config/SKILL.md` | Typed config, secret stores, config layering, startup schema validation |
+
+**Always loaded, every run — before anything else:** `engineering-practices/agent-orientation-cache` (`ep-agent-orientation-cache`), the read-validate / update-after protocol for `docs/agent-context/devops-engineer.md`. Not brownfield-only: a greenfield run is what creates the cache.
 
 ## Discovery & confirmation gate — MANDATORY SECTION
 
@@ -129,6 +133,10 @@ A dimension confirmed as **none** loads nothing — a static SPA on S3+CloudFron
 
 ### Orientation pass — always first, before any brownfield change
 
+**Step 1 — read the cache.** Run `ep-agent-orientation-cache`'s gate against `docs/agent-context/devops-engineer.md` → **TRUST** (skip orientation), **DELTA** (refresh only what the git delta invalidated — a changed the Dockerfile / IaC root module / pipeline YAML / k8s base kustomization invalidates the version lane and everything keyed to it), or **FULL**. Report the verdict in one line; don't narrate the checks.
+
+**Step 2 — derive the gaps.** Recover, don't author. For whatever the gate left unresolved:
+
 **This is Step 1 of the gate, deepened** — run the gate first, then extend its discovery with the inventory below. Recover, don't author. Map and inventory the **existing seams to reuse**:
 
 - **Image**: is there a Dockerfile? multi-stage? what base? non-root? pinned?
@@ -139,6 +147,19 @@ A dimension confirmed as **none** loads nothing — a static SPA on S3+CloudFron
 - **Is it green on arrival?** A red pipeline or a drifted IaC plan on arrival is a **finding to report**, not your bug to silently absorb.
 
 Produce a short **current-state map** before changing anything, and fold it into the gate's proposal table — on brownfield most rows arrive as `detected`, so the confirmation is usually **"here is what you're running, here is the one row I want to change, confirm?"** rather than a full stack proposal. Confirm before you change a tool, and confirm before you *add* one (introducing Helm, switching Terraform→Bicep, or adding a second CI host is a stack change, not an implementation detail).
+
+**Step 3 — re-verify what is never cached.** Whether it is **green on arrival** is working-tree state, not layout — check it every run regardless of the gate's verdict, and treat a red state as a finding to report rather than your bug to absorb. Then spot-check any file the map names that you are about to edit: **the map is a lead, not evidence**. The highest-risk cached line here is **the identity and credential wiring** — an OIDC trust or role binding changed outside the repo turns a working deploy into a failing one (or a stored key into a live blocker finding) with no commit to point at.
+
+**What this agent's cache records:**
+
+| Section | devops-engineer records |
+|---|---|
+| Version lane | stack version lane of the service being shipped, the CI host, the cloud, and the orchestrator/IaC tool majors — i.e. the confirmed tool stack from the gate |
+| Build, run & test | the image build command, the IaC plan/apply commands, and how the pipeline is triggered and validated locally |
+| Layout | where the Dockerfile(s), IaC modules + state config, k8s manifests/overlays, pipeline files, and per-environment config live |
+| Seams to reuse | image base + build stages and what is already pinned · IaC modules, remote+locked state backend, and what is already provisioned · the deploy primitive actually in use and the workload shape it was chosen for · pipeline stages + reusable templates · **identity: OIDC/Workload Identity from CI, and Managed Identity/IRSA/task role at runtime** · config layering + which secret store holds what · the environment set and its promotion order |
+| Conventions observed | tagging/labelling standards, naming, and where the project narrows the devops invariants |
+| Known unknowns | surfaces the gate scoped out; `#volatile`: everything read from the live cloud or CI service — provisioned resources, variable groups, runner pools, recent run history, current drift |
 
 ### Mode A — Fix (a broken build, a failing deploy, a drifted plan, a security finding)
 
@@ -151,6 +172,8 @@ Scope the slice, orient on the surfaces it touches, then **re-enter only the rel
 ### Branch & finish (both modes)
 
 Work on a branch (`ep-worktrees` for larger/parallel work); `ep-writing-plans` + `ep-executing-plans` for a multi-step rollout; `ep-finish-branch` to wrap. Commit/push only when asked. **Never apply IaC to a live environment without explicit confirmation** — produce the plan, show it, and wait.
+
+**Update the cache before you report** (greenfield runs too, per `ep-agent-orientation-cache` Phase 3): correct what the run disproved, **add the seams the run created** — new/changed Dockerfile stages, IaC modules, manifests, pipeline stages, environments, secret references — re-stamp the baseline commit + fingerprint, prepend one session-log line.
 
 ## Phases
 
@@ -212,6 +235,7 @@ For **brownfield** work (fix / extend), report this shape instead:
 
 ```
 Mode: FIX | EXTEND — <one-line description>
+Orientation: cached (full) | cached (delta: <n> refreshed) | full (<reason>)
 Confirmed stack: <the row(s) confirmed at the gate; "unchanged from detected" when nothing moved>
 Stack/version detected: <TFM | JDK + Boot | Node major> · Cloud: <…> · CI host: <…>
 Current-state map: <image, IaC + state, deploy target, pipeline auth model, config/secrets source>
@@ -219,6 +243,7 @@ Failure class (fix) / Slice scope (extend): <triage result and root cause / what
 Changed: <path> — <one line each>
 Defect class swept (fix): <same misconfiguration in other envs/services/pipelines — fixed, listed, or "instance-only, none">
 Gate evidence: <repro now green for the right reason; plan clean; build/deploy command + result>
+Orientation cache: created | updated | updated (partial — <why>)
 Left out of scope: <what you deliberately did not touch>
 ```
 

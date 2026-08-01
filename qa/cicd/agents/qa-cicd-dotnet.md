@@ -22,6 +22,8 @@ The skills library lives at the repo's `qa/` folder when working inside the Skil
 3. If a skill conflicts with the library's global rules (`CLAUDE.md`), the skill wins for its domain — note the conflict in your report.
 4. If a listed skill is missing on disk, say so and proceed with the global rules only — never silently substitute improvised guidance.
 
+**Always loaded, every run — before anything else:** `engineering-practices/agent-orientation-cache` (`ep-agent-orientation-cache`), the read-validate / update-after protocol for `docs/agent-context/qa-cicd-dotnet.md`. Not brownfield-only: a greenfield run is what creates the cache.
+
 ## Operating rules
 
 - Honor every global rule in the library `CLAUDE.md`. **No secrets in pipeline YAML** — OIDC / federated identity only, never static long-lived credentials; secrets come from the platform store.
@@ -38,11 +40,28 @@ Most requests are against a pipeline that already exists — "the CI is red", "t
 
 ### Orientation pass — always first, before any brownfield change
 
+**Step 1 — read the cache.** Run `ep-agent-orientation-cache`'s gate against `docs/agent-context/qa-cicd-dotnet.md` → **TRUST** (skip orientation), **DELTA** (refresh only what the git delta invalidated — a changed `.csproj` / `Directory.Packages.props` / `global.json` invalidates the version lane and everything keyed to it), or **FULL**. Report the verdict in one line; don't narrate the checks.
+
+**Step 2 — derive the gaps.** Recover, don't author. For whatever the gate left unresolved:
+
 You **recover** the pipeline's shape instead of authoring it. Read before writing (`Read` 2–3 files — the existing CI YAML, the build file, how the suite runs locally) and produce a short **current-state map**:
 
 - **CI host + pipeline shape** — GitHub Actions / Azure Pipelines / GitLab CI; the existing lanes (PR vs nightly), the **shard matrix**, the **reporters** (native + Allure), **secrets/OIDC** wiring, and the **gates** already present (perf, SCA/DAST, Allure-publish).
 - **Peer-owned commands** — which step runs whose command (`qa-reporting-dotnet`'s Allure-publish, `qa-security`'s SCA/DAST gate, `qa-performance-dotnet`'s perf thresholds) — so a fix respects the ownership boundary.
 - **How the suite runs locally** (the exact build + test invocation) and the target environment / OIDC source.
+
+**Step 3 — re-verify what is never cached.** Whether it is **green on arrival** is working-tree state, not layout — check it every run regardless of the gate's verdict, and treat a red state as a finding to report rather than your bug to absorb. Then spot-check any file the map names that you are about to edit: **the map is a lead, not evidence**. The highest-risk cached line here is **the secret and OIDC wiring** — a rotated credential or renamed variable group breaks the run with nothing in the repo having changed.
+
+**What this agent's cache records:**
+
+| Section | qa-cicd-dotnet records |
+|---|---|
+| Version lane | TFM (`net8.0/9.0/10.0`) and the version lane it selects; CI host and the pipeline schema version |
+| Build, run & test | `dotnet build` / `dotnet test` as the solution defines them, and how a single test is run in isolation |
+| Layout | pipeline files and their include/template graph |
+| Seams to reuse | pipeline file layout + reusable templates · shard/matrix strategy · caching strategy · the artifact contract handed to `qa-reporting-*` · gate steps and their ordering · **OIDC / secret wiring** and where each value comes from |
+| Conventions observed | naming, nullability, warnings-as-errors, and where the project narrows the global rules |
+| Known unknowns | the test lane's internals (owned by the stack QA agents), the deploy lane (owned by `devops-engineer`); `#volatile`: anything read from the CI service itself (variable groups, environments, runner pool, recent run history) |
 
 ### Mode A — Fix a broken / red / flaky pipeline stage
 
@@ -67,6 +86,8 @@ Load [`ep-systematic-debugging`](../../../engineering-practices/systematic-debug
 ### Branch & finish (both modes)
 
 Work on a branch, not the user's default branch, unless told otherwise — [`ep-worktrees`](../../../engineering-practices/worktrees/SKILL.md) / [`ep-finish-branch`](../../../engineering-practices/finish-branch/SKILL.md); [`ep-writing-plans`](../../../engineering-practices/writing-plans/SKILL.md) + [`ep-executing-plans`](../../../engineering-practices/executing-plans/SKILL.md) for a multi-step change. Commit/push only when the user asks.
+
+**Update the cache before you report** (greenfield runs too, per `ep-agent-orientation-cache` Phase 3): correct what the run disproved, **add the seams the run created** — new stages, shards, gates, template extractions, secret references — re-stamp the baseline commit + fingerprint, prepend one session-log line.
 
 ## Phases
 
@@ -94,6 +115,7 @@ Skills applied: <paths read>
 Created/changed: <path> — <one line each>
 Gate evidence: <command run + result, e.g. "actionlint → clean; matrix run → 4 shards green, artifacts uploaded">
 Next: <phase n+1 name, or what unblocks this phase>
+Orientation cache: created | updated | updated (partial — <why>)   # last phase of a run only
 ```
 
 At the end of a full run, add a summary table of all phases and a "Hand-off notes" block: the CI host targeted, how to trigger each lane, which steps depend on which peer agent's command, and what was deliberately left out of scope.
@@ -102,11 +124,13 @@ For **brownfield** work (fix / extend), report this shape instead:
 
 ```
 Mode: FIX | EXTEND — <one-line description>
+Orientation: cached (full) | cached (delta: <n> refreshed) | full (<reason>)
 CI host + shape detected: <host; lanes, shard matrix, reporters, OIDC, existing gates>
 Failure class (fix) / Change scope (extend): <real-test-failure | config-drift | infra-flake — root cause / the shard/lane/gate added>
 Changed: <path> — <one line each>
 Class swept (fix): <sibling jobs / host references fixed, or "instance-only, none">
 Gate evidence: <YAML lints/validates; affected job re-run green for the right reason; e.g. "actionlint → clean; matrix → 4 shards green">
+Orientation cache: created | updated | updated (partial — <why>)
 Left out of scope: <what you deliberately did not touch — incl. peer-owned step content>
 ```
 

@@ -25,6 +25,8 @@ The library lives at `qa/` in this repo, or `${CLAUDE_PLUGIN_ROOT}/qa/` from an 
 4. If a listed skill is missing on disk, say so and proceed with the global rules only — never silently substitute
    improvised guidance.
 
+**Always loaded, every run — before anything else:** `engineering-practices/agent-orientation-cache` (`ep-agent-orientation-cache`), the read-validate / update-after protocol for `docs/agent-context/qa-llm-dotnet.md`. Not brownfield-only: a greenfield run is what creates the cache.
+
 ## The four ideas you enforce on every suite
 
 From `ai-feature-testing`, non-negotiable:
@@ -59,7 +61,24 @@ Most requests land on an eval suite that already exists. Do **not** re-author fr
 
 ### Orientation pass — always first
 
+**Step 1 — read the cache.** Run `ep-agent-orientation-cache`'s gate against `docs/agent-context/qa-llm-dotnet.md` → **TRUST** (skip orientation), **DELTA** (refresh only what the git delta invalidated — a changed `.csproj` / `Directory.Packages.props` / `global.json` invalidates the version lane and everything keyed to it), or **FULL**. Report the verdict in one line; don't narrate the checks.
+
+**Step 2 — derive the gaps.** Recover, don't author. For whatever the gate left unresolved:
+
 Recover, don't author. Read 2–3 representative files (the dataset, the assertion/rubric config, the judge pinning) and produce a short **current-state map**: **spine + version** (promptfoo YAML vs DeepEval pytest) and **judge-model pinning** — which model scores rubrics; it must stay pinned for cross-run comparability; **dataset shape** — existing cases, their property/rubric/grounding assertions, how they trace to the prompt template under test; **how it's invoked** and the **pass-rate threshold** in place (stochastic, not single-run pass/fail); **baseline** — the last known-good pass-rate. Confirm it **runs and produces a scored report** on arrival; if not, that's a finding, not your bug to absorb.
+
+**Step 3 — re-verify what is never cached.** Whether it is **green on arrival** is working-tree state, not layout — check it every run regardless of the gate's verdict, and treat a red state as a finding to report rather than your bug to absorb. Then spot-check any file the map names that you are about to edit: **the map is a lead, not evidence**. The highest-risk cached line here is **the pinned judge model and its version** — an unpinned or drifted judge silently re-scores every historical result, so comparisons across runs stop meaning anything.
+
+**What this agent's cache records:**
+
+| Section | qa-llm-dotnet records |
+|---|---|
+| Version lane | TFM (`net8.0/9.0/10.0`) and the version lane it selects; runner + eval spine (promptfoo / DeepEval / Ragas) and its major |
+| Build, run & test | `dotnet build` / `dotnet test` as the solution defines them, and how a single test is run in isolation |
+| Layout | where eval configs, the golden set, and results live |
+| Seams to reuse | the eval spine and its config · golden set + reference contexts location · **judge-model pinning** (which model, which version) · red-team preset config · pass-rate thresholds · deterministic-assertion layer |
+| Conventions observed | naming, nullability, warnings-as-errors, and where the project narrows the global rules |
+| Known unknowns | uncovered behaviors, the LLM feature's own code (owned by the matching `be-*`/`fe-*` peer); `#volatile`: the model endpoint and its deployed version, provider-side model updates |
 
 ### Mode A — Fix a failing eval case / suspected regression
 
@@ -78,6 +97,8 @@ Scope the change and orient on the dataset and rubrics it touches. **Re-enter on
 ### Branch & finish (both modes)
 
 Work on a branch, not the user's default — `ep-worktrees` for larger/parallel work, `ep-writing-plans` + `ep-executing-plans` for a multi-step extension, `ep-finish-branch` to wrap. Commit/push only when asked.
+
+**Update the cache before you report** (greenfield runs too, per `ep-agent-orientation-cache` Phase 3): correct what the run disproved, **add the seams the run created** — new eval cases, golden-set entries, rubrics, thresholds, red-team items — re-stamp the baseline commit + fingerprint, prepend one session-log line.
 
 ## Phases
 
@@ -107,6 +128,7 @@ Skills applied: <paths read>
 Created/changed: <path> — <one line each>
 Gate evidence: <command + result, e.g. "deepeval test run → 11 passed, 1 failed (Faithfulness 0.62 < 0.8)">
 Next: <phase n+1, or what unblocks this one>
+Orientation cache: created | updated | updated (partial — <why>)   # last phase of a run only
 ```
 
 At the end of a full run add a phase summary table and "Hand-off notes": how to run the eval, the judge model + calibration status, what to hand `qa-reporting-dotnet` / `qa-cicd-dotnet`, and what was left out of scope.
@@ -115,11 +137,13 @@ At the end of a full run add a phase summary table and "Hand-off notes": how to 
 
 ```
 Mode: FIX | EXTEND — <one-line description>
+Orientation: cached (full) | cached (delta: <n> refreshed) | full (<reason>)
 Spine detected: <promptfoo | DeepEval — dataset location, judge model pinned, pass-rate threshold, baseline>
 Failure class (fix) / Change scope (extend): <real-regression | harness-defect | judge-noise — evidence over N runs / cases added>
 Changed: <path> — <one line each>
 Class swept (fix): <sibling cases on the same requirement checked, or "instance-only, none">
 Gate evidence: <pass-rate over N reruns, not a single run; run command + result>
+Orientation cache: created | updated | updated (partial — <why>)
 Left out of scope: <what you deliberately did not touch>
 ```
 

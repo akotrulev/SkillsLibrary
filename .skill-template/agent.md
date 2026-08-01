@@ -13,11 +13,13 @@ You work in **two modes**; most real work is the second:
 - **Greenfield** — build from zero: run the phases below in order.
 - **Brownfield** — an **existing** <codebase / test suite / pipeline / schema / document set> you must **fix** (a defect) or **extend** (add/change functionality). This is the common case. You do **not** re-run the whole pipeline; you **orient** first, then re-enter only the phases the change touches. See **"Working on existing <X>"** — read it before you touch anything existing.
 
-**First act on any existing project:** run the **orientation pass** — starting with **version detection** (<TFM / JDK / Node+tsconfig / package.json majors / server version probe>) — and apply the version-tagged guidance for it throughout. Never use an up-level-only API on a down-level project, and never flag a down-level project for lacking one.
+**First act on any existing project:** run the **orientation pass** — which starts by reading the **orientation cache** (`docs/agent-context/<agent-name>.md`) and deriving only what it doesn't already cover, beginning with **version detection** (<TFM / JDK / Node+tsconfig / package.json majors / server version probe>). Apply the version-tagged guidance throughout; never use an up-level-only API on a down-level project, and never flag a down-level project for lacking one.
 
 ## Skill-loading protocol
 
 The skills live at the repo's `<domain>/<stack>/skills/` folder when working inside the SkillsLibrary repo, or at `${CLAUDE_PLUGIN_ROOT}/<domain>/<stack>/skills/` when this agent runs from an installed Claude Code plugin — resolve every skill path below against whichever root exists. Load **only** the skills this agent owns plus the cross-cutting skills named here; peer domains are invoked as agents, never loaded as skills.
+
+**Always loaded, every run:** `engineering-practices/agent-orientation-cache` (frontmatter `ep-agent-orientation-cache`) — the read-validate / update-after protocol for this agent's orientation cache. It ships in **all** plugins, including `data` and `business-analysis`, so it resolves everywhere; it is not brownfield-only, because a greenfield run is what *creates* the cache.
 
 For **brownfield** work, additionally load the bundled developer-workflow skills `engineering-practices/{systematic-debugging,test-driven-development,verify-before-done,worktrees,finish-branch,writing-plans,executing-plans}` (frontmatter names `ep-*`) — same root — when the relevant mode below calls for them. *(Only if this agent's plugin bundles the `ep-*` skills — `qa-*` and `fe-*` do. If it does not — `data`, `business-analysis` — inline the same discipline into the mode text instead, as `data-architect` does; do not reference skills the installed plugin cannot resolve.)*
 
@@ -35,7 +37,24 @@ For **brownfield** work, additionally load the bundled developer-workflow skills
 
 ### Orientation pass — always first, before any brownfield change
 
-Recover, don't author. Detect the version(s), map the layout, and inventory the **existing seams to reuse** (<POMs / API clients / DTOs / builders / fixtures / state containers / migrations / Step Catalog — per family>), how the thing is built/run/invoked, and whether it is **green on arrival** (a red state on arrival is a finding to report, not your bug to silently absorb). Produce a short **current-state map**.
+**Step 1 — read the cache.** Load `ep-agent-orientation-cache` and run its validation gate against `docs/agent-context/<agent-name>.md`: **TRUST** (skip orientation), **DELTA** (refresh only the sections the git delta invalidated), or **FULL** (no usable cache — derive everything). Report the verdict in one line; don't narrate the checks.
+
+**Step 2 — derive the gaps.** Recover, don't author. For whatever the gate left unresolved: detect the version(s), map the layout, and inventory the **existing seams to reuse** (<POMs / API clients / DTOs / builders / fixtures / state containers / migrations / Step Catalog — per family>) and how the thing is built/run/invoked. The result is the **current-state map**.
+
+**Step 3 — re-verify what is never cached.** Whether it is **green on arrival** is working-tree state, not layout: check it every run regardless of verdict (a red state on arrival is a finding to report, not your bug to silently absorb). Same for `#volatile` fields (<live server/cloud/device probes — per family>), and for any file the map names that you are about to edit: **the map is a lead, not evidence.**
+
+**This agent's field list** — what its cache records under each section:
+
+| Section | <agent-name> records |
+|---|---|
+| Version lane | <the versions + the guidance lane they select> |
+| Build, run & test | <the project's own commands> |
+| Layout | <the directory-altitude areas> |
+| Seams to reuse | <the family's reusable inventory — the largest section> |
+| Conventions observed | <where this project narrows or differs from the plugin defaults> |
+| Known unknowns | <deliberately unmapped areas + `#inferred` lines to confirm> |
+
+**On finishing** (both modes, and greenfield runs too) — update the cache per the skill's Phase 3: correct what the run disproved, **add the seams the run created**, re-stamp the baseline commit + fingerprint, prepend one session-log line.
 
 ### Mode A — Fix a <failing test / defect / red gate / slow query / stale case>
 
@@ -59,6 +78,13 @@ Work on a branch (`ep-worktrees` for larger/parallel work); `ep-writing-plans` +
 
 ## Output contract
 
+Both shapes carry these two lines:
+
+```
+Orientation: cached (full) | cached (delta: <n> sections refreshed — <what invalidated them>) | full (<reason>)
+Orientation cache: created | updated | updated (partial — <why>)
+```
+
 For a full (greenfield) run, report:
 
 ```
@@ -69,12 +95,14 @@ For **brownfield** work (fix / extend), report this shape instead:
 
 ```
 Mode: FIX | EXTEND — <one-line description>
+Orientation: cached (full) | cached (delta: <n> refreshed) | full (<reason>)
 Stack/version detected: <TFM | JDK | Node/tsconfig | React major | server version + runner>
 Current-state map: <layout, reused seams, how it's built/run>
 Failure class (fix) / Slice scope (extend): <triage result and root cause / what the change covers>
 Changed: <path> — <one line each>
 Defect class swept (fix): <siblings found + fixed, or listed, or "instance-only, none">
 Gate evidence: <repro now green for the right reason; build/test command + result>
+Orientation cache: created | updated | updated (partial — <why>)
 Left out of scope: <what you deliberately did not touch>
 ```
 

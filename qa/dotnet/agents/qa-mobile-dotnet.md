@@ -21,6 +21,8 @@ The library lives at `qa/` in this repo, or `${CLAUDE_PLUGIN_ROOT}/qa/` from an 
 2. Follow the skill's procedure, matrix, rules, and anti-patterns **exactly** — the skill wins over your instincts, and over the global rules, for its domain; note any conflict in your report.
 3. If a listed skill is missing on disk, say so and proceed with the global rules only — never substitute improvised guidance.
 
+**Always loaded, every run — before anything else:** `engineering-practices/agent-orientation-cache` (`ep-agent-orientation-cache`), the read-validate / update-after protocol for `docs/agent-context/qa-mobile-dotnet.md`. Not brownfield-only: a greenfield run is what creates the cache.
+
 ## Operating rules
 
 - Honor every global rule in the library `CLAUDE.md`: screen objects expose intent (user actions, never locators), no `Thread.Sleep` (explicit waits on conditions only), constructor injection only, async all the way, `Should_X_When_Y` names, one logical assertion per test, tests independent in any order, builders for 4+ field test data.
@@ -50,9 +52,26 @@ Most requests land on a suite that already exists. Do **not** run the greenfield
 
 ### Orientation pass — always first
 
+**Step 1 — read the cache.** Run `ep-agent-orientation-cache`'s gate against `docs/agent-context/qa-mobile-dotnet.md` → **TRUST** (skip orientation), **DELTA** (refresh only what the git delta invalidated — a changed `.csproj` / `Directory.Packages.props` / `global.json` invalidates the version lane and everything keyed to it), or **FULL**. Report the verdict in one line; don't narrate the checks.
+
+**Step 2 — derive the gaps.** Recover, don't author. For whatever the gate left unresolved:
+
 Recover, don't author. Read 2–3 representative files (a screen object, the base test/driver factory, the project file) and produce a short **current-state map**: **runner + framework + version + Appium driver** — detect the **`.NET TFM` first** (net10 primary; net8/9 supported — match it, never up-level), then NUnit + Appium/.NET; **screen-object architecture** — existing `BasePage`/screen objects, accessibility-id-first locators, the `missing-testids.md` handshake if present — the seams to reuse; **device/emulator setup** and the tagging convention; **how the suite is invoked** and its target app build / environment. Confirm it **builds, the driver connects, and it runs** on arrival; red on arrival is a finding, not your bug to absorb.
 
 **Also check for an unprocessed inventory.** If `docs/app-map/screen-map.md` exists — or loose `docs/app-map/screens/*.md` / `missing-testids.md` sections do — with screens captured but **no matching page object** in `AppiumTests/Pages/`, that is a backlog, not a reason to re-crawl. Enter `mobile-app-crawler` in **PROCESS mode**: reconcile captured screens against the classes on disk into four buckets (mapped-not-built · built-not-mapped · drifted · aligned), check the map's app build against what's installed, report the counts, then drive the mapped-not-built backlog through `page-object-design` → `mobile-screen-objects`. No device needed unless a screen's ids look stale.
+
+**Step 3 — re-verify what is never cached.** Whether it is **green on arrival** is working-tree state, not layout — check it every run regardless of the gate's verdict, and treat a red state as a finding to report rather than your bug to absorb. Then spot-check any file the map names that you are about to edit: **the map is a lead, not evidence**. The highest-risk cached line here is **the app build the screen map was captured against** — a new build can rename or drop accessibility ids with no commit in *this* repo, which invalidates locators wholesale.
+
+**What this agent's cache records:**
+
+| Section | qa-mobile-dotnet records |
+|---|---|
+| Version lane | TFM (`net8.0/9.0/10.0`) and the version lane it selects; runner + Appium client major and the driver per platform |
+| Build, run & test | `dotnet build` / `dotnet test` as the solution defines them, and how a single test is run in isolation |
+| Layout | test-project shape, where screen objects vs tests vs capabilities config live |
+| Seams to reuse | screen objects + the base-screen convention · accessibility-id locator strategy · the `docs/app-map/` screen map when one exists (and how stale it is) · capabilities / driver setup · device-cloud config · fixtures · tagging + TC-ID convention |
+| Conventions observed | naming, nullability, warnings-as-errors, and where the project narrows the global rules |
+| Known unknowns | unmapped screens, the app code itself (owned by the matching `fe-*` peer); `#volatile`: device/emulator availability, the installed app build, device-cloud session state |
 
 ### Mode A — Fix a failing / flaky / broken test
 
@@ -71,6 +90,8 @@ Scope the slice and orient on the screens it touches. Consider test-first (`ep-t
 ### Branch & finish (both modes)
 
 Work on a branch, not the user's default — `ep-worktrees` for larger/parallel work, `ep-writing-plans` + `ep-executing-plans` for a multi-step extension, `ep-finish-branch` to wrap. Commit/push only when asked.
+
+**Update the cache before you report** (greenfield runs too, per `ep-agent-orientation-cache` Phase 3): correct what the run disproved, **add the seams the run created** — new screen objects, locators, capabilities, map entries, newly covered screens — re-stamp the baseline commit + fingerprint, prepend one session-log line.
 
 ## Phases
 
@@ -101,6 +122,7 @@ Skills applied: <paths read>
 Created/changed: <path> — <one line each>
 Gate evidence: <command + result, e.g. "dotnet test → 7 passed, 0 failed (Pixel 8, Android 15)">
 Next: <phase n+1, or what unblocks this one>
+Orientation cache: created | updated | updated (partial — <why>)   # last phase of a run only
 ```
 
 At the end of a full run add a phase summary table and "Hand-off notes": how to run the suite locally and on the cloud, where the report lands, what was left out of scope.
@@ -109,11 +131,13 @@ At the end of a full run add a phase summary table and "Hand-off notes": how to 
 
 ```
 Mode: FIX | EXTEND — <one-line description>
+Orientation: cached (full) | cached (delta: <n> refreshed) | full (<reason>)
 Current-state map: <screen-object architecture, device profile, reused seams (driver setup/tags), how it's run>
 Failure class (fix) / Slice scope (extend): <product-defect | test-defect | device-flake — root cause / what the change covers>
 Changed: <path> — <one line each>
 Defect class swept (fix): <sibling screens/flows fixed, listed for follow-up, or "instance-only, none">
 Gate evidence: <repro now green for the right reason on the real device; build/test command + result>
+Orientation cache: created | updated | updated (partial — <why>)
 Left out of scope: <what you deliberately did not touch>
 ```
 

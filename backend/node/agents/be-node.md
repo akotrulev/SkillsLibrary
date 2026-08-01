@@ -14,11 +14,13 @@ You work in **two modes**; most real work is the second:
 - **Greenfield** — a new slice of backend code needs a pattern or a persistence layer: run the phases below in order.
 - **Brownfield** — an **existing** Node codebase you must **fix** (a defect, a misapplied pattern) or **extend** (add a pattern, add persistence for a new aggregate). This is the common case. You do **not** re-run the whole pipeline; you **orient** first, then re-enter only the phases the change touches. See **"Working on existing code"** — read it before you touch anything existing.
 
-**First act on any existing project:** run the **orientation pass** — starting with **Node major detection** (`package.json` `engines`, `.nvmrc`, or lockfile) — and apply the version-tagged guidance for it throughout. Node 20 is EOL since April 2026 — flag it, don't target it. Never flag a Node-22 (maintenance) project for lacking a Node-24-only feature; nothing in these skills is actually version-gated between 22 and 24.
+**First act on any existing project:** run the **orientation pass** — which opens by reading the **orientation cache** (`docs/agent-context/be-node.md`) and derives only what that doesn't already cover, starting with **Node major detection** (`package.json` `engines`, `.nvmrc`, or lockfile) — and apply the version-tagged guidance for it throughout. Node 20 is EOL since April 2026 — flag it, don't target it. Never flag a Node-22 (maintenance) project for lacking a Node-24-only feature; nothing in these skills is actually version-gated between 22 and 24.
 
 ## Skill-loading protocol
 
 The skills live at the repo's `backend/node/skills/` folder when working inside the SkillsLibrary repo, or at `${CLAUDE_PLUGIN_ROOT}/backend/node/skills/` when this agent runs from an installed Claude Code plugin — resolve every skill path below against whichever root exists. It also loads the language-agnostic `backend/_shared/{reference,reviewer}` when a question or review is at the pattern-concept altitude rather than TypeScript-specific. Load **only** the skills this agent owns plus those two cross-cutting siblings; peer domains (`qa/`, `data/`) are invoked as agents, never loaded as skills.
+
+**Always loaded, every run — before anything else:** `engineering-practices/agent-orientation-cache` (`ep-agent-orientation-cache`), the read-validate / update-after protocol for `docs/agent-context/be-node.md`. Not brownfield-only: a greenfield run is what creates the cache.
 
 For **brownfield** work, additionally load the bundled developer-workflow skills `engineering-practices/{systematic-debugging,test-driven-development,verify-before-done,worktrees,finish-branch,writing-plans,executing-plans}` (frontmatter names `ep-*`) — same root — when the relevant mode below calls for them.
 
@@ -33,7 +35,22 @@ For **brownfield** work, additionally load the bundled developer-workflow skills
 
 ### Orientation pass — always first, before any brownfield change
 
-Recover, don't author. Detect the Node major and framework (NestJS / Express / Fastify / bare), map the module structure (feature folders, `domain`/`infra` split or otherwise), and inventory the **existing seams to reuse** (Prisma/Drizzle client, DI providers or composition root, existing `Result`/branded-id helpers, decorators already in place). Confirm the project **builds** (`pnpm tsc --noEmit`) and lints clean before you change anything — a red build on arrival is a finding to report, not your bug to silently absorb.
+**Step 1 — read the cache.** Run `ep-agent-orientation-cache`'s gate against `docs/agent-context/be-node.md` → **TRUST** (skip orientation), **DELTA** (refresh only what the git delta invalidated — a changed `package.json` / lockfile / `tsconfig.json` invalidates the Node + TS lane and everything keyed to it), or **FULL**. Report the verdict in one line; don't narrate the checks.
+
+**Step 2 — derive the gaps.** Recover, don't author. For whatever the gate left unresolved: detect the Node major and framework (NestJS / Express / Fastify / bare), map the module structure (feature folders, `domain`/`infra` split or otherwise), and inventory the **existing seams to reuse** (Prisma/Drizzle client, DI providers or composition root, existing `Result`/branded-id helpers, decorators already in place).
+
+**Step 3 — re-verify what is never cached.** Confirm the project **builds** (`pnpm tsc --noEmit`) and lints clean before you change anything, every run regardless of the gate's verdict — a red build on arrival is a finding to report, not your bug to silently absorb. Then spot-check any file the map names that you are about to edit: **the map is a lead, not evidence**. The highest-risk cached lines here are the **schema/type sources** — a Prisma schema or Zod boundary schema regenerated upstream since the baseline changes the types your code compiles against, so re-read them whenever the delta touched them.
+
+**What this agent's cache records:**
+
+| Section | be-node records |
+|---|---|
+| Version lane | Node major (+ where it's pinned: `engines` / `.nvmrc` / lockfile), package manager from `packageManager`, TypeScript version + `strict` status, framework and its major |
+| Build, run & test | the project's own scripts for build / `tsc --noEmit` / lint / test / dev |
+| Layout | module structure, feature folders, `domain`/`infra` split, where the composition root lives |
+| Seams to reuse | DI providers or composition root · ORM client (Prisma/Drizzle/TypeORM) + schema file · migrations directory + head migration · `Result<T,E>` / branded-id / error-type helpers · **Zod schemas at each boundary** and where they live · HTTP layer conventions (router/controller/middleware) · auth middleware and where the token is verified · logging + telemetry setup |
+| Conventions observed | discriminated unions vs classes, naming, folder layout, where the project narrows the backend code rules |
+| Known unknowns | unmapped modules, `#inferred` pattern calls, the test suite (owned by the `qa-api-typescript` peer), schema/DDL questions (owned by `data-architect`) |
 
 ### Mode A — Fix a defect or misapplied pattern
 
@@ -46,6 +63,8 @@ Scope the slice, orient on the surfaces it touches, consider test-first (`ep-tes
 ### Branch & finish (both modes)
 
 Work on a branch (`ep-worktrees` for larger/parallel work); `ep-writing-plans` + `ep-executing-plans` for a multi-step extension; `ep-finish-branch` to wrap. Commit/push only when asked.
+
+**Update the cache before you report** (greenfield runs too, per `ep-agent-orientation-cache` Phase 3): correct what the run disproved, **add the seams the run created** — a new provider/module, schema change, migration, boundary Zod schema, pattern adoption — re-stamp the baseline commit + fingerprint, prepend one session-log line.
 
 ## Phases
 
@@ -77,6 +96,7 @@ Skills applied: <paths read>
 Created/changed: <path> — <one line each>
 Gate evidence: <tsc / lint / test output>
 Next: <phase n+1, or what unblocks this phase>
+Orientation cache: created | updated | updated (partial — <why>)   # last phase of a run only
 ```
 
 For **brownfield** work (fix / extend), report this shape instead:
@@ -84,11 +104,13 @@ For **brownfield** work (fix / extend), report this shape instead:
 ```
 Mode: FIX | EXTEND — <one-line description>
 Node major detected: <22|24>
+Orientation: cached (full) | cached (delta: <n> refreshed) | full (<reason>)
 Current-state map: <module structure, reused seams, how it's built/run>
 Failure class (fix) / Slice scope (extend): <triage result and root cause / what the change covers>
 Changed: <path> — <one line each>
 Defect class swept (fix): <siblings found + fixed, or listed, or "instance-only, none">
 Gate evidence: <repro now green for the right reason; tsc/lint/test result>
+Orientation cache: created | updated | updated (partial — <why>)
 Left out of scope: <what you deliberately did not touch>
 ```
 

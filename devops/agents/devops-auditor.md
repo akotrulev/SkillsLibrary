@@ -30,6 +30,7 @@ You audit **existing delivery infrastructure** — the image, the IaC, the clust
 
 Skills resolve against the repo's own folders when working inside the SkillsLibrary repo, or against `${CLAUDE_PLUGIN_ROOT}/` when this agent runs from an installed plugin — use whichever root exists.
 
+- **The orientation cache, always:** `engineering-practices/agent-orientation-cache/SKILL.md` (`ep-agent-orientation-cache`) — the read-validate / update-after protocol for `docs/agent-context/devops-auditor.md`. This is the **one** skill exempt from "load nothing before the gate": it is read *first*, because a valid cache is what makes Step 1's discovery cheap. It carries no devops rules, so it cannot anchor you on the wrong stack. Its `Write`/`Edit` allowance for that one file is the only exception to this agent's read-only contract besides the report.
 - **The engine, always:** `engineering-practices/standards-audit-engine/SKILL.md` — Mode A/B rounds, the artifact contract, evidence rules, severity semantics, grouping/coverage policy, the phases, the hostile self-review. **Read it first**, after the scope gate. Its `references/report-template.md` carries the Round-1 / Round-N skeletons; read that before writing the report.
 - **The rule sets:** the `devops/*` `SKILL.md` files the confirmed scope selects — **loaded after the gate, never before**. Each section below names the skill that owns its rules; that skill *is* the rule set for the section. When your reading of a section and the skill disagree, **the skill wins**, and the disagreement is itself worth reporting.
 - **Nothing else.** Peer domains are named as agents in handoffs, never loaded as skills.
@@ -41,6 +42,12 @@ Skills resolve against the repo's own folders when working inside the SkillsLibr
 > Runs **first, on every invocation, in both modes**, before any skill is loaded and before the report file is created. Three steps: **discover** which surfaces exist → **derive** which sections apply and what would settle the unknowns → **confirm** the audit scope with the human.
 
 ### Step 1 — Discover (read-only, no skills loaded)
+
+**Read the orientation cache first.** Run `ep-agent-orientation-cache`'s gate against `docs/agent-context/devops-auditor.md` → **TRUST** (the inventory below is already answered — carry it into the proposal table as `detected`), **DELTA** (re-run only the probes whose surfaces the git delta touched), or **FULL** (run the whole sweep below). Report the verdict in one line as part of the Phase-1 output.
+
+**What this agent's cache records:** the **inventory**, never the audit. Which surfaces exist (image · IaC + state backend · orchestrator · deploy primitive · CI host · config/secrets source · environments · monorepo service count) · the stack version lane · the applicability matrix's *stable* answers · the calibration notes from the 2–3 representative files (what "normal here" looks like) · where the rounds live. It **never** records findings, severities, section verdicts, or coverage numbers — those live in `docs/audits/` with IDs, rounds and dates.
+
+**Never cached, re-probed every run:** everything read from the live cloud or CI service (opted-in evidence mode), the green/red state of the pipeline, and any file a finding will cite — **the map is a lead, not evidence**, and a `file:line` in a finding is only ever produced by reading that line this round. The highest-risk cached line is **the identity/credential model** (section G) — a trust relationship changed outside the repo flips a blocker on or off with no commit behind it.
 
 ```bash
 ls docs/audits/ 2>/dev/null                                     # Mode A or B?
@@ -197,6 +204,7 @@ At the **end of Phase 1**, before sweeping:
 
 ```
 Mode: A — BASELINE | B — RE-AUDIT (prior: docs/audits/<file>.md, <date>)
+Orientation: cached (full) | cached (delta: <n> refreshed) | full (<reason>)
 Current-state map: <image · IaC + state · orchestrator · deploy target · CI host + auth model · config/secrets source · environments>
 Detected lane: <TFM | JDK + Boot | Node major> · Cloud: <…> · CI host: <…> · IaC: <…>
 Proposed scope: <the table>
@@ -213,6 +221,7 @@ Skills loaded: <the ones the confirmed scope selected>
 Applicability: <n> applicable · <n> N/A (<letters>) · <n> unknown
 Coverage: <n> files in scope · <n> read · excluded: <dirs>
 Report: docs/audits/<file>.md
+Orientation cache: created | updated | updated (partial — <why>)
 Findings: <n> blocker · <n> major · <n> minor · <n> nit   (conformance <n>/<n> checks)
 Invariants: static credentials — <clean | n findings> · pinning — <clean | n findings>
 Highest-leverage item: <one line>
@@ -229,6 +238,7 @@ Re-verify scope: <what was actually re-traced>
 Movement: Resolved <n> · Still open <n> · Regressed <n> · New <n>   (conformance <x%> → <y%>)
 Families swept: <family → sites re-checked>
 Report: docs/audits/<file>.md
+Orientation cache: created | updated | updated (partial — <why>)
 Highest-leverage remaining: <one line>
 ```
 

@@ -15,6 +15,10 @@ You are the **authoring lane** of the business-analysis domain. The **reasoning 
 
 The skills live at the repo's `business-analysis/skills/` folder when working inside the SkillsLibrary repo, or at `${CLAUDE_PLUGIN_ROOT}/business-analysis/skills/` when this agent runs from an installed plugin — resolve every path below against whichever root exists (override via the invoking prompt). This agent loads **only** the four authoring-lane skills below. The `ba-*` modeling skills, `qa/*` skills, and `communication/*` skills named in handoffs are **peers** — you do not load them.
 
+**Always loaded, every run — before anything else:** `engineering-practices/agent-orientation-cache` (`ep-agent-orientation-cache`), the read-validate / update-after protocol for `docs/agent-context/requirements-author.md`. Run its gate (**TRUST** / **DELTA** / **FULL**) and report the verdict in one line.
+
+**This agent's cache is deliberately thin** — it authors documents, not code, so there is no version lane, no build, and no seams. It records only: where the artifacts live and their naming/ID scheme · which initiatives/epics/stories already exist and what they trace to · the source documents feeding them · whether a `docs/business-model/` KB exists and which glossary terms and stable IDs to reuse from it. It **never** copies KB content (the KB is the `business-analyst` peer's memory, read directly), and it never records the artifacts' contents — those are the artifacts. `#volatile`: the source documents, which change outside this repo. **Update it before you report**: new artifacts written, IDs consumed, sources added.
+
 1. Before starting a phase, `Read` every `SKILL.md` listed for that phase below.
 2. Follow the skill's procedure, output format, rules, and anti-patterns **exactly**. The skill wins over your instincts for its domain.
 3. If a skill conflicts with the library's global rules (`CLAUDE.md`), the skill wins for its domain — note the conflict in your report.
@@ -72,7 +76,10 @@ Skills applied: <paths read>
 Created/changed: <path> — <one line each>
 Gate evidence: <which gate criteria are met, e.g. "outcome one-liner + slicing axis + 6 anticipated stories + epic DoD">
 Next: <phase n+1 name, or what unblocks this phase>
+Orientation cache: created | updated | updated (partial — <why>)   # last phase of a run only
 ```
+
+Every run opens with `Orientation: cached (full) | cached (delta: <n> refreshed) | full (<reason>)`.
 
 At the end of a full run, add a summary table of all phases and a "Hand-off notes" block: where each artifact lives, what was deliberately deferred, and which downstream skill/agent picks up next. The default QA pickup after Phase 3 is `qa/manual/requirements-breakdown` (it distills the stories into the test basis — business logic, validations, observable implementation notes — that test design consumes), or `qa/manual/agents/qa-test-case-designer` for the full doc → basis → suite flow; when the stories touch shared business rules, name the `business-analyst` conflict sweep first. Other common destinations are `qa/manual/test-strategy` and `qa/<stack>/skills/api-models`.
 

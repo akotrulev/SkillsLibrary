@@ -22,6 +22,8 @@ The skills library lives at the repo's `qa/` folder when working inside the Skil
 3. If a skill conflicts with the library's global rules (`CLAUDE.md`), the skill wins for its domain — note the conflict in your report.
 4. If a listed skill is missing on disk, say so and proceed with the global rules only — never silently substitute improvised guidance.
 
+**Always loaded, every run — before anything else:** `engineering-practices/agent-orientation-cache` (`ep-agent-orientation-cache`), the read-validate / update-after protocol for `docs/agent-context/qa-performance-typescript.md`. Not brownfield-only: a greenfield run is what creates the cache.
+
 ## Operating rules
 
 - Honor every global rule in the library `CLAUDE.md`: no secrets in code (env-driven config via `__ENV`), builders for 4+ field test data, structured output. Remember k6 scripts run in the k6 runtime, not Node — no Node APIs or npm runtime imports; Node-side tooling (data prep, report processing) follows the full TS rules (`strict: true`, async/await all the way).
@@ -39,6 +41,10 @@ Most requests are against a load-test script that already exists — "this perf 
 
 ### Orientation pass — always first, before any brownfield change
 
+**Step 1 — read the cache.** Run `ep-agent-orientation-cache`'s gate against `docs/agent-context/qa-performance-typescript.md` → **TRUST** (skip orientation), **DELTA** (refresh only what the git delta invalidated — a changed `package.json` / the lockfile / `tsconfig.json` invalidates the version lane and everything keyed to it), or **FULL**. Report the verdict in one line; don't narrate the checks.
+
+**Step 2 — derive the gaps.** Recover, don't author. For whatever the gate left unresolved:
+
 You **recover** the script's design instead of authoring it. Read before writing (`Read` 2–3 representative files — the k6 script, the `thresholds`/SLA config, how it's invoked in CI) and produce a short **current-state map**:
 
 - **Tool + version + workload model** (k6 script, JS/TS, scenario/executor shape) → which skill lane applies.
@@ -47,6 +53,19 @@ You **recover** the script's design instead of authoring it. Read before writing
 - **Baseline** — the last known-good k6 summary/report percentiles to compare against.
 
 Confirm the script **runs and produces a report** before you change it (`k6 run script.js` → summary/report emitted). If it doesn't, that's a finding, not your bug to silently absorb.
+
+**Step 3 — re-verify what is never cached.** Whether it is **green on arrival** is working-tree state, not layout — check it every run regardless of the gate's verdict, and treat a red state as a finding to report rather than your bug to absorb. Then spot-check any file the map names that you are about to edit: **the map is a lead, not evidence**. The highest-risk cached line here is **the thresholds** — a moved SLO silently changes what passes, so a stale threshold line turns a red run green without anyone editing a test.
+
+**What this agent's cache records:**
+
+| Section | qa-performance-typescript records |
+|---|---|
+| Version lane | Node major, package manager from `packageManager`, TypeScript version + `strict` status; runner + load tool and its major |
+| Build, run & test | the project's own scripts for build / `tsc --noEmit` / lint / test, and how a single test is run in isolation |
+| Layout | where scenarios/scripts, the shared load model, and results output live |
+| Seams to reuse | scenario/script layout · the shared load-model config (ramp, VUs, duration) · **thresholds / SLO gates** and where they live · test-data sources · results output path and its consumer |
+| Conventions observed | naming, folder layout, `strict` settings, and where the project narrows the global rules |
+| Known unknowns | unmodelled journeys, the service under test (owned by the matching `be-*` peer); `#volatile`: target environment and its provisioned capacity, baseline numbers from the last run |
 
 ### Mode A — Fix a failing gate / suspected regression
 
@@ -71,6 +90,8 @@ Load [`ep-systematic-debugging`](../../../engineering-practices/systematic-debug
 ### Branch & finish (both modes)
 
 Work on a branch, not the user's default branch, unless told otherwise — [`ep-worktrees`](../../../engineering-practices/worktrees/SKILL.md) / [`ep-finish-branch`](../../../engineering-practices/finish-branch/SKILL.md). Commit/push only when the user asks.
+
+**Update the cache before you report** (greenfield runs too, per `ep-agent-orientation-cache` Phase 3): correct what the run disproved, **add the seams the run created** — new scenarios, thresholds, load-model changes, data sources — re-stamp the baseline commit + fingerprint, prepend one session-log line.
 
 ## Phases
 
@@ -100,6 +121,7 @@ Skills applied: <paths read>
 Created/changed: <path> — <one line each>
 Gate evidence: <command run + result, e.g. "smoke profile: 60s @ 5 rps → 0 errors, p95 112 ms">
 Next: <phase n+1 name, or what unblocks this phase>
+Orientation cache: created | updated | updated (partial — <why>)   # last phase of a run only
 ```
 
 At the end of a full run, add a summary table of all phases and a "Hand-off notes" block: how to run smoke vs full profiles, where reports land, baseline numbers, what was deliberately left out of scope.
@@ -108,11 +130,13 @@ For **brownfield** work (fix / extend), report this shape instead:
 
 ```
 Mode: FIX | EXTEND — <one-line description>
+Orientation: cached (full) | cached (delta: <n> refreshed) | full (<reason>)
 Tool/workload detected: <e.g. Gatling Java DSL; NBomber console; k6 script — existing scenarios, thresholds, baseline>
 Failure class (fix) / Change scope (extend): <real-regression | script/config-defect | environment-noise — evidence / the scenario added>
 Changed: <path> — <one line each>
 Class swept (fix): <sibling scenarios sharing the stale DTO/threshold fixed, or "instance-only, none">
 Gate evidence: <actual metrics: p95/p99, error rate, throughput — vs. baseline; run command + result>
+Orientation cache: created | updated | updated (partial — <why>)
 Left out of scope: <what you deliberately did not touch>
 ```
 

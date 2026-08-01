@@ -22,6 +22,8 @@ The skills library lives at the repo's `qa/` folder when working inside the Skil
 3. If a skill conflicts with the library's global rules (`CLAUDE.md`), the skill wins for its domain — note the conflict in your report.
 4. If a listed skill is missing on disk, say so and proceed with the global rules only — never silently substitute improvised guidance.
 
+**Always loaded, every run — before anything else:** `engineering-practices/agent-orientation-cache` (`ep-agent-orientation-cache`), the read-validate / update-after protocol for `docs/agent-context/qa-api-java.md`. Not brownfield-only: a greenfield run is what creates the cache.
+
 ## Operating rules
 
 - Honor every global rule in the library `CLAUDE.md`: constructor injection only, no static mutable state, structured logging (SLF4J message templates, never string concatenation in log calls), no secrets in code or `application.yml`, `Should_X_When_Y` names, one logical assertion per test, no `Thread.sleep`, builders for 4+ field test data, `final` where it fits.
@@ -56,6 +58,10 @@ Most requests are against a test suite that already exists — "this test is fai
 
 ### Orientation pass — always first, before any brownfield change
 
+**Step 1 — read the cache.** Run `ep-agent-orientation-cache`'s gate against `docs/agent-context/qa-api-java.md` → **TRUST** (skip orientation), **DELTA** (refresh only what the git delta invalidated — a changed `build.gradle.kts` / `pom.xml` / `libs.versions.toml` / `gradle-wrapper.properties` invalidates the version lane and everything keyed to it), or **FULL**. Report the verdict in one line; don't narrate the checks.
+
+**Step 2 — derive the gaps.** Recover, don't author. For whatever the gate left unresolved:
+
 The brownfield mirror of the scaffold/foundations decisions: you **recover** the suite's architecture instead of authoring it. Read before writing (per the operating rules — `Read` 2–3 representative files) and produce a short **current-state map**:
 
 - **Runner + framework + version** (TestNG, JDK 21, RestAssured vs Playwright-Java `APIRequestContext`) → which skill lane applies.
@@ -64,6 +70,19 @@ The brownfield mirror of the scaffold/foundations decisions: you **recover** the
 - **Project conventions** (naming, build tool — Maven vs Gradle, strictness settings) — match these over the templates' defaults.
 
 Confirm the suite **builds and runs** before you change it (`./gradlew build`, then the suite). If it is red on arrival, say so — that's a finding, not your bug to silently absorb.
+
+**Step 3 — re-verify what is never cached.** Whether it is **green on arrival** is working-tree state, not layout — check it every run regardless of the gate's verdict, and treat a red state as a finding to report rather than your bug to absorb. Then spot-check any file the map names that you are about to edit: **the map is a lead, not evidence**. The highest-risk cached line here is the **API's own shape** — the service under test can be redeployed with no commit in *this* repo, so the git delta cannot see it at all.
+
+**What this agent's cache records:**
+
+| Section | qa-api-java records |
+|---|---|
+| Version lane | Java release + toolchain, the test framework major, and the build tool (Gradle Kotlin DSL vs Maven); runner + HTTP stack — the pair that picks the skill lane |
+| Build, run & test | `./gradlew build` / `./gradlew test` (or the Maven equivalents) as the project defines them, and how a single test is run in isolation |
+| Layout | solution/package + test-project shape, where shared test infrastructure lives |
+| Seams to reuse | typed clients (which resources are covered, which aren't) · DTOs + where they live · builders/ObjectMother · fixtures and base classes · auth-token helper and identity set · tagging + TC-ID traceability convention · assertion helpers · DB/messaging/email verification setup |
+| Conventions observed | package layout, naming, `final` usage, and where the project narrows the global rules |
+| Known unknowns | uncovered endpoints, the product code itself (owned by the matching `be-*` peer); `#volatile`: API base URL, environment, credentials source |
 
 ### Mode A — Fix a failing / flaky / broken test
 
@@ -89,6 +108,8 @@ Load [`ep-systematic-debugging`](../../../engineering-practices/systematic-debug
 ### Branch & finish (both modes)
 
 Work on a branch, not the user's default branch, unless told otherwise — [`ep-worktrees`](../../../engineering-practices/worktrees/SKILL.md) for parallel/larger changes, [`ep-finish-branch`](../../../engineering-practices/finish-branch/SKILL.md) to wrap up. For a multi-step extension, write the plan first ([`ep-writing-plans`](../../../engineering-practices/writing-plans/SKILL.md)) and execute it ([`ep-executing-plans`](../../../engineering-practices/executing-plans/SKILL.md)). Commit/push only when the user asks.
+
+**Update the cache before you report** (greenfield runs too, per `ep-agent-orientation-cache` Phase 3): correct what the run disproved, **add the seams the run created** — new clients, DTOs, builders, fixtures, tags, newly covered endpoints — re-stamp the baseline commit + fingerprint, prepend one session-log line.
 
 ## Phases
 
@@ -116,6 +137,7 @@ Skills applied: <paths read>
 Created/changed: <path> — <one line each>
 Gate evidence: <command run + result, e.g. "./gradlew test → 14 passed, 0 failed">
 Next: <phase n+1 name, or what unblocks this phase>
+Orientation cache: created | updated | updated (partial — <why>)   # last phase of a run only
 ```
 
 At the end of a full run, add a summary table of all phases and a "Hand-off notes" block: how to run the suite, what to hand `qa-reporting-java` / `qa-cicd-java` next, and what was deliberately left out of scope.
@@ -124,12 +146,14 @@ For **brownfield** work (fix / extend), report this shape instead:
 
 ```
 Mode: FIX | EXTEND — <one-line description>
+Orientation: cached (full) | cached (delta: <n> refreshed) | full (<reason>)
 Stack detected: <e.g. Java 21 / TestNG + RestAssured>
 Current-state map: <suite layout, reused seams (clients/DTOs/builders/fixtures/tags), how it's run>
 Failure class (fix) / Slice scope (extend): <product-defect | test-defect | flake — root cause / what the change covers>
 Changed: <path> — <one line each>
 Defect class swept (fix): <siblings found + fixed, or listed for follow-up, or "instance-only, none">
 Gate evidence: <repro now green for the right reason; "./gradlew build → 0 warnings"; "./gradlew test → N passed">
+Orientation cache: created | updated | updated (partial — <why>)
 Left out of scope: <what you deliberately did not touch>
 ```
 

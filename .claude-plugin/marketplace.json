@@ -7,7 +7,7 @@
   },
   "metadata": {
     "description": "Stack-first skills library covering QA, frontend, backend, data, and business-analysis: install one self-contained plugin per tech stack. `qa-{java,dotnet,typescript}` bundle every QA discipline \u2014 API/UI/mobile/performance/LLM/BDD authoring and verification, manual-QA process, CI/CD, reporting, and OWASP-mapped security. `fe-{blazor,react}` are phased frontend dev-stack agents (scaffold \u2192 architecture \u2192 features \u2192 quality \u2192 tests \u2192 review). `be-{dotnet,java,node}` are phased backend dev-stack agents for design-pattern application, ORM persistence, and Auth0/Cognito service-side auth. `devops` ships the platform lane \u2014 container images, IaC, cloud deploys, and build/deploy pipelines. `data` and `business-analysis` round out the database-engineering and cross-feature requirements domains.",
-    "version": "2.15.0"
+    "version": "2.16.0"
   },
   "plugins": [
     {
@@ -100,6 +100,7 @@
         "./qa/manual/test-strategy",
         "./qa/reporting/java/skills/test-reports",
         "./qa/reporting/java/skills/flaky-test-quarantine",
+        "./engineering-practices/agent-orientation-cache",
         "./engineering-practices/standards-audit-engine",
         "./engineering-practices/brainstorming",
         "./engineering-practices/writing-plans",
@@ -262,6 +263,7 @@
         "./engineering-practices/receiving-code-review",
         "./engineering-practices/spec-vs-code-audit",
         "./engineering-practices/feature-audit",
+        "./engineering-practices/agent-orientation-cache",
         "./engineering-practices/standards-audit-engine"
       ],
       "commands": [
@@ -391,6 +393,7 @@
         "./qa/typescript/skills/ui-test-author/selenium",
         "./qa/typescript/skills/visual-regression",
         "./qa/typescript/skills/realtime-stream-testing",
+        "./engineering-practices/agent-orientation-cache",
         "./engineering-practices/standards-audit-engine",
         "./engineering-practices/brainstorming",
         "./engineering-practices/writing-plans",
@@ -495,6 +498,7 @@
         "./design/ui-code-audit",
         "./design/theme-presets",
         "./design/ux-writing",
+        "./engineering-practices/agent-orientation-cache",
         "./engineering-practices/standards-audit-engine",
         "./engineering-practices/brainstorming",
         "./engineering-practices/writing-plans",
@@ -565,7 +569,8 @@
         "./data/redis",
         "./data/dynamodb",
         "./data/cosmosdb",
-        "./data/elasticsearch"
+        "./data/elasticsearch",
+        "./engineering-practices/agent-orientation-cache"
       ],
       "commands": [
         "./data/commands/data-architect.md"
@@ -601,7 +606,8 @@
         "./business-analysis/skills/ba-process-flow-diagram",
         "./business-analysis/skills/ba-entity-state-grid",
         "./business-analysis/skills/ba-decision-table",
-        "./business-analysis/skills/ba-feature-conflict-check"
+        "./business-analysis/skills/ba-feature-conflict-check",
+        "./engineering-practices/agent-orientation-cache"
       ],
       "commands": [
         "./business-analysis/commands/business-analyst.md",
@@ -672,6 +678,7 @@
         "./design/ui-code-audit",
         "./design/theme-presets",
         "./design/ux-writing",
+        "./engineering-practices/agent-orientation-cache",
         "./engineering-practices/standards-audit-engine",
         "./engineering-practices/brainstorming",
         "./engineering-practices/writing-plans",
@@ -757,6 +764,7 @@
         "./engineering-practices/receiving-code-review",
         "./engineering-practices/spec-vs-code-audit",
         "./engineering-practices/feature-audit",
+        "./engineering-practices/agent-orientation-cache",
         "./engineering-practices/standards-audit-engine",
         "./observability/opentelemetry-dotnet",
         "./observability/structured-logging-dotnet",
@@ -812,6 +820,7 @@
         "./backend/_shared/code-review",
         "./auth/_shared/auth0-concepts",
         "./auth/_shared/oidc-concepts",
+        "./engineering-practices/agent-orientation-cache",
         "./engineering-practices/standards-audit-engine",
         "./engineering-practices/brainstorming",
         "./engineering-practices/writing-plans",
@@ -876,6 +885,7 @@
         "./backend/node/skills/database-code",
         "./backend/_shared/pattern-guide",
         "./backend/_shared/code-review",
+        "./engineering-practices/agent-orientation-cache",
         "./engineering-practices/standards-audit-engine",
         "./engineering-practices/brainstorming",
         "./engineering-practices/writing-plans",
@@ -946,6 +956,7 @@
         "./devops/gitlab-ci",
         "./devops/azure-pipelines",
         "./devops/environment-config",
+        "./engineering-practices/agent-orientation-cache",
         "./engineering-practices/standards-audit-engine",
         "./engineering-practices/brainstorming",
         "./engineering-practices/writing-plans",

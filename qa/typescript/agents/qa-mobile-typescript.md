@@ -22,6 +22,8 @@ The skills library lives at the repo's `qa/` folder when working inside the Skil
 3. If a skill conflicts with the library's global rules (`CLAUDE.md`), the skill wins for its domain — note the conflict in your report.
 4. If a listed skill is missing on disk, say so and proceed with the global rules only — never silently substitute improvised guidance.
 
+**Always loaded, every run — before anything else:** `engineering-practices/agent-orientation-cache` (`ep-agent-orientation-cache`), the read-validate / update-after protocol for `docs/agent-context/qa-mobile-typescript.md`. Not brownfield-only: a greenfield run is what creates the cache.
+
 ## Operating rules
 
 - Honor every global rule in the library `CLAUDE.md`: screen objects expose intent (user actions, never locators), no fixed pauses (`browser.pause` only as a documented last resort — explicit `waitUntil`/`waitForDisplayed` on conditions), `strict: true` TypeScript, async/await all the way (no floating promises), behavior-describing test names, one logical assertion per test, tests independent in any order, builders for 4+ field test data.
@@ -52,6 +54,10 @@ Most requests are against a mobile test suite that already exists — "this test
 
 ### Orientation pass — always first, before any brownfield change
 
+**Step 1 — read the cache.** Run `ep-agent-orientation-cache`'s gate against `docs/agent-context/qa-mobile-typescript.md` → **TRUST** (skip orientation), **DELTA** (refresh only what the git delta invalidated — a changed `package.json` / the lockfile / `tsconfig.json` invalidates the version lane and everything keyed to it), or **FULL**. Report the verdict in one line; don't narrate the checks.
+
+**Step 2 — derive the gaps.** Recover, don't author. For whatever the gate left unresolved:
+
 You **recover** the suite's architecture instead of authoring it. Read before writing (`Read` 2–3 representative files — a screen object, the base test/driver factory, the project file) and produce a short **current-state map**:
 
 - **Runner + framework + version + Appium driver** (WebdriverIO + Appium/TS on Node 20) → which skill lane applies.
@@ -62,6 +68,19 @@ You **recover** the suite's architecture instead of authoring it. Read before wr
 Confirm the suite **builds, the driver connects, and runs** before you change it. If it is red on arrival, say so — that's a finding, not your bug to silently absorb.
 
 **Also check for an unprocessed inventory.** If `docs/app-map/screen-map.md` exists — or loose `docs/app-map/screens/*.md` / `missing-testids.md` sections do — with screens captured but **no matching page object** in `src/pages/mobile/`, that is a backlog, not a reason to re-crawl. Enter `mobile-app-crawler` in **PROCESS mode**: reconcile captured screens against the classes on disk into four buckets (mapped-not-built · built-not-mapped · drifted · aligned), check the map's app build against what's installed, report the counts, then drive the mapped-not-built backlog through `page-object-design` → `mobile-screen-objects`. No device needed unless a screen's ids look stale.
+
+**Step 3 — re-verify what is never cached.** Whether it is **green on arrival** is working-tree state, not layout — check it every run regardless of the gate's verdict, and treat a red state as a finding to report rather than your bug to absorb. Then spot-check any file the map names that you are about to edit: **the map is a lead, not evidence**. The highest-risk cached line here is **the app build the screen map was captured against** — a new build can rename or drop accessibility ids with no commit in *this* repo, which invalidates locators wholesale.
+
+**What this agent's cache records:**
+
+| Section | qa-mobile-typescript records |
+|---|---|
+| Version lane | Node major, package manager from `packageManager`, TypeScript version + `strict` status; runner + Appium client major and the driver per platform |
+| Build, run & test | the project's own scripts for build / `tsc --noEmit` / lint / test, and how a single test is run in isolation |
+| Layout | test-project shape, where screen objects vs tests vs capabilities config live |
+| Seams to reuse | screen objects + the base-screen convention · accessibility-id locator strategy · the `docs/app-map/` screen map when one exists (and how stale it is) · capabilities / driver setup · device-cloud config · fixtures · tagging + TC-ID convention |
+| Conventions observed | naming, folder layout, `strict` settings, and where the project narrows the global rules |
+| Known unknowns | unmapped screens, the app code itself (owned by the matching `fe-*` peer); `#volatile`: device/emulator availability, the installed app build, device-cloud session state |
 
 ### Mode A — Fix a failing / flaky / broken test
 
@@ -87,6 +106,8 @@ Load [`ep-systematic-debugging`](../../../engineering-practices/systematic-debug
 ### Branch & finish (both modes)
 
 Work on a branch, not the user's default branch, unless told otherwise — [`ep-worktrees`](../../../engineering-practices/worktrees/SKILL.md) / [`ep-finish-branch`](../../../engineering-practices/finish-branch/SKILL.md). [`ep-writing-plans`](../../../engineering-practices/writing-plans/SKILL.md) + [`ep-executing-plans`](../../../engineering-practices/executing-plans/SKILL.md) for a multi-step extension. Commit/push only when the user asks.
+
+**Update the cache before you report** (greenfield runs too, per `ep-agent-orientation-cache` Phase 3): correct what the run disproved, **add the seams the run created** — new screen objects, locators, capabilities, map entries, newly covered screens — re-stamp the baseline commit + fingerprint, prepend one session-log line.
 
 ## Phases
 
@@ -114,6 +135,7 @@ Skills applied: <paths read>
 Created/changed: <path> — <one line each>
 Gate evidence: <command run + result, e.g. "npx wdio run → 7 passed, 0 failed (Pixel 8, Android 15)">
 Next: <phase n+1 name, or what unblocks this phase>
+Orientation cache: created | updated | updated (partial — <why>)   # last phase of a run only
 ```
 
 At the end of a full run, add a summary table of all phases and a "Hand-off notes" block: how to run the suite (locally and on the cloud), where the report lands, what was deliberately left out of scope.
@@ -122,12 +144,14 @@ For **brownfield** work (fix / extend), report this shape instead:
 
 ```
 Mode: FIX | EXTEND — <one-line description>
+Orientation: cached (full) | cached (delta: <n> refreshed) | full (<reason>)
 Stack detected: <runner/framework/driver, e.g. NUnit + Appium/.NET8; TestNG + Appium/Java21; WebdriverIO + Appium/TS>
 Current-state map: <screen-object architecture, device/emulator profile, reused seams (driver setup/tags), how it's run>
 Failure class (fix) / Slice scope (extend): <product-defect | test-defect | device-instability/flake — root cause / what the change covers>
 Changed: <path> — <one line each>
 Defect class swept (fix): <sibling screens/flows fixed, or listed for follow-up, or "instance-only, none">
 Gate evidence: <repro now green for the right reason on the actual device/emulator; build/test command + result>
+Orientation cache: created | updated | updated (partial — <why>)
 Left out of scope: <what you deliberately did not touch>
 ```
 

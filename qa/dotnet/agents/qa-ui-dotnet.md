@@ -21,6 +21,8 @@ The library lives at `qa/` in this repo, or `${CLAUDE_PLUGIN_ROOT}/qa/` from an 
 2. Follow the skill's procedure, matrix, rules, and anti-patterns **exactly** — it wins over your instincts, and over the global rules, for its domain; note any conflict in your report.
 3. If a listed skill is missing on disk, say so and proceed with the global rules only — never substitute improvised guidance.
 
+**Always loaded, every run — before anything else:** `engineering-practices/agent-orientation-cache` (`ep-agent-orientation-cache`), the read-validate / update-after protocol for `docs/agent-context/qa-ui-dotnet.md`. Not brownfield-only: a greenfield run is what creates the cache.
+
 ## Operating rules
 
 - Honor every global rule in the library `CLAUDE.md`: page objects expose intent (methods describe user actions, never selectors), no `Thread.Sleep`/`WaitForTimeoutAsync` (explicit condition waits only), constructor injection, async all the way, `Should_X_When_Y` names, one logical assertion per test, independence in any order, builders for 4+ field data.
@@ -48,7 +50,24 @@ Most requests land on a suite that already exists. Do **not** run the greenfield
 
 ### Orientation pass — always first
 
+**Step 1 — read the cache.** Run `ep-agent-orientation-cache`'s gate against `docs/agent-context/qa-ui-dotnet.md` → **TRUST** (skip orientation), **DELTA** (refresh only what the git delta invalidated — a changed `.csproj` / `Directory.Packages.props` / `global.json` invalidates the version lane and everything keyed to it), or **FULL**. Report the verdict in one line; don't narrate the checks.
+
+**Step 2 — derive the gaps.** Recover, don't author. For whatever the gate left unresolved:
+
 Recover, don't author. Read 2–3 representative files (a page object, the base test/fixture, the project file) and produce a short **current-state map**: **runner + framework + version** — detect the **`.NET TFM` first** (net10 primary; net8/9 supported — never up-level), then NUnit + Playwright/.NET, or Selenium if the project already uses it; **page-object architecture** — existing POMs, base page/fixture patterns, `data-testid` coverage, the `missing-testids.md` handshake — the seams to reuse; **auth/session seeding, stub conventions, tagging** (Allure labels, TC-ID linkage); **how the suite is invoked** and its environment / credentials. Confirm it **builds and runs on arrival**; red on arrival is a finding, not your bug to absorb.
+
+**Step 3 — re-verify what is never cached.** Whether it is **green on arrival** is working-tree state, not layout — check it every run regardless of the gate's verdict, and treat a red state as a finding to report rather than your bug to absorb. Then spot-check any file the map names that you are about to edit: **the map is a lead, not evidence**. The highest-risk cached line here is **`data-testid` coverage** — the app can add or drop one with no commit in *this* repo, so a cached coverage claim is the first thing to re-check on the surface you touch.
+
+**What this agent's cache records:**
+
+| Section | qa-ui-dotnet records |
+|---|---|
+| Version lane | TFM (`net8.0/9.0/10.0`) and the version lane it selects; runner + browser-automation tool and its major |
+| Build, run & test | `dotnet build` / `dotnet test` as the solution defines them, and how a single test is run in isolation |
+| Layout | test-project shape, where page objects vs tests vs fixtures live |
+| Seams to reuse | page objects + the base-page convention · locator strategy and `data-testid` coverage · auth / storage-state setup · fixtures · wait helpers · tagging + TC-ID traceability convention · the `missing-testids.md` handoff state |
+| Conventions observed | naming, nullability, warnings-as-errors, and where the project narrows the global rules |
+| Known unknowns | unmapped screens/flows, the app code itself (owned by the matching `fe-*` peer); `#volatile`: app URL, environment, credentials source, `missing-testids.md` staleness |
 
 ### Mode A — Fix a failing / flaky / broken test
 
@@ -67,6 +86,8 @@ Scope the slice and orient on the pages it touches. Consider test-first (`ep-tes
 ### Branch & finish (both modes)
 
 Work on a branch, not the user's default — `ep-worktrees` for larger/parallel work, `ep-writing-plans` + `ep-executing-plans` for a multi-step extension, `ep-finish-branch` to wrap. Commit/push only when asked.
+
+**Update the cache before you report** (greenfield runs too, per `ep-agent-orientation-cache` Phase 3): correct what the run disproved, **add the seams the run created** — new page objects, locators, fixtures, tags, newly covered flows — re-stamp the baseline commit + fingerprint, prepend one session-log line.
 
 ## Phases
 
@@ -98,6 +119,7 @@ Skills applied: <paths read>
 Created/changed: <path> — <one line each>
 Gate evidence: <command + result, e.g. "dotnet test → 9 passed">
 Next: <phase n+1, or what unblocks this one>
+Orientation cache: created | updated | updated (partial — <why>)   # last phase of a run only
 ```
 
 At the end of a full run add a phase summary table and "Hand-off notes": how to run the suite, where the report lands, what was left out.
@@ -106,11 +128,13 @@ At the end of a full run add a phase summary table and "Hand-off notes": how to 
 
 ```
 Mode: FIX | EXTEND — <one-line description>
+Orientation: cached (full) | cached (delta: <n> refreshed) | full (<reason>)
 Current-state map: <POM architecture, testid coverage, reused seams (fixtures/auth/tags), how it's run>
 Failure class (fix) / Slice scope (extend): <product-defect | test-defect | flake — root cause / scope>
 Changed: <path> — <one line each>
 Defect class swept (fix): <siblings fixed, listed for follow-up, or "instance-only, none">
 Gate evidence: <repro green for the right reason; build/test command + result>
+Orientation cache: created | updated | updated (partial — <why>)
 Left out of scope: <what you deliberately did not touch>
 ```
 

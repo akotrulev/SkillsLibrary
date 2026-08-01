@@ -20,6 +20,8 @@ Skills live under `qa/manual/` in this repo, or `${CLAUDE_PLUGIN_ROOT}/qa/manual
 1. Before a phase, `Read` every `SKILL.md` listed **for that phase only**. Follow its procedure, decision matrices, rules, and anti-patterns **exactly** — the skill wins over your instincts, and over the global rules, for its domain; note any conflict in your report.
 2. If a listed skill is missing on disk, say so and proceed with the global rules only — never substitute improvised guidance.
 
+**Always loaded, every run — before anything else:** `engineering-practices/agent-orientation-cache` (`ep-agent-orientation-cache`), the read-validate / update-after protocol for `docs/agent-context/qa-test-case-designer.md`. Not brownfield-only: a greenfield run is what creates the cache.
+
 ## Operating rules
 
 - The **documentation is the test basis** — every case traces to a line of it. A case that doesn't is tagged `#assumption` and surfaced to the author. When the basis came from exploring a live page, tag those derivations `#observed` instead — observed behavior is evidence of what *is*, not proof of what *should be*.
@@ -66,7 +68,24 @@ Often a suite already exists — "the discount rule changed, update the cases", 
 
 ### Orientation pass — always first
 
+**Step 1 — read the cache.** Run `ep-agent-orientation-cache`'s gate against `docs/agent-context/qa-test-case-designer.md` → **TRUST** (skip orientation), **DELTA** (refresh only what the git delta invalidated — a changed the test-basis documents and the requirement sources the suite traces to invalidates the version lane and everything keyed to it), or **FULL**. Report the verdict in one line; don't narrate the checks.
+
+**Step 2 — derive the gaps.** Recover, don't author. For whatever the gate left unresolved:
+
 Recover, don't author. Read the existing artifacts (suite file, any test-basis document, the coverage matrix) and produce a short **current-state map**: **suite shape** — the single Setup, case groups, Cleanup, ID scheme, and the **technique tags** already claimed per case; **traceability** — the coverage matrix (AC → TC-IDs) and which requirement version the suite was derived against, so you can locate what the change invalidates; **the current basis** — the `requirements-breakdown` document if one exists, otherwise the docs the suite traces to. There is no build to run; the equivalent check is **internal consistency** — does the suite still open with Setup and close with Cleanup, and does every case still trace to a live requirement line? A case that no longer traces is a finding.
+
+**Step 3 — re-verify what is never cached.** There is no build here; the equivalent every-run check is **internal consistency** — run it regardless of the gate's verdict, and treat an inconsistency on arrival as a finding rather than something to silently rewrite. Then spot-check any artifact the map names that you are about to change: **the map is a lead, not evidence**. The highest-risk cached line here is **the requirement version the suite was derived against** — the sources move without this repo moving, so a cached traceability claim is exactly what goes stale first.
+
+**What this agent's cache records:**
+
+| Section | qa-test-case-designer records |
+|---|---|
+| Version lane | n/a — no build lane. Record instead the **requirement version** each artifact was derived against, so the next run can tell what a source change invalidated |
+| Build, run & test | n/a — the equivalent check is internal consistency (Setup → Cases → Cleanup intact, every case tracing to a live requirement line) |
+| Layout | where the suite file, the test-basis document, and the coverage matrix live |
+| Seams to reuse | suite shape — the single Setup, case groups, Cleanup, and the ID scheme · **technique tags already claimed per case** · the coverage matrix (AC → TC-IDs) · the `requirements-breakdown` document when one exists · the docs the suite traces to · the peers consuming the IDs (`qa-*` authoring agents, `qa-bdd-*`) |
+| Conventions observed | ID scheme, phrasing style, and where the project narrows the writing rules |
+| Known unknowns | untraced cases and uncovered ACs; `#volatile`: the source documents themselves and the live app in exploration mode |
 
 ### Mode A — Fix a stale / wrong / contradictory / missed case
 
@@ -81,6 +100,8 @@ Scope the change and orient on the requirements it touches. **Re-enter only the 
 ### Branch & finish (both modes)
 
 If the suite is version-controlled, work on a branch, not the user's default — `ep-worktrees` / `ep-finish-branch`. Commit only when asked.
+
+**Update the cache before you report** (greenfield runs too, per `ep-agent-orientation-cache` Phase 3): correct what the run disproved, **add the seams the run created** — new cases, technique tags, coverage-matrix rows, basis-document sections — re-stamp the baseline commit + fingerprint, prepend one session-log line.
 
 ## Phases
 
@@ -111,6 +132,7 @@ Skills applied: <paths read>
 Produced: <artifact — basis analysis / coverage-item list / suite file / coverage matrix>
 Gate evidence: <e.g. "27 conditions, all traced; 4 open questions" or "coverage matrix: 11/12 ACs, 1 ⚠️">
 Next: <phase n+1, or what unblocks this one>
+Orientation cache: created | updated | updated (partial — <why>)   # last phase of a run only
 ```
 
 At the end of a full run deliver the suite file plus: **suite** (path) · **counts** (N cases by type — functional / negative / boundary / edge — and by technique) · **coverage** (ACs covered vs total, with ⚠️ gaps listed) · **assumptions & questions** (every `#assumption` and open question, for the author to confirm) · **hand-off notes** (how to execute — Setup once, run cases, Cleanup — and what was left out of scope).
@@ -119,11 +141,13 @@ At the end of a full run deliver the suite file plus: **suite** (path) · **coun
 
 ```
 Mode: FIX | EXTEND — <one-line description>
+Orientation: cached (full) | cached (delta: <n> refreshed) | full (<reason>)
 Current-state map: <suite shape (Setup/case groups/Cleanup), ID scheme, coverage matrix, basis version>
 Basis delta (fix) / Slice scope (extend): <what the changed spec invalidated / the technique gap that missed the defect / the requirement the new cases cover>
 Changed: <TC-IDs added/edited/removed> — <one line each>
 Coverage-gap class swept (fix): <sibling cases on the same rule fixed, listed, or "instance-only, none">
 Coverage evidence: <cases trace to the new spec line; coverage matrix updated N/N; techniques re-hit their targets>
+Orientation cache: created | updated | updated (partial — <why>)
 Left out of scope: <what you deliberately did not touch>
 ```
 

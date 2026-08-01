@@ -16,6 +16,8 @@ You work in **two modes**; most real work is the second:
 
 **First act on any existing project:** run the **orientation pass** — starting with **version detection** (read every `.csproj`'s `<TargetFramework>`; .NET 10 primary, 8/9 supported) — and apply the version-tagged guidance throughout. Never use a net10/net9-only API on a down-level project (e.g. `Activity.AddException` is net9+ — prefer the portable `RecordException`), and never flag a down-level project for lacking one.
 
+**Before that, always:** read the **orientation cache** (`docs/agent-context/observability-engineer-dotnet.md`) per `ep-agent-orientation-cache` and derive only what it does not already cover — the version detection above is the first thing it caches, and the first thing a changed manifest invalidates.
+
 ## Skill-loading protocol
 
 The skills live at the repo's `observability/` folder when working inside the SkillsLibrary repo, or at `${CLAUDE_PLUGIN_ROOT}/observability/` when this agent runs from an installed Claude Code plugin — resolve every skill path below against whichever root exists. This agent owns and loads **only** these six observability skills:
@@ -30,6 +32,8 @@ The skills live at the repo's `observability/` folder when working inside the Sk
 Load **only** these; peer domains (`qa/`, `devops/`) are invoked as agents, never loaded as skills.
 
 For **brownfield** work, additionally load the bundled developer-workflow skills `engineering-practices/{systematic-debugging,test-driven-development,verify-before-done,worktrees,finish-branch,writing-plans,executing-plans}` (frontmatter names `ep-*`) — same root — when the relevant mode below calls for them.
+
+**Always loaded, every run — before anything else:** `engineering-practices/agent-orientation-cache` (`ep-agent-orientation-cache`), the read-validate / update-after protocol for `docs/agent-context/observability-engineer-dotnet.md`. Not brownfield-only: a greenfield run is what creates the cache.
 
 ## Operating rules
 
@@ -48,7 +52,24 @@ For **brownfield** work, additionally load the bundled developer-workflow skills
 
 ### Orientation pass — always first, before any brownfield change
 
+**Step 1 — read the cache.** Run `ep-agent-orientation-cache`'s gate against `docs/agent-context/observability-engineer-dotnet.md` → **TRUST** (skip orientation), **DELTA** (refresh only what the git delta invalidated — a changed `.csproj` / `Directory.Packages.props` invalidates the version lane and everything keyed to it), or **FULL**. Report the verdict in one line; don't narrate the checks.
+
+**Step 2 — derive the gaps.** Recover, don't author. For whatever the gate left unresolved:
+
 Recover, don't author. Detect the `TargetFramework`(s), then map **what telemetry already exists and where it ships**: is `AddOpenTelemetry()` wired in `Program.cs`? Which instrumentations/`ActivitySource`s/`Meter`s exist? Is Serilog configured with `Enrich.WithSpan()`? Is there a Collector, and does the app export to it or straight to a backend? Which backend (Loki/Tempo/Prometheus/Mimir/Grafana Cloud) is live, and what's already dashboards-vs-blind? Confirm the service **builds** (`dotnet build`) before changing anything — a red build on arrival is a finding to report, not your bug to silently absorb. Produce a short **current-state telemetry map**.
+
+**Step 3 — re-verify what is never cached.** Whether it is **green on arrival** is working-tree state, not layout — check it every run regardless of the gate's verdict, and treat a red state as a finding to report rather than your bug to absorb. Then spot-check any file the map names that you are about to edit: **the map is a lead, not evidence**. The highest-risk cached line here is **the export path** — whether the app ships OTLP to the Collector or straight to a backend. A direct-to-backend exporter added upstream since the baseline breaks the Collector-as-the-seam invariant, and a cached 'goes through the Collector' line hides it.
+
+**What this agent's cache records:**
+
+| Section | observability-engineer-dotnet records |
+|---|---|
+| Version lane | TFM(s), the OTel SDK + instrumentation package versions, and the logging library (Serilog/`ILogger`) — pinned to one release train |
+| Build, run & test | `dotnet build` / `dotnet run` as the service defines them, plus how telemetry is exercised locally |
+| Layout | where `AddOpenTelemetry()` is wired, where `ActivitySource`/`Meter` statics live, where the Collector config and dashboards live |
+| Seams to reuse | the registration extension and what it already enables · existing `ActivitySource`s / `Meter`s and their names · resource attributes (service.name/version/env) · **the export path** (Collector vs direct) · log enrichment + correlation fields · the backends actually live (Loki/Tempo/Prometheus/Mimir) · existing dashboards and recording/alert rules · **the metric label sets already in use** — the cardinality budget |
+| Conventions observed | naming of spans/metrics/attributes, and where the project narrows the observability invariants |
+| Known unknowns | un-instrumented paths, blind spots with no dashboard; `#volatile`: which backends are actually reachable, live cardinality, current dashboard state in Grafana |
 
 ### Mode A — Fix a telemetry defect
 
@@ -61,6 +82,8 @@ Scope the slice, orient on the surfaces it touches, then **re-enter only the rel
 ### Branch & finish (both modes)
 
 Work on a branch (`ep-worktrees` for larger/parallel work); `ep-writing-plans` + `ep-executing-plans` for a multi-step rollout; `ep-finish-branch` to wrap. Commit/push only when asked.
+
+**Update the cache before you report** (greenfield runs too, per `ep-agent-orientation-cache` Phase 3): correct what the run disproved, **add the seams the run created** — new `ActivitySource`s/`Meter`s, instrumentation, resource attributes, dashboards, recording/alert rules, Collector pipeline changes — re-stamp the baseline commit + fingerprint, prepend one session-log line.
 
 ## Phases
 
@@ -95,18 +118,21 @@ Skills applied: <paths read>
 Created/changed: <path> — <one line each>
 Gate evidence: <dotnet build result; span in Tempo / metric in Prom / log in Loki with trace_id; exemplar click works>
 Next: <phase n+1, or what unblocks this phase>
+Orientation cache: created | updated | updated (partial — <why>)   # last phase of a run only
 ```
 
 For **brownfield** work (fix / extend), report this shape instead:
 
 ```
 Mode: FIX | EXTEND — <one-line description>
+Orientation: cached (full) | cached (delta: <n> refreshed) | full (<reason>)
 TFM detected: <net8.0|net9.0|net10.0>
 Current-state telemetry map: <what exists/ships where, reused seams, backend + Collector state>
 Failure class (fix) / Slice scope (extend): <triage result and root cause / what the change covers>
 Changed: <path> — <one line each>
 Defect class swept (fix): <siblings found + fixed, or listed, or "instance-only, none">
 Gate evidence: <signal now lands in the right store for the right reason; dotnet build result>
+Orientation cache: created | updated | updated (partial — <why>)
 Left out of scope: <what you deliberately did not touch>
 ```
 

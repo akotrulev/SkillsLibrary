@@ -22,6 +22,8 @@ The skills library lives at the repo's `qa/` folder when working inside the Skil
 3. If a skill conflicts with the library's global rules (`CLAUDE.md`), the skill wins for its domain — note the conflict in your report.
 4. If a listed skill is missing on disk, say so and proceed with the global rules only — never silently substitute improvised guidance.
 
+**Always loaded, every run — before anything else:** `engineering-practices/agent-orientation-cache` (`ep-agent-orientation-cache`), the read-validate / update-after protocol for `docs/agent-context/qa-bdd-java.md`. Not brownfield-only: a greenfield run is what creates the cache.
+
 ## Operating rules
 
 - Honor every global rule in the library `CLAUDE.md`: page objects expose intent (never selectors), no `Thread.sleep`/`page.waitForTimeout` (explicit/auto waits only), constructor injection only, no static mutable state, one logical assertion per behavior, tests independent in any order.
@@ -38,6 +40,10 @@ Most requests are against a BDD suite that already exists — "this scenario is 
 
 ### Orientation pass — always first, before any brownfield change
 
+**Step 1 — read the cache.** Run `ep-agent-orientation-cache`'s gate against `docs/agent-context/qa-bdd-java.md` → **TRUST** (skip orientation), **DELTA** (refresh only what the git delta invalidated — a changed `build.gradle.kts` / `pom.xml` / `libs.versions.toml` / `gradle-wrapper.properties` invalidates the version lane and everything keyed to it), or **FULL**. Report the verdict in one line; don't narrate the checks.
+
+**Step 2 — derive the gaps.** Recover, don't author. For whatever the gate left unresolved:
+
 You **recover** the BDD architecture instead of authoring it. Read before writing (`Read` 2–3 representative files — a `.feature`, a step-definition class, a page object, the `build.gradle.kts`) and produce a short **current-state map**:
 
 - **Runner + framework + version** (Cucumber-JVM + the JUnit 5 Platform engine, Java version, Playwright vs Selenium vs Appium under the steps) → which skill lane applies.
@@ -46,6 +52,19 @@ You **recover** the BDD architecture instead of authoring it. Read before writin
 - **Project conventions** (naming, folder layout) — match these over the templates' defaults.
 
 Confirm the suite **builds and runs** before you change it (`./gradlew build`, then the smoke scenario). If it is red on arrival, say so — that's a finding, not your bug to silently absorb.
+
+**Step 3 — re-verify what is never cached.** Whether it is **green on arrival** is working-tree state, not layout — check it every run regardless of the gate's verdict, and treat a red state as a finding to report rather than your bug to absorb. Then spot-check any file the map names that you are about to edit: **the map is a lead, not evidence**. The highest-risk cached line here is **the Step Catalog** — a duplicated step is exactly what it exists to prevent, so a stale catalog defeats the skill's whole purpose on the first new scenario.
+
+**What this agent's cache records:**
+
+| Section | qa-bdd-java records |
+|---|---|
+| Version lane | Java release + toolchain, the test framework major, and the build tool (Gradle Kotlin DSL vs Maven); runner + BDD framework and its major |
+| Build, run & test | `./gradlew build` / `./gradlew test` (or the Maven equivalents) as the project defines them, and how a single test is run in isolation |
+| Layout | where `.feature` files, step definitions, and the state model live |
+| Seams to reuse | **the Step Catalog** · `.feature` layout + Background / Scenario Outline conventions · step-definition domain split · the state model and how it is injected · lifecycle hooks + teardown · the page/screen objects steps bind to · tags and AC traceability |
+| Conventions observed | package layout, naming, `final` usage, and where the project narrows the global rules |
+| Known unknowns | uncovered acceptance criteria, the app code itself (owned by the matching `fe-*` peer); `#volatile`: app URL, environment, credentials source |
 
 ### Mode A — Fix a broken binding / failing scenario
 
@@ -71,6 +90,8 @@ Load [`ep-systematic-debugging`](../../../engineering-practices/systematic-debug
 ### Branch & finish (both modes)
 
 Work on a branch, not the user's default branch, unless told otherwise — [`ep-worktrees`](../../../engineering-practices/worktrees/SKILL.md) for parallel/larger changes, [`ep-finish-branch`](../../../engineering-practices/finish-branch/SKILL.md) to wrap up. For a multi-step extension, write the plan first ([`ep-writing-plans`](../../../engineering-practices/writing-plans/SKILL.md)) and execute it ([`ep-executing-plans`](../../../engineering-practices/executing-plans/SKILL.md)). Commit/push only when the user asks.
+
+**Update the cache before you report** (greenfield runs too, per `ep-agent-orientation-cache` Phase 3): correct what the run disproved, **add the seams the run created** — new steps (added to the Catalog), features, hooks, tags — re-stamp the baseline commit + fingerprint, prepend one session-log line.
 
 ## Phases
 
@@ -102,6 +123,7 @@ Skills applied: <paths read>
 Created/changed: <path> — <one line each>
 Gate evidence: <command run + result, e.g. "./gradlew test → 1 scenario, 3 examples passed">
 Next: <phase n+1 name, or what unblocks this phase>
+Orientation cache: created | updated | updated (partial — <why>)   # last phase of a run only
 ```
 
 At the end of a full run, add a summary table of all phases and a "Hand-off notes" block: how to run the suite, where the living-documentation report lands, the Step Catalog location, and what was deliberately left out of scope.
@@ -110,12 +132,14 @@ For **brownfield** work (fix / extend), report this shape instead:
 
 ```
 Mode: FIX | EXTEND — <one-line description>
+Orientation: cached (full) | cached (delta: <n> refreshed) | full (<reason>)
 Stack detected: <Java version + framework, e.g. Java21 / Cucumber-JVM + JUnit5 + Playwright/Selenium>
 Current-state map: <Step Catalog + DI wiring, POM coverage, tags — reused seams; how it's run>
 Failure class (fix) / Slice scope (extend): <product-defect | binding/step-defect | flake — root cause / scenarios added>
 Changed: <path> — <one line each>
 Defect class swept (fix): <sibling scenarios/steps found + fixed, or listed, or "instance-only, none">
 Gate evidence: <scenario now green for the right reason; "./gradlew build → 0 warnings"; no undefined/ambiguous steps; "./gradlew test → N passed">
+Orientation cache: created | updated | updated (partial — <why>)
 Left out of scope: <what you deliberately did not touch>
 ```
 

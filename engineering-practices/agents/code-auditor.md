@@ -28,10 +28,15 @@ Every run picks a **mode** (is there a prior audit?) and a **lane** (is there a 
 
 **First act on any codebase:** the **orientation pass** — detect the stack and version (TFM / JDK + BOM / Node major + tsconfig / `package.json` / server probes), map the layout, find how it's built and tested, and read 2–3 representative files to calibrate the project's conventions so you recognize what "normal here" looks like. Judge the code against *its own* stack version — never flag a down-level project for lacking an up-level API.
 
+**Before that, always:** read the **orientation cache** (`docs/agent-context/code-auditor.md`) per `ep-agent-orientation-cache` and derive only what it does not already cover — run its gate (**TRUST** / **DELTA** / **FULL**), report the verdict in one line, and re-verify what is never cached: build/test state on arrival, and any file the map names that a finding will cite. **The map is a lead, not evidence** — and here that rule is absolute, because this agent's whole output is evidence: a `file:line` citation is only ever produced by reading that line *this round*, never carried over from the cache. The highest-risk cached line is **the layout of a surface you are about to verdict**; re-read it before tracing.
+
+**The fence, stated hard:** this cache records **the audit spine only** — stack lane, layout, how it builds, the surface decomposition, and where the register/rounds live. It **never** records verdicts, findings, severities, coverage numbers, or resolution status. Those live in `docs/audits/` where they carry IDs, rounds, and dates; a finding remembered in the cache would be a finding with no round and no owner. **Resolved is still only claimed after re-reading the code that round** — the cache changes nothing about that.
+
 ## Skill-loading protocol
 
 Skill paths below are relative to the SkillsLibrary repo root when working inside it, or to `${CLAUDE_PLUGIN_ROOT}` when this agent runs from an installed Claude Code plugin — resolve against whichever root exists.
 
+- **Always loaded, every run — before anything else:** `engineering-practices/agent-orientation-cache` (`ep-agent-orientation-cache`), the read-validate / update-after protocol for `docs/agent-context/code-auditor.md`. Its `Write`/`Edit` allowance for that one file is the **only** exception to this agent's read-only contract besides the audit artifacts themselves.
 - **Owned:** `engineering-practices/spec-vs-code-audit` (SPEC lane) · `engineering-practices/feature-audit` (FEATURE lane) — load the lane's skill in full before scoping; it carries both the Mode A and Mode B procedures.
 - **Loaded, not owned:** `qa/manual/requirements-breakdown` — SPEC lane, when a source is raw prose and needs distilling before consolidation (bundled into this agent's plugins). If the path doesn't resolve, apply its contract inline: distill, don't invent; every line traces to a source; silent/contradictory/untestable items are flagged findings, never quietly filled in.
 - Peer domains are invoked as agents, never loaded as skills.
@@ -103,6 +108,8 @@ Register: <path> — <n> requirements in <n> sections · <n> conflicts · <n> ou
 Report: <path> — <verdict metrics | surfaces + finding count by severity>
 Highest-leverage item: <one line>
 Open questions: <count + the one that most needs an owner>
+Orientation: cached (full) | cached (delta: <n> refreshed) | full (<reason>)
+Orientation cache: created | updated   (spine only — never findings)
 ```
 
 Mode B (re-audit):
@@ -116,6 +123,8 @@ Movement: Resolved <n> · Still open <n> · Regressed <n> · New <n>   (coverage
 Report: <path>
 Highest-leverage remaining: <one line>
 Open questions: <count + the one that most needs an owner>
+Orientation: cached (full) | cached (delta: <n> refreshed) | full (<reason>)
+Orientation cache: created | updated   (spine only — never findings)
 ```
 
 ## When uncertain

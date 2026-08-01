@@ -22,6 +22,8 @@ The skills library lives at the repo's `qa/` folder when working inside the Skil
 3. If a skill conflicts with the library's global rules (`CLAUDE.md`), the skill wins for its domain — note the conflict in your report.
 4. If a listed skill is missing on disk, say so and proceed with the global rules only — never silently substitute improvised guidance.
 
+**Always loaded, every run — before anything else:** `engineering-practices/agent-orientation-cache` (`ep-agent-orientation-cache`), the read-validate / update-after protocol for `docs/agent-context/qa-reporting-dotnet.md`. Not brownfield-only: a greenfield run is what creates the cache.
+
 ## Operating rules
 
 - Honor every global rule in the library `CLAUDE.md`: no secrets in code or config (Allure server tokens, TMS keys → env + secret store), structured logging, `Should_X_When_Y` test names left untouched.
@@ -38,6 +40,10 @@ Reporting is usually a brownfield job by nature — but often the setup *already
 
 ### Orientation pass — always first, before any brownfield change
 
+**Step 1 — read the cache.** Run `ep-agent-orientation-cache`'s gate against `docs/agent-context/qa-reporting-dotnet.md` → **TRUST** (skip orientation), **DELTA** (refresh only what the git delta invalidated — a changed `.csproj` / `Directory.Packages.props` / `global.json` invalidates the version lane and everything keyed to it), or **FULL**. Report the verdict in one line; don't narrate the checks.
+
+**Step 2 — derive the gaps.** Recover, don't author. For whatever the gate left unresolved:
+
 You **recover** the reporting setup instead of authoring it. Read before writing (`Read` 2–3 files — the build file, the existing Allure config/adapter, any CI publish step) and produce a short **current-state map**:
 
 - **Allure wiring** — the adapter + results dir + attachment hooks, and whether a real run currently produces a report.
@@ -46,6 +52,19 @@ You **recover** the reporting setup instead of authoring it. Read before writing
 - **Publish path** — how/where results are published and the `qa-cicd-dotnet` step that consumes them.
 
 Confirm a real run still emits `allure-results` and generates before you change it. If it doesn't, that's the finding.
+
+**Step 3 — re-verify what is never cached.** Whether it is **green on arrival** is working-tree state, not layout — check it every run regardless of the gate's verdict, and treat a red state as a finding to report rather than your bug to absorb. Then spot-check any file the map names that you are about to edit: **the map is a lead, not evidence**. The highest-risk cached line here is **the quarantine list** — a stale entry keeps a fixed test excluded, so coverage silently shrinks while the suite stays green.
+
+**What this agent's cache records:**
+
+| Section | qa-reporting-dotnet records |
+|---|---|
+| Version lane | TFM (`net8.0/9.0/10.0`) and the version lane it selects; runner + Allure major and adapter |
+| Build, run & test | `dotnet build` / `dotnet test` as the solution defines them, and how a single test is run in isolation |
+| Layout | where results, categories, and the published report live |
+| Seams to reuse | Allure wiring + adapter config · `categories.json` and its buckets · label/tag conventions (suite, severity, TMS/issue links) · attachment strategy · **flake-quarantine state** — which tests are tagged, why, and since when · the CI publish step it hands to |
+| Conventions observed | naming, nullability, warnings-as-errors, and where the project narrows the global rules |
+| Known unknowns | the tests themselves (owned by the stack QA agents), the publish infrastructure (owned by `qa-cicd-*`); `#volatile`: recent run history and flake rates (they change with every CI run, not with commits) |
 
 ### Mode A — Fix broken reporting / a mis-quarantined test
 
@@ -70,6 +89,8 @@ Load [`ep-systematic-debugging`](../../../engineering-practices/systematic-debug
 ### Branch & finish (both modes)
 
 Work on a branch, not the user's default branch, unless told otherwise — [`ep-worktrees`](../../../engineering-practices/worktrees/SKILL.md) / [`ep-finish-branch`](../../../engineering-practices/finish-branch/SKILL.md). Commit/push only when the user asks.
+
+**Update the cache before you report** (greenfield runs too, per `ep-agent-orientation-cache` Phase 3): correct what the run disproved, **add the seams the run created** — new categories, labels, quarantine entries (and lifted ones), publish wiring — re-stamp the baseline commit + fingerprint, prepend one session-log line.
 
 ## Phases
 
@@ -97,6 +118,7 @@ Skills applied: <paths read>
 Created/changed: <path> — <one line each>
 Gate evidence: <command run + result, e.g. "allure generate → report built; 14 passed, 1 quarantined">
 Next: <phase n+1 name, or what unblocks this phase>
+Orientation cache: created | updated | updated (partial — <why>)   # last phase of a run only
 ```
 
 At the end of a full run, add a summary table of all phases and a "Hand-off notes" block: how to generate the report, where results land, the Allure-publish command for `qa-cicd-dotnet`, and the current quarantine list with owners/expiries.
@@ -105,11 +127,13 @@ For **brownfield** work (fix / extend), report this shape instead:
 
 ```
 Mode: FIX | EXTEND — <one-line description>
+Orientation: cached (full) | cached (delta: <n> refreshed) | full (<reason>)
 Setup detected: <Allure wiring, label conventions, quarantine list + owners/expiries, publish path>
 Fix class (fix) / Change scope (extend): <reporting-wiring | quarantine-hygiene | labeling — root cause / what was tagged/quarantined>
 Changed: <path> — <one line each>
 Class swept (fix): <sibling attachments/quarantines/labels fixed, or "instance-only, none">
 Gate evidence: <report generates from a real run; honest pass/fail/flaky counts; e.g. "allure generate → 14 passed, 1 quarantined (owner+expiry set)">
+Orientation cache: created | updated | updated (partial — <why>)
 Left out of scope: <what you deliberately did not touch — incl. any test-logic fix routed to the stack agent>
 ```
 

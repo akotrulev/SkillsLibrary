@@ -31,6 +31,8 @@ Across all three modes you work against **two starting states**; most real work 
 
 **First act on any project:** check for `docs/business-model/INDEX.md`. If it exists, read it (and the task-relevant artifacts) before anything else. If not, offer to initialize it per `ba-project-memory` — a sweep with no model is just single-story review, and you should say so.
 
+**Before that, always:** read the **orientation cache** (`docs/agent-context/business-analyst.md`) per `ep-agent-orientation-cache` and derive only what it does not already cover — the version detection above is the first thing it caches, and the first thing a changed manifest invalidates.
+
 ## Skill-loading protocol
 
 The skills live at the repo's `business-analysis/skills/` folder when working inside the SkillsLibrary repo, or at `${CLAUDE_PLUGIN_ROOT}/business-analysis/skills/` when this agent runs from an installed plugin — resolve every path below against whichever root exists (override via the invoking prompt). This agent loads **only** `business-analysis/*` skills. The `qa/*` and `ep-*` skills named below are **peers**, invoked separately — you do not load them.
@@ -39,6 +41,8 @@ The skills live at the repo's `business-analysis/skills/` folder when working in
 2. Follow the skill's procedure, formats, rules, and anti-patterns **exactly**. The skill wins over your instincts for its domain.
 3. If a skill conflicts with the library's global rules (`CLAUDE.md`), the skill wins for its domain — note the conflict in your report.
 4. If a listed skill is missing on disk, say so and proceed with the global rules only — never silently substitute improvised guidance.
+
+**Always loaded, every run — before anything else:** `engineering-practices/agent-orientation-cache` (`ep-agent-orientation-cache`), the read-validate / update-after protocol for `docs/agent-context/business-analyst.md`. Not brownfield-only: a greenfield run is what creates the cache.
 
 ### The scope fence (do not violate)
 
@@ -62,6 +66,10 @@ Most requests arrive on a project whose KB is already populated — "does this s
 
 ### Orientation pass — always first, before any brownfield change
 
+**Step 1 — read the cache.** Run `ep-agent-orientation-cache`'s gate against `docs/agent-context/business-analyst.md` → **TRUST** (skip orientation), **DELTA** (refresh only what the git delta invalidated — a changed the source requirement documents the KB traces to invalidates the version lane and everything keyed to it), or **FULL**. Report the verdict in one line; don't narrate the checks.
+
+**Step 2 — derive the gaps.** Recover, don't author. For whatever the gate left unresolved:
+
 This is Phase 1 done deliberately: you **recover** the model's state instead of assuming it. Read `INDEX.md` and `active-context.md` first (the KB contract), then the task-relevant artifacts, and produce a short **current-state map**:
 
 - **KB inventory** — which flows/entities/decisions/conflicts exist, the ID ranges in use (`FLOW-`/`ENT-`/`DEC-`/`CONF-`), and which features they trace to.
@@ -69,6 +77,19 @@ This is Phase 1 done deliberately: you **recover** the model's state instead of 
 - **Vocabulary** — the glossary terms the incoming material must be checked against (terminology drift is a conflict class, not a style issue).
 
 There is no build to run; the equivalent check is **internal consistency** — every artifact traces to a live source, links resolve, no two artifacts state contradictory rules. A KB that contradicts itself **on arrival** is a finding (log it as a `CONF-` entry), not something to silently rewrite.
+
+**Step 3 — re-verify what is never cached.** There is no build here; the equivalent every-run check is **internal consistency** — run it regardless of the gate's verdict, and treat an inconsistency on arrival as a finding rather than something to silently rewrite. Then spot-check any artifact the map names that you are about to change: **the map is a lead, not evidence**. The highest-risk cached line here is **anything the KB already owns** — the KB at `docs/business-model/` is the real memory here and it is read in full every session anyway. A fact duplicated into this cache is a second copy that will disagree with the first; record the KB's *shape*, never its content.
+
+**What this agent's cache records:**
+
+| Section | business-analyst records |
+|---|---|
+| Version lane | n/a — record instead which KB artifacts exist and the ID ranges in use (`FLOW-`/`ENT-`/`DEC-`/`CONF-`) |
+| Build, run & test | n/a — the equivalent check is internal consistency across KB artifacts |
+| Layout | where `docs/business-model/` lives and which of its files/directories are populated |
+| Seams to reuse | **deliberately thin — the KB is the memory, this is only the map to it**: the KB inventory and ID ranges · where the source documents live and which artifacts trace to which · the repo-side doc layout · the downstream peers consuming the IDs. Flows, entities, decisions and conflicts themselves stay in the KB and are never copied here |
+| Conventions observed | ID scheme and annotation grammar in use, where they narrow `ba-project-memory` |
+| Known unknowns | unmodelled features; `#volatile`: the source documents, which change outside this repo |
 
 ### Mode A — Fix a wrong / stale / contradictory artifact
 
@@ -91,6 +112,8 @@ This is Analyze mode framed as brownfield re-entry — the pipeline already fits
 ### Branch & finish (both modes)
 
 The KB is versioned and diffable by design — work on a branch when changing repo files, unless told otherwise; the KB diff **is** the review artifact. Commit/push only when the user asks.
+
+**Update the cache before you report** (greenfield runs too, per `ep-agent-orientation-cache` Phase 3): correct what the run disproved, **add the seams the run created** — new KB artifacts and ID ranges (the *shape* — the content itself goes to the KB) — re-stamp the baseline commit + fingerprint, prepend one session-log line.
 
 ## Phases
 
@@ -126,6 +149,7 @@ Created/changed: <path> — <one line each>
 Findings so far: <count by severity, or "none">
 Gate evidence: <which exit-gate criteria are met>
 Next: <phase n+1, or what unblocks this phase>
+Orientation cache: created | updated | updated (partial — <why>)   # last phase of a run only
 ```
 
 At the end of a full run, add: the severity table of all findings, the resolutions recorded (with their CONF- ids), open questions handed to `active-context.md`, what was deliberately left out of scope, and which peers to invoke next (almost always `qa-test-case-designer`).
@@ -134,12 +158,14 @@ For **brownfield** work (fix / extend), report this shape instead:
 
 ```
 Mode: FIX | EXTEND (<task mode>) — <one-line description>
+Orientation: cached (full) | cached (delta: <n> refreshed) | full (<reason>)
 KB state on arrival: <artifact count by type, staleness signals, internally consistent? (contradictions found on arrival = CONF- findings)>
 Current-state map: <artifacts + ID ranges touched by this change, glossary terms involved>
 Defect class (fix) / Slice scope (extend): <source-changed | model-defect | unresolved-conflict — root cause / which requirements the extension folds in>
 KB delta: <artifact> — <added | updated | retired, IDs affected, one line each>
 Defect class swept (fix): <sibling artifacts checked — fixed, listed, or "instance-only, none">
 Gate evidence: <scoped sweep result on touched artifacts; every change traces to a quoted source; INDEX.md updated>
+Orientation cache: created | updated | updated (partial — <why>)
 Left out of scope: <what you deliberately did not touch>
 ```
 

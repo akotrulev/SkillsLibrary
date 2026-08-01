@@ -27,6 +27,8 @@ The library lives at `qa/` in this repo, or `${CLAUDE_PLUGIN_ROOT}/qa/` from an 
 1. Before a phase, `Read` every `SKILL.md` listed **for that phase only**; where a skill routes to several `references/<tool>.md`, read only the one matching the project's tool. Follow its procedure, matrix, rules, and anti-patterns **exactly** — the skill wins over your instincts, and over the global rules, for its domain.
 2. If a listed skill is missing on disk, say so and proceed with `qa/_shared/security` + the global rules — never improvise guidance or invent scanner flags.
 
+**Always loaded, every run — before anything else:** `engineering-practices/agent-orientation-cache` (`ep-agent-orientation-cache`), the read-validate / update-after protocol for `docs/agent-context/qa-security.md`. Not brownfield-only: a greenfield run is what creates the cache.
+
 ## Operating rules
 
 - Honor every global rule in `CLAUDE.md`: constructor injection, async all the way, structured logging, no secrets in code, builders for 4+ field data, `Should_X_When_Y` names, one logical assertion per test, no `Thread.Sleep` — an app must be *ready* before a scan on a healthcheck, never a fixed sleep.
@@ -43,7 +45,24 @@ Most requests land on an app that **already has** some coverage. Do **not** re-r
 
 ### Orientation pass — always first
 
+**Step 1 — read the cache.** Run `ep-agent-orientation-cache`'s gate against `docs/agent-context/qa-security.md` → **TRUST** (skip orientation), **DELTA** (refresh only what the git delta invalidated — a changed the CI config / scanner config + baseline files / the dependency manifests invalidates the version lane and everything keyed to it), or **FULL**. Report the verdict in one line; don't narrate the checks.
+
+**Step 2 — derive the gaps.** Recover, don't author. For whatever the gate left unresolved:
+
 Recover, don't author. Read `qa/_shared/security` first, then the project (CI config, baseline/suppression files, existing access-control tests) and produce a short **current-state map**: **gates already wired** — which of SAST / secrets / SCA / access-control / DAST / fuzzing / container-IaC / TLS exist, on which lane, and their **baseline + ticketed-suppression** files; **stack siblings** that apply; **target + authorization** — the environment each active scan may hit and whether that authorization still holds; **OWASP coverage map** — PASS / FAIL / manual-only, so you know the delta.
+
+**Step 3 — re-verify what is never cached.** Whether it is **green on arrival** is working-tree state, not layout — check it every run regardless of the gate's verdict, and treat a red state as a finding to report rather than your bug to absorb. Then spot-check any file the map names that you are about to edit: **the map is a lead, not evidence**. The highest-risk cached line here is **the authorization to scan** — it is `#volatile` and it expires. A cached 'this environment is in scope' line is never sufficient to launch an active scan; re-confirm the target and the authorization every run.
+
+**What this agent's cache records:**
+
+| Section | qa-security records |
+|---|---|
+| Version lane | which scanners are wired and their versions/images, plus the stack lane of the stack-native siblings (`dependency-scan`, `passive-scan`, `permission-testing`) |
+| Build, run & test | how each gate is invoked (locally and in CI) and what a clean run looks like |
+| Layout | where scanner configs, **baseline / ticketed-suppression files**, and access-control tests live |
+| Seams to reuse | **which gates exist** — SAST · secrets · SCA · access-control · DAST · fuzzing · container/IaC · TLS — on which lane, and where each one's config lives · baseline + suppression files and what each suppression is ticketed to · the OWASP coverage map (PASS / FAIL / manual-only) · the identity matrix the BOLA/IDOR/BFLA tests use · the CI gate wiring |
+| Conventions observed | severity policy, what fails the build vs warns, and where the project narrows the defaults |
+| Known unknowns | unmapped OWASP entries; `#volatile`: **every scan result and finding** — the cache records *that a gate exists*, never what it found — plus the target environment and whether the authorization to scan it still holds |
 
 ### Mode A — Fix a red gate (triage a finding)
 
@@ -62,6 +81,8 @@ Scope the layer and orient on what exists and the authorization for anything act
 ### Branch & finish (both modes)
 
 Work on a branch, not the user's default — `ep-worktrees` for larger/parallel work, `ep-writing-plans` + `ep-executing-plans` for a multi-step extension, `ep-finish-branch` to wrap. Commit/push only when asked.
+
+**Update the cache before you report** (greenfield runs too, per `ep-agent-orientation-cache` Phase 3): correct what the run disproved, **add the seams the run created** — new gates, baselines, ticketed suppressions, access-control tests, OWASP-map coverage — re-stamp the baseline commit + fingerprint, prepend one session-log line.
 
 ## Phases
 
@@ -94,6 +115,7 @@ Skills applied: <paths read>
 Created/changed: <path> — <one line each>
 Gate evidence: <command + result, e.g. "semgrep ci → 0 new, 3 baselined; SARIF uploaded">
 Next: <phase n+1, or what unblocks this one>
+Orientation cache: created | updated | updated (partial — <why>)   # last phase of a run only
 ```
 
 At the end of a full run add: a **layer-coverage table** (SAST / secrets / SCA / access-control / DAST / fuzzing / container-IaC / TLS — gate + status each), an **OWASP coverage map** (each in-scope item → PASS / FAIL / **manual-pentest-only**), and "Hand-off notes": how to run each gate (PR vs safe-env-only), where SARIF/reports and baselines land, and **what was left to a manual pentest** (business-logic abuse, API6 sensitive-flow abuse, anything CI can't reach).
@@ -102,6 +124,7 @@ At the end of a full run add: a **layer-coverage table** (SAST / secrets / SCA /
 
 ```
 Mode: FIX | EXTEND — <one-line description>
+Orientation: cached (full) | cached (delta: <n> refreshed) | full (<reason>)
 Stack + gates detected: <stack siblings; gates per lane; baseline/suppression locations>
 Finding class (fix) / Layer scope (extend): <true-positive | false-positive | gate/config-defect — OWASP id / layer added>
 Changed: <path> — <one line each>

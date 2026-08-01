@@ -22,6 +22,8 @@ The skills library lives at the repo's `qa/` folder when working inside the Skil
 3. If a skill conflicts with the library's global rules (`CLAUDE.md`), the skill wins for its domain — note the conflict in your report.
 4. If a listed skill is missing on disk, say so and proceed with the global rules only — never silently substitute improvised guidance.
 
+**Always loaded, every run — before anything else:** `engineering-practices/agent-orientation-cache` (`ep-agent-orientation-cache`), the read-validate / update-after protocol for `docs/agent-context/qa-ui-typescript.md`. Not brownfield-only: a greenfield run is what creates the cache.
+
 ## Operating rules
 
 - Honor every global rule in the library `CLAUDE.md`: page objects expose intent (method names describe user actions, never selectors), no `page.waitForTimeout` (web-first assertions and explicit waits on conditions only), `strict: true` TypeScript, async/await all the way (no floating promises), behavior-describing test names, one logical assertion per test, tests independent in any order, builders for 4+ field test data, `readonly` where it fits.
@@ -49,6 +51,10 @@ Most requests are against a UI test suite that already exists — "this test is 
 
 ### Orientation pass — always first, before any brownfield change
 
+**Step 1 — read the cache.** Run `ep-agent-orientation-cache`'s gate against `docs/agent-context/qa-ui-typescript.md` → **TRUST** (skip orientation), **DELTA** (refresh only what the git delta invalidated — a changed `package.json` / the lockfile / `tsconfig.json` invalidates the version lane and everything keyed to it), or **FULL**. Report the verdict in one line; don't narrate the checks.
+
+**Step 2 — derive the gaps.** Recover, don't author. For whatever the gate left unresolved:
+
 You **recover** the suite's architecture instead of authoring it. Read before writing (`Read` 2–3 representative files — a page object, the base test/fixture, the project file) and produce a short **current-state map**:
 
 - **Runner + framework + version** (Playwright Test/TypeScript, or Selenium/WebdriverIO if the project is already invested in it) → which skill lane applies.
@@ -57,6 +63,19 @@ You **recover** the suite's architecture instead of authoring it. Read before wr
 - **How the suite is invoked** and its target environment/credentials source.
 
 Confirm the suite **builds and runs** before you change it. If it is red on arrival, say so — that's a finding, not your bug to silently absorb.
+
+**Step 3 — re-verify what is never cached.** Whether it is **green on arrival** is working-tree state, not layout — check it every run regardless of the gate's verdict, and treat a red state as a finding to report rather than your bug to absorb. Then spot-check any file the map names that you are about to edit: **the map is a lead, not evidence**. The highest-risk cached line here is **`data-testid` coverage** — the app can add or drop one with no commit in *this* repo, so a cached coverage claim is the first thing to re-check on the surface you touch.
+
+**What this agent's cache records:**
+
+| Section | qa-ui-typescript records |
+|---|---|
+| Version lane | Node major, package manager from `packageManager`, TypeScript version + `strict` status; runner + browser-automation tool and its major |
+| Build, run & test | the project's own scripts for build / `tsc --noEmit` / lint / test, and how a single test is run in isolation |
+| Layout | test-project shape, where page objects vs tests vs fixtures live |
+| Seams to reuse | page objects + the base-page convention · locator strategy and `data-testid` coverage · auth / storage-state setup · fixtures · wait helpers · tagging + TC-ID traceability convention · the `missing-testids.md` handoff state |
+| Conventions observed | naming, folder layout, `strict` settings, and where the project narrows the global rules |
+| Known unknowns | unmapped screens/flows, the app code itself (owned by the matching `fe-*` peer); `#volatile`: app URL, environment, credentials source, `missing-testids.md` staleness |
 
 ### Mode A — Fix a failing / flaky / broken test
 
@@ -82,6 +101,8 @@ Load [`ep-systematic-debugging`](../../../engineering-practices/systematic-debug
 ### Branch & finish (both modes)
 
 Work on a branch, not the user's default branch, unless told otherwise — [`ep-worktrees`](../../../engineering-practices/worktrees/SKILL.md) / [`ep-finish-branch`](../../../engineering-practices/finish-branch/SKILL.md). [`ep-writing-plans`](../../../engineering-practices/writing-plans/SKILL.md) + [`ep-executing-plans`](../../../engineering-practices/executing-plans/SKILL.md) for a multi-step extension. Commit/push only when the user asks.
+
+**Update the cache before you report** (greenfield runs too, per `ep-agent-orientation-cache` Phase 3): correct what the run disproved, **add the seams the run created** — new page objects, locators, fixtures, tags, newly covered flows — re-stamp the baseline commit + fingerprint, prepend one session-log line.
 
 ## Phases
 
@@ -110,6 +131,7 @@ Skills applied: <paths read>
 Created/changed: <path> — <one line each>
 Gate evidence: <command run + result, e.g. "npx playwright test → 9 passed, 0 failed">
 Next: <phase n+1 name, or what unblocks this phase>
+Orientation cache: created | updated | updated (partial — <why>)   # last phase of a run only
 ```
 
 At the end of a full run, add a summary table of all phases and a "Hand-off notes" block: how to run the suite, where the report lands, what was deliberately left out of scope.
@@ -118,12 +140,14 @@ For **brownfield** work (fix / extend), report this shape instead:
 
 ```
 Mode: FIX | EXTEND — <one-line description>
+Orientation: cached (full) | cached (delta: <n> refreshed) | full (<reason>)
 Stack detected: <runner/framework, e.g. NUnit + Playwright / .NET8; TestNG + Playwright / Java21; Playwright Test / TS>
 Current-state map: <POM architecture, data-testid coverage, reused seams (fixtures/auth/tags), how it's run>
 Failure class (fix) / Slice scope (extend): <product-defect | test-defect | flake — root cause / what the change covers>
 Changed: <path> — <one line each>
 Defect class swept (fix): <sibling pages/journeys fixed, or listed for follow-up, or "instance-only, none">
 Gate evidence: <repro now green for the right reason; build/test command + result>
+Orientation cache: created | updated | updated (partial — <why>)
 Left out of scope: <what you deliberately did not touch>
 ```
 
