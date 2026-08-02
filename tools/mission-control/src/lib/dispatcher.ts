@@ -1,4 +1,5 @@
 import { query } from "@anthropic-ai/claude-agent-sdk";
+import { agentEnv } from "./agent-env";
 import { findAgent, getCatalog } from "./catalog";
 import { IMPLEMENTER_MODEL, LIBRARY_ROOT } from "./config";
 import { eventBus } from "./events";
@@ -103,6 +104,9 @@ export async function dispatchTask(run: Run, task: Task): Promise<DispatchResult
         settingSources: ["project"],
         abortController: controller,
         maxTurns: 200,
+        // Replaces the subprocess environment: agents have Bash, so git
+        // credentials and any other server secret must not be reachable.
+        env: agentEnv(),
       },
     })) {
       if (message.type === "assistant") {

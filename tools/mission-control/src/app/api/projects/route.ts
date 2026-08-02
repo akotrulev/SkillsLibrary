@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { NextResponse } from "next/server";
-import { listProjects, upsertProject } from "@/lib/projects";
+import { createGitProject, listProjects, upsertProject } from "@/lib/projects";
 import { listRuns } from "@/lib/store";
 
 export const dynamic = "force-dynamic";
@@ -23,16 +23,43 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  let body: { name?: string; targetDir?: string };
+  let body: {
+    name?: string;
+    targetDir?: string;
+    repoUrl?: string;
+    baseBranch?: string;
+    workBranch?: string;
+  };
   try {
     body = await request.json();
   } catch {
     return NextResponse.json({ error: "Invalid JSON body." }, { status: 400 });
   }
 
+  // Git-backed project: nothing is cloned until the first run prepares it.
+  const repoUrl = body.repoUrl?.trim();
+  if (repoUrl) {
+    if (!/^(https:\/\/|git@)/.test(repoUrl)) {
+      return NextResponse.json(
+        { error: "Repository URL must start with https:// or git@." },
+        { status: 400 },
+      );
+    }
+    const project = await createGitProject({
+      repoUrl,
+      name: body.name,
+      baseBranch: body.baseBranch,
+      workBranch: body.workBranch,
+    });
+    return NextResponse.json(project, { status: 201 });
+  }
+
   const raw = body.targetDir?.trim();
   if (!raw) {
-    return NextResponse.json({ error: "A target directory is required." }, { status: 400 });
+    return NextResponse.json(
+      { error: "Provide either a target directory or a repository URL." },
+      { status: 400 },
+    );
   }
 
   const targetDir = path.resolve(raw);

@@ -15,6 +15,7 @@ export async function GET(request: Request) {
       skillCount: catalog.skills.length,
       candidateCount: catalog.candidateCount,
       unreadable: catalog.unreadable,
+      malformed: catalog.malformed,
       agents: catalog.agents.map((a) => ({
         name: a.name,
         domain: a.domain,

@@ -196,6 +196,47 @@ Every project has an execution switch:
 
 Selecting a project filters the run list to it.
 
+## GitHub credentials
+
+Git-backed projects clone, commit and push on your behalf, which needs a
+credential. There are two places to put one, and the **project token wins**:
+
+| Source | Scope | Where |
+|---|---|---|
+| Project token | That one project | The **GitHub access** section on the project row (key icon) |
+| Environment token | Every project without its own | `MISSION_CONTROL_GIT_TOKEN`, `GITHUB_TOKEN` or `GH_TOKEN` |
+
+### Per-project tokens
+
+Open a git project's key icon, paste a token, press **Save**. Use a
+[fine-grained personal access token](https://github.com/settings/personal-access-tokens)
+scoped to that repository with **Contents: read and write**.
+
+Storing a token requires **`MISSION_CONTROL_SECRET`** — a passphrase used to
+encrypt it (AES-256-GCM) in `projects.json`. Without that variable the section
+says so and the field is disabled; a token is never written unencrypted. Change
+or lose the passphrase and stored tokens become unreadable: the UI flags them
+and you re-enter them.
+
+**Test access** verifies the credential against the real remote. Once the
+workspace is cloned it runs a dry-run push, so it proves *write* access — a
+plain reachability check would pass on any public repo even with a junk token.
+Before the first clone it can only confirm the repo is reachable, and says so.
+
+### What agents can see: nothing
+
+Credentials are the server's, not the agents'. Two mechanisms:
+
+- The token is injected into the remote URL **per git command** and never
+  written to `.git/config` inside a workspace an agent can read.
+- Agent subprocesses get an **explicitly built environment** (`src/lib/agent-env.ts`)
+  rather than inheriting the server's. It is an allowlist — process plumbing plus
+  Anthropic auth — so `GITHUB_TOKEN`, `MISSION_CONTROL_SECRET` and any future
+  secret are excluded by default.
+
+Git errors are redacted before they reach a log or the UI, since a failing
+command can echo the remote URL back.
+
 ## Persistence
 
 All state lives on disk under `.data/` and is written on every mutation:
@@ -203,7 +244,7 @@ All state lives on disk under `.data/` and is written on every mutation:
 ```
 .data/
   catalog.json          # indexed agents + skills
-  projects.json         # projects and their execution switches
+  projects.json         # projects, execution switches, encrypted tokens
   runs/<runId>.json     # plan, phases, tasks, statuses, summaries, logs
 ```
 
@@ -224,6 +265,8 @@ Stopping the tool is safe. On restart:
 | `MISSION_CONTROL_PLANNER_MODEL` | `claude-opus-5` | Planner model |
 | `MISSION_CONTROL_IMPLEMENTER_MODEL` | `claude-opus-5` | Implementer model |
 | `MISSION_CONTROL_MAX_PARALLEL` | `3` | Concurrency in a parallel-safe phase |
+| `MISSION_CONTROL_SECRET` | — | Passphrase encrypting per-project tokens; without it they cannot be stored |
+| `MISSION_CONTROL_GIT_TOKEN` | — | Fallback git credential for projects with no token of their own |
 
 Set these in `.env.local`, or export them before `npm run dev`.
 

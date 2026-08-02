@@ -112,6 +112,7 @@ export async function buildCatalog(): Promise<Catalog> {
   const agents: CatalogAgent[] = [];
   const skills: CatalogSkill[] = [];
   const unreadable: string[] = [];
+  const malformed: string[] = [];
 
   await mapLimit(candidates, READ_CONCURRENCY, async (c) => {
     const source = await readFileResilient(c.full);
@@ -122,7 +123,12 @@ export async function buildCatalog(): Promise<Catalog> {
 
     const { data } = parseFrontmatter(source);
     const name = data.name?.trim() ?? "";
-    if (!name) return;
+    if (!name) {
+      // Readable but unusable: no frontmatter `name` means nothing can address
+      // it. Tracked so an authoring slip is visible instead of a silent gap.
+      malformed.push(c.relPath);
+      return;
+    }
     const description = data.description?.trim() ?? "";
 
     if (c.isAgent) {
@@ -148,6 +154,12 @@ export async function buildCatalog(): Promise<Catalog> {
   agents.sort((a, b) => a.name.localeCompare(b.name));
   skills.sort((a, b) => a.name.localeCompare(b.name));
 
+  if (malformed.length > 0) {
+    console.warn(
+      `[catalog] ${malformed.length} file(s) have no frontmatter \`name\` and were skipped:\n  ${malformed.join("\n  ")}`,
+    );
+  }
+
   if (unreadable.length > 0) {
     // Visible rather than silent: a missing agent would otherwise look to the
     // planner like an agent that simply does not exist.
@@ -162,6 +174,7 @@ export async function buildCatalog(): Promise<Catalog> {
     skills,
     candidateCount: candidates.length,
     unreadable,
+    malformed,
     indexedAt: new Date().toISOString(),
   };
 }
@@ -171,7 +184,8 @@ async function readCacheFile(): Promise<Catalog | null> {
     const parsed = JSON.parse(await fs.readFile(CACHE_FILE, "utf8")) as Catalog;
     if (parsed.libraryRoot !== LIBRARY_ROOT) return null;
     if (!parsed.agents?.length) return null;
-    return parsed;
+    // A cache written before a field existed must not surface as undefined.
+    return { ...parsed, unreadable: parsed.unreadable ?? [], malformed: parsed.malformed ?? [] };
   } catch {
     return null;
   }

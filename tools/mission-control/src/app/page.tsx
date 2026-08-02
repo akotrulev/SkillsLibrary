@@ -48,6 +48,13 @@ export default function HomePage() {
   const [projects, setProjects] = useState<ProjectRow[]>([]);
   const [selectedDir, setSelectedDir] = useState<string | null>(null);
 
+  const selectedProject = useMemo(
+    () => projects.find((p) => p.targetDir === selectedDir) ?? null,
+    [projects, selectedDir],
+  );
+  // Git projects are addressed by id — their checkout path is managed for you.
+  const isGitSelected = selectedProject?.source === "git";
+
   const refresh = useCallback(() => {
     fetch("/api/runs")
       .then((r) => r.json())
@@ -80,11 +87,11 @@ export default function HomePage() {
       const response = await fetch("/api/runs", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          planText,
-          targetDir: targetDir || selectedDir || "",
-          title,
-        }),
+        body: JSON.stringify(
+          isGitSelected
+            ? { planText, projectId: selectedProject.id, title }
+            : { planText, targetDir: targetDir || selectedDir || "", title },
+        ),
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error ?? "Planning failed.");
@@ -121,14 +128,22 @@ export default function HomePage() {
       <Paper variant="outlined" sx={{ p: 3, mb: 5 }}>
         <Stack spacing={2.5}>
           <TextField
-            label="Target directory"
+            label={isGitSelected ? "Repository" : "Target directory"}
             placeholder="/Users/you/code/my-project"
-            value={targetDir || selectedDir || ""}
+            value={
+              isGitSelected
+                ? `${selectedProject.repoUrl} (${selectedProject.workBranch})`
+                : targetDir || selectedDir || ""
+            }
             onChange={(e) => setTargetDir(e.target.value)}
             fullWidth
             size="small"
-            helperText="Absolute path to the repository the agents will work in."
-            disabled={planning}
+            helperText={
+              isGitSelected
+                ? "Cloned and checked out automatically when the run is planned."
+                : "Absolute path to the repository the agents will work in."
+            }
+            disabled={planning || isGitSelected}
           />
           <TextField
             label="Run title (optional)"
@@ -163,11 +178,17 @@ export default function HomePage() {
               variant="contained"
               onClick={submit}
               disabled={
-                planning || !planText.trim() || !(targetDir.trim() || selectedDir)
+                planning ||
+                !planText.trim() ||
+                !(isGitSelected || targetDir.trim() || selectedDir)
               }
               startIcon={planning ? <CircularProgress size={16} /> : undefined}
             >
-              {planning ? "Planning…" : "Plan this run"}
+              {planning
+              ? isGitSelected
+                ? "Cloning and planning…"
+                : "Planning…"
+              : "Plan this run"}
             </Button>
           </Box>
         </Stack>

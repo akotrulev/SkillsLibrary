@@ -2,7 +2,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { NextResponse } from "next/server";
 import { planRun } from "@/lib/planner";
-import { upsertProject } from "@/lib/projects";
+import { getProject, prepareProject, upsertProject } from "@/lib/projects";
 import { listRuns, saveRun } from "@/lib/store";
 
 export const dynamic = "force-dynamic";
@@ -27,7 +27,13 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  let body: { planText?: string; targetDir?: string; title?: string; maxParallel?: number };
+  let body: {
+    planText?: string;
+    targetDir?: string;
+    projectId?: string;
+    title?: string;
+    maxParallel?: number;
+  };
   try {
     body = await request.json();
   } catch {
@@ -35,11 +41,36 @@ export async function POST(request: Request) {
   }
 
   const planText = body.planText?.trim();
-  const targetDirRaw = body.targetDir?.trim();
-
   if (!planText) {
     return NextResponse.json({ error: "A plan is required." }, { status: 400 });
   }
+
+  // A git-backed project is addressed by id: clone/fetch it, then plan against
+  // the checkout rather than a path the user had to know.
+  if (body.projectId) {
+    const project = await getProject(body.projectId);
+    if (!project) {
+      return NextResponse.json({ error: "Project not found." }, { status: 404 });
+    }
+    try {
+      const workDir = await prepareProject(project);
+      const run = await planRun({
+        planText,
+        targetDir: workDir,
+        title: body.title,
+        maxParallel: body.maxParallel,
+      });
+      await saveRun(run);
+      return NextResponse.json(run, { status: 201 });
+    } catch (error) {
+      return NextResponse.json(
+        { error: error instanceof Error ? error.message : "Planning failed." },
+        { status: 500 },
+      );
+    }
+  }
+
+  const targetDirRaw = body.targetDir?.trim();
   if (!targetDirRaw) {
     return NextResponse.json({ error: "A target directory is required." }, { status: 400 });
   }

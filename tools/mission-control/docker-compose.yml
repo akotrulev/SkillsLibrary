@@ -1,0 +1,51 @@
+# Mission Control — container setup.
+#
+# Usage:
+#   export ANTHROPIC_API_KEY=sk-ant-...
+#   export MC_PROJECTS_ROOT=/Users/you/code     # parent dir of your projects
+#   docker compose up --build
+#
+# Then open http://localhost:4300
+#
+# Why MC_PROJECTS_ROOT is mounted at the SAME path inside the container:
+# you type absolute host paths into the UI (e.g. /Users/you/code/my-api), and
+# agents log absolute paths back. Mounting host:container at an identical path
+# means those paths resolve on both sides and nothing has to be translated.
+
+services:
+  mission-control:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: mission-control:latest
+    ports:
+      - "4300:4300"
+    environment:
+      # First match wins: API key, or mount a credentials dir (see below).
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      MISSION_CONTROL_LIBRARY_ROOT: /library
+      MISSION_CONTROL_DATA_DIR: /data
+      MISSION_CONTROL_MAX_PARALLEL: ${MC_MAX_PARALLEL:-3}
+      # Encrypts per-project GitHub tokens at rest. Without it, tokens can only
+      # come from MISSION_CONTROL_GIT_TOKEN below.
+      MISSION_CONTROL_SECRET: ${MISSION_CONTROL_SECRET:-}
+      # Optional fallback credential for projects with no token of their own.
+      MISSION_CONTROL_GIT_TOKEN: ${MISSION_CONTROL_GIT_TOKEN:-}
+    volumes:
+      # The SkillsLibrary — read-only, the catalog only ever reads it.
+      - ../..:/library:ro
+
+      # Your projects, mounted at their real host path so UI paths just work.
+      - ${MC_PROJECTS_ROOT:?set MC_PROJECTS_ROOT to the parent dir of your projects}:${MC_PROJECTS_ROOT}
+
+      # Runs, projects and the catalog cache — survives container replacement.
+      - mission-control-data:/data
+
+      # Optional: reuse your host Claude Code login instead of an API key.
+      # - ${HOME}/.claude:/root/.claude
+
+    # Agents can run long; do not let a health check reap them.
+    stop_grace_period: 30s
+
+volumes:
+  mission-control-data:

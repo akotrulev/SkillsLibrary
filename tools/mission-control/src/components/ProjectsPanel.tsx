@@ -1,24 +1,32 @@
 "use client";
 
 import { useState } from "react";
+import VpnKeyIcon from "@mui/icons-material/VpnKey";
 import {
   Box,
   Button,
   Chip,
+  Collapse,
   IconButton,
   Paper,
   Stack,
   Switch,
   TextField,
+  ToggleButton,
+  ToggleButtonGroup,
   Tooltip,
   Typography,
 } from "@mui/material";
+import { GitHubAccess } from "./GitHubAccess";
 
 export interface ProjectRow {
   id: string;
   name: string;
   targetDir: string;
   enabled: boolean;
+  source: "local" | "git";
+  repoUrl?: string;
+  workBranch?: string;
   runCount: number;
   activeRunCount: number;
 }
@@ -38,10 +46,48 @@ interface Props {
  */
 export function ProjectsPanel({ projects, selectedDir, onSelect, onChanged }: Props) {
   const [adding, setAdding] = useState(false);
+  const [mode, setMode] = useState<"local" | "git">("local");
   const [dir, setDir] = useState("");
+  const [repoUrl, setRepoUrl] = useState("");
   const [name, setName] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
+  /** Which project has its GitHub access section open. */
+  const [keyOpenId, setKeyOpenId] = useState<string | null>(null);
+
+  /** Commit + push a git project's work branch. */
+  async function pushWork(project: ProjectRow) {
+    setBusyId(project.id);
+    setError(null);
+    setNotice(null);
+    try {
+      const commit = await fetch(`/api/projects/${project.id}/git`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "commit" }),
+      }).then((r) => r.json());
+      if (commit.error) throw new Error(commit.error);
+
+      const push = await fetch(`/api/projects/${project.id}/git`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "push" }),
+      }).then((r) => r.json());
+      if (push.error) throw new Error(push.error);
+
+      setNotice(
+        commit.committed
+          ? `Committed and pushed ${project.workBranch}.`
+          : `Nothing new to commit; pushed ${project.workBranch}.`,
+      );
+      onChanged();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Push failed.");
+    } finally {
+      setBusyId(null);
+    }
+  }
 
   async function toggle(project: ProjectRow) {
     setBusyId(project.id);
@@ -59,10 +105,12 @@ export function ProjectsPanel({ projects, selectedDir, onSelect, onChanged }: Pr
 
   async function add() {
     setError(null);
+    const payload =
+      mode === "git" ? { repoUrl, name } : { targetDir: dir, name };
     const response = await fetch("/api/projects", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ targetDir: dir, name }),
+      body: JSON.stringify(payload),
     });
     if (!response.ok) {
       const data = await response.json().catch(() => ({}));
@@ -70,6 +118,7 @@ export function ProjectsPanel({ projects, selectedDir, onSelect, onChanged }: Pr
       return;
     }
     setDir("");
+    setRepoUrl("");
     setName("");
     setAdding(false);
     onChanged();
@@ -89,30 +138,66 @@ export function ProjectsPanel({ projects, selectedDir, onSelect, onChanged }: Pr
       </Stack>
 
       {adding && (
-        <Stack direction={{ xs: "column", sm: "row" }} spacing={1} sx={{ mb: 2 }}>
-          <TextField
+        <Box sx={{ mb: 2 }}>
+          <ToggleButtonGroup
             size="small"
-            label="Directory"
-            placeholder="/Users/you/code/project"
-            value={dir}
-            onChange={(e) => setDir(e.target.value)}
-            fullWidth
-          />
-          <TextField
-            size="small"
-            label="Name (optional)"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
-          <Button variant="contained" onClick={add} disabled={!dir.trim()}>
-            Add
-          </Button>
-        </Stack>
+            exclusive
+            value={mode}
+            onChange={(_e, v) => v && setMode(v)}
+            sx={{ mb: 1.5 }}
+          >
+            <ToggleButton value="local">Local directory</ToggleButton>
+            <ToggleButton value="git">GitHub repo</ToggleButton>
+          </ToggleButtonGroup>
+
+          <Stack direction={{ xs: "column", sm: "row" }} spacing={1}>
+            {mode === "local" ? (
+              <TextField
+                size="small"
+                label="Directory"
+                placeholder="/Users/you/code/project"
+                value={dir}
+                onChange={(e) => setDir(e.target.value)}
+                fullWidth
+              />
+            ) : (
+              <TextField
+                size="small"
+                label="Repository URL"
+                placeholder="https://github.com/owner/repo.git"
+                value={repoUrl}
+                onChange={(e) => setRepoUrl(e.target.value)}
+                fullWidth
+                helperText="Cloned into a managed workspace; work lands on its own branch."
+              />
+            )}
+            <TextField
+              size="small"
+              label="Name (optional)"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
+            <Button
+              variant="contained"
+              onClick={add}
+              disabled={mode === "local" ? !dir.trim() : !repoUrl.trim()}
+              sx={{ alignSelf: "flex-start" }}
+            >
+              Add
+            </Button>
+          </Stack>
+        </Box>
       )}
 
       {error && (
         <Typography variant="caption" color="error" sx={{ display: "block", mb: 1 }}>
           {error}
+        </Typography>
+      )}
+
+      {notice && (
+        <Typography variant="caption" color="success.main" sx={{ display: "block", mb: 1 }}>
+          {notice}
         </Typography>
       )}
 
@@ -128,15 +213,12 @@ export function ProjectsPanel({ projects, selectedDir, onSelect, onChanged }: Pr
               <Box
                 key={project.id}
                 sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 1.5,
-                  p: 1,
                   borderRadius: 1,
                   bgcolor: selected ? "rgba(76,141,255,0.12)" : "transparent",
                   "&:hover": { bgcolor: "rgba(255,255,255,0.04)" },
                 }}
               >
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, p: 1 }}>
                 <Tooltip
                   title={
                     project.enabled
@@ -160,10 +242,41 @@ export function ProjectsPanel({ projects, selectedDir, onSelect, onChanged }: Pr
                     {project.name}
                   </Typography>
                   <Typography variant="caption" color="text.secondary" noWrap>
-                    {project.targetDir}
+                    {project.source === "git"
+                      ? `${project.repoUrl} · ${project.workBranch}`
+                      : project.targetDir}
                   </Typography>
                 </Box>
 
+                {project.source === "git" && (
+                  <Tooltip title="GitHub access for this project">
+                    <IconButton
+                      size="small"
+                      color={keyOpenId === project.id ? "primary" : "default"}
+                      onClick={() =>
+                        setKeyOpenId(keyOpenId === project.id ? null : project.id)
+                      }
+                    >
+                      <VpnKeyIcon fontSize="small" />
+                    </IconButton>
+                  </Tooltip>
+                )}
+                {project.source === "git" && (
+                  <Tooltip title="Commit everything in the workspace and push the work branch">
+                    <span>
+                      <Button
+                        size="small"
+                        onClick={() => pushWork(project)}
+                        disabled={busyId === project.id}
+                      >
+                        Push
+                      </Button>
+                    </span>
+                  </Tooltip>
+                )}
+                {project.source === "git" && (
+                  <Chip size="small" variant="outlined" label="git" />
+                )}
                 {project.activeRunCount > 0 && (
                   <Chip size="small" color="primary" label={`${project.activeRunCount} active`} />
                 )}
@@ -171,6 +284,13 @@ export function ProjectsPanel({ projects, selectedDir, onSelect, onChanged }: Pr
                   {project.runCount} run{project.runCount === 1 ? "" : "s"}
                 </Typography>
                 {!project.enabled && <Chip size="small" label="paused" />}
+              </Box>
+
+              {project.source === "git" && (
+                <Collapse in={keyOpenId === project.id} unmountOnExit>
+                  <GitHubAccess projectId={project.id} repoUrl={project.repoUrl} />
+                </Collapse>
+              )}
               </Box>
             );
           })}

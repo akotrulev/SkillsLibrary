@@ -131,8 +131,19 @@ export async function startRun(runId: string): Promise<void> {
       );
 
       if (pending.length === 0) {
-        // Nothing left to do here; the phase finder moves on next iteration.
-        continue;
+        // The phase finder counts `review` as unfinished but nothing here can
+        // dispatch it — it is waiting on a human. Looping would spin hot, so
+        // stop and hand the run back.
+        const awaiting = phaseTasks.filter((t) => t.status === "review");
+        await updateRun(runId, (r) => {
+          r.status = "paused";
+          r.error =
+            awaiting.length > 0
+              ? `Phase "${phase.name}" is waiting on review of: ${awaiting.map((t) => t.id).join(", ")}.`
+              : `Phase "${phase.name}" has no dispatchable work left.`;
+        });
+        await publishRun(runId);
+        return;
       }
 
       const dispatchable = pending.filter((t) => isDispatchable(current, t));

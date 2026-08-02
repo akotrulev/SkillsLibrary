@@ -55,6 +55,8 @@ export interface Catalog {
   candidateCount: number;
   /** Files that could not be read; each is an entry missing from the catalog. */
   unreadable: string[];
+  /** Files read fine but with no frontmatter `name`, so nothing can address them. */
+  malformed: string[];
   indexedAt: string;
 }
 

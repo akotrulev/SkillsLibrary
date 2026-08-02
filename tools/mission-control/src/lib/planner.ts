@@ -1,8 +1,10 @@
 import { randomUUID } from "node:crypto";
 import { query } from "@anthropic-ai/claude-agent-sdk";
 import { z } from "zod";
+import { agentEnv } from "./agent-env";
 import { getCatalog } from "./catalog";
 import { DEFAULT_MAX_PARALLEL, LIBRARY_ROOT, PLANNER_MODEL } from "./config";
+import { validatePlan } from "./plan-validation";
 import { plannerSystemPrompt, plannerUserPrompt } from "./prompts";
 import type { Run } from "./types";
 
@@ -114,6 +116,7 @@ export async function planRun(request: PlanRequest): Promise<Run> {
       // Ignore the target repo's own agents/settings so planning is reproducible.
       settingSources: [],
       maxTurns: 60,
+      env: agentEnv(),
     },
   })) {
     if (message.type === "result") {
@@ -127,6 +130,15 @@ export async function planRun(request: PlanRequest): Promise<Run> {
   if (!finalText.trim()) throw new Error("Planner returned an empty response.");
 
   const plan = PlanSchema.parse(extractJson(finalText));
+
+  // Structural consistency. These are planning errors that would otherwise be
+  // silent: an orphaned task never runs, and a duplicate id misroutes state.
+  const problems = validatePlan(plan);
+  if (problems.length > 0) {
+    throw new Error(
+      `Planner produced an inconsistent plan:\n- ${problems.join("\n- ")}`,
+    );
+  }
 
   // Bind the plan to the catalog: an unknown agent is a planning error we want
   // surfaced now, not at dispatch time.
