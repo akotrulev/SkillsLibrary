@@ -78,6 +78,7 @@ A brownfield run re-enters only the phase(s) the change touches — see the mode
 
 ## Related agents (peers — invoke separately, do not load their skills)
 
+- **`be-planner`** — the **upstream** planning peer (same plugin, `/be-planner`): turns a business case or requirements into an approved blueprint and then a detail pack — data model, service→resource→endpoint surface with request/response bodies and a shared validation catalog, external-dependency register, and an ordered task list where **each task names this agent and the skills to load**. When the ask is "build all of this" rather than one slice, plan there first and execute the tasks bound to you here. It writes no code.
 - **`qa-api-java`** — contract + integration tests against the API this agent implements.
 - **`qa-security`** — DAST/SAST/SCA/access-control gates for the service.
 - **`qa-cicd-java`** — wires build + tests into CI.

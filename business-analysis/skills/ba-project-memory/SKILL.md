@@ -30,6 +30,8 @@ Lives **in the target repo**, versioned with the code, diffable and PR-reviewabl
 docs/business-model/
 ├── INDEX.md              # loaded first, every session — one line per artifact + relevance hook
 ├── glossary.md           # canonical terms; the terminology-drift defense
+├── system-overview.md    # what the system is, for whom, the area map + cross-area journeys — owned by be-shared-business-documentation
+├── areas/<area>.md       # one functional area per file (AREA-nnn): capabilities, actors, use cases, rules — owned by be-shared-business-documentation
 ├── flows/<flow>.md       # one business flow per file (FLOW-nnn) — owned by ba-process-flow-diagram
 ├── entities/<entity>.md  # one state model per business entity (ENT-nnn) — owned by ba-entity-state-grid
 ├── decisions/<point>.md  # one merged decision table per shared decision point (DEC-nnn) — owned by ba-decision-table
@@ -41,7 +43,7 @@ docs/business-model/
 
 | Tier | Files | Changes |
 |---|---|---|
-| **Stable** | `glossary.md`, `flows/`, `entities/`, `decisions/`, `interaction-map.md` | deliberately, when the business model actually changes |
+| **Stable** | `glossary.md`, `system-overview.md`, `areas/`, `flows/`, `entities/`, `decisions/`, `interaction-map.md` | deliberately, when the business model actually changes |
 | **Dynamic** | `active-context.md` (+ the INDEX line-items) | every session that touches the model |
 
 ## The contract
@@ -67,7 +69,7 @@ Re-read **all** files, reconcile drift against the current requirements/codebase
 
 - **Size discipline.** Any file approaching ~2,000 words splits by topic; `INDEX.md` stays one line per artifact. Critical facts near the top of each file.
 - **Short declarative statements**, not essays. "Refunds allowed within 30 days (BRD §6)" — not a paragraph.
-- **Stable IDs + traceability.** Every artifact carries an ID (`FLOW-`, `ENT-`, `DEC-`, `CONF-` + number); flow nodes are `FLOW-nnn.k`, decision-table rule rows are table-local `R1, R2…` under their `DEC-` id. Everything cites its source requirement (story ID, BRD section, contract path). IDs are never reused after deletion.
+- **Stable IDs + traceability.** Every artifact carries an ID (`AREA-`, `FLOW-`, `ENT-`, `DEC-`, `CONF-` + number); flow nodes are `FLOW-nnn.k`, decision-table rule rows are table-local `R1, R2…` under their `DEC-` id. Everything cites its source requirement (story ID, BRD section, contract path). IDs are never reused after deletion.
 - **Annotation grammar** (uniform across artifacts):
   - `[TBD - reason]` — known unknown, waiting on a decision
   - `⚠️ Assumption:` — stated but unconfirmed; must be resolvable to a source or removed at refresh
@@ -75,7 +77,7 @@ Re-read **all** files, reconcile drift against the current requirements/codebase
   - Confidence tags: `#confirmed` (sourced to a requirement/stakeholder decision) · `#inferred` (derived by analysis, plausible but unverified) · `#observed` (seen in the live system, not in any doc)
 - **Record decisions with rationale.** A conflict resolution in `interaction-map.md` is a *business decision* — record who/what decided and why, not just the outcome.
 - **Skip what the repo already records.** Code structure, API shapes derivable from contracts in-repo, git history. The KB records what the software must *do* and how features *interact* — nothing else.
-- **Header on every artifact file.** Each `flows/<flow>.md`, `entities/<entity>.md`, `decisions/<point>.md` file opens with `**Created:** <YYYY-MM-DD>` and `**Owned by:** \`<the ba-* skill>\`` (e.g. `ba-process-flow-diagram`); on every later update, add `**Last updated:** <YYYY-MM-DD> by \`<skill>\`` beneath it rather than overwriting the creation line.
+- **Header on every artifact file.** Each `areas/<area>.md`, `flows/<flow>.md`, `entities/<entity>.md`, `decisions/<point>.md` file opens with `**Created:** <YYYY-MM-DD>` and `**Owned by:** \`<the ba-* skill>\`` (e.g. `ba-process-flow-diagram`); on every later update, add `**Last updated:** <YYYY-MM-DD> by \`<skill>\`` beneath it rather than overwriting the creation line.
 
 ## INDEX.md format
 
@@ -84,6 +86,8 @@ Re-read **all** files, reconcile drift against the current requirements/codebase
 
 Read this file first, every session. One line per artifact; read the ones your task touches.
 
+## Areas
+- [Ordering](areas/ordering.md) — AREA-003; place/cancel/track orders; actors: customer, support agent · derived from code
 ## Entities
 - [Order](entities/order.md) — ENT-001; lifecycle Draft→…→Refunded; owners: checkout, fulfillment, refunds
 ## Flows
@@ -93,6 +97,7 @@ Read this file first, every session. One line per artifact; read the ones your t
 ## Cross-cutting
 - [Glossary](glossary.md) — canonical terms; "customer" ≠ "account" here
 - [Interaction map](interaction-map.md) — 4 resolved conflicts, 1 open (CONF-005)
+- [System overview](system-overview.md) — 6 areas, 3 cross-area journeys; 2 areas not yet documented
 - [Active context](active-context.md) — last touched 2026-07-12; 3 open questions
 ```
 
@@ -101,8 +106,20 @@ Read this file first, every session. One line per artifact; read the ones your t
 When no `docs/business-model/` exists and the user wants one:
 
 1. Confirm the path (default `docs/business-model/`; respect an existing docs convention if the project has one).
-2. Create `INDEX.md`, `glossary.md`, `active-context.md`, `interaction-map.md` with headers and empty sections — plus the three directories.
+2. Create `INDEX.md`, `glossary.md`, `active-context.md`, `interaction-map.md` with headers and empty sections — plus the `areas/`, `flows/`, `entities/`, `decisions/` directories.
 3. Do **not** backfill the whole model speculatively. The KB accretes as features are analyzed; seed it only with what the current task's analysis actually produces.
+
+**The one exception — evidence-based backfill from code.** The `be-documenter` agent deliberately populates the KB in bulk by reading an existing implementation. That does not violate the rule above, because the rule forbids *speculation*, not *volume*: every statement it writes is `#observed` with a `file:line` read that session, or `#inferred` and simultaneously raised as an open question. It never writes `#confirmed` — promotion is a human act — and it never overwrites a `#confirmed` entry, since a human's confirmation outranks a trace. See `backend/_shared/business-documentation`.
+
+## Provenance — telling generated from hand-authored
+
+An artifact derived from code rather than from requirements carries, beneath its header:
+
+```markdown
+**Derived from:** code by `be-documenter` @ `<commit sha>` on YYYY-MM-DD
+```
+
+Without it a generated `#inferred` line is indistinguishable from a business decision someone actually made — and the whole value of the KB is that a reader can tell which is which. On refresh, re-verify the citations against the current commit and re-stamp; a `file:line` that has silently drifted is worse than none, because it still looks checkable.
 
 ## Anti-example
 
@@ -117,4 +134,5 @@ Also bad: dumping the full BRD into `flows/` verbatim. The KB is a distilled mod
 - Build/extend a decision table → `business-analysis/skills/ba-decision-table`
 - Sweep a new/changed feature against the model → `business-analysis/skills/ba-feature-conflict-check`
 - Orchestrate the whole loop → `business-analysis/agents/business-analyst`
+- Populate the KB from an existing backend implementation (areas, system overview, and the evidence behind the flows/entities/decisions) → the `be-documenter` agent and `backend/_shared/business-documentation`
 - Distill one story for testing (consumes these artifacts as test basis) → `qa/manual/requirements-breakdown`
