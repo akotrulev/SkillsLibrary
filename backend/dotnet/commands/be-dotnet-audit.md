@@ -17,8 +17,6 @@ Run a **be-dotnet conformance audit** on this repository: sweep the service agai
 
 **Version gate first.** Detect the TFM (net8/9/10, and any mix — a mixed solution is finding A2), the EF Core major, and `Nullable` state before judging anything. Never flag a down-level project for lacking an up-level API, and never propose one as a fix.
 
-Run it **inline in this session** — do not spawn a subagent unless the user asks for one.
-
 **Scope limiter (optional):**
 
 $ARGUMENTS

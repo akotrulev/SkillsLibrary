@@ -19,8 +19,6 @@ Run a **qa-dotnet conformance audit** on this repository: sweep the **test suite
 
 **Tool lane first.** Detect the runner (NUnit / xUnit / MSTest), the UI driver (Playwright .NET / Selenium / Appium / none), the API stack, Reqnroll, Testcontainers, Allure, and the CI host before judging anything. A suite is never in violation for lacking a tool it doesn't use — those rows are N/A. A documented house convention that differs from a plugin default is a **deviation**, not a finding.
 
-Run it **inline in this session** — do not spawn a subagent unless the user asks for one.
-
 **Discipline scope:** if the task below says `api`, `ui`/`fe`/`frontend`, or `mobile`, resolve that to `scope: api | ui | mobile` per the stack skill's **Discipline scope** section and sweep only that discipline's sections (plus the universal ones). Otherwise `scope: all`. State the resolved scope in the announcement and as the first line of the report's §2 Scope & coverage.
 
 **Scope limiter (optional, additional to the discipline scope above):**

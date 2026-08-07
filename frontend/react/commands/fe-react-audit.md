@@ -14,8 +14,6 @@ Run a **fe-react conformance audit** on this repository: sweep the codebase agai
 
 **Evidence is static-first.** Read code, cite `file:line`, tag `#confirmed` / `#inferred`, and name the search behind every negative claim. Only run builds, type-checks, tests, or a live app if the user explicitly opts in for this audit — and let execution corroborate a code trace, never replace it.
 
-Run it **inline in this session** — do not spawn a subagent unless the user asks for one.
-
 **Scope limiter (optional):**
 
 $ARGUMENTS

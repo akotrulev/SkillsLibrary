@@ -1,24 +1,16 @@
 ---
 name: ep-requesting-code-review
-description: Use when you want a completed change reviewed before it cascades — after a major feature, before a merge/PR. Prefer the harness's native review command (e.g. `/code-review`); otherwise dispatch a reviewer subagent (a deliberate spend, not a reflex). Triggers: "review this before I merge", "second pair of eyes on this diff". Do NOT use as a per-task step in `ep-delegate-to-subagents` (its default is inline review) or to act on feedback (`ep-receiving-code-review`).
+description: Use when you want a completed change reviewed before it cascades — after a major feature, before a merge/PR. Prefer the harness's native review command (e.g. `/code-review`); otherwise dispatch a reviewer subagent. Triggers: "review this before I merge", "second pair of eyes on this diff". Do NOT use to act on feedback (`ep-receiving-code-review`).
 ---
 
 # Requesting Code Review
 
-Get a completed change reviewed before issues cascade into more work. Two paths, in preference order:
+Get a completed change reviewed before issues cascade into more work. Two paths:
 
-1. **Native review command (preferred).** If the harness provides a review command (e.g. `/code-review`, `/review`), use it — same "never fight the harness" stance as `ep-worktrees`. It's cheaper than a subagent and integrates with the platform.
-2. **Reviewer subagent (fallback).** When no native command fits — or you need independent verification with curated context — dispatch a reviewer subagent. The reviewer gets precisely-crafted context, never your session's history, which keeps it focused on the work product and preserves your own context.
+1. **Native review command.** If the harness provides a review command (e.g. `/code-review`, `/review`), use it — same "never fight the harness" stance as `ep-worktrees`; it integrates with the platform.
+2. **Reviewer subagent.** The reviewer gets precisely-crafted context, never your session's history, which keeps it focused on the work product and preserves your own context.
 
-**Core principle:** Review before it compounds — but weigh the cost. A reviewer subagent is an extra invocation.
-
-## Cost gate (read before dispatching a subagent)
-
-This skill is governed by the library's conservative agent-spawning policy (see `ep-parallel-agents` / `ep-delegate-to-subagents`):
-
-- **In `ep-delegate-to-subagents`, inline controller review is the default** — the controller reviews the implementer's diff itself (spec compliance THEN code quality, per that skill's rubric). A *separate* reviewer subagent is an **escalation** — one more invocation on top of the implementer, so spend it deliberately.
-- **For ad-hoc work** (no subagents in flight), a single reviewer subagent is one agent — fine to offer, but still weigh it against just reviewing inline yourself. When inline review would do, do it inline.
-- **Never** treat review-by-subagent as "mandatory after each task". It is not.
+**Core principle:** Review before it compounds.
 
 ## When to Request Review
 
@@ -28,7 +20,7 @@ This skill is governed by the library's conservative agent-spawning policy (see 
 - After fixing a complex or subtle bug
 - When stuck and a fresh perspective would help
 
-**How to review it** (in preference order): native review command → inline self-review (controller rubric) → reviewer subagent (a deliberate extra invocation).
+**How to review it:** a native review command, a self-review against the controller rubric, or a reviewer subagent.
 
 ## How to Request (reviewer-subagent path)
 
@@ -79,11 +71,11 @@ You: [Hand findings to ep-receiving-code-review; fix major, note minor, continue
 
 ## Integration with Workflows
 
-**`ep-delegate-to-subagents`:** the controller reviews **inline** by default. Reach for this skill as the escalation to a dedicated reviewer subagent, when the task earns the extra invocation.
+**`ep-delegate-to-subagents`:** reach for this skill for the per-task review of an implementer's diff.
 
-**`ep-executing-plans`:** at a natural checkpoint or before finishing, review the accumulated diff — native command first, inline second, subagent only if it earns its cost.
+**`ep-executing-plans`:** at a natural checkpoint or before finishing, review the accumulated diff.
 
-**`ep-finish-branch`:** before Option 1 (merge) or Option 2 (PR), a review pass is worthwhile — again, native command → inline → subagent.
+**`ep-finish-branch`:** before Option 1 (merge) or Option 2 (PR), a review pass is worthwhile.
 
 **Receiving the feedback:** always route the reviewer's output through `ep-receiving-code-review` (verify before implementing, push back with reasoning, no performative agreement).
 
@@ -94,8 +86,6 @@ You: [Hand findings to ep-receiving-code-review; fix major, note minor, continue
 - Ignore **blocker** issues
 - Proceed with unfixed **major** issues
 - Argue with valid technical feedback (evaluate it via `ep-receiving-code-review`)
-- Spawn a reviewer subagent by reflex when the native command or an inline self-review would have done
-- Reach for a subagent when a native review command or your own inline review would do
 
 **If the reviewer is wrong:**
 - Push back with technical reasoning

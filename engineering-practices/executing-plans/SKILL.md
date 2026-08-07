@@ -11,8 +11,6 @@ Load plan, review critically, execute task-by-task, report at each checkpoint, a
 
 **Announce at start:** "I'm using the `ep-executing-plans` skill to implement this plan."
 
-**This is the default execution path (inline, cost before speed).** A subagent-based alternative — `ep-delegate-to-subagents` — exists for the rare case where delegation clearly pays for itself and the user asks for it; it is governed by the cost-before-speed policy. Unless both are true, stay here.
-
 ## The Process
 
 ### Step 1: Load and Review Plan
@@ -87,5 +85,5 @@ After all tasks complete and verified:
 - **`ep-writing-plans`** - Creates the plan this skill executes
 - **`ep-finish-branch`** - Complete development after all tasks
 
-**Opt-in alternative:**
-- **`ep-delegate-to-subagents`** - subagent execution when delegation pays for itself (cost-aware); not the default
+**Alternative:**
+- **`ep-delegate-to-subagents`** - execute the plan's tasks through subagents instead

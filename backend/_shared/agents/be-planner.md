@@ -131,7 +131,7 @@ Artifacts land in **`docs/plans/<NNN>-<initiative>/`** under the **target projec
 | 5 | Delivery plan | Ordered phases and tasks, parallel-safety calls, agent + skills + files + deps + AC per task, the handoff loop | `backend/_shared/delivery-plan` | `delivery-plan.md` + `HANDOFF.md` saved; every task binds to an **exact** catalog agent name; foundations precede slices; the pack is Mission-Control-ingestible |
 | 6 | Self-review | Coverage and consistency sweep of the pack | — | The coverage table below shows no gaps; zero placeholders; every cited agent/skill name resolves |
 
-**Phase 6 is a checklist you run yourself, not a subagent dispatch:**
+**Phase 6 is a checklist you run yourself:**
 
 1. **Area coverage** — every functional area in `blueprint.md` maps to ≥1 task in `delivery-plan.md`. List any that don't.
 2. **Endpoint↔model consistency** — every field in an `api-surface.md` request/response resolves to a column, a computed value, or a named external source in `data-model.md` or `integrations.md`. Every table in `data-model.md` is written or read by something.

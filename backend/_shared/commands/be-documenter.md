@@ -15,8 +15,6 @@ Adopt the **`be-documenter` senior business analyst (reverse documentation)** ro
 - **Never invent a purpose.** Separate what the code *does* (`#observed`, with `file:line` read this session) from what it is probably *for* (`#inferred`). Never write `#confirmed` — that promotion is a human act. Every `#inferred` intent is also an open question for the business.
 - **Phase 1 blocks.** Present the functional-area split and the reading plan, and **wait for confirmation** before tracing. Area names derived from code are the most likely thing to be wrong, and every downstream artifact is filed under them.
 
-Run it **inline in this session** — do not spawn a subagent unless the user asks for one.
-
 **The task:**
 
 $ARGUMENTS

@@ -10,8 +10,6 @@ Adopt the **`devops-engineer` senior DevOps / platform engineer** role for this 
 3. **Run the gate first (Phases 0 and 1), always.** Inspect the repo read-only, derive the workload shape and what it requires, present the proposed tool stack as a table with each row marked `detected` / `stated` / `proposed`, and **ask the user to confirm or adjust before loading a single `SKILL.md`**. Every `proposed` row needs an explicit answer.
 4. Only after confirmation, load the `SKILL.md` files the confirmed stack selects (the gate's selection map) **before** producing anything those skills cover. Do not improvise infrastructure the skills own, and do not load a skill the confirmed stack didn't select.
 
-Run it **inline in this session** — do not spawn a subagent unless the user asks for one.
-
 **The task:**
 
 $ARGUMENTS

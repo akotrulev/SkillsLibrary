@@ -1,58 +1,29 @@
 ---
 name: ep-delegate-to-subagents
-description: Use only when the user has explicitly asked to execute an implementation plan via subagents, and only when delegation clearly pays for itself — an opt-in, cost-aware alternative to inline `ep-executing-plans`. Triggers: "run this plan with subagents", "delegate each task to an agent". Do NOT use as the default execution path (inline is the default — cost before speed) or for tightly-coupled tasks.
+description: Use when executing an implementation plan by delegating its tasks to subagents — the alternative to running the plan inline with `ep-executing-plans`. Triggers: "run this plan with subagents", "delegate each task to an agent". Do NOT use for tightly-coupled tasks that can't be split cleanly.
 ---
 
-# Subagent-Driven Development (cost-aware)
+# Subagent-Driven Development
 
-Execute a plan by delegating self-contained tasks to subagents, reviewing each result before moving on. This is the **opt-in, cost-aware** alternative to inline `ep-executing-plans` — reach for it only when delegation clearly pays for itself.
+Execute a plan by delegating self-contained tasks to subagents, reviewing each result before moving on. The alternative to running the plan inline with `ep-executing-plans`.
 
 **Announce at start:** "I'm using the `ep-delegate-to-subagents` skill to execute this plan via subagents."
 
 **Why subagents:** you delegate a task to a specialized agent with isolated context. By precisely crafting its instructions and context, you keep it focused. It should never inherit your session's history — you construct exactly what it needs. This preserves your own context for coordination.
 
-## Conservative agent-spawning policy (governs this whole skill)
+## Ground rules
 
-**Cost before speed.** Inline `ep-executing-plans` is the **default**. Use this skill only when the task is genuinely self-contained *and* context isolation genuinely helps *and* the delegation saves more than it costs. When inline and subagent both work, choose inline.
-
-**Keep the per-task fan-out lean.** Every extra agent is another expensive invocation, so add one only when it buys something the cheaper path can't. By default:
-- **1 agent per task**: dispatch a single implementer subagent, then **review its result inline yourself** (spec compliance + code quality — see the review rubric below). This is the normal path.
-- Dedicated *separate* reviewer subagents (the upstream two-stage fan-out) are an **escalation** — worth it when a task genuinely warrants independent verification, wasteful as a reflex. Say why when you reach for them.
+- **1 agent per task**: dispatch a single implementer subagent, then **review its result yourself** (spec compliance + code quality — see the review rubric below). Dedicated *separate* reviewer subagents are available when a task warrants independent verification.
 - Never dispatch implementation subagents in parallel (they conflict on the working tree — see `ep-parallel-agents` for the worktree escape hatch).
+- Once dispatch is under way, keep executing without pausing for "should I continue?" check-ins. Stop only for BLOCKED you can't resolve, genuine ambiguity, or all tasks complete.
 
-This is about *spend*, not task progress — once the spawn decision is made, continue executing without pausing for "should I continue?" check-ins. Stop only for BLOCKED you can't resolve, genuine ambiguity, or all tasks complete.
+## When it fits
 
-## When to Use
-
-Default to inline `ep-executing-plans`. Only branch to this skill when *all* the gates below pass.
-
-```dot
-digraph when_to_use {
-    "User explicitly asked for subagents?" [shape=diamond];
-    "Tasks self-contained + context-heavy?" [shape=diamond];
-    "Delegation pays for itself (cost > speed)?" [shape=diamond];
-    "ep-executing-plans (inline, default)" [shape=box];
-    "ep-delegate-to-subagents" [shape=box];
-
-    "User explicitly asked for subagents?" -> "ep-executing-plans (inline, default)" [label="no"];
-    "User explicitly asked for subagents?" -> "Tasks self-contained + context-heavy?" [label="yes"];
-    "Tasks self-contained + context-heavy?" -> "ep-executing-plans (inline, default)" [label="no - coupled/light"];
-    "Tasks self-contained + context-heavy?" -> "Delegation pays for itself (cost > speed)?" [label="yes"];
-    "Delegation pays for itself (cost > speed)?" -> "ep-executing-plans (inline, default)" [label="no"];
-    "Delegation pays for itself (cost > speed)?" -> "ep-delegate-to-subagents" [label="yes"];
-}
-```
-
-**When it earns its cost (vs. inline `ep-executing-plans`):**
 - A task carries a lot of exploration context that would pollute your coordination context
 - The task is genuinely self-contained (clear spec, isolated files)
 - Isolated context measurably improves the result
 
-**When it does not** — most plans. If in doubt, run inline; it is cheaper and simpler.
-
-## The Process (default: 1 agent per task + inline review)
-
-Under the spawn policy, the normal per-task flow dispatches **one** implementer subagent and then **you (the controller) review its result inline**. Dedicated separate reviewer subagents are an escalation — reach for them when a task warrants independent verification, not by reflex.
+## The Process (1 agent per task + controller review)
 
 ```dot
 digraph process {
@@ -90,9 +61,9 @@ digraph process {
 }
 ```
 
-**Escalation:** if a task genuinely warrants dedicated reviewer subagents rather than your inline review — deeper independent verification — dispatch using `./spec-reviewer-prompt.md` and `./code-quality-reviewer-prompt.md`, and say why the extra invocations are worth it. Same for a final whole-implementation review agent.
+For deeper independent verification on a task, dispatch dedicated reviewer subagents using `./spec-reviewer-prompt.md` and `./code-quality-reviewer-prompt.md`. Same for a final whole-implementation review agent.
 
-### Inline review rubric (controller, no extra agent)
+### Controller review rubric
 
 Review the implementer's diff yourself, in this order:
 1. **Spec compliance** — read the actual code (don't trust the report): everything requested is present, nothing extra/over-built, no misinterpretation. Report `file:line` gaps.
@@ -141,7 +112,7 @@ Implementer subagents report one of four statuses. Handle each appropriately:
 
 ## Example Workflow
 
-> The example below depicts the **escalation** (separate spec + code reviewer subagents). The default path reviews inline instead — see The Process above.
+> The example below depicts the variant with separate spec + code reviewer subagents; the shorter path has the controller review the diff itself — see The Process above.
 
 ```
 You: I'm using ep-delegate-to-subagents to execute this plan.
@@ -217,27 +188,24 @@ Final reviewer: All requirements met, ready to merge
 Done!
 ```
 
-## When it pays off (and what it costs)
+## What you gain and what it costs
 
-**What you gain when the cost check passes:**
+**What you gain:**
 - Isolated context per task keeps a heavy task from polluting your coordination context
 - The controller curates exactly the context the subagent needs (no file-reading overhead in the subagent)
 - The subagent can ask clarifying questions before and during work
-- Quality gates: subagent self-review + your inline spec-then-quality review, with fix loops
+- Quality gates: subagent self-review + your spec-then-quality review, with fix loops
 
-**What it costs (why inline is the default):**
-- Extra model invocations (at minimum an implementer per task; more if you escalate to reviewer agents)
+**What it costs:**
+- Extra model invocations (at minimum an implementer per task; more with reviewer agents)
 - Controller prep work (extracting every task's full text upfront)
 - Review/fix loops add iterations
-- For most plans this is more expensive than doing the work inline with `ep-executing-plans`. It only wins when the isolation genuinely helps.
 
 ## Red Flags
 
 **Never:**
-- Fan out to extra agents by reflex rather than because the task earns them (cost before speed)
-- Reach for this skill when inline `ep-executing-plans` would do (cost before speed)
 - Start implementation on main/master branch without explicit user consent
-- Skip reviews (spec compliance OR code quality — inline by default)
+- Skip reviews (spec compliance OR code quality)
 - Proceed with unfixed issues
 - Dispatch multiple implementation subagents in parallel (conflicts)
 - Make subagent read plan file (provide full text instead)
@@ -271,15 +239,15 @@ Done!
 - **`ep-writing-plans`** - Creates the plan this skill executes
 - **`ep-finish-branch`** - Complete development after all tasks
 
-**Review format:** the controller's inline review (and any escalated reviewer subagent) reports findings in the CLAUDE.md severity-table format (`| Severity | Location | Issue | Suggested fix |`) and points to the fix rather than rewriting.
+**Review format:** the controller's review (and any reviewer subagent) reports findings in the CLAUDE.md severity-table format (`| Severity | Location | Issue | Suggested fix |`) and points to the fix rather than rewriting.
 
 **Subagents should use:**
 - **`ep-test-driven-development`** - Subagents follow TDD for each task
 
 **Code review:**
-- **`ep-requesting-code-review`** - the controller's **inline** review (spec-then-quality, above) is the default per-task path. A *dedicated reviewer subagent* is the escalation — one more invocation on top of the implementer, so spend it deliberately. This skill carries the reviewer prompt + native-command-first guidance.
+- **`ep-requesting-code-review`** - the per-task review path: the controller's own spec-then-quality review (above), or a dedicated reviewer subagent. Carries the reviewer prompt + native-command-first guidance.
 - **`ep-receiving-code-review`** - how the controller (or a re-dispatched implementer) acts on the findings: verify before implementing, fix by severity, push back with reasoning.
 
-**Default / alternative workflow:**
-- **`ep-executing-plans`** - the default inline execution path; use this unless subagent delegation clearly pays for itself
-- **`ep-parallel-agents`** - for independent parallel problems (same cost-before-speed policy applies)
+**Alternative workflow:**
+- **`ep-executing-plans`** - the inline execution path for the same plan
+- **`ep-parallel-agents`** - for independent parallel problems

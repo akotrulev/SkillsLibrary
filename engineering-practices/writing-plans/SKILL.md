@@ -55,7 +55,7 @@ This structure informs the task decomposition. Each task should produce self-con
 
 **Date:** [YYYY-MM-DD] · **Written by:** `ep-writing-plans`
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use `ep-executing-plans` (inline, the default) to implement this plan task-by-task. Only if delegation clearly pays for itself and the user asks for it, use `ep-delegate-to-subagents` (cost-aware). Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use `ep-executing-plans` to implement this plan task-by-task, or `ep-delegate-to-subagents` to run its tasks through subagents. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** [One sentence describing what this builds]
 
@@ -127,7 +127,7 @@ Every step must contain the actual content an engineer needs. These are **plan f
 
 ## Self-Review
 
-After writing the complete plan, look at the spec with fresh eyes and check the plan against it. This is a checklist you run yourself — not a subagent dispatch.
+After writing the complete plan, look at the spec with fresh eyes and check the plan against it.
 
 **1. Spec coverage:** Skim each section/requirement in the spec. Can you point to a task that implements it? List any gaps.
 
@@ -137,15 +137,13 @@ After writing the complete plan, look at the spec with fresh eyes and check the 
 
 If you find issues, fix them inline. No need to re-review — just fix and move on. If you find a spec requirement with no task, add the task.
 
-**Escalation:** the self-review above is the default. For a large or high-stakes plan you may dispatch a dedicated reviewer subagent using the template at `./plan-document-reviewer-prompt.md` (it checks completeness, spec alignment, task decomposition, buildability). This is one extra invocation — weigh it against the plan's stakes per the cost-before-speed policy in `ep-delegate-to-subagents`; don't dispatch it by reflex.
+For a large or high-stakes plan, a dedicated reviewer pass is available — the template at `./plan-document-reviewer-prompt.md` checks completeness, spec alignment, task decomposition, and buildability.
 
 ## Execution Handoff
 
-After saving the plan, hand off to execution. **Default to inline execution — cost before speed.**
+After saving the plan, hand off to execution.
 
 **"Plan complete and saved to `docs/plans/<filename>.md`. Ready to implement it task-by-task with checkpoints for review?"**
 
-- **Default — Inline execution (recommended):** use `ep-executing-plans`. Batch execution with checkpoints for review. Cheaper and simpler; the right choice for almost every plan.
-- **Opt-in — Subagent execution:** use `ep-delegate-to-subagents` **only** when the user asks for it and delegation clearly pays for itself (self-contained, context-heavy tasks). It is governed by the cost-before-speed policy — each extra agent is a deliberate spend, not a default.
-
-Do not offer the subagent path as "faster/better" — it is the cost-aware exception, not the default.
+- **Inline execution:** use `ep-executing-plans`. Batch execution with checkpoints for review.
+- **Subagent execution:** use `ep-delegate-to-subagents`. Self-contained tasks dispatched to implementer agents, each result reviewed before moving on.

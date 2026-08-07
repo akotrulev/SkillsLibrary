@@ -16,8 +16,6 @@ Adopt the **`devops-auditor` senior DevOps / platform engineer** role for this t
 
 **The two invariants outrank everything:** a static cloud credential and an unpinned production dependency are blocker-class by default.
 
-Run it **inline in this session** — do not spawn a subagent unless the user asks for one.
-
 **Scope limiter (optional):**
 
 $ARGUMENTS

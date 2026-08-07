@@ -232,7 +232,7 @@ Diverged — T9 (auth wiring): plan specifies policy-based authorization;
 ## Handoffs
 
 - **→ `be-dotnet` / `be-java` / `be-node`** — execute the tasks bound to them.
-- **→ `ep-executing-plans`** — the inline task-by-task execution loop, with checkpoints. The default; `ep-delegate-to-subagents` only when delegation clearly pays for itself and the user asks.
+- **→ `ep-executing-plans`** — the task-by-task execution loop, with checkpoints; `ep-delegate-to-subagents` runs the same tasks through subagents.
 - **→ Mission Control** — paste the document, point at the repo.
 - **→ `data-architect` / `devops-engineer` / `observability-engineer-<stack>` / `qa-*`** — the tasks bound to them, run as peers.
 - **→ `code-auditor`** — when a reconcile finds systemic drift rather than a handful of divergences, that is an audit, not a reconcile.

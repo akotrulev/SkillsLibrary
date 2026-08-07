@@ -48,7 +48,6 @@ Skill paths below are relative to the SkillsLibrary repo root when working insid
 - **Severities** use the library's standard table (blocker / major / minor / nit); impact qualifiers after the severity are welcome.
 - A red build/test state on arrival is a **finding to report**, not yours to fix.
 - Findings never include applied fixes — direction only, one line, naming who applies it.
-- Conservative fan-out: sweeping a large codebase may use Explore subagents for *locating* candidates (findings still require you to read the evidence yourself); each additional concurrent agent is a deliberate spend, weighed before dispatch.
 
 ## Artifacts — MANDATORY SECTION
 

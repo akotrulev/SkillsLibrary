@@ -253,10 +253,9 @@ git worktree prune  # Self-healing: clean up any stale registrations
 ## Related skills
 
 - **`ep-requesting-code-review`** — before Option 1 (merge) or Option 2 (PR) on a
-  substantial change, a review pass is worthwhile. Prefer a native review command
-  (e.g. `/code-review`), then inline self-review, then a reviewer subagent only if it
-  earns its cost. Reviewing before you merge/open the PR is
-  cheaper than reviewing after.
+  substantial change, a review pass is worthwhile — a native review command
+  (e.g. `/code-review`), a self-review, or a reviewer subagent. Reviewing before you
+  merge/open the PR is cheaper than reviewing after.
 - **`ep-receiving-code-review`** — route whatever the review surfaces through this skill
   (verify before implementing, push back with reasoning) before you finish.
 - **`ep-worktrees`** — the skill whose worktree this one tears down.

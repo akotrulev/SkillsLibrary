@@ -1,53 +1,28 @@
 ---
 name: ep-parallel-agents
-description: Use only when you have genuinely independent problem domains (no shared state, no sequential dependencies) AND running them concurrently clearly pays for itself — a cost-aware exception to sequential/inline work. Triggers: "investigate these unrelated failures in parallel", "fan these independent fixes out". Do NOT use for related failures, work needing shared context, or as a reflex for speed — sequential is the default.
+description: Use when you have genuinely independent problem domains (no shared state, no sequential dependencies) to work on concurrently. Triggers: "investigate these unrelated failures in parallel", "fan these independent fixes out". Do NOT use for related failures or work needing shared context.
 ---
 
-# Dispatching Parallel Agents (cost-aware)
+# Dispatching Parallel Agents
 
 ## Overview
 
 You delegate a task to a specialized agent with isolated context. By precisely crafting its instructions and context, you keep it focused. It should never inherit your session's history — you construct exactly what it needs. This preserves your own context for coordination.
 
-Parallel dispatch can save wall-clock time when failures are truly independent — but each agent is an extra, expensive invocation, so it is the **exception, not the reflex**.
+Parallel dispatch saves wall-clock time when failures are truly independent.
 
-## Conservative agent-spawning policy (governs this whole skill)
-
-**Cost before speed.** Default to investigating sequentially / inline. Parallelize only when the domains are genuinely independent *and* the time saved is worth the extra invocations. When sequential and parallel both work, choose sequential.
-
-**Scale the fan-out to the work, not to the reflex.** The upstream "3+ failures → dispatch one agent each" habit is what this policy tempers: dispatch as many agents as there are genuinely independent domains, but make it a deliberate call each time — every additional agent is another expensive invocation. When the count climbs, say what you're spawning and why rather than fanning out silently.
-
-**Core principle:** at most one agent per independent problem domain, cost weighed before speed.
+**Core principle:** one agent per independent problem domain.
 
 ## When to Use
 
-```dot
-digraph when_to_use {
-    "Multiple failures?" [shape=diamond];
-    "Are they independent?" [shape=diamond];
-    "Worth the extra invocations?" [shape=diamond];
-    "Single agent / inline (default)" [shape=box];
-    "One agent per independent domain" [shape=box];
-
-    "Multiple failures?" -> "Are they independent?" [label="yes"];
-    "Are they independent?" -> "Single agent / inline (default)" [label="no - related"];
-    "Are they independent?" -> "Worth the extra invocations?" [label="yes"];
-    "Worth the extra invocations?" -> "Single agent / inline (default)" [label="no - cost>benefit"];
-    "Worth the extra invocations?" -> "One agent per independent domain" [label="yes"];
-}
-```
-
-**Use when (all must hold):**
+**Use when:**
 - Genuinely independent problems with different root causes and no shared state
 - Each problem can be understood without context from the others
-- The wall-clock saving is worth the extra agent invocations
-- No more agents than there are independent domains
 
 **Don't use when:**
 - Failures are related (fix one might fix others)
 - Need to understand full system state
 - Agents would interfere with each other
-- You're reaching for it purely for speed
 
 ## The Pattern
 
@@ -70,16 +45,16 @@ Each agent gets:
 
 ### 3. Dispatch
 
-Dispatch one agent per independent domain. Weigh the invocation cost before each addition, and name what you're spawning so the fan-out is visible rather than silent.
+Dispatch one agent per independent domain, naming what you're spawning so the fan-out is visible rather than silent.
 
 ```
 Agent("Fix agent-tool-abort.test.ts failures")
 Agent("Fix batch-completion-behavior.test.ts failures")
 Agent("Fix tool-approval-race-conditions.test.ts failures")
 
-# Say what you did and why:
+# Say what you dispatched and why:
 # "Three independent failure domains, so three agents in parallel —
-#  no shared state between them, and the sequential path would be ~3x the wall clock."
+#  no shared state between them."
 ```
 
 ### 4. Review and Integrate
@@ -161,7 +136,7 @@ Return: Summary of what you found and what you fixed.
 
 **Decision:** Independent domains - abort logic separate from batch completion separate from race conditions
 
-**Cost check:** three domains means three concurrent agents. Independent root causes, no shared state, and sequential investigation would triple the wall clock — the extra invocations earn their keep here.
+**Dispatch shape:** three domains, three concurrent agents — independent root causes, no shared state.
 
 **Dispatch:**
 ```
@@ -177,14 +152,12 @@ Agent 3 → Fix tool-approval-race-conditions.test.ts
 
 **Integration:** All fixes independent, no conflicts, full suite green
 
-**If the third domain hadn't been worth an agent:** two in parallel and the third inline captures most of the saving for one fewer invocation.
-
-## Key Benefits (when the cost check passes)
+## Key Benefits
 
 1. **Focus** - Each agent has narrow scope, less context to track
 2. **Independence** - Agents don't interfere with each other
 3. **Context preservation** - Heavy investigation stays out of your coordination context
-4. **Parallelization** - Independent investigations proceed at once — the payoff you weigh against the extra invocations
+4. **Parallelization** - Independent investigations proceed at once
 
 ## Verification
 
@@ -198,12 +171,11 @@ After agents return:
 
 From a debugging session:
 - 6 failures across 3 files
-- 3 independent domains, each worth its own invocation
+- 3 independent domains
 - 3 agents run concurrently, all fixes integrated, zero conflicts
-- The cheaper alternative — 2 in parallel + 1 inline — captures most of the saving for one fewer agent
 
 ## Related skills
 
-- **`ep-systematic-debugging`** — the per-domain investigation each agent runs; use it inline when there's only one domain (the common case)
-- **`ep-delegate-to-subagents`** — the plan-execution counterpart; same cost-before-speed policy
+- **`ep-systematic-debugging`** — the per-domain investigation each agent runs; use it directly when there's only one domain
+- **`ep-delegate-to-subagents`** — the plan-execution counterpart
 - **`ep-verify-before-done`** — run the full suite and verify before claiming the parallel fixes worked

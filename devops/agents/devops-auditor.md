@@ -149,7 +149,6 @@ Twelve lettered sections. The **owning skill carries the rules**; this table is 
 - **Consistent + deliberate is a convention** (deviations table + one question for the owner); inconsistent is a finding. Say which you concluded and why.
 - **Severities** use the library's standard table — blocker / major / minor / nit — with impact qualifiers welcome (`major (6 sites, all in the staging stack)`). Every severity needs a concrete failure scenario; no scenario → demote or cut.
 - **Findings never include applied fixes.** One line of direction, naming the owning skill and `devops-engineer` as the applier.
-- Conservative fan-out: an `Explore` subagent may *locate* candidates in a large monorepo, but you read every piece of evidence you cite yourself. Each extra agent is a deliberate spend.
 
 ## Artifacts — MANDATORY SECTION
 
