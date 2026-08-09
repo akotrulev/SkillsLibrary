@@ -246,6 +246,7 @@ When the KB already holds documentation for an area and the code has moved:
 - **→ `qa-test-case-designer`** — the rules and "what can go wrong" tables are a test basis; the thresholds are BVA seeds.
 - **→ `be-planner`** — the area map and documented behavior are the inputs to an EXTEND run against this system.
 - **→ `code-auditor`** — the findings the trace produced but this documentation deliberately excludes.
+- **→ `be-shared-plain-language-companion`** — writes `areas/<area>-explained.md` and `system-overview-explained.md` beside these documents: the same facts in shorter sentences with worked examples, for the stakeholder who has to answer the open questions. It adds nothing; anything it exposes as missing gets fixed **here**. Regenerate a companion whenever its source is refreshed.
 
 ## Version policy
 

@@ -1,5 +1,5 @@
 ---
-description: Plan a backend build — high-level blueprint (approved by you) then the detailed pack: DB structure, endpoints, validations, integrations, ordered tasks
+description: Plan a backend build — high-level blueprint (approved by you) then the detailed pack: DB structure, endpoints, validations, integrations, ordered tasks, each with a plain-language -explained.md companion
 argument-hint: [the business case, requirements, or "resume" to pick up existing work]
 ---
 

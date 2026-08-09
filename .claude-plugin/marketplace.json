@@ -7,7 +7,7 @@
   },
   "metadata": {
     "description": "Stack-first skills library covering QA, frontend, backend, data, and business-analysis: install one self-contained plugin per tech stack. `qa-{java,dotnet,typescript}` bundle every QA discipline \u2014 API/UI/mobile/performance/LLM/BDD authoring and verification, manual-QA process, CI/CD, reporting, and OWASP-mapped security. `fe-{blazor,react}` are phased frontend dev-stack agents (scaffold \u2192 architecture \u2192 features \u2192 quality \u2192 tests \u2192 review). `be-{dotnet,java,node}` are phased backend dev-stack agents for design-pattern application, ORM persistence, and Auth0/Cognito service-side auth. `devops` ships the platform lane \u2014 container images, IaC, cloud deploys, and build/deploy pipelines. `data` and `business-analysis` round out the database-engineering and cross-feature requirements domains.",
-    "version": "2.16.0"
+    "version": "2.17.0"
   },
   "plugins": [
     {
@@ -613,6 +613,7 @@
         "./backend/_shared/codebase-survey",
         "./backend/_shared/feature-trace",
         "./backend/_shared/business-documentation",
+        "./backend/_shared/plain-language-companion",
         "./engineering-practices/agent-orientation-cache"
       ],
       "commands": [
@@ -765,6 +766,7 @@
         "./backend/_shared/codebase-survey",
         "./backend/_shared/feature-trace",
         "./backend/_shared/business-documentation",
+        "./backend/_shared/plain-language-companion",
         "./business-analysis/skills/ba-project-memory",
         "./business-analysis/skills/ba-process-flow-diagram",
         "./business-analysis/skills/ba-decision-table",
@@ -852,6 +854,7 @@
         "./backend/_shared/codebase-survey",
         "./backend/_shared/feature-trace",
         "./backend/_shared/business-documentation",
+        "./backend/_shared/plain-language-companion",
         "./business-analysis/skills/ba-project-memory",
         "./business-analysis/skills/ba-process-flow-diagram",
         "./business-analysis/skills/ba-decision-table",
@@ -936,6 +939,7 @@
         "./backend/_shared/codebase-survey",
         "./backend/_shared/feature-trace",
         "./backend/_shared/business-documentation",
+        "./backend/_shared/plain-language-companion",
         "./business-analysis/skills/ba-project-memory",
         "./business-analysis/skills/ba-process-flow-diagram",
         "./business-analysis/skills/ba-decision-table",

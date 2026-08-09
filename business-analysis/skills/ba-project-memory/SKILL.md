@@ -32,6 +32,8 @@ docs/business-model/
 ├── glossary.md           # canonical terms; the terminology-drift defense
 ├── system-overview.md    # what the system is, for whom, the area map + cross-area journeys — owned by be-shared-business-documentation
 ├── areas/<area>.md       # one functional area per file (AREA-nnn): capabilities, actors, use cases, rules — owned by be-shared-business-documentation
+├── areas/<area>-explained.md  # the plain-language companion to that area (same facts, simpler words, worked examples) — owned by be-shared-plain-language-companion
+├── system-overview-explained.md   # the plain-language companion to the system overview — owned by be-shared-plain-language-companion
 ├── flows/<flow>.md       # one business flow per file (FLOW-nnn) — owned by ba-process-flow-diagram
 ├── entities/<entity>.md  # one state model per business entity (ENT-nnn) — owned by ba-entity-state-grid
 ├── decisions/<point>.md  # one merged decision table per shared decision point (DEC-nnn) — owned by ba-decision-table
@@ -44,6 +46,7 @@ docs/business-model/
 | Tier | Files | Changes |
 |---|---|---|
 | **Stable** | `glossary.md`, `system-overview.md`, `areas/`, `flows/`, `entities/`, `decisions/`, `interaction-map.md` | deliberately, when the business model actually changes |
+| **Derived** | `*-explained.md` | regenerated wholesale whenever their source changes — never hand-patched, never a source of truth. A fact that exists only in a companion belongs in the companion's source instead |
 | **Dynamic** | `active-context.md` (+ the INDEX line-items) | every session that touches the model |
 
 ## The contract

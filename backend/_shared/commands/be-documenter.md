@@ -1,5 +1,5 @@
 ---
-description: Reverse-engineer business documentation from an existing backend — split it into functional areas, trace each one, and write what it does from the end user's perspective into docs/business-model/
+description: Reverse-engineer business documentation from an existing backend — split it into functional areas, trace each one, and write what it does from the end user's perspective into docs/business-model/, each area paired with a plain-language -explained.md companion
 argument-hint: [the system or area to document, or "refresh" to reconcile the existing KB against the code]
 ---
 

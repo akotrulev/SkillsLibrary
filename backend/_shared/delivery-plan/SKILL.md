@@ -236,6 +236,7 @@ Diverged — T9 (auth wiring): plan specifies policy-based authorization;
 - **→ Mission Control** — paste the document, point at the repo.
 - **→ `data-architect` / `devops-engineer` / `observability-engineer-<stack>` / `qa-*`** — the tasks bound to them, run as peers.
 - **→ `code-auditor`** — when a reconcile finds systemic drift rather than a handful of divergences, that is an audit, not a reconcile.
+- **→ `be-shared-plain-language-companion`** — writes `delivery-plan-explained.md` beside this document for the stakeholders who need the sequence, the deliverables and the blockers without the task ids and agent bindings. Regenerate it whenever this plan is re-sequenced.
 
 ## Version policy
 
