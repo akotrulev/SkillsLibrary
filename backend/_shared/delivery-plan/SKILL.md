@@ -77,7 +77,7 @@ The shape that works, and why:
 ```markdown
 ### T12 — Orders resource (P4)
 
-**Agent:** `be-dotnet` · **Skills:** `be-dotnet-pattern-writer`, `be-dotnet-database-code`
+**Agent:** `be-dotnet` · **Skills:** `be-dotnet-pattern-writer`, `be-dotnet-database-code`, `be-dotnet-unit-testing`
 **Depends on:** T4 (schema), T9 (auth wiring), T10 (shared DTOs + error middleware)
 **Files:**
 - Create: `src/Ordering/Domain/Order.cs`, `src/Ordering/Domain/OrderLine.cs`

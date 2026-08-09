@@ -114,7 +114,7 @@ The "late cancel" consequence (does it ever block future bookings?) is **Q2** â€
 
 | Area / concern | Agent | Skills it will load | Note |
 |---|---|---|---|
-| Scaffold, all three areas, persistence | `be-dotnet` | `be-dotnet-pattern-writer`, `be-dotnet-database-code` | |
+| Scaffold, all three areas, persistence | `be-dotnet` | `be-dotnet-pattern-writer`, `be-dotnet-database-code`, `be-dotnet-unit-testing` | Unit tests ship with the slice |
 | Service-side auth | `be-dotnet` | `be-dotnet-auth0` | SPA half is out of scope here |
 | Schema depth (index review) | `data-architect` | `data-postgresql`, `data-schema-design` | Only if the session-list query needs it |
 | Contract + integration tests | `qa-api-dotnet` | `qa-api-test-writer-dotnet` | Test basis: `api-surface.md` |

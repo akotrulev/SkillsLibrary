@@ -198,7 +198,7 @@ One line each: system, what it does for us, direction (we call it / it calls us 
 
 | Area / concern | Agent | Skills it will load | Note |
 |---|---|---|---|
-| Ordering domain + persistence | `be-dotnet` | `be-dotnet-pattern-writer`, `be-dotnet-database-code` | |
+| Ordering domain + persistence | `be-dotnet` | `be-dotnet-pattern-writer`, `be-dotnet-database-code`, `be-dotnet-unit-testing` | Unit tests ship with the slice, not after |
 | Schema, indexes, tenancy enforcement | `data-architect` | `data-postgresql`, `data-schema-design` | Beyond ORM mechanics |
 | Service-side auth | `be-dotnet` | `be-dotnet-auth0` | Frontend half is `fe-react` |
 | Telemetry | `observability-engineer-dotnet` | `observability-opentelemetry-dotnet` | Runs after the first slice is real |

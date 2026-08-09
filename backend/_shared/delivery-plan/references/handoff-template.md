@@ -42,7 +42,7 @@ what is half-built, and what the next session should do first.>
 
 ## Next task
 
-**T12 — Orders resource** (`be-dotnet`; loads `be-dotnet-pattern-writer`, `be-dotnet-database-code`)
+**T12 — Orders resource** (`be-dotnet`; loads `be-dotnet-pattern-writer`, `be-dotnet-database-code`, `be-dotnet-unit-testing`)
 Unblocked: T4, T9, T10 all Done.
 Start with: `src/Ordering/Domain/Order.cs`, following the shape already set by
 `src/Catalog/Domain/Product.cs:1-60` (T11's output — match it, do not invent a second convention).

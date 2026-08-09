@@ -1,9 +1,11 @@
 ---
 name: fe-blazor-component-testing
-description: Use when writing dev-side component tests for Blazor (.NET 8/9/10) with bUnit v2 — `.razor` test files, `MarkupMatches`, fake services, cascading parameters, the bUnit `JSInterop` mock, `AddTestAuthorization()`, `EventCallback` + re-render assertions, `WaitForState`/`WaitForAssertion`. Triggers: "unit-test this Blazor component", "write bUnit tests", "mock IJSRuntime in a component test". Do NOT use for E2E/browser journeys (the `qa-ui-dotnet` peer) or data-testid authoring (`test-ids`).
+description: Use when writing dev-side tests for Blazor (.NET 8/9/10) — bUnit v2 for anything that renders, plain NUnit/xUnit for anything that doesn't: `.razor` test files, `MarkupMatches`, fake services, cascading parameters, the bUnit `JSInterop` mock, `AddTestAuthorization()`, `EventCallback` + re-render assertions, `WaitForState`/`WaitForAssertion`, plus pure-logic tests for state containers, validators, formatters and culture helpers. Triggers: "unit-test this Blazor component", "write bUnit tests", "mock IJSRuntime in a component test", "test this validator", "test my state container". Do NOT use for E2E/browser journeys (the `qa-ui-dotnet` peer) or data-testid authoring (`test-ids`).
 ---
 
-# Blazor — Component Testing (bUnit v2)
+# Blazor — Component & Pure-Logic Testing (bUnit v2)
+
+Owns **every dev-side test in the app**, at two altitudes: **component tests** (it renders → bUnit) and **pure-logic tests** (it doesn't render → plain NUnit/xUnit, no bUnit). The split is mechanical — *does the unit need a renderer?* — and both live in the same test project and runner.
 
 Owns **dev-side component tests**: render a Blazor component in isolation, drive it, and assert on rendered markup and behavior. This is the unit layer under the component — it runs headless, with no browser and no real backend. **Boundary:** end-to-end user journeys, real navigation, and cross-page flows belong to the peer agent [`qa-ui-dotnet`](../../../../qa/dotnet/agents/qa-ui-dotnet.md) (Playwright/Selenium). If a test needs a running app and a real DOM, it is not a bUnit test.
 
@@ -32,7 +34,7 @@ bUnit **v2 was a rewrite** — the API moved. Detect the bUnit package version b
 
 - **Markup-only components** (a static card, a layout shell with no branching) — a snapshot of hand-written markup asserts nothing but tautology. Test *logic-bearing* components only.
 - **End-to-end journeys / real navigation / real backend** → `qa-ui-dotnet` (peer). bUnit fakes `NavigationManager`; it does not actually route.
-- **Pure C# logic** with no rendering (a formatter, a validator class) → a plain NUnit/xUnit test on the class, no bUnit.
+- **Pure C# logic** with no rendering (a formatter, a validator, a state container) → **not bUnit, but still yours** — see **Pure-logic tests** below.
 - **Authoring `data-testid`s** → `frontend/blazor/skills/test-ids`. (Tests here *consume* those testids as stable selectors — `cut.Find("[data-testid='Orders.Row']")`.)
 
 ## Test what has behavior — the selection matrix
@@ -133,8 +135,58 @@ Renders and interop are async. Assert on a **condition**, never a delay (global 
 - **Loose JS mode everywhere** — hides interop that silently no-ops.
 - **Testing the framework** — asserting that `@bind` binds or `EditForm` submits; test *your* logic, not Blazor's.
 
+## Pure-logic tests (no renderer)
+
+A Blazor app is not only components. These units carry real rules and need **no bUnit, no `BunitContext`, no `Render<T>`** — a plain test class in the same test project.
+
+**The rule:** if you are reaching for `Render<T>` to test a validator, you extracted the wrong thing. **Runner: the same one the project already uses** for component tests (see the xUnit/NUnit deviation note at the top) — do **not** introduce a second runner for non-component tests.
+
+| Unit (and the skill that produces it) | Test it? | What to assert |
+|---|---|---|
+| **Scoped state container** (`state-management`) | **Yes** | A mutation raises `Changed` **exactly once**; subscribers see the new value; unsubscribe stops delivery (a leaked handler is a real Blazor bug) |
+| **FluentValidation validator** (`forms`) | **Yes** | The rule fires on the invalid case; the error's property name and message key. Use the validator directly — no `EditForm` needed |
+| **Formatter / culture helper** (`languages`) | **Yes** | Per-culture output with an explicit `CultureInfo`, never the ambient one |
+| **Breakpoint C# mirror** (`responsive-design`) | **Yes** | The mirror matches the CSS token source — the test that catches drift |
+| **Polly policy predicate / retry condition** (`error-handling`) | **Yes** | Which responses retry, which don't, and that the retry count is bounded |
+| **DTO→view-model mapper** (`data-fetching`) | **Yes** | Each branch; an unmapped input doesn't become a silent default |
+| **Error→UI state mapper** (`error-handling`) | **Yes** | Each failure maps to its three-state region value **without leaking the raw exception message** |
+| Records/DTOs with no behavior, `@inject` wiring | **No** | Tautology / framework |
+
+### The browser & ambient seams
+
+The same five seams as everywhere, plus the one Blazor-specific trap:
+
+| Seam | Untestable | Injectable |
+|---|---|---|
+| **Time** | `DateTime.Now`, `DateTimeOffset.Now` | `TimeProvider` (net8+) → `FakeTimeProvider` |
+| **Identity** | `Guid.NewGuid()` | pass the id in, or inject a generator |
+| **Config** | `IConfiguration` reads inside logic | `IOptions<T>` → `Options.Create(...)` |
+| **JS interop** | a direct `IJSRuntime` call inside logic | keep interop at the component edge; the logic takes the value |
+| **Ambient culture** | logic that depends on `CultureInfo.CurrentCulture` | pass the `CultureInfo` explicitly — an ambient-culture-dependent test passes on your machine and fails in CI |
+
+```csharp
+[Test]
+public void Should_RaiseChangedOnce_When_ValueIsSet()
+{
+    var container = new CartState();
+    var raised = 0;
+    container.Changed += () => raised++;
+
+    container.SetItemCount(3);
+
+    Assert.Multiple(() =>
+    {
+        Assert.That(container.ItemCount, Is.EqualTo(3));
+        Assert.That(raised, Is.EqualTo(1));      // not 0 (no notify), not 2 (double-fire)
+    });
+}
+```
+
+Conventions, seams, doubles policy and anti-patterns for this altitude are the same ones the backend stack documents in depth — see [`be-dotnet-unit-testing`](../../../../backend/dotnet/skills/unit-testing/SKILL.md) for the full treatment (NUnit constraint model, NSubstitute traps, `FakeTimeProvider`, parameterized cases, builders). Do not duplicate it here; the fence is only *where the code runs*, and the discipline is identical.
+
 ## Handoffs
 
+- Non-rendering logic (state containers, validators, formatters, culture helpers) → **Pure-logic tests**, in this skill
 - Data-testid authoring/audit → `frontend/blazor/skills/test-ids`
 - End-to-end / real-browser journeys, POM → **peer** `qa-ui-dotnet`
 - Visual/pixel regression → **peer** `qa/dotnet/skills/visual-regression`

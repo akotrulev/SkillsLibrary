@@ -240,8 +240,8 @@ rg -n "<pattern>" --glob '*.csproj'    # project-level checks
 
 ---
 
-## M — Testability & contract tests
-*Owning skill: `code-review` · the tests themselves → **peer** `qa-api-dotnet` / `qa-dotnet-standards-audit`*
+## M — Testability & unit tests
+*Owning skills: `unit-testing` (M7–M9, and the constructive half of M2) · `code-review` (M1–M6) · the **contract/integration/E2E** suite → **peer** `qa-api-dotnet` / `qa-dotnet-standards-audit`*
 
 | # | Check | Violation looks like | Find it with | Sev |
 |---|---|---|---|---|
@@ -251,6 +251,9 @@ rg -n "<pattern>" --glob '*.csproj'    # project-level checks
 | M4 | Business logic is reachable without HTTP | All logic inside controller actions, so nothing can be tested below the transport | Read 2–3 controllers | major |
 | M5 | Static/sealed choices don't block test doubles | Sealed concrete with no interface where a test must substitute it | Cross-reference E6 findings with test needs | minor |
 | M6 | Integration tests can run against a real dependency | No `WebApplicationFactory`/Testcontainers path — only mocks all the way down | `rg -n "WebApplicationFactory\|Testcontainers" --glob '*.cs' --glob '*.csproj'` | minor |
+| M7 | Logic-bearing types have unit tests | Handlers, strategies, resolvers, decorators, calculators, validators, mappers with no test class — per `unit-testing`'s selection matrix | List logic-bearing types, compare with `rg -l "Tests" --glob '*Tests.cs'`; spot-check 3 handlers/strategies | major |
+| M8 | The unit-test project stays in-process | `WebApplicationFactory`, Testcontainers, or a real connection string inside a project named `*.UnitTests`/beside the unit fixtures — the fence has moved | `rg -n "WebApplicationFactory\|Testcontainers\|ConnectionString" --glob '*UnitTests*'` | major |
+| M9 | No assertion-free or in-memory-DB "unit" tests | A `[Test]` whose body only exercises code, or `UseInMemoryDatabase` standing in for a repository test (a false-negative machine) | `rg -n "UseInMemoryDatabase" --glob '*.cs'`; scan fixtures for bodies with no `Assert`/`Received`/`Should` | major |
 
 ---
 
@@ -286,5 +289,5 @@ rg -n "<pattern>" --glob '*.csproj'    # project-level checks
 | J | Error handling & resilience | always |
 | K | Configuration & secrets | always |
 | L | Observability | always — **absence is L1**, not N/A |
-| M | Testability & contract tests | always |
+| M | Testability & unit tests | always |
 | N | Project structure & type safety | always |

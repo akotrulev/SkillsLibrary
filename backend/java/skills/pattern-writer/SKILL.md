@@ -24,7 +24,7 @@ Scaffolds pattern implementations into a Java 21 + Spring Boot 3.x codebase. Con
 
 - Explanations → `backend/java/skills/pattern-guide`
 - Reviewing existing code → `backend/java/skills/code-review`
-- Scaffolding tests against the generated code → `qa/java/skills/api-test-author/writer` if API-facing
+- Scaffolding tests against the generated code → `backend/java/skills/unit-testing` for the class-level tests (JUnit 5, no Spring context); `qa/java/skills/api-test-author/writer` (peer) once it's reachable over HTTP
 
 ## Inputs needed
 
@@ -259,7 +259,7 @@ For every pattern:
 1. The contract (interface / sealed type / record) in the domain package
 2. Concrete implementations (one per file) under the matching package
 3. A `@Configuration` class registering the components (when not auto-component-scanned)
-4. A TestNG test using the conventions from `qa/java/skills/api-test-author/writer` if API-facing, otherwise plain TestNG + AssertJ
+4. Unit tests for every logic-bearing type produced — **conventions, seams, and doubles policy live in `backend/java/skills/unit-testing`** (**JUnit 5** + Mockito + AssertJ, no Spring context; *not* TestNG, which is the QA suite's runner). Once the pattern is reachable over HTTP, the contract/integration layer is the **peer** `qa-api-java`'s
 
 ## Validation
 
@@ -274,7 +274,8 @@ After scaffolding:
 
 - Conceptual lookup → `backend/java/skills/pattern-guide`
 - Reviewing the result → `backend/java/skills/code-review`
-- Tests for new API → `qa/java/skills/api-test-author/writer`
+- Unit-testing the generated classes → `backend/java/skills/unit-testing`
+- Tests for new API (contract/integration) → **peer** `qa/java/skills/api-test-author/writer`
 - POJOs/records → `qa/java/skills/api-models`
 - .NET equivalent → `backend/dotnet/skills/pattern-writer`
 - TypeScript equivalent → `backend/node/skills/pattern-writer`

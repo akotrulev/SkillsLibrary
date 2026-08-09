@@ -1,9 +1,11 @@
 ---
 name: fe-react-component-testing
-description: Use when a component or custom hook needs a dev-side test — Vitest + React Testing Library: config, role/label queries over testids, `userEvent`, async `findBy*`/`waitFor`, `vi.mock`/MSW, `renderHook`, and the limit that Vitest can't render async Server Components (extract the fetch, E2E the rest). Triggers "unit-test this component", "test my custom hook", "an update was not wrapped in act". Not for E2E journeys (the `qa-ui-typescript` peer).
+description: Use when a component, custom hook, or any front-end logic needs a dev-side test — Vitest + React Testing Library for anything that renders, plain Vitest for anything that doesn't: config, role/label queries over testids, `userEvent`, async `findBy*`/`waitFor`, `vi.mock`/MSW, `renderHook`, the limit that Vitest can't render async Server Components (extract the fetch, E2E the rest), and pure-logic tests for Zod schemas, formatters, mappers, stores and extracted fetch functions. Triggers "unit-test this component", "test my custom hook", "test my Zod schema", "test this formatter", "test my Zustand store", "an update was not wrapped in act". Not for E2E journeys (the `qa-ui-typescript` peer).
 ---
 
-# React — Component Testing (Vitest + React Testing Library)
+# React — Component & Pure-Logic Testing (Vitest + React Testing Library)
+
+Owns **every dev-side test in the app**, at two altitudes: **component tests** (it renders → RTL) and **pure-logic tests** (it doesn't render → plain Vitest, no RTL). The split is mechanical — *does the unit need a renderer?* — and both live in the same project, runner and config.
 
 Owns **dev-side component tests**: render a React component in isolation, drive it as a user would, and assert on the rendered output and behavior. This is the unit layer under the component — it runs headless in a simulated DOM (jsdom/happy-dom), with no real browser and no real backend. **Boundary:** end-to-end user journeys, real navigation, real network, and cross-page flows belong to the peer agent [`qa-ui-typescript`](../../../../qa/typescript/agents/qa-ui-typescript.md) (Playwright). If a test needs a running app and a real browser, it is not a Vitest component test.
 
@@ -31,9 +33,9 @@ React 19 idioms are primary; React 18 equivalents are tagged fallbacks (not obso
 ## When NOT to use
 
 - **Markup-only components** (a static card, a layout shell with no branching) — asserting hand-written markup is a tautology. Test *logic-bearing* components only.
-- **Async Server Components** (an `async function` component that `await`s data) — **Vitest cannot render them** (React's RSC runtime isn't available in the test runner; the render throws the moment you `await`). Pull the data fetch into a plain async function and unit-test *that*; render the resulting **synchronous** presentational component with RTL; hand the assembled async page to the `qa-ui-typescript` peer (E2E). This is the official Next.js guidance.
+- **Async Server Components** (an `async function` component that `await`s data) — **Vitest cannot render them** (React's RSC runtime isn't available in the test runner; the render throws the moment you `await`). Pull the data fetch into a plain async function and unit-test *that* (→ [Pure-logic tests](#pure-logic-tests-no-renderer)); render the resulting **synchronous** presentational component with RTL; hand the assembled async page to the `qa-ui-typescript` peer (E2E). This is the official Next.js guidance.
 - **End-to-end journeys / real navigation / real backend** → `qa-ui-typescript` (peer). RTL fakes nothing about routing — there is no route.
-- **Pure TS logic** with no rendering (a Zod schema, a formatter, a mapper) → a plain Vitest test on the function, no RTL.
+- **Pure TS logic** with no rendering (a Zod schema, a formatter, a mapper, a store, an extracted fetch) → **not RTL, but still yours** — see [Pure-logic tests](#pure-logic-tests-no-renderer) below.
 - **Authoring `data-testid`s** → [`test-ids`](../test-ids/SKILL.md). Tests here *consume* testids as a last-resort selector — prefer role/label.
 
 ## Test what has behavior — the selection matrix
@@ -172,8 +174,77 @@ Wrap state-mutating calls in `act(...)`; pass a `wrapper` for hooks that read co
 - **Re-implementing E2E in RTL** — mocking `next/navigation` and pretending it's a journey test. Hand real navigation to `qa-ui-typescript`.
 - **Not resetting mocks** — leaked call history across tests → order-dependent flakiness.
 
+## Pure-logic tests (no renderer)
+
+A React app is not only components. These units carry real rules, are the cheapest things in the codebase to test, and need **no RTL, no jsdom, no `render()`** — a plain `*.test.ts` beside the unit.
+
+**The rule:** if you are reaching for `render()` to test a formatter, you extracted the wrong thing.
+
+| Unit (and the skill that produces it) | Test it? | What to assert |
+|---|---|---|
+| **Zod schema** (`forms`) | **Yes** | Accept case; reject case + `issues[].path` and `code` — never the human message (localizable, version-dependent) |
+| **Extracted async fetch function** (`data-fetching`, the async-RSC workaround) | **Yes** | Success maps to the shape the component expects; a non-OK response becomes the failed state, not `undefined` |
+| **Formatter / mapper** (currency, date, unit, DTO→view-model) | **Yes** | Boundaries, the rounding rule, the empty/null input |
+| **Zustand store logic** (`state-management`) | **Yes** | Action → new state; a derived selector; that no server data lives in it |
+| **URL-as-state serializer** (`state-management`, `routing`) | **Yes** | Round-trip: state → search params → state; unknown params ignored |
+| **Breakpoint TS mirror** (`responsive-design`) | **Yes** | The mirror matches the token source — this is the test that catches drift |
+| **i18n message helper / plural rule** (`languages`) | **Yes** | Each plural category; a missing key fails loudly rather than rendering the key |
+| **`middleware.ts` predicate / route matcher** (`routing`) | **Yes** | Which paths match, which don't — extract the predicate out of the middleware body first |
+| **Error→UI mapper** (`error-handling`) | **Yes** | Each error class maps to its user-facing state; unknown errors map to the generic one **without leaking `error.message`** |
+| Type-only module, barrel re-export, constants | **No** | No runtime behavior |
+| A thin wrapper that only forwards to the library | **No** | You'd be testing MUI/Next |
+
+### Conventions
+
+- **`*.test.ts` for pure logic, `*.test.tsx` for components** — the extension is the signal, and the repo's audit greps rely on it (`standards-audit` §O).
+- Colocated beside the unit, same as component tests. Same runner, same config, no separate project.
+- Import the function directly. If you need `render()` or a provider wrapper, it's a component test — move it to `.tsx` and use RTL.
+- The rules above apply unchanged: one behavior per test, `it.each` instead of loops, no `any`, fakes over `vi.mock`, `findBy*` never needed here.
+
+### The browser seams
+
+Pure logic becomes untestable for the same reasons everywhere — and on the front end these double as the hydration-safety rules (`basics`, `performance`): **a unit that can't be tested without `window` is usually the same defect as a component that reads the browser during render.**
+
+| Seam | Untestable | Injectable |
+|---|---|---|
+| **Time** | `Date.now()`, `new Date()` | a `clock: () => Date` parameter; or `vi.setSystemTime` |
+| **Identity** | `crypto.randomUUID()` | pass the id in, or inject a generator |
+| **Randomness** | `Math.random()` | inject `random: () => number` |
+| **Browser/global state** | `window`, `localStorage`, `navigator`, `document` | take the value as an argument; keep the read at the component edge |
+| **Env/config** | `process.env.NEXT_PUBLIC_*` inside logic | a parsed config object passed in |
+
+```ts
+// src/lib/format-currency.test.ts
+import { formatCurrency } from './format-currency';
+
+it.each([
+  [0,     'en-US', '$0.00'],
+  [1999,  'en-US', '$19.99'],   // minor units in
+])('formats %i cents in %s', (cents, locale, expected) => {
+  expect(formatCurrency(cents, locale)).toBe(expected);
+});
+```
+
+```ts
+// src/features/orders/get-orders.test.ts — the extracted async-RSC fetch
+it('should map a failed response to the failed state', async () => {
+  const fetchImpl = vi.fn().mockResolvedValue(new Response('nope', { status: 500 }));
+
+  const result = await getOrders({ fetchImpl });
+
+  expect(result.status).toBe('failed');   // never undefined, never a thrown raw message
+});
+```
+
+**Money is integer minor units, never a float** — `0.1 + 0.2 !== 0.3`, and a test whose expected value is `0.30000000000000004` is a design finding, not a test to adjust.
+
+### Handoff
+
+Whether these assertions actually catch faults is a mutation-score question, and **StrykerJS has no skill in this library yet** (`qa-test-quality-check-typescript` is unbuilt — the java/dotnet siblings exist). Until it lands, treat mutation grading as unavailable on this stack rather than substituting a coverage number.
+
 ## Handoffs
 
+- Non-rendering logic (schemas, formatters, mappers, stores, extracted fetches) → [Pure-logic tests](#pure-logic-tests-no-renderer), in this skill
 - `data-testid` authoring/audit → [`test-ids`](../test-ids/SKILL.md)
 - End-to-end / real-browser journeys, POM → **peer** `qa-ui-typescript`
 - Visual/pixel regression → **peer** `qa/typescript/skills/visual-regression`

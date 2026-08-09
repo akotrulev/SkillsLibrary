@@ -26,7 +26,7 @@ Detect the project's Node major (`package.json` `engines`, `.nvmrc`, or lockfile
 - Reviewing → `backend/node/skills/code-review`
 - React component patterns → `frontend/react/skills/component-writer`
 - React Native → `frontend/react-native`
-- Scaffolding tests → `qa/typescript/skills/api-test-author/writer`
+- Scaffolding tests → `backend/node/skills/unit-testing` for the class/function-level tests (Vitest, no HTTP); `qa/typescript/skills/api-test-author/writer` (peer) once it's reachable over HTTP
 
 ## Inputs needed
 
@@ -304,7 +304,7 @@ For every pattern:
 
 1. The type definitions (`type Pricing = ...`, `interface OrderRepository`) under the feature's `domain/` or `shared/`
 2. The implementations under `feature/` / `infra/` as appropriate
-3. Tests (Vitest by default) alongside (`*.spec.ts`)
+3. Unit tests for every logic-bearing unit produced — **conventions, seams, and doubles policy live in `backend/node/skills/unit-testing`** (Vitest, DI over `vi.mock`, **both branches of every `Result<T,E>`**). Once reachable over HTTP, the contract/integration layer is the **peer** `qa-api-typescript`'s
 4. A small `index.ts` barrel where the project uses them
 
 ## Validation
@@ -322,4 +322,5 @@ After scaffolding:
 - Reviewing the result → `backend/node/skills/code-review`
 - React patterns → `frontend/react/skills/component-writer`
 - API DTOs (Zod schemas) → `qa/typescript/skills/api-models`
-- API tests → `qa/typescript/skills/api-test-author/writer`
+- Unit-testing the generated code → `backend/node/skills/unit-testing`
+- API tests (contract/integration) → **peer** `qa/typescript/skills/api-test-author/writer`

@@ -52,7 +52,7 @@ Status vocabulary: Not started · In progress · Done · Partial · Diverged · 
 
 ### T9 — Error middleware + shared DTOs + endpoint-module convention (P3)
 
-**Agent:** `be-dotnet` · **Skills:** `be-dotnet-pattern-writer`
+**Agent:** `be-dotnet` · **Skills:** `be-dotnet-pattern-writer`, `be-dotnet-unit-testing`
 **Depends on:** T2
 **Files:**
 - Create: `src/Shared/ProblemDetailsMiddleware.cs`, `src/Shared/PagedResult.cs`, `src/Shared/SessionSummary.cs`
@@ -71,7 +71,7 @@ Status vocabulary: Not started · In progress · Done · Partial · Diverged · 
 
 ### T11 — Bookings resource (P4)
 
-**Agent:** `be-dotnet` · **Skills:** `be-dotnet-pattern-writer`, `be-dotnet-database-code`
+**Agent:** `be-dotnet` · **Skills:** `be-dotnet-pattern-writer`, `be-dotnet-database-code`, `be-dotnet-unit-testing`
 **Depends on:** T3, T5, T9
 **Files:**
 - Create: `src/Booking/Domain/Booking.cs`, `src/Booking/BookingService.cs`, `src/Booking/BookingEndpoints.cs`, `src/Booking/BookingConfiguration.cs`
@@ -91,7 +91,7 @@ Status vocabulary: Not started · In progress · Done · Partial · Diverged · 
 
 ### T12 — Generate + commit the OpenAPI asset (P4)
 
-**Agent:** `be-dotnet` · **Skills:** `be-dotnet-pattern-writer`
+**Agent:** `be-dotnet` · **Skills:** `be-dotnet-pattern-writer`, `be-dotnet-unit-testing`
 **Depends on:** T10, T11
 **Files:**
 - Create: `docs/api/booking-api-openapi-2026-08-02.json` (canonicalized: `jq -S`, 2-space)

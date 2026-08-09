@@ -279,18 +279,24 @@ Findings in this section are the direct input to the `missing-testids.md` handsh
 
 ---
 
-## O — Component tests
+## O — Component & pure-logic tests
 *Owning skill: [`component-testing`](../../component-testing/SKILL.md)*
+
+**Glob note:** component tests are `*.test.tsx`, pure-logic tests are `*.test.ts`. Layer-agnostic checks below sweep **both** (`*.test.{ts,tsx}`) — a repo with zero pure-logic tests must not pass this section clean.
 
 | # | Check | Violation looks like | Find it with | Sev |
 |---|---|---|---|---|
-| O1 | A component test runner is configured and green | No Vitest/Jest at all, or a suite nobody runs | `package.json` scripts + `find . -name '*.test.tsx'` | major |
+| O1 | A test runner is configured and green | No Vitest/Jest at all, or a suite nobody runs | `package.json` scripts + `find . -name '*.test.ts*'` | major |
 | O2 | Logic-bearing components and custom hooks are covered | Reducers, guards, derived-state components, `use*` hooks with no test | Compare hooks/logic components with test files | major |
 | O3 | No markup-only snapshot tests standing in for assertions | `toMatchSnapshot()` as the only assertion | `rg "toMatchSnapshot" $SRC` | minor |
 | O4 | Queries prefer role/label over testid | `getByTestId` everywhere in unit tests where `getByRole` fits | `rg "getByTestId" --glob '*.test.tsx' $SRC` | minor |
 | O5 | Async-RSC logic is extracted and unit-tested | An async Server Component with untestable inline fetching and no extracted function | Read async page components | minor |
-| O6 | No conditional logic driving assertions | `if`/`for` deciding what a test asserts | `rg "\bif\s*\(" --glob '*.test.tsx' $SRC` | minor |
-| O7 | Tests are independent and deterministic | Shared mutable fixture across tests; `waitForTimeout`/`sleep` instead of condition waits | `rg "setTimeout\|sleep\(" --glob '*.test.tsx' $SRC` | major |
+| O6 | No conditional logic driving assertions | `if`/`for` deciding what a test asserts | `rg "\bif\s*\(" --glob '*.test.{ts,tsx}' $SRC` | minor |
+| O7 | Tests are independent and deterministic | Shared mutable fixture across tests; `waitForTimeout`/`sleep` instead of condition waits | `rg "setTimeout\|sleep\(" --glob '*.test.{ts,tsx}' $SRC` | major |
+| O8 | Non-rendering logic has pure-logic tests | Zod schemas, formatters, mappers, stores, URL serializers, extracted async-RSC fetches with no `*.test.ts` beside them | `find $SRC -name '*.test.ts'` vs the schema/util/store inventory; spot-check 3 schemas + the stores | major |
+| O9 | Pure-logic tests don't render | `render()`/`renderHook` inside a `*.test.ts`, or a formatter tested through a component | `rg "render\(" --glob '*.test.ts' $SRC` | minor |
+| O10 | Assertions on schema errors use path/code, not message | `expect(err.message).toBe('Required')` — breaks on locale or a Zod bump | `rg "issues\[0\]\?\.message\|error.message" --glob '*.test.{ts,tsx}' $SRC` | minor |
+| O11 | Browser seams are injected, not global | Logic reading `Date.now()`/`window`/`localStorage` directly, so its test needs jsdom | `rg "Date.now\(\)\|localStorage\|window\." $SRC --glob '!*.test.*'` cross-referenced with untested units | major |
 
 ---
 
@@ -369,7 +375,7 @@ Findings in this section are the direct input to the `missing-testids.md` handsh
 | L | SEO & discoverability | App Router / public site |
 | M | Testability (`data-testid`) | always |
 | N | UI conventions | always |
-| O | Component tests | always (absence is O1) |
+| O | Component & pure-logic tests | always (absence is O1) |
 | P | Localization | multi-language apps only |
 | Q | PWA / offline | installable/offline apps only |
 | R | Auth wiring | apps with auth only |

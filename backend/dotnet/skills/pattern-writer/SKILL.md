@@ -24,7 +24,7 @@ Scaffolds pattern implementations into a .NET codebase — **.NET 10 primary, 8/
 
 - Explaining a pattern → `backend/dotnet/skills/pattern-guide`
 - Critiquing existing code → `backend/dotnet/skills/code-review`
-- Scaffolding tests against a generated pattern → use `qa/dotnet/skills/api-test-author/writer` if it's API-facing, plain NUnit otherwise
+- Scaffolding tests against a generated pattern → `backend/dotnet/skills/unit-testing` for the class-level tests; `qa/dotnet/skills/api-test-author/writer` (peer) once it's reachable over HTTP
 
 ## Inputs needed
 
@@ -42,7 +42,7 @@ Scaffolds pattern implementations into a .NET codebase — **.NET 10 primary, 8/
 2. One file per concrete strategy under `Application/Strategies/{Domain}/`
 3. Register all in DI with **named** or **keyed** services (`AddKeyedScoped`, available since .NET 8)
 4. Replace the `switch` at the call site with a resolver: `_strategies[input.Type]`
-5. Add NUnit fixture per strategy + one for the resolver
+5. Add a test fixture per strategy + one for the resolver — conventions in `backend/dotnet/skills/unit-testing`
 
 ```csharp
 public interface IPricingStrategy
@@ -200,7 +200,7 @@ For every pattern, produce:
 1. The contract (interface or abstract record) in `Domain/` or `Application/Contracts/`
 2. Concrete implementations one per file in the matching `Application/<Pattern>/` or `Infrastructure/`
 3. A DI extension `Add<Feature>(this IServiceCollection)` registering all of them
-4. NUnit fixture(s) under `Tests/<Feature>/`, using the conventions from `qa/dotnet/skills/api-test-author/writer` if API-facing, otherwise plain NUnit with `Assert.That` + `Assert.Multiple`
+4. Unit-test fixture(s) for every logic-bearing type produced — **conventions, seams, and doubles policy live in `backend/dotnet/skills/unit-testing`** (NUnit 4 + NSubstitute, `Assert.That` + `Assert.Multiple`). Once the pattern is reachable over HTTP, the contract/integration layer is the **peer** `qa-api-dotnet`'s
 
 ## Validation
 
@@ -215,7 +215,8 @@ After scaffolding, run:
 
 - Conceptual explanation → `backend/dotnet/skills/pattern-guide`
 - Reviewing the result → `backend/dotnet/skills/code-review`
-- Generating tests for the new API → `qa/dotnet/skills/api-test-author/writer`
+- Unit-testing the generated classes → `backend/dotnet/skills/unit-testing`
+- Generating tests for the new API (contract/integration) → **peer** `qa/dotnet/skills/api-test-author/writer`
 - DTOs for new endpoints → `qa/dotnet/skills/api-models`
 - Java equivalent → `backend/java/skills/pattern-writer`
 - TypeScript equivalent → `backend/node/skills/pattern-writer`
