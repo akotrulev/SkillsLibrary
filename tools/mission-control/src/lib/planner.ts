@@ -1,11 +1,11 @@
 import { randomUUID } from "node:crypto";
 import { query } from "@anthropic-ai/claude-agent-sdk";
 import { z } from "zod";
-import { agentEnv } from "./agent-env";
 import { getCatalog } from "./catalog";
-import { DEFAULT_MAX_PARALLEL, LIBRARY_ROOT, PLANNER_MODEL } from "./config";
+import { LIBRARY_ROOT } from "./config";
 import { validatePlan } from "./plan-validation";
 import { plannerSystemPrompt, plannerUserPrompt } from "./prompts";
+import { agentEnvWithSettings, runtimeConfig } from "./settings";
 import type { Run } from "./types";
 
 const PlanSchema = z.object({
@@ -100,13 +100,17 @@ export interface PlanRequest {
  */
 export async function planRun(request: PlanRequest): Promise<Run> {
   const catalog = await getCatalog();
+  const [env, { plannerModel }] = await Promise.all([
+    agentEnvWithSettings(),
+    runtimeConfig(),
+  ]);
 
   let finalText = "";
   for await (const message of query({
     prompt: plannerUserPrompt(request.planText, request.targetDir),
     options: {
       cwd: request.targetDir,
-      model: PLANNER_MODEL,
+      model: plannerModel,
       systemPrompt: plannerSystemPrompt(catalog),
       // Read-only: the planner inspects the repo but must not modify it.
       allowedTools: ["Read", "Glob", "Grep"],
@@ -116,7 +120,7 @@ export async function planRun(request: PlanRequest): Promise<Run> {
       // Ignore the target repo's own agents/settings so planning is reproducible.
       settingSources: [],
       maxTurns: 60,
-      env: agentEnv(),
+      env,
     },
   })) {
     if (message.type === "result") {
@@ -163,7 +167,9 @@ export async function planRun(request: PlanRequest): Promise<Run> {
     planText: request.planText,
     status: "planned",
     planningNotes: plan.planningNotes,
-    maxParallel: request.maxParallel ?? DEFAULT_MAX_PARALLEL,
+    // An explicit per-run value wins; otherwise the configured instance
+    // default, which is itself the env default when nothing is configured.
+    maxParallel: request.maxParallel ?? (await runtimeConfig()).maxParallel,
     phases: plan.phases.map((p, index) => ({
       id: p.id,
       index,

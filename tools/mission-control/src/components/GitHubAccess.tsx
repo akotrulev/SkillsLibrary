@@ -5,7 +5,7 @@ import { Alert, Box, Button, Chip, Link, Stack, TextField, Typography } from "@m
 
 /** Client-safe view of a project's credential. Never carries the token. */
 export interface TokenDescriptor {
-  source: "project" | "env" | "none";
+  source: "project" | "settings" | "env" | "none";
   hint?: string;
   canPush: boolean;
   undecryptable: boolean;

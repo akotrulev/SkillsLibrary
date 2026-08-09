@@ -23,7 +23,7 @@ export async function GET(
       repoUrl: project.repoUrl,
       baseBranch: project.baseBranch,
       workBranch: project.workBranch,
-      token: tokenDescriptor(project),
+      token: await tokenDescriptor(project),
       cloned: status !== null,
       ...(status ?? {}),
     });
@@ -77,7 +77,7 @@ export async function POST(
           project.targetDir,
           project.repoUrl,
           project.workBranch ?? "mission-control/work",
-          resolveGitToken(project).token,
+          (await resolveGitToken(project)).token,
         );
         return NextResponse.json({ ok: true, branch: project.workBranch });
       }

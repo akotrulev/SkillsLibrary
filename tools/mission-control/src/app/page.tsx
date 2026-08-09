@@ -18,6 +18,7 @@ import {
   Typography,
 } from "@mui/material";
 import { ProjectsPanel, type ProjectRow } from "@/components/ProjectsPanel";
+import { SettingsPanel } from "@/components/SettingsPanel";
 
 interface RunSummary {
   id: string;
@@ -117,6 +118,8 @@ export default function HomePage() {
         agent from the SkillsLibrary to each, and runs them — sequentially where order
         matters, in parallel where it is safe.
       </Typography>
+
+      <SettingsPanel />
 
       <ProjectsPanel
         projects={projects}

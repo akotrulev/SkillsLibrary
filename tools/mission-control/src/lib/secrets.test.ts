@@ -67,8 +67,23 @@ describe("encryptSecret / decryptSecret", () => {
     expect(decryptSecret(encryptSecret(TOKEN, KEY), {})).toBeNull();
   });
 
-  it("Should_Throw_When_EncryptingWithoutAKey", () => {
-    expect(() => encryptSecret(TOKEN, {})).toThrow(/MISSION_CONTROL_SECRET/);
+  /**
+   * Changed deliberately: encrypting with no passphrase used to throw, because
+   * the environment key was the only key. It now falls back to the generated
+   * local key (`secret-key.ts`) so credentials can be stored on a machine that
+   * was never configured through the environment. What must NOT change is that
+   * the plaintext is still encrypted — the fallback is a weaker place to keep
+   * the key, not an absence of one.
+   */
+  it("Should_EncryptWithTheLocalKey_When_NoPassphraseIsConfigured", () => {
+    const record = encryptSecret(TOKEN, {});
+
+    expect(record.ciphertext).not.toContain(TOKEN);
+    expect(decryptSecret(record, {})).toBe(TOKEN);
+  });
+
+  it("Should_NotDecryptWithTheLocalKey_When_WrittenUnderAPassphrase", () => {
+    expect(decryptSecret(encryptSecret(TOKEN, KEY), {})).toBeNull();
   });
 });
 

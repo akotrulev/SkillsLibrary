@@ -76,6 +76,8 @@ Keep the repo-access check itself: "can I push to this remote" is still worth an
 
 ### D5 — Bind to loopback; keep the env allowlist
 
+> **→ superseded in part by plan 006** (2026-08-09), which moves the server to the homelab box and publishes it. The loopback bind survives — it is what makes an edge-terminated auth layer the only door — but "the app has no authentication, correctly, for a single-user tool" does not survive the host being reachable from outside. 006 D3 is the replacement.
+
 `next start` binds `0.0.0.0` by default, and the app has no authentication — correctly, for a single-user tool. Set `HOSTNAME=127.0.0.1` so it is not reachable off-box. `agent-env.ts` stays byte-for-byte: an agent with `Bash` reading the server's environment is a bad idea at any tenancy count.
 
 ---

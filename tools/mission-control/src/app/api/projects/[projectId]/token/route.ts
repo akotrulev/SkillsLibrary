@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { checkAccess, redact } from "@/lib/git";
 import { getProject, resolveGitToken, setProjectToken, tokenDescriptor } from "@/lib/projects";
-import { secretsEnabled } from "@/lib/secrets";
+import { secretStorageAvailable } from "@/lib/secrets";
 
 export const dynamic = "force-dynamic";
 
@@ -21,7 +21,7 @@ export async function GET(
   const { projectId } = await params;
   const project = await getProject(projectId);
   if (!project) return NextResponse.json({ error: "Project not found." }, { status: 404 });
-  return NextResponse.json(tokenDescriptor(project));
+  return NextResponse.json(await tokenDescriptor(project));
 }
 
 export async function PUT(
@@ -32,11 +32,11 @@ export async function PUT(
   const project = await getProject(projectId);
   if (!project) return NextResponse.json({ error: "Project not found." }, { status: 404 });
 
-  if (!secretsEnabled()) {
+  if (!secretStorageAvailable()) {
     return NextResponse.json(
       {
         error:
-          "MISSION_CONTROL_SECRET is not set, so tokens cannot be stored encrypted. Set it and restart, or use MISSION_CONTROL_GIT_TOKEN for all projects.",
+          "The data directory is not writable, so no encryption key can be established and tokens cannot be stored. Fix the directory permissions, or set MISSION_CONTROL_GIT_TOKEN for all projects.",
       },
       { status: 409 },
     );
@@ -59,7 +59,7 @@ export async function PUT(
     if (!updated) {
       return NextResponse.json({ error: "Project not found." }, { status: 404 });
     }
-    return NextResponse.json(tokenDescriptor(updated));
+    return NextResponse.json(await tokenDescriptor(updated));
   } catch (error) {
     return NextResponse.json(
       { error: redact(error instanceof Error ? error.message : "Could not store token.") },
@@ -76,7 +76,7 @@ export async function DELETE(
   const { projectId } = await params;
   const updated = await setProjectToken(projectId, null);
   if (!updated) return NextResponse.json({ error: "Project not found." }, { status: 404 });
-  return NextResponse.json(tokenDescriptor(updated));
+  return NextResponse.json(await tokenDescriptor(updated));
 }
 
 /**
@@ -102,7 +102,7 @@ export async function POST(
   }
 
   const candidate = body.token?.trim();
-  const token = candidate || resolveGitToken(project).token;
+  const token = candidate || (await resolveGitToken(project)).token;
   const result = await checkAccess(project.repoUrl, token, project.targetDir);
 
   return NextResponse.json(
@@ -110,7 +110,7 @@ export async function POST(
       ? {
           ok: true,
           verified: result.verified,
-          testedWith: candidate ? "supplied" : tokenDescriptor(project).source,
+          testedWith: candidate ? "supplied" : (await tokenDescriptor(project)).source,
         }
       : { ok: false, reason: result.reason },
   );

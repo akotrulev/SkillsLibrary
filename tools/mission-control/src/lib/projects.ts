@@ -6,10 +6,11 @@ import { ensureWorkspace, gitTokenFromEnv, repoName, WORKSPACES_DIR } from "./gi
 import {
   decryptSecret,
   encryptSecret,
-  secretsEnabled,
+  secretStorageAvailable,
   tokenHint,
   type SecretRecord,
 } from "./secrets";
+import { configuredGitToken } from "./settings";
 
 /**
  * A configured working directory. Mission Control can hold many projects at
@@ -173,7 +174,7 @@ export async function prepareProject(project: Project): Promise<string> {
     repoUrl: project.repoUrl,
     baseBranch: project.baseBranch,
     workBranch: project.workBranch ?? "mission-control/work",
-    token: resolveGitToken(project).token,
+    token: (await resolveGitToken(project)).token,
   });
 
   // Record what the clone actually resolved to (e.g. the real default branch).
@@ -244,7 +245,7 @@ export async function setProjectToken(
 
 /** Where a project's credential comes from, and whether it can push at all. */
 export interface GitTokenDescriptor {
-  source: "project" | "env" | "none";
+  source: "project" | "settings" | "env" | "none";
   /** Safe-to-display label, project-sourced tokens only. */
   hint?: string;
   canPush: boolean;
@@ -255,19 +256,28 @@ export interface GitTokenDescriptor {
 }
 
 /**
- * Resolve the credential for a project: its own token first, then the
- * process-wide environment token, then nothing.
+ * Resolve the credential for a project, most specific first: the project's own
+ * token, then the instance-wide token from Settings, then the process
+ * environment, then nothing.
+ *
+ * "Nothing" is a legitimate outcome, not a failure — on a machine with a git
+ * credential helper, git authenticates on its own and no token needs to exist
+ * anywhere in this app.
  *
  * The returned token is for server-side git commands only — it must never be
  * put in an API response (see `tokenDescriptor`) or an agent's environment
  * (see `agent-env.ts`).
  */
-export function resolveGitToken(project: Project): {
+export async function resolveGitToken(project: Project): Promise<{
   token?: string;
   descriptor: GitTokenDescriptor;
-} {
-  const storageAvailable = secretsEnabled();
-  const envToken = gitTokenFromEnv();
+}> {
+  const storageAvailable = secretStorageAvailable();
+  const fallback = (await configuredGitToken())
+    ? { token: await configuredGitToken(), source: "settings" as const }
+    : gitTokenFromEnv()
+      ? { token: gitTokenFromEnv(), source: "env" as const }
+      : { token: undefined, source: "none" as const };
 
   if (project.tokenCipher) {
     const token = decryptSecret(project.tokenCipher);
@@ -283,13 +293,13 @@ export function resolveGitToken(project: Project): {
         },
       };
     }
-    // Stored but unreadable: fall back to env rather than failing outright,
-    // and tell the UI the stored token needs re-entering.
+    // Stored but unreadable: fall back rather than failing outright, and tell
+    // the UI the stored token needs re-entering.
     return {
-      token: envToken,
+      token: fallback.token,
       descriptor: {
-        source: envToken ? "env" : "none",
-        canPush: Boolean(envToken),
+        source: fallback.source,
+        canPush: Boolean(fallback.token),
         undecryptable: true,
         storageAvailable,
       },
@@ -297,10 +307,10 @@ export function resolveGitToken(project: Project): {
   }
 
   return {
-    token: envToken,
+    token: fallback.token,
     descriptor: {
-      source: envToken ? "env" : "none",
-      canPush: Boolean(envToken),
+      source: fallback.source,
+      canPush: Boolean(fallback.token),
       undecryptable: false,
       storageAvailable,
     },
@@ -308,8 +318,8 @@ export function resolveGitToken(project: Project): {
 }
 
 /** The client-safe half of `resolveGitToken`. Never contains the token. */
-export function tokenDescriptor(project: Project): GitTokenDescriptor {
-  return resolveGitToken(project).descriptor;
+export async function tokenDescriptor(project: Project): Promise<GitTokenDescriptor> {
+  return (await resolveGitToken(project)).descriptor;
 }
 
 /**

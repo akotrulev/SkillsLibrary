@@ -1,9 +1,9 @@
 import { query } from "@anthropic-ai/claude-agent-sdk";
-import { agentEnv } from "./agent-env";
 import { findAgent, getCatalog } from "./catalog";
-import { IMPLEMENTER_MODEL, LIBRARY_ROOT } from "./config";
+import { LIBRARY_ROOT } from "./config";
 import { eventBus } from "./events";
 import { implementerSystemPrompt, implementerUserPrompt } from "./prompts";
+import { agentEnvWithSettings, runtimeConfig } from "./settings";
 import { appendLog, updateRun } from "./store";
 import type { Run, Task, TaskLogEntry } from "./types";
 
@@ -88,12 +88,19 @@ export async function dispatchTask(run: Run, task: Task): Promise<DispatchResult
   let finalText = "";
   let costUsd: number | undefined;
 
+  // Resolved per dispatch rather than at module load: a credential saved in the
+  // settings UI must take effect on the next task, not the next restart.
+  const [env, { implementerModel }] = await Promise.all([
+    agentEnvWithSettings(),
+    runtimeConfig(),
+  ]);
+
   try {
     for await (const message of query({
       prompt: implementerUserPrompt(run, task),
       options: {
         cwd: run.targetDir,
-        model: IMPLEMENTER_MODEL,
+        model: implementerModel,
         systemPrompt: implementerSystemPrompt(agent, LIBRARY_ROOT),
         allowedTools: IMPLEMENTER_TOOLS,
         permissionMode: "acceptEdits",
@@ -106,7 +113,8 @@ export async function dispatchTask(run: Run, task: Task): Promise<DispatchResult
         maxTurns: 200,
         // Replaces the subprocess environment: agents have Bash, so git
         // credentials and any other server secret must not be reachable.
-        env: agentEnv(),
+        // Configured credentials are layered on top by `agentEnvWithSettings`.
+        env,
       },
     })) {
       if (message.type === "assistant") {
