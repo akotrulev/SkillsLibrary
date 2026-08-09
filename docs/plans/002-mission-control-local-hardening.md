@@ -1,107 +1,152 @@
-# 002 — Mission Control: local-deployment hardening
+# 002 — Mission Control: local single-user deployment
 
 **Status:** planned 2026-08-09
 **Scope:** `tools/mission-control`
-**Goal:** make the existing Docker image safe and predictable as a **local, single-user** deployment — not reachable off-box, not serving stale catalog data, not silently corrupting state across a version bump, and backed up.
+**Goal:** tailor Mission Control to what it actually is — a **single-user tool running natively on one Mac** — by deleting the credential and container machinery that only a hosted deployment needs, and adding per-run worktree isolation so agents never edit a tree you have open.
 
-**Explicitly out of scope:** multi-tenancy, auth/registration, sandboxed execution, billing. Those belong to a hosted product; see the evaluation summary in *Why*. This plan assumes exactly one user, on one machine, running their own agents against their own repos.
+> Supersedes the Docker-oriented first draft of this plan (same number, replaced 2026-08-09). The four gaps that draft identified are still real; two of them are dissolved by the runtime change rather than fixed, and the surviving two are Phase 5 here.
 
 ---
 
 ## Why
 
-The container story is essentially finished already. `Dockerfile` is a clean three-stage build (deps → build → `node:22-bookworm-slim` runtime with `git` + `ripgrep`, which agents shell out to), `MISSION_CONTROL_DATA_DIR=/data` is backed by the named volume `mission-control-data`, `VOLUME ["/data"]` is declared so even a bare `docker run` keeps state, and every mutation is written through immediately. Restart recovery is already correct: `reconcile()` (`src/lib/store.ts:56`) requeues orphaned `in_progress` tasks and demotes a `running` run to `paused`, so a restart never silently resumes writing to your code.
+Three questions drove this: does a local deployment need an LLM token, does it need a git token, and how do multiple project directories get configured. Investigating them on the actual machine produced a fourth answer that reframes all three.
 
-State survives `stop`/`start`, `down`/`up`, and image rebuilds. It does **not** survive `down -v` or `docker volume prune`.
+### The LLM token is a Docker artifact
 
-Four gaps remain between that and something safe to leave running day to day.
+The Agent SDK resolves credentials `ANTHROPIC_API_KEY` → `ant auth login` → the local Claude Code login. On this machine there is **no `ANTHROPIC_API_KEY`** and **no `~/.claude/.credentials.json`** — macOS keeps the Claude Code login in the **keychain**.
 
-1. **`4300:4300` publishes on every interface** (`docker-compose.yml:22`) and there is **no authentication anywhere in the app**. On any shared network, that is an unauthenticated agent with `Bash` and write access to the mounted repos, exposed to the LAN. Blocker-class.
-2. **The catalog cache never invalidates.** `getCatalog()` (`src/lib/catalog.ts:207`) serves the in-memory copy, then `/data/catalog.json`, and only rebuilds when `force` is set — and **nothing in the UI ever sets it**: the sole call site is `fetch("/api/catalog")` (`src/app/page.tsx:71`), with no `?refresh=1`. So the cache is permanent until someone deletes the file by hand. Since this library is under active development, a newly authored agent is invisible to the planner, and `dispatchTask` hard-fails a task whose agent is absent (`src/lib/dispatcher.ts:76`).
-3. **No schema versioning on persisted state.** `store.ts:76`, `store.ts:137`, `projects.ts:60` and `catalog.ts:184` all `JSON.parse(...) as T` — a bare cast, no validation. Fine for stop/start of one version; the failure mode is a **redeploy across versions**, where a renamed or added field silently deserializes to `undefined` and surfaces as confusing UI rather than a clean error. Zod is already a dependency.
-4. **Uncommitted agent work has a single point of failure.** Git-backed projects check out under `.data/workspaces/<id>` (`src/lib/git.ts:10`), which is on the volume — so it survives restarts, but it is a *working tree*. Edits an agent has made but not pushed exist in exactly one place: a Docker volume with no backup and a one-flag destruction path.
+A container cannot reach the keychain, so the commented-out `~/.claude` mount in `docker-compose.yml` does not work on macOS. Docker therefore forces a separate metered API key. Run the app natively and the SDK picks up the existing login with zero configuration.
+
+### The git token is mostly a Docker artifact too
+
+`credential.helper` is `store` on this machine, so `~/.git-credentials` already answers non-interactively. `withToken()` (`src/lib/git.ts:60`) passes a URL through untouched when no token is configured, and `GIT_ASKPASS=echo` / `GIT_TERMINAL_PROMPT=0` (`git.ts:22`) suppress *prompting* without blocking the helper — so a native process pushes successfully with no token of its own.
+
+That makes the encrypted per-project PAT store from plan 001 redundant here: it protects a credential that already sits in plaintext two directories away in `~/.git-credentials`. Its **other** purpose survives untouched and is not affected by this plan — `agent-env.ts` keeping the credential out of agent subprocesses is still exactly right, because an agent with `Bash` should not be able to read your environment regardless of who is using the tool.
+
+### Toolchains are the decisive argument
+
+The `Dockerfile` says it plainly: agents run unit tests inside the container, so *"whatever your target project needs must exist there."* The image carries `node`, `git` and `ripgrep`. This library's agents target .NET 10, Java 21, Node 24 and React — and this machine already has `dotnet`, `java`, `node` and `python3` installed. Containerising means baking every toolchain into one image and keeping it aligned with each project's detected version lane, permanently, for no benefit a single user receives.
+
+### Multiple project directories already work
+
+`projects.json` + `ProjectsPanel` already hold N projects, each with its own absolute `targetDir` and an independent execution switch. The only constraint is Docker's `MC_PROJECTS_ROOT`, which mounts **one** parent directory at an identical host/container path and so forces every project under a single root. Native has no such limit — any absolute path works and the paths agents log back are real.
+
+**Conclusion: run it natively, delete the container, delete both credential paths.**
 
 ---
 
 ## Design decisions
 
-### D1 — Bind to loopback, do not add auth
+### D1 — Native process, no container
 
-The fix is `127.0.0.1:4300:4300`, not a login screen. Adding users/sessions to a single-user local tool is the first step down the multi-tenant road this deployment deliberately isn't taking, and loopback binding is strictly stronger than a password against the actual threat (someone else on the same wifi). Anyone needing off-box access uses an SSH tunnel, which is documented rather than built.
+`npm run build && npm run start`, wrapped in a launchd agent for start-on-login. Deletes `Dockerfile`, `docker-compose.yml`, `.dockerignore`, the `MC_PROJECTS_ROOT` path-mapping concept, and the toolchain-extension section of the README.
 
-Rejected: *bind to the LAN and add basic auth* — more code, weaker guarantee, and invites the assumption that the tool is safe to expose.
+Rejected: *a container with the toolchains baked in* — see above; it is a standing maintenance cost that buys a single user nothing. Rejected: *keeping the container as an optional path* — two supported runtimes doubles the documentation and the failure modes for a tool with one user.
 
-### D2 — Invalidate the catalog on library mtime, keep the cache
+### D2 — No LLM credential configuration
 
-The cache exists for a good reason: a cold index is ~25s over a bind-mounted volume. So keep it and add a cheap staleness probe — walk the library for the newest `.md` mtime and compare against `indexedAt`. The walk is `stat`-only (no file reads), which is the fast half of indexing; `collect()` (`src/lib/catalog.ts:36`) already does exactly this traversal and can be reused.
+The SDK's own resolution order is the feature. Remove `ANTHROPIC_API_KEY` from the setup instructions and let the host login serve. `agent-env.ts` already forwards `ANTHROPIC_*` and `CLAUDE_*` prefixes, so an API key still works for anyone who prefers one — it just stops being a documented prerequisite.
 
-Rejected: *a filesystem watcher* — the library is a read-only bind mount, and inotify across that boundary is unreliable on Docker Desktop. Rejected: *TTL expiry* — either too short (pays 25s for nothing) or too long (still stale); mtime answers the actual question.
+### D3 — No credential store; git uses the host helper
 
-### D3 — Version the persisted shape, fail loud on mismatch
+Delete `secrets.ts` (+ `secrets.test.ts`), `MISSION_CONTROL_SECRET`, the token API routes, and the token half of `GitHubAccess.tsx`. Two call sites change behaviour rather than disappearing:
 
-Add `schemaVersion: number` to `Run` and the projects file, validate on load with Zod, and on a version the running code doesn't understand **refuse the record and say so** rather than best-effort casting it. A quarantine rename (`<runId>.json.v1.bak`) keeps the data recoverable.
+- `pushBranch()` (`git.ts:174`) drops its "no git token for this project" precondition and simply pushes, letting the helper authenticate.
+- `checkAccess()` (`git.ts:230`) stops forcing `credential.helper=`. That flag exists so a cached keychain entry cannot mask a bad *supplied* token — with no supplied token there is nothing to mask, and forcing it empty would make the check fail where the real push succeeds. The dry-run-push-over-`ls-remote` reasoning in that function is sound and stays.
 
-`catalog.json` is exempt — it is a derived cache, so the correct response to an unreadable one is to rebuild, which `readCacheFile()` already does by returning null.
+Keep the repo-access check itself: "can I push to this remote" is still worth answering before a run, and it now verifies the helper rather than a stored PAT.
 
-Rejected: *migration functions per version* — premature for one user and one writer; loud refusal plus a preserved file is enough, and migrations can be added later at the same seam.
+### D4 — Both project sources stay; isolation is a per-run worktree
 
-### D4 — Host bind mount as the default, named volume as the fallback
+`local` (a path to a repo you already have) and `git` (a managed clone under `.data/workspaces/<id>`) both remain. On top of either, every run gets its own **`git worktree`**:
 
-Switch `docker-compose.yml` to `./.data:/data`. `.data/` is already in `.gitignore` (`tools/mission-control/.gitignore:3`) and already in `.dockerignore`, so nothing leaks into the repo or the image. The payoff is that state becomes an ordinary directory the user can inspect, back up, and copy — and the `down -v` footgun disappears entirely.
+```
+.data/worktrees/<runId>   ← branch mc/<runId>, cut from the project's base branch
+```
 
-The cost is UID ownership on Linux: the container runs as root by default (deliberately — see the `Dockerfile` comment on bind-mounted host directories), so it would leave root-owned files in the tree. Document `--user "$(id -u):$(id -g)"` alongside it. On macOS, where this is actually run, the issue doesn't arise.
+`run.targetDir` becomes that worktree path, which is what `dispatchTask` already passes as `cwd` (`dispatcher.ts:93`) — so nothing downstream changes. The properties that make this the right primitive locally:
+
+- `git worktree add` works fine against a repo with a dirty main tree, so a run never disturbs the checkout you have open in an editor;
+- it shares the object store, so there is no duplicated history and no second fetch;
+- the result is an ordinary branch in your own repo — review with `git diff`, merge or delete, no push required and no remote involved for `local` projects;
+- `CLAUDE.md`, `.claude/` and `docs/agent-context/` come along in the worktree, so agents keep their orientation cache and project conventions.
+
+**Fallback:** a `local` project that is not a git repository gets no worktree and is edited directly, with the UI saying so. Silently doing nothing would be worse than the honest downgrade.
+
+### D5 — Bind to loopback; keep the env allowlist
+
+`next start` binds `0.0.0.0` by default, and the app has no authentication — correctly, for a single-user tool. Set `HOSTNAME=127.0.0.1` so it is not reachable off-box. `agent-env.ts` stays byte-for-byte: an agent with `Bash` reading the server's environment is a bad idea at any tenancy count.
 
 ---
 
 ## Phases
 
-Independent of each other; ordered by risk. Each is self-contained and shippable.
+Ordered by dependency: 1 and 2 shrink the surface, 3 is the one real feature, 4–5 are ergonomics and durability.
 
-### Phase 1 — Close the network exposure
+### Phase 1 — Native runtime
 
-- [ ] `docker-compose.yml:22` → `- "127.0.0.1:4300:4300"`
-- [ ] `README.md`: state plainly that the app has **no authentication** and must not be published on a routable interface; give the SSH-tunnel one-liner (`ssh -L 4300:localhost:4300 <host>`) as the remote-access path
-- [ ] Add a startup log line naming the bound address, so a misconfiguration is visible at boot
+- [ ] Delete `Dockerfile`, `docker-compose.yml`, `.dockerignore`
+- [ ] `package.json`: `"start": "next start -p 4300 -H 127.0.0.1"`
+- [ ] Add `launchd/com.mission-control.plist` + a `README` section for start-on-login (`launchctl load`), logging to `.data/mission-control.log`
+- [ ] Default `MISSION_CONTROL_DATA_DIR` to `./.data` (already the code default via `config.ts:16`) and confirm `LIBRARY_ROOT`'s two-levels-up default resolves correctly outside a container
+- [ ] README rewrite: prerequisites become *Node 22+, a Claude Code login, git* — no API key, no `MC_PROJECTS_ROOT`, no toolchain-extension section
 
-**Acceptance:** `curl http://<host-lan-ip>:4300` from another machine on the LAN is refused; `curl http://localhost:4300` on the host succeeds.
+**Acceptance:** `npm run start` on a machine with no `ANTHROPIC_API_KEY` plans and dispatches a run successfully. `curl http://<lan-ip>:4300` from another machine is refused.
 
-### Phase 2 — Make the catalog self-invalidate
+### Phase 2 — Delete the credential subsystem
 
-- [ ] `catalog.ts`: extract the `stat`-only traversal from `collect()` into `newestLibraryMtime(): Promise<number>`
-- [ ] `getCatalog()`: after loading from memory or disk, compare `newestLibraryMtime()` against `indexedAt`; rebuild when the library is newer. Keep `force` for a manual override
-- [ ] Guard the probe with a short in-process throttle (≥10s) so a page with several catalog reads doesn't re-walk the tree per request
-- [ ] Wire a **Refresh** control in the header next to the `40 agents · 333 skills` count, calling `/api/catalog?refresh=1` — the endpoint supports it (`src/app/api/catalog/route.ts:8`) and has no caller
-- [ ] Surface `indexedAt` in the header as a relative time, so staleness is legible
+- [ ] Remove `src/lib/secrets.ts`, `src/lib/secrets.test.ts`, `src/app/api/projects/[projectId]/token/route.ts`
+- [ ] `projects.ts`: drop `tokenCipher`, `tokenHint`, `secretsEnabled` and the token-resolution path; keep `gitTokenFromEnv()` as an unadvertised override for a repo the helper cannot serve
+- [ ] `git.ts`: relax `pushBranch()`'s token precondition; stop forcing `credential.helper=` in `gitAuthed()`
+- [ ] `GitHubAccess.tsx` → a read-only **Repo access** panel: remote, base branch, and the result of the access check
+- [ ] Migration for the existing `.data/projects.json`: strip `tokenCipher`/`tokenHint` on load, no user action needed
+- [ ] Remove `MISSION_CONTROL_SECRET` and `MISSION_CONTROL_GIT_TOKEN` from all documentation
 
-**Acceptance:** add a new `SKILL.md` under the library, reload the page without restarting the container, and the skill count increases. Touching nothing and reloading does **not** trigger a rebuild (verify via the absence of the ~25s index).
+**Acceptance:** a `git` project clones, commits and pushes with no token configured anywhere in Mission Control. `rg -i "MISSION_CONTROL_SECRET|tokenCipher"` returns nothing outside this plan and plan 001.
 
-### Phase 3 — Version the persisted state
+### Phase 3 — Per-run worktree isolation
 
-- [ ] Add `schemaVersion` to `Run` (`src/lib/types.ts`) and to the projects file; define `CURRENT_SCHEMA_VERSION`
-- [ ] Zod schemas for `Run` and `Project`; validate in `loadRun`, `loadRunUncached` (`store.ts:76,137`) and `readAll` (`projects.ts:60`)
-- [ ] On a version or shape mismatch: log it, rename the file to `<name>.v<n>.bak`, and omit the record from the listing rather than crashing the whole list — matching the existing `decryptSecret` posture of degrading rather than throwing (`src/lib/secrets.ts:70`)
-- [ ] Treat a missing `schemaVersion` as version 1 and stamp it on next write, so existing `.data/` upgrades cleanly
-- [ ] Surface quarantined runs in the UI as a one-line notice, so a silent disappearance is impossible
-- [ ] Unit tests: current shape loads; unknown-future version quarantines; missing field is caught by Zod, not by `undefined` reaching a component
+- [ ] `git.ts`: `createWorktree(baseDir, runId, baseBranch)` → `.data/worktrees/<runId>` on branch `mc/<runId>`; `removeWorktree(runId)` doing `git worktree remove` + `git worktree prune`
+- [ ] `isGitRepo(dir)` probe; a non-repo `local` project skips the worktree and is flagged in the UI
+- [ ] Run creation: build the worktree, set `run.targetDir` to it, record `baseDir` + `workBranch` on the run
+- [ ] Extend `reconcile()` (`store.ts:56`) to survive a worktree that vanished under a stopped process — a run whose `targetDir` no longer exists must fail loudly, not dispatch into a missing directory
+- [ ] Run detail UI: branch name, changed-file count (reuse `workspaceStatus`), a copyable `git diff mc/<runId>` line, and **Discard** (remove worktree + branch) / **Keep** (remove worktree, keep branch)
+- [ ] Never auto-delete a worktree with uncommitted changes — `hasChanges()` already answers this
+- [ ] Retention: prune worktrees for runs finished more than N days ago, branches kept
 
-**Acceptance:** hand-edit a run file's `schemaVersion` to `999`; the board still renders every other run and shows the notice. Revert, and it loads normally.
+**Acceptance:** start a run against a `local` project with a deliberately dirty working tree; the tree is untouched throughout, the work lands on `mc/<runId>`, and `git worktree list` is clean after Discard.
 
-### Phase 4 — Durable state and backups
+### Phase 4 — Project configuration ergonomics
 
-- [ ] `docker-compose.yml`: replace `mission-control-data:/data` with `./.data:/data`; drop the now-unused `volumes:` block
-- [ ] `README.md` → *Persistence*: document the bind mount, the Linux `--user "$(id -u):$(id -g)"` note, and the migration for anyone on the old named volume:
-      `docker run --rm -v mission-control-data:/data -v "$PWD/.data:/out" alpine cp -a /data/. /out/`
-- [ ] Document the backup one-liner and the durability boundary in one sentence: **pushed commits are safe; anything uncommitted in `.data/workspaces/<id>` lives in one place only**
-- [ ] Consider (do not build yet) a `git push` of the work branch at end-of-run as the real fix for that boundary — noted here so Phase 4 doesn't get mistaken for having solved it
+- [ ] Validate on add: path exists, is a directory, is readable, and report whether it is a git repo — instead of silently registering anything typed
+- [ ] Reject duplicate `targetDir` registrations (normalise trailing slashes and symlinks via `fs.realpath`)
+- [ ] Show base branch and repo-clean state per project row in `ProjectsPanel`
+- [ ] Recently-used paths in the target-directory field, sourced from existing projects
 
-**Acceptance:** `docker compose down && docker compose up` preserves all runs and projects with `.data/` visible on the host; a `tar` of `.data/` restored into a fresh checkout reproduces the board.
+**Acceptance:** adding a path that does not exist produces an inline error, not a project row that fails at dispatch.
+
+### Phase 5 — Carried over from the superseded draft
+
+Both survive the runtime change untouched.
+
+- [ ] **Catalog self-invalidation.** `getCatalog()` (`catalog.ts:207`) serves the cache unconditionally and `?refresh=1` **has no caller** — the sole fetch is `src/app/page.tsx:71` — so a newly authored agent stays invisible, and `dispatchTask` hard-fails a task naming it (`dispatcher.ts:76`). Add a `stat`-only newest-mtime probe over `LIBRARY_ROOT` compared against `indexedAt`, throttled to ~10s, plus a Refresh control and a relative `indexedAt` in the header.
+- [ ] **Schema versioning.** `store.ts:76,137` and `projects.ts:60` are bare `JSON.parse(...) as T` casts. Add `schemaVersion`, validate with Zod (already a dependency), and on mismatch quarantine the file to `<name>.v<n>.bak` and omit the record with a UI notice rather than letting `undefined` reach a component. Missing version reads as 1. `catalog.json` is exempt — it is derived, and rebuilding is the correct response.
+
+**Acceptance:** adding a `SKILL.md` to the library makes the skill count rise on reload without a restart; a run file with `schemaVersion: 999` is quarantined while every other run still renders.
 
 ---
 
+## What this deletes
+
+`Dockerfile` · `docker-compose.yml` · `.dockerignore` · `secrets.ts` · `secrets.test.ts` · the token route · the token half of `GitHubAccess.tsx` · `MISSION_CONTROL_SECRET` · `MISSION_CONTROL_GIT_TOKEN` (as a documented path) · `MC_PROJECTS_ROOT` and all host↔container path mapping.
+
+Plan 001 is **partly reverted by design**: its D1–D3 (encrypted per-project token, resolution order, write-only API) are hosted-deployment concerns that a native single-user process does not have. Its **D4 is untouched and remains load-bearing** — the token never reaching an agent subprocess, via the `agent-env.ts` allowlist.
+
 ## Effort
 
-Roughly one focused day for all four: Phase 1 is minutes, Phase 2 and 4 an hour or two each, Phase 3 the bulk of it because of the tests.
+Phase 1 and 2 are half a day each and mostly deletion. Phase 3 is the real work — call it two days with the UI and the reconcile edge cases. Phases 4 and 5 are a day together. Roughly **four focused days** for all five.
 
-## Notes for a future session
+## Deferred
 
-The larger question that produced this plan — extracting Mission Control as a multi-tenant hosted product — was evaluated and **deferred**. The blocking item is execution isolation: `dispatchTask` runs `query()` as a host subprocess with `Bash` and `permissionMode: "acceptEdits"` for up to 200 turns (`src/lib/dispatcher.ts:91-108`), contained only by the env allowlist in `agent-env.ts`. That is sound for a single trusted user and is not a multi-tenant boundary; a hosted version needs one ephemeral microVM per run with allowlisted egress, which is where the majority of that project's cost sits. The intermediate step, if demand appears, is a **single-tenant self-hosted** distribution — which is what this plan produces.
+The hosted multi-tenant product remains out of scope. Its blocking item is execution isolation: `dispatchTask` runs `query()` as a host subprocess with `Bash` and `permissionMode: "acceptEdits"` for up to 200 turns (`dispatcher.ts:91-108`), contained only by the `agent-env.ts` allowlist. Sound for one trusted user; not a tenancy boundary. A hosted version needs one ephemeral microVM per run with allowlisted egress, which is where the majority of that project's cost sits.
