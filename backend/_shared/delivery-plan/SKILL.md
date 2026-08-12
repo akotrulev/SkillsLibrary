@@ -1,6 +1,6 @@
 ---
 name: be-shared-delivery-plan
-description: Use when a planned backend (blueprint + data model + API surface + integrations) needs turning into an ordered, executable task list — phases with parallel-safety calls, one task per unit of work bound to an exact library agent and the skills it loads, files touched, dependencies, and acceptance criteria — plus the HANDOFF.md session-state file that lets work stop and resume across sessions, and a reconcile procedure that re-verifies a plan against half-built code. Directly ingestible by Mission Control. Triggers "what order do we build this in", "turn the plan into tasks", "which agent builds what", "pick up where we left off", "reconcile the plan against the code". Do NOT use to write the code (`be-dotnet`/`be-java`/`be-node`), to execute a generic step-by-step plan (`ep-executing-plans`), or to audit built code against a spec (`code-auditor`).
+description: Use when a planned backend (blueprint + data model + API surface + integrations) needs turning into an ordered, executable task list — phases as hard barriers with named streams (lanes of sequential work) inside them, one task per unit of work bound to an exact library agent and the skills it loads, files touched, dependencies, and acceptance criteria — plus the HANDOFF.md session-state file that lets work stop and resume across sessions, and a reconcile procedure that re-verifies a plan against half-built code. Directly ingestible by Mission Control. Triggers "what order do we build this in", "turn the plan into tasks", "which agent builds what", "pick up where we left off", "reconcile the plan against the code". Do NOT use to write the code (`be-dotnet`/`be-java`/`be-node`), to execute a generic step-by-step plan (`ep-executing-plans`), or to audit built code against a spec (`code-auditor`).
 ---
 
 # Delivery Plan — the ordered, agent-bound task list
@@ -56,28 +56,52 @@ Anything not traceable to a row above is either missing from the design pack (go
 
 ### Step 2 — Group into phases
 
-A **phase** is a set of tasks that can start once the previous phase is done. Phases run strictly in order; tasks within a phase may run in parallel **only if** they touch disjoint files and none consumes another's output.
+A **phase** is a set of tasks that can start once the previous phase is done. Phases are **hard barriers**: nothing in phase N+1 starts until every task in phase N is finished, even when a particular task's own dependencies are already satisfied. The barrier is what makes the ordering safe on plans that encode prerequisites structurally — P2 schema before P4 slices — rather than enumerating every edge.
 
-The shape that works, and why:
+The shape that works, and the lanes it falls into:
 
-| Phase | Contains | Parallel-safe? |
+| Phase | Contains | Streams inside it |
 |---|---|---|
-| **P0 Prerequisites** | Human-blocked provisioning from `integrations.md` | Yes — nobody is editing code |
-| **P1 Foundations** | Scaffold, project layout, config + validation, CI skeleton | **No** — everything touches the same root files |
-| **P2 Schema** | Migrations in their stated order | **No** — migrations are ordered by definition |
-| **P3 Cross-cutting** | Auth wiring, error middleware, shared DTOs, telemetry base | **No** — shared surfaces, and every later task depends on them |
-| **P4 Feature slices** | One task per resource: entity → persistence → service → endpoints → unit tests | **Usually yes** — disjoint files, once P3 is stable |
-| **P5 Integrations** | External clients, webhook handlers, background jobs | Usually yes — one file set per dependency |
-| **P6 Hardening** | Rate limiting, observability, performance, docs | Mixed — call it per task |
+| **P0 Prerequisites** | Human-blocked provisioning from `integrations.md` | One per provisioning track — nobody is editing code |
+| **P1 Foundations** | Scaffold, project layout, config + validation, CI skeleton | **One** — scaffold, config and CI all edit the same root files |
+| **P2 Schema** | Migrations in their stated order | **One** — migrations are ordered by definition |
+| **P3 Cross-cutting** | Auth wiring, error middleware, shared DTOs, telemetry base | **One** — shared surfaces, and every later task depends on them |
+| **P4 Feature slices** | One task per resource: entity → persistence → service → endpoints → unit tests | **One per resource** — disjoint file sets, once P3 is stable |
+| **P5 Integrations** | External clients, webhook handlers, background jobs | One per dependency — one file set each |
+| **P6 Hardening** | Rate limiting, observability, performance, docs | Group by what they touch; often one per subsystem |
 
-**The parallel-safety call is a claim you must defend in one concrete sentence.** Not "these are independent" but "T7 touches `Orders/*`, T8 touches `Products/*`, no shared file". If two tasks in a phase would edit the same file — a DI registration module, a route table, a `DbContext` — the phase is **not** parallel-safe, or that shared edit is pulled out into its own earlier task. Foundational work is almost never parallel-safe, and claiming otherwise produces merge conflicts that look like agent failures.
+A lane that finishes its phase work early **idles at the barrier** until the phase closes. That is the cost of the conservatism, and it is worth stating in the plan rather than leaving someone to read it as a stall.
 
-### Step 3 — Write each task
+### Step 3 — Declare the streams
+
+A **stream** is a named lane. Tasks in one stream run strictly one after another; different streams run at the same time. So the question to answer is not a per-phase yes/no — it is **"which lanes does this work actually have, and why is each one internally sequential?"**, which is answerable from the file sets you just wrote down.
+
+Give the plan a streams table, before the progress table:
+
+| Stream | Owns | Why it is internally sequential |
+|---|---|---|
+| `foundation` | Scaffold, config, CI, the shared surfaces every slice builds on | One root file set — every task edits the solution root or `Program.cs` |
+| `booking` | The Bookings resource and the email it sends on confirm | `src/Booking/*` throughout; T13 sends on the event T11 raises |
+
+Rules:
+
+- **Name a stream after what it owns** — `booking`, `schema`, `infra`, `ui`. Never `stream1`, and never one lane per phase.
+- **Stream identity is stable across phases.** If P1 and P3 both hold foundation work, that is one `foundation` lane running down the whole plan, not two.
+- **Two tasks whose `Files` overlap MUST share a stream.** This is the hard rule and the one that is machine-checked: concurrent lanes execute against a single working tree, so two lanes writing one path is a corrupted edit, not a merge conflict to resolve later. If the shared edit is incidental — a DI registration module, a route table — pull it out into its own earlier task instead of collapsing two good lanes into one.
+- **A stream is a claim, not a bucket.** Each task in it needs the previous one's output, or touches the same code. Spreading independent tasks across lanes to look parallel is the failure mode in one direction; dumping unrelated work into one lane to look safe is the failure mode in the other, and it serialises a plan that did not need to be.
+- **A task that depends on nothing and shares no file gets its own stream.**
+- **`order` is one sequence across the whole plan** — 1, 2, 3, … no repeats, no gaps. Within a stream it fixes execution sequence; across the plan it records the order you would have done the work in yourself, which is what decides who gets a slot when more lanes are eligible than the run allows to be concurrent.
+- **`Depends on` still points backwards in `order`.** Streams say "same lane, therefore sequential"; `dependsOn` says "across lanes, this waits on that". Both are needed and a task waits on both — but a dependency on a task with a *higher* order is a contradiction between the two, and it is reported as a defect rather than resolved.
+
+Keep the per-phase parallel-safety line in the phases table for the reader, and defend it the same concrete way as before — "T10 touches `src/Scheduling/*`, T11 touches `src/Booking/*`, no shared file". But the streams table is now the load-bearing statement: a phase whose tasks all sit in one stream *is* what `parallelSafe: false` used to say, derived rather than asserted.
+
+### Step 4 — Write each task
 
 ```markdown
 ### T12 — Orders resource (P4)
 
 **Agent:** `be-dotnet` · **Skills:** `be-dotnet-pattern-writer`, `be-dotnet-database-code`, `be-dotnet-unit-testing`
+**Stream:** `ordering` · **Order:** 12
 **Depends on:** T4 (schema), T9 (auth wiring), T10 (shared DTOs + error middleware)
 **Files:**
 - Create: `src/Ordering/Domain/Order.cs`, `src/Ordering/Domain/OrderLine.cs`
@@ -105,28 +129,29 @@ endpoints in `api-surface.md` §5 (list, get, place, cancel, close), with the st
 Rules:
 
 - **`Agent` is an exact catalog name.** `be-dotnet`, `be-java`, `be-node`, `data-architect`, `devops-engineer`, `observability-engineer-<stack>`, `qa-api-<stack>`, `qa-security`, `fe-react`, `fe-blazor`. An invented name is the most damaging defect in the pack, because Mission Control binds on this string. Same for skill names.
-- **`Files` must be specific.** This is what the parallel-safety check relies on, and it is the difference between a plan and a wish.
+- **`Files` must be specific.** This is what the stream check relies on, and it is the difference between a plan and a wish.
+- **`Stream` is one of the ids declared in Step 3**, and `Order` is that task's slot in the plan-wide sequence. **Every task carries both, or no task does** — half-authored lanes are rejected rather than completed, because back-filling the rest would scatter tasks into lanes nobody planned. A `Stream` naming an undeclared lane and two tasks claiming one `Order` are both reported as plan defects, and the undeclared lane also costs you the lanes you did author: the whole plan falls back to derived ones.
 - **Acceptance criteria are checkable**, and they cite the design pack by section rather than restating it. "Handles errors properly" is not a criterion; "returns the documented `type` slug for each of the three deltas" is.
 - **The build/test command is the project's own**, taken from the orientation pass — never a guessed default.
 - **A task is one sitting.** If it touches more than ~8 files or has more than ~8 acceptance criteria, split it. Tasks that span days hide their own failure.
 - **`Out of scope` per task** — mostly to keep the executing agent from wandering into a peer's lane.
 - **Tasks are implementation.** Live/E2E/integration test runs, starting servers, and manual verification belong to a separate QA pass owned by a `qa-*` peer. Unit tests are part of the implementation task, not a separate one.
 
-### Step 4 — The progress table
+### Step 5 — The progress table
 
-The scannable index, and the thing `HANDOFF.md` points at:
+The scannable index, and the thing `HANDOFF.md` points at. Rows sorted by `#`, which makes the sequence auditable at a glance — a repeat or a gap is visible without cross-reading the task blocks:
 
-| Task | Phase | Title | Agent | Depends on | Status | Evidence |
-|---|---|---|---|---|---|---|
-| T12 | P4 | Orders resource | `be-dotnet` | T4, T9, T10 | Not started | — |
+| # | Task | Phase | Stream | Title | Agent | Depends on | Status | Evidence |
+|---|---|---|---|---|---|---|---|---|
+| 12 | T12 | P4 | `ordering` | Orders resource | `be-dotnet` | T4, T9, T10 | Not started | — |
 
 Status vocabulary — five values, no others: **Not started · In progress · Done · Partial · Diverged · Blocked**. `Evidence` holds the `file:line` or command output that justifies a `Done` or `Partial`. An empty Evidence cell on a `Done` row is a defect in the plan, not a formatting gap.
 
-### Step 5 — Write `HANDOFF.md`
+### Step 6 — Write `HANDOFF.md`
 
 The live session-state file — see `references/handoff-template.md` for the full template and its rules. It is **rewritten each session, not appended**, except for the short session-log tail. Its whole purpose is that a cold agent (or a human on Monday) can read one file and know exactly where things stand and what to do next.
 
-### Step 6 — The Mission Control section
+### Step 7 — The Mission Control section
 
 Close the document with an ingestion block so the plan can be pasted into Mission Control and produce a near-identical task graph:
 
@@ -134,17 +159,21 @@ Close the document with an ingestion block so the plan can be pasted into Missio
 ## For Mission Control
 
 Paste this document into the plan box and point the run at `<target repo path>`.
-The task graph maps 1:1 — phases keep their `parallelSafe` calls, tasks keep their
-`agent`, `skills`, `files`, and `dependsOn`, and the open questions below carry
-their options. MC's planner re-reads the target repo, so it may split a task it
-finds too large; that is expected and does not invalidate the sequence.
+The task graph maps 1:1 — the streams in §2 become MC's lanes, each task keeps its
+`stream` and `order` alongside its `agent`, `skills`, `files` and `dependsOn`,
+phases stay hard barriers, and the open questions below carry their options.
+MC's planner re-reads the target repo, so it may split a task it finds too large;
+that is expected and does not invalidate the sequence — the new pieces belong in
+the split task's own lane.
 
 **Open questions still blocking tasks**
 | # | Question | Options | Blocks |
 |---|---|---|---|
 ```
 
-Mission Control's planner consumes exactly these fields — `id · phaseId · title · intent · acceptanceCriteria[] · agent · skills[] · files[] · dependsOn[]`, per-phase `parallelSafe` + `parallelRationale`, and `openQuestions[]` with 2–4 options each and one recommended. Writing them in that vocabulary is the entire compatibility requirement.
+Mission Control's planner consumes exactly these fields — run-level `streams[]` (`id · name · description`), per-task `id · phaseId · streamId · order · title · intent · acceptanceCriteria[] · agent · skills[] · files[] · dependsOn[]`, per-phase `parallelSafe` + `parallelRationale`, and `openQuestions[]` with 2–4 options each and one recommended. Writing them in that vocabulary is the entire compatibility requirement.
+
+**A pack without streams still imports.** MC derives lanes from the phases' parallel-safety calls — a sequential phase becomes one lane, a parallel-safe one becomes a lane per task — and orders from position in the list. That is why `parallelSafe` stays in the artifact. But a derivation is a guess at the shape you already know: it cannot tell that P1's foundation lane and P3's shared-surfaces lane are the same continuous lane, and it will fan a parallel-safe phase out to the width of its task count. Author the streams.
 
 ---
 
@@ -200,18 +229,22 @@ Diverged — T9 (auth wiring): plan specifies policy-based authorization;
 | Phase | Goal | Parallel-safe | Rationale |
 |---|---|---|---|
 
-## 2. Progress
-| Task | Phase | Title | Agent | Depends on | Status | Evidence |
-|---|---|---|---|---|---|---|
+## 2. Streams
+| Stream | Owns | Why it is internally sequential |
+|---|---|---|
 
-## 3. Tasks
-<!-- one block per task: agent, skills, depends on, files, intent, acceptance criteria, out of scope -->
+## 3. Progress
+| # | Task | Phase | Stream | Title | Agent | Depends on | Status | Evidence |
+|---|---|---|---|---|---|---|---|---|
 
-## 4. Open questions
+## 4. Tasks
+<!-- one block per task: agent, skills, stream + order, depends on, files, intent, acceptance criteria, out of scope -->
+
+## 5. Open questions
 | # | Question | Options | Blocks | Owner |
 |---|---|---|---|---|
 
-## 5. Deliberately not planned
+## 6. Deliberately not planned
 <!-- what this initiative excludes and which agent/peer owns it instead -->
 
 ## For Mission Control
@@ -223,7 +256,7 @@ Diverged — T9 (auth wiring): plan specifies policy-based authorization;
 1. Every functional area in `blueprint.md` has at least one task; every migration, every resource, every external client, every blocking unknown is a task.
 2. Every task binds to an **exact** catalog agent name and exact skill names.
 3. No task depends on a later phase. Every `dependsOn` id exists.
-4. Every phase marked parallel-safe has a concrete disjoint-files rationale; no two of its tasks share a file.
+4. Every task names a declared stream and carries a unique `order`; every stream's row says why it is internally sequential; no two tasks in the same phase but different streams share a file; no `dependsOn` points at a higher `order`.
 5. Every task's acceptance criteria are checkable and cite the design pack by section.
 6. The build/test commands are the project's own, from the orientation pass.
 7. `HANDOFF.md` exists, names the next task, and lists every blocker.

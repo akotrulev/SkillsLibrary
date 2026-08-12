@@ -42,7 +42,11 @@ what is half-built, and what the next session should do first.>
 
 ## Next task
 
-**T12 — Orders resource** (`be-dotnet`; loads `be-dotnet-pattern-writer`, `be-dotnet-database-code`, `be-dotnet-unit-testing`)
+<!-- One entry per unblocked stream, lowest `order` first. Inline execution takes them
+     in that order; Mission Control starts them concurrently, so a second entry here is
+     not a choice between two tasks — it is two lanes about to run. -->
+
+**T12 — Orders resource** (`ordering`, order 12 · `be-dotnet`; loads `be-dotnet-pattern-writer`, `be-dotnet-database-code`, `be-dotnet-unit-testing`)
 Unblocked: T4, T9, T10 all Done.
 Start with: `src/Ordering/Domain/Order.cs`, following the shape already set by
 `src/Catalog/Domain/Product.cs:1-60` (T11's output — match it, do not invent a second convention).
