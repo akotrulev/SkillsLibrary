@@ -7,7 +7,7 @@
   },
   "metadata": {
     "description": "Stack-first skills library covering QA, frontend, backend, data, and business-analysis: install one self-contained plugin per tech stack. `qa-{java,dotnet,typescript}` bundle every QA discipline \u2014 API/UI/mobile/performance/LLM/BDD authoring and verification, manual-QA process, CI/CD, reporting, and OWASP-mapped security. `fe-{blazor,react}` are phased frontend dev-stack agents (scaffold \u2192 architecture \u2192 features \u2192 quality \u2192 tests \u2192 review). `be-{dotnet,java,node}` are phased backend dev-stack agents for design-pattern application, ORM persistence, and Auth0/Cognito service-side auth. `devops` ships the platform lane \u2014 container images, IaC, cloud deploys, and build/deploy pipelines. `data` and `business-analysis` round out the database-engineering and cross-feature requirements domains.",
-    "version": "2.17.0"
+    "version": "2.18.0"
   },
   "plugins": [
     {
@@ -98,6 +98,7 @@
         "./qa/manual/requirements-breakdown",
         "./qa/manual/test-case-writer",
         "./qa/manual/test-design-techniques",
+        "./qa/manual/test-plan-writer",
         "./qa/manual/test-strategy",
         "./qa/reporting/java/skills/test-reports",
         "./qa/reporting/java/skills/flaky-test-quarantine",
@@ -134,6 +135,8 @@
         "./qa/manual/commands/qa-exploratory-charter-writer.md",
         "./qa/manual/commands/qa-requirements-breakdown.md",
         "./qa/manual/commands/qa-test-case-writer.md",
+        "./qa/manual/commands/qa-test-plan-writer.md",
+        "./qa/manual/commands/qa-test-planner.md",
         "./qa/manual/commands/qa-test-strategy.md",
         "./engineering-practices/commands/ep-brainstorming.md",
         "./engineering-practices/commands/ep-writing-plans.md",
@@ -151,6 +154,7 @@
         "./qa/java/agents/qa-performance-java.md",
         "./qa/java/agents/qa-ui-java.md",
         "./qa/manual/agents/qa-test-case-designer.md",
+        "./qa/manual/agents/qa-test-planner.md",
         "./qa/reporting/agents/qa-reporting-java.md",
         "./engineering-practices/agents/code-auditor.md"
       ]
@@ -248,6 +252,7 @@
         "./qa/manual/requirements-breakdown",
         "./qa/manual/test-case-writer",
         "./qa/manual/test-design-techniques",
+        "./qa/manual/test-plan-writer",
         "./qa/manual/test-strategy",
         "./qa/reporting/dotnet/skills/test-reports",
         "./qa/reporting/dotnet/skills/flaky-test-quarantine",
@@ -285,6 +290,8 @@
         "./qa/manual/commands/qa-exploratory-charter-writer.md",
         "./qa/manual/commands/qa-requirements-breakdown.md",
         "./qa/manual/commands/qa-test-case-writer.md",
+        "./qa/manual/commands/qa-test-plan-writer.md",
+        "./qa/manual/commands/qa-test-planner.md",
         "./qa/manual/commands/qa-test-strategy.md",
         "./engineering-practices/commands/ep-brainstorming.md",
         "./engineering-practices/commands/ep-writing-plans.md",
@@ -302,6 +309,7 @@
         "./qa/dotnet/agents/qa-performance-dotnet.md",
         "./qa/dotnet/agents/qa-ui-dotnet.md",
         "./qa/manual/agents/qa-test-case-designer.md",
+        "./qa/manual/agents/qa-test-planner.md",
         "./qa/reporting/agents/qa-reporting-dotnet.md",
         "./engineering-practices/agents/code-auditor.md"
       ]
@@ -345,6 +353,7 @@
         "./qa/manual/requirements-breakdown",
         "./qa/manual/test-case-writer",
         "./qa/manual/test-design-techniques",
+        "./qa/manual/test-plan-writer",
         "./qa/manual/test-strategy",
         "./qa/reporting/typescript/skills/test-reports",
         "./qa/reporting/typescript/skills/flaky-test-quarantine",
@@ -429,6 +438,8 @@
         "./qa/manual/commands/qa-exploratory-charter-writer.md",
         "./qa/manual/commands/qa-requirements-breakdown.md",
         "./qa/manual/commands/qa-test-case-writer.md",
+        "./qa/manual/commands/qa-test-plan-writer.md",
+        "./qa/manual/commands/qa-test-planner.md",
         "./qa/manual/commands/qa-test-strategy.md",
         "./engineering-practices/commands/ep-brainstorming.md",
         "./engineering-practices/commands/ep-writing-plans.md",
@@ -440,6 +451,7 @@
         "./qa/_shared/agents/qa-security.md",
         "./qa/cicd/agents/qa-cicd-typescript.md",
         "./qa/manual/agents/qa-test-case-designer.md",
+        "./qa/manual/agents/qa-test-planner.md",
         "./qa/reporting/agents/qa-reporting-typescript.md",
         "./qa/typescript/agents/qa-api-typescript.md",
         "./qa/typescript/agents/qa-bdd-typescript.md",

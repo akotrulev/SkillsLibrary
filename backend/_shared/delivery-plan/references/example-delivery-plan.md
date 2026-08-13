@@ -26,33 +26,47 @@ The filled example for `be-shared-delivery-plan`, from the **workshop-booking** 
 | P5 | Integrations (email sender) | Yes | One file set, one task |
 | P6 | Hardening (telemetry, race test support, docs) | Mixed | Called per task |
 
-## 2. Progress
+## 2. Streams
 
-| Task | Phase | Title | Agent | Depends on | Status | Evidence |
-|---|---|---|---|---|---|---|
-| T0.1 | P0 | Auth0 tenant + per-env applications | *(human — owner)* | — | Not started | — |
-| T0.2 | P0 | SendGrid account + domain auth | *(human — owner)* | — | Not started | — |
-| T1 | P1 | Scaffold solution + module layout | `be-dotnet` | — | Not started | — |
-| T2 | P1 | Config + startup validation, CI skeleton | `be-dotnet` | T1 | Not started | — |
-| T3 | P2 | Migrations 001–003 + seeds | `be-dotnet` | T2 | Not started | — |
-| T5 | P3 | Auth wiring (JWT bearer, two permissions) | `be-dotnet` | T2, T0.1 | Not started | — |
-| T9 | P3 | Error middleware + shared DTOs + endpoint-module convention | `be-dotnet` | T2 | Not started | — |
-| T10 | P4 | Workshops + Sessions resources | `be-dotnet` | T3, T5, T9 | Not started | — |
-| T11 | P4 | Bookings resource | `be-dotnet` | T3, T5, T9 | Not started | — |
-| T12 | P4 | Generate + commit the OpenAPI asset | `be-dotnet` | T10, T11 | Not started | — |
-| T13 | P5 | Email sender (SendGrid + Mailpit lane) | `be-dotnet` | T9, T11 | Not started | — |
-| T14 | P6 | Telemetry base | `observability-engineer-dotnet` | T10, T11 | Not started | — |
-| T15 | P6 | Overbooking guard depth review | `data-architect` | T3 | Not started | — |
+| Stream | Owns | Why it is internally sequential |
+|---|---|---|
+| `foundation` | The solution root and everything shared: scaffold, config, CI, auth wiring, error middleware, the endpoint-module seam, the OpenAPI asset, telemetry base | Every task edits the solution root or `src/Api/Program.cs`. T0.1 sits here too — the Auth0 tenant is what T5 wires, so the provisioning belongs to the lane that consumes it |
+| `schema` | Migrations and the data-integrity work that follows from them | Migrations are ordered by definition, and T15's guard review reads the constraint T3 creates |
+| `scheduling` | Workshops + Sessions — `src/Scheduling/*` | One module, one file set |
+| `booking` | Bookings and the confirmation email — `src/Booking/*`, `src/Notifications/*` | T13 sends on the event T11 raises, so it cannot start until T11 exists; T0.2 provisions the sender it uses |
+
+Lanes idle at phase barriers by design: `booking` finishes T0.2 in minutes and then waits for the whole of P1–P3, because `foundation` is building the surfaces T11 is written against.
+
+## 3. Progress
+
+| # | Task | Phase | Stream | Title | Agent | Depends on | Status | Evidence |
+|---|---|---|---|---|---|---|---|---|
+| 1 | T0.1 | P0 | `foundation` | Auth0 tenant + per-env applications | *(human — owner)* | — | Not started | — |
+| 2 | T0.2 | P0 | `booking` | SendGrid account + domain auth | *(human — owner)* | — | Not started | — |
+| 3 | T1 | P1 | `foundation` | Scaffold solution + module layout | `be-dotnet` | — | Not started | — |
+| 4 | T2 | P1 | `foundation` | Config + startup validation, CI skeleton | `be-dotnet` | T1 | Not started | — |
+| 5 | T3 | P2 | `schema` | Migrations 001–003 + seeds | `be-dotnet` | T2 | Not started | — |
+| 6 | T5 | P3 | `foundation` | Auth wiring (JWT bearer, two permissions) | `be-dotnet` | T2, T0.1 | Not started | — |
+| 7 | T9 | P3 | `foundation` | Error middleware + shared DTOs + endpoint-module convention | `be-dotnet` | T2 | Not started | — |
+| 8 | T10 | P4 | `scheduling` | Workshops + Sessions resources | `be-dotnet` | T3, T5, T9 | Not started | — |
+| 9 | T11 | P4 | `booking` | Bookings resource | `be-dotnet` | T3, T5, T9 | Not started | — |
+| 10 | T12 | P4 | `foundation` | Generate + commit the OpenAPI asset | `be-dotnet` | T10, T11 | Not started | — |
+| 11 | T13 | P5 | `booking` | Email sender (SendGrid + Mailpit lane) | `be-dotnet` | T9, T11 | Not started | — |
+| 12 | T14 | P6 | `foundation` | Telemetry base | `observability-engineer-dotnet` | T10, T11 | Not started | — |
+| 13 | T15 | P6 | `schema` | Overbooking guard depth review | `data-architect` | T3 | Not started | — |
 
 Status vocabulary: Not started · In progress · Done · Partial · Diverged · Blocked. A `Done`/`Partial` with an empty Evidence cell is a plan defect.
 
-## 3. Tasks
+Note T5 and T9 sharing `foundation`: both modify `src/Api/Program.cs`, so they may not be separate lanes however independent they read. T12 is in `foundation` for the same reason and runs alone in that lane during P4 — its `dependsOn` holds it behind T10 and T11 without a lane needing to say so.
+
+## 4. Tasks
 
 *A real artifact writes every block; this example shows three.*
 
 ### T9 — Error middleware + shared DTOs + endpoint-module convention (P3)
 
 **Agent:** `be-dotnet` · **Skills:** `be-dotnet-pattern-writer`, `be-dotnet-unit-testing`
+**Stream:** `foundation` · **Order:** 7
 **Depends on:** T2
 **Files:**
 - Create: `src/Shared/ProblemDetailsMiddleware.cs`, `src/Shared/PagedResult.cs`, `src/Shared/SessionSummary.cs`
@@ -72,6 +86,7 @@ Status vocabulary: Not started · In progress · Done · Partial · Diverged · 
 ### T11 — Bookings resource (P4)
 
 **Agent:** `be-dotnet` · **Skills:** `be-dotnet-pattern-writer`, `be-dotnet-database-code`, `be-dotnet-unit-testing`
+**Stream:** `booking` · **Order:** 9
 **Depends on:** T3, T5, T9
 **Files:**
 - Create: `src/Booking/Domain/Booking.cs`, `src/Booking/BookingService.cs`, `src/Booking/BookingEndpoints.cs`, `src/Booking/BookingConfiguration.cs`
@@ -92,6 +107,7 @@ Status vocabulary: Not started · In progress · Done · Partial · Diverged · 
 ### T12 — Generate + commit the OpenAPI asset (P4)
 
 **Agent:** `be-dotnet` · **Skills:** `be-dotnet-pattern-writer`, `be-dotnet-unit-testing`
+**Stream:** `foundation` · **Order:** 10
 **Depends on:** T10, T11
 **Files:**
 - Create: `docs/api/booking-api-openapi-2026-08-02.json` (canonicalized: `jq -S`, 2-space)
@@ -109,23 +125,25 @@ Status vocabulary: Not started · In progress · Done · Partial · Diverged · 
 ### T0.1–T15, remaining — abbreviated in this example
 Each gets the same block shape. Notable: T0.x are human prerequisite tasks from `integrations.md` §5 (the three-places rule); T15 executes `data-model.md` §9's routed decision.
 
-## 4. Open questions
+## 5. Open questions
 
 | # | Question | Options | Blocks | Owner |
 |---|---|---|---|---|
 | — | none — all settled at blueprint approval | | | |
 
-## 5. Deliberately not planned
+## 6. Deliberately not planned
 
 Contract/integration tests (`qa-api-dotnet`), the access-control proof (`qa-security`), pipeline beyond the CI skeleton (`devops-engineer`), both SPAs (`fe-react`).
 
 ## For Mission Control
 
 Paste this document into the plan box and point the run at `~/src/workshop-booking`.
-The task graph maps 1:1 — phases keep their `parallelSafe` calls, tasks keep their
-`agent`, `skills`, `files`, and `dependsOn`, and the open questions above carry
-their options. MC's planner re-reads the target repo, so it may split a task it
-finds too large; that is expected and does not invalidate the sequence.
+The task graph maps 1:1 — the four streams in §2 become MC's lanes, each task keeps
+its `stream` and `order` alongside its `agent`, `skills`, `files` and `dependsOn`,
+phases stay hard barriers, and the open questions above carry their options.
+MC's planner re-reads the target repo, so it may split a task it finds too large;
+that is expected and does not invalidate the sequence — the new pieces belong in
+the split task's own lane.
 
 **Open questions still blocking tasks**
 | # | Question | Options | Blocks |

@@ -1,6 +1,6 @@
 ---
 name: qa-test-case-writer
-description: Use when the user asks to write, derive, or generate formal test cases from requirements, user stories, acceptance criteria, or feature specs. Triggers: "write test cases for X", "derive test scenarios from these ACs", "create a test plan for feature Y".
+description: Use when the user asks to write, derive, or generate formal test cases from requirements, user stories, acceptance criteria, or feature specs. Triggers: "write test cases for X", "derive test scenarios from these ACs", "turn these ACs into runnable case scripts". Do NOT use for a feature test plan (scope/harness/artifacts) — that is test-plan-writer.
 ---
 
 # QA Test Case Writer
@@ -13,11 +13,12 @@ This skill **assembles and formats** the suite: it factors shared preconditions 
 
 - The user provides a requirement, user story, or acceptance criteria and wants test cases derived
 - The user wants positive, negative, and edge cases enumerated for a feature
-- The user wants a test plan or coverage matrix for a feature
+- The user wants a coverage matrix alongside the cases
 - An exploratory session report (from `qa/manual/exploratory-charter-writer`) lists **test-case candidates** to formalize — each candidate becomes a case traced to the session/finding instead of an AC, tagged `#observed`
 
 ## When NOT to use
 
+- The user wants a feature **test plan** — scope in/out, harness, artifacts, a scenario-level case inventory → `qa/manual/test-plan-writer` / the `qa-test-planner` agent
 - The user wants an exploratory session charter → `qa/manual/exploratory-charter-writer`
 - The user wants automation code (Playwright, Appium, RestSharp) → `qa/<stack>/skills/ui-test-author` or `qa/<stack>/skills/api-test-author`
 - The user wants to report a defect they found → `qa/manual/bug-report-writer`

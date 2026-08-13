@@ -17,6 +17,7 @@ Produces a stack-agnostic test strategy for a feature, release, or whole service
 
 ## When NOT to use
 
+- A full feature **test plan** — harness & tooling looked up from the repo, environments, artifacts, a gap-analyzed case inventory → `qa/manual/test-plan-writer` / the `qa-test-planner` agent (which *embeds* this skill's risk register and scope call)
 - Writing the actual tests → `qa/<stack>/skills/api-test-author/generator/<stack>` / `qa/<stack>/skills/ui-test-author/<stack>` / `qa/manual/test-case-writer`
 - Reviewing existing tests → `qa/<stack>/skills/api-test-author/reviewer` / `qa/<stack>/skills/ui-test-author/reviewer`
 - Bug reports → `qa/manual/bug-report-writer`
