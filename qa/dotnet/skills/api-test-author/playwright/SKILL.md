@@ -184,7 +184,7 @@ public class UserTests : BasePlaywrightApiTest
 
 Create/update flows keep the RestSharp sibling's discipline unchanged: the rich happy-path template (request
 fields + server-generated fields + `GetById` round-trip in `Assert.Multiple`), per-test cleanup via
-`try { … } finally { try { await client.DeleteAsync(...); } catch { } }`, `[TearDown]` for data created in
+tracked ids deleted in a `[TearDown]` that carries no `try`/`catch` (the test body stays linear — no `try`/`finally`), `[TearDown]` for data created in
 `[SetUp]`.
 
 ## Scenario → pattern matrix

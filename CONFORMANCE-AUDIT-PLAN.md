@@ -84,6 +84,8 @@ The **procedure** (modes, artifacts, evidence rules, severity, report templates,
 
 Each is a first-cut section list to review, not final. Target 12–20 sections, 100–150 checks — the react build landed at 19/143, which felt right: dense enough to be a real sweep, short enough to read.
 
+**One cross-cutting rule every stack's checklist must carry** (already landed in `be-dotnet` §N, `fe-react` §S, `qa-dotnet` §B): the global **Comments** rules in `CLAUDE.md` — no inline comments; a doc comment only where the name genuinely cannot carry the meaning, and only on a complex flow; stale comments are `major`. Put it in the structure/hygiene section rather than inventing a letter for it, and keep the reporting convention the three landed sections use: **the "no inline comments" check is reported as one finding family** (count + 3–5 representative `file:line`s + the worst offender + one fix direction), while each **stale** comment is its own finding, because each is a distinct false statement.
+
 ### 4.1 `fe-blazor` — 20 sections (the Blazor twin of react's 19)
 
 Same spine, Blazor mechanics. `javascript-calls` is the one section with no react counterpart.
@@ -109,7 +111,7 @@ Same spine, Blazor mechanics. `javascript-calls` is the one section with no reac
 | Q | PWA / offline | `installable-offline-app` | WASM-only installable+offline; **Server can only be installable** — flag an offline claim on a Server app |
 | R | Auth wiring | `auth/auth0-blazor` | `AuthorizeView` + cascading auth state; server-side enforcement, not UI-only; no tokens in `localStorage` |
 | S | **JS interop discipline** | `javascript-calls` | `IJSObjectReference` disposed (`IAsyncDisposable`); **never called in `OnInitializedAsync`**; `JSDisconnectedException` handled; no-interop-where-C#-suffices |
-| T | Project structure, nullability & secrets | `project-setup` | `<Nullable>enable</Nullable>`; no secrets in `appsettings.json`; DI registration hygiene; constructor injection only |
+| T | Project structure, nullability, secrets & comments | `project-setup` | `<Nullable>enable</Nullable>`; no secrets in `appsettings.json`; DI registration hygiene; constructor injection only; **no inline comments** — XML doc only on complex flows where the name can't carry the meaning; no stale comments (see the global **Comments** rules) |
 
 ### 4.2 `be-dotnet` · `be-java` · `be-node` — 14 sections (one shared spine, three sets of mechanics)
 
@@ -130,7 +132,7 @@ The spine is identical; every row's *violation shape* and *recipe* is stack-spec
 | K | Configuration & secrets | `reviewer` | No secrets in `appsettings.json`; typed `IOptions` | No secrets in `application.yml`; `@ConfigurationProperties` | No committed `.env`; validated env schema |
 | L | Observability | `observability/*` (bundled) | **Bounded metric cardinality** (per-record ids are span attributes, never metric labels) · **Collector as the seam** (no direct-to-backend exporters) · structured logging with **message templates, never interpolation** · trace-context propagation · log↔trace correlation · health endpoints. Serilog / SLF4J+Logback / pino per stack |
 | M | Testability & contract tests | `reviewer` | Every public API has a contract test (coordinate with the `qa-api-<stack>` peer — the audit reports absence, the peer writes them); seams injectable; no test-only hooks in prod code |
-| N | Project structure & type safety | `reference` | Nullable enabled | No raw generics | `strict: true`, no `any` |
+| N | Project structure, type safety & comments | `reference` | Nullable enabled; no inline comments; XML doc only on complex flows | No raw generics; no inline comments; Javadoc only on complex flows | `strict: true`, no `any`; no inline comments; TSDoc only on complex flows |
 
 ### 4.3 `qa-java` · `qa-dotnet` · `qa-typescript` — 14 sections (**audits the test suite, not the app**)
 
@@ -141,7 +143,7 @@ Relationship to the existing reviewers: `api-test-author/reviewer`, `ui-test-aut
 | Letter | Section | Owning skill(s) | Signature checks |
 |---|---|---|---|
 | A | Build health & suite lane | stack scaffold skills | Runner + build tool + versions; the suite compiles and actually runs; disabled/ignored tests without a ticketed reason |
-| B | Test naming & structure | global test rules | `Should_X_When_Y` / `Given_When_Then`; **one logical assertion**; **no conditional logic** (`if`/`for` driving assertions → parameterized instead); AAA shape |
+| B | Test naming, structure & comments | global test + **Comments** rules | `Should_X_When_Y` / `Given_When_Then`; **one logical assertion**; **no conditional logic** (`if`/`for` driving assertions → parameterized instead); AAA shape; **no inline comments — including `// Arrange`/`// Act`/`// Assert` banners** (the name and the AAA shape are the explanation); the only three permitted are a linked defect id, a recorded instructed deviation, and the source of a domain-fixed magic value |
 | C | Independence & isolation | global test rules | Any test alone, in any order; no shared mutable state; no ordering dependency; parallel-safe |
 | D | Waits & timing | `ui-test-author/*` | **No `Thread.Sleep` / `waitForTimeout` / implicit-wait soup**; explicit condition waits (Awaitility / `expect` polling / `WebDriverWait`) |
 | E | Page / screen objects | `page-object-design`, `ui-test-author/*`, `mobile-screen-objects` | **Expose intent, not selectors**; mechanics + waits live in the POM; no selectors in tests or step definitions; no 900-line god-page |

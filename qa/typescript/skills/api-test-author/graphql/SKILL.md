@@ -131,8 +131,8 @@ it('rejects invalid input with BAD_USER_INPUT (HTTP 200)', async () => {
 });
 ```
 
-Clean up data created inside a spec with `afterEach`/`afterAll` (wrap cleanup in `try/catch` so a cleanup error
-never masks a test failure) — same discipline as the REST sibling.
+Track ids created inside a spec and delete them in `afterEach`/`afterAll` — no `try/finally` in the test and no
+`try/catch` in the hook: a cleanup that fails should fail loudly. Same discipline as the REST sibling.
 
 ## Introspection — assert the schema contract, and that prod disables it
 
@@ -245,7 +245,7 @@ transport contract differs.
   `GraphQLErrorSchema` for the envelope. One logical assertion per test; assert specific `extensions.code` +
   `path`, never a bare `errors` presence.
 - **A mutation test round-trips a read** to prove persistence; data created in a spec is cleaned up in
-  `afterEach`/`afterAll` (cleanup in `try/catch`).
+  `afterEach`/`afterAll` (ids tracked as created; no `try/finally` in the spec, no `try/catch` in the hook).
 - **Subscriptions are out of scope** → `qa-realtime-stream-testing-typescript`. **Endpoint + token via env**, read
   lazily, never logged. No `waitForTimeout`/sleeps; `strict: true`.
 

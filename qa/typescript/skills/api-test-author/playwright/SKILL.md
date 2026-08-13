@@ -141,19 +141,23 @@ test.describe('GET /api/users', () => {
 });
 
 test.describe('POST /api/users', () => {
+  const createdIds: string[] = [];
+
+  // Cleanup is registered, never inlined: the test body stays linear with no
+  // try/finally, and the hook carries no try/catch — a failing cleanup fails loudly.
+  test.afterEach(async ({ adminClient }) => {
+    for (const id of createdIds) await adminClient.remove(id);
+    createdIds.length = 0;
+  });
+
   test('TC-USER-010: creates a user when the body is valid', async ({ adminClient }) => {
     const body = validUser().build(); // builder — see qa/typescript/skills/test-data-builder
-    let createdId: string | undefined;
 
-    try {
-      const created = await adminClient.createTyped(body, 201);
-      createdId = String(created.id);
+    const created = await adminClient.createTyped(body, 201);
+    createdIds.push(String(created.id));
 
-      expect.soft(created.email).toBe(body.email);
-      expect.soft(created.firstName).toBe(body.firstName);
-    } finally {
-      if (createdId) await adminClient.remove(createdId).catch(() => { /* cleanup must not mask failures */ });
-    }
+    expect.soft(created.email).toBe(body.email);
+    expect.soft(created.firstName).toBe(body.firstName);
   });
 
   test('TC-USER-011: returns 400 with a field error when email is missing', async ({ adminClient }) => {

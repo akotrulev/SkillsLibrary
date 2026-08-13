@@ -59,6 +59,9 @@ Severities (from `CLAUDE.md`):
 | No business logic in page objects | Price calculation, JSON parsing, branching on app state inside POM | major |
 | Tests are independent | Test B depends on data created by Test A; `test.describe.serial` (Playwright) chaining setup across tests | blocker |
 | One logical behavior per test | One `test(...)` verifies login + cart + checkout | major |
+| No `try`/`catch` in a test or cleanup hook | Any catch block in a test; `.catch(() => {})` on an action; a swallowing hook | major |
+| Failures identify the subject | Assertions with no message, so a failure cannot be told from a bad locator | minor |
+| Every assertion states one expected condition | `expect([a, b]).toContain(x)`, `\|\|` inside an `expect`, `/a\|b/` in a `toHaveText` / `toHaveURL` | major |
 | Test names describe behavior | `test1`, `'login test'`, `'click button'` | minor |
 | No hardcoded credentials / base URLs | Literal `admin@example.com`, hardcoded `https://staging.x.y` | major |
 | Locators promoted to `readonly Locator` fields / module constants | Inline locator strings re-typed across methods | minor |
@@ -147,6 +150,8 @@ Code that looks well-written in this stack tends to share these traits:
 
 ## Always-flag anti-patterns
 
+- **`OR` in an assertion.** `expect(['Saved', 'Success']).toContain(text)`, a `||` inside an `expect`, or a `/Saved|Success/` alternation in a `toHaveText` / `toHaveURL` — all the same defect: the test does not know what the app should render, so it passes on the wrong state and never fails when the app flips between the two. Watch for the regex form especially; it reads as a legitimate matcher. Fix by splitting into one `test(...)` per expected outcome, generating one test per row from a case array, or pinning the correct value.
+
 - **Test that asserts nothing.** A spec that ends after a `click()` with no `expect` is not a test.
 - **`expect` inside a page object.** Always a blocker — moves assertion ownership away from the test.
 - **`waitForTimeout` / `browser.pause` / `setTimeout` for UI sync.** Always a blocker, regardless of duration.
@@ -154,9 +159,23 @@ Code that looks well-written in this stack tends to share these traits:
 - **Floating promises.** Missing `await` on `expect` or page actions silently passes tests.
 - **Brittle locator chain.** `page.locator('div > div > span:nth-child(3) > a')` will break on the next DOM tweak.
 - **Login-in-every-test.** Use `storageState` (Playwright) or per-suite seeded session.
-- **`try/catch` wrapping the whole test body.** Hides failures. Cleanup belongs in fixtures/teardown.
+- **Any `try`/`catch` in a test — or in a cleanup hook.** There is no legitimate one. Wrapping the body hides failures; wrapping cleanup leaks state silently; a `.catch(() => {})` on an action is the same defect in one line. An expected rejection is asserted with `await expect(...).rejects`; an unexpected one must reach the runner; cleanup is registered and deleted in `afterEach` with no catch. The suite's only catches belong in an I/O helper narrowing **one named** error — never a bare `catch {}`.
+- **A failure message that names no subject.** `expected '' to be 'Saved'` could be a wrong value or a locator that matched nothing — pass the message argument naming the element and the record.
 - **`any` / `as unknown as X` casts in fixtures or page object types.** Defeats the purpose of TS strict mode.
-- **Comments that restate what the code does** (`// click login`). Comment the *why*.
+- **Any inline comment in a test body or a page-object method** (`// click login`, `// Arrange`), and any stale comment. Per `ep-code-comments` — the name is the explanation; rename or extract, never reword.
+
+## Comments in test code
+
+Load **[`ep-code-comments`](../../../../../engineering-practices/code-comments/SKILL.md)** for the rule itself, the complex-flow test that earns a doc comment, the never-comment trivia list, and the severity mapping. Its **test-code** section carries the AAA-banner rule and the exactly-three-permitted-comments list. This section supplies only the mechanics that differ here. Here it covers **page-object and screen-object bodies** as well as tests — an intent-revealing method name is the page object's documentation.
+
+| TypeScript mechanic | What to check |
+|---|---|
+| Doc syntax | TSDoc (`/** … */`) — a doc block on a locator field, or restating `ClickSave`, is trivia |
+| Skips needing a reason and a ticket | a bare `test.skip(...)` / `.fixme` — a silently disabled test |
+| Suppressions needing a reason | `@ts-expect-error` / `eslint-disable` in a fixture or page-object type |
+| Where an unclear interaction goes instead | Into a named page-object method, not a comment above the locator chain |
+
+**The locator corollary — the one that matters most here.** A comment explaining a locator (`// the third span is the price`) is not a comment finding; it is evidence the locator is **positional and brittle**. Fix the locator: request a `data-testid` and record it in `missing-testids.md`. Cross-reference the finding to the locator-hygiene list rather than filing it as a comment.
 
 ## Procedure
 

@@ -340,8 +340,8 @@ Findings in this section are the direct input to the `missing-testids.md` handsh
 
 ---
 
-## S — Project structure, TS strictness & secrets
-*Owning skills: [`project-setup`](../../project-setup/SKILL.md) · [`basics`](../../basics/SKILL.md)*
+## S — Project structure, TS strictness, secrets & comments
+*Owning skills: [`project-setup`](../../project-setup/SKILL.md) · [`basics`](../../basics/SKILL.md) · [`code-review`](../../code-review/SKILL.md) (S10–S12)*
 
 | # | Check | Violation looks like | Find it with | Sev |
 |---|---|---|---|---|
@@ -354,6 +354,11 @@ Findings in this section are the direct input to the `missing-testids.md` handsh
 | S7 | Lint + format configured and enforced | No ESLint config, or a config nothing runs | `ls .eslintrc* eslint.config.*`; CI workflow | minor |
 | S8 | Structured logging on the server; no stray `console.log` | `console.log` in server code and hot render paths | `rg "console\.(log\|debug)" $SRC` | minor |
 | S9 | Env access is validated and typed | `process.env.X!` used raw with no schema/validation | `rg "process\.env\." $SRC` | minor |
+| S10 | No inline comments inside component bodies, hooks, or JSX | Step markers (`// render the header`, `{/* the list */}`), a line restating the line below, leftover `TODO`/`FIXME` with no ticket, commented-out JSX | `rg -n "^\s+//\|\{/\*" $SRC` then read the hits that sit inside a body — a hit is never a finding | minor |
+| S11 | TSDoc only where the name genuinely cannot carry the meaning | A doc block restating the component name; TSDoc on every member of a `Props` interface or every field of a Zod schema | `rg -n -A1 "^\s*/\*\*" $SRC` — check what each sits above | minor |
+| S12 | Surviving comments are true and load-bearing | A comment describing behaviour the component no longer has — the comment is the defect, and deletion is the fix | Read the code around every comment S10/S11 surfaced; grep cannot decide this one | major |
+
+**S10–S12 are the audit face of [`ep-code-comments`](../../../../../engineering-practices/code-comments/SKILL.md)** — read it for the rule, the complex-flow test that earns TSDoc, the never-comment trivia list, and the family-vs-per-finding reporting split (S10 is one family with a count and 3–5 cited sites; each **S12** stale comment is its own finding). Two local notes: the `'use client'` / `'use server'` directives are **not** comments, and **S3 already owns bare suppressions** — an un-justified `eslint-disable-next-line react-hooks/exhaustive-deps` belongs there, not here.
 
 ---
 
@@ -379,4 +384,4 @@ Findings in this section are the direct input to the `missing-testids.md` handsh
 | P | Localization | multi-language apps only |
 | Q | PWA / offline | installable/offline apps only |
 | R | Auth wiring | apps with auth only |
-| S | Project structure, TS strictness & secrets | always |
+| S | Project structure, TS strictness, secrets & comments | always |

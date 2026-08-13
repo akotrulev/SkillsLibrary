@@ -108,9 +108,8 @@ describe('POST /api/users', () => {
 
   afterEach(async () => {
     const client = createUserClient(await authHelper.getToken(TestUsers.ADMIN));
-    for (const id of createdIds) {
-      try { await client.remove(id); } catch { /* cleanup must not mask failures */ }
-    }
+    // no try/catch — a cleanup that fails should fail the hook loudly
+    for (const id of createdIds) await client.remove(id);
     createdIds.length = 0;
   });
 
@@ -162,10 +161,16 @@ describe('POST /api/users', () => {
 - Always assert the status code before reading the body — the typed method does this for you; raw responses get an explicit `expect(response.status).toBe(...)` first.
 - Happy path uses the **typed** method; negative scenarios use the **raw** method. Never re-assert the status after a typed call.
 - One logical behavior per test. Use `expect.soft(...)` for multiple fields of one response so Vitest reports every mismatch; never assert multiple unrelated behaviors in one `it`.
+- **One expected condition per assertion — never an `OR`.** `expect(response.status).toBe(200)`, never `expect([200, 204]).toContain(response.status)` or `expect(s === 200 || s === 204).toBe(true)`; `toBe(400)`, never "400 or 409". The rule covers every assertion, not just status: field values, array lengths, error codes, and response-time budgets are asserted against the single value the test expects. No `||` inside an `expect`, no `toContain`/`toMatch` used to smuggle a set of acceptable values, no `expect.any(...)` where a concrete value is knowable. If two outcomes are both possible, the scenario is under-specified — split it into one `it` per expected outcome, drive it from `it.each([...])`, or establish which value is correct. The only exception is an explicit instruction to accept more than one value; when that happens, state the instruction in a comment on the assertion.
 - Parse every 2xx body through the Zod schema (the typed method already does); error bodies are parsed in the spec via `ProblemDetailsSchema.parse(response.bodyJson)`. Never read `response.bodyJson.field` without parsing first; never `JSON.parse` — `baseClient` already populated `bodyJson`.
 - Request bodies with 4+ fields come from builders (`qa/typescript/skills/test-data-builder`); simpler bodies use an object literal typed as the InDto.
-- Tests are independent: per-test data setup, `afterEach`/`afterAll` cleanup of created entities wrapped in `try/catch`, no execution-order assumptions.
+- Tests are independent: per-test data setup, `afterEach`/`afterAll` cleanup of created entities (no `try/catch` — a failing cleanup should fail the hook loudly), no execution-order assumptions.
 - Rows that differ only in data → parameterize via `it.each([...])` (`qa/typescript/skills/data-driven-testing`), never `if`/`for` driving assertions.
+- **Never swallow an error, and never write a `try`/`catch` in a spec.** An `it(...)` body contains no catch blocks and no `.catch(...)` on a client call — not around the act, not around the assert, not for cleanup. An unexpected rejection must reach Vitest untouched. An **expected** rejection is asserted, not caught: `await expect(...).rejects.toThrow(...)` is an assertion, not error handling.
+- **`afterEach` / `afterAll` get no `try`/`catch` either.** If the cleanup delete rejects, Vitest reports the hook failure and you go fix the leak — that is the system working. A swallowed cleanup failure means the suite quietly leaks data until the environment rots.
+- **`try`/`catch` belongs in one place only: a helper that performs I/O**, where converting a specific failure into a useful message *is* the helper's contract (a parse helper, a polling probe). It narrows to the one error it understands, never a blanket catch, and rethrows or reports — it never returns a silent default.
+- **Every failure message names the subject and carries the evidence.** `expect(dto.status, \`user ${dto.id} status after activation\`).toBe('active')` — a bare `expected 'pending' to be 'active'` with no id sends the reader hunting through logs for which record it was.
+- **A Zod failure explains itself — inside the parse helper, not the spec.** Wrap `safeParse` in a small `parseOrFail(schema, response, label)` helper that, on `!success`, throws with `issues[].path` + `issues[].code` and the raw `response.bodyJson` — so the failure reads "`GET /orders` → `total` expected number, received string" rather than a wall of `ZodError`. Specs call the helper and never `catch` a `ZodError` themselves. Never soften a drifted contract with `.passthrough()` / `.optional()` to make the spec pass — that is a contract-drift **failure**, not a schema bug.
 
 ### What NOT to do
 
@@ -174,6 +179,10 @@ describe('POST /api/users', () => {
 - No `JSON.parse(...)` / `as any` / `Record<string, any>` response parsing in specs — model the shape via `api-models` and `Schema.parse(response.bodyJson)`.
 - No `setTimeout`-based waits (`await new Promise(r => setTimeout(r, n))`) — poll on a concrete condition with `vi.waitFor`.
 - No missing `await` — every client call and async assertion is awaited; no floating promises.
+- No `OR` in any assertion — no `||` inside an `expect`, no `expect([a, b]).toContain(actual)`. One expected value per assertion (see Test rules).
+- No `try`/`catch` in a spec or in `afterEach`/`afterAll` — none, for any reason including cleanup; no `.catch(() => {})` anywhere. Expected rejections use `await expect(...).rejects`; catches live only in I/O helpers (see Test rules).
+- No `try`/`finally` wrapping a test body for cleanup — track created ids and delete them in `afterEach`.
+- No bare Zod failures — report `issues[].path` + `code` and the raw body; never loosen the schema to make a drifted contract pass.
 - No inter-test dependencies or shared mutable module-level state.
 - No hardcoded base URLs, credentials, or tokens — configuration via `getTestEnvironment()`, tokens via `authHelper`.
 - No `// @ts-ignore` / `// eslint-disable` to silence Zod or strict-mode errors — fix the schema or type.

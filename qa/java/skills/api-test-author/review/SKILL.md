@@ -41,6 +41,11 @@ Reviews Java API test code against the patterns enforced by `qa/java/skills/api-
 | No `Thread.sleep` | Any literal millisecond sleep | blocker |
 | Resource cleanup on resources the test created | Created records left in the system if the test fails mid-way | major |
 | One logical behavior per test | A single test asserts 200 path AND 404 path AND 401 path | major |
+| No `try`/`catch` anywhere in a test or `@AfterMethod` | Any catch block in a `@Test`; a `try/finally` wrapping the body for cleanup; a swallowing teardown | major |
+| Created resources tracked and deleted in `@AfterMethod(alwaysRun = true)` | Cleanup inlined in the test body instead of registered | major |
+| Unexpected errors fail loudly with an identifying message | Empty `catch`, catch-and-continue, or an assertion whose failure names no id/subject | major |
+| Deserialization failures name the Jackson path and body | A bare `MismatchedInputException` trace with no attached body | major |
+| Every assertion states one expected condition | `assertTrue(s == SC_OK \|\| s == SC_NO_CONTENT)`, `anyOf(...)` / `either().or()` matchers — on a status, a field, a size, or a duration | major |
 | Test names describe behavior | `test1`, `testGet`, `it_works` | minor |
 | Deserialization uses a typed DTO | `Map<String,Object>` / `jsonPath().get(...)` in assertions | major |
 | Status codes via named constants | Raw integers (`200`, `401`) | minor |
@@ -63,6 +68,18 @@ Reviews Java API test code against the patterns enforced by `qa/java/skills/api-
 | TC-ID traceability via `@Test(description = "TC-…")` when a test-case document exists | Tests with no link back to the planned cases | nit |
 | `@Test(groups = ...)` used so suites can filter | Untagged tests that always run | nit |
 | `JavaTimeModule` registered on the `ObjectMapper` (`BaseTest` / `RestAssuredConfig`) for `OffsetDateTime` | Date fields fail to deserialize and the test silently passes with `null` | major |
+
+### Comments in test code
+
+Load **[`ep-code-comments`](../../../../../engineering-practices/code-comments/SKILL.md)** for the rule itself, the complex-flow test that earns a doc comment, the never-comment trivia list, and the severity mapping. Its **test-code** section carries the AAA-banner rule and the exactly-three-permitted-comments list. This section supplies only the mechanics that differ here.
+
+| Java mechanic | What to check |
+|---|---|
+| Doc syntax | Javadoc (`/** … */`) — a doc block restating the test name is trivia |
+| Skips needing a reason and a ticket | `@Test(enabled = false)` / `@Ignore` with nothing recorded — a silently disabled test |
+| Where an unclear step goes instead | Into a named client method, not a comment above the request-building chain |
+
+**The API-test corollary:** an instruction to accept more than one value is permitted comment #2 — but only alongside a real parameterized case (`@DataProvider`) or a split test. A comment alone does not license the `OR`.
 
 ## Procedure
 
@@ -93,12 +110,16 @@ Severities (from `CLAUDE.md`):
 ## Anti-patterns to always flag
 
 - **Status-code-only 4xx test.** When the backend emits an error body, asserting just the code throws away the highest-signal failure information.
+- **`OR` in an assertion.** `assertTrue(status == SC_OK || status == SC_NO_CONTENT)` (or a Hamcrest `anyOf` / `either().or()`) means the author did not know what the endpoint returns, so the test passes on the wrong behavior and never fails when the API changes between the two. Applies to fields, sizes, and time budgets as much as to status codes. Fix by splitting into one test per expected outcome, driving it from a `@DataProvider`, or pinning the correct value.
 - **Happy-path test that asserts one field.** Round-trip persistence (GET-after-POST) is cheap and catches most regressions; one-field tests pass through real bugs.
 - **Raw overload that deserializes.** Couples response shape to the request layer and removes the test's ability to assert on the raw `Response` for error paths.
 - **Negative test through the typed overload.** Forces deserialization of an error body into the resource DTO — either a misleading exception or a DTO full of nulls.
 - **Shared mutable test data.** Tests must remain independent; pre-seeded shared rows always end up being mutated by some test eventually.
 - **401 test that deserializes a body.** Auth middleware returns no body — wasting effort and producing flaky `null` checks.
-- **Cleanup that can mask failures.** A `finally` that throws on cleanup error replaces the real assertion error with a cleanup error. Wrap cleanup in try/catch inside `finally` (or use `@AfterMethod(alwaysRun = true)` that swallows per-id cleanup errors with a log).
+- **A `try`/`catch` inside a test.** There is no legitimate one: an expected exception is asserted with `assertThrows`, an unexpected one must reach TestNG, and cleanup belongs in `@AfterMethod(alwaysRun = true)`. A catch in a test body is either hiding a failure or substituting for an assertion.
+- **A `try`/`finally` wrapping a test body for cleanup.** Track the created id and delete it in `@AfterMethod` — the test body stays linear and cleanup runs whether the test passed, failed, or threw.
+- **A swallowing `@AfterMethod`.** An empty catch around the delete means the suite leaks data silently until the environment rots. Let it throw; TestNG reports the configuration failure.
+- **Deserialization failure with no context.** A raw `Cannot deserialize value of type int from String ""` with no attached body and no Jackson path makes the reader reproduce the call by hand to learn what the test already knew.
 - **Forgetting `JavaTimeModule`.** Date fields fail to deserialize and the test silently passes with `null`.
 - **Tests tightly coupled to specific data ids.** "Order 42 exists in staging" tests fail the day someone reseeds.
 

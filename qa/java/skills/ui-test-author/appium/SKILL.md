@@ -215,6 +215,9 @@ public class AuthenticationTest extends BaseMobileTest {
 - Assertions live in the test class, **never** inside page methods (except the `verifyPageLoaded()` landmark assertion)
 - Use TestNG `Assert.assertTrue` / `assertEquals` with a message argument
 - Use `SoftAssert` when verifying multiple fields after one user action; call `soft.assertAll()` at the end
+- **One expected condition per assertion — never an `OR`.** `assertEquals(banner.getText(), "Saved")`, never `assertTrue(t.equals("Saved") || t.equals("Success"))`, a Hamcrest `anyOf(...)` / `either(...).or(...)`, or a `"Saved|Success"` regex alternation. The rule covers label text, element counts, screen landmarks, attribute values, and displayed/enabled state alike — and applies per platform: when Android and iOS legitimately show different copy, that is two platform-scoped expectations, never one `OR`. If both outcomes are genuinely reachable on one platform the test does not know what the app should do — split it into one `@Test` per expected outcome, drive it from a `@DataProvider`, or pin down the correct behavior. The only exception is an explicit instruction to accept more than one value; record that instruction in a comment on the assertion.
+- **No `try`/`catch` in a test — and none in `@AfterMethod`.** An unexpected exception must reach TestNG; an expected one is asserted with `assertThrows`, which is an assertion, not error handling. Anything the test created is tracked and deleted in `@AfterMethod(alwaysRun = true)` with no catch — a cleanup that fails should fail loudly rather than leak state into the next run. The suite's only catches live in **I/O helpers where narrowing one named exception is the contract** — an `isDisplayed(By)` probe converting `NoSuchElementException` into `false`, a driver-quit helper — never a blanket `catch (Exception)`, and never a catch that lets a failed action continue into the assertions.
+- **Failures name the subject.** `assertEquals(banner.getText(), "Saved", "success banner after saving order " + orderId)`. A UI failure reported as `expected [Saved] but found []` with no subject is indistinguishable from a locator that matched the wrong element.
 
 ### Waits
 - Default 10s `WebDriverWait` baked into `BaseAppiumPage`
@@ -234,6 +237,8 @@ public class AuthenticationTest extends BaseMobileTest {
 - No raw `IWebElement` / `RemoteWebElement` returns — `WebElement` is the contract
 - No locator strings inline in actions — promote to a `private static final String`
 - No assertions inside actions — assertions live in `verifyPageLoaded()` and in test methods, never inside `tap*` / `enter*` actions
+- No `OR` in any assertion — no `||` inside `assertTrue`, no `anyOf`/`either().or()` matchers, no `"a|b"` regex alternation, and no OR-ing Android and iOS copy into one expectation. One expected value per assertion (see Test rules)
+- No `try`/`catch` in a `@Test` or `@AfterMethod` — expected exceptions use `assertThrows`; catches live only in I/O helpers narrowing one named exception (see Test rules)
 - No multi-screen page objects — one class per screen. If the screen has tabs/sheets, model each as its own component or sub-page.
 - No business logic / API calls inside a page object — page objects model the screen, not the workflow
 - No hardcoded device names, app paths, or server URLs — use `SystemPropertyUtil`

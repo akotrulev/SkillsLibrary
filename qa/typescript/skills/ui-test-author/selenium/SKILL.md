@@ -190,6 +190,9 @@ describe("Authentication", () => {
 - Use Mocha `describe`/`it` (or Vitest `describe`/`test`) tags via test grep / file path for selective runs
 - Assertions live in the test, never in pages
 - Every assertion has a message: `expect(x).to.equal(y, "why this matters")`
+- **One expected condition per assertion — never an `OR`.** `expect(text).to.equal('Saved')`, never `expect(text).to.be.oneOf(['Saved', 'Success'])`, `to.match(/Saved|Success/)`, or a `||` inside an `expect`. The rule covers text, element counts, URLs, attribute values, and displayed/enabled state alike. If both outcomes are genuinely reachable the test does not know what the app should do — split it into one `it(...)` per expected outcome, generate one test per row from a case array, or pin down the correct behavior. The only exception is an explicit instruction to accept more than one value; record that instruction in a comment on the assertion.
+- **No `try`/`catch` in a test — and none in the cleanup hook.** An unexpected rejection must reach the runner; an expected one is asserted with `await expect(...).rejects` / `expect(fn).toThrow()`, which is an assertion, not error handling. Anything the test created is tracked and deleted in `afterEach` with no catch — a cleanup that fails should fail loudly rather than leak state into the next run. The suite's only catches live in **I/O helpers where narrowing one named error is the contract** — an `isDisplayed()` probe, a session-teardown helper — never a bare `catch {}` or `.catch(() => {})`, and never a catch that lets a failed action continue into the assertions.
+- **Failures name the subject.** `expect(await banner.getText(), \`success banner after saving order ${orderId}\`).toBe('Saved')`. A UI failure reported as `expected '' to be 'Saved'` with no subject is indistinguishable from a locator that matched the wrong element.
 
 ### Waits
 - Default 10s wait set in `BasePage` via `driver.wait(until.X, TIMEOUT)`
@@ -207,6 +210,8 @@ describe("Authentication", () => {
 - No `setTimeout` waits — use `driver.wait(...)`
 - No `driver.findElement` outside `BasePage`
 - No assertions inside page methods
+- No `OR` in any assertion — no `to.be.oneOf([...])`, no `||` inside an `expect`, no `/a|b/` alternation. One expected value per assertion (see Test rules)
+- No `try`/`catch` in a test or cleanup hook — expected rejections use `await expect(...).rejects`; catches live only in I/O helpers narrowing one named error (see Test rules)
 - No `@FindBy`-style decorators or PageFactory analogues
 - No XPath when `data-test` could be added
 - No shared mutable state on pages — instantiate fresh per test

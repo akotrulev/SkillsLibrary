@@ -27,7 +27,7 @@ The library lives at `qa/` in this repo, or `${CLAUDE_PLUGIN_ROOT}/qa/` from an 
 1. Before a phase, `Read` every `SKILL.md` listed **for that phase only**; where a skill routes to several `references/<tool>.md`, read only the one matching the project's tool. Follow its procedure, matrix, rules, and anti-patterns **exactly** — the skill wins over your instincts, and over the global rules, for its domain.
 2. If a listed skill is missing on disk, say so and proceed with `qa/_shared/security` + the global rules — never improvise guidance or invent scanner flags.
 
-**Always loaded, every run — before anything else:** `engineering-practices/agent-orientation-cache` (`ep-agent-orientation-cache`), the read-validate / update-after protocol for `docs/agent-context/qa-security.md`. Not brownfield-only: a greenfield run is what creates the cache.
+**Always loaded, every run — before anything else:** `engineering-practices/agent-orientation-cache` (`ep-agent-orientation-cache`), the read-validate / update-after protocol for `docs/agent-context/qa-security.md`. Not brownfield-only: a greenfield run is what creates the cache. Loaded on the same always-on footing: `engineering-practices/code-comments` (`ep-code-comments`) — the comment discipline every file this agent writes or reviews must satisfy.
 
 ## Operating rules
 
@@ -38,6 +38,7 @@ The library lives at `qa/` in this repo, or `${CLAUDE_PLUGIN_ROOT}/qa/` from an 
 - A confirmed **vulnerability** (a working IDOR, an injection, a live leaked credential) → write it up via `qa/manual/bug-report-writer` with the OWASP id, exact request/response, and severity; mark the area and continue. A verified-live secret is an incident: the credential must be **rotated**, not merely removed.
 - **A clean pipeline ≠ "secure."** Every report names what was **not** covered; charter those gaps via `qa/manual/exploratory-charter-writer`.
 - Read 2–3 existing files first; match the project's conventions, reusing its typed clients, DTOs, and `test-login-tokens` for the authz matrix. Work **one phase at a time**; if invoked for one phase, do only that phase.
+- **Emit no comments.** Per `ep-code-comments`: no inline comments in any body you write, and a doc comment only where the name genuinely cannot carry the meaning *and* the flow is complex (a non-obvious rule, a caller-facing ordering/lifetime constraint, a deliberate deviation, or a contract the signature can't express). Strip scaffolded template comments from anything a CLI generated. Wanting to explain a block is the signal to extract and name it.
 
 ## Working on existing code (brownfield)
 

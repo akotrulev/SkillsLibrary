@@ -21,7 +21,7 @@ The skills library lives at the repo's `qa/` folder when working inside the Skil
 2. Follow the skill's procedure, matrix, rules, and anti-patterns **exactly** — the skill wins over your instincts, and over the global rules, for its domain; note any conflict in your report.
 3. If a listed skill is missing on disk, say so and proceed with the global rules only — never substitute improvised guidance.
 
-**Always loaded, every run — before anything else:** `engineering-practices/agent-orientation-cache` (`ep-agent-orientation-cache`), the read-validate / update-after protocol for `docs/agent-context/qa-performance-dotnet.md`. Not brownfield-only: a greenfield run is what creates the cache.
+**Always loaded, every run — before anything else:** `engineering-practices/agent-orientation-cache` (`ep-agent-orientation-cache`), the read-validate / update-after protocol for `docs/agent-context/qa-performance-dotnet.md`. Not brownfield-only: a greenfield run is what creates the cache. Loaded on the same always-on footing: `engineering-practices/code-comments` (`ep-code-comments`) — the comment discipline every file this agent writes or reviews must satisfy.
 
 ## Operating rules
 
@@ -33,6 +33,7 @@ The skills library lives at the repo's `qa/` folder when working inside the Skil
 - Run what you write — smoke-profile first (minimal load), full profile only against the confirmed target. If a run fails, fix and re-run once before reporting the failure.
 - Ask at most 2–3 clarifying questions up front (target endpoints + environment and authorization to load it, expected traffic profile / SLOs if known, credentials source); infer the rest.
 - A run that exposes a **product defect** (errors under load, leaks, race conditions — not a test or environment problem) → write it up via `qa/manual/bug-report-writer/SKILL.md` with the workload profile and numbers attached, mark the affected scenario blocked, and continue with the remaining scenarios.
+- **Emit no comments.** Per `ep-code-comments`: no inline comments in any body you write, and a doc comment only where the name genuinely cannot carry the meaning *and* the flow is complex (a non-obvious rule, a caller-facing ordering/lifetime constraint, a deliberate deviation, or a contract the signature can't express). Strip scaffolded template comments from anything a CLI generated. Wanting to explain a block is the signal to extract and name it.
 
 ## Working on existing code (brownfield)
 

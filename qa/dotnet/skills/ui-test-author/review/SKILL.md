@@ -60,6 +60,9 @@ Severities (from `CLAUDE.md`):
 | No business logic in page objects | Price calculation, JSON parsing, branching on app state inside POM | major |
 | Tests are independent | `[Order(...)]` chained `[Test]` methods modelling a flow | blocker |
 | One logical behavior per test | One `[Test]` verifies login + cart + checkout | major |
+| No `try`/`catch` in a test or `[TearDown]` | Any catch block in a `[Test]`; a swallowing teardown; a blanket `catch (Exception)` in a page helper | major |
+| Failures identify the subject | Assertions with no message, so a failure cannot be told from a bad locator | minor |
+| Every assertion states one expected condition | `Is.EqualTo(a).Or.EqualTo(b)`, `Is.AnyOf(...)`, `\|\|` inside `Assert.That`, `Does.Match("a\|b")` or `new Regex("a\|b")` in a text/URL assertion | major |
 | Test names describe behavior | `Test1`, `LoginTest`, `ClickButtonTest` | minor |
 | No hardcoded credentials / base URLs | Literal `admin@example.com`, hardcoded `https://staging.x.y` | major |
 | Locators promoted to `readonly ILocator` / `private const string` fields | Inline locator strings re-typed across methods | minor |
@@ -147,15 +150,29 @@ Code that looks well-written in this stack tends to share these traits:
 
 - **Test that asserts nothing.** A `[Test]` ending after a `ClickAsync()` with no `Expect`/`Assert` is not a test.
 - **Page object that asserts.** Move every `Assert.*` / `Expect(...)` out of the POM and into the test.
+- **`OR` in an assertion.** `Is.EqualTo("Saved").Or.EqualTo("Success")`, `Is.AnyOf(...)`, a `||` inside `Assert.That`, or a `"Saved|Success"` regex alternation in a text/URL assertion — all the same defect: the test does not know what the app should render, so it passes on the wrong state and never fails when the app flips between the two. Watch for the regex form especially; it hides in `Does.Match` and `ToHaveTextAsync(new Regex(...))` and reads as a legitimate matcher. Fix by splitting into one test per expected outcome, parameterizing with `[TestCase]`, or pinning the correct value.
 - **`Thread.Sleep` / `Task.Delay` for UI sync.** Always a blocker, regardless of duration.
 - **`.Result` / `.Wait()` / `.GetAwaiter().GetResult()`.** Causes deadlocks under NUnit + Playwright. Always async.
 - **`async void`** outside event handlers — exceptions escape and crash the runner.
 - **Brittle locator chain.** `Page.Locator("div > div > span:nth-child(3) > a")` will break on the next DOM tweak.
 - **Login-in-every-test.** Use `StorageState` (Playwright), a seeded session (Selenium), or a token-injecting `[OneTimeSetUp]`.
-- **`try/catch` wrapping the whole `[Test]` body.** Hides failures. Cleanup belongs in `[TearDown]`.
+- **Any `try`/`catch` in a `[Test]` — or in `[TearDown]`.** There is no legitimate one. Wrapping the body hides failures; wrapping cleanup leaks state silently. An expected exception is asserted with `Assert.Throws<T>`; an unexpected one must reach NUnit; cleanup is registered and deleted in `[TearDown]` with no catch. The suite's only catches belong in an I/O helper narrowing **one named** exception (`IsDisplayed(By)` catching `NoSuchElementException`) — never a blanket `catch (Exception)`.
+- **A failure message that names no subject.** `Expected: "Saved" But was: ""` could be a wrong value or a locator that matched nothing — pass a message naming the element and the record.
 - **`PageFactory` + explicit `FindElement` mixed.** Pick one (prefer explicit; `PageFactory` is deprecated).
 - **Shared static `IWebDriver`** across tests. Breaks parallel execution.
-- **Comments restating what the code does** (`// click login`). Comment the *why*.
+- **Any inline comment in a test body or a page-object method** (`// click login`, `// Arrange`), and any stale comment. Per `ep-code-comments` — the name is the explanation; rename or extract, never reword.
+
+## Comments in test code
+
+Load **[`ep-code-comments`](../../../../../engineering-practices/code-comments/SKILL.md)** for the rule itself, the complex-flow test that earns a doc comment, the never-comment trivia list, and the severity mapping. Its **test-code** section carries the AAA-banner rule and the exactly-three-permitted-comments list. This section supplies only the mechanics that differ here. Here it covers **page-object and screen-object bodies** as well as tests — an intent-revealing method name is the page object's documentation.
+
+| .NET mechanic | What to check |
+|---|---|
+| Doc syntax | XML doc (`/// <summary>`) — a doc block on a locator field, or restating `ClickSave`, is trivia |
+| Skips needing a reason and a ticket | `[Ignore("")]` / a bare `[Explicit]` — a silently disabled test |
+| Where an unclear interaction goes instead | Into a named page-object method, not a comment above the locator chain |
+
+**The locator corollary — the one that matters most here.** A comment explaining a locator (`// the third span is the price`) is not a comment finding; it is evidence the locator is **positional and brittle**. Fix the locator: request a `data-testid` and record it in `missing-testids.md`. Cross-reference the finding to the locator-hygiene list rather than filing it as a comment.
 
 ## Procedure
 

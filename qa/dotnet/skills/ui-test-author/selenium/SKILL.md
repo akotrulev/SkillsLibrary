@@ -181,6 +181,9 @@ public sealed class AuthenticationTests : BaseTest
 - Assertions live in the test, **never** inside page methods
 - Use `Assert.That(value, Is.X, "message")` — every failure must explain itself
 - Use `Assert.Multiple(() => { ... })` when verifying multiple fields after one user action
+- **One expected condition per assertion — never an `OR`.** `Assert.That(banner.Text, Is.EqualTo("Saved"))`, never `Is.EqualTo("Saved").Or.EqualTo("Success")`, `Is.AnyOf(...)`, `Does.Match("Saved|Success")`, or a `||` inside the condition. The rule covers text, element counts, URLs, attribute values, and displayed/enabled state alike. If both outcomes are genuinely reachable the test does not know what the app should do — split it into one `[Test]` per expected outcome, parameterize with `[TestCase]`, or pin down the correct behavior. The only exception is an explicit instruction to accept more than one value; record that instruction in a comment on the assertion.
+- **No `try`/`catch` in a test — and none in `[TearDown]`.** An unexpected exception must reach NUnit; an expected one is asserted with `Assert.Throws<T>`, which is an assertion, not error handling. Anything the test created is tracked and deleted in `[TearDown]` with no catch — a cleanup that fails should fail loudly rather than leak state into the next run. The suite's only catches live in **I/O helpers where narrowing one named exception is the contract** — an `IsDisplayed(By)` probe converting `NoSuchElementException` into `false`, a driver-quit helper — never a blanket `catch (Exception)`, and never a catch that lets a failed action continue into the assertions.
+- **Failures name the subject.** `Assert.That(banner.Text, Is.EqualTo("Saved"), $"success banner after saving order {orderId}")`. A UI failure reported as `Expected: "Saved" But was: ""` with no subject is indistinguishable from a locator that matched the wrong element.
 
 ### Waits
 - Default 10s wait set in `BasePage` via `WebDriverWait`
@@ -198,6 +201,8 @@ public sealed class AuthenticationTests : BaseTest
 - No `Thread.Sleep` — use `WebDriverWait`
 - No `Driver.FindElement(...)` in a page outside `BasePage`
 - No assertions inside page methods
+- No `OR` in any assertion — no `.Or.`, no `Is.AnyOf(...)`, no `||` inside `Assert.That`, no `Does.Match("a|b")` alternation. One expected value per assertion (see Test rules)
+- No `try`/`catch` in a `[Test]` or `[TearDown]` — expected exceptions use `Assert.Throws<T>`; catches live only in I/O helpers narrowing one named exception (see Test rules)
 - No `PageFactory` / `[FindsBy]` attributes — explicit `FindElement(By)` only
 - No raw XPath when a `data-test` attribute could be added to the app
 - No shared mutable state on page objects

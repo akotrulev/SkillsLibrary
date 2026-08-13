@@ -31,7 +31,7 @@ The domain has two skill shapes:
 3. If a skill conflicts with the library's global rules (`CLAUDE.md`), the skill wins for its domain — note the conflict in your report.
 4. If a listed skill is missing on disk, say so and proceed with the global rules only — never silently substitute improvised guidance.
 
-**Always loaded, every run — before anything else:** `engineering-practices/agent-orientation-cache` (`ep-agent-orientation-cache`), the read-validate / update-after protocol for `docs/agent-context/data-architect.md`. Not brownfield-only: a greenfield run is what creates the cache.
+**Always loaded, every run — before anything else:** `engineering-practices/agent-orientation-cache` (`ep-agent-orientation-cache`), the read-validate / update-after protocol for `docs/agent-context/data-architect.md`. Not brownfield-only: a greenfield run is what creates the cache. Loaded on the same always-on footing: `engineering-practices/code-comments` (`ep-code-comments`) — the comment discipline every file this agent writes or reviews must satisfy.
 
 ### The scope-fence contract (do not violate)
 
@@ -53,6 +53,7 @@ The domain has two skill shapes:
 - **Every design decision is version-keyed.** State the detected engine version and the backend TFM/runtime, and pin every recipe to them (`uuidv7()` needs PG 18; `SESSION_CONTEXT` is SQL Server; app-enforced tenancy is the MySQL/Mongo story). Never up-level a down-level engine.
 - **Security is not a later phase you can skip.** Multi-tenant isolation, encryption-at-rest tier, and least-privilege roles are decided in Phase 3 for every design that stores tenant or personal data — and the cross-tenant leak test is handed to `qa-security` by name.
 - Ask at most 2–3 clarifying questions up front (engine + version if not detectable, backend stack, workload shape — read-heavy vs write-heavy vs mixed, single- vs multi-tenant); infer the rest.
+- **Emit no comments.** Per `ep-code-comments`: no inline comments in any body you write, and a doc comment only where the name genuinely cannot carry the meaning *and* the flow is complex (a non-obvious rule, a caller-facing ordering/lifetime constraint, a deliberate deviation, or a contract the signature can't express). Strip scaffolded template comments from anything a CLI generated. Wanting to explain a block is the signal to extract and name it.
 
 ## Working on existing data (brownfield)
 

@@ -22,7 +22,7 @@ The skills library lives at the repo's `qa/` folder when working inside the Skil
 3. If a skill conflicts with the library's global rules (`CLAUDE.md`), the skill wins for its domain — note the conflict in your report.
 4. If a listed skill is missing on disk, say so and proceed with the global rules only — never silently substitute improvised guidance.
 
-**Always loaded, every run — before anything else:** `engineering-practices/agent-orientation-cache` (`ep-agent-orientation-cache`), the read-validate / update-after protocol for `docs/agent-context/qa-reporting-dotnet.md`. Not brownfield-only: a greenfield run is what creates the cache.
+**Always loaded, every run — before anything else:** `engineering-practices/agent-orientation-cache` (`ep-agent-orientation-cache`), the read-validate / update-after protocol for `docs/agent-context/qa-reporting-dotnet.md`. Not brownfield-only: a greenfield run is what creates the cache. Loaded on the same always-on footing: `engineering-practices/code-comments` (`ep-code-comments`) — the comment discipline every file this agent writes or reviews must satisfy.
 
 ## Operating rules
 
@@ -33,6 +33,7 @@ The skills library lives at the repo's `qa/` folder when working inside the Skil
 - Run what you write. A reporting config that has never produced a report does not pass its gate. If a run fails, fix and re-run once before reporting the failure.
 - Quarantine is a loan, not a write-off: every quarantined test gets an owner and an expiry/exit condition. A quarantine with no exit is a deleted test in disguise — call that out.
 - Ask at most 2–3 clarifying questions up front (target project path, where results are published / Allure history source, TMS or issue-tracker for links); infer the rest.
+- **Emit no comments.** Per `ep-code-comments`: no inline comments in any body you write, and a doc comment only where the name genuinely cannot carry the meaning *and* the flow is complex (a non-obvious rule, a caller-facing ordering/lifetime constraint, a deliberate deviation, or a contract the signature can't express). Strip scaffolded template comments from anything a CLI generated. Wanting to explain a block is the signal to extract and name it.
 
 ## Working on existing code (brownfield)
 

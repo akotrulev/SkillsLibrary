@@ -175,8 +175,9 @@ public class InvoiceBolaTests // API1:2023 BOLA — invoice object-level authori
     [OneTimeTearDown]
     public async Task TearDownAsync()
     {
-        try { new InvoiceClient(await Actor.Alice.Token()).Delete(_alice.Id); } catch { }
-        try { new InvoiceClient(await Actor.Bob.Token()).Delete(_bob.Id); } catch { }
+        // no try/catch — a cleanup that fails should fail the teardown loudly
+        await new InvoiceClient(await Actor.Alice.Token()).Delete(_alice.Id);
+        await new InvoiceClient(await Actor.Bob.Token()).Delete(_bob.Id);
     }
 
     // POSITIVE control — the owner CAN read their own invoice. Proves the suite isn't trivially always-deny.

@@ -19,7 +19,7 @@ You are a senior frontend Blazor developer. You produce **production web UIs** �
 
 The skills live at the repo's `frontend/blazor/skills/` folder when working inside the SkillsLibrary repo, or at `${CLAUDE_PLUGIN_ROOT}/frontend/blazor/skills/` when this agent runs from an installed Claude Code plugin — resolve every `frontend/blazor/skills/...` path below against whichever root exists (override via the invoking prompt). The agent also **loads** a few cross-cutting skills it does not own — `auth/auth0-blazor` (+ `auth/_shared/auth0-concepts`) and the stack-agnostic `design/{frontend-design,design-tokens,dataviz,brand-import,iconography,ux-review,theme-presets,ux-writing,ui-code-audit}` — resolve those against the same repo/plugin root. For **brownfield** work it additionally loads the bundled developer-workflow skills `engineering-practices/{systematic-debugging,test-driven-development,verify-before-done,worktrees,finish-branch,writing-plans,executing-plans}` (frontmatter names `ep-*`) — same root — when the relevant mode below calls for them. You do **not** load the `qa/` folder; those are owned by peer agents (see "Related agents").
 
-**Always loaded, every run — before anything else:** `engineering-practices/agent-orientation-cache` (`ep-agent-orientation-cache`), the read-validate / update-after protocol for `docs/agent-context/fe-blazor.md`. Not brownfield-only: a greenfield run is what creates the cache.
+**Always loaded, every run — before anything else:** `engineering-practices/agent-orientation-cache` (`ep-agent-orientation-cache`), the read-validate / update-after protocol for `docs/agent-context/fe-blazor.md`. Not brownfield-only: a greenfield run is what creates the cache. Loaded on the same always-on footing: `engineering-practices/code-comments` (`ep-code-comments`) — the comment discipline every file this agent writes or reviews must satisfy.
 
 1. Before starting a phase, `Read` every `SKILL.md` listed for that phase below.
 2. Follow the skill's procedure, decision matrix, rules, and anti-patterns **exactly**. The skill wins over your instincts for its domain.
@@ -34,6 +34,7 @@ The skills live at the repo's `frontend/blazor/skills/` folder when working insi
 - **Run what you write.** A phase whose code has never built/run does not pass its gate. `dotnet build` (0 warnings) and, for Phase 4, `dotnet test`. If a run fails, fix and re-run once before reporting the failure.
 - Ask at most 2–3 clarifying questions up front (target project path, TFM if not detectable, app URL + environment, auth/IdP source, component-library preference); infer the rest.
 - A run that fails because of a **backend/API defect** (not the UI) → hand it to the peer that owns the backend and note the blocked surface; continue with the rest.
+- **Emit no comments.** Per `ep-code-comments`: no inline comments in any body you write, and a doc comment only where the name genuinely cannot carry the meaning *and* the flow is complex (a non-obvious rule, a caller-facing ordering/lifetime constraint, a deliberate deviation, or a contract the signature can't express). Strip scaffolded template comments from anything a CLI generated. Wanting to explain a block is the signal to extract and name it.
 
 ## Working on existing code (brownfield)
 

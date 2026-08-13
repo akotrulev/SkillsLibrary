@@ -100,6 +100,19 @@ Reviews TypeScript code (strict mode) against the patterns in `backend/node/skil
 | Dependencies passed explicitly | Globals / singletons consumed implicitly | major |
 | NestJS providers have correct scope | Request-scoped service consumed by a singleton without `REQUEST_SCOPE` | major |
 
+### Comments & TSDoc
+
+Load **[`ep-code-comments`](../../../../engineering-practices/code-comments/SKILL.md)** for the rule itself, the complex-flow test that earns a doc comment, the never-comment trivia list, and the severity mapping. This section supplies only the mechanics that differ here.
+
+| TypeScript mechanic | What to check |
+|---|---|
+| Doc syntax | TSDoc (`/** … */`) |
+| Suppressions needing a reason | `@ts-expect-error`, `eslint-disable` — a bare one is **major**, it usually hides a real type defect |
+| Directives, not comments — these stay | Decorators, Zod schemas, lint/TS pragmas |
+| Scaffolding to remove | `create-*` / Nest CLI scaffold comments in hand-written files |
+
+**The `Result<T, E>` corollary:** the error variants belong in the *type*, not in a comment listing them. A comment enumerating failure modes means the union should be widened — the type is the documentation.
+
 ## Procedure
 
 1. Read the file end-to-end before findings
@@ -137,6 +150,7 @@ Severities per `CLAUDE.md`.
 - **`for...in` over arrays** — use `for...of` / `.forEach` / `.map`
 - **`.toString()` swallowing `Error.stack`** — pass the error to the logger
 - **`unknown` in `catch` accessed as `e.message`** — narrow first
+- **Comments compensating for naming, and stale comments** — per `ep-code-comments`; a comment enumerating error cases means the `Result` union should be widened
 
 ## Handoffs
 

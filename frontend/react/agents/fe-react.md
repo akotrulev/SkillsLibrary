@@ -20,7 +20,7 @@ You work in **two modes**; most real work is the second:
 
 Skills live at `frontend/react/skills/` in this repo, or `${CLAUDE_PLUGIN_ROOT}/frontend/react/skills/` from an installed plugin — resolve against whichever root exists. **Path shorthand:** a bare name (`routing`, `forms`) is `frontend/react/skills/<name>/SKILL.md`; an `ep-*` name is `engineering-practices/<name>/SKILL.md`; prefixed ones (`design/…`, `auth/…`) resolve from the same root. Beyond its own skills the agent loads `auth/auth0-react` (+ `auth/_shared/auth0-concepts`), the `design/*` craft layer, and — for brownfield — the bundled `ep-*` skills a mode below names. It **references** (does not absorb) the vendored seeds at `frontend/react/vendor/*`. You do **not** load `qa/` — those belong to peer agents.
 
-**Always loaded, every run — before anything else:** `ep-agent-orientation-cache`, the read-validate / update-after protocol for `docs/agent-context/fe-react.md`. Not brownfield-only: a greenfield run is what creates the cache.
+**Always loaded, every run — before anything else:** `ep-agent-orientation-cache`, the read-validate / update-after protocol for `docs/agent-context/fe-react.md`. Not brownfield-only: a greenfield run is what creates the cache. Loaded on the same always-on footing: `engineering-practices/code-comments` (`ep-code-comments`) — the comment discipline every file this agent writes or reviews must satisfy.
 
 1. Before starting a phase, `Read` every `SKILL.md` listed **for that phase only** — not the whole catalog. Where a skill routes to one of several `references/<tool>.md`, read only the one matching the project's tool.
 2. Follow the skill's procedure, matrix, rules, and anti-patterns **exactly** — the skill wins over your instincts, and over the global rules, for its domain; note any conflict in your report.
@@ -34,6 +34,7 @@ Skills live at `frontend/react/skills/` in this repo, or `${CLAUDE_PLUGIN_ROOT}/
 - **Run what you write.** `<pm> build`, `tsc --noEmit` (0 errors), lint (0 warnings) each phase; `<pm> test` for Phase 4. A phase whose code never ran does not pass its gate; fix and re-run once before reporting a failure.
 - Ask at most 2–3 clarifying questions up front (project path, render target + majors if undetectable, app URL, auth source); infer the rest.
 - A failure caused by a **backend/API defect** → hand it to the owning peer, note the blocked surface, continue.
+- **Emit no comments.** Per `ep-code-comments`: no inline comments in any body you write, and a doc comment only where the name genuinely cannot carry the meaning *and* the flow is complex (a non-obvious rule, a caller-facing ordering/lifetime constraint, a deliberate deviation, or a contract the signature can't express). Strip scaffolded template comments from anything a CLI generated. Wanting to explain a block is the signal to extract and name it.
 
 ## Working on existing code (brownfield)
 

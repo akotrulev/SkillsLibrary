@@ -41,6 +41,7 @@ Reviews .NET API test code against the patterns enforced by `qa/dotnet/skills/ap
 | No `Thread.Sleep` | Any literal millisecond sleep | blocker |
 | Resource cleanup on resources the test created | Created records left in the system if the test fails mid-way | major |
 | One logical behavior per test | A single test asserts 200 path AND 404 path AND 401 path | major |
+| Every assertion states one expected condition | `Is.EqualTo(OK).Or.EqualTo(NoContent)`, `Is.AnyOf(...)`, `\|\|` inside `Assert.That` — on a status, a field, a count, or a duration | major |
 | Test names describe behavior | `Test1`, `TestGet`, `It_Works` | minor |
 | Deserialization uses a typed DTO | `JsonNode` / dictionary parsing in assertions | major |
 | Status codes via named constants | Raw integers (`200`, `401`) | minor |
@@ -59,11 +60,26 @@ Reviews .NET API test code against the patterns enforced by `qa/dotnet/skills/ap
 | `System.Text.Json` only — no Newtonsoft | `JsonConvert.DeserializeObject` | major |
 | Explicit types — no `var` for known types | `var dto = client.Create(...)` | minor |
 | Client variable named after concrete type in camelCase | Generic `client` variable | nit |
-| Resources created in the test wrapped in `try { ... } finally { try { cleanup; } catch { } }` | Bare cleanup that swallows test failures if it throws | major |
+| No `try`/`catch` anywhere in a test or `[TearDown]` | Any catch block in a `[Test]`; a `try/finally` wrapping the body for cleanup; a swallowing `[TearDown]` | major |
+| Created resources tracked and deleted in `[TearDown]` | Cleanup inlined in the test body instead of registered | major |
+| Unexpected errors fail loudly with an identifying message | Empty `catch`, catch-and-continue, or an assertion whose failure names no id/subject | major |
+| Deserialization failures name the property path and body | A bare `JsonException` trace with no `AttachBody` and no contract-drift message | major |
 | 401 test uses a single status-code assertion | A 401 test that tries to deserialize a `ProblemDetails` body | minor |
 | `[AllureFeature]` + `[AllureStory]` + `[AllureSeverity]` on every test | Missing Allure attributes | minor |
 | TC-ID traceability when a test-case document exists (`[AllureTms(...)]` / `[Property("TmsLink", "TC-…")]` / `[AllureStory("TC-… — …")]`) | Tests generated from a TC document with no link back to the planned cases | nit |
 | No `.Result` / `.Wait()` / `.GetAwaiter().GetResult()` | Sync-over-async on an async RestSharp call | blocker |
+
+### Comments in test code
+
+Load **[`ep-code-comments`](../../../../../engineering-practices/code-comments/SKILL.md)** for the rule itself, the complex-flow test that earns a doc comment, the never-comment trivia list, and the severity mapping. Its **test-code** section carries the AAA-banner rule and the exactly-three-permitted-comments list. This section supplies only the mechanics that differ here.
+
+| .NET mechanic | What to check |
+|---|---|
+| Doc syntax | XML doc (`/// <summary>`) — a doc block restating the test name is trivia |
+| Skips needing a reason and a ticket | `[Ignore("")]` / a bare `[Explicit]` — a silently disabled test |
+| Where an unclear step goes instead | Into a named client method, not a comment above the request-building chain |
+
+**The API-test corollary:** an instruction to accept more than one value is permitted comment #2 — but only alongside a real parameterized case (`[TestCase]`) or a split test. A comment alone does not license the `OR`.
 
 ## Procedure
 
@@ -94,11 +110,15 @@ Severities (from `CLAUDE.md`):
 ## Anti-patterns to always flag
 
 - **Status-code-only 4xx test.** When the backend emits a `ProblemDetails` body, asserting just the code throws away the highest-signal failure information.
+- **`OR` in an assertion.** `Is.EqualTo(HttpStatusCode.OK).Or.EqualTo(HttpStatusCode.NoContent)` (or `Is.AnyOf`, or `||` inside the condition) means the author did not know what the endpoint returns, so the test passes on the wrong behavior and never fails when the API changes between the two. Applies to fields, counts, and time budgets as much as to status codes. Fix by splitting into one test per expected outcome, parameterizing with `[TestCase]`, or pinning the correct value.
 - **Happy-path test that asserts one field.** Round-trip persistence (GET-after-POST) is cheap and catches most regressions; one-field tests pass through real bugs.
 - **Client that deserializes.** Couples response shape to the client layer and removes the test's ability to assert on raw `RestResponse` for error paths.
 - **Shared mutable test data.** Tests must remain independent; pre-seeded shared rows always end up being mutated by some test eventually.
 - **401 test that deserializes a body.** Auth middleware returns no body — wasting effort and producing flaky `null` checks.
-- **Cleanup that can mask failures.** A `finally` that throws on cleanup error replaces the real assertion error with a cleanup error. Wrap cleanup in try/catch inside `finally`.
+- **A `try`/`catch` inside a test.** There is no legitimate one: an expected exception is asserted with `Assert.ThrowsAsync<T>`, an unexpected one must reach NUnit, and cleanup belongs in `[TearDown]`. A catch in a test body is either hiding a failure or substituting for an assertion.
+- **A `try`/`finally` wrapping a test body for cleanup.** Track the created id and delete it in `[TearDown]` — the test body stays linear and cleanup runs whether the test passed, failed, or threw.
+- **A swallowing `[TearDown]`.** `catch { }` around the delete means the suite leaks data silently until the environment rots. Let it throw; NUnit reports the teardown error.
+- **Deserialization failure with no context.** A raw "The JSON value could not be converted" with no attached body and no property path makes the reader reproduce the call by hand to learn what the test already knew.
 - **Reading dates as strings.** Forgetting `JsonSerializerOptions` for dates causes silent `null` reads.
 - **Tests tightly coupled to specific data ids.** "Order 42 exists in staging" tests fail the day someone reseeds.
 

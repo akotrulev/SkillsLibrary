@@ -103,6 +103,7 @@
         "./qa/reporting/java/skills/test-reports",
         "./qa/reporting/java/skills/flaky-test-quarantine",
         "./engineering-practices/agent-orientation-cache",
+        "./engineering-practices/code-comments",
         "./engineering-practices/standards-audit-engine",
         "./engineering-practices/brainstorming",
         "./engineering-practices/writing-plans",
@@ -271,6 +272,7 @@
         "./engineering-practices/spec-vs-code-audit",
         "./engineering-practices/feature-audit",
         "./engineering-practices/agent-orientation-cache",
+        "./engineering-practices/code-comments",
         "./engineering-practices/standards-audit-engine"
       ],
       "commands": [
@@ -406,6 +408,7 @@
         "./qa/typescript/skills/visual-regression",
         "./qa/typescript/skills/realtime-stream-testing",
         "./engineering-practices/agent-orientation-cache",
+        "./engineering-practices/code-comments",
         "./engineering-practices/standards-audit-engine",
         "./engineering-practices/brainstorming",
         "./engineering-practices/writing-plans",
@@ -514,6 +517,7 @@
         "./design/theme-presets",
         "./design/ux-writing",
         "./engineering-practices/agent-orientation-cache",
+        "./engineering-practices/code-comments",
         "./engineering-practices/standards-audit-engine",
         "./engineering-practices/brainstorming",
         "./engineering-practices/writing-plans",
@@ -585,7 +589,8 @@
         "./data/dynamodb",
         "./data/cosmosdb",
         "./data/elasticsearch",
-        "./engineering-practices/agent-orientation-cache"
+        "./engineering-practices/agent-orientation-cache",
+        "./engineering-practices/code-comments"
       ],
       "commands": [
         "./data/commands/data-architect.md"
@@ -626,7 +631,8 @@
         "./backend/_shared/feature-trace",
         "./backend/_shared/business-documentation",
         "./backend/_shared/plain-language-companion",
-        "./engineering-practices/agent-orientation-cache"
+        "./engineering-practices/agent-orientation-cache",
+        "./engineering-practices/code-comments"
       ],
       "commands": [
         "./business-analysis/commands/business-analyst.md",
@@ -700,6 +706,7 @@
         "./design/theme-presets",
         "./design/ux-writing",
         "./engineering-practices/agent-orientation-cache",
+        "./engineering-practices/code-comments",
         "./engineering-practices/standards-audit-engine",
         "./engineering-practices/brainstorming",
         "./engineering-practices/writing-plans",
@@ -800,6 +807,7 @@
         "./engineering-practices/spec-vs-code-audit",
         "./engineering-practices/feature-audit",
         "./engineering-practices/agent-orientation-cache",
+        "./engineering-practices/code-comments",
         "./engineering-practices/standards-audit-engine",
         "./observability/opentelemetry-dotnet",
         "./observability/structured-logging-dotnet",
@@ -874,6 +882,7 @@
         "./auth/_shared/auth0-concepts",
         "./auth/_shared/oidc-concepts",
         "./engineering-practices/agent-orientation-cache",
+        "./engineering-practices/code-comments",
         "./engineering-practices/standards-audit-engine",
         "./engineering-practices/brainstorming",
         "./engineering-practices/writing-plans",
@@ -957,6 +966,7 @@
         "./business-analysis/skills/ba-decision-table",
         "./business-analysis/skills/ba-entity-state-grid",
         "./engineering-practices/agent-orientation-cache",
+        "./engineering-practices/code-comments",
         "./engineering-practices/standards-audit-engine",
         "./engineering-practices/brainstorming",
         "./engineering-practices/writing-plans",
@@ -1032,6 +1042,7 @@
         "./devops/azure-pipelines",
         "./devops/environment-config",
         "./engineering-practices/agent-orientation-cache",
+        "./engineering-practices/code-comments",
         "./engineering-practices/standards-audit-engine",
         "./engineering-practices/brainstorming",
         "./engineering-practices/writing-plans",

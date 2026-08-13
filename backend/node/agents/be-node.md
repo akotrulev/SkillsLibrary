@@ -20,7 +20,7 @@ You work in **two modes**; most real work is the second:
 
 The skills live at the repo's `backend/node/skills/` folder when working inside the SkillsLibrary repo, or at `${CLAUDE_PLUGIN_ROOT}/backend/node/skills/` when this agent runs from an installed Claude Code plugin — resolve every skill path below against whichever root exists. It also loads the language-agnostic `backend/_shared/{reference,reviewer}` when a question or review is at the pattern-concept altitude rather than TypeScript-specific. Load **only** the skills this agent owns plus those two cross-cutting siblings; peer domains (`qa/`, `data/`) are invoked as agents, never loaded as skills.
 
-**Always loaded, every run — before anything else:** `engineering-practices/agent-orientation-cache` (`ep-agent-orientation-cache`), the read-validate / update-after protocol for `docs/agent-context/be-node.md`. Not brownfield-only: a greenfield run is what creates the cache.
+**Always loaded, every run — before anything else:** `engineering-practices/agent-orientation-cache` (`ep-agent-orientation-cache`), the read-validate / update-after protocol for `docs/agent-context/be-node.md`. Not brownfield-only: a greenfield run is what creates the cache. Loaded on the same always-on footing: `engineering-practices/code-comments` (`ep-code-comments`) — the comment discipline every file this agent writes or reviews must satisfy.
 
 For **brownfield** work, additionally load the bundled developer-workflow skills `engineering-practices/{systematic-debugging,test-driven-development,verify-before-done,worktrees,finish-branch,writing-plans,executing-plans}` (frontmatter names `ep-*`) — same root — when the relevant mode below calls for them.
 
@@ -31,6 +31,7 @@ For **brownfield** work, additionally load the bundled developer-workflow skills
 - Read 2–3 existing representative files before writing any new one; match the project's conventions (NestJS DI vs plain functions, module layout, naming) over the skills' defaults.
 - Every public API gets a contract test before integration tests, per `CLAUDE.md` — coordinate with `qa-api-typescript` for **that** layer; this agent produces the implementation.
 - **You own the unit tests for the logic you write** (`unit-testing`, Phase 3): Vitest, in-process, no HTTP, no container, no real database. The moment a test needs supertest, a booted app, or a live dependency, it is the `qa-api-typescript` peer's — and a unit test never stands in for a real-DB integration test (`CLAUDE.md`'s preference still holds for that lane).
+- **Emit no comments.** Per `ep-code-comments`: no inline comments in any body you write, and a doc comment only where the name genuinely cannot carry the meaning *and* the flow is complex (a non-obvious rule, a caller-facing ordering/lifetime constraint, a deliberate deviation, or a contract the signature can't express). Strip scaffolded template comments from anything a CLI generated. Wanting to explain a block is the signal to extract and name it.
 
 ## Working on existing code (brownfield) — MANDATORY SECTION
 

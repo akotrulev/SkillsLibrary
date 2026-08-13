@@ -323,6 +323,9 @@ public class AuthenticationTest : BaseMobileTest
 - Use `[Category("Smoke" | "Regression" | ...)]` to enable selective runs
 - Assertions live in the test class, **never** inside page methods (except the `VerifyPageLoaded()` landmark assertion)
 - One logical assertion per test; use NUnit `Assert.Multiple` only when verifying one behavior across several fields after a single user action
+- **One expected condition per assertion — never an `OR`.** `Assert.That(banner.Text, Is.EqualTo("Saved"))`, never `Is.EqualTo("Saved").Or.EqualTo("Success")`, `Is.AnyOf(...)`, `Does.Match("Saved|Success")`, or a `||` inside the condition. The rule covers label text, element counts, screen landmarks, attribute values, and displayed/enabled state alike — and applies per platform: when Android and iOS legitimately show different copy, that is two platform-scoped expectations, never one `OR`. If both outcomes are genuinely reachable on one platform the test does not know what the app should do — split it into one `[Test]` per expected outcome, parameterize with `[TestCase]`, or pin down the correct behavior. The only exception is an explicit instruction to accept more than one value; record that instruction in a comment on the assertion.
+- **No `try`/`catch` in a test — and none in `[TearDown]`.** An unexpected exception must reach NUnit; an expected one is asserted with `Assert.Throws<T>`, which is an assertion, not error handling. Anything the test created is tracked and deleted in `[TearDown]` with no catch — a cleanup that fails should fail loudly rather than leak state into the next run. The suite's only catches live in **I/O helpers where narrowing one named exception is the contract** — an `IsDisplayed(By)` probe converting `NoSuchElementException` into `false`, a driver-quit helper — never a blanket `catch (Exception)`, and never a catch that lets a failed action continue into the assertions.
+- **Failures name the subject.** `Assert.That(banner.Text, Is.EqualTo("Saved"), $"success banner after saving order {orderId}")`. A UI failure reported as `Expected: "Saved" But was: ""` with no subject is indistinguishable from a locator that matched the wrong element.
 - No conditional logic in tests — use `[TestCase]` / `[TestCaseSource]` parameterization
 
 ### Waits
@@ -351,6 +354,8 @@ public class AuthenticationTest : BaseMobileTest
 - No deprecated `TouchAction` / `MultiAction` — W3C Actions or `mobile:` commands
 - No mixing implicit + explicit waits — keep `ImplicitWait` at zero
 - No assertions inside actions — assertions live in `VerifyPageLoaded()` and in test methods, never inside `Tap*` / `Enter*` actions
+- No `OR` in any assertion — no `.Or.`, no `Is.AnyOf(...)`, no `||` inside `Assert.That`, no `Does.Match("a|b")` alternation, and no OR-ing Android and iOS copy into one expectation. One expected value per assertion (see Test rules)
+- No `try`/`catch` in a `[Test]` or `[TearDown]` — expected exceptions use `Assert.Throws<T>`; catches live only in I/O helpers narrowing one named exception (see Test rules)
 - No multi-screen page objects — one class per screen. Tabs/sheets → their own component or sub-page.
 - No business logic / API calls inside a page object — page objects model the screen, not the workflow
 - No hardcoded device names, app paths, or server URLs — go through `Env` / `AppiumOptions`

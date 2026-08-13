@@ -108,8 +108,8 @@ public async Task GetUserWithBilling_WhenForbiddenField_ResolvesUserAndErrorsOnB
 ## Mutation — assert the payload, then round-trip the read (idea #4)
 
 A mutation returns a payload, but the payload alone doesn't prove the write **persisted**. Assert the returned
-object, then query it back. Clean up created data in `[TearDown]` (or `try/finally`), cleanup wrapped in
-`try/catch` so it never masks a test failure.
+object, then query it back. Track created ids and delete them in `[TearDown]` — no `try/finally` in the test,
+and no `try/catch` in the teardown: a cleanup that fails should fail loudly.
 
 ```csharp
 [Test]
@@ -268,7 +268,7 @@ for a status" discipline, different envelope.
 - **Model the typed `Data` per operation** (selection set) as a record, plus the shared `GraphQLError` envelope.
   Wrap related checks in `Assert.Multiple`; assert specific `Extensions.Code` + `Path`, never a bare presence.
 - **A mutation test round-trips a read** to prove persistence; data created in a test is cleaned up in
-  `[TearDown]`/`try-finally` (cleanup in `try/catch`).
+  `[TearDown]` (ids tracked as created; no `try/finally` in the test, no `try/catch` in the teardown).
 - **NUnit + `System.Text.Json` only** (no FluentAssertions, no Newtonsoft, no `var`). Subscriptions →
   `qa-realtime-stream-testing-dotnet`. Endpoint + token via `ConfigurationLoader`/env, lazy, never logged. No
   `Thread.Sleep`.

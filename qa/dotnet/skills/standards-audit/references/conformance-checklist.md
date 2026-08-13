@@ -35,8 +35,8 @@ rg -n "<pattern>" --glob '*.cs' $TESTS
 
 ---
 
-## B — Test naming & structure
-*Owning skills: global Test-code rules (`CLAUDE.md`), `api-test-author/reviewer`, `ui-test-author/reviewer`*
+## B — Test naming, structure & comments
+*Owning skills: global Test-code + Comments rules (`CLAUDE.md`), `api-test-author/reviewer`, `ui-test-author/reviewer`*
 
 | # | Check | Violation looks like | Find it with | Sev |
 |---|---|---|---|---|
@@ -49,6 +49,11 @@ rg -n "<pattern>" --glob '*.cs' $TESTS
 | B7 | No `async void` test or helper | `public async void ...` — exceptions escape and can crash the runner | `rg -n "async void" --glob '*.cs'` | blocker |
 | B8 | Tests live in the layer they belong to | Integration concerns inside a "unit" project; UI assertions inside the API project | Read the project layout vs test contents | minor |
 | B9 | No commented-out tests shipped | Large commented `[Test]` blocks left in place of deletion or `[Ignore]` with a ticket | `rg -n "^\s*//\s*\[Test" --glob '*.cs'` | nit |
+| B10 | No inline comments in test bodies, page objects, or step definitions | `// Arrange` / `// Act` / `// Assert` banners; `// log in`; `// wait for the grid` inside a page-object method; a line restating the call below; a leftover `TODO`/`FIXME` with no ticket | `rg -n "^\s+//" --glob '*.cs'` then read the hits inside a body — a hit is never a finding | minor |
+| B11 | XML doc only where the name genuinely cannot carry the meaning | `/// <summary>Tests the get endpoint.</summary>` above `Should_Return_200_When_…`; `///` on every locator field or builder property | `rg -n -B1 "^\s*/// <summary>" --glob '*.cs'` — check what each sits above | minor |
+| B12 | Surviving comments are true and load-bearing | A comment describing an assertion or a flow the test no longer performs | Read the code around every comment B10/B11 surfaced; grep cannot decide this one | major |
+
+**B10–B12 are the audit face of [`ep-code-comments`](../../../../../engineering-practices/code-comments/SKILL.md)** — read it for the rule, the exactly-three-permitted-comments list for test code, the AAA-banner rule, and the family-vs-per-finding reporting split (B10 is one family with a count and 3–5 cited sites; each **B12** stale comment is its own finding). Three local notes: **B9 already owns commented-out tests**, a skip carrying no reason stays **A5**, and **a comment explaining a locator is an F-section finding** — `// the third span is the price` means the locator is positional, so fix the locator and cross-reference rather than filing it here.
 
 ---
 
@@ -289,7 +294,7 @@ rg -n "<pattern>" --glob '*.cs' $TESTS
 | Letter | Section | Conditional? | Discipline |
 |---|---|---|---|
 | A | Build health & suite lane | always | all |
-| B | Test naming & structure | always | all |
+| B | Test naming, structure & comments | always | all |
 | C | Independence & isolation | always | all |
 | D | Waits & timing | always (tool-tagged rows follow the driver) | all — but PW/Sel-tagged rows only run under `ui`/`all`, Appium-tagged rows only under `mobile`/`all` |
 | E | Page / screen objects | UI or mobile suite present | `ui`, `mobile` — E14 **[Appium]** only under `mobile`/`all`; E13 **[Sel]** only under `ui`/`all` |

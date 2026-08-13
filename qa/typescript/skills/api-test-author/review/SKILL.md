@@ -42,6 +42,7 @@ Reviews TypeScript API test code against the patterns enforced by `qa/typescript
 | No `setTimeout` / `await new Promise(r => setTimeout(r, n))` waits | Any sleep-style synchronization | blocker |
 | Resource cleanup on resources the test created | Created records left in the system if the test fails mid-way | major |
 | One logical behavior per test | A single `it(...)` asserts 200 path AND 404 path AND 401 path | major |
+| Every assertion states one expected condition | `expect([200, 204]).toContain(status)`, `expect(s === 200 \|\| s === 204).toBe(true)` — on a status, a field, a length, or a duration | major |
 | Test names describe behavior | `it('test 1')`, `it('works')` | minor |
 | Deserialization uses a typed schema | `JSON.parse(...) as any` followed by ad-hoc property reads | major |
 | Status codes consistent from a single source | Magic numbers sprinkled and inconsistent | minor |
@@ -66,7 +67,23 @@ Reviews TypeScript API test code against the patterns enforced by `qa/typescript
 | Schemas tighten primitives + types inferred via `z.infer` | Hand-written `interface` duplicating a schema; loose `z.string()` where `.email()`/`.uuid()` applies | minor |
 | `it.each([...])` for parameterized cases instead of `if`/`for` | Conditional logic driving assertions inside an `it(...)` | major |
 | TC-ID traceability when a test-case document exists (TC-ID in the title or `allure.tms(...)`) | Tests generated from a TC document with no link back to the planned cases | nit |
-| Cleanup in `afterEach` / `afterAll` wrapped in `try/catch` | Bare cleanup that swallows test failures if it throws | major |
+| No `try`/`catch` anywhere in a spec or hook | Any catch block in an `it(...)`; `.catch(() => {})` on a client call; a `try/finally` wrapping the body for cleanup | major |
+| Created resources tracked and deleted in `afterEach` | Cleanup inlined in the spec body instead of registered | major |
+| Unexpected errors fail loudly with an identifying message | Empty `catch`, catch-and-continue, or an assertion whose failure names no id/subject | major |
+| Zod failures name `issues[].path` + `code` and the body | A wall of raw `ZodError`, or a loosened schema hiding contract drift | major |
+
+### Comments in test code
+
+Load **[`ep-code-comments`](../../../../../engineering-practices/code-comments/SKILL.md)** for the rule itself, the complex-flow test that earns a doc comment, the never-comment trivia list, and the severity mapping. Its **test-code** section carries the AAA-banner rule and the exactly-three-permitted-comments list. This section supplies only the mechanics that differ here.
+
+| TypeScript mechanic | What to check |
+|---|---|
+| Doc syntax | TSDoc (`/** … */`) — a doc block restating the test name is trivia |
+| Skips needing a reason and a ticket | a bare `it.skip(...)` / `.todo` — a silently disabled test |
+| Suppressions needing a reason | `@ts-expect-error` / `eslint-disable` — a bare one usually hides a genuine mismatch between the DTO and the response |
+| Where an unclear step goes instead | Into a named client method, not a comment above the request-building chain |
+
+**The API-test corollary:** an instruction to accept more than one value is permitted comment #2 — but only alongside a real parameterized case (`it.each`) or a split test. A comment alone does not license the `OR`.
 
 ## Smells to flag (TypeScript-specific quick list)
 
@@ -92,7 +109,7 @@ Reviews TypeScript API test code against the patterns enforced by `qa/typescript
 - Each `it(...)` constructs its own client; no top-level `let` reassigned between tests.
 - Test titles read like behavior sentences and carry the TC-ID when a document exists.
 - `it.each([...])` for parameterized cases; `tsc --noEmit` passes; `strict: true` is on; no `any` in the diff.
-- Cleanup in `afterEach` / `afterAll` is wrapped in `try/catch` so cleanup errors do not mask test failures.
+- Cleanup runs in `afterEach` / `afterAll` over ids tracked as they were created — with no `try/catch`, so a failing cleanup fails the hook loudly.
 
 ## Procedure
 
@@ -123,8 +140,13 @@ Severities (from `CLAUDE.md`):
 
 ## Anti-patterns to always flag
 
+- **A `try`/`catch` inside a spec.** There is no legitimate one: an expected rejection is asserted with `await expect(...).rejects`, an unexpected one must reach Vitest, and cleanup belongs in `afterEach`. A catch in a spec body — or a `.catch(() => {})` on a client call — is either hiding a failure or substituting for an assertion.
+- **A `try`/`finally` wrapping a spec body for cleanup.** Track the created id and delete it in `afterEach` — the body stays linear and cleanup runs whether the test passed, failed, or threw.
+- **A swallowing cleanup hook.** An empty catch around the delete means the suite leaks data silently until the environment rots. Let it throw; Vitest reports the hook failure.
+- **Zod failure with no context.** A raw `ZodError` dump, or a `.passthrough()`/`.optional()` added to make a drifted contract pass — report `issues[].path` + `code` and the raw body instead, and let the drift fail the spec.
 - **Unawaited async assertion.** `expect(promise).resolves.toBe(x)` without `await` is a no-op — Vitest cannot fail the test.
 - **Status-code-only 4xx test.** When the backend emits `ProblemDetails`, asserting just the status throws away the highest-signal failure information.
+- **`OR` in an assertion.** `expect([200, 204]).toContain(response.status)` (or `||` inside an `expect`, or a `toMatch`/`toContain` smuggling a set of acceptable values) means the author did not know what the endpoint returns, so the test passes on the wrong behavior and never fails when the API changes between the two. Applies to fields, lengths, and time budgets as much as to status codes. Fix by splitting into one `it` per expected outcome, driving it from `it.each([...])`, or pinning the correct value.
 - **`toBeDefined()` as the only happy-path assertion.** It passes on any non-`undefined` body, including a wrong-shape one — parse with the Zod schema and assert structural fields.
 - **Raw method that validates.** Couples the response shape to the request layer and removes the spec's ability to assert on the raw `ApiResponse` for error paths. Parse in the typed method (happy path) or the spec (error path).
 - **Negative test through the typed method.** Forces Zod-parsing of an error body into the resource schema — either a thrown ZodError or a wrong-shape parse.

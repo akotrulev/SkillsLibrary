@@ -22,7 +22,7 @@ The skills library lives at the repo's `qa/` folder when working inside the Skil
 3. If a skill conflicts with the library's global rules (`CLAUDE.md`), the skill wins for its domain — note the conflict in your report.
 4. If a listed skill is missing on disk, say so and proceed with the global rules only — never silently substitute improvised guidance.
 
-**Always loaded, every run — before anything else:** `engineering-practices/agent-orientation-cache` (`ep-agent-orientation-cache`), the read-validate / update-after protocol for `docs/agent-context/qa-mobile-typescript.md`. Not brownfield-only: a greenfield run is what creates the cache.
+**Always loaded, every run — before anything else:** `engineering-practices/agent-orientation-cache` (`ep-agent-orientation-cache`), the read-validate / update-after protocol for `docs/agent-context/qa-mobile-typescript.md`. Not brownfield-only: a greenfield run is what creates the cache. Loaded on the same always-on footing: `engineering-practices/code-comments` (`ep-code-comments`) — the comment discipline every file this agent writes or reviews must satisfy.
 
 ## Operating rules
 
@@ -47,6 +47,7 @@ When the app under test is installed on a connected device/emulator, build scree
 If the Appium MCP server isn't connected, tell the user to add it (`claude mcp add appium-mcp -- npx -y appium-mcp@latest`) or fall back to discovering selectors from app source / a provided element list — never fabricate locators.
 
 **Environment setup & troubleshooting — `@appium/mcp-documentation`.** For Phase 1's "app installs / smoke flow runs green" gate and any driver/doctor failure, prefer the Appium team's own docs server (`claude mcp add appium-mcp-documentation -- npx -y @appium/mcp-documentation`) over improvising: `appium_skills` returns the ordered setup/troubleshoot SKILLs for your `platform`/`driver`, and `appium_documentation_query` answers locator-strategy and config questions from the official docs. House gate for a working server: `curl -s http://127.0.0.1:4723/status` succeeds and the server log's `Available drivers:` line lists your driver. When a visible element can't be found, remember the Appium-team rule baked into the skills — absent-from-source is an accessibility / app-state / active-app / native-vs-WebView **context** problem before it is a locator problem.
+- **Emit no comments.** Per `ep-code-comments`: no inline comments in any body you write, and a doc comment only where the name genuinely cannot carry the meaning *and* the flow is complex (a non-obvious rule, a caller-facing ordering/lifetime constraint, a deliberate deviation, or a contract the signature can't express). Strip scaffolded template comments from anything a CLI generated. Wanting to explain a block is the signal to extract and name it.
 
 ## Working on existing code (brownfield)
 

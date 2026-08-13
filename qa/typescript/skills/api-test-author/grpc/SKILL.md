@@ -121,8 +121,8 @@ it('CreateUser surfaces an ErrorInfo reason on a duplicate email', async () => {
 ## Unary write — assert the payload, then round-trip the read (idea #4)
 
 A mutating RPC returns a payload, but the payload alone doesn't prove the write **persisted**. Assert the returned
-message, then read it back with the read RPC. Clean up created data in `afterEach`/`afterAll` (wrap cleanup in
-`try/catch` so a cleanup error never masks a test failure).
+message, then read it back with the read RPC. Track created ids and delete them in `afterEach`/`afterAll` — no
+`try/finally` in the spec and no `try/catch` in the hook: a cleanup that fails should fail loudly.
 
 ```typescript
 it('CreateUser persists and the change is readable', async () => {
@@ -275,7 +275,7 @@ differ.
 - **Assert on the typed generated message** — never hand-decode bytes; the `.proto` is the contract. Types via
   `proto-loader-gen-types` / `qa-api-models-typescript`.
 - **A write RPC test round-trips a read** to prove persistence; data created in a spec is cleaned up in
-  `afterEach`/`afterAll` (cleanup in `try/catch`).
+  `afterEach`/`afterAll` (ids tracked as created; no `try/finally` in the spec, no `try/catch` in the hook).
 - **Streaming = drain-then-assert on a bounded condition** — `for await` the `ClientReadableStream`
   (server-streaming) or await the response callback after `call.end()` (client-streaming); bound unbounded streams
   with `{ deadline }`. **No `setTimeout`/`waitForTimeout`.** Deep stream-lifecycle assertions →

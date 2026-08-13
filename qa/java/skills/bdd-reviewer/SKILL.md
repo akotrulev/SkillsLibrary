@@ -36,6 +36,8 @@ Audits a BDD layer across **two surfaces** — the `.feature` files (Gherkin qua
 - [ ] Tags carry priority (`@p1..`), tier (`@smoke`/`@regression`), type (`@negative`/`@boundary`/`@edge`), and AC traceability (`@AC-<n>`).
 - [ ] Each scenario reads as documentation without the code; names state behavior, not data.
 - [ ] Every TC-ID / AC from the source suite maps to a scenario (no silent gaps).
+- [ ] **No `#` comments in the feature file.** A `.feature` is living documentation — if a step needs explaining, the step is wrong; if the *feature* needs explaining, use the `Feature:` description block. Only a linked defect id beside a `@wip`/skip tag is permitted (`minor`).
+- [ ] **No commented-out scenarios or steps.** A `#`-prefixed `Scenario` left in place of deletion is dead documentation that still reads as a requirement (`minor`); disable with a tag carrying a ticket instead.
 
 ## Cucumber-JVM / step-definition checklist
 
@@ -50,6 +52,7 @@ Audits a BDD layer across **two surfaces** — the `.feature` files (Gherkin qua
 - [ ] Cleanup implemented as an `@After` hook, not as Gherkin steps.
 - [ ] Idiomatic JUnit 5 Platform runner (`@Suite` + `cucumber-junit-platform-engine`), not the deprecated JUnit 4 `@RunWith(Cucumber.class)`; glue path + plugins configured.
 - [ ] No hardcoded credentials/URLs — env vars / system properties.
+- [ ] **No inline comments in step definitions or hooks** — the step text above the binding is already the explanation, and a body long enough to need narration belongs in a page object. Javadoc only where the binding's contract can't be read off the step text and the method name; no commented-out bindings, no stray `TODO`/`FIXME`. Full rule, complex-flow test, and severities: [`ep-code-comments`](../../../../engineering-practices/code-comments/SKILL.md).
 
 ## Output format
 

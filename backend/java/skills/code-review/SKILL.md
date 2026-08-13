@@ -106,6 +106,19 @@ Detect the reviewed project's Java release and Spring Boot major first. Don't fl
 | Application orchestrates, doesn't know HTTP | Controller calling `EntityManager` / repository directly | major |
 | Adapters implement application ports | Application code newing up infrastructure types | major |
 
+### Comments & Javadoc
+
+Load **[`ep-code-comments`](../../../../engineering-practices/code-comments/SKILL.md)** for the rule itself, the complex-flow test that earns a doc comment, the never-comment trivia list, and the severity mapping. This section supplies only the mechanics that differ here.
+
+| Java mechanic | What to check |
+|---|---|
+| Doc syntax | Javadoc (`/** … */`). `@throws` / `@return` carry real contract — `@return the result` is a **nit** |
+| Suppressions needing a reason | `@SuppressWarnings("unchecked")` with nothing recorded |
+| Directives, not comments — these stay | Spring / Jackson / Bean Validation annotations |
+| Scaffolding to remove | IDE and Maven-archetype header comments in hand-written files |
+
+**The Java corollary:** thread-safety and transaction-boundary constraints are exactly complex-flow case 2 — "must be called inside the transaction", "not safe after `close()`" earn their Javadoc. A comment restating `@Transactional` does not.
+
 ## Procedure
 
 1. Read the file end-to-end before findings
@@ -144,6 +157,7 @@ Severities per `CLAUDE.md`:
 - **`e.printStackTrace()`** in production paths.
 - **CQRS adopted for two endpoints** "for future-proofing".
 - **`@Async` returning `void`.** Exceptions vanish; return `CompletableFuture<?>` and chain `.exceptionally`.
+- **Comments compensating for naming, and stale comments.** A body that needs a step-by-step commentary needs extracting; a comment that no longer matches the code is a confident lie. Both per `ep-code-comments` — the fix is the rename or the extraction, never a reword.
 
 ## Handoffs
 

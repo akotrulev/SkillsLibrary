@@ -200,6 +200,9 @@ WDIO owns the driver session via `wdio.conf.ts`; one session per worker is autom
 - Assertions live in the test, never in pages (except the `verifyPageLoaded()` landmark assertion)
 - Every assertion has a `message`: `expect(x).toBeDisplayed({ message: "why this matters" })`
 - Use `expect.soft` (Vitest) or aggregate `await Promise.all([...])` patterns when verifying multiple fields after one user action
+- **One expected condition per assertion — never an `OR`.** `await expect(banner).toHaveText('Saved')`, never `toHaveText(/Saved|Success/)`, `expect(['Saved', 'Success']).toContain(text)`, or a `||` inside an `expect`. The rule covers label text, element counts, screen landmarks, attribute values, and displayed/enabled state alike — and applies per platform: when Android and iOS legitimately show different copy, that is two platform-scoped expectations, never one `OR`. If both outcomes are genuinely reachable on one platform the test does not know what the app should do — split it into one `it(...)` per expected outcome, generate one test per row from a case array, or pin down the correct behavior. The only exception is an explicit instruction to accept more than one value; record that instruction in a comment on the assertion.
+- **No `try`/`catch` in a test — and none in the cleanup hook.** An unexpected rejection must reach the runner; an expected one is asserted with `await expect(...).rejects` / `expect(fn).toThrow()`, which is an assertion, not error handling. Anything the test created is tracked and deleted in `afterEach` with no catch — a cleanup that fails should fail loudly rather than leak state into the next run. The suite's only catches live in **I/O helpers where narrowing one named error is the contract** — an `isDisplayed()` probe, a session-teardown helper — never a bare `catch {}` or `.catch(() => {})`, and never a catch that lets a failed action continue into the assertions.
+- **Failures name the subject.** `expect(await banner.getText(), \`success banner after saving order ${orderId}\`).toBe('Saved')`. A UI failure reported as `expected '' to be 'Saved'` with no subject is indistinguishable from a locator that matched the wrong element.
 
 ### Waits
 - Default 10s `waitForDisplayed` baked into `BasePage`
@@ -218,6 +221,8 @@ WDIO owns the driver session via `wdio.conf.ts`; one session per worker is autom
 - No `setTimeout` / `browser.pause` waits — use `waitForDisplayed`, `waitForEnabled`, or `waitUntil`
 - No `browser.$(...)` outside `BasePage` — the selector helpers are the single funnel
 - No assertions inside page methods (except the `verifyPageLoaded()` landmark)
+- No `OR` in any assertion — no `||` inside an `expect`, no `expect([a, b]).toContain(x)`, no `/a|b/` alternation, and no OR-ing Android and iOS copy into one expectation. One expected value per assertion (see Test rules)
+- No `try`/`catch` in a test or cleanup hook — expected rejections use `await expect(...).rejects`; catches live only in I/O helpers narrowing one named error (see Test rules)
 - No XPath when an `accessibility id` could be added to the app — flag as tech debt
 - No shared mutable state on page objects — instantiate fresh per test
 - No business logic / API calls in page objects — pages model the screen, tests own the workflow

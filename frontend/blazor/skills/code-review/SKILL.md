@@ -141,6 +141,19 @@ Reviews Blazor code (.NET 8/9/10 — Static SSR / Server / WASM / Interactive Au
 | No mutable static fields | `static List<Foo>` holding "shared" component state | blocker |
 | HTTP calls through typed clients / `IHttpClientFactory` | `new HttpClient()` per call | major |
 
+### Comments & XML documentation
+
+Load **[`ep-code-comments`](../../../../engineering-practices/code-comments/SKILL.md)** for the rule itself, the complex-flow test that earns a doc comment, the never-comment trivia list, and the severity mapping. This section supplies only the mechanics that differ here. It covers `@code` blocks, code-behind, **and markup** (`@* … *@`, `<!-- … -->`) alike.
+
+| Blazor mechanic | What to check |
+|---|---|
+| Doc syntax | XML doc (`/// <summary>`). Doc blocks on `[Parameter]` properties are trivia |
+| Suppressions needing a reason | `#pragma warning disable`, `[SuppressMessage]` (use its `Justification` argument) |
+| Directives, not comments — these stay | `@rendermode`, `@attribute`, `@inject`; analyzer and validation attributes |
+| Scaffolding to remove | Blazor template remnants (`@* Add your code here *@`, sample-page comments) in shipped components |
+
+**The Blazor corollary:** render-mode and lifetime constraints are complex-flow case 2 — "only valid under an interactive render mode", "must be inside `<CascadingAuthenticationState>`", "disposes the JS module" earn their XML doc. A comment narrating `OnInitializedAsync` does not.
+
 ## Procedure
 
 1. Identify the **render mode** and **hosting model** of the component first — half the bugs depend on it
@@ -177,6 +190,7 @@ Severities per `CLAUDE.md`.
 - **`new HttpClient()`** per call — use `IHttpClientFactory` typed clients
 - **`@key={index}` on reorderable lists** — reuse confused with rerender
 - **Server-only secrets in code that compiles to WASM** (the WASM bundle is public)
+- **Comments compensating for naming, and stale comments** — per `ep-code-comments`; a narrated `@code` block means the logic belongs in a service or a child component
 
 ## Handoffs
 

@@ -257,8 +257,8 @@ rg -n "<pattern>" --glob '*.csproj'    # project-level checks
 
 ---
 
-## N — Project structure & type safety
-*Owning skills: `pattern-guide`, `pattern-writer`*
+## N — Project structure, type safety & comments
+*Owning skills: `pattern-guide`, `pattern-writer`, [`code-review`](../../code-review/SKILL.md) (N9–N12)*
 
 | # | Check | Violation looks like | Find it with | Sev |
 |---|---|---|---|---|
@@ -270,6 +270,12 @@ rg -n "<pattern>" --glob '*.csproj'    # project-level checks
 | N6 | Primary constructors / records used where they reduce noise **[net8+]** | Hand-rolled backing-field ctor boilerplate everywhere | `rg -n "private readonly \w+ _\w+;" --glob '*.cs'` | nit |
 | N7 | No dead code / commented-out blocks shipped | Large commented-out regions, unused classes | `rg -n "^\s*//\s*(public\|private\|var\|await)" --glob '*.cs'` | nit |
 | N8 | Analyzer/style config committed | No `.editorconfig`, so style is argued in review instead of enforced | `ls .editorconfig` | minor |
+| N9 | No inline comments inside method bodies | Step markers (`// validate input`, `// now save`), a line restating the line below, banner comments, leftover `TODO`/`FIXME` with no ticket | `rg -n "^\s+//" --glob '*.cs'` then read the hits that sit inside a body — a hit is never a finding | minor |
+| N10 | XML doc only where the name genuinely cannot carry the meaning | `/// <summary>Gets the user id.</summary>` on a property; `///` blocks on DTOs, records, expression-bodied members, assign-only ctors, `override`s | `rg -n -B1 "^\s*/// <summary>" --glob '*.cs'` — check what each sits above | minor |
+| N11 | Surviving comments are true and load-bearing | A comment describing behaviour the method no longer has — the comment is the defect, and deletion is the fix | Read the code around every comment N9/N10 surfaced; grep cannot decide this one | major |
+| N12 | Suppressions carry their justification | `#pragma warning disable` or `[SuppressMessage]` with no `Justification` and no reason recorded | `rg -n "#pragma warning disable\|SuppressMessage" --glob '*.cs'` | minor |
+
+**N9–N12 are the audit face of [`ep-code-comments`](../../../../../engineering-practices/code-comments/SKILL.md)** — read it for the rule, the complex-flow test that earns XML doc, the never-comment trivia list, and the family-vs-per-finding reporting split (N9 is one family with a count and 3–5 cited sites; each **N11** stale comment is its own finding). Two local notes: attributes, serializer/OpenAPI annotations, and analyzer directives are **not** comments, and **N7 already owns commented-out code** — don't double-file it.
 
 ---
 
@@ -290,4 +296,4 @@ rg -n "<pattern>" --glob '*.csproj'    # project-level checks
 | K | Configuration & secrets | always |
 | L | Observability | always — **absence is L1**, not N/A |
 | M | Testability & unit tests | always |
-| N | Project structure & type safety | always |
+| N | Project structure, type safety & comments | always |

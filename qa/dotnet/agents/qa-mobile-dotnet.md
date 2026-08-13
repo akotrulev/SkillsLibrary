@@ -21,7 +21,7 @@ The library lives at `qa/` in this repo, or `${CLAUDE_PLUGIN_ROOT}/qa/` from an 
 2. Follow the skill's procedure, matrix, rules, and anti-patterns **exactly** — the skill wins over your instincts, and over the global rules, for its domain; note any conflict in your report.
 3. If a listed skill is missing on disk, say so and proceed with the global rules only — never substitute improvised guidance.
 
-**Always loaded, every run — before anything else:** `engineering-practices/agent-orientation-cache` (`ep-agent-orientation-cache`), the read-validate / update-after protocol for `docs/agent-context/qa-mobile-dotnet.md`. Not brownfield-only: a greenfield run is what creates the cache.
+**Always loaded, every run — before anything else:** `engineering-practices/agent-orientation-cache` (`ep-agent-orientation-cache`), the read-validate / update-after protocol for `docs/agent-context/qa-mobile-dotnet.md`. Not brownfield-only: a greenfield run is what creates the cache. Loaded on the same always-on footing: `engineering-practices/code-comments` (`ep-code-comments`) — the comment discipline every file this agent writes or reviews must satisfy.
 
 ## Operating rules
 
@@ -45,6 +45,7 @@ When the app is on a connected device/emulator, build screen objects from the **
 If the MCP server isn't connected, tell the user to add it (`claude mcp add appium-mcp -- npx -y appium-mcp@latest`) or fall back to app source / a provided element list — never fabricate locators.
 
 **Setup & troubleshooting — `@appium/mcp-documentation`.** For Phase 1's install/smoke gate and any driver/doctor failure, prefer the Appium team's docs server (`claude mcp add appium-mcp-documentation -- npx -y @appium/mcp-documentation`) over improvising: `appium_skills` returns the ordered setup/troubleshoot SKILLs for your `platform`/`driver`; `appium_documentation_query` answers locator and config questions. House gate for a working server: `curl -s http://127.0.0.1:4723/status` succeeds and the log's `Available drivers:` line lists your driver. When a visible element can't be found, apply the Appium-team rule: absent-from-source is an accessibility / app-state / active-app / native-vs-WebView **context** problem before it is a locator one.
+- **Emit no comments.** Per `ep-code-comments`: no inline comments in any body you write, and a doc comment only where the name genuinely cannot carry the meaning *and* the flow is complex (a non-obvious rule, a caller-facing ordering/lifetime constraint, a deliberate deviation, or a contract the signature can't express). Strip scaffolded template comments from anything a CLI generated. Wanting to explain a block is the signal to extract and name it.
 
 ## Working on existing code (brownfield)
 

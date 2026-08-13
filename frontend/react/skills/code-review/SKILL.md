@@ -192,6 +192,19 @@ Reviews React code (React 19/18 + TypeScript — Next.js App Router / RSC primar
 | Fetch through a typed client / server util | `fetch` string literals scattered with no error typing | minor |
 | No mutable module-level state as "shared" component state | `let cache = []` at module scope holding user state | blocker |
 
+### Comments & TSDoc
+
+Load **[`ep-code-comments`](../../../../engineering-practices/code-comments/SKILL.md)** for the rule itself, the complex-flow test that earns a doc comment, the never-comment trivia list, and the severity mapping. This section supplies only the mechanics that differ here. It covers component bodies, hooks, and JSX (`{/* … */}`) alike.
+
+| React mechanic | What to check |
+|---|---|
+| Doc syntax | TSDoc (`/** … */`). TSDoc on every member of a `Props` interface is trivia |
+| Suppressions needing a reason | `@ts-expect-error`, `eslint-disable`. **A bare `react-hooks/exhaustive-deps` disable is `major` on its own** — the suppression is the symptom, the stale closure it hides is the bug |
+| Directives, not comments — these stay | `'use client'` / `'use server'` |
+| Scaffolding to remove | `create-next-app` / Vite starter comments in hand-written files |
+
+**The React corollary:** what earns TSDoc on a shared component or hook is the contract the props can't express — what it renders on the empty case, which props are mutually exclusive, what it returns while pending, or "must be inside `<XProvider>`" (complex-flow case 2).
+
 ## Procedure
 
 1. Identify the **render target** (App Router RSC / Vite SPA) and, for each file, whether it's a Server or Client Component — half the findings depend on it.
@@ -234,6 +247,8 @@ Severities per `CLAUDE.md`:
 - **Missing effect cleanup** — leaked subscriptions/timers across navigations.
 - **`forwardRef` on React 19** — `ref` is a plain prop now.
 - **Secret / server-only import in a `'use client'` module** — the client bundle is public.
+- **Comments compensating for naming, and stale comments.** Per `ep-code-comments` — extract a sub-component or hook rather than annotate.
+- **An un-justified `eslint-disable-next-line react-hooks/exhaustive-deps`.** The suppression is the symptom; the stale closure it hides is the bug.
 
 ## Handoffs
 

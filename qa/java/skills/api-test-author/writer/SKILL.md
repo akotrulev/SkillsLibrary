@@ -184,11 +184,17 @@ public class PostUserTest extends BaseTest {
 - Always assert the status code before reading the body — the typed overload does this for you; raw responses get an explicit `assertEquals` first.
 - Happy path uses the **typed** client overload; negative scenarios use the **raw** overload. Never re-assert the status after a typed call.
 - One logical assertion per test. Use `SoftAssert` + `soft.assertAll()` when verifying multiple fields of one response; never multiple unrelated behaviors.
+- **One expected condition per assertion — never an `OR`.** `assertEquals(response.statusCode(), SC_OK)`, never `assertTrue(status == SC_OK || status == SC_NO_CONTENT)`; `SC_BAD_REQUEST`, never "400 or 409". The rule covers every assertion, not just status: field values, collection sizes, error codes, and response-time budgets are asserted against the single value the test expects. No `||` inside an `assertTrue`, no `anyOf(...)` / `either(...).or(...)` Hamcrest matchers, no `body(..., anyOf(...))` in a RestAssured chain. If two outcomes are both possible, the scenario is under-specified — split it into one test per expected outcome, drive it from a `@DataProvider`, or establish which value is correct. The only exception is an explicit instruction to accept more than one value; when that happens, state the instruction in a comment on the assertion.
 - Use `HttpStatus.SC_*` constants — never raw integers.
 - Error bodies are deserialized in the test via `response.as(ErrorDto.class)`; happy-path DTOs come from the typed overload. Never call `ObjectMapper` directly.
 - Request bodies with 4+ fields come from builders (`qa/java/skills/test-data-builder`); simpler bodies use the record's canonical constructor.
 - Tests are independent: per-test data setup, `@AfterMethod(alwaysRun = true)` cleanup of created entities, no execution-order assumptions.
 - Rows that differ only in data → parameterize via `@DataProvider` (`qa/java/skills/data-driven-testing`), not copy-pasted methods.
+- **Never swallow an error, and never write a `try`/`catch` in a test.** A `@Test` body contains no catch blocks at all — not around the act, not around the assert, not for cleanup. An unexpected exception must reach TestNG untouched. An **expected** exception is asserted, not caught: `assertThrows(...)` / `@Test(expectedExceptions = ...)` is an assertion, not error handling.
+- **`@AfterMethod` gets no `try`/`catch` either.** If the cleanup delete throws, TestNG reports a configuration failure and you go fix the leak — that is the system working. A swallowed cleanup failure means the suite quietly leaks data until the environment rots.
+- **`try`/`catch` belongs in one place only: a helper that performs I/O**, where converting a specific failure into a useful message *is* the helper's contract (a response deserializer, a polling probe). It catches one named exception type, never a blanket `Exception`, and rethrows or reports — it never returns a silent default.
+- **Every failure message names the subject and carries the evidence.** `assertEquals(dto.status(), "ACTIVE", "account " + dto.id() + " status after activation")` — a bare `expected [ACTIVE] but found [PENDING]` with no id sends the reader hunting through logs for which record it was.
+- **A deserialization failure explains itself — inside the helper, not the test.** Attach the raw body to the Allure report **before** `response.as(...)`. Put the one catch in a small deserialize helper: it catches Jackson's `MismatchedInputException` / `UnrecognizedPropertyException` and rethrows with the **path** the exception reports, the target type, and the raw body — so the report reads "`GET /orders` → `total` expected int, got string" rather than a bare `Cannot deserialize value of type int from String ""`. A parse failure is a **failed** test with a contract-drift message, never a skip.
 
 ### What NOT to do
 
@@ -198,6 +204,10 @@ public class PostUserTest extends BaseTest {
 - No inter-test dependencies (`dependsOnMethods`, shared mutable state between tests).
 - No hardcoded base URLs, credentials, or tokens — configuration via `ConfigurationLoader`, tokens via `AuthHelper`.
 - No conditional logic (`if`/`for`) driving assertions — use `@DataProvider`.
+- No `OR` in any assertion — no `||` inside `assertTrue`, no `anyOf`/`either().or()` matchers. One expected value per assertion (see Test rules).
+- No `try`/`catch` in a test method or in `@AfterMethod` — none, for any reason including cleanup. Expected exceptions use `assertThrows`; catches live only in I/O helpers (see Test rules).
+- No `try`/`finally` wrapping a test body for cleanup — track created ids and delete them in `@AfterMethod(alwaysRun = true)`.
+- No bare deserialization failures — attach the body first and fail with the Jackson path and payload, not a raw stack trace.
 - No raw integer status codes.
 - No `@Test(expectedExceptions = ...)` mixed with response assertions — pick one.
 
