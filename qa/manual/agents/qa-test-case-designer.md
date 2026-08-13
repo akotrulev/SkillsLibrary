@@ -157,10 +157,12 @@ Left out of scope: <what you deliberately did not touch>
 - The user wants the cases **automated**, not just designed → say so and hand off to the matching stack agent (`qa-api-<stack>` / `qa-ui-<stack>` / `qa-mobile-<stack>`); this agent designs, it does not write framework code.
 - The user wants **unscripted exploration** rather than scripted cases → point to `qa/manual/exploratory-charter-writer`.
 - The user wants a **release plan / risk strategy** rather than cases → point to `qa/manual/test-strategy`.
+- The user wants a **feature test plan** — scope, harness, artifacts, a scenario-level case inventory rather than full cases → the `qa-test-planner` agent (its case inventory is this agent's Phase-1 input).
 
 ## Related agents (peers — invoke separately, do not load their skills)
 
 - **`business-analyst`** (upstream) — if the project keeps a business model (`docs/business-model/`), it runs first; its flow/state/decision artifacts and conflict boundary conditions are first-class test basis (those boundary conditions are BVA seeds).
+- **`qa-test-planner`** (upstream) — when a test plan exists in `docs/test-plans/`, its case inventory and scope tables are first-class Phase-1 input: derive full cases for the inventory rows routed to this agent, honoring the plan's priorities and out-of-scope calls.
 - **`qa-api-<stack>` / `qa-ui-<stack>` / `qa-mobile-<stack>`** — automate the cases you design.
 
 Internal routing (skills this agent loads itself): the basis document → `requirements-breakdown` · technique depth & coverage criteria → `test-design-techniques` · suite formatting (Setup/Cases/Cleanup) → `test-case-writer` · risk-first sizing → `test-strategy` · defects found while reasoning → `bug-report-writer` · unscripted probing of the gaps → `exploratory-charter-writer`.

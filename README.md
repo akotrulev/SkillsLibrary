@@ -24,7 +24,7 @@ The repo is a Claude Code plugin marketplace. Add it once, then install the one 
 
 **One self-contained plugin per language** — `qa-java`, `qa-dotnet`, `qa-typescript`. Each is a complete QA toolkit for its stack: it bundles every discipline (API / UI / mobile / performance / LLM authoring and review, BDD living documentation, deep verification, contracts, chaos, feature flags) **plus** the shared, cross-cutting capabilities that used to be separate peer plugins:
 
-- **Manual QA** — the language-agnostic `qa/manual` process skills and the `qa-test-case-designer` agent (test-basis analysis, ISTQB design techniques, test-case / bug-report / charter writing).
+- **Manual QA** — the language-agnostic `qa/manual` process skills and the `qa-test-case-designer` + `qa-test-planner` agents (test-basis analysis, ISTQB design techniques, test-case / test-plan / bug-report / charter writing).
 - **Security** — the cross-stack, OWASP-mapped `qa/_shared` scanner gates (ZAP, SAST, secrets, container/IaC, API fuzzing, Nuclei, TLS), the stack-native security skills (BOLA/IDOR/BFLA access-control matrix, ZAP baseline, SCA), and the `qa-security` orchestrator agent.
 - **CI/CD** — the stack's `ci-pipelines` skill (GitHub Actions / Azure Pipelines / GitLab CI), the language-agnostic `ci-conventions`, and the `qa-cicd-<stack>` agent.
 - **Reporting** — Allure results wiring + flaky-test detection/quarantine and the `qa-reporting-<stack>` agent.
@@ -52,7 +52,7 @@ A 16th, **`ep-agent-orientation-cache`**, ships in **all eleven** plugins (inclu
 
 **Code-touching skills deliberately have no command** — no `/qa-api-client-writer-<stack>`, no `/be-<stack>-generator`, no `/fe-<stack>-project-setup`, no `/devops-docker`. Reach them through their agent instead. The reason is orientation: an agent's first act is version detection (TFM / React major / engine version / Node major) plus reading existing files for conventions, and a skill invoked directly skips all of it — the exact way a .NET 8 repo ends up with a .NET 10 recipe. Agents are phase-scoped and brownfield-capable, so "write me one API client" is a one-phase agent run, not a six-phase build. What keeps a command is the set with nothing to detect: prose artifacts (manual-QA writing, BA authoring), stack-agnostic design craft, the `ep-*` process entry points, and the read-only audits.
 
-**`qa-java` · `qa-dotnet` · `qa-typescript`** — 21 commands each (`qa-dotnet` has 22 — see `/qa-dotnet-audit` below); substitute your stack for `<stack>`:
+**`qa-java` · `qa-dotnet` · `qa-typescript`** — 23 commands each (`qa-dotnet` has 24 — see `/qa-dotnet-audit` below); substitute your stack for `<stack>`:
 
 | Command | Argument | Runs |
 |---|---|---|
@@ -65,11 +65,12 @@ A 16th, **`ep-agent-orientation-cache`**, ships in **all eleven** plugins (inclu
 | `/qa-cicd-<stack>` | pipeline to build or harden | shard matrix, gates, OIDC secrets, result publishing |
 | `/qa-reporting-<stack>` | what to wire, tag, or quarantine | wire Allure, tag tests by finding, detect and quarantine flakes |
 | `/qa-test-case-designer` | doc, story, contract, or URL | documentation (or a live page) → a systematically-derived test-case suite |
+| `/qa-test-planner` | feature, doc, URL, or repo area | feature (documented or not) → a saved test plan: scope, harness looked up from the repo, artifacts, gap-analyzed case inventory |
 | `/qa-security` | app, API, or layer | OWASP-mapped SAST, secrets, SCA, access-control, DAST, fuzzing, container/IaC, TLS gates |
 | `/qa-dotnet-audit` *(qa-dotnet only so far)* | *(none — or a path/section limiter)* | read-only sweep of the **test suite** against the `qa-dotnet` conventions → findings report in `docs/audits/` |
 | `/code-auditor` | spec, stories, feature, or area | read-only audit engagement, saved to `docs/audits/` |
 
-…plus the 5 manual-QA writing commands and the 5 `ep-*` process commands listed under **Shared across plugins** below.
+…plus the 6 manual-QA writing commands and the 5 `ep-*` process commands listed under **Shared across plugins** below.
 
 **`fe-blazor`** — 17 commands · **`fe-react`** — 18:
 
@@ -144,6 +145,7 @@ A 16th, **`ep-agent-orientation-cache`**, ships in **all eleven** plugins (inclu
 | `/ep-spec-vs-code-audit` | ″ | code vs a spec / stories → requirement register + verdicts |
 | `/ep-feature-audit` | ″ | spec-less feature trace → surfaces, inventories, defect families |
 | `/qa-test-case-writer` | `qa-*` | requirements → a Setup / Cases / Cleanup manual test-case suite |
+| `/qa-test-plan-writer` | `qa-*` | inputs in hand → the assembled feature test-plan document |
 | `/qa-requirements-breakdown` | `qa-*`, `fe-*`, `be-*` | a story / BRD / contract → a sourced test-basis document |
 | `/qa-bug-report-writer` | `qa-*` | a defect description → a formal, reproducible bug report |
 | `/qa-exploratory-charter-writer` | `qa-*` | a feature or area → a bounded session-based exploratory charter |
@@ -254,6 +256,7 @@ The `qa/` section is the most fully built-out part of the library. Most code-pro
 | Skill | What it does |
 |-------|--------------|
 | `test-case-writer` | Write structured test cases |
+| `test-plan-writer` | Assemble a feature/release test plan (scope, harness, artifacts, case inventory) |
 | `bug-report-writer` | Write actionable bug reports |
 | `exploratory-charter-writer` | Write exploratory testing charters |
 | `_shared/test-strategy` | Test strategy guidance |

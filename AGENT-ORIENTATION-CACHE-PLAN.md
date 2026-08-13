@@ -102,6 +102,7 @@ Design + architecture option confirmed (shared engine, all 11 plugins).
 
   For the four non-stack QA agents: **cicd** records the CI host + pipeline file layout, shard matrix, secret/OIDC wiring (`#volatile`: anything read from the CI service itself) · **reporting** records the Allure wiring, categories file, tag conventions, flake-quarantine state · **security** records which scanner gates exist and where their configs/baselines live (`#volatile`: every live scan result — the cache records *that a gate exists*, never a finding) · **test-case-designer** records the test-basis sources and suite layout only.
 - [x] `qa-cicd-*` (3) · `qa-reporting-*` (3) · `qa-security` · `qa-test-case-designer` (8)
+- [x] `qa-test-planner` (1) — added 2026-08-13, cache-native from birth: records the detected harness lane, the Phase-2 seam inventory (API clients/DTOs · POMs · BDD step catalog · fixtures) and the existing-coverage map; `#volatile`: the coverage map and harness detection — suites move without any plan changing
 - [x] `observability-engineer-{dotnet,java,node}` (3)
 - [x] `devops-engineer` · `devops-auditor` (2) — the Phase-0 Discover inventory *is* the cache; `#volatile` on every live-cloud read
 - [x] `data-architect` (1) — `#volatile` on the server version probe; repo-side migration/schema layout is cacheable
