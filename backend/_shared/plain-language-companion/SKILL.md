@@ -57,9 +57,9 @@ The companion always takes the source's own filename plus **`-explained`**, in t
 Rules that come with the convention:
 
 - **One companion per source file, never a merged one.** A single "everything explained" document loses the ability to say *this* companion is stale because *that* source moved.
-- **`HANDOFF.md`, `INDEX.md`, `active-context.md` and `references/` get no companion.** They are working files for whoever is executing, not documents anyone signs off on.
+- **`HANDOFF.md`, `INDEX.md`, `active-context.md` and `references/` get no companion.** They are working files for whoever is executing, not documents anyone signs off on. **`glossary.md` and `interaction-map.md` get none either** — the glossary is already the plain-language layer, and the interaction map is `business-analyst`'s working record.
 - **`flows/`, `entities/` and `decisions/` get no companion either.** They are diagrams and grids already; a companion links to them and explains what they show, in the companion of the area or plan artifact that references them.
-- **Index the companion** where the source is indexed — a line in `docs/business-model/INDEX.md` for the documentation lane, and in the plan folder's own file list for the planning lane. An unlinked companion is one nobody knows exists.
+- **Index the companion in the documentation lane** — a line in `docs/business-model/INDEX.md` beside the source's own line; an unlinked companion is one nobody knows exists. The planning lane has no index file: there the `-explained` name sitting beside its source in the initiative folder *is* the discoverability, and nothing further is required.
 
 ## The mandatory header
 

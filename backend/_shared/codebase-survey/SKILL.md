@@ -25,7 +25,7 @@ It also produces the thing that keeps the whole exercise honest: a **coverage le
 
 ## Output
 
-The area map and reading plan. On a `be-documenter` run they are presented for confirmation and then recorded in the KB's `system-overview.md` (per `ba-project-memory`); the coverage ledger persists in the orientation cache so later runs reuse it.
+The area map and reading plan. On a `be-documenter` run they are presented for confirmation and then recorded in the KB's `system-overview.md` (per `ba-project-memory`) — the full per-surface coverage ledger included, as that file's Coverage appendix, so the KB can back its own coverage claim. The orientation cache holds only the surface **counts** and the parked list; a 120-controller ledger belongs in the KB, not in a file meant to orient a run in one read.
 
 ---
 
@@ -52,7 +52,7 @@ Useful, stack-agnostic first cuts:
 ```bash
 git log --oneline -20 && git ls-files | wc -l
 git ls-files | sed 's|/[^/]*$||' | sort | uniq -c | sort -rn | head -40   # where the mass is
-grep -rlE '\[Route|\[Http(Get|Post|Put|Patch|Delete)|MapGet|MapPost|@RestController|@RequestMapping|@(Get|Post|Put|Patch|Delete)Mapping|@(Get|Post|Put|Patch|Delete)\(|router\.(get|post|put|patch|delete)|app\.(get|post|put|patch|delete)' --include=* . | head -60
+grep -rlE '\[Route|\[Http(Get|Post|Put|Patch|Delete)|MapGet|MapPost|@RestController|@RequestMapping|@(Get|Post|Put|Patch|Delete)Mapping|@(Get|Post|Put|Patch|Delete)\(|router\.(get|post|put|patch|delete)|app\.(get|post|put|patch|delete)' . | head -60
 grep -rlE '@Scheduled|BackgroundService|IHostedService|RecurringJob|cron|@Cron' . | head -30
 grep -rlE '@KafkaListener|IConsumer<|SqsListener|ServiceBusProcessor|@EventPattern|@RabbitListener|@SqsListener' . | head -30
 ```
@@ -174,7 +174,7 @@ If the human has no opinion (common — they may know the business but not the c
 ## Handoffs
 
 - **→ `be-shared-feature-trace`** — the reading plan drives it, one area at a time, in the confirmed order.
-- **→ `be-shared-business-documentation`** — the area names become `areas/<area>.md`; the Foundations table becomes part of `system-overview.md`.
+- **→ `be-shared-business-documentation`** — the area names become `areas/<area>.md`; the Foundations table and the coverage ledger become part of `system-overview.md`.
 - **→ `ba-project-memory`** — the area map is recorded in `system-overview.md` under the KB contract.
 - **→ `code-auditor`** — if the survey's findings are dominated by defects rather than capabilities, the user wants an audit, not documentation. Say so.
 - **→ `be-shared-solution-blueprint`** — a confirmed area map of an existing system is directly reusable as the functional-area decomposition of a plan to extend it.

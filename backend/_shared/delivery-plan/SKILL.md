@@ -72,6 +72,8 @@ The shape that works, and the lanes it falls into:
 
 A lane that finishes its phase work early **idles at the barrier** until the phase closes. That is the cost of the conservatism, and it is worth stating in the plan rather than leaving someone to read it as a stall.
 
+Each phase's row in the plan carries **`Parallel-safe: Yes | No` — strictly boolean**, because the streams-absent fallback (Step 7) ingests it as one. A "partly" or "mixed" phase is `No`, with the safe pairs named in the Rationale column — the streams carry the pairwise answer, so nothing is lost by the conservative call.
+
 ### Step 3 — Declare the streams
 
 A **stream** is a named lane. Tasks in one stream run strictly one after another; different streams run at the same time. So the question to answer is not a per-phase yes/no — it is **"which lanes does this work actually have, and why is each one internally sequential?"**, which is answerable from the file sets you just wrote down.
@@ -87,7 +89,7 @@ Rules:
 
 - **Name a stream after what it owns** — `booking`, `schema`, `infra`, `ui`. Never `stream1`, and never one lane per phase.
 - **Stream identity is stable across phases.** If P1 and P3 both hold foundation work, that is one `foundation` lane running down the whole plan, not two.
-- **Two tasks whose `Files` overlap MUST share a stream.** This is the hard rule and the one that is machine-checked: concurrent lanes execute against a single working tree, so two lanes writing one path is a corrupted edit, not a merge conflict to resolve later. If the shared edit is incidental — a DI registration module, a route table — pull it out into its own earlier task instead of collapsing two good lanes into one.
+- **Two tasks in the same phase whose `Files` overlap MUST share a stream.** This is the hard rule and the one that is machine-checked: concurrent lanes execute against a single working tree, so two lanes writing one path is a corrupted edit, not a merge conflict to resolve later. Across phases the barrier already serialises them, so two tasks in different phases may share a file across different streams safely. If the shared edit is incidental — a DI registration module, a route table — pull it out into its own earlier task instead of collapsing two good lanes into one.
 - **A stream is a claim, not a bucket.** Each task in it needs the previous one's output, or touches the same code. Spreading independent tasks across lanes to look parallel is the failure mode in one direction; dumping unrelated work into one lane to look safe is the failure mode in the other, and it serialises a plan that did not need to be.
 - **A task that depends on nothing and shares no file gets its own stream.**
 - **`order` is one sequence across the whole plan** — 1, 2, 3, … no repeats, no gaps. Within a stream it fixes execution sequence; across the plan it records the order you would have done the work in yourself, which is what decides who gets a slot when more lanes are eligible than the run allows to be concurrent.
@@ -128,7 +130,8 @@ endpoints in `api-surface.md` §5 (list, get, place, cancel, close), with the st
 
 Rules:
 
-- **`Agent` is an exact catalog name.** `be-dotnet`, `be-java`, `be-node`, `data-architect`, `devops-engineer`, `observability-engineer-<stack>`, `qa-api-<stack>`, `qa-security`, `fe-react`, `fe-blazor`. An invented name is the most damaging defect in the pack, because Mission Control binds on this string. Same for skill names.
+- **`Agent` is an exact catalog name**, picked from the routing-map catalog in `blueprint.md` (authored by `be-shared-solution-blueprint` — that catalog is the single authoritative list; `be-dotnet`, `data-architect`, `qa-api-<stack>` are the shape). An invented name is the most damaging defect in the pack, because Mission Control binds on this string. Same for skill names. When the chosen stack has no skill for a concern the task needs (e.g. `be-node` currently ships no service-side auth skill), bind the task to the stack agent anyway, note the gap in the Skills cell (`— no <concern> skill for this stack; the agent works from the design pack`), and add an open question — never invent a skill name to fill the hole.
+- **Human prerequisite tasks use `Agent: human`.** Provisioning work from `integrations.md`'s blocking unknowns — accounts, tenants, sandbox access — is a real task with a real id, but its executor is a person: the Agent cell is the literal `human` and the task block carries an `**Owner:**` line naming who does it. `human` is exempt from catalog-name resolution, and Mission Control treats these tasks as gates to satisfy, never lanes to schedule.
 - **`Files` must be specific.** This is what the stream check relies on, and it is the difference between a plan and a wish.
 - **`Stream` is one of the ids declared in Step 3**, and `Order` is that task's slot in the plan-wide sequence. **Every task carries both, or no task does** — half-authored lanes are rejected rather than completed, because back-filling the rest would scatter tasks into lanes nobody planned. A `Stream` naming an undeclared lane and two tasks claiming one `Order` are both reported as plan defects, and the undeclared lane also costs you the lanes you did author: the whole plan falls back to derived ones.
 - **Acceptance criteria are checkable**, and they cite the design pack by section rather than restating it. "Handles errors properly" is not a criterion; "returns the documented `type` slug for each of the three deltas" is.
@@ -139,13 +142,13 @@ Rules:
 
 ### Step 5 — The progress table
 
-The scannable index, and the thing `HANDOFF.md` points at. Rows sorted by `#`, which makes the sequence auditable at a glance — a repeat or a gap is visible without cross-reading the task blocks:
+The scannable index, and the thing `HANDOFF.md` points at. Rows sorted by `#`, which makes the sequence auditable at a glance — a repeat or a gap is visible without cross-reading the task blocks. `#` **is** the plan-wide `order` Mission Control consumes; the task blocks repeat it as `Order:`, and the two must agree:
 
 | # | Task | Phase | Stream | Title | Agent | Depends on | Status | Evidence |
 |---|---|---|---|---|---|---|---|---|
 | 12 | T12 | P4 | `ordering` | Orders resource | `be-dotnet` | T4, T9, T10 | Not started | — |
 
-Status vocabulary — five values, no others: **Not started · In progress · Done · Partial · Diverged · Blocked**. `Evidence` holds the `file:line` or command output that justifies a `Done` or `Partial`. An empty Evidence cell on a `Done` row is a defect in the plan, not a formatting gap.
+Status vocabulary — six values, no others: **Not started · In progress · Done · Partial · Diverged · Blocked**. `Evidence` holds the `file:line` or command output that justifies a `Done` or `Partial`. An empty Evidence cell on a `Done` row is a defect in the plan, not a formatting gap.
 
 ### Step 6 — Write `HANDOFF.md`
 

@@ -133,6 +133,7 @@ The KB is versioned and diffable by design — work on a branch when changing re
 - **`requirements-author`** (`business-analysis/agents/`) — the domain's authoring lane: scoping writeups, epics, INVEST stories, and backlog readiness audits (`ba-scoping-writeup` / `ba-epic-writer` / `ba-story-writer` / `ba-story-quality-review`). It writes and repairs the artifacts you sweep; when a conflict resolution changes a story, it applies the fix.
 - **`qa-test-case-designer`** (`qa/manual/agents/`) — turns the analyzed feature into a manual test-case suite; your flow/state/decision artifacts and boundary conditions (BVA seeds) are its test basis. The natural next step after Phase 6.
 - **`qa/manual/requirements-breakdown`** (skill, loaded by that agent) — the single-story distillation your artifacts feed into.
+- **`be-documenter`** (`backend/_shared/agents/`, bundled in this plugin) — populates this KB from an existing backend's code (`#observed`/`#inferred` only) and hands off; you own the KB, resolve the cross-feature conflicts its traces surface, and decide every code-vs-`#confirmed` contradiction it escalates.
 - **`ep-brainstorming`** (skill) — upstream ideation for a genuinely new solution; hand off if the user is designing rather than analyzing.
 - **`qa-security`** — when a finding is a permission/authority conflict (class 8) that needs an access-control test matrix, name it in the report.
 

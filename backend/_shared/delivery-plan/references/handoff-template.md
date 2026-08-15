@@ -13,30 +13,34 @@ One file per initiative, living beside the plan at `docs/plans/<NNN>-<initiative
 | **It points at the plan; it does not duplicate it** | Task detail lives in `delivery-plan.md`. Copying it guarantees the two drift |
 | **Names the next task by id, always** | "Continue where we left off" is not a resumable instruction |
 
-## Template
+## Template — shown filled
+
+The example below is the paired `HANDOFF.md` for the **workshop-booking** pack in `example-delivery-plan.md`, caught mid-execution during P4. The section structure is the template; the content shows each section doing its job:
 
 ```markdown
-# <Initiative> — Handoff
+# Workshop Booking — Handoff
 
-**Updated:** YYYY-MM-DD · **Updated by:** `<agent or human>` · **Plan:** `./delivery-plan.md`
-**Repo:** `<path>` · **Branch:** `<branch>` · **Baseline commit:** `<sha>`
+**Updated:** 2026-08-09 · **Updated by:** `be-dotnet` · **Plan:** `./delivery-plan.md`
+**Repo:** `~/src/workshop-booking` · **Branch:** `main` · **Baseline commit:** `9d4b7e2`
 
 ## Where we are
 
-**Phase:** P4 — Feature slices (3 of 6 tasks done)
-**Overall:** 11 of 24 tasks done · 1 partial · 1 blocked
+**Phase:** P4 — Feature slices (1 of 3 tasks done)
+**Overall:** 7 of 13 tasks done · 1 in progress · 1 blocked
 
-<2–4 sentences a human can read in ten seconds: what works end-to-end right now,
-what is half-built, and what the next session should do first.>
+Scheduling works end-to-end: workshops and sessions can be created, listed and cancelled,
+behind auth. Bookings (T11) is half-built — the book and my-bookings endpoints exist and
+pass their tests; cancel and attend do not exist yet. Finish T11 first; T13 (email) stays
+blocked until the SendGrid account (T0.2) is provisioned.
 
 ## Repo state on last check
 
 | Check | Result | When |
 |---|---|---|
-| Build | `dotnet build` — clean | 2026-08-02 |
-| Tests | `dotnet test` — 84 passed, 0 failed | 2026-08-02 |
-| Migrations | head `004_orders`, applied to local + staging | 2026-08-02 |
-| Uncommitted work | none | 2026-08-02 |
+| Build | `dotnet build` — clean | 2026-08-09 |
+| Tests | `dotnet test` — 61 passed, 0 failed | 2026-08-09 |
+| Migrations | head `003`, applied to local | 2026-08-09 |
+| Uncommitted work | none | 2026-08-09 |
 
 > Re-verify this before trusting it — it is working-tree state, not layout, and it goes stale fastest.
 
@@ -46,23 +50,24 @@ what is half-built, and what the next session should do first.>
      in that order; Mission Control starts them concurrently, so a second entry here is
      not a choice between two tasks — it is two lanes about to run. -->
 
-**T12 — Orders resource** (`ordering`, order 12 · `be-dotnet`; loads `be-dotnet-pattern-writer`, `be-dotnet-database-code`, `be-dotnet-unit-testing`)
-Unblocked: T4, T9, T10 all Done.
-Start with: `src/Ordering/Domain/Order.cs`, following the shape already set by
-`src/Catalog/Domain/Product.cs:1-60` (T11's output — match it, do not invent a second convention).
+**T11 — Bookings resource, continued** (`booking`, order 9 · `be-dotnet`; loads `be-dotnet-pattern-writer`, `be-dotnet-database-code`, `be-dotnet-unit-testing`)
+In progress: book + my-bookings done (`src/Booking/BookingEndpoints.cs:1-88`); cancel and attend remain.
+Start with: the cancel endpoint, applying the blueprint §3b decision table (R1–R3) for `lateCancel`,
+following the endpoint shape already set by `src/Scheduling/SessionEndpoints.cs:1-60` (T10's
+output — match it, do not invent a second convention). The `scheduling` lane is finished with
+P4 and idles at the barrier.
 
 ## Blocked
 
 | Task | Blocked on | Owner | Since |
 |---|---|---|---|
-| T18 | Stripe sandbox credentials not provisioned (`integrations.md` §5, X2) | Finance | 2026-07-28 |
+| T13 | T0.2 — SendGrid account + domain auth not provisioned (`integrations.md` §5) | Studio owner | 2026-08-04 |
 
 ## Decisions made
 
 | # | Decision | Answered | Why | Recorded in |
 |---|---|---|---|---|
-| Q3 | Cross-tenant reads return **404**, not 403 | 2026-07-24 | Avoids the id-enumeration oracle | `api-surface.md` §4 |
-| D1 | Role attributes kept over policy-based auth (T9 divergence) | 2026-07-30 | Three flat roles; policies bought nothing | `delivery-plan.md` T9 |
+| D1 | Sessions embedded in the Scheduling module, not a third module (T10 divergence) | 2026-08-06 | One aggregate; a separate module bought nothing | `delivery-plan.md` T10 |
 
 <!-- Every answered open question and every resolved divergence lands here.
      This is the institutional memory the design documents do not carry. -->
@@ -71,8 +76,7 @@ Start with: `src/Ordering/Domain/Order.cs`, following the shape already set by
 
 | Task | Plan said | Code does | Resolution |
 |---|---|---|---|
-| T9 | Policy-based authorization | `[Authorize(Roles=...)]` attributes (`src/Api/Program.cs:44-58`) | Accepted; plan amended 2026-07-30 |
-| T11 | `products.sku` unique globally | Unique per tenant (`migrations/003:22`) | Accepted — correct for the tenancy model; `data-model.md` amended |
+| T10 | Separate `WorkshopEndpoints.cs` + `SessionEndpoints.cs` | One `SessionEndpoints.cs` carrying both resources (`src/Scheduling/SessionEndpoints.cs:1-140`) | Accepted; plan amended 2026-08-06 (D1) |
 
 <!-- Empty is a fine answer. A missing section when deviations exist is not. -->
 
@@ -80,31 +84,32 @@ Start with: `src/Ordering/Domain/Order.cs`, following the shape already set by
 
 | # | Question | Blocks | Owner | Asked |
 |---|---|---|---|---|
-| Q7 | Order retention: 7 years for closed, or per-tenant policy? | T20 | Legal | 2026-07-24 |
+| Q1 | Departing staff member's authored sessions — reassign, or SET NULL with an audit note? (`data-model.md` §8) | nothing yet — becomes real at the first staff offboarding | Studio owner | 2026-07-21 |
 
 ## How to verify current state
 
 ```bash
 git log --oneline -5
 dotnet build && dotnet test
-dotnet ef migrations list --project src/Infrastructure
+dotnet ef migrations list --project src/Api
 ```
 
-Expected: build clean, 84 tests pass, head migration `004_orders`.
+Expected: build clean, 61 tests pass, head migration `003`.
 
 ## Resume instructions
 
-1. Read `delivery-plan.md` §3 T12 for the full task spec.
+1. Read `delivery-plan.md` §4 T11 for the full task spec.
 2. Re-verify the repo state table above — it is a lead, not evidence.
-3. Run T12 as `be-dotnet`. Match `src/Catalog/` conventions; do not introduce a second pattern.
-4. Update this file at the end of the session: status, evidence, decisions, deviations, next task.
+3. Finish T11 as `be-dotnet`. Match `src/Scheduling/` conventions; do not introduce a second pattern.
+4. Chase T0.2 with the studio owner — T13 cannot start without it.
+5. Update this file at the end of the session: status, evidence, decisions, deviations, next task.
 
 ## Session log
 
 <!-- Newest first. One line per session. This is the only part that appends. -->
-- 2026-08-02 — T11 Products resource done; T12 next. Q7 raised with Legal.
-- 2026-07-30 — T9 divergence resolved (role attributes accepted); T10 shared DTOs done.
-- 2026-07-28 — T18 blocked on Stripe sandbox; escalated to Finance.
+- 2026-08-09 — T11 book + my-bookings done; cancel/attend next.
+- 2026-08-06 — T10 done; divergence resolved (sessions embedded in Scheduling, D1).
+- 2026-08-04 — P1–P3 done (T1, T2, T3, T5, T9); T13 flagged blocked on T0.2, chased with studio owner.
 ```
 
 ## Writing rules

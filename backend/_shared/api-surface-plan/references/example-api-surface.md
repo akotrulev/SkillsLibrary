@@ -27,18 +27,18 @@ The filled example for `be-shared-api-surface-plan`, from the **workshop-booking
 
 | Service | Resource | Method | Path | Name | Description | Auth | Idempotent | Success |
 |---|---|---|---|---|---|---|---|---|
-| booking-api | Workshops | GET | `/api/v1/workshops` | List workshops | Published only for members; all for staff | any authenticated | yes | 200 |
-| booking-api | Workshops | POST | `/api/v1/workshops` | Create workshop | Creates a `draft` workshop | `workshops:manage` | no | 201 |
-| booking-api | Workshops | POST | `/api/v1/workshops/{workshopId}/publish` | Publish workshop | `draft → published` | `workshops:manage` | no | 200 |
-| booking-api | Sessions | POST | `/api/v1/workshops/{workshopId}/sessions` | Schedule session | New `scheduled` session with capacity | `workshops:manage` | no | 201 |
-| booking-api | Sessions | GET | `/api/v1/sessions` | List sessions | Upcoming published sessions; default sort `startsAt` asc, tie-break `id` | any authenticated | yes | 200 |
-| booking-api | Sessions | PUT | `/api/v1/sessions/{sessionId}` | Edit session | Capacity/time edit; `If-Match` required | `workshops:manage` | yes | 200 |
-| booking-api | Bookings | POST | `/api/v1/sessions/{sessionId}/bookings` | Book a seat | Confirmed booking for the caller | `bookings:own` | no | 201 |
-| booking-api | Bookings | GET | `/api/v1/my/bookings` | My bookings | The caller's bookings, newest first | `bookings:own` | yes | 200 |
-| booking-api | Bookings | POST | `/api/v1/bookings/{bookingId}/cancel` | Cancel booking | `confirmed → cancelled`; sets `lateCancel` per policy | `bookings:own` (own) / `workshops:manage` (any) | no | 200 |
-| booking-api | Bookings | POST | `/api/v1/bookings/{bookingId}/attend` | Mark attended | `confirmed → attended` | `workshops:manage` | no | 200 |
+| Scheduling | Workshops | GET | `/api/v1/workshops` | List workshops | Published only for members; all for staff; default sort `title` asc, tie-break `id` | any authenticated | yes | 200 |
+| Scheduling | Workshops | POST | `/api/v1/workshops` | Create workshop | Creates a `draft` workshop | `workshops:manage` | no | 201 |
+| Scheduling | Workshops | POST | `/api/v1/workshops/{workshopId}/publish` | Publish workshop | `draft → published` | `workshops:manage` | no | 200 |
+| Scheduling | Sessions | POST | `/api/v1/workshops/{workshopId}/sessions` | Schedule session | New `scheduled` session with capacity | `workshops:manage` | no | 201 |
+| Scheduling | Sessions | GET | `/api/v1/sessions` | List sessions | Upcoming published sessions; default sort `startsAt` asc, tie-break `id` | any authenticated | yes | 200 |
+| Scheduling | Sessions | PUT | `/api/v1/sessions/{sessionId}` | Edit session | Capacity/time edit; `If-Match` required | `workshops:manage` | yes | 200 |
+| Booking | Bookings | POST | `/api/v1/sessions/{sessionId}/bookings` | Book a seat | Confirmed booking for the caller | `bookings:own` | no | 201 |
+| Booking | Bookings | GET | `/api/v1/my/bookings` | My bookings | The caller's bookings, newest first | `bookings:own` | yes | 200 |
+| Booking | Bookings | POST | `/api/v1/bookings/{bookingId}/cancel` | Cancel booking | `confirmed → cancelled`; sets `lateCancel` per policy | `bookings:own` (own) / `workshops:manage` (any) | no | 200 |
+| Booking | Bookings | POST | `/api/v1/bookings/{bookingId}/attend` | Mark attended | `confirmed → attended` | `workshops:manage` | no | 200 |
 
-State transitions are actions on sub-paths (`/publish`, `/cancel`, `/attend`) — never `PATCH {status}`. Every endpoint has a consumer: the member SPA (list/book/cancel) or the staff SPA (the rest).
+State transitions are actions on sub-paths (`/publish`, `/cancel`, `/attend`) — never `PATCH {status}`. Every endpoint has a consumer: the member SPA (list/book/cancel) or the staff SPA (the rest). `Service` carries the owning module — one deployable, per the blueprint's modular monolith.
 
 ## 3. Shared schemas
 
@@ -46,7 +46,7 @@ State transitions are actions on sub-paths (`/publish`, `/cancel`, `/attend`) �
 
 ## 4. Validation & error contract
 
-**Standard set:** `references/validation-catalog.md`, applied API-wide. **This API's instantiation:**
+**Standard set:** `./validation-catalog.md` (the copy in this folder), applied API-wide. **This API's instantiation:**
 
 - Unknown fields (V1.5/V1.7): **reject, 400** — two first-party SPAs, client typos should surface
 - Field validation status (§2): **400** API-wide

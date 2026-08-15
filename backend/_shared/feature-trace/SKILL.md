@@ -27,9 +27,13 @@ The discipline that makes it worth doing: **separate what the code does from wha
 
 ## Output
 
-Per-area structured evidence. On a `be-documenter` run it is working material that feeds Phases 3–4; it is not itself a KB artifact, and it is not written into `docs/business-model/` in raw form. Keep it in the session, or in the scratchpad if the area is large.
+Per-area structured evidence. On a `be-documenter` run it is working material that feeds Phases 3–4; it is not itself a KB artifact, and it is not written into `docs/business-model/` in raw form. One rule for where it lives: evidence consumed within the session stays in the session (or the scratchpad, if the area is large); evidence that must survive the session goes to `.trace/`, below.
 
-**Multi-session runs persist the trace.** When a FULL run spans sessions (a large codebase documented in confirmed batches), a session that ends between Trace and Write would otherwise lose its evidence and force a full re-read. So: on a run that will not reach Write in the same session, persist each completed area's evidence inventory to **`docs/business-model/.trace/<area>.md`** — working files, each stamped `**Working trace by `be-documenter` @ <commit> on <date>` — not a KB artifact**, never listed in `INDEX.md`. On resume, a persisted trace is a **lead, not evidence**: spot-check three of its `file:line` citations against the current commit — if the commit moved or a spot-check fails, re-trace the area rather than trusting the file. Phase 5 (Consolidate) deletes `.trace/` once every area's write-up cites its evidence; a leftover `.trace/` folder is a sign a run ended before consolidation.
+**Multi-session runs persist the trace.** When a FULL run spans sessions (a large codebase documented in confirmed batches), a session that ends between Trace and Write would otherwise lose its evidence and force a full re-read. So: on a run that will not reach Write in the same session, persist each completed area's evidence inventory to **`docs/business-model/.trace/<area>.md`** — working files, never listed in `INDEX.md`, each opening with the line:
+
+```markdown
+**Working trace by `be-documenter` @ <commit> on <date> — not a KB artifact**
+``` On resume, a persisted trace is a **lead, not evidence**: spot-check three of its `file:line` citations against the current commit — if the commit moved or a spot-check fails, re-trace the area rather than trusting the file. Phase 5 (Consolidate) deletes `.trace/` once every area's write-up cites its evidence; a leftover `.trace/` folder is a sign a run ended before consolidation.
 
 ---
 

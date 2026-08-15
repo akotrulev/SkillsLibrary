@@ -39,11 +39,15 @@ Everything lands in **`docs/business-model/`** in the target repo, per `ba-proje
 | `INDEX.md`, `active-context.md` | shared | Updated per the KB's update-after contract |
 | `flows/`, `entities/`, `decisions/` | `ba-process-flow-diagram` · `ba-entity-state-grid` · `ba-decision-table` | **Not yours.** Produced by those skills in Phase 3; you link to them by ID |
 
-**The provenance stamp is mandatory** on every file this skill writes:
+**The header block and provenance stamp are mandatory** on every file this skill writes — the `Created`/`Owned by` lines per `ba-project-memory`'s header rule, then the stamp:
 
 ```markdown
+**Created:** YYYY-MM-DD
+**Owned by:** `be-shared-business-documentation`
 **Derived from:** code by `be-documenter` @ `<commit sha>` on YYYY-MM-DD
 ```
+
+On a later update, add `**Last updated:** YYYY-MM-DD by \`<skill>\`` beneath the creation line rather than overwriting it.
 
 A reader must be able to tell generated content from hand-authored content at a glance. Without it, a generated `#inferred` line is indistinguishable from a business decision someone actually made.
 
@@ -158,6 +162,8 @@ Ask about the **rule**, not the code. "Why does `RefundService` check `PlacedAt`
 
 ```markdown
 # <System> — What it does
+**Created:** YYYY-MM-DD
+**Owned by:** `be-shared-business-documentation`
 **Derived from:** code by `be-documenter` @ `<sha>` on YYYY-MM-DD
 
 ## In one paragraph
@@ -187,6 +193,13 @@ Ask about the **rule**, not the code. "Why does `RefundService` check `PlacedAt`
 ## What is not documented
 | Area / surface | Why | Revisit when |
 |---|---|---|
+
+## Coverage
+<!-- The survey's full coverage ledger — every surface assigned to an area or parked with a
+     reason — so this file can back its own coverage claim without the reader opening the
+     orientation cache. -->
+| Surface | Kind | Area | Note |
+|---|---|---|---|
 ```
 
 **"What is not documented" is mandatory.** A documentation set that does not state its own limits gets read as complete, and the parts nobody traced become the parts everyone assumes are fine.
@@ -214,7 +227,7 @@ The rule that makes the difference between documentation the business uses and d
 | "Throws `InsufficientStockException`" | "The order is rejected and the customer is told the item is unavailable" |
 | "Nullable `ShippedAt`" | "An order that has not shipped yet has no shipping date" |
 
-Banned from narrative sections (sections 1, 2, 3, 5): class names, method names, table and column names, HTTP status codes, exception types, framework nouns. They are welcome in the **Evidence** columns, where they belong.
+Banned from narrative sections (sections 1, 2, 3, 5): class names, method names, table and column names, HTTP status codes, exception types, framework nouns. They are welcome in the **Evidence** columns, where they belong. The final column of the Section-2 "How they are recognised" table and of each "What can go wrong" table is an evidence column for this purpose — permission strings and `file:line` citations belong there, exempt from the ban just like Section 4's Evidence column.
 
 ## Reconcile procedure (REFRESH mode)
 
@@ -235,7 +248,7 @@ When the KB already holds documentation for an area and the code has moved:
 4. Narrative sections contain no class names, table names, status codes, or exception types — grep your own output.
 5. Every area document has all six sections; "What can go wrong" and "Boundaries" are the ones most likely to be skipped.
 6. Flows, state grids, and decision tables are **linked by ID**, not duplicated.
-7. Every file carries its provenance stamp; `INDEX.md` has a line for everything added; `active-context.md` has this session at the top.
+7. Every file carries its `Created`/`Owned by` header and provenance stamp; `INDEX.md` has a line for everything added; `active-context.md` has this session at the top.
 8. The glossary records both vocabularies and flags every drift.
 9. Nothing unreachable is documented as a capability.
 

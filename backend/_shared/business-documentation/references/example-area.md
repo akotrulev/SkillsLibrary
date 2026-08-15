@@ -8,6 +8,8 @@ Note what the example demonstrates: business language in every narrative section
 
 # AREA-003 — Bookings
 
+**Created:** 2026-08-02
+**Owned by:** `be-shared-business-documentation`
 **Derived from:** code by `be-documenter` @ `a3f9c21` on 2026-08-02
 **Entry points:** 4 HTTP · 0 jobs · 0 consumers — all traced
 **Models:** [FLOW-001 booking a seat] · [ENT-002 booking lifecycle] · [DEC-001 cancellation outcome]

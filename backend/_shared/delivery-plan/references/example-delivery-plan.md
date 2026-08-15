@@ -22,9 +22,9 @@ The filled example for `be-shared-delivery-plan`, from the **workshop-booking** 
 | P1 | Foundations (scaffold, config, CI skeleton) | **No** | Every task touches the solution root |
 | P2 | Schema (migrations 001–003) | **No** | Migrations are ordered by definition |
 | P3 | Cross-cutting (auth wiring, error middleware, shared DTOs) | **No** | Shared surfaces every P4 task depends on |
-| P4 | Feature slices (workshops+sessions, bookings) + the OpenAPI asset | **Partly** — T10 ∥ T11 (T10 touches `src/Scheduling/*`, T11 touches `src/Booking/*`, no shared file; both register routes via per-module `IEndpointModule` self-registration created in T9, so no shared route table is edited). T12 follows both | |
+| P4 | Feature slices (workshops+sessions, bookings) + the OpenAPI asset | **No** | T10 ∥ T11 are safe pairwise (T10 touches `src/Scheduling/*`, T11 touches `src/Booking/*`, no shared file; both register routes via the per-module `IEndpointModule` self-registration created in T9, so no shared route table is edited) — but T12 follows both, so the phase as a whole is not. The streams carry the pairwise answer |
 | P5 | Integrations (email sender) | Yes | One file set, one task |
-| P6 | Hardening (telemetry, race test support, docs) | Mixed | Called per task |
+| P6 | Hardening (telemetry, race test support, docs) | Yes | T14 (telemetry base) and T15 (migration-constraint review) touch disjoint file sets |
 
 ## 2. Streams
 
@@ -41,8 +41,8 @@ Lanes idle at phase barriers by design: `booking` finishes T0.2 in minutes and t
 
 | # | Task | Phase | Stream | Title | Agent | Depends on | Status | Evidence |
 |---|---|---|---|---|---|---|---|---|
-| 1 | T0.1 | P0 | `foundation` | Auth0 tenant + per-env applications | *(human — owner)* | — | Not started | — |
-| 2 | T0.2 | P0 | `booking` | SendGrid account + domain auth | *(human — owner)* | — | Not started | — |
+| 1 | T0.1 | P0 | `foundation` | Auth0 tenant + per-env applications | `human` | — | Not started | — |
+| 2 | T0.2 | P0 | `booking` | SendGrid account + domain auth | `human` | — | Not started | — |
 | 3 | T1 | P1 | `foundation` | Scaffold solution + module layout | `be-dotnet` | — | Not started | — |
 | 4 | T2 | P1 | `foundation` | Config + startup validation, CI skeleton | `be-dotnet` | T1 | Not started | — |
 | 5 | T3 | P2 | `schema` | Migrations 001–003 + seeds | `be-dotnet` | T2 | Not started | — |
@@ -123,7 +123,7 @@ Note T5 and T9 sharing `foundation`: both modify `src/Api/Program.cs`, so they m
 **Out of scope:** writing any test from the spec (`qa-api-dotnet`), maintaining the asset thereafter (`qa/_shared/api-spec-assets`).
 
 ### T0.1–T15, remaining — abbreviated in this example
-Each gets the same block shape. Notable: T0.x are human prerequisite tasks from `integrations.md` §5 (the three-places rule); T15 executes `data-model.md` §9's routed decision.
+Each gets the same block shape. Notable: T0.x are human prerequisite tasks from `integrations.md` §5 (the three-places rule) — `Agent: human`, each block carrying an `**Owner:**` line (T0.1: the studio owner's Auth0 admin; T0.2: the studio owner), exempt from catalog-name resolution per the skill's rules; T15 executes `data-model.md` §9's routed decision.
 
 ## 5. Open questions
 

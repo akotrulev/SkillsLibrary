@@ -53,7 +53,7 @@ Lifecycle: `scheduled → completed`; `scheduled → cancelled`.
 | `capacity` | int | no | — | CHECK `>= 1` |
 | `status` | text | no | `'scheduled'` | one of `scheduled,completed,cancelled` |
 | `version` | int | no | `0` | optimistic concurrency (staff edits vs bookings) |
-| `created_by` | uuid | no | — | FK → `members.id` (staff) |
+| `created_by` | uuid | no | — | FK → `members.id` (staff) ON DELETE RESTRICT — blocks the GDPR hard delete for a staff author; open question §8 |
 | `created_at` / `updated_at` | timestamptz | no | `now()` | convention |
 
 **Keys & constraints**
@@ -64,6 +64,8 @@ Lifecycle: `scheduled → completed`; `scheduled → cancelled`.
 |---|---|---|
 | `ix_sessions_starts_status` | (`starts_at`, `status`) | the member-facing "upcoming sessions" list |
 | `ix_sessions_workshop` | (`workshop_id`) | staff's per-workshop view; FK not auto-indexed in PG |
+
+**Retention:** kept indefinitely — schedule history, no member PII beyond the staff author id. `#inferred`
 
 ### `bookings` — Booking area
 Purpose: one member's confirmed seat in one session.
@@ -90,6 +92,8 @@ Lifecycle: `confirmed → cancelled`; `confirmed → attended`.
 | `ix_bookings_member` | (`member_id`, `created_at` DESC) | "my bookings" list |
 | `ix_bookings_session` | (`session_id`) WHERE `status = 'confirmed'` | the capacity count + staff attendance view |
 
+**Retention:** kept 2 years, then purged; a member GDPR hard delete cascades sooner (blueprint §7). `#confirmed`
+
 ### `members`, `workshops` — abbreviated in this example
 A real artifact writes these in full. Shape notes only: `members` carries `auth0_sub` UNIQUE, `email` UNIQUE, `role` (`member|staff`); `workshops` carries `title`, `description`, `status` (`draft|published|archived`), `created_by`.
 
@@ -98,6 +102,12 @@ A real artifact writes these in full. Shape notes only: `members` carries `auth0
 | Table | Contents | Owned by | Per-environment? |
 |---|---|---|---|
 | `members` | One staff account (the owner) | Migration seed | Yes — real email in prod only |
+
+**Existing data & backfill:** the spreadsheet the blueprint replaces (§2, Q3).
+
+| Source | Data | Target tables | One-time or sync | Validated by | Delivery task |
+|---|---|---|---|---|---|
+| Owner's spreadsheet (CSV export) | Member list; future bookings already taken | `members`, `bookings` (against sessions staff schedule first) | One-time import at go-live; spreadsheet then read-only | Owner reviews the imported lists before cutover | go-live import — sequenced by `be-shared-delivery-plan` after migration 3 |
 
 ## 5. Diagrams
 
@@ -134,7 +144,9 @@ Omitted — modular monolith; owning module noted per table block.
 
 | # | Question | Blocks | Owner |
 |---|---|---|---|
-| — | none open — Q-retention answered (2 years, hard delete) | | |
+| 1 | A departing staff member's authored sessions: reassign `created_by`, or SET NULL with an audit note? RESTRICT blocks the GDPR hard delete for staff authors today — the member CASCADE and the staff RESTRICT pull in opposite directions | GDPR delete of a staff account (not the v1 launch) | owner |
+
+Q-retention answered at blueprint (2 years, hard delete).
 
 ## 9. Routed to `data-architect`
 

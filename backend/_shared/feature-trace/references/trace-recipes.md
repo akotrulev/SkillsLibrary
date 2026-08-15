@@ -93,6 +93,8 @@ grep -rn 'BackgroundService\|IHostedService\|RecurringJob\|CronSchedule\|IConsum
 grep -rn 'HasCheckConstraint\|HasIndex\|IsUnique\|HasDefaultValue\|OnDelete\|HasQueryFilter\|IsConcurrencyToken\|IsRowVersion' --include=*.cs src/
 # silent rules
 grep -rn 'Math.Round\|MidpointRounding\|DateTime.Now\|DateTime.Today\|TimeZoneInfo\|\.First()\|\.OrderBy' --include=*.cs src/
+# GraphQL + gRPC entry points — only if the survey found these surfaces
+grep -rn '\[Query\]\|\[Mutation\]\|\[Subscription\]\|QueryType\|MutationType\|MapGraphQL\|MapGrpcService\|ServerCallContext' --include=*.cs src/
 ```
 
 `HasQueryFilter` is worth its own pass — it is where soft-delete and tenancy filters live, and it silently changes the meaning of *every* query in the area.
@@ -114,6 +116,8 @@ grep -rn '@Scheduled\|@KafkaListener\|@RabbitListener\|@SqsListener\|@JmsListene
 grep -rn '@Column(\|@Table(\|uniqueConstraints\|@Version\|@Where\|@SQLRestriction\|@Filter\|cascade =\|orphanRemoval' --include=*.java src/
 # transaction boundaries — what is atomic is a business statement
 grep -rn '@Transactional' --include=*.java src/
+# GraphQL + gRPC entry points — only if the survey found these surfaces
+grep -rn '@QueryMapping\|@MutationMapping\|@SchemaMapping\|@SubscriptionMapping\|DataFetcher\|@GrpcService\|extends .*ImplBase' --include=*.java src/
 ```
 
 `@Where` / `@SQLRestriction` are the Hibernate equivalent of a global query filter — same warning as .NET's.
@@ -135,6 +139,8 @@ grep -rn '@Cron\|node-cron\|schedule(\|@EventPattern\|@MessagePattern\|\.subscri
 grep -rn '@@unique\|@unique\|@default\|onDelete\|@relation\|uniqueIndex(\|\.default(\|@Column(' --include=*.ts prisma/ src/
 # silent rules
 grep -rn 'toFixed\|Math.round\|new Date()\|Date.now()\|\.sort(\|\[0\]' --include=*.ts src/
+# GraphQL + gRPC entry points — only if the survey found these surfaces
+grep -rn '@Resolver\|@Query(\|@Mutation(\|@ResolveField\|@Subscription(\|@GrpcMethod\|@GrpcStreamMethod\|loadPackageDefinition' --include=*.ts src/
 ```
 
 Prisma's `schema.prisma` is a single high-value read: constraints, defaults, cascades and the full relational model in one file.

@@ -77,10 +77,10 @@ Re-read **all** files, reconcile drift against the current requirements/codebase
   - `[TBD - reason]` — known unknown, waiting on a decision
   - `⚠️ Assumption:` — stated but unconfirmed; must be resolvable to a source or removed at refresh
   - `~~old~~ → new` — versioned change, keep one generation of history inline
-  - Confidence tags: `#confirmed` (sourced to a requirement/stakeholder decision) · `#inferred` (derived by analysis, plausible but unverified) · `#observed` (seen in the live system, not in any doc)
+  - Confidence tags: `#confirmed` (sourced to a requirement/stakeholder decision) · `#inferred` (derived by analysis, plausible but unverified) · `#observed` (seen in the implementation or the live system, not in any doc)
 - **Record decisions with rationale.** A conflict resolution in `interaction-map.md` is a *business decision* — record who/what decided and why, not just the outcome.
 - **Skip what the repo already records.** Code structure, API shapes derivable from contracts in-repo, git history. The KB records what the software must *do* and how features *interact* — nothing else.
-- **Header on every artifact file.** Each `areas/<area>.md`, `flows/<flow>.md`, `entities/<entity>.md`, `decisions/<point>.md` file opens with `**Created:** <YYYY-MM-DD>` and `**Owned by:** \`<the ba-* skill>\`` (e.g. `ba-process-flow-diagram`); on every later update, add `**Last updated:** <YYYY-MM-DD> by \`<skill>\`` beneath it rather than overwriting the creation line.
+- **Header on every artifact file.** Each `areas/<area>.md`, `flows/<flow>.md`, `entities/<entity>.md`, `decisions/<point>.md` file (and `system-overview.md`) opens with `**Created:** <YYYY-MM-DD>` and `**Owned by:** \`<the owning skill>\`` (e.g. `ba-process-flow-diagram`; `be-shared-business-documentation` for `areas/` and `system-overview.md`); on every later update, add `**Last updated:** <YYYY-MM-DD> by \`<skill>\`` beneath it rather than overwriting the creation line.
 
 ## INDEX.md format
 

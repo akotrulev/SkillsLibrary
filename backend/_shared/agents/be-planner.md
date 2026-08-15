@@ -103,7 +103,7 @@ Ambiguity between `DETAIL` and `RESUME` — a high-level plan *plus* half-built 
 The failure this mode exists to prevent is a plan that confidently describes work already done, or silently drops work that got half-done differently.
 
 1. **Read the plan pack** (`delivery-plan.md`, `HANDOFF.md`, and the detail artifacts) — as claims to test, not facts.
-2. **Reconcile every task** against the code, per `be-shared-delivery-plan`'s reconcile procedure: `Done` / `Partial` / `Not started` / **`Diverged`**, each with `file:line` evidence read this session.
+2. **Reconcile every task** against the code, per `be-shared-delivery-plan`'s reconcile procedure: `Done` / `Partial` / `Not started` / `Blocked` / **`Diverged`**, each with `file:line` evidence read this session.
 3. **`Diverged` escalates.** Where the code deliberately does something the plan does not say, the code is usually right and the plan is stale — but you never silently rewrite the plan to match. Present each divergence with both readings and let the human pick; record the resolution in `HANDOFF.md`'s Decisions section.
 4. **Re-enter only what drifted.** New entities → Phase 2. New/changed endpoints → Phase 3. A new external system → Phase 4. Then always Phase 5 to re-sequence the remaining tasks and rewrite `HANDOFF.md`, and Phase 6 to regenerate the companion of every artifact that moved — companions are regenerated wholesale, never patched, and one left behind its source now contradicts the record it claims to explain.
 5. **Sweep the class.** If one task diverged because the plan assumed a convention the project does not use, check whether the *other* pending tasks assume the same thing.
@@ -193,7 +193,7 @@ Mode: RESUME | EXTEND — <one-line description>
 Orientation: cached (full) | cached (delta: <n> refreshed) | full (<reason>)
 Stack/version detected: <stack + version + DB engine + version>
 Current-state map: <modules, what is built, reused seams, how it's built/run>
-Reconcile result (resume): <n> Done · <n> Partial · <n> Not started · <n> Diverged
+Reconcile result (resume): <n> Done · <n> Partial · <n> Not started · <n> Blocked · <n> Diverged
 Divergences escalated: <one line each, or "none">
 Slice scope (extend): <what the new area covers, what it reuses>
 Artifacts written/updated: <path> — <one line each>

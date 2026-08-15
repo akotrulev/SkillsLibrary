@@ -15,7 +15,7 @@ The plan altitude: **every table, every column, every key, every index — and w
 
 - Phase 2 of a `be-planner` run, after blueprint approval
 - A new functional area is being added to an existing planned system (`EXTEND` — model the delta, reuse the existing conventions)
-- An existing schema needs documenting as the baseline a plan will extend (`RESUME` — read it out of migrations and entities, mark everything `#confirmed`, then plan the delta)
+- An existing schema needs documenting as the baseline a plan will extend (`RESUME` — read it out of migrations and entities, mark everything `#observed` — repo-read facts are never `#confirmed`, that tier is human-stated only — then plan the delta)
 
 ## When NOT to use
 
@@ -111,6 +111,13 @@ Rules that keep this section honest:
 
 Lookup tables, enum tables, and any row the system cannot boot without: what it is, who owns its contents (app migration vs business-editable), and whether it differs per environment. A seeded row that production needs and staging invents is a class of bug this section exists to prevent.
 
+**Existing data & backfill** — where the blueprint names a system of record being replaced, the data living there is part of the model, not an afterthought at cutover. One row per source:
+
+| Source | Data | Target tables | One-time or sync | Validated by | Delivery task |
+|---|---|---|---|---|---|
+
+State the mapping at column level only where it is non-obvious (a spreadsheet column that splits into two fields, a legacy status that has no successor value). Every import feeds a delivery task — `be-shared-delivery-plan` sequences it after the schema it targets — and names the human who validates the imported data before cutover. No source of record being replaced → one line saying so.
+
 ### Step 5 — Diagrams
 
 An ER diagram of the whole model, and a state diagram for each entity with a non-trivial lifecycle:
@@ -145,10 +152,10 @@ If the blueprint chose services, state which service owns which table, and how t
 
 Ordered, each mapped to the delivery task that will apply it:
 
-| # | Migration | Contains | Depends on | Delivery task |
-|---|---|---|---|---|
-| 1 | `001_tenancy_and_identity` | `tenants`, `users`, `roles` + seeds | — | T3 |
-| 2 | `002_catalog` | `products`, `categories` | 1 | T7 |
+| # | Migration | Contains | Depends on | Delivery task | Online-safe? |
+|---|---|---|---|---|---|
+| 1 | `001_tenancy_and_identity` | `tenants`, `users`, `roles` + seeds | — | T3 | yes |
+| 2 | `002_catalog` | `products`, `categories` | 1 | T7 | yes |
 
 Rules:
 - **Reference tables before the tables that point at them** — FK order is the dependency order.
@@ -185,6 +192,10 @@ Rules:
 ## 4. Reference & seed data
 | Table | Contents | Owned by | Per-environment? |
 |---|---|---|---|
+
+**Existing data & backfill:** <one row per source being replaced, or "none — no predecessor system">
+| Source | Data | Target tables | One-time or sync | Validated by | Delivery task |
+|---|---|---|---|---|---|
 
 ## 5. Diagrams
 <!-- ER diagram; state diagram per entity with a real lifecycle -->

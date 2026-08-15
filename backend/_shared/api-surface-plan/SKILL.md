@@ -130,7 +130,9 @@ Any object shape used by more than one endpoint gets defined once in a **Shared 
 
 ### Step 5 — Apply the validation catalog
 
-Read `references/validation-catalog.md` and state, in the document's own **Validation & error contract** section:
+**First, copy `references/validation-catalog.md` into the initiative folder** as `docs/plans/<NNN>-<initiative>/validation-catalog.md`, and have the plan cite that copy. The plan's readers — the QA agents, Mission Control, the human — read the initiative folder, not this skill's directory; a skill-relative path in the written artifact resolves to nothing for them.
+
+Then read the catalog and state, in the document's own **Validation & error contract** section:
 
 1. Which parts of the standard set apply API-wide (essentially all of it).
 2. The concrete instantiation of the parameterized rules for *this* API: the permission model, the not-found-vs-forbidden disclosure policy, the referential-integrity rule (a referenced id must exist **and** be visible to the caller **and** be in a valid state — all three, in that order), the state-transition rules taken from `data-model.md`'s state diagrams, and the uniqueness rules taken from its unique constraints.
@@ -167,7 +169,7 @@ The per-endpoint blocks then carry deltas only.
 <!-- Money, Address, PagedResult<T>, ProblemDetails, … — defined once -->
 
 ## 4. Validation & error contract
-**Standard set:** `references/validation-catalog.md`, applied API-wide.
+**Standard set:** `./validation-catalog.md` (the copy in this folder), applied API-wide.
 **This API's instantiation:**
 - Permission model: …
 - Not-found vs forbidden disclosure: …
@@ -200,6 +202,8 @@ The per-endpoint blocks then carry deltas only.
 5. Every request field maps to a column, a computed value, or a named external input; every server-computed response field is marked.
 6. No endpoint re-lists the standard error set. No endpoint lacks a consumer.
 7. Every shape used twice is a shared schema.
+8. Every table in `data-model.md` is written or read by at least one endpoint, background job, or integration — list any orphans; a deliberately internal table counts, named as such.
+9. The validation catalog is copied into the initiative folder and the plan cites the copy, not the skill's `references/` path.
 
 ## Handoffs
 

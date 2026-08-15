@@ -27,6 +27,8 @@ The studio schedules recurring workshops (pottery, life drawing) and currently t
 
 **Explicitly not in this initiative:** payments (sessions are included in membership — confirmed by owner), waitlists, and any member-facing mobile app.
 
+**Existing data & backfill:** the spreadsheet is the system of record being replaced. The member list and the future bookings already taken come across in a one-time import at go-live; past attendance history stays in the spreadsheet, kept read-only (Q3). `#confirmed`
+
 ## 3. Architecture
 
 **Style:** Modular monolith — one team of two, three areas, one deployable, no independent scaling need. Earned by default; nothing here justifies more.
@@ -42,7 +44,7 @@ flowchart LR
     Auth0[Auth0] -->|JWT| API
 ```
 
-**Cross-cutting concerns:** Auth — JWT bearer, roles from Auth0 claims. Errors — RFC 9457 API-wide. Logging/telemetry — OTel via the bundled observability lane, wired after the first slice. Config — env vars + user-secrets locally. Background work — one job: auto-release of unconfirmed holds is **out** (no holds); none needed. `#confirmed`
+**Cross-cutting concerns:** Auth — JWT bearer, roles from Auth0 claims. Errors — RFC 9457 API-wide. Logging/telemetry — OTel via the bundled observability lane, wired after the first slice. Config — env vars + user-secrets locally. Background work — none; auto-release of unconfirmed holds was considered and rejected (no holds in v1). `#confirmed`
 
 ## 3b. Key flows & decisions
 
@@ -158,6 +160,9 @@ All answered before approval; recorded with their answers as the decision log se
 
 **Q2 — Does a late cancellation carry any consequence?**
 **Answer:** recorded on the member's record, no enforcement in v1 (owner, 2026-08-02).
+
+**Q3 — What comes across from the spreadsheet, and what stays behind?**
+**Answer:** member list + already-taken future bookings, imported once at go-live; past history stays in the read-only spreadsheet (owner, 2026-08-02). Mapping detail in `data-model.md` §4.
 
 ## 11. Approval
 

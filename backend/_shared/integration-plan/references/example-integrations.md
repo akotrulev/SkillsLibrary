@@ -72,8 +72,9 @@ A real artifact writes the full block. Notable rows: Authorization Code + PKCE (
 
 | Secret | Store | Environments | Provisioned by | Needed by task | Rotation | Status |
 |---|---|---|---|---|---|---|
-| `Email__ApiKey` | Container Apps secrets | staging, prod (distinct) | Owner → devops | T13 (email sender) | on demand | `[TBD - owner, wk 1]` |
-| Auth0 tenant + application config | Auth0 dashboard | one tenant, per-env applications | Owner | T5 (auth wiring) | n/a | `[TBD - owner, wk 1]` |
+| `Email__ApiKey` | user-secrets (local) / Container Apps secrets (staging, prod, distinct) | local, staging, prod | Owner → devops | T13 (email sender) | on demand | `[TBD - owner, wk 1]` |
+
+Auth0 needs no API secret here — the API validates tokens against the public JWKS, and `Auth0__Domain` / `Auth0__Audience` are non-secret appsettings. The tenant + per-env applications are provisioning, not a secret: U1 in §5 and prerequisite task T0.1.
 
 ## 4. Failure matrix
 
@@ -88,12 +89,13 @@ A real artifact writes the full block. Notable rows: Authorization Code + PKCE (
 |---|---|---|---|---|
 | U1 | Auth0 tenant + per-env applications created | Owner | week 1 | T5, and every task after it that needs sign-in |
 | U2 | SendGrid account + domain authentication | Owner | before prod cutover | T13 in prod only — local/staging proceed via Mailpit/sandbox |
+| U3 | Documented test-token fallback for local dev (how a developer mints a token before U1 lands; retired when U1 lands) | Dev lead | week 1 | local development only — no delivery task, scoped inside T0.1's window |
 
-Each is also a register `[TBD]` and a P0 prerequisite task (T0.1, T0.2) in `delivery-plan.md` — the three-places rule.
+U1 and U2 are each also a register `[TBD]` and a P0 prerequisite task (T0.1, T0.2) in `delivery-plan.md` — the three-places rule. U3 is a mitigation *of* U1, lives inside its window, and expires with it.
 
 ## 6. Local development
 
-A developer clones, runs `docker compose up` (PostgreSQL + Mailpit), and signs in against the shared Auth0 **dev** application. Nothing secret is required beyond the dev-app client id (non-secret, committed). Honest answer: day-one runnable except sign-in before U1 lands — mitigated by a documented test-token fallback in week 1 only.
+A developer clones, runs `docker compose up` (PostgreSQL + Mailpit), and signs in against the shared Auth0 **dev** application. Nothing secret is required beyond the dev-app client id (non-secret, committed). Honest answer: day-one runnable except sign-in before U1 lands — mitigated by the documented test-token fallback (U3, week 1 only).
 
 ## 7. Routed to `devops-engineer`
 

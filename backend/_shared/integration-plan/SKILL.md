@@ -60,65 +60,33 @@ Every external system on one screen. Seeded from the blueprint, then completed b
 
 ### Step 2 — A block per dependency
 
+One block per register row, with these fields — the worked content lives in `references/example-integrations.md`; do not restate it here:
+
 ````markdown
-### X2 — Stripe (payments)
+### X<n> — <System> (<what it is>)
 
-**Purpose:** authorize and capture card payments; issue refunds; receive settlement events.
-**Direction:** outbound REST + inbound webhook · **Criticality:** critical
-**Docs:** <link> · **API version pinned to:** `2025-08-27.basil`
+**Purpose:** <one sentence — what it does for us>
+**Direction:** <outbound | inbound | both> · **Criticality:** <critical | degraded | optional>
+**Docs:** <link> · **API version pinned to:** <version>
 
-**Auth**
-| Aspect | Value |
-|---|---|
-| Method | Secret API key, `Authorization: Bearer` |
-| Rotation | Quarterly; dual-key overlap supported |
-| Inbound verification | Webhook signature (`Stripe-Signature`, HMAC-SHA256 over the **raw** body) |
-
-**Configuration** *(names and locations only — never values, never in the plan, never in the repo)*
-| Key | Where it lives | Environments | Provisioned by |
-|---|---|---|---|
-| `Payments__ApiKey` | Key Vault → `stripe-api-key` | dev / staging / prod, distinct per env | Finance → Platform |
-| `Payments__WebhookSecret` | Key Vault → `stripe-webhook-secret` | per env, per endpoint | Platform |
-| `Payments__BaseUrl` | appsettings (non-secret) | all | — |
-
-**Environments**
-| Env | Provider environment | Notes |
-|---|---|---|
-| local | Stripe test mode + `stripe listen` CLI forwarding | no real cards, no shared test account |
-| staging | Stripe test mode, separate key | test-card numbers documented in the runbook |
-| prod | Stripe live mode | access restricted; rotation logged |
-
-**Limits & budget:** 100 req/s account-wide · our expected peak ~5 req/s · connect timeout 2s, read timeout 10s (webhook handler must respond < 5s).
-
-**Resilience**
-| Aspect | Policy |
-|---|---|
-| Retry | 3 attempts, exponential backoff + jitter, **only** on 5xx/timeout/429 — never on 4xx |
-| Idempotency | `Idempotency-Key` on every charge; the key is our order id, so a retry cannot double-charge |
-| Circuit breaker | Open after 5 consecutive failures, half-open after 30s |
-| Fallback | None — checkout returns 503 + `Retry-After`; the order stays `pending` and is never silently marked paid |
-
-**Inbound webhook**
-| Aspect | Policy |
-|---|---|
-| Endpoint | `POST /api/v1/webhooks/stripe` — anonymous, signature-verified (an explicit exception to the 401 rule) |
-| Replay protection | Reject events with a timestamp older than 5 minutes |
-| Idempotency | Store the provider event id; a repeat is a 200 no-op |
-| Ordering | Not guaranteed — handlers are order-independent and ignore events older than current state |
-| Failure | Non-2xx makes the provider retry; return 200 once persisted, then process asynchronously |
-
-**Data crossing the boundary:** customer email, amount, order id. **No card data touches our servers** (tokenized client-side) — this is what keeps PCI scope out.
-
-**Local dev & test**
-| Layer | Approach |
-|---|---|
-| Local run | Test mode against the real sandbox; CLI forwards webhooks |
-| Unit / component | Fake at our own client interface — never assert on the vendor's wire format |
-| Integration | Recorded/stubbed HTTP (`qa-network-mocking-<stack>`) |
-| Contract | Pinned API version; a version bump is its own task with its own test pass |
-
-**Open questions:** who owns key rotation in prod? `[TBD - Platform, before T14]`
+**Auth** — method, rotation policy, and (if inbound) how we verify the caller
+**Configuration** — key **names** and store **locations** only, per environment, with who provisions each
+**Environments** — which provider environment each of local / staging / prod talks to
+**Limits & budget:** <provider limit> · <our expected peak> · <connect/read timeouts>
+**Resilience** — retry policy, idempotency, circuit breaker, and the stated fallback
+**Inbound webhook** *(if any)* — endpoint, replay protection, idempotency, ordering, failure handling
+**Data crossing the boundary:** <fields, PII called out>
+**Local dev & test** — local run, unit/component, integration, contract layers
+**Open questions:** <or "none">
 ````
+
+Rules the block must honor, whatever the system:
+
+- **Retry only on 5xx / timeout / 429 — never on a 4xx.** A 4xx retried is the same wrong request sent twice.
+- **Outbound idempotency keys are our own ids** (an order id, not a random UUID per attempt), so a retry cannot double-apply.
+- **A webhook endpoint is anonymous but signature-verified** — state it as an explicit exception to the API-wide 401 rule, and verify over the **raw** body before parsing.
+- **A fallback of "none" is stated, not omitted** — say what the user sees (e.g. 503 + `Retry-After`) and what state the affected record stays in.
+- **Fakes live at our own client interface, never the vendor's wire format**; the pinned API version means a version bump is its own task with its own test pass.
 
 ### Step 3 — Category-specific rules
 

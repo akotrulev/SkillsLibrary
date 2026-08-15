@@ -31,7 +31,7 @@ The blueprint is the document the human approves. Everything downstream — data
 
 | Marker | Means |
 |---|---|
-| `#confirmed` | Stated by the human, or read directly out of the repo/requirements |
+| `#confirmed` | Stated by the human — in this session or in a requirements document. Never read out of code; that is `#observed` |
 | `#inferred` | Your reasoning from indirect evidence — the human should scan these |
 | `#observed` | Read out of existing code/behavior rather than a document — `ba-project-memory`'s grammar is the canonical definition; in the documenter lane it always carries `file:line` |
 | `[TBD - <owner>, <by when>]` | Genuinely unknown; has a named owner. **Not** a synonym for vague |
@@ -46,6 +46,9 @@ An unmarked claim reads as `#confirmed`. Mark honestly — the value of the pack
 | `detected` | Found in the repo — a TFM, a lockfile, an existing migration, an existing route |
 | `stated` | The human said so, in this session or in the requirements |
 | `proposed` | Your inference from the workload. **These are the rows the human needs to look at** |
+| `proposed → approved` | A `proposed` row the human confirmed at the gate — the post-approval state, recorded when the blueprint moves to APPROVED |
+
+The two systems encode one axis: `stated` ≈ `#confirmed` · `detected` ≈ `#observed` · `proposed` ≈ `#inferred` — the evidence marks are the table-cell form of the annotation grammar, used where a one-word cell reads better than a tag.
 
 In an existing repo, `detected` beats the library Stack defaults every time. In a greenfield one, the Stack defaults from `CLAUDE.md` are the proposal, marked `proposed`.
 
@@ -77,6 +80,7 @@ Rules:
 - **6–8 areas is a lot.** Beyond that, either the initiative should be decomposed into separate initiatives (each with its own folder and its own executable plan), or several "areas" are really one. Say which.
 - **Out of scope is not optional.** The most common plan defect is an unstated boundary that someone later reads as included.
 - Every area gets at least one entity or it is not an area — it is a cross-cutting concern (auth, logging, config), which belongs in the architecture section instead.
+- **Ask about existing data.** If any area replaces a current system of record (a spreadsheet, a legacy app, a manual process), the data living there is in scope or out — say which. What must come across, and whether it is a one-time import or an ongoing sync, is a scope boundary and usually an open question; the mapping detail belongs to `be-shared-data-model-plan`'s backfill section.
 
 ### Step 3 — Decide the architecture style
 
@@ -217,7 +221,7 @@ One line each: system, what it does for us, direction (we call it / it calls us 
 | Observability | `observability-engineer-dotnet` · `observability-engineer-java` · `observability-engineer-node` |
 | DevOps | `devops-engineer` · `devops-auditor` |
 | QA — per stack (`{dotnet,java,typescript}`) | `qa-api-<stack>` · `qa-ui-<stack>` · `qa-mobile-<stack>` · `qa-performance-<stack>` · `qa-llm-<stack>` · `qa-bdd-<stack>` · `qa-cicd-<stack>` · `qa-reporting-<stack>` |
-| QA — stack-agnostic | `qa-security` · `qa-test-case-designer` |
+| QA — stack-agnostic | `qa-security` · `qa-test-case-designer` · `qa-test-planner` |
 | Requirements | `requirements-author` · `business-analyst` |
 | Audit | `code-auditor` |
 
@@ -285,6 +289,8 @@ In `DETAIL` mode, where the human supplied the high-level plan, the gate is shor
 |---|---|---|---|---|---|---|
 
 **Explicitly not in this initiative:** <the boundary, stated once, plainly.>
+
+**Existing data & backfill:** <the system of record being replaced and what comes across, or "none — no predecessor system".>
 
 ## 3. Architecture
 **Style:** <choice> — <why it is earned for this system>

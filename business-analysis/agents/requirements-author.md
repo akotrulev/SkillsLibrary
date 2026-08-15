@@ -64,6 +64,7 @@ Phase 3R is not gated behind 1–3: invoke it whenever externally-authored stori
 
 - **`business-analyst`** (`business-analysis/agents/`) — the reasoning lane: sweeps your story sets against the project's business-model KB for cross-feature conflicts (contradictory rules, state interference, stacking, races) and keeps the KB current. The natural next step after Phase 3 when the stories add or change business rules.
 - **`qa-test-case-designer`** (`qa/manual/agents/`) — turns ready stories into a manual test-case suite; `qa/manual/requirements-breakdown` is its first phase and consumes your Phase-3/3R output directly.
+- **`be-documenter`** (`backend/_shared/agents/`, bundled in this plugin) — recovers documented areas and business rules from an existing backend nobody wrote requirements for; run it first when your input is a legacy system, then author epics and stories from its confirmed areas.
 - **`communication/stakeholder-updates` · `communication/incident-postmortem` · `communication/meeting-notes`** — standalone writing skills for reporting out, incident reviews, and session capture; load them directly, no agent needed.
 
 ## Output contract
