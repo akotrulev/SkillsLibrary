@@ -120,13 +120,13 @@ blind to logic flaws.**
 
 | Layer | Skill | Reads | OWASP |
 |-------|-------|-------|-------|
-| **SAST** | `_shared/security-testing/sast` | your source | A05/A06 |
+| **SAST** | `_shared/security-testing/code-scan` | your source | A05/A06 |
 | **Secrets** | `_shared/security-testing/secrets-scan` | source + git history | A02/A07 |
 | **SCA** | `<stack>/skills/security-testing/dependency-scan` | dependency tree | **A03** |
 | **DAST (passive)** | `<stack>/skills/security-testing/passive-scan` | running app, no payloads | A02/A08 |
 | **DAST (active/API)** | `_shared/security-testing/active-scan` | running app, **payloads** | A05/API8 |
 | **API fuzzing** | `_shared/security-testing/api-fuzzing` | running app + OpenAPI/GraphQL | A05/API4 |
-| **Templates/CVE** | `_shared/security-testing/nuclei` | running app / hosts | A02/A05 |
+| **Templates/CVE** | `_shared/security-testing/known-vuln-scan` | running app / hosts | A02/A05 |
 | **Container/IaC** | `_shared/security-testing/image-infra-scan` | images, fs, Terraform/K8s | A02/A03 |
 | **TLS** | `_shared/security-testing/certificate-scan` | the TLS endpoint | A04 |
 | **Access control** | `<stack>/skills/security-testing/permission-testing` | your API, multi-user | **A01/API1/3/5** |
@@ -210,7 +210,7 @@ abuse still needs a manual pentest. State that in every report.
 
 - `qa/_shared/security/SETUP.md` — **setup & prerequisites** (per-tool install, env vars, target requirements,
   how to invoke the agent vs a single skill, the pre-flight checklist). The *how* to this skill's *why*.
-- `qa/_shared/security-testing/{active-scan,sast,secrets-scan,image-infra-scan,api-fuzzing,nuclei,certificate-scan}`
+- `qa/_shared/security-testing/{active-scan,code-scan,secrets-scan,image-infra-scan,api-fuzzing,known-vuln-scan,certificate-scan}`
   — the language-agnostic scanner skills this reference frames.
 - `qa/<stack>/skills/security-testing/permission-testing` — the **stack-native** functional authz-matrix
   skill (the scanner blind spot; TS canonical).

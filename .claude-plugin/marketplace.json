@@ -7,7 +7,7 @@
   },
   "metadata": {
     "description": "Stack-first skills library covering QA, frontend, backend, data, and business-analysis: install one self-contained plugin per tech stack. `qa-{java,dotnet,typescript}` bundle every QA discipline \u2014 API/UI/mobile/performance/LLM/BDD authoring and verification, manual-QA process, CI/CD, reporting, and OWASP-mapped security. `fe-{blazor,react}` are phased frontend dev-stack agents (scaffold \u2192 architecture \u2192 features \u2192 quality \u2192 tests \u2192 review). `be-{dotnet,java,node}` are phased backend dev-stack agents for design-pattern application, ORM persistence, and Auth0/Cognito service-side auth. `devops` ships the platform lane \u2014 container images, IaC, cloud deploys, and build/deploy pipelines. `data` and `business-analysis` round out the database-engineering and cross-feature requirements domains.",
-    "version": "2.18.0"
+    "version": "2.20.0"
   },
   "plugins": [
     {
@@ -1042,6 +1042,13 @@
         "./devops/gitlab-ci",
         "./devops/azure-pipelines",
         "./devops/environment-config",
+        "./devops/threat-modeling",
+        "./devops/iac-security",
+        "./devops/k8s-security",
+        "./devops/container-runtime-security",
+        "./devops/cloud-posture",
+        "./devops/supply-chain-security",
+        "./devops/infra-controls-validation",
         "./engineering-practices/agent-orientation-cache",
         "./engineering-practices/code-comments",
         "./engineering-practices/standards-audit-engine",
@@ -1063,6 +1070,8 @@
       "commands": [
         "./devops/commands/devops-engineer.md",
         "./devops/commands/devops-auditor.md",
+        "./devops/commands/infra-security-tester.md",
+        "./security/commands/security-test-planner.md",
         "./engineering-practices/commands/code-auditor.md",
         "./engineering-practices/commands/ep-brainstorming.md",
         "./engineering-practices/commands/ep-writing-plans.md",
@@ -1073,6 +1082,8 @@
       "agents": [
         "./devops/agents/devops-engineer.md",
         "./devops/agents/devops-auditor.md",
+        "./devops/agents/infra-security-tester.md",
+        "./security/agents/security-test-planner.md",
         "./engineering-practices/agents/code-auditor.md"
       ]
     }
