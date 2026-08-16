@@ -7,7 +7,7 @@
   },
   "metadata": {
     "description": "Stack-first skills library covering QA, frontend, backend, data, and business-analysis: install one self-contained plugin per tech stack. `qa-{java,dotnet,typescript}` bundle every QA discipline \u2014 API/UI/mobile/performance/LLM/BDD authoring and verification, manual-QA process, CI/CD, reporting, and OWASP-mapped security. `fe-{blazor,react}` are phased frontend dev-stack agents (scaffold \u2192 architecture \u2192 features \u2192 quality \u2192 tests \u2192 review). `be-{dotnet,java,node}` are phased backend dev-stack agents for design-pattern application, ORM persistence, and Auth0/Cognito service-side auth. `devops` ships the platform lane \u2014 container images, IaC, cloud deploys, and build/deploy pipelines. `data` and `business-analysis` round out the database-engineering and cross-feature requirements domains.",
-    "version": "2.20.0"
+    "version": "2.21.0"
   },
   "plugins": [
     {
@@ -40,6 +40,9 @@
         "./qa/_shared/security-testing/secrets-scan",
         "./qa/_shared/security-testing/certificate-scan",
         "./qa/_shared/security-testing/active-scan",
+        "./qa/_shared/security-testing/exploit-validation",
+        "./qa/_shared/security-testing/vuln-reachability",
+        "./qa/_shared/security-testing/client-side-security",
         "./qa/_shared/python-web-testing",
         "./qa/cicd/ci-conventions",
         "./qa/cicd/java/skills/ci-pipelines",
@@ -190,6 +193,9 @@
         "./qa/_shared/security-testing/secrets-scan",
         "./qa/_shared/security-testing/certificate-scan",
         "./qa/_shared/security-testing/active-scan",
+        "./qa/_shared/security-testing/exploit-validation",
+        "./qa/_shared/security-testing/vuln-reachability",
+        "./qa/_shared/security-testing/client-side-security",
         "./qa/_shared/python-web-testing",
         "./qa/cicd/ci-conventions",
         "./qa/cicd/dotnet/skills/ci-pipelines",
@@ -346,6 +352,9 @@
         "./qa/_shared/security-testing/secrets-scan",
         "./qa/_shared/security-testing/certificate-scan",
         "./qa/_shared/security-testing/active-scan",
+        "./qa/_shared/security-testing/exploit-validation",
+        "./qa/_shared/security-testing/vuln-reachability",
+        "./qa/_shared/security-testing/client-side-security",
         "./qa/_shared/python-web-testing",
         "./qa/cicd/ci-conventions",
         "./qa/cicd/typescript/skills/ci-pipelines",
