@@ -7,7 +7,7 @@
   },
   "metadata": {
     "description": "Stack-first skills library covering QA, frontend, backend, data, and business-analysis: install one self-contained plugin per tech stack. `qa-{java,dotnet,typescript}` bundle every QA discipline \u2014 API/UI/mobile/performance/LLM/BDD authoring and verification, manual-QA process, CI/CD, reporting, and OWASP-mapped security. `fe-{blazor,react}` are phased frontend dev-stack agents (scaffold \u2192 architecture \u2192 features \u2192 quality \u2192 tests \u2192 review). `be-{dotnet,java,node}` are phased backend dev-stack agents for design-pattern application, ORM persistence, and Auth0/Cognito service-side auth. `devops` ships the platform lane \u2014 container images, IaC, cloud deploys, and build/deploy pipelines. `data` and `business-analysis` round out the database-engineering and cross-feature requirements domains.",
-    "version": "2.21.0"
+    "version": "2.22.0"
   },
   "plugins": [
     {
@@ -1080,7 +1080,6 @@
         "./devops/commands/devops-engineer.md",
         "./devops/commands/devops-auditor.md",
         "./devops/commands/infra-security-tester.md",
-        "./security/commands/security-test-planner.md",
         "./engineering-practices/commands/code-auditor.md",
         "./engineering-practices/commands/ep-brainstorming.md",
         "./engineering-practices/commands/ep-writing-plans.md",
@@ -1092,8 +1091,46 @@
         "./devops/agents/devops-engineer.md",
         "./devops/agents/devops-auditor.md",
         "./devops/agents/infra-security-tester.md",
-        "./security/agents/security-test-planner.md",
         "./engineering-practices/agents/code-auditor.md"
+      ]
+    },
+    {
+      "name": "penetration-testing",
+      "description": "Self-contained offensive-security plugin — the full, authorization-gated penetration-testing kill chain the defensive lanes hand off to. Two agents: penetration-tester runs a live kill chain against owned/lab infrastructure (recon → exploitation into a foothold → privilege escalation → lateral movement → post-exploitation capped at proof → report), and security-test-planner (the entry point to the whole security domain) discovers a platform's attack surface, blocks for a scope + authorization sign-off, and emits a phased, independently-executable assessment plan that binds each phase to the exact lane agent (infra-security-tester, qa-security, penetration-tester, …) that runs it. Seven language-agnostic kill-chain skills — recon-enumeration (amass/subfinder/httpx/nmap/masscan/Shodan), initial-access (Metasploit/sqlmap), privilege-escalation (linPEAS/winPEAS/GTFOBins), lateral-movement (NetExec/impacket/BloodHound CE/ligolo-ng/kube pivots), credential-attacks (hashcat/hydra/Responder/secrets harvesting), post-exploitation (Sliver/Mythic C2, persistence demo-then-remove), pentest-reporting (CVSS + MITRE ATT&CK Enterprise) — each opening with the load-bearing safety gate: a committed engagement scope file, a #volatile expiring authorization line, owned-infra-only, production as a separate louder sign-off, per-act opt-in for destructive acts, loot redaction, a full action log, cleanup verification, and a defined mid-run abort. Never fixes (the be-*/fe-*/devops-engineer agents do); no DoS ever. Bundles the two always-on ep-* skills.",
+      "source": "./",
+      "strict": false,
+      "author": {
+        "name": "Aleksandar Kotrulev",
+        "email": "alexandur.kotrulev@gmail.com"
+      },
+      "license": "MIT",
+      "keywords": [
+        "security",
+        "penetration-testing",
+        "red-team",
+        "offensive-security",
+        "mitre-attack",
+        "kill-chain"
+      ],
+      "category": "development",
+      "skills": [
+        "./security/recon-enumeration",
+        "./security/initial-access",
+        "./security/privilege-escalation",
+        "./security/lateral-movement",
+        "./security/credential-attacks",
+        "./security/post-exploitation",
+        "./security/pentest-reporting",
+        "./engineering-practices/agent-orientation-cache",
+        "./engineering-practices/code-comments"
+      ],
+      "commands": [
+        "./security/commands/penetration-tester.md",
+        "./security/commands/security-test-planner.md"
+      ],
+      "agents": [
+        "./security/agents/penetration-tester.md",
+        "./security/agents/security-test-planner.md"
       ]
     }
   ]
