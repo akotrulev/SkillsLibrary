@@ -1,6 +1,6 @@
 ---
 name: qa-security-client-side-security
-description: Use for dynamic client-side security testing the server-side scanners are blind to — DOM-based XSS (source→sink taint that never touches the server), CSP VALIDATION (does the deployed header actually block an injected script and emit a violation report, not just parse clean), and SPA-specific DAST (crawling client-routed React/Vue/Blazor apps a proxy can't see). Language-agnostic, runs against an owned/authorized non-prod env. Triggers "test for DOM XSS", "does our CSP actually block injection", "SPA security scan", "validate our security headers", "client-side prototype pollution". This is the TEST half of the fe-* handshake whose authoring half is the Stage-5 `security-hardening` skill. Do NOT use for server-side injection (`active-scan`/`exploit-validation`), access-control (`permission-testing`), or authoring the CSP itself (that is `fe-*` + `security-hardening`).
+description: Use for dynamic client-side security testing the server-side scanners are blind to — DOM-based XSS, CSP validation, and SPA-specific DAST. Language-agnostic, runs against an owned/authorized non-prod env. Triggers "test for DOM XSS", "does our CSP actually block injection", "SPA security scan", "validate our security headers", "client-side prototype pollution". Do NOT use for server-side injection (`active-scan`/`exploit-validation`) or access-control (`permission-testing`).
 ---
 
 # Security Testing — Client-Side Security (DOM XSS · CSP validation · SPA DAST)

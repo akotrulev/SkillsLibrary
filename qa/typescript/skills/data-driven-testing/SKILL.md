@@ -1,6 +1,6 @@
 ---
 name: qa-data-driven-testing-typescript
-description: Run one Node 24 (22 supported) / TypeScript test body against **many rows of data sourced from an external file**. Triggers: "run this test for every row in a CSV / spreadsheet", "data-drive these tests from a JSON file", "parameterize these Playwright/Vitest tests with external data". For end-to-end suite work prefer the phased agent `qa-api-typescript` / `qa-ui-typescript` / `qa-mobile-typescript` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
+description: Run one Node 24 (22 supported) / TypeScript test body against **many rows of data sourced from an external file**. Triggers: "run this test for every row in a CSV / spreadsheet", "data-drive these tests from a JSON file", "parameterize these Playwright/Vitest tests with external data".
 ---
 
 # Data-Driven Testing (Node 20 / TypeScript — Vitest + Playwright)

@@ -1,6 +1,6 @@
 ---
 name: fe-blazor-test-ids
-description: Use when adding, auditing, or fixing `data-testid` attributes in Blazor (.razor) pages and components so UI suites can target the app — including consuming a `missing-testids.md` report from QA's `page-objects-from-url` / `mobile-screen-explorer`. Triggers: "add testids to this page", "audit the data-testids", "QA sent a missing-testids report". Do NOT use to write the UI tests (`qa-ui-dotnet`), build page objects (qa `page-objects-from-url`), or for non-Blazor UIs beyond the static-HTML appendix.
+description: Use when adding, auditing, or fixing `data-testid` attributes in Blazor (.razor) pages and components so UI suites can target the app — including consuming a `missing-testids.md` report from QA's `page-objects-from-url` / `mobile-screen-explorer`. Triggers: "add testids to this page", "audit the data-testids", "QA sent a missing-testids report". Do NOT use to write the UI tests (`qa-ui-dotnet`) or build page objects (qa `page-objects-from-url`).
 ---
 
 # Blazor Testability — `data-testid` Writer

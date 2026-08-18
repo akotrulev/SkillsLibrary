@@ -1,6 +1,6 @@
 ---
 name: qa-mobile-screen-explorer-typescript
-description: Use when a TypeScript mobile suite needs to explore the currently open Android/iOS app on a real device or emulator through the Appium MCP server — enumerate elements, derive accessibility-id-first locators, and produce a `missing-testids.md` report for the dev team. Triggers "explore this screen", "what's on the current screen", "find the locators for X", "inventory this app screen". Do NOT use to emit the screen object from that inventory (use `qa-mobile-screen-objects-typescript`), to author the mobile test itself (use `qa-ui-test-writer-appium-typescript`), for web pages (use `qa-page-objects-from-url-typescript`), or for non-TypeScript projects (use `qa-mobile-screen-explorer-{java,dotnet}`). For end-to-end suite work prefer the phased agent `qa-mobile-typescript` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
+description: Use when a TypeScript mobile suite needs to explore the open Android/iOS app on a device or emulator through the Appium MCP server. Triggers "explore this screen", "what's on the current screen", "find the locators for X", "inventory this app screen". Do NOT use to emit the screen object from that inventory (use `qa-mobile-screen-objects-typescript`), to author the mobile test itself (use `qa-ui-test-writer-appium-typescript`), or for web pages (use `qa-page-objects-from-url-typescript`).
 ---
 
 # QA — Appium Live-App Explorer (TypeScript)

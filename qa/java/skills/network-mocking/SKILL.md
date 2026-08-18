@@ -1,6 +1,6 @@
 ---
 name: qa-network-mocking-java
-description: Use when Java 21 / TestNG UI tests must intercept, mock, throttle, or assert browser network traffic — Playwright routes, raw CDP (throttling/offline), or an out-of-browser MITM proxy (HAR capture, non-Playwright drivers). Triggers "mock this XHR in the UI test", "simulate slow 3G/offline", "capture a HAR", "assert the page called endpoint X". Pick the layer, then read its reference file. Do NOT use for direct API testing without a browser (use `qa-api-test-writer-java`), for load-level throttling (use the stack's `performance` skill), for WebSocket/SSE streams (use `qa-realtime-stream-testing-java`), or for non-Java projects (use `qa-network-mocking-{dotnet,typescript}`). For end-to-end suite work prefer the phased agent `qa-ui-java` / `qa-mobile-java` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
+description: Use when Java 21 / TestNG UI tests must intercept, mock, throttle, or assert browser network traffic — Playwright routes, raw CDP, or an out-of-browser MITM proxy. Triggers "mock this XHR in the UI test", "simulate slow 3G/offline", "capture a HAR", "assert the page called endpoint X". Do NOT use for direct API testing without a browser (use `qa-api-test-writer-java`), for load throttling (the `performance` skill), or for WebSocket/SSE streams (use `qa-realtime-stream-testing-java`).
 ---
 
 # QA — Network Monitoring (Java 21)

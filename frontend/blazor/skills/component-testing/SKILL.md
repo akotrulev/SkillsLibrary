@@ -1,6 +1,6 @@
 ---
 name: fe-blazor-component-testing
-description: Use when writing dev-side tests for Blazor (.NET 8/9/10) — bUnit v2 for anything that renders, plain NUnit/xUnit for anything that doesn't: `.razor` test files, `MarkupMatches`, fake services, cascading parameters, the bUnit `JSInterop` mock, `AddTestAuthorization()`, `EventCallback` + re-render assertions, `WaitForState`/`WaitForAssertion`, plus pure-logic tests for state containers, validators, formatters and culture helpers. Triggers: "unit-test this Blazor component", "write bUnit tests", "mock IJSRuntime in a component test", "test this validator", "test my state container". Do NOT use for E2E/browser journeys (the `qa-ui-dotnet` peer) or data-testid authoring (`test-ids`).
+description: Use when writing dev-side tests for Blazor — bUnit v2 for anything that renders, plain NUnit/xUnit for anything that doesn't. Triggers: "unit-test this Blazor component", "write bUnit tests", "mock IJSRuntime in a component test", "test this validator", "test my state container". Do NOT use for E2E/browser journeys (the `qa-ui-dotnet` peer) or data-testid authoring (`test-ids`).
 ---
 
 # Blazor — Component & Pure-Logic Testing (bUnit v2)

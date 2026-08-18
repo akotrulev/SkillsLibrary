@@ -1,6 +1,6 @@
 ---
 name: qa-api-client-writer-typescript
-description: Use when the user asks to create a new API client module (`{resource}Client.ts`) in a TypeScript API test project (Vitest + native `fetch` + Zod, Node 24 (22 supported), strict TS). Triggers: "write an API client for X", "add a {resource}Client", "scaffold the TS client for /api/{path}". For end-to-end suite work prefer the phased agent `qa-api-typescript` / `qa-performance-typescript` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
+description: Use when the user asks to create a new API client module (`{resource}Client.ts`) in a TypeScript API test project (Vitest + native `fetch` + Zod, Node 24 (22 supported), strict TS). Triggers: "write an API client for X", "add a {resource}Client", "scaffold the TS client for /api/{path}".
 ---
 
 # qa-api-client-writer-typescript

@@ -1,6 +1,6 @@
 ---
 name: td-dataset-formats
-description: Use when deciding how a training dataset is stored on disk — the record schema, chat/conversation format, image references for VLM, provenance/license fields, train/val/test splits, and shard layout — before writing any example. Triggers: "what format should the SFT data be", "JSONL schema for a chat dataset", "how do I lay out train/val/test", "shard a pretraining corpus", "ShareGPT vs OpenAI messages format". Do NOT use for quality filtering (`td-data-quality`), synthesis (`td-synthetic-generation`), or engine-specific storage DDL (`data/<db>`).
+description: Use when deciding how a training dataset is stored on disk — record schema, chat format, VLM image references, provenance/license fields, splits, and shard layout. Triggers: "what format should the SFT data be", "JSONL schema for a chat dataset", "how do I lay out train/val/test", "shard a pretraining corpus", "ShareGPT vs OpenAI messages format". Do NOT use for quality filtering (`td-data-quality`), synthesis (`td-synthetic-generation`), or engine-specific storage DDL (`data/<db>`).
 ---
 
 # Training Data — Dataset Formats & Layout (cross-stage)

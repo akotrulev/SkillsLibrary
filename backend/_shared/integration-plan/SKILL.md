@@ -1,6 +1,6 @@
 ---
 name: be-shared-integration-plan
-description: Use when a planned backend needs its external dependencies specified — every third-party or sibling system it calls or is called by, with auth method, config keys and where each secret lives (never values), sandbox vs production environments, rate limits, timeout/retry/circuit-breaker policy, failure mode and degradation, PII crossing the boundary, and the local-dev/test strategy per dependency. Covers mailing services, payment providers, storage, identity providers, message brokers, partner APIs, and inbound webhooks. Triggers "what external services do we depend on", "plan the email/payment integration", "what API keys do we need and who provisions them", "how do we handle it when the provider is down". Do NOT use to provision secret stores, networking, or environments (`devops-engineer`), to write the client code (`be-dotnet`/`be-java`/`be-node`), or to plan this service's own endpoints (`be-shared-api-surface-plan`).
+description: Use when a planned backend needs its external dependencies specified — every system it calls, with auth, config keys (never values), limits, retry/circuit-breaker policy, and local-dev/test strategy. Triggers "what external services do we depend on", "what API keys do we need", "how do we handle it when the provider is down". Do NOT use to provision secret stores (`devops-engineer`), write client code (`be-<stack>`), or plan this service's own endpoints (`be-shared-api-surface-plan`).
 ---
 
 # Integration Plan — the external dependency register

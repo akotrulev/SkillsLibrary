@@ -1,6 +1,6 @@
 ---
 name: qa-api-test-playwright-typescript
-description: Use when the user asks to write TypeScript API tests on the Playwright runner (@playwright/test `request` fixture / APIRequestContext + Zod) — usually because the project already runs Playwright for UI and wants one runner, one report, one trace. Triggers: "write API tests with Playwright", "use the request fixture for endpoint X", "add API coverage to our Playwright suite". Plain Node API suites without Playwright → `api-test-author/generator` (Vitest + fetch). For end-to-end suite work prefer the phased agent `qa-api-typescript` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
+description: Use when the user asks to write TypeScript API tests on the Playwright runner (@playwright/test `request` fixture / APIRequestContext + Zod) — usually because the project already runs Playwright for UI and wants one runner, one report, one trace. Triggers: "write API tests with Playwright", "use the request fixture for endpoint X", "add API coverage to our Playwright suite". Plain Node API suites without Playwright → `api-test-author/generator` (Vitest + fetch).
 ---
 
 # QA — API Test Writer (TypeScript / Playwright + APIRequestContext + Zod)

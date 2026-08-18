@@ -1,6 +1,6 @@
 ---
 name: ba-story-quality-review
-description: Use when stories or epics were authored by someone else (client, another team, a PO) and need a review-only readiness audit before refinement or test design — INVEST, AC quality, testability, dependency hygiene. Triggers: "review these stories", "are these stories ready for the sprint", "we received this backlog — check it", "prep these tickets for refinement/grooming", "is this Jira ticket good enough to build", "are these ACs testable", "check AC-to-story traceability". Do NOT use to write or fix stories (`ba-story-writer`), shape epics (`ba-epic-writer`), or scope a vague ask (`ba-scoping-writeup`).
+description: Use when stories or epics were authored by someone else (client, another team, a PO) and need a review-only readiness audit before refinement or test design — INVEST, AC quality, testability, dependency hygiene. Triggers: "review these stories", "are these stories ready for the sprint", "prep these tickets for refinement", "are these ACs testable". Do NOT use to write or fix stories (`ba-story-writer`), shape epics (`ba-epic-writer`), or scope a vague ask (`ba-scoping-writeup`).
 ---
 
 # Backlog Reviewer

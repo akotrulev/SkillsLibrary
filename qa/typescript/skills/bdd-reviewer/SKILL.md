@@ -1,6 +1,6 @@
 ---
 name: qa-bdd-reviewer-typescript
-description: Use when reviewing existing Gherkin .feature files and TypeScript step definitions (playwright-bdd web, CucumberJS + WebdriverIO mobile) for living-documentation quality, step reusability, and correct binding/state/lifecycle. Triggers: "review these feature files", "audit our playwright-bdd step definitions", "check our BDD layer". Do NOT use to generate features (`feature-file-writer`) or step definitions (`gherkin-step-code`). For end-to-end suite work prefer the phased agent `qa-bdd-typescript` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
+description: Use when reviewing existing Gherkin .feature files and TypeScript step definitions (playwright-bdd web, CucumberJS + WebdriverIO mobile) for living-documentation quality, step reusability, and correct binding/state/lifecycle. Triggers: "review these feature files", "audit our playwright-bdd step definitions", "check our BDD layer". Do NOT use to generate features (`feature-file-writer`) or step definitions (`gherkin-step-code`).
 ---
 
 # BDD / Gherkin Reviewer (TypeScript)

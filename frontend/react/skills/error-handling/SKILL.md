@@ -1,6 +1,6 @@
 ---
 name: fe-react-error-handling
-description: Use when a failure must not blank the screen — error boundary placement (`error.tsx` + `global-error.tsx`, `react-error-boundary`), retry with backoff on idempotent calls only, request timeout budgets (`AbortSignal.timeout`), loading/loaded/failed/**stale** data regions with inline retry, failure scoped to the data-dependent subtree (chrome keeps rendering), the persistent top-right error notification, mid-session 401 recovery that keeps unsaved work, actionable empty states. Triggers "an unhandled error blanks my app", "add error boundaries", "the grid shows empty when the API 500s", "the spinner never stops", "a failed refresh wiped the table", "the session expired and my form was gone", "the whole page disappears when one call fails", "show the error in a toast that doesn't auto-dismiss". Not for PRODUCING the categorized error (`data-fetching` — this RENDERS it).
+description: Use when a failure must not blank the screen — error boundary placement, retry on idempotent calls only, timeout budgets, loading/loaded/failed/stale data regions, the persistent error notification, mid-session 401 recovery. Triggers "an unhandled error blanks my app", "add error boundaries", "the grid shows empty when the API 500s", "the spinner never stops", "the session expired and my form was gone". Not for PRODUCING the categorized error (`data-fetching` — this RENDERS it).
 ---
 
 # React — Error Resilience

@@ -1,6 +1,6 @@
 ---
 name: pentest-recon-enumeration
-description: Use to map the in-scope attack surface at the start of an authorized penetration test — subdomains, live hosts, open ports, running services, and web technologies — passive-first, rate-bounded, and never outside the engagement scope file. Covers amass/subfinder (subdomain enum), httpx (HTTP probing/tech-detect), nmap (service/version/NSE), masscan (fast async port sweep), and Shodan/Censys (passive third-party index reads). Language-agnostic, any target. Triggers "enumerate the attack surface", "recon this authorized target", "find the subdomains and open ports of our lab environment". Not for exploiting what you find (`pentest-initial-access`), infra posture benchmarks (`infra-security-tester`), or proving a single app vuln (`qa-security`). Owned/lab targets only, under a committed engagement scope file.
+description: Use to map the in-scope attack surface at the start of an authorized penetration test — subdomains, hosts, ports, services, web tech — passive-first, rate-bounded, never outside the engagement scope file. Triggers "enumerate the attack surface", "recon this authorized target". Not for exploiting what you find (`pentest-initial-access`), infra posture benchmarks (`infra-security-tester`), or proving a single app vuln (`qa-security`). Owned/lab targets only, under a committed scope file.
 ---
 
 # Penetration Testing — Recon & Attack-Surface Enumeration (amass · subfinder · httpx · nmap · masscan · Shodan/Censys)

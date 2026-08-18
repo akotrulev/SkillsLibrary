@@ -1,6 +1,6 @@
 ---
 name: qa-api-contract-testing-java
-description: Use when setting up consumer-driven contract testing with Pact in a Java 21 + Spring Boot 3 service (Pact-JVM, JUnit 5) — synchronous HTTP, asynchronous/message (Kafka/SQS/RabbitMQ) contracts, or bi-directional (OpenAPI) contracts. Triggers: "set up Pact-JVM for our Spring Boot service", "verify our Java provider against Y's contract", "message pact for our Kafka consumer", "bi-directional contract from our OpenAPI spec". For end-to-end suite work prefer the phased agent `qa-api-java` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
+description: Use when setting up consumer-driven contract testing with Pact in a Java 21 + Spring Boot 3 service (Pact-JVM, JUnit 5) — synchronous HTTP, asynchronous/message (Kafka/SQS/RabbitMQ) contracts, or bi-directional (OpenAPI) contracts. Triggers: "set up Pact-JVM for our Spring Boot service", "verify our Java provider against Y's contract", "message pact for our Kafka consumer", "bi-directional contract from our OpenAPI spec".
 ---
 
 # QA — Contract Testing with Pact (Java / Pact-JVM)

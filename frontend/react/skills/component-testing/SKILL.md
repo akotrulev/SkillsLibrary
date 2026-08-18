@@ -1,6 +1,6 @@
 ---
 name: fe-react-component-testing
-description: Use when a component, custom hook, or any front-end logic needs a dev-side test — Vitest + React Testing Library for anything that renders, plain Vitest for anything that doesn't: config, role/label queries over testids, `userEvent`, async `findBy*`/`waitFor`, `vi.mock`/MSW, `renderHook`, the limit that Vitest can't render async Server Components (extract the fetch, E2E the rest), and pure-logic tests for Zod schemas, formatters, mappers, stores and extracted fetch functions. Triggers "unit-test this component", "test my custom hook", "test my Zod schema", "test this formatter", "test my Zustand store", "an update was not wrapped in act". Not for E2E journeys (the `qa-ui-typescript` peer).
+description: Use when a component, custom hook, or any front-end logic needs a dev-side test — Vitest + React Testing Library for anything that renders, plain Vitest for anything that doesn't. Triggers "unit-test this component", "test my custom hook", "test my Zod schema", "test this formatter", "test my Zustand store", "an update was not wrapped in act". Not for E2E journeys (the `qa-ui-typescript` peer).
 ---
 
 # React — Component & Pure-Logic Testing (Vitest + React Testing Library)

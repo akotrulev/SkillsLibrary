@@ -1,6 +1,6 @@
 ---
 name: qa-messaging-testing-typescript
-description: Use when a Node 24 (22 supported) / TypeScript / Vitest test suite must produce, consume, or assert messages against the project's broker — Kafka/Redpanda, AWS SQS/SNS, RabbitMQ, or Azure Service Bus. Triggers "assert the service published event X", "test the consumer's side-effect", "DLQ/DLT assertions", "seed a topic/queue in a test". Pick the broker in the decision matrix, then read its reference file. Do NOT use for synchronous HTTP API assertions (use `qa-api-test-writer-typescript`), for message-contract verification (use `qa-api-contract-testing-typescript`), for email (use `qa-email-testing-typescript`), or for non-TypeScript projects (use `qa-messaging-testing-{java,dotnet}`). For end-to-end suite work prefer the phased agent `qa-api-typescript` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
+description: Use when a Node 24 / TypeScript / Vitest suite must produce, consume, or assert messages against the project's broker (Kafka, SQS/SNS, RabbitMQ, Service Bus). Triggers "assert the service published event X", "test the consumer's side-effect", "DLQ/DLT assertions", "seed a topic in a test". Do NOT use for HTTP API assertions (use `qa-api-test-writer-typescript`), for message-contract verification (use `qa-api-contract-testing-typescript`), or for email (use `qa-email-testing-typescript`).
 ---
 
 # QA — Messaging Testing (TypeScript)

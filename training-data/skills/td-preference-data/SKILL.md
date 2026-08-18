@@ -1,6 +1,6 @@
 ---
 name: td-preference-data
-description: Use when building preference / alignment data for a small LLM — chosen/rejected pairs for DPO/ORPO, single-response labels for KTO, ranking data, on-policy sampling against the student model, and constitutional self-critique pairs — with judge-pinning, margin control, and bias guards. Triggers: "make DPO pairs", "build preference data", "chosen/rejected dataset", "on-policy preference data for my model", "constitutional AI self-critique pairs". Do NOT use for SFT/instruction data (`td-instruction-sft`), eval sets (`td-eval-sets`), or the judge/generation mechanics themselves (`td-synthetic-generation`).
+description: Use when building preference / alignment data for a small LLM — chosen/rejected pairs for DPO/ORPO, KTO labels, ranking data, on-policy sampling, and constitutional self-critique pairs. Triggers: "make DPO pairs", "build preference data", "chosen/rejected dataset", "on-policy preference data for my model", "constitutional AI self-critique pairs". Do NOT use for SFT/instruction data (`td-instruction-sft`), eval sets (`td-eval-sets`), or judge/generation mechanics (`td-synthetic-generation`).
 ---
 
 # Training Data — Preference / Alignment

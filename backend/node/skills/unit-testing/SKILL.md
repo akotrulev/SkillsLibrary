@@ -1,6 +1,6 @@
 ---
 name: be-node-unit-testing
-description: Use when backend TypeScript logic needs a dev-side unit test — Vitest (Jest when the repo uses it): what deserves a test, the five seams that make logic untestable (time, id, randomness, config, outbound I/O), DI over `vi.mock`, both branches of every `Result<T,E>`, Zod schema tests, `test.each`, async rejection assertions. Runs in-process with no HTTP, no container, no real database. Triggers "unit-test this service", "write tests for this handler", "test this Zod schema", "test this calculator", "how do I fake the clock in Vitest", "vi.mock isn't working". Do NOT use for supertest/HTTP-level or integration tests (the `qa-api-typescript` peer).
+description: Use when backend TypeScript logic needs a dev-side unit test — Vitest (Jest when the repo uses it): what deserves a test, the five untestable seams (time, id, randomness, config, outbound I/O), DI over `vi.mock`, both branches of every `Result<T,E>`, Zod schema tests. In-process, no HTTP, container, or real database. Triggers "unit-test this service", "test this Zod schema", "how do I fake the clock in Vitest". Do NOT use for supertest/HTTP-level or integration tests (`qa-api-typescript`).
 ---
 
 # Node — Unit Testing (Vitest + TypeScript strict)

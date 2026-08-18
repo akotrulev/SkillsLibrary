@@ -1,6 +1,6 @@
 ---
 name: qa-responsive-testing-typescript
-description: Use when testing responsive layout/breakpoint behavior in Node 24 (22 supported) / TypeScript with Playwright — drive the viewport across the app's real CSS breakpoints (read from its token/theme source, never guessed), assert the layout variant at breakpoint−1 and breakpoint (BVA), verify geometry via bounding boxes. Triggers: "test the responsive design", "assert the nav collapses to a hamburger", "test around the breakpoints". Do NOT use for pixel-diff screenshots (qa-visual-regression-typescript). For end-to-end suite work prefer the phased agent `qa-ui-typescript` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
+description: Use when testing responsive layout/breakpoint behavior in TypeScript with Playwright — drive the viewport across the app's real CSS breakpoints (read from its token/theme source, never guessed), assert the layout variant at breakpoint−1 and breakpoint (BVA), verify geometry via bounding boxes. Triggers: "test the responsive design", "assert the nav collapses to a hamburger", "test around the breakpoints". Do NOT use for pixel-diff screenshots (qa-visual-regression-typescript).
 ---
 
 # QA — Responsive / Breakpoint Testing (TypeScript / Playwright)

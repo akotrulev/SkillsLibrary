@@ -1,6 +1,6 @@
 ---
 name: be-shared-data-model-plan
-description: Use when an approved backend blueprint needs its DB structure planned — entity catalog with owners and lifecycle states, per-table column specs with keys/constraints/indexes, cross-cutting conventions (id strategy, money, timestamps, soft delete, tenancy, concurrency), an ER diagram, seed data, and an ordered migration sequence mapped to build tasks. Triggers "plan the database structure", "what tables do we need", "design the data model for this feature", "what migrations and in what order". Do NOT use to write DDL, migrations, or ORM code (`be-dotnet`/`be-java`/`be-node`), to choose the engine or design indexing/partitioning/RLS depth (`data-architect`), or to plan endpoints (`be-shared-api-surface-plan`).
+description: Use when an approved backend blueprint needs its DB structure planned — entity catalog, per-table column specs with keys/constraints/indexes, cross-cutting conventions, an ER diagram, and an ordered migration sequence. Triggers "plan the database structure", "what tables do we need", "what migrations and in what order". Do NOT use to write DDL/migrations/ORM code (`be-<stack>`), design indexing/partitioning/RLS depth (`data-architect`), or plan endpoints (`be-shared-api-surface-plan`).
 ---
 
 # Data Model Plan — the logical DB structure

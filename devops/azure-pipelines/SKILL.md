@@ -1,6 +1,6 @@
 ---
 name: devops-azure-pipelines
-description: Use when the user asks to write, review, or modify Azure DevOps YAML pipelines (`azure-pipelines.yml`) for build/test/deploy of Java, .NET, or TypeScript projects, with deploys to AWS or Azure. Triggers: "write an Azure Pipelines YAML for X", "add a stage to my pipeline", "convert this classic build to YAML", "set up Azure DevOps CI". Do NOT use for GitHub Actions (use `devops/github-actions`), GitLab CI (use `devops/gitlab-ci`), or IaC scripts (use `devops/infrastructure-as-code`). Do NOT use for the **test-suite CI lane** — shard matrix, Allure publishing, perf gate, flake quarantine — that belongs to `qa-cicd-{java,dotnet,typescript}`; this skill owns the **build/deploy** lane.
+description: Use when the user asks to write, review, or modify Azure DevOps YAML pipelines (`azure-pipelines.yml`) for build/test/deploy of Java, .NET, or TypeScript projects. Triggers: "write an Azure Pipelines YAML for X", "add a stage to my pipeline", "set up Azure DevOps CI". Do NOT use for GitHub Actions (`devops/github-actions`), GitLab CI (`devops/gitlab-ci`), or IaC (`devops/infrastructure-as-code`). Do NOT use for the test-suite CI lane — `qa-cicd-{java,dotnet,typescript}` owns that.
 ---
 
 # DevOps — Azure Pipelines

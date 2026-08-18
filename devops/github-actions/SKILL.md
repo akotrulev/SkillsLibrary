@@ -1,6 +1,6 @@
 ---
 name: devops-github-actions
-description: Use when the user asks to write, review, or modify GitHub Actions workflows for build/test/deploy of Java, .NET, or TypeScript projects, with deploys to AWS or Azure. Triggers: "write a GitHub Actions workflow for X", "add a deploy job to .github/workflows/Y.yml", "set up CI for this repo", "add a release workflow". Do NOT use for GitLab CI (use `devops/gitlab-ci`), Azure Pipelines (use `devops/azure-pipelines`), or IaC scripts (use `devops/infrastructure-as-code`). Do NOT use for the **test-suite CI lane** — shard matrix, Allure publishing, perf gate, flake quarantine — that belongs to `qa-cicd-{java,dotnet,typescript}`; this skill owns the **build/deploy** lane.
+description: Use when the user asks to write, review, or modify GitHub Actions workflows for build/test/deploy of Java, .NET, or TypeScript projects. Triggers: "write a GitHub Actions workflow for X", "add a deploy job to .github/workflows/Y.yml". Do NOT use for GitLab CI (`devops/gitlab-ci`), Azure Pipelines (`devops/azure-pipelines`), or IaC (`devops/infrastructure-as-code`). Do NOT use for the test-suite CI lane — `qa-cicd-{java,dotnet,typescript}` owns that; this skill owns the build/deploy lane.
 ---
 
 # DevOps — GitHub Actions

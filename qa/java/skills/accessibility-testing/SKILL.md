@@ -1,6 +1,6 @@
 ---
 name: qa-accessibility-testing-java
-description: Use when a Java 21 / TestNG test suite must scan for accessibility violations — axe-core inside Playwright flows (per-state WCAG scans) or Lighthouse CI (page-level scores with budgets). Triggers "add a11y tests", "scan for WCAG violations", "fail CI on accessibility regressions", "set an accessibility budget". Pick the tool in the decision matrix, then read its reference file. Do NOT use for the application's own accessibility implementation (that is the `fe-*` stack's `accessibility` skill), for pixel diffs (use `qa-visual-regression-java`), for breakpoint layout (use `qa-responsive-testing-java`), or for non-Java projects (use `qa-accessibility-testing-{dotnet,typescript}`). For end-to-end suite work prefer the phased agent `qa-ui-java` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
+description: Use when a Java 21 / TestNG test suite must scan for accessibility violations — axe-core inside Playwright flows or Lighthouse CI. Triggers "add a11y tests", "scan for WCAG violations", "fail CI on accessibility regressions", "set an accessibility budget". Do NOT use for the application's own accessibility implementation (the `fe-*` stack's `accessibility` skill), for pixel diffs (use `qa-visual-regression-java`), or for breakpoint layout (use `qa-responsive-testing-java`).
 ---
 
 # QA — Accessibility Testing (Java 21)

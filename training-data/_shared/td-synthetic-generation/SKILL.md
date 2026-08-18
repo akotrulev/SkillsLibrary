@@ -1,6 +1,6 @@
 ---
 name: td-synthetic-generation
-description: Use when generating training data with a teacher model (the Claude API) instead of collecting it — distillation, self-instruct / evol-instruct expansion, persona and topic diversification, rubric-graded self-critique, and preference-pair generation, with diversity, dedup, cost control, and a pinned judge built in. Triggers: "generate SFT data with Claude", "synthesize instruction pairs", "distill from a teacher model", "make DPO pairs by sampling and judging", "evol-instruct harder prompts". Do NOT use for the record schema (`td-dataset-formats`), dedup/decontamination mechanics (`td-data-quality`), or the API mechanics themselves (`ai-development/claude-api`).
+description: Use when generating training data with a teacher model (the Claude API) — distillation, self-instruct/evol-instruct, self-critique, and preference-pair generation. Triggers: "generate SFT data with Claude", "synthesize instruction pairs", "distill from a teacher model", "make DPO pairs by sampling and judging", "evol-instruct harder prompts". Do NOT use for the record schema (`td-dataset-formats`), dedup/decontamination (`td-data-quality`), or API mechanics (`ai-development/claude-api`).
 ---
 
 # Training Data — Synthetic Generation (cross-stage engine)

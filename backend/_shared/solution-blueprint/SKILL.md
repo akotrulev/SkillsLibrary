@@ -1,6 +1,6 @@
 ---
 name: be-shared-solution-blueprint
-description: Use when turning a business case, requirements set, or loose direction into an approved HIGH-LEVEL backend plan — functional areas, architecture style, tech stack, external systems, non-functional targets, and the routing map binding each area to the library agent that will build it. Ends in a blocking human approval gate before any detail is written. Triggers "plan the backend for…", "what services do we need", "what's the architecture for this", "which agents should build what". Do NOT use for the detail pack (`be-shared-{data-model-plan,api-surface-plan,integration-plan,delivery-plan}`), for authoring requirements or stories (`requirements-author`), for schema depth (`data-architect`), or for writing any code (`be-dotnet`/`be-java`/`be-node`).
+description: Use when turning a business case, requirements set, or loose direction into an approved HIGH-LEVEL backend plan — areas, architecture, stack, and a routing map binding each area to the agent that builds it. Ends in a blocking human approval gate before any detail. Triggers "plan the backend for…", "which agents should build what". Do NOT use for the detail pack (the `be-shared-*` detail skills), requirements (`requirements-author`), schema depth (`data-architect`), or code (`be-<stack>`).
 ---
 
 # Solution Blueprint — the high-level backend plan

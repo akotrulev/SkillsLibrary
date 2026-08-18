@@ -1,6 +1,6 @@
 ---
 name: qa-security-vuln-reachability
-description: Use to de-noise an existing SCA/SAST gate so it fires on EXPLOITABLE-AND-REACHABLE, not raw CVSS — a post-processing enrichment stage that joins scanner output (Trivy/Grype/npm-audit/OWASP-DC/dotnet-list) on CVE id against CISA KEV + EPSS + CISA Vulnrichment + a VEX reachability file, then rewrites the verdict. Read-only, no re-scan, safe every PR. Language-agnostic. Triggers "our CVE gate is too noisy", "gate on exploitability not CVSS", "add EPSS/KEV weighting", "which of these CVEs actually matter", "suppress unreachable CVEs with VEX". Do NOT use to run a scan (`dependency-scan`/`image-infra-scan`/`code-scan` own detection) or to exploit a CVE (`exploit-validation`).
+description: Use to de-noise an existing SCA/SAST gate so it fires on EXPLOITABLE-AND-REACHABLE, not raw CVSS — a post-processing stage that joins scanner output on CVE id against CISA KEV + EPSS + VEX, then rewrites the verdict. Read-only, no re-scan, safe every PR. Language-agnostic. Triggers "our CVE gate is too noisy", "gate on exploitability not CVSS", "add EPSS/KEV weighting". Do NOT use to run a scan (`dependency-scan`/`image-infra-scan`/`code-scan`) or to exploit a CVE (`exploit-validation`).
 ---
 
 # Security Testing — Vulnerability Reachability & Exploitability Weighting

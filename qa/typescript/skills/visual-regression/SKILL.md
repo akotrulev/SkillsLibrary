@@ -1,6 +1,6 @@
 ---
 name: qa-visual-regression-typescript
-description: Use when a Node 24 (22 supported) / TypeScript / Vitest test suite must catch unintended visual changes — Playwright's built-in pixel snapshots, Percy's hosted review workflow, or Applitools Eyes visual-AI. Triggers "add visual regression tests", "screenshot diff this page", "the layout broke and no functional test caught it". Pick the tool in the decision matrix, then read its reference file. Do NOT use for structural breakpoint/viewport assertions (use `qa-responsive-testing-typescript`), for accessibility scans (use `qa-accessibility-testing-typescript`), or for non-TypeScript projects (use `qa-visual-regression-{java,dotnet}`). For end-to-end suite work prefer the phased agent `qa-ui-typescript` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
+description: Use when a Node 24 / TypeScript / Vitest test suite must catch unintended visual changes (Playwright pixel snapshots, Percy, or Applitools Eyes). Triggers "add visual regression tests", "screenshot diff this page", "the layout broke and no functional test caught it". Pick the tool in the decision matrix. Do NOT use for structural breakpoint/viewport assertions (use `qa-responsive-testing-typescript`) or accessibility scans (use `qa-accessibility-testing-typescript`).
 ---
 
 # QA — Visual Regression (TypeScript)

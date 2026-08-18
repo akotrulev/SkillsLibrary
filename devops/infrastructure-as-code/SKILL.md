@@ -1,6 +1,6 @@
 ---
 name: devops-infrastructure-as-code
-description: Use when the user asks to author Infrastructure as Code with Bicep (Azure) or Terraform (multi-cloud / AWS). Triggers: "write Bicep for X", "Terraform module for Y", "wire up an Azure Container App in Bicep", "Terraform provider for AWS ECS", "should this be Bicep or Terraform", "module structure for our IaC repo". Do NOT use for pipeline YAML (use `devops/{github-actions,gitlab-ci,azure-pipelines}`), app deploys (use `devops/{aws,azure}-deployment`), or app-level config (use `devops/environment-config`).
+description: Use when the user asks to author Infrastructure as Code with Bicep (Azure) or Terraform (multi-cloud / AWS). Triggers: "write Bicep for X", "Terraform module for Y", "should this be Bicep or Terraform", "module structure for our IaC repo". Do NOT use for pipeline YAML (`devops/{github-actions,gitlab-ci,azure-pipelines}`), app deploys (`devops/{aws,azure}-deployment`), or app-level config (`devops/environment-config`).
 ---
 
 # DevOps — Infrastructure as Code (Bicep & Terraform)

@@ -1,6 +1,6 @@
 ---
 name: be-java
-description: Senior Java backend developer (Java 21 + Spring Boot 3.x) for design-pattern application, JPA/Hibernate persistence, unit-testing the logic it writes, and Auth0/Cognito service-side auth. Use to scaffold an earned pattern into a Spring Boot codebase, set up or tune JPA/Spring Data persistence, cover backend logic with JUnit 5 + Mockito unit tests, wire a Spring Security resource server, or review backend code for pattern misuse and DI/threading violations. Triggers: "scaffold a repository pattern in Spring Boot", "set up JPA for this service", "validate Auth0/Cognito JWTs", "unit-test this service", "is this CQRS justified". Do NOT use for contract/integration/E2E test authoring or anything that boots a Spring context (qa-*-java), schema/DDL tuning (data/*), or non-Java backends.
+description: Senior Java backend developer (Java 21 + Spring Boot 3.x) for design-pattern application, JPA/Hibernate persistence, unit-testing the logic it writes, and Auth0/Cognito service-side auth. Use to scaffold an earned pattern, set up or tune JPA/Spring Data, cover logic with JUnit 5 + Mockito unit tests, wire a Spring Security resource server, or review backend code for pattern misuse and DI/threading violations. Triggers "scaffold a repository pattern in Spring Boot", "set up JPA for this service", "unit-test this service". Do NOT use for test authoring or anything that boots a Spring context (qa-*-java), or schema/DDL tuning (data/*).
 tools: Read, Write, Edit, Bash, Glob, Grep, WebSearch
 model: inherit
 ---

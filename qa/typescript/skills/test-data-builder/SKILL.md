@@ -1,6 +1,6 @@
 ---
 name: qa-test-data-builder-typescript
-description: Use when the user asks to create test data factories or ObjectMothers in a Node 24 (22 supported) + TypeScript test project (Vitest primary, Playwright/WebdriverIO OK) to replace duplicated inline literals across tests with named, intention-revealing factories. Triggers: "create a builder for User in TS", "set up test data for X in Vitest", "extract this fixture into a factory". For end-to-end suite work prefer the phased agent `qa-api-typescript` / `qa-ui-typescript` / `qa-mobile-typescript` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
+description: Use when the user asks to create test data factories or ObjectMothers in a Node + TypeScript test project to replace duplicated inline literals across tests with named, intention-revealing factories. Triggers: "create a builder for User in TS", "set up test data for X in Vitest", "extract this fixture into a factory".
 ---
 
 # QA — Test Data Builder / ObjectMother (TypeScript / Node 20)

@@ -1,6 +1,6 @@
 ---
 name: be-shared-codebase-survey
-description: Use when an existing backend must be split into functional areas before it can be documented or understood — inventory every entry point, scheduled job, queue consumer, domain module and external client, group them by business capability (not technical layer), and produce a reading plan with an order, a depth, and a coverage ledger, then confirm the split with the human. Triggers "split this codebase into areas", "what are the functional areas here", "plan how to read this service", "we inherited this backend, where do we start". Do NOT use to trace one area in depth (`be-shared-feature-trace`), to write the documentation (`be-shared-business-documentation`), to find defects (`ep-feature-audit`), or to plan new work (`be-shared-solution-blueprint`).
+description: Use when an existing backend must be split into functional areas before it can be documented — inventory every entry point and external surface, group them by business capability (not technical layer), then confirm the split with the human. Triggers "split this codebase into areas", "what are the functional areas here". Do NOT use to trace one area in depth (`be-shared-feature-trace`), write documentation (`be-shared-business-documentation`), or find defects (`ep-feature-audit`).
 ---
 
 # Codebase Survey — the area map and the reading plan

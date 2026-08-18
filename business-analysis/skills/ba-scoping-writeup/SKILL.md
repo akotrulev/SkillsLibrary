@@ -1,6 +1,6 @@
 ---
 name: ba-scoping-writeup
-description: Use when turning a vague business problem, stakeholder request, or feature idea into a structured single-initiative scoping writeup — goals, scope, stakeholders, constraints, risks, success metrics. Carries the elicitation question bank for driving discovery when the brief is thin. Triggers: "do a BA writeup for X", "what's missing from this brief", "help me scope this initiative", "what should I ask the stakeholders about this", "we got a PRD/BRD — what's actually in scope", "what questions do we need answered before we build this". Do NOT use for writing user stories (`ba-story-writer`), cross-feature conflict checks (`ba-feature-conflict-check`), or the testable distillation of a single doc (`qa/manual/requirements-breakdown`).
+description: Use when turning a vague business problem, stakeholder request, or feature idea into a structured single-initiative scoping writeup. Carries the elicitation question bank for thin briefs. Triggers: "do a BA writeup for X", "help me scope this initiative", "we got a PRD/BRD — what's actually in scope". Do NOT use for writing user stories (`ba-story-writer`), cross-feature conflict checks (`ba-feature-conflict-check`), or single-doc test distillation (`qa/manual/requirements-breakdown`).
 ---
 
 # Initiative Scoping

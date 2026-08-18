@@ -1,6 +1,6 @@
 ---
 name: td-data-quality
-description: Use when cleaning, filtering, deduplicating, or decontaminating a training dataset — exact and near-duplicate removal, eval/test contamination checks, quality heuristics and classifiers, language/length filters, PII and toxicity scrubbing, and balancing/mixing. The gate every dataset passes before it is trained on. Triggers: "dedup this corpus", "check for eval contamination", "filter low-quality examples", "scrub PII from the SFT data", "balance the dataset by topic". Do NOT use for record schema (`td-dataset-formats`), synthesis (`td-synthetic-generation`), or corpus collection (`td-pretraining-corpus`).
+description: Use when cleaning, filtering, deduplicating, or decontaminating a training dataset — the gate every dataset passes before training. Triggers: "dedup this corpus", "check for eval contamination", "filter low-quality examples", "scrub PII from the SFT data", "balance the dataset by topic". Do NOT use for record schema (`td-dataset-formats`), synthesis (`td-synthetic-generation`), or corpus collection (`td-pretraining-corpus`).
 ---
 
 # Training Data — Quality, Dedup & Decontamination (cross-stage)

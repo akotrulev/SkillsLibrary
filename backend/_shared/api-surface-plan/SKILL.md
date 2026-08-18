@@ -1,6 +1,6 @@
 ---
 name: be-shared-api-surface-plan
-description: Use when a planned data model needs its API surface specified — a service → resource → endpoint table with a description, auth requirement and status per endpoint, typed request and response bodies (what a Swagger/OpenAPI document would define), the shared validation and error catalog applied as "standard set + deltas", pagination/filtering contract, and versioning policy. Triggers "what endpoints do we need", "plan the API surface", "define the request and response bodies", "what validations should every endpoint have", "spec the REST contract before we build it". Do NOT use to write controllers, DTOs, or clients (`be-dotnet`/`be-java`/`be-node`), to write API tests (`qa-api-<stack>`), to manage an existing OpenAPI file and its diff-driven updates (`qa/_shared/api-spec-assets`), or to plan tables (`be-shared-data-model-plan`).
+description: Use when a planned data model needs its API surface specified — a service → resource → endpoint table with typed request/response bodies, the shared validation/error catalog, and pagination/versioning contract. Triggers "what endpoints do we need", "plan the API surface", "spec the REST contract". Do NOT use to write controllers/DTOs/clients (`be-<stack>`), write API tests (`qa-api-<stack>`), manage an OpenAPI file (`qa/_shared/api-spec-assets`), or plan tables (`be-shared-data-model-plan`).
 ---
 
 # API Surface Plan — the contract, before the code

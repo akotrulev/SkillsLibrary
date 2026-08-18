@@ -1,6 +1,6 @@
 ---
 name: qa-file-storage-testing-typescript
-description: Use when a Node 24 (22 supported) / TypeScript / Vitest test suite must assert object-storage side-effects — AWS S3 via LocalStack or Azure Blob via Azurite: uploads, downloads, presigned/SAS URLs, multipart/block staging, storage-triggered events. Triggers "assert the export landed in the bucket", "test the presigned-URL flow", "verify blob metadata/tier". Pick the store in the decision matrix, then read its reference file. Do NOT use for database assertions (use `qa-db-connection-typescript`), for broker messages (use `qa-messaging-testing-typescript`), or for non-TypeScript projects (use `qa-file-storage-testing-{java,dotnet}`). For end-to-end suite work prefer the phased agent `qa-api-typescript` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
+description: Use when a Node 24 / TypeScript / Vitest test suite must assert object-storage side-effects (AWS S3 via LocalStack or Azure Blob via Azurite). Triggers "assert the export landed in the bucket", "test the presigned-URL flow", "verify blob metadata/tier". Pick the store in the decision matrix, then read its reference file. Do NOT use for database assertions (use `qa-db-connection-typescript`) or for broker messages (use `qa-messaging-testing-typescript`).
 ---
 
 # QA — File Storage Testing (TypeScript)

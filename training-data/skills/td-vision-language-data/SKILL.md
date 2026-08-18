@@ -1,6 +1,6 @@
 ---
 name: td-vision-language-data
-description: Use when building image-text training data for a small vision-language model (VLM) — image captioning, visual QA, OCR/document understanding, region grounding with bounding boxes, and multi-image/interleaved data — across pretraining, SFT, preference, and eval stages, with image dedup, resolution/format handling, and image-token placement built in. Triggers: "build VLM training data", "image captioning dataset", "visual QA / VQA data", "OCR training data", "grounding / bounding-box data for a VLM", "multimodal SFT". Do NOT use for text-only data (`td-instruction-sft` etc.), or the base record envelope/splits (`td-dataset-formats`).
+description: Use when building image-text training data for a small vision-language model (VLM) — captioning, visual QA, OCR, region grounding, and multi-image/interleaved data. Triggers: "build VLM training data", "image captioning dataset", "visual QA / VQA data", "OCR training data", "grounding / bounding-box data for a VLM", "multimodal SFT". Do NOT use for text-only data (`td-instruction-sft` etc.), or the base record envelope/splits (`td-dataset-formats`).
 ---
 
 # Training Data — Vision-Language (VLM)

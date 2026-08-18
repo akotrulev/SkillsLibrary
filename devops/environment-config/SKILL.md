@@ -1,6 +1,6 @@
 ---
 name: devops-environment-config
-description: Use when the user asks how to manage environment configuration, secrets, and per-environment overrides across .NET 10 (8/9 supported) / Java 21 / Node 24 (22 maintenance) services — typed config classes, secret stores (Azure Key Vault, AWS Secrets Manager / Parameter Store, HashiCorp Vault), config layering (defaults → per-env → secrets), config schema validation, hot-reload. Triggers: "set up config for X", "where do secrets go", "how do we layer config per env", "validate config at startup", "Key Vault wiring in .NET". Do NOT use for pipeline authoring (use `devops/{github-actions,gitlab-ci,azure-pipelines}`) or for cloud-specific deploy (use `devops/{aws,azure}-deployment`).
+description: Use when the user asks to manage environment configuration, secrets, and per-environment overrides across .NET / Java / Node services — typed config classes, secret stores (Key Vault, AWS Secrets Manager, Vault), config layering, schema validation, hot-reload. Triggers: "set up config for X", "where do secrets go", "validate config at startup". Do NOT use for pipeline authoring (`devops/{github-actions,gitlab-ci,azure-pipelines}`) or cloud deploy (`devops/{aws,azure}-deployment`).
 ---
 
 # DevOps — Environment Configuration & Secrets

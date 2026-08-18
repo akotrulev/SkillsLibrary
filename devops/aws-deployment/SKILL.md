@@ -1,6 +1,6 @@
 ---
 name: devops-aws-deployment
-description: Use when the user asks to deploy a service to AWS — ECS Fargate (default for long-running containers), Lambda (event-driven / API Gateway), App Runner (simplest container option), S3 + CloudFront (static frontends / SPAs), or EKS (Kubernetes). Triggers: "deploy this .NET service to ECS", "ship a Lambda from a Node TS handler", "host the React SPA on S3 + CloudFront", "switch this from App Runner to ECS". Do NOT use for Azure (use `devops/azure-deployment`), IaC scripts (use `devops/infrastructure-as-code`), or pipeline YAML (use `devops/{github-actions,gitlab-ci,azure-pipelines}`).
+description: Use when the user asks to deploy a service to AWS — ECS Fargate (default), Lambda, App Runner, S3 + CloudFront, or EKS. Triggers: "deploy this .NET service to ECS", "ship a Lambda from a Node TS handler", "host the React SPA on S3 + CloudFront", "switch this from App Runner to ECS". Do NOT use for Azure (`devops/azure-deployment`), IaC scripts (`devops/infrastructure-as-code`), or pipeline YAML (`devops/{github-actions,gitlab-ci,azure-pipelines}`).
 ---
 
 # DevOps — AWS Deployment

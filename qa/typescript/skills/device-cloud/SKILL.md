@@ -1,6 +1,6 @@
 ---
 name: qa-device-cloud-typescript
-description: Use when the user needs the **real-device-cloud specifics** of running TypeScript + WebdriverIO Appium tests on a mobile device farm. Triggers: "upload our app to BrowserStack App Automate and run the WebdriverIO tests", "run our mobile suite across a real-device matrix in TypeScript", "test biometric login on a real device with WebdriverIO". For end-to-end suite work prefer the phased agent `qa-mobile-typescript` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
+description: Use when the user needs the **real-device-cloud specifics** of running TypeScript + WebdriverIO Appium tests on a mobile device farm. Triggers: "upload our app to BrowserStack App Automate and run the WebdriverIO tests", "run our mobile suite across a real-device matrix in TypeScript", "test biometric login on a real device with WebdriverIO".
 ---
 
 # QA — Mobile Device Farm (TypeScript: WebdriverIO + Appium on a real-device cloud)

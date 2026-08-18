@@ -1,6 +1,6 @@
 ---
 name: qa-permission-testing-java
-description: Use when authoring **functional access-control tests** in Java 21 (TestNG + AssertJ + RestAssured) that cover the OWASP scanner blind spot — **BOLA/IDOR** (object-level), **BFLA** (function-level), and property-level authorization — driven as an identity x endpoint x object matrix that asserts 403/404 for every unauthorized combination. Maps to OWASP A01:2025 and API1/API3/API5:2023. Triggers "test for IDOR", "check broken object-level authorization", "can user A read user B's records", "build an authorization matrix", "test our role permissions", "cross-tenant leak test". Do NOT use for scanner-driven DAST (use `qa-security-passive-scan-java` or `qa-security-active-scan`), for minting test identities/tokens (use `qa-test-login-tokens-java`), or for non-Java projects (use the `{dotnet,typescript}` siblings).
+description: Use when authoring functional access-control tests in Java 21 (TestNG + RestAssured) that cover the OWASP scanner blind spot — BOLA/IDOR, BFLA, and property-level authorization — as an identity×endpoint×object matrix asserting 403/404. Triggers "test for IDOR", "check broken object-level authorization", "can user A read user B's records", "cross-tenant leak test". Do NOT use for scanner-driven DAST (use `qa-security-passive-scan-java`), or minting test tokens (use `qa-test-login-tokens-java`).
 ---
 
 # Security Testing — Access Control / Authorization Matrix (Java / TestNG)

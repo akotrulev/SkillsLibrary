@@ -1,6 +1,6 @@
 ---
 name: td-instruction-sft
-description: Use when building supervised fine-tuning (SFT) data for a small LLM — single- and multi-turn chat, instruction/response pairs, tool-use traces, and system-prompt design — whether curated from logs/public sets or synthesized with a teacher model, with task coverage and quality gating built in. Triggers: "build an SFT dataset", "make instruction-tuning data", "multi-turn chat data for fine-tuning", "tool-use / function-calling training traces", "convert our support logs into SFT data". Do NOT use for pretraining text (`td-pretraining-corpus`), preference/DPO data (`td-preference-data`), or eval sets (`td-eval-sets`).
+description: Use when building supervised fine-tuning (SFT) data for a small LLM — single/multi-turn chat, instruction/response pairs, tool-use traces, and system prompts. Triggers: "build an SFT dataset", "make instruction-tuning data", "multi-turn chat data for fine-tuning", "tool-use / function-calling training traces", "convert our support logs into SFT data". Do NOT use for pretraining text (`td-pretraining-corpus`), preference/DPO data (`td-preference-data`), or eval sets (`td-eval-sets`).
 ---
 
 # Training Data — Instruction / SFT

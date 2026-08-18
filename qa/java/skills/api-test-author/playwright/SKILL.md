@@ -1,6 +1,6 @@
 ---
 name: qa-api-test-playwright-java
-description: Use when the user asks to write Java API tests through Playwright's APIRequestContext (playwright-java + TestNG + Jackson) — usually because the project already runs Playwright-Java for UI and wants one dependency and one report. Triggers: "write API tests with Playwright in Java", "use APIRequestContext for endpoint X", "add API coverage to our Playwright Java suite". Plain Java API suites without Playwright → `api-test-author/generator` (RestAssured + TestNG, the stack default). For end-to-end suite work prefer the phased agent `qa-api-java` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
+description: Use when the user asks to write Java API tests through Playwright's APIRequestContext (playwright-java + TestNG + Jackson) — usually because the project already runs Playwright-Java for UI and wants one dependency and one report. Triggers: "write API tests with Playwright in Java", "use APIRequestContext for endpoint X", "add API coverage to our Playwright Java suite". Plain Java API suites without Playwright → `api-test-author/generator` (RestAssured + TestNG, the stack default).
 ---
 
 # QA — API Test Writer (Java / Playwright APIRequestContext + TestNG)

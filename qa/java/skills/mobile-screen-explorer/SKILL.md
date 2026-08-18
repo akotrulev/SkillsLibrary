@@ -1,6 +1,6 @@
 ---
 name: qa-mobile-screen-explorer-java
-description: Use when a Java mobile suite needs to explore the currently open Android/iOS app on a real device or emulator through the Appium MCP server — enumerate elements, derive accessibility-id-first locators, and produce a `missing-testids.md` report for the dev team. Triggers "explore this screen", "what's on the current screen", "find the locators for X", "inventory this app screen". Do NOT use to emit the screen object from that inventory (use `qa-mobile-screen-objects-java`), to author the mobile test itself (use `qa-ui-test-writer-appium-java`), for web pages (use `qa-page-objects-from-url-java`), or for non-Java projects (use `qa-mobile-screen-explorer-{dotnet,typescript}`). For end-to-end suite work prefer the phased agent `qa-mobile-java` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
+description: Use when a Java mobile suite needs to explore the currently open Android/iOS app via the Appium MCP server — enumerate elements, derive accessibility-id-first locators, produce a `missing-testids.md` report. Triggers "explore this screen", "what's on the current screen", "find the locators for X". Do NOT use to emit the screen object (use `qa-mobile-screen-objects-java`), or for web pages (use `qa-page-objects-from-url-java`).
 ---
 
 # QA — Appium Live-App Explorer (Java)

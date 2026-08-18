@@ -1,6 +1,6 @@
 ---
 name: be-dotnet-unit-testing
-description: Use when backend C# logic needs a dev-side unit test — NUnit 4 + NSubstitute + FakeTimeProvider: what deserves a test, test-project setup, the five seams that make logic untestable, fakes-over-mocks, parameterized cases, and async assertions. Runs in-process with no HTTP, no container, no real database. Triggers "unit-test this handler", "write tests for this domain service", "test this validator/calculator", "how do I fake the clock in a test", "my service isn't testable". Do NOT use for contract/integration tests through the transport (the `qa-api-dotnet` peer), for mutation scoring (`qa-test-quality-check-dotnet`), or for Blazor components (`fe-blazor-component-testing`).
+description: Use when backend C# logic needs a dev-side unit test — NUnit 4 + NSubstitute + FakeTimeProvider: the five untestable seams, fakes-over-mocks, async assertions. In-process, no HTTP, container, or real database. Triggers "unit-test this handler", "test this validator/calculator", "how do I fake the clock in a test". Do NOT use for contract/integration tests through the transport (`qa-api-dotnet`), mutation scoring (`qa-test-quality-check-dotnet`), or Blazor (`fe-blazor-component-testing`).
 ---
 
 # .NET — Unit Testing (NUnit 4 + NSubstitute)

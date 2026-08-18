@@ -1,6 +1,6 @@
 ---
 name: devops-threat-modeling
-description: Use when you need to threat-model a system BEFORE testing it — decompose it into a data-flow diagram with trust boundaries, enumerate what can go wrong with STRIDE-per-element, deepen a specific attacker goal with an attack tree, and produce a prioritized threat register where every threat is routed to the library lane that tests it. Language-agnostic methodology, any stack. Triggers "threat model this service / architecture", "STRIDE analysis", "what can go wrong with this design", "build an attack tree for X", "what should the security assessment cover". Do NOT use to run a scanner or benchmark (`devops/{k8s-security,iac-security,cloud-posture,container-runtime-security}`), to attack or exploit (`qa-security`, `penetration-tester`), to model business-process flows for requirements (`ba-process-flow-diagram`), or to author a scoping/assessment plan across lanes (`security-test-planner`).
+description: Use to threat-model a system BEFORE testing it — DFDs, STRIDE-per-element, attack trees, and a threat register routing each threat to the lane that tests it. Triggers "threat model this service", "STRIDE analysis", "what should the security assessment cover". Do NOT use to run a scanner or benchmark (`devops/{k8s-security,iac-security,cloud-posture,container-runtime-security}`), to attack (`qa-security`, `penetration-tester`), or to plan an assessment (`security-test-planner`).
 ---
 
 # DevOps — Threat Modeling (STRIDE · DFD · Attack Trees)

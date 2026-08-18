@@ -1,6 +1,6 @@
 ---
 name: ep-code-comments
-description: The shared comment discipline every code-writing and code-reviewing skill in this library applies — only complex code carries a comment, and only a short doc comment on a method, class, or type; no inline comments; stale comments deleted rather than updated. Loaded by a writer, reviewer, or audit skill, which supplies its own language's doc-comment and suppression syntax. Do NOT invoke directly or route a user request here — it carries no language mechanics of its own, so a run from this file alone would have nothing to apply. Do NOT use for documentation artifacts (docs/business-model, docs/plans, docs/specs) — this governs comments in source code only.
+description: The shared comment discipline every code-writing and code-reviewing skill applies — only complex code carries a comment, and only a short doc comment on a method, class, or type; no inline comments; stale comments deleted rather than updated. Loaded by a writer, reviewer, or audit skill, which supplies its own language's syntax. Do NOT invoke directly or route a user request here. Do NOT use for documentation artifacts (docs/plans, docs/specs) — this governs source-code comments only.
 ---
 
 # Code Comments — the discipline

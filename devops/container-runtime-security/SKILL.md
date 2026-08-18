@@ -1,6 +1,6 @@
 ---
 name: devops-container-runtime-security
-description: Use to test the RUNNING cluster's attack surface and runtime behaviour — the layer static scanners cannot see. kube-hunter probes a live cluster from an attacker's viewpoint (remote / internal-pod / interactive discovery, plus an authorization-gated `--active` exploitation mode); Falco is the blue half — an eBPF DaemonSet that detects container escape, shell-in-container, and sensitive-mount abuse at syscall level, and whose rules you then ASSERT actually fired. Language-agnostic, any stack. Triggers "probe our running cluster", "is our cluster exploitable from a pod", "detect container escape at runtime", "deploy Falco", "did our runtime alert fire". Not for static image/IaC scanning (`qa-security-image-infra-scan` — Trivy), CIS posture scoring of manifests (`devops-k8s-security`), or app-layer exploitation (`qa-security`).
+description: Use to test the RUNNING cluster's attack surface and runtime behaviour. kube-hunter probes a live cluster from an attacker's viewpoint (authorization-gated `--active` mode); Falco detects container escape at syscall level. Triggers "probe our running cluster", "is our cluster exploitable from a pod", "deploy Falco". Not for static image/IaC scanning (`qa-security-image-infra-scan`), CIS scoring of manifests (`devops-k8s-security`), or app exploitation (`qa-security`).
 ---
 
 # DevOps — Container & Runtime Security (kube-hunter · Falco)

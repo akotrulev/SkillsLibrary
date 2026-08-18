@@ -1,6 +1,6 @@
 ---
 name: be-shared-feature-trace
-description: Use when one functional area of an existing backend must be read in depth to recover what it actually does — follow every entry point through authorization, validation, orchestration, domain rules, persistence, external calls, events and failure paths, and extract six inventories (capabilities, business rules, validations & gates, entity states, decision points, integrations) with file:line evidence for every item. Triggers "trace how this area works", "what business rules are in this module", "what does this endpoint actually enforce", "extract the rules from this code". Do NOT use to split a codebase into areas first (`be-shared-codebase-survey`), to write the end-user documentation (`be-shared-business-documentation`), or to find and prioritize defects (`ep-feature-audit`).
+description: Use when one functional area of an existing backend must be read in depth to recover what it actually does — following every entry point through auth, validation, domain rules, persistence and failure into six file:line-evidenced inventories. Triggers "trace how this area works", "what business rules are in this module". Do NOT use to split a codebase into areas first (`be-shared-codebase-survey`), write documentation (`be-shared-business-documentation`), or find defects (`ep-feature-audit`).
 ---
 
 # Feature Trace — recovering behavior from code

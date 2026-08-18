@@ -1,6 +1,6 @@
 ---
 name: pentest-lateral-movement
-description: Use to move from one compromised host to other in-scope systems during an authorized penetration test — credential reuse (pass-the-hash/ticket), network pivoting/tunnelling, Active Directory attack-path mapping, and Kubernetes/cloud pivots. Covers NetExec (nxc, the CrackMapExec successor), impacket, BloodHound CE + SharpHound/AzureHound, ligolo-ng/chisel/sshuttle/SSH pivoting, and compromised-pod → kube-API pivots. Language-agnostic, any target. Triggers "pivot from this foothold to the rest of the subnet", "map the AD attack paths to Domain Admin", "reuse these creds across the network". Not for gaining the foothold (`pentest-initial-access`), escalating on one host (`pentest-privilege-escalation`), or cracking/capturing creds (`pentest-credential-attacks` — the feedstock). Owned/lab targets only, under a committed engagement scope file; never touch out-of-scope hosts even when reachable.
+description: Use to move from one compromised host to other in-scope systems during an authorized penetration test — credential reuse, AD attack-path mapping, K8s/cloud pivots. Triggers "pivot from this foothold to the subnet", "map the AD attack paths to Domain Admin". Not for gaining the foothold (`pentest-initial-access`), escalating (`pentest-privilege-escalation`), or cracking creds (`pentest-credential-attacks`). Owned/lab only, under a committed scope file; never touch out-of-scope hosts.
 ---
 
 # Penetration Testing — Lateral Movement (NetExec · impacket · BloodHound CE · ligolo-ng/chisel/sshuttle · K8s pivots)

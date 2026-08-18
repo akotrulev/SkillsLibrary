@@ -1,6 +1,6 @@
 ---
 name: dataset-auditor
-description: Read-only audit of an existing LLM/VLM training dataset against this domain's conventions — format validity, eval contamination, duplication rate, PII/secret leakage, license coverage, provenance honesty, and composition/coverage skew — saving a versioned report to docs/datasets/audits/ that can be re-run to show what got fixed. Use to verify a dataset before training on it, or to assess one built elsewhere before extending it. Triggers: "audit my training dataset", "is this dataset contaminated", "check this SFT set before I train", "dataset quality report", "re-audit — what got fixed". Do NOT use to build or fix the dataset (dataset-engineer applies fixes), or to run the model eval (qa ai-feature-testing).
+description: Read-only audit of an existing LLM/VLM training dataset against this domain's conventions — format validity, eval contamination, duplication, PII/secret leakage, license coverage, provenance, and composition skew — saving a versioned, re-runnable report to docs/datasets/audits/. Use to verify a dataset before training, or assess one built elsewhere. Triggers: "audit my training dataset", "is this dataset contaminated", "check this SFT set before I train", "dataset quality report", "re-audit — what got fixed". Do NOT use to build or fix the dataset (dataset-engineer applies fixes), or run the model eval (qa ai-feature-testing).
 tools: Read, Glob, Grep, Bash, WebSearch, Write, Edit
 model: inherit
 ---

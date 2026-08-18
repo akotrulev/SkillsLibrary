@@ -1,6 +1,6 @@
 ---
 name: qa-bdd-project-setup-java
-description: Use when adding the Cucumber-JVM BDD layer onto a Java 21 UI/mobile test project, or standing up a Cucumber-JVM + JUnit 5 project from zero. Triggers: "set up Cucumber", "add a BDD layer to our Playwright/Selenium/Appium tests in Java", "wire Cucumber DI and hooks". Do NOT use to write feature files (`feature-file-writer`), generate step definitions (`gherkin-step-code`), or build page objects (`page-object-design`). For end-to-end suite work prefer the phased agent `qa-bdd-java` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
+description: Use when adding the Cucumber-JVM BDD layer onto a Java 21 UI/mobile test project, or standing up a Cucumber-JVM + JUnit 5 project from zero. Triggers: "set up Cucumber", "add a BDD layer to our Playwright/Selenium/Appium tests in Java", "wire Cucumber DI and hooks". Do NOT use to write feature files (`feature-file-writer`), generate step definitions (`gherkin-step-code`), or build page objects (`page-object-design`).
 ---
 
 # Cucumber-JVM BDD Project Scaffold (Java 21)

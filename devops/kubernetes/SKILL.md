@@ -1,6 +1,6 @@
 ---
 name: devops-kubernetes
-description: Use when the user asks to author Kubernetes manifests, Helm charts, Kustomize overlays, or workload patterns (Deployment, Service, Ingress, ConfigMap, Secret, HPA, PDB, ServiceAccount + IRSA / Workload Identity) for AKS / EKS / GKE. Triggers: "write a Deployment for service X", "Helm chart for Y", "AKS / EKS manifest", "set HPA and PDB", "IRSA for this pod", "Kustomize overlay per env". Do NOT use for non-Kubernetes targets (ECS / Container Apps — see `devops/{aws,azure}-deployment`), pipelines (use `devops/{github-actions,gitlab-ci,azure-pipelines}`), or container build (use `devops/docker`).
+description: Use when the user asks to author Kubernetes manifests, Helm charts, Kustomize overlays, or workload patterns (Deployment, Service, Ingress, HPA, PDB, ServiceAccount + IRSA / Workload Identity) for AKS / EKS / GKE. Triggers: "write a Deployment for service X", "Helm chart for Y", "IRSA for this pod". Do NOT use for non-Kubernetes targets (`devops/{aws,azure}-deployment`), pipelines (`devops/{github-actions,gitlab-ci,azure-pipelines}`), or container build (`devops/docker`).
 ---
 
 # DevOps — Kubernetes (AKS / EKS / GKE)

@@ -1,6 +1,6 @@
 ---
 name: qa-security-passive-scan-java
-description: Use when adding an OWASP ZAP **baseline** (passive) DAST scan as a CI build gate for a Java 21 / TestNG pipeline — spider a running app for a bounded time and run ZAP's passive rules (missing security headers, cookie flags, information leaks, mixed content) with **no attack payloads**, fail on new alerts above a threshold, and manage a false-positive baseline file. Fast and safe enough for every PR. Triggers "add a DAST gate to CI", "run ZAP against our running app", "scan for missing security headers", "passive security scan on every PR". Do NOT use for active/injection scanning (use `qa-security-active-scan`), known-CVE or exposure matching (use `qa-security-known-vuln-scan`), TLS handshake configuration (use `qa-security-certificate-scan`), BOLA/IDOR authorization logic (use `qa-permission-testing-java`), or non-Java pipelines (use `qa-security-testing-passive-scan-{dotnet,typescript}`).
+description: Use when adding an OWASP ZAP baseline (passive) DAST scan as a CI build gate for a Java 21 / TestNG pipeline — passive rules only, no attack payloads, fail on new alerts above a threshold. Triggers "add a DAST gate to CI", "run ZAP against our running app", "scan for missing security headers", "passive security scan on every PR". Do NOT use for active/injection scanning (use `qa-security-active-scan`), or BOLA/IDOR logic (use `qa-permission-testing-java`).
 ---
 
 # Security Testing — OWASP ZAP Baseline Scan (Java / TestNG)

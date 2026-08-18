@@ -1,6 +1,6 @@
 ---
 name: qa-device-cloud-java
-description: Use when the user needs the **real-device-cloud specifics** of running Java Appium tests on a mobile device farm. Triggers: "upload our app to BrowserStack App Automate and run the Appium Java tests", "run our TestNG mobile suite across a real-device matrix", "test biometric login on a real device on BrowserStack". For end-to-end suite work prefer the phased agent `qa-mobile-java` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
+description: Use when the user needs the **real-device-cloud specifics** of running Java Appium tests on a mobile device farm. Triggers: "upload our app to BrowserStack App Automate and run the Appium Java tests", "run our TestNG mobile suite across a real-device matrix", "test biometric login on a real device on BrowserStack".
 ---
 
 # QA — Mobile Device Farm (Java: Appium java-client on a real-device cloud)

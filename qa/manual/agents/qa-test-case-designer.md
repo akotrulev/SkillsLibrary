@@ -68,40 +68,36 @@ Often a suite already exists — "the discount rule changed, update the cases", 
 
 ### Orientation pass — always first
 
-**Step 1 — read the cache.** Run `ep-agent-orientation-cache`'s gate against `docs/agent-context/qa-test-case-designer.md` → **TRUST** (skip orientation), **DELTA** (refresh only what the git delta invalidated — a changed the test-basis documents and the requirement sources the suite traces to invalidates the version lane and everything keyed to it), or **FULL**. Report the verdict in one line; don't narrate the checks.
+**Step 1 — read the cache.** Run `ep-agent-orientation-cache`'s gate against `docs/agent-context/qa-test-case-designer.md` → **TRUST** / **DELTA** (a changed test-basis document or requirement source the suite traces to invalidates everything keyed to it) / **FULL**. Report the verdict in one line.
 
-**Step 2 — derive the gaps.** Recover, don't author. For whatever the gate left unresolved:
+**Step 2 — derive the gaps.** Recover, don't author. Read the existing artifacts (suite file, test-basis document, coverage matrix) and produce a **current-state map**: **suite shape** (single Setup, case groups, Cleanup, ID scheme, **technique tags** claimed per case) · **traceability** (coverage matrix AC→TC-IDs, and the requirement version the suite was derived against) · **the current basis** (the `requirements-breakdown` document, else the docs the suite traces to).
 
-Recover, don't author. Read the existing artifacts (suite file, any test-basis document, the coverage matrix) and produce a short **current-state map**: **suite shape** — the single Setup, case groups, Cleanup, ID scheme, and the **technique tags** already claimed per case; **traceability** — the coverage matrix (AC → TC-IDs) and which requirement version the suite was derived against, so you can locate what the change invalidates; **the current basis** — the `requirements-breakdown` document if one exists, otherwise the docs the suite traces to. There is no build to run; the equivalent check is **internal consistency** — does the suite still open with Setup and close with Cleanup, and does every case still trace to a live requirement line? A case that no longer traces is a finding.
-
-**Step 3 — re-verify what is never cached.** There is no build here; the equivalent every-run check is **internal consistency** — run it regardless of the gate's verdict, and treat an inconsistency on arrival as a finding rather than something to silently rewrite. Then spot-check any artifact the map names that you are about to change: **the map is a lead, not evidence**. The highest-risk cached line here is **the requirement version the suite was derived against** — the sources move without this repo moving, so a cached traceability claim is exactly what goes stale first.
+**Step 3 — re-verify what is never cached.** There is no build; the every-run check is **internal consistency** — does the suite still open with Setup and close with Cleanup, and does every case still trace to a live requirement line? Run it regardless of verdict; an inconsistency on arrival is a finding, not something to silently rewrite. Spot-check any artifact the map names that you'll change: **the map is a lead, not evidence.** Highest-risk cached line: **the requirement version the suite was derived against** — sources move without this repo moving, so it goes stale first.
 
 **What this agent's cache records:**
 
 | Section | qa-test-case-designer records |
 |---|---|
-| Version lane | n/a — no build lane. Record instead the **requirement version** each artifact was derived against, so the next run can tell what a source change invalidated |
-| Build, run & test | n/a — the equivalent check is internal consistency (Setup → Cases → Cleanup intact, every case tracing to a live requirement line) |
-| Layout | where the suite file, the test-basis document, and the coverage matrix live |
-| Seams to reuse | suite shape — the single Setup, case groups, Cleanup, and the ID scheme · **technique tags already claimed per case** · the coverage matrix (AC → TC-IDs) · the `requirements-breakdown` document when one exists · the docs the suite traces to · the peers consuming the IDs (`qa-*` authoring agents, `qa-bdd-*`) |
-| Conventions observed | ID scheme, phrasing style, and where the project narrows the writing rules |
-| Known unknowns | untraced cases and uncovered ACs; `#volatile`: the source documents themselves and the live app in exploration mode |
+| Version lane | n/a — no build. Record the **requirement version** each artifact was derived against |
+| Build, run & test | n/a — the check is internal consistency (Setup → Cases → Cleanup intact, every case tracing to a live requirement line) |
+| Layout | where the suite file, test-basis document, and coverage matrix live |
+| Seams to reuse | suite shape (Setup, case groups, Cleanup, ID scheme) · **technique tags claimed per case** · coverage matrix (AC→TC-IDs) · the `requirements-breakdown` document · docs the suite traces to · peers consuming the IDs (`qa-*` authoring agents, `qa-bdd-*`) |
+| Conventions observed | ID scheme, phrasing style, where the project narrows the writing rules |
+| Known unknowns | untraced cases and uncovered ACs; `#volatile`: the source documents and the live app in exploration mode |
 
 ### Mode A — Fix a stale / wrong / contradictory / missed case
 
-Load `ep-systematic-debugging`; here "debugging" means root-causing why a case is wrong or why the suite **missed** a defect, never patching the visible symptom. **Reproduce the gap**: re-run `requirements-breakdown` on the **changed** source and diff it against the recovered basis — the delta is what invalidated the case, or the condition never covered. Then **root-cause**: a wrong expected result usually traces to a changed rule; a *missed* defect traces to a skipped technique (a rule boundary untested, a state model with only happy-path arrows, an invalid class not partitioned). Name the technique gap, not just the case.
+Load `ep-systematic-debugging`; "debugging" means root-causing why a case is wrong or why the suite **missed** a defect, never patching the symptom. **Reproduce the gap**: re-run `requirements-breakdown` on the **changed** source and diff against the recovered basis — the delta is what invalidated the case, or the condition never covered. **Root-cause**: a wrong expected result usually traces to a changed rule; a *missed* defect to a skipped technique (a rule boundary untested, a state model with only happy-path arrows, an invalid class not partitioned). Name the technique gap, not just the case.
 
-Make the **smallest correct fix** — correct the steps / expected result / technique tag, or add the missing coverage item, staying inside the existing Setup/Cleanup and ID scheme; don't renumber or restructure unless asked. **Verify** (`ep-verify-before-done`): the case traces to the new spec line, the coverage matrix is updated, the claimed technique hits its target — state the delta. Then **sweep the class**: if one case missed a boundary, its siblings on the same rule likely did too — fix the whole decision table or boundary set.
+Make the **smallest correct fix** — correct the steps / expected result / technique tag, or add the missing coverage item, inside the existing Setup/Cleanup and ID scheme; don't renumber unless asked. **Verify** (`ep-verify-before-done`): the case traces to the new spec line, the matrix is updated, the claimed technique hits its target. Then **sweep the class**: if one case missed a boundary, siblings on the same rule likely did too — fix the whole decision table or boundary set.
 
 ### Mode B — Extend coverage (a changed / added requirement)
 
-Scope the change and orient on the requirements it touches. **Re-enter only the relevant phases** — Phase 1 (analyze *only the new/changed* basis), Phase 2 (techniques on the new conditions), Phase 3 (fold the new cases into the **existing** Setup/Cleanup and ID scheme, not a fresh suite) — reusing existing preconditions and Cleanup. Then Phase 4 on the changed surface: update the coverage matrix, confirm the new cases trace and that no existing case now conflicts. Every rule still binds — a new case that violates one is a new defect.
+Scope the change and orient on the requirements it touches. **Re-enter only the relevant phases** — Phase 1 (analyze *only the new/changed* basis), Phase 2 (techniques on the new conditions), Phase 3 (fold new cases into the **existing** Setup/Cleanup and ID scheme, not a fresh suite). Then Phase 4 on the changed surface: update the matrix, confirm the new cases trace and no existing case now conflicts. A new case that violates a rule is a new defect.
 
 ### Branch & finish (both modes)
 
-If the suite is version-controlled, work on a branch, not the user's default — `ep-worktrees` / `ep-finish-branch`. Commit only when asked.
-
-**Update the cache before you report** (greenfield runs too, per `ep-agent-orientation-cache` Phase 3): correct what the run disproved, **add the seams the run created** — new cases, technique tags, coverage-matrix rows, basis-document sections — re-stamp the baseline commit + fingerprint, prepend one session-log line.
+If version-controlled, work on a branch (`ep-worktrees` / `ep-finish-branch`); commit only when asked. **Update the cache before you report** (greenfield too, per `ep-agent-orientation-cache` Phase 3): correct what the run disproved, add the seams it created (new cases, technique tags, matrix rows, basis sections), re-stamp baseline + fingerprint, prepend one session-log line.
 
 ## Phases
 

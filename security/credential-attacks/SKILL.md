@@ -1,6 +1,6 @@
 ---
 name: pentest-credential-attacks
-description: Use to recover and crack credentials during an authorized penetration test — offline hash cracking (hashcat), online login brute-force (hydra), LAN hash capture (Responder), and post-foothold secrets harvesting (LSASS, cloud/IMDS creds, AD hashes). Every recovered secret is reported as blast radius, never contents. Language-agnostic, any target. Triggers "crack these captured hashes", "brute the login on our lab app", "capture NetNTLM on the test segment", "harvest creds from the foothold". Not for reusing the creds across hosts (`pentest-lateral-movement` — the consumer), gaining the foothold (`pentest-initial-access`), or escalating on one host (`pentest-privilege-escalation`). Owned/lab targets only, under a committed engagement scope file; production is a separate, louder gate.
+description: Use to recover and crack credentials during an authorized penetration test — offline/online cracking, LAN capture, secrets harvesting. Every recovered secret is reported as blast radius, never contents. Triggers "crack these captured hashes", "harvest creds from the foothold". Not for reusing creds across hosts (`pentest-lateral-movement`), gaining the foothold (`pentest-initial-access`), or escalating (`pentest-privilege-escalation`). Owned/lab only, under a committed scope file.
 ---
 
 # Penetration Testing — Credential Attacks (hashcat · hydra · Responder · secrets harvesting)

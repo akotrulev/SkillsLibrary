@@ -1,6 +1,6 @@
 ---
 name: be-dotnet-standards-audit
-description: Use to audit a whole .NET service against the be-dotnet plugin's conventions — pattern application, DI lifetimes, async, layering, EF Core persistence, API contract, JWT/RBAC auth, resilience, config/secrets, OTel + Serilog observability — producing a saved, re-runnable findings report in `docs/audits/`. Read-only; it never fixes. Triggers: "audit our .NET service against the plugin conventions", "does this API follow our backend rules", "conformance audit of this C# codebase", "give me a findings .md for our service", "re-audit — what did we fix since last round". Do NOT use to review one file or diff (`be-dotnet-code-review`), to check code against a product spec (`ep-spec-vs-code-audit` / `code-auditor`), to trace one feature (`ep-feature-audit`), to audit a test suite (`qa-dotnet-standards-audit`), or to fix anything (the `be-dotnet` agent).
+description: Use to audit a whole .NET service against the be-dotnet plugin's conventions — patterns, DI, async, EF Core, API contract, auth, observability — as a saved, re-runnable findings report in `docs/audits/`. Read-only; never fixes. Triggers "audit our .NET service against the plugin conventions", "conformance audit of this C# codebase". Do NOT use to review one diff (`be-dotnet-code-review`), check code against a spec (`code-auditor`), or audit a test suite (`qa-dotnet-standards-audit`).
 ---
 
 # be-dotnet Conformance Audit

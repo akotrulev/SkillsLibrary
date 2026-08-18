@@ -1,6 +1,6 @@
 ---
 name: pentest-privilege-escalation
-description: Use to elevate a foothold's privilege on a single host during an authorized penetration test — from a user shell to root/SYSTEM via SUID/sudo/kernel/capability chains (Linux) or token-impersonation/service/unquoted-path chains (Windows). Covers linPEAS/winPEAS enumeration, GTFOBins/LOLBAS abuse lookups, and disciplined kernel/sudo exploitation. Language-agnostic, any target. Triggers "escalate this foothold to root", "enumerate priv-esc vectors on the compromised host", "from www-data to root". Not for gaining the initial foothold (`pentest-initial-access`), moving to another host (`pentest-lateral-movement`), or infra posture benchmarks (`infra-security-tester`). Owned/lab targets only, under a committed engagement scope file.
+description: Use to elevate a foothold's privilege on a single host during an authorized penetration test — user shell to root/SYSTEM via SUID/sudo/kernel chains (Linux) or token/service chains (Windows). Triggers "escalate this foothold to root", "from www-data to root". Not for gaining the foothold (`pentest-initial-access`), moving hosts (`pentest-lateral-movement`), or infra posture benchmarks (`infra-security-tester`). Owned/lab targets only, under a committed scope file.
 ---
 
 # Penetration Testing — Privilege Escalation (linPEAS/winPEAS · GTFOBins/LOLBAS · kernel/sudo/SUID chains)

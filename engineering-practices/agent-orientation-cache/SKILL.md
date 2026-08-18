@@ -1,6 +1,6 @@
 ---
 name: ep-agent-orientation-cache
-description: The shared protocol every agent uses to persist and reuse its orientation pass — write the current-state map to docs/agent-context/<agent-name>.md on the first run, validate it against a git delta on later runs, and update it before finishing, so an agent stops re-deriving version lane, layout, and reusable seams every invocation. Loaded by an agent, which supplies the field list its orientation actually derives. Do NOT invoke directly or route a user request here — it carries no fields of its own, so a run from this file alone would have nothing to record. Do NOT use for findings, plans, or specs (docs/audits, docs/plans, docs/specs) or the business model (docs/business-model).
+description: The shared protocol every agent uses to persist and reuse its orientation pass — write the current-state map to docs/agent-context/<agent-name>.md, validate it against a git delta on later runs, and update it before finishing. Loaded by an agent, which supplies its own field list. Do NOT invoke directly or route a user request here — it carries no fields of its own. Do NOT use for findings, plans, or specs (docs/audits, docs/plans, docs/specs) or the business model (docs/business-model).
 ---
 
 # Agent Orientation Cache — the protocol

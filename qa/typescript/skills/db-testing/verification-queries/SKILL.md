@@ -1,6 +1,6 @@
 ---
 name: qa-db-verification-queries-typescript
-description: Use when writing or reviewing a **safe verification query** for tests in Node 24 (22 supported) / TypeScript — assert a row exists, add a `COUNT(*)` check from an integration test, review test SQL for guardrails (parameterized, scoped to test-owned data, read-only), or poll for an eventually-consistent row. Triggers "write a verification query for this test", "assert this row exists from the test", "review my test SQL", "wait for an eventually-consistent row". Do NOT use for connection/seeding/cleanup (use `qa-db-connection-typescript`), container lifecycle (use `qa-db-testing-testcontainers-typescript`), schema/index design (the `data-architect` peer), or other stacks (`{java,dotnet}`). For end-to-end suite work prefer the phased `qa-api-typescript` agent, which loads this skill inside its workflow.
+description: Use when writing or reviewing a **safe verification query** for tests in Node 24 / TypeScript — assert a row exists, add a `COUNT(*)` check, review test SQL for guardrails, or poll for a row. Triggers "write a verification query for this test", "assert this row exists from the test", "review my test SQL", "wait for an eventually-consistent row". Do NOT use for connection/seeding/cleanup (use `qa-db-connection-typescript`) or container lifecycle (use `qa-db-testing-testcontainers-typescript`).
 ---
 
 # QA — DB Testing Query Author (TypeScript / Node 20)

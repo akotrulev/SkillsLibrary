@@ -1,6 +1,6 @@
 ---
 name: qa-ai-feature-testing-typescript
-description: Use when testing LLM-generated output (chatbot, RAG answer, summarizer, extraction, tool-using agent) from a Node 24 (22 supported) / TypeScript suite — property, rubric (LLM-as-judge), and grounding assertions with promptfoo (default) or DeepEval (RAG/agent/red-team metrics) as the eval spine; never exact-string equality. Triggers: "test our chatbot/RAG feature", "eval prompt outputs", "assert the answer is grounded in the retrieved context", "deepeval / G-Eval / faithfulness metric". For end-to-end suite work prefer the phased agent `qa-llm-typescript` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
+description: Use when testing LLM-generated output (chatbot, RAG answer, summarizer, extraction, tool-using agent) from a TypeScript suite — property, rubric (LLM-as-judge), and grounding assertions with promptfoo (default) or DeepEval (RAG/agent/red-team metrics) as the eval spine; never exact-string equality. Triggers: "test our chatbot/RAG feature", "eval prompt outputs", "assert the answer is grounded in the retrieved context", "deepeval / G-Eval / faithfulness metric".
 ---
 
 # LLM-App Testing (Node 20 / TypeScript — promptfoo + Anthropic SDK)

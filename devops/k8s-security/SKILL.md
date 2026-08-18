@@ -1,6 +1,6 @@
 ---
 name: devops-k8s-security
-description: Use when benchmarking or probing the security posture of Kubernetes — CIS scoring with kube-bench, NSA/CISA + MITRE + CIS framework mapping with Kubescape, best-practice config validation with Polaris / kube-score, and active validation that RBAC, NetworkPolicy, Pod Security Standards, and secrets-at-rest actually hold. Language-agnostic, any cluster (AKS / EKS / GKE / self-managed). Triggers "run CIS benchmark on our cluster", "kube-bench / Kubescape / Polaris", "audit our K8s RBAC", "are our network policies actually enforcing", "score these manifests before merge", "is our pod security admission working". Do NOT use for authoring manifests (use `devops/kubernetes`), image or IaC CVEs (use `qa-security-image-infra-scan` — Trivy), or static conformance against the plugin's own rules (use `devops-auditor`).
+description: Use when benchmarking or probing the security posture of Kubernetes — CIS scoring, framework mapping, config validation, and active validation that RBAC, NetworkPolicy, Pod Security Standards, and secrets-at-rest hold. Triggers "run CIS benchmark on our cluster", "audit our K8s RBAC", "are our network policies actually enforcing". Do NOT use for authoring manifests (`devops/kubernetes`), image or IaC CVEs (`qa-security-image-infra-scan`), or plugin-rule conformance (`devops-auditor`).
 ---
 
 # DevOps — Kubernetes Security Posture (kube-bench · Kubescape · Polaris · kube-score)

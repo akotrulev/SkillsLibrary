@@ -1,6 +1,6 @@
 ---
 name: td-pretraining-corpus
-description: Use when building a raw-text pretraining corpus for a small LLM — collecting sources, extracting clean text from HTML/PDF, removing boilerplate, applying quality and language filters, dedup, and sharding into tokenizer-ready files with a documented mixing blend. Triggers: "build a pretraining corpus", "extract clean text from these web pages / PDFs", "shard a corpus for training", "what mixing weights for my pretraining data". Do NOT use for instruction/chat data (`td-instruction-sft`), preference data (`td-preference-data`), or eval sets (`td-eval-sets`).
+description: Use when building a raw-text pretraining corpus for a small LLM — collecting sources, extracting clean text from HTML/PDF, quality/language filters, dedup, and sharding with a mixing blend. Triggers: "build a pretraining corpus", "extract clean text from these web pages / PDFs", "shard a corpus for training", "what mixing weights for my pretraining data". Do NOT use for instruction/chat data (`td-instruction-sft`), preference data (`td-preference-data`), or eval sets (`td-eval-sets`).
 ---
 
 # Training Data — Pretraining Corpus

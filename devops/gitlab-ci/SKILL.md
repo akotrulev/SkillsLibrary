@@ -1,6 +1,6 @@
 ---
 name: devops-gitlab-ci
-description: Use when the user asks to write, review, or modify a GitLab CI/CD pipeline (`.gitlab-ci.yml`) for build/test/deploy of Java, .NET, or TypeScript projects, with deploys to AWS or Azure. Triggers: "write a `.gitlab-ci.yml` for X", "add a deploy stage to my GitLab pipeline", "set up CI on GitLab for this repo". Do NOT use for GitHub Actions (use `devops/github-actions`), Azure Pipelines (use `devops/azure-pipelines`), or IaC scripts (use `devops/infrastructure-as-code`). Do NOT use for the **test-suite CI lane** — shard matrix, Allure publishing, perf gate, flake quarantine — that belongs to `qa-cicd-{java,dotnet,typescript}`; this skill owns the **build/deploy** lane.
+description: Use when the user asks to write, review, or modify a GitLab CI/CD pipeline (`.gitlab-ci.yml`) for build/test/deploy of Java, .NET, or TypeScript projects. Triggers: "write a `.gitlab-ci.yml` for X", "add a deploy stage to my GitLab pipeline". Do NOT use for GitHub Actions (`devops/github-actions`), Azure Pipelines (`devops/azure-pipelines`), or IaC (`devops/infrastructure-as-code`). Do NOT use for the test-suite CI lane — `qa-cicd-{java,dotnet,typescript}` owns that.
 ---
 
 # DevOps — GitLab CI/CD

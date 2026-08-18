@@ -1,6 +1,6 @@
 ---
 name: be-shared-business-documentation
-description: Use when traced backend behavior must be written up as business documentation a non-engineer can read — per-area capabilities, actors, end-to-end use cases, the rules that govern them, what users see when things fail, and boundaries — plus the system overview, glossary and open-questions list, written into the docs/business-model/ knowledge base under ba-project-memory's contract. Every statement tiered as #observed (what the code does, with file:line) or #inferred (what it is probably for, which becomes a question for the business). Triggers "write up what this system does for users", "turn this trace into business documentation", "document the areas we just traced". Do NOT use to trace the code first (`be-shared-feature-trace`), to author requirements for new work (`requirements-author`), or to write findings (`ep-feature-audit`).
+description: Use when traced backend behavior must be written up as business documentation a non-engineer can read, into the docs/business-model/ knowledge base under ba-project-memory's contract. Every statement tiered #observed (with file:line) or #inferred. Triggers "write up what this system does for users", "turn this trace into business documentation". Do NOT use to trace the code first (`be-shared-feature-trace`), author requirements (`requirements-author`), or write findings (`ep-feature-audit`).
 ---
 
 # Business Documentation — the write-up a non-engineer can use

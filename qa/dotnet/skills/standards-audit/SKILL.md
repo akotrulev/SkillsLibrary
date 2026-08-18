@@ -1,6 +1,6 @@
 ---
 name: qa-dotnet-standards-audit
-description: Use to audit a .NET test suite against the qa-dotnet plugin's conventions — NUnit structure, waits, page objects, locators, API layering, DB verification, secrets, Allure, CI wiring — producing a saved, re-runnable findings report in `docs/audits/`. Scopeable to the whole suite or to just one discipline. Read-only; it never fixes. Triggers "audit our test suite against the conventions", "re-audit — what did we fix since last round", "audit just our API tests", "check only the UI/mobile automation against the conventions". Not for one test file (a `reviewer` skill) or fixing anything (the `qa-*-dotnet` agents).
+description: Use to audit a .NET test suite against the qa-dotnet plugin's conventions, producing a saved, re-runnable findings report in `docs/audits/`. Scopeable to the whole suite or to just one discipline. Read-only; it never fixes. Triggers "audit our test suite against the conventions", "re-audit — what did we fix since last round", "audit just our API tests". Not for one test file (a `reviewer` skill) or fixing anything (the `qa-*-dotnet` agents).
 ---
 
 # qa-dotnet Conformance Audit

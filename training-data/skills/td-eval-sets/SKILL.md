@@ -1,6 +1,6 @@
 ---
 name: td-eval-sets
-description: Use when building held-out evaluation data to measure a small LLM/VLM you trained — golden test sets, multiple-choice and exact-match items, rubric and LLM-judge eval data, contamination checks, and canary strings — so the numbers reflect learning, not leakage. Triggers: "build an eval set for my model", "golden test set", "how do I measure my fine-tuned model", "LLM-as-judge eval data", "check my model isn't contaminated". Do NOT use for the training data itself (`td-instruction-sft` / `td-preference-data` / `td-pretraining-corpus`), or for authoring the eval-running harness/assertions (qa `ai-feature-testing`).
+description: Use when building held-out evaluation data to measure a small LLM/VLM you trained — golden test sets, multiple-choice/exact-match items, rubric and LLM-judge data, contamination checks, and canary strings. Triggers: "build an eval set for my model", "golden test set", "how do I measure my fine-tuned model", "LLM-as-judge eval data", "check my model isn't contaminated". Do NOT use for training data itself (`td-instruction-sft` etc.), or the eval-running harness (qa `ai-feature-testing`).
 ---
 
 # Training Data — Evaluation Sets

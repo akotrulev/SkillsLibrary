@@ -1,6 +1,6 @@
 ---
 name: devops-docker
-description: Use when the user asks to author or improve Dockerfiles / container images for .NET (8/9/10) / Java 21 / Node 22-24 services, build multi-stage images, choose a base image, pin versions, optimize layers, set non-root + healthcheck, or wire image scanning. Triggers: "write a Dockerfile for X", "shrink this image", "multi-stage build for service Y", "non-root user", "what base image should we use", "scan for CVEs". Do NOT use for compose / orchestration (use `devops/kubernetes`), pipelines (use `devops/{github-actions,gitlab-ci,azure-pipelines}`), or app deploy (use `devops/{aws,azure}-deployment`).
+description: Use when the user asks to author or improve Dockerfiles / container images for .NET / Java / Node services, build multi-stage images, choose a base image, pin versions, optimize layers, set non-root + healthcheck, or wire image scanning. Triggers: "write a Dockerfile for X", "shrink this image", "what base image should we use". Do NOT use for orchestration (`devops/kubernetes`), pipelines (`devops/{github-actions,gitlab-ci,azure-pipelines}`), or app deploy (`devops/{aws,azure}-deployment`).
 ---
 
 # DevOps — Docker

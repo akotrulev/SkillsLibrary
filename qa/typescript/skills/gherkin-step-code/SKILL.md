@@ -1,6 +1,6 @@
 ---
 name: qa-gherkin-step-code-typescript
-description: Use when turning Gherkin .feature files into TypeScript step definitions implemented against existing Page Object Models — playwright-bdd (createBdd + fixtures) for web, CucumberJS + WebdriverIO for mobile. Pick the framework, then read its reference. Triggers: "generate step definitions for these features", "bind these Gherkin steps to our page objects in TS". Do NOT use to write the .feature files (`feature-file-writer`), scaffold the project (`bdd-project-setup`), or build page objects. For end-to-end suite work prefer the phased agent `qa-bdd-typescript` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
+description: Use when turning Gherkin .feature files into TypeScript step definitions implemented against existing Page Object Models — playwright-bdd (createBdd + fixtures) for web, CucumberJS + WebdriverIO for mobile. Triggers: "generate step definitions for these features", "bind these Gherkin steps to our page objects in TS". Do NOT use to write the .feature files (`feature-file-writer`), scaffold the project (`bdd-project-setup`), or build page objects.
 ---
 
 # BDD Step Bindings + POM Implementation (TypeScript)

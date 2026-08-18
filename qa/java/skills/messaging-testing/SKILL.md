@@ -1,6 +1,6 @@
 ---
 name: qa-messaging-testing-java
-description: Use when a Java 21 / TestNG test suite must produce, consume, or assert messages against the project's broker — Kafka/Redpanda, AWS SQS/SNS, RabbitMQ, or Azure Service Bus. Triggers "assert the service published event X", "test the consumer's side-effect", "DLQ/DLT assertions", "seed a topic/queue in a test". Pick the broker in the decision matrix, then read its reference file. Do NOT use for synchronous HTTP API assertions (use `qa-api-test-writer-java`), for message-contract verification (use `qa-api-contract-testing-java`), for email (use `qa-email-testing-java`), or for non-Java projects (use `qa-messaging-testing-{dotnet,typescript}`). For end-to-end suite work prefer the phased agent `qa-api-java` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
+description: Use when a Java 21 / TestNG test suite must produce, consume, or assert messages against the project's broker — Kafka/Redpanda, AWS SQS/SNS, RabbitMQ, or Azure Service Bus. Triggers "assert the service published event X", "test the consumer's side-effect", "DLQ/DLT assertions", "seed a topic/queue in a test". Do NOT use for HTTP API assertions (use `qa-api-test-writer-java`), for message-contract verification (use `qa-api-contract-testing-java`), or for email (use `qa-email-testing-java`).
 ---
 
 # QA — Messaging Testing (Java 21)
