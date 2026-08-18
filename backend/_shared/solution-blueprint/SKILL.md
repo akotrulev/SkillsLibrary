@@ -70,6 +70,7 @@ A **functional area** is a coherent slice of business capability that could plau
 |---|---|
 | Area | Short noun phrase |
 | Purpose | One sentence — the capability, in business terms |
+| User-facing capabilities | The things a person can *do* here, one short sentence each in the user's voice (*"a member books a session"*, *"an admin publishes a workshop"*) — empty for areas nothing user-facing sits on. `be-shared-delivery-plan` sequences user-facing work one capability per phase, so this column is what it slices on; an area with none is planned layer-first |
 | Primary actors | Who or what drives it (end user, admin, scheduled job, external system) |
 | Key entities | The 2–5 nouns it owns — the seed of `data-model.md` |
 | In scope | What this initiative builds for it |
@@ -77,6 +78,7 @@ A **functional area** is a coherent slice of business capability that could plau
 | Depends on | Other areas or external systems |
 
 Rules:
+- **Name the user-facing capabilities in the user's voice, not the system's.** *"A member books a session"* is a capability; *"exposes the bookings endpoint"* is an implementation of one. The delivery plan turns each into a phase that closes when a person can actually do it, so a vague capability produces a phase with no checkable exit.
 - **6–8 areas is a lot.** Beyond that, either the initiative should be decomposed into separate initiatives (each with its own folder and its own executable plan), or several "areas" are really one. Say which.
 - **Out of scope is not optional.** The most common plan defect is an unstated boundary that someone later reads as included.
 - Every area gets at least one entity or it is not an area — it is a cross-cutting concern (auth, logging, config), which belongs in the architecture section instead.

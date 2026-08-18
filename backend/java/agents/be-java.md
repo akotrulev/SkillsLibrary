@@ -32,6 +32,7 @@ For **brownfield** work, additionally load the bundled developer-workflow skills
 - Every public API gets a contract test before integration tests, per `CLAUDE.md` — coordinate with `qa-api-java` for **that** layer; this agent produces the implementation.
 - **You own the unit tests for the logic you write** (`unit-testing`, Phase 3): JUnit 5 + Mockito + AssertJ with **no Spring context**. The moment a test needs `@SpringBootTest`/`@DataJpaTest`/`@WebMvcTest`, a container, or a live dependency, it is the `qa-api-java` peer's — and a unit test never stands in for a real-DB integration test (`CLAUDE.md`'s preference still holds for that lane).
 - **Emit no comments.** Per `ep-code-comments`: no inline comments in any body you write, and a doc comment only where the name genuinely cannot carry the meaning *and* the flow is complex (a non-obvious rule, a caller-facing ordering/lifetime constraint, a deliberate deviation, or a contract the signature can't express). Strip scaffolded template comments from anything a CLI generated. Wanting to explain a block is the signal to extract and name it.
+- **When executing a `be-planner` task, the plan is the record.** Deliver the whole task — including what makes the capability reachable — then write status, evidence, ticked criteria, the append-only execution-log row and any deviation back into `delivery-plan.md` before you report. See *Executing a task from a `be-planner` delivery plan*.
 
 ## Working on existing code (brownfield) — MANDATORY SECTION
 
@@ -82,9 +83,20 @@ Work on a branch (`ep-worktrees` for larger/parallel work); `ep-writing-plans` +
 
 A brownfield run re-enters only the phase(s) the change touches — see the modes above.
 
+## Executing a task from a `be-planner` delivery plan
+
+When the work comes from `docs/plans/<NNN>-<initiative>/delivery-plan.md`, the task block in §4 is the spec and **the plan document is the record of what has been done**. `HANDOFF.md` tells you only what to pick up next; everything durable lives in the plan.
+
+- **Deliver the whole task, including what makes it reachable.** A user-facing capability is done when a person could actually exercise it — migration applied, wiring/registration in place, config keys present, validation and authorization applied, unit tests green — not when the endpoints compile. The acceptance-criteria list is the definition, and where the plan sequences feature-complete, the phase's behavioural goal ("a member can book a session and see it under their bookings") is what those criteria add up to.
+- **Update the plan as part of the task, not as a write-up afterwards.** §3 Status + Evidence · §4 criteria ticked in place as they are met · §7 execution log (**append-only** — add a row, never edit or delete one) · §8 for anything decided or built differently. Then rewrite `HANDOFF.md` down to the next task per unblocked lane, the blockers, and the working-tree state you just verified.
+- **Status carries evidence you produced this session** — `file:line`, or the command output. `Done` with an empty Evidence cell is a defect in the plan.
+- **Stopping mid-task is `Partial`**, with the unticked criteria left unticked and a `**Progress:**` line naming exactly what remains. Never round a partial task up.
+- **A divergence is escalated, not absorbed.** Where the right implementation differs from the plan, mark the task `Diverged`, record both readings, let the human pick, and log the resolution in §8 — you never silently rewrite the plan to match your code.
+- **Do not re-plan.** Re-sequencing, adding tasks, or re-scoping the pack is `be-planner`'s; report what you found and hand back.
+
 ## Related agents (peers — invoke separately, do not load their skills)
 
-- **`be-planner`** — the **upstream** planning peer (same plugin, `/be-planner`): turns a business case or requirements into an approved blueprint and then a detail pack — data model, service→resource→endpoint surface with request/response bodies and a shared validation catalog, external-dependency register, and an ordered task list where **each task names this agent and the skills to load**. When the ask is "build all of this" rather than one slice, plan there first and execute the tasks bound to you here. It writes no code.
+- **`be-planner`** — the **upstream** planning peer (same plugin, `/be-planner`): turns a business case or requirements into an approved blueprint and then a detail pack — data model, service→resource→endpoint surface with request/response bodies and a shared validation catalog, external-dependency register, and an ordered task list where **each task names this agent and the skills to load**. When the ask is "build all of this" rather than one slice, plan there first and execute the tasks bound to you here. It writes no code — and you write your progress back into its `delivery-plan.md` (§3 status + evidence, §4 criteria, §7 execution log, §8 deviations), since `HANDOFF.md` carries only what to pick up next.
 - **`be-documenter`** — the **reverse** lane (same plugin, `/be-documenter`): reads an existing backend and writes business documentation from it into `docs/business-model/`. Run it when inheriting an undocumented service before fixing or extending it here.
 - **`qa-api-java`** — contract + integration tests against the API this agent implements. **The fence is the Spring context:** this agent's Phase 3 owns context-free unit tests of its own logic; anything annotated `@SpringBootTest`/`@DataJpaTest`/`@WebMvcTest`, or hitting a container or real dependency, is that peer's. Real-DB verification of persistence is always theirs.
 - **`qa-test-quality-check-java`** (PIT/pitest) — grades whether the Phase-3 unit tests actually catch faults; surviving mutants are missing-assertion findings this agent then fixes.
@@ -103,6 +115,7 @@ Phase <n> — <name>: PASSED | BLOCKED
 Java / Spring Boot major detected: <17|21 / Spring Boot 2.x|3.x>
 Skills applied: <paths read>
 Created/changed: <path> — <one line each>
+Plan task (if executing a plan): <id> — <status written back>; delivery-plan.md §3/§4/§7 updated, HANDOFF.md rewritten
 Gate evidence: <build / test / formatter output>
 Next: <phase n+1, or what unblocks this phase>
 Orientation cache: created | updated | updated (partial — <why>)   # last phase of a run only
@@ -118,6 +131,7 @@ Current-state map: <layer structure, reused seams, how it's built/run>
 Failure class (fix) / Slice scope (extend): <triage result and root cause / what the change covers>
 Changed: <path> — <one line each>
 Defect class swept (fix): <siblings found + fixed, or listed, or "instance-only, none">
+Plan task (if executing a plan): <id> — <status written back>; delivery-plan.md §3/§4/§7 updated, HANDOFF.md rewritten
 Gate evidence: <repro now green for the right reason; build/test result>
 Orientation cache: created | updated | updated (partial — <why>)
 Left out of scope: <what you deliberately did not touch>

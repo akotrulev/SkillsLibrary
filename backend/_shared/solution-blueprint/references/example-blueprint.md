@@ -19,11 +19,13 @@ The studio schedules recurring workshops (pottery, life drawing) and currently t
 
 ## 2. Functional areas
 
-| Area | Purpose | Primary actors | Key entities | In scope | Out of scope | Depends on |
-|---|---|---|---|---|---|---|
-| Identity & access | Who can sign in and what they may do | Member, Staff | Member profile | Login via IdP, member/staff roles | Self-service registration approval flows | Auth0 |
-| Scheduling | Staff define workshops and their sessions | Staff | Workshop, Session | Create/publish/archive workshops; schedule sessions with capacity | Recurring-session templates (phase 2) | Identity |
-| Booking | Members book and cancel seats | Member, Staff | Booking | Book a seat, cancel within policy, staff view attendance | Payments, waitlists | Scheduling, Identity |
+| Area | Purpose | User-facing capabilities | Primary actors | Key entities | In scope | Out of scope | Depends on |
+|---|---|---|---|---|---|---|---|
+| Identity & access | Who can sign in and what they may do | A member signs in and sees who they are | Member, Staff | Member profile | Login via IdP, member/staff roles | Self-service registration approval flows | Auth0 |
+| Scheduling | Staff define workshops and their sessions | An admin publishes a workshop and adds sessions to it · anyone browses the published schedule | Staff | Workshop, Session | Create/publish/archive workshops; schedule sessions with capacity | Recurring-session templates (phase 2) | Identity |
+| Booking | Members book and cancel seats | A member books a session and sees it under their bookings · a member cancels a booking · staff mark attendance | Member, Staff | Booking | Book a seat, cancel within policy, staff view attendance | Payments, waitlists | Scheduling, Identity |
+
+Each capability above becomes one phase in `delivery-plan.md`, closing when a person can actually do it.
 
 **Explicitly not in this initiative:** payments (sessions are included in membership — confirmed by owner), waitlists, and any member-facing mobile app.
 
