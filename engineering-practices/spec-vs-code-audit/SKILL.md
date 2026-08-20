@@ -5,7 +5,7 @@ description: Use when a written spec — or a pile of user stories / ACs / ticke
 
 # Spec-Compliance Audit
 
-Verify a written specification — or a set of user stories that collectively *are* the specification — against the code that claims to implement it. The output is a **per-requirement verdict with cited evidence**, not an opinion: every requirement gets exactly one verdict, every verdict gets a `file:line` trail, and every gap becomes a severity-tabled finding someone can act on.
+Verify a written specification — or a set of user stories that collectively *are* the specification — against the code that claims to implement it. The output is a **per-requirement verdict with cited evidence**, not an opinion: every requirement gets exactly one verdict, every verdict gets a `file:line` trail, and every gap becomes a severity-tabled finding — classed **data issue / code issue / logical conflict** — that someone can act on.
 
 This is **read-only analysis** on product code. It never fixes anything — it points to the fix and names who applies it (the stack's `be-*`/`fe-*` agent, or the spec's owner when the spec is what's wrong). The only files it writes are its own artifacts: the requirement register and the audit reports.
 
@@ -166,6 +166,16 @@ Also record **checked-but-adjacent observations** sparingly: behavior the code h
 
 Keep signal high: cap detailed findings at ~30; aggregate the remainder in one overflow line per family.
 
+**Class every finding.** Class is orthogonal to severity: severity says how much it hurts, class says *what kind of wrong it is* and therefore *who can act*. Exactly one class per finding, and the report's Findings section is split into the three, in this order:
+
+| Class | The defect lives in… | Typical here | Unblocked by |
+|---|---|---|---|
+| **Data issue** | the data the code runs on, not the logic — the code would be right on correct data | a reference/lookup row or config value that disagrees with the spec (`VatRates.json` holds 19%, spec says 20%, the lookup code is fine); migration residue; stored state violating an invariant the spec assumes; an enum/column out of step with the schema | a data correction, migration, or config change — the data/platform owner |
+| **Code issue** | the logic itself — absent, incomplete, or wrong | `Missing` and `Partial` requirements; a missing validation/gate; an unhandled branch; a wrong computation; a trust assumption at a boundary | a code change — the owning `be-*`/`fe-*` agent |
+| **Logical conflict** | two things that cannot both hold, and which one wins is not the auditor's call | a `⚠️ CONFLICT` source pair; a `Divergent` verdict (code deliberately does something else); two code paths enforcing contradictory rules; the team's stated model vs what the code does | a **decision** by the spec/product owner first, then code or data — the Suggested-fix cell names the decision and its owner, never a side |
+
+When a bad row is *caused by* a bug that writes it, the finding is a **code issue** (root cause) with the data consequence noted in its row; if the already-written data needs correcting regardless of the code fix, that is a second, cross-referenced **data issue**. `Unverifiable` items are open questions, not findings, until something settles them.
+
 ### 4. Report (round 1)
 
 Organized **by register section**, each closed with a rollup — the same shape Mode B reuses, so a round-1 and a round-3 report read alike.
@@ -197,11 +207,24 @@ whether the section is safe to ship. Name the one thing to fix here first.>
 **Section summary —** …
 
 ## Findings
+<Every finding under exactly one class. All three headings always present — `None.` when
+a class is empty — so rounds compare class by class. Severity-ordered within each.>
+
+### Data issues
+| Severity | Location | Issue | Suggested fix |
+|----------|----------|-------|---------------|
+| major | A5 `VatRates.json:3` | Rate stored as 19%, spec says 20% — lookup code `PriceCalc.cs:61` is correct | Correct the rate entry; data owner |
+
+### Code issues
 | Severity | Location | Issue | Suggested fix |
 |----------|----------|-------|---------------|
 | blocker | A3 | Export requirement has no implementation | Implement or descope; owner decides |
 | major | A2 `OrderSaga.cs:77` | Timeout path skips notification | Add notify call on timeout branch |
-| major | B1/B2 conflict | Sources disagree: 30 min fixed vs 60 min sliding (code does `AuthConfig.cs:23` sliding 60) | Escalate to spec owner — do not pick a side |
+
+### Logical conflicts
+| Severity | Location | Issue | Suggested fix |
+|----------|----------|-------|---------------|
+| major | B1/B2 conflict | Sources disagree: 30 min fixed vs 60 min sliding (code does `AuthConfig.cs:23` sliding 60) | Spec owner decides — do not pick a side |
 
 ## Out of audit scope
 <non-buildable outcomes, with why>
@@ -246,7 +269,7 @@ Every item carries its status **as a prefix**, so the report is scannable withou
 | **Still open (regressed)** | Was `Met` at round N−1, is not now. Always a finding, severity at least `major` |
 | **New** | Added to the register this round (§1), verdicted for the first time |
 
-`Divergent` and `Unverifiable` are **Still open** — a divergence nobody has decided is not resolved, and an unverifiable requirement stays unverifiable until the spec gets a number or execution is opted into. Never mark an item Resolved on `#inferred` evidence alone.
+`Divergent` and `Unverifiable` are **Still open** — a divergence nobody has decided is not resolved, and an unverifiable requirement stays unverifiable until the spec gets a number or execution is opted into. Never mark an item Resolved on `#inferred` evidence alone. A **logical conflict** finding is Resolved only when the owner's decision is recorded *and* the code or data now matches it — a decision alone, or a unilateral code change, is Still open. A finding keeps its class across rounds; if a re-trace shows it was misclassed, move it and say so in its row (`reclassed from data`).
 
 ### 4. Report (round N)
 
@@ -283,9 +306,20 @@ next action for this section. Never a row-by-row restatement.>
 **Section summary —** …
 
 ## Findings (open + new only)
+<Carry forward each still-open finding with its original ID, under its class; new findings
+continue the sequence. All three headings always present — `None.` when empty.>
+
+### Data issues
 | Severity | Location | Issue | Suggested fix |
 |----------|----------|-------|---------------|
-<Carry forward each still-open finding with its original ID; new findings continue the sequence.>
+
+### Code issues
+| Severity | Location | Issue | Suggested fix |
+|----------|----------|-------|---------------|
+
+### Logical conflicts
+| Severity | Location | Issue | Suggested fix |
+|----------|----------|-------|---------------|
 
 ## Closed this round
 <one line per resolved finding — ID, what closed it, cited. This is the credit half of
@@ -313,6 +347,7 @@ The rollup under each section is the deliverable stakeholders actually read. Rul
 - **Strictly read-only** on product code and the spec. The register and reports are the only files this skill writes. Offer a remediation plan; never apply it here.
 - The register is **append-only and never renumbered.** IDs are the contract that makes rounds comparable; breaking them silently invalidates every trend the reports claim.
 - Verdicts are per requirement; never a blended "mostly compliant" for the batch. Section summaries characterize, they don't verdict.
+- **Findings are listed under exactly one of three classes — Data issues / Code issues / Logical conflicts** — and all three headings appear in every round (`None.` when empty) so rounds compare class by class. Class is orthogonal to severity.
 - `Divergent` is never resolved by the auditor — deciding whether spec or code is right is a business call; the audit's job is to make the divergence undeniable. Same for a `⚠️ CONFLICT` pair from consolidation: both entries are verdicted, neither is dropped.
 - **Resolved is a claim you make only after re-reading the code this round.** No commit message, ticket status, or passing test earns it on its own.
 - A red build/test state discovered on arrival is a finding to report, not yours to fix.

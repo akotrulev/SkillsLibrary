@@ -1,11 +1,11 @@
 ---
 name: be-shared-plain-language-companion
-description: Use when a finished technical document needs a plain-language companion a non-technical reader can follow, saved beside the source as <name>-explained.md. A translation, never a second source of truth. Triggers "explain this plan in plain English", "write a version the business can read". Do NOT use to author the technical document (`be-shared-business-documentation`, `be-shared-solution-blueprint`) or write requirements (`requirements-author`).
+description: Use when a finished technical document needs a plain-language companion a non-technical reader can follow, saved beside the source as <name>-explained.md. A translation, never a second source of truth. Triggers "explain this plan in plain English", "write a version the business can read". Do NOT use to author the technical document (`be-shared-solution-blueprint` and the other planning skills), to write requirements (`requirements-author`), or on `be-documenter` / `be-feature-documenter` documents — those are already written in the plain, example-first shape and get no companion.
 ---
 
 # Plain-Language Companion — the same document, for someone who doesn't build software
 
-Every artifact in the backend planning and documentation lanes is written for two audiences that read very differently: the agent or engineer who will act on it, and the person who owns the business it describes. Writing one document for both makes it worse for both — precision gets sanded off for readability, and readability gets sacrificed for precision.
+Every artifact in the backend planning lane is written for two audiences that read very differently: the agent or engineer who will act on it, and the person who owns the business it describes. Writing one document for both makes it worse for both — precision gets sanded off for readability, and readability gets sacrificed for precision.
 
 So the technical document stays exactly as precise as it is, and this skill produces a **companion** beside it: same scope, same facts, plainer words, and — the part that carries the weight — **worked examples with real names and numbers**.
 
@@ -20,7 +20,6 @@ Two disciplines are the whole skill:
 
 ## When to use
 
-- Phase 6 of a `be-documenter` run — after the area documents and system overview are consolidated
 - Phase 6 of a `be-planner` run — after the five plan artifacts are written and self-reviewed
 - A stakeholder, product owner, support lead or client sponsor needs to review or sign off on work described in an existing technical artifact
 - A source document changed and its companion needs regenerating
@@ -31,18 +30,11 @@ Two disciplines are the whole skill:
 - The reader is an engineer or an implementing agent → they read the source. A companion is not a shortcut for them, and pointing them at one costs precision
 - The ask is really "the technical document is too dense" → that is a defect in the source, not a case for a companion. Route it back to the owning skill
 - The ask is for new requirements, a proposal, or a summary that draws conclusions → `requirements-author` / `ba-scoping-writeup`. A companion concludes nothing
+- The source is a `be-documenter` area document or a `be-feature-documenter` feature document → **no companion.** Those are written in the plain, example-first shape by design (`be-shared-business-documentation`: overview · setup · how it works · worked example · open questions, with the evidence in a closing table); a companion would be a second copy
 
 ## Naming convention — one companion per source, sitting beside it
 
 The companion always takes the source's own filename plus **`-explained`**, in the source's own directory. That is the whole convention: adjacent, self-describing, sorts next to what it explains, and makes a missing companion visible at a glance in a directory listing.
-
-**`be-documenter` lane** — inside `docs/business-model/`:
-
-| Source | Companion |
-|---|---|
-| `areas/ordering.md` | `areas/ordering-explained.md` |
-| `areas/billing.md` | `areas/billing-explained.md` |
-| `system-overview.md` | `system-overview-explained.md` |
 
 **`be-planner` lane** — inside `docs/plans/<NNN>-<initiative>/`:
 
@@ -57,9 +49,8 @@ The companion always takes the source's own filename plus **`-explained`**, in t
 Rules that come with the convention:
 
 - **One companion per source file, never a merged one.** A single "everything explained" document loses the ability to say *this* companion is stale because *that* source moved.
-- **`HANDOFF.md`, `INDEX.md`, `active-context.md` and `references/` get no companion.** They are working files for whoever is executing, not documents anyone signs off on. **`glossary.md` and `interaction-map.md` get none either** — the glossary is already the plain-language layer, and the interaction map is `business-analyst`'s working record.
-- **`flows/`, `entities/` and `decisions/` get no companion either.** They are diagrams and grids already; a companion links to them and explains what they show, in the companion of the area or plan artifact that references them.
-- **Index the companion in the documentation lane** — a line in `docs/business-model/INDEX.md` beside the source's own line; an unlinked companion is one nobody knows exists. The planning lane has no index file: there the `-explained` name sitting beside its source in the initiative folder *is* the discoverability, and nothing further is required.
+- **`HANDOFF.md` and `references/` get no companion.** They are working files for whoever is executing, not documents anyone signs off on.
+- **No index is needed** — the `-explained` name sitting beside its source in the initiative folder *is* the discoverability.
 
 ## The mandatory header
 
@@ -120,25 +111,12 @@ A worked example that lands:
 
 The rule (30 days, from delivery) is the source's. Maria, the lamp and the dates are the companion's.
 
-## Tiering, in the documentation lane
-
-`be-documenter`'s source documents tier every statement as `#observed` or `#inferred`. The companion **does not carry the tags** — a business reader does not need the grammar — but it absolutely carries the **distinction**, in words:
-
-| Source | Companion |
-|---|---|
-| "Refunds are only possible within 30 days of delivery `#observed` `RefundService.cs:88`" | "Today the system only allows a refund within 30 days of delivery." |
-| "The 30-day window most likely tracks the card scheme's chargeback period `#inferred`" | "**We don't know why it's 30 days.** It may match the card companies' own dispute window, but nothing in the system says so — this is one of the open questions below." |
-
-Never flatten an `#inferred` line into a flat statement of fact. It is the exact failure the tiering exists to prevent, and it is easier to commit in plain prose than in a tagged table. **`#inferred` items always read as uncertainty in the companion, and the open questions get their own section**, phrased as questions the reader can actually answer.
-
 ## Per-artifact focus
 
 Each companion answers one question, and stops. Depth belongs to the source.
 
 | Companion | The question it answers | Keep out |
 |---|---|---|
-| `system-overview-explained.md` | What is this system for, who uses it, and what can they do end to end? | The area table — link it |
-| `areas/<area>-explained.md` | What can you do in this part of the system, what are the rules, and what happens when it goes wrong? | Evidence citations, per-rule tables |
 | `blueprint-explained.md` | What are we building, in what pieces, and what did we decide and why? | Pattern rationale, the routing map, non-functional numbers |
 | `data-model-explained.md` | What information does the system keep, and what does each thing mean in business terms? | Columns, keys, indexes, migration mechanics |
 | `api-surface-explained.md` | What can be asked of the system, by whom, and what comes back? | Field tables, status codes, the validation catalog |
@@ -177,18 +155,14 @@ The companion is **generated wholesale from its source, every time the source ch
 2. The header block is present and complete on each — precedence, provenance, and the made-up-examples line.
 3. **No new facts.** Read each companion against its source and confirm every rule, number, threshold, dependency and deliverable traces to a source statement. This is the check that matters; do it deliberately, not by feel.
 4. Every number used as a *rule* matches the source exactly. Nothing is rounded, simplified, or "about".
-5. Every `#inferred` item from a documentation source reads as uncertainty, not as fact; every open question survived into the companion.
-6. No banned vocabulary — grep for status codes, class-name casing, file extensions, task ids.
-7. Each companion has at least one worked example, and every example is labelled and uses the running cast.
-8. Each has a "what this doesn't cover" pointer back to the source.
-9. Failure behavior and blockers survived the translation. They are the first thing lost and the most asked about.
-10. The companion is indexed wherever the source is indexed.
+5. No banned vocabulary — grep for status codes, class-name casing, file extensions, task ids.
+6. Each companion has at least one worked example, and every example is labelled and uses the running cast.
+7. Each has a "what this doesn't cover" pointer back to the source.
+8. Failure behavior and blockers survived the translation. They are the first thing lost and the most asked about.
 
 ## Handoffs
 
-- **→ the source's owning skill** (`be-shared-business-documentation`, `be-shared-solution-blueprint`, `be-shared-data-model-plan`, `be-shared-api-surface-plan`, `be-shared-integration-plan`, `be-shared-delivery-plan`) — anything the translation exposed as missing, contradictory or unclear in the source. Fix it there; the companion is never the place to correct the record.
-- **→ `business-analyst`** — a companion of an area document is what a stakeholder reads before a conflict sweep, and the open questions in it are its input.
-- **→ `requirements-author`** — once the business answers the open questions a documentation companion surfaces, those answers become epics and stories.
+- **→ the source's owning skill** (`be-shared-solution-blueprint`, `be-shared-data-model-plan`, `be-shared-api-surface-plan`, `be-shared-integration-plan`, `be-shared-delivery-plan`) — anything the translation exposed as missing, contradictory or unclear in the source. Fix it there; the companion is never the place to correct the record.
 - **→ `design/ux-writing`** — for microcopy that ends up in the product itself. This skill explains documents; that one writes what users read on screen.
 
 ## Version policy

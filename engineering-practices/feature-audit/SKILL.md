@@ -5,7 +5,7 @@ description: Use when ONE feature or area of an existing codebase must be traced
 
 # Feature Audit
 
-Audit a named feature or area of an existing codebase and produce **one report that makes the feature legible**: what it actually does (not what it's named), every validation and gate it enforces, how it integrates with the rest of the system — and where it's wrong, fragile, or relying on an assumption, as prioritized findings with evidence.
+Audit a named feature or area of an existing codebase and produce **one report that makes the feature legible**: what it actually does (not what it's named), every validation and gate it enforces, how it integrates with the rest of the system — and where it's wrong, fragile, or relying on an assumption, as prioritized findings with evidence, each classed **data issue / code issue / logical conflict**.
 
 This is **read-only analysis** on product code. The audit points; owners fix. The only files it writes are its own reports.
 
@@ -100,7 +100,18 @@ Each finding is one row of the priority table plus a short section containing, i
 1. **Mechanism** — *why* the code behaves this way, cited (`file:line`), not just that it does
 2. **Concrete failure scenario / impact band** — inputs or state → wrong outcome; when the defect only bites in a window, say which ("impact band ≈ 00:00–05:00 UTC")
 3. **Severity** — the library's standard table (blocker / major / minor / nit); qualifiers like "(UX)", "(conditional)", "(spec check)", "(design)" are welcome after the severity
-4. **Suggested fix direction** — one line pointing where; never the applied fix
+4. **Class** — data issue / code issue / logical conflict, one per finding (table below)
+5. **Suggested fix direction** — one line pointing where; never the applied fix
+
+**Class every finding.** Class is orthogonal to severity and to defect family: severity says how much it hurts, the family groups by shared cause, the class says *what kind of wrong it is* and therefore *who can act*. Exactly one class per finding; the Priority table is split into the three, in this order (keep the definitions aligned with `ep-spec-vs-code-audit`):
+
+| Class | The defect lives in… | Typical here | Unblocked by |
+|---|---|---|---|
+| **Data issue** | the data the code runs on, not the logic — the code would be right on correct data | wrong seed/reference/lookup rows; a stale or wrong config value; migration residue; stored state violating an invariant the code assumes; an enum/column out of step with the schema | a data correction, migration, or config change — the data/platform owner |
+| **Code issue** | the logic itself — absent, incomplete, or wrong | a missing validation or gate; an unhandled error path; a wrong computation; inbound data trusted without normalization; a concurrency window | a code change — the owning `be-*`/`fe-*` agent |
+| **Logical conflict** | two things that cannot both hold, and which one wins is not the auditor's call | two code paths enforcing contradictory rules (one normalizes to UTC, another assumes local); a gate that contradicts another gate; the team's stated model vs what the code does; naming/docs vs behavior where it is genuinely unclear which was intended | a **decision** by the product/spec owner first, then code or data — the fix direction names the decision and its owner, never a side |
+
+When a bad row is *caused by* a bug that writes it, the finding is a **code issue** (root cause) with the data consequence noted; if the already-written data needs correcting regardless of the code fix, that is a second, cross-referenced **data issue**. One family can span all three classes — that is normal, and the split is what tells the fixer which part of the family they can close alone.
 
 Also record what's **correct-but-dependent**: a surface that is internally consistent but inherits another finding's defect is itself a (low-severity) finding — it tells the fixer the blast radius. And group findings into **defect families** in the summary (e.g. "UTC conflated with a local concept" vs "inbound data trusted without normalization") — families reveal the systemic cause individual findings hide.
 
@@ -143,6 +154,18 @@ A1/A2 — those are above.>
 <who calls it / what it calls / events / shared data — with the trust assumption at each boundary>
 
 ## Priority table
+<Every finding under exactly one class. All three headings always present — `None.` when a
+class is empty — so rounds compare class by class. Severity-ordered within each.>
+
+### Data issues
+| # | Finding | Severity | File |
+|---|---------|----------|------|
+
+### Code issues
+| # | Finding | Severity | File |
+|---|---------|----------|------|
+
+### Logical conflicts
 | # | Finding | Severity | File |
 |---|---------|----------|------|
 
@@ -155,7 +178,7 @@ isolated high): 1. <finding> — why first. Items needing a product decision bef
 code changes say so explicitly.>
 ```
 
-Scale to the ask: a narrow driving question over one surface can drop the inventory tables into prose; a multi-surface audit keeps all sections. Never drop the Summary, surface summaries, Priority table, or Recommended sequencing.
+Scale to the ask: a narrow driving question over one surface can drop the inventory tables into prose; a multi-surface audit keeps all sections. Never drop the Summary, surface summaries, Priority table (with its three class headings), or Recommended sequencing.
 
 ## Procedure — Mode B (re-audit)
 
@@ -187,7 +210,7 @@ Every finding carries its status **as a prefix**, so the report is scannable wit
 | **Still open (regressed)** | Was resolved in an earlier round, is back. Always at least `major`, and always names what reintroduced it |
 | **New** | Found this round — a family sibling, or a defect introduced since round N−1 |
 
-Never mark Resolved on `#inferred` evidence, and never on a **correct-but-dependent** finding whose parent is still open — the blast radius hasn't shrunk just because the dependent site looks fine.
+Never mark Resolved on `#inferred` evidence, and never on a **correct-but-dependent** finding whose parent is still open — the blast radius hasn't shrunk just because the dependent site looks fine. A **logical conflict** is Resolved only when the owner's decision is recorded *and* the code or data now matches it — a decision alone, or a unilateral code change, is Still open. A finding keeps its class across rounds; if a re-trace shows it was misclassed, move it and say so in its row (`reclassed from data`).
 
 ### 4. Report (round N)
 
@@ -239,6 +262,15 @@ the findings above.>
 <Deltas only — new boundaries, changed trust assumptions.>
 
 ## Priority table (open + new only)
+<Same three class headings as round 1, always present — `None.` when empty.>
+
+### Data issues
+| # | Finding | Severity | File | Status |
+
+### Code issues
+| # | Finding | Severity | File | Status |
+
+### Logical conflicts
 | # | Finding | Severity | File | Status |
 
 ## Closed this round
@@ -268,6 +300,7 @@ The rollup under each surface is the deliverable stakeholders actually read. Rul
 - **Surface letters and finding IDs are permanent across rounds** — continue the sequence, never renumber or reuse. They are the contract that makes the trend claims real.
 - **Resolved is a claim you make only after re-reading the code this round.** No commit message, ticket status, or passing test earns it on its own.
 - Every finding answers the driving question or is explicitly marked adjacent.
+- **Findings are listed under exactly one of three classes — Data issues / Code issues / Logical conflicts** — and all three headings appear in every round (`None.` when empty) so rounds compare class by class. Class is orthogonal to severity and to defect family.
 - Unknowns are legitimate: what you couldn't settle goes in *Open questions*, never silently guessed (an audit that admits its limits is trusted; one that doesn't is checked).
 - A red build/test state on arrival is a finding, not yours to fix.
 - Sequencing is by leverage, not severity — say why each item is where it is.

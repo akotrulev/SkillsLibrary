@@ -645,7 +645,6 @@
         "./backend/_shared/codebase-survey",
         "./backend/_shared/feature-trace",
         "./backend/_shared/business-documentation",
-        "./backend/_shared/plain-language-companion",
         "./qa/manual/requirements-breakdown",
         "./engineering-practices/agent-orientation-cache",
         "./engineering-practices/code-comments"

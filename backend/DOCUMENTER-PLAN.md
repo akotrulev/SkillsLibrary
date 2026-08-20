@@ -119,3 +119,7 @@ backend/_shared/
 - [x] Agent template-compliant; both output contracts present.
 - [x] The `ep-feature-audit` fence is stated in the agent **and** in the two skills most likely to be confused with it.
 - [x] No placeholders; every template is fillable without invention.
+
+### Shape revision (2026-08-20)
+- [x] Area documents (`be-documenter`) and feature documents (`be-feature-documenter`) switched to the **simple spec shape**: overview (with one governing *Important:* line) · scope & boundaries · setup parameters with layered precedence and validations · how it works as one flow per trigger (numbered steps, plain-text formulas with `Where:`, the result for the user) · **a full worked example with real numbers, arithmetic recomputed** · who can do what · open questions · a closing evidence table. Tier tags and `file:line` moved out of the prose into that table; optional sections are dropped, never padded. Golden example rewritten (`business-documentation/references/example-area.md`, AREA-004 session credits & charges).
+- [x] The `-explained.md` companion **dropped from the documenter lane** — the document itself is now the plain, example-first one, so a companion would be a second copy. `be-shared-plain-language-companion` stays for `be-planner` only; `ba-project-memory` layout, the catalog and README updated to match.
