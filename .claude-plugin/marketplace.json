@@ -7,7 +7,7 @@
   },
   "metadata": {
     "description": "Stack-first skills library covering QA, frontend, backend, data, and business-analysis: install one self-contained plugin per tech stack. `qa-{java,dotnet,typescript}` bundle every QA discipline — API/UI/mobile/performance/LLM/BDD authoring and verification, manual-QA process, CI/CD, reporting, and OWASP-mapped security. `fe-{blazor,react}` are phased frontend dev-stack agents (scaffold → architecture → features → quality → tests → review). `be-{dotnet,java,node}` are phased backend dev-stack agents for design-pattern application, ORM persistence, and Auth0/Cognito service-side auth. `devops` ships the platform lane — container images, IaC, cloud deploys, and build/deploy pipelines. `data` and `business-analysis` round out the database-engineering and cross-feature requirements domains.",
-    "version": "2.23.0"
+    "version": "2.27.0"
   },
   "plugins": [
     {
@@ -43,6 +43,8 @@
         "./qa/_shared/security-testing/exploit-validation",
         "./qa/_shared/security-testing/vuln-reachability",
         "./qa/_shared/security-testing/client-side-security",
+        "./qa/_shared/security-testing/mobile-app-scan",
+        "./qa/_shared/security-testing/mobile-runtime-testing",
         "./qa/_shared/python-web-testing",
         "./qa/cicd/ci-conventions",
         "./qa/cicd/java/skills/ci-pipelines",
@@ -196,6 +198,8 @@
         "./qa/_shared/security-testing/exploit-validation",
         "./qa/_shared/security-testing/vuln-reachability",
         "./qa/_shared/security-testing/client-side-security",
+        "./qa/_shared/security-testing/mobile-app-scan",
+        "./qa/_shared/security-testing/mobile-runtime-testing",
         "./qa/_shared/python-web-testing",
         "./qa/cicd/ci-conventions",
         "./qa/cicd/dotnet/skills/ci-pipelines",
@@ -355,6 +359,8 @@
         "./qa/_shared/security-testing/exploit-validation",
         "./qa/_shared/security-testing/vuln-reachability",
         "./qa/_shared/security-testing/client-side-security",
+        "./qa/_shared/security-testing/mobile-app-scan",
+        "./qa/_shared/security-testing/mobile-runtime-testing",
         "./qa/_shared/python-web-testing",
         "./qa/cicd/ci-conventions",
         "./qa/cicd/typescript/skills/ci-pipelines",
@@ -1104,7 +1110,7 @@
     },
     {
       "name": "penetration-testing",
-      "description": "Self-contained offensive-security plugin — the full, authorization-gated penetration-testing kill chain the defensive lanes hand off to. Two agents: penetration-tester runs a live kill chain against owned/lab infrastructure (recon → exploitation into a foothold → privilege escalation → lateral movement → post-exploitation capped at proof → report), and security-test-planner (the entry point to the whole security domain) discovers a platform's attack surface, blocks for a scope + authorization sign-off, and emits a phased, independently-executable assessment plan that binds each phase to the exact lane agent (infra-security-tester, qa-security, penetration-tester, …) that runs it. Seven language-agnostic kill-chain skills — recon-enumeration (amass/subfinder/httpx/nmap/masscan/Shodan), initial-access (Metasploit/sqlmap), privilege-escalation (linPEAS/winPEAS/GTFOBins), lateral-movement (NetExec/impacket/BloodHound CE/ligolo-ng/kube pivots), credential-attacks (hashcat/hydra/Responder/secrets harvesting), post-exploitation (Sliver/Mythic C2, persistence demo-then-remove), pentest-reporting (CVSS + MITRE ATT&CK Enterprise) — each opening with the load-bearing safety gate: a committed engagement scope file, a #volatile expiring authorization line, owned-infra-only, production as a separate louder sign-off, per-act opt-in for destructive acts, loot redaction, a full action log, cleanup verification, and a defined mid-run abort. Never fixes (the be-*/fe-*/devops-engineer agents do); no DoS ever. Bundles the two always-on ep-* skills.",
+      "description": "Self-contained offensive-security plugin — the full, authorization-gated penetration-testing kill chain the defensive lanes hand off to. Two agents: penetration-tester runs a live kill chain against owned/lab infrastructure (recon → exploitation into a foothold → privilege escalation → lateral movement → post-exploitation capped at proof → report), and security-test-planner (the entry point to the whole security domain) discovers a platform's attack surface, blocks for a scope + authorization sign-off, and emits a phased, independently-executable assessment plan that binds each phase to the exact lane agent (infra-security-tester, qa-security, penetration-tester, …) that runs it. Seven language-agnostic kill-chain skills — recon-enumeration (amass/subfinder/httpx/nmap/masscan/Shodan), initial-access (Metasploit/sqlmap), privilege-escalation (linPEAS/winPEAS/GTFOBins), lateral-movement (NetExec/impacket/BloodHound CE/ligolo-ng/kube pivots), credential-attacks (hashcat/hydra/Responder/secrets harvesting), post-exploitation (Sliver/Mythic C2, persistence demo-then-remove), pentest-reporting (CVSS + MITRE ATT&CK Enterprise) — each opening with the load-bearing safety gate: a committed engagement scope file, a #volatile expiring authorization line, owned-infra-only, production as a separate louder sign-off, per-act opt-in for destructive acts, loot redaction, a full action log, cleanup verification, and a defined mid-run abort. Never fixes (the be-*/fe-*/devops-engineer agents do); no DoS ever. A third agent, purple-team-engineer (the purple bridge), runs authorization-gated continuous validation: it detonates known MITRE ATT&CK techniques against an authorized lab/owned environment (red — atomic-simulation: Atomic Red Team/invoke-atomicredteam · Apache Caldera · Stratus Red Team for cloud) and then asserts the SIEM/guardrail/alert actually fired (blue — detection-validation: query the log/alert store, gated on a telemetry backend being present), scoring each technique detected/not-detected (not CVSS) and catching security drift round over round; it closes the author→validate→roll-up loop with security-governance's detection-engineering (authors the rule) and security-architect (rolls up validated coverage). Bundles the two always-on ep-* skills.",
       "source": "./",
       "strict": false,
       "author": {
@@ -1116,6 +1122,7 @@
         "security",
         "penetration-testing",
         "red-team",
+        "purple-team",
         "offensive-security",
         "mitre-attack",
         "kill-chain"
@@ -1129,16 +1136,57 @@
         "./security/credential-attacks",
         "./security/post-exploitation",
         "./security/pentest-reporting",
+        "./security/atomic-simulation",
+        "./security/detection-validation",
         "./engineering-practices/agent-orientation-cache",
         "./engineering-practices/code-comments"
       ],
       "commands": [
         "./security/commands/penetration-tester.md",
-        "./security/commands/security-test-planner.md"
+        "./security/commands/security-test-planner.md",
+        "./security/commands/purple-team-engineer.md"
       ],
       "agents": [
         "./security/agents/penetration-tester.md",
-        "./security/agents/security-test-planner.md"
+        "./security/agents/security-test-planner.md",
+        "./security/agents/purple-team-engineer.md"
+      ]
+    },
+    {
+      "name": "security-governance",
+      "description": "Self-contained defensive & governance security plugin — the blue-team and CISO-altitude counterpart to the offensive penetration-testing lane. One agent: security-architect rolls every security lane's findings (infra-security-tester, qa-security, penetration-tester, purple-team-engineer, the conformance auditors) into ONE risk & posture picture — a normalized risk register, a MITRE ATT&CK coverage map, a compliance evidence register with gaps, and a leverage-ordered remediation roadmap framed for an increasing-threat environment (spines: NIST CSF 2.0 + ATT&CK). Four language-agnostic defensive/governance skills, agent-reached (no commands): detection-engineering (Sigma rules / alert-as-code, unit-tested against true+benign log samples, ATT&CK-mapped — the standing blue counterpart to purple-team validation), security-hardening (strict nonce CSP, the OWASP secure-headers set, OWASP CRS WAF rules on Coraza/ModSecurity — the authoring half of the fe-* / client-side-security handshake), secrets-hardening (two-slot rotation runbooks + secret-store wiring via Vault/ESO/SOPS/cloud managers — the defensive complement to secrets-scan), and compliance-evidence-mapping (map controls/tests to SOC 2 / PCI DSS 4.0.1 / ISO 27001:2022 / GDPR, bridged by ASVS 5.0, via the SCF/OSCAL crosswalk). Consumes findings and authors governance artifacts; never runs a scan or exploit and never fixes application code (routes to be-*/fe-*/devops-engineer). The planner runs before to sequence the lanes; this runs after to roll them up. Also ships the plugin's own conformance self-audit — /security-governance-audit sweeps a repo's detections, CSP/header/WAF policy, secret-store wiring and rotation runbooks, and compliance evidence register against these skills' rules, read-only, into a re-runnable report in docs/audits/ (a control never adopted is a coverage note, never a finding). Bundles ep-standards-audit-engine and the two always-on ep-* skills.",
+      "source": "./",
+      "strict": false,
+      "author": {
+        "name": "Aleksandar Kotrulev",
+        "email": "alexandur.kotrulev@gmail.com"
+      },
+      "license": "MIT",
+      "keywords": [
+        "security",
+        "blue-team",
+        "detection-engineering",
+        "security-hardening",
+        "compliance",
+        "governance"
+      ],
+      "category": "development",
+      "skills": [
+        "./security/detection-engineering",
+        "./security/secrets-hardening",
+        "./security/security-hardening",
+        "./security/compliance-evidence-mapping",
+        "./security/standards-audit",
+        "./engineering-practices/standards-audit-engine",
+        "./engineering-practices/agent-orientation-cache",
+        "./engineering-practices/code-comments"
+      ],
+      "commands": [
+        "./security/commands/security-architect.md",
+        "./security/commands/security-governance-audit.md"
+      ],
+      "agents": [
+        "./security/agents/security-architect.md"
       ]
     },
     {

@@ -134,8 +134,8 @@ Every report opens with `**Date:** <YYYY-MM-DD>` · `**Tester:** \`penetration-t
 - **`security-test-planner`** — runs **before** you, sequencing which lanes assess a platform and binding this agent to the kill-chain phase; it consumes the same scope discipline. It never exploits; you never plan.
 - **`qa-security`** — the **application-layer** detect-and-prove lane. Its Phase-4b **validated single-vuln proof** (`exploit-validation`) is your exploitation **feedstock**: it proves *one* vuln fires and its blast radius, stopping there; you chain that proof into a **foothold and beyond**. The boundary is single-vuln-proof (theirs) vs foothold-and-kill-chain (yours).
 - **`infra-security-tester`** — authorized infra **posture** testing and bounded active probing (CIS benchmarks, kube-hunter, CSPM), mapped to ATT&CK **Cloud/Containers**. It probes to prove a surface is exposed; you exploit to prove the surface is *breachable and chainable*. Its findings scope your recon.
-- **`purple-team-engineer`** *(Stage 4, forthcoming)* — the blue counterpart: it runs ATT&CK techniques on a schedule and asserts detections fired. You share its ATT&CK mapping and authorization machinery; it validates whether your chain was *detected*.
-- **`security-architect`** *(Stage 5, forthcoming)* — rolls your findings, with every other lane's, into one CISO-altitude posture picture.
+- **`purple-team-engineer`** (`security/agents/purple-team-engineer.md`, same plugin) — the blue counterpart: it runs ATT&CK techniques on a schedule and asserts detections fired. You share its ATT&CK mapping and authorization machinery; it validates whether your chain was *detected*.
+- **`security-architect`** *(Stage 5, `security-governance` plugin)* — rolls your findings, with every other lane's, into one CISO-altitude posture picture.
 - **`be-*` / `fe-*` / `devops-engineer`** — apply the remediation for every finding; your report's remediation section is the handoff. You **retest** after they fix; you never edit code or infrastructure.
 
 ## The fence — what this is not
@@ -146,7 +146,7 @@ Every report opens with `**Date:** <YYYY-MM-DD>` · `**Tester:** \`penetration-t
 | Detecting + proving a *single* app vuln (no chaining) | **`qa-security`** (`exploit-validation` — the feedstock) |
 | Infra posture benchmarks + bounded active probing (ATT&CK Cloud/Containers) | **`infra-security-tester`** |
 | Planning / sequencing the assessment across lanes | **`security-test-planner`** |
-| Asserting a detection fired for a technique | **`purple-team-engineer`** (Stage 4) |
+| Asserting a detection fired for a technique | **`purple-team-engineer`** |
 | Rolling all lanes into a posture/risk picture | **`security-architect`** (Stage 5) |
 | LLM red-teaming | **`qa-llm-*`** (already shipped) |
 

@@ -34,12 +34,13 @@ The lanes live at `security/`, `devops/`, and `qa/` when working inside the Skil
 |---|---|---|
 | Infra posture — K8s, IaC, cloud, image, supply-chain, controls | `infra-security-tester` | `k8s-security` · `iac-security` · `cloud-posture` · `container-runtime-security` · `supply-chain-security` · `threat-modeling` · `infra-controls-validation` |
 | App-layer scanning + functional authz + exploit-validation + client-side | `qa-security` | the `_shared/security-testing/*` scanners · `permission-testing` · `exploit-validation` · `vuln-reachability` · `client-side-security` |
-| Mobile app security | `qa-security` (mobile phase) | `mobile-security` (MobSF / MASVS-MASTG) |
+| Mobile app security | `qa-security` (mobile phase) | `mobile-app-scan` · `mobile-runtime-testing` (MobSF / MASVS-MASTG) |
 | Full offensive kill chain | `penetration-tester` | `recon-enumeration` · `initial-access` · `privilege-escalation` · `lateral-movement` · `credential-attacks` · `post-exploitation` · `pentest-reporting` |
 | Purple-team continuous validation | `purple-team-engineer` | `atomic-simulation` · `detection-validation` |
 | Governance roll-up (runs *after* the assessment) | `security-architect` | `detection-engineering` · `security-hardening` · `secrets-hardening` · `compliance-evidence-mapping` |
 
 **Loaded when the input warrants it, not by default:**
+- `devops/threat-modeling` — as a **scoping aid** in Phases 0–1: STRIDE/DFD reasoning to decide which lanes a surface warrants and to sharpen the blueprint. Its output stays *advisory to the plan* — any threat content it surfaces is folded into the assessment-plan document, never written out as a standalone threat-register findings artifact (that is `infra-security-tester`'s Phase-0 job, and this agent writes plans, never findings).
 - `qa/manual/requirements-breakdown` — when the platform arrives as prose (a system description, a threat brief) that must be distilled into a sourced surface list before decomposition.
 - `engineering-practices/{writing-plans,verify-before-done}` — for the RE-PLAN reconcile.
 
@@ -59,7 +60,7 @@ The lanes live at `security/`, `devops/`, and `qa/` when working inside the Skil
 
 ## Phases
 
-**0 — Discover & orient.** Read the orientation cache; re-confirm `#volatile` authorization/live facts fresh. Map the platform's surface read-only: stack + version lane, cloud/K8s/IaC/CI presence, exposed HTTP/API entry points, background jobs and consumers, data sensitivity, existing security wiring (which scanners/gates already run, which lanes already have coverage). Classify the input shape — repo / running system / cloud account / prose description. Produce a **surface ledger**: every surface assigned to a candidate lane or explicitly parked.
+**0 — Discover & orient.** Read the orientation cache; re-confirm `#volatile` authorization/live facts fresh. Map the platform's surface read-only: stack + version lane, cloud/K8s/IaC/CI presence, exposed HTTP/API entry points, background jobs and consumers, data sensitivity, existing security wiring (which scanners/gates already run, which lanes already have coverage). Classify the input shape — repo / running system / cloud account / prose description. Where the surface is non-trivial, use `devops/threat-modeling` as a scoping aid to reason each surface onto a candidate lane (its output stays advisory to the plan, never a standalone findings artifact). Produce a **surface ledger**: every surface assigned to a candidate lane or explicitly parked.
 
 **1 — Scope & authorization blueprint *(blocking gate)*.** Present: which lanes apply to *this* platform and why (with `detected`/`stated`/`proposed` marks), the proposed phase set, and — for every offensive phase — its **scope + authorization requirement** (target, authorizer, expiry, lab-vs-prod). Ask the open questions (2–4 options each). **Block** on sign-off. Nothing offensive is planned against an unapproved scope; no artifact is written before approval.
 
