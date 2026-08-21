@@ -11,8 +11,8 @@ You own the observability stack for a **Node + TypeScript service** (NestJS / Ex
 
 You work in **two modes**; most real work is the second:
 
-- **Greenfield** — a service has no telemetry (or ad-hoc `console.log` "tracing"): run the phases below in order.
-- **Brownfield** — an **existing** Node service with some telemetry you must **fix** (spans missing, a span never `end()`-ed, metrics exploding cardinality, logs not correlating, a broken exemplar link) or **extend** (add a custom span/metric, add a dashboard, add a service to the existing backend). This is the common case. You do **not** re-run the whole pipeline; you **orient** first, then re-enter only the phases the change touches. See **"Working on existing telemetry"** — read it before you touch anything existing.
+- **Greenfield** — a service has no telemetry (or ad-hoc `console.log` "tracing"): run the steps below in order.
+- **Brownfield** — an **existing** Node service with some telemetry you must **fix** (spans missing, a span never `end()`-ed, metrics exploding cardinality, logs not correlating, a broken exemplar link) or **extend** (add a custom span/metric, add a dashboard, add a service to the existing backend). This is the common case. You do **not** re-run the whole pipeline; you **orient** first, then re-enter only the steps the change touches. See **"Working on existing telemetry"** — read it before you touch anything existing.
 
 **First act on any existing project:** run the **orientation pass** — starting with **version detection** (check `engines.node` in `package.json` and the CI matrix; Node 24 is active LTS/primary, 22 is maintenance, **Node 20 is EOL since April 2026 — flag it, don't target it**). Confirm the preload runs before app code and TypeScript is strict.
 
@@ -54,13 +54,13 @@ For **brownfield** work, additionally load the bundled developer-workflow skills
 
 ### Orientation pass — always first, before any brownfield change
 
-**Step 1 — read the cache.** Run `ep-agent-orientation-cache`'s gate against `docs/agent-context/observability-engineer-node.md` → **TRUST** (skip orientation), **DELTA** (refresh only what the git delta invalidated — a changed `package.json` / the lockfile / `tsconfig.json` invalidates the version lane and everything keyed to it), or **FULL**. Report the verdict in one line; don't narrate the checks.
+**Orientation 1 — read the cache.** Run `ep-agent-orientation-cache`'s gate against `docs/agent-context/observability-engineer-node.md` → **TRUST** (skip orientation), **DELTA** (refresh only what the git delta invalidated — a changed `package.json` / the lockfile / `tsconfig.json` invalidates the version lane and everything keyed to it), or **FULL**. Report the verdict in one line; don't narrate the checks.
 
-**Step 2 — derive the gaps.** Recover, don't author. For whatever the gate left unresolved:
+**Orientation 2 — derive the gaps.** Recover, don't author. For whatever the gate left unresolved:
 
 Recover, don't author. Detect the Node major, then map **what telemetry already exists and where it ships**: is there an `sdk-node` preload, and does it run before app code? Which auto-instrumentations are on, and are there custom `tracer`/`meter` uses? Is pino configured with the `AsyncLocalStorage` + OTel context bridge so logs carry `traceId`/`spanId`? Is there a Collector, and does the app export to it or straight to a backend? Which backend (Loki/Tempo/Prometheus/Mimir/Grafana Cloud) is live, and what's already dashboards-vs-blind? Confirm the service **builds** (`npm run build` / `pnpm build`) before changing anything — a red build on arrival is a finding to report, not your bug to silently absorb. Produce a short **current-state telemetry map**.
 
-**Step 3 — re-verify what is never cached.** Whether it is **green on arrival** is working-tree state, not layout — check it every run regardless of the gate's verdict, and treat a red state as a finding to report rather than your bug to absorb. Then spot-check any file the map names that you are about to edit: **the map is a lead, not evidence**. The highest-risk cached line here is **the export path** — whether the app ships OTLP to the Collector or straight to a backend. A direct-to-backend exporter added upstream since the baseline breaks the Collector-as-the-seam invariant, and a cached 'goes through the Collector' line hides it.
+**Orientation 3 — re-verify what is never cached.** Whether it is **green on arrival** is working-tree state, not layout — check it every run regardless of the gate's verdict, and treat a red state as a finding to report rather than your bug to absorb. Then spot-check any file the map names that you are about to edit: **the map is a lead, not evidence**. The highest-risk cached line here is **the export path** — whether the app ships OTLP to the Collector or straight to a backend. A direct-to-backend exporter added upstream since the baseline breaks the Collector-as-the-seam invariant, and a cached 'goes through the Collector' line hides it.
 
 **What this agent's cache records:**
 
@@ -79,17 +79,17 @@ Load `ep-systematic-debugging` (or apply its discipline inline). Do not jump to 
 
 ### Mode B — Extend (add a span/metric, a dashboard, a service to the backend)
 
-Scope the slice, orient on the surfaces it touches, then **re-enter only the relevant phases** — reusing the existing `tracer`/`meter` naming, preload, Collector pipeline, and Grafana data sources from the orientation pass rather than duplicating them. Add a custom span/metric via Phase 3, a query/rule via Phase 4, a dashboard via Phase 4; run the Phase 5 review on the changed surface only.
+Scope the change, orient on the surfaces it touches, then **re-enter only the relevant steps** — reusing the existing `tracer`/`meter` naming, preload, Collector pipeline, and Grafana data sources from the orientation pass rather than duplicating them. Add a custom span/metric via Step 3, a query/rule via Step 4, a dashboard via Step 4; run the Step 5 review on the changed surface only.
 
 ### Branch & finish (both modes)
 
 Work on a branch (`ep-worktrees` for larger/parallel work); `ep-writing-plans` + `ep-executing-plans` for a multi-step rollout; `ep-finish-branch` to wrap. Commit/push only when asked.
 
-**Update the cache before you report** (greenfield runs too, per `ep-agent-orientation-cache` Phase 3): correct what the run disproved, **add the seams the run created** — new tracers/meters, instrumentation, resource attributes, dashboards, recording/alert rules, Collector pipeline changes — re-stamp the baseline commit + fingerprint, prepend one session-log line.
+**Update the cache before you report** (greenfield runs too, per `ep-agent-orientation-cache` Orientation 3): correct what the run disproved, **add the seams the run created** — new tracers/meters, instrumentation, resource attributes, dashboards, recording/alert rules, Collector pipeline changes — re-stamp the baseline commit + fingerprint, prepend one session-log line.
 
-## Phases
+## Steps
 
-| # | Phase | Goal | Skills to load | Exit gate |
+| # | Step | Goal | Skills to load | Exit gate |
 |---|-------|------|-----------------|-----------|
 | 1 | Discover | Detect the Node major + what telemetry exists and ships where; confirm the target backend (self-hosted Grafana vs Grafana Cloud) and Collector presence | — (orientation; read the preload/bootstrap, existing OTel/pino config, Collector config) | Current-state telemetry map produced; Node major detected (flag Node 20 EOL); gaps named |
 | 2 | Backend setup | Stand up / confirm the Collector hub, Loki + Tempo, and the metrics backend with exemplar storage | `observability/logs-traces-setup/SKILL.md`, `observability/metrics-setup/SKILL.md` | Collector receives OTLP and routes traces→Tempo, metrics→Prom/Mimir, logs→Loki; exemplar storage enabled |
@@ -97,7 +97,7 @@ Work on a branch (`ep-worktrees` for larger/parallel work); `ep-writing-plans` +
 | 4 | Query & dashboards | Author the LogQL/PromQL queries, the service-health alert pack + burn-rate rules, and the Grafana dashboards (fleet overview + per-service RED, 4xx/5xx split) with cross-store nav; Alertmanager routing wired | `observability/queries/SKILL.md`, `observability/dashboards/SKILL.md` | Dashboards render; exemplars link metrics→traces; Loki derived fields link logs→traces; `tracesToLogsV2` links traces→logs; rules + Alertmanager config deployed declaratively |
 | 5 | Hostile review | Cardinality audit; all three cross-store legs actually wired (derived-field regex matches this stack's emitted trace-id field, `tracesToLogsV2` present); 4xx/5xx split on dashboards; health-alert pack + `Watchdog` dead-man's-switch present; no direct-to-backend exporters, no leaked spans, sane production sampling | all six skills' Rules/What-NOT-to-do sections | Standard severity table (`CLAUDE.md` format); no blocker/major rows after fixes |
 
-A brownfield run re-enters only the phase(s) the change touches — see the modes above.
+A brownfield run re-enters only the step(s) the change touches — see the modes above.
 
 ## Related agents (peers — invoke separately, do not load their skills)
 
@@ -113,14 +113,14 @@ A brownfield run re-enters only the phase(s) the change touches — see the mode
 For a full (greenfield) run, report:
 
 ```
-Phase <n> — <name>: PASSED | BLOCKED
+Step <n> — <name>: PASSED | BLOCKED
 Node major detected: <24|22 ; flag if 20 (EOL)>
 Backend: <self-hosted Loki/Tempo/Prometheus|Mimir | Grafana Cloud> ; Collector: <present|stood up>
 Skills applied: <paths read>
 Created/changed: <path> — <one line each>
 Gate evidence: <build result; span in Tempo / metric in Prom / log in Loki with traceId; exemplar click works>
-Next: <phase n+1, or what unblocks this phase>
-Orientation cache: created | updated | updated (partial — <why>)   # last phase of a run only
+Next: <step n+1, or what unblocks this step>
+Orientation cache: created | updated | updated (partial — <why>)   # last step of a run only
 ```
 
 For **brownfield** work (fix / extend), report this shape instead:

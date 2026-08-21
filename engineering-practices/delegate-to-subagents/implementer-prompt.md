@@ -4,9 +4,14 @@ Use this template when dispatching an implementer subagent.
 
 ```
 Task tool (general-purpose):
-  description: "Implement Task N: [task name]"
+  description: "Implement T<N>: [task name]"
   prompt: |
-    You are implementing Task N: [task name]
+    You are implementing T<N>: [task name]
+
+    ## Deliverable
+
+    [the task's stated Deliverable — the one observable thing that must exist
+    when you are done. This, not the step list, is what "finished" means]
 
     ## Task Description
 
@@ -31,7 +36,7 @@ Task tool (general-purpose):
     Once you're clear on requirements:
     1. Implement exactly what the task specifies
     2. Write tests (following TDD if task says to)
-    3. Verify implementation works
+    3. Verify implementation works, and that the Deliverable above actually exists
     4. Commit your work
     5. Self-review (see below)
     6. Report back

@@ -40,7 +40,7 @@ in the pipeline*: fast, safe to run against a deployed/ephemeral env, and CI-nat
 
 **Rule of thumb:** ZAP baseline is your **passive DAST PR gate** against a running app. It complements —
 does not replace — SCA dependency scanning: they are different layers (running-app HTTP surface vs
-your dependency tree). Run both; together they close Phase 2's `security-testing` family.
+your dependency tree). Run both; together they close Step 2's `security-testing` family.
 
 ## Setup — no SDK, just Docker (and optionally the GitHub Action)
 

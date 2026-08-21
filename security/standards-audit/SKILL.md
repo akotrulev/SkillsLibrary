@@ -13,9 +13,9 @@ Audit an existing repo's **defensive-security artifacts** against the convention
 
 ## Read before sweeping
 
-1. **[`ep-standards-audit-engine`](../../engineering-practices/standards-audit-engine/SKILL.md)** — the engine: Mode A/B rounds, the artifact contract, evidence rules, severity semantics, grouping/coverage policy, the 5 phases, the hostile self-review. **Read it first.**
-2. [`references/conformance-checklist.md`](references/conformance-checklist.md) — the 14 lettered sections (A–N), 127 checks, the **absence rule**, and the pinned-standards table. **Read end-to-end** before Phase 2.
-3. `engineering-practices/standards-audit-engine/references/report-template.md` — the Round-1 / Round-N skeletons. Read before Phase 3.
+1. **[`ep-standards-audit-engine`](../../engineering-practices/standards-audit-engine/SKILL.md)** — the engine: Mode A/B rounds, the artifact contract, evidence rules, severity semantics, grouping/coverage policy, the 5 steps, the hostile self-review. **Read it first.**
+2. [`references/conformance-checklist.md`](references/conformance-checklist.md) — the 14 lettered sections (A–N), 127 checks, the **absence rule**, and the pinned-standards table. **Read end-to-end** before Step 2.
+3. `engineering-practices/standards-audit-engine/references/report-template.md` — the Round-1 / Round-N skeletons. Read before Step 3.
 
 Load the **owning skill** (named per section in the checklist) whenever a check is ambiguous, version-keyed, or you are about to write its fix direction. When checklist and skill disagree on a *rule*, **the skill wins** — and report the disagreement. The one exception, stated in the checklist's version-lane block: where a skill cites a **standard version or identifier that the pinned table contradicts**, the table wins and the skill text becomes an open question for the maintainer.
 
@@ -44,7 +44,7 @@ The object is the **governance artifact**: a Sigma rule and its test fixtures, a
 
 **Why the `penetration-testing` plugin has no audit of its own.** Its outputs are per-engagement reports and scope files — point-in-time records, not standing artifacts that drift. Its rules are enforced as **blocking pre-conditions** by the §5 safety gates and the mandatory `pentest-reporting` sections, so a post-hoc sweep finds only what the gates already refused to allow, and mostly finds it too late to fix. The one residual the gates cannot cover — sensitive material that reached a **committed** file — is **section M** of this checklist, which sweeps `docs/security/**` and `detections/**` whoever authored them. Only the redaction rule crosses that boundary; the offensive findings themselves are never re-verdicted here.
 
-## Phase 0 — the standards & tooling pin lane *(never skip)*
+## Step 0 — the standards & tooling pin lane *(never skip)*
 
 ```bash
 ls -d detections rules sigma waf crs docs/security 2>/dev/null
@@ -63,7 +63,7 @@ Record: **ATT&CK pin** · **Sigma tooling version** (and whether `sigmac` surviv
 
 Then read 2–3 representative artifacts (one Sigma rule with its fixtures, the header/CSP config, one runbook) to calibrate what "normal here" looks like.
 
-## Phase 1 — applicability
+## Step 1 — applicability
 
 | Section | Applies when | Probe |
 |---|---|---|

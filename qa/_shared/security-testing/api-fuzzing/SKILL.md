@@ -71,7 +71,7 @@ against the introspected schema. The target is always a **running** app.
 > inside the Schemathesis container points at the *container*. Use `--network host` on Linux CI,
 > `http://host.docker.internal:<port>` on Mac/Windows, or a shared Docker network + service name.
 
-## Invocation + the selectable checks and phases
+## Invocation + the selectable checks and steps
 
 `schemathesis run <schema>` derives an operation per path×method from the spec, **generates** inputs, sends
 them, and runs **checks** (the properties) on each response.
@@ -90,11 +90,11 @@ them, and runs **checks** (the properties) on each response.
 Select checks with `--checks` (e.g. `--checks all` or `--checks response_schema_conformance,not_a_server_error`);
 `--exclude-checks` drops one. Each failing check is a reported failure that drives the exit code.
 
-### The phases — what gets generated
+### The steps — what gets generated
 
-Schemathesis runs in **selectable phases**; pick with `--phases`:
+Schemathesis runs in **selectable steps**; pick with `--steps`:
 
-| Phase | What it does |
+| Step | What it does |
 |-------|--------------|
 | `examples` | replay the **examples embedded in the schema** (closest to example-based) |
 | `coverage` | deterministic boundary/edge values aiming for schema **coverage** |
@@ -104,7 +104,7 @@ Schemathesis runs in **selectable phases**; pick with `--phases`:
 ```bash
 schemathesis run https://app.example.com/openapi.json \
   --checks all \
-  --phases examples,coverage,fuzzing,stateful \
+  --steps examples,coverage,fuzzing,stateful \
   --max-examples 200 \
   --workers auto \
   --header "Authorization: Bearer $API_TOKEN" \
@@ -157,13 +157,13 @@ literal (global rule: no secrets in code/config).
 
 ## Stateful testing — create→get→delete via OpenAPI links
 
-The `stateful` phase makes Schemathesis chain operations using the **OpenAPI `links`** declared in your
+The `stateful` step makes Schemathesis chain operations using the **OpenAPI `links`** declared in your
 spec: it uses the `id` returned by `POST /resources` as the path parameter for `GET /resources/{id}` and
 `DELETE /resources/{id}`, fuzzing whole **sequences** and asserting the properties hold across them
 (e.g. a resource you just created is then retrievable; a deleted one then 404s).
 
 ```bash
-schemathesis run https://app.example.com/openapi.json --phases stateful --checks all
+schemathesis run https://app.example.com/openapi.json --steps stateful --checks all
 ```
 
 This catches conformance failures that only appear **after** a state change (the response shape drifts on
@@ -189,7 +189,7 @@ jobs:
           schema: 'http://localhost:8080/openapi.json'
           args: >-
             --checks all
-            --phases examples,coverage,fuzzing,stateful
+            --steps examples,coverage,fuzzing,stateful
             --max-examples 150
             --report junit --report-junit-path reports/schemathesis-junit.xml
         env:
@@ -253,7 +253,7 @@ Cross-link `qa-ci-pipelines-*` for the OIDC-secret + artifact wiring.
   **cleanup after**. (Defers to `qa-security-shared`'s authorization-to-scan rule.)
 - **No secrets in config:** the auth token comes from an **env var read lazily** (`--header
   "Authorization: Bearer $API_TOKEN"`), sourced from `qa-{stack}-test-login-tokens`; never committed.
-- Run **`--checks all`** by default; run the **`stateful`** phase when the spec declares OpenAPI `links`.
+- Run **`--checks all`** by default; run the **`stateful`** step when the spec declares OpenAPI `links`.
 - For any gated failure, **pin `--hypothesis-seed` + keep the cassette** so it reproduces deterministically.
 - Treat **schema-conformance** failures as real defects (app or spec); never blanket-suppress them.
 - **A green run ≠ "API secure"** — Schemathesis is blind to **BOLA/BFLA** (use `permission-testing`)

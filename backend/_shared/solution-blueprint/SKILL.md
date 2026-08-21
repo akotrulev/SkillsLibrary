@@ -5,7 +5,7 @@ description: Use when turning a business case, requirements set, or loose direct
 
 # Solution Blueprint — the high-level backend plan
 
-The blueprint is the document the human approves. Everything downstream — data model, API surface, integrations, task sequence — is derived from it, so a wrong blueprint is not a cheap mistake to discover in Phase 5. Its job is to make the *consequential* decisions visible and confirmable in one page-sized pass, and to make the uncertain ones explicit rather than silently resolved.
+The blueprint is the document the human approves. Everything downstream — data model, API surface, integrations, task sequence — is derived from it, so a wrong blueprint is not a cheap mistake to discover in Step 5. Its job is to make the *consequential* decisions visible and confirmable in one page-sized pass, and to make the uncertain ones explicit rather than silently resolved.
 
 **Announce at start:** "I'm using the `be-shared-solution-blueprint` skill to produce the high-level plan for your approval."
 
@@ -70,7 +70,7 @@ A **functional area** is a coherent slice of business capability that could plau
 |---|---|
 | Area | Short noun phrase |
 | Purpose | One sentence — the capability, in business terms |
-| User-facing capabilities | The things a person can *do* here, one short sentence each in the user's voice (*"a member books a session"*, *"an admin publishes a workshop"*) — empty for areas nothing user-facing sits on. `be-shared-delivery-plan` sequences user-facing work one capability per phase, so this column is what it slices on; an area with none is planned layer-first |
+| User-facing capabilities | The things a person can *do* here, one short sentence each in the user's voice (*"a member books a session"*, *"an admin publishes a workshop"*) — empty for areas nothing user-facing sits on. `be-shared-delivery-plan` sequences user-facing work one capability per step, so this column is what it slices on; an area with none is planned layer-first |
 | Primary actors | Who or what drives it (end user, admin, scheduled job, external system) |
 | Key entities | The 2–5 nouns it owns — the seed of `data-model.md` |
 | In scope | What this initiative builds for it |
@@ -78,7 +78,7 @@ A **functional area** is a coherent slice of business capability that could plau
 | Depends on | Other areas or external systems |
 
 Rules:
-- **Name the user-facing capabilities in the user's voice, not the system's.** *"A member books a session"* is a capability; *"exposes the bookings endpoint"* is an implementation of one. The delivery plan turns each into a phase that closes when a person can actually do it, so a vague capability produces a phase with no checkable exit.
+- **Name the user-facing capabilities in the user's voice, not the system's.** *"A member books a session"* is a capability; *"exposes the bookings endpoint"* is an implementation of one. The delivery plan turns each into a step that closes when a person can actually do it, so a vague capability produces a step with no checkable exit.
 - **6–8 areas is a lot.** Beyond that, either the initiative should be decomposed into separate initiatives (each with its own folder and its own executable plan), or several "areas" are really one. Say which.
 - **Out of scope is not optional.** The most common plan defect is an unstated boundary that someone later reads as included.
 - Every area gets at least one entity or it is not an area — it is a cross-cutting concern (auth, logging, config), which belongs in the architecture section instead.
@@ -196,7 +196,7 @@ Version policy: **detected wins**. Never propose an up-level runtime as a side e
 
 ### Step 5 — Name the external systems (architecture altitude only)
 
-One line each: system, what it does for us, direction (we call it / it calls us / both), and criticality (does the feature fail without it, or degrade?). Depth — auth method, config keys, retry policy, sandbox strategy — belongs to `be-shared-integration-plan` in Phase 4. Here you only need enough to make the architecture and the risk list honest.
+One line each: system, what it does for us, direction (we call it / it calls us / both), and criticality (does the feature fail without it, or degrade?). Depth — auth method, config keys, retry policy, sandbox strategy — belongs to `be-shared-integration-plan` in Step 4. Here you only need enough to make the architecture and the risk list honest.
 
 ### Step 6 — Build the routing map
 
@@ -204,7 +204,7 @@ One line each: system, what it does for us, direction (we call it / it calls us 
 
 | Area / concern | Agent | Skills it will load | Note |
 |---|---|---|---|
-| Ordering domain + persistence | `be-dotnet` | `be-dotnet-pattern-writer`, `be-dotnet-database-code`, `be-dotnet-unit-testing` | Unit tests ship with the slice, not after |
+| Ordering domain + persistence | `be-dotnet` | `be-dotnet-pattern-writer`, `be-dotnet-database-code`, `be-dotnet-unit-testing` | Unit tests ship with the task, not after |
 | Schema, indexes, tenancy enforcement | `data-architect` | `data-postgresql`, `data-schema-design` | Beyond ORM mechanics |
 | Service-side auth | `be-dotnet` | `be-dotnet-auth0` | Frontend half is `fe-react` |
 | Telemetry | `observability-engineer-dotnet` | `observability-opentelemetry-dotnet` | Runs after the first slice is real |
@@ -233,7 +233,7 @@ If a needed capability has no agent, say so plainly and name the skill or the hu
 
 Only what is known or decidable now; the rest are `[TBD - <owner>]` lines, which is useful information rather than a gap. Cover: expected scale (users, requests/sec, data volume, growth), latency expectations on the paths that matter, availability target, data retention and deletion obligations, compliance constraints (PII, PCI, residency, audit trail), and the security posture (tenancy isolation model, who can see whose data).
 
-**The tenancy model is load-bearing** — it decides table shape, every query, the auth model, and an entire class of security test. If the system is multi-tenant, the isolation approach is a blueprint decision, not a Phase-2 detail.
+**The tenancy model is load-bearing** — it decides table shape, every query, the auth model, and an entire class of security test. If the system is multi-tenant, the isolation approach is a blueprint decision, not a Step-2 detail.
 
 ### Step 8 — Risks and assumptions
 
@@ -265,7 +265,7 @@ Options must be genuinely different, and the trade-off must be real — "A is be
 
 > "Blueprint saved to `docs/plans/<NNN>-<initiative>/blueprint.md`. Review it — particularly the `proposed` rows in the tech stack, the architecture decision, and the assumptions list — and answer the open questions. I'll build the detail pack (data model → API surface → integrations → delivery plan) once you approve."
 
-Do not write `data-model.md` or anything else in Phase 2+ until the human approves. Deferring a question is a valid answer — record the deferral with its owner and proceed, noting what it leaves `[TBD]`.
+Do not write `data-model.md` or anything else in Step 2+ until the human approves. Deferring a question is a valid answer — record the deferral with its owner and proceed, noting what it leaves `[TBD]`.
 
 In `DETAIL` mode, where the human supplied the high-level plan, the gate is shorter but still blocking: present your normalized reading of their plan (the same sections, filled from their document, with everything you had to infer marked `#inferred`) plus the gaps you need settled, and wait.
 
@@ -364,15 +364,15 @@ flowchart LR
 
 ## What NOT to put in a blueprint
 
-- **Table columns, endpoint paths, or field-level schemas** — those are Phases 2 and 3. A blueprint that specifies columns will be wrong before it is approved, and it hides the decisions that actually need review.
-- **Task lists or estimates** — Phase 5 owns sequencing, and it can only sequence once the detail exists.
+- **Table columns, endpoint paths, or field-level schemas** — those are Steps 2 and 3. A blueprint that specifies columns will be wrong before it is approved, and it hides the decisions that actually need review.
+- **Task lists or estimates** — Step 5 owns sequencing, and it can only sequence once the detail exists.
 - **Code** — no scaffolds, no snippets beyond the diagrams and tables above.
 - **Silent decisions** — anything consequential that appears without a `why` and an evidence mark.
 - **A pattern with no earned reason** — the single most common way a plan makes a system worse.
 
 ## Handoffs
 
-- **Approved →** `be-shared-data-model-plan` (Phase 2). The Key entities column is its input.
+- **Approved →** `be-shared-data-model-plan` (Step 2). The Key entities column is its input.
 - **Requirements too thin →** `requirements-author`, or `business-analyst` when the ask may conflict with existing features. Their `docs/business-model/` KB is a first-class input here.
 - **Architecture turns on a pattern question →** `backend/_shared/pattern-guide` for the concept card (loaded, not delegated).
 - **Flows and decision rules need the full modelling discipline →** `ba-process-flow-diagram` / `ba-decision-table` (loaded, not delegated); `ba-entity-state-grid` for entity lifecycles, which `be-shared-data-model-plan` also draws.

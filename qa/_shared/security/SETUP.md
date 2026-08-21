@@ -147,7 +147,7 @@ This is the highest-setup, highest-value skill. It needs:
 
 **To run the whole orchestrated flow** — invoke the **`qa-security`** agent (`qa/_shared/agents/qa-security.md`).
 Give it: the **target app/API**, the **environment + written authorization** for any active scan, the project
-**stack**, and the **OWASP scope / ASVS level** if known. It runs the six phases (threat-model → static gates →
+**stack**, and the **OWASP scope / ASVS level** if known. It runs the six steps (threat-model → static gates →
 access-control → dynamic gates → container/IaC → review + CI + OWASP coverage report), loading each skill as it
 goes, and asks before any active scan.
 

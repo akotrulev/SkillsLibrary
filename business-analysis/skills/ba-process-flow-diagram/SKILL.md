@@ -45,7 +45,7 @@ A degraded — deliberately solo-agent — form of event storming. Before drawin
 1. **Derive the domain-event list** from the requirements: past-tense facts ("Order Placed", "Payment Captured", "Refund Issued").
 2. **Order them on a timeline.** Where order is unclear or contested, that's a hotspot → open question.
 3. **Ask per event:** *what must already have happened?* (missing preconditions = missing upstream steps) and *who else reacts to this?* (hidden fan-out: notifications, quotas, lifecycle jobs, analytics — the recurring interaction hotspots).
-4. **Mark pivotal events** — ownership/phase boundaries ("Payment Captured" hands off from checkout to fulfillment). Pivotal events are the natural seams for splitting a big flow into linked sub-flow files.
+4. **Mark pivotal events** — ownership/step boundaries ("Payment Captured" hands off from checkout to fulfillment). Pivotal events are the natural seams for splitting a big flow into linked sub-flow files.
 
 The timeline is scaffolding; keep it in the flow file under "Event timeline" — it's the cheapest cross-feature ordering check the sweep has.
 

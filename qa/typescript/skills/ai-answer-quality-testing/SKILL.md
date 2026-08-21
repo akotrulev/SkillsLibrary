@@ -215,4 +215,4 @@ vector store, assert state, tear down) reuses `qa-db-testing-*-typescript` disci
   subprocess via `Process`/`ProcessBuilder`.
 - `qa-_shared-quality-metrics` — track triad + recall@k **over time** (a declining recall is a silent index/embed
   regression). `qa-test-reports-typescript` — each stage/case as a named result.
-- The `qa-llm-typescript` **agent** owns this skill alongside `ai-feature-testing` (RAG is a phase of the LLM-eval run).
+- The `qa-llm-typescript` **agent** owns this skill alongside `ai-feature-testing` (RAG is a step of the LLM-eval run).

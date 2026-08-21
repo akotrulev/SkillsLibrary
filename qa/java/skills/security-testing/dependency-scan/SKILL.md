@@ -15,7 +15,7 @@ running app** (contrast DAST): it's a static, fast, every-PR pipeline gate.
 > **⚠️ SCA vs DAST — two orthogonal layers, run both.** ZAP scans the **running app's HTTP
 > surface** (missing headers, cookie flags, info leaks). SCA scans your **dependency tree** (vulnerable
 > `log4j`, `jackson`, transitive `commons-text`…). A clean ZAP baseline says nothing about a Log4Shell in
-> your classpath; a clean SCA says nothing about a missing CSP header. **Together they close Phase 2's
+> your classpath; a clean SCA says nothing about a missing CSP header. **Together they close Step 2's
 > `security-testing` family — wire both gates.**
 
 > **Stack-native first — and why Java is canonical for this node.** Unlike `passive-scan` (one language-agnostic
@@ -338,7 +338,7 @@ These sections live in `references/details.md` — **read it when the task touch
   --include-transitive` + NuGet audit (`<NuGetAudit>`, `NuGetAuditLevel`).
 - `qa-security-passive-scan-java` — the **DAST** sibling that opened the `security-testing`
   family: ZAP probes the **running app's HTTP surface**; SCA reads your **dependency tree**. Orthogonal
-  layers — **run both** (together they close Phase 2).
+  layers — **run both** (together they close Step 2).
 - `qa-accessibility-testing-java` — the **ticketed-baseline triage** discipline reused
   here for the suppression file (gate new findings, document every suppression with a ticket).
 - `qa-ci-pipelines-java` — the gate step, `dependency-review-action`, NVD-cache, artifact +

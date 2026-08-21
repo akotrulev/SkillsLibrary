@@ -5,7 +5,7 @@ description: Use to move from one compromised host to other in-scope systems dur
 
 # Penetration Testing — Lateral Movement (NetExec · impacket · BloodHound CE · ligolo-ng/chisel/sshuttle · K8s pivots)
 
-Lateral movement takes one foothold and reaches the **rest of the in-scope environment**: reuse captured credentials to authenticate to other hosts, pivot network traffic through the compromised host into segments you couldn't reach directly, and — in an Active Directory estate — map the shortest path from where you are to Domain Admin. The defining risk of this phase is **scope**: a pivot makes out-of-scope hosts *reachable*, and reaching them is a boundary violation.
+Lateral movement takes one foothold and reaches the **rest of the in-scope environment**: reuse captured credentials to authenticate to other hosts, pivot network traffic through the compromised host into segments you couldn't reach directly, and — in an Active Directory estate — map the shortest path from where you are to Domain Admin. The defining risk of this step is **scope**: a pivot makes out-of-scope hosts *reachable*, and reaching them is a boundary violation.
 
 > **⚠️ Authorized self-testing only — owned/lab targets, and the scope file bounds every hop.** Lateral movement is where a run most easily drifts out of scope, because a pivot exposes whole networks. **Only the in-scope hosts/CIDRs in the engagement scope file may be touched; a host that becomes reachable through a pivot but is not in scope is never touched.** Re-read the scope file before every hop; if the next hop would land on an out-of-scope host, **halt the run and report** — do not touch it and note it later. Credential spraying (NetExec) can lock out real accounts (a self-inflicted DoS) — it is gated, threshold-agreed, and production-excluded by default.
 
@@ -14,7 +14,7 @@ Authorization: engagement=<NNN>  in-scope-hosts=<CIDRs/hosts>  exclusions=<never
                authorized-by=<name>  window=<start>..<expiry>  environment=lab|production(2nd sign-off)
 ```
 
-This skill is **language-agnostic** and is loaded by the **`penetration-tester`** agent in its **Lateral movement** phase. It owns *reaching other in-scope hosts*; the credentials it reuses come from `pentest-credential-attacks` (its feedstock).
+This skill is **language-agnostic** and is loaded by the **`penetration-tester`** agent in its **Lateral movement** step. It owns *reaching other in-scope hosts*; the credentials it reuses come from `pentest-credential-attacks` (its feedstock).
 
 > **Two spines, stated per finding.** Lateral movement maps to **MITRE ATT&CK Enterprise**: `T1021` Remote Services (`.002` SMB/Admin Shares, `.004` SSH, `.006` WinRM), `T1550` Use Alternate Authentication Material (`.002` Pass the Hash, `.003` Pass the Ticket), `T1078` Valid Accounts, `T1572` Protocol Tunneling + `T1090.001` Internal Proxy (pivoting), `T1482` Domain Trust Discovery / `T1069` Permission Groups Discovery (AD mapping), `T1528` Steal Application Access Token + `T1550.001` (K8s). Score CVSS in `pentest-reporting`.
 
@@ -113,7 +113,7 @@ A compromised pod's mounted ServiceAccount token (`/var/run/secrets/kubernetes.i
 
 ## Anti-patterns
 
-- **Touching an out-of-scope host because a pivot made it reachable.** The most common scope violation of the phase. *Fix:* re-read the scope file before every hop; an out-of-scope host reachable through a pivot is never touched — halt and report.
+- **Touching an out-of-scope host because a pivot made it reachable.** The most common scope violation of the step. *Fix:* re-read the scope file before every hop; an out-of-scope host reachable through a pivot is never touched — halt and report.
 - **Credential spraying without an agreed lockout threshold.** Locks out real users = self-inflicted DoS. *Fix:* agree the threshold, cap attempts, exclude production by default.
 - **`psexec.py` when `wmiexec.py` would do.** psexec creates a service (Event 7045) — a loud artifact. *Fix:* prefer wmiexec for quieter RCE; enumerate and remove any service/artifact created.
 - **Using a Golden Ticket and not flagging krbtgt rotation.** A forged TGT outlives the engagement. *Fix:* document it, redact the hash, flag krbtgt rotation to the owner, and remove the `.ccache` at cleanup.
@@ -132,10 +132,10 @@ A compromised pod's mounted ServiceAccount token (`/var/run/secrets/kubernetes.i
 
 ## Cross-references
 
-- **`penetration-tester`** — the orchestrator; runs this in its **Lateral movement** phase, owns the scope-file gate.
+- **`penetration-tester`** — the orchestrator; runs this in its **Lateral movement** step, owns the scope-file gate.
 - **`pentest-initial-access`** — supplies the foothold used as the pivot.
 - **`pentest-credential-attacks`** — the **feedstock**: captures/cracks the credentials this skill reuses (hashes → PtH, cracked passwords → spray).
 - **`pentest-privilege-escalation`** — root/SYSTEM on a host often unlocks the credential material that enables the next lateral hop.
-- **`pentest-post-exploitation`** — owns cleanup of every pivot binary, TUN interface, forged ticket, and created pod this phase leaves.
-- **`infra-security-tester`** (`devops/`) — the posture sibling; its K8s/cloud/network-policy findings scope where a pivot could go. `data-architect` owns the cross-tenant isolation this phase would test.
+- **`pentest-post-exploitation`** — owns cleanup of every pivot binary, TUN interface, forged ticket, and created pod this step leaves.
+- **`infra-security-tester`** (`devops/`) — the posture sibling; its K8s/cloud/network-policy findings scope where a pivot could go. `data-architect` owns the cross-tenant isolation this step would test.
 - **`pentest-reporting`** — action log + CVSS/ATT&CK scoring of every hop and the AD path.

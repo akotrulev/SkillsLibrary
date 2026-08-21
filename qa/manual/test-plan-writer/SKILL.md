@@ -102,7 +102,7 @@ Exit: <numbers, not adjectives — every P1 case executed/passing, no open block
 
 - No steps or concrete data in the case inventory — that's the suite's job, not the plan's
 - No re-deriving the risk register — embed `test-strategy`'s output and reference its IDs
-- No "regression testing" as a phase — regression coverage is a property of the suites the plan names
+- No "regression testing" as a step — regression coverage is a property of the suites the plan names
 - No plan that ignores existing automation — §6 is mandatory even when it says "none found (searched: <globs>)"
 - No unowned artifacts — every §8 row has a producer
 - No 12-page plan — if a section outgrows the document, it's a separate artifact the plan links to

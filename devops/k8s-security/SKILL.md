@@ -540,7 +540,7 @@ cluster credentials and a live target — exactly the two things a fork PR must 
   sibling infra-security lanes: Terraform/Bicep misconfig scoring, CSPM/IAM, runtime detection and escape
   probing, artifact signing and provenance, the STRIDE model that scopes the assessment, and the
   secrets/encryption/monitoring control checks.
-- **`infra-security-tester`** — the phased orchestrator that runs this skill (Phase 3, K8s & runtime).
+- **`infra-security-tester`** — the step-by-step orchestrator that runs this skill (Step 3, K8s & runtime).
   Read-heavy and **retest-capable**: it re-runs after remediation and reports the delta.
 - `devops-engineer` — **applies every fix**; the remediation half of the pair.
 - `devops/kubernetes` — the authoring skill whose output this scores (securityContext, NetworkPolicy,

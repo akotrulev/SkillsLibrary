@@ -27,7 +27,7 @@ exfiltrate another user's data, get talked past a refusal, be coerced into an un
 | Inputs | Representative of real usage | Adversarial, generated, multi-turn, obfuscated |
 | Pass bar | A property/rubric/grounding metric per case | **Attack-success rate below threshold**, per OWASP item |
 | Cadence | Every PR (fast deterministic gate) | Nightly / pre-release (slow, token-heavy, generative) |
-| Owner | `qa-llm-{stack}` agent, Phase 1–3 | `qa-llm-{stack}` agent, Phase 4; the model-behavior attack surface the `qa-security` scanners **cannot** reach |
+| Owner | `qa-llm-{stack}` agent, Step 1–3 | `qa-llm-{stack}` agent, Step 4; the model-behavior attack surface the `qa-security` scanners **cannot** reach |
 
 > **Boundary vs `qa-security`.** The `qa-security` agent + `qa/_shared/security-testing/*` scanners own the
 > **non-LLM** attack surface (SAST, DAST, SCA, TLS, container, the BOLA/IDOR/BFLA authz matrix). Those are blind

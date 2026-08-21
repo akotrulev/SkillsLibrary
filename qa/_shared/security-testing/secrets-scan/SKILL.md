@@ -294,5 +294,5 @@ jobs:
 - `qa-test-reports-{stack}` — attach the junit/JSON report to the run.
 - `qa/manual/bug-report-writer` — write up a confirmed leaked-credential finding (with the rotation step as
   the fix, not "delete the line").
-- `qa/_shared/agents/qa-security` — the phased orchestrator that loads `qa-security-shared` + this tool skill
-  in the per-PR static-gate phase.
+- `qa/_shared/agents/qa-security` — the step-by-step orchestrator that loads `qa-security-shared` + this tool skill
+  in the per-PR static-gate step.

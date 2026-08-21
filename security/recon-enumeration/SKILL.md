@@ -5,7 +5,7 @@ description: Use to map the in-scope attack surface at the start of an authorize
 
 # Penetration Testing — Recon & Attack-Surface Enumeration (amass · subfinder · httpx · nmap · masscan · Shodan/Censys)
 
-Recon is the first phase of an authorized kill chain: turn "here is a scope" into "here is exactly what is reachable and running inside it." You enumerate subdomains, resolve live hosts, sweep ports, fingerprint services and web tech — **only against assets the engagement scope file names**, passive-first, and rate-bounded so a sweep never becomes a denial-of-service. Everything you find is a lead for `pentest-initial-access`; recon itself sends no exploit.
+Recon is the first step of an authorized kill chain: turn "here is a scope" into "here is exactly what is reachable and running inside it." You enumerate subdomains, resolve live hosts, sweep ports, fingerprint services and web tech — **only against assets the engagement scope file names**, passive-first, and rate-bounded so a sweep never becomes a denial-of-service. Everything you find is a lead for `pentest-initial-access`; recon itself sends no exploit.
 
 > **⚠️ Authorized self-testing only — owned/lab targets, under a committed scope file.** This skill enumerates the surface of **your own** systems (or a designated throwaway/lab environment) to find the holes before an attacker does. It is the defensive act of attacking yourself under authorization. Every run is gated by the engagement scope file and its `#volatile` authorization line; the scope file's in-scope hosts/CIDRs are the **only** things you may touch, its hard exclusions are never touched even if reachable, and its blast-radius cap bounds every sweep. Active scanning against a third party you do not own or have written authorization to test is not testing — it is an attack. **Read the scope file before every act; if the next act would fall outside it, halt the run and report.**
 
@@ -14,13 +14,13 @@ Authorization: engagement=<NNN>  in-scope=<hosts/CIDRs/domains>  exclusions=<nev
                authorized-by=<name>  window=<start>..<expiry>  environment=lab|production(2nd sign-off)
 ```
 
-This skill is **language-agnostic** (every tool is a Go/C/CLI binary — no per-stack split, per the library's anti-triplication rule) and is loaded by the **`penetration-tester`** agent in its **Recon** phase. It owns *finding* the surface; it does **not** exploit it (`pentest-initial-access`), benchmark its posture (`infra-security-tester`), or prove an app vuln (`qa-security`).
+This skill is **language-agnostic** (every tool is a Go/C/CLI binary — no per-stack split, per the library's anti-triplication rule) and is loaded by the **`penetration-tester`** agent in its **Recon** step. It owns *finding* the surface; it does **not** exploit it (`pentest-initial-access`), benchmark its posture (`infra-security-tester`), or prove an app vuln (`qa-security`).
 
 > **Two spines, stated per finding.** Recon actions map to the **MITRE ATT&CK Enterprise** matrix under the **Reconnaissance** and **Discovery** tactics — `T1595` Active Scanning (`.001` Scanning IP Blocks, `.002` Vulnerability Scanning), `T1592` Gather Victim Host Information, `T1590` Gather Victim Network Information, `T1595.003`/`T1596` for passive index reads, `T1046` Network Service Discovery, `T1594` Search Victim-Owned Websites. Where a finding is a *misconfiguration* (an exposed admin panel, a stale subdomain) it additionally carries its **OWASP** category (A05 Misconfiguration). Severity is scored **CVSS** in the final report, not the blocker/major/minor/nit table (see `pentest-reporting`).
 
 ## Passive-first — the ordering that bounds blast radius
 
-Run recon in order of increasing noise, and stop escalating the moment you have what the next phase needs:
+Run recon in order of increasing noise, and stop escalating the moment you have what the next step needs:
 
 1. **Passive index reads** (Shodan/Censys, passive amass) — you query a *third party's* pre-built index; you never touch the target. Zero target-side footprint. `T1596` Search Open Technical Databases.
 2. **Passive subdomain enum** (subfinder, `amass enum -passive`) — pulls from OSINT sources/APIs; no packets to the target's infrastructure beyond DNS resolution. `T1590.002` DNS.
@@ -111,7 +111,7 @@ nmap -sV -sC -p 22,80,443,8080 -Pn --open -oA nmap-example 10.0.10.5
 
 - **Scan-type flags:** `-sS` SYN (default, needs root), `-sT` full-connect (no root), `-sU` UDP (slow — scope it tightly), `-sV` version, `-sC` default scripts, `-O` OS detect, `-A` aggressive (OS+version+scripts+traceroute — opt-in, loud).
 - **NSE (`--script`):** targeted scripts only (`--script http-title,ssl-cert`), never `--script vuln` blindly against production (some scripts are intrusive). Treat an intrusive NSE script as an active probe, not passive recon.
-- **Output `-oA`** writes all three formats (`.nmap`/`.xml`/`.gnmap`) — the `.xml` feeds Metasploit's `db_nmap` workspace in the next phase; the `.gnmap` greps cleanly.
+- **Output `-oA`** writes all three formats (`.nmap`/`.xml`/`.gnmap`) — the `.xml` feeds Metasploit's `db_nmap` workspace in the next step; the `.gnmap` greps cleanly.
 - **Timing/politeness (`-T0`–`-T5`)** is a blast-radius knob: `-T2` for anything fragile or production, `-T4` on a robust lab, **never `-T5`** (it will trip rate limits and can destabilize weak services).
 
 ## Passive index reads — Shodan / Censys
@@ -151,8 +151,8 @@ censys search 'services.service_name: RDP and ip: 203.0.113.10'
 
 ## Cross-references
 
-- **`penetration-tester`** (`security/agents/penetration-tester.md`) — the orchestrator that runs this skill in its **Recon** phase and owns the scope-file gate this skill enforces.
-- **`pentest-initial-access`** — the **next** phase: it takes the live hosts, open ports, and services this skill found (plus a `qa-security` `exploit-validation` proof) and chains them into a foothold. Recon feeds it; it does the exploiting.
+- **`penetration-tester`** (`security/agents/penetration-tester.md`) — the orchestrator that runs this skill in its **Recon** step and owns the scope-file gate this skill enforces.
+- **`pentest-initial-access`** — the **next** step: it takes the live hosts, open ports, and services this skill found (plus a `qa-security` `exploit-validation` proof) and chains them into a foothold. Recon feeds it; it does the exploiting.
 - **`infra-security-tester`** (`devops/`) — the **posture** sibling: it benchmarks and probes infrastructure config (CIS, kube-hunter, CSPM). Its findings can scope this recon; it does not run the offensive chain.
-- **`qa-security`** (`qa/_shared/agents/qa-security.md`) — the app-layer detect/validate lane; its `exploit-validation` single-vuln proof is exploitation feedstock for the next phase, not recon.
+- **`qa-security`** (`qa/_shared/agents/qa-security.md`) — the app-layer detect/validate lane; its `exploit-validation` single-vuln proof is exploitation feedstock for the next step, not recon.
 - **`pentest-reporting`** — where every recon act is logged (action log) and every surface finding is scored (CVSS) and mapped (ATT&CK).

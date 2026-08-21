@@ -30,7 +30,7 @@ By default this audits the **whole suite**. The user may narrow it to one automa
 | `api` | A, B, C, G, H, I, J\*, K, L, M, N | E, F | D3, D5, D6, D9, D10 **[PW]** · D4 **[Sel]** · D12 **[Appium]** · I3 **[PW]** |
 | `ui` | A, B, C, E, F, G, I, J\*, K, L, M, N | H | D12 **[Appium]** · E14 **[Appium]** — keep D3–D6/D9/D10 **[PW/Sel]**, I3 **[PW]** |
 | `mobile` | A, B, C, E, F, G, I, J\*, K, L, M, N | H | D3–D6, D9, D10 **[PW/Sel]** · E13 **[Sel]**, F2 **[PW]**, F7 **[Sel]** — keep D12 **[Appium]**, E14 **[Appium]** |
-| `all` (default) | every section the Phase-1 probes find applicable | — | — |
+| `all` (default) | every section the Step-1 probes find applicable | — | — |
 
 \* **J is discipline-independent** — it stays gated by its own probe (does the suite touch a DB/broker/storage/mail), in every scope. An API, UI, or mobile suite can all do external verification.
 
@@ -42,9 +42,9 @@ A, B, C, G, I (minus the tagged rows above), K, L, M, N are **universal** — ev
 
 ## Read before sweeping
 
-1. **[`ep-standards-audit-engine`](../../../../engineering-practices/standards-audit-engine/SKILL.md)** — the engine: Mode A/B rounds, the artifact contract, evidence rules, severity semantics, grouping/coverage policy, the 5 phases, the hostile self-review. **Read it first.**
-2. [`references/conformance-checklist.md`](references/conformance-checklist.md) — the 14 lettered sections (A–N) and every check. **Read end-to-end** before Phase 2.
-3. `engineering-practices/standards-audit-engine/references/report-template.md` — the Round-1 / Round-N skeletons. Read before Phase 3.
+1. **[`ep-standards-audit-engine`](../../../../engineering-practices/standards-audit-engine/SKILL.md)** — the engine: Mode A/B rounds, the artifact contract, evidence rules, severity semantics, grouping/coverage policy, the 5 steps, the hostile self-review. **Read it first.**
+2. [`references/conformance-checklist.md`](references/conformance-checklist.md) — the 14 lettered sections (A–N) and every check. **Read end-to-end** before Step 2.
+3. `engineering-practices/standards-audit-engine/references/report-template.md` — the Round-1 / Round-N skeletons. Read before Step 3.
 
 Load the **owning skill** (named per section in the checklist) whenever a check is ambiguous, tool-keyed, or you are about to write its fix direction. When checklist and skill disagree, **the skill wins** — and report the disagreement.
 
@@ -62,7 +62,7 @@ Report path: `docs/audits/<NNN>-qa-dotnet-conformance-r<N>.md`.
 | Code vs a written spec, or a feature trace | `ep-spec-vs-code-audit` / `ep-feature-audit` / the `code-auditor` agent |
 | Applying any fix found here | the matching `qa-api-dotnet` / `qa-ui-dotnet` / `qa-mobile-dotnet` / `qa-reporting-dotnet` / `qa-cicd-dotnet` agent |
 
-## Phase 0 — the suite lane *(never skip)*
+## Step 0 — the suite lane *(never skip)*
 
 ```bash
 ls *.sln **/*Tests.csproj **/*.Tests.csproj 2>/dev/null
@@ -80,7 +80,7 @@ Record: **runner** (NUnit primary / xUnit / MSTest) · **TFM + `Nullable`** · *
 
 Then read 2–3 representative files (a test fixture, a page object or API client, a builder) to calibrate conventions.
 
-## Phase 1 — applicability
+## Step 1 — applicability
 
 Two filters stack: the **tool-presence probes** below (a section is N/A when its tool isn't in the repo at all), and the **discipline scope** from the section above (a section is *skipped by user choice*, not N/A, when it's outside the requested `api`/`ui`/`mobile` scope). Record which reason applied — "N/A: no Appium" and "Skipped: scope=api" are different things and the applicability matrix must say which.
 

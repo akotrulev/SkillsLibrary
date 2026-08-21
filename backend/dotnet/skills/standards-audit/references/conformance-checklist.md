@@ -48,7 +48,7 @@ rg -n "<pattern>" --glob '*.csproj'    # project-level checks
 | B7 | No interface with one implementation forever | `IFooService`/`FooService` pairs with no second implementation and no test double need | `rg -o "interface I\w+" --glob '*.cs'` cross-checked against implementations | minor |
 | B8 | No abstract base class where composition fits | `public abstract class XBase` with exactly one subclass | `rg -n "abstract class" --glob '*.cs'` | minor |
 | B9 | No god service | `IOrderService` with 20+ methods spanning several bounded contexts | `rg -c "public (async )?Task" --glob '*Service.cs' \| sort -t: -k2 -rn \| head` | major |
-| B10 | Pattern choice is recorded where non-obvious | CQRS/Mediator/Decorator adopted with no ADR/comment stating why | `ls docs/adr docs/decisions 2>/dev/null`; read the slice | nit |
+| B10 | Pattern choice is recorded where non-obvious | CQRS/Mediator/Decorator adopted with no ADR/comment stating why | `ls docs/adr docs/decisions 2>/dev/null`; read the code | nit |
 
 ---
 

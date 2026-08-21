@@ -116,6 +116,6 @@ The paths whose change invalidates the version lane. Pick the ones that exist; r
 
 ## Session log
 
-- 2026-08-01 · EXTEND · added order-hold slice; new `OrderHoldConfiguration` + migration → Seams §Persistence updated
+- 2026-08-01 · EXTEND · added order-hold capability; new `OrderHoldConfiguration` + migration → Seams §Persistence updated
 - 2026-07-30 · FULL · first orientation
 ```

@@ -6,7 +6,7 @@ The audit's spine. Section letters and check numbers are **permanent** — a fin
 
 **How to read a row.** *Check* = the invariant. *Violation looks like* = what disqualifies it. *Find it with* = a mechanical lead (a hit is never a finding — read the file). *Sev* = the default severity; adjust for real impact and say why.
 
-## The absence rule — read this before Phase 1
+## The absence rule — read this before Step 1
 
 **A control the repo has never adopted produces no finding.** No detection repo, no CSP, no WAF, no rotation runbook, no compliance scope → those sections are **N/A**, and the absence is recorded in the applicability matrix as a **coverage note routed to `security-architect`**, never as a conformance finding. Conformance audits an artifact that exists against the rules it must follow; *whether a control should exist at all* is a posture question and posture is the architect's lane.
 

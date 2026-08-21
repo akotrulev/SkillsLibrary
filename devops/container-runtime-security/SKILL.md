@@ -347,8 +347,8 @@ progress." Different questions — run all three; do not fold Trivy's static k8s
 
 ## Cross-references
 
-- **`infra-security-tester`** (`devops/agents/infra-security-tester.md`) — the phased orchestrator that runs
-  this skill in its **K8s & runtime** phase; owns the scope/authorization gate this skill enforces.
+- **`infra-security-tester`** (`devops/agents/infra-security-tester.md`) — the step-by-step orchestrator that runs
+  this skill in its **K8s & runtime** step; owns the scope/authorization gate this skill enforces.
 - **`devops-k8s-security`** (sibling, Stage 1) — CIS/NSA **benchmark posture scoring** of manifests + cluster
   config (kube-bench · Kubescape · Polaris). The static-config sibling: it grades the *declared* state; this
   skill probes the *running* one. Run both.

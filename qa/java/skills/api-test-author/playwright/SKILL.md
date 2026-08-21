@@ -66,7 +66,7 @@ test to avoid creating a client.
 ## When NOT to use
 
 - No Playwright in the project → `qa/java/skills/api-test-author/writer` (RestAssured + TestNG, the stack default)
-- API calls **inside a UI test** (seed data, then drive the browser) → the UI suite's arrange phase; conventions in `qa/java/skills/ui-test-author/playwright`
+- API calls **inside a UI test** (seed data, then drive the browser) → the UI suite's arrange step; conventions in `qa/java/skills/ui-test-author/playwright`
 - Mocking/intercepting the browser's network traffic (`page.route`) → `qa/java/skills/network-mocking`
 - GraphQL / gRPC → the protocol siblings under `qa/java/skills/api-test-author/`
 - Reviewing existing tests → `qa/java/skills/api-test-author/review` (cross-stack checklist applies; add this skill's anti-patterns below)

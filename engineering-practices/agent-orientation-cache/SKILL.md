@@ -19,7 +19,7 @@ This file is the **agent-agnostic half**: where the map lives, its format, how t
 
 Leave it untracked if the project's `.gitignore` already excludes `docs/`; otherwise it is a normal committed file. Committing is still governed by the global rule — commit only when the user asks.
 
-## Phase 1 — Read-validate (before any orientation work)
+## Orientation 1 — Read-validate (before any orientation work)
 
 Run these checks in order and stop at the first that matches.
 
@@ -60,11 +60,11 @@ Report the outcome as one line — `Orientation: cached (delta: 2 sections refre
 - **Anything the current change depends on directly.** Before editing a file the map names, confirm it exists and still matches the description. **The map is a lead, not evidence** — the same rule the audit lane applies to a "Resolved" verdict.
 - **`#volatile` fields.** Live-resource facts describe a system that can change with no commit behind it: a database server version probe, a live cloud read, a device/emulator state, a deployed API's shape. Recorded for context, always re-probed before use.
 
-## Phase 2 — Derive the gaps
+## Orientation 2 — Derive the gaps
 
 Whatever the gate left unresolved, derive it exactly as the agent's own orientation pass says — **recover, don't author**. Then write or refresh those sections. On a FULL verdict this is the whole orientation; on DELTA it is a slice; on TRUST it is nothing.
 
-## Phase 3 — Update-after (part of closing the work, not an afterthought)
+## Orientation 3 — Update-after (part of closing the work, not an afterthought)
 
 Every run that reached the work — fix, extend, or full build — closes by updating the file:
 

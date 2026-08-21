@@ -5,7 +5,7 @@ description: Use to turn a validated vulnerability into an actual foothold durin
 
 # Penetration Testing — Initial Access / Exploitation (Metasploit · sqlmap · custom exploit)
 
-Initial access is where a *detected-and-validated* weakness becomes a *foothold*: an interactive session on an in-scope host, obtained by chaining a proven vulnerability into code execution or access at network altitude. You do not re-discover vulns here — you take the proof `qa-security`'s `exploit-validation` produced (or a recon finding this engagement surfaced) and turn it into a session the next phases escalate from.
+Initial access is where a *detected-and-validated* weakness becomes a *foothold*: an interactive session on an in-scope host, obtained by chaining a proven vulnerability into code execution or access at network altitude. You do not re-discover vulns here — you take the proof `qa-security`'s `exploit-validation` produced (or a recon finding this engagement surfaced) and turn it into a session the next steps escalate from.
 
 > **⚠️ Authorized self-testing only — owned/lab targets, under a committed scope file.** Gaining a foothold on a system is the most consequential act in the chain so far. You do it **only** against systems the engagement scope file names, **only** within the window, and **only** with techniques the scope file's "allowed techniques" list permits. Exploiting a machine you do not own or have written authorization to test is an intrusion, not a test. **Read the scope file before every act; if the next act would fall outside it — a target not listed, an exploit class not permitted, an out-of-scope host the exploit would touch — halt the run and report.** No exploit that risks availability (a memory-corruption exploit that may crash the service) runs against production without the separate, louder sign-off, and never as a technique whose goal is the crash.
 
@@ -14,7 +14,7 @@ Authorization: engagement=<NNN>  target=<in-scope host>  allowed-techniques=<lis
                authorized-by=<name>  window=<start>..<expiry>  environment=lab|production(2nd sign-off)
 ```
 
-This skill is **language-agnostic** and is loaded by the **`penetration-tester`** agent in its **Exploitation** phase. It owns *gaining the foothold*; it does not *find* the surface (`pentest-recon-enumeration`), *prove a single vuln in isolation* (`qa-security` `exploit-validation` — its feedstock), or *escalate* the foothold (`pentest-privilege-escalation`).
+This skill is **language-agnostic** and is loaded by the **`penetration-tester`** agent in its **Exploitation** step. It owns *gaining the foothold*; it does not *find* the surface (`pentest-recon-enumeration`), *prove a single vuln in isolation* (`qa-security` `exploit-validation` — its feedstock), or *escalate* the foothold (`pentest-privilege-escalation`).
 
 ## The boundary vs Stage-2 `exploit-validation` (sqlmap appears in both — draw it sharply)
 
@@ -39,7 +39,7 @@ Both this skill and `qa-security`'s `exploit-validation` use sqlmap. The line is
 # Start with a workspace DB so recon + sessions are tracked (reproducible, and feeds the report).
 msfconsole -q
 msf6 > workspace -a engagement-<NNN>
-msf6 > db_import nmap-example.xml           # ingest the recon phase's nmap -oA XML
+msf6 > db_import nmap-example.xml           # ingest the recon step's nmap -oA XML
 msf6 > db_nmap -sV 10.0.10.5                 # or scan directly into the workspace
 
 # The module taxonomy: exploit / auxiliary / payload / post / encoder / nop.
@@ -89,7 +89,7 @@ When no module fits, a custom exploit (or a public PoC adapted to the target) is
 
 ## The handoff — a foothold is where escalation begins
 
-A session from this phase is the input to the next:
+A session from this step is the input to the next:
 
 - **`pentest-privilege-escalation`** takes the foothold's user-level session and elevates it (SUID/sudo/kernel/token).
 - **`pentest-lateral-movement`** takes the foothold as a pivot point into other in-scope hosts.
@@ -121,9 +121,9 @@ This skill stops at the foothold; it does not escalate or pivot itself.
 
 ## Cross-references
 
-- **`penetration-tester`** — the orchestrator; runs this in its **Exploitation** phase, owns the scope-file gate.
+- **`penetration-tester`** — the orchestrator; runs this in its **Exploitation** step, owns the scope-file gate.
 - **`qa-security`** `exploit-validation` (`qa/_shared/security-testing/exploit-validation`) — the **feedstock**: proves *one* vuln fires + its blast radius, stops there. This skill chains that proof into a foothold. The single-vuln-proof vs foothold boundary is the whole reason both exist.
-- **`pentest-recon-enumeration`** — the **prior** phase: supplies the live hosts, open ports, and services (and the nmap XML for `db_import`) this skill exploits.
-- **`pentest-privilege-escalation`** · **`pentest-lateral-movement`** · **`pentest-credential-attacks`** — the **next** phases that build on the foothold.
-- **`pentest-post-exploitation`** — owns the cleanup discipline for every session/artifact this phase creates.
+- **`pentest-recon-enumeration`** — the **prior** step: supplies the live hosts, open ports, and services (and the nmap XML for `db_import`) this skill exploits.
+- **`pentest-privilege-escalation`** · **`pentest-lateral-movement`** · **`pentest-credential-attacks`** — the **next** steps that build on the foothold.
+- **`pentest-post-exploitation`** — owns the cleanup discipline for every session/artifact this step creates.
 - **`pentest-reporting`** — the action log (every exploit act) + CVSS/ATT&CK scoring of the access gained.

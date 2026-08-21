@@ -215,7 +215,7 @@ export const test = base.extend<{ seededOrder: Order }>({
 - Pass `{ exact: true }` to `getByText` / `getByRole` when the expected text is a substring of other labels on the page (`Submit` vs `Submit Order` / `Submitting…`) — otherwise a future label change causes a strict-mode violation.
 - **No `expect.soft` chains pretending to be hard assertions** — pick `expect` for blocking, `expect.soft` deliberately when the test must continue.
 - Use `test.step('...')` to label substeps; substeps show up in the HTML report and Allure.
-- **Do not use `test.describe.serial` to model multi-step flows.** Each test must set up its own state. If a flow is genuinely one journey, put the whole flow in a single test and use `test.step` for the phases.
+- **Do not use `test.describe.serial` to model multi-step flows.** Each test must set up its own state. If a flow is genuinely one journey, put the whole flow in a single test and use `test.step` for the steps.
 - Tag tests via the title or annotations: `test('@smoke logs in', ...)` so projects can filter.
 
 ### Auth & storage state

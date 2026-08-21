@@ -296,7 +296,7 @@ public async Task SeedOrder()
 - No shared mutable state between tests — each test gets a fresh context (via `PageTest`) and fresh page objects
 - No hardcoded credentials, base URLs, or environment hostnames — read from env vars / `appsettings.Test.json`
 - No test without at least one assertion — actions without assertions verify nothing
-- No NUnit `[Order]` chains across `[Test]` methods to model multi-step flows. Each test sets up its own state. For one journey, put the whole flow in a single test and use Allure `[AllureStep]` for the phases.
+- No NUnit `[Order]` chains across `[Test]` methods to model multi-step flows. Each test sets up its own state. For one journey, put the whole flow in a single test and use Allure `[AllureStep]` for the steps.
 
 ## Generation steps
 

@@ -15,7 +15,7 @@ The discipline that makes it worth doing: **separate what the code does from wha
 
 ## When to use
 
-- Phase 2 of a `be-documenter` run, once the area split is confirmed
+- Step 2 of a `be-documenter` run, once the area split is confirmed
 - Someone needs to know what a specific module enforces before changing it
 - A `REFRESH` run re-tracing an area whose code has moved
 
@@ -27,13 +27,13 @@ The discipline that makes it worth doing: **separate what the code does from wha
 
 ## Output
 
-Per-area structured evidence. On a `be-documenter` run it is working material that feeds Phases 3–4; it is not itself a KB artifact, and it is not written into `docs/business-model/` in raw form. One rule for where it lives: evidence consumed within the session stays in the session (or the scratchpad, if the area is large); evidence that must survive the session goes to `.trace/`, below.
+Per-area structured evidence. On a `be-documenter` run it is working material that feeds Steps 3–4; it is not itself a KB artifact, and it is not written into `docs/business-model/` in raw form. One rule for where it lives: evidence consumed within the session stays in the session (or the scratchpad, if the area is large); evidence that must survive the session goes to `.trace/`, below.
 
 **Multi-session runs persist the trace.** When a FULL run spans sessions (a large codebase documented in confirmed batches), a session that ends between Trace and Write would otherwise lose its evidence and force a full re-read. So: on a run that will not reach Write in the same session, persist each completed area's evidence inventory to **`docs/business-model/.trace/<area>.md`** — working files, never listed in `INDEX.md`, each opening with the line:
 
 ```markdown
 **Working trace by `be-documenter` @ <commit> on <date> — not a KB artifact**
-``` On resume, a persisted trace is a **lead, not evidence**: spot-check three of its `file:line` citations against the current commit — if the commit moved or a spot-check fails, re-trace the area rather than trusting the file. Phase 5 (Consolidate) deletes `.trace/` once every area's write-up cites its evidence; a leftover `.trace/` folder is a sign a run ended before consolidation.
+``` On resume, a persisted trace is a **lead, not evidence**: spot-check three of its `file:line` citations against the current commit — if the commit moved or a spot-check fails, re-trace the area rather than trusting the file. Step 5 (Consolidate) deletes `.trace/` once every area's write-up cites its evidence; a leftover `.trace/` folder is a sign a run ended before consolidation.
 
 ---
 
@@ -82,7 +82,7 @@ Per entity the area owns: the states, what moves between them, who can trigger e
 **The refusals matter as much as the transitions.** A missing arrow is a business rule ("a shipped order can never go back to pending"), and it is usually written down nowhere else.
 
 ### 5. Decision points
-Any branch where more than two inputs combine to select an outcome — pricing, eligibility, routing, discounting, risk scoring. Capture the inputs, the combinations, and the result of each. These become decision tables in the next phase, and building the table is what exposes the gaps and contradictions the code has been quietly living with.
+Any branch where more than two inputs combine to select an outcome — pricing, eligibility, routing, discounting, risk scoring. Capture the inputs, the combinations, and the result of each. These become decision tables in the next step, and building the table is what exposes the gaps and contradictions the code has been quietly living with.
 
 ### 6. Integrations
 Per external system: what triggers the call, what is sent (business-level, not payload schemas), what comes back, and — critically — **what happens when it fails**. Timeout, retry, fallback, or unhandled. "Unhandled" is a finding.

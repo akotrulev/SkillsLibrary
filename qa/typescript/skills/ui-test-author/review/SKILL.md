@@ -1,6 +1,6 @@
 ---
 name: qa-ui-test-review-typescript
-description: Use when the user asks to review existing TypeScript UI test code or page objects. Triggers: "review this Playwright spec", "look at this page object class", "is this WebdriverIO test any good". For end-to-end suite work prefer the phased agent `qa-ui-typescript` / `qa-mobile-typescript` / `qa-bdd-typescript` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
+description: Use when the user asks to review existing TypeScript UI test code or page objects. Triggers: "review this Playwright spec", "look at this page object class", "is this WebdriverIO test any good". For end-to-end suite work prefer the staged agent `qa-ui-typescript` / `qa-mobile-typescript` / `qa-bdd-typescript` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
 ---
 
 # QA — UI Test & Page Object Reviewer (TypeScript)

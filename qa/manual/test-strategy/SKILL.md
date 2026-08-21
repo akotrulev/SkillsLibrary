@@ -183,7 +183,7 @@ Avoid testing the *same* thing at three layers — that's not safety, that's tax
 - No quality gates with no owner — every gate has a tool and a name
 - No exit criteria that depend on a human judgement call ("looks good") — explicit checks only
 - No same-test-thrice (unit + integration + E2E covering the same path) — pick the right layer
-- No "regression testing" as a phase — regression coverage is a property of the suite, not a phase
+- No "regression testing" as a step — regression coverage is a property of the suite, not a step
 - No "test everything" — bound the scope by risk; deferred items belong in the doc
 
 ## Generation steps

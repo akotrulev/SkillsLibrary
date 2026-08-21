@@ -7,6 +7,8 @@ description: Use when executing an implementation plan by delegating its tasks t
 
 Execute a plan by delegating self-contained tasks to subagents, reviewing each result before moving on. The alternative to running the plan inline with `ep-executing-plans`.
 
+**Dispatch tasks in the plan's order** — the order is its dependency graph, and a subagent's task assumes the tasks above it are done. Send the task's `Deliverable` in the prompt: it is what the subagent is being asked to produce, and what you check its result against.
+
 **Announce at start:** "I'm using the `ep-delegate-to-subagents` skill to execute this plan via subagents."
 
 **Why subagents:** you delegate a task to a specialized agent with isolated context. By precisely crafting its instructions and context, you keep it focused. It should never inherit your session's history — you construct exactly what it needs. This preserves your own context for coordination.
@@ -66,8 +68,9 @@ For deeper independent verification on a task, dispatch dedicated reviewer subag
 ### Controller review rubric
 
 Review the implementer's diff yourself, in this order:
-1. **Spec compliance** — read the actual code (don't trust the report): everything requested is present, nothing extra/over-built, no misinterpretation. Report `file:line` gaps.
-2. **Code quality** — one clear responsibility per file, tests verify real behavior not mocks, names accurate, YAGNI, follows existing patterns.
+1. **Deliverable** — the task's stated `Deliverable` exists and you can point at it. This comes first: a diff that is clean but does not produce the deliverable has not finished the task.
+2. **Spec compliance** — read the actual code (don't trust the report): everything requested is present, nothing extra/over-built, no misinterpretation. Report `file:line` gaps.
+3. **Code quality** — one clear responsibility per file, tests verify real behavior not mocks, names accurate, YAGNI, follows existing patterns.
 
 Report findings in the CLAUDE.md review format (`| Severity | Location | Issue | Suggested fix |`, severities blocker/major/minor/nit) and point to the fix — the implementer subagent applies it, you re-review.
 
@@ -121,9 +124,9 @@ You: I'm using ep-delegate-to-subagents to execute this plan.
 [Extract all 5 tasks with full text and context]
 [Create task list (TaskCreate) with all tasks]
 
-Task 1: Hook installation script
+T1 — Hook installation script
 
-[Get Task 1 text and context (already extracted)]
+[Get T1 text and context (already extracted)]
 [Dispatch implementation subagent with full task text + context]
 
 Implementer: "Before I begin - should the hook be installed at user or system level?"
@@ -143,11 +146,11 @@ Spec reviewer: ✅ Spec compliant - all requirements met, nothing extra
 [Get git SHAs, dispatch code quality reviewer]
 Code reviewer: Strengths: Good test coverage, clean. Issues: None. Approved.
 
-[Mark Task 1 complete]
+[Mark T1 complete]
 
-Task 2: Recovery modes
+T2 — Recovery modes
 
-[Get Task 2 text and context (already extracted)]
+[Get T2 text and context (already extracted)]
 [Dispatch implementation subagent with full task text + context]
 
 Implementer: [No questions, proceeds]
@@ -177,7 +180,7 @@ Implementer: Extracted PROGRESS_INTERVAL constant
 [Code reviewer reviews again]
 Code reviewer: ✅ Approved
 
-[Mark Task 2 complete]
+[Mark T2 complete]
 
 ...
 

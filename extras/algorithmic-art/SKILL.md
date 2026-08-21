@@ -26,7 +26,7 @@ To begin, create an ALGORITHMIC PHILOSOPHY (not static images or templates) that
 
 Consider this approach:
 - Write a manifesto for a generative art movement
-- The next phase involves writing the algorithm that brings it to life
+- The next step involves writing the algorithm that brings it to life
 
 The philosophy must emphasize: Algorithmic expression. Emergent behavior. Computational beauty. Seeded variation.
 
@@ -58,7 +58,7 @@ Algorithmic expression: Flow fields driven by layered Perlin noise. Thousands of
 
 **"Quantum Harmonics"**
 Philosophy: Discrete entities exhibiting wave-like interference patterns.
-Algorithmic expression: Particles initialized on a grid, each carrying a phase value that evolves through sine waves. When particles are near, their phases interfere - constructive interference creates bright nodes, destructive creates voids. Simple harmonic motion generates complex emergent mandalas. The result of painstaking frequency calibration where every ratio was carefully chosen to produce resonant beauty.
+Algorithmic expression: Particles initialized on a grid, each carrying a step value that evolves through sine waves. When particles are near, their steps interfere - constructive interference creates bright nodes, destructive creates voids. Simple harmonic motion generates complex emergent mandalas. The result of painstaking frequency calibration where every ratio was carefully chosen to produce resonant beauty.
 
 **"Recursive Whispers"**
 Philosophy: Self-similarity across scales, infinite depth in finite space.
@@ -177,7 +177,7 @@ If the philosophy is about **mathematical beauty**, consider using:
 
 If the philosophy is about **controlled chaos**, consider using:
 - Random variation within strict boundaries
-- Bifurcation and phase transitions
+- Bifurcation and step transitions
 - Order emerging from disorder
 
 **The algorithm flows from the philosophy, not from a menu of options.**

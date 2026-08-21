@@ -13,7 +13,7 @@ It also produces the thing that keeps the whole exercise honest: a **coverage le
 
 ## When to use
 
-- Phase 1 of a `be-documenter` run
+- Step 1 of a `be-documenter` run
 - An inherited or long-lived backend needs decomposing before anyone can reason about it
 - A `be-planner` `RESUME`/`EXTEND` run needs to know what functional areas already exist in the code
 
@@ -123,7 +123,7 @@ Confirm these three things specifically, because they are the ones that are expe
 2. **Is the split right?** — should anything merge or divide.
 3. **Is the scope right?** — everything, or a subset first; anything parked that should not be.
 
-Use the harness's structured-question tool if one is available. Do not begin tracing before the answer: a rename after Phase 4 means re-filing every artifact and re-writing every cross-reference.
+Use the harness's structured-question tool if one is available. Do not begin tracing before the answer: a rename after Step 4 means re-filing every artifact and re-writing every cross-reference.
 
 If the human has no opinion (common — they may know the business but not the codebase), say which names you are least confident in and proceed on your own proposal, marking those `#inferred` in `system-overview.md`.
 

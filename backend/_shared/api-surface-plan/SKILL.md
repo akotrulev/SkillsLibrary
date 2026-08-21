@@ -17,7 +17,7 @@ The document has two audiences and both matter: the `be-<stack>` agent that impl
 
 ## When to use
 
-- Phase 3 of a `be-planner` run
+- Step 3 of a `be-planner` run
 - A new functional area adds endpoints to an existing API (`EXTEND` — plan the delta, inherit the existing envelope and conventions)
 - An existing API needs its contract documented as the baseline for planned changes (`RESUME` — read routes and DTOs out of the code, mark `#confirmed`, then plan the delta)
 
@@ -207,7 +207,7 @@ The per-endpoint blocks then carry deltas only.
 
 ## Handoffs
 
-- **→ `be-shared-integration-plan`** (Phase 4). Any endpoint that calls out to a third party names it there.
+- **→ `be-shared-integration-plan`** (Step 4). Any endpoint that calls out to a third party names it there.
 - **→ `be-<stack>` agents** — `api-models` equivalents and controllers/handlers come from these tables.
 - **→ `qa-api-<stack>`** — this is the contract-test basis. The standard validation set is the negative-test matrix; the endpoint table is the positive one.
 - **→ `qa-security`** — the Auth column is the BOLA/IDOR/BFLA permission matrix.

@@ -393,5 +393,5 @@ public class AuthenticationTest : BaseMobileTest
 - Java sibling (TestNG + `io.appium:java-client`) → `qa/java/skills/ui-test-author/appium`
 - TypeScript sibling (WebdriverIO + `@wdio/appium-service`) → `qa/typescript/skills/ui-test-author/appium`
 - Web UI (.NET) → `qa/dotnet/skills/ui-test-author/selenium`, `qa/dotnet/skills/ui-test-author/playwright`
-- Cloud device grid (BrowserStack / Sauce / Device Farm) → `qa/dotnet/skills/browser-cloud-setup` (Phase 2)
+- Cloud device grid (BrowserStack / Sauce / Device Farm) → `qa/dotnet/skills/browser-cloud-setup` (Step 2)
 - Network capture for non-Playwright stacks → `qa/dotnet/skills/network-mocking`

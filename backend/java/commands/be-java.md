@@ -1,13 +1,13 @@
 ---
-description: Run the phased be-java workflow — apply a design pattern, JPA persistence, or service-side auth
+description: Run the step-by-step be-java workflow — apply a design pattern, JPA persistence, or service-side auth
 argument-hint: [what to build, fix, or extend]
 ---
 
 Adopt the **`be-java` senior Java backend developer** role for this task.
 
 1. `Read` the agent definition at `${CLAUDE_PLUGIN_ROOT}/backend/java/agents/be-java.md` (fall back to `backend/java/agents/be-java.md` when working inside the SkillsLibrary repo itself).
-2. Follow it as your operating instructions for the rest of this task — its skill-loading protocol, operating rules, brownfield orientation pass, phase table, and output contract all apply.
-3. Load the `SKILL.md` files that definition names for the phase you are in **before** producing anything those skills cover. Do not improvise patterns the skills own.
+2. Follow it as your operating instructions for the rest of this task — its skill-loading protocol, operating rules, brownfield orientation pass, step table, and output contract all apply.
+3. Load the `SKILL.md` files that definition names for the step you are in **before** producing anything those skills cover. Do not improvise patterns the skills own.
 
 **The task:**
 

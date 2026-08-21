@@ -65,7 +65,7 @@ inline in a spec to avoid generating a client.
 ## When NOT to use
 
 - No Playwright in the project → `qa/typescript/skills/api-test-author/writer` (Vitest + fetch + Zod, the stack default)
-- API calls **inside a UI test** (seed data, then drive the browser) → that is the UI suite's arrange phase; conventions in `qa/typescript/skills/ui-test-author/playwright`
+- API calls **inside a UI test** (seed data, then drive the browser) → that is the UI suite's arrange step; conventions in `qa/typescript/skills/ui-test-author/playwright`
 - Mocking/intercepting the browser's network traffic → `qa/typescript/skills/network-mocking` (`page.route` is not API testing)
 - GraphQL / gRPC → the protocol siblings under `qa/typescript/skills/api-test-author/`
 - Reviewing existing tests → `qa/typescript/skills/api-test-author/review` (cross-stack checklist applies; add this skill's anti-patterns below)

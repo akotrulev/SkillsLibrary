@@ -14,7 +14,7 @@ Authorization: engagement=<NNN>  host=<in-scope foothold>  allowed-techniques=<l
                authorized-by=<name>  window=<start>..<expiry>  environment=lab|production(2nd sign-off)
 ```
 
-This skill is **language-agnostic** (the enumerators are scripts/binaries; the reference catalogues are sites) and is loaded by the **`penetration-tester`** agent in its **Privilege escalation** phase. It owns *elevating on one host*; it does not gain the foothold (`pentest-initial-access`) or move to another host (`pentest-lateral-movement`).
+This skill is **language-agnostic** (the enumerators are scripts/binaries; the reference catalogues are sites) and is loaded by the **`penetration-tester`** agent in its **Privilege escalation** step. It owns *elevating on one host*; it does not gain the foothold (`pentest-initial-access`) or move to another host (`pentest-lateral-movement`).
 
 > **Two spines, stated per finding.** Escalation maps to **MITRE ATT&CK Enterprise** under **Privilege Escalation** — `T1068` Exploitation for Privilege Escalation (kernel/component), `T1548.001` Setuid/Setgid, `T1548.003` Sudo and Sudo Caching, `T1134` Access Token Manipulation (`.001` Token Impersonation), `T1543.003` Windows Service, `T1574` Hijack Execution Flow (`.009` unquoted path). Where the vector is a misconfiguration it also carries **OWASP** A05. Severity is scored **CVSS** in `pentest-reporting`.
 
@@ -86,9 +86,9 @@ When enumeration finds a vulnerable component rather than a misconfiguration, a 
 
 ## Cross-references
 
-- **`penetration-tester`** — the orchestrator; runs this in its **Privilege escalation** phase, owns the scope-file gate.
-- **`pentest-initial-access`** — the **prior** phase: supplies the user-level foothold this skill elevates.
-- **`pentest-lateral-movement`** — the **next** phase: takes the elevated host as a stronger pivot; SYSTEM/root often unlocks credential material (`pentest-credential-attacks`) that enables lateral reuse.
+- **`penetration-tester`** — the orchestrator; runs this in its **Privilege escalation** step, owns the scope-file gate.
+- **`pentest-initial-access`** — the **prior** step: supplies the user-level foothold this skill elevates.
+- **`pentest-lateral-movement`** — the **next** step: takes the elevated host as a stronger pivot; SYSTEM/root often unlocks credential material (`pentest-credential-attacks`) that enables lateral reuse.
 - **`pentest-credential-attacks`** — root/SYSTEM enables LSASS/`/etc/shadow`/keystore harvesting for reuse.
 - **`infra-security-tester`** (`devops/`) — the posture sibling that would have *flagged* the misconfiguration statically (a writable service path, a permissive sudoers); this skill *proves* it escalates.
 - **`pentest-reporting`** — action log + CVSS/ATT&CK scoring of the escalation.

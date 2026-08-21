@@ -15,9 +15,9 @@ Create MCP (Model Context Protocol) servers that enable LLMs to interact with ex
 
 ## 🚀 High-Level Workflow
 
-Creating a high-quality MCP server involves four main phases:
+Creating a high-quality MCP server involves four main steps:
 
-### Phase 1: Deep Research and Planning
+### Step 1: Deep Research and Planning
 
 #### 1.1 Understand Modern MCP Design
 
@@ -74,7 +74,7 @@ Prioritize comprehensive API coverage. List endpoints to implement, starting wit
 
 ---
 
-### Phase 2: Implementation
+### Step 2: Implementation
 
 #### 2.1 Set Up Project Structure
 
@@ -123,7 +123,7 @@ For each tool:
 
 ---
 
-### Phase 3: Review and Test
+### Step 3: Review and Test
 
 #### 3.1 Code Quality
 
@@ -147,7 +147,7 @@ See language-specific guides for detailed testing approaches and quality checkli
 
 ---
 
-### Phase 4: Create Evaluations
+### Step 4: Create Evaluations
 
 After implementing your MCP server, create comprehensive evaluations to test its effectiveness.
 
@@ -207,11 +207,11 @@ Load these resources as needed during development:
   - Transport selection (streamable HTTP vs stdio)
   - Security and error handling standards
 
-### SDK Documentation (Load During Phase 1/2)
+### SDK Documentation (Load During Step 1/2)
 - **Python SDK**: Fetch from `https://raw.githubusercontent.com/modelcontextprotocol/python-sdk/main/README.md`
 - **TypeScript SDK**: Fetch from `https://raw.githubusercontent.com/modelcontextprotocol/typescript-sdk/main/README.md`
 
-### Language-Specific Implementation Guides (Load During Phase 2)
+### Language-Specific Implementation Guides (Load During Step 2)
 - [🐍 Python Implementation Guide](./reference/python_mcp_server.md) - Complete Python/FastMCP guide with:
   - Server initialization patterns
   - Pydantic model examples
@@ -226,7 +226,7 @@ Load these resources as needed during development:
   - Complete working examples
   - Quality checklist
 
-### Evaluation Guide (Load During Phase 4)
+### Evaluation Guide (Load During Step 4)
 - [✅ Evaluation Guide](./reference/evaluation.md) - Complete evaluation creation guide with:
   - Question creation guidelines
   - Answer verification strategies

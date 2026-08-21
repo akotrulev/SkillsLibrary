@@ -16,7 +16,7 @@ threshold. It needs **no running app** (contrast DAST): it's a static, fast, eve
 > surface** (missing headers, cookie flags, info leaks). SCA scans your **dependency tree** (a
 > vulnerable `lodash`, a transitive `minimist`…). A clean ZAP baseline says nothing about a prototype
 > pollution in a transitive package; a clean SCA says nothing about a missing CSP header. **Together they
-> close Phase 2's `security-testing` family — wire both gates.**
+> close Step 2's `security-testing` family — wire both gates.**
 
 > **Stack-native first.** Unlike `passive-scan` (one language-agnostic Docker tool), SCA is **stack-native**: each
 > ecosystem has its own first-class auditor. TypeScript's is **`npm audit`** — built in, no install, reads
@@ -329,7 +329,7 @@ Lifecycle for this gate:
   --include-transitive` + NuGet audit (`<NuGetAudit>`, `NuGetAuditLevel`).
 - `qa-security-passive-scan-typescript` — the **DAST** sibling that opened the
   `security-testing` family: ZAP probes the **running app's HTTP surface**; SCA reads your **lockfile**.
-  Orthogonal layers — **run both** (together they close Phase 2).
+  Orthogonal layers — **run both** (together they close Step 2).
 - `qa-accessibility-testing-typescript` — the **ticketed-baseline triage** discipline
   reused here for the allow-list (gate new findings, document every suppression with a ticket).
 - `qa-ci-pipelines-typescript` — the gate step, `dependency-review-action`, artifact upload.

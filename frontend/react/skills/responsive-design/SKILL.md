@@ -173,4 +173,4 @@ Make that possible:
 - Which table columns/actions survive narrow widths → [`ui-rules`](../ui-rules/SKILL.md)
 - Zoom/reflow (WCAG 1.4.10), touch targets, DOM-order-vs-visual-order → [`accessibility`](../accessibility/SKILL.md)
 - Responsive image weight, listener leaks from resize hooks → [`performance`](../performance/SKILL.md)
-- Verifying all of it by shrinking the browser → qa `responsive-testing` (peer agent's Phase 3)
+- Verifying all of it by shrinking the browser → qa `responsive-testing` (peer agent's Step 3)

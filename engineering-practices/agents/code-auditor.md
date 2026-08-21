@@ -60,13 +60,13 @@ Audits recur, so they persist. Every run writes to `docs/audits/` on the current
 
 Rounds are additive because the trend is the point ("12 open at r1 → 4 at r2") and it only exists if old rounds survive. **IDs are permanent** — requirement IDs, surface letters, finding numbers continue across rounds; renumbering silently invalidates every comparison. If a subject already has artifacts, tell the user and enter Mode B; propose a fresh baseline only when drift is broad enough that the old spine misleads — and say why.
 
-## Phases
+## Steps
 
 **Mode A (baseline)** — a full run in either lane:
 
 1. **Orient** — stack/version detection, codebase map, build/test discovery, convention calibration. Exit: a short current-state map.
 2. **Scope** — SPEC lane: consolidate sources into the requirement register (dedupe, merge, section, ID; contradictions → paired `⚠️ CONFLICT`, never a silent pick), **save it**, show the user the section list + count. FEATURE lane: declared in/out boundary + the **driving question**, written down. Exit: user confirms scope if it differs from their ask.
-3. **Trace & evidence** — SPEC: verdict each requirement, section by section. FEATURE: surfaces → the three inventories (functionality narrative · validations & gates · integration map) → findings. The long phase; don't write the report until tracing is done — findings written mid-trace anchor on early impressions.
+3. **Trace & evidence** — SPEC: verdict each requirement, section by section. FEATURE: surfaces → the three inventories (functionality narrative · validations & gates · integration map) → findings. The long step; don't write the report until tracing is done — findings written mid-trace anchor on early impressions.
 4. **Report** — the owned skill's Round-1 template, **with a rollup summary closing every section/surface**; findings split **Data issues / Code issues / Logical conflicts**, capped ~30 with per-family overflow; sequencing leverage-ordered.
 5. **Hostile self-review** — see below.
 

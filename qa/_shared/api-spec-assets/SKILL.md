@@ -135,7 +135,7 @@ Read hunks by their JSON path, not by line proximity. `#/components/schemas/*` (
 | Property renamed (a remove + an add in the same schema) | **breaking** | One rename in the DTO — including the wire-name attribute (`[JsonPropertyName]` / `@JsonProperty` / Zod key). Diffs never say "renamed"; you infer it from the pair, so state the inference in the report |
 | Property type changed | **breaking** | Retype the DTO property per the stack's type-mapping table; check every builder and assertion touching it |
 | `required` list changed | contract-visible | Nullability/optionality in the DTO (Zod `.optional()`, C# `?`, Java `@NotNull` expectations) **and** a negative test worth adding — a newly-required field is a new 400 case |
-| `format`/`pattern`/`minimum`/`maxLength` changed | validation | Usually no DTO change; it is a **boundary-test** change — hand the new bound to the test-authoring phase (BVA at the new edge) |
+| `format`/`pattern`/`minimum`/`maxLength` changed | validation | Usually no DTO change; it is a **boundary-test** change — hand the new bound to the test-authoring step (BVA at the new edge) |
 | Enum value added / removed | additive / **breaking** | Update the enum or union type; a removed value in use by a test is a test change too |
 | New schema | additive | New DTO file (`api-models`) — only if a path or an existing schema actually references it; an orphan schema gets reported, not generated |
 | Schema removed | **breaking** | Report it and delete only once the DTOs' consumers are handled; never delete a DTO whose tests still reference it in the same silent step |

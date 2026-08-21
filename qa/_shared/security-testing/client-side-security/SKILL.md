@@ -13,7 +13,7 @@ that layer: **prove a DOM sink is reachable, prove the deployed CSP actually blo
 crawl an SPA the way a browser does.**
 
 This skill is **language-agnostic** (Dalfox, ZAP, Nuclei, the CSP tools are CLI binaries / browser
-harnesses) and lives in the **`qa-security` agent's Phase 4b** dynamic lane, pairing with
+harnesses) and lives in the **`qa-security` agent's Step 4b** dynamic lane, pairing with
 `qa-security-shared` (the OWASP backbone) — load that alongside. It is the **test half of the `fe-*`
 handshake**: the Stage-5 `security-hardening` skill *authors* the strict CSP / security headers into the
 `fe-react` / `fe-blazor` app; this skill *proves in a real browser that they hold*. Same shape as the
@@ -180,7 +180,7 @@ npm i -g retire@5.4.3
   skill proves the header blocks and the report lands. Sink findings route to their component writers.
 - `qa/manual/bug-report-writer` — write up a confirmed DOM XSS / CSP-bypass with the WSTG id, the PoC URL,
   and the browser evidence (no-execution + violation event + report body).
-- `qa/_shared/agents/qa-security.md` — the phased orchestrator that runs this in **Phase 4b** dynamic lane.
+- `qa/_shared/agents/qa-security.md` — the step-by-step orchestrator that runs this in **Step 4b** dynamic lane.
 - Deep dives: **`references/dom-xss.md`** (Dalfox v3.2.1 · DOM Invader · source→sink taint · Retire.js) ·
   **`references/csp-validation.md`** (CSP Evaluator · MDN Observatory · the `securitypolicyviolation`
   dynamic-block recipe · `report-to`) · **`references/spa-dast.md`** (ZAP Client Spider · the

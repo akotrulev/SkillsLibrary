@@ -78,7 +78,7 @@ These hold regardless of which reference you read:
 
 ## Workflow
 
-1. **Choose** via the decision tree above. State the reason (one line) in the architecture decision record ([`project-setup`](../project-setup/SKILL.md) Phase-1 output).
+1. **Choose** via the decision tree above. State the reason (one line) in the architecture decision record ([`project-setup`](../project-setup/SKILL.md) Step-1 output).
 2. **Read the one `references/<library>.md`** for the chosen library — setup packages, provider wiring, theme + dark mode, DataGrid, dialog/snackbar services, render-mode gotchas.
 3. **Wire providers once** at the interactive layout root; register services in DI per the reference.
 4. **Theme centrally** from the `design/theme-presets` output via [`styling`](../styling/SKILL.md); wire the dark-mode toggle + system-preference watch.
@@ -99,4 +99,4 @@ These hold regardless of which reference you read:
 - Component layering (atom/molecule/organism), prop-drilling limits, when a molecule owns state → [`basics`](../basics/SKILL.md)
 - Render-mode selection per surface, provider placement in the layout → [`project-setup`](../project-setup/SKILL.md)
 - Forms/validation with library inputs → [`forms`](../forms/SKILL.md)
-- Theme palette/fonts source → `design/theme-presets` (loaded in agent Phase 1)
+- Theme palette/fonts source → `design/theme-presets` (loaded in agent Step 1)

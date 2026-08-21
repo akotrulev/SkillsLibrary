@@ -66,7 +66,7 @@ For RPS-target tests, **always open-loop** — closed-loop hides backpressure (s
 ## Test data & cleanup
 
 - Use **seeded users and resources** specifically marked as perf-fixture (`tenant=perf`, `customer=perf-XXX`).
-- The setup phase creates fixtures; the teardown phase drops them — never leak fixtures into prod-style data.
+- The setup step creates fixtures; the teardown step drops them — never leak fixtures into prod-style data.
 - Don't share fixtures across concurrent test runs — they collide; namespace by run id.
 - **Never run write-heavy tests against production**; perf tests live in dedicated environments (staging, perf).
 
@@ -161,7 +161,7 @@ Review checklist for an authored perf suite (any tool). Report findings in the l
 **Minors** — quality drift:
 - Unpinned tool versions; hardcoded URLs or tokens; magic numbers for rates/durations with no comment tying them to the traffic profile; report missing the deltas-vs-baseline section.
 
-A clean review = no blocker or major rows after fixes, plus a per-scenario PASS/FAIL table against the phase-1 thresholds.
+A clean review = no blocker or major rows after fixes, plus a per-scenario PASS/FAIL table against the step-1 thresholds.
 
 ## When NOT to use any of these tools
 

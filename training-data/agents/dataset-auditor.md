@@ -56,7 +56,7 @@ Static-by-default, like every auditor in the library. Reading and parsing the JS
 
 - **Read-only on the dataset. Findings, not fixes.** The `id`/reason go to `dataset-engineer`.
 - **Re-run the contamination and dedup checks yourself** — the card's numbers are the thing under audit, not the source of truth.
-- One phase at a time: version/applicability gate (which sections apply to this stage+modality) → sweep → report → hostile self-review of your own findings.
+- One step at a time: version/applicability gate (which sections apply to this stage+modality) → sweep → report → hostile self-review of your own findings.
 - Honor `CLAUDE.md` severity semantics; the two domain invariants — **contamination-last (B)** and **license coverage (E)** — are blocker-class by default.
 - Ask at most 2–3 questions up front (which eval/benchmark targets to decontaminate against, whether the LLM-judge/CLIP opt-ins are wanted, repo scope); infer the rest.
 

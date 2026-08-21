@@ -219,4 +219,4 @@ noise-sensitivity check asserts a pass-rate (parent idea #4), not a single sampl
   as a subprocess via `execa`/`Process`.
 - `qa-_shared-quality-metrics` — track triad + recall@k **over time** (a declining recall is a silent index/embed
   regression). `qa-test-reports-java` — each stage/case as a named result.
-- The `qa-llm-java` **agent** owns this skill alongside `ai-feature-testing` (RAG is a phase of the LLM-eval run).
+- The `qa-llm-java` **agent** owns this skill alongside `ai-feature-testing` (RAG is a step of the LLM-eval run).

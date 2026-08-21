@@ -1,6 +1,6 @@
 ---
 name: qa-data-driven-testing-java
-description: Run one Java 21 / TestNG test body against **many rows of data sourced from an external file**. Triggers: "run this test for every row in a CSV / spreadsheet", "data-drive these tests from a JSON file", "parameterize this test with external test data". For end-to-end suite work prefer the phased agent `qa-api-java` / `qa-ui-java` / `qa-mobile-java` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
+description: Run one Java 21 / TestNG test body against **many rows of data sourced from an external file**. Triggers: "run this test for every row in a CSV / spreadsheet", "data-drive these tests from a JSON file", "parameterize this test with external test data". For end-to-end suite work prefer the staged agent `qa-api-java` / `qa-ui-java` / `qa-mobile-java` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
 ---
 
 # Data-Driven Testing (Java 21 / TestNG) — **canonical stack**

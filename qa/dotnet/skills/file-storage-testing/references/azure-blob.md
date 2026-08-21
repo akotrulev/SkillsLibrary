@@ -11,7 +11,7 @@ condition-wait** (`WaitFor.Async`) from `qa-db-connection-dotnet`.
 **.NET leads this node by the user's choice.** The Azure SDK is first-class across all three stacks (no single
 "native" runtime), so the house default would have been TypeScript; .NET was picked — and it is an especially
 natural canonical for an **Azure-native** store (the "lead where the tool is most authentic" reasoning `service-bus`
-service-bus used), keeping the recent Phase-3 nodes .NET-led. This file is the **canonical** `azure-blob`
+service-bus used), keeping the recent Step-3 nodes .NET-led. This file is the **canonical** `azure-blob`
 stack; the `java` (`com.azure:azure-storage-blob`) and `typescript` (`@azure/storage-blob`) siblings are
 **ported** from it — all three SDKs mirror the same upload / download / exists / get-properties / list /
 delete + SAS + block-staging model, so this is a true translate-the-concepts port, not a redesign.

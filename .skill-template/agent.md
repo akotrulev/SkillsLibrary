@@ -10,8 +10,8 @@ tools: <Read, Write, Edit, Bash, Glob, Grep, WebSearch, ...only what the agent n
 
 You work in **two modes**; most real work is the second:
 
-- **Greenfield** — build from zero: run the phases below in order.
-- **Brownfield** — an **existing** <codebase / test suite / pipeline / schema / document set> you must **fix** (a defect) or **extend** (add/change functionality). This is the common case. You do **not** re-run the whole pipeline; you **orient** first, then re-enter only the phases the change touches. See **"Working on existing <X>"** — read it before you touch anything existing.
+- **Greenfield** — build from zero: run the steps below in order.
+- **Brownfield** — an **existing** <codebase / test suite / pipeline / schema / document set> you must **fix** (a defect) or **extend** (add/change functionality). This is the common case. You do **not** re-run the whole pipeline; you **orient** first, then re-enter only the steps the change touches. See **"Working on existing <X>"** — read it before you touch anything existing.
 
 **First act on any existing project:** run the **orientation pass** — which starts by reading the **orientation cache** (`docs/agent-context/<agent-name>.md`) and deriving only what it doesn't already cover, beginning with **version detection** (<TFM / JDK / Node+tsconfig / package.json majors / server version probe>). Apply the version-tagged guidance throughout; never use an up-level-only API on a down-level project, and never flag a down-level project for lacking one.
 
@@ -37,11 +37,11 @@ For **brownfield** work, additionally load the bundled developer-workflow skills
 
 ### Orientation pass — always first, before any brownfield change
 
-**Step 1 — read the cache.** Load `ep-agent-orientation-cache` and run its validation gate against `docs/agent-context/<agent-name>.md`: **TRUST** (skip orientation), **DELTA** (refresh only the sections the git delta invalidated), or **FULL** (no usable cache — derive everything). Report the verdict in one line; don't narrate the checks.
+**Orientation 1 — read the cache.** Load `ep-agent-orientation-cache` and run its validation gate against `docs/agent-context/<agent-name>.md`: **TRUST** (skip orientation), **DELTA** (refresh only the sections the git delta invalidated), or **FULL** (no usable cache — derive everything). Report the verdict in one line; don't narrate the checks.
 
-**Step 2 — derive the gaps.** Recover, don't author. For whatever the gate left unresolved: detect the version(s), map the layout, and inventory the **existing seams to reuse** (<POMs / API clients / DTOs / builders / fixtures / state containers / migrations / Step Catalog — per family>) and how the thing is built/run/invoked. The result is the **current-state map**.
+**Orientation 2 — derive the gaps.** Recover, don't author. For whatever the gate left unresolved: detect the version(s), map the layout, and inventory the **existing seams to reuse** (<POMs / API clients / DTOs / builders / fixtures / state containers / migrations / Step Catalog — per family>) and how the thing is built/run/invoked. The result is the **current-state map**.
 
-**Step 3 — re-verify what is never cached.** Whether it is **green on arrival** is working-tree state, not layout: check it every run regardless of verdict (a red state on arrival is a finding to report, not your bug to silently absorb). Same for `#volatile` fields (<live server/cloud/device probes — per family>), and for any file the map names that you are about to edit: **the map is a lead, not evidence.**
+**Orientation 3 — re-verify what is never cached.** Whether it is **green on arrival** is working-tree state, not layout: check it every run regardless of verdict (a red state on arrival is a finding to report, not your bug to silently absorb). Same for `#volatile` fields (<live server/cloud/device probes — per family>), and for any file the map names that you are about to edit: **the map is a lead, not evidence.**
 
 **This agent's field list** — what its cache records under each section:
 
@@ -54,7 +54,7 @@ For **brownfield** work, additionally load the bundled developer-workflow skills
 | Conventions observed | <where this project narrows or differs from the plugin defaults> |
 | Known unknowns | <deliberately unmapped areas + `#inferred` lines to confirm> |
 
-**On finishing** (both modes, and greenfield runs too) — update the cache per the skill's Phase 3: correct what the run disproved, **add the seams the run created**, re-stamp the baseline commit + fingerprint, prepend one session-log line.
+**On finishing** (both modes, and greenfield runs too) — update the cache per the skill's Orientation 3: correct what the run disproved, **add the seams the run created**, re-stamp the baseline commit + fingerprint, prepend one session-log line.
 
 ### Mode A — Fix a <failing test / defect / red gate / slow query / stale case>
 
@@ -62,15 +62,15 @@ Load `ep-systematic-debugging` (or apply its discipline inline). Do not jump to 
 
 ### Mode B — Extend (<add coverage / add a feature / add a lane / add a table>)
 
-Scope the slice, orient on the surfaces it touches, consider test-first (`ep-test-driven-development`) where code is involved, then **re-enter only the relevant phases** — **reusing** the existing seams from the orientation pass rather than duplicating them — and run the review phase on the changed surface only.
+Scope the change, orient on the surfaces it touches, consider test-first (`ep-test-driven-development`) where code is involved, then **re-enter only the relevant steps** — **reusing** the existing seams from the orientation pass rather than duplicating them — and run the review step on the changed surface only.
 
 ### Branch & finish (both modes)
 
 Work on a branch (`ep-worktrees` for larger/parallel work); `ep-writing-plans` + `ep-executing-plans` for a multi-step extension; `ep-finish-branch` to wrap. Commit/push only when asked.
 
-## Phases
+## Steps
 
-<The greenfield pipeline: numbered phases, each naming the skills it loads and its exit gate. A brownfield run re-enters only the phases the change touches.>
+<The greenfield pipeline: numbered steps, each naming the skills it loads and its exit gate. A brownfield run re-enters only the steps the change touches.>
 
 ## Related agents (peers — invoke separately, do not load their skills)
 

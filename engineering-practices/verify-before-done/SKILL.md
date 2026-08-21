@@ -96,7 +96,7 @@ Skip any step = lying, not verifying
 **Requirements:**
 ```
 ✅ Re-read plan → Create checklist → Verify each → Report gaps or completion
-❌ "Tests pass, phase complete"
+❌ "Tests pass, step complete"
 ```
 
 **Agent delegation:**

@@ -15,8 +15,8 @@ This is **read-only analysis on product code**. The audit points; the `fe-react`
 
 ## Read before sweeping
 
-1. [`references/conformance-checklist.md`](references/conformance-checklist.md) — the 19 lettered sections, every check, how to find violations, and the severity each carries. **Read it end-to-end** before Phase 2; it is the audit's spine.
-2. [`references/report-template.md`](references/report-template.md) — the Round-1 and Round-N report skeletons. Read it before Phase 3.
+1. [`references/conformance-checklist.md`](references/conformance-checklist.md) — the 19 lettered sections, every check, how to find violations, and the severity each carries. **Read it end-to-end** before Step 2; it is the audit's spine.
+2. [`references/report-template.md`](references/report-template.md) — the Round-1 and Round-N report skeletons. Read it before Step 3.
 
 Load the **owning skill's `SKILL.md`** (named per section in the checklist) whenever a check is ambiguous, version-keyed, or you are about to write a fix direction for it. The checklist carries the invariant; the skill carries the reasoning and the correct form. When the checklist and the owning skill disagree, **the skill wins** — and that disagreement is itself worth reporting.
 
@@ -57,9 +57,9 @@ Rounds are additive — never overwrite or regenerate a previous round. **The re
 
 Create `docs/audits/` if absent. If the repo has a different audits convention already in use, follow it and say so.
 
-## Phases
+## Steps
 
-### Phase 0 — Orient & version gate *(never skip)*
+### Step 0 — Orient & version gate *(never skip)*
 
 Half of all false findings come from auditing a project against a version lane it isn't on. Detect before you judge:
 
@@ -79,7 +79,7 @@ Record: **React major** (18/19) · **Next major** (14/15/none) · **render targe
 
 Then read **2–3 representative files** (a route/page, a shared component, a data hook or server util) to calibrate what "normal here" looks like. A deliberate project convention that differs from the plugin's default is a **noted deviation**, not automatically a finding — say which it is.
 
-### Phase 1 — Applicability matrix
+### Step 1 — Applicability matrix
 
 Not every section applies. Decide, per section, **Applicable / Not applicable / Unknown**, with the probe that decided it, before sweeping — a section marked N/A produces no findings and no false confidence.
 
@@ -96,7 +96,7 @@ Everything else (A, D, F, G, H, I, J, K, M, N, S) applies to every React codebas
 
 State the matrix in the report. "Not applicable" must name its probe; "Unknown" must name what would settle it.
 
-### Phase 2 — Sweep, section by section
+### Step 2 — Sweep, section by section
 
 Work the checklist in letter order. For each check:
 
@@ -109,7 +109,7 @@ Work the checklist in letter order. For each check:
 
 **Do not start writing the report mid-sweep.** Findings written while tracing anchor on early impressions and mis-rank severity.
 
-### Phase 3 — Report
+### Step 3 — Report
 
 Fill the Mode A or Mode B skeleton in [`references/report-template.md`](references/report-template.md). Non-negotiable parts:
 
@@ -120,7 +120,7 @@ Fill the Mode A or Mode B skeleton in [`references/report-template.md`](referenc
 - **Priority table + leverage-ordered sequencing** — what to fix first because it unblocks or de-duplicates the most (a shared component fix that closes eight sites outranks a lone blocker in a dead route; say why).
 - **Conformance score per section**, so the trend across rounds is measurable: `checks applicable / conforming / violated / unverifiable`.
 
-### Phase 4 — Hostile self-review *(before delivering)*
+### Step 4 — Hostile self-review *(before delivering)*
 
 Attack your own report and cut anything that fails:
 
@@ -192,7 +192,7 @@ Highest-leverage remaining: <one line>
 - **Code vs a spec or story set** → `ep-spec-vs-code-audit` / the `code-auditor` agent (SPEC lane).
 - **"What does this feature actually do"** → `ep-feature-audit`.
 - **Prove the a11y / perf / security findings dynamically** → peers `qa-ui-typescript` (axe, E2E), `qa-security` (DAST/SCA/access control), `qa-cicd-typescript` (gate the conformance run in CI).
-- **Design-craft altitude** (is it *good*, not just conforming) → `design/ui-code-audit` (code-level) and `design/ux-review` (experience-level), run by the `fe-react` agent's Phase 5.
+- **Design-craft altitude** (is it *good*, not just conforming) → `design/ui-code-audit` (code-level) and `design/ux-review` (experience-level), run by the `fe-react` agent's Step 5.
 - **Section M findings** double as the `missing-testids.md` handshake input for `qa-ui-typescript` / [`test-ids`](../test-ids/SKILL.md).
 
 ## When uncertain

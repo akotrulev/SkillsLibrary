@@ -16,7 +16,7 @@ needs **no running app** (contrast DAST): it's a static, fast, every-PR pipeline
 > surface** (missing headers, cookie flags, info leaks). SCA scans your **dependency tree** (a
 > vulnerable `Newtonsoft.Json`, a transitive `System.*` package…). A clean ZAP baseline says nothing about
 > a deserialization CVE in a transitive package; a clean SCA says nothing about a missing CSP header.
-> **Together they close Phase 2's `security-testing` family — wire both gates.**
+> **Together they close Step 2's `security-testing` family — wire both gates.**
 
 > **Stack-native first.** Unlike `passive-scan` (one language-agnostic Docker tool), SCA is **stack-native**: each
 > ecosystem has its own first-class auditor. .NET's are **`dotnet list package --vulnerable`** (the CLI,
@@ -317,7 +317,7 @@ These sections live in `references/details.md` — **read it when the task touch
   `--json`, `overrides`/`.nsprc`).
 - `qa-security-passive-scan-dotnet` — the **DAST** sibling that opened the `security-testing`
   family: ZAP probes the **running app's HTTP surface**; SCA reads your **build graph**. Orthogonal layers
-  — **run both** (together they close Phase 2).
+  — **run both** (together they close Step 2).
 - `qa-accessibility-testing-dotnet` — the **ticketed-baseline triage** discipline
   reused here for the suppression list (gate new findings, document every suppression with a ticket).
 - `qa-ci-pipelines-dotnet` — the gate step, `dependency-review-action`, artifact upload.

@@ -465,8 +465,8 @@ jobs:
   matter for **this** system, which is what a custom policy should encode.
 - `devops-infra-controls-validation` — proves encryption / secrets management / monitoring controls are not
   just declared but **effective**. This skill proves the setting is in the template; that one proves it works.
-- `infra-security-tester` (agent) — the phased orchestrator that runs this skill as its **IaC & image
-  posture** phase, before the live-cluster and cloud-posture phases.
+- `infra-security-tester` (agent) — the step-by-step orchestrator that runs this skill as its **IaC & image
+  posture** step, before the live-cluster and cloud-posture steps.
 - **`devops-auditor`** — the **static conformance** sibling. It sweeps the repo against the `devops` plugin's
   own twelve-section rule set into `docs/audits/`; this skill runs scanners and policy engines and gates a
   build. Fence: who owns the rule — the plugin's conventions vs a scanner catalogue plus your policies.

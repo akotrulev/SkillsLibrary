@@ -1,6 +1,6 @@
 ---
 name: qa-api-test-review-java
-description: Use when the user asks to review existing Java API test code (RestAssured + TestNG) for quality. Triggers: "review this RestAssured test", "look at OrderTest.java", "spot issues in this {Resource}Client class". Not for generating new tests → `api-test-author/generator`. For end-to-end suite work prefer the phased agent `qa-api-java` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
+description: Use when the user asks to review existing Java API test code (RestAssured + TestNG) for quality. Triggers: "review this RestAssured test", "look at OrderTest.java", "spot issues in this {Resource}Client class". Not for generating new tests → `api-test-author/generator`. For end-to-end suite work prefer the staged agent `qa-api-java` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
 ---
 
 # QA — API Test Reviewer (Java / RestAssured + TestNG)

@@ -19,7 +19,7 @@ Three disciplines carry the whole skill:
 
 ## When to use
 
-- Phases 4–5 of a `be-documenter` run
+- Steps 4–5 of a `be-documenter` run
 - A traced area needs its write-up refreshed after the code moved
 
 ## When NOT to use
@@ -39,7 +39,7 @@ Everything lands in **`docs/business-model/`** in the target repo, per `ba-proje
 | `system-overview.md` | **this skill** | What the system is, for whom, the area map, the end-to-end flows that cross areas |
 | `glossary.md` | shared | Terms found in code + the code-name → business-name mapping |
 | `INDEX.md`, `active-context.md` | shared | Updated per the KB's update-after contract |
-| `flows/`, `entities/`, `decisions/` | `ba-process-flow-diagram` · `ba-entity-state-grid` · `ba-decision-table` | **Not yours.** Produced by those skills in Phase 3; you link to them by ID |
+| `flows/`, `entities/`, `decisions/` | `ba-process-flow-diagram` · `ba-entity-state-grid` · `ba-decision-table` | **Not yours.** Produced by those skills in Step 3; you link to them by ID |
 
 **The header block and provenance stamp are mandatory** on every file this skill writes — the `Created`/`Owned by` lines per `ba-project-memory`'s header rule, then the stamp:
 

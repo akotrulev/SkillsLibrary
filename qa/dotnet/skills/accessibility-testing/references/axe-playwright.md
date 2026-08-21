@@ -204,7 +204,7 @@ if (result.Incomplete.Length > 0)
     TestContext.Out.WriteLine($"axe needs manual review for: {string.Join(", ", result.Incomplete.Select(i => i.Id))}");
 ```
 
-**4. Phase the rollout by impact.** When even the baseline is huge, gate on the worst first and ratchet
+**4. Step the rollout by impact.** When even the baseline is huge, gate on the worst first and ratchet
 down over time:
 
 ```csharp

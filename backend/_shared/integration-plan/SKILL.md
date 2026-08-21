@@ -18,7 +18,7 @@ Two failure modes this document exists to prevent:
 
 ## When to use
 
-- Phase 4 of a `be-planner` run
+- Step 4 of a `be-planner` run
 - A new external system is being added to an existing planned build (`EXTEND`)
 - An existing integration needs documenting before it is changed (`RESUME` — read the client code and config, mark `#confirmed`, then plan the delta)
 
@@ -189,7 +189,7 @@ One table that makes the system's degraded behavior reviewable in one read:
 
 ## Handoffs
 
-- **→ `be-shared-delivery-plan`** (Phase 5). Prerequisite tasks for blocking unknowns, plus a client-implementation task per dependency.
+- **→ `be-shared-delivery-plan`** (Step 5). Prerequisite tasks for blocking unknowns, plus a client-implementation task per dependency.
 - **→ `devops-engineer`** — the secrets checklist and section 7 are its work order: stores, environment config, network paths, egress rules.
 - **→ `be-<stack>`** — writes the typed clients, retry/circuit-breaker policies, and webhook handlers. Outbound M2M token acquisition is its `auth0`/`cognito` skill.
 - **→ QA peers** — `qa-network-mocking-<stack>` (stub outbound HTTP), `qa-email-testing-<stack>` (assert what was sent), `qa-messaging-testing-<stack>` (broker assertions), `qa-file-storage-testing-<stack>` (object storage), `qa-failure-injection-testing-<stack>` (prove the failure matrix is real rather than aspirational).

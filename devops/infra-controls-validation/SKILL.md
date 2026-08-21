@@ -319,8 +319,8 @@ assert something about a running system that only exists after the deploy.
 
 ## Cross-references
 
-- `devops/agents/infra-security-tester.md` — the phased owner; this skill is its **Phase 5, Controls
-  validation & retest**, and the retest loop above is that phase's contract.
+- `devops/agents/infra-security-tester.md` — the step-by-step owner; this skill is its **Step 5, Controls
+  validation & retest**, and the retest loop above is that step's contract.
 - **`devops-cloud-posture`** — the boundary partner and the real overlap. Cloud-posture runs **broad CSPM
   benchmark sweeps** (Prowler / ScoutSuite across CIS + framework rows, hundreds of checks, whole account);
   this skill runs **a small targeted set proving four specific controls are effective**, and re-runs it

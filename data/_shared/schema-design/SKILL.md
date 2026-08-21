@@ -52,7 +52,7 @@ Before any DDL, confirm the **engine fits the workload** — this is the cross-e
 | Redis/SQS for "a job queue" | `SELECT … FOR UPDATE SKIP LOCKED` — a correct, transactional queue on a table |
 | A dedicated vector DB for "embeddings / RAG" | **pgvector** — a `vector(n)` column next to the row it embeds, HNSW index (see `data/postgresql/references/indexing.md`) |
 
-Cross the line to a second store when the Postgres feature stops paying off — corpus/relevance beyond `tsvector`, queue throughput beyond a single table, embedding volume/filtered-ANN recall beyond pgvector, or the data doesn't live in Postgres in the first place. Qualify each with the workload's **consistency / latency SLO / scale** needs, and record the decision in the agent's Phase 1 (engine + version + why-this-engine). If none of the eight catalog engines fits (local-first/embedded, OLAP/analytics at column-store scale, a dedicated vector DB), say so plainly — it's out of this catalog's current scope, not a silent Postgres default.
+Cross the line to a second store when the Postgres feature stops paying off — corpus/relevance beyond `tsvector`, queue throughput beyond a single table, embedding volume/filtered-ANN recall beyond pgvector, or the data doesn't live in Postgres in the first place. Qualify each with the workload's **consistency / latency SLO / scale** needs, and record the decision in the agent's Step 1 (engine + version + why-this-engine). If none of the eight catalog engines fits (local-first/embedded, OLAP/analytics at column-store scale, a dedicated vector DB), say so plainly — it's out of this catalog's current scope, not a silent Postgres default.
 
 ## Identifiers
 

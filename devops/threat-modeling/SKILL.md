@@ -9,7 +9,7 @@ Threat modeling is the **design-time analysis that scopes every downstream secur
 
 It produces **analysis, never a payload.** No scan, no exploit, no live-target touch — it reads the design (diagrams, code, IaC, docs) and reasons. It needs no authorization to run because it sends nothing; instead it *defines the authorization each downstream lane will need*.
 
-This skill is **language-agnostic** — a DFD and a STRIDE table are the same whether the service is .NET, Java, or Node. It is the **first thing `infra-security-tester` runs** (Phase 0) and the analysis `security-test-planner` consumes to sequence a platform's assessment; it also closes the `qa-security` Phase-1 forward-wire — where that agent once built a threat model inline, this is the dedicated skill it hands to.
+This skill is **language-agnostic** — a DFD and a STRIDE table are the same whether the service is .NET, Java, or Node. It is the **first thing `infra-security-tester` runs** (Step 0) and the analysis `security-test-planner` consumes to sequence a platform's assessment; it also closes the `qa-security` Step-1 forward-wire — where that agent once built a threat model inline, this is the dedicated skill it hands to.
 
 ## The two spines — stated per threat
 
@@ -135,9 +135,9 @@ docs/security/threat-models/<NNN>-<system>.md
 
 - `references/stride.md` — the STRIDE-per-element chart + the full threat catalogue (spine on every row); the enumeration engine.
 - `references/attack-trees.md` — attack-tree notation, construction, worked examples, and scoring/roll-up.
-- `infra-security-tester` — the phased agent that runs this in Phase 0 to scope its posture assessment; the register's infra rows route to its `k8s-security` / `iac-security` / `cloud-posture` / `container-runtime-security` / `supply-chain-security` / `infra-controls-validation` skills.
+- `infra-security-tester` — the step-by-step agent that runs this in Step 0 to scope its posture assessment; the register's infra rows route to its `k8s-security` / `iac-security` / `cloud-posture` / `container-runtime-security` / `supply-chain-security` / `infra-controls-validation` skills.
 - `security-test-planner` — consumes the register to sequence a platform's assessment across lanes.
-- `qa-security` — the app-layer executor for authz/authn/injection/exposure threats (`permission-testing`, the `_shared/security-testing/*` scanners, `exploit-validation`); the threat model this produces replaces its inline Phase-1 model.
+- `qa-security` — the app-layer executor for authz/authn/injection/exposure threats (`permission-testing`, the `_shared/security-testing/*` scanners, `exploit-validation`); the threat model this produces replaces its inline Step-1 model.
 - `penetration-tester` (`security/` domain) — the executor for threats whose real impact is a multi-stage chain.
 - `data-architect` — owns the data-tier trust boundary and the cross-tenant leak test that proves a tenancy threat's mitigation holds.
 - `ba-process-flow-diagram` / `ba-decision-table` — the requirements-side flow/decision modelling; the fence is business process (theirs) vs security threats (this).

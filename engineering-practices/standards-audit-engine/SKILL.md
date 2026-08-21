@@ -23,7 +23,7 @@ This engine is the **CONVENTION lane**, the third of the library's three read-on
 | The artifact path + naming contract | The version-lane probes for its stack |
 | Evidence rules, severity semantics, grouping/coverage policy | The applicability probes (which sections are N/A here) |
 | The report templates ([`references/report-template.md`](references/report-template.md)) | The fence against its own sibling reviewer skill |
-| The 5 phases and the hostile self-review | Handoffs to the agent that applies fixes |
+| The 5 steps and the hostile self-review | Handoffs to the agent that applies fixes |
 
 A stack skill **must** name, per section, the skill that owns the rule — so a fix direction always has an owner and a disagreement between checklist and skill is resolvable (**the owning skill wins**; that disagreement is itself worth reporting).
 
@@ -54,9 +54,9 @@ Create `docs/audits/` if absent. If the repo already uses a different audits con
 
 **Finding IDs** are `<SectionLetter><CheckNumber>` (`B3`, `M1`, `G7`) — the number is the check number from the stack's checklist, so an ID names exactly which rule is broken and stays stable forever. If one check yields two genuinely distinct findings, suffix them (`B3a`, `B3b`) rather than inventing a number.
 
-## Phases
+## Steps
 
-### Phase 0 — Orient & version gate *(never skip)*
+### Step 0 — Orient & version gate *(never skip)*
 
 Half of all false findings come from auditing a project against a version lane it isn't on. Run the stack skill's detection probes, record the lane, and read **2–3 representative files** to calibrate what "normal here" looks like.
 
@@ -64,11 +64,11 @@ Half of all false findings come from auditing a project against a version lane i
 
 A deliberate project convention that differs from the plugin's default is a **noted deviation**, not automatically a finding — say which it is.
 
-### Phase 1 — Applicability matrix
+### Step 1 — Applicability matrix
 
 Decide per section: **Applicable / Not applicable / Unknown**, with the probe that decided it, *before* sweeping. A section marked N/A produces no findings and no false confidence. "Not applicable" must name its probe; "Unknown" must name what would settle it. State the matrix in the report.
 
-### Phase 2 — Sweep, section by section
+### Step 2 — Sweep, section by section
 
 Work the checklist in letter order. For each check:
 
@@ -81,7 +81,7 @@ Work the checklist in letter order. For each check:
 
 **Do not start writing the report mid-sweep.** Findings written while tracing anchor on early impressions and mis-rank severity.
 
-### Phase 3 — Report
+### Step 3 — Report
 
 Fill the Mode A or Mode B skeleton in [`references/report-template.md`](references/report-template.md). Non-negotiable parts:
 
@@ -92,7 +92,7 @@ Fill the Mode A or Mode B skeleton in [`references/report-template.md`](referenc
 - **Priority table + leverage-ordered sequencing** — what to fix first because it unblocks or de-duplicates the most (a shared-component fix that closes eight sites outranks a lone blocker in a dead corner; say why).
 - **Conformance score per section** (`applicable / conforming / violated / unverifiable`), so the trend across rounds is measurable.
 
-### Phase 4 — Hostile self-review *(before delivering)*
+### Step 4 — Hostile self-review *(before delivering)*
 
 Attack your own report and cut anything that fails:
 

@@ -44,9 +44,9 @@ Skills resolve against the repo's own folders when working inside the SkillsLibr
 
 **Load nothing but the cache before the gate.** Reading `devops/cloud-posture` during discovery anchors you on AWS rules for a cluster that turned out to be on-prem. Discovery is inspection only.
 
-## Phases
+## Steps
 
-| # | Phase | Goal | Loads | Exit gate |
+| # | Step | Goal | Loads | Exit gate |
 |---|---|---|---|---|
 | 0 | Discover & threat-model | Which surfaces exist (cluster · cloud · IaC · images · CI · supply chain · controls), the version lane, Mode NEW or RETEST — read-only. Build the threat model that scopes the rest | cache + `devops/threat-modeling` | Surface map + threat model + Mode declared, evidenced from the repo; 2–3 representative files read |
 | 1 | Confirm scope & authorization *(blocking gate)* | Human confirms which areas are in scope, the **owned target(s)** for any live probe, and the **authorization line + expiry** — static-only proceeds without it | **none** (rule sets loaded at the end) | Signed-off scope table; authorization recorded (`#volatile`) or explicitly declined (→ static-only run) |
@@ -60,7 +60,7 @@ Skills resolve against the repo's own folders when working inside the SkillsLibr
 
 > Runs **first, on every invocation, both modes**, before any rule-set skill loads. Three steps: **discover** which surfaces exist and threat-model them → **derive** which areas apply and what a live probe would need → **confirm** scope + authorization with the human.
 
-### Step 1 — Discover (read-only, cache + threat-modeling only)
+### Gate 1 — Discover (read-only, cache + threat-modeling only)
 
 Run `ep-agent-orientation-cache`'s gate against `docs/agent-context/infra-security-tester.md` → **TRUST** / **DELTA** / **FULL**; report the verdict in one line. Then map read-only:
 
@@ -80,7 +80,7 @@ Record: **stack + version lane** · **cloud + region(s)** · **cluster present? 
 
 Then **run `devops/threat-modeling`** to produce the threat model that scopes the assessment: the DFD, STRIDE-per-element, and the prioritized threat register whose routing table names which area (and which downstream lane) tests each threat. The threat model is what turns "scan everything" into "these are the surfaces that matter for this platform."
 
-### Step 2 — Derive the applicability + authorization matrix
+### Gate 2 — Derive the applicability + authorization matrix
 
 Per area: **Applicable / Not applicable / Unknown**, plus **Static** or **Live-probe (authorization-gated)**, each with the probe that decided it.
 
@@ -95,7 +95,7 @@ Per area: **Applicable / Not applicable / Unknown**, plus **Static** or **Live-p
 
 A live-probe area with no authorization runs only its static sub-checks; say so, don't skip it silently.
 
-### Step 3 — Confirm scope + authorization *(blocking — do not proceed without an answer)*
+### Gate 3 — Confirm scope + authorization *(blocking — do not proceed without an answer)*
 
 Present **one message**: the surface map + threat model summary, the areas you propose to assess, static vs live for each, the **owned target(s)** for any live probe, and the skills each selects. Use the harness's structured-question tool if available; otherwise a table plus a direct question.
 
@@ -113,9 +113,9 @@ Then ask plainly: **"Confirm this scope and — for the live-probe areas — the
 
 The gate settles, every time: **area scope**, the **owned live target(s)**, the **`#volatile` authorization line + expiry**, whether **active/disruptive probes** are permitted, and whether any target is **production** (a distinct second sign-off, never folded into the lab authorization). Proportional (a static-only IaC repo gets a one-word confirmation), one round, and it never blocks the static-posture inventory.
 
-### Step 4 — Load, then assess
+### Gate 4 — Load, then assess
 
-Load the rule-set skills the confirmed scope named, and nothing else. Run static checks freely; run live probes only against authorized targets, re-reading the authorization before each live phase and **halting the run and reporting** if the next act would fall outside the confirmed scope — an explicit kill switch, never silent scope-narrowing.
+Load the rule-set skills the confirmed scope named, and nothing else. Run static checks freely; run live probes only against authorized targets, re-reading the authorization before each live step and **halting the run and reporting** if the next act would fall outside the confirmed scope — an explicit kill switch, never silent scope-narrowing.
 
 ## Operating rules
 
@@ -146,11 +146,11 @@ Every artifact opens with `**Date:** <YYYY-MM-DD>` · `**Tester:** \`infra-secur
 
 ## Related agents (peers — invoke separately, do not load their skills)
 
-- **`devops-engineer`** — the sibling that **applies every fix**. Your priority table is the handoff; it re-enters its phases in Mode FIX / EXTEND citing your finding ids. You **retest** after it fixes; you never edit infrastructure.
+- **`devops-engineer`** — the sibling that **applies every fix**. Your priority table is the handoff; it re-enters its steps in Mode FIX / EXTEND citing your finding ids. You **retest** after it fixes; you never edit infrastructure.
 - **`devops-auditor`** — the **static-conformance** sibling: it inventories whether the plugin's rules are met by reading files; you run **benchmarks and live probes** that prove isolation and controls actually hold. A pure static IaC misconfig can be either's; a CIS score, a runtime probe, or an isolation-validation is yours.
 - **`qa-security`** — the **application-layer** lane: DAST/SAST/SCA, functional authz (BOLA/IDOR/BFLA), and *proving an app vuln exploitable*. You own the infrastructure around the app.
 - **`penetration-tester`** (Stage 3, `security/` domain) — the **full offensive kill chain**. You do authorized posture testing and bounded active probing; deep exploitation, privilege-escalation chaining, and lateral movement are its lane, under its scope-file gates.
-- **`security-test-planner`** — runs **before** you, sequencing which lanes assess a platform; it consumes the same threat model and binds this agent to the infra phases.
+- **`security-test-planner`** — runs **before** you, sequencing which lanes assess a platform; it consumes the same threat model and binds this agent to the infra steps.
 - **`data-architect`** — owns the **cross-tenant leak test** proving data isolation holds (mandatory where tenancy is app-enforced). You assess the infra isolation around it, not the schema.
 - **`observability-engineer-{dotnet,java,node}`** — you validate whether monitoring controls are **wired and effective**; they own the telemetry content. The controls-validation monitoring check needs their backend to assert an alert actually fired.
 
@@ -167,7 +167,7 @@ Every artifact opens with `**Date:** <YYYY-MM-DD>` · `**Tester:** \`infra-secur
 
 ## Output contract
 
-At the **end of Phase 1**, before assessing:
+At the **end of Step 1**, before assessing:
 
 ```
 Mode: NEW — BASELINE | RETEST (prior: docs/security/<file>.md, <date>)
@@ -198,7 +198,7 @@ Retest (RETEST mode): Resolved <n> · Still open <n> · Regressed <n> · New <n>
 
 ## When uncertain
 
-- **Scope or authorization ambiguity always goes to the gate**, never to an assumption — an unclear target, an environment you can't see, a "which account". That is what Phase 1 is for, and a live probe never runs against an assumed scope.
+- **Scope or authorization ambiguity always goes to the gate**, never to an assumption — an unclear target, an environment you can't see, a "which account". That is what Step 1 is for, and a live probe never runs against an assumed scope.
 - A check is ambiguous → **read the owning skill** before verdicting. Don't guess a rule you can look up.
 - A verdict you can't settle without a live probe you weren't authorized for → `Unverifiable (needs live probe)` + exactly what would settle it. Never guess to complete a row.
 - The infrastructure consistently does something different on purpose → **deviations table** + one question for the owner, not a finding.

@@ -182,7 +182,7 @@ MyApp.Client/
 ## Rules
 
 - **Static SSR default; interactivity opt-in per surface.** Prefer `--all-interactive false` (islands) over global interactivity.
-- **Decide render mode per route from the transport shape**, using the matrix above; document the decision (Phase-1 decision record).
+- **Decide render mode per route from the transport shape**, using the matrix above; document the decision (Step-1 decision record).
 - **`.Client` holds only browser-runnable components**; server-only dependencies (EF Core, secrets, server services) never leak into it.
 - **Feature folders**, not type folders. Layer components by reuse level (atom → molecule → organism → template → page) as a **placement heuristic**: shared atoms/molecules in `.Client/Components/`, feature-specific organisms/pages in the feature folder. Promote to shared on the *second* consumer, not the first.
 - **Nullable + warnings-as-errors + CPM + `.editorconfig`** from commit one — retrofitting is painful.

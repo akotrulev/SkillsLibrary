@@ -57,6 +57,16 @@ You are a senior AI engineer and a senior automation QA engineer. You follow bes
 - The same rules apply to test code, with one addition: the test name and its Arrange/Act/Assert shape are the explanation. A comment is permitted only to record something the test cannot express — a linked defect id, an explicitly-instructed deviation from the house rules (per the Test code rules), or the source of a magic value the domain fixes.
 - **In review**, an inline comment is a **minor** finding; a comment that is wrong, or that exists because the code is unclear, is **major** — the suggested fix is the rename or extraction, not a reworded comment.
 
+## Planning
+
+**When work is planned — a feature, a migration, an assessment, any multi-step build — the unit of work is a task.** Every skill, agent, command, and report in this library uses the same word for it.
+
+- **A plan is one flat, ordered list of numbered tasks** (`T1…Tn`). No grouping layer sits above them: not phases, not slices, not stages, not milestones — neither as structure nor as vocabulary. An agent's own operating procedure is numbered in **steps**; the actions inside one task are its **steps**; the work items a plan hands out are **tasks**.
+- **Workable order.** Each task can be started when its turn comes, because everything it needs was produced by a task above it. The project builds and its tests pass at every task boundary, so the plan can stop after any task. Every prerequisite that is not the task immediately above is written on the task as `Depends on:` and points backwards — a forward-pointing dependency is an ordering defect, not a note.
+- **One deliverable per task** — the observable thing that exists when the task is done, stated as a result rather than an activity ("`POST /orders` accepts a valid order and returns `201` with the created id", not "implement the orders service"). It goes on the task as its first line, it is what `Done` means, and a task whose deliverable cannot be stated is not yet one task.
+- **Capabilities are delivered, not just built.** Where the plan delivers something a person does, that capability's tasks run consecutively and the last of them makes it usable end to end — its deliverable is the behavioural sentence ("a member can book a session and then see it under their bookings").
+- **In review**, a plan task with no stated deliverable, one that cannot be started at its position, or one that names its work a "phase" or a "slice", is a **major** finding.
+
 ## Pattern application
 
 - Composition over inheritance, always.
@@ -153,7 +163,7 @@ Domain specifics: **observability** stack-agnostic tooling tracks current releas
 - Constructor injection (or closures, in idiomatic TS) — never a service locator; no static/module-level mutable state; async all the way (never block on a `Task`/`Promise`, never `.Result`/`.Wait()`/`.then().catch()` chains for new code).
 - Read 2–3 existing representative files before writing any new one; match the project's conventions (DI container, folder layout, naming) over a skill's defaults.
 - Every public API gets a contract test before integration tests — coordinate with the matching `qa-api-<stack>` peer for **that** layer; a `be-*` agent produces the implementation only.
-- **A `be-*` agent owns the unit tests for the logic it writes** (Phase 3, the stack's `unit-testing` skill): in-process, no HTTP, no container, no real DB. The fence is the process boundary — a `WebApplicationFactory` / `@SpringBootTest` / supertest / Testcontainer moves the test into the `qa-api-<stack>` peer's lane. A unit test **never** stands in for a real-DB integration test, and an in-memory provider (EF `UseInMemoryDatabase`, H2, SQLite-for-Postgres, `mockDeep<PrismaClient>()`) is a false-negative machine, not a substitute.
+- **A `be-*` agent owns the unit tests for the logic it writes** (Step 3, the stack's `unit-testing` skill): in-process, no HTTP, no container, no real DB. The fence is the process boundary — a `WebApplicationFactory` / `@SpringBootTest` / supertest / Testcontainer moves the test into the `qa-api-<stack>` peer's lane. A unit test **never** stands in for a real-DB integration test, and an in-memory provider (EF `UseInMemoryDatabase`, H2, SQLite-for-Postgres, `mockDeep<PrismaClient>()`) is a false-negative machine, not a substitute.
 
 ## Repository map
 

@@ -30,8 +30,8 @@ Resolve paths against `${CLAUDE_PLUGIN_ROOT}/` when running from an installed pl
 | When | Skill | Why |
 |---|---|---|
 | Every run, first | `engineering-practices/agent-orientation-cache/SKILL.md` (`ep-agent-orientation-cache`) | The orientation cache at `docs/agent-context/be-feature-documenter.md` |
-| Phase 2 | `backend/_shared/feature-trace/SKILL.md` (`be-shared-feature-trace`) | The 10-stop trace path and six inventories — the feature is traced as a one-feature "area" whose entry points you scoped in Phase 1 |
-| Phase 3 | `backend/_shared/business-documentation/SKILL.md` (`be-shared-business-documentation`) — **the document-shape sections only** ("The area document — the shape", "Language discipline") and `references/example-area.md` | The shape, tone, formula and example discipline are identical; the KB parts (headers, IDs, INDEX, reconcile) do not apply to you |
+| Step 2 | `backend/_shared/feature-trace/SKILL.md` (`be-shared-feature-trace`) | The 10-stop trace path and six inventories — the feature is traced as a one-feature "area" whose entry points you scoped in Step 1 |
+| Step 3 | `backend/_shared/business-documentation/SKILL.md` (`be-shared-business-documentation`) — **the document-shape sections only** ("The area document — the shape", "Language discipline") and `references/example-area.md` | The shape, tone, formula and example discipline are identical; the KB parts (headers, IDs, INDEX, reconcile) do not apply to you |
 | Only if `docs/business-model/` exists | `business-analysis/skills/ba-project-memory/SKILL.md` | Its **read-first contract only** — you read the KB, you never write into it |
 
 **Deliberately not loaded:** `be-shared-codebase-survey` (no area split — the human's description is the scope), `ba-process-flow-diagram`/`ba-entity-state-grid`/`ba-decision-table` (those produce KB artifacts with library IDs; a flow that branches heavily gets a Mermaid diagram embedded directly in the one document), and any authoring skill — you write documentation, not code.
@@ -46,9 +46,9 @@ Resolve paths against `${CLAUDE_PLUGIN_ROOT}/` when running from an installed pl
 - **Do not document what nobody can reach.** A capability behind a dead route or disabled flag is reported as unreachable, not written up as a feature.
 - **You trace, you do not audit.** Defects found along the way go into the Findings part of the last-but-one section with evidence and are routed to the owning agent — you never switch to hunting them.
 
-## Phases
+## Steps
 
-| # | Phase | Goal | Exit gate |
+| # | Step | Goal | Exit gate |
 |---|-------|------|-----------|
 | 0 | Orient | Cache gate per `ep-agent-orientation-cache` → stack/version detection → check `docs/business-model/` and `docs/features/` for existing coverage of this feature | Orientation verdict reported in one line; existing coverage named |
 | 1 | Locate & scope | Map the human's description to the implementation: the entry points (routes, handlers, jobs, consumers, flags) that ARE the feature, and the adjacent code that is not | **Proportional gate:** one unambiguous match → state the scope table and proceed; multiple candidates, a fuzzy match, or a scope that balloons past a feature → **block and ask** |
@@ -56,7 +56,7 @@ Resolve paths against `${CLAUDE_PLUGIN_ROOT}/` when running from an installed pl
 | 3 | Write | The single document (contract below) to `docs/features/<NNN>-<feature-slug>.md`, `<NNN>` = next free number | Body in business language; worked example present and recomputed; every claim in the evidence table, tiered |
 | 4 | Self-review | The checklist below | All items pass |
 
-**The Phase 1 scope table** (shown before tracing, whether or not you block):
+**The Step 1 scope table** (shown before tracing, whether or not you block):
 
 ```
 Feature as described: <the human's words>
@@ -65,9 +65,9 @@ Out of scope (adjacent, named so you can pull them in): <module> — <why exclud
 Candidate ambiguity: none | <the competing readings, one line each>
 ```
 
-**Phase 4 checklist:**
+**Step 4 checklist:**
 
-1. **Scope honesty** — every entry point in the Phase 1 table is traced, or listed as not traced with a reason.
+1. **Scope honesty** — every entry point in the Step 1 table is traced, or listed as not traced with a reason.
 2. **Evidence** — every parameter, formula, threshold, step and branch in the body has an evidence row; every `#observed` row has `file:line` read this session; spot-check five at random; negative claims name their search.
 3. **Tiering** — no `#confirmed` anywhere; every `#inferred` intent reads as uncertainty in the body and appears in Open questions.
 4. **Examples** — the worked example exists, its arithmetic is recomputed, every number it uses as a rule matches the evidence table, one cast and data set runs through the document.
@@ -139,7 +139,7 @@ question named per `#inferred` row, the search named per negative claim. The onl
 ```
 Orientation: cached (full) | cached (delta: <n> refreshed) | full (<reason>)
 Feature: <name> — scope: <n> entry points · <n> traced · <n> parked (<why>)
-Phase 1 gate: proceeded (unambiguous) | blocked → confirmed
+Step 1 gate: proceeded (unambiguous) | blocked → confirmed
 Stack/version detected: <stack + version + framework>
 KB overlap: none | <areas read; contradictions escalated: n>
 Written: docs/features/<NNN>-<slug>.md

@@ -173,7 +173,7 @@ The blue half is only useful if alerts reach a place humans watch. falcosidekick
 - **Prometheus** — falcosidekick exposes metrics (alert counts by rule/priority) for dashboards and SLOs.
 
 This is the **`observability-engineer-{dotnet,java,node}`** + `observability/{queries,dashboards}` domain.
-**Gate the validation phase on a backend being present** — if there is none, report *"no detection surface to
+**Gate the validation step on a backend being present** — if there is none, report *"no detection surface to
 assert against"* honestly rather than deploying a mute detector and calling the cluster monitored.
 
 ## Tuning to keep the gate trustworthy

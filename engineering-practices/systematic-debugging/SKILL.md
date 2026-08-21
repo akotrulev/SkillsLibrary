@@ -19,7 +19,7 @@ Random fixes waste time and create new bugs. Quick patches mask underlying issue
 NO FIXES WITHOUT ROOT CAUSE INVESTIGATION FIRST
 ```
 
-If you haven't completed Phase 1, you cannot propose fixes.
+If you haven't completed Step 1, you cannot propose fixes.
 
 ## When to Use
 
@@ -43,11 +43,11 @@ Use for ANY technical issue:
 - You're in a hurry (rushing guarantees rework)
 - Manager wants it fixed NOW (systematic is faster than thrashing)
 
-## The Four Phases
+## The Four Steps
 
-You MUST complete each phase before proceeding to the next.
+You MUST complete each step before proceeding to the next.
 
-### Phase 1: Root Cause Investigation
+### Step 1: Root Cause Investigation
 
 **BEFORE attempting ANY fix:**
 
@@ -119,7 +119,7 @@ You MUST complete each phase before proceeding to the next.
    - Keep tracing up until you find the source
    - Fix at source, not at symptom
 
-### Phase 2: Pattern Analysis
+### Step 2: Pattern Analysis
 
 **Find the pattern before fixing:**
 
@@ -142,7 +142,7 @@ You MUST complete each phase before proceeding to the next.
    - What settings, config, environment?
    - What assumptions does it make?
 
-### Phase 3: Hypothesis and Testing
+### Step 3: Hypothesis and Testing
 
 **Scientific method:**
 
@@ -157,7 +157,7 @@ You MUST complete each phase before proceeding to the next.
    - Don't fix multiple things at once
 
 3. **Verify Before Continuing**
-   - Did it work? Yes → Phase 4
+   - Did it work? Yes → Step 4
    - Didn't work? Form NEW hypothesis
    - DON'T add more fixes on top
 
@@ -167,7 +167,7 @@ You MUST complete each phase before proceeding to the next.
    - Ask for help
    - Research more
 
-### Phase 4: Implementation
+### Step 4: Implementation
 
 **Fix the root cause, not the symptom:**
 
@@ -192,7 +192,7 @@ You MUST complete each phase before proceeding to the next.
 4. **If Fix Doesn't Work**
    - STOP
    - Count: How many fixes have you tried?
-   - If < 3: Return to Phase 1, re-analyze with new information
+   - If < 3: Return to Step 1, re-analyze with new information
    - **If ≥ 3: STOP and question the architecture (step 5 below)**
    - DON'T attempt Fix #4 without architectural discussion
 
@@ -227,9 +227,9 @@ If you catch yourself thinking:
 - **"One more fix attempt" (when already tried 2+)**
 - **Each fix reveals new problem in different place**
 
-**ALL of these mean: STOP. Return to Phase 1.**
+**ALL of these mean: STOP. Return to Step 1.**
 
-**If 3+ fixes failed:** Question the architecture (see Phase 4.5)
+**If 3+ fixes failed:** Question the architecture (see Step 4.5)
 
 ## Signals From the User That You're Doing It Wrong
 
@@ -240,7 +240,7 @@ If you catch yourself thinking:
 - "Ultrathink this" - Question fundamentals, not just symptoms
 - "We're stuck?" (frustrated) - Your approach isn't working
 
-**When you see these:** STOP. Return to Phase 1.
+**When you see these:** STOP. Return to Step 1.
 
 ## Common Rationalizations
 
@@ -257,7 +257,7 @@ If you catch yourself thinking:
 
 ## Quick Reference
 
-| Phase | Key Activities | Success Criteria |
+| Step | Key Activities | Success Criteria |
 |-------|---------------|------------------|
 | **1. Root Cause** | Read errors, reproduce, check changes, gather evidence | Understand WHAT and WHY |
 | **2. Pattern** | Find working examples, compare | Identify differences |
@@ -290,7 +290,7 @@ These techniques are part of systematic debugging and available in this director
 > `ep-writing-plans`' Stack-defaults notes.)
 
 **Related skills:**
-- **`ep-test-driven-development`** - For creating failing test case (Phase 4, Step 1)
+- **`ep-test-driven-development`** - For creating failing test case (Step 4, Step 1)
 - **`ep-verify-before-done`** - Verify fix worked before claiming success
 
 ## Real-World Impact

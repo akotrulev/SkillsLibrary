@@ -80,7 +80,7 @@ Want a broad copy-in-ish accessible component set with a utility-style API?
 
 ## Workflow
 
-1. **Choose** via the decision tree. State the reason (one line) in the Phase-1 architecture record ([`project-scaffold`](../project-scaffold/SKILL.md)).
+1. **Choose** via the decision tree. State the reason (one line) in the Step-1 architecture record ([`project-scaffold`](../project-scaffold/SKILL.md)).
 2. **Read the one `references/<kit>.md`** — packages, provider wiring, theme + dark mode, New-Arch/Expo notes, the kit's test-id prop.
 3. **Wire the provider once** at the root layout; install with `npx expo install`, verify with `expo-doctor`.
 4. **Theme centrally** from the [`design/frontend-design`](../../../../design/frontend-design/SKILL.md) output via [`styling`](../styling/SKILL.md); wire dark mode off `useColorScheme` + a toggle.

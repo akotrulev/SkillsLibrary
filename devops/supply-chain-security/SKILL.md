@@ -548,8 +548,8 @@ jobs:
   skill; the threat model scopes which of the four surfaces a given system actually needs.
 - **`devops-infra-controls-validation`** — validates that the CI/CD hardening controls named here are
   present *and effective*, and re-tests after remediation.
-- **`devops/agents/infra-security-tester`** — the phased orchestrator that loads this skill in its
-  IaC-&-image-posture phase and reports findings with their A08 / SLSA mapping.
+- **`devops/agents/infra-security-tester`** — the step-by-step orchestrator that loads this skill in its
+  IaC-&-image-posture step and reports findings with their A08 / SLSA mapping.
 - **`devops-docker`** — image build and `buildx --provenance/--sbom`; the image this skill signs is the one
   that skill authors. Base-image **digest pinning** is stated in both.
 - **`devops/{github-actions,gitlab-ci,azure-pipelines}`** — the **deploy pipeline** that wires the

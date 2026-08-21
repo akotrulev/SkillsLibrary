@@ -22,10 +22,10 @@ The studio schedules recurring workshops (pottery, life drawing) and currently t
 | Area | Purpose | User-facing capabilities | Primary actors | Key entities | In scope | Out of scope | Depends on |
 |---|---|---|---|---|---|---|---|
 | Identity & access | Who can sign in and what they may do | A member signs in and sees who they are | Member, Staff | Member profile | Login via IdP, member/staff roles | Self-service registration approval flows | Auth0 |
-| Scheduling | Staff define workshops and their sessions | An admin publishes a workshop and adds sessions to it · anyone browses the published schedule | Staff | Workshop, Session | Create/publish/archive workshops; schedule sessions with capacity | Recurring-session templates (phase 2) | Identity |
+| Scheduling | Staff define workshops and their sessions | An admin publishes a workshop and adds sessions to it · anyone browses the published schedule | Staff | Workshop, Session | Create/publish/archive workshops; schedule sessions with capacity | Recurring-session templates (step 2) | Identity |
 | Booking | Members book and cancel seats | A member books a session and sees it under their bookings · a member cancels a booking · staff mark attendance | Member, Staff | Booking | Book a seat, cancel within policy, staff view attendance | Payments, waitlists | Scheduling, Identity |
 
-Each capability above becomes one phase in `delivery-plan.md`, closing when a person can actually do it.
+Each capability above becomes one step in `delivery-plan.md`, closing when a person can actually do it.
 
 **Explicitly not in this initiative:** payments (sessions are included in membership — confirmed by owner), waitlists, and any member-facing mobile app.
 
@@ -118,7 +118,7 @@ The "late cancel" consequence (does it ever block future bookings?) is **Q2** �
 
 | Area / concern | Agent | Skills it will load | Note |
 |---|---|---|---|
-| Scaffold, all three areas, persistence | `be-dotnet` | `be-dotnet-pattern-writer`, `be-dotnet-database-code`, `be-dotnet-unit-testing` | Unit tests ship with the slice |
+| Scaffold, all three areas, persistence | `be-dotnet` | `be-dotnet-pattern-writer`, `be-dotnet-database-code`, `be-dotnet-unit-testing` | Unit tests ship with the task |
 | Service-side auth | `be-dotnet` | `be-dotnet-auth0` | SPA half is out of scope here |
 | Schema depth (index review) | `data-architect` | `data-postgresql`, `data-schema-design` | Only if the session-list query needs it |
 | Contract + integration tests | `qa-api-dotnet` | `qa-api-test-writer-dotnet` | Test basis: `api-surface.md` |
@@ -158,7 +158,7 @@ All answered before approval; recorded with their answers as the decision log se
 *Context:* changes the booking entity (quantity vs one-row-per-seat) and the capacity check.
 - **A. One seat per member per session** *(recommended)* — simplest model; guests need their own membership
 - **B. Quantity per booking** — guest-friendly, but capacity, cancellation, and attendance all get per-seat complexity
-**Answer: A** (owner, 2026-08-02) — guests are a phase-2 question.
+**Answer: A** (owner, 2026-08-02) — guests are a step-2 question.
 
 **Q2 — Does a late cancellation carry any consequence?**
 **Answer:** recorded on the member's record, no enforcement in v1 (owner, 2026-08-02).

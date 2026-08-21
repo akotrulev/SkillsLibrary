@@ -353,5 +353,5 @@ identical two-pass via `aquasec/trivy` Docker steps (cross-link `qa-ci-pipelines
 - `qa-ci-pipelines-{github-actions,gitlab-ci,azure-pipelines}-*` + `qa/cicd/ci-conventions` — wire the
   two-pass image + IaC gates, `aquasecurity/trivy-action`, the Trivy DB cache, and the SARIF upload.
 - `qa-test-reports-*` — attach the Trivy HTML/JSON report to the run.
-- `qa/_shared/agents/qa-security.md` — the phased orchestrator that runs this as the **build-artifact gate**
-  (Phase 5).
+- `qa/_shared/agents/qa-security.md` — the step-by-step orchestrator that runs this as the **build-artifact gate**
+  (Step 5).

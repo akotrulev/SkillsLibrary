@@ -76,7 +76,7 @@ export default defineConfig({
 
 **`clearMocks` + `restoreMocks` are not optional.** Leaked call history across tests is the #1 source of order-dependent flakes in Vitest suites.
 
-**The `tsc` prerequisite the Phase-3 gate depends on.** Vitest's own type surface needs Node types and a modern `lib`, or `tsc --noEmit` fails inside `node_modules` (`Cannot find name 'Disposable' / 'setImmediate'`, `Cannot find type definition file for 'node'`) — errors that have nothing to do with your code and will block the gate on a fresh setup. The test lane needs:
+**The `tsc` prerequisite the Step-3 gate depends on.** Vitest's own type surface needs Node types and a modern `lib`, or `tsc --noEmit` fails inside `node_modules` (`Cannot find name 'Disposable' / 'setImmediate'`, `Cannot find type definition file for 'node'`) — errors that have nothing to do with your code and will block the gate on a fresh setup. The test lane needs:
 
 ```jsonc
 // tsconfig.json

@@ -318,5 +318,5 @@ map in `qa-security-shared`.
 - `qa/cicd/<stack>/skills/ci-pipelines/{github-actions,azure-pipelines,gitlab-ci}` + `qa/cicd/ci-conventions` —
   wire the gate step, SARIF upload, and artifact.
 - `qa/reporting/<stack>/skills/test-reports` — attach the parsed JSON finding summary to the run.
-- `qa/_shared/agents/qa-security.md` — the phased orchestrator that runs SAST in the per-PR static-gates
-  phase (Phase 2) alongside secrets + SCA.
+- `qa/_shared/agents/qa-security.md` — the step-by-step orchestrator that runs SAST in the per-PR static-gates
+  step (Step 2) alongside secrets + SCA.

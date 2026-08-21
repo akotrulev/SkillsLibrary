@@ -1,6 +1,6 @@
 ---
 name: ep-brainstorming
-description: Use when turning an ad-hoc idea or feature request into an approved design/spec before any code is written. Triggers "let's build X", "add a feature that…", "help me design…", "how should we approach…", before scaffolding or implementation. Chains into `ep-writing-plans` once approved. Do NOT use while a phased agent is driving its own design gate (merely having one installed is not a reason to skip this), for pure Q&A, or once a design is approved.
+description: Use when turning an ad-hoc idea or feature request into an approved design/spec before any code is written. Triggers "let's build X", "add a feature that…", "help me design…", "how should we approach…", before scaffolding or implementation. Chains into `ep-writing-plans` once approved. Do NOT use while a step-by-step agent is driving its own design gate (merely having one installed is not a reason to skip this), for pure Q&A, or once a design is approved.
 ---
 
 # Brainstorming Ideas Into Designs
@@ -14,7 +14,7 @@ Start by understanding the current project context, then ask questions one at a 
 <HARD-GATE>
 Do NOT invoke any implementation skill, write any code, scaffold any project, or take any implementation action until you have presented a design and the user has approved it. This applies to EVERY project regardless of perceived simplicity.
 
-**Scope:** the gate governs *ad-hoc implementation requests*. A phased agent that runs its own design gate — the `fe-blazor` Blazor build, the `qa-*` orchestrators — already satisfies this requirement; invoking such an agent is not a gate violation.
+**Scope:** the gate governs *ad-hoc implementation requests*. A step-by-step agent that runs its own design gate — the `fe-blazor` Blazor build, the `qa-*` orchestrators — already satisfies this requirement; invoking such an agent is not a gate violation.
 </HARD-GATE>
 
 ## Anti-Pattern: "This Is Too Simple To Need A Design"

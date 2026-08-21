@@ -8,12 +8,12 @@ Use this template when escalating to a dedicated reviewer subagent (one more inv
 
 ```
 Task tool (general-purpose):
-  description: "Code quality review for Task N"
+  description: "Code quality review for T<N>"
   prompt: |
     Review the code quality of the change between BASE_SHA and HEAD_SHA.
 
     DESCRIPTION: [task summary, from implementer's report]
-    PLAN_OR_REQUIREMENTS: Task N from [plan-file]
+    PLAN_OR_REQUIREMENTS: T<N> from [plan-file]
     BASE_SHA: [commit before task]
     HEAD_SHA: [current commit]
 

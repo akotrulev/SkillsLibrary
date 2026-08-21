@@ -13,7 +13,7 @@ The plan altitude: **every table, every column, every key, every index — and w
 
 ## When to use
 
-- Phase 2 of a `be-planner` run, after blueprint approval
+- Step 2 of a `be-planner` run, after blueprint approval
 - A new functional area is being added to an existing planned system (`EXTEND` — model the delta, reuse the existing conventions)
 - An existing schema needs documenting as the baseline a plan will extend (`RESUME` — read it out of migrations and entities, mark everything `#observed` — repo-read facts are never `#confirmed`, that tier is human-stated only — then plan the delta)
 
@@ -227,7 +227,7 @@ Rules:
 
 ## Handoffs
 
-- **→ `be-shared-api-surface-plan`** (Phase 3). Entities become resources; lifecycle transitions become state-conflict validations; unique constraints become `409 duplicate` rules; FKs become "referenced id must exist and be visible" rules.
+- **→ `be-shared-api-surface-plan`** (Step 3). Entities become resources; lifecycle transitions become state-conflict validations; unique constraints become `409 duplicate` rules; FKs become "referenced id must exist and be visible" rules.
 - **→ `data-architect`** for engine selection, index strategy that needs plan analysis, partitioning, RLS policies, and cross-engine migration. Everything in the "Routed to" table.
 - **→ `be-<stack>`'s `database-code` skill** (via the `be-<stack>` agent) to write the entities, configurations, and migrations.
 - **→ `qa-api-<stack>`'s `db-testing` skills** — this document is the seed/assert/clean basis.

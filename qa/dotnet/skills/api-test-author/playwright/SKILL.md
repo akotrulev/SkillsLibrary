@@ -63,7 +63,7 @@ inline in a test to avoid creating a client.
 ## When NOT to use
 
 - No Playwright in the project → `qa/dotnet/skills/api-test-author/writer` (NUnit + RestSharp, the stack default)
-- API calls **inside a UI test** (seed data, then drive the browser) → the UI suite's arrange phase; conventions in `qa/dotnet/skills/ui-test-author/playwright`
+- API calls **inside a UI test** (seed data, then drive the browser) → the UI suite's arrange step; conventions in `qa/dotnet/skills/ui-test-author/playwright`
 - Mocking/intercepting the browser's network traffic (`page.RouteAsync`) → `qa/dotnet/skills/network-mocking`
 - GraphQL / gRPC → the protocol siblings under `qa/dotnet/skills/api-test-author/`
 - Reviewing existing tests → `qa/dotnet/skills/api-test-author/review` (cross-stack checklist applies; add this skill's anti-patterns below)

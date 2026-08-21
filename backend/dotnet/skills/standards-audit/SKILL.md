@@ -13,9 +13,9 @@ Audit an existing **.NET service** against the conventions this plugin defines �
 
 ## Read before sweeping
 
-1. **[`ep-standards-audit-engine`](../../../../engineering-practices/standards-audit-engine/SKILL.md)** — the engine: Mode A/B rounds, the artifact contract, evidence rules, severity semantics, grouping/coverage policy, the 5 phases, the hostile self-review. **Read it first.**
-2. [`references/conformance-checklist.md`](references/conformance-checklist.md) — the 14 lettered sections (A–N) and every check. **Read end-to-end** before Phase 2.
-3. `engineering-practices/standards-audit-engine/references/report-template.md` — the Round-1 / Round-N skeletons. Read before Phase 3.
+1. **[`ep-standards-audit-engine`](../../../../engineering-practices/standards-audit-engine/SKILL.md)** — the engine: Mode A/B rounds, the artifact contract, evidence rules, severity semantics, grouping/coverage policy, the 5 steps, the hostile self-review. **Read it first.**
+2. [`references/conformance-checklist.md`](references/conformance-checklist.md) — the 14 lettered sections (A–N) and every check. **Read end-to-end** before Step 2.
+3. `engineering-practices/standards-audit-engine/references/report-template.md` — the Round-1 / Round-N skeletons. Read before Step 3.
 
 Load the **owning skill** (named per section in the checklist) whenever a check is ambiguous, version-keyed, or you are about to write its fix direction. When checklist and skill disagree, **the skill wins** — and report the disagreement.
 
@@ -33,7 +33,7 @@ Report path: `docs/audits/<NNN>-be-dotnet-conformance-r<N>.md`.
 | Schema / DDL / index design, cross-engine migration strategy | **peer** `data-architect` — section G covers EF Core mechanics only |
 | Applying any fix found here | the `be-dotnet` agent (Mode FIX / EXTEND) |
 
-## Phase 0 — the .NET version lane *(never skip)*
+## Step 0 — the .NET version lane *(never skip)*
 
 ```bash
 ls *.sln **/*.csproj 2>/dev/null
@@ -50,7 +50,7 @@ Record: **TFM** (net8.0 / net9.0 / net10.0, or a mix across projects) · **`Null
 
 Then read 2–3 representative files (a controller/endpoint, a service, the `DbContext` + one configuration) to calibrate conventions.
 
-## Phase 1 — applicability
+## Step 1 — applicability
 
 | Section | Applies when | Probe |
 |---|---|---|

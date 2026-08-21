@@ -196,7 +196,7 @@ if (results.incomplete.length > 0) {
 }
 ```
 
-**4. Phase the rollout by impact.** When even the baseline is huge, gate on the worst first and ratchet
+**4. Step the rollout by impact.** When even the baseline is huge, gate on the worst first and ratchet
 down over time:
 
 ```typescript

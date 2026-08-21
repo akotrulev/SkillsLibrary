@@ -1,6 +1,6 @@
 ---
 name: be-shared-delivery-plan
-description: Use when a planned backend (blueprint + data model + API surface + integrations) needs turning into an ordered, agent-bound task list — phases as hard barriers with named streams, a HANDOFF.md pointer, and a reconcile procedure against half-built code. Triggers "what order do we build this in", "turn the plan into tasks", "pick up where we left off". Do NOT use to write code (`be-<stack>`), execute a generic plan (`ep-executing-plans`), or audit code against a spec (`code-auditor`).
+description: Use when a planned backend (blueprint + data model + API surface + integrations) needs turning into an ordered task list — one flat sequence of tasks, each with a deliverable and an executing agent, plus named streams, a HANDOFF.md pointer, and a reconcile against half-built code. Triggers "what order do we build this in", "turn the plan into tasks", "pick up where we left off". Do NOT use to write code (`be-<stack>`), run a plan (`ep-executing-plans`), or audit code vs spec (`code-auditor`).
 ---
 
 # Delivery Plan — the ordered, agent-bound task list
@@ -11,7 +11,11 @@ The artifact that turns four design documents into work. Two things make it diff
 - **It survives interruption.** `HANDOFF.md` says what to pick up next, and the reconcile procedure re-derives the state from the code when the plan's own record is stale — because a plan whose status you have to trust is a plan you have to redo.
 - **It is the progress record.** Once implementation starts, status, evidence, ticked criteria and an append-only execution log are maintained **in this document** — not only in `HANDOFF.md`, and not only in someone's memory of the session. See *Tracking execution in the plan document*.
 
-And one property decides the shape of the sequence: **user-facing work is sequenced feature-complete**, so a phase closes on something a person can actually do, rather than on a layer finished across every area. See Step 2.
+**The unit of work is a task, and the plan is one flat list of them.** Tasks are numbered `T1…Tn` in the order they are done, and there is no grouping layer above them — no phases, no slices, no stages, no milestones. What used to be carried by a grouping is carried by three things on the task itself: its position in the order, its `Depends on` edges, and its stream. Use the word **task** everywhere — in this document, in `HANDOFF.md`, in status reports, and when talking to the human.
+
+**Every task states one deliverable** — the observable thing that exists once it is done. See Step 4.
+
+And one property decides the shape of the sequence: **user-facing work is sequenced feature-complete**, so the tasks for one capability run consecutively and the last of them makes the capability usable, rather than a layer being finished across every area first. See Step 2.
 
 **Announce at start:** "I'm using the `be-shared-delivery-plan` skill to sequence the work."
 
@@ -19,7 +23,7 @@ And one property decides the shape of the sequence: **user-facing work is sequen
 
 ## When to use
 
-- Phase 5 of a `be-planner` run
+- Step 5 of a `be-planner` run
 - `RESUME` — reconciling an existing plan against partially-built code and re-sequencing what remains
 - `EXTEND` — appending tasks for a new functional area
 
@@ -50,10 +54,10 @@ Do not brainstorm tasks. Read them out of the detail pack, in this order — the
 | `data-model.md` migration sequence | One task per migration, in its stated order |
 | `blueprint.md` cross-cutting concerns | Auth wiring, error envelope, logging/telemetry, config validation |
 | `api-surface.md` shared schemas + section 4 | Shared DTOs and the validation/error middleware — **once**, before any endpoint |
-| `api-surface.md` endpoint blocks | One task per resource (not per endpoint — a resource's CRUD set is one coherent slice) |
+| `api-surface.md` endpoint blocks | One task per resource (not per endpoint — a resource's CRUD set is one coherent task) |
 | `integrations.md` dependency blocks | One client task per external system |
 | `api-surface.md` outbound webhooks + background work | Job/consumer tasks |
-| `api-surface.md` endpoint map (once the resource slices exist) | **The OpenAPI-asset task** — one standard task, after the last endpoint slice: the `be-<stack>` agent generates the spec from the implemented surface and commits it canonicalized as `{service}-openapi-YYYY-MM-DD.json`, so `qa/_shared/api-spec-assets` has its canonical input from day one and every later contract change flows through that skill's diff-driven lane instead of being reverse-engineered. Greenfield plans include it by default; skip only when the repo already keeps the asset |
+| `api-surface.md` endpoint map (once the resource tasks exist) | **The OpenAPI-asset task** — one standard task, after the last endpoint task: the `be-<stack>` agent generates the spec from the implemented surface and commits it canonicalized as `{service}-openapi-YYYY-MM-DD.json`, so `qa/_shared/api-spec-assets` has its canonical input from day one and every later contract change flows through that skill's diff-driven lane instead of being reverse-engineered. Greenfield plans include it by default; skip only when the repo already keeps the asset |
 
 Anything not traceable to a row above is either missing from the design pack (go add it there) or is not needed.
 
@@ -63,78 +67,85 @@ Anything not traceable to a row above is either missing from the design pack (go
 
 That set is what Step 2 sequences. A capability missing any of it has been planned, not delivered — and "the endpoints exist but nothing registers them" is the way this fails most often.
 
-### Step 2 — Group into phases
+### Step 2 — Put the tasks in workable order
 
-A **phase** is a set of tasks that can start once the previous phase is done. Phases are **hard barriers**: nothing in phase N+1 starts until every task in phase N is finished, even when a particular task's own dependencies are already satisfied. The barrier is what makes the ordering safe on plans that encode prerequisites structurally — schema before the slice that maps it, foundations before the capability built on them — rather than enumerating every edge.
+**One flat sequence, `T1…Tn`, in the order the work is done.** No grouping layer sits above the tasks: what makes the order safe is that each task's inputs are produced by tasks above it, and that every such prerequisite is written on the task as a `Depends on` edge. There is no barrier to hide behind — **adjacency is not a dependency claim, so an edge that is not written down does not exist.**
 
-**First decide the sequencing shape**, because it changes what a phase *means*:
+The order must satisfy four things:
 
-| Shape | Use when | A phase ends with |
+- **Startable at its position.** Everything a task imports, calls, migrates against, registers with, or configures exists by the time its turn comes. If it does not, the task is in the wrong place — move it, don't annotate it.
+- **Working tree at every task boundary.** Each task ends with the project building and its tests green, so the plan can stop after any task and what exists still runs. A task that leaves the build red until the next one lands is not a boundary; the two are one task.
+- **Dependencies point backwards, always.** A `Depends on` naming a task with a higher order is a contradiction, and it is reported as a plan defect rather than resolved by reordering the ids.
+- **Prerequisites first.** Human-blocked provisioning from `integrations.md` leads the sequence as its own tasks, so nothing downstream stalls on a credential nobody requested.
+
+**Then decide the sequencing shape**, because it changes what runs consecutively:
+
+| Shape | Use when | The order reads as |
 |---|---|---|
-| **Feature-complete** (the default for user-facing work) | The initiative delivers capabilities a person uses, and someone will want to see one working before the rest exists | **A capability a user can exercise, end to end** |
-| **Platform-first** (the layered shape) | The initiative is a service or platform with no single user journey at stake — several areas land together and the consumer is another system | A layer completed across every area |
+| **Feature-complete** (the default for user-facing work) | The initiative delivers capabilities a person uses, and someone will want to see one working before the rest exists | One capability at a time, each usable end to end before the next begins |
+| **Platform-first** (the layered shape) | The initiative is a service or platform with no single user journey at stake — several areas land together and the consumer is another system | One layer at a time, completed across every area |
 
-Feature-complete sequencing keeps the same barriers and the same task sources; what changes is what goes into each phase. Foundations still come first — but only the foundations the **first** capability needs, never every foundation every capability will eventually want:
+**Feature-complete sequencing** puts the foundation tasks first — but only the foundations the **first** capability needs, never every foundation every capability will eventually want — and then runs each capability's tasks back to back:
 
-| Phase | Contains | Streams inside it |
-|---|---|---|
-| **P0 Prerequisites** | Human-blocked provisioning the first capability needs | One per provisioning track |
-| **P1 Foundations** | Scaffold, layout, config + validation, CI skeleton, and the cross-cutting surfaces (auth, error envelope, shared DTOs) the first capability actually depends on — nothing speculative | **One** — shared root files |
-| **P2 Capability A** | A's whole set from Step 1, in its natural order: migration → entities + rules → service → endpoints → wiring → unit tests | **One** — the steps of one feature are sequential by construction |
-| **P3 Capability B** | B's own set, plus only the foundations B is the first to need | One per capability built concurrently, when their file sets are disjoint |
-| **…** | One phase per remaining capability, most valuable first | |
-| **Pn Close-out** | The OpenAPI asset, telemetry, rate limiting, performance, docs | Group by what they touch |
+| Order | Tasks |
+|---|---|
+| First | Human-blocked provisioning the first capability needs — one task per provisioning track |
+| Then | Scaffold, layout, config + validation, CI skeleton, and the cross-cutting surfaces (auth, error envelope, shared DTOs) the first capability actually depends on — nothing speculative |
+| Then | Capability A's whole set from Step 1, in its natural order: migration → entities + rules → service → endpoints → wiring → unit tests |
+| Then | Capability B's own set, plus only the foundations B is the first to need |
+| Then | One run of tasks per remaining capability, most valuable first |
+| Last | The OpenAPI asset, telemetry, rate limiting, performance, docs |
 
 Three rules keep it honest:
 
-- **A capability phase closes only when the capability works.** Its exit condition is behavioural — *"a user with the `booker` permission can book a session and then see it under their bookings"* — not "the tasks are checked off". Write that sentence into the phase row's Goal, and make the last task in the phase the one that makes it true.
-- **Deferred foundations are named, not forgotten.** Where a capability's phase deliberately stops short of a shared surface a later one will need — a generic error envelope, a pagination convention, a caching layer — say so in the phase rationale and place the generalization in the phase that first needs it. An implied deferral is indistinguishable from an oversight.
-- **Schema order stays global.** Migrations run in the order `data-model.md` states even when phases are per-capability; a capability phase owns the migrations for its own entities, at their stated position in that sequence.
+- **A capability's last task delivers the capability.** Its `Deliverable` is the behavioural sentence — *"a user with the `booker` permission can book a session and then see it under their bookings"* — not "the tasks are done". Order the capability's tasks so exactly one of them makes that true, and make it the last of the run.
+- **Deferred foundations are named, not forgotten.** Where a capability's run deliberately stops short of a shared surface a later one will need — a generic error envelope, a pagination convention, a caching layer — say so in that task's `Out of scope` and place the generalization in the task that first needs it. An implied deferral is indistinguishable from an oversight.
+- **Schema order stays global.** Migrations run in the order `data-model.md` states even when the sequence is per-capability; a capability's tasks own the migrations for its own entities, at their stated position in that sequence.
 
-**The platform-first shape**, and the lanes it falls into:
+**The platform-first shape** runs the same tasks in layer order instead:
 
-| Phase | Contains | Streams inside it |
-|---|---|---|
-| **P0 Prerequisites** | Human-blocked provisioning from `integrations.md` | One per provisioning track — nobody is editing code |
-| **P1 Foundations** | Scaffold, project layout, config + validation, CI skeleton | **One** — scaffold, config and CI all edit the same root files |
-| **P2 Schema** | Migrations in their stated order | **One** — migrations are ordered by definition |
-| **P3 Cross-cutting** | Auth wiring, error middleware, shared DTOs, telemetry base | **One** — shared surfaces, and every later task depends on them |
-| **P4 Feature slices** | One task per resource: entity → persistence → service → endpoints → unit tests | **One per resource** — disjoint file sets, once P3 is stable |
-| **P5 Integrations** | External clients, webhook handlers, background jobs | One per dependency — one file set each |
-| **P6 Hardening** | Rate limiting, observability, performance, docs | Group by what they touch; often one per subsystem |
+| Order | Tasks |
+|---|---|
+| First | Human-blocked provisioning from `integrations.md` |
+| Then | Scaffold, project layout, config + validation, CI skeleton |
+| Then | Migrations, in their stated order |
+| Then | Auth wiring, error middleware, shared DTOs, telemetry base — every later task depends on these |
+| Then | One task per resource: entity → persistence → service → endpoints → unit tests |
+| Then | External clients, webhook handlers, background jobs — one per dependency |
+| Last | Rate limiting, observability, performance, docs |
 
-A lane that finishes its phase work early **idles at the barrier** until the phase closes. That is the cost of the conservatism, and it is worth stating in the plan rather than leaving someone to read it as a stall.
-
-Each phase's row in the plan carries **`Parallel-safe: Yes | No` — strictly boolean**, because the streams-absent fallback (Step 7) ingests it as one. A "partly" or "mixed" phase is `No`, with the safe pairs named in the Rationale column — the streams carry the pairwise answer, so nothing is lost by the conservative call.
+**What runs concurrently is decided in Step 3, not here.** The order is a single sequence — the one you would work through yourself, alone. Streams say which parts of it can be worked at the same time, and `Depends on` says what must not be.
 
 ### Step 3 — Declare the streams
 
-A **stream** is a named lane. Tasks in one stream run strictly one after another; different streams run at the same time. So the question to answer is not a per-phase yes/no — it is **"which lanes does this work actually have, and why is each one internally sequential?"**, which is answerable from the file sets you just wrote down.
+A **stream** is a named lane. Tasks in one stream run strictly one after another; different streams run at the same time. The question to answer is **"which lanes does this work actually have, and why is each one internally sequential?"**, which is answerable from the file sets you just wrote down.
 
 Give the plan a streams table, before the progress table:
 
 | Stream | Owns | Why it is internally sequential |
 |---|---|---|
-| `foundation` | Scaffold, config, CI, the shared surfaces every slice builds on | One root file set — every task edits the solution root or `Program.cs` |
+| `foundation` | Scaffold, config, CI, the shared surfaces every task builds on | One root file set — every task edits the solution root or `Program.cs` |
 | `booking` | The Bookings resource and the email it sends on confirm | `src/Booking/*` throughout; T13 sends on the event T11 raises |
 
 Rules:
 
-- **Name a stream after what it owns** — `booking`, `schema`, `infra`, `ui`. Never `stream1`, and never one lane per phase.
-- **Stream identity is stable across phases.** If P1 and P3 both hold foundation work, that is one `foundation` lane running down the whole plan, not two.
-- **Two tasks in the same phase whose `Files` overlap MUST share a stream.** This is the hard rule and the one that is machine-checked: concurrent lanes execute against a single working tree, so two lanes writing one path is a corrupted edit, not a merge conflict to resolve later. Across phases the barrier already serialises them, so two tasks in different phases may share a file across different streams safely. If the shared edit is incidental — a DI registration module, a route table — pull it out into its own earlier task instead of collapsing two good lanes into one.
+- **Name a stream after what it owns** — `booking`, `schema`, `infra`, `ui`. Never `stream1`.
+- **Stream identity is stable across the whole plan.** Foundation work at T2 and foundation work at T14 is one `foundation` lane running down the plan, not two.
+- **Two tasks whose `Files` overlap MUST be ordered against each other — same stream, or a `Depends on` edge between them.** This is the hard rule and the one that is machine-checked: concurrent lanes execute against a single working tree, so two lanes writing one path with nothing sequencing them is a corrupted edit, not a merge conflict to resolve later. With no barrier in the plan, this rule is the only thing standing between an overlapping pair and a lost write. If the shared edit is incidental — a DI registration module, a route table — pull it out into its own earlier task instead of collapsing two good lanes into one.
 - **A stream is a claim, not a bucket.** Each task in it needs the previous one's output, or touches the same code. Spreading independent tasks across lanes to look parallel is the failure mode in one direction; dumping unrelated work into one lane to look safe is the failure mode in the other, and it serialises a plan that did not need to be.
 - **A task that depends on nothing and shares no file gets its own stream.**
 - **`order` is one sequence across the whole plan** — 1, 2, 3, … no repeats, no gaps. Within a stream it fixes execution sequence; across the plan it records the order you would have done the work in yourself, which is what decides who gets a slot when more lanes are eligible than the run allows to be concurrent.
 - **`Depends on` still points backwards in `order`.** Streams say "same lane, therefore sequential"; `dependsOn` says "across lanes, this waits on that". Both are needed and a task waits on both — but a dependency on a task with a *higher* order is a contradiction between the two, and it is reported as a defect rather than resolved.
 
-Keep the per-phase parallel-safety line in the phases table for the reader, and defend it the same concrete way as before — "T10 touches `src/Scheduling/*`, T11 touches `src/Booking/*`, no shared file". But the streams table is now the load-bearing statement: a phase whose tasks all sit in one stream *is* what `parallelSafe: false` used to say, derived rather than asserted.
+Defend each lane concretely — "T10 touches `src/Scheduling/*`, T11 touches `src/Booking/*`, no shared file". The streams table is the load-bearing statement about what may run at the same time; there is no plan-level parallel-safety flag behind it.
 
 ### Step 4 — Write each task
 
 ```markdown
-### T12 — Orders resource (P4)
+### T12 — Orders resource
 
+**Deliverable:** the five Orders endpoints are live and reachable — a caller with the `orders:write`
+permission can place, cancel and close an order, and list or get their own.
 **Agent:** `be-dotnet` · **Skills:** `be-dotnet-pattern-writer`, `be-dotnet-database-code`, `be-dotnet-unit-testing`
 **Stream:** `ordering` · **Order:** 12
 **Depends on:** T4 (schema), T9 (auth wiring), T10 (shared DTOs + error middleware)
@@ -163,23 +174,24 @@ endpoints in `api-surface.md` §5 (list, get, place, cancel, close), with the st
 
 Rules:
 
+- **`Deliverable` is the one observable thing that exists when the task is done**, stated as a fact about the world rather than as an activity. "Implement the Orders service" is not a deliverable; "`POST /orders` accepts a valid order and returns `201` with the created id" is. It is one line, it is checkable by someone who did not do the work, and it is the first thing written — a task whose deliverable you cannot state is not yet one task. The acceptance criteria say how it is verified in detail; the deliverable says what it *is*. Where the task is the last of a capability's run, its deliverable is the behavioural sentence for the whole capability (see Step 2).
 - **`Agent` is an exact catalog name**, picked from the routing-map catalog in `blueprint.md` (authored by `be-shared-solution-blueprint` — that catalog is the single authoritative list; `be-dotnet`, `data-architect`, `qa-api-<stack>` are the shape). An invented name is the most damaging defect in the pack, because Mission Control binds on this string. Same for skill names. When the chosen stack has no skill for a concern the task needs (e.g. `be-node` currently ships no service-side auth skill), bind the task to the stack agent anyway, note the gap in the Skills cell (`— no <concern> skill for this stack; the agent works from the design pack`), and add an open question — never invent a skill name to fill the hole.
 - **Human prerequisite tasks use `Agent: human`.** Provisioning work from `integrations.md`'s blocking unknowns — accounts, tenants, sandbox access — is a real task with a real id, but its executor is a person: the Agent cell is the literal `human` and the task block carries an `**Owner:**` line naming who does it. `human` is exempt from catalog-name resolution, and Mission Control treats these tasks as gates to satisfy, never lanes to schedule.
 - **`Files` must be specific.** This is what the stream check relies on, and it is the difference between a plan and a wish.
 - **`Stream` is one of the ids declared in Step 3**, and `Order` is that task's slot in the plan-wide sequence. **Every task carries both, or no task does** — half-authored lanes are rejected rather than completed, because back-filling the rest would scatter tasks into lanes nobody planned. A `Stream` naming an undeclared lane and two tasks claiming one `Order` are both reported as plan defects, and the undeclared lane also costs you the lanes you did author: the whole plan falls back to derived ones.
 - **Acceptance criteria are checkable**, and they cite the design pack by section rather than restating it. "Handles errors properly" is not a criterion; "returns the documented `type` slug for each of the three deltas" is.
 - **The build/test command is the project's own**, taken from the orientation pass — never a guessed default.
-- **Size a task by coherence, not by volume.** A task is one thing, done once — a resource, a migration set, an external client, a capability's endpoint surface — and it is exactly as big as that thing is. File counts and criterion counts are not a limit: a slice that genuinely needs fourteen files is one task, and cutting it into "the entity" and "the service" produces two tasks neither of which can be verified alone. **Split when it stops being one thing**: it delivers two independent behaviours; a natural intermediate point exists where the work is meaningfully complete *and* checkable on its own; part of it is blocked while the rest is not; or two different agents own the halves. Every piece of a split must still build, still pass its own tests, and still be independently verifiable — a split that leaves the tree broken between the pieces was a bad seam, and the two pieces are one task. When a task is large, its **acceptance-criteria list is its step breakdown**, ticked off in place as the work lands.
+- **Size a task by coherence, not by volume.** A task is one thing, done once — a resource, a migration set, an external client, a capability's endpoint surface — and it is exactly as big as that thing is. File counts and criterion counts are not a limit: work that genuinely needs fourteen files is one task, and cutting it into "the entity" and "the service" produces two tasks neither of which can be verified alone. **The deliverable is the test**: one task, one deliverable. Two deliverables means two tasks; no statable deliverable means it is a fragment of one. **Split when it stops being one thing**: it delivers two independent behaviours; a natural intermediate point exists where the work is meaningfully complete *and* checkable on its own; part of it is blocked while the rest is not; or two different agents own the halves. Every piece of a split must still build, still pass its own tests, and still be independently verifiable — a split that leaves the tree broken between the pieces was a bad seam, and the two pieces are one task. When a task is large, its **acceptance-criteria list is its step breakdown**, ticked off in place as the work lands.
 - **`Out of scope` per task** — mostly to keep the executing agent from wandering into a peer's lane.
 - **Tasks are implementation.** Live/E2E/integration test runs, starting servers, and manual verification belong to a separate QA pass owned by a `qa-*` peer. Unit tests are part of the implementation task, not a separate one.
 
 ### Step 5 — The progress table
 
-The scannable index, and the thing `HANDOFF.md` points at. Rows sorted by `#`, which makes the sequence auditable at a glance — a repeat or a gap is visible without cross-reading the task blocks. `#` **is** the plan-wide `order` Mission Control consumes; the task blocks repeat it as `Order:`, and the two must agree:
+The scannable index, and the thing `HANDOFF.md` points at. Rows sorted by `#`, which makes the sequence auditable at a glance — a repeat or a gap is visible without cross-reading the task blocks, and the whole plan reads top to bottom as "what gets delivered, in what order". `#` **is** the plan-wide `order` Mission Control consumes; the task blocks repeat it as `Order:`, and the two must agree. The `Deliverable` cell is the task block's deliverable line, shortened to fit — same claim, fewer words:
 
-| # | Task | Phase | Stream | Title | Agent | Depends on | Status | Evidence |
+| # | Task | Stream | Title | Deliverable | Agent | Depends on | Status | Evidence |
 |---|---|---|---|---|---|---|---|---|
-| 12 | T12 | P4 | `ordering` | Orders resource | `be-dotnet` | T4, T9, T10 | Not started | — |
+| 12 | T12 | `ordering` | Orders resource | The five Orders endpoints are live and reachable | `be-dotnet` | T4, T9, T10 | Not started | — |
 
 Status vocabulary — six values, no others: **Not started · In progress · Done · Partial · Diverged · Blocked**. `Evidence` holds the `file:line` or command output that justifies a `Done` or `Partial`. An empty Evidence cell on a `Done` row is a defect in the plan, not a formatting gap.
 
@@ -197,21 +209,22 @@ Close the document with an ingestion block so the plan can be pasted into Missio
 ## For Mission Control
 
 Paste this document into the plan box and point the run at `<target repo path>`.
-The task graph maps 1:1 — the streams in §2 become MC's lanes, each task keeps its
-`stream` and `order` alongside its `agent`, `skills`, `files` and `dependsOn`,
-phases stay hard barriers, and the open questions below carry their options.
-MC's planner re-reads the target repo, so it may split a task it finds too large;
-that is expected and does not invalidate the sequence — the new pieces belong in
-the split task's own lane.
+The task graph maps 1:1 — the streams in §1 become MC's lanes, each task keeps its
+`stream` and `order` alongside its `deliverable`, `agent`, `skills`, `files` and
+`dependsOn`, and the open questions below carry their options. There is no grouping
+level: ordering is the `order` sequence, and every prerequisite is an explicit
+`dependsOn` edge. MC's planner re-reads the target repo, so it may split a task it
+finds too large; that is expected and does not invalidate the sequence — the new
+pieces belong in the split task's own lane, and each needs its own deliverable.
 
 **Open questions still blocking tasks**
 | # | Question | Options | Blocks |
 |---|---|---|---|
 ```
 
-Mission Control's planner consumes exactly these fields — run-level `streams[]` (`id · name · description`), per-task `id · phaseId · streamId · order · title · intent · acceptanceCriteria[] · agent · skills[] · files[] · dependsOn[]`, per-phase `parallelSafe` + `parallelRationale`, and `openQuestions[]` with 2–4 options each and one recommended. Writing them in that vocabulary is the entire compatibility requirement.
+Mission Control's planner consumes exactly these fields — run-level `streams[]` (`id · name · description`), per-task `id · streamId · order · title · deliverable · intent · acceptanceCriteria[] · agent · skills[] · files[] · dependsOn[]`, and `openQuestions[]` with 2–4 options each and one recommended. Writing them in that vocabulary is the entire compatibility requirement.
 
-**A pack without streams still imports.** MC derives lanes from the phases' parallel-safety calls — a sequential phase becomes one lane, a parallel-safe one becomes a lane per task — and orders from position in the list. That is why `parallelSafe` stays in the artifact. But a derivation is a guess at the shape you already know: it cannot tell that P1's foundation lane and P3's shared-surfaces lane are the same continuous lane, and it will fan a parallel-safe phase out to the width of its task count. Author the streams.
+**Streams are mandatory, not an optimization.** With no grouping level in the plan, `streams[]` + `order` + `dependsOn[]` are the whole concurrency story: the streams say what may run at the same time, and the dependencies say what must not. A pack that omits them leaves MC nothing to derive lanes from but the raw sequence, and it will run the plan strictly serially — correct, but one lane wide. Author the streams.
 
 ---
 
@@ -227,15 +240,16 @@ The executing agent (or the human) updates the plan **as part of the task**, not
 | Meeting an acceptance criterion | Tick its checkbox in the task block, in place |
 | Finishing a task | Progress row → `Done`, with `file:line` or command output in the Evidence cell; every criterion ticked; one execution-log row |
 | Stopping mid-task | Progress row → `Partial`, plus a `**Progress:**` line in the task block naming what remains — the unticked criteria are that list |
-| Building it differently | Progress row → `Diverged`; both readings in the task block; the resolution recorded in §8 once the human picks |
+| Building it differently | Progress row → `Diverged`; both readings in the task block; the resolution recorded in §7 once the human picks |
 | Hitting a blocker | Progress row → `Blocked`, naming what on and who owns it; one execution-log row |
-| Closing a capability phase | Record that the phase's behavioural goal now holds, with how it was checked |
+| Finishing a capability's last task | Record that its behavioural deliverable now holds, with how it was checked |
 
 Rules:
 
+- **The deliverable is what `Done` means.** A task is `Done` when its stated deliverable exists, not when its steps were performed. Every criterion ticked with the deliverable absent is a `Partial`.
 - **Evidence, not assertion.** `Done` and `Partial` carry the `file:line` or command output that proves them, produced in the session that wrote the status. The rule the reconcile runs on applies first to the person writing the status.
 - **The execution log is append-only.** Rows are added, never edited or deleted — a task that regresses gets a new row, not a corrected one. It is the one part of the pack that is history rather than a statement of now, and it is what makes *"what has been done"* answerable without reading git.
-- **Decisions and deviations are recorded in the plan** (§8), because they outlive the session that made them. A deviation that lives only in a rewritten handoff is gone by Monday.
+- **Decisions and deviations are recorded in the plan** (§7), because they outlive the session that made them. A deviation that lives only in a rewritten handoff is gone by Monday.
 - **Never delete a task that turned out to be unnecessary.** Mark it, say why, keep the id. A task that vanishes reads as a task that was forgotten.
 - **The status is still a lead to a cold agent.** A `Done` written last month is re-verified against the code on a RESUME, per the reconcile procedure below. Recording status well makes that reconcile cheap; it does not replace it.
 - **Regenerate `delivery-plan-explained.md` when the plan is re-sequenced**, not on every status tick — the companion explains the sequence, not the progress.
@@ -254,13 +268,13 @@ Run this **before** re-sequencing anything, when a plan and partially-built code
 
 | Verdict | Means |
 |---|---|
-| **Done** | Every acceptance criterion is satisfied by code you read this session |
+| **Done** | The deliverable exists and every acceptance criterion is satisfied by code you read this session |
 | **Partial** | Some criteria satisfied; name exactly which are missing |
 | **Not started** | No artifacts found. Say what you searched for — a negative claim needs its search named |
 | **Diverged** | Built, but differently from the plan. **Both readings recorded; the human decides** |
 | **Blocked** | Cannot proceed — a prerequisite, a missing credential, a red build |
 
-4. **Escalate every divergence.** Usually the code is right and the plan is stale — but you never silently rewrite the plan to match, because the other possibility is a defect. Present both readings, recommend one, and record the resolution in the plan's §8 Decisions & deviations.
+4. **Escalate every divergence.** Usually the code is right and the plan is stale — but you never silently rewrite the plan to match, because the other possibility is a defect. Present both readings, recommend one, and record the resolution in the plan's §7 Decisions & deviations.
 5. **Sweep the class.** If one task diverged because the plan assumed a convention the project does not use, every other pending task assuming it is also wrong. Fix them together.
 6. **Check the baseline.** Does the repo build and do its tests pass *right now*? A plan that assumes a green baseline while the build is red is wrong from task one. Report a red state as a finding — it is not yours to silently fix.
 7. **Re-sequence what remains**, then rewrite `HANDOFF.md`.
@@ -286,40 +300,37 @@ Diverged — T9 (auth wiring): plan specifies policy-based authorization;
 **Pack:** `./blueprint.md` · `./data-model.md` · `./api-surface.md` · `./integrations.md`
 **Target repo:** `<path>` · **Stack:** <stack + version> · **Build/test:** `<the project's own commands>`
 
-> **For agentic workers:** each task names the agent that should execute it and the skills to load.
+> **For agentic workers:** the tasks below are one flat sequence — work them in order. Each names
+> the agent that should execute it, the skills to load, and the one deliverable that means it is done.
 > Run them with `ep-executing-plans` inline, or hand the whole document to Mission Control.
-> **Update this document as you work** — the Status and Evidence cells in §3, the criterion
-> checkboxes in §4, an append-only row in §7, and any decision or deviation in §8.
+> **Update this document as you work** — the Status and Evidence cells in §2, the criterion
+> checkboxes in §3, an append-only row in §6, and any decision or deviation in §7.
 > `HANDOFF.md` says only what to pick up next.
 
-## 1. Phases
-| Phase | Goal | Parallel-safe | Rationale |
-|---|---|---|---|
-
-## 2. Streams
+## 1. Streams
 | Stream | Owns | Why it is internally sequential |
 |---|---|---|
 
-## 3. Progress
-| # | Task | Phase | Stream | Title | Agent | Depends on | Status | Evidence |
+## 2. Progress
+| # | Task | Stream | Title | Deliverable | Agent | Depends on | Status | Evidence |
 |---|---|---|---|---|---|---|---|---|
 
-## 4. Tasks
-<!-- one block per task: agent, skills, stream + order, depends on, files, intent, acceptance criteria, out of scope -->
+## 3. Tasks
+<!-- one block per task, in order: deliverable, agent, skills, stream + order, depends on, files, intent, acceptance criteria, out of scope -->
 
-## 5. Open questions
+## 4. Open questions
 | # | Question | Options | Blocks | Owner |
 |---|---|---|---|---|
 
-## 6. Deliberately not planned
+## 5. Deliberately not planned
 <!-- what this initiative excludes and which agent/peer owns it instead -->
 
-## 7. Execution log
+## 6. Execution log
 <!-- append-only, oldest first: one row per status change. Never edited, never deleted -->
 | When | Task | Status | By | Note |
 |---|---|---|---|---|
 
-## 8. Decisions & deviations
+## 7. Decisions & deviations
 <!-- answered questions, resolved divergences, and what got built differently from the plan -->
 | # | Task | Plan said | What was decided/built | Why | When |
 |---|---|---|---|---|---|
@@ -331,24 +342,25 @@ Diverged — T9 (auth wiring): plan specifies policy-based authorization;
 ## Self-check before handing off
 
 1. Every functional area in `blueprint.md` has at least one task; every migration, every resource, every external client, every blocking unknown is a task.
-2. Every task binds to an **exact** catalog agent name and exact skill names.
-3. No task depends on a later phase. Every `dependsOn` id exists.
-4. Every task names a declared stream and carries a unique `order`; every stream's row says why it is internally sequential; no two tasks in the same phase but different streams share a file; no `dependsOn` points at a higher `order`.
-5. Every task's acceptance criteria are checkable and cite the design pack by section.
-6. The build/test commands are the project's own, from the orientation pass.
-7. `HANDOFF.md` exists, names the next task per unblocked lane and every blocker — and carries no progress record of its own.
-8. Every `Done`/`Partial` status carries `file:line` evidence read this session.
-9. Every user-facing capability has a phase whose Goal states behaviourally what a user can do once it closes, and that phase's tasks cover everything on the Step-1 capability set — including what makes it reachable, not only its endpoints.
-10. Sections 7 and 8 exist (empty before execution starts), and the header note tells the executing agents to maintain §3, §4, §7 and §8 as they work.
+2. Reading the tasks in `order`, each one could be started at its position: everything it needs was produced by a task above it.
+3. Every task states one `Deliverable`, as a result rather than an activity. Every user-facing capability has a last task whose deliverable says behaviourally what a user can then do, and the run of tasks ending there covers everything on the Step-1 capability set — including what makes it reachable, not only its endpoints.
+4. Every task binds to an **exact** catalog agent name and exact skill names.
+5. Every `dependsOn` id exists, and every one points backwards in `order`.
+6. Every task names a declared stream and carries a unique `order`; every stream's row says why it is internally sequential; every pair of tasks whose `Files` overlap is ordered against each other — same stream or a `dependsOn` edge between them.
+7. Every task's acceptance criteria are checkable and cite the design pack by section.
+8. The build/test commands are the project's own, from the orientation pass.
+9. `HANDOFF.md` exists, names the next task per unblocked lane and every blocker — and carries no progress record of its own.
+10. Every `Done`/`Partial` status carries `file:line` evidence read this session.
+11. Sections 6 and 7 exist (empty before execution starts), and the header note tells the executing agents to maintain §2, §3, §6 and §7 as they work.
 
 ## Handoffs
 
-- **→ `be-dotnet` / `be-java` / `be-node`** — execute the tasks bound to them, and update this document's §3/§4/§7/§8 as each task moves.
+- **→ `be-dotnet` / `be-java` / `be-node`** — execute the tasks bound to them, and update this document's §2/§3/§6/§7 as each task moves.
 - **→ `ep-executing-plans`** — the task-by-task execution loop, with checkpoints; its per-task checkpoint is where this plan's status, evidence and execution log get written. `ep-delegate-to-subagents` runs the same tasks through subagents — the controller, not the subagent, owns the plan update.
 - **→ Mission Control** — paste the document, point at the repo.
 - **→ `data-architect` / `devops-engineer` / `observability-engineer-<stack>` / `qa-*`** — the tasks bound to them, run as peers.
 - **→ `code-auditor`** — when a reconcile finds systemic drift rather than a handful of divergences, that is an audit, not a reconcile.
-- **→ `be-shared-plain-language-companion`** — writes `delivery-plan-explained.md` beside this document for the stakeholders who need the sequence, the deliverables and the blockers without the task ids and agent bindings. Regenerate it whenever this plan is re-sequenced.
+- **→ `be-shared-plain-language-companion`** — writes `delivery-plan-explained.md` beside this document for the stakeholders who need the order, the deliverables and the blockers without the task ids and agent bindings. Regenerate it whenever this plan is re-sequenced.
 
 ## Version policy
 

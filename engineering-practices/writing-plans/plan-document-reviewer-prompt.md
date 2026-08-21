@@ -22,6 +22,8 @@ Task tool (general-purpose):
     | Completeness | TODOs, placeholders, incomplete tasks, missing steps |
     | Spec Alignment | Plan covers spec requirements, no major scope creep |
     | Task Decomposition | Tasks have clear boundaries, steps are actionable |
+    | Deliverables | Every task states one deliverable, and it is a result rather than an activity |
+    | Order | Read top to bottom: could each task actually be started at its position? Every `Depends on` points backwards |
     | Buildability | Could an engineer follow this plan without getting stuck? |
 
     ## Calibration
@@ -40,7 +42,7 @@ Task tool (general-purpose):
     **Status:** Approved | Issues Found
 
     **Issues (if any):**
-    - [Task X, Step Y]: [specific issue] - [why it matters for implementation]
+    - [TX, Step Y]: [specific issue] - [why it matters for implementation]
 
     **Recommendations (advisory, do not block approval):**
     - [suggestions for improvement]

@@ -20,7 +20,7 @@ Two disciplines are the whole skill:
 
 ## When to use
 
-- Phase 6 of a `be-planner` run — after the five plan artifacts are written and self-reviewed
+- Step 6 of a `be-planner` run — after the five plan artifacts are written and self-reviewed
 - A stakeholder, product owner, support lead or client sponsor needs to review or sign off on work described in an existing technical artifact
 - A source document changed and its companion needs regenerating
 
@@ -121,7 +121,7 @@ Each companion answers one question, and stops. Depth belongs to the source.
 | `data-model-explained.md` | What information does the system keep, and what does each thing mean in business terms? | Columns, keys, indexes, migration mechanics |
 | `api-surface-explained.md` | What can be asked of the system, by whom, and what comes back? | Field tables, status codes, the validation catalog |
 | `integrations-explained.md` | Which outside services do we rely on, what breaks if one is down, and what does someone need to go get? | Config key names, timeout and retry policy |
-| `delivery-plan-explained.md` | What gets built in what order, what does each phase deliver, and what is blocking us? | Task ids, file lists, `dependsOn` graphs, agent names |
+| `delivery-plan-explained.md` | What gets built in what order, what does each step deliver, and what is blocking us? | Task ids, file lists, `dependsOn` graphs, agent names |
 
 The consistent instinct: **cut the machinery, keep the meaning, keep every deadline, threshold and blocker.** A stakeholder who reads only `delivery-plan-explained.md` must still learn that the Stripe credentials nobody has requested yet are holding up payments.
 

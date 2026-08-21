@@ -6,7 +6,7 @@ Use this template when dispatching a spec compliance reviewer subagent.
 
 ```
 Task tool (general-purpose):
-  description: "Review spec compliance for Task N"
+  description: "Review spec compliance for T<N>"
   prompt: |
     You are reviewing whether an implementation matches its specification.
 

@@ -81,7 +81,7 @@ Does this route need client interactivity (state, effects, event handlers, brows
 | **Streaming** | shell now, slow parts stream in via `<Suspense>` | slow first data, above-the-fold speed matters | more moving parts; ensure fallbacks are designed |
 | **Client island** | a `'use client'` leaf inside a server route | one interactive widget on an otherwise static page | ships that subtree's JS — keep it small |
 
-**Don't make the whole route a Client Component** to get one interactive button — that drags the entire subtree into the bundle. Keep the route server, island the button (the boundary rule from [`basics`](../basics/SKILL.md)). Document the per-route decision in the Phase-1 decision record, like the Blazor render-mode map.
+**Don't make the whole route a Client Component** to get one interactive button — that drags the entire subtree into the bundle. Keep the route server, island the button (the boundary rule from [`basics`](../basics/SKILL.md)). Document the per-route decision in the Step-1 decision record, like the Blazor render-mode map.
 
 ## Project layout — feature folders + the app router tree
 

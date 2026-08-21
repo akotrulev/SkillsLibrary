@@ -21,17 +21,27 @@ Load plan, review critically, execute task-by-task, report at each checkpoint, a
 
 ### Step 2: Execute Tasks with Checkpoints
 
+**Work the tasks in the order the plan lists them.** The order is the plan's
+dependency graph — a task's inputs are produced by the tasks above it. Don't
+reorder, don't run ahead to a task that looks independent, and if a task cannot
+be started at its position, that is a blocker to raise, not an ordering to fix
+on the fly.
+
 For each task:
 1. Mark as in_progress (TaskUpdate)
 2. Follow each step exactly (plan has bite-sized steps)
 3. Run verifications as specified
-4. Mark as completed (TaskUpdate)
-5. **Checkpoint — report, then continue:** post a short summary and continue to
+4. **Confirm the task's stated `Deliverable` actually exists** — the endpoint
+   answers, the migration applied, the test file runs. The deliverable is what
+   "done" means; the steps are only how you got there
+5. Mark as completed (TaskUpdate)
+6. **Checkpoint — report, then continue:** post a short summary and continue to
    the next task without waiting for a reply. Include:
-   - the task just finished (name/number)
+   - the task just finished (id + name)
+   - its deliverable, and the evidence it exists
    - files created/modified
    - verification output (test/lint/build result — the actual pass/fail line)
-   - what's next (the next task's name)
+   - what's next (the next task's id + name)
 
    This is a **report, not a permission prompt** — you keep going. It exists so
    the user has a natural interception point to correct course mid-plan; the skill
@@ -74,7 +84,9 @@ After all tasks complete and verified:
 - Follow plan steps exactly
 - Don't skip verifications
 - Reference skills when plan says to
-- Checkpoint after each task (files touched + verification output), then continue — unless the user asked to run through to the end
+- Tasks are the unit of work — never call one a slice or a phase, in the plan or in a report
+- Run them in the plan's order; a task that can't start where it sits is a blocker
+- Checkpoint after each task (deliverable + evidence + files touched + verification output), then continue — unless the user asked to run through to the end
 - Stop when blocked, don't guess
 - Never start implementation on main/master branch without explicit user consent
 

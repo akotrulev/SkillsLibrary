@@ -29,7 +29,7 @@ Don't test:
 
 ## TDD Mapping for Skill Testing
 
-| TDD Phase | Skill Testing | What You Do |
+| TDD Step | Skill Testing | What You Do |
 |-----------|---------------|-------------|
 | **RED** | Baseline test | Run scenario WITHOUT skill, watch agent fail |
 | **Verify RED** | Capture rationalizations | Document exact failures verbatim |
@@ -40,7 +40,7 @@ Don't test:
 
 Same cycle as code TDD, different test format.
 
-## RED Phase: Baseline Testing (Watch It Fail)
+## RED Step: Baseline Testing (Watch It Fail)
 
 **Goal:** Run test WITHOUT the skill - watch agent fail, document exact failures.
 
@@ -79,7 +79,7 @@ Run this WITHOUT a TDD skill. Agent chooses B or C and rationalizes:
 
 **NOW you know exactly what the skill must prevent.**
 
-## GREEN Phase: Write Minimal Skill (Make It Pass)
+## GREEN Step: Write Minimal Skill (Make It Pass)
 
 Write skill addressing the specific baseline failures you documented. Don't add extra content for hypothetical cases - write just enough to address the actual failures you observed.
 
@@ -160,7 +160,7 @@ You have access to: [skill-being-tested]
 
 Make agent believe it's real work, not a quiz.
 
-## REFACTOR Phase: Close Loopholes (Stay Green)
+## REFACTOR Step: Close Loopholes (Stay Green)
 
 Agent violated rule despite having the skill? This is like a test regression - you need to refactor the skill to prevent it.
 
@@ -309,17 +309,17 @@ Meta-test: "Skill was clear, I should follow it"
 
 Before deploying skill, verify you followed RED-GREEN-REFACTOR:
 
-**RED Phase:**
+**RED Step:**
 - [ ] Created pressure scenarios (3+ combined pressures)
 - [ ] Ran scenarios WITHOUT skill (baseline)
 - [ ] Documented agent failures and rationalizations verbatim
 
-**GREEN Phase:**
+**GREEN Step:**
 - [ ] Wrote skill addressing specific baseline failures
 - [ ] Ran scenarios WITH skill
 - [ ] Agent now complies
 
-**REFACTOR Phase:**
+**REFACTOR Step:**
 - [ ] Identified NEW rationalizations from testing
 - [ ] Added explicit counters for each loophole
 - [ ] Updated rationalization table
@@ -357,7 +357,7 @@ Tests pass once ≠ bulletproof.
 
 ## Quick Reference (TDD Cycle)
 
-| TDD Phase | Skill Testing | Success Criteria |
+| TDD Step | Skill Testing | Success Criteria |
 |-----------|---------------|------------------|
 | **RED** | Run scenario without skill | Agent fails, document rationalizations |
 | **Verify RED** | Capture exact wording | Verbatim documentation of failures |

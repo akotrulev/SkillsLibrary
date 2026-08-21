@@ -60,7 +60,7 @@ Two ways to run it in a TypeScript shop — cover both:
 
 ## `lhci autorun` + `lighthouserc` — the URL-list CI gate
 
-`lhci autorun` does three phases in one command: **collect** (run Lighthouse N times per URL, keep the
+`lhci autorun` does three steps in one command: **collect** (run Lighthouse N times per URL, keep the
 median), **assert** (apply your score thresholds — this is the build-fail mechanism), **upload** (store
 the report). Configure it in `lighthouserc.cjs`:
 

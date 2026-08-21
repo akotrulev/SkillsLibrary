@@ -7,7 +7,7 @@ description: Use when the user hands over a story, BRD, acceptance criteria, API
 
 Turns raw, scattered, or partial inputs — a user story, a BRD section, acceptance criteria, an API contract, a state diagram, a Figma flow, or just a paragraph describing part of a feature — into **one concise, structured document that captures everything a tester needs to know about the feature**: its business logic, the high-level implementation details that affect observable behavior, every validation, and every restriction.
 
-This is the **ISTQB test-analysis step**: the inputs are the *test basis*; this skill analyzes them to produce a distilled, testable feature breakdown. It is the artifact that **precedes** test design. It does not enumerate cases, pick techniques, or assign coverage — it produces the single source of truth those steps consume. It backs **Phase 1 of the `qa/manual/agents/qa-test-case-designer` agent** ("Analyze the test basis").
+This is the **ISTQB test-analysis step**: the inputs are the *test basis*; this skill analyzes them to produce a distilled, testable feature breakdown. It is the artifact that **precedes** test design. It does not enumerate cases, pick techniques, or assign coverage — it produces the single source of truth those steps consume. It backs **Step 1 of the `qa/manual/agents/qa-test-case-designer` agent** ("Analyze the test basis").
 
 ## When to use
 

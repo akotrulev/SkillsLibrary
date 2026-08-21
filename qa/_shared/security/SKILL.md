@@ -1,6 +1,6 @@
 ---
 name: qa-security-shared
-description: Cross-stack security-testing backbone — maps OWASP Top 10 (2025) and API Security Top 10 (2023) risks to this library's scanner gates and stack-native security skills, with severity/gating policy, the authorization-to-scan rule, and triage discipline. The planning layer the `qa-security` agent drives phase by phase. Triggers "what security testing do we need", "map our coverage to OWASP", "which security skill applies", "triage these findings". Do NOT load standalone to run a scan.
+description: Cross-stack security-testing backbone — maps OWASP Top 10 (2025) and API Security Top 10 (2023) risks to this library's scanner gates and stack-native security skills, with severity/gating policy, the authorization-to-scan rule, and triage discipline. The planning layer the `qa-security` agent drives step by step. Triggers "what security testing do we need", "map our coverage to OWASP", "which security skill applies", "triage these findings". Do NOT load standalone to run a scan.
 ---
 
 # QA — Security Testing (Shared / OWASP backbone)
@@ -176,9 +176,9 @@ Most modern tools emit **SARIF** (Static Analysis Results Interchange Format). S
 - Attach the human report to **Allure** + as a CI artifact so a failing run names the findings without
   re-scanning. Cross-link `qa/reporting/<stack>/skills/test-reports`.
 
-## The phased model (what the `qa-security` agent runs)
+## The step model (what the `qa-security` agent runs)
 
-| # | Phase | Layers | When |
+| # | Step | Layers | When |
 |---|-------|--------|------|
 | 1 | **Threat model & OWASP scope** | pick Top-10/API-10 items + ASVS level in scope; confirm authorization & target env | before anything runs |
 | 2 | **Static gates** (fast, every PR) | SAST · secrets · SCA | per-PR |
@@ -187,7 +187,7 @@ Most modern tools emit **SARIF** (Static Analysis Results Interchange Format). S
 | 5 | **Build-artifact gates** | container image · IaC | per-build / pre-release |
 | 6 | **Review, gate & report** | triage, SARIF consolidation, CI wiring, ASVS coverage report | the gate |
 
-Phases 2/3 are cheap and safe — run on every PR. Phase 4-active and Phase 5 need a safe target and may run on
+Steps 2/3 are cheap and safe — run on every PR. Step 4-active and Step 5 need a safe target and may run on
 a slower cadence. **A clean pipeline ≠ "secure"** — it means the *automatable* layers passed; business-logic
 abuse still needs a manual pentest. State that in every report.
 
@@ -216,7 +216,7 @@ abuse still needs a manual pentest. State that in every report.
   skill (the scanner blind spot; TS canonical).
 - `qa/<stack>/skills/security-testing/{passive-scan,dependency-scan}` — the existing passive-DAST and SCA
   per-stack skills this family already shipped.
-- `qa/_shared/agents/qa-security.md` — the phased orchestrator that loads this reference + the tool skills.
+- `qa/_shared/agents/qa-security.md` — the step-by-step orchestrator that loads this reference + the tool skills.
 - `qa/<stack>/skills/test-login-tokens` — multi-user/role token acquisition the access-control matrix needs.
 - `qa/cicd/<stack>/skills/ci-pipelines/*` + `qa/cicd/ci-conventions` — wire the gates and SARIF upload.
 - `qa/reporting/<stack>/skills/test-reports` — attach the human reports.

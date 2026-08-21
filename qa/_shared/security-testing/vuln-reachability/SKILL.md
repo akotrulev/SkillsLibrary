@@ -182,7 +182,7 @@ finding, correctly demoted. Add a VEX `not_affected / vulnerable_code_not_in_exe
 - `qa/manual/bug-report-writer` — an ACT/ATTEND verdict on a real CVE is written up with its KEV/EPSS/VEX
   evidence and feed versions.
 - `qa/_shared/agents/qa-security.md` — the orchestrator; this skill runs as the **reachability-weighting
-  step inside Phase 2** (static gates), reprioritizing SCA/SAST output before the gate decision.
+  step inside Step 2** (static gates), reprioritizing SCA/SAST output before the gate decision.
 - Deep dives: **`references/epss-kev.md`** (both feeds, the API traps, thresholds, Vulnrichment/SSVC) ·
   **`references/vex-reachability.md`** (OpenVEX + govulncheck/osv-scanner/dep-scan/Grype/Kubescape, the
   myth-busters) · **`references/enrichment-gate.md`** (the join, the decide function, the three output paths,
