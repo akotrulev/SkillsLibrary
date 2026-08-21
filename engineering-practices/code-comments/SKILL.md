@@ -34,6 +34,15 @@ Two near-misses that look like case 1 but are design defects: a comment **enumer
 
 **Directives** change what a tool does and they stay: analyzer/lint suppressions and compiler pragmas (`#pragma`, `eslint-disable`), serializer/validation/mapping/OpenAPI annotations that produce output, source-generator and framework markers. **A suppression must carry its reason** — in the tool's justification field where one exists, otherwise on the same line; a bare suppression is its own finding, usually hiding the defect rather than accepting it.
 
+**Annotations inside a skill's own code examples are teaching apparatus, not source comments.**
+A `SKILL.md` or `references/*.md` snippet may carry ``// Pin the image tag, never `latest` ``,
+`// never do this` markers, or a pointer to the surrounding prose — these address the *reader of the
+skill* and are **never copied into the project**. Emit the snippet's code, not its annotations.
+Two consequences: a gotcha that must survive into the generated file does not belong in a snippet
+comment — put it in the skill's prose, or make the code self-evident; and an example must never
+use a comment to stand in for code it does not show (`// re-init the page objects` above a method
+that does not) — a reader who copies it gets a defect the comment concealed.
+
 **Database object comments are schema metadata**, not source comments — `COMMENT ON`, extended properties, and equivalents are queryable data-dictionary entries governed by the schema conventions. A `--` comment inside a migration or a query *is* a source comment and is governed here.
 
 ## Test code

@@ -26,6 +26,7 @@ The skills library lives at the repo's `qa/` folder when working inside the Skil
 
 ## Operating rules
 
+- **KISS — write the simplest test that proves the behaviour, then stop.** No wrapper or DSL over the runner, driver, or HTTP client; no base-class hierarchy where a plain helper does; no fixture factory, builder, or abstraction with one caller; no indirection a reader must chase to see what the test actually asserts. Extract it on the **second** real need. Cut **structure**, never **rigour** — one behaviour per test, no OR-assertions, explicit waits, loud failures carrying evidence, and independent tests all stay. An unearned abstraction is a **major** finding whose fix is to inline it.
 - Honor every global rule in the library `CLAUDE.md`: no secrets in code (env-driven config via `__ENV`), builders for 4+ field test data, structured output. Remember k6 scripts run in the k6 runtime, not Node — no Node APIs or npm runtime imports; Node-side tooling (data prep, report processing) follows the full TS rules (`strict: true`, async/await all the way).
 - Numbers without context are noise: every scenario states its workload model (open vs closed, arrival rate, duration, warm-up) and its thresholds (p95/p99 latency, error rate, throughput) **before** it runs — as k6 `thresholds`, not prose.
 - Never load-test an environment you are not authorized to load. Confirm the target environment is disposable/sized for it before the first real run.

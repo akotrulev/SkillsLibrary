@@ -189,7 +189,7 @@ public abstract class CdpBaseTest extends BaseTest {
     @BeforeMethod(alwaysRun = true, dependsOnMethods = "createContext")
     public void initCdp() {
         // CDP is Chromium-only — declare the dependency loudly.
-        throw_if_not_chromium();
+        skipUnlessChromium();
         cdp = CdpControls.attach(page);
     }
 
@@ -198,7 +198,7 @@ public abstract class CdpBaseTest extends BaseTest {
         if (cdp != null) cdp.detach();
     }
 
-    private void throw_if_not_chromium() {
+    private void skipUnlessChromium() {
         if (!"chromium".equals(browserName)) {
             throw new SkipException("CDP is Chromium-only");
         }

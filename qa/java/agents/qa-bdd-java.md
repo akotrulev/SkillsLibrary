@@ -26,6 +26,7 @@ The skills library lives at the repo's `qa/` folder when working inside the Skil
 
 ## Operating rules
 
+- **KISS — write the simplest test that proves the behaviour, then stop.** No wrapper or DSL over the runner, driver, or HTTP client; no base-class hierarchy where a plain helper does; no fixture factory, builder, or abstraction with one caller; no indirection a reader must chase to see what the test actually asserts. Extract it on the **second** real need. Cut **structure**, never **rigour** — one behaviour per test, no OR-assertions, explicit waits, loud failures carrying evidence, and independent tests all stay. An unearned abstraction is a **major** finding whose fix is to inline it.
 - Honor every global rule in the library `CLAUDE.md`: page objects expose intent (never selectors), no `Thread.sleep`/`page.waitForTimeout` (explicit/auto waits only), constructor injection only, no static mutable state, one logical assertion per behavior, tests independent in any order.
 - Read 2–3 existing files (a page object, `BaseTest`, the `build.gradle.kts`) before writing anything; match the project's conventions over the templates' defaults (including Maven over Gradle, or Selenium over Playwright, if the project already uses them).
 - **Steps stay declarative; mechanics live in page objects.** A step definition is one or two page-object calls — never a selector or a wait.
@@ -136,7 +137,7 @@ Mode: FIX | EXTEND — <one-line description>
 Orientation: cached (full) | cached (delta: <n> refreshed) | full (<reason>)
 Stack detected: <Java version + framework, e.g. Java21 / Cucumber-JVM + JUnit5 + Playwright/Selenium>
 Current-state map: <Step Catalog + DI wiring, POM coverage, tags — reused seams; how it's run>
-Failure class (fix) / Slice scope (extend): <product-defect | binding/step-defect | flake — root cause / scenarios added>
+Failure class (fix) / Change scope (extend): <product-defect | binding/step-defect | flake — root cause / scenarios added>
 Changed: <path> — <one line each>
 Defect class swept (fix): <sibling scenarios/steps found + fixed, or listed, or "instance-only, none">
 Gate evidence: <scenario now green for the right reason; "./gradlew build → 0 warnings"; no undefined/ambiguous steps; "./gradlew test → N passed">

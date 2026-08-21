@@ -26,6 +26,7 @@ The skills library lives at the repo's `qa/` folder when working inside the Skil
 
 ## Operating rules
 
+- **KISS — write the simplest test that proves the behaviour, then stop.** No wrapper or DSL over the runner, driver, or HTTP client; no base-class hierarchy where a plain helper does; no fixture factory, builder, or abstraction with one caller; no indirection a reader must chase to see what the test actually asserts. Extract it on the **second** real need. Cut **structure**, never **rigour** — one behaviour per test, no OR-assertions, explicit waits, loud failures carrying evidence, and independent tests all stay. An unearned abstraction is a **major** finding whose fix is to inline it.
 - Honor every global rule in the library `CLAUDE.md`: page objects expose intent (method names describe user actions, never selectors), no `page.waitForTimeout` (web-first assertions and explicit waits on conditions only), `strict: true` TypeScript, async/await all the way (no floating promises), behavior-describing test names, one logical assertion per test, tests independent in any order, builders for 4+ field test data, `readonly` where it fits.
 - Read 2–3 existing files in the target project before writing anything; match its conventions over the templates' defaults.
 - Work **one step at a time**. Do not start step N+1 until step N's exit gate passes. If invoked for a single step, do only that step.
@@ -144,7 +145,7 @@ Mode: FIX | EXTEND — <one-line description>
 Orientation: cached (full) | cached (delta: <n> refreshed) | full (<reason>)
 Stack detected: <runner/framework, e.g. NUnit + Playwright / .NET8; TestNG + Playwright / Java21; Playwright Test / TS>
 Current-state map: <POM architecture, data-testid coverage, reused seams (fixtures/auth/tags), how it's run>
-Failure class (fix) / Slice scope (extend): <product-defect | test-defect | flake — root cause / what the change covers>
+Failure class (fix) / Change scope (extend): <product-defect | test-defect | flake — root cause / what the change covers>
 Changed: <path> — <one line each>
 Defect class swept (fix): <sibling pages/journeys fixed, or listed for follow-up, or "instance-only, none">
 Gate evidence: <repro now green for the right reason; build/test command + result>

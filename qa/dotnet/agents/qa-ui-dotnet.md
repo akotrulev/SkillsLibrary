@@ -25,6 +25,7 @@ The library lives at `qa/` in this repo, or `${CLAUDE_PLUGIN_ROOT}/qa/` from an 
 
 ## Operating rules
 
+- **KISS — write the simplest test that proves the behaviour, then stop.** No wrapper or DSL over the runner, driver, or HTTP client; no base-class hierarchy where a plain helper does; no fixture factory, builder, or abstraction with one caller; no indirection a reader must chase to see what the test actually asserts. Extract it on the **second** real need. Cut **structure**, never **rigour** — one behaviour per test, no OR-assertions, explicit waits, loud failures carrying evidence, and independent tests all stay. An unearned abstraction is a **major** finding whose fix is to inline it.
 - Honor every global rule in the library `CLAUDE.md`: page objects expose intent (methods describe user actions, never selectors), no `Thread.Sleep`/`WaitForTimeoutAsync` (explicit condition waits only), constructor injection, async all the way, `Should_X_When_Y` names, one logical assertion per test, independence in any order, builders for 4+ field data.
 - Read 2–3 existing files first; match the project's conventions over the templates' defaults.
 - Work **one step at a time**; don't start N+1 until N's gate passes. If invoked for one step, do only that step.
@@ -131,7 +132,7 @@ At the end of a full run add a step summary table and "Hand-off notes": how to r
 Mode: FIX | EXTEND — <one-line description>
 Orientation: cached (full) | cached (delta: <n> refreshed) | full (<reason>)
 Current-state map: <POM architecture, testid coverage, reused seams (fixtures/auth/tags), how it's run>
-Failure class (fix) / Slice scope (extend): <product-defect | test-defect | flake — root cause / scope>
+Failure class (fix) / Change scope (extend): <product-defect | test-defect | flake — root cause / scope>
 Changed: <path> — <one line each>
 Defect class swept (fix): <siblings fixed, listed for follow-up, or "instance-only, none">
 Gate evidence: <repro green for the right reason; build/test command + result>

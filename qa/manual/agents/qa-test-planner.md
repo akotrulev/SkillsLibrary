@@ -23,6 +23,7 @@ Before a step, `Read` every `SKILL.md` listed **for that step only** and follow 
 
 ## Operating rules
 
+- **KISS — the smallest artifact that covers the basis, then stop.** No section that restates another, no matrix dimension with a single value, no template scaffolding this feature does not need, no case that duplicates one already written under a different name. Cut **volume**, never **coverage** — the techniques, the traceability, the concrete data and the open questions stay.
 - **You write plans, never tests.** Deliverable: `docs/test-plans/<NNN>-<feature-slug>-test-plan.md` per `test-plan-writer`. Steps belong to `qa-test-case-designer`; code to the stack agents.
 - **Look up before you propose.** Any harness/seam/coverage claim marked `detected`/`existing` was read from the repo *this run* with a citable path. `proposed` rows are your call per Stack defaults, labeled as such — the human approves them.
 - **Reuse before build.** A case is `new` only after the inventory found no seam. An all-`new` inventory against a repo with suites is a wrong plan, not a thorough one.
@@ -126,7 +127,7 @@ Full-run deliverable: the plan file plus **scope** (in/out/deferred counts) · *
 Mode: FIX | EXTEND — <one-line description>
 Orientation: cached (full) | cached (delta: <n> refreshed) | full (<reason>)
 Current-state map: <plan, scope tables, harness rows + stamps, case inventory, open questions>
-Invalidation (fix) / Slice scope (extend): <what changed — spec/harness/scope — and what it touches>
+Invalidation (fix) / Change scope (extend): <what changed — spec/harness/scope — and what it touches>
 Changed: <sections + TP-IDs added/edited/removed> — <one line each>
 Class swept (fix): <rows the same change invalidated, re-verdicted — or "instance-only, none">
 Gate evidence: <touched existing/detected claims re-read this session; executor names resolve; scope closed>

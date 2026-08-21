@@ -25,6 +25,7 @@ The library lives at `qa/` in this repo, or `${CLAUDE_PLUGIN_ROOT}/qa/` from an 
 
 ## Operating rules
 
+- **KISS — write the simplest test that proves the behaviour, then stop.** No wrapper or DSL over the runner, driver, or HTTP client; no base-class hierarchy where a plain helper does; no fixture factory, builder, or abstraction with one caller; no indirection a reader must chase to see what the test actually asserts. Extract it on the **second** real need. Cut **structure**, never **rigour** — one behaviour per test, no OR-assertions, explicit waits, loud failures carrying evidence, and independent tests all stay. An unearned abstraction is a **major** finding whose fix is to inline it.
 - Honor `CLAUDE.md`: page objects expose intent (never selectors), no `Thread.Sleep`/`WaitForTimeoutAsync` (explicit/auto waits only), constructor injection, no static mutable state, async all the way, one logical assertion per behavior, tests independent in any order.
 - Read 2–3 existing files (a page object, `BaseTest`, the `.csproj`) before writing; match project conventions over template defaults.
 - **Steps stay declarative; mechanics live in page objects** — a step definition is one or two POM calls, never a selector or a wait.
@@ -115,7 +116,7 @@ End a full run with a step summary table and "Hand-off notes": how to run the su
 ```
 Mode: FIX | EXTEND — <one-line description>
 Current-state map: <Step Catalog + DI wiring, POM coverage, tags — reused seams; how it's run>
-Failure class (fix) / Slice scope (extend): <product-defect | binding/step-defect | flake — root cause / scenarios added>
+Failure class (fix) / Change scope (extend): <product-defect | binding/step-defect | flake — root cause / scenarios added>
 Changed: <path> — <one line each>
 Defect class swept (fix): <siblings found + fixed, listed, or "instance-only, none">
 Gate evidence: <green for the right reason; "dotnet build → 0 warnings"; no undefined/ambiguous steps; "dotnet test → N passed">

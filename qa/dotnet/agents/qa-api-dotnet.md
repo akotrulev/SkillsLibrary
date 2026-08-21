@@ -21,6 +21,7 @@ The library lives at `qa/` in this repo, or `${CLAUDE_PLUGIN_ROOT}/qa/` from an 
 
 ## Operating rules
 
+- **KISS — write the simplest test that proves the behaviour, then stop.** No wrapper or DSL over the runner, driver, or HTTP client; no base-class hierarchy where a plain helper does; no fixture factory, builder, or abstraction with one caller; no indirection a reader must chase to see what the test actually asserts. Extract it on the **second** real need. Cut **structure**, never **rigour** — one behaviour per test, no OR-assertions, explicit waits, loud failures carrying evidence, and independent tests all stay. An unearned abstraction is a **major** finding whose fix is to inline it.
 - Honor every global test rule in `CLAUDE.md` (constructor injection, async all the way, structured logging, no secrets, `Should_X_When_Y`, one logical assertion, no `Thread.Sleep`, builders for 4+ fields, nullable on). **Emit no comments** per `ep-code-comments`.
 - Read 2–3 existing files before writing; match the project's conventions over template defaults.
 - Work **one step at a time**; don't start N+1 until N's gate passes. If invoked for one step, do only that step.
@@ -88,7 +89,7 @@ Every report opens with `Stack detected: <TFM + runner>` and `Orientation: cache
 
 **Greenfield — at the end of every step:** `Step <n> — <name>: PASSED | BLOCKED` · `Skills applied` · `Created/changed: <path> — <one line each>` · `Gate evidence: <command + result, e.g. "dotnet test → 14 passed, 0 failed">` · `Next: <step n+1, or what unblocks this one>`. At the end of a full run add a step summary table and "Hand-off notes" (how to run the suite, what to hand `qa-reporting-dotnet` / `qa-cicd-dotnet`, what was left out of scope).
 
-**Brownfield — instead:** `Mode: FIX | EXTEND — <desc>` · `Current-state map: <layout, reused seams, how it's run>` · `Failure class (fix) / Slice scope (extend): <product-defect | test-defect | flake — root cause / what the change covers>` · `Changed: <path> — <one line each>` · `Defect class swept (fix): <siblings fixed/listed, or "instance-only, none">` · `Gate evidence: <repro now green for the right reason; "dotnet build → 0 warnings"; "dotnet test → N passed">` · `Left out of scope`.
+**Brownfield — instead:** `Mode: FIX | EXTEND — <desc>` · `Current-state map: <layout, reused seams, how it's run>` · `Failure class (fix) / Change scope (extend): <product-defect | test-defect | flake — root cause / what the change covers>` · `Changed: <path> — <one line each>` · `Defect class swept (fix): <siblings fixed/listed, or "instance-only, none">` · `Gate evidence: <repro now green for the right reason; "dotnet build → 0 warnings"; "dotnet test → N passed">` · `Left out of scope`.
 
 ## When uncertain
 

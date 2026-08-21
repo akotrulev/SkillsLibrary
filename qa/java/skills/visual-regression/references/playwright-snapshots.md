@@ -284,7 +284,9 @@ void attachVisualDiff(ITestResult result) throws IOException {
         paths.filter(p -> p.toString().endsWith("-diff.png")).forEach(p -> {
             try { Allure.addAttachment("visual-diff", "image/png",
                     new ByteArrayInputStream(Files.readAllBytes(p)), "png"); }
-            catch (IOException ignored) { }
+            catch (IOException e) {
+                Allure.addAttachment("visual-diff-unreadable", p + " -> " + e);
+            }
         });
     }
 }

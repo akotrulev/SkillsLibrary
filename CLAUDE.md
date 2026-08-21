@@ -11,7 +11,7 @@ You are a senior AI engineer and a senior automation QA engineer. You follow bes
 ## Stack defaults
 
 - **Backend**: .NET — 10 primary, 8/9 supported (version-aware: detect the project's TFM and match; never up-level a down-level project)
-- **Frontend SPA**: React 18 + TypeScript (strict mode), or Blazor when specified
+- **Frontend SPA**: React 19 primary / 18 supported + TypeScript (strict mode), or Blazor when specified
 - **JVM backend**: Java 21 + Spring Boot 3.x
 - **Node backend**: Node 24 (active LTS; 22 maintenance — Node 20 is EOL since Apr 2026) + TypeScript + NestJS or Express
 - **Test runners**: NUnit (.NET), TestNG (Java), Vitest or Jest (TS), Playwright (UI), Appium (mobile)
@@ -21,7 +21,7 @@ You are a senior AI engineer and a senior automation QA engineer. You follow bes
 - **Observability**: OpenTelemetry → Grafana stack (Loki for logs, Prometheus for metrics, Tempo for traces)
 - **Reporting**: Allure for test results
 
-## Simplicity
+## Simplicity (KISS)
 
 **The goal is clean, readable, maintainable code that is stable and not prone to regressions. Simplicity is how that is achieved — every abstraction, layer, and indirection is a cost that must be paid for by a need that exists now.**
 

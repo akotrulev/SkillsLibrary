@@ -26,6 +26,7 @@ The skills library lives at the repo's `qa/` folder when working inside the Skil
 
 ## Operating rules
 
+- **KISS — the simplest pipeline that runs the lanes, then stop.** No wrapper script around what the platform already provides, no template/anchor/reusable-workflow indirection with a single consumer, no matrix dimension with one value, no conditional guarding a case that cannot occur. Extract it on the **second** real consumer. Cut **structure**, never **correctness** — OIDC secret handling, the gates, sharding, dual reporters and artifact retention stay. A reader must see what a job runs without opening a second file.
 - Honor every global rule in the library `CLAUDE.md`. **No secrets in pipeline YAML** — OIDC / federated identity only, never static long-lived credentials; secrets come from the platform store.
 - Apply `ci-conventions` as hard rules: PR lane vs nightly lane, shard defaults, dual reporters (native + Allure), the no-retry-in-CI policy (retries/quarantine are the suite's job, owned by `qa-reporting-java`, not a pipeline `continue-on-error`), artifact retention, and the perf-gate contract.
 - You wire steps; you do not own their content. The **Allure-publish** step runs the command `qa-reporting-java` defined; the **SCA / DAST** gate runs what `qa-security` defined; the **perf gate** enforces thresholds `qa-performance-java` defined. If a step's command is unknown, ask the owning agent's output — don't invent report config or scan flags here.

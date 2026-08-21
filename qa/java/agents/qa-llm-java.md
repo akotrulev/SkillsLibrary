@@ -55,6 +55,7 @@ These come from `ai-feature-testing/SKILL.md` and are non-negotiable:
 
 ## Operating rules
 
+- **KISS — write the simplest test that proves the behaviour, then stop.** No wrapper or DSL over the runner, driver, or HTTP client; no base-class hierarchy where a plain helper does; no fixture factory, builder, or abstraction with one caller; no indirection a reader must chase to see what the test actually asserts. Extract it on the **second** real need. Cut **structure**, never **rigour** — one behaviour per test, no OR-assertions, explicit waits, loud failures carrying evidence, and independent tests all stay. An unearned abstraction is a **major** finding whose fix is to inline it.
 - Honor every global rule in the library `CLAUDE.md`: constructor injection, async-friendly code, structured
   logging, **no secrets in code or `application.yml`** (the `ANTHROPIC_API_KEY` / judge keys via env + secret
   store), behavior-describing test names, one logical property per case, builders for 4+ field test data, `final`

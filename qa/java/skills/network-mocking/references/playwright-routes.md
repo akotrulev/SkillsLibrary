@@ -109,25 +109,17 @@ public final class MockApi {
 }
 ```
 
-Expose it on `BaseTest` so tests get `mockApi` ready (mirrors how the UI sibling wires page objects):
-
-```java
-public abstract class NetworkBaseTest extends BaseTest {
-    protected MockApi mockApi;
-
-    @BeforeMethod(alwaysRun = true, dependsOnMethods = "createContext")
-    public void initNetwork() {
-        mockApi = new MockApi(page);
-    }
-}
-```
+`MockApi` holds no lifecycle — it wraps the `page` the base class already created, so build it
+in the test that stubs. A second base class for one assignment would only add an ordering
+contract (`dependsOnMethods`) for the reader to trace.
 
 ```java
 // tests/OrdersTest.java
-public class OrdersTest extends NetworkBaseTest {
+public class OrdersTest extends BaseTest {
 
     @Test
     public void rendersEmptyStateWhenThereAreNoOrders() {
+        MockApi mockApi = new MockApi(page);
         mockApi.stubOrders(List.of());
         page.navigate("/orders");
 
@@ -382,7 +374,7 @@ For real bandwidth/latency emulation (not just per-request delay) use CDP `Netwo
 ## Generation steps
 
 1. Confirm **traffic** (endpoints + glob/regex), **intent** (mock / assert / modify / HAR / offline), and **scope** (page vs context).
-2. Add or extend `support/network/MockApi.java` with one intent-named method per scenario (`stubOrders`, `failOrdersWith`, `blockAnalytics`). Expose it on `NetworkBaseTest` via `@BeforeMethod`.
+2. Add or extend `support/network/MockApi.java` with one intent-named method per scenario (`stubOrders`, `failOrdersWith`, `blockAnalytics`). Construct it in the test that stubs — it wraps `page` and owns no lifecycle.
 3. For call assertions, use `RequestAssertions.expectRequest` (or a direct `page.waitForResponse` predicate); parse the payload from `postData()` with Jackson.
 4. For third-party determinism, record a HAR with `setUpdate(true)`, commit it under `src/test/resources/har/` with `ATTACH` content, then replay with `setNotFound(HarNotFound.ABORT)`.
 5. For offline/latency states, use `context.setOffline(true)` and a `Thread.sleep` latency helper inside a route handler — never `page.waitForTimeout`.

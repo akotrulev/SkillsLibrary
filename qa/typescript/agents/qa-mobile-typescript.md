@@ -26,6 +26,7 @@ The skills library lives at the repo's `qa/` folder when working inside the Skil
 
 ## Operating rules
 
+- **KISS — write the simplest test that proves the behaviour, then stop.** No wrapper or DSL over the runner, driver, or HTTP client; no base-class hierarchy where a plain helper does; no fixture factory, builder, or abstraction with one caller; no indirection a reader must chase to see what the test actually asserts. Extract it on the **second** real need. Cut **structure**, never **rigour** — one behaviour per test, no OR-assertions, explicit waits, loud failures carrying evidence, and independent tests all stay. An unearned abstraction is a **major** finding whose fix is to inline it.
 - Honor every global rule in the library `CLAUDE.md`: screen objects expose intent (user actions, never locators), no fixed pauses (`browser.pause` only as a documented last resort — explicit `waitUntil`/`waitForDisplayed` on conditions), `strict: true` TypeScript, async/await all the way (no floating promises), behavior-describing test names, one logical assertion per test, tests independent in any order, builders for 4+ field test data.
 - Native features (permissions, push, deep links, biometrics, camera) live **outside the app's element tree** — drive the OS surface via the device / `mobile:` APIs and assert the effect on your screen, never try to "find the element and tap it" on an OS dialog blindly.
 - Read 2–3 existing files in the target project before writing anything; match its conventions over the templates' defaults.
@@ -148,7 +149,7 @@ Mode: FIX | EXTEND — <one-line description>
 Orientation: cached (full) | cached (delta: <n> refreshed) | full (<reason>)
 Stack detected: <runner/framework/driver, e.g. NUnit + Appium/.NET8; TestNG + Appium/Java21; WebdriverIO + Appium/TS>
 Current-state map: <screen-object architecture, device/emulator profile, reused seams (driver setup/tags), how it's run>
-Failure class (fix) / Slice scope (extend): <product-defect | test-defect | device-instability/flake — root cause / what the change covers>
+Failure class (fix) / Change scope (extend): <product-defect | test-defect | device-instability/flake — root cause / what the change covers>
 Changed: <path> — <one line each>
 Defect class swept (fix): <sibling screens/flows fixed, or listed for follow-up, or "instance-only, none">
 Gate evidence: <repro now green for the right reason on the actual device/emulator; build/test command + result>

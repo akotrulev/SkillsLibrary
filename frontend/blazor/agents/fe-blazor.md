@@ -28,7 +28,8 @@ Skills live at `frontend/blazor/skills/` in this repo, or `${CLAUDE_PLUGIN_ROOT}
 
 ## Operating rules
 
-- Honor the FE code rules in the library `CLAUDE.md`'s "Frontend dev catalog" (the loaded skills carry them in full) — render-mode-agnostic components, `[PersistentState]`, semantic-HTML-before-ARIA, no-interop-where-C#-suffices, `EditForm` + FluentValidation, CSS isolation, `data-testid` on every interactive element/grid, real-anchor nav, three-state data regions, `InvokeAsync` for background→UI, constructor injection, async, structured logging.
+- **KISS — write the simplest thing that satisfies the requirement, then stop.** No wrapper component that only forwards props, no shared store or context for state one component owns, no custom hook/base component with a single caller, no abstraction over what the framework or component library already does, no parameter nothing passes. The abstraction is earned on the **second** real need, never anticipated on the first. Cut **structure**, never **correctness** — validation, the three-state data region, accessibility, disposal/cleanup and the tests are the requirement, not decoration. An unearned abstraction is a **major** finding whose fix is to inline it.
+- Honor the FE Blazor code rules in the library `CLAUDE.md` (the loaded skills carry them in full) — render-mode-agnostic components, `[PersistentState]`, semantic-HTML-before-ARIA, no-interop-where-C#-suffices, `EditForm` + FluentValidation, CSS isolation, `data-testid` on every interactive element/grid, real-anchor nav, three-state data regions, `InvokeAsync` for background→UI, constructor injection, async, structured logging.
 - Read 2–3 existing files before writing anything; match the project's conventions over the templates' defaults.
 - Work **one step at a time**; don't start N+1 until N's gate passes. If invoked for one step, do only that step.
 - **Run what you write.** `dotnet build` (0 warnings) each step; `dotnet test` for Step 4. A step whose code never ran does not pass its gate; fix and re-run once before reporting a failure.
@@ -117,7 +118,7 @@ Mode: FIX | EXTEND — <one-line description>
 TFM detected: <net8.0 | net9.0 | net10.0>
 Orientation: cached (full) | cached (delta: <n> refreshed) | full (<reason>)
 Current-state map: <render mode of the touched surface, library, state/data lane, conventions matched>
-Root cause (fix) / Slice scope (extend): <what was wrong / what the change covers>
+Root cause (fix) / Change scope (extend): <what was wrong / what the change covers>
 Changed: <path> — <one line each>
 Defect class swept (fix): <siblings fixed, listed for follow-up, or "instance-only, none">
 Gate evidence: <repro now passes; "dotnet build → 0 warnings"; "dotnet test → N passed">

@@ -80,9 +80,11 @@ import com.example.pages.LoginPage;
 import com.microsoft.playwright.*;
 import org.testng.annotations.*;
 
+import java.nio.file.Path;
+
 public abstract class BaseTest {
     private static Playwright playwright;
-    private static Browser browser;
+    protected static Browser browser;
 
     protected BrowserContext context;
     protected Page page;
@@ -96,9 +98,17 @@ public abstract class BaseTest {
         browser = playwright.chromium().launch(new BrowserType.LaunchOptions().setHeadless(headless));
     }
 
+    protected Path storageState() {
+        return null;
+    }
+
     @BeforeMethod(alwaysRun = true)
     public void createContext() {
-        context = browser.newContext();
+        Browser.NewContextOptions options = new Browser.NewContextOptions();
+        Path state = storageState();
+        if (state != null) options.setStorageStatePath(state);
+
+        context = browser.newContext(options);
         page = context.newPage();
         loginPage = new LoginPage(page);
         homePage = new HomePage(page);
@@ -201,30 +211,32 @@ public class LoginTest extends BaseTest {
 
 ### Authenticated state via `storageState`
 
-For tests that need a signed-in session, sign in once and persist `storageState` to a file. Reuse it in a separate base class:
+For tests that need a signed-in session, sign in once and persist `storageState` to a file.
+A fixture opts in by overriding `storageState()` — there is no second base class, and no
+`@BeforeMethod` override, so `createContext()` stays the single place page objects are built.
 
 ```java
-public abstract class AuthenticatedBaseTest extends BaseTest {
+public final class AuthState {
     private static final Path STATE = Path.of("build/.auth/user.json");
 
-    @BeforeSuite(alwaysRun = true, dependsOnMethods = "launchBrowser")
-    public void authenticate() {
-        if (Files.exists(STATE)) return;
+    public static synchronized Path signedIn(Browser browser) {
+        if (Files.exists(STATE)) return STATE;
         try (BrowserContext setupCtx = browser.newContext()) {
-            Page setupPage = setupCtx.newPage();
-            LoginPage login = new LoginPage(setupPage);
+            LoginPage login = new LoginPage(setupCtx.newPage());
             login.goTo();
             login.signIn(System.getenv("E2E_USER"), System.getenv("E2E_PASSWORD"));
             setupCtx.storageState(new BrowserContext.StorageStateOptions().setPath(STATE));
         }
+        return STATE;
     }
+}
+```
 
+```java
+public class CheckoutTest extends BaseTest {
     @Override
-    @BeforeMethod(alwaysRun = true)
-    public void createContext() {
-        context = browser.newContext(new Browser.NewContextOptions().setStorageStatePath(STATE));
-        page = context.newPage();
-        // re-init page objects
+    protected Path storageState() {
+        return AuthState.signedIn(browser);
     }
 }
 ```
@@ -330,7 +342,7 @@ public void seedOrder() {
 4. Generate `src/test/java/<pkg>/tests/{Feature}Test.java` extending `BaseTest`:
    - One `@Test` per scenario
    - Use Allure `@Step` for non-trivial substeps
-5. For authenticated flows, ensure an `AuthenticatedBaseTest` exists and the test extends it.
+5. For authenticated flows, override `storageState()` on the fixture to return `AuthState.signedIn(browser)`.
 6. Run `./gradlew test` — expect 0 failures. Run `./gradlew test -Dplaywright.headless=false` to debug visually.
 
 ## Handoffs

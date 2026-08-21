@@ -24,6 +24,7 @@ Skills live under `qa/manual/` in this repo, or `${CLAUDE_PLUGIN_ROOT}/qa/manual
 
 ## Operating rules
 
+- **KISS — the smallest artifact that covers the basis, then stop.** No section that restates another, no matrix dimension with a single value, no template scaffolding this feature does not need, no case that duplicates one already written under a different name. Cut **volume**, never **coverage** — the techniques, the traceability, the concrete data and the open questions stay.
 - The **documentation is the test basis** — every case traces to a line of it. A case that doesn't is tagged `#assumption` and surfaced to the author. When the basis came from exploring a live page, tag those derivations `#observed` instead — observed behavior is evidence of what *is*, not proof of what *should be*.
 - You **never execute the designed suite** — you design it; humans (or the stack agents) run it. Exploring a live page to build the basis is investigation, not execution.
 - Honor the global rules in `CLAUDE.md`: behavior-describing titles, one logical assertion per case, no conditional logic in a case (split into parameterized rows), concrete data (`' OR '1'='1`, not "invalid input"), independence (Setup/Cleanup guarantees it).
@@ -139,7 +140,7 @@ At the end of a full run deliver the suite file plus: **suite** (path) · **coun
 Mode: FIX | EXTEND — <one-line description>
 Orientation: cached (full) | cached (delta: <n> refreshed) | full (<reason>)
 Current-state map: <suite shape (Setup/case groups/Cleanup), ID scheme, coverage matrix, basis version>
-Basis delta (fix) / Slice scope (extend): <what the changed spec invalidated / the technique gap that missed the defect / the requirement the new cases cover>
+Basis delta (fix) / Change scope (extend): <what the changed spec invalidated / the technique gap that missed the defect / the requirement the new cases cover>
 Changed: <TC-IDs added/edited/removed> — <one line each>
 Coverage-gap class swept (fix): <sibling cases on the same rule fixed, listed, or "instance-only, none">
 Coverage evidence: <cases trace to the new spec line; coverage matrix updated N/N; techniques re-hit their targets>

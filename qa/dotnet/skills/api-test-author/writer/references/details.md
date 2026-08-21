@@ -20,10 +20,25 @@ namespace ApiTests.Tests;
 [TestFixture]
 public class {Resource}Tests : BaseApiTest
 {
-    // Apply rich happy-path template (below) for 200 tests, and
-    // strict ProblemDetails template for 400/404/422 tests.
+    private readonly List<string> _createdIds = new();
+
+    [TearDown]
+    public void DeleteCreatedResources()
+    {
+        foreach (string id in _createdIds)
+        {
+            new {Resource}Client(AuthToken).{CleanupVerb}(_account.Id, id);
+        }
+
+        _createdIds.Clear();
+    }
 }
 ```
+
+Apply the rich happy-path template (below) for 200 tests, and the strict ProblemDetails
+template for 400/404/422 tests. Every test that creates a resource registers its id on
+`_createdIds`; the teardown deletes them and is **not** wrapped in `try`/`catch` — a
+cleanup that fails must fail the fixture loudly rather than leak data into the environment.
 
 ### Happy-path template (preferred for 200 responses)
 
@@ -46,37 +61,31 @@ public void Create{Resource}_WithValidData_ReturnsOk()
     };
 
     {Resource}Dto created = {resource}Client.Create(_account.Id, dto, HttpStatusCode.OK);
+    _createdIds.Add(created.Id);
 
-    try
+    {Resource}Dto fetched = {resource}Client.GetById(_account.Id, created.Id, HttpStatusCode.OK);
+
+    Assert.Multiple(() =>
     {
-        {Resource}Dto fetched = {resource}Client.GetById(_account.Id, created.Id, HttpStatusCode.OK);
+        // --- CREATE response: fields from the request ---
+        Assert.That(created.Id, Is.Not.Null.And.Not.Empty, "created.Id must not be null or empty.");
+        Assert.That(created.AccountId, Is.EqualTo(_account.Id));
+        Assert.That(created.{ForeignKeyId}, Is.EqualTo(dto.{ForeignKeyId}.ToString()));
+        Assert.That(created.{Field}, Is.EqualTo(dto.{Field}));
+        // ... one assertion per request field ...
 
-        Assert.Multiple(() =>
-        {
-            // --- CREATE response: fields from the request ---
-            Assert.That(created.Id, Is.Not.Null.And.Not.Empty, "created.Id must not be null or empty.");
-            Assert.That(created.AccountId, Is.EqualTo(_account.Id));
-            Assert.That(created.{ForeignKeyId}, Is.EqualTo(dto.{ForeignKeyId}.ToString()));
-            Assert.That(created.{Field}, Is.EqualTo(dto.{Field}));
-            // ... one assertion per request field ...
+        // --- CREATE response: server-generated fields ---
+        Assert.That(created.Status, Is.EqualTo("{InitialStatus}"));
+        Assert.That(created.CreatedOn, Is.GreaterThan(DateTimeOffset.UtcNow.AddMinutes(-1)));
+        Assert.That(created.UpdatedOn, Is.Null, "UpdatedOn must be null on a fresh resource.");
+        // ... assert every nullable timestamp / counter is in its initial state ...
 
-            // --- CREATE response: server-generated fields ---
-            Assert.That(created.Status, Is.EqualTo("{InitialStatus}"));
-            Assert.That(created.CreatedOn, Is.GreaterThan(DateTimeOffset.UtcNow.AddMinutes(-1)));
-            Assert.That(created.UpdatedOn, Is.Null, "UpdatedOn must be null on a fresh resource.");
-            // ... assert every nullable timestamp / counter is in its initial state ...
-
-            // --- PERSISTENCE round-trip: fetched matches created ---
-            Assert.That(fetched.Id, Is.EqualTo(created.Id));
-            Assert.That(fetched.AccountId, Is.EqualTo(created.AccountId));
-            Assert.That(fetched.{Field}, Is.EqualTo(created.{Field}));
-            // ... one assertion per field, comparing fetched vs created ...
-        });
-    }
-    finally
-    {
-        try { {resource}Client.{CleanupVerb}(_account.Id, created.Id); } catch { }
-    }
+        // --- PERSISTENCE round-trip: fetched matches created ---
+        Assert.That(fetched.Id, Is.EqualTo(created.Id));
+        Assert.That(fetched.AccountId, Is.EqualTo(created.AccountId));
+        Assert.That(fetched.{Field}, Is.EqualTo(created.{Field}));
+        // ... one assertion per field, comparing fetched vs created ...
+    });
 }
 ```
 
@@ -91,32 +100,26 @@ public void {Action}{Resource}_When{Precondition}_ReturnsOkAndStatusIs{NewStatus
 {
     {Resource}Client {resource}Client = new {Resource}Client(AuthToken);
     {Resource}Dto created = {resource}Client.Create(_account.Id, new {Resource}InDto { /*...*/ }, HttpStatusCode.OK);
+    _createdIds.Add(created.Id);
 
-    try
+    RestResponse actionResponse = {resource}Client.{Action}(_account.Id, created.Id);
+    {Resource}Dto fetched = {resource}Client.GetById(_account.Id, created.Id, HttpStatusCode.OK);
+
+    Assert.Multiple(() =>
     {
-        RestResponse actionResponse = {resource}Client.{Action}(_account.Id, created.Id);
-        {Resource}Dto fetched = {resource}Client.GetById(_account.Id, created.Id, HttpStatusCode.OK);
+        Assert.That(actionResponse.StatusCode, Is.EqualTo(HttpStatusCode.OK),
+            "{Action} must return 200 OK.");
 
-        Assert.Multiple(() =>
-        {
-            Assert.That(actionResponse.StatusCode, Is.EqualTo(HttpStatusCode.OK),
-                "{Action} must return 200 OK.");
+        // --- State change ---
+        Assert.That(fetched.Status, Is.EqualTo("{NewStatus}"));
+        Assert.That(fetched.UpdatedOn, Is.Not.Null);
+        Assert.That(fetched.UpdatedOn!.Value, Is.GreaterThan(DateTimeOffset.UtcNow.AddMinutes(-1)));
 
-            // --- State change ---
-            Assert.That(fetched.Status, Is.EqualTo("{NewStatus}"));
-            Assert.That(fetched.UpdatedOn, Is.Not.Null);
-            Assert.That(fetched.UpdatedOn!.Value, Is.GreaterThan(DateTimeOffset.UtcNow.AddMinutes(-1)));
-
-            // --- Invariants: every other field must match the original create ---
-            Assert.That(fetched.Id, Is.EqualTo(created.Id));
-            Assert.That(fetched.{Field}, Is.EqualTo(created.{Field}));
-            // ...
-        });
-    }
-    finally
-    {
-        try { {resource}Client.{CleanupVerb}(_account.Id, created.Id); } catch { }
-    }
+        // --- Invariants: every other field must match the original create ---
+        Assert.That(fetched.Id, Is.EqualTo(created.Id));
+        Assert.That(fetched.{Field}, Is.EqualTo(created.{Field}));
+        // ...
+    });
 }
 ```
 
@@ -235,14 +238,7 @@ public class {Resource}Tests : BaseApiTest
     [TearDown]
     public void CleanupTestData()
     {
-        try
-        {
-            new {Resource}Client(AuthToken).Remove(testResource.Id);
-        }
-        catch
-        {
-            // Swallow cleanup errors to avoid masking test failures
-        }
+        new {Resource}Client(AuthToken).Remove(testResource.Id);
     }
 
     [Test]
@@ -339,7 +335,7 @@ public class {Resource}Tests : BaseApiTest
     [OneTimeTearDown]
     public void CleanupSharedPaymentMethod()
     {
-        try { methodClient.Delete(account.Id, method.Id); } catch { }
+        methodClient.Delete(account.Id, method.Id);
     }
 }
 ```
@@ -385,7 +381,7 @@ public class PaymentMethodMutationTests : BaseApiTest
     [TearDown]
     public void DeletePaymentMethod()
     {
-        try { methodClient.Delete(account.Id, method.Id); } catch { }
+        methodClient.Delete(account.Id, method.Id);
     }
 }
 ```
@@ -403,29 +399,23 @@ public void GetAll{Resource}s_When{Precondition}_ReturnsOk()
 {
     {Resource}Client {resource}Client = new {Resource}Client(AuthToken);
     {Resource}Dto created = {resource}Client.Create(_account.Id, new {Resource}InDto { /*...*/ }, HttpStatusCode.OK);
+    _createdIds.Add(created.Id);
 
-    try
+    RestResponse response = {resource}Client.GetAll(_account.Id);
+    List<{Resource}Dto> items = Deserialize<List<{Resource}Dto>>(response);
+    {Resource}Dto? match = items.FirstOrDefault(x => x.Id == created.Id);
+
+    Assert.Multiple(() =>
     {
-        RestResponse response = {resource}Client.GetAll(_account.Id);
-        List<{Resource}Dto> items = Deserialize<List<{Resource}Dto>>(response);
-        {Resource}Dto? match = items.FirstOrDefault(x => x.Id == created.Id);
+        Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+        Assert.That(items, Is.Not.Null);
+        Assert.That(match, Is.Not.Null, "GetAll response must contain the resource just created.");
 
-        Assert.Multiple(() =>
-        {
-            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
-            Assert.That(items, Is.Not.Null);
-            Assert.That(match, Is.Not.Null, "GetAll response must contain the resource just created.");
-
-            // --- Matched item must equal the originally-created resource on every field ---
-            Assert.That(match!.Id, Is.EqualTo(created.Id));
-            Assert.That(match.{Field}, Is.EqualTo(created.{Field}));
-            // ...
-        });
-    }
-    finally
-    {
-        try { {resource}Client.{CleanupVerb}(_account.Id, created.Id); } catch { }
-    }
+        // --- Matched item must equal the originally-created resource on every field ---
+        Assert.That(match!.Id, Is.EqualTo(created.Id));
+        Assert.That(match.{Field}, Is.EqualTo(created.{Field}));
+        // ...
+    });
 }
 ```
 

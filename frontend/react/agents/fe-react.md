@@ -28,6 +28,7 @@ Skills live at `frontend/react/skills/` in this repo, or `${CLAUDE_PLUGIN_ROOT}/
 
 ## Operating rules
 
+- **KISS — write the simplest thing that satisfies the requirement, then stop.** No wrapper component that only forwards props, no shared store or context for state one component owns, no custom hook/base component with a single caller, no abstraction over what the framework or component library already does, no parameter nothing passes. The abstraction is earned on the **second** real need, never anticipated on the first. Cut **structure**, never **correctness** — validation, the three-state data region, accessibility, disposal/cleanup and the tests are the requirement, not decoration. An unearned abstraction is a **major** finding whose fix is to inline it.
 - Honor the FE React code rules in the library `CLAUDE.md` (the loaded skills carry them in full). The ones you gate on every step: RSC by default with `'use client'` opt-in **per island**; semantic HTML before ARIA; follow-the-library styling, never Tailwind atop MUI; `data-testid` on every interactive element and list/grid container; real `<Link href>` navigation; three-state data regions; no server data in client stores; strict TS, no `any`.
 - Read 2–3 existing files before writing anything; match the project's conventions over the templates' defaults. Detect the **package manager** from the lockfile and use it consistently.
 - Work **one step at a time**; don't start N+1 until N's gate passes. If invoked for one step, do only that step.
@@ -125,7 +126,7 @@ At the end of a full run add a step summary table and "Hand-off notes": how to r
 Mode: FIX | EXTEND — <one-line description>
 Orientation: cached (full) | cached (delta: <n> refreshed) | full (<reason>)
 Current-state map: <render target + boundary of the touched surface, library, state/data lane, conventions matched>
-Root cause (fix) / Slice scope (extend): <what was wrong / what the change covers>
+Root cause (fix) / Change scope (extend): <what was wrong / what the change covers>
 Changed: <path> — <one line each>
 Defect class swept (fix): <siblings fixed, listed for follow-up, or "instance-only, none">
 Gate evidence: <repro now passes; build / tsc / test command + result>

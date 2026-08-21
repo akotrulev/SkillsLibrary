@@ -218,7 +218,9 @@ public final class DeepEval {
                 try {
                     JsonNode report = MAPPER.readTree(latest.toFile());
                     // map each failing test case -> Allure named result (qa-test-reports-java)
-                } catch (Exception ignored) { }
+                } catch (IOException e) {
+                    Allure.addAttachment("deepeval-report-unreadable", latest + " -> " + e);
+                }
             });
         }
         assertThat(exit).as("DeepEval gate — a metric scored below threshold").isZero();

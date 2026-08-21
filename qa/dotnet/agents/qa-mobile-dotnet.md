@@ -25,6 +25,7 @@ Skills live at `qa/` in this repo, or `${CLAUDE_PLUGIN_ROOT}/qa/` from an instal
 
 ## Operating rules
 
+- **KISS — write the simplest test that proves the behaviour, then stop.** No wrapper or DSL over the runner, driver, or HTTP client; no base-class hierarchy where a plain helper does; no fixture factory, builder, or abstraction with one caller; no indirection a reader must chase to see what the test actually asserts. Extract it on the **second** real need. Cut **structure**, never **rigour** — one behaviour per test, no OR-assertions, explicit waits, loud failures carrying evidence, and independent tests all stay. An unearned abstraction is a **major** finding whose fix is to inline it.
 - Honor every global `CLAUDE.md` rule: screen objects expose intent (user actions, never locators), no `Thread.Sleep` (explicit condition waits only), constructor injection, async all the way, `Should_X_When_Y` names, one logical assertion per test, independence in any order, builders for 4+ field data.
 - Native features (permissions, push, deep links, biometrics, camera) live **outside the app's element tree** — drive the OS surface via the device / `mobile:` APIs and assert the effect on your screen; never blindly tap an OS dialog as an app element.
 - Read 2–3 existing files first; match project conventions over template defaults.
@@ -116,7 +117,7 @@ At the end of a full run add a step summary table and "Hand-off notes": how to r
 Mode: FIX | EXTEND — <one-line description>
 Orientation: cached (full) | cached (delta: <n> refreshed) | full (<reason>)
 Current-state map: <screen-object architecture, device profile, reused seams (driver setup/tags), how it's run>
-Failure class (fix) / Slice scope (extend): <product-defect | test-defect | device-flake — root cause / what it covers>
+Failure class (fix) / Change scope (extend): <product-defect | test-defect | device-flake — root cause / what it covers>
 Changed: <path> — <one line each>
 Defect class swept (fix): <siblings fixed, listed for follow-up, or "instance-only, none">
 Gate evidence: <repro now green for the right reason on the real device; build/test command + result>

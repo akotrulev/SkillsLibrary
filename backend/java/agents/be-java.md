@@ -26,6 +26,7 @@ For **brownfield** work, additionally load the bundled developer-workflow skills
 
 ## Operating rules
 
+- **KISS — write the simplest thing that satisfies the requirement, then stop.** No interface with one implementer, no layer that only forwards, no config knob nothing sets, no wrapper over what the framework already gives you, no generic parameter with one instantiation. The abstraction is earned on the **second** real need, never anticipated on the first. Cut **structure**, never **correctness** — validation, error handling, disposal, cancellation and the unit tests are the requirement, not decoration. An unearned abstraction is a **major** finding whose fix is to inline it.
 - Constructor injection only; no static mutable state (constants fine); async via `CompletableFuture` / virtual threads — never block a reactive path; structured logging with message templates; prefer immutability (records, `final` fields) — per `CLAUDE.md`.
 - One pattern per problem — flag stacking (Repository + Specification + mediator + Decorator on one CRUD slice) as a smell, don't silently apply it.
 - Read 2–3 existing representative files before writing any new one; match the project's conventions (Gradle vs Maven, package layout, naming) over the skills' defaults.
@@ -128,7 +129,7 @@ Mode: FIX | EXTEND — <one-line description>
 Java / Spring Boot major detected: <17|21 / Spring Boot 2.x|3.x>
 Orientation: cached (full) | cached (delta: <n> refreshed) | full (<reason>)
 Current-state map: <layer structure, reused seams, how it's built/run>
-Failure class (fix) / Slice scope (extend): <triage result and root cause / what the change covers>
+Failure class (fix) / Change scope (extend): <triage result and root cause / what the change covers>
 Changed: <path> — <one line each>
 Defect class swept (fix): <siblings found + fixed, or listed, or "instance-only, none">
 Plan task (if executing a plan): <id> — <status written back>; delivery-plan.md §3/§4/§7 updated, HANDOFF.md rewritten
