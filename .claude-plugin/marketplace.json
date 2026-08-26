@@ -7,7 +7,7 @@
   },
   "metadata": {
     "description": "Stack-first skills library covering QA, frontend, backend, data, and business-analysis: install one self-contained plugin per tech stack. `qa-{java,dotnet,typescript}` bundle every QA discipline — API/UI/mobile/performance/LLM/BDD authoring and verification, manual-QA process, CI/CD, reporting, and OWASP-mapped security. `fe-{blazor,react}` are phased frontend dev-stack agents (scaffold → architecture → features → quality → tests → review). `be-{dotnet,java,node}` are phased backend dev-stack agents for design-pattern application, ORM persistence, and Auth0/Cognito service-side auth. `devops` ships the platform lane — container images, IaC, cloud deploys, and build/deploy pipelines. `data` and `business-analysis` round out the database-engineering and cross-feature requirements domains.",
-    "version": "2.27.0"
+    "version": "2.28.0"
   },
   "plugins": [
     {
@@ -1226,6 +1226,37 @@
       "agents": [
         "./training-data/agents/dataset-engineer.md",
         "./training-data/agents/dataset-auditor.md"
+      ]
+    },
+    {
+      "name": "tooling",
+      "description": "Self-contained agent-tooling plugin — turn a project, or a chosen set of its functionalities, into a surface an agent can drive correctly on the first call. The tool-capability-contract skill derives the capability list, typed input/output contracts, multi-step flows, and runtime dependencies from the codebase into one reviewable document; tool-mcp-builder and tool-cli-builder then render that document mechanically into an MCP server (TypeScript SDK, or stack-native .NET / Spring AI when the capabilities are in-process) and a subcommand CLI (commander / System.CommandLine / picocli) that share one response envelope, one closed error vocabulary, clamped paging, and a gate on every destructive capability. Bundles the phased tooling-engineer agent — contract first, code second, every capability smoke-tested before it ships.",
+      "source": "./",
+      "strict": false,
+      "author": {
+        "name": "Aleksandar Kotrulev",
+        "email": "alexandur.kotrulev@gmail.com"
+      },
+      "license": "MIT",
+      "keywords": [
+        "mcp",
+        "cli",
+        "agent-tooling",
+        "developer-tools"
+      ],
+      "category": "development",
+      "skills": [
+        "./tooling/_shared/capability-contract",
+        "./tooling/skills/mcp-builder",
+        "./tooling/skills/cli-builder",
+        "./engineering-practices/agent-orientation-cache",
+        "./engineering-practices/code-comments"
+      ],
+      "commands": [
+        "./tooling/commands/tooling-engineer.md"
+      ],
+      "agents": [
+        "./tooling/agents/tooling-engineer.md"
       ]
     }
   ]

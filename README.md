@@ -20,6 +20,7 @@ The repo is a Claude Code plugin marketplace. Add it once, then install the one 
 /plugin install be-node@skills-library             # Node 24 / TypeScript backend design-pattern + Prisma toolkit
 /plugin install data@skills-library                # complete database-engineering toolkit (8 engines)
 /plugin install business-analysis@skills-library   # cross-feature business-flow analysis toolkit
+/plugin install tooling@skills-library             # turn a project into an agent-drivable MCP server / CLI
 ```
 
 **One self-contained plugin per language** — `qa-java`, `qa-dotnet`, `qa-typescript`. Each is a complete QA toolkit for its stack: it bundles every discipline (API / UI / mobile / performance / LLM authoring and review, BDD living documentation, deep verification, contracts, chaos, feature flags) **plus** the shared, cross-cutting capabilities that used to be separate peer plugins:
@@ -40,6 +41,7 @@ So installing a single plugin gives you the stack's authoring/verification skill
 - **`be-node`** — the Node (24 primary / 22 maintenance) + TypeScript strict backend **design-pattern + persistence + unit-test** stack: `pattern-guide`/`pattern-writer`/`code-review`/`database-code` (Prisma default / Drizzle / TypeORM)/`unit-testing` (Vitest, DI over `vi.mock`, both `Result` branches), the step-by-step `be-node` orchestrator agent, plus `backend/_shared` (no `auth0`/`cognito` skill yet — a known gap). Also ships **`/be-planner`** and **`/be-documenter`** — see below.
 - **`devops`** — the platform / delivery lane, the path from a built service to a running one: 9 cloud/CI-keyed skills (docker, kubernetes, infrastructure-as-code, aws-deployment, azure-deployment, github-actions, gitlab-ci, azure-pipelines, environment-config) and two stack-agnostic agents — **`devops-engineer`** builds, **`devops-auditor`** audits read-only. Unlike the stack-first plugins these skills are keyed to *tools* rather than languages, so picking which to load **is** the design decision: both agents inspect the repo, derive what the workload requires, and **confirm the tool stack (or the audit scope) with you before loading a single skill**. `/devops-auditor` is the read-only conformance sweep of an existing setup — image, IaC, k8s, deploy target, pipeline, identity, secrets — saved as a re-runnable findings report in `docs/audits/`. OIDC / Workload Identity Federation throughout; no static cloud credentials anywhere.
 - **`data`** — the database-engineering stack: 8 version-aware per-engine skills (PostgreSQL, SQL Server / Azure SQL, MySQL, MongoDB, Redis / Valkey, DynamoDB, Cosmos DB, Elasticsearch / OpenSearch), 4 cross-engine `_shared` skills (schema-design, migrations, caching-patterns, slow-query-fixes), and the step-by-step `data-architect` agent.
+- **`tooling`** — the agent-drivable-surface lane: turn a project, or a chosen set of its functionalities, into something an agent (or a script, or a CI step) can drive **correctly on the first call**. Its one rule is *contract first, code second* — `tool-capability-contract` reads the codebase's entry points and writes one reviewable contract document (capability table with a `file:line` source per row, typed inputs carrying their examples, an error table whose last column is *what the caller does next*, the multi-step flows, and the dependency + trust boundary), and `tool-mcp-builder` / `tool-cli-builder` then render **that** document mechanically into an MCP server and/or a subcommand CLI sharing one response envelope, one closed error vocabulary, clamped paging, and a gate on every destructive capability. MCP defaults to the TypeScript SDK (in-process for Node projects, a sidecar for anything reachable over HTTP, stack-native .NET / Spring AI only when the capabilities are in-process and unreachable otherwise); the CLI matches the project's stack (commander · System.CommandLine · picocli). One agent, `tooling-engineer`. Distinct from the vendored `ai-development/mcp-builder`, which wraps a **third-party API with no local codebase**.
 - **`business-analysis`** — the upstream requirements domain in two lanes: 9 `ba-*` skills and 2 agents. The **authoring** lane (`ba-scoping-writeup`, `ba-epic-writer`, `ba-story-writer`, `ba-story-quality-review` + the `requirements-author` agent) turns a vague stakeholder ask into refinement-ready artifacts; the **reasoning** lane (`ba-project-memory`, `ba-process-flow-diagram`, `ba-entity-state-grid`, `ba-decision-table`, the 11-class `ba-feature-conflict-check` + the `business-analyst` agent) keeps a persistent per-project business model and detects conflicts between features.
 
 Every stack plugin (`qa-*`, `fe-*`, `be-*`) also bundles the 14 `ep-*` engineering-practices skills (brainstorm → plan → execute → verify → finish, TDD, systematic debugging, worktrees, agent dispatch, code-review pair, and the spec-compliance/feature audit pair) plus the read-only `code-auditor` agent. A 15th, `ep-standards-audit-engine`, is the shared engine behind the per-stack conformance audits — it ships in **all ten** `qa-*` / `fe-*` / `be-*` / `devops` / `security-governance` plugins. Where a stack's own conformance audit is not authored yet it simply sits inert — the engine carries no rules and its description forbids routing a request to it directly — so nothing needs rewiring when that audit lands. Authored so far: `/qa-dotnet-audit`, `/be-dotnet-audit`, `/fe-react-audit`, `/security-governance-audit`, and `/devops-auditor` (whose agent supplies its own rule sections, since devops is outside `CONFORMANCE-AUDIT-PLAN.md`'s scope; `security-governance` is also outside that scope but took the skill shape); `fe-react` carries its own copy of the procedure pending the extraction. The rest roll out per `CONFORMANCE-AUDIT-PLAN.md`.
@@ -124,6 +126,12 @@ A 17th, **`ep-code-comments`**, also ships in **all eleven** plugins: it is the 
 |---|---|---|
 | `/data-architect` | what to model, secure, migrate, or tune | model, secure, implement, and tune a schema across 8 engines |
 
+**`tooling`** — 1 command:
+
+| Command | Argument | Runs |
+|---|---|---|
+| `/tooling-engineer` | what to expose, and whether you want MCP, CLI, or both | derive and confirm the capability contract, then build and smoke-test the MCP server and/or CLI over it |
+
 **`business-analysis`** — 9 commands:
 
 | Command | Argument | Runs |
@@ -177,7 +185,8 @@ engineering-practices/  # TDD, debugging, code review, git worktrees, planning (
 meta/                   # Authoring skills themselves (writing-skills, skill-creator)
 design/                 # Visual/UX: visual-identity, design-tokens, charts, brand-import, iconography, ux-review, theme-presets, ux-writing, ui-code-audit
 communication/          # BA, user stories, stakeholder updates, internal comms
-ai-development/         # claude-api, mcp-builder
+ai-development/         # claude-api, mcp-builder (vendored: wraps a third-party API)
+tooling/               # Agent-drivable surfaces over your own project: capability-contract -> mcp-builder / cli-builder + tooling-engineer agent
 extras/                 # Off-mission, kept available: algorithmic-art, Office document generation (docx, pdf, pptx, xlsx)
 ```
 
@@ -288,3 +297,4 @@ See [`CONTRIBUTING.md`](CONTRIBUTING.md) and the templates in [`.skill-template/
 | design                | imported (Anthropic + Vercel) |
 | communication         | imported + 3 authored (business-analysis, user-story-writer, stakeholder-updates) |
 | ai-development        | imported from anthropics/skills |
+| tooling               | authored + shipped — 3 `tool-*` skills (`capability-contract` + the `mcp-builder` / `cli-builder` renderers) + the `tooling-engineer` agent; `tooling` plugin |

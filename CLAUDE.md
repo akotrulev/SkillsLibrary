@@ -181,6 +181,7 @@ Each top-level folder owns a domain, is **stack-first and domain-encapsulated** 
 | `security/` | Offensive (pentest + purple-team) and defensive/governance lanes | `penetration-testing` · `security-governance` |
 | `business-analysis/` | Upstream requirements authoring + cross-feature reasoning | `business-analysis` |
 | `training-data/` | LLM/VLM training-data engineering | `training-data` |
+| `tooling/` | Agent-drivable surfaces over a project — capability contract → MCP server / CLI | `tooling` |
 | `engineering-practices/` | Language-agnostic developer-workflow spine (`ep-*`) + audit lanes | bundled into all stack plugins |
 
 **Under construction — ignore, do not upload to the remote:** `frontend/react-native/`, `auth/cognito-{blazor,react}`, `communication/`.
