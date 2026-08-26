@@ -1,6 +1,6 @@
 # SkillsLibrary
 
-A shared library of Claude skills and rules for backend, frontend, DevOps, observability, and QA work. Designed to be consumed by Claude Code, Claude Desktop, and CI agents across multiple repos.
+A shared library of Claude skills and rules for backend, frontend, DevOps, observability, QA, security, data, and agent-tooling work. Designed to be consumed by Claude Code, Claude Desktop, and CI agents across multiple repos.
 
 ## How to use
 
@@ -20,6 +20,9 @@ The repo is a Claude Code plugin marketplace. Add it once, then install the one 
 /plugin install be-node@skills-library             # Node 24 / TypeScript backend design-pattern + Prisma toolkit
 /plugin install data@skills-library                # complete database-engineering toolkit (8 engines)
 /plugin install business-analysis@skills-library   # cross-feature business-flow analysis toolkit
+/plugin install penetration-testing@skills-library # offensive kill-chain + purple-team detection validation
+/plugin install security-governance@skills-library # defensive/blue-team + CISO-altitude posture toolkit
+/plugin install training-data@skills-library       # LLM/VLM training-data engineering toolkit
 /plugin install tooling@skills-library             # turn a project into an agent-drivable MCP server / CLI
 ```
 
@@ -40,15 +43,18 @@ So installing a single plugin gives you the stack's authoring/verification skill
 - **`be-java`** — the Java 21 + Spring Boot 3.x backend **design-pattern + persistence + unit-test** stack: the same six skills, Spring-idiomatic (JPA/Hibernate + Spring Data, Spring Security OAuth2 Resource Server for `auth0`/`cognito`, `unit-testing` on JUnit 5 + Mockito + AssertJ with **no Spring context**), the step-by-step `be-java` orchestrator agent, plus `backend/_shared` and `auth/_shared/{auth0-concepts,oidc-concepts}`. Also ships **`/be-planner`** and **`/be-documenter`** — see below.
 - **`be-node`** — the Node (24 primary / 22 maintenance) + TypeScript strict backend **design-pattern + persistence + unit-test** stack: `pattern-guide`/`pattern-writer`/`code-review`/`database-code` (Prisma default / Drizzle / TypeORM)/`unit-testing` (Vitest, DI over `vi.mock`, both `Result` branches), the step-by-step `be-node` orchestrator agent, plus `backend/_shared` (no `auth0`/`cognito` skill yet — a known gap). Also ships **`/be-planner`** and **`/be-documenter`** — see below.
 - **`devops`** — the platform / delivery lane, the path from a built service to a running one: 9 cloud/CI-keyed skills (docker, kubernetes, infrastructure-as-code, aws-deployment, azure-deployment, github-actions, gitlab-ci, azure-pipelines, environment-config) and two stack-agnostic agents — **`devops-engineer`** builds, **`devops-auditor`** audits read-only. Unlike the stack-first plugins these skills are keyed to *tools* rather than languages, so picking which to load **is** the design decision: both agents inspect the repo, derive what the workload requires, and **confirm the tool stack (or the audit scope) with you before loading a single skill**. `/devops-auditor` is the read-only conformance sweep of an existing setup — image, IaC, k8s, deploy target, pipeline, identity, secrets — saved as a re-runnable findings report in `docs/audits/`. OIDC / Workload Identity Federation throughout; no static cloud credentials anywhere.
+- **`penetration-testing`** — the **offensive** half of the `security/` domain, language-agnostic throughout (every tool is a Docker/CLI binary). Seven `pentest-*` kill-chain skills — recon-enumeration, initial-access, privilege-escalation, lateral-movement, credential-attacks, post-exploitation, pentest-reporting — plus the two `purpleteam-*` skills (`atomic-simulation` detonates known ATT&CK techniques, `detection-validation` then asserts the SIEM/alert actually fired). Three agents: **`penetration-tester`** runs the full chain to prove an attacker could chain findings into impact, **`security-test-planner`** sequences an assessment across every lane before it starts, and **`purple-team-engineer`** re-runs technique sets on a cadence to catch detection drift. **The safety model is load-bearing and non-optional:** every run refuses to start without a committed engagement scope file (`docs/security/engagement-<NNN>.md` — in-scope hosts, hard exclusions, blast-radius cap, window, named authorizer), re-reads it before every step, treats authorization as expiring rather than cached, requires per-act opt-in for anything irreversible, **never** does DoS, redacts all recovered loot out of the report, logs every action, verifies cleanup, and halts mid-run rather than quietly narrowing scope. Spines are MITRE ATT&CK Enterprise + CVSS. It finds and retests; it never remediates.
+- **`security-governance`** — the **defensive / blue-team** half, at CISO altitude. Four `secgov-*` skills: `detection-engineering` (vendor-neutral Sigma rules as code, unit-tested against a true-AND-benign log sample before deploy, each mapped to a pinned ATT&CK technique), `security-hardening` (nonce + `strict-dynamic` CSP, the OWASP Secure Headers baseline, OWASP CRS on Coraza/ModSecurity rolled out detection-only → tuned → blocking), `secrets-hardening` (rotate-first-purge-second, the two-slot rotation runbook, Vault/ESO/SOPS wiring, dynamic over static-and-rotated), and `compliance-evidence-mapping` (the library's own controls and tests mapped to SOC 2 / PCI DSS 4.0.1 / ISO 27001:2022 / GDPR — it **maps, never certifies**). The **`security-architect`** agent is the roll-up: it consumes findings from *every* lane, normalizes offensive CVSS against the library severity table onto one risk band, and produces one posture picture — risk register, ATT&CK coverage map, evidence register with gaps, leverage-ordered roadmap. `/security-governance-audit` is its read-only conformance sweep (14 sections, 127 checks). It authors governance artifacts and prescribes; it never runs a scan and never edits application code.
 - **`data`** — the database-engineering stack: 8 version-aware per-engine skills (PostgreSQL, SQL Server / Azure SQL, MySQL, MongoDB, Redis / Valkey, DynamoDB, Cosmos DB, Elasticsearch / OpenSearch), 4 cross-engine `_shared` skills (schema-design, migrations, caching-patterns, slow-query-fixes), and the step-by-step `data-architect` agent.
+- **`training-data`** — the **LLM/VLM training-data engineering** domain: building the datasets a *small* model trains on, as distinct from `ai-development/` (apps built *on top of* a hosted model) and from QA's `ai-feature-testing` (which *tests* a model). Eight `td-*` skills cover all four training stages (pretraining corpus, instruction/SFT, preference/DPO, evaluation sets) across both modalities (text and image-text), by curation and/or teacher-model synthesis as equal-weight lanes, over three shared foundations: the on-disk contract (`td-dataset-formats`), the quality gate (`td-data-quality`), and the synthesis engine (`td-synthetic-generation`). Two agents — the phased **`dataset-engineer`** builder and the read-only **`dataset-auditor`**. Two invariants hold everywhere: **decontamination runs last and always** (no eval number is trustworthy until the train split has been checked against its eval targets — the teacher model is itself a prime contamination source), and **synthetic data is a flagged draft, never verified truth**. Out of scope: training the model and the training harness itself.
 - **`tooling`** — the agent-drivable-surface lane: turn a project, or a chosen set of its functionalities, into something an agent (or a script, or a CI step) can drive **correctly on the first call**. Its one rule is *contract first, code second* — `tool-capability-contract` reads the codebase's entry points and writes one reviewable contract document (capability table with a `file:line` source per row, typed inputs carrying their examples, an error table whose last column is *what the caller does next*, the multi-step flows, and the dependency + trust boundary), and `tool-mcp-builder` / `tool-cli-builder` then render **that** document mechanically into an MCP server and/or a subcommand CLI sharing one response envelope, one closed error vocabulary, clamped paging, and a gate on every destructive capability. MCP defaults to the TypeScript SDK (in-process for Node projects, a sidecar for anything reachable over HTTP, stack-native .NET / Spring AI only when the capabilities are in-process and unreachable otherwise); the CLI matches the project's stack (commander · System.CommandLine · picocli). One agent, `tooling-engineer`. Distinct from the vendored `ai-development/mcp-builder`, which wraps a **third-party API with no local codebase**.
 - **`business-analysis`** — the upstream requirements domain in two lanes: 9 `ba-*` skills and 2 agents. The **authoring** lane (`ba-scoping-writeup`, `ba-epic-writer`, `ba-story-writer`, `ba-story-quality-review` + the `requirements-author` agent) turns a vague stakeholder ask into refinement-ready artifacts; the **reasoning** lane (`ba-project-memory`, `ba-process-flow-diagram`, `ba-entity-state-grid`, `ba-decision-table`, the 11-class `ba-feature-conflict-check` + the `business-analyst` agent) keeps a persistent per-project business model and detects conflicts between features.
 
 Every stack plugin (`qa-*`, `fe-*`, `be-*`) also bundles the 14 `ep-*` engineering-practices skills (brainstorm → plan → execute → verify → finish, TDD, systematic debugging, worktrees, agent dispatch, code-review pair, and the spec-compliance/feature audit pair) plus the read-only `code-auditor` agent. A 15th, `ep-standards-audit-engine`, is the shared engine behind the per-stack conformance audits — it ships in **all ten** `qa-*` / `fe-*` / `be-*` / `devops` / `security-governance` plugins. Where a stack's own conformance audit is not authored yet it simply sits inert — the engine carries no rules and its description forbids routing a request to it directly — so nothing needs rewiring when that audit lands. Authored so far: `/qa-dotnet-audit`, `/be-dotnet-audit`, `/fe-react-audit`, `/security-governance-audit`, and `/devops-auditor` (whose agent supplies its own rule sections, since devops is outside `CONFORMANCE-AUDIT-PLAN.md`'s scope; `security-governance` is also outside that scope but took the skill shape); `fe-react` carries its own copy of the procedure pending the extraction. The rest roll out per `CONFORMANCE-AUDIT-PLAN.md`.
 
-A 16th, **`ep-agent-orientation-cache`**, ships in **all eleven** plugins (including `data` and `business-analysis`, which bundle no other `ep-*`): it is the protocol every agent uses to persist its orientation pass to `docs/agent-context/<agent-name>.md` in your project and reuse it next run, re-deriving only what a git delta proves changed. It makes repeat invocations cheap without letting a stale map be mistaken for evidence. Like the audit engine it is loaded by agents, never invoked directly.
+A 16th, **`ep-agent-orientation-cache`**, ships in **all fifteen** plugins (including `data`, `business-analysis`, `penetration-testing`, `security-governance`, `training-data`, and `tooling`, which bundle no other `ep-*`): it is the protocol every agent uses to persist its orientation pass to `docs/agent-context/<agent-name>.md` in your project and reuse it next run, re-deriving only what a git delta proves changed. It makes repeat invocations cheap without letting a stale map be mistaken for evidence. Like the audit engine it is loaded by agents, never invoked directly.
 
-A 17th, **`ep-code-comments`**, also ships in **all eleven** plugins: it is the comment discipline every code-writing and code-reviewing skill applies — **no inline comments**, a short doc comment only where the name genuinely cannot carry the meaning *and* the flow is complex (pinned to four qualifying cases), nothing at all on trivia, and a stale comment deleted rather than updated. Test code adds one rule: the test name and the Arrange-Act-Assert shape *are* the explanation, so `// Arrange` banners are a finding, and exactly three comments are permitted. The six `code-review` reviewers, the nine QA test reviewers, the three conformance checklists, and 31 code-writing agents load it and supply only their own language's doc-comment and suppression syntax. Loaded, never invoked directly. Pull updates later with `/plugin marketplace update skills-library`.
+A 17th, **`ep-code-comments`**, also ships in **all fifteen** plugins: it is the comment discipline every code-writing and code-reviewing skill applies — **no inline comments**, a short doc comment only where the name genuinely cannot carry the meaning *and* the flow is complex (pinned to four qualifying cases), nothing at all on trivia, and a stale comment deleted rather than updated. Test code adds one rule: the test name and the Arrange-Act-Assert shape *are* the explanation, so `// Arrange` banners are a finding, and exactly three comments are permitted. The six `code-review` reviewers, the nine QA test reviewers, the three conformance checklists, and 31 code-writing agents load it and supply only their own language's doc-comment and suppression syntax. Loaded, never invoked directly. Pull updates later with `/plugin marketplace update skills-library`.
 
 ### Slash commands
 
@@ -120,6 +126,21 @@ A 17th, **`ep-code-comments`**, also ships in **all eleven** plugins: it is the 
 
 …plus the 5 `ep-*` process commands listed under **Shared across plugins** below. The 9 `devops-*` skills (docker, IaC, kubernetes, the three CI hosts, the two cloud deployments, environment-config) are reached through the two agents — and because devops skills are keyed to *tools* rather than stacks, both agents inspect the repo and **confirm the tool stack with you before loading a single skill**, then load only what that answer selects.
 
+**`penetration-testing`** — 3 commands:
+
+| Command | Argument | Runs |
+|---|---|---|
+| `/security-test-planner` | repo, running system, cloud account, or a loose description | discover the attack surface, block for scope + authorization, emit an ordered task list binding each step to its lane agent |
+| `/penetration-tester` | engagement id / scope-file path, or the owned-lab target | scope gate → recon → exploitation → priv-esc → lateral movement → post-exploitation (capped at proof) → report + cleanup verification |
+| `/purple-team-engineer` | engagement id, target, or the ATT&CK technique set | detonate each technique and assert the alert fired — scored detected/not-detected, with the drift delta against the last round |
+
+**`security-governance`** — 2 commands:
+
+| Command | Argument | Runs |
+|---|---|---|
+| `/security-architect` | the system to build a posture picture for, or a round to consolidate | roll every lane's findings into one risk register, ATT&CK coverage map, evidence register, and remediation roadmap |
+| `/security-governance-audit` | *(none — or a path/section limiter)* | read-only sweep of the repo's defensive-security artifacts against the `security-governance` conventions → findings report in `docs/audits/` |
+
 **`data`** — 1 command:
 
 | Command | Argument | Runs |
@@ -131,6 +152,13 @@ A 17th, **`ep-code-comments`**, also ships in **all eleven** plugins: it is the 
 | Command | Argument | Runs |
 |---|---|---|
 | `/tooling-engineer` | what to expose, and whether you want MCP, CLI, or both | derive and confirm the capability contract, then build and smoke-test the MCP server and/or CLI over it |
+
+**`training-data`** — 2 commands:
+
+| Command | Argument | Runs |
+|---|---|---|
+| `/dataset-engineer` | what dataset to build — stage, modality, target model | spec → source/curate → synthesize → quality gate (decontamination last) → format & split → dataset card |
+| `/dataset-auditor` | dataset path or name, and its eval targets | read-only audit across 8 sections — format, contamination, duplication, PII, license, composition, splits, card |
 
 **`business-analysis`** — 9 commands:
 
@@ -180,13 +208,15 @@ business-analysis/      # Cross-feature business-flow reasoning: ba-* skills + b
 auth/                   # Auth0 setup per stack
 devops/                 # Platform lane: docker, kubernetes, IaC (Bicep/Terraform), AWS/Azure deploy, CI pipelines, env config + devops-engineer & devops-auditor agents
 observability/          # Grafana, OpenTelemetry, structured logging
+security/               # Security domain in two lanes: pentest-* kill chain + purpleteam-* validation (penetration-testing) and secgov-* defensive/governance (security-governance) + 4 agents
+training-data/          # LLM/VLM training-data engineering: td-* skills across 4 stages and 2 modalities + dataset-engineer & dataset-auditor agents
 qa/                     # Test authoring (API/UI/perf), DB/email/network verification, CI pipelines, reporting (see QA skills below)
 engineering-practices/  # TDD, debugging, code review, git worktrees, planning (from obra/superpowers)
 meta/                   # Authoring skills themselves (writing-skills, skill-creator)
 design/                 # Visual/UX: visual-identity, design-tokens, charts, brand-import, iconography, ux-review, theme-presets, ux-writing, ui-code-audit
 communication/          # BA, user stories, stakeholder updates, internal comms
 ai-development/         # claude-api, mcp-builder (vendored: wraps a third-party API)
-tooling/               # Agent-drivable surfaces over your own project: capability-contract -> mcp-builder / cli-builder + tooling-engineer agent
+tooling/                # Agent-drivable surfaces over your own project: capability-contract -> mcp-builder / cli-builder + tooling-engineer agent
 extras/                 # Off-mission, kept available: algorithmic-art, Office document generation (docx, pdf, pptx, xlsx)
 ```
 
@@ -296,5 +326,7 @@ See [`CONTRIBUTING.md`](CONTRIBUTING.md) and the templates in [`.skill-template/
 | documents             | imported from anthropics/skills |
 | design                | imported (Anthropic + Vercel) |
 | communication         | imported + 3 authored (business-analysis, user-story-writer, stakeholder-updates) |
+| security              | authored + shipped — 13 language-agnostic skills in two lanes: 7 `pentest-*` + 2 `purpleteam-*` (`penetration-testing` plugin) and 4 `secgov-*` + the `secgov-standards-audit` self-audit (`security-governance` plugin) + the `penetration-tester`, `security-test-planner`, `purple-team-engineer`, and `security-architect` agents |
+| training-data         | authored + shipped — 8 `td-*` skills (3 `_shared` foundations + 5 stage lanes) + the `dataset-engineer` and `dataset-auditor` agents; `training-data` plugin |
 | ai-development        | imported from anthropics/skills |
 | tooling               | authored + shipped — 3 `tool-*` skills (`capability-contract` + the `mcp-builder` / `cli-builder` renderers) + the `tooling-engineer` agent; `tooling` plugin |
