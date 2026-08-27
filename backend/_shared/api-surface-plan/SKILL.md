@@ -11,13 +11,13 @@ The document has two audiences and both matter: the `be-<stack>` agent that impl
 
 **Announce at start:** "I'm using the `be-shared-api-surface-plan` skill to plan the API surface."
 
-**Prerequisites:** an approved `blueprint.md` and a written `data-model.md`. Resources derive from entities; state-conflict rules derive from lifecycle diagrams; duplicate rules derive from unique constraints.
+**Prerequisites:** an approved `blueprint.md` and a written `data-model.md` — plus `experience-plan.md` when the initiative has a frontend. Resources derive from entities; state-conflict rules derive from lifecycle diagrams; duplicate rules derive from unique constraints; **response shapes derive from what the screens need** (`experience-plan.md` §4's data-needed lines — an aggregate the tables lack, such as `bookedCount`, becomes a computed field decided here). On finishing, fill the experience plan's §5 screen ↔ endpoint matrix and hand the file back.
 
 **Read `references/validation-catalog.md` before writing any endpoint block.** It is the standard set every endpoint inherits, and the per-endpoint blocks are only meaningful as deltas against it.
 
 ## When to use
 
-- Step 3 of a `be-planner` run
+- Step 4 of a `be-planner` run (after the experience plan, which is skipped when nothing is user-facing)
 - A new functional area adds endpoints to an existing API (`EXTEND` — plan the delta, inherit the existing envelope and conventions)
 - An existing API needs its contract documented as the baseline for planned changes (`RESUME` — read routes and DTOs out of the code, mark `#confirmed`, then plan the delta)
 
@@ -120,6 +120,7 @@ Rules:
 
 - **"Standard set, plus —" is the required form.** Never re-list 401/403/404/400 per endpoint; state only what is *additional or different*. If an endpoint deliberately omits part of the standard set (a public health check has no 401), say so explicitly — that is a delta too.
 - **Every request field maps to something real** — a column in `data-model.md`, a computed value, or a named external input. A field that maps to nothing is either a missing table or a field nobody needs.
+- **Every screen data need maps to a response field** — walk `experience-plan.md` §4 line by line; a need with no field is a missing endpoint or a computed field you have not declared, and a response field no screen and no integration reads is a candidate for removal.
 - **Server-computed fields are marked as such and are never trusted from the client.** Totals, statuses, timestamps, ids, tenant. This is a security rule, not a style one.
 - **Response fields are chosen, not dumped.** Say what is deliberately not returned (password hashes, internal ids, other tenants' data, soft-deleted rows).
 - **Nested objects get their own field table** if they appear more than once — define a shared schema block near the top and reference it.
@@ -203,11 +204,13 @@ The per-endpoint blocks then carry deltas only.
 6. No endpoint re-lists the standard error set. No endpoint lacks a consumer.
 7. Every shape used twice is a shared schema.
 8. Every table in `data-model.md` is written or read by at least one endpoint, background job, or integration — list any orphans; a deliberately internal table counts, named as such.
+9. When `experience-plan.md` exists: every §4 data need resolves to a response field, and §5 is filled — every user-facing endpoint on at least one screen, or named machine-to-machine.
 9. The validation catalog is copied into the initiative folder and the plan cites the copy, not the skill's `references/` path.
 
 ## Handoffs
 
-- **→ `be-shared-integration-plan`** (Step 4). Any endpoint that calls out to a third party names it there.
+- **→ `be-shared-experience-plan`** — hand back its §5 screen ↔ endpoint matrix, filled.
+- **→ `be-shared-integration-plan`** (Step 5). Any endpoint that calls out to a third party names it there.
 - **→ `be-<stack>` agents** — `api-models` equivalents and controllers/handlers come from these tables.
 - **→ `qa-api-<stack>`** — this is the contract-test basis. The standard validation set is the negative-test matrix; the endpoint table is the positive one.
 - **→ `qa-security`** — the Auth column is the BOLA/IDOR/BFLA permission matrix.

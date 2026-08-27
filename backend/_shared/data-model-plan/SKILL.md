@@ -227,7 +227,8 @@ Rules:
 
 ## Handoffs
 
-- **→ `be-shared-api-surface-plan`** (Step 3). Entities become resources; lifecycle transitions become state-conflict validations; unique constraints become `409 duplicate` rules; FKs become "referenced id must exist and be visible" rules.
+- **→ `be-shared-experience-plan`** (Step 3, when the routing map names a frontend agent). The entity catalog is what the screens display; screens' data needs then feed the API surface.
+- **→ `be-shared-api-surface-plan`** (Step 4). Entities become resources; lifecycle transitions become state-conflict validations; unique constraints become `409 duplicate` rules; FKs become "referenced id must exist and be visible" rules.
 - **→ `data-architect`** for engine selection, index strategy that needs plan analysis, partitioning, RLS policies, and cross-engine migration. Everything in the "Routed to" table.
 - **→ `be-<stack>`'s `database-code` skill** (via the `be-<stack>` agent) to write the entities, configurations, and migrations.
 - **→ `qa-api-<stack>`'s `db-testing` skills** — this document is the seed/assert/clean basis.

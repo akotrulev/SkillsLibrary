@@ -47,6 +47,15 @@ virtualization, no layout reads in render), navigation & URL state, touch,
 safe-area/layout, dark-mode/theming, i18n formatting, hydration safety, hover
 states, copy, and an explicit anti-pattern list to flag.
 
+## House overrides
+
+The vendored ruleset's **Content & Copy** section (Title Case for headings and
+buttons, `&` over "and", …) is **superseded by
+[`design/ux-writing`](../ux-writing/SKILL.md)** — sentence case, active verb
+labels, one voice across both stacks. The audit emits **no findings** from that
+section; a label that follows `ux-writing` is correct. Every other section of
+the vendored ruleset applies unchanged.
+
 ## Do NOT use for
 
 - **Experience-level review** — flows, friction, Nielsen heuristics, IA →

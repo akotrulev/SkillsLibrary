@@ -1,11 +1,20 @@
 ---
 name: design-visual-identity
-description: The authority for a SHIPPING web app's visual identity — invents one per-brief design direction (palette, type scale, spacing, layout, motion) and hands it down as a token system a stack's `styling` consumes. Triggers "give this app a look", "make this UI not look AI-generated", "pick a palette and fonts", "restyle this app". Not for CSS mechanics (the stack's `styling`), token naming (`design-tokens`), a brand book (`design-brand-import`), or presets (`design-theme-presets`).
+description: The authority for a SHIPPING web app's visual identity — invents one per-brief design direction (palette, type scale, spacing, layout, motion) and hands it down as a token system a stack's `styling` consumes. Two lanes — a MARKETING page gets a hero, a signature element and one aesthetic risk; an APPLICATION (grids, forms, nav) gets the modern-app recipe (neutral surfaces, one accent, tonal hierarchy, hairline borders) with layout/shell decisions taken from `design-ux-patterns`. Triggers "give this app a look", "make this UI not look AI-generated", "pick a palette and fonts", "restyle this app". Not for CSS mechanics (the stack's `styling`), token naming (`design-tokens`), a brand book (`design-brand-import`), or presets (`design-theme-presets`).
 ---
 
 # Frontend Design
 
-Approach this as the design lead at a small studio known for giving every client a visual identity that could not be mistaken for anyone else's. The client has already rejected proposals that felt templated, and is paying for a distinctive point of view: make deliberate, opinionated choices about palette, typography, and layout that are specific to *this* brief, and take one real aesthetic risk you can justify.
+Approach this as the design lead at a small studio known for giving every client a visual identity that could not be mistaken for anyone else's. The client has already rejected proposals that felt templated, and is paying for a distinctive point of view: make deliberate, opinionated choices about palette, typography, and layout that are specific to *this* brief, and take one real aesthetic risk you can justify — where the lane below allows it.
+
+## Two lanes: marketing page vs application
+
+Classify the brief first, and say which lane you chose:
+
+- **Marketing lane** — a landing page, a campaign page, a product site: the page's job is to *persuade* in one visit. Everything in *Design principles*, *Composition & atmosphere*, and the "signature element" of the plan applies in full.
+- **Application lane** — a product people *use*: lists, detail pages, forms, navigation, dashboards. The job is to get out of the way of the task. The hero, the layout stunt, and the aesthetic risk are wrong here; the section *The application lane — the modern-app recipe* replaces them, and the layout, shell, and page anatomy come from [`design/ux-patterns`](../ux-patterns/SKILL.md), not from this skill's composition section.
+
+A brief can hold both (a marketing site and the app behind it) — then the two get one token system and two lanes, and the app never inherits the landing page's drama.
 
 **What this skill owns:** the *taste* — the visual direction, the per-brief token system, the composition, whether/where motion serves the subject, and the copy voice. **What it does not own:** the *mechanics* — how the tokens become CSS, how the animation is coded, how contrast is verified. Those belong to the stack skills (`styling`, `motion`, `accessibility`, `responsive-design`) and to `design/ux-writing` for the copy rules in depth. This skill is the primary theming authority: its token system feeds `styling`'s CSS custom properties, not the other way around, and `design/theme-presets` is only an optional quick-start when a brief doesn't warrant a bespoke system.
 
@@ -15,13 +24,13 @@ If the brief does not pin down what the product or subject is, pin it yourself b
 
 ## Design principles
 
-**The hero is a thesis.** For web designs, open with the most characteristic thing in the subject's world, in whatever form makes sense for it: a headline, an image, an animation, a live demo, an interactive moment. Be deliberate: a big number with a small label, supporting stats, and a gradient accent is the *template* answer — use it only if it's truly the best option for this subject.
+**The hero is a thesis** *(marketing lane)*. For a marketing page, open with the most characteristic thing in the subject's world, in whatever form makes sense for it: a headline, an image, an animation, a live demo, an interactive moment. Be deliberate: a big number with a small label, supporting stats, and a gradient accent is the *template* answer — use it only if it's truly the best option for this subject.
 
 **Typography carries the personality of the page.** Pair the display and body faces deliberately — not the same families you'd reach for on any other project — and set a clear type scale with intentional weights, widths, and spacing. Make the type treatment itself a memorable part of the design, not a neutral delivery vehicle. (The *scale-as-tokens* mechanics — modular ratio, `clamp()` responsive type, weight/tracking discipline — are implemented in the stack's `styling` type-scale subsection; decide the treatment here, encode it there.)
 
 **Structure is information.** Structural devices — numbering, eyebrows, dividers, labels — should encode something true about the content, not decorate it. Numbered markers (01 / 02 / 03) are only appropriate if the content actually *is* a sequence (a real process, a typed timeline where order carries information). Question whether a device makes sense before incorporating it.
 
-**Leverage motion deliberately.** Think about where and *if* animation serves the subject: a page-load sequence, a scroll-triggered reveal, hover micro-interactions, ambient atmosphere. An orchestrated moment usually lands harder than scattered effects; choose what the direction calls for. Sometimes less is more — extra animation is one of the strongest tells that a design is AI-generated. Decide the motion *intent* here; the implementation (CSS transitions/keyframes, `prefers-reduced-motion` as a hard floor, scroll reveals, view transitions) lives in the stack's `motion` skill.
+**Leverage motion deliberately.** In the application lane motion is feedback only — press, hover, region enter/exit — never atmosphere. For a marketing page, think about where and *if* animation serves the subject: a page-load sequence, a scroll-triggered reveal, hover micro-interactions, ambient atmosphere. An orchestrated moment usually lands harder than scattered effects; choose what the direction calls for. Sometimes less is more — extra animation is one of the strongest tells that a design is AI-generated. Decide the motion *intent* here; the implementation (CSS transitions/keyframes, `prefers-reduced-motion` as a hard floor, scroll reveals, view transitions) lives in the stack's `motion` skill.
 
 **Match complexity to the vision.** Maximalist directions need elaborate execution; minimal directions need precision in spacing, type, and detail. Elegance is executing the chosen vision well — not intensity for its own sake.
 
@@ -35,12 +44,27 @@ If the brief does not pin down what the product or subject is, pin it yourself b
 
 ## Composition & atmosphere
 
-Layout is a design decision, not just a responsive-mechanics problem. The stack's `styling`/`responsive-design` own *how* a grid reflows across breakpoints; this skill owns *what the composition says*:
+*Marketing lane.* Layout is a design decision, not just a responsive-mechanics problem. The stack's `styling`/`responsive-design` own *how* a grid reflows across breakpoints; this skill owns *what the composition says*:
 
 - **Spatial composition** — consider unexpected layouts: asymmetry, overlap, diagonal flow, deliberate grid-breaking, an off-center focal point. Choose between **generous negative space** (the vision breathes) and **controlled density** (the vision is rich and packed) — commit to one; timid in-between spacing reads as a default. One grid container should own each region's geometry (siblings don't self-position) so the composition holds across breakpoints.
 - **Atmosphere & depth** — create atmosphere rather than defaulting to flat solid fills where the direction wants more: gradient meshes, subtle noise/grain textures, geometric patterns, layered transparencies, dramatic or layered shadows, decorative borders, custom cursors. These are how a page gains depth — but they are accessories (see restraint below), and the thin CSS implementation (`background`, `box-shadow`, `filter`, layered pseudo-elements) is `styling`'s.
 
 Avoid the reflexive defaults: purple gradients on white, evenly-distributed timid palettes, predictable card grids, and cookie-cutter component patterns with no context-specific character.
+
+## The application lane — the modern-app recipe
+
+An application looks modern by being quiet and consistent, so the data and the actions are the loudest thing on the screen. Decide these values here; [`design/design-tokens`](../design-tokens/SKILL.md) gives them structure and the stack's `styling` renders them:
+
+- **A neutral surface scale** — base, raised, overlay — carrying nearly every pixel; tinted, not pure white or pure black.
+- **One accent**, spent on the primary action and the active nav item; the semantic status set (success / warning / danger / info) stays separate and is never the brand color.
+- **Three text tones** — primary, muted, disabled — and weight for emphasis; headings step the type scale, body text does not.
+- **Hairline borders over heavy shadows.** Elevation is reserved for what actually floats: menus, drawers, dialogs.
+- **A 4/8-px spacing rhythm**, one radius scale, one icon family at one stroke weight.
+- **A deliberate dark palette** — desaturated accent, no pure-black surface, contrast re-verified — never an inversion.
+- **Typography restraint:** the body face does the work; at most one display face, used on page titles and the brand mark.
+- **The signature is a detail, not a stunt** — the empty-state illustration, the brand-mark treatment, one characterful transition — never an asymmetric grid or a hero on a list page.
+
+The three-AI-default-looks critique below applies to this lane too: a cream-and-terracotta admin panel is as templated as a cream-and-terracotta landing page.
 
 ## Process: brainstorm, explore, plan, critique, build, critique again
 
@@ -52,7 +76,7 @@ Avoid the reflexive defaults: purple gradients on white, evenly-distributed timi
 - **Color** — the palette as 4–6 named hex values.
 - **Type** — the typefaces for 2+ roles: a characterful display face used with restraint, a complementary body face, and a utility face for captions/data if needed.
 - **Layout** — a layout concept, described in one-sentence prose plus ASCII wireframes to ideate and compare.
-- **Signature** — the single unique element this page will be remembered by, one that embodies the brief.
+- **Signature** — the single unique element this page will be remembered by, one that embodies the brief (application lane: a detail, per the recipe above).
 
 This four-part plan is the *taste* — the chosen values. Its *structure* — how those values become a tiered token system (primitive → semantic → component), how they're named by purpose, and how theming/dark-mode is a semantic swap set — is owned by [`design/design-tokens`](../design-tokens/SKILL.md); decide the values here, encode them as a system there, and the stack's `styling` renders that system as CSS. This skill is the **greenfield** path (invent an identity); when a project must instead match an *existing* brand book, [`design/brand-import`](../brand-import/SKILL.md) is the brownfield counterpart (composition/signature/hero still come from here even under a fixed brand).
 
@@ -64,7 +88,7 @@ Do most of this planning and iteration in your thinking; only show ideas to the 
 
 ## Restraint and self-critique
 
-**Spend your boldness in one place.** Let the signature element be the one memorable thing; keep everything around it quiet and disciplined, and cut any decoration that doesn't serve the brief. Not taking a risk can be a risk itself. Build to a quality floor without announcing it: responsive down to mobile, visible keyboard focus, reduced motion respected.
+**Spend your boldness in one place.** (Marketing lane; in the application lane the boldness budget is the one accent and the signature detail.) Let the signature element be the one memorable thing; keep everything around it quiet and disciplined, and cut any decoration that doesn't serve the brief. Not taking a risk can be a risk itself. Build to a quality floor without announcing it: responsive down to mobile, visible keyboard focus, reduced motion respected.
 
 **Critique your own work as you build** — take screenshots if the environment supports it; a picture is worth 1000 tokens. Apply Chanel's advice: before leaving the house, look in the mirror and **remove one accessory**. Human creators have memory and always try something new — if there's a space to jot notes about what you've tried, it helps future passes. (This restraint check is exactly the visual self-critique the `fe-blazor` agent runs in its Review step.)
 

@@ -23,7 +23,7 @@ And one property decides the shape of the sequence: **user-facing work is sequen
 
 ## When to use
 
-- Step 5 of a `be-planner` run
+- Step 6 of a `be-planner` run
 - `RESUME` — reconciling an existing plan against partially-built code and re-sequencing what remains
 - `EXTEND` — appending tasks for a new functional area
 
@@ -56,6 +56,7 @@ Do not brainstorm tasks. Read them out of the detail pack, in this order — the
 | `api-surface.md` shared schemas + section 4 | Shared DTOs and the validation/error middleware — **once**, before any endpoint |
 | `api-surface.md` endpoint blocks | One task per resource (not per endpoint — a resource's CRUD set is one coherent task) |
 | `integrations.md` dependency blocks | One client task per external system |
+| `experience-plan.md` §2 + §4 screen catalog | The **app-shell task** (shell, nav, home — once, bound to `fe-react` / `fe-blazor` with `design-ux-patterns`), then one frontend task per screen or per journey's screen set (a list and its detail are one coherent task), each after the endpoints it calls and citing its screen ids |
 | `api-surface.md` outbound webhooks + background work | Job/consumer tasks |
 | `api-surface.md` endpoint map (once the resource tasks exist) | **The OpenAPI-asset task** — one standard task, after the last endpoint task: the `be-<stack>` agent generates the spec from the implemented surface and commits it canonicalized as `{service}-openapi-YYYY-MM-DD.json`, so `qa/_shared/api-spec-assets` has its canonical input from day one and every later contract change flows through that skill's diff-driven lane instead of being reverse-engineered. Greenfield plans include it by default; skip only when the repo already keeps the asset |
 
@@ -63,7 +64,7 @@ Anything not traceable to a row above is either missing from the design pack (go
 
 **A user-facing capability is not a row — it is the sum of several.** Where the initiative delivers something a person does (place an order, book a session, reset a password), the table gives you the *pieces*; what makes them a feature is that all of them exist at once. Before sequencing, write down, per capability, the full set it needs to be usable end to end:
 
-> schema + entities + the domain rules → the service/orchestration → the endpoints and their request/response contracts → the validation & error deltas → the authorization rule → registration and wiring (DI, route module, config keys) → unit tests → and whatever makes it **reachable**: the migration applied, seed/reference data, a feature flag defaulted to on, the OpenAPI asset when a consumer is generated from it.
+> schema + entities + the domain rules → the service/orchestration → the endpoints and their request/response contracts → the validation & error deltas → the authorization rule → registration and wiring (DI, route module, config keys) → unit tests → the screens that carry it (`experience-plan.md`'s journey for the capability) → and whatever makes it **reachable**: the migration applied, seed/reference data, a feature flag defaulted to on, the OpenAPI asset when a consumer is generated from it.
 
 That set is what Step 2 sequences. A capability missing any of it has been planned, not delivered — and "the endpoints exist but nothing registers them" is the way this fails most often.
 
@@ -91,7 +92,7 @@ The order must satisfy four things:
 |---|---|
 | First | Human-blocked provisioning the first capability needs — one task per provisioning track |
 | Then | Scaffold, layout, config + validation, CI skeleton, and the cross-cutting surfaces (auth, error envelope, shared DTOs) the first capability actually depends on — nothing speculative |
-| Then | Capability A's whole set from Step 1, in its natural order: migration → entities + rules → service → endpoints → wiring → unit tests |
+| Then | Capability A's whole set from Step 1, in its natural order: migration → entities + rules → service → endpoints → wiring → unit tests → its screens (the app-shell task precedes the first capability's screens) |
 | Then | Capability B's own set, plus only the foundations B is the first to need |
 | Then | One run of tasks per remaining capability, most valuable first |
 | Last | The OpenAPI asset, telemetry, rate limiting, performance, docs |
@@ -182,6 +183,7 @@ Rules:
 - **Acceptance criteria are checkable**, and they cite the design pack by section rather than restating it. "Handles errors properly" is not a criterion; "returns the documented `type` slug for each of the three deltas" is.
 - **The build/test command is the project's own**, taken from the orientation pass — never a guessed default.
 - **Size a task by coherence, not by volume.** A task is one thing, done once — a resource, a migration set, an external client, a capability's endpoint surface — and it is exactly as big as that thing is. File counts and criterion counts are not a limit: work that genuinely needs fourteen files is one task, and cutting it into "the entity" and "the service" produces two tasks neither of which can be verified alone. **The deliverable is the test**: one task, one deliverable. Two deliverables means two tasks; no statable deliverable means it is a fragment of one. **Split when it stops being one thing**: it delivers two independent behaviours; a natural intermediate point exists where the work is meaningfully complete *and* checkable on its own; part of it is blocked while the rest is not; or two different agents own the halves. Every piece of a split must still build, still pass its own tests, and still be independently verifiable — a split that leaves the tree broken between the pieces was a bad seam, and the two pieces are one task. When a task is large, its **acceptance-criteria list is its step breakdown**, ticked off in place as the work lands.
+- **Frontend tasks cite their screens.** A task bound to `fe-react` / `fe-blazor` names the `experience-plan.md` screen ids it delivers (`S3`, `S4`) and the journey it completes (`J1`), lists `design-ux-patterns` in its skills, and carries `experience-plan.md` §6's responsiveness budget as acceptance criteria verbatim; the capability's last task is usually this one, and its deliverable is the journey's behavioural sentence.
 - **`Out of scope` per task** — mostly to keep the executing agent from wandering into a peer's lane.
 - **Tasks are implementation.** Live/E2E/integration test runs, starting servers, and manual verification belong to a separate QA pass owned by a `qa-*` peer. Unit tests are part of the implementation task, not a separate one.
 
@@ -297,7 +299,7 @@ Diverged — T9 (auth wiring): plan specifies policy-based authorization;
 # <Initiative> — Delivery Plan
 
 **Date:** YYYY-MM-DD · **Written by:** `be-shared-delivery-plan`
-**Pack:** `./blueprint.md` · `./data-model.md` · `./api-surface.md` · `./integrations.md`
+**Pack:** `./blueprint.md` · `./data-model.md` · `./experience-plan.md` (when user-facing) · `./api-surface.md` · `./integrations.md`
 **Target repo:** `<path>` · **Stack:** <stack + version> · **Build/test:** `<the project's own commands>`
 
 > **For agentic workers:** the tasks below are one flat sequence — work them in order. Each names
@@ -341,9 +343,9 @@ Diverged — T9 (auth wiring): plan specifies policy-based authorization;
 
 ## Self-check before handing off
 
-1. Every functional area in `blueprint.md` has at least one task; every migration, every resource, every external client, every blocking unknown is a task.
+1. Every functional area in `blueprint.md` has at least one task; every migration, every resource, every screen in `experience-plan.md`, every external client, every blocking unknown is a task.
 2. Reading the tasks in `order`, each one could be started at its position: everything it needs was produced by a task above it.
-3. Every task states one `Deliverable`, as a result rather than an activity. Every user-facing capability has a last task whose deliverable says behaviourally what a user can then do, and the run of tasks ending there covers everything on the Step-1 capability set — including what makes it reachable, not only its endpoints.
+3. Every task states one `Deliverable`, as a result rather than an activity. Every user-facing capability has a last task whose deliverable says behaviourally what a user can then do, and the run of tasks ending there covers everything on the Step-1 capability set — including its screens and what makes it reachable, not only its endpoints. Every frontend task cites its screen ids and inherits the responsiveness budget.
 4. Every task binds to an **exact** catalog agent name and exact skill names.
 5. Every `dependsOn` id exists, and every one points backwards in `order`.
 6. Every task names a declared stream and carries a unique `order`; every stream's row says why it is internally sequential; every pair of tasks whose `Files` overlap is ordered against each other — same stream or a `dependsOn` edge between them.

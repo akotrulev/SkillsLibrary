@@ -1,6 +1,6 @@
 ---
 name: design-ux-review
-description: Use when reviewing a built UI, screenshot, mockup, or Figma flow at EXPERIENCE altitude — Nielsen's 10 heuristics, flow friction (steps-to-goal, dead ends), IA sanity — output is a severity-tabled findings list, no rewrites. Triggers "review the UX", "heuristic evaluation", "is this flow confusing", "usability audit", "why does this feel clunky". Not for code-level UI audit (`design-ui-code-audit`), a11y scans (qa `accessibility-testing`), or copy voice (`design-ux-writing`).
+description: Use when reviewing a built UI, screenshot, mockup, or Figma flow at EXPERIENCE altitude — captures its own evidence (Playwright screenshot per primary task), then Nielsen's 10 heuristics, flow friction (steps-to-goal, dead ends), IA sanity, and the responsiveness budget — checked against the initiative's `experience-plan.md` where one exists — output is a severity-tabled findings list, no rewrites. Triggers "review the UX", "heuristic evaluation", "is this flow confusing", "usability audit", "why does this feel clunky". Not for code-level UI audit (`design-ui-code-audit`), a11y scans (qa `accessibility-testing`), or copy voice (`design-ux-writing`).
 ---
 
 # UX heuristics — experience-level review
@@ -32,6 +32,16 @@ Severities are the house scale (see `CLAUDE.md`): **blocker** (the user cannot c
 
 Best practice from the discipline: a heuristic evaluation catches more when **run as several independent passes** — 3–5 evaluators find ~60% of issues one finds far fewer of. When you review alone, make **two deliberate passes** (once free-exploring the flow, once walking the checklist) rather than one, and note the primary user tasks you evaluated so coverage is legible.
 
+## Capture the evidence
+
+A review without evidence is an opinion. Before the first heuristic:
+
+1. **Name the primary user tasks** you will walk (from the brief, or from `docs/plans/<NNN>-*/experience-plan.md`'s actors & tasks where the initiative has one).
+2. **Capture each task end to end.** With a running app, drive it through the Playwright MCP and take one screenshot per screen in the task's path, at the desktop and the narrowest supported width. Without one, use the user-supplied screenshots / mockup / Figma frames and say so.
+3. **Record what was captured** in the report header — tasks walked, screens seen, widths — so the coverage is legible and a screen you never reached is not silently "passed".
+
+**Where an `experience-plan.md` exists it is the reference, not the build.** Every IA or steps-to-goal finding names the plan decision the build contradicts — the screen id (`S4`), the nav-map row, the journey's step count — and a build that matches a plan decision you would have flagged is a finding *against the plan*, routed to `be-planner`, not against the build.
+
 ## Nielsen's 10 heuristics, as review questions
 
 Walk each defined user task against these. Each is a question you answer with a finding or a pass:
@@ -57,6 +67,17 @@ Beyond the ten, walk each primary task end to end and measure the *path*:
 - **Undo over confirm, where the action is reversible.** A confirmation dialog interrupts *every* use to guard against the *rare* mistake; an undo affordance lets the common case flow and still catches the mistake. Reserve confirmations for the genuinely irreversible (delete-with-no-recovery, send, pay) — and there, confirm **by object name** (defer the confirmation-copy mechanics to `ux-writing` / a stack's `ui-rules`). Flag reversible actions that block behind a modal.
 - **State legibility.** At any point the user should be able to answer "where am I, what just happened, what can I do next" without guessing.
 
+## Responsiveness pass
+
+Perceived speed is part of the experience; the budget is [`design/ux-patterns`](../ux-patterns/SKILL.md) §9, here as review questions:
+
+- **Does every press acknowledge within ~100 ms** — a pressed state, a submit button that disables and shows in-flight — or does the user click twice?
+- **Does a load show a skeleton shaped like the content**, in its region, or a blank / a page-centre spinner?
+- **Does a long load say it is alive** at ~4 s, and does a failure land in the region with a retry rather than blanking the page?
+- **Does anything shift** when content arrives — a header that jumps, a table that pushes the toolbar?
+- **Is optimism used where reversible** (toggle, star, reorder) **and nowhere irreversible** (pay, send, delete)?
+- **Does one region's wait block the page?** Independent regions load independently; the shell renders at once.
+
 ## IA sanity
 
 - **Nav depth.** Primary destinations should be reachable shallowly; a task buried three-plus levels deep, or reachable only by a path the user won't guess, is a finding. Prefer breadth the user can scan over depth they must remember.
@@ -66,7 +87,10 @@ Beyond the ten, walk each primary task end to end and measure the *path*:
 
 ## Review checklist
 
+- **Evidence captured** — tasks walked, screens seen, widths — before any judgement; the report says what was and was not reached.
 - **Two passes**, primary user tasks named, each task walked against **all ten heuristics** — findings, not vibes.
+- **Responsiveness measured** against the §9 budget: press feedback, skeletons, the ~4 s acknowledgement, no layout shift, optimism only where reversible.
+- **Plan referenced** where `experience-plan.md` exists — each IA / steps-to-goal finding names the screen id or nav-map row it contradicts.
 - **Flow measured:** steps-to-goal minimized, no dead ends, back-button safe, **undo preferred over confirm** for reversible actions, state always legible.
 - **IA checked:** nav shallow and scannable, labels predict destinations, one-name-one-concept holds, you-are-here always shown.
 - **Output is a findings table** (severity / location / heuristic / suggested fix) on the **house severity scale** — **no rewrites**, each finding ranked by user-task impact.
@@ -74,6 +98,7 @@ Beyond the ten, walk each primary task end to end and measure the *path*:
 
 ## Related
 
+- [`design/ux-patterns`](../ux-patterns/SKILL.md) — the **generative** counterpart: the IA, shell, page-anatomy and responsiveness decisions this review judges a build against; `be-shared-experience-plan` carries them per initiative.
 - [`design/ui-code-audit`](../ui-code-audit/SKILL.md) — the **code-level** UI audit one layer below this; this reviews the experience, that reviews the implementation.
 - [`design/ux-writing`](../ux-writing/SKILL.md) — owns the **wording** of labels, errors, and confirmations this review judges the *structure* of; shares the one-name-one-concept rule.
 - [`design/visual-identity`](../visual-identity/SKILL.md) — owns **visual taste**; heuristic #8 (minimalism) is the usability face of its restraint discipline.

@@ -82,6 +82,7 @@ Rules:
 - **6–8 areas is a lot.** Beyond that, either the initiative should be decomposed into separate initiatives (each with its own folder and its own executable plan), or several "areas" are really one. Say which.
 - **Out of scope is not optional.** The most common plan defect is an unstated boundary that someone later reads as included.
 - Every area gets at least one entity or it is not an area — it is a cross-cutting concern (auth, logging, config), which belongs in the architecture section instead.
+- **Name the actors and propose the shell when anything is user-facing.** Where the table has a non-empty *User-facing capabilities* column, add a short §2b: one line per actor with their two or three most frequent tasks (*verb + object + outcome*), and the **app shell** — sidebar / top nav / hybrid, from `design/ux-patterns` §2's table — as a `proposed` row with its one-line reason. This is what lets the approver judge the experience at the gate; the nav map, journeys and screens are `be-shared-experience-plan`'s in Step 3, not the blueprint's. An initiative with no user-facing capability writes "no user-facing area" and skips the section.
 - **Ask about existing data.** If any area replaces a current system of record (a spreadsheet, a legacy app, a manual process), the data living there is in scope or out — say which. What must come across, and whether it is a one-time import or an ongoing sync, is a scope boundary and usually an open question; the mapping detail belongs to `be-shared-data-model-plan`'s backfill section.
 
 ### Step 3 — Decide the architecture style
@@ -196,7 +197,7 @@ Version policy: **detected wins**. Never propose an up-level runtime as a side e
 
 ### Step 5 — Name the external systems (architecture altitude only)
 
-One line each: system, what it does for us, direction (we call it / it calls us / both), and criticality (does the feature fail without it, or degrade?). Depth — auth method, config keys, retry policy, sandbox strategy — belongs to `be-shared-integration-plan` in Step 4. Here you only need enough to make the architecture and the risk list honest.
+One line each: system, what it does for us, direction (we call it / it calls us / both), and criticality (does the feature fail without it, or degrade?). Depth — auth method, config keys, retry policy, sandbox strategy — belongs to `be-shared-integration-plan` in Step 5. Here you only need enough to make the architecture and the risk list honest.
 
 ### Step 6 — Build the routing map
 
@@ -204,6 +205,7 @@ One line each: system, what it does for us, direction (we call it / it calls us 
 
 | Area / concern | Agent | Skills it will load | Note |
 |---|---|---|---|
+| Screens, shell, navigation (`experience-plan.md` S1–Sn) | `fe-react` | `design-ux-patterns`, `fe-react-component-writer`, `fe-react-routing` | Builds from the experience plan; IA is decided there, not re-derived |
 | Ordering domain + persistence | `be-dotnet` | `be-dotnet-pattern-writer`, `be-dotnet-database-code`, `be-dotnet-unit-testing` | Unit tests ship with the task, not after |
 | Schema, indexes, tenancy enforcement | `data-architect` | `data-postgresql`, `data-schema-design` | Beyond ORM mechanics |
 | Service-side auth | `be-dotnet` | `be-dotnet-auth0` | Frontend half is `fe-react` |
@@ -287,12 +289,20 @@ In `DETAIL` mode, where the human supplied the high-level plan, the gate is shor
 **Success signals:** <measurable where possible; `[TBD - <owner>]` where not.>
 
 ## 2. Functional areas
-| Area | Purpose | Primary actors | Key entities | In scope | Out of scope | Depends on |
-|---|---|---|---|---|---|---|
+| Area | Purpose | User-facing capabilities | Primary actors | Key entities | In scope | Out of scope | Depends on |
+|---|---|---|---|---|---|---|---|
 
 **Explicitly not in this initiative:** <the boundary, stated once, plainly.>
 
 **Existing data & backfill:** <the system of record being replaced and what comes across, or "none — no predecessor system".>
+
+## 2b. Actors & app shell
+<!-- Only when a User-facing capabilities cell is non-empty; otherwise the single line "no user-facing area". -->
+| Actor | Most frequent tasks (verb + object + outcome) | Evidence |
+|---|---|---|
+
+**App shell:** sidebar | top nav | hybrid — <one-line reason, per `design/ux-patterns` §2> · `proposed`
+<!-- Nav map, journeys, screens: experience-plan.md (Step 3), not here. -->
 
 ## 3. Architecture
 **Style:** <choice> — <why it is earned for this system>
@@ -353,6 +363,7 @@ flowchart LR
 
 ## 11. Approval
 - [ ] Functional areas and scope boundary confirmed
+- [ ] Actors, their primary tasks and the app shell confirmed (or "no user-facing area")
 - [ ] Architecture style and pattern choices confirmed
 - [ ] Key flows modelled, every failure exit labeled; decision-table hit policies confirmed (not inferred)
 - [ ] Tech stack `proposed` rows confirmed
@@ -364,15 +375,16 @@ flowchart LR
 
 ## What NOT to put in a blueprint
 
-- **Table columns, endpoint paths, or field-level schemas** — those are Steps 2 and 3. A blueprint that specifies columns will be wrong before it is approved, and it hides the decisions that actually need review.
-- **Task lists or estimates** — Step 5 owns sequencing, and it can only sequence once the detail exists.
+- **Nav maps, routes, screen lists, page layouts** — those are Step 3 (`experience-plan.md`); the blueprint names the actors, their tasks and the shell, and stops.
+- **Table columns, endpoint paths, or field-level schemas** — those are Steps 2 and 4. A blueprint that specifies columns will be wrong before it is approved, and it hides the decisions that actually need review.
+- **Task lists or estimates** — Step 6 owns sequencing, and it can only sequence once the detail exists.
 - **Code** — no scaffolds, no snippets beyond the diagrams and tables above.
 - **Silent decisions** — anything consequential that appears without a `why` and an evidence mark.
 - **A pattern with no earned reason** — the single most common way a plan makes a system worse.
 
 ## Handoffs
 
-- **Approved →** `be-shared-data-model-plan` (Step 2). The Key entities column is its input.
+- **Approved →** `be-shared-data-model-plan` (Step 2). The Key entities column is its input. Then **`be-shared-experience-plan` (Step 3)** whenever the routing map names `fe-react` / `fe-blazor` — §2's capabilities, §2b's actors and shell, and §3b's flows are its inputs.
 - **Requirements too thin →** `requirements-author`, or `business-analyst` when the ask may conflict with existing features. Their `docs/business-model/` KB is a first-class input here.
 - **Architecture turns on a pattern question →** `backend/_shared/pattern-guide` for the concept card (loaded, not delegated).
 - **Flows and decision rules need the full modelling discipline →** `ba-process-flow-diagram` / `ba-decision-table` (loaded, not delegated); `ba-entity-state-grid` for entity lifecycles, which `be-shared-data-model-plan` also draws.

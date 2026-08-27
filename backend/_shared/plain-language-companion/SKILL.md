@@ -20,7 +20,7 @@ Two disciplines are the whole skill:
 
 ## When to use
 
-- Step 6 of a `be-planner` run — after the five plan artifacts are written and self-reviewed
+- Step 7 of a `be-planner` run — after the plan artifacts (five; six when an experience plan exists) are written and self-reviewed
 - A stakeholder, product owner, support lead or client sponsor needs to review or sign off on work described in an existing technical artifact
 - A source document changed and its companion needs regenerating
 
@@ -42,6 +42,7 @@ The companion always takes the source's own filename plus **`-explained`**, in t
 |---|---|
 | `blueprint.md` | `blueprint-explained.md` |
 | `data-model.md` | `data-model-explained.md` |
+| `experience-plan.md` | `experience-plan-explained.md` |
 | `api-surface.md` | `api-surface-explained.md` |
 | `integrations.md` | `integrations-explained.md` |
 | `delivery-plan.md` | `delivery-plan-explained.md` |
@@ -119,6 +120,7 @@ Each companion answers one question, and stops. Depth belongs to the source.
 |---|---|---|
 | `blueprint-explained.md` | What are we building, in what pieces, and what did we decide and why? | Pattern rationale, the routing map, non-functional numbers |
 | `data-model-explained.md` | What information does the system keep, and what does each thing mean in business terms? | Columns, keys, indexes, migration mechanics |
+| `experience-plan-explained.md` | Who uses it, what do they see, and how do they get each thing done — the journeys walked as short stories | Screen ids, routes, page-type vocabulary, the endpoint matrix |
 | `api-surface-explained.md` | What can be asked of the system, by whom, and what comes back? | Field tables, status codes, the validation catalog |
 | `integrations-explained.md` | Which outside services do we rely on, what breaks if one is down, and what does someone need to go get? | Config key names, timeout and retry policy |
 | `delivery-plan-explained.md` | What gets built in what order, what does each step deliver, and what is blocking us? | Task ids, file lists, `dependsOn` graphs, agent names |
@@ -162,7 +164,7 @@ The companion is **generated wholesale from its source, every time the source ch
 
 ## Handoffs
 
-- **→ the source's owning skill** (`be-shared-solution-blueprint`, `be-shared-data-model-plan`, `be-shared-api-surface-plan`, `be-shared-integration-plan`, `be-shared-delivery-plan`) — anything the translation exposed as missing, contradictory or unclear in the source. Fix it there; the companion is never the place to correct the record.
+- **→ the source's owning skill** (`be-shared-solution-blueprint`, `be-shared-data-model-plan`, `be-shared-experience-plan`, `be-shared-api-surface-plan`, `be-shared-integration-plan`, `be-shared-delivery-plan`) — anything the translation exposed as missing, contradictory or unclear in the source. Fix it there; the companion is never the place to correct the record.
 - **→ `design/ux-writing`** — for microcopy that ends up in the product itself. This skill explains documents; that one writes what users read on screen.
 
 ## Version policy

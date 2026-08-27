@@ -70,7 +70,7 @@ Renaming for consistency is high-leverage: a single concept called three things 
 
 ### 5. Register: conversational, tuned, one job per element
 
-Plain verbs, **sentence case** (not Title Case or ALL CAPS), no filler ("please," "simply," "just"), tone matched to the brand and audience. Let each element do exactly one job — a label labels, a hint demonstrates, a tooltip clarifies; nothing quietly does double duty. Be concise: cut every word that doesn't help the person navigate.
+Plain verbs, **sentence case** (not Title Case or ALL CAPS — this overrides the vendored Vercel *Content & Copy* rule in [`design/ui-code-audit`](../ui-code-audit/SKILL.md), which emits no copy findings; one house voice beats a borrowed style guide, and it holds across both stacks), no filler ("please," "simply," "just"), tone matched to the brand and audience. Let each element do exactly one job — a label labels, a hint demonstrates, a tooltip clarifies; nothing quietly does double duty. Be concise: cut every word that doesn't help the person navigate.
 
 - **Front-load the distinguishing word.** People scan; the word that tells them apart comes first — "Pricing", not "Our pricing options"; "To reset your password…", not "In order to reset…". This is the copy face of the IA rule that nav/section labels lead with content, not org structure.
 - **Personality lives in low-stakes moments only.** A little voice is welcome in empty states, success toasts, and onboarding; it is out of place in errors, payments, and destructive confirmations, where the user's goal beats brand voice every time.
