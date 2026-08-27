@@ -87,6 +87,13 @@ Define **one** format per data type app-wide and centralize it in shared helpers
 - **Filter parity:** if shared grids offer per-column filters, hand-written grids must too — especially the columns users most need (a status badge you can't filter by status is a recurring miss).
 - **Consistent sortability within a grid** — mixed sortable/unsortable columns with no rationale reads as broken.
 - **Consistent row→detail affordance** across grids — same view/link everywhere a detail page exists.
+- **Sticky header row** on any table that scrolls past a screen — a column you cannot name is a column you cannot read. (Reflow/stickiness mechanics: [`responsive-design`](../responsive-design/SKILL.md).)
+- **Selection is signalled by the row, not only the checkbox** — a selected row carries a background/border change; a 16-px tick is not a state indicator. Selection **survives paging** within one task, and the count of what is selected is always visible.
+- **Bulk actions appear as a contextual toolbar on selection**, above the table, and disappear with it — not a permanently-rendered row of buttons that are disabled most of the time.
+- **Quick filters apply instantly; advanced filters get an Apply.** A single-value toggle re-queries on click; a multi-condition builder waits for a deliberate submit. An **Apply button on a quick filter is a known confusion source** — users cannot tell whether the click took.
+- **Active filters render as removable chips** with a count and a clear-all, above the data region so a failed load never unmounts them.
+- **Inline edit for the repeated, high-frequency change** (§7's surface rule) — and an inline edit commits or cancels explicitly; a row that saves on blur loses work to a stray click.
+- **Row actions live behind one compliant trigger when space is tight** — an overflow menu with a ≥24×24 CSS px target beats four 16-px icons crammed into a compact row (sizing rule: `design/accessible-by-design`).
 
 ---
 

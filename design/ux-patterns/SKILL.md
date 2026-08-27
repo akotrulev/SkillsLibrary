@@ -98,7 +98,7 @@ Every page has the same skeleton — **header · optional toolbar · content reg
 
 Frequent users outgrow the nav within a week; the app should have somewhere for them to go.
 
-- **Global search / command palette (`⌘K` / `Ctrl+K`)** once the app has more than ~20 destinations or the user's day starts with "find the record" — it searches **destinations and records** in one box, and every result is a link. Below that threshold a search field on the list page is enough.
+- **Global search / command palette (`⌘K` / `Ctrl+K`)** once the app has more than ~20 destinations or the user's day starts with "find the record" — it searches **destinations and records** in one box, and every result is a link. Below that threshold a search field on the list page is enough. What the results surface itself must do is §10.
 - **Keyboard shortcuts for the top three tasks** (create, search, save/approve), discoverable through a `?` overlay and shown in tooltips. Never override browser or OS shortcuts.
 - **Saved views** — a named filter + sort + column set on any list a user returns to daily; the default view is the most common task's.
 - **Recents and favourites** in the shell when the entity count is large and the user's working set is small.
@@ -140,6 +140,21 @@ Perceived speed is a design requirement; the build meets it or the feature is no
 - **Navigation feels instant:** the shell renders immediately and only the page region loads; likely next routes are prefetched (the stack's `routing` / `performance`).
 - **One region's wait never blocks the page.** Independent regions load independently.
 
+**The same budget, in the field's measuring vocabulary.** The windows above are the *design* requirement; **Core Web Vitals** are how it is measured in production, at the **75th percentile** of real sessions — not the median, and not your machine. **LCP < 2.5 s** (the main content is on screen) · **INP < 200 ms** (every interaction acknowledges — INP replaced FID in March 2024, measures *all* interactions and reports the worst, and is now the most-failed of the three) · **CLS < 0.1** (nothing moves under the reader — the metric form of the no-layout-shift rule above). Write the budget as design acceptance criteria; the stack's `performance` skill owns hitting the numbers and `frontend/_shared/product-analytics` owns measuring them in the field. A design that meets the windows and a build that fails INP are the same defect reported twice.
+
+## 10. Search results and filtering
+
+§6 covers how search gets the user *to* a destination. This is the surface they land on when the answer is a **result set** — the second half of every list, catalogue, and knowledge base.
+
+- **Autocomplete is instant or it is noise.** Suggestions appear as the user types, and any perceptible lag breaks the flow; a suggestion list that arrives after the user has finished typing has cost them time rather than saved it. Suggest destinations and records, never just query strings.
+- **Match the user's vocabulary, not the database's.** Synonyms (couch/sofa), the domain's slang, brand terms and misspellings resolve to the same results. A high refinement rate — most users searching twice — is a **matching defect**, not user behaviour.
+- **Facets are derived from the result set, not from the schema.** Show only facets that would change *this* result set; hide the ones that return nothing or everything. Order them by what people actually use.
+- **Active filters are always visible and individually removable** — chips with a count and a clear-all, above the results. A filter the user cannot see is a filter they will blame the results for.
+- **Quick filters apply instantly; advanced filters get an Apply.** The split is by cost: a single-value toggle re-queries on click, a multi-condition builder waits for a deliberate submit. An Apply button on a quick filter is a reliably confusing pattern — users don't know whether their click took.
+- **Zero results is a state with work to do, never a dead end.** Say plainly that nothing matched *this* query, then offer the way forward: spelling correction, the broadened query, the filter to clear, or popular/related records. The words are [`ux-writing`](../ux-writing/SKILL.md)'s; that the state offers an *action* is decided here.
+- **The query and the filters live in the URL.** A result set is the most-shared thing in an app — if it cannot be linked, pasted, or reloaded, the user re-derives it every time (`ui-rules` owns the URL-reflection mechanics).
+- **Preserve the search on return.** Coming back from a result to the list restores the query, filters, sort, and scroll position; losing them is the most common reason a person abandons a search-driven task.
+
 ## Output — the experience decision block
 
 Whoever loads this skill produces this block (into the plan's `experience-plan.md`, or the frontend agent's decision record):
@@ -167,7 +182,8 @@ Whoever loads this skill produces this block (into the plan's `experience-plan.m
 - Accelerators match the app's size — a command palette past ~20 destinations, shortcuts for the top three tasks, saved views on daily lists.
 - Feedback follows the §7 table: inline first, toast for off-screen success, persistent for failure, a notification centre only for real asynchronous events.
 - First run is a checklist of real actions; disclosure stages, never hides.
-- The §9 budget is written into acceptance criteria.
+- The §9 budget is written into acceptance criteria, and its Core Web Vitals form (LCP < 2.5 s · INP < 200 ms · CLS < 0.1 at p75) is the number the build is measured on.
+- Search results carry visible removable filters, a query in the URL, and a zero-results state that offers an action (§10).
 
 ## What NOT to do
 
@@ -178,6 +194,7 @@ Whoever loads this skill produces this block (into the plan's `experience-plan.m
 - No wizard for three independent fields; no tour where a checklist would do; no recurring tips.
 - No page-centre spinner; no blank region while loading; no toast for what the screen already shows; no empty notification bell.
 - No optimistic update on money, sends, or deletes.
+- No zero-results dead end; no Apply button on a quick filter; no facet that returns nothing; no search whose query and filters vanish from the URL or on the way back from a result.
 
 ## Related
 

@@ -1,9 +1,11 @@
 ---
-description: Run the whole design audit on this UI — visual identity, tokens, IA, heuristics, flow, responsiveness, UI code, copy, charts, icons — read-only, saved to docs/audits/
+description: Run the whole design audit on this UI — visual identity, tokens, IA, heuristics, flow, responsiveness, UI code, copy, charts, icons, WCAG 2.2 design decisions, ethics, AI UX — read-only, saved to docs/audits/
 argument-hint: [optional: the app URL / how to start it, or a scope limiter]
 ---
 
 Run a **full design audit** on this project as the **`design-auditor`** agent.
+
+Fourteen lettered sections, A–N: visual identity · token system · IA & shell · Nielsen heuristics · flow friction · responsiveness budget · UI-code guidelines · copy voice · charts · iconography · brand fidelity · **design-time accessibility (WCAG 2.2)** · **ethical patterns** · **AI experience**. The last three are applicability-gated — N only where the app ships an AI or agent feature, M only where it asks for money, consent, data, or a device permission.
 
 1. `Read` the agent definition at `${CLAUDE_PLUGIN_ROOT}/design/agents/design-auditor.md` (fall back to `design/agents/design-auditor.md` when working inside the SkillsLibrary repo itself), then follow it as your operating instructions for the rest of this task.
 2. Load `engineering-practices/agent-orientation-cache` first, then `engineering-practices/standards-audit-engine` for the Mode A/B procedure, the evidence rules, and `references/report-template.md`.
@@ -20,6 +22,6 @@ Run a **full design audit** on this project as the **`design-auditor`** agent.
 
 $ARGUMENTS
 
-If nothing was given above, ask once how to start or reach the app (and whether to drive it), then audit the whole UI: build the applicability matrix and sweep every applicable section A–K.
+If nothing was given above, ask once how to start or reach the app (and whether to drive it), then audit the whole UI: build the applicability matrix and sweep every applicable section A–N.
 
 When done, report the agent's output contract (stack · evidence mode · applicability · coverage · report path · finding counts by severity · cross-altitude count · highest-leverage item) and the path to the saved report.

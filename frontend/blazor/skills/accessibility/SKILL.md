@@ -9,6 +9,8 @@ Standardizes **authoring** accessible Blazor UIs. Targets **WCAG 2.2 AA** as the
 
 **Boundary — authoring, not scanning.** This skill makes the app accessible as you build it. *Verifying* it (automated axe/Lighthouse scans, WCAG audit gates in CI) is qa's [`accessibility-testing`](../../../qa) — a **peer** the orchestrator invokes separately, never loaded here. Build accessible; let QA prove it.
 
+**What of WCAG 2.2 is *not* here.** Nine criteria are new in 2.2 and most are **design decisions made before this skill runs** — target size (2.5.8), a non-drag alternative (2.5.7), accessible authentication (3.3.8), redundant entry (3.3.7), consistent help (3.2.6), focus not obscured (2.4.11/2.4.12) and focus appearance (2.4.13). They belong to `design/accessible-by-design`; this skill implements what that decided (the focus token, the alternative control, the carried-forward value) and never invents it. A build cannot reach 2.2 AA from this file alone.
+
 **Version rule:** the accessibility *concepts* are version-agnostic. The **net-sensitive** bits are navigation-side: `FocusOnNavigate` (net6+, but the default Blazor Web App template wires it in the `Routes.razor` from net8), and **enhanced navigation** (net8+, default in static SSR) — which swaps DOM without a full reload, so a screen reader is *not* told the page changed unless you manage focus/announcement yourself. net10 keeps the same APIs; the enhanced-nav focus gap is the same across net8/9/10.
 
 ## When to use
@@ -153,6 +155,7 @@ These are the most-missed rules and they scale badly through shared renderers �
 ## Handoffs
 
 - Automated axe/Lighthouse WCAG scan + CI gate → qa `accessibility-testing` (**peer**, not loaded)
+- WCAG 2.2 **design-time** criteria (target size, drag alternative, accessible auth, redundant entry, consistent help, focus not obscured), cognitive/neurodiversity design, and layout-for-translation → `design/accessible-by-design`
 - Contrast **token** definition + `:focus-visible` styling → [`styling`](../styling/SKILL.md)
 - Form-input labels + validation-message a11y → [`forms`](../forms/SKILL.md)
 - Accessible library primitives (dialog/tabs/menu that ship a11y) → [`component-library`](../component-library/SKILL.md)

@@ -68,7 +68,18 @@ The three-AI-default-looks critique below applies to this lane too: a cream-and-
 
 ## Process: brainstorm, explore, plan, critique, build, critique again
 
-**Calibration.** AI-generated design right now clusters around three looks: (1) a warm cream background (near `#F4F1EA`) with a high-contrast serif display and a terracotta accent; (2) a near-black background with a single bright acid-green or vermilion accent; (3) a broadsheet-style layout with hairline rules, zero border-radius, and dense newspaper-like columns. All three are legitimate for *some* briefs, but they are defaults rather than choices, and they appear regardless of subject. Where the brief pins down a visual direction, follow it exactly — the brief's own words always win, including when it asks for one of these looks. Where it leaves an axis free, **don't spend that freedom on one of these defaults.** Like a hired human designer, balance doing what you're good at against treating each project as a chance to experiment.
+**Calibration** *(perishable — this list is dated, and a stale one is worse than none: it waves through exactly what it exists to catch. **Reviewed 2026-08; re-check by 2027-08.** If today's generated work no longer looks like this, the list is the thing that is wrong.)*
+
+AI-generated and trend-following design right now clusters around six looks — three that arrived with the current image and code models, and three older ones that have not fully cleared:
+
+1. **Bento grid** — modular asymmetric tiles, one large feature block among smaller ones, applied to any content whether or not the tiles differ in weight.
+2. **Glassmorphism / Liquid Glass** — frosted translucent panels over a blurred backdrop, spread across cards, nav and page chrome alike. Apple's 2025 Liquid Glass announcement accelerated this precisely as the backlash began; the disciplined form ("Glassmorphism 2.0") keeps glass on the layer that genuinely floats — modals, floating toolbars, notification panels — and nowhere else.
+3. **Kinetic / elastic display type** — letterforms stretching, softening and implying motion, used as decoration rather than at a brand moment that earns it.
+4. A warm cream background (near `#F4F1EA`) with a high-contrast serif display and a terracotta accent.
+5. A near-black background with a single bright acid-green or vermilion accent.
+6. A broadsheet layout with hairline rules, zero border-radius, and dense newspaper columns.
+
+All six are legitimate for *some* briefs, but they are defaults rather than choices, and they appear regardless of subject. Where the brief pins down a visual direction, follow it exactly — the brief's own words always win, including when it asks for one of these looks. Where it leaves an axis free, **don't spend that freedom on one of these defaults.** The test for the first three is the same one the whole skill runs on: **what does this effect do for the user here?** Glass on the modal that floats over content is depth doing a job; glass on every card is a filter. A bento grid whose tiles are genuinely different weights of content is structure; one whose tiles are all the same thing is a card grid wearing a costume. Like a hired human designer, balance doing what you're good at against treating each project as a chance to experiment.
 
 **Work in two passes.**
 

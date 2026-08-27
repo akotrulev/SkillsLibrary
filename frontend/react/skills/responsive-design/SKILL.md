@@ -19,7 +19,7 @@ guard against the server↔client hydration mismatch — the React analog of Bla
 - Use for: defining breakpoints, building/reflowing layouts, responsive component variants, alignment drift
   between breakpoints, hiding/showing per width, container queries.
 - NOT for: CSS Modules, tokens, dark mode → [`styling`](../styling/SKILL.md) · library install/theme →
-  [`component-library`](../component-library/SKILL.md) · zoom/reflow a11y (WCAG 1.4.10), touch targets →
+  [`component-library`](../component-library/SKILL.md) · zoom/reflow a11y (WCAG 1.4.10) →
   [`accessibility`](../accessibility/SKILL.md) · verifying it → qa `responsive-testing` (peer, see handshake).
 
 ## The breakpoint contract — one definition, three consumers
@@ -171,6 +171,7 @@ Make that possible:
 - CSS Modules mechanics, tokens, mobile-first authority → [`styling`](../styling/SKILL.md)
 - Library grid component APIs, theming, `useMediaQuery` setup → [`component-library`](../component-library/SKILL.md)
 - Which table columns/actions survive narrow widths → [`ui-rules`](../ui-rules/SKILL.md)
-- Zoom/reflow (WCAG 1.4.10), touch targets, DOM-order-vs-visual-order → [`accessibility`](../accessibility/SKILL.md)
+- Zoom/reflow (WCAG 1.4.10), DOM-order-vs-visual-order → [`accessibility`](../accessibility/SKILL.md)
+- **Touch/pointer target sizing and placement** (WCAG 2.2 **2.5.8** — 24×24 CSS px minimum, 44×44 for touch-primary; reachable-zone placement) → `design/accessible-by-design`, which **decides** it; this skill lays out what it decided
 - Responsive image weight, listener leaks from resize hooks → [`performance`](../performance/SKILL.md)
 - Verifying all of it by shrinking the browser → qa `responsive-testing` (peer agent's Step 3)
