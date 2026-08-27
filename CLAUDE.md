@@ -2,7 +2,7 @@
 
 These rules apply to every skill in this library unless a specific skill explicitly overrides them.
 
-> **Full catalog:** the per-domain inventory of every skill, agent, and published plugin — plus the scope list and the 80-command slash surface — lives in [`docs/skills-catalog.md`](docs/skills-catalog.md). Consult it to learn what exists and which agent owns it. This file holds only the behavioral rules every skill follows.
+> **Full catalog:** the per-domain inventory of every skill, agent, and published plugin — plus the scope list and the 82-command slash surface — lives in [`docs/skills-catalog.md`](docs/skills-catalog.md). Consult it to learn what exists and which agent owns it. This file holds only the behavioral rules every skill follows.
 
 ## Role
 

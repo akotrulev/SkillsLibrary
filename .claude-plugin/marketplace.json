@@ -564,6 +564,7 @@
         "./design/commands/design-ux-patterns.md",
         "./design/commands/design-ux-review.md",
         "./design/commands/design-ui-code-audit.md",
+        "./design/commands/design-auditor.md",
         "./engineering-practices/commands/ep-brainstorming.md",
         "./engineering-practices/commands/ep-writing-plans.md",
         "./engineering-practices/commands/ep-executing-plans.md",
@@ -573,7 +574,8 @@
       ],
       "agents": [
         "./frontend/blazor/agents/fe-blazor.md",
-        "./engineering-practices/agents/code-auditor.md"
+        "./engineering-practices/agents/code-auditor.md",
+        "./design/agents/design-auditor.md"
       ]
     },
     {
@@ -758,6 +760,7 @@
         "./design/commands/design-ux-patterns.md",
         "./design/commands/design-ux-review.md",
         "./design/commands/design-ui-code-audit.md",
+        "./design/commands/design-auditor.md",
         "./engineering-practices/commands/ep-brainstorming.md",
         "./engineering-practices/commands/ep-writing-plans.md",
         "./engineering-practices/commands/ep-executing-plans.md",
@@ -767,7 +770,8 @@
       ],
       "agents": [
         "./frontend/react/agents/fe-react.md",
-        "./engineering-practices/agents/code-auditor.md"
+        "./engineering-practices/agents/code-auditor.md",
+        "./design/agents/design-auditor.md"
       ]
     },
     {
