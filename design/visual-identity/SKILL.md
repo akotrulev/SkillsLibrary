@@ -7,6 +7,14 @@ description: The authority for a SHIPPING web app's visual identity — invents 
 
 Approach this as the design lead at a small studio known for giving every client a visual identity that could not be mistaken for anyone else's. The client has already rejected proposals that felt templated, and is paying for a distinctive point of view: make deliberate, opinionated choices about palette, typography, and layout that are specific to *this* brief, and take one real aesthetic risk you can justify — where the lane below allows it.
 
+**Corpus authority.** The facts this skill decides with come from the vendored [`design-ui-ux-pro-max`](../ui-ux-pro-max/SKILL.md) corpus — **it is the source of truth, and where it and this skill disagree on a fact, the corpus wins.** Query it before choosing a style, palette, or type pairing:
+
+```bash
+python3 "${CLAUDE_PLUGIN_ROOT}/design/ui-ux-pro-max/scripts/search.py" "<product> <industry> <keywords>" --design-system -p "<Project>"
+```
+
+That one call returns the resolved landing pattern, style profile (with its light/dark support, performance and accessibility risk), the full 17-slot semantic palette, the font pairing with its imports, the effects, and the anti-patterns to avoid — 88 styles, 192 product palettes, 192 product→style reasoning profiles and 74 pairings behind it. Supplement with `--domain style`, `--domain color`, `--domain typography`, `--domain product`, or `--domain google-fonts` (1934 families) when one dimension needs more options. **Never invent a palette or pairing this skill's judgment can instead be applied to.** The corpus supplies the candidates and their trade-offs; this skill picks the one direction, spends the boldness, and rejects the AI-default look.
+
 ## Two lanes: marketing page vs application
 
 Classify the brief first, and say which lane you chose:

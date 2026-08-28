@@ -187,7 +187,7 @@ Reviews React code (React 19/18 + TypeScript — Next.js App Router / RSC primar
 
 | Check | Bad sign | Severity |
 |---|---|---|
-| Follow-the-library styling (no Tailwind atop MUI) | Two styling authorities fighting | minor |
+| One styling authority (Tailwind on the shadcn lane; never Tailwind atop MUI/Mantine/Chakra) | Two styling authorities fighting | minor |
 | Structured server logging | `console.log` in server code / hot render paths | minor |
 | Fetch through a typed client / server util | `fetch` string literals scattered with no error typing | minor |
 | No mutable module-level state as "shared" component state | `let cache = []` at module scope holding user state | blocker |

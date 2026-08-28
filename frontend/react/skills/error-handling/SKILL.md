@@ -282,10 +282,10 @@ Wire it with the project's component library rather than hand-rolling — [`comp
 
 | Library | Persistent-error call |
 |---|---|
-| **MUI** (default, notistack) | `enqueueSnackbar(msg, { variant: 'error', persist: true, anchorOrigin: { vertical: 'top', horizontal: 'right' }, action: closeButton })` |
+| MUI (notistack) | `enqueueSnackbar(msg, { variant: 'error', persist: true, anchorOrigin: { vertical: 'top', horizontal: 'right' }, action: closeButton })` |
 | Mantine | `notifications.show({ color: 'red', autoClose: false, withCloseButton: true })` + `<Notifications position="top-right" />` |
 | Chakra v3 | `toaster.error({ duration: null, meta: { closable: true } })`, toaster created with `placement: 'top-end'` |
-| shadcn (sonner) | `toast.error(msg, { duration: Infinity, closeButton: true })` + `<Toaster position="top-right" />` |
+| **shadcn (sonner)** — default lane | `toast.error(msg, { duration: Infinity, closeButton: true })` + `<Toaster position="top-right" />` |
 | none | a small `NotificationProvider` context + a fixed-position `<ul aria-live="polite">` portal; same contract |
 
 Give the surface stable test ids ([`test-ids`](../test-ids/SKILL.md)): `Notifications.Region`, `Notifications.Error`, `Notifications.Error.Close`, `Notifications.Error.CorrelationId`.

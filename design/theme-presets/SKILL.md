@@ -19,6 +19,14 @@ doc, an HTML page — or use it as a quick-start palette for a web app.
 > Factory is the quick-start when a brief doesn't warrant a bespoke
 > [`design/visual-identity`](../visual-identity/SKILL.md) system.
 
+**Corpus authority.** The facts this skill decides with come from the vendored [`design-ui-ux-pro-max`](../ui-ux-pro-max/SKILL.md) corpus — **it is the source of truth, and where it and this skill disagree on a fact, the corpus wins.** The 10 presets below remain the artifact/quick-start lane, but for a **web app** the corpus's 192 product palettes are the larger and better-matched set — query it before settling for a preset:
+
+```bash
+python3 "${CLAUDE_PLUGIN_ROOT}/design/ui-ux-pro-max/scripts/search.py" "<product type> <mood>" --domain color
+```
+
+Each corpus palette ships all 17 semantic slots (primary/on-primary … ring), which a preset does not. Use a preset when the target is a deck, doc, or HTML artifact, or when the user asked for one by name; use the corpus for anything that ships as product UI.
+
 ## Purpose
 
 To apply consistent, professional styling to an artifact without a bespoke

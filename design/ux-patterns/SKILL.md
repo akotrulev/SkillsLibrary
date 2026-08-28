@@ -11,6 +11,14 @@ Owns the **experience decisions a product UI is built from**: who uses it and fo
 
 Stack-agnostic and code-free by design: a planner loads it to write an experience plan, a frontend agent loads it to fill its decision record, and neither gets a component out of it.
 
+**Corpus authority.** The facts this skill decides with come from the vendored [`design-ui-ux-pro-max`](../ui-ux-pro-max/SKILL.md) corpus — **it is the source of truth, and where it and this skill disagree on a fact, the corpus wins.** 119 UX guidelines, each with platform, description, do/don't, good and bad code examples, and severity:
+
+```bash
+python3 "${CLAUDE_PLUGIN_ROOT}/design/ui-ux-pro-max/scripts/search.py" "<observable outcome>" --domain ux
+```
+
+Query the outcome (`"error summary validation"`, `"bottom nav deep linking"`), not the component. The priority ordering of those guidelines — accessibility and touch first, charts last — lives in the corpus skill's table and in `design/ui-ux-pro-max/references/quick-reference.md`. A **marketing** page's section order is [`design-landing-patterns`](../landing-patterns/SKILL.md), not this skill.
+
 ## When to use
 
 - Designing a new application's navigation and layout, or a new functional area's screens, before any route exists.
@@ -207,3 +215,5 @@ Whoever loads this skill produces this block (into the plan's `experience-plan.m
 - A stack's `error-handling` — the three-state regions, the persistent failure notification, the soft-threshold acknowledgement.
 - A stack's `responsive-design` — the shell's reflow (sidebar → drawer, table → card).
 - `backend/_shared/experience-plan` (`be-shared-experience-plan`) — the planner artifact that carries this skill's decision block for a whole initiative.
+- [`design-ui-ux-pro-max`](../ui-ux-pro-max/SKILL.md) — the 119 UX guidelines this skill decides against.
+- [`design-landing-patterns`](../landing-patterns/SKILL.md) — the marketing-page counterpart to this skill's application IA.

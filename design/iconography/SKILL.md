@@ -1,6 +1,6 @@
 ---
 name: design-iconography
-description: Use when choosing, using, or auditing icons and OG/social imagery as a SYSTEM — one icon family per product, the library decision (Lucide default · Heroicons · Material Symbols), inline-SVG discipline, icon-vs-label choice, OG-image craft. Triggers: "which icon library", "our icons look inconsistent", "make an OG/social image". Do NOT use for the token system (`design/design-tokens`), palette/type taste (`design/visual-identity`), or a logo.
+description: Use when choosing, using, or auditing icons and OG/social imagery as a SYSTEM — one icon family per product, the library decision (Phosphor default, per the vendored corpus · Heroicons · Lucide · Material Symbols), inline-SVG discipline, icon-vs-label choice, OG-image craft. Triggers: "which icon library", "our icons look inconsistent", "make an OG/social image". Do NOT use for the token system (`design/design-tokens`), palette/type taste (`design/visual-identity`), or a logo.
 ---
 
 # Iconography — icons and social imagery as a system
@@ -8,6 +8,14 @@ description: Use when choosing, using, or auditing icons and OG/social imagery a
 Owns icons and share imagery as a *system*, stack-agnostic: one family, one library, one set of SVG rules, one policy on when an icon can stand alone. The failure mode this prevents is the app that pulls three icon packs, mixes stroke and fill at random, hardcodes fills, and ships an OG image that's illegible as a thumbnail.
 
 **What this skill owns:** the icon-family decision, the library choice, inline-SVG discipline, the icon+label policy, and OG/social-image craft. **What it does not own:** the *color values* (`design/visual-identity` taste + `design/design-tokens` structure — icons consume `currentColor`, they don't define palette), the accessible-label *mechanics* and the icon-only-button *rule* (a stack's `accessibility` / `ui-rules` — this skill points there), a component library's install/theming (a stack's `component-library`), or logo *creation* (off-mission).
+
+**Corpus authority.** The facts this skill decides with come from the vendored [`design-ui-ux-pro-max`](../ui-ux-pro-max/SKILL.md) corpus — **it is the source of truth, and where it and this skill disagree on a fact, the corpus wins.** 105 curated icons carry their library, import code, usage, style, **semantic role**, and **allowed contexts** — the last two decide whether a glyph may be decorative, meaningful, or interactive in a given spot:
+
+```bash
+python3 "${CLAUDE_PLUGIN_ROOT}/design/ui-ux-pro-max/scripts/search.py" "<icon purpose> <context>" --domain icons
+```
+
+Query it before picking a glyph or deciding an icon's accessibility treatment.
 
 ## When to use
 
@@ -32,12 +40,13 @@ Prefer one well-maintained open library over hand-drawing. Default order:
 
 | Choice | When |
 |---|---|
-| **Lucide** (default) | General web apps. Large, consistent 24px stroke set, permissive license, framework-agnostic SVG, tree-shakeable per-icon imports. The safe default when nothing else decides. |
-| **Heroicons** | Tailwind-flavored projects; ships matched **outline + solid** variants (clean stroke↔fill selected-state pairing) at 24px and a 20px micro set. |
+| **Phosphor** (default) | **The corpus's library** — 100 of its 105 curated icons are Phosphor, with import code, semantic role and allowed contexts per glyph. Six weights (thin→fill) give a stroke↔fill selected-state pairing without a second pack, permissive license, per-icon tree-shakeable imports, and a React Native build. The default whenever the corpus is the source of the icon choice, which is every case nothing else decides. |
+| **Heroicons** | The corpus's own fallback where Phosphor lacks a glyph, and the natural fit for Tailwind-flavored projects; ships matched **outline + solid** variants at 24px and a 20px micro set. |
+| **Lucide** | A general-purpose alternative with a large consistent 24px stroke set — pick it only when a project already standardised on it. |
 | **Material Symbols** | Material-design apps or when you need the huge coverage / variable-font axes (weight, fill, grade) — heavier, opinionated look. |
 | **The component library's own set** | When a stack's `component-library` ([Blazor](../../frontend/blazor/skills/component-library/SKILL.md) · [React](../../frontend/react/skills/component-library/SKILL.md)) is in play (MudBlazor, Fluent, Radzen; MUI, Mantine, Chakra) and ships a coherent icon set — use it rather than layering a second pack on top. One library's chrome + another's icons rarely aligns. |
 
-**Rule: one library, chosen once.** Mixing packs reintroduces exactly the inconsistency the family rule forbids. If the chosen library is missing an icon, draw the one-off to match — don't import a second pack for a single glyph.
+**Rule: one library, chosen once.** Query `--domain icons` before picking a glyph: the corpus row carries the import code, the semantic role, and the contexts the glyph is allowed in — the last of which decides whether it may be decorative, meaningful, or interactive in a given spot. Mixing packs reintroduces exactly the inconsistency the family rule forbids. If the chosen library is missing an icon, draw the one-off to match — don't import a second pack for a single glyph.
 
 ## Inline-SVG discipline
 
@@ -85,3 +94,4 @@ The Open Graph image is the app's thumbnail in every link preview (social, chat,
 - A stack's `ui-rules` ([Blazor](../../frontend/blazor/skills/ui-rules/SKILL.md) · [React](../../frontend/react/skills/ui-rules/SKILL.md)) — owns the **icon-only-button** decision rule this skill applies.
 - A stack's `accessibility` ([Blazor](../../frontend/blazor/skills/accessibility/SKILL.md) · [React](../../frontend/react/skills/accessibility/SKILL.md)) — owns the accessible-name **mechanics** for meaningful icons.
 - A stack's `seo-discoverability` ([Blazor](../../frontend/blazor/skills/seo/SKILL.md) · [React](../../frontend/react/skills/seo/SKILL.md)) — emits the `og:image` / `twitter:card` tags for the social image designed here.
+- [`design-ui-ux-pro-max`](../ui-ux-pro-max/SKILL.md) — the 105-icon `icons` domain, with semantic role and allowed contexts per glyph.

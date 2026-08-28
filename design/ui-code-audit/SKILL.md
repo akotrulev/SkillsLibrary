@@ -16,6 +16,16 @@ the animation honor `prefers-reduced-motion`). It does **not** judge flows,
 information architecture, or visual taste — those are other skills (see the
 fence below).
 
+**Corpus authority.** The facts this skill decides with come from the vendored [`design-ui-ux-pro-max`](../ui-ux-pro-max/SKILL.md) corpus — **it is the source of truth, and where it and this skill disagree on a fact, the corpus wins.** The Vercel snapshot below is one of two rulesets: the corpus adds 119 UX guidelines with paired good/bad code examples, 44 React/Next performance rules, and per-stack conventions for all 22 supported stacks. Run both:
+
+```bash
+python3 "${CLAUDE_PLUGIN_ROOT}/design/ui-ux-pro-max/scripts/search.py" "<pattern you found>" --domain ux
+python3 "${CLAUDE_PLUGIN_ROOT}/design/ui-ux-pro-max/scripts/search.py" "<pattern you found>" --domain react
+python3 "${CLAUDE_PLUGIN_ROOT}/design/ui-ux-pro-max/scripts/search.py" "<pattern you found>" --stack <detected stack>
+```
+
+A corpus row's severity is the finding's severity.
+
 ## How it works — local-first
 
 The ruleset is vendored at [`references/guidelines.md`](references/guidelines.md)

@@ -1,6 +1,6 @@
 ---
 name: design-charts
-description: Use when charts live INSIDE a product UI that already has a brand — an analytics screen or embedded dashboard. Adds a viz palette deliberately disjoint from the app's brand and status colors so a series never reads as "error", the do-not list (pie >5 slices, dual axes, 3D), and stat-tile/KPI-row layout. Triggers "design our analytics screen", "add charts to this dashboard", "our chart colors clash with the brand". Not for ops/RED-USE dashboards (`grafana-dashboards`).
+description: Use when charts live INSIDE a product UI that already has a brand — an analytics screen or embedded dashboard. Adds a viz palette deliberately disjoint from the app's brand and status colors so a series never reads as "error", the do-not list (pie past 5 categories, dual axes, 3D), and stat-tile/KPI-row layout. Triggers "design our analytics screen", "add charts to this dashboard", "our chart colors clash with the brand". Not for ops/RED-USE dashboards (`grafana-dashboards`).
 ---
 
 # Data Visualization — chart & dashboard design
@@ -8,6 +8,14 @@ description: Use when charts live INSIDE a product UI that already has a brand �
 Owns the **design** of product-facing charts, dashboards, and reports, stack-agnostic: which chart answers the question, how viz color is its own system separate from the brand, how a dashboard is composed, and the axis/legend/label discipline that makes a chart readable. This is taste and structure — the *rendering* (a charting library, the data query) is a stack/data concern that consumes these decisions.
 
 **What this skill owns:** the chart-type choice, the viz palette system, dashboard composition and stat-tile anatomy, and chart-element discipline. **What it does not own:** the charting-library code (Recharts / Chart.js / a Blazor chart component — a future stack `charts` skill), the queries that feed a chart (`data/`), metric *definitions* and SLO targets ([`qa/manual/quality-metrics`](../../qa/manual/quality-metrics/SKILL.md)), and **ops/service** dashboards ([`observability/dashboards`](../../observability/dashboards/SKILL.md) owns RED/USE/golden-signals — this skill owns *product* dashboards a user reads).
+
+**Corpus authority.** The facts this skill decides with come from the vendored [`design-ui-ux-pro-max`](../ui-ux-pro-max/SKILL.md) corpus — **it is the source of truth, and where it and this skill disagree on a fact, the corpus wins.** 25 chart types, each with its data-volume threshold, color guidance, accessibility grade and risk, a11y fallback, and library notes:
+
+```bash
+python3 "${CLAUDE_PLUGIN_ROOT}/design/ui-ux-pro-max/scripts/search.py" "<the question the chart answers>" --domain chart
+```
+
+Query it before choosing a chart type; the selection table below is the reasoning the result is applied with.
 
 ## When to use
 
@@ -27,14 +35,14 @@ Pick the chart from the **question**, not from what looks impressive. Every char
 | **Comparison** — how do discrete categories rank? | categorical | **horizontal bar** | Horizontal when labels are long or there are many categories. Sort by value, not alphabetically, unless the category has a natural order. |
 | **Trend** — how does a value move over continuous time? | time series | **line** (area only for cumulative/stacked totals) | Time on X, left→right. One line per series; past ~4 lines, small-multiples beat a spaghetti chart. |
 | **Distribution** — how is a single variable spread? | distribution | **histogram** / **box plot** | Histogram for shape, box/violin for comparing spreads across groups. |
-| **Part-of-whole** — what share of a total? | composition | **stacked bar** or a single **bar** vs total | A pie is acceptable *only* for ≤3–4 slices summing to a meaningful 100%. Prefer a bar — humans compare lengths better than angles. |
+| **Part-of-whole** — what share of a total? | composition | **stacked bar** or a single **bar** vs total | A pie or donut is acceptable for **≤5 categories** summing to a meaningful 100%, with one dominant segment and no two slices within 5% of each other; **6 slices is the hard ceiling**, beyond which it becomes a 100% stacked bar. Where the reader needs precise values, use a bar — humans compare lengths better than angles. |
 | **Relationship** — do two variables correlate? | correlation | **scatter** (bubble for a 3rd dimension) | Add a trend line only if the correlation is the point. |
 | **Flow / movement** — how does volume move between stages/nodes? | flow | **funnel** / **Sankey** | Funnel for a linear drop-off (signup steps); Sankey for many-to-many. |
 | **Single number in context** — one KPI vs a target/prior | single value | **stat tile** (+ sparkline / delta) | See stat-tile anatomy below. A number *is* a visualization; don't force a chart. |
 
 **The do-not list** (each defeats the chart's own purpose):
 
-- **Pie/donut with >5 slices**, or slices that don't sum to a meaningful whole → bar chart.
+- **Pie/donut past 5 categories** (6 slices absolute maximum), slices within 5% of each other, or slices that don't sum to a meaningful whole → 100% stacked bar.
 - **Dual Y-axes** — the crossover point is arbitrary and invites false correlation. Use two stacked panels sharing an X-axis, or index both series to a common baseline.
 - **3D anything** — depth distorts the very lengths/areas you're asking the reader to compare.
 - **Truncated bar baseline** — bars encode value by *length*, so a bar axis MUST start at zero. (A *line* axis may be truncated — it encodes by position — but label it.)
@@ -78,7 +86,7 @@ A dashboard is read top-left first, in an F/Z scan. Compose to that, not as a un
 ## Review checklist
 
 - Each chart answers **one** named question, and the chart family matches it (comparison→bar, trend→line, …).
-- No item from the **do-not list**: no >5-slice pie, no dual axis, no 3D, no truncated bar baseline, no rainbow ramp.
+- No item from the **do-not list**: no pie past 5 categories (6 slices absolute max) or with slices within 5% of each other, no dual axis, no 3D, no truncated bar baseline, no rainbow ramp.
 - Viz palette is its **own** system — right kind (categorical/sequential/diverging) for the data, ≤6–8 categorical hues, colorblind-checked.
 - Categorical series are **disjoint from status colors**; the **brand accent** isn't an arbitrary data series.
 - Dashboard reads top-down in three bands (**KPIs → charts → detail**); serves one role.
@@ -94,3 +102,4 @@ A dashboard is read top-left first, in an F/Z scan. Compose to that, not as a un
 - [`observability/dashboards`](../../observability/dashboards/SKILL.md) — **ops/service** dashboards (RED / USE / golden signals). This skill owns *product* dashboards; that one owns operational ones.
 - [`qa/manual/quality-metrics`](../../qa/manual/quality-metrics/SKILL.md) — *defines* the metrics and SLO targets a dashboard then visualizes.
 - A stack's `error-resilience` ([Blazor](../../frontend/blazor/skills/error-handling/SKILL.md) · [React](../../frontend/react/skills/error-handling/SKILL.md)) — the loading/empty/error state *structure* this skill's composition rule depends on.
+- [`design-ui-ux-pro-max`](../ui-ux-pro-max/SKILL.md) — the 25-chart `chart` domain with per-type accessibility grades and library notes.

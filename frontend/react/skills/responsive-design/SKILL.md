@@ -39,9 +39,11 @@ export const breakpoints = { sm: 640, md: 768, lg: 1024, xl: 1280 } as const;
 ```
 
 Rules:
-- **With a component library, adopt ITS breakpoints wholesale** — MUI's `theme.breakpoints.values`
-  (`xs 0 / sm 600 / md 900 / lg 1200 / xl 1536`), Mantine's `theme.breakpoints`, Chakra's tokens. Your CSS-var
-  block and `breakpoints.ts` **mirror the library values**; you never introduce a third set. Two breakpoint
+- **Adopt ONE breakpoint set and mirror it everywhere.** On the default Tailwind lane that set is
+  `theme.screens` in your CSS (`sm 640 / md 768 / lg 1024 / xl 1280 / 2xl 1536`) — the utilities' prefixes
+  and your `breakpoints.ts` mirror read from it. On a CSS-in-JS library, adopt **ITS** values wholesale —
+  MUI's `theme.breakpoints.values` (`xs 0 / sm 600 / md 900 / lg 1200 / xl 1536`), Mantine's
+  `theme.breakpoints`, Chakra's tokens. Either way you never introduce a second set. Two breakpoint
   systems in one app = permanent near-boundary misalignment. When there's no library, the block above is the set.
 - **Breakpoints are content-driven, few, and named** — add one where the *layout* breaks, not per device
   ("tablet"). 3–4 is the norm; a 5th needs a reason.
@@ -51,7 +53,12 @@ Rules:
 ## Layout system decision — off-the-shelf grid vs your own CSS
 
 ```
-Component library present (MUI / Mantine / Chakra)?
+On the default lane (shadcn/ui + Tailwind)?
+  YES → Tailwind's grid/flex utilities with breakpoint prefixes are the DEFAULT
+        (`grid grid-cols-1 md:grid-cols-2 gap-4`); `@container` + `@md:` when the component
+        must respond to ITS OWN box rather than the viewport.
+  NO  ↓
+CSS-in-JS component library present (MUI / Mantine / Chakra)?
   YES → its responsive grid + visibility props are the DEFAULT for page/section layout
         (MUI `<Grid size={{ xs: 12, md: 6 }}>` · Mantine `<Grid>`/`<SimpleGrid>` · Chakra `<SimpleGrid>`).
         Drop to raw CSS Grid/Flexbox (CSS Modules) for bespoke regions the 12-col model fights.

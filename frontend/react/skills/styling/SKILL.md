@@ -1,6 +1,6 @@
 ---
 name: fe-react-styling
-description: Use when writing the CSS yourself — CSS Modules + `composes`, design tokens as CSS custom properties bridged to the library theme, type scale (`clamp()`, `next/font`), dark mode via next-themes, and the follow-the-library authority decision (MUI `theme`+`sx` vs Tailwind vs CSS Modules — never two at once). Triggers "scope this component's CSS", "dark mode with next-themes", "my styles leak between components". Not for the library's own theme object (`component-library`).
+description: Use when writing the CSS yourself — CSS Modules + `composes`, design tokens as CSS custom properties bridged to the library theme, type scale (`clamp()`, `next/font`), dark mode via next-themes, and the one-authority decision (Tailwind on the default shadcn lane vs MUI `theme`+`sx` vs CSS Modules — never two at once). Triggers "scope this component's CSS", "dark mode with next-themes", "my styles leak between components". Not for the library's own theme object (`component-library`).
 ---
 
 # React — Styling (CSS Modules, tokens, dark mode, the styling authority)
@@ -29,24 +29,25 @@ Owns how a React app is styled with **CSS you write**: component-scoped CSS Modu
 Pick **one** primary styling authority per app. Mixing them uncontrolled is the top cause of specificity wars and dark-mode drift. This decision is driven by the component-library choice ([`component-library`](../component-library/SKILL.md)):
 
 ```
-Using a CSS-in-JS component library (MUI / Mantine / Chakra)?
+On the default lane — shadcn/ui, or bespoke on a headless kit?
+  YES → Tailwind is the authority (shadcn REQUIRES it); the CSS-variable token block in
+        `globals.css` IS the theme; CSS Modules for the rare escape hatch.
+  NO ↓
+On a CSS-in-JS component library (MUI / Mantine / Chakra) — usually an existing codebase?
   YES → the library theme + its style API (MUI `sx`/`styled`, Mantine style props, Chakra style props)
         is the authority. Your CSS Modules are gap-only (bespoke layout the library fights).
         Do NOT bolt Tailwind on top — its reset + utilities fight the library.
   NO ↓
-Using shadcn/ui, or bespoke on a headless kit, with a Tailwind-fluent team?
-  YES → Tailwind is the authority (shadcn REQUIRES it); CSS Modules for the rare escape hatch.
-  NO ↓
-Bespoke design, no library, team prefers scoped CSS?
-  YES → CSS Modules + design tokens (default for the "none" branch).
+Bespoke design, no library, team prefers scoped CSS over utilities?
+  YES → CSS Modules + design tokens.
 ```
 
 | Approach | Scope | Use when | Cost |
 |---|---|---|---|
+| **Tailwind** (utility-first) | Global utilities | **The default lane** — shadcn (requires it); bespoke on a headless kit | Reset fights CSS-in-JS libraries; **the authority when chosen** |
 | **Library style API** (`sx`/`styled`, style props) | Per component, themed | With MUI/Mantine/Chakra — **the authority there** | Coupled to the library; runtime CSS-in-JS cost |
-| **CSS Modules** (`*.module.css`) | Per file, auto-scoped | **Default for the "none" branch**; gap-only alongside a library | Verbose for cross-cutting utilities |
+| **CSS Modules** (`*.module.css`) | Per file, auto-scoped | Escape hatch on the Tailwind lane; gap-only alongside a CSS-in-JS library; primary for bespoke-no-utilities | Verbose for cross-cutting utilities |
 | **Design tokens** (CSS custom properties) | Global vars, consumed everywhere | **Always** — the theming backbone under any approach | None; do this regardless |
-| **Tailwind** (utility-first) | Global utilities | shadcn (required); bespoke, no CSS-in-JS library, team wants utilities | Reset fights CSS-in-JS libraries; **the authority when chosen** |
 | **Global stylesheet dumping** | Global, unscoped | **Never** for component styles | Collisions, dead CSS, no ownership |
 
 **One authority, always.** Never Tailwind *and* a CSS-in-JS library; never two of {sx, Tailwind, CSS Modules} fighting for the same element. [`component-library`](../component-library/SKILL.md) picks the authority; this skill enforces it.

@@ -9,6 +9,15 @@ The brownfield counterpart to [`design/visual-identity`](../visual-identity/SKIL
 
 **What this skill owns:** the extract → normalize → gap-fill pipeline, the fidelity-mode decision, and the discipline of extending a brand *in its own voice*. **What it does not own:** the token tier/naming mechanics (`design/design-tokens`), inventing an identity where none exists (`visual-identity`), preset themes (`theme-presets`), or logo/asset *creation* (off-mission — this reads a logo, it doesn't draw one).
 
+**Corpus authority.** The facts this skill decides with come from the vendored [`design-ui-ux-pro-max`](../ui-ux-pro-max/SKILL.md) corpus — **it is the source of truth, and where it and this skill disagree on a fact, the corpus wins.** Gap-filling is where it matters: when the brand book never specified a status set, a dark mode, a muted tier, or a body face, take the missing values from the nearest corpus palette or pairing rather than inventing them:
+
+```bash
+python3 "${CLAUDE_PLUGIN_ROOT}/design/ui-ux-pro-max/scripts/search.py" "<brand mood> <industry>" --domain color
+python3 "${CLAUDE_PLUGIN_ROOT}/design/ui-ux-pro-max/scripts/search.py" "<brand mood>" --domain typography
+```
+
+The brand's own values always win over the corpus for the slots the brand actually defines — the corpus fills the silence, in the brand's voice.
+
 ## When to use
 
 - A client or product hands you a brand book / PDF style guide / Figma library and you need a web token system that matches it.
@@ -97,3 +106,4 @@ When you need a worked example or a stand-in brand to demonstrate the pipeline, 
 - [`design/theme-presets`](../theme-presets/SKILL.md) — preset themes; use it when there is *no* brand and you want a fast starting point, not when a real brand must be matched.
 - [`design/ux-writing`](../ux-writing/SKILL.md) — a brand's **voice/tone** guidance (if the book includes it) feeds microcopy here.
 - A stack's `styling` / `accessibility` — render the resulting tokens as CSS and verify the flagged contrast pairs.
+- [`design-ui-ux-pro-max`](../ui-ux-pro-max/SKILL.md) — the 192-palette / 74-pairing corpus the gap-fill draws from.

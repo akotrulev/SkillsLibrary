@@ -7,7 +7,7 @@
   },
   "metadata": {
     "description": "Stack-first skills library covering QA, frontend, backend, data, and business-analysis: install one self-contained plugin per tech stack. `qa-{java,dotnet,typescript}` bundle every QA discipline — API/UI/mobile/performance/LLM/BDD authoring and verification, manual-QA process, CI/CD, reporting, and OWASP-mapped security. `fe-{blazor,react}` are phased frontend dev-stack agents (scaffold → architecture → features → quality → tests → review). `be-{dotnet,java,node}` are phased backend dev-stack agents for design-pattern application, ORM persistence, and Auth0/Cognito service-side auth. `devops` ships the platform lane — container images, IaC, cloud deploys, and build/deploy pipelines. `data` and `business-analysis` round out the database-engineering and cross-feature requirements domains.",
-    "version": "2.28.0"
+    "version": "2.29.0"
   },
   "plugins": [
     {
@@ -482,7 +482,7 @@
     },
     {
       "name": "fe-blazor",
-      "description": "Self-contained senior frontend Blazor developer plugin for .NET 8/9/10 (Blazor Web App, unified render modes). Covers the full FE build lifecycle end-to-end: project scaffold and render-mode strategy, architecture foundations (state, component library, styling, responsive design), feature build (pages/components/forms, API + live/realtime data, motion, UX writing, data-testids), quality layers (accessibility, performance, error resilience, SEO), and dev-side tests at both altitudes (bUnit v2 for components, plain NUnit/xUnit for state containers, validators and formatters) — plus a distinctive-visual-design critique loop. Bundles the Auth0 Blazor auth skills and the stack-agnostic design-craft skills (frontend-design, design-tokens, dataviz, brand-intake, iconography, ux-heuristics, ux-patterns, theme-factory, ux-writing, web-design-guidelines) and the phased fe-blazor orchestrator agent — install just this one plugin for a complete Blazor frontend toolkit.",
+      "description": "Self-contained senior frontend Blazor developer plugin for .NET 8/9/10 (Blazor Web App, unified render modes). Covers the full FE build lifecycle end-to-end: project scaffold and render-mode strategy, architecture foundations (state, component library, styling, responsive design), feature build (pages/components/forms, API + live/realtime data, motion, UX writing, data-testids), quality layers (accessibility, performance, error resilience, SEO), and dev-side tests at both altitudes (bUnit v2 for components, plain NUnit/xUnit for state containers, validators and formatters) — plus a distinctive-visual-design critique loop. Bundles the Auth0 Blazor auth skills and the stack-agnostic design-craft skills (the vendored ui-ux-pro-max design-intelligence corpus that is the source of truth for every design fact — 88 styles, 192 palettes, 74 font pairings, 119 UX guidelines, 105 icons, 34 landing patterns, 17 motion presets, 25 chart types and 22 stack files, searchable offline — plus visual-identity, design-tokens, charts, brand-import, iconography, ux-patterns, landing-patterns, motion, ux-review, theme-presets, ux-writing, ui-code-audit, accessible-by-design, ethical-patterns, ai-experience) and the phased fe-blazor orchestrator agent — install just this one plugin for a complete Blazor frontend toolkit.",
       "source": "./",
       "strict": false,
       "author": {
@@ -527,6 +527,7 @@
         "./design/charts",
         "./design/brand-import",
         "./design/iconography",
+        "./design/ui-ux-pro-max",
         "./design/ux-patterns",
         "./design/ux-review",
         "./design/ui-code-audit",
@@ -535,6 +536,8 @@
         "./design/accessible-by-design",
         "./design/ethical-patterns",
         "./design/ai-experience",
+        "./design/motion",
+        "./design/landing-patterns",
         "./engineering-practices/agent-orientation-cache",
         "./engineering-practices/code-comments",
         "./engineering-practices/standards-audit-engine",
@@ -570,6 +573,9 @@
         "./design/commands/design-accessible-by-design.md",
         "./design/commands/design-ethical-patterns.md",
         "./design/commands/design-ai-experience.md",
+        "./design/commands/design-ui-ux-pro-max.md",
+        "./design/commands/design-motion.md",
+        "./design/commands/design-landing-patterns.md",
         "./design/commands/design-auditor.md",
         "./engineering-practices/commands/ep-brainstorming.md",
         "./engineering-practices/commands/ep-writing-plans.md",
@@ -681,7 +687,7 @@
     },
     {
       "name": "fe-react",
-      "description": "Self-contained senior frontend React developer plugin for React 19/18 + TypeScript (Next.js App Router / RSC primary, Vite SPA fallback; MUI default). Covers the full FE build lifecycle end-to-end: project scaffold and rendering-strategy choice, architecture foundations (RSC/'use client' boundary, App Router route topology, state, component library, styling, responsive design), feature build (pages/components/forms with React Hook Form + Zod, API + live/realtime data via RSC fetch/Server Actions/TanStack Query/SSE/WebSocket, motion, UX writing, data-testids), quality layers (accessibility, performance, error resilience, SEO, i18n, PWA/offline), and dev-side tests at both altitudes (Vitest + React Testing Library for components and hooks, plain Vitest for Zod schemas, formatters, stores and extracted async-RSC fetches) — plus version migration (React 18→19, Next 14→15, Pages→App Router), a distinctive-visual-design critique loop, and a one-call read-only conformance audit (/fe-react-audit) that sweeps an existing codebase against every convention above into a saved, re-runnable findings report. Bundles the Auth0 React auth skills and the stack-agnostic design-craft skills (frontend-design, design-tokens, dataviz, brand-intake, iconography, ux-heuristics, ux-patterns, theme-factory, ux-writing, web-design-guidelines) and the phased fe-react orchestrator agent — install just this one plugin for a complete React frontend toolkit.",
+      "description": "Self-contained senior frontend React developer plugin for React 19/18 + TypeScript (Next.js App Router / RSC primary, Vite SPA fallback; shadcn/ui + Tailwind default). Covers the full FE build lifecycle end-to-end: project scaffold and rendering-strategy choice, architecture foundations (RSC/'use client' boundary, App Router route topology, state, component library, styling, responsive design), feature build (pages/components/forms with React Hook Form + Zod, API + live/realtime data via RSC fetch/Server Actions/TanStack Query/SSE/WebSocket, motion, UX writing, data-testids), quality layers (accessibility, performance, error resilience, SEO, i18n, PWA/offline), and dev-side tests at both altitudes (Vitest + React Testing Library for components and hooks, plain Vitest for Zod schemas, formatters, stores and extracted async-RSC fetches) — plus version migration (React 18→19, Next 14→15, Pages→App Router), a distinctive-visual-design critique loop, and a one-call read-only conformance audit (/fe-react-audit) that sweeps an existing codebase against every convention above into a saved, re-runnable findings report. Bundles the Auth0 React auth skills and the stack-agnostic design-craft skills (the vendored ui-ux-pro-max design-intelligence corpus that is the source of truth for every design fact — 88 styles, 192 palettes, 74 font pairings, 119 UX guidelines, 105 icons, 34 landing patterns, 17 motion presets, 25 chart types and 22 stack files, searchable offline — plus visual-identity, design-tokens, charts, brand-import, iconography, ux-patterns, landing-patterns, motion, ux-review, theme-presets, ux-writing, ui-code-audit, accessible-by-design, ethical-patterns, ai-experience) and the phased fe-react orchestrator agent — install just this one plugin for a complete React frontend toolkit.",
       "source": "./",
       "strict": false,
       "author": {
@@ -728,6 +734,7 @@
         "./design/charts",
         "./design/brand-import",
         "./design/iconography",
+        "./design/ui-ux-pro-max",
         "./design/ux-patterns",
         "./design/ux-review",
         "./design/ui-code-audit",
@@ -736,6 +743,8 @@
         "./design/accessible-by-design",
         "./design/ethical-patterns",
         "./design/ai-experience",
+        "./design/motion",
+        "./design/landing-patterns",
         "./engineering-practices/agent-orientation-cache",
         "./engineering-practices/code-comments",
         "./engineering-practices/standards-audit-engine",
@@ -772,6 +781,9 @@
         "./design/commands/design-accessible-by-design.md",
         "./design/commands/design-ethical-patterns.md",
         "./design/commands/design-ai-experience.md",
+        "./design/commands/design-ui-ux-pro-max.md",
+        "./design/commands/design-motion.md",
+        "./design/commands/design-landing-patterns.md",
         "./design/commands/design-auditor.md",
         "./engineering-practices/commands/ep-brainstorming.md",
         "./engineering-practices/commands/ep-writing-plans.md",
@@ -817,6 +829,7 @@
         "./backend/_shared/solution-blueprint",
         "./backend/_shared/data-model-plan",
         "./backend/_shared/experience-plan",
+        "./design/ui-ux-pro-max",
         "./design/ux-patterns",
         "./backend/_shared/api-surface-plan",
         "./backend/_shared/integration-plan",
@@ -910,6 +923,7 @@
         "./backend/_shared/solution-blueprint",
         "./backend/_shared/data-model-plan",
         "./backend/_shared/experience-plan",
+        "./design/ui-ux-pro-max",
         "./design/ux-patterns",
         "./backend/_shared/api-surface-plan",
         "./backend/_shared/integration-plan",
@@ -1000,6 +1014,7 @@
         "./backend/_shared/solution-blueprint",
         "./backend/_shared/data-model-plan",
         "./backend/_shared/experience-plan",
+        "./design/ui-ux-pro-max",
         "./design/ux-patterns",
         "./backend/_shared/api-surface-plan",
         "./backend/_shared/integration-plan",

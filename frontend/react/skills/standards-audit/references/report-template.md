@@ -24,7 +24,7 @@ Saved to `docs/audits/<NNN>-fe-react-conformance-r<N>.md`. Never overwrite a pre
 | Next.js | <14 \| 15 \| n/a (Vite SPA)> |
 | Render target | <App Router \| Pages Router \| Vite SPA> |
 | React Compiler | <on \| off> |
-| Component library | <MUI \| Mantine \| Chakra \| shadcn \| none> |
+| Component library | <shadcn \| Mantine \| MUI \| Chakra \| none> |
 | Styling authority | <library style API \| Tailwind \| CSS Modules \| mixed ⚠️> |
 | TypeScript | strict <on \| off> |
 | Package manager | <pnpm \| npm \| yarn \| bun> |

@@ -55,3 +55,42 @@ values for artifacts (slides, docs, HTML pages) and as a web-app quick-start.
 The theme files' original PDF-rendering typefaces (DejaVu / Free* families) are
 retained for the slide/doc lane; each theme additionally carries a web-font
 substitution for the web-app lane (see `theme-presets/themes/*.md`).
+
+---
+
+## `ui-ux-pro-max` — the design-intelligence corpus
+
+The whole of `design/ui-ux-pro-max/` — the CSV corpus under `data/`, the BM25
+search engine and design-system generator under `scripts/`, and both reference
+rulesets under `references/` — is vendored from the UI/UX Pro Max skill.
+
+- Upstream: `nextlevelbuilder/ui-ux-pro-max-skill`,
+  `https://github.com/nextlevelbuilder/ui-ux-pro-max-skill`
+- Snapshot commit: `8bd29e775453ebcae52b6e6514fbf134df0c5770` (2026-08-27)
+- Upstream release: **v2.13.0**
+- Retrieved / vendored: **2026-08-28**
+- License: MIT at import time — the upstream notice is kept verbatim at
+  `design/ui-ux-pro-max/LICENSE`.
+- Vendored from the upstream paths `src/ui-ux-pro-max/{data,scripts}` and
+  `.claude/skills/ui-ux-pro-max/references`.
+
+**This corpus is the source of truth for design facts in this library.** Where
+it and a house `design/*` skill disagree on a fact — which palette suits a
+product type, which font pairing carries a mood, what the guideline for a
+pattern is, which chart fits a data shape, what a stack's UI convention is —
+the corpus wins, and the house skill supplies only the judgment layered on top.
+Every consuming skill states this in its own **Corpus authority** block.
+
+What was changed from upstream at import, and why:
+
+| Fork | Reason |
+|---|---|
+| `SKILL.md` rewritten in house style, renamed `design-ui-ux-pro-max` | The library's skills are `design-`-prefixed and carry a `## Review checklist` the `design-auditor` agent sweeps. The query contract, workflow, dials, domain/stack tables and zero-result rule are upstream's, unchanged in substance. |
+| Script paths rewritten to `${CLAUDE_PLUGIN_ROOT}/design/ui-ux-pro-max/scripts/…` | The skill sits under `design/` here, not at a plugin root. |
+| `scripts/tests/`, `templates/`, the CLI, gallery and stack starter not vendored | Upstream repo tooling, not skill content. `scripts/validate_data.py` is kept so the corpus can be re-validated after a refresh. |
+| All 22 stack files retained | Deliberate: the corpus ships whole. Blazor has no upstream stack file and takes its conventions from `frontend/blazor/`. |
+| GSAP presets surfaced as a house skill (`design/motion`), landing patterns as `design/landing-patterns` | Two upstream domains had no home in `design/`; the data stays in the corpus, the judgment layer is house-written. |
+
+Refreshing is a snapshot operation: copy those upstream paths at a new pinned
+commit, run `python3 design/ui-ux-pro-max/scripts/validate_data.py`, and update
+the commit, release and date above.

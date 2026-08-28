@@ -9,6 +9,14 @@ Reviews a design or a built UI at **experience altitude**: is the flow usable, i
 
 **What this skill owns:** the heuristic evaluation (Nielsen's 10 as review questions), flow-friction review, and IA sanity, delivered as a findings table under the house severity scale. **What it does not own:** the *code-level* UI-guideline audit ([`design/ui-code-audit`](../ui-code-audit/SKILL.md) stays at the code layer — this is the experience layer above it), automated **accessibility scanning** (a stack's / qa `accessibility-testing` runs axe/Lighthouse; this only flags a usability *heuristic* an a11y scan can't see, e.g. "no visible focus path through this flow"), **bug** hunting (qa `exploratory-charter-writer` charters an exploratory session to find *defects* — this judges the *experience* of a build that already works), copy *voice* ([`design/ux-writing`](../ux-writing/SKILL.md)), and visual *taste* ([`design/visual-identity`](../visual-identity/SKILL.md)).
 
+**Corpus authority.** The facts this skill decides with come from the vendored [`design-ui-ux-pro-max`](../ui-ux-pro-max/SKILL.md) corpus — **it is the source of truth, and where it and this skill disagree on a fact, the corpus wins.** Findings are stated against corpus guidelines rather than personal preference — each row carries a severity the review can inherit:
+
+```bash
+python3 "${CLAUDE_PLUGIN_ROOT}/design/ui-ux-pro-max/scripts/search.py" "<what you observed>" --domain ux
+```
+
+Read `design/ui-ux-pro-max/references/quick-reference.md` §1–§3 (CRITICAL + HIGH) as a final pass, and `references/pro-rules.md` when the surface is a native/mobile app or the UI "doesn't look professional" and the cause isn't obvious. Cite the guideline in the finding.
+
 ## When to use
 
 - Reviewing a design plan, a mockup, or a built UI for usability before it ships.
@@ -105,3 +113,4 @@ Perceived speed is part of the experience; the budget is [`design/ux-patterns`](
 - A stack's `ui-rules` ([Blazor](../../frontend/blazor/skills/ui-rules/SKILL.md) · [React](../../frontend/react/skills/ui-rules/SKILL.md)) — owns the confirmation-by-object-name and empty-state *mechanics* this review defers to.
 - A stack's / qa `accessibility-testing` — runs the **automated** a11y scans; this only flags usability heuristics a scanner can't see.
 - qa `exploratory-charter-writer` — charters an exploratory session to find **defects**; this judges the **experience** of a build that already works.
+- [`design-ui-ux-pro-max`](../ui-ux-pro-max/SKILL.md) — the guideline corpus findings are cited against, plus `references/quick-reference.md` and `references/pro-rules.md`.

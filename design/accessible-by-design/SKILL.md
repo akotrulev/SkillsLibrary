@@ -17,6 +17,14 @@ Owns the accessibility work that happens **before there is code to audit**: the 
 
 Automated tooling catches a minority of WCAG failures and almost none of the seven criteria below — they are not scannable, because a machine cannot tell whether an alternative path *exists*, only whether an attribute does. Decide here; author there; prove it in QA.
 
+**Corpus authority.** The facts this skill decides with come from the vendored [`design-ui-ux-pro-max`](../ui-ux-pro-max/SKILL.md) corpus — **it is the source of truth, and where it and this skill disagree on a fact, the corpus wins.** Search one **observable outcome** at a time with explicit accessibility terms — `"focus not obscured"`, `"dragging movements"`, `"accessible authentication"`, `"error summary validation"` — then, if needed, the component domain, then the stack:
+
+```bash
+python3 "${CLAUDE_PLUGIN_ROOT}/design/ui-ux-pro-max/scripts/search.py" "<observable outcome>" --domain ux
+```
+
+Never accept a generic accessibility result for a specific interaction or WCAG criterion. The pre-delivery accessibility checklist in `design/ui-ux-pro-max/references/pro-rules.md` is canonical for app UI.
+
 ## Why this is not optional any more
 
 The **European Accessibility Act** has been enforceable since **28 June 2025**, with penalties up to €3 million and the possibility of market exclusion. It works through **EN 301 549**, which today carries WCAG 2.1 AA; **V4.1.1, expected during 2026, moves it to WCAG 2.2 AA**. The compliance instruction from every source is the same: build to **2.2 AA now**. Accessibility overlay widgets were explicitly stated by the European Commission not to deliver compliance — an overlay is a finding, not a fix.
@@ -104,3 +112,4 @@ Localization mechanics belong to a stack's `languages` skill; the **layout const
 - [`design/ux-patterns`](../ux-patterns/SKILL.md) — density (§5), wizards and forms (§3/§4), first run (§8): the decisions this skill constrains.
 - [`design/ux-writing`](../ux-writing/SKILL.md) — plain language, one-name-one-concept, and the no-visual-references rule, which is this discipline expressed in copy.
 - [`design/design-tokens`](../design-tokens/SKILL.md) — where the focus-indicator and target-size decisions become tokens.
+- [`design-ui-ux-pro-max`](../ui-ux-pro-max/SKILL.md) — outcome-searchable accessibility guidelines and the canonical pre-delivery checklist.

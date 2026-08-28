@@ -11,6 +11,12 @@ The current framing from the field is worth stating plainly, because it decides 
 
 **What this skill owns:** the patterns — progress, visibility, control, approval, uncertainty, correction, disclosure, and the AI-specific states. **What it does not own:** the transport that delivers them (a stack's `realtime` / `data-fetching` — SSE, WebSocket, streamed responses, resumable runs), the prompt/model/tool design behind them (`ai-development/claude-api`), and proving the feature works (qa `ai-feature-testing`). Design the pattern here; build it there.
 
+**Corpus authority.** The facts this skill decides with come from the vendored [`design-ui-ux-pro-max`](../ui-ux-pro-max/SKILL.md) corpus — **it is the source of truth, and where it and this skill disagree on a fact, the corpus wins.** The AI-surface patterns below are this skill's own; the corpus supplies the general UX guidelines they sit on — streaming feedback, interruptibility, loading and empty states, focus behavior:
+
+```bash
+python3 "${CLAUDE_PLUGIN_ROOT}/design/ui-ux-pro-max/scripts/search.py" "<observable outcome>" --domain ux
+```
+
 ## 1. Show the work, while it happens
 
 The single highest-value improvement reported across agent products: **stream tool inputs and outputs inline as they occur**, rather than presenting a finished summary. A user watching a run knows whether it is going well, and can stop it when it is not.
@@ -118,3 +124,4 @@ The named risk for 2026 is **AI fatigue** — on the user's side as much as the 
 - [`design/ethical-patterns`](../ethical-patterns/SKILL.md) — consent and disclosure mechanics for what the AI reads.
 - [`design/accessible-by-design`](../accessible-by-design/SKILL.md) — streamed output is a live-region and cognitive-load problem; a step timeline that never stops moving is unusable for some readers.
 - `ai-development/claude-api` — the model, prompt, and tool design behind the surface. qa `ai-feature-testing` — proving it works. Both peers, invoked separately.
+- [`design-ui-ux-pro-max`](../ui-ux-pro-max/SKILL.md) — the general UX guideline corpus these AI-surface patterns sit on.

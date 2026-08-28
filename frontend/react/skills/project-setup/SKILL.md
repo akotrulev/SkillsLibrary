@@ -30,7 +30,7 @@ Stands up a **Next.js 15 App Router** app (primary) or a **Vite SPA** (fallback 
 1. **Route shapes** — the routes/features and their data shape (content · API-consuming · live/push · offline) — this drives per-route rendering, not one global choice
 2. **Backend** — is there an API to consume, a database the server touches directly, or both?
 3. **Auth** — needed at scaffold time? (pairs with `auth/auth0-react`)
-4. **Component library** — MUI (default) or another (pairs with [`component-library`](../component-library/SKILL.md))
+4. **Component library** — shadcn/ui + Tailwind (default) or another (pairs with [`component-library`](../component-library/SKILL.md))
 
 ## Create the app
 
@@ -38,7 +38,7 @@ Stands up a **Next.js 15 App Router** app (primary) or a **Vite SPA** (fallback 
 
 ```bash
 pnpm create next-app@latest my-app --ts --app --eslint --src-dir --import-alias "@/*"
-# then, per house style: MUI + emotion, no Tailwind (see component-library/styling)
+# then, per house style: shadcn/ui init on Tailwind v4 (see component-library/styling)
 ```
 
 | Prompt | Choice | Why |
@@ -47,7 +47,7 @@ pnpm create next-app@latest my-app --ts --app --eslint --src-dir --import-alias 
 | App Router | **yes** | RSC is the primary target |
 | `src/` directory | **yes** | keeps `app/` and code out of the repo root |
 | Import alias | **`@/*`** | stable absolute imports |
-| Tailwind | **no** (default lib is MUI) | one styling authority; only "yes" if the chosen library is shadcn — [`styling`](../styling/SKILL.md) |
+| Tailwind | **yes** (default lib is shadcn/ui) | one styling authority, and shadcn requires it; **"no"** only if the chosen library is MUI/Mantine/Chakra — [`styling`](../styling/SKILL.md) |
 | Turbopack | yes | faster dev builds |
 
 ### Vite SPA (fallback lane)
@@ -109,7 +109,8 @@ src/
     Button.tsx
     SearchBox.tsx
   lib/                         # cross-cutting: api client, env, utils
-  theme/                       # MUI theme / tokens (see styling)
+  components/ui/               # shadcn components — your code, edit freely
+  theme/                       # CSS-variable tokens / library theme (see styling)
 ```
 
 **Feature folders over type folders.** Group by capability (`features/orders/{OrderTable, useOrders, orders.actions, orders.schema}`), not by artifact type (`components/`, `hooks/`, `services/` split apart). A feature is deletable and reviewable as one unit. Keep `app/` files **thin** — routing, layout, and composition; the real logic lives in `features/`.

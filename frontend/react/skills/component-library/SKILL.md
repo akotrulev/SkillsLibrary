@@ -1,6 +1,6 @@
 ---
 name: fe-react-component-library
-description: Use when picking or wiring the UI component library an app is built on — MUI (default) vs Mantine vs Chakra vs shadcn/ui vs none — plus theme/`ThemeProvider` + dark mode, DataGrid, dialog/toast surface, and the RSC `'use client'` boundary each forces. Triggers "which component library", "set up MUI/Mantine/Chakra/shadcn", "why do MUI components error in a Server Component". Not for hand-written CSS/tokens (`styling`) or forms (`forms`).
+description: Use when picking or wiring the UI component library an app is built on — shadcn/ui + Tailwind (default) vs Mantine vs MUI vs Chakra vs none — plus theme/`ThemeProvider` + dark mode, DataGrid, dialog/toast surface, and the RSC `'use client'` boundary each forces. Triggers "which component library", "set up MUI/Mantine/Chakra/shadcn", "why do MUI components error in a Server Component". Not for hand-written CSS/tokens (`styling`) or forms (`forms`).
 ---
 
 # React — Component Library (one-of-N family)
@@ -13,7 +13,7 @@ Picks and wires the UI component library that supplies your grids, dialogs, inpu
 
 - Choosing a component library for a new React app (or justifying a change)
 - Wiring the chosen library's provider(s), theme, and services into an existing app
-- Adding a DataGrid, dialog, or toast/snackbar and needing the library-native way
+- Adding a DataGrid, dialog, or toast/snackbar and needing the library-native way (building the grid itself → [`data-grid`](../data-grid/SKILL.md))
 - Diagnosing why library components throw or render dead in a Server Component
 
 ## When NOT to use
@@ -27,29 +27,36 @@ Picks and wires the UI component library that supplies your grids, dialogs, inpu
 ## The decision
 
 ```
-Do you want to OWN the component source (copied into your repo, no runtime dep) on Tailwind?
-  YES → shadcn/ui       (Radix primitives + Tailwind; you own + edit the code)   → references/shadcn.md
+Is this an EXISTING app already on a component library?
+  YES → keep it. The library in the repo is the authority; changing it is a wholesale
+        migration with its own justification, never a side effect of a feature.
   NO  ↓
-Do you need a rich FREE component set (DataTable, DatePicker, Charts, hooks) out of the box?
-  YES → Mantine         (largest free set + free DataTable, superb DX)           → references/mantine.md
+Do you need a rich FREE component set (DataTable, DatePicker, Charts, 100+ hooks)
+WITHOUT owning the component source?
+  YES → Mantine         (largest free set + free DataTable, superb DX)            → references/mantine.md
   NO  ↓
-Is the design fully bespoke / minimal, with a design system you own end-to-end?
-  YES → none            (headless: Radix / React Aria + TanStack Table + your CSS) → references/none.md
+Is Material Design itself the requirement (a brand or spec mandates it)?
+  YES → MUI             (Material, largest ecosystem, MUI X DataGrid + paid tiers) → references/mui.md
   NO  ↓
 Prefer an accessible style-props / recipe DX (Ark UI under the hood)?
   YES → Chakra UI v3                                                              → references/chakra.md
-  NO  → MUI             (DEFAULT — Material, largest ecosystem, MUI X DataGrid)   → references/mui.md
+  NO  ↓
+Is the design fully bespoke / minimal, with a design system you own end-to-end?
+  YES → none            (headless: Radix / React Aria + TanStack Table + your CSS) → references/none.md
+  NO  → shadcn/ui       (DEFAULT — Radix primitives + Tailwind; you own the code)  → references/shadcn.md
 ```
 
 | Library | Cost | Look | Strength | RSC reality | Reference |
 |---|---|---|---|---|---|
+| **shadcn/ui** *(default)* | Free (you own the code) | Tailwind, fully themeable | Copy-in components on Radix; **no runtime dependency**, total control | Components are client where they use hooks (`'use client'` at the file top, generated for you); styling authority flips to **Tailwind** | [`shadcn`](references/shadcn.md) |
 | **MUI (Material UI)** | Free (MIT); MUI X has a Pro tier | Material Design | Largest ecosystem, `theme` + `sx`, MUI X DataGrid (free + Pro), `@mui/material-nextjs` App-Router integration | Emotion runtime → interactive components are **client**; wrap in `'use client'` islands, use the Next integration for SSR style flush | [`mui`](references/mui.md) |
 | **Mantine** | Free (MIT) | Neutral, modern | **Richest free set** + free `mantine-datatable`, 100+ hooks, best-in-class DX | Needs `'use client'` provider + `ColorSchemeScript` in the root layout; components are client | [`mantine`](references/mantine.md) |
 | **Chakra UI v3** | Free (MIT) | Neutral, accessible | Style-props + recipes, Ark UI a11y primitives, strong theming | v3 provider is `'use client'`; `next-themes` for color mode | [`chakra`](references/chakra.md) |
-| **shadcn/ui** | Free (you own the code) | Tailwind, fully themeable | Copy-in components on Radix; **no runtime dependency**, total control | Components are client where they use hooks (`'use client'` at the file top, generated for you); styling authority flips to **Tailwind** | [`shadcn`](references/shadcn.md) |
 | **none** | — | Fully custom | Zero component dep/payload; you own every primitive | You own the RSC boundary; headless primitives (Radix/React Aria) are client; pairs with [`styling`](../styling/SKILL.md) | [`none`](references/none.md) |
 
-**Default = MUI** unless a row above clearly fits better. Pick **Mantine** the moment a rich free DataTable + hooks are the deciding factor; **shadcn** when the team wants to own the component source on Tailwind; **Chakra** for the style-props DX; **none** when the design is bespoke and any library would fight it.
+**Default = shadcn/ui on Tailwind** unless a row above clearly fits better. It is the default because there is **no runtime component dependency and no paid tier** — the source is yours, Radix carries the a11y, and everything MUI X gates behind Pro/Premium (multi-sort, column pinning, row grouping, aggregation, tree data) is free in the TanStack engine the [`data-grid`](../data-grid/SKILL.md) skill builds on. The cost is real and stated up front: **you own the component code forever** — upgrading a component means re-running `shadcn add` and merging your edits by hand, and you build the grid toolbar yourself. Pick **Mantine** when a rich free component set out of the box matters more than owning the source; **MUI** when Material Design is the requirement; **Chakra** for the style-props DX; **none** when the design is bespoke and any library would fight it.
+
+**Brownfield never re-litigates this.** An existing MUI/Mantine/Chakra app keeps its library and its styling authority — the default applies to *new* apps. Introducing Tailwind alongside a CSS-in-JS library to "start migrating" is the G1 violation, not a migration plan.
 
 ## Cross-cutting rules (every library)
 
@@ -98,6 +105,7 @@ These hold regardless of which reference you read:
 - `data-testid` per-library mechanics → [`test-ids`](../test-ids/SKILL.md)
 - Component layering (atom/molecule/organism), prop-drilling limits, when a molecule owns state → [`basics`](../basics/SKILL.md)
 - `'use client'` boundary + rendering strategy per route, provider placement → [`project-setup`](../project-setup/SKILL.md)
+- Building the app's own grid (Tailwind/shadcn lane) + the full feature surface → [`data-grid`](../data-grid/SKILL.md)
 - The grid's data function (server-side paging/sort/filter) → [`data-fetching`](../data-fetching/SKILL.md)
 - Forms/validation with library inputs → [`forms`](../forms/SKILL.md)
 - Theme palette/fonts source → [`design/visual-identity`](../../../../design/visual-identity/SKILL.md) (primary), `design/theme-presets` (quick-start)

@@ -2,7 +2,7 @@
 
 These rules apply to every skill in this library unless a specific skill explicitly overrides them.
 
-> **Full catalog:** the per-domain inventory of every skill, agent, and published plugin — plus the scope list and the 85-command slash surface — lives in [`docs/skills-catalog.md`](docs/skills-catalog.md). Consult it to learn what exists and which agent owns it. This file holds only the behavioral rules every skill follows.
+> **Full catalog:** the per-domain inventory of every skill, agent, and published plugin — plus the scope list and the 88-command slash surface — lives in [`docs/skills-catalog.md`](docs/skills-catalog.md). Consult it to learn what exists and which agent owns it. This file holds only the behavioral rules every skill follows.
 
 ## Role
 
@@ -110,6 +110,7 @@ Do not rewrite code during review. Point to the fix and let the human apply it.
 ## When uncertain
 
 - If a skill's instructions conflict with these global rules, the skill wins for its domain. Note the conflict in the response.
+- **Design facts come from the vendored corpus.** `design/ui-ux-pro-max` (imported from `nextlevelbuilder/ui-ux-pro-max-skill`, pinned in [`design/ATTRIBUTIONS.md`](design/ATTRIBUTIONS.md)) is the **source of truth** for which style, palette, font pairing, UX guideline, icon, chart type, motion preset, landing pattern or per-stack UI convention applies. Where it and a `design/*` skill — or these global rules — disagree on such a fact, **the corpus wins**; the prose skill supplies only the judgment layered on top. Query it before deciding, and cite the row. It settles facts, not process: the code-quality, comment, planning, and test rules above are unaffected.
 - If a user request conflicts with these rules, follow the user but call out the deviation once.
 - If you don't have enough information to apply a pattern correctly, ask one clarifying question rather than guess.
 
@@ -148,7 +149,7 @@ Domain specifics: **observability** stack-agnostic tooling tracks current releas
 - Server Components fetch; Client Components interact — data crosses the boundary as serializable props; a Client Component composes server output via `children`, never by importing a Server Component.
 - **Semantic HTML before ARIA.** Reach for ARIA only when no semantic element fits.
 - Forms use **React Hook Form + Zod** (Server Actions + `useActionState` on App Router); field-level `aria-invalid` + error text; server errors mapped back with `setError`.
-- **Follow-the-library styling** (MUI theme/`sx`); CSS Modules only for gaps; **never Tailwind atop MUI**. (When the library is shadcn/none the authority flips to Tailwind / CSS Modules — the reference file says which.)
+- **One styling authority.** The default lane is **shadcn/ui, where the authority is Tailwind** (utilities + the CSS-variable token layer); CSS Modules only for the rare escape hatch. On a project already built on a CSS-in-JS library (MUI/Mantine/Chakra) that library's theme/`sx` **is** the authority and stays so — **never bolt Tailwind on top**. The reference file says which lane applies.
 - Every **interactive element and list/grid container ships a `data-testid`** — PascalCase dot-separated, static row locators, never array index / id / GUID / state value.
 - **In-app navigation is a real `<Link href>`**, never an `onClick` `router.push` on a `<div>`.
 - Every **data region has explicit loading / loaded / failed states** (Suspense + error boundary, or a three-state hook); a failure never collapses to blank, and never leaks `error.message`. **The failure is scoped to the response-dependent subtree** — search, filters, toolbars and headers keep rendering (only the rows/canvas/pane swaps to the failed body), and **every surfaced failure also raises a persistent top-right notification** that never auto-dismisses and closes only on its close button. A drifted/unparseable response is a *failed* state, never an empty one.
