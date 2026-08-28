@@ -15,7 +15,7 @@ The artifact that turns four design documents into work. Two things make it diff
 
 **Every task states one deliverable** — the observable thing that exists once it is done. See Step 4.
 
-And one property decides the shape of the sequence: **user-facing work is sequenced feature-complete**, so the tasks for one capability run consecutively and the last of them makes the capability usable, rather than a layer being finished across every area first. See Step 2.
+And one property decides the shape of the sequence: **how the plan will be executed**. User-facing work is sequenced *feature-complete* by default — the tasks for one capability run consecutively and the last of them makes the capability usable, rather than a layer being finished across every area first — but a plan one operator will run in back-to-back batches is sequenced *agent-batched* instead: a contract wave, then one batch per backend module, then one per frontend area. See Step 2.
 
 **Announce at start:** "I'm using the `be-shared-delivery-plan` skill to sequence the work."
 
@@ -84,7 +84,10 @@ The order must satisfy four things:
 | Shape | Use when | The order reads as |
 |---|---|---|
 | **Feature-complete** (the default for user-facing work) | The initiative delivers capabilities a person uses, and someone will want to see one working before the rest exists | One capability at a time, each usable end to end before the next begins |
+| **Agent-batched** (the one-operator shape) | One operator will execute the whole plan in back-to-back batches, and nobody needs a capability demonstrable before the last batch lands | One agent against one file tree at a time: a contract wave, then backend module by module, then frontend area by area |
 | **Platform-first** (the layered shape) | The initiative is a service or platform with no single user journey at stake — several areas land together and the consumer is another system | One layer at a time, completed across every area |
+
+**The shape is chosen from how the plan will be executed, and that is an input, not an inference.** Ask it once — *"who runs this, and do you need a capability working before the whole plan lands?"* — and record the answer and the shape it selected in the plan header. One operator running batches sequentially, with the integration and E2E pass at the end, selects **agent-batched**; several lanes running concurrently, or a stakeholder who wants the first capability demonstrable early, selects **feature-complete**. Guessing this wrong is expensive in both directions: feature-complete sequencing under one operator pays an agent switch and a context reload per capability for a property nobody is using, and agent-batching under a demo deadline hides every capability behind the last batch.
 
 **Feature-complete sequencing** puts the foundation tasks first — but only the foundations the **first** capability needs, never every foundation every capability will eventually want — and then runs each capability's tasks back to back:
 
@@ -102,6 +105,33 @@ Three rules keep it honest:
 - **A capability's last task delivers the capability.** Its `Deliverable` is the behavioural sentence — *"a user with the `booker` permission can book a session and then see it under their bookings"* — not "the tasks are done". Order the capability's tasks so exactly one of them makes that true, and make it the last of the run.
 - **Deferred foundations are named, not forgotten.** Where a capability's run deliberately stops short of a shared surface a later one will need — a generic error envelope, a pagination convention, a caching layer — say so in that task's `Out of scope` and place the generalization in the task that first needs it. An implied deferral is indistinguishable from an oversight.
 - **Schema order stays global.** Migrations run in the order `data-model.md` states even when the sequence is per-capability; a capability's tasks own the migrations for its own entities, at their stated position in that sequence.
+
+**Agent-batched sequencing** trades the "one capability at a time" property for the smallest number of agent switches and file-tree reloads. It groups the same tasks by **who executes them and what they touch**, so each batch is one agent working one tree once:
+
+| Order | Tasks |
+|---|---|
+| First | Human-blocked provisioning from `integrations.md` — unchanged, and still one task per provisioning track |
+| Then | **The contract wave** — one batch carrying everything both sides bind to, for the **whole initiative** rather than the first capability: the full migration sequence, the entity/model types, the shared DTOs and the error envelope, auth wiring, config keys, the typed endpoint signatures with their request/response contracts (stubbed where the behaviour lands later), the generated or hand-written API client the frontend imports, and the app shell + nav map + route tree. Once this lands, no later batch waits on a different agent |
+| Then | **Backend, one batch per module** — a module is a file tree one agent owns (`src/Booking/*`): its entities, domain rules, service, endpoint bodies, registration and unit tests, in a single task. Most-depended-on module first |
+| Then | **Frontend, one batch per screen area** — an area is one nav section of `experience-plan.md` §2 and the screens under it: their components, routes, states and wiring, in a single task, ordered by the nav map |
+| Last | The OpenAPI asset, telemetry, rate limiting, docs — and the **verification batch**: the full build, the test run, and the QA pass the plan defers to the end |
+
+**What may be merged into one batch — all four, or it stays separate:**
+
+- **Same agent.** A batch spanning two agents is not a batch, it is two tasks. This is the rule the shape exists for.
+- **Same file tree**, or trees that no other batch touches. The Step-3 overlap rule is unchanged and still hard.
+- **No gate between them** — no human prerequisite, no approval, no open question either one waits on.
+- **Every dependency already satisfied by an earlier batch.** A merge that pulls a `Depends on` forward is a reordering, not a merge.
+
+**And two things never merge:** work on opposite sides of the contract wave (a capability's screens do not join its backend module batch because they are one feature), and two tasks whose deliverables cannot be stated as one sentence — that is still the test of whether something is one task.
+
+**What the shape costs, stated in the plan rather than discovered:**
+
+- **No capability is usable until both its batches have landed.** The plan says which capabilities become usable at which batch, and the frontend batch that completes each one still carries the behavioural deliverable — the sentence just arrives later than it would under feature-complete sequencing.
+- **Stubs must be unmistakable.** A contract-wave endpoint with no behaviour yet returns an explicit not-implemented response, never a fake success or an empty list, and the batch's `Out of scope` names the module batch that fills it. An indistinguishable stub is the failure mode of this shape.
+- **Nothing about task discipline relaxes.** A batch *is* a task, so the tree still builds and its unit tests still pass at every task boundary, and those unit tests are still written inside the batch that writes the code. The only thing this shape defers to the end is the live/integration/E2E pass — which was already a separate `qa-*` pass, not a licence to ship untested code.
+
+**Where several plan packs are executed as one delivery** — three initiative folders that together make one working application — the shape is decided once across all of them and the batching is derived across the packs, not inside each: one contract wave covering every pack's schema and contracts, then the module batches, then the area batches. Tasks keep their own pack's ids and are cited as `<NNN-initiative>/T<n>`; the batch order lives in the pack that owns the contract wave, and the others' delivery plans point at it rather than restating it.
 
 **The platform-first shape** runs the same tasks in layer order instead:
 
@@ -139,6 +169,8 @@ Rules:
 - **`Depends on` still points backwards in `order`.** Streams say "same lane, therefore sequential"; `dependsOn` says "across lanes, this waits on that". Both are needed and a task waits on both — but a dependency on a task with a *higher* order is a contradiction between the two, and it is reported as a defect rather than resolved.
 
 Defend each lane concretely — "T10 touches `src/Scheduling/*`, T11 touches `src/Booking/*`, no shared file". The streams table is the load-bearing statement about what may run at the same time; there is no plan-level parallel-safety flag behind it.
+
+**Under agent-batched sequencing the lanes are the batches**: `contract` (the whole wave, one lane, everything downstream depends on it), one lane per backend module, one per frontend area, and `verification` last. They are still declared and still defended — a one-operator run executes them serially by choice, and the same document handed to Mission Control or to a second operator must still say truthfully which of them could run at the same time.
 
 ### Step 4 — Write each task
 
@@ -183,6 +215,7 @@ Rules:
 - **Acceptance criteria are checkable**, and they cite the design pack by section rather than restating it. "Handles errors properly" is not a criterion; "returns the documented `type` slug for each of the three deltas" is.
 - **The build/test command is the project's own**, taken from the orientation pass — never a guessed default.
 - **Size a task by coherence, not by volume.** A task is one thing, done once — a resource, a migration set, an external client, a capability's endpoint surface — and it is exactly as big as that thing is. File counts and criterion counts are not a limit: work that genuinely needs fourteen files is one task, and cutting it into "the entity" and "the service" produces two tasks neither of which can be verified alone. **The deliverable is the test**: one task, one deliverable. Two deliverables means two tasks; no statable deliverable means it is a fragment of one. **Split when it stops being one thing**: it delivers two independent behaviours; a natural intermediate point exists where the work is meaningfully complete *and* checkable on its own; part of it is blocked while the rest is not; or two different agents own the halves. Every piece of a split must still build, still pass its own tests, and still be independently verifiable — a split that leaves the tree broken between the pieces was a bad seam, and the two pieces are one task. When a task is large, its **acceptance-criteria list is its step breakdown**, ticked off in place as the work lands.
+- **A batch is still one task, and it still states one deliverable.** Under agent-batched sequencing a task is the whole module or the whole screen area, its acceptance-criteria list is the per-piece breakdown (one criterion per endpoint, per screen, per rule), and its deliverable is the one sentence that covers the set — *"every endpoint under `/bookings` implements its documented behaviour and validation"*, not a list of five. A batch whose deliverable takes two sentences was two batches; a batch of unrelated leftovers grouped because one agent happens to own them is a bucket, not a task, and it is split.
 - **Frontend tasks cite their screens.** A task bound to `fe-react` / `fe-blazor` names the `experience-plan.md` screen ids it delivers (`S3`, `S4`) and the journey it completes (`J1`), lists `design-ux-patterns` in its skills, and carries `experience-plan.md` §6's responsiveness budget as acceptance criteria verbatim; the capability's last task is usually this one, and its deliverable is the journey's behavioural sentence.
 - **`Out of scope` per task** — mostly to keep the executing agent from wandering into a peer's lane.
 - **Tasks are implementation.** Live/E2E/integration test runs, starting servers, and manual verification belong to a separate QA pass owned by a `qa-*` peer. Unit tests are part of the implementation task, not a separate one.
@@ -301,6 +334,7 @@ Diverged — T9 (auth wiring): plan specifies policy-based authorization;
 **Date:** YYYY-MM-DD · **Written by:** `be-shared-delivery-plan`
 **Pack:** `./blueprint.md` · `./data-model.md` · `./experience-plan.md` (when user-facing) · `./api-surface.md` · `./integrations.md`
 **Target repo:** `<path>` · **Stack:** <stack + version> · **Build/test:** `<the project's own commands>`
+**Sequencing shape:** feature-complete | agent-batched | platform-first — <the execution model that selected it>
 
 > **For agentic workers:** the tasks below are one flat sequence — work them in order. Each names
 > the agent that should execute it, the skills to load, and the one deliverable that means it is done.
@@ -345,15 +379,16 @@ Diverged — T9 (auth wiring): plan specifies policy-based authorization;
 
 1. Every functional area in `blueprint.md` has at least one task; every migration, every resource, every screen in `experience-plan.md`, every external client, every blocking unknown is a task.
 2. Reading the tasks in `order`, each one could be started at its position: everything it needs was produced by a task above it.
-3. Every task states one `Deliverable`, as a result rather than an activity. Every user-facing capability has a last task whose deliverable says behaviourally what a user can then do, and the run of tasks ending there covers everything on the Step-1 capability set — including its screens and what makes it reachable, not only its endpoints. Every frontend task cites its screen ids and inherits the responsiveness budget.
-4. Every task binds to an **exact** catalog agent name and exact skill names.
-5. Every `dependsOn` id exists, and every one points backwards in `order`.
-6. Every task names a declared stream and carries a unique `order`; every stream's row says why it is internally sequential; every pair of tasks whose `Files` overlap is ordered against each other — same stream or a `dependsOn` edge between them.
-7. Every task's acceptance criteria are checkable and cite the design pack by section.
-8. The build/test commands are the project's own, from the orientation pass.
-9. `HANDOFF.md` exists, names the next task per unblocked lane and every blocker — and carries no progress record of its own.
-10. Every `Done`/`Partial` status carries `file:line` evidence read this session.
-11. Sections 6 and 7 exist (empty before execution starts), and the header note tells the executing agents to maintain §2, §3, §6 and §7 as they work.
+3. The sequencing shape is stated in the plan header, with the execution model that selected it. Under agent-batched: every batch is one agent against one file tree, every contract-wave stub names the batch that fills it, and the plan says which capability becomes usable at which batch.
+4. Every task states one `Deliverable`, as a result rather than an activity. Every user-facing capability has a last task whose deliverable says behaviourally what a user can then do, and the run of tasks ending there covers everything on the Step-1 capability set — including its screens and what makes it reachable, not only its endpoints. Every frontend task cites its screen ids and inherits the responsiveness budget.
+5. Every task binds to an **exact** catalog agent name and exact skill names.
+6. Every `dependsOn` id exists, and every one points backwards in `order`.
+7. Every task names a declared stream and carries a unique `order`; every stream's row says why it is internally sequential; every pair of tasks whose `Files` overlap is ordered against each other — same stream or a `dependsOn` edge between them.
+8. Every task's acceptance criteria are checkable and cite the design pack by section.
+9. The build/test commands are the project's own, from the orientation pass.
+10. `HANDOFF.md` exists, names the next task per unblocked lane and every blocker — and carries no progress record of its own.
+11. Every `Done`/`Partial` status carries `file:line` evidence read this session.
+12. Sections 6 and 7 exist (empty before execution starts), and the header note tells the executing agents to maintain §2, §3, §6 and §7 as they work.
 
 ## Handoffs
 

@@ -231,6 +231,16 @@ One line each: system, what it does for us, direction (we call it / it calls us 
 
 If a needed capability has no agent, say so plainly and name the skill or the human step that covers it — do not stretch an agent past its description.
 
+**Then record the execution model — one line, and it is an answer, not an inference.** The routing map says *which* agents build the system; the execution model says *how the run happens*, and the delivery plan's sequencing shape is chosen from it. Ask it in the Step-9 question batch:
+
+| Execution model | Recognized by | Selects (in `be-shared-delivery-plan` Step 2) |
+|---|---|---|
+| **One operator, sequential batches** | One person drives one session at a time; the integration/E2E pass happens once at the end; nothing has to be demonstrable before the last batch | `agent-batched` — a contract wave, then one batch per backend module, then one per frontend screen area |
+| **Concurrent lanes / Mission Control** | Several lanes run at once, or a stakeholder wants the first capability working early | `feature-complete` — one capability at a time, each usable end to end |
+| **No user journey at stake** | A service or platform whose consumer is another system | `platform-first` — one layer at a time |
+
+Write it into §6 as `**Execution model:** <which> — <what settled it>`. Getting it wrong is expensive both ways: feature-complete sequencing under one operator pays an agent switch and a context reload per capability for a property nobody is using, and agent-batching under a demo deadline hides every capability behind the last batch.
+
 ### Step 7 — Non-functional targets
 
 Only what is known or decidable now; the rest are `[TBD - <owner>]` lines, which is useful information rather than a gap. Cover: expected scale (users, requests/sec, data volume, growth), latency expectations on the paths that matter, availability target, data retention and deletion obligations, compliance constraints (PII, PCI, residency, audit trail), and the security posture (tenancy isolation model, who can see whose data).
@@ -262,6 +272,8 @@ Each question carries:
 ```
 
 Options must be genuinely different, and the trade-off must be real — "A is better" is not a trade-off. Use the harness's structured-question tool if one is available; otherwise present the block above and ask directly.
+
+**The execution-model question is always one of them** (Step 6), unless the human already stated how the plan gets run. It is cheap to ask, it cannot be read off the repo, and it decides the whole shape of the delivery plan.
 
 **Then the gate — this blocks:**
 
@@ -336,6 +348,8 @@ flowchart LR
 |---|---|---|---|
 
 **Capabilities with no agent:** <named plainly, with what covers them instead.>
+
+**Execution model:** <one operator, sequential batches | concurrent lanes / Mission Control | no user journey at stake> — <what settled it, and the sequencing shape it selects>
 
 ## 7. Non-functional targets
 | Dimension | Target | Evidence |
