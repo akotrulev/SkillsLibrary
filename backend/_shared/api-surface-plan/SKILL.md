@@ -17,7 +17,7 @@ The document has two audiences and both matter: the `be-<stack>` agent that impl
 
 ## When to use
 
-- Step 4 of a `be-planner` run (after the experience plan, which is skipped when nothing is user-facing)
+- Step 4 of a `solution-planner` run (after the experience plan, which is skipped when nothing is user-facing)
 - A new functional area adds endpoints to an existing API (`EXTEND` — plan the delta, inherit the existing envelope and conventions)
 - An existing API needs its contract documented as the baseline for planned changes (`RESUME` — read routes and DTOs out of the code, mark `#confirmed`, then plan the delta)
 

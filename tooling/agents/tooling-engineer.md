@@ -102,7 +102,7 @@ Next: <step n+1, or the decision needed>
 
 ## Related agents
 
-- **`be-shared-api-surface-plan`** (via `be-planner`) — designs the REST API for human/browser clients. This agent *consumes* its output as a contract input; it does not design APIs.
+- **`be-shared-api-surface-plan`** (via `solution-planner`) — designs the REST API for human/browser clients. This agent *consumes* its output as a contract input; it does not design APIs.
 - **`be-documenter` / `be-feature-documenter`** — reverse-document a codebase for people. Their feature traces are an excellent Step 1 input.
 - **`devops-engineer`** — owns pipelines and deployment. This agent builds the tool a pipeline step calls; it does not write the pipeline.
 - **The vendor `ai-development/mcp-builder` skill** — the lane for wrapping a third-party HTTP API with no local codebase, including its evaluation harness.

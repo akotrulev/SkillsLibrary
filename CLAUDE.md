@@ -2,7 +2,7 @@
 
 These rules apply to every skill in this library unless a specific skill explicitly overrides them.
 
-> **Full catalog:** the per-domain inventory of every skill, agent, and published plugin — plus the scope list and the 88-command slash surface — lives in [`docs/skills-catalog.md`](docs/skills-catalog.md). Consult it to learn what exists and which agent owns it. This file holds only the behavioral rules every skill follows.
+> **Full catalog:** the per-domain inventory of every skill, agent, and published plugin — plus the scope list and the 91-command slash surface — lives in [`docs/skills-catalog.md`](docs/skills-catalog.md). Consult it to learn what exists and which agent owns it. This file holds only the behavioral rules every skill follows.
 
 ## Role
 
@@ -175,7 +175,7 @@ Each top-level folder owns a domain, is **stack-first and domain-encapsulated** 
 | `qa/` | Test automation + manual test design, reporting, CI/CD, security scanning | `qa-java` · `qa-dotnet` · `qa-typescript` |
 | `frontend/blazor/`, `frontend/react/` | Frontend dev stacks (+ `design/`, `auth/auth0-*`) | `fe-blazor` · `fe-react` |
 | `design/` | Stack-agnostic aesthetic-craft layer | bundled into `fe-*` |
-| `backend/` | Design-pattern + persistence dev stacks; planning (`be-planner`) + reverse-docs (`be-documenter`) | `be-dotnet` · `be-java` · `be-node` |
+| `backend/` | Design-pattern + persistence dev stacks; planning (`solution-planner`) + reverse-docs (`be-documenter`) | `be-dotnet` · `be-java` · `be-node` |
 | `observability/` | OpenTelemetry → Grafana telemetry | bundled into `be-*` |
 | `data/` | Database engineering (8 engines) | `data` |
 | `devops/` | Platform/delivery + infra-security | `devops` |

@@ -15,7 +15,7 @@ It also produces the thing that keeps the whole exercise honest: a **coverage le
 
 - Step 1 of a `be-documenter` run
 - An inherited or long-lived backend needs decomposing before anyone can reason about it
-- A `be-planner` `RESUME`/`EXTEND` run needs to know what functional areas already exist in the code
+- A `solution-planner` `RESUME`/`EXTEND` run needs to know what functional areas already exist in the code
 
 ## When NOT to use
 

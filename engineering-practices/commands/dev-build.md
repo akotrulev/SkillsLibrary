@@ -1,6 +1,6 @@
 ---
-description: Use when you have a written implementation plan (from `ep-writing-plans`) to execute task-by-task with review checkpoints.
-argument-hint: [what to apply this skill to]
+description: Build — execute a written implementation plan (from /dev-plan-feature or /dev-plan-solution) task-by-task, with a review checkpoint after each task
+argument-hint: [the plan file to execute]
 ---
 
 Load and follow the **`ep-executing-plans`** skill for this task.

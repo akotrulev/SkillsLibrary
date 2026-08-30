@@ -241,7 +241,7 @@ it.each([
 
 ## Money — the JS-specific trap
 
-**Never `number` floats for money.** `0.1 + 0.2 !== 0.3`, and `toBe` will show you exactly that. Use **integer minor units** (the house default per `be-planner`'s data-model conventions) or a decimal library, and assert on integers. A money test whose expected value is `0.30000000000000004` is a design finding, not a test to adjust.
+**Never `number` floats for money.** `0.1 + 0.2 !== 0.3`, and `toBe` will show you exactly that. Use **integer minor units** (the house default per `solution-planner`'s data-model conventions) or a decimal library, and assert on integers. A money test whose expected value is `0.30000000000000004` is a design finding, not a test to adjust.
 
 ## Test data
 

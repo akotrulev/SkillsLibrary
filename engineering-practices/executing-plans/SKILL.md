@@ -33,14 +33,30 @@ For each task:
 3. Run verifications as specified
 4. **Confirm the task's stated `Deliverable` actually exists** — the endpoint
    answers, the migration applied, the test file runs. The deliverable is what
-   "done" means; the steps are only how you got there
+   "done" means; the steps are only how you got there. **Stay inside the task's
+   stack:** every task names exactly one, and a file outside that tree in the
+   task's `Files` list means the task was mis-cut — that is a blocker to raise,
+   not something to fix by widening your reach
 5. Mark as completed (TaskUpdate)
-6. **Checkpoint — report, then continue:** post a short summary and continue to
+6. **Write the record back into the plan** — status and `file:line` evidence, the
+   criteria ticked in place, an append-only execution-log row, and anything you
+   built differently from the plan. This is part of the task, not a write-up
+   afterwards. **Then, where the plan pack has a `NEXT-PROMPTS.md`** (a
+   `solution-planner` pack does), rewrite this lane's block for the lane's next
+   task per `be-shared-session-budget` Step 5 — built from that task's own block,
+   copied rather than paraphrased. If yours was the lane's last task, replace the
+   block with a closed-lane line and check `epic-map.md` — a finished lane usually
+   opens a wave, and every lane that just became runnable needs a block. Stopping
+   mid-task keeps the block on the **same** task with a `Picking up from:` line;
+   a blocked lane keeps its block and names its blocker and owner, because
+   deleting it loses the lane.
+7. **Checkpoint — report, then continue:** post a short summary and continue to
    the next task without waiting for a reply. Include:
-   - the task just finished (id + name)
+   - the task just finished (id + name, its stack and lane)
    - its deliverable, and the evidence it exists
    - files created/modified
    - verification output (test/lint/build result — the actual pass/fail line)
+   - the plan record written, and the prompt block rewritten (or why not)
    - what's next (the next task's id + name)
 
    This is a **report, not a permission prompt** — you keep going. It exists so
@@ -86,6 +102,9 @@ After all tasks complete and verified:
 - Reference skills when plan says to
 - Tasks are the unit of work — never call one a slice or a phase, in the plan or in a report
 - Run them in the plan's order; a task that can't start where it sits is a blocker
+- Write the record back into the plan before checkpointing, and rewrite the lane's `NEXT-PROMPTS.md` block where the pack has one — the plan is the record, the prompts are only what's next
+- Stay inside the task's stack; a file outside its tree is a mis-cut task, which is a blocker, not a licence to widen
+- A task's `Est. context` is a plan-time target, not a budget to manage mid-run — if the session is running long, that is a finding for the plan, not a reason to cut the task short
 - Checkpoint after each task (deliverable + evidence + files touched + verification output), then continue — unless the user asked to run through to the end
 - Stop when blocked, don't guess
 - Never start implementation on main/master branch without explicit user consent

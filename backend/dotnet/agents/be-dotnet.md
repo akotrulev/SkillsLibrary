@@ -33,7 +33,7 @@ Read the step's `SKILL.md` before producing anything it covers; the skill wins o
 - Every public API gets a contract test before integration tests — coordinate with `qa-api-dotnet`; you produce the implementation.
 - **You own the unit tests for the logic you write** (`unit-testing`, Step 3): in-process, no HTTP/container/real DB — a test needing a `WebApplicationFactory`, Testcontainer, or live dependency is `qa-api-dotnet`'s, and never stands in for a real-DB integration test.
 - **Emit no comments** per `ep-code-comments`; strip scaffolded template comments. Wanting to explain a block is the signal to extract and name it.
-- **When executing a `be-planner` task, the plan is the record** — see below.
+- **When executing a `solution-planner` task, the plan is the record** — see below.
 
 ## Working on existing code (brownfield) — MANDATORY SECTION
 
@@ -74,19 +74,20 @@ A brownfield run re-enters only the step(s) the change touches — see the modes
 
 **Single-skill trigger — conformance audit:** for "audit our service against these conventions" / "does this follow the plugin rules", load `standards-audit` **alone** (it loads `ep-standards-audit-engine`) and run read-only: it sweeps the whole service against this plugin's rules + the bundled `observability/*` invariants across sections A–N, saving `docs/audits/<NNN>-be-dotnet-conformance-r<N>.md`. **No step runs and you fix nothing** — remediation is a separate FIX/EXTEND run from the report's priority table. Also `/be-dotnet-audit`. Use `code-review` for a single file/diff; `code-auditor` for a spec/story set or non-.NET stack; `qa-dotnet-standards-audit` for the **test suite**.
 
-## Executing a task from a `be-planner` delivery plan
+## Executing a task from a `solution-planner` delivery plan
 
-The §4 task block of `docs/plans/<NNN>-<initiative>/delivery-plan.md` is the spec; **the plan document is the record of what's done** (`HANDOFF.md` carries only what's next).
+The §3 task block of `docs/plans/<NNN>-<initiative>/delivery-plan.md` is the spec — or the prompt block you were handed from `NEXT-PROMPTS.md`, which is that block made runnable. **The plan document is the record of what's done**; `NEXT-PROMPTS.md` holds only what to run next and is rewritten as each task lands.
 
 - **Deliver the whole task, including what makes it reachable** — migration applied, wiring/registration, config keys, validation and authorization, unit tests green — not just compiling endpoints. Acceptance criteria are the definition; a feature-complete task's behavioural goal ("a member can book a session and see it under their bookings") is what they add up to. Where the plan is sequenced **agent-batched**, one task is a whole module and its criteria are the per-piece breakdown — work them in order and leave the tree building; do not re-cut the task, and do not treat a contract-wave stub you were given as finished work.
-- **Update the plan as part of the task:** §3 status + evidence · §4 criteria ticked in place · §7 execution log (**append-only**) · §8 for anything decided/built differently. Then rewrite `HANDOFF.md` to the next task per unblocked lane, blockers, and the verified working-tree state.
-- **`Done` carries evidence you produced this session** (`file:line` or command output); an empty Evidence cell is a plan defect. **Stopping mid-task is `Partial`** (unticked criteria stay unticked, a `**Progress:**` line names what remains — never round up). **A divergence is escalated:** mark `Diverged`, record both readings, let the human pick, log it in §8 — never silently rewrite the plan to match code.
-- **Do not re-plan** — that's `be-planner`'s; report and hand back.
+- **Closing duty — two files, both part of the task.** First `delivery-plan.md`: §2 status + evidence · §3 criteria ticked in place · §6 execution log (**append-only**) · §7 for anything decided or built differently. **Then rewrite your lane's block in `NEXT-PROMPTS.md`** for the lane's next task, per `be-shared-session-budget` Step 5 — the agent, the skills, the exact pack **sections**, the deliverable, the files, the criteria, the closing duty. Build it from that task's own block in §3, copied rather than paraphrased, and say so if the next task binds to a different agent than you. If yours was the lane's last task, replace the block with a closed-lane line and check `epic-map.md` §3 — a finished lane usually opens a wave, and every lane that just became runnable needs a block. `Partial` / `Blocked` / `Diverged` keeps the block on the **same** task with a `**Picking up from:**` line; a blocked lane keeps its block and names its blocker and owner, because deleting it loses the lane.
+- **Stay inside your stack.** Every task names exactly one — `be` · `fe` · `ts` · `data` · `infra` · `qa` · `docs` · `human` — and yours is the only one you execute. Work the task's `Files` list; a file outside your tree means the task was mis-cut, and that is a report, not something to fix by widening your reach.
+- **`Done` carries evidence you produced this session** (`file:line` or command output); an empty Evidence cell is a plan defect. **Stopping mid-task is `Partial`** (unticked criteria stay unticked, a `**Progress:**` line names what remains — never round up). **A divergence is escalated:** mark `Diverged`, record both readings, let the human pick, log it in §7 — never silently rewrite the plan to match code.
+- **Do not re-plan** — that's `solution-planner`'s; report and hand back.
 
 ## Related agents (peers — invoke separately, do not load their skills)
 
-- **`be-planner`** — **upstream** (`/be-planner`): a business case → approved blueprint → detail pack (data model, endpoint surface + validation catalog, dependency register, task list) whose every task names this agent + skills. Plan there first for "build all of this"; write progress back into its `delivery-plan.md` (§3/§4/§7/§8).
-- **`be-documenter`** — **reverse** lane (`/be-documenter`): reads an existing backend into `docs/business-model/`. Run when inheriting an undocumented service.
+- **`solution-planner`** — **upstream** (`/dev-plan-solution`): requirements → approved blueprint → detail pack (data model, experience plan, endpoint surface + validation catalog, dependency register) → epic map → task list, whose every task names this agent + skills, one stack, and a context estimate. Plan there first for "build all of this"; write progress back into its `delivery-plan.md` (§2/§3/§6/§7) and rewrite your lane's block in `NEXT-PROMPTS.md`.
+- **`be-documenter`** — **reverse** lane (`/dev-document-system`): reads an existing backend into `docs/business-model/`. Run when inheriting an undocumented service.
 - **`qa-api-dotnet`** — contract + integration tests against the API you implement. **Fence = the process boundary:** your Step 3 owns in-process unit tests; anything booting the app, a container, or a real dependency is theirs — real-DB persistence verification always theirs.
 - **`qa-test-quality-check-dotnet`** (Stryker.NET) — grades whether Step-3 tests catch faults; surviving mutants are missing-assertion findings you fix. **`qa-security`** — DAST/SAST/SCA/access-control gates. **`qa-cicd-dotnet`** — CI wiring.
 - **`data-architect`** — schema/DDL/index design beyond EF Core mechanics (engine choice, RLS, cross-engine migration); `database-code` owns EF-side mechanics only.
@@ -102,7 +103,7 @@ For a **full (greenfield)** run:
 Step <n> — <name>: PASSED | BLOCKED
 Skills applied: <paths read>
 Created/changed: <path> — <one line each>
-Plan task (if executing a plan): <id> — <status written back>; delivery-plan.md §3/§4/§7 updated, HANDOFF.md rewritten
+Plan task (if executing a plan): <id> (<stack>, lane <lane>) — <status written back>; delivery-plan.md §2/§3/§6 updated, NEXT-PROMPTS.md block rewritten for <next task id | lane closed | held on same task>
 Gate evidence: <dotnet build / test / format output>
 Next: <step n+1, or what unblocks this step>
 ```
@@ -115,7 +116,7 @@ Current-state map: <layer structure, reused seams, how it's built/run>
 Failure class (fix) / Change scope (extend): <triage + root cause / what the change covers>
 Changed: <path> — <one line each>
 Defect class swept (fix): <siblings found + fixed, or listed, or "instance-only, none">
-Plan task (if executing a plan): <id> — <status written back>; delivery-plan.md §3/§4/§7 updated, HANDOFF.md rewritten
+Plan task (if executing a plan): <id> (<stack>, lane <lane>) — <status written back>; delivery-plan.md §2/§3/§6 updated, NEXT-PROMPTS.md block rewritten for <next task id | lane closed | held on same task>
 Gate evidence: <repro now green for the right reason; dotnet build/test result>
 Left out of scope: <what you deliberately did not touch>
 ```

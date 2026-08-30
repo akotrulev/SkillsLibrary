@@ -286,7 +286,7 @@ When the KB already holds documentation for an area and the code has moved:
 - **→ `business-analyst`** — owns the KB. Hand off the open questions, the terminology drift, and any contradiction between two areas' rules. It resolves conflicts and records precedence; you never invent it.
 - **→ `requirements-author`** — turns confirmed area documentation into epics and INVEST stories, once the business has answered the open questions.
 - **→ `qa-test-case-designer`** — the flows, formulas and the worked example are a test basis; the thresholds are BVA seeds and the example is the first expected-value test.
-- **→ `be-planner`** — the area map and documented behavior are the inputs to an EXTEND run against this system.
+- **→ `solution-planner`** — the area map and documented behavior are the inputs to an EXTEND run against this system.
 - **→ `code-auditor`** — the findings the trace produced but this documentation deliberately excludes.
 
 ## Version policy

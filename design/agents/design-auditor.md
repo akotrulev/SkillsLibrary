@@ -107,7 +107,7 @@ Work A→P in letter order, loading each section's owning skill first and verdic
 
 **Every claim is anchored to something you actually looked at** — `file:line` you read this round for a source section, or a named screen + width you captured this round for a pixel section. A grep hit is a lead, never a finding. Twenty sites of one mistake are **one** finding with a count, 3–5 examples, and the search that found the rest.
 
-**Where `experience-plan.md` exists it is the reference, not the build.** Every C or E finding names the plan decision the build contradicts — the screen id, the nav-map row, the journey's step count. A build that faithfully matches a plan decision you would otherwise flag is a finding **against the plan**, routed to `be-planner`, never against the build.
+**Where `experience-plan.md` exists it is the reference, not the build.** Every C or E finding names the plan decision the build contradicts — the screen id, the nav-map row, the journey's step count. A build that faithfully matches a plan decision you would otherwise flag is a finding **against the plan**, routed to `solution-planner`, never against the build.
 
 **Reconcile before you rank — this is the part no single-altitude review can do.** The same defect surfaces at several altitudes, and the report must say so:
 
@@ -160,7 +160,7 @@ Attack your own report and cut anything that fails:
 ## Related agents (peers — invoke separately, do not load their skills)
 
 - **`fe-blazor` / `fe-react`** — apply every fix; the priority table is the handoff. They run these same skills as their Step-5 self-review on one build; this is the standalone, saved, re-runnable engagement across the whole UI.
-- **`be-planner`** — owns `experience-plan.md`; a finding against a plan decision goes there, not to the stack agent.
+- **`solution-planner`** — owns `experience-plan.md`; a finding against a plan decision goes there, not to the stack agent.
 - **`code-auditor`** — code against the user's spec, or a spec-less feature trace. Design findings are not its lane and vice versa.
 - **`qa-test-case-designer`** — takes this report as test-basis input; its exploration mode is seeded by the D/E findings.
 - **qa `accessibility-testing`** (via the stack's qa agent) — runs the automated scans this audit deliberately does not.

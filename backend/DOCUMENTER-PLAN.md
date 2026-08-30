@@ -27,7 +27,7 @@ Reverse documentation fails in exactly one way: stating business intent the code
 ```
 backend/_shared/
   agents/be-documenter.md              # phased orchestrator, 7 phases, confirmation gate at Phase 1
-  commands/be-documenter.md            # /be-documenter
+  commands/be-documenter.md            # /dev-document-system
   codebase-survey/SKILL.md             # be-shared-codebase-survey       -> area-map.md + reading plan
   feature-trace/SKILL.md               # be-shared-feature-trace         -> per-area evidence (file:line)
     references/trace-recipes.md        #   where the business rules hide, per stack + per surface
@@ -105,7 +105,7 @@ backend/_shared/
 
 ### Phase G — wiring
 - [x] `.claude-plugin/marketplace.json`: `be-*` gain the 3 new skills + `ba-project-memory` + `ba-process-flow-diagram` + `ba-decision-table` + `ba-entity-state-grid` + the agent + the command; `business-analysis` gains the 3 new skills + agent + command.
-- [x] Root `CLAUDE.md`: the reverse-documentation lane in the Backend catalog, the command table row (`/be-documenter` — 71 commands), the business-analysis catalog note about the new KB artifact types.
+- [x] Root `CLAUDE.md`: the reverse-documentation lane in the Backend catalog, the command table row (`/dev-document-system` — 71 commands), the business-analysis catalog note about the new KB artifact types.
 - [x] `README.md` parity.
 - [x] Verify every cited agent/skill name resolves and every path exists.
 

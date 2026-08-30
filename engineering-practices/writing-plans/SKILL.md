@@ -68,6 +68,67 @@ A deliverable is concrete and checkable by someone who did not do the work:
 
 State it as a fact about the world after the task, not as an activity. If you cannot write the deliverable, the task is not yet one task — it is either too vague to start or two tasks wearing one number.
 
+## One Stack Per Task
+
+**Every task names exactly one stack, and it is one of eight:** `be` (backend, database, migrations) · `fe` (the web client) · `ts` (shared TypeScript packages — CLI, MCP, generated clients) · `data` · `infra` · `qa` · `docs` · `human`.
+
+> **A task that touches both the API tree and the web tree is two tasks.** There is no mixed task at any size, and no estimate justifies one.
+
+This is what makes a task handable to a single agent without it wandering across a boundary it does not own, and it is what makes the ordering mechanical rather than a judgement call — same-stack work is already adjacent. Where a stack-cut task cannot be demonstrated end to end on its own (a backend task whose screen arrives two tasks later), say so in its `Out of scope` rather than pretending the capability landed, and have the contract-first side return an explicit not-implemented response — never a fake success or an empty list.
+
+## Sizing a Task to One Session
+
+**One task is executed in one session, so its context cost is a property of the task.** Estimate it while you are authoring the task — not afterwards, which turns the number into trivia rather than an input to how the task is written.
+
+**The floor — every session pays it, once:**
+
+| Line | Estimate |
+|---|---|
+| System prompt + tool schemas | 12k |
+| `CLAUDE.md` and project instructions | 6k |
+| The executing agent's own definition | 7k |
+| **Floor** | **25k** |
+
+**Loaded once per session:**
+
+| Line | Estimate |
+|---|---|
+| Each distinct skill the task loads | 8k |
+| The task block itself | 1k |
+| Each design/spec **section** the task cites | 2k |
+| Orientation — repo survey + orientation cache (brownfield only) | 8k |
+
+**Per file the task touches:**
+
+| Line | Estimate |
+|---|---|
+| An existing file the task must read | `bytes ÷ 3.5`, or **3k** when it cannot be measured |
+| A source file created | 2k |
+| A UI component or screen created | 3k |
+| A test file created | 2k |
+| A file modified in place | 1.5k |
+| A registration, config key, or migration entry | 0.5k |
+
+**Per task, once:** build + test run and the fix loop it triggers, **12k**; then **× 1.2** on the whole sum for conversation and tool churn.
+
+`Est. = (floor + skills + sections + orientation + files + verify) × 1.2`
+
+**Worked example** — a task creating an Orders resource: 25k floor + 24k (3 skills) + 1k task block + 6k (3 sections) + 10k (4 source files + 1 test) + 1.5k (1 modified) + 12k verify = 79.5k × 1.2 = **~95k**.
+
+**Aim for ~80k–150k, centred on ~130k.** Under ~80k, look at the next task in the same stack — merge only if the result still states **one** deliverable. Over ~150k, annotate the task with its estimate and name its natural split point.
+
+> **The estimate is a guide, never a gate.** Three rules outrank it, always: one deliverable; one stack and one agent; a green tree at every task boundary. A task that overshoots with all three satisfied is a large task correctly authored — it is labelled, not filed as a defect. Never split something coherent to hit a number, and never pad a task to fill one.
+
+Record it on the task with its drivers, so a reader can tell a 95k of many small files from a 95k of one large one:
+
+```markdown
+**Est. context:** ~95k — 5 files created, 1 modified, 3 skills, 3 pack sections
+```
+
+Re-derive it whenever the task's files, skills or cited sections change. A stale estimate is worse than none — it is a number someone will trust.
+
+For a plan produced by `solution-planner`, this is `be-shared-session-budget`'s job and it also writes `NEXT-PROMPTS.md`; here the same cost model applies to a plan that never went through that pipeline.
+
 ## Bite-Sized Task Granularity
 
 **Each step is one action (2-5 minutes):**
@@ -96,10 +157,10 @@ State it as a fact about the world after the task, not as an activity. If you ca
 
 **Tasks** — in the order they are done:
 
-| # | Task | Deliverable | Depends on |
-|---|---|---|---|
-| 1 | T1 — [name] | [the observable result] | none |
-| 2 | T2 — [name] | [the observable result] | T1 |
+| # | Task | Stack | Deliverable | Est. | Depends on |
+|---|---|---|---|---|---|
+| 1 | T1 — [name] | `be` | [the observable result] | ~95k | none |
+| 2 | T2 — [name] | `fe` | [the observable result] | ~120k | T1 |
 
 ---
 ```
@@ -112,6 +173,8 @@ The task table is the plan's index: it is how a reader sees the order and what e
 ### T<N> — [Component Name]
 
 **Deliverable:** [the one observable thing that exists when this task is done]
+**Stack:** `be` | `fe` | `ts` | `data` | `infra` | `qa` | `docs` | `human` — exactly one
+**Est. context:** ~<n>k — [the drivers: files created/modified, skills, sections cited]
 **Depends on:** T<n> ([what it provides]) — or `none`
 
 **Files:**
@@ -165,7 +228,9 @@ Every step must contain the actual content an engineer needs. These are **plan f
 
 ## Remember
 - Tasks, numbered `T1…Tn`, in the order they are done — no slices, no phases, no grouping layer
-- One stated deliverable per task, plus its `Depends on`
+- One stated deliverable per task, plus its `Stack`, its `Est. context` and its `Depends on`
+- One stack per task — a task spanning the API tree and the web tree is two tasks, at any size
+- The estimate is a target, never a gate: one deliverable, one stack, a green tree at the boundary all outrank it
 - Exact file paths always
 - Complete code in every step — if a step changes code, show the code
 - Exact commands with expected output
@@ -184,6 +249,10 @@ After writing the complete plan, look at the spec with fresh eyes and check the 
 **4. Order check:** Read the tasks in order and ask, at each one, "could I actually start this now?" Anything it needs must have been produced by a task above it, and every `Depends on` must point backwards. A forward-pointing dependency means the order is wrong, not that the dependency needs a note.
 
 **5. Deliverable check:** Every task has a `**Deliverable:**` line, and each one states a result rather than an activity.
+
+**6. Stack check:** Every task names exactly one `Stack` from the eight. Run it as a mechanical check on the `Files` lists — a task whose files span two trees is two tasks, and the split is an ordering, not a redesign.
+
+**7. Sizing check:** Every task carries an `Est. context` with its drivers, and the header table's `Est.` column agrees with it. Every estimate over ~150k either names its natural split point or says why the task is one thing anyway; every one under ~80k was checked against the next same-stack task and either merged or left alone deliberately.
 
 If you find issues, fix them inline. No need to re-review — just fix and move on. If you find a spec requirement with no task, add the task.
 

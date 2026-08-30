@@ -1,6 +1,6 @@
 ---
 name: be-feature-documenter
-description: Use to document ONE feature of an existing codebase from a description of it (stack-agnostic): locates the implementation, traces it through authorization, validation, domain rules, persistence and failure paths, and writes a single standalone docs/features/ document in the simple spec shape — overview, scope, setup parameters, how it works (triggers → numbered steps → formulas), a full worked example with real numbers, open questions — with every claim's file:line and tier (#observed / #inferred) in a closing evidence table. Triggers "document how feature X works", "write up what the discount engine does", "I need a doc for the password-reset implementation". Do NOT use to document a whole system or maintain docs/business-model/ (be-documenter), to find defects (ep-feature-audit / code-auditor), or to plan work (be-planner).
+description: Use to document ONE feature of an existing codebase from a description of it (stack-agnostic): locates the implementation, traces it through authorization, validation, domain rules, persistence and failure paths, and writes a single standalone docs/features/ document in the simple spec shape — overview, scope, setup parameters, how it works (triggers → numbered steps → formulas), a full worked example with real numbers, open questions — with every claim's file:line and tier (#observed / #inferred) in a closing evidence table. Triggers "document how feature X works", "write up what the discount engine does", "I need a doc for the password-reset implementation". Do NOT use to document a whole system or maintain docs/business-model/ (be-documenter), to find defects (ep-feature-audit / code-auditor), or to plan work (solution-planner).
 tools: Read, Write, Edit, Bash, Glob, Grep, WebSearch
 model: inherit
 ---
@@ -130,7 +130,7 @@ question named per `#inferred` row, the search named per negative claim. The onl
 
 - **`be-documenter`** — the whole-system lane. Route there when the target turns out to be a full functional area, or the project maintains a `docs/business-model/` KB and wants this feature folded into it (its AREA mode) rather than documented standalone.
 - **`code-auditor`** (`ep-feature-audit`) — same tracing technique, opposite question: it asks *what is wrong*, you ask *what is true*. Route there when the real ask is "find the defects"; hand it your Findings as a starting point.
-- **`be-planner`** — the forward direction; your document is a ready-made "existing behavior to respect" input for an EXTEND run.
+- **`solution-planner`** — the forward direction; your document is a ready-made "existing behavior to respect" input for an EXTEND run.
 - **`qa-test-case-designer`** — your document is a test basis: the flows and formulas are conditions, the worked example is the first expected-value test, the refusals are the negative-case list, the thresholds are BVA seeds.
 - **`be-dotnet` / `be-java` / `be-node`** — own the code you are reading; route anything that should *change* to them.
 

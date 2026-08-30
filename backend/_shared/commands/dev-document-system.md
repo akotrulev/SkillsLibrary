@@ -1,5 +1,5 @@
 ---
-description: Reverse-engineer business documentation from an existing backend — split it into functional areas, trace each one, and write one simple document per area into docs/business-model/ (overview, setup parameters, how it works as triggers → steps → formulas, a full worked example, open questions, a closing file:line evidence table)
+description: Document a system — reverse-engineer business documentation from an existing backend: split it into functional areas, trace each one, and write one simple document per area into docs/business-model/ (overview, setup parameters, how it works as triggers -> steps -> formulas, a full worked example, open questions, a closing file:line evidence table)
 argument-hint: [the system or area to document, or "refresh" to reconcile the existing KB against the code]
 ---
 

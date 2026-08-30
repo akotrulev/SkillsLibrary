@@ -18,7 +18,7 @@ Two failure modes this document exists to prevent:
 
 ## When to use
 
-- Step 5 of a `be-planner` run
+- Step 5 of a `solution-planner` run
 - A new external system is being added to an existing planned build (`EXTEND`)
 - An existing integration needs documenting before it is changed (`RESUME` — read the client code and config, mark `#confirmed`, then plan the delta)
 

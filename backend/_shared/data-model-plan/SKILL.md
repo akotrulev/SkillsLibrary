@@ -13,7 +13,7 @@ The plan altitude: **every table, every column, every key, every index — and w
 
 ## When to use
 
-- Step 2 of a `be-planner` run, after blueprint approval
+- Step 2 of a `solution-planner` run, after blueprint approval
 - A new functional area is being added to an existing planned system (`EXTEND` — model the delta, reuse the existing conventions)
 - An existing schema needs documenting as the baseline a plan will extend (`RESUME` — read it out of migrations and entities, mark everything `#observed` — repo-read facts are never `#confirmed`, that tier is human-stated only — then plan the delta)
 

@@ -1,5 +1,5 @@
 ---
-description: Document ONE feature of the codebase from a description of it — locate the implementation, trace it end to end, and write a single standalone docs/features/ document in the simple spec shape (overview, scope, setup parameters, how it works as triggers → steps → formulas, a full worked example, open questions) with every claim file:line-evidenced in a closing table
+description: Document a feature — locate ONE described feature in the codebase, trace it end to end, and write a single standalone docs/features/ document in the simple spec shape (overview, scope, setup parameters, how it works as triggers -> steps -> formulas, a full worked example, open questions) with every claim file:line-evidenced in a closing table
 argument-hint: [the feature to document, in your own words — e.g. "the refund flow" or "password reset"]
 ---
 
@@ -20,4 +20,4 @@ Adopt the **`be-feature-documenter` feature documentation** role for this task.
 
 $ARGUMENTS
 
-If no feature was given above, ask for one — this agent documents a described feature, not a whole system (that is `/be-documenter`).
+If no feature was given above, ask for one — this agent documents a described feature, not a whole system (that is `/dev-document-system`).

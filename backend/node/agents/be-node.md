@@ -33,7 +33,7 @@ For **brownfield** work, additionally load the bundled developer-workflow skills
 - Every public API gets a contract test before integration tests, per `CLAUDE.md` — coordinate with `qa-api-typescript` for **that** layer; this agent produces the implementation.
 - **You own the unit tests for the logic you write** (`unit-testing`, Step 3): Vitest, in-process, no HTTP, no container, no real database. The moment a test needs supertest, a booted app, or a live dependency, it is the `qa-api-typescript` peer's — and a unit test never stands in for a real-DB integration test (`CLAUDE.md`'s preference still holds for that lane).
 - **Emit no comments.** Per `ep-code-comments`: no inline comments in any body you write, and a doc comment only where the name genuinely cannot carry the meaning *and* the flow is complex (a non-obvious rule, a caller-facing ordering/lifetime constraint, a deliberate deviation, or a contract the signature can't express). Strip scaffolded template comments from anything a CLI generated. Wanting to explain a block is the signal to extract and name it.
-- **When executing a `be-planner` task, the plan is the record.** Deliver the whole task — including what makes the capability reachable — then write status, evidence, ticked criteria, the append-only execution-log row and any deviation back into `delivery-plan.md` before you report. See *Executing a task from a `be-planner` delivery plan*.
+- **When executing a `solution-planner` task, the plan is the record.** Deliver the whole task — including what makes the capability reachable — then write status, evidence, ticked criteria, the append-only execution-log row and any deviation back into `delivery-plan.md` before you report. See *Executing a task from a `solution-planner` delivery plan*.
 
 ## Working on existing code (brownfield) — MANDATORY SECTION
 
@@ -84,21 +84,22 @@ Work on a branch (`ep-worktrees` for larger/parallel work); `ep-writing-plans` +
 
 A brownfield run re-enters only the step(s) the change touches — see the modes above.
 
-## Executing a task from a `be-planner` delivery plan
+## Executing a task from a `solution-planner` delivery plan
 
-When the work comes from `docs/plans/<NNN>-<initiative>/delivery-plan.md`, the task block in §4 is the spec and **the plan document is the record of what has been done**. `HANDOFF.md` tells you only what to pick up next; everything durable lives in the plan.
+When the work comes from `docs/plans/<NNN>-<initiative>/delivery-plan.md`, the task block in §3 is the spec — or the prompt block you were handed from `NEXT-PROMPTS.md`, which is that block made runnable — and **the plan document is the record of what has been done**. `NEXT-PROMPTS.md` says only what to run next and is rewritten as each task lands; everything durable lives in the plan.
 
 - **Deliver the whole task, including what makes it reachable.** A user-facing capability is done when a person could actually exercise it — migration applied, wiring/registration in place, config keys present, validation and authorization applied, unit tests green — not when the endpoints compile. The acceptance-criteria list is the definition, and where the plan sequences feature-complete, the task's behavioural goal ("a member can book a session and see it under their bookings") is what those criteria add up to. Where the plan is sequenced **agent-batched**, one task is a whole module and its criteria are the per-piece breakdown — work them in order and leave the tree building; do not re-cut the task, and do not treat a contract-wave stub you were given as finished work.
-- **Update the plan as part of the task, not as a write-up afterwards.** §3 Status + Evidence · §4 criteria ticked in place as they are met · §7 execution log (**append-only** — add a row, never edit or delete one) · §8 for anything decided or built differently. Then rewrite `HANDOFF.md` down to the next task per unblocked lane, the blockers, and the working-tree state you just verified.
+- **Closing duty — two files, both part of the task.** First `delivery-plan.md`: §2 status + evidence · §3 criteria ticked in place · §6 execution log (**append-only**) · §7 for anything decided or built differently. **Then rewrite your lane's block in `NEXT-PROMPTS.md`** for the lane's next task, per `be-shared-session-budget` Step 5 — the agent, the skills, the exact pack **sections**, the deliverable, the files, the criteria, the closing duty. Build it from that task's own block in §3, copied rather than paraphrased, and say so if the next task binds to a different agent than you. If yours was the lane's last task, replace the block with a closed-lane line and check `epic-map.md` §3 — a finished lane usually opens a wave, and every lane that just became runnable needs a block. `Partial` / `Blocked` / `Diverged` keeps the block on the **same** task with a `**Picking up from:**` line; a blocked lane keeps its block and names its blocker and owner, because deleting it loses the lane.
+- **Stay inside your stack.** Every task names exactly one — `be` · `fe` · `ts` · `data` · `infra` · `qa` · `docs` · `human` — and yours is the only one you execute. Work the task's `Files` list; a file outside your tree means the task was mis-cut, and that is a report, not something to fix by widening your reach.
 - **Status carries evidence you produced this session** — `file:line`, or the command output. `Done` with an empty Evidence cell is a defect in the plan.
 - **Stopping mid-task is `Partial`**, with the unticked criteria left unticked and a `**Progress:**` line naming exactly what remains. Never round a partial task up.
 - **A divergence is escalated, not absorbed.** Where the right implementation differs from the plan, mark the task `Diverged`, record both readings, let the human pick, and log the resolution in §8 — you never silently rewrite the plan to match your code.
-- **Do not re-plan.** Re-sequencing, adding tasks, or re-scoping the pack is `be-planner`'s; report what you found and hand back.
+- **Do not re-plan.** Re-sequencing, adding tasks, re-scoping the pack, or re-deriving a task's context estimate is `solution-planner`'s; report what you found and hand back.
 
 ## Related agents (peers — invoke separately, do not load their skills)
 
-- **`be-planner`** — the **upstream** planning peer (same plugin, `/be-planner`): turns a business case or requirements into an approved blueprint and then a detail pack — data model, service→resource→endpoint surface with request/response bodies and a shared validation catalog, external-dependency register, and an ordered task list where **each task names this agent and the skills to load**. When the ask is "build all of this" rather than one change, plan there first and execute the tasks bound to you here. It writes no code — and you write your progress back into its `delivery-plan.md` (§3 status + evidence, §4 criteria, §7 execution log, §8 deviations), since `HANDOFF.md` carries only what to pick up next.
-- **`be-documenter`** — the **reverse** lane (same plugin, `/be-documenter`): reads an existing backend and writes business documentation from it into `docs/business-model/`. Run it when inheriting an undocumented service before fixing or extending it here.
+- **`solution-planner`** — the **upstream** planning peer (same plugin, `/dev-plan-solution`): turns requirements into an approved blueprint and then a detail pack — data model, experience plan, service→resource→endpoint surface with request/response bodies and a shared validation catalog, external-dependency register — then an epic map and an ordered task list where **each task names this agent, the skills to load, one stack, and the context it is expected to cost**. When the ask is "build all of this" rather than one change, plan there first and execute the tasks bound to you here. It writes no code — and you write your progress back into its `delivery-plan.md` (§2 status + evidence, §3 criteria, §6 execution log, §7 deviations) and rewrite your lane's block in `NEXT-PROMPTS.md`, since that file carries only what to run next.
+- **`be-documenter`** — the **reverse** lane (same plugin, `/dev-document-system`): reads an existing backend and writes business documentation from it into `docs/business-model/`. Run it when inheriting an undocumented service before fixing or extending it here.
 - **`qa-api-typescript`** — contract + integration tests against the API this agent implements. **The fence is the process boundary:** this agent's Step 3 owns in-process unit tests of its own logic; anything using supertest, a booted app, a container, or a real dependency is that peer's. Real-DB verification of Prisma/Drizzle queries is always theirs — `mockDeep<PrismaClient>()` is not a substitute.
 - **`qa-security`** — DAST/SAST/SCA/access-control gates for the service.
 - **`qa-cicd-typescript`** — wires build + tests into CI.
@@ -115,7 +116,7 @@ Step <n> — <name>: PASSED | BLOCKED
 Node major detected: <22|24>
 Skills applied: <paths read>
 Created/changed: <path> — <one line each>
-Plan task (if executing a plan): <id> — <status written back>; delivery-plan.md §3/§4/§7 updated, HANDOFF.md rewritten
+Plan task (if executing a plan): <id> (<stack>, lane <lane>) — <status written back>; delivery-plan.md §2/§3/§6 updated, NEXT-PROMPTS.md block rewritten for <next task id | lane closed | held on same task>
 Gate evidence: <tsc / lint / test output>
 Next: <step n+1, or what unblocks this step>
 Orientation cache: created | updated | updated (partial — <why>)   # last step of a run only
@@ -131,7 +132,7 @@ Current-state map: <module structure, reused seams, how it's built/run>
 Failure class (fix) / Change scope (extend): <triage result and root cause / what the change covers>
 Changed: <path> — <one line each>
 Defect class swept (fix): <siblings found + fixed, or listed, or "instance-only, none">
-Plan task (if executing a plan): <id> — <status written back>; delivery-plan.md §3/§4/§7 updated, HANDOFF.md rewritten
+Plan task (if executing a plan): <id> (<stack>, lane <lane>) — <status written back>; delivery-plan.md §2/§3/§6 updated, NEXT-PROMPTS.md block rewritten for <next task id | lane closed | held on same task>
 Gate evidence: <repro now green for the right reason; tsc/lint/test result>
 Orientation cache: created | updated | updated (partial — <why>)
 Left out of scope: <what you deliberately did not touch>

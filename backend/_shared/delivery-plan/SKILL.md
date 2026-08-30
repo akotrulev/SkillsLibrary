@@ -1,43 +1,49 @@
 ---
 name: be-shared-delivery-plan
-description: Use when a planned backend (blueprint + data model + API surface + integrations) needs turning into an ordered task list — one flat sequence of tasks, each with a deliverable and an executing agent, plus named streams, a HANDOFF.md pointer, and a reconcile against half-built code. Triggers "what order do we build this in", "turn the plan into tasks", "pick up where we left off". Do NOT use to write code (`be-<stack>`), run a plan (`ep-executing-plans`), or audit code vs spec (`code-auditor`).
+description: Use when a planned build (blueprint + data model + API surface + integrations + epic map) needs turning into an ordered task list — one flat sequence of tasks, each with a deliverable, one stack, one executing agent and a context estimate, plus named streams derived from the epic map and a reconcile against half-built code. Triggers "what order do we build this in", "turn the plan into tasks", "pick up where we left off". Do NOT use to write code (`be-<stack>`), size tasks or write the next prompts (`be-shared-session-budget`), decide what runs in parallel at epic level (`be-shared-epic-map`), run a plan (`ep-executing-plans`), or audit code vs spec (`code-auditor`).
 ---
 
 # Delivery Plan — the ordered, agent-bound task list
 
-The artifact that turns four design documents into work. Two things make it different from a generic plan:
+The artifact that turns the design pack into work. Three things make it different from a generic plan:
 
-- **Every task names its executor** — an exact agent name from this library plus the skills it should load. That binding is what lets the plan run unattended, inline or through Mission Control.
-- **It survives interruption.** `HANDOFF.md` says what to pick up next, and the reconcile procedure re-derives the state from the code when the plan's own record is stale — because a plan whose status you have to trust is a plan you have to redo.
-- **It is the progress record.** Once implementation starts, status, evidence, ticked criteria and an append-only execution log are maintained **in this document** — not only in `HANDOFF.md`, and not only in someone's memory of the session. See *Tracking execution in the plan document*.
+- **Every task names its executor and its stack** — exactly one stack, exactly one agent name from this library, plus the skills it should load. That binding is what lets the plan run unattended, inline or through Mission Control, and it is what makes a task handable to a single agent without it wandering across a boundary it does not own.
+- **It survives interruption.** `NEXT-PROMPTS.md` says what to run next — as a prompt, not a description — and the reconcile procedure re-derives the state from the code when the plan's own record is stale, because a plan whose status you have to trust is a plan you have to redo.
+- **It is the progress record.** Once implementation starts, status, evidence, ticked criteria and an append-only execution log are maintained **in this document** — not only in `NEXT-PROMPTS.md`, and not only in someone's memory of the session. See *Tracking execution in the plan document*.
 
-**The unit of work is a task, and the plan is one flat list of them.** Tasks are numbered `T1…Tn` in the order they are done, and there is no grouping layer above them — no phases, no slices, no stages, no milestones. What used to be carried by a grouping is carried by three things on the task itself: its position in the order, its `Depends on` edges, and its stream. Use the word **task** everywhere — in this document, in `HANDOFF.md`, in status reports, and when talking to the human.
+**The unit of work is a task, and the plan is one flat list of them.** Tasks are numbered `T1…Tn` in the order they are done, and there is no grouping layer above them — no phases, no slices, no stages, no milestones. What used to be carried by a grouping is carried by four things on the task itself: its position in the order, its `Depends on` edges, its stream, and the epic and story it serves. Use the word **task** everywhere — in this document, in `NEXT-PROMPTS.md`, in status reports, and when talking to the human.
 
 **Every task states one deliverable** — the observable thing that exists once it is done. See Step 4.
+
+**Every task belongs to exactly one epic, one story, one stack and one agent, and is executed in one session.** The epic and story come from `epics.md` / `stories.md` by way of `epic-map.md`; the stack is one of `be` · `fe` · `ts` · `data` · `infra` · `qa` · `docs` · `human`; and the session estimate is derived by `be-shared-session-budget` while the task is being authored, not measured afterwards.
+
+> **A task that touches both the API tree and the web tree is two tasks.** There is no mixed task at any size, and no estimate justifies one.
 
 And one property decides the shape of the sequence: **how the plan will be executed**. User-facing work is sequenced *feature-complete* by default — the tasks for one capability run consecutively and the last of them makes the capability usable, rather than a layer being finished across every area first — but a plan one operator will run in back-to-back batches is sequenced *agent-batched* instead: a contract wave, then one batch per backend module, then one per frontend area. See Step 2.
 
 **Announce at start:** "I'm using the `be-shared-delivery-plan` skill to sequence the work."
 
-**Prerequisites:** `blueprint.md` (approved), `data-model.md`, `api-surface.md`, `integrations.md`. Sequencing without the detail pack produces task titles, not tasks.
+**Prerequisites:** `blueprint.md` (approved), `data-model.md`, `api-surface.md`, `integrations.md`, and `epic-map.md` — whose lanes and waves this plan's streams and order are derived from, not re-decided. Sequencing without the detail pack produces task titles, not tasks; sequencing without the epic map produces a plan that is one lane wide.
 
 ## When to use
 
-- Step 6 of a `be-planner` run
+- Step 7 of a `solution-planner` run
 - `RESUME` — reconciling an existing plan against partially-built code and re-sequencing what remains
 - `EXTEND` — appending tasks for a new functional area
 
 ## When NOT to use
 
-- Executing the plan → `ep-executing-plans` (inline, the default) or the named `be-<stack>` agent per task
+- Executing the plan → `ep-executing-plans` (inline, the default) or the named stack agent per task
+- Deciding which epics run at the same time → `be-shared-epic-map`, which this skill consumes
+- Sizing the tasks and writing `NEXT-PROMPTS.md` → `be-shared-session-budget`, which runs on this skill's output
 - A generic non-backend multi-step task → `ep-writing-plans`
 - Auditing what got built against what was specified → `code-auditor`
 
 ## Output
 
-**`docs/plans/<NNN>-<initiative>/delivery-plan.md`** and **`docs/plans/<NNN>-<initiative>/HANDOFF.md`**.
+**`docs/plans/<NNN>-<initiative>/delivery-plan.md`**. `NEXT-PROMPTS.md` sits beside it and is written by `be-shared-session-budget` from these tasks — this skill produces the tasks and points at that file; it does not author it.
 
-**A filled golden example is at `references/example-delivery-plan.md`** (the shared `001-workshop-booking` pack — shapes normative, domain content illustrative); the filled `HANDOFF.md` example is inside `references/handoff-template.md`.
+**A filled golden example is at `references/example-delivery-plan.md`** (the shared `001-workshop-booking` pack — shapes normative, domain content illustrative); the paired `NEXT-PROMPTS.md` example is in `backend/_shared/session-budget/references/next-prompts-template.md`.
 
 ---
 
@@ -62,6 +68,16 @@ Do not brainstorm tasks. Read them out of the detail pack, in this order — the
 
 Anything not traceable to a row above is either missing from the design pack (go add it there) or is not needed.
 
+**Then bind every task to its epic, its story and its stack**, before anything else is written about it:
+
+- **Epic** — from `epic-map.md` §1. Foundation and contract tasks are `E0`, the planner-created epic that carries no stories; every other task names an `E` id from `epics.md`.
+- **Story** — the `US` id from `stories.md` the task serves. `E0` tasks have no story and say `—`. A task under `E1..En` that serves no story is either work the backlog is missing (go add it there) or work nobody asked for.
+- **Stack** — exactly one of `be` (backend, database, migrations) · `fe` (the web client) · `ts` (shared TypeScript packages — CLI, MCP, generated clients) · `data` · `infra` · `qa` · `docs` · `human`.
+
+**One stack per task is a hard rule, and it is what makes the batching mechanical rather than a judgement call.** A row above that yields work in two trees yields two tasks: the endpoints are `be`, the screens that call them are `fe`, and the generated client between them is `ts`. Splitting them is not a cost — the tasks of one stack within one epic are already adjacent, so the split costs an ordering, not a session.
+
+Where a stack-cut task cannot be demonstrated end to end on its own — a backend task whose screen arrives two tasks later — say so in its `Out of scope` rather than pretending the capability landed, and have the contract-first side return an explicit not-implemented response, never a fake success.
+
 **A user-facing capability is not a row — it is the sum of several.** Where the initiative delivers something a person does (place an order, book a session, reset a password), the table gives you the *pieces*; what makes them a feature is that all of them exist at once. Before sequencing, write down, per capability, the full set it needs to be usable end to end:
 
 > schema + entities + the domain rules → the service/orchestration → the endpoints and their request/response contracts → the validation & error deltas → the authorization rule → registration and wiring (DI, route module, config keys) → unit tests → the screens that carry it (`experience-plan.md`'s journey for the capability) → and whatever makes it **reachable**: the migration applied, seed/reference data, a feature flag defaulted to on, the OpenAPI asset when a consumer is generated from it.
@@ -72,8 +88,9 @@ That set is what Step 2 sequences. A capability missing any of it has been plann
 
 **One flat sequence, `T1…Tn`, in the order the work is done.** No grouping layer sits above the tasks: what makes the order safe is that each task's inputs are produced by tasks above it, and that every such prerequisite is written on the task as a `Depends on` edge. There is no barrier to hide behind — **adjacency is not a dependency claim, so an edge that is not written down does not exist.**
 
-The order must satisfy four things:
+The order must satisfy five things:
 
+- **The order is a valid serialization of `epic-map.md`'s dependency graph.** No task is ordered before anything it transitively depends on, cross-epic edges included. That is the whole constraint the epic map places on the order — **it does not require the waves to be worked one at a time.** A wave-3 lane's task may sit above a wave-2 lane's task when its own dependencies are already met, and under feature-complete sequencing it usually will: the order is the single sequence one person would work through, while the waves are the claim about what *could* be open at once, which the streams table carries. Where a dependency edge makes the order impossible, the epic map is wrong — report it and fix it there.
 - **Startable at its position.** Everything a task imports, calls, migrates against, registers with, or configures exists by the time its turn comes. If it does not, the task is in the wrong place — move it, don't annotate it.
 - **Working tree at every task boundary.** Each task ends with the project building and its tests green, so the plan can stop after any task and what exists still runs. A task that leaves the build red until the next one lands is not a boundary; the two are one task.
 - **Dependencies point backwards, always.** A `Depends on` naming a task with a higher order is a contradiction, and it is reported as a plan defect rather than resolved by reordering the ids.
@@ -149,7 +166,12 @@ Three rules keep it honest:
 
 ### Step 3 — Declare the streams
 
-A **stream** is a named lane. Tasks in one stream run strictly one after another; different streams run at the same time. The question to answer is **"which lanes does this work actually have, and why is each one internally sequential?"**, which is answerable from the file sets you just wrote down.
+A **stream** is a named lane. Tasks in one stream run strictly one after another; different streams run at the same time. The question to answer is **"which lanes does this work actually have, and why is each one internally sequential?"** — and `epic-map.md` §2 has already answered it at story altitude.
+
+**Derive the streams from the epic map's lanes; do not re-decide them.** One epic-map lane is one stream, with the same id and the same "internally sequential because" claim, now defended with the task-level file sets instead of the story-level ones. Two things follow:
+
+- **A stream that is not an epic-map lane is a defect in one of the two documents.** Say which — usually the map missed a split the task file sets make obvious, and the fix is upstream in `epic-map.md`.
+- **The one-stack rule usually splits a lane in two.** An epic-map lane covering a story's backend and its screens becomes a `be` stream and an `fe` stream, ordered against each other by a `Depends on` edge rather than merged. Name them `<lane>-api` and `<lane>-ui`, and record the split back into `epic-map.md` §2 so the two documents keep agreeing.
 
 Give the plan a streams table, before the progress table:
 
@@ -179,8 +201,10 @@ Defend each lane concretely — "T10 touches `src/Scheduling/*`, T11 touches `sr
 
 **Deliverable:** the five Orders endpoints are live and reachable — a caller with the `orders:write`
 permission can place, cancel and close an order, and list or get their own.
+**Epic:** `E2` Ordering · **Story:** `US7` · **Stack:** `be`
 **Agent:** `be-dotnet` · **Skills:** `be-dotnet-pattern-writer`, `be-dotnet-database-code`, `be-dotnet-unit-testing`
-**Stream:** `ordering` · **Order:** 12
+**Stream:** `ordering-api` · **Order:** 12
+**Est. context:** ~110k — 6 files created, 1 modified, 3 skills, 4 pack sections
 **Depends on:** T4 (schema), T9 (auth wiring), T10 (shared DTOs + error middleware)
 **Files:**
 - Create: `src/Ordering/Domain/Order.cs`, `src/Ordering/Domain/OrderLine.cs`
@@ -202,11 +226,14 @@ endpoints in `api-surface.md` §5 (list, get, place, cancel, close), with the st
 - [ ] Unit tests cover every validation branch and every state transition
 - [ ] `dotnet build` clean, 0 warnings; `dotnet test` green; `dotnet format --verify-no-changes`
 
-**Out of scope:** contract/integration tests (`qa-api-dotnet`), the stock-reservation client (T18).
+**Out of scope:** the Orders screens (T19, stack `fe`, same epic — the endpoints are not reachable from
+the UI until it lands), contract/integration tests (`qa-api-dotnet`), the stock-reservation client (T18).
 ```
 
 Rules:
 
+- **`Epic`, `Story` and `Stack` are on every task, or on none.** `Epic` is an `E` id from `epic-map.md` (`E0` for foundation and contract work); `Story` is a `US` id from `stories.md`, or `—` for an `E0` task; `Stack` is exactly one of `be` · `fe` · `ts` · `data` · `infra` · `qa` · `docs` · `human`. A task naming two stacks is two tasks, reported as a plan defect rather than resolved by picking the larger one. A `Story` id that does not exist in `stories.md`, or an `Epic` that does not exist in `epic-map.md`, is a defect in the citation, not licence to invent the backlog entry.
+- **`Est. context` is derived by `be-shared-session-budget` while the task is authored**, and it carries its drivers — `~110k — 6 files created, 1 modified, 3 skills, 4 pack sections` — so a reader can tell a 110k of many small files from a 110k of one large one. It is a target, never a gate: one deliverable, one stack and one agent, and a green tree at the boundary all outrank it. Re-derive it whenever the task's `Files`, `Skills` or cited sections change; a stale estimate is worse than none, because it is a number someone will trust.
 - **`Deliverable` is the one observable thing that exists when the task is done**, stated as a fact about the world rather than as an activity. "Implement the Orders service" is not a deliverable; "`POST /orders` accepts a valid order and returns `201` with the created id" is. It is one line, it is checkable by someone who did not do the work, and it is the first thing written — a task whose deliverable you cannot state is not yet one task. The acceptance criteria say how it is verified in detail; the deliverable says what it *is*. Where the task is the last of a capability's run, its deliverable is the behavioural sentence for the whole capability (see Step 2).
 - **`Agent` is an exact catalog name**, picked from the routing-map catalog in `blueprint.md` (authored by `be-shared-solution-blueprint` — that catalog is the single authoritative list; `be-dotnet`, `data-architect`, `qa-api-<stack>` are the shape). An invented name is the most damaging defect in the pack, because Mission Control binds on this string. Same for skill names. When the chosen stack has no skill for a concern the task needs (e.g. `be-node` currently ships no service-side auth skill), bind the task to the stack agent anyway, note the gap in the Skills cell (`— no <concern> skill for this stack; the agent works from the design pack`), and add an open question — never invent a skill name to fill the hole.
 - **Human prerequisite tasks use `Agent: human`.** Provisioning work from `integrations.md`'s blocking unknowns — accounts, tenants, sandbox access — is a real task with a real id, but its executor is a person: the Agent cell is the literal `human` and the task block carries an `**Owner:**` line naming who does it. `human` is exempt from catalog-name resolution, and Mission Control treats these tasks as gates to satisfy, never lanes to schedule.
@@ -214,7 +241,7 @@ Rules:
 - **`Stream` is one of the ids declared in Step 3**, and `Order` is that task's slot in the plan-wide sequence. **Every task carries both, or no task does** — half-authored lanes are rejected rather than completed, because back-filling the rest would scatter tasks into lanes nobody planned. A `Stream` naming an undeclared lane and two tasks claiming one `Order` are both reported as plan defects, and the undeclared lane also costs you the lanes you did author: the whole plan falls back to derived ones.
 - **Acceptance criteria are checkable**, and they cite the design pack by section rather than restating it. "Handles errors properly" is not a criterion; "returns the documented `type` slug for each of the three deltas" is.
 - **The build/test command is the project's own**, taken from the orientation pass — never a guessed default.
-- **Size a task by coherence, not by volume.** A task is one thing, done once — a resource, a migration set, an external client, a capability's endpoint surface — and it is exactly as big as that thing is. File counts and criterion counts are not a limit: work that genuinely needs fourteen files is one task, and cutting it into "the entity" and "the service" produces two tasks neither of which can be verified alone. **The deliverable is the test**: one task, one deliverable. Two deliverables means two tasks; no statable deliverable means it is a fragment of one. **Split when it stops being one thing**: it delivers two independent behaviours; a natural intermediate point exists where the work is meaningfully complete *and* checkable on its own; part of it is blocked while the rest is not; or two different agents own the halves. Every piece of a split must still build, still pass its own tests, and still be independently verifiable — a split that leaves the tree broken between the pieces was a bad seam, and the two pieces are one task. When a task is large, its **acceptance-criteria list is its step breakdown**, ticked off in place as the work lands.
+- **Size a task by coherence, not by volume.** A task is one thing, done once — a resource, a migration set, an external client, a capability's endpoint surface — and it is exactly as big as that thing is. File counts and criterion counts are not a limit: work that genuinely needs fourteen files is one task, and cutting it into "the entity" and "the service" produces two tasks neither of which can be verified alone. **The deliverable is the test**: one task, one deliverable. Two deliverables means two tasks; no statable deliverable means it is a fragment of one. **Split when it stops being one thing**: it delivers two independent behaviours; a natural intermediate point exists where the work is meaningfully complete *and* checkable on its own; part of it is blocked while the rest is not; or two different agents own the halves. Every piece of a split must still build, still pass its own tests, and still be independently verifiable — a split that leaves the tree broken between the pieces was a bad seam, and the two pieces are one task. When a task is large, its **acceptance-criteria list is its step breakdown**, ticked off in place as the work lands. The session estimate informs this and never decides it: under ~80k, look at the next task in the same story and same stack and merge only if the result still states one deliverable; over ~150k, annotate the task and name its natural split point. A task that overshoots with one deliverable, one stack and a green boundary is a large task correctly authored — label it, do not file it as a defect.
 - **A batch is still one task, and it still states one deliverable.** Under agent-batched sequencing a task is the whole module or the whole screen area, its acceptance-criteria list is the per-piece breakdown (one criterion per endpoint, per screen, per rule), and its deliverable is the one sentence that covers the set — *"every endpoint under `/bookings` implements its documented behaviour and validation"*, not a list of five. A batch whose deliverable takes two sentences was two batches; a batch of unrelated leftovers grouped because one agent happens to own them is a bucket, not a task, and it is split.
 - **Frontend tasks cite their screens.** A task bound to `fe-react` / `fe-blazor` names the `experience-plan.md` screen ids it delivers (`S3`, `S4`) and the journey it completes (`J1`), lists `design-ux-patterns` in its skills, and carries `experience-plan.md` §6's responsiveness budget as acceptance criteria verbatim; the capability's last task is usually this one, and its deliverable is the journey's behavioural sentence.
 - **`Out of scope` per task** — mostly to keep the executing agent from wandering into a peer's lane.
@@ -222,19 +249,25 @@ Rules:
 
 ### Step 5 — The progress table
 
-The scannable index, and the thing `HANDOFF.md` points at. Rows sorted by `#`, which makes the sequence auditable at a glance — a repeat or a gap is visible without cross-reading the task blocks, and the whole plan reads top to bottom as "what gets delivered, in what order". `#` **is** the plan-wide `order` Mission Control consumes; the task blocks repeat it as `Order:`, and the two must agree. The `Deliverable` cell is the task block's deliverable line, shortened to fit — same claim, fewer words:
+The scannable index, and the row a `NEXT-PROMPTS.md` block is built from. Rows sorted by `#`, which makes the sequence auditable at a glance — a repeat or a gap is visible without cross-reading the task blocks, and the whole plan reads top to bottom as "what gets delivered, in what order". `#` **is** the plan-wide `order` Mission Control consumes; the task blocks repeat it as `Order:`, and the two must agree. The `Deliverable` cell is the task block's deliverable line, shortened to fit — same claim, fewer words:
 
-| # | Task | Stream | Title | Deliverable | Agent | Depends on | Status | Evidence |
-|---|---|---|---|---|---|---|---|---|
-| 12 | T12 | `ordering` | Orders resource | The five Orders endpoints are live and reachable | `be-dotnet` | T4, T9, T10 | Not started | — |
+| # | Task | Epic | Story | Stack | Stream | Title | Deliverable | Agent | Est. | Depends on | Status | Evidence |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| 12 | T12 | `E2` | `US7` | `be` | `ordering-api` | Orders resource | The five Orders endpoints are live and reachable | `be-dotnet` | ~110k | T4, T9, T10 | Not started | — |
 
-Status vocabulary — six values, no others: **Not started · In progress · Done · Partial · Diverged · Blocked**. `Evidence` holds the `file:line` or command output that justifies a `Done` or `Partial`. An empty Evidence cell on a `Done` row is a defect in the plan, not a formatting gap.
+Status vocabulary — six values, no others: **Not started · In progress · Done · Partial · Diverged · Blocked**. `Evidence` holds the `file:line` or command output that justifies a `Done` or `Partial`. An empty Evidence cell on a `Done` row is a defect in the plan, not a formatting gap. The `Est.` cell repeats the task block's `Est. context` figure and must agree with it; the drivers stay on the block.
 
-### Step 6 — Write `HANDOFF.md`
+The table is scannable by epic and by stack on purpose: **every runnable lane's next task is one filter away**, which is exactly what `be-shared-session-budget` needs to rewrite a `NEXT-PROMPTS.md` block without re-reading the whole plan.
 
-The pointer file — see `references/handoff-template.md` for the full template and its rules. **It answers one question: what does the next agent do next.** The next unblocked task per lane, where to start inside it, what is blocking, and the working-tree state that goes stale fastest. It is **rewritten each session, never appended**.
+### Step 6 — Point at `NEXT-PROMPTS.md`
 
-**Progress does not live here.** Status, evidence, ticked criteria, the execution log, the decisions and the deviations all live in `delivery-plan.md` — one record, in the document that defines the work. The handoff cites task ids and never restates their history; anything it would duplicate is a line the two files will eventually disagree about.
+**This skill does not author it.** `be-shared-session-budget` writes `NEXT-PROMPTS.md` from these tasks — one ready-to-paste prompt block per lane that is runnable right now, with the exact agent, the exact skills, the exact pack **sections**, the deliverable, the files, the criteria, and the closing duty. What this skill owes it is what a block is built from: a task block with `Epic` / `Story` / `Stack` / `Agent` / `Skills` / `Files` / `Est. context` filled in, and a streams table that says which lanes exist.
+
+Close this document's header note by naming that file, so an executing agent knows both halves of its duty: **the record goes in `delivery-plan.md`; the next prompt goes in `NEXT-PROMPTS.md`.**
+
+**Progress lives here, and only here.** Status, evidence, ticked criteria, the execution log, the decisions and the deviations all stay in this document. `NEXT-PROMPTS.md` is rewritten as each task lands and holds nothing durable; where the two disagree, this plan is right.
+
+There is no `HANDOFF.md`. It answered the same question in prose and is retired — two files answering "what next" is one file and one thing that drifts.
 
 ### Step 7 — The Mission Control section
 
@@ -259,25 +292,30 @@ pieces belong in the split task's own lane, and each needs its own deliverable.
 
 Mission Control's planner consumes exactly these fields — run-level `streams[]` (`id · name · description`), per-task `id · streamId · order · title · deliverable · intent · acceptanceCriteria[] · agent · skills[] · files[] · dependsOn[]`, and `openQuestions[]` with 2–4 options each and one recommended. Writing them in that vocabulary is the entire compatibility requirement.
 
+**`epic`, `story`, `stack` and `estContext` are additive** — MC ignores fields it does not know, so carrying them costs nothing and losing them costs the whole epic and sizing story on a round trip. Write them per task alongside the fields above.
+
 **Streams are mandatory, not an optimization.** With no grouping level in the plan, `streams[]` + `order` + `dependsOn[]` are the whole concurrency story: the streams say what may run at the same time, and the dependencies say what must not. A pack that omits them leaves MC nothing to derive lanes from but the raw sequence, and it will run the plan strictly serially — correct, but one lane wide. Author the streams.
 
 ---
 
 ## Tracking execution in the plan document
 
-Once implementation starts, **this document is the record of what has been done.** `HANDOFF.md` says only what to do next and is rewritten each session; the plan carries the durable per-task history and is never rewritten backwards. Where the two touch, the plan is the record.
+Once implementation starts, **this document is the record of what has been done.** `NEXT-PROMPTS.md` says only what to run next and is rewritten as each task lands; the plan carries the durable per-task history and is never rewritten backwards. Where the two touch, the plan is the record.
 
 The executing agent (or the human) updates the plan **as part of the task**, not as a write-up afterwards:
 
-| When | Update in `delivery-plan.md` |
-|---|---|
-| Starting a task | Progress row → `In progress`; one execution-log row |
-| Meeting an acceptance criterion | Tick its checkbox in the task block, in place |
-| Finishing a task | Progress row → `Done`, with `file:line` or command output in the Evidence cell; every criterion ticked; one execution-log row |
-| Stopping mid-task | Progress row → `Partial`, plus a `**Progress:**` line in the task block naming what remains — the unticked criteria are that list |
-| Building it differently | Progress row → `Diverged`; both readings in the task block; the resolution recorded in §7 once the human picks |
-| Hitting a blocker | Progress row → `Blocked`, naming what on and who owns it; one execution-log row |
-| Finishing a capability's last task | Record that its behavioural deliverable now holds, with how it was checked |
+| When | Update in `delivery-plan.md` | And in `NEXT-PROMPTS.md` |
+|---|---|---|
+| Starting a task | Progress row → `In progress`; one execution-log row | — |
+| Meeting an acceptance criterion | Tick its checkbox in the task block, in place | — |
+| Finishing a task | Progress row → `Done`, with `file:line` or command output in the Evidence cell; every criterion ticked; one execution-log row | Replace this lane's block with the next task's prompt |
+| Finishing a lane's last task | As above | Replace the block with a closed-lane line; check `epic-map.md` — a finished lane usually opens a wave, and every newly runnable lane needs a block |
+| Stopping mid-task | Progress row → `Partial`, plus a `**Progress:**` line in the task block naming what remains — the unticked criteria are that list | Block stays on the **same** task, with a `Picking up from:` line |
+| Building it differently | Progress row → `Diverged`; both readings in the task block; the resolution recorded in §7 once the human picks | Block stays on the same task until the human resolves it |
+| Hitting a blocker | Progress row → `Blocked`, naming what on and who owns it; one execution-log row | Block stays, and names the blocker and its owner. Deleting it loses the lane |
+| Finishing a capability's last task | Record that its behavioural deliverable now holds, with how it was checked | — |
+
+The `NEXT-PROMPTS.md` half is `be-shared-session-budget`'s Step 5, and it is part of finishing the task rather than a write-up afterwards. The block is built from the next task's own block in §3 — deliverable, files, criteria and out-of-scope copied, never paraphrased.
 
 Rules:
 
@@ -287,7 +325,6 @@ Rules:
 - **Decisions and deviations are recorded in the plan** (§7), because they outlive the session that made them. A deviation that lives only in a rewritten handoff is gone by Monday.
 - **Never delete a task that turned out to be unnecessary.** Mark it, say why, keep the id. A task that vanishes reads as a task that was forgotten.
 - **The status is still a lead to a cold agent.** A `Done` written last month is re-verified against the code on a RESUME, per the reconcile procedure below. Recording status well makes that reconcile cheap; it does not replace it.
-- **Regenerate `delivery-plan-explained.md` when the plan is re-sequenced**, not on every status tick — the companion explains the sequence, not the progress.
 
 ---
 
@@ -295,7 +332,7 @@ Rules:
 
 Run this **before** re-sequencing anything, when a plan and partially-built code both exist. It is the mode this skill earns its keep in.
 
-**The governing rule: the plan is a lead, not evidence.** A checked box, a green pipeline, a commit message, this plan's own execution log, and a previous `HANDOFF.md` are all claims. Status is assigned only after reading the code **this session**.
+**The governing rule: the plan is a lead, not evidence.** A checked box, a green pipeline, a commit message, this plan's own execution log, and a previous `NEXT-PROMPTS.md` block are all claims. Status is assigned only after reading the code **this session**.
 
 1. **Read the design pack**, so you know what was supposed to exist.
 2. **Walk each task** in the progress table and look for its artifacts — the files it names, the migration, the endpoint, the registration.
@@ -312,7 +349,7 @@ Run this **before** re-sequencing anything, when a plan and partially-built code
 4. **Escalate every divergence.** Usually the code is right and the plan is stale — but you never silently rewrite the plan to match, because the other possibility is a defect. Present both readings, recommend one, and record the resolution in the plan's §7 Decisions & deviations.
 5. **Sweep the class.** If one task diverged because the plan assumed a convention the project does not use, every other pending task assuming it is also wrong. Fix them together.
 6. **Check the baseline.** Does the repo build and do its tests pass *right now*? A plan that assumes a green baseline while the build is red is wrong from task one. Report a red state as a finding — it is not yours to silently fix.
-7. **Re-sequence what remains**, then rewrite `HANDOFF.md`.
+7. **Re-sequence what remains**, then have `be-shared-session-budget` re-derive the estimates that changed and rewrite `NEXT-PROMPTS.md` from what you found — not from what it previously said.
 
 Report the reconcile as counts plus the divergences in full:
 
@@ -332,7 +369,7 @@ Diverged — T9 (auth wiring): plan specifies policy-based authorization;
 # <Initiative> — Delivery Plan
 
 **Date:** YYYY-MM-DD · **Written by:** `be-shared-delivery-plan`
-**Pack:** `./blueprint.md` · `./data-model.md` · `./experience-plan.md` (when user-facing) · `./api-surface.md` · `./integrations.md`
+**Pack:** `./epics.md` · `./stories.md` · `./blueprint.md` · `./data-model.md` · `./experience-plan.md` (when user-facing) · `./api-surface.md` · `./integrations.md` · `./epic-map.md`
 **Target repo:** `<path>` · **Stack:** <stack + version> · **Build/test:** `<the project's own commands>`
 **Sequencing shape:** feature-complete | agent-batched | platform-first — <the execution model that selected it>
 
@@ -341,18 +378,21 @@ Diverged — T9 (auth wiring): plan specifies policy-based authorization;
 > Run them with `ep-executing-plans` inline, or hand the whole document to Mission Control.
 > **Update this document as you work** — the Status and Evidence cells in §2, the criterion
 > checkboxes in §3, an append-only row in §6, and any decision or deviation in §7.
-> `HANDOFF.md` says only what to pick up next.
+> **Then rewrite your lane's block in `NEXT-PROMPTS.md`** for the next task, per
+> `be-shared-session-budget` Step 5. The record lives here; the next prompt lives there.
 
 ## 1. Streams
-| Stream | Owns | Why it is internally sequential |
-|---|---|---|
+<!-- one per `epic-map.md` §2 lane, split by stack where the lane spans two -->
+| Stream | Epic | Stack | Owns | Why it is internally sequential |
+|---|---|---|---|---|
 
 ## 2. Progress
-| # | Task | Stream | Title | Deliverable | Agent | Depends on | Status | Evidence |
-|---|---|---|---|---|---|---|---|---|
+| # | Task | Epic | Story | Stack | Stream | Title | Deliverable | Agent | Est. | Depends on | Status | Evidence |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
 
 ## 3. Tasks
-<!-- one block per task, in order: deliverable, agent, skills, stream + order, depends on, files, intent, acceptance criteria, out of scope -->
+<!-- one block per task, in order: deliverable, epic + story + stack, agent + skills, stream + order,
+     est. context, depends on, files, intent, acceptance criteria, out of scope -->
 
 ## 4. Open questions
 | # | Question | Options | Blocks | Owner |
@@ -382,22 +422,25 @@ Diverged — T9 (auth wiring): plan specifies policy-based authorization;
 3. The sequencing shape is stated in the plan header, with the execution model that selected it. Under agent-batched: every batch is one agent against one file tree, every contract-wave stub names the batch that fills it, and the plan says which capability becomes usable at which batch.
 4. Every task states one `Deliverable`, as a result rather than an activity. Every user-facing capability has a last task whose deliverable says behaviourally what a user can then do, and the run of tasks ending there covers everything on the Step-1 capability set — including its screens and what makes it reachable, not only its endpoints. Every frontend task cites its screen ids and inherits the responsiveness budget.
 5. Every task binds to an **exact** catalog agent name and exact skill names.
-6. Every `dependsOn` id exists, and every one points backwards in `order`.
-7. Every task names a declared stream and carries a unique `order`; every stream's row says why it is internally sequential; every pair of tasks whose `Files` overlap is ordered against each other — same stream or a `dependsOn` edge between them.
-8. Every task's acceptance criteria are checkable and cite the design pack by section.
-9. The build/test commands are the project's own, from the orientation pass.
-10. `HANDOFF.md` exists, names the next task per unblocked lane and every blocker — and carries no progress record of its own.
-11. Every `Done`/`Partial` status carries `file:line` evidence read this session.
-12. Sections 6 and 7 exist (empty before execution starts), and the header note tells the executing agents to maintain §2, §3, §6 and §7 as they work.
+6. Every task carries `Epic`, `Story` and `Stack`; every `Stack` is exactly one of the eight values; every `Epic` resolves in `epic-map.md` and every non-`E0` `Story` resolves in `stories.md`. No task names two stacks, and no task touches both the API tree and the web tree.
+7. Every task carries an `Est. context` line with its drivers, the §2 `Est.` cell agrees with it, and every estimate over ~150k either names its natural split point or says why the task is one thing anyway.
+8. Every `dependsOn` id exists, and every one points backwards in `order`.
+9. Every task names a declared stream and carries a unique `order`; every stream's row says why it is internally sequential; every pair of tasks whose `Files` overlap is ordered against each other — same stream or a `dependsOn` edge between them. Every stream traces to an `epic-map.md` §2 lane (or to a stack split of one, recorded back into that document), and the order is a valid serialization of that document's dependency graph.
+10. Every task's acceptance criteria are checkable and cite the design pack by section.
+11. The build/test commands are the project's own, from the orientation pass.
+12. `NEXT-PROMPTS.md` exists beside this plan, with one block per currently-runnable lane and a line for every blocked one — and carries no progress record of its own.
+13. Every `Done`/`Partial` status carries `file:line` evidence read this session.
+14. Sections 6 and 7 exist (empty before execution starts), and the header note tells the executing agents to maintain §2, §3, §6 and §7 as they work.
 
 ## Handoffs
 
-- **→ `be-dotnet` / `be-java` / `be-node`** — execute the tasks bound to them, and update this document's §2/§3/§6/§7 as each task moves.
+- **← `be-shared-epic-map`** — supplies the epics, the lanes and the waves. The streams table is its §2 at task altitude, and the order respects its §3.
+- **→ `be-shared-session-budget`** — sizes these tasks, writes the `Est. context` lines back onto them, and authors `NEXT-PROMPTS.md` from them.
+- **→ `be-dotnet` / `be-java` / `be-node` / `fe-react` / `fe-blazor`** — execute the tasks bound to them, update this document's §2/§3/§6/§7 as each task moves, and rewrite their lane's block in `NEXT-PROMPTS.md`.
 - **→ `ep-executing-plans`** — the task-by-task execution loop, with checkpoints; its per-task checkpoint is where this plan's status, evidence and execution log get written. `ep-delegate-to-subagents` runs the same tasks through subagents — the controller, not the subagent, owns the plan update.
 - **→ Mission Control** — paste the document, point at the repo.
 - **→ `data-architect` / `devops-engineer` / `observability-engineer-<stack>` / `qa-*`** — the tasks bound to them, run as peers.
 - **→ `code-auditor`** — when a reconcile finds systemic drift rather than a handful of divergences, that is an audit, not a reconcile.
-- **→ `be-shared-plain-language-companion`** — writes `delivery-plan-explained.md` beside this document for the stakeholders who need the order, the deliverables and the blockers without the task ids and agent bindings. Regenerate it whenever this plan is re-sequenced.
 
 ## Version policy
 

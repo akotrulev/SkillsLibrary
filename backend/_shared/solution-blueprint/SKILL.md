@@ -23,7 +23,7 @@ The blueprint is the document the human approves. Everything downstream — data
 
 ## Output
 
-**`docs/plans/<NNN>-<initiative>/blueprint.md`** under the **target project's** root — never the skills-library checkout, never a global directory. `NNN` is zero-padded, scoped to `docs/plans/` (files and folders both count toward the high-water mark); never reuse or renumber. `<initiative>` is a short kebab-case noun phrase (`billing-service`, `tenant-onboarding`), stable for the life of the initiative — the folder name is cited by every other artifact and by `HANDOFF.md`.
+**`docs/plans/<NNN>-<initiative>/blueprint.md`** under the **target project's** root — never the skills-library checkout, never a global directory. `NNN` is zero-padded, scoped to `docs/plans/` (files and folders both count toward the high-water mark); never reuse or renumber. `<initiative>` is a short kebab-case noun phrase (`billing-service`, `tenant-onboarding`), stable for the life of the initiative — the folder name is cited by every other artifact and by every prompt block in `NEXT-PROMPTS.md`.
 
 **A filled golden example is at `references/example-blueprint.md`** — all five planner examples describe the same toy initiative (`001-workshop-booking`), so together they show one coherent pack. Shapes and disciplines there are normative; the domain content is illustrative.
 
@@ -69,6 +69,7 @@ A **functional area** is a coherent slice of business capability that could plau
 | Column | Content |
 |---|---|
 | Area | Short noun phrase |
+| Epics | The `E` ids from `epics.md` this area serves — `E1, E3`, or `E0` for a cross-cutting foundation. This is the join the whole pack is later checked on |
 | Purpose | One sentence — the capability, in business terms |
 | User-facing capabilities | The things a person can *do* here, one short sentence each in the user's voice (*"a member books a session"*, *"an admin publishes a workshop"*) — empty for areas nothing user-facing sits on. `be-shared-delivery-plan` sequences user-facing work one capability per step, so this column is what it slices on; an area with none is planned layer-first |
 | Primary actors | Who or what drives it (end user, admin, scheduled job, external system) |
@@ -78,6 +79,7 @@ A **functional area** is a coherent slice of business capability that could plau
 | Depends on | Other areas or external systems |
 
 Rules:
+- **Every area names the epic ids it serves, and every epic is served by an area.** The ids come from `epics.md` as `requirements-author` wrote them — read, never renumbered, never invented. An area serving no epic is work nobody asked for; an epic no area serves is a capability the architecture forgot. Both are gate defects, and finding them here costs a sentence, while finding them at the delivery plan costs a re-plan. Cross-cutting foundations (auth, config, the error envelope, the app shell) serve `E0` — the planner-created epic that carries no stories and never appears in `epics.md`.
 - **Name the user-facing capabilities in the user's voice, not the system's.** *"A member books a session"* is a capability; *"exposes the bookings endpoint"* is an implementation of one. The delivery plan turns each into a step that closes when a person can actually do it, so a vague capability produces a step with no checkable exit.
 - **6–8 areas is a lot.** Beyond that, either the initiative should be decomposed into separate initiatives (each with its own folder and its own executable plan), or several "areas" are really one. Say which.
 - **Out of scope is not optional.** The most common plan defect is an unstated boundary that someone later reads as included.
@@ -219,7 +221,7 @@ One line each: system, what it does for us, direction (we call it / it calls us 
 | Domain | Agents |
 |---|---|
 | Backend build | `be-dotnet` · `be-java` · `be-node` |
-| Backend planning | `be-planner` (this one) |
+| Solution planning | `solution-planner` (this one) |
 | Data | `data-architect` |
 | Frontend | `fe-blazor` · `fe-react` |
 | Observability | `observability-engineer-dotnet` · `observability-engineer-java` · `observability-engineer-node` |
@@ -301,7 +303,7 @@ In `DETAIL` mode, where the human supplied the high-level plan, the gate is shor
 **Success signals:** <measurable where possible; `[TBD - <owner>]` where not.>
 
 ## 2. Functional areas
-| Area | Purpose | User-facing capabilities | Primary actors | Key entities | In scope | Out of scope | Depends on |
+| Area | Epics | Purpose | User-facing capabilities | Primary actors | Key entities | In scope | Out of scope | Depends on |
 |---|---|---|---|---|---|---|---|
 
 **Explicitly not in this initiative:** <the boundary, stated once, plainly.>
@@ -376,7 +378,8 @@ flowchart LR
 *Blocks:* …
 
 ## 11. Approval
-- [ ] Functional areas and scope boundary confirmed
+- [ ] Functional areas and scope boundary confirmed, each naming the epic ids it serves
+- [ ] Every epic in `epics.md` served by at least one area
 - [ ] Actors, their primary tasks and the app shell confirmed (or "no user-facing area")
 - [ ] Architecture style and pattern choices confirmed
 - [ ] Key flows modelled, every failure exit labeled; decision-table hit policies confirmed (not inferred)

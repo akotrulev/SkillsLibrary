@@ -15,7 +15,7 @@ The plan altitude for the user's side of the system: **who uses it, what they ar
 
 ## When to use
 
-- Step 3 of a `be-planner` run — after the data model, before the API surface — whenever the routing map names a frontend agent
+- Step 3 of a `solution-planner` run — after the data model, before the API surface — whenever the routing map names a frontend agent
 - A new user-facing area is added to a planned system (`EXTEND` — plan the delta screens, reuse the existing shell and nav)
 - An existing frontend needs its screens documented as the baseline a plan will extend (`RESUME` — read routes and nav out of the code, mark `#observed`, then plan the delta)
 
@@ -100,7 +100,7 @@ Once `api-surface.md` is written (the API step fills this in and hands the file 
 | S3 | `GET /api/v1/sessions/{sessionId}` | header + description |
 | S3 | `POST /api/v1/sessions/{sessionId}/bookings` | primary action (member) |
 
-Two checks run on it, and both are `be-planner` Step-7 coverage lines: **every user-facing endpoint appears on at least one screen** (an endpoint no screen calls is either a machine-to-machine one — say so — or dead), and **every screen's data-needed line resolves to an endpoint** (a screen with a need no endpoint meets is the gap the build would have discovered).
+Two checks run on it, and both are `solution-planner` Step-9 coverage lines: **every user-facing endpoint appears on at least one screen** (an endpoint no screen calls is either a machine-to-machine one — say so — or dead), and **every screen's data-needed line resolves to an endpoint** (a screen with a need no endpoint meets is the gap the build would have discovered).
 
 ### Step 6 — Cross-cutting decisions
 
@@ -174,7 +174,6 @@ Once, at the end, from `ux-patterns` §5–§9: **density** (and why) · **accel
 - **→ `be-shared-delivery-plan`** — every frontend task binds `fe-react` / `fe-blazor` with `design-ux-patterns` in its skills, cites the screen ids it delivers, and inherits §6's budget as acceptance criteria; a capability's last task is worded from its journey.
 - **→ `fe-react` / `fe-blazor`** — takes §2–§4 as the IA decision in its Step 1 (validates, does not redesign; disagreement is a `delivery-plan.md` §7 deviation) and applies `design-ux-patterns` per page in Step 2.
 - **→ `design/ux-review`** — at build review, cites the screen id / nav-map row a finding contradicts.
-- **→ `be-shared-plain-language-companion`** — `experience-plan-explained.md`: the journeys as stories a stakeholder can walk.
 - **→ `qa-test-case-designer` / `qa-ui-<stack>`** — the journeys are their end-to-end test basis.
 
 ## Version policy

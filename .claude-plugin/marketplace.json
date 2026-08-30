@@ -145,8 +145,8 @@
         "./qa/manual/commands/qa-test-planner.md",
         "./qa/manual/commands/qa-test-strategy.md",
         "./engineering-practices/commands/ep-brainstorming.md",
-        "./engineering-practices/commands/ep-writing-plans.md",
-        "./engineering-practices/commands/ep-executing-plans.md",
+        "./engineering-practices/commands/dev-plan-feature.md",
+        "./engineering-practices/commands/dev-build.md",
         "./engineering-practices/commands/ep-spec-vs-code-audit.md",
         "./engineering-practices/commands/ep-feature-audit.md"
       ],
@@ -306,8 +306,8 @@
         "./qa/manual/commands/qa-test-planner.md",
         "./qa/manual/commands/qa-test-strategy.md",
         "./engineering-practices/commands/ep-brainstorming.md",
-        "./engineering-practices/commands/ep-writing-plans.md",
-        "./engineering-practices/commands/ep-executing-plans.md",
+        "./engineering-practices/commands/dev-plan-feature.md",
+        "./engineering-practices/commands/dev-build.md",
         "./engineering-practices/commands/ep-spec-vs-code-audit.md",
         "./engineering-practices/commands/ep-feature-audit.md"
       ],
@@ -460,8 +460,8 @@
         "./qa/manual/commands/qa-test-planner.md",
         "./qa/manual/commands/qa-test-strategy.md",
         "./engineering-practices/commands/ep-brainstorming.md",
-        "./engineering-practices/commands/ep-writing-plans.md",
-        "./engineering-practices/commands/ep-executing-plans.md",
+        "./engineering-practices/commands/dev-plan-feature.md",
+        "./engineering-practices/commands/dev-build.md",
         "./engineering-practices/commands/ep-spec-vs-code-audit.md",
         "./engineering-practices/commands/ep-feature-audit.md"
       ],
@@ -482,7 +482,7 @@
     },
     {
       "name": "fe-blazor",
-      "description": "Self-contained senior frontend Blazor developer plugin for .NET 8/9/10 (Blazor Web App, unified render modes). Covers the full FE build lifecycle end-to-end: project scaffold and render-mode strategy, architecture foundations (state, component library, styling, responsive design), feature build (pages/components/forms, API + live/realtime data, motion, UX writing, data-testids), quality layers (accessibility, performance, error resilience, SEO), and dev-side tests at both altitudes (bUnit v2 for components, plain NUnit/xUnit for state containers, validators and formatters) — plus a distinctive-visual-design critique loop. Bundles the Auth0 Blazor auth skills and the stack-agnostic design-craft skills (the vendored ui-ux-pro-max design-intelligence corpus that is the source of truth for every design fact — 88 styles, 192 palettes, 74 font pairings, 119 UX guidelines, 105 icons, 34 landing patterns, 17 motion presets, 25 chart types and 22 stack files, searchable offline — plus visual-identity, design-tokens, charts, brand-import, iconography, ux-patterns, landing-patterns, motion, ux-review, theme-presets, ux-writing, ui-code-audit, accessible-by-design, ethical-patterns, ai-experience) and the phased fe-blazor orchestrator agent — install just this one plugin for a complete Blazor frontend toolkit.",
+      "description": "Self-contained senior frontend Blazor developer plugin for .NET 8/9/10 (Blazor Web App, unified render modes). Covers the full FE build lifecycle end-to-end: project scaffold and render-mode strategy, architecture foundations (state, component library, styling, responsive design), feature build (pages/components/forms, API + live/realtime data, motion, UX writing, data-testids), quality layers (accessibility, performance, error resilience, SEO), and dev-side tests at both altitudes (bUnit v2 for components, plain NUnit/xUnit for state containers, validators and formatters) — plus a distinctive-visual-design critique loop. Bundles the Auth0 Blazor auth skills and the stack-agnostic design-craft skills (the vendored ui-ux-pro-max design-intelligence corpus that is the source of truth for every design fact — 88 styles, 192 palettes, 74 font pairings, 119 UX guidelines, 105 icons, 34 landing patterns, 17 motion presets, 25 chart types and 22 stack files, searchable offline — plus visual-identity, design-tokens, charts, brand-import, iconography, ux-patterns, landing-patterns, motion, ux-review, theme-presets, ux-writing, ui-code-audit, accessible-by-design, ethical-patterns, ai-experience) and the phased fe-blazor orchestrator agent — install just this one plugin for a complete Blazor frontend toolkit.Also bundles backend/_shared/session-budget, so a task handed to this agent from a solution-planner delivery plan carries its context estimate, and this agent rewrites its lane's ready-to-paste block in NEXT-PROMPTS.md as each task lands.",
       "source": "./",
       "strict": false,
       "author": {
@@ -555,7 +555,8 @@
         "./engineering-practices/receiving-code-review",
         "./engineering-practices/spec-vs-code-audit",
         "./engineering-practices/feature-audit",
-        "./qa/manual/requirements-breakdown"
+        "./qa/manual/requirements-breakdown",
+        "./backend/_shared/session-budget"
       ],
       "commands": [
         "./engineering-practices/commands/code-auditor.md",
@@ -578,8 +579,8 @@
         "./design/commands/design-landing-patterns.md",
         "./design/commands/design-auditor.md",
         "./engineering-practices/commands/ep-brainstorming.md",
-        "./engineering-practices/commands/ep-writing-plans.md",
-        "./engineering-practices/commands/ep-executing-plans.md",
+        "./engineering-practices/commands/dev-plan-feature.md",
+        "./engineering-practices/commands/dev-build.md",
         "./engineering-practices/commands/ep-spec-vs-code-audit.md",
         "./engineering-practices/commands/ep-feature-audit.md",
         "./qa/manual/commands/qa-requirements-breakdown.md"
@@ -632,7 +633,7 @@
     },
     {
       "name": "business-analysis",
-      "description": "Self-contained senior business-analysis plugin covering the whole upstream requirements lifecycle in two lanes. The AUTHORING lane turns a vague stakeholder ask into refinement-ready artifacts: a single-initiative scoping writeup, outcome-shaped epics, INVEST user stories with Gherkin acceptance criteria, and a review-only backlog readiness audit for stories authored elsewhere. It additionally bundles the be-documenter agent (/be-documenter), which reverse-engineers business documentation from an existing backend implementation into the same knowledge base — areas, actors, use cases and rules recovered from code, every statement tiered #observed/#inferred and never #confirmed. Its feature-scale sibling be-feature-documenter (/be-feature-documenter) documents ONE described feature into a standalone docs/features/ document — plain-language overview plus the full technical trace, every claim file:line-evidenced. The REASONING lane checks features against the WHOLE project: a persistent per-project business-model knowledge base (docs/business-model/ — read-first / update-after, stable IDs, source traceability), BPMN-disciplined Mermaid flow mapping, one state × event lifecycle grid per business entity with all features overlaid, merged DMN-style decision tables with declared hit policies and mechanical completeness/overlap checks, and the taxonomy-driven feature-conflict sweep (11 conflict classes, mandatory boundary conditions, severity-tabled findings, resolutions recorded as business decisions). Sits upstream of QA test design — its artifacts and boundary conditions are first-class test-basis inputs. Bundles two phased orchestrator agents: requirements-author (scope → epics → stories → audit) and business-analyst (analyze / model / audit modes) — install just this one plugin for a complete business-analysis toolkit.",
+      "description": "Self-contained senior business-analysis plugin covering the whole upstream requirements lifecycle in two lanes. The AUTHORING lane is the front door to the planning lane: it takes a loose description of something to build, refines it through one batch of questions, and writes requirements.md, epics.md (E1..En — each with a measurable outcome plus a plain-English section: an as-a/I-want/so-that line, what gets built, and how it fits with everything else) and stories.md (US1..USn, INVEST with Gherkin acceptance criteria) into an initiative folder ready for /dev-plan-solution — plus a review-only backlog readiness audit for stories authored elsewhere. It additionally bundles the be-documenter agent (/dev-document-system), which reverse-engineers business documentation from an existing backend implementation into the same knowledge base — areas, actors, use cases and rules recovered from code, every statement tiered #observed/#inferred and never #confirmed. Its feature-scale sibling be-feature-documenter (/dev-document) documents ONE described feature into a standalone docs/features/ document — plain-language overview plus the full technical trace, every claim file:line-evidenced. The REASONING lane checks features against the WHOLE project: a persistent per-project business-model knowledge base (docs/business-model/ — read-first / update-after, stable IDs, source traceability), BPMN-disciplined Mermaid flow mapping, one state × event lifecycle grid per business entity with all features overlaid, merged DMN-style decision tables with declared hit policies and mechanical completeness/overlap checks, and the taxonomy-driven feature-conflict sweep (11 conflict classes, mandatory boundary conditions, severity-tabled findings, resolutions recorded as business decisions). Sits upstream of QA test design — its artifacts and boundary conditions are first-class test-basis inputs. Bundles two phased orchestrator agents: requirements-author (refine → requirements → epics → stories, handing off to /dev-plan-solution) and business-analyst (analyze / model / audit modes) — install just this one plugin for a complete business-analysis toolkit.",
       "source": "./",
       "strict": false,
       "author": {
@@ -667,7 +668,7 @@
       ],
       "commands": [
         "./business-analysis/commands/business-analyst.md",
-        "./business-analysis/commands/requirements-author.md",
+        "./business-analysis/commands/dev-refine.md",
         "./business-analysis/commands/ba-scoping-writeup.md",
         "./business-analysis/commands/ba-epic-writer.md",
         "./business-analysis/commands/ba-story-writer.md",
@@ -675,8 +676,8 @@
         "./business-analysis/commands/ba-entity-state-grid.md",
         "./business-analysis/commands/ba-decision-table.md",
         "./business-analysis/commands/ba-feature-conflict-check.md",
-        "./backend/_shared/commands/be-documenter.md",
-        "./backend/_shared/commands/be-feature-documenter.md"
+        "./backend/_shared/commands/dev-document-system.md",
+        "./backend/_shared/commands/dev-document.md"
       ],
       "agents": [
         "./business-analysis/agents/requirements-author.md",
@@ -687,7 +688,7 @@
     },
     {
       "name": "fe-react",
-      "description": "Self-contained senior frontend React developer plugin for React 19/18 + TypeScript (Next.js App Router / RSC primary, Vite SPA fallback; shadcn/ui + Tailwind default). Covers the full FE build lifecycle end-to-end: project scaffold and rendering-strategy choice, architecture foundations (RSC/'use client' boundary, App Router route topology, state, component library, styling, responsive design), feature build (pages/components/forms with React Hook Form + Zod, API + live/realtime data via RSC fetch/Server Actions/TanStack Query/SSE/WebSocket, motion, UX writing, data-testids), quality layers (accessibility, performance, error resilience, SEO, i18n, PWA/offline), and dev-side tests at both altitudes (Vitest + React Testing Library for components and hooks, plain Vitest for Zod schemas, formatters, stores and extracted async-RSC fetches) — plus version migration (React 18→19, Next 14→15, Pages→App Router), a distinctive-visual-design critique loop, and a one-call read-only conformance audit (/fe-react-audit) that sweeps an existing codebase against every convention above into a saved, re-runnable findings report. Bundles the Auth0 React auth skills and the stack-agnostic design-craft skills (the vendored ui-ux-pro-max design-intelligence corpus that is the source of truth for every design fact — 88 styles, 192 palettes, 74 font pairings, 119 UX guidelines, 105 icons, 34 landing patterns, 17 motion presets, 25 chart types and 22 stack files, searchable offline — plus visual-identity, design-tokens, charts, brand-import, iconography, ux-patterns, landing-patterns, motion, ux-review, theme-presets, ux-writing, ui-code-audit, accessible-by-design, ethical-patterns, ai-experience) and the phased fe-react orchestrator agent — install just this one plugin for a complete React frontend toolkit.",
+      "description": "Self-contained senior frontend React developer plugin for React 19/18 + TypeScript (Next.js App Router / RSC primary, Vite SPA fallback; shadcn/ui + Tailwind default). Covers the full FE build lifecycle end-to-end: project scaffold and rendering-strategy choice, architecture foundations (RSC/'use client' boundary, App Router route topology, state, component library, styling, responsive design), feature build (pages/components/forms with React Hook Form + Zod, API + live/realtime data via RSC fetch/Server Actions/TanStack Query/SSE/WebSocket, motion, UX writing, data-testids), quality layers (accessibility, performance, error resilience, SEO, i18n, PWA/offline), and dev-side tests at both altitudes (Vitest + React Testing Library for components and hooks, plain Vitest for Zod schemas, formatters, stores and extracted async-RSC fetches) — plus version migration (React 18→19, Next 14→15, Pages→App Router), a distinctive-visual-design critique loop, and a one-call read-only conformance audit (/fe-react-audit) that sweeps an existing codebase against every convention above into a saved, re-runnable findings report. Bundles the Auth0 React auth skills and the stack-agnostic design-craft skills (the vendored ui-ux-pro-max design-intelligence corpus that is the source of truth for every design fact — 88 styles, 192 palettes, 74 font pairings, 119 UX guidelines, 105 icons, 34 landing patterns, 17 motion presets, 25 chart types and 22 stack files, searchable offline — plus visual-identity, design-tokens, charts, brand-import, iconography, ux-patterns, landing-patterns, motion, ux-review, theme-presets, ux-writing, ui-code-audit, accessible-by-design, ethical-patterns, ai-experience) and the phased fe-react orchestrator agent — install just this one plugin for a complete React frontend toolkit.Also bundles backend/_shared/session-budget, so a task handed to this agent from a solution-planner delivery plan carries its context estimate, and this agent rewrites its lane's ready-to-paste block in NEXT-PROMPTS.md as each task lands.",
       "source": "./",
       "strict": false,
       "author": {
@@ -762,7 +763,8 @@
         "./engineering-practices/receiving-code-review",
         "./engineering-practices/spec-vs-code-audit",
         "./engineering-practices/feature-audit",
-        "./qa/manual/requirements-breakdown"
+        "./qa/manual/requirements-breakdown",
+        "./backend/_shared/session-budget"
       ],
       "commands": [
         "./engineering-practices/commands/code-auditor.md",
@@ -786,8 +788,8 @@
         "./design/commands/design-landing-patterns.md",
         "./design/commands/design-auditor.md",
         "./engineering-practices/commands/ep-brainstorming.md",
-        "./engineering-practices/commands/ep-writing-plans.md",
-        "./engineering-practices/commands/ep-executing-plans.md",
+        "./engineering-practices/commands/dev-plan-feature.md",
+        "./engineering-practices/commands/dev-build.md",
         "./engineering-practices/commands/ep-spec-vs-code-audit.md",
         "./engineering-practices/commands/ep-feature-audit.md",
         "./qa/manual/commands/qa-requirements-breakdown.md"
@@ -800,7 +802,7 @@
     },
     {
       "name": "be-dotnet",
-      "description": "Self-contained senior .NET backend developer plugin (.NET 10 primary, 8/9 supported) for design-pattern application, EF Core persistence, and Auth0/Cognito service-side auth. Covers explaining patterns (Strategy, Decorator, Repository, CQRS/MediatR, Factory, Specification, Options, Pipeline, Saga, Outbox), scaffolding them into a codebase with constructor injection / async-all-the-way / nullable reference types, EF Core persistence (DbContext design, configurations, migrations, query patterns, optimistic concurrency, bulk operations), dev-side unit testing of that logic (NUnit 4 + NSubstitute + FakeTimeProvider, in-process only — no HTTP, no container, no real database), Auth0/Cognito JWT bearer validation + RBAC + Client Credentials M2M, and reviewing existing code for pattern misuse, DI/async violations, and layering bleeds — end-to-end or any single phase. Bundles the language-agnostic pattern reference/reviewer, the Auth0/Cognito concepts skills, the developer-workflow + read-only audit (ep-*) skills and the code-auditor agent, and the full observability toolkit (OpenTelemetry + Serilog structured logging + Loki/Tempo/Prometheus-Mimir backend + LogQL/PromQL + Grafana dashboards), plus the phased be-dotnet orchestrator and observability-engineer-dotnet agents and a one-call read-only conformance audit (/be-dotnet-audit) that sweeps an existing service against every convention above into a saved, re-runnable findings report — install just this one plugin for a complete .NET backend toolkit. Also bundles the stack-agnostic be-planner solution planner (/be-planner): it turns a business case or loose requirements into an approved high-level blueprint — functional areas, architecture, tech stack, and which library agent builds what — then a detailed plan pack (DB structure, an experience plan — actors, journeys, screens and the app shell — service→resource→endpoint surface with request/response bodies, a shared validation and error catalog, an external-dependency register, and an ordered agent-bound task list with a plan+handoff loop), starting from scratch or picking up partially-built work. It also ships the be-documenter agent (/be-documenter) — the reverse direction: it reads an existing backend, splits it into functional areas, confirms the split with you, then traces each area and writes what the system does from the END USER's perspective (capabilities, actors, use cases, business rules, failure behaviour) into the docs/business-model/ knowledge base, modelled with flowcharts, decision tables and state grids — tiering every statement as #observed (what the code does, with file:line) or #inferred (what it is probably for, which becomes a question for the business), and never inventing intent. For a single feature rather than a whole system, the bundled be-feature-documenter agent (/be-feature-documenter) locates the implementation behind a described feature and writes one standalone docs/features/ document — a plain-language overview up top, then the full technical trace (triggers, inputs, validations, gates, business rules, entity states, integrations, failure behavior), every claim file:line-evidenced.",
+      "description": "Self-contained senior .NET backend developer plugin (.NET 10 primary, 8/9 supported) for design-pattern application, EF Core persistence, and Auth0/Cognito service-side auth. Covers explaining patterns (Strategy, Decorator, Repository, CQRS/MediatR, Factory, Specification, Options, Pipeline, Saga, Outbox), scaffolding them into a codebase with constructor injection / async-all-the-way / nullable reference types, EF Core persistence (DbContext design, configurations, migrations, query patterns, optimistic concurrency, bulk operations), dev-side unit testing of that logic (NUnit 4 + NSubstitute + FakeTimeProvider, in-process only — no HTTP, no container, no real database), Auth0/Cognito JWT bearer validation + RBAC + Client Credentials M2M, and reviewing existing code for pattern misuse, DI/async violations, and layering bleeds — end-to-end or any single phase. Bundles the language-agnostic pattern reference/reviewer, the Auth0/Cognito concepts skills, the developer-workflow + read-only audit (ep-*) skills and the code-auditor agent, and the full observability toolkit (OpenTelemetry + Serilog structured logging + Loki/Tempo/Prometheus-Mimir backend + LogQL/PromQL + Grafana dashboards), plus the phased be-dotnet orchestrator and observability-engineer-dotnet agents and a one-call read-only conformance audit (/be-dotnet-audit) that sweeps an existing service against every convention above into a saved, re-runnable findings report — install just this one plugin for a complete .NET backend toolkit. Also bundles the stack-agnostic solution-planner whole-application planner (/dev-plan-solution): it turns requirements — ideally the requirements/epics/stories pack from requirements-author — into an approved high-level blueprint (functional areas with the epic ids they serve, architecture, tech stack, and which library agent builds what), then a detailed plan pack (DB structure, an experience plan — actors, journeys, screens and the app shell — service→resource→endpoint surface with request/response bodies, a shared validation and error catalog, an external-dependency register), then an epic map saying which lanes can run concurrently, then a task list where every task is one epic, one story, one stack, one agent and one session with an estimated context cost — closing with NEXT-PROMPTS.md, one ready-to-paste prompt per lane that can start right now, regenerated by each executing agent as its task lands. Starts from scratch or picks up partially-built work. It also ships the be-documenter agent (/dev-document-system) — the reverse direction: it reads an existing backend, splits it into functional areas, confirms the split with you, then traces each area and writes what the system does from the END USER's perspective (capabilities, actors, use cases, business rules, failure behaviour) into the docs/business-model/ knowledge base, modelled with flowcharts, decision tables and state grids — tiering every statement as #observed (what the code does, with file:line) or #inferred (what it is probably for, which becomes a question for the business), and never inventing intent. For a single feature rather than a whole system, the bundled be-feature-documenter agent (/dev-document) locates the implementation behind a described feature and writes one standalone docs/features/ document — a plain-language overview up top, then the full technical trace (triggers, inputs, validations, gates, business rules, entity states, integrations, failure behavior), every claim file:line-evidenced.",
       "source": "./",
       "strict": false,
       "author": {
@@ -833,11 +835,12 @@
         "./design/ux-patterns",
         "./backend/_shared/api-surface-plan",
         "./backend/_shared/integration-plan",
+        "./backend/_shared/epic-map",
         "./backend/_shared/delivery-plan",
+        "./backend/_shared/session-budget",
         "./backend/_shared/codebase-survey",
         "./backend/_shared/feature-trace",
         "./backend/_shared/business-documentation",
-        "./backend/_shared/plain-language-companion",
         "./business-analysis/skills/ba-project-memory",
         "./business-analysis/skills/ba-process-flow-diagram",
         "./business-analysis/skills/ba-decision-table",
@@ -871,22 +874,22 @@
       ],
       "commands": [
         "./backend/dotnet/commands/be-dotnet.md",
-        "./backend/_shared/commands/be-planner.md",
-        "./backend/_shared/commands/be-documenter.md",
-        "./backend/_shared/commands/be-feature-documenter.md",
+        "./backend/_shared/commands/dev-plan-solution.md",
+        "./backend/_shared/commands/dev-document-system.md",
+        "./backend/_shared/commands/dev-document.md",
         "./backend/dotnet/commands/be-dotnet-audit.md",
         "./engineering-practices/commands/code-auditor.md",
         "./observability/commands/observability-engineer-dotnet.md",
         "./engineering-practices/commands/ep-brainstorming.md",
-        "./engineering-practices/commands/ep-writing-plans.md",
-        "./engineering-practices/commands/ep-executing-plans.md",
+        "./engineering-practices/commands/dev-plan-feature.md",
+        "./engineering-practices/commands/dev-build.md",
         "./engineering-practices/commands/ep-spec-vs-code-audit.md",
         "./engineering-practices/commands/ep-feature-audit.md",
         "./qa/manual/commands/qa-requirements-breakdown.md"
       ],
       "agents": [
         "./backend/dotnet/agents/be-dotnet.md",
-        "./backend/_shared/agents/be-planner.md",
+        "./backend/_shared/agents/solution-planner.md",
         "./backend/_shared/agents/be-documenter.md",
         "./backend/_shared/agents/be-feature-documenter.md",
         "./observability/agents/observability-engineer-dotnet.md",
@@ -895,7 +898,7 @@
     },
     {
       "name": "be-java",
-      "description": "Self-contained senior Java backend developer plugin (Java 21 + Spring Boot 3.x) for design-pattern application, JPA/Hibernate persistence, and Auth0/Cognito service-side auth. Covers explaining patterns (Strategy, Decorator, Repository, CQRS/mediator, Factory, Specification, Options/`@ConfigurationProperties`, Pipeline, Saga, Outbox), scaffolding them into a codebase with constructor injection / virtual-threads-async / modern-Java idioms (records, sealed types), JPA/Hibernate + Spring Data persistence (entity design, Flyway migrations, `@Transactional` boundaries, `@Version` optimistic locking, N+1 prevention), dev-side unit testing of that logic (JUnit 5 + Mockito + AssertJ with no Spring context — slice tests belong to the QA peer), Auth0/Cognito Spring Security resource server + method-level RBAC + Client Credentials M2M, and reviewing existing code for pattern misuse, threading/DI violations, and layering bleeds — end-to-end or any single phase. Bundles the language-agnostic pattern reference/reviewer, the Auth0/Cognito concepts skills, the developer-workflow + read-only audit (ep-*) skills and the code-auditor agent, and the full observability toolkit (OpenTelemetry Java agent + SLF4J/Logback structured logging + Loki/Tempo/Prometheus-Mimir backend + LogQL/PromQL + Grafana dashboards), plus the phased be-java orchestrator and observability-engineer-java agents — install just this one plugin for a complete Java backend toolkit. Also bundles the stack-agnostic be-planner solution planner (/be-planner): it turns a business case or loose requirements into an approved high-level blueprint — functional areas, architecture, tech stack, and which library agent builds what — then a detailed plan pack (DB structure, an experience plan — actors, journeys, screens and the app shell — service→resource→endpoint surface with request/response bodies, a shared validation and error catalog, an external-dependency register, and an ordered agent-bound task list with a plan+handoff loop), starting from scratch or picking up partially-built work. It also ships the be-documenter agent (/be-documenter) — the reverse direction: it reads an existing backend, splits it into functional areas, confirms the split with you, then traces each area and writes what the system does from the END USER's perspective (capabilities, actors, use cases, business rules, failure behaviour) into the docs/business-model/ knowledge base, modelled with flowcharts, decision tables and state grids — tiering every statement as #observed (what the code does, with file:line) or #inferred (what it is probably for, which becomes a question for the business), and never inventing intent. For a single feature rather than a whole system, the bundled be-feature-documenter agent (/be-feature-documenter) locates the implementation behind a described feature and writes one standalone docs/features/ document — a plain-language overview up top, then the full technical trace (triggers, inputs, validations, gates, business rules, entity states, integrations, failure behavior), every claim file:line-evidenced.",
+      "description": "Self-contained senior Java backend developer plugin (Java 21 + Spring Boot 3.x) for design-pattern application, JPA/Hibernate persistence, and Auth0/Cognito service-side auth. Covers explaining patterns (Strategy, Decorator, Repository, CQRS/mediator, Factory, Specification, Options/`@ConfigurationProperties`, Pipeline, Saga, Outbox), scaffolding them into a codebase with constructor injection / virtual-threads-async / modern-Java idioms (records, sealed types), JPA/Hibernate + Spring Data persistence (entity design, Flyway migrations, `@Transactional` boundaries, `@Version` optimistic locking, N+1 prevention), dev-side unit testing of that logic (JUnit 5 + Mockito + AssertJ with no Spring context — slice tests belong to the QA peer), Auth0/Cognito Spring Security resource server + method-level RBAC + Client Credentials M2M, and reviewing existing code for pattern misuse, threading/DI violations, and layering bleeds — end-to-end or any single phase. Bundles the language-agnostic pattern reference/reviewer, the Auth0/Cognito concepts skills, the developer-workflow + read-only audit (ep-*) skills and the code-auditor agent, and the full observability toolkit (OpenTelemetry Java agent + SLF4J/Logback structured logging + Loki/Tempo/Prometheus-Mimir backend + LogQL/PromQL + Grafana dashboards), plus the phased be-java orchestrator and observability-engineer-java agents — install just this one plugin for a complete Java backend toolkit. Also bundles the stack-agnostic solution-planner whole-application planner (/dev-plan-solution): it turns requirements — ideally the requirements/epics/stories pack from requirements-author — into an approved high-level blueprint (functional areas with the epic ids they serve, architecture, tech stack, and which library agent builds what), then a detailed plan pack (DB structure, an experience plan — actors, journeys, screens and the app shell — service→resource→endpoint surface with request/response bodies, a shared validation and error catalog, an external-dependency register), then an epic map saying which lanes can run concurrently, then a task list where every task is one epic, one story, one stack, one agent and one session with an estimated context cost — closing with NEXT-PROMPTS.md, one ready-to-paste prompt per lane that can start right now, regenerated by each executing agent as its task lands. Starts from scratch or picks up partially-built work. It also ships the be-documenter agent (/dev-document-system) — the reverse direction: it reads an existing backend, splits it into functional areas, confirms the split with you, then traces each area and writes what the system does from the END USER's perspective (capabilities, actors, use cases, business rules, failure behaviour) into the docs/business-model/ knowledge base, modelled with flowcharts, decision tables and state grids — tiering every statement as #observed (what the code does, with file:line) or #inferred (what it is probably for, which becomes a question for the business), and never inventing intent. For a single feature rather than a whole system, the bundled be-feature-documenter agent (/dev-document) locates the implementation behind a described feature and writes one standalone docs/features/ document — a plain-language overview up top, then the full technical trace (triggers, inputs, validations, gates, business rules, entity states, integrations, failure behavior), every claim file:line-evidenced.",
       "source": "./",
       "strict": false,
       "author": {
@@ -927,11 +930,12 @@
         "./design/ux-patterns",
         "./backend/_shared/api-surface-plan",
         "./backend/_shared/integration-plan",
+        "./backend/_shared/epic-map",
         "./backend/_shared/delivery-plan",
+        "./backend/_shared/session-budget",
         "./backend/_shared/codebase-survey",
         "./backend/_shared/feature-trace",
         "./backend/_shared/business-documentation",
-        "./backend/_shared/plain-language-companion",
         "./business-analysis/skills/ba-project-memory",
         "./business-analysis/skills/ba-process-flow-diagram",
         "./business-analysis/skills/ba-decision-table",
@@ -965,21 +969,21 @@
       ],
       "commands": [
         "./backend/java/commands/be-java.md",
-        "./backend/_shared/commands/be-planner.md",
-        "./backend/_shared/commands/be-documenter.md",
-        "./backend/_shared/commands/be-feature-documenter.md",
+        "./backend/_shared/commands/dev-plan-solution.md",
+        "./backend/_shared/commands/dev-document-system.md",
+        "./backend/_shared/commands/dev-document.md",
         "./engineering-practices/commands/code-auditor.md",
         "./observability/commands/observability-engineer-java.md",
         "./engineering-practices/commands/ep-brainstorming.md",
-        "./engineering-practices/commands/ep-writing-plans.md",
-        "./engineering-practices/commands/ep-executing-plans.md",
+        "./engineering-practices/commands/dev-plan-feature.md",
+        "./engineering-practices/commands/dev-build.md",
         "./engineering-practices/commands/ep-spec-vs-code-audit.md",
         "./engineering-practices/commands/ep-feature-audit.md",
         "./qa/manual/commands/qa-requirements-breakdown.md"
       ],
       "agents": [
         "./backend/java/agents/be-java.md",
-        "./backend/_shared/agents/be-planner.md",
+        "./backend/_shared/agents/solution-planner.md",
         "./backend/_shared/agents/be-documenter.md",
         "./backend/_shared/agents/be-feature-documenter.md",
         "./observability/agents/observability-engineer-java.md",
@@ -988,7 +992,7 @@
     },
     {
       "name": "be-node",
-      "description": "Self-contained senior Node backend developer plugin (Node 24 active LTS primary, 22 maintenance supported; TypeScript strict) for design-pattern application and Prisma/Drizzle persistence. Covers explaining patterns (discriminated-union strategy, `Result<T,E>` vs throwing, branded ids, higher-order-function decorators, repository, lightweight CQRS command handlers, Options config via Zod), scaffolding them into a Node/NestJS/Express codebase with constructor injection or closures / async-all-the-way / TypeScript strict mode, Prisma (default) / Drizzle / TypeORM persistence (schema design, migrations, query patterns, optimistic concurrency, bulk operations), dev-side unit testing of that logic (Vitest, dependency injection over module mocking, both branches of every Result type), and reviewing existing code for type-safety leaks, pattern misuse, and async/DI violations — end-to-end or any single phase. Bundles the language-agnostic pattern reference/reviewer, the developer-workflow + read-only audit (ep-*) skills and the code-auditor agent, and the full observability toolkit (OpenTelemetry sdk-node + pino structured logging + Loki/Tempo/Prometheus-Mimir backend + LogQL/PromQL + Grafana dashboards), plus the phased be-node orchestrator and observability-engineer-node agents — install just this one plugin for a complete Node backend-patterns toolkit. Also bundles the stack-agnostic be-planner solution planner (/be-planner): it turns a business case or loose requirements into an approved high-level blueprint — functional areas, architecture, tech stack, and which library agent builds what — then a detailed plan pack (DB structure, an experience plan — actors, journeys, screens and the app shell — service→resource→endpoint surface with request/response bodies, a shared validation and error catalog, an external-dependency register, and an ordered agent-bound task list with a plan+handoff loop), starting from scratch or picking up partially-built work. It also ships the be-documenter agent (/be-documenter) — the reverse direction: it reads an existing backend, splits it into functional areas, confirms the split with you, then traces each area and writes what the system does from the END USER's perspective (capabilities, actors, use cases, business rules, failure behaviour) into the docs/business-model/ knowledge base, modelled with flowcharts, decision tables and state grids — tiering every statement as #observed (what the code does, with file:line) or #inferred (what it is probably for, which becomes a question for the business), and never inventing intent. For a single feature rather than a whole system, the bundled be-feature-documenter agent (/be-feature-documenter) locates the implementation behind a described feature and writes one standalone docs/features/ document — a plain-language overview up top, then the full technical trace (triggers, inputs, validations, gates, business rules, entity states, integrations, failure behavior), every claim file:line-evidenced.",
+      "description": "Self-contained senior Node backend developer plugin (Node 24 active LTS primary, 22 maintenance supported; TypeScript strict) for design-pattern application and Prisma/Drizzle persistence. Covers explaining patterns (discriminated-union strategy, `Result<T,E>` vs throwing, branded ids, higher-order-function decorators, repository, lightweight CQRS command handlers, Options config via Zod), scaffolding them into a Node/NestJS/Express codebase with constructor injection or closures / async-all-the-way / TypeScript strict mode, Prisma (default) / Drizzle / TypeORM persistence (schema design, migrations, query patterns, optimistic concurrency, bulk operations), dev-side unit testing of that logic (Vitest, dependency injection over module mocking, both branches of every Result type), and reviewing existing code for type-safety leaks, pattern misuse, and async/DI violations — end-to-end or any single phase. Bundles the language-agnostic pattern reference/reviewer, the developer-workflow + read-only audit (ep-*) skills and the code-auditor agent, and the full observability toolkit (OpenTelemetry sdk-node + pino structured logging + Loki/Tempo/Prometheus-Mimir backend + LogQL/PromQL + Grafana dashboards), plus the phased be-node orchestrator and observability-engineer-node agents — install just this one plugin for a complete Node backend-patterns toolkit. Also bundles the stack-agnostic solution-planner whole-application planner (/dev-plan-solution): it turns requirements — ideally the requirements/epics/stories pack from requirements-author — into an approved high-level blueprint (functional areas with the epic ids they serve, architecture, tech stack, and which library agent builds what), then a detailed plan pack (DB structure, an experience plan — actors, journeys, screens and the app shell — service→resource→endpoint surface with request/response bodies, a shared validation and error catalog, an external-dependency register), then an epic map saying which lanes can run concurrently, then a task list where every task is one epic, one story, one stack, one agent and one session with an estimated context cost — closing with NEXT-PROMPTS.md, one ready-to-paste prompt per lane that can start right now, regenerated by each executing agent as its task lands. Starts from scratch or picks up partially-built work. It also ships the be-documenter agent (/dev-document-system) — the reverse direction: it reads an existing backend, splits it into functional areas, confirms the split with you, then traces each area and writes what the system does from the END USER's perspective (capabilities, actors, use cases, business rules, failure behaviour) into the docs/business-model/ knowledge base, modelled with flowcharts, decision tables and state grids — tiering every statement as #observed (what the code does, with file:line) or #inferred (what it is probably for, which becomes a question for the business), and never inventing intent. For a single feature rather than a whole system, the bundled be-feature-documenter agent (/dev-document) locates the implementation behind a described feature and writes one standalone docs/features/ document — a plain-language overview up top, then the full technical trace (triggers, inputs, validations, gates, business rules, entity states, integrations, failure behavior), every claim file:line-evidenced.",
       "source": "./",
       "strict": false,
       "author": {
@@ -1018,11 +1022,12 @@
         "./design/ux-patterns",
         "./backend/_shared/api-surface-plan",
         "./backend/_shared/integration-plan",
+        "./backend/_shared/epic-map",
         "./backend/_shared/delivery-plan",
+        "./backend/_shared/session-budget",
         "./backend/_shared/codebase-survey",
         "./backend/_shared/feature-trace",
         "./backend/_shared/business-documentation",
-        "./backend/_shared/plain-language-companion",
         "./business-analysis/skills/ba-project-memory",
         "./business-analysis/skills/ba-process-flow-diagram",
         "./business-analysis/skills/ba-decision-table",
@@ -1054,21 +1059,21 @@
       ],
       "commands": [
         "./backend/node/commands/be-node.md",
-        "./backend/_shared/commands/be-planner.md",
-        "./backend/_shared/commands/be-documenter.md",
-        "./backend/_shared/commands/be-feature-documenter.md",
+        "./backend/_shared/commands/dev-plan-solution.md",
+        "./backend/_shared/commands/dev-document-system.md",
+        "./backend/_shared/commands/dev-document.md",
         "./engineering-practices/commands/code-auditor.md",
         "./observability/commands/observability-engineer-node.md",
         "./engineering-practices/commands/ep-brainstorming.md",
-        "./engineering-practices/commands/ep-writing-plans.md",
-        "./engineering-practices/commands/ep-executing-plans.md",
+        "./engineering-practices/commands/dev-plan-feature.md",
+        "./engineering-practices/commands/dev-build.md",
         "./engineering-practices/commands/ep-spec-vs-code-audit.md",
         "./engineering-practices/commands/ep-feature-audit.md",
         "./qa/manual/commands/qa-requirements-breakdown.md"
       ],
       "agents": [
         "./backend/node/agents/be-node.md",
-        "./backend/_shared/agents/be-planner.md",
+        "./backend/_shared/agents/solution-planner.md",
         "./backend/_shared/agents/be-documenter.md",
         "./backend/_shared/agents/be-feature-documenter.md",
         "./observability/agents/observability-engineer-node.md",
@@ -1136,8 +1141,8 @@
         "./devops/commands/infra-security-tester.md",
         "./engineering-practices/commands/code-auditor.md",
         "./engineering-practices/commands/ep-brainstorming.md",
-        "./engineering-practices/commands/ep-writing-plans.md",
-        "./engineering-practices/commands/ep-executing-plans.md",
+        "./engineering-practices/commands/dev-plan-feature.md",
+        "./engineering-practices/commands/dev-build.md",
         "./engineering-practices/commands/ep-spec-vs-code-audit.md",
         "./engineering-practices/commands/ep-feature-audit.md"
       ],

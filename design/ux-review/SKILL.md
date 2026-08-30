@@ -48,7 +48,7 @@ A review without evidence is an opinion. Before the first heuristic:
 2. **Capture each task end to end.** With a running app, drive it through the Playwright MCP and take one screenshot per screen in the task's path, at the desktop and the narrowest supported width. Without one, use the user-supplied screenshots / mockup / Figma frames and say so.
 3. **Record what was captured** in the report header — tasks walked, screens seen, widths — so the coverage is legible and a screen you never reached is not silently "passed".
 
-**Where an `experience-plan.md` exists it is the reference, not the build.** Every IA or steps-to-goal finding names the plan decision the build contradicts — the screen id (`S4`), the nav-map row, the journey's step count — and a build that matches a plan decision you would have flagged is a finding *against the plan*, routed to `be-planner`, not against the build.
+**Where an `experience-plan.md` exists it is the reference, not the build.** Every IA or steps-to-goal finding names the plan decision the build contradicts — the screen id (`S4`), the nav-map row, the journey's step count — and a build that matches a plan decision you would have flagged is a finding *against the plan*, routed to `solution-planner`, not against the build.
 
 ## Nielsen's 10 heuristics, as review questions
 

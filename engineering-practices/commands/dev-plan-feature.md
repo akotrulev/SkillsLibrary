@@ -1,6 +1,6 @@
 ---
-description: Use when you have an approved spec or clear requirements for a multi-step task and need a detailed, bite-sized implementation plan before touching code.
-argument-hint: [what to apply this skill to]
+description: Plan a feature — turn an approved spec or clear requirements for one multi-step change into a detailed, bite-sized task-by-task implementation plan before touching code (next: /dev-build)
+argument-hint: [the spec, requirements, or change to plan]
 ---
 
 Load and follow the **`ep-writing-plans`** skill for this task.
