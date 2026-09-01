@@ -1,11 +1,21 @@
 ---
 name: ep-brainstorming
-description: Use when turning an ad-hoc idea or feature request into an approved design/spec before any code is written. Triggers "let's build X", "add a feature that…", "help me design…", "how should we approach…", before scaffolding or implementation. Chains into `ep-writing-plans` once approved. Do NOT use while a step-by-step agent is driving its own design gate (merely having one installed is not a reason to skip this), for pure Q&A, or once a design is approved.
+description: Use when turning an ad-hoc idea or feature request into an approved design/spec before any code is written. Triggers "let's build X", "add a feature that…", "help me design…", "how should we approach…", before scaffolding or implementation. Chains into `ep-writing-plans` once approved. Command `/dev-design`. Do NOT use when the *what* is still loose or the ask spans more than one capability — that is `/dev-refine` (`requirements-author`) — nor while a step-by-step agent is driving its own design gate (merely having one installed is not a reason to skip this), for pure Q&A, or once a design is approved.
 ---
 
 # Brainstorming Ideas Into Designs
 
 Help turn ideas into fully formed designs and specs through natural collaborative dialogue.
+
+**Which front door.** The library has two, and they do not overlap:
+
+| | `/dev-design` (this skill) | `/dev-refine` (`requirements-author`) |
+|---|---|---|
+| The input | **One feature** whose requirements are already clear | A loose ask — the *what* is still open, or it spans several capabilities |
+| The question | *How* should we build it | *What* are we building, for whom, and what is out |
+| The output | `docs/specs/NNN-<topic>-design.md` → `/dev-plan-feature` | `docs/plans/<NNN>-<initiative>/{requirements,epics,stories}.md` → `/dev-plan-solution` |
+
+If, while brainstorming, the idea turns out to be several capabilities or the requirements keep moving, stop and hand to `/dev-refine` — do not decompose it into sub-project specs here.
 
 **Announce at start:** "I'm using the `ep-brainstorming` skill to turn this idea into an approved design."
 
@@ -69,7 +79,7 @@ digraph brainstorming {
 
 - Check out the current project state first (files, docs, recent commits)
 - Before asking detailed questions, assess scope: if the request describes multiple independent subsystems (e.g., "build a platform with chat, file storage, billing, and analytics"), flag this immediately. Don't spend questions refining details of a project that needs to be decomposed first.
-- If the project is too large for a single spec, help the user decompose into sub-projects: what are the independent pieces, how do they relate, what order should they be built? Then brainstorm the first sub-project through the normal design flow. Each sub-project gets its own spec → plan → implementation cycle.
+- If the request is several capabilities rather than one feature, it is an initiative, not a design: hand it to `/dev-refine` (`requirements-author`), which writes the requirements, epics and stories that `/dev-plan-solution` then turns into a task list. Come back here only for a single feature that needs a technical design.
 - For appropriately-scoped projects, ask questions one at a time to refine the idea
 - Prefer multiple choice questions when possible, but open-ended is fine too
 - Only one question per message - if a topic needs more exploration, break it into multiple questions
@@ -147,16 +157,6 @@ Wait for the user's response. If they request changes, make them and re-run the 
 - **Incremental validation** - Present design, get approval before moving on
 - **Be flexible** - Go back and clarify when something doesn't make sense
 
-## Visual Companion
+## Showing something visual
 
-A browser-based companion for showing mockups, diagrams, and visual options during brainstorming. It is **opt-in, on explicit request only** — do NOT proactively offer it as part of the brainstorming flow. Brainstorming runs text-only by default.
-
-Use it only when the user explicitly asks to see something visually (e.g. "can you mock that up", "show me the two layouts side by side"). When the user asks:
-
-- **Use the browser** for content that IS visual — mockups, wireframes, layout comparisons, architecture diagrams, side-by-side visual designs
-- **Use the terminal** for content that is text — requirements questions, conceptual choices, tradeoff lists, A/B/C/D text options, scope decisions
-
-A question about a UI topic is not automatically a visual question. "What does personality mean in this context?" is a conceptual question — use the terminal. "Which wizard layout works better?" is a visual question — use the browser.
-
-When you do use the companion, read the detailed guide first:
-`visual-companion.md` (in this skill directory)
+Brainstorming runs text-only by default. When the user explicitly asks to *see* something — "mock that up", "show me the two layouts side by side", an architecture diagram — use the harness's own surface rather than a local server: the `Artifact` tool for a mockup, diagram or side-by-side comparison page, or the `design` canvas skill for a multi-artboard UI mockup. A question *about* a UI topic is not a visual question ("what does personality mean here?" is conceptual — answer in the terminal); "which wizard layout works better?" is.

@@ -1,13 +1,13 @@
 ---
 name: ep-delegate-to-subagents
-description: Use when executing an implementation plan by delegating its tasks to subagents — the alternative to running the plan inline with `ep-executing-plans`. Triggers: "run this plan with subagents", "delegate each task to an agent". Do NOT use for tightly-coupled tasks that can't be split cleanly.
+description: Use when executing an implementation plan by delegating its tasks to subagents — the alternative to running the plan inline with `ep-executing-plans` — or when fanning genuinely independent problems (no shared state, no sequential dependency) out to concurrent agents. Triggers: "run this plan with subagents", "delegate each task to an agent", "investigate these unrelated failures in parallel", "fan these independent fixes out". Do NOT use for tightly-coupled tasks that can't be split cleanly, or for related failures that need one investigator.
 ---
 
 # Subagent-Driven Development
 
-Execute a plan by delegating self-contained tasks to subagents, reviewing each result before moving on. The alternative to running the plan inline with `ep-executing-plans`.
+Execute a plan by delegating self-contained tasks to subagents, reviewing each result before moving on. The alternative to running the plan inline with `ep-executing-plans`. The same dispatch discipline has a second use — **fanning independent problems out concurrently** — covered at the end of this file.
 
-**Dispatch tasks in the plan's order** — the order is its dependency graph, and a subagent's task assumes the tasks above it are done. Send the task's `Deliverable` in the prompt: it is what the subagent is being asked to produce, and what you check its result against.
+**Dispatch tasks in the plan's order** — the order is its dependency graph, and a subagent's task assumes the tasks above it are done. **Dispatch to the agent the task's `Agent:` line names** — that is the `subagent_type`, or the agent definition the prompt tells the subagent to read and adopt. **Where the plan carries a prompt block for the task** (`## Prompts — one per task`, or the pack's `NEXT-PROMPTS.md`), that block *is* the task prompt — send it verbatim, then add what `./implementer-prompt.md` asks for that it lacks. Otherwise send the task's `Deliverable` in the prompt: it is what the subagent is being asked to produce, and what you check its result against.
 
 **Announce at start:** "I'm using the `ep-delegate-to-subagents` skill to execute this plan via subagents."
 
@@ -16,7 +16,7 @@ Execute a plan by delegating self-contained tasks to subagents, reviewing each r
 ## Ground rules
 
 - **1 agent per task**: dispatch a single implementer subagent, then **review its result yourself** (spec compliance + code quality — see the review rubric below). Dedicated *separate* reviewer subagents are available when a task warrants independent verification.
-- Never dispatch implementation subagents in parallel (they conflict on the working tree — see `ep-parallel-agents` for the worktree escape hatch).
+- Never dispatch implementation subagents in parallel on one working tree (they conflict on it — see **Fan-out for independent problems** below for the worktree escape hatch).
 - Once dispatch is under way, keep executing without pausing for "should I continue?" check-ins. Stop only for BLOCKED you can't resolve, genuine ambiguity, or all tasks complete.
 
 ## When it fits
@@ -235,6 +235,23 @@ Done!
 - Dispatch fix subagent with specific instructions
 - Don't try to fix manually (context pollution)
 
+## Fan-out for independent problems
+
+The other shape this skill takes: not a plan, but several **genuinely independent problem domains** — different root causes, no shared state, each understandable without the others — that can be worked concurrently. Typical trigger: six test failures across three files after a refactor, three unrelated causes.
+
+**Core principle:** one agent per independent problem domain. Parallel dispatch buys wall-clock time only when the domains really are independent.
+
+**Use when** each problem has its own root cause and no shared state, and each can be understood without context from the others. **Don't use when** failures are related (fixing one may fix others), understanding needs the whole system's state, or you don't yet know what is broken — investigate together first, with `ep-systematic-debugging`.
+
+**The pattern:**
+
+1. **Identify the domains.** Group failures by what is broken (file A: the approval flow · file B: batch completion · file C: abort handling). If fixing one could plausibly fix another, they are one domain.
+2. **Write one focused prompt per domain** — specific scope (one file or subsystem), a clear goal ("make these tests pass"), constraints ("do not change production code" / "fix tests only"), the actual error messages and test names pasted in, and the expected output ("return the root cause and what you changed"). "Fix all the tests" is too broad; "fix the race condition" has no location; "fix it" has no output.
+3. **Dispatch concurrently, and say so** — name what you are spawning and why ("three independent failure domains, so three agents in parallel — no shared state between them") rather than fanning out silently. Each extra agent is a deliberate spend.
+4. **Review and integrate** — read each summary, check that no two agents edited the same code, run the full suite, spot-check for systematic errors. Then `ep-verify-before-done` before claiming the parallel fixes worked.
+
+> **Working-tree conflicts ≠ abandon parallelism.** If the domains are logically independent but the agents would touch the *same working tree* (colliding edits, a shared build output), don't drop back to sequential — give each agent an **isolated worktree**: the harness's native `isolation: worktree` when dispatching, or one per `ep-worktrees`. The shared-state exclusion above is about *logical* coupling (they need each other's state to reason), not a shared checkout, which is a tooling problem worktrees solve. This is exactly why plan implementers above are never run in parallel on one tree.
+
 ## Integration
 
 **Required workflow skills:**
@@ -253,4 +270,7 @@ Done!
 
 **Alternative workflow:**
 - **`ep-executing-plans`** - the inline execution path for the same plan
-- **`ep-parallel-agents`** - for independent parallel problems
+
+**Fan-out companions:**
+- **`ep-systematic-debugging`** - the per-domain investigation each fanned-out agent runs; use it directly when there is only one domain
+- **`ep-verify-before-done`** - run the full suite before claiming the parallel fixes worked

@@ -42,16 +42,20 @@ Turns a scoped requirement into a set of INVEST-quality user stories with Gherki
    - User roles (admin first, then end-user)
    - Data variations (single record → bulk → import)
    - CRUD operations (read before write before delete)
-   - Interface (API before UI, or vice versa per team contract)
+
+   **Never by layer.** "The API" and "the screen" are not stories — a story that ships one side of a capability cannot be demoed, so it fails INVEST on its own terms. Layers are cut later, at task level, by the planner; a story stays whole.
 4. **Acceptance criteria in Gherkin.** `Given / When / Then`. One scenario per criterion. No `And` chains that hide multiple behaviors.
 5. **Separate functional AC from non-functional AC.** Performance, accessibility, audit logging — these are AC too, just labeled.
 6. **Out-of-scope list at the story level**, not just the epic. Reviewers will assume it's in scope otherwise.
-7. **Dependencies are explicit.** "Blocked by #123" beats discovering it at standup.
+7. **Dependencies are explicit**, by story id. "Depends on: US3" beats discovering it at standup.
+8. **Every story carries an id and its parent epic.** Ids are `US1..USn`, flat across the initiative (never restarted per epic); the parent is its `E` id. Ids are assigned once and never renumbered — downstream plans and prompts cite them. A dropped story keeps its id with a line saying why.
 
 ## Output format
 
 ```markdown
-## Story: <short title>
+## US<n> — <short title>
+
+**Epic:** E<n>
 
 **As a** <specific role>
 **I want** <capability>
@@ -70,8 +74,8 @@ Turns a scoped requirement into a set of INVEST-quality user stories with Gherki
 - <explicit exclusion>
 
 ### Dependencies
-- Blocked by: <story / ticket>
-- Related: <story / ticket>
+- Depends on: US<n> (<what it provides>) — or none
+- Related: US<n>
 
 ### Notes
 <implementation hints, links to designs, API contracts — anything reviewers need>
@@ -82,12 +86,13 @@ Turns a scoped requirement into a set of INVEST-quality user stories with Gherki
 - **"As a user" with no role.** Every system has multiple roles; pick one.
 - **"So that the system can..."** — value flows to a *person*, not the system.
 - **AC that restates the story.** "Then the user can do X" with no observable check.
-- **Story that contains both API and UI work for the same capability.** Usually a split candidate.
+- **Story that ships only one layer of a capability** ("the endpoint", "the screen"). It cannot be demoed; merge it back into the capability it belongs to.
 - **AC list with `And` chaining 5 behaviors.** Each one is a separate scenario.
 - **Story that can't be demoed.** If there's nothing to show the stakeholder, it isn't a user story — it's a technical task.
 
 ## Handoffs
 
+- Inside the delivery lane → `requirements-author` (`/dev-refine`) runs this skill as its Step 4 and writes the output to `docs/plans/<NNN>-<initiative>/stories.md`; the `business-analyst` sweep follows when the stories change shared business rules
 - Tests next → `qa/manual/requirements-breakdown` first (distills the stories' business logic, validations, and observable implementation notes into the test basis), then `qa/manual/test-case-writer`; or hand the whole flow to `qa/manual/agents/qa-test-case-designer`
 - API contracts next → `qa/<stack>/skills/api-models`
 - Page objects / UI tests → `qa/<stack>/skills/page-object-design` then `qa/<stack>/skills/ui-test-author`

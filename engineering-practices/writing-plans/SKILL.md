@@ -74,7 +74,9 @@ State it as a fact about the world after the task, not as an activity. If you ca
 
 > **A task that touches both the API tree and the web tree is two tasks.** There is no mixed task at any size, and no estimate justifies one.
 
-This is what makes a task handable to a single agent without it wandering across a boundary it does not own, and it is what makes the ordering mechanical rather than a judgement call — same-stack work is already adjacent. Where a stack-cut task cannot be demonstrated end to end on its own (a backend task whose screen arrives two tasks later), say so in its `Out of scope` rather than pretending the capability landed, and have the contract-first side return an explicit not-implemented response — never a fake success or an empty list.
+This is what makes a task handable to a single agent without it wandering across a boundary it does not own, and it is what makes the ordering mechanical rather than a judgement call — same-stack work is already adjacent.
+
+**Every task also names its agent** — an `**Agent:**` line beside `Stack`, naming the plugin agent or skill that executes it (`be-dotnet`, `be-java`, `be-node`, `fe-react`, `fe-blazor`, `data-architect`, `devops-engineer`, `tooling-engineer`, `qa-api-<stack>` …; `human` tasks name the person or role). One stack, one agent, one session: the agent is who the session is opened as, and it is what `ep-executing-plans` adopts and `ep-delegate-to-subagents` dispatches to. A task whose agent you cannot name is a task whose stack you have not actually decided. Where a stack-cut task cannot be demonstrated end to end on its own (a backend task whose screen arrives two tasks later), say so in its `Out of scope` rather than pretending the capability landed, and have the contract-first side return an explicit not-implemented response — never a fake success or an empty list.
 
 ## Sizing a Task to One Session
 
@@ -127,7 +129,7 @@ Record it on the task with its drivers, so a reader can tell a 95k of many small
 
 Re-derive it whenever the task's files, skills or cited sections change. A stale estimate is worse than none — it is a number someone will trust.
 
-For a plan produced by `solution-planner`, this is `be-shared-session-budget`'s job and it also writes `NEXT-PROMPTS.md`; here the same cost model applies to a plan that never went through that pipeline.
+For a plan produced by `solution-planner`, this is `be-shared-session-budget`'s job and it also writes `NEXT-PROMPTS.md`; here the same cost model applies to a plan that never went through that pipeline, and the prompts live inside the plan itself (see **Prompts — one per task** below).
 
 ## Bite-Sized Task Granularity
 
@@ -157,10 +159,10 @@ For a plan produced by `solution-planner`, this is `be-shared-session-budget`'s 
 
 **Tasks** — in the order they are done:
 
-| # | Task | Stack | Deliverable | Est. | Depends on |
-|---|---|---|---|---|---|
-| 1 | T1 — [name] | `be` | [the observable result] | ~95k | none |
-| 2 | T2 — [name] | `fe` | [the observable result] | ~120k | T1 |
+| # | Task | Stack | Agent | Deliverable | Est. | Depends on |
+|---|---|---|---|---|---|---|
+| 1 | T1 — [name] | `be` | `be-dotnet` | [the observable result] | ~95k | none |
+| 2 | T2 — [name] | `fe` | `fe-react` | [the observable result] | ~120k | T1 |
 
 ---
 ```
@@ -174,6 +176,7 @@ The task table is the plan's index: it is how a reader sees the order and what e
 
 **Deliverable:** [the one observable thing that exists when this task is done]
 **Stack:** `be` | `fe` | `ts` | `data` | `infra` | `qa` | `docs` | `human` — exactly one
+**Agent:** `<plugin agent or skill that executes this task>` — exactly one
 **Est. context:** ~<n>k — [the drivers: files created/modified, skills, sections cited]
 **Depends on:** T<n> ([what it provides]) — or `none`
 
@@ -215,6 +218,28 @@ git commit -m "feat: add specific feature"
 ```
 ````
 
+## Prompts — one per task
+
+**One task is one session, so the plan ends with a `## Prompts — one per task` section: one paste-ready block per task, in task order.** The block is the whole of what the next session is told, so it is complete on its own:
+
+````markdown
+### Prompt — T<N> — [Component Name]
+
+```
+You are `<agent>`. Read, in this order: `docs/plans/<NNN>-<feature>.md` §T<N> · `CLAUDE.md` · [the files this task must read as patterns, exact paths] · [the spec sections it cites].
+
+Deliver: [the task's Deliverable, verbatim].
+
+Traps this task will hit: [the 2–4 things specific to this task — the convention that is easy to miss, the file that looks like the pattern but is not, the migration that must run before the test, the version-lane API that does not exist here].
+
+When done: run [the exact build/test gate command], commit `[what to commit]` as `[commit message]`, write the record back into §T<N> of the plan, and rewrite the prompt blocks below yours if what landed differs from what they assume.
+```
+````
+
+- **Built from the task's own block, copied rather than paraphrased** — the deliverable, the files and the gate are the task's; the prompt adds only the reading order and the traps.
+- **Living text.** A task that lands something different from what the plan predicted rewrites the prompt blocks *below* it before it stops — in place, with no changelog appended. A prompt block that still names a file the previous task renamed is the most expensive kind of stale.
+- **No block says "see task".** A session opened from the block must be able to start without scrolling up.
+
 ## No Placeholders
 
 Every step must contain the actual content an engineer needs. These are **plan failures** — never write them:
@@ -223,13 +248,16 @@ Every step must contain the actual content an engineer needs. These are **plan f
 - "Write tests for the above" (without actual test code)
 - "Similar to T<N>" (repeat the code — the engineer may be reading tasks out of order)
 - A `**Deliverable:**` that names an activity ("implement the service") instead of a result
+- A task with no `**Agent:**` line, or one naming two agents
+- A prompt block that says "see T<N>" or "as above" instead of carrying its own reading list, traps and gate
 - Steps that describe what to do without showing how (code blocks required for code steps)
 - References to types, functions, or methods not defined in any task
 
 ## Remember
 - Tasks, numbered `T1…Tn`, in the order they are done — no slices, no phases, no grouping layer
-- One stated deliverable per task, plus its `Stack`, its `Est. context` and its `Depends on`
+- One stated deliverable per task, plus its `Stack`, its `Agent`, its `Est. context` and its `Depends on`
 - One stack per task — a task spanning the API tree and the web tree is two tasks, at any size
+- One paste-ready prompt block per task under `## Prompts — one per task`, rewritten in place by the task that changes what it assumes
 - The estimate is a target, never a gate: one deliverable, one stack, a green tree at the boundary all outrank it
 - Exact file paths always
 - Complete code in every step — if a step changes code, show the code
@@ -253,6 +281,10 @@ After writing the complete plan, look at the spec with fresh eyes and check the 
 **6. Stack check:** Every task names exactly one `Stack` from the eight. Run it as a mechanical check on the `Files` lists — a task whose files span two trees is two tasks, and the split is an ordering, not a redesign.
 
 **7. Sizing check:** Every task carries an `Est. context` with its drivers, and the header table's `Est.` column agrees with it. Every estimate over ~150k either names its natural split point or says why the task is one thing anyway; every one under ~80k was checked against the next same-stack task and either merged or left alone deliberately.
+
+**8. Agent check:** Every task names exactly one `Agent`, it matches the task's `Stack` (a `be` task run by `fe-react` is a mis-cut), and the header table agrees.
+
+**9. Prompt check:** There is one prompt block per task, in task order, each carrying the deliverable verbatim, an exact reading list, its traps, and the gate command. Read each block as if it were the only thing you had: if you would need the task above it to start, the block is incomplete.
 
 If you find issues, fix them inline. No need to re-review — just fix and move on. If you find a spec requirement with no task, add the task.
 

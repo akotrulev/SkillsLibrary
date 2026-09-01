@@ -62,7 +62,7 @@ The skills live at the repo's `business-analysis/skills/` folder when working in
 
 ## Working on the existing business model (brownfield)
 
-Most requests arrive on a project whose KB is already populated — "does this story conflict with anything", "the discount rule changed, update the model", "this decision table is stale". Do **not** rebuild the model. Instead: **orient**, then pick a **mode** (fix or extend), then re-enter only the steps the change touches.
+Most requests arrive on a project whose KB is already populated — "does this story conflict with anything", "the discount rule changed, update the model", "this decision table is stale". Do **not** rebuild the model. Instead: **orient**, then pick the **task mode** (FIX or EXTEND — the two brownfield shapes the report names), then re-enter only the steps the change touches.
 
 ### Orientation pass — always first, before any brownfield change
 
@@ -91,7 +91,7 @@ There is no build to run; the equivalent check is **internal consistency** — e
 | Conventions observed | ID scheme and annotation grammar in use, where they narrow `ba-project-memory` |
 | Known unknowns | unmodelled features; `#volatile`: the source documents, which change outside this repo |
 
-### Mode A — Fix a wrong / stale / contradictory artifact
+### FIX — a wrong / stale / contradictory artifact
 
 Root-cause first; do not patch the visible symptom. **Reproduce the defect** by showing the contradiction with source traceability (artifact says X, source line says Y — quote both), then **triage the class**:
 
@@ -101,7 +101,7 @@ Root-cause first; do not patch the visible symptom. **Reproduce the defect** by 
 
 Make the **smallest correct change** — touch only the affected artifact and its `[[links]]`, keep IDs stable, don't renumber or restructure the KB unless asked. Then **verify**: re-run the conflict sweep (`ba-feature-conflict-check`) scoped to the touched artifacts, confirm every changed element traces to its source, and update `INDEX.md`. Finally **sweep the class, not the instance** — a stale term or mis-transcribed rule usually has siblings (search the KB (Grep) for the same term/rule; terminology drift never lives in one file).
 
-### Mode B — Extend (a new / changed feature into the existing model)
+### EXTEND — a new / changed feature into the existing model
 
 This is Analyze mode framed as brownfield re-entry — the pipeline already fits; the discipline is **reuse, never fork**:
 
@@ -109,7 +109,7 @@ This is Analyze mode framed as brownfield re-entry — the pipeline already fits
 2. Re-enter **Step 2** (normalize *only the new/changed* requirements against the **existing** glossary — new terms are staged, colliding terms are drift findings), **Step 3** (extend the existing flow/grid/table artifacts where the entity or decision point already exists — never create a parallel `ENT-` for an entity the KB already models), then **Step 4–5** as normal (the sweep is the whole point of having the KB).
 3. Keep every KB rule: stable IDs, source traceability, annotation grammar, read-first / update-after.
 
-### Branch & finish (both modes)
+### Branch & finish (FIX and EXTEND)
 
 The KB is versioned and diffable by design — work on a branch when changing repo files, unless told otherwise; the KB diff **is** the review artifact. Commit/push only when the user asks.
 

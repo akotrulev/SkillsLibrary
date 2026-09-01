@@ -29,16 +29,17 @@ on the fly.
 
 For each task:
 1. Mark as in_progress (TaskUpdate)
-2. Follow each step exactly (plan has bite-sized steps)
-3. Run verifications as specified
-4. **Confirm the task's stated `Deliverable` actually exists** — the endpoint
+2. **Run it as the agent the task's `Agent:` line names** — `Read` that agent's definition and follow its skill-loading protocol for the task's steps; a task whose agent you cannot resolve is a blocker, not a licence to improvise the stack's patterns. Where the plan carries a prompt block for the task (`## Prompts — one per task`), its reading list and traps are the first thing you read.
+3. Follow each step exactly (plan has bite-sized steps)
+4. Run verifications as specified
+5. **Confirm the task's stated `Deliverable` actually exists** — the endpoint
    answers, the migration applied, the test file runs. The deliverable is what
    "done" means; the steps are only how you got there. **Stay inside the task's
    stack:** every task names exactly one, and a file outside that tree in the
    task's `Files` list means the task was mis-cut — that is a blocker to raise,
    not something to fix by widening your reach
-5. Mark as completed (TaskUpdate)
-6. **Write the record back into the plan** — status and `file:line` evidence, the
+6. Mark as completed (TaskUpdate)
+7. **Write the record back into the plan** — status and `file:line` evidence, the
    criteria ticked in place, an append-only execution-log row, and anything you
    built differently from the plan. This is part of the task, not a write-up
    afterwards. **Then, where the plan pack has a `NEXT-PROMPTS.md`** (a
@@ -49,8 +50,12 @@ For each task:
    opens a wave, and every lane that just became runnable needs a block. Stopping
    mid-task keeps the block on the **same** task with a `Picking up from:` line;
    a blocked lane keeps its block and names its blocker and owner, because
-   deleting it loses the lane.
-7. **Checkpoint — report, then continue:** post a short summary and continue to
+   deleting it loses the lane. **Where the plan carries its own `## Prompts —
+   one per task` section instead** (an `ep-writing-plans` plan), rewrite the
+   prompt blocks of the tasks below yours wherever what you landed differs from
+   what they assume — a renamed file, a changed signature, a gate that moved —
+   in place, no changelog.
+8. **Checkpoint — report, then continue:** post a short summary and continue to
    the next task without waiting for a reply. Include:
    - the task just finished (id + name, its stack and lane)
    - its deliverable, and the evidence it exists
@@ -102,7 +107,8 @@ After all tasks complete and verified:
 - Reference skills when plan says to
 - Tasks are the unit of work — never call one a slice or a phase, in the plan or in a report
 - Run them in the plan's order; a task that can't start where it sits is a blocker
-- Write the record back into the plan before checkpointing, and rewrite the lane's `NEXT-PROMPTS.md` block where the pack has one — the plan is the record, the prompts are only what's next
+- Run each task as the agent its `Agent:` line names; an unresolvable agent is a blocker
+- Write the record back into the plan before checkpointing, and rewrite the lane's `NEXT-PROMPTS.md` block where the pack has one, or the plan's own prompt blocks below yours where it carries them — the plan is the record, the prompts are only what's next
 - Stay inside the task's stack; a file outside its tree is a mis-cut task, which is a blocker, not a licence to widen
 - A task's `Est. context` is a plan-time target, not a budget to manage mid-run — if the session is running long, that is a finding for the plan, not a reason to cut the task short
 - Checkpoint after each task (deliverable + evidence + files touched + verification output), then continue — unless the user asked to run through to the end

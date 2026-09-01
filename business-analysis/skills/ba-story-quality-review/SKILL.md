@@ -45,7 +45,7 @@ Apply per story. Each failed check becomes one finding row with a severity.
 - **N**egotiable — intent, not an implementation spec in disguise
 - **V**aluable — the so-that survives a stakeholder sniff test
 - **E**stimable — enough info to size; unanswered design questions are findings
-- **S**mall — fits a sprint; API + UI for the same capability in one story is a split candidate
+- **S**mall — fits a sprint; two capabilities in one story is a split candidate. A story that ships only one *layer* of a capability ("the API", "the screen") is not small, it is undemoable — verdict **Not a story**, fix is to merge it back
 - **T**estable — every AC objectively verifiable
 
 **Acceptance criteria quality**
@@ -99,7 +99,7 @@ Calibrate to the stated purpose: for a *testability* review, silent validations 
 |----------|------------------|--------------------------------------------|--------------------------------------------|
 | blocker  | ST-13 AC2 | "loads fast" — unfalsifiable | Quantify: e.g. p95 < 2s; owner to confirm |
 | major    | ST-13 AC1 | `And` chain hides 3 behaviors | One Given/When/Then per behavior |
-| major    | ST-14 | API + UI in one story | Split by interface; same epic |
+| major    | ST-14 | Two capabilities (export + schedule) in one story | Split by workflow step; same epic |
 
 ## Backlog-level findings *(batch reviews)*
 | Severity | Scope | Issue | Suggested fix |

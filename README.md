@@ -185,7 +185,7 @@ A 17th, **`ep-code-comments`**, also ships in **all fifteen** plugins: it is the
 
 | Command | In | Runs |
 |---|---|---|
-| `/ep-brainstorming` | all eight stack plugins + `devops` | idea → approved design/spec in `docs/specs/` |
+| `/dev-design` | all eight stack plugins + `devops` | one clear feature → approved technical design/spec in `docs/specs/` (loose or multi-capability ask → `/dev-refine`) |
 | `/dev-plan-feature` | ″ | approved spec → bite-sized implementation plan in `docs/plans/` |
 | `/dev-build` | ″ | execute a written plan task-by-task with checkpoints |
 | `/ep-spec-vs-code-audit` | ″ | code vs a spec / stories → requirement register + verdicts |

@@ -200,7 +200,7 @@ Fixes: honest limits, per §2.5.
 - **Fork drift** — the single largest risk. Mitigated by gitignoring `dist/` and never committing an export.
 - **Regression by later plans** — exactly what happened to `TOKEN-OPTIMIZATION-PLAN.md` Phase 1 when the conformance rollout re-inflated descriptions under a contradicting budget. Mitigated by the A4 CI gate and by this plan explicitly deferring to `TOKEN-OPTIMIZATION-PLAN.md`'s numbers rather than restating its own.
 - **Track B flattening the writing** — over-mechanizing turns nuanced guidance into a checklist that loses the judgment the frontier lanes depend on. Mitigated by §2.4: nothing may make the Claude experience worse, and B3 converts *procedures* to steps, never *judgment* to rules.
-- **Harness capability gaps we cannot close** — no sub-agent dispatch means `ep-delegate-to-subagents` and `ep-parallel-agents` are simply unsupported on some targets. Declare it (§2.3); do not simulate it.
+- **Harness capability gaps we cannot close** — no sub-agent dispatch means `ep-delegate-to-subagents` (plan execution and independent fan-out alike) is simply unsupported on some targets. Declare it (§2.3); do not simulate it.
 - **Fixture maintenance** — the Stage A3 fixtures rot. Keep them small and version-pinned; three fixtures, not thirty.
 
 ## 16. Open questions (for the owner)
