@@ -44,10 +44,10 @@ Confirm at most 2–3; infer the rest from the suite.
 | Steps (numbered, atomic) | `When` (the action under test) + supporting `Given`s |
 | Expected Result | `Then` (+ `And` for additional observable outcomes) |
 | Test Data | Inline step parameters, or an `Examples:` table when ≥2 rows share one behavior |
-| Priority (P1/P2/P3) | Tag `@p1` / `@p2` / `@p3` |
-| Type (functional/negative/boundary/edge) | Tag `@negative` / `@boundary` / `@edge` (functional needs none) |
-| Technique (EP/BVA/…) | Drives Outline-vs-scenarios choice (see #4); not a tag |
-| Coverage Summary AC mapping | Tag `@AC-<n>` on each scenario so traceability survives into living docs |
+| Priority (P1/P2/P3) | Tag `@p1` / `@p2` / `@p3`; every `@p1` also gets `@regression` — P1 is the suite's regression floor |
+| Type (positive/negative) | Tag `@negative` (positive needs none); add `@boundary` when the Technique column says BVA, `@edge` when it says error guessing |
+| Technique (EP/BVA/…) | Drives Outline-vs-scenarios choice (see #4) and the `@boundary`/`@edge` tags above; not a tag itself |
+| Source (`AC2` / `BR-1` / `TP-012` / `#observed` / `#assumption`) | Tag `@AC-<n>` / `@BR-<n>` / `@TP-<n>` on each scenario so traceability survives into living docs; `#assumption` cases get `@assumption` and stay out of `@regression` until confirmed |
 | Cleanup block | **Not** Gherkin — handed to `gherkin-step-code` as `@AfterScenario`/`After` hook notes (record it in the handoff, not the `.feature`) |
 
 ### 2. Declarative over imperative (the central rule)
@@ -80,7 +80,7 @@ Maintain one **step catalog** across the whole suite. Before writing a new step,
 
 ### 6. Tags
 
-`@p1/@p2/@p3` (priority) · `@smoke`/`@regression` (tier) · `@negative`/`@boundary`/`@edge` (type) · `@AC-<n>` (traceability) · `@web`/`@mobile` (platform, only if the suite spans both). Feature-level tags are inherited — put `@regression` at the top and only override per scenario.
+`@p1/@p2/@p3` (priority) · `@smoke`/`@regression` (tier — `@regression` = every P1) · `@negative`/`@boundary`/`@edge` (type) · `@AC-<n>`/`@BR-<n>`/`@TP-<n>`/`@assumption` (traceability, from the Source column) · `@web`/`@mobile` (platform, only if the suite spans both). Feature-level tags are inherited — put `@regression` at the top and only override per scenario.
 
 ## Output format
 

@@ -1,5 +1,5 @@
 ---
-description: Use when turning requirements (story, BRD, feature description) into a business-flow model — a BPMN-disciplined Mermaid flowchart with named actors, every decision exit labeled, f…
+description: Turn requirements (story, BRD, feature description) into a BPMN-disciplined Mermaid business flow — named actors, every decision exit labeled including failure and timeout, precondition→action→postcondition steps — persisted to the business-model KB.
 argument-hint: [what to apply this skill to]
 ---
 

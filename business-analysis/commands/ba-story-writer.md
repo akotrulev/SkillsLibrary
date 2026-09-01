@@ -1,5 +1,5 @@
 ---
-description: Use when the user wants to convert a scoped requirement or BA writeup into INVEST user stories with acceptance criteria.
+description: Turn epics or a scoped requirement into INVEST user stories (US1..USn) with Gherkin acceptance criteria, functional and non-functional criteria separated, story-level out-of-scope and dependencies by id — never sliced by layer.
 argument-hint: [what to apply this skill to]
 ---
 

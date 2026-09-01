@@ -1,5 +1,5 @@
 ---
-description: Use when converting a scoped business-analysis writeup into one or more epics — sized for a release/quarter, sliced into user stories, with measurable outcomes.
+description: Turn a scoped requirements document into epics — one capability-sized outcome each, a measurable outcome line, a plain-English section with no technology in it, a slicing strategy and anticipated stories.
 argument-hint: [what to apply this skill to]
 ---
 

@@ -1,5 +1,5 @@
 ---
-description: Use when turning a vague business problem, stakeholder request, or feature idea into a structured single-initiative scoping writeup — goals, scope, stakeholders, constraints, risk…
+description: Turn a vague business problem, stakeholder request or feature idea into a structured requirements document — the ask verbatim, actors, capabilities as outcomes, constraints, success measures, scope, assumptions, risks, open questions.
 argument-hint: [what to apply this skill to]
 ---
 

@@ -48,7 +48,7 @@ The hit policy is the table's declared rule about **multiple matches**. Choosing
 ## Procedure
 
 1. **Name the decision point** and its output(s) ("order shipping cost: money"). One table = one question.
-2. **Collect every contributing rule from every feature** — the KB's existing table plus the new feature's requirements. Tag each rule row with its owning feature + source.
+2. **Collect every contributing rule from every feature** — the KB's existing table plus the new feature's requirements. Tag each rule row with its owning feature (an `E<n>`/`AREA-` id with a label, per `ba-project-memory`) + source (`US<n> AC<k>`, BRD section).
 3. **Enumerate the inputs** and their value ranges/partitions. Inputs must be glossary-checked (two features using "total" differently — pre- vs post-discount — is terminology drift that fakes agreement).
 4. **Build the merged table**; declare the hit policy.
 5. **Run the completeness check**: sweep the input-combination space (collapse with `-` don't-cares); every combination matching no rule → a **gap** finding with the concrete combination as its boundary condition.
@@ -60,10 +60,13 @@ The hit policy is the table's declared rule about **multiple matches**. Choosing
 ```markdown
 # Decision — Order shipping cost (DEC-002)
 
+**Created:** <YYYY-MM-DD>
+**Owned by:** `ba-decision-table`
+**Last updated:** <YYYY-MM-DD> by `ba-decision-table` — <one line what changed>
+
 **Question**: what shipping does an order pay? **Output**: money
 **Hit policy**: F (business decided: free-shipping beats flat-rate — BRD §5.1)
-**Contributed by**: shipping (STORY-31), promotions (STORY-88)
-**Last updated**: <date> — <one line what changed>
+**Contributed by**: E3 shipping (US31), E5 promotions (US88)
 
 ## Inputs
 | Input | Type | Partitions | Glossary |
@@ -74,9 +77,9 @@ The hit policy is the table's declared rule about **multiple matches**. Choosing
 ## Rules
 | # | order_total | promo_free_ship | → shipping | Feature | Source |
 |---|---|---|---|---|---|
-| R1 | ≥$100 | - | $0 | shipping | STORY-31 AC2 |
-| R2 | - | true | $0 | promotions | STORY-88 AC1 |
-| R3 | <$100 | false | $5.99 | shipping | STORY-31 AC1 |
+| R1 | ≥$100 | - | $0 | E3 shipping | US31 AC2 |
+| R2 | - | true | $0 | E5 promotions | US88 AC1 |
+| R3 | <$100 | false | $5.99 | E3 shipping | US31 AC1 |
 
 ## Checks
 - Completeness: ✅ all combinations covered (R1–R3)

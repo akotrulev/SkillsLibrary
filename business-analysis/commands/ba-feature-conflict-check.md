@@ -1,5 +1,5 @@
 ---
-description: Use when checking a new or changed feature against the WHOLE project's business model for conflicts — normalize into trigger/actor/action/data/constraint/state tuples, sweep pairw…
+description: Sweep a new or changed feature against the WHOLE project's business-model KB — normalize into comparison tuples, run the 11-class conflict taxonomy per pair, give every finding a concrete boundary condition, record resolutions as business decisions.
 argument-hint: [what to apply this skill to]
 ---
 

@@ -33,7 +33,7 @@ Per `business-analysis/skills/ba-project-memory`: **read first** — `INDEX.md`,
 
 ### 1. Normalize the new feature
 
-Decompose each of its requirements into the comparison tuple (the FSARC port):
+Decompose each of its requirements into one comparison tuple — the same six elements for every requirement, so two features' requirements can be compared element by element:
 
 | Element | Meaning |
 |---|---|
@@ -96,7 +96,7 @@ Standard CLAUDE.md review format, typed by kind:
 - **Class**: policy stacking (7) · **Severity**: blocker
 - **Boundary condition**: order $100.00, 20% promo + 500 loyalty pts — combined outcome undefined
 - **Resolution (2026-07-12, PO)**: best-offer-wins, no stacking; DEC-001 hit policy → P, promo priority > loyalty. Why: finance forbids double-discounting.
-- **Sources**: STORY-88, STORY-102 · **Artifacts updated**: decisions/order-pricing.md
+- **Pair**: E5 promotions × E6 loyalty · **Sources**: US88, US102 · **Artifacts updated**: decisions/order-pricing.md
 ```
 
 ## Quality bar

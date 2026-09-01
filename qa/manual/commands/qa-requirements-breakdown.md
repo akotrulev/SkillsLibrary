@@ -1,5 +1,5 @@
 ---
-description: Use when the user hands over a story, BRD, acceptance criteria, API contract, or a loose feature description and wants it distilled into a structured, sourced test-basis document…
+description: Use when the user hands over a story, BRD, acceptance criteria, API contract, exploratory session report, or a loose feature description and wants it distilled into a structured, sourced test-basis document before any test cases are written.
 argument-hint: [what to apply this skill to]
 ---
 

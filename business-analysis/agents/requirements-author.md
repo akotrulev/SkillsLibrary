@@ -86,23 +86,11 @@ Rules for the batch:
 
 ### Step 2 — `requirements.md`
 
-Load `ba-scoping-writeup` and follow it. The document is the refined ask, and it carries:
-
-| Section | Holds |
-|---|---|
-| 1. The ask, verbatim | What the user actually said, quoted. Never paraphrased — this is the thing everything else is checked against |
-| 2. Problem & why now | The problem in the business's terms, and what not doing it costs |
-| 3. Actors | Who uses this, what each one is trying to get done, which one matters most |
-| 4. What it must do | The capabilities, as outcomes. Business rules with their numbers. No mechanism |
-| 5. Constraints | What the business imposes — regulatory, contractual, "must reuse X", deadlines. Each marked with who stated it |
-| 6. Success | How anyone will know it worked. A baseline → target where one exists, or an explicitly qualitative measure |
-| 7. Out of scope | What is deliberately not being built, and whether it is deferred or refused |
-| 8. Assumptions | Every inference you made, one line each, separately from anything the user said |
-| 9. Open questions | What is still unsettled, with an owner and what it blocks |
+Load `ba-scoping-writeup` and follow it. **Its output format is `requirements.md`, section for section** — the ten sections it defines (the ask verbatim · problem & why now · actors · what it must do · constraints · success · scope · assumptions · risks · open questions) are the document; do not add, drop or reorder them. The only thing this agent supplies is the file name and the initiative folder.
 
 **Separate what was said from what you concluded.** §1 and §5 are quotation; §8 is inference. A reviewer must be able to challenge your conclusions without re-litigating the ask.
 
-**Exit gate:** the ask is quoted verbatim; every actor has a goal; at least one success measure exists (or its absence is the top open question, never an invented number); scope is split in/out; assumptions are separate from the ask.
+**Exit gate:** the ask is quoted verbatim; every actor has a goal and one is named as the decision-maker; at least one success measure exists (or its absence is the top open question, never an invented number); scope is split in/out/deferred; assumptions are separate from the ask.
 
 ### Step 3 — `epics.md`
 
@@ -135,7 +123,7 @@ Load `ba-story-writer` and follow it. `US1..USn`, grouped under their epics, eac
 4. **No architecture** — no artifact names a stack, a table, an endpoint, a screen, a component or a library, except as a constraint in `requirements.md` §5 attributed to whoever stated it. Run this check hardest on each epic's plain-English section: read it with every technical noun deleted, and if a sentence stops making sense, the sentence is wrong.
 5. **Every epic connects** — each plain-English section's "how it fits" paragraph names what the epic leans on and what becomes possible after it. An epic that fits with nothing is either the first of its kind (say so) or was sliced off from something it still belongs to.
 6. **Questions closed** — every open question is answered, or deferred with a named owner and what it blocks. None floating.
-7. **KB consistency**, where `docs/business-model/INDEX.md` exists — glossary terms and stable IDs reused, not re-coined. Where the stories add or change business rules, name the `business-analyst` conflict sweep as the next step before planning.
+7. **KB consistency**, where `docs/business-model/INDEX.md` exists — glossary terms and stable IDs reused, not re-coined. Where the stories add or change business rules, name the `business-analyst` conflict sweep as the next step before planning. **Terms the requirements coin that the glossary lacks are listed in the run report as "staged for `glossary.md`"** — you never write the KB, but the sweep must not have to rediscover the vocabulary you introduced.
 
 Then hand off: **`/dev-plan-solution docs/plans/<NNN>-<initiative>/`**.
 
@@ -170,7 +158,8 @@ If the input is mid-chain but missing its upstream hook — an epic with no meas
 - **`qa-test-case-designer`** (`qa/manual/agents/`) — turns ready stories into a manual test-case suite; `qa/manual/requirements-breakdown` is its first step and consumes `stories.md` directly.
 - **`be-documenter`** (`backend/_shared/agents/`) — recovers documented areas and business rules from an existing system nobody wrote requirements for. Run it **first** when the input is a legacy system, then author epics and stories from its confirmed areas.
 - **`ep-brainstorming`** (`/dev-design`) — the *other* front door, for one feature whose requirements are already clear and that needs a technical design (`docs/specs/`) before `/dev-plan-feature`. You are the door for anything where the *what* is still loose or spans more than one capability. If the ask arrives here already refined to one clear feature, say so and route to `/dev-design`.
-- **`communication/stakeholder-updates` · `communication/incident-postmortem` · `communication/meeting-notes`** — standalone writing skills; load them directly, no agent needed.
+
+The `qa/*` peers above are not bundled in this plugin; name them in the handoff, never attempt to load them.
 
 ## Output contract
 
@@ -196,6 +185,7 @@ Question rounds: <n> — <how many questions, how many answered>
 Assumptions recorded: <n> — <the load-bearing ones, one line each>
 Open questions: <n> outstanding — <the blocking ones, with owners>
 Coverage: capabilities <n/n> in epics · epics <n/n> with stories · ids contiguous, none reused
+Staged for glossary.md: <terms the requirements coined that the KB lacks, or "none" / "no KB">
 Next: /dev-plan-solution docs/plans/<NNN>-<initiative>/
       <and the `business-analyst` sweep first, when the stories change shared business rules>
 Orientation cache: created | updated | updated (partial — <why>)

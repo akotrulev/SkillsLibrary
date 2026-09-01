@@ -1,5 +1,5 @@
 ---
-description: Use when modeling a business entity's lifecycle (Order, Subscription, User…) as one state × event table shared across ALL features, each transition annotated by its owning feature…
+description: Model a business entity's lifecycle (Order, Subscription, User…) as one state × event grid shared across ALL features, every transition annotated with its owning feature id, and persist it to the business-model KB.
 argument-hint: [what to apply this skill to]
 ---
 

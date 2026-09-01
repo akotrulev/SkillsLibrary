@@ -150,7 +150,7 @@ Every Bug row links to a report filed via `qa/manual/bug-report-writer` — deta
 - <area> — _why_
 
 ### Test-case candidates
-- <behavior worth a formal scripted case> — technique it maps to (e.g. BVA on refund amount) → hand to `qa/manual/test-case-writer`
+- <behavior worth a formal scripted case> — technique it maps to (e.g. BVA on refund amount) → distilled by `qa/manual/requirements-breakdown` (session-report input shape), then `qa/manual/test-case-writer`
 
 ### Automation candidates
 - <flow> — would benefit from an API contract test

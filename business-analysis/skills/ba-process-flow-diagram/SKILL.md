@@ -54,11 +54,14 @@ The timeline is scaffolding; keep it in the flow file under "Event timeline" —
 ````markdown
 # Flow — <Name> (FLOW-001)
 
-**Sources**: <story/BRD/contract refs>
+**Created:** <YYYY-MM-DD>
+**Owned by:** `ba-process-flow-diagram`
+**Last updated:** <YYYY-MM-DD> by `ba-process-flow-diagram` — <one line what changed>
+
+**Sources**: <US<n> / BRD / contract refs> · **Feature**: <E<n> label, or AREA-nnn>
 **Actors**: <list>
 **Trigger**: <the start event>
 **Outcomes**: <every terminal state, incl. failures>
-**Last updated**: <date> — <one line what changed>
 
 ## Diagram
 ```mermaid
@@ -75,7 +78,7 @@ flowchart TD
 ## Steps
 | Node | Actor | Precondition | Action | Postcondition | Source |
 |---|---|---|---|---|---|
-| FLOW-001.4 | System | stock reserved | capture payment via provider | payment captured or declined or timed out | STORY-42 AC2 |
+| FLOW-001.4 | System | stock reserved | capture payment via provider | payment captured or declined or timed out | US42 AC2 |
 
 ## Event timeline
 Order Placed → Stock Reserved → Payment Captured *(pivotal — hands to fulfillment)* → …

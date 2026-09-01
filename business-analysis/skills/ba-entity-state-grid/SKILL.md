@@ -32,7 +32,7 @@ Per `business-analysis/skills/ba-project-memory`: **read first** (`INDEX.md` + t
 1. **Identify the entity and enumerate its states** from the requirements *and* the existing KB model. States are business-meaningful conditions ("Submitted", "Suspended"), not implementation flags. A new feature inventing a near-synonym of an existing state ("Deactivated" vs "Suspended") is terminology drift → glossary check before adding.
 2. **Enumerate the events** — everything any feature does that can move the entity: user actions, system events, timeouts, lifecycle jobs (archival, cleanup, expiry — the classically forgotten writers).
 3. **Fill the grid — every cell.** For each `state × event`: the target state, `—` (illegal by decision), or `?` (unspecified — a finding). Never leave a cell blank.
-4. **Annotate every legal transition with its owning feature** — the feature whose requirements define it. One transition claimed by two features is a **double-fire** finding; a transition no feature owns is an orphan.
+4. **Annotate every legal transition with its owning feature** — the feature whose requirements define it, written as an `E<n>`/`AREA-` id with a label per `ba-project-memory`. One transition claimed by two features is a **double-fire** finding; a transition no feature owns is an orphan.
 5. **Overlay the new feature** (the common case): add its events/states to the existing grid, then read the *whole* grid again — the conflicts are in the cells the new feature changed *and* the cells it silently assumed.
 6. **Run the conflict-surface checklist** (below) and log findings.
 
@@ -54,27 +54,30 @@ Each finding gets a **boundary condition** — the concrete scenario where it bi
 ```markdown
 # Entity — Order (ENT-001)
 
-**Sources**: <refs> · **Features touching this lifecycle**: checkout, fulfillment, refunds, archival
-**Last updated**: <date> — <one line what changed>
+**Created:** <YYYY-MM-DD>
+**Owned by:** `ba-entity-state-grid`
+**Last updated:** <YYYY-MM-DD> by `ba-entity-state-grid` — <one line what changed>
+
+**Sources**: <refs> · **Features touching this lifecycle**: E1 checkout, E2 fulfillment, E4 refunds, AREA-007 archival
 
 ## States
 | State | Meaning | Terminal? | Source |
 |---|---|---|---|
-| Draft | in cart, not submitted | no | STORY-40 |
+| Draft | in cart, not submitted | no | US40 |
 
 ## Transition grid
-Cell = target state `(owning feature)` · `—` = illegal by decision · `?` = unspecified (finding)
+Cell = target state `(owning feature id)` · `—` = illegal by decision · `?` = unspecified (finding)
 
 | ↓ State \ Event → | submit | payment captured | refund requested | 90d inactivity |
 |---|---|---|---|---|
-| Draft | Submitted (checkout) | — | — | Deleted (archival) |
-| Submitted | — | Confirmed (checkout) | ? | ? |
-| Confirmed | — | — | Refunding (refunds) | Archived (archival) |
+| Draft | Submitted (E1) | — | — | Deleted (AREA-007) |
+| Submitted | — | Confirmed (E1) | ? | ? |
+| Confirmed | — | — | Refunding (E4) | Archived (AREA-007) |
 
 ## Guards
 | Transition | Guard | Feature | Source |
 |---|---|---|---|
-| Confirmed → Refunding | within 30 days of purchase | refunds | BRD §6 |
+| Confirmed → Refunding | within 30 days of purchase | E4 refunds | BRD §6 |
 
 ## Open questions
 - ❓ ENT-001: `Submitted × refund requested` = `?` — refunds spec only covers Confirmed. [TBD - ask PO]

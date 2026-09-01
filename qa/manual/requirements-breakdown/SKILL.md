@@ -22,7 +22,7 @@ This is the **ISTQB test-analysis step**: the inputs are the *test basis*; this 
 - The user wants partitions / boundaries / decision-table rules derived → `qa/manual/test-design-techniques`
 - The user wants release-level risk register + quality gates → `qa/manual/test-strategy`
 - The user wants an unscripted exploratory charter → `qa/manual/exploratory-charter-writer`
-- The basis must be built by probing a *live* app because docs are absent → Exploration mode in `qa/manual/agents/qa-test-case-designer` (charter + `exploratory-charter-writer`)
+- Nothing has been explored yet and no docs exist → run Exploration mode in `qa/manual/agents/qa-test-case-designer` (charter + `exploratory-charter-writer`) first; this skill then distills the **session report** it produces
 
 ## Core principle — distill, don't invent
 
@@ -41,7 +41,7 @@ Confirm before analyzing. Ask only what's missing, at most 2–3 questions:
 
 1. **The material** — the story/BRD/contract/description, plus any linked specs (if it references other docs in the repo, `Glob`/`Grep` for them and read them too)
 2. **Scope** — is this the whole feature or one slice? what's explicitly out of scope?
-3. **Where the document should be written** (default: alongside the source, or report inline)
+3. **Where the document should be written** (default: `docs/test-cases/<NNN>-<feature-slug>-basis.md`, `NNN` = the number the suite will take; a project that already keeps basis documents elsewhere wins)
 
 ## Procedure
 
@@ -55,8 +55,24 @@ Confirm before analyzing. Ask only what's missing, at most 2–3 questions:
    | API contract (OpenAPI/Swagger) | endpoints + schemas | per-field validations, required/optional, formats, auth/restrictions, status codes |
    | State diagram / workflow | states + events | the state model, legal/illegal transitions, guards |
    | Business-model KB artifact (`docs/business-model/` flow/entity/decision file) | the artifact's tables + IDs | rules/transitions with sources already traced; open questions + `⚠️ Assumption` items carry over as flags |
+   | Feature document (`docs/features/<NNN>-<slug>.md` from `be-feature-documenter`) | its numbered steps, formulas, "who can do what" table and evidence table | steps → rules (BR) and states; formulas + worked example → data dictionary ranges and rounding; "who can do what" → actors; its open questions carry over; rows tiered `#inferred` there stay `#assumption` here |
+   | Exploratory session report (`exploratory-charter-writer` output, live app) | observations, findings, test-case candidates | every row sourced `#observed <session/finding id>`; a candidate becomes a BR/V row, a finding a V row with the *actual* violation behavior; anything the docs contradict is a ⚠️ conflict, not a fact |
    | Business-rules table | the rules | the rule set (candidate decision table) |
    | Loose description / partial feature | the prose | best-effort extraction; gaps become Open questions — heaviest flagging |
+
+   **OpenAPI, mechanically.** Walk the contract rather than reading it as prose — each keyword lands in one place:
+
+   | Schema / operation keyword | Lands in |
+   |---|---|
+   | `required` array | data dictionary `Required = yes`; one V row per required field ("missing → 400 `<error shape>`") |
+   | `minimum` / `maximum` / `exclusiveMinimum` / `minLength` / `maxLength` / `minItems` / `maxItems` | data dictionary *Range*; one V row per bound (note open vs closed) |
+   | `enum` / `pattern` / `format` | data dictionary *Format*; one V row per field ("value outside enum → …") |
+   | `default` / `nullable` / `readOnly` | data dictionary *Notes* |
+   | each `4xx` response + its schema | the *On violation* column of the matching V row; a `4xx` with no V row is an Open question ("what triggers 409?") |
+   | `security` / scopes per operation | actors & roles; one restriction row per operation-scope pair |
+   | `x-`-extensions, `description` prose | rules (BR) only when they state a decision; otherwise ignored |
+
+   A constraint the schema states and the prose contradicts is a ⚠️ conflict row.
 
 3. **Extract into the seven sections** (see Output). For each, pull from the inputs and cite the source line/section.
 4. **Separate business logic from implementation detail.** Business logic = *what the system decides and why* (rules, calculations, outcomes). Implementation detail = *how*, captured only when observable (server-side re-validation, async processing, caching, expiry windows, pagination sizes, rate limits).

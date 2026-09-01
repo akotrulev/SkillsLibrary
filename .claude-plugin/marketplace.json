@@ -673,6 +673,7 @@
         "./business-analysis/commands/ba-decision-table.md",
         "./business-analysis/commands/ba-feature-conflict-check.md",
         "./business-analysis/commands/ba-story-quality-review.md",
+        "./business-analysis/commands/ba-project-memory.md",
         "./backend/_shared/commands/dev-document-system.md",
         "./backend/_shared/commands/dev-document.md"
       ],

@@ -152,7 +152,3 @@ Left out of scope: <what you deliberately did not touch>
 - **`qa-cicd-<stack>` / `qa-reporting-<stack>`** — the CI lane and reporting artifacts named in §8.
 
 Internal routing (skills this agent loads): basis → `requirements-breakdown` · exploration → `exploratory-charter-writer` (+ `bug-report-writer`) · risk & scope → `test-strategy` · techniques → `test-design-techniques` · document contract → `test-plan-writer` · gate framing → `quality-metrics`.
-
-## Session memory
-
-Given persistent agent memory, record **planning-relevant institutional knowledge**: which repos hold which suites and how they run · coverage-map stable facts (chronically-uncovered areas, quarantined suites) · harness decisions + rationale · recurring open questions and who answered them. Not session state, and not what `docs/agent-context/qa-test-planner.md` already records.

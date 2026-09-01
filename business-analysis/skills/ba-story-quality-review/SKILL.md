@@ -89,37 +89,39 @@ Calibrate to the stated purpose: for a *testability* review, silent validations 
 ## Verdicts
 | Story | Verdict | Blocking findings |
 |-------|---------------------------------------------|-------------------|
-| ST-12 | ✅ Ready | — |
-| ST-13 | 🛠 Needs work | 2 |
-| ST-14 | ✂️ Split candidate | 1 |
-| ST-15 | ❌ Not a story (technical task) | 1 |
+| US12 | ✅ Ready | — |
+| US13 | 🛠 Needs work | 2 |
+| US14 | ✂️ Split candidate | 1 |
+| US15 | ❌ Not a story (technical task) | 1 |
 
 ## Findings
 | Severity | Location | Issue | Suggested fix |
 |----------|------------------|--------------------------------------------|--------------------------------------------|
-| blocker  | ST-13 AC2 | "loads fast" — unfalsifiable | Quantify: e.g. p95 < 2s; owner to confirm |
-| major    | ST-13 AC1 | `And` chain hides 3 behaviors | One Given/When/Then per behavior |
-| major    | ST-14 | Two capabilities (export + schedule) in one story | Split by workflow step; same epic |
+| blocker  | US13 AC2 | "loads fast" — unfalsifiable | Quantify: e.g. p95 < 2s; owner to confirm |
+| major    | US13 AC1 | `And` chain hides 3 behaviors | One Given/When/Then per behavior |
+| major    | US14 | Two capabilities (export + schedule) in one story | Split by workflow step; same epic |
 
 ## Backlog-level findings *(batch reviews)*
 | Severity | Scope | Issue | Suggested fix |
 |----------|-------------|--------------------------------------|----------------------------|
-| major    | EPIC-4 | Children mix two slicing axes | Re-slice by workflow steps |
+| major    | E4 | Children mix two slicing axes | Re-slice by workflow steps |
 
 ## What blocks test design
 <The findings that would stall `qa/manual/requirements-breakdown` — silent validations, contradictions, unfalsifiable AC — so QA knows exactly what to chase. "None" if clean.>
 
 ## Recommended next step
-<one sentence: e.g. "Route ST-13/ST-14 to user-story-writer for repair; ST-12 can proceed to requirements-breakdown now.">
+<one sentence: e.g. "Route US13/US14 to ba-story-writer for repair; US12 can proceed to requirements-breakdown now.">
 ```
+
+Story and epic ids are quoted as the source backlog writes them; where the backlog has none, assign `US<n>`/`E<n>` in reading order and say so, so the findings are citable.
 
 ## Rules
 
 - **Review-only.** Never rewrite a story during the review — point to the fix; `business-analysis/skills/ba-story-writer` applies it. (Library-wide review behavior.)
 - Every finding cites its location (story ID + AC number) so the author can act without re-reading the review.
-- Verdicts are per story; a batch never gets one blended verdict (same honesty rule as RAG status in `stakeholder-updates`).
+- Verdicts are per story; a batch never gets one blended verdict.
 - Don't manufacture findings to look thorough — a clean story gets ✅ and zero rows.
-- Don't re-litigate product decisions; review the story's *quality*, not whether the feature is a good idea (that's `business-analysis` territory, upstream).
+- Don't re-litigate product decisions; review the story's *quality*, not whether the feature is a good idea (that was settled upstream in `ba-scoping-writeup`).
 
 ## Anti-patterns to flag in the backlog
 
@@ -134,3 +136,5 @@ Calibrate to the stated purpose: for a *testability* review, silent validations 
 - Story is really an unscoped initiative → `business-analysis/skills/ba-scoping-writeup`
 - Ready stories, QA next → `qa/manual/requirements-breakdown`, or `qa/manual/agents/qa-test-case-designer` for the full basis → suite flow
 - Review uncovered a live defect reference → `qa/manual/bug-report-writer`
+
+Only `qa/manual/requirements-breakdown` ships in this plugin; the other `qa/*` peers are invoked separately, never loaded here.

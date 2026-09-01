@@ -1,63 +1,61 @@
 ---
 name: ba-epic-writer
-description: Use when converting a scoped business-analysis writeup into one or more epics — sized for a release/quarter, sliced into user stories, with measurable outcomes and a plain-English section (user-story line, what gets built, how it fits with everything else) carrying no technology at all. Triggers: "write an epic for X", "slice this BA writeup into epics", "size this initiative into a quarter". Do NOT use for high-level scoping (`ba-scoping-writeup`) or individual stories with AC (`ba-story-writer`).
+description: Use when converting a scoped requirements document into one or more epics — one capability-sized outcome each, sliced into user stories, with a measurable outcome and a plain-English section (user-story line, what gets built, how it fits with everything else) carrying no technology at all. Triggers: "write an epic for X", "slice this requirements doc into epics", "what are the epics for this initiative". Do NOT use for high-level scoping (`ba-scoping-writeup`) or individual stories with AC (`ba-story-writer`).
 ---
 
 # Epic Writer
 
-Closes the **BA → Epic → Story** chain. Takes a scoped business-analysis writeup and produces one or more epics: each sized for a release or quarter, with a clear outcome, a slicing strategy, an enumeration of child stories, and explicit out-of-scope. Epics are the negotiation surface with product and engineering leadership — bigger than a sprint, smaller than a roadmap.
+The middle of the **requirements → epics → stories** chain. Takes a scoped requirements document and produces one or more epics: each one capability a person gets, with a measurable outcome, a plain-English section, a slicing strategy, an enumeration of child stories, and explicit out-of-scope. **An epic is a capability, not a calendar unit.** Inside the delivery lane every initiative gets epics, however small — `E1..En` are what `solution-planner`'s epic map and delivery plan cite — so an initiative with one capability has one epic, never zero.
 
 ## When to use
 
-- BA writeup is done and the initiative is too big for stories — needs an epic shape first
+- The requirements document is done and its capabilities (§4) need shaping into outcomes before stories are written
 - An existing "mega-story" needs splitting into epics + stories
 - A roadmap item needs to become refinement-ready
-- Multiple teams will touch the same outcome — epics align them around a shared "done"
+- Several people or teams will touch the same outcome — epics align them around a shared "done"
 
 ## When NOT to use
 
 - Vague requirement, no scope yet → `business-analysis/skills/ba-scoping-writeup` first
-- Scoped requirement, ready for stories → `business-analysis/skills/ba-story-writer`
-- Status update to stakeholders → `communication/stakeholder-updates`
-- A single sprint-sized piece of work → write a story, not an epic
+- Epics exist and stories are the ask → `business-analysis/skills/ba-story-writer`
+- Epics authored elsewhere need auditing, not shaping → `business-analysis/skills/ba-story-quality-review`
 
 ## Inputs needed
 
-1. **BA writeup or scoped problem statement** (the `business-analysis` output, ideally)
-2. **Release window / quarter / OKR** the epic should fit into
-3. **Teams involved** and their dependencies
-4. **Success metric(s)** for the epic — measurable, not "improve UX"
-5. **Constraints** that affect slicing — feature flags, deployment cadence, contract changes, compliance
-6. **Known dependencies** — work that must complete before, or in parallel with
+1. **The requirements document** (`requirements.md` from `ba-scoping-writeup`, ideally) — its §4 capabilities are what the epics cover, exactly once each
+2. **Success measures** — from `requirements.md` §6, or the epic's own where one capability has its own signal
+3. **Constraints that affect slicing** — from `requirements.md` §5; compliance, contractual sequencing, a deadline
+4. **Known dependencies** — work that must complete before, or alongside
+5. **Delivery window and teams**, only where the user has them — they shape sizing and the deferred column, never the outcome
 
 ## Procedure
 
-1. **An epic has exactly one outcome.** If you can't write the outcome in one sentence using a user / business term and a measurable change, it's two epics.
-2. **Write the plain-English section before anything else, and write it first for a reason.** Section 2 is the epic in the language of the person who asked for it — a user-story line, what gets built, and how it fits with what already exists. It is not a summary of the sections below and not a translation of them: it is the epic as it was understood, and the rest of the document is the working-out. **If you cannot write it without naming a technology, you do not yet have an epic** — you have a technical task, and the fix is upstream in the scoping, not a better paragraph. Where it disagrees with a section further down, one of the two is wrong; find out which before shipping the epic.
-3. **Slice by outcome, then by team.** Two epics each delivering a shippable outcome beat one epic where Team A blocks Team B for two months.
+1. **Write the plain-English section first.** Section 2 is the epic in the language of the person who asked for it — a user-story line, what gets built, and how it fits with what already exists. It is not a summary of the sections below and not a translation of them: it is the epic as it was understood, and the rest of the document is the working-out. **If you cannot write it without naming a technology, you do not yet have an epic** — you have a technical task, and the fix is upstream in the requirements, not a better paragraph. Where it disagrees with a section further down, one of the two is wrong; find out which before shipping the epic.
+2. **Then the outcome line — an epic has exactly one.** If you can't write it in one sentence using a user / business term and a measurable change, it's two epics. Where the requirements carry no measure, the outcome line carries `[TBD — <who decides>]` in the measurable slot and the gap is the epic's first open question; never an invented number, and never a reason to stop.
+3. **Slice by outcome, then by actor.** Two epics each delivering a usable capability beat one epic where one half blocks the other for two months.
 4. **Spell out the value increment.** What's better for the user or business when the epic is done vs at the start. Vague "platform improvements" with no outcome is a tech-debt item, not an epic.
-5. **Time-box explicitly.** Epics that take a quarter end exactly when planned, never longer. If the epic threatens to exceed the timebox, split or descope — never extend the timebox silently.
-6. **Slicing strategy first, story enumeration second.** Pick a slicing axis (workflow steps, user roles, data variations, CRUD, vertical slices by feature flag) and stick to it across child stories.
-7. **Every epic ships a thin vertical slice.** "Read-only API + UI for the new entity" is a valid first epic; "API only" or "UI only" is usually wrong because nothing ships to a user.
-8. **Out-of-scope is part of the epic.** What is *deliberately* deferred to a follow-up epic, with the reason.
-9. **Risks at the epic level**, not just per story. A risk that affects the whole initiative needs naming early.
+5. **Slicing strategy first, story enumeration second.** Pick a slicing axis (workflow steps, user roles, data variations, read-before-write) and stick to it across child stories.
+6. **Every epic is usable end to end when done.** Its first stories deliver the thinnest complete capability a person can try; a slice a person cannot use is not a slice. Layers ("the API", "the screen") are never epics or stories — they are cut at task level by `solution-planner`.
+7. **Out-of-scope is part of the epic.** What is *deliberately* deferred to a follow-up epic, with the reason.
+8. **Risks at the epic level**, not just per story. A risk that affects the whole initiative needs naming early.
+9. **Where a delivery window is stated, hold it.** An epic that threatens to exceed it is split or descoped — never silently extended.
 
 ## Output format
 
 ```markdown
-# Epic: <short, outcome-shaped title>
+# E<n> — <short, outcome-shaped title>
 
-**Owner:** <name / squad>   **Status:** Draft / Approved / In progress / Done
-**Target window:** <quarter / release / date range>
-**Linked BA:** <link to BA writeup>
+**Status:** Draft / Approved / In progress / Done
+**Covers:** requirements.md §4 — <the capability lines this epic delivers>
+**Delivery window:** <only where the user stated one; otherwise omit the line>
 
 ## 1. Outcome (one sentence)
 When this epic is done, **<who>** can **<do what>** so that **<measurable change>**.
 
 ## 2. In plain English
-<!-- No technology anywhere in this section. No table, endpoint, service, component, library,
-     queue or framework — not even by implication. If it cannot be written without one, the
-     epic is a technical task wearing an epic's clothes. -->
+<No technology anywhere in this section. No table, endpoint, service, component, library,
+ queue or framework — not even by implication. If it cannot be written without one, the
+ epic is a technical task wearing an epic's clothes. Delete this note in the written epic.>
 
 **As a** <actor>, **I want** <the thing they want>, **so that** <why they want it>.
 
@@ -74,54 +72,45 @@ would notice this one connecting to — named by what they are, not by their ids
 the system, say that instead: what it establishes that nothing else has yet.>
 
 ## 3. Why now
-<1–3 sentences: why this quarter, what costs not doing it>
+<1–3 sentences: why this initiative, what not doing it costs>
 
-## 4. Success metrics
-- **Primary:** <metric with baseline → target> (e.g. "Time-to-first-export drops from 4 min to <1 min for 80% of users")
-- **Secondary:** <metric>
+## 4. Success measures
+- **Primary:** <measure with baseline → target> (e.g. "Time-to-first-export drops from 4 min to <1 min for 80% of users")
+- **Secondary:** <measure>
 
 ## 5. Slicing strategy
-<one paragraph naming the axis: workflow / role / CRUD / data variation / feature-flag rollout — and why this axis was chosen>
+<one paragraph naming the axis: workflow / role / read-before-write / data variation — and why this axis was chosen>
 
 ## 6. Child stories (anticipated)
-| # | Story | Slice | Sprint guess |
-|---|-------|-------|--------------|
-| 1 | Read-only list endpoint + minimal UI | First slice (read) | S1 |
-| 2 | Create flow with validation | Add write | S1–S2 |
-| 3 | Bulk operations | Data variation | S2 |
-| ... | ... | ... | ... |
+| # | Story | Slice |
+|---|-------|-------|
+| 1 | A member sees the classes they can book | First slice (read) |
+| 2 | A member books a place on a class with room | Add the action |
+| 3 | A member drops out of a class they booked | Data variation |
+| ... | ... | ... |
 
-These are enumerated, not committed — refinement will produce the real INVEST stories via `business-analysis/skills/ba-story-writer`.
+These are enumerated, not committed — refinement produces the real INVEST stories via `business-analysis/skills/ba-story-writer`. Each line is something a person does, never a layer or a component.
 
 ## 7. In scope / out of scope / deferred
 | In scope | Out of scope | Deferred (next epic) |
 |----------|--------------|----------------------|
 
 ## 8. Dependencies
-- **Blocked by:** <epic / team / external>
-- **Blocks:** <epic / team>
-- **Parallel:** <epic that touches the same area; coordinate>
+- **Blocked by:** <epic / external decision>
+- **Blocks:** <epic>
+- **Parallel:** <epic that touches the same capability; coordinate>
 
 ## 9. Risks
 | Risk | L | I | Mitigation |
 |------|---|---|------------|
 
-## 10. Cross-team contracts
-<APIs / message schemas / feature flags / data shapes that must be agreed before stories start — link to design docs>
-
-## 11. Definition of Done (epic-level)
-- [ ] Primary success metric measurable + measured in prod
+## 10. Definition of Done (epic-level)
+- [ ] Primary success measure is measurable, and measured once live
 - [ ] All in-scope stories `Done`
 - [ ] Out-of-scope explicitly handed to the next epic or accepted as won't-do
-- [ ] Runbook / docs updated
-- [ ] Stakeholder update posted
-
-## 12. Handoffs
-- Per-story refinement → `business-analysis/skills/ba-story-writer`
-- Release / steerco update → `communication/stakeholder-updates`
-- API contract scaffolds → `qa/<stack>/skills/api-models`
-- Test strategy for the epic → `qa/manual/test-strategy`
 ```
+
+Nothing technical belongs in the document: no cross-team contract section, no API list, no data shapes. Those are `solution-planner`'s artifacts (`api-surface.md`, `data-model.md`) and they cite the epic, not the other way round.
 
 ## Anti-patterns to flag
 
@@ -130,13 +119,13 @@ These are enumerated, not committed — refinement will produce the real INVEST 
 - **"How it fits" that only lists dependencies.** "Blocked by E1, blocks E4" is section 8's job and it is already there. This paragraph says what a person can do afterwards that they could not before, and what this leans on that already exists.
 - **Tech-only outcome.** "Migrate to v3 of the library" is not an epic outcome unless you can name the user-facing benefit and metric. Otherwise it's a tech-debt task on a roadmap.
 - **Outcome-less epic.** "Improvements to the orders area" — what improves, by how much?
-- **God epic.** Three quarters of work, ten dependencies, no slicing — it's a program, not an epic; needs to be split.
-- **Time-box drift.** "Originally Q1, slipped to Q3, still tracking" — at slip #2, replan as two epics with new time-boxes.
-- **Slice that ships nothing.** An "API-only" first slice with no UI for two months means nothing ships to a user. Pull in the thinnest UI.
+- **God epic.** Several capabilities, ten dependencies, no slicing — it's a program, not an epic; needs to be split.
+- **Window drift.** "Originally Q1, slipped to Q3, still tracking" — at slip #2, replan as two epics.
+- **Slice that ships nothing.** A first slice a person cannot use means nothing ships. Pull in the thinnest complete capability.
 - **Stories pre-committed in the epic.** Story sizing happens in refinement; the epic enumerates *anticipated* stories, with permission to revise.
 - **Out-of-scope = "not in the epic"**, no rationale. Each deferred item needs a one-liner on why.
-- **No success metric**, or success = "ship the epic". Shipping is not a metric.
-- **Risks copy-pasted from the BA writeup.** Epics introduce new risks (sequencing, parallel work, contract drift) — surface those, don't just inherit.
+- **An invented success number.** "Shipping" is not a measure, and neither is a target nobody stated — an unknown is `[TBD — who decides]` plus an open question.
+- **Risks copy-pasted from the requirements.** Epics introduce new risks (sequencing, parallel work) — surface those, don't just inherit.
 
 ## Examples — outcome shapes
 
@@ -182,57 +171,57 @@ owner can tell you whether this is the thing they asked for.
 
 ## Sizing heuristics
 
-| Symptom | Likely size |
+An epic is one capability a person gets. Size follows from that, not from a calendar:
+
+| Symptom | Shape |
 |---|---|
-| Fits one team, ~4–8 stories, ~1 sprint | **Too small for an epic** — write stories directly |
-| Fits one team, ~10–30 stories, 1 quarter | **Right size** for an epic |
-| Two+ teams, contract changes, multiple deploy windows | **One epic per team** under a shared theme; coordinate via a brief "program" doc |
-| Three+ teams, multi-quarter | **Roadmap initiative** — split into per-quarter epics; each epic has its own outcome |
+| One capability, a handful of stories | **One epic** — small is fine; the epic still exists so the plan can cite it |
+| One capability with several actors or data variations | **One epic**, sliced by actor or variation |
+| Two capabilities that happen to share an area | **Two epics** — one outcome each, "parallel" dependency noted |
+| A capability spanning several delivery windows | **Split by window**, each part usable on its own and with its own outcome line |
 
 ## Rules
 
 - One outcome per epic, written in WHO / DO WHAT / SO THAT MEASURABLE CHANGE form
 - **Every epic carries its plain-English section** — the As-a / I-want / So-that line, what gets built, and how it fits with everything else — and that section names no technology at all
 - **The "how it fits" paragraph names other epics by what they are**, not only by id, and says what becomes possible after this one that was not before
-- Time-box explicit; slip = replan, never silent extension
-- Slicing strategy named (workflow / role / CRUD / data / flag) — applied consistently across stories
-- Every epic ships an end-to-end user-visible slice in its first 2–3 stories
+- Slicing strategy named (workflow / role / read-before-write / data variation) — applied consistently across stories
+- Every epic is usable end to end by its first 2–3 stories
 - Out-of-scope itemized, each with rationale and pointer to the follow-up
-- Success metric measurable and committed (baseline + target)
+- Success measure stated with baseline + target, or `[TBD — who decides]` plus an open question — never invented
 - Dependencies named bidirectionally (blocked-by, blocks, parallel)
 - Risks owned at the epic level, with mitigation
-- Definition of Done is binary checklist — no subjective items
+- Definition of Done is a binary checklist — no subjective items
 - Story enumeration is *anticipated*, not committed — refinement produces the real INVEST stories
+- Where a delivery window is stated, a slip is a replan, never a silent extension
 
 ## What NOT to do
 
-- No epics without measurable success metrics
+- No invented success numbers — an unknown measure is an open question, not a reason to stop
 - No "platform improvements" epics with no user-facing outcome
-- No "API only" or "UI only" first slice unless explicitly time-boxed and the followup is in the same release window
-- No silent time-box extensions; replan instead
-- No copy-pasted risks from the BA writeup — add epic-level risks
-- No DoD items like "tested" — say *which* tests, by which gate (`qa/manual/test-strategy`)
+- No epic or anticipated story that is one layer of a capability ("API only", "UI only")
+- No copy-pasted risks from the requirements — add epic-level risks
+- No DoD items like "tested" — the test gate is the QA peers' to define, not the epic's
 - No epic written for the team's convenience that produces nothing for the user (re-orgs of code that doesn't ship value)
 - No mixing two outcomes in one epic — they are two epics
-- No epic without a named owner
+- No technology anywhere in the document
 
 ## Generation steps
 
-1. Read the BA writeup; refuse to start if the BA is unscoped or has no measurable success criterion (point user back to `business-analysis/skills/ba-scoping-writeup`)
-2. Draft the one-sentence outcome — iterate with the user until WHO / DO WHAT / SO THAT MEASURABLE CHANGE all pass the sniff test
-3. Write the plain-English section (§2): the As-a / I-want / So-that line, what gets built, how it fits. **Read it back with every technical noun removed** — if a sentence stops making sense, rewrite the sentence, do not reinstate the noun
+1. Read the requirements document. If it is unscoped, route back to `business-analysis/skills/ba-scoping-writeup`. If it merely lacks a success measure, proceed — the measure becomes `[TBD — who decides]` and an open question
+2. Write the plain-English section (§2): the As-a / I-want / So-that line, what gets built, how it fits. **Read it back with every technical noun removed** — if a sentence stops making sense, rewrite the sentence, do not reinstate the noun
+3. Draft the one-sentence outcome from it — iterate with the user until WHO / DO WHAT / SO THAT MEASURABLE CHANGE all pass the sniff test
 4. Pick the slicing strategy
-5. Enumerate child stories (titles + slice + rough sprint guess) — note these are anticipated, not committed
+5. Enumerate child stories (titles + slice) — note these are anticipated, not committed
 6. Mark in-scope / out-of-scope / deferred with rationale
 7. Surface epic-level risks and dependencies
 8. Write the Definition of Done as a binary checklist
-9. Hand off to `business-analysis/skills/ba-story-writer` for the first 2–3 stories
+9. Hand off to `business-analysis/skills/ba-story-writer`
 
 ## Handoffs
 
+- Inside the delivery lane → `requirements-author` (`/dev-refine`) runs this skill as its Step 3 and writes `docs/plans/<NNN>-<initiative>/epics.md`
 - Up-stream (vague requirement) → `business-analysis/skills/ba-scoping-writeup`
 - Down-stream (story refinement) → `business-analysis/skills/ba-story-writer`
 - Epics/stories authored elsewhere need a readiness audit → `business-analysis/skills/ba-story-quality-review`
-- Stakeholder update during execution → `communication/stakeholder-updates`
-- Test plan for the epic → `qa/manual/test-strategy`
-- API/DTO contracts that the epic depends on → `qa/<stack>/skills/api-models`
+- Architecture, contracts, task plan → `solution-planner` (`/dev-plan-solution`), a peer agent invoked separately

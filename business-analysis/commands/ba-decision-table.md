@@ -1,5 +1,5 @@
 ---
-description: Use when a business decision point (pricing, eligibility, access, fees, routing) is touched by rules from one or more features — build ONE merged DMN-style decision table per deci…
+description: Model one business decision point (pricing, eligibility, access, fees, routing) as ONE merged DMN-style decision table with a declared hit policy, run the completeness and overlap checks, and persist it to the business-model KB.
 argument-hint: [what to apply this skill to]
 ---
 

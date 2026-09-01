@@ -69,7 +69,8 @@ Re-read **all** files, reconcile drift against the current requirements/codebase
 
 - **Size discipline.** Any file approaching ~2,000 words splits by topic; `INDEX.md` stays one line per artifact. Critical facts near the top of each file.
 - **Short declarative statements**, not essays. "Refunds allowed within 30 days (BRD §6)" — not a paragraph.
-- **Stable IDs + traceability.** Every artifact carries an ID (`AREA-`, `FLOW-`, `ENT-`, `DEC-`, `CONF-` + number); flow nodes are `FLOW-nnn.k`, decision-table rule rows are table-local `R1, R2…` under their `DEC-` id. Everything cites its source requirement (story ID, BRD section, contract path). IDs are never reused after deletion.
+- **Stable IDs + traceability.** Every artifact carries an ID (`AREA-`, `FLOW-`, `ENT-`, `DEC-`, `CONF-` + number); flow nodes are `FLOW-nnn.k`, decision-table rule rows are table-local `R1, R2…` under their `DEC-` id. Everything cites its source requirement — a story as `US<n>` (plus `AC<k>` where one criterion is meant), an epic as `E<n>`, otherwise the BRD section or contract path. IDs are never reused after deletion.
+- **Feature identity.** Wherever an artifact names the feature that *owns* a transition, rule or step, the feature is an id with a label, never a bare word: the epic from the initiative that introduced it (`E2 booking`), or the area for code-derived artifacts (`AREA-003 ordering`). Two initiatives may both have an `E2`, so the label carries the initiative folder when it is not obvious (`E2 booking · 004-workshop`). A free-text feature name with no id is a traceability gap, because nothing downstream can find the story set behind it.
 - **Annotation grammar** (uniform across artifacts):
   - `[TBD - reason]` — known unknown, waiting on a decision
   - `⚠️ Assumption:` — stated but unconfirmed; must be resolvable to a source or removed at refresh

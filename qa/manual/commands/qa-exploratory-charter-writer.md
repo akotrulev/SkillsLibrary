@@ -1,5 +1,5 @@
 ---
-description: Use when the user asks to write a session-based exploratory testing charter — bounded, mission-driven, deliberate exploration of a feature or area with a clear time-box and report…
+description: Use when the user asks to write a session-based exploratory testing charter — bounded, mission-driven, deliberate exploration of a feature or area with a clear time-box and reportable outcome.
 argument-hint: [what to apply this skill to]
 ---
 

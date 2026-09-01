@@ -22,10 +22,9 @@ Turns a scoped requirement into a set of INVEST-quality user stories with Gherki
 
 ## Inputs needed
 
-1. **The scoped requirement or BA writeup** (link or paste)
+1. **The epics** (`epics.md` from `ba-epic-writer`, ideally) and the requirements document they cover
 2. **The user role(s)** the story is for (be specific — "logged-in admin", not "user")
-3. **Definition of Done** the team uses (if non-standard)
-4. **Known constraints** that affect splitting (deployment cadence, feature flags, dependencies)
+3. **Known constraints** that affect splitting (a stated delivery window, compliance sequencing, dependencies)
 
 ## Procedure
 
@@ -77,9 +76,11 @@ Turns a scoped requirement into a set of INVEST-quality user stories with Gherki
 - Depends on: US<n> (<what it provides>) — or none
 - Related: US<n>
 
-### Notes
-<implementation hints, links to designs, API contracts — anything reviewers need>
+### Source
+<the requirements.md §4 lines and business rules this story realises — never implementation hints, designs or contracts; those are solution-planner's>
 ```
+
+**No technology in a story.** No table, endpoint, screen, component or library — the AC describe what a person observes. A business-imposed constraint lives in `requirements.md` §5 and is cited, not restated.
 
 ## Anti-patterns to flag
 
@@ -94,5 +95,6 @@ Turns a scoped requirement into a set of INVEST-quality user stories with Gherki
 
 - Inside the delivery lane → `requirements-author` (`/dev-refine`) runs this skill as its Step 4 and writes the output to `docs/plans/<NNN>-<initiative>/stories.md`; the `business-analyst` sweep follows when the stories change shared business rules
 - Tests next → `qa/manual/requirements-breakdown` first (distills the stories' business logic, validations, and observable implementation notes into the test basis), then `qa/manual/test-case-writer`; or hand the whole flow to `qa/manual/agents/qa-test-case-designer`
-- API contracts next → `qa/<stack>/skills/api-models`
-- Page objects / UI tests → `qa/<stack>/skills/page-object-design` then `qa/<stack>/skills/ui-test-author`
+- Architecture, contracts, task plan → `solution-planner` (`/dev-plan-solution`)
+
+Only `qa/manual/requirements-breakdown` ships in this plugin; the other `qa/*` peers and `solution-planner` are invoked separately, never loaded here.
