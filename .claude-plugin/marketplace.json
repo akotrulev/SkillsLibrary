@@ -7,7 +7,7 @@
   },
   "metadata": {
     "description": "Stack-first skills library covering QA, frontend, backend, data, and business-analysis: install one self-contained plugin per tech stack. `qa-{java,dotnet,typescript}` bundle every QA discipline — API/UI/mobile/performance/LLM/BDD authoring and verification, manual-QA process, CI/CD, reporting, and OWASP-mapped security. `fe-{blazor,react}` are phased frontend dev-stack agents (scaffold → architecture → features → quality → tests → review). `be-{dotnet,java,node}` are phased backend dev-stack agents for design-pattern application, ORM persistence, and Auth0/Cognito service-side auth. `devops` ships the platform lane — container images, IaC, cloud deploys, and build/deploy pipelines. `data` and `business-analysis` round out the database-engineering and cross-feature requirements domains.",
-    "version": "2.30.0"
+    "version": "2.31.0"
   },
   "plugins": [
     {
@@ -589,7 +589,7 @@
     },
     {
       "name": "data",
-      "description": "Self-contained senior data / database engineer plugin across 8 engines — PostgreSQL, SQL Server / Azure SQL, MySQL / MariaDB / Aurora, MongoDB, Redis / Valkey, DynamoDB, Cosmos DB, Elasticsearch / OpenSearch. Covers the full data lifecycle end-to-end: engine selection and version detection, schema / document / container modeling, security (roles / RLS / encryption / fine-grained IAM / DLS-FLS / audit), safe expand-contract online migrations, indexing, and query tuning — from a .NET 10 / Java 21 / Node 24 backend. Each engine skill is version-aware; the four cross-engine _shared skills (schema-design, migrations, caching-patterns, query-optimization) own the cross-engine decisions while the engine skills own the mechanics. Bundles the phased data-architect orchestrator agent — install just this one plugin for a complete database-engineering toolkit.",
+      "description": "Self-contained senior data / database engineer plugin across 8 engines — PostgreSQL, SQL Server / Azure SQL, MySQL / MariaDB / Aurora, MongoDB, Redis / Valkey, DynamoDB, Cosmos DB, Elasticsearch / OpenSearch. Covers the full data lifecycle end-to-end: engine selection and version detection, schema / document / container modeling, security (roles / RLS / encryption / fine-grained IAM / DLS-FLS / audit), safe expand-contract online migrations, indexing, and query tuning — from a .NET 10 / Java 21 / Node 24 backend. Each engine skill is version-aware; the four cross-engine _shared skills (schema-design, migrations, caching-patterns, query-optimization) own the cross-engine decisions while the engine skills own the mechanics. Bundles the phased data-architect orchestrator agent — install just this one plugin for a complete database-engineering toolkit. Also bundles backend/_shared/session-budget, so a task handed to this agent from a solution-planner delivery plan carries its context estimate, and this agent rewrites its lane's ready-to-paste block in NEXT-PROMPTS.md as each task lands.",
       "source": "./",
       "strict": false,
       "author": {
@@ -617,6 +617,7 @@
         "./data/dynamodb",
         "./data/cosmosdb",
         "./data/elasticsearch",
+        "./backend/_shared/session-budget",
         "./engineering-practices/agent-orientation-cache",
         "./engineering-practices/code-comments"
       ],
@@ -686,7 +687,7 @@
     },
     {
       "name": "fe-react",
-      "description": "Self-contained senior frontend React developer plugin for React 19/18 + TypeScript (Next.js App Router / RSC primary, Vite SPA fallback; shadcn/ui + Tailwind default). Covers the full FE build lifecycle end-to-end: project scaffold and rendering-strategy choice, architecture foundations (RSC/'use client' boundary, App Router route topology, state, component library, styling, responsive design), feature build (pages/components/forms with React Hook Form + Zod, API + live/realtime data via RSC fetch/Server Actions/TanStack Query/SSE/WebSocket, motion, UX writing, data-testids), quality layers (accessibility, performance, error resilience, SEO, i18n, PWA/offline), and dev-side tests at both altitudes (Vitest + React Testing Library for components and hooks, plain Vitest for Zod schemas, formatters, stores and extracted async-RSC fetches) — plus version migration (React 18→19, Next 14→15, Pages→App Router), a distinctive-visual-design critique loop, and a one-call read-only conformance audit (/fe-react-audit) that sweeps an existing codebase against every convention above into a saved, re-runnable findings report. Bundles the Auth0 React auth skills and the stack-agnostic design-craft skills (the vendored ui-ux-pro-max design-intelligence corpus that is the source of truth for every design fact — 88 styles, 192 palettes, 74 font pairings, 119 UX guidelines, 105 icons, 34 landing patterns, 17 motion presets, 25 chart types and 22 stack files, searchable offline — plus visual-identity, design-tokens, charts, brand-import, iconography, ux-patterns, landing-patterns, motion, ux-review, theme-presets, ux-writing, ui-code-audit, accessible-by-design, ethical-patterns, ai-experience) and the phased fe-react orchestrator agent — install just this one plugin for a complete React frontend toolkit.Also bundles backend/_shared/session-budget, so a task handed to this agent from a solution-planner delivery plan carries its context estimate, and this agent rewrites its lane's ready-to-paste block in NEXT-PROMPTS.md as each task lands.",
+      "description": "Self-contained senior frontend React developer plugin for React 19/18 + TypeScript (Next.js App Router / RSC primary, Vite SPA fallback; shadcn/ui + Tailwind default). Covers the full FE build lifecycle end-to-end: project scaffold and rendering-strategy choice, architecture foundations (RSC/'use client' boundary, App Router route topology, state, component library, styling, responsive design), feature build (pages/components/forms with React Hook Form + Zod, API + live/realtime data via RSC fetch/Server Actions/TanStack Query/SSE/WebSocket, motion, UX writing, data-testids, and a house data grid on TanStack Table + Tailwind/shadcn), quality layers (accessibility, performance, error resilience, SEO, i18n, PWA/offline), and dev-side tests at both altitudes (Vitest + React Testing Library for components and hooks, plain Vitest for Zod schemas, formatters, stores and extracted async-RSC fetches) — plus version migration (React 18→19, Next 14→15, Pages→App Router), a distinctive-visual-design critique loop, and a one-call read-only conformance audit (/fe-react-audit) that sweeps an existing codebase against every convention above into a saved, re-runnable findings report. Bundles the Auth0 React auth skills and the stack-agnostic design-craft skills (the vendored ui-ux-pro-max design-intelligence corpus that is the source of truth for every design fact — 88 styles, 192 palettes, 74 font pairings, 119 UX guidelines, 105 icons, 34 landing patterns, 17 motion presets, 25 chart types and 22 stack files, searchable offline — plus visual-identity, design-tokens, charts, brand-import, iconography, ux-patterns, landing-patterns, motion, ux-review, theme-presets, ux-writing, ui-code-audit, accessible-by-design, ethical-patterns, ai-experience) and the phased fe-react orchestrator agent — install just this one plugin for a complete React frontend toolkit. Also bundles backend/_shared/session-budget, so a task handed to this agent from a solution-planner delivery plan carries its context estimate, and this agent rewrites its lane's ready-to-paste block in NEXT-PROMPTS.md as each task lands.",
       "source": "./",
       "strict": false,
       "author": {
@@ -726,6 +727,7 @@
         "./frontend/react/skills/styling",
         "./frontend/react/skills/test-ids",
         "./frontend/react/skills/ui-rules",
+        "./frontend/react/skills/data-grid",
         "./auth/auth0-react",
         "./auth/_shared/auth0-concepts",
         "./design/visual-identity",
@@ -1269,7 +1271,7 @@
     },
     {
       "name": "tooling",
-      "description": "Self-contained agent-tooling plugin — turn a project, or a chosen set of its functionalities, into a surface an agent can drive correctly on the first call. The tool-capability-contract skill derives the capability list, typed input/output contracts, multi-step flows, and runtime dependencies from the codebase into one reviewable document; tool-mcp-builder and tool-cli-builder then render that document mechanically into an MCP server (TypeScript SDK, or stack-native .NET / Spring AI when the capabilities are in-process) and a subcommand CLI (commander / System.CommandLine / picocli) that share one response envelope, one closed error vocabulary, clamped paging, and a gate on every destructive capability. Bundles the phased tooling-engineer agent — contract first, code second, every capability smoke-tested before it ships.",
+      "description": "Self-contained agent-tooling plugin — turn a project, or a chosen set of its functionalities, into a surface an agent can drive correctly on the first call. The tool-capability-contract skill derives the capability list, typed input/output contracts, multi-step flows, and runtime dependencies from the codebase into one reviewable document; tool-mcp-builder and tool-cli-builder then render that document mechanically into an MCP server (TypeScript SDK, or stack-native .NET / Spring AI when the capabilities are in-process) and a subcommand CLI (commander / System.CommandLine / picocli) that share one response envelope, one closed error vocabulary, clamped paging, and a gate on every destructive capability. Bundles the phased tooling-engineer agent — contract first, code second, every capability smoke-tested before it ships. Also bundles backend/_shared/session-budget, so a task handed to this agent from a solution-planner delivery plan carries its context estimate, and this agent rewrites its lane's ready-to-paste block in NEXT-PROMPTS.md as each task lands.",
       "source": "./",
       "strict": false,
       "author": {
@@ -1288,6 +1290,7 @@
         "./tooling/_shared/capability-contract",
         "./tooling/skills/mcp-builder",
         "./tooling/skills/cli-builder",
+        "./backend/_shared/session-budget",
         "./engineering-practices/agent-orientation-cache",
         "./engineering-practices/code-comments"
       ],

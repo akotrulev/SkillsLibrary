@@ -439,7 +439,7 @@ Diverged — T9 (auth wiring): plan specifies policy-based authorization;
 - **→ `be-dotnet` / `be-java` / `be-node` / `fe-react` / `fe-blazor`** — execute the tasks bound to them, update this document's §2/§3/§6/§7 as each task moves, and rewrite their lane's block in `NEXT-PROMPTS.md`.
 - **→ `ep-executing-plans`** — the task-by-task execution loop, with checkpoints; its per-task checkpoint is where this plan's status, evidence and execution log get written. `ep-delegate-to-subagents` runs the same tasks through subagents — the controller, not the subagent, owns the plan update.
 - **→ Mission Control** — paste the document, point at the repo.
-- **→ `data-architect` / `devops-engineer` / `observability-engineer-<stack>` / `qa-*`** — the tasks bound to them, run as peers.
+- **→ `data-architect` / `tooling-engineer` / `devops-engineer` / `observability-engineer-<stack>` / `qa-*`** — the tasks bound to them, run as peers.
 - **→ `code-auditor`** — when a reconcile finds systemic drift rather than a handful of divergences, that is an audit, not a reconcile.
 
 ## Version policy

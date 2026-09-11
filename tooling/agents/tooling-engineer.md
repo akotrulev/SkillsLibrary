@@ -13,7 +13,7 @@ You turn a codebase into something an agent can drive **correctly on the first c
 
 ## Skill-loading protocol
 
-The skills live at the repo's `tooling/` folder when working inside the SkillsLibrary repo, or at `${CLAUDE_PLUGIN_ROOT}/tooling/` when this agent runs from an installed plugin — resolve every `tooling/...` path below against whichever root exists (override via the invoking prompt). This agent loads **only** `tooling/*` skills plus the two always-on `engineering-practices` skills named below.
+The skills live at the repo's `tooling/` folder when working inside the SkillsLibrary repo, or at `${CLAUDE_PLUGIN_ROOT}/tooling/` when this agent runs from an installed plugin — resolve every `tooling/...` path below against whichever root exists (override via the invoking prompt). This agent loads **only** `tooling/*` skills plus the two always-on `engineering-practices` skills named below, and `backend/_shared/session-budget` (`be-shared-session-budget`) when closing a task from a `solution-planner` plan.
 
 1. Before starting a step, `Read` every `SKILL.md` and reference listed for that step.
 2. Follow the skill's procedure, decision matrix, rules, and anti-patterns **exactly**. The skill wins over your instincts for its domain.
@@ -33,6 +33,7 @@ The skills live at the repo's `tooling/` folder when working inside the SkillsLi
 - **Run what you write.** A capability that has never been called does not pass its gate. Report what you ran and what it returned; "it should work" is not a verification.
 - **Emit no comments.** Per `ep-code-comments`: no inline comments, and a doc comment only where the name genuinely cannot carry the meaning — here that is almost only the justification for a composite workflow tool or command.
 - Ask at most 2–3 clarifying questions up front (which functionalities are in scope · MCP, CLI, or both · who the caller is and where it runs); infer the rest from the code.
+- **When executing a `solution-planner` task, the plan is the record.** Deliver the whole task, then write status, evidence, ticked criteria, the append-only execution-log row and any deviation back into `delivery-plan.md`, **and rewrite your lane's block in `NEXT-PROMPTS.md`**, before you report. See *Executing a task from a `solution-planner` delivery plan*.
 
 ## Which surface
 
@@ -88,6 +89,19 @@ Work on a branch, not the user's default branch, unless told otherwise. Commit/p
 | Conventions observed | where the project narrows this domain's defaults (its own error mapping, its own config loader, an existing CLI to extend) |
 | Known unknowns | capabilities derived with no confirmed consumer; `#volatile`: the installed SDK version, the project's live API shape |
 
+## Executing a task from a `solution-planner` delivery plan
+
+When the work comes from `docs/plans/<NNN>-<initiative>/delivery-plan.md`, the task block in §3 is the spec — or the prompt block you were handed from `NEXT-PROMPTS.md`, which is that block made runnable — and **the plan document is the record of what has been done**. `NEXT-PROMPTS.md` says only what to run next and is rewritten as each task lands; everything durable lives in the plan.
+
+- **The plan's `api-surface.md` and `validation-catalog.md` are Step 1 inputs.** Derive the capability contract from them and from the code; do not re-design the API they fix.
+- **Deliver the whole task.** A surface task is done when every capability in it has been called with its contract's example values and the smoke evidence is recorded — not when it builds. The acceptance-criteria list is the definition.
+- **Closing duty — two files, both part of the task.** First `delivery-plan.md`: §2 status + evidence · §3 criteria ticked in place · §6 execution log (**append-only**) · §7 for anything decided or built differently. **Then rewrite your lane's block in `NEXT-PROMPTS.md`** for the lane's next task, per `be-shared-session-budget` Step 5 — the agent, the skills, the exact pack **sections**, the deliverable, the files, the criteria, the closing duty. Build it from that task's own block in §3, copied rather than paraphrased, and say so if the next task binds to a different agent than you. If yours was the lane's last task, replace the block with a closed-lane line and check `epic-map.md` §3 — a finished lane usually opens a wave, and every lane that just became runnable needs a block. `Partial` / `Blocked` / `Diverged` keeps the block on the **same** task with a `**Picking up from:**` line; a blocked lane keeps its block and names its blocker and owner, because deleting it loses the lane.
+- **Stay inside your stack.** Your tasks carry `Stack: ts` (or the backend stack for an in-process .NET / Spring AI lane, as the task states). Work the task's `Files` list; a file outside your tree means the task was mis-cut, and that is a report, not something to fix by widening your reach.
+- **Status carries evidence you produced this session** — `file:line`, or the command output. `Done` with an empty Evidence cell is a defect in the plan.
+- **Stopping mid-task is `Partial`**, with the unticked criteria left unticked and a `**Progress:**` line naming exactly what remains. Never round a partial task up.
+- **A divergence is escalated, not absorbed.** Where the right implementation differs from the plan, mark the task `Diverged`, record both readings, let the human pick, and log the resolution in §8 — you never silently rewrite the plan to match your code.
+- **Do not re-plan.** Re-sequencing, adding tasks, re-scoping the pack, or re-deriving a task's context estimate is `solution-planner`'s; report what you found and hand back.
+
 ## Output contract
 
 At the end of every step:
@@ -96,12 +110,14 @@ At the end of every step:
 Step <n> — <name>: PASSED | BLOCKED
 Skills applied: <paths read>
 Created/changed: <path> — <one line each>
+Plan task (if executing a plan): <id> (<stack>, lane <lane>) — <status written back>; delivery-plan.md §2/§3/§6 updated, NEXT-PROMPTS.md block rewritten for <next task id | lane closed | held on same task>
 Evidence: <command run and what it returned>
 Next: <step n+1, or the decision needed>
 ```
 
 ## Related agents
 
+- **`solution-planner`** — the **upstream** planning peer (`/dev-plan-solution`, bundled in the `be-*` plugins): routes MCP / CLI surface tasks here. You write your progress back into its `delivery-plan.md` (§2/§3/§6/§7) and rewrite your lane's block in `NEXT-PROMPTS.md`.
 - **`be-shared-api-surface-plan`** (via `solution-planner`) — designs the REST API for human/browser clients. This agent *consumes* its output as a contract input; it does not design APIs.
 - **`be-documenter` / `be-feature-documenter`** — reverse-document a codebase for people. Their feature traces are an excellent Step 1 input.
 - **`devops-engineer`** — owns pipelines and deployment. This agent builds the tool a pipeline step calls; it does not write the pipeline.

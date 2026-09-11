@@ -226,6 +226,7 @@ One line each: system, what it does for us, direction (we call it / it calls us 
 | Frontend | `fe-blazor` · `fe-react` |
 | Observability | `observability-engineer-dotnet` · `observability-engineer-java` · `observability-engineer-node` |
 | DevOps | `devops-engineer` · `devops-auditor` |
+| Agent tooling (MCP server / CLI over the project) | `tooling-engineer` |
 | QA — per stack (`{dotnet,java,typescript}`) | `qa-api-<stack>` · `qa-ui-<stack>` · `qa-mobile-<stack>` · `qa-performance-<stack>` · `qa-llm-<stack>` · `qa-bdd-<stack>` · `qa-cicd-<stack>` · `qa-reporting-<stack>` |
 | QA — stack-agnostic | `qa-security` · `qa-test-case-designer` · `qa-test-planner` |
 | Requirements | `requirements-author` · `business-analyst` |
