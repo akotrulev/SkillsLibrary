@@ -34,7 +34,7 @@ You work in **two modes**; most real work is the second:
 
 ## Skill-loading protocol
 
-The skills live at `backend/_shared/` and `business-analysis/skills/` when working inside the SkillsLibrary repo, or under `${CLAUDE_PLUGIN_ROOT}/` when this agent runs from an installed `be-dotnet` / `be-java` / `be-node` / `business-analysis` plugin — resolve every path below against whichever root exists.
+The skills live at `backend/_shared/` and `business-analysis/skills/` when working inside the SkillsLibrary repo, or under `${CLAUDE_PLUGIN_ROOT}/` when this agent runs from an installed `be-dotnet` / `be-java` / `be-node` / `be-python` / `business-analysis` plugin — resolve every path below against whichever root exists.
 
 **Owned** (this agent's own lane):
 
@@ -143,7 +143,7 @@ KB artifacts are documents — writing and committing them on the current branch
 - **`code-auditor`** (`ep-feature-audit` / `ep-spec-vs-code-audit`) — **the nearest neighbour, opposite purpose.** Same tracing technique; it asks *"what is wrong with this"* and writes findings for engineers into `docs/audits/`, you ask *"what does this do and for whom"* and write documentation for the business into `docs/business-model/`. Its feature-audit report is a first-class input to your trace step, and your documentation is what a later spec-vs-code audit verifies against. Route there when the ask is really "find the defects".
 - **`qa-test-case-designer`** — your `areas/<area>.md` files are a test basis: the flows and formulas become test conditions, the worked example is the first expected-value test, and the refusals become negative cases.
 - **`qa-security`** — the authorization gates your trace inventories are its starting map; it owns *proving* they hold.
-- **`be-dotnet` / `be-java` / `be-node`** — own the code you are reading. Route anything that should *change* to them.
+- **`be-dotnet` / `be-java` / `be-node` / `be-python`** — own the code you are reading. Route anything that should *change* to them.
 
 ## Output contract
 

@@ -6,7 +6,7 @@
     "email": "alexandur.kotrulev@gmail.com"
   },
   "metadata": {
-    "description": "Stack-first skills library covering QA, frontend, backend, data, and business-analysis: install one self-contained plugin per tech stack. `qa-{java,dotnet,typescript}` bundle every QA discipline — API/UI/mobile/performance/LLM/BDD authoring and verification, manual-QA process, CI/CD, reporting, and OWASP-mapped security. `fe-{blazor,react}` are phased frontend dev-stack agents (scaffold → architecture → features → quality → tests → review). `be-{dotnet,java,node}` are phased backend dev-stack agents for design-pattern application, ORM persistence, and Auth0/Cognito service-side auth. `devops` ships the platform lane — container images, IaC, cloud deploys, and build/deploy pipelines. `data` and `business-analysis` round out the database-engineering and cross-feature requirements domains.",
+    "description": "Stack-first skills library covering QA, frontend, backend, data, and business-analysis: install one self-contained plugin per tech stack. `qa-{java,dotnet,typescript}` bundle every QA discipline — API/UI/mobile/performance/LLM/BDD authoring and verification, manual-QA process, CI/CD, reporting, and OWASP-mapped security. `fe-{blazor,react}` are phased frontend dev-stack agents (scaffold → architecture → features → quality → tests → review). `be-{dotnet,java,node}` are phased backend dev-stack agents for design-pattern application, ORM persistence, and Auth0/Cognito service-side auth; `be-python` is the sandboxed upload-processing worker stack (content-sniffed validation, SVG sanitising, EXIF/GPS strip, rembg, VTracer, DPI verdict, dominant colours, resize ladders, a no-network hardened container, pytest with hostile fixtures). `devops` ships the platform lane — container images, IaC, cloud deploys, and build/deploy pipelines. `data` and `business-analysis` round out the database-engineering and cross-feature requirements domains.",
     "version": "2.31.0"
   },
   "plugins": [
@@ -1073,6 +1073,90 @@
         "./backend/_shared/agents/be-documenter.md",
         "./backend/_shared/agents/be-feature-documenter.md",
         "./observability/agents/observability-engineer-node.md",
+        "./engineering-practices/agents/code-auditor.md"
+      ]
+    },
+    {
+      "name": "be-python",
+      "description": "Self-contained senior Python backend / worker developer plugin (Python 3.13 primary; 3.12 and 3.14 supported) for the one isolated Python worker in an otherwise TypeScript repo: the sandboxed container that processes customer uploads. Covers the pipeline the worker runs — content-sniffed format validation (bytes decide, polyglots and decompression bombs rejected), allowlist SVG sanitising on defusedxml (reject, never strip), total EXIF/GPS/XMP/comment strip with orientation applied first and ICC kept, rembg background removal with the model session built once, VTracer raster-to-SVG tracing whose output passes the same sanitiser, a print-DPI verdict graded from pixels against the print size, dominant-colour extraction excluding transparency, and venue-photo resize ladders (WebP + JPEG, never upscaled) — plus the package skeleton (uv, src layout, ruff, mypy --strict, pydantic-settings, tagged-union Result, Protocol injection, JSON logging to stdout), a multi-stage Dockerfile with model weights baked and checksum-verified at build and no outbound network at runtime (network_mode none or an internal-only network, non-root, read-only rootfs, dropped capabilities, tmpfs scratch) with every job in a spawned child that sets RLIMIT_AS / RLIMIT_CPU / RLIMIT_FSIZE before loading the model, under a wall-clock kill, dev-side pytest unit tests with self-proving hostile fixture builders (GPS JPEG, header-only bomb, polyglot, script SVG, XXE, truncated JPEG) and a marked model lane, and a reviewer whose untrusted-input checklist is applied row by row. Bundles the language-agnostic pattern reference/reviewer, the developer-workflow + read-only audit (ep-*) skills and the code-auditor agent, and the phased be-python orchestrator — install just this one plugin for a complete Python upload-worker toolkit. Also bundles the stack-agnostic solution-planner (/dev-plan-solution) and the be-documenter / be-feature-documenter reverse-documentation agents (/dev-document-system, /dev-document), exactly as the sibling be-* plugins do, so a plan can bind the worker's tasks to be-python and the TypeScript tasks to be-node in one pack.",
+      "source": "./",
+      "strict": false,
+      "author": {
+        "name": "Aleksandar Kotrulev",
+        "email": "alexandur.kotrulev@gmail.com"
+      },
+      "license": "MIT",
+      "keywords": [
+        "python",
+        "backend",
+        "worker",
+        "image-processing",
+        "sandbox",
+        "pillow",
+        "rembg",
+        "vtracer"
+      ],
+      "category": "development",
+      "skills": [
+        "./backend/python/skills/pattern-guide",
+        "./backend/python/skills/pattern-writer",
+        "./backend/python/skills/media-processing",
+        "./backend/python/skills/sandboxed-worker",
+        "./backend/python/skills/unit-testing",
+        "./backend/python/skills/code-review",
+        "./backend/_shared/pattern-guide",
+        "./backend/_shared/code-review",
+        "./backend/_shared/solution-blueprint",
+        "./backend/_shared/data-model-plan",
+        "./backend/_shared/experience-plan",
+        "./backend/_shared/api-surface-plan",
+        "./backend/_shared/integration-plan",
+        "./backend/_shared/epic-map",
+        "./backend/_shared/delivery-plan",
+        "./backend/_shared/session-budget",
+        "./backend/_shared/codebase-survey",
+        "./backend/_shared/feature-trace",
+        "./backend/_shared/business-documentation",
+        "./business-analysis/skills/ba-project-memory",
+        "./business-analysis/skills/ba-process-flow-diagram",
+        "./business-analysis/skills/ba-decision-table",
+        "./business-analysis/skills/ba-entity-state-grid",
+        "./engineering-practices/agent-orientation-cache",
+        "./engineering-practices/code-comments",
+        "./engineering-practices/standards-audit-engine",
+        "./engineering-practices/brainstorming",
+        "./engineering-practices/writing-plans",
+        "./engineering-practices/executing-plans",
+        "./engineering-practices/systematic-debugging",
+        "./engineering-practices/test-driven-development",
+        "./engineering-practices/worktrees",
+        "./engineering-practices/verify-before-done",
+        "./engineering-practices/finish-branch",
+        "./engineering-practices/delegate-to-subagents",
+        "./engineering-practices/requesting-code-review",
+        "./engineering-practices/receiving-code-review",
+        "./engineering-practices/spec-vs-code-audit",
+        "./engineering-practices/feature-audit",
+        "./qa/manual/requirements-breakdown"
+      ],
+      "commands": [
+        "./backend/python/commands/be-python.md",
+        "./backend/_shared/commands/dev-plan-solution.md",
+        "./backend/_shared/commands/dev-document-system.md",
+        "./backend/_shared/commands/dev-document.md",
+        "./engineering-practices/commands/code-auditor.md",
+        "./engineering-practices/commands/dev-design.md",
+        "./engineering-practices/commands/dev-plan-feature.md",
+        "./engineering-practices/commands/dev-build.md",
+        "./engineering-practices/commands/ep-spec-vs-code-audit.md",
+        "./engineering-practices/commands/ep-feature-audit.md",
+        "./qa/manual/commands/qa-requirements-breakdown.md"
+      ],
+      "agents": [
+        "./backend/python/agents/be-python.md",
+        "./backend/_shared/agents/solution-planner.md",
+        "./backend/_shared/agents/be-documenter.md",
+        "./backend/_shared/agents/be-feature-documenter.md",
         "./engineering-practices/agents/code-auditor.md"
       ]
     },

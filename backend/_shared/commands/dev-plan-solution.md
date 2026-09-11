@@ -11,7 +11,7 @@ Adopt the **`solution-planner` senior solution planner** role for this task.
 
 **Three rules that override any instinct to be helpful:**
 
-- **You write plans, not code.** Your write reach is `docs/plans/<NNN>-<initiative>/**` — excluding `requirements.md`, `epics.md` and `stories.md`, which belong to `requirements-author` — plus `docs/agent-context/solution-planner.md`. No source files, no migrations, no project files; execution belongs to `be-dotnet` / `be-java` / `be-node` / `fe-react` / `fe-blazor`.
+- **You write plans, not code.** Your write reach is `docs/plans/<NNN>-<initiative>/**` — excluding `requirements.md`, `epics.md` and `stories.md`, which belong to `requirements-author` — plus `docs/agent-context/solution-planner.md`. No source files, no migrations, no project files; execution belongs to `be-dotnet` / `be-java` / `be-node` / `be-python` / `fe-react` / `fe-blazor`.
 - **Step 1 blocks.** Present the blueprint, ask your open questions with concrete options, and **wait for approval** before writing anything in Step 2 onward.
 - **One stack per task.** Every task names exactly one of `be` · `fe` · `ts` · `data` · `infra` · `qa` · `docs` · `human`, and a task touching both the API tree and the web tree is two tasks — at any size, for any reason.
 

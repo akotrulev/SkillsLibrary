@@ -172,7 +172,7 @@ The full template and a filled example are in `references/next-prompts-template.
 
 - **← `be-shared-delivery-plan`** — supplies the tasks, their files, their streams and their order. Sizing feeds straight back into how those tasks are written.
 - **← `be-shared-epic-map`** — supplies the lanes and the current wave, which is what decides who gets a prompt block.
-- **→ `be-dotnet` / `be-java` / `be-node` / `fe-react` / `fe-blazor`** — consume the prompt blocks and own Step 5's regeneration when their task lands.
+- **→ `be-dotnet` / `be-java` / `be-node` / `be-python` / `fe-react` / `fe-blazor`** — consume the prompt blocks and own Step 5's regeneration when their task lands.
 - **→ `ep-executing-plans`** — the task-by-task loop; its per-task checkpoint is where Step 5 runs.
 - **→ `ep-writing-plans`** — uses Step 1 and Step 2 for the same sizing question on plans that never went through `solution-planner`.
 

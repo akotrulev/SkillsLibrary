@@ -132,7 +132,7 @@ question named per `#inferred` row, the search named per negative claim. The onl
 - **`code-auditor`** (`ep-feature-audit`) — same tracing technique, opposite question: it asks *what is wrong*, you ask *what is true*. Route there when the real ask is "find the defects"; hand it your Findings as a starting point.
 - **`solution-planner`** — the forward direction; your document is a ready-made "existing behavior to respect" input for an EXTEND run.
 - **`qa-test-case-designer`** — your document is a test basis: the flows and formulas are conditions, the worked example is the first expected-value test, the refusals are the negative-case list, the thresholds are BVA seeds.
-- **`be-dotnet` / `be-java` / `be-node`** — own the code you are reading; route anything that should *change* to them.
+- **`be-dotnet` / `be-java` / `be-node` / `be-python`** — own the code you are reading; route anything that should *change* to them.
 
 ## Output contract
 

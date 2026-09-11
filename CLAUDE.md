@@ -14,7 +14,8 @@ You are a senior AI engineer and a senior automation QA engineer. You follow bes
 - **Frontend SPA**: React 19 primary / 18 supported + TypeScript (strict mode), or Blazor when specified
 - **JVM backend**: Java 21 + Spring Boot 3.x
 - **Node backend**: Node 24 (active LTS; 22 maintenance — Node 20 is EOL since Apr 2026) + TypeScript + NestJS or Express
-- **Test runners**: NUnit (.NET), TestNG (Java), Vitest or Jest (TS), Playwright (UI), Appium (mobile)
+- **Python worker**: Python 3.13 primary / 3.12 and 3.14 supported — only for the one isolated upload-processing worker (Pillow, rembg, VTracer); uv + ruff + mypy `--strict`, pydantic at the boundary
+- **Test runners**: NUnit (.NET), TestNG (Java), Vitest or Jest (TS), pytest (Python), Playwright (UI), Appium (mobile)
 - **JVM build tool**: Gradle (Kotlin DSL) for new projects
 - **Auth**: Auth0 — Authorization Code + PKCE for SPAs, Client Credentials for service-to-service
 - **Cloud**: Azure DevOps for pipelines; AWS or Azure for hosting depending on project
@@ -123,6 +124,7 @@ Core stack versions:
 - **.NET 10 primary / 8–9 supported** (EF Core major matches the TFM major; .NET 8 LTS ends Nov 2026).
 - **Java 21 LTS + Spring Boot 3.x.**
 - **Node 24 active LTS / 22 maintenance** — Node 20 is EOL since Apr 2026: flag it, don't target it.
+- **Python 3.13 primary / 3.12, 3.14 supported** — the ML worker stays on 3.13 until `uv lock` resolves every wheel (onnxruntime, rembg, vtracer) for 3.14; Pillow 12 primary / 11 supported. Never up-level `requires-python`.
 - **React 19 primary / 18 tagged fallback** (an 18 pattern is correct for 18, not obsolete); **Next.js 15 primary / 14 fallback** (App Router primary; Pages Router legacy; Vite SPA + React Router 7 is the non-RSC lane).
 - **Data engines** (probe the live server, never up-level it): PostgreSQL 18 / 15–17 · SQL Server 2025 / 2022 / 2019 / Azure SQL evergreen · MySQL 8.4 LTS / 9.x / 8.0 · MongoDB 8.0 LTS / 7.0 · Redis 8.x / 7.2–7.4 + Valkey fork · Elasticsearch 9.x / 8.x + OpenSearch 3.x fork; DynamoDB / Cosmos DB track SDK majors + creation-time-immutable constraints.
 
@@ -175,7 +177,7 @@ Each top-level folder owns a domain, is **stack-first and domain-encapsulated** 
 | `qa/` | Test automation + manual test design, reporting, CI/CD, security scanning | `qa-java` · `qa-dotnet` · `qa-typescript` |
 | `frontend/blazor/`, `frontend/react/` | Frontend dev stacks (+ `design/`, `auth/auth0-*`) | `fe-blazor` · `fe-react` |
 | `design/` | Stack-agnostic aesthetic-craft layer | bundled into `fe-*` |
-| `backend/` | Design-pattern + persistence dev stacks; planning (`solution-planner`) + reverse-docs (`be-documenter`) | `be-dotnet` · `be-java` · `be-node` |
+| `backend/` | Design-pattern + persistence dev stacks; the sandboxed Python upload worker (`backend/python/`); planning (`solution-planner`) + reverse-docs (`be-documenter`) | `be-dotnet` · `be-java` · `be-node` · `be-python` |
 | `observability/` | OpenTelemetry → Grafana telemetry | bundled into `be-*` |
 | `data/` | Database engineering (8 engines) | `data` |
 | `devops/` | Platform/delivery + infra-security | `devops` |

@@ -436,7 +436,7 @@ Diverged — T9 (auth wiring): plan specifies policy-based authorization;
 
 - **← `be-shared-epic-map`** — supplies the epics, the lanes and the waves. The streams table is its §2 at task altitude, and the order respects its §3.
 - **→ `be-shared-session-budget`** — sizes these tasks, writes the `Est. context` lines back onto them, and authors `NEXT-PROMPTS.md` from them.
-- **→ `be-dotnet` / `be-java` / `be-node` / `fe-react` / `fe-blazor`** — execute the tasks bound to them, update this document's §2/§3/§6/§7 as each task moves, and rewrite their lane's block in `NEXT-PROMPTS.md`.
+- **→ `be-dotnet` / `be-java` / `be-node` / `be-python` / `fe-react` / `fe-blazor`** — execute the tasks bound to them, update this document's §2/§3/§6/§7 as each task moves, and rewrite their lane's block in `NEXT-PROMPTS.md`.
 - **→ `ep-executing-plans`** — the task-by-task execution loop, with checkpoints; its per-task checkpoint is where this plan's status, evidence and execution log get written. `ep-delegate-to-subagents` runs the same tasks through subagents — the controller, not the subagent, owns the plan update.
 - **→ Mission Control** — paste the document, point at the repo.
 - **→ `data-architect` / `tooling-engineer` / `devops-engineer` / `observability-engineer-<stack>` / `qa-*`** — the tasks bound to them, run as peers.
