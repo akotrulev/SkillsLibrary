@@ -175,6 +175,11 @@ than a write-up afterwards. When a task is done:
 6. If the task ended partial, blocked or diverged, **the block stays** and gains a
    `**Picking up from:**` line naming what remains — the unfinished bullets are that list. A blocked
    task keeps its block and names what it waits on and who owns it; deleting it loses the lane.
+7. **If step 2 left no blocks at all, the plan is finished — file it.** Rewrite the `Status:` line
+   one last time (what the plan delivered, what is still **unverified**), then `git mv` the plan — or
+   the whole initiative folder — into `docs/plans/implemented/`, keeping its name and its number, in
+   this task's commit. A plan still holding a blocked task's block stays in `docs/plans/`: that folder
+   answers "what is in flight" by being listed, and moving a waiting plan hides the wait.
 
 The prompts section is rewritten, never appended; the durable history is the `As built` notes and
 `## Decisions`, which are append-only. Where the two disagree, the `As built` notes are right.
@@ -189,6 +194,9 @@ The prompts section is rewritten, never appended; the durable history is the `As
 - **An unknown file size is 3k, and it is written as an assumption.** Do not silently guess a number that reads like a measurement.
 - **A task that cannot be run gets a line, not silence.** "Blocked on H1 (Stripe sandbox credentials — owner: Ana)" is the answer to "what do I paste next" for it, and it stays in the section.
 - **A prompt that cannot be written yet is written by the task that unblocks it**, never guessed at plan time — and that duty is on the blocking task, not in a note nobody owns.
+- **The last block carries the filing duty.** Deleting it is what finishes the plan, so it says to
+  rewrite `Status:` and move the plan into `docs/plans/implemented/`. A block that ends without it
+  leaves finished plans sitting in the live folder, which is the one thing that folder is for.
 - **The gate is budgeted and written once**, on the last runnable task. A block that tells an intermediate task to run the build is the rule's most common violation and the most expensive: it pays 12k for a verify loop whose failures belong to tasks that have not been written yet.
 - **The prompt names one task.** A block that hands over two tasks is a block that will get half-done and then re-derived from scratch.
 
@@ -212,7 +220,7 @@ The prompts section is rewritten, never appended; the durable history is the `As
 4. `## Prompts — one per task` has one block per task that has not landed — no more (a landed task's block is deleted), no fewer (a task with no block is a session nobody knows they can start), and each `Blocked on <id>` placeholder is matched by a bullet on that task.
 5. Every block names one task, an exact agent, exact skills, and **sections** rather than artifacts, and carries its traps.
 6. Exactly one block carries the gate — the last runnable task's — with the project's own commands in run order and the instruction to fix what they find. Every other block says `Gate: none` and names what not to run.
-7. Every block ends with the closing duty: the `As built` note, the `Status:` line, deleting its own block, and repairing the ones below it.
+7. Every block ends with the closing duty: the `As built` note, the `Status:` line, deleting its own block, and repairing the ones below it — and the block that will delete the **last** one also carries the move into `docs/plans/implemented/`.
 8. Blocked tasks appear with their blocker and its owner.
 
 ## Handoffs

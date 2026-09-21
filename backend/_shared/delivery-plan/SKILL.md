@@ -82,7 +82,7 @@ produces a plan that is one lane wide.
 
 ## Output
 
-**One self-contained file: `docs/plans/<NNN>-<initiative>/delivery-plan.md`.** It carries the context,
+**One self-contained file: `docs/plans/<NNN>-<initiative>/delivery-plan.md`**, beside the rest of the pack. **The whole initiative folder moves to `docs/plans/implemented/<NNN>-<initiative>/` once every task has landed** — done by the task that deletes the last prompt block, per the format reference §7 — so `docs/plans/` lists what is in flight. `NNN`'s high-water mark spans both folders; a moved plan's number stays spent. It carries the context,
 the streams, the tasks, the decisions and the paste-ready prompt per task. `be-shared-session-budget`
 derives the `**Budget:**` lines and authors the `## Prompts — one per task` section inside this
 document — there is no companion prompt file.
@@ -457,6 +457,7 @@ file to keep in step with it. Three things carry the record, and every executing
 | Building it differently | Both readings on the task block, and the resolution appended to `## Decisions` as a dated `D<n>` once the human picks. A divergence is escalated, never absorbed |
 | Hitting a blocker | The `**Status:**` line and the task block name what it waits on and who owns it. The prompt block **stays** and names the blocker and its owner — deleting it loses the lane |
 | Finishing a capability's last task | That its behavioural deliverable now holds, and how it was checked |
+| Deleting the **last** prompt block | The plan is finished. The `Status:` line rewritten one last time — what the pack delivered, and what is still **unverified** — then `git mv docs/plans/<NNN>-<initiative> docs/plans/implemented/`, the whole folder with every artifact in it, in that task's own commit. **A plan still holding a blocked task's block does not move** |
 
 And the header `**Status:**` line is rewritten by **every** session that lands anything: what is built,
 what is next, and what is built but unverified.
@@ -618,6 +619,7 @@ that lands anything.>
 13. Every `As built` note carries `file:line` or command output read this session. §1, §2, §6 and the
     task table exist, §6 empty before execution starts.
 14. The header `Status:` line says what is built, what is next, and what is built but unverified.
+15. The prompt block that will delete the last block carries the filing duty — rewrite `Status:`, then move the whole initiative folder into `docs/plans/implemented/` — and this pack's `NNN` was taken from the high-water mark across `docs/plans/` **and** `docs/plans/implemented/`.
 
 ## Handoffs
 

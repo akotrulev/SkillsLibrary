@@ -23,7 +23,7 @@ The blueprint is the document the human approves. Everything downstream — data
 
 ## Output
 
-**`docs/plans/<NNN>-<initiative>/blueprint.md`** under the **target project's** root — never the skills-library checkout, never a global directory. `NNN` is zero-padded, scoped to `docs/plans/` (files and folders both count toward the high-water mark); never reuse or renumber. `<initiative>` is a short kebab-case noun phrase (`billing-service`, `tenant-onboarding`), stable for the life of the initiative — the folder name is cited by every other artifact and by every prompt block in `delivery-plan.md`'s `## Prompts — one per task` section.
+**`docs/plans/<NNN>-<initiative>/blueprint.md`** under the **target project's** root — never the skills-library checkout, never a global directory. `NNN` is zero-padded, and its high-water mark spans `docs/plans/` **and** `docs/plans/implemented/` (files and folders both count — a finished pack is moved there, and its number stays spent); never reuse or renumber. `<initiative>` is a short kebab-case noun phrase (`billing-service`, `tenant-onboarding`), stable for the life of the initiative — the folder name is cited by every other artifact and by every prompt block in `delivery-plan.md`'s `## Prompts — one per task` section.
 
 **A filled golden example is at `references/example-blueprint.md`** — all five planner examples describe the same toy initiative (`001-workshop-booking`), so together they show one coherent pack. Shapes and disciplines there are normative; the domain content is illustrative.
 

@@ -65,6 +65,13 @@ For each task:
      that reads as current.
    - Stopping mid-task keeps your block in place with a `Picking up from:` line; a blocked task
      keeps its block and names its blocker and owner, because deleting it loses the lane.
+   - **If your deletion left no blocks at all, the plan is finished — file it.** Rewrite the
+     `Status:` line one last time (what the plan delivered, and what is still **unverified**), then
+     `git mv` the plan into `docs/plans/implemented/` keeping its filename and its number — a
+     `solution-planner` pack moves its whole initiative folder, artifacts and all — and include the
+     move in this task's commit. Say in your checkpoint where the plan went. **A plan still holding
+     a blocked task's block does not move:** it stays in `docs/plans/`, which is what makes that
+     folder answerable by listing it.
 
 8. **Checkpoint — report, then continue:** post a short summary and continue to
    the next task without waiting for a reply. Include:
@@ -73,7 +80,7 @@ For each task:
    - files created/modified
    - the gate: `Gate: none — tests written, not run` on an ungated task, or the actual pass/fail lines and what you fixed if you carried the gate
    - what you wrote back: the `As built` note, the `Status:` line, your block deleted, which blocks below you repaired or wrote
-   - what's next (the next task's id + name)
+   - what's next (the next task's id + name), or, if the plan is finished, where you filed it
 
    This is a **report, not a permission prompt** — you keep going. It exists so
    the user has a natural interception point to correct course mid-plan; the skill
@@ -124,6 +131,8 @@ After all tasks complete and verified:
 - Before checkpointing: the `As built` note, the `Status:` line, `## Decisions` if you diverged,
   your own prompt block deleted, the blocks below yours repaired, and any block that was blocked
   on you written
+- **No blocks left means the plan is done: move it to `docs/plans/implemented/`**, same name, same
+  number, in your commit — unless a blocked task is still holding one
 - Stay inside the task's stack; a file outside its tree is a mis-cut task, which is a blocker, not
   a licence to widen
 - A task's `Budget` is a plan-time target, not a budget to manage mid-run — if the session is

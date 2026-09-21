@@ -18,7 +18,9 @@ Read for five things this example carries that a generic plan does not: every ta
 stack, so the backend and screens of one capability are separate tasks; every task carries its **epic
 and story**; every task carries a **`Budget`** with the drivers behind it; **exactly one task carries
 the gate** (`B7`, the last runnable one) and every other says `Gate: none`; and the plan's **progress
-is the `As built` notes plus the prompt blocks that are left**, not a status column.
+is the `As built` notes plus the prompt blocks that are left**, not a status column. Note also where the
+filing duty sits: `B4` is blocked on a person and outlives the gate task, so **`B4`'s block carries the
+move to `docs/plans/implemented/`**, not `B7`'s.
 
 ---
 
@@ -227,6 +229,9 @@ attributing it is part of this task, and the `As built` note says which task eac
   at minimum: journey J2 has not been walked by a person, the concurrency race on the capacity guard
   has not been exercised, and no email has been sent (`B4` is blocked on `H2`).
 - The plan's `**Status:**` line is rewritten from what the gate actually showed.
+- **The plan is not filed here.** `B4` is blocked on `H2` and still holds a prompt block, so
+  `docs/plans/003-workshop-booking/` stays in `docs/plans/`. Say so in `Status:`. `B4` is the task
+  that will delete the last block, and its prompt carries the move to `docs/plans/implemented/`.
 - **Not in B7:** the contract and integration suites (`qa-api-dotnet`), the E2E journeys
   (`qa-ui-typescript`), the access-control proof (`qa-security`) — and `B4`, which is blocked on `H2`
   and carries its own gate whenever it runs.
@@ -380,7 +385,10 @@ Before you stop:
 **Blocked on B2** for the prompt — B2 writes this block when it lands, from the exact name and payload
 of the `BookingConfirmed` domain event it raises. **And blocked on H2** to run at all: the SendGrid
 sending domain is not verified (`integrations.md` §5), owned by the studio owner, since 2026-08-04.
-`B4` sits below `B7`, so it carries its own gate whenever it runs.
+`B4` sits below `B7`, so it carries its own gate whenever it runs — **and, as the task that will delete
+the last prompt block, it carries the filing duty:** rewrite `Status:` with what the pack finally
+delivered and what is still unverified, then
+`git mv docs/plans/003-workshop-booking docs/plans/implemented/`, the whole folder, in its own commit.
 
 ---
 

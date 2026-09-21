@@ -24,7 +24,8 @@ they disagree, the `As built` notes are right.
 | **Every block carries its traps** | The two to four things specific to that task. This is what the prompt adds to the task block, and it is what earns it its place |
 | **Every block carries a gate line** | `Gate: none` with what not to run, on every block but the last runnable task's. That block carries the whole gate, in run order, and the instruction to fix what it finds |
 | **Every block ends with the closing duty** | The `As built` note, the `Status:` line, delete this block, repair the ones below. Without it the section rots after the first session |
-| **A blocked task keeps its block** | It states its blocker and its owner. A deleted block reads as finished work |
+| **A blocked task keeps its block** | It states its blocker and its owner. A deleted block reads as finished work — and it would file a plan that is still waiting |
+| **The block that deletes the last one files the plan** | Deleting it is what finishes the plan: `Status:` rewritten, then the plan moved to `docs/plans/implemented/`. Without that duty, finished plans sit in the live folder and it stops meaning anything |
 | **A block that cannot be written yet is written by the task that unblocks it** | Guessing it produces the one kind of stale that reads as current |
 | **The budget travels with the prompt** | The session about to spend the context should know what it was authored against |
 
@@ -109,6 +110,10 @@ attributing it is part of this task. Say in your `As built` note which task each
 Close-out:
 - <the docs this plan owes>, and the repository-state note.
 - The honest list of what is built but **unverified**, into the plan's `**Status:**` line.
+- **File the plan.** This deletes the last prompt block, so the plan is finished:
+  `git mv docs/plans/<NNN>-<slug>.md docs/plans/implemented/` — or the whole initiative folder,
+  artifacts and all — same name, same number, in this commit. (If `<blocked id>` is still holding a
+  block, do **not** move it: say so in `Status:` and leave the plan in `docs/plans/`.)
 
 Commit: `<the commit message>`.
 ````
@@ -226,5 +231,6 @@ Before you stop:
   tasks nobody has written yet, and it reports a red tree as its own failure.
 - **When the next task binds to a different agent, say so in the closing duty.** The agent writing the
   repair is not the agent who will run it, and a block that quietly changes hands is one nobody adopts.
+- **The filing duty goes on whichever block will be the last.** Normally that is the gate task's, but a task that was blocked on a person outlives it — then the duty is on *that* block, and the gate task's says the plan stays in `docs/plans/` until it clears. Getting this wrong leaves a finished plan in the live folder, or files one that is still waiting.
 - **Partial / blocked / diverged keeps the block on the same task**, with a `**Picking up from:**` line
   naming what remains and where inside the task to start. The task's unfinished bullets are that list.

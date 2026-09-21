@@ -54,9 +54,9 @@ The skills live at the repo's `business-analysis/skills/` folder when working in
 
 ## Where the artifacts go
 
-**`docs/plans/<NNN>-<initiative>/`** under the **target project's** root — the repo this session is working in, never the skills-library checkout and never a global directory. `NNN` is zero-padded, scoped to `docs/plans/`: take the highest existing prefix (files and folders both count), use `highest + 1`, start at `001`. Never reuse or renumber.
+**`docs/plans/<NNN>-<initiative>/`** under the **target project's** root — the repo this session is working in, never the skills-library checkout and never a global directory. `NNN` is zero-padded, and its high-water mark spans **`docs/plans/` and `docs/plans/implemented/`** — a finished pack is moved there and its number stays spent. List both, take the highest existing prefix (files and folders both count), use `highest + 1`, start at `001`. Never reuse or renumber.
 
-This is the same folder `solution-planner` writes its pack into, on purpose: one initiative, one folder, eleven artifacts, and the handoff between the two agents is a path rather than a paste.
+This is the same folder `solution-planner` writes its pack into, on purpose: one initiative, one folder, ten artifacts, and the handoff between the two agents is a path rather than a paste. The whole folder moves to `docs/plans/implemented/` once every task in the delivery plan has landed.
 
 ```
 docs/plans/<NNN>-<initiative>/

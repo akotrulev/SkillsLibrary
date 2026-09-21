@@ -8,10 +8,16 @@ fresh session needs is *in the file*: the context, the decisions, the tasks, and
 per task. There is no companion file — no `NEXT-PROMPTS.md`, no `HANDOFF.md`. Two files answering
 "what do I run next" is one file and one thing that drifts.
 
-**Path:** `docs/plans/NNN-<slug>.md`, under the **target project's** root — never the skills-library
-checkout, never a global config directory. `NNN` is zero-padded and scoped to `docs/plans/` (files and
-folders both count toward the high-water mark); never reuse or renumber. A `solution-planner` pack puts
-its plan at `docs/plans/<NNN>-<initiative>/delivery-plan.md` beside the rest of its artifacts.
+**Path:** `docs/plans/NNN-<slug>.md` while the plan is live, `docs/plans/implemented/NNN-<slug>.md`
+once every task in it has landed (§8) — under the **target project's** root, never the skills-library
+checkout and never a global config directory. A `solution-planner` pack puts its plan at
+`docs/plans/<NNN>-<initiative>/delivery-plan.md` beside the rest of its artifacts, and the whole folder
+moves.
+
+**`NNN` is zero-padded, and its high-water mark spans both folders** — `docs/plans/` *and*
+`docs/plans/implemented/`, files and folders alike. List both before picking a number. A number is
+never reused and never renumbered, so a moved plan's number stays spent: reusing it would give two
+different plans the same id in every commit message, prompt block and `Depends on` that cites one.
 
 ---
 
@@ -229,10 +235,45 @@ Rules:
   *"B1 and B2 have landed, and their prompts are deleted — a prompt for a finished task is a thing
   someone runs by mistake."* The live prompt set is the plan's progress indicator: what is left to run
   is exactly what is still written down.
+- **When the last block goes, the plan moves.** See §8 — deleting the last prompt block is what
+  finishes the plan, so the task that does it is the task that files it.
 - **Fence the prompt in four backticks** (five around an example that contains four), so the prompt
   itself can carry fenced code and commands.
 
-## 7. Never in a plan
+## 7. A finished plan is moved to `docs/plans/implemented/`
+
+**Deleting the last prompt block is what finishes a plan**, so the task that deletes it is the task
+that files the plan. Before it stops, it:
+
+1. Rewrites the `**Status:**` line one last time — what the plan delivered, and what is still
+   **unverified** (a journey nobody walked, a path only the gate's unit tests exercised, a capability
+   built against a stub). This is the line the next person reads instead of the whole document.
+2. `git mv`s the file into `docs/plans/implemented/`, **keeping its filename and its number** —
+   `docs/plans/030-agent-model-effort-benchmark.md` → `docs/plans/implemented/030-agent-model-effort-benchmark.md`.
+   A `solution-planner` pack moves its **whole initiative folder**:
+   `docs/plans/003-workshop-booking/` → `docs/plans/implemented/003-workshop-booking/`, with every
+   artifact in it, so the plan never loses the pack it cites.
+3. Commits the move with the task's own commit, and says in its report where the plan went.
+
+**`docs/plans/` is what is in flight; `docs/plans/implemented/` is what landed.** That is the whole
+point of the move: the live folder answers "what is being built" by being listed, without anyone
+reading a status line to find out.
+
+**The test is the blocks, not the tasks.** The plan moves when no prompt block is left — no live
+block, no `Blocked on <id>` placeholder, and no blocked task holding one. So:
+
+- **A blocked task keeps the plan in `docs/plans/`.** Its block stays, naming its blocker and its
+  owner; a plan whose only remaining work is waiting on a person is still in flight, and moving it
+  would hide the wait. The filing duty then belongs to *that* block, not to the gate task's — say so
+  in both.
+- **A task marked unnecessary does not.** It keeps its id and its "why", per §3, but it has no prompt
+  block, so it holds nothing up.
+
+**Never delete a plan, and never edit one after it moves.** It is the record of why the code looks the
+way it does, and its `Decisions` and `As built` notes are cited by later plans. A plan that turns out
+to have been wrong gets a new plan saying so, not a rewrite of the old one.
+
+## 8. Never in a plan
 
 These are plan failures, not style:
 

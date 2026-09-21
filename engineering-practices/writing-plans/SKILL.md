@@ -40,10 +40,14 @@ the user, so the same thing has the same name everywhere.
 **Context:** Write the plan on whatever branch you are already on — do not create or check out a branch
 or worktree to author it. Workspace isolation, if any, is `ep-executing-plans`' call at execution time.
 
-**Save plans to:** `docs/plans/NNN-<feature-name>.md`
-- `NNN` is zero-padded and sequential, scoped to `docs/plans/`: list the folder, take the highest
-  existing `NNN` prefix (files and folders both count), use `highest + 1` — `001` if the folder is
-  empty or absent. Never reuse or renumber an existing number.
+**Save plans to:** `docs/plans/NNN-<feature-name>.md` — the live folder. A plan moves to
+`docs/plans/implemented/` once every task in it has landed (format reference §7), and that is done by
+the task that deletes the last prompt block, not by you.
+- `NNN` is zero-padded and sequential, and **its high-water mark spans both folders**: list
+  `docs/plans/` *and* `docs/plans/implemented/`, take the highest existing `NNN` prefix (files and
+  folders both count), use `highest + 1` — `001` if neither folder exists. Never reuse or renumber an
+  existing number; a moved plan's number stays spent, because it is cited by commit messages, prompt
+  blocks and `Depends on` lines that outlive the plan being live.
 - Resolve the path under the **current project's** root — the repo the session is working in — never
   this skills-library checkout and never a global config directory, unless the user explicitly asks
   for a global copy. (A user preference for plan location overrides this default.)
@@ -205,7 +209,7 @@ none — it is a number someone will trust.
 ## Step 6 — Write the task blocks and the prompts
 
 Both shapes are specified in [`./references/plan-format.md`](./references/plan-format.md) §4 and §6.
-Two rules are easy to get wrong and expensive when you do:
+Three rules are easy to get wrong and expensive when you do:
 
 - **Every task but the last carries `**Gate: none**`**, naming the commands it must not run. The last
   runnable task carries the whole gate, in run order, and **fixes what it finds rather than handing it
@@ -215,10 +219,15 @@ Two rules are easy to get wrong and expensive when you do:
   write `**Blocked on <id>** — <id> writes this prompt when it lands, from <what it will then know>.`
   and put "write B4's prompt block" in the blocking task's bullets **and** in its own prompt's closing
   duty. Guessing the block produces the one kind of stale that reads as current.
+- **The block that will delete the last prompt carries the filing duty.** Deleting the last block is
+  what finishes the plan (§7), so that block's closing duty says: rewrite the `Status:` line with what
+  landed and what is unverified, then `git mv` the plan — or the whole initiative folder — into
+  `docs/plans/implemented/`, same name, same number, in the task's own commit. Where a blocked task
+  will still be holding a block, say so instead: that plan stays in `docs/plans/` until it clears.
 
 ## No Placeholders
 
-The format reference §7 lists what is never in a plan. The two worth repeating while you write:
+The format reference §8 lists what is never in a plan. The two worth repeating while you write:
 **"similar to B2" is not content** — the executing session may read the tasks out of order, so repeat
 it — and **a `**Status:**` line that says "in progress"** without saying what is built and what is
 unverified is worse than no status at all.
@@ -230,7 +239,7 @@ After writing the complete plan, look at the spec with fresh eyes and check the 
 1. **Grounding:** every row of `## 1.`'s gap table traces to a task, and every task traces back to a
    row. List any gap in either direction.
 2. **Spec coverage:** skim each section of the spec. Can you point to a task that implements it?
-3. **Placeholder scan:** search the plan for the format reference's §7 list. Fix what you find.
+3. **Placeholder scan:** search the plan for the format reference's §8 list. Fix what you find.
 4. **Type consistency:** do the types, signatures and property names in later tasks match what earlier
    tasks define? A function called `clearLayers()` in B3 but `clearFullLayers()` in B7 is a bug.
 5. **Order check:** read the tasks in order and ask, at each one, "could I actually start this now?"
@@ -248,7 +257,10 @@ After writing the complete plan, look at the spec with fresh eyes and check the 
 10. **Gate check:** exactly one task carries the gate, it is the last runnable one, its commands are
     the project's own and in run order, and every other task says `**Gate: none**` with what not to run.
     The ungated-boundary cost is stated in the plan.
-11. **Prompt check:** one block per task, in task order, each carrying the deliverable verbatim, an
+11. **Filing check:** the block that will delete the last prompt — normally the last runnable task's —
+    carries the duty to rewrite `Status:` and move the plan into `docs/plans/implemented/`, and the
+    plan's own number was taken from the high-water mark across both folders.
+12. **Prompt check:** one block per task, in task order, each carrying the deliverable verbatim, an
     exact reading list with **sections** rather than artifacts, its traps, and its gate line. Read each
     block as if it were the only thing you had: if you would need the task above it to start, the block
     is incomplete. Every `Blocked on <id>` placeholder is matched by that task's duty to write it.
@@ -281,6 +293,7 @@ checkpoints for review?"**
 - The plan gates once, in its last runnable task, and that task fixes what the gate finds
 - One paste-ready prompt per task, rewritten in place by any task that changes what it assumes; a
   prompt that cannot be written yet is written by the task that unblocks it
-- A landed task's prompt is deleted; the live prompt set is the progress indicator
+- A landed task's prompt is deleted; the live prompt set is the progress indicator, and the task that
+  deletes the last one rewrites `Status:` and moves the plan into `docs/plans/implemented/`
 - `**Status:**` at the top is maintained, and names what is built but unverified
 - Exact file paths, exact commands, real values — always
