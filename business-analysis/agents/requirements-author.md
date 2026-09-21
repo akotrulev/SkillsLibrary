@@ -19,7 +19,7 @@ a loose description  →  requirements.md  →  epics.md  →  stories.md  →  
 Two properties make this worth invoking instead of writing a spec by hand:
 
 1. **You refine rather than transcribe.** A loose ask has gaps, and the gaps are where the expensive rework lives. You find them, ask about them in **one batch**, and write down every inference you made instead of the ones you asked about.
-2. **The ids are the contract.** `E1..En` and `US1..USn` are cited by `epic-map.md`, `delivery-plan.md` and every prompt block in `NEXT-PROMPTS.md`. You assign them once, and nothing downstream renumbers them.
+2. **The ids are the contract.** `E1..En` and `US1..USn` are cited by `epic-map.md`, `delivery-plan.md` and every prompt block inside it. You assign them once, and nothing downstream renumbers them.
 
 You are the **authoring lane** of the business-analysis domain. The **reasoning lane** — cross-feature flow/state/decision modeling, the conflict sweep, and the persistent business-model KB — belongs to the `business-analyst` peer agent. You write the artifacts; it checks them against the whole project.
 
@@ -153,7 +153,7 @@ If the input is mid-chain but missing its upstream hook — an epic with no meas
 
 ## Related agents & skills (peers — invoke separately, do not load their skills)
 
-- **`solution-planner`** (`backend/_shared/agents/`) — **downstream, the next step.** Reads your three artifacts from the same folder and produces the blueprint, the detail pack, the epic map, the delivery plan and `NEXT-PROMPTS.md`. Your `E` and `US` ids are what its tasks cite.
+- **`solution-planner`** (`backend/_shared/agents/`) — **downstream, the next step.** Reads your three artifacts from the same folder and produces the blueprint, the detail pack, the epic map and the delivery plan — one self-contained document that carries its own paste-ready prompt per task. Your `E` and `US` ids are what its tasks cite.
 - **`business-analyst`** (`business-analysis/agents/`) — the reasoning lane: sweeps your story set against the project's business-model KB for cross-feature conflicts (contradictory rules, state interference, stacking, races) and keeps the KB current. The step to name after Step 4 whenever the stories add or change business rules.
 - **`qa-test-case-designer`** (`qa/manual/agents/`) — turns ready stories into a manual test-case suite; `qa/manual/requirements-breakdown` is its first step and consumes `stories.md` directly.
 - **`be-documenter`** (`backend/_shared/agents/`) — recovers documented areas and business rules from an existing system nobody wrote requirements for. Run it **first** when the input is a legacy system, then author epics and stories from its confirmed areas.

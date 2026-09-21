@@ -158,7 +158,7 @@ Where the operator will run the plan alone, back to back, say that too — the w
 | Two epics in one wave "because they are mostly separate" | The one shared file is where the lost write happens. Mostly-disjoint is not disjoint |
 | Collapsing two colliding epics into one serial lane | Serialises work that only collided on a DI registration. Pull the registration into `E0` and keep both lanes |
 | `E2 depends on E1` with no reason | Unfalsifiable, so it is never removed, so the critical path never gets shorter |
-| Renumbering the backlog's epics to make the waves read better | Breaks every `US` and `E` citation in `stories.md`, `delivery-plan.md` and `NEXT-PROMPTS.md` |
+| Renumbering the backlog's epics to make the waves read better | Breaks every `US` and `E` citation in `stories.md` and in `delivery-plan.md` — its task blocks, its task table and every one of its prompt blocks |
 | Putting `E0` in `epics.md` | It has no outcome a person can state, so it fails `ba-epic-writer`'s own gate. It is a planner construct and belongs here |
 | A wave table with no lane counts | The operator's question is "how many sessions can I open", and the document declines to answer it |
 | Treating one epic as one lane always | Two independent stories inside an epic are two sessions the plan never offered |
@@ -179,7 +179,7 @@ Where the operator will run the plan alone, back to back, say that too — the w
 - **← `requirements-author`** — supplies `epics.md` and `stories.md`. Their ids are read, never rewritten.
 - **← `be-shared-solution-blueprint`** — supplies the functional areas and the routing map that place each epic in a file tree.
 - **→ `be-shared-delivery-plan`** — consumes the lanes and the waves: the streams table is this document's lanes at task altitude, and the task order respects the wave order.
-- **→ `be-shared-session-budget`** — the current wave decides which lanes get a prompt block in `NEXT-PROMPTS.md`.
+- **→ `be-shared-session-budget`** — the lanes and the wave order are what its prompt blocks in the plan's `## Prompts — one per task` section are ordered by.
 - **→ `ba-epic-writer`** (back upstream) — when Step 3 finds two epics that are genuinely intertwined, the slicing is the defect and it is fixed there, not here.
 
 ## Version policy

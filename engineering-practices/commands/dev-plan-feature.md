@@ -1,5 +1,5 @@
 ---
-description: Plan a feature — turn an approved spec or clear requirements for one multi-step change into a detailed, bite-sized task-by-task implementation plan before touching code (next: /dev-build)
+description: Plan a feature — turn an approved spec or clear requirements for one multi-step change into a self-contained plan document before touching code: what exists and what is missing, the decisions, one flat ordered task list, and one paste-ready prompt per task (next: /dev-build)
 argument-hint: [the spec, requirements, or change to plan]
 ---
 

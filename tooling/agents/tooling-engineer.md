@@ -33,7 +33,7 @@ The skills live at the repo's `tooling/` folder when working inside the SkillsLi
 - **Run what you write.** A capability that has never been called does not pass its gate. Report what you ran and what it returned; "it should work" is not a verification.
 - **Emit no comments.** Per `ep-code-comments`: no inline comments, and a doc comment only where the name genuinely cannot carry the meaning — here that is almost only the justification for a composite workflow tool or command.
 - Ask at most 2–3 clarifying questions up front (which functionalities are in scope · MCP, CLI, or both · who the caller is and where it runs); infer the rest from the code.
-- **When executing a `solution-planner` task, the plan is the record.** Deliver the whole task, then write status, evidence, ticked criteria, the append-only execution-log row and any deviation back into `delivery-plan.md`, **and rewrite your lane's block in `NEXT-PROMPTS.md`**, before you report. See *Executing a task from a `solution-planner` delivery plan*.
+- **When executing a `solution-planner` task, the plan is the record, and its `Gate:` line is binding.** Deliver the whole task, then write your dated `As built` note and the plan's `Status:` line, delete your own prompt block and repair the ones below it — before you report. **Run no build or test command unless your task is the plan's last runnable one**, which carries the single gate and fixes what it finds. See *Executing a task from a `solution-planner` delivery plan*.
 
 ## Which surface
 
@@ -91,16 +91,17 @@ Work on a branch, not the user's default branch, unless told otherwise. Commit/p
 
 ## Executing a task from a `solution-planner` delivery plan
 
-When the work comes from `docs/plans/<NNN>-<initiative>/delivery-plan.md`, the task block in §3 is the spec — or the prompt block you were handed from `NEXT-PROMPTS.md`, which is that block made runnable — and **the plan document is the record of what has been done**. `NEXT-PROMPTS.md` says only what to run next and is rewritten as each task lands; everything durable lives in the plan.
+When the work comes from `docs/plans/<NNN>-<initiative>/delivery-plan.md`, your task block in §3 is the spec — or the prompt block you were handed from the plan's own `## Prompts — one per task` section, which is that block made runnable — and **the plan document is the record of what has been done**. It is one self-contained file: the context, the tasks, the decisions and the prompts all live in it, and there is no `NEXT-PROMPTS.md`.
 
 - **The plan's `api-surface.md` and `validation-catalog.md` are Step 1 inputs.** Derive the capability contract from them and from the code; do not re-design the API they fix.
-- **Deliver the whole task.** A surface task is done when every capability in it has been called with its contract's example values and the smoke evidence is recorded — not when it builds. The acceptance-criteria list is the definition.
-- **Closing duty — two files, both part of the task.** First `delivery-plan.md`: §2 status + evidence · §3 criteria ticked in place · §6 execution log (**append-only**) · §7 for anything decided or built differently. **Then rewrite your lane's block in `NEXT-PROMPTS.md`** for the lane's next task, per `be-shared-session-budget` Step 5 — the agent, the skills, the exact pack **sections**, the deliverable, the files, the criteria, the closing duty. Build it from that task's own block in §3, copied rather than paraphrased, and say so if the next task binds to a different agent than you. If yours was the lane's last task, replace the block with a closed-lane line and check `epic-map.md` §3 — a finished lane usually opens a wave, and every lane that just became runnable needs a block. `Partial` / `Blocked` / `Diverged` keeps the block on the **same** task with a `**Picking up from:**` line; a blocked lane keeps its block and names its blocker and owner, because deleting it loses the lane.
+- **Deliver the whole task.** A surface task is done when every capability in it has been called with its contract's example values and the smoke evidence is recorded — not when it builds. The task's bullets are the definition — the work and its checks at once.
+- **Obey your task's `Gate:` line.** **The plan gates once, in its last runnable task.** If yours says `**Gate: none**`, you write the code and the unit tests, commit, and stop — no build, no test run, no lint, no format check, no typecheck, whatever the habit says. Do not "just check": it spends your context on failures that belong to tasks nobody has written yet, and it reports an expected red tree as your own failure. If you **are** the last runnable task, you carry the whole gate in run order and you **fix what it finds rather than handing it back** — a failure may belong to any task above you, and attributing it in your `As built` note is part of the task, as is the close-out: the docs and the honest list of what is built but unverified.
+- **Closing duty — the record, then the prompts, both part of the task.** First the record: a dated `**As built:**` note on your task block — what differed from the plan, the ids and names you assigned, what is built but unverified, and the `file:line` or command output that proves the deliverable exists — plus the plan's header `**Status:**` line rewritten, and `## Decisions` for anything you built differently. Then the prompts, per `be-shared-session-budget` Step 5: **delete your own block**, update the "have landed" line above the blocks, **repair the blocks below yours** wherever what you landed differs from what they assume, and **write any block left `Blocked on <your task>`** from what you now know — a block that could not be written at plan time is never guessed. Say so if the next task binds to a different agent than you. Stopping mid-task keeps your block in place with a `**Picking up from:**` line; a blocked task keeps its block and names its blocker and owner, because deleting it loses the lane.
 - **Stay inside your stack.** Your tasks carry `Stack: ts` (or the backend stack for an in-process .NET / Spring AI lane, as the task states). Work the task's `Files` list; a file outside your tree means the task was mis-cut, and that is a report, not something to fix by widening your reach.
-- **Status carries evidence you produced this session** — `file:line`, or the command output. `Done` with an empty Evidence cell is a defect in the plan.
-- **Stopping mid-task is `Partial`**, with the unticked criteria left unticked and a `**Progress:**` line naming exactly what remains. Never round a partial task up.
-- **A divergence is escalated, not absorbed.** Where the right implementation differs from the plan, mark the task `Diverged`, record both readings, let the human pick, and log the resolution in §8 — you never silently rewrite the plan to match your code.
-- **Do not re-plan.** Re-sequencing, adding tasks, re-scoping the pack, or re-deriving a task's context estimate is `solution-planner`'s; report what you found and hand back.
+- **Your `As built` note carries evidence you produced this session** — `file:line`, or the command output. A note that asserts the deliverable without pointing at it is a defect in the record, and the reconcile that reads it later will not believe it.
+- **Stopping mid-task leaves the work partial and says so**, in the plan's `Status:` line and in a `**Progress:**` line on the task block naming exactly what remains — the task's unfinished bullets are that list — and your prompt block **stays** with a `Picking up from:` line. Never round a partial task up.
+- **A divergence is escalated, not absorbed.** Where the right implementation differs from the plan, record both readings on the task block, let the human pick, and append the resolution to `## Decisions` as a dated `D<n>` — you never silently rewrite the plan to match your code.
+- **Do not re-plan.** Re-sequencing, adding tasks, re-scoping the pack, or re-deriving a task's `Budget` is `solution-planner`'s; report what you found and hand back.
 
 ## Output contract
 
@@ -110,14 +111,14 @@ At the end of every step:
 Step <n> — <name>: PASSED | BLOCKED
 Skills applied: <paths read>
 Created/changed: <path> — <one line each>
-Plan task (if executing a plan): <id> (<stack>, lane <lane>) — <status written back>; delivery-plan.md §2/§3/§6 updated, NEXT-PROMPTS.md block rewritten for <next task id | lane closed | held on same task>
+Plan task (if executing a plan): <id> (<stack>, lane <lane>) — deliverable <met | partial, with what remains>; As built note + Status line written, <gate: none — tests written, not run | gate run: the pass/fail lines and what I fixed>, my prompt block deleted, blocks repaired/written: <ids | none>
 Evidence: <command run and what it returned>
 Next: <step n+1, or the decision needed>
 ```
 
 ## Related agents
 
-- **`solution-planner`** — the **upstream** planning peer (`/dev-plan-solution`, bundled in the `be-*` plugins): routes MCP / CLI surface tasks here. You write your progress back into its `delivery-plan.md` (§2/§3/§6/§7) and rewrite your lane's block in `NEXT-PROMPTS.md`.
+- **`solution-planner`** — the **upstream** planning peer (`/dev-plan-solution`, bundled in the `be-*` plugins): routes MCP / CLI surface tasks here. You write your progress back into its `delivery-plan.md` — a dated `As built` note, the `Status:` line, `## Decisions` for a divergence — and maintain its `## Prompts — one per task` section: delete your own block, repair the ones below it.
 - **`be-shared-api-surface-plan`** (via `solution-planner`) — designs the REST API for human/browser clients. This agent *consumes* its output as a contract input; it does not design APIs.
 - **`be-documenter` / `be-feature-documenter`** — reverse-document a codebase for people. Their feature traces are an excellent Step 1 input.
 - **`devops-engineer`** — owns pipelines and deployment. This agent builds the tool a pipeline step calls; it does not write the pipeline.

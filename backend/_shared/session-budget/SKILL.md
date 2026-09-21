@@ -1,6 +1,6 @@
 ---
 name: be-shared-session-budget
-description: Use when plan tasks need sizing to one working session each, and when the next runnable task must be handed to an agent as a ready-to-paste prompt. Estimates a task's context cost, grows or splits it toward the session target, and writes NEXT-PROMPTS.md — one prompt per lane that can run right now, regenerated as each task lands. Triggers "how big should this task be", "is this one session", "what do I paste next". Do NOT use to sequence tasks (`be-shared-delivery-plan`), to group them into epics (`be-shared-epic-map`), or to execute one (`ep-executing-plans`).
+description: Use when plan tasks need sizing to one working session each, and when each task must be handed to an agent as a ready-to-paste prompt. Estimates a task's context cost, grows or splits it toward the session target, and writes the plan's own `## Prompts — one per task` section — one block per task, deleted as each task lands. Triggers "how big should this task be", "is this one session", "what do I paste next". Do NOT use to sequence tasks (`be-shared-delivery-plan`), to group them into epics (`be-shared-epic-map`), or to execute one (`ep-executing-plans`).
 ---
 
 # Session Budget — one task, one session, one prompt
@@ -8,7 +8,7 @@ description: Use when plan tasks need sizing to one working session each, and wh
 Two jobs, both about the boundary between a plan and the sessions that run it.
 
 - **Sizing.** A task is executed in one session, so its context cost is a property of the task. This skill estimates that cost before the task is ever run, so tasks are authored at the size the work actually is instead of being discovered too large halfway through a session.
-- **Handoff.** The next runnable task of every lane is written as a **prompt** — the agent, the skills, the exact pack sections to read, the deliverable, the files, the criteria — into `NEXT-PROMPTS.md`. The operator pastes it; nobody re-derives it. When a task lands, the agent that ran it rewrites its lane's block for the next task.
+- **Handoff.** Every task is written as a **prompt** — the agent, the skills, the exact pack sections to read, the deliverable, the files, the bullets, the traps and the gate — into the plan's own `## Prompts — one per task` section. The operator pastes it; nobody re-derives it. The plan document is self-contained and queueable on purpose: there is no `NEXT-PROMPTS.md`. When a task lands, the agent that ran it **deletes its own block** and rewrites the ones below it wherever what it landed differs from what they assume.
 
 **The estimate is a target, never a gate.** It says what to aim for. It does not decide what a task is — coherence does, and coherence wins every time the two disagree. Never split a task that is one thing to get under a number, and never merge unrelated work to fill one up.
 
@@ -18,9 +18,9 @@ Two jobs, both about the boundary between a plan and the sessions that run it.
 
 ## When to use
 
-- Step 8 of a `solution-planner` run — sizing the authored tasks and writing the first prompts
+- Step 8 of a `solution-planner` run — sizing the authored tasks and writing the prompt blocks
 - Whenever a task is added, split, or re-scoped and its estimate needs re-deriving
-- After a task completes — regenerating that lane's prompt block for the next task
+- After a task completes — deleting its block and repairing the ones below it
 - From `ep-writing-plans`, for the same sizing question on a non-`solution-planner` plan
 
 ## When NOT to use
@@ -31,10 +31,12 @@ Two jobs, both about the boundary between a plan and the sessions that run it.
 
 ## Output
 
-Two things, both inside `docs/plans/<NNN>-<initiative>/`:
+Two things, both **inside the plan document** — `docs/plans/<NNN>-<initiative>/delivery-plan.md`, or the single-file plan an `ep-writing-plans` run produced:
 
-1. An **`Est. context:`** line on every task block in `delivery-plan.md`, and an `Est.` column in its progress table.
-2. **`NEXT-PROMPTS.md`** — one prompt block per lane that is runnable right now. See `references/next-prompts-template.md`.
+1. A **`**Budget:**`** line on every task block, with its drivers itemized, and a matching `Budget` cell in the task table.
+2. The **`## Prompts — one per task`** section — one paste-ready block per task that has not landed. See `references/prompts-section-template.md`.
+
+The plan document format both of these live in is specified in `engineering-practices/writing-plans/references/plan-format.md`; read it before writing either.
 
 ---
 
@@ -77,64 +79,105 @@ Add up the lines that apply, then apply the churn multiplier. Everything is in t
 
 | Line | Estimate |
 |---|---|
-| Build + test run, their output, and the fix loop they trigger | 12k |
+| The output the task reads back — its own commit and diff, on an ungated task | 6k |
+| The **last runnable task only**: the whole gate, its output, and the fix loop it triggers across the plan | 12k, plus 4k per earlier task whose failures it may have to fix |
 | Conversation, tool churn, re-reads after edits | **× 1.2** on the sum of everything above |
 
-So: `Est. = (floor + skills + pack sections + orientation + files + verify) × 1.2`.
+So: `Budget = (floor + skills + pack sections + orientation + files + read-back) × 1.2`.
 
-**Worked example** — a `be-dotnet` task creating an Orders resource: floor 25k + 3 skills 24k + task block 1k + 3 pack sections 6k + 5 files created (4 source at 2k, 1 test at 2k) 10k + 1 file modified 1.5k + verify 12k = 79.5k, × 1.2 = **95k**. Comfortably one session, with room to absorb the next coherent piece.
+**The gate is budgeted once, on the task that runs it.** The plan gates in its last runnable task, so every earlier task pays 6k for its own diff rather than 12k for a verify loop it is told not to run — and the gate task pays for the whole plan's fallout, which is why it is usually the largest task in the plan and why it must not also carry a big build.
+
+**Worked example** — a `be-dotnet` task creating an Orders resource: floor 25k + 3 skills 24k + task block 1k + 3 pack sections 6k + 5 files created (4 source at 2k, 1 test at 2k) 10k + 1 file modified 1.5k + read-back 6k = 73.5k, × 1.2 = **~90k**. Comfortably one session, with room to absorb the next coherent piece.
 
 ### Step 2 — Compare against the target and act
 
 | Estimate | What it means | What to do |
 |---|---|---|
-| **under ~80k** | The session is underfilled | Look at the next task in the same story, same stack, same agent. If merging them still yields **one** deliverable, merge. If it does not, leave it alone — a small task is not a defect |
+| **under ~80k** | The session is underfilled | Look at the next task in the same story, same stack, same agent. If merging them still yields **one** deliverable, merge. The goal is the **fewest sessions**, not the smallest tasks — an agent switch costs a whole context reload. If it does not merge cleanly, leave it alone — a small task is not a defect |
 | **~80k – ~150k** | The size to aim for | Nothing. This is the target |
-| **over ~150k** | The session will be long, and may need a compaction | Annotate, do not force. Record the estimate on the task and name the natural split point if one exists (`splits cleanly after the endpoints land`). Split **only** if that point yields two tasks that each state one deliverable and each leave the tree green |
+| **over ~150k** | The session will be long, and may need a compaction | Annotate, do not force. Record the estimate on the task and name the natural split point if one exists (`splits cleanly after the endpoints land`). Split **only along a seam inside the same stack**, and only if that point yields two tasks that each state one deliverable |
 
 **The three rules that outrank the number:**
 
 - **One deliverable.** Two deliverables is two tasks at any estimate; no statable deliverable is a fragment at any estimate.
 - **One stack, one agent.** A merge that spans `fe` and `be` is not a merge, whatever it costs.
-- **The tree is green at the boundary.** A split that leaves the build red between the pieces was a bad seam — the pieces are one task, and the estimate does not get a vote.
+- **The work is whole at the boundary.** A split that leaves a service with no caller, or an endpoint nobody registered, was a bad seam — the pieces are one task, and the estimate does not get a vote. A split that leaves the *build* red is fine: the plan gates once, and that failure is the gate task's to fix.
 
 A task that overshoots the target with all three rules satisfied is a **large task**, correctly authored. Say so on it rather than filing it as a defect.
 
-### Step 3 — Record the estimate
+### Step 3 — Record the budget
 
-On the task block, under `Stream` / `Order`:
+On the task block, under `Depends on`:
 
 ```markdown
-**Est. context:** ~95k — 5 files created, 1 modified, 3 skills, 3 pack sections
+**Budget:** ~90k — CLAUDE.md 25k, `api-surface.md` §5 and two `data-model.md` entity blocks 6k,
+3 skills 24k, `src/Billing/*` as the module pattern ~12k, 5 files created and 1 modified 11.5k,
+commit and diff read-back 6k, churn ×1.2
 ```
 
-One line, with what drives it, so a reader can tell a 95k of many small files from a 95k of one huge one. In the progress table it is one `Est.` column.
+**Itemize the drivers, don't summarize them.** A bare `~90k` is unfalsifiable; the list is what makes
+it checkable and re-derivable, and it lets a reader tell a 90k of many small files from a 90k of one
+huge one. In the task table it is one `Budget` cell, carrying the figure only.
 
-Re-derive it whenever the task's `Files`, `Skills`, or cited sections change. A stale estimate is worse than none — it is a number someone will trust.
+Re-derive it whenever the task's `Files`, `Skills`, or cited sections change. A stale budget is worse
+than none — it is a number someone will trust.
 
-### Step 4 — Write `NEXT-PROMPTS.md`
+### Step 4 — Write `## Prompts — one per task`
 
-**One block per lane that is runnable right now**, and nothing else. A lane is runnable when its dependencies are `Done` and no gate blocks it; `epic-map.md`'s current wave says which lanes those are. At the start of a run that is the first task of every wave-1 epic — which is exactly the set of sessions the operator can open at the same time.
+**One block per task that has not landed, inside the plan document**, in task order. The plan is
+queued and handed over whole, so the prompts live in it — see
+`engineering-practices/writing-plans/references/plan-format.md` §6 for the section's shape, and
+`references/prompts-section-template.md` for the filled template.
 
-Each block is a **prompt, not a summary**. It is pasted verbatim into a fresh session, so it carries everything that session needs and names nothing it does not:
+The section opens with a preamble — run them in order, one session each, each block complete on its
+own; where the gates run; and anything **no** prompt may do — then the task table, then the line saying
+which blocks have been deleted, then the blocks themselves.
+
+Each block is a **prompt, not a summary**. It is pasted verbatim into a fresh session, so it carries
+everything that session needs and names nothing it does not:
 
 - The agent to adopt and the skills to load.
-- **The exact pack sections to read** — `api-surface.md` §5.3, not `api-surface.md`. This is the single biggest lever on the estimate holding: a session told to read the whole pack reads the whole pack.
-- The deliverable, the files, the acceptance criteria, and what is out of scope.
-- The closing duty: update `delivery-plan.md`, then regenerate this block for the next task.
+- **The exact pack sections to read** — `api-surface.md` §5.3, not `api-surface.md`. This is the single
+  biggest lever on the budget holding: a session told to read the whole pack reads the whole pack.
+- The deliverable, the files, the work bullets, and what is out of scope — copied from the task block,
+  never paraphrased.
+- **The traps**: the two to four things specific to that task. The convention that is easy to miss, the
+  file that looks like the pattern but is not, the migration that must run before the test, the
+  down-level API that does not exist here. This is the part the prompt adds, and it is what earns it.
+- **The gate line.** `Gate: none — this plan gates once, in <the last runnable task>. Do not run <the
+  commands>.` on every block but the last; the last block carries the project's own commands in run
+  order, and the instruction to **fix what they find rather than hand it back**.
+- The closing duty: write the `As built` note and the header `Status:` line, delete this block, and
+  repair the blocks below it.
 
-The full template and a filled example are in `references/next-prompts-template.md`.
+**A block you cannot write yet is not guessed.** Where it genuinely depends on what an earlier task
+lands — the shape of a file it has not created, an id it will assign, a decision it will make — write
+`**Blocked on <id>** — <id> writes this prompt when it lands, from <what it will then know>.` and put
+writing it in **that** task's bullets and in its own prompt's closing duty. A guessed block is the one
+kind of stale that reads as current.
 
-### Step 5 — Regenerate after each task
+### Step 5 — Maintain the section as each task lands
 
-**This is the executing agent's duty, not the planner's**, and it is part of finishing the task rather than a write-up afterwards. When a task reaches `Done`:
+**This is the executing agent's duty, not the planner's**, and it is part of finishing the task rather
+than a write-up afterwards. When a task is done:
 
-1. Write the status, evidence and ticked criteria into `delivery-plan.md` (§2, §3, §6) — the durable record.
-2. **Replace that lane's block in `NEXT-PROMPTS.md`** with the prompt for the lane's next task, built from its task block by this skill's Step 4.
-3. If the finished task was the lane's last, replace the block with a closed-lane line naming what the lane delivered, and check `epic-map.md` — completing an epic usually unblocks a wave, and every lane that just became runnable needs a block.
-4. If the task ended `Partial`, `Blocked` or `Diverged`, the block stays on the **same** task and gains a `**Picking up from:**` line naming what remains. A blocked lane keeps its block and states what it waits on — deleting it loses the lane.
+1. Write the dated `**As built:**` note onto its task block, with the `file:line` or command output
+   that proves the deliverable exists, and rewrite the header `**Status:**` line — what is built, what
+   is next, what is built but unverified.
+2. **Delete its own prompt block**, and update the line above the blocks
+   (*"B1 and B2 have landed, and their prompts are deleted"*). A prompt for a finished task is a thing
+   someone runs by mistake, and the live prompt set is the plan's progress indicator.
+3. **Rewrite the blocks below it** wherever what landed differs from what they assume — a renamed file,
+   a changed signature, a gate that moved. In place, no changelog appended.
+4. **Write any block that was `Blocked on` this task**, from what it now knows.
+5. If the task was the plan's last runnable one, it ran the gate and fixed what it found; its `As built`
+   note says what the gate caught and which task it belonged to.
+6. If the task ended partial, blocked or diverged, **the block stays** and gains a
+   `**Picking up from:**` line naming what remains — the unfinished bullets are that list. A blocked
+   task keeps its block and names what it waits on and who owns it; deleting it loses the lane.
 
-`NEXT-PROMPTS.md` is rewritten, never appended. It holds only what to do next; history lives in `delivery-plan.md` §6. The two files disagreeing is always the plan being right.
+The prompts section is rewritten, never appended; the durable history is the `As built` notes and
+`## Decisions`, which are append-only. Where the two disagree, the `As built` notes are right.
 
 ---
 
@@ -144,38 +187,43 @@ The full template and a filled example are in `references/next-prompts-template.
 - **Never cite a whole artifact in a prompt.** Sections, always. `data-model.md` is 40k of context; the two entity blocks the task needs are 4k.
 - **The floor is not negotiable and not divisible.** Two tasks in one session do not pay one floor — they are one task, or they are two sessions.
 - **An unknown file size is 3k, and it is written as an assumption.** Do not silently guess a number that reads like a measurement.
-- **A lane with no runnable task gets a line, not silence.** "Blocked on U2 (Stripe sandbox credentials — owner: Ana)" is the answer to "what do I paste next" for that lane.
+- **A task that cannot be run gets a line, not silence.** "Blocked on H1 (Stripe sandbox credentials — owner: Ana)" is the answer to "what do I paste next" for it, and it stays in the section.
+- **A prompt that cannot be written yet is written by the task that unblocks it**, never guessed at plan time — and that duty is on the blocking task, not in a note nobody owns.
+- **The gate is budgeted and written once**, on the last runnable task. A block that tells an intermediate task to run the build is the rule's most common violation and the most expensive: it pays 12k for a verify loop whose failures belong to tasks that have not been written yet.
 - **The prompt names one task.** A block that hands over two tasks is a block that will get half-done and then re-derived from scratch.
 
 ## Anti-patterns
 
 | Anti-pattern | Why it fails |
 |---|---|
-| Splitting a coherent task to land under the target | Produces two tasks neither of which can be verified alone, and a red tree between them |
+| Splitting a coherent task to land under the target | Produces two tasks neither of which can be verified alone, and a half-written seam between them |
 | Padding a task with unrelated work to reach the target | A bucket with one number on it; the second deliverable gets dropped when the session runs long |
-| `Est. context: ~95k` with nothing behind it | Unfalsifiable. The drivers are what make it checkable and re-derivable |
+| `Budget: ~95k` with nothing behind it | Unfalsifiable. The itemized drivers are what make it checkable and re-derivable |
 | A prompt that says "read the plan pack" | The session spends its budget reading and its output suffers for it |
-| Leaving `NEXT-PROMPTS.md` for the end of the session | It is the one artifact whose whole value is being current. Regenerate it as the task closes |
-| Deleting a blocked lane's block | The lane looks finished. Blocked lanes state their blocker and their owner |
+| Leaving the prompts section for the end of the session | It is the one part of the plan whose whole value is being current. Maintain it as the task closes |
+| Deleting a blocked task's block | The task looks finished. A blocked task keeps its block and states its blocker and owner |
+| Keeping a landed task's block "for the record" | Someone runs it again. The record is the `As built` note; the live prompt set is what is left to do |
 
 ## Self-check
 
-1. Every task in `delivery-plan.md` carries an `Est. context:` line with its drivers, and the progress table's `Est.` column agrees with it.
-2. Every estimate over ~150k either names its natural split point or states why the task is one thing anyway.
-3. No task was split or merged in a way that breaks one deliverable, one stack, or a green tree at the boundary.
-4. `NEXT-PROMPTS.md` has one block per currently-runnable lane — no more (a lane whose dependencies are unmet has no block), no fewer (a runnable lane with no block is a session nobody knows they can start).
-5. Every block names one task, an exact agent, exact skills, and **sections** rather than artifacts.
-6. Every block ends with the update-and-regenerate duty, naming `delivery-plan.md` and this file.
-7. Blocked lanes appear with their blocker and its owner.
+1. Every task carries a `**Budget:**` line with its drivers itemized, and the task table's `Budget` cell agrees with it.
+2. Every estimate over ~150k either names its natural split point — inside its own stack — or states why the task is one thing anyway.
+3. No task was split or merged in a way that breaks one deliverable, one stack, one agent, or whole work at the boundary.
+4. `## Prompts — one per task` has one block per task that has not landed — no more (a landed task's block is deleted), no fewer (a task with no block is a session nobody knows they can start), and each `Blocked on <id>` placeholder is matched by a bullet on that task.
+5. Every block names one task, an exact agent, exact skills, and **sections** rather than artifacts, and carries its traps.
+6. Exactly one block carries the gate — the last runnable task's — with the project's own commands in run order and the instruction to fix what they find. Every other block says `Gate: none` and names what not to run.
+7. Every block ends with the closing duty: the `As built` note, the `Status:` line, deleting its own block, and repairing the ones below it.
+8. Blocked tasks appear with their blocker and its owner.
 
 ## Handoffs
 
+- **← `ep-writing-plans`** — owns the plan document format these prompts live in (`engineering-practices/writing-plans/references/plan-format.md` §6). Where the two disagree on the shape, that reference wins.
 - **← `be-shared-delivery-plan`** — supplies the tasks, their files, their streams and their order. Sizing feeds straight back into how those tasks are written.
 - **← `be-shared-epic-map`** — supplies the lanes and the current wave, which is what decides who gets a prompt block.
-- **→ `be-dotnet` / `be-java` / `be-node` / `be-python` / `fe-react` / `fe-blazor`** — consume the prompt blocks and own Step 5's regeneration when their task lands.
+- **→ `be-dotnet` / `be-java` / `be-node` / `be-python` / `fe-react` / `fe-blazor`** — consume the prompt blocks and own Step 5 when their task lands: the `As built` note, the `Status:` line, deleting their own block and repairing the ones below it.
 - **→ `ep-executing-plans`** — the task-by-task loop; its per-task checkpoint is where Step 5 runs.
 - **→ `ep-writing-plans`** — uses Step 1 and Step 2 for the same sizing question on plans that never went through `solution-planner`.
 
 ## Version policy
 
-The cost model is calibrated for a ~200k-token working window with the target set at one comfortable session inside it. It is stack-agnostic — a file is a file. The one stack-sensitive line is the verify cost: a project whose test suite prints thousands of lines pays more than 12k, and the orientation pass is where that is discovered. Adjust the constant for the project and say that you did; do not carry a number that the first session disproved.
+The cost model is calibrated for a ~200k-token working window with the target set at one comfortable session inside it. It is stack-agnostic — a file is a file. The one stack-sensitive line is the gate task's verify cost: a project whose test suite prints thousands of lines pays more than 12k, and the orientation pass is where that is discovered. Adjust the constant for the project and say that you did; do not carry a number that the first session disproved.
