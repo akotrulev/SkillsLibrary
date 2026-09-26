@@ -1,6 +1,6 @@
 ---
 name: qa-requirements-breakdown
-description: Use when the user hands over a story, BRD, acceptance criteria, API contract, or a loose feature description and wants it distilled into a structured, sourced test-basis document before any test cases are written. Triggers: "summarize the business logic of this story", "turn this spec into a testable breakdown", "what are the rules/validations in this doc".
+description: Use when the user hands over a story, BRD, acceptance criteria, API contract, or a loose feature description and wants it distilled into a structured, sourced test-basis document before any test cases are written. Triggers: "summarize the business logic of this story", "turn this spec into a testable breakdown", "what are the rules/validations in this doc". Not for the test cases themselves (test-case-writer) or a test plan (test-plan-writer).
 ---
 
 # QA Test Basis Analyzer
@@ -40,7 +40,7 @@ Concise is the goal. This is a 1–2 page distillation, not a re-typing of the s
 Confirm before analyzing. Ask only what's missing, at most 2–3 questions:
 
 1. **The material** — the story/BRD/contract/description, plus any linked specs (if it references other docs in the repo, `Glob`/`Grep` for them and read them too)
-2. **Scope** — is this the whole feature or one slice? what's explicitly out of scope?
+2. **Scope** — is this the whole feature or one part of it? what's explicitly out of scope?
 3. **Where the document should be written** (default: `docs/test-cases/<NNN>-<feature-slug>-basis.md`, `NNN` = the number the suite will take; a project that already keeps basis documents elsewhere wins)
 
 ## Procedure

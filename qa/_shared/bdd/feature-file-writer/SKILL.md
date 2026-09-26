@@ -1,6 +1,6 @@
 ---
 name: qa-feature-file-writer
-description: Use when turning a manual test-case suite (or raw acceptance criteria) into clean, reusable Gherkin feature files for living documentation — framework-agnostic. Triggers: "convert these test cases to Gherkin", "write feature files for this suite", "structure these scenarios with a Background", "make these steps declarative". Do NOT use to generate step-definition code (the stack's `gherkin-step-code`), scaffold the BDD project (`bdd-project-setup`), or design test cases (`test-case-writer`).
+description: Use when turning a manual test-case suite (or raw acceptance criteria) into clean, reusable Gherkin feature files for living documentation — framework-agnostic. Triggers: "convert these test cases to Gherkin", "write feature files for this suite", "structure these scenarios with a Background", "make these steps declarative". Do NOT use to generate step-definition code (the stack's `gherkin-step-code`), scaffold the BDD project (`bdd-project-scaffold`), or design test cases (`test-case-writer`).
 ---
 
 # Gherkin Authoring — Test Cases → Living-Documentation Feature Files
@@ -18,7 +18,7 @@ This skill owns the **Gherkin**, not the code. It decides scenario shape, Backgr
 ## When NOT to use
 
 - Generating step definitions / glue code → the stack's `gherkin-step-code` (Reqnroll / Cucumber-JVM / playwright-bdd|CucumberJS).
-- Wiring the BDD framework into a project → the stack's `bdd-project-setup`.
+- Wiring the BDD framework into a project → the stack's `bdd-project-scaffold`.
 - Designing test cases / applying ISTQB techniques → `qa/manual/test-case-writer` + `qa/manual/test-design-techniques`.
 - Deciding which page objects exist → `qa/{stack}/skills/page-object-design`.
 
@@ -152,7 +152,7 @@ Feature: Login
 ## Handoffs
 
 - Step definitions / glue + POM wiring → `qa/{stack}/skills/gherkin-step-code`.
-- Project wiring (packages, runner, features dir) → `qa/{stack}/skills/bdd-project-setup`.
+- Project wiring (packages, runner, features dir) → `qa/{stack}/skills/bdd-project-scaffold`.
 - Reviewing existing `.feature` files → `qa/{stack}/skills/bdd-reviewer`.
 - Deep Gherkin style reference → `references/gherkin-style-guide.md`.
 - Source test cases → `qa/manual/test-case-writer` (run `qa-test-case-designer` first if none exist).

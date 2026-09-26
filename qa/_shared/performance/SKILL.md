@@ -5,7 +5,7 @@ description: Cross-stack reference for performance / load testing — workload m
 
 # QA — Performance Testing (Shared)
 
-Cross-stack concepts shared by `qa/<stack>/skills/performance/{k6/typescript,nbomber/dotnet,gatling/java}`. The tool siblings carry the per-tool DSL and recipes; this skill carries the workload modelling, SLO-tied thresholds, environment policy, and reporting habits that apply regardless of tool.
+Cross-stack concepts shared by `qa/<stack>/skills/load-testing` (k6 in TypeScript, NBomber in .NET, Gatling in Java). The tool siblings carry the per-tool DSL and recipes; this skill carries the workload modelling, SLO-tied thresholds, environment policy, and reporting habits that apply regardless of tool.
 
 ## Pick the tool
 
@@ -87,7 +87,7 @@ Two viable flows (combine both):
 1. **Smoke on every PR** — 1-minute smoke against staging, verifies SLO threshold on a happy-path endpoint; fast feedback, low cost.
 2. **Full average / spike / soak on release** — scheduled or release-triggered; results published as artifacts + dashboard.
 
-Wire perf gates into the same `qa/cicd/<stack>/skills/ci-pipelines/<ci>` pipelines as functional tests.
+Wire perf gates into the same `qa/cicd/<stack>/skills/ci-pipelines` pipelines as functional tests.
 
 ## Observability during the test
 
@@ -165,7 +165,7 @@ A clean review = no blocker or major rows after fixes, plus a per-scenario PASS/
 
 ## When NOT to use any of these tools
 
-- Functional behavior tests → `qa/<stack>/skills/api-test-author/generator/<stack>` / `qa/<stack>/skills/ui-test-author/<stack>`
+- Functional behavior tests → `qa/<stack>/skills/api-test-author/writer` / `qa/<stack>/skills/ui-test-author/<tool>`
 - Unit / microbenchmarks (loop bodies, parsing speed) → BenchmarkDotNet (.NET) / JMH (Java) / Vitest bench (TS)
 - Production-side observability → `observability/dashboards`
 - Defining the SLO itself → `qa/manual/quality-metrics`
@@ -179,6 +179,6 @@ A clean review = no blocker or major rows after fixes, plus a per-scenario PASS/
 - Grafana dashboards for server-side correlation → `observability/dashboards`
 - LogQL / PromQL for queries during the test → `observability/queries`
 - Test strategy that calls out where perf testing fits → `qa/manual/test-strategy`
-- Pipeline integration → `qa/cicd/<stack>/skills/ci-pipelines/{github-actions,azure-pipelines,gitlab-ci}` or `devops/<ci>`
-- Allure publishing for perf reports → `qa/reporting/<stack>/skills/test-reports/<stack>`
+- Pipeline integration → `qa/cicd/<stack>/skills/ci-pipelines` (its `references/<host>.md`) or `devops/<ci>`
+- Allure publishing for perf reports → `qa/reporting/<stack>/skills/test-reports`
 - Bug filings discovered during perf → `qa/manual/bug-report-writer`

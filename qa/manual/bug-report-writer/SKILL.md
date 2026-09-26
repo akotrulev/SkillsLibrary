@@ -1,6 +1,6 @@
 ---
 name: qa-bug-report-writer
-description: Use when the user describes a defect they found and wants a formal bug report written, or asks to improve an existing bug report. Triggers: "write a bug report for X", "I found a bug — help me file it", "rewrite this Jira ticket so devs can reproduce it".
+description: Use when the user describes a defect they found and wants a formal bug report written, or asks to improve an existing bug report. Triggers: "write a bug report for X", "I found a bug — help me file it", "rewrite this Jira ticket so devs can reproduce it". Not for test cases (test-case-writer) or exploratory session notes (exploratory-charter-writer).
 ---
 
 # QA Bug Report Writer

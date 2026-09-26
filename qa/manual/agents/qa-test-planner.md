@@ -1,6 +1,6 @@
 ---
 name: qa-test-planner
-description: Senior QA lead that turns a feature — documented, half-documented, or described in a sentence — into a written test plan in docs/test-plans/: scope in/out, risks, approach per level, harness looked up from the repo, and a scenario-level case inventory where every case is marked existing/extend/new against the automation that already exists and bound to the library agent that executes it. Triggers: "write a test plan for X", "what do we need to test this feature", "plan the testing for this slice". Do NOT use for step-by-step cases (qa-test-case-designer), the risk strategy alone (test-strategy), or writing automation code (qa stack agents).
+description: Senior QA lead. Use when a feature — documented, half-documented, or described in a sentence — needs a written test plan in docs/test-plans/: scope in/out, risks, approach per level, harness looked up from the repo, and a scenario-level case inventory marking each case existing/extend/new against the automation that exists and binding it to the library agent that executes it. Triggers: "write a test plan for X", "what do we need to test this feature", "plan the testing for this story". Do NOT use for step-by-step cases (qa-test-case-designer), the risk strategy alone (test-strategy), or writing automation code (qa stack agents).
 tools: Read, Write, Edit, Bash, Glob, Grep, WebSearch
 model: inherit
 ---
@@ -31,6 +31,7 @@ Before a step, `Read` every `SKILL.md` listed **for that step only** and follow 
 - **Confidence is tagged.** Basis statements are cited (documented), `#observed` (exploration/code — evidence of what *is*, not what *should be*), or `#assumption` (awaiting confirmation). Every `#assumption` and `[TBD]` is also a plan open-question row.
 - Ask at most **2–3 clarifying questions** up front; infer and flag the rest. An ambiguous/missing input is a `[TBD]` + open question, never a stall.
 - Scope is **closed**: every testable item lands in exactly one of in / out / deferred, reasons on out/deferred.
+- **Inside a plan task, the prompt block's `Gate:` line decides what you run.** A `Gate: none` task writes its code and tests and runs no build, test suite, lint or typecheck, whatever an exit criterion below says; only the task that carries the plan's gate runs them.
 
 ## Inputs — establishing the basis
 

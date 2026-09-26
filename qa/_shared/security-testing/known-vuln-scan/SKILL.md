@@ -1,6 +1,6 @@
 ---
 name: qa-security-known-vuln-scan
-description: Use when matching a running app or host list against known signatures — CVEs, exposures (leaked `.env`, exposed `/.git`), misconfigurations, and default credentials — using Nuclei's community YAML templates as a fast CI gate. Language-agnostic, any stack. Triggers "scan for known CVEs", "add Nuclei to CI", "check for an exposed .git or .env", "default-credentials scan". Nuclei never spiders or injects — for that use `active-scan`, `api-fuzzing`, or `permission-testing`.
+description: Use when matching a running app or host list against known signatures — CVEs, exposures (leaked `.env`, exposed `/.git`), misconfigurations, and default credentials — using Nuclei's community YAML templates as a fast CI gate. Language-agnostic, any stack. Triggers "scan for known CVEs", "add Nuclei to CI", "check for an exposed .git or .env", "default-credentials scan". Not for spidering or injection (`active-scan`, `api-fuzzing`) or access control (`permission-testing`).
 ---
 
 # Security Testing — Nuclei (template-based scanner, shared)

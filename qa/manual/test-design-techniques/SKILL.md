@@ -1,6 +1,6 @@
 ---
 name: qa-test-design-techniques
-description: Use when deriving test cases systematically from a specification using formal black-box test design techniques. Triggers: "what technique applies here", "derive partitions and boundaries", "build a decision table for these rules".
+description: Use when deriving test cases systematically from a specification using formal black-box test design techniques. Triggers: "what technique applies here", "derive partitions and boundaries", "build a decision table for these rules". Not for formatting the suite (test-case-writer) or choosing what to test by risk (test-strategy).
 ---
 
 # QA — Test Design Techniques (ISTQB)

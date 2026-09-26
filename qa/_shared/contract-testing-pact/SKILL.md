@@ -166,8 +166,8 @@ Tag every pact and every verification with the **consumer's commit SHA + branch*
 
 ## When NOT to use Pact
 
-- Single-service API tests against a deployed service → `qa/<stack>/skills/api-test-author/generator/<stack>`.
-- UI tests → `qa/<stack>/skills/ui-test-author/<stack>`.
+- Single-service API tests against a deployed service → `qa/<stack>/skills/api-test-author/writer`.
+- UI tests → `qa/<stack>/skills/ui-test-author/<tool>`.
 - OpenAPI-only validation with no consumer-driven aspect → use schema validation libraries directly.
 - One-shot integration tests that don't need versioning or multi-consumer fan-in — contract testing is overkill for a 1:1 internal call.
 
@@ -176,7 +176,7 @@ Tag every pact and every verification with the **consumer's commit SHA + branch*
 - Consumer / provider code on .NET → `qa/dotnet/skills/api-contract-testing`
 - Consumer / provider code on Java → `qa/java/skills/api-contract-testing`
 - Consumer / provider code on TypeScript → `qa/typescript/skills/api-contract-testing`
-- Live-service API tests → `qa/<stack>/skills/api-test-author/generator/<stack>`
-- DTO authoring → `qa/<stack>/skills/api-models/<stack>`
-- CI pipeline syntax → `qa/cicd/<stack>/skills/ci-pipelines/{github-actions,azure-pipelines,gitlab-ci}` or `devops/<ci>`
+- Live-service API tests → `qa/<stack>/skills/api-test-author/writer`
+- DTO authoring → `qa/<stack>/skills/api-models`
+- CI pipeline syntax → `qa/cicd/<stack>/skills/ci-pipelines` (its `references/<host>.md`) or `devops/<ci>`
 - Test strategy decisions (when contract vs E2E) → `qa/manual/test-strategy`

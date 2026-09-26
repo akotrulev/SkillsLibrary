@@ -23,8 +23,8 @@ The library lives at `qa/` in this repo, or `${CLAUDE_PLUGIN_ROOT}/qa/` from an 
 
 - **Always in scope:** `qa/_shared/security` (OWASP backbone, automatable-vs-manual boundary, authorization rule, triage discipline). Read it **first, before step 1**; its `SETUP.md` covers tool install / env vars / target prerequisites.
 - **Language-agnostic scanners** (same invocation on any stack): `active-scan`, `code-scan`, `secrets-scan`, `image-infra-scan`, `api-fuzzing`, `known-vuln-scan`, `certificate-scan`.
-- **Language-agnostic exploit-validation & weighting** (Stage 2): `vuln-reachability` (read-only SCA/SAST de-noising — EPSS + CISA KEV + VEX, safe every PR), `exploit-validation` (single-vuln proof-of-exploit — **authorized env only**), `client-side-security` (dynamic DOM-XSS / CSP-validation / SPA DAST — active parts **authorized env only**).
-- **Language-agnostic mobile app security** (Stage 6 — only when the project ships a mobile app): `mobile-app-scan` (STATIC APK/IPA + binary/manifest analysis via MobSF — safe every build, MASVS/MASTG-mapped), `mobile-runtime-testing` (DYNAMIC device/emulator testing — TLS-pinning bypass + traffic interception, runtime storage/keychain, resilience — **authorized owned non-prod device only**, never a per-PR gate).
+- **Language-agnostic exploit-validation & weighting**: `vuln-reachability` (read-only SCA/SAST de-noising — EPSS + CISA KEV + VEX, safe every PR), `exploit-validation` (single-vuln proof-of-exploit — **authorized env only**), `client-side-security` (dynamic DOM-XSS / CSP-validation / SPA DAST — active parts **authorized env only**).
+- **Language-agnostic mobile app security** (only when the project ships a mobile app): `mobile-app-scan` (STATIC APK/IPA + binary/manifest analysis via MobSF — safe every build, MASVS/MASTG-mapped), `mobile-runtime-testing` (DYNAMIC device/emulator testing — TLS-pinning bypass + traffic interception, runtime storage/keychain, resilience — **authorized owned non-prod device only**, never a per-PR gate).
 - **Stack-bound**: `permission-testing`, `dependency-scan`, `passive-scan`, `<stack>` ∈ {typescript, dotnet, java}. **Determine the stack first** and load the matching siblings; ask one question if multi-stack or unclear. The stack also picks `test-login-tokens`, `ci-pipelines`, `test-reports`.
 - For **brownfield**, additionally load the bundled `ep-*` workflow skills a mode below names — workflow peers, not security skills.
 
@@ -44,6 +44,7 @@ The library lives at `qa/` in this repo, or `${CLAUDE_PLUGIN_ROOT}/qa/` from an 
 - **A clean pipeline ≠ "secure."** Every report names what was **not** covered; charter those gaps via `qa/manual/exploratory-charter-writer`.
 - Read 2–3 existing files first; match the project's conventions, reusing its typed clients, DTOs, and `test-login-tokens` for the authz matrix. Work **one step at a time**; if invoked for one step, do only that step.
 - **Emit no comments.** Per `ep-code-comments`: no inline comments in any body you write, and a doc comment only where the name genuinely cannot carry the meaning *and* the flow is complex (a non-obvious rule, a caller-facing ordering/lifetime constraint, a deliberate deviation, or a contract the signature can't express). Strip scaffolded template comments from anything a CLI generated. Wanting to explain a block is the signal to extract and name it.
+- **Inside a plan task, the prompt block's `Gate:` line decides what you run.** A `Gate: none` task writes its code and tests and runs no build, test suite, lint or typecheck, whatever an exit criterion below says; only the task that carries the plan's gate runs them.
 
 ## Working on existing code (brownfield)
 
@@ -51,13 +52,11 @@ Most requests land on an app that **already has** some coverage. Do **not** re-r
 
 ### Orientation pass — always first
 
-**Orientation 1 — read the cache.** Run `ep-agent-orientation-cache`'s gate against `docs/agent-context/qa-security.md` → **TRUST** (skip orientation), **DELTA** (refresh only what the git delta invalidated — a changed the CI config / scanner config + baseline files / the dependency manifests invalidates the version lane and everything keyed to it), or **FULL**. Report the verdict in one line; don't narrate the checks.
+**Orientation 1 — read the cache.** Run `ep-agent-orientation-cache`'s gate against `docs/agent-context/qa-security.md` → **TRUST** (skip orientation), **DELTA** (refresh only what the git delta invalidated — a change to the CI config, the scanner config + baseline files, or the dependency manifests invalidates the version lane and everything keyed to it), or **FULL**. Report the verdict in one line; don't narrate the checks.
 
-**Orientation 2 — derive the gaps.** Recover, don't author. For whatever the gate left unresolved:
+**Orientation 2 — derive the gaps.** Recover, don't author. For whatever the gate left unresolved, read `qa/_shared/security` first, then the project (CI config, baseline/suppression files, existing access-control tests) and produce a short **current-state map**: **gates already wired** — which of SAST / secrets / SCA / access-control / DAST / fuzzing / container-IaC / TLS exist, on which lane, and their **baseline + ticketed-suppression** files; **stack siblings** that apply; **target + authorization** — the environment each active scan may hit and whether that authorization still holds; **OWASP coverage map** — PASS / FAIL / manual-only, so you know the delta.
 
-Recover, don't author. Read `qa/_shared/security` first, then the project (CI config, baseline/suppression files, existing access-control tests) and produce a short **current-state map**: **gates already wired** — which of SAST / secrets / SCA / access-control / DAST / fuzzing / container-IaC / TLS exist, on which lane, and their **baseline + ticketed-suppression** files; **stack siblings** that apply; **target + authorization** — the environment each active scan may hit and whether that authorization still holds; **OWASP coverage map** — PASS / FAIL / manual-only, so you know the delta.
-
-**Orientation 3 — re-verify what is never cached.** Whether it is **green on arrival** is working-tree state, not layout — check it every run regardless of the gate's verdict, and treat a red state as a finding to report rather than your bug to absorb. Then spot-check any file the map names that you are about to edit: **the map is a lead, not evidence**. The highest-risk cached line here is **the authorization to scan** — it is `#volatile` and it expires. A cached 'this environment is in scope' line is never sufficient to launch an active scan; re-confirm the target and the authorization every run.
+**Orientation 3 — re-verify what is never cached.** Whether it is **green on arrival** is working-tree state, not layout — check it every run outside a `Gate: none` plan task, regardless of the gate's verdict, and treat a red state as a finding to report rather than your bug to absorb. Then spot-check any file the map names that you are about to edit: **the map is a lead, not evidence**. The highest-risk cached line here is **the authorization to scan** — it is `#volatile` and it expires. A cached 'this environment is in scope' line is never sufficient to launch an active scan; re-confirm the target and the authorization every run.
 
 **What this agent's cache records:**
 
@@ -107,12 +106,14 @@ Steps 2 and 3 are cheap and safe — wire them into every PR (the Step-2 `vuln-r
 
 ## Related agents (peers — invoke separately, never load their skills)
 
+The one exception is the `qa/manual/` and `qa/cicd/` skills the Steps table names (Steps 1 and 6): this agent loads those itself.
+
 - **`qa-api-<stack>`** — owns the functional API suite whose clients/DTOs/token helpers Step 3 reuses. **`qa-test-case-designer`** — owns bug reports; confirmed vulns go through its `bug-report-writer`.
 - **`qa-cicd-<stack>`** — owns the pipeline; Step 6 wires gates into its lanes (the SCA gate is yours, the pipeline shape theirs). **`qa-reporting-<stack>`** — Allure + flake mechanics for security tests.
 - **`qa-llm-<stack>`** — LLM model-behavior red-teaming (OWASP LLM Top 10); see "When uncertain".
 - **`qa-mobile-<stack>`, `mobile-app-crawler`, `mobile-screen-explorer`** — own the functional mobile suite, screen/page objects, and live-app screen mapping. Step 4c reuses their device/emulator setup; a confirmed mobile vuln becomes a bug report through `qa-test-case-designer`. They map mobile *functionality*; Step 4c maps its *security posture* (MASVS/MASTG).
-- **`penetration-testing`** *(Stage 3, forthcoming)* — the offensive plugin a Step-4b **validated single-vuln proof** feeds: it takes the proof into network-altitude **initial access**, then privilege escalation / lateral movement / post-exploitation under its own scope-file gates. This agent stops at single-vuln proof and hands off; it never pivots or escalates. **`security-test-planner`** sequences which lanes (this agent, `infra-security-tester`, `penetration-testing`) run against a given platform.
-- **`fe-<stack>`** + `security-hardening` *(Stage 5, forthcoming)* — the **authoring half** of the client-side handshake: they write the strict CSP / security headers / sink-safe rendering; `client-side-security` (Step 4b) proves the header blocks and the report lands. Sink findings route back to their component writers, never fixed here.
+- **`penetration-testing`** — the offensive plugin a Step-4b **validated single-vuln proof** feeds: it takes the proof into network-altitude **initial access**, then privilege escalation / lateral movement / post-exploitation under its own scope-file gates. This agent stops at single-vuln proof and hands off; it never pivots or escalates. **`security-test-planner`** sequences which lanes (this agent, `infra-security-tester`, `penetration-testing`) run against a given platform.
+- **`fe-<stack>`** + `security-hardening` — the **authoring half** of the client-side handshake: they write the strict CSP / security headers / sink-safe rendering; `client-side-security` (Step 4b) proves the header blocks and the report lands. Sink findings route back to their component writers, never fixed here.
 
 ## Output contract
 

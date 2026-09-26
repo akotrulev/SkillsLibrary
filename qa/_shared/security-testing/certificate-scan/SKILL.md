@@ -62,7 +62,7 @@ requires disabling early-TLS (TLS 1.0, and 1.1 in practice) and weak ciphers —
 **sslyze** (Python lib + CLI — runs anywhere Python 3 runs, or via Docker):
 
 ```bash
-pip install --upgrade sslyze            # Python 3.10+; ships the `sslyze` CLI and a library API
+pip install --upgrade sslyze            # Python 3.13; ships the `sslyze` CLI and a library API
 # or Dockerised (no local Python):
 docker run --rm nablac0d3/sslyze:latest --mozilla_config=intermediate example.com:443
 ```

@@ -1,6 +1,6 @@
 ---
 name: qa-test-strategy
-description: Use when the user asks for help building a test strategy, risk-based test plan, coverage matrix, test-pyramid sizing, or release quality gates. Triggers: "build a test strategy for X", "what tests should we have for this release", "risk-based plan for the migration".
+description: Use when the user asks for help building a test strategy, risk-based test plan, coverage matrix, test-pyramid sizing, or release quality gates. Triggers: "build a test strategy for X", "what tests should we have for this release", "risk-based plan for the migration". Not for one feature's test plan (test-plan-writer) or step-by-step cases (test-case-writer).
 ---
 
 # QA — Test Strategy
@@ -18,11 +18,11 @@ Produces a stack-agnostic test strategy for a feature, release, or whole service
 ## When NOT to use
 
 - A full feature **test plan** — harness & tooling looked up from the repo, environments, artifacts, a gap-analyzed case inventory → `qa/manual/test-plan-writer` / the `qa-test-planner` agent (which *embeds* this skill's risk register and scope call)
-- Writing the actual tests → `qa/<stack>/skills/api-test-author/generator/<stack>` / `qa/<stack>/skills/ui-test-author/<stack>` / `qa/manual/test-case-writer`
-- Reviewing existing tests → `qa/<stack>/skills/api-test-author/reviewer` / `qa/<stack>/skills/ui-test-author/reviewer`
+- Writing the actual tests → `qa/<stack>/skills/api-test-author/writer` / `qa/<stack>/skills/ui-test-author/<tool>` / `qa/manual/test-case-writer`
+- Reviewing existing tests → `qa/<stack>/skills/api-test-author/review` / `qa/<stack>/skills/ui-test-author/review`
 - Bug reports → `qa/manual/bug-report-writer`
 - Quality metrics dashboard → `qa/manual/quality-metrics`
-- Performance plan → `qa/<stack>/skills/performance` + `qa/_shared/performance`
+- Performance plan → `qa/<stack>/skills/load-testing` + `qa/_shared/performance`
 
 ## Inputs needed
 
@@ -157,8 +157,8 @@ Avoid testing the *same* thing at three layers — that's not safety, that's tax
 - <thing> — deferred because <reason>; revisit on <date / signal>
 
 ## Handoffs
-- API tests → qa/<stack>/skills/api-test-author/generator/<stack>
-- UI tests → qa/<stack>/skills/ui-test-author/<stack>
+- API tests → qa/<stack>/skills/api-test-author/writer
+- UI tests → qa/<stack>/skills/ui-test-author/<tool>
 - Test data → qa/<stack>/skills/test-data-builder
 - Contract testing → qa/<stack>/skills/api-contract-testing
 - Allure reporting → qa/reporting/<stack>/skills/test-reports
@@ -198,8 +198,8 @@ Avoid testing the *same* thing at three layers — that's not safety, that's tax
 
 ## Handoffs
 
-- API test generation → `qa/<stack>/skills/api-test-author/generator/<stack>`
-- UI test generation → `qa/<stack>/skills/ui-test-author/<stack>`
+- API test generation → `qa/<stack>/skills/api-test-author/writer`
+- UI test generation → `qa/<stack>/skills/ui-test-author/<tool>`
 - Test data → `qa/<stack>/skills/test-data-builder`
 - Contract testing → `qa/<stack>/skills/api-contract-testing`
 - Exploratory charters → `qa/manual/exploratory-charter-writer`

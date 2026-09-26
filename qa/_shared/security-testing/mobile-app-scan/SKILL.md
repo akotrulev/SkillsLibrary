@@ -1,6 +1,6 @@
 ---
 name: qa-security-mobile-app-scan
-description: Use for STATIC mobile app security testing — analyzing an Android APK/AAB or iOS IPA (and its source) for the flaws MobSF and the mobile SAST tools catch without running the app — hardcoded secrets, weak crypto, insecure storage config, a permissive manifest/Info.plist, cleartext/ATS-disabled traffic, missing binary hardening. Language-agnostic (any mobile stack — native, Flutter, React Native, MAUI), OWASP MASVS/MASTG-mapped, safe every build (no device). Triggers "scan our APK/IPA for security issues", "run MobSF static analysis", "check the app manifest / ATS / network security config", "find secrets in the mobile binary", "MASVS static coverage". Not for runtime/traffic testing on a device (`mobile-runtime-testing`), a running web API (`active-scan`), or lockfile CVEs (`dependency-scan`).
+description: Use when an Android APK/AAB or iOS IPA must be scanned STATICALLY (MobSF, no device) — hardcoded secrets, weak crypto, storage config, a permissive manifest/Info.plist, cleartext traffic, missing binary hardening. Any mobile stack, MASVS/MASTG-mapped, safe every build. Triggers "scan our APK/IPA", "run MobSF static analysis", "check the network security config". Not for runtime testing on a device (`mobile-runtime-testing`), a web API (`active-scan`), or lockfile CVEs (`dependency-scan`).
 ---
 
 # Security Testing — Mobile Static Analysis (MobSF + mobile SAST)

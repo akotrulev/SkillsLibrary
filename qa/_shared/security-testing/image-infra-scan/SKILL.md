@@ -6,7 +6,7 @@ description: Use when scanning the layers application SCA cannot see — base-OS
 # Security Testing — Container & IaC Scanning (Trivy)
 
 **Trivy** (Aqua Security) is one language-agnostic Go binary that scans the layers your **application SCA
-gate cannot see**: the **base OS image** (`apt`/`apk`/`yum` packages baked into `node:20-slim`,
+gate cannot see**: the **base OS image** (`apt`/`apk`/`yum` packages baked into `node:24-slim`,
 `mcr.microsoft.com/dotnet/aspnet`, etc.), the **container image as shipped** (every layer, plus embedded
 secrets and a misconfigured `USER root`), and **Infrastructure-as-Code** (Terraform, CloudFormation,
 Kubernetes manifests, Helm charts, Dockerfiles). It also **generates and scans SBOMs**. It needs **no

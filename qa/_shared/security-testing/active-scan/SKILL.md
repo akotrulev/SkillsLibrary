@@ -71,7 +71,7 @@ These sections live in `references/details.md` — **read it when the task touch
 ## ⚠️ Active scan SENDS ATTACK PAYLOADS and MUTATES STATE — authorization is mandatory
 
 > **The `activeScan` job *injects* SQLi / XSS / path-traversal / command-injection payloads and will
-> create, mutate, and delete data. It must NEVER run against production or any shared environment.** This is
+> create, mutate, and delete data. It must never run against production or any shared environment.** This is
 > the hard `qa-security-shared` authorization-to-scan rule — deferred there, restated loud here because this
 > is the skill that actually fires the payloads.
 
@@ -238,7 +238,7 @@ Emit **two** reports from the AF `report` jobs (shown in the plan): a **SARIF** 
 
 ## Rules (hard constraints)
 
-- **Active scan = attack payloads + state mutation.** NEVER against prod or a shared env — only a throwaway
+- **Active scan = attack payloads + state mutation.** Never against prod or a shared env — only a throwaway
   env you own and are **authorized** to attack, spun on a readiness condition (never a fixed sleep). Defer
   the rule to `qa-security-shared`; obey it here.
 - **Prefer the YAML Automation Framework** (`zap.sh -cmd -autorun plan.yaml`) over the legacy packaged

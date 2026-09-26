@@ -1,6 +1,6 @@
 ---
 name: qa-security-secrets-scan
-description: Use when scanning a repo and its git history for committed secrets — Gitleaks as the fast PR gate, TruffleHog to verify whether leaked credentials are live — blocking new leaks via pre-commit + CI. Language-agnostic (CLI/Docker). Triggers: "scan for leaked secrets", "add Gitleaks to CI", "a key was committed to the repo".
+description: Use when scanning a repo and its git history for committed secrets — Gitleaks as the fast PR gate, TruffleHog to verify whether leaked credentials are live — blocking new leaks via pre-commit + CI. Language-agnostic (CLI/Docker). Triggers: "scan for leaked secrets", "add Gitleaks to CI", "a key was committed to the repo". Not for secrets inside a mobile binary (`mobile-app-scan`) or code flaws (`code-scan`).
 ---
 
 # Security Testing — Secrets Scanning (Shared)

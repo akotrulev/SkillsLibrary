@@ -1,6 +1,6 @@
 ---
 name: qa-quality-metrics
-description: Use when the user asks how to measure QA effectiveness or delivery quality — DORA metrics, defect escape rate, flake rate, MTTR, SLOs / SLIs, coverage as a signal (not a target). Triggers: "measure QA effectiveness", "DORA metrics", "track flaky tests".
+description: Use when the user asks how to measure QA effectiveness or delivery quality — DORA metrics, defect escape rate, flake rate, MTTR, SLOs / SLIs, coverage as a signal (not a target). Triggers: "measure QA effectiveness", "DORA metrics", "track flaky tests". Not for setting release gates or a test strategy (test-strategy).
 ---
 
 # QA — Quality Metrics

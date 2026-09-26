@@ -26,8 +26,11 @@ line in three agents, 63 `Node 20` hits moved to Node 24 with the realtime Node-
 flag, 20 stale paths, the K1 name and 23 descriptions; the LLM agent's `qa/manual` write-up became a hand-off,
 D15). S10 landed 2026-09-26 (qa/typescript UI, mobile and performance lanes and commands: the Gate line in
 three agents, the last 23 `Node 20` hits moved to Node 24 so qa/typescript holds only flagged EOL lines, the
-production-uptime-checks names resolved, eight Do-NOT clauses added). S11 is next. S1–S18 are ungated: the
-edits from S1 to S10 are built but unverified until G1 runs §7.
+production-uptime-checks names resolved, eight Do-NOT clauses added). S11 landed 2026-09-26 (qa/_shared and
+qa/manual: the Gate line in three agents, the two mobile security descriptions and `qa-test-case-designer`
+under budget, nine Do-NOT clauses added, 20 stale paths fixed; the "(Stage N, forthcoming)" family is carried
+into S17 and S18). S12 is next. S1–S18 are ungated: the edits from S1 to S11 are built but unverified until
+G1 runs §7.
 
 ## 1. What already exists, and what is missing
 
@@ -1354,6 +1357,63 @@ skills around hits 16k, descriptions 7k, ~11 files modified 17k, read-back 6k, c
   rules and stay bold.
 - K2: the Gate line in every agent under both folders.
 - **Not in S11:** the per-stack qa folders (S5–S10) and `qa/cicd`, `qa/reporting` (S12).
+- **As built (2026-09-26):** `qa/_shared/` and `qa/manual/`; the three agents and nine commands read in full.
+  Gate line added to 3 agents, each as the last Operating-rules bullet (`qa-security.md:47`,
+  `qa-test-case-designer.md:37`, `qa-test-planner.md:34`). The nine commands need nothing: each only points at
+  its agent or skill file.
+  Data issues: 27 fixed.
+  - K6: `image-infra-scan/SKILL.md:9` `node:20-slim` → `node:24-slim`; `certificate-scan/SKILL.md:65` sslyze
+    install comment "Python 3.10+" → "Python 3.13".
+  - Stale paths, 20: `api-test-author/generator/<stack>` → `…/writer` and `ui-test-author/<stack>` → `…/<tool>` in
+    `performance:168`, `contract-testing-pact:169`, `:170`, `:179`, `exploratory-charter-writer:256` and
+    `test-strategy:21`, `:160`, `:161`, `:201`, `:202`; `test-strategy:22` `…/reviewer` → `…/review` (both);
+    `test-strategy:25` and `performance:8` `skills/performance/…` → `skills/load-testing`;
+    `feature-file-writer:3`, `:21`, `:155` `bdd-project-setup` → `bdd-project-scaffold` (the folder);
+    `ci-pipelines/{github-actions,…}` and `ci-pipelines/<ci>` → "`ci-pipelines` (its `references/<host>.md`)" in
+    `code-scan:318`, `performance:90`, `:182`, `contract-testing-pact:181`; `performance:183`
+    `test-reports/<stack>` → `test-reports`; `contract-testing-pact:180` `api-models/<stack>` → `api-models`;
+    `security/SETUP.md:184` put `ci-pipelines` and `test-reports` under `qa/cicd/<stack>` and
+    `qa/reporting/<stack>`, where they live.
+  - Stale plan stages: SECURITY-EXPANSION-PLAN's "(Stage 2/3/5/6)" and "forthcoming" labels dropped where the
+    lane has landed (`penetration-testing`, `initial-access`, `security-hardening` all exist):
+    `qa-security.md:26`, `:27`, `:115`, `:116`; `exploit-validation:80`, `:207`; `client-side-security:18`,
+    `:161`, `:178`; `vuln-reachability:21`.
+  - `python-web-testing:3`, `:11` "the library's one/single Python skill" → "qa's" (backend/python ships more).
+  - `qa-security.md:55` "a changed the CI config / …" → "a change to the CI config, … or the dependency manifests".
+  Code issues: 20 fixed.
+  - K7: `mobile-runtime-testing` 881 → 499, `mobile-app-scan` 803 → 493, `qa-test-case-designer` 675 → 631 (both
+    manual agents now open with "Use when"; `qa-test-planner` 636). Do-NOT clauses added to the nine that lacked
+    one — `known-vuln-scan` (476), `secrets-scan`, `api-fuzzing`, `quality-metrics`, `test-design-techniques`,
+    `exploratory-charter-writer`, `bug-report-writer`, `requirements-breakdown`, `test-strategy` — each naming the
+    sibling. Every description in both folders now fits and carries one.
+  - K4: `qa-test-planner` description trigger "plan the testing for this slice" → "this story";
+    `requirements-breakdown:43` "one slice" → "one part of it".
+  - K5: `active-scan:74`, `:241` `NEVER` → never (the bold hard rule at `:73` stays, once);
+    `code-scan:152` `ALWAYS`; `python-web-testing:18` "DO NOT read the source … abslutely necessary" → one plain
+    sentence, `:64` `CRITICAL:` code comment → lower case.
+  - K8 and K2 for skills: `security/SETUP.md:132` "`npx vitest` / `dotnet test` / `./gradlew test`" → the project's
+    own test command (the `package.json` script run with the package manager `packageManager` names, the
+    `.sln`, the Gradle wrapper), plus the "written, not run" sentence.
+  - `qa-security.md` Orientation 2 said "Recover, don't author" twice; merged into one sentence.
+  Logical conflicts: 2 fixed.
+  - `qa-security.md:59` Orientation 3 "check it every run regardless of the gate's verdict" gains "outside a
+    `Gate: none` plan task".
+  - `qa-security`'s Steps 1 and 6 load `qa/manual/` and `qa/cicd/` skills while "Related agents" says "never load
+    their skills"; the exception is stated once under that heading (S6's reading).
+  Cleanup: none. The K9 file recipe hits only `qa-test-planner.md` and the `qa-test-plan-writer` / `qa-test-planner`
+  commands (names, not plans); no tracked junk; every SKILL.md, agent and command in both folders is listed in the
+  marketplace and every listed path exists.
+  Kept on purpose: K3 hits are the fixed workspace sentence, Pact `--branch` / `mainBranch`, KEV "OR-branch" and
+  branch coverage. K4 hits are pipeline/enrichment "stages", the test-strategy "Stage" column, "the relevant slice"
+  of logs and OWASP-category "slices" (D8). K8 hits left are `pip install` tool installs and the `dotnet test
+  --collect` coverage sample. The `green` hits are exit criteria or "green ≠ secure" rule text (K2 keep).
+  qa-security's authorization and scope rules stay bold (K5 keep). `qa-test-case-designer` and `qa-test-planner`
+  Orientation 3 run a read-only consistency check, not a build, so they need no Gate qualifier. The skills' own
+  scan-run instructions got no "written, not run" sentence: the scanners are loaded through `qa-security`, whose
+  Gate line covers them. "— MANDATORY SECTION" and the `be-shared-session-budget` Step 5 duty do not occur.
+  Carried forward: the "(Stage N, forthcoming)" family into the S17 and S18 blocks (`devops/` and `security/`
+  still carry it).
+  Unverified: nothing was run beyond §4's searches (Gate: none).
 
 ### S12 — qa/cicd and qa/reporting
 
@@ -1619,58 +1679,9 @@ name: the K1 resolver flags it (D12).
 | S18 | `docs` | `general-purpose` | — | ~135k |
 | G1 | `docs` | `general-purpose` | S1–S18 | ~120k |
 
-S1 to S10 have landed, and their prompts are deleted; the 9 prompts from S11 to G1 are live.
+S1 to S11 have landed, and their prompts are deleted; the 8 prompts from S12 to G1 are live.
 
 ---
-
-### S11 — qa/_shared and qa/manual (general-purpose, docs)
-
-````
-You are `general-purpose`. Task S11 of docs/plans/001-library-conformance-sweep.md: bring qa/_shared
-and qa/manual in line with the plan's checks K1–K9.
-
-Deliverable: qa/_shared/ and qa/manual/ pass K1–K9: qa-security, qa-test-case-designer and
-qa-test-planner carry the Gate line, and the two over-budget mobile security descriptions fit.
-
-Read, in this order:
-1. CLAUDE.md.
-2. The plan: §2, §3, §4, §6 (the S11 rows), D1–D11, task S11.
-3. CONTRIBUTING.md.
-4. qa/_shared/agents/*.md, qa/manual/agents/*.md and qa/manual/commands/*.md in full.
-5. The plan's "Close-out — every task".
-
-Do:
-- Run §4's recipes with DIR=qa/_shared, then DIR=qa/manual.
-- K7: qa/_shared/security-testing/mobile-runtime-testing 881 and mobile-app-scan 803 → ≤ 500;
-  qa-test-case-designer 675 → ≤ 650.
-- K6: node:20 ×1 and Python 3.10 ×1 → the primary versions.
-- K2: the Gate line in every agent under both folders.
-
-Traps:
-- Agent sentences S3/S4 fixed in backend recur in 28 agents across S5–S17; fix them where your
-  agents carry them:
-  - "— MANDATORY SECTION" on the brownfield heading is dropped (K5).
-  - The orientation pass's "every run regardless of the gate's verdict" (the cache gate) gains
-    "outside a `Gate: none` plan task".
-  - A closing duty "per `be-shared-session-budget` Step 5" now reads "per the plan's
-    `## Close-out — every task` section (plan format §7)".
-  - A skill's Validation / Verify list gets one sentence: inside a `Gate: none` plan task it runs
-    none of the checks and reports "written, not run".
-  - K8: a hardcoded `pnpm …` / `npm …` in an instruction becomes the project's own script, run with
-    the package manager `packageManager` names.
-- Stale path shorthands (S5): `api-test-author/generator` → `writer`, `api-test-author/reviewer`
-  and `ui-test-author/reviewer` → `review`, `bdd-project-setup` → `bdd-project-scaffold`. Known
-  hits: `qa/_shared/{bdd/feature-file-writer,contract-testing-pact,performance}/SKILL.md`,
-  `qa/manual/{test-strategy,exploratory-charter-writer}/SKILL.md`. The K1 resolver cannot see paths.
-  S6 adds `qa/manual/test-strategy/SKILL.md:25`: `qa/<stack>/skills/performance` → `load-testing`.
-- qa-security's authorization and scope rules are hard safety rules (K5 keep).
-- qa/_shared skills are loaded by all three qa stacks. Change descriptions, not skill names.
-
-Gate: none — this plan gates once, in G1. Do not run tools/token-audit.py or §7's script.
-
-Commit: `chore(sweep S11): qa/_shared and qa/manual`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
 
 ### S12 — qa/cicd and qa/reporting (general-purpose, docs)
 
@@ -1992,6 +2003,11 @@ Traps:
 - (S9/S10) Node 20 is sometimes a feature boundary, not a default (native `WebSocket`/`EventSource`,
   global `fetch`/`FormData`/`Blob`): such a line says Node 22/24 have the feature and flags a detected
   Node 20 as EOL, rather than reading "Node 24" after the substitution. A CI `node-version: 20` moves to 24.
+- (S11) SECURITY-EXPANSION-PLAN's "Stage N" / "(Stage N, forthcoming)" labels name units of planned work
+  (K4) and point at lanes that have since landed. Drop the label and keep the lane name, after checking
+  the named skill, agent or plugin exists (e.g. S11 made "`penetration-testing` *(Stage 3, forthcoming)*"
+  read "`penetration-testing`"). Known hits: `devops/agents/infra-security-tester.md`,
+  `devops/commands/infra-security-tester.md` and eight devops skills or references.
 
 Gate: none — this plan gates once, in G1. Do not run tools/token-audit.py or §7's script.
 
@@ -2029,7 +2045,12 @@ Traps:
 - Rules of engagement, written authorization, scope files and production sign-off are hard safety
   rules. Keep them bold, once each, with their reason; K5 must not soften them.
 - Kill-chain "phases" are domain vocabulary (D8).
-- `docs/plans/implemented/` may not exist yet; `mkdir -p` it before the move.
+- (S11) SECURITY-EXPANSION-PLAN's "Stage N" / "(Stage N, forthcoming)" labels name units of planned work
+  (K4) and point at lanes that have since landed. Drop the label and keep the lane name, after checking
+  the named skill, agent or plugin exists. Known hits: `security/agents/{penetration-tester,security-architect}.md`,
+  `security/commands/security-test-planner.md`, `initial-access`, `detection-engineering`,
+  `security-hardening`, `pentest-reporting`. SECURITY-EXPANSION-PLAN itself is filed unedited (D7).
+- `docs/plans/implemented/` already exists (S2 created it).
 
 Gate: none — this plan gates once, in G1. Do not run tools/token-audit.py or §7's script.
 

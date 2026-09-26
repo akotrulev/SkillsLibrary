@@ -18,7 +18,7 @@ running unchanged and stay authoritative on *"is the vulnerable component presen
 function of their output + cached public feeds** — it joins on the CVE id, so it works identically for Trivy,
 Grype, `npm audit`, OWASP Dependency-Check, and `dotnet list --vulnerable`. It is **read-only and safe on
 every PR** — it reads public feeds and local scanner JSON, sends no payloads, and needs no authorization gate
-(the one skill in this Stage-2 set that doesn't). It pairs with `qa-security-shared` (the OWASP backbone,
+(the one exploit-weighting skill that doesn't). It pairs with `qa-security-shared` (the OWASP backbone,
 esp. **A03:2025 Software Supply Chain Failures**) — load that alongside.
 
 ## The single most important rule: never multiply EPSS by CVSS

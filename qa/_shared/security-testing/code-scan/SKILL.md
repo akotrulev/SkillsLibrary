@@ -149,7 +149,7 @@ test/fixtures/**     # intentionally-vulnerable test fixtures
 ```
 
 ```java
-// Inline, line-scoped suppression — ALWAYS carry the rule-id + a ticket (qa-security-shared discipline).
+// Inline, line-scoped suppression — always carry the rule-id + a ticket (qa-security-shared discipline).
 String q = "SELECT * FROM users WHERE id = " + id; // nosemgrep: java.lang.security.audit.sqli — JIRA-5120 false positive: id is an int bound upstream, re-review 2026-Q4
 ```
 
@@ -315,7 +315,7 @@ map in `qa-security-shared`.
   source concern from insecure-code-pattern SAST).
 - `qa/<stack>/skills/security-testing/permission-testing` — the **functional** BOLA/IDOR/BFLA matrix for
   A01, the access-control flaw SAST is blind to.
-- `qa/cicd/<stack>/skills/ci-pipelines/{github-actions,azure-pipelines,gitlab-ci}` + `qa/cicd/ci-conventions` —
+- `qa/cicd/<stack>/skills/ci-pipelines` (its `references/<host>.md`) + `qa/cicd/ci-conventions` —
   wire the gate step, SARIF upload, and artifact.
 - `qa/reporting/<stack>/skills/test-reports` — attach the parsed JSON finding summary to the run.
 - `qa/_shared/agents/qa-security.md` — the step-by-step orchestrator that runs SAST in the per-PR static-gates

@@ -15,7 +15,7 @@ crawl an SPA the way a browser does.**
 This skill is **language-agnostic** (Dalfox, ZAP, Nuclei, the CSP tools are CLI binaries / browser
 harnesses) and lives in the **`qa-security` agent's Step 4b** dynamic lane, pairing with
 `qa-security-shared` (the OWASP backbone) — load that alongside. It is the **test half of the `fe-*`
-handshake**: the Stage-5 `security-hardening` skill *authors* the strict CSP / security headers into the
+handshake**: the `security-hardening` skill *authors* the strict CSP / security headers into the
 `fe-react` / `fe-blazor` app; this skill *proves in a real browser that they hold*. Same shape as the
 existing `data-testid` / `missing-testids.md` contract — the frontend skill writes the artifact, the test
 skill asserts it. Sink findings route **back** to `fe-react-component-writer` / `fe-blazor-component-writer`
@@ -158,7 +158,7 @@ npm i -g retire@5.4.3
   Playwright→proxy pattern; never trust a server-side-only crawl's site tree for a client-routed app.
 - **Two spines:** OWASP/WSTG primary (A05 DOM XSS · A02 header misconfig · A03 vulnerable libs · CLNT ids);
   ATT&CK `T1059.007` only where a proof executes and is handed onward.
-- **The fe-\* handshake:** this skill tests; `security-hardening` (Stage 5) + `fe-*` author. Sink fixes route
+- **The fe-\* handshake:** this skill tests; `security-hardening` + `fe-*` author. Sink fixes route
   back to the frontend generators — never fixed here.
 - **Loot redaction:** a proven DOM XSS / prototype-pollution PoC reports the sink and the reachable action,
   not harvested cookies/tokens; nothing sensitive committed under `docs/`.
@@ -175,7 +175,7 @@ npm i -g retire@5.4.3
   SSRF, SSTI…). A confirmed DOM XSS that needs chaining hands off there / to `penetration-testing`.
 - `qa/<stack>/skills/security-testing/dependency-scan` — **application** SCA (lockfile CVEs); Retire.js here
   catches vulnerable libs in the **shipped browser bundle** (a different surface). Boundary partners.
-- **`security-hardening`** *(Stage 5, forthcoming)* + **`fe-react`** / **`fe-blazor`** — the **authoring half
+- **`security-hardening`** + **`fe-react`** / **`fe-blazor`** — the **authoring half
   of the handshake**: they write the strict nonce CSP, `Reporting-Endpoints`, and sink-safe rendering; this
   skill proves the header blocks and the report lands. Sink findings route to their component writers.
 - `qa/manual/bug-report-writer` — write up a confirmed DOM XSS / CSP-bypass with the WSTG id, the PoC URL,

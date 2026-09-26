@@ -1,6 +1,6 @@
 ---
 name: qa-python-web-testing
-description: Use when driving a locally running web app through Playwright from Python to verify frontend behavior interactively — browser screenshots, console logs, ad-hoc UI debugging. The library's one Python-based skill. Triggers "open the local app and check X", "screenshot this page", "what is the browser console showing", "debug this UI behavior with Python". Not for authoring a maintained UI suite, page objects, or a POM from a URL (`ui-test-author/playwright`, `page-objects-from-url`).
+description: Use when driving a locally running web app through Playwright from Python to verify frontend behavior interactively — browser screenshots, console logs, ad-hoc UI debugging. qa's one Python-based skill. Triggers "open the local app and check X", "screenshot this page", "what is the browser console showing", "debug this UI behavior with Python". Not for authoring a maintained UI suite, page objects, or a POM from a URL (`ui-test-author/playwright`, `page-objects-from-url`).
 ---
 
 # Web Application Testing
@@ -8,14 +8,14 @@ description: Use when driving a locally running web app through Playwright from 
 > **Scope / when to use this vs the stack-native Playwright skills.** This is an Anthropic-provided **Python** toolkit for *ad-hoc, throwaway* browser automation — quickly driving a local web app to verify frontend behavior, debug UI, capture screenshots, or read browser logs *inside a Claude session*. It is **not** the way to author a maintained UI test suite. For a project's actual regression/E2E suite, use the **stack-native** skills instead, which produce page-objects, fixtures, and CI-runnable tests in the project's own language and runner:
 > - `qa/typescript/skills/ui-test-author/playwright` · `qa/dotnet/skills/ui-test-author/playwright` · `qa/java/skills/ui-test-author/playwright` — the maintained web UI suites (owned by the `qa-ui-{stack}` agents), plus `page-object-design` / `page-objects-from-url` for POMs.
 >
-> **Rule of thumb:** reach for *this* skill when you need Claude to poke a running app once and report back; reach for the stack skill when you're writing tests that live in the repo and run in the pipeline. This one is intentionally the library's single Python skill.
+> **Rule of thumb:** reach for *this* skill when you need Claude to poke a running app once and report back; reach for the stack skill when you're writing tests that live in the repo and run in the pipeline. This one is intentionally qa's single Python skill.
 
 To test local web applications, write native Python Playwright scripts.
 
 **Helper Scripts Available**:
 - `scripts/with_server.py` - Manages server lifecycle (supports multiple servers)
 
-**Always run scripts with `--help` first** to see usage. DO NOT read the source until you try running the script first and find that a customized solution is abslutely necessary. These scripts can be very large and thus pollute your context window. They exist to be called directly as black-box scripts rather than ingested into your context window.
+**Always run scripts with `--help` first** to see usage. Read the source only after running the script shows a customized solution is necessary. These scripts can be very large and thus pollute your context window. They exist to be called directly as black-box scripts rather than ingested into your context window.
 
 ## Decision Tree: Choosing Your Approach
 
@@ -61,7 +61,7 @@ with sync_playwright() as p:
     browser = p.chromium.launch(headless=True) # Always launch chromium in headless mode
     page = browser.new_page()
     page.goto('http://localhost:5173') # Server already running and ready
-    page.wait_for_load_state('networkidle') # CRITICAL: Wait for JS to execute
+    page.wait_for_load_state('networkidle') # wait for JS to execute
     # ... your automation logic
     browser.close()
 ```

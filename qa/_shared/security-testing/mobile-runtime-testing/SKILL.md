@@ -1,6 +1,6 @@
 ---
 name: qa-security-mobile-runtime-testing
-description: Use for DYNAMIC mobile app security testing on a device/emulator you own — the runtime MASVS controls static analysis cannot reach — TLS pinning bypass + traffic interception (MITM), runtime local-storage/keychain inspection, insecure logging, session/auth token handling, and root/jailbreak-detection efficacy. Language-agnostic, OWASP MASVS/MASTG-mapped, AUTHORIZATION-GATED (running app on an owned non-prod device), NOT a per-PR gate. Tools: MobSF dynamic analyzer, Frida, objection, mitmproxy/Burp. Triggers "bypass SSL pinning and inspect the app's traffic", "what does the app store on disk at runtime", "test our root/jailbreak detection", "MASVS network/auth/resilience testing", "run MobSF dynamic analysis". Not for static binary/manifest analysis (`mobile-app-scan`), a web API (`active-scan`/`exploit-validation`), or a full network kill chain (`penetration-testing`).
+description: Use when a mobile app must be tested DYNAMICALLY on a device you own — TLS-pinning bypass + traffic interception, runtime storage/keychain, logging, session tokens, jailbreak-detection efficacy. MASVS/MASTG-mapped; Frida, objection, mitmproxy. Authorization-gated, never a per-PR gate. Triggers "bypass SSL pinning", "what does the app store at runtime", "test our jailbreak detection". Not for static analysis (`mobile-app-scan`), a web API (`active-scan`), or a kill chain (`penetration-testing`).
 ---
 
 # Security Testing — Mobile Runtime / Dynamic Analysis (MobSF dynamic · Frida · objection)
