@@ -20,6 +20,7 @@ runs §7.
 | Descriptions carry triggers and a Do-NOT clause, within `tools/token-audit.py`'s budgets | `python3 tools/token-audit.py` (2026-09-26): 34 skill descriptions over 500 chars, 11 agent descriptions over 650 (§6.2), plus 160 body/file size violations (D6). Marketplace: 0 missing paths | K7: fix the 45 description violations and check every description |
 | Instructions name the project's own commands, not defaults | The one known case (`ep-worktrees`' `npm install`) left with that skill; other folders unchecked | K8 sweep |
 | Old plans, progress files and leftovers are filed or removed | 5 root `*-PLAN.md`; `backend/{PLAN,DOCUMENTER-PLAN,PLANNER-PLAN,UNIT-TESTING-PLAN}.md`; `frontend/PLAN.md`; `meta/PLAN.md`; 5 unnumbered files in `docs/plans/`, no `docs/plans/implemented/` yet; 6 tracked build files under `tools/mission-control/.next/`; tracked `.claude/settings.local.json`; `.agent-template/AGENT.md` beside `.skill-template/agent.md` | Apply §5 per folder; G1 takes the root |
+| The `claude-api` copy `training-data` ships is current | `ai-development/claude-api` was imported 2026-07-12 from `anthropics/skills`; its models table says "cached: 2026-04-15". Upstream `skills/claude-api` is at `main` `33375500` (2026-09-24). The only house edit since import is the description trimmed to 464 chars (`fc94a9a`) | S15 re-vendors it (O5, D11) |
 | The engineering-practices review's leftovers | `brainstorming` names `frontend-design` and a "`design` canvas skill", and neither exists; `CONTRIBUTING.md:75` says a skill's name matches its folder, but every skill is plugin-prefixed; four audit files copy one contract | S1 |
 | README, catalog and CLAUDE.md match what landed, and the check can be rerun | Updated for the removed skills; no repeatable check beyond `tools/token-audit.py` | G1 reconciles the docs; §7 is the rerunnable check |
 
@@ -55,7 +56,7 @@ skill-loading list names. A skill two lanes load belongs to the API/BDD/LLM task
 
 **Out of scope (D5):** `design/ui-ux-pro-max/data/` and `scripts/` (vendored corpus, the design source
 of truth), `frontend/react/vendor/` (vendored seeds), `ai-development/` (vendored; `training-data`
-ships its `claude-api` copy, which S15 records and does not edit), `extras/` and `meta/` (not
+ships its `claude-api` copy, which S15 replaces wholesale from upstream and never hand-edits, D11), `extras/` and `meta/` (not
 published), and `communication/`, `frontend/react-native/`, `auth/cognito-*/` (under construction,
 per CLAUDE.md).
 
@@ -470,8 +471,8 @@ descriptions). It is the smallest change that makes an agent safe inside a `Gate
 unchanged outside one.
 
 **D5 — Vendored, unpublished and under-construction trees are excluded** (list in §2). **Cost:** stale
-content there stays. The `ai-development/claude-api` copy that `training-data` ships is recorded, not
-refreshed (Q1).
+content there stays. The one exception is the `ai-development/claude-api` copy that `training-data`
+ships, which S15 refreshes (D11).
 
 | Option | Verdict | Why |
 |---|---|---|
@@ -480,13 +481,13 @@ refreshed (Q1).
 
 **D6 — Description budgets are fixed here; body and file size violations are not.** The 45
 description violations are cheap to fix and cost tokens in every session. The 160 body/file
-violations mean relocating content to `references/`, which is `TOKEN-OPTIMIZATION-PLAN.md`'s work, and
-that plan stays live. **Cost:** `tools/token-audit.py` still exits non-zero after G1.
+violations mean relocating content to `references/`, which is `TOKEN-OPTIMIZATION-PLAN.md`'s work. That plan
+stays live and gets its own numbered plan after this one (O7). **Cost:** `tools/token-audit.py` still exits non-zero after G1.
 
 **D7 — Legacy plans are filed by rule (§5), keep their unnumbered filenames, and are not converted to
 the plan format.** Renaming would break every commit message and doc that cites them by name. The one exception is the three files called `PLAN.md`, which gain their folder as a prefix because they would otherwise collide.
 `NNN`'s high-water mark counts numbered files only, so this plan is `001`. **Cost:** `docs/plans/`
-holds legacy-shaped live plans until each one gets a new plan (Q3).
+holds legacy-shaped live plans until each one gets a new plan (O6, O7).
 
 **D8 — Domain uses of phase, stage, slice and milestone stay.** K4 renames only units of planned work.
 **Cost:** judgment per hit; the recipe over-reports.
@@ -499,6 +500,12 @@ whichever task caused it.
 `standards-audit-engine` is flagged, not consolidated.** The four copies agree today; merging them is
 a refactor with no failing behaviour behind it. **Cost:** they can drift, and a later edit must touch
 all four.
+
+**D11 — The shipped `claude-api` copy is replaced wholesale from `anthropics/skills`, then its
+description is trimmed back under 500 chars.** Upstream owns every file in it; the description is the
+one house fork, because `training-data` pays for it in every session and `tools/token-audit.py`
+budgets it. **Cost:** upstream's changes land reviewed only by `git diff --stat` and a skim of
+`SKILL.md`, and the description fork has to be re-applied at every refresh.
 
 ## Answered questions (2026-09-26)
 
@@ -514,15 +521,21 @@ task touches `docs/agent-context/`.
 
 **O4 — Does each folder task also clean up its old plans and docs: yes.** Per §5; G1 takes the root.
 
+**O5 — The vendored `claude-api` copy: re-vendor it.** S15 refreshes it from `anthropics/skills` (D11).
+
+**O6 — The unbuilt proposals: keep both live.** `MODEL-PORTABILITY-PLAN.md` moves to `docs/plans/`;
+`docs/plans/fine-tuning-house-models.md` stays.
+
+**O7 — Next plans: conformance audits and size optimization.** `CONFORMANCE-AUDIT-PLAN.md`'s remaining
+stacks and `TOKEN-OPTIMIZATION-PLAN.md`'s 160 size violations each get their own numbered plan after
+this one lands. G1 leaves both live in `docs/plans/` and names them as next in the final `Status:`.
+
+**O8 — The unpublished trees: keep them all.** `extras/`, `meta/` and `ai-development/mcp-builder`
+stay; D5 still keeps them out of this sweep.
+
 ## Open questions
 
-| # | Question | Options | Blocks | Owner |
-|---|---|---|---|---|
-| Q1 | Refresh the vendored `ai-development/claude-api` copy that `training-data` ships? | Re-vendor from upstream · stop shipping it · leave as is | Nothing; S15 records its cached date | user |
-| Q2 | Keep the unbuilt proposals `MODEL-PORTABILITY-PLAN.md` and `docs/plans/fine-tuning-house-models.md`? | Keep live in `docs/plans/` (the default, D7) · delete | Nothing | user |
-| Q3 | Turn `CONFORMANCE-AUDIT-PLAN.md`'s remaining stacks into a numbered plan? | New plan · leave it live as is | Nothing | user |
-| Q4 | Keep the unpublished `extras/`, `meta/` and `ai-development/` trees in the repo? | Keep · delete | Nothing | user |
-| Q5 | Run the body/file size work (160 violations) next? | Resume `TOKEN-OPTIMIZATION-PLAN.md` as a numbered plan · leave | Nothing | user |
+None. The five raised while writing this plan were answered on 2026-09-26 (O5–O8).
 
 ## 8. Tasks
 
@@ -844,13 +857,13 @@ note headers 5k, read-back 6k, churn ×1.2
 ### S15 — data and training-data
 
 **Stack:** `docs` · **Agent:** `general-purpose`
-**Deliverable:** `data/` and `training-data/` pass K1–K9: three agents carry the Gate line, the
-vendored `claude-api` copy that `training-data` ships is recorded against Q1, and
-`docs/plans/fine-tuning-house-models.md` is filed per §5.
+**Deliverable:** `data/` and `training-data/` pass K1–K9 with three agents carrying the Gate line;
+`ai-development/claude-api` matches `anthropics/skills` `skills/claude-api` at the current `main`
+except for a description of ≤ 500 chars; `docs/plans/fine-tuning-house-models.md` is filed per §5.
 **Depends on:** —
-**Budget:** ~135k — floor 24k, plan sections 9k, recipe output 6k, three agents 16k, ~11 skills around
-hits 22k, descriptions 5k, ~13 files modified 20k, the research note and the `claude-api` header 6k,
-read-back 6k, churn ×1.2
+**Budget:** ~140k — floor 24k, plan sections 9k, recipe output 6k, three agents 16k, ~11 skills around
+hits 22k, descriptions 5k, ~13 files modified 20k, the research note header 2k, the re-vendor (clone,
+`git diff --stat`, a skim of the new `SKILL.md`, the description fork) 8k, read-back 6k, churn ×1.2
 **Gate: none** — this plan gates once, in G1. Do not run `tools/token-audit.py` or §7's script.
 
 - K1: `data-modeling` ×2 in `data/agents/data-architect.md`. Decide whether it is a skill name or a
@@ -858,10 +871,13 @@ read-back 6k, churn ×1.2
 - K4: expand/contract migration "phases" are domain vocabulary (D8), so they stay.
 - K5: `data/` has 10 all-caps rule words. Keep migration-safety rules (online-safe DDL, never drop
   before backfill) as hard rules with their reason.
-- D5: read only `ai-development/claude-api/SKILL.md`'s header for its cached-models date. Record that
-  date and today's date in the As built note and in Q1; do not edit it.
+- D11 re-vendor: shallow-clone `https://github.com/anthropics/skills`, replace
+  `ai-development/claude-api/` with its `skills/claude-api/` (`rsync -a --delete`), then put the
+  description back under 500 chars. Start from today's house description (`fc94a9a`); keep upstream's
+  trigger phrases and Do-NOT scope. Record the upstream commit SHA and date, the file count changed and
+  the new "cached:" date in the As built note, so G1 can update README's attribution row.
 - K9: `docs/plans/fine-tuning-house-models.md` is a research note with nothing built. It stays in
-  `docs/plans/` by default (D7, Q2).
+  `docs/plans/` (O6).
 - K2: the Gate line in `data-architect` and both `training-data` agents.
 - **Not in S15:** `business-analysis`, `tooling` (S16).
 
@@ -966,8 +982,10 @@ the As built note.
   - `git rm --cached .claude/settings.local.json` and add it to `.gitignore`.
 - Docs: grep README, `docs/skills-catalog.md` and CLAUDE.md for every name, count and path the As
   built notes say changed, and fix those places only. The catalog is 175 KB; do not read it whole.
-- Record in the As built note the gate output lines, every `ALLOW`/`LINK_EXAMPLES` addition with its
-  reason, and the open questions still open.
+- README's attribution row for `ai-development` gets the upstream SHA and date S15 recorded.
+- Record in the As built note the gate output lines and every `ALLOW`/`LINK_EXAMPLES` addition with its
+  reason. The final `Status:` names the next two plans (O7): conformance audits from
+  `CONFORMANCE-AUDIT-PLAN.md` and size optimization from `TOKEN-OPTIMIZATION-PLAN.md`.
 - This task deletes the last prompt block, so Close-out step 6 files this plan into
   `docs/plans/implemented/`.
 
@@ -1015,12 +1033,11 @@ agent, edits a vendored tree (D5), or touches `docs/agent-context/`.
 | S12 | `docs` | `general-purpose` | — | ~155k |
 | S13 | `docs` | `general-purpose` | — | ~145k |
 | S14 | `docs` | `general-purpose` | — | ~135k |
-| S15 | `docs` | `general-purpose` | — | ~135k |
+| S15 | `docs` | `general-purpose` | — | ~140k |
 | S16 | `docs` | `general-purpose` | — | ~135k |
 | S17 | `docs` | `general-purpose` | — | ~135k |
 | S18 | `docs` | `general-purpose` | — | ~135k |
 | G1 | `docs` | `general-purpose` | S1–S18 | ~120k |
-| — | Q1–Q5, whenever convenient | **the user** | — | — |
 
 No task has landed yet; all 19 prompts are live.
 
@@ -1039,7 +1056,7 @@ and verify-before-done state their rules without dated emphasis, and no name in 
 
 Read, in this order:
 1. CLAUDE.md.
-2. The plan: §2, §3, §4, §5, §6 (the S1 rows), D1–D10, task S1.
+2. The plan: §2, §3, §4, §5, §6 (the S1 rows), D1–D11, task S1.
 3. CONTRIBUTING.md.
 4. engineering-practices/agents/code-auditor.md and engineering-practices/commands/*.md in full.
 5. engineering-practices/{brainstorming,systematic-debugging,verify-before-done}/SKILL.md in full;
@@ -1084,7 +1101,7 @@ docs/plans/planning-lane-rebuild.md and backend/PLANNER-PLAN.md are filed.
 
 Read, in this order:
 1. CLAUDE.md.
-2. The plan: §2, §3, §4, §5, §6 (the S2 rows), D1–D10, task S2.
+2. The plan: §2, §3, §4, §5, §6 (the S2 rows), D1–D11, task S2.
 3. engineering-practices/writing-plans/references/plan-format.md, all of it (§6 and §7 matter most).
 4. CONTRIBUTING.md.
 5. backend/_shared/agents/solution-planner.md and backend/_shared/commands/*.md in full.
@@ -1127,7 +1144,7 @@ are filed per §5.
 
 Read, in this order:
 1. CLAUDE.md.
-2. The plan: §2, §3, §4, §5, §6 (the S3 rows), D1–D10, task S3.
+2. The plan: §2, §3, §4, §5, §6 (the S3 rows), D1–D11, task S3.
 3. CONTRIBUTING.md.
 4. backend/_shared/agents/be-documenter.md, be-feature-documenter.md,
    backend/dotnet/agents/be-dotnet.md and backend/dotnet/commands/*.md in full.
@@ -1168,7 +1185,7 @@ fit their budgets.
 
 Read, in this order:
 1. CLAUDE.md, especially the version policy.
-2. The plan: §2, §3, §4, §6 (the S4 rows), D1–D10, task S4.
+2. The plan: §2, §3, §4, §6 (the S4 rows), D1–D11, task S4.
 3. CONTRIBUTING.md.
 4. backend/{java,node,python}/agents/*.md in full.
 5. The plan's "Close-out — every task".
@@ -1206,7 +1223,7 @@ K1–K9, and the finding families found here are written into S6–S10 as traps.
 
 Read, in this order:
 1. CLAUDE.md, especially the Test code rules and the version policy.
-2. The plan: §2 (the lane rule), §3, §4, §6 (the S5 rows), D1–D10, task S5.
+2. The plan: §2 (the lane rule), §3, §4, §6 (the S5 rows), D1–D11, task S5.
 3. CONTRIBUTING.md.
 4. qa/dotnet/agents/{qa-api-dotnet,qa-bdd-dotnet,qa-llm-dotnet}.md in full. Their skill-loading
    lists decide which qa/dotnet/skills/ are yours; a skill the other lanes also load is yours.
@@ -1243,7 +1260,7 @@ remaining qa/dotnet skill pass K1–K9.
 
 Read, in this order:
 1. CLAUDE.md.
-2. The plan: §2, §3, §4, §6 (the S6 rows), D1–D10, task S6 and S5's As built note (it lists the skills
+2. The plan: §2, §3, §4, §6 (the S6 rows), D1–D11, task S6 and S5's As built note (it lists the skills
    S5 owned).
 3. CONTRIBUTING.md.
 4. qa/dotnet/agents/{qa-ui-dotnet,qa-mobile-dotnet,qa-performance-dotnet}.md and
@@ -1277,7 +1294,7 @@ Deliverable: qa-api-java, qa-bdd-java, qa-llm-java and every qa/java skill they 
 
 Read, in this order:
 1. CLAUDE.md.
-2. The plan: §2 (the lane rule), §3, §4, §6 (the S7 rows), D1–D10, task S7, S5's As built note.
+2. The plan: §2 (the lane rule), §3, §4, §6 (the S7 rows), D1–D11, task S7, S5's As built note.
 3. CONTRIBUTING.md.
 4. qa/java/agents/{qa-api-java,qa-bdd-java,qa-llm-java}.md in full; their skill-loading lists decide
    which qa/java/skills/ are yours.
@@ -1313,7 +1330,7 @@ qa/java skill pass K1–K9.
 
 Read, in this order:
 1. CLAUDE.md.
-2. The plan: §2, §3, §4, §6 (the S8 rows), D1–D10, task S8, S7's As built note.
+2. The plan: §2, §3, §4, §6 (the S8 rows), D1–D11, task S8, S7's As built note.
 3. CONTRIBUTING.md.
 4. qa/java/agents/{qa-ui-java,qa-mobile-java,qa-performance-java}.md and qa/java/commands/*.md in
    full.
@@ -1347,7 +1364,7 @@ load pass K1–K9, including the move off Node 20 in those files.
 
 Read, in this order:
 1. CLAUDE.md, especially the version policy (Node 24 active LTS, 22 maintenance, 20 EOL).
-2. The plan: §2 (the lane rule), §3, §4, §6 (the S9 rows), D1–D10, task S9, S5's As built note.
+2. The plan: §2 (the lane rule), §3, §4, §6 (the S9 rows), D1–D11, task S9, S5's As built note.
 3. CONTRIBUTING.md.
 4. qa/typescript/agents/{qa-api-typescript,qa-bdd-typescript,qa-llm-typescript}.md in full; their
    skill-loading lists decide which qa/typescript/skills/ are yours.
@@ -1385,7 +1402,7 @@ and every remaining qa/typescript skill pass K1–K9, with no Node 20 default le
 
 Read, in this order:
 1. CLAUDE.md.
-2. The plan: §2, §3, §4, §6 (the S10 rows), D1–D10, task S10, S9's As built note.
+2. The plan: §2, §3, §4, §6 (the S10 rows), D1–D11, task S10, S9's As built note.
 3. CONTRIBUTING.md.
 4. qa/typescript/agents/{qa-ui-typescript,qa-mobile-typescript,qa-performance-typescript}.md and
    qa/typescript/commands/*.md in full.
@@ -1419,7 +1436,7 @@ qa-test-planner carry the Gate line, and the two over-budget mobile security des
 
 Read, in this order:
 1. CLAUDE.md.
-2. The plan: §2, §3, §4, §6 (the S11 rows), D1–D10, task S11.
+2. The plan: §2, §3, §4, §6 (the S11 rows), D1–D11, task S11.
 3. CONTRIBUTING.md.
 4. qa/_shared/agents/*.md, qa/manual/agents/*.md and qa/manual/commands/*.md in full.
 5. The plan's "Close-out — every task".
@@ -1453,7 +1470,7 @@ remains.
 
 Read, in this order:
 1. CLAUDE.md.
-2. The plan: §2, §3, §4, §6 (the S12 rows), D1–D10, task S12.
+2. The plan: §2, §3, §4, §6 (the S12 rows), D1–D11, task S12.
 3. CONTRIBUTING.md.
 4. qa/cicd/agents/*.md and qa/reporting/agents/*.md in full.
 5. The plan's "Close-out — every task".
@@ -1490,7 +1507,7 @@ description budgets, and frontend/PLAN.md is filed per §5.
 
 Read, in this order:
 1. CLAUDE.md, especially the Frontend code rules (Blazor and React) and the version policy.
-2. The plan: §2, §3, §4, §6 (the S13 rows), D1–D10, task S13, S4's As built note (the real name for
+2. The plan: §2, §3, §4, §6 (the S13 rows), D1–D11, task S13, S4's As built note (the real name for
    `qa-test-quality-check-typescript`).
 3. CONTRIBUTING.md.
 4. frontend/blazor/agents/*.md, frontend/react/agents/*.md and both folders' commands/*.md in full.
@@ -1531,7 +1548,7 @@ docs/plans/design-ux-improvements.md and docs/research/ui-ux-practice-2026.md ar
 
 Read, in this order:
 1. CLAUDE.md, especially "When uncertain" (the design corpus wins on design facts).
-2. The plan: §2, §3, §4, §5, §6 (the S14 rows), D1–D10, task S14.
+2. The plan: §2, §3, §4, §5, §6 (the S14 rows), D1–D11, task S14.
 3. design/ATTRIBUTIONS.md.
 4. CONTRIBUTING.md.
 5. design/agents/*.md, design/commands/*.md and observability/agents/*.md in full.
@@ -1564,13 +1581,13 @@ Close out per the plan's "Close-out — every task" before you stop.
 You are `general-purpose`. Task S15 of docs/plans/001-library-conformance-sweep.md: bring data/ and
 training-data/ in line with the plan's checks K1–K9.
 
-Deliverable: data/ and training-data/ pass K1–K9: three agents carry the Gate line, the vendored
-claude-api copy that training-data ships is recorded against Q1, and
-docs/plans/fine-tuning-house-models.md is filed per §5.
+Deliverable: `data/` and `training-data/` pass K1–K9 with three agents carrying the Gate line;
+`ai-development/claude-api` matches `anthropics/skills` `skills/claude-api` at the current `main`
+except for a description of ≤ 500 chars; `docs/plans/fine-tuning-house-models.md` is filed per §5.
 
 Read, in this order:
 1. CLAUDE.md, especially the data-engine versions in the version policy.
-2. The plan: §2, §3, §4, §5, §6 (the S15 rows), D1–D10, task S15, Open questions Q1–Q2.
+2. The plan: §1 (the claude-api row), §2, §3, §4, §5, §6 (the S15 rows), D1–D11, O5–O6, task S15.
 3. CONTRIBUTING.md.
 4. data/agents/*.md and training-data/agents/*.md in full.
 5. The plan's "Close-out — every task".
@@ -1581,15 +1598,23 @@ Do:
   name.
 - K5: restate data/'s 10 all-caps rule words; migration-safety rules stay hard rules with their
   reason.
-- D5: read only the header of ai-development/claude-api/SKILL.md for its cached-models date; record
-  it with today's date in the As built note and in Q1's row. No edit.
-- K9: docs/plans/fine-tuning-house-models.md stays in docs/plans/ (D7, Q2).
+- D11 re-vendor, from the repo root:
+    git clone --depth 1 https://github.com/anthropics/skills "${TMPDIR:-/tmp}/anthropic-skills"
+    rsync -a --delete "${TMPDIR:-/tmp}/anthropic-skills/skills/claude-api/" ai-development/claude-api/
+  Then restore a ≤ 500-char description in ai-development/claude-api/SKILL.md: start from today's
+  house description (git show fc94a9a) and keep upstream's trigger phrases and Do-NOT scope. Record the
+  upstream SHA and date, `git diff --stat` totals and the new "cached:" date in the As built note.
+- K9: docs/plans/fine-tuning-house-models.md stays in docs/plans/ (O6).
 - K2: the Gate line in data-architect and both training-data agents.
 
 Traps:
 - Expand/contract "phases" are domain vocabulary (D8).
 - Never up-level a data engine version in a probe-first recipe. The recipes are keyed to the live
   server's version.
+- The re-vendored files are upstream's (D11): do not apply K1–K9 to them, and do not edit anything
+  but the description. The marketplace path `./ai-development/claude-api` must still exist afterwards.
+- If the clone fails (no network), keep the prompt block with a `Blocked on network` line and your
+  other work landed (Close-out step 4), rather than hand-copying files.
 
 Gate: none — this plan gates once, in G1. Do not run tools/token-audit.py or §7's script.
 
@@ -1608,7 +1633,7 @@ over-budget descriptions fit.
 
 Read, in this order:
 1. CLAUDE.md.
-2. The plan: §2, §3, §4, §6 (the S16 rows), D1–D10, task S16.
+2. The plan: §2, §3, §4, §6 (the S16 rows), D1–D11, task S16.
 3. CONTRIBUTING.md.
 4. business-analysis/agents/*.md, business-analysis/commands/*.md and tooling/agents/*.md in full.
 5. The plan's "Close-out — every task".
@@ -1642,7 +1667,7 @@ Gate line, the two dangling names are resolved, and no Node 20 or Python 3.10 de
 
 Read, in this order:
 1. CLAUDE.md, especially the version policy's DevOps note (managed runtimes lag the language).
-2. The plan: §2, §3, §4, §6 (the S17 rows), D1–D10, task S17.
+2. The plan: §2, §3, §4, §6 (the S17 rows), D1–D11, task S17.
 3. CONTRIBUTING.md.
 4. devops/agents/*.md and devops/commands/*.md in full.
 5. The plan's "Close-out — every task".
@@ -1677,7 +1702,7 @@ docs/plans/STAGE3-PROGRESS.md is removed.
 
 Read, in this order:
 1. CLAUDE.md.
-2. The plan: §2, §3, §4, §5, §6 (the S18 rows), D1–D10, task S18.
+2. The plan: §2, §3, §4, §5, §6 (the S18 rows), D1–D11, task S18.
 3. CONTRIBUTING.md.
 4. security/agents/*.md and security/commands/*.md in full.
 5. The plan's "Close-out — every task".
@@ -1717,7 +1742,7 @@ landed.
 
 Read, in this order:
 1. CLAUDE.md.
-2. The plan: §5, §7, D1–D10, the Open questions, task G1, every As built note on S1–S18.
+2. The plan: §5, §7, D1–D11, O5–O8, task G1, every As built note on S1–S18.
 3. The first 15 lines of each root legacy plan: AGENT-ORIENTATION-CACHE-PLAN.md,
    CONFORMANCE-AUDIT-PLAN.md, MODEL-PORTABILITY-PLAN.md, TOKEN-OPTIMIZATION-PLAN.md, meta/PLAN.md.
 4. The plan's "Close-out — every task".
@@ -1733,7 +1758,10 @@ Do:
     tools/MISSION-CONTROL-MOVED.md.
   - `git rm --cached .claude/settings.local.json`; add it to .gitignore.
 - Docs: grep README.md, docs/skills-catalog.md and CLAUDE.md for every name, count and path the As
-  built notes changed, and fix those places. Grep for root plan filenames too; they moved.
+  built notes changed, and fix those places. Grep for root plan filenames too; they moved. README's
+  ai-development attribution row gets the upstream SHA and date from S15's As built note.
+- Final Status (Close-out steps 5–6) names the next plans (O7): conformance audits and size
+  optimization.
 - Gate, in run order. Save §7's script as "${TMPDIR:-/tmp}/library-check.py", then:
     python3 -m json.tool .claude-plugin/marketplace.json > /dev/null
     python3 "${TMPDIR:-/tmp}/library-check.py"
