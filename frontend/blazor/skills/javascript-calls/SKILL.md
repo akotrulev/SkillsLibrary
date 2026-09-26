@@ -171,6 +171,8 @@ Interop needs a live JS runtime, which **does not exist during prerender or on s
 
 ## Validation
 
+Inside a `Gate: none` plan task, run none of these checks and report "written, not run"; the plan's gate task runs them.
+
 - Prerender a page using the component → no "interop calls cannot be issued at this time" error (the call is in `OnAfterRenderAsync`, not init).
 - Navigate away and back repeatedly → memory stable (module + `DotNetObjectReference` disposed; no growing handle count).
 - Kill the Server circuit (stop the app tab mid-session) → disposal doesn't surface an unhandled `JSDisconnectedException`.

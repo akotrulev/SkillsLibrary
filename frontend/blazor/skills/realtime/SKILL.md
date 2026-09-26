@@ -64,7 +64,7 @@ public sealed class PriceBroker
     private void OnTick(PriceTick tick) =>
         InvokeAsync(() => { _price = tick.Price; StateHasChanged(); });   // hop onto the circuit's sync context
 
-    public void Dispose() => Broker.Ticked -= OnTick;   // ALWAYS unsubscribe — the broker is a singleton
+    public void Dispose() => Broker.Ticked -= OnTick;   // always unsubscribe — the broker is a singleton
 }
 ```
 
@@ -185,6 +185,8 @@ This is the exact seam between the two lanes: **data-fetching owns the snapshot,
 - No net10-only API (circuit pause/resume, `ReconnectModal`) emitted into net8/net9.
 
 ## Validation
+
+Inside a `Gate: none` plan task, run none of these checks and report "written, not run"; the plan's gate task runs them.
 
 - `dotnet build` — 0 warnings.
 - Kill the connection (stop the hub / drop the network) → status affordance flips to Reconnecting; on restore, `WithStatefulReconnect` replays buffered messages (no gap).

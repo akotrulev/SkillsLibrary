@@ -149,6 +149,8 @@ Once `CurrentCulture` is correct, `@item.Price.ToString("C")`, `date.ToString("d
 
 ## Validation
 
+Inside a `Gate: none` plan task, run none of these checks and report "written, not run"; the plan's gate task runs them.
+
 - Switch language in the UI → text, dates, numbers, and currency all change; the choice survives a reload/return visit.
 - WASM: dates/decimals render in the selected culture (proves ICU data shipped + `InvariantGlobalization=false`).
 - Server/SSR: the culture cookie drives the first render (no English flash before a client swap).

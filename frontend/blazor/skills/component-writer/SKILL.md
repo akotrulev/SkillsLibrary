@@ -410,6 +410,8 @@ For every component:
 
 ## Validation
 
+Inside a `Gate: none` plan task, run none of these checks and report "written, not run"; the plan's gate task runs them.
+
 - `dotnet build` — 0 warnings
 - `dotnet test` — bUnit tests pass
 - Smoke in browser: confirm no double fetch on prerender, confirm `Dispose` is invoked on navigation (DevTools network panel)
@@ -420,4 +422,4 @@ For every component:
 - Reviewing the result → `frontend/blazor/skills/code-review`
 - Auth wiring → `auth/auth0-blazor`
 - Non-component .NET patterns → the `backend/dotnet` dev stack's generator, if installed
-- API DTOs the components consume → `qa/api-models/dotnet`
+- API DTOs the components consume → `qa/dotnet/skills/api-models`

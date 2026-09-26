@@ -150,6 +150,8 @@ new Intl.NumberFormat(locale).format(1234.5);          // 1,234.5 (en) · 1 234,
 
 ## Validation
 
+Inside a `Gate: none` plan task, run none of these checks and report "written, not run"; the plan's gate task runs them.
+
 - Switch language in the UI → text, dates, numbers, and currency all change; the choice survives a reload/return visit; the URL reflects the locale (App Router).
 - A Server Component and a Client Component on the same page both render translated text (proves `getTranslations` + `useTranslations` are wired correctly).
 - Localized pages render statically where expected (`setRequestLocale` + `generateStaticParams` held) — not forced dynamic.

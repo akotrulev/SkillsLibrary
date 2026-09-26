@@ -82,7 +82,7 @@ export function useSSE<T>(url: string, onMessage: (data: T) => void) {
     es.onopen = () => setStatus('open');
     es.onmessage = (e) => cb.current(JSON.parse(e.data) as T);
     es.onerror = () => setStatus('closed');        // EventSource auto-reconnects with backoff
-    return () => es.close();                        // ALWAYS close on unmount
+    return () => es.close();                        // always close on unmount
   }, [url]);
 
   return status;
@@ -194,7 +194,9 @@ SSE and WebSocket connections are **stateful and pinned to one server instance**
 
 ## Validation
 
-- `pnpm build` + typecheck clean.
+Inside a `Gate: none` plan task, run none of these checks and report "written, not run"; the plan's gate task runs them.
+
+- The project's own build and typecheck scripts (run with the package manager `packageManager` names) clean.
 - Drop the connection (kill the server / go offline) → status affordance flips to closed; SSE auto-reconnects, the WS hook reconnects with backoff and stops when the component unmounts.
 - Navigate away from a live page → the channel closes; no post-unmount `setState` warning, no lingering socket in DevTools.
 - No flash on a snapshot→live page — the server snapshot renders, then live updates continue.

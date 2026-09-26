@@ -203,6 +203,8 @@ MyApp.Client/
 
 ## Validation (exit gate)
 
+Inside a `Gate: none` plan task, run none of these checks and report "written, not run"; the plan's gate task runs them.
+
 - `dotnet build` — **0 warnings** (warnings-as-errors makes this real).
 - App **boots**: `dotnet run`, home page renders.
 - **One page per chosen render mode renders** — a static SSR page, and one interactive page per interactivity model in use (confirm the WASM page hydrates and the Server page opens a circuit).

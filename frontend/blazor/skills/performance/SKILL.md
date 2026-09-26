@@ -1,6 +1,6 @@
 ---
 name: fe-blazor-performance
-description: Use when a Blazor app (.NET 8/9/10) is slow or must stay fast — render perf (`@key`, `ShouldRender`, `Virtualize`), WASM startup (trimming, lazy loading, the AOT decision), interactive-Server scale (circuit memory, Azure SignalR), diagnostics + budgets. Triggers: "my grid re-renders too much", "the WASM app takes forever to load", "should I AOT-compile". Do NOT use for CSS (`styling`), live-data functionality (`realtime`), DB tuning (`data/*`), or load-testing (qa `performance/nbomber`).
+description: Use when a Blazor app (.NET 8/9/10) is slow or must stay fast — render perf (`@key`, `ShouldRender`, `Virtualize`), WASM startup (trimming, lazy loading, the AOT decision), interactive-Server scale (circuit memory, Azure SignalR), diagnostics + budgets. Triggers: "my grid re-renders too much", "the WASM app takes forever to load", "should I AOT-compile". Do NOT use for CSS (`styling`), live-data functionality (`realtime`), DB tuning (`data/*`), or load-testing (`qa-load-testing-dotnet`).
 ---
 
 # Blazor — Performance
@@ -240,6 +240,8 @@ Set explicit budgets and fail CI when they regress — an unmeasured perf rule r
 - No "we optimized it" without a before/after measurement.
 
 ## Validation
+
+Inside a `Gate: none` plan task, run none of these checks and report "written, not run"; the plan's gate task runs them.
 
 - Published WASM `_framework` transfer size within budget; Brotli served (Network shows `content-encoding: br`).
 - A key large grid uses `Virtualize`; scrolling stays smooth (no long tasks in DevTools Performance).

@@ -202,6 +202,8 @@ If a re-render can wipe the animation's target, you've picked the wrong layer �
 
 ## Validation
 
+Inside a `Gate: none` plan task, run none of these checks and report "written, not run"; the plan's gate task runs them.
+
 - Toggle OS **Reduce Motion** on → every reveal/transition drops to instant (or a bare crossfade); nothing slides or bounces.
 - Reload a page with a staggered entrance → items rise in sequence, the tail isn't sluggish, no layout shift while they animate.
 - Scroll a long page → below-the-fold sections reveal as they enter, not all at once on load.

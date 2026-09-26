@@ -5,11 +5,11 @@ description: Use when setting up or modifying Auth0 in Blazor Server or WASM —
 
 # Auth — Auth0 in Blazor (Server & WebAssembly)
 
-Wires Auth0 into Blazor Server and Blazor WebAssembly. Server uses Authorization Code + PKCE via OpenIdConnect + cookie auth; WASM uses the OIDC SPA flow via `Microsoft.AspNetCore.Components.WebAssembly.Authentication`. Both target .NET 8.
+Wires Auth0 into Blazor Server and Blazor WebAssembly. Server uses Authorization Code + PKCE via OpenIdConnect + cookie auth; WASM uses the OIDC SPA flow via `Microsoft.AspNetCore.Components.WebAssembly.Authentication`. Both target .NET 10 (8/9 supported — the setup below is the same on each).
 
 ## Stack
 
-- **.NET 8** + Blazor (Server, WASM, or interactive Auto)
+- **.NET 10** (8/9 supported) + Blazor (Server, WASM, or Interactive Auto)
 - **Blazor Server**: `Microsoft.AspNetCore.Authentication.OpenIdConnect` + cookie auth (acts like a Regular Web App in Auth0)
 - **Blazor WASM**: `Microsoft.AspNetCore.Components.WebAssembly.Authentication` (acts like a SPA in Auth0)
 - Backend Web API (if separate) uses `backend/dotnet/skills/auth0`
@@ -30,7 +30,7 @@ Wires Auth0 into Blazor Server and Blazor WebAssembly. Server uses Authorization
 
 ## Inputs needed
 
-1. **Blazor hosting model** (Server, WASM, or Interactive Auto in .NET 8)
+1. **Blazor hosting model** (Server, WASM, or Interactive Auto — .NET 8+)
 2. **Auth0 tenant domain** + **Application** (Regular Web App for Server, SPA for WASM) + **API audience**
 3. **Required permissions** per page / endpoint
 4. **Backend API** the Blazor app calls (its audience + scopes)
@@ -354,4 +354,4 @@ public class CustomAuthorizationMessageHandler : AuthorizationMessageHandler
 - React equivalent → `auth/auth0-react`
 - Java backend → `backend/java/skills/auth0`
 - Storing secrets → `devops/environment-config` + Key Vault
-- E2E auth with Playwright → `qa/ui-test-author/playwright`
+- E2E auth with Playwright → `qa/dotnet/skills/ui-test-author/playwright`

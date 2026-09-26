@@ -33,8 +33,11 @@ into S17 and S18). S12 landed 2026-09-26 (qa/cicd and qa/reporting: the Gate lin
 `qa-ci-pipelines` → `qa-ci-pipelines-<stack>` in the three `flaky-test-quarantine` skills, every Node 20 and
 .NET 8 default moved to Node 24 / .NET 10, the `test-reports` green-washing samples fixed against
 `ci-conventions` with the quarantine lane stated as its one exception, D16; the .NET 8 and
-`continue-on-error` families are carried into S13, S14 and S17). S13 is next. S1–S18 are ungated: the edits
-from S1 to S12 are built but unverified until G1 runs §7.
+`continue-on-error` families are carried into S13, S14 and S17). S13 landed 2026-09-26 (frontend/blazor,
+frontend/react and the three published auth folders: the Gate line in `fe-blazor` and `fe-react`, `fe-react`
+649 and `data-grid` 495 under budget, the K1 name and six stale paths fixed, `auth0-blazor`'s .NET 8 default
+moved to .NET 10; `frontend/PLAN.md` filed live as `docs/plans/frontend-PLAN.md`, its Blazor port unbuilt).
+S14 is next. S1–S18 are ungated: the edits from S1 to S13 are built but unverified until G1 runs §7.
 
 ## 1. What already exists, and what is missing
 
@@ -1537,6 +1540,63 @@ skills around hits 26k, descriptions 13k, ~15 files modified 23k, read-back 6k, 
   remaining. Check whether the Blazor port landed: if so it is landed, otherwise it moves to
   `docs/plans/` as live. Either way it moves as `frontend-PLAN.md` (§5). `frontend/react-native/{PLAN,HANDOFF}.md` stay (D5).
 - **Not in S13:** `auth/cognito-*` (under construction, D5); `design/` (S14).
+- **As built (2026-09-26):** `frontend/blazor/`, `frontend/react/` (not `vendor/`), `auth/_shared/`,
+  `auth/auth0-blazor/`, `auth/auth0-react/`. The two agents and three commands were read in full; the
+  commands needed no change. Gate line added to 2 agents, each as the last Operating-rules bullet
+  (`fe-blazor.md:40`, `fe-react.md:40`). 43 files changed plus the plan move.
+  Data issues: 10 fixed.
+  - K1: `qa-test-quality-check-typescript` → `react/skills/component-testing:243` now says no TypeScript
+    mutation-testing skill exists and cites `qa-test-quality-check-java` (PIT) and
+    `qa-test-quality-check-dotnet` (Stryker.NET), as `backend/node/skills/unit-testing` does. The resolver
+    now prints only HTML attributes (`data-testid`, `data-theme`, `data-table`, `data-bs-target`,
+    `data-enhance`, all already in §7's `ALLOW`).
+  - Stale paths (6): `blazor/skills/forms:201`, `:387` `qa/api-test-author/generator/dotnet` →
+    `qa/dotnet/skills/api-test-author/writer`; `blazor/skills/performance:3` qa `performance/nbomber` →
+    `qa-load-testing-dotnet`; `blazor/skills/component-writer:423` `qa/api-models/dotnet` →
+    `qa/dotnet/skills/api-models`; `auth0-blazor:357` and `auth0-react:389` `qa/ui-test-author/playwright`
+    → `qa/{dotnet,typescript}/skills/ui-test-author/playwright`. A script that checks every cited repo path
+    in the five folders now finds none missing.
+  - K6 .NET (the recipe misses it): `auth/auth0-blazor:8`, `:12` "target .NET 8" → .NET 10 (8/9
+    supported); `:33` "Interactive Auto in .NET 8" → ".NET 8+". The `.NET 8/9/10` ranges in every Blazor
+    description stay (they are the supported lanes, not a default).
+  Code issues: 51 fixed.
+  - K7: `fe-react` 663→649 (dropped "/ RSC" from the stack line and "page or" from a trigger);
+    `data-grid` 688→495 (feature list condensed, two trigger phrases cut; Do-NOT clause kept). Every
+    other description in the five folders already fit its budget and had its Do-NOT clause.
+  - K5: "Announce at start" dropped from `react/skills/standards-audit:14`; `ALWAYS` ×4 and `MUST` ×1 in
+    code comments lowercased (`blazor/skills/realtime:67`, `react/skills/{component-testing:97,realtime:85,routing:145,seo:63}`).
+    No "— MANDATORY SECTION" occurs in either agent.
+  - K2 for skills: the "written, not run" sentence after `## Validation` in all 32 frontend SKILL.md
+    files that have one, in `react/skills/migration`'s Verification, and "Outside a `Gate: none` plan
+    task" on the build step of both `test-ids` Procedures.
+  - K8: `pnpm tsc`/`pnpm lint`/`pnpm test`/`pnpm build`/`pnpm dev` in the Validation lists of
+    `react/skills/{component-writer,component-library,styling,realtime,data-fetching,project-setup}` and
+    `test-ids` step 4 → the project's own scripts, run with the package manager `packageManager` names.
+  - K4: `react/skills/standards-audit:188` "EXTEND (a slice)" → "(a missing capability)".
+  Logical conflicts: 5 fixed. "Run what you write" and Orientation 3's "every run regardless of the
+  verdict" gain "outside a `Gate: none` plan task" in both agents; the closing duty "per
+  `be-shared-session-budget` Step 5" now points at the plan's `## Close-out — every task` section in both.
+  `react/skills/migration:10`, `:31`, `:149` told the session to work "on its own branch" (K3); now "as its
+  own change", with the fixed workspace sentence, and `fe-react.md:17` matches. `migration:33` recommended
+  Node 18 as React 19's floor; it now names Node 22/24 as the house floor and flags 18/20 as EOL.
+  Cleanup: `frontend/PLAN.md` → `docs/plans/frontend-PLAN.md` (live). Its Phase 7 Blazor port has not
+  landed: `blazor/skills/error-handling` has no stale state or failure scoping, `test-ids` has no
+  `<Region>.Stale`, and there is no `blazor/skills/standards-audit`. No tracked junk. Every SKILL.md,
+  agent and command in the five folders is listed in the marketplace and every listed path exists.
+  `frontend/_shared/product-analytics` is deliberately unpublished (no plugin lists it, §2 does not
+  scope it).
+  Kept on purpose: the K6 hits in `frontend/react` are flag lines (`standards-audit` checklist A6 flags
+  Node 20 and React 17 as EOL; `migration:33` names the upstream Node floor) — D13. K3 hits are code
+  branches and the audit report's `**Branch:**` field; K4 hits are "model slice", Zustand slices, a
+  `Stage` field and "vertical slice" (D8). Remaining `pnpm add`/`pnpm create`/`pnpm dlx` lines are install
+  samples. `green` hits are exit criteria, "contract test green" validation rows and the colour green.
+  `ui-rules` ×2 and `standards-audit` open with "Use on"/"Use to", a trigger, so they stay.
+  `oidc-concepts:3` still points at `auth/cognito-*`, a folder that exists but is under construction.
+  Legacy files still cite `frontend/PLAN.md` (`CONFORMANCE-AUDIT-PLAN.md:45`,
+  `docs/plans/implemented/UNIT-TESTING-PLAN.md:126`, `frontend/react-native/PLAN.md:68`); per D7 they are
+  not edited.
+  Carried forward: nothing new. Unverified: nothing was run beyond §4's searches, the K1/K7 scripts and
+  a path-existence script (Gate: none). Left for the user: nothing.
 
 ### S14 — design and observability
 
@@ -1757,79 +1817,9 @@ name: the K1 resolver flags it (D12).
 | S18 | `docs` | `general-purpose` | — | ~135k |
 | G1 | `docs` | `general-purpose` | S1–S18 | ~120k |
 
-S1 to S12 have landed, and their prompts are deleted; the 7 prompts from S13 to G1 are live.
+S1 to S13 have landed, and their prompts are deleted; the 6 prompts from S14 to G1 are live.
 
 ---
-
-### S13 — frontend and auth (general-purpose, docs)
-
-````
-You are `general-purpose`. Task S13 of docs/plans/001-library-conformance-sweep.md: bring
-frontend/blazor, frontend/react and the published auth folders in line with the plan's checks K1–K9.
-
-Deliverable: frontend/blazor/, frontend/react/ (not vendor/) and the three published auth/ folders
-pass K1–K9: fe-blazor and fe-react carry the Gate line, and fe-react and data-grid fit their
-description budgets, and frontend/PLAN.md is filed per §5.
-
-Read, in this order:
-1. CLAUDE.md, especially the Frontend code rules (Blazor and React) and the version policy.
-2. The plan: §2, §3, §4, §6 (the S13 rows), D1–D11, task S13, S4's As built note.
-3. CONTRIBUTING.md.
-4. frontend/blazor/agents/*.md, frontend/react/agents/*.md and both folders' commands/*.md in full.
-5. The plan's "Close-out — every task".
-
-Do:
-- Run §4's recipes with DIR=frontend/blazor, frontend/react, auth/_shared, auth/auth0-blazor,
-  auth/auth0-react.
-- K1: `qa-test-quality-check-typescript` in frontend/react/skills/component-testing/SKILL.md. S4
-  found no such skill: qa/typescript/skills/ has no mutation-testing skill, and the real siblings
-  are `qa-test-quality-check-java` (PIT) and `qa-test-quality-check-dotnet` (Stryker.NET). State
-  that StrykerJS has no skill yet and cite those two, as backend/node/skills/unit-testing does.
-- K6: Node 18 ×2, Node 20 ×2, React 17 ×1 in frontend/react. fe-react-migration names React 17/18 as
-  migration sources; keep those.
-- K7: data-grid 688 → ≤ 500; fe-react 663 → ≤ 650.
-- K2: the Gate line in fe-blazor and fe-react.
-- K9: frontend/PLAN.md — if its cross-stack (Blazor) port landed, file it as
-  docs/plans/implemented/frontend-PLAN.md; otherwise move it to docs/plans/frontend-PLAN.md (live). frontend/react-native/ files stay.
-
-Traps:
-- Agent sentences S3/S4 fixed in backend recur in 28 agents across S5–S17; fix them where your
-  agents carry them:
-  - "— MANDATORY SECTION" on the brownfield heading is dropped (K5).
-  - The orientation pass's "every run regardless of the gate's verdict" (the cache gate) gains
-    "outside a `Gate: none` plan task".
-  - A closing duty "per `be-shared-session-budget` Step 5" now reads "per the plan's
-    `## Close-out — every task` section (plan format §7)".
-  - A skill's Validation / Verify list gets one sentence: inside a `Gate: none` plan task it runs
-    none of the checks and reports "written, not run".
-  - K8: a hardcoded `pnpm …` / `npm …` in an instruction becomes the project's own script, run with
-    the package manager `packageManager` names.
-  - The operating rule "Run what you write — a step whose code never executed does not pass its
-    gate" becomes "Run what you write, outside a `Gate: none` plan task — …" (S5; every qa agent
-    carries it).
-- Stale path (S5): `frontend/blazor/skills/forms/SKILL.md:201` cites
-  `qa/api-test-author/generator/dotnet`; the folder is `qa/dotnet/skills/api-test-author/writer`.
-- Stale path (S6): `frontend/blazor/skills/performance/SKILL.md:3` cites `performance/nbomber`; the
-  NBomber skill is `qa/dotnet/skills/load-testing` (`qa-load-testing-dotnet`).
-- The Frontend code rules in CLAUDE.md are house rules, not dated emphasis; where a skill restates
-  them in bold, they stay.
-- `data-testid` and the other `data-*` tokens are HTML attributes.
-- frontend/react/vendor/ and auth/cognito-*/ are out of scope (D5).
-- (S9/S10) Node 20 is sometimes a feature boundary, not a default (native `WebSocket`/`EventSource`,
-  global `fetch`/`FormData`/`Blob`): such a line says Node 22/24 have the feature and flags a detected
-  Node 20 as EOL, rather than reading "Node 24" after the substitution. A CI `node-version: 20` moves to 24.
-- (S12) K6's recipe does not catch .NET 8 defaults: grep `\.NET 8\b|8\.0\.x|sdk:8\.0|net8\.0/` too. A
-  default, CI pin or sample path moves to .NET 10 (`10.0.x`, `sdk:10.0`, `net10.0/`); a TFM detection
-  list (`net8.0/9.0/10.0`) stays.
-- (S12) A CI sample that puts `continue-on-error` / `continueOnError` / `|| true` on a gating test step
-  contradicts `qa-ci-conventions-shared`; the test step fails the build and the upload/publish steps run
-  with `if: always()` / `condition: succeededOrFailed()` / `when: always`.
-
-Gate: none — this plan gates once, in G1. Do not run tools/token-audit.py or §7's script.
-
-Commit: `chore(sweep S13): frontend and auth`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
 
 ### S14 — design and observability (general-purpose, docs)
 

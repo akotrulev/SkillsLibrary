@@ -156,6 +156,8 @@ Make that possible:
 
 ## Validation
 
+Inside a `Gate: none` plan task, run none of these checks and report "written, not run"; the plan's gate task runs them.
+
 - Resize from 320px to 4k: no horizontal scrollbar at any width; every swap flips exactly at its documented
   boundary (check bp−1/bp by hand — QA automates it).
 - Grep `.razor.css` for `@media` width values → only the documented set appears.

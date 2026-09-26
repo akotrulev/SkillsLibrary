@@ -86,6 +86,8 @@ These hold regardless of which reference you read:
 
 ## Validation
 
+Inside a `Gate: none` plan task, run none of these checks and report "written, not run"; the plan's gate task runs them.
+
 - `dotnet build` — 0 warnings; the theme/dialog/snackbar providers resolve at startup.
 - A dialog and a snackbar/toast fire from an interactive island (they no-op/throw from static SSR — that's the test that your render mode is right).
 - The DataGrid pages, sorts, and filters **server-side** (Network shows one page's rows, not the whole table).

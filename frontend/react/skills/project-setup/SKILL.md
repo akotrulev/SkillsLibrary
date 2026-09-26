@@ -182,8 +182,10 @@ Feature folders answer *"which capability owns this?"*; a reuse-level taxonomy a
 
 ## Validation (exit gate)
 
-- `pnpm build` — **clean** (type errors and lint errors fail it).
-- App **boots**: `pnpm dev`, home route renders.
+Inside a `Gate: none` plan task, run none of these checks and report "written, not run"; the plan's gate task runs them.
+
+- The `build` script, run with the package manager `packageManager` names — **clean** (type errors and lint errors fail it).
+- App **boots**: the `dev` script, home route renders.
 - **One route per chosen strategy renders** — a static content route, one dynamic/personalized route, and (if used) a streamed route with its `loading.tsx`. Confirm a client island hydrates and a Server Component ships no JS for its subtree.
 - Lockfile committed; `@/*` alias resolves; typed env parses at boot.
 

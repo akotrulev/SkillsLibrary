@@ -142,7 +142,7 @@ export default function RootLayout({
 
 ```tsx
 import Link from 'next/link';
-<Link href="/dashboard">Dashboard</Link>            // in-app navigation is ALWAYS a real anchor
+<Link href="/dashboard">Dashboard</Link>            // in-app navigation is always a real anchor
 <Link href="/heavy" prefetch={false}>Heavy</Link>   // opt out of prefetch for rarely-taken links
 ```
 

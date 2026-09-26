@@ -371,6 +371,8 @@ A single generic "No data" for all three is a defect — it tells the user nothi
 
 ## Validation
 
+Inside a `Gate: none` plan task, run none of these checks and report "written, not run"; the plan's gate task runs them.
+
 - Throw in a feature component → its boundary shows friendly content; the rest of the page still works; the report has the structured entry + correlation id; no `error.message` on screen.
 - Make a fetch 500 → the region shows the **failed** state inline with a working retry, not a blank grid; the retry recovers on the next success; a transient 503 is absorbed by backoff without surfacing.
 - With that 500 still failing: the **search bar, filters, and toolbar are still on screen and still interactive**, the filter text the user typed is intact, and only the rows area carries the error. Change a filter → the query re-runs.

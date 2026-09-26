@@ -204,6 +204,8 @@ A single generic "No data" for all three is a defect — it tells the user nothi
 
 ## Validation
 
+Inside a `Gate: none` plan task, run none of these checks and report "written, not run"; the plan's gate task runs them.
+
 - Force an exception in a feature component → its boundary shows friendly content; the rest of the page still works; the log has the structured entry + correlation id; no `ex.Message` on screen.
 - Kill the network on an interactive-Server page → the reconnect modal appears; restore → it reconnects (net10: prior state restored, not a cold reload).
 - Make an API call 500 → the region shows the **failed** state inline with a working retry, not a blank grid; the retry recovers on the next success.

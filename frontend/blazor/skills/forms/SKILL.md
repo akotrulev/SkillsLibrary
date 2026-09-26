@@ -198,7 +198,7 @@ builder.Services.AddValidatorsFromAssemblyContaining<CreateOrderValidator>();
 
 ## Server-side errors → form
 
-The library's APIs emit `ProblemDetails` with an `errors` dictionary keyed by field name (matches `qa/api-test-author/generator/dotnet`). Translate that into form messages:
+The library's APIs emit `ProblemDetails` with an `errors` dictionary keyed by field name (matches `qa/dotnet/skills/api-test-author/writer`). Translate that into form messages:
 
 ```csharp
 public sealed class FieldServerException : Exception
@@ -384,5 +384,5 @@ For large files, upload to a signed URL (S3 presigned / Azure Blob SAS) directly
 - State management → `frontend/blazor/skills/state-management`
 - Component scaffolding → `frontend/blazor/skills/component-writer`
 - Auth-protected forms → `auth/auth0-blazor`
-- API contract → `qa/api-test-author/generator/dotnet`
+- API contract → `qa/dotnet/skills/api-test-author/writer`
 - React equivalent → `frontend/react/skills/forms`

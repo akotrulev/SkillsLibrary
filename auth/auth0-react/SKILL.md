@@ -386,4 +386,4 @@ Fetch on the **server** and pass serializable data down as props. Sending the ac
 - Blazor → `auth/auth0-blazor`
 - Route topology + middleware mechanics → `frontend/react/skills/routing`
 - React patterns (custom hooks, providers) → `frontend/react/skills/component-writer`
-- E2E with auth → `qa/ui-test-author/playwright` (use `storageState` for an authenticated session)
+- E2E with auth → `qa/typescript/skills/ui-test-author/playwright` (use `storageState` for an authenticated session)

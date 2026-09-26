@@ -233,7 +233,7 @@ When QA's `page-objects-from-url` hands over a report of elements it could not l
    2. Walk the JSX. For each candidate element (Rule 5), generate the locator and apply it via the right mechanism (inline attribute, library slot/rest-prop, `testId` prefix prop, hardcoded row const).
    3. Skip decorative elements; note them in the summary.
 3. If the target is a config-driven shell, do **not** touch the page — propose edits to the framework components in a separate diff.
-4. Type-check / build the touched project (`pnpm tsc --noEmit`) to confirm nothing broke.
+4. Outside a `Gate: none` plan task, type-check / build the touched project with its own typecheck script (run with the package manager `packageManager` names) to confirm nothing broke.
 5. Report per the contract:
    - Files modified, with locator counts per file.
    - Decorative elements skipped (so the user can override if any need anchoring).

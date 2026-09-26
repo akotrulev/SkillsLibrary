@@ -94,7 +94,7 @@ import { Counter } from './Counter';
 
 describe('Counter', () => {
   it('increments the count when the button is clicked', async () => {
-    const user = userEvent.setup();          // ALWAYS setup(), then await every interaction
+    const user = userEvent.setup();          // always setup(), then await every interaction
     render(<Counter />);
 
     await user.click(screen.getByRole('button', { name: /increment/i }));
@@ -240,7 +240,7 @@ it('should map a failed response to the failed state', async () => {
 
 ### Handoff
 
-Whether these assertions actually catch faults is a mutation-score question, and **StrykerJS has no skill in this library yet** (`qa-test-quality-check-typescript` is unbuilt — the java/dotnet siblings exist). Until it lands, treat mutation grading as unavailable on this stack rather than substituting a coverage number.
+Whether these assertions actually catch faults is a mutation-score question, and **StrykerJS has no skill in this library yet** — no TypeScript mutation-testing skill exists; the siblings `qa-test-quality-check-java` (PIT) and `qa-test-quality-check-dotnet` (Stryker.NET) do. Until it lands, treat mutation grading as unavailable on this stack rather than substituting a coverage number.
 
 ## Handoffs
 

@@ -197,6 +197,8 @@ This skill owns only the CSS *authority* rules responsive design rides on: **mob
 
 ## Validation
 
+Inside a `Gate: none` plan task, run none of these checks and report "written, not run"; the plan's gate task runs them.
+
 - `dotnet build` — the bundled `{Project}.styles.css` is generated and linked once in `App.razor`.
 - Toggle dark mode → colors flip with **no** component CSS changes and **no** light→dark flash on reload.
 - Grep isolated `.razor.css` files for hex literals and `px` colors → none (all `var(--token)`).

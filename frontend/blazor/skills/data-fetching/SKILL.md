@@ -260,6 +260,8 @@ The **three-state region** that renders this failure inline (with retry) is [`er
 
 ## Validation
 
+Inside a `Gate: none` plan task, run none of these checks and report "written, not run"; the plan's gate task runs them.
+
 - `dotnet build` — 0 warnings.
 - Prerender smoke: DevTools **Network** shows **one** fetch, not two, on an Auto/prerendered page.
 - Server lane: no `DbContext` lives longer than one operation (no injected context in any component/circuit service).

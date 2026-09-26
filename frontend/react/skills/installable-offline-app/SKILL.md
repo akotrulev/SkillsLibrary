@@ -158,6 +158,8 @@ export function useOnline() {
 
 ## Validation
 
+Inside a `Gate: none` plan task, run none of these checks and report "written, not run"; the plan's gate task runs them.
+
 - Build (`next build && next start`), install the app, go fully offline → it launches and the shell renders (no browser dino).
 - Offline read of a cached endpoint → data shows (from runtime cache/IndexedDB), clearly marked if stale; an uncached/dynamic route degrades to a friendly offline state, not a crash.
 - Make a write offline → it's queued and labeled pending; reconnect → it replays and reconciles (concurrency token honored).

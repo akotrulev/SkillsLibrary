@@ -229,6 +229,8 @@ Anything using `animation` is a **Client Component** (`'use client'`) and adds t
 
 ## Validation
 
+Inside a `Gate: none` plan task, run none of these checks and report "written, not run"; the plan's gate task runs them.
+
 - Toggle OS **Reduce Motion** on → every reveal/transition drops to instant (or a bare crossfade); nothing slides, bounces, or is held below the fold; `animation` components render at rest.
 - Reload a page with a staggered entrance → items rise in sequence, the tail isn't sluggish, no layout shift while they animate.
 - Scroll a long page → below-the-fold sections reveal as they enter, not all at once on load.

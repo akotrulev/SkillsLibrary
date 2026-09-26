@@ -259,7 +259,9 @@ Throwing this from a Server Component surfaces it at the nearest `error.tsx` bou
 
 ## Validation
 
-- `pnpm build` + typecheck clean.
+Inside a `Gate: none` plan task, run none of these checks and report "written, not run"; the plan's gate task runs them.
+
+- The project's own build and typecheck scripts (run with the package manager `packageManager` names) clean.
 - Prerender/network smoke: a Server-Component route ships **no fetching JS** and its data isn't re-fetched on the client (Network shows one fetch, server-side).
 - A mutation via Server Action `revalidateTag`s and the list reflects the change without a manual refresh.
 - Navigate away from a client query → the in-flight request **aborts** (no post-unmount state update warning) and nothing is rendered or notified as a failure.

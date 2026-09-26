@@ -344,9 +344,13 @@ For every artifact:
 
 ## Validation
 
-- `pnpm tsc --noEmit` — 0 errors
-- `pnpm lint` — 0 warnings (React Hooks + a11y rules included)
-- `pnpm test` — generated tests pass
+Inside a `Gate: none` plan task, run none of these checks and report "written, not run"; the plan's gate task runs them.
+
+Run the project's own typecheck, lint and test scripts with the package manager `packageManager` names:
+
+- typecheck (`tsc --noEmit`) — 0 errors
+- lint — 0 warnings (React Hooks + a11y rules included)
+- test — generated tests pass
 - Smoke in the dev server: interactivity behaves, no console/hydration errors, no double fetch across the RSC → client boundary, links navigate same-tab
 
 ## Handoffs

@@ -1,6 +1,6 @@
 ---
 name: fe-react-data-grid
-description: Use when building, extending, or reviewing a data grid / table — the house `<DataGrid>` on TanStack Table v9 + Tailwind (default), its server-side paging/sort/filter contract, and the full feature surface (column visibility/order/resize/pinning, row selection, expanding, grouping + aggregation, tree data, cell selection, editing, virtualization, export, keyboard + a11y, URL state, density). Triggers "add a table/grid", "make this grid sortable/filterable", "our grid loads every row", "column picker", "export to CSV", "virtualize this list of 100k rows", "replace MUI DataGrid". Not for picking the component library (`component-library`) or the fetch layer itself (`data-fetching`).
+description: Use when building, extending, or reviewing a data grid / table — the house `<DataGrid>` on TanStack Table v9 + Tailwind, its server-side paging/sort/filter contract, and the feature surface (columns, selection, grouping, tree data, editing, virtualization, export, a11y, URL state). Triggers "add a table/grid", "our grid loads every row", "column picker", "export to CSV", "replace MUI DataGrid". Not for picking the component library (`component-library`) or the fetch layer (`data-fetching`).
 ---
 
 # React — Data Grid (the house grid)
@@ -162,6 +162,8 @@ Whichever lane, **`GridQuery`/`GridPage` stay the same** so the fetch layer and 
 7. **Verify** against the checklist below.
 
 ## Validation
+
+Inside a `Gate: none` plan task, run none of these checks and report "written, not run"; the plan's gate task runs them.
 
 - Network shows **one page** of rows per interaction — never the whole table.
 - Sorting, filtering, and paging each fire exactly one request, and the request carries the tiebreaker sort.

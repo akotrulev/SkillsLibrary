@@ -7,7 +7,7 @@ description: Use when upgrading a React or Next.js codebase across a major — R
 
 Owns getting an **existing** codebase from one major to the next: what breaks, what the codemod handles, what it silently doesn't, and the order to do it in. Three migrations, in dependency order — **Next 15 requires React 19 for the App Router**, so a Next upgrade usually forces the React upgrade first.
 
-**The seam with siblings.** Every other skill in this stack is *version-aware* — it applies the guidance keyed to what's already there. This skill is the only one that **changes** which version lane the project is in. Run it deliberately, on its own branch, never bundled into a feature fix (per the agent's brownfield rule: a fix does not smuggle in a version upgrade).
+**The seam with siblings.** Every other skill in this stack is *version-aware* — it applies the guidance keyed to what's already there. This skill is the only one that **changes** which version lane the project is in. Run it deliberately, as its own change, never bundled into a feature fix (per the agent's brownfield rule: a fix does not smuggle in a version upgrade).
 
 **Order of operations:** React 18→19 → Next 14→15 → (optionally) Pages→App Router. Each step ships and is verified before the next starts. Never run two majors in one PR — when something breaks you won't know which upgrade caused it.
 
@@ -28,9 +28,9 @@ Owns getting an **existing** codebase from one major to the next: what breaks, w
 ## Before you start — the gate
 
 1. **Clean tree, green build.** `tsc --noEmit` 0 errors, lint 0 warnings, tests green *before* you touch a version. You cannot attribute a new failure otherwise.
-2. **Own branch, own PR.** One major per PR.
+2. **Its own change, its own PR.** One major per PR. Work in the checkout you are given — never create a branch or worktree.
 3. **Inventory the blast radius** — grep for the removed APIs below and count. That number is the real size of the job; the version bump itself is one line.
-4. **Check the floor.** React 19 needs Node 18+; Next 15 needs Node 18.18+. Node 20 is EOL (April 2026) — if the project is on it, that's a separate prerequisite.
+4. **Check the floor.** React 19 needs Node 18+; Next 15 needs Node 18.18+. Both of those Node lines are past EOL (Node 20 since April 2026), so the house floor is Node 22 with Node 24 primary — if the project is below it, flag it; the Node upgrade is a separate prerequisite.
 
 ## React 18 → 19
 
@@ -133,7 +133,7 @@ Re-opt in explicitly where you relied on it: `fetch(url, { cache: 'force-cache' 
 
 ## Verification (every migration, non-negotiable)
 
-Per [`ep-verify-before-done`](../../../../engineering-practices/verify-before-done/SKILL.md) — an upgrade you haven't run is not done:
+Per [`ep-verify-before-done`](../../../../engineering-practices/verify-before-done/SKILL.md) — an upgrade you haven't run is not done. Inside a `Gate: none` plan task, run none of these checks and report the upgrade as "written, not run"; the plan's gate task runs them.
 
 1. `<pm> build` clean · `tsc --noEmit` 0 errors · lint 0 warnings
 2. `<pm> test` green (Vitest) — plus the `qa-ui-typescript` peer's E2E suite if one exists; a major upgrade is exactly when E2E earns its cost
@@ -146,7 +146,7 @@ Per [`ep-verify-before-done`](../../../../engineering-practices/verify-before-do
 | Anti-pattern | Why it's wrong | Do instead |
 |---|---|---|
 | Two majors in one PR | A break can't be attributed | One major per PR, verified and shipped |
-| Upgrade bundled into a feature/bugfix | Review becomes impossible; a revert takes the feature with it | Separate branch, separate PR |
+| Upgrade bundled into a feature/bugfix | Review becomes impossible; a revert takes the feature with it | Separate change, separate PR |
 | Trusting the codemod's exit code | Codemods handle syntax, not semantics — the caching flip and async params in dynamic call sites are missed | Grep the removed-API table yourself; boot the app |
 | `'use client'` on every migrated page | App Router with none of its benefits | Server Component by default, client at the leaves |
 | Big-bang `pages/` → `app/` rewrite | Both routers coexist; a rewrite is all risk, no need | Route by route, ship each |

@@ -60,7 +60,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     alternates: { canonical: url },
     openGraph: {
       title: p.name, description: p.summary, url, type: 'website',
-      images: [{ url: p.imageAbsoluteUrl }],           // MUST be absolute
+      images: [{ url: p.imageAbsoluteUrl }],           // must be absolute
     },
     twitter: { card: 'summary_large_image', title: p.name, description: p.summary },
   };
@@ -152,6 +152,8 @@ Emit `schema.org` JSON-LD in a `<script type="application/ld+json">` rendered **
 - **Don't** re-own the tab-title convention (ui-rules) or its scaffold emission (generator) — only the SEO metadata content.
 
 ## Validation
+
+Inside a `Gate: none` plan task, run none of these checks and report "written, not run"; the plan's gate task runs them.
 
 - **View source** (not the rendered DOM) / `curl` a public page: the `<h1>`, body text, `title`, `meta description`, canonical, OG tags, and JSON-LD are all present in the **response HTML**.
 - Load the page with JS disabled — the core content is there.

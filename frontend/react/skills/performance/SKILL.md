@@ -247,6 +247,8 @@ Set explicit budgets and fail CI when they regress — an unmeasured perf rule r
 
 ## Validation
 
+Inside a `Gate: none` plan task, run none of these checks and report "written, not run"; the plan's gate task runs them.
+
 - React DevTools Profiler: toggle a `memo`/`key`/Context-split fix off→on and confirm the render count drops on the target interaction.
 - Bundle analyzer: initial First Load JS per route within budget; heavy widgets in their own async chunks; no barrel pulling a whole package.
 - Network/Performance: independent server fetches run in parallel (overlapping in the waterfall), slow sections stream via Suspense, wrapper paints first.

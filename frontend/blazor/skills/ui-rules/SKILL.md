@@ -236,6 +236,8 @@ This is *why* the rules above are keepable at scale, not one-offs.
 
 ## Validation
 
+Inside a `Gate: none` plan task, run none of these checks and report "written, not run"; the plan's gate task runs them.
+
 - Grep for raw enum/`ToString()` in cells; every enum renders humanized in grid, filter, detail, and form.
 - One format helper per type; a page audit shows no hand-rolled `string.Format`; timezones labeled.
 - No GUID visible where a lookup exists; pickers type-ahead by name.

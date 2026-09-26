@@ -11,8 +11,6 @@ The rule set is fixed and known in advance (unlike a spec audit) and the scope i
 
 This is **read-only analysis on product code**. The audit points; the `fe-react` agent fixes. The only files it writes are its own reports.
 
-**Announce at start:** "I'm using the `fe-react-standards-audit` skill in Mode A (baseline) / Mode B (re-audit) on `<repo/path>`."
-
 ## Read before sweeping
 
 1. [`references/conformance-checklist.md`](references/conformance-checklist.md) — the 19 lettered sections, every check, how to find violations, and the severity each carries. **Read it end-to-end** before Step 2; it is the audit's spine.
@@ -187,7 +185,7 @@ Highest-leverage remaining: <one line>
 
 ## Handoffs
 
-- **Apply the fixes** → the `fe-react` agent, Mode FIX (a defect) or EXTEND (a slice). The priority table is the handoff artifact.
+- **Apply the fixes** → the `fe-react` agent, Mode FIX (a defect) or EXTEND (a missing capability). The priority table is the handoff artifact.
 - **One file / one diff instead** → [`fe-react-code-review`](../code-review/SKILL.md).
 - **Code vs a spec or story set** → `ep-spec-vs-code-audit` / the `code-auditor` agent (SPEC lane).
 - **"What does this feature actually do"** → `ep-feature-audit`.

@@ -247,7 +247,7 @@ When QA's `page-objects-from-url` / `mobile-screen-explorer` hands over a report
    2. Walk the markup. For each candidate element (Rule 5), generate the locator and apply it via the right mechanism (inline attribute, capture-forwarding on library controls, `TestId` prefix prop, hardcoded row const).
    3. Skip decorative elements; note them in the summary.
 3. If the target is a metadata-driven shell page, do **not** touch the page — propose edits to the framework components instead, in a separate diff.
-4. Build the touched project (`dotnet build`) to confirm nothing broke.
+4. Outside a `Gate: none` plan task, build the touched project (`dotnet build`) to confirm nothing broke.
 5. Report per the contract:
    - Files modified, with locator counts per file.
    - Decorative elements skipped (so the user can override if any need anchoring).

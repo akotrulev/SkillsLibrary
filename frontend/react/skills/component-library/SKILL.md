@@ -93,7 +93,9 @@ These hold regardless of which reference you read:
 
 ## Validation
 
-- `pnpm build` + typecheck clean; the theme/dialog/toast providers resolve at the root.
+Inside a `Gate: none` plan task, run none of these checks and report "written, not run"; the plan's gate task runs them.
+
+- The project's own build and typecheck scripts (run with the package manager `packageManager` names) clean; the theme/dialog/toast providers resolve at the root.
 - A dialog and a toast/snackbar fire from a `'use client'` island (they can't be called from an RSC — that's the test your boundary is right).
 - The DataGrid pages, sorts, and filters **server-side** (Network shows one page's rows, not the whole table).
 - Dark mode toggles from one control and follows system preference (`next-themes` / library color-mode API), with no light→dark flash on reload.

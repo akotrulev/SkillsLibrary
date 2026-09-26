@@ -204,6 +204,8 @@ These are the most-missed rules and they scale badly through shared components â
 
 ## Validation
 
+Inside a `Gate: none` plan task, run none of these checks and report "written, not run"; the plan's gate task runs them.
+
 - **Keyboard-only pass** on every key flow: reach and operate everything with `Tab`/`Shift+Tab`/`Enter`/`Space`/arrows/`Esc`; focus is always visible; no trap outside an intentional modal.
 - **Navigate between routes** with a screen reader (or focus-visible eye test): focus lands on the new page's `<main>`/`<h1>` and the page is announced.
 - **Open/close a dialog**: focus enters it, Tab wraps inside, `Esc` closes, focus returns to the trigger.
