@@ -1,6 +1,6 @@
 ---
 name: qa-ui-test-writer-selenium-typescript
-description: Use when the user asks to scaffold a TypeScript + Selenium 4 page object or Mocha/Vitest UI test, following the BasePage / DriverFactory pattern. Triggers: "create a Selenium page object for X in TS", "add a TypeScript Selenium page for screen Y", "write a Selenium TS UI test for Z". For end-to-end suite work prefer the staged agent `qa-ui-typescript` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
+description: Use when the user asks to scaffold a TypeScript + Selenium 4 page object or Mocha/Vitest UI test, following the BasePage / DriverFactory pattern. Triggers: "create a Selenium page object for X in TS", "add a TypeScript Selenium page for screen Y", "write a Selenium TS UI test for Z". Not for Playwright projects (`qa-ui-test-writer-playwright-typescript`) or reviewing existing tests (`qa-ui-test-review-typescript`).
 ---
 
 # QA — Selenium TypeScript Page Object & Test Generator
@@ -11,7 +11,7 @@ Scaffolds Selenium 4 page objects and Mocha (or Vitest) UI tests in TypeScript s
 
 ## Stack
 
-- Node 20, TypeScript strict mode (`"strict": true`)
+- Node 24, TypeScript strict mode (`"strict": true`)
 - **selenium-webdriver** 4.x (Selenium Manager handles drivers; no third-party driver manager needed)
 - **Mocha** (or **Vitest** — pick one and stay consistent) with parallel files
 - **Allure Mocha** (or **allure-vitest**) for reporting
@@ -230,7 +230,7 @@ describe("Authentication", () => {
    - For repeating items, an `async {component}s(): Promise<Component[]>` method
 4. If a destination page is missing, stub it or recursively generate it.
 5. Generate the spec file using `BaseTest`; one `it(...)` per scenario.
-6. Run `npm test` (or `npx vitest run`) — expect 0 failures.
+6. Run the project's own test script with the package manager `packageManager` names — expect 0 failures. Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run".
 
 ## Handoffs
 

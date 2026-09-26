@@ -1,9 +1,9 @@
 ---
 name: qa-production-uptime-checks-typescript
-description: Use when authoring synthetic monitoring as code in Node 24 (22 supported) / TypeScript — scheduled API and Playwright-based browser checks against live staging/prod via Checkly (`@checkly/cli`). The "is it up right now" layer, distinct from CI pre-merge tests. Triggers: "add a prod uptime check", "synthetic monitor for the login flow", "monitoring as code".
+description: Use when authoring synthetic monitoring as code in Node 24 (22 supported) / TypeScript — scheduled API and Playwright-based browser checks against live staging/prod via Checkly (`@checkly/cli`). The "is it up right now" layer, distinct from CI pre-merge tests. Triggers: "add a prod uptime check", "synthetic monitor for the login flow", "monitoring as code". Not for pre-merge CI gates (`qa-ci-pipelines-typescript`) or load testing (`qa-load-testing-typescript`).
 ---
 
-# Synthetic Monitoring as Code (Checkly · Node 20 / TypeScript) — **canonical stack**
+# Synthetic Monitoring as Code (Checkly · Node 24 / TypeScript) — **canonical stack**
 
 This is the **canonical** stack of the `qa/typescript/skills/production-uptime-checks/` family. It leads in TypeScript because
 synthetic monitoring is largely a JS/TS world and **Checkly `@checkly/cli`** is the strongest
@@ -26,7 +26,7 @@ It is **not**:
 - a **CI test** — CI tests run **once, pre-merge, against an ephemeral env** to gate a change
   (`qa-ci-pipelines-*`). A synthetic runs **forever, post-deploy, against the real thing**. Same Playwright
   muscle, opposite execution model. (Checkly's selling point: the *same* spec serves both — see § The boundary.)
-- a **load test** — `qa-performance-k6` drives throughput to find the breaking point. A synthetic fires one
+- a **load test** — `qa-load-testing-typescript` drives throughput to find the breaking point. A synthetic fires one
   scripted journey every N minutes to answer "is it working *right now*". (Note the overlap: k6 *can* run as a
   synthetic via Grafana Synthetic Monitoring — the Java sibling.)
 - a **journey author** — this skill *reuses* the page objects authored by
@@ -61,7 +61,7 @@ browser-check what an API check can prove.
 
 ## Stack
 
-- Node 20 + TypeScript (strict mode) — **no `waitForTimeout` / `setTimeout`-as-wait** anywhere
+- Node 24 + TypeScript (strict mode) — **no `waitForTimeout` / `setTimeout`-as-wait** anywhere
 - `checkly` (npm) — constructs import from `checkly/constructs`; the `checkly` CLI is the deploy tool
 - `@playwright/test` — browser-check bodies are plain Playwright specs; **reuse** the page objects from
   `qa-ui-test-writer-playwright-typescript` (cross-link — this skill does not author them)
@@ -183,7 +183,7 @@ import { CartPage } from '../../../tests/pages/cart.page';
 test('user can log in and add an item to the cart', async ({ page }) => {
   const login = new LoginPage(page);
   await login.goto();
-  // creds from env, read lazily, NEVER logged or committed — set as Checkly secret env vars
+  // creds from env, read lazily, never logged or committed — set as Checkly secret env vars
   await login.signInAs(process.env.SYNTHETIC_USER!, process.env.SYNTHETIC_PASSWORD!);
 
   const cart = new CartPage(page);
@@ -341,9 +341,9 @@ deployed with `checkly deploy`, both runnable as a PR gate with `checkly test --
   ported, not code.
 - `qa-ui-test-writer-playwright-typescript` — authors the page objects + journeys that the **browser checks
   reuse**. This skill schedules and alerts on them; it does not author them. Mirror its intent-not-selectors discipline.
-- `qa-performance-k6` — load testing (throughput), NOT uptime. The overlap: k6 *can* run as a synthetic via
+- `qa-load-testing-typescript` — k6 load testing (throughput), NOT uptime. The overlap: k6 *can* run as a synthetic via
   Grafana Synthetic Monitoring (the Java sibling). Synthetics check "is it working"; k6 checks "how much can it take".
-- `qa-ci-pipelines` (github-actions / azure-pipelines / gitlab-ci references) — the **pre-merge gate against
+- `qa-ci-pipelines-typescript` (its GitHub Actions, Azure Pipelines and GitLab CI references) — the **pre-merge gate against
   ephemeral envs** boundary; also where `checkly test --record` (gate) + `checkly deploy` (promote) are wired.
 - `qa-test-login-tokens-typescript` — M2M / test-user tokens for checks that hit an **authenticated** live
   endpoint (setup script mints the token; creds from env, lazily).

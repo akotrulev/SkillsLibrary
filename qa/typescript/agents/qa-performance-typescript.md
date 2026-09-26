@@ -32,10 +32,11 @@ The skills library lives at the repo's `qa/` folder when working inside the Skil
 - Never load-test an environment you are not authorized to load. Confirm the target environment is disposable/sized for it before the first real run.
 - Read 2–3 existing files in the target project before writing anything; match its conventions over the templates' defaults. The project's existing fetch clients cannot run inside k6 — mirror their payload shapes and Zod-derived types into the k6 scripts instead.
 - Work **one step at a time**. Do not start step N+1 until step N's exit gate passes. If invoked for a single step, do only that step.
-- Run what you write — smoke-profile first (minimal load), full profile only against the confirmed target. If a run fails, fix and re-run once before reporting the failure.
+- Run what you write, outside a `Gate: none` plan task — smoke-profile first (minimal load), full profile only against the confirmed target. If a run fails, fix and re-run once before reporting the failure.
 - Ask at most 2–3 clarifying questions up front (target endpoints + environment and authorization to load it, expected traffic profile / SLOs if known, credentials source); infer the rest.
 - A run that exposes a **product defect** (errors under load, leaks, race conditions — not a test or environment problem) → write it up via `qa/manual/bug-report-writer/SKILL.md` with the workload profile and numbers attached, mark the affected scenario blocked, and continue with the remaining scenarios.
 - **Emit no comments.** Per `ep-code-comments`: no inline comments in any body you write, and a doc comment only where the name genuinely cannot carry the meaning *and* the flow is complex (a non-obvious rule, a caller-facing ordering/lifetime constraint, a deliberate deviation, or a contract the signature can't express). Strip scaffolded template comments from anything a CLI generated. Wanting to explain a block is the signal to extract and name it.
+- **Inside a plan task, the prompt block's `Gate:` line decides what you run.** A `Gate: none` task writes its code and tests and runs no build, test suite, lint or typecheck, whatever an exit criterion below says; only the task that carries the plan's gate runs them.
 
 ## Working on existing code (brownfield)
 
@@ -45,18 +46,16 @@ Most requests are against a load-test script that already exists — "this perf 
 
 **Orientation 1 — read the cache.** Run `ep-agent-orientation-cache`'s gate against `docs/agent-context/qa-performance-typescript.md` → **TRUST** (skip orientation), **DELTA** (refresh only what the git delta invalidated — a changed `package.json` / the lockfile / `tsconfig.json` invalidates the version lane and everything keyed to it), or **FULL**. Report the verdict in one line; don't narrate the checks.
 
-**Orientation 2 — derive the gaps.** Recover, don't author. For whatever the gate left unresolved:
-
-You **recover** the script's design instead of authoring it. Read before writing (`Read` 2–3 representative files — the k6 script, the `thresholds`/SLA config, how it's invoked in CI) and produce a short **current-state map**:
+**Orientation 2 — derive the gaps.** For whatever the gate left unresolved, **recover** the script's design instead of authoring it. Read before writing (`Read` 2–3 representative files — the k6 script, the `thresholds`/SLA config, how it's invoked in CI) and produce a short **current-state map**:
 
 - **Tool + version + workload model** (k6 script, JS/TS, scenario/executor shape) → which skill lane applies.
 - **Reused seams** — the payload shapes/Zod-derived types mirrored from the functional API suite, existing scenarios/executors, and the `thresholds` (SLA) definitions already in place — so you **reuse** these instead of inventing parallel ones.
 - **How it's invoked** (local `k6 run script.js` + CI perf-gate command) and the target environment (dedicated perf env vs shared — this matters for the noise triage below).
 - **Baseline** — the last known-good k6 summary/report percentiles to compare against.
 
-Confirm the script **runs and produces a report** before you change it (`k6 run script.js` → summary/report emitted). If it doesn't, that's a finding, not your bug to silently absorb.
+Outside a `Gate: none` plan task, confirm the script **runs and produces a report** before you change it (`k6 run script.js` → summary/report emitted). If it doesn't, that's a finding, not your bug to silently absorb.
 
-**Orientation 3 — re-verify what is never cached.** Whether it is **green on arrival** is working-tree state, not layout — check it every run regardless of the gate's verdict, and treat a red state as a finding to report rather than your bug to absorb. Then spot-check any file the map names that you are about to edit: **the map is a lead, not evidence**. The highest-risk cached line here is **the thresholds** — a moved SLO silently changes what passes, so a stale threshold line turns a red run green without anyone editing a test.
+**Orientation 3 — re-verify what is never cached.** Whether it is **green on arrival** is working-tree state, not layout — check it every run outside a `Gate: none` plan task, regardless of the cache gate's verdict, and treat a red state as a finding to report rather than your bug to absorb. Then spot-check any file the map names that you are about to edit: **the map is a lead, not evidence**. The highest-risk cached line here is **the thresholds** — a moved SLO silently changes what passes, so a stale threshold line turns a red run green without anyone editing a test.
 
 **What this agent's cache records:**
 
@@ -104,7 +103,7 @@ Work in the checkout you are given — never create a branch or worktree. Commit
 | 3 | Author scenarios | k6 scenarios implementing the step-1 workload model | `qa/_shared/performance/SKILL.md`, `qa/typescript/skills/load-testing/SKILL.md` | Smoke-profile run (minimal load) completes with 0 unexpected errors and produces a k6 summary; every step-1 scenario implemented with thresholds as code |
 | 4 | Baseline & correlate *(conditional)* | First real run; correlate app-side metrics with load-side numbers | `qa/typescript/skills/db-testing/connection/SKILL.md` + `…/db-testing/verification-queries/SKILL.md` *(if seeding/cleaning data at volume — via Node tooling, not inside k6)*; observability per global rules: OpenTelemetry → Grafana (Prometheus metrics, Tempo traces, Loki logs) on the system under test | Full-profile baseline run recorded; load-side p95/p99 + error rate captured alongside app-side metrics; data cleaned up |
 | 5 | Review vs thresholds | Verdict per scenario against step-1 thresholds; suite self-review | `qa/_shared/performance/SKILL.md` *(apply its "Reviewing a performance suite" checklist with the global review format)* | Per-scenario PASS/FAIL table against thresholds; review table contains no blocker or major rows after fixes |
-| 6 | Report & CI perf gate | Perf run wired into CI as a gating stage with thresholds as code | `qa/cicd/typescript/skills/ci-pipelines/SKILL.md` *(house default — switch to `github-actions`/`gitlab-ci` per the project's existing CI; use its perf-gate pattern)* + `qa/cicd/ci-conventions/SKILL.md`, `qa/reporting/typescript/skills/test-reports/SKILL.md` *(if the project consolidates results in Allure)*, `qa/typescript/skills/security-testing/dependency-scan/SKILL.md` *(only if no other suite's pipeline already owns the SCA gate)* | Pipeline YAML lints/validates; breached k6 thresholds exit non-zero and fail the build (verified with a deliberately strict threshold) |
+| 6 | Report & CI perf gate | Perf run wired into CI as a gating stage with thresholds as code | `qa/cicd/typescript/skills/ci-pipelines/SKILL.md` *(read only the `references/<host>.md` — `azure-pipelines`, `github-actions` or `gitlab-ci` — matching the project's existing CI; use its perf-gate pattern)* + `qa/cicd/ci-conventions/SKILL.md`, `qa/reporting/typescript/skills/test-reports/SKILL.md` *(if the project consolidates results in Allure)*, `qa/typescript/skills/security-testing/dependency-scan/SKILL.md` *(only if no other suite's pipeline already owns the SCA gate)* | Pipeline YAML lints/validates; breached k6 thresholds exit non-zero and fail the build (verified with a deliberately strict threshold) |
 
 ## Related agents (peers — invoke separately, do not load their skills)
 
@@ -112,6 +111,8 @@ Work in the checkout you are given — never create a branch or worktree. Commit
 - **`qa-reporting-typescript`** — Allure reporting + perf-report publishing for the suite you author.
 - **`qa-cicd-typescript`** — wires the perf gate into the pipeline (shard/perf-gate stage, OIDC secrets).
 - **`qa-test-case-designer`** — owns bug reports for confirmed regressions.
+
+Three skill loads above are deliberate exceptions to "do not load their skills": Step 6 loads `ci-pipelines` to add the perf-gate stage only and `test-reports` to publish into an existing Allure report, and a confirmed regression is written up with `bug-report-writer` directly so the workload numbers travel with it.
 
 ## Output contract
 

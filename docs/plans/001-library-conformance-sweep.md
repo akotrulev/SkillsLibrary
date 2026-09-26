@@ -24,7 +24,10 @@ the Gate line in three agents, the production-uptime-checks names resolved, seve
 one open question raised, O9). S9 landed 2026-09-26 (qa/typescript API, BDD and LLM lanes: the Gate
 line in three agents, 63 `Node 20` hits moved to Node 24 with the realtime Node-20 boundary reworded as an EOL
 flag, 20 stale paths, the K1 name and 23 descriptions; the LLM agent's `qa/manual` write-up became a hand-off,
-D15). S10 is next. S1–S18 are ungated: the edits from S1 to S9 are built but unverified until G1 runs §7.
+D15). S10 landed 2026-09-26 (qa/typescript UI, mobile and performance lanes and commands: the Gate line in
+three agents, the last 23 `Node 20` hits moved to Node 24 so qa/typescript holds only flagged EOL lines, the
+production-uptime-checks names resolved, eight Do-NOT clauses added). S11 is next. S1–S18 are ungated: the
+edits from S1 to S10 are built but unverified until G1 runs §7.
 
 ## 1. What already exists, and what is missing
 
@@ -1276,6 +1279,63 @@ files modified 24k, read-back 6k, churn ×1.2
 - K1: `qa-ci-pipelines` and `qa-performance-k6` ×2 in `skills/production-uptime-checks/SKILL.md`.
 - K2: the Gate line in the three agents.
 - **Not in S10:** S9's lanes.
+- **As built (2026-09-26):** `qa/typescript/agents/{qa-ui-typescript,qa-mobile-typescript,qa-performance-typescript}.md`
+  and `qa/typescript/commands/*.md` (read in full), and the 15 skill folders S9's note left to S10 (41 `.md`
+  files). Gate line added to 3 agents, each as the last Operating-rules bullet (`qa-ui-typescript.md:37`,
+  `qa-mobile-typescript.md:38`, `qa-performance-typescript.md:39`). The six commands need nothing: each only
+  points at its agent file.
+  Data issues: 34 fixed.
+  - K6: the same one-pass substitution over the S10 files moved the 23 remaining `Node 20` hits to Node 24 (the
+    ui and mobile agents' descriptions, titles, role lines and mobile's "Appium/TS on Node 20"; the "Node 20 +
+    TypeScript" stack lines of 11 skills and references; `inhouse-framework-conventions/SKILL.md:8`, whose
+    description already said Node 24). The diff review reworded one feature boundary:
+    `device-cloud/SKILL.md:16` global `fetch` + `FormData` + `Blob` "(Node 20)" → "(built into Node 22 and 24)".
+    Also `security-testing/dependency-scan/SKILL.md:232` CI YAML `node-version: 20` → 24. The K6 recipe over
+    qa/typescript now prints only S9's four flagged EOL lines in `realtime-stream-testing`.
+  - K1: `production-uptime-checks/SKILL.md:29`, `:344` `qa-performance-k6` → `qa-load-testing-typescript`;
+    `:346` `qa-ci-pipelines` → `qa-ci-pipelines-typescript` ("its GitHub Actions, Azure Pipelines and GitLab CI
+    references"). The resolver prints only `data-testid` / `data-test` over qa/typescript.
+  - Stale paths, 7: `qa-ui-typescript.md:114` `…/percy/SKILL.md`, `…/applitools/SKILL.md`, `…/lighthouse-ci/SKILL.md`
+    → "its `references/percy.md`" etc.; `browser-cloud-setup/SKILL.md:8` `ui-test-author/{playwright,appium}/typescript`
+    → `…/{playwright,appium}`; `load-testing/SKILL.md:21` `api-test-author/writer/<stack>` → `…/writer` and
+    `ui-test-author/<stack>` → `<tool>`; `:326` `ci-pipelines/{github-actions,…}` → "`ci-pipelines` (its
+    `references/<host>.md`)". Every other `qa/…` path in the S10 files resolves on disk or is a stated glob.
+  Code issues: 27 fixed.
+  - K7: Do-NOT clauses added to the eight — `browser-cloud-setup`, `inhouse-framework-conventions`,
+    `ui-test-author/selenium`, `language-testing`, `device-cloud`, `production-uptime-checks`,
+    `mobile-native-features`, `load-testing` — each naming the sibling by frontmatter name (S8's Java pairs,
+    with `fe-react-languages` for localization wiring); the staged-agent boilerplate is gone from the three
+    that had it. All ≤ 500 (largest `language-testing` 491). Agent descriptions fit (616, 597, 544).
+  - K5: all-caps `NEVER` in `production-uptime-checks/SKILL.md:186`, `references/details.md:25` and
+    `NEVER`/`CALLER` in `mobile-native-features/SKILL.md:116` → lower case.
+  - K2 for skills: the "written, not run" sentence on the run step of `ui-test-author/selenium:233`,
+    `browser-cloud-setup:114`, `device-cloud:378`, `load-testing:315` and `network-mocking/references/{cdp:310,proxy:339,playwright-routes:328}`.
+  - K8: `ui-test-author/selenium:233` `npm test`, `load-testing:313` `npm run build:perf`, and the ui and mobile
+    agents' "how the suite is invoked" line → the project's own script, run with the package manager
+    `packageManager` names.
+  - "Recover, don't author" doubled in Orientation 2 of all three agents; merged into the one-sentence form.
+  - `qa-mobile-typescript.md` "Emit no comments" bullet moved from after the "Live-app exploration" subsection
+    into the Operating-rules list, with the Gate line after it.
+  - `qa-performance-typescript.md:106` "house default — switch to …" CI note → "read only the
+    `references/<host>.md` … matching the project's existing CI".
+  Logical conflicts: 10 fixed.
+  - "Run what you write", Orientation 3's "every run regardless of the gate's verdict" and Orientation 2's
+    "confirm it builds/runs on arrival" each gain "outside a `Gate: none` plan task" in all three agents.
+  - `qa-performance-typescript`'s Step 6 loads `qa/cicd` / `qa/reporting` skills and its bug-report rule loads
+    `qa/manual/bug-report-writer`, while "Related agents" says "do not load their skills"; the three exceptions
+    are stated once under the list (`:115`, S6's reading).
+  Cleanup: none. The K9 recipes find nothing in qa/typescript, and every qa/typescript skill, agent and command
+  is listed in the marketplace.
+  Kept on purpose: K3 hits are the fixed workspace sentence, Percy/Applitools branch baselines and
+  `inhouse-framework-conventions:209` (the Accelerator's own `/review` command). K4 hits are k6 `stages:`, the
+  CI "gating stage" / "perf-gate stage", CDP throttling "phases" and an "authorization slice" of a suite (D8).
+  K8 hits left are `npm install` tool installs and `npm run start` / `npm ci` in code and CI YAML samples. The
+  `green` hits are exit criteria (K2 keep). `ci-pipelines/*` cross-links stay as globs. "— MANDATORY SECTION"
+  and the `be-shared-session-budget` Step 5 duty do not occur.
+  Carried forward: the Node-20 feature-boundary trap (and CI `node-version: 20`) into the S12, S13, S14 and
+  S17 blocks, whose folders still hold `Node 20` hits.
+  Unverified: nothing was run beyond §4's searches (Gate: none). Left for the user: O9 also covers
+  `qa-ui-typescript.md:45` (the `// TODO: missing data-testid` marker); the text is unchanged.
 
 ### S11 — qa/_shared and qa/manual
 
@@ -1559,85 +1619,9 @@ name: the K1 resolver flags it (D12).
 | S18 | `docs` | `general-purpose` | — | ~135k |
 | G1 | `docs` | `general-purpose` | S1–S18 | ~120k |
 
-S1 to S9 have landed, and their prompts are deleted; the 10 prompts from S10 to G1 are live.
+S1 to S10 have landed, and their prompts are deleted; the 9 prompts from S11 to G1 are live.
 
 ---
-
-### S10 — qa/typescript UI, mobile and performance lanes (general-purpose, docs)
-
-````
-You are `general-purpose`. Task S10 of docs/plans/001-library-conformance-sweep.md: bring
-qa/typescript's UI, mobile and performance lanes and its commands in line with the plan's checks
-K1–K9.
-
-Deliverable: qa-ui-typescript, qa-mobile-typescript, qa-performance-typescript, qa/typescript/commands/
-and every remaining qa/typescript skill pass K1–K9, with no Node 20 default left in qa/typescript/.
-
-Read, in this order:
-1. CLAUDE.md.
-2. The plan: §2, §3, §4, §6 (the S10 rows), D1–D11, task S10, S9's As built note.
-3. CONTRIBUTING.md.
-4. qa/typescript/agents/{qa-ui-typescript,qa-mobile-typescript,qa-performance-typescript}.md and
-   qa/typescript/commands/*.md in full.
-5. The plan's "Close-out — every task".
-
-Do:
-- Run §4's recipes with DIR=qa/typescript; work the hits in your agents, the commands and the skills
-  S9 did not own.
-- K6: the same one-pass substitution and diff review as S9, over your files. When you finish, the K6
-  recipe over qa/typescript shows only flagged detection/EOL mentions.
-- K1: `qa-ci-pipelines`, `qa-performance-k6` ×2 (skills/production-uptime-checks/SKILL.md).
-- K2: the Gate line in the three agents.
-
-Traps:
-- Agent sentences S3/S4 fixed in backend recur in 28 agents across S5–S17; fix them where your
-  agents carry them:
-  - "— MANDATORY SECTION" on the brownfield heading is dropped (K5).
-  - The orientation pass's "every run regardless of the gate's verdict" (the cache gate) gains
-    "outside a `Gate: none` plan task".
-  - A closing duty "per `be-shared-session-budget` Step 5" now reads "per the plan's
-    `## Close-out — every task` section (plan format §7)".
-  - A skill's Validation / Verify list gets one sentence: inside a `Gate: none` plan task it runs
-    none of the checks and reports "written, not run".
-  - K8: a hardcoded `pnpm …` / `npm …` in an instruction becomes the project's own script, run with
-    the package manager `packageManager` names.
-  - The operating rule "Run what you write — a step whose code never executed does not pass its
-    gate" becomes "Run what you write, outside a `Gate: none` plan task — …" (S5; every qa agent
-    carries it).
-- Stale path shorthands (S5): skill folders were renamed but citations were not, and the K1
-  resolver cannot see paths. Grep for `api-test-author/generator` → `writer`,
-  `api-test-author/reviewer` and `ui-test-author/reviewer` → `review`, `db-testing/client` →
-  `connection`, `bdd-project-setup` → `bdd-project-scaffold`, `conformance-audit` →
-  `standards-audit`, and (S6) `performance/<tool>` or `skills/performance` → `load-testing`,
-  `qa/_shared/api-contract-testing` → `qa/_shared/contract-testing-pact`. Check every step-table
-  path, and every `qa/…` path in the files you own, against the folder on disk.
-- WebdriverIO/Appium examples pin Node in CI YAML. A matrix may keep Node 22 beside 24.
-- S6's choice for production-uptime-checks: `qa-performance-k6` → `qa-load-testing-typescript`,
-  `qa-ci-pipelines` → `qa-ci-pipelines-typescript` (host names as "its … references"). S6 also found
-  a doubled "Recover, don't author" in the orientation, a "Confirm it builds and runs on arrival" that
-  needs the `Gate: none` exception, and a performance agent whose Step 6 loads `qa/cicd` /
-  `qa/reporting` skills while "Related agents" says not to — state the exceptions once.
-- Known S10 hits, found by S8 in the same copied text: `qa-ui-typescript.md:115` cites
-  `…/percy/SKILL.md`, `…/applitools/SKILL.md` and `…/lighthouse-ci/SKILL.md`, which are
-  `references/*.md` of `visual-regression` and `accessibility-testing` (S8 wrote "its
-  `references/percy.md`"); `qa-mobile-typescript.md:51` puts the "Emit no comments" bullet after the
-  "Live-app exploration" subsection instead of in the Operating-rules list (S8 moved it up, with the
-  Gate line after it); `qa-performance-typescript.md:107` says "house default — switch to …" for
-  `ci-pipelines` (S6/S8 wording: "read only the `references/<host>.md` … matching the project's
-  existing CI"). The descriptions ending in "For end-to-end suite work prefer the staged agent …"
-  get a Do-NOT clause in its place (S7/S8).
-- (S9) The 23 `Node 20` hits left in qa/typescript are all in your files; S9's 56 files show only four
-  flagged EOL lines (realtime-stream-testing). S9's diff review found Node 20 used as a feature boundary
-  (native `WebSocket`/`EventSource` arrive in Node 22): such lines say Node 22/24 have the feature and flag a
-  detected Node 20 as EOL, rather than reading "Node 24" after the substitution. Your skill run steps
-  hardcode `pnpm …` / `npm …` too; S9 wrote "the project's own <typecheck|test|lint> script with the package
-  manager `packageManager` names" and appended the "written, not run" sentence to the same step.
-
-Gate: none — this plan gates once, in G1. Do not run tools/token-audit.py or §7's script.
-
-Commit: `chore(sweep S10): qa/typescript UI, mobile and performance lanes`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
 
 ### S11 — qa/_shared and qa/manual (general-purpose, docs)
 
@@ -1732,6 +1716,9 @@ Traps:
 - "Stage" is CI vocabulary here (D8). Azure DevOps stages stay.
 - Over budget: if the session runs long, finish qa/cicd first, then qa/reporting. The split point is
   between the folders.
+- (S9/S10) Node 20 is sometimes a feature boundary, not a default (native `WebSocket`/`EventSource`,
+  global `fetch`/`FormData`/`Blob`): such a line says Node 22/24 have the feature and flags a detected
+  Node 20 as EOL, rather than reading "Node 24" after the substitution. A CI `node-version: 20` moves to 24.
 
 Gate: none — this plan gates once, in G1. Do not run tools/token-audit.py or §7's script.
 
@@ -1793,6 +1780,9 @@ Traps:
   them in bold, they stay.
 - `data-testid` and the other `data-*` tokens are HTML attributes.
 - frontend/react/vendor/ and auth/cognito-*/ are out of scope (D5).
+- (S9/S10) Node 20 is sometimes a feature boundary, not a default (native `WebSocket`/`EventSource`,
+  global `fetch`/`FormData`/`Blob`): such a line says Node 22/24 have the feature and flags a detected
+  Node 20 as EOL, rather than reading "Node 24" after the substitution. A CI `node-version: 20` moves to 24.
 
 Gate: none — this plan gates once, in G1. Do not run tools/token-audit.py or §7's script.
 
@@ -1843,6 +1833,9 @@ Traps:
 - Never edit design/ui-ux-pro-max/data/ or scripts/.
 - A trimmed description keeps the Do-NOT clause that routes between the 16 design skills; those
   clauses are what stop them colliding.
+- (S9/S10) Node 20 is sometimes a feature boundary, not a default (native `WebSocket`/`EventSource`,
+  global `fetch`/`FormData`/`Blob`): such a line says Node 22/24 have the feature and flags a detected
+  Node 20 as EOL, rather than reading "Node 24" after the substitution. A CI `node-version: 20` moves to 24.
 
 Gate: none — this plan gates once, in G1. Do not run tools/token-audit.py or §7's script.
 
@@ -1996,6 +1989,9 @@ Traps:
     the package manager `packageManager` names.
 - Pipeline "stages" and git-branching guidance inside CI skills are domain content (D8, K3 keep).
 - "Never apply IaC to a live environment without explicit confirmation" stays bold, once.
+- (S9/S10) Node 20 is sometimes a feature boundary, not a default (native `WebSocket`/`EventSource`,
+  global `fetch`/`FormData`/`Blob`): such a line says Node 22/24 have the feature and flags a detected
+  Node 20 as EOL, rather than reading "Node 24" after the substitution. A CI `node-version: 20` moves to 24.
 
 Gate: none — this plan gates once, in G1. Do not run tools/token-audit.py or §7's script.
 

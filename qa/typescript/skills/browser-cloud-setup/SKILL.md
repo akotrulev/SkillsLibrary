@@ -1,17 +1,17 @@
 ---
 name: qa-browser-cloud-setup-typescript
-description: Use when the user needs to run TypeScript Playwright (web) or WebdriverIO/Appium (mobile) tests on a **hosted cloud grid**. Triggers: "run our Playwright tests on BrowserStack", "wire WebdriverIO to Sauce Labs", "set up LambdaTest caps for our Appium TS tests". For end-to-end suite work prefer the staged agent `qa-ui-typescript` / `qa-mobile-typescript` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
+description: Use when the user needs to run TypeScript Playwright (web) or WebdriverIO/Appium (mobile) tests on a **hosted cloud grid**. Triggers: "run our Playwright tests on BrowserStack", "wire WebdriverIO to Sauce Labs", "set up LambdaTest caps for our Appium TS tests". Not for real-device app upload and device matrices (`qa-device-cloud-typescript`) or writing the tests (`qa-ui-test-writer-playwright-typescript`).
 ---
 
 # QA — Cloud Grid Config (TypeScript: Playwright + WebdriverIO/Appium)
 
-Wires TypeScript tests to a **hosted device/browser grid** — BrowserStack, Sauce Labs, LambdaTest, or AWS Device Farm — so the same Playwright web specs and WebdriverIO/Appium mobile specs that run locally execute at scale on someone else's infrastructure. This skill is the **bridge** between `qa/typescript/skills/ui-test-author/{playwright,appium}/typescript` (which write the tests) and the grid that runs them: connection wiring, vendor capabilities, parallelism, artifacts, secrets, tunnels, and result reporting. It is **config/wiring** — it does not author page objects or specs.
+Wires TypeScript tests to a **hosted device/browser grid** — BrowserStack, Sauce Labs, LambdaTest, or AWS Device Farm — so the same Playwright web specs and WebdriverIO/Appium mobile specs that run locally execute at scale on someone else's infrastructure. This skill is the **bridge** between `qa/typescript/skills/ui-test-author/{playwright,appium}` (which write the tests) and the grid that runs them: connection wiring, vendor capabilities, parallelism, artifacts, secrets, tunnels, and result reporting. It is **config/wiring** — it does not author page objects or specs.
 
 > **Why this skill exists.** A local Playwright/Appium suite hard-codes nothing about a grid: it launches a local browser or a local emulator. Moving it to a grid changes exactly one thing per stack — **how the driver/browser is connected** — plus a capability block, a parallelism cap, and secret hygiene. Get those five things right and every existing page object runs unchanged. Get them wrong and you leak an access key, blow the plan's session cap, or stare at a green local run that was actually a grid that never connected.
 
 ## Stack
 
-- Node 20 + TypeScript (strict mode)
+- Node 24 + TypeScript (strict mode)
 - **Web**: `@playwright/test` connected to a cloud grid via `chromium.connect({ wsEndpoint })`, the `browserstack-node-sdk` wrapper, or `saucectl`
 - **Mobile**: WebdriverIO 9.x + Appium 2.x with `@wdio/browserstack-service` / `@wdio/sauce-service` (or raw `bstack:options`/`sauce:options`/`LT:Options` caps)
 - Tunnels: `browserstack-local` (npm), Sauce Connect 5 (`sc` binary), LambdaTest Tunnel (`LT` binary)
@@ -111,7 +111,7 @@ These sections live in `references/details.md` — **read it when the task touch
 4. Map the session cap onto `workers` / `maxInstances` from `GRID_CONCURRENCY`; note the `shards × workers ≤ cap` rule and cross-link `qa/cicd/typescript/skills/ci-pipelines/*`.
 5. Wire artifacts (`attachSessionUrl`) + session status (`markSessionStatus`) into the fixture teardown.
 6. If the target is private, add the tunnel lifecycle (`GridTunnel` start/stop in global setup/teardown) and tie sessions via the cap.
-7. Run a single spec against the grid first (one worker) to confirm the connection + caps before fanning out. Confirm the session appears on the dashboard with the right build/project tags.
+7. Run a single spec against the grid first (one worker) to confirm the connection + caps before fanning out. Confirm the session appears on the dashboard with the right build/project tags. Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run".
 
 ## Cross-references
 

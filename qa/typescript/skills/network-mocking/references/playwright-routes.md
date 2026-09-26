@@ -4,7 +4,7 @@ Intercepts, mocks, asserts, and shapes HTTP traffic in Playwright `@playwright/t
 
 ## Stack
 
-- Node 20 + TypeScript (strict mode)
+- Node 24 + TypeScript (strict mode)
 - `@playwright/test` (Playwright ≥ 1.48 — `routeWebSocket`, the post-1.43 glob semantics, `routeFromHAR` update modes)
 - Network helpers under `tests/fixtures/network/`, HAR archives under `tests/fixtures/har/`
 - Page objects under `tests/pages/`, specs under `tests/specs/` (see the UI sibling)
@@ -325,7 +325,7 @@ For real bandwidth/latency emulation (not just per-request delay) use CDP `Netwo
 3. For call assertions, use `expectRequest` (or a direct `waitForResponse` predicate) with listener-before-action ordering; assert payload via `postDataJSON()`.
 4. For third-party determinism, record a HAR with `update: true`, commit it under `tests/fixtures/har/` with `content: 'attach'`, then replay with `notFound: 'abort'`.
 5. For offline/latency states, use `context.setOffline(true)` and a latency-injection route helper — never `waitForTimeout`.
-6. Run `npx playwright test`; verify under `npx playwright test --ui` (the trace's Network tab shows which requests were routed vs hit the network). Run `tsc --noEmit` for strict-TS green.
+6. Run `npx playwright test`; verify under `npx playwright test --ui` (the trace's Network tab shows which requests were routed vs hit the network). Run `tsc --noEmit` for strict-TS green. Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run".
 
 ## Cross-references
 

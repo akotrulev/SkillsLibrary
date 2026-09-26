@@ -1,6 +1,6 @@
 ---
 name: qa-mobile-native-features-typescript
-description: Use when the user needs to test the **device-native, OS-level capabilities** a mobile app uses that a normal Appium page-object UI test doesn't exercise. Triggers: "test our deep link opens the right screen in WebdriverIO", "handle the camera/location permission dialog", "test Face ID / fingerprint login on the simulator".
+description: Use when the user needs to test the **device-native, OS-level capabilities** a mobile app uses that a normal Appium page-object UI test doesn't exercise. Triggers: "test our deep link opens the right screen in WebdriverIO", "handle the camera/location permission dialog", "test Face ID / fingerprint login on the simulator". Not for device-cloud wiring (`qa-device-cloud-typescript`) or ordinary screen flows (`qa-ui-test-writer-appium-typescript`).
 ---
 
 # QA — Mobile Native Features (TypeScript: WebdriverIO + Appium)
@@ -55,7 +55,7 @@ drives the OS surfaces *around* your screens.
 
 ## Stack
 
-- Node 20, TypeScript strict mode (`"strict": true`), ESM
+- Node 24, TypeScript strict mode (`"strict": true`), ESM
 - **WebdriverIO** 9.x with `@wdio/appium-service` (manages the Appium 2.x server) — exposes the device commands
   `driver.background(seconds)` / `terminateApp` / `activateApp` / `queryAppState` / `setClipboard` / `getClipboard` /
   `setOrientation` / `pushFile` / `openNotifications` / `fingerPrint`, and `driver.execute('mobile: …')` for the rest
@@ -113,7 +113,7 @@ implicit global, so the helper takes no constructor arg.)
 // src/support/native/NativeFeatures.ts
 /**
  * Owns the OS-level surfaces around the app. Every method drives a device command or a `mobile:` command —
- * NEVER a page-object selector. The CALLER asserts the effect on a page object afterwards.
+ * never a page-object selector. The caller asserts the effect on a page object afterwards.
  */
 export class NativeFeatures {
   // --- 1. Deep links: launch via the OS, assert routing on a page object ---

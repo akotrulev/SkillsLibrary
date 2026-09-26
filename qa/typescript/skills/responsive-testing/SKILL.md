@@ -49,7 +49,7 @@ pixel-level diffing is `visual-regression`'s job and pairs with this skill, it d
 
 ## Stack
 
-- Node 20 + TypeScript (strict mode), **Playwright Test**
+- Node 24 + TypeScript (strict mode), **Playwright Test**
 - **The app's own breakpoint source** — imported or mirrored into one `BREAKPOINTS` module (the analogue of
   language-testing's supported-locale list). Where the app defines them:
 

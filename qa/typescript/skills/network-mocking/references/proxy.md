@@ -1,6 +1,6 @@
 # QA — Out-of-Browser MITM Proxy (TypeScript / `mockttp`)
 
-Stands up an **out-of-process MITM HTTP(S) proxy** with [`mockttp`](https://github.com/httptoolkit/mockttp) (Node 20 + TS strict) to capture, assert, and fault-inject traffic when **there is no Playwright in the picture** — the client under test is a Selenium WebDriver, an Appium driver, a native HTTP client, or a multi-process system. The proxy sits between the client and the network; you point the client at `proxy.url`, then **record** what it sent, **assert** a specific request fired, and **inject faults** (abort, timeout, rewrite a response). Cross-browser and cross-client by construction — the cost is **TLS interception**: the client must trust the proxy's generated CA certificate.
+Stands up an **out-of-process MITM HTTP(S) proxy** with [`mockttp`](https://github.com/httptoolkit/mockttp) (Node 24 + TS strict) to capture, assert, and fault-inject traffic when **there is no Playwright in the picture** — the client under test is a Selenium WebDriver, an Appium driver, a native HTTP client, or a multi-process system. The proxy sits between the client and the network; you point the client at `proxy.url`, then **record** what it sent, **assert** a specific request fired, and **inject faults** (abort, timeout, rewrite a response). Cross-browser and cross-client by construction — the cost is **TLS interception**: the client must trust the proxy's generated CA certificate.
 
 Built on the same wrapper discipline as `qa/typescript/skills/network-mocking` and `cdp/typescript`: the proxy and every match/record/fault rule are wrapped in one intent-revealing `ProxyControls` helper exposed through a fixture — never raw `proxy.forGet(...).thenReply(...)` scattered across spec bodies. Every wait is conditional on a seen-request promise or a real client signal; there is **no `setTimeout`-as-a-wait / `waitForTimeout`** anywhere in this skill.
 
@@ -8,7 +8,7 @@ Built on the same wrapper discipline as `qa/typescript/skills/network-mocking` a
 
 ## Stack
 
-- Node 20 + TypeScript (strict mode)
+- Node 24 + TypeScript (strict mode)
 - [`mockttp`](https://www.npmjs.com/package/mockttp) ≥ 3.x — `getLocal()`, `forGet`/`forPost`/`forAnyRequest`, `thenReply`/`thenJson`/`thenPassThrough`/`thenForwardTo`/`thenCallback`/`thenCloseConnection`/`thenTimeout`, `getSeenRequests`, `on('request'|'response')`, `generateCACertificate`
 - `selenium-webdriver` (or `webdriverio` for Appium) as the **client under test**; a plain `fetch`/`got` client also works
 - Proxy helpers under `tests/support/proxy/`, recorded HARs under `tests/artifacts/har/`
@@ -336,7 +336,7 @@ export function recordHar(server: Mockttp): { save: (path: string) => Promise<vo
 3. Point the client at `proxy.url` (`chromeThroughProxy` / native agent / Appium caps) and **trust `proxy.caCert`** for HTTPS.
 4. Register match/fault rules before the action; assert via `awaitRequest` (payload from `request.json()`) or `getSeenRequests()`, waiting only on wire events / client signals.
 5. For determinism/debugging, record a scrubbed HAR via the `recordHar` helper under `tests/artifacts/har/`.
-6. Run the suite; run `tsc --noEmit` for strict-TS green. In CI, ensure the job installs/trusts the per-run CA before the client starts.
+6. Run the suite; run `tsc --noEmit` for strict-TS green. In CI, ensure the job installs/trusts the per-run CA before the client starts. Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run".
 
 ## Cross-references
 

@@ -1,12 +1,12 @@
 # QA — Raw CDP Network & Performance Hooks (TypeScript)
 
-Drives the raw **Chrome DevTools Protocol** from a Playwright `@playwright/test` (Node 20 + TS strict) test via `page.context().newCDPSession(page)`, for the hooks that live **below the `page.route` routing layer**: real bandwidth/latency throttling, HTTP-cache disable, CPU throttling, security-header/`securityDetails` auditing, and `Performance` metrics. Built on the **fixture-driven** model from `qa/typescript/skills/network-mocking`: the CDP session and every command/event are wrapped in a single fixture (`cdp`) with intent-revealing methods (`throttle`, `disableCache`, `cpuThrottle`, `metrics`, `responseFor`) — never raw `client.send('Domain.method', …)` scattered across spec bodies. Every wait is conditional on a Playwright condition or a CDP event; there is **no `waitForTimeout`** anywhere in this skill.
+Drives the raw **Chrome DevTools Protocol** from a Playwright `@playwright/test` (Node 24 + TS strict) test via `page.context().newCDPSession(page)`, for the hooks that live **below the `page.route` routing layer**: real bandwidth/latency throttling, HTTP-cache disable, CPU throttling, security-header/`securityDetails` auditing, and `Performance` metrics. Built on the **fixture-driven** model from `qa/typescript/skills/network-mocking`: the CDP session and every command/event are wrapped in a single fixture (`cdp`) with intent-revealing methods (`throttle`, `disableCache`, `cpuThrottle`, `metrics`, `responseFor`) — never raw `client.send('Domain.method', …)` scattered across spec bodies. Every wait is conditional on a Playwright condition or a CDP event; there is **no `waitForTimeout`** anywhere in this skill.
 
 > **Chromium-only.** CDP exists only in Chromium-based browsers. On Firefox/WebKit `newCDPSession` throws. That is the price of dropping below the routing layer — guard the project (or `test.skip`) to the `chromium` project. For anything that must run cross-browser, stay at the `page.route` layer (`playwright-routes`).
 
 ## Stack
 
-- Node 20 + TypeScript (strict mode)
+- Node 24 + TypeScript (strict mode)
 - `@playwright/test` (Playwright ≥ 1.49) — `page.context().newCDPSession(page)` → `client.send(method, params)` + `client.on(event, …)`
 - CDP helpers under `tests/fixtures/cdp/`
 - Page objects under `tests/pages/`, specs under `tests/specs/` (see the UI sibling)
@@ -307,7 +307,7 @@ Sample metrics **after** a user-visible "ready" signal, never after a sleep — 
 3. Gate the spec to `chromium` (`test.skip(({ browserName }) => …)` or a project filter).
 4. Apply the hook **before** the navigation/action; assert on a real loading/ready signal with a `timeout` deadline — never `waitForTimeout`.
 5. For audits, normalize header case and use `expectSecurityHeaders`; for budgets, sample `metrics()` after a ready signal.
-6. Run `npx playwright test --project=chromium`; inspect under `--ui` (the trace's Network tab shows the throttled timings). Run `tsc --noEmit` for strict-TS green.
+6. Run `npx playwright test --project=chromium`; inspect under `--ui` (the trace's Network tab shows the throttled timings). Run `tsc --noEmit` for strict-TS green. Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run".
 
 ## Cross-references
 

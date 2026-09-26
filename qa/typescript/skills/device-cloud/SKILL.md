@@ -1,6 +1,6 @@
 ---
 name: qa-device-cloud-typescript
-description: Use when the user needs the **real-device-cloud specifics** of running TypeScript + WebdriverIO Appium tests on a mobile device farm. Triggers: "upload our app to BrowserStack App Automate and run the WebdriverIO tests", "run our mobile suite across a real-device matrix in TypeScript", "test biometric login on a real device with WebdriverIO".
+description: Use when the user needs the **real-device-cloud specifics** of running TypeScript + WebdriverIO Appium tests on a mobile device farm. Triggers: "upload our app to BrowserStack App Automate and run the WebdriverIO tests", "run our mobile suite across a real-device matrix in TypeScript", "test biometric login on a real device with WebdriverIO". Not for web grids (`qa-browser-cloud-setup-typescript`) or OS-surface features (`qa-mobile-native-features-typescript`).
 ---
 
 # QA — Mobile Device Farm (TypeScript: WebdriverIO + Appium on a real-device cloud)
@@ -11,9 +11,9 @@ Runs TypeScript + WebdriverIO Appium tests against a **managed real-device cloud
 
 ## Stack
 
-- Node 20, TypeScript (`strict: true`)
+- Node 24, TypeScript (`strict: true`)
 - **Appium**: WebdriverIO (`webdriverio` `remote()` / `@wdio/cli`), `@wdio/appium-service`, `@wdio/browserstack-service`
-- **App upload (REST)**: global `fetch` + `FormData` + `Blob` (Node 20) — no extra HTTP dependency
+- **App upload (REST)**: global `fetch` + `FormData` + `Blob` (built into Node 22 and 24) — no extra HTTP dependency
 - **Remote-run farm**: AWS SDK for JS v3 `@aws-sdk/client-device-farm` (`DeviceFarmClient`)
 - **Condition waits**: `browser.waitUntil(...)` for the app; a bounded `pollUntil` (deadline + check interval) for AWS — never `browser.pause` / `setTimeout` *as* a wait
 - Test runner: Vitest or WDIO's Mocha (`describe`/`it`); device matrix via `describe.each`
@@ -375,7 +375,7 @@ export function browserStackCreds(): BrowserStackCreds {
 3. **Live-session**: add `uploadApp` (REST upload → `bs://…`/`custom_id`), `createRealDeviceSession` (real-device caps + the device-only features the test needs), and `DeviceFeatures` for mid-session injection; drive a device matrix from `describe.each`.
 4. **Remote-run**: add `DeviceFarmRunner` (`CreateUpload` → poll → `ScheduleRun` → poll `GetRun`) with the bounded `pollUntil` helper.
 5. Reuse `browser-cloud-setup`'s session-status + dashboard-URL teardown; map the device count onto `maxInstances` per its rules.
-6. Run **one** device/session first to confirm the upload + caps + features before fanning the matrix out; confirm the session/run appears on the dashboard with the right build/project tags.
+6. Run **one** device/session first to confirm the upload + caps + features before fanning the matrix out; confirm the session/run appears on the dashboard with the right build/project tags. Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run".
 
 ## Cross-references
 

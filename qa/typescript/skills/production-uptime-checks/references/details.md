@@ -22,7 +22,7 @@ export const emailChannel = new EmailAlertChannel('email-oncall', {
 });
 
 export const slackChannel = new SlackAlertChannel('slack-alerts', {
-  url: process.env.SLACK_WEBHOOK_URL!,   // secret from env, NEVER committed
+  url: process.env.SLACK_WEBHOOK_URL!,   // secret from env, never committed
   channel: '#storefront-alerts',
 });
 

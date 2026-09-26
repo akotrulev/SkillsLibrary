@@ -1,6 +1,6 @@
 ---
 name: qa-load-testing-typescript
-description: Use when the user asks to design or author k6 (Grafana k6) performance / load tests in JavaScript/TypeScript. Triggers: "write a k6 script for endpoint X", "design a k6 average load test", "spike test in k6". For end-to-end suite work prefer the staged agent `qa-performance-typescript` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
+description: Use when the user asks to design or author k6 (Grafana k6) performance / load tests in JavaScript/TypeScript. Triggers: "write a k6 script for endpoint X", "design a k6 average load test", "spike test in k6". Not for fault injection under normal load (`qa-failure-injection-testing-typescript`) or uptime probes (`qa-production-uptime-checks-typescript`).
 ---
 
 # QA — Performance Testing with k6 (TypeScript / JavaScript)
@@ -18,7 +18,7 @@ Authors k6 scripts against deployed services. k6 ships as a single Go binary and
 
 - NBomber (.NET-native author experience) → `qa/dotnet/skills/load-testing`
 - Gatling (JVM-native author experience) → `qa/java/skills/load-testing`
-- Functional behavior tests → `qa/typescript/skills/api-test-author/writer/<stack>` / `qa/typescript/skills/ui-test-author/<stack>`
+- Functional behavior tests → `qa/typescript/skills/api-test-author/writer` / `qa/typescript/skills/ui-test-author/<tool>`
 - Unit benchmarks → Vitest bench / `tinybench`
 - Defining the SLO itself → `qa/manual/quality-metrics`
 
@@ -310,9 +310,9 @@ Configure the remote-write endpoint via `K6_PROMETHEUS_RW_SERVER_URL`. The metri
 3. Write the script with `tags: { name: '…' }` on every request and per-route `thresholds`.
 4. Wire env vars (`BASE_URL`, `AUTH_TOKEN`).
 5. Add `setup()` / `teardown()` for seeded fixtures, namespacing ids per run.
-6. If authoring in TS, configure esbuild to mark `k6` / `k6/*` as external; run `npm run build:perf`.
+6. If authoring in TS, configure esbuild to mark `k6` / `k6/*` as external; run the project's own perf build script with the package manager `packageManager` names.
 7. Add CI step (smoke on PR; full on release). Pin `grafana/k6:<version>`.
-8. Run locally; review per-route thresholds; confirm the test fails when an SLO is breached.
+8. Run locally; review per-route thresholds; confirm the test fails when an SLO is breached. Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run".
 9. Add the report to the release / change notes (see `_shared` template).
 
 ## Handoffs
@@ -323,6 +323,6 @@ Configure the remote-write endpoint via `K6_PROMETHEUS_RW_SERVER_URL`. The metri
 - SLO targets the test validates → `qa/manual/quality-metrics`
 - Grafana dashboards for server-side correlation → `observability/dashboards`
 - LogQL / PromQL for queries → `observability/queries`
-- Pipeline integration → `qa/cicd/typescript/skills/ci-pipelines/{github-actions,azure-pipelines,gitlab-ci}` or `devops/<ci>`
+- Pipeline integration → `qa/cicd/typescript/skills/ci-pipelines` (its `references/<host>.md`) or `devops/<ci>`
 - Allure publishing for perf reports → `qa/reporting/typescript/skills/test-reports`
 - Bug filings discovered during perf → `qa/manual/bug-report-writer`

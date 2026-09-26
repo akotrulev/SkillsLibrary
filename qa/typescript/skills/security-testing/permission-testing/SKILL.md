@@ -18,7 +18,7 @@ security testing most teams are missing, and the one security concern you **cann
 
 ## Stack
 
-- Node 20 + TypeScript (strict), **Vitest** as the runner, native `fetch` through the project's
+- Node 24 + TypeScript (strict), **Vitest** as the runner, native `fetch` through the project's
   `{resource}Client` (from `qa/typescript/skills/api-client-writer`) — never a one-off `fetch`.
 - Multi-user/role tokens via `qa/typescript/skills/test-login-tokens` (ROPG to mint a token *as a specific
   seeded test user*; M2M for service roles). Tokens cached per user, secrets via env read lazily.

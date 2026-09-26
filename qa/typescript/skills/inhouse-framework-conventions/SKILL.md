@@ -1,11 +1,11 @@
 ---
 name: qa-inhouse-framework-conventions-typescript
-description: Use when working in the TypeScript Accelerator test automation framework (Node 24 (22 supported) + @playwright/test + WebdriverIO/Appium + Vitest, JSON-driven page objects) or any consumer of it. Triggers: "add a test to the TS Accelerator", "scaffold a screen for the WebdriverIO suite", "create a Playwright page object for X in Accelerator".
+description: Use when working in the TypeScript Accelerator test automation framework (Node 24 (22 supported) + @playwright/test + WebdriverIO/Appium + Vitest, JSON-driven page objects) or any consumer of it. Triggers: "add a test to the TS Accelerator", "scaffold a screen for the WebdriverIO suite", "create a Playwright page object for X in Accelerator". Not for a suite outside the Accelerator (`qa-page-object-design-typescript`, `qa-ui-test-writer-playwright-typescript`).
 ---
 
 # Accelerator Conventions (TypeScript)
 
-The Accelerator is a Node 20 + TypeScript (strict mode) test automation framework, organized as a monorepo with workspace packages for `appium-tests`, `playwright-tests`, `api-tests`, and `test-core`. It uses a JSON-driven page object pattern, `@playwright/test` for web and WebdriverIO (Appium service) for mobile, Vitest for API tests, Allure for reporting, BrowserStack for cloud execution, and a two-agent Claude Code workflow (Opus planner + Sonnet implementer).
+The Accelerator is a Node 24 + TypeScript (strict mode) test automation framework, organized as a monorepo with workspace packages for `appium-tests`, `playwright-tests`, `api-tests`, and `test-core`. It uses a JSON-driven page object pattern, `@playwright/test` for web and WebdriverIO (Appium service) for mobile, Vitest for API tests, Allure for reporting, BrowserStack for cloud execution, and a two-agent Claude Code workflow (Opus planner + Sonnet implementer).
 
 This skill encodes the conventions that distinguish "Accelerator code" from generic test automation.
 
