@@ -46,7 +46,7 @@ flowchart LR
     Auth0[Auth0] -->|JWT| API
 ```
 
-**Cross-cutting concerns:** Auth — JWT bearer, roles from Auth0 claims. Errors — RFC 9457 API-wide. Logging/telemetry — OTel via the bundled observability lane, wired after the first slice. Config — env vars + user-secrets locally. Background work — none; auto-release of unconfirmed holds was considered and rejected (no holds in v1). `#confirmed`
+**Cross-cutting concerns:** Auth — JWT bearer, roles from Auth0 claims. Errors — RFC 9457 API-wide. Logging/telemetry — OTel via the bundled observability lane, wired after the first capability's tasks land. Config — env vars + user-secrets locally. Background work — none; auto-release of unconfirmed holds was considered and rejected (no holds in v1). `#confirmed`
 
 ## 3b. Key flows & decisions
 
@@ -123,7 +123,7 @@ The "late cancel" consequence (does it ever block future bookings?) is **Q2** �
 | Schema depth (index review) | `data-architect` | `data-postgresql`, `data-schema-design` | Only if the session-list query needs it |
 | Contract + integration tests | `qa-api-dotnet` | `qa-api-test-writer-dotnet` | Test basis: `api-surface.md` |
 | Access-control proof | `qa-security` | `qa-permission-testing-dotnet` | Member-vs-staff + own-booking BOLA |
-| Telemetry | `observability-engineer-dotnet` | `observability-opentelemetry-dotnet` | After the first slice |
+| Telemetry | `observability-engineer-dotnet` | `observability-opentelemetry-dotnet` | After the first capability's tasks land |
 | Image, IaC, pipeline, secrets | `devops-engineer` | `devops-docker`, `devops-environment-config` | |
 
 **Capabilities with no agent:** none.

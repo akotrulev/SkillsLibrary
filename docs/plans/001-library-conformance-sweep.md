@@ -4,8 +4,11 @@
 engineering-practices review settled (§4), and clean up each folder's old plans, progress files and
 leftovers along the way (§5). One repo-wide gate at the end proves it (§7).
 
-**Status:** S1 landed 2026-09-26 (engineering-practices, templates, CONTRIBUTING; `.agent-template`
-removed). S2 is next. S1–S18 are ungated: S1's edits are built but unverified until G1 runs §7.
+**Status:** S1 and S2 landed 2026-09-26 (S1: engineering-practices, templates, CONTRIBUTING;
+`.agent-template` removed. S2: the backend/_shared planning lane — `delivery-plan` and `session-budget`
+now emit `## Close-out — every task`; `docs/plans/implemented/` created, holding
+`planning-lane-rebuild.md` and `PLANNER-PLAN.md`). S3 is next. S1–S18 are ungated: S1's and S2's edits
+are built but unverified until G1 runs §7.
 
 ## 1. What already exists, and what is missing
 
@@ -624,6 +627,44 @@ churn ×1.2
   says complete 2026-08-02. Spot-check three deliverables of each; if they hold, `git mv` both into
   `docs/plans/implemented/`.
 - **Not in S2:** the documenter and pattern skills in the same folder (S3).
+- **As built (2026-09-26):** `backend/_shared/agents/solution-planner.md`, `backend/_shared/commands/`
+  (all three read; nothing to fix), and the eight planning-lane skill folders with their `references/`.
+  Gate line added to 1 agent (`solution-planner.md` Operating rules, first bullet after "You write
+  plans, not code").
+  Data issues: 6 fixed — "slice" as a unit of planned work became task/capability at
+  `solution-blueprint/SKILL.md:72` and `:212`, `solution-blueprint/references/example-blueprint.md:49`
+  and `:126`, `api-surface-plan/SKILL.md:216`; `delivery-plan` Output cited plan format §7 for filing,
+  now §8.
+  Code issues: 16 fixed — "Announce at start" removed from all 8 skills; `delivery-plan`'s "MUST"
+  (Step 3 overlap rule) lower-cased; `solution-planner`'s "— MANDATORY SECTION" heading suffix dropped;
+  descriptions `delivery-plan` 665→487, `experience-plan` 653→486, `session-budget` 578→481,
+  `solution-planner` 795→619 (K7 report); K3: `solution-planner` Workspace now opens "Work in the
+  checkout you are given — never create a branch or worktree.", and `delivery-plan` no longer says a
+  plan runs "inline".
+  Logical conflicts: 2 fixed — (1) plan-format §6/§7 require `## Close-out — every task` above the
+  prompts and a close-out line ending every block, while `delivery-plan`'s template, both golden
+  references and `session-budget` Step 4/5 had each block carry its own "Before you stop" list: now
+  `delivery-plan` Step 6, template and self-check 12, `example-delivery-plan.md:287` (verbatim §7 copy)
+  and its B2 block, `prompts-section-template.md` (template + filled example) and `solution-planner`
+  Step 7/8 exit gates and Step 9 item 14 all require the section and the line; (2) `session-budget`
+  Step 5 restated the close-out as its own 7-step list — it now points at plan format §7 and keeps only
+  what §7 cannot know (which block files the plan, which block writes a `Blocked on` block).
+  `solution-planner`'s "two-file closing duty" (a leftover of the removed NEXT-PROMPTS file) now says
+  "the same close-out".
+  Cleanup: `mkdir -p docs/plans/implemented`; `git mv docs/plans/planning-lane-rebuild.md` and
+  `git mv backend/PLANNER-PLAN.md` into it (spot checks: `delivery-plan` "valid serialization" rule =
+  its T3; `epic-map` and `session-budget` skills exist; `ba-epic-writer` plain-English §2;
+  `validation-catalog.md`, `solution-blueprint`, `data-model-plan` exist per PLANNER-PLAN's shape).
+  Nothing else cited either file.
+  Kept on purpose: `## For Mission Control` stays after `## Prompts` in `delivery-plan.md` (the MC
+  ingestion shape, tools/MISSION-CONTROL-MOVED.md), so the close-out section went between
+  `## 6. Decisions` and the prompts — additive, path unchanged; "vertical-slice" (architecture term,
+  `solution-planner.md` cache table); rule text forbidding phases/slices; `Node 20` in
+  `solution-blueprint` Version policy (flags it as EOL); K8 hits are all example plan content
+  (`dotnet build`/`pnpm test` in gate lines); `data-testid` resolver hit. The three commands'
+  descriptions have no Do-NOT clause; the K7 report covers skills and agents only, and slash-command
+  descriptions are menu text, so they were left.
+  Unverified: nothing was run beyond §4's searches (Gate: none). Left for the user: nothing.
 
 ### S3 — backend/_shared documenter and pattern lane, and backend/dotnet
 
@@ -1064,51 +1105,9 @@ name: the K1 resolver flags it (D12).
 | S18 | `docs` | `general-purpose` | — | ~135k |
 | G1 | `docs` | `general-purpose` | S1–S18 | ~120k |
 
-S1 has landed; the 18 prompts from S2 to G1 are live.
+S1 and S2 have landed, and their prompts are deleted; the 17 prompts from S3 to G1 are live.
 
 ---
-
-### S2 — backend/_shared planning lane (general-purpose, docs)
-
-````
-You are `general-purpose`. Task S2 of docs/plans/001-library-conformance-sweep.md: bring the
-backend/_shared planning lane in line with the plan's checks K1–K9 and with plan-format.md.
-
-Deliverable: solution-planner, backend/_shared/commands/ and the eight planning-lane skills pass
-K1–K9, the plans they produce follow plan-format.md including `## Close-out — every task`, and
-docs/plans/planning-lane-rebuild.md and backend/PLANNER-PLAN.md are filed.
-
-Read, in this order:
-1. CLAUDE.md.
-2. The plan: §2, §3, §4, §5, §6 (the S2 rows), D1–D11, task S2.
-3. engineering-practices/writing-plans/references/plan-format.md, all of it (§6 and §7 matter most).
-4. CONTRIBUTING.md.
-5. backend/_shared/agents/solution-planner.md and backend/_shared/commands/*.md in full.
-6. backend/_shared/delivery-plan/SKILL.md and backend/_shared/session-budget/SKILL.md in full.
-7. The plan's "Close-out — every task".
-
-Do:
-- Run §4's recipes with DIR set to each of the eight skill folders, the agent and the commands.
-- K4: delivery-plan and session-budget produce plans that carry `## Close-out — every task` above the
-  prompts and end every block with its close-out line. session-budget's Step 5 points at
-  plan-format.md §7 instead of restating it.
-- K2: the Gate line in solution-planner.
-- K7: delivery-plan 665, experience-plan 653, session-budget 578 → ≤ 500; solution-planner 795 → ≤ 650.
-- K9: spot-check three deliverables each of docs/plans/planning-lane-rebuild.md and
-  backend/PLANNER-PLAN.md; if they hold, `git mv` both into docs/plans/implemented/.
-
-Traps:
-- Mission Control reads `docs/plans/<NNN>-<initiative>/delivery-plan.md`
-  (tools/MISSION-CONTROL-MOVED.md). Do not change that path or its top-level shape.
-- These skills contain rule text that forbids phases and slices. That text is K4's "keep", not a hit
-  to fix.
-- `docs/plans/implemented/` may not exist yet; `mkdir -p` it before the move.
-
-Gate: none — this plan gates once, in G1. Do not run tools/token-audit.py or §7's script.
-
-Commit: `chore(sweep S2): backend/_shared planning lane`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
 
 ### S3 — backend/_shared documenter and pattern lane, and backend/dotnet (general-purpose, docs)
 
@@ -1751,6 +1750,9 @@ Do:
 
 Traps:
 - docs/skills-catalog.md is 175 KB. Grep it; do not read it whole.
+- S2 replaced the planning lane's per-block "closing duty" with the plan's `## Close-out — every task`
+  section (plan-format §7) plus one close-out line per block; docs/skills-catalog.md's session-budget
+  entry (line ~207) still says "the closing duty". Reword it.
 - Any entry you add to ALLOW or LINK_EXAMPLES needs a one-line reason in the As built note.
 - CONFORMANCE-AUDIT-PLAN.md and README cite each other; fix the README link after the move.
 - You delete the last prompt block, so Close-out step 6 files this plan into docs/plans/implemented/.

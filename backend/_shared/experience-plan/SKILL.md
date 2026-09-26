@@ -1,13 +1,11 @@
 ---
 name: be-shared-experience-plan
-description: Use when an approved blueprint with user-facing areas needs its EXPERIENCE planned before the API surface — actors and their primary tasks, journeys (task → screens → endpoints, steps-to-goal counted), the screen map and information architecture, the app shell, a per-screen spec (page type, surface, primary action, region states, data needed), and the screen ↔ endpoint matrix. Triggers "plan the screens", "what does the user actually see", "design the navigation for this system". Do NOT use to build the UI (`fe-<stack>`), judge a built UI (`design-ux-review`), plan tables (`be-shared-data-model-plan`) or endpoints (`be-shared-api-surface-plan`).
+description: Use when an approved blueprint with user-facing areas needs its experience planned before the API — actors and tasks, journeys with steps counted, the screen map and app shell, per-screen specs, and the screen ↔ endpoint matrix. Triggers "plan the screens", "what does the user actually see", "design the navigation". Do NOT use to build the UI (`fe-<stack>`), judge a built UI (`design-ux-review`), plan tables (`be-shared-data-model-plan`) or endpoints (`be-shared-api-surface-plan`).
 ---
 
 # Experience Plan — what the user sees, before the API exists
 
 The plan altitude for the user's side of the system: **who uses it, what they are trying to get done, which screens carry each task, how those screens are reached, and what each screen needs from the API** — written so the `fe-<stack>` agent builds the shell and the pages without inventing the navigation, and so the API surface is planned against real screens instead of guessed from tables. It states decisions; it draws no mockups and writes no components.
-
-**Announce at start:** "I'm using the `be-shared-experience-plan` skill to plan the experience."
 
 **Prerequisites:** an **approved** `blueprint.md` whose routing map binds at least one area to `fe-react` / `fe-blazor`, and a written `data-model.md`. The blueprint's *User-facing capabilities* and *Primary actors* columns and its §3b flows are the inputs; the entity catalog is what the screens display. Runs **before** `api-surface.md` — the screens' data needs are one of that step's inputs.
 

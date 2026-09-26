@@ -23,7 +23,7 @@ they disagree, the `As built` notes are right.
 | **Exact agent name, exact skill names** | The block is a binding, not a suggestion. An invented name is the most damaging defect here, same as in the plan |
 | **Every block carries its traps** | The two to four things specific to that task. This is what the prompt adds to the task block, and it is what earns it its place |
 | **Every block carries a gate line** | `Gate: none` with what not to run, on every block but the last runnable task's. That block carries the whole gate, in run order, and the instruction to fix what it finds |
-| **Every block ends with the closing duty** | The `As built` note, the `Status:` line, delete this block, repair the ones below. Without it the section rots after the first session |
+| **Every block ends with the close-out line** | `Close out per the plan's "Close-out — every task" before you stop.` — pointing at the section directly above this one, copied verbatim from plan format §7. Without it the section rots after the first session |
 | **A blocked task keeps its block** | It states its blocker and its owner. A deleted block reads as finished work — and it would file a plan that is still waiting |
 | **The block that deletes the last one files the plan** | Deleting it is what finishes the plan: `Status:` rewritten, then the plan moved to `docs/plans/implemented/`. Without that duty, finished plans sit in the live folder and it stops meaning anything |
 | **A block that cannot be written yet is written by the task that unblocks it** | Guessing it produces the one kind of stale that reads as current |
@@ -32,6 +32,10 @@ they disagree, the `As built` notes are right.
 ## Template
 
 `````markdown
+## Close-out — every task
+
+<copied verbatim from engineering-practices/writing-plans/references/plan-format.md §7 — never edited per plan>
+
 ## Prompts — one per task
 
 Run them in order, one session each. Every block is complete on its own — it names the agent, the
@@ -66,6 +70,7 @@ Read, in this order — these sections only, not the whole artifacts:
    §<n.n> — <…>.
 3. <exact paths to the existing code this task must match> — <the seam, the convention, the sibling
    module, and why: "match them, do not introduce a second convention">.
+4. The plan's "Close-out — every task".
 
 Deliverable: <copied verbatim from the task block>.
 
@@ -84,12 +89,9 @@ and typecheck commands>. Write the tests; leave running them to that task.
 
 Commit: `<the commit message>`.
 
-Before you stop:
-1. Write a dated `**As built:**` note onto task B1 with the `file:line` that proves the deliverable
-   exists, and rewrite the plan's `**Status:**` line.
-2. Delete this prompt block and update the "have landed" line above.
-3. Repair the blocks below yours wherever what you landed differs from what they assume.
-4. Write `<Bn>`'s prompt block — it was left `Blocked on B1`. <What B1 will then know that it needs.>
+<Which block below binds to what you land.> Write `<Bn>`'s prompt block — it was left
+`Blocked on B1`. <What B1 will then know that it needs.>
+Close out per the plan's "Close-out — every task" before you stop.
 ````
 
 ---
@@ -107,15 +109,12 @@ Gate (this is the last runnable task, so it carries the plan's only gate, in run
 **Fix what it finds rather than handing it back** — a failure may belong to any task above you, and
 attributing it is part of this task. Say in your `As built` note which task each failure belonged to.
 
-Close-out:
-- <the docs this plan owes>, and the repository-state note.
-- The honest list of what is built but **unverified**, into the plan's `**Status:**` line.
-- **File the plan.** This deletes the last prompt block, so the plan is finished:
-  `git mv docs/plans/<NNN>-<slug>.md docs/plans/implemented/` — or the whole initiative folder,
-  artifacts and all — same name, same number, in this commit. (If `<blocked id>` is still holding a
-  block, do **not** move it: say so in `Status:` and leave the plan in `docs/plans/`.)
+Also write <the docs this plan owes> and the repository-state note. This block normally deletes the
+last one, so the close-out files the plan — the whole initiative folder. (If `<blocked id>` is still
+holding a block, the plan stays in `docs/plans/`: say so in `Status:`; that block files it.)
 
 Commit: `<the commit message>`.
+Close out per the plan's "Close-out — every task" before you stop.
 ````
 
 ---
@@ -123,7 +122,7 @@ Commit: `<the commit message>`.
 ### B4 — <title>
 
 **Blocked on B2** — B2 writes this prompt when it lands, from the file layout and the exported type
-names it actually settles on. Writing it is a bullet on B2 and a line in B2's closing duty.
+names it actually settles on. Writing it is a bullet on B2 and a line in B2's own block.
 
 ---
 
@@ -135,7 +134,8 @@ owner, since 2026-08-04. Nothing to start here until that clears.
 
 ## Filled example
 
-The **workshop-booking** pack, caught after the contract wave has landed:
+The **workshop-booking** pack, caught after the contract wave has landed (its
+`## Close-out — every task` section, verbatim from plan format §7, sits directly above this one):
 
 `````markdown
 ## Prompts — one per task
@@ -174,6 +174,7 @@ Read, in this order — these sections only, not the whole artifacts:
    `data-model.md` §2.1–§2.2 (the `Workshop` and `Session` entity specs).
 3. `src/Shared/IEndpointModule.cs` and `src/Shared/ProblemDetailsMiddleware.cs` — the seam and the
    error envelope C1 built. Match them; do not introduce a second convention.
+4. The plan's "Close-out — every task".
 
 Deliverable: a studio admin can publish a workshop, add sessions to it, and see them listed; nobody
 else can.
@@ -205,12 +206,9 @@ Gate: none — this plan gates once, in F4. Do not run `dotnet build`, `dotnet t
 
 Commit: `feat: workshops and sessions resources (B1)`.
 
-Before you stop:
-1. Write a dated `**As built:**` note onto task B1 with the `file:line` that proves an admin can
-   publish and add, and rewrite the plan's `**Status:**` line.
-2. Delete this prompt block and update the "have landed" line above.
-3. Repair B2's and F4's blocks wherever what you landed differs from what they assume — F4 binds to
-   the response field names, so a rename there is a rewrite here.
+Your `As built` note carries the `file:line` that proves an admin can publish and add. F4 binds to
+the response field names, so a rename there is a rewrite of F4's block.
+Close out per the plan's "Close-out — every task" before you stop.
 ````
 `````
 
@@ -229,7 +227,7 @@ Before you stop:
 - **The gate line is on every block.** The most expensive violation of this format is an intermediate
   block that tells its session to run the suite: it pays for a verify loop whose failures belong to
   tasks nobody has written yet, and it reports a red tree as its own failure.
-- **When the next task binds to a different agent, say so in the closing duty.** The agent writing the
+- **When the next task binds to a different agent, say so above the close-out line.** The agent writing the
   repair is not the agent who will run it, and a block that quietly changes hands is one nobody adopts.
 - **The filing duty goes on whichever block will be the last.** Normally that is the gate task's, but a task that was blocked on a person outlives it — then the duty is on *that* block, and the gate task's says the plan stays in `docs/plans/` until it clears. Getting this wrong leaves a finished plan in the live folder, or files one that is still waiting.
 - **Partial / blocked / diverged keeps the block on the same task**, with a `**Picking up from:**` line

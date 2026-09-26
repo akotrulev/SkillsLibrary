@@ -1,6 +1,6 @@
 ---
 name: be-shared-delivery-plan
-description: Use when a planned build (blueprint + data model + API surface + integrations + epic map) needs turning into an ordered task list — one flat sequence of tasks, each with a deliverable, one stack, one executing agent and a context estimate, plus named streams derived from the epic map and a reconcile against half-built code. Triggers "what order do we build this in", "turn the plan into tasks", "pick up where we left off". Do NOT use to write code (`be-<stack>`), size tasks or write the next prompts (`be-shared-session-budget`), decide what runs in parallel at epic level (`be-shared-epic-map`), run a plan (Plan Queue), or audit code vs spec (`code-auditor`).
+description: Use when a design pack (blueprint, data model, API surface, integrations, epic map) must become an ordered task list — one flat sequence, each task with one deliverable, stack and agent, plus streams and a reconcile against half-built code. Triggers "what order do we build this in", "turn the plan into tasks". Do NOT use to size tasks or write prompts (`be-shared-session-budget`), plan epic parallelism (`be-shared-epic-map`), write code (`be-<stack>`) or audit code (`code-auditor`).
 ---
 
 # Delivery Plan — the ordered, agent-bound task list
@@ -16,8 +16,8 @@ first; this skill is the procedure, not the shape.
 Three things make it different from a generic plan:
 
 - **Every task names its executor and its stack** — exactly one stack, exactly one agent name from this
-  library, plus the skills it should load. That binding is what lets the plan run unattended, inline or
-  through Mission Control, and it is what makes a task handable to a single agent without it wandering
+  library, plus the skills it should load. That binding is what lets the plan run unattended, through
+  Plan Queue or Mission Control, and it is what makes a task handable to a single agent without it wandering
   across a boundary it does not own.
 - **It survives interruption, in one file.** The plan carries its own `## Prompts — one per task`
   section: one paste-ready prompt per task, deleted as each task lands, so what is left to run is
@@ -60,8 +60,6 @@ of them makes the capability usable, rather than a layer being finished across e
 plan one operator will run in back-to-back batches is sequenced *agent-batched* instead: a contract
 wave, then one batch per backend module, then one per frontend area. See Step 2.
 
-**Announce at start:** "I'm using the `be-shared-delivery-plan` skill to sequence the work."
-
 **Prerequisites:** `blueprint.md` (approved), `data-model.md`, `api-surface.md`, `integrations.md`, and
 `epic-map.md` — whose lanes and waves this plan's streams and order are derived from, not re-decided.
 Sequencing without the detail pack produces task titles, not tasks; sequencing without the epic map
@@ -82,7 +80,7 @@ produces a plan that is one lane wide.
 
 ## Output
 
-**One self-contained file: `docs/plans/<NNN>-<initiative>/delivery-plan.md`**, beside the rest of the pack. **The whole initiative folder moves to `docs/plans/implemented/<NNN>-<initiative>/` once every task has landed** — done by the task that deletes the last prompt block, per the format reference §7 — so `docs/plans/` lists what is in flight. `NNN`'s high-water mark spans both folders; a moved plan's number stays spent. It carries the context,
+**One self-contained file: `docs/plans/<NNN>-<initiative>/delivery-plan.md`**, beside the rest of the pack. **The whole initiative folder moves to `docs/plans/implemented/<NNN>-<initiative>/` once every task has landed** — done by the task that deletes the last prompt block, per the format reference §8 — so `docs/plans/` lists what is in flight. `NNN`'s high-water mark spans both folders; a moved plan's number stays spent. It carries the context,
 the streams, the tasks, the decisions and the paste-ready prompt per task. `be-shared-session-budget`
 derives the `**Budget:**` lines and authors the `## Prompts — one per task` section inside this
 document — there is no companion prompt file.
@@ -229,7 +227,7 @@ Rules:
 
 - **Name a stream after what it owns** — `booking`, `schema`, `infra`, `ui`. Never `stream1`.
 - **Stream identity is stable across the whole plan.** Foundation work at T2 and foundation work at T14 is one `foundation` lane running down the plan, not two.
-- **Two tasks whose `Files` overlap MUST be ordered against each other — same stream, or a `Depends on` edge between them.** This is the hard rule and the one that is machine-checked: concurrent lanes execute against a single working tree, so two lanes writing one path with nothing sequencing them is a corrupted edit, not a merge conflict to resolve later. With no barrier in the plan, this rule is the only thing standing between an overlapping pair and a lost write. If the shared edit is incidental — a DI registration module, a route table — pull it out into its own earlier task instead of collapsing two good lanes into one.
+- **Two tasks whose `Files` overlap must be ordered against each other — same stream, or a `Depends on` edge between them.** This is the hard rule and the one that is machine-checked: concurrent lanes execute against a single working tree, so two lanes writing one path with nothing sequencing them is a corrupted edit, not a merge conflict to resolve later. With no barrier in the plan, this rule is the only thing standing between an overlapping pair and a lost write. If the shared edit is incidental — a DI registration module, a route table — pull it out into its own earlier task instead of collapsing two good lanes into one.
 - **A stream is a claim, not a bucket.** Each task in it needs the previous one's output, or touches the same code. Spreading independent tasks across lanes to look parallel is the failure mode in one direction; dumping unrelated work into one lane to look safe is the failure mode in the other, and it serialises a plan that did not need to be.
 - **A task that depends on nothing and shares no file gets its own stream.**
 - **`order` is one sequence across the whole plan** — 1, 2, 3, … no repeats, no gaps. Within a stream it fixes execution sequence; across the plan it records the order you would have done the work in yourself, which is what decides who gets a slot when more lanes are eligible than the run allows to be concurrent.
@@ -394,10 +392,15 @@ record goes into its task's `As built` note and the header `Status:` line; the n
 the block in `## Prompts — one per task` — rewritten where what landed differs from what it assumes,
 and deleted when its own task lands.**
 
+**Directly above `## Prompts — one per task`, write `## Close-out — every task`**, copied verbatim from
+`plan-format.md` §7. A session opened from a prompt block loads nothing the block does not name, so
+this section is where it learns those duties; every prompt block names it last in its reading list and
+ends with the line `Close out per the plan's "Close-out — every task" before you stop.`
+
 **Where a prompt cannot be written at plan time** — because it depends on what an earlier task actually
 lands, an id it will assign, or a decision it will make — the block is the line
 `**Blocked on <id>** — <id> writes this prompt when it lands, from <what it will then know>.`, and
-writing it is a bullet on the blocking task and a closing duty in the blocking task's own prompt.
+writing it is a bullet on the blocking task and a line in the blocking task's own prompt block.
 Guessing the block produces the one kind of stale that reads as current.
 
 ### Step 7 — The Mission Control section
@@ -568,9 +571,13 @@ that lands anything.>
 <!-- D1..Dn: the decision as a claim, why, what it costs. Answered questions, resolved divergences,
      and anything built differently from the plan, appended with its date. Never argued twice -->
 
+## Close-out — every task
+<!-- copied verbatim from plan-format.md §7; never edited per plan -->
+
 ## Prompts — one per task
 <!-- the preamble (one session each, where the gates run, what no prompt may do), the task table,
-     the line saying which prompts have been deleted, then one fenced block per live task -->
+     the line saying which prompts have been deleted, then one fenced block per live task, each
+     ending with: Close out per the plan's "Close-out — every task" before you stop. -->
 
 | # | Task | Epic | Story | Stack | Stream | Deliverable | Agent | Budget | Depends on |
 |---|---|---|---|---|---|---|---|---|---|
@@ -615,7 +622,8 @@ that lands anything.>
 12. `## Prompts — one per task` exists inside this document, with one block per task that has not
     landed, each naming one task, an exact agent, exact skills, and pack **sections** rather than
     artifacts — and every `Blocked on <id>` placeholder is matched by a bullet on that task and a line
-    in its prompt's closing duty.
+    in that task's own block. `## Close-out — every task` sits directly above it, verbatim from
+    `plan-format.md` §7, and every block ends with its close-out line.
 13. Every `As built` note carries `file:line` or command output read this session. §1, §2, §6 and the
     task table exist, §6 empty before execution starts.
 14. The header `Status:` line says what is built, what is next, and what is built but unverified.

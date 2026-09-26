@@ -12,8 +12,6 @@ Two failure modes this document exists to prevent:
 1. **The blocking unknown discovered late** — an API key that needs a procurement request, a sandbox that takes two weeks to provision, a partner contract that has not been signed. These are cheap to surface at plan time and expensive at task time.
 2. **The undefined failure mode** — nobody decided what the system does when the provider is down, so it does whatever the HTTP client's default happens to be.
 
-**Announce at start:** "I'm using the `be-shared-integration-plan` skill to plan the external dependencies."
-
 **Prerequisites:** an approved `blueprint.md` (its External systems section is the seed list) and `api-surface.md` (endpoints that call out, and the outbound webhooks it emits).
 
 ## When to use

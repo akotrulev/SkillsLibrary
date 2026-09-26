@@ -7,8 +7,6 @@ description: Use when turning a business case, requirements set, or loose direct
 
 The blueprint is the document the human approves. Everything downstream — data model, API surface, integrations, task sequence — is derived from it, so a wrong blueprint is not a cheap mistake to discover in Step 5. Its job is to make the *consequential* decisions visible and confirmable in one page-sized pass, and to make the uncertain ones explicit rather than silently resolved.
 
-**Announce at start:** "I'm using the `be-shared-solution-blueprint` skill to produce the high-level plan for your approval."
-
 ## When to use
 
 - A business case, a feature brief, an epic set, or a "we need a backend that does X" direction needs turning into an architecture and a build direction
@@ -71,7 +69,7 @@ A **functional area** is a coherent slice of business capability that could plau
 | Area | Short noun phrase |
 | Epics | The `E` ids from `epics.md` this area serves — `E1, E3`, or `E0` for a cross-cutting foundation. This is the join the whole pack is later checked on |
 | Purpose | One sentence — the capability, in business terms |
-| User-facing capabilities | The things a person can *do* here, one short sentence each in the user's voice (*"a member books a session"*, *"an admin publishes a workshop"*) — empty for areas nothing user-facing sits on. `be-shared-delivery-plan` sequences user-facing work one capability per step, so this column is what it slices on; an area with none is planned layer-first |
+| User-facing capabilities | The things a person can *do* here, one short sentence each in the user's voice (*"a member books a session"*, *"an admin publishes a workshop"*) — empty for areas nothing user-facing sits on. `be-shared-delivery-plan` sequences user-facing work one capability at a time, so this column is what it sequences on; an area with none is planned layer-first |
 | Primary actors | Who or what drives it (end user, admin, scheduled job, external system) |
 | Key entities | The 2–5 nouns it owns — the seed of `data-model.md` |
 | In scope | What this initiative builds for it |
@@ -211,7 +209,7 @@ One line each: system, what it does for us, direction (we call it / it calls us 
 | Ordering domain + persistence | `be-dotnet` | `be-dotnet-pattern-writer`, `be-dotnet-database-code`, `be-dotnet-unit-testing` | Unit tests ship with the task, not after |
 | Schema, indexes, tenancy enforcement | `data-architect` | `data-postgresql`, `data-schema-design` | Beyond ORM mechanics |
 | Service-side auth | `be-dotnet` | `be-dotnet-auth0` | Frontend half is `fe-react` |
-| Telemetry | `observability-engineer-dotnet` | `observability-opentelemetry-dotnet` | Runs after the first slice is real |
+| Telemetry | `observability-engineer-dotnet` | `observability-opentelemetry-dotnet` | Runs after the first capability's tasks land |
 | Contract + integration tests | `qa-api-dotnet` | `qa-api-test-writer-dotnet` | Test basis is `api-surface.md` |
 | Access-control proof | `qa-security` | `qa-permission-testing-dotnet` | BOLA/IDOR over the auth column |
 | Image, IaC, pipeline, secrets | `devops-engineer` | `devops-docker`, `devops-environment-config` | |

@@ -11,8 +11,6 @@ It exists as its own document because it is the thing that actually gets checked
 
 **The lane, not the epic, is the unit of concurrency.** An epic is usually one lane, but where two of its stories share no files they are two lanes. What the operator opens is a lane, and the wave table counts lanes.
 
-**Announce at start:** "I'm using the `be-shared-epic-map` skill to work out which epics can run in parallel."
-
 **Prerequisites:** `epics.md` and `stories.md` (from `requirements-author`), and the approved `blueprint.md` — its functional areas and routing map are what tell you which file trees each epic lands in. Mapping epics without knowing where their code goes produces a wave table with no evidence behind it.
 
 ## When to use

@@ -7,8 +7,6 @@ description: Use when an approved backend blueprint needs its DB structure plann
 
 The plan altitude: **every table, every column, every key, every index — and why each exists** — expressed so an implementing agent writes the migration without inventing structure, and a reviewer can see the shape of the system in one read. Engine-specific DDL, index internals, partitioning, and row-level-security mechanics are `data-architect`'s; this document states the *requirement* they satisfy.
 
-**Announce at start:** "I'm using the `be-shared-data-model-plan` skill to plan the data model."
-
 **Prerequisite:** an **approved** `blueprint.md`. Its Key entities column and its tenancy decision are the inputs. Do not run this on an unapproved blueprint.
 
 ## When to use

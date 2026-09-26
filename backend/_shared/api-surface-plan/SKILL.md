@@ -9,8 +9,6 @@ What a Swagger document would say, written at plan time and in a form a human ca
 
 The document has two audiences and both matter: the `be-<stack>` agent that implements it, and the `qa-api-<stack>` agent that writes contract tests against it. The validation catalog is, on purpose, a ready-made negative-test matrix.
 
-**Announce at start:** "I'm using the `be-shared-api-surface-plan` skill to plan the API surface."
-
 **Prerequisites:** an approved `blueprint.md` and a written `data-model.md` — plus `experience-plan.md` when the initiative has a frontend. Resources derive from entities; state-conflict rules derive from lifecycle diagrams; duplicate rules derive from unique constraints; **response shapes derive from what the screens need** (`experience-plan.md` §4's data-needed lines — an aggregate the tables lack, such as `bookedCount`, becomes a computed field decided here). On finishing, fill the experience plan's §5 screen ↔ endpoint matrix and hand the file back.
 
 **Read `references/validation-catalog.md` before writing any endpoint block.** It is the standard set every endpoint inherits, and the per-endpoint blocks are only meaningful as deltas against it.
@@ -215,7 +213,7 @@ The per-endpoint blocks then carry deltas only.
 - **→ `qa-api-<stack>`** — this is the contract-test basis. The standard validation set is the negative-test matrix; the endpoint table is the positive one.
 - **→ `qa-security`** — the Auth column is the BOLA/IDOR/BFLA permission matrix.
 - **→ `fe-react` / `fe-blazor`** — the response shapes and the error envelope are what their data-fetching and error-handling layers bind to.
-- **→ `qa/_shared/api-spec-assets`** — once a real OpenAPI document exists in the repo, that skill owns it and its diff-driven updates; this plan becomes the design record, not the source of truth. On a greenfield build, `be-shared-delivery-plan` schedules a standard task (after the last endpoint slice) for the `be-<stack>` agent to generate and commit that asset from the implemented surface — the plan does not write it itself.
+- **→ `qa/_shared/api-spec-assets`** — once a real OpenAPI document exists in the repo, that skill owns it and its diff-driven updates; this plan becomes the design record, not the source of truth. On a greenfield build, `be-shared-delivery-plan` schedules a standard task (after the last endpoint task) for the `be-<stack>` agent to generate and commit that asset from the implemented surface — the plan does not write it itself.
 
 ## Version policy
 

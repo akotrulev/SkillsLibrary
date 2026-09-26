@@ -284,6 +284,28 @@ The accepted cost: the tree is not known to build at any boundary before `B7`, a
 stopped halfway and trusted. `C4`'s and `B2`'s `As built` notes say "tests written, not run" for
 exactly this reason. *(2026-08-02)*
 
+## Close-out — every task
+
+Before you stop, in this order, in this file:
+
+1. **As built** — append a dated `**As built (YYYY-MM-DD):**` bullet to your task block: what differed
+   from the plan, the ids and names you assigned, what is built but unverified, and the `file:line` or
+   command output that proves the deliverable exists. Never edit an earlier note.
+2. **Decisions** — where you built something differently from the plan, append a dated `D<n>` to
+   `## Decisions` with both readings. A divergence is recorded, never absorbed.
+3. **The blocks below yours** — rewrite, in place, every prompt block whose assumptions your work
+   changed (a renamed file, a changed signature, a moved gate), and write any block left
+   `Blocked on <your id>` from what you now know.
+4. **Your own block** — delete it, and update the line above the blocks that says which have landed.
+   Stopping mid-task: keep it, with a `Picking up from:` line. Blocked: keep it, naming the blocker and
+   its owner.
+5. **Status** — rewrite the header `**Status:**` line: what is built, what is next, what is built but
+   unverified.
+6. **Filing** — if your deletion left no blocks, rewrite `**Status:**` one final time (what the plan
+   delivered, what is still unverified) and `git mv` this plan into `docs/plans/implemented/`, same
+   name and number — a `solution-planner` pack moves its whole initiative folder.
+7. **Commit** — the code, its tests and these plan edits together, in one commit.
+
 ## Prompts — one per task
 
 Run them in order, one session each. Every block is complete on its own — it names the agent, the
@@ -342,6 +364,7 @@ Read, in this order — these sections only, not the whole artifacts:
 3. `src/Booking/BookingEndpoints.cs` and `src/Booking/BookingService.cs` as you left them, and
    `src/Shared/ProblemDetailsMiddleware.cs` + `src/Api/ModuleRegistration.cs` — the envelope and the
    assembly-scan seam C4 built (see C4's `As built` note: there is no explicit module list).
+4. The plan's "Close-out — every task".
 
 Deliverable: the four booking endpoints implement their documented behaviour, validation and capacity
 guard — book, my-bookings, cancel, attend.
@@ -369,13 +392,11 @@ Write the tests; leave running them to B7.
 
 Commit: `feat: booking cancel and attend (B2)`.
 
-Before you stop:
-1. Append a dated `**As built:**` note to task B2 with the `file:line` for cancel, attend and the
-   `lateCancel` computation, and rewrite the plan's `**Status:**` line.
-2. Delete this prompt block, and update the "have landed" line above.
-3. Repair F2's block: it binds to the cancel response fields, so a rename there is a rewrite here.
-4. Write B4's prompt block — it was left `Blocked on B2`. It needs the exact name and payload of the
-   domain event you raise on a confirmed booking, which does not exist until this task lands.
+Your `As built` note carries the `file:line` for cancel, attend and the `lateCancel` computation.
+F2's block binds to the cancel response fields, so a rename there is a rewrite of F2's block. B4's
+block was left `Blocked on B2`: write it from the exact name and payload of the domain event you
+raise on a confirmed booking, which does not exist until this task lands.
+Close out per the plan's "Close-out — every task" before you stop.
 ````
 
 ---

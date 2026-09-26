@@ -1,6 +1,6 @@
 ---
 name: be-shared-session-budget
-description: Use when plan tasks need sizing to one working session each, and when each task must be handed to an agent as a ready-to-paste prompt. Estimates a task's context cost, grows or splits it toward the session target, and writes the plan's own `## Prompts — one per task` section — one block per task, deleted as each task lands. Triggers "how big should this task be", "is this one session", "what do I paste next". Do NOT use to sequence tasks (`be-shared-delivery-plan`), to group them into epics (`be-shared-epic-map`), or to execute one (Plan Queue, as the task's named agent).
+description: Use when plan tasks need sizing to one session each, or each task needs a ready-to-paste prompt. Estimates a task's context cost, grows or splits it toward the session target, and writes the plan's `## Prompts — one per task` section. Triggers "how big should this task be", "is this one session", "what do I paste next". Do NOT use to sequence tasks (`be-shared-delivery-plan`), group them into epics (`be-shared-epic-map`), or execute one (Plan Queue, as the task's named agent).
 ---
 
 # Session Budget — one task, one session, one prompt
@@ -12,15 +12,13 @@ Two jobs, both about the boundary between a plan and the sessions that run it.
 
 **The estimate is a target, never a gate.** It says what to aim for. It does not decide what a task is — coherence does, and coherence wins every time the two disagree. Never split a task that is one thing to get under a number, and never merge unrelated work to fill one up.
 
-**Announce at start:** "I'm using the `be-shared-session-budget` skill to size the tasks and write the prompts."
-
 **Prerequisites:** a task list from `be-shared-delivery-plan` with `Files` filled in, and `epic-map.md` for the lane structure. Sizing a task whose files are vague produces a number with nothing behind it.
 
 ## When to use
 
 - Step 8 of a `solution-planner` run — sizing the authored tasks and writing the prompt blocks
 - Whenever a task is added, split, or re-scoped and its estimate needs re-deriving
-- After a task completes — deleting its block and repairing the ones below it
+- After a task completes — the plan's `## Close-out — every task` (plan format §7) is the procedure; Step 5 says what this skill adds to it
 - From `ep-writing-plans`, for the same sizing question on a non-`solution-planner` plan
 
 ## When NOT to use
@@ -147,42 +145,34 @@ everything that session needs and names nothing it does not:
 - **The gate line.** `Gate: none — this plan gates once, in <the last runnable task>. Do not run <the
   commands>.` on every block but the last; the last block carries the project's own commands in run
   order, and the instruction to **fix what they find rather than hand it back**.
-- The closing duty: write the `As built` note and the header `Status:` line, delete this block, and
-  repair the blocks below it.
+- **The close-out.** The reading list names the plan's `## Close-out — every task` last, and the
+  block's final line is `Close out per the plan's "Close-out — every task" before you stop.` Only
+  what is specific to this task goes above that line — which block below it binds to what it lands,
+  and any block left `Blocked on` it that it must now write.
 
 **A block you cannot write yet is not guessed.** Where it genuinely depends on what an earlier task
 lands — the shape of a file it has not created, an id it will assign, a decision it will make — write
 `**Blocked on <id>** — <id> writes this prompt when it lands, from <what it will then know>.` and put
-writing it in **that** task's bullets and in its own prompt's closing duty. A guessed block is the one
+writing it in **that** task's bullets and in its own prompt block, above the close-out line. A guessed block is the one
 kind of stale that reads as current.
 
-### Step 5 — Maintain the section as each task lands
+### Step 5 — Carry the close-out into the plan
 
-**This is the executing agent's duty, not the planner's**, and it is part of finishing the task rather
-than a write-up afterwards. When a task is done:
+**Maintaining this section as each task lands is the executing agent's duty, not the planner's**, and
+the planner's job is to make sure the plan tells it so. Write `## Close-out — every task` directly
+above `## Prompts — one per task`, copied verbatim from
+`engineering-practices/writing-plans/references/plan-format.md` §7 — it holds the whole duty: the
+`As built` note, `## Decisions`, repairing the blocks below, deleting the task's own block, the
+`Status:` line, filing the plan when no block is left, and the one commit. Do not restate or edit it
+per plan; a copy that drifts from §7 is two contracts.
 
-1. Write the dated `**As built:**` note onto its task block, with the `file:line` or command output
-   that proves the deliverable exists, and rewrite the header `**Status:**` line — what is built, what
-   is next, what is built but unverified.
-2. **Delete its own prompt block**, and update the line above the blocks
-   (*"B1 and B2 have landed, and their prompts are deleted"*). A prompt for a finished task is a thing
-   someone runs by mistake, and the live prompt set is the plan's progress indicator.
-3. **Rewrite the blocks below it** wherever what landed differs from what they assume — a renamed file,
-   a changed signature, a gate that moved. In place, no changelog appended.
-4. **Write any block that was `Blocked on` this task**, from what it now knows.
-5. If the task was the plan's last runnable one, it ran the gate and fixed what it found; its `As built`
-   note says what the gate caught and which task it belonged to.
-6. If the task ended partial, blocked or diverged, **the block stays** and gains a
-   `**Picking up from:**` line naming what remains — the unfinished bullets are that list. A blocked
-   task keeps its block and names what it waits on and who owns it; deleting it loses the lane.
-7. **If step 2 left no blocks at all, the plan is finished — file it.** Rewrite the `Status:` line
-   one last time (what the plan delivered, what is still **unverified**), then `git mv` the plan — or
-   the whole initiative folder — into `docs/plans/implemented/`, keeping its name and its number, in
-   this task's commit. A plan still holding a blocked task's block stays in `docs/plans/`: that folder
-   answers "what is in flight" by being listed, and moving a waiting plan hides the wait.
+Two things stay this skill's to get right, because the close-out section cannot know them:
 
-The prompts section is rewritten, never appended; the durable history is the `As built` notes and
-`## Decisions`, which are append-only. Where the two disagree, the `As built` notes are right.
+- **Which block files the plan.** Normally the gate task's; where a blocked task sits below it, the
+  filing falls to that block, and the gate task's block says the plan stays in `docs/plans/` until it
+  clears (plan format §8).
+- **Which block writes which.** Every `Blocked on <id>` placeholder is matched by a line in that
+  task's own block, above its close-out line.
 
 ---
 
@@ -220,7 +210,7 @@ The prompts section is rewritten, never appended; the durable history is the `As
 4. `## Prompts — one per task` has one block per task that has not landed — no more (a landed task's block is deleted), no fewer (a task with no block is a session nobody knows they can start), and each `Blocked on <id>` placeholder is matched by a bullet on that task.
 5. Every block names one task, an exact agent, exact skills, and **sections** rather than artifacts, and carries its traps.
 6. Exactly one block carries the gate — the last runnable task's — with the project's own commands in run order and the instruction to fix what they find. Every other block says `Gate: none` and names what not to run.
-7. Every block ends with the closing duty: the `As built` note, the `Status:` line, deleting its own block, and repairing the ones below it — and the block that will delete the **last** one also carries the move into `docs/plans/implemented/`.
+7. `## Close-out — every task` sits directly above `## Prompts — one per task`, verbatim from plan format §7; every block names it last in its reading list and ends with its close-out line; and the block that will delete the **last** one is the one the filing falls to.
 8. Blocked tasks appear with their blocker and its owner.
 
 ## Handoffs
@@ -228,8 +218,8 @@ The prompts section is rewritten, never appended; the durable history is the `As
 - **← `ep-writing-plans`** — owns the plan document format these prompts live in (`engineering-practices/writing-plans/references/plan-format.md` §6). Where the two disagree on the shape, that reference wins.
 - **← `be-shared-delivery-plan`** — supplies the tasks, their files, their streams and their order. Sizing feeds straight back into how those tasks are written.
 - **← `be-shared-epic-map`** — supplies the lanes and the current wave, which is what decides who gets a prompt block.
-- **→ `be-dotnet` / `be-java` / `be-node` / `be-python` / `fe-react` / `fe-blazor`** — consume the prompt blocks and own Step 5 when their task lands: the `As built` note, the `Status:` line, deleting their own block and repairing the ones below it.
-- **→ plan format §7** — the `## Close-out — every task` section every plan carries; it is what tells each queued session to run Step 5.
+- **→ `be-dotnet` / `be-java` / `be-node` / `be-python` / `fe-react` / `fe-blazor`** — consume the prompt blocks and run the plan's `## Close-out — every task` when their task lands.
+- **→ plan format §7** — the `## Close-out — every task` section every plan carries, copied verbatim by Step 5.
 - **→ `ep-writing-plans`** — uses Step 1 and Step 2 for the same sizing question on plans that never went through `solution-planner`.
 
 ## Version policy
