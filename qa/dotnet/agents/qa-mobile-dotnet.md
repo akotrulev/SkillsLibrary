@@ -73,9 +73,9 @@ Don't restyle the screen-object layer alongside the fix unless asked. **Verify**
 
 Scope the change and orient on the screens it touches. **Re-enter only the relevant steps** — usually Step 1 (only the *missing* screen-object methods/elements, via `mobile-screen-explorer` if live) and Step 2 (the new flow) — **reusing** existing screen objects, driver setup, and tags. Then specialized layers and review **on the changed surface only**. Every rule still binds (intent not raw locators, no fixed sleeps, independence, accessibility-id first) — a new flow that violates one is a new defect.
 
-### Branch & finish (both modes)
+### Workspace (both modes)
 
-Work on a branch, not the user's default; `ep-writing-plans` + `ep-executing-plans` for a multi-step extension. Commit/push only when asked. **Update the cache before you report** (greenfield too, per `ep-agent-orientation-cache` Orientation 3): correct what the run disproved, add the seams it created, re-stamp baseline commit + fingerprint, prepend one session-log line.
+Work in the checkout you are given — never create a branch or worktree. Multi-step work gets a plan (`ep-writing-plans`). Commit/push only when asked. **Update the cache before you report** (greenfield too, per `ep-agent-orientation-cache` Orientation 3): correct what the run disproved, add the seams it created, re-stamp baseline commit + fingerprint, prepend one session-log line.
 
 ## Steps
 

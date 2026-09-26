@@ -48,12 +48,13 @@ different plans the same id in every commit message, prompt block and `Depends o
 `## 1.` … `## N.`, cited elsewhere as `§N`. **The narrative comes first and the tasks come last**,
 because a task block is only readable against the context above it.
 
-Three positions are fixed:
+Four positions are fixed:
 
 | Section | Holds |
 |---|---|
 | `## 1. What already exists, and what is missing` | A `\| Need \| Today \| Gap \|` table — one row per thing the plan must deliver, what the codebase does about it today (with `file:line` or the function name), and what is missing. On a greenfield plan `Today` is `—`, and the table is still written: it is the plan's grounding, and every task below traces to a row |
 | `## N. Tasks` | The task blocks, last of the numbered sections |
+| `## Close-out — every task` | The duties every task runs before it stops, copied verbatim from §7. Unnumbered, directly above the prompts |
 | `## Prompts — one per task` | Last of all, unnumbered |
 
 Between them go as many sections as the subject needs — the matrix, the data model, the script, what is
@@ -187,8 +188,8 @@ into REPORT.md, with cost per quote first. Then close the work out.
 **You never run it for real.** The pilot is the user's to start, after you finish.
 
 Read, in this order:
-1. CLAUDE.md, including the close-out rule at the end.
-2. The plan: §4, §5a (the drop rules), §6, D6, and task B3.
+1. CLAUDE.md.
+2. The plan: §4, §5a (the drop rules), §6, D6, task B3, and "Close-out — every task".
 3. `tools/model-bench` as B2 left it: README, `journal.ts`, `results.ts` (the `Results` type is what
    `report.ts` reads), `checks.ts`, `args.ts` (add the `report` command there — B2 refuses it as
    unknown), and B2's "As built" notes in the plan.
@@ -208,6 +209,7 @@ Fix what it finds — a failure may belong to B1 or B2, not only to you.
 
 Commit: `feat: bench:agent report, drop candidates and screenshots (bench B3)`.
 Finish with the exact commands the user runs for the pilot, and every prerequisite still missing.
+Close out per the plan's "Close-out — every task" before you stop.
 ````
 `````
 
@@ -235,12 +237,50 @@ Rules:
   *"B1 and B2 have landed, and their prompts are deleted — a prompt for a finished task is a thing
   someone runs by mistake."* The live prompt set is the plan's progress indicator: what is left to run
   is exactly what is still written down.
+- **Every block ends with the close-out.** Its reading list names `## Close-out — every task` last, and
+  its final line is the close-out instruction — see §7. It is how a queued session learns to write
+  its `As built` note, maintain the blocks below it, and file the plan.
 - **When the last block goes, the plan moves.** See §8 — deleting the last prompt block is what
   finishes the plan, so the task that does it is the task that files it.
 - **Fence the prompt in four backticks** (five around an example that contains four), so the prompt
   itself can carry fenced code and commands.
 
-## 7. A finished plan is moved to `docs/plans/implemented/`
+## 7. The close-out every task runs
+
+**A session opened from a prompt block loads nothing the block does not name** — no execution skill,
+no runner. So the duties every task performs before it stops live in the plan itself, as a fixed
+section directly above the prompts, copied verbatim from here:
+
+````markdown
+## Close-out — every task
+
+Before you stop, in this order, in this file:
+
+1. **As built** — append a dated `**As built (YYYY-MM-DD):**` bullet to your task block: what differed
+   from the plan, the ids and names you assigned, what is built but unverified, and the `file:line` or
+   command output that proves the deliverable exists. Never edit an earlier note.
+2. **Decisions** — where you built something differently from the plan, append a dated `D<n>` to
+   `## Decisions` with both readings. A divergence is recorded, never absorbed.
+3. **The blocks below yours** — rewrite, in place, every prompt block whose assumptions your work
+   changed (a renamed file, a changed signature, a moved gate), and write any block left
+   `Blocked on <your id>` from what you now know.
+4. **Your own block** — delete it, and update the line above the blocks that says which have landed.
+   Stopping mid-task: keep it, with a `Picking up from:` line. Blocked: keep it, naming the blocker and
+   its owner.
+5. **Status** — rewrite the header `**Status:**` line: what is built, what is next, what is built but
+   unverified.
+6. **Filing** — if your deletion left no blocks, rewrite `**Status:**` one final time (what the plan
+   delivered, what is still unverified) and `git mv` this plan into `docs/plans/implemented/`, same
+   name and number — a `solution-planner` pack moves its whole initiative folder.
+7. **Commit** — the code, its tests and these plan edits together, in one commit.
+````
+
+Every prompt block ends its reading list with this section and closes with the line
+`Close out per the plan's "Close-out — every task" before you stop.` The section is the same in
+every plan; a plan does not edit it, and a task does not skip a step because it "changed nothing" —
+step 4 and step 5 always apply.
+
+## 8. A finished plan is moved to `docs/plans/implemented/`
 
 **Deleting the last prompt block is what finishes a plan**, so the task that deletes it is the task
 that files the plan. Before it stops, it:
@@ -273,7 +313,7 @@ block, no `Blocked on <id>` placeholder, and no blocked task holding one. So:
 way it does, and its `Decisions` and `As built` notes are cited by later plans. A plan that turns out
 to have been wrong gets a new plan saying so, not a rewrite of the old one.
 
-## 8. Never in a plan
+## 9. Never in a plan
 
 These are plan failures, not style:
 
@@ -284,6 +324,7 @@ These are plan failures, not style:
 - A task with no `**Agent:**` line, or one naming two agents; a task naming two stacks
 - A `**Budget:**` with no drivers behind it
 - A task with no `**Gate:**` line, or an intermediate task that runs the build or the suite
-- A prompt block that says "see the task", or one missing its reading list, its traps or its gate
+- A prompt block that says "see the task", or one missing its reading list, its traps or its gate, or
+  its close-out line; a plan with no `## Close-out — every task` section
 - A reference to a type, function, file or command that no section and no task defines
 - A `**Status:**` line that says "in progress" without saying what is built and what is unverified

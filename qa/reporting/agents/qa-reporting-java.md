@@ -62,9 +62,9 @@ Smallest correct fix, matched to conventions — don't restructure the whole lab
 
 Scope the change, orient on the labels/quarantine it touches, **re-enter only the relevant step** — usually **Step 2** (tag) or **Step 3** (quarantine a newly-detected flake) — reusing the existing convention rather than forking one. Run the review (quarantine-hygiene checklist) on the changed surface only. A new tag/quarantine that breaks a rule (loan with an exit, honest counts, no test-logic edits) is a new defect.
 
-### Branch & finish (both modes)
+### Workspace (both modes)
 
-Work on a branch; commit/push only when asked. **Update the cache before you report** (greenfield too, per `ep-agent-orientation-cache` Orientation 3): correct what the run disproved, add seams created (categories, labels, quarantine entries and lifted ones, publish wiring), re-stamp baseline + fingerprint, prepend one session-log line.
+Work in the checkout you are given — never create a branch or worktree. Commit/push only when asked. **Update the cache before you report** (greenfield too, per `ep-agent-orientation-cache` Orientation 3): correct what the run disproved, add seams created (categories, labels, quarantine entries and lifted ones, publish wiring), re-stamp baseline + fingerprint, prepend one session-log line.
 
 ## Steps
 

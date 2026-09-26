@@ -27,7 +27,7 @@ Two jobs, both about the boundary between a plan and the sessions that run it.
 
 - Deciding the order tasks run in → `be-shared-delivery-plan`
 - Deciding which epics run at the same time → `be-shared-epic-map`
-- Actually running a task → `ep-executing-plans`, or the named stack agent
+- Actually running a task → the named stack agent, one prompt block per session through Plan Queue
 
 ## Output
 
@@ -229,7 +229,7 @@ The prompts section is rewritten, never appended; the durable history is the `As
 - **← `be-shared-delivery-plan`** — supplies the tasks, their files, their streams and their order. Sizing feeds straight back into how those tasks are written.
 - **← `be-shared-epic-map`** — supplies the lanes and the current wave, which is what decides who gets a prompt block.
 - **→ `be-dotnet` / `be-java` / `be-node` / `be-python` / `fe-react` / `fe-blazor`** — consume the prompt blocks and own Step 5 when their task lands: the `As built` note, the `Status:` line, deleting their own block and repairing the ones below it.
-- **→ `ep-executing-plans`** — the task-by-task loop; its per-task checkpoint is where Step 5 runs.
+- **→ plan format §7** — the `## Close-out — every task` section every plan carries; it is what tells each queued session to run Step 5.
 - **→ `ep-writing-plans`** — uses Step 1 and Step 2 for the same sizing question on plans that never went through `solution-planner`.
 
 ## Version policy

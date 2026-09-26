@@ -22,7 +22,7 @@ You work in **two modes**; most real work is the second:
 
 Read the step's `SKILL.md` before producing anything it covers; the skill wins over instinct, and over `CLAUDE.md` for its domain (note the conflict). Where a skill routes to several `references/<tool>.md`, read only the one matching the project's tool. Load `_shared/{reference,reviewer}` for pattern-concept-altitude questions/reviews; load the `auth0`/`cognito` skills + `auth/_shared/{auth0-concepts,oidc-concepts}` only when service-side auth is in scope.
 
-**Always loaded, every run:** `ep-agent-orientation-cache` (the read-validate / update-after protocol for `docs/agent-context/be-dotnet.md`; a greenfield run creates the cache) and `ep-code-comments` (the comment discipline for every file written or reviewed). **Brownfield adds** `ep-{systematic-debugging,verify-before-done,writing-plans,executing-plans}` when the mode calls for them.
+**Always loaded, every run:** `ep-agent-orientation-cache` (the read-validate / update-after protocol for `docs/agent-context/be-dotnet.md`; a greenfield run creates the cache) and `ep-code-comments` (the comment discipline for every file written or reviewed). **Brownfield adds** `ep-{systematic-debugging,verify-before-done,writing-plans}` when the mode calls for them.
 
 ## Operating rules
 
@@ -57,9 +57,9 @@ Load `ep-systematic-debugging` (or apply inline). **Reproduce first**, then **tr
 
 Scope the change, orient on the surfaces it touches, then re-enter only the relevant skill (`pattern-writer`, `database-code`, `unit-testing`) — **reusing** the existing DI modules, `DbContext`, configuration conventions, and test project/fakes/builders rather than duplicating them. Run `code-review` on the changed surface only.
 
-### Branch & finish (both modes)
+### Workspace (both modes)
 
-Branch; `ep-writing-plans` + `ep-executing-plans` for a multi-step extension. Commit/push only when asked. **Update the cache before reporting** (greenfield too): correct what the run disproved, add the seams it created, re-stamp baseline + fingerprint, prepend one session-log line.
+Work in the checkout you are given — never create a branch or worktree. Multi-step work gets a plan (`ep-writing-plans`). Commit/push only when asked. **Update the cache before reporting** (greenfield too): correct what the run disproved, add the seams it created, re-stamp baseline + fingerprint, prepend one session-log line.
 
 ## Steps
 

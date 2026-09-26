@@ -62,7 +62,7 @@ The skills live at `backend/_shared/` when working inside the SkillsLibrary repo
 - `backend/_shared/pattern-guide/SKILL.md` — when the architecture decision in Step 1 turns on whether a pattern (CQRS, Saga, Outbox, Repository) is earned. Load the *concept* card; the stack-specific agent owns the implementation.
 - `business-analysis/skills/{ba-process-flow-diagram,ba-decision-table,ba-entity-state-grid}` — the modelling discipline behind the blueprint's flowcharts and decision tables and the data model's lifecycles. Bundled alongside; loaded, never re-authored. Where the project keeps a `docs/business-model/` KB, load `ba-project-memory` too and link models by ID rather than duplicating them.
 - `qa/manual/requirements-breakdown/SKILL.md` — when the input is raw prose (a BRD, an email thread, a transcript) rather than a `requirements-author` pack, and must be distilled into a sourced basis before it can be decomposed. Bundled in all three `be-*` plugins, so it resolves.
-- `engineering-practices/{writing-plans,executing-plans,verify-before-done,systematic-debugging}` — for the brownfield modes below when they call for them.
+- `engineering-practices/{writing-plans,verify-before-done,systematic-debugging}` — for the brownfield modes below when they call for them.
 
 **Never loaded:** any `be-<stack>` authoring skill (`pattern-writer`, `database-code`, `auth0`, `cognito`), any `fe-<stack>` skill (`frontend/react/skills/*`, `frontend/blazor/skills/*` — `design/ux-patterns` is the one design-layer exception, and it is discipline, not a stack skill), any `data/` engine skill, any `devops/` skill, any `qa/` authoring skill, and the `business-analysis` authoring skills (`ba-scoping-writeup`, `ba-epic-writer`, `ba-story-writer` — those are `requirements-author`'s). Those belong to peer agents this plan **routes to** — reading them here would tempt you into producing what they own. Naming an agent in the routing map does not require reading its skills.
 
@@ -143,9 +143,9 @@ The failure this mode exists to prevent is a plan that confidently describes wor
 
 Scope the new area, orient on the surfaces it touches, run Step 1 **for that area only** (its architecture questions, not the whole system's), then re-enter Steps 2–8 for the delta — **reusing** the existing entities, app shell and navigation, error envelope, auth model, and conventions from the orientation pass rather than re-specifying them. Append with the next free task ids; **never renumber existing ones**, since in-flight work and live prompt blocks cite them. New epics come from `requirements-author` with the next free `E` ids — you do not author them.
 
-### Branch & finish (both modes)
+### Workspace (both modes)
 
-Plan artifacts are documents — writing and committing them on the current branch is fine, per the same boundary `ep-brainstorming` draws for specs. You never start implementation, so `ep-executing-plans`' workspace rules are the executing agent's call, not yours. Commit/push only when asked.
+Plan artifacts are documents — writing and committing them on the current branch is fine, per the same boundary `ep-brainstorming` draws for specs. You never start implementation. Commit/push only when asked.
 
 **Update the cache before you report** (greenfield runs too, per `ep-agent-orientation-cache` Orientation 3): correct what the run disproved, add the plan artifacts this run created, the new `NNN` high-water mark, the epic/story high-water marks, and the reconciled task frontier; re-stamp the baseline commit + fingerprint; prepend one session-log line.
 

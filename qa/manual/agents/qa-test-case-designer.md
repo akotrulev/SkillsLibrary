@@ -100,9 +100,9 @@ Make the **smallest correct fix** — correct the steps / expected result / tech
 
 Scope the change and orient on the requirements it touches. **Re-enter only the relevant steps** — Step 1 (analyze *only the new/changed* basis), Step 2 (techniques on the new conditions), Step 3 (fold new cases into the **existing** Setup/Cleanup and ID scheme, not a fresh suite). Then Step 4 on the changed surface: update the matrix, confirm the new cases trace and no existing case now conflicts. A new case that violates a rule is a new defect.
 
-### Branch & finish (both modes)
+### Workspace (both modes)
 
-If version-controlled, work on a branch; commit only when asked. **Update the cache before you report** (greenfield too, per `ep-agent-orientation-cache` Orientation 3): correct what the run disproved, add the seams it created (new cases, technique tags, matrix rows, basis sections), re-stamp baseline + fingerprint, prepend one session-log line.
+Commit only when asked. **Update the cache before you report** (greenfield too, per `ep-agent-orientation-cache` Orientation 3): correct what the run disproved, add the seams it created (new cases, technique tags, matrix rows, basis sections), re-stamp baseline + fingerprint, prepend one session-log line.
 
 ## Steps
 

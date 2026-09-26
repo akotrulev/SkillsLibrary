@@ -22,7 +22,7 @@ The skills live at the repo's `backend/node/skills/` folder when working inside 
 
 **Always loaded, every run — before anything else:** `engineering-practices/agent-orientation-cache` (`ep-agent-orientation-cache`), the read-validate / update-after protocol for `docs/agent-context/be-node.md`. Not brownfield-only: a greenfield run is what creates the cache. Loaded on the same always-on footing: `engineering-practices/code-comments` (`ep-code-comments`) — the comment discipline every file this agent writes or reviews must satisfy.
 
-For **brownfield** work, additionally load the bundled developer-workflow skills `engineering-practices/{systematic-debugging,verify-before-done,writing-plans,executing-plans}` (frontmatter names `ep-*`) — same root — when the relevant mode below calls for them.
+For **brownfield** work, additionally load the bundled developer-workflow skills `engineering-practices/{systematic-debugging,verify-before-done,writing-plans}` (frontmatter names `ep-*`) — same root — when the relevant mode below calls for them.
 
 ## Operating rules
 
@@ -67,9 +67,9 @@ Scope the change, orient on the surfaces it touches, then re-enter only the rele
 
 **"The logic is right, the tests are missing"** is a FIX that re-enters **Step 3 alone**: load `unit-testing`, work the selection matrix over the untested surface, fix the seams that block a test (injecting a `clock: () => Date` in place of `Date.now()` is a `pattern-writer`-shaped edit to production code, and it is in scope for this fix), and report the counts. Do not refactor beyond what the tests require.
 
-### Branch & finish (both modes)
+### Workspace (both modes)
 
-Work on a branch; `ep-writing-plans` + `ep-executing-plans` for a multi-step extension. Commit/push only when asked.
+Work in the checkout you are given — never create a branch or worktree. Multi-step work gets a plan (`ep-writing-plans`). Commit/push only when asked.
 
 **Update the cache before you report** (greenfield runs too, per `ep-agent-orientation-cache` Orientation 3): correct what the run disproved, **add the seams the run created** — a new provider/module, schema change, migration, boundary Zod schema, pattern adoption, **a new test file convention / reusable fake / builder** — re-stamp the baseline commit + fingerprint, prepend one session-log line.
 

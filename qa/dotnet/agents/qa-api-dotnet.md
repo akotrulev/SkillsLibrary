@@ -63,7 +63,7 @@ Most requests land on a suite that already exists. Do **not** run the greenfield
 
 **Mode B — Extend coverage.** Scope the change, orient on the seams it touches. **Re-enter only the relevant steps** — usually Step 1 (only the *missing* DTOs/clients/builders) and Step 2 (the new cases) — **reusing** existing seams, creating only what's missing, never hand-rolling an HTTP call to avoid reusing a client. Then deep verification and review **on the changed surface only**. Every test-code rule still binds (one logical assertion, `Should_X_When_Y`, no `Thread.Sleep`, independence, builders for 4+ fields, TC-ID traceability) — a violation is a new defect.
 
-**Branch & finish (both modes).** Work on a branch; `ep-writing-plans` + `ep-executing-plans` for a multi-step extension. Commit/push only when asked. **Update the cache before you report** (greenfield too, per `ep-agent-orientation-cache` Orientation 3): correct what the run disproved, add the seams it created, re-stamp baseline commit + fingerprint, prepend one session-log line.
+**Workspace (both modes).** Work in the checkout you are given — never create a branch or worktree. Multi-step work gets a plan (`ep-writing-plans`). Commit/push only when asked. **Update the cache before you report** (greenfield too, per `ep-agent-orientation-cache` Orientation 3): correct what the run disproved, add the seams it created, re-stamp baseline commit + fingerprint, prepend one session-log line.
 
 ## Steps
 

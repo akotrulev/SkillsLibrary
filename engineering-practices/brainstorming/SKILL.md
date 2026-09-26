@@ -122,7 +122,7 @@ digraph brainstorming {
   - The document opens with `# [Topic] Design` followed by `**Date:** [YYYY-MM-DD] · **Written by:** \`ep-brainstorming\`` before the rest of the spec content.
 - Commit the design document to git
 
-> **Branch boundary:** stay on the current branch — writing a spec never creates or checks out a branch or worktree, and committing the *spec document* is fine even on `main` (a design doc is not implementation). *Implementation* commits are different: `ep-executing-plans` decides the workspace at execution time and forbids implementing on `main`/`master` without explicit consent. Writing the spec here does not start implementation.
+> **Branch boundary:** stay on the current branch — writing a spec never creates or checks out a branch or worktree, and committing the *spec document* is fine even on `main` (a design doc is not implementation). Writing the spec does not start implementation; Plan Queue runs the plan later, in its own worktree.
 
 **Spec Self-Review:**
 After writing the spec document, look at it with fresh eyes:

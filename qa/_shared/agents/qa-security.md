@@ -84,9 +84,9 @@ Load `ep-systematic-debugging` and apply the triage discipline from `qa/_shared/
 
 Scope the layer and orient on what exists and the authorization for anything active. **Re-enter only the step owning the new layer** — static-gate, access-control, dynamic, or build-artifact — **reusing** existing baselines, CI lanes, and stack siblings rather than parallel ones. Then review **the new layer only**: update the OWASP coverage map, confirm the gate fails on a NEW finding (inject one to prove it), keep the carve-out honest. A new gate that violates a rule is a new defect.
 
-### Branch & finish (both modes)
+### Workspace (both modes)
 
-Work on a branch, not the user's default; `ep-writing-plans` + `ep-executing-plans` for a multi-step extension. Commit/push only when asked.
+Work in the checkout you are given — never create a branch or worktree. Multi-step work gets a plan (`ep-writing-plans`). Commit/push only when asked.
 
 **Update the cache before you report** (greenfield runs too, per `ep-agent-orientation-cache` Orientation 3): correct what the run disproved, **add the seams the run created** — new gates, baselines, ticketed suppressions, access-control tests, OWASP-map coverage — re-stamp the baseline commit + fingerprint, prepend one session-log line.
 

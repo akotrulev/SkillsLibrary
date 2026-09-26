@@ -24,7 +24,7 @@ Discovery starts with **version and platform detection** (TFM from `*.csproj`, J
 
 The skills live at the repo's `devops/` folder when working inside the SkillsLibrary repo, or at `${CLAUDE_PLUGIN_ROOT}/devops/` when this agent runs from an installed Claude Code plugin — resolve every skill path below against whichever root exists. Load **only** `devops/*` skills; peer domains are invoked as agents, never loaded as skills.
 
-For **brownfield** work, additionally load the bundled developer-workflow skills `engineering-practices/{systematic-debugging,verify-before-done,writing-plans,executing-plans}` (frontmatter names `ep-*`) — same root — when the relevant mode below calls for them. These are workflow peers, not authoring skills; the boundary against `qa/`, `observability/`, and `data/` stays intact.
+For **brownfield** work, additionally load the bundled developer-workflow skills `engineering-practices/{systematic-debugging,verify-before-done,writing-plans}` (frontmatter names `ep-*`) — same root — when the relevant mode below calls for them. These are workflow peers, not authoring skills; the boundary against `qa/`, `observability/`, and `data/` stays intact.
 
 **Load nothing before the gate.** No `devops/*` `SKILL.md` is read until the tool stack is confirmed (see the next section) — loading a cloud or CI skill during discovery pre-commits the design to the tool you happened to read about. Discovery is repo inspection only. Once confirmed, load **only** the skills the confirmed stack selects, and load each one **before** producing anything it covers.
 
@@ -169,9 +169,9 @@ Load `ep-systematic-debugging` (or apply its discipline inline). Do not jump to 
 
 Scope the change, orient on the surfaces it touches, then **re-enter only the relevant steps** — **reusing** the existing modules, templates, and pipeline fragments from the orientation pass rather than duplicating them (a new environment is an overlay/variable file, not a copy-pasted pipeline) — and run the review step on the changed surface only.
 
-### Branch & finish (both modes)
+### Workspace (both modes)
 
-Work on a branch; `ep-writing-plans` + `ep-executing-plans` for a multi-step rollout. Commit/push only when asked. **Never apply IaC to a live environment without explicit confirmation** — produce the plan, show it, and wait.
+Work in the checkout you are given — never create a branch or worktree. Multi-step work gets a plan (`ep-writing-plans`). Commit/push only when asked. **Never apply IaC to a live environment without explicit confirmation** — produce the plan, show it, and wait.
 
 **Update the cache before you report** (greenfield runs too, per `ep-agent-orientation-cache` Orientation 3): correct what the run disproved, **add the seams the run created** — new/changed Dockerfile stages, IaC modules, manifests, pipeline stages, environments, secret references — re-stamp the baseline commit + fingerprint, prepend one session-log line.
 

@@ -26,7 +26,7 @@ The skills library lives at the repo's `qa/` folder when working inside the Skil
 below against whichever root exists (override via the invoking prompt). Your skills root is `qa/java/skills/`. You
 load **only** those skills — never the `qa/manual/`, `qa/reporting/`, `qa/cicd/`, or security folders; those are
 owned by their own agents (see "Related agents"). For **brownfield** work you additionally load the bundled
-developer-workflow skills `engineering-practices/{systematic-debugging,verify-before-done,writing-plans,executing-plans}`
+developer-workflow skills `engineering-practices/{systematic-debugging,verify-before-done,writing-plans}`
 (frontmatter names `ep-*`) — resolve them against the same repo/plugin root — when the relevant mode below calls
 for them. These are workflow peers, not authoring skills.
 
@@ -160,9 +160,9 @@ not conclude "regression" from a single failing run; LLM outputs are stochastic.
 4. Keep every rule (never exact-string equality, judge pinned, red-team boundary respected if in scope) — a new
    case that violates them is a new defect.
 
-### Branch & finish (both modes)
+### Workspace (both modes)
 
-Work on a branch, not the user's default branch, unless told otherwise.
+Work in the checkout you are given — never create a branch or worktree.
 Commit/push only when the user asks.
 
 **Update the cache before you report** (greenfield runs too, per `ep-agent-orientation-cache` Orientation 3): correct what the run disproved, **add the seams the run created** — new eval cases, golden-set entries, rubrics, thresholds, red-team items — re-stamp the baseline commit + fingerprint, prepend one session-log line.

@@ -101,9 +101,9 @@ For a **tenant-isolation / access-control gap**, follow the engine `security` re
 2. Re-enter only the relevant steps — usually **Step 2** (model the addition, reusing the existing id/tenancy/soft-delete conventions), the security-relevant part of **Step 3** if it stores tenant/personal data, **Step 4** (the expand-contract migration, backfill plan, online-safe DDL), and the indexing part of **Step 5**.
 3. **Then Step 6 on the changed objects only** — the hostile review scoped to what you changed, not the whole schema.
 
-### Branch & finish (both modes)
+### Workspace (both modes)
 
-Work on a branch, not the user's default branch, unless told otherwise. Commit/push only when the user asks.
+Work in the checkout you are given — never create a branch or worktree. Commit/push only when the user asks.
 
 **Update the cache before you report** (greenfield runs too, per `ep-agent-orientation-cache` Orientation 3): correct what the run disproved, **add the seams the run created** — new tables/collections/indexes, migrations, tenancy or id-strategy decisions, access patterns modelled — re-stamp the baseline commit + fingerprint, prepend one session-log line.
 

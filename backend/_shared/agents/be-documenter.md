@@ -105,7 +105,7 @@ The skills live at `backend/_shared/` and `business-analysis/skills/` when worki
 
 Scope it, confirm it belongs in the existing area map (or extends it with the next free `AREA-nnn`), then run Steps 2→6 for that area only — reusing the existing glossary, actor definitions, and cross-area flows rather than re-deriving them. Never renumber existing IDs.
 
-### Branch & finish (both modes)
+### Workspace (both modes)
 
 KB artifacts are documents — writing and committing them on the current branch is fine. You never start implementation. Commit/push only when asked.
 

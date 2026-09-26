@@ -67,9 +67,9 @@ Load `ep-systematic-debugging`. Do not jump to a fix. **Reproduce first** — a 
 
 Scope the change and orient on the surfaces it touches. **Re-enter only the relevant steps** — usually Step 2 and the affected parts of Step 3 — **reusing** existing state containers, components, `data-testid` conventions, and **test fakes/builders**. Then Step 4 + 5 **on the changed surface only**. Every FE code rule still binds: a new feature that violates one is a new defect.
 
-### Branch & finish (both modes)
+### Workspace (both modes)
 
-Work on a branch, not the user's default; `ep-writing-plans` + `ep-executing-plans` for a multi-step extension. Commit/push only when asked.
+Work in the checkout you are given — never create a branch or worktree. Multi-step work gets a plan (`ep-writing-plans`). Commit/push only when asked.
 
 **Update the cache before you report** (greenfield runs too, per `ep-agent-orientation-cache` Orientation 3): correct what the run disproved, **add the seams the run created** — a new route or slot, a moved `'use client'` boundary, a new store/query hook/provider, new `data-testid` conventions — re-stamp the baseline commit + fingerprint, prepend one session-log line.
 

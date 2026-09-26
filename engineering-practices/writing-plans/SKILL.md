@@ -1,6 +1,6 @@
 ---
 name: ep-writing-plans
-description: Use when you have an approved spec or clear requirements and need a detailed implementation plan before touching code — a self-contained plan document with numbered context sections, decisions, an ordered task list and one paste-ready prompt per task. Triggers: after `ep-brainstorming` produces an approved design, "write the implementation plan", "break this spec into tasks". Chains into `ep-executing-plans`. Do NOT use to design the idea itself (`ep-brainstorming`), to execute a written plan (`ep-executing-plans`), or for a single trivial edit.
+description: Use when you have an approved spec or clear requirements and need a detailed implementation plan before touching code — a self-contained plan document with numbered context sections, decisions, an ordered task list and one paste-ready prompt per task. Triggers: after `ep-brainstorming` produces an approved design, "write the implementation plan", "break this spec into tasks". The plan then runs one prompt block per session through Plan Queue. Do NOT use to design the idea itself (`ep-brainstorming`), to execute a written plan, or for a single trivial edit.
 ---
 
 # Writing Plans
@@ -38,10 +38,11 @@ the user, so the same thing has the same name everywhere.
 **Announce at start:** "I'm using the `ep-writing-plans` skill to create the implementation plan."
 
 **Context:** Write the plan on whatever branch you are already on — do not create or check out a branch
-or worktree to author it. Workspace isolation, if any, is `ep-executing-plans`' call at execution time.
+or worktree to author it. Plan Queue gives each plan its own worktree when it runs, so plans can run in
+parallel; nothing in the plan creates branches or worktrees.
 
 **Save plans to:** `docs/plans/NNN-<feature-name>.md` — the live folder. A plan moves to
-`docs/plans/implemented/` once every task in it has landed (format reference §7), and that is done by
+`docs/plans/implemented/` once every task in it has landed (format reference §8), and that is done by
 the task that deletes the last prompt block, not by you.
 - `NNN` is zero-padded and sequential, and **its high-water mark spans both folders**: list
   `docs/plans/` *and* `docs/plans/implemented/`, take the highest existing `NNN` prefix (files and
@@ -138,7 +139,7 @@ another stack.
 **Every task also names its agent** — an exact catalog name on the same line as the stack
 (`be-dotnet`, `be-java`, `be-node`, `be-python`, `fe-react`, `fe-blazor`, `data-architect`,
 `devops-engineer`, `tooling-engineer`, `qa-api-<stack>`, …). One stack, one agent, one session: the
-agent is who the session is opened as, and it is what `ep-executing-plans` adopts. A task whose agent you cannot name is a task whose stack you
+agent is who the session is opened as, and it is who each prompt block tells the session to be. A task whose agent you cannot name is a task whose stack you
 have not actually decided; an invented agent name is the most damaging defect in the document.
 
 ## Step 5 — Budget the session
@@ -218,15 +219,18 @@ Three rules are easy to get wrong and expensive when you do:
   write `**Blocked on <id>** — <id> writes this prompt when it lands, from <what it will then know>.`
   and put "write B4's prompt block" in the blocking task's bullets **and** in its own prompt's closing
   duty. Guessing the block produces the one kind of stale that reads as current.
+- **Every plan carries `## Close-out — every task`**, copied verbatim from the format reference §7,
+  directly above the prompts, and every block names it last in its reading list and ends with its
+  close-out line. A queued session loads nothing else, so this is the only place it learns to write
+  its `As built` note, repair the blocks below it, delete its own block and file the plan.
 - **The block that will delete the last prompt carries the filing duty.** Deleting the last block is
-  what finishes the plan (§7), so that block's closing duty says: rewrite the `Status:` line with what
-  landed and what is unverified, then `git mv` the plan — or the whole initiative folder — into
-  `docs/plans/implemented/`, same name, same number, in the task's own commit. Where a blocked task
-  will still be holding a block, say so instead: that plan stays in `docs/plans/` until it clears.
+  what finishes the plan (§8). The close-out's step 6 already tells every task to file the plan when its
+  deletion leaves no blocks; where a blocked task will still be holding a block, say so in the last
+  runnable block: that plan stays in `docs/plans/` until it clears.
 
 ## No Placeholders
 
-The format reference §8 lists what is never in a plan. The two worth repeating while you write:
+The format reference §9 lists what is never in a plan. The two worth repeating while you write:
 **"similar to B2" is not content** — the executing session may read the tasks out of order, so repeat
 it — and **a `**Status:**` line that says "in progress"** without saying what is built and what is
 unverified is worse than no status at all.
@@ -238,7 +242,7 @@ After writing the complete plan, look at the spec with fresh eyes and check the 
 1. **Grounding:** every row of `## 1.`'s gap table traces to a task, and every task traces back to a
    row. List any gap in either direction.
 2. **Spec coverage:** skim each section of the spec. Can you point to a task that implements it?
-3. **Placeholder scan:** search the plan for the format reference's §8 list. Fix what you find.
+3. **Placeholder scan:** search the plan for the format reference's §9 list. Fix what you find.
 4. **Type consistency:** do the types, signatures and property names in later tasks match what earlier
    tasks define? A function called `clearLayers()` in B3 but `clearFullLayers()` in B7 is a bug.
 5. **Order check:** read the tasks in order and ask, at each one, "could I actually start this now?"
@@ -256,13 +260,14 @@ After writing the complete plan, look at the spec with fresh eyes and check the 
 10. **Gate check:** exactly one task carries the gate, it is the last runnable one, its commands are
     the project's own and in run order, and every other task says `**Gate: none**` with what not to run.
     The ungated-boundary cost is stated in the plan.
-11. **Filing check:** the block that will delete the last prompt — normally the last runnable task's —
-    carries the duty to rewrite `Status:` and move the plan into `docs/plans/implemented/`, and the
-    plan's own number was taken from the high-water mark across both folders.
+11. **Filing check:** where a blocked task will outlive the last runnable one, the last runnable block
+    says the plan stays in `docs/plans/` until it clears; the plan's own number was taken from the high-water mark across both
+    folders.
 12. **Prompt check:** one block per task, in task order, each carrying the deliverable verbatim, an
-    exact reading list with **sections** rather than artifacts, its traps, and its gate line. Read each
-    block as if it were the only thing you had: if you would need the task above it to start, the block
-    is incomplete. Every `Blocked on <id>` placeholder is matched by that task's duty to write it.
+    exact reading list with **sections** rather than artifacts, its traps, its gate line and its
+    close-out line; `## Close-out — every task` is present verbatim. Read each block as if it were the
+    only thing you had: if you would need the task above it to start, the block is incomplete. Every
+    `Blocked on <id>` placeholder is matched by that task's duty to write it.
 
 Fix what you find inline. No need to re-review — fix and move on. A spec requirement with no task gets
 a task.
@@ -271,12 +276,11 @@ a task.
 
 After saving the plan, hand off to execution.
 
-**"Plan complete and saved to `docs/plans/<filename>.md`. Ready to implement it task-by-task with
-checkpoints for review?"**
+**"Plan complete and saved to `docs/plans/<filename>.md` — ready to queue in Plan Queue."**
 
-- **Queued execution (default):** the plan file itself, run through Plan Queue. It is self-contained on
-  purpose — the whole document queues, and each prompt block runs one session.
-- **Inline execution:** `ep-executing-plans`. Batch execution with checkpoints for review.
+The plan file is the whole handoff. It is self-contained on purpose: Plan Queue runs it in its own
+worktree, one prompt block per session, in order, and each session closes out per the plan's
+`## Close-out — every task`.
 
 ## Remember
 
@@ -289,5 +293,6 @@ checkpoints for review?"**
   prompt that cannot be written yet is written by the task that unblocks it
 - A landed task's prompt is deleted; the live prompt set is the progress indicator, and the task that
   deletes the last one rewrites `Status:` and moves the plan into `docs/plans/implemented/`
+- `## Close-out — every task` sits above the prompts, verbatim, and every block ends by pointing at it
 - `**Status:**` at the top is maintained, and names what is built but unverified
 - Exact file paths, exact commands, real values — always

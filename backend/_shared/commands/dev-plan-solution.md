@@ -1,5 +1,5 @@
 ---
-description: Plan an app — a blueprint you approve, then the detail pack (data model, experience, API surface, integrations), the epic map, and a task list where each task is one stack, one agent and one session, with a ready-to-paste prompt per lane (next: /dev-build)
+description: Plan an app — a blueprint you approve, then the detail pack (data model, experience, API surface, integrations), the epic map, and a task list where each task is one stack, one agent and one session, with a ready-to-paste prompt per lane (next: queue it in Plan Queue)
 argument-hint: [the initiative folder from /dev-refine, the requirements themselves, or "resume" to pick up existing work]
 ---
 

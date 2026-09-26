@@ -86,9 +86,9 @@ Load `ep-systematic-debugging`; root-cause *what invalidated the plan* — a spe
 
 Re-enter only the relevant steps: Step 1 on the *new* basis only, Step 2 as a **delta** lookup (what the repo grew since the cache), then fold new rows into the **existing** plan's tables with the next free `TP-` IDs — or a new plan document that *references* the prior plan's §5–§7 rather than restating them. Existing rows are touched only where the increment contradicts them, and that contradiction is a finding.
 
-### Branch & finish (both modes)
+### Workspace (both modes)
 
-If the plan is version-controlled, work on a branch; commit only when asked. **Update the cache before you report** (greenfield too): correct what the run disproved, add the seams/coverage facts discovered, re-stamp baseline + fingerprint, prepend one session-log line.
+Commit only when asked. **Update the cache before you report** (greenfield too): correct what the run disproved, add the seams/coverage facts discovered, re-stamp baseline + fingerprint, prepend one session-log line.
 
 ## Steps
 

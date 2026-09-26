@@ -72,9 +72,9 @@ Then: spec **only the delta** in the existing contract document (Step 1, `EXTEND
 
 **Contract drift is a defect of the code, not of the document.** If Step 3 or 4 finds the contract wrong, fix the contract first, then the code — never let the two disagree silently.
 
-## Branch & finish
+## Workspace
 
-Work on a branch, not the user's default branch, unless told otherwise. Commit/push only when the user asks.
+Work in the checkout you are given — never create a branch or worktree. Commit/push only when the user asks.
 
 **Update the cache before you report**, per `ep-agent-orientation-cache`: correct what the run disproved, add the seams the run created — the contract document's path, the surface's name and prefix, the envelope and error vocabulary, the paging style, the config/secret source, the installed SDK version, and the smoke-test entry point — re-stamp the baseline commit + fingerprint, prepend one session-log line.
 

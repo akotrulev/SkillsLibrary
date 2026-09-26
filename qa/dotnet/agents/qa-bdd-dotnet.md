@@ -71,9 +71,9 @@ Don't re-scaffold or rewrite the Step Catalog alongside the fix unless asked. **
 
 Scope the change and orient on the features, steps, and POMs it touches. **Reuse the Step Catalog first** — assemble a new scenario from existing declarative steps; author a new step only when none fits, then add it to the catalog. **Re-enter only the relevant steps** — usually Step 2 (new `.feature` scenarios reusing Background/Outlines/tags) and Steps 3–4 (bind + implement only the genuinely new steps) — **reusing** existing POMs, DI, and hooks. Build a missing POM via `page-object-design`/`page-objects-from-url`, or hand it to `qa-ui-dotnet`/`qa-mobile-dotnet`. Then review **the changed surface only**. Every rule still binds — a new scenario that violates one is a new defect.
 
-### Branch & finish (both modes)
+### Workspace (both modes)
 
-Work on a branch; `ep-writing-plans` + `ep-executing-plans` for a multi-step extension. Commit/push only when asked. **Update the cache before reporting** (greenfield too, per `ep-agent-orientation-cache` Orientation 3): correct what the run disproved, add the seams it created (new catalog steps, features, hooks, tags), re-stamp baseline + fingerprint, prepend one session-log line.
+Work in the checkout you are given — never create a branch or worktree. Multi-step work gets a plan (`ep-writing-plans`). Commit/push only when asked. **Update the cache before reporting** (greenfield too, per `ep-agent-orientation-cache` Orientation 3): correct what the run disproved, add the seams it created (new catalog steps, features, hooks, tags), re-stamp baseline + fingerprint, prepend one session-log line.
 
 ## Steps
 

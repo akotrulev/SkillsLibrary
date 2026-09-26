@@ -81,9 +81,9 @@ Scope to the defect. **Contamination leak** → re-run `td-data-quality` deconta
 2. Re-enter only the relevant steps — usually **2/3** (source/synthesize the addition, reusing existing id/source/split conventions), **4** (quality gate on new records — dedup against the *existing* set too, decontaminate), **5** (merge into splits by dedup cluster, never straddling the frozen test line; bump the manifest).
 3. **Then Step 6 on the changed portion only** — re-review, update the card's composition/provenance sections.
 
-### Branch & finish (both modes)
+### Workspace (both modes)
 
-Work on a branch, not the user's default, unless told otherwise. Commit/push only when asked. **Update the cache before you report** (NEW runs too, per `ep-agent-orientation-cache` Orientation 3): correct what the run disproved, add seams it created (new pipeline scripts, pinned judge, new eval targets, id prefixes), re-stamp baseline + fingerprint, prepend one session-log line.
+Work in the checkout you are given — never create a branch or worktree. Commit/push only when asked. **Update the cache before you report** (NEW runs too, per `ep-agent-orientation-cache` Orientation 3): correct what the run disproved, add seams it created (new pipeline scripts, pinned judge, new eval targets, id prefixes), re-stamp baseline + fingerprint, prepend one session-log line.
 
 ## Steps
 

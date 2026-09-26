@@ -74,7 +74,7 @@ produces a plan that is one lane wide.
 
 ## When NOT to use
 
-- Executing the plan → `ep-executing-plans` (inline, the default) or the named stack agent per task
+- Executing the plan → the named stack agent per task, one prompt block per session through Plan Queue
 - Deciding which epics run at the same time → `be-shared-epic-map`, which this skill consumes
 - Sizing the tasks and writing `## Prompts — one per task` → `be-shared-session-budget`, which runs on this skill's output
 - A generic non-backend multi-step task → `ep-writing-plans`
@@ -633,8 +633,6 @@ that lands anything.>
 - **→ `be-dotnet` / `be-java` / `be-node` / `be-python` / `fe-react` / `fe-blazor`** — execute the
   tasks bound to them, write the `As built` note and the `Status:` line, delete their own prompt block
   and rewrite the ones below it.
-- **→ `ep-executing-plans`** — the task-by-task execution loop, with checkpoints; its per-task
-  checkpoint is where the `As built` note and the prompt maintenance get written.
 - **→ Mission Control** — paste the document, point at the repo.
 - **→ `data-architect` / `tooling-engineer` / `devops-engineer` / `observability-engineer-<stack>` /
   `qa-*`** — the tasks bound to them, run as peers.
