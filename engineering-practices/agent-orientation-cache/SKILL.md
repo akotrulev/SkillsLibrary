@@ -13,11 +13,11 @@ This file is the **agent-agnostic half**: where the map lives, its format, how t
 
 ## The artifact
 
-`docs/agent-context/<agent-name>.md` — in the **target** project, resolved against the current working directory, versioned with the code like `docs/app-map/` and `docs/business-model/`. Never in this skills-library checkout and never in a global config directory (`~/.claude/...`) unless the user explicitly asks for a shared copy.
+`docs/agent-context/<agent-name>.md` — in the **target** project, resolved against the current working directory. It is a **local, untracked** file, not versioned with the code. Never in this skills-library checkout and never in a global config directory (`~/.claude/...`) unless the user explicitly asks for a shared copy.
 
 **One file per agent type** (`fe-react.md`, `be-dotnet.md`, `qa-api-typescript.md`). Not one shared file: each agent orients on different things, so a shared file would be the union of unrelated concerns and stale for everyone. Different agent types never write the same file, so there is no cross-agent write contention.
 
-Leave it untracked if the project's `.gitignore` already excludes `docs/`; otherwise it is a normal committed file. Committing is still governed by the global rule — commit only when the user asks.
+**Keep it out of git.** Before the first write, make sure the project's `.gitignore` excludes `docs/agent-context/` — add that line if it is missing — and if a cache file is already tracked, untrack it with `git rm --cached`. Both changes go in the run's own commit. The reason is parallel work: plans run concurrently, each in its own worktree, and two runs of the same agent type would otherwise both rewrite the same tracked file and conflict on merge. The cost: a fresh worktree starts without the cache, so the first run in it is a **FULL** orientation; later runs in that worktree reuse it.
 
 ## Orientation 1 — Read-validate (before any orientation work)
 
@@ -32,7 +32,7 @@ Run these checks in order and stop at the first that matches.
 | 5 | The delta set (below) is **empty** | **TRUST** — skip orientation entirely |
 | 6 | Anything else | **DELTA** — go to the delta pass |
 
-**Always exclude `docs/agent-context/` from the delta set.** The update-after step stamps the current `HEAD` into the file and that stamp is itself a change — so a naive `HEAD == baseline` test can never be true once the cache is committed, and the TRUST path would never fire. The cache's own churn is not evidence about the code.
+**Always exclude `docs/agent-context/` from the delta set.** The update-after step stamps the current `HEAD` into the file and that stamp is itself a change — and in a project that still tracks the file, a naive `HEAD == baseline` test could never be true, so the TRUST path would never fire. The cache's own churn is not evidence about the code.
 
 Three commands answer 2, 3, 5 and feed 6:
 
