@@ -1,6 +1,6 @@
 ---
 name: qa-mobile-native-features-java
-description: Use when the user needs to test the **device-native, OS-level capabilities** a mobile app uses that a normal Appium page-object UI test doesn't exercise. Triggers: "test our deep link opens the right screen in Appium Java", "handle the camera/location permission dialog", "test Face ID / fingerprint login on the simulator".
+description: Use when the user needs to test the **device-native, OS-level capabilities** a mobile app uses that a normal Appium page-object UI test doesn't exercise. Triggers: "test our deep link opens the right screen in Appium Java", "handle the camera/location permission dialog", "test Face ID / fingerprint login on the simulator". Not for device-cloud wiring (`qa-device-cloud-java`) or ordinary screen flows (`qa-ui-test-writer-appium-java`).
 ---
 
 # QA — Mobile Native Features (Java: Appium java-client + TestNG)
@@ -123,7 +123,7 @@ import java.util.Map;
 
 /**
  * Owns the OS-level surfaces around the app. Every method drives a device/driver API or a `mobile:` command —
- * NEVER a page-object selector. The CALLER asserts the effect on a page object afterwards.
+ * never a page-object selector. The caller asserts the effect on a page object afterwards.
  */
 public final class NativeFeatures {
     private final AppiumDriver driver;

@@ -19,7 +19,9 @@ agents, the production-uptime-checks names resolved, two new stale-path families
 and `qa/_shared/api-contract-testing` — fixed across qa/dotnet and carried into S7–S11, S13 and G1).
 S7 landed 2026-09-26 (qa/java API, BDD and LLM lanes: the Gate line in three agents, the two K1 names,
 21 stale paths, the six qa/java `Node 20` hits and 25 descriptions; the LLM agent's `qa/manual` write-up
-became a hand-off, D15). S8 is next. S1–S18 are ungated: the edits from S1 to S7 are built but
+became a hand-off, D15). S8 landed 2026-09-26 (qa/java UI, mobile and performance lanes and commands:
+the Gate line in three agents, the production-uptime-checks names resolved, seven Do-NOT clauses added;
+one open question raised, O9). S9 is next. S1–S18 are ungated: the edits from S1 to S8 are built but
 unverified until G1 runs §7.
 
 ## 1. What already exists, and what is missing
@@ -584,7 +586,11 @@ stay; D5 still keeps them out of this sweep.
 
 ## Open questions
 
-None. The five raised while writing this plan were answered on 2026-09-26 (O5–O8).
+The five raised while writing this plan were answered on 2026-09-26 (O5–O8).
+
+| # | Question | Raised by | Why it needs you |
+|---|---|---|---|
+| O9 | Should a fallback locator in a generated page object keep its `// TODO: missing data-testid` marker? | S8 (2026-09-26) | CLAUDE.md's Comments rule forbids a `TODO` left behind, and every qa UI agent says "Emit no comments", yet `page-objects-from-url` in all three stacks (and `qa-ui-{dotnet,java,typescript}.md` Live-page step 3) makes the marker "the contract that it gets upgraded". CLAUDE.md lets a skill win for its domain, so both readings hold today. Dropping the marker leaves `missing-testids.md` as the only handshake; keeping it means stating the exception in CLAUDE.md. The text is unchanged until you decide. |
 
 ## 8. Tasks
 
@@ -1107,6 +1113,62 @@ skills around hits 20k, descriptions 6k, ~13 files modified 20k, read-back 6k, c
 - K2: the Gate line in the three agents.
 - K6: the remaining `qa/java` `Node 20` hits → Node 24.
 - **Not in S8:** S7's lanes.
+- **As built (2026-09-26):** `qa/java/agents/{qa-ui-java,qa-mobile-java,qa-performance-java}.md` and
+  `qa/java/commands/*.md` (read in full), and the 15 skill folders S7's note left to S8. Gate line added
+  to 3 agents, each as the last Operating-rules bullet (`qa-ui-java.md:37`, `qa-mobile-java.md:38`,
+  `qa-performance-java.md:35`). The six commands need nothing: each only points at its agent file.
+  Data issues: 12 fixed.
+  - K1: `production-uptime-checks/SKILL.md:20`, `:35`, `:131`, `:327` `qa-performance-k6` →
+    `qa-load-testing-typescript` (k6 is the TypeScript lane's tool, S6's mapping); `:35`, `:329`
+    `qa-performance-gatling` → `qa-load-testing-java`; `:117`, `:330` `qa-ci-pipelines` →
+    `qa-ci-pipelines-java` (`:330` now "its GitLab CI, GitHub Actions and Azure Pipelines references";
+    the stray `(#?)` at `:327` removed). The resolver now prints only `data-testid` / `data-test` /
+    `data-provider-thread-count` over qa/java.
+  - Stale paths: `qa-ui-java.md:114` `…/percy/SKILL.md`, `…/applitools/SKILL.md`, `…/lighthouse-ci/SKILL.md`
+    → "its `references/percy.md`" etc.; `network-mocking/SKILL.md:3` "the `performance` skill" →
+    `qa-load-testing-java`; `qa-performance-java.md:87` bare `test-reports` (which resolves to no
+    qa/java skill) → `qa/reporting/java/skills/test-reports/SKILL.md`, and its "house default" CI note →
+    S6's "read only the `references/<host>.md`"; `load-testing/SKILL.md:363`
+    `ci-pipelines/{github-actions,azure-pipelines,gitlab-ci}` (reference files, not folders) → "its
+    `references/<host>.md`"; `browser-cloud-setup/SKILL.md:8` `ui-test-author/{playwright,appium}/java`
+    → `…/{playwright,appium}`. Every `qa/…` path in the S8 files now resolves on disk.
+  - K6: nothing; the recipe prints no hit in qa/java.
+  Code issues: 14 fixed.
+  - K7: Do-NOT clauses added to the seven — `browser-cloud-setup`, `inhouse-framework-conventions`,
+    `ui-test-author/selenium`, `device-cloud`, `production-uptime-checks`, `mobile-native-features`,
+    `load-testing` — each naming the sibling by frontmatter name; the staged-agent boilerplate is gone
+    from the three that had it. All ≤ 500 (largest `network-mocking` 487, `production-uptime-checks` 468).
+    Agent descriptions already fit (639, 559, 518).
+  - K5: all-caps `NEVER` in `production-uptime-checks/SKILL.md:161` and `NEVER`/`CALLER` in
+    `mobile-native-features/SKILL.md:126` → lower case.
+  - K2 for skills: the "written, not run" sentence on the run step of `ui-test-author/selenium:221`,
+    `browser-cloud-setup:115`, `device-cloud:212` and `load-testing:353`.
+  - "Recover, don't author" doubled in the Orientation 2 of `qa-ui-java` and `qa-mobile-java`; merged
+    into S7's one-sentence form.
+  - `qa-mobile-java.md` had its "Emit no comments" bullet stranded after the "Live-app exploration"
+    subsection; moved into the Operating-rules list.
+  Logical conflicts: 10 fixed.
+  - "Run what you write", Orientation 3's "every run regardless of the gate's verdict" (worded
+    "regardless of verdict" in `qa-performance-java`) and Orientation 2's "confirm it builds/runs on
+    arrival" each gain "outside a `Gate: none` plan task" in all three agents.
+  - `qa-performance-java`'s Step 6 loads `qa/cicd` / `qa/reporting` skills and its bug-report rule loads
+    `qa/manual/bug-report-writer`, while "Related agents" says "do not load their skills"; the three
+    exceptions are now stated once under the list (S6's reading, kept for performance agents).
+  Cleanup: none. The K9 recipes find nothing in qa/java, and every qa/java skill, agent and command is
+  listed in the marketplace.
+  Kept on purpose: K3 hits are Percy/Applitools branch baselines, flag and code branching, Pact
+  `--branch`, and `inhouse-framework-conventions:220` (the Accelerator's own `/review` command). K4 hits
+  are the CI "gating stage", CDP throttling "phases", a "slice" of a suite, Spring slice tests, Azure
+  block staging and RAG stages (D8). K8 hits are `./gradlew test` / `gatlingRun` (the Gradle suite's own
+  command) and `npm install` / `pip install` tool installs in code samples (Lighthouse CI, Percy,
+  DeepEval, Ragas). The mobile-app-crawler screen-map template's three broken links are deliberate
+  examples (§6.1). "— MANDATORY SECTION" and the `be-shared-session-budget` Step 5 duty do not occur.
+  Carried forward: S10's block gains the same three copied defects in its agents
+  (`qa-ui-typescript.md:115` reference paths, `qa-mobile-typescript.md:51` stranded bullet,
+  `qa-performance-typescript.md:107` CI note) and the description boilerplate.
+  Unverified: nothing was run beyond §4's searches (Gate: none). Left for the user: O9 — the
+  `// TODO: missing data-testid` marker that `page-objects-from-url` and the UI agents prescribe against
+  CLAUDE.md's no-`TODO` rule; the text is unchanged.
 
 ### S9 — qa/typescript API, BDD and LLM lanes
 
@@ -1427,86 +1489,9 @@ name: the K1 resolver flags it (D12).
 | S18 | `docs` | `general-purpose` | — | ~135k |
 | G1 | `docs` | `general-purpose` | S1–S18 | ~120k |
 
-S1 to S7 have landed, and their prompts are deleted; the 12 prompts from S8 to G1 are live.
+S1 to S8 have landed, and their prompts are deleted; the 11 prompts from S9 to G1 are live.
 
 ---
-
-### S8 — qa/java UI, mobile and performance lanes (general-purpose, docs)
-
-````
-You are `general-purpose`. Task S8 of docs/plans/001-library-conformance-sweep.md: bring qa/java's UI,
-mobile and performance lanes and its commands in line with the plan's checks K1–K9.
-
-Deliverable: qa-ui-java, qa-mobile-java, qa-performance-java, qa/java/commands/ and every remaining
-qa/java skill pass K1–K9.
-
-Read, in this order:
-1. CLAUDE.md.
-2. The plan: §2, §3, §4, §6 (the S8 rows), D1–D11, task S8, S7's As built note.
-3. CONTRIBUTING.md.
-4. qa/java/agents/{qa-ui-java,qa-mobile-java,qa-performance-java}.md and qa/java/commands/*.md in
-   full.
-5. The plan's "Close-out — every task".
-
-Do:
-- Run §4's recipes with DIR=qa/java; work the hits in your agents, the commands and the skills S7 did
-  not own.
-- K1: `qa-ci-pipelines`, `qa-performance-k6` ×4, `qa-performance-gatling` ×2
-  (skills/production-uptime-checks/SKILL.md).
-- K2: the Gate line in the three agents.
-- K6: nothing to do — S7 moved all six qa/java `Node 20` hits (they sat in S7's messaging and
-  file-storage references); the recipe now prints nothing for `Node 20` in qa/java.
-- K7: seven descriptions have no Do-NOT clause — `browser-cloud-setup`, `inhouse-framework-conventions`,
-  `ui-test-author/selenium`, `device-cloud`, `production-uptime-checks`, `mobile-native-features`,
-  `load-testing`. Three of them end in the boilerplate "For end-to-end suite work prefer the staged
-  agent … use this skill directly for a single targeted artifact"; S7 replaced that sentence with the
-  Do-NOT clause in 12 skills (it restates what the agent's loading list already says).
-- Known S8 path hits: `qa-ui-java.md:115` cites `…/percy/SKILL.md`, `…/applitools/SKILL.md` and
-  `…/lighthouse-ci/SKILL.md`, which are `references/*.md` files of `visual-regression` and
-  `accessibility-testing`, not skills; `network-mocking/SKILL.md:3` names "the `performance` skill"
-  (→ `qa-load-testing-java`).
-
-Traps:
-- Agent sentences S3/S4 fixed in backend recur in 28 agents across S5–S17; fix them where your
-  agents carry them:
-  - "— MANDATORY SECTION" on the brownfield heading is dropped (K5).
-  - The orientation pass's "every run regardless of the gate's verdict" (the cache gate) gains
-    "outside a `Gate: none` plan task". `qa-performance-java.md:46` words it "regardless of verdict".
-  - A closing duty "per `be-shared-session-budget` Step 5" now reads "per the plan's
-    `## Close-out — every task` section (plan format §7)".
-  - A skill's Validation / Verify list gets one sentence: inside a `Gate: none` plan task it runs
-    none of the checks and reports "written, not run".
-  - K8: a hardcoded `pnpm …` / `npm …` in an instruction becomes the project's own script, run with
-    the package manager `packageManager` names.
-  - The operating rule "Run what you write — a step whose code never executed does not pass its
-    gate" becomes "Run what you write, outside a `Gate: none` plan task — …" (S5; every qa agent
-    carries it).
-- Stale path shorthands (S5): skill folders were renamed but citations were not, and the K1
-  resolver cannot see paths. Grep for `api-test-author/generator` → `writer`,
-  `api-test-author/reviewer` and `ui-test-author/reviewer` → `review`, `db-testing/client` →
-  `connection`, `bdd-project-setup` → `bdd-project-scaffold`, `conformance-audit` →
-  `standards-audit`, and (S6) `performance/<tool>` or `skills/performance` → `load-testing`,
-  `qa/_shared/api-contract-testing` → `qa/_shared/contract-testing-pact`. Check every step-table
-  path, and every `qa/…` path in the files you own, against the folder on disk.
-- S6's choice for production-uptime-checks: a load-tool name points at the stack skill that owns the
-  tool (`qa-performance-gatling` → `qa-load-testing-java`; `qa-performance-k6` → `qa-load-testing-typescript`,
-  since k6 is the TypeScript lane's tool), and `qa-ci-pipelines` → `qa-ci-pipelines-java`, with the
-  host names as "its … references". The unresolved token is a backticked name the resolver sees;
-  `qa-ci-pipelines-*` with a star is not a hit.
-- S6 also found: the orientation's "Recover, don't author" written twice (merge the two paragraphs);
-  "Confirm it builds and runs on arrival" needs the same `Gate: none` exception as Orientation 3;
-  the performance agent's Step 6 loads `qa/cicd` and `qa/reporting` skills while "Related agents"
-  says "do not load their skills" — state the exceptions once under the list. `qa-performance-java.md:33`
-  also writes defects up via `qa/manual/bug-report-writer`; keep it as one of those stated exceptions
-  (S6's reading for performance agents; D15 covers the LLM agents only).
-- The skills S7 owned (listed in its As built note) are done; a description or path in them is not
-  yours to re-edit.
-
-Gate: none — this plan gates once, in G1. Do not run tools/token-audit.py or §7's script.
-
-Commit: `chore(sweep S8): qa/java UI, mobile and performance lanes`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
 
 ### S9 — qa/typescript API, BDD and LLM lanes (general-purpose, docs)
 
@@ -1632,6 +1617,15 @@ Traps:
   a doubled "Recover, don't author" in the orientation, a "Confirm it builds and runs on arrival" that
   needs the `Gate: none` exception, and a performance agent whose Step 6 loads `qa/cicd` /
   `qa/reporting` skills while "Related agents" says not to — state the exceptions once.
+- Known S10 hits, found by S8 in the same copied text: `qa-ui-typescript.md:115` cites
+  `…/percy/SKILL.md`, `…/applitools/SKILL.md` and `…/lighthouse-ci/SKILL.md`, which are
+  `references/*.md` of `visual-regression` and `accessibility-testing` (S8 wrote "its
+  `references/percy.md`"); `qa-mobile-typescript.md:51` puts the "Emit no comments" bullet after the
+  "Live-app exploration" subsection instead of in the Operating-rules list (S8 moved it up, with the
+  Gate line after it); `qa-performance-typescript.md:107` says "house default — switch to …" for
+  `ci-pipelines` (S6/S8 wording: "read only the `references/<host>.md` … matching the project's
+  existing CI"). The descriptions ending in "For end-to-end suite work prefer the staged agent …"
+  get a Do-NOT clause in its place (S7/S8).
 
 Gate: none — this plan gates once, in G1. Do not run tools/token-audit.py or §7's script.
 

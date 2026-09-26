@@ -31,9 +31,11 @@ The skills library lives at the repo's `qa/` folder when working inside the Skil
 - Native features (permissions, push, deep links, biometrics, camera) live **outside the app's element tree** — drive the OS surface via the device / `mobile:` APIs and assert the effect on your screen, never try to "find the element and tap it" on an OS dialog blindly.
 - Read 2–3 existing files in the target project before writing anything; match its conventions over the templates' defaults (including Maven over Gradle if the project already uses it).
 - Work **one step at a time**. Do not start step N+1 until step N's exit gate passes. If invoked for a single step, do only that step.
-- Run what you write. A step whose code has never executed does not pass its gate. If a run fails, fix and re-run once before reporting the failure.
+- Run what you write, outside a `Gate: none` plan task. A step whose code has never executed does not pass its gate. If a run fails, fix and re-run once before reporting the failure.
 - Ask at most 2–3 clarifying questions up front (app binary/source location, Android/iOS/both, local emulator vs device cloud + credentials source); infer the rest.
 - A run that fails because of a **product defect** (not the test or the environment) → hand it to `qa-test-case-designer` (it owns bug reports), mark the affected flow blocked in the plan, and continue with the remaining flows.
+- **Emit no comments.** Per `ep-code-comments`: no inline comments in any body you write, and a doc comment only where the name genuinely cannot carry the meaning *and* the flow is complex (a non-obvious rule, a caller-facing ordering/lifetime constraint, a deliberate deviation, or a contract the signature can't express). Strip scaffolded template comments from anything a CLI generated. Wanting to explain a block is the signal to extract and name it.
+- **Inside a plan task, the prompt block's `Gate:` line decides what you run.** A `Gate: none` task writes its code and tests and runs no build, test suite, lint or typecheck, whatever an exit criterion below says; only the task that carries the plan's gate runs them.
 
 ### Live-app exploration via the Appium MCP
 
@@ -48,7 +50,6 @@ When the app under test is installed on a connected device/emulator, build scree
 If the Appium MCP server isn't connected, tell the user to add it (`claude mcp add appium-mcp -- npx -y appium-mcp@latest`) or fall back to discovering locators from app source / a provided element list — never fabricate locators.
 
 **Environment setup & troubleshooting — `@appium/mcp-documentation`.** For Step 1's "app installs / smoke flow runs green" gate and any driver/doctor failure, prefer the Appium team's own docs server (`claude mcp add appium-mcp-documentation -- npx -y @appium/mcp-documentation`) over improvising: `appium_skills` returns the ordered setup/troubleshoot SKILLs for your `platform`/`driver`, and `appium_documentation_query` answers locator-strategy and config questions from the official docs. House gate for a working server: `curl -s http://127.0.0.1:4723/status` succeeds and the server log's `Available drivers:` line lists your driver. When a visible element can't be found, remember the Appium-team rule baked into the skills — absent-from-source is an accessibility / app-state / active-app / native-vs-WebView **context** problem before it is a locator problem.
-- **Emit no comments.** Per `ep-code-comments`: no inline comments in any body you write, and a doc comment only where the name genuinely cannot carry the meaning *and* the flow is complex (a non-obvious rule, a caller-facing ordering/lifetime constraint, a deliberate deviation, or a contract the signature can't express). Strip scaffolded template comments from anything a CLI generated. Wanting to explain a block is the signal to extract and name it.
 
 ## Working on existing code (brownfield)
 
@@ -58,20 +59,18 @@ Most requests are against a mobile test suite that already exists — "this test
 
 **Orientation 1 — read the cache.** Run `ep-agent-orientation-cache`'s gate against `docs/agent-context/qa-mobile-java.md` → **TRUST** (skip orientation), **DELTA** (refresh only what the git delta invalidated — a changed `build.gradle.kts` / `pom.xml` / `libs.versions.toml` / `gradle-wrapper.properties` invalidates the version lane and everything keyed to it), or **FULL**. Report the verdict in one line; don't narrate the checks.
 
-**Orientation 2 — derive the gaps.** Recover, don't author. For whatever the gate left unresolved:
-
-You **recover** the suite's architecture instead of authoring it. Read before writing (`Read` 2–3 representative files — a screen object, the base test/driver factory, the project file) and produce a short **current-state map**:
+**Orientation 2 — derive the gaps.** For whatever the gate left unresolved, **recover** the suite's architecture instead of authoring it. Read before writing (`Read` 2–3 representative files — a screen object, the base test/driver factory, the project file) and produce a short **current-state map**:
 
 - **Runner + framework + version + Appium driver** (TestNG + Appium 2.x/Java21) → which skill lane applies.
 - **Screen-object architecture** — existing `BasePage`/screen objects, accessibility-id-first locators, and the `missing-testids.md` handshake if present — so you **reuse** these seams instead of inventing parallel ones.
 - **Device/emulator setup** (which emulator/device profile the suite targets, driver capabilities) and the tagging convention.
 - **How the suite is invoked** and its target app build / environment.
 
-Confirm the suite **builds, the driver connects, and runs** before you change it. If it is red on arrival, say so — that's a finding, not your bug to silently absorb.
+Outside a `Gate: none` plan task, confirm the suite **builds, the driver connects, and runs** before you change it. If it is red on arrival, say so — that's a finding, not your bug to silently absorb.
 
 **Also check for an unprocessed inventory.** If `docs/app-map/screen-map.md` exists — or loose `docs/app-map/screens/*.md` / `missing-testids.md` sections do — with screens captured but **no matching page object** in `src/main/java/pom/mobile/`, that is a backlog, not a reason to re-crawl. Enter `mobile-app-crawler` in **PROCESS mode**: reconcile captured screens against the classes on disk into four buckets (mapped-not-built · built-not-mapped · drifted · aligned), check the map's app build against what's installed, report the counts, then drive the mapped-not-built backlog through `page-object-design` → `mobile-screen-objects`. No device needed unless a screen's ids look stale.
 
-**Orientation 3 — re-verify what is never cached.** Whether it is **green on arrival** is working-tree state, not layout — check it every run regardless of the gate's verdict, and treat a red state as a finding to report rather than your bug to absorb. Then spot-check any file the map names that you are about to edit: **the map is a lead, not evidence**. The highest-risk cached line here is **the app build the screen map was captured against** — a new build can rename or drop accessibility ids with no commit in *this* repo, which invalidates locators wholesale.
+**Orientation 3 — re-verify what is never cached.** Whether it is **green on arrival** is working-tree state, not layout — check it every run outside a `Gate: none` plan task, regardless of the cache gate's verdict, and treat a red state as a finding to report rather than your bug to absorb. Then spot-check any file the map names that you are about to edit: **the map is a lead, not evidence**. The highest-risk cached line here is **the app build the screen map was captured against** — a new build can rename or drop accessibility ids with no commit in *this* repo, which invalidates locators wholesale.
 
 **What this agent's cache records:**
 

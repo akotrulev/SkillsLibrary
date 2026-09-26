@@ -1,6 +1,6 @@
 ---
 name: qa-device-cloud-java
-description: Use when the user needs the **real-device-cloud specifics** of running Java Appium tests on a mobile device farm. Triggers: "upload our app to BrowserStack App Automate and run the Appium Java tests", "run our TestNG mobile suite across a real-device matrix", "test biometric login on a real device on BrowserStack".
+description: Use when the user needs the **real-device-cloud specifics** of running Java Appium tests on a mobile device farm. Triggers: "upload our app to BrowserStack App Automate and run the Appium Java tests", "run our TestNG mobile suite across a real-device matrix", "test biometric login on a real device on BrowserStack". Not for web grids (`qa-browser-cloud-setup-java`) or OS-surface features (`qa-mobile-native-features-java`).
 ---
 
 # QA — Mobile Device Farm (Java: Appium java-client on a real-device cloud)
@@ -209,7 +209,7 @@ public final class FarmCredentials {
 3. **Live-session**: add `AppUploader` (REST upload → `bs://…`/`custom_id`), `RealDeviceDriverFactory` (real-device caps + the device-only features the test needs), and `DeviceFeatures` for mid-session injection; drive a device matrix from a `@DataProvider`.
 4. **Remote-run**: add `DeviceFarmRunner` (`createUpload` → poll → `scheduleRun` → poll `getRun`) with Awaitility condition waits.
 5. Reuse `browser-cloud-setup`'s session-status + dashboard-URL teardown; map the device count onto `thread-count` per its rules.
-6. Run **one** device/session first to confirm the upload + caps + features before fanning the matrix out; confirm the session/run appears on the dashboard with the right build/project tags.
+6. Run **one** device/session first to confirm the upload + caps + features before fanning the matrix out; confirm the session/run appears on the dashboard with the right build/project tags. Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run".
 
 ## Cross-references
 

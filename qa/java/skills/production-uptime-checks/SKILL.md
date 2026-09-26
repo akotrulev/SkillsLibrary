@@ -1,6 +1,6 @@
 ---
 name: qa-production-uptime-checks-java
-description: Use when authoring synthetic monitoring as code from the JVM stack — scheduled probe checks (HTTP/ping/DNS/TCP) and scripted checks against live staging/prod via Grafana Cloud Synthetic Monitoring + Terraform. The "is it up right now" layer, distinct from CI pre-merge tests. Triggers: "add a prod uptime check", "synthetic monitor for the login flow", "monitoring as code".
+description: Use when authoring synthetic monitoring as code from the JVM stack — scheduled probe checks (HTTP/ping/DNS/TCP) and scripted checks against live staging/prod via Grafana Cloud Synthetic Monitoring + Terraform. The "is it up right now" layer, distinct from CI pre-merge tests. Triggers: "add a prod uptime check", "synthetic monitor for the login flow", "monitoring as code". Not for pre-merge CI gates (`qa-ci-pipelines-java`) or load testing (`qa-load-testing-java`).
 ---
 
 # Synthetic Monitoring as Code (Grafana Cloud Synthetic Monitoring · Java 21) — **ported from the TypeScript/Checkly canonical**
@@ -17,7 +17,7 @@ tool changes.
 > **An honest note on "JVM-native".** Grafana Synthetic Monitoring's *scripted/browser* checks are **k6
 > scripts (JavaScript)** — same reality as Checkly's Playwright-JS browser checks: there's no JVM scripting
 > surface. So this file gives you **two routes for the rich journey layer**: (1) k6 scripts in Grafana SM
-> (cross-link `qa-performance-k6` — JS, but managed alongside everything else), or (2) the **truly Java-native
+> (cross-link `qa-load-testing-typescript`, the k6 skill — JS, but managed alongside everything else), or (2) the **truly Java-native
 > route** — a Spring Boot `@Scheduled` **Playwright-Java** probe that reuses your `qa-ui-test-writer-playwright-java`
 > page objects and publishes metrics to Prometheus (the parallel to the .NET sibling's `TrackAvailability`).
 > The cheap HTTP/ping/TCP layer needs no scripting in either route — it's pure Terraform config-as-code.
@@ -32,7 +32,7 @@ It is **not**:
 
 - a **CI test** — CI tests run **once, pre-merge, against an ephemeral env** to gate a change
   (`qa-ci-pipelines-*`). A synthetic runs **forever, post-deploy, against the real thing**.
-- a **load test** — `qa-performance-gatling` / `qa-performance-k6` drive throughput to find the breaking
+- a **load test** — `qa-load-testing-java` (Gatling) / `qa-load-testing-typescript` (k6) drive throughput to find the breaking
   point; a synthetic fires one scripted journey every N minutes to answer "is it working *right now*".
 - a **journey author** — this skill *reuses* the page objects authored by
   `qa-ui-test-writer-playwright-java`; it is the **assertion + scheduling + alerting layer**, not a new author.
@@ -114,7 +114,7 @@ resource "grafana_synthetic_monitoring_check" "storefront_health" {
 
 The check's **`frequency`** (set on the check / inherited) is the cadence; the emitted
 **`probe_http_duration_seconds`** metric is the latency the alert gates on (the SLA). Deploy from the pipeline
-(`terraform apply`) — cross-link `qa-ci-pipelines`. This is the synthetic-vs-CI boundary: this check
+(`terraform apply`) — cross-link `qa-ci-pipelines-java`. This is the synthetic-vs-CI boundary: this check
 runs **forever, against the live target**, not as a pre-merge gate.
 
 ## Check type 1 — HTTP/ping/TCP probe checks (status + latency + content)
@@ -128,7 +128,7 @@ reachability use the `ping`, `tcp`, or `dns` settings block; for a chained API f
 ## Check type 2 — the journey layer (k6, or the Java-native probe)
 
 **Route A — k6 (in Grafana SM).** Grafana Synthetic Monitoring runs **k6 scripts** as `scripted` checks (and
-k6 `browser` scripts as browser checks). This reuses `qa-performance-k6` muscle — honest caveat: it's
+k6 `browser` scripts as browser checks). This reuses the k6 muscle of `qa-load-testing-typescript` — honest caveat: it's
 JavaScript, not Java. Good when the journey is API-shaped or the team already writes k6.
 
 **Route B — the Java-native probe (author the journey in Java end-to-end).** A Spring Boot `@Scheduled`
@@ -158,7 +158,7 @@ public final class CheckoutJourneyProbe {
             // REUSE the SAME page objects the CI suite uses — intent, not selectors
             var login = new LoginPage(page);
             login.goTo();
-            // creds from env, read lazily, NEVER logged — set via Spring config / secret store
+            // creds from env, read lazily, never logged — set via Spring config / secret store
             login.signInAs(System.getenv("SYNTHETIC_USER"), System.getenv("SYNTHETIC_PASSWORD"));
 
             var cart = new CartPage(page);
@@ -324,10 +324,10 @@ objects are exercised by the CI TestNG suite (the gate) and the probe (the monit
   is the parallel to its custom `TrackAvailability` probe.
 - `qa-ui-test-writer-playwright-java` — authors the page objects + journeys that the **Java-native probe reuses**.
   This skill schedules and alerts on them; it does not author them. Mirror its intent-not-selectors discipline.
-- `qa-performance-k6` (#?) — the k6 muscle Grafana SM's **scripted/browser checks** reuse (Route A), and the
+- `qa-load-testing-typescript` — the k6 muscle Grafana SM's **scripted/browser checks** reuse (Route A), and the
   load-vs-uptime overlap: k6 *can* run as a synthetic via Grafana SM. Synthetics check "is it working"; k6 checks
-  "how much can it take". `qa-performance-gatling` is the JVM load tool (also not a synthetic).
-- `qa-ci-pipelines` (gitlab-ci / github-actions / azure-pipelines references) — the **pre-merge gate against
+  "how much can it take". `qa-load-testing-java` (Gatling) is the JVM load tool (also not a synthetic).
+- `qa-ci-pipelines-java` (its GitLab CI, GitHub Actions and Azure Pipelines references) — the **pre-merge gate against
   ephemeral envs** boundary; also where `terraform apply` for the checks + the probe-app deploy are wired.
 - `qa-test-login-tokens-java` — M2M / test-user tokens for checks hitting an **authenticated** live
   endpoint (mint in the probe / multihttp setup; creds from env, lazily).

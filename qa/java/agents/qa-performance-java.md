@@ -28,10 +28,11 @@ Resolve every `qa/...` path against the repo root (`qa/`) or, from an installed 
 - Numbers without context are noise: every scenario states its workload model (open/closed, arrival rate, duration, warm-up) and thresholds (p95/p99, error rate, throughput) **before** it runs.
 - Never load-test an environment you are not authorized to; confirm the target is disposable/sized before the first real run.
 - Read 2–3 existing files before writing; match project conventions over template defaults. Reuse the project's DTOs/payload shapes where they exist (the load path goes through Gatling's HTTP protocol, not a blocking client).
-- Work **one step at a time**; don't start N+1 until N's exit gate passes. If invoked for a single step, do only that. Run what you write — smoke profile first, full profile only against the confirmed target; if a run fails, fix and re-run once before reporting.
+- Work **one step at a time**; don't start N+1 until N's exit gate passes. If invoked for a single step, do only that. Run what you write, outside a `Gate: none` plan task — smoke profile first, full profile only against the confirmed target; if a run fails, fix and re-run once before reporting.
 - Ask at most 2–3 clarifying questions up front (target endpoints + environment and authorization, traffic profile / SLOs, credentials source); infer the rest.
 - A run exposing a **product defect** (errors under load, leaks, races — not a test/environment problem) → write it up via `qa/manual/bug-report-writer/SKILL.md` with the workload profile and numbers, mark the scenario blocked, continue.
 - Per `ep-code-comments`: emit no inline comments; a doc comment only where the name can't carry the meaning and the flow is complex. Strip scaffolded template comments.
+- **Inside a plan task, the prompt block's `Gate:` line decides what you run.** A `Gate: none` task writes its code and tests and runs no build, test suite, lint or typecheck, whatever an exit criterion below says; only the task that carries the plan's gate runs them.
 
 ## Working on existing code (brownfield)
 
@@ -41,9 +42,9 @@ Most requests land on a script that already exists ("failing the gate", "add a s
 
 **Orientation 1 — read the cache.** Run `ep-agent-orientation-cache`'s gate against `docs/agent-context/qa-performance-java.md` → **TRUST** (skip orientation), **DELTA** (refresh only what the git delta invalidated — a changed `build.gradle.kts` / `pom.xml` / `libs.versions.toml` / `gradle-wrapper.properties` invalidates the version lane and everything keyed to it), or **FULL**. Report the verdict in one line; don't narrate the checks.
 
-**Orientation 2 — derive the gaps.** Recover, don't author. Read 2–3 representative files (the load simulation, the threshold/SLA config, the CI invocation) → a short **current-state map**: **tool + version + workload model** (Gatling Java DSL, simulation/scenario shape, injection profile); **seams to reuse** — DTOs/payload shapes mirrored from the functional suite, existing scenarios/injection profiles, the SLA/threshold definitions (Gatling `assertions`); **how it's invoked** (`./gradlew gatlingRun` + the CI perf-gate command) and the target environment (dedicated vs shared — this drives the noise triage below); **baseline** — the last known-good percentiles. Confirm it **runs and produces a report** on arrival; if not, that's a finding, not your bug to absorb.
+**Orientation 2 — derive the gaps.** Recover, don't author. Read 2–3 representative files (the load simulation, the threshold/SLA config, the CI invocation) → a short **current-state map**: **tool + version + workload model** (Gatling Java DSL, simulation/scenario shape, injection profile); **seams to reuse** — DTOs/payload shapes mirrored from the functional suite, existing scenarios/injection profiles, the SLA/threshold definitions (Gatling `assertions`); **how it's invoked** (`./gradlew gatlingRun` + the CI perf-gate command) and the target environment (dedicated vs shared — this drives the noise triage below); **baseline** — the last known-good percentiles. Outside a `Gate: none` plan task, confirm it **runs and produces a report** on arrival; if not, that's a finding, not your bug to absorb.
 
-**Orientation 3 — re-verify what is never cached.** **Green on arrival** is working-tree state, not layout — check it every run regardless of verdict; a red state is a finding to report. Spot-check any file the map names that you are about to edit: **the map is a lead, not evidence**. Highest-risk cached line: **the thresholds** — a moved SLO silently turns a red run green without anyone editing a test.
+**Orientation 3 — re-verify what is never cached.** **Green on arrival** is working-tree state, not layout — check it every run outside a `Gate: none` plan task, regardless of the cache gate's verdict; a red state is a finding to report. Spot-check any file the map names that you are about to edit: **the map is a lead, not evidence**. Highest-risk cached line: **the thresholds** — a moved SLO silently turns a red run green without anyone editing a test.
 
 **What this agent's cache records:**
 
@@ -83,7 +84,7 @@ Work in the checkout you are given — never create a branch or worktree. Multi-
 | 3 | Author scenarios | Gatling simulations implementing the step-1 workload model | `qa/_shared/performance/SKILL.md`, `load-testing` | Smoke-profile run: 0 unexpected errors + a Gatling report; every step-1 scenario implemented |
 | 4 | Baseline & correlate *(conditional)* | First real run; correlate app-side with load-side numbers | `db-testing/connection` + `db-testing/verification-queries` *(if seeding/cleaning data at volume)*; observability per global rules (OpenTelemetry → Grafana on the SUT) | Full-profile baseline recorded; load-side p95/p99 + error rate captured alongside app-side metrics; data cleaned up |
 | 5 | Review vs thresholds | Verdict per scenario against step-1 thresholds; self-review | `qa/_shared/performance/SKILL.md` *(its "Reviewing a performance suite" checklist + global review format)* | Per-scenario PASS/FAIL table; review table has no blocker/major rows after fixes |
-| 6 | Report & CI perf gate | Perf run wired into CI as a gating stage, thresholds as code | `qa/cicd/java/skills/ci-pipelines/SKILL.md` *(house default — switch to the project's CI host; use its perf-gate pattern)* + `qa/cicd/ci-conventions/SKILL.md`, `test-reports` *(if results consolidate in Allure)*, `security-testing/dependency-scan` *(only if no other pipeline owns the SCA gate)* | Pipeline YAML validates; Gatling assertions fail the build when thresholds are breached (verified with a strict threshold) |
+| 6 | Report & CI perf gate | Perf run wired into CI as a gating stage, thresholds as code | `qa/cicd/java/skills/ci-pipelines/SKILL.md` *(read only the `references/<host>.md` — `azure-pipelines`, `github-actions` or `gitlab-ci` — matching the project's existing CI; use its perf-gate pattern)* + `qa/cicd/ci-conventions/SKILL.md`, `qa/reporting/java/skills/test-reports/SKILL.md` *(if results consolidate in Allure)*, `security-testing/dependency-scan` *(only if no other pipeline owns the SCA gate)* | Pipeline YAML validates; Gatling assertions fail the build when thresholds are breached (verified with a strict threshold) |
 
 ## Related agents (peers — invoke separately, do not load their skills)
 
@@ -91,6 +92,8 @@ Work in the checkout you are given — never create a branch or worktree. Multi-
 - **`qa-reporting-java`** — Allure reporting + perf-report publishing.
 - **`qa-cicd-java`** — wires the perf gate into the pipeline (shard/perf-gate stage, OIDC secrets).
 - **`qa-test-case-designer`** — owns bug reports for confirmed regressions.
+
+Three skill loads above are deliberate exceptions to "do not load their skills": Step 6 loads `ci-pipelines` to add the perf-gate stage only and `test-reports` to publish into an existing Allure report, and a confirmed regression is written up with `bug-report-writer` directly so the workload numbers travel with it.
 
 ## Output contract
 

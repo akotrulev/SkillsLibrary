@@ -1,11 +1,11 @@
 ---
 name: qa-browser-cloud-setup-java
-description: Use when the user needs to run Java Playwright (web) or Appium java-client (mobile) tests on a **hosted cloud grid**. Triggers: "run our Playwright Java tests on BrowserStack", "wire Appium java-client to Sauce Labs", "set up LambdaTest caps for our TestNG Appium tests". For end-to-end suite work prefer the staged agent `qa-ui-java` / `qa-mobile-java` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
+description: Use when the user needs to run Java Playwright (web) or Appium java-client (mobile) tests on a **hosted cloud grid**. Triggers: "run our Playwright Java tests on BrowserStack", "wire Appium java-client to Sauce Labs", "set up LambdaTest caps for our TestNG Appium tests". Not for real-device app upload and device matrices (`qa-device-cloud-java`) or writing the tests (`qa-ui-test-writer-playwright-java`).
 ---
 
 # QA — Cloud Grid Config (Java: Playwright + Appium java-client)
 
-Wires Java tests to a **hosted device/browser grid** — BrowserStack, Sauce Labs, LambdaTest, or AWS Device Farm — so the same Playwright web tests and Appium java-client mobile tests that run locally execute at scale on someone else's infrastructure. This skill is the **bridge** between `qa/java/skills/ui-test-author/{playwright,appium}/java` (which write the tests) and the grid that runs them: connection wiring, vendor capabilities, parallelism, artifacts, secrets, tunnels, and result reporting. It is **config/wiring** — it does not author page objects or tests.
+Wires Java tests to a **hosted device/browser grid** — BrowserStack, Sauce Labs, LambdaTest, or AWS Device Farm — so the same Playwright web tests and Appium java-client mobile tests that run locally execute at scale on someone else's infrastructure. This skill is the **bridge** between `qa/java/skills/ui-test-author/{playwright,appium}` (which write the tests) and the grid that runs them: connection wiring, vendor capabilities, parallelism, artifacts, secrets, tunnels, and result reporting. It is **config/wiring** — it does not author page objects or tests.
 
 > **Why this skill exists.** A local Playwright/Appium suite hard-codes nothing about a grid: it launches a local browser or a local emulator. Moving it to a grid changes exactly one thing per stack — **how the driver/browser is connected** — plus a capability block, a parallelism cap, and secret hygiene. Get those five things right and every existing page object runs unchanged. Get them wrong and you leak an access key, blow the plan's session cap, or stare at a green local run that was actually a grid that never connected.
 
@@ -112,7 +112,7 @@ These sections live in `references/details.md` — **read it when the task touch
 4. Map the session cap onto TestNG `thread-count` from `GRID_CONCURRENCY`; note the `shards × thread-count ≤ cap` rule and cross-link `qa/cicd/java/skills/ci-pipelines/*`.
 5. Wire artifacts (`Artifacts.attachSessionUrl`) + session status (`SessionStatus.mark…`) into `@AfterMethod`.
 6. If the target is private, add the tunnel lifecycle (`GridTunnel` in `@BeforeSuite`/`@AfterSuite`) and tie sessions via the cap.
-7. Run a single test against the grid first (one thread) to confirm the connection + caps before fanning out. Confirm the session appears on the dashboard with the right build/project tags.
+7. Run a single test against the grid first (one thread) to confirm the connection + caps before fanning out. Confirm the session appears on the dashboard with the right build/project tags. Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run".
 
 ## Cross-references
 

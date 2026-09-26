@@ -1,6 +1,6 @@
 ---
 name: qa-load-testing-java
-description: Use when the user asks to design or author Gatling performance / load tests in Java 21 (Gatling 3.11+ Java DSL). Triggers: "write a Gatling simulation for X", "Gatling spike test for our Java service", "ramp profile in Gatling Java DSL". For end-to-end suite work prefer the staged agent `qa-performance-java` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
+description: Use when the user asks to design or author Gatling performance / load tests in Java 21 (Gatling 3.11+ Java DSL). Triggers: "write a Gatling simulation for X", "Gatling spike test for our Java service", "ramp profile in Gatling Java DSL". Not for fault injection under normal load (`qa-failure-injection-testing-java`) or uptime probes (`qa-production-uptime-checks-java`).
 ---
 
 # QA — Performance Testing with Gatling (Java 21)
@@ -350,7 +350,7 @@ Pair with Grafana for service-side correlation (`observability/dashboards`).
 4. Add CSV feeders / body files under `src/gatling/resources/` as needed.
 5. Wire seed / cleanup Gradle tasks if the test mutates state; chain via `dependsOn` / `finalizedBy`.
 6. Add CI step (smoke on PR; full on release). Publish `build/reports/gatling/` as a CI artifact.
-7. Run locally with `./gradlew gatlingRun-<FQN>`; confirm per-route assertions; confirm the test fails when an SLO is breached.
+7. Run locally with `./gradlew gatlingRun-<FQN>`; confirm per-route assertions; confirm the test fails when an SLO is breached. Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run".
 8. Add the report to the release / change notes (see `_shared` template).
 
 ## Handoffs
@@ -360,6 +360,6 @@ Pair with Grafana for service-side correlation (`observability/dashboards`).
 - NBomber (.NET) → `qa/dotnet/skills/load-testing`
 - SLO targets the test validates → `qa/manual/quality-metrics`
 - Grafana dashboards for server-side correlation → `observability/dashboards`
-- Pipeline integration → `qa/cicd/java/skills/ci-pipelines/{github-actions,azure-pipelines,gitlab-ci}` or `devops/<ci>`
+- Pipeline integration → `qa/cicd/java/skills/ci-pipelines` (its `references/<host>.md`) or `devops/<ci>`
 - Allure publishing for perf reports → `qa/reporting/java/skills/test-reports`
 - Bug filings discovered during perf → `qa/manual/bug-report-writer`

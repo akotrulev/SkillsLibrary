@@ -1,6 +1,6 @@
 ---
 name: qa-ui-test-writer-selenium-java
-description: Use when the user asks to scaffold a Java + Selenium 4 page object or TestNG UI test, following the BasePage / DriverFactory / TestNG pattern. Triggers: "create a Selenium page object for X", "add a Java page for screen Y", "write a Selenium UI test for Z". For end-to-end suite work prefer the staged agent `qa-ui-java` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
+description: Use when the user asks to scaffold a Java + Selenium 4 page object or TestNG UI test, following the BasePage / DriverFactory / TestNG pattern. Triggers: "create a Selenium page object for X", "add a Java page for screen Y", "write a Selenium UI test for Z". Not for Playwright projects (`qa-ui-test-writer-playwright-java`) or reviewing existing tests (`qa-ui-test-review-java`).
 ---
 
 # QA — Selenium Java Page Object & Test Generator
@@ -218,7 +218,7 @@ public class AuthenticationTest extends BaseTest {
    - For repeating items, a `List<{Component}>` method that wraps each `WebElement` in a component class
 4. If a destination page doesn't exist yet, create a stub or recursively generate it.
 5. Generate the test class extending `BaseTest`; one `@Test` per scenario, with assertions on user-visible outcomes (not implementation details).
-6. Run `./gradlew test` — expect 0 failures. If browser drivers fail to download, check the `WebDriverManager` version and `system.properties`.
+6. Run `./gradlew test` — expect 0 failures. If browser drivers fail to download, check the `WebDriverManager` version and `system.properties`. Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run".
 
 ## Handoffs
 
