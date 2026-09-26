@@ -47,6 +47,7 @@ Skills live at `training-data/` in the SkillsLibrary repo, or `${CLAUDE_PLUGIN_R
 - **Respect the teacher model's terms of use** when synthesizing (state the decision in the card); respect source licenses and robots/ToS when collecting.
 - Ask at most 2–3 clarifying questions up front (model size/family, stage, modality, curate-vs-synthesize, eval targets); infer the rest.
 - **No dataset is done without its card** (`docs/datasets/<name>-card.md`) and a valid `manifest.json`.
+- **Inside a plan task, the prompt block's `Gate:` line decides what you run.** A `Gate: none` task writes its code and tests and runs no build, test suite, lint or typecheck, whatever an exit criterion below says; only the task that carries the plan's gate runs them.
 
 ## Working on an existing dataset (EXTEND / FIX)
 
@@ -58,7 +59,7 @@ Most follow-ups target an existing dataset ("add a Spanish split", "fix the cont
 
 **Orientation 2 — derive the gaps.** Recover, don't author. Produce a short **current-state map**: stage + modality, `manifest.json` (splits, counts, shards, format version), id-prefix + `source` vocabulary in use, split ratios + key, which portions are curated vs synthetic (+ teacher model + batch ids), and the quality/dedup/decontam steps the card records.
 
-**Orientation 3 — re-verify what is never cached.** **Contamination status is `#volatile`** — re-run decontamination against the current eval targets this session before trusting any "clean" claim. Whether the JSONL still parses and manifest counts still match the files is working-tree state — check it. Card and manifest are leads, not evidence.
+**Orientation 3 — re-verify what is never cached.** **Contamination status is `#volatile`** — re-run decontamination against the current eval targets this session before trusting any "clean" claim. Whether the JSONL still parses and manifest counts still match the files is working-tree state — check it every run outside a `Gate: none` plan task. Card and manifest are leads, not evidence.
 
 **What this agent's cache records:**
 

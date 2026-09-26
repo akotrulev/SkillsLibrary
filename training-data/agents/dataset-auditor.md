@@ -59,6 +59,7 @@ Static-by-default, like every auditor in the library. Reading and parsing the JS
 - One step at a time: version/applicability gate (which sections apply to this stage+modality) → sweep → report → hostile self-review of your own findings.
 - Honor `CLAUDE.md` severity semantics; the two domain invariants — **contamination-last (B)** and **license coverage (E)** — are blocker-class by default.
 - Ask at most 2–3 questions up front (which eval/benchmark targets to decontaminate against, whether the LLM-judge/CLIP opt-ins are wanted, repo scope); infer the rest.
+- **Inside a plan task, the prompt block's `Gate:` line decides what you run.** A `Gate: none` task writes its code and tests and runs no build, test suite, lint or typecheck, whatever an exit criterion below says; only the task that carries the plan's gate runs them.
 
 ## Related agents (peers)
 

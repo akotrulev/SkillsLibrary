@@ -114,7 +114,7 @@ Fixes:
 - **Batched fetches**: load all parents, then load all children with `WHERE parent_id IN (...)`, then assemble in app code
 - **Dataloaders** (graphql-style): batch + dedupe within a request scope
 
-Tracing (OTel) shows N+1 as a fan of identical short queries on a span — quick to spot. Add it to your `qa/<stack>/skills/api-test-author/reviewer` checklist.
+Tracing (OTel) shows N+1 as a fan of identical short queries on a span — quick to spot. Add it to your `qa/<stack>/skills/api-test-author/review` checklist.
 
 ## Filtering & sorting
 

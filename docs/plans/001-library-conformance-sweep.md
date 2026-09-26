@@ -40,8 +40,11 @@ moved to .NET 10; `frontend/PLAN.md` filed live as `docs/plans/frontend-PLAN.md`
 S14 landed 2026-09-26 (design/ and observability/: the Gate line in `design-auditor` and the three
 `observability-engineer-*` agents, the nine design descriptions and `design-auditor` under budget, the K1
 name fixed; `docs/plans/design-ux-improvements.md` filed to `docs/plans/implemented/`,
-`docs/research/ui-ux-practice-2026.md` kept as the catalog cites it). S15 is next. S1–S18 are ungated:
-the edits from S1 to S14 are built but unverified until G1 runs §7.
+`docs/research/ui-ux-practice-2026.md` kept as the catalog cites it). S15 landed 2026-09-26 (data/ and
+training-data/: the Gate line in `data-architect`, `dataset-engineer` and `dataset-auditor`, the
+`data-modeling` K1 hits resolved as reference paths, one stale path; `ai-development/claude-api`
+re-vendored from `anthropics/skills` `33375500` with a 491-char house description). S16 is next.
+S1–S18 are ungated: the edits from S1 to S15 are built but unverified until G1 runs §7.
 
 ## 1. What already exists, and what is missing
 
@@ -1697,6 +1700,49 @@ hits 22k, descriptions 5k, ~13 files modified 20k, the research note header 2k, 
   `docs/plans/` (O6).
 - K2: the Gate line in `data-architect` and both `training-data` agents.
 - **Not in S15:** `business-analysis`, `tooling` (S16).
+- **As built (2026-09-26):** `data/`, `training-data/`, and the `ai-development/claude-api` re-vendor.
+  The three agents and three commands were read in full; the commands needed no change. Gate line added
+  to 3 agents: `data-architect.md:58` (below the plan-task operating rule), `dataset-engineer.md:50` and
+  `dataset-auditor.md:62`, each the last Operating-rules bullet. 7 house files changed, plus this plan.
+  Data issues: 3 fixed. K1: `data-modeling` ×2 (`data-architect.md:42`, `:118`) named the engine
+  reference file, not a skill, so both now read `references/data-modeling.md` (the resolver prints
+  nothing for either folder). Stale path: `slow-query-fixes/SKILL.md:117` `api-test-author/reviewer` →
+  `api-test-author/review`.
+  Code issues: 4 fixed. K5: of the 10 all-caps hits, 9 are SQL (`GENERATED ALWAYS AS …`) and stay; the
+  one rule word, `redis/references/operations.md:24` "you MUST configure it", → "configure it
+  explicitly" (the reason follows in the paragraph). Migration-safety rules (`migrations/SKILL.md`
+  "What NOT to do", `data-architect.md:52`) were left as the hard rules they are. K4: "Slice scope
+  (extend)" → "Change scope (extend)" (`data-architect.md:174`). Verify list: `migrations/SKILL.md:177`
+  step 6 gains the `Gate: none` "written, not run" sentence.
+  Logical conflicts: 4 fixed. Orientation 3's "every run regardless of the gate's verdict" gains
+  "outside a `Gate: none` plan task" (`data-architect.md:80`); the Orientation 2 migrations-apply-clean
+  check (`:78`) and `dataset-engineer.md:62`'s JSONL/manifest check gain the same guard; the closing duty
+  "per `be-shared-session-budget` Step 5" → "per the plan's `## Close-out — every task` section (plan
+  format §7)" (`:131`), and the loading line (`:22`) now loads `be-shared-session-budget` "when executing
+  a task from a `solution-planner` plan" rather than "when closing" one, since closing no longer follows
+  it. No "MANDATORY SECTION" heading and no `pnpm`/`npm` instruction exists in either folder.
+  Re-vendor (D11): upstream `anthropics/skills` `main` `33375500bcea98d610eb30ce10ac4e59b89c390d`
+  (2026-09-24T12:20:35-04:00). `git diff --stat -- ai-development/claude-api`: 75 files changed, 8165
+  insertions(+), 2948 deletions(-) — 31 added, 39 modified, 5 deleted (the single-file
+  `{csharp,go,java,php,ruby}/claude-api.md` guides became `<lang>/claude-api/` folders; nothing outside
+  `ai-development/` cites a path inside the skill). The models table now reads
+  "cached: 2026-06-24" (`SKILL.md:175`, was 2026-04-15). `diff -r` against the clone shows only the
+  description differs: upstream's is a 3-paragraph `|-` block well over budget; the house one is a quoted
+  line of 491 chars (493 as `tools/token-audit.py` counts it, quotes included), keeping upstream's
+  opening sentence, its Claude/Anthropic/`claude-*` triggers and LLM-shaped-task trigger, and its
+  other-provider skip as a Do-NOT clause. Upstream's new `license:` frontmatter line is kept. The clone
+  went into an untracked `.scratch/` inside the worktree (the unattended shell refuses `/tmp` and `$VAR`
+  expansion), removed before commit. `./ai-development/claude-api` still exists and is still listed.
+  Cleanup: `docs/plans/fine-tuning-house-models.md` stays live in `docs/plans/` (O6). No plan, progress
+  or handoff file and no tracked junk in either folder. Every SKILL.md, agent and command in both folders
+  is listed in the marketplace and every listed path exists.
+  Kept on purpose: expand/contract "phases" in `migrations/SKILL.md` (D8); Mongo `$slice` and aggregation
+  "stages", and training-data's pipeline "stages" (pretraining/SFT/preference/eval), are domain terms. No
+  version hit in either folder; the engine version lanes are probe-keyed and untouched. The engine
+  "Quick-wins checklist" sections are judging lists, not runnable checks. Agent descriptions keep their
+  role-first opening, as S3–S14 left every agent.
+  Carried forward: nothing new. Unverified: nothing was run beyond §4's searches, the K1/K7 scripts, a
+  marketplace path check and `diff -r` against the clone (Gate: none). Left for the user: nothing.
 
 ### S16 — business-analysis and tooling
 
@@ -1864,69 +1910,9 @@ name: the K1 resolver flags it (D12).
 | S18 | `docs` | `general-purpose` | — | ~135k |
 | G1 | `docs` | `general-purpose` | S1–S18 | ~120k |
 
-S1 to S14 have landed, and their prompts are deleted; the 5 prompts from S15 to G1 are live.
+S1 to S15 have landed, and their prompts are deleted; the 4 prompts from S16 to G1 are live.
 
 ---
-
-### S15 — data and training-data (general-purpose, docs)
-
-````
-You are `general-purpose`. Task S15 of docs/plans/001-library-conformance-sweep.md: bring data/ and
-training-data/ in line with the plan's checks K1–K9.
-
-Deliverable: `data/` and `training-data/` pass K1–K9 with three agents carrying the Gate line;
-`ai-development/claude-api` matches `anthropics/skills` `skills/claude-api` at the current `main`
-except for a description of ≤ 500 chars; `docs/plans/fine-tuning-house-models.md` is filed per §5.
-
-Read, in this order:
-1. CLAUDE.md, especially the data-engine versions in the version policy.
-2. The plan: §1 (the claude-api row), §2, §3, §4, §5, §6 (the S15 rows), D1–D11, O5–O6, task S15.
-3. CONTRIBUTING.md.
-4. data/agents/*.md and training-data/agents/*.md in full.
-5. The plan's "Close-out — every task".
-
-Do:
-- Run §4's recipes with DIR=data, then DIR=training-data.
-- K1: `data-modeling` ×2 in data/agents/data-architect.md. Resolve it only if it is meant as a skill
-  name.
-- K5: restate data/'s 10 all-caps rule words; migration-safety rules stay hard rules with their
-  reason.
-- D11 re-vendor, from the repo root:
-    git clone --depth 1 https://github.com/anthropics/skills "${TMPDIR:-/tmp}/anthropic-skills"
-    rsync -a --delete "${TMPDIR:-/tmp}/anthropic-skills/skills/claude-api/" ai-development/claude-api/
-  Then restore a ≤ 500-char description in ai-development/claude-api/SKILL.md: start from today's
-  house description (git show fc94a9a) and keep upstream's trigger phrases and Do-NOT scope. Record the
-  upstream SHA and date, `git diff --stat` totals and the new "cached:" date in the As built note.
-- K9: docs/plans/fine-tuning-house-models.md stays in docs/plans/ (O6).
-- K2: the Gate line in data-architect and both training-data agents.
-
-Traps:
-- Agent sentences S3/S4 fixed in backend recur in 28 agents across S5–S17; fix them where your
-  agents carry them:
-  - "— MANDATORY SECTION" on the brownfield heading is dropped (K5).
-  - The orientation pass's "every run regardless of the gate's verdict" (the cache gate) gains
-    "outside a `Gate: none` plan task".
-  - A closing duty "per `be-shared-session-budget` Step 5" now reads "per the plan's
-    `## Close-out — every task` section (plan format §7)".
-  - A skill's Validation / Verify list gets one sentence: inside a `Gate: none` plan task it runs
-    none of the checks and reports "written, not run".
-  - K8: a hardcoded `pnpm …` / `npm …` in an instruction becomes the project's own script, run with
-    the package manager `packageManager` names.
-- Stale path (S5): `data/_shared/slow-query-fixes/SKILL.md:117` cites
-  `qa/<stack>/skills/api-test-author/reviewer`; the folder is `…/api-test-author/review`.
-- Expand/contract "phases" are domain vocabulary (D8).
-- Never up-level a data engine version in a probe-first recipe. The recipes are keyed to the live
-  server's version.
-- The re-vendored files are upstream's (D11): do not apply K1–K9 to them, and do not edit anything
-  but the description. The marketplace path `./ai-development/claude-api` must still exist afterwards.
-- If the clone fails (no network), keep the prompt block with a `Blocked on network` line and your
-  other work landed (Close-out step 4), rather than hand-copying files.
-
-Gate: none — this plan gates once, in G1. Do not run tools/token-audit.py or §7's script.
-
-Commit: `chore(sweep S15): data and training-data`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
 
 ### S16 — business-analysis and tooling (general-purpose, docs)
 
@@ -2109,7 +2095,8 @@ Do:
   - `git rm --cached .claude/settings.local.json`; add it to .gitignore.
 - Docs: grep README.md, docs/skills-catalog.md and CLAUDE.md for every name, count and path the As
   built notes changed, and fix those places. Grep for root plan filenames too; they moved. README's
-  ai-development attribution row gets the upstream SHA and date from S15's As built note.
+  ai-development attribution row gets upstream `anthropics/skills` `main` `33375500` (2026-09-24),
+  re-vendored 2026-09-26, models table "cached: 2026-06-24" (S15's As built note).
 - Final Status (Close-out steps 5–6) names the next plans (O7): conformance audits and size
   optimization.
 - Gate, in run order. Save §7's script as "${TMPDIR:-/tmp}/library-check.py", then:

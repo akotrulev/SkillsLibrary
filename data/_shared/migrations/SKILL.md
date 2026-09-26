@@ -174,7 +174,7 @@ NoSQL engines lack `ALTER`. Migration moves:
 3. Choose the engine-specific online-safe primitive (`CONCURRENTLY`, `INPLACE`, `ALGORITHM=INSTANT`, etc.)
 4. Write the migration file in the project's tool's naming convention.
 5. If a backfill is needed, write it as a separate file or, for large backfills, as a job that the pipeline triggers post-deploy.
-6. Verify locally against a representative dataset; check the execution plan / row count.
+6. Verify locally against a representative dataset; check the execution plan / row count. Inside a `Gate: none` plan task, run none of these checks and report the migration as "written, not run".
 
 ## Handoffs
 

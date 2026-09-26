@@ -21,7 +21,7 @@ Guidance by workload:
 - Combine both (RDB + AOF): fast restore from RDB with AOF filling the gap. Redis 7+ uses a multi-part AOF that makes rewrites cheaper.
 - **Snapshots and AOF files contain the whole keyspace in plaintext** — encrypt at rest and guard backups (`references/security.md`).
 
-## Eviction — you MUST configure it
+## Eviction — configure it explicitly
 
 The default `maxmemory` is unbounded and the default policy is **`noeviction`** — meaning a server with no cap will consume memory until the OOM killer takes it, and a server with a cap but `noeviction` starts **rejecting writes** when full. Neither is what a cache wants. **Always set `maxmemory` and an explicit policy.**
 
