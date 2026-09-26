@@ -16,18 +16,18 @@ Authorization: engagement=<NNN>  target=<in-scope host>  allowed-techniques=<lis
 
 This skill is **language-agnostic** and is loaded by the **`penetration-tester`** agent in its **Exploitation** step. It owns *gaining the foothold*; it does not *find* the surface (`pentest-recon-enumeration`), *prove a single vuln in isolation* (`qa-security` `exploit-validation` — its feedstock), or *escalate* the foothold (`pentest-privilege-escalation`).
 
-## The boundary vs Stage-2 `exploit-validation` (sqlmap appears in both — draw it sharply)
+## The boundary vs `exploit-validation` (sqlmap appears in both — draw it sharply)
 
 Both this skill and `qa-security`'s `exploit-validation` use sqlmap. The line is the **altitude and goal**:
 
-| | `qa-security` `exploit-validation` (Stage 2) | **this skill** `pentest-initial-access` (Stage 3) |
+| | `qa-security` `exploit-validation` | **this skill** `pentest-initial-access` |
 |---|---|---|
 | Question | *Does this one detected vuln actually fire, and how far does it reach?* | *Can I chain a proven vuln into a foothold/session?* |
 | sqlmap depth | Prove the injection + its blast radius: `--dump` a table, confirm the DB, redacted | **Gain a shell**: `--os-shell`, `--os-pwn`, `--file-write` a webshell, `--file-read` a credential file |
 | Output | Proof-of-exploit + blast radius on *one app* | An interactive session on an *in-scope host* |
 | Stops at | Single-vuln proof — no pivot, no escalation | The foothold — hands off to priv-esc/lateral |
 
-**`exploit-validation` feeds `initial-access`.** A validated SQLi from Stage 2 is the input; this skill takes it from "the injection works" to "I have a shell." It does not itself re-validate — it consumes the proof and chains it.
+**`exploit-validation` feeds `initial-access`.** A validated SQLi from `exploit-validation` is the input; this skill takes it from "the injection works" to "I have a shell." It does not itself re-validate — it consumes the proof and chains it.
 
 > **Two spines, stated per finding.** Exploitation maps to **MITRE ATT&CK Enterprise** — `T1190` Exploit Public-Facing Application, `T1133` External Remote Services, `T1078` Valid Accounts (where access is via reused creds), `T1210` Exploitation of Remote Services (internal), `T1059` Command and Scripting Interpreter (the shell you land). The web/API weakness that gave access carries its **OWASP/WSTG** id (e.g. A03 Injection). Severity is scored **CVSS** in `pentest-reporting`, not the blocker/major/minor/nit table.
 
@@ -62,7 +62,7 @@ msf6 > sessions -l                            # the foothold(s)
 
 ## sqlmap at foothold altitude
 
-Beyond proving the injection (Stage 2), sqlmap can escalate a SQL injection into OS access — the initial-access use:
+Beyond proving the injection (in `exploit-validation`), sqlmap can escalate a SQL injection into OS access — the initial-access use:
 
 ```bash
 # From a validated injection point, escalate toward a foothold:
@@ -110,7 +110,7 @@ This skill stops at the foothold; it does not escalate or pivot itself.
 ## Rules (hard constraints)
 
 - **The scope file gates every exploit.** Only in-scope targets, only permitted techniques, only within the window. Re-read it before each act; halt and report if the next act would exceed it.
-- **`exploit-validation` is the feedstock, not re-done here.** Consume the Stage-2 single-vuln proof; take it to a foothold. Do not re-validate; do not stop at proof.
+- **`exploit-validation` is the feedstock, not re-done here.** Consume the single-vuln proof; take it to a foothold. Do not re-validate; do not stop at proof.
 - **`check` before `exploit` where supported; understand every custom exploit before firing.** No exploit you cannot predict the effect of.
 - **No DoS, ever** — not as a technique, not as an accepted side effect against production. A crash-risk exploit is scope-gated and excluded from production by default.
 - **C2 containment:** the payload handler and every session transport stay inside the authorized environment; no callback egresses scope.

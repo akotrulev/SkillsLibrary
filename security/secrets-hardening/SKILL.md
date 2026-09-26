@@ -1,6 +1,6 @@
 ---
 name: secgov-secrets-hardening
-description: Use to fix the secret AFTER it is found — rotation runbooks, wiring the app to a secret store (Vault / cloud secret manager / SOPS / External Secrets Operator), and preventing recurrence (pre-commit + CI gates, dynamic/short-lived credentials). The defensive complement to secrets-scan, which only detects. Language-agnostic. Triggers "rotate this leaked credential", "wire the app to a secret store", "set up automatic secret rotation", "stop secrets landing in the repo", "move from static keys to dynamic credentials". Not for detecting secrets (`secrets-scan`), typed app config classes (`devops-environment-config`), or exploiting a recovered secret (`penetration-tester`).
+description: Use to fix the secret after it is found — rotation runbooks, wiring the app to a secret store (Vault / cloud secret manager / SOPS / ESO), and preventing recurrence (pre-commit + CI gates, dynamic credentials). The defensive complement to secrets-scan, which only detects. Triggers "rotate this leaked credential", "wire the app to a secret store". Not for detecting secrets (`secrets-scan`), typed app config (`devops-environment-config`), or exploiting a recovered secret (`penetration-tester`).
 ---
 
 # Security Governance — Secrets Hardening (rotation runbooks · secret-store wiring · recurrence prevention)

@@ -49,8 +49,14 @@ re-vendored from `anthropics/skills` `33375500` with a 491-char house descriptio
 marketplace's remaining "phased" wording is carried into G1). S17 landed 2026-09-26 (devops/: the Gate
 line in `devops-engineer`, `devops-auditor` and `infra-security-tester`, both K1 names resolved, the
 "Stage N" / "forthcoming" labels dropped, the Prowler Python line reworded to prefer 3.13 within the tool's
-own cap, D17; the eight `Node 20` lines were already EOL flags and stay). S18 is next.
-S1–S18 are ungated: the edits from S1 to S17 are built but unverified until G1 runs §7.
+own cap, D17; the eight `Node 20` lines were already EOL flags and stay). S18 landed 2026-09-26 (security/:
+the Gate line in `penetration-tester`, `purple-team-engineer`, `security-architect` and
+`security-test-planner`; the six over-budget skill descriptions and the two agent descriptions trimmed
+under budget; the Stage-2/3/4/5 planned-work labels dropped in 13 places across 7 files with lane/plugin
+names kept; four "Announce at start" lines and five "— MANDATORY" headings removed;
+`SECURITY-EXPANSION-PLAN.md` filed to `docs/plans/implemented/` and `docs/plans/STAGE3-PROGRESS.md`
+removed). G1 is next.
+S1–S18 are ungated: the edits from S1 to S18 are built but unverified until G1 runs §7.
 
 ## 1. What already exists, and what is missing
 
@@ -1905,6 +1911,42 @@ read-back 6k, churn ×1.2
   `git rm` it. `docs/audits/002-security-domain-audit.md` stays.
 - K2: the Gate line in all four agents.
 - **Not in S18:** `devops/`'s infra-security skills (S17).
+- **As built (2026-09-26):** `security/`. All four agents (`penetration-tester`, `purple-team-engineer`,
+  `security-architect`, `security-test-planner`) and all five commands read in full. Gate line added to
+  4 agents, each as the last Operating-rules bullet: `penetration-tester.md`, `purple-team-engineer.md`,
+  `security-architect.md`, `security-test-planner.md`.
+  Data issues: the Stage-2/3/4/5 planned-work labels (the S11 "Stage N" family) dropped in 13 places
+  across 7 files, keeping every lane and plugin name after confirming the target exists —
+  `initial-access` (heading + table header + three prose refs to Stage-2 `exploit-validation`),
+  `detection-engineering:10` (Stage 5 / Stage 4, `penetration-testing` plugin kept),
+  `agents/penetration-tester.md` (kill-chain skills, and two `security-architect` Stage-5 refs),
+  `agents/security-architect.md:40` (four governance skills), `security-hardening:8` (Stage 2 →
+  `client-side-security`), `pentest-reporting:96` (Stage 5), `commands/security-test-planner.md:11`
+  (Stage 2/4/5). No stale K1 names (resolver prints only `data-testid`, an HTML attribute → §7 ALLOW);
+  no `qa-security-testing-` brace-form names (grepped by hand, none); no stale versions.
+  Code issues: 8 over-budget descriptions trimmed — the six skills (`detection-validation` 778→466,
+  `atomic-simulation` 749→490, `detection-engineering` 711→472, `secrets-hardening` 678→497,
+  `compliance-evidence-mapping` 664→491, `security-hardening` 654→492) and the two agents
+  (`security-architect` 947→633, `purple-team-engineer` 909→633), Do-NOT clauses kept. K5: four
+  `**Announce at start:**` lines deleted (3 agents + `standards-audit/SKILL.md`); "— MANDATORY" dropped
+  from five headings (`penetration-tester` Rules-of-engagement + Artifacts, `purple-team-engineer`
+  Rules-of-engagement & telemetry + Artifacts, `security-architect` Artifacts); five all-caps emphasis
+  words lowercased in sample comments (`atomic-simulation` ONE/ALWAYS + two MANDATORY, `credential-attacks`
+  DO NOT/ACTIVE).
+  Logical conflicts: none — no "regardless of the gate's verdict" check in these agents, no
+  verify-before-done clash.
+  Kept on purpose: rules of engagement, `#volatile` written authorization, the committed scope file, no
+  DoS, production as a separate louder sign-off, loot redaction, and mid-run abort stay bold, once each,
+  with their reason (K5 hard-safety keep); kill-chain "for its stage", CSP `Report-Only` "rollout stage",
+  `-GetPrereqs` "stage prerequisites", and the two "never phases, never slices" rule sentences (D8/K4
+  keep); "on the current branch" in the three report contracts (K3 keep); every `green` hit (domain prose
+  — green ≠ safe/covered, a green pipeline is a lead). The `pip install` lines (shodan/censys/sigma-cli/
+  httpx) are security-tool installs, not the project's build (K8 keep). K9: `penetration-testing` and
+  `security-governance` both present in `.claude-plugin/marketplace.json`, every listed path exists.
+  Cleanup: `SECURITY-EXPANSION-PLAN.md` filed unedited to `docs/plans/implemented/` (D7);
+  `docs/plans/STAGE3-PROGRESS.md` (its uncommitted build log) `git rm`'d; `docs/audits/002-security-domain-audit.md`
+  kept. No tracked junk in `security/`.
+  Unverified: nothing run beyond §4's searches and the K1/K7 scripts (Gate: none). Left for the user: nothing.
 
 ### G1 — root cleanup, the docs, and the gate
 
@@ -2006,63 +2048,9 @@ name: the K1 resolver flags it (D12).
 | S18 | `docs` | `general-purpose` | — | ~135k |
 | G1 | `docs` | `general-purpose` | S1–S18 | ~120k |
 
-S1 to S17 have landed, and their prompts are deleted; the 2 prompts S18 and G1 are live.
+S1 to S18 have landed, and their prompts are deleted; only G1's prompt is live.
 
 ---
-
-### S18 — security (general-purpose, docs)
-
-````
-You are `general-purpose`. Task S18 of docs/plans/001-library-conformance-sweep.md: bring security/ in
-line with the plan's checks K1–K9 and file its legacy plan.
-
-Deliverable: security/ passes K1–K9: four agents carry the Gate line, the six over-budget skill
-descriptions and two agent descriptions fit, SECURITY-EXPANSION-PLAN.md is filed and
-docs/plans/STAGE3-PROGRESS.md is removed.
-
-Read, in this order:
-1. CLAUDE.md.
-2. The plan: §2, §3, §4, §5, §6 (the S18 rows), D1–D11, task S18.
-3. CONTRIBUTING.md.
-4. security/agents/*.md and security/commands/*.md in full.
-5. The plan's "Close-out — every task".
-
-Do:
-- Run §4's recipes with DIR=security.
-- K7: the six security skills in §6.2 → ≤ 500; security-architect 947 and purple-team-engineer 909 →
-  ≤ 650.
-- K2: the Gate line in all four agents.
-- K9: confirm penetration-testing and security-governance are in .claude-plugin/marketplace.json, then
-  `git mv SECURITY-EXPANSION-PLAN.md docs/plans/implemented/` and
-  `git rm docs/plans/STAGE3-PROGRESS.md`. docs/audits/002-security-domain-audit.md stays.
-
-Traps:
-- Rules of engagement, written authorization, scope files and production sign-off are hard safety
-  rules. Keep them bold, once each, with their reason; K5 must not soften them.
-- Kill-chain "phases" are domain vocabulary (D8).
-- (S11) SECURITY-EXPANSION-PLAN's "Stage N" / "(Stage N, forthcoming)" labels name units of planned work
-  (K4) and point at lanes that have since landed. Drop the label and keep the lane name, after checking
-  the named skill, agent or plugin exists. Known hits: `security/agents/{penetration-tester,security-architect}.md`,
-  `security/commands/security-test-planner.md`, `initial-access`, `detection-engineering`,
-  `security-hardening`, `pentest-reporting`. SECURITY-EXPANSION-PLAN itself is filed unedited (D7).
-- `docs/plans/implemented/` already exists (S2 created it).
-- (S17) The agent sentences S3–S17 fixed recur here where your agents carry them: `**Announce at start:**`
-  lines are deleted (K5), "— MANDATORY" / "— MANDATORY SECTION" is dropped from headings, and a
-  "regardless of the gate's verdict" check gains "outside a `Gate: none` plan task". S17 dropped
-  "forthcoming" from devops's `purple-team-engineer` / `detection-validation` mentions; the security
-  side should agree.
-- (S17) The K1 resolver skips brace-form names (`qa-foo-{java,dotnet,typescript}`, `qa-foo-*`); grep for
-  `qa-security-testing-` by hand — devops had three stale ones (the real names are `qa-security-<x>-<stack>`
-  and `qa-permission-testing-<stack>`).
-- (S17) A backticked audit slug (`devops-conformance`, `design-audit`) fails K1; write the artifact filename
-  instead (`<NNN>-<slug>-r<N>.md`). A cited skill that does not resolve is pointed at its real frontmatter
-  name (S17: `qa-security-testing-permission-testing` → `qa-permission-testing-{dotnet,java,typescript}`).
-
-Gate: none — this plan gates once, in G1. Do not run tools/token-audit.py or §7's script.
-
-Commit: `chore(sweep S18): security`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
 
 ### G1 — root cleanup, the docs, and the gate (general-purpose, docs)
 

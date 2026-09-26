@@ -9,8 +9,6 @@ Audit an existing repo's **defensive-security artifacts** against the convention
 
 **Read-only analysis.** The audit points; `security-architect` fixes.
 
-**Announce at start:** "I'm using the `secgov-standards-audit` skill in Mode A (baseline) / Mode B (re-audit) on `<repo/path>`."
-
 ## Read before sweeping
 
 1. **[`ep-standards-audit-engine`](../../engineering-practices/standards-audit-engine/SKILL.md)** — the engine: Mode A/B rounds, the artifact contract, evidence rules, severity semantics, grouping/coverage policy, the 5 steps, the hostile self-review. **Read it first.**

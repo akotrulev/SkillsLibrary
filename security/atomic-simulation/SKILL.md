@@ -1,6 +1,6 @@
 ---
 name: purpleteam-atomic-simulation
-description: Use to run individual MITRE ATT&CK techniques and scenario chains against an AUTHORIZED lab/owned environment on a schedule, so a paired detection assertion can prove the guardrails still fire — the red half of a purple-team run and the standing answer to "security drift". Atomic Red Team (invoke-atomicredteam) + Apache Caldera + Stratus Red Team for cloud. Triggers "simulate T1003 against our lab", "run an atomic to test our detections", "schedule purple-team drift checks". Not for exploiting a real target into a foothold (`pentest-initial-access`), proving a single app vuln (`qa-security`), or asserting the detection fired (`purpleteam-detection-validation`, the blue half). Owned/lab targets only, under a committed engagement scope file.
+description: Use to run MITRE ATT&CK techniques against an authorized lab/owned environment, so a paired assertion proves the guardrails still fire — the red half of a purple-team run. Atomic Red Team + Caldera + Stratus. Owned/lab only, under a committed scope file. Triggers "simulate T1003 against our lab", "test our detections for drift". Not for exploiting a real target (`pentest-initial-access`), proving one app vuln (`qa-security`), or asserting the detection fired (`purpleteam-detection-validation`).
 ---
 
 # Purple Team — Atomic Simulation (Atomic Red Team · Apache Caldera · Stratus Red Team)
@@ -53,12 +53,12 @@ IEX (IWR 'https://raw.githubusercontent.com/redcanaryco/invoke-atomicredteam/mas
 Install-AtomicRedTeam -getAtomics                       # pulls the atomics/ library beside the module
 Import-Module invoke-atomicredteam -Force
 
-# The disciplined per-technique sequence — check, prereqs, run ONE test, then ALWAYS clean up.
+# The disciplined per-technique sequence — check, prereqs, run one test, then always clean up.
 Invoke-AtomicTest T1003.001 -ShowDetailsBrief           # what it will do — read before running
 Invoke-AtomicTest T1003.001 -CheckPrereqs               # does the host meet the test's prerequisites?
 Invoke-AtomicTest T1003.001 -GetPrereqs                 # stage prerequisites (opt-in — it changes the host)
 Invoke-AtomicTest T1003.001 -TestNumbers 1              # run exactly one test, not the whole technique blindly
-Invoke-AtomicTest T1003.001 -TestNumbers 1 -Cleanup     # MANDATORY — revert what the test planted
+Invoke-AtomicTest T1003.001 -TestNumbers 1 -Cleanup     # clean up — revert what the test planted
 ```
 
 - **`-TestNumbers`/`-TestGuids` scope the run.** Never `Invoke-AtomicTest T1003.001` with no test selector against a live env — that runs *every* atomic under the technique, some of which are more intrusive than you intend.
@@ -86,7 +86,7 @@ Invoke-AtomicTest T1003.001 -TestNumbers 1 -Cleanup     # MANDATORY — revert w
 stratus list                                            # techniques available, with ATT&CK ids
 stratus warmup   aws.credential-access.ec2-get-password-data   # prepare prerequisite infra (opt-in)
 stratus detonate aws.credential-access.ec2-get-password-data   # run the technique — the CloudTrail event to detect
-stratus cleanup  aws.credential-access.ec2-get-password-data   # MANDATORY — tear the technique's resources down
+stratus cleanup  aws.credential-access.ec2-get-password-data   # clean up — tear the technique's resources down
 stratus status                                          # what is warm / detonated / to be cleaned
 ```
 

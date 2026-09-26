@@ -57,8 +57,8 @@ hydra -l admin -P pass.txt 10.0.10.5 http-post-form \
 **Responder** (lgandx, current **v3.2.2.0**) poisons LLMNR/NBT-NS/mDNS to capture NetNTLM hashes on a LAN segment. **Its blast radius is the entire broadcast domain** — in its default (active) mode it *answers name-resolution queries destined for other hosts*, so it can misdirect legitimate traffic and disrupt production systems on the segment.
 
 ```bash
-sudo responder -I eth0 -A          # -A = PASSIVE analyze mode: observe + log, DO NOT poison (the safe default)
-sudo responder -I eth0             # ACTIVE poisoning (no -A) — answers for other hosts; whole-segment impact
+sudo responder -I eth0 -A          # -A = passive analyze mode: observe + log, does not poison (the safe default)
+sudo responder -I eth0             # active poisoning (no -A) — answers for other hosts; whole-segment impact
 # captured NetNTLMv2 → hashcat -m 5600 ; NetNTLMv1 → -m 5500
 ```
 

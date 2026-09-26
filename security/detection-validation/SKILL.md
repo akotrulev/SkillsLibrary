@@ -1,6 +1,6 @@
 ---
 name: purpleteam-detection-validation
-description: Use to assert — for each simulated MITRE ATT&CK technique — that the guardrail, SIEM rule, or alert that should catch it ACTUALLY fired, by querying the log/alert store within the detonation window. The blue half of a purple-team run; the direct answer to "are our detections working?". Gates every assertion on a telemetry backend being present, and distinguishes a missing detection (rule gap) from a missing log source (telemetry gap) — never passes silently when there is nothing to query. Sigma-converted queries + LogQL/PromQL/KQL/SPL. Triggers "did our SIEM catch T1003?", "validate the detection fired", "assert the guardrail triggered". Not for running the technique (`purpleteam-atomic-simulation`, the red half) or authoring the rule (`secgov-detection-engineering`).
+description: Use to assert that the rule or alert meant to catch a simulated MITRE ATT&CK technique actually fired, by querying the log/alert store in the detonation window — the blue half of a purple-team run answering "are our detections working?". Gates every assertion on a telemetry backend. Triggers "did our SIEM catch T1003?", "validate the detection fired". Not for running the technique (`purpleteam-atomic-simulation`) or authoring it (`secgov-detection-engineering`).
 ---
 
 # Purple Team — Detection Validation (assert the guardrail actually fired)

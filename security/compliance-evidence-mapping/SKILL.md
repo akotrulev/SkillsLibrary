@@ -1,6 +1,6 @@
 ---
 name: secgov-compliance-evidence-mapping
-description: Use to map the library's existing security controls and tests (scanners, gates, ASVS requirements, ATT&CK coverage, hardening, detections) to compliance-framework evidence — SOC 2, PCI DSS 4.0.1, GDPR, ISO 27001:2022 — and produce an evidence register plus a gap list. Language-agnostic, governance. Triggers "map our controls to SOC 2 / PCI / ISO", "what evidence do we have for this control", "compliance gap analysis", "which ASVS level are we at", "prep the audit evidence pack". Not for running the controls (the scan/test lanes), authoring the controls (`security-hardening`/`detection-engineering`), or certifying compliance (a human auditor/QSA does that).
+description: Use to map the library's security controls and tests (scanners, gates, ASVS, ATT&CK coverage, hardening, detections) to compliance-framework evidence — SOC 2, PCI DSS 4.0.1, GDPR, ISO 27001:2022 — as an evidence register plus a gap list. Triggers "map our controls to SOC 2 / PCI / ISO", "compliance gap analysis". Not for running the controls (the scan/test lanes), authoring them (`secgov-security-hardening`/`secgov-detection-engineering`), or certifying compliance (a human auditor/QSA).
 ---
 
 # Security Governance — Compliance Evidence Mapping (SOC 2 · PCI DSS · GDPR · ISO 27001 · ASVS)
