@@ -239,7 +239,7 @@ export const test = base.extend<{ seededOrder: Order }>({
 - No `test.describe.serial` to chain dependent tests — one test + `test.step`
 - No `page.locator('div.foo > span:nth-child(3)')` in specs — promote to a page object with a semantic locator
 - No `await page.goto(...)` directly in specs — put it in the page object's `goto()` so it knows its own URL
-- No `console.log` for debugging in committed tests — use `test.step` and the trace viewer instead
+- No `console.log` debugging in committed tests — use `test.step` and the trace viewer
 - No assertions in action methods — `expectLoaded()` is the only assertion that belongs on a page object
 - No `if`/`for` driving assertions — use parameterized tests outside the `test` body (`for (const [name, value] of cases) test(name, ...)`)
 - No shared mutable state between tests — each test gets a fresh `page` and fresh fixtures
@@ -261,7 +261,7 @@ export const test = base.extend<{ seededOrder: Order }>({
    - One `test(...)` per scenario, destructuring the page-object fixtures
    - Use `test.step` for non-trivial workflows
 5. For authenticated flows, ensure a `setup` project exists and the spec's project depends on it.
-6. Run `npx playwright test` — expect 0 failures. Run `npx playwright test --ui` to verify locator strategies under the inspector before committing. Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run".
+6. Run `npx playwright test` — expect 0 failures — and check locators under `npx playwright test --ui` before committing. In a `Gate: none` plan task, run neither; report the files as "written, not run".
 
 ## Handoffs
 

@@ -4,59 +4,7 @@
 engineering-practices review settled (§4), and clean up each folder's old plans, progress files and
 leftovers along the way (§5). One repo-wide gate at the end proves it (§7).
 
-**Status:** S1 and S2 landed 2026-09-26 (S1: engineering-practices, templates, CONTRIBUTING;
-`.agent-template` removed. S2: the backend/_shared planning lane — `delivery-plan` and `session-budget`
-now emit `## Close-out — every task`; `docs/plans/implemented/` created, holding
-`planning-lane-rebuild.md` and `PLANNER-PLAN.md`). S3 landed 2026-09-26 (the backend/_shared
-documenter and pattern lane, and backend/dotnet; `UNIT-TESTING-PLAN.md` and `DOCUMENTER-PLAN.md` filed
-to `docs/plans/implemented/`, and the backend audit filed live as `docs/plans/backend-PLAN.md`). S4 landed
-2026-09-26 (backend/java, backend/node and backend/python; the Gate line in `be-java`, `be-node` and
-`be-python`, the seven be-python descriptions under budget). S5 landed 2026-09-26 (qa/dotnet API, BDD
-and LLM lanes: the Gate line in three agents, 35 stale skill-path citations and 15 missing Do-NOT
-clauses fixed; the stale-path and "Run what you write" families are carried into S6–S13, S15 and S16).
-S6 landed 2026-09-26 (qa/dotnet UI, mobile and performance lanes and commands: the Gate line in three
-agents, the production-uptime-checks names resolved, two new stale-path families — `performance/nbomber`
-and `qa/_shared/api-contract-testing` — fixed across qa/dotnet and carried into S7–S11, S13 and G1).
-S7 landed 2026-09-26 (qa/java API, BDD and LLM lanes: the Gate line in three agents, the two K1 names,
-21 stale paths, the six qa/java `Node 20` hits and 25 descriptions; the LLM agent's `qa/manual` write-up
-became a hand-off, D15). S8 landed 2026-09-26 (qa/java UI, mobile and performance lanes and commands:
-the Gate line in three agents, the production-uptime-checks names resolved, seven Do-NOT clauses added;
-one open question raised, O9). S9 landed 2026-09-26 (qa/typescript API, BDD and LLM lanes: the Gate
-line in three agents, 63 `Node 20` hits moved to Node 24 with the realtime Node-20 boundary reworded as an EOL
-flag, 20 stale paths, the K1 name and 23 descriptions; the LLM agent's `qa/manual` write-up became a hand-off,
-D15). S10 landed 2026-09-26 (qa/typescript UI, mobile and performance lanes and commands: the Gate line in
-three agents, the last 23 `Node 20` hits moved to Node 24 so qa/typescript holds only flagged EOL lines, the
-production-uptime-checks names resolved, eight Do-NOT clauses added). S11 landed 2026-09-26 (qa/_shared and
-qa/manual: the Gate line in three agents, the two mobile security descriptions and `qa-test-case-designer`
-under budget, nine Do-NOT clauses added, 20 stale paths fixed; the "(Stage N, forthcoming)" family is carried
-into S17 and S18). S12 landed 2026-09-26 (qa/cicd and qa/reporting: the Gate line in six agents,
-`qa-ci-pipelines` → `qa-ci-pipelines-<stack>` in the three `flaky-test-quarantine` skills, every Node 20 and
-.NET 8 default moved to Node 24 / .NET 10, the `test-reports` green-washing samples fixed against
-`ci-conventions` with the quarantine lane stated as its one exception, D16; the .NET 8 and
-`continue-on-error` families are carried into S13, S14 and S17). S13 landed 2026-09-26 (frontend/blazor,
-frontend/react and the three published auth folders: the Gate line in `fe-blazor` and `fe-react`, `fe-react`
-649 and `data-grid` 495 under budget, the K1 name and six stale paths fixed, `auth0-blazor`'s .NET 8 default
-moved to .NET 10; `frontend/PLAN.md` filed live as `docs/plans/frontend-PLAN.md`, its Blazor port unbuilt).
-S14 landed 2026-09-26 (design/ and observability/: the Gate line in `design-auditor` and the three
-`observability-engineer-*` agents, the nine design descriptions and `design-auditor` under budget, the K1
-name fixed; `docs/plans/design-ux-improvements.md` filed to `docs/plans/implemented/`,
-`docs/research/ui-ux-practice-2026.md` kept as the catalog cites it). S15 landed 2026-09-26 (data/ and
-training-data/: the Gate line in `data-architect`, `dataset-engineer` and `dataset-auditor`, the
-`data-modeling` K1 hits resolved as reference paths, one stale path; `ai-development/claude-api`
-re-vendored from `anthropics/skills` `33375500` with a 491-char house description). S16 landed 2026-09-26
-(business-analysis/ and tooling/: the Gate line in `business-analyst`, `requirements-author` and
-`tooling-engineer`, the six descriptions under budget, three "Announce at start" lines removed; the
-marketplace's remaining "phased" wording is carried into G1). S17 landed 2026-09-26 (devops/: the Gate
-line in `devops-engineer`, `devops-auditor` and `infra-security-tester`, both K1 names resolved, the
-"Stage N" / "forthcoming" labels dropped, the Prowler Python line reworded to prefer 3.13 within the tool's
-own cap, D17; the eight `Node 20` lines were already EOL flags and stay). S18 landed 2026-09-26 (security/:
-the Gate line in `penetration-tester`, `purple-team-engineer`, `security-architect` and
-`security-test-planner`; the six over-budget skill descriptions and the two agent descriptions trimmed
-under budget; the Stage-2/3/4/5 planned-work labels dropped in 13 places across 7 files with lane/plugin
-names kept; four "Announce at start" lines and five "— MANDATORY" headings removed;
-`SECURITY-EXPANSION-PLAN.md` filed to `docs/plans/implemented/` and `docs/plans/STAGE3-PROGRESS.md`
-removed). G1 is next.
-S1–S18 are ungated: the edits from S1 to S18 are built but unverified until G1 runs §7.
+**Status:** complete 2026-09-26. S1–S18 swept every published folder against §4 (the Gate line in every in-scope agent, stale names, paths and versions, dated emphasis, the plan vocabulary, the 45 over-budget descriptions) and filed each folder's old plans; G1 filed the root, reconciled README, `docs/skills-catalog.md` and the marketplace descriptions, and ran §7 once: the marketplace parses, the library check prints `OK`, and `tools/token-audit.py` lists no description violation with 109 body + 51 file = 160 size violations (D6). Verified only by §7: nothing checks versions or the K2–K9 judgment calls beyond the searches each task ran, and O9 is still open. Next plans (O7): conformance audits for the remaining stacks from `docs/plans/CONFORMANCE-AUDIT-PLAN.md`, and size optimization of the 160 violations from `docs/plans/TOKEN-OPTIMIZATION-PLAN.md`. Also live: `docs/plans/backend-PLAN.md` (F1–F5 still open), `docs/plans/frontend-PLAN.md` (the Blazor port), `docs/plans/MODEL-PORTABILITY-PLAN.md` and `docs/plans/fine-tuning-house-models.md` (O6).
 
 ## 1. What already exists, and what is missing
 
@@ -186,7 +134,7 @@ for r, ds, fs in os.walk('.'):
             m = re.search(r'^name:\s*(\S+)', open(p, errors='ignore').read(), re.M)
             if m:
                 defined.add(m.group(1))
-tok = re.compile(r'`((?:ep|qa|be|fe|design|data|ba|tool|devops|secgov|observability|auth|td|dev)-[a-z0-9-]+)`')
+tok = re.compile(r'`((?:ep|qa|be|fe|design|data|ba|tool|devops|secgov|pentest|purpleteam|observability|auth|td|dev)-[a-z0-9-]+)`')
 for r, _, fs in os.walk(sys.argv[1]):
     for f in fs:
         p = os.path.join(r, f)
@@ -440,7 +388,7 @@ SCOPE = ("qa frontend/blazor frontend/react design backend observability data de
          "auth/auth0-blazor auth/auth0-react .skill-template").split()
 EXCL = re.compile(r'/ui-ux-pro-max/(data|scripts)/|/vendor/')
 ALLOW = {"data-testid", "data-test", "data-theme", "data-table", "data-bs-target", "data-enhance",
-         "data-provider-thread-count", "data-access"}
+         "data-provider-thread-count", "data-access", "data-density"}
 LINK_EXAMPLES = re.compile(r'screen-map-template\.md$|ba-project-memory/SKILL\.md$|business-documentation/SKILL\.md$')
 GATE_LINE = "prompt block's `Gate:` line"
 CHECKS = {
@@ -473,7 +421,7 @@ for root, dirs, files in os.walk("."):
             if m:
                 defined.add(m.group(1))
 
-name_token = re.compile(r"`((?:ep|qa|be|fe|design|data|ba|tool|devops|secgov|observability|auth|td|dev)-[a-z0-9-]+)`")
+name_token = re.compile(r"`((?:ep|qa|be|fe|design|data|ba|tool|devops|secgov|pentest|purpleteam|observability|auth|td|dev)-[a-z0-9-]+)`")
 md_link = re.compile(r"\]\((?!https?:|mailto:|#)([^)\s]+?\.md)(?:#[^)]*)?\)")
 for top in SCOPE:
     for root, _, files in os.walk(top):
@@ -610,6 +558,12 @@ library default: forcing 3.13 on a release whose `requires-python` stops at 3.12
 Reading one: write 3.13. Reading two (chosen): prefer 3.13, and fall back to the newest Python the pinned
 release allows — the CLAUDE.md DevOps rule for managed runtimes that lag, applied to a scanner. **Cost:**
 the line names no single version, and whether 5.38 accepts 3.13 was not verified.
+
+**D18 (2026-09-26, G1) — The resolver checks `pentest-` and `purpleteam-` names too.** CONTRIBUTING.md (S1)
+lists both as skill prefixes, but §4's and §7's prefix lists did not, so a stale `pentest-*` or `purpleteam-*`
+name could never fail the gate. Reading one: leave the lists as the plan wrote them. Reading two (chosen): add
+both to §4 and §7; the run found no new hit. **Cost:** the gate is stricter than the one S1–S18 were written
+against, so a later edit to `security/` can fail it where it would have passed.
 
 ## Answered questions (2026-09-26)
 
@@ -1990,6 +1944,53 @@ the As built note.
 - This task deletes the last prompt block, so Close-out step 6 files this plan into
   `docs/plans/implemented/`.
 
+- **As built (2026-09-26):** the root, the docs and the gate.
+  Gate output, run in order from the repo root with §7's script saved as `"${TMPDIR:-/tmp}/library-check.py"`:
+  `python3 -m json.tool .claude-plugin/marketplace.json` → exit 0; the library check → `OK`, exit 0;
+  `python3 tools/token-audit.py` → `Skill description budget violations (> 500 chars): 0`,
+  `Agent description budget violations (> 650 chars): 0`, `SKILL.md body budget violations (> 16000 chars): 109`,
+  `Agent file budget violations (> 14000 chars): 51`, `Violations by plugin (160 total)`, exit 1 (expected, D6).
+  Fixes the gate found: (1) the library check's only hit was `data-density`
+  (`design/ui-ux-pro-max/references/quick-reference.md`, S14's pending item); (2) the size counts were 162, two
+  over. A before/after run against `cccd9aa` (the tree before S1: 34 + 11 description, 109 + 51 size) showed two
+  files the sweep pushed over budget: `qa/reporting/agents/qa-reporting-dotnet.md` 13963 → 14349 (S12's .NET 10
+  wording and `Gate: none` clauses, plus S5–S13's Gate line) and
+  `qa/typescript/skills/ui-test-author/playwright/SKILL.md` body 16049 (S10's "written, not run" step). G1 trimmed
+  wording in both, no rule removed: the agent to 13998 chars (dropped two `e.g.` samples in the output contract, a
+  redundant "ask one question" bullet the global rules already carry, and tightened five phrases); the skill's
+  step 6 and one anti-pattern bullet reworded, now under 16,000.
+  `ALLOW` + `data-density`: a rule id of the vendored design corpus (`references/` is vendored per
+  `design/ATTRIBUTIONS.md`), not a name, and not editable (D5) — the same reason `data-table` is there.
+  `LINK_EXAMPLES`: nothing added. Resolver prefixes + `pentest`, `purpleteam` in §4 and §7 (D18); adding them
+  surfaced no new hit.
+  Cleanup: `AGENT-ORIENTATION-CACHE-PLAN.md` → `docs/plans/implemented/`; `CONFORMANCE-AUDIT-PLAN.md`,
+  `MODEL-PORTABILITY-PLAN.md`, `TOKEN-OPTIMIZATION-PLAN.md` → `docs/plans/` (live); today's audit counts and
+  budgets folded into `TOKEN-OPTIMIZATION-PLAN.md`'s new `Status:` line and
+  `docs/plans/token-optimization-progress.md` removed; `tools/mission-control/.next/` (6 files) removed and
+  `tools/mission-control/` ignored, `tools/MISSION-CONTROL-MOVED.md` kept; `.claude/settings.local.json`
+  untracked and ignored. `meta/PLAN.md` has no status line saying complete, so it stays where it is (live, out of
+  scope, O8).
+  Docs: `.claude-plugin/marketplace.json` — the 11 "phased" agent descriptions → "step-by-step", "any single
+  phase" → "any single step" (×3, be-*), and security's "phased, independently-executable assessment plan" → "a
+  task-shaped assessment plan, each task independently executable". README — `qa-dotnet` .NET 8 → .NET 10 (8/9
+  supported) at `:14` and `:37`; the authoring table's `api-contract-testing` `_shared` entry split out as
+  `contract-testing-pact`, and the four `performance/*` rows → one `load-testing` row plus `_shared`
+  `performance`; `training-data`'s "phased" agent; `CONFORMANCE-AUDIT-PLAN.md` ×2 now links
+  `docs/plans/CONFORMANCE-AUDIT-PLAN.md`; the ai-development status row carries `claude-api` re-vendored
+  2026-09-26 from `main` `33375500` (2026-09-24), models table "cached: 2026-06-24"; "all fifteen" plugins →
+  "all sixteen" ×2 (the marketplace lists 16). `docs/skills-catalog.md` — `performance/nbomber` (`:36`),
+  `performance/{k6,nbomber,gatling}` (`:66`) → `load-testing`; `qa/_shared/api-contract-testing` (`:42`, `:65`,
+  `:124`) → `contract-testing-pact`; session-budget's "the closing duty" (`:207`) and writing-plans' (`:336`) →
+  the close-out line pointing at `## Close-out — every task`; "written on the current branch" ×2 → "written in the
+  checkout it is given"; `ep-brainstorming`'s "HARD-GATE" ×2 (S1 removed it) → its approved-design rule; 17
+  "Stage N" planned-work labels in the security entries dropped with lane names kept (S11/S18's family);
+  the root plan paths → `docs/plans/…` and `docs/plans/implemented/…` (`CONFORMANCE-AUDIT-PLAN.md` ×4,
+  `AGENT-ORIENTATION-CACHE-PLAN.md`, `SECURITY-EXPANSION-PLAN.md` ×2); `data-modeling` at `:272` → the
+  engine's `references/data-modeling.md` (S15); "all fifteen" ×2 → "all sixteen". CLAUDE.md needed no change
+  (no name, count or path in it changed). The catalog quotes no "Python 3.10" (D17).
+  Left for the user: O9 is still open. README, the catalog and CLAUDE.md name the plugins backticked, which the
+  resolver would flag, but §7 does not scan them; left as they are.
+
 ## Close-out — every task
 
 Before you stop, in this order, in this file:
@@ -2048,85 +2049,5 @@ name: the K1 resolver flags it (D12).
 | S18 | `docs` | `general-purpose` | — | ~135k |
 | G1 | `docs` | `general-purpose` | S1–S18 | ~120k |
 
-S1 to S18 have landed, and their prompts are deleted; only G1's prompt is live.
+S1 to S18 and G1 have landed, and every prompt is deleted; the plan is filed in `docs/plans/implemented/`.
 
----
-
-### G1 — root cleanup, the docs, and the gate (general-purpose, docs)
-
-````
-You are `general-purpose`. Task G1 of docs/plans/001-library-conformance-sweep.md: file the root's old
-plans, reconcile README, the catalog and CLAUDE.md with what S1–S18 landed, and run the plan's only
-gate, fixing what it finds.
-
-Deliverable: §7 passes: the marketplace parses, the library check prints `OK`, and
-tools/token-audit.py lists no description violation with body and file violations ≤ 160. The root and
-docs/plans/ are filed per §5, and README, docs/skills-catalog.md and CLAUDE.md match what S1–S18
-landed.
-
-Read, in this order:
-1. CLAUDE.md.
-2. The plan: §5, §7, D1–D11, O5–O8, task G1, every As built note on S1–S18.
-3. The first 15 lines of each root legacy plan: AGENT-ORIENTATION-CACHE-PLAN.md,
-   CONFORMANCE-AUDIT-PLAN.md, MODEL-PORTABILITY-PLAN.md, TOKEN-OPTIMIZATION-PLAN.md, meta/PLAN.md.
-4. The plan's "Close-out — every task".
-
-Do:
-- §5 root inventory:
-  - `git mv AGENT-ORIENTATION-CACHE-PLAN.md docs/plans/implemented/`.
-  - `git mv CONFORMANCE-AUDIT-PLAN.md MODEL-PORTABILITY-PLAN.md TOKEN-OPTIMIZATION-PLAN.md docs/plans/`.
-  - Fold today's token-audit counts into TOKEN-OPTIMIZATION-PLAN.md's status, then
-    `git rm docs/plans/token-optimization-progress.md`.
-  - meta/PLAN.md: file it as docs/plans/implemented/meta-PLAN.md only if its own status says complete.
-  - `git rm -r tools/mission-control/.next`; add `tools/mission-control/` to .gitignore; keep
-    tools/MISSION-CONTROL-MOVED.md.
-  - `git rm --cached .claude/settings.local.json`; add it to .gitignore.
-- Docs: grep README.md, docs/skills-catalog.md and CLAUDE.md for every name, count and path the As
-  built notes changed, and fix those places. Grep for root plan filenames too; they moved. README's
-  ai-development attribution row gets upstream `anthropics/skills` `main` `33375500` (2026-09-24),
-  re-vendored 2026-09-26, models table "cached: 2026-06-24" (S15's As built note).
-- Final Status (Close-out steps 5–6) names the next plans (O7): conformance audits and size
-  optimization.
-- Gate, in run order. Save §7's script as "${TMPDIR:-/tmp}/library-check.py", then:
-    python3 -m json.tool .claude-plugin/marketplace.json > /dev/null
-    python3 "${TMPDIR:-/tmp}/library-check.py"
-    python3 tools/token-audit.py
-  Fix what it finds. A failure may belong to any S task; attribute it in your As built note. The last
-  command exits non-zero while size violations remain; judge it by the two description headings
-  (empty) and the body + file counts (≤ 160).
-
-Traps:
-- docs/skills-catalog.md is 175 KB. Grep it; do not read it whole.
-- S2 replaced the planning lane's per-block "closing duty" with the plan's `## Close-out — every task`
-  section (plan-format §7) plus one close-out line per block; docs/skills-catalog.md's session-budget
-  entry (line ~207) still says "the closing duty". Reword it.
-- Stale skill paths in docs/skills-catalog.md (S6): `performance/nbomber` at ~:36 and
-  `performance/{nbomber,k6,gatling}` at ~:66 → each stack's `load-testing`;
-  `qa/_shared/api-contract-testing` at ~:65 → `qa/_shared/contract-testing-pact`.
-- Any entry you add to ALLOW or LINK_EXAMPLES needs a one-line reason in the As built note.
-- `data-density` (design/ui-ux-pro-max/references/quick-reference.md:248) is a vendored corpus rule id
-  (ATTRIBUTIONS: `references/` is vendored), not a name and not editable (D5). S14 decided: add it to
-  §7's ALLOW, as `data-table` already is.
-- CONFORMANCE-AUDIT-PLAN.md and README cite each other; fix the README link after the move.
-- CONFORMANCE-AUDIT-PLAN.md cites `backend/PLAN.md` (F2, F3) as plain text, not a link. S3 moved that
-  file to docs/plans/backend-PLAN.md (live). The plan is legacy text, so leave it as it is.
-- `docs/plans/backend-PLAN.md` joins the live legacy plans. Its F1–F5 are still open in the skills
-  (S3 checked them). Name it beside O7's two plans in the final Status.
-- You delete the last prompt block, so Close-out step 6 files this plan into docs/plans/implemented/.
-- Writing to "${TMPDIR:-/tmp}" may be refused in an unattended session (S1 hit it). If so, save the
-  script in an untracked scratch folder inside the worktree, run it from the repo root, and delete the
-  folder before committing — it must not be scanned as part of the tree when it holds `.md` files.
-- (S16) `.claude-plugin/marketplace.json` still calls agents "phased" 11 times — the top-level
-  description (the fe-* and be-* stacks) and the fe-blazor, fe-react, data, be-dotnet/java/node/python,
-  devops, security and training-data plugin descriptions. CONTRIBUTING.md forbids calling an agent's steps
-  a phase; S16 changed the business-analysis and tooling entries to "step-by-step". Do the same for the
-  rest; security's "phased, independently-executable assessment plan" names planned work, so it becomes a
-  task-shaped plan.
-- (S17) D17: `devops/cloud-posture`'s Prowler line prefers Python 3.13 within the tool's own cap; §7 does not
-  check versions, so nothing to do beyond the catalog if it quotes "Python 3.10".
-- The resolver's prefix list has no `pentest` or `purpleteam`, so those skill names are never checked;
-  CONTRIBUTING.md (S1) lists both as prefixes. Adding them to both §4 and §7 is your call; record it.
-
-Commit: `chore(sweep G1): file legacy plans, reconcile docs, pass the gate`.
-Close out per the plan's "Close-out — every task" before you stop.
-````

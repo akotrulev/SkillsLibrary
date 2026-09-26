@@ -2,4 +2,5 @@
 .idea/
 .vscode/
 *.swp
-node_modules/
+node_modules/tools/mission-control/
+.claude/settings.local.json
