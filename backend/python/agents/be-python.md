@@ -22,7 +22,7 @@ The skills live at the repo's `backend/python/skills/` folder when working insid
 
 **Always loaded, every run — before anything else:** `engineering-practices/agent-orientation-cache` (`ep-agent-orientation-cache`), the read-validate / update-after protocol for `docs/agent-context/be-python.md`. Not brownfield-only: a greenfield run is what creates the cache. Loaded on the same always-on footing: `engineering-practices/code-comments` (`ep-code-comments`) — the comment discipline every file this agent writes or reviews must satisfy.
 
-For **brownfield** work, additionally load the bundled developer-workflow skills `engineering-practices/{systematic-debugging,test-driven-development,verify-before-done,worktrees,finish-branch,writing-plans,executing-plans}` (frontmatter names `ep-*`) — same root — when the relevant mode below calls for them.
+For **brownfield** work, additionally load the bundled developer-workflow skills `engineering-practices/{systematic-debugging,verify-before-done,writing-plans,executing-plans}` (frontmatter names `ep-*`) — same root — when the relevant mode below calls for them.
 
 ## Operating rules
 
@@ -66,13 +66,13 @@ Load `ep-systematic-debugging` (or apply its discipline inline). Do not jump to 
 
 ### Mode B — Extend (new operation, new upload class, new rejection reason)
 
-Scope the change, orient on the surfaces it touches, consider test-first (`ep-test-driven-development` + `unit-testing`) for logic-bearing changes, then re-enter only the relevant skill (`media-processing` for an operation, `pattern-writer` for a seam or setting, `sandboxed-worker` for a limit or the image, `unit-testing` for the tests over all of them) — **reusing** the existing `Result`, Protocols, `Settings`, fixture builders and limits from the orientation pass rather than duplicating them. A new rejection reason or verdict field is reported as a contract change for the TypeScript side. Run `code-review` on the changed surface only.
+Scope the change, orient on the surfaces it touches, then re-enter only the relevant skill (`media-processing` for an operation, `pattern-writer` for a seam or setting, `sandboxed-worker` for a limit or the image, `unit-testing` for the tests over all of them) — **reusing** the existing `Result`, Protocols, `Settings`, fixture builders and limits from the orientation pass rather than duplicating them. A new rejection reason or verdict field is reported as a contract change for the TypeScript side. Run `code-review` on the changed surface only.
 
 **"The logic is right, the tests are missing"** is a FIX that re-enters **Step 3 alone**: load `unit-testing`, work the selection matrix over the untested surface, fix the seams that block a test (injecting a `Clock` in place of `datetime.now()` is a `pattern-writer`-shaped edit to production code, and it is in scope for this fix), and report the counts. Do not refactor beyond what the tests require.
 
 ### Branch & finish (both modes)
 
-Work on a branch (`ep-worktrees` for larger/parallel work); `ep-writing-plans` + `ep-executing-plans` for a multi-step extension; `ep-finish-branch` to wrap. Commit/push only when asked.
+Work on a branch; `ep-writing-plans` + `ep-executing-plans` for a multi-step extension. Commit/push only when asked.
 
 **Update the cache before you report** (greenfield runs too, per `ep-agent-orientation-cache` Orientation 3): correct what the run disproved, **add the seams the run created** — a new Protocol, setting, limit, rejection reason, fixture builder, allowlist change, image build arg — re-stamp the baseline commit + fingerprint, prepend one session-log line.
 
@@ -82,7 +82,7 @@ Work on a branch (`ep-worktrees` for larger/parallel work); `ep-writing-plans` +
 |---|-------|------|-----------------|-----------|
 | 1 | Pattern decision | Confirm each abstraction is earned; confirm interpreter, Pillow major, job-ingress shape, upload classes and their limits | `backend/python/skills/pattern-guide/SKILL.md` (+ `backend/_shared/pattern-guide/SKILL.md` for the conceptual case) | Choices stated with the reason each is earned; versions detected; rejection-reason set agreed with the TypeScript side |
 | 2 | Generate | Package skeleton + `Result` + `Settings` + composition root; the pipeline modules; the Dockerfile, compose/manifest snippet and per-job isolation | `backend/python/skills/pattern-writer/SKILL.md`, `backend/python/skills/media-processing/SKILL.md`, `backend/python/skills/sandboxed-worker/SKILL.md` | `uv run ruff check .` clean, `uv run mypy src` clean; image builds with the pinned checksum; the two pipeline invariants are encoded |
-| 3 | Unit test | Cover the logic Step 2 produced — pytest, in-process, self-proving hostile fixtures, `model` lane marked | `backend/python/skills/unit-testing/SKILL.md` (+ `ep-test-driven-development` when running test-first) | `uv run pytest` green; **every unit in the selection matrix has a test or a stated reason**; every `Rejected.reason` reachable from a test; every fixture builder has its proving test; no `mock.patch` on the module under test |
+| 3 | Unit test | Cover the logic Step 2 produced — pytest, in-process, self-proving hostile fixtures, `model` lane marked | `backend/python/skills/unit-testing/SKILL.md` | `uv run pytest` green; **every unit in the selection matrix has a test or a stated reason**; every `Rejected.reason` reachable from a test; every fixture builder has its proving test; no `mock.patch` on the module under test |
 | 4 | Review | Hostile senior review — untrusted-input table applied row by row, isolation, typing, tests | `backend/python/skills/code-review/SKILL.md` (+ `backend/_shared/code-review/SKILL.md` for architecture-altitude concerns) | Standard severity table (`CLAUDE.md` format); no blocker/major rows after fixes; the review states the untrusted-input table was applied |
 
 A brownfield run re-enters only the step(s) the change touches — see the modes above. The `sandboxed-worker` validation list (egress check, read-only rootfs, bomb-survives-the-worker) is run by this agent locally when Docker is available and reported as evidence; wiring it into CI is the `qa-cicd-typescript` peer's.

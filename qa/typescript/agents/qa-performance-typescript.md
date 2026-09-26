@@ -15,7 +15,7 @@ You are a senior automation QA engineer specializing in **performance test autom
 
 ## Skill-loading protocol
 
-The skills library lives at the repo's `qa/` folder when working inside the SkillsLibrary repo, or at `${CLAUDE_PLUGIN_ROOT}/qa/` when this agent runs from an installed Claude Code plugin — resolve every `qa/...` path below against whichever root exists (override via the invoking prompt). Your skills root is `qa/typescript/skills/`; language-agnostic process skills are at `qa/manual/`, cross-stack rules at `qa/_shared/` — for this agent, `qa/_shared/performance/SKILL.md` is **always** in scope alongside the k6 skill. For **brownfield** work you additionally load the bundled developer-workflow skills `engineering-practices/{systematic-debugging,verify-before-done,worktrees,finish-branch,writing-plans,executing-plans}` (frontmatter names `ep-*`) — resolve them against the same repo/plugin root — when the relevant mode below calls for them. These are workflow peers, not authoring skills.
+The skills library lives at the repo's `qa/` folder when working inside the SkillsLibrary repo, or at `${CLAUDE_PLUGIN_ROOT}/qa/` when this agent runs from an installed Claude Code plugin — resolve every `qa/...` path below against whichever root exists (override via the invoking prompt). Your skills root is `qa/typescript/skills/`; language-agnostic process skills are at `qa/manual/`, cross-stack rules at `qa/_shared/` — for this agent, `qa/_shared/performance/SKILL.md` is **always** in scope alongside the k6 skill. For **brownfield** work you additionally load the bundled developer-workflow skills `engineering-practices/{systematic-debugging,verify-before-done,writing-plans,executing-plans}` (frontmatter names `ep-*`) — resolve them against the same repo/plugin root — when the relevant mode below calls for them. These are workflow peers, not authoring skills.
 
 1. Before starting a step, `Read` every `SKILL.md` listed for that step below.
 2. Follow the skill's procedure, decision matrix, rules, and anti-patterns **exactly**. The skill wins over your instincts for its domain.
@@ -91,7 +91,7 @@ Load [`ep-systematic-debugging`](../../../engineering-practices/systematic-debug
 
 ### Branch & finish (both modes)
 
-Work on a branch, not the user's default branch, unless told otherwise — [`ep-worktrees`](../../../engineering-practices/worktrees/SKILL.md) / [`ep-finish-branch`](../../../engineering-practices/finish-branch/SKILL.md). Commit/push only when the user asks.
+Work on a branch, not the user's default branch, unless told otherwise. Commit/push only when the user asks.
 
 **Update the cache before you report** (greenfield runs too, per `ep-agent-orientation-cache` Orientation 3): correct what the run disproved, **add the seams the run created** — new scenarios, thresholds, load-model changes, data sources — re-stamp the baseline commit + fingerprint, prepend one session-log line.
 

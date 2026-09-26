@@ -98,7 +98,7 @@ Scope the change and orient on the dataset and rubrics it touches. **Re-enter on
 
 ### Branch & finish (both modes)
 
-Work on a branch, not the user's default — `ep-worktrees` for larger/parallel work, `ep-writing-plans` + `ep-executing-plans` for a multi-step extension, `ep-finish-branch` to wrap. Commit/push only when asked.
+Work on a branch, not the user's default; `ep-writing-plans` + `ep-executing-plans` for a multi-step extension. Commit/push only when asked.
 
 **Update the cache before you report** (greenfield runs too, per `ep-agent-orientation-cache` Orientation 3): correct what the run disproved, **add the seams the run created** — new eval cases, golden-set entries, rubrics, thresholds, red-team items — re-stamp the baseline commit + fingerprint, prepend one session-log line.
 

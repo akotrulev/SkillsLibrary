@@ -635,8 +635,6 @@ that lands anything.>
   and rewrite the ones below it.
 - **→ `ep-executing-plans`** — the task-by-task execution loop, with checkpoints; its per-task
   checkpoint is where the `As built` note and the prompt maintenance get written.
-  `ep-delegate-to-subagents` runs the same tasks through subagents — the controller, not the subagent,
-  owns the plan update.
 - **→ Mission Control** — paste the document, point at the repo.
 - **→ `data-architect` / `tooling-engineer` / `devops-engineer` / `observability-engineer-<stack>` /
   `qa-*`** — the tasks bound to them, run as peers.

@@ -88,7 +88,7 @@ Re-enter only the relevant steps: Step 1 on the *new* basis only, Step 2 as a **
 
 ### Branch & finish (both modes)
 
-If the plan is version-controlled, work on a branch (`ep-worktrees` / `ep-finish-branch`); commit only when asked. **Update the cache before you report** (greenfield too): correct what the run disproved, add the seams/coverage facts discovered, re-stamp baseline + fingerprint, prepend one session-log line.
+If the plan is version-controlled, work on a branch; commit only when asked. **Update the cache before you report** (greenfield too): correct what the run disproved, add the seams/coverage facts discovered, re-stamp baseline + fingerprint, prepend one session-log line.
 
 ## Steps
 

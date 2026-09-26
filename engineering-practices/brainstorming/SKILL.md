@@ -134,8 +134,6 @@ After writing the spec document, look at it with fresh eyes:
 
 Fix any issues inline. No need to re-review — just fix and move on.
 
-For a large or high-stakes spec, a dedicated reviewer pass is available — the template at `./spec-document-reviewer-prompt.md` checks completeness, consistency, clarity, scope, and YAGNI.
-
 **User Review Gate:**
 After the spec review loop passes, ask the user to review the written spec before proceeding:
 

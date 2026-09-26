@@ -21,7 +21,7 @@ The skills live at the repo's `<domain>/<stack>/skills/` folder when working ins
 
 **Always loaded, every run:** `engineering-practices/agent-orientation-cache` (frontmatter `ep-agent-orientation-cache`) — the read-validate / update-after protocol for this agent's orientation cache. It ships in **all** plugins, including `data` and `business-analysis`, so it resolves everywhere; it is not brownfield-only, because a greenfield run is what *creates* the cache.
 
-For **brownfield** work, additionally load the bundled developer-workflow skills `engineering-practices/{systematic-debugging,test-driven-development,verify-before-done,worktrees,finish-branch,writing-plans,executing-plans}` (frontmatter names `ep-*`) — same root — when the relevant mode below calls for them. *(Only if this agent's plugin bundles the `ep-*` skills — `qa-*` and `fe-*` do. If it does not — `data`, `business-analysis` — inline the same discipline into the mode text instead, as `data-architect` does; do not reference skills the installed plugin cannot resolve.)*
+For **brownfield** work, additionally load the bundled developer-workflow skills `engineering-practices/{systematic-debugging,verify-before-done,writing-plans,executing-plans}` (frontmatter names `ep-*`) — same root — when the relevant mode below calls for them. *(Only if this agent's plugin bundles the `ep-*` skills — `qa-*` and `fe-*` do. If it does not — `data`, `business-analysis` — inline the same discipline into the mode text instead, as `data-architect` does; do not reference skills the installed plugin cannot resolve.)*
 
 ## Operating rules
 
@@ -62,11 +62,11 @@ Load `ep-systematic-debugging` (or apply its discipline inline). Do not jump to 
 
 ### Mode B — Extend (<add coverage / add a feature / add a lane / add a table>)
 
-Scope the change, orient on the surfaces it touches, consider test-first (`ep-test-driven-development`) where code is involved, then **re-enter only the relevant steps** — **reusing** the existing seams from the orientation pass rather than duplicating them — and run the review step on the changed surface only.
+Scope the change, orient on the surfaces it touches, then **re-enter only the relevant steps** — **reusing** the existing seams from the orientation pass rather than duplicating them — and run the review step on the changed surface only.
 
 ### Branch & finish (both modes)
 
-Work on a branch (`ep-worktrees` for larger/parallel work); `ep-writing-plans` + `ep-executing-plans` for a multi-step extension; `ep-finish-branch` to wrap. Commit/push only when asked.
+Work on a branch; `ep-writing-plans` + `ep-executing-plans` for a multi-step extension. Commit/push only when asked.
 
 ## Steps
 

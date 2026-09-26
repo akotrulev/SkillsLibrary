@@ -1,6 +1,6 @@
 ---
 name: ep-systematic-debugging
-description: Use when encountering any bug, test failure, or unexpected behavior, before proposing fixes — find root cause first, fix the cause not the symptom. Triggers: "this test is failing", "debug this", "why is X breaking", "the fix didn't work". Pairs with `ep-test-driven-development` (write the failing test) and `ep-verify-before-done` (confirm the fix). Do NOT use for designing new work (`ep-brainstorming`) or known-cause changes needing no investigation.
+description: Use when encountering any bug, test failure, or unexpected behavior, before proposing fixes — find root cause first, fix the cause not the symptom. Triggers: "this test is failing", "debug this", "why is X breaking", "the fix didn't work". Pairs with `ep-verify-before-done` (confirm the fix). Do NOT use for designing new work (`ep-brainstorming`) or known-cause changes needing no investigation.
 ---
 
 # Systematic Debugging
@@ -176,7 +176,6 @@ You MUST complete each step before proceeding to the next.
    - Automated test if possible
    - One-off test script if no framework
    - MUST have before fixing
-   - Use the `ep-test-driven-development` skill for writing proper failing tests
 
 2. **Implement Single Fix**
    - Address the root cause identified
@@ -286,11 +285,9 @@ These techniques are part of systematic debugging and available in this director
 > **Stack note:** `condition-based-waiting-example.ts` (TypeScript) and `find-polluter.sh`
 > (a shell/glob loop) are illustrations of the *technique*, not required tooling. Port
 > the idea to your stack — the .NET, Java, or Node equivalent — rather than the literal
-> code. (Same "port the idea, not the code" stance as `ep-test-driven-development`'s and
-> `ep-writing-plans`' Stack-defaults notes.)
+> code.
 
 **Related skills:**
-- **`ep-test-driven-development`** - For creating failing test case (Step 4, Step 1)
 - **`ep-verify-before-done`** - Verify fix worked before claiming success
 
 ## Real-World Impact

@@ -25,7 +25,7 @@ You work in **two modes**; most real work is the second:
 - `queries` — query + recording/alert rule syntax
 - `dashboards` — dashboard layout + cross-store nav wiring
 
-Load **only** these; peer domains (`qa/`, `devops/`) are invoked as agents, never loaded. For **brownfield** work also load `ep-{systematic-debugging,test-driven-development,verify-before-done,worktrees,finish-branch,writing-plans,executing-plans}` when a mode calls for them. If a listed skill is missing on disk, say so and proceed with the global rules only.
+Load **only** these; peer domains (`qa/`, `devops/`) are invoked as agents, never loaded. For **brownfield** work also load `ep-{systematic-debugging,verify-before-done,writing-plans,executing-plans}` when a mode calls for them. If a listed skill is missing on disk, say so and proceed with the global rules only.
 
 **Always loaded, every run:** `ep-agent-orientation-cache` (read-validate / update-after protocol for `docs/agent-context/observability-engineer-java.md`; a greenfield run creates the cache) and `ep-code-comments` (comment discipline for every file this agent writes or reviews).
 
@@ -62,7 +62,7 @@ Scope the change, orient on the surfaces it touches, then **re-enter only the re
 
 ### Branch & finish (both modes)
 
-Work on a branch (`ep-worktrees` for larger/parallel work; `ep-writing-plans` + `ep-executing-plans` for a multi-step rollout; `ep-finish-branch` to wrap). Commit/push only when asked. **Update the cache before you report** (greenfield too, per `ep-agent-orientation-cache` Orientation 3): correct what the run disproved, add seams created (new tracers/meters, instrumentation, resource attributes, dashboards, recording/alert rules, Collector pipeline changes), re-stamp baseline + fingerprint, prepend one session-log line.
+Work on a branch (`ep-writing-plans` + `ep-executing-plans` for a multi-step rollout). Commit/push only when asked. **Update the cache before you report** (greenfield too, per `ep-agent-orientation-cache` Orientation 3): correct what the run disproved, add seams created (new tracers/meters, instrumentation, resource attributes, dashboards, recording/alert rules, Collector pipeline changes), re-stamp baseline + fingerprint, prepend one session-log line.
 
 ## Steps
 

@@ -34,7 +34,7 @@ Owns **dev-side unit tests of backend logic**: construct a class or call a funct
 - A calculation: money (minor units), rounding, proration, date math.
 - A Zod schema — its accept **and** reject cases, including the error path.
 - A mapper, a branded-id conversion, an error-to-ProblemDetails translation.
-- Reproducing a bug at the unit level before fixing it (`ep-systematic-debugging` RED, `ep-test-driven-development`).
+- Reproducing a bug at the unit level before fixing it (`ep-systematic-debugging` RED).
 
 ## When NOT to use
 
@@ -268,7 +268,7 @@ const shipped = anOrder({ status: 'Shipped' });
 - Arrange–Act–Assert, visibly separated. A 20-line arrange is a coupling finding.
 - Tests are independent and order-free; `clearMocks`/`restoreMocks` on.
 - The unit under test is real and constructed directly — never resolved from a DI container.
-- Verify RED once per new behavior (`ep-test-driven-development`).
+- Verify RED once per new behavior.
 - `strict: true` applies; no `any`, no `as unknown as`.
 - No coverage-% gate here — assertion quality is a mutation-score question (see Handoffs).
 
@@ -302,7 +302,6 @@ const shipped = anOrder({ status: 'Shipped' });
 - Do the tests actually catch faults? → **peer** `qa-test-quality-check-typescript` (StrykerJS) — **this skill does not exist yet**; the java/dotnet siblings do. Until it lands, treat mutation grading as unavailable on this stack rather than substituting a coverage number (tracked in `backend/UNIT-TESTING-PLAN.md` §7)
 - Suite-scale builders / fixtures → **peer** `qa/typescript/skills/test-data-builder`
 - Flaky triage / quarantine → **peer** `qa/reporting/typescript/skills/flaky-test-quarantine`
-- The red-green-refactor loop → [`ep-test-driven-development`](../../../../engineering-practices/test-driven-development/SKILL.md)
 - The unit needs a seam / a pattern → [`pattern-writer`](../pattern-writer/SKILL.md)
 - Reviewing the tests with the change → [`code-review`](../code-review/SKILL.md)
 - .NET equivalent → `backend/dotnet/skills/unit-testing` · Java equivalent → `backend/java/skills/unit-testing`

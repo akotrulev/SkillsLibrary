@@ -138,8 +138,7 @@ another stack.
 **Every task also names its agent** — an exact catalog name on the same line as the stack
 (`be-dotnet`, `be-java`, `be-node`, `be-python`, `fe-react`, `fe-blazor`, `data-architect`,
 `devops-engineer`, `tooling-engineer`, `qa-api-<stack>`, …). One stack, one agent, one session: the
-agent is who the session is opened as, and it is what `ep-executing-plans` adopts and
-`ep-delegate-to-subagents` dispatches to. A task whose agent you cannot name is a task whose stack you
+agent is who the session is opened as, and it is what `ep-executing-plans` adopts. A task whose agent you cannot name is a task whose stack you
 have not actually decided; an invented agent name is the most damaging defect in the document.
 
 ## Step 5 — Budget the session
@@ -268,9 +267,6 @@ After writing the complete plan, look at the spec with fresh eyes and check the 
 Fix what you find inline. No need to re-review — fix and move on. A spec requirement with no task gets
 a task.
 
-For a large or high-stakes plan, a dedicated reviewer pass is available — the template at
-[`./plan-document-reviewer-prompt.md`](./plan-document-reviewer-prompt.md).
-
 ## Execution Handoff
 
 After saving the plan, hand off to execution.
@@ -278,11 +274,9 @@ After saving the plan, hand off to execution.
 **"Plan complete and saved to `docs/plans/<filename>.md`. Ready to implement it task-by-task with
 checkpoints for review?"**
 
+- **Queued execution (default):** the plan file itself, run through Plan Queue. It is self-contained on
+  purpose — the whole document queues, and each prompt block runs one session.
 - **Inline execution:** `ep-executing-plans`. Batch execution with checkpoints for review.
-- **Subagent execution:** `ep-delegate-to-subagents`. Self-contained tasks dispatched to implementer
-  agents, each result reviewed before moving on.
-- **Queued execution:** the plan file itself. It is self-contained on purpose — the whole document
-  queues, and each prompt block runs one session.
 
 ## Remember
 

@@ -83,11 +83,11 @@ Don't restyle the POM layer alongside the fix unless asked. **Verify** (`ep-veri
 
 ### Mode B — Extend coverage (add / change journeys)
 
-Scope the change and orient on the pages it touches. Consider test-first (`ep-test-driven-development`). **Re-enter only the relevant steps** — usually Step 1 (only the *missing* POM methods/elements, via `page-objects-from-url` if it's a live page) and Step 2 (the new journey) — **reusing** existing POMs, fixtures, and tags. Then specialized layers and review **on the changed surface only**. Every rule still binds (intent not selectors, no fixed sleeps, independence, `data-testid` first) — a new journey that violates one is a new defect.
+Scope the change and orient on the pages it touches. **Re-enter only the relevant steps** — usually Step 1 (only the *missing* POM methods/elements, via `page-objects-from-url` if it's a live page) and Step 2 (the new journey) — **reusing** existing POMs, fixtures, and tags. Then specialized layers and review **on the changed surface only**. Every rule still binds (intent not selectors, no fixed sleeps, independence, `data-testid` first) — a new journey that violates one is a new defect.
 
 ### Branch & finish (both modes)
 
-Work on a branch, not the user's default — `ep-worktrees` for larger/parallel work, `ep-writing-plans` + `ep-executing-plans` for a multi-step extension, `ep-finish-branch` to wrap. Commit/push only when asked.
+Work on a branch, not the user's default; `ep-writing-plans` + `ep-executing-plans` for a multi-step extension. Commit/push only when asked.
 
 **Update the cache before you report** (greenfield runs too, per `ep-agent-orientation-cache` Orientation 3): correct what the run disproved, **add the seams the run created** — new page objects, locators, fixtures, tags, newly covered flows — re-stamp the baseline commit + fingerprint, prepend one session-log line.
 

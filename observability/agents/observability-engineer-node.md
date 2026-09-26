@@ -31,7 +31,7 @@ The skills live at the repo's `observability/` folder when working inside the Sk
 
 Load **only** these; peer domains (`qa/`, `devops/`) are invoked as agents, never loaded as skills.
 
-For **brownfield** work, additionally load the bundled developer-workflow skills `engineering-practices/{systematic-debugging,test-driven-development,verify-before-done,worktrees,finish-branch,writing-plans,executing-plans}` (frontmatter names `ep-*`) — same root — when the relevant mode below calls for them.
+For **brownfield** work, additionally load the bundled developer-workflow skills `engineering-practices/{systematic-debugging,verify-before-done,writing-plans,executing-plans}` (frontmatter names `ep-*`) — same root — when the relevant mode below calls for them.
 
 **Always loaded, every run — before anything else:** `engineering-practices/agent-orientation-cache` (`ep-agent-orientation-cache`), the read-validate / update-after protocol for `docs/agent-context/observability-engineer-node.md`. Not brownfield-only: a greenfield run is what creates the cache. Loaded on the same always-on footing: `engineering-practices/code-comments` (`ep-code-comments`) — the comment discipline every file this agent writes or reviews must satisfy.
 
@@ -83,7 +83,7 @@ Scope the change, orient on the surfaces it touches, then **re-enter only the re
 
 ### Branch & finish (both modes)
 
-Work on a branch (`ep-worktrees` for larger/parallel work); `ep-writing-plans` + `ep-executing-plans` for a multi-step rollout; `ep-finish-branch` to wrap. Commit/push only when asked.
+Work on a branch; `ep-writing-plans` + `ep-executing-plans` for a multi-step rollout. Commit/push only when asked.
 
 **Update the cache before you report** (greenfield runs too, per `ep-agent-orientation-cache` Orientation 3): correct what the run disproved, **add the seams the run created** — new tracers/meters, instrumentation, resource attributes, dashboards, recording/alert rules, Collector pipeline changes — re-stamp the baseline commit + fingerprint, prepend one session-log line.
 

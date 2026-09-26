@@ -30,7 +30,7 @@ Owns **dev-side unit tests of backend logic**: instantiate a class directly, dri
 - A calculation: money, rounding, proration, tax, totals, date math.
 - A mapper / `Result<T,E>`-style branch / error-to-ProblemDetails translation.
 - A validator (FluentValidation rules, custom validation attributes).
-- Reproducing a bug at the unit level before fixing it (`ep-systematic-debugging`'s repro step, `ep-test-driven-development`'s RED).
+- Reproducing a bug at the unit level before fixing it (`ep-systematic-debugging`'s repro step).
 
 ## When NOT to use
 
@@ -225,7 +225,7 @@ var order = new OrderBuilder().WithStatus(OrderStatus.Shipped).Build();
 - Arrange–Act–Assert, visibly separated. If Arrange needs 20 lines, the design is too coupled — that's a finding, not a fixture problem.
 - Tests are independent and order-free: any test runs alone, in any order, in parallel.
 - Fake at the boundary you own; the class under test is real and constructed directly (`new`, never resolved from a container).
-- Every test the run generates must actually fail if the behavior breaks — verify RED at least once per new behavior (`ep-test-driven-development`).
+- Every test the run generates must actually fail if the behavior breaks — verify RED at least once per new behavior.
 - No conditional logic, no loops driving assertions, no `try/catch` standing in for `Assert.Throws`.
 - No coverage-percentage gate here; whether the assertions are any good is measured by mutation score — **peer** `qa-test-quality-check-dotnet`.
 
@@ -258,7 +258,6 @@ var order = new OrderBuilder().WithStatus(OrderStatus.Shipped).Build();
 - Do the tests actually catch faults? → **peer** `qa/dotnet/skills/test-quality-check` (Stryker.NET)
 - Suite-scale builders / ObjectMother → **peer** `qa/dotnet/skills/test-data-builder`
 - Flaky test triage / quarantine → **peer** `qa/reporting/dotnet/skills/flaky-test-quarantine`
-- The red-green-refactor loop itself → [`ep-test-driven-development`](../../../../engineering-practices/test-driven-development/SKILL.md)
 - The class under test needs a seam / a pattern → [`pattern-writer`](../pattern-writer/SKILL.md)
 - Reviewing the tests with the change → [`code-review`](../code-review/SKILL.md)
 - Whole-service conformance sweep (incl. §M testability) → [`standards-audit`](../standards-audit/SKILL.md)

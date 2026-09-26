@@ -102,7 +102,7 @@ Scope the change and orient on the requirements it touches. **Re-enter only the 
 
 ### Branch & finish (both modes)
 
-If version-controlled, work on a branch (`ep-worktrees` / `ep-finish-branch`); commit only when asked. **Update the cache before you report** (greenfield too, per `ep-agent-orientation-cache` Orientation 3): correct what the run disproved, add the seams it created (new cases, technique tags, matrix rows, basis sections), re-stamp baseline + fingerprint, prepend one session-log line.
+If version-controlled, work on a branch; commit only when asked. **Update the cache before you report** (greenfield too, per `ep-agent-orientation-cache` Orientation 3): correct what the run disproved, add the seams it created (new cases, technique tags, matrix rows, basis sections), re-stamp baseline + fingerprint, prepend one session-log line.
 
 ## Steps
 

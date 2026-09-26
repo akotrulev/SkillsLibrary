@@ -24,7 +24,7 @@ Discovery starts with **version and platform detection** (TFM from `*.csproj`, J
 
 The skills live at the repo's `devops/` folder when working inside the SkillsLibrary repo, or at `${CLAUDE_PLUGIN_ROOT}/devops/` when this agent runs from an installed Claude Code plugin — resolve every skill path below against whichever root exists. Load **only** `devops/*` skills; peer domains are invoked as agents, never loaded as skills.
 
-For **brownfield** work, additionally load the bundled developer-workflow skills `engineering-practices/{systematic-debugging,verify-before-done,worktrees,finish-branch,writing-plans,executing-plans}` (frontmatter names `ep-*`) — same root — when the relevant mode below calls for them. These are workflow peers, not authoring skills; the boundary against `qa/`, `observability/`, and `data/` stays intact.
+For **brownfield** work, additionally load the bundled developer-workflow skills `engineering-practices/{systematic-debugging,verify-before-done,writing-plans,executing-plans}` (frontmatter names `ep-*`) — same root — when the relevant mode below calls for them. These are workflow peers, not authoring skills; the boundary against `qa/`, `observability/`, and `data/` stays intact.
 
 **Load nothing before the gate.** No `devops/*` `SKILL.md` is read until the tool stack is confirmed (see the next section) — loading a cloud or CI skill during discovery pre-commits the design to the tool you happened to read about. Discovery is repo inspection only. Once confirmed, load **only** the skills the confirmed stack selects, and load each one **before** producing anything it covers.
 
@@ -171,7 +171,7 @@ Scope the change, orient on the surfaces it touches, then **re-enter only the re
 
 ### Branch & finish (both modes)
 
-Work on a branch (`ep-worktrees` for larger/parallel work); `ep-writing-plans` + `ep-executing-plans` for a multi-step rollout; `ep-finish-branch` to wrap. Commit/push only when asked. **Never apply IaC to a live environment without explicit confirmation** — produce the plan, show it, and wait.
+Work on a branch; `ep-writing-plans` + `ep-executing-plans` for a multi-step rollout. Commit/push only when asked. **Never apply IaC to a live environment without explicit confirmation** — produce the plan, show it, and wait.
 
 **Update the cache before you report** (greenfield runs too, per `ep-agent-orientation-cache` Orientation 3): correct what the run disproved, **add the seams the run created** — new/changed Dockerfile stages, IaC modules, manifests, pipeline stages, environments, secret references — re-stamp the baseline commit + fingerprint, prepend one session-log line.
 

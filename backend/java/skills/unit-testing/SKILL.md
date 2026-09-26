@@ -35,7 +35,7 @@ That line is worth stating twice, because Spring's slice-test annotations are ro
 - A calculation: money (`BigDecimal`), rounding, proration, tax, date math.
 - A mapper, a sealed-type state transition, an exception-to-response translation.
 - A `jakarta.validation` constraint set (buildable without Spring — see below).
-- Reproducing a bug at the unit level before fixing it (`ep-systematic-debugging` RED, `ep-test-driven-development`).
+- Reproducing a bug at the unit level before fixing it (`ep-systematic-debugging` RED).
 
 ## When NOT to use
 
@@ -249,7 +249,7 @@ var order = anOrder().withStatus(SHIPPED).build();
 - Arrange–Act–Assert, visibly separated. 20 lines of arrange = a coupling finding, not a fixture problem.
 - Tests are independent and order-free; any test runs alone, in any order.
 - The class under test is **real and constructed directly** — never resolved from a context.
-- Verify RED once per new behavior (`ep-test-driven-development`).
+- Verify RED once per new behavior.
 - No `if`/`for` driving assertions; no `try/catch` standing in for `assertThatThrownBy`.
 - No coverage-% gate here — assertion quality is measured by mutation score (**peer** `qa-test-quality-check-java`, PIT).
 
@@ -283,7 +283,6 @@ var order = anOrder().withStatus(SHIPPED).build();
 - Do the tests actually catch faults? → **peer** `qa/java/skills/test-quality-check` (PIT)
 - Suite-scale builders / ObjectMother → **peer** `qa/java/skills/test-data-builder`
 - Flaky triage / quarantine → **peer** `qa/reporting/java/skills/flaky-test-quarantine`
-- The red-green-refactor loop → [`ep-test-driven-development`](../../../../engineering-practices/test-driven-development/SKILL.md)
 - The class needs a seam / a pattern → [`pattern-writer`](../pattern-writer/SKILL.md)
 - Reviewing the tests with the change → [`code-review`](../code-review/SKILL.md)
 - .NET equivalent → `backend/dotnet/skills/unit-testing` · TypeScript equivalent → `backend/node/skills/unit-testing`

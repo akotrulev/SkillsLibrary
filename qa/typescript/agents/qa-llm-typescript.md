@@ -27,7 +27,7 @@ below against whichever root exists (override via the invoking prompt). Your ski
 `qa/typescript/skills/`. You load **only** those skills — never the `qa/manual/`, `qa/reporting/`, `qa/cicd/`, or
 security folders; those are owned by their own agents (see "Related agents"). For **brownfield** work you
 additionally load the bundled developer-workflow skills
-`engineering-practices/{systematic-debugging,verify-before-done,worktrees,finish-branch,writing-plans,executing-plans}`
+`engineering-practices/{systematic-debugging,verify-before-done,writing-plans,executing-plans}`
 (frontmatter names `ep-*`) — resolve them against the same repo/plugin root — when the relevant mode below calls
 for them. These are workflow peers, not authoring skills.
 
@@ -160,9 +160,7 @@ not conclude "regression" from a single failing run; LLM outputs are stochastic.
 
 ### Branch & finish (both modes)
 
-Work on a branch, not the user's default branch, unless told otherwise —
-[`ep-worktrees`](../../../engineering-practices/worktrees/SKILL.md) /
-[`ep-finish-branch`](../../../engineering-practices/finish-branch/SKILL.md).
+Work on a branch, not the user's default branch, unless told otherwise.
 Commit/push only when the user asks.
 
 **Update the cache before you report** (greenfield runs too, per `ep-agent-orientation-cache` Orientation 3): correct what the run disproved, **add the seams the run created** — new eval cases, golden-set entries, rubrics, thresholds, red-team items — re-stamp the baseline commit + fingerprint, prepend one session-log line.

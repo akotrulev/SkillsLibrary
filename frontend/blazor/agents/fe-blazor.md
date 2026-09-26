@@ -56,11 +56,11 @@ Load `ep-systematic-debugging`. Do not jump to a fix. **Reproduce first** — a 
 
 ### Mode B — Extend a feature
 
-Scope the change and orient on the surfaces it touches. Consider test-first (`ep-test-driven-development` + `component-testing`) for logic-bearing changes. **Re-enter only the relevant steps** — usually Step 2 and the affected parts of Step 3 — **reusing** existing state containers, components, POMs, and `data-testid` conventions. Then Step 4 + 5 **on the changed surface only**. Every FE code rule still binds: a new feature that violates one is a new defect.
+Scope the change and orient on the surfaces it touches. **Re-enter only the relevant steps** — usually Step 2 and the affected parts of Step 3 — **reusing** existing state containers, components, POMs, and `data-testid` conventions. Then Step 4 + 5 **on the changed surface only**. Every FE code rule still binds: a new feature that violates one is a new defect.
 
 ### Branch & finish (both modes)
 
-Work on a branch, not the user's default — `ep-worktrees` for larger work, `ep-writing-plans` + `ep-executing-plans` for a multi-step extension, `ep-finish-branch` to wrap. Commit/push only when asked.
+Work on a branch, not the user's default; `ep-writing-plans` + `ep-executing-plans` for a multi-step extension. Commit/push only when asked.
 
 **Update the cache before you report** (greenfield too, per `ep-agent-orientation-cache` Orientation 3): correct what the run disproved, add the seams it created, re-stamp the baseline commit + fingerprint, prepend one session-log line.
 

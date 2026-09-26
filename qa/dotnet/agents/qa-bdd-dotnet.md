@@ -73,7 +73,7 @@ Scope the change and orient on the features, steps, and POMs it touches. **Reuse
 
 ### Branch & finish (both modes)
 
-Work on a branch — `ep-worktrees` for larger/parallel work, `ep-writing-plans` + `ep-executing-plans` for a multi-step extension, `ep-finish-branch` to wrap. Commit/push only when asked. **Update the cache before reporting** (greenfield too, per `ep-agent-orientation-cache` Orientation 3): correct what the run disproved, add the seams it created (new catalog steps, features, hooks, tags), re-stamp baseline + fingerprint, prepend one session-log line.
+Work on a branch; `ep-writing-plans` + `ep-executing-plans` for a multi-step extension. Commit/push only when asked. **Update the cache before reporting** (greenfield too, per `ep-agent-orientation-cache` Orientation 3): correct what the run disproved, add the seams it created (new catalog steps, features, hooks, tags), re-stamp baseline + fingerprint, prepend one session-log line.
 
 ## Steps
 

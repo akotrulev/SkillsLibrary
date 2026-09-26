@@ -22,7 +22,7 @@ You work in **two modes**; most real work is the second:
 
 Read the step's `SKILL.md` before producing anything it covers; the skill wins over instinct, and over `CLAUDE.md` for its domain (note the conflict). Where a skill routes to several `references/<tool>.md`, read only the one matching the project's tool. Load `_shared/{reference,reviewer}` for pattern-concept-altitude questions/reviews; load the `auth0`/`cognito` skills + `auth/_shared/{auth0-concepts,oidc-concepts}` only when service-side auth is in scope.
 
-**Always loaded, every run:** `ep-agent-orientation-cache` (the read-validate / update-after protocol for `docs/agent-context/be-dotnet.md`; a greenfield run creates the cache) and `ep-code-comments` (the comment discipline for every file written or reviewed). **Brownfield adds** `ep-{systematic-debugging,test-driven-development,verify-before-done,worktrees,finish-branch,writing-plans,executing-plans}` when the mode calls for them.
+**Always loaded, every run:** `ep-agent-orientation-cache` (the read-validate / update-after protocol for `docs/agent-context/be-dotnet.md`; a greenfield run creates the cache) and `ep-code-comments` (the comment discipline for every file written or reviewed). **Brownfield adds** `ep-{systematic-debugging,verify-before-done,writing-plans,executing-plans}` when the mode calls for them.
 
 ## Operating rules
 
@@ -55,11 +55,11 @@ Load `ep-systematic-debugging` (or apply inline). **Reproduce first**, then **tr
 
 ### Mode B — Extend (add a pattern / persistence for a new aggregate)
 
-Scope the change, orient on the surfaces it touches, consider test-first (`ep-test-driven-development` + `unit-testing`) for logic-bearing changes, then re-enter only the relevant skill (`pattern-writer`, `database-code`, `unit-testing`) — **reusing** the existing DI modules, `DbContext`, configuration conventions, and test project/fakes/builders rather than duplicating them. Run `code-review` on the changed surface only.
+Scope the change, orient on the surfaces it touches, then re-enter only the relevant skill (`pattern-writer`, `database-code`, `unit-testing`) — **reusing** the existing DI modules, `DbContext`, configuration conventions, and test project/fakes/builders rather than duplicating them. Run `code-review` on the changed surface only.
 
 ### Branch & finish (both modes)
 
-Branch (`ep-worktrees` for larger/parallel work); `ep-writing-plans` + `ep-executing-plans` for a multi-step extension; `ep-finish-branch` to wrap. Commit/push only when asked. **Update the cache before reporting** (greenfield too): correct what the run disproved, add the seams it created, re-stamp baseline + fingerprint, prepend one session-log line.
+Branch; `ep-writing-plans` + `ep-executing-plans` for a multi-step extension. Commit/push only when asked. **Update the cache before reporting** (greenfield too): correct what the run disproved, add the seams it created, re-stamp baseline + fingerprint, prepend one session-log line.
 
 ## Steps
 
@@ -69,7 +69,7 @@ A brownfield run re-enters only the step(s) the change touches — see the modes
 |---|-------|------|-----------------|-----------|
 | 1 | Pattern decision | Confirm the pattern is earned (not premature/stacked); confirm TFM + EF Core major | `pattern-guide` (+ `_shared/pattern-guide` for the conceptual case) | Pattern choice stated with why it's earned; TFM/EF Core detected |
 | 2 | Generate | Scaffold the pattern and/or persistence and/or service-side auth wiring | `pattern-writer`, `database-code` (if persistence), `auth0`/`cognito` (if auth) | `dotnet build` clean, 0 warnings; `dotnet format --verify-no-changes` |
-| 3 | Unit test | Cover Step 2's logic — in-process, no HTTP/container/real DB | `unit-testing` (+ `ep-test-driven-development` when test-first) | `dotnet test` green; every logic-bearing type has a test or a stated reason (per the skill's matrix); seams injected not statically faked; no `WebApplicationFactory`/Testcontainers/`UseInMemoryDatabase` |
+| 3 | Unit test | Cover Step 2's logic — in-process, no HTTP/container/real DB | `unit-testing` | `dotnet test` green; every logic-bearing type has a test or a stated reason (per the skill's matrix); seams injected not statically faked; no `WebApplicationFactory`/Testcontainers/`UseInMemoryDatabase` |
 | 4 | Review | Hostile senior review — pattern misuse, DI/async violations, layering | `code-review` (+ `_shared/code-review` for architecture-altitude concerns) | Standard severity table (`CLAUDE.md` format); no blocker/major rows after fixes |
 
 **Single-skill trigger — conformance audit:** for "audit our service against these conventions" / "does this follow the plugin rules", load `standards-audit` **alone** (it loads `ep-standards-audit-engine`) and run read-only: it sweeps the whole service against this plugin's rules + the bundled `observability/*` invariants across sections A–N, saving `docs/audits/<NNN>-be-dotnet-conformance-r<N>.md`. **No step runs and you fix nothing** — remediation is a separate FIX/EXTEND run from the report's priority table. Also `/be-dotnet-audit`. Use `code-review` for a single file/diff; `code-auditor` for a spec/story set or non-.NET stack; `qa-dotnet-standards-audit` for the **test suite**.

@@ -19,7 +19,7 @@ Resolve every `qa/...` path against the repo root (`qa/`) or, from an installed 
 2. Where a skill routes to one of several `references/<tool>.md`, read only the one matching the project's tool.
 3. If a listed skill is missing on disk, say so and proceed with the global rules only — never substitute improvised guidance.
 
-**Always loaded, every run:** `ep-agent-orientation-cache` (read-validate / update-after for `docs/agent-context/qa-performance-java.md` — a greenfield run creates it) and `ep-code-comments` (the comment discipline for every file written or reviewed). For **brownfield** work also load the bundled `ep-{systematic-debugging,verify-before-done,worktrees,finish-branch,writing-plans,executing-plans}` when the mode calls for them.
+**Always loaded, every run:** `ep-agent-orientation-cache` (read-validate / update-after for `docs/agent-context/qa-performance-java.md` — a greenfield run creates it) and `ep-code-comments` (the comment discipline for every file written or reviewed). For **brownfield** work also load the bundled `ep-{systematic-debugging,verify-before-done,writing-plans,executing-plans}` when the mode calls for them.
 
 ## Operating rules
 
@@ -72,7 +72,7 @@ Scope the change and orient on the scenarios and thresholds it touches. **Re-ent
 
 ### Branch & finish (both modes)
 
-Work on a branch — `ep-worktrees` for larger/parallel work, `ep-writing-plans` + `ep-executing-plans` for a multi-step extension, `ep-finish-branch` to wrap. Commit/push only when asked. **Update the cache before you report** (greenfield runs too): correct what the run disproved, add the seams it created, re-stamp the baseline commit + fingerprint, prepend one session-log line.
+Work on a branch; `ep-writing-plans` + `ep-executing-plans` for a multi-step extension. Commit/push only when asked. **Update the cache before you report** (greenfield runs too): correct what the run disproved, add the seams it created, re-stamp the baseline commit + fingerprint, prepend one session-log line.
 
 ## Steps
 

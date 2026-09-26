@@ -71,11 +71,11 @@ Don't restyle the screen-object layer alongside the fix unless asked. **Verify**
 
 ### Mode B — Extend coverage (add / change flows)
 
-Scope the change and orient on the screens it touches. Consider test-first (`ep-test-driven-development`) for a new flow. **Re-enter only the relevant steps** — usually Step 1 (only the *missing* screen-object methods/elements, via `mobile-screen-explorer` if live) and Step 2 (the new flow) — **reusing** existing screen objects, driver setup, and tags. Then specialized layers and review **on the changed surface only**. Every rule still binds (intent not raw locators, no fixed sleeps, independence, accessibility-id first) — a new flow that violates one is a new defect.
+Scope the change and orient on the screens it touches. **Re-enter only the relevant steps** — usually Step 1 (only the *missing* screen-object methods/elements, via `mobile-screen-explorer` if live) and Step 2 (the new flow) — **reusing** existing screen objects, driver setup, and tags. Then specialized layers and review **on the changed surface only**. Every rule still binds (intent not raw locators, no fixed sleeps, independence, accessibility-id first) — a new flow that violates one is a new defect.
 
 ### Branch & finish (both modes)
 
-Work on a branch, not the user's default — `ep-worktrees` for larger/parallel work, `ep-writing-plans` + `ep-executing-plans` for a multi-step extension, `ep-finish-branch` to wrap. Commit/push only when asked. **Update the cache before you report** (greenfield too, per `ep-agent-orientation-cache` Orientation 3): correct what the run disproved, add the seams it created, re-stamp baseline commit + fingerprint, prepend one session-log line.
+Work on a branch, not the user's default; `ep-writing-plans` + `ep-executing-plans` for a multi-step extension. Commit/push only when asked. **Update the cache before you report** (greenfield too, per `ep-agent-orientation-cache` Orientation 3): correct what the run disproved, add the seams it created, re-stamp baseline commit + fingerprint, prepend one session-log line.
 
 ## Steps
 
