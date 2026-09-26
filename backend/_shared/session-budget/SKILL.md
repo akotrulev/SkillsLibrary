@@ -1,6 +1,6 @@
 ---
 name: be-shared-session-budget
-description: Use when plan tasks need sizing to one working session each, and when each task must be handed to an agent as a ready-to-paste prompt. Estimates a task's context cost, grows or splits it toward the session target, and writes the plan's own `## Prompts — one per task` section — one block per task, deleted as each task lands. Triggers "how big should this task be", "is this one session", "what do I paste next". Do NOT use to sequence tasks (`be-shared-delivery-plan`), to group them into epics (`be-shared-epic-map`), or to execute one (`ep-executing-plans`).
+description: Use when plan tasks need sizing to one working session each, and when each task must be handed to an agent as a ready-to-paste prompt. Estimates a task's context cost, grows or splits it toward the session target, and writes the plan's own `## Prompts — one per task` section — one block per task, deleted as each task lands. Triggers "how big should this task be", "is this one session", "what do I paste next". Do NOT use to sequence tasks (`be-shared-delivery-plan`), to group them into epics (`be-shared-epic-map`), or to execute one (Plan Queue, as the task's named agent).
 ---
 
 # Session Budget — one task, one session, one prompt

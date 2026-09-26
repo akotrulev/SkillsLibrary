@@ -1,6 +1,6 @@
 ---
 name: be-shared-delivery-plan
-description: Use when a planned build (blueprint + data model + API surface + integrations + epic map) needs turning into an ordered task list — one flat sequence of tasks, each with a deliverable, one stack, one executing agent and a context estimate, plus named streams derived from the epic map and a reconcile against half-built code. Triggers "what order do we build this in", "turn the plan into tasks", "pick up where we left off". Do NOT use to write code (`be-<stack>`), size tasks or write the next prompts (`be-shared-session-budget`), decide what runs in parallel at epic level (`be-shared-epic-map`), run a plan (`ep-executing-plans`), or audit code vs spec (`code-auditor`).
+description: Use when a planned build (blueprint + data model + API surface + integrations + epic map) needs turning into an ordered task list — one flat sequence of tasks, each with a deliverable, one stack, one executing agent and a context estimate, plus named streams derived from the epic map and a reconcile against half-built code. Triggers "what order do we build this in", "turn the plan into tasks", "pick up where we left off". Do NOT use to write code (`be-<stack>`), size tasks or write the next prompts (`be-shared-session-budget`), decide what runs in parallel at epic level (`be-shared-epic-map`), run a plan (Plan Queue), or audit code vs spec (`code-auditor`).
 ---
 
 # Delivery Plan — the ordered, agent-bound task list
