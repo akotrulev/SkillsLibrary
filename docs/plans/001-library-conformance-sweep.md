@@ -7,8 +7,10 @@ leftovers along the way (§5). One repo-wide gate at the end proves it (§7).
 **Status:** S1 and S2 landed 2026-09-26 (S1: engineering-practices, templates, CONTRIBUTING;
 `.agent-template` removed. S2: the backend/_shared planning lane — `delivery-plan` and `session-budget`
 now emit `## Close-out — every task`; `docs/plans/implemented/` created, holding
-`planning-lane-rebuild.md` and `PLANNER-PLAN.md`). S3 is next. S1–S18 are ungated: S1's and S2's edits
-are built but unverified until G1 runs §7.
+`planning-lane-rebuild.md` and `PLANNER-PLAN.md`). S3 landed 2026-09-26 (the backend/_shared
+documenter and pattern lane, and backend/dotnet; `UNIT-TESTING-PLAN.md` and `DOCUMENTER-PLAN.md` filed
+to `docs/plans/implemented/`, and the backend audit filed live as `docs/plans/backend-PLAN.md`). S4 is
+next. S1–S18 are ungated: the edits from S1, S2 and S3 are built but unverified until G1 runs §7.
 
 ## 1. What already exists, and what is missing
 
@@ -693,6 +695,59 @@ three legacy plans' headers and spot checks 4k, read-back 6k, churn ×1.2
   status line: check three of its findings against the skills; if they are fixed it is landed,
   otherwise it moves to `docs/plans/` as live. Either way it moves as `backend-PLAN.md` (§5).
 - **Not in S3:** `backend/{java,node,python}` (S4).
+- **As built (2026-09-26):** `backend/_shared/agents/{be-documenter,be-feature-documenter}.md`,
+  `backend/_shared/{pattern-guide,code-review,codebase-survey,feature-trace,business-documentation}/`,
+  `backend/dotnet/` (agent and both commands read in full; the commands needed no change). Gate line
+  added to 3 agents, each as the last Operating-rules bullet: `be-documenter.md`,
+  `be-feature-documenter.md` and `be-dotnet.md`.
+  Data issues: 3 fixed.
+  - `be-dotnet.md:23` and `:98` named `_shared/{reference,reviewer}`, which no longer exist. They now
+    name `_shared/{pattern-guide,code-review}`, and `:98` lists `be-python` as a sibling.
+  - `be-documenter`'s description said ".NET / Java / Node", but the be-python plugin also ships it.
+    It now says "… / Python".
+  - `be-dotnet.md:84` pointed its closing duty at `be-shared-session-budget` Step 5, which S2 reduced
+    to a pointer. It now points at the plan's `## Close-out — every task` section (plan format §7).
+  Code issues: 12 fixed.
+  - "Announce at start" was removed from `codebase-survey`, `feature-trace` and
+    `business-documentation`. In `standards-audit/SKILL.md:12` it became "State the mode … in the
+    first line of output".
+  - The "— MANDATORY SECTION" heading suffix was dropped from `be-documenter` and `be-dotnet`.
+  - Descriptions were trimmed (K7 report): `business-documentation` 709→500, `be-documenter`
+    735→622, `be-feature-documenter` 843→641. Every other description in scope already had its
+    Do-NOT clause and fit its budget.
+  - K3: `be-documenter` Workspace said "committing … on the current branch is fine". It now opens
+    "Work in the checkout you are given — never create a branch or worktree." `be-feature-documenter`
+    had no workspace rule and gained that line.
+  - K2 for skills: one `Gate: none` sentence ("written, not run") each in
+    `dotnet/skills/unit-testing` Generation step 6 and `dotnet/skills/pattern-writer` Validation.
+  Logical conflicts: 1 fixed. `be-dotnet`'s orientation said "confirm `dotnet build` is green …
+  every run", which contradicts a `Gate: none` task. It now reads "every run outside a `Gate: none`
+  plan task" (`be-dotnet.md:47`).
+  Cleanup (the `docs/plans/implemented/` folder already existed):
+  - `git mv backend/UNIT-TESTING-PLAN.md docs/plans/implemented/`: all three
+    `backend/{dotnet,java,node}/skills/unit-testing/` exist.
+  - `git mv backend/DOCUMENTER-PLAN.md docs/plans/implemented/`. Spot checks: the agent and its
+    three skills exist; `feature-trace/references/trace-recipes.md` exists;
+    `commands/dev-document-system.md` exists; the business-analysis plugin bundles the agent.
+  - `git mv backend/PLAN.md docs/plans/backend-PLAN.md` (**live**). Findings still open:
+    - F1: `dotnet/skills/pattern-guide` still has only Strategy, Repository and Mediator cards, plus
+      its coverage checklist.
+    - F3: `database-code/SKILL.md:79-80` still pairs `[Timestamp]` with `xmin`.
+    - F5: `:128` still uses `builder.HasCheckConstraint`.
+    - F2 (no `backend/node/skills/auth0`) and F4 (no Version policy in the java auth skills) are also
+      open.
+  - Nothing outside legacy plans cited the three files. `CONFORMANCE-AUDIT-PLAN.md` cites
+    `backend/PLAN.md` as plain text and was left as it is (legacy; noted in G1's prompt).
+  Kept on purpose:
+  - Every K4 hit is D8 architecture vocabulary ("CRUD slice", "vertical slice", CoR "stage").
+  - K8 hits are the .NET CLI inside exit criteria, which the plan keeps, and inside
+    code/validation lists.
+  - The `data-testid` resolver hit is S2's example plan.
+  - `be-dotnet`'s description opens with the role, not "Use when" (S2 did the same for
+    `solution-planner`).
+  - Recipe fixes F1–F5 in `backend/dotnet/skills/database-code` and `pattern-guide` are outside
+    K1–K9. They stay with `backend-PLAN.md`.
+  Unverified: nothing was run beyond §4's searches (Gate: none). Left for the user: nothing.
 
 ### S4 — backend/java, backend/node and backend/python
 
@@ -1105,51 +1160,9 @@ name: the K1 resolver flags it (D12).
 | S18 | `docs` | `general-purpose` | — | ~135k |
 | G1 | `docs` | `general-purpose` | S1–S18 | ~120k |
 
-S1 and S2 have landed, and their prompts are deleted; the 17 prompts from S3 to G1 are live.
+S1, S2 and S3 have landed, and their prompts are deleted; the 16 prompts from S4 to G1 are live.
 
 ---
-
-### S3 — backend/_shared documenter and pattern lane, and backend/dotnet (general-purpose, docs)
-
-````
-You are `general-purpose`. Task S3 of docs/plans/001-library-conformance-sweep.md: bring the
-documenter and pattern half of backend/_shared, and backend/dotnet, in line with the plan's checks
-K1–K9.
-
-Deliverable: be-documenter, be-feature-documenter, the five remaining backend/_shared skills and all
-of backend/dotnet/ pass K1–K9, and backend/{UNIT-TESTING-PLAN,DOCUMENTER-PLAN,PLAN}.md
-are filed per §5.
-
-Read, in this order:
-1. CLAUDE.md.
-2. The plan: §2, §3, §4, §5, §6 (the S3 rows), D1–D11, task S3.
-3. CONTRIBUTING.md.
-4. backend/_shared/agents/be-documenter.md, be-feature-documenter.md,
-   backend/dotnet/agents/be-dotnet.md and backend/dotnet/commands/*.md in full.
-5. The plan's "Close-out — every task".
-
-Do:
-- Run §4's recipes over backend/_shared/{pattern-guide,code-review,codebase-survey,feature-trace,
-  business-documentation}, the two agents, and DIR=backend/dotnet.
-- K2: the Gate line in the three agents. be-dotnet's "`dotnet test` green" exit criterion stays.
-- K7: business-documentation 709 → ≤ 500; be-feature-documenter 843 and be-documenter 735 → ≤ 650.
-- K9: confirm backend/{dotnet,java,node}/skills/unit-testing/ exist, then
-  `git mv backend/UNIT-TESTING-PLAN.md docs/plans/implemented/`. Spot-check three deliverables of
-  backend/DOCUMENTER-PLAN.md and file it the same way. backend/PLAN.md has no status line: check three
-  of its findings; fixed → docs/plans/implemented/backend-PLAN.md, otherwise →
-  docs/plans/backend-PLAN.md (live).
-- Never edit a legacy plan's text; its dead names leave with it.
-
-Traps:
-- business-documentation's `areas/identity.md` link is a deliberate example.
-- Do not touch the planning-lane skills; S2 owns them.
-- `docs/plans/implemented/` may not exist yet; `mkdir -p` it before the move.
-
-Gate: none — this plan gates once, in G1. Do not run tools/token-audit.py or §7's script.
-
-Commit: `chore(sweep S3): backend/_shared documenter lane and backend/dotnet`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
 
 ### S4 — backend/java, backend/node and backend/python (general-purpose, docs)
 
@@ -1183,6 +1196,19 @@ Traps:
   safety rules (K5 keep).
 - Record the real name you find for `qa-test-quality-check-typescript`; S13 needs it. Put it in S13's
   prompt per Close-out step 3.
+- S3 found these in be-dotnet; be-java and be-node carry the same text (be-java.md:110,
+  be-node.md:109 and each agent's "Closing duty" bullet), and be-python the last two:
+  - `backend/_shared/{reference,reviewer}` is stale — the skills are `pattern-guide` and `code-review`.
+  - The "— MANDATORY SECTION" suffix on the brownfield heading is dropped (K5).
+  - "Then the prompts, per `be-shared-session-budget` Step 5" now reads "per the plan's
+    `## Close-out — every task` section (plan format §7)".
+  - Place the Gate line as the last Operating-rules bullet; where the orientation pass says "confirm
+    the build is green … every run", add "outside a `Gate: none` plan task".
+  - The stacks' `pattern-writer` Validation and `unit-testing` Verify steps each got one sentence:
+    inside a `Gate: none` plan task they run none of the checks and report "written, not run".
+  - A mode-based skill's "Announce at start" becomes "State the mode … in the first line of output".
+- The backend audit plan is now docs/plans/backend-PLAN.md (live; its F1–F12 were not fixed by
+  this sweep). Never edit it.
 
 Gate: none — this plan gates once, in G1. Do not run tools/token-audit.py or §7's script.
 
@@ -1755,6 +1781,10 @@ Traps:
   entry (line ~207) still says "the closing duty". Reword it.
 - Any entry you add to ALLOW or LINK_EXAMPLES needs a one-line reason in the As built note.
 - CONFORMANCE-AUDIT-PLAN.md and README cite each other; fix the README link after the move.
+- CONFORMANCE-AUDIT-PLAN.md cites `backend/PLAN.md` (F2, F3) as plain text, not a link. S3 moved that
+  file to docs/plans/backend-PLAN.md (live). The plan is legacy text, so leave it as it is.
+- `docs/plans/backend-PLAN.md` joins the live legacy plans. Its F1–F5 are still open in the skills
+  (S3 checked them). Name it beside O7's two plans in the final Status.
 - You delete the last prompt block, so Close-out step 6 files this plan into docs/plans/implemented/.
 - Writing to "${TMPDIR:-/tmp}" may be refused in an unattended session (S1 hit it). If so, save the
   script in an untracked scratch folder inside the worktree, run it from the repo root, and delete the

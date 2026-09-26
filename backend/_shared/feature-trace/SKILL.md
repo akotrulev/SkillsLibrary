@@ -9,8 +9,6 @@ Depth, one area at a time. The output is not prose — it is **structured eviden
 
 The discipline that makes it worth doing: **separate what the code does from what you think it means.** Every item you extract is `#observed` with a `file:line` read this session. Intent is a separate, clearly-marked layer — and where intent is not recoverable, the honest output is the behavior plus a question.
 
-**Announce at start:** "I'm using the `be-shared-feature-trace` skill to trace <area>."
-
 **Prerequisite:** a confirmed area from `be-shared-codebase-survey`, with its entry points and its assigned depth.
 
 ## When to use

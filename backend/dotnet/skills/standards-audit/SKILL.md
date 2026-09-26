@@ -9,7 +9,7 @@ Audit an existing **.NET service** against the conventions this plugin defines �
 
 **Read-only analysis on product code.** The audit points; the `be-dotnet` agent fixes.
 
-**Announce at start:** "I'm using the `be-dotnet-standards-audit` skill in Mode A (baseline) / Mode B (re-audit) on `<repo/path>`."
+State the mode — Mode A (baseline) or Mode B (re-audit) — and the target path in the first line of output.
 
 ## Read before sweeping
 

@@ -204,7 +204,7 @@ For every pattern, produce:
 
 ## Validation
 
-After scaffolding, run:
+After scaffolding, run the checks below — unless you are inside a plan task marked `Gate: none`, which runs none of them and reports "written, not run":
 
 - `dotnet build` — 0 warnings (treat warnings as errors in `Directory.Build.props`)
 - `dotnet test` — the generated tests must pass

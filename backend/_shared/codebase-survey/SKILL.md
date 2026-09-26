@@ -9,8 +9,6 @@ Breadth before depth. A backend of any size cannot be read end-to-end in one pas
 
 It also produces the thing that keeps the whole exercise honest: a **coverage ledger** where every entry point in the system is assigned to exactly one area or explicitly parked. Without it, "we documented the system" means "we documented the parts we happened to open".
 
-**Announce at start:** "I'm using the `be-shared-codebase-survey` skill to map the functional areas and plan the reading pass."
-
 ## When to use
 
 - Step 1 of a `be-documenter` run

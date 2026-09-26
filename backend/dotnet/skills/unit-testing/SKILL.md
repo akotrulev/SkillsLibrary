@@ -248,7 +248,7 @@ var order = new OrderBuilder().WithStatus(OrderStatus.Shipped).Build();
 3. **Fix the seams first** — if a unit reads the clock, a GUID, config, or does I/O directly, inject it (that's a `pattern-writer` edit, not a test edit) before writing the test.
 4. **Write the failing test** (behavior name, AAA, one logical assertion), watch it fail for the right reason, then make it pass.
 5. **Add the boundary cases** as `[TestCase]` rows — nulls, empties, min/max, the rounding boundary, the state that must be refused.
-6. **Verify:** `dotnet test` green, `dotnet build` 0 warnings, `dotnet format --verify-no-changes`. Report the counts.
+6. **Verify:** `dotnet test` green, `dotnet build` 0 warnings, `dotnet format --verify-no-changes`. Report the counts. Inside a plan task marked `Gate: none`, run none of these (nor step 4's failing run) and report the tests as "written, not run".
 7. **Sweep:** any sibling of the same shape left untested? A strategy family with one tested member is a gap.
 
 ## Handoffs

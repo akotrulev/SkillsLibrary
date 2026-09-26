@@ -1,6 +1,6 @@
 ---
 name: be-shared-business-documentation
-description: Use when traced backend behavior must be written up as business documentation a non-engineer can read, into the docs/business-model/ knowledge base under ba-project-memory's contract — one simple document per functional area in a fixed shape (overview · scope · setup parameters · how it works as triggers → numbered steps → formulas · a full worked example with real numbers · open questions · a closing file:line evidence table tiered #observed / #inferred). Triggers "write up what this system does for users", "turn this trace into business documentation". Do NOT use to trace the code first (`be-shared-feature-trace`), author requirements (`requirements-author`), or write findings (`ep-feature-audit`).
+description: Use when traced backend behavior must be written for a non-engineer in the docs/business-model/ KB under ba-project-memory's contract — one document per area: overview, setup, how it works, a worked example, open questions, a file:line evidence table. Triggers "write up what this system does for users", "turn this trace into business documentation". Do NOT use to trace the code first (`be-shared-feature-trace`), author requirements (`requirements-author`), or write findings (`ep-feature-audit`).
 ---
 
 # Business Documentation — the write-up a non-engineer can use
@@ -12,8 +12,6 @@ Three disciplines carry the whole skill:
 1. **Write in the user's words, not the code's.** The reader does not know what a handler is. "An order cannot be cancelled once it has shipped" — never "`CancelOrderHandler` throws when `status == Shipped`".
 2. **Never let inference pass as fact — but keep the grammar out of the prose.** `#observed` is what the code does; `#inferred` is what you think it is for. Both tiers, and every `file:line`, live in the **closing evidence table** — the body reads like a product spec. In the body an inferred purpose is written as uncertainty ("appears to exist so that…"), and every inferred purpose is *also* a row in the open-questions list — which, for a business reader, is often the most valuable output of the whole run.
 3. **Simple, flows, examples.** Every document reads the same way: what the feature is → how it is set up → what happens, step by step, when it runs → **a full worked example with real numbers**. A reader who reads only the example still understands the feature. Short sections, plain headings, no apparatus.
-
-**Announce at start:** "I'm using the `be-shared-business-documentation` skill to write up the traced areas."
 
 **Prerequisites:** a confirmed area map (`be-shared-codebase-survey`) and per-area evidence (`be-shared-feature-trace`). **Load `ba-project-memory` first** — it owns the KB layout, IDs, annotation grammar, and the read-first/update-after contract that governs every file written here.
 
