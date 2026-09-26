@@ -1,6 +1,6 @@
 ---
 name: tool-cli-builder
-description: Use when a project's capabilities must be driven from a terminal or a script — turn a confirmed capability contract into a subcommand CLI with typed flags, a machine-readable `--json` mode, meaningful exit codes, and a smoke test. Triggers "build a CLI for this project", "expose these functions as commands", "we need a command-line tool for X". Do NOT use to derive the capabilities first (`tool-capability-contract`), to build an MCP surface (`tool-mcp-builder`), or to write CI pipeline YAML (`devops/*`).
+description: Use when a project's capabilities must be driven from a terminal or a script — render a confirmed capability contract as a subcommand CLI with typed flags, a `--json` mode, meaningful exit codes, and a smoke test. Triggers "build a CLI for this project", "expose these functions as commands", "we need a command-line tool for X". Do NOT use to derive the capabilities first (`tool-capability-contract`), to build an MCP surface (`tool-mcp-builder`), or to write CI pipeline YAML (`devops/*`).
 ---
 
 # CLI Builder — the contract, rendered as commands
@@ -8,8 +8,6 @@ description: Use when a project's capabilities must be driven from a terminal or
 A CLI is the same capability contract as an MCP server, addressed to a shell instead of a protocol. Every design question — what commands exist, what they accept, what they print, what they refuse — was answered in `docs/specs/<NNN>-<surface>-tool-contract.md`. This skill renders that document into a binary that validates its flags, prints one predictable shape under `--json`, and exits with a code that means something.
 
 **Two readers, both first-class:** a human at a prompt, and an agent (or a CI step) capturing stdout. The human gets the default text rendering; the agent passes `--json` and gets the envelope. **They are renderings of the same object, never two different objects.**
-
-**Announce at start:** "I'm using the `tool-cli-builder` skill to build the CLI."
 
 **Prerequisite: a confirmed capability contract.** Read its capability table, flows, and dependency section, plus `tooling/_shared/capability-contract/references/output-contract.md` — the envelope `--json` emits.
 
@@ -135,7 +133,7 @@ A composite command is justified only when the steps are atomic — all succeed 
 4. **Prove the exit codes** — force a validation failure and a conflict, and assert the code, not the message.
 5. **Destructive commands:** prove the prompt refuses without `--yes`, and that `--dry-run` changes nothing.
 
-Report what you ran and what it printed.
+Report what you ran and what it printed. Inside a `Gate: none` plan task, write the smoke script but run none of these checks, and report the CLI as "written, not run".
 
 ### Step 9 — Ship it installable
 

@@ -1,6 +1,6 @@
 ---
 name: tool-capability-contract
-description: Use when a project (or a set of its functionalities) must be turned into an agent-drivable surface — derive the capability list, the typed input/output contracts, the multi-step flows, and the runtime dependencies, and write them to a reviewable contract document. Triggers "expose this project to an agent", "what tools should the MCP have", "spec the CLI commands", "derive the contract before we build the tool". Do NOT use to implement the surface (`tool-mcp-builder` / `tool-cli-builder`), to plan a REST API (`be-shared-api-surface-plan`), or to document a feature for humans (`be-shared-feature-trace`).
+description: Use when a project (or part of it) must become an agent-drivable surface — derive the capabilities, typed input/output contracts, flows and runtime dependencies into a reviewable contract document. Triggers "expose this project to an agent", "what tools should the MCP have", "spec the CLI commands". Do NOT use to implement the surface (`tool-mcp-builder` / `tool-cli-builder`), to plan a REST API (`be-shared-api-surface-plan`), or to document a feature for humans (`be-shared-feature-trace`).
 ---
 
 # Capability Contract — what the tool exposes, before it exists
@@ -8,8 +8,6 @@ description: Use when a project (or a set of its functionalities) must be turned
 An MCP server and a CLI are the same thing wearing different clothes: a set of **capabilities**, each with typed inputs, one predictable output shape, a fixed error vocabulary, and a stated place in a **flow**. Get that list right and both surfaces fall out of it mechanically. Get it wrong and you ship forty tools an agent cannot compose.
 
 This skill produces the **one document both builders consume**. `tool-mcp-builder` renders each capability as a tool; `tool-cli-builder` renders each capability as a subcommand. Neither invents capabilities — if it is not in this document, it is not in the surface.
-
-**Announce at start:** "I'm using the `tool-capability-contract` skill to derive the capability contract."
 
 **Read `references/output-contract.md` before writing any capability block.** It fixes the envelope, pagination, error body, and token budget that every capability inherits; the per-capability blocks are only meaningful as deltas against it.
 

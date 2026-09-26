@@ -1,13 +1,11 @@
 ---
 name: tool-mcp-builder
-description: Use when a project's capabilities must be exposed to agents as an MCP server — turn a confirmed capability contract into a typed, schema-validated MCP server with one tool per capability, a shared envelope, actionable errors, and a smoke test. Triggers "build an MCP for this project", "expose these functions as MCP tools", "wrap our API in an MCP server". Do NOT use to derive the capabilities first (`tool-capability-contract`), to build a terminal surface (`tool-cli-builder`), or to wrap a third-party API with no local codebase (vendor `ai-development/mcp-builder`).
+description: Use when a project's capabilities must reach agents as an MCP server — render a confirmed capability contract as a schema-validated server: one tool per capability, one envelope, actionable errors, a smoke test. Triggers "build an MCP for this project", "expose these functions as MCP tools". Do NOT use to derive capabilities (`tool-capability-contract`), for a terminal surface (`tool-cli-builder`), or to wrap a third-party API with no local codebase (vendor `ai-development/mcp-builder`).
 ---
 
 # MCP Builder — the contract, rendered as tools
 
 An MCP server is a **projection of the capability contract**, nothing more. Every design question — what tools exist, what they accept, what they return, what they refuse — was answered in `docs/specs/<NNN>-<surface>-tool-contract.md`. This skill's job is to render that document into a server that compiles, validates its inputs, and returns the same envelope from every tool.
-
-**Announce at start:** "I'm using the `tool-mcp-builder` skill to build the MCP server."
 
 **Prerequisite: a confirmed capability contract.** No contract, no server — run `tool-capability-contract` first. Building tools from a vague description is how a surface ends up with an `execute(command: string)` tool.
 
@@ -130,13 +128,13 @@ Build a workflow tool only when the steps are genuinely atomic — they must all
 
 ### Step 7 — Build, smoke, verify
 
-1. **Build.** `npm run build` (or the stack's equivalent) must be clean — no errors, no `any`, `strict: true`.
+1. **Build.** The project's own build script (from `package.json`, run with the package manager `packageManager` names, or the stack's equivalent) must be clean — no errors, no `any`, `strict: true`.
 2. **Smoke each tool once** with the `Example` values from the contract, through the MCP Inspector (`npx @modelcontextprotocol/inspector`) or a scripted stdio client. Every tool, including the ones you are sure about.
 3. **Prove one full flow** end to end, using only outputs from the previous step as inputs to the next. If a field you need is not in the previous tool's output, that is a contract defect — fix the contract, then the code.
 4. **Prove one failure path** — force a `validation_failed` and a `conflict`, and check the agent-facing message actually says what to do next.
 5. **Destructive tools:** prove the `confirm` gate refuses without it.
 
-Report what you ran and what it returned. "It should work" is not a verification.
+Report what you ran and what it returned. "It should work" is not a verification. Inside a `Gate: none` plan task, run none of these checks and report the server as "written, not run".
 
 ### Step 8 — Ship the registration snippet
 

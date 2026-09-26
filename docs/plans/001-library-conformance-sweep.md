@@ -43,8 +43,11 @@ name fixed; `docs/plans/design-ux-improvements.md` filed to `docs/plans/implemen
 `docs/research/ui-ux-practice-2026.md` kept as the catalog cites it). S15 landed 2026-09-26 (data/ and
 training-data/: the Gate line in `data-architect`, `dataset-engineer` and `dataset-auditor`, the
 `data-modeling` K1 hits resolved as reference paths, one stale path; `ai-development/claude-api`
-re-vendored from `anthropics/skills` `33375500` with a 491-char house description). S16 is next.
-S1–S18 are ungated: the edits from S1 to S15 are built but unverified until G1 runs §7.
+re-vendored from `anthropics/skills` `33375500` with a 491-char house description). S16 landed 2026-09-26
+(business-analysis/ and tooling/: the Gate line in `business-analyst`, `requirements-author` and
+`tooling-engineer`, the six descriptions under budget, three "Announce at start" lines removed; the
+marketplace's remaining "phased" wording is carried into G1). S17 is next.
+S1–S18 are ungated: the edits from S1 to S16 are built but unverified until G1 runs §7.
 
 ## 1. What already exists, and what is missing
 
@@ -1763,6 +1766,39 @@ skills around hits 18k, descriptions 3k, ~18 files modified 27k, read-back 6k, c
   leave them.
 - K2: the Gate line in `business-analyst`, `requirements-author` and `tooling-engineer`.
 - **Not in S16:** the planning lane (S2), which `requirements-author` hands to.
+- **As built (2026-09-26):** `business-analysis/` and `tooling/`. The three agents and twelve commands were
+  read in full; the commands needed no change. Gate line added to 3 agents: `business-analyst.md:53` and
+  `requirements-author.md:153` (last Operating-rules bullet), `tooling-engineer.md:37` (below the
+  plan-task operating rule). 10 house files changed, plus `.claude-plugin/marketplace.json` and this plan.
+  Data issues: 0 — the K1 resolver prints nothing for either folder, and no version or stale-path hit exists.
+  Code issues: 12 fixed. K7 (K7 report after the edits): `ba-epic-writer` 515 → 494,
+  `capability-contract` 610 → 495, `mcp-builder` 572 → 492, `cli-builder` 509 → 492, `requirements-author`
+  657 → 643, `tooling-engineer` 693 → 634; every Do-NOT clause kept, and `requirements-author` still names
+  `/dev-plan-solution`. `mcp-builder` lost the trigger "wrap our API in an MCP server", which read against
+  its own Do-NOT clause. K5: three `**Announce at start:**` lines deleted (`capability-contract`,
+  `mcp-builder`, `cli-builder`). K8: `mcp-builder/SKILL.md:131` "`npm run build`" → the project's own build
+  script, run with the package manager `packageManager` names; the `npm run build` / `dotnet build` lines
+  in `mcp-builder/references/{typescript,stack-native}.md` are code samples and stay. Verify lists:
+  `mcp-builder` Step 7 and `cli-builder` Step 8 gain the `Gate: none` "written, not run" sentence. K4: the
+  prompt's "17 phase hits" were 0 `phase` and 14 `slice` hits; `business-analyst.md:151` "Slice scope
+  (extend)" → "Change scope (extend)" (as S15 did) and `:49` "whole feature vs slice" → "vs one part of
+  it"; the marketplace descriptions of both plugins said "phased orchestrator agent(s)" → "step-by-step".
+  Logical conflicts: 4 fixed. `tooling-engineer.md`: "Run what you write" gains "outside a `Gate: none`
+  plan task" (`:33`); Orientation 3's "green on arrival" check gains the same guard (`:59`); the closing
+  duty "per `be-shared-session-budget` Step 5" → "per the plan's `## Close-out — every task` section (plan
+  format §7)" (`:100`), and the loading line (`:16`) loads `be-shared-session-budget` "when executing" a
+  plan task rather than "when closing" one. `business-analyst.md:69`'s KB consistency check ("regardless of
+  the gate's verdict") gains the guard too, for the same shape as every other agent, although it is a read,
+  not a build. No "MANDATORY SECTION" heading and no `pnpm`/`npm` instruction beyond the one above.
+  Kept on purpose: story/epic "slicing" (`ba-epic-writer`, `ba-story-writer`, `ba-story-quality-review`,
+  `ba-scoping-writeup`, `requirements-author.md:101`), a feature's "slice" of a decision
+  (`ba-decision-table:8`) and the storefront "ordering slice" (`example-contract.md:9`) are domain terms,
+  not planned work; the `ba-project-memory` example links; "branch" in flow and exit-code prose.
+  Cleanup: no plan, progress or handoff file and no tracked junk in either folder. Every SKILL.md, agent
+  and command in both folders is listed in the marketplace and every listed path exists.
+  Carried forward: the 11 other "phased" hits in `.claude-plugin/marketplace.json` (the top-level
+  description and nine plugin descriptions) go to G1. Unverified: nothing was run beyond §4's searches and
+  the K1/K7 scripts (Gate: none). Left for the user: nothing.
 
 ### S17 — devops
 
@@ -1910,57 +1946,9 @@ name: the K1 resolver flags it (D12).
 | S18 | `docs` | `general-purpose` | — | ~135k |
 | G1 | `docs` | `general-purpose` | S1–S18 | ~120k |
 
-S1 to S15 have landed, and their prompts are deleted; the 4 prompts from S16 to G1 are live.
+S1 to S16 have landed, and their prompts are deleted; the 3 prompts from S17 to G1 are live.
 
 ---
-
-### S16 — business-analysis and tooling (general-purpose, docs)
-
-````
-You are `general-purpose`. Task S16 of docs/plans/001-library-conformance-sweep.md: bring
-business-analysis/ and tooling/ in line with the plan's checks K1–K9.
-
-Deliverable: business-analysis/ and tooling/ pass K1–K9: three agents carry the Gate line, and the six
-over-budget descriptions fit.
-
-Read, in this order:
-1. CLAUDE.md.
-2. The plan: §2, §3, §4, §6 (the S16 rows), D1–D11, task S16.
-3. CONTRIBUTING.md.
-4. business-analysis/agents/*.md, business-analysis/commands/*.md and tooling/agents/*.md in full.
-5. The plan's "Close-out — every task".
-
-Do:
-- Run §4's recipes with DIR=business-analysis, then DIR=tooling.
-- K7: ba-epic-writer 515, tooling/_shared/capability-contract 610, tooling/skills/mcp-builder 572,
-  tooling/skills/cli-builder 509 → ≤ 500; requirements-author 657 and tooling-engineer 693 → ≤ 650.
-- K4: 17 "phase" hits in business-analysis. Keep business-process phases; rename planned-work phases
-  to tasks.
-- K2: the Gate line in business-analyst, requirements-author and tooling-engineer.
-
-Traps:
-- Agent sentences S3/S4 fixed in backend recur in 28 agents across S5–S17; fix them where your
-  agents carry them:
-  - "— MANDATORY SECTION" on the brownfield heading is dropped (K5).
-  - The orientation pass's "every run regardless of the gate's verdict" (the cache gate) gains
-    "outside a `Gate: none` plan task".
-  - A closing duty "per `be-shared-session-budget` Step 5" now reads "per the plan's
-    `## Close-out — every task` section (plan format §7)".
-  - A skill's Validation / Verify list gets one sentence: inside a `Gate: none` plan task it runs
-    none of the checks and reports "written, not run".
-  - K8: a hardcoded `pnpm …` / `npm …` in an instruction becomes the project's own script, run with
-    the package manager `packageManager` names.
-  - The operating rule "Run what you write — a step whose code never executed does not pass its
-    gate" becomes "Run what you write, outside a `Gate: none` plan task — …" (S5; every qa agent
-    carries it).
-- ba-project-memory's links (areas/ordering.md, entities/order.md, …) are deliberate examples.
-- requirements-author hands off to /dev-plan-solution (S2's lane). Keep that handoff name exact.
-
-Gate: none — this plan gates once, in G1. Do not run tools/token-audit.py or §7's script.
-
-Commit: `chore(sweep S16): business-analysis and tooling`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
 
 ### S17 — devops (general-purpose, docs)
 
@@ -2128,6 +2116,12 @@ Traps:
 - Writing to "${TMPDIR:-/tmp}" may be refused in an unattended session (S1 hit it). If so, save the
   script in an untracked scratch folder inside the worktree, run it from the repo root, and delete the
   folder before committing — it must not be scanned as part of the tree when it holds `.md` files.
+- (S16) `.claude-plugin/marketplace.json` still calls agents "phased" 11 times — the top-level
+  description (the fe-* and be-* stacks) and the fe-blazor, fe-react, data, be-dotnet/java/node/python,
+  devops, security and training-data plugin descriptions. CONTRIBUTING.md forbids calling an agent's steps
+  a phase; S16 changed the business-analysis and tooling entries to "step-by-step". Do the same for the
+  rest; security's "phased, independently-executable assessment plan" names planned work, so it becomes a
+  task-shaped plan.
 - The resolver's prefix list has no `pentest` or `purpleteam`, so those skill names are never checked;
   CONTRIBUTING.md (S1) lists both as prefixes. Adding them to both §4 and §7 is your call; record it.
 

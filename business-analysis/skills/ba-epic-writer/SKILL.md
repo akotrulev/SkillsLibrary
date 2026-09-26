@@ -1,6 +1,6 @@
 ---
 name: ba-epic-writer
-description: Use when converting a scoped requirements document into one or more epics — one capability-sized outcome each, sliced into user stories, with a measurable outcome and a plain-English section (user-story line, what gets built, how it fits with everything else) carrying no technology at all. Triggers: "write an epic for X", "slice this requirements doc into epics", "what are the epics for this initiative". Do NOT use for high-level scoping (`ba-scoping-writeup`) or individual stories with AC (`ba-story-writer`).
+description: Use when converting a scoped requirements document into one or more epics — one capability-sized outcome each, sliced into user stories, with a measurable outcome and a plain-English section (user-story line, what gets built, how it fits) carrying no technology at all. Triggers: "write an epic for X", "slice this requirements doc into epics", "what are the epics for this initiative". Do NOT use for high-level scoping (`ba-scoping-writeup`) or individual stories with AC (`ba-story-writer`).
 ---
 
 # Epic Writer

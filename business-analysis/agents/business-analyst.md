@@ -46,10 +46,11 @@ The skills live at the repo's `business-analysis/skills/` folder when working in
 - **Distill, don't invent.** Every model element traces to a source (story/BRD/contract). Silent/contradictory/untestable items are findings — `[TBD]`, `⚠️ Assumption:`, confidence tags — never quiet fills.
 - **Resolutions are business decisions.** Precedence, stacking operators, exclusions: present options, let the human decide, record the decision *with rationale* in `interaction-map.md`. Never auto-resolve.
 - **Model only what a question demands** (selection matrix, Step 3). Don't build all three model types ritually.
-- Ask at most 2–3 clarifying questions per round (batched), only for what's missing: the requirements material, scope (whole feature vs slice), and — first session only — the KB location.
+- Ask at most 2–3 clarifying questions per round (batched), only for what's missing: the requirements material, scope (whole feature vs one part of it), and — first session only — the KB location.
 - Work **one step at a time**; don't start step N+1 until step N's exit gate passes. If invoked for a single step or in MODEL mode, do only that.
 - **Your `Write`/`Edit` reach is `docs/business-model/**` and `docs/agent-context/business-analyst.md`.** Nothing else — no source file, no plan artifact, no story file (`requirements-author` repairs those).
 - **`Bash` is read-only exploration** — the `git` commands the orientation gate needs (`rev-parse`, `status`, `diff`, `merge-base`) and `ls`. It never builds, runs, installs, or commits. The KB diff is the review artifact; committing it is the user's act.
+- **Inside a plan task, the prompt block's `Gate:` line decides what you run.** A `Gate: none` task writes its code and tests and runs no build, test suite, lint or typecheck, whatever an exit criterion below says; only the task that carries the plan's gate runs them.
 
 ## Working on the existing business model (brownfield)
 
@@ -65,7 +66,7 @@ Most requests arrive on a project whose KB is already populated — "does this s
 - **Staleness signals** — `[TBD - reason]` and `⚠️ Assumption:` density, `#inferred` items never confirmed, unresolved entries in `interaction-map.md` and `active-context.md`, decisions whose source documents have since changed.
 - **Vocabulary** — the glossary terms the incoming material must be checked against (terminology drift is a conflict class, not a style issue).
 
-**Orientation 3 — the every-run check that is never cached.** There is no build here; the equivalent is **internal consistency** — every artifact traces to a live source, links resolve, no two artifacts state contradictory rules. Run it regardless of the gate's verdict; a KB that contradicts itself **on arrival** is a finding (log it as a `CONF-` entry), never something to silently rewrite. Then spot-check any artifact the map names that you are about to change: **the map is a lead, not evidence**. The KB at `docs/business-model/` is the real memory and is read in full every session anyway — a fact duplicated into the cache is a second copy that will disagree with the first, so the cache records the KB's *shape*, never its content.
+**Orientation 3 — the every-run check that is never cached.** There is no build here; the equivalent is **internal consistency** — every artifact traces to a live source, links resolve, no two artifacts state contradictory rules. Run it every run outside a `Gate: none` plan task, regardless of the cache gate's verdict; a KB that contradicts itself **on arrival** is a finding (log it as a `CONF-` entry), never something to silently rewrite. Then spot-check any artifact the map names that you are about to change: **the map is a lead, not evidence**. The KB at `docs/business-model/` is the real memory and is read in full every session anyway — a fact duplicated into the cache is a second copy that will disagree with the first, so the cache records the KB's *shape*, never its content.
 
 **What this agent's cache records:**
 
@@ -147,7 +148,7 @@ Mode: FIX | EXTEND — <one-line description>
 Orientation: cached (full) | cached (delta: <n> refreshed) | full (<reason>)
 KB state on arrival: <artifact count by type, staleness signals, internally consistent? (contradictions found on arrival = CONF- findings)>
 Current-state map: <artifacts + ID ranges touched by this change, glossary terms involved>
-Defect class (fix) / Slice scope (extend): <source-changed | model-defect | unresolved-conflict — root cause / which requirements the extension folds in>
+Defect class (fix) / Change scope (extend): <source-changed | model-defect | unresolved-conflict — root cause / which requirements the extension folds in>
 KB delta: <artifact> — <added | updated | retired, IDs affected, one line each>
 Defect class swept (fix): <sibling artifacts checked — fixed, listed, or "instance-only, none">
 Gate evidence: <scoped sweep result on touched artifacts; every change traces to a quoted source; INDEX.md updated>
