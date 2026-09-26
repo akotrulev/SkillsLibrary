@@ -43,7 +43,6 @@ That line is worth stating twice, because Spring's slice-test annotations are ro
 - Contract / integration / E2E, Testcontainers, real-DB seed-assert-clean → **peer** `qa-api-java` (`db-testing/*`)
 - Whether the tests actually catch faults (mutation score) → **peer** `qa-test-quality-check-java` (PIT/pitest)
 - Suite-scale builders / ObjectMother → **peer** `qa-test-data-builder-java`
-- Auditing an existing suite → **peer** `qa-java-standards-audit`
 - **Records/DTOs with no behavior, entities, `@Configuration` classes, generated code** → don't test them at all
 
 ## Stack
@@ -273,7 +272,7 @@ var order = anOrder().withStatus(SHIPPED).build();
 3. **Fix the seams first** — a direct `Instant.now()`, `UUID.randomUUID()`, `@Value`, or outbound call is a `pattern-writer`-shaped edit to production code, done before the test.
 4. **Write the failing test** (behavior name, AAA, one logical assertion), watch it fail for the right reason, make it pass.
 5. **Add the boundary cases** as `@ParameterizedTest` rows — nulls, empties, min/max, the rounding boundary, the refused transition.
-6. **Verify:** `./gradlew test` green, no `UnnecessaryStubbingException`, compiler warning-clean. Report counts.
+6. **Verify:** `./gradlew test` green, no `UnnecessaryStubbingException`, compiler warning-clean. Report counts. Inside a plan task marked `Gate: none`, run none of these (nor step 4's failing run) and report the tests as "written, not run".
 7. **Sweep:** a strategy family with one tested member is a gap.
 
 ## Handoffs

@@ -1,6 +1,6 @@
 ---
 name: be-python-code-review
-description: Use when reviewing Python 3.12–3.14 worker or backend code for typing leaks, exception swallowing, module-level state, blocking calls in async, unsafe subprocess/path/deserialisation use, Pillow handle and metadata mistakes, SVG sanitiser gaps, and missing per-job isolation. Triggers "review this Python module", "audit the upload validator", "is this worker hardened", "check the SVG sanitiser". Do NOT use for explanations (`pattern-guide`), generating code (`pattern-writer` / `media-processing`), or the Dockerfile itself beyond the checklist row that points to `sandboxed-worker`.
+description: Use when reviewing Python 3.12–3.14 worker or backend code for typing leaks, swallowed exceptions, module state, blocking async, unsafe subprocess/path/deserialisation, Pillow metadata mistakes, SVG sanitiser gaps, missing per-job isolation. Triggers "review this Python module", "is this worker hardened". Do NOT use for explanations (`pattern-guide`), generating code (`pattern-writer` / `media-processing`), or the Dockerfile beyond its checklist row (`sandboxed-worker`).
 ---
 
 # Python — Reviewer

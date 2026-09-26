@@ -40,7 +40,7 @@ Owns **dev-side unit tests of backend logic**: construct a class or call a funct
 
 - supertest / a booted app / HTTP-level assertions → **peer** `qa-api-typescript`
 - Contract / integration / E2E, Testcontainers, real-DB seed-assert-clean → **peer** `qa-api-typescript` (`db-testing/*`)
-- Whether the tests actually catch faults (mutation score) → **peer** `qa-test-quality-check-typescript` (StrykerJS) — **not built yet; see Handoffs**
+- Whether the tests actually catch faults (mutation score) → no TypeScript peer exists yet (StrykerJS would be its tool); see Handoffs
 - Suite-scale builders / fixtures → **peer** `qa-test-data-builder-typescript`
 - React components / hooks → `fe-react-component-testing`
 - **Types with no runtime behavior, barrel re-exports, constants, generated clients** → don't test them at all
@@ -118,7 +118,7 @@ src/ordering/__fakes__/in-memory-order-repository.ts
 src/ordering/__builders__/order.builder.ts
 ```
 
-- `*.test.ts` colocated (or `tests/unit/**` if the repo does that) — **integration tests must use a different include pattern** so `pnpm test` stays fast and this lane stays honest.
+- `*.test.ts` colocated (or `tests/unit/**` if the repo does that) — **integration tests must use a different include pattern** so the unit test script stays fast and this lane stays honest.
 - **No `any` in tests, no `as unknown as X` to force a fake.** A fake that can't satisfy the interface means the interface is too wide — narrow it to what the consumer needs (that's a `pattern-writer` edit).
 - No shared mutable module state between tests; no top-level `let` a test mutates.
 
@@ -292,14 +292,14 @@ const shipped = anOrder({ status: 'Shipped' });
 3. **Fix the seams first** — a direct `Date.now()`, `crypto.randomUUID()`, `process.env` read, or `fetch` call is a `pattern-writer`-shaped edit to production code, done before the test.
 4. **Write the failing test**, watch it fail for the right reason, make it pass.
 5. **Add the boundary cases** with `it.each` — nulls, empties, min/max, the rounding boundary, **both `Result` branches**, the refused transition.
-6. **Verify:** `pnpm test` green, `tsc --noEmit` clean, lint clean. Report counts.
+6. **Verify:** the project's test script green (from `package.json`, run with its `packageManager`), `tsc --noEmit` clean, lint clean. Report counts. Inside a plan task marked `Gate: none`, run none of these (nor step 4's failing run) and report the tests as "written, not run".
 7. **Sweep:** a union whose members are handled in one place but tested in one case is a gap.
 
 ## Handoffs
 
 - supertest / HTTP-level, contract / integration / E2E → **peer** [`qa-api-typescript`](../../../../qa/typescript/agents/qa-api-typescript.md)
 - Real-DB verification, Testcontainers → **peer** `qa/typescript/skills/db-testing/*`
-- Do the tests actually catch faults? → **peer** `qa-test-quality-check-typescript` (StrykerJS) — **this skill does not exist yet**; the java/dotnet siblings do. Until it lands, treat mutation grading as unavailable on this stack rather than substituting a coverage number (tracked in `backend/UNIT-TESTING-PLAN.md` §7)
+- Do the tests actually catch faults? → no TypeScript mutation-testing skill exists yet; the siblings `qa-test-quality-check-java` (PIT) and `qa-test-quality-check-dotnet` (Stryker.NET) do. Treat mutation grading as unavailable on this stack rather than substituting a coverage number
 - Suite-scale builders / fixtures → **peer** `qa/typescript/skills/test-data-builder`
 - Flaky triage / quarantine → **peer** `qa/reporting/typescript/skills/flaky-test-quarantine`
 - The unit needs a seam / a pattern → [`pattern-writer`](../pattern-writer/SKILL.md)

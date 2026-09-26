@@ -309,11 +309,11 @@ For every pattern:
 
 ## Validation
 
-After scaffolding:
+After scaffolding, run the project's own scripts (from `package.json`, with its `packageManager`) — unless you are inside a plan task marked `Gate: none`, which runs none of them and reports "written, not run":
 
-- `pnpm tsc --noEmit` — 0 errors
-- `pnpm lint` — 0 warnings
-- `pnpm test` — generated tests pass
+- typecheck (`tsc --noEmit`) — 0 errors
+- lint — 0 warnings
+- test — generated tests pass
 - Sweep old call sites; remove the `if-else` chain the new pattern replaces
 
 ## Handoffs

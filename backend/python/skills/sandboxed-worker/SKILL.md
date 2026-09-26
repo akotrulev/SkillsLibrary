@@ -1,6 +1,6 @@
 ---
 name: be-python-sandboxed-worker
-description: Use when containerising and isolating a Python worker that handles untrusted uploads — a multi-stage uv Dockerfile on python:3.13-slim with model weights baked at build time, a runtime with no outbound network (`network_mode: none` or an `internal: true` compose network), non-root, read-only rootfs, tmpfs scratch, dropped capabilities, and per-job subprocess limits (memory, CPU seconds, wall clock, pids). Triggers "Dockerfile for the Python worker", "no network for the upload processor", "bake the rembg model into the image", "limit memory per job". Do NOT use for .NET/Java/Node images (`devops/docker`), Kubernetes manifests (`devops/kubernetes`) or the image-processing code (`media-processing`).
+description: Use when containerising a Python worker that handles untrusted uploads — a multi-stage uv Dockerfile with weights baked at build, no outbound network, non-root, read-only rootfs, dropped capabilities, per-job memory/CPU/wall-clock limits. Triggers "Dockerfile for the Python worker", "no network for the upload processor", "limit memory per job". Do NOT use for .NET/Java/Node images (`devops/docker`), Kubernetes manifests (`devops/kubernetes`) or the processing code (`media-processing`).
 ---
 
 # Sandboxed Python Worker — Generator
@@ -217,6 +217,8 @@ plus a default-deny egress `NetworkPolicy` for the pod and an `emptyDir` with `m
 - No shared writable volume between jobs; one directory per job, deleted with it
 
 ## Validation
+
+Inside a plan task marked `Gate: none`, run none of these and report the image as "written, not run".
 
 - `docker build` succeeds with `--build-arg U2NET_SHA256=<pinned>`; changing one hex digit fails the build
 - `docker run --rm --network none <image> python -c "from rembg import new_session; new_session('u2net')"` succeeds (weights present, no download)

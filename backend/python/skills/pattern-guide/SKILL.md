@@ -1,6 +1,6 @@
 ---
 name: be-python-pattern-guide
-description: Use when a Python backend / worker question is at the concept altitude — which idiom fits (Protocol vs ABC, frozen dataclass vs pydantic, Result union vs exception, generator vs list, context manager vs try/finally), and whether a pattern is earned. Triggers "should this be a Protocol or an ABC", "Result type or raise in Python", "is a repository justified here", "dataclass or pydantic model". Do NOT use to scaffold code (`pattern-writer`), review a diff (`code-review`), or for the media pipeline itself (`media-processing`).
+description: Use when a Python backend / worker question is at the concept altitude — which idiom fits (Protocol vs ABC, dataclass vs pydantic, Result union vs exception, generator vs list) and whether a pattern is earned. Triggers "Protocol or ABC", "Result type or raise in Python", "is a repository justified here", "dataclass or pydantic model". Do NOT use to scaffold code (`pattern-writer`), review a diff (`code-review`), or for the media pipeline itself (`media-processing`).
 ---
 
 # Python Design Patterns — Reference

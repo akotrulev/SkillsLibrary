@@ -1,6 +1,6 @@
 ---
 name: be-python-pattern-writer
-description: Use when scaffolding Python 3.13/3.14 backend or worker code into the active repo — a src-layout package with uv + ruff + mypy --strict, a tagged-union Result, Protocol-injected collaborators, pydantic-settings config, frozen dataclasses, JSON structured logging to stdout, a composition root. Triggers "set up the Python worker package", "add a Result type here", "inject the clock/session", "typed settings from env". Do NOT use for explanations (`pattern-guide`), review (`code-review`), image/SVG/model code (`media-processing`) or the Dockerfile (`sandboxed-worker`).
+description: Use when scaffolding Python 3.13/3.14 backend or worker code into the repo — a src-layout uv + ruff + mypy --strict package, a tagged-union Result, Protocol-injected collaborators, pydantic-settings, frozen dataclasses, JSON logging, a composition root. Triggers "set up the Python worker package", "add a Result type here". Do NOT use for explanations (`pattern-guide`), review (`code-review`), image/SVG/model code (`media-processing`) or the Dockerfile (`sandboxed-worker`).
 ---
 
 # Python Design Patterns — Generator
@@ -298,6 +298,8 @@ Retry belongs only around I/O that can transiently fail; there is none inside a 
 4. The composition-root edit that wires the new collaborator in
 
 ## Validation
+
+Run the checks below — unless you are inside a plan task marked `Gate: none`, which runs none of them and reports "written, not run":
 
 - `uv run ruff check . && uv run ruff format --check .` — clean
 - `uv run mypy src tests` — clean

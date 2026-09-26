@@ -1,6 +1,6 @@
 ---
 name: be-python-unit-testing
-description: Use when Python worker or backend logic needs a dev-side pytest test — what deserves a test, the seams to inject (time, randomness, model session, filesystem), hostile fixture builders that generate their own evidence (GPS JPEG, header-only decompression bomb, polyglot, script SVG, truncated JPEG), parametrised rejection tables, and the `model` marker for tests that need baked weights. In-process, no container, no network. Triggers "unit-test the validator", "build a hostile fixture", "test that GPS is stripped", "how do I fake the rembg session". Do NOT use for the container-level contract the TypeScript side calls (`qa-api-typescript`) or for image scanning (`qa-security`).
+description: Use when Python worker or backend logic needs a dev-side pytest test — what deserves one, the seams to inject (time, model session, filesystem), self-proving hostile fixture builders (GPS JPEG, decompression bomb, polyglot, script SVG), rejection tables, the `model` marker. In-process only. Triggers "unit-test the validator", "build a hostile fixture". Do NOT use for the container-level contract the TypeScript side calls (`qa-api-typescript`) or image scanning (`qa-security`).
 ---
 
 # Python — Unit Testing (pytest)
@@ -168,6 +168,8 @@ def test_dpi_grade_is_monotonic_in_pixels(width: int, height: int, print_mm: flo
 Bounded strategies keep the run under a second; never generate images with hypothesis.
 
 ## Gate
+
+Inside a plan task marked `Gate: none`, run none of these and report the tests as "written, not run".
 
 - `uv run pytest` green on a laptop with no weights (`model` tests skip, and the skip is reported, not hidden)
 - `uv run pytest -m model` green in the CI job that has `U2NET_HOME`

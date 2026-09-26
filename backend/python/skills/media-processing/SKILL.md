@@ -1,6 +1,6 @@
 ---
 name: be-python-media-processing
-description: Use when writing the Python code that processes customer-uploaded images — content-sniffed format validation, SVG sanitising, EXIF/GPS/XMP strip, background removal with rembg, raster-to-SVG tracing with VTracer, a print-DPI verdict, dominant-colour extraction, venue-photo resize ladders — with Pillow 12 and hostile input assumed. Triggers "validate this upload", "strip GPS from photos", "sanitise the SVG", "remove the background", "trace the logo to SVG", "is this 300 DPI", "dominant colours", "resize venue photos". Do NOT use for the Dockerfile (`sandboxed-worker`), package skeleton (`pattern-writer`) or tests (`unit-testing`).
+description: Use when writing the Python code that processes customer-uploaded images with Pillow 12, hostile input assumed — content-sniffed validation, SVG sanitising, EXIF/GPS/XMP strip, rembg, VTracer tracing, print-DPI verdict, dominant colours, resize ladders. Triggers "validate this upload", "strip GPS from photos", "sanitise the SVG", "is this 300 DPI". Do NOT use for the Dockerfile (`sandboxed-worker`), package skeleton (`pattern-writer`) or tests (`unit-testing`).
 ---
 
 # Media Processing — Generator

@@ -9,8 +9,10 @@ leftovers along the way (§5). One repo-wide gate at the end proves it (§7).
 now emit `## Close-out — every task`; `docs/plans/implemented/` created, holding
 `planning-lane-rebuild.md` and `PLANNER-PLAN.md`). S3 landed 2026-09-26 (the backend/_shared
 documenter and pattern lane, and backend/dotnet; `UNIT-TESTING-PLAN.md` and `DOCUMENTER-PLAN.md` filed
-to `docs/plans/implemented/`, and the backend audit filed live as `docs/plans/backend-PLAN.md`). S4 is
-next. S1–S18 are ungated: the edits from S1, S2 and S3 are built but unverified until G1 runs §7.
+to `docs/plans/implemented/`, and the backend audit filed live as `docs/plans/backend-PLAN.md`). S4 landed
+2026-09-26 (backend/java, backend/node and backend/python; the Gate line in `be-java`, `be-node` and
+`be-python`, the seven be-python descriptions under budget). S5 is next. S1–S18 are ungated: the edits
+from S1 to S4 are built but unverified until G1 runs §7.
 
 ## 1. What already exists, and what is missing
 
@@ -521,6 +523,13 @@ lives in the qa-dotnet plugin with the stack as a suffix), and `CONTRIBUTING.md`
 plugin names lose code formatting wherever they appear; later tasks must do the same or add the name to
 `ALLOW`.
 
+**D13 (2026-09-26, S4) — Old-version lines that only detect or flag stay.** Task S4 read "`Node 20`
+×6 → Node 24" and "keep Spring Boot 2 / Java 17 only where they are the migration source". Every hit
+was a detection, fallback or EOL-flag line instead ("Node 20 is EOL — flag it", "never use a Java-21
+construct on a Java 17 / Spring Boot 2.x project"), which K6's keep clause and the CLAUDE.md version
+policy protect. S4 kept all 16 and added the missing EOL flag for Spring Boot 2.x. **Cost:** §7 does
+not check versions, so these hits stay in the K6 recipe's output for later readers to re-judge.
+
 ## Answered questions (2026-09-26)
 
 **O1 — How are plans run: through Plan Queue only, one prompt block per session, each plan in its own
@@ -770,6 +779,51 @@ hits 20k, descriptions 6k, ~21 files modified 31k, read-back 6k, churn ×1.2
   `code-review` 586, `pattern-writer` 572, `pattern-guide` 530 → ≤ 500; `be-python` 810 → ≤ 650.
 - K2: the Gate line in `be-java`, `be-node` and `be-python`.
 - **Not in S4:** `backend/_shared` (S2, S3).
+- **As built (2026-09-26):** `backend/java/`, `backend/node/`, `backend/python/` (three agents and
+  three commands read in full; the commands needed no change). Gate line added to 3 agents, each as
+  the last Operating-rules bullet: `be-java.md:37`, `be-node.md:37`, `be-python.md:40`.
+  Data issues: 6 fixed.
+  - K1: `qa-java-standards-audit` does not exist (only qa-dotnet has a standards audit), so the
+    clause was dropped from `java/skills/unit-testing` (was `:46`).
+  - K1: `qa-test-quality-check-typescript` has **no real name** — `qa/typescript/skills/` has no
+    mutation-testing skill. `node/skills/unit-testing:43` and `:302` now say no TypeScript peer exists
+    yet and cite the real siblings `qa-test-quality-check-java` (PIT) and
+    `qa-test-quality-check-dotnet` (Stryker.NET). The stale "tracked in
+    `backend/UNIT-TESTING-PLAN.md` §7" pointer went with it (S3 filed that plan). S13's prompt says so.
+  - `backend/_shared/{reference,reviewer}` → `{pattern-guide,code-review}` in `be-java.md:21`,
+    `:111` and `be-node.md:21`, `:111`; the sibling lines now name `be-python`.
+  - The closing duty "per `be-shared-session-budget` Step 5" now points at the plan's
+    `## Close-out — every task` section (plan format §7) in all three agents.
+  Code issues: 17 fixed.
+  - "— MANDATORY SECTION" dropped from the three brownfield headings.
+  - K7: `be-python` 810→622; `sandboxed-worker` 705→490, `unit-testing` 684→481, `media-processing`
+    637→465, `code-review` 586→475, `pattern-writer` 572→477, `pattern-guide` 530→470. Every other
+    description in the three folders already fit its budget and had its Do-NOT clause.
+  - K2 for skills: one `Gate: none` sentence ("written, not run") in the `pattern-writer` Validation of
+    all three stacks, in the `unit-testing` Verify step of java and node and the `## Gate` list of
+    python, and in `python/skills/sandboxed-worker` Validation.
+  - K8: `be-node` hardcoded `pnpm` in the orientation pass, Mode A verify and the Step 2/3 exit
+    criteria; `node/skills/unit-testing` (`:121`, `:295`) and `node/skills/pattern-writer` Validation
+    did too. They now name the project's own scripts, run with its `packageManager`.
+  - K6: `be-java.md:17` now flags Spring Boot 2.x as past open-source support (Nov 2023).
+  Logical conflicts: 4 fixed. The orientation pass in all three agents said "every run regardless of
+  the gate's verdict", which contradicts a `Gate: none` task; it now reads "every run outside a
+  `Gate: none` plan task, regardless of the cache gate's verdict". `be-python.md:89` ran the
+  `sandboxed-worker` validation list whenever Docker was available; it now excepts `Gate: none` too.
+  Cleanup: none — the K9 recipes found no plan, progress or tracked junk file in the three folders,
+  and all 18 skills, 3 commands and 3 agents are listed in the marketplace.
+  Kept on purpose (D13):
+  - `Spring Boot 2` ×7 and `Java 17` ×3 are all version-detection or down-level fallback text
+    (`be-java.md:17`, the output contract `:119`/`:132`, and line 12 of `database-code`,
+    `code-review`, `pattern-guide`, `pattern-writer`).
+  - `Node 20` ×6 are all "Node 20 is EOL — flag it, don't target it" lines.
+  - K4 hits are D8 vocabulary ("CRUD slice", "vertical slice", CoR `Stage`, Docker build stage,
+    TS stage-3 decorators). K3 hits are code branches; K8's `./gradlew` and `uv run` are the Gradle
+    wrapper and the house uv toolchain.
+  - The `be-python` hard safety rules (no network, per-job limits, hostile-by-default) stay bold.
+  Carried forward: the four recurring agent sentences and the `pnpm` default (K8) are written into
+  the S5–S17 prompts as a trap; 28 agents outside backend carry at least one of them.
+  Unverified: nothing was run beyond §4's searches (Gate: none). Left for the user: nothing.
 
 ### S5 — qa/dotnet API, BDD and LLM lanes
 
@@ -1160,61 +1214,9 @@ name: the K1 resolver flags it (D12).
 | S18 | `docs` | `general-purpose` | — | ~135k |
 | G1 | `docs` | `general-purpose` | S1–S18 | ~120k |
 
-S1, S2 and S3 have landed, and their prompts are deleted; the 16 prompts from S4 to G1 are live.
+S1 to S4 have landed, and their prompts are deleted; the 15 prompts from S5 to G1 are live.
 
 ---
-
-### S4 — backend/java, backend/node and backend/python (general-purpose, docs)
-
-````
-You are `general-purpose`. Task S4 of docs/plans/001-library-conformance-sweep.md: bring backend/java,
-backend/node and backend/python in line with the plan's checks K1–K9.
-
-Deliverable: backend/java/, backend/node/ and backend/python/ pass K1–K9: three agents carry the Gate
-line, the §6 names and versions for these folders are resolved, and the seven be-python descriptions
-fit their budgets.
-
-Read, in this order:
-1. CLAUDE.md, especially the version policy.
-2. The plan: §2, §3, §4, §6 (the S4 rows), D1–D11, task S4.
-3. CONTRIBUTING.md.
-4. backend/{java,node,python}/agents/*.md in full.
-5. The plan's "Close-out — every task".
-
-Do:
-- Run §4's recipes with DIR=backend/java, backend/node, backend/python.
-- K1: `qa-java-standards-audit` (backend/java/skills/unit-testing/SKILL.md) — only qa-dotnet has a
-  standards audit, so point at the real skill or drop the clause; `qa-test-quality-check-typescript`
-  ×2 (backend/node/skills/unit-testing/SKILL.md) — find the real name under qa/typescript/skills/.
-- K6: Spring Boot 2 ×7 and Java 17 ×3 — keep only where they are the migration source; Node 20 ×6 →
-  Node 24.
-- K7: the six backend/python skills in §6.2 → ≤ 500; be-python 810 → ≤ 650.
-- K2: the Gate line in be-java, be-node, be-python.
-
-Traps:
-- backend/python is the sandboxed upload worker. Its no-network and per-job limit rules are hard
-  safety rules (K5 keep).
-- Record the real name you find for `qa-test-quality-check-typescript`; S13 needs it. Put it in S13's
-  prompt per Close-out step 3.
-- S3 found these in be-dotnet; be-java and be-node carry the same text (be-java.md:110,
-  be-node.md:109 and each agent's "Closing duty" bullet), and be-python the last two:
-  - `backend/_shared/{reference,reviewer}` is stale — the skills are `pattern-guide` and `code-review`.
-  - The "— MANDATORY SECTION" suffix on the brownfield heading is dropped (K5).
-  - "Then the prompts, per `be-shared-session-budget` Step 5" now reads "per the plan's
-    `## Close-out — every task` section (plan format §7)".
-  - Place the Gate line as the last Operating-rules bullet; where the orientation pass says "confirm
-    the build is green … every run", add "outside a `Gate: none` plan task".
-  - The stacks' `pattern-writer` Validation and `unit-testing` Verify steps each got one sentence:
-    inside a `Gate: none` plan task they run none of the checks and report "written, not run".
-  - A mode-based skill's "Announce at start" becomes "State the mode … in the first line of output".
-- The backend audit plan is now docs/plans/backend-PLAN.md (live; its F1–F12 were not fixed by
-  this sweep). Never edit it.
-
-Gate: none — this plan gates once, in G1. Do not run tools/token-audit.py or §7's script.
-
-Commit: `chore(sweep S4): backend java, node and python`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
 
 ### S5 — qa/dotnet API, BDD and LLM lanes (general-purpose, docs)
 
@@ -1243,6 +1245,17 @@ Do:
 - Write the families you found into the traps of S6–S10 (Close-out step 3).
 
 Traps:
+- Agent sentences S3/S4 fixed in backend recur in 28 agents across S5–S17; fix them where your
+  agents carry them:
+  - "— MANDATORY SECTION" on the brownfield heading is dropped (K5).
+  - The orientation pass's "every run regardless of the gate's verdict" (the cache gate) gains
+    "outside a `Gate: none` plan task".
+  - A closing duty "per `be-shared-session-budget` Step 5" now reads "per the plan's
+    `## Close-out — every task` section (plan format §7)".
+  - A skill's Validation / Verify list gets one sentence: inside a `Gate: none` plan task it runs
+    none of the checks and reports "written, not run".
+  - K8: a hardcoded `pnpm …` / `npm …` in an instruction becomes the project's own script, run with
+    the package manager `packageManager` names.
 - The same skills exist in qa/java and qa/typescript under the same folder names. A family found here
   almost certainly recurs there, which is why you write it forward.
 - Code samples are teaching apparatus: K8 does not touch them.
@@ -1279,6 +1292,17 @@ Do:
 - K6: the remaining Node 20 hits → Node 24.
 
 Traps:
+- Agent sentences S3/S4 fixed in backend recur in 28 agents across S5–S17; fix them where your
+  agents carry them:
+  - "— MANDATORY SECTION" on the brownfield heading is dropped (K5).
+  - The orientation pass's "every run regardless of the gate's verdict" (the cache gate) gains
+    "outside a `Gate: none` plan task".
+  - A closing duty "per `be-shared-session-budget` Step 5" now reads "per the plan's
+    `## Close-out — every task` section (plan format §7)".
+  - A skill's Validation / Verify list gets one sentence: inside a `Gate: none` plan task it runs
+    none of the checks and reports "written, not run".
+  - K8: a hardcoded `pnpm …` / `npm …` in an instruction becomes the project's own script, run with
+    the package manager `packageManager` names.
 - S5 may have added finding families to this block; they are listed here once S5 lands.
 - mobile-app-crawler's screen-map template links are deliberate examples.
 
@@ -1313,6 +1337,17 @@ Do:
 - List your skills in the As built note; S8 owns the rest.
 
 Traps:
+- Agent sentences S3/S4 fixed in backend recur in 28 agents across S5–S17; fix them where your
+  agents carry them:
+  - "— MANDATORY SECTION" on the brownfield heading is dropped (K5).
+  - The orientation pass's "every run regardless of the gate's verdict" (the cache gate) gains
+    "outside a `Gate: none` plan task".
+  - A closing duty "per `be-shared-session-budget` Step 5" now reads "per the plan's
+    `## Close-out — every task` section (plan format §7)".
+  - A skill's Validation / Verify list gets one sentence: inside a `Gate: none` plan task it runs
+    none of the checks and reports "written, not run".
+  - K8: a hardcoded `pnpm …` / `npm …` in an instruction becomes the project's own script, run with
+    the package manager `packageManager` names.
 - S5 found the dotnet side of each family first; its As built note tells you the real names.
 - Java 21 + Spring Boot 3.x is the policy; a Java 17 mention is a K6 hit unless it is a migration
   source.
@@ -1349,6 +1384,17 @@ Do:
 - K6: the remaining Node 20 hits → Node 24.
 
 Traps:
+- Agent sentences S3/S4 fixed in backend recur in 28 agents across S5–S17; fix them where your
+  agents carry them:
+  - "— MANDATORY SECTION" on the brownfield heading is dropped (K5).
+  - The orientation pass's "every run regardless of the gate's verdict" (the cache gate) gains
+    "outside a `Gate: none` plan task".
+  - A closing duty "per `be-shared-session-budget` Step 5" now reads "per the plan's
+    `## Close-out — every task` section (plan format §7)".
+  - A skill's Validation / Verify list gets one sentence: inside a `Gate: none` plan task it runs
+    none of the checks and reports "written, not run".
+  - K8: a hardcoded `pnpm …` / `npm …` in an instruction becomes the project's own script, run with
+    the package manager `packageManager` names.
 - S6 resolved the dotnet version of production-uptime-checks; match its choice.
 
 Gate: none — this plan gates once, in G1. Do not run tools/token-audit.py or §7's script.
@@ -1384,6 +1430,17 @@ Do:
 - List your skills in the As built note; S10 owns the rest.
 
 Traps:
+- Agent sentences S3/S4 fixed in backend recur in 28 agents across S5–S17; fix them where your
+  agents carry them:
+  - "— MANDATORY SECTION" on the brownfield heading is dropped (K5).
+  - The orientation pass's "every run regardless of the gate's verdict" (the cache gate) gains
+    "outside a `Gate: none` plan task".
+  - A closing duty "per `be-shared-session-budget` Step 5" now reads "per the plan's
+    `## Close-out — every task` section (plan format §7)".
+  - A skill's Validation / Verify list gets one sentence: inside a `Gate: none` plan task it runs
+    none of the checks and reports "written, not run".
+  - K8: a hardcoded `pnpm …` / `npm …` in an instruction becomes the project's own script, run with
+    the package manager `packageManager` names.
 - The agents' descriptions say "TypeScript/Node 20". Descriptions are always-on text, so they must
   change too, and must stay within 650 chars.
 - A substitution over files you do not own collides with S10. Scope the command to your file list.
@@ -1421,6 +1478,17 @@ Do:
 - K2: the Gate line in the three agents.
 
 Traps:
+- Agent sentences S3/S4 fixed in backend recur in 28 agents across S5–S17; fix them where your
+  agents carry them:
+  - "— MANDATORY SECTION" on the brownfield heading is dropped (K5).
+  - The orientation pass's "every run regardless of the gate's verdict" (the cache gate) gains
+    "outside a `Gate: none` plan task".
+  - A closing duty "per `be-shared-session-budget` Step 5" now reads "per the plan's
+    `## Close-out — every task` section (plan format §7)".
+  - A skill's Validation / Verify list gets one sentence: inside a `Gate: none` plan task it runs
+    none of the checks and reports "written, not run".
+  - K8: a hardcoded `pnpm …` / `npm …` in an instruction becomes the project's own script, run with
+    the package manager `packageManager` names.
 - WebdriverIO/Appium examples pin Node in CI YAML. A matrix may keep Node 22 beside 24.
 
 Gate: none — this plan gates once, in G1. Do not run tools/token-audit.py or §7's script.
@@ -1453,6 +1521,17 @@ Do:
 - K2: the Gate line in every agent under both folders.
 
 Traps:
+- Agent sentences S3/S4 fixed in backend recur in 28 agents across S5–S17; fix them where your
+  agents carry them:
+  - "— MANDATORY SECTION" on the brownfield heading is dropped (K5).
+  - The orientation pass's "every run regardless of the gate's verdict" (the cache gate) gains
+    "outside a `Gate: none` plan task".
+  - A closing duty "per `be-shared-session-budget` Step 5" now reads "per the plan's
+    `## Close-out — every task` section (plan format §7)".
+  - A skill's Validation / Verify list gets one sentence: inside a `Gate: none` plan task it runs
+    none of the checks and reports "written, not run".
+  - K8: a hardcoded `pnpm …` / `npm …` in an instruction becomes the project's own script, run with
+    the package manager `packageManager` names.
 - qa-security's authorization and scope rules are hard safety rules (K5 keep).
 - qa/_shared skills are loaded by all three qa stacks. Change descriptions, not skill names.
 
@@ -1489,6 +1568,17 @@ Do:
 - K2: the Gate line in all six agents.
 
 Traps:
+- Agent sentences S3/S4 fixed in backend recur in 28 agents across S5–S17; fix them where your
+  agents carry them:
+  - "— MANDATORY SECTION" on the brownfield heading is dropped (K5).
+  - The orientation pass's "every run regardless of the gate's verdict" (the cache gate) gains
+    "outside a `Gate: none` plan task".
+  - A closing duty "per `be-shared-session-budget` Step 5" now reads "per the plan's
+    `## Close-out — every task` section (plan format §7)".
+  - A skill's Validation / Verify list gets one sentence: inside a `Gate: none` plan task it runs
+    none of the checks and reports "written, not run".
+  - K8: a hardcoded `pnpm …` / `npm …` in an instruction becomes the project's own script, run with
+    the package manager `packageManager` names.
 - "Stage" is CI vocabulary here (D8). Azure DevOps stages stay.
 - Over budget: if the session runs long, finish qa/cicd first, then qa/reporting. The split point is
   between the folders.
@@ -1511,8 +1601,7 @@ description budgets, and frontend/PLAN.md is filed per §5.
 
 Read, in this order:
 1. CLAUDE.md, especially the Frontend code rules (Blazor and React) and the version policy.
-2. The plan: §2, §3, §4, §6 (the S13 rows), D1–D11, task S13, S4's As built note (the real name for
-   `qa-test-quality-check-typescript`).
+2. The plan: §2, §3, §4, §6 (the S13 rows), D1–D11, task S13, S4's As built note.
 3. CONTRIBUTING.md.
 4. frontend/blazor/agents/*.md, frontend/react/agents/*.md and both folders' commands/*.md in full.
 5. The plan's "Close-out — every task".
@@ -1520,7 +1609,10 @@ Read, in this order:
 Do:
 - Run §4's recipes with DIR=frontend/blazor, frontend/react, auth/_shared, auth/auth0-blazor,
   auth/auth0-react.
-- K1: `qa-test-quality-check-typescript` in frontend/react/skills/component-testing/SKILL.md.
+- K1: `qa-test-quality-check-typescript` in frontend/react/skills/component-testing/SKILL.md. S4
+  found no such skill: qa/typescript/skills/ has no mutation-testing skill, and the real siblings
+  are `qa-test-quality-check-java` (PIT) and `qa-test-quality-check-dotnet` (Stryker.NET). State
+  that StrykerJS has no skill yet and cite those two, as backend/node/skills/unit-testing does.
 - K6: Node 18 ×2, Node 20 ×2, React 17 ×1 in frontend/react. fe-react-migration names React 17/18 as
   migration sources; keep those.
 - K7: data-grid 688 → ≤ 500; fe-react 663 → ≤ 650.
@@ -1529,6 +1621,17 @@ Do:
   docs/plans/implemented/frontend-PLAN.md; otherwise move it to docs/plans/frontend-PLAN.md (live). frontend/react-native/ files stay.
 
 Traps:
+- Agent sentences S3/S4 fixed in backend recur in 28 agents across S5–S17; fix them where your
+  agents carry them:
+  - "— MANDATORY SECTION" on the brownfield heading is dropped (K5).
+  - The orientation pass's "every run regardless of the gate's verdict" (the cache gate) gains
+    "outside a `Gate: none` plan task".
+  - A closing duty "per `be-shared-session-budget` Step 5" now reads "per the plan's
+    `## Close-out — every task` section (plan format §7)".
+  - A skill's Validation / Verify list gets one sentence: inside a `Gate: none` plan task it runs
+    none of the checks and reports "written, not run".
+  - K8: a hardcoded `pnpm …` / `npm …` in an instruction becomes the project's own script, run with
+    the package manager `packageManager` names.
 - The Frontend code rules in CLAUDE.md are house rules, not dated emphasis; where a skill restates
   them in bold, they stay.
 - `data-testid` and the other `data-*` tokens are HTML attributes.
@@ -1569,6 +1672,17 @@ Do:
   docs/research/ui-ux-practice-2026.md stays if anything cites it; otherwise list it for the user.
 
 Traps:
+- Agent sentences S3/S4 fixed in backend recur in 28 agents across S5–S17; fix them where your
+  agents carry them:
+  - "— MANDATORY SECTION" on the brownfield heading is dropped (K5).
+  - The orientation pass's "every run regardless of the gate's verdict" (the cache gate) gains
+    "outside a `Gate: none` plan task".
+  - A closing duty "per `be-shared-session-budget` Step 5" now reads "per the plan's
+    `## Close-out — every task` section (plan format §7)".
+  - A skill's Validation / Verify list gets one sentence: inside a `Gate: none` plan task it runs
+    none of the checks and reports "written, not run".
+  - K8: a hardcoded `pnpm …` / `npm …` in an instruction becomes the project's own script, run with
+    the package manager `packageManager` names.
 - Never edit design/ui-ux-pro-max/data/ or scripts/.
 - A trimmed description keeps the Do-NOT clause that routes between the 16 design skills; those
   clauses are what stop them colliding.
@@ -1612,6 +1726,17 @@ Do:
 - K2: the Gate line in data-architect and both training-data agents.
 
 Traps:
+- Agent sentences S3/S4 fixed in backend recur in 28 agents across S5–S17; fix them where your
+  agents carry them:
+  - "— MANDATORY SECTION" on the brownfield heading is dropped (K5).
+  - The orientation pass's "every run regardless of the gate's verdict" (the cache gate) gains
+    "outside a `Gate: none` plan task".
+  - A closing duty "per `be-shared-session-budget` Step 5" now reads "per the plan's
+    `## Close-out — every task` section (plan format §7)".
+  - A skill's Validation / Verify list gets one sentence: inside a `Gate: none` plan task it runs
+    none of the checks and reports "written, not run".
+  - K8: a hardcoded `pnpm …` / `npm …` in an instruction becomes the project's own script, run with
+    the package manager `packageManager` names.
 - Expand/contract "phases" are domain vocabulary (D8).
 - Never up-level a data engine version in a probe-first recipe. The recipes are keyed to the live
   server's version.
@@ -1651,6 +1776,17 @@ Do:
 - K2: the Gate line in business-analyst, requirements-author and tooling-engineer.
 
 Traps:
+- Agent sentences S3/S4 fixed in backend recur in 28 agents across S5–S17; fix them where your
+  agents carry them:
+  - "— MANDATORY SECTION" on the brownfield heading is dropped (K5).
+  - The orientation pass's "every run regardless of the gate's verdict" (the cache gate) gains
+    "outside a `Gate: none` plan task".
+  - A closing duty "per `be-shared-session-budget` Step 5" now reads "per the plan's
+    `## Close-out — every task` section (plan format §7)".
+  - A skill's Validation / Verify list gets one sentence: inside a `Gate: none` plan task it runs
+    none of the checks and reports "written, not run".
+  - K8: a hardcoded `pnpm …` / `npm …` in an instruction becomes the project's own script, run with
+    the package manager `packageManager` names.
 - ba-project-memory's links (areas/ordering.md, entities/order.md, …) are deliberate examples.
 - requirements-author hands off to /dev-plan-solution (S2's lane). Keep that handoff name exact.
 
@@ -1685,6 +1821,17 @@ Do:
 - K2: the Gate line in all three agents.
 
 Traps:
+- Agent sentences S3/S4 fixed in backend recur in 28 agents across S5–S17; fix them where your
+  agents carry them:
+  - "— MANDATORY SECTION" on the brownfield heading is dropped (K5).
+  - The orientation pass's "every run regardless of the gate's verdict" (the cache gate) gains
+    "outside a `Gate: none` plan task".
+  - A closing duty "per `be-shared-session-budget` Step 5" now reads "per the plan's
+    `## Close-out — every task` section (plan format §7)".
+  - A skill's Validation / Verify list gets one sentence: inside a `Gate: none` plan task it runs
+    none of the checks and reports "written, not run".
+  - K8: a hardcoded `pnpm …` / `npm …` in an instruction becomes the project's own script, run with
+    the package manager `packageManager` names.
 - Pipeline "stages" and git-branching guidance inside CI skills are domain content (D8, K3 keep).
 - "Never apply IaC to a live environment without explicit confirmation" stays bold, once.
 
