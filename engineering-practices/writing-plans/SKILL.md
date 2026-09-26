@@ -1,6 +1,6 @@
 ---
 name: ep-writing-plans
-description: Use when you have an approved spec or clear requirements and need a detailed implementation plan before touching code — a self-contained plan document with numbered context sections, decisions, an ordered task list and one paste-ready prompt per task. Triggers: after `ep-brainstorming` produces an approved design, "write the implementation plan", "break this spec into tasks". The plan then runs one prompt block per session through Plan Queue. Do NOT use to design the idea itself (`ep-brainstorming`), to execute a written plan, or for a single trivial edit.
+description: Use when you have an approved spec or clear requirements and need an implementation plan before touching code — one self-contained document: context, decisions, an ordered task list and one paste-ready prompt per task, run through Plan Queue. Triggers: after `ep-brainstorming` approves a design, "write the implementation plan", "break this spec into tasks". Do NOT use to design the idea itself (`ep-brainstorming`), to execute a written plan, or for a single trivial edit.
 ---
 
 # Writing Plans
@@ -34,8 +34,6 @@ work (`B1`, `B2`, `B3`, then `P1`) — never a "slice", never a "phase", never a
 grouped into any of those. A task's *internal* actions are its **steps**; that is the only thing the
 word "step" names. Use the word **task** in the plan, in the checkpoint reports, and when talking to
 the user, so the same thing has the same name everywhere.
-
-**Announce at start:** "I'm using the `ep-writing-plans` skill to create the implementation plan."
 
 **Context:** Write the plan on whatever branch you are already on — do not create or check out a branch
 or worktree to author it. Plan Queue gives each plan its own worktree when it runs, so plans can run in

@@ -23,7 +23,7 @@ Every run is one of them. Pick it before reading any code, and state it in the r
 
 Mode B is only possible because Mode A persisted the register. **Never skip the save** — an audit whose requirement set lives only in a chat transcript cannot be re-audited, only redone.
 
-**Announce at start:** "I'm using the `ep-spec-vs-code-audit` skill in Mode A (baseline) / Mode B (re-audit) …"
+State the mode — Mode A (baseline) or Mode B (re-audit) — in the first line of output, so the reader knows whether the report is a baseline or a delta.
 
 ## Relationship to the `code-auditor` agent
 

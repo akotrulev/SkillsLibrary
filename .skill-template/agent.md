@@ -28,6 +28,7 @@ For **brownfield** work, additionally load the bundled developer-workflow skills
 - <Global CLAUDE.md rules that bind this agent, restated where load-bearing.>
 - Read 2–3 existing representative files before writing any new one; match conventions.
 - <Domain-specific hard rules.>
+- **Inside a plan task, the prompt block's `Gate:` line decides what you run.** A `Gate: none` task writes its code and tests and runs no build, test suite, lint or typecheck, whatever an exit criterion below says; only the task that carries the plan's gate runs them.
 
 ## Working on existing <X> (brownfield) — MANDATORY SECTION
 
@@ -101,7 +102,7 @@ Current-state map: <layout, reused seams, how it's built/run>
 Failure class (fix) / Slice scope (extend): <triage result and root cause / what the change covers>
 Changed: <path> — <one line each>
 Defect class swept (fix): <siblings found + fixed, or listed, or "instance-only, none">
-Gate evidence: <repro now green for the right reason; build/test command + result>
+Gate evidence: <repro now green for the right reason; build/test command + result — or "Gate: none — written, not run">
 Orientation cache: created | updated | updated (partial — <why>)
 Left out of scope: <what you deliberately did not touch>
 ```

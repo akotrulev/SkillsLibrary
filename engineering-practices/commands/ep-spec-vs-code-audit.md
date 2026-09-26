@@ -1,5 +1,5 @@
 ---
-description: Use when a written spec — or a pile of user stories / ACs / tickets — must become one deduped requirement register, each verdicted against the code (Met/Partial/Missing/Divergent/…
+description: Use when a written spec — or a pile of user stories / ACs / tickets — must become one deduped requirement register, each verdicted against the code (Met / Partial / Missing / Divergent / Unverifiable).
 argument-hint: [what to apply this skill to]
 ---
 

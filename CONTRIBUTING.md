@@ -47,7 +47,7 @@ Every skill follows the same outline. Copy the right file from `.skill-template/
 
 ## Agent structure
 
-Step-by-step orchestrator agents live in `<domain>/agents/<name>.md`. Copy `.skill-template/agent.md` and keep its section skeleton: role + **two-modes note** → Skill-loading protocol → Operating rules → **Working on existing \<X\> (brownfield)** → Steps → Related agents → Output contract (both shapes) → When uncertain.
+Step-by-step orchestrator agents live in `<domain>/agents/<name>.md`. Copy `.skill-template/agent.md` and keep its section skeleton: role + **two-modes note** → Skill-loading protocol → Operating rules → **Working on existing \<X\> (brownfield)** → Steps → Related agents → Output contract (both shapes) → When uncertain. Keep the template's `Gate:` line in Operating rules verbatim: inside a plan task it overrides the agent's own exit criteria.
 
 **Vocabulary is fixed.** An agent's own operating procedure is numbered in **steps** (`## Steps`, `| # | Step | Goal | …`); the work items any plan it writes hands out are **tasks** (flat and ordered, ids prefixed by the family of work — `C1`, `B1…Bn`, `F1…Fn` — one deliverable each) — see the Planning rules in `CLAUDE.md`. Never call either a *phase* or a *slice*, in a heading, a table, or prose.
 
@@ -61,7 +61,7 @@ Rules:
 - Start with "Use when..." and list concrete trigger phrases.
 - Include the stack/language if the skill is stack-specific.
 - Include an explicit "Do NOT use for..." clause to disambiguate from siblings.
-- Stay under ~400 characters.
+- Stay within ≤ 500 characters for a skill and ≤ 650 for an agent — `tools/token-audit.py` enforces both. Trim restated detail, never the Do-NOT clause.
 
 Good:
 > Use when the user asks to write, derive, or generate formal test cases from requirements, user stories, or acceptance criteria. Triggers: "write test cases for X", "derive test scenarios from these ACs". Do NOT use for exploratory test charters (use qa/exploratory-charter-writer) or for writing automation code (use qa/api-test-author or qa/ui-test-author).
@@ -72,7 +72,7 @@ Bad:
 ## Naming conventions
 
 - Folders: `kebab-case`
-- Skill names in frontmatter: match the folder name
+- Skill names in frontmatter: the domain prefix plus the folder name. Prefixes: `ep`, `be`, `fe`, `qa`, `data`, `design`, `observability`, `devops`, `secgov`, `pentest`, `purpleteam`, `ba`, `td`, `tool`, `auth`. A stack-scoped skill adds its stack — after the prefix in backend and frontend (`be-dotnet-pattern-writer`, `be-shared-delivery-plan`, `fe-react-data-grid`), as a suffix in qa (`qa-api-project-setup-dotnet`). A folder that already starts with its prefix is not doubled (`design/design-tokens` → `design-tokens`). Never rename a published skill; installs resolve it by name
 - Stack-specific skills: include the stack in the path (`auth/auth0-react`, not `auth/react`)
 
 ## Testing a new skill

@@ -1,6 +1,6 @@
 ---
 name: ep-brainstorming
-description: Use when turning an ad-hoc idea or feature request into an approved design/spec before any code is written. Triggers "let's build X", "add a feature that…", "help me design…", "how should we approach…", before scaffolding or implementation. Chains into `ep-writing-plans` once approved. Command `/dev-design`. Do NOT use when the *what* is still loose or the ask spans more than one capability — that is `/dev-refine` (`requirements-author`) — nor while a step-by-step agent is driving its own design gate (merely having one installed is not a reason to skip this), for pure Q&A, or once a design is approved.
+description: Use when turning an ad-hoc idea or one feature request into an approved design/spec before any code is written. Triggers "let's build X", "add a feature that…", "help me design…", "how should we approach…". Chains into `ep-writing-plans`; command `/dev-design`. Do NOT use when the *what* is still loose or spans several capabilities (`/dev-refine`, `requirements-author`), while a step-by-step agent runs its own design gate, for pure Q&A, or once a design is approved.
 ---
 
 # Brainstorming Ideas Into Designs
@@ -17,23 +17,15 @@ Help turn ideas into fully formed designs and specs through natural collaborativ
 
 If, while brainstorming, the idea turns out to be several capabilities or the requirements keep moving, stop and hand to `/dev-refine` — do not decompose it into sub-project specs here.
 
-**Announce at start:** "I'm using the `ep-brainstorming` skill to turn this idea into an approved design."
-
 Start by understanding the current project context, then ask questions one at a time to refine the idea. Once you understand what you're building, present the design and get user approval.
 
-<HARD-GATE>
-Do NOT invoke any implementation skill, write any code, scaffold any project, or take any implementation action until you have presented a design and the user has approved it. This applies to EVERY project regardless of perceived simplicity.
+**No implementation before an approved design.** Invoke no implementation skill, write no code and scaffold nothing until you have presented a design and the user has approved it — including for a todo list, a one-function utility or a config change, because small projects are where unexamined assumptions waste the most work. A simple project gets a short design (a few sentences), not none.
 
-**Scope:** the gate governs *ad-hoc implementation requests*. A step-by-step agent that runs its own design gate — the `fe-blazor` Blazor build, the `qa-*` orchestrators — already satisfies this requirement; invoking such an agent is not a gate violation.
-</HARD-GATE>
-
-## Anti-Pattern: "This Is Too Simple To Need A Design"
-
-Every project goes through this process. A todo list, a single-function utility, a config change — all of them. "Simple" projects are where unexamined assumptions cause the most wasted work. The design can be short (a few sentences for truly simple projects), but you MUST present it and get approval.
+The rule governs *ad-hoc implementation requests*. A step-by-step agent that runs its own design gate — the `fe-blazor` Blazor build, the `qa-*` orchestrators — already satisfies it, so invoking such an agent does not break it.
 
 ## Checklist
 
-You MUST create a task for each of these items and complete them in order:
+Complete these items in order:
 
 1. **Explore project context** — check files, docs, recent commits
 2. **Ask clarifying questions** — one at a time, understand purpose/constraints/success criteria
@@ -71,7 +63,7 @@ digraph brainstorming {
 }
 ```
 
-**The terminal state is invoking `ep-writing-plans`.** Do NOT invoke `frontend-design`, a `qa-*`/`fe-*`/`be-*` generator, or any other implementation skill. The ONLY skill you invoke after brainstorming is `ep-writing-plans`.
+**The terminal state is invoking `ep-writing-plans`.** It is the only skill brainstorming hands to: a `qa-*`/`fe-*`/`be-*` generator or any other implementation skill would start building before a plan exists.
 
 ## The Process
 
@@ -143,8 +135,7 @@ Wait for the user's response. If they request changes, make them and re-run the 
 
 **Implementation:**
 
-- Invoke the `ep-writing-plans` skill to create a detailed implementation plan
-- Do NOT invoke any other skill. `ep-writing-plans` is the next step.
+- Invoke the `ep-writing-plans` skill to create a detailed implementation plan; no other skill comes next.
 
 ## Key Principles
 
@@ -157,4 +148,4 @@ Wait for the user's response. If they request changes, make them and re-run the 
 
 ## Showing something visual
 
-Brainstorming runs text-only by default. When the user explicitly asks to *see* something — "mock that up", "show me the two layouts side by side", an architecture diagram — use the harness's own surface rather than a local server: the `Artifact` tool for a mockup, diagram or side-by-side comparison page, or the `design` canvas skill for a multi-artboard UI mockup. A question *about* a UI topic is not a visual question ("what does personality mean here?" is conceptual — answer in the terminal); "which wizard layout works better?" is.
+Brainstorming runs text-only by default. When the user explicitly asks to *see* something — "mock that up", "show me the two layouts side by side", an architecture diagram — use the harness's own surface rather than a local server: the `Artifact` tool for a mockup, diagram or side-by-side comparison page. A question *about* a UI topic is not a visual question ("what does personality mean here?" is conceptual — answer in the terminal); "which wizard layout works better?" is.

@@ -7,34 +7,26 @@ description: Use when about to claim work is complete, fixed, or passing, before
 
 ## Overview
 
-Claiming work is complete without verification is dishonesty, not efficiency.
-
-**Core principle:** Evidence before claims, always.
-
-**Violating the letter of this rule is violating the spirit of this rule.**
-
-## The Iron Law
-
-```
-NO COMPLETION CLAIMS WITHOUT FRESH VERIFICATION EVIDENCE
-```
+**Make no completion claim without fresh verification evidence.** A claim that work is done, fixed or passing is a statement of fact; without output from a command run in this message, it is a guess presented as a fact, and the user acts on it.
 
 If you haven't run the verification command in this message, you cannot claim it passes.
+
+**Inside a plan task, the prompt block's `Gate:` line decides what you run:** a `Gate: none` task runs no build, suite, lint or typecheck, and reports its work as "written, not run", never "passing".
 
 ## The Gate Function
 
 ```
-BEFORE claiming any status or expressing satisfaction:
+Before claiming any status or expressing satisfaction:
 
-1. IDENTIFY: What command proves this claim?
-2. RUN: Execute the FULL command (fresh, complete)
-3. READ: Full output, check exit code, count failures
-4. VERIFY: Does output confirm the claim?
-   - If NO: State actual status with evidence
-   - If YES: State claim WITH evidence
-5. ONLY THEN: Make the claim
+1. Identify: what command proves this claim?
+2. Run: execute the full command (fresh, complete)
+3. Read: full output, check exit code, count failures
+4. Verify: does output confirm the claim?
+   - If no: state actual status with evidence
+   - If yes: state claim with evidence
+5. Only then: make the claim
 
-Skip any step = lying, not verifying
+A skipped step means the claim is unverified.
 ```
 
 ## Common Failures
@@ -49,29 +41,7 @@ Skip any step = lying, not verifying
 | Agent completed | VCS diff shows changes | Agent reports "success" |
 | Requirements met | Line-by-line checklist | Tests passing |
 
-## Red Flags - STOP
-
-- Using "should", "probably", "seems to"
-- Expressing satisfaction before verification ("Great!", "Perfect!", "Done!", etc.)
-- About to commit/push/PR without verification
-- Trusting agent success reports
-- Relying on partial verification
-- Thinking "just this once"
-- Tired and wanting work over
-- **ANY wording implying success without having run verification**
-
-## Rationalization Prevention
-
-| Excuse | Reality |
-|--------|---------|
-| "Should work now" | RUN the verification |
-| "I'm confident" | Confidence ≠ evidence |
-| "Just this once" | No exceptions |
-| "Linter passed" | Linter ≠ compiler |
-| "Agent said success" | Verify independently |
-| "I'm tired" | Exhaustion ≠ excuse |
-| "Partial check is enough" | Partial proves nothing |
-| "Different words so rule doesn't apply" | Spirit over letter |
+Hedged wording ("should", "probably", "seems to"), satisfaction before a run ("Done!"), and a partial check standing in for the full one are the usual signs a claim has run ahead of its evidence. A linter pass does not prove compilation, and an agent's success report does not prove the diff.
 
 ## Key Patterns
 
@@ -83,7 +53,7 @@ Skip any step = lying, not verifying
 
 **Regression tests (red-green):**
 ```
-✅ Write → Run (pass) → Revert fix → Run (MUST FAIL) → Restore → Run (pass)
+✅ Write → Run (pass) → Revert fix → Run (must fail) → Restore → Run (pass)
 ❌ "I've written a regression test" (without red-green verification)
 ```
 
@@ -112,28 +82,7 @@ Common failure modes when completion is claimed without verification:
 - Undefined functions shipped — would crash
 - Missing requirements shipped — incomplete features
 - Time wasted on false completion → redirect → rework
-- Honesty is a core value: an unverified success claim is a false statement, not a shortcut.
 
 ## When To Apply
 
-**ALWAYS before:**
-- ANY variation of success/completion claims
-- ANY expression of satisfaction
-- ANY positive statement about work state
-- Committing, PR creation, task completion
-- Moving to next task
-- Delegating to agents
-
-**Rule applies to:**
-- Exact phrases
-- Paraphrases and synonyms
-- Implications of success
-- ANY communication suggesting completion/correctness
-
-## The Bottom Line
-
-**No shortcuts for verification.**
-
-Run the command. Read the output. THEN claim the result.
-
-This is non-negotiable.
+Before any success or completion claim, however it is worded — an exact phrase, a paraphrase, or an implication that the work is correct — and before committing, opening a PR, marking a task complete, moving to the next task, or delegating to an agent.

@@ -20,7 +20,7 @@ This is **read-only analysis** on product code. The audit points; owners fix. Th
 
 Where `ep-spec-vs-code-audit` persists a requirement register, this skill's **report is its own register**: the surface letters, finding IDs, and defect families are the stable spine every later round reuses. That is why the report is saved to a file, not just narrated.
 
-**Announce at start:** "I'm using the `ep-feature-audit` skill in Mode A (baseline) / Mode B (re-audit) on <feature>."
+State the mode — Mode A (baseline) or Mode B (re-audit) — and the feature in the first line of output, so the reader knows whether the report is a baseline or a delta.
 
 ## Relationship to the `code-auditor` agent
 

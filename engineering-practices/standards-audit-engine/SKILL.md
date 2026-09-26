@@ -46,7 +46,7 @@ Every run writes one file to `docs/audits/` on the current branch:
 docs/audits/<NNN>-<plugin>-conformance-r<N>.md
 ```
 
-`<plugin>` is the stack plugin's name (`fe-react`, `be-dotnet`, `qa-dotnet`, …). Rounds are additive — never overwrite or regenerate a previous round. **The report is its own register:** section letters, finding IDs, and defect families are the stable spine every later round reuses. There is no separate requirements file — the requirements here *are* the plugin's rules.
+`<plugin>` is the stack plugin's name as the marketplace lists it (the fe-react, be-dotnet or qa-dotnet plugin, …). Rounds are additive — never overwrite or regenerate a previous round. **The report is its own register:** section letters, finding IDs, and defect families are the stable spine every later round reuses. There is no separate requirements file — the requirements here *are* the plugin's rules.
 
 `<NNN>` is a zero-padded sequential number, scoped to `docs/audits/`: list the folder, take the highest existing `NNN` prefix, use `highest + 1` (start at `001` if the folder is empty or doesn't exist yet). It is minted **once per plugin lineage** at `r1` and every later round for that plugin reuses the same `NNN` — never renumbered, never reused for a different lineage.
 
@@ -58,7 +58,7 @@ Create `docs/audits/` if absent. If the repo already uses a different audits con
 
 ### Step 0 — Orient & version gate *(never skip)*
 
-Half of all false findings come from auditing a project against a version lane it isn't on. Run the stack skill's detection probes, record the lane, and read **2–3 representative files** to calibrate what "normal here" looks like.
+Auditing a project against a version lane it isn't on produces false findings — an up-level rule flagged against a down-level project. Run the stack skill's detection probes, record the lane, and read **2–3 representative files** to calibrate what "normal here" looks like.
 
 **The version rule binds every finding:** never flag a down-level project for lacking an up-level API, and never apply an up-level recipe to it. Write the detected lane at the top of the report so every reader can check your work.
 

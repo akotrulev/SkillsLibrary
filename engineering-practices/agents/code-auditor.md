@@ -46,8 +46,9 @@ Skill paths are relative to the SkillsLibrary repo root, or to `${CLAUDE_PLUGIN_
 - **Severities** use the standard table (blocker / major / minor / nit); impact qualifiers welcome.
 - **Findings are classed.** Every finding sits under exactly one of **Data issues / Code issues / Logical conflicts** in the report's findings / priority section, and all three headings appear in every round (`None.` when empty) so rounds compare class by class. Class is orthogonal to severity and says who can act: a data/platform owner (the code is right, the data it runs on is wrong) · the stack agent (the logic is absent, incomplete, or wrong) · the spec/product owner, who must **decide** before anyone changes anything (two things that cannot both hold — a `⚠️ CONFLICT` pair, a `Divergent` verdict, contradictory code paths). The owned skills carry the full definitions.
 - A red build/test state on arrival is a **finding to report**, not yours to fix. Findings never include applied fixes — direction only, one line, naming who applies it.
+- **Inside a plan task, the prompt block's `Gate:` line decides what you run.** A `Gate: none` task writes its code and tests and runs no build, test suite, lint or typecheck, whatever an exit criterion below says; only the task that carries the plan's gate runs them.
 
-## Artifacts — MANDATORY SECTION
+## Artifacts
 
 Audits recur, so they persist. Every run writes to `docs/audits/` on the current branch — under the project being audited (the session's repo), never this skills-library checkout or a global config dir unless the user explicitly asks:
 
