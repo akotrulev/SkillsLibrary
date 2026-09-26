@@ -1,6 +1,6 @@
 # CucumberJS + WebdriverIO Step Bindings + POM Implementation (Mobile / TypeScript)
 
-The **mobile** path of the TypeScript `gherkin-step-code` family. Binds Gherkin steps to **@cucumber/cucumber** step definitions (`Given`/`When`/`Then`), run under `@wdio/cucumber-framework` against **WebdriverIO + Appium**. State is shared across steps via a **custom `World`** (`this.login`, …) — not fixtures. Assertions use WDIO's `expect`. The World, hooks, and `wdio.conf.ts` already exist from `bdd-project-setup`.
+The **mobile** path of the TypeScript `gherkin-step-code` family. Binds Gherkin steps to **@cucumber/cucumber** step definitions (`Given`/`When`/`Then`), run under `@wdio/cucumber-framework` against **WebdriverIO + Appium**. State is shared across steps via a **custom `World`** (`this.login`, …) — not fixtures. Assertions use WDIO's `expect`. The World, hooks, and `wdio.conf.ts` already exist from `bdd-project-scaffold`.
 
 > Read the family router `../SKILL.md` first for the shared rules (one file per domain, Cucumber Expressions, thin steps, assertions in `Then`, reuse the catalog, build missing POMs first). This file is the mobile-specific deep dive: the **World** model, end to end.
 
@@ -18,7 +18,7 @@ CucumberJS has **no fixtures**. State is shared via the **World** — the `this`
 Because the World **is** `this`, every step and hook must be a **`function` expression — never an arrow function** (arrows capture the outer `this` and lose the World). Type `this` explicitly as `CustomWorld`.
 
 ```typescript
-// support/world.ts (from bdd-project-setup) — recap, do not re-create
+// support/world.ts (from bdd-project-scaffold) — recap, do not re-create
 import { World, setWorldConstructor } from '@cucumber/cucumber';
 import { LoginScreen } from '../pages/mobile/LoginScreen';
 

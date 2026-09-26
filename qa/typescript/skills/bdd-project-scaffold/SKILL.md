@@ -3,7 +3,7 @@ name: qa-bdd-project-setup-typescript
 description: Use when adding a BDD/Gherkin layer onto a TypeScript UI/mobile test project, or standing one up from zero — playwright-bdd (on the Playwright Test runner) for web, CucumberJS + WebdriverIO + Appium for mobile. Triggers: "set up playwright-bdd", "add a BDD layer to our Playwright tests in TS", "wire bddgen and fixtures". Do NOT use to write feature files (`feature-file-writer`), generate step definitions (`gherkin-step-code`), or build page objects (`page-object-design`).
 ---
 
-# BDD Project Scaffold (TypeScript / Node 20)
+# BDD Project Scaffold (TypeScript / Node 24)
 
 Wires a **BDD/Gherkin layer** onto a TypeScript test project: packages, runner config, the `features/` folder, the state/driver-sharing mechanism, the per-scenario lifecycle, and the smoke `.feature` that proves the rig parses and runs. It produces the **empty rig** — no feature files, no step logic; those come from `feature-file-writer` and `gherkin-step-code`.
 
@@ -44,7 +44,7 @@ The two paths never share a runner. A project that tests **both** scaffolds both
 - Writing `.feature` files → `qa/_shared/bdd/feature-file-writer`
 - Generating step definitions → `qa/typescript/skills/gherkin-step-code`
 - Building page objects → `qa/typescript/skills/page-object-design` / `page-objects-from-url` / `mobile-screen-objects`
-- BDD in .NET/Java → `qa/{dotnet,java}/skills/bdd-project-setup` (Reqnroll / Cucumber-JVM)
+- BDD in .NET/Java → `qa/{dotnet,java}/skills/bdd-project-scaffold` (Reqnroll / Cucumber-JVM)
 
 ## Inputs needed
 
@@ -61,7 +61,7 @@ Confirm at most 2–3.
 3. Web: add `defineBddConfig(...)` to `playwright.config.ts` and a `bddgen` script. Mobile: add `wdio.conf.ts` with the appium service + the cucumber framework + the World/hooks files.
 4. Create the state/lifecycle layer — web: a `test` fixture extending page objects (no World); mobile: a `CustomWorld` + `Before`/`After` hooks that own the driver **with teardown**.
 5. Create the empty `features/` folder and one throwaway smoke `.feature` to prove the rig parses and runs.
-6. Run the toolchain (web: `npx bddgen && npx playwright test`; mobile: `npx wdio run`), confirm the smoke scenario is green.
+6. Run the toolchain (web: `npx bddgen && npx playwright test`; mobile: `npx wdio run`), confirm the smoke scenario is green. Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run".
 7. Report files created and hand off to `feature-file-writer` (features) + `gherkin-step-code` (steps).
 
 ## Templates — Web (playwright-bdd)

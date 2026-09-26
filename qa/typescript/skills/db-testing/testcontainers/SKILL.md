@@ -226,7 +226,7 @@ const c = await new GenericContainer('ghcr.io/myco/legacy-app:1.4.0')
    - Concrete `tests/integration/{feature}.int.test.ts`
    - `package.json` updates: add `testcontainers`, `@testcontainers/postgresql` (or mongodb/mssql), `pg`, `supertest`, `vitest`, `@vitest/coverage-v8`.
 4. Add npm script: `"test:integration": "vitest run --config vitest.integration.config.ts"`.
-5. Run the script — expect green or a real assertion failure.
+5. Run the script — expect green or a real assertion failure. Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run".
 
 ## Cross-references
 

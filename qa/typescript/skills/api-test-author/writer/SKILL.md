@@ -1,6 +1,6 @@
 ---
 name: qa-api-test-writer-typescript
-description: Use when the user asks to write TypeScript API tests using Vitest + native fetch + Zod against a REST backend. Triggers: "write a TS API test for X", "add a Vitest spec for endpoint Y", "automate these test cases in TypeScript". For end-to-end suite work prefer the staged agent `qa-api-typescript` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
+description: Use when the user asks to write TypeScript API tests using Vitest + native fetch + Zod against a REST backend. Triggers: "write a TS API test for X", "add a Vitest spec for endpoint Y", "automate these test cases in TypeScript". Do NOT use for API tests on the Playwright runner (`qa-api-test-playwright-typescript`), GraphQL or gRPC (`qa-api-test-graphql-typescript` / `qa-api-test-grpc-typescript`), or reviewing tests (`qa-api-test-review-typescript`).
 ---
 
 # QA — API Test Writer (TypeScript / Vitest + fetch + Zod)
@@ -9,9 +9,9 @@ Authors `*.spec.ts` files on top of the **Schema/types + Client + Spec** layerin
 
 ## Stack
 
-- Node 20 + TypeScript (strict mode)
+- Node 24 + TypeScript (strict mode)
 - **Vitest** as the test runner (`vitest`) — the global default for the TS stack
-- **Native `fetch`** (built into Node 20) — accessed only through `{resource}Client`; no axios/got/supertest
+- **Native `fetch`** (built into Node 24) — accessed only through `{resource}Client`; no axios/got/supertest
 - **Zod** for request/response schemas and runtime validation — schemas double as the contract check
 - **Allure** via `allure-vitest` where the project uses Allure
 - Project layout: `src/clients/{api}/`, `src/models/{api}/{resource}/`, `src/specs/{api}/{resource}/`, `src/config/`, `tests/setup.ts`
@@ -193,7 +193,7 @@ describe('POST /api/users', () => {
 2. For each resource in scope, verify the Zod schema + inferred types (`models/{api}/{resource}/`) and the `{resource}Client` exist. Create missing ones via `qa/typescript/skills/api-models` then `qa/typescript/skills/api-client-writer` before writing any spec.
 3. Author one spec file per operation, picking patterns from the scenario matrix. Body-manipulation cases (malformed JSON, extra/missing property) require the optional `createRaw` / `createUnchecked` client methods — add them via `api-client-writer`.
 4. Verify every test title describes behavior (and carries the TC-ID when a document exists) and asserts one behavior; verify every TC-ID maps to a test or is explicitly deferred.
-5. Run `pnpm exec tsc --noEmit` then `npx vitest run` — expect 0 type errors and 0 failures.
+5. Run the project's own typecheck script (with the package manager `packageManager` names), then `npx vitest run` — expect 0 type errors and 0 failures. Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run".
 
 ## Handoffs
 

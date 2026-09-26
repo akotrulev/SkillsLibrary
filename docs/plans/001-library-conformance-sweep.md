@@ -21,8 +21,10 @@ S7 landed 2026-09-26 (qa/java API, BDD and LLM lanes: the Gate line in three age
 21 stale paths, the six qa/java `Node 20` hits and 25 descriptions; the LLM agent's `qa/manual` write-up
 became a hand-off, D15). S8 landed 2026-09-26 (qa/java UI, mobile and performance lanes and commands:
 the Gate line in three agents, the production-uptime-checks names resolved, seven Do-NOT clauses added;
-one open question raised, O9). S9 is next. S1–S18 are ungated: the edits from S1 to S8 are built but
-unverified until G1 runs §7.
+one open question raised, O9). S9 landed 2026-09-26 (qa/typescript API, BDD and LLM lanes: the Gate
+line in three agents, 63 `Node 20` hits moved to Node 24 with the realtime Node-20 boundary reworded as an EOL
+flag, 20 stale paths, the K1 name and 23 descriptions; the LLM agent's `qa/manual` write-up became a hand-off,
+D15). S10 is next. S1–S18 are ungated: the edits from S1 to S9 are built but unverified until G1 runs §7.
 
 ## 1. What already exists, and what is missing
 
@@ -1188,6 +1190,74 @@ non-version hits 16k, ~14 version-only files reviewed as a diff 7k, descriptions
 - K1: `qa-db-testing-typescript` ×2 in `skills/failure-injection-testing/SKILL.md`.
 - K2: the Gate line in the three agents.
 - **Not in S9:** the UI, mobile and performance lanes and `qa/typescript/commands/` (S10).
+- **As built (2026-09-26):** `qa/typescript/agents/{qa-api-typescript,qa-bdd-typescript,qa-llm-typescript}.md`
+  (read in full) and the 28 skill folders their loading lists name: `test-login-tokens`, `api-models`,
+  `api-client-writer`, `test-data-builder`, `api-test-author/{writer,playwright,graphql,grpc,review}`,
+  `data-driven-testing`, `db-testing/{connection,testcontainers,verification-queries}`, `messaging-testing`,
+  `file-storage-testing`, `email-testing`, `realtime-stream-testing`, `api-contract-testing`,
+  `failure-injection-testing`, `feature-flag-testing`, `bdd-project-scaffold`, `bdd-reviewer`,
+  `gherkin-step-code`, `page-object-design`, `page-objects-from-url`, `ui-test-author/{playwright,appium,review}`,
+  `mobile-screen-objects`, `ai-feature-testing`, `ai-answer-quality-testing` (56 `.md` files). qa/typescript has
+  no `api-project-setup`, `standards-audit` or `test-quality-check` folder. **S10 owns the rest:**
+  `accessibility-testing`, `browser-cloud-setup`, `device-cloud`, `inhouse-framework-conventions`,
+  `language-testing`, `load-testing`, `mobile-app-crawler`, `mobile-native-features`, `mobile-screen-explorer`,
+  `network-mocking`, `production-uptime-checks`, `responsive-testing`, `security-testing/*`,
+  `ui-test-author/selenium`, `visual-regression`. Gate line added to 3 agents, each as the last
+  Operating-rules bullet (`qa-api-typescript.md:37`, `qa-bdd-typescript.md:40`, `qa-llm-typescript.md:72`).
+  Data issues: 85 fixed.
+  - K6: one substitution over the 56 files changed 63 `Node 20` hits in 30 files to Node 24 (agent
+    descriptions, titles and role lines; the "Node 20 + TypeScript" stack lines; the email, messaging and
+    file-storage references). The diff review reworded 9 of them in `realtime-stream-testing/SKILL.md:64–68`,
+    `:283`, `:332` and `references/details.md:42–55`, where Node 20 was the native-`WebSocket`/`EventSource`
+    boundary: those now describe Node 22/24 as having the globals and flag a detected Node 20 as EOL. The K6
+    recipe over the S9 files prints only those four flag lines; the 23 `Node 20` hits left in qa/typescript
+    are all S10's. `api-client-writer/SKILL.md:8` "(Node 24+)" for native `fetch` → "(built into Node 22 and 24)".
+  - K1: `failure-injection-testing/SKILL.md:312`, `:345` `qa-db-testing-typescript` →
+    `qa-db-testing-testcontainers-typescript` (`:345` also listed `qa-messaging-testing-typescript` twice;
+    one removed). The resolver prints only `data-testid` / `data-test` over the S9 files.
+  - Stale paths, 20: `qa/_shared/api-contract-testing` → `contract-testing-pact` (`qa-api-typescript.md:18`,
+    `:140`; `api-contract-testing/SKILL.md:8`, `:15`, `:213`, `:251`); `bdd-project-setup` →
+    `bdd-project-scaffold` (`qa-bdd-typescript.md:105`, a step-table path to a folder that does not exist;
+    `gherkin-step-code/SKILL.md:3`, `:8`, `:82` and both references ×2; `bdd-project-scaffold/SKILL.md:47`);
+    the frontmatter name `qa-bdd-project-setup-typescript` stays. `api-test-author/generator` → `writer`
+    (`api-test-author/playwright/SKILL.md:3`, `:29`, `:233`; `…/review/SKILL.md:3`); `db-testing/client` →
+    `connection` (`db-testing/connection/SKILL.md:23`, `file-storage-testing/references/s3.md:25`,
+    `azure-blob.md:13`, `:26`); `api-contract-testing/SKILL.md:256` `ci-pipelines/{github-actions,…}` →
+    "`ci-pipelines` (its `references/<host>.md`)". Every `qa/…` path in the S9 files now resolves on disk.
+  Code issues: 51 fixed.
+  - K7: 23 skill descriptions rewritten, 22 of them to add a Do-NOT clause naming the sibling by frontmatter
+    name (e.g. `api-models`, `api-client-writer`, `api-test-author/*`, `db-testing/connection`,
+    `page-object-design`, `ui-test-author/{playwright,appium,review}`, `ai-feature-testing`,
+    `ai-answer-quality-testing`; `api-test-author/review` swapped its path pointer for the name). In 12 the
+    staged-agent boilerplate gave way to the clause; `api-test-author/{graphql,grpc}`, `data-driven-testing`
+    and `realtime-stream-testing` now open with "Use when". All ≤ 500 (largest `ai-answer-quality-testing`
+    499). Agent descriptions fit (524, 640, 574); "TypeScript/Node 20" → "Node 24" in two of them.
+  - K2 for skills: the "written, not run" sentence on the run/verify step of 15 skills (`api-models:158`,
+    `api-client-writer:320`, `api-test-author/writer:196`, `…/playwright:243`, `ui-test-author/playwright:264`,
+    `…/appium:245`, `page-objects-from-url` §6, `mobile-screen-objects:100`, `bdd-project-scaffold:64`,
+    `gherkin-step-code:60`, `test-data-builder:242`, `db-testing/connection:284`, `…/testcontainers:229`,
+    `api-contract-testing:242`, `test-login-tokens:112`).
+  - K8: hardcoded `pnpm exec tsc` / `pnpm test` / `npm run typecheck` / `pnpm exec eslint` in those run steps
+    (`api-models`, `api-client-writer` ×2, `api-test-author/{writer,playwright}`, `test-data-builder`,
+    `db-testing/connection`, `api-contract-testing:242`) and in the orientation's "how it is invoked" line of
+    `qa-api-typescript` and `qa-llm-typescript` → the project's own script, run with the package manager
+    `packageManager` names.
+  - "Recover, don't author" doubled in Orientation 2 of all three agents; merged into S7's one-sentence form.
+  Logical conflicts: 10 fixed.
+  - "Run what you write", Orientation 3's "every run regardless of the gate's verdict" and Orientation 2's
+    "confirm it builds/runs" each gain "outside a `Gate: none` plan task" in all three agents.
+  - `qa-llm-typescript.md:135` wrote a real regression up via `qa/manual/bug-report-writer` against its own
+    loading protocol; it now hands off to `qa-test-case-designer` (D15).
+  Cleanup: none. The K9 recipes find no plan, progress or tracked junk file in qa/typescript, and every
+  qa/typescript skill, agent and command is listed in the marketplace.
+  Kept on purpose: K3 hits are the fixed workspace sentence, flag branches, GraphQL envelope branches, Pact
+  `--branch` / `mainBranch` and POM "branching" review rows. K4 hits are RAG retrieval/generation "stages",
+  a Pact deploy "stage", Azure block staging, a "vertical slice" read, an inbox "slice" and a
+  "test-token slice" (D8). K8 hits left are `pip install` tool installs in the DeepEval/Ragas references and
+  the `pnpm --filter … test` lines in `api-contract-testing`'s CI YAML samples. The exit-gate commands
+  (`npx vitest run`, `npx tsc --noEmit`, `npx bddgen && npx playwright test`) stay as exit criteria. K5 and
+  "— MANDATORY SECTION" / the `be-shared-session-budget` Step 5 duty do not occur in the S9 files.
+  Unverified: nothing was run beyond §4's searches (Gate: none). Left for the user: nothing.
 
 ### S10 — qa/typescript UI, mobile and performance lanes
 
@@ -1489,79 +1559,9 @@ name: the K1 resolver flags it (D12).
 | S18 | `docs` | `general-purpose` | — | ~135k |
 | G1 | `docs` | `general-purpose` | S1–S18 | ~120k |
 
-S1 to S8 have landed, and their prompts are deleted; the 11 prompts from S9 to G1 are live.
+S1 to S9 have landed, and their prompts are deleted; the 10 prompts from S10 to G1 are live.
 
 ---
-
-### S9 — qa/typescript API, BDD and LLM lanes (general-purpose, docs)
-
-````
-You are `general-purpose`. Task S9 of docs/plans/001-library-conformance-sweep.md: bring qa/typescript's
-API, BDD and LLM lanes in line with the plan's checks K1–K9.
-
-Deliverable: qa-api-typescript, qa-bdd-typescript, qa-llm-typescript and every qa/typescript skill they
-load pass K1–K9, including the move off Node 20 in those files.
-
-Read, in this order:
-1. CLAUDE.md, especially the version policy (Node 24 active LTS, 22 maintenance, 20 EOL).
-2. The plan: §2 (the lane rule), §3, §4, §6 (the S9 rows), D1–D11, task S9, S5's As built note.
-3. CONTRIBUTING.md.
-4. qa/typescript/agents/{qa-api-typescript,qa-bdd-typescript,qa-llm-typescript}.md in full; their
-   skill-loading lists decide which qa/typescript/skills/ are yours.
-5. The plan's "Close-out — every task".
-
-Do:
-- Run §4's recipes with DIR=qa/typescript; work the hits in your agents and skills.
-- K6: in your files only, substitute `Node 20` → `Node 24` and `node:20` → `node:24` in one pass, then
-  read the diff. Revert any hit that names Node 20 as a detected or EOL version, and reword it to flag
-  it instead.
-- K1: `qa-db-testing-typescript` ×2 (skills/failure-injection-testing/SKILL.md).
-- K2: the Gate line in the three agents.
-- List your skills in the As built note; S10 owns the rest.
-
-Traps:
-- Agent sentences S3/S4 fixed in backend recur in 28 agents across S5–S17; fix them where your
-  agents carry them:
-  - "— MANDATORY SECTION" on the brownfield heading is dropped (K5).
-  - The orientation pass's "every run regardless of the gate's verdict" (the cache gate) gains
-    "outside a `Gate: none` plan task".
-  - A closing duty "per `be-shared-session-budget` Step 5" now reads "per the plan's
-    `## Close-out — every task` section (plan format §7)".
-  - A skill's Validation / Verify list gets one sentence: inside a `Gate: none` plan task it runs
-    none of the checks and reports "written, not run".
-  - K8: a hardcoded `pnpm …` / `npm …` in an instruction becomes the project's own script, run with
-    the package manager `packageManager` names.
-  - The operating rule "Run what you write — a step whose code never executed does not pass its
-    gate" becomes "Run what you write, outside a `Gate: none` plan task — …" (S5; every qa agent
-    carries it).
-- Stale path shorthands (S5): skill folders were renamed but citations were not, and the K1
-  resolver cannot see paths. Grep for `api-test-author/generator` → `writer`,
-  `api-test-author/reviewer` and `ui-test-author/reviewer` → `review`, `db-testing/client` →
-  `connection`, `bdd-project-setup` → `bdd-project-scaffold`, `conformance-audit` →
-  `standards-audit`, and (S6) `performance/<tool>` or `skills/performance` → `load-testing`,
-  `qa/_shared/api-contract-testing` → `qa/_shared/contract-testing-pact`. Check every step-table
-  path, and every `qa/…` path in the files you own, against the folder on disk.
-- Known S9 hits of that family: `gherkin-step-code/SKILL.md` and its two references,
-  `bdd-project-scaffold`, `api-test-author/{playwright,review}`, `db-testing/connection`,
-  `file-storage-testing/references/{s3,azure-blob}.md`; and (S6) `qa-api-typescript.md:18`, `:140`,
-  `api-contract-testing/SKILL.md:8`, `:15`, `:213`, `:251` (`qa/_shared/api-contract-testing`).
-- Descriptions lacking a Do-NOT clause were common in qa/dotnet (15 of 26 skills); expect the same.
-- The agents' descriptions say "TypeScript/Node 20". Descriptions are always-on text, so they must
-  change too, and must stay within 650 chars.
-- A substitution over files you do not own collides with S10. Scope the command to your file list.
-- (S7) Twelve of your skill descriptions end in the boilerplate "For end-to-end suite work prefer the
-  staged agent … use this skill directly for a single targeted artifact". S7 replaced it with the
-  Do-NOT clause, which also frees the characters the clause needs.
-- (S7, D15) `qa-llm-typescript.md:136` writes a real regression up via `qa/manual/bug-report-writer`
-  while its loading protocol (`:27`) forbids `qa/manual/`; hand it to `qa-test-case-designer` (it owns
-  bug reports), as `qa-llm-java` and `qa-llm-dotnet` now do. The orientation's "Recover, don't author"
-  is written twice in each qa/java agent too; merge it.
-
-Gate: none — this plan gates once, in G1. Do not run tools/token-audit.py or §7's script.
-
-Commit: `chore(sweep S9): qa/typescript API, BDD and LLM lanes`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
 
 ### S10 — qa/typescript UI, mobile and performance lanes (general-purpose, docs)
 
@@ -1626,6 +1626,12 @@ Traps:
   `ci-pipelines` (S6/S8 wording: "read only the `references/<host>.md` … matching the project's
   existing CI"). The descriptions ending in "For end-to-end suite work prefer the staged agent …"
   get a Do-NOT clause in its place (S7/S8).
+- (S9) The 23 `Node 20` hits left in qa/typescript are all in your files; S9's 56 files show only four
+  flagged EOL lines (realtime-stream-testing). S9's diff review found Node 20 used as a feature boundary
+  (native `WebSocket`/`EventSource` arrive in Node 22): such lines say Node 22/24 have the feature and flag a
+  detected Node 20 as EOL, rather than reading "Node 24" after the substitution. Your skill run steps
+  hardcode `pnpm …` / `npm …` too; S9 wrote "the project's own <typecheck|test|lint> script with the package
+  manager `packageManager` names" and appended the "written, not run" sentence to the same step.
 
 Gate: none — this plan gates once, in G1. Do not run tools/token-audit.py or §7's script.
 

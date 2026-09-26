@@ -1,6 +1,6 @@
 # QA — Validate Outbound Mail via SendGrid Sandbox Mode (TypeScript)
 
-Scaffolds a thin, intent-revealing wrapper over the official `@sendgrid/mail` SDK (Node 20 + TS) plus Vitest helpers that **validate the SUT's send request without delivering any email**. With `mailSettings.sandboxMode.enable = true`, SendGrid runs its real validator over the form, type, and shape of the request — template IDs, personalizations, dynamic template data, `from` / `reply-to`, categories — accepts a valid one with **`200 OK`** (note: not the `202 Accepted` a real send returns), and **delivers nothing**. A malformed request surfaces as **`4xx` with an error body**.
+Scaffolds a thin, intent-revealing wrapper over the official `@sendgrid/mail` SDK (Node 24 + TS) plus Vitest helpers that **validate the SUT's send request without delivering any email**. With `mailSettings.sandboxMode.enable = true`, SendGrid runs its real validator over the form, type, and shape of the request — template IDs, personalizations, dynamic template data, `from` / `reply-to`, categories — accepts a valid one with **`200 OK`** (note: not the `202 Accepted` a real send returns), and **delivers nothing**. A malformed request surfaces as **`4xx` with an error body**.
 
 This is the **"no inbox at all"** sibling. The other three email skills all assert on a *captured / delivered* message; **this one never produces a received message** — there is no SMTP sink, no IMAP poll, no `messages.get`. Two consequences shape the whole skill:
 

@@ -1,9 +1,9 @@
 ---
 name: qa-ai-answer-quality-testing-typescript
-description: Use when testing a RAG feature from a Node 24 / TypeScript suite — decompose RETRIEVAL from GENERATION so a bad answer is localized, then assert the RAG triad (context relevance · groundedness · answer relevance) plus retrieval-ranking metrics. Triggers: "test our RAG pipeline", "is the answer grounded in the retrieved chunks", "evaluate context precision/recall", "build a RAG golden set". Builds on the stack's `qa-ai-feature-testing-typescript` skill.
+description: Use when testing a RAG feature from a Node 24 / TypeScript suite — decompose RETRIEVAL from GENERATION so a bad answer is localized, then assert the RAG triad (context relevance · groundedness · answer relevance) plus retrieval-ranking metrics. Triggers: "test our RAG pipeline", "is the answer grounded in the retrieved chunks", "evaluate context precision/recall". Do NOT use for non-RAG LLM output (`qa-ai-feature-testing-typescript`) or deterministic API tests (`qa-api-test-writer-typescript`).
 ---
 
-# RAG Testing (Node 20 / TypeScript — retrieval ⊕ generation, Ragas-spined)
+# RAG Testing (Node 24 / TypeScript — retrieval ⊕ generation, Ragas-spined)
 
 A RAG feature is **two systems wearing one trench coat**: a **retriever** (query → top-k chunks from a vector /
 hybrid index) and a **generator** (chunks + query → answer). A wrong answer is therefore *ambiguous* — it can be

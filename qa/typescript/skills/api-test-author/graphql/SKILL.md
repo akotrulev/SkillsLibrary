@@ -1,6 +1,6 @@
 ---
 name: qa-api-test-graphql-typescript
-description: Scaffold black-box **GraphQL** API tests in Node 24 (22 supported) / TypeScript with Vitest, native `fetch`, and Zod. Triggers: "write a GraphQL test for query/mutation X", "assert the errors array on a GraphQL response", "test partial GraphQL data + errors". For end-to-end suite work prefer the staged agent `qa-api-typescript` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
+description: Use when scaffolding black-box **GraphQL** API tests in Node 24 (22 supported) / TypeScript with Vitest, native `fetch`, and Zod. Triggers: "write a GraphQL test for query/mutation X", "assert the errors array on a GraphQL response", "test partial GraphQL data + errors". Do NOT use for REST (`qa-api-test-writer-typescript`) or gRPC (`qa-api-test-grpc-typescript`).
 ---
 
 # QA — GraphQL API Test Writer (TypeScript / Vitest + fetch + Zod)
@@ -48,9 +48,9 @@ envelope, not in the status line.**
 
 ## Stack
 
-- Node 20 + TypeScript (strict mode)
+- Node 24 + TypeScript (strict mode)
 - **Vitest** as test runner (`allure-vitest` where the project uses Allure)
-- **Native `fetch`** (Node 20) — no axios/got. A GraphQL request is just a `POST` of `{ query, variables }`.
+- **Native `fetch`** (Node 24) — no axios/got. A GraphQL request is just a `POST` of `{ query, variables }`.
 - **Zod** for the per-operation `data` schema **and** the `errors[]` envelope schema
 - Project layout: `tests/operations/` (query/mutation documents), `tests/clients/`, `tests/schemas/`,
   `tests/specs/`, `tests/setup.ts`

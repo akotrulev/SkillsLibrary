@@ -1,9 +1,9 @@
 ---
 name: qa-feature-flag-testing-typescript
-description: Use when testing feature-flagged code in Node 24 (22 supported) / TypeScript / Vitest — pin flag state in-process with OpenFeature's `InMemoryProvider` or LaunchDarkly's `TestData` fixture (never a live flag service), cover BOTH sides of every flag, drive targeting through the evaluation context. Triggers: "test a feature flag", "test both sides of a flag", "pin a flag state in tests".
+description: Use when testing feature-flagged code in Node 24 (22 supported) / TypeScript / Vitest — pin flag state in-process with OpenFeature's `InMemoryProvider` or LaunchDarkly's `TestData` fixture (never a live flag service), cover BOTH sides of every flag, drive targeting through the evaluation context. Triggers: "test a feature flag", "test both sides of a flag", "pin a flag state in tests". Do NOT use for the endpoint tests themselves (`qa-api-test-writer-typescript`).
 ---
 
-# QA — Feature-Flag Testing (Node 20 + TypeScript / OpenFeature + LaunchDarkly `TestData` + Vitest)
+# QA — Feature-Flag Testing (Node 24 + TypeScript / OpenFeature + LaunchDarkly `TestData` + Vitest)
 
 Scaffolds **deterministic feature-flag tests** in TypeScript for code whose behavior branches on a flag, using
 [**OpenFeature**](https://openfeature.dev) — the CNCF vendor-neutral flag API — with its built-in
@@ -54,7 +54,7 @@ Vitest.
 
 ## Stack
 
-- Node 20 + TypeScript (strict), **Vitest** (the global default TS runner) + Allure via `allure-vitest` where used
+- Node 24 + TypeScript (strict), **Vitest** (the global default TS runner) + Allure via `allure-vitest` where used
 - **OpenFeature** — `@openfeature/server-sdk` — the vendor-neutral API the *production code* talks
   (`client.getBooleanValue/getStringValue/...`), plus the built-in test spine: **`InMemoryProvider`** + the
   flag-configuration map (variants + `defaultVariant` + `contextEvaluator`)

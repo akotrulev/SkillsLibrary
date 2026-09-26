@@ -1,6 +1,6 @@
 ---
 name: qa-api-test-grpc-typescript
-description: Scaffold black-box **gRPC** API tests in Node 24 (22 supported) / TypeScript with Vitest + `@grpc/grpc-js` + `@grpc/proto-loader` against a deployed, proto-defined HTTP/2 service. Triggers: "write a gRPC test for RPC X", "assert the ServiceError code", "test a server-streaming RPC". For end-to-end suite work prefer the staged agent `qa-api-typescript` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
+description: Use when scaffolding black-box **gRPC** API tests in Node 24 (22 supported) / TypeScript with Vitest + `@grpc/grpc-js` + `@grpc/proto-loader` against a deployed, proto-defined HTTP/2 service. Triggers: "write a gRPC test for RPC X", "assert the ServiceError code", "test a server-streaming RPC". Do NOT use for REST (`qa-api-test-writer-typescript`) or GraphQL (`qa-api-test-graphql-typescript`).
 ---
 
 # QA — gRPC API Test Writer (TypeScript / Vitest + @grpc/grpc-js)
@@ -59,7 +59,7 @@ siblings, but the contract is the **`.proto`** (load + type the messages + clien
 
 ## Stack
 
-- Node 20 + TypeScript (strict mode)
+- Node 24 + TypeScript (strict mode)
 - **Vitest** as test runner (`allure-vitest` where the project uses Allure)
 - **`@grpc/grpc-js`** (the pure-JS client) + **`@grpc/proto-loader`** (load `.proto` at runtime)
 - **`proto-loader-gen-types`** generates the `*.ts` typings for the loaded package (the typed-client path); or

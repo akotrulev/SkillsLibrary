@@ -1,6 +1,6 @@
 # QA — Email Testing against a Real Mailbox over IMAP (TypeScript)
 
-Scaffolds a thin, intent-revealing wrapper over `imapflow` (Node 20 + TS) plus `mailparser`'s `simpleParser`, with Vitest / Playwright helpers that **poll a real provider mailbox** (Gmail / Outlook / any IMAP server) for a specific message — by recipient alias + subject + `since` time bound — extract HTML / text body / links / OTP codes, download attachments, and clean up by flagging the message `\Seen` / `\Deleted` rather than wiping an inbox.
+Scaffolds a thin, intent-revealing wrapper over `imapflow` (Node 24 + TS) plus `mailparser`'s `simpleParser`, with Vitest / Playwright helpers that **poll a real provider mailbox** (Gmail / Outlook / any IMAP server) for a specific message — by recipient alias + subject + `since` time bound — extract HTML / text body / links / OTP codes, download attachments, and clean up by flagging the message `\Seen` / `\Deleted` rather than wiping an inbox.
 
 This is the sibling for flows that must exercise the **genuine provider inbox** — real MX, real spam/routing, real provider quirks — not an SMTP sink or a test-SaaS server. Two consequences shape the whole skill:
 

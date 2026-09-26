@@ -1,9 +1,9 @@
 ---
 name: qa-data-driven-testing-typescript
-description: Run one Node 24 (22 supported) / TypeScript test body against **many rows of data sourced from an external file**. Triggers: "run this test for every row in a CSV / spreadsheet", "data-drive these tests from a JSON file", "parameterize these Playwright/Vitest tests with external data".
+description: Use when one Node 24 (22 supported) / TypeScript test body must run against **many rows of data sourced from an external file**. Triggers: "run this test for every row in a CSV / spreadsheet", "data-drive these tests from a JSON file", "parameterize these Playwright/Vitest tests with external data". Do NOT use for building single test objects (`qa-test-data-builder-typescript`) or seeding a database (`qa-db-connection-typescript`).
 ---
 
-# Data-Driven Testing (Node 20 / TypeScript — Vitest + Playwright)
+# Data-Driven Testing (Node 24 / TypeScript — Vitest + Playwright)
 
 > **Ported from the canonical `qa-data-driven-testing-java`.** The four ideas and the section order are
 > identical; only the runner API (Vitest `test.for` / a Playwright test-per-row loop instead of TestNG
@@ -53,7 +53,7 @@ never knows which one fed it.
 
 ## Stack
 
-- Node 20, TypeScript (strict), Vitest (unit) + `@playwright/test` (UI) — **no `waitForTimeout`** anywhere
+- Node 24, TypeScript (strict), Vitest (unit) + `@playwright/test` (UI) — **no `waitForTimeout`** anywhere
 - `csv-parse` — CSV → records (`parse(content, { columns: true })`); RFC-4180 quoting; sync + streaming
 - native `JSON.parse` — JSON → `unknown`, then validated
 - `xlsx` (SheetJS) — Excel `.xlsx` reading (`read` + `utils.sheet_to_json`)

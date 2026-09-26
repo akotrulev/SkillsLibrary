@@ -1,6 +1,6 @@
 ---
 name: qa-ui-test-writer-appium-typescript
-description: Use when the user asks to scaffold a TypeScript + WebdriverIO (Appium service) page object or Mocha/Vitest mobile UI test. Triggers: "create an Appium page object for X in TS", "add a WebdriverIO mobile page for screen Y", "write an Appium TS test for Z". For end-to-end suite work prefer the staged agent `qa-mobile-typescript` / `qa-bdd-typescript` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
+description: Use when the user asks to scaffold a TypeScript + WebdriverIO (Appium service) page object or Mocha/Vitest mobile UI test. Triggers: "create an Appium page object for X in TS", "add a WebdriverIO mobile page for screen Y", "write an Appium TS test for Z". Do NOT use for web UI (`qa-ui-test-writer-playwright-typescript`) or live-screen discovery (`qa-mobile-screen-explorer-typescript`).
 ---
 
 # QA — Appium TypeScript Page Object & Test Generator
@@ -11,7 +11,7 @@ Scaffolds WebdriverIO + Appium page objects and Mocha (or Vitest) mobile UI test
 
 ## Stack
 
-- Node 20, TypeScript strict mode (`"strict": true`)
+- Node 24, TypeScript strict mode (`"strict": true`)
 - **WebdriverIO** 9.x with `@wdio/appium-service` (manages the Appium 2.x server)
 - **Mocha** (or **Vitest** — pick one and stay consistent) with `@wdio/mocha-framework`
 - **Allure WDIO reporter** (`@wdio/allure-reporter`)
@@ -242,7 +242,7 @@ WDIO owns the driver session via `wdio.conf.ts`; one session per worker is autom
    - For repeating items, an `async {component}s(): Promise<Component[]>` method
 4. If a destination page is missing, stub it or recursively generate it.
 5. Generate the spec file using `describe`/`it`; one `it(...)` per scenario, with assertions on user-visible outcomes.
-6. Run `npx wdio run wdio.conf.ts --suite mobile` — expect 0 failures. If the Appium service fails to start, check that the relevant driver (`uiautomator2` / `xcuitest`) is installed via `appium driver list --installed`; a manually-run server should answer `curl -s http://127.0.0.1:4723/status` and list your driver under `Available drivers:`.
+6. Run `npx wdio run wdio.conf.ts --suite mobile` — expect 0 failures. Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run". If the Appium service fails to start, check that the relevant driver (`uiautomator2` / `xcuitest`) is installed via `appium driver list --installed`; a manually-run server should answer `curl -s http://127.0.0.1:4723/status` and list your driver under `Available drivers:`.
 
 > **A test that can't find a visible element is usually not a locator bug.** Per the Appium team, an element absent from page source is most often an accessibility, app-state, active-app (system alert/overlay), or native-vs-WebView context problem — fix that before rewriting the selector. For environment/doctor failures and driver-specific locator questions, the `@appium/mcp-documentation` server (`appium_skills`, `appium_documentation_query`) answers authoritatively; prefer it over community forums.
 

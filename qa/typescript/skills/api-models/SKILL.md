@@ -1,6 +1,6 @@
 ---
 name: qa-api-models-typescript
-description: Use when the user asks to create a new DTO / model / response interface in a TypeScript test project (Node 24 (22 supported) + TS strict, typically alongside supertest or axios). Triggers: "add a {Resource}Dto in TS", "create the InDto / ModDto types", "scaffold the wrapper DTO for paginated {resource} in TS".
+description: Use when the user asks to create a new DTO / model / response interface in a TypeScript test project (Node 24 (22 supported) + TS strict, typically alongside supertest or axios). Triggers: "add a {Resource}Dto in TS", "create the InDto / ModDto types", "scaffold the wrapper DTO for paginated {resource} in TS". Do NOT use for the client module (`qa-api-client-writer-typescript`) or the test specs (`qa-api-test-writer-typescript`).
 ---
 
 # qa-api-models-typescript
@@ -155,4 +155,4 @@ Use derivations when the relationship is genuinely "subset of fields, same names
 3. Ask which properties are needed, or inspect a sample API response.
 4. Decide: explicit definition or derivation (`Omit` / `Partial`) from an existing DTO.
 5. Generate at `apitests/src/models/{api}/{resource}/{name}.dto.ts`.
-6. Run `pnpm -F apitests typecheck` (or `npm run typecheck`) — expect 0 errors.
+6. Run the project's own typecheck script with the package manager `packageManager` names — expect 0 errors. Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run".

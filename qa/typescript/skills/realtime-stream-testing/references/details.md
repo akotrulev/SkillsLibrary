@@ -39,20 +39,21 @@ describe('chat websocket', () => {
 });
 ```
 
-> **Node-20 vs Node-22:** the harness uses the **`ws`** lib so it runs on Node 20 unchanged. On Node 22 you
-> can drop `ws` and `new globalThis.WebSocket(url)`; on Node 20 the native global isn't available — either keep
-> `ws` (recommended) or polyfill `globalThis.WebSocket = (await import('undici')).WebSocket` once in setup.
+> **The Node-22 boundary:** the harness uses the **`ws`** lib so it runs on any Node line unchanged. On Node 22
+> and 24 you can drop `ws` and `new globalThis.WebSocket(url)`; a project detected on Node 20 (EOL — flag it) has
+> no native global — either keep `ws` (recommended) or polyfill
+> `globalThis.WebSocket = (await import('undici')).WebSocket` once in setup.
 
 ## Protocol-client 3 — SSE (native `EventSource` / the `eventsource` package)
 
 SSE is **plain HTTP** — a `GET` whose body streams `text/event-stream`. `EventSource` (native on Node 22+, the
-`eventsource` package on Node 20) handles the streaming, parsing, and reconnect; subscribe with `onmessage` /
+`eventsource` package on any line) handles the streaming, parsing, and reconnect; subscribe with `onmessage` /
 `addEventListener(type)` and drain into the harness queue. Auth note: a browser `EventSource` **can't set
 headers**, but the Node `eventsource` package accepts a `fetch` override / headers for server-side tests.
 
 ```ts
 // tests/realtime/sse-harness.ts
-import { EventSource } from 'eventsource';   // Node 20; on Node 22 use the global EventSource
+import { EventSource } from 'eventsource';   // any Node line; Node 22+ also has a global EventSource
 
 export interface SseEvent { type: string; data: string; lastEventId: string; }
 

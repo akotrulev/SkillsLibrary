@@ -1,18 +1,18 @@
 ---
 name: qa-api-contract-testing-typescript
-description: Use when the user asks to set up consumer-driven contract testing with Pact in a Node 24 (22 supported) + TypeScript service (`@pact-foundation/pact` PactV3+). Triggers: "set up Pact for our Node service", "PactV3 consumer test in TS for X", "verify our TS provider against Y's contract". For end-to-end suite work prefer the staged agent `qa-api-typescript` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
+description: Use when the user asks to set up consumer-driven contract testing with Pact in a Node 24 (22 supported) + TypeScript service (`@pact-foundation/pact` PactV3+). Triggers: "set up Pact for our Node service", "PactV3 consumer test in TS for X", "verify our TS provider against Y's contract". Do NOT use for the Broker / `can-i-deploy` model (`qa-api-contract-testing-shared`) or live-service API tests (`qa-api-test-writer-typescript`).
 ---
 
 # QA — Contract Testing with Pact (TypeScript / `@pact-foundation/pact`)
 
-Wires Pact V3+ into a Node 20 + TypeScript service via `@pact-foundation/pact` for consumer-driven contract testing with Vitest. Covers the consumer test, provider verification, state handlers, and CI publish. Load `qa/_shared/api-contract-testing` for the Broker model, matchers reference, and `can-i-deploy` gate that are shared across all stacks.
+Wires Pact V3+ into a Node 24 + TypeScript service via `@pact-foundation/pact` for consumer-driven contract testing with Vitest. Covers the consumer test, provider verification, state handlers, and CI publish. Load `qa/_shared/contract-testing-pact` for the Broker model, matchers reference, and `can-i-deploy` gate that are shared across all stacks.
 
 ## When to use
 
-- A Node 20 / TypeScript service consumes or produces an HTTP API and needs contract coverage.
+- A Node 24 / TypeScript service consumes or produces an HTTP API and needs contract coverage.
 - Replacing brittle multi-service E2E tests with Pact-JS verification.
 - Catching breaking changes at the Node producer side before they ship.
-- Pairing with `qa/_shared/api-contract-testing` for Broker / `can-i-deploy` wiring.
+- Pairing with `qa/_shared/contract-testing-pact` for Broker / `can-i-deploy` wiring.
 
 ## When NOT to use
 
@@ -23,7 +23,7 @@ Wires Pact V3+ into a Node 20 + TypeScript service via `@pact-foundation/pact` f
 
 ## Stack
 
-- **Runtime**: Node 20
+- **Runtime**: Node 24
 - **Language**: TypeScript (strict)
 - **Test runner**: Vitest (Jest works the same way — adjust imports)
 - **Pact lib**: `@pact-foundation/pact` (v12+ for PactV3/V4; v15+ for V4 pact format)
@@ -210,7 +210,7 @@ The verifier publishes results back via `publishVerificationResult: true`.
 
 ## `can-i-deploy` gate (both pipelines)
 
-See `qa/_shared/api-contract-testing` for the shared `can-i-deploy` and `record-deployment` commands. Wire them in the deploy stage of **both** the consumer and the provider pipelines, before `kubectl apply` / Cloud Run / Lambda update.
+See `qa/_shared/contract-testing-pact` for the shared `can-i-deploy` and `record-deployment` commands. Wire them in the deploy stage of **both** the consumer and the provider pipelines, before `kubectl apply` / Cloud Run / Lambda update.
 
 ## Rules (TypeScript-specific)
 
@@ -239,7 +239,7 @@ See `qa/_shared/api-contract-testing` for the shared `can-i-deploy` and `record-
 ## Generation steps
 
 1. Add a new package under `tests/{service}.contract/` with `@pact-foundation/pact` and `vitest` as devDependencies; set `"type": "module"`.
-2. For the consumer: scaffold `{provider}.consumer.spec.ts` building a `PactV3`; add one interaction with `given(...)` + `uponReceiving(...)`; run `pnpm test`; confirm a pact file appears under `pacts/`.
+2. For the consumer: scaffold `{provider}.consumer.spec.ts` building a `PactV3`; add one interaction with `given(...)` + `uponReceiving(...)`; run the package's own test script; confirm a pact file appears under `pacts/`. Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run".
 3. For the provider: scaffold `{service}.provider.spec.ts` that boots the real server on `5050`, calls `new Verifier({ ... }).verifyProvider()`, with `stateHandlers` for each state name.
 4. Wire consumer CI: Vitest → `pact-cli broker publish` with `--branch` and `--consumer-app-version`.
 5. Wire provider CI: Vitest with `PACT_BROKER_*` and `GIT_SHA` / `BRANCH_NAME` env vars exported.
@@ -248,10 +248,10 @@ See `qa/_shared/api-contract-testing` for the shared `can-i-deploy` and `record-
 
 ## Handoffs
 
-- Cross-stack Broker / `can-i-deploy` / matchers concepts → `qa/_shared/api-contract-testing`
+- Cross-stack Broker / `can-i-deploy` / matchers concepts → `qa/_shared/contract-testing-pact`
 - .NET consumer/provider → `qa/dotnet/skills/api-contract-testing`
 - Java consumer/provider → `qa/java/skills/api-contract-testing`
 - Live-service API tests → `qa/typescript/skills/api-test-author/writer`
 - DTOs / Zod schemas → `qa/typescript/skills/api-models`
-- CI pipeline syntax → `qa/cicd/typescript/skills/ci-pipelines/{github-actions,azure-pipelines,gitlab-ci}` or `devops/<ci>`
+- CI pipeline syntax → `qa/cicd/typescript/skills/ci-pipelines` (its `references/<host>.md`) or `devops/<ci>`
 - Allure publishing for contract test results → `qa/reporting/typescript/skills/test-reports`

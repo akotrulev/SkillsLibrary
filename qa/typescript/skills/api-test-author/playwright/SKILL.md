@@ -1,6 +1,6 @@
 ---
 name: qa-api-test-playwright-typescript
-description: Use when the user asks to write TypeScript API tests on the Playwright runner (@playwright/test `request` fixture / APIRequestContext + Zod) — usually because the project already runs Playwright for UI and wants one runner, one report, one trace. Triggers: "write API tests with Playwright", "use the request fixture for endpoint X", "add API coverage to our Playwright suite". Plain Node API suites without Playwright → `api-test-author/generator` (Vitest + fetch).
+description: Use when the user asks to write TypeScript API tests on the Playwright runner (@playwright/test `request` fixture / APIRequestContext + Zod) — usually because the project already runs Playwright for UI and wants one runner, one report, one trace. Triggers: "write API tests with Playwright", "use the request fixture for endpoint X". Do NOT use for plain Node API suites without Playwright (`qa-api-test-writer-typescript`) or UI tests (`qa-ui-test-writer-playwright-typescript`).
 ---
 
 # QA — API Test Writer (TypeScript / Playwright + APIRequestContext + Zod)
@@ -26,7 +26,7 @@ the transport and the runner change; the discipline does not.
 > 3. **You are here for one runner, one report, one trace.** The value of Playwright API testing is that API
 >    specs share the UI suite's config, projects, HTML/Allure report, tracing, and CI wiring — and that a
 >    cookie-authenticated app can share **`storageState`** between a logged-in browser and API calls. If the
->    project has no Playwright UI suite, the stack default is `api-test-author/generator` (Vitest + fetch).
+>    project has no Playwright UI suite, the stack default is `api-test-author/writer` (Vitest + fetch).
 > 4. **The layering survives the runner swap.** Specs still never touch HTTP directly: a `{resource}Client`
 >    factory wraps the context (`create{Resource}Client(ctx: APIRequestContext)`), the raw method returns the
 >    Playwright `APIResponse` unasserted, the typed method asserts the **exact** status and `Schema.parse`s
@@ -35,7 +35,7 @@ the transport and the runner change; the discipline does not.
 
 ## Stack
 
-- Node 20 + TypeScript (strict mode)
+- Node 24 + TypeScript (strict mode)
 - **@playwright/test** as the test runner — API specs live beside the UI specs, same `playwright.config.ts`
 - **`APIRequestContext`** for HTTP — the built-in `request` fixture for the default identity, fixture-created
   contexts for other identities; no `fetch`/axios/supertest in a Playwright project
@@ -230,7 +230,7 @@ test.describe('POST /api/users', () => {
 ## Generation steps
 
 1. Confirm the project runs Playwright (a `playwright.config.ts` and `@playwright/test` dependency). If not,
-   stop and route to `api-test-author/generator` — say why.
+   stop and route to `api-test-author/writer` — say why.
 2. Determine the **source of truth**: OpenAPI/Swagger spec, test-case document (map one `test(...)` per TC-ID,
    id in the title), or verbal scenarios.
 3. Ensure the `api` project exists in `playwright.config.ts` (`use.baseURL`, no browser); add it if missing.
@@ -240,7 +240,7 @@ test.describe('POST /api/users', () => {
 5. Add the identity fixtures the planned scenarios need (standard / admin / anonymous / wrong-role) to
    `tests/fixtures.ts`.
 6. Author one spec file per operation from the scenario matrix.
-7. Run `pnpm exec tsc --noEmit`, then `npx playwright test --project=api` — expect 0 type errors, 0 failures.
+7. Run the project's own typecheck script (with the package manager `packageManager` names), then `npx playwright test --project=api` — expect 0 type errors, 0 failures. Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run".
 
 ## Cross-references
 

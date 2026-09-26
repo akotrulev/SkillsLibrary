@@ -1,6 +1,6 @@
 ---
 name: qa-failure-injection-testing-typescript
-description: Use when writing fault-injection / resilience tests in Node / TypeScript / Vitest with Toxiproxy via Testcontainers — inject latency, drops, and bandwidth caps on a dependency and assert the app degrades gracefully. Triggers: "test the app survives a slow database", "inject a connection drop", "assert the circuit breaker opens".
+description: Use when writing fault-injection / resilience tests in Node / TypeScript / Vitest with Toxiproxy via Testcontainers — inject latency, drops, bandwidth caps on a dependency and assert the app degrades gracefully. Triggers: "test the app survives a slow database", "assert the circuit breaker opens". Do NOT use for happy-path DB tests (`qa-db-testing-testcontainers-typescript`), mocking HTTP traffic (`qa-network-mocking-typescript`), or load (`qa-load-testing-typescript`).
 ---
 
 # QA — Chaos / Fault-Injection Testing (TypeScript / Toxiproxy + Testcontainers + Vitest)
@@ -50,7 +50,7 @@ happy-path skill in this library: the REST/gRPC authors assert *the dependency a
 
 ## Stack
 
-- Node 20 + TypeScript (strict), **Vitest** (the global default TS runner) + Allure via `allure-vitest` where used
+- Node 24 + TypeScript (strict), **Vitest** (the global default TS runner) + Allure via `allure-vitest` where used
 - **Testcontainers for Node** — `testcontainers` + `@testcontainers/toxiproxy` (the `ToxiProxyContainer` module) +
   the dependency module (e.g. `@testcontainers/postgresql`, `@testcontainers/kafka`)
 - **toxiproxy-node-client** — the REST client the container module returns as `proxy.instance` (`addToxic`,
@@ -309,7 +309,7 @@ failing?*
 
 **Composing with the dependency families.** The thing you fault is stood up by Testcontainers
 (`ToxiProxyContainer` next to a `PostgreSqlContainer` / `KafkaContainer` on a shared `Network`); the dependency
-itself is exercised happy-path by `qa-db-testing-typescript` / `qa-messaging-testing-typescript`. Chaos adds
+itself is exercised happy-path by `qa-db-testing-testcontainers-typescript` / `qa-messaging-testing-typescript`. Chaos adds
 the proxy in front and asserts the resilience layer — it **composes** with those skills, it doesn't replace them. A
 data-driven fault matrix (toxic × parameter) binds cleanly via `qa-data-driven-testing-typescript` (`it.each`).
 
@@ -342,7 +342,7 @@ data-driven fault matrix (toxic × parameter) binds cleanly via `qa-data-driven-
   Observe vs break. Read it for the proxy-in-the-middle model; draw the boundary cleanly.
 - `qa-data-driven-testing-typescript` — drive a **fault matrix** (toxic × parameter × expected pattern) via
   `it.each` instead of copy-pasted tests.
-- `qa-db-testing-typescript` · `qa-messaging-testing-typescript` · `qa-messaging-testing-typescript` —
+- `qa-db-testing-testcontainers-typescript` · `qa-messaging-testing-typescript` —
   the dependencies you fault (DB / broker connections through the proxy); they cover the happy path this inverts.
 - `qa-realtime-stream-testing-typescript` — shares the **lifecycle discipline** (steady → perturb → assert →
   recover) and bounded-condition waits (`vi.waitFor`, never sleep).

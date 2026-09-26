@@ -1,9 +1,9 @@
 ---
 name: qa-test-data-builder-typescript
-description: Use when the user asks to create test data factories or ObjectMothers in a Node + TypeScript test project to replace duplicated inline literals across tests with named, intention-revealing factories. Triggers: "create a builder for User in TS", "set up test data for X in Vitest", "extract this fixture into a factory".
+description: Use when the user asks to create test data factories or ObjectMothers in a Node + TypeScript test project to replace duplicated inline literals across tests with named, intention-revealing factories. Triggers: "create a builder for User in TS", "set up test data for X in Vitest", "extract this fixture into a factory". Do NOT use for many-row data files (`qa-data-driven-testing-typescript`) or database seeding (`qa-db-connection-typescript`).
 ---
 
-# QA — Test Data Builder / ObjectMother (TypeScript / Node 20)
+# QA — Test Data Builder / ObjectMother (TypeScript / Node 24)
 
 Eliminates repeated inline test data literals in TypeScript test projects (Vitest primary) by generating function-based factories with `Partial<T>` overrides and ObjectMother namespaces. Required by `CLAUDE.md`: "Builder pattern for test data objects with 4+ fields" and "Test data via builders or ObjectMother, not inline literals duplicated across tests."
 
@@ -238,8 +238,8 @@ Don't build "an order in the DB" inside the factory — that couples the factory
 3. Generate the factory under `tests/builders/<noun>.ts` following the template.
 4. Add an ObjectMother under `tests/mothers/<noun>.ts` with the canonical variants.
 5. Replace inline literals in 2–3 representative tests so the pattern is set; leave the rest as a follow-up sweep.
-6. Run `pnpm test` (or `npm test`) — every test still passes with the new defaults.
-7. Run `tsc --noEmit` — strict TS green.
+6. Run the project's own test script with the package manager `packageManager` names — every test still passes with the new defaults.
+7. Run `tsc --noEmit` — strict TS green. Inside a plan task marked `Gate: none`, run none of steps 6–7 and report the files as "written, not run".
 
 ## Handoffs
 

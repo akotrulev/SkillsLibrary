@@ -1,4 +1,4 @@
-# File-Storage Testing — Azure Blob Storage (Node 20 + TypeScript / Vitest)
+# File-Storage Testing — Azure Blob Storage (Node 24 + TypeScript / Vitest)
 
 This is the **TypeScript sibling** of the `qa/typescript/skills/file-storage-testing/` node, **ported** from the
 canonical .NET stack (`qa-file-storage-testing-dotnet`, **.NET-led by the user's choice** — Azure
@@ -10,7 +10,7 @@ SDK and its primitives change. Where S3 has buckets/keys, presigned URLs, multip
 Azure Blob has containers/blobs, SAS tokens, block-blob staging, and Azurite. It reuses the same
 verification-inside-tests lineage: the standard Testcontainers fixture discipline
 and the **eventual-consistency condition-wait** (`expect.poll`) from `qa-db-connection-typescript`
-(`db-testing/client`). All three Azure SDKs mirror the same upload / download / exists / get-properties / list / delete + SAS +
+(`db-testing/connection`). All three Azure SDKs mirror the same upload / download / exists / get-properties / list / delete + SAS +
 block-staging model, so this is a true translate-the-concepts port, not a redesign.
 
 File-storage tests assert one of two things about a blob flow:
@@ -23,7 +23,7 @@ File-storage tests assert one of two things about a blob flow:
 > **The boundary that shapes this skill — eventual consistency.** Azure Blob is strongly read-after-write
 > consistent for a single upload/download, but the things tests usually assert are *not* synchronous: a worker
 > that processes an uploaded blob runs on its own schedule, a **Blob → Event Grid → Storage Queue** notification
-> lands "soon", a derived blob appears after the worker finishes. So the core discipline matches `db-testing/client` / `s3`:
+> lands "soon", a derived blob appears after the worker finishes. So the core discipline matches `db-testing/connection` / `s3`:
 > **wait on a condition** for the effect to appear, with a bounded timeout — **never `setTimeout` /
 > `waitForTimeout`**. Use Vitest's `expect.poll`. (Listing is the one place to stay alert to lag —
 > `listBlobsFlat` can momentarily lag a just-written blob; assert the blob via `exists`/`getProperties` rather
@@ -31,7 +31,7 @@ File-storage tests assert one of two things about a blob flow:
 
 ## Stack
 
-- Node 20, TypeScript (`strict: true`), Vitest — async all the way (`await` every blob call)
+- Node 24, TypeScript (`strict: true`), Vitest — async all the way (`await` every blob call)
 - `@azure/storage-blob` — `BlobServiceClient` (account-level), `ContainerClient` (container-level), `BlobClient`
   (per-blob download + properties + SAS + snapshots + tier), `BlockBlobClient` (uploads + block staging).
   `@azure/storage-queue` `QueueClient` only for the Event-Grid → Storage-Queue notification bridge (cross-link

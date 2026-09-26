@@ -1,6 +1,6 @@
 ---
 name: qa-ui-test-writer-playwright-typescript
-description: Use when the user asks to scaffold Playwright UI tests in TypeScript — new spec files, page objects under `tests/pages/`, or a specific scenario (login, form, accessibility, visual). Triggers: "write a Playwright test for X in TypeScript", "add a Playwright TS page object for screen Y", "scaffold a Playwright spec (TS)".
+description: Use when the user asks to scaffold Playwright UI tests in TypeScript — new spec files, page objects under `tests/pages/`, or a specific scenario (login, form, accessibility, visual). Triggers: "write a Playwright test for X in TypeScript", "add a Playwright TS page object for screen Y", "scaffold a Playwright spec (TS)". Do NOT use for API tests on the Playwright runner (`qa-api-test-playwright-typescript`) or reviewing specs (`qa-ui-test-review-typescript`).
 ---
 
 # QA — Playwright Test & Page Object Generator (TypeScript)
@@ -9,7 +9,7 @@ Scaffolds Playwright `@playwright/test` specs and page objects in TypeScript. Us
 
 ## Stack
 
-- Node 20 + TypeScript (strict mode)
+- Node 24 + TypeScript (strict mode)
 - `@playwright/test` (Playwright Test runner)
 - Page objects under `tests/pages/`, specs under `tests/specs/`
 - Fixtures under `tests/fixtures/`
@@ -261,7 +261,7 @@ export const test = base.extend<{ seededOrder: Order }>({
    - One `test(...)` per scenario, destructuring the page-object fixtures
    - Use `test.step` for non-trivial workflows
 5. For authenticated flows, ensure a `setup` project exists and the spec's project depends on it.
-6. Run `npx playwright test` — expect 0 failures. Run `npx playwright test --ui` to verify locator strategies under the inspector before committing.
+6. Run `npx playwright test` — expect 0 failures. Run `npx playwright test --ui` to verify locator strategies under the inspector before committing. Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run".
 
 ## Handoffs
 

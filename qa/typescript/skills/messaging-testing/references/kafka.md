@@ -1,4 +1,4 @@
-# Messaging Testing — Apache Kafka (Node 20 + TypeScript / Vitest)
+# Messaging Testing — Apache Kafka (Node 24 + TypeScript / Vitest)
 
 Ported from the **canonical** `java` stack of the `qa/typescript/skills/messaging-testing/` node (Java leads this node by
 judgment — Kafka is JVM-native and `org.apache.kafka:kafka-clients` is its most first-class client; this file
@@ -56,7 +56,7 @@ assumption SQS and Service Bus baked in:
 
 ## Stack
 
-- Node 20 + TypeScript (strict) + Vitest
+- Node 24 + TypeScript (strict) + Vitest
 - `kafkajs` (`new Kafka(...)` → `producer()` / `consumer()` / `admin()`). Callback-driven consumer: `run({
   eachMessage })`, **no synchronous poll**.
 - `@testcontainers/kafka` (`KafkaContainer`) — boots a **local broker** and surfaces `getBootstrapServers()`. A Redpanda image (Kafka-API-compatible, ~2× faster start) is

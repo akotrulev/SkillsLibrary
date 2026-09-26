@@ -3,9 +3,9 @@ name: qa-db-verification-queries-typescript
 description: Use when writing or reviewing a **safe verification query** for tests in Node 24 / TypeScript — assert a row exists, add a `COUNT(*)` check, review test SQL for guardrails, or poll for a row. Triggers "write a verification query for this test", "assert this row exists from the test", "review my test SQL", "wait for an eventually-consistent row". Do NOT use for connection/seeding/cleanup (use `qa-db-connection-typescript`) or container lifecycle (use `qa-db-testing-testcontainers-typescript`).
 ---
 
-# QA — DB Testing Query Author (TypeScript / Node 20)
+# QA — DB Testing Query Author (TypeScript / Node 24)
 
-Guardrails for the **SQL string itself** when a Node 20 + TypeScript Vitest integration test reaches into the database to verify behaviour. The pool, seeder, and probe scaffolding live in `qa/typescript/skills/db-testing/connection`; this skill owns *what the SQL is allowed to look like* — `$1` placeholder binding only, explicit column lists, safe `LIKE`, type-correct parsing (especially `BIGINT` → `number`), exists / not-exists / count helpers, a `waitFor` poller that re-runs the same safe query, and a hard refusal list for destructive verbs outside cleanup.
+Guardrails for the **SQL string itself** when a Node 24 + TypeScript Vitest integration test reaches into the database to verify behaviour. The pool, seeder, and probe scaffolding live in `qa/typescript/skills/db-testing/connection`; this skill owns *what the SQL is allowed to look like* — `$1` placeholder binding only, explicit column lists, safe `LIKE`, type-correct parsing (especially `BIGINT` → `number`), exists / not-exists / count helpers, a `waitFor` poller that re-runs the same safe query, and a hard refusal list for destructive verbs outside cleanup.
 
 ## When to use
 
@@ -44,7 +44,7 @@ Guardrails for the **SQL string itself** when a Node 20 + TypeScript Vitest inte
 
 ## Stack
 
-- **Runtime**: Node 20 (LTS), TypeScript (`"strict": true`), ESM (`"type": "module"`, explicit `.js` on relative imports)
+- **Runtime**: Node 24 (LTS), TypeScript (`"strict": true`), ESM (`"type": "module"`, explicit `.js` on relative imports)
 - **Test runner**: Vitest (Jest works the same — adjust imports)
 - **Clients**: `pg` (`node-postgres`, default), Knex when joins / windowing earn it, Prisma `$queryRaw` only when production already uses Prisma
 - **Connection**: shared `pg.Pool` from `qa/typescript/skills/db-testing/connection` via `getPool()` — never `new pg.Client(...)` in the probe

@@ -1,9 +1,9 @@
 ---
 name: qa-ai-feature-testing-typescript
-description: Use when testing LLM-generated output (chatbot, RAG answer, summarizer, extraction, tool-using agent) from a TypeScript suite — property, rubric (LLM-as-judge), and grounding assertions with promptfoo (default) or DeepEval (RAG/agent/red-team metrics) as the eval spine; never exact-string equality. Triggers: "test our chatbot/RAG feature", "eval prompt outputs", "assert the answer is grounded in the retrieved context", "deepeval / G-Eval / faithfulness metric".
+description: Use when testing LLM-generated output (chatbot, summarizer, extraction, tool-using agent) from a TypeScript suite — property, rubric (LLM-as-judge) and grounding assertions on a promptfoo (default) or DeepEval spine; never exact-string equality. Triggers: "test our chatbot", "eval prompt outputs", "deepeval / G-Eval / faithfulness metric". Do NOT use for RAG retrieval-vs-generation metrics (`qa-ai-answer-quality-testing-typescript`) or deterministic API tests (`qa-api-test-writer-typescript`).
 ---
 
-# LLM-App Testing (Node 20 / TypeScript — promptfoo + Anthropic SDK)
+# LLM-App Testing (Node 24 / TypeScript — promptfoo + Anthropic SDK)
 
 Tests software whose output is produced by a large language model — so the output is **non-deterministic**
 (the same input yields different text run to run), **free-form** (prose, not a fixed shape), and
@@ -65,7 +65,7 @@ latency, and adds its own noise.
 
 ## Stack
 
-- Node 20 + TypeScript (strict mode)
+- Node 24 + TypeScript (strict mode)
 - **promptfoo** (`npx promptfoo@latest` or a dev-dependency) — the eval spine: `promptfooconfig.yaml`, `promptfoo eval`, `promptfoo eval -o results.json`
 - **Vitest** as the in-code runner for the SDK path (`allure-vitest` where the project uses Allure)
 - **`@anthropic-ai/sdk`** — the house-default provider (CLAUDE.md: build AI apps on the latest Claude models) for the in-test SDK path and as a promptfoo provider

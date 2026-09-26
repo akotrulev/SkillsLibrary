@@ -1,11 +1,11 @@
 ---
 name: qa-db-connection-typescript
-description: Use when the user asks to connect from Node + TypeScript tests to a real database (Postgres / MySQL / Mongo) to seed fixtures, run read-only assertion queries, and clean up safely. Triggers: "connect from our Vitest tests to Postgres", "node-postgres probe for the orders table", "seed and clean a SQL fixture without leaks".
+description: Use when the user asks to connect from Node + TypeScript tests to a real database (Postgres / MySQL / Mongo) to seed fixtures, run read-only assertion queries, and clean up safely. Triggers: "connect from our Vitest tests to Postgres", "node-postgres probe for the orders table", "seed and clean a SQL fixture without leaks". Do NOT use for the container lifecycle (`qa-db-testing-testcontainers-typescript`) or SQL-safety guardrails (`qa-db-verification-queries-typescript`).
 ---
 
-# QA — DB Testing Client (TypeScript / Node 20)
+# QA — DB Testing Client (TypeScript / Node 24)
 
-Wires Node 20 + TypeScript Vitest tests to talk to a **real** database — seed fixtures via factories, run read-only assertion queries via `node-postgres` / Knex / Prisma, wait for eventual consistency, and clean state safely. Pairs with `qa/typescript/skills/db-testing/testcontainers` for the container lifecycle and `qa/typescript/skills/db-testing/verification-queries` for SQL safety.
+Wires Node 24 + TypeScript Vitest tests to talk to a **real** database — seed fixtures via factories, run read-only assertion queries via `node-postgres` / Knex / Prisma, wait for eventual consistency, and clean state safely. Pairs with `qa/typescript/skills/db-testing/testcontainers` for the container lifecycle and `qa/typescript/skills/db-testing/verification-queries` for SQL safety.
 
 ## When to use
 
@@ -20,11 +20,11 @@ Wires Node 20 + TypeScript Vitest tests to talk to a **real** database — seed 
 - Container booting itself → `qa/typescript/skills/db-testing/testcontainers`.
 - SQL guardrails (parameterization, no `SELECT *` in assertions) → `qa/typescript/skills/db-testing/verification-queries`.
 - Pure unit tests with no SQL surface — keep them mock-driven.
-- .NET / Java stacks → `qa/{dotnet,java}/skills/db-testing/client`.
+- .NET / Java stacks → `qa/{dotnet,java}/skills/db-testing/connection`.
 
 ## Stack
 
-- **Runtime**: Node 20 (LTS)
+- **Runtime**: Node 24 (LTS)
 - **Language**: TypeScript (`"strict": true`)
 - **Test runner**: Vitest (Jest works the same — adjust imports)
 - **DB clients**:
@@ -280,8 +280,8 @@ Order the deletes by FK dependency.
 3. For each new test set, scaffold an `<aggregate>Seeder.ts` (write) and `<aggregate>DbProbe.ts` (read), reusing factories from `qa/typescript/skills/test-data-builder`.
 4. Add the `waitFor` polling helper if the SUT involves async projections.
 5. Pick a cleanup strategy (`TRUNCATE … CASCADE` default); wire `beforeEach`.
-6. Run `pnpm test` (or `npm test`) — every test passes; no leaks between specs.
-7. Run `tsc --noEmit` — strict TS green.
+6. Run the project's own test script with the package manager `packageManager` names — every test passes; no leaks between specs.
+7. Run `tsc --noEmit` — strict TS green. Inside a plan task marked `Gate: none`, run none of steps 6–7 and report the files as "written, not run".
 
 ## Handoffs
 

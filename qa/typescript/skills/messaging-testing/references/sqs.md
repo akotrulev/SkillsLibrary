@@ -1,4 +1,4 @@
-# Messaging Testing — AWS SQS / SNS (Node 20 + TypeScript / Vitest)
+# Messaging Testing — AWS SQS / SNS (Node 24 + TypeScript / Vitest)
 
 Ported from the **canonical** `.NET` stack of the `qa/typescript/skills/messaging-testing/` node (.NET led this node by the
 user's choice; this file re-expresses the same model in TypeScript idioms — `@aws-sdk/client-sqs`/`client-sns`,
@@ -26,7 +26,7 @@ Messaging tests assert one of two things about an **async** flow:
 
 ## Stack
 
-- Node 20 + TypeScript (strict) + Vitest
+- Node 24 + TypeScript (strict) + Vitest
 - `@aws-sdk/client-sqs` (`SQSClient` + command objects — send / receive / delete / queue attributes) and
   `@aws-sdk/client-sns` (`SNSClient`) for SNS→SQS fan-out
 - `@testcontainers/localstack` (`LocalstackContainer`) — boots **LocalStack** (the local AWS emulator) and

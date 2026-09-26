@@ -1,4 +1,4 @@
-# Messaging Testing — Azure Service Bus (Node 20 + TypeScript / Vitest)
+# Messaging Testing — Azure Service Bus (Node 24 + TypeScript / Vitest)
 
 Ported from the **canonical** `.NET` stack of the `qa/typescript/skills/messaging-testing/` node (Service Bus is
 Azure-native and `Azure.Messaging.ServiceBus` is its most first-class client, so .NET led; this file
@@ -24,7 +24,7 @@ Messaging tests assert one of two things about an **async** flow:
 
 ## Stack
 
-- Node 20 + TypeScript (strict) + Vitest
+- Node 24 + TypeScript (strict) + Vitest
 - `@azure/service-bus` (the data-plane SDK — client / sender / receiver)
 - `@azure/service-bus` `ServiceBusAdministrationClient` only when a test must **create/clear entities** the
   emulator config didn't pre-declare (most tests don't)

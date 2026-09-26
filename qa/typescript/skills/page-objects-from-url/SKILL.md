@@ -1,6 +1,6 @@
 ---
 name: qa-page-objects-from-url-typescript
-description: Use when the user gives a website URL or an HTML page and wants a Page Object Model extracted/built/updated from it for a TypeScript Playwright suite. Triggers: "build a POM from this URL", "extract locators from this page", "update the LoginPage object from the live site". For end-to-end suite work prefer the staged agent `qa-ui-typescript` / `qa-bdd-typescript` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
+description: Use when the user gives a website URL or an HTML page and wants a Page Object Model extracted/built/updated from it for a TypeScript Playwright suite. Triggers: "build a POM from this URL", "extract locators from this page", "update the LoginPage object from the live site". Do NOT use for designing the page-object structure (`qa-page-object-design-typescript`) or mobile screens (`qa-mobile-screen-objects-typescript`).
 ---
 
 # QA — POM Builder from Live Page (TypeScript)
@@ -123,6 +123,8 @@ Apply the page-object rules from `qa/typescript/skills/ui-test-author/playwright
 - Never reorder/rename existing public methods that tests already call without flagging it
 
 ### 6. Verify and hand off
+
+Inside a plan task marked `Gate: none`, run none of the checks below and report the POM as "written, not run".
 
 - `npx tsc --noEmit` (or project equivalent) → must type-check clean.
 - If a smoke spec exists for the page, run it (`npx playwright test`); if the POM is new, verify the load-assertion landmark against one more live snapshot.

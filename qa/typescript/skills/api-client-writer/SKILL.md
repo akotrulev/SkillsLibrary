@@ -1,11 +1,11 @@
 ---
 name: qa-api-client-writer-typescript
-description: Use when the user asks to create a new API client module (`{resource}Client.ts`) in a TypeScript API test project (Vitest + native `fetch` + Zod, Node 24 (22 supported), strict TS). Triggers: "write an API client for X", "add a {resource}Client", "scaffold the TS client for /api/{path}".
+description: Use when the user asks to create a new API client module (`{resource}Client.ts`) in a TypeScript API test project (Vitest + native `fetch` + Zod, Node 24 (22 supported), strict TS). Triggers: "write an API client for X", "add a {resource}Client", "scaffold the TS client for /api/{path}". Do NOT use for the Zod schemas / DTO types (`qa-api-models-typescript`) or the specs that call the client (`qa-api-test-writer-typescript`).
 ---
 
 # qa-api-client-writer-typescript
 
-Generator skill. Scaffolds a single `{resource}Client.ts` file in the TypeScript API test project under `src/clients/{api}/`, following the conventions below. Uses **native `fetch`** (Node 20+) and **Zod** for response validation.
+Generator skill. Scaffolds a single `{resource}Client.ts` file in the TypeScript API test project under `src/clients/{api}/`, following the conventions below. Uses **native `fetch`** (built into Node 22 and 24) and **Zod** for response validation.
 
 ## When to use
 
@@ -316,5 +316,5 @@ Only add these overloads when the test plan requires them — not by default.
 3. Ask which **operations** are needed, and whether they are user-facing, admin, or both. Default to full CRUD on the user-facing surface.
 4. Ensure the required Zod schemas and inferred types exist under `src/models/{api}/{resource}/`. If not, run `qa/typescript/skills/api-models` first.
 5. Generate the file at `src/clients/{api}/{resource}Client.ts`.
-6. Run `pnpm exec tsc --noEmit` (or `npm run typecheck`) — expect 0 errors.
-7. Run `pnpm exec eslint src/clients/{api}/{resource}Client.ts` — expect 0 errors.
+6. Run the project's own typecheck script with the package manager `packageManager` names — expect 0 errors.
+7. Run the project's own lint script on `src/clients/{api}/{resource}Client.ts` — expect 0 errors. Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run".

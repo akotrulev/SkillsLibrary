@@ -1,6 +1,6 @@
 ---
 name: qa-api-test-review-typescript
-description: Use when the user asks to review existing TypeScript API test code (Vitest + native fetch + Zod) for quality. Triggers: "review this Vitest API spec", "look at getUser.spec.ts", "spot issues in this {resource}Client.ts". Not for generating new tests → `api-test-author/generator`. For end-to-end suite work prefer the staged agent `qa-api-typescript` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
+description: Use when the user asks to review existing TypeScript API test code (Vitest + native fetch + Zod) for quality. Triggers: "review this Vitest API spec", "look at getUser.spec.ts", "spot issues in this {resource}Client.ts". Do NOT use for writing new tests (`qa-api-test-writer-typescript`) or reviewing UI tests (`qa-ui-test-review-typescript`).
 ---
 
 # QA — API Test Reviewer (TypeScript / Vitest + fetch + Zod)

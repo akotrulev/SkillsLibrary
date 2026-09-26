@@ -1,10 +1,10 @@
-# Messaging Testing — RabbitMQ / AMQP (Node 20 + TypeScript / Vitest)
+# Messaging Testing — RabbitMQ / AMQP (Node 24 + TypeScript / Vitest)
 
 This is the **TypeScript** sibling of the `qa/typescript/skills/messaging-testing/` node, the **fourth and final
 `messaging-testing` sibling** (service-bus → SQS → Kafka → **RabbitMQ**) — building it
 **closes the family**. The **canonical stack is .NET** (`qa-messaging-testing-dotnet`): RabbitMQ's
 clients are first-class across all three stacks, so .NET was chosen to keep the family .NET-led for three of
-its four siblings. This file is a **direct port** — same section order, same concepts, re-expressed in Node 20
+its four siblings. This file is a **direct port** — same section order, same concepts, re-expressed in Node 24
 + TypeScript (strict) / Vitest idioms with `amqplib`.
 
 This node **ports the service-bus structure** onto RabbitMQ: the **same two assertion patterns** and the
@@ -64,7 +64,7 @@ is unique and it's where most test mistakes happen:
 
 ## Stack
 
-- Node 20 + TypeScript (`strict: true`) + Vitest — **async all the way** (`await amqp.connect`,
+- Node 24 + TypeScript (`strict: true`) + Vitest — **async all the way** (`await amqp.connect`,
   `await channel.assertQueue`, `await channel.get`; every AMQP call is a promise)
 - `amqplib` (the AMQP client — `connect` / `Connection` / `Channel`). Use the promise API
   (`import amqp from 'amqplib'`), not the callback variant.

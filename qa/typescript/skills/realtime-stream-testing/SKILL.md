@@ -1,9 +1,9 @@
 ---
 name: qa-realtime-stream-testing-typescript
-description: Test real-time **WebSocket** and **Server-Sent-Events (SSE)** streams in Node 24 (22 supported) + TypeScript (Vitest / Playwright). Triggers: "test our WebSocket chat endpoint with ws", "assert the server pushes N SSE events then closes", "wait for a websocket frame without a setTimeout". For end-to-end suite work prefer the staged agent `qa-api-typescript` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
+description: Use when testing real-time **WebSocket** and **Server-Sent-Events (SSE)** streams in Node 24 (22 supported) + TypeScript (Vitest / Playwright). Triggers: "test our WebSocket chat endpoint with ws", "assert the server pushes N SSE events then closes", "wait for a websocket frame without a setTimeout". Do NOT use for request/response HTTP (`qa-api-test-writer-typescript`) or broker messages (`qa-messaging-testing-typescript`).
 ---
 
-# WebSocket & SSE Testing (Node 20 + TypeScript) — **ported from the canonical `qa-realtime-stream-testing-dotnet`**
+# WebSocket & SSE Testing (Node 24 + TypeScript) — **ported from the canonical `qa-realtime-stream-testing-dotnet`**
 
 > **Ported from the canonical `qa-realtime-stream-testing-dotnet`.** The four ideas and the section order are
 > identical; only the protocol-client library (the **`ws`** lib / native `WebSocket` instead of
@@ -59,13 +59,13 @@ server is fine, mock if you need determinism). *A discrete message on a queue, n
 
 ## Stack
 
-- Node 20 + TypeScript (strict), Vitest 1.x (protocol-client) + Playwright (browser)
+- Node 24 + TypeScript (strict), Vitest 1.x (protocol-client) + Playwright (browser)
 - **`ws`** (`import WebSocket from 'ws'`) — the standard Node WS client (also used to stand up a test server)
-- Native global **`WebSocket`** — available since **Node 22** (undici impl). **The Node-20 boundary:** on Node
-  20 it is *not* global → either use `ws`, or polyfill `globalThis.WebSocket = (await import('undici')).WebSocket`.
-  **Call this out explicitly** — the CLAUDE.md default is Node 20, so prefer `ws` (or the undici polyfill) and
-  note the Node-22 native path.
-- Native **`EventSource`** (Node 22+) / the **`eventsource`** npm package for SSE on Node 20
+- Native global **`WebSocket`** — available since **Node 22** (undici impl), so the CLAUDE.md default (Node 24)
+  and the maintenance line (Node 22) both have it. **The Node-20 boundary:** a project detected on Node 20 (EOL
+  since Apr 2026 — flag it) has no global → use `ws`, or polyfill
+  `globalThis.WebSocket = (await import('undici')).WebSocket`.
+- Native **`EventSource`** (Node 22+) / the **`eventsource`** npm package for SSE (the only option on an EOL Node 20)
 - Vitest **`vi.waitFor`** is the condition-poll; a reusable client harness with a `waitForNextMessage()` queue
   is the recommended pattern (ad-hoc promise wrappers are the known pain point)
 - Browser surface: `@playwright/test` (≥ **1.48** for `routeWebSocket`), built on the page-object model from
@@ -280,8 +280,8 @@ test('should render the alert banner when the socket pushes an outage', async ({
   never catch a bad close code. *Fix:* `close(1000, …)` in `afterEach`; assert `closeCode`.
 - **`sleep` to "let it reconnect".** *Fix:* assert the reconnected state on a condition (`'reconnect'` event;
   await the next frame after the drop).
-- **Assuming the native global `WebSocket` exists on Node 20.** It's `undefined` < Node 22. *Fix:* use the `ws`
-  lib (recommended) or polyfill via `undici`.
+- **Assuming the native global `WebSocket` exists on every Node.** It's `undefined` < Node 22, so a project
+  detected on Node 20 (EOL — flag it) lacks it. *Fix:* use the `ws` lib (recommended) or polyfill via `undici`.
 - **Using raw `ws` for a socket.io / SignalR endpoint.** You'd re-implement their framing/heartbeat. *Fix:* use
   the real client.
 - **Reaching for this skill for a queue/topic.** A discrete message on a broker is *not* an open stream. *Fix:*
@@ -329,7 +329,7 @@ ws.send(JSON.stringify(payload));
 - **Assert the whole lifecycle** — the 101 upgrade (the `'open'` event; `'error'` first = failed handshake),
   the frames, **and** the clean close (code **1000** / the contract's close code, on `'close'`). "N then close"
   = take N, *then* assert close.
-- **Use the right client** — the `ws` lib (raw, reassembles; works on Node 20), socket.io/SignalR clients for
+- **Use the right client** — the `ws` lib (raw, reassembles; works on every Node line), socket.io/SignalR clients for
   those protocols, `EventSource`/`eventsource` for SSE (free reconnect + `Last-Event-ID`). **Mind the Node-22
   boundary** for the native global `WebSocket`/`EventSource`.
 - **Pick the transport and surface deliberately** — WS (bidirectional) vs SSE (server-push, free reconnect);

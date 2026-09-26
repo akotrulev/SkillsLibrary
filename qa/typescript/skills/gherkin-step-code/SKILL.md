@@ -1,11 +1,11 @@
 ---
 name: qa-gherkin-step-code-typescript
-description: Use when turning Gherkin .feature files into TypeScript step definitions implemented against existing Page Object Models — playwright-bdd (createBdd + fixtures) for web, CucumberJS + WebdriverIO for mobile. Triggers: "generate step definitions for these features", "bind these Gherkin steps to our page objects in TS". Do NOT use to write the .feature files (`feature-file-writer`), scaffold the project (`bdd-project-setup`), or build page objects.
+description: Use when turning Gherkin .feature files into TypeScript step definitions implemented against existing Page Object Models — playwright-bdd (createBdd + fixtures) for web, CucumberJS + WebdriverIO for mobile. Triggers: "generate step definitions for these features", "bind these Gherkin steps to our page objects in TS". Do NOT use to write the .feature files (`feature-file-writer`), scaffold the project (`bdd-project-scaffold`), or build page objects.
 ---
 
 # BDD Step Bindings + POM Implementation (TypeScript)
 
-One registered skill, two frameworks — a TypeScript project uses exactly one per platform. Parses `.feature` files (and the **Step Catalog** from `feature-file-writer`) into step definitions, **split by domain**, with parameterized Cucumber-Expression steps, and **implements each step by calling existing page-object intent methods**. The BDD project, lifecycle, and state-sharing layer already exist (from `bdd-project-setup`).
+One registered skill, two frameworks — a TypeScript project uses exactly one per platform. Parses `.feature` files (and the **Step Catalog** from `feature-file-writer`) into step definitions, **split by domain**, with parameterized Cucumber-Expression steps, and **implements each step by calling existing page-object intent methods**. The BDD project, lifecycle, and state-sharing layer already exist (from `bdd-project-scaffold`).
 
 Identify the project's framework (web vs mobile; check `package.json`, `playwright.config.ts` vs `wdio.conf.ts`; ask one question if ambiguous), then **read the matching `references/<framework>.md` end-to-end before writing any step code** — it carries the full model, templates (fixtures vs World), patterns, and hard rules. This file only routes and holds the rules shared by both frameworks.
 
@@ -57,7 +57,7 @@ If a step needs a page object/method that doesn't exist, stop and build it via `
 5. Implement each body with page-object calls only; put assertions in `Then` with the framework's `expect`.
 6. For any missing page object/method, build it before binding the step.
 7. Ensure the Cleanup is implemented as teardown/`After` (scaffold layer), not as steps.
-8. Run the toolchain (web: `npx bddgen && npx playwright test`; mobile: `npx wdio run`): every step bound (no undefined/ambiguous), the smoke scenario green.
+8. Run the toolchain (web: `npx bddgen && npx playwright test`; mobile: `npx wdio run`): every step bound (no undefined/ambiguous), the smoke scenario green. Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run".
 
 ## Anti-patterns to flag (both frameworks)
 
@@ -79,7 +79,7 @@ Each `references/<framework>.md` carries its own templates and sibling cross-ref
 ## Handoffs
 
 - `.feature` files / Step Catalog → `qa/_shared/bdd/feature-file-writer`
-- Project/lifecycle/state layer → `qa/typescript/skills/bdd-project-setup`
+- Project/lifecycle/state layer → `qa/typescript/skills/bdd-project-scaffold`
 - Page objects → `qa/typescript/skills/page-object-design` / `page-objects-from-url` / `mobile-screen-objects`
 - Review features + bindings → `qa/typescript/skills/bdd-reviewer`
 - Allure labels from tags → `qa/reporting/typescript/skills/test-reports`

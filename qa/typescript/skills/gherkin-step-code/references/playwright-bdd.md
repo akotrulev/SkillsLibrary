@@ -1,6 +1,6 @@
 # playwright-bdd Step Bindings + POM Implementation (Web / TypeScript)
 
-The **web** path of the TypeScript `gherkin-step-code` family. Binds Gherkin steps to **playwright-bdd** step definitions created via `createBdd(test)`, where the `test` object has been extended with page objects as **Playwright fixtures** (the scaffold's `steps/fixtures.ts`). Steps destructure the fixtures they need; assertions use the web-first `expect` from `@playwright/test`. The model, lifecycle, and `fixtures.ts` already exist from `bdd-project-setup`.
+The **web** path of the TypeScript `gherkin-step-code` family. Binds Gherkin steps to **playwright-bdd** step definitions created via `createBdd(test)`, where the `test` object has been extended with page objects as **Playwright fixtures** (the scaffold's `steps/fixtures.ts`). Steps destructure the fixtures they need; assertions use the web-first `expect` from `@playwright/test`. The model, lifecycle, and `fixtures.ts` already exist from `bdd-project-scaffold`.
 
 > Read the family router `../SKILL.md` first for the shared rules (one file per domain, Cucumber Expressions, thin steps, assertions in `Then`, reuse the catalog, build missing POMs first). This file is the web-specific deep dive: the **fixtures** model, end to end.
 
@@ -16,7 +16,7 @@ The **web** path of the TypeScript `gherkin-step-code` family. Binds Gherkin ste
 There is **no World and no DI container**. Page objects are Playwright **fixtures**: declared once in `steps/fixtures.ts` via `base.extend<Fixtures>(...)`, then **destructured as the step's argument**. Every step is an **arrow function** whose single argument is the fixture object.
 
 ```typescript
-// steps/fixtures.ts (from bdd-project-setup) — recap, do not re-create
+// steps/fixtures.ts (from bdd-project-scaffold) — recap, do not re-create
 import { test as base, createBdd } from 'playwright-bdd';
 import { LoginPage } from '../pages/LoginPage';
 import { DashboardPage } from '../pages/DashboardPage';
