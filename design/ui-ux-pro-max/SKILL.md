@@ -1,6 +1,6 @@
 ---
 name: design-ui-ux-pro-max
-description: The design DATA authority for this library — a vendored, offline, searchable corpus (88 UI styles, 192 product palettes, 192 product→style reasoning profiles, 74 font pairings + 1934 Google Fonts, 119 UX guidelines, 105 icons, 34 landing patterns, 17 motion presets, 25 chart types, 44 React-performance rules, 22 stack files) plus a `--design-system` generator that turns a brief into a concrete style + palette + type + token block. Every other `design/` skill queries it before deciding. Triggers "what palette for a fintech dashboard", "pick a style/font pairing", "generate a design system", "what does the UX corpus say about X", "stack UI guidelines for Flutter/SwiftUI/Vue/…". Not for the judgment layered on top — that stays with the owning `design/*` skill.
+description: Use when a design decision needs the vendored design corpus — styles, palettes, font pairings, UX guidelines, icons, landing patterns, motion presets, chart types, stack UI rules — or a `--design-system` block from a brief. Every `design/` skill queries it first. Triggers "what palette for a fintech dashboard", "pick a font pairing", "generate a design system", "what does the UX corpus say about X". Not for the judgment layered on top — that stays with the owning `design/*` skill.
 metadata:
   author: nextlevelbuilder
   version: "2.13.0"

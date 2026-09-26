@@ -1,6 +1,6 @@
 ---
 name: design-ai-experience
-description: Use when designing how an AI or agent feature BEHAVES on screen — streaming and inline tool-call visibility, stop/interrupt, approval-with-context before an agent acts, confidence and uncertainty display, the edit/reject/correct affordance, AI labelling, and the empty/failure/refusal states an AI surface needs that a CRUD screen does not. Triggers "design the chat/assistant UI", "how should the agent show what it's doing", "AI feature UX", "should we show a confidence score", "the assistant feels like a black box". Not for the transport (a stack's `realtime`/`data-fetching`), prompt/model work (`ai-development`), or testing an LLM feature (qa `ai-feature-testing`).
+description: Use when designing how an AI or agent feature behaves on screen — streaming and tool-call visibility, stop/interrupt, approval-with-context, confidence display, correction, AI labelling, and the AI-specific states. Triggers "design the chat/assistant UI", "how should the agent show what it's doing", "show a confidence score?". Not for the transport (a stack's `realtime`/`data-fetching`), prompt/model work (`ai-development`), or testing an LLM feature (qa `ai-feature-testing`).
 ---
 
 # AI experience — designing what the agent shows

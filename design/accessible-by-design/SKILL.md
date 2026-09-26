@@ -1,6 +1,6 @@
 ---
 name: design-accessible-by-design
-description: Use when the accessibility decision is a DESIGN decision — the WCAG 2.2 criteria you cannot code your way out of (target size, a non-drag alternative, accessible authentication, redundant entry, consistent help, focus not obscured), plus cognitive/neurodiversity design and the layout constraints translation imposes (30-50% text expansion, RTL, CJK). Triggers "is this design accessible", "WCAG 2.2 compliance", "European Accessibility Act", "design for neurodivergent users", "will this survive translation". Not for authoring accessible markup (a stack's `accessibility`) or scanning a build (qa `accessibility-testing`).
+description: Use when the accessibility decision is a DESIGN decision — the WCAG 2.2 criteria code cannot fix (target size, non-drag alternative, accessible auth, redundant entry, consistent help, focus not obscured), cognitive design, and layout for translation (expansion, RTL, CJK). Triggers "is this design accessible", "WCAG 2.2 compliance", "European Accessibility Act", "will this survive translation". Not for accessible markup (a stack's `accessibility`) or scanning a build (qa `accessibility-testing`).
 ---
 
 # Accessible by design — the decisions a scan cannot make

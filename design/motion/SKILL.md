@@ -1,6 +1,6 @@
 ---
 name: design-motion
-description: Use when deciding WHAT a UI's motion is — the intensity tier (subtle / standard / complex) the product earns, which of the 17 vendored presets fits the trigger (hover, scroll reveal, stagger, page transition, parallax, skeleton, carousel), and the duration/easing/cleanup contract each carries. Stack-agnostic; backed by the `gsap` domain of `design-ui-ux-pro-max`. Triggers "what animation should this have", "pick a scroll reveal", "our animations feel random", "how long should this transition be", "motion intensity for this product". Not for whether motion serves the brief at all (`design-visual-identity`) or how it is coded in a stack (a stack's `animation`).
+description: Use when deciding what a UI's motion is — the intensity tier (subtle / standard / complex), which of the 17 vendored presets fits each trigger (hover, scroll reveal, page transition, skeleton…), and each one's duration/easing/cleanup contract, from the corpus's `gsap` domain. Triggers "what animation should this have", "our animations feel random", "how long should this transition be". Not for whether motion serves the brief (`design-visual-identity`) or how it is coded (a stack's `animation`).
 ---
 
 # Motion design — the tier, the preset, the floor

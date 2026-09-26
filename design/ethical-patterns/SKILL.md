@@ -1,6 +1,6 @@
 ---
 name: design-ethical-patterns
-description: Use when a flow asks the user for money, consent, data, or permission — and when reviewing one for deceptive design. Owns the symmetry rules (cancel as easy as subscribe, reject as prominent as accept), consent granularity, pricing disclosure, permission priming, and the dark-pattern taxonomy now prohibited under DSA Article 25 and enforced by the FTC. Triggers "review this signup/checkout/cancellation flow", "is this a dark pattern", "cookie consent design", "how should we ask for this permission". Not for the words themselves (`design-ux-writing`) or auth mechanics (a stack's `auth0`).
+description: Use when a flow asks for money, consent, data, or permission, or is reviewed for deceptive design — symmetry (cancel as easy as subscribe), consent granularity, pricing disclosure, permission priming, and the dark-pattern taxonomy prohibited under DSA Art. 25 and FTC §5. Triggers "review this checkout/cancellation flow", "is this a dark pattern", "cookie consent design", "how do we ask for this permission". Not for the words themselves (`design-ux-writing`) or auth mechanics (a stack's `auth0`).
 ---
 
 # Ethical patterns — the flows that ask for something

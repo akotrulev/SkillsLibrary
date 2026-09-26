@@ -1,6 +1,6 @@
 ---
 name: design-visual-identity
-description: The authority for a SHIPPING web app's visual identity — invents one per-brief design direction (palette, type scale, spacing, layout, motion) and hands it down as a token system a stack's `styling` consumes. Two lanes — a MARKETING page gets a hero, a signature element and one aesthetic risk; an APPLICATION (grids, forms, nav) gets the modern-app recipe (neutral surfaces, one accent, tonal hierarchy, hairline borders) with layout/shell decisions taken from `design-ux-patterns`. Triggers "give this app a look", "make this UI not look AI-generated", "pick a palette and fonts", "restyle this app". Not for CSS mechanics (the stack's `styling`), token naming (`design-tokens`), a brand book (`design-brand-import`), or presets (`design-theme-presets`).
+description: Use when a shipping web app needs its visual identity — one per-brief direction (palette, type, spacing, layout, motion) handed down as tokens; a MARKETING page gets a hero and one aesthetic risk, an APPLICATION the modern-app recipe. Triggers "give this app a look", "make this UI not look AI-generated", "pick a palette and fonts". Not for CSS mechanics (the stack's `styling`), token naming (`design-tokens`), a brand book (`design-brand-import`), or presets (`design-theme-presets`).
 ---
 
 # Frontend Design

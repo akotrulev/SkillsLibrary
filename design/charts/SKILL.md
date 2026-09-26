@@ -45,7 +45,7 @@ Pick the chart from the **question**, not from what looks impressive. Every char
 - **Pie/donut past 5 categories** (6 slices absolute maximum), slices within 5% of each other, or slices that don't sum to a meaningful whole → 100% stacked bar.
 - **Dual Y-axes** — the crossover point is arbitrary and invites false correlation. Use two stacked panels sharing an X-axis, or index both series to a common baseline.
 - **3D anything** — depth distorts the very lengths/areas you're asking the reader to compare.
-- **Truncated bar baseline** — bars encode value by *length*, so a bar axis MUST start at zero. (A *line* axis may be truncated — it encodes by position — but label it.)
+- **Truncated bar baseline** — bars encode value by *length*, so a bar axis must start at zero. (A *line* axis may be truncated — it encodes by position — but label it.)
 - **Rainbow sequential ramp** — a multi-hue gradient (jet/rainbow) creates false boundaries where the data is smooth. Use a single-hue ramp.
 - **A legend when direct labeling fits** — see below.
 

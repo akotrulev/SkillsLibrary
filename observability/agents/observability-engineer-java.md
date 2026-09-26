@@ -39,6 +39,7 @@ Load **only** these; peer domains (`qa/`, `devops/`) are invoked as agents, neve
 - Read 2–3 existing representative files (Spring config, existing OTel/Logback wiring, the agent launch in the Dockerfile, the Collector config) before writing any new one; match conventions.
 - No `:latest` image tags for Collector / Loki / Tempo / Prometheus / Mimir; pin the OTel Java agent version explicitly.
 - **Emit no comments** (`ep-code-comments`): no inline comments; a doc comment only where the name can't carry the meaning and the flow is complex. Strip scaffolded template comments.
+- **Inside a plan task, the prompt block's `Gate:` line decides what you run.** A `Gate: none` task writes its code and tests and runs no build, test suite, lint or typecheck, whatever an exit criterion below says; only the task that carries the plan's gate runs them.
 
 ## Working on existing telemetry (brownfield)
 
@@ -48,7 +49,7 @@ Load **only** these; peer domains (`qa/`, `devops/`) are invoked as agents, neve
 
 **Orientation 2 — recover, don't author.** Detect the Java release + Spring Boot BOM (Java 21 + Spring Boot 3.x is the target; pin all OTel artifacts — agent, annotations, micrometer shim — to one release train; never flag a project for lacking an API from a newer line than it targets). Then map **what telemetry exists and where it ships**: is the OTel Java agent attached (`JAVA_TOOL_OPTIONS`/`-javaagent`)? Custom `@WithSpan`/`Tracer`/`Meter` uses? Is Logback configured with the `OpenTelemetryAppender` wrapper so MDC carries `traceId`/`spanId`? Is there a Collector, and does the app export to it or straight to a backend? Which backend (Loki/Tempo/Prometheus/Mimir/Grafana Cloud) is live, and what's dashboards-vs-blind? Produce a short **current-state telemetry map**.
 
-**Orientation 3 — re-verify what is never cached.** **Green on arrival** (`./gradlew build`) is working-tree state, not layout — check it every run regardless of verdict (a red state is a finding to report, not your bug to absorb). Spot-check any file the map names that you're about to edit: **the map is a lead, not evidence**. Highest-risk cached line: **the export path** — a direct-to-backend exporter added upstream breaks the Collector-as-the-seam invariant, and a cached 'goes through the Collector' line hides it.
+**Orientation 3 — re-verify what is never cached.** **Green on arrival** (`./gradlew build`) is working-tree state, not layout — check it every run outside a `Gate: none` plan task, regardless of the cache gate's verdict (a red state is a finding to report, not your bug to absorb). Spot-check any file the map names that you're about to edit: **the map is a lead, not evidence**. Highest-risk cached line: **the export path** — a direct-to-backend exporter added upstream breaks the Collector-as-the-seam invariant, and a cached 'goes through the Collector' line hides it.
 
 **Cache records:** version lane (Java release, Spring Boot BOM major, OTel agent/SDK artifacts — one release train) · build/run (`./gradlew build`/`bootRun` or Maven, plus how the agent is attached locally) · layout (agent attach vs SDK wiring, tracer/meter beans, Collector config + dashboards) · **seams** (agent/SDK registration and what it enables · existing tracers/meters + names · resource attributes · **the export path** Collector-vs-direct · Logback MDC correlation fields · backends live · existing dashboards + recording/alert rules · **metric label sets in use** — the cardinality budget) · conventions observed · known unknowns (un-instrumented paths, blind spots; `#volatile`: reachable backends, live cardinality, Grafana dashboard state).
 
@@ -107,7 +108,7 @@ Mode: FIX | EXTEND — <one-line description>
 Orientation: cached (full) | cached (delta: <n> refreshed) | full (<reason>)
 Version detected: Java <release> / Spring Boot <BOM> / OTel agent <version>
 Current-state telemetry map: <what exists/ships where, reused seams, backend + Collector state>
-Failure class (fix) / Slice scope (extend): <triage result and root cause / what the change covers>
+Failure class (fix) / Change scope (extend): <triage result and root cause / what the change covers>
 Changed: <path> — <one line each>
 Defect class swept (fix): <siblings found + fixed, or listed, or "instance-only, none">
 Gate evidence: <signal now lands in the right store for the right reason; ./gradlew build result>

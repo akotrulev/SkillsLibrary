@@ -1,6 +1,6 @@
 ---
 name: design-ux-patterns
-description: Use when DESIGNING how an application is used — before it is built or planned — the user-task inventory → information architecture, app-shell choice (sidebar / top nav / hybrid), page anatomy per page type (list, detail, form, dashboard, wizard, settings), form layout, density, expert accelerators (global search, command palette, shortcuts), notification surface, first-run onboarding, and the responsiveness budget. Output is a decision block the plan or the build consumes. Triggers "design the navigation", "what should the app shell be", "how should this page be laid out", "make this easy to use", "the app feels clunky and I haven't built it yet". Not for judging a built UI (`design-ux-review`), data-display correctness (the stack's `ui-rules`), words (`design-ux-writing`), or the look (`design-visual-identity`).
+description: Use when DESIGNING how an application is used, before it is built — task inventory → IA, app shell, page anatomy, form layout, density, accelerators, notifications, onboarding, the responsiveness budget, as a decision block. Triggers "design the navigation", "what should the app shell be", "lay out this page". Not for judging a built UI (`design-ux-review`), data-display correctness (the stack's `ui-rules`), words (`design-ux-writing`), or the look (`design-visual-identity`).
 ---
 
 # UX patterns — designing how the app is used

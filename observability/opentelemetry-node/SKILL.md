@@ -122,7 +122,7 @@ Two ways to fix it:
 Or import otel as the very first line of `src/main.ts`:
 
 ```typescript
-import './otel';                  // MUST be first
+import './otel';                  // must be first
 import { NestFactory } from '@nestjs/core';
 ```
 

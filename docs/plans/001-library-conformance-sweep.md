@@ -37,7 +37,11 @@ into S17 and S18). S12 landed 2026-09-26 (qa/cicd and qa/reporting: the Gate lin
 frontend/react and the three published auth folders: the Gate line in `fe-blazor` and `fe-react`, `fe-react`
 649 and `data-grid` 495 under budget, the K1 name and six stale paths fixed, `auth0-blazor`'s .NET 8 default
 moved to .NET 10; `frontend/PLAN.md` filed live as `docs/plans/frontend-PLAN.md`, its Blazor port unbuilt).
-S14 is next. S1–S18 are ungated: the edits from S1 to S13 are built but unverified until G1 runs §7.
+S14 landed 2026-09-26 (design/ and observability/: the Gate line in `design-auditor` and the three
+`observability-engineer-*` agents, the nine design descriptions and `design-auditor` under budget, the K1
+name fixed; `docs/plans/design-ux-improvements.md` filed to `docs/plans/implemented/`,
+`docs/research/ui-ux-practice-2026.md` kept as the catalog cites it). S15 is next. S1–S18 are ungated:
+the edits from S1 to S14 are built but unverified until G1 runs §7.
 
 ## 1. What already exists, and what is missing
 
@@ -1623,6 +1627,49 @@ note headers 5k, read-back 6k, churn ×1.2
 - K9: `docs/plans/design-ux-improvements.md` says T1–T8 executed 2026-08-27. Spot-check three of its
   deliverables, then file it. `docs/research/ui-ux-practice-2026.md` stays if anything cites it.
 - **Not in S14:** frontend (S13).
+- **As built (2026-09-26):** `design/` (not `ui-ux-pro-max/data/`, `scripts/` or `references/`) and
+  `observability/`. The four agents and 20 commands were read in full; the commands needed no change.
+  Gate line added to 4 agents: `design-auditor.md:14` (it has no operating-rules list, so the bullet sits
+  under the read-only contract), `observability-engineer-dotnet.md:48`, `-java.md:42`, `-node.md:49`, each
+  the last Operating-rules bullet. 15 files changed, plus this plan and the design plan's move.
+  Data issues: 2 fixed. K1: `design-auditor.md:141` backticked `design-audit` as a slug → "the file is
+  `<NNN>-design-audit-r<N>.md`" (the resolver now prints only `data-testid`, `data-table` and
+  `data-density`). K3: `design-auditor.md:135` "on the current branch" → "in the checkout you are given".
+  Code issues: 19 fixed.
+  - K7: `ux-patterns` 824→480, `ui-ux-pro-max` 767→485, `visual-identity` 756→487 (now opens with "Use
+    when…"), `ai-experience` 673→481, `motion` 667→499, `ux-review` 657→488, `landing-patterns` 643→472,
+    `accessible-by-design` 624→500, `ethical-patterns` 594→500, `design-auditor` 875→633 (the K7 report's
+    count). Every Do-NOT clause and its sibling pointers were kept; every other description in both
+    folders already fit and had one. No description contains `: `, so the plain YAML scalars still parse.
+  - K5: "— MANDATORY SECTION" dropped from `design-auditor` "## Artifacts" and the dotnet/node brownfield
+    headings, with the "mandatory in every agent" blockquote reduced to its reason in one sentence;
+    `charts:48` "MUST" and `opentelemetry-node:125`'s code-comment "MUST" lowercased.
+  - K8: `observability-engineer-node.md` Orientation 2 `npm run build` / `pnpm build` → the project's own
+    build script, run with the package manager `packageManager` names; the dotnet twin now names the
+    repo's own `.sln`.
+  - K4: "Slice scope (extend)" → "Change scope (extend)" in all three output contracts, as the backend
+    and frontend agents read.
+  Logical conflicts: 5 fixed. Orientation 3's "every run regardless of the gate's verdict" gains "outside
+  a `Gate: none` plan task" in all three observability agents, and Orientation 2's build-on-arrival check
+  in dotnet and node gains the same guard. No agent in either folder carries the
+  `be-shared-session-budget` Step 5 closing duty.
+  Cleanup: `docs/plans/design-ux-improvements.md` → `docs/plans/implemented/` (landed: T1
+  `design/ux-patterns/SKILL.md` exists, T3 `ui-code-audit:62` states the Title-Case override, T5
+  `backend/_shared/experience-plan/SKILL.md` exists; its "uncommitted" status is stale — the work is in
+  `73ce26d`). `docs/research/ui-ux-practice-2026.md` stays: `docs/skills-catalog.md:172` cites it. No
+  tracked junk, no plan/progress file in either folder. Every SKILL.md, agent and command in both folders
+  is listed in the marketplace and every listed path exists.
+  Kept on purpose: the four `Node 20` hits (`observability-engineer-node.md:17`, `:94`,
+  `opentelemetry-node:12`, `structured-logging-node:12`) are all "Node 20 is EOL — flag it" detection
+  lines, not defaults, so none moved to Node 24 (D13); no .NET 8 default exists in `observability/`.
+  `data-density` (`ui-ux-pro-max/references/quick-reference.md:248`) is a vendored corpus rule id, not an
+  HTML attribute — `references/` is vendored per `design/ATTRIBUTIONS.md`, so it is not edited and G1 adds
+  it to §7's `ALLOW` (written into G1's block). The design skills' `## Review checklist` sections are
+  judging checklists, not runnable checks, so they got no "written, not run" sentence; no observability
+  skill has a Validation list. `pnpm add` lines are install samples; `green` hits are the colour and exit
+  criteria; `stage.json`/`stage.labels` are Alloy config; "slices" are pie slices.
+  Carried forward: nothing new. Unverified: nothing was run beyond §4's searches, the K1/K7 scripts and a
+  marketplace path check (Gate: none). Left for the user: nothing.
 
 ### S15 — data and training-data
 
@@ -1817,65 +1864,9 @@ name: the K1 resolver flags it (D12).
 | S18 | `docs` | `general-purpose` | — | ~135k |
 | G1 | `docs` | `general-purpose` | S1–S18 | ~120k |
 
-S1 to S13 have landed, and their prompts are deleted; the 6 prompts from S14 to G1 are live.
+S1 to S14 have landed, and their prompts are deleted; the 5 prompts from S15 to G1 are live.
 
 ---
-
-### S14 — design and observability (general-purpose, docs)
-
-````
-You are `general-purpose`. Task S14 of docs/plans/001-library-conformance-sweep.md: bring design/ (not
-the vendored corpus) and observability/ in line with the plan's checks K1–K9.
-
-Deliverable: design/ (not the vendored corpus) and observability/ pass K1–K9: nine design descriptions
-and design-auditor fit their budgets, four agents carry the Gate line, and
-docs/plans/design-ux-improvements.md and docs/research/ui-ux-practice-2026.md are filed per §5.
-
-Read, in this order:
-1. CLAUDE.md, especially "When uncertain" (the design corpus wins on design facts).
-2. The plan: §2, §3, §4, §5, §6 (the S14 rows), D1–D11, task S14.
-3. design/ATTRIBUTIONS.md.
-4. CONTRIBUTING.md.
-5. design/agents/*.md, design/commands/*.md and observability/agents/*.md in full.
-6. The plan's "Close-out — every task".
-
-Do:
-- Run §4's recipes with DIR=design, then DIR=observability.
-- K7: the nine design skills in §6.2 → ≤ 500; design-auditor 875 → ≤ 650.
-  design/ui-ux-pro-max/SKILL.md is house-written, so trim it too.
-- K1: `design-audit` in design/agents/design-auditor.md.
-- K6: Node 20 ×4 in observability → Node 24.
-- K2: the Gate line in design-auditor and the three observability-engineer agents.
-- K9: spot-check three deliverables of docs/plans/design-ux-improvements.md, then file it per §5.
-  docs/research/ui-ux-practice-2026.md stays if anything cites it; otherwise list it for the user.
-
-Traps:
-- Agent sentences S3/S4 fixed in backend recur in 28 agents across S5–S17; fix them where your
-  agents carry them:
-  - "— MANDATORY SECTION" on the brownfield heading is dropped (K5).
-  - The orientation pass's "every run regardless of the gate's verdict" (the cache gate) gains
-    "outside a `Gate: none` plan task".
-  - A closing duty "per `be-shared-session-budget` Step 5" now reads "per the plan's
-    `## Close-out — every task` section (plan format §7)".
-  - A skill's Validation / Verify list gets one sentence: inside a `Gate: none` plan task it runs
-    none of the checks and reports "written, not run".
-  - K8: a hardcoded `pnpm …` / `npm …` in an instruction becomes the project's own script, run with
-    the package manager `packageManager` names.
-- Never edit design/ui-ux-pro-max/data/ or scripts/.
-- A trimmed description keeps the Do-NOT clause that routes between the 16 design skills; those
-  clauses are what stop them colliding.
-- (S9/S10) Node 20 is sometimes a feature boundary, not a default (native `WebSocket`/`EventSource`,
-  global `fetch`/`FormData`/`Blob`): such a line says Node 22/24 have the feature and flags a detected
-  Node 20 as EOL, rather than reading "Node 24" after the substitution. A CI `node-version: 20` moves to 24.
-- (S12) K6's recipe does not catch .NET 8 defaults (observability-engineer-dotnet): grep
-  `\.NET 8\b|8\.0\.x|sdk:8\.0|net8\.0/` too. A default or sample moves to .NET 10; a TFM detection list
-  (`net8.0/9.0/10.0`) stays.
-
-Gate: none — this plan gates once, in G1. Do not run tools/token-audit.py or §7's script.
-
-Commit: `chore(sweep S14): design and observability`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
 
 ### S15 — data and training-data (general-purpose, docs)
 
@@ -2138,6 +2129,9 @@ Traps:
   `performance/{nbomber,k6,gatling}` at ~:66 → each stack's `load-testing`;
   `qa/_shared/api-contract-testing` at ~:65 → `qa/_shared/contract-testing-pact`.
 - Any entry you add to ALLOW or LINK_EXAMPLES needs a one-line reason in the As built note.
+- `data-density` (design/ui-ux-pro-max/references/quick-reference.md:248) is a vendored corpus rule id
+  (ATTRIBUTIONS: `references/` is vendored), not a name and not editable (D5). S14 decided: add it to
+  §7's ALLOW, as `data-table` already is.
 - CONFORMANCE-AUDIT-PLAN.md and README cite each other; fix the README link after the move.
 - CONFORMANCE-AUDIT-PLAN.md cites `backend/PLAN.md` (F2, F3) as plain text, not a link. S3 moved that
   file to docs/plans/backend-PLAN.md (live). The plan is legacy text, so leave it as it is.

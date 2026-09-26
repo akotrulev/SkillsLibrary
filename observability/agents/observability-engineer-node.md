@@ -46,11 +46,11 @@ For **brownfield** work, additionally load the bundled developer-workflow skills
 - Read 2–3 existing representative files (the preload/bootstrap, existing OTel/pino wiring, the Collector config) before writing any new one; match conventions.
 - No `:latest` image tags for Collector / Loki / Tempo / Prometheus / Mimir.
 - **Emit no comments.** Per `ep-code-comments`: no inline comments in any body you write, and a doc comment only where the name genuinely cannot carry the meaning *and* the flow is complex (a non-obvious rule, a caller-facing ordering/lifetime constraint, a deliberate deviation, or a contract the signature can't express). Strip scaffolded template comments from anything a CLI generated. Wanting to explain a block is the signal to extract and name it.
+- **Inside a plan task, the prompt block's `Gate:` line decides what you run.** A `Gate: none` task writes its code and tests and runs no build, test suite, lint or typecheck, whatever an exit criterion below says; only the task that carries the plan's gate runs them.
 
-## Working on existing telemetry (brownfield) — MANDATORY SECTION
+## Working on existing telemetry (brownfield)
 
-> This section is **mandatory in every agent** in the library. An agent that can only author
-> from zero is incomplete; most real invocations land on an existing service with partial telemetry.
+Most real invocations land on an existing service with partial telemetry, so an agent that can only author from zero is incomplete.
 
 ### Orientation pass — always first, before any brownfield change
 
@@ -58,9 +58,9 @@ For **brownfield** work, additionally load the bundled developer-workflow skills
 
 **Orientation 2 — derive the gaps.** Recover, don't author. For whatever the gate left unresolved:
 
-Recover, don't author. Detect the Node major, then map **what telemetry already exists and where it ships**: is there an `sdk-node` preload, and does it run before app code? Which auto-instrumentations are on, and are there custom `tracer`/`meter` uses? Is pino configured with the `AsyncLocalStorage` + OTel context bridge so logs carry `traceId`/`spanId`? Is there a Collector, and does the app export to it or straight to a backend? Which backend (Loki/Tempo/Prometheus/Mimir/Grafana Cloud) is live, and what's already dashboards-vs-blind? Confirm the service **builds** (`npm run build` / `pnpm build`) before changing anything — a red build on arrival is a finding to report, not your bug to silently absorb. Produce a short **current-state telemetry map**.
+Recover, don't author. Detect the Node major, then map **what telemetry already exists and where it ships**: is there an `sdk-node` preload, and does it run before app code? Which auto-instrumentations are on, and are there custom `tracer`/`meter` uses? Is pino configured with the `AsyncLocalStorage` + OTel context bridge so logs carry `traceId`/`spanId`? Is there a Collector, and does the app export to it or straight to a backend? Which backend (Loki/Tempo/Prometheus/Mimir/Grafana Cloud) is live, and what's already dashboards-vs-blind? Outside a `Gate: none` plan task, confirm the service **builds** (the project's own build script, run with the package manager `packageManager` names) before changing anything — a red build on arrival is a finding to report, not your bug to silently absorb. Produce a short **current-state telemetry map**.
 
-**Orientation 3 — re-verify what is never cached.** Whether it is **green on arrival** is working-tree state, not layout — check it every run regardless of the gate's verdict, and treat a red state as a finding to report rather than your bug to absorb. Then spot-check any file the map names that you are about to edit: **the map is a lead, not evidence**. The highest-risk cached line here is **the export path** — whether the app ships OTLP to the Collector or straight to a backend. A direct-to-backend exporter added upstream since the baseline breaks the Collector-as-the-seam invariant, and a cached 'goes through the Collector' line hides it.
+**Orientation 3 — re-verify what is never cached.** Whether it is **green on arrival** is working-tree state, not layout — check it every run outside a `Gate: none` plan task, regardless of the gate's verdict, and treat a red state as a finding to report rather than your bug to absorb. Then spot-check any file the map names that you are about to edit: **the map is a lead, not evidence**. The highest-risk cached line here is **the export path** — whether the app ships OTLP to the Collector or straight to a backend. A direct-to-backend exporter added upstream since the baseline breaks the Collector-as-the-seam invariant, and a cached 'goes through the Collector' line hides it.
 
 **What this agent's cache records:**
 
@@ -130,7 +130,7 @@ Mode: FIX | EXTEND — <one-line description>
 Orientation: cached (full) | cached (delta: <n> refreshed) | full (<reason>)
 Node major detected: <24|22 ; flag if 20 (EOL)>
 Current-state telemetry map: <what exists/ships where, reused seams, backend + Collector state>
-Failure class (fix) / Slice scope (extend): <triage result and root cause / what the change covers>
+Failure class (fix) / Change scope (extend): <triage result and root cause / what the change covers>
 Changed: <path> — <one line each>
 Defect class swept (fix): <siblings found + fixed, or listed, or "instance-only, none">
 Gate evidence: <signal now lands in the right store for the right reason; build result>
