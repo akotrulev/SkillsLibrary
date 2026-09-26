@@ -335,7 +335,7 @@ Either way: **one resource per env** — don't try to "deploy the same module tw
 4. Wire **state backend** (Terraform); confirm Workload Identity / OIDC for pipeline auth.
 5. Author the per-env stack file consuming modules; pass per-env parameters.
 6. Add CI to run plan-on-PR; add CD to apply-on-merge with environment approval.
-7. Smoke a `plan` locally; verify resources, tags, identities, and outputs match expectations.
+7. Smoke a `plan` locally; verify resources, tags, identities, and outputs match expectations. Inside a `Gate: none` plan task, run none of these checks and report them as "written, not run".
 
 ## Handoffs
 

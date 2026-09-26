@@ -256,9 +256,9 @@ Avoid for: a small number of services, a team new to k8s, or "we might need k8s 
 
 1. Confirm workload shape and pick the target (ECS / Lambda / App Runner / S3+CF / EKS).
 2. Ensure prerequisite infra exists (VPC, ECR repo, ALB, certs, secrets) — hand off to `devops/infrastructure-as-code` for the Terraform.
-3. Produce the deployable artifact: Dockerfile + task definition (ECS), Lambda zip / container image, or `npm run build` output (SPA).
+3. Produce the deployable artifact: Dockerfile + task definition (ECS), Lambda zip / container image, or the output of the SPA's own build script, run with the package manager `packageManager` names.
 4. Wire the pipeline (`devops/github-actions` / `gitlab-ci` / `azure-pipelines`) with OIDC role assumption + the appropriate deploy step (`ecs update-service` / `lambda update-function-code` / `s3 sync` + invalidation).
-5. Smoke: hit `/health` after deploy; verify CloudWatch Logs receive logs; verify metrics arrive in Prometheus via the Collector.
+5. Smoke: hit `/health` after deploy; verify CloudWatch Logs receive logs; verify metrics arrive in Prometheus via the Collector. Inside a `Gate: none` plan task, run none of these checks and report them as "written, not run".
 
 ## Handoffs
 

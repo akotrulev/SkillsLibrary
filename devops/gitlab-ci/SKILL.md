@@ -336,7 +336,7 @@ test:
 3. Add `id_tokens:` + OIDC `before_script:` blocks for the cloud being deployed to.
 4. Add `environment:` to every deploy job; mark prod environment as protected in the UI.
 5. If multiple repos share patterns, extract templates into a `ci-templates` project and `include:` them with a pinned `ref:`.
-6. Validate locally with the CI Lint endpoint (`Pipelines → CI lint`) or `glab ci lint`.
+6. Validate locally with the CI Lint endpoint (`Pipelines → CI lint`) or `glab ci lint`. Inside a `Gate: none` plan task, run none of these checks and report them as "written, not run".
 
 ## Handoffs
 

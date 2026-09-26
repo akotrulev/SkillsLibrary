@@ -127,7 +127,7 @@ kube-bench run
 # Pin the benchmark explicitly rather than trusting auto-detection. Self-managed target set:
 kube-bench run --benchmark cis-1.12 --targets master,controlplane,node,etcd,policies
 
-# MANAGED clusters: the control plane is the provider's — master/etcd checks DO NOT APPLY.
+# MANAGED clusters: the control plane is the provider's — master/etcd checks do not apply.
 kube-bench run --benchmark eks-1.5.0 --targets node,policies,managedservices,controlplane
 kube-bench run --benchmark gke-1.2.0 --targets node,policies,managedservices
 kube-bench run --benchmark aks-1.7   --targets node
@@ -255,7 +255,8 @@ kubectl get clusterrolebindings -o json \
 
 Assert an **expected answer per row** (`no` for every escalation above) — a matrix of subject × verb ×
 resource with one expected value each, which is the same discipline
-`qa-security-testing-permission-testing` applies to an API's BOLA/BFLA matrix, one layer down.
+the qa stacks' `permission-testing` skills (`qa-permission-testing-dotnet`, `qa-permission-testing-java`,
+`qa-permission-testing-typescript`) apply to an API's BOLA/BFLA matrix, one layer down.
 
 **2 — NetworkPolicy actually enforces (A01 · ATT&CK T1210).** The two failure modes are invisible in YAML:
 a namespace with **no default-deny**, and a **CNI that does not implement NetworkPolicy at all** (a plain
@@ -287,7 +288,7 @@ kubectl get ns -o json | jq -r '.items[]
   | select(.metadata.labels["pod-security.kubernetes.io/enforce"] == null)
   | .metadata.name'
 
-# Prove enforcement rather than reading the label: a dry-run apply that MUST be rejected.
+# Prove enforcement rather than reading the label: a dry-run apply that must be rejected.
 kubectl apply -n orders --dry-run=server -f - <<'EOF'
 apiVersion: v1
 kind: Pod
@@ -547,7 +548,7 @@ cluster credentials and a live target — exactly the two things a fork PR must 
   probes, Workload Identity / IRSA, PDB/HPA). A finding here is usually a three-line change there.
 - `qa-security` + `qa/_shared/security` — the app-layer OWASP backbone, the authorization-to-scan rule this
   skill's live gate inherits, and the ticketed-triage discipline.
-- `qa-security-testing-permission-testing-{java,dotnet,typescript}` — the **application** authz matrix
+- `qa-permission-testing-{java,dotnet,typescript}` — the **application** authz matrix
   (BOLA/IDOR/BFLA). The RBAC matrix above is the same discipline one layer down, at the cluster.
 - `data-architect` — owns the **cross-tenant leak test** that proves data isolation; cluster-level isolation
   is not database-level isolation.

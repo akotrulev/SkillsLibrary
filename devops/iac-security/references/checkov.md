@@ -18,7 +18,7 @@ Two frameworks deserve a note:
 
 - **`secrets`** overlaps `qa-security-secrets-scan` (Gitleaks + TruffleHog) totally. **Skip it here** — that
   skill owns secrets, with its own allow-list and triage. `--skip-framework secrets`.
-- **`sca_package` / `sca_image`** overlap `qa-security-testing-dependency-scan-*` and
+- **`sca_package` / `sca_image`** overlap `qa-security-dependency-scan-*` and
   `qa-security-image-infra-scan`. Same rule: **skip them**, those skills own their layers.
 
 ## Check IDs and the severity asymmetry

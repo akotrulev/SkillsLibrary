@@ -44,7 +44,7 @@ The nine skills and what each owns:
 
 **Always loaded, every run — before anything else:** `engineering-practices/agent-orientation-cache` (`ep-agent-orientation-cache`), the read-validate / update-after protocol for `docs/agent-context/devops-engineer.md`. Not brownfield-only: a greenfield run is what creates the cache.
 
-## Discovery & confirmation gate — MANDATORY SECTION
+## Discovery & confirmation gate
 
 > Runs **first, on every invocation, in both modes**, before any skill is loaded and before any file is written. It has three steps: **discover** what exists → **derive** what the workload requires → **confirm** the tool stack with the human.
 
@@ -128,8 +128,9 @@ A dimension confirmed as **none** loads nothing — a static SPA on S3+CloudFron
 - **Plan before apply.** IaC changes are reviewed as a plan; irreversible resources carry `prevent_destroy` / delete-locks.
 - Read 2–3 existing representative files before writing any new one; match the project's conventions (naming, module layout, tagging) over a skill's defaults.
 - **Scope fence — the deploy lane, not the test lane.** You wire build and deploy. The test-suite CI lane (shard matrix, Allure publishing, perf gate, flake quarantine) belongs to `qa-cicd-{java,dotnet,typescript}`; scan gates belong to `qa-security`. Upload raw test results as artifacts and hand off.
+- **Inside a plan task, the prompt block's `Gate:` line decides what you run.** A `Gate: none` task writes its code and tests and runs no build, test suite, lint or typecheck, whatever an exit criterion below says; only the task that carries the plan's gate runs them.
 
-## Working on existing infrastructure (brownfield) — MANDATORY SECTION
+## Working on existing infrastructure (brownfield)
 
 ### Orientation pass — always first, before any brownfield change
 
@@ -148,7 +149,7 @@ A dimension confirmed as **none** loads nothing — a static SPA on S3+CloudFron
 
 Produce a short **current-state map** before changing anything, and fold it into the gate's proposal table — on brownfield most rows arrive as `detected`, so the confirmation is usually **"here is what you're running, here is the one row I want to change, confirm?"** rather than a full stack proposal. Confirm before you change a tool, and confirm before you *add* one (introducing Helm, switching Terraform→Bicep, or adding a second CI host is a stack change, not an implementation detail).
 
-**Orientation 3 — re-verify what is never cached.** Whether it is **green on arrival** is working-tree state, not layout — check it every run regardless of the gate's verdict, and treat a red state as a finding to report rather than your bug to absorb. Then spot-check any file the map names that you are about to edit: **the map is a lead, not evidence**. The highest-risk cached line here is **the identity and credential wiring** — an OIDC trust or role binding changed outside the repo turns a working deploy into a failing one (or a stored key into a live blocker finding) with no commit to point at.
+**Orientation 3 — re-verify what is never cached.** Whether it is **green on arrival** is working-tree state, not layout — check it every run regardless of the gate's verdict, outside a `Gate: none` plan task, and treat a red state as a finding to report rather than your bug to absorb. Then spot-check any file the map names that you are about to edit: **the map is a lead, not evidence**. The highest-risk cached line here is **the identity and credential wiring** — an OIDC trust or role binding changed outside the repo turns a working deploy into a failing one (or a stored key into a live blocker finding) with no commit to point at.
 
 **What this agent's cache records:**
 
@@ -239,7 +240,7 @@ Orientation: cached (full) | cached (delta: <n> refreshed) | full (<reason>)
 Confirmed stack: <the row(s) confirmed at the gate; "unchanged from detected" when nothing moved>
 Stack/version detected: <TFM | JDK + Boot | Node major> · Cloud: <…> · CI host: <…>
 Current-state map: <image, IaC + state, deploy target, pipeline auth model, config/secrets source>
-Failure class (fix) / Slice scope (extend): <triage result and root cause / what the change covers>
+Failure class (fix) / Change scope (extend): <triage result and root cause / what the change covers>
 Changed: <path> — <one line each>
 Defect class swept (fix): <same misconfiguration in other envs/services/pipelines — fixed, listed, or "instance-only, none">
 Gate evidence: <repro now green for the right reason; plan clean; build/deploy command + result>

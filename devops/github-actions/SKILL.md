@@ -313,7 +313,7 @@ Upload the raw results as an artifact here; the **report generation/publishing p
 3. Insert the per-stack build/test job from the templates above.
 4. Insert the cloud deploy job for the target. Gate via `environment:`. Use OIDC.
 5. If multiple repos need the same pipeline, extract a reusable workflow and call it from `ci.yml`.
-6. Validate locally with `actionlint` (`brew install actionlint`) before committing.
+6. Validate locally with `actionlint` (`brew install actionlint`) before committing. Inside a `Gate: none` plan task, run none of these checks and report them as "written, not run".
 
 ## Handoffs
 

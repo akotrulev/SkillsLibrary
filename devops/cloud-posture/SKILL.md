@@ -32,7 +32,8 @@ This skill is **language-agnostic** (a cloud account has no stack) and owns the 
 ## Setup — pin the version, use a venv
 
 ```bash
-# Prowler v5 — Python CLI (needs Python 3.10–3.12).
+# Prowler v5 — Python CLI. Use Python 3.13 when the pinned release's `requires-python` allows it; Prowler
+# lags new Pythons, so otherwise take the newest version it does allow (5.x has capped at 3.12).
 python3 -m venv .prowler && source .prowler/bin/activate
 pip install prowler==5.38.0          # pin the version — a scanner bump is a reviewable change, not a silent one
 prowler --version
@@ -240,7 +241,7 @@ jobs:
 - `devops-iac-security` — Checkov/tfsec/Terrascan on **IaC templates before deploy** (the *intended* state on disk). The boundary partner: this skill scans the **deployed account** (the *actual* state, incl. drift). **Run both.**
 - `devops-k8s-security` — kube-bench/Kubescape on **running K8s** workloads/RBAC/network policy. Cloud posture covers the account around the cluster; this covers inside it.
 - `devops-container-runtime-security` — kube-hunter/Falco runtime probing; the runtime sibling to this configuration-time scan.
-- `devops-supply-chain-security` · `devops-threat-modeling` · `devops-infra-controls-validation` — the other Stage-1 infra-security skills the `infra-security-tester` agent orchestrates alongside this one.
+- `devops-supply-chain-security` · `devops-threat-modeling` · `devops-infra-controls-validation` — the other infra-security skills the `infra-security-tester` agent orchestrates alongside this one.
 - `qa-security-image-infra-scan` — Trivy for **image/OS-package CVEs, IaC-template CVEs, and SBOM** — a different surface (the artifact, not the account).
 - `devops-auditor` — read-only **static** conformance: does a gate exist in the repo. **The fence:** the auditor reads repo files and never authenticates to the account; this skill reads the **live account** and never opens the repo's conformance rule set.
 - `infra-security-tester` (agent) — the step-by-step orchestrator that runs this as its **Step-4 cloud-posture & IAM** pass, under its scope/authorization gate.

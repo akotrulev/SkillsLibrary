@@ -31,7 +31,7 @@ Authorization: cluster=<owned/lab cluster id or context>  scope=<in-scope namesp
 ```
 
 This skill is **language-agnostic** (both tools are Go/CLI binaries + a DaemonSet — no per-stack split, per
-the library's anti-triplication rule) and sits in the **Stage-1 infra-security lane**, orchestrated by the
+the library's anti-triplication rule) and sits in the **infra-security lane**, orchestrated by the
 **`infra-security-tester`** agent. It owns the **runtime + probing** surface; it does **not** score manifests
 (that is `devops-k8s-security`) or scan shipped artifacts (that is `qa-security-image-infra-scan`). See the
 fences below — they are the whole reason three skills exist.
@@ -277,7 +277,7 @@ kubectl delete pod canary -n security-testing
   loaded, or the sink is broken) — not a passing run.
 - **Assert at the sink, not just Falco's stdout.** A rule that fires locally but whose alert never reaches
   Loki/Alertmanager is invisible to the responder — the detection is only as real as its last hop.
-- This is the seam the **forthcoming `purple-team-engineer` agent + its `detection-validation` skill** own at
+- This is the seam the **`purple-team-engineer` agent + its `detection-validation` skill** own at
   scale (run every ATT&CK technique on a schedule, assert each detection still fires, catch "security drift").
   This skill does the **single-rule** version inline; name that lane as the partner.
 
@@ -349,19 +349,19 @@ progress." Different questions — run all three; do not fold Trivy's static k8s
 
 - **`infra-security-tester`** (`devops/agents/infra-security-tester.md`) — the step-by-step orchestrator that runs
   this skill in its **K8s & runtime** step; owns the scope/authorization gate this skill enforces.
-- **`devops-k8s-security`** (sibling, Stage 1) — CIS/NSA **benchmark posture scoring** of manifests + cluster
+- **`devops-k8s-security`** (sibling) — CIS/NSA **benchmark posture scoring** of manifests + cluster
   config (kube-bench · Kubescape · Polaris). The static-config sibling: it grades the *declared* state; this
   skill probes the *running* one. Run both.
 - **`qa-security-image-infra-scan`** (Trivy) — **static** image/IaC/SBOM scanning of the shipped artifact,
   incl. `trivy k8s`. The static-vs-runtime boundary partner: it owns everything read as a file; this skill
   owns the live cluster. Run both.
 - **`devops-iac-security`** · **`devops-cloud-posture`** · **`devops-supply-chain-security`** ·
-  **`devops-threat-modeling`** · **`devops-infra-controls-validation`** (Stage-1 siblings) — the rest of the
+  **`devops-threat-modeling`** · **`devops-infra-controls-validation`** (siblings) — the rest of the
   infra-security lane; `threat-modeling` feeds the scope this skill probes within.
 - **`observability-engineer-{dotnet,java,node}`** + `observability/{queries,dashboards}` — **where Falco
   alerts land.** The blue half needs a telemetry backend (Loki/Alertmanager) to assert against; wire
   falcosidekick to their stack. No backend = no detection surface.
-- **`purple-team-engineer`** + **`detection-validation`** (*forthcoming*, Stage 4) — the **detection-assertion
+- **`purple-team-engineer`** + **`detection-validation`** (`security/` domain) — the **detection-assertion
   partner** at scale: run every ATT&CK technique on a schedule and assert each detection still fires. This
   skill does the single-rule inline version and hands the continuous version to that lane.
 - **`qa-security`** (`qa/_shared/agents/qa-security.md`) — the **app-layer** security lane beneath which this

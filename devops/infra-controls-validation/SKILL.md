@@ -344,7 +344,7 @@ assert something about a running system that only exists after the deploy.
 - `devops-engineer` — **applies every fix**; this skill retests. `devops-{github-actions,gitlab-ci,azure-pipelines}`
   own the pipeline this skill hardens *and* the deploy pipeline the gate runs in.
 - `devops-iac-security` · `devops-k8s-security` · `devops-container-runtime-security` ·
-  `devops-supply-chain-security` · `devops-threat-modeling` — the Stage-1 siblings. Threat-modeling supplies
+  `devops-supply-chain-security` · `devops-threat-modeling` — the infra-security siblings. Threat-modeling supplies
   *which* controls matter for this platform; supply-chain owns artifact signing/provenance (family 4's
   pinning checks stop at the reference, not the attestation).
 - `ep-standards-audit-engine` — the Mode A/B round vocabulary, evidence rules, and severity semantics the

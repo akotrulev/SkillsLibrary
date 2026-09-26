@@ -128,7 +128,7 @@ aws secretsmanager describe-secret --secret-id NAME \
 and the **old credential stops authenticating**:
 
 ```bash
-# A secret consumed as an env var can NEVER hot-rotate — kubelet resolves it once at container start.
+# A secret consumed as an env var can never hot-rotate — kubelet resolves it once at container start.
 # Assert that first; for an env consumer the correct finding is "requires restart by construction."
 kubectl get pod -n NS POD -o json | jq -e '
   [ .spec.containers[] | (.env // [])[] | select(.valueFrom.secretKeyRef != null) ] | length == 0

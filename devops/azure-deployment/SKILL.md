@@ -241,7 +241,7 @@ Same logic as EKS — only when k8s expertise + workload complexity justify it. 
 2. Ensure prerequisite infra exists (RG, VNet, ACR, Key Vault, Log Analytics) — hand off to `devops/infrastructure-as-code` for Bicep.
 3. Produce the deployable artifact: Dockerfile + image push (Container Apps), Function code (Functions), zip / code (App Service), SPA build output (Static Web Apps).
 4. Wire the pipeline (`devops/azure-pipelines` / `devops/github-actions` / `devops/gitlab-ci`) with WIF + the deploy step (`az containerapp update`, `func azure functionapp publish`, `swa deploy`, slot swap).
-5. Smoke: hit `/health` after deploy; confirm Log Analytics receives logs; confirm Application Insights or OTel Collector receives traces/metrics.
+5. Smoke: hit `/health` after deploy; confirm Log Analytics receives logs; confirm Application Insights or OTel Collector receives traces/metrics. Inside a `Gate: none` plan task, run none of these checks and report them as "written, not run".
 
 ## Handoffs
 

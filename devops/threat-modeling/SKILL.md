@@ -102,7 +102,7 @@ Prefer **threat-model-as-code** (versioned, diffable, CI-checkable) and Mermaid 
 - **Microsoft Threat Modeling Tool** (7.3, Windows-only, `.tm7`) — the canonical STRIDE-per-element implementation; reach for it only on a Windows-centric team already standardized on it.
 - **Threagile** (v0.9.1, Go/Docker) — YAML model + configurable risk rules → PDF/JSON/Excel; suits a larger architecture kept as code.
 
-## The output artifact — MANDATORY
+## The output artifact
 
 Write one file per system to `docs/security/threat-models/` on the current branch, under the repo being modelled:
 

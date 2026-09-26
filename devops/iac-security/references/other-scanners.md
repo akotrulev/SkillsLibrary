@@ -15,7 +15,7 @@ the single most useful fact in this file.
 | **Conftest / OPA** (CNCF) | Active | **The org-rules layer.** `references/opa-conftest.md` |
 | **Trivy** (Aqua) | Active | The lightweight built-in gate — **owned by `qa-security-image-infra-scan`**, not this skill |
 
-> **Why the two deaths matter for this skill's design.** The original Stage-1 plan listed
+> **Why the two deaths matter for this skill's design.** The original tool list for this skill named
 > `Checkov · tfsec · Terrascan · KICS · OPA/Conftest` as the tool family. Research collapsed it: tfsec's value
 > is now reachable only through Trivy (which a sibling skill already owns), and Terrascan is unsafe to build a
 > gate on. The family this skill actually routes is **Checkov + OPA/Conftest**, with KICS as a breadth

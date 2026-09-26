@@ -167,7 +167,7 @@ found). Map each:
   surface. Aqua itself points CVE users to Trivy — do not use kube-hunter as a CVE scanner.
 - **vs `devops-k8s-security`:** benchmark scoring (kube-bench/Kubescape/Polaris) grades the *declared* config
   against CIS/NSA; kube-hunter proves the *running* surface is reachable. A benchmark pass ≠ not exploitable.
-- **vs the exploit-validation lane (Stage 2 `qa-security`):** that proves a single **app-layer** vuln fires;
+- **vs the exploit-validation lane (`qa-security`):** that proves a single **app-layer** vuln fires;
   kube-hunter proves **cluster/infra** surface is reachable. Different layer.
 
 ## The report — required elements

@@ -46,8 +46,11 @@ training-data/: the Gate line in `data-architect`, `dataset-engineer` and `datas
 re-vendored from `anthropics/skills` `33375500` with a 491-char house description). S16 landed 2026-09-26
 (business-analysis/ and tooling/: the Gate line in `business-analyst`, `requirements-author` and
 `tooling-engineer`, the six descriptions under budget, three "Announce at start" lines removed; the
-marketplace's remaining "phased" wording is carried into G1). S17 is next.
-S1–S18 are ungated: the edits from S1 to S16 are built but unverified until G1 runs §7.
+marketplace's remaining "phased" wording is carried into G1). S17 landed 2026-09-26 (devops/: the Gate
+line in `devops-engineer`, `devops-auditor` and `infra-security-tester`, both K1 names resolved, the
+"Stage N" / "forthcoming" labels dropped, the Prowler Python line reworded to prefer 3.13 within the tool's
+own cap, D17; the eight `Node 20` lines were already EOL flags and stay). S18 is next.
+S1–S18 are ungated: the edits from S1 to S17 are built but unverified until G1 runs §7.
 
 ## 1. What already exists, and what is missing
 
@@ -594,6 +597,13 @@ the test step fail and runs upload/publish with `if: always()` / `condition: suc
 `when: always` — and `ci-conventions` names the quarantine lane as the one non-gating exception, because
 that lane exists to run and report tests that must not block. **Cost:** the no-green-washing rule now has
 an exception a reader must keep narrow; a second "non-gating" lane would need its own justification.
+
+**D17 (2026-09-26, S17) — A tool's own Python cap outranks the 3.13 default.** S17 said "`Python 3.10` in
+`cloud-posture` → 3.13", but the hit was Prowler's supported range ("needs Python 3.10–3.12"), not a
+library default: forcing 3.13 on a release whose `requires-python` stops at 3.12 breaks `pip install`.
+Reading one: write 3.13. Reading two (chosen): prefer 3.13, and fall back to the newest Python the pinned
+release allows — the CLAUDE.md DevOps rule for managed runtimes that lag, applied to a scanner. **Cost:**
+the line names no single version, and whether 5.38 accepts 3.13 was not verified.
 
 ## Answered questions (2026-09-26)
 
@@ -1820,6 +1830,56 @@ skills around hits 22k, descriptions 4k, ~14 files modified 21k, read-back 6k, c
   keep it bold, stated once.
 - K3: git-branching guidance inside a CI skill is domain content, so it stays.
 - **Not in S17:** `security/` (S18).
+- **As built (2026-09-26):** `devops/`. The three agents and three commands were read in full. Gate line
+  added to 3 agents, each as the last Operating-rules bullet: `devops-engineer.md:131`,
+  `devops-auditor.md:102`, `infra-security-tester.md:128`. 25 house files changed, plus this plan.
+  Data issues: 19 fixed. K1 (resolver prints nothing after the edits): `devops-auditor.md:112` "Slug fixed —
+  `devops-conformance`" → "the file is always `<NNN>-devops-conformance-r<N>.md`" (S14's shape);
+  `k8s-security/SKILL.md:258` `qa-security-testing-permission-testing` → the qa stacks' `permission-testing`
+  skills, named `qa-permission-testing-{dotnet,java,typescript}` in full. Three brace-form names the resolver
+  cannot see were stale too: `k8s-security:551` `qa-security-testing-permission-testing-{…}` →
+  `qa-permission-testing-{…}`; `dependency-integrity.md:107` and `checkov.md:21`
+  `qa-security-testing-dependency-scan-…` → `qa-security-dependency-scan-…`. Stage labels (K4, the S11 family):
+  "Stage-1" / "Stage 1/2/3" dropped in 13 places — `infra-security-tester.md:39,40,151`,
+  `commands/infra-security-tester.md:11`, `supply-chain-security:538`, `iac-security:20`,
+  `iac-security/references/other-scanners.md:18`, `container-runtime-security:34,352,359`,
+  `infra-controls-validation:347`, `cloud-posture:243`, `kube-hunter.md:170` — with "infra-security" kept as
+  the lane name; "forthcoming" dropped from the four `purple-team-engineer` / `detection-validation`
+  mentions (`container-runtime-security:280,364`, `falco.md:160`, `monitoring-and-pipeline.md:56,142`) after
+  checking `security/agents/purple-team-engineer.md` and `security/detection-validation/SKILL.md`
+  (`purpleteam-detection-validation`) exist. K6: `cloud-posture/SKILL.md:35` "needs Python 3.10–3.12" →
+  "use 3.13 when the pinned release's `requires-python` allows it, else the newest it does allow" (D17). The
+  eight `Node 20` hits (the version-policy lines of `docker`, `environment-config`, `github-actions`,
+  `gitlab-ci`, `azure-pipelines`, `aws-deployment`, `azure-deployment`, plus `docker:223`) all read "Node 20
+  is EOL (Apr 2026) — 24 is active LTS, 22 maintenance": detection/EOL-flag lines, kept (D13). No .NET 8
+  default: every `8.0.x` / `sdk:8.0` hit is a TFM-match comment beside a `10.0` default, or the
+  `github-actions` matrix/reusable-workflow sample (`:157`, `:254`, `:265`), which K6 lets keep 8.
+  Code issues: 17 fixed. K5: two `**Announce at start:**` lines deleted (`devops-auditor`,
+  `infra-security-tester`); "— MANDATORY SECTION" / "— MANDATORY" dropped from six agent headings and from
+  `threat-modeling`'s "The output artifact"; five all-caps words in sample comments lowercased
+  (`k8s-security:130,290`, `supply-chain-security:163`, `secrets-and-encryption.md:131`). The one bold
+  "Never apply IaC to a live environment without explicit confirmation" stays, once
+  (`devops-engineer.md:175`). K8: `aws-deployment:259` "`npm run build` output" → the SPA's own build
+  script, run with the package manager `packageManager` names; every other `pnpm`/`npm`/`dotnet` hit is a
+  CI or Dockerfile sample, or a "never `npm install`" rule. Verify lists: the "Generation steps" check step
+  of `docker`, `infrastructure-as-code`, `aws-deployment`, `azure-deployment`, `github-actions`,
+  `gitlab-ci` and `azure-pipelines` gains the `Gate: none` "written, not run" sentence. K4:
+  `devops-engineer.md:243` "Slice scope (extend)" → "Change scope (extend)".
+  Logical conflicts: 1 fixed — `devops-engineer.md:152` Orientation 3's "check it every run regardless of
+  the gate's verdict" gains "outside a `Gate: none` plan task". No agent carried the
+  `be-shared-session-budget` Step 5 closing duty.
+  Kept on purpose: pipeline and Dockerfile "stages", PASTA's "7-stage", "multi-stage chain" (D8); CI branch
+  filters, OIDC `ref:main` trust, branch protection, and "on the current branch" in the two report
+  contracts (K3 keep); every `green` hit (domain prose about gates turning red/green, blue/green deploys);
+  the `|| true` on `gradlew dependencies` and `buildx create` (setup steps, not test steps); the three
+  "never `continue-on-error` / `continueOnError` / `allow_failure`" rules already match D16. K7: all 19
+  skill and 3 agent descriptions are within budget with a Do-NOT clause (largest: `cloud-posture` 500/500,
+  `devops-engineer` 648/650); nothing edited.
+  Cleanup: no plan, progress or handoff file and no tracked junk in `devops/`. Every devops SKILL.md, agent
+  and command is listed in the marketplace, and every listed path exists.
+  Unverified: nothing was run beyond §4's searches and the K1/K7 scripts (Gate: none); Prowler's current
+  `requires-python` could not be checked (web fetch denied in this unattended session). Left for the user:
+  nothing.
 
 ### S18 — security
 
@@ -1946,68 +2006,9 @@ name: the K1 resolver flags it (D12).
 | S18 | `docs` | `general-purpose` | — | ~135k |
 | G1 | `docs` | `general-purpose` | S1–S18 | ~120k |
 
-S1 to S16 have landed, and their prompts are deleted; the 3 prompts from S17 to G1 are live.
+S1 to S17 have landed, and their prompts are deleted; the 2 prompts S18 and G1 are live.
 
 ---
-
-### S17 — devops (general-purpose, docs)
-
-````
-You are `general-purpose`. Task S17 of docs/plans/001-library-conformance-sweep.md: bring devops/ in
-line with the plan's checks K1–K9.
-
-Deliverable: devops/ passes K1–K9: devops-engineer, devops-auditor and infra-security-tester carry the
-Gate line, the two dangling names are resolved, and no Node 20 or Python 3.10 default remains.
-
-Read, in this order:
-1. CLAUDE.md, especially the version policy's DevOps note (managed runtimes lag the language).
-2. The plan: §2, §3, §4, §6 (the S17 rows), D1–D11, task S17.
-3. CONTRIBUTING.md.
-4. devops/agents/*.md and devops/commands/*.md in full.
-5. The plan's "Close-out — every task".
-
-Do:
-- Run §4's recipes with DIR=devops.
-- K1: `devops-conformance` (devops/agents/devops-auditor.md),
-  `qa-security-testing-permission-testing` (devops/k8s-security/SKILL.md).
-- K6: Node 20 ×8 → Node 24, or the newest runtime the platform offers, said so; Python 3.10 in
-  cloud-posture → 3.13.
-- K2: the Gate line in all three agents.
-
-Traps:
-- Agent sentences S3/S4 fixed in backend recur in 28 agents across S5–S17; fix them where your
-  agents carry them:
-  - "— MANDATORY SECTION" on the brownfield heading is dropped (K5).
-  - The orientation pass's "every run regardless of the gate's verdict" (the cache gate) gains
-    "outside a `Gate: none` plan task".
-  - A closing duty "per `be-shared-session-budget` Step 5" now reads "per the plan's
-    `## Close-out — every task` section (plan format §7)".
-  - A skill's Validation / Verify list gets one sentence: inside a `Gate: none` plan task it runs
-    none of the checks and reports "written, not run".
-  - K8: a hardcoded `pnpm …` / `npm …` in an instruction becomes the project's own script, run with
-    the package manager `packageManager` names.
-- Pipeline "stages" and git-branching guidance inside CI skills are domain content (D8, K3 keep).
-- "Never apply IaC to a live environment without explicit confirmation" stays bold, once.
-- (S9/S10) Node 20 is sometimes a feature boundary, not a default (native `WebSocket`/`EventSource`,
-  global `fetch`/`FormData`/`Blob`): such a line says Node 22/24 have the feature and flags a detected
-  Node 20 as EOL, rather than reading "Node 24" after the substitution. A CI `node-version: 20` moves to 24.
-- (S11) SECURITY-EXPANSION-PLAN's "Stage N" / "(Stage N, forthcoming)" labels name units of planned work
-  (K4) and point at lanes that have since landed. Drop the label and keep the lane name, after checking
-  the named skill, agent or plugin exists (e.g. S11 made "`penetration-testing` *(Stage 3, forthcoming)*"
-  read "`penetration-testing`"). Known hits: `devops/agents/infra-security-tester.md`,
-  `devops/commands/infra-security-tester.md` and eight devops skills or references.
-- (S12) K6's recipe does not catch .NET 8 defaults: grep `\.NET 8\b|8\.0\.x|sdk:8\.0|net8\.0/` too. A
-  default, CI pin or sample path moves to .NET 10 (`10.0.x`, `sdk:10.0`); a TFM detection list stays, and
-  a managed runtime that lags stays pinned to the newest one the platform offers (CLAUDE.md).
-- (S12) A CI sample that puts `continue-on-error` / `continueOnError` / `allow_failure` / `|| true` on a
-  gating test step lets a red suite pass; the test step fails the build and the upload/publish steps run
-  with `if: always()` / `condition: succeededOrFailed()` / `when: always`.
-
-Gate: none — this plan gates once, in G1. Do not run tools/token-audit.py or §7's script.
-
-Commit: `chore(sweep S17): devops`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
 
 ### S18 — security (general-purpose, docs)
 
@@ -2045,6 +2046,17 @@ Traps:
   `security/commands/security-test-planner.md`, `initial-access`, `detection-engineering`,
   `security-hardening`, `pentest-reporting`. SECURITY-EXPANSION-PLAN itself is filed unedited (D7).
 - `docs/plans/implemented/` already exists (S2 created it).
+- (S17) The agent sentences S3–S17 fixed recur here where your agents carry them: `**Announce at start:**`
+  lines are deleted (K5), "— MANDATORY" / "— MANDATORY SECTION" is dropped from headings, and a
+  "regardless of the gate's verdict" check gains "outside a `Gate: none` plan task". S17 dropped
+  "forthcoming" from devops's `purple-team-engineer` / `detection-validation` mentions; the security
+  side should agree.
+- (S17) The K1 resolver skips brace-form names (`qa-foo-{java,dotnet,typescript}`, `qa-foo-*`); grep for
+  `qa-security-testing-` by hand — devops had three stale ones (the real names are `qa-security-<x>-<stack>`
+  and `qa-permission-testing-<stack>`).
+- (S17) A backticked audit slug (`devops-conformance`, `design-audit`) fails K1; write the artifact filename
+  instead (`<NNN>-<slug>-r<N>.md`). A cited skill that does not resolve is pointed at its real frontmatter
+  name (S17: `qa-security-testing-permission-testing` → `qa-permission-testing-{dotnet,java,typescript}`).
 
 Gate: none — this plan gates once, in G1. Do not run tools/token-audit.py or §7's script.
 
@@ -2122,6 +2134,8 @@ Traps:
   a phase; S16 changed the business-analysis and tooling entries to "step-by-step". Do the same for the
   rest; security's "phased, independently-executable assessment plan" names planned work, so it becomes a
   task-shaped plan.
+- (S17) D17: `devops/cloud-posture`'s Prowler line prefers Python 3.13 within the tool's own cap; §7 does not
+  check versions, so nothing to do beyond the catalog if it quotes "Python 3.10".
 - The resolver's prefix list has no `pentest` or `purpleteam`, so those skill names are never checked;
   CONTRIBUTING.md (S1) lists both as prefixes. Adding them to both §4 and §7 is your call; record it.
 

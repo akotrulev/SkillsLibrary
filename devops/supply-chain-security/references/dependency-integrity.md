@@ -104,7 +104,7 @@ pip install --require-hashes -r requirements.txt    # hashes, not just versions
   typosquat) row and the pinning invariant.
 - `cosign-sigstore.md` · `slsa-provenance.md` — the output-side integrity controls (your build); this is the
   input side.
-- `qa-security-testing-dependency-scan-{java,dotnet,typescript}` — the SCA sibling that gates *known CVEs* in
+- `qa-security-dependency-scan-{java,dotnet,typescript}` — the SCA sibling that gates *known CVEs* in
   the same dependency graph; this lane gates *integrity* (confusion, squats, pinning). Run both.
 - `devops/{github-actions,gitlab-ci,azure-pipelines}` — where action-SHA pinning and the internal-proxy
   registry config live.

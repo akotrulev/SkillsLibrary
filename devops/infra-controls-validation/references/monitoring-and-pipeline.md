@@ -53,7 +53,7 @@ az monitor diagnostic-settings list --resource RESOURCE_ID --query '[].logs[?ena
 
 Map a gap to **OWASP A09 Security Logging & Alerting Failures**; a disabled/short-retention cloud trail is
 also ATT&CK `T1562.008` (Impair Defenses: Cloud Logs). The effectiveness assertion hands off to
-`observability-engineer-*` (who own the backend and the rule) and, at continuous scale, to the forthcoming
+`observability-engineer-*` (who own the backend and the rule) and, at continuous scale, to the
 `detection-validation` purple-team lane — this lane proves a *specific* control fires, that lane runs it on a
 schedule.
 
@@ -139,7 +139,7 @@ the fix worked. A control that can't be re-asserted the same way twice isn't val
 - `secrets-and-encryption.md` — Families 1 and 2.
 - `observability-engineer-{dotnet,java,node}` + the `queries`/`dashboards` skills — own the telemetry backend
   and rules Family 3 asserts against; a `SKIP` when no backend exists routes here.
-- `detection-validation` (forthcoming purple-team lane) — continuous, scheduled detection assertion; this lane
+- `detection-validation` (the purple-team lane, `security/` domain) — continuous, scheduled detection assertion; this lane
   proves a specific control fires on demand.
 - `devops/{github-actions,gitlab-ci,azure-pipelines}` — own the pipeline authoring Family 4 hardens; findings
   route to `devops-engineer`, then this lane retests.

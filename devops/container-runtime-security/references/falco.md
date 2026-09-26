@@ -157,7 +157,7 @@ kubectl delete pod canary -n security-testing
   on that node, or the sink hop broken.
 - **Assert at the sink, not only Falco stdout.** A rule that fires locally but whose alert never reaches
   Loki/Alertmanager is invisible to the responder — the detection is only as real as its last hop.
-- **This is the single-rule version.** The **forthcoming `purple-team-engineer` + `detection-validation`
+- **This is the single-rule version.** The **`purple-team-engineer` agent + its `detection-validation`
   skill** own the continuous version — run every ATT&CK technique on a schedule (Atomic Red Team / Caldera),
   assert each detection still fires, catch "security drift." Name that lane as the partner and hand the
   scheduled form to it.

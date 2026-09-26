@@ -370,7 +370,7 @@ Publish the raw results as a pipeline artifact here; the **report generation/pub
 4. Add a `Test` stage (often folded into `Build` for small projects; separate stage when matrix or long).
 5. Add `Deploy_<Env>` stages using `deployment:` jobs and Environments. Wire WIF service connections.
 6. If multiple pipelines share logic, extract templates and `resources: repositories:` them in.
-7. Validate with `az pipelines validate` or the **Validate** button in the YAML editor before merging.
+7. Validate with `az pipelines validate` or the **Validate** button in the YAML editor before merging. Inside a `Gate: none` plan task, run none of these checks and report them as "written, not run".
 
 ## Handoffs
 

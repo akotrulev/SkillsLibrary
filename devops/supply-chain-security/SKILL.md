@@ -160,7 +160,7 @@ The flow, end to end:
 
 ```bash
 IMAGE=ghcr.io/myorg/api
-DIGEST=sha256:0d1c9e...           # ALWAYS sign and verify a digest, never a mutable tag
+DIGEST=sha256:0d1c9e...           # always sign and verify a digest, never a mutable tag
 
 # Sign — keyless by default in cosign v2+; --yes skips the interactive confirmation.
 cosign sign --yes "$IMAGE@$DIGEST"
@@ -535,7 +535,7 @@ jobs:
   **CVE scanning** (A03 Software Supply Chain Failures) for the image, OS packages, and IaC; this skill
   **signs and attests** what Trivy produced and owns **A08 Software and Data Integrity Failures**. Run
   both — authenticity and vulnerability are orthogonal.
-- **`devops-iac-security`** — the beside-partner in the same Stage-1 lane: IaC misconfiguration +
+- **`devops-iac-security`** — the beside-partner in the same infra-security lane: IaC misconfiguration +
   policy-as-code. It authors the admission policy; this skill supplies the verification rule inside it.
 - **`devops-k8s-security`** — owns **admission enforcement** (`policy-controller` `ClusterImagePolicy`,
   Kyverno `verifyImages`, namespace opt-in labels, RBAC around the policy). The deploy-time verification

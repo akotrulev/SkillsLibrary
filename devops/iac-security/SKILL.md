@@ -17,7 +17,7 @@ configs, with **graph-based** checks that reason across resources), and **OPA/Co
 any structured config, which is how **org-specific** rules that no vendor ships get enforced. It runs in the
 **deploy pipeline** (`devops/{github-actions,gitlab-ci,azure-pipelines}`), never the `qa/cicd/*` test lane.
 
-> **⚠️ Authorization: none needed — and say so.** Unlike its Stage-1 siblings (`devops-k8s-security` probes a
+> **⚠️ Authorization: none needed — and say so.** Unlike its infra-security siblings (`devops-k8s-security` probes a
 > live cluster, `devops-cloud-posture` reads a live account), IaC scanning is **purely static**: it reads
 > files in the repo and sends nothing anywhere. There is no live target, no blast radius, and no
 > authorization line to record. That is the whole point — this is the **shift-left, safe-on-every-PR** gate

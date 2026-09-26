@@ -367,7 +367,7 @@ If you're well above these, look at: extra packages in the runtime stage, dev de
 4. Add `.dockerignore`.
 5. Pin the base image tag (and ideally digest).
 6. Wire health (HEALTHCHECK or platform probe), non-root user, OCI labels.
-7. Build locally; check size and scan for CVEs.
+7. Build locally; check size and scan for CVEs. Inside a `Gate: none` plan task, run none of these checks and report them as "written, not run".
 8. Add the build + scan to the CI pipeline (`devops/{github-actions,gitlab-ci,azure-pipelines}`).
 
 ## Handoffs
