@@ -544,7 +544,7 @@ public static class Orders
   `basicGet` polling, Awaitility for side-effects; **Spring AMQP** `RabbitTemplate` + `@RabbitListener` +
   `QueueBuilder.deadLetterExchange(...)` noted for the listener/DLX convention; `RabbitMQContainer`). Structure
   ported, not code.
-- `qa-messaging-testing-typescript` — same skill, Node 20 + TS (`amqplib`: `amqp.connect(url)`,
+- `qa-messaging-testing-typescript` — same skill, Node 24 + TS (`amqplib`: `amqp.connect(url)`,
   `conn.createChannel()`, `assertExchange` / `assertQueue(..., { arguments: { 'x-dead-letter-exchange' } })` /
   `bindQueue`, `channel.publish`, `channel.consume(q, cb, { noAck: false })` + `channel.ack`/`nack`/`reject`,
   `channel.get` polling, `expect.poll` for side-effects, `@testcontainers/rabbitmq` `RabbitMQContainer`).

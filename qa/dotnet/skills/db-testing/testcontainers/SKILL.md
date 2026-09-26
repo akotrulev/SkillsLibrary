@@ -1,6 +1,6 @@
 ---
 name: qa-db-testing-testcontainers-dotnet
-description: Use when scaffolding .NET integration tests backed by a real database (Postgres / SQL Server / Mongo / Redis) via Testcontainers. Triggers "spin up a real Postgres for these tests", "Testcontainers fixture for X", "stop mocking the DB in IntegrationTests". Not for query guardrails (`db-testing/verification-queries`) or connect/seed/clean against an existing DB (`db-testing/client`).
+description: Use when scaffolding .NET integration tests backed by a real database (Postgres / SQL Server / Mongo / Redis) via Testcontainers. Triggers "spin up a real Postgres for these tests", "Testcontainers fixture for X", "stop mocking the DB in IntegrationTests". Not for query guardrails (`db-testing/verification-queries`) or connect/seed/clean against an existing DB (`db-testing/connection`).
 ---
 
 # QA — DB Testing with Testcontainers (.NET)
@@ -266,7 +266,7 @@ new ContainerBuilder()
    - `IntegrationTests/Fixtures/{Engine}Fixture.cs` (base class) — only if a sibling base doesn't already exist.
    - `IntegrationTests/Fixtures/{Resource}IntegrationTests.cs` (concrete fixture) inheriting from the base.
    - `IntegrationTests/IntegrationTests.csproj` updates: add `Testcontainers.PostgreSql` / `.MsSql` / `.MongoDb`, `Respawn`, `Microsoft.AspNetCore.Mvc.Testing` if HTTP surface is exercised.
-4. Run `dotnet test IntegrationTests/IntegrationTests.csproj --filter "FullyQualifiedName~{Resource}IntegrationTests"` — expect green or a real assertion failure (not a setup crash).
+4. Run `dotnet test IntegrationTests/IntegrationTests.csproj --filter "FullyQualifiedName~{Resource}IntegrationTests"` — expect green or a real assertion failure (not a setup crash). Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run".
 5. Cross-link: in the fixture file's header comment, point to `qa/dotnet/skills/db-testing/verification-queries` for assertion-query rules and `qa/dotnet/skills/test-data-builder` for seed builders.
 
 ## Cross-references

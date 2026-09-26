@@ -36,7 +36,7 @@ rg -n "<pattern>" --glob '*.cs' $TESTS
 ---
 
 ## B — Test naming, structure & comments
-*Owning skills: global Test-code + Comments rules (`CLAUDE.md`), `api-test-author/reviewer`, `ui-test-author/reviewer`*
+*Owning skills: global Test-code + Comments rules (`CLAUDE.md`), `api-test-author/review`, `ui-test-author/review`*
 
 | # | Check | Violation looks like | Find it with | Sev |
 |---|---|---|---|---|
@@ -58,7 +58,7 @@ rg -n "<pattern>" --glob '*.cs' $TESTS
 ---
 
 ## C — Independence & isolation
-*Owning skills: global Test-code rules, `api-test-author/reviewer`, `ui-test-author/reviewer`, `db-testing/testcontainers`*
+*Owning skills: global Test-code rules, `api-test-author/review`, `ui-test-author/review`, `db-testing/testcontainers`*
 
 | # | Check | Violation looks like | Find it with | Sev |
 |---|---|---|---|---|
@@ -75,7 +75,7 @@ rg -n "<pattern>" --glob '*.cs' $TESTS
 ---
 
 ## D — Waits & timing
-*Owning skills: `ui-test-author/{playwright,selenium,appium}`, `db-testing/client`*
+*Owning skills: `ui-test-author/{playwright,selenium,appium}`, `db-testing/connection`*
 
 | # | Check | Violation looks like | Find it with | Sev |
 |---|---|---|---|---|
@@ -135,7 +135,7 @@ rg -n "<pattern>" --glob '*.cs' $TESTS
 ---
 
 ## G — Test data
-*Owning skills: `test-data-builder`, `data-driven-testing`, `db-testing/client`*
+*Owning skills: `test-data-builder`, `data-driven-testing`, `db-testing/connection`*
 
 | # | Check | Violation looks like | Find it with | Sev |
 |---|---|---|---|---|
@@ -173,7 +173,7 @@ rg -n "<pattern>" --glob '*.cs' $TESTS
 ---
 
 ## I — Assertion quality
-*Owning skills: `api-test-author/reviewer`, `ui-test-author/reviewer`*
+*Owning skills: `api-test-author/review`, `ui-test-author/review`*
 
 | # | Check | Violation looks like | Find it with | Sev |
 |---|---|---|---|---|
@@ -213,7 +213,7 @@ rg -n "<pattern>" --glob '*.cs' $TESTS
 ---
 
 ## K — Config, secrets & environments
-*Owning skills: `qa/cicd/ci-conventions`, `test-login-tokens`, `db-testing/client`*
+*Owning skills: `qa/cicd/ci-conventions`, `test-login-tokens`, `db-testing/connection`*
 
 | # | Check | Violation looks like | Find it with | Sev |
 |---|---|---|---|---|

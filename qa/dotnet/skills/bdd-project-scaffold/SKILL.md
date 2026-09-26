@@ -31,7 +31,7 @@ This is the BDD analogue of `ui-project-setup`; it assumes a Playwright (web) or
 - Writing `.feature` files → `qa/_shared/bdd/feature-file-writer`
 - Generating `[Binding]` step classes → `qa/dotnet/skills/gherkin-step-code`
 - Building page objects → `qa/dotnet/skills/page-object-design` / `page-objects-from-url`
-- Reqnroll in Java/TS → `qa/{java,typescript}/skills/bdd-project-setup` (those use Cucumber-JVM / playwright-bdd)
+- Reqnroll in Java/TS → `qa/{java,typescript}/skills/bdd-project-scaffold` (those use Cucumber-JVM / playwright-bdd)
 
 ## Inputs needed
 
@@ -48,7 +48,7 @@ Confirm at most 2–3.
 3. Create `reqnroll.json` with the report formatter and (optionally) the Cucumber-Expression behavior.
 4. Create `Support/` : the DI registration (`[ScenarioDependencies]`), the scenario-context object, and the lifecycle hooks (`[BeforeScenario]`/`[AfterScenario]` that own the Playwright page or Appium driver — **with teardown**).
 5. Create the empty `Features/` folder and one throwaway smoke `.feature` to prove the rig parses and runs.
-6. `dotnet build` (the source generator must produce code-behind) and run the smoke scenario.
+6. `dotnet build` (the source generator must produce code-behind) and run the smoke scenario. Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run".
 7. Report files created and hand off to `feature-file-writer` (features) + `gherkin-step-code` (steps).
 
 ## Templates

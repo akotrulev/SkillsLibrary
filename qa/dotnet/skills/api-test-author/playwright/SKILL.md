@@ -1,6 +1,6 @@
 ---
 name: qa-api-test-playwright-dotnet
-description: Use when writing .NET API tests through Playwright's `IAPIRequestContext` (Microsoft.Playwright + NUnit) — usually because the project already runs Playwright for UI and wants one dependency and one report. Triggers "write API tests with Playwright in C#", "use IAPIRequestContext for endpoint X", "add API coverage to our Playwright .NET suite". Plain .NET API suites without Playwright → `api-test-author/generator` (NUnit + RestSharp, the stack default).
+description: Use when writing .NET API tests through Playwright's `IAPIRequestContext` (Microsoft.Playwright + NUnit) — usually because the project already runs Playwright for UI and wants one dependency and one report. Triggers "write API tests with Playwright in C#", "use IAPIRequestContext for endpoint X", "add API coverage to our Playwright .NET suite". Do NOT use for API suites without Playwright (`qa-api-test-writer-dotnet`, the RestSharp default).
 ---
 
 # QA — API Test Writer (.NET / Playwright IAPIRequestContext + NUnit)
@@ -25,7 +25,7 @@ dual raw + typed overloads, fixtures that own scenarios, the rich happy-path tem
 >    Microsoft.Playwright for UI gets API tests with zero extra HTTP stack, the same NUnit + Allure wiring,
 >    and — for cookie-authenticated apps — a **storage state** shared between a logged-in browser context and
 >    API calls. If the project has no Playwright UI suite, the stack default is RestSharp
->    (`api-test-author/generator`).
+>    (`api-test-author/writer`).
 > 4. **The layering survives the client swap.** Tests still never touch HTTP directly: `{Resource}Client`
 >    wraps the context, the raw overload returns Playwright's `IAPIResponse` unasserted, the typed overload
 >    asserts the **exact** status and `System.Text.Json`-deserializes `await response.TextAsync()` into the
@@ -237,7 +237,7 @@ tracked ids deleted in a `[TearDown]` that carries no `try`/`catch` (the test bo
 ## Generation steps
 
 1. Confirm the project uses Microsoft.Playwright (the package reference). If not, stop and route to
-   `api-test-author/generator` — say why.
+   `api-test-author/writer` — say why.
 2. Determine the **source of truth**: OpenAPI/Swagger spec, test-case document (one test per TC-ID, tagged for
    traceability), or verbal scenarios.
 3. Ensure `BasePlaywrightApiTest` exists with the lifecycle above (plus `Deserialize<T>` / `AttachBody`); create it if missing.
@@ -247,7 +247,7 @@ tracked ids deleted in a `[TearDown]` that carries no `try`/`catch` (the test bo
 5. Author one fixture per resource from the scenario matrix: rich happy-path template for 2xx, strict
    `ProblemDetails` template for 4xx, single status assert for 401.
 6. Verify every test name follows `[Action]_[Condition]_[ExpectedOutcome]` and every TC-ID maps to a test or is explicitly deferred.
-7. Run `dotnet build ApiTests/ApiTests.csproj` then `dotnet test` — expect 0 errors, 0 failures.
+7. Run `dotnet build ApiTests/ApiTests.csproj` then `dotnet test` — expect 0 errors, 0 failures. Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run".
 
 ## Cross-references
 

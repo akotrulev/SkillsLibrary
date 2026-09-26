@@ -1,6 +1,6 @@
 ---
 name: qa-ui-test-writer-playwright-dotnet
-description: Use when the user asks to scaffold Playwright UI tests in C# / .NET. Triggers: "write a Playwright test for X in C#", "add a Playwright .NET page object for screen Y", "scaffold a Playwright C# spec".
+description: Use when the user asks to scaffold Playwright UI tests in C# / .NET. Triggers: "write a Playwright test for X in C#", "add a Playwright .NET page object for screen Y", "scaffold a Playwright C# spec". Do NOT use for Selenium (`qa-ui-test-writer-selenium-dotnet`), Appium (`qa-ui-test-writer-appium-dotnet`) or reviewing tests (`qa-ui-test-review-dotnet`).
 ---
 
 # QA — Playwright Test & Page Object Generator (C# / .NET)
@@ -312,7 +312,7 @@ public async Task SeedOrder()
    - One `[Test]` per scenario
 5. For authenticated flows, ensure an `AuthSetup` `[SetUpFixture]` exists and the test inherits `AuthenticatedBaseTest`.
 6. Install Playwright browsers once via `pwsh bin/Debug/net10.0/playwright.ps1 install` (use the project's TFM in the path; or the project's bootstrap script).
-7. Run `dotnet test` — expect 0 failures. Run with `HEADED=1` (via `LaunchOptions`) to debug visually.
+7. Run `dotnet test` — expect 0 failures. Run with `HEADED=1` (via `LaunchOptions`) to debug visually. Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run".
 
 ## Handoffs
 

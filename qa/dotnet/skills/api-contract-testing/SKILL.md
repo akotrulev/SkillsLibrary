@@ -1,6 +1,6 @@
 ---
 name: qa-api-contract-testing-dotnet
-description: Use when the user asks to set up consumer-driven contract testing with Pact in a .NET 10 (8-9 supported) service (PactNet v5+). Triggers: "set up Pact for our .NET service", "PactNet consumer test for X", "verify our .NET provider against Y's contract".
+description: Use when the user asks to set up consumer-driven contract testing with Pact in a .NET 10 (8-9 supported) service (PactNet v5+). Triggers: "set up Pact for our .NET service", "PactNet consumer test for X", "verify our .NET provider against Y's contract". Do NOT use for a single API's own tests (`qa-api-test-writer-dotnet`) or other stacks' Pact setup.
 ---
 
 # QA — Contract Testing with Pact (.NET / PactNet)
@@ -241,7 +241,7 @@ See `qa/_shared/api-contract-testing` for the shared `can-i-deploy` and `record-
 ## Generation steps
 
 1. Add `PactNet` to `tests/{Service}.ContractTests/{Service}.ContractTests.csproj`.
-2. For the consumer: scaffold `{Provider}ConsumerTests.cs` with `[OneTimeSetUp]` building `IPactBuilderV4`; add one interaction; run `dotnet test` and confirm a pact file appears under `pacts/`.
+2. For the consumer: scaffold `{Provider}ConsumerTests.cs` with `[OneTimeSetUp]` building `IPactBuilderV4`; add one interaction; run `dotnet test` and confirm a pact file appears under `pacts/`. Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run".
 3. For the provider: scaffold `{Service}ProviderTests.cs` that boots `Program.CreateHostBuilder`, calls `PactVerifier.WithPactBrokerSource(...)`, and points at `/_pact/provider-states`.
 4. Add the `POST /_pact/provider-states` handler in `Program.cs` under a non-Production environment guard.
 5. Wire consumer CI: `dotnet test` → `pact-cli broker publish` with `--branch` and `--consumer-app-version`.

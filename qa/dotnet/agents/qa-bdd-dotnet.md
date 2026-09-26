@@ -30,9 +30,10 @@ The library lives at `qa/` in this repo, or `${CLAUDE_PLUGIN_ROOT}/qa/` from an 
 - Read 2–3 existing files (a page object, `BaseTest`, the `.csproj`) before writing; match project conventions over template defaults.
 - **Steps stay declarative; mechanics live in page objects** — a step definition is one or two POM calls, never a selector or a wait.
 - Work **one step at a time**; don't start N+1 until N's gate passes. If invoked for one step, do only that step.
-- Run what you write — a step whose code never executed fails its gate; fix and re-run once before reporting.
+- Run what you write, outside a `Gate: none` plan task — a step whose code never executed fails its gate; fix and re-run once before reporting.
 - Ask at most 2–3 clarifying questions up front (target path, where the suite is, web vs mobile, existing POM project); infer the rest.
 - **Emit no comments** per `ep-code-comments`: no inline comments; a doc comment only where the name can't carry the meaning *and* the flow is complex; strip scaffolded template comments.
+- **Inside a plan task, the prompt block's `Gate:` line decides what you run.** A `Gate: none` task writes its code and tests and runs no build, test suite, lint or typecheck, whatever an exit criterion below says; only the task that carries the plan's gate runs them.
 
 ## Working on existing code (brownfield)
 
@@ -44,7 +45,7 @@ Most requests land on an existing suite. Don't run the pipeline over it: **orien
 
 **Derive the gaps (recover, don't author).** Read 2–3 representative files (a `.feature`, a step-definition class, a page object, the `.csproj`) → a short **current-state map**: **runner + framework + version** (Reqnroll + NUnit, the TFM, Playwright vs Appium) picks the skill lane; **the Step Catalog + binding layout** — declarative steps, domain split, **DI wiring** (`[ScenarioDependencies]`, `ScenarioState`, hook lifecycle/teardown) — so a new scenario reuses steps and a fix respects the injection seam; **POM coverage** and the **tag/traceability convention**; **project conventions**.
 
-**Re-verify what is never cached.** **Green on arrival** is working-tree state, not layout — check every run regardless of verdict; a red state is a finding to report, not your bug to absorb. Spot-check any file the map names that you'll edit: **the map is a lead, not evidence**. Highest-risk cached line: **the Step Catalog** — a stale one produces the duplicate step it exists to prevent.
+**Re-verify what is never cached.** **Green on arrival** is working-tree state, not layout — check every run outside a `Gate: none` plan task, regardless of the cache gate's verdict; a red state is a finding to report, not your bug to absorb. Spot-check any file the map names that you'll edit: **the map is a lead, not evidence**. Highest-risk cached line: **the Step Catalog** — a stale one produces the duplicate step it exists to prevent.
 
 **What this agent's cache records:**
 
@@ -80,11 +81,11 @@ Work in the checkout you are given — never create a branch or worktree. Multi-
 | # | Step | Goal | Skills to load | Exit gate |
 |---|-------|------|----------------|-----------|
 | 0 | Ingest test cases | Confirm the manual test-case suite (TC-IDs, Setup/Cases/Cleanup, ACs) is present; assess page-object coverage | — *(consume the artifact)* | Suite in hand; if absent → **stop, hand off to `qa-test-case-designer`**. POMs that exist vs. must be built listed. |
-| 1 | Scaffold BDD layer *(skip if Reqnroll wired)* | Stand up Reqnroll + NUnit — packages, `reqnroll.json`, DI (`[ScenarioDependencies]`), `ScenarioState`, browser/driver hooks with teardown | `bdd-project-setup` | `dotnet build` → 0 errors/warnings; a throwaway smoke `.feature` parses and runs green |
+| 1 | Scaffold BDD layer *(skip if Reqnroll wired)* | Stand up Reqnroll + NUnit — packages, `reqnroll.json`, DI (`[ScenarioDependencies]`), `ScenarioState`, browser/driver hooks with teardown | `bdd-project-scaffold` | `dotnet build` → 0 errors/warnings; a throwaway smoke `.feature` parses and runs green |
 | 2 | Author feature files | Convert the suite into declarative, deduplicated `.feature` files — Background, Scenario Outline + Examples, tags from priority/type/AC; emit Step Catalog + Cleanup handoff | `qa/_shared/bdd/feature-file-writer/SKILL.md` | All parse; steps deduped to a catalog; Background/Outlines/tags applied; every TC-ID + AC mapped |
 | 3 | Generate step bindings | Bind every catalog step to a Reqnroll `[Binding]` method, split by domain, Cucumber Expressions, `ScenarioState` injected | `gherkin-step-code` | `dotnet build` green; features show **no undefined or ambiguous** steps |
 | 4 | Implement steps vs POMs | Implement each step body with existing page-object intent methods; build missing POMs; wire Cleanup as `[AfterScenario]` | `gherkin-step-code`, `page-object-design`, `page-objects-from-url` *(web, new POM — data-testid first)*, `ui-test-author/playwright` *(web)* or `mobile-screen-objects` + `ui-test-author/appium` *(mobile)* | `dotnet test` → the smoke scenario runs green end-to-end; rest bound or explicitly deferred |
-| 5 | Review | Hostile self-review — Gherkin quality + binding/DI/lifecycle correctness | `bdd-reviewer`, `ui-test-author/reviewer` | Review table has no blocker/major rows after fixes; traceability complete |
+| 5 | Review | Hostile self-review — Gherkin quality + binding/DI/lifecycle correctness | `bdd-reviewer`, `ui-test-author/review` | Review table has no blocker/major rows after fixes; traceability complete |
 
 ## Related agents (peers — invoke separately, do not load their skills)
 

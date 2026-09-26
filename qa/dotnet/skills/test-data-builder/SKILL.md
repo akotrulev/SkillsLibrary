@@ -194,7 +194,7 @@ Don't build "an order in the DB" inside the builder — that couples the builder
 3. Generate the builder under `tests/<project>/Builders/` following the template.
 4. Add an ObjectMother under `tests/<project>/Mothers/` with the canonical variants.
 5. Replace inline literals in 2–3 representative tests so the pattern is set; leave the rest as a follow-up sweep.
-6. Run `dotnet test` — every test still passes with the new defaults.
+6. Run `dotnet test` — every test still passes with the new defaults. Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run".
 
 ## Handoffs
 

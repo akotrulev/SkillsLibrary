@@ -575,7 +575,7 @@ public static class Orders
   `SqsClient.builder().endpointOverride(...)`, `receiveMessage(b -> b.waitTimeSeconds(10)...)`,
   `RedrivePolicy` attribute, Awaitility for side-effects, `org.testcontainers:localstack`
   `LocalStackContainer`). Structure ported, not code.
-- `qa-messaging-testing-typescript` — same skill, Node 20 + TS (`@aws-sdk/client-sqs`/`client-sns`:
+- `qa-messaging-testing-typescript` — same skill, Node 24 + TS (`@aws-sdk/client-sqs`/`client-sns`:
   `new SQSClient({ endpoint })`, `ReceiveMessageCommand({ WaitTimeSeconds: 10 })`, `expect.poll` for
   side-effects, `@testcontainers/localstack`).
 - `references/service-bus.md` (`service-bus`, the **structure this node is ported from**) — Azure Service

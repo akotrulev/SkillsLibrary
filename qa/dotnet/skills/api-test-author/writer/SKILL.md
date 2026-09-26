@@ -135,4 +135,4 @@ For unauthenticated negative tests, pass `string.Empty` to the client constructo
    - For 4xx tests, use the raw `RestResponse` overload, call `AttachBody(response)`, then `Deserialize<ProblemDetailsDto>(response)` from `BaseApiTest`.
    - Use explicit types (no `var`) for all local variables in test methods.
    - Track any resource the test creates (`_createdIds.Add(dto.Id)`) and delete it in `[TearDown]` — no `try`/`finally` in the test, no `try`/`catch` in the teardown.
-7. Run `dotnet build ApiTests/ApiTests.csproj` — expect 0 errors.
+7. Run `dotnet build ApiTests/ApiTests.csproj` — expect 0 errors. Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run".

@@ -42,10 +42,11 @@ From `ai-feature-testing`, non-negotiable:
 - Honor every global rule in the library `CLAUDE.md`: nullable reference types, constructor injection, async all the way, structured logging, **no secrets in code** (`ANTHROPIC_API_KEY` / judge keys via env + secret store), behavior-describing names, one logical property per case, builders for 4+ field data.
 - Read 2–3 existing files before writing anything; match the project's conventions.
 - Work **one step at a time**; don't start N+1 until N's gate passes. If invoked for one step, do only that step.
-- Run what you write — a step whose eval never executed does not pass its gate; fix and re-run once before reporting.
+- Run what you write, outside a `Gate: none` plan task — a step whose eval never executed does not pass its gate; fix and re-run once before reporting.
 - **No real PII / customer prompts in committed cases** — synthetic or redacted only.
 - A genuine **product defect** in the LLM feature (a real regression, not a flake or env issue) → hand it to `qa-test-case-designer` (owns bug reports), mark the case blocked, continue.
 - **Emit no comments.** Per `ep-code-comments`: no inline comments in any body you write, and a doc comment only where the name genuinely cannot carry the meaning *and* the flow is complex (a non-obvious rule, a caller-facing ordering/lifetime constraint, a deliberate deviation, or a contract the signature can't express). Strip scaffolded template comments from anything a CLI generated. Wanting to explain a block is the signal to extract and name it.
+- **Inside a plan task, the prompt block's `Gate:` line decides what you run.** A `Gate: none` task writes its code and tests and runs no build, test suite, lint or typecheck, whatever an exit criterion below says; only the task that carries the plan's gate runs them.
 
 ## Choosing the spine (Step 0, before Step 1)
 
@@ -65,11 +66,9 @@ Most requests land on an eval suite that already exists. Do **not** re-author fr
 
 **Orientation 1 — read the cache.** Run `ep-agent-orientation-cache`'s gate against `docs/agent-context/qa-llm-dotnet.md` → **TRUST** (skip orientation), **DELTA** (refresh only what the git delta invalidated — a changed `.csproj` / `Directory.Packages.props` / `global.json` invalidates the version lane and everything keyed to it), or **FULL**. Report the verdict in one line; don't narrate the checks.
 
-**Orientation 2 — derive the gaps.** Recover, don't author. For whatever the gate left unresolved:
+**Orientation 2 — derive the gaps.** Recover, don't author. For whatever the gate left unresolved, read 2–3 representative files (the dataset, the assertion/rubric config, the judge pinning) and produce a short **current-state map**: **spine + version** (promptfoo YAML vs DeepEval pytest) and **judge-model pinning** — which model scores rubrics; it must stay pinned for cross-run comparability; **dataset shape** — existing cases, their property/rubric/grounding assertions, how they trace to the prompt template under test; **how it's invoked** and the **pass-rate threshold** in place (stochastic, not single-run pass/fail); **baseline** — the last known-good pass-rate. Outside a `Gate: none` plan task, confirm it **runs and produces a scored report** on arrival; if not, that's a finding, not your bug to absorb.
 
-Recover, don't author. Read 2–3 representative files (the dataset, the assertion/rubric config, the judge pinning) and produce a short **current-state map**: **spine + version** (promptfoo YAML vs DeepEval pytest) and **judge-model pinning** — which model scores rubrics; it must stay pinned for cross-run comparability; **dataset shape** — existing cases, their property/rubric/grounding assertions, how they trace to the prompt template under test; **how it's invoked** and the **pass-rate threshold** in place (stochastic, not single-run pass/fail); **baseline** — the last known-good pass-rate. Confirm it **runs and produces a scored report** on arrival; if not, that's a finding, not your bug to absorb.
-
-**Orientation 3 — re-verify what is never cached.** Whether it is **green on arrival** is working-tree state, not layout — check it every run regardless of the gate's verdict, and treat a red state as a finding to report rather than your bug to absorb. Then spot-check any file the map names that you are about to edit: **the map is a lead, not evidence**. The highest-risk cached line here is **the pinned judge model and its version** — an unpinned or drifted judge silently re-scores every historical result, so comparisons across runs stop meaning anything.
+**Orientation 3 — re-verify what is never cached.** Whether it is **green on arrival** is working-tree state, not layout — check it every run outside a `Gate: none` plan task, regardless of the cache gate's verdict, and treat a red state as a finding to report rather than your bug to absorb. Then spot-check any file the map names that you are about to edit: **the map is a lead, not evidence**. The highest-risk cached line here is **the pinned judge model and its version** — an unpinned or drifted judge silently re-scores every historical result, so comparisons across runs stop meaning anything.
 
 **What this agent's cache records:**
 

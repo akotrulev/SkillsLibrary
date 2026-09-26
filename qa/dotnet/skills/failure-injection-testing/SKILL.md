@@ -284,7 +284,7 @@ failing?*
 
 **Composing with the dependency families.** The thing you fault is stood up by Testcontainers
 (`ToxiproxyContainer` next to a `PostgreSqlContainer` on a shared `Network`); the dependency itself is exercised
-happy-path by `qa-db-testing-dotnet` / `qa-messaging-testing-dotnet`. Chaos adds the proxy in front and
+happy-path by `qa-db-testing-testcontainers-dotnet` / `qa-messaging-testing-dotnet`. Chaos adds the proxy in front and
 asserts the resilience layer — it **composes**. A data-driven fault matrix binds via `qa-data-driven-testing-dotnet`.
 
 ## Rules (hard constraints)
@@ -315,7 +315,7 @@ asserts the resilience layer — it **composes**. A data-driven fault matrix bin
   faults**. Observe vs break.
 - `qa-data-driven-testing-dotnet` — drive a **fault matrix** (toxic × parameter × expected pattern) via
   `[TestCaseSource]` instead of copy-pasted `[Test]` methods.
-- `qa-db-testing-dotnet` · `qa-messaging-testing-dotnet` — the dependencies you fault (DB / broker
+- `qa-db-testing-testcontainers-dotnet` · `qa-messaging-testing-dotnet` — the dependencies you fault (DB / broker
   connections through the proxy); they cover the happy path this inverts.
 - `qa-realtime-stream-testing-dotnet` — shares the **lifecycle discipline** (steady → perturb → assert →
   recover) and bounded-condition waits (never `Task.Delay`-as-a-wait).

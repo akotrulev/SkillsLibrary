@@ -1,6 +1,6 @@
 ---
 name: qa-api-client-writer-dotnet
-description: Use when the user asks to create a new API client or `*Client.cs` file in the Accelerator `ApiTests` project (RestSharp, .NET 10 (8-9 supported)). Triggers: "write an API client for X", "add a Client.cs for the {resource} endpoints", "scaffold {Resource}Client".
+description: Use when the user asks to create a new API client or `*Client.cs` file in the Accelerator `ApiTests` project (RestSharp, .NET 10 (8-9 supported)). Triggers: "write an API client for X", "add a Client.cs for the {resource} endpoints", "scaffold {Resource}Client". Do NOT use for DTOs (`qa-api-models-dotnet`) or the tests themselves (`qa-api-test-writer-dotnet`).
 ---
 
 # qa-api-client-writer-dotnet
@@ -282,4 +282,4 @@ Only add these overloads when the test plan requires them — not by default.
 3. Ask which **operations** are needed, and whether they are user-facing, admin, or both. Default to full CRUD on the user-facing surface.
 4. Ensure the required DTOs exist in `Models/{Api}/{Resource}Models/`. If not, run the `api-models` skill first.
 5. Generate the file at `ApiTests/Clients/{Api}/{Resource}Client.cs`.
-6. Run `dotnet build ApiTests/ApiTests.csproj` — expect 0 errors.
+6. Run `dotnet build ApiTests/ApiTests.csproj` — expect 0 errors. Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run".

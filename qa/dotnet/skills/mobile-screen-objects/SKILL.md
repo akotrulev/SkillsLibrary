@@ -1,6 +1,6 @@
 ---
 name: qa-mobile-screen-objects-dotnet
-description: Use when the user wants a .NET (C#) Appium page object created or updated from elements already discovered on a live screen. Triggers: "create a page object for the Login screen", "add a page for the … screen", "implement the … page".
+description: Use when the user wants a .NET (C#) Appium page object created or updated from elements already discovered on a live screen. Triggers: "create a page object for the Login screen", "add a page for the … screen", "implement the … page". Do NOT use for discovering a screen's elements (`qa-mobile-screen-explorer-dotnet`) or web page objects (`qa-page-object-design-dotnet`).
 ---
 
 # QA — Appium Page Object Builder (.NET)
@@ -102,7 +102,7 @@ private const string PasswordRevealXPath = "//*[@class='…ImageButton'][2]";
    - Element's accessibility id changed → update the constant, note it as a breaking rename for the team
    - Fallback locator where an accessibility id now exists → upgrade to `FindByAccessibilityId`, drop the `// TODO`, remove the row from `missing-testids.md`
    - Never reorder/rename existing public methods tests already call without flagging it
-5. **Verify:** `dotnet build` (or the project equivalent) → compiles clean. Confirm `VerifyPageLoaded()`'s landmark matches what `mobile-screen-explorer` reported for this screen.
+5. **Verify:** `dotnet build` (or the project equivalent) → compiles clean. Confirm `VerifyPageLoaded()`'s landmark matches what `mobile-screen-explorer` reported for this screen. Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run".
 6. **Report:** class created/updated (diff summary), counts (accessibility-id-backed / fallback / ⚠ XPath), destination stubs created, open questions.
 
 ## Rules

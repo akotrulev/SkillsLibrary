@@ -1,6 +1,6 @@
 ---
 name: qa-api-models-dotnet
-description: Use when creating a new DTO, model class, or response object in a .NET 10 (8-9) / System.Text.Json API test project. Triggers "add a {Resource}Dto", "create the InDto / ModDto for the {resource} endpoint", "scaffold the wrapper DTO for paginated {resource}". Not for the client that calls the endpoint (`api-client-writer`) or the test itself (`api-test-author/generator`).
+description: Use when creating a new DTO, model class, or response object in a .NET 10 (8-9) / System.Text.Json API test project. Triggers "add a {Resource}Dto", "create the InDto / ModDto for the {resource} endpoint", "scaffold the wrapper DTO for paginated {resource}". Not for the client that calls the endpoint (`api-client-writer`) or the test itself (`api-test-author/writer`).
 ---
 
 # qa-api-models-dotnet
@@ -17,7 +17,7 @@ Generator skill. Scaffolds a single DTO file in the Accelerator `ApiTests` proje
 
 - Java or TypeScript DTOs — use `qa-api-models-java` / `qa-api-models-typescript`.
 - Production domain models — DTOs here exist only for the test project.
-- Writing the client itself — use `qa-api-client-writer`.
+- Writing the client itself — use `qa-api-client-writer-dotnet`.
 - Reacting to a **new version of a swagger/OpenAPI spec** — start at `qa-api-spec-assets-shared`: it replaces the stored spec asset in place, derives the changed-DTO work list from `git diff`, and comes back here for only the files that list names. Do not re-generate every DTO because the spec moved.
 
 ## Folder & naming convention
@@ -174,4 +174,4 @@ public class {Resource}ListDto
 2. Ask: resource name and DTO kind (`Dto`, `InDto`, `ModDto`, nested, wrapper).
 3. Ask which properties are needed, or inspect a sample API response.
 4. Generate at `ApiTests/Models/{Api}/{Resource}Models/{Name}Dto.cs`.
-5. Run `dotnet build ApiTests/ApiTests.csproj` — expect 0 errors.
+5. Run `dotnet build ApiTests/ApiTests.csproj` — expect 0 errors. Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run".

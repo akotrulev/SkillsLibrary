@@ -11,8 +11,10 @@ now emit `## Close-out — every task`; `docs/plans/implemented/` created, holdi
 documenter and pattern lane, and backend/dotnet; `UNIT-TESTING-PLAN.md` and `DOCUMENTER-PLAN.md` filed
 to `docs/plans/implemented/`, and the backend audit filed live as `docs/plans/backend-PLAN.md`). S4 landed
 2026-09-26 (backend/java, backend/node and backend/python; the Gate line in `be-java`, `be-node` and
-`be-python`, the seven be-python descriptions under budget). S5 is next. S1–S18 are ungated: the edits
-from S1 to S4 are built but unverified until G1 runs §7.
+`be-python`, the seven be-python descriptions under budget). S5 landed 2026-09-26 (qa/dotnet API, BDD
+and LLM lanes: the Gate line in three agents, 35 stale skill-path citations and 15 missing Do-NOT
+clauses fixed; the stale-path and "Run what you write" families are carried into S6–S13, S15 and S16).
+S6 is next. S1–S18 are ungated: the edits from S1 to S5 are built but unverified until G1 runs §7.
 
 ## 1. What already exists, and what is missing
 
@@ -844,6 +846,72 @@ hits 20k, descriptions 7k, ~13 files modified 20k, read-back 6k, churn ×1.2
 - First qa stack task: write the families you found (a renamed skill cited in all stacks, a phrase
   every qa agent copies) into the traps of S6–S10, per Close-out step 3.
 - **Not in S5:** the UI, mobile and performance lanes and `qa/dotnet/commands/` (S6).
+- **As built (2026-09-26):** `qa/dotnet/agents/{qa-api-dotnet,qa-bdd-dotnet,qa-llm-dotnet}.md` (read in
+  full) and the 26 skill folders their loading lists name: `api-project-setup`, `test-login-tokens`,
+  `api-models`, `api-client-writer`, `test-data-builder`, `api-test-author/{writer,playwright,graphql,grpc,review}`,
+  `data-driven-testing`, `db-testing/{connection,testcontainers,verification-queries}`, `messaging-testing`,
+  `file-storage-testing`, `email-testing`, `realtime-stream-testing`, `api-contract-testing`,
+  `failure-injection-testing`, `feature-flag-testing`, `test-quality-check`, `standards-audit`,
+  `bdd-project-scaffold`, `bdd-reviewer`, `gherkin-step-code`, `page-object-design`,
+  `page-objects-from-url`, `ui-test-author/{playwright,appium,review}`, `mobile-screen-objects`,
+  `ai-feature-testing`, `ai-answer-quality-testing`. **S6 owns the rest:** `accessibility-testing`,
+  `browser-cloud-setup`, `device-cloud`, `inhouse-framework-conventions`, `language-testing`,
+  `load-testing`, `mobile-app-crawler`, `mobile-native-features`, `mobile-project-setup`,
+  `mobile-screen-explorer`, `network-mocking`, `performance-project-setup`, `production-uptime-checks`,
+  `responsive-testing`, `security-testing/*`, `ui-project-setup`, `ui-test-author/selenium`,
+  `visual-regression`. Gate line added to 3 agents, each as the last Operating-rules bullet.
+  Data issues: 46 fixed.
+  - K1: `qa-api-client-writer` → `qa-api-client-writer-dotnet` (`api-models/SKILL.md:20`);
+    `qa-db-testing-dotnet` ×2 → `qa-db-testing-testcontainers-dotnet` (`failure-injection-testing/SKILL.md:287`,
+    `:318`; both sentences are about the Testcontainers-hosted dependency).
+  - **Stale path shorthands** (the resolver cannot see them: they are paths, not prefixed names), 35
+    occurrences in 2 agents and 17 skill files. The folders were renamed but the citations were not:
+    `api-test-author/generator` → `writer`, `api-test-author/reviewer` → `review`,
+    `ui-test-author/reviewer` → `review`, `db-testing/client` → `connection`, `bdd-project-setup` →
+    `bdd-project-scaffold`, and `conformance-audit` → `standards-audit` (`qa-api-dotnet.md:78`). Every
+    step-table hit in `qa-api-dotnet.md:74–78` and `qa-bdd-dotnet.md:83`, `:87` pointed at a folder that
+    does not exist.
+  - K6: `Node 20` ×8 in 7 files, all "same skill, Node 20 + TS" sibling lines
+    (`realtime-stream-testing/SKILL.md:379`, the four `messaging-testing/references/*`, the two
+    `file-storage-testing/references/*`) → Node 24. `realtime-stream-testing:380` names Node 20 as the
+    polyfill boundary; it stays and now flags Node 20 as EOL. No `Node 20` hit is left in `qa/dotnet`,
+    so S6 has none.
+  Code issues: 37 fixed.
+  - K7: 15 descriptions gained a Do-NOT clause pointing at the sibling (e.g. `api-client-writer`,
+    `page-object-design`, `ui-test-author/{playwright,review}`, `test-login-tokens`, `api-contract-testing`,
+    `test-quality-check`, `ai-answer-quality-testing`); `api-test-author/grpc`, `data-driven-testing` and
+    `standards-audit` now open with "Use when". All ≤ 500 (largest 483). The three agent descriptions
+    already fit (521, 592, 583) and open with the role, as S2/S3 kept.
+  - K5: `standards-audit/SKILL.md:12` "Announce at start" → "State the mode … in the first line of
+    output"; the all-caps "THE SCOPE FENCE" heading became sentence case.
+  - K2 for skills: one `Gate: none` sentence ("written, not run") on the run/verify step of 16 skills
+    (`api-models:177`, `api-client-writer:285`, `api-test-author/writer:138`, `…/playwright:250`,
+    `ui-test-author/playwright:315`, `…/appium:377`, `page-objects-from-url` §6, `mobile-screen-objects:105`,
+    `bdd-project-scaffold:51`, `gherkin-step-code:148`, `test-data-builder:197`, `db-testing/connection:263`,
+    `…/testcontainers:269`, `api-contract-testing:244`, `api-project-setup:208`, `test-login-tokens:123`).
+  - `qa-llm-dotnet.md` Orientation 2 said "Recover, don't author" twice; merged into one paragraph.
+  Logical conflicts: 7 fixed.
+  - The operating rule "Run what you write — a step whose code never executed does not pass its gate"
+    contradicts a `Gate: none` task; in all three agents it now reads "Run what you write, outside a
+    `Gate: none` plan task". **New family** — every qa agent and `fe-blazor`, `fe-react`,
+    `tooling-engineer` carry it.
+  - The orientation "every run regardless of (the gate's) verdict" now reads "every run outside a
+    `Gate: none` plan task, regardless of the cache gate's verdict" (`qa-api-dotnet.md:58`,
+    `qa-bdd-dotnet.md:47`, `qa-llm-dotnet.md:70`); `qa-llm-dotnet.md:68`'s "confirm it runs … on
+    arrival" got the same exception.
+  Cleanup: none. The K9 recipes found no plan, progress or tracked junk file in `qa/dotnet`, and every
+  qa/dotnet skill, agent and command is listed in the marketplace.
+  Kept on purpose:
+  - K4 hits are D8 vocabulary (RAG retrieval/generation "stages", a Pact deploy "stage", Azure block
+    staging). K3 hits are code branches, feature-flag branches, Pact `--branch` and "branch coverage".
+  - K8 hits are the .NET CLI in exit criteria, procedure steps and checklists. `dotnet test` is the
+    project's own command in a .NET suite; `pip install deepteam` is a tool install line.
+  - "— MANDATORY SECTION" and the `be-shared-session-budget` Step 5 closing duty do not occur in
+    `qa/dotnet`; the `NEVER` in `production-uptime-checks` / `mobile-native-features` code comments is S6's.
+  Carried forward: the stale-path family and the "Run what you write" family are traps in S6–S10;
+  the stale paths also occur in `qa/_shared` and `qa/manual` (S11), `frontend/blazor/skills/forms`
+  (S13) and `data/_shared/slow-query-fixes` (S15), so those blocks carry it too.
+  Unverified: nothing was run beyond §4's searches (Gate: none). Left for the user: nothing.
 
 ### S6 — qa/dotnet UI, mobile and performance lanes
 
@@ -1214,57 +1282,9 @@ name: the K1 resolver flags it (D12).
 | S18 | `docs` | `general-purpose` | — | ~135k |
 | G1 | `docs` | `general-purpose` | S1–S18 | ~120k |
 
-S1 to S4 have landed, and their prompts are deleted; the 15 prompts from S5 to G1 are live.
+S1 to S5 have landed, and their prompts are deleted; the 14 prompts from S6 to G1 are live.
 
 ---
-
-### S5 — qa/dotnet API, BDD and LLM lanes (general-purpose, docs)
-
-````
-You are `general-purpose`. Task S5 of docs/plans/001-library-conformance-sweep.md: bring qa/dotnet's
-API, BDD and LLM lanes in line with the plan's checks K1–K9.
-
-Deliverable: qa-api-dotnet, qa-bdd-dotnet, qa-llm-dotnet and every qa/dotnet skill they load pass
-K1–K9, and the finding families found here are written into S6–S10 as traps.
-
-Read, in this order:
-1. CLAUDE.md, especially the Test code rules and the version policy.
-2. The plan: §2 (the lane rule), §3, §4, §6 (the S5 rows), D1–D11, task S5.
-3. CONTRIBUTING.md.
-4. qa/dotnet/agents/{qa-api-dotnet,qa-bdd-dotnet,qa-llm-dotnet}.md in full. Their skill-loading
-   lists decide which qa/dotnet/skills/ are yours; a skill the other lanes also load is yours.
-5. The plan's "Close-out — every task".
-
-Do:
-- Run §4's recipes with DIR=qa/dotnet; work only the hits in your agents and skills.
-- K1: `qa-api-client-writer` (skills/api-models/SKILL.md), `qa-db-testing-dotnet` ×2
-  (skills/failure-injection-testing/SKILL.md) — resolve to the real frontmatter names.
-- K2: the Gate line in the three agents; the "green" exit criteria stay.
-- K6: Node 20 hits in your skills → Node 24.
-- List your skills in the As built note; S6 owns the rest.
-- Write the families you found into the traps of S6–S10 (Close-out step 3).
-
-Traps:
-- Agent sentences S3/S4 fixed in backend recur in 28 agents across S5–S17; fix them where your
-  agents carry them:
-  - "— MANDATORY SECTION" on the brownfield heading is dropped (K5).
-  - The orientation pass's "every run regardless of the gate's verdict" (the cache gate) gains
-    "outside a `Gate: none` plan task".
-  - A closing duty "per `be-shared-session-budget` Step 5" now reads "per the plan's
-    `## Close-out — every task` section (plan format §7)".
-  - A skill's Validation / Verify list gets one sentence: inside a `Gate: none` plan task it runs
-    none of the checks and reports "written, not run".
-  - K8: a hardcoded `pnpm …` / `npm …` in an instruction becomes the project's own script, run with
-    the package manager `packageManager` names.
-- The same skills exist in qa/java and qa/typescript under the same folder names. A family found here
-  almost certainly recurs there, which is why you write it forward.
-- Code samples are teaching apparatus: K8 does not touch them.
-
-Gate: none — this plan gates once, in G1. Do not run tools/token-audit.py or §7's script.
-
-Commit: `chore(sweep S5): qa/dotnet API, BDD and LLM lanes`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
 
 ### S6 — qa/dotnet UI, mobile and performance lanes (general-purpose, docs)
 
@@ -1289,7 +1309,7 @@ Do:
   did not own.
 - K1: `qa-ci-pipelines` and `qa-performance-nbomber` (skills/production-uptime-checks/SKILL.md).
 - K2: the Gate line in the three agents.
-- K6: the remaining Node 20 hits → Node 24.
+- K6: S5 moved all 8 qa/dotnet Node 20 hits; confirm the recipe prints only the flagged EOL line.
 
 Traps:
 - Agent sentences S3/S4 fixed in backend recur in 28 agents across S5–S17; fix them where your
@@ -1303,7 +1323,17 @@ Traps:
     none of the checks and reports "written, not run".
   - K8: a hardcoded `pnpm …` / `npm …` in an instruction becomes the project's own script, run with
     the package manager `packageManager` names.
-- S5 may have added finding families to this block; they are listed here once S5 lands.
+  - The operating rule "Run what you write — a step whose code never executed does not pass its
+    gate" becomes "Run what you write, outside a `Gate: none` plan task — …" (S5; every qa agent
+    carries it).
+- Stale path shorthands (S5): skill folders were renamed but citations were not, and the K1
+  resolver cannot see paths. Grep for `api-test-author/generator` → `writer`,
+  `api-test-author/reviewer` and `ui-test-author/reviewer` → `review`, `db-testing/client` →
+  `connection`, `bdd-project-setup` → `bdd-project-scaffold`, `conformance-audit` →
+  `standards-audit`, and check every step-table path against the folder on disk.
+- Known S6 hits of that family: `qa-ui-dotnet.md:101`, `:102`, `:104`, `qa-mobile-dotnet.md:87`,
+  `:88`, `qa-performance-dotnet.md:92`, `network-mocking/SKILL.md:3`. S5 left no `Node 20` hit in
+  qa/dotnet, and S5 fixed the shared `ui-test-author/{playwright,appium,review}` skills already.
 - mobile-app-crawler's screen-map template links are deliberate examples.
 
 Gate: none — this plan gates once, in G1. Do not run tools/token-audit.py or §7's script.
@@ -1348,6 +1378,18 @@ Traps:
     none of the checks and reports "written, not run".
   - K8: a hardcoded `pnpm …` / `npm …` in an instruction becomes the project's own script, run with
     the package manager `packageManager` names.
+  - The operating rule "Run what you write — a step whose code never executed does not pass its
+    gate" becomes "Run what you write, outside a `Gate: none` plan task — …" (S5; every qa agent
+    carries it).
+- Stale path shorthands (S5): skill folders were renamed but citations were not, and the K1
+  resolver cannot see paths. Grep for `api-test-author/generator` → `writer`,
+  `api-test-author/reviewer` and `ui-test-author/reviewer` → `review`, `db-testing/client` →
+  `connection`, `bdd-project-setup` → `bdd-project-scaffold`, `conformance-audit` →
+  `standards-audit`, and check every step-table path against the folder on disk.
+- Known S7 hits of that family: `gherkin-step-code/SKILL.md:3`, `:8`, `:26`,
+  `bdd-project-scaffold`, `api-test-author/{playwright,review}`, `db-testing/connection`,
+  `file-storage-testing/references/{s3,azure-blob}.md`.
+- Descriptions lacking a Do-NOT clause were common in qa/dotnet (15 of 26 skills); expect the same.
 - S5 found the dotnet side of each family first; its As built note tells you the real names.
 - Java 21 + Spring Boot 3.x is the policy; a Java 17 mention is a K6 hit unless it is a migration
   source.
@@ -1395,6 +1437,14 @@ Traps:
     none of the checks and reports "written, not run".
   - K8: a hardcoded `pnpm …` / `npm …` in an instruction becomes the project's own script, run with
     the package manager `packageManager` names.
+  - The operating rule "Run what you write — a step whose code never executed does not pass its
+    gate" becomes "Run what you write, outside a `Gate: none` plan task — …" (S5; every qa agent
+    carries it).
+- Stale path shorthands (S5): skill folders were renamed but citations were not, and the K1
+  resolver cannot see paths. Grep for `api-test-author/generator` → `writer`,
+  `api-test-author/reviewer` and `ui-test-author/reviewer` → `review`, `db-testing/client` →
+  `connection`, `bdd-project-setup` → `bdd-project-scaffold`, `conformance-audit` →
+  `standards-audit`, and check every step-table path against the folder on disk.
 - S6 resolved the dotnet version of production-uptime-checks; match its choice.
 
 Gate: none — this plan gates once, in G1. Do not run tools/token-audit.py or §7's script.
@@ -1441,6 +1491,18 @@ Traps:
     none of the checks and reports "written, not run".
   - K8: a hardcoded `pnpm …` / `npm …` in an instruction becomes the project's own script, run with
     the package manager `packageManager` names.
+  - The operating rule "Run what you write — a step whose code never executed does not pass its
+    gate" becomes "Run what you write, outside a `Gate: none` plan task — …" (S5; every qa agent
+    carries it).
+- Stale path shorthands (S5): skill folders were renamed but citations were not, and the K1
+  resolver cannot see paths. Grep for `api-test-author/generator` → `writer`,
+  `api-test-author/reviewer` and `ui-test-author/reviewer` → `review`, `db-testing/client` →
+  `connection`, `bdd-project-setup` → `bdd-project-scaffold`, `conformance-audit` →
+  `standards-audit`, and check every step-table path against the folder on disk.
+- Known S9 hits of that family: `gherkin-step-code/SKILL.md` and its two references,
+  `bdd-project-scaffold`, `api-test-author/{playwright,review}`, `db-testing/connection`,
+  `file-storage-testing/references/{s3,azure-blob}.md`.
+- Descriptions lacking a Do-NOT clause were common in qa/dotnet (15 of 26 skills); expect the same.
 - The agents' descriptions say "TypeScript/Node 20". Descriptions are always-on text, so they must
   change too, and must stay within 650 chars.
 - A substitution over files you do not own collides with S10. Scope the command to your file list.
@@ -1489,6 +1551,14 @@ Traps:
     none of the checks and reports "written, not run".
   - K8: a hardcoded `pnpm …` / `npm …` in an instruction becomes the project's own script, run with
     the package manager `packageManager` names.
+  - The operating rule "Run what you write — a step whose code never executed does not pass its
+    gate" becomes "Run what you write, outside a `Gate: none` plan task — …" (S5; every qa agent
+    carries it).
+- Stale path shorthands (S5): skill folders were renamed but citations were not, and the K1
+  resolver cannot see paths. Grep for `api-test-author/generator` → `writer`,
+  `api-test-author/reviewer` and `ui-test-author/reviewer` → `review`, `db-testing/client` →
+  `connection`, `bdd-project-setup` → `bdd-project-scaffold`, `conformance-audit` →
+  `standards-audit`, and check every step-table path against the folder on disk.
 - WebdriverIO/Appium examples pin Node in CI YAML. A matrix may keep Node 22 beside 24.
 
 Gate: none — this plan gates once, in G1. Do not run tools/token-audit.py or §7's script.
@@ -1532,6 +1602,10 @@ Traps:
     none of the checks and reports "written, not run".
   - K8: a hardcoded `pnpm …` / `npm …` in an instruction becomes the project's own script, run with
     the package manager `packageManager` names.
+- Stale path shorthands (S5): `api-test-author/generator` → `writer`, `api-test-author/reviewer`
+  and `ui-test-author/reviewer` → `review`, `bdd-project-setup` → `bdd-project-scaffold`. Known
+  hits: `qa/_shared/{bdd/feature-file-writer,contract-testing-pact,performance}/SKILL.md`,
+  `qa/manual/{test-strategy,exploratory-charter-writer}/SKILL.md`. The K1 resolver cannot see paths.
 - qa-security's authorization and scope rules are hard safety rules (K5 keep).
 - qa/_shared skills are loaded by all three qa stacks. Change descriptions, not skill names.
 
@@ -1579,6 +1653,9 @@ Traps:
     none of the checks and reports "written, not run".
   - K8: a hardcoded `pnpm …` / `npm …` in an instruction becomes the project's own script, run with
     the package manager `packageManager` names.
+  - The operating rule "Run what you write — a step whose code never executed does not pass its
+    gate" becomes "Run what you write, outside a `Gate: none` plan task — …" (S5; every qa agent
+    carries it).
 - "Stage" is CI vocabulary here (D8). Azure DevOps stages stay.
 - Over budget: if the session runs long, finish qa/cicd first, then qa/reporting. The split point is
   between the folders.
@@ -1632,6 +1709,11 @@ Traps:
     none of the checks and reports "written, not run".
   - K8: a hardcoded `pnpm …` / `npm …` in an instruction becomes the project's own script, run with
     the package manager `packageManager` names.
+  - The operating rule "Run what you write — a step whose code never executed does not pass its
+    gate" becomes "Run what you write, outside a `Gate: none` plan task — …" (S5; every qa agent
+    carries it).
+- Stale path (S5): `frontend/blazor/skills/forms/SKILL.md:201` cites
+  `qa/api-test-author/generator/dotnet`; the folder is `qa/dotnet/skills/api-test-author/writer`.
 - The Frontend code rules in CLAUDE.md are house rules, not dated emphasis; where a skill restates
   them in bold, they stay.
 - `data-testid` and the other `data-*` tokens are HTML attributes.
@@ -1737,6 +1819,8 @@ Traps:
     none of the checks and reports "written, not run".
   - K8: a hardcoded `pnpm …` / `npm …` in an instruction becomes the project's own script, run with
     the package manager `packageManager` names.
+- Stale path (S5): `data/_shared/slow-query-fixes/SKILL.md:117` cites
+  `qa/<stack>/skills/api-test-author/reviewer`; the folder is `…/api-test-author/review`.
 - Expand/contract "phases" are domain vocabulary (D8).
 - Never up-level a data engine version in a probe-first recipe. The recipes are keyed to the live
   server's version.
@@ -1787,6 +1871,9 @@ Traps:
     none of the checks and reports "written, not run".
   - K8: a hardcoded `pnpm …` / `npm …` in an instruction becomes the project's own script, run with
     the package manager `packageManager` names.
+  - The operating rule "Run what you write — a step whose code never executed does not pass its
+    gate" becomes "Run what you write, outside a `Gate: none` plan task — …" (S5; every qa agent
+    carries it).
 - ba-project-memory's links (areas/ordering.md, entities/order.md, …) are deliberate examples.
 - requirements-author hands off to /dev-plan-solution (S2's lane). Keep that handoff name exact.
 

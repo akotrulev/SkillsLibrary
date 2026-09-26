@@ -1,6 +1,6 @@
 ---
 name: qa-page-objects-from-url-dotnet
-description: Use when the user gives a website URL or an HTML page and wants a Page Object Model extracted/built/updated from it for a .NET Playwright suite. Triggers: "build a POM from this URL", "extract locators from this page", "update the LoginPage object from the live site".
+description: Use when the user gives a website URL or an HTML page and wants a Page Object Model extracted/built/updated from it for a .NET Playwright suite. Triggers: "build a POM from this URL", "extract locators from this page", "update the LoginPage object from the live site". Do NOT use for designing the POM structure (`qa-page-object-design-dotnet`) or Appium screens (`qa-mobile-screen-objects-dotnet`).
 ---
 
 # QA — POM Builder from Live Page (.NET)
@@ -123,6 +123,8 @@ Apply the page-object rules from `qa/dotnet/skills/ui-test-author/playwright` (c
 - Never reorder/rename existing public methods that tests already call without flagging it
 
 ### 6. Verify and hand off
+
+Inside a plan task marked `Gate: none`, run none of the checks below and report the POM as "written, not run".
 
 - `dotnet build` (or project equivalent) → must compile clean.
 - If a smoke test exists for the page, run it; if the POM is new, verify the load-assertion landmark against one more live snapshot.

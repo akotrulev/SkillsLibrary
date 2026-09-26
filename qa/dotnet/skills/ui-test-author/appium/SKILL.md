@@ -374,7 +374,7 @@ public class AuthenticationTest : BaseMobileTest
    - One query method per piece of data the test needs to read
 5. If a destination page doesn't exist yet, create a stub or recursively generate it.
 6. Generate the test class extending `BaseMobileTest`; one `[Test]` per scenario, with assertions on user-visible outcomes.
-7. Run `dotnet test AppiumTests/AppiumTests.csproj -p:Platform=android` (or `ios`) — expect 0 failures. If the Appium server isn't reachable, check `Env.AppiumServerUrl`, that `appium server` is running (`curl -s http://127.0.0.1:4723/status` succeeds), and that the server log's `Available drivers:` line lists your driver (`uiautomator2` / `xcuitest`; `appium driver list --installed`).
+7. Run `dotnet test AppiumTests/AppiumTests.csproj -p:Platform=android` (or `ios`) — expect 0 failures. If the Appium server isn't reachable, check `Env.AppiumServerUrl`, that `appium server` is running (`curl -s http://127.0.0.1:4723/status` succeeds), and that the server log's `Available drivers:` line lists your driver (`uiautomator2` / `xcuitest`; `appium driver list --installed`). Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run".
 
 > **A test that can't find a visible element is usually not a locator bug.** Per the Appium team, an element absent from page source is most often an accessibility, app-state, active-app (system alert/overlay), or native-vs-WebView context problem — fix that before rewriting the selector. For environment/doctor failures and driver-specific locator questions, the `@appium/mcp-documentation` server (`appium_skills`, `appium_documentation_query`) answers authoritatively; prefer it over community forums.
 

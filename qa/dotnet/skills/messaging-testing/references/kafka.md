@@ -504,7 +504,7 @@ public static class Orders
 - `qa-messaging-testing-java` — the **canonical** stack, Java 21 / TestNG (`org.apache.kafka:kafka-clients`:
   `KafkaProducer`/`KafkaConsumer`, `consumer.poll(Duration)`, `auto.offset.reset=earliest`, `commitSync`,
   Awaitility for side-effects, `ConfluentKafkaContainer`/`RedpandaContainer`). This file is ported from it.
-- `qa-messaging-testing-typescript` — same skill, Node 20 + TS (`kafkajs`: `consumer.subscribe({
+- `qa-messaging-testing-typescript` — same skill, Node 24 + TS (`kafkajs`: `consumer.subscribe({
   fromBeginning: true })` + `consumer.run({ eachMessage })` collecting into a buffer, `expect.poll`,
   `@testcontainers/kafka`). Note: kafkajs has **no synchronous poll** — a buffer + `expect.poll` is the port
   of this file's bounded consume loop.

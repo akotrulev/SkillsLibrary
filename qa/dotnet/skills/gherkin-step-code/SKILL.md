@@ -1,11 +1,11 @@
 ---
 name: qa-gherkin-step-code-dotnet
-description: Use when turning Gherkin `.feature` files into Reqnroll step definitions in C#/.NET, implementing each step against existing Page Object Models. Triggers "generate Reqnroll step definitions for these features", "bind these Gherkin steps to our page objects", "split the step definitions by domain". Not for writing the `.feature` files (`feature-file-writer`), scaffolding Reqnroll DI/hooks (`bdd-project-setup`), or building page objects (`page-object-design`).
+description: Use when turning Gherkin `.feature` files into Reqnroll step definitions in C#/.NET, implementing each step against existing Page Object Models. Triggers "generate Reqnroll step definitions for these features", "bind these Gherkin steps to our page objects", "split the step definitions by domain". Not for writing the `.feature` files (`feature-file-writer`), scaffolding Reqnroll DI/hooks (`bdd-project-scaffold`), or building page objects (`page-object-design`).
 ---
 
 # Reqnroll Step Bindings + POM Implementation (C# / .NET 8)
 
-Parses `.feature` files (and the **Step Catalog** from `feature-file-writer`) into Reqnroll `[Binding]` classes, **split by domain**, with parameterized Cucumber-Expression steps, and **implements each step by calling existing page-object intent methods**. Assertions live in `Then` steps; page objects only act and expose `ExpectLoadedAsync()`. The Reqnroll project, DI container, hooks, and `ScenarioState` already exist (from `bdd-project-setup`).
+Parses `.feature` files (and the **Step Catalog** from `feature-file-writer`) into Reqnroll `[Binding]` classes, **split by domain**, with parameterized Cucumber-Expression steps, and **implements each step by calling existing page-object intent methods**. Assertions live in `Then` steps; page objects only act and expose `ExpectLoadedAsync()`. The Reqnroll project, DI container, hooks, and `ScenarioState` already exist (from `bdd-project-scaffold`).
 
 ## Stack
 
@@ -23,7 +23,7 @@ Parses `.feature` files (and the **Step Catalog** from `feature-file-writer`) in
 ## When NOT to use
 
 - Authoring/canonicalizing `.feature` files → `qa/_shared/bdd/feature-file-writer`
-- Project/DI/hooks scaffold → `qa/dotnet/skills/bdd-project-setup`
+- Project/DI/hooks scaffold → `qa/dotnet/skills/bdd-project-scaffold`
 - Building or extracting page objects → `qa/dotnet/skills/page-object-design` / `page-objects-from-url` / `mobile-screen-objects`
 - Reviewing features + bindings → `qa/dotnet/skills/bdd-reviewer`
 - Java/TS step glue → `qa/{java,typescript}/skills/gherkin-step-code`
@@ -145,7 +145,7 @@ public void WhenISignInWith(string email, string password) =>
 4. Implement each body with page-object calls only; put assertions in `Then` with web-first `Expect`.
 5. For any missing page object/method, build it (`page-object-design`/`page-objects-from-url`) before binding the step.
 6. Ensure the Cleanup is implemented as the `[AfterScenario]` hook (scaffold layer), not as steps.
-7. `dotnet build`, then run the features: every step bound (no undefined/ambiguous), the smoke scenario green.
+7. `dotnet build`, then run the features: every step bound (no undefined/ambiguous), the smoke scenario green. Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run".
 
 ## Anti-patterns to flag
 
@@ -162,7 +162,7 @@ public void WhenISignInWith(string email, string password) =>
 ## Handoffs
 
 - `.feature` files / Step Catalog → `qa/_shared/bdd/feature-file-writer`
-- Project/DI/hooks → `qa/dotnet/skills/bdd-project-setup`
+- Project/DI/hooks → `qa/dotnet/skills/bdd-project-scaffold`
 - Page objects → `qa/dotnet/skills/page-object-design` / `page-objects-from-url` / `mobile-screen-objects`
 - Review features + bindings → `qa/dotnet/skills/bdd-reviewer`
 - Allure labels from tags → `qa/reporting/dotnet/skills/test-reports`

@@ -1,6 +1,6 @@
 ---
 name: qa-realtime-stream-testing-dotnet
-description: Use when testing WebSocket or SSE streams in .NET 10 (8-9) / NUnit — protocol clients (`ClientWebSocket`, SignalR `HubConnection`, SSE over `HttpClient`) draining frames into a channel and asserting on conditions (never sleeps), plus Playwright .NET for in-browser frames. Triggers "test our WebSocket endpoint", "assert the SSE stream emits X", "SignalR hub test". Not for request/response HTTP (`api-test-author/generator`).
+description: Use when testing WebSocket or SSE streams in .NET 10 (8-9) / NUnit — protocol clients (`ClientWebSocket`, SignalR `HubConnection`, SSE over `HttpClient`) draining frames into a channel and asserting on conditions (never sleeps), plus Playwright .NET for in-browser frames. Triggers "test our WebSocket endpoint", "assert the SSE stream emits X", "SignalR hub test". Not for request/response HTTP (`api-test-author/writer`).
 ---
 
 # WebSocket & SSE Testing (.NET 8 / NUnit) — **canonical stack**
@@ -376,8 +376,8 @@ await probe.SendAsync(JsonSerializer.Serialize(payload));
   as the condition-wait, **OkHttp-SSE** (`EventSources` + `EventSourceListener`) or Spring `WebClient`
   `Flux<ServerSentEvent>` + `StepVerifier` for SSE, Playwright-Java (`page.waitForWebSocket`,
   `ws.onFrameReceived`, `page.routeWebSocket`). Structure ported, not code.
-- `qa-realtime-stream-testing-typescript` — same skill, Node 20 + TS: the **`ws`** lib / native global
-  `WebSocket` (the **Node-22** boundary — polyfill via `undici` on Node 20), a promise-with-timeout +
+- `qa-realtime-stream-testing-typescript` — same skill, Node 24 + TS: the **`ws`** lib / native global
+  `WebSocket` (the **Node-22** boundary — polyfill via `undici` on Node 20, which is EOL — flag it), a promise-with-timeout +
   Vitest **`vi.waitFor`** as the condition-wait, native `EventSource` / the **`eventsource`** package for SSE,
   Playwright-TS (`page.waitForEvent('websocket')`, `ws.on('framereceived')`, `page.routeWebSocket`).
 - `qa-messaging-testing-dotnet` — the **eventual-consistency lineage** this skill leans on:

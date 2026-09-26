@@ -1,6 +1,6 @@
 ---
 name: qa-dotnet-standards-audit
-description: Use to audit a .NET test suite against the qa-dotnet plugin's conventions, producing a saved, re-runnable findings report in `docs/audits/`. Scopeable to the whole suite or to just one discipline. Read-only; it never fixes. Triggers "audit our test suite against the conventions", "re-audit — what did we fix since last round", "audit just our API tests". Not for one test file (a `reviewer` skill) or fixing anything (the `qa-*-dotnet` agents).
+description: Use when auditing a .NET test suite against the qa-dotnet plugin's conventions, producing a saved, re-runnable findings report in `docs/audits/`. Scopeable to the whole suite or to just one discipline. Read-only; it never fixes. Triggers "audit our test suite against the conventions", "re-audit — what did we fix since last round", "audit just our API tests". Not for one test file (a `reviewer` skill) or fixing anything (the `qa-*-dotnet` agents).
 ---
 
 # qa-dotnet Conformance Audit
@@ -9,9 +9,9 @@ Audit an existing **.NET test suite** against the conventions this plugin define
 
 **Read-only analysis on test code.** The audit points; the `qa-*-dotnet` agents fix.
 
-**Announce at start:** "I'm using the `qa-dotnet-standards-audit` skill in Mode A (baseline) / Mode B (re-audit) on `<repo/path>`, scope: api | ui | mobile | all."
+State the mode — Mode A (baseline) or Mode B (re-audit) — the `<repo/path>` and the scope (api | ui | mobile | all) in the first line of output, so the reader knows which comparison the report makes.
 
-## THE SCOPE FENCE — this audits the test suite, not the application
+## The scope fence — this audits the test suite, not the application
 
 Every finding must be about **test code**: the suite's own structure, layering, waits, data, assertions, reporting, and CI wiring. The application under test is owned by `be-dotnet` / `fe-blazor` / `fe-react` and their conformance audits.
 
@@ -54,7 +54,7 @@ Report path: `docs/audits/<NNN>-qa-dotnet-conformance-r<N>.md`.
 
 | Job | Owner |
 |---|---|
-| Review one test file / one diff, inline severity table | [`api-test-author/reviewer`](../api-test-author/review/SKILL.md) · [`ui-test-author/reviewer`](../ui-test-author/review/SKILL.md) · [`bdd-reviewer`](../bdd-reviewer/SKILL.md) — this skill **rolls their checklists up to suite scale** |
+| Review one test file / one diff, inline severity table | [`api-test-author/review`](../api-test-author/review/SKILL.md) · [`ui-test-author/review`](../ui-test-author/review/SKILL.md) · [`bdd-reviewer`](../bdd-reviewer/SKILL.md) — this skill **rolls their checklists up to suite scale** |
 | Audit the **application** the suite tests | **peers** `be-dotnet-standards-audit` · `fe-blazor`/`fe-react` conformance audits |
 | Test-case design coverage from requirements | **peer** `qa-test-case-designer` (+ `qa/manual/requirements-breakdown`) — section N reports *suite shape*, not requirement coverage |
 | Filing a defect the suite exposed | `qa/manual/bug-report-writer` |

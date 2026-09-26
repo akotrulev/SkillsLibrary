@@ -482,7 +482,7 @@ public static class Orders
   `new ServiceBusClientBuilder().connectionString(...)`, `.receiver().queueName(...).receiveMode(PEEK_LOCK)`,
   `receiveMessages(maxMessages, maxWaitTime)`, `SubQueue.DEAD_LETTER`, Awaitility for side-effects,
   `Testcontainers` Service Bus emulator module). Structure ported, not code.
-- `qa-messaging-testing-typescript` — same skill, Node 20 + TS (`@azure/service-bus`:
+- `qa-messaging-testing-typescript` — same skill, Node 24 + TS (`@azure/service-bus`:
   `new ServiceBusClient(connStr)`, `createReceiver(queue, { receiveMode, subQueueType: "deadLetter" })`,
   `receiveMessages(maxCount, { maxWaitTimeInMs })`, `expect.poll` for side-effects, Testcontainers emulator).
 - `references/sqs.md` (`sqs`, next in family) — AWS SQS/SNS on LocalStack; visibility timeout +

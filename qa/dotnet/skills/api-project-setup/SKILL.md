@@ -1,6 +1,6 @@
 ---
 name: qa-api-project-setup-dotnet
-description: Use when starting an API test-automation project from zero in C# / .NET 10 (8-9) — solution layout, exact package versions, local setup, and run commands for a standalone RestSharp + NUnit suite. Composable with the ui/mobile/performance dotnet scaffolds. Triggers "scaffold an API test project", "set up a .NET API test suite from scratch", "create the solution structure for API tests". Not for adding tests to an existing suite (`api-test-author/generator`).
+description: Use when starting an API test-automation project from zero in C# / .NET 10 (8-9) — solution layout, exact package versions, local setup, and run commands for a standalone RestSharp + NUnit suite. Composable with the ui/mobile/performance dotnet scaffolds. Triggers "scaffold an API test project", "set up a .NET API test suite from scratch", "create the solution structure for API tests". Not for adding tests to an existing suite (`api-test-author/writer`).
 ---
 
 # API Test Project Scaffold (C# / .NET 10)
@@ -205,4 +205,4 @@ The same recipe folds in `AppiumTests` (Appium) and a `PerfTests` console projec
 - [ ] Per-project `appsettings.json`/`appsettings.test.json`/`allureConfig.json`/`Dockerfile`/`README.md` present
 - [ ] Allure local tool installed (`.config/dotnet-tools.json`)
 - [ ] No secrets in `appsettings*.json`; secrets via env vars
-- [ ] `dotnet build` → 0 errors / 0 warnings; `dotnet test` discovers the placeholder
+- [ ] `dotnet build` → 0 errors / 0 warnings; `dotnet test` discovers the placeholder. Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run".
