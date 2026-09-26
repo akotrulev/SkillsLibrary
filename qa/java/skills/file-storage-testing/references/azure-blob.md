@@ -22,7 +22,7 @@ File-storage tests assert one of two things about a blob flow:
 > **The boundary that shapes this skill — eventual consistency.** Azure Blob is strongly read-after-write
 > consistent for a single upload/download, but the things tests usually assert are *not* synchronous: a worker
 > that processes an uploaded blob runs on its own schedule, a **Blob → Event Grid → Storage Queue** notification
-> lands "soon", a derived blob appears after the worker finishes. So the core discipline matches `db-testing/client` / `s3`:
+> lands "soon", a derived blob appears after the worker finishes. So the core discipline matches `db-testing/connection` / `s3`:
 > **wait on a condition** for the effect to appear, with a bounded timeout — **never `Thread.sleep`**. Use
 > **Awaitility**. (Listing is the one place to stay alert to lag — `listBlobs` can momentarily lag a
 > just-written blob; assert the blob via `exists`/`getProperties` rather than scanning a list when you can.)
@@ -507,7 +507,7 @@ public final class Invoices {
 - `qa-file-storage-testing-dotnet` — the **canonical** stack this is ported from (.NET 8 / NUnit,
   `Azure.Storage.Blobs` `BlobServiceClient`/`BlobClient`/`BlockBlobClient`, `BlobSasBuilder` + `GenerateSasUri`,
   `Testcontainers.Azurite` `AzuriteBuilder`, `WaitFor.Async`). Structure ported, not code.
-- `qa-file-storage-testing-typescript` — same skill, Node 20 + TS (`@azure/storage-blob`:
+- `qa-file-storage-testing-typescript` — same skill, Node 24 + TS (`@azure/storage-blob`:
   `BlobServiceClient.fromConnectionString`, `BlockBlobClient.uploadData`/`download`/`exists`/`getProperties`,
   `stageBlock`/`commitBlockList`, `generateSasUrl`, `expect.poll`, `@testcontainers/azurite`).
 - `references/s3.md` — **the node whose structure this is ported from** AND the

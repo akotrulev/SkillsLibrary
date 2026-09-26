@@ -474,7 +474,7 @@ public final class Orders {
   `ProducerBuilder`/`ConsumerBuilder`, `consumer.Consume(TimeSpan)` poll, `AutoOffsetReset.Earliest`,
   `EnableAutoCommit=false` + `Commit()`, `WaitFor.Async` for side-effects, `Testcontainers.Kafka`
   `KafkaContainer`). Structure ported, not code.
-- `qa-messaging-testing-typescript` — same skill, Node 20 + TS (`kafkajs`: `consumer.subscribe({
+- `qa-messaging-testing-typescript` — same skill, Node 24 + TS (`kafkajs`: `consumer.subscribe({
   fromBeginning: true })` + `consumer.run({ eachMessage })` collecting into a buffer, `expect.poll` for the
   buffer and for side-effects, `@testcontainers/kafka` `KafkaContainer`). Note: kafkajs has **no synchronous
   `poll()`** — the buffer + `expect.poll` is the port of this file's bounded poll loop.

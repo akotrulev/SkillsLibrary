@@ -1,11 +1,11 @@
 ---
 name: qa-api-contract-testing-java
-description: Use when setting up consumer-driven contract testing with Pact in a Java 21 + Spring Boot 3 service (Pact-JVM, JUnit 5) — synchronous HTTP, asynchronous/message (Kafka/SQS/RabbitMQ) contracts, or bi-directional (OpenAPI) contracts. Triggers: "set up Pact-JVM for our Spring Boot service", "verify our Java provider against Y's contract", "message pact for our Kafka consumer", "bi-directional contract from our OpenAPI spec".
+description: Use when setting up consumer-driven contract testing with Pact in a Java 21 + Spring Boot 3 service (Pact-JVM, JUnit 5) — synchronous HTTP, message (Kafka/SQS/RabbitMQ) or bi-directional (OpenAPI) contracts. Triggers: "set up Pact-JVM for our Spring Boot service", "verify our Java provider against Y's contract", "message pact for our Kafka consumer". Do NOT use for a single API's own tests (`qa-api-test-writer-java`) or broker plumbing (`qa-messaging-testing-java`).
 ---
 
 # QA — Contract Testing with Pact (Java / Pact-JVM)
 
-Wires Pact V4 into a Java 21 + Spring Boot 3 service via **Pact-JVM** for consumer-driven contract testing with JUnit 5. Covers the consumer test, provider verification, state handlers, and Gradle/CI publish. Load `qa/_shared/api-contract-testing` for the Broker model, matchers reference, and `can-i-deploy` gate that are shared across all stacks.
+Wires Pact V4 into a Java 21 + Spring Boot 3 service via **Pact-JVM** for consumer-driven contract testing with JUnit 5. Covers the consumer test, provider verification, state handlers, and Gradle/CI publish. Load `qa/_shared/contract-testing-pact` for the Broker model, matchers reference, and `can-i-deploy` gate that are shared across all stacks.
 
 ## Pick the contract type first
 
@@ -23,7 +23,7 @@ CDCT (HTTP + message) is the default and the strongest guarantee — the provide
 - A Java 21 / Spring Boot 3 service consumes or produces an HTTP API and needs contract coverage.
 - Replacing brittle multi-service E2E tests with Pact-JVM verification.
 - Catching breaking changes at the Java producer side before they ship.
-- Pairing with `qa/_shared/api-contract-testing` for Broker / `can-i-deploy` wiring.
+- Pairing with `qa/_shared/contract-testing-pact` for Broker / `can-i-deploy` wiring.
 
 ## When NOT to use
 
@@ -262,7 +262,7 @@ Verification results are published back to the Broker via `pact.verifier.publish
 
 ## `can-i-deploy` gate (both pipelines)
 
-See `qa/_shared/api-contract-testing` for the shared `can-i-deploy` and `record-deployment` commands. Wire them in the deploy stage of **both** the consumer and the provider pipelines, before `kubectl apply` / `helm upgrade`.
+See `qa/_shared/contract-testing-pact` for the shared `can-i-deploy` and `record-deployment` commands. Wire them in the deploy stage of **both** the consumer and the provider pipelines, before `kubectl apply` / `helm upgrade`.
 
 ## Async / message contracts (message pacts)
 
@@ -437,7 +437,7 @@ GraphQL rides on HTTP — contract it as a CDCT HTTP interaction: `POST /graphql
 ## Generation steps
 
 1. Add a Gradle sub-module `{service}-contract-tests` with `useJUnitPlatform()`.
-2. For the consumer: scaffold `{Provider}ConsumerTest.java` annotated with `@ExtendWith(PactConsumerTestExt.class)` + `@PactTestFor(providerName = "{provider}")`; author one `@Pact` method + one `@Test`; run `./gradlew :{module}:test`; confirm a pact file appears under `build/pacts/`.
+2. For the consumer: scaffold `{Provider}ConsumerTest.java` annotated with `@ExtendWith(PactConsumerTestExt.class)` + `@PactTestFor(providerName = "{provider}")`; author one `@Pact` method + one `@Test`; run `./gradlew :{module}:test`; confirm a pact file appears under `build/pacts/`. Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run".
 3. For the provider: scaffold `{Service}ProviderVerificationTest.java` with `@Provider`, `@PactBroker`, `@SpringBootTest(RANDOM_PORT)`, and a `@State("…")` handler per state name.
 4. Configure Gradle `test` task system properties (`pact.provider.version`, `pact.provider.branch`, `pact.verifier.publishResults`, `pactbroker.url`, `pactbroker.auth.token`).
 5. Wire consumer CI: `./gradlew :{consumer}-contract-tests:test` → `pact-cli broker publish` with `--branch` and `--consumer-app-version`.
@@ -447,12 +447,12 @@ GraphQL rides on HTTP — contract it as a CDCT HTTP interaction: `POST /graphql
 
 ## Handoffs
 
-- Cross-stack Broker / `can-i-deploy` / matchers concepts → `qa/_shared/api-contract-testing`
+- Cross-stack Broker / `can-i-deploy` / matchers concepts → `qa/_shared/contract-testing-pact`
 - .NET consumer/provider → `qa/dotnet/skills/api-contract-testing`
 - TypeScript consumer/provider → `qa/typescript/skills/api-contract-testing`
 - Live-service API tests → `qa/java/skills/api-test-author/writer`
 - Broker plumbing for async tests (produce/consume/assert against Kafka/SQS/RabbitMQ) → `qa/java/skills/messaging-testing`
 - GraphQL request/response envelope conventions → `qa/java/skills/api-test-author/graphql`
 - DTOs → `qa/java/skills/api-models`
-- CI pipeline syntax → `qa/cicd/java/skills/ci-pipelines/{github-actions,azure-pipelines,gitlab-ci}` or `devops/<ci>`
+- CI pipeline syntax → `qa/cicd/java/skills/ci-pipelines` (its `references/<host>.md`) or `devops/<ci>`
 - Allure publishing for contract test results → `qa/reporting/java/skills/test-reports`

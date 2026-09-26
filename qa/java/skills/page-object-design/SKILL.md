@@ -1,6 +1,6 @@
 ---
 name: qa-page-object-design-java
-description: Use when the user is designing the page object structure for a Java UI test project. Triggers: "design page objects for app X in Java", "how should I structure pom/ for TestNG", "split this giant page". For end-to-end suite work prefer the staged agent `qa-ui-java` / `qa-mobile-java` / `qa-bdd-java` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
+description: Use when the user is designing the page object structure for a Java UI test project. Triggers: "design page objects for app X in Java", "how should I structure pom/ for TestNG", "split this giant page". Do NOT use for extracting locators from a live URL (`qa-page-objects-from-url-java`) or Appium screens (`qa-mobile-screen-objects-java`).
 ---
 
 # QA — Page Object Architect (Java)

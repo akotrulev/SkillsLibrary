@@ -1,6 +1,6 @@
 ---
 name: qa-ui-test-writer-appium-java
-description: Use when the user asks to scaffold a Java + Appium 2.x page object or TestNG mobile UI test, following the BasePage / DriverFactory / TestNG pattern. Triggers: "create an Appium page object for X in Java", "add a Java mobile page for screen Y", "write an Appium TestNG test for Z". For end-to-end suite work prefer the staged agent `qa-mobile-java` / `qa-bdd-java` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
+description: Use when the user asks to scaffold a Java + Appium 2.x page object or TestNG mobile UI test, following the BasePage / DriverFactory / TestNG pattern. Triggers: "create an Appium page object for X in Java", "add a Java mobile page for screen Y", "write an Appium TestNG test for Z". Do NOT use for exploring a live screen (`qa-mobile-screen-explorer-java`) or OS-surface features (`qa-mobile-native-features-java`).
 ---
 
 # QA — Appium Java Page Object & Test Generator
@@ -257,7 +257,7 @@ public class AuthenticationTest extends BaseMobileTest {
    - One query method per piece of data the test needs to read
 5. If a destination page doesn't exist yet, create a stub or recursively generate it.
 6. Generate the test class extending `BaseMobileTest`; one `@Test` per scenario, with assertions on user-visible outcomes.
-7. Run `./gradlew test -Dplatform=android` (or `ios`) — expect 0 failures. If the Appium server isn't reachable, check `SystemPropertyUtil.getAppiumServerUrl()`, that `appium server` is running (`curl -s http://127.0.0.1:4723/status` succeeds), and that the server log's `Available drivers:` line lists your driver (`uiautomator2` / `xcuitest`).
+7. Run `./gradlew test -Dplatform=android` (or `ios`) — expect 0 failures. If the Appium server isn't reachable, check `SystemPropertyUtil.getAppiumServerUrl()`, that `appium server` is running (`curl -s http://127.0.0.1:4723/status` succeeds), and that the server log's `Available drivers:` line lists your driver (`uiautomator2` / `xcuitest`). Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run".
 
 > **A test that can't find a visible element is usually not a locator bug.** Per the Appium team, an element absent from page source is most often an accessibility, app-state, active-app (system alert/overlay), or native-vs-WebView context problem — fix that before rewriting the selector. For environment/doctor failures and driver-specific locator questions, the `@appium/mcp-documentation` server (`appium_skills`, `appium_documentation_query`) answers authoritatively; prefer it over community forums.
 

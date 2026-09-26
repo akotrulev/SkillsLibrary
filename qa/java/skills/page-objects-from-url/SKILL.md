@@ -1,6 +1,6 @@
 ---
 name: qa-page-objects-from-url-java
-description: Use when the user gives a website URL or an HTML page and wants a Page Object Model extracted/built/updated from it for a Java Playwright suite. Triggers: "build a POM from this URL", "extract locators from this page", "update the LoginPage object from the live site". For end-to-end suite work prefer the staged agent `qa-ui-java` / `qa-bdd-java` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
+description: Use when the user gives a website URL or an HTML page and wants a Page Object Model extracted/built/updated from it for a Java Playwright suite. Triggers: "build a POM from this URL", "extract locators from this page", "update the LoginPage object from the live site". Do NOT use for designing the POM structure (`qa-page-object-design-java`) or Appium screens (`qa-mobile-screen-objects-java`).
 ---
 
 # QA — POM Builder from Live Page (Java)
@@ -122,6 +122,8 @@ Apply the page-object rules from `qa/java/skills/ui-test-author/playwright` (con
 - Never reorder/rename existing public methods that tests already call without flagging it
 
 ### 6. Verify and hand off
+
+Inside a plan task marked `Gate: none`, run none of the checks below and report the POM as "written, not run".
 
 - `./gradlew compileTestJava` (or project equivalent) → must compile clean.
 - If a smoke test exists for the page, run it; if the POM is new, verify `expectLoaded()`'s landmark against one more live snapshot.

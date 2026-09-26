@@ -1,6 +1,6 @@
 ---
 name: qa-api-client-writer-java
-description: Use when the user asks to create a new API client class (`{Resource}Client.java`) in a Java API test project (RestAssured + TestNG + Gradle, Java 21). Triggers: "write an API client for X", "add a {Resource}Client", "scaffold the Java client for /api/{path}". For end-to-end suite work prefer the staged agent `qa-api-java` / `qa-performance-java` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
+description: Use when the user asks to create a new API client class (`{Resource}Client.java`) in a Java API test project (RestAssured + TestNG + Gradle, Java 21). Triggers: "write an API client for X", "add a {Resource}Client", "scaffold the Java client for /api/{path}". Do NOT use for DTOs (`qa-api-models-java`) or the tests themselves (`qa-api-test-writer-java`).
 ---
 
 # qa-api-client-writer-java
@@ -315,4 +315,4 @@ Only add these overloads when the test plan requires them — not by default.
 3. Ask which **operations** are needed, and whether they are user-facing, admin, or both. Default to full CRUD on the user-facing surface.
 4. Ensure the required DTOs exist under `models/{api}/{resource}/`. If not, run `qa/java/skills/api-models` first.
 5. Generate the file at `src/test/java/com/{org}/apitests/clients/{api}/{Resource}Client.java`.
-6. Run `./gradlew :apitests:compileTestJava` — expect 0 errors.
+6. Run `./gradlew :apitests:compileTestJava` — expect 0 errors. Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run".

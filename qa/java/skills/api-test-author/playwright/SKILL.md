@@ -1,6 +1,6 @@
 ---
 name: qa-api-test-playwright-java
-description: Use when the user asks to write Java API tests through Playwright's APIRequestContext (playwright-java + TestNG + Jackson) — usually because the project already runs Playwright-Java for UI and wants one dependency and one report. Triggers: "write API tests with Playwright in Java", "use APIRequestContext for endpoint X", "add API coverage to our Playwright Java suite". Plain Java API suites without Playwright → `api-test-author/generator` (RestAssured + TestNG, the stack default).
+description: Use when the user asks to write Java API tests through Playwright's APIRequestContext (playwright-java + TestNG + Jackson) — usually because the project already runs Playwright-Java for UI and wants one dependency and one report. Triggers: "write API tests with Playwright in Java", "use APIRequestContext for endpoint X", "add API coverage to our Playwright Java suite". Do NOT use for API suites without Playwright (`qa-api-test-writer-java`, the RestAssured default).
 ---
 
 # QA — API Test Writer (Java / Playwright APIRequestContext + TestNG)
@@ -25,7 +25,7 @@ HTTP transport changes; the discipline does not.
 >    Playwright-Java for UI gets API tests with zero extra HTTP stack, the same TestNG + Allure wiring, and —
 >    for cookie-authenticated apps — a **`storageState`** shared between a logged-in browser context and API
 >    calls. If the project has no Playwright UI suite, the stack default is RestAssured
->    (`api-test-author/generator`).
+>    (`api-test-author/writer`).
 > 4. **The layering survives the client swap.** Tests still never touch HTTP directly: `{Resource}Client`
 >    wraps the context, the raw overload returns Playwright's `APIResponse` unasserted, the typed overload
 >    asserts the **exact** status and Jackson-deserializes `response.text()` into the record DTO. The only
@@ -234,7 +234,7 @@ Create/update flows keep the RestAssured sibling's cleanup discipline: track cre
 ## Generation steps
 
 1. Confirm the project uses playwright-java (the `com.microsoft.playwright:playwright` dependency). If not,
-   stop and route to `api-test-author/generator` — say why.
+   stop and route to `api-test-author/writer` — say why.
 2. Determine the **source of truth**: OpenAPI/Swagger spec, test-case document (one test method per TC-ID), or
    verbal scenarios.
 3. Ensure `BaseApiTest` exists with the `Playwright`/context lifecycle above; create it if missing.
@@ -243,7 +243,7 @@ Create/update flows keep the RestAssured sibling's cleanup discipline: track cre
    `(APIRequestContext)` constructor.
 5. Author one test class per operation from the scenario matrix, one client field per identity in `@BeforeClass`.
 6. Verify every test name follows `Should_X_When_Y` and every TC-ID maps to a test or is explicitly deferred.
-7. Run `./gradlew :apitests:test` — expect 0 failures.
+7. Run `./gradlew :apitests:test` — expect 0 failures. Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run".
 
 ## Cross-references
 

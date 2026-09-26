@@ -1,6 +1,6 @@
 ---
 name: qa-api-models-java
-description: Use when the user asks to create a new DTO / model class / response object in a Java test project (Java 21 + Jackson, typically alongside RestAssured). Triggers: "add a {Resource}Dto in Java", "create the InDto / ModDto record", "scaffold the wrapper DTO for paginated {resource} in Java".
+description: Use when the user asks to create a new DTO / model class / response object in a Java test project (Java 21 + Jackson, typically alongside RestAssured). Triggers: "add a {Resource}Dto in Java", "create the InDto / ModDto record", "scaffold the wrapper DTO for paginated {resource} in Java". Do NOT use for the client that calls the endpoint (`qa-api-client-writer-java`) or the test itself (`qa-api-test-writer-java`).
 ---
 
 # qa-api-models-java
@@ -19,7 +19,7 @@ Generator skill. Scaffolds a single DTO file in the Java `apitests` module.
 
 - C# or TypeScript DTOs — use `qa-api-models-dotnet` / `qa-api-models-typescript`.
 - Production domain models — these DTOs are test-project-only.
-- Writing the client itself — use `qa-api-client-writer` (or the Java equivalent).
+- Writing the client itself — use `qa-api-client-writer-java`.
 
 ## Folder & naming convention
 
@@ -156,4 +156,4 @@ public record {Resource}ListDto(
 2. Ask: resource name and DTO kind (`Dto`, `InDto`, `ModDto`, nested, wrapper).
 3. Ask which properties are needed, or inspect a sample API response.
 4. Generate at `apitests/src/test/java/com/{org}/apitests/models/{api}/{resource}/{Name}Dto.java`.
-5. Run `./gradlew :apitests:compileTestJava` — expect 0 errors.
+5. Run `./gradlew :apitests:compileTestJava` — expect 0 errors. Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run".

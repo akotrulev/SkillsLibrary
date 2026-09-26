@@ -1,11 +1,11 @@
 ---
 name: qa-gherkin-step-code-java
-description: Use when turning Gherkin .feature files into Cucumber-JVM step definitions in Java, implementing each step against existing Page Object Models. Triggers: "generate Cucumber step definitions for these features", "bind these Gherkin steps to our page objects", "split the step definitions by domain". Do NOT use to write the .feature files (`feature-file-writer`), scaffold the Cucumber project/hooks/DI (`bdd-project-setup`), or build page objects (`page-object-design`).
+description: Use when turning Gherkin .feature files into Cucumber-JVM step definitions in Java, implementing each step against existing Page Object Models. Triggers: "generate Cucumber step definitions for these features", "bind these Gherkin steps to our page objects", "split the step definitions by domain". Do NOT use to write the .feature files (`feature-file-writer`), scaffold the Cucumber project/hooks/DI (`bdd-project-scaffold`), or build page objects (`page-object-design`).
 ---
 
 # Cucumber-JVM Step Bindings + POM Implementation (Java 21)
 
-Parses `.feature` files (and the **Step Catalog** from `feature-file-writer`) into Cucumber-JVM glue classes, **split by domain**, with parameterized Cucumber-Expression steps, and **implements each step by calling existing page-object intent methods**. Assertions live in `Then` steps; page objects only act and expose `expectLoaded()`. The Cucumber project, DI (PicoContainer), hooks, and `TestContext` already exist (from `bdd-project-setup`).
+Parses `.feature` files (and the **Step Catalog** from `feature-file-writer`) into Cucumber-JVM glue classes, **split by domain**, with parameterized Cucumber-Expression steps, and **implements each step by calling existing page-object intent methods**. Assertions live in `Then` steps; page objects only act and expose `expectLoaded()`. The Cucumber project, DI (PicoContainer), hooks, and `TestContext` already exist (from `bdd-project-scaffold`).
 
 ## Stack
 
@@ -23,7 +23,7 @@ Parses `.feature` files (and the **Step Catalog** from `feature-file-writer`) in
 ## When NOT to use
 
 - Authoring/canonicalizing `.feature` files → `qa/_shared/bdd/feature-file-writer`
-- Project/DI/hooks scaffold → `qa/java/skills/bdd-project-setup`
+- Project/DI/hooks scaffold → `qa/java/skills/bdd-project-scaffold`
 - Building or extracting page objects → `qa/java/skills/page-object-design` / `page-objects-from-url` / `mobile-screen-objects`
 - Reviewing features + bindings → `qa/java/skills/bdd-reviewer`
 - .NET/TS step glue → `qa/{dotnet,typescript}/skills/gherkin-step-code`
@@ -162,7 +162,7 @@ public void iSignInWith(String email, String password) {
 4. Implement each body with page-object calls only; put assertions in `Then` with web-first `assertThat`.
 5. For any missing page object/method, build it (`page-object-design`/`page-objects-from-url`) before binding the step.
 6. Ensure the Cleanup is implemented as the `@After` hook (scaffold layer), not as steps.
-7. `./gradlew test`, then run the features: every step bound (no undefined/ambiguous), the smoke scenario green.
+7. `./gradlew test`, then run the features: every step bound (no undefined/ambiguous), the smoke scenario green. Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run".
 
 ## Anti-patterns to flag
 
@@ -180,7 +180,7 @@ public void iSignInWith(String email, String password) {
 ## Handoffs
 
 - `.feature` files / Step Catalog → `qa/_shared/bdd/feature-file-writer`
-- Project/DI/hooks → `qa/java/skills/bdd-project-setup`
+- Project/DI/hooks → `qa/java/skills/bdd-project-scaffold`
 - Page objects → `qa/java/skills/page-object-design` / `page-objects-from-url` / `mobile-screen-objects`
 - Review features + bindings → `qa/java/skills/bdd-reviewer`
 - Allure labels from tags → `qa/reporting/java/skills/test-reports`

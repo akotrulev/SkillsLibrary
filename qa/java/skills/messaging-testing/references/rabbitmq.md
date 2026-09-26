@@ -497,7 +497,7 @@ public final class Orders {
   `CreateChannelAsync`, `ExchangeDeclareAsync` / `QueueDeclareAsync(args)` / `QueueBindAsync`,
   `BasicPublishAsync`, `AsyncEventingBasicConsumer` + `BasicConsumeAsync(autoAck:false)`, `BasicAckAsync` /
   `BasicNackAsync` / `BasicRejectAsync`, `BasicGetAsync`, `Testcontainers.RabbitMq`). This file is its port.
-- `qa-messaging-testing-typescript` — same skill, Node 20 + TS (`amqplib`: `amqp.connect(url)`,
+- `qa-messaging-testing-typescript` — same skill, Node 24 + TS (`amqplib`: `amqp.connect(url)`,
   `assertExchange` / `assertQueue(..., { arguments })` / `bindQueue`, `channel.publish`,
   `channel.consume(q, cb, { noAck: false })` + `channel.ack`/`nack`/`reject`, `channel.get` polling,
   `expect.poll` for side-effects, `@testcontainers/rabbitmq` `RabbitMQContainer`).

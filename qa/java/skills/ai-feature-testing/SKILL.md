@@ -1,6 +1,6 @@
 ---
 name: qa-ai-feature-testing-java
-description: Use when testing LLM-generated output (chatbot, RAG answer, summarizer, extraction, tool-using agent) from a Java 21 / TestNG suite — property, rubric (LLM-as-judge), and grounding assertions with promptfoo (default) or DeepEval (RAG/agent/red-team metrics) as the eval spine; never exact-string equality. Triggers: "test our chatbot/RAG feature", "eval prompt outputs", "assert the answer is grounded in the retrieved context", "deepeval / G-Eval / faithfulness metric".
+description: Use when testing LLM-generated output (chatbot, RAG answer, summarizer, extraction, tool-using agent) from a Java 21 / TestNG suite — property, rubric (LLM-as-judge), and grounding assertions with promptfoo (default) or DeepEval as the eval spine; never exact-string equality. Triggers: "test our chatbot", "eval prompt outputs", "assert the answer is grounded in the retrieved context", "G-Eval / faithfulness metric". Do NOT use for RAG retrieval metrics (`qa-ai-answer-quality-testing-java`).
 ---
 
 # LLM-App Testing (Java 21 / TestNG — promptfoo via ProcessBuilder + LangChain4j)

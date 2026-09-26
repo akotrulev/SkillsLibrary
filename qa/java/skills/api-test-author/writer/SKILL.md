@@ -1,6 +1,6 @@
 ---
 name: qa-api-test-writer-java
-description: Use when the user asks to write Java API tests using RestAssured + TestNG against a REST backend. Triggers: "write a Java API test for X", "add a TestNG test method", "automate these test cases in Java". For end-to-end suite work prefer the staged agent `qa-api-java` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
+description: Use when the user asks to write Java API tests using RestAssured + TestNG against a REST backend. Triggers: "write a Java API test for X", "add a TestNG test method", "automate these test cases in Java". Do NOT use for GraphQL (`qa-api-test-graphql-java`), gRPC (`qa-api-test-grpc-java`), Playwright-based API tests (`qa-api-test-playwright-java`) or reviewing tests (`qa-api-test-review-java`).
 ---
 
 # QA — API Test Writer (Java / RestAssured + TestNG)
@@ -217,7 +217,7 @@ public class PostUserTest extends BaseTest {
 2. For each resource in scope, verify the record DTOs (`models/{api}/{resource}/`) and the `{Resource}Client` exist. Create missing ones via `qa/java/skills/api-models` then `qa/java/skills/api-client-writer` before writing any test.
 3. Author one test class per operation, picking patterns from the scenario matrix. Body-manipulation cases (malformed JSON, extra/missing property) require the optional raw/`Map` client overloads — add them via `api-client-writer`.
 4. Verify every test name follows `Should_X_When_Y` and asserts one behavior; verify every TC-ID (when given) maps to a test or is explicitly deferred.
-5. Run `./gradlew :apitests:test` — expect 0 failures.
+5. Run `./gradlew :apitests:test` — expect 0 failures. Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run".
 
 ## Handoffs
 

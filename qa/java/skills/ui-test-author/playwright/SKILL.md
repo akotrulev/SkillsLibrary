@@ -1,6 +1,6 @@
 ---
 name: qa-ui-test-writer-playwright-java
-description: Use when the user asks to scaffold Playwright UI tests in Java — new test classes, page objects under `src/test/java/<pkg>/pages/`, or a specific scenario (login, form, accessibility, visual). Triggers: "write a Playwright test for X in Java", "add a Playwright Java page object for screen Y", "scaffold a Playwright Java spec".
+description: Use when the user asks to scaffold Playwright UI tests in Java — new test classes, page objects under `src/test/java/<pkg>/pages/`, or a specific scenario (login, form, accessibility, visual). Triggers: "write a Playwright test for X in Java", "add a Playwright Java page object for screen Y", "scaffold a Playwright Java spec". Do NOT use for Selenium (`qa-ui-test-writer-selenium-java`), Appium (`qa-ui-test-writer-appium-java`) or reviewing tests (`qa-ui-test-review-java`).
 ---
 
 # QA — Playwright Test & Page Object Generator (Java)
@@ -343,7 +343,7 @@ public void seedOrder() {
    - One `@Test` per scenario
    - Use Allure `@Step` for non-trivial substeps
 5. For authenticated flows, override `storageState()` on the fixture to return `AuthState.signedIn(browser)`.
-6. Run `./gradlew test` — expect 0 failures. Run `./gradlew test -Dplaywright.headless=false` to debug visually.
+6. Run `./gradlew test` — expect 0 failures. Run `./gradlew test -Dplaywright.headless=false` to debug visually. Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run".
 
 ## Handoffs
 

@@ -457,7 +457,7 @@ public final class Orders {
 - `qa-messaging-testing-dotnet` — the **canonical** stack, .NET 8 / NUnit
   (`Azure.Messaging.ServiceBus`: `new ServiceBusClient(...)`, `CreateReceiver(queue, options)`,
   `ReceiveMessageAsync(maxWaitTime)`, `SubQueue.DeadLetter`, `WaitFor.Async` poll). This file is ported from it.
-- `qa-messaging-testing-typescript` — same skill, Node 20 + TS (`@azure/service-bus`:
+- `qa-messaging-testing-typescript` — same skill, Node 24 + TS (`@azure/service-bus`:
   `new ServiceBusClient(connStr)`, `createReceiver(queue, { subQueueType: "deadLetter" })`,
   `receiveMessages(maxCount, { maxWaitTimeInMs })`, `expect.poll`).
 - `references/sqs.md` (`sqs`, next in family) — AWS SQS/SNS on LocalStack; visibility timeout +

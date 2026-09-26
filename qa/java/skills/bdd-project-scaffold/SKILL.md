@@ -33,7 +33,7 @@ This is the BDD analogue of the UI project scaffold; it assumes a Playwright (we
 - Writing `.feature` files → `qa/_shared/bdd/feature-file-writer`
 - Generating step-definition classes → `qa/java/skills/gherkin-step-code`
 - Building page objects → `qa/java/skills/page-object-design` / `page-objects-from-url`
-- BDD in .NET/TS → `qa/{dotnet,typescript}/skills/bdd-project-setup` (those use Reqnroll / playwright-bdd)
+- BDD in .NET/TS → `qa/{dotnet,typescript}/skills/bdd-project-scaffold` (those use Reqnroll / playwright-bdd)
 
 ## Inputs needed
 
@@ -50,7 +50,7 @@ Confirm at most 2–3.
 3. Create the runner: a JUnit 5 `@Suite` class (`RunCucumberTest`) **and/or** `src/test/resources/junit-platform.properties` carrying glue, features path, plugins, and the tag filter.
 4. Create `support/` : the per-scenario `TestContext` (holds the Playwright `Page` / Selenium `WebDriver` + lazily-built page objects), and the lifecycle `Hooks` class (`@Before`/`@After` that own the browser/driver — **with teardown**). PicoContainer is zero-config — adding the dependency is the whole wiring step.
 5. Create the empty `src/test/resources/features/` folder and one throwaway smoke `.feature` to prove the rig parses and runs.
-6. `./gradlew test` (the engine must discover the feature and bind the smoke step) and run the smoke scenario.
+6. `./gradlew test` (the engine must discover the feature and bind the smoke step) and run the smoke scenario. Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run".
 7. Report files created and hand off to `feature-file-writer` (features) + `gherkin-step-code` (steps).
 
 ## Templates

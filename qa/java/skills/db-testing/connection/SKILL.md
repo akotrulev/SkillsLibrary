@@ -1,6 +1,6 @@
 ---
 name: qa-db-connection-java
-description: Use when the user asks to connect from Java 21 tests to a real database (Postgres / MySQL / SQL Server / Mongo) to seed fixtures, run read-only assertion queries, and clean up safely. Triggers: "connect from our TestNG tests to Postgres", "JdbcTemplate probe for the orders table", "seed and clean a SQL fixture without leaks".
+description: Use when the user asks to connect from Java 21 tests to a real database (Postgres / MySQL / SQL Server / Mongo) to seed fixtures, run read-only assertion queries, and clean up safely. Triggers: "connect from our TestNG tests to Postgres", "JdbcTemplate probe for the orders table", "seed and clean a SQL fixture without leaks". Do NOT use for container lifecycle (`qa-db-testing-testcontainers-java`) or query guardrails (`qa-db-verification-queries-java`).
 ---
 
 # QA — DB Testing Client (Java 21 + Spring Boot 3)
@@ -20,7 +20,7 @@ Wires Java 21 TestNG tests to talk to a **real** database — seed fixtures via 
 - Container booting itself → `qa/java/skills/db-testing/testcontainers`.
 - SQL guardrails (parameterization, no `SELECT *` in assertions) → `qa/java/skills/db-testing/verification-queries`.
 - Pure unit tests with no SQL surface — keep them mock-driven.
-- .NET / TypeScript stacks → `qa/{dotnet,typescript}/skills/db-testing/client`.
+- .NET / TypeScript stacks → `qa/{dotnet,typescript}/skills/db-testing/connection`.
 
 ## Stack
 
@@ -255,7 +255,7 @@ List tables explicitly. Don't loop over `information_schema.tables` — that tou
 3. For each new test set, scaffold a `<Aggregate>Seeder.java` (write) and `<Aggregate>DbProbe.java` (read), reusing builders from `qa/java/skills/test-data-builder`.
 4. Add `DbWaits` (Awaitility wrapper) if the SUT involves async projections.
 5. Pick a cleanup strategy (transactional rollback default); annotate / wire `@AfterMethod`.
-6. Run `./gradlew test` — every test passes; no leaks between tests.
+6. Run `./gradlew test` — every test passes; no leaks between tests. Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run".
 
 ## Handoffs
 

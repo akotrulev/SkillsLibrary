@@ -17,7 +17,10 @@ clauses fixed; the stale-path and "Run what you write" families are carried into
 S6 landed 2026-09-26 (qa/dotnet UI, mobile and performance lanes and commands: the Gate line in three
 agents, the production-uptime-checks names resolved, two new stale-path families — `performance/nbomber`
 and `qa/_shared/api-contract-testing` — fixed across qa/dotnet and carried into S7–S11, S13 and G1).
-S7 is next. S1–S18 are ungated: the edits from S1 to S6 are built but unverified until G1 runs §7.
+S7 landed 2026-09-26 (qa/java API, BDD and LLM lanes: the Gate line in three agents, the two K1 names,
+21 stale paths, the six qa/java `Node 20` hits and 25 descriptions; the LLM agent's `qa/manual` write-up
+became a hand-off, D15). S8 is next. S1–S18 are ungated: the edits from S1 to S7 are built but
+unverified until G1 runs §7.
 
 ## 1. What already exists, and what is missing
 
@@ -543,6 +546,16 @@ lane's files.** §2 gives S5 the API/BDD/LLM skills, but six stale paths S5's fa
 than leave qa/dotnet half-swept. **Cost:** S6's diff touches S5's files; the qa stack pairs (S7/S8,
 S9/S10) may do the same, and the As built note names each such file.
 
+**D15 (2026-09-26, S7) — An LLM agent hands a real regression to `qa-test-case-designer`; it does not
+load `qa/manual/bug-report-writer`.** `qa-llm-java` forbids `qa/manual/` in its loading protocol and
+its own operating rule hands product defects to `qa-test-case-designer`, yet Mode A said "write it up
+via `qa/manual/bug-report-writer`". S6 settled the same clash in `qa-performance-dotnet` the other way,
+by stating the load as an exception. For the LLM agents the hand-off wins, because the agent's own
+operating rule already says so and the other lane agents (`qa-api-*`, `qa-bdd-*`) do the same. S7 also
+applied it to `qa-llm-dotnet.md:88`, outside its folder, since S5 had left that copy in place.
+**Cost:** two readings coexist: performance agents keep the stated exception (S6, carried into S8/S10),
+while LLM agents hand off. `qa-llm-dotnet` is edited by a task that does not own qa/dotnet.
+
 ## Answered questions (2026-09-26)
 
 **O1 — How are plans run: through Plan Queue only, one prompt block per session, each plan in its own
@@ -1009,6 +1022,74 @@ hits 22k, descriptions 6k, ~14 files modified 21k, read-back 6k, churn ×1.2
 - K2: the Gate line in the three agents.
 - K6: `qa/java`'s `Node 20` hits in your skills → Node 24.
 - **Not in S7:** the UI, mobile and performance lanes and `qa/java/commands/` (S8).
+- **As built (2026-09-26):** `qa/java/agents/{qa-api-java,qa-bdd-java,qa-llm-java}.md` (read in full)
+  and the 27 skill folders their loading lists name: `test-login-tokens`, `api-models`,
+  `api-client-writer`, `test-data-builder`, `api-test-author/{writer,playwright,graphql,grpc,review}`,
+  `data-driven-testing`, `db-testing/{connection,testcontainers,verification-queries}`,
+  `messaging-testing`, `file-storage-testing`, `email-testing`, `realtime-stream-testing`,
+  `api-contract-testing`, `failure-injection-testing`, `feature-flag-testing`, `test-quality-check`,
+  `bdd-project-scaffold`, `bdd-reviewer`, `gherkin-step-code`, `page-object-design`,
+  `page-objects-from-url`, `ui-test-author/{playwright,appium,review}`, `mobile-screen-objects`,
+  `ai-feature-testing`, `ai-answer-quality-testing`. qa/java has no `api-project-setup` or
+  `standards-audit` folder. **S8 owns the rest:** `accessibility-testing`, `browser-cloud-setup`,
+  `device-cloud`, `inhouse-framework-conventions`, `language-testing`, `load-testing`,
+  `mobile-app-crawler`, `mobile-native-features`, `mobile-screen-explorer`, `network-mocking`,
+  `production-uptime-checks`, `responsive-testing`, `security-testing/*`, `ui-test-author/selenium`,
+  `visual-regression`. Gate line added to 3 agents, each as the last Operating-rules bullet
+  (`qa-api-java.md:37`, `qa-bdd-java.md:38`, `qa-llm-java.md:73`).
+  Data issues: 29 fixed.
+  - K1: `api-models/SKILL.md:22` `qa-api-client-writer` → `qa-api-client-writer-java`;
+    `failure-injection-testing/SKILL.md:307`, `:340` `qa-db-testing-java` → `qa-db-testing-testcontainers-java`
+    (`:340` also listed `qa-messaging-testing-java` twice; one removed). The resolver now prints only
+    `data-testid` / `data-test` / `data-provider-thread-count` and S8's `production-uptime-checks` names.
+  - Stale paths, 21: `qa/_shared/api-contract-testing` → `contract-testing-pact` (`qa-api-java.md:18`,
+    `:140`; `api-contract-testing/SKILL.md:8`, `:26`, `:265`, `:450`); `bdd-project-setup` →
+    `bdd-project-scaffold` (`qa-bdd-java.md:103`, a step-table path to a folder that does not exist;
+    `gherkin-step-code/SKILL.md:3`, `:8`, `:26`, `:183`; `bdd-project-scaffold/SKILL.md:36`); the skill's
+    frontmatter name `qa-bdd-project-setup-java` stays (no renames). `api-test-author/generator` →
+    `writer` (`api-test-author/playwright/SKILL.md:3`, `:28`, `:237`; `…/review/SKILL.md:3`);
+    `db-testing/client` → `connection` (`db-testing/connection/SKILL.md:23`,
+    `file-storage-testing/references/s3.md:24`, `azure-blob.md:25`). `api-contract-testing/SKILL.md:457`
+    named three `ci-pipelines/<host>` folders → "`ci-pipelines` (its `references/<host>.md`)";
+    `test-quality-check/SKILL.md:22` cited a `qa/typescript/skills/test-quality-check` that does not
+    exist → "no house skill yet" (S6's wording). Every `qa/…` path in the S7 files now resolves on disk.
+  - K6: `Node 20` ×6, all "same skill, Node 20 + TS" sibling lines in the four
+    `messaging-testing/references/*` and two `file-storage-testing/references/*` → Node 24. No `Node 20`,
+    `Java 17` or `Spring Boot 2` hit is left in qa/java.
+  Code issues: 43 fixed.
+  - K7: 25 descriptions rewritten, 24 of them to add a Do-NOT clause naming the sibling (e.g.
+    `api-models`, `api-client-writer`, `api-test-author/*`, `db-testing/{connection,testcontainers}`,
+    `page-object-design`, `ui-test-author/{playwright,appium,review}`, `ai-feature-testing`,
+    `ai-answer-quality-testing`), and `gherkin-step-code` for its stale path. In 12 of them the
+    boilerplate "For end-to-end suite work prefer the staged agent … single targeted artifact" gave way
+    to the clause; `api-test-author/{graphql,grpc}` and `data-driven-testing` now open with "Use when".
+    All ≤ 500 (largest `ai-feature-testing` 495). The agent descriptions already fit (482, 596, 566).
+  - K2 for skills: the "written, not run" sentence on the run/verify step of 15 skills (`api-models:159`,
+    `api-client-writer:318`, `api-test-author/writer:220`, `…/playwright:246`, `ui-test-author/playwright:346`,
+    `…/appium:260`, `page-objects-from-url` §6, `mobile-screen-objects:105`, `bdd-project-scaffold:53`,
+    `gherkin-step-code:165`, `test-data-builder:217`, `db-testing/connection:258`, `…/testcontainers:239`,
+    `api-contract-testing:440`, `test-login-tokens:119`).
+  - "Recover, don't author" doubled in Orientation 2 of all three agents; merged.
+  Logical conflicts: 10 fixed.
+  - "Run what you write", Orientation 3's "every run regardless of the gate's verdict", and Orientation 2's
+    "confirm the suite builds and runs" each gain "outside a `Gate: none` plan task" in all three agents.
+  - `qa-llm-java.md` Mode A wrote a real regression up via `qa/manual/bug-report-writer` while the
+    loading protocol forbids `qa/manual/` and its own operating rule hands defects to
+    `qa-test-case-designer`; it now hands off (D15). Same fix in `qa-llm-dotnet.md:88` (outside qa/java).
+  Cleanup: none. The K9 recipes find no plan, progress or tracked junk file in qa/java, and all 61
+  qa/java skills, agents and commands are listed in the marketplace.
+  Kept on purpose: K3 hits are flag branches, code branching, Pact `--branch` / `mainBranch`, PIT's
+  origin branch, Percy/Applitools branch baselines and `inhouse-framework-conventions:220` (S8's; it
+  describes the Accelerator's own `/review`). K4 hits are RAG retrieval/generation "stages", Spring
+  "slice" tests, a "vertical slice" read, Azure block staging and a Pact deploy "stage" (D8). K5 prints
+  only the `NEVER`/`CALLER` code comments in S8's `production-uptime-checks` and `mobile-native-features`.
+  K8 hits are `./gradlew test` (the project's own command in a Gradle suite) and `pip install` /
+  `npm install` tool-install lines in code samples. "— MANDATORY SECTION" and the
+  `be-shared-session-budget` Step 5 duty do not occur in qa/java.
+  Carried forward: S8's block now lists its seven Do-NOT gaps, the `…/percy|applitools|lighthouse-ci/SKILL.md`
+  paths in `qa-ui-java.md:115`, `network-mocking`'s "`performance` skill", and that K6 is empty; S9's
+  block gains the description boilerplate and the `qa-llm-typescript.md:136` hand-off (D15).
+  Unverified: nothing was run beyond §4's searches (Gate: none). Left for the user: nothing.
 
 ### S8 — qa/java UI, mobile and performance lanes
 
@@ -1346,70 +1427,9 @@ name: the K1 resolver flags it (D12).
 | S18 | `docs` | `general-purpose` | — | ~135k |
 | G1 | `docs` | `general-purpose` | S1–S18 | ~120k |
 
-S1 to S6 have landed, and their prompts are deleted; the 13 prompts from S7 to G1 are live.
+S1 to S7 have landed, and their prompts are deleted; the 12 prompts from S8 to G1 are live.
 
 ---
-
-### S7 — qa/java API, BDD and LLM lanes (general-purpose, docs)
-
-````
-You are `general-purpose`. Task S7 of docs/plans/001-library-conformance-sweep.md: bring qa/java's API,
-BDD and LLM lanes in line with the plan's checks K1–K9.
-
-Deliverable: qa-api-java, qa-bdd-java, qa-llm-java and every qa/java skill they load pass K1–K9.
-
-Read, in this order:
-1. CLAUDE.md.
-2. The plan: §2 (the lane rule), §3, §4, §6 (the S7 rows), D1–D11, task S7, S5's As built note.
-3. CONTRIBUTING.md.
-4. qa/java/agents/{qa-api-java,qa-bdd-java,qa-llm-java}.md in full; their skill-loading lists decide
-   which qa/java/skills/ are yours.
-5. The plan's "Close-out — every task".
-
-Do:
-- Run §4's recipes with DIR=qa/java; work the hits in your agents and skills.
-- K1: `qa-api-client-writer` (skills/api-models/SKILL.md), `qa-db-testing-java` ×2
-  (skills/failure-injection-testing/SKILL.md).
-- K2: the Gate line in the three agents.
-- K6: Node 20 hits in your skills → Node 24.
-- List your skills in the As built note; S8 owns the rest.
-
-Traps:
-- Agent sentences S3/S4 fixed in backend recur in 28 agents across S5–S17; fix them where your
-  agents carry them:
-  - "— MANDATORY SECTION" on the brownfield heading is dropped (K5).
-  - The orientation pass's "every run regardless of the gate's verdict" (the cache gate) gains
-    "outside a `Gate: none` plan task".
-  - A closing duty "per `be-shared-session-budget` Step 5" now reads "per the plan's
-    `## Close-out — every task` section (plan format §7)".
-  - A skill's Validation / Verify list gets one sentence: inside a `Gate: none` plan task it runs
-    none of the checks and reports "written, not run".
-  - K8: a hardcoded `pnpm …` / `npm …` in an instruction becomes the project's own script, run with
-    the package manager `packageManager` names.
-  - The operating rule "Run what you write — a step whose code never executed does not pass its
-    gate" becomes "Run what you write, outside a `Gate: none` plan task — …" (S5; every qa agent
-    carries it).
-- Stale path shorthands (S5): skill folders were renamed but citations were not, and the K1
-  resolver cannot see paths. Grep for `api-test-author/generator` → `writer`,
-  `api-test-author/reviewer` and `ui-test-author/reviewer` → `review`, `db-testing/client` →
-  `connection`, `bdd-project-setup` → `bdd-project-scaffold`, `conformance-audit` →
-  `standards-audit`, and (S6) `performance/<tool>` or `skills/performance` → `load-testing`,
-  `qa/_shared/api-contract-testing` → `qa/_shared/contract-testing-pact`. Check every step-table
-  path, and every `qa/…` path in the files you own, against the folder on disk.
-- Known S7 hits of that family: `gherkin-step-code/SKILL.md:3`, `:8`, `:26`,
-  `bdd-project-scaffold`, `api-test-author/{playwright,review}`, `db-testing/connection`,
-  `file-storage-testing/references/{s3,azure-blob}.md`; and (S6) `qa-api-java.md:18`, `:140`,
-  `api-contract-testing/SKILL.md:8`, `:26`, `:265`, `:450` (`qa/_shared/api-contract-testing`).
-- Descriptions lacking a Do-NOT clause were common in qa/dotnet (15 of 26 skills); expect the same.
-- S5 found the dotnet side of each family first; its As built note tells you the real names.
-- Java 21 + Spring Boot 3.x is the policy; a Java 17 mention is a K6 hit unless it is a migration
-  source.
-
-Gate: none — this plan gates once, in G1. Do not run tools/token-audit.py or §7's script.
-
-Commit: `chore(sweep S7): qa/java API, BDD and LLM lanes`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
 
 ### S8 — qa/java UI, mobile and performance lanes (general-purpose, docs)
 
@@ -1434,14 +1454,24 @@ Do:
 - K1: `qa-ci-pipelines`, `qa-performance-k6` ×4, `qa-performance-gatling` ×2
   (skills/production-uptime-checks/SKILL.md).
 - K2: the Gate line in the three agents.
-- K6: the remaining Node 20 hits → Node 24.
+- K6: nothing to do — S7 moved all six qa/java `Node 20` hits (they sat in S7's messaging and
+  file-storage references); the recipe now prints nothing for `Node 20` in qa/java.
+- K7: seven descriptions have no Do-NOT clause — `browser-cloud-setup`, `inhouse-framework-conventions`,
+  `ui-test-author/selenium`, `device-cloud`, `production-uptime-checks`, `mobile-native-features`,
+  `load-testing`. Three of them end in the boilerplate "For end-to-end suite work prefer the staged
+  agent … use this skill directly for a single targeted artifact"; S7 replaced that sentence with the
+  Do-NOT clause in 12 skills (it restates what the agent's loading list already says).
+- Known S8 path hits: `qa-ui-java.md:115` cites `…/percy/SKILL.md`, `…/applitools/SKILL.md` and
+  `…/lighthouse-ci/SKILL.md`, which are `references/*.md` files of `visual-regression` and
+  `accessibility-testing`, not skills; `network-mocking/SKILL.md:3` names "the `performance` skill"
+  (→ `qa-load-testing-java`).
 
 Traps:
 - Agent sentences S3/S4 fixed in backend recur in 28 agents across S5–S17; fix them where your
   agents carry them:
   - "— MANDATORY SECTION" on the brownfield heading is dropped (K5).
   - The orientation pass's "every run regardless of the gate's verdict" (the cache gate) gains
-    "outside a `Gate: none` plan task".
+    "outside a `Gate: none` plan task". `qa-performance-java.md:46` words it "regardless of verdict".
   - A closing duty "per `be-shared-session-budget` Step 5" now reads "per the plan's
     `## Close-out — every task` section (plan format §7)".
   - A skill's Validation / Verify list gets one sentence: inside a `Gate: none` plan task it runs
@@ -1466,7 +1496,11 @@ Traps:
 - S6 also found: the orientation's "Recover, don't author" written twice (merge the two paragraphs);
   "Confirm it builds and runs on arrival" needs the same `Gate: none` exception as Orientation 3;
   the performance agent's Step 6 loads `qa/cicd` and `qa/reporting` skills while "Related agents"
-  says "do not load their skills" — state the exceptions once under the list.
+  says "do not load their skills" — state the exceptions once under the list. `qa-performance-java.md:33`
+  also writes defects up via `qa/manual/bug-report-writer`; keep it as one of those stated exceptions
+  (S6's reading for performance agents; D15 covers the LLM agents only).
+- The skills S7 owned (listed in its As built note) are done; a description or path in them is not
+  yours to re-edit.
 
 Gate: none — this plan gates once, in G1. Do not run tools/token-audit.py or §7's script.
 
@@ -1530,6 +1564,13 @@ Traps:
 - The agents' descriptions say "TypeScript/Node 20". Descriptions are always-on text, so they must
   change too, and must stay within 650 chars.
 - A substitution over files you do not own collides with S10. Scope the command to your file list.
+- (S7) Twelve of your skill descriptions end in the boilerplate "For end-to-end suite work prefer the
+  staged agent … use this skill directly for a single targeted artifact". S7 replaced it with the
+  Do-NOT clause, which also frees the characters the clause needs.
+- (S7, D15) `qa-llm-typescript.md:136` writes a real regression up via `qa/manual/bug-report-writer`
+  while its loading protocol (`:27`) forbids `qa/manual/`; hand it to `qa-test-case-designer` (it owns
+  bug reports), as `qa-llm-java` and `qa-llm-dotnet` now do. The orientation's "Recover, don't author"
+  is written twice in each qa/java agent too; merge it.
 
 Gate: none — this plan gates once, in G1. Do not run tools/token-audit.py or §7's script.
 

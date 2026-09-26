@@ -32,9 +32,10 @@ The skills library lives at the repo's `qa/` folder when working inside the Skil
 - **Steps stay declarative; mechanics live in page objects.** A step definition is one or two page-object calls — never a selector or a wait.
 - **State flows through the injected `TestContext`, not inheritance.** Cucumber-JVM does not support step-class inheritance; PicoContainer constructor-injects the per-scenario context into every glue class and page object.
 - Work **one step at a time**. Do not start step N+1 until step N's exit gate passes. If invoked for a single step, do only that step.
-- Run what you write. A step whose code has never executed does not pass its gate. If a run fails, fix and re-run once before reporting.
+- Run what you write, outside a `Gate: none` plan task. A step whose code has never executed does not pass its gate. If a run fails, fix and re-run once before reporting.
 - Ask at most 2–3 clarifying questions up front (target project path, where the test-case suite is, web vs mobile, existing page-object project); infer the rest.
 - **Emit no comments.** Per `ep-code-comments`: no inline comments in any body you write, and a doc comment only where the name genuinely cannot carry the meaning *and* the flow is complex (a non-obvious rule, a caller-facing ordering/lifetime constraint, a deliberate deviation, or a contract the signature can't express). Strip scaffolded template comments from anything a CLI generated. Wanting to explain a block is the signal to extract and name it.
+- **Inside a plan task, the prompt block's `Gate:` line decides what you run.** A `Gate: none` task writes its code and tests and runs no build, test suite, lint or typecheck, whatever an exit criterion below says; only the task that carries the plan's gate runs them.
 
 ## Working on existing code (brownfield)
 
@@ -44,18 +45,16 @@ Most requests are against a BDD suite that already exists — "this scenario is 
 
 **Orientation 1 — read the cache.** Run `ep-agent-orientation-cache`'s gate against `docs/agent-context/qa-bdd-java.md` → **TRUST** (skip orientation), **DELTA** (refresh only what the git delta invalidated — a changed `build.gradle.kts` / `pom.xml` / `libs.versions.toml` / `gradle-wrapper.properties` invalidates the version lane and everything keyed to it), or **FULL**. Report the verdict in one line; don't narrate the checks.
 
-**Orientation 2 — derive the gaps.** Recover, don't author. For whatever the gate left unresolved:
-
-You **recover** the BDD architecture instead of authoring it. Read before writing (`Read` 2–3 representative files — a `.feature`, a step-definition class, a page object, the `build.gradle.kts`) and produce a short **current-state map**:
+**Orientation 2 — derive the gaps.** For whatever the gate left unresolved, **recover** the BDD architecture instead of authoring it. Read before writing (`Read` 2–3 representative files — a `.feature`, a step-definition class, a page object, the `build.gradle.kts`) and produce a short **current-state map**:
 
 - **Runner + framework + version** (Cucumber-JVM + the JUnit 5 Platform engine, Java version, Playwright vs Selenium vs Appium under the steps) → which skill lane applies.
 - **The Step Catalog + binding layout** — the existing declarative steps, how they're split by domain, and the **DI wiring** (PicoContainer, the injected `TestContext`, hook lifecycle/teardown) — so a new scenario **reuses** existing steps and a fix respects the existing injection seam.
 - **Page-object coverage** for the touched journeys (which POMs exist vs. must be built) and the **tag/traceability convention** (TC-ID + AC linkage, Allure labels).
 - **Project conventions** (naming, folder layout) — match these over the templates' defaults.
 
-Confirm the suite **builds and runs** before you change it (`./gradlew build`, then the smoke scenario). If it is red on arrival, say so — that's a finding, not your bug to silently absorb.
+Outside a `Gate: none` plan task, confirm the suite **builds and runs** before you change it (`./gradlew build`, then the smoke scenario). If it is red on arrival, say so — that's a finding, not your bug to silently absorb.
 
-**Orientation 3 — re-verify what is never cached.** Whether it is **green on arrival** is working-tree state, not layout — check it every run regardless of the gate's verdict, and treat a red state as a finding to report rather than your bug to absorb. Then spot-check any file the map names that you are about to edit: **the map is a lead, not evidence**. The highest-risk cached line here is **the Step Catalog** — a duplicated step is exactly what it exists to prevent, so a stale catalog defeats the skill's whole purpose on the first new scenario.
+**Orientation 3 — re-verify what is never cached.** Whether it is **green on arrival** is working-tree state, not layout — check it every run outside a `Gate: none` plan task, regardless of the cache gate's verdict, and treat a red state as a finding to report rather than your bug to absorb. Then spot-check any file the map names that you are about to edit: **the map is a lead, not evidence**. The highest-risk cached line here is **the Step Catalog** — a duplicated step is exactly what it exists to prevent, so a stale catalog defeats the skill's whole purpose on the first new scenario.
 
 **What this agent's cache records:**
 
@@ -100,7 +99,7 @@ Work in the checkout you are given — never create a branch or worktree. Multi-
 | # | Step | Goal | Skills to load | Exit gate |
 |---|-------|------|----------------|-----------|
 | 0 | Ingest test cases | Confirm the manual test-case suite (TC-IDs, Setup/Cases/Cleanup, ACs) is present and assess page-object coverage for the journeys | — *(consume the artifact; do not load manual skills)* | Test-case suite in hand; if absent → **stop and hand off to `qa-test-case-designer`**. Page objects that exist vs. must be built are listed. |
-| 1 | Scaffold BDD layer *(skip if Cucumber already wired)* | Stand up Cucumber-JVM + the JUnit 5 Platform engine on top of the existing UI/mobile project — BOM + packages, the `@Suite` runner + `junit-platform.properties`, PicoContainer DI, `TestContext`, browser/driver hooks with teardown | `qa/java/skills/bdd-project-setup/SKILL.md` | `./gradlew build` → 0 errors/warnings; a throwaway smoke `.feature` is discovered by the engine and runs green |
+| 1 | Scaffold BDD layer *(skip if Cucumber already wired)* | Stand up Cucumber-JVM + the JUnit 5 Platform engine on top of the existing UI/mobile project — BOM + packages, the `@Suite` runner + `junit-platform.properties`, PicoContainer DI, `TestContext`, browser/driver hooks with teardown | `qa/java/skills/bdd-project-scaffold/SKILL.md` | `./gradlew build` → 0 errors/warnings; a throwaway smoke `.feature` is discovered by the engine and runs green |
 | 2 | Author feature files | Convert the suite into declarative, deduplicated `.feature` files — Background for shared steps (login), Scenario Outline + Examples for data sets, tags from priority/type/AC; emit the Step Catalog + Cleanup handoff | `qa/_shared/bdd/feature-file-writer/SKILL.md` | All `.feature` files parse; steps deduped to a catalog; Background/Outlines/tags applied; every TC-ID + AC mapped |
 | 3 | Generate step bindings | Bind every catalog step to a Cucumber-JVM glue method, split by domain, Cucumber Expressions, `TestContext` injected | `qa/java/skills/gherkin-step-code/SKILL.md` | `./gradlew test` builds green; running the features shows **no undefined or ambiguous** steps |
 | 4 | Implement steps vs POMs | Implement each step body with existing page-object intent methods; build missing page objects; wire Cleanup as `@After` | `qa/java/skills/gherkin-step-code/SKILL.md`, `qa/java/skills/page-object-design/SKILL.md`, `qa/java/skills/page-objects-from-url/SKILL.md` *(web, if a page/URL needs a new POM — data-testid first)*, `qa/java/skills/ui-test-author/playwright/SKILL.md` *(web POM/assertion conventions)* or `qa/java/skills/mobile-screen-objects/SKILL.md` + `qa/java/skills/ui-test-author/appium/SKILL.md` *(mobile)* | `./gradlew test` → the smoke scenario (Background + one Scenario Outline) runs green end-to-end; remaining scenarios bound or explicitly deferred |

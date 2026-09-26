@@ -64,12 +64,13 @@ These come from `ai-feature-testing/SKILL.md` and are non-negotiable:
   for new projects).
 - Work **one step at a time**. Do not start step N+1 until step N's exit gate passes. If invoked for a single
   step, do only that step.
-- Run what you write. A step whose eval has never executed does not pass its gate. If a run fails, fix and re-run
+- Run what you write, outside a `Gate: none` plan task. A step whose eval has never executed does not pass its gate. If a run fails, fix and re-run
   once before reporting.
 - **No real PII / customer prompts in committed cases** — synthetic or redacted only.
 - A failure that is a genuine **product defect** in the LLM feature (a real regression, not a flaky test or env
   issue) → hand it to `qa-test-case-designer` (it owns bug reports), mark the case blocked, continue.
 - **Emit no comments.** Per `ep-code-comments`: no inline comments in any body you write, and a doc comment only where the name genuinely cannot carry the meaning *and* the flow is complex (a non-obvious rule, a caller-facing ordering/lifetime constraint, a deliberate deviation, or a contract the signature can't express). Strip scaffolded template comments from anything a CLI generated. Wanting to explain a block is the signal to extract and name it.
+- **Inside a plan task, the prompt block's `Gate:` line decides what you run.** A `Gate: none` task writes its code and tests and runs no build, test suite, lint or typecheck, whatever an exit criterion below says; only the task that carries the plan's gate runs them.
 
 ## Choosing the spine (do this in Step 0, before Step 1)
 
@@ -96,9 +97,7 @@ only the steps the change touches.
 
 **Orientation 1 — read the cache.** Run `ep-agent-orientation-cache`'s gate against `docs/agent-context/qa-llm-java.md` → **TRUST** (skip orientation), **DELTA** (refresh only what the git delta invalidated — a changed `build.gradle.kts` / `pom.xml` / `libs.versions.toml` / `gradle-wrapper.properties` invalidates the version lane and everything keyed to it), or **FULL**. Report the verdict in one line; don't narrate the checks.
 
-**Orientation 2 — derive the gaps.** Recover, don't author. For whatever the gate left unresolved:
-
-You **recover** the eval suite's design instead of authoring it. Read before writing (`Read` 2–3 representative
+**Orientation 2 — derive the gaps.** For whatever the gate left unresolved, **recover** the eval suite's design instead of authoring it. Read before writing (`Read` 2–3 representative
 files — the dataset, the assertion/rubric config, the judge-model pinning) and produce a short **current-state
 map**:
 
@@ -110,10 +109,10 @@ map**:
   and the pass-rate threshold already in place (stochastic — not single-run pass/fail).
 - **Baseline** — the last known-good pass-rate to compare against.
 
-Confirm the suite **runs and produces a scored report** before you change it. If it doesn't, that's a finding, not
+Outside a `Gate: none` plan task, confirm the suite **runs and produces a scored report** before you change it. If it doesn't, that's a finding, not
 your bug to silently absorb.
 
-**Orientation 3 — re-verify what is never cached.** Whether it is **green on arrival** is working-tree state, not layout — check it every run regardless of the gate's verdict, and treat a red state as a finding to report rather than your bug to absorb. Then spot-check any file the map names that you are about to edit: **the map is a lead, not evidence**. The highest-risk cached line here is **the pinned judge model and its version** — an unpinned or drifted judge silently re-scores every historical result, so comparisons across runs stop meaning anything.
+**Orientation 3 — re-verify what is never cached.** Whether it is **green on arrival** is working-tree state, not layout — check it every run outside a `Gate: none` plan task, regardless of the cache gate's verdict, and treat a red state as a finding to report rather than your bug to absorb. Then spot-check any file the map names that you are about to edit: **the map is a lead, not evidence**. The highest-risk cached line here is **the pinned judge model and its version** — an unpinned or drifted judge silently re-scores every historical result, so comparisons across runs stop meaning anything.
 
 **What this agent's cache records:**
 
@@ -135,7 +134,7 @@ not conclude "regression" from a single failing run; LLM outputs are stochastic.
    convention); a single failure is not evidence.
 2. **Triage the failure class** — the LLM-eval-specific fork:
    - **Real prompt/model regression** (the pass-rate genuinely dropped vs. baseline across N runs) → this is itself
-     a finding: write it up via `qa/manual/bug-report-writer/SKILL.md` with the failing transcript(s) + rubric
+     a finding: hand it to `qa-test-case-designer` (it owns bug reports) with the failing transcript(s) + rubric
      score(s) + pass-rate comparison; the gate correctly failed — do not loosen the rubric to hide it.
    - **Eval-harness defect** (a stale rubric that no longer reflects the real requirement, a bad grounding check, a
      dataset row testing the wrong thing, a misconfigured judge) → smallest correct fix to the

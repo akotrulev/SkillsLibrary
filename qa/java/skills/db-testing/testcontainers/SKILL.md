@@ -1,6 +1,6 @@
 ---
 name: qa-db-testing-testcontainers-java
-description: Use when the user asks to scaffold Java 21 + Spring Boot 3 + TestNG (or JUnit 5) integration tests backed by a real database (Postgres / SQL Server / MongoDB / Redis) via Testcontainers-Java. Triggers: "spin up Postgres for the integration tests", "Testcontainers for the Spring Boot tests", "stop using H2 in tests".
+description: Use when the user asks to scaffold Java 21 + Spring Boot 3 + TestNG (or JUnit 5) integration tests backed by a real database (Postgres / SQL Server / MongoDB / Redis) via Testcontainers-Java. Triggers: "spin up Postgres for the integration tests", "Testcontainers for the Spring Boot tests", "stop using H2 in tests". Do NOT use for query guardrails (`qa-db-verification-queries-java`) or connect/seed/clean against an existing DB (`qa-db-connection-java`).
 ---
 
 # QA — DB Testing with Testcontainers (Java)
@@ -236,7 +236,7 @@ new GenericContainer<>("ghcr.io/myco/legacy-app:1.4.0")
    - `support/datasets/empty.yml` (db-rider seed reset)
    - Concrete `{Feature}IT.java`
    - `build.gradle.kts` dependency additions.
-4. Run `./gradlew test --tests "*IT"` — expect green or real assertion failure.
+4. Run `./gradlew test --tests "*IT"` — expect green or real assertion failure. Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run".
 
 ## Cross-references
 

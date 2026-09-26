@@ -1,6 +1,6 @@
 ---
 name: qa-test-data-builder-java
-description: Use when the user asks to create test data builders or ObjectMothers in a Java 21 test project (TestNG primary, JUnit 5 OK) to replace duplicated inline literals across tests with named, intention-revealing factories. Triggers: "create a builder for User in Java", "set up test data for X in Gradle TestNG", "extract this fixture into an OrderBuilder".
+description: Use when the user asks to create test data builders or ObjectMothers in a Java 21 test project (TestNG primary, JUnit 5 OK) to replace duplicated inline literals across tests with named, intention-revealing factories. Triggers: "create a builder for User in Java", "set up test data for X in Gradle TestNG", "extract this fixture into an OrderBuilder". Do NOT use for driving one test from an external data file (`qa-data-driven-testing-java`).
 ---
 
 # QA — Test Data Builder / ObjectMother (Java 21)
@@ -214,7 +214,7 @@ Don't build "an order in the DB" inside the builder — that couples the builder
 3. Generate the record + `@Builder` under `src/test/java/.../builders/` following the template.
 4. Add a `final` ObjectMother class under `mothers/` with the canonical variants.
 5. Replace inline literals in 2–3 representative tests so the pattern is set; leave the rest as a follow-up sweep.
-6. Run `./gradlew test` — every test still passes with the new defaults.
+6. Run `./gradlew test` — every test still passes with the new defaults. Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run".
 
 ## Handoffs
 

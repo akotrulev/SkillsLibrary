@@ -1,6 +1,6 @@
 ---
 name: qa-api-test-graphql-java
-description: Scaffold black-box **GraphQL** API tests in Java 21 with RestAssured + TestNG and Jackson. Triggers: "write a Java GraphQL test for query/mutation X", "assert the errors array on a GraphQL response", "test partial GraphQL data + errors". For end-to-end suite work prefer the staged agent `qa-api-java` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
+description: Use when scaffolding black-box **GraphQL** API tests in Java 21 with RestAssured + TestNG and Jackson. Triggers: "write a Java GraphQL test for query/mutation X", "assert the errors array on a GraphQL response", "test partial GraphQL data + errors". Do NOT use for REST (`qa-api-test-writer-java`) or gRPC (`qa-api-test-grpc-java`).
 ---
 
 # QA — GraphQL API Test Writer (Java 21 / RestAssured + TestNG + Jackson)

@@ -484,7 +484,7 @@ public final class Orders {
 - `qa-messaging-testing-dotnet` — the **canonical** stack, .NET 8 / NUnit (`AWSSDK.SQS`:
   `new AmazonSQSClient(creds, new AmazonSQSConfig { ServiceURL })`, `ReceiveMessageAsync(WaitTimeSeconds)`,
   `RedrivePolicy` attribute, `WaitFor.Async` poll, `Testcontainers.LocalStack`). This file is ported from it.
-- `qa-messaging-testing-typescript` — same skill, Node 20 + TS (`@aws-sdk/client-sqs`/`client-sns`:
+- `qa-messaging-testing-typescript` — same skill, Node 24 + TS (`@aws-sdk/client-sqs`/`client-sns`:
   `new SQSClient({ endpoint })`, `ReceiveMessageCommand({ WaitTimeSeconds: 10 })`, `expect.poll`,
   `@testcontainers/localstack`).
 - `references/service-bus.md` (`service-bus`, the **structure this node is ported from**) — Azure Service

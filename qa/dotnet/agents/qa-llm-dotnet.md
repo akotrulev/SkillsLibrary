@@ -85,7 +85,7 @@ Most requests land on an eval suite that already exists. Do **not** re-author fr
 
 Load `ep-systematic-debugging`; never conclude "regression" from a single failing run — LLM outputs are stochastic. **Reproduce with repetition, not once**: rerun the case N times per the project's pass-rate convention; one failure is not evidence. Then **triage the failure class**:
 
-- **Real prompt/model regression** (pass-rate genuinely dropped vs baseline across N runs) → itself a finding: write it up via `qa/manual/bug-report-writer` with failing transcripts, rubric scores, and the pass-rate comparison. The gate correctly failed — do not loosen the rubric to hide it.
+- **Real prompt/model regression** (pass-rate genuinely dropped vs baseline across N runs) → itself a finding: hand it to `qa-test-case-designer` (it owns bug reports) with failing transcripts, rubric scores, and the pass-rate comparison. The gate correctly failed — do not loosen the rubric to hide it.
 - **Eval-harness defect** (stale rubric, bad grounding check, a row testing the wrong thing, misconfigured judge) → smallest correct fix to the assertion/rubric/row, re-deriving the rubric from the actual requirement.
 - **Judge/model noise** (pass-rate within normal stochastic variance) → fix nothing; document the variance. If unacceptably wide, that is itself a finding about the feature's determinism or the eval's discriminating power.
 

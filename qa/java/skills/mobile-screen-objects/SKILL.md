@@ -1,6 +1,6 @@
 ---
 name: qa-mobile-screen-objects-java
-description: Use when the user wants a Java Appium page object created or updated from elements already discovered on a live screen. Triggers: "create a page object for the Login screen", "add a page for the … screen", "implement the … page". For end-to-end suite work prefer the staged agent `qa-mobile-java` / `qa-bdd-java` (or the matching slash command), which loads this skill inside its workflow; use this skill directly for a single targeted artifact.
+description: Use when the user wants a Java Appium page object created or updated from elements already discovered on a live screen. Triggers: "create a page object for the Login screen", "add a page for the … screen", "implement the … page". Do NOT use for discovering a screen's elements (`qa-mobile-screen-explorer-java`) or web page objects (`qa-page-object-design-java`).
 ---
 
 # QA — Appium Page Object Builder (Java)
@@ -102,7 +102,7 @@ private static final String PASSWORD_REVEAL_XPATH = "//*[@class='…ImageButton'
    - Element's accessibility id changed → update the constant, note it as a breaking rename for the team
    - Fallback locator where an accessibility id now exists → upgrade to `findByAccessibilityId`, drop the `// TODO`, remove the row from `missing-testids.md`
    - Never reorder/rename existing public methods tests already call without flagging it
-5. **Verify:** `./gradlew compileTestJava` (or the project equivalent) → compiles clean. Confirm `verifyPageLoaded()`'s landmark matches what `mobile-screen-explorer` reported for this screen.
+5. **Verify:** `./gradlew compileTestJava` (or the project equivalent) → compiles clean. Confirm `verifyPageLoaded()`'s landmark matches what `mobile-screen-explorer` reported for this screen. Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run".
 6. **Report:** class created/updated (diff summary), counts (accessibility-id-backed / fallback / ⚠ XPath), destination stubs created, open questions.
 
 ## Rules

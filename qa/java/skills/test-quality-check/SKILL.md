@@ -1,6 +1,6 @@
 ---
 name: qa-test-quality-check-java
-description: Use when measuring TEST QUALITY (not code coverage) for a Java 21 / Kotlin suite with mutation testing — run PIT/pitest to seed faults into JVM bytecode and prove the tests detect them, fail the build on a mutation-score threshold, and turn surviving mutants into missing-assertion findings. Triggers: "add mutation testing", "run pitest", "is my coverage real", "tests pass but catch nothing", "mutation score gate". JVM-only tool; the .NET sibling is Stryker.NET, the TS sibling is StrykerJS.
+description: Use when measuring TEST QUALITY (not code coverage) for a Java 21 / Kotlin suite with mutation testing — run PIT/pitest to seed faults into JVM bytecode and prove the tests detect them, fail the build on a mutation-score threshold, turn surviving mutants into missing-assertion findings. Triggers: "add mutation testing", "run pitest", "is my coverage real", "tests pass but catch nothing". Do NOT use for line coverage or .NET (`qa-test-quality-check-dotnet`, Stryker.NET).
 ---
 
 # QA — Mutation Testing (PIT / pitest, Java/Kotlin)
@@ -19,7 +19,7 @@ gap. **PIT (pitest)** is the state-of-the-art mutation engine for the JVM and th
 > |---|---|---|
 > | **Java / Kotlin** | **PIT (pitest)** | **this skill** |
 > | **.NET (C#)** | **Stryker.NET** (`dotnet stryker`) | `qa/dotnet/skills/test-quality-check` |
-> | **TypeScript / JS** | **StrykerJS** (`@stryker-mutator/core`) | `qa/typescript/skills/test-quality-check` |
+> | **TypeScript / JS** | **StrykerJS** (`@stryker-mutator/core`) | no house skill yet |
 >
 > The threshold philosophy, the "surviving mutant = missing assertion" workflow, the scope/incremental
 > discipline, and the anti-patterns below carry over to the siblings — only the tool invocation differs.

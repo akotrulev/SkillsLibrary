@@ -1,6 +1,6 @@
 ---
 name: qa-failure-injection-testing-java
-description: Use when writing fault-injection / resilience tests in Java 21 / TestNG with Toxiproxy via Testcontainers — inject latency, drops, and bandwidth caps on a dependency (DB, API, broker, cache) and assert the app degrades gracefully. Triggers: "test the app survives a slow database", "inject a connection drop", "assert the circuit breaker opens".
+description: Use when writing fault-injection / resilience tests in Java 21 / TestNG with Toxiproxy via Testcontainers — inject latency, drops, and bandwidth caps on a dependency (DB, API, broker, cache) and assert the app degrades gracefully. Triggers: "test the app survives a slow database", "inject a connection drop", "assert the circuit breaker opens". Do NOT use for load/throughput testing (`qa-load-testing-java`).
 ---
 
 # QA — Chaos / Fault-Injection Testing (Java 21 / Toxiproxy + Testcontainers + TestNG)
@@ -304,7 +304,7 @@ failing?*
 
 **Composing with the dependency families.** The thing you fault is stood up by Testcontainers
 (`ToxiproxyContainer` next to a `PostgreSQLContainer` / `KafkaContainer` on a shared `Network`); the dependency
-itself is exercised happy-path by `qa-db-testing-java` / `qa-messaging-testing-java`. Chaos adds the proxy in
+itself is exercised happy-path by `qa-db-testing-testcontainers-java` / `qa-messaging-testing-java`. Chaos adds the proxy in
 front and asserts the resilience layer — it **composes** with those skills, it doesn't replace them. A
 data-driven fault matrix (toxic × parameter) binds cleanly via `qa-data-driven-testing-java`.
 
@@ -337,7 +337,7 @@ data-driven fault matrix (toxic × parameter) binds cleanly via `qa-data-driven-
   break. Read it for the proxy-in-the-middle model; draw the boundary cleanly.
 - `qa-data-driven-testing-java` — drive a **fault matrix** (toxic × parameter × expected pattern) via
   row-binding instead of copy-pasted `@Test` methods.
-- `qa-db-testing-java` · `qa-messaging-testing-java` · `qa-messaging-testing-java` — the
+- `qa-db-testing-testcontainers-java` · `qa-messaging-testing-java` — the
   dependencies you fault (DB / broker connections through the proxy); they cover the happy path this inverts.
 - `qa-realtime-stream-testing-java` — shares the **lifecycle discipline** (steady → perturb → assert → recover)
   and bounded-condition waits (Awaitility, never sleep).
