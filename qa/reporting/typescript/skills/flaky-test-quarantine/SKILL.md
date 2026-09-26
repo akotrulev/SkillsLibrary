@@ -1,9 +1,9 @@
 ---
 name: qa-flaky-test-quarantine-typescript
-description: Detect, retry, **quarantine**, and report flaky tests in a Node 24 (22 supported) + TypeScript suite (Playwright for e2e, Vitest for unit). Triggers: "this Playwright test is flaky, stop it blocking CI", "quarantine our flaky e2e tests but keep running them", "retry failed tests in Playwright/Vitest".
+description: Use when flaky tests in a Node 24 (22 supported) + TypeScript suite (Playwright e2e, Vitest unit) must be detected, retried, **quarantined** and reported. Triggers: "this Playwright test is flaky, stop it blocking CI", "quarantine our flaky e2e tests but keep running them", "retry failed tests in Playwright/Vitest". Not for Allure wiring (`qa-test-reports-typescript`), the pipeline lanes (`qa-ci-pipelines-typescript`), or fixing test logic (the owning qa-*-typescript agent).
 ---
 
-# Flaky-Test Quarantine (Node 20 + TypeScript / Playwright + Vitest)
+# Flaky-Test Quarantine (Node 24 + TypeScript / Playwright + Vitest)
 
 This is the **TypeScript sibling** of the single-node `qa/reporting/typescript/skills/flaky-test-quarantine/` family, **ported** from
 the canonical **Java/TestNG** file (`qa-flaky-test-quarantine-java`). The **four-move loop** is identical;
@@ -45,7 +45,7 @@ non-gating lane. *Deterministic failure* → it's a bug, fix it. **Never** crank
 
 ## Stack
 
-- Node 20, TypeScript (strict), Playwright Test (e2e — where flakiness mostly lives) + Vitest (unit)
+- Node 24 (22 supported), TypeScript (strict), Playwright Test (e2e — where flakiness mostly lives) + Vitest (unit)
 - **No `await page.waitForTimeout(...)` / `setTimeout` as a wait** — sleeps *cause* flakiness; use Playwright
   **auto-waiting** locators + web-first assertions + `expect.poll` (cross-link
   `qa-ui-test-writer-playwright-typescript`)
@@ -106,7 +106,7 @@ import { test, expect } from '@playwright/test';
 import * as allure from 'allure-js-commons';
 
 test('should settle payment when gateway is slow', { tag: '@flaky' }, async ({ page }) => {
-  await allure.issue('CHECKOUT-871', 'https://jira/CHECKOUT-871'); // the ticket — quarantine is NEVER permanent
+  await allure.issue('CHECKOUT-871', 'https://jira/CHECKOUT-871'); // the ticket — quarantine is never permanent
   await allure.tag('flaky');                                       // visible flag in Allure (Move 4)
   // ... the intermittently-failing assertion, awaiting a real fix under CHECKOUT-871
 });
@@ -126,7 +126,7 @@ export default defineConfig({
 ```
 
 CI runs them as **two lanes** — the quarantine lane never blocks (cross-link
-`qa-ci-pipelines`):
+`qa-ci-pipelines-typescript`):
 
 ```yaml
 - name: Gate suite (blocks merge)
@@ -272,5 +272,5 @@ is reported in Allure (flaky-flagged, history-tracked) but **never** fails the p
 - `qa-ui-test-writer-playwright-typescript` — where the quarantined tests are authored; flakiness is best
   fixed at the source: auto-waiting locators, web-first assertions, **no `waitForTimeout`**,
   intent-not-selectors page objects. Fix the wait and the test leaves quarantine.
-- `qa-ci-pipelines` (github-actions / azure-pipelines / gitlab-ci references) — the gate-lane vs quarantine-lane job
+- `qa-ci-pipelines-typescript` (its GitHub Actions, Azure Pipelines and GitLab CI references) — the gate-lane vs quarantine-lane job
   wiring (`continue-on-error` on the non-gating lane); sharding the gate project across runners.

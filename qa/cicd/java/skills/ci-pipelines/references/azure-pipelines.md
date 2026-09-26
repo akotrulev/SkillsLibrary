@@ -12,8 +12,8 @@ Authors `azure-pipelines.yml` for Gradle + TestNG suites (per CLAUDE.md defaults
 
 ## When NOT to use
 
-- GitHub Actions → `qa/cicd/java/skills/ci-pipelines`
-- GitLab CI → `qa/cicd/java/skills/ci-pipelines`
+- GitHub Actions → `references/github-actions.md` in this skill
+- GitLab CI → `references/gitlab-ci.md` in this skill
 - App build / deploy → `devops/azure-pipelines`
 - .NET / TS stacks — see siblings
 

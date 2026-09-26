@@ -1,6 +1,6 @@
 ---
 name: qa-flaky-test-quarantine-java
-description: Detect, retry, **quarantine**, and report flaky tests in a Java 21 / TestNG suite. Triggers: "this test is flaky, stop it blocking the pipeline", "quarantine the flaky tests but keep running them", "retry failed tests a couple of times in TestNG".
+description: Use when flaky tests in a Java 21 / TestNG suite must be detected, retried, **quarantined** and reported. Triggers: "this test is flaky, stop it blocking the pipeline", "quarantine the flaky tests but keep running them", "retry failed tests a couple of times in TestNG". Not for Allure wiring (`qa-test-reports-java`), the pipeline lanes (`qa-ci-pipelines-java`), or fixing test logic (the owning qa-*-java agent).
 ---
 
 # Flaky-Test Quarantine (Java 21 / TestNG) — **canonical stack**
@@ -171,7 +171,7 @@ public class CheckoutTests {
 
     @Test(groups = "flaky")            // ← out of the gate, into the quarantine lane
     @Flaky                             // ← paints it yellow in Allure even on a green run (see Move 4)
-    @Issue("CHECKOUT-871")             // ← the ticket tracking the de-flake — quarantine is NEVER permanent
+    @Issue("CHECKOUT-871")             // ← the ticket tracking the de-flake — quarantine is never permanent
     public void shouldSettlePaymentWhenGatewayIsSlow() {
         // ... the intermittently-failing assertion, awaiting a real fix under CHECKOUT-871
     }
@@ -327,5 +327,5 @@ These sections live in `references/details.md` — **read it when the task touch
   are sleep/timing tests in disguise; fix the wait and they leave quarantine.
 - `qa-ui-test-writer-playwright-java` / `qa-api-test-writer-java` — where the tests being
   quarantined are authored; flakiness is best fixed at the source (stable locators, intent-not-selectors).
-- `qa-ci-pipelines` (github-actions / azure-pipelines / gitlab-ci references) — the gate-lane vs quarantine-lane
+- `qa-ci-pipelines-java` (its GitHub Actions, Azure Pipelines and GitLab CI references) — the gate-lane vs quarantine-lane
   job wiring (a non-gating job with `continue-on-error` / `ignoreFailures`).

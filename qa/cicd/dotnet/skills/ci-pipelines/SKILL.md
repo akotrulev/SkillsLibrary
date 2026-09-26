@@ -1,9 +1,9 @@
 ---
 name: qa-ci-pipelines-dotnet
-description: Use when wiring a test suite into CI — shard matrix, JUnit + Allure publishing, performance gates, OIDC secrets — on GitHub Actions, Azure Pipelines, or GitLab CI. Triggers: "add a CI pipeline for the tests", "shard the suite in CI", "publish Allure from the pipeline". The repo's CI host picks the tool; read its reference file.
+description: Use when wiring a test suite into CI — shard matrix, JUnit + Allure publishing, performance gates, OIDC secrets — on GitHub Actions, Azure Pipelines, or GitLab CI. Triggers: "add a CI pipeline for the tests", "shard the suite in CI", "publish Allure from the pipeline". The repo's CI host picks the tool; read its reference file. Not for the cross-CI rules (`qa-ci-conventions-shared`), Allure adapter wiring or quarantine (the qa-reporting agents), or deploy pipelines (the devops plugin).
 ---
 
-# QA — CI Pipelines (.NET 8 / C#)
+# QA — CI Pipelines (.NET 10 / C#)
 
 One registered skill, 3 tools — a project uses exactly one. Identify the project's tool
 (dependencies, docker-compose, infra config; ask one question if ambiguous), then **read the matching
@@ -25,6 +25,7 @@ shared by every tool in the family.
 - Shard with fail-fast off; always publish JUnit XML + Allure results, including on failure.
 - Secrets via OIDC / the platform's secret store — never in YAML.
 - Cross-stack conventions live in `qa/cicd/ci-conventions` — load it alongside the tool reference.
+- Inside a `Gate: none` plan task, run none of the generation steps' lint, dry-run or smoke checks, and report the pipeline as "written, not run".
 
 ## Cross-references
 

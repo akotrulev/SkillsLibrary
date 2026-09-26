@@ -12,8 +12,8 @@ Authors `azure-pipelines.yml` for Vitest / Jest / Playwright / k6 suites on Micr
 
 ## When NOT to use
 
-- GitHub Actions → `qa/cicd/typescript/skills/ci-pipelines`
-- GitLab CI → `qa/cicd/typescript/skills/ci-pipelines`
+- GitHub Actions → `references/github-actions.md` in this skill
+- GitLab CI → `references/gitlab-ci.md` in this skill
 - App build / deploy → `devops/azure-pipelines`
 - Non-TS stacks — see siblings
 
@@ -55,7 +55,7 @@ schedules:
 
 variables:
   - name: nodeVersion
-    value: '20.x'
+    value: '24.x'
   - group: qa-test-secrets
 
 stages:

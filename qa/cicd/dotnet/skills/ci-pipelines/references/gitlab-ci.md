@@ -1,8 +1,8 @@
 # QA — GitLab CI/CD for .NET Test Suites
 
-Authors `.gitlab-ci.yml` that runs NUnit / Playwright / Testcontainers-backed integration tests on GitLab runners using .NET 8, shards for speed via `parallel:`, publishes Allure to GitLab Pages with history, fails on real failures (not flakes), and pulls secrets via `id_tokens:` cloud OIDC rather than long-lived CI/CD variables.
+Authors `.gitlab-ci.yml` that runs NUnit / Playwright / Testcontainers-backed integration tests on GitLab runners using .NET 10 (8/9 supported), shards for speed via `parallel:`, publishes Allure to GitLab Pages with history, fails on real failures (not flakes), and pulls secrets via `id_tokens:` cloud OIDC rather than long-lived CI/CD variables.
 
-This is a **true port** of `qa/cicd/dotnet/skills/ci-pipelines` — the *same* pipeline (same stages, same shard strategy, same artifacts, same gates), re-keyed to GitLab's `.gitlab-ci.yml` vocabulary, and the .NET sibling of the canonical `qa/cicd/typescript/skills/ci-pipelines`. **Translate, don't redesign.** Only the YAML schema and a few primitives differ:
+This is a **true port** of this skill's GitHub Actions reference (`references/github-actions.md`) — the *same* pipeline (same stages, same shard strategy, same artifacts, same gates), re-keyed to GitLab's `.gitlab-ci.yml` vocabulary, and the .NET sibling of the canonical `qa/cicd/typescript/skills/ci-pipelines`. **Translate, don't redesign.** Only the YAML schema and a few primitives differ:
 
 | Capability | GitHub Actions | GitLab CI (this skill) |
 |---|---|---|
@@ -26,8 +26,8 @@ The canonical TS sibling uses Playwright's native `blob` → `merge-reports` flo
 
 ## When NOT to use
 
-- GitHub Actions equivalent → `qa/cicd/dotnet/skills/ci-pipelines`
-- Azure Pipelines equivalent → `qa/cicd/dotnet/skills/ci-pipelines`
+- GitHub Actions equivalent → `references/github-actions.md` in this skill
+- Azure Pipelines equivalent → `references/azure-pipelines.md` in this skill
 - App build / deploy pipelines unrelated to tests → `devops/gitlab-ci`
 - Non-.NET stacks — use the `java` or `typescript` sibling under this skill
 
@@ -45,7 +45,7 @@ Infer everything else from `.csproj` files, `packages.lock.json` if present, and
 
 | Concern | Default | Override when |
 |---|---|---|
-| Runner | `image: mcr.microsoft.com/dotnet/sdk:8.0` on a `docker` runner | Self-hosted/shell runner only for proprietary hardware (mobile farm, GPU) |
+| Runner | `image: mcr.microsoft.com/dotnet/sdk:10.0` on a `docker` runner | Self-hosted/shell runner only for proprietary hardware (mobile farm, GPU) |
 | .NET | 8.0 LTS via the SDK image | Newer LTS only after 3 mo GA |
 | NuGet cache | `cache:key:files:[packages.lock.json]` (enable lock file) + `policy:` + `--locked-mode` restore | Hash `**/*.csproj` when no lock file exists |
 | Triggers | `merge_request_event` + nightly `schedule` (set via `workflow:rules`) | `push` on the default branch only when the suite is < 5 min |
@@ -66,7 +66,7 @@ Infer everything else from `.csproj` files, `packages.lock.json` if present, and
 stages: [install, test, merge, perf, publish]
 
 default:
-  image: mcr.microsoft.com/dotnet/sdk:8.0
+  image: mcr.microsoft.com/dotnet/sdk:10.0
   tags: [docker]              # a runner with the Docker executor
   interruptible: true         # GitLab analogue of cancel-in-progress for superseded MR pipelines
 
@@ -124,7 +124,7 @@ api-tests:
     - export AWS_WEB_IDENTITY_TOKEN_FILE="$(mktemp)"
     - echo "$AWS_ID_TOKEN" > "$AWS_WEB_IDENTITY_TOKEN_FILE"
     - export AWS_ROLE_ARN="arn:aws:iam::111122223333:role/qa-ci"
-    - export API_BASE_URL="$(aws ssm get-parameter --name /qa/dotnet/skills/api-base-url --with-decryption --query Parameter.Value --output text)"
+    - export API_BASE_URL="$(aws ssm get-parameter --name /qa/api-base-url --with-decryption --query Parameter.Value --output text)"
     # NUnit slices the suite across CI_NODE_TOTAL runners via a modulo filter predicate.
     - >
       dotnet test ApiTests/ApiTests.csproj
@@ -137,7 +137,7 @@ api-tests:
   artifacts:
     when: always                # collect reports even when tests fail
     expire_in: 30 days
-    paths: [ApiTests/bin/$BUILD_CONFIGURATION/net8.0/allure-results/]
+    paths: [ApiTests/bin/$BUILD_CONFIGURATION/net10.0/allure-results/]
     reports:
       junit: reports/junit-api-*.xml   # native MR test widget — no third-party action
 ```
@@ -203,8 +203,8 @@ ui-tests:
     when: always
     expire_in: 14 days
     paths:
-      - UiTests/bin/$BUILD_CONFIGURATION/net8.0/allure-results/
-      - UiTests/bin/$BUILD_CONFIGURATION/net8.0/playwright-traces/
+      - UiTests/bin/$BUILD_CONFIGURATION/net10.0/allure-results/
+      - UiTests/bin/$BUILD_CONFIGURATION/net10.0/playwright-traces/
     reports:
       junit: reports/junit-ui-*.xml
 ```
@@ -218,7 +218,7 @@ GitLab has no `gh-pages` branch. The native deliverable is **GitLab Pages**: a j
 ```yaml
 pages:
   stage: publish
-  image: node:20-bookworm              # allure-commandline needs Node + a JRE
+  image: node:24-bookworm              # allure-commandline needs Node + a JRE
   needs:
     - job: api-tests
       artifacts: true
@@ -265,7 +265,7 @@ k6-perf:
   script:
     - export AWS_WEB_IDENTITY_TOKEN_FILE="$(mktemp)"; echo "$AWS_ID_TOKEN" > "$AWS_WEB_IDENTITY_TOKEN_FILE"
     - export AWS_ROLE_ARN="arn:aws:iam::111122223333:role/qa-ci"
-    - export K6_BASE_URL="$(aws ssm get-parameter --name /qa/dotnet/skills/api-base-url --query Parameter.Value --output text)"
+    - export K6_BASE_URL="$(aws ssm get-parameter --name /qa/api-base-url --query Parameter.Value --output text)"
     - k6 run --out json=k6-summary.json perf/scenarios/checkout.js
   artifacts:
     when: always
@@ -340,8 +340,8 @@ k6-perf:
 ## Cross-references
 
 - **`qa/cicd/typescript/skills/ci-pipelines`** (canonical) + **`qa/cicd/java/skills/ci-pipelines`** — the same-CI siblings; the TS one shows the Playwright `blob`/`merge-reports` flow this stack replaces with a per-shard Allure merge.
-- **`qa/cicd/dotnet/skills/ci-pipelines`** — the structural template this ports from; the `strategy.matrix` / `dorny/test-reporter` (TRX) variant.
-- **`qa/cicd/dotnet/skills/ci-pipelines`** — the Azure sibling; the `strategy: parallel` / service-connection variant.
+- **`references/github-actions.md`** — the structural template this ports from; the `strategy.matrix` / `dorny/test-reporter` (TRX) variant.
+- **`references/azure-pipelines.md`** — the Azure sibling; the `strategy: parallel` / service-connection variant.
 - **`qa/dotnet/skills/db-testing/testcontainers`** — the integration-tests job runs these (needs the `docker:dind` service shown above).
 - **`qa/dotnet/skills/network-mocking`** — runs an **external MITM proxy** (`Titanium.Web.Proxy`) the job must start/stop, whose **CA the client must trust** (per-run — no stored secret); the in-process `playwright-routes`/`cdp` specs need no extra plumbing.
 - **`qa/dotnet/skills/network-mocking`** — in-process CDP specs the `ui-tests` job runs directly.

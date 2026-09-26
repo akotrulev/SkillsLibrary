@@ -5,7 +5,7 @@ description: Cross-stack, cross-CI rules every `ci-pipelines` skill enforces —
 
 # QA — CI Conventions (Shared)
 
-Cross-stack rules shared by all nine `qa/cicd/<stack>/skills/ci-pipelines/<ci>` skills. The per-CI siblings carry platform YAML, templates, and generation steps; this skill carries the conventions that must hold identically on Azure Pipelines, GitHub Actions, and GitLab CI, in Java, .NET, and TypeScript. When a per-CI skill and this file disagree, the per-CI skill is wrong — fix it.
+Cross-stack rules shared by the three `qa/cicd/<stack>/skills/ci-pipelines` skills and their nine `references/<ci>.md` files. The per-CI references carry platform YAML, templates, and generation steps; this skill carries the conventions that must hold identically on Azure Pipelines, GitHub Actions, and GitLab CI, in Java, .NET, and TypeScript. When a per-CI reference and this file disagree, the reference is wrong — fix it.
 
 ## Platform primitive map
 
@@ -43,7 +43,7 @@ The same convention, three spellings. Use this table to translate, not to choose
 ## Reporters
 
 - Always emit **both**: the platform-native format (TRX / JUnit XML — feeds the PR/MR test widget) **and** Allure results (feeds humans, carries history and trends).
-- The pipeline must go red on real failures even when a runner exit code is masked — turn on the report task's fail-on-failed-tests option; never `continue-on-error` / `allow_failure` on a test step.
+- The pipeline must go red on real failures even when a runner exit code is masked — turn on the report task's fail-on-failed-tests option; never `continue-on-error` / `allow_failure` on a gating test step. The one exception is the non-gating quarantine lane `flaky-test-quarantine` defines: it runs only quarantined tests, still reports them, and must not block the merge.
 - Allure **history must persist across runs** (see primitive map for where) — a trendless Allure report is just a prettier TRX.
 - Container logs (Testcontainers) attach to Allure via the test runner, not as separate pipeline artifacts.
 
@@ -80,7 +80,7 @@ The same convention, three spellings. Use this table to translate, not to choose
 
 ## What NOT to do (all platforms, all stacks)
 
-- No green-washing: `continueOnError` / `continue-on-error` / `allow_failure` on a test step.
+- No green-washing: `continueOnError` / `continue-on-error` / `allow_failure` / `|| true` on a gating test step (the quarantine lane is the one non-gating exception).
 - No PATs or long-lived keys where OIDC exists.
 - No printing or artifact-collecting a secret, ever.
 - No re-discovering tests per shard at runtime.
@@ -90,7 +90,7 @@ The same convention, three spellings. Use this table to translate, not to choose
 
 ## Handoffs
 
-- Platform YAML, templates, generation steps → `qa/cicd/<stack>/skills/ci-pipelines/{azure-pipelines,github-actions,gitlab-ci}` for the project's stack and CI
+- Platform YAML, templates, generation steps → `qa/cicd/<stack>/skills/ci-pipelines` (its `references/<ci>.md`) for the project's stack and CI
 - Flake quarantine policy the retry rules defer to → `qa/reporting/<stack>/skills/flaky-test-quarantine`
 - Allure adapter wiring inside the test project → `qa/reporting/<stack>/skills/test-reports`
 - Workload models and threshold semantics behind the perf gate → `qa/_shared/performance`

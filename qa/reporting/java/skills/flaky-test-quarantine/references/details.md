@@ -33,7 +33,7 @@ public class PaymentFlowTests {
 }
 ```
 
-CI shape (two lanes — cross-link `qa-ci-pipelines` for the full workflow):
+CI shape (two lanes — cross-link `qa-ci-pipelines-java` for the full workflow):
 
 ```yaml
 - name: Gate suite (blocks merge)

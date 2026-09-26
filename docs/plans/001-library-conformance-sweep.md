@@ -29,8 +29,12 @@ three agents, the last 23 `Node 20` hits moved to Node 24 so qa/typescript holds
 production-uptime-checks names resolved, eight Do-NOT clauses added). S11 landed 2026-09-26 (qa/_shared and
 qa/manual: the Gate line in three agents, the two mobile security descriptions and `qa-test-case-designer`
 under budget, nine Do-NOT clauses added, 20 stale paths fixed; the "(Stage N, forthcoming)" family is carried
-into S17 and S18). S12 is next. S1–S18 are ungated: the edits from S1 to S11 are built but unverified until
-G1 runs §7.
+into S17 and S18). S12 landed 2026-09-26 (qa/cicd and qa/reporting: the Gate line in six agents,
+`qa-ci-pipelines` → `qa-ci-pipelines-<stack>` in the three `flaky-test-quarantine` skills, every Node 20 and
+.NET 8 default moved to Node 24 / .NET 10, the `test-reports` green-washing samples fixed against
+`ci-conventions` with the quarantine lane stated as its one exception, D16; the .NET 8 and
+`continue-on-error` families are carried into S13, S14 and S17). S13 is next. S1–S18 are ungated: the edits
+from S1 to S12 are built but unverified until G1 runs §7.
 
 ## 1. What already exists, and what is missing
 
@@ -565,6 +569,18 @@ operating rule already says so and the other lane agents (`qa-api-*`, `qa-bdd-*`
 applied it to `qa-llm-dotnet.md:88`, outside its folder, since S5 had left that copy in place.
 **Cost:** two readings coexist: performance agents keep the stated exception (S6, carried into S8/S10),
 while LLM agents hand off. `qa-llm-dotnet` is edited by a task that does not own qa/dotnet.
+
+**D16 (2026-09-26, S12) — A gating test step never carries `continue-on-error`; the quarantine lane is
+the one stated exception.** `qa-ci-conventions-shared` forbids `continue-on-error` / `allow_failure` on a
+test step and says a reference that disagrees is wrong, yet the three `test-reports` skills taught
+`continue-on-error: true`, `continueOnError: true` and `|| true` on the test step as the *right* way to
+keep publishing, and the three `flaky-test-quarantine` skills wire their non-gating quarantine lane with
+`continue-on-error`. Reading one: the conventions win everywhere, so the quarantine lane must find
+another mechanism. Reading two (chosen): the conventions win for gating steps — `test-reports` now lets
+the test step fail and runs upload/publish with `if: always()` / `condition: succeededOrFailed()` /
+`when: always` — and `ci-conventions` names the quarantine lane as the one non-gating exception, because
+that lane exists to run and report tests that must not block. **Cost:** the no-green-washing rule now has
+an exception a reader must keep narrow; a second "non-gating" lane would need its own justification.
 
 ## Answered questions (2026-09-26)
 
@@ -1435,6 +1451,68 @@ split is between the two folders; the task stays whole because both folders shar
 - K5: `qa/cicd` has 6 all-caps rule words; restate them.
 - K2: the Gate line in the three `qa-cicd-*` and three `qa-reporting-*` agents.
 - **Not in S12:** `qa/_shared` and `qa/manual` (S11).
+- **As built (2026-09-26):** `qa/cicd/` and `qa/reporting/`, one session, not split; the six agents and six
+  commands read in full. Gate line added to 6 agents, each as the last Operating-rules bullet
+  (`qa-cicd-{dotnet,java,typescript}.md:37`, `qa-reporting-{dotnet,java,typescript}.md:37`). The six commands
+  need nothing: each only points at its agent file. 26 files changed.
+  Data issues: 44 fixed.
+  - K1, 6 hits (the plan counted 5): `qa-ci-pipelines` → `qa-ci-pipelines-<stack>`, matching S6/S8/S10, in
+    `flaky-test-quarantine` dotnet `:176`, `:345`, java `:330`, `references/details.md:36`, typescript `:129`,
+    `:275`; the trailing "(github-actions / … references)" now reads "(its GitHub Actions, Azure Pipelines and
+    GitLab CI references)". The resolver now prints nothing for both folders.
+  - K6 Node: `Node 20` ×5 → Node 24 (`ci-pipelines/references/{github-actions,gitlab-ci}.md:3` typescript,
+    `flaky-test-quarantine` typescript `:6`, `:48`, `test-reports` typescript `:8`); `node:20` ×6 → `node:24`
+    (typescript `gitlab-ci.md:50`, `:51`, `:71`, dotnet `gitlab-ci.md:221`, `test-reports` typescript `:264`,
+    `:278`); plus pins the recipe misses: `NODE_VERSION` `'20'`/`"20"` (typescript `github-actions.md:74`,
+    `gitlab-ci.md:83`), `'20.x'` (typescript `azure-pipelines.md:58`, `test-reports` typescript `:236`),
+    `node-version: '20'` (`test-reports` typescript `:209`). None was a feature boundary.
+  - K6 .NET (the recipe misses it): `.NET 8` defaults → .NET 10 (8/9 supported) in `qa-cicd-dotnet` and
+    `qa-reporting-dotnet` (description, title, intro), the dotnet `ci-pipelines` and `flaky-test-quarantine`
+    titles and stack line; `8.0.x` → `10.0.x`, `sdk:8.0` → `sdk:10.0` and `net8.0/` → `net10.0/` in the three
+    dotnet CI references and `test-reports` dotnet. The TFM detection lists (`net8.0/9.0/10.0`) stay.
+  - Stale paths: the earlier path rewrite collapsed `ci-pipelines/<host>` into `ci-pipelines`, so 18 "GitHub
+    Actions / Azure Pipelines / GitLab CI equivalent → `qa/cicd/<stack>/skills/ci-pipelines`" lines and 9
+    "port of / ports from" lines pointed at their own skill; they now name `references/<host>.md`. The same
+    rewrite turned the SSM parameter `/qa/api-base-url` into `/qa/<stack>/skills/api-base-url` in the three
+    `gitlab-ci.md` files (6 hits); restored. `ci-conventions:8`, `:93` and the three `test-reports` handoffs
+    `ci-pipelines/{github-actions,…}` → "`ci-pipelines` (its `references/<ci>.md`)"; `test-reports:20`
+    `ui-test-author/<stack>/<stack>` → `ui-test-author/<tool>`; the reporting agents' Step 2 cited a
+    `@known-flaky` label no skill defines → "its quarantine tag/category convention".
+  Code issues: 22 fixed.
+  - K7: Do-NOT clauses added to all 9 skills that lacked one (three `ci-pipelines`, three
+    `flaky-test-quarantine`, three `test-reports`), each naming the sibling; the six reporting skills now open
+    with "Use when". Longest now: `ci-conventions` 494, `ci-pipelines` 490; agents 537–587.
+  - K5: `MUST` ×6 (YAML comments in the three `github-actions.md`) and `NEVER` ×3 (code comments in the three
+    `flaky-test-quarantine`) → lower case. No `— MANDATORY SECTION` or `be-shared-session-budget` duty occurs.
+  - K8: `qa-cicd-typescript` Step 1 "`npx tsc --noEmit`" and "Node + npm/pnpm", `qa-reporting-typescript`
+    Step 1 "`npx vitest run`" → the project's own scripts, run with the package manager `packageManager` names.
+  - "written, not run": one sentence in each `ci-pipelines` SKILL.md's shared rules (covers the nine
+    references' Generation steps) and before each `test-reports` Handoffs (its smoke step).
+  - `qa-cicd-*` Orientation 2 said "Recover, don't author" twice; merged.
+  Logical conflicts: 5 fixed.
+  - The three `qa-cicd-*` agents said "GitHub Actions by the library default … Gradle Kotlin DSL for new
+    projects" while `ci-pipelines` calls Azure Pipelines the house default (CLAUDE.md) and `ci-conventions`
+    lets the project's CI decide; now "the project's existing CI host decides — Azure Pipelines is the house
+    default for a new pipeline". The Gradle clause is gone from the dotnet and typescript agents too.
+  - `test-reports` ×3 put `continue-on-error` / `continueOnError` / `|| true` on the test step and recommended
+    it in "What NOT to do", against `ci-conventions`; the test step now fails the build, and the GitHub publish
+    step gains `always() &&`, Azure `PublishHtmlReport` gains `condition: succeededOrFailed()` and the GitLab
+    publish rule gains `when: always` so the report still publishes. `ci-conventions:46`, `:83` state the
+    quarantine lane as the one non-gating exception (D16).
+  - "Run what you write" (`qa-reporting-*:33`) and "Validate what you write" (`qa-cicd-*:35`) gain "outside a
+    `Gate: none` plan task"; Orientation 3's "every run regardless of the (gate's) verdict" gains the same in
+    all six.
+  Cleanup: none. The K9 file recipe finds nothing; no tracked junk; every SKILL.md, agent and command in both
+  folders is listed in the marketplace and every listed path exists.
+  Kept on purpose: K3 hits are the fixed workspace sentence and CI branch filters / `gh-pages`. K4 hits are
+  pipeline stages (D8), Gradle/NUnit shard "slices" and Allure's "user-story slice". K8 hits left are CI YAML
+  samples (`dotnet test`, `./gradlew test`, `pnpm install --frozen-lockfile`, `npm ci`) and the
+  "never bare `npm install` in CI" rules. `green` hits are exit criteria, gate-evidence examples and
+  anti-green-washing rule text (K2 keep). The qa agent descriptions still open with the role, like every
+  qa-* agent S5–S11 left.
+  Carried forward: the .NET 8 default family into S13, S14 and S17, and the `continue-on-error` family into
+  S13 and S17.
+  Unverified: nothing was run beyond §4's searches and the K1/K7 scripts (Gate: none).
 
 ### S13 — frontend and auth
 
@@ -1679,63 +1757,9 @@ name: the K1 resolver flags it (D12).
 | S18 | `docs` | `general-purpose` | — | ~135k |
 | G1 | `docs` | `general-purpose` | S1–S18 | ~120k |
 
-S1 to S11 have landed, and their prompts are deleted; the 8 prompts from S12 to G1 are live.
+S1 to S12 have landed, and their prompts are deleted; the 7 prompts from S13 to G1 are live.
 
 ---
-
-### S12 — qa/cicd and qa/reporting (general-purpose, docs)
-
-````
-You are `general-purpose`. Task S12 of docs/plans/001-library-conformance-sweep.md: bring qa/cicd and
-qa/reporting in line with the plan's checks K1–K9.
-
-Deliverable: qa/cicd/ and qa/reporting/ pass K1–K9: all six agents carry the Gate line,
-`qa-ci-pipelines` is resolved in the three flaky-test-quarantine skills, and no Node 20 default
-remains.
-
-Read, in this order:
-1. CLAUDE.md.
-2. The plan: §2, §3, §4, §6 (the S12 rows), D1–D11, task S12.
-3. CONTRIBUTING.md.
-4. qa/cicd/agents/*.md and qa/reporting/agents/*.md in full.
-5. The plan's "Close-out — every task".
-
-Do:
-- Run §4's recipes with DIR=qa/cicd, then DIR=qa/reporting.
-- K1: `qa-ci-pipelines` in qa/reporting/{dotnet,java,typescript}/skills/flaky-test-quarantine/
-  (5 hits). Confirm the intended target against qa/cicd/agents/; S6, S8 and S10 resolved the same name
-  in production-uptime-checks, so match their choice.
-- K6: Node 20 ×5 and node:20 ×6 → Node 24; a CI matrix may keep 22.
-- K5: restate qa/cicd's 6 all-caps rule words.
-- K2: the Gate line in all six agents.
-
-Traps:
-- Agent sentences S3/S4 fixed in backend recur in 28 agents across S5–S17; fix them where your
-  agents carry them:
-  - "— MANDATORY SECTION" on the brownfield heading is dropped (K5).
-  - The orientation pass's "every run regardless of the gate's verdict" (the cache gate) gains
-    "outside a `Gate: none` plan task".
-  - A closing duty "per `be-shared-session-budget` Step 5" now reads "per the plan's
-    `## Close-out — every task` section (plan format §7)".
-  - A skill's Validation / Verify list gets one sentence: inside a `Gate: none` plan task it runs
-    none of the checks and reports "written, not run".
-  - K8: a hardcoded `pnpm …` / `npm …` in an instruction becomes the project's own script, run with
-    the package manager `packageManager` names.
-  - The operating rule "Run what you write — a step whose code never executed does not pass its
-    gate" becomes "Run what you write, outside a `Gate: none` plan task — …" (S5; every qa agent
-    carries it).
-- "Stage" is CI vocabulary here (D8). Azure DevOps stages stay.
-- Over budget: if the session runs long, finish qa/cicd first, then qa/reporting. The split point is
-  between the folders.
-- (S9/S10) Node 20 is sometimes a feature boundary, not a default (native `WebSocket`/`EventSource`,
-  global `fetch`/`FormData`/`Blob`): such a line says Node 22/24 have the feature and flags a detected
-  Node 20 as EOL, rather than reading "Node 24" after the substitution. A CI `node-version: 20` moves to 24.
-
-Gate: none — this plan gates once, in G1. Do not run tools/token-audit.py or §7's script.
-
-Commit: `chore(sweep S12): qa/cicd and qa/reporting`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
 
 ### S13 — frontend and auth (general-purpose, docs)
 
@@ -1794,6 +1818,12 @@ Traps:
 - (S9/S10) Node 20 is sometimes a feature boundary, not a default (native `WebSocket`/`EventSource`,
   global `fetch`/`FormData`/`Blob`): such a line says Node 22/24 have the feature and flags a detected
   Node 20 as EOL, rather than reading "Node 24" after the substitution. A CI `node-version: 20` moves to 24.
+- (S12) K6's recipe does not catch .NET 8 defaults: grep `\.NET 8\b|8\.0\.x|sdk:8\.0|net8\.0/` too. A
+  default, CI pin or sample path moves to .NET 10 (`10.0.x`, `sdk:10.0`, `net10.0/`); a TFM detection
+  list (`net8.0/9.0/10.0`) stays.
+- (S12) A CI sample that puts `continue-on-error` / `continueOnError` / `|| true` on a gating test step
+  contradicts `qa-ci-conventions-shared`; the test step fails the build and the upload/publish steps run
+  with `if: always()` / `condition: succeededOrFailed()` / `when: always`.
 
 Gate: none — this plan gates once, in G1. Do not run tools/token-audit.py or §7's script.
 
@@ -1847,6 +1877,9 @@ Traps:
 - (S9/S10) Node 20 is sometimes a feature boundary, not a default (native `WebSocket`/`EventSource`,
   global `fetch`/`FormData`/`Blob`): such a line says Node 22/24 have the feature and flags a detected
   Node 20 as EOL, rather than reading "Node 24" after the substitution. A CI `node-version: 20` moves to 24.
+- (S12) K6's recipe does not catch .NET 8 defaults (observability-engineer-dotnet): grep
+  `\.NET 8\b|8\.0\.x|sdk:8\.0|net8\.0/` too. A default or sample moves to .NET 10; a TFM detection list
+  (`net8.0/9.0/10.0`) stays.
 
 Gate: none — this plan gates once, in G1. Do not run tools/token-audit.py or §7's script.
 
@@ -2008,6 +2041,12 @@ Traps:
   the named skill, agent or plugin exists (e.g. S11 made "`penetration-testing` *(Stage 3, forthcoming)*"
   read "`penetration-testing`"). Known hits: `devops/agents/infra-security-tester.md`,
   `devops/commands/infra-security-tester.md` and eight devops skills or references.
+- (S12) K6's recipe does not catch .NET 8 defaults: grep `\.NET 8\b|8\.0\.x|sdk:8\.0|net8\.0/` too. A
+  default, CI pin or sample path moves to .NET 10 (`10.0.x`, `sdk:10.0`); a TFM detection list stays, and
+  a managed runtime that lags stays pinned to the newest one the platform offers (CLAUDE.md).
+- (S12) A CI sample that puts `continue-on-error` / `continueOnError` / `allow_failure` / `|| true` on a
+  gating test step lets a red suite pass; the test step fails the build and the upload/publish steps run
+  with `if: always()` / `condition: succeededOrFailed()` / `when: always`.
 
 Gate: none — this plan gates once, in G1. Do not run tools/token-audit.py or §7's script.
 

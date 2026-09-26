@@ -2,7 +2,7 @@
 
 Authors `.github/workflows/*.yml` that run NUnit / Playwright / Testcontainers-backed integration tests on GitHub-hosted `ubuntu-latest` runners, shard for speed via `strategy.matrix`, publish Allure to GitHub Pages with history, fail on real failures (not flakes), and pull secrets via OIDC federated credentials rather than PATs or stored cloud secrets.
 
-This is a port of `qa/cicd/dotnet/skills/ci-pipelines` to GitHub Actions idioms — same patterns (shard, OIDC, Allure history, TRX upload, retry policy, perf gate), re-expressed for the Actions runtime.
+This is a port of this skill's Azure Pipelines reference (`references/azure-pipelines.md`) to GitHub Actions idioms — same patterns (shard, OIDC, Allure history, TRX upload, retry policy, perf gate), re-expressed for the Actions runtime.
 
 ## When to use
 
@@ -14,8 +14,8 @@ This is a port of `qa/cicd/dotnet/skills/ci-pipelines` to GitHub Actions idioms 
 
 ## When NOT to use
 
-- Azure Pipelines equivalent → `qa/cicd/dotnet/skills/ci-pipelines`
-- GitLab CI equivalent → `qa/cicd/dotnet/skills/ci-pipelines`
+- Azure Pipelines equivalent → `references/azure-pipelines.md` in this skill
+- GitLab CI equivalent → `references/gitlab-ci.md` in this skill
 - App build / deploy workflows unrelated to tests → `devops/github-actions`
 - Non-.NET stacks — use the `java` or `typescript` sibling under this skill
 
@@ -68,7 +68,7 @@ permissions:
   id-token: write        # OIDC token for azure/login — NOT repo write
 
 env:
-  DOTNET_VERSION: '8.0.x'
+  DOTNET_VERSION: '10.0.x'
   BUILD_CONFIGURATION: Release
   DOTNET_NOLOGO: 'true'
   DOTNET_CLI_TELEMETRY_OPTOUT: 'true'
@@ -121,7 +121,7 @@ jobs:
     strategy:
       fail-fast: false       # one shard failing must not kill the others
       matrix:
-        shard-index: [1, 2]  # length MUST equal shard-total
+        shard-index: [1, 2]  # length must equal shard-total
     steps:
       - uses: actions/checkout@v4
         with: { fetch-depth: 1 }
@@ -240,7 +240,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        shard-index: [1, 2, 3, 4]   # length MUST equal shard-total
+        shard-index: [1, 2, 3, 4]   # length must equal shard-total
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4
@@ -250,7 +250,7 @@ jobs:
       - name: Build + install Playwright browsers
         run: |
           dotnet build UiTests/UiTests.csproj -c "$BUILD_CONFIGURATION"
-          pwsh UiTests/bin/$BUILD_CONFIGURATION/net8.0/playwright.ps1 install --with-deps chromium
+          pwsh UiTests/bin/$BUILD_CONFIGURATION/net10.0/playwright.ps1 install --with-deps chromium
 
       - name: Run UI tests (shard ${{ matrix.shard-index }}/${{ inputs.shard-total }})
         run: |
@@ -265,7 +265,7 @@ jobs:
         if: failure()
         with:
           name: playwright-traces-shard-${{ matrix.shard-index }}
-          path: UiTests/bin/${{ env.BUILD_CONFIGURATION }}/net8.0/playwright-traces
+          path: UiTests/bin/${{ env.BUILD_CONFIGURATION }}/net10.0/playwright-traces
           retention-days: 14
 
       - name: Publish test report
@@ -440,7 +440,7 @@ jobs:
 
 ## Cross-references
 
-- **`qa/cicd/dotnet/skills/ci-pipelines`** — the canonical sibling this ports from; consult it for the variable-group / service-connection variant.
+- **`references/azure-pipelines.md`** — the canonical sibling this ports from; consult it for the variable-group / service-connection variant.
 - **`qa/dotnet/skills/db-testing/testcontainers`** — the integration-tests job runs these.
 - **`qa/dotnet/skills/email-testing`** — pair Mailpit as a `services:` container or inline Testcontainers run.
 - **`qa/reporting/dotnet/skills/test-reports`** — adapter wiring inside the test project that produces `allure-results/`.

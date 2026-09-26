@@ -1,11 +1,11 @@
 ---
 name: qa-test-reports-typescript
-description: Use when the user asks to set up Allure reporting for a TypeScript test suite (Vitest + native fetch, Playwright TS, WebdriverIO TS). Triggers: "set up Allure for our Vitest project", "wire Allure in Playwright config", "publish Allure report from our Node CI".
+description: Use when setting up Allure reporting for a TypeScript test suite (Vitest + native fetch, Playwright TS, WebdriverIO TS). Triggers: "set up Allure for our Vitest project", "wire Allure in Playwright config", "publish Allure report from our Node CI". Not for flaky-test quarantine (`qa-flaky-test-quarantine-typescript`) or pipeline YAML (`qa-ci-pipelines-typescript`).
 ---
 
 # QA — Allure Reporting (TypeScript / Vitest, Playwright, WebdriverIO)
 
-Wires Allure into a Node 20 + TypeScript test project — `allure-vitest`, `allure-playwright` (`@playwright/test` reporter), or `@wdio/allure-reporter`. Standardizes failure-path attachments, behavior-first hierarchy (`label('feature')` / `label('story')` / `severity`), CI publish, history, and triage categories.
+Wires Allure into a Node 24 + TypeScript test project — `allure-vitest`, `allure-playwright` (`@playwright/test` reporter), or `@wdio/allure-reporter`. Standardizes failure-path attachments, behavior-first hierarchy (`label('feature')` / `label('story')` / `severity`), CI publish, history, and triage categories.
 
 ## When to use
 
@@ -17,7 +17,7 @@ Wires Allure into a Node 20 + TypeScript test project — `allure-vitest`, `allu
 
 - .NET reporting → `qa/reporting/dotnet/skills/test-reports`
 - Java reporting → `qa/reporting/java/skills/test-reports`
-- Writing tests → `qa/typescript/skills/api-test-author/writer` / `qa/typescript/skills/ui-test-author/<stack>/typescript`
+- Writing tests → `qa/typescript/skills/api-test-author/writer` / `qa/typescript/skills/ui-test-author/<tool>`
 - Test strategy → `qa/manual/test-strategy`
 - Quality metrics dashboards → `qa/manual/quality-metrics`
 
@@ -206,11 +206,10 @@ Pattern is identical regardless of CI:
 
 ```yaml
 - uses: actions/setup-node@v4
-  with: { node-version: '20' }
+  with: { node-version: '24' }
 
 - name: Run tests
   run: pnpm test
-  continue-on-error: true
 
 - name: Upload Allure results
   if: always()
@@ -220,7 +219,7 @@ Pattern is identical regardless of CI:
     path: allure-results
 
 - name: Publish Allure report
-  if: github.ref == 'refs/heads/main'
+  if: always() && github.ref == 'refs/heads/main'
   uses: simple-elf/allure-report-action@v1.9
   with:
     gh_pages: gh-pages
@@ -233,11 +232,10 @@ Pattern is identical regardless of CI:
 
 ```yaml
 - task: NodeTool@0
-  inputs: { versionSpec: '20.x' }
+  inputs: { versionSpec: '24.x' }
 
-- script: pnpm install && pnpm test
+- script: pnpm install --frozen-lockfile && pnpm test
   displayName: Run tests
-  continueOnError: true
 
 - task: PublishBuildArtifacts@1
   condition: always()
@@ -252,6 +250,7 @@ Pattern is identical regardless of CI:
   condition: succeededOrFailed()
 
 - task: PublishHtmlReport@1
+  condition: succeededOrFailed()
   inputs:
     reportDir: $(Build.ArtifactStagingDirectory)/allure-report
     tabName: Allure
@@ -261,11 +260,11 @@ Pattern is identical regardless of CI:
 
 ```yaml
 test:
-  image: node:20
+  image: node:24
   script:
     - corepack enable
-    - pnpm install
-    - pnpm test || true
+    - pnpm install --frozen-lockfile
+    - pnpm test
   artifacts:
     when: always
     paths: [allure-results/]
@@ -275,10 +274,11 @@ test:
 
 publish:allure:
   stage: package
-  image: node:20
+  image: node:24
   needs: [test]
   rules:
     - if: $CI_COMMIT_BRANCH == "main"
+      when: always
   before_script:
     - apt-get update && apt-get install -y default-jre-headless
     - curl -L https://github.com/allure-framework/allure2/releases/download/2.27.0/allure-2.27.0.tgz | tar -xz
@@ -326,7 +326,7 @@ Copy it into `allure-results/` before `allure generate` runs.
 
 ## What NOT to do
 
-- No "always pass" wrappers around `pnpm test` — use `continue-on-error: true` (GHA) / `continueOnError: true` (Azure) instead.
+- No "always pass" wrappers around the test step — no `continue-on-error` / `continueOnError` / `|| true`. The test step fails the build; the upload and publish steps run anyway (`if: always()` / `condition: succeededOrFailed()` / `when: always`).
 - No committing `allure-results/` to Git — it's an artifact.
 - No `allure.feature('misc')` catch-all bucket.
 - No `allure.description` that paraphrases the test name — describe behavior or link the spec.
@@ -347,6 +347,8 @@ Copy it into `allure-results/` before `allure generate` runs.
 7. Wire CI per the snippet for the team's CI platform; configure history retention.
 8. Smoke a green build + a deliberate failing test; confirm trend, categories, attachments populate.
 
+Inside a `Gate: none` plan task, skip the smoke run in the last step and report the wiring as "written, not run".
+
 ## Handoffs
 
 - .NET Allure → `qa/reporting/dotnet/skills/test-reports`
@@ -355,4 +357,4 @@ Copy it into `allure-results/` before `allure generate` runs.
 - UI test generation → `qa/typescript/skills/ui-test-author/playwright` / `qa/typescript/skills/ui-test-author/selenium` / `qa/typescript/skills/ui-test-author/appium`
 - Test strategy → `qa/manual/test-strategy`
 - Quality metrics dashboards → `qa/manual/quality-metrics`
-- CI pipeline syntax → `qa/cicd/typescript/skills/ci-pipelines/{github-actions,azure-pipelines,gitlab-ci}` or `devops/<ci>`
+- CI pipeline syntax → `qa/cicd/typescript/skills/ci-pipelines` (its `references/<ci>.md`) or `devops/<ci>`

@@ -1,8 +1,8 @@
 # QA — GitHub Actions for TypeScript Test Suites
 
-Authors `.github/workflows/*.yml` that run Vitest / Jest / Playwright / Testcontainers-backed integration tests on GitHub-hosted `ubuntu-latest` runners using Node 20 + TypeScript (strict), shard for speed via `strategy.matrix`, publish Allure (and/or Playwright's own HTML report) to GitHub Pages with history, fail on real failures (not flakes), and pull secrets via OIDC federated credentials rather than PATs or stored cloud secrets.
+Authors `.github/workflows/*.yml` that run Vitest / Jest / Playwright / Testcontainers-backed integration tests on GitHub-hosted `ubuntu-latest` runners using Node 24 + TypeScript (strict), shard for speed via `strategy.matrix`, publish Allure (and/or Playwright's own HTML report) to GitHub Pages with history, fail on real failures (not flakes), and pull secrets via OIDC federated credentials rather than PATs or stored cloud secrets.
 
-This is a port across two axes: the `qa/cicd/dotnet/skills/ci-pipelines` sibling (GitHub Actions idioms) and the `qa/cicd/typescript/skills/ci-pipelines` sibling (Node/TS tooling). Same patterns — shard, OIDC, Allure history, JUnit upload, retry policy, perf gate — re-expressed for the Actions runtime. **TypeScript is the most Actions-native of the three stacks**: Playwright ships first-class `--shard=i/N` and an official `blob` reporter → `merge-reports` flow, so the UI job replaces the per-shard Allure-merge dance with a single merge step. k6 stays the perf tool (JS-native here, same exit-99 gate as the dotnet sibling).
+This is a port across two axes: the .NET GitHub Actions reference (`qa/cicd/dotnet/skills/ci-pipelines`, GitHub Actions idioms) and this skill's Azure Pipelines reference (`references/azure-pipelines.md`, Node/TS tooling). Same patterns — shard, OIDC, Allure history, JUnit upload, retry policy, perf gate — re-expressed for the Actions runtime. **TypeScript is the most Actions-native of the three stacks**: Playwright ships first-class `--shard=i/N` and an official `blob` reporter → `merge-reports` flow, so the UI job replaces the per-shard Allure-merge dance with a single merge step. k6 stays the perf tool (JS-native here, same exit-99 gate as the dotnet sibling).
 
 ## When to use
 
@@ -15,8 +15,8 @@ This is a port across two axes: the `qa/cicd/dotnet/skills/ci-pipelines` sibling
 
 ## When NOT to use
 
-- Azure Pipelines equivalent → `qa/cicd/typescript/skills/ci-pipelines`
-- GitLab CI equivalent → `qa/cicd/typescript/skills/ci-pipelines`
+- Azure Pipelines equivalent → `references/azure-pipelines.md` in this skill
+- GitLab CI equivalent → `references/gitlab-ci.md` in this skill
 - App build / deploy workflows unrelated to tests → `devops/github-actions`
 - Non-TS stacks — use the `dotnet` or `java` sibling under this skill
 
@@ -71,7 +71,7 @@ permissions:
   id-token: write        # OIDC token for azure/login — NOT repo write
 
 env:
-  NODE_VERSION: '20'
+  NODE_VERSION: '24'
 
 jobs:
   api-tests:
@@ -121,7 +121,7 @@ jobs:
     strategy:
       fail-fast: false       # one shard failing must not kill the others
       matrix:
-        shard-index: [1, 2]  # length MUST equal shard-total
+        shard-index: [1, 2]  # length must equal shard-total
     steps:
       - uses: actions/checkout@v4
         with: { fetch-depth: 1 }
@@ -246,7 +246,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        shard-index: [1, 2, 3, 4]   # length MUST equal shard-total
+        shard-index: [1, 2, 3, 4]   # length must equal shard-total
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -481,7 +481,7 @@ jobs:
 ## Cross-references
 
 - **`qa/cicd/dotnet/skills/ci-pipelines`** + **`qa/cicd/java/skills/ci-pipelines`** — the same-CI siblings; consult for the NUnit/TRX and TestNG/JUnit variants (both need a per-shard Allure merge the Playwright `blob` flow avoids).
-- **`qa/cicd/typescript/skills/ci-pipelines`** — the Azure sibling this ports from; consult it for the variable-group / service-connection variant of the same Vitest/Playwright patterns.
+- **`references/azure-pipelines.md`** — the Azure sibling this ports from; consult it for the variable-group / service-connection variant of the same Vitest/Playwright patterns.
 - **`qa/typescript/skills/ui-test-author/playwright`** — the `playwright.config.ts` (`blob`/`allure-playwright` reporters, `--shard`, traces) this workflow runs.
 - **`qa/typescript/skills/db-testing/testcontainers`** — the integration-tests job runs these.
 - **`qa/typescript/skills/email-testing`** — pair Mailpit as a `services:` container or inline Testcontainers run.

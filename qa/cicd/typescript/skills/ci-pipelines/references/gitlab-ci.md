@@ -1,8 +1,8 @@
 # QA — GitLab CI/CD for TypeScript Test Suites
 
-Authors `.gitlab-ci.yml` that runs Vitest / Jest / Playwright / Testcontainers-backed integration tests on GitLab runners using Node 20 + TypeScript (strict), shards for speed via `parallel:`, publishes Allure (and/or Playwright's own HTML report) to GitLab Pages with history, fails on real failures (not flakes), and pulls secrets via `id_tokens:` cloud OIDC rather than long-lived CI/CD variables.
+Authors `.gitlab-ci.yml` that runs Vitest / Jest / Playwright / Testcontainers-backed integration tests on GitLab runners using Node 24 + TypeScript (strict), shards for speed via `parallel:`, publishes Allure (and/or Playwright's own HTML report) to GitLab Pages with history, fails on real failures (not flakes), and pulls secrets via `id_tokens:` cloud OIDC rather than long-lived CI/CD variables.
 
-This is a **true port** of `qa/cicd/typescript/skills/ci-pipelines` — the *same* pipeline (same stages, same shard strategy, same artifacts, same gates), re-keyed to GitLab's `.gitlab-ci.yml` vocabulary. **Translate, don't redesign.** The capability set is identical to the two CI siblings; only the YAML schema and a few primitives differ:
+This is a **true port** of this skill's GitHub Actions reference (`references/github-actions.md`) — the *same* pipeline (same stages, same shard strategy, same artifacts, same gates), re-keyed to GitLab's `.gitlab-ci.yml` vocabulary. **Translate, don't redesign.** The capability set is identical to the two CI siblings; only the YAML schema and a few primitives differ:
 
 | Capability | GitHub Actions | GitLab CI (this skill) |
 |---|---|---|
@@ -28,8 +28,8 @@ This is a **true port** of `qa/cicd/typescript/skills/ci-pipelines` — the *sam
 
 ## When NOT to use
 
-- GitHub Actions equivalent → `qa/cicd/typescript/skills/ci-pipelines`
-- Azure Pipelines equivalent → `qa/cicd/typescript/skills/ci-pipelines`
+- GitHub Actions equivalent → `references/github-actions.md` in this skill
+- Azure Pipelines equivalent → `references/azure-pipelines.md` in this skill
 - App build / deploy pipelines unrelated to tests → `devops/gitlab-ci`
 - Non-TS stacks — use the `dotnet` or `java` sibling under this skill
 
@@ -47,8 +47,8 @@ Infer everything else from `package.json`, `playwright.config.ts`, `vitest.confi
 
 | Concern | Default | Override when |
 |---|---|---|
-| Runner | `image: node:20-bookworm` on a `docker` runner | Self-hosted/shell runner only for proprietary hardware (mobile farm, GPU) |
-| Node | 20 LTS via the `node:20` image, version pinned by `.nvmrc` | Newer LTS only after 3 mo GA |
+| Runner | `image: node:24-bookworm` on a `docker` runner | Self-hosted/shell runner only for proprietary hardware (mobile farm, GPU) |
+| Node | 24 LTS via the `node:24` image, version pinned by `.nvmrc` (22 in a matrix) | Newer LTS only after 3 mo GA |
 | Package manager / cache | Detect from lockfile; `cache:key:files:[<lockfile>]` + `policy:` + frozen install (`npm ci` / `pnpm install --frozen-lockfile`) | Match whatever the repo already uses — never switch managers in a CI MR |
 | Triggers | `merge_request_event` + nightly `schedule` (set via `workflow:rules`) | `push` on the default branch only when the suite is < 5 min |
 | Test reporter | Vitest/Jest: `jest-junit` → `artifacts:reports:junit` + Allure adapter. Playwright: `blob` in CI + `allure-playwright` | Always emit JUnit XML for the native MR widget; Playwright's HTML can stand in for Allure on UI-only repos |
@@ -68,7 +68,7 @@ Infer everything else from `package.json`, `playwright.config.ts`, `vitest.confi
 stages: [install, test, merge, perf, publish]
 
 default:
-  image: node:20-bookworm
+  image: node:24-bookworm
   tags: [docker]              # a runner with the Docker executor
   interruptible: true         # GitLab analogue of cancel-in-progress for superseded MR pipelines
 
@@ -80,7 +80,7 @@ workflow:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 
 variables:
-  NODE_VERSION: "20"
+  NODE_VERSION: "24"
   npm_config_cache: "$CI_PROJECT_DIR/.npm"   # cacheable npm store inside the workspace
 
 # Reusable cache anchor — keyed on the lockfile so a dependency change busts it.
@@ -126,7 +126,7 @@ api-tests:
     - export AWS_WEB_IDENTITY_TOKEN_FILE="$(mktemp)"
     - echo "$AWS_ID_TOKEN" > "$AWS_WEB_IDENTITY_TOKEN_FILE"
     - export AWS_ROLE_ARN="arn:aws:iam::111122223333:role/qa-ci"
-    - export API_BASE_URL="$(aws ssm get-parameter --name /qa/typescript/skills/api-base-url --with-decryption --query Parameter.Value --output text)"
+    - export API_BASE_URL="$(aws ssm get-parameter --name /qa/api-base-url --with-decryption --query Parameter.Value --output text)"
     # Vitest splits the suite deterministically across CI_NODE_TOTAL runners.
     - >
       npx vitest run
@@ -274,7 +274,7 @@ k6-perf:
   script:
     - export AWS_WEB_IDENTITY_TOKEN_FILE="$(mktemp)"; echo "$AWS_ID_TOKEN" > "$AWS_WEB_IDENTITY_TOKEN_FILE"
     - export AWS_ROLE_ARN="arn:aws:iam::111122223333:role/qa-ci"
-    - export K6_BASE_URL="$(aws ssm get-parameter --name /qa/typescript/skills/api-base-url --query Parameter.Value --output text)"
+    - export K6_BASE_URL="$(aws ssm get-parameter --name /qa/api-base-url --query Parameter.Value --output text)"
     - k6 run --out json=k6-summary.json perf/scenarios/checkout.js
   artifacts:
     when: always
@@ -352,8 +352,8 @@ k6-perf:
 ## Cross-references
 
 - **`qa/cicd/dotnet/skills/ci-pipelines`** + **`qa/cicd/java/skills/ci-pipelines`** — the same-CI siblings; consult for the NUnit/JUnit-logger and TestNG/JUnit variants (both need a per-shard Allure merge the Playwright `blob` flow avoids).
-- **`qa/cicd/typescript/skills/ci-pipelines`** — the structural template this ports from; consult it for the `strategy.matrix` / `dorny/test-reporter` variant of the same Vitest/Playwright patterns.
-- **`qa/cicd/typescript/skills/ci-pipelines`** — the Azure sibling; the `strategy: parallel` / service-connection variant.
+- **`references/github-actions.md`** — the structural template this ports from; consult it for the `strategy.matrix` / `dorny/test-reporter` variant of the same Vitest/Playwright patterns.
+- **`references/azure-pipelines.md`** — the Azure sibling; the `strategy: parallel` / service-connection variant.
 - **`qa/typescript/skills/ui-test-author/playwright`** — the `playwright.config.ts` (`blob`/`allure-playwright` reporters, `--shard`, traces) this pipeline runs.
 - **`qa/typescript/skills/db-testing/testcontainers`** — the integration-tests job runs these (needs the `docker:dind` service shown above).
 - **`qa/typescript/skills/network-mocking`** + **`qa/typescript/skills/network-mocking`** — in-process network specs the `e2e` job runs with no extra pipeline plumbing.

@@ -1,6 +1,6 @@
 ---
 name: qa-test-reports-java
-description: Use when the user asks to set up Allure reporting for a Java test suite (TestNG + RestAssured, TestNG + Playwright Java, TestNG + Selenium Java, TestNG + Appium Java, JUnit 5). Triggers: "set up Allure for our Gradle TestNG project", "wire Allure attachments in Java", "publish Allure report from our Java CI".
+description: Use when setting up Allure reporting for a Java test suite (TestNG + RestAssured, TestNG + Playwright Java, TestNG + Selenium Java, TestNG + Appium Java, JUnit 5). Triggers: "set up Allure for our Gradle TestNG project", "wire Allure attachments in Java", "publish Allure report from our Java CI". Not for flaky-test quarantine (`qa-flaky-test-quarantine-java`) or pipeline YAML (`qa-ci-pipelines-java`).
 ---
 
 # QA — Allure Reporting (Java / TestNG & JUnit 5)
@@ -17,7 +17,7 @@ Wires Allure into a Java 21 test project (TestNG primary, JUnit 5 secondary) —
 
 - .NET reporting → `qa/reporting/dotnet/skills/test-reports`
 - TypeScript reporting → `qa/reporting/typescript/skills/test-reports`
-- Writing tests → `qa/java/skills/api-test-author/writer` / `qa/java/skills/ui-test-author/<stack>/java`
+- Writing tests → `qa/java/skills/api-test-author/writer` / `qa/java/skills/ui-test-author/<tool>`
 - Test strategy → `qa/manual/test-strategy`
 - Quality metrics dashboards → `qa/manual/quality-metrics`
 
@@ -180,7 +180,6 @@ The pattern is identical regardless of CI:
 ```yaml
 - name: Run tests
   run: ./gradlew test
-  continue-on-error: true
 
 - name: Upload Allure results
   if: always()
@@ -190,7 +189,7 @@ The pattern is identical regardless of CI:
     path: '**/build/allure-results/'
 
 - name: Publish Allure report
-  if: github.ref == 'refs/heads/main'
+  if: always() && github.ref == 'refs/heads/main'
   uses: simple-elf/allure-report-action@v1.9
   with:
     gh_pages: gh-pages
@@ -225,6 +224,7 @@ The pattern is identical regardless of CI:
       ./allure-2.27.0/bin/allure generate $(System.DefaultWorkingDirectory)/build/allure-results -o $(Build.ArtifactStagingDirectory)/allure-report --clean
 
 - task: PublishHtmlReport@1
+  condition: succeededOrFailed()
   inputs:
     reportDir: $(Build.ArtifactStagingDirectory)/allure-report
     tabName: Allure
@@ -236,7 +236,7 @@ The pattern is identical regardless of CI:
 test:
   image: eclipse-temurin:21-jdk
   script:
-    - ./gradlew test || true
+    - ./gradlew test
   artifacts:
     when: always
     paths: ['**/build/allure-results/']
@@ -250,6 +250,7 @@ publish:allure:
   needs: [test]
   rules:
     - if: $CI_COMMIT_BRANCH == "main"
+      when: always
   before_script:
     - curl -L https://github.com/allure-framework/allure2/releases/download/2.27.0/allure-2.27.0.tgz | tar -xz
   script:
@@ -293,7 +294,7 @@ Place at `src/test/resources/categories.json` (the Allure adapter picks it up au
 
 ## What NOT to do
 
-- No "always pass" wrappers around `./gradlew test` — use `continue-on-error: true` (GHA) / `condition: succeededOrFailed()` (Azure) instead.
+- No "always pass" wrappers around `./gradlew test` — no `continue-on-error` / `continueOnError` / `|| true` on the test step. The test step fails the build; the upload and publish steps run anyway (`if: always()` / `condition: succeededOrFailed()` / `when: always`).
 - No committing `build/allure-results/` to Git — it's an artifact.
 - No `@Feature("misc")` catch-all bucket.
 - No `@Description` that paraphrases the test name — describe behavior or link the spec.
@@ -314,6 +315,8 @@ Place at `src/test/resources/categories.json` (the Allure adapter picks it up au
 7. Wire CI per the snippet for the team's CI platform; configure history retention.
 8. Smoke a green build + a deliberate failing test; confirm trend, categories, attachments populate.
 
+Inside a `Gate: none` plan task, skip the smoke run in the last step and report the wiring as "written, not run".
+
 ## Handoffs
 
 - .NET Allure → `qa/reporting/dotnet/skills/test-reports`
@@ -322,4 +325,4 @@ Place at `src/test/resources/categories.json` (the Allure adapter picks it up au
 - UI test generation → `qa/java/skills/ui-test-author/playwright` / `qa/java/skills/ui-test-author/selenium` / `qa/java/skills/ui-test-author/appium`
 - Test strategy → `qa/manual/test-strategy`
 - Quality metrics dashboards → `qa/manual/quality-metrics`
-- CI pipeline syntax → `qa/cicd/java/skills/ci-pipelines/{github-actions,azure-pipelines,gitlab-ci}` or `devops/<ci>`
+- CI pipeline syntax → `qa/cicd/java/skills/ci-pipelines` (its `references/<ci>.md`) or `devops/<ci>`

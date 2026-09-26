@@ -2,7 +2,7 @@
 
 Authors `.gitlab-ci.yml` that runs TestNG / Selenium / RestAssured / Testcontainers-backed integration tests on GitLab runners using Java 21 + Gradle (Kotlin DSL), shards for speed via `parallel:`, publishes Allure to GitLab Pages with history, fails on real failures (not flakes), and pulls secrets via `id_tokens:` cloud OIDC rather than long-lived CI/CD variables.
 
-This is a **true port** of `qa/cicd/java/skills/ci-pipelines` — the *same* pipeline (same stages, same shard strategy, same artifacts, same gates), re-keyed to GitLab's `.gitlab-ci.yml` vocabulary, and the Java sibling of the canonical `qa/cicd/typescript/skills/ci-pipelines`. **Translate, don't redesign.** Only the YAML schema and a few primitives differ:
+This is a **true port** of this skill's GitHub Actions reference (`references/github-actions.md`) — the *same* pipeline (same stages, same shard strategy, same artifacts, same gates), re-keyed to GitLab's `.gitlab-ci.yml` vocabulary, and the Java sibling of the canonical `qa/cicd/typescript/skills/ci-pipelines`. **Translate, don't redesign.** Only the YAML schema and a few primitives differ:
 
 | Capability | GitHub Actions | GitLab CI (this skill) |
 |---|---|---|
@@ -26,8 +26,8 @@ The canonical TS sibling uses Playwright's native `blob` → `merge-reports` flo
 
 ## When NOT to use
 
-- GitHub Actions equivalent → `qa/cicd/java/skills/ci-pipelines`
-- Azure Pipelines equivalent → `qa/cicd/java/skills/ci-pipelines`
+- GitHub Actions equivalent → `references/github-actions.md` in this skill
+- Azure Pipelines equivalent → `references/azure-pipelines.md` in this skill
 - App build / deploy pipelines unrelated to tests → `devops/gitlab-ci`
 - Non-Java stacks — use the `dotnet` or `typescript` sibling under this skill
 
@@ -124,7 +124,7 @@ api-tests:
     - export AWS_WEB_IDENTITY_TOKEN_FILE="$(mktemp)"
     - echo "$AWS_ID_TOKEN" > "$AWS_WEB_IDENTITY_TOKEN_FILE"
     - export AWS_ROLE_ARN="arn:aws:iam::111122223333:role/qa-ci"
-    - export API_BASE_URL="$(aws ssm get-parameter --name /qa/java/skills/api-base-url --with-decryption --query Parameter.Value --output text)"
+    - export API_BASE_URL="$(aws ssm get-parameter --name /qa/api-base-url --with-decryption --query Parameter.Value --output text)"
     # Gradle reads the shard props; the Test task includes only this shard's slice.
     - >
       ./gradlew :api-tests:test
@@ -280,7 +280,7 @@ gatling-perf:
   script:
     - export AWS_WEB_IDENTITY_TOKEN_FILE="$(mktemp)"; echo "$AWS_ID_TOKEN" > "$AWS_WEB_IDENTITY_TOKEN_FILE"
     - export AWS_ROLE_ARN="arn:aws:iam::111122223333:role/qa-ci"
-    - export GATLING_BASE_URL="$(aws ssm get-parameter --name /qa/java/skills/api-base-url --query Parameter.Value --output text)"
+    - export GATLING_BASE_URL="$(aws ssm get-parameter --name /qa/api-base-url --query Parameter.Value --output text)"
     - ./gradlew :perf:gatlingRun --no-daemon
   artifacts:
     when: always
@@ -356,8 +356,8 @@ gatling-perf:
 ## Cross-references
 
 - **`qa/cicd/typescript/skills/ci-pipelines`** (canonical) + **`qa/cicd/dotnet/skills/ci-pipelines`** — the same-CI siblings; the TS one shows the Playwright `blob`/`merge-reports` flow this stack replaces with a per-shard Allure merge.
-- **`qa/cicd/java/skills/ci-pipelines`** — the structural template this ports from; the `strategy.matrix` / `dorny/test-reporter` (`java-junit`) variant.
-- **`qa/cicd/java/skills/ci-pipelines`** — the Azure sibling; the `strategy: parallel` / service-connection variant.
+- **`references/github-actions.md`** — the structural template this ports from; the `strategy.matrix` / `dorny/test-reporter` (`java-junit`) variant.
+- **`references/azure-pipelines.md`** — the Azure sibling; the `strategy: parallel` / service-connection variant.
 - **`qa/java/skills/db-testing/testcontainers`** — the integration-tests job runs these (needs the `docker:dind` service shown above).
 - **`qa/java/skills/network-mocking`** — runs an **external MITM proxy** (BrowserUp) the job must start/stop, whose **CA the client must trust** (per-run — no stored secret); the in-process `playwright-routes`/`cdp` specs need no extra plumbing.
 - **`qa/java/skills/network-mocking`** — in-process CDP specs the `ui-tests` job runs directly.

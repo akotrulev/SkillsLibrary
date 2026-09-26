@@ -1,6 +1,6 @@
 ---
 name: qa-test-reports-dotnet
-description: Use when the user asks to set up Allure reporting for a .NET test suite (NUnit + RestSharp, NUnit + Playwright .NET, NUnit + Appium .NET, xUnit). Triggers: "set up Allure for our NUnit project", "wire Allure attachments in .NET", "publish Allure report from our .NET CI".
+description: Use when setting up Allure reporting for a .NET test suite (NUnit + RestSharp, NUnit + Playwright .NET, NUnit + Appium .NET, xUnit). Triggers: "set up Allure for our NUnit project", "wire Allure attachments in .NET", "publish Allure report from our .NET CI". Not for flaky-test quarantine (`qa-flaky-test-quarantine-dotnet`) or pipeline YAML (`qa-ci-pipelines-dotnet`).
 ---
 
 # QA — Allure Reporting (.NET / NUnit & xUnit)
@@ -17,7 +17,7 @@ Wires Allure into a .NET test project (NUnit primary, xUnit secondary) — `Allu
 
 - Java reporting → `qa/reporting/java/skills/test-reports`
 - TypeScript reporting → `qa/reporting/typescript/skills/test-reports`
-- Writing tests → `qa/dotnet/skills/api-test-author/writer` / `qa/dotnet/skills/ui-test-author/<stack>/dotnet`
+- Writing tests → `qa/dotnet/skills/api-test-author/writer` / `qa/dotnet/skills/ui-test-author/<tool>`
 - Test strategy → `qa/manual/test-strategy`
 - Quality metrics dashboards → `qa/manual/quality-metrics`
 
@@ -174,7 +174,6 @@ For attribute-style step decoration on page methods, use `[AllureStep("Sign in")
 ```yaml
 - name: Run tests
   run: dotnet test --logger "trx;LogFileName=test.trx"
-  continue-on-error: true
 
 - name: Upload Allure results
   if: always()
@@ -184,7 +183,7 @@ For attribute-style step decoration on page methods, use `[AllureStep("Sign in")
     path: '**/allure-results/'
 
 - name: Publish Allure report
-  if: github.ref == 'refs/heads/main'
+  if: always() && github.ref == 'refs/heads/main'
   uses: simple-elf/allure-report-action@v1.9
   with:
     gh_pages: gh-pages
@@ -203,7 +202,7 @@ For attribute-style step decoration on page methods, use `[AllureStep("Sign in")
 - task: PublishBuildArtifacts@1
   condition: always()
   inputs:
-    PathtoPublish: $(System.DefaultWorkingDirectory)/tests/ApiTests/bin/Debug/net8.0/allure-results
+    PathtoPublish: $(System.DefaultWorkingDirectory)/tests/ApiTests/bin/Debug/net10.0/allure-results
     ArtifactName: allure-results
 
 - task: CmdLine@2
@@ -212,9 +211,10 @@ For attribute-style step decoration on page methods, use `[AllureStep("Sign in")
   inputs:
     script: |
       curl -L https://github.com/allure-framework/allure2/releases/download/2.27.0/allure-2.27.0.tgz | tar -xz
-      ./allure-2.27.0/bin/allure generate $(System.DefaultWorkingDirectory)/tests/ApiTests/bin/Debug/net8.0/allure-results -o $(Build.ArtifactStagingDirectory)/allure-report --clean
+      ./allure-2.27.0/bin/allure generate $(System.DefaultWorkingDirectory)/tests/ApiTests/bin/Debug/net10.0/allure-results -o $(Build.ArtifactStagingDirectory)/allure-report --clean
 
 - task: PublishHtmlReport@1
+  condition: succeededOrFailed()
   inputs:
     reportDir: $(Build.ArtifactStagingDirectory)/allure-report
     tabName: Allure
@@ -225,7 +225,7 @@ For attribute-style step decoration on page methods, use `[AllureStep("Sign in")
 ```yaml
 test:
   script:
-    - dotnet test --logger "trx;LogFileName=test.trx" || true
+    - dotnet test --logger "trx;LogFileName=test.trx"
   artifacts:
     when: always
     paths: ['**/allure-results/']
@@ -233,10 +233,11 @@ test:
 
 publish:allure:
   stage: package
-  image: mcr.microsoft.com/dotnet/sdk:8.0
+  image: mcr.microsoft.com/dotnet/sdk:10.0
   needs: [test]
   rules:
     - if: $CI_COMMIT_BRANCH == "main"
+      when: always
   before_script:
     - apt-get update && apt-get install -y openjdk-17-jre-headless
     - curl -L https://github.com/allure-framework/allure2/releases/download/2.27.0/allure-2.27.0.tgz | tar -xz
@@ -282,7 +283,7 @@ Place in the test project root and copy to output alongside `allureConfig.json`:
 
 ## What NOT to do
 
-- No "always pass the build" wrappers around `dotnet test` — use `continue-on-error: true` / `condition: succeededOrFailed()` instead.
+- No "always pass the build" wrappers around `dotnet test` — no `continue-on-error` / `continueOnError` / `|| true` on the test step. The test step fails the build; the upload and publish steps run anyway (`if: always()` / `condition: succeededOrFailed()` / `when: always`).
 - No committing `allure-results/` to Git — it's an artifact.
 - No `[AllureFeature("misc")]` catch-all bucket.
 - No `[AllureDescription]` that paraphrases the test name — describe behavior or link the spec.
@@ -301,6 +302,8 @@ Place in the test project root and copy to output alongside `allureConfig.json`:
 6. Wire CI per the snippet for the team's CI platform; configure history retention.
 7. Smoke a green build + a deliberate failing test; confirm trend, categories, attachments populate.
 
+Inside a `Gate: none` plan task, skip the smoke run in the last step and report the wiring as "written, not run".
+
 ## Handoffs
 
 - Java Allure → `qa/reporting/java/skills/test-reports`
@@ -309,4 +312,4 @@ Place in the test project root and copy to output alongside `allureConfig.json`:
 - UI test generation → `qa/dotnet/skills/ui-test-author/playwright` / `qa/dotnet/skills/ui-test-author/selenium` / `qa/dotnet/skills/ui-test-author/appium`
 - Test strategy → `qa/manual/test-strategy`
 - Quality metrics dashboards → `qa/manual/quality-metrics`
-- CI pipeline syntax → `qa/cicd/dotnet/skills/ci-pipelines/{github-actions,azure-pipelines,gitlab-ci}` or `devops/<ci>`
+- CI pipeline syntax → `qa/cicd/dotnet/skills/ci-pipelines` (its `references/<ci>.md`) or `devops/<ci>`

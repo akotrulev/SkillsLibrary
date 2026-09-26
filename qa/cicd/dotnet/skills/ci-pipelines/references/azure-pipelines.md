@@ -12,8 +12,8 @@ Authors `azure-pipelines.yml` (or template fragments) that run NUnit / Playwrigh
 
 ## When NOT to use
 
-- GitHub Actions equivalent → `qa/cicd/dotnet/skills/ci-pipelines`
-- GitLab CI equivalent → `qa/cicd/dotnet/skills/ci-pipelines`
+- GitHub Actions equivalent → `references/github-actions.md` in this skill
+- GitLab CI equivalent → `references/gitlab-ci.md` in this skill
 - App build / deploy pipelines unrelated to tests → `devops/azure-pipelines`
 - Non-.NET stacks — use the `java` or `typescript` sibling under this skill
 
@@ -59,7 +59,7 @@ schedules:
 
 variables:
   - name: dotnetVersion
-    value: '8.0.x'
+    value: '10.0.x'
   - name: buildConfiguration
     value: Release
   - group: qa-test-secrets   # variable group backed by Key Vault via OIDC
@@ -234,7 +234,7 @@ jobs:
 
       - script: |
           dotnet build UiTests/UiTests.csproj -c $(buildConfiguration)
-          pwsh UiTests/bin/$(buildConfiguration)/net8.0/playwright.ps1 install --with-deps chromium
+          pwsh UiTests/bin/$(buildConfiguration)/net10.0/playwright.ps1 install --with-deps chromium
         displayName: Build + install Playwright browsers
 
       - script: |
@@ -248,7 +248,7 @@ jobs:
       - task: PublishPipelineArtifact@1
         condition: failed()
         inputs:
-          targetPath: 'UiTests/bin/$(buildConfiguration)/net8.0/playwright-traces'
+          targetPath: 'UiTests/bin/$(buildConfiguration)/net10.0/playwright-traces'
           artifact: 'playwright-traces-shard-$(System.JobPositionInPhase)'
           publishLocation: pipeline
 

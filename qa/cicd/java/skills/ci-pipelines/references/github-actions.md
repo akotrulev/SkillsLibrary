@@ -2,7 +2,7 @@
 
 Authors `.github/workflows/*.yml` that run TestNG / Selenium / RestAssured / Testcontainers-backed integration tests on GitHub-hosted `ubuntu-latest` runners using Java 21 + Gradle (Kotlin DSL), shard for speed via `strategy.matrix`, publish Allure to GitHub Pages with history, fail on real failures (not flakes), and pull secrets via OIDC federated credentials rather than PATs or stored cloud secrets.
 
-This is a port across two axes: the `qa/cicd/dotnet/skills/ci-pipelines` sibling (GitHub Actions idioms) and the `qa/cicd/java/skills/ci-pipelines` sibling (JVM tooling). Same patterns — shard, OIDC, Allure history, JUnit upload, retry policy, perf gate — re-expressed for the Actions runtime in Gradle/TestNG terms.
+This is a port across two axes: the .NET GitHub Actions reference (`qa/cicd/dotnet/skills/ci-pipelines`, GitHub Actions idioms) and this skill's Azure Pipelines reference (`references/azure-pipelines.md`, JVM tooling). Same patterns — shard, OIDC, Allure history, JUnit upload, retry policy, perf gate — re-expressed for the Actions runtime in Gradle/TestNG terms.
 
 ## When to use
 
@@ -14,8 +14,8 @@ This is a port across two axes: the `qa/cicd/dotnet/skills/ci-pipelines` sibling
 
 ## When NOT to use
 
-- Azure Pipelines equivalent → `qa/cicd/java/skills/ci-pipelines`
-- GitLab CI equivalent → `qa/cicd/java/skills/ci-pipelines`
+- Azure Pipelines equivalent → `references/azure-pipelines.md` in this skill
+- GitLab CI equivalent → `references/gitlab-ci.md` in this skill
 - App build / deploy workflows unrelated to tests → `devops/github-actions`
 - Non-Java stacks — use the `dotnet` or `typescript` sibling under this skill
 
@@ -117,7 +117,7 @@ jobs:
     strategy:
       fail-fast: false       # one shard failing must not kill the others
       matrix:
-        shard-index: [1, 2]  # length MUST equal shard-total
+        shard-index: [1, 2]  # length must equal shard-total
     steps:
       - uses: actions/checkout@v4
         with: { fetch-depth: 1 }
@@ -251,7 +251,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        shard-index: [1, 2, 3, 4]   # length MUST equal shard-total
+        shard-index: [1, 2, 3, 4]   # length must equal shard-total
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
@@ -463,7 +463,7 @@ jobs:
 ## Cross-references
 
 - **`qa/cicd/dotnet/skills/ci-pipelines`** — the same-CI sibling this mirrors; consult it for the .NET / NUnit / TRX variant.
-- **`qa/cicd/java/skills/ci-pipelines`** — the Azure sibling this ports from; consult it for the variable-group / service-connection variant of the same Gradle/TestNG patterns.
+- **`references/azure-pipelines.md`** — the Azure sibling this ports from; consult it for the variable-group / service-connection variant of the same Gradle/TestNG patterns.
 - **`qa/java/skills/db-testing/testcontainers`** — the integration-tests job runs these.
 - **`qa/java/skills/email-testing`** — pair Mailpit as a `services:` container or inline Testcontainers run.
 - **`qa/reporting/java/skills/test-reports`** — Allure-TestNG adapter wiring inside the test module that produces `build/allure-results/`.

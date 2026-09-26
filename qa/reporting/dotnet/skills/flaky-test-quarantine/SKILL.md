@@ -1,9 +1,9 @@
 ---
 name: qa-flaky-test-quarantine-dotnet
-description: Detect, retry, **quarantine**, and report flaky tests in a .NET 10 (8-9 supported) / NUnit suite. Triggers: "this NUnit test is flaky, stop it blocking CI", "quarantine our flaky tests but keep running them", "retry failed tests in NUnit including on exceptions".
+description: Use when flaky tests in a .NET 10 (8/9 supported) / NUnit suite must be detected, retried, **quarantined** and reported. Triggers: "this NUnit test is flaky, stop it blocking CI", "quarantine our flaky tests but keep running them", "retry failed tests in NUnit including on exceptions". Not for Allure wiring (`qa-test-reports-dotnet`), the pipeline lanes themselves (`qa-ci-pipelines-dotnet`), or fixing the test's logic (the owning qa-*-dotnet agent).
 ---
 
-# Flaky-Test Quarantine (.NET 8 / NUnit)
+# Flaky-Test Quarantine (.NET 10 / NUnit)
 
 This is the **.NET sibling** of the single-node `qa/reporting/dotnet/skills/flaky-test-quarantine/` family, **ported** from the
 canonical **Java/TestNG** file (`qa-flaky-test-quarantine-java`). The **four-move loop** is identical; only
@@ -45,7 +45,7 @@ assumption, an order dependency, a real-but-rare backend hiccup. It is *not*:
 
 ## Stack
 
-- .NET 8, C# (nullable reference types on), NUnit 4.x — **async all the way** in the tests; **no
+- .NET 10 (8/9 supported), C# (nullable reference types on), NUnit 4.x — **async all the way** in the tests; **no
   `Thread.Sleep` / `Task.Delay`-as-wait** (sleeps *cause* flakiness — cross-link the condition-wait in
   `qa-db-connection-dotnet` / `qa-messaging-testing-*`)
 - `NUnit` — `[Retry(n)]` (built-in) + a custom `RetryOnFailureAttribute : IRepeatTest` (retries on errors too)
@@ -164,7 +164,7 @@ public class CheckoutTests : FlakyMarkBase   // base marks Flaky-category result
 {
     [Test]
     [Category("Flaky")]                 // ← out of the gate, into the quarantine lane
-    [Property("Issue", "CHECKOUT-871")] // ← the ticket tracking the de-flake — quarantine is NEVER permanent
+    [Property("Issue", "CHECKOUT-871")] // ← the ticket tracking the de-flake — quarantine is never permanent
     public async Task Should_settle_payment_When_gateway_is_slow()
     {
         // ... the intermittently-failing assertion, awaiting a real fix under CHECKOUT-871
@@ -173,7 +173,7 @@ public class CheckoutTests : FlakyMarkBase   // base marks Flaky-category result
 ```
 
 **The gate excludes the category; the quarantine lane includes only it and never blocks** — driven entirely
-by the `--filter` (cross-link `qa-ci-pipelines`):
+by the `--filter` (cross-link `qa-ci-pipelines-dotnet`):
 
 ```yaml
 - name: Gate suite (blocks merge)
@@ -342,5 +342,5 @@ result is reported in Allure (flaky-flagged, history-tracked) but **never** fail
   `WaitForAsync` **condition-wait** that *prevents* the eventual-consistency flakiness this skill quarantines.
 - `qa-ui-test-writer-playwright-dotnet` / `qa-api-test-writer-dotnet` — where the quarantined tests
   are authored; flakiness is best fixed at the source (stable locators, intent-not-selectors).
-- `qa-ci-pipelines` (github-actions / azure-pipelines / gitlab-ci references) — the gate-lane vs quarantine-lane job
+- `qa-ci-pipelines-dotnet` (its GitHub Actions, Azure Pipelines and GitLab CI references) — the gate-lane vs quarantine-lane job
   wiring (`continue-on-error` on the non-gating lane).
