@@ -15,7 +15,7 @@ rg -n "<pattern>" --glob '*.cs' $TESTS
 
 **The tool lane gates everything.** Rows tagged **[NUnit]**, **[PW]** (Playwright .NET), **[Sel]** (Selenium 4), **[Appium]**, **[RestSharp]**, **[Reqnroll]**, **[TC]** (Testcontainers) apply only when that tool is in use. A suite that doesn't use a tool is **N/A** for its rows, never in violation. Where the project has a documented house convention that differs from a plugin default, record a **deviation**, not a finding.
 
-**Owning skills:** `qa/dotnet/skills/{api-test-author/*,ui-test-author/*,page-object-design,page-objects-from-url,mobile-screen-explorer,mobile-screen-objects,api-client-writer,api-models,test-data-builder,data-driven-testing,db-testing/*,test-login-tokens,test-quality-check,performance/nbomber,bdd-*}` · `qa/reporting/dotnet/skills/{test-reports,flaky-test-quarantine}` · `qa/cicd/{ci-conventions,dotnet/skills/ci-pipelines}` · `qa/_shared/performance` · `qa/manual/{test-strategy,quality-metrics}`.
+**Owning skills:** `qa/dotnet/skills/{api-test-author/*,ui-test-author/*,page-object-design,page-objects-from-url,mobile-screen-explorer,mobile-screen-objects,api-client-writer,api-models,test-data-builder,data-driven-testing,db-testing/*,test-login-tokens,test-quality-check,load-testing,bdd-*}` · `qa/reporting/dotnet/skills/{test-reports,flaky-test-quarantine}` · `qa/cicd/{ci-conventions,dotnet/skills/ci-pipelines}` · `qa/_shared/performance` · `qa/manual/{test-strategy,quality-metrics}`.
 
 ---
 

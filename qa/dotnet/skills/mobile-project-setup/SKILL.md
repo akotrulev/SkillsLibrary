@@ -162,4 +162,4 @@ Flat solution + shared `TestCore` + CPM make this purely additive. To add a sibl
 - [ ] `AppiumDriverFactory` reads caps from per-project `appsettings.<platform>.json` — no hard-coded caps
 - [ ] No `Thread.Sleep`; waits centralized in `Support/Waits`
 - [ ] Per-project `appsettings`/`allureConfig`/`Dockerfile`/`README`; allure local tool installed; secrets out of config
-- [ ] `dotnet build` clean; `dotnet test` green against a booted device
+- [ ] `dotnet build` clean; `dotnet test` green against a booted device. Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run".

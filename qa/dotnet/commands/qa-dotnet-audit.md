@@ -11,7 +11,7 @@ Run a **qa-dotnet conformance audit** on this repository: sweep the **test suite
 4. Check `docs/audits/` first: a prior `…-qa-dotnet-conformance-r<N>.md` means **Mode B (re-audit)** — reuse its section letters and finding IDs verbatim, never renumber. Otherwise **Mode A (baseline)**.
 5. Load the owning `qa/dotnet/skills/<skill>/SKILL.md` (or the `qa/reporting/dotnet` / `qa/cicd` sibling for sections L and M) whenever a check is ambiguous, tool-keyed, or you are about to write its fix direction.
 
-**THE SCOPE FENCE: this audits the test suite, not the application.** Every finding must be about test code — structure, layering, waits, data, assertions, reporting, CI. Application defects the suite exposes are bug reports (`qa/manual/bug-report-writer`); application conventions belong to `be-dotnet-standards-audit` / the `fe-*` audits. A brittle locator is a *suite* finding even when a missing `data-testid` caused it — report the locator strategy and hand the testid list to the frontend peer.
+**The scope fence: this audits the test suite, not the application.** Every finding must be about test code — structure, layering, waits, data, assertions, reporting, CI. Application defects the suite exposes are bug reports (`qa/manual/bug-report-writer`); application conventions belong to `be-dotnet-standards-audit` / the `fe-*` audits. A brittle locator is a *suite* finding even when a missing `data-testid` caused it — report the locator strategy and hand the testid list to the frontend peer.
 
 **Read-only.** `Write`/`Edit` are for the report under `docs/audits/` and nothing else — never fix, reformat, or "quickly correct" anything found, however trivial. Findings carry a one-line fix direction and the owning skill; the matching `qa-*-dotnet` agent applies them in a separate run.
 
@@ -19,7 +19,7 @@ Run a **qa-dotnet conformance audit** on this repository: sweep the **test suite
 
 **Tool lane first.** Detect the runner (NUnit / xUnit / MSTest), the UI driver (Playwright .NET / Selenium / Appium / none), the API stack, Reqnroll, Testcontainers, Allure, and the CI host before judging anything. A suite is never in violation for lacking a tool it doesn't use — those rows are N/A. A documented house convention that differs from a plugin default is a **deviation**, not a finding.
 
-**Discipline scope:** if the task below says `api`, `ui`/`fe`/`frontend`, or `mobile`, resolve that to `scope: api | ui | mobile` per the stack skill's **Discipline scope** section and sweep only that discipline's sections (plus the universal ones). Otherwise `scope: all`. State the resolved scope in the announcement and as the first line of the report's §2 Scope & coverage.
+**Discipline scope:** if the task below says `api`, `ui`/`fe`/`frontend`, or `mobile`, resolve that to `scope: api | ui | mobile` per the stack skill's **Discipline scope** section and sweep only that discipline's sections (plus the universal ones). Otherwise `scope: all`. State the resolved scope in the first line of output and as the first line of the report's §2 Scope & coverage.
 
 **Scope limiter (optional, additional to the discipline scope above):**
 

@@ -152,4 +152,4 @@ Flat solution + shared `TestCore` + CPM make this purely additive. To add a sibl
 - [ ] Base fixture attaches trace + screenshot on failure
 - [ ] Per-project `appsettings`/`allureConfig`/`Dockerfile`/`README` present; allure local tool installed
 - [ ] No secrets in `appsettings*.json`
-- [ ] `dotnet build` clean; `dotnet test` green
+- [ ] `dotnet build` clean; `dotnet test` green. Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run".

@@ -1,6 +1,6 @@
 ---
 name: qa-performance-project-setup-dotnet
-description: Use when starting a load/performance test project from zero in C# / .NET 10 (8-9) — solution layout, exact package versions, local setup, and run commands for a standalone NBomber console suite. Composable with the api/ui/mobile dotnet scaffolds. Triggers "scaffold a performance test project", "set up an NBomber suite from scratch", "what versions for a C# load test framework". Not for authoring the load scenarios (`performance/nbomber`).
+description: Use when starting a load/performance test project from zero in C# / .NET 10 (8-9) — solution layout, exact package versions, local setup, and run commands for a standalone NBomber console suite. Composable with the api/ui/mobile dotnet scaffolds. Triggers "scaffold a performance test project", "set up an NBomber suite from scratch", "what versions for a C# load test framework". Not for authoring the load scenarios (`load-testing`).
 ---
 
 # Performance Test Project Scaffold (C# / .NET 10)
@@ -97,7 +97,7 @@ dotnet build        # exit gate: 0 errors, 0 warnings
 dotnet run --project PerfTests          # runs scenarios, writes ./reports
 ```
 
-`Directory.Packages.props` (CPM version table) + `Directory.Build.props` (settings only) are as in `qa-api-project-setup-dotnet`. **Key difference:** `PerfTests.csproj` references **only** NBomber packages — never `NUnit` / `Microsoft.NET.Test.Sdk`, even though CPM may list their versions for sibling test projects. `Program.cs` entry point shape (scenario bodies owned by `performance/nbomber`):
+`Directory.Packages.props` (CPM version table) + `Directory.Build.props` (settings only) are as in `qa-api-project-setup-dotnet`. **Key difference:** `PerfTests.csproj` references **only** NBomber packages — never `NUnit` / `Microsoft.NET.Test.Sdk`, even though CPM may list their versions for sibling test projects. `Program.cs` entry point shape (scenario bodies owned by `load-testing`):
 
 ```csharp
 NBomberRunner
@@ -124,7 +124,7 @@ CI gates on the run's threshold result (NBomber returns a failed status when an 
 - **Config-driven load**: virtual users, ramp, duration, base URL from per-project `appsettings.<env>.json` — never hard-coded in scenarios.
 - **Reuse, don't reimplement, the API client**: when composing with the API module, point scenarios at `TestCore`'s typed clients instead of raw `HttpClient`.
 
-Scenario shapes, injection profiles, threshold tuning, and the review checklist are owned by `qa-performance-dotnet` (`performance/nbomber`) and `qa/_shared/performance`. Defer to them.
+Scenario shapes, injection profiles, threshold tuning, and the review checklist are owned by `qa-performance-dotnet` (`load-testing`) and `qa/_shared/performance`. Defer to them.
 
 ## Expanding into a multi-module solution
 
@@ -144,4 +144,4 @@ Flat solution + shared `TestCore` + CPM make this purely additive. The most comm
 - [ ] Target environment confirmed safe to load-test; auth token/creds sourced from config
 - [ ] Every scenario has an explicit, SLA-derived threshold
 - [ ] Load profile (VUs, ramp, duration, URL) read from per-project `appsettings.<env>.json`
-- [ ] `dotnet build` clean; `dotnet run` produces an HTML report under `reports/`
+- [ ] `dotnet build` clean; `dotnet run` produces an HTML report under `reports/`. Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run".

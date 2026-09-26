@@ -1,6 +1,6 @@
 ---
 name: qa-production-uptime-checks-dotnet
-description: Use when authoring synthetic monitoring as code from the .NET / Azure stack — scheduled availability tests and scripted checks against live staging/prod via Azure Application Insights. The "is it up right now" layer, distinct from CI pre-merge tests. Triggers: "add a prod uptime check", "synthetic monitor for the login flow", "monitoring as code".
+description: Use when authoring synthetic monitoring as code from the .NET / Azure stack — scheduled availability tests and scripted checks against live staging/prod via Azure Application Insights. The "is it up right now" layer, distinct from CI pre-merge tests. Triggers: "add a prod uptime check", "synthetic monitor for the login flow", "monitoring as code". Not for pre-merge CI gates (`qa-ci-pipelines-dotnet`) or load testing (`qa-load-testing-dotnet`).
 ---
 
 # Synthetic Monitoring as Code (Azure App Insights · .NET 8) — **ported from the TypeScript/Checkly canonical**
@@ -28,7 +28,7 @@ It is **not**:
 
 - a **CI test** — CI tests run **once, pre-merge, against an ephemeral env** to gate a change
   (`qa-ci-pipelines-*`). A synthetic runs **forever, post-deploy, against the real thing**.
-- a **load test** — `qa-performance-nbomber` drives throughput to find the breaking point; a synthetic fires
+- a **load test** — `qa-load-testing-dotnet` drives throughput to find the breaking point; a synthetic fires
   one scripted journey every N minutes to answer "is it working *right now*".
 - a **journey author** — this skill *reuses* the page objects authored by
   `qa-ui-test-writer-playwright-dotnet`; it is the **assertion + scheduling + alerting layer**, not a new author.
@@ -121,7 +121,7 @@ resource healthTest 'Microsoft.Insights/webtests@2022-06-15' = {
 ```
 
 Deploy it from the pipeline (`az deployment group create` / `terraform apply`) — cross-link
-`qa-ci-pipelines`. This is the synthetic-vs-CI boundary: this resource runs **forever, against
+`qa-ci-pipelines-dotnet`. This is the synthetic-vs-CI boundary: this resource runs **forever, against
 the live target**, not as a pre-merge gate.
 
 ## Check type 1 — Standard availability tests (status + latency + content)
@@ -164,7 +164,7 @@ public sealed class CheckoutJourneyProbe
             // REUSE the SAME page objects the CI suite uses — intent, not selectors
             var login = new LoginPage(page);
             await login.GotoAsync();
-            // creds from env, read lazily, NEVER logged — set in app settings / Key Vault
+            // creds from env, read lazily, never logged — set in app settings / Key Vault
             await login.SignInAsAsync(
                 Environment.GetEnvironmentVariable("SYNTHETIC_USER")!,
                 Environment.GetEnvironmentVariable("SYNTHETIC_PASSWORD")!);
@@ -357,9 +357,9 @@ a user can't check out — and the same `LoginPage`/`CartPage` page objects are 
   Synthetic Monitoring**. Honest divergence: no Checkly Java SDK either.
 - `qa-ui-test-writer-playwright-dotnet` — authors the page objects + journeys that the **custom probes reuse**.
   This skill schedules and alerts on them; it does not author them. Mirror its intent-not-selectors discipline.
-- `qa-performance-nbomber` — load testing (throughput), NOT uptime. Synthetics check "is it working"; NBomber
+- `qa-load-testing-dotnet` — load testing (throughput), not uptime. Synthetics check "is it working"; NBomber
   checks "how much can it take".
-- `qa-ci-pipelines` / `-github-actions` / `-gitlab-ci` — the **pre-merge gate against
+- `qa-ci-pipelines-dotnet` (its Azure Pipelines, GitHub Actions and GitLab CI references) — the **pre-merge gate against
   ephemeral envs** boundary; also where `az deployment` / `terraform apply` for the Standard tests + Function
   deploy are wired.
 - `qa-test-login-tokens-dotnet` — M2M / test-user tokens for probes hitting an **authenticated** live

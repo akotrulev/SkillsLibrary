@@ -20,7 +20,7 @@ this stack.
 > |---|---|---|
 > | **.NET (C#)** | **Stryker.NET** (`dotnet stryker`) | **this skill** |
 > | **Java / Kotlin** | **PIT (pitest)** | `qa/java/skills/test-quality-check` |
-> | **TypeScript / JS** | **StrykerJS** (`@stryker-mutator/core`) | `qa/typescript/skills/test-quality-check` |
+> | **TypeScript / JS** | **StrykerJS** (`@stryker-mutator/core`) | no house skill yet |
 >
 > The threshold philosophy, the "surviving mutant = missing assertion" workflow, the scope/incremental
 > discipline, and the anti-patterns below carry over to the siblings — only the tool invocation differs.

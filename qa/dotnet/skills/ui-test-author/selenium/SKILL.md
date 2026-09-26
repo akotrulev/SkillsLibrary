@@ -1,6 +1,6 @@
 ---
 name: qa-ui-test-writer-selenium-dotnet
-description: Use when the user asks to scaffold a C# / .NET 10 (8-9 supported) + Selenium 4 page object or NUnit UI test, following the BasePage / DriverFactory / NUnit pattern. Triggers: "create a Selenium page object for X in C#", "add a .NET page for screen Y", "write a Selenium NUnit test for Z".
+description: Use when the user asks to scaffold a C# / .NET 10 (8-9 supported) + Selenium 4 page object or NUnit UI test, following the BasePage / DriverFactory / NUnit pattern. Triggers: "create a Selenium page object for X in C#", "add a .NET page for screen Y", "write a Selenium NUnit test for Z". Not for Playwright projects (`ui-test-author/playwright`) or reviewing existing tests (`ui-test-author/review`).
 ---
 
 # QA — Selenium .NET Page Object & Test Generator
@@ -221,7 +221,7 @@ public sealed class AuthenticationTests : BaseTest
    - For repeating items, an `IReadOnlyList<{Component}>` property wrapping each `IWebElement` in a component class
 4. If a destination page doesn't exist yet, create a stub or recursively generate it.
 5. Generate the test class inheriting `BaseTest`; one `[Test]` per scenario, assertions on user-visible outcomes.
-6. Run `dotnet test` — expect 0 failures.
+6. Run `dotnet test` — expect 0 failures. Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run".
 
 ## Handoffs
 

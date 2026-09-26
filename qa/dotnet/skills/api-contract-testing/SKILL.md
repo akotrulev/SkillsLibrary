@@ -5,14 +5,14 @@ description: Use when the user asks to set up consumer-driven contract testing w
 
 # QA — Contract Testing with Pact (.NET / PactNet)
 
-Wires Pact V4 into a .NET service via **PactNet v5+** for consumer-driven contract testing with NUnit. Covers the consumer test, provider verification, state handlers, and CI publish. Load `qa/_shared/api-contract-testing` for the Broker model, matchers reference, and `can-i-deploy` gate that are shared across all stacks.
+Wires Pact V4 into a .NET service via **PactNet v5+** for consumer-driven contract testing with NUnit. Covers the consumer test, provider verification, state handlers, and CI publish. Load `qa/_shared/contract-testing-pact` for the Broker model, matchers reference, and `can-i-deploy` gate that are shared across all stacks.
 
 ## When to use
 
 - A .NET service consumes or produces an HTTP API and needs contract coverage.
 - Replacing brittle multi-service E2E tests with PactNet verification.
 - Catching breaking changes at the .NET producer side before they ship.
-- Pairing with `qa/_shared/api-contract-testing` for Broker / `can-i-deploy` wiring.
+- Pairing with `qa/_shared/contract-testing-pact` for Broker / `can-i-deploy` wiring.
 
 ## When NOT to use
 
@@ -214,7 +214,7 @@ Verification results are published back to the Broker via `PublishResults(...)` 
 
 ## `can-i-deploy` gate (both pipelines)
 
-See `qa/_shared/api-contract-testing` for the shared `can-i-deploy` and `record-deployment` commands. Wire them in the deploy stage of **both** the consumer and the provider pipelines, before `kubectl apply` / `az containerapp update`.
+See `qa/_shared/contract-testing-pact` for the shared `can-i-deploy` and `record-deployment` commands. Wire them in the deploy stage of **both** the consumer and the provider pipelines, before `kubectl apply` / `az containerapp update`.
 
 ## Rules (.NET-specific)
 
@@ -251,7 +251,7 @@ See `qa/_shared/api-contract-testing` for the shared `can-i-deploy` and `record-
 
 ## Handoffs
 
-- Cross-stack Broker / `can-i-deploy` / matchers concepts → `qa/_shared/api-contract-testing`
+- Cross-stack Broker / `can-i-deploy` / matchers concepts → `qa/_shared/contract-testing-pact`
 - Java consumer/provider → `qa/java/skills/api-contract-testing`
 - TypeScript consumer/provider → `qa/typescript/skills/api-contract-testing`
 - Live-service API tests → `qa/dotnet/skills/api-test-author/writer`

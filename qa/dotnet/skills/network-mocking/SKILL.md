@@ -1,6 +1,6 @@
 ---
 name: qa-network-mocking-dotnet
-description: Use when .NET / NUnit UI tests must intercept, mock, throttle, or assert browser network traffic — Playwright routes, raw CDP (throttling/offline), or an out-of-browser MITM proxy. Triggers "mock this XHR in the UI test", "simulate slow 3G/offline", "capture a HAR", "assert the page called endpoint X". Pick the layer, then read its reference file. Not for browser-less API tests (`api-test-author/generator`), load-level throttling (`performance/nbomber`), or WS/SSE (`realtime-stream-testing`).
+description: Use when .NET / NUnit UI tests must intercept, mock, throttle, or assert browser network traffic — Playwright routes, raw CDP (throttling/offline), or an out-of-browser MITM proxy. Triggers "mock this XHR in the UI test", "simulate slow 3G/offline", "capture a HAR", "assert the page called endpoint X". Pick the layer, then read its reference file. Not for browser-less API tests (`api-test-author/writer`), load-level throttling (`load-testing`), or WS/SSE (`realtime-stream-testing`).
 ---
 
 # QA — Network Monitoring (.NET 8 / C#)

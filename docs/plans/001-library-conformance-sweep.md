@@ -14,7 +14,10 @@ to `docs/plans/implemented/`, and the backend audit filed live as `docs/plans/ba
 `be-python`, the seven be-python descriptions under budget). S5 landed 2026-09-26 (qa/dotnet API, BDD
 and LLM lanes: the Gate line in three agents, 35 stale skill-path citations and 15 missing Do-NOT
 clauses fixed; the stale-path and "Run what you write" families are carried into S6–S13, S15 and S16).
-S6 is next. S1–S18 are ungated: the edits from S1 to S5 are built but unverified until G1 runs §7.
+S6 landed 2026-09-26 (qa/dotnet UI, mobile and performance lanes and commands: the Gate line in three
+agents, the production-uptime-checks names resolved, two new stale-path families — `performance/nbomber`
+and `qa/_shared/api-contract-testing` — fixed across qa/dotnet and carried into S7–S11, S13 and G1).
+S7 is next. S1–S18 are ungated: the edits from S1 to S6 are built but unverified until G1 runs §7.
 
 ## 1. What already exists, and what is missing
 
@@ -532,6 +535,14 @@ construct on a Java 17 / Spring Boot 2.x project"), which K6's keep clause and t
 policy protect. S4 kept all 16 and added the missing EOL flag for Spring Boot 2.x. **Cost:** §7 does
 not check versions, so these hits stay in the K6 recipe's output for later readers to re-judge.
 
+**D14 (2026-09-26, S6) — A stale path is fixed wherever it sits in the folder, even in the other
+lane's files.** §2 gives S5 the API/BDD/LLM skills, but six stale paths S5's family list did not name
+(`performance/nbomber`, `qa/_shared/api-contract-testing`, a missing TypeScript sibling) sat in S5-owned
+`qa-api-dotnet.md`, `api-contract-testing`, `failure-injection-testing`, `api-test-author/writer`,
+`test-quality-check` and `standards-audit/references/conformance-checklist.md`. S6 fixed them rather
+than leave qa/dotnet half-swept. **Cost:** S6's diff touches S5's files; the qa stack pairs (S7/S8,
+S9/S10) may do the same, and the As built note names each such file.
+
 ## Answered questions (2026-09-26)
 
 **O1 — How are plans run: through Plan Queue only, one prompt block per session, each plan in its own
@@ -928,6 +939,59 @@ skills around hits 20k, descriptions 7k, ~13 files modified 20k, read-back 6k, c
 - K2: the Gate line in the three agents.
 - K6: the remaining `qa/dotnet` `Node 20` hits → Node 24.
 - **Not in S6:** S5's lanes.
+- **As built (2026-09-26):** `qa/dotnet/agents/{qa-ui-dotnet,qa-mobile-dotnet,qa-performance-dotnet}.md`
+  and `qa/dotnet/commands/*.md` (read in full), and the 18 skill folders S5 left to S6. Gate line added
+  to 3 agents, each as the last Operating-rules bullet (`qa-ui-dotnet.md:36`, `qa-mobile-dotnet.md:37`,
+  `qa-performance-dotnet.md:38`). Six stale paths sat in S5-owned files; S6 fixed them too (D14).
+  Data issues: 29 fixed.
+  - K1: `production-uptime-checks/SKILL.md:31`, `:360` `qa-performance-nbomber` → `qa-load-testing-dotnet`;
+    `:124`, `:362` `qa-ci-pipelines` → `qa-ci-pipelines-dotnet` (the `-github-actions` / `-gitlab-ci`
+    names are reference files of that skill, now said so). The resolver prints only `data-testid` /
+    `data-test` over `qa/dotnet`.
+  - Stale paths: the known seven (`qa-ui-dotnet.md:101` `db-testing/client`, `:102`
+    `ui-test-author/reviewer`, `:104` `conformance-audit`; `qa-mobile-dotnet.md:87`, `:88`;
+    `qa-performance-dotnet.md:92`; `network-mocking/SKILL.md:3` `api-test-author/generator`). **New
+    family:** `performance/nbomber`, a folder that never existed — the NBomber skill is `load-testing`
+    (`qa-performance-dotnet.md:91`, `network-mocking/SKILL.md:3`, `failure-injection-testing/SKILL.md:3`,
+    `performance-project-setup/SKILL.md:3`, `:100`, `:127`, `standards-audit/references/conformance-checklist.md:18`,
+    `api-test-author/writer/SKILL.md:21` `qa/dotnet/skills/performance`). **Second new family:**
+    `qa/_shared/api-contract-testing` → `qa/_shared/contract-testing-pact` (`qa-api-dotnet.md:16`, `:76`;
+    `api-contract-testing/SKILL.md:8`, `:15`, `:217`, `:254`). `qa-performance-dotnet.md:94` named CI
+    hosts as skills; now "read only the `references/<host>.md`". `test-quality-check/SKILL.md:23` cited a
+    `qa/typescript/skills/test-quality-check` that does not exist → "no house skill yet".
+  - K6: the recipe prints only `realtime-stream-testing/SKILL.md:380`, the flagged EOL line.
+  Code issues: 16 fixed.
+  - K7: Do-NOT clauses added to `production-uptime-checks`, `load-testing`, `browser-cloud-setup`,
+    `ui-test-author/selenium`, `inhouse-framework-conventions`; all ≤ 500 (largest `network-mocking` 487).
+    Agent descriptions already fit (622, 594, 549).
+  - K5: `qa-dotnet-audit.md:14` "THE SCOPE FENCE" → sentence case, and `:22` "in the announcement" →
+    "in the first line of output" (matching S5's `standards-audit` fix); all-caps `NEVER`/`CALLER`/`NOT`
+    in `mobile-native-features/SKILL.md:117` and `production-uptime-checks/SKILL.md:167`, `:360`.
+  - K2 for skills: the "written, not run" sentence on the run/checklist step of `ui-project-setup`,
+    `mobile-project-setup`, `performance-project-setup` and `ui-test-author/selenium:224`.
+  - "Recover, don't author" doubled in the Orientation 2 of `qa-ui-dotnet` and `qa-performance-dotnet`;
+    merged.
+  Logical conflicts: 10 fixed.
+  - "Run what you write" gains "outside a `Gate: none` plan task" in all three agents; so do Orientation
+    3's "every run regardless of the gate's verdict" and Orientation 2's "confirm it builds/runs on
+    arrival".
+  - `qa-performance-dotnet`'s Step 6 loads `qa/cicd` / `qa/reporting` skills and its bug-report rule
+    loads `qa/manual/bug-report-writer`, while "Related agents" says "do not load their skills"; the three
+    exceptions are now stated once under the list.
+  Cleanup: none; the K9 recipes find nothing in `qa/dotnet`, and every qa/dotnet skill is published.
+  Kept on purpose: K3 hits are Percy/Applitools branch baselines, "code branching", and
+  `inhouse-framework-conventions:197`, which describes the Accelerator project's own `/review` command
+  rather than instructing the session. K4 hits are a CI gating stage, CDP throttling "phases" and an
+  "authorization slice" of a suite (D8). K8 hits are the .NET CLI in exit gates and checklists, and
+  `npm install` / `npx` tool installs in code samples (Lighthouse CI, Percy, Appium).
+  Carried forward: `performance/<tool>` → `load-testing` and `qa/_shared/api-contract-testing` →
+  `contract-testing-pact` into S7–S11, S13 and G1 (catalog `:36`, `:65`, `:66`); production-uptime-checks'
+  name mapping into S8 and S10.
+  Unverified: nothing was run beyond §4's searches (Gate: none). Left for the user: `.NET 8` is written
+  as the stack in ~70 headings and "Stack assumptions" lines across qa/dotnet skills (e.g.
+  `load-testing/SKILL.md:6`, `:28`, `network-mocking/SKILL.md:6`). The K6 recipe does not match it and
+  .NET 8 is a supported version until Nov 2026, so it stays; moving the defaults to ".NET 10 (8–9
+  supported)" is a wide rewrite for a later plan to decide.
 
 ### S7 — qa/java API, BDD and LLM lanes
 
@@ -1282,65 +1346,9 @@ name: the K1 resolver flags it (D12).
 | S18 | `docs` | `general-purpose` | — | ~135k |
 | G1 | `docs` | `general-purpose` | S1–S18 | ~120k |
 
-S1 to S5 have landed, and their prompts are deleted; the 14 prompts from S6 to G1 are live.
+S1 to S6 have landed, and their prompts are deleted; the 13 prompts from S7 to G1 are live.
 
 ---
-
-### S6 — qa/dotnet UI, mobile and performance lanes (general-purpose, docs)
-
-````
-You are `general-purpose`. Task S6 of docs/plans/001-library-conformance-sweep.md: bring qa/dotnet's
-UI, mobile and performance lanes and its commands in line with the plan's checks K1–K9.
-
-Deliverable: qa-ui-dotnet, qa-mobile-dotnet, qa-performance-dotnet, qa/dotnet/commands/ and every
-remaining qa/dotnet skill pass K1–K9.
-
-Read, in this order:
-1. CLAUDE.md.
-2. The plan: §2, §3, §4, §6 (the S6 rows), D1–D11, task S6 and S5's As built note (it lists the skills
-   S5 owned).
-3. CONTRIBUTING.md.
-4. qa/dotnet/agents/{qa-ui-dotnet,qa-mobile-dotnet,qa-performance-dotnet}.md and
-   qa/dotnet/commands/*.md in full.
-5. The plan's "Close-out — every task".
-
-Do:
-- Run §4's recipes with DIR=qa/dotnet; work the hits in your agents, the commands and the skills S5
-  did not own.
-- K1: `qa-ci-pipelines` and `qa-performance-nbomber` (skills/production-uptime-checks/SKILL.md).
-- K2: the Gate line in the three agents.
-- K6: S5 moved all 8 qa/dotnet Node 20 hits; confirm the recipe prints only the flagged EOL line.
-
-Traps:
-- Agent sentences S3/S4 fixed in backend recur in 28 agents across S5–S17; fix them where your
-  agents carry them:
-  - "— MANDATORY SECTION" on the brownfield heading is dropped (K5).
-  - The orientation pass's "every run regardless of the gate's verdict" (the cache gate) gains
-    "outside a `Gate: none` plan task".
-  - A closing duty "per `be-shared-session-budget` Step 5" now reads "per the plan's
-    `## Close-out — every task` section (plan format §7)".
-  - A skill's Validation / Verify list gets one sentence: inside a `Gate: none` plan task it runs
-    none of the checks and reports "written, not run".
-  - K8: a hardcoded `pnpm …` / `npm …` in an instruction becomes the project's own script, run with
-    the package manager `packageManager` names.
-  - The operating rule "Run what you write — a step whose code never executed does not pass its
-    gate" becomes "Run what you write, outside a `Gate: none` plan task — …" (S5; every qa agent
-    carries it).
-- Stale path shorthands (S5): skill folders were renamed but citations were not, and the K1
-  resolver cannot see paths. Grep for `api-test-author/generator` → `writer`,
-  `api-test-author/reviewer` and `ui-test-author/reviewer` → `review`, `db-testing/client` →
-  `connection`, `bdd-project-setup` → `bdd-project-scaffold`, `conformance-audit` →
-  `standards-audit`, and check every step-table path against the folder on disk.
-- Known S6 hits of that family: `qa-ui-dotnet.md:101`, `:102`, `:104`, `qa-mobile-dotnet.md:87`,
-  `:88`, `qa-performance-dotnet.md:92`, `network-mocking/SKILL.md:3`. S5 left no `Node 20` hit in
-  qa/dotnet, and S5 fixed the shared `ui-test-author/{playwright,appium,review}` skills already.
-- mobile-app-crawler's screen-map template links are deliberate examples.
-
-Gate: none — this plan gates once, in G1. Do not run tools/token-audit.py or §7's script.
-
-Commit: `chore(sweep S6): qa/dotnet UI, mobile and performance lanes`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
 
 ### S7 — qa/java API, BDD and LLM lanes (general-purpose, docs)
 
@@ -1385,10 +1393,13 @@ Traps:
   resolver cannot see paths. Grep for `api-test-author/generator` → `writer`,
   `api-test-author/reviewer` and `ui-test-author/reviewer` → `review`, `db-testing/client` →
   `connection`, `bdd-project-setup` → `bdd-project-scaffold`, `conformance-audit` →
-  `standards-audit`, and check every step-table path against the folder on disk.
+  `standards-audit`, and (S6) `performance/<tool>` or `skills/performance` → `load-testing`,
+  `qa/_shared/api-contract-testing` → `qa/_shared/contract-testing-pact`. Check every step-table
+  path, and every `qa/…` path in the files you own, against the folder on disk.
 - Known S7 hits of that family: `gherkin-step-code/SKILL.md:3`, `:8`, `:26`,
   `bdd-project-scaffold`, `api-test-author/{playwright,review}`, `db-testing/connection`,
-  `file-storage-testing/references/{s3,azure-blob}.md`.
+  `file-storage-testing/references/{s3,azure-blob}.md`; and (S6) `qa-api-java.md:18`, `:140`,
+  `api-contract-testing/SKILL.md:8`, `:26`, `:265`, `:450` (`qa/_shared/api-contract-testing`).
 - Descriptions lacking a Do-NOT clause were common in qa/dotnet (15 of 26 skills); expect the same.
 - S5 found the dotnet side of each family first; its As built note tells you the real names.
 - Java 21 + Spring Boot 3.x is the policy; a Java 17 mention is a K6 hit unless it is a migration
@@ -1444,8 +1455,18 @@ Traps:
   resolver cannot see paths. Grep for `api-test-author/generator` → `writer`,
   `api-test-author/reviewer` and `ui-test-author/reviewer` → `review`, `db-testing/client` →
   `connection`, `bdd-project-setup` → `bdd-project-scaffold`, `conformance-audit` →
-  `standards-audit`, and check every step-table path against the folder on disk.
-- S6 resolved the dotnet version of production-uptime-checks; match its choice.
+  `standards-audit`, and (S6) `performance/<tool>` or `skills/performance` → `load-testing`,
+  `qa/_shared/api-contract-testing` → `qa/_shared/contract-testing-pact`. Check every step-table
+  path, and every `qa/…` path in the files you own, against the folder on disk.
+- S6's choice for production-uptime-checks: a load-tool name points at the stack skill that owns the
+  tool (`qa-performance-gatling` → `qa-load-testing-java`; `qa-performance-k6` → `qa-load-testing-typescript`,
+  since k6 is the TypeScript lane's tool), and `qa-ci-pipelines` → `qa-ci-pipelines-java`, with the
+  host names as "its … references". The unresolved token is a backticked name the resolver sees;
+  `qa-ci-pipelines-*` with a star is not a hit.
+- S6 also found: the orientation's "Recover, don't author" written twice (merge the two paragraphs);
+  "Confirm it builds and runs on arrival" needs the same `Gate: none` exception as Orientation 3;
+  the performance agent's Step 6 loads `qa/cicd` and `qa/reporting` skills while "Related agents"
+  says "do not load their skills" — state the exceptions once under the list.
 
 Gate: none — this plan gates once, in G1. Do not run tools/token-audit.py or §7's script.
 
@@ -1498,10 +1519,13 @@ Traps:
   resolver cannot see paths. Grep for `api-test-author/generator` → `writer`,
   `api-test-author/reviewer` and `ui-test-author/reviewer` → `review`, `db-testing/client` →
   `connection`, `bdd-project-setup` → `bdd-project-scaffold`, `conformance-audit` →
-  `standards-audit`, and check every step-table path against the folder on disk.
+  `standards-audit`, and (S6) `performance/<tool>` or `skills/performance` → `load-testing`,
+  `qa/_shared/api-contract-testing` → `qa/_shared/contract-testing-pact`. Check every step-table
+  path, and every `qa/…` path in the files you own, against the folder on disk.
 - Known S9 hits of that family: `gherkin-step-code/SKILL.md` and its two references,
   `bdd-project-scaffold`, `api-test-author/{playwright,review}`, `db-testing/connection`,
-  `file-storage-testing/references/{s3,azure-blob}.md`.
+  `file-storage-testing/references/{s3,azure-blob}.md`; and (S6) `qa-api-typescript.md:18`, `:140`,
+  `api-contract-testing/SKILL.md:8`, `:15`, `:213`, `:251` (`qa/_shared/api-contract-testing`).
 - Descriptions lacking a Do-NOT clause were common in qa/dotnet (15 of 26 skills); expect the same.
 - The agents' descriptions say "TypeScript/Node 20". Descriptions are always-on text, so they must
   change too, and must stay within 650 chars.
@@ -1558,8 +1582,15 @@ Traps:
   resolver cannot see paths. Grep for `api-test-author/generator` → `writer`,
   `api-test-author/reviewer` and `ui-test-author/reviewer` → `review`, `db-testing/client` →
   `connection`, `bdd-project-setup` → `bdd-project-scaffold`, `conformance-audit` →
-  `standards-audit`, and check every step-table path against the folder on disk.
+  `standards-audit`, and (S6) `performance/<tool>` or `skills/performance` → `load-testing`,
+  `qa/_shared/api-contract-testing` → `qa/_shared/contract-testing-pact`. Check every step-table
+  path, and every `qa/…` path in the files you own, against the folder on disk.
 - WebdriverIO/Appium examples pin Node in CI YAML. A matrix may keep Node 22 beside 24.
+- S6's choice for production-uptime-checks: `qa-performance-k6` → `qa-load-testing-typescript`,
+  `qa-ci-pipelines` → `qa-ci-pipelines-typescript` (host names as "its … references"). S6 also found
+  a doubled "Recover, don't author" in the orientation, a "Confirm it builds and runs on arrival" that
+  needs the `Gate: none` exception, and a performance agent whose Step 6 loads `qa/cicd` /
+  `qa/reporting` skills while "Related agents" says not to — state the exceptions once.
 
 Gate: none — this plan gates once, in G1. Do not run tools/token-audit.py or §7's script.
 
@@ -1606,6 +1637,7 @@ Traps:
   and `ui-test-author/reviewer` → `review`, `bdd-project-setup` → `bdd-project-scaffold`. Known
   hits: `qa/_shared/{bdd/feature-file-writer,contract-testing-pact,performance}/SKILL.md`,
   `qa/manual/{test-strategy,exploratory-charter-writer}/SKILL.md`. The K1 resolver cannot see paths.
+  S6 adds `qa/manual/test-strategy/SKILL.md:25`: `qa/<stack>/skills/performance` → `load-testing`.
 - qa-security's authorization and scope rules are hard safety rules (K5 keep).
 - qa/_shared skills are loaded by all three qa stacks. Change descriptions, not skill names.
 
@@ -1714,6 +1746,8 @@ Traps:
     carries it).
 - Stale path (S5): `frontend/blazor/skills/forms/SKILL.md:201` cites
   `qa/api-test-author/generator/dotnet`; the folder is `qa/dotnet/skills/api-test-author/writer`.
+- Stale path (S6): `frontend/blazor/skills/performance/SKILL.md:3` cites `performance/nbomber`; the
+  NBomber skill is `qa/dotnet/skills/load-testing` (`qa-load-testing-dotnet`).
 - The Frontend code rules in CLAUDE.md are house rules, not dated emphasis; where a skill restates
   them in bold, they stay.
 - `data-testid` and the other `data-*` tokens are HTML attributes.
@@ -2013,6 +2047,9 @@ Traps:
 - S2 replaced the planning lane's per-block "closing duty" with the plan's `## Close-out — every task`
   section (plan-format §7) plus one close-out line per block; docs/skills-catalog.md's session-budget
   entry (line ~207) still says "the closing duty". Reword it.
+- Stale skill paths in docs/skills-catalog.md (S6): `performance/nbomber` at ~:36 and
+  `performance/{nbomber,k6,gatling}` at ~:66 → each stack's `load-testing`;
+  `qa/_shared/api-contract-testing` at ~:65 → `qa/_shared/contract-testing-pact`.
 - Any entry you add to ALLOW or LINK_EXAMPLES needs a one-line reason in the As built note.
 - CONFORMANCE-AUDIT-PLAN.md and README cite each other; fix the README link after the move.
 - CONFORMANCE-AUDIT-PLAN.md cites `backend/PLAN.md` (F2, F3) as plain text, not a link. S3 moved that

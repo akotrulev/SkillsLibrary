@@ -18,7 +18,7 @@ Scaffolds NUnit-based API tests against a REST backend that emits a uniform `Pro
 - UI / browser tests → `qa/dotnet/skills/ui-test-author`
 - Generating the typed client itself → `qa/dotnet/skills/api-client-writer`
 - Generating request/response DTOs → `qa/dotnet/skills/api-models`
-- Performance / load tests → `qa/dotnet/skills/performance`
+- Performance / load tests → `qa/dotnet/skills/load-testing`
 
 ## Source of truth & input modes
 

@@ -114,7 +114,7 @@ namespace AppiumTests.Support.Native;
 
 /// <summary>
 /// Owns the OS-level surfaces around the app. Every method drives a device/driver API or a `mobile:` command —
-/// NEVER a page-object selector. The CALLER asserts the effect on a page object afterwards.
+/// never a page-object selector. The caller asserts the effect on a page object afterwards.
 /// </summary>
 public sealed class NativeFeatures(AppiumDriver driver)
 {

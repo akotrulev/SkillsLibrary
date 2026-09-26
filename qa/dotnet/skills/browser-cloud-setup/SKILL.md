@@ -1,6 +1,6 @@
 ---
 name: qa-browser-cloud-setup-dotnet
-description: Use when the user needs to run .NET Playwright (web) or Appium.WebDriver (mobile) tests on a **hosted cloud grid**. Triggers: "run our Playwright .NET tests on BrowserStack", "wire Appium .NET to Sauce Labs", "set up LambdaTest caps for our NUnit Appium tests".
+description: Use when the user needs to run .NET Playwright (web) or Appium.WebDriver (mobile) tests on a **hosted cloud grid**. Triggers: "run our Playwright .NET tests on BrowserStack", "wire Appium .NET to Sauce Labs", "set up LambdaTest caps for our NUnit Appium tests". Not for real-device app upload and device matrices (`device-cloud`) or local runs (`ui-project-setup`).
 ---
 
 # QA — Cloud Grid Config (.NET: Playwright + Appium.WebDriver)
