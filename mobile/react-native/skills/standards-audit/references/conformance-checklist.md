@@ -264,6 +264,19 @@ This section holds no rows of its own. The rows are those of `mobile/_shared/sto
 
 | # | Check | Violation looks like | Find it with | Sev |
 |---|---|---|---|---|
+| M1 | Every interactive element has an accessible name | An icon-only `Pressable` / `TextInput` with no `aria-label`, `accessibilityLabel` or text child | `rg -n '<(Pressable\|TouchableOpacity\|TextInput)\b' $SRC -g '*.tsx'` — read each for a name | major |
+| M2 | Every interactive element has a role | A `Pressable` or tap `View` with no `role` / `accessibilityRole` | `rg -n '<(Pressable\|TouchableOpacity\|TouchableWithoutFeedback)\b' $SRC -g '*.tsx'` and subtract those with `role=`/`accessibilityRole=` | major |
+| M3 | Text scaling is never locked | `allowFontScaling={false}` or `maxFontSizeMultiplier` below 2 | `rg -n 'allowFontScaling=\{false\}\|maxFontSizeMultiplier' $SRC -g '*.tsx'` | major |
+| M4 | Touch targets are at least 44 pt / 48 dp | A control sized or padded below the minimum with no `hitSlop` that reaches it | `rg -n 'width: ([0-9]\|[1-3][0-9]\|4[0-3])\b\|height: ([0-9]\|[1-3][0-9]\|4[0-3])\b' $SRC -g '*.tsx'` — read each for a target | major |
+| M5 | State lives in `aria-*` / `accessibilityState`, not in the label | A label such as "Menu, open", "Selected", "disabled" or one containing "button" | `rg -n 'aria-label="[^"]*(button\|selected\|disabled\|open\|closed\|checked)' $SRC -g '*.tsx' -i` | minor |
+| M6 | One prop family per element | `role` and `accessibilityRole` (or `aria-label` and `accessibilityLabel`) on one element | `rg -n 'accessibilityRole=.*role=\|role=.*accessibilityRole=' $SRC -g '*.tsx'` | minor |
+| M7 | Modals and sheets manage focus | A custom overlay with no `accessibilityViewIsModal` / hidden background and no focus move on open or return on close. requires dynamic test → `qa-mobile-typescript` | `rg -n '<Modal\|accessibilityViewIsModal\|sendAccessibilityEvent' $SRC -g '*.tsx'` | major |
+| M8 | Results and errors are announced without moving focus | An async save or error appearing with no `announceForAccessibility`, live region or `role="alert"` | `rg -n 'announceForAccessibility\|aria-live\|accessibilityLiveRegion\|role="alert"\|accessibilityRole="alert"' $SRC -g '*.tsx'` | major |
+| M9 | Gesture-only operations have an accessible alternative | A swipe-to-delete, drag or long-press action with no `accessibilityActions` | `rg -n 'Swipeable\|onLongPress\|Gesture\.(Pan\|LongPress)' $SRC -g '*.tsx'` — read each for `accessibilityActions` | major |
+| M10 | Decorative images are hidden, informative ones are described | An `Image` with meaning and no `alt` / label; a decorative one exposed to the reader | `rg -n '<(Image\|ExpoImage)\b' $SRC -g '*.tsx'` | minor |
+| M11 | Headings are marked | Section titles as plain `Text` on a screen with several sections | `rg -n 'role="heading"\|accessibilityRole="header"' $SRC -g '*.tsx'` | minor |
+| M12 | Colour is never the only cue; contrast holds in both schemes | An error or selected state shown by colour alone; a token pair below 4.5:1 (3:1 large) in light or dark. Contrast requires a token check or device pass | `rg -n 'color: .(red\|#f00)' $SRC -g '*.tsx'`; compare the token file | major |
+| M13 | Reduce Motion is honoured | `ReduceMotion.Never`, or a looping / parallax animation with no reduced variant | `rg -n 'ReduceMotion\.Never\|withRepeat\|useReducedMotion' $SRC -g '*.tsx' -g '*.ts'` | major |
 
 ---
 
@@ -272,6 +285,19 @@ This section holds no rows of its own. The rows are those of `mobile/_shared/sto
 
 | # | Check | Violation looks like | Find it with | Sev |
 |---|---|---|---|---|
+| N1 | Lists are virtualized | `ScrollView` + `.map` over data of unknown size | `rg -n '<ScrollView' $SRC -g '*.tsx' -A4 \| rg '\.map\('` | major |
+| N2 | The project's list library is used consistently | `FlatList` alongside an installed FlashList / Legend List on the same data shape | `rg -n 'FlatList\|FlashList\|LegendList' $SRC -g '*.tsx'`; `rg -n 'flash-list\|legendapp' package.json` | minor |
+| N3 | No inline objects, closures or pre-mapped data cross into a list | `data={x.map(...)}` or `.filter(...)`; inline style or object props in `renderItem`; `onPress={() => f(item.id)}` created per row | `rg -n 'data=\{[^}]*\.(map\|filter)\(' $SRC -g '*.tsx'`; `rg -n 'renderItem=\{' $SRC -g '*.tsx' -A6` | major |
+| N4 | List keys are stable ids | `keyExtractor` returning the index, or none | `rg -n 'keyExtractor\|key=\{(index\|i)\}' $SRC -g '*.tsx'` | major |
+| N5 | Heterogeneous lists use `getItemType` | One row component branching on a kind inside a recycling list | `rg -n 'getItemType' $SRC -g '*.tsx'` | minor |
+| N6 | Rows are cheap | A query, several contexts or a heavy `useMemo` inside a row component | `rg -n 'useQuery\|useContext\|useMemo' $SRC -g '*.tsx'` in files that render list rows | major |
+| N7 | Images are right-sized and cached | Full-size remote image in a row; RN `Image` for remote URLs where `expo-image` is installed | `rg -n 'from .react-native.' $SRC -g '*.tsx' \| rg 'Image'`; `rg -n 'expo-image' package.json` | major |
+| N8 | [compiler] No manual memoization for render cost | `useMemo` / `useCallback` / `memo` sprinkled on a project with `reactCompiler: true`, outside effect deps, worklet boundaries or measured rows | `rg -n 'reactCompiler' app.json app.config.*`; `rg -n 'useMemo\|useCallback\|memo\(' $SRC -g '*.tsx'` | minor |
+| N9 | [compiler] Code the compiler can analyse | `.value` on a Reanimated shared value; dotted `props.fn()` / `router.push` calls in handlers | `rg -n '\.value\b' $SRC -g '*.tsx'`; `rg -n 'props\.on[A-Z]\w*\(' $SRC -g '*.tsx'` | minor |
+| N10 | Startup is measured and the first screen is light | No startup instrumentation; a blocking SDK `init` or large synchronous parse before first render | `rg -n 'ObserveRoot\|markInteractive\|preventAutoHideAsync' $SRC package.json` | minor |
+| N11 | No JS-thread blocking work or leaks | Heavy synchronous compute in render or a handler; an effect with a listener / timer and no cleanup; `console.log` in a hot path | `rg -n 'addEventListener\|setInterval\|setTimeout' $SRC -g '*.tsx' -A4` — read each for cleanup | major |
+| N12 | `InteractionManager` is not used on 0.87+ | `InteractionManager` import on RN 0.87+ | `rg -n 'InteractionManager' $SRC` | major |
+| N13 | `Intl` formatters are hoisted | `new Intl.NumberFormat` / `DateTimeFormat` inside a component body | `rg -n 'new Intl\.' $SRC -g '*.tsx'` | minor |
 
 ---
 
@@ -280,6 +306,28 @@ This section holds no rows of its own. The rows are those of `mobile/_shared/sto
 
 | # | Check | Violation looks like | Find it with | Sev |
 |---|---|---|---|---|
+| O1 | A root `ErrorBoundary` export exists | No `export function ErrorBoundary` in `app/_layout`; a route that can fail has none | `rg -n 'export (function\|const) ErrorBoundary' app -g '*.tsx'` | blocker |
+| O2 | Independent widgets have their own boundary | A map, chart or embed that can throw with no `react-error-boundary` around it | `rg -n 'react-error-boundary\|ErrorBoundary' $SRC -g '*.tsx'`; `rg -n '<(MapView\|WebView\|LineChart)' $SRC -g '*.tsx'` | major |
+| O3 | The user never sees `error.message` | `{error.message}` or a stack rendered in JSX | `rg -n '\{[a-zA-Z.]*(error\|err\|e)\.(message\|stack)\}' $SRC -g '*.tsx'` | major |
+| O4 | Errors are reported, not logged only | A boundary or `catch` ending in `console.log` / `console.error` | `rg -n 'console\.(log\|error\|warn)' $SRC -g '*.ts' -g '*.tsx'` | major |
+| O5 | Data regions have loading, failed, stale and offline states | A region with `isPending` and data but no `isError` branch; a `catch {}` that leaves rows empty | `rg -n 'isError\|isPending\|isLoading' $SRC -g '*.tsx'`; `rg -n 'catch \(\w*\) \{\s*\}\|\.catch\(\(\) =>' $SRC` | blocker |
+| O6 | A drifted response is failed, never empty | `?? []` / `data ?? []` on a parse error path; no schema parse before render | `rg -n '\?\? \[\]' $SRC -g '*.ts' -g '*.tsx'`; read each for the error path | major |
+| O7 | The failure is scoped to the response-dependent subtree | An early `return <Error/>` in a container that also renders search, filters or a header | `rg -n 'if \(.*(isError\|error)\) return' $SRC -g '*.tsx'` | major |
+| O8 | A failed refetch keeps data and shows stale | A failed body replacing rows the user already has; a failed pull-to-refresh that empties the list | `rg -n 'isError && !?\w*data\|dataUpdatedAt\|refreshing=' $SRC -g '*.tsx'` | major |
+| O9 | One persistent error banner in the safe area | A banner with auto-dismiss or no close control, not inside `useSafeAreaInsets`, a close target below 44 pt, or a toast portal per feature | `rg -n 'Notifications\.Banner\|autoHide\|duration:\|useSafeAreaInsets' $SRC -g '*.tsx'` | major |
+| O10 | The banner is deduped, capped and raised from one place | `notify` at the call site and in `QueryCache.onError`; more than 3 entries; one entry per retry | `rg -n 'onError\|notify\.\|QueryCache\|MutationCache' $SRC -g '*.ts' -g '*.tsx'` | major |
+| O11 | Timeout and abort render differently | `TimeoutError` and `AbortError` handled the same; `AbortError` raising a banner | `rg -n 'TimeoutError\|AbortError' $SRC -g '*.ts' -g '*.tsx'` | major |
+| O12 | Offline is told apart from a server error, with no retry loop | Offline rendered as "failed"; a retry button spinning while `onlineManager` is offline | `rg -n 'onlineManager\|NetInfo\|useOnlineStatus' $SRC -g '*.ts' -g '*.tsx'` | major |
+| O13 | A 401 runs the ladder; sign-out is not the first answer | A `signOut()` / navigate-to-login in an interceptor straight off a 401; sign-out from a 403 or a third-party 401 | `rg -n '401\|403\|signOut\|router\.(replace\|push)\(.(/login\|/sign-in)' $SRC -g '*.ts' -g '*.tsx'` | major |
+| O14 | Re-auth is in place, and not over unsaved work | A redirect while `isDirty` or a mutation is pending | `rg -n 'isDirty\|isPending\|reauth' $SRC -g '*.tsx'` | major |
+| O15 | OTA reload is guarded and prompted | An unconditional `Updates.reloadAsync()` / `DevSettings.reload()`; a reload over a dirty form | `rg -n 'reloadAsync\|DevSettings\.reload\|useUpdates\|isUpdatePending' $SRC -g '*.ts' -g '*.tsx'` | blocker |
+| O16 | Writes disable on pending and carry an idempotency key per intent | A submit control enabled while `isPending`; a retryable write with no key, or a key per attempt | `rg -n 'useMutation\|Idempotency-Key\|idempotencyKey' $SRC -g '*.ts' -g '*.tsx'` | blocker |
+| O17 | An optimistic rollback is announced and keeps the input | A silent revert; a form cleared on a failed submit; a 409 auto-retried; a 422 shown in the banner | `rg -n 'onMutate\|onError\|409\|422\|setError' $SRC -g '*.ts' -g '*.tsx'` | major |
+| O18 | An unknown write outcome is reconciled | A timeout or backgrounded write reported as a definite failure, with no refetch or same-key replay | `rg -n 'TimeoutError\|onSettled\|invalidateQueries' $SRC -g '*.ts' -g '*.tsx'` | major |
+| O19 | Third parties fail in their own boundary | An analytics or flag failure raising a banner; a flag provider gating first render; a missing optional native module crashing at import | `rg -n 'analytics\|featureFlag\|useFlag\|requireNativeModule\|require\(' $SRC -g '*.ts' -g '*.tsx'` | major |
+| O20 | Storage-full degrades to memory with one notice | A bare `set` / `setItemAsync` with no typed catch at a repository boundary; a secret degraded to MMKV; a notice per failed write | `rg -n 'StorageFull\|setItemAsync\|\.set\(' $SRC -g '*.ts' -g '*.tsx'` | major |
+| O21 | Resume revalidates; stale data is labelled | `refetchOnWindowFocus: false` / `refetchOnReconnect: false`; no `focusManager` on `AppState`; yesterday's data shown as current | `rg -n 'refetchOnWindowFocus\|refetchOnReconnect\|focusManager\|AppState' $SRC -g '*.ts' -g '*.tsx'` | major |
+| O22 | A 404 on a record is "gone"; empty is three kinds | A generic failed body with retry on a deleted record; one "No data" for no-records, no-filter and no-match | `rg -n 'No data\|no longer exists\|404' $SRC -g '*.tsx'` | minor |
 
 ---
 
@@ -340,6 +388,18 @@ This section holds no rows of its own. The rows are those of `mobile/_shared/sto
 
 | # | Check | Violation looks like | Find it with | Sev |
 |---|---|---|---|---|
+| S1 | Jest with `jest-expo` is the only runner | `vitest` in dependencies or a `vi.` call in an RN project | `rg -n 'vitest\|\bvi\.' package.json $SRC -g '*.ts' -g '*.tsx'` | major |
+| S2 | [RNTL 14] Every RNTL call is awaited | `render(` / `renderHook(` / `fireEvent.` / `act(` / `rerender(` with no `await` | `rg -n '^\s*(const [^=]+= )?(render\|renderHook\|renderWithProviders\|act)\(' $SRC -g '*.test.tsx' \| rg -v await`; `rg -n 'fireEvent\.\w+\(' $SRC -g '*.test.tsx' \| rg -v await` | blocker |
+| S3 | [RNTL 14] No removed API | `UNSAFE_getBy*`, `update(`, `concurrentRoot`, `createNodeMock`, `renderAsync`, `fireEventAsync`, `getQueriesForElement` | `rg -n 'UNSAFE_\|concurrentRoot\|createNodeMock\|renderAsync\|fireEventAsync\|renderHookAsync\|getQueriesForElement' $SRC -g '*.test.ts*'` | major |
+| S4 | [RNTL 14] Dependencies match the major | `react-test-renderer` beside RNTL 14, or no `test-renderer` line for the React minor | `rg -n 'react-test-renderer\|"test-renderer"\|@testing-library/react-native' package.json` | major |
+| S5 | Queries are role / label first | `getByTestId` where a role or label exists; `UNSAFE_*` or style queries | `rg -n 'getByTestId\|queryByTestId\|findByTestId' $SRC -g '*.test.tsx' -c` | minor |
+| S6 | `userEvent` for user actions | `fireEvent.press` for a user tap | `rg -n 'fireEvent\.(press\|changeText)' $SRC -g '*.test.tsx'` | minor |
+| S7 | Native modules are faked at the boundary | A test hitting the real secure store, network or timers; `jest.mock` of the project's own module to dodge an import | `rg -n 'jest\.mock\(' $SRC -g '*.test.ts*'`; `rg -n 'fetch\(' $SRC -g '*.test.ts*'` | major |
+| S8 | A fresh `QueryClient` per test | A module-level `new QueryClient()` shared across tests; `retry` left on | `rg -n 'new QueryClient' $SRC -g '*.test.ts*'` | major |
+| S9 | No sleeps, no `try` / `catch`, no conditional logic in a test body | `setTimeout` waits, `try {`, `if (`, or `for (` driving assertions in a test | `rg -n 'setTimeout\|try \{\|\bif \(\|\bfor \(' $SRC -g '*.test.ts*'` | major |
+| S10 | Behaviour-named tests with one expected value | A name like `works` / `test1`; an assertion accepting two values (`200 or 204`) | `rg -n "it\('(works\|test\|should work)" $SRC -g '*.test.ts*'`; `rg -n 'toBeOneOf' $SRC -g '*.test.ts*'` | minor |
+| S11 | Pure logic is tested without a renderer | A formatter, schema, mapper or store tested through `render()`; a logic unit with no `*.test.ts` | `rg -n 'render\(' $SRC -g '*.test.tsx' -B3 \| rg -i 'format\|schema\|mapper\|parse'` | minor |
+| S12 | No whole-screen snapshots | `toMatchSnapshot()` / `toJSON()` on a screen | `rg -n 'toMatchSnapshot\|toMatchInlineSnapshot\|toJSON\(' $SRC -g '*.test.ts*'` | minor |
 
 ---
 

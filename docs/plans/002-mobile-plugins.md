@@ -8,7 +8,7 @@ step-by-step agent that works greenfield and brownfield, a conformance audit, an
 
 **Status:** C1 landed (2026-10-11): `mobile/` exists with the five July drafts moved and renamed under
 `mobile/react-native/`, the three conformance-checklist skeletons, and `## Mobile code rules` in `CLAUDE.md`;
-the stale `frontend/react-native` pointers are repointed. S1 landed (2026-10-11): `mobile/_shared/{store-compliance,security}` with their references and the `L1…L26` / `K1…K27` audit fragments. S2 landed (2026-10-11): `mobile/_shared/{release,observability}` with their references and the `T1…T19` / `U1…U20` audit fragments. S3 landed (2026-10-11): `mobile/_shared/in-app-purchases` with its references and the `X1…X22` fragment, plus `auth/auth0-{react-native,ios,android}`. N1 landed (2026-10-11): `mobile/{ios,android}/skills/basics` with `references/concurrency.md` each, and rows `A1…A5`/`B1…B16` (iOS), `A1…A4`/`B1…B16` (Android). R1 landed (2026-10-11): the five drafts rewritten onto SDK 57 and `mobile/react-native/skills/navigation` written, with RN checklist rows `A1…A7`, `B1…B13`, `C1…C10`, `D1…D10`, `E1…E13`, `F1…F15`. R2 landed (2026-10-11): `mobile/react-native/skills/{ui-components,forms,networking,offline-and-storage,native-modules}` with checklist rows `D10…D19`, `G1…G10`, `H1…H15`, `I1…I13`, `J1…J13`. R3 landed (2026-10-10): `mobile/react-native/skills/{device-features,notifications-and-links,animation,languages,test-ids}` with checklist rows `F15…F20`, `J14…J28`, `P1…P10`, `Q1…Q11`, `R1…R10`, and §8.5's RN mapping answered (D20 — the QA explorer's `content-desc` claim is refuted). Next: R4, I1.
+the stale `frontend/react-native` pointers are repointed. S1 landed (2026-10-11): `mobile/_shared/{store-compliance,security}` with their references and the `L1…L26` / `K1…K27` audit fragments. S2 landed (2026-10-11): `mobile/_shared/{release,observability}` with their references and the `T1…T19` / `U1…U20` audit fragments. S3 landed (2026-10-11): `mobile/_shared/in-app-purchases` with its references and the `X1…X22` fragment, plus `auth/auth0-{react-native,ios,android}`. N1 landed (2026-10-11): `mobile/{ios,android}/skills/basics` with `references/concurrency.md` each, and rows `A1…A5`/`B1…B16` (iOS), `A1…A4`/`B1…B16` (Android). R1 landed (2026-10-11): the five drafts rewritten onto SDK 57 and `mobile/react-native/skills/navigation` written, with RN checklist rows `A1…A7`, `B1…B13`, `C1…C10`, `D1…D10`, `E1…E13`, `F1…F15`. R2 landed (2026-10-11): `mobile/react-native/skills/{ui-components,forms,networking,offline-and-storage,native-modules}` with checklist rows `D10…D19`, `G1…G10`, `H1…H15`, `I1…I13`, `J1…J13`. R3 landed (2026-10-10): `mobile/react-native/skills/{device-features,notifications-and-links,animation,languages,test-ids}` with checklist rows `F15…F20`, `J14…J28`, `P1…P10`, `Q1…Q11`, `R1…R10`, and §8.5's RN mapping answered (D20 — the QA explorer's `content-desc` claim is refuted). R4 landed (2026-10-11): `mobile/react-native/skills/{accessibility,performance,error-handling,component-testing}` with `error-handling/references/{session-and-resume,writes-and-dependencies}.md` and checklist rows `M1…M13`, `N1…N13`, `O1…O22`, `S1…S12`. Next: R5, I1.
 Built but unverified: everything — the plan gates once, in G1. Flutter becomes a fourth plugin in its own plan, written
 once this one lands (O4); it is **not** in this plan's tasks. Maestro arrives on the QA side through plan 003
 (its X1); this plan feeds it the same test ids and an EAS Workflows job (D7). Every fact in §4 was web-verified
@@ -1136,6 +1136,7 @@ accessibility props ~30k; writes: four SKILL.md ~18k + two references ~10k; rows
   (Appium, or its Maestro lane on Expo projects — plan 003).
 - `performance`: the vendor list rules by filename; React Compiler's effect on manual memoization.
 - **Not in R4:** migration, review, audit, agent (R5).
+- **As built (2026-10-11):** `mobile/react-native/skills/{accessibility,performance,error-handling,component-testing}/SKILL.md` — bodies 13.4k / 14.2k / 15.7k / 14.0k chars (counted with `wc -m`, no gate run; `error-handling` is over the 14k aim, under the 16k cap — fe-react's 42.5k set was condensed, with OTA skew, the 401 ladder and app resume in `references/session-and-resume.md` (7.5k) and mutations, third parties and storage-full degradation in `references/writes-and-dependencies.md` (7.0k)); frontmatter names `mobile-react-native-<folder>`, descriptions all under 500. Every §6.5 row is covered (failure scope, safe-area banner, stale / pull-to-refresh, timeouts, ladder with biometric re-auth, OTA skew with one ref-guarded `Updates.reloadAsync()`, mutations, `Retry-After` / circuit by pointer to `networking`, banner cap and roll-up, third parties incl. a native module that fails to link, storage-full via a typed `StorageFullError` at the `offline-and-storage` boundary, app resume; multi-tab and hydration marked N/A). Checklist rows appended: `M1…M13`, `N1…N13`, `O1…O22`, `S1…S12` (`grep -n "^| [MNOS][0-9]" mobile/react-native/skills/standards-audit/references/conformance-checklist.md` → 60 rows). Verified at source this session: RNTL 14 (async `render` / `renderHook` / `rerender` / `unmount` / `fireEvent` / `act`; `test-renderer` replaces `react-test-renderer`; React 19+, RN 0.78+, Node `^22.13 || >=24`; codemods `rntl-v14-update-deps` and `rntl-v14-async-functions`; removed `update`, `UNSAFE_*`, `concurrentRoot`, `createNodeMock`), `expo-observe` (beta; `ObserveRoot`, `markInteractive`, `Observe.configure`; SDK 57 JS error reporting is preview, no native crashes), Expo Atlas (`EXPO_ATLAS=true npx expo export` then `npx expo-atlas .expo/atlas.jsonl`; `EXPO_UNSTABLE_ATLAS` is the older flag; experimental), `expo-updates` `useUpdates` / `checkForUpdateAsync` / `fetchUpdateAsync` / `reloadAsync`. **Built but unverified:** the RNTL 14 matcher registration path (`extend-expect`) and whether `userEvent` is exported from the package root — the skill says to confirm in the v14 docs; `jest-expo` 57 `transformIgnorePatterns` copy; the exact RN 0.86 `AccessibilityInfo.sendAccessibilityEvent` signature on a ref (written from recall); `aria-*` coverage of every state prop; `eslint-plugin-react-native-a11y` currency; `react-compiler-healthcheck`; Metro inline requires default; `requestIdleCallback` as the `InteractionManager` replacement; the `expo-router` `ErrorBoundary` prop names (`error`, `retry`). The `rg` recipes in `M*`–`S*` have not been run. Not run (Gate: none): `tools/token-audit.py`, §11's script, any lint.
 
 ### R5 — React Native migration, review, audit, agent and commands
 
@@ -1461,44 +1462,9 @@ goes in an untracked `scratch/` folder inside the worktree, deleted before commi
 | W1 | `docs` | `general-purpose` | R5, I5, A6, R3, S1–S3 | ~120k |
 | G1 | `docs` | `general-purpose` | every task above | ~140k |
 
-C1, S1, S2, S3, N1, R1, R2 and R3 have landed (their blocks are deleted); every block below is live.
+C1, S1, S2, S3, N1, R1, R2, R3 and R4 have landed (their blocks are deleted); every block below is live.
 
 ---
-
-### R4 — React Native quality layers and component tests (general-purpose, docs)
-
-````
-You are `general-purpose`. Task R4 of docs/plans/002-mobile-plugins.md: write
-`mobile-react-native-{accessibility,performance,error-handling,component-testing}`.
-
-Read, in this order:
-1. CLAUDE.md (`## Mobile code rules`, § Test code rules).
-2. The plan: §4.1, §5, §6.2, §6.5, §8.3, §10, task R4, and "Close-out — every task".
-3. `frontend/react/skills/error-handling/SKILL.md` and its two references — the rule source.
-4. `frontend/react/skills/{component-testing,accessibility}/SKILL.md`.
-5. Vendor `list-performance-*.md`; `mobile-react-native-networking` (its request-level rules and `references/request-policy.md`, which defines `AppError` and the retry / `Retry-After` policy `error-handling` renders), and `mobile-react-native-offline-and-storage` (which hands the storage-full degradation to you).
-6. The RN checklist, sections M, N, O, S.
-
-Build:
-- `error-handling`: every fe-react rule with its §6.5 delta; OTA skew with one guarded
-  `Updates.reloadAsync()`; the safe-area banner; the expo-router `ErrorBoundary` export; the bodies in
-  `references/session-and-resume.md` and `references/writes-and-dependencies.md`.
-- `component-testing`: RNTL 14's async API in every sample, the v13 → v14 codemod named, native modules
-  faked at the boundary, plain Jest for non-rendering logic, E2E handed to `qa-mobile-typescript`
-  (Appium, or its Maestro lane on Expo projects — plan 003).
-- `performance`: the vendor list rules by filename; the React Compiler's effect on manual memoization.
-- `accessibility` per §6.2. Rows appended to M, N, O, S.
-
-Traps:
-- fe-react's `error-handling` is 41,976 characters — copy its rules, not its size; 16,000 is the cap.
-- RNTL 14: `render` is async — an un-awaited render in a sample is a wrong sample.
-- Vitest is not viable for RN; Jest only.
-
-Gate: none — this plan gates once, in G1. Do not run tools/token-audit.py, §11's script, or any lint.
-
-Commit: `feat(mobile R4): React Native quality layers and component tests`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
 
 ### R5 — React Native migration, review, audit, agent and commands (general-purpose, docs)
 
