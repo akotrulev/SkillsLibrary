@@ -8,7 +8,7 @@ step-by-step agent that works greenfield and brownfield, a conformance audit, an
 
 **Status:** C1 landed (2026-10-11): `mobile/` exists with the five July drafts moved and renamed under
 `mobile/react-native/`, the three conformance-checklist skeletons, and `## Mobile code rules` in `CLAUDE.md`;
-the stale `frontend/react-native` pointers are repointed. Next: S1–S3, N1 and R1 (each depends only on C1).
+the stale `frontend/react-native` pointers are repointed. S1 landed (2026-10-11): `mobile/_shared/{store-compliance,security}` with their references and the `L1…L26` / `K1…K27` audit fragments. Next: S2, S3, N1 and R1 (each depends only on C1).
 Built but unverified: everything — the plan gates once, in G1. The five drafts keep their July bodies (SDK 56
 lane, pre-sweep content) until R1 rewrites them. Flutter becomes a fourth plugin in its own plan, written
 once this one lands (O4); it is **not** in this plan's tasks. Maestro arrives on the QA side through plan 003
@@ -950,6 +950,8 @@ SKILL.md ~9k, five references ~25k, two fragments ~10k.
   (+ a `MASWE` column in K), rows `L1…` and `K1…`, every row's `Stacks` naming `rn`, `ios`, `android`.
 - **Not in S1:** release signing (S2), IAP rules (S3), anything stack-local.
 
+- **As built (2026-10-11):** `mobile/_shared/store-compliance/` (`SKILL.md` 11.5k chars; `references/{apple,google-play,audit-checks}.md`; rows `L1…L26`, five marked console-only) and `mobile/_shared/security/` (`SKILL.md` 12.6k chars; `references/{ios,android,react-native,audit-checks}.md`; rows `K1…K27`, MASWE as a last column, every row's `Stacks` naming `rn`/`ios`/`android` as applies — `K27` is `rn` only, `K4` carries `android, rn`). Verified at source this session: 16 KB (developer.android.com page-sizes: updates blocked from 2027-02-01; other dates recorded as circulating), Play exact-alarm wording (`USE_EXACT_ALARM` restricted + declaration, `SCHEDULE_EXACT_ALARM` user-approved, not pre-granted since Android 13), MASVS 2.1 groups/controls, MASWE-0001…0078 ids, the MASTG test ids used. **Built but unverified:** Apple's Required Reason page is client-rendered and could not be fetched — `CA92.1`, `1C8F.1`, `C56D.1`, `AC6B.1`, `C617.1`, `35F9.1`, `E174.1` were confirmed from a Microsoft Learn page quoting Apple's table; `3B52.1`, `DDA9.1`, `0A2A.1`, `8FFB.1`, `3D61.1`, `85F4.1`, `7D9E.1`, `B728.1`, `3EC4.1`, `54BD.1` are written from recall and flagged **unconfirmed** in `apple.md` §2; the iOS 27.2 EU ATT alternative API is flagged unconfirmed (`apple.md` §5); MASVS control one-line statements and the RESILIENCE-1…4 naming were not re-read; the MASTG ids come from the tests index and each MASWE ↔ test pairing is the author's mapping. The `rg` recipes in `L*` / `K*` have not been run. Not run (Gate: none): `tools/token-audit.py`, §11's script, any lint.
+
 ### S2 — shared: release and observability
 
 **Stack:** `docs` · **Agent:** `general-purpose`
@@ -1443,52 +1445,9 @@ goes in an untracked `scratch/` folder inside the worktree, deleted before commi
 | W1 | `docs` | `general-purpose` | R5, I5, A6, R3, S1–S3 | ~120k |
 | G1 | `docs` | `general-purpose` | every task above | ~140k |
 
-C1 has landed (its block is deleted); every block below is live.
+C1 and S1 have landed (their blocks are deleted); every block below is live.
 
 ---
-
-### S1 — shared: store compliance and mobile security (general-purpose, docs)
-
-````
-You are `general-purpose`. Task S1 of docs/plans/002-mobile-plugins.md: write
-`mobile-shared-store-compliance` and `mobile-shared-security`, with their references and audit fragments.
-
-Read, in this order:
-1. CLAUDE.md (its `## Mobile code rules` is the standard these skills enforce).
-2. The plan: §4.4, §4.5, §5, §6.6, §8.3, §8.4, §10, task S1, and "Close-out — every task".
-3. `qa/_shared/security-testing/mobile-app-scan/SKILL.md` — the fence: scanning is QA's, coding rules are yours.
-4. `frontend/react/skills/accessibility/SKILL.md` — the skill shape and voice.
-
-Build:
-- `mobile/_shared/store-compliance/SKILL.md`: when to run it (before a release; on adding a permission,
-  an SDK, accounts, tracking or purchases; near a store deadline); inventory what the app does → the
-  rules that apply → "in the repo" vs "in App Store Connect / Play Console only" (a likely mismatch,
-  never a pass); a dated rule table with `Source` and `Re-verify after` columns.
-- `references/apple.md` and `references/google-play.md` with the content listed in task S1's bullets:
-  privacy manifest + Required Reason codes, listed SDKs, ATT + the iOS 27.2 EU prompt, 5.1.1(v) and
-  Sign in with Apple revocation, 2.5.2 / DPLA 3.3.1(B), 3.1.1, 4.8, 5.1.2 AI consent, age rating,
-  Accessibility Nutrition Labels, upload dates; target-API table, 16 KB, Data safety, account deletion
-  in-app and web, permission declarations, developer verification, the 2027-01-27 deadlines.
-- `mobile/_shared/security/SKILL.md`: MASVS 2.1 group by group → dev rule → MASWE id → MASTG test; the
-  static/dynamic boundary; the Mobile Top 10 2024 map; the fence to `qa-security`
-  (`mobile-app-scan`, `mobile-runtime-testing`). `references/ios.md`, `android.md`, `react-native.md`
-  with the platform rules task S1 lists.
-- Each `references/audit-checks.md` per §8.3: `| # | Check | Violation looks like | Find it with | Sev | Stacks |`
-  (+ `MASWE` in the security one), rows `L1…` and `K1…`.
-
-Traps:
-- §4.5 lists the Required Reason codes, Play's exact-alarm wording and the 16 KB history as unverified —
-  fetch the official pages before writing them. For 16 KB write the official 2027-02-01 and record that
-  other dates circulate.
-- A rule a source read cannot prove (pinning holds, what lands on disk, obfuscation works) is written
-  "requires dynamic test → `qa-security`" — never a check that passes on a grep.
-- Description ≤ 500 characters each; bodies aim at 14,000 (count with `wc -m`).
-
-Gate: none — this plan gates once, in G1. Do not run tools/token-audit.py, §11's script, or any lint.
-
-Commit: `feat(mobile S1): shared store-compliance and security skills`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
 
 ### S2 — shared: release and observability (general-purpose, docs)
 
