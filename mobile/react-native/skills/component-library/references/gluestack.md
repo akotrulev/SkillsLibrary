@@ -1,8 +1,8 @@
-# gluestack-ui v2 — accessible components on a Nativewind core
+# gluestack v5 — accessible components on a Nativewind core
 
-gluestack-ui v2 is a broad, accessible component set (Button, Input, Modal, Actionsheet, Toast, Select, form controls) styled with a **Nativewind/Tailwind** core. It's the successor to **NativeBase** — which is deprecated; never pick NativeBase for new work. Choose gluestack for a large accessible set with utility-style theming, or when migrating off NativeBase. Because its styling core is Nativewind, the **styling authority is Tailwind** ([`styling`](../../styling/SKILL.md)).
+gluestack v5 is a broad, accessible component set (Button, Input, Modal, Actionsheet, Toast, Select, form controls) styled with a **Nativewind/Tailwind** core. It's the successor to **NativeBase** — which is deprecated; never pick NativeBase for new work. Choose gluestack for a large accessible set with utility-style theming, or when migrating off NativeBase. Because its styling core is Nativewind, the **styling authority is Tailwind** ([`styling`](../../styling/SKILL.md)).
 
-**Version:** **gluestack-ui v2**, New-Architecture ready, components are added via its CLI (copy-in-friendly, you can edit them). Install via `npx expo install` for the RN deps; verify with `expo-doctor`. v2 depends on the Nativewind setup — do that first (see [`nativewind`](nativewind.md)).
+**Version:** **gluestack v5**, New-Architecture ready, components are added via its CLI (copy-in-friendly, you can edit them). Install via `npx expo install` for the RN deps; verify with `expo-doctor`. The setup depends on a Nativewind/Tailwind core — confirm the core against the v5 docs at install time, and do that first (see [`nativewind`](nativewind.md)).
 
 ## Setup
 
@@ -17,7 +17,6 @@ The CLI writes a `components/ui/` folder you own, plus `GluestackUIProvider`. In
 ## Provider — once at the root
 
 ```tsx
-// app/_layout.tsx
 import { useColorScheme } from 'react-native';
 import { GluestackUIProvider } from '@/components/ui/gluestack-ui-provider';
 import '@/global.css';                                  // Nativewind
@@ -48,7 +47,7 @@ function ConfirmButton({ onConfirm, testID }: { onConfirm: () => void; testID?: 
       <Modal isOpen={open} onClose={() => setOpen(false)}>
         <ModalBackdrop />
         <ModalContent testID="Orders.DeleteDialog">
-          <ModalHeader>Delete this order?</ModalHeader>       {/* name the object — ui-conventions */}
+          <ModalHeader>Delete this order?</ModalHeader>
           <ModalBody>This cannot be undone.</ModalBody>
           <ModalFooter>
             <Button variant="outline" onPress={() => setOpen(false)}><ButtonText>Cancel</ButtonText></Button>
@@ -63,18 +62,18 @@ function ConfirmButton({ onConfirm, testID }: { onConfirm: () => void; testID?: 
 
 ## Theme + dark mode
 
-Theming rides on the Nativewind config — semantic colors as tokens, dark mode via the provider `mode` bound to `useColorScheme()`. Map the [`design/frontend-design`](../../../../../design/frontend-design/SKILL.md) palette into the Tailwind/gluestack config once ([`styling`](../../styling/SKILL.md)). Don't scatter per-element `dark:`.
+Theming rides on the Nativewind config — semantic colors as tokens, dark mode via the provider `mode` bound to `useColorScheme()`. Map the [`design/visual-identity`](../../../../../design/visual-identity/SKILL.md) palette into the Tailwind/gluestack config once ([`styling`](../../styling/SKILL.md)). Don't scatter per-element `dark:`.
 
 ## testID
 
-Pass `testID` inline; it forwards to the underlying primitive. Since components live in `components/ui/` you own, you can route the prop precisely. → [`testability`](../../testability/SKILL.md).
+Pass `testID` inline; it forwards to the underlying primitive. Since components live in `components/ui/` you own, you can route the prop precisely. → [`test-ids`](../../test-ids/SKILL.md).
 
 ## Gotchas
 
 | Symptom | Cause | Fix |
 |---|---|---|
 | Nothing styled | Nativewind not set up first | Complete [`nativewind`](nativewind.md) before `gluestack-ui init` |
-| Reaching for NativeBase docs | NativeBase is deprecated | Use gluestack-ui v2 (the successor) |
+| Reaching for NativeBase docs | NativeBase is deprecated | Use gluestack v5 (the successor) |
 | Dark mode static | Provider `mode` not bound to scheme | Bind `mode` to `useColorScheme()` |
 | Two styling authorities | Competing `StyleSheet` colors | Tailwind is the authority ([`styling`](../../styling/SKILL.md)) |
 

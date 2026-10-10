@@ -2,7 +2,7 @@
 
 Nativewind compiles **Tailwind CSS class names** to RN `StyleSheet` objects at build time — the same utility DX as web Tailwind, on device. Pick it when the team is Tailwind-fluent or you want to share a token/design language with a web app. When Nativewind is present, the **styling authority flips to Tailwind** ([`styling`](../../styling/SKILL.md)) — you write `className`, not `StyleSheet`.
 
-**Version:** **Nativewind v4** (current) — New-Architecture ready, Tailwind v3-style config. Install via `npx expo install` so the RN-compatible versions are pinned. Needs Babel + Metro config; verify with `expo-doctor`.
+**Version:** **NativeWind 4.2** (stable) on Tailwind v3-style config. **v5 is a release candidate** — do not start a production app on it without a recorded decision; it moves to Tailwind v4 and a new setup. Install via `npx expo install` so the RN-compatible versions are pinned. Needs Babel + Metro config; verify with `expo-doctor`.
 
 ## Setup
 
@@ -13,7 +13,6 @@ npx tailwindcss init
 ```
 
 ```js
-// tailwind.config.js
 module.exports = {
   content: ['./app/**/*.{ts,tsx}', './components/**/*.{ts,tsx}'],
   presets: [require('nativewind/preset')],
@@ -23,7 +22,6 @@ module.exports = {
 ```
 
 ```js
-// babel.config.js
 module.exports = (api) => {
   api.cache(true);
   return {
@@ -33,7 +31,6 @@ module.exports = (api) => {
 ```
 
 ```js
-// metro.config.js
 const { getDefaultConfig } = require('expo/metro-config');
 const { withNativeWind } = require('nativewind/metro');
 module.exports = withNativeWind(getDefaultConfig(__dirname), { input: './global.css' });
@@ -68,7 +65,6 @@ Dark mode is Tailwind's `dark:` variant, driven by RN's color scheme (Nativewind
 ```tsx
 import { useColorScheme } from 'nativewind';
 const { colorScheme, setColorScheme } = useColorScheme();   // 'light' | 'dark' | 'system'
-// <Pressable onPress={() => setColorScheme(colorScheme === 'dark' ? 'light' : 'dark')} />
 ```
 
 ```tsx
@@ -77,7 +73,7 @@ const { colorScheme, setColorScheme } = useColorScheme();   // 'light' | 'dark' 
 
 ## testID
 
-Pass `testID` inline on the RN primitive under the class names — Nativewind styles the same element `testID` targets, so nothing changes. → [`testability`](../../testability/SKILL.md).
+Pass `testID` inline on the RN primitive under the class names — Nativewind styles the same element `testID` targets, so nothing changes. → [`test-ids`](../../test-ids/SKILL.md).
 
 ## Gotchas
 

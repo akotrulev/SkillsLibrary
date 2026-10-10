@@ -1,89 +1,85 @@
-# none — RN primitives + StyleSheet (default)
+# StyleSheet + your own atoms (default)
 
-No UI kit. You compose the RN primitives (`View`/`Text`/`Pressable`/`TextInput`/`ScrollView`) and build your own atom layer (`AppText`, `PrimaryButton`, `AppTextInput`) on top of `StyleSheet` + a token object. Zero dependency, zero bundle cost, total control — and the design is entirely yours. This is the honest default for a bespoke product design; a Material kit fights a custom look.
+No third-party UI kit. You compose RN primitives (`View`, `Text`, `Pressable`, `TextInput`) and a small atom layer (`AppText`, `PrimaryButton`) over `StyleSheet` and a token object. **Native controls that must look and behave like the platform** — pickers, switches, date pickers, context menus, sheets — come from **Expo UI** ([`expo-ui`](expo-ui.md)), which is part of this default, not an alternative to it.
 
-**Compatibility:** always New-Architecture compatible and Expo-Go-friendly (no native deps beyond RN itself). Pairs directly with [`styling`](../../styling/SKILL.md), which owns the token object, dark-mode swap, and type scale.
+This is the honest default for a bespoke product design: a Material or Tailwind layer fights a custom look, and each kit is a dependency that must earn its place by a need that exists now.
 
-## What you build instead of a kit
+**Compatibility:** New-Architecture compatible. Needs a development build only if you adopt Expo UI. Pairs with [`styling`](../../styling/SKILL.md), which owns the token object, dark-mode swap, type scale and adaptive layout.
 
-A small, owned atom set — the RN analog of shadcn's "own the code," minus even the copy-in step:
+## The split
+
+| Need | Source |
+|---|---|
+| Layout, text, cards, rows, buttons that carry your brand | Your atoms over `StyleSheet` + tokens |
+| A control the OS already provides (switch, picker, date, menu, sheet) | Expo UI (`@expo/ui`), or the RN core control |
+| Images, lists, menus, modals | [`ui-components`](../../ui-components/SKILL.md) |
+
+## Atoms you own
 
 ```tsx
-// components/atoms/AppText.tsx
-import { Text, type TextProps, StyleSheet } from 'react-native';
-import { useTokens } from '@/theme';                 // styling skill owns the token hook
+import { StyleSheet, Text, type TextProps } from 'react-native';
+import { useTokens } from '@/theme';
 
 type Variant = 'body' | 'title' | 'caption';
+
 export function AppText({ variant = 'body', style, ...rest }: TextProps & { variant?: Variant }) {
-  const t = useTokens();
-  return <Text style={[styles[variant], { color: t.color.text }, style]} {...rest} />;
+  const tokens = useTokens();
+  return <Text style={[styles[variant], { color: tokens.color.text }, style]} {...rest} />;
 }
+
 const styles = StyleSheet.create({
-  title:   { fontSize: 20, fontWeight: '600' },
-  body:    { fontSize: 16 },
+  title: { fontSize: 20, fontWeight: '600' },
+  body: { fontSize: 16 },
   caption: { fontSize: 13, opacity: 0.7 },
 });
 ```
 
 ```tsx
-// components/atoms/PrimaryButton.tsx — Pressable over TouchableOpacity (ui-conventions)
-import { Pressable, Text, StyleSheet, type PressableProps } from 'react-native';
+import { Pressable, StyleSheet, Text, type PressableProps } from 'react-native';
 import { useTokens } from '@/theme';
 
-export function PrimaryButton({ label, testID, ...rest }: PressableProps & { label: string }) {
-  const t = useTokens();
+export function PrimaryButton({ label, ...rest }: PressableProps & { label: string }) {
+  const tokens = useTokens();
   return (
     <Pressable
       accessibilityRole="button"
-      testID={testID}
-      style={({ pressed }) => [styles.base, { backgroundColor: t.color.actionPrimary, opacity: pressed ? 0.85 : 1 }]}
+      style={({ pressed }) => [styles.base, { backgroundColor: tokens.color.actionPrimary, opacity: pressed ? 0.85 : 1 }]}
       {...rest}
     >
-      <Text style={[styles.label, { color: t.color.onAction }]}>{label}</Text>
+      <Text style={[styles.label, { color: tokens.color.onAction }]}>{label}</Text>
     </Pressable>
   );
 }
+
 const styles = StyleSheet.create({
-  base:  { paddingVertical: 12, paddingHorizontal: 20, borderRadius: 12, borderCurve: 'continuous', alignItems: 'center' },
+  base: { minHeight: 44, paddingHorizontal: 20, borderRadius: 12, borderCurve: 'continuous', alignItems: 'center', justifyContent: 'center' },
   label: { fontSize: 16, fontWeight: '600' },
 });
 ```
 
+`testID` flows through `...rest` to the `Pressable`, so a caller passes it inline. `minHeight: 44` keeps the touch target at 44 pt.
+
 ## Theme provider
 
-There's no third-party provider — your own token Context (or a Zustand store) supplies colors/spacing and the current color scheme. Mount it once at the root `app/_layout.tsx`; drive dark mode off `useColorScheme()`. Full mechanics (token object, dark swap, type scale) live in [`styling`](../../styling/SKILL.md).
-
-```tsx
-// app/_layout.tsx
-import { useColorScheme } from 'react-native';
-import { ThemeProvider } from '@/theme';             // your own token provider (styling skill)
-
-export default function RootLayout() {
-  const scheme = useColorScheme() ?? 'light';
-  return <ThemeProvider scheme={scheme}>{/* <Stack /> */}</ThemeProvider>;
-}
-```
+There is no third-party provider: your token Context supplies colours, spacing and the scheme. Mount it once in `src/app/_layout.tsx`; the swap mechanics are in [`styling`](../../styling/SKILL.md).
 
 ## Dialogs, sheets, menus
 
-You don't get these free — but you rarely want a kit's versions anyway. Use the **native-first** components ([`ui-conventions`](../../ui-conventions/SKILL.md)): RN core `Modal` or `@gorhom/bottom-sheet` for sheets, `expo-image` for images, Zeego for native context menus. That skill owns the choices.
-
-## testID
-
-Pass `testID` inline on your atoms; forward it to the underlying primitive (as shown above). Because you own the atom, there's never a wrapper-to-carry-a-testid smell — the prop lands where you route it. → [`testability`](../../testability/SKILL.md).
+Native-first, owned by [`ui-components`](../../ui-components/SKILL.md): RN `Modal` or a `formSheet` route presentation, Expo UI menus and pickers, `expo-image` for images. Do not build a JS menu.
 
 ## Gotchas
 
 | Symptom | Cause | Fix |
 |---|---|---|
-| Text renders nothing / crashes | A bare string outside `<Text>` | All text goes inside `<Text>` |
-| Parent `color` doesn't reach child text | No CSS cascade in RN | Read the token in each `<Text>` (or pass via `AppText` variant) |
-| Reinventing a dozen atoms per screen | No shared atom layer | Build the atom set once, compose everywhere |
-| Square iOS corners look off | Missing `borderCurve` | `borderRadius` + `borderCurve: 'continuous'` (styling seed rule) |
+| Text renders nothing or crashes | A bare string outside `<Text>` | All text inside `<Text>` |
+| Parent `color` does not reach child text | No CSS cascade | Read the token in each `<Text>` or use `AppText` |
+| A dozen near-identical buttons per screen | No shared atom layer | Build the atoms once, compose everywhere |
+| Square corners look off on iOS | Missing `borderCurve` | `borderRadius` + `borderCurve: 'continuous'` |
+| A hand-rolled switch or date picker | Native control exists | Expo UI |
 
 ## Validation
 
-- App builds on iOS + Android; `expo-doctor` clean (no native deps to break New Arch).
-- A shared atom layer exists (`AppText`/`PrimaryButton`/inputs) — screens compose atoms, not raw primitives with inline styles.
-- Dark mode flips via `useColorScheme()` with no per-component color edits (all read tokens).
-- `testID` on an atom forwards to the rendered native view.
+- Builds on iOS and Android; `npx expo-doctor` clean.
+- Screens compose atoms, not raw primitives with inline styles.
+- Dark mode flips via `useColorScheme()` with no per-component colour edits.
+- `testID` on an atom lands on the rendered native view.

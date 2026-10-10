@@ -1,144 +1,152 @@
 ---
 name: mobile-react-native-basics
-description: Use when the user asks to explain a React Native / Expo concept — native primitives (`View`/`Text`/`Pressable`) vs the DOM, why there is **no RSC / `'use client'` boundary** on device, the New Architecture (Fabric renderer, TurboModules, Bridgeless, JSI), the Hermes engine, Expo-managed vs bare workflow, the RN thread model (JS thread vs UI/native thread), hooks and React 19 in RN, `StyleSheet` vs the CSS cascade, and the atomic-design taxonomy. Triggers "what's the RN equivalent of X in React web", "why is there no server component here", "what is Fabric / TurboModules / the New Architecture", "JS thread vs UI thread", "Expo Go vs dev client vs bare", "atom or organism / how deep to prop-drill". Do NOT use for scaffolding a project (use `mobile/react-native/skills/project-setup`), generating a screen/component (use `mobile/react-native/skills/generator`), reviewing (use `mobile/react-native/skills/reviewer`), or React **web** concepts (use `frontend/react/skills/reference`).
+description: Use when explaining or checking React Native + Expo fundamentals on SDK 57 — New Architecture, Hermes V1, JS/UI/worklet threads, React Compiler, the web-React to RN map (no RSC, DOM, CSS cascade or SEO), Expo as the framework. Triggers "RN equivalent of X", "why no server component", "JS thread vs UI thread", "Expo Go vs dev build". Do NOT use for scaffolding (`mobile-react-native-project-setup`), routes (`-navigation`), screens (`-ui-components`) or React web (`fe-react-basics`).
 ---
 
-# React Native / Expo — Reference
+# React Native / Expo — Basics
 
-Conceptual reference for React Native + Expo — the on-device rendering model, the New Architecture, the thread model, and the "wait, this isn't the DOM" surprises that trip up developers arriving from React web. Everything here runs **on the device**; there is no server-rendering split.
+The on-device rendering model and the "this isn't the DOM" surprises for developers arriving from React web. Everything runs **on the device**; there is no server render.
 
-## Version applicability
+## Version lane
 
-Detect the **Expo SDK**, **React Native**, and **React** majors first (from `package.json` / `app.json`) and key every recipe to them.
+Detect the Expo SDK, React Native and React majors from `package.json` first; key every recipe to them. Never up-level a project as a side effect.
 
-| Concern | Primary (SDK 56 · RN 0.85 · React 19.2) | Supported floor (SDK 53–55) |
-|---|---|---|
-| Architecture | New Architecture only (Fabric + TurboModules + Bridgeless) — always-on since SDK 55 | New Arch default since SDK 52; SDK 53 first with full React 19 support |
-| JS engine | **Hermes v1** (default) | Hermes (pre-v1) |
-| React features | React 19: `use()`, Actions, `useActionState`, `useOptimistic`, `ref` as a prop, React Compiler (opt-in via `babel-plugin-react-compiler`) | React 19 from SDK 53; below that (SDK ≤52) is out of scope for this stack |
-| Navigation | Expo Router (its own React-Navigation fork; do not also install `react-navigation`) | Expo Router on top of React Navigation (SDK ≤55) |
+| Lane | Expo SDK | RN | React | Notes |
+|---|---|---|---|---|
+| **Primary** | **57** | 0.86 | 19.2 | Node ≥ 22.13, Xcode 26.4+, iOS 16.4+, Android 7+, compile/target SDK 36 |
+| Next `[SDK58]` | 58 (beta) | 0.88 RC | 19.3 | Becomes primary the day it ships stable |
+| Supported | 55–56 | 0.83 / 0.85 | 19.2 | SDK 56 + Hermes V1 has a Reanimated memory regression fixed in `expo@57.0.9` — steer to 57 |
+| Floor | 54 | 0.81 | 19.1 | Last SDK where the legacy architecture can be on — migration bridge only |
+| Below 54 | — | — | — | A finding plus a `mobile-react-native-migration` run; never author for it |
 
-**Never author an old-architecture (`Paper`/bridge) recipe as the primary path** — the New Architecture is the assumed baseline.
+`[SDK58]` deltas, named where each skill owns them: native tabs stable at `expo-router/native-tabs`, Gesture Handler 3, Reanimated 4.7 + worklets 0.13, scene lifecycle default (iOS 27), AGP 9, Expo Router core reworked.
+
+## Facts every skill assumes
+
+- **New Architecture only** since RN 0.82 / SDK 55 (the interop layer still exists). Never author a Paper/bridge recipe.
+- **Hermes V1** is the default engine (RN 0.84 / SDK 56). Release builds run bytecode.
+- **React Compiler 1.0 is on** in the default template (`reactCompiler: true`): do not hand-write `useMemo` / `useCallback` / `memo` for render-cost reasons; keep them where identity matters (effect deps, Reanimated).
+- **React Native officially recommends a framework, and it is Expo.** Expo Router, development builds, CNG.
+- **RN 0.87 strict TS API**: deep `react-native/Libraries/*` imports are type errors; `InteractionManager` is removed.
+- `EXPO_PUBLIC_*` is inlined in plain text — public, never a secret.
+- Jest is the only runner (`jest-expo`); Vitest is not viable.
 
 ## When to use
 
-- "What's the React Native equivalent of `<div>` / `<a>` / CSS / `useMediaQuery`?"
-- "Why isn't there a Server Component / `'use client'` here?"
-- "What is Fabric / TurboModules / Bridgeless / JSI — do I need to care?"
-- "What runs on the JS thread vs the UI thread, and why does that matter for animation?"
-- "Expo Go vs dev client vs bare — which am I on?"
-- "Atom or organism? How deep should I prop-drill?"
+- "What is the RN equivalent of `<div>` / `<a>` / CSS / `useMediaQuery`?"
+- "Why is there no Server Component / `'use client'` here?"
+- "What runs on the JS thread vs the UI thread?"
+- "Expo Go vs development build vs bare — which am I on?"
+- Confirming a recipe matches the detected lane before another skill applies it.
 
 ## When NOT to use
 
-- Standing up a project / EAS / config → [`project-setup`](../project-setup/SKILL.md)
-- Scaffolding a screen/component → [`generator`](../generator/SKILL.md)
-- Picking a state library in depth → [`architecture`](../architecture/SKILL.md)
-- Reviewing → [`reviewer`](../reviewer/SKILL.md)
-- React **web** (RSC, DOM, Next.js) → `frontend/react/skills/reference`
-- Auth0 in the app → `auth/auth0-react` (+ `auth/_shared/auth0-concepts`)
+- Standing up a project, EAS, config plugins → [`project-setup`](../project-setup/SKILL.md)
+- Routes, navigators, deep links → [`navigation`](../navigation/SKILL.md)
+- Screens and components → [`ui-components`](../ui-components/SKILL.md)
+- State library choice → [`architecture`](../architecture/SKILL.md)
+- Animation → [`animation`](../animation/SKILL.md); lists and profiling → [`performance`](../performance/SKILL.md)
+- React **web** → `fe-react-basics`
 
----
+## No server render
 
-## The single biggest mental shift: there is no server render
+Every component runs on the device, always. There is:
 
-React web on the App Router is **a server app with selective client interactivity** (RSC default, `'use client'` islands). **React Native has none of that.** Every component runs **on the device**, in the JS runtime, always. There is:
+- **No RSC, `'use client'`, `'use server'`, Server Actions or hydration.** There is no boundary to look for.
+- **No SEO, metadata or crawling.** A binary is not a web page.
+- **No URL as state.** State that would sit in the URL on web is a **typed route param** (screen-scoped) or a store (app-wide).
+- **No DOM, no CSS cascade.** Styles are objects per element; nothing inherits except some `Text` props.
 
-- **No RSC, no `'use client'`, no `'use server'`, no Server Actions, no hydration.** A component is just a component. Do not look for the boundary — it isn't there.
-- **No SEO / metadata / crawling** — a native binary is not a web page. (That whole `fe-react` skill is dropped here.)
-- **No URL as state.** Navigation is Expo Router file routes + typed params; there is no address bar the user edits. State that would be "in the URL" on web lives in **navigation params** or a store.
+Carries over unchanged: hooks and their rules, one-way data flow, keys, exhaustive effect deps, React 19 APIs, Suspense, composition.
 
-What *does* carry over unchanged: hooks and their rules, the one-way data flow, keys, effect-dependency discipline, React 19 APIs, Context vs store, Suspense (`use()` + a Suspense boundary works in RN), and the composition patterns.
+## Native primitives replace the DOM
 
-## Native primitives — the DOM replacements
-
-There are no HTML elements. You compose a fixed set of **native primitives** from `react-native` (and `expo-*`):
-
-| React web | React Native | Notes |
+| React web | React Native | Rule |
 |---|---|---|
-| `<div>` | `<View>` | flex container; **no** `display:block`, flex is the default and only layout |
-| text (bare, in `<p>`/`<span>`) | `<Text>` | **all text must be inside `<Text>`** — a bare string in a `<View>` crashes. → `vendor/react-native-guidelines/rules/rendering-text-in-text-component.md` |
-| `<a href>` | Expo Router `<Link href>` | file-based route; not a URL bar |
-| `<button>` | `<Pressable>` | prefer over `TouchableOpacity`. → `.../rules/ui-pressable.md` |
-| `<img>` | `<Image>` from **`expo-image`** | not RN's core `Image`. → `.../rules/ui-expo-image.md` |
-| `<input>` | `<TextInput>` | controlled the same way |
-| scroll container | `<ScrollView>` (small) / `<FlatList>`/**FlashList** (lists) | never map a large array inside a `ScrollView`. → performance skill |
-| CSS file / `sx` | `StyleSheet.create({...})` objects | no cascade, no inheritance (except some `Text` props), no media queries |
+| `<div>` | `<View>` | Flexbox is the only layout; column is the default direction |
+| bare text | `<Text>` | **All text inside `<Text>`** — `vendor/react-native-guidelines/rules/rendering-text-in-text-component.md` |
+| `<a href>` | Expo Router `<Link href>` | A real link, not a handler on a `View` — [`navigation`](../navigation/SKILL.md) |
+| `<button>` | `<Pressable>` | `vendor/.../rules/ui-pressable.md` |
+| `<img>` | `Image` from `expo-image` | `vendor/.../rules/ui-expo-image.md` |
+| `<input>` | `<TextInput>` | Controlled the same way; see [`forms`](../forms/SKILL.md) |
+| scroll container | `ScrollView` (small) · FlashList / Legend List (lists) | Never `.map` a large array in a `ScrollView` — `vendor/.../rules/list-performance-virtualize.md` |
+| CSS / `sx` | `StyleSheet.create` | No `@media`; responsiveness is `useWindowDimensions` — [`styling`](../styling/SKILL.md) |
+| `data-testid` | `testID` | [`test-ids`](../test-ids/SKILL.md) |
 
-**No CSS cascade.** Styles are plain objects; there is no inheritance down the tree (a `color` on a parent `View` does **not** reach child `Text`), no `@media`, no pseudo-classes. Responsiveness comes from `useWindowDimensions` + `Platform`, not breakpoints. → [`styling`](../styling/SKILL.md), [`responsive-design`](../responsive-design/SKILL.md).
+## Threads
 
-## The New Architecture — what it is, what you must know
+RN runs three contexts:
 
-Since SDK 52 (default) / SDK 55 (mandatory), Expo runs the **New Architecture**. You rarely touch it directly, but it changes the mental model:
+| Thread | Runs | Consequence |
+|---|---|---|
+| **JS** (Hermes) | Your components, effects, state | Heavy work drops frames; a re-render per frame is jank |
+| **UI / main** | Native views, layout, drawing | Never blocked by app code in the managed lane |
+| **Worklet** (UI runtime) | Reanimated worklets, Gesture Handler callbacks | Animates `transform` / `opacity` without the JS thread |
 
-- **JSI (JavaScript Interface)** — a synchronous C++ bridge between JS and native, replacing the old asynchronous JSON "bridge." Native calls can now be synchronous and hold references to native objects.
-- **Fabric** — the new rendering system. The React tree is reconciled into a native view tree with less serialization overhead; layout can be measured synchronously.
-- **TurboModules** — native modules are lazy-loaded and typed via **Codegen** from TS specs, instead of all eagerly loaded at startup.
-- **Bridgeless** — the old bridge is gone entirely; everything goes through JSI.
+Animating through React state re-renders on the JS thread; animate through shared values on the worklet runtime — [`animation`](../animation/SKILL.md), `vendor/.../rules/animation-gpu-properties.md`, `animation-derived-value.md`. A JS-thread frame budget is a correctness rule (CLAUDE.md § Mobile code rules).
 
-**Why you care as an app developer:** the practical payoff is that **Reanimated worklets and Gesture Handler run animations on the UI thread** without round-tripping the (now-absent) bridge — which is why the [`motion`](../motion/SKILL.md) skill insists on GPU-only properties and worklets. Also: `expo-*` packages all support the New Arch; a random old third-party native module may not, and that's the main compatibility risk when adding deps.
+## New Architecture, briefly
 
-## The thread model — why animation rules exist
+- **JSI** — synchronous C++ interface between JS and native; no JSON bridge.
+- **Fabric** — renderer; layout can be measured synchronously.
+- **TurboModules** — lazily loaded native modules typed through Codegen.
+- **Bridgeless** — the old bridge is gone.
 
-RN runs your JS on a dedicated **JS thread**, separate from the **UI (native/main) thread** that draws frames. Consequences that drive other skills:
+An app developer's practical exposure is dependency compatibility: an unmaintained native library may not run. `npx expo-doctor` checks installed packages against React Native Directory.
 
-- **A busy JS thread drops frames.** Heavy work (parsing, big `.map`, non-memoized list items) blocks JS and the UI stutters. → [`performance`](../performance/SKILL.md).
-- **Animating via React state re-renders on the JS thread** → jank. **Reanimated worklets run on the UI thread** and animate `transform`/`opacity` on the GPU without JS involvement. → [`motion`](../motion/SKILL.md), `.../rules/animation-gpu-properties.md`, `.../rules/animation-derived-value.md`.
-- **Lists virtualize** so off-screen items aren't kept in the tree. → `.../rules/list-performance-virtualize.md`.
+## Expo workflows
 
-## Hermes
-
-**Hermes** is the default JS engine (v1 as of SDK 56) — an engine built for RN: fast startup (bytecode precompiled at build time), lower memory. Practical notes: `console.log` is slower than you'd expect (strip in release), and some very new JS syntax may need the Babel/Metro transform rather than running natively. You don't configure it; just know release builds run bytecode, not your source.
-
-## Expo-managed vs bare — which workflow am I on?
-
-| | Expo Go | Dev client (managed + custom native) | Bare RN |
+| | Expo Go | Development build | Bare |
 |---|---|---|---|
-| Custom native modules | No (only Expo SDK) | **Yes** (via config plugins / prebuild) | Yes |
-| `ios/` `android/` folders in repo | No | Usually no (generated by `prebuild`) | Yes (checked in) |
-| Build | Expo Go app | EAS Build → dev client | EAS Build / Xcode / Gradle |
-| This stack's default | quick prototypes | **primary for real apps** | fallback lane |
+| Custom native code | No — SDK modules only | **Yes** — config plugins, Expo Modules | Yes |
+| `ios/` `android/` in repo | No | No — generated by `prebuild` | Yes |
+| This stack | prototypes only | **default for a real app** | brownfield / fallback lane `[bare]` |
 
-**Config plugins** (`app.json` `plugins`) are how the managed workflow configures native code without ejecting — the managed replacement for editing `Info.plist`/`AndroidManifest.xml` by hand. → [`project-setup`](../project-setup/SKILL.md), `.../rules/fonts-config-plugin.md`.
+Native configuration goes in **config plugins**, never hand edits to generated `ios/` / `android/` — [`project-setup`](../project-setup/SKILL.md).
 
-## React 19 in React Native
+## React 19 in RN
 
-React 19 ships from SDK 53. The additions behave the same as on web, minus anything server-only:
+- `use()` + Suspense, `useActionState`, `useOptimistic` work on device; there are no Server Actions, so an action is a plain async function. Forms use React Hook Form + Zod — [`forms`](../forms/SKILL.md).
+- `ref` is a plain prop; no `forwardRef` on React 19. On a React 18 project `forwardRef` is correct — do not flag it.
+- The React Compiler has Reanimated gotchas: `vendor/.../rules/react-compiler-reanimated-shared-values.md`, `react-compiler-destructure-functions.md`.
 
-- `use()` + Suspense for reading promises/context in render — works on device.
-- Actions / `useActionState` / `useOptimistic` — the hooks work; there are **no Server Actions**, so `action` is a plain async function, not a server reference. Forms use React Hook Form + Zod. → [`forms`](../forms/SKILL.md).
-- **`ref` is a plain prop** — no `forwardRef` on React 19. On an SDK ≤52 (React 18) project, `forwardRef` is still correct — do not flag it.
-- **React Compiler** auto-memoizes; enable via `babel-plugin-react-compiler`. It has RN-specific gotchas with Reanimated shared values and destructuring. → `.../rules/react-compiler-reanimated-shared-values.md`, `.../rules/react-compiler-destructure-functions.md`.
+## State discipline
 
-## State: ground truth and derived values
+One source of truth; derive everything else in render; subscribe to the minimum. `vendor/.../rules/state-ground-truth.md`, `react-state-minimize.md`, `react-state-fallback.md`, `react-state-dispatcher.md`; library choice in [`architecture`](../architecture/SKILL.md).
 
-Same discipline as web: keep **one source of truth**, compute derived values in render (don't mirror them into state), minimize what a component subscribes to. → `.../rules/state-ground-truth.md`, `.../rules/react-state-minimize.md`, `.../rules/react-state-fallback.md`, and [`architecture`](../architecture/SKILL.md) for the library choice.
+## Layering
 
-## Atomic-design taxonomy (shared with `fe-react`)
+Atom (one primitive, no domain) → molecule (a few atoms, one job) → organism (a section with its own data) → screen (a route file; owns navigation and the fetch). Prop-drilling past 2–3 levels moves to Context or a store; server state belongs to TanStack Query, never a store.
 
-Same naming and ownership rules as the web stack — components are organized atom → molecule → organism → template → screen:
-
-- **Atom** — one primitive with styling/props, no domain knowledge (`AppText`, `PrimaryButton`, `Avatar`). Owns no server state.
-- **Molecule** — a few atoms bound to one small job (`SearchField`, `ListRow`, `FormField`).
-- **Organism** — a self-contained section with its own data/state (`ProductList`, `CheckoutForm`, `CommentThread`).
-- **Template / Screen** — a route target under `app/` (Expo Router). Screens compose organisms; screens own navigation and the data fetch.
-- **Prop-drilling limit:** 2–3 levels. Past that, lift to Context (client state) or a store — not deeper drilling. Server state belongs to TanStack Query, never a store. → [`architecture`](../architecture/SKILL.md).
-
-## The React-web ↔ React-Native cheat sheet
+## Web ↔ RN cheat sheet
 
 | Web idiom | React Native | Skill |
 |---|---|---|
-| `'use client'` boundary | none — all on device | this file |
-| `<div>` / `<span>` / `<p>` | `<View>` / `<Text>` | this file |
-| `<a href>` / router | Expo Router `<Link href>` / typed params | [`navigation`](../navigation/SKILL.md) |
-| CSS / MUI `sx` | `StyleSheet.create` / Nativewind | [`styling`](../styling/SKILL.md) |
-| `useMediaQuery` / breakpoints | `useWindowDimensions` / `Platform` / `SafeAreaView` | [`responsive-design`](../responsive-design/SKILL.md) |
-| `data-testid` | **`testID`** | [`testability`](../testability/SKILL.md) |
-| SEO / metadata | dropped (native app) | — |
-| PWA / service worker | offline-first (MMKV + sync) | [`offline-first`](../offline-first/SKILL.md) |
-| axe / Lighthouse | `accessibilityRole/Label`, VoiceOver/TalkBack | [`accessibility`](../accessibility/SKILL.md) |
-| Vitest + RTL | Jest + React Native Testing Library | [`component-testing`](../component-testing/SKILL.md) |
+| `'use client'` | none | this file |
+| Next.js routing | Expo Router file routes | [`navigation`](../navigation/SKILL.md) |
+| CSS / MUI | `StyleSheet` / Expo UI / kit | [`styling`](../styling/SKILL.md) · [`component-library`](../component-library/SKILL.md) |
+| `useMediaQuery` | `useWindowDimensions` + safe-area insets | [`styling`](../styling/SKILL.md) |
+| service worker / PWA | MMKV + sync queue | [`offline-and-storage`](../offline-and-storage/SKILL.md) |
+| axe / Lighthouse | `accessibilityRole` / `accessibilityLabel`, VoiceOver, TalkBack | [`accessibility`](../accessibility/SKILL.md) |
+| Vitest + RTL | Jest + RNTL 14 (async APIs) | [`component-testing`](../component-testing/SKILL.md) |
 
 ## The vendored rules pack
 
-Deep, rule-by-rule guidance (impact-ranked, incorrect-vs-correct examples) lives in the vendored Vercel seed at `mobile/react-native/vendor/react-native-guidelines/` — 35+ rules across list-performance, animation, navigation, UI, state, rendering, monorepo, config. Load it **through** the house skill that routes into it ([`performance`](../performance/SKILL.md), [`motion`](../motion/SKILL.md), [`ui-conventions`](../ui-conventions/SKILL.md), [`navigation`](../navigation/SKILL.md), this `reference`), never as a standalone skill.
+`mobile/react-native/vendor/react-native-guidelines/rules/` holds impact-ranked rules with incorrect-vs-correct examples. Reach it through the skill that routes into it ([`performance`](../performance/SKILL.md), [`animation`](../animation/SKILL.md), [`ui-components`](../ui-components/SKILL.md), [`navigation`](../navigation/SKILL.md), this skill), never as a standalone skill. The vendored tree is read-only.
+
+## Rules
+
+- Detect the lane first; never author below the SDK 54 floor and never up-level.
+- Never a Paper-architecture recipe as the primary path.
+- All text inside `<Text>`; no URL-as-state; no DOM assumptions.
+- Native changes go in config plugins; Expo Go is a prototype tool.
+- Public config only in `EXPO_PUBLIC_*`.
+
+## Handoffs
+
+- Project scaffold, EAS → [`project-setup`](../project-setup/SKILL.md)
+- Routing → [`navigation`](../navigation/SKILL.md)
+- State → [`architecture`](../architecture/SKILL.md)
+- Styling and adaptive layout → [`styling`](../styling/SKILL.md)
+- SDK upgrades → [`migration`](../migration/SKILL.md)
+- Review → [`code-review`](../code-review/SKILL.md)

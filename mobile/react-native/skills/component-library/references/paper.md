@@ -2,7 +2,7 @@
 
 React Native Paper is a batteries-included **Material Design 3** component set (Button, Card, Dialog, Snackbar, TextInput, DataTable, FAB, Appbar) with MD3 theming and solid accessibility. Pick it when you want a Material look out of the box and don't want to build the atom layer yourself. Styling stays **`StyleSheet` + the Paper theme** ([`styling`](../../styling/SKILL.md)); Paper owns component look, you own layout.
 
-**Version:** **Paper v5** (MD3), New-Architecture ready. Install via `npx expo install`; needs `react-native-safe-area-context` and the `PaperProvider` at the root. Verify with `expo-doctor`.
+**Version:** **Paper 5.x** (MD3), New-Architecture ready. `[SDK58]` re-run `expo-doctor` after the upgrade. Install via `npx expo install`; needs `react-native-safe-area-context` and the `PaperProvider` at the root. Verify with `expo-doctor`.
 
 ## Setup
 
@@ -13,7 +13,6 @@ npx expo install react-native-paper react-native-safe-area-context
 ## Provider — once at the root
 
 ```tsx
-// app/_layout.tsx
 import { useColorScheme } from 'react-native';
 import { PaperProvider, MD3LightTheme, MD3DarkTheme } from 'react-native-paper';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -33,7 +32,7 @@ export default function RootLayout() {
 }
 ```
 
-Feed the two theme palettes from the [`design/frontend-design`](../../../../../design/frontend-design/SKILL.md) token system ([`styling`](../../styling/SKILL.md) owns the mapping) — dark is a **deliberately-authored second palette** (desaturated primary, not an inversion), swapped by `useColorScheme()`.
+Feed the two theme palettes from the [`design/visual-identity`](../../../../../design/visual-identity/SKILL.md) token system ([`styling`](../../styling/SKILL.md) owns the mapping) — dark is a **deliberately-authored second palette** (desaturated primary, not an inversion), swapped by `useColorScheme()`.
 
 ## Usage
 
@@ -48,7 +47,7 @@ function DeleteFlow({ onConfirm }: { onConfirm: () => Promise<void> }) {
       <Button mode="contained" onPress={() => setOpen(true)} testID="Orders.Delete">Delete</Button>
       <Portal>
         <Dialog visible={open} onDismiss={() => setOpen(false)} testID="Orders.DeleteDialog">
-          <Dialog.Title>Delete this order?</Dialog.Title>            {/* name the object — ui-conventions */}
+          <Dialog.Title>Delete this order?</Dialog.Title>
           <Dialog.Content><Text>This cannot be undone.</Text></Dialog.Content>
           <Dialog.Actions>
             <Button onPress={() => setOpen(false)}>Cancel</Button>
@@ -63,11 +62,11 @@ function DeleteFlow({ onConfirm }: { onConfirm: () => Promise<void> }) {
 }
 ```
 
-Wrap dialogs/menus in `<Portal>` (Paper mounts them above the tree). `DataTable` is client-side only — for large data, page against a [`data-access`](../../data-access/SKILL.md) call and feed one page at a time; a huge list still belongs in FlashList ([`performance`](../../performance/SKILL.md)), not `DataTable`.
+Wrap dialogs/menus in `<Portal>` (Paper mounts them above the tree). `DataTable` is client-side only — for large data, page against a [`networking`](../../networking/SKILL.md) call and feed one page at a time; a huge list still belongs in FlashList ([`performance`](../../performance/SKILL.md)), not `DataTable`.
 
 ## testID
 
-Paper components forward `testID` to the underlying view — pass it inline. → [`testability`](../../testability/SKILL.md).
+Paper components forward `testID` to the underlying view — pass it inline. → [`test-ids`](../../test-ids/SKILL.md).
 
 ## Gotchas
 

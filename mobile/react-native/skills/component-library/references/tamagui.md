@@ -2,7 +2,7 @@
 
 Tamagui is a themeable component set + token system with a **compile-time optimizing compiler** that flattens styles and hoists them out of render — the best *runtime* style performance of the RN kits, which matters on lower-end devices and long lists. It's universal (the same components render on RN and web), so it's the strongest pick when you share a design system across a mobile app and a web app. The **styling authority is Tamagui's `styled`/tokens API**, not `StyleSheet`.
 
-**Version:** current Tamagui is New-Architecture ready. Install via `npx expo install`; it requires the **Tamagui Babel plugin** and a `tamagui.config.ts`. Verify with `expo-doctor`. Some setups want a dev client rather than Expo Go — confirm in [`project-scaffold`](../../project-scaffold/SKILL.md).
+**Version:** **Tamagui 3.0**, New-Architecture ready. Install via `npx expo install`; it requires the **Tamagui Babel plugin** and a `tamagui.config.ts`. Verify with `expo-doctor`. Some setups want a dev client rather than Expo Go — confirm in [`project-setup`](../../project-setup/SKILL.md).
 
 ## Setup
 
@@ -12,16 +12,14 @@ npm i -D @tamagui/babel-plugin
 ```
 
 ```ts
-// tamagui.config.ts
 import { defaultConfig } from '@tamagui/config/v4';
 import { createTamagui } from 'tamagui';
-export const config = createTamagui(defaultConfig);   // swap tokens/themes from design/frontend-design
+export const config = createTamagui(defaultConfig);   // swap tokens/themes from design/visual-identity
 export type Conf = typeof config;
 declare module 'tamagui' { interface TamaguiCustomConfig extends Conf {} }
 ```
 
 ```js
-// babel.config.js
 module.exports = (api) => {
   api.cache(true);
   return {
@@ -37,7 +35,6 @@ module.exports = (api) => {
 ## Provider — once at the root
 
 ```tsx
-// app/_layout.tsx
 import { useColorScheme } from 'react-native';
 import { TamaguiProvider, Theme } from 'tamagui';
 import { config } from '../tamagui.config';
@@ -67,11 +64,11 @@ export function SavePanel({ onSave, testID }: { onSave: () => void; testID?: str
 }
 ```
 
-Tokens (`$3`, `$6`, `$color`) come from `tamagui.config.ts` — map the [`design/frontend-design`](../../../../../design/frontend-design/SKILL.md) palette/spacing there once ([`styling`](../../styling/SKILL.md) owns the mapping). Dark mode is a **theme swap** driven by `useColorScheme()` + the `<Theme name>` — never per-component color props.
+Tokens (`$3`, `$6`, `$color`) come from `tamagui.config.ts` — map the [`design/visual-identity`](../../../../../design/visual-identity/SKILL.md) palette/spacing there once ([`styling`](../../styling/SKILL.md) owns the mapping). Dark mode is a **theme swap** driven by `useColorScheme()` + the `<Theme name>` — never per-component color props.
 
 ## testID
 
-Tamagui components forward `testID` to the underlying native view — pass it inline. → [`testability`](../../testability/SKILL.md).
+Tamagui components forward `testID` to the underlying native view — pass it inline. → [`test-ids`](../../test-ids/SKILL.md).
 
 ## Gotchas
 

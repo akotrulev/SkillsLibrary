@@ -26,6 +26,13 @@ If the repo gitignores a generated native folder (`ios/`, `android/` under CNG) 
 
 | # | Check | Violation looks like | Find it with | Sev |
 |---|---|---|---|---|
+| A1 | Expo SDK is at or above the floor | `expo` below 54 (a finding plus a `migration` run), or a lane the project never recorded | `rg -n '"expo":' package.json` | major |
+| A2 | New Architecture is on | `newArchEnabled: false`, or `RCT_NEW_ARCH_ENABLED=0` in a build config, on SDK 55+ | `rg -n 'newArchEnabled\|RCT_NEW_ARCH_ENABLED' app.json app.config.* eas.json` | blocker |
+| A3 | Hermes is the engine | `jsEngine: "jsc"` or a JSC override in config | `rg -n 'jsEngine' app.json app.config.* ios android` | major |
+| A4 | Expo, React Native and React match the SDK | A package pinned to a version the SDK does not ship (added with `pnpm add`, not `expo install`); `expo-doctor` reports a mismatch | Compare `package.json` against the SDK's bundled versions; run `npx expo-doctor` (not a static read) | major |
+| A5 | No API the lane removed | Deep `react-native/Libraries/*` imports or `InteractionManager` on RN 0.87+ | `rg -n "react-native/Libraries\|InteractionManager" $SRC -g '*.ts' -g '*.tsx'` | major |
+| A6 | SDK 56 with Hermes V1 and Reanimated is on the fixed `expo` | `expo` 56.x with `react-native-reanimated` — memory regression fixed in `expo@57.0.9` | `rg -n '"expo":\|react-native-reanimated' package.json` | major |
+| A7 | `[SDK58]` Lane-specific APIs match the SDK | An SDK 58 API (`expo-router/native-tabs`, Gesture Handler 3) imported on SDK 57, or an SDK 57 workaround left after the upgrade | `rg -n "expo-router/(unstable-)?native-tabs\|react-native-gesture-handler" $SRC package.json` | major |
 
 ---
 
@@ -34,6 +41,18 @@ If the repo gitignores a generated native folder (`ios/`, `android/` under CNG) 
 
 | # | Check | Violation looks like | Find it with | Sev |
 |---|---|---|---|---|
+| B1 | TypeScript is strict | `strict` absent or `false` in `tsconfig.json` | `rg -n '"strict"' tsconfig.json` | major |
+| B2 | No `any` in app code | `: any`, `as any`, `<any>` outside a typed-boundary shim | `rg -n ": any\b\|as any\b\|<any>" $SRC -g '*.ts' -g '*.tsx'` | major |
+| B3 | ESLint uses the flat Expo config | `.eslintrc*` present, or no `eslint-config-expo/flat` in `eslint.config.*` | `rg -n 'eslint-config-expo' eslint.config.* package.json` | minor |
+| B4 | `expo-doctor` is clean | Version, config or React Native Directory findings left open | Run `npx expo-doctor` — requires a run, report as unverified from a static read | major |
+| B5 | No secret in an `EXPO_PUBLIC_*` variable | `EXPO_PUBLIC_*KEY`, `*SECRET`, `*TOKEN`, `*PASSWORD` holding a real secret (it is inlined in the bundle in plain text) | `rg -n 'EXPO_PUBLIC_\w*(SECRET\|KEY\|TOKEN\|PASSWORD\|PRIVATE)' . -g '!node_modules'` | blocker |
+| B6 | Generated native folders are not hand-edited | `ios/` or `android/` tracked in a CNG project, or a native edit with no config plugin behind it | `git ls-files ios android \| head`; read `plugins` in `app.json` | major |
+| B7 | Route files are thin | Fetching, mutation or business rules inside `src/app/**` | `rg -n 'fetch(\|useQuery(\|useMutation(' src/app` | minor |
+| B8 | A development build backs native dependencies | Native libraries beyond the Expo SDK with no `expo-dev-client` and the team on Expo Go | `rg -n 'expo-dev-client' package.json` | minor |
+| B9 | Typed routes are on | `experiments.typedRoutes` absent or `false` | `rg -n 'typedRoutes' app.json app.config.*` | minor |
+| B10 | Fonts load through the `expo-font` plugin | `Font.loadAsync` / `useFonts` in a render path with no plugin entry | `rg -n 'loadAsync\|useFonts' $SRC -g '*.tsx'`; `rg -n 'expo-font' app.json app.config.*` | minor |
+| B11 | One lockfile, one package manager | Two lockfiles, or a missing `packageManager` field | `ls *lock* pnpm-lock.yaml; rg -n 'packageManager' package.json` | minor |
+| B12 | `[monorepo]` Native dependencies live in the app package; one version per dependency | A native library hoisted to a shared package, or two versions of one dependency across workspaces | `rg -n 'react-native' packages/*/package.json` | minor |
 
 ---
 
@@ -42,6 +61,16 @@ If the repo gitignores a generated native folder (`ios/`, `android/` under CNG) 
 
 | # | Check | Violation looks like | Find it with | Sev |
 |---|---|---|---|---|
+| C1 | Server data lives in TanStack Query, not a store | A Zustand store or Context that holds fetched rows and re-implements refetch or invalidation | `rg -ln "from 'zustand'" $SRC -g '*.ts' -g '*.tsx'`; then `rg -n 'fetch(\|api\.(get\|post)' <hit>` | major |
+| C2 | No effect-synced mirror state | `useEffect(() => setX(...derived from y...), [y])` | `rg -n -A1 'useEffect\(\(\) => set[A-Z]' $SRC -g '*.tsx'` | major |
+| C3 | Updater form when next state depends on current | `setCount(count + 1)` read from a gesture or `onLayout` callback | `rg -n 'set[A-Z]\w*\(\w+ [-+] ' $SRC -g '*.tsx'` | minor |
+| C4 | Nothing sensitive in a plain persisted store | A token, password or PII written to AsyncStorage, MMKV or a Zustand `persist` store | `rg -n "(AsyncStorage\|mmkv\|storage)\.(setItem\|set)\(['\"]\w*(token\|secret\|password\|jwt)" $SRC -i` | blocker |
+| C5 | Stores are subscribed through selectors | `const { items } = useCart()` — the whole store, re-rendering on every change | `rg -n 'const \{[^}]*\} = use\w+(Store\|Cart)?\(\)' $SRC -g '*.tsx'` | minor |
+| C6 | A Context consumer throws outside its provider | `createContext` with a default `{}` / `null!` and no guard in the consumer hook | `rg -n 'createContext\(' $SRC -g '*.tsx'` | minor |
+| C7 | No static mutable state, no service locator | `export let` module state, a mutable singleton a test cannot replace, a global container lookup | `rg -n '^export let \|^let \w+ *= *(null\|\{\|\[)' $SRC -g '*.ts' -g '*.tsx'` | major |
+| C8 | A `queryFn` forwards `signal` | `queryFn: () => fetch(...)` — leaving the screen cannot cancel it | `rg -n 'queryFn: *\(\) *=>' $SRC` | minor |
+| C9 | A feature does not import another feature's internals | `@/features/x/components` or `/hooks` imported from `features/y` | `rg -n "from '@/features/\w+/(components\|hooks\|api)" src/features` | minor |
+| C10 | Screen-scoped state is a route param, not global | A selected id or filter held in an app-wide store | Read each store's fields against its readers | minor |
 
 ---
 
@@ -50,6 +79,15 @@ If the repo gitignores a generated native folder (`ios/`, `android/` under CNG) 
 
 | # | Check | Violation looks like | Find it with | Sev |
 |---|---|---|---|---|
+| D1 | One component-library option per app | Two of NativeWind, Unistyles, Tamagui, Paper, gluestack in one `package.json` | `rg -n '"(nativewind\|react-native-unistyles\|tamagui\|react-native-paper\|@gluestack-ui[^"]*)"' package.json` | major |
+| D2 | NativeBase is absent | `native-base` in dependencies | `rg -n 'native-base' package.json` | major |
+| D3 | The kit provider mounts once, at the root | `PaperProvider`, `TamaguiProvider` or `GluestackUIProvider` outside a root `_layout.tsx` | `rg -n '<(PaperProvider\|TamaguiProvider\|GluestackUIProvider)' src -g '!**/_layout.tsx'` | major |
+| D4 | One styling authority per element | `className` and a `StyleSheet` colour on one element; Unistyles and React Native `StyleSheet` in one file | `rg -n 'className=.*style=\{' $SRC -g '*.tsx'`; `rg -ln 'react-native-unistyles' $SRC \| xargs rg -n "StyleSheet.*from 'react-native'"` | major |
+| D5 | A release candidate is a recorded decision | NativeWind v5 RC (`"nativewind": "5.x"`, `rc`, `next`) with no decision recorded | `rg -n '"nativewind"' package.json` | minor |
+| D6 | `[Expo UI]` Native Expo UI imports sit in platform files | `@expo/ui/swift-ui` or `@expo/ui/jetpack-compose` imported from a shared file, or behind a `Platform.OS` ternary in render | `rg -n '@expo/ui/(swift-ui\|jetpack-compose)' $SRC -g '!*.ios.tsx' -g '!*.android.tsx'` | major |
+| D7 | `[Expo UI]` Every Expo UI tree sits inside a `Host` | A file importing `@expo/ui` with no `<Host`; flex props relied on inside the native tree | `rg -l '@expo/ui' $SRC \| xargs rg -L '<Host'` | major |
+| D8 | A wrapper exists for a reason beyond forwarding a prop | `AppButton` that only sets a default or carries a `testID` around a kit control | `rg -n 'export function App\w+\(' $SRC -g '*.tsx'`; read each hit | minor |
+| D9 | The kit is New Architecture compatible and installed with `expo install` | A kit or a transitive native dependency that `expo-doctor` flags | Run `npx expo-doctor` — requires a run, report as unverified from a static read | major |
 
 ---
 
@@ -58,6 +96,18 @@ If the repo gitignores a generated native folder (`ios/`, `android/` under CNG) 
 
 | # | Check | Violation looks like | Find it with | Sev |
 |---|---|---|---|---|
+| E1 | Styles read tokens, not literals | Hex or `rgba(` colours in a component style, scattered spacing numbers | `rg -n "#[0-9a-fA-F]{3,8}['\"]\|rgba?\(" $SRC -g '*.tsx' -g '!**/theme/**' -g '!**/tokens*'` | minor |
+| E2 | No inline style literal in a reused or list-item component | `style={{ ... }}` inside `renderItem` or a reused atom | `rg -n 'style=\{\{' $SRC -g '*.tsx'` | minor |
+| E3 | Dark mode follows the OS through tokens | Appearance locked with `userInterfaceStyle: "light"` and no recorded reason; per-component dark conditionals | `rg -n 'userInterfaceStyle\|useColorScheme' app.json app.config.* $SRC` | minor |
+| E4 | No `Dimensions.get` for layout | `Dimensions.get('window')` at module scope or in render — stale after rotation, split view or fold | `rg -n 'Dimensions\.get\(' $SRC -g '*.ts' -g '*.tsx'` | major |
+| E5 | No hardcoded inset | `paddingTop: 44`, `StatusBar.currentHeight`, a fixed home-indicator offset | `rg -n 'paddingTop: *[2-5][0-9]\b\|StatusBar\.currentHeight\|statusBarHeight' $SRC -g '*.tsx'` | major |
+| E6 | Insets come from `react-native-safe-area-context` or `contentInsetAdjustmentBehavior` | RN core `SafeAreaView` (deprecated) wrapped around a scroller | `rg -n "SafeAreaView" $SRC -g '*.tsx'`; read the import source | major |
+| E7 | Font scaling is never locked | `allowFontScaling={false}` or `maxFontSizeMultiplier={1}` | `rg -n 'allowFontScaling=\{false\}\|maxFontSizeMultiplier=\{1\}' $SRC -g '*.tsx'` | major |
+| E8 | Large screens are not orientation-locked | `"orientation": "portrait"` in config for an app that ships to tablets or foldables (Android 16 ignores the lock at ≥ 600 dp) | `rg -n '"orientation"\|supportsTablet' app.json app.config.*` | minor |
+| E9 | Layout branches on width class, not device model | `Platform.isPad`, a model lookup or `width === 390` deciding layout | `rg -n 'Platform\.isPad\|getModel\|isTablet\|width *[=<>]=* *(375\|390\|414\|768)' $SRC -g '*.tsx'` | minor |
+| E10 | Shadows and gradients use the current API | `shadowColor` / `shadowOffset` / `elevation` or a gradient library on RN 0.76+ | `rg -n 'shadowColor\|shadowOffset\|elevation:\|expo-linear-gradient' $SRC -g '*.tsx'` | minor |
+| E11 | Functional tokens are named by purpose | `color.red`, `colors.blue` instead of `danger` / `actionPrimary` | `rg -n 'colors?\.(red\|blue\|green\|orange)\b' $SRC` | minor |
+| E12 | `borderCurve: 'continuous'` accompanies `borderRadius` | Rounded corners with no `borderCurve` | `rg -n 'borderRadius' $SRC -g '*.tsx'`; compare against `borderCurve` hits | nit |
 
 ---
 
@@ -66,6 +116,20 @@ If the repo gitignores a generated native folder (`ios/`, `android/` under CNG) 
 
 | # | Check | Violation looks like | Find it with | Sev |
 |---|---|---|---|---|
+| F1 | No `@react-navigation/*` import in an Expo Router app | Any `@react-navigation/*` import or dependency beside `expo-router` (SDK 56 forked the core) | `rg -n '@react-navigation/' $SRC package.json` — fix: `npx expo-codemod sdk-56-expo-router-react-navigation-replace` | major |
+| F2 | The native-tabs import path matches the SDK | `expo-router/native-tabs` on SDK ≤ 57, or `expo-router/unstable-native-tabs` on SDK 58 | `rg -n 'expo-router/(unstable-)?native-tabs' $SRC`; compare with `expo` | major |
+| F3 | Navigators are native | `createStackNavigator`, `createBottomTabNavigator` or JS `Tabs` where native stack or native tabs fit | `rg -n 'createStackNavigator\|createBottomTabNavigator\|Tabs.*from .expo-router.' $SRC` | major |
+| F4 | In-app navigation is a real `<Link href>` | A `Pressable`/`View` whose `onPress` only calls `router.push` to a fixed route | `rg -n 'onPress=\{\(\) => router\.(push\|navigate)' $SRC -g '*.tsx'` | minor |
+| F5 | `href` is typed, not an interpolated string | `router.push(`/orders/${id}`)` with `typedRoutes` available | `rg -n 'router\.(push\|replace\|navigate)\(`\|href=\{`' $SRC -g '*.tsx'` | minor |
+| F6 | Route params are validated at the screen boundary | A `useLocalSearchParams` value used as a number, enum or id with no parse | `rg -n 'useLocalSearchParams' $SRC -g '*.tsx'`; read each hit | major |
+| F7 | Params carry small ids, never objects, tokens or PII | `params: { user: JSON.stringify(...) }`, a token in a URL | `rg -n 'params: *\{[^}]*(token\|JSON\.stringify\|password)' $SRC -g '*.tsx'` | major |
+| F8 | Auth gating uses `Stack.Protected` or a layout `Redirect`, not an effect | `useEffect(() => router.replace('/sign-in'))` in a screen; `loading` treated as signed out | `rg -n 'useEffect' -A3 $SRC -g '*.tsx' \| rg 'router\.(replace\|push)'`; `rg -n 'Stack\.Protected' $SRC` | major |
+| F9 | The client guard is not the only authorisation | A route guard with no server-side check behind the data it shows | requires dynamic test → `qa-security` | major |
+| F10 | Native tabs stay within the platform limits | More than 5 `NativeTabs.Trigger` (Android), nested native tabs, heavy work in an eagerly rendered tab | `rg -c 'NativeTabs\.Trigger ' $SRC` | major |
+| F11 | A modal or sheet that must survive a link is a route | A JS modal or bottom-sheet library for a flow that needs a link target or back-gesture dismissal | `rg -n 'presentation' $SRC -g '*.tsx'`; read modals against `Modal` / sheet libraries | minor |
+| F12 | `scheme` and link association are configured | No `scheme`, or universal links with no `associatedDomains` / `autoVerify` intent filter | `rg -n '"scheme"\|associatedDomains\|autoVerify' app.json app.config.*` | minor |
+| F13 | `useGlobalSearchParams` is not read in a list item | Re-rendering every row on each route change | `rg -n 'useGlobalSearchParams' $SRC -g '*.tsx'` | minor |
+| F14 | `[bare]` React Navigation uses native stack and a `linking` config | `@react-navigation/stack`, or no `linking.prefixes` on a bare app | `rg -n '@react-navigation/stack\|linking' $SRC package.json` | minor |
 
 ---
 
