@@ -1,6 +1,6 @@
 ---
-name: fe-react-native-state-management
-description: Use when picking or setting up state management in a React Native + Expo app (React 19 + TypeScript strict) — local state, lifted state, Context + reducer, Zustand, TanStack Query, and the server-vs-client-state split. Covers the RN deltas: no RSC/Server Actions, no URL-as-state (navigation params + a store take its place), AsyncStorage/MMKV persistence instead of web storage, and the derived-state / dispatch-updater / fallback-state discipline. Triggers "what state library here", "Zustand vs Context", "server state vs client state", "I'm prop-drilling everywhere", "persist this across app restarts", "share state across screens". Do NOT use for component scaffolding (use `frontend/react-native/skills/generator`), forms (use `frontend/react-native/skills/forms`), data-fetching mechanics (use `frontend/react-native/skills/data-access`), offline sync/queues (use `frontend/react-native/skills/offline-first`), navigation params as routing (use `frontend/react-native/skills/navigation`), or React web (use `frontend/react/skills/state-management`).
+name: mobile-react-native-architecture
+description: Use when picking or setting up state management in a React Native + Expo app (React 19 + TypeScript strict) — local state, lifted state, Context + reducer, Zustand, TanStack Query, and the server-vs-client-state split. Covers the RN deltas: no RSC/Server Actions, no URL-as-state (navigation params + a store take its place), AsyncStorage/MMKV persistence instead of web storage, and the derived-state / dispatch-updater / fallback-state discipline. Triggers "what state library here", "Zustand vs Context", "server state vs client state", "I'm prop-drilling everywhere", "persist this across app restarts", "share state across screens". Do NOT use for component scaffolding (use `mobile/react-native/skills/generator`), forms (use `mobile/react-native/skills/forms`), data-fetching mechanics (use `mobile/react-native/skills/data-access`), offline sync/queues (use `mobile/react-native/skills/offline-first`), navigation params as routing (use `mobile/react-native/skills/navigation`), or React web (use `frontend/react/skills/state-management`).
 ---
 
 # React Native — State Management
@@ -26,7 +26,7 @@ Detect the Expo SDK / RN / React majors first (`package.json`, `app.json`). Reac
 - Data-fetching mechanics (fetch, cancellation, `AppState` refetch) → [`data-access`](../data-access/SKILL.md)
 - Offline persistence queue / optimistic mutation sync → [`offline-first`](../offline-first/SKILL.md)
 - Route params as the routing mechanism → [`navigation`](../navigation/SKILL.md)
-- Conceptual lookup (no server render, thread model) → [`reference`](../reference/SKILL.md)
+- Conceptual lookup (no server render, thread model) → [`basics`](../basics/SKILL.md)
 - React web → `frontend/react/skills/state-management`
 
 ## Inputs needed
@@ -269,6 +269,6 @@ function CartBadge() {
 - Data-fetching mechanics (fetch, cancellation, `AppState` refetch) → [`data-access`](../data-access/SKILL.md)
 - Query-cache persistence, optimistic mutation queue → [`offline-first`](../offline-first/SKILL.md)
 - Navigation params as screen-scoped state → [`navigation`](../navigation/SKILL.md)
-- Conceptual lookup (no server render, thread model) → [`reference`](../reference/SKILL.md)
+- Conceptual lookup (no server render, thread model) → [`basics`](../basics/SKILL.md)
 - Auth-driven state (current user) → `auth/auth0-react`
 - React web equivalent → `frontend/react/skills/state-management`

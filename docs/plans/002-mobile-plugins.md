@@ -6,12 +6,14 @@ lane) — each with the library's plugin shape: a coding standard, the common us
 step-by-step agent that works greenfield and brownfield, a conformance audit, and a shared mobile layer
 (store compliance, security, release, observability, in-app purchases) bundled into all three.
 
-**Status:** Not started — C1 is next. Nothing under `mobile/` exists yet. Five July drafts sit under
-`frontend/react-native/skills/` (pre-sweep names, an SDK 56 lane that §4.1 corrects, unwired); C1
-moves them and R1 rewrites them. Flutter becomes a fourth plugin in its own plan, written once this
-one lands (O4); it is **not** in this plan's tasks. Maestro arrives on the QA side through plan 003
-(its X1); this plan feeds it the same test ids and an EAS Workflows job (D7). Every fact in §4 was
-web-verified on 2026-10-10; the items listed under §4.5 were not.
+**Status:** C1 landed (2026-10-11): `mobile/` exists with the five July drafts moved and renamed under
+`mobile/react-native/`, the three conformance-checklist skeletons, and `## Mobile code rules` in `CLAUDE.md`;
+the stale `frontend/react-native` pointers are repointed. Next: S1–S3, N1 and R1 (each depends only on C1).
+Built but unverified: everything — the plan gates once, in G1. The five drafts keep their July bodies (SDK 56
+lane, pre-sweep content) until R1 rewrites them. Flutter becomes a fourth plugin in its own plan, written
+once this one lands (O4); it is **not** in this plan's tasks. Maestro arrives on the QA side through plan 003
+(its X1); this plan feeds it the same test ids and an EAS Workflows job (D7). Every fact in §4 was web-verified
+on 2026-10-10; the items listed under §4.5 were not.
 
 **The cost, accepted and stated once:** the plan gates once, in G1. Intermediate commits are ungated,
 so the tree is not known to pass the library check at every task boundary and the plan cannot be
@@ -824,6 +826,14 @@ library's. Cost: some overlap with Apple's SwiftUI Specialist and modernization 
 **D16 — Every mobile agent fits the 14,000-character agent budget.** fe-react's agent (29,289) is the
 content pattern only. Routing stays in the agent; procedure stays in the skills.
 
+**D17 — C1 repointed more than the plan listed (2026-10-11).** The plan said the vendor `SKILL.md` clause
+names `fe-react-native`; it names the paths `frontend/react-native/skills/{performance,motion,ui-conventions,navigation,reference}`.
+Reading A: change only the prefix. Reading B (taken): also rename the folders to §6.2's names
+(`animation`, `ui-components`, `basics`) so the clause resolves once the skills exist. Also repointed, to
+satisfy the deliverable grep: `docs/plans/003-qa-playwright-appium-upgrade.md` (O2), the F8 row of
+`docs/plans/backend-PLAN.md`, `docs/plans/frontend-PLAN.md` F10 and Phase 5 lines, the `README.md`
+status-table `frontend` row, and `docs/plans/CONFORMANCE-AUDIT-PLAN.md` item 7.
+
 ## Answered questions (2026-10-10)
 
 **O1 — Packaging: one plugin or several?** Three plugins in one `mobile/` domain (the user; D1).
@@ -896,6 +906,8 @@ files ~15k; three skeletons ~12k; greps ~6k.
   and the `docs/plans/CONFORMANCE-AUDIT-PLAN.md` scope line → "superseded by
   `docs/plans/002-mobile-plugins.md`". Never edit `docs/plans/implemented/**` or `docs/audits/**`.
 - **Not in C1:** any skill body (R1), the marketplace (W1), the catalog's mobile section (G1).
+
+- **As built (2026-10-11):** the five drafts moved to `mobile/react-native/skills/{basics,project-setup,architecture,component-library,styling}` with `name: mobile-react-native-<folder>`; their cross-links point at each other's new names and `frontend/react-native/vendor` paths became `mobile/react-native/vendor`. `PLAN.md` and `HANDOFF.md` are removed. The vendor `SKILL.md` "Do NOT use directly" clause named paths, not `fe-react-native`, so its prefix and folder names were repointed to `mobile/react-native/skills/{performance,animation,ui-components,navigation,basics}` (D17). Three checklist skeletons exist at `mobile/{react-native,ios,android}/skills/standards-audit/references/conformance-checklist.md` — 23 / 23 / 24 sections, every owner a relative link, K, L, T, U, X carrying the fragment wording, V holding rows V1–V8 (`grep -n "^| V" <file>`). `CLAUDE.md` gained the Mobile stack line, the test-runner additions, three Version-policy bullets, `## Mobile code rules` (§5 verbatim, before `## Backend code rules`) and `mobile/` on the under-construction line; `CONTRIBUTING.md` lists `mobile` and `mobile-ios-navigation`. `grep -rIn "frontend/react-native"` outside this plan, `docs/plans/implemented/` and `docs/audits/` returns nothing. Not run (Gate: none): `tools/token-audit.py`, §11's script, any lint. Built but unverified: the relative links in the skeletons point at skills that later tasks write; the `rg` recipes in V1–V8 have not been run against a real project.
 
 ### S1 — shared: store compliance and mobile security
 
@@ -1431,61 +1443,9 @@ goes in an untracked `scratch/` folder inside the worktree, deleted before commi
 | W1 | `docs` | `general-purpose` | R5, I5, A6, R3, S1–S3 | ~120k |
 | G1 | `docs` | `general-purpose` | every task above | ~140k |
 
-No task has landed; every block below is live.
+C1 has landed (its block is deleted); every block below is live.
 
 ---
-
-### C1 — the `mobile/` domain, the code rules, and the move (general-purpose, docs)
-
-````
-You are `general-purpose`. Task C1 of docs/plans/002-mobile-plugins.md: create the `mobile/` domain,
-move and rename the July React Native drafts, write the three audit-checklist skeletons, and put the
-mobile code rules into CLAUDE.md.
-
-Read, in this order:
-1. CLAUDE.md.
-2. The plan: the header, §1, §2, the §4.1–§4.3 tables, §5, the first five rows of §6.2, §8.2–§8.3, §10,
-   task C1, and "Close-out — every task".
-3. `frontend/react/skills/standards-audit/references/conformance-checklist.md` — the header and section A
-   only (the skeleton pattern).
-4. The five drafts under `frontend/react-native/skills/` — frontmatter, and every line naming another draft.
-
-Build:
-- `git mv frontend/react-native mobile/react-native`; then in `mobile/react-native/skills/`:
-  `git mv reference basics`, `git mv project-scaffold project-setup`, `git mv state-management architecture`.
-  Set the five `name:` lines to `mobile-react-native-<folder>` and repoint the drafts' references to
-  each other's old names. Leave the bodies otherwise — R1 rewrites them.
-- `git rm mobile/react-native/PLAN.md mobile/react-native/HANDOFF.md`.
-- In `mobile/react-native/vendor/react-native-guidelines/SKILL.md` repoint only the house-written
-  "Do NOT use directly" routing clause from `fe-react-native` to `mobile-react-native`.
-- Write `mobile/{react-native,ios,android}/skills/standards-audit/references/conformance-checklist.md`
-  per §8.3: the fe-react header adapted per stack (permanent ids, how to read a row, the `rg` recipe
-  shape with the stack's globs, the lane tags), then every §8.2 heading with its owners as relative
-  links (A–V and X on all three, W on Android only), the fragment wording for K, L, T, U, X, and V's
-  rows from CLAUDE.md § Comments and § Simplicity — at least six.
-- CLAUDE.md: a Mobile line in § Stack defaults and Swift Testing / JUnit 4 + Robolectric / Jest + RNTL in
-  its test-runner line; one bullet per §4.1–§4.3 table in § Version policy; §5 verbatim as
-  `## Mobile code rules` after § Frontend code rules (React); `mobile/` in place of
-  `frontend/react-native/` in the under-construction line.
-- CONTRIBUTING.md § Naming conventions: `mobile` in the prefix list, `mobile-ios-navigation` as an example.
-- Repoint `backend/node/skills/pattern-guide/SKILL.md:25`, `backend/node/skills/pattern-writer/SKILL.md:28`,
-  `README.md:215`, the `docs/skills-catalog.md` scope paragraph, `docs/plans/frontend-PLAN.md` Phase 5 and
-  its two react-native notes, `docs/plans/backend-PLAN.md:52`, and the `docs/plans/CONFORMANCE-AUDIT-PLAN.md`
-  scope line — the plans to "superseded by docs/plans/002-mobile-plugins.md".
-
-Traps:
-- `docs/plans/implemented/**` and `docs/audits/**` are records — they keep their old paths, and the
-  deliverable's grep excludes them.
-- CLAUDE.md is loaded by every session in this library: `## Mobile code rules` is §5 word for word —
-  nothing added, nothing summarized.
-- The skeletons get rows only in V. Every other section is filled by the task that writes its skill
-  (D13); an empty section now is correct.
-
-Gate: none — this plan gates once, in G1. Do not run tools/token-audit.py, §11's script, or any lint.
-
-Commit: `feat(mobile C1): mobile domain, code rules, RN drafts moved`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
 
 ### S1 — shared: store compliance and mobile security (general-purpose, docs)
 

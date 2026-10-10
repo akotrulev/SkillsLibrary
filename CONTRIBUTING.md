@@ -72,7 +72,7 @@ Bad:
 ## Naming conventions
 
 - Folders: `kebab-case`
-- Skill names in frontmatter: the domain prefix plus the folder name. Prefixes: `ep`, `be`, `fe`, `qa`, `data`, `design`, `observability`, `devops`, `secgov`, `pentest`, `purpleteam`, `ba`, `td`, `tool`, `auth`. A stack-scoped skill adds its stack — after the prefix in backend and frontend (`be-dotnet-pattern-writer`, `be-shared-delivery-plan`, `fe-react-data-grid`), as a suffix in qa (`qa-api-project-setup-dotnet`). A folder that already starts with its prefix is not doubled (`design/design-tokens` → `design-tokens`). Never rename a published skill; installs resolve it by name
+- Skill names in frontmatter: the domain prefix plus the folder name. Prefixes: `ep`, `be`, `fe`, `qa`, `data`, `design`, `observability`, `devops`, `secgov`, `pentest`, `purpleteam`, `ba`, `td`, `tool`, `auth`, `mobile`. A stack-scoped skill adds its stack — after the prefix in backend and frontend (`be-dotnet-pattern-writer`, `be-shared-delivery-plan`, `fe-react-data-grid`, `mobile-ios-navigation`), as a suffix in qa (`qa-api-project-setup-dotnet`). A folder that already starts with its prefix is not doubled (`design/design-tokens` → `design-tokens`). Never rename a published skill; installs resolve it by name
 - Stack-specific skills: include the stack in the path (`auth/auth0-react`, not `auth/react`)
 
 ## Testing a new skill

@@ -22,7 +22,7 @@ Detect the project's Node major from `package.json` `engines` / `.nvmrc` / lockf
 - Scaffolding → `backend/node/skills/pattern-writer`
 - Reviewing code → `backend/node/skills/code-review`
 - React patterns → `frontend/react/skills/basics`
-- React Native → `frontend/react-native`
+- React Native → `mobile/react-native` (the `mobile-react-native` agent)
 
 ---
 

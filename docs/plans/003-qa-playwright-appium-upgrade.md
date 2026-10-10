@@ -565,7 +565,7 @@ research did not cover it, and writes the facts to `docs/research/003-qa-playwri
 publish (the user).**
 
 **O2 — What "mobile plugin" means: the `qa-mobile-*` lane inside the three qa plugins.** No standalone
-mobile plugin exists, and `frontend/react-native/` is out of scope (`aM` §0).
+mobile plugin exists, and the React Native drafts (now `mobile/react-native/`, plan 002) are out of scope (`aM` §0).
 
 **O3 — Mobile scope: a full Appium-lane audit and upgrade (the user).**
 

@@ -1,6 +1,6 @@
 ---
-name: fe-react-native-project-scaffold
-description: Use when the user asks to stand up a React Native + Expo app from zero — `create-expo-app` with Expo Router (file-based routing), the Expo-managed workflow (Expo Go vs dev client) and EAS Build/Submit, `app.json`/config-plugin setup, the feature-folder + `app/` route layout, and the quality gates every project ships with (strict TS, ESLint flat config, Prettier, pnpm, typed env via `expo-constants`). Triggers "create a new React Native / Expo app", "scaffold an Expo Router project", "set up EAS build", "dev client vs Expo Go", "add a config plugin", "set up the folder structure / strict TS / env config for RN". Do NOT use to scaffold a screen/component into an existing app (use `frontend/react-native/skills/generator`), wire navigation routes (use `frontend/react-native/skills/navigation`), pick a component/styling library (use `frontend/react-native/skills/component-library` / `styling`), or wire auth (use `auth/auth0-react`).
+name: mobile-react-native-project-setup
+description: Use when the user asks to stand up a React Native + Expo app from zero — `create-expo-app` with Expo Router (file-based routing), the Expo-managed workflow (Expo Go vs dev client) and EAS Build/Submit, `app.json`/config-plugin setup, the feature-folder + `app/` route layout, and the quality gates every project ships with (strict TS, ESLint flat config, Prettier, pnpm, typed env via `expo-constants`). Triggers "create a new React Native / Expo app", "scaffold an Expo Router project", "set up EAS build", "dev client vs Expo Go", "add a config plugin", "set up the folder structure / strict TS / env config for RN". Do NOT use to scaffold a screen/component into an existing app (use `mobile/react-native/skills/generator`), wire navigation routes (use `mobile/react-native/skills/navigation`), pick a component/styling library (use `mobile/react-native/skills/component-library` / `styling`), or wire auth (use `auth/auth0-react`).
 ---
 
 # React Native / Expo — Project Scaffold
@@ -23,7 +23,7 @@ Stands up a **React Native app on the Expo-managed workflow** from zero: `create
 - Component library + theming → [`component-library`](../component-library/SKILL.md), [`styling`](../styling/SKILL.md)
 - Data fetching / live data → [`data-access`](../data-access/SKILL.md), [`realtime`](../realtime/SKILL.md)
 - Auth0 wiring → `auth/auth0-react`
-- Concepts (New Arch, threads, primitives) → [`reference`](../reference/SKILL.md)
+- Concepts (New Arch, threads, primitives) → [`basics`](../basics/SKILL.md)
 
 ## Inputs needed
 
@@ -79,7 +79,7 @@ Native configuration in the managed workflow happens through `app.json` (or `app
 }
 ```
 
-Custom fonts go through the **`expo-font` config plugin**, not runtime `Font.loadAsync` in the render path — see `frontend/react-native/vendor/react-native-guidelines/rules/fonts-config-plugin.md`.
+Custom fonts go through the **`expo-font` config plugin**, not runtime `Font.loadAsync` in the render path — see `mobile/react-native/vendor/react-native-guidelines/rules/fonts-config-plugin.md`.
 
 ## Folder layout
 

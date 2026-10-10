@@ -1,6 +1,6 @@
 ---
-name: fe-react-native-styling
-description: Use when styling a React Native + Expo app with StyleSheet you write — `StyleSheet.create` as the default authority, design tokens as a typed JS object (from a `design/frontend-design` palette), a type scale + heading hierarchy, dark mode as a token swap driven by `useColorScheme()`, the no-CSS-cascade discipline (styles don't inherit; text lives in `<Text>`), and the follow-the-kit styling-authority decision (StyleSheet vs Nativewind/Tailwind vs Tamagui — never two at once). Triggers "how do I structure styles here", "set up design tokens in RN", "dark mode with useColorScheme", "StyleSheet or Nativewind or Tamagui", "why doesn't my parent color reach the child", "modern RN styling patterns / shadows / gradients". Do NOT use for a UI kit's own theme object (use `frontend/react-native/skills/component-library`), the palette/font design itself (use `design/frontend-design`), breakpoints/orientation/safe-area layout (use `frontend/react-native/skills/responsive-design`), native component patterns (use `frontend/react-native/skills/ui-conventions`), accessibility contrast (use `frontend/react-native/skills/accessibility`), or React web CSS (use `frontend/react/skills/styling`).
+name: mobile-react-native-styling
+description: Use when styling a React Native + Expo app with StyleSheet you write — `StyleSheet.create` as the default authority, design tokens as a typed JS object (from a `design/frontend-design` palette), a type scale + heading hierarchy, dark mode as a token swap driven by `useColorScheme()`, the no-CSS-cascade discipline (styles don't inherit; text lives in `<Text>`), and the follow-the-kit styling-authority decision (StyleSheet vs Nativewind/Tailwind vs Tamagui — never two at once). Triggers "how do I structure styles here", "set up design tokens in RN", "dark mode with useColorScheme", "StyleSheet or Nativewind or Tamagui", "why doesn't my parent color reach the child", "modern RN styling patterns / shadows / gradients". Do NOT use for a UI kit's own theme object (use `mobile/react-native/skills/component-library`), the palette/font design itself (use `design/frontend-design`), breakpoints/orientation/safe-area layout (use `mobile/react-native/skills/responsive-design`), native component patterns (use `mobile/react-native/skills/ui-conventions`), accessibility contrast (use `mobile/react-native/skills/accessibility`), or React web CSS (use `frontend/react/skills/styling`).
 ---
 
 # React Native — Styling (StyleSheet, tokens, dark mode, the styling authority)
@@ -128,7 +128,7 @@ const variantStyle: Record<Variant, TextStyle> = {
 };
 ```
 
-**Custom fonts load via a config plugin / `expo-font`**, not a runtime `<link>` — see `../../vendor/react-native-guidelines/rules/fonts-config-plugin.md` and [`project-scaffold`](../project-scaffold/SKILL.md). Rules: sizes come from scale tokens (never a literal `fontSize: 17`); two–three weights; large display text wants slightly negative tracking; body line-height looser than headings.
+**Custom fonts load via a config plugin / `expo-font`**, not a runtime `<link>` — see `../../vendor/react-native-guidelines/rules/fonts-config-plugin.md` and [`project-setup`](../project-setup/SKILL.md). Rules: sizes come from scale tokens (never a literal `fontSize: 17`); two–three weights; large display text wants slightly negative tracking; body line-height looser than headings.
 
 ## Dark mode
 
@@ -159,7 +159,7 @@ export function useTokens() {
 
 Rules:
 - **Dark mode is a deliberately-authored second palette, not an inversion.** Never negate hex. **Desaturate accents** (saturated brand colors vibrate on dark), **avoid pure `#000`** (a very dark neutral reads better and lets shadows show), and **re-verify every contrast pair** ([`accessibility`](../accessibility/SKILL.md) — a ratio that passes on light routinely fails on dark).
-- **Follow the OS by default (`useColorScheme`), let the user override, persist the override** (via a store — [`state-management`](../state-management/SKILL.md)).
+- **Follow the OS by default (`useColorScheme`), let the user override, persist the override** (via a store — [`architecture`](../architecture/SKILL.md)).
 - **With a kit, drive dark mode from its color-mode API** (Paper theme swap, Tamagui `<Theme>`, Nativewind `useColorScheme`) and keep it in sync with your tokens so both agree.
 - Static images/status bar: pair with `expo-status-bar` `style="auto"` so the status bar text flips too.
 
@@ -200,5 +200,5 @@ Rules:
 - Contrast/WCAG check, dynamic type, touch targets → [`accessibility`](../accessibility/SKILL.md)
 - Breakpoints, orientation, `SafeAreaView`, tablet layout → [`responsive-design`](../responsive-design/SKILL.md)
 - Inline-style / list-perf cost, font loading → [`performance`](../performance/SKILL.md)
-- Custom font config plugin, `expo-font` → [`project-scaffold`](../project-scaffold/SKILL.md)
+- Custom font config plugin, `expo-font` → [`project-setup`](../project-setup/SKILL.md)
 - Native component look (Pressable, expo-image) → [`ui-conventions`](../ui-conventions/SKILL.md)

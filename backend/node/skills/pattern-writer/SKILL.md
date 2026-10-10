@@ -25,7 +25,7 @@ Detect the project's Node major (`package.json` `engines`, `.nvmrc`, or lockfile
 - Explanations → `backend/node/skills/pattern-guide`
 - Reviewing → `backend/node/skills/code-review`
 - React component patterns → `frontend/react/skills/component-writer`
-- React Native → `frontend/react-native`
+- React Native → `mobile/react-native` (the `mobile-react-native` agent)
 - Scaffolding tests → `backend/node/skills/unit-testing` for the class/function-level tests (Vitest, no HTTP); `qa/typescript/skills/api-test-author/writer` (peer) once it's reachable over HTTP
 
 ## Inputs needed

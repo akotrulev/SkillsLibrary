@@ -15,7 +15,8 @@ You are a senior AI engineer and a senior automation QA engineer. You follow bes
 - **JVM backend**: Java 21 + Spring Boot 3.x
 - **Node backend**: Node 24 (active LTS; 22 maintenance — Node 20 is EOL since Apr 2026) + TypeScript + NestJS or Express
 - **Python worker**: Python 3.13 primary / 3.12 and 3.14 supported — only for the one isolated upload-processing worker (Pillow, rembg, VTracer); uv + ruff + mypy `--strict`, pydantic at the boundary
-- **Test runners**: NUnit (.NET), TestNG (Java), Vitest or Jest (TS), pytest (Python), Playwright (UI), Appium (mobile)
+- **Mobile**: React Native + Expo primary (Expo Router, development builds, EAS) · Swift / SwiftUI (iOS) · Kotlin / Jetpack Compose (Android), with a Kotlin Multiplatform lane — each its own `mobile-*` plugin under `mobile/`
+- **Test runners**: NUnit (.NET), TestNG (Java), Vitest or Jest (TS), pytest (Python), Playwright (UI), Appium (mobile); dev-side in mobile apps — Swift Testing (iOS), JUnit 4 + Robolectric (Android), Jest + RNTL (React Native)
 - **JVM build tool**: Gradle (Kotlin DSL) for new projects
 - **Auth**: Auth0 — Authorization Code + PKCE for SPAs, Client Credentials for service-to-service
 - **Cloud**: Azure DevOps for pipelines; AWS or Azure for hosting depending on project
@@ -135,6 +136,9 @@ Core stack versions:
 - **Node 24 active LTS / 22 maintenance** — Node 20 is EOL since Apr 2026: flag it, don't target it.
 - **Python 3.13 primary / 3.12, 3.14 supported** — the ML worker stays on 3.13 until `uv lock` resolves every wheel (onnxruntime, rembg, vtracer) for 3.14; Pillow 12 primary / 11 supported. Never up-level `requires-python`.
 - **React 19 primary / 18 tagged fallback** (an 18 pattern is correct for 18, not obsolete); **Next.js 15 primary / 14 fallback** (App Router primary; Pages Router legacy; Vite SPA + React Router 7 is the non-RSC lane).
+- **React Native / Expo: SDK 57 primary** (RN 0.86, React 19.2, Node ≥ 22.13) **/ SDK 55–56 supported / SDK 54 the floor** (last SDK where the legacy architecture can be on — the migration bridge only; below 54 is a finding plus a migration run, never authored for). SDK 58 (beta) becomes primary the day it ships stable. New-Architecture only since RN 0.82.
+- **iOS / Swift: Xcode 27 + Swift 6.4 + iOS 27 SDK primary / Xcode 26.x + Swift 6.2–6.3 supported; deployment target iOS 17 primary / iOS 16 supported** (below 16 is the UIKit lane only, flagged). Swift 6 language mode for new modules; Swift 5-mode modules migrate one module at a time. Never raise a deployment target as a side effect.
+- **Android / Kotlin: Kotlin 2.4 + AGP 9.4 + Gradle 9.6 primary / Kotlin 2.0–2.3 and AGP 8.x supported in brownfield; compileSdk 37, targetSdk 36, minSdk 24; Compose BOM 2026.09; JDK 21 toolchain (17 minimum).** Play requires new apps and updates to target API 36.
 - **Data engines** (probe the live server, never up-level it): PostgreSQL 18 / 15–17 · SQL Server 2025 / 2022 / 2019 / Azure SQL evergreen · MySQL 8.4 LTS / 9.x / 8.0 · MongoDB 8.0 LTS / 7.0 · Redis 8.x / 7.2–7.4 + Valkey fork · Elasticsearch 9.x / 8.x + OpenSearch 3.x fork; DynamoDB / Cosmos DB track SDK majors + creation-time-immutable constraints.
 
 Domain specifics: **observability** stack-agnostic tooling tracks current releases — Grafana Alloy (not Promtail), Prometheus 3.x (native histograms stable), Mimir for scale. **DevOps** — managed runtimes lag the language, so pin to the newest runtime the platform actually offers for the project's major and never silently up-level the app to reach one; `infrastructure-as-code` and `kubernetes` are tool-/API-version bound, not stack-bound.
@@ -169,6 +173,57 @@ Domain specifics: **observability** stack-agnostic tooling tracks current releas
 - Strict TypeScript (`strict: true`), no `any`; async all the way; structured logging on the server; HTTP through a typed client / server util.
 - **Vitest + RTL for logic-bearing components, plain Vitest for non-rendering logic** (dev-side — RTL if it renders, a `*.test.ts` on the function if it doesn't; query by role/label first; assert schema errors on `issues[].path`/`code`, never the message); E2E / user journeys and async-RSC rendering belong to the `qa-ui-typescript` peer.
 
+## Mobile code rules
+
+All three stacks:
+
+- **Platform conventions first.** Native navigation, native controls, system text styles. An app never
+  imitates the other platform or the web. Design facts come from `design/ui-ux-pro-max`
+  (`--stack react-native | swiftui | jetpack-compose`).
+- **The UI thread never blocks** — no disk, network, database or heavy compute on the main thread (or
+  the RN JS thread). A frame budget is a correctness rule.
+- **Lifecycle is part of the requirement.** Work a screen starts is cancelled when the screen goes;
+  returning to the foreground revalidates instead of showing stale data; Android process death restores
+  state; nothing assumes the app stays foregrounded mid-write.
+- **Every data region has loading / loaded / failed states, plus stale and offline** — failure scoped to
+  the response-dependent subtree, one persistent user-dismissed error banner inside the safe area,
+  offline told apart from a server error, every request inside a timeout budget.
+- **Secrets never ship in the binary or bundle** — `EXPO_PUBLIC_*`, `Info.plist`, `BuildConfig` and
+  resources are public. Tokens live only in Keychain / Keystore-backed storage; nothing sensitive in
+  logs, `UserDefaults`, `SharedPreferences` or `AsyncStorage`.
+- **TLS only.** An ATS or cleartext exception carries a recorded reason. Deep links, push payloads and
+  intents are untrusted input, validated before they route.
+- **Permissions are asked in context, at the moment of use, after a pre-prompt; the denied path is a
+  working screen.**
+- **Accessible by default** — every interactive element labelled, touch targets ≥ 44 pt / 48 dp, text
+  scales with the system setting and is never locked, Reduce Motion honoured, no state by colour alone.
+- **Every interactive element and list container carries the stack's test id** — `testID` (RN),
+  `accessibilityIdentifier` (iOS), `Modifier.testTag` with `testTagsAsResourceId` or `android:id`
+  (Android) — PascalCase dot-separated and static, **never the accessibility label**.
+- **Store rules are code rules** — privacy manifest and Required Reason APIs, in-app account deletion,
+  permission declarations, target API level. `mobile/_shared/store-compliance` owns them.
+- Constructor / initializer injection only; no service locator; no static mutable state; async all the
+  way — never block on a result.
+- **Dev-side tests** for the logic the agent writes (Swift Testing · JUnit + fakes · Jest + RNTL);
+  device journeys and E2E belong to the `qa-mobile-<stack>` peer.
+- Never up-level a project's toolchain, SDK or deployment target as a side effect of other work.
+
+Per stack:
+
+- **React Native:** Expo is the framework — Expo Router, development builds, CNG; native changes go in
+  config plugins, never hand edits to generated `ios/` / `android/`. New Architecture only. Text only
+  inside `<Text>`. Unbounded lists are virtualized (FlashList / Legend List). Animation runs on the UI
+  thread (Reanimated), transform/opacity only. Server state lives in TanStack Query, never in a client
+  store.
+- **iOS (Swift):** Swift 6 mode with Approachable Concurrency for new modules — `@MainActor` default in
+  app/UI modules, `nonisolated` in packages, `@concurrent` for CPU work; no `@unchecked Sendable` or
+  `nonisolated(unsafe)` without a written justification; no force unwrap outside tests. SwiftUI first,
+  UIKit where the codebase is UIKit. `@Observable` over `ObservableObject` on iOS 17+. `os.Logger` only.
+- **Android (Kotlin):** Compose first. One `uiState: StateFlow` per screen ViewModel, collected with
+  `collectAsStateWithLifecycle`; no ViewModel-to-UI events. Structured concurrency — no `GlobalScope`,
+  dispatchers injected. No `!!` outside tests. KSP, never kapt. Room / DataStore over raw SQLite /
+  `SharedPreferences`. R8 full mode and a Baseline Profile in release builds.
+
 ## Backend code rules
 
 - One pattern per problem — flag stacking (e.g. Repository + Unit-of-Work + Specification + Mediator + Decorator on one CRUD slice) as a smell in reviews, per the global Pattern-application rule.
@@ -196,5 +251,5 @@ Each top-level folder owns a domain, is **stack-first and domain-encapsulated** 
 | `tooling/` | Agent-drivable surfaces over a project — capability contract → MCP server / CLI | `tooling` |
 | `engineering-practices/` | Language-agnostic developer-workflow spine (`ep-*`) + audit lanes | bundled into all stack plugins |
 
-**Under construction — ignore, do not upload to the remote:** `frontend/react-native/`, `auth/cognito-{blazor,react}`, `communication/`.
+**Under construction — ignore, do not upload to the remote:** `mobile/`, `auth/cognito-{blazor,react}`, `communication/`.
 

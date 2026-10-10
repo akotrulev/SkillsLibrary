@@ -1,6 +1,6 @@
 ---
-name: fe-react-native-reference
-description: Use when the user asks to explain a React Native / Expo concept — native primitives (`View`/`Text`/`Pressable`) vs the DOM, why there is **no RSC / `'use client'` boundary** on device, the New Architecture (Fabric renderer, TurboModules, Bridgeless, JSI), the Hermes engine, Expo-managed vs bare workflow, the RN thread model (JS thread vs UI/native thread), hooks and React 19 in RN, `StyleSheet` vs the CSS cascade, and the atomic-design taxonomy. Triggers "what's the RN equivalent of X in React web", "why is there no server component here", "what is Fabric / TurboModules / the New Architecture", "JS thread vs UI thread", "Expo Go vs dev client vs bare", "atom or organism / how deep to prop-drill". Do NOT use for scaffolding a project (use `frontend/react-native/skills/project-scaffold`), generating a screen/component (use `frontend/react-native/skills/generator`), reviewing (use `frontend/react-native/skills/reviewer`), or React **web** concepts (use `frontend/react/skills/reference`).
+name: mobile-react-native-basics
+description: Use when the user asks to explain a React Native / Expo concept — native primitives (`View`/`Text`/`Pressable`) vs the DOM, why there is **no RSC / `'use client'` boundary** on device, the New Architecture (Fabric renderer, TurboModules, Bridgeless, JSI), the Hermes engine, Expo-managed vs bare workflow, the RN thread model (JS thread vs UI/native thread), hooks and React 19 in RN, `StyleSheet` vs the CSS cascade, and the atomic-design taxonomy. Triggers "what's the RN equivalent of X in React web", "why is there no server component here", "what is Fabric / TurboModules / the New Architecture", "JS thread vs UI thread", "Expo Go vs dev client vs bare", "atom or organism / how deep to prop-drill". Do NOT use for scaffolding a project (use `mobile/react-native/skills/project-setup`), generating a screen/component (use `mobile/react-native/skills/generator`), reviewing (use `mobile/react-native/skills/reviewer`), or React **web** concepts (use `frontend/react/skills/reference`).
 ---
 
 # React Native / Expo — Reference
@@ -31,9 +31,9 @@ Detect the **Expo SDK**, **React Native**, and **React** majors first (from `pac
 
 ## When NOT to use
 
-- Standing up a project / EAS / config → [`project-scaffold`](../project-scaffold/SKILL.md)
+- Standing up a project / EAS / config → [`project-setup`](../project-setup/SKILL.md)
 - Scaffolding a screen/component → [`generator`](../generator/SKILL.md)
-- Picking a state library in depth → [`state-management`](../state-management/SKILL.md)
+- Picking a state library in depth → [`architecture`](../architecture/SKILL.md)
 - Reviewing → [`reviewer`](../reviewer/SKILL.md)
 - React **web** (RSC, DOM, Next.js) → `frontend/react/skills/reference`
 - Auth0 in the app → `auth/auth0-react` (+ `auth/_shared/auth0-concepts`)
@@ -99,7 +99,7 @@ RN runs your JS on a dedicated **JS thread**, separate from the **UI (native/mai
 | Build | Expo Go app | EAS Build → dev client | EAS Build / Xcode / Gradle |
 | This stack's default | quick prototypes | **primary for real apps** | fallback lane |
 
-**Config plugins** (`app.json` `plugins`) are how the managed workflow configures native code without ejecting — the managed replacement for editing `Info.plist`/`AndroidManifest.xml` by hand. → [`project-scaffold`](../project-scaffold/SKILL.md), `.../rules/fonts-config-plugin.md`.
+**Config plugins** (`app.json` `plugins`) are how the managed workflow configures native code without ejecting — the managed replacement for editing `Info.plist`/`AndroidManifest.xml` by hand. → [`project-setup`](../project-setup/SKILL.md), `.../rules/fonts-config-plugin.md`.
 
 ## React 19 in React Native
 
@@ -112,7 +112,7 @@ React 19 ships from SDK 53. The additions behave the same as on web, minus anyth
 
 ## State: ground truth and derived values
 
-Same discipline as web: keep **one source of truth**, compute derived values in render (don't mirror them into state), minimize what a component subscribes to. → `.../rules/state-ground-truth.md`, `.../rules/react-state-minimize.md`, `.../rules/react-state-fallback.md`, and [`state-management`](../state-management/SKILL.md) for the library choice.
+Same discipline as web: keep **one source of truth**, compute derived values in render (don't mirror them into state), minimize what a component subscribes to. → `.../rules/state-ground-truth.md`, `.../rules/react-state-minimize.md`, `.../rules/react-state-fallback.md`, and [`architecture`](../architecture/SKILL.md) for the library choice.
 
 ## Atomic-design taxonomy (shared with `fe-react`)
 
@@ -122,7 +122,7 @@ Same naming and ownership rules as the web stack — components are organized at
 - **Molecule** — a few atoms bound to one small job (`SearchField`, `ListRow`, `FormField`).
 - **Organism** — a self-contained section with its own data/state (`ProductList`, `CheckoutForm`, `CommentThread`).
 - **Template / Screen** — a route target under `app/` (Expo Router). Screens compose organisms; screens own navigation and the data fetch.
-- **Prop-drilling limit:** 2–3 levels. Past that, lift to Context (client state) or a store — not deeper drilling. Server state belongs to TanStack Query, never a store. → [`state-management`](../state-management/SKILL.md).
+- **Prop-drilling limit:** 2–3 levels. Past that, lift to Context (client state) or a store — not deeper drilling. Server state belongs to TanStack Query, never a store. → [`architecture`](../architecture/SKILL.md).
 
 ## The React-web ↔ React-Native cheat sheet
 
@@ -141,4 +141,4 @@ Same naming and ownership rules as the web stack — components are organized at
 
 ## The vendored rules pack
 
-Deep, rule-by-rule guidance (impact-ranked, incorrect-vs-correct examples) lives in the vendored Vercel seed at `frontend/react-native/vendor/react-native-guidelines/` — 35+ rules across list-performance, animation, navigation, UI, state, rendering, monorepo, config. Load it **through** the house skill that routes into it ([`performance`](../performance/SKILL.md), [`motion`](../motion/SKILL.md), [`ui-conventions`](../ui-conventions/SKILL.md), [`navigation`](../navigation/SKILL.md), this `reference`), never as a standalone skill.
+Deep, rule-by-rule guidance (impact-ranked, incorrect-vs-correct examples) lives in the vendored Vercel seed at `mobile/react-native/vendor/react-native-guidelines/` — 35+ rules across list-performance, animation, navigation, UI, state, rendering, monorepo, config. Load it **through** the house skill that routes into it ([`performance`](../performance/SKILL.md), [`motion`](../motion/SKILL.md), [`ui-conventions`](../ui-conventions/SKILL.md), [`navigation`](../navigation/SKILL.md), this `reference`), never as a standalone skill.

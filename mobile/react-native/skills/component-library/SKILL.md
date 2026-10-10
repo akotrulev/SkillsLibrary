@@ -1,6 +1,6 @@
 ---
-name: fe-react-native-component-library
-description: Use when choosing or wiring a React Native UI kit — the decision between RN primitives + StyleSheet (default), Nativewind (Tailwind for RN), Tamagui (compiler-optimized universal), React Native Paper (Material Design), or gluestack-ui — plus setup, the theme/provider + dark-mode wiring, and the New-Architecture / Expo compatibility each one carries. Triggers: "which RN component library should we use", "set up Nativewind / Tamagui / Paper / gluestack", "do we need a UI kit at all", "add a themed Button/Dialog/Snackbar", "does this kit support the New Architecture / Expo Go". Do NOT use for hand-written StyleSheet / tokens / dark-mode mechanics (use `frontend/react-native/skills/styling`), `testID` mechanics per kit (use `frontend/react-native/skills/testability`), the component-layering taxonomy (use `frontend/react-native/skills/reference`), native UI patterns like Pressable/expo-image/menus (use `frontend/react-native/skills/ui-conventions`), forms (use `frontend/react-native/skills/forms`), or React web libraries (use `frontend/react/skills/component-library`).
+name: mobile-react-native-component-library
+description: Use when choosing or wiring a React Native UI kit — the decision between RN primitives + StyleSheet (default), Nativewind (Tailwind for RN), Tamagui (compiler-optimized universal), React Native Paper (Material Design), or gluestack-ui — plus setup, the theme/provider + dark-mode wiring, and the New-Architecture / Expo compatibility each one carries. Triggers: "which RN component library should we use", "set up Nativewind / Tamagui / Paper / gluestack", "do we need a UI kit at all", "add a themed Button/Dialog/Snackbar", "does this kit support the New Architecture / Expo Go". Do NOT use for hand-written StyleSheet / tokens / dark-mode mechanics (use `mobile/react-native/skills/styling`), `testID` mechanics per kit (use `mobile/react-native/skills/testability`), the component-layering taxonomy (use `mobile/react-native/skills/reference`), native UI patterns like Pressable/expo-image/menus (use `mobile/react-native/skills/ui-conventions`), forms (use `mobile/react-native/skills/forms`), or React web libraries (use `frontend/react/skills/component-library`).
 ---
 
 # React Native — Component Library (one-of-N family)
@@ -24,7 +24,7 @@ Detect the **Expo SDK / RN** majors first (`package.json`, `app.json`). The load
 
 - Hand-written `StyleSheet`, tokens, dark-mode token swap, type scale → [`styling`](../styling/SKILL.md)
 - `testID` placement per kit → [`testability`](../testability/SKILL.md)
-- Atom/molecule/organism layering + when a molecule owns state → [`reference`](../reference/SKILL.md)
+- Atom/molecule/organism layering + when a molecule owns state → [`basics`](../basics/SKILL.md)
 - Native UI patterns (`Pressable` over `TouchableOpacity`, `expo-image`, native menus/modals) → [`ui-conventions`](../ui-conventions/SKILL.md)
 - Forms + validation → [`forms`](../forms/SKILL.md)
 - React web → `frontend/react/skills/component-library`
@@ -63,7 +63,7 @@ Want a broad copy-in-ish accessible component set with a utility-style API?
 - **Theme once, centrally.** One theme object / token set at the root; per-component color overrides are a smell. Dark mode is a theme concern — drive it from `useColorScheme()` (system) + one toggle, redefining tokens, never per-component conditional colors. The palette/fonts source is [`design/frontend-design`](../../../../design/frontend-design/SKILL.md); [`styling`](../styling/SKILL.md) owns mapping it to tokens.
 - **`testID` forwards through the kit component's props** to the rendered native view. The exact prop per kit lives in [`testability`](../testability/SKILL.md)'s matrix — kept consistent with this one on purpose. (`testID` replaces web's `data-testid`.)
 - **Styling authority follows the kit.** Nativewind/gluestack → **Tailwind classes** are the authority; Tamagui → its **styled/tokens** API; Paper/none → **`StyleSheet` + tokens** ([`styling`](../styling/SKILL.md)). Never two authorities on one element (e.g. Nativewind `className` *and* a competing `StyleSheet` color).
-- **New-Architecture + Expo Go compatibility is a gate, not a nicety.** Install via `npx expo install`, run `expo-doctor`; a kit (or its transitive native deps) that isn't New-Arch-ready fails on SDK 55+. Some kits need a **dev client** (custom native) rather than Expo Go — that's a [`project-scaffold`](../project-scaffold/SKILL.md) decision.
+- **New-Architecture + Expo Go compatibility is a gate, not a nicety.** Install via `npx expo install`, run `expo-doctor`; a kit (or its transitive native deps) that isn't New-Arch-ready fails on SDK 55+. Some kits need a **dev client** (custom native) rather than Expo Go — that's a [`project-setup`](../project-setup/SKILL.md) decision.
 - **Don't wrap kit controls in `App*` wrappers** just to set defaults or carry test ids — pass `testID` inline (testability), use the theme for defaults.
 
 ## Anti-patterns
@@ -80,7 +80,7 @@ Want a broad copy-in-ish accessible component set with a utility-style API?
 
 ## Workflow
 
-1. **Choose** via the decision tree. State the reason (one line) in the Step-1 architecture record ([`project-scaffold`](../project-scaffold/SKILL.md)).
+1. **Choose** via the decision tree. State the reason (one line) in the Step-1 architecture record ([`project-setup`](../project-setup/SKILL.md)).
 2. **Read the one `references/<kit>.md`** — packages, provider wiring, theme + dark mode, New-Arch/Expo notes, the kit's test-id prop.
 3. **Wire the provider once** at the root layout; install with `npx expo install`, verify with `expo-doctor`.
 4. **Theme centrally** from the [`design/frontend-design`](../../../../design/frontend-design/SKILL.md) output via [`styling`](../styling/SKILL.md); wire dark mode off `useColorScheme` + a toggle.
@@ -98,9 +98,9 @@ Want a broad copy-in-ish accessible component set with a utility-style API?
 
 - Hand-written `StyleSheet`, tokens as JS objects, dark-mode token swap, type scale → [`styling`](../styling/SKILL.md)
 - `testID` per-kit mechanics → [`testability`](../testability/SKILL.md)
-- Component layering (atom/molecule/organism), prop-drilling limits → [`reference`](../reference/SKILL.md)
+- Component layering (atom/molecule/organism), prop-drilling limits → [`basics`](../basics/SKILL.md)
 - Native UI patterns (Pressable, expo-image, native menus/modals) → [`ui-conventions`](../ui-conventions/SKILL.md)
-- Provider placement, dev-client-vs-Expo-Go decision → [`project-scaffold`](../project-scaffold/SKILL.md)
+- Provider placement, dev-client-vs-Expo-Go decision → [`project-setup`](../project-setup/SKILL.md)
 - Forms/validation with kit inputs → [`forms`](../forms/SKILL.md)
 - Theme palette/fonts source → [`design/frontend-design`](../../../../design/frontend-design/SKILL.md) (primary), `design/theme-factory` (quick-start)
 - Breakpoints, orientation, safe areas → [`responsive-design`](../responsive-design/SKILL.md)

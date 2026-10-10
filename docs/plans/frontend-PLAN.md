@@ -1,7 +1,7 @@
 # frontend/ audit — findings & plan of action
 
 **Date:** 2026-07-12
-**Scope audited:** `frontend/blazor/` (22 skills + `fe-blazor` agent), `frontend/react/` (21 skills + `fe-react` agent + 3 vendored seeds), `frontend/react-native/` (under construction), plus the `fe-blazor`/`fe-react` marketplace wiring.
+**Scope audited:** `frontend/blazor/` (22 skills + `fe-blazor` agent), `frontend/react/` (21 skills + `fe-react` agent + 3 vendored seeds), React Native (moved to `mobile/`; superseded by `docs/plans/002-mobile-plugins.md`), plus the `fe-blazor`/`fe-react` marketplace wiring.
 **Method:** structural + wiring checks inline; one deep read-only audit per shipped stack (frontmatter, cross-references, agent↔skills contract, version-awareness, size, consistency).
 
 ---
@@ -27,7 +27,7 @@ The issues found are concentrated in four areas: **(1)** skill descriptions at o
 | F7 | minor | `react/skills/testability/` | No `references/` at all — blazor's counterpart has `references/static-html.md` (hybrid/static-HTML surfaces). Real parity delta beyond the documented `javascript-calls` drop; plausibly intentional | Either add a short hybrid/static-surface note or state in-skill that non-React surfaces are out of scope |
 | F8 | minor | `react/vendor/composition-patterns/metadata.json` | `"organization": "Engineering"` vs siblings' `"Vercel Engineering"` | Normalize to `"Vercel Engineering"` |
 | F9 | nit | `react/vendor/*/README.md`, `react/vendor/*/AGENTS.md` | Standalone-repo scaffolding ("maintaining this repo") ships in the plugin bundle — dead weight for consumers; `metadata.json` alone carries provenance | Optionally strip `README.md`/`AGENTS.md` from the bundled copies |
-| F10 | info | `frontend/react-native/` | Raw, unadapted Vercel import (`name: vercel-react-native-skills`, upstream `rules/`/`AGENTS.md`/`metadata.json` layout). Correctly fenced: under construction per CLAUDE.md and **not** referenced by any plugin. No action required now — captured as the future work item below | See Phase 5 |
+| F10 | info | React Native seed (now `mobile/react-native/`) | Raw, unadapted Vercel import (`name: vercel-react-native-skills`, upstream `rules/`/`AGENTS.md`/`metadata.json` layout). Correctly fenced: under construction per CLAUDE.md and **not** referenced by any plugin. No action required now — captured as the future work item below | See Phase 5 |
 
 **Verified clean (no action):** frontmatter names all match folders with full Triggers + Do-NOT routing (43/43 house skills); all spot-checked cross-references resolve (design/*, auth/*, qa/* peers, ep-* bundle paths, intra-domain links, references/ files); both agents brownfield-compliant (`Mode: FIX | EXTEND`, orientation pass, minimal-change rule) per `.skill-template/agent.md`; version policies correctly applied (incl. `forwardRef`-only-a-finding-on-19, `useActionState` vs `useFormState`, net10 `NotFoundPage`/`[PersistentState]`/`ReconnectModal` with down-level fallbacks); no SKILL.md over 500 lines; vendor skill names don't collide; marketplace `skills`/`agents` arrays for `fe-blazor`/`fe-react` all resolve on disk.
 
@@ -58,17 +58,17 @@ Run phases in order; each is independently committable. Phases 1–3 are quick h
 - [ ] `react/skills/generator/SKILL.md`: add the `vendor/composition-patterns` deep-dive pointer in the compound-component and container/presentation sections (mirror `basics` L125's phrasing)
 - [ ] `react/skills/testability/SKILL.md`: add either a short "hybrid/static-HTML surfaces" appendix (rows-by-index rule, hardcoded parent locator consts — mirror blazor's `references/static-html.md`) **or** an explicit out-of-scope statement; the current silence is the only unexplained blazor↔react delta
 
-### Phase 5 — react-native adaptation (F10 — IN PROGRESS, multi-session; tracked in `frontend/react-native/PLAN.md`)
-- [x] **Decision (2026-07-12):** adapt the Vercel rules into a proper **`fe-react-native` stack** (agent + `fe-react-native-*` skills), mirroring the react port pattern — one node per session, `HANDOFF.md` between sessions. Build plan + node breakdown live in `frontend/react-native/PLAN.md`.
-- [x] Node 0 (groundwork): restructured the raw Vercel import into `frontend/react-native/vendor/react-native-guidelines/` (fenced seed — "Do NOT use directly" clause, `organization → "Vercel Engineering"`, this closes the F8 parity + F10 fencing items for RN).
+### Phase 5 — react-native adaptation (F10 — superseded by `docs/plans/002-mobile-plugins.md`; the stack moved to `mobile/react-native/`)
+- [x] **Decision (2026-07-12):** adapt the Vercel rules into a proper **React Native stack** (agent + skills; now the `mobile-react-native` plugin), mirroring the react port pattern — one node per session, `HANDOFF.md` between sessions. The node breakdown that lived in the old `PLAN.md` is superseded by `docs/plans/002-mobile-plugins.md`.
+- [x] Node 0 (groundwork): restructured the raw Vercel import into `mobile/react-native/vendor/react-native-guidelines/` (fenced seed — "Do NOT use directly" clause, `organization → "Vercel Engineering"`, this closes the F8 parity + F10 fencing items for RN).
 - [x] Node 1 (foundations A): `basics` + `project-setup` skills authored (Expo SDK 56 / New-Architecture version policy locked).
-- [ ] Nodes 2–7: remaining skills, phased `fe-react-native` agent, marketplace + CLAUDE.md wiring, verification — see `frontend/react-native/PLAN.md`.
+- [ ] Nodes 2–7: remaining skills, phased agent, marketplace + CLAUDE.md wiring, verification — superseded by `docs/plans/002-mobile-plugins.md`.
 - [ ] Until Node 7: stays **unregistered** (no plugin references it) and listed as under-construction in CLAUDE.md's scope fence.
 - [ ] When built (Node 7): update CLAUDE.md scope + catalog, marketplace.json, and the new-project-setup line.
 
 ### Phase 6 — GAP: failure scoping + persistent error notification (cross-stack parity)
 
-**Raised 2026-07-27. Landed in `frontend/react/` only — `frontend/blazor/` and `frontend/react-native/` still have the gap.**
+**Raised 2026-07-27. Landed in `frontend/react/` only — `frontend/blazor/` and React Native (now `mobile/react-native/`; superseded by `docs/plans/002-mobile-plugins.md`) still have the gap.**
 
 **The rule** (now in CLAUDE.md's FE-React code rules and `react/skills/error-handling`): when an element depends on a request and the request fails **or the response can't be read** (transport error, auth error, or a **drifted body that fails schema validation**):
 
@@ -89,7 +89,7 @@ Run phases in order; each is independently committable. Phases 1–3 are quick h
 - [ ] When `blazor/skills/standards-audit` is authored (per `CONFORMANCE-AUDIT-PLAN.md`), its error-resilience section must carry the J8–J11 equivalents.
 - [ ] Update the CLAUDE.md **Frontend code rules** (Blazor) bullet to match the React one.
 
-**React-Native (to do when the node lands):** `error-handling` isn't authored yet — record the rule now in `frontend/react-native/PLAN.md` so the skill ships with it. RN deltas to state explicitly: there is no viewport "top-right" on a phone — the notification is a **top-anchored banner inside the safe area** (below the status bar / notch), still no auto-dismiss, still an explicit close control sized to the 44pt touch target, and it must not sit under a translucent header or the keyboard; offline is a first-class failure cause (`@react-native-community/netinfo`), so the failed body distinguishes "offline" from "server error".
+**React-Native (to do when the node lands):** `error-handling` isn't authored yet — the rule is carried by superseded by `docs/plans/002-mobile-plugins.md` (§6.5) so the skill ships with it. RN deltas to state explicitly: there is no viewport "top-right" on a phone — the notification is a **top-anchored banner inside the safe area** (below the status bar / notch), still no auto-dismiss, still an explicit close control sized to the 44pt touch target, and it must not sit under a translucent header or the keyboard; offline is a first-class failure cause (`@react-native-community/netinfo`), so the failed body distinguishes "offline" from "server error".
 
 ### Phase 7 — GAP: the second tier of failure scenarios (research 2026-07-27)
 
