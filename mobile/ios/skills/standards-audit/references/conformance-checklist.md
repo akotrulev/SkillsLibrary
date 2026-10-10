@@ -106,6 +106,15 @@ If the repo gitignores generated sources (R.swift, Sourcery, SwiftGen output) yo
 | D9 | `#Preview` exists for reusable views and covers states; none uses live data | A view with no preview, or one that calls the network | `rg -L "#Preview" $SRC -g '*View.swift'` | minor |
 | D10 | No `AnyView`, no `GeometryReader` as a default layout tool | `AnyView` erasing a conditional; `GeometryReader` for plain sizing | `rg -n "AnyView\|GeometryReader" $SRC -g '*.swift'` | minor |
 | D11 | Standard controls, not imitations of another platform | A custom tab bar, back button, switch or alert drawn to look like Material or web | `rg -n "ZStack" -B2 -A6 $SRC -g '*TabBar*.swift'`; read custom control views | major |
+| D12 | `[UIKit]` A scene delegate owns the window; the app delegate does not | `window` created in `application(_:didFinishLaunchingWithOptions:)`, no `UIApplicationSceneManifest`, `UIApplication.shared.keyWindow` | `rg -n "var window: UIWindow\|keyWindow\|UIApplicationSceneManifest\|UIWindowSceneDelegate" -g '*.swift' -g 'Info.plist'` | major |
+| D13 | `[UIKit]` Controllers take dependencies in `init`, not through singletons or later-set optionals | `static let shared` reached from a controller, `var client: APIClient!`, a property assigned after `instantiateViewController` | `rg -n "\.shared\.\|: [A-Z][A-Za-z]*!$" $SRC -g '*ViewController.swift'` | major |
+| D14 | `[UIKit]` A `Task` or observer a controller starts is cancelled when the screen goes | `Task { }` / `NotificationCenter` token / `Timer` with no cancel in `viewDidDisappear` / `deinit`; a delegate declared strong | `rg -n "Task \{\|addObserver\|Timer\.scheduled\|var delegate:" $SRC -g '*.swift'`; check each for teardown | major |
+| D15 | `[UIKit]` Collections use diffable data sources with stable ids; no `reloadData()` for ordinary updates | `reloadData()` after every change; snapshots of model values that change on edit; index-based `cellForRowAt` over a mutable array | `rg -n "reloadData\(\)\|numberOfItemsInSection\|numberOfRowsInSection" $SRC -g '*.swift'` | minor |
+| D16 | `[UIKit]` Layout uses Auto Layout with safe-area and keyboard guides, and Dynamic Type | `UIScreen.main.bounds`, frame math in a layout that must adapt, a fixed label height, `adjustsFontForContentSizeCategory` missing | `rg -n "UIScreen\.main\|\.frame = CGRect\|systemFont\(ofSize\|heightAnchor\.constraint\(equalToConstant" $SRC -g '*.swift'` | major |
+| D17 | `[UIKit]` SwiftUI is hosted as a child through `UIHostingController` / `UIHostingConfiguration`; no second navigation stack inside a pushed host | A `NavigationStack` inside a hosting controller pushed onto a `UINavigationController`; host view added without `addChild` / `didMove` | `rg -n "UIHostingController\|UIHostingConfiguration\|addChild" $SRC -g '*.swift'`; read each site | major |
+| D18 | `[UIKit]` `UIViewRepresentable` builds in `make`, applies state idempotently in `update`, keeps delegates in a `Coordinator` and cleans up in `dismantle` | Subviews created in `updateUIView`, state mutated from it, a delegate set to the SwiftUI struct, no `dismantleUIView` for a delegate or observer | `rg -n "UIViewRepresentable\|UIViewControllerRepresentable\|updateUIView\|dismantleUIView" $SRC -g '*.swift'` | major |
+| D19 | `[UIKit]` `@Observable` read in UIKit is tracked where tracking is on, or the codebase's binding is kept | Observation reads in `viewDidLoad` expecting updates; `@Observable` introduced into a Combine / KVO codebase; iOS 18 target without `UIObservationTrackingEnabled` | `rg -n "updateProperties\|withObservationTracking\|UIObservationTrackingEnabled" $SRC -g '*.swift' -g 'Info.plist'` | minor |
+| D20 | `[UIKit]` A UIKit codebase is extended in UIKit; no unrequested rewrite | A PR or plan converting screens to SwiftUI, removing storyboards or bridging Objective-C that the task did not ask for | `git diff --stat`; read the task | minor |
 
 ---
 
@@ -153,6 +162,16 @@ If the repo gitignores generated sources (R.swift, Sourcery, SwiftGen output) yo
 
 | # | Check | Violation looks like | Find it with | Sev |
 |---|---|---|---|---|
+| G1 | Form fields use `Form` / `Section` and system controls | `ScrollView` + `VStack` imitating a form; custom text-field chrome copying Material | `rg -n "TextField\|SecureField" -B3 $SRC -g '*.swift'`; read the container | minor |
+| G2 | One validator, a pure function over a draft, drives the errors | Validation inside `body`, in a `Task` per keystroke, or duplicated across views; error strings built in the view | `rg -n "isValid\|validate" $SRC -g '*.swift'` | major |
+| G3 | Field errors sit beside their field, as localized text, and clear when fixed | A single alert for all errors; colour-only error state; `Text(error.localizedDescription)`; a raw server message | `rg -n "localizedDescription\|\.alert\(" $SRC -g '*Form*.swift' -g '*SignUp*.swift' -g '*Login*.swift'` | major |
+| G4 | Focus order follows the layout and Return moves on or submits | No `@FocusState`; no `.submitLabel` / `.onSubmit`; the first invalid field not focused after a failed submit | `rg -n "FocusState\|submitLabel\|onSubmit" $SRC -g '*.swift'`; compare with the field count | minor |
+| G5 | Submit guards re-entry in code and shows progress | Only `.disabled(isSubmitting)` with a `.onSubmit` path that bypasses it; no in-flight state; a second tap sends a second request | `rg -n "isSubmitting\|isLoading" -A4 $SRC -g '*.swift'`; read each submit | major |
+| G6 | Credentials, addresses and codes declare `textContentType`; secrets use `SecureField` | A password in a `TextField`; sign-in without `.username` / `.password`; no `.oneTimeCode` | `rg -n "textContentType\|SecureField\|isSecureTextEntry" $SRC -g '*.swift'` | major |
+| G7 | Server field errors map to fields; an unmapped one reaches a form-level message | A ProblemDetails `errors` dictionary ignored; a field name that matches nothing silently dropped | `rg -n "ProblemDetails\|\.errors\b" $SRC -g '*.swift'`; read the mapper | major |
+| G8 | Email, username and code fields turn autocapitalization and autocorrect off | `TextField` for an email with the defaults | `rg -n "emailAddress\|username" -A6 $SRC -g '*.swift'` | minor |
+| G9 | A multi-step flow holds one draft above the steps; no secret is persisted in a draft | A draft per step copied forward; a password or token written to `@AppStorage` / `@SceneStorage` / SwiftData | `rg -n "@SceneStorage\|@AppStorage" $SRC -g '*.swift'` | major |
+| G10 | Every control and error text has a static `accessibilityIdentifier` | Missing ids on fields, submit and error text; an id built from the label or state | `rg -L "accessibilityIdentifier" $SRC -g '*Form*.swift'` | minor |
 
 ---
 
@@ -161,6 +180,18 @@ If the repo gitignores generated sources (R.swift, Sourcery, SwiftGen output) yo
 
 | # | Check | Violation looks like | Find it with | Sev |
 |---|---|---|---|---|
+| H1 | One concrete API client; no protocol with a single conformer; no second HTTP layer | `protocol APIClientProtocol` with one type; Alamofire beside a working `URLSession` client | `rg -n "protocol .*Client\|import Alamofire\|import Moya" $SRC -g '*.swift'`; count conformers | major |
+| H2 | Every request has a timeout budget by endpoint class | `URLSession.shared` with default timeouts; `timeoutIntervalForResource` left at 7 days; budgets scattered at call sites | `rg -n "URLSession\.shared\|timeoutInterval\|URLSessionConfiguration" $SRC -g '*.swift'` | major |
+| H3 | `.task(id:)` or an owned `Task` cancels a request when its key changes or the screen goes; `CancellationError` is silent | `Task { }` fire-and-forget for a request; `catch { state = .failed }` that also catches cancellation | `rg -n "catch \{" -B6 $SRC -g '*.swift'`; `rg -n "Task\.detached" $SRC -g '*.swift'` | major |
+| H4 | Retries are bounded, jittered, honour `Retry-After`, skip writes without an idempotency key, and never run offline | A retry loop at a call site on top of the client's; fixed-interval retry; retrying a `POST`; retrying with no connectivity | `rg -n "retry\|Task\.sleep\|Retry-After\|Idempotency" $SRC -g '*.swift'` | major |
+| H5 | A decode failure is a categorised error and renders as failed | `try? decoder.decode` / `?? []` | `rg -n "try\? .*decode\|try\? JSONDecoder" $SRC -g '*.swift'` | major |
+| H6 | 401 triggers one shared refresh, one replay, then re-auth in place | Each request refreshing on its own; an unbounded replay; a refresh token in `UserDefaults` | `rg -n "refresh\|401\|unauthorized" $SRC -g '*.swift'` | major |
+| H7 | TLS is never bypassed in code | A `URLSessionDelegate` returning `.useCredential` for every `serverTrust`; `NSAllowsArbitraryLoads` | `rg -n "serverTrust\|useCredential\|NSAllowsArbitraryLoads" $SRC -g '*.swift' -g 'Info.plist'` | blocker |
+| H8 | No token, body or PII reaches a log | `print` / `Logger` of a request, header, response body or URL with a query secret | `rg -n "print\(\|Logger.*(request\|body\|token\|Authorization)" $SRC -g '*.swift'` | major |
+| H9 | Reads outside the critical path do not fail the screen; independent calls do not wait on each other serially | `try await a(); try await b()` where both are independent; one optional call in a throwing `TaskGroup` | `rg -n "try await .*\n.*try await" -U $SRC -g '*.swift'`; read each screen's loads | minor |
+| H10 | Foreground and reconnect revalidate; sockets close on background and on owner exit | No `scenePhase` / `NWPathMonitor` hook; a `URLSessionWebSocketTask` created in `body` or never cancelled; reconnect while offline | `rg -n "scenePhase\|NWPathMonitor\|webSocketTask" $SRC -g '*.swift'` | major |
+| H11 | Endpoints are built by name from one place; no unsubstituted placeholder reaches the wire | String-concatenated URLs at call sites; a `{id}` left in a path | `rg -n "URL\(string:" $SRC -g '*.swift'` | minor |
+| H12 | `[iOS16]` A `Result`-or-completion-handler API is not newly written where `async` is available | New `URLSession.dataTask(with:completionHandler:)` code in an async codebase | `rg -n "dataTask\(with\|completionHandler:" $SRC -g '*.swift'` | minor |
 
 ---
 
@@ -169,6 +200,20 @@ If the repo gitignores generated sources (R.swift, Sourcery, SwiftGen output) yo
 
 | # | Check | Violation looks like | Find it with | Sev |
 |---|---|---|---|---|
+| I1 | Each kind of data is in its right store; SwiftData only on iOS 17+ | A SwiftData model on an iOS 16 target; a second store beside the existing Core Data / GRDB; server responses cached in `UserDefaults` | `rg -n "import SwiftData\|NSPersistentContainer\|import GRDB" $SRC -g '*.swift'`; compare with the deployment target | major |
+| I2 | Every shipped SwiftData schema is versioned and has a migration stage `[iOS17+]` | `@Model` edited with no new `VersionedSchema`; `ModelContainer(for:)` without a `migrationPlan` after the first release | `rg -n "VersionedSchema\|SchemaMigrationPlan\|ModelContainer\(" $SRC -g '*.swift'`; `git log -p -- '*Model*.swift'` | blocker |
+| I3 | Core Data and GRDB changes migrate existing stores `[iOS16]` | A new `.xcdatamodel` change with no model version; `eraseDatabaseOnSchemaChange = true` in a release path | `rg -n "eraseDatabaseOnSchemaChange\|DatabaseMigrator\|NSInferMappingModel" $SRC -g '*.swift'` | blocker |
+| I4 | Secrets live in the Keychain with a `…ThisDeviceOnly` class | A token or key in `UserDefaults`, `@AppStorage`, a plist, a file or a model column; `kSecAttrAccessibleAlways*`; `kSecAttrAccessibleWhenUnlocked` without `ThisDeviceOnly` and no restore requirement | `rg -n "kSecAttrAccessible\|kSecClass" $SRC -g '*.swift'`; `rg -n "UserDefaults.*(token\|secret\|password)\|AppStorage\(\"[^\"]*(token\|secret\|key)" -i $SRC -g '*.swift'` | blocker |
+| I5 | Keychain writes update before adding, and a fresh install clears stale items | `SecItemDelete` then `SecItemAdd`; no first-launch check | `rg -n "SecItemDelete\|SecItemUpdate\|SecItemAdd" $SRC -g '*.swift'` | minor |
+| I6 | Biometric-gated secrets use `SecAccessControl` with `.biometryCurrentSet`, not a boolean `evaluatePolicy` | An `LAContext` result gating a screen that shows a stored token | `rg -n "evaluatePolicy\|biometryCurrentSet\|SecAccessControlCreateWithFlags" $SRC -g '*.swift'` | major |
+| I7 | `UserDefaults` use is declared in `PrivacyInfo.xcprivacy` | `UserDefaults` / `@AppStorage` in code and no `NSPrivacyAccessedAPICategoryUserDefaults` entry | `rg -n "UserDefaults\|@AppStorage" $SRC -g '*.swift'`; `rg -n "UserDefaults" -g '*.xcprivacy'` — shares row L1 | major |
+| I8 | Model objects do not cross actors; background work uses `@ModelActor` or a background context | A `@Model` / `NSManagedObject` passed into a `Task` or returned from an actor; a large fetch on the main context | `rg -n "@ModelActor\|performBackgroundTask\|mainContext\|viewContext" $SRC -g '*.swift'` | major |
+| I9 | Private files carry file protection; regenerable files are excluded from backup | `data.write(to:)` with no options for private data; a cache in Application Support without `isExcludedFromBackup` | `rg -n "completeFileProtection\|isExcludedFromBackup\|\.write\(to:" $SRC -g '*.swift'` | major |
+| I10 | Caches are rebuildable and sit in `Caches`; a miss is normal | Required data stored in `Caches` or `tmp`; no handling for an empty cache | `rg -n "cachesDirectory\|temporaryDirectory\|applicationSupportDirectory" $SRC -g '*.swift'` | minor |
+| I11 | Offline writes are queued with an idempotency key, replayed in order through the one client, and shown as pending or failed | A write dropped when offline; replay creating duplicates; failed rows invisible | `rg -n "PendingMutation\|pending\|outbox\|idempotenc" -i $SRC -g '*.swift'` | major |
+| I12 | Each entity has a stated conflict rule | "Sync" with no rule; silent overwrite of a `409` | read the sync code and its doc comment / PR notes | minor |
+| I13 | A store that fails to open degrades to memory with a notice; it does not crash | `fatalError` / `try!` on `ModelContainer` or `loadPersistentStores` in release paths | `rg -n "try! ModelContainer\|fatalError.*(Container\|store)\|loadPersistentStores" $SRC -g '*.swift'` | major |
+| I14 | Logout clears the store, caches and Keychain items | Logout that only nils an in-memory token | `rg -n "logout\|signOut" -A10 $SRC -g '*.swift'` | major |
 
 ---
 
@@ -177,6 +222,18 @@ If the repo gitignores generated sources (R.swift, Sourcery, SwiftGen output) yo
 
 | # | Check | Violation looks like | Find it with | Sev |
 |---|---|---|---|---|
+| J1 | The system picker is used where it needs no permission | Full photo-library access (`PHPhotoLibrary.requestAuthorization(.readWrite)`) to choose one photo; a custom file browser instead of `fileImporter` | `rg -n "PHPhotoLibrary\.requestAuthorization\|PhotosPicker\|fileImporter" $SRC -g '*.swift'` | major |
+| J2 | Every protected resource has a specific, localized `NS…UsageDescription` | A missing key (crash at request), a generic string, a key for a resource the app never uses | `rg -n "NS[A-Za-z]*UsageDescription" -g 'Info.plist' -g '*.xcstrings' -g '*.strings'`; compare with `rg -n "AVCaptureDevice\|CLLocationManager\|CNContactStore\|LAContext" $SRC -g '*.swift'` | blocker |
+| J3 | Permissions are requested from `notDetermined`, in context, after a pre-prompt; never at launch | `requestAccess` / `requestWhenInUseAuthorization` in `App.init`, `onAppear` of the first screen or a launch service; no pre-prompt | `rg -n "requestAccess\|requestWhenInUse\|requestAlways\|requestAuthorization" -B4 $SRC -g '*.swift'` | major |
+| J4 | The denied and restricted states are working screens with an alternative and a Settings route, rechecked on foreground | A denied branch that is empty or a dead button; no `openSettingsURLString`; status read once at `init` | `rg -n "\.denied\|\.restricted\|openSettingsURLString" $SRC -g '*.swift'` | major |
+| J5 | Capture sessions and location updates are tied to the screen | `startRunning()` on the main thread; a session or `liveUpdates()` loop still running after the screen is gone | `rg -n "startRunning\|stopRunning\|liveUpdates\|startUpdatingLocation\|stopUpdatingLocation" $SRC -g '*.swift'` | major |
+| J6 | Location asks When In Use at the accuracy the feature needs; coordinates stay out of logs | `requestAlwaysAuthorization` for a foreground feature; `kCLLocationAccuracyBest` for a store locator; a coordinate in `Logger` or analytics | `rg -n "requestAlways\|desiredAccuracy\|kCLLocationAccuracy" $SRC -g '*.swift'` | major |
+| J7 | Biometric flows declare `NSFaceIDUsageDescription` and have a passcode / password fallback | Biometrics-only policy with no fallback; the key missing | `rg -n "NSFaceIDUsageDescription" -g 'Info.plist'`; `rg -n "deviceOwnerAuthentication" $SRC -g '*.swift'` | major |
+| J8 | `fileImporter` URLs are accessed through the security-scoped calls | A picked URL read with no `startAccessingSecurityScopedResource` | `rg -n "fileImporter\|startAccessingSecurityScopedResource" $SRC -g '*.swift'` | major |
+| J9 | Heavy device work (image decode, capture start, large file copy) is off the main actor | Full-size `UIImage(data:)` in a view task on the main actor; `Data(contentsOf:)` of a picked file on main | `rg -n "UIImage\(data\|Data\(contentsOf\|loadTransferable" $SRC -g '*.swift'` | major |
+| J10 | No `canOpenURL:` probing; no pasteboard read at launch | `canOpenURL` for installed-app detection; `UIPasteboard.general.string` read in launch code | `rg -n "canOpenURL\|UIPasteboard" $SRC -g '*.swift'` | major |
+| J11 | Haptics follow a user-initiated result, not passive events | `.sensoryFeedback` or a feedback generator in a scroll or timer path | `rg -n "sensoryFeedback\|UIImpactFeedbackGenerator\|UINotificationFeedbackGenerator" $SRC -g '*.swift'` | minor |
+| J12 | A resource's Required Reason API use is declared (file timestamps, disk space) | `creationDate` / `volumeAvailableCapacity…` in code with no manifest entry — shares row L1 | `rg -n "creationDate\|modificationDate\|volumeAvailableCapacity" $SRC -g '*.swift'` | major |
 
 ---
 
