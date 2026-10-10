@@ -9,42 +9,34 @@ Reviews .NET UI test code (Playwright .NET, Selenium .NET, Appium .NET) against 
 
 ## When to use
 
-- A diff or file (page object, `[Test]` class, fixture, `BaseTest`, `BasePage`) is submitted for review
+- A diff or file (page object, `[Test]` class, fixture, `BaseTest`, `BasePage`, `.runsettings`, `.csproj`) is submitted for review
 - Pre-merge gate on a PR touching `Pages/`, `Tests/`, `AppiumTests/Pages/`, or any NUnit/xUnit UI test
-- Second opinion on whether a .NET page object is well-structured
 
 ## When NOT to use
 
 - Generating new code → `qa/dotnet/skills/ui-test-author/playwright`, `qa/dotnet/skills/ui-test-author/selenium`, `qa/dotnet/skills/ui-test-author/appium`
 - Architecting the POM → `qa/dotnet/skills/page-object-design`
 - Reviewing API tests → `qa/dotnet/skills/api-test-author/review`
-- Reviewing Java UI code → `qa/java/skills/ui-test-author/review`
-- Reviewing TypeScript UI code → `qa/typescript/skills/ui-test-author/review`
+- Reviewing Java or TypeScript UI code → `qa/java/skills/ui-test-author/review`, `qa/typescript/skills/ui-test-author/review`
 
 ## Inputs needed
 
 1. **Stack** — Playwright .NET, Selenium .NET, or Appium .NET
-2. **Files** to review (page objects, `[Test]` classes, fixtures, `BaseTest`/`BasePage`)
+2. **Files** to review (page objects, `[Test]` classes, fixtures, `BaseTest`/`BasePage`, `.runsettings`, `.csproj`)
 3. **Context** — new feature, refactor, or bug fix?
-4. **Project conventions** — anything overriding the stack defaults (e.g. project mandates `Microsoft.Playwright.NUnit.PageTest`, bans XPath, requires `[AllureStep]`)
+4. **Project conventions** — anything overriding the stack defaults (a different test-id attribute, banned XPath, required `[AllureStep]`)
 
 ## Output format
 
 ```
-| Severity | Location                       | Issue                                                  | Suggested fix                                                |
-|----------|--------------------------------|--------------------------------------------------------|--------------------------------------------------------------|
-| blocker  | Pages/LoginPage.cs:42          | `Task.Delay(2000)` used as UI sync                     | Replace with `Expect(locator).ToBeVisibleAsync()` auto-wait  |
-| blocker  | Pages/CartPage.cs:88           | `.Result` on async call inside page object             | Make method `async Task` all the way down                    |
-| major    | Pages/ProductPage.cs:18        | XPath where a `data-test` attribute exists             | Switch to `GetByTestId("inventory-item")`                    |
-| minor    | Pages/CheckoutPage.cs:55       | Inline `Page.Locator("[data-test='...']")` repeated    | Promote to `private readonly ILocator _summary` field        |
+| Severity | Location                | Issue                                  | Suggested fix                                               |
+|----------|-------------------------|----------------------------------------|-------------------------------------------------------------|
+| blocker  | Pages/LoginPage.cs:42   | `Task.Delay(2000)` used as UI sync     | Replace with `Expect(locator).ToBeVisibleAsync()` auto-wait |
+| major    | Pages/ProductPage.cs:18 | XPath where a `data-testid` exists     | Switch to `GetByTestId("Inventory.Item")`                   |
+| minor    | Pages/CartPage.cs:55    | Inline `Page.Locator("...")` repeated  | Promote to `private readonly ILocator _summary` field       |
 ```
 
-Severities (from `CLAUDE.md`):
-
-- **blocker** — ships a bug, breaks the build, or violates a hard rule (`.Result`/`.Wait()`, `Task.Delay` as sync, shared driver, raw credentials)
-- **major** — design or correctness issue that will hurt soon (brittle locators, assertions in page objects, NetworkIdle waits)
-- **minor** — style or small inconsistency (naming, missing field promotion)
-- **nit** — optional preference
+Severities follow `CLAUDE.md`: **blocker** (a bug, a broken build, a hard rule — `.Result`/`.Wait()`, `Task.Delay` as sync, shared driver, raw credentials), **major**, **minor**, **nit**.
 
 **Do not rewrite the code during review.** If the user wants a rewrite, hand off to the matching generator skill.
 
@@ -52,56 +44,64 @@ Severities (from `CLAUDE.md`):
 
 | Check | Bad sign | Severity |
 |---|---|---|
-| Async all the way down | `.Result`, `.Wait()`, `.GetAwaiter().GetResult()` in tests or pages | blocker |
+| Async all the way down | `.Result`, `.Wait()`, `.GetAwaiter().GetResult()`, or `async void` outside an event handler | blocker |
 | No `Task.Delay` as UI sync | `await Task.Delay(2000)` waiting on DOM state | blocker |
 | Constructor injection | Service locator / static `Driver.Current` / property injection in pages | major |
-| Locators are semantic | XPath/CSS where `data-test`, role, or label exists | major |
+| Locators are semantic | XPath/CSS where a test id, role, or label exists | major |
+| Test ids follow the contract | Kebab-case or dynamic ids (`login-submit`, `row-42`) instead of PascalCase dot-separated static ids (`Login.Submit`, `OrderRow`) | minor |
+| A fallback is recorded, not marked | A `// TODO: missing data-testid` marker or comment on a fallback locator instead of a `missing-testids.md` row | minor |
 | Assertions live in tests, not page objects | `Assert.*` / `Expect(...)` inside page action methods | major |
 | No business logic in page objects | Price calculation, JSON parsing, branching on app state inside POM | major |
 | Tests are independent | `[Order(...)]` chained `[Test]` methods modelling a flow | blocker |
 | One logical behavior per test | One `[Test]` verifies login + cart + checkout | major |
-| No `try`/`catch` in a test or `[TearDown]` | Any catch block in a `[Test]`; a swallowing teardown; a blanket `catch (Exception)` in a page helper | major |
-| Failures identify the subject | Assertions with no message, so a failure cannot be told from a bad locator | minor |
-| Every assertion states one expected condition | `Is.EqualTo(a).Or.EqualTo(b)`, `Is.AnyOf(...)`, `\|\|` inside `Assert.That`, `Does.Match("a\|b")` or `new Regex("a\|b")` in a text/URL assertion | major |
-| Test names describe behavior | `Test1`, `LoginTest`, `ClickButtonTest` | minor |
+| No `try`/`catch` in a test or a hook | Any catch in a `[Test]`, `[SetUp]` or `[TearDown]`; a blanket `catch (Exception)` in a page helper | major |
+| Expected exceptions from async code | `Assert.Throws<T>(() => SomethingAsync())` — the exception lives in the discarded `Task`, so it reports "no exception"; `Assert.Throws` with an `async` lambda is `async void`. Use `Assert.ThrowsAsync<T>` | major |
+| Failures identify the subject | A Playwright assertion on a locator with no `Describe()` and no `Expect(locator, "message")`; an NUnit value assertion with no message | minor |
+| Every assertion states one expected condition | `Is.EqualTo(a).Or.EqualTo(b)`, `Is.AnyOf(...)`, `\|\|` inside `Assert.That`, `Does.Match("a\|b")` or `new Regex("a\|b")` in a text/URL assertion, an assertion on an `Or()` locator | major |
+| Test names are `Should_X_When_Y` | `Test1`, `LoginTest`, `Signs_In_With_Valid_Credentials` | minor |
 | No hardcoded credentials / base URLs | Literal `admin@example.com`, hardcoded `https://staging.x.y` | major |
-| Locators promoted to `readonly ILocator` / `private const string` fields | Inline locator strings re-typed across methods | minor |
-| No conditional logic driving assertions | `if (x) Assert.That(...)` instead of `[TestCase]` parameterization | major |
-| `[TestCase]` / `[TestCaseSource]` used for parameterization, not `foreach` in `[Test]` | Loop-driven multi-case test that hides which case failed | major |
-| Nullable reference types honored | `string?` ignored, `!`-bang scattered through page object fields | minor |
-| `records` / immutable models for test data | Mutable DTOs with public setters used as test fixtures | minor |
-| No `async void` outside event handlers | `public async void DoStuff()` on a page or test class | blocker |
+| Locators built once | Inline locator strings re-typed across methods; public locator fields | minor |
+| No conditional logic driving assertions | `if (x) Assert.That(...)` or a `foreach` in a `[Test]` instead of `[TestCase]` / `[TestCaseSource]` | major |
+| One version source under CPM | `Version=` on a `PackageReference` while `Directory.Packages.props` manages versions — restore fails with NU1008 | blocker |
+| Nullable reference types honored | `string?` ignored, `!`-bangs scattered through page object fields | minor |
 
 ## Playwright .NET smells
 
+The writer's rules and mechanics are in `qa/dotnet/skills/ui-test-author/playwright` (`references/lifecycle.md`, `locators.md`, `assertions.md`).
+
 | Check | Bad sign | Severity |
 |---|---|---|
-| Every test asserts something | `[Test]` body ends with an action and no `Expect(...)` / `Assertions.Expect(...)` | blocker |
-| Web-first assertions used | `Assert.That(await loc.IsVisibleAsync(), Is.True)` / `Assert.That(await loc.TextContentAsync(), Is.EqualTo(...))` / count-based one-shots | major |
-| `GetByRole` / `GetByLabel` / `GetByTestId` preferred | `Page.Locator("css...")` in test classes | major |
-| Locators are `private readonly ILocator` fields initialized in constructor | Properties that call `Page.Locator(...)` per access | minor |
-| No hardcoded sleeps | `Page.WaitForTimeoutAsync(...)` or `Task.Delay(...)` to wait on UI state | blocker |
-| No `WaitUntil = WaitUntilState.NetworkIdle` | `GotoAsync(url, new() { WaitUntil = WaitUntilState.NetworkIdle })` | major |
-| No `Force = true` to bypass actionability | `.ClickAsync(new() { Force = true })` / same on `FillAsync`/`CheckAsync` | major |
-| No redundant pre-waits before auto-waiting actions | `locator.WaitForAsync()` immediately before `locator.ClickAsync()` | minor |
-| `RunAndWaitForResponseAsync` wraps the trigger | `await page.WaitForResponseAsync(...)` placed before/after the action (race) | major |
-| Custom retry loops replaced by raised assertion timeouts | `while (retries-- > 0) { … Task.Delay … }` | major |
-| `WaitForFunctionAsync` not used for plain UI state | `page.WaitForFunctionAsync("() => ...")` for visible/text checks | minor |
-| Deprecated APIs removed | `page.WaitForNavigationAsync(...)` in code | major |
-| Positive matchers preferred over `.Not` | `Not.ToBeVisibleAsync()` where `ToBeHiddenAsync()` exists | nit |
-| `Exact = true` set for ambiguous text/role names | `GetByText("Submit")` matching multiple labels (`Submit Order`, `Submitting…`) | minor |
-| Auth via `StorageState`, not per-test login | Every test calls `loginPage.SignInAsync(...)` | major |
-| `ExpectLoadedAsync()` exists on every page object | No landmark assertion method | minor |
-| Tests inherit `PageTest` / project `BaseTest` — no manual `Playwright.CreateAsync` | Test class owns its Playwright/browser lifecycle | major |
-| Browser/context lifecycle per worker, not per test, when project allows it | `[SetUp]` re-launches the browser every test (slow) | minor |
-| Allure `[AllureStep]` used for non-trivial workflows | A test with 12 actions and no step labels | nit |
+| Tests derive from the one `BaseTest` | `Playwright.CreateAsync()` in a `[Test]`, a `[SetUp]` or a fixture's `[OneTimeSetUp]`; a second base class per role or device. The root `AuthSetup` `[SetUpFixture]` is the one exception | blocker |
+| A base URL is set | Relative `GotoAsync("/x")` / `APIRequest.PostAsync("/api/x")` with no `BaseURL` in `ContextOptions()`, or a hardcoded host instead of `BASE_URL` | blocker |
+| `ContextOptions()` amends the base | An override that returns `new()` / `new BrowserNewContextOptions { ... }` instead of amending `base.ContextOptions()` — it drops `BaseURL`, the video folder and the defaults | major |
+| The `[SetUpFixture]` covers the tests | `AuthSetup` in `X.Support` while tests live in `X.Tests` — NUnit runs it only for its own namespace, so the state file is never written | blocker |
+| Parallelism is `ParallelScope.Self` | `ParallelScope.All` / `Children` / `Fixtures` on a Playwright fixture — tests of one fixture share its `Page` | blocker |
+| Launch settings in the `.runsettings` | Browser, headless or test-id attribute hardcoded in code; `<Headless>` or `<Shard>` directly under `<Playwright>` (ignored: "not implemented") | major |
+| Failure evidence survives | The context left open in the derived `[TearDown]` (`PageTest` closes it only after a pass); `SaveAsAsync` before `Context.CloseAsync()` | major |
+| Code compiles on the pinned version | `Page.Video.GetPathAsync()` (the API is `PathAsync()`); `Within(`, `GetByRef` or `RecordVideoFps` on 1.63; `Visible()` called as a method | blocker |
+| `ILocator` has no `.Text` | `Assert.That(banner.Text, ...)` — Selenium's `IWebElement` API pasted into Playwright; it does not compile | blocker |
+| Every test asserts something | `[Test]` body ends with an action and no `Expect(...)` | blocker |
+| Web-first assertions used | `Assert.That(await loc.IsVisibleAsync(), Is.True)` / `TextContentAsync()` / `CountAsync()` one-shots | major |
+| URL assertions match | `ToHaveURLAsync("**/dashboard")` — the string is an exact match after `BaseURL` resolution; use a `Regex` or `WaitForURLAsync` | major |
+| Exact HTTP status | `Assert.That(res.Ok, Is.True)` or `Expect(res).ToBeOKAsync()` when seeding | major |
+| Locator ladder | `Page.Locator("css...")` where a test id or role exists, or in a test class | major |
+| No page-level selector or deprecated APIs | `Page.ClickAsync(selector)`, `Page.FillAsync(selector)`, `Page.InnerTextAsync(selector)`, `QuerySelectorAsync`, `WaitForNavigationAsync` | major |
+| Scoped, not positional | `.First` / `Nth()` silencing a strictness error with no reason in the name | major |
+| `Visible` over `:visible` | `:visible` in a selector on 1.63+ | minor |
+| No sleeps or retry loops | `Page.WaitForTimeoutAsync(...)`, `Task.Delay(...)` or `while (retries-- > 0)` waiting on UI state | blocker |
+| Actions wait for themselves | `WaitUntil = WaitUntilState.NetworkIdle`; `Force = true`; `WaitForAsync()` right before an action; `WaitForFunctionAsync` for visible/text state | major |
+| `RunAndWaitForResponseAsync` wraps the trigger | `WaitForResponseAsync(...)` started after the action (race) | major |
+| `Exact = true` for ambiguous names | `GetByText("Submit")` matching `Submit Order`, `Submitting…` | minor |
+| Auth via storage state | Every test calls `SignInAsync(...)` before its real behaviour | major |
+| No seeding in `[OneTimeSetUp]` | A record shared by a fixture's tests, created where no `Page` exists | major |
+| Pages built in the test class | Page objects as properties of `BaseTest` | minor |
 
 ## Selenium .NET smells
 
 | Check | Bad sign | Severity |
 |---|---|---|
 | All page objects inherit `BasePage` | Pages calling `_driver.FindElement(...)` directly without a base abstraction | major |
-| Locator preference order (`data-test` → `id` → `css` → `class` → `xpath`) honored | XPath used where `data-test` exists | major |
+| Locator order honored: test id (`data-testid`) → `id` → `css` → `class` → `xpath` | XPath used where a test id exists | major |
 | Driver lifecycle via `IDriverFactory` + DI / `AsyncLocal<IWebDriver>` | `new ChromeDriver()` in a test or `[SetUp]` directly | blocker |
 | `BaseTest` provides driver via `[SetUp]` / `[TearDown]` | Per-test driver instantiation or shared static driver | major |
 | `WebDriverWait` + `ExpectedConditions` for conditional waits | `Thread.Sleep` for synchronization | blocker |
@@ -132,39 +132,24 @@ Severities (from `CLAUDE.md`):
 
 ## Good signals (.NET)
 
-Code that looks well-written in this stack tends to share these traits:
-
-- Every page object inherits a thin base (`BasePage` / `BaseAppiumPage`) with one synchronization helper
-- Locators are `private readonly ILocator` fields (Playwright) or `private static readonly By` (Selenium) — not magic strings
-- One `[Test]` per behavior with descriptive name (`Should_SignIn_When_CredentialsValid`), no `[Order(...)]`
-- Driver / Playwright lifecycle owned by `BaseTest` via a factory with `AsyncLocal` or per-worker fixtures — parallel-safe
-- `WebDriverWait` + `ExpectedConditions` (Selenium) or Playwright auto-waits — no `Thread.Sleep`/`Task.Delay` for UI sync
-- Multi-step flows live in a sub-folder with each step returning the next page
-- Reusable components (cards, rows) take a parent `ILocator` / `IWebElement` and query inside it
-- `[TestCase]` / `[TestCaseSource]` for parameterization; failure message identifies the failing case
-- Constructor injection — no `Driver.Current` / static mutable state
-- Nullable reference types enabled; no scattered `!`-bangs
-- Allure `[AllureStep]` annotations on non-trivial workflows for human-readable reports
+- Playwright: one `BaseTest : PageTest` with `BaseURL` and failure evidence, a `.runsettings`, CPM; Selenium / Appium: a thin base page and an `AsyncLocal` driver factory
+- Locators built once on the highest ladder rung; components take a parent `ILocator` / `IWebElement`
+- One `[Test]` per behavior named `Should_X_When_Y`, web-first assertions, `[TestCase]` parameterization
 
 ## Always-flag anti-patterns
 
-- **Test that asserts nothing.** A `[Test]` ending after a `ClickAsync()` with no `Expect`/`Assert` is not a test.
-- **Page object that asserts.** Move every `Assert.*` / `Expect(...)` out of the POM and into the test.
-- **`OR` in an assertion.** `Is.EqualTo("Saved").Or.EqualTo("Success")`, `Is.AnyOf(...)`, a `||` inside `Assert.That`, or a `"Saved|Success"` regex alternation in a text/URL assertion — all the same defect: the test does not know what the app should render, so it passes on the wrong state and never fails when the app flips between the two. Watch for the regex form especially; it hides in `Does.Match` and `ToHaveTextAsync(new Regex(...))` and reads as a legitimate matcher. Fix by splitting into one test per expected outcome, parameterizing with `[TestCase]`, or pinning the correct value.
-- **`Thread.Sleep` / `Task.Delay` for UI sync.** Always a blocker, regardless of duration.
-- **`.Result` / `.Wait()` / `.GetAwaiter().GetResult()`.** Causes deadlocks under NUnit + Playwright. Always async.
-- **`async void`** outside event handlers — exceptions escape and crash the runner.
-- **Brittle locator chain.** `Page.Locator("div > div > span:nth-child(3) > a")` will break on the next DOM tweak.
-- **Login-in-every-test.** Use `StorageState` (Playwright), a seeded session (Selenium), or a token-injecting `[OneTimeSetUp]`.
-- **Any `try`/`catch` in a `[Test]` — or in `[TearDown]`.** There is no legitimate one. Wrapping the body hides failures; wrapping cleanup leaks state silently. An expected exception is asserted with `Assert.Throws<T>`; an unexpected one must reach NUnit; cleanup is registered and deleted in `[TearDown]` with no catch. The suite's only catches belong in an I/O helper narrowing **one named** exception (`IsDisplayed(By)` catching `NoSuchElementException`) — never a blanket `catch (Exception)`.
-- **A failure message that names no subject.** `Expected: "Saved" But was: ""` could be a wrong value or a locator that matched nothing — pass a message naming the element and the record.
-- **`PageFactory` + explicit `FindElement` mixed.** Pick one (prefer explicit; `PageFactory` is deprecated).
-- **Shared static `IWebDriver`** across tests. Breaks parallel execution.
-- **Any inline comment in a test body or a page-object method** (`// click login`, `// Arrange`), and any stale comment. Per `ep-code-comments` — the name is the explanation; rename or extract, never reword.
+Each is a row above; flag it whatever else the review finds.
+
+- **`OR` in an assertion**, including a `"Saved|Success"` regex inside `ToHaveTextAsync(new Regex(...))` or `Does.Match` — it passes on the wrong state.
+- **A test that asserts nothing, or a page object that asserts.**
+- **`Thread.Sleep` / `Task.Delay` for sync, `.Result` / `.Wait()`, `async void`**, and any `try`/`catch` in a `[Test]` or a hook — an expected exception is `Assert.ThrowsAsync<T>`.
+- **Relative navigation with no `BaseURL`, a `ContextOptions()` that returns `new()`, or an `AuthSetup` outside the tests' namespace** — each makes every test fail before its first assertion.
+- **Static or shared browser state** — `static IWebDriver`, `ParallelScope.All` with Playwright.
+- **Any inline comment in a test body or a page-object method**, and any stale comment — rename or extract, never reword.
 
 ## Comments in test code
 
-Load **[`ep-code-comments`](../../../../../engineering-practices/code-comments/SKILL.md)** for the rule itself, the complex-flow test that earns a doc comment, the never-comment trivia list, and the severity mapping. Its **test-code** section carries the AAA-banner rule and the exactly-three-permitted-comments list. This section supplies only the mechanics that differ here. Here it covers **page-object and screen-object bodies** as well as tests — an intent-revealing method name is the page object's documentation.
+Load **[`ep-code-comments`](../../../../../engineering-practices/code-comments/SKILL.md)** for the rule, the complex-flow test that earns a doc comment, the trivia list, the severity mapping and its **test-code** section. Here it covers **page-object and screen-object bodies** as well as tests — an intent-revealing method name is the page object's documentation.
 
 | .NET mechanic | What to check |
 |---|---|
@@ -172,20 +157,18 @@ Load **[`ep-code-comments`](../../../../../engineering-practices/code-comments/S
 | Skips needing a reason and a ticket | `[Ignore("")]` / a bare `[Explicit]` — a silently disabled test |
 | Where an unclear interaction goes instead | Into a named page-object method, not a comment above the locator chain |
 
-**The locator corollary — the one that matters most here.** A comment explaining a locator (`// the third span is the price`) is not a comment finding; it is evidence the locator is **positional and brittle**. Fix the locator: request a `data-testid` and record it in `missing-testids.md`. Cross-reference the finding to the locator-hygiene list rather than filing it as a comment.
+**The locator corollary.** A comment explaining a locator (`// the third span is the price`) is evidence the locator is **positional and brittle**. Fix the locator: request a `data-testid` and record it in `missing-testids.md`.
 
 ## Procedure
 
-1. Identify the **stack** (Playwright / Selenium / Appium) from imports and file location.
-2. Read the file end-to-end before writing findings — context matters for severity.
-3. Walk the cross-stack list, then the stack-specific list.
-4. For each finding, capture: file path + line, issue, one-sentence suggested fix.
-5. **Do not rewrite the code.** Hand off to the matching generator if the user asks for a rewrite.
+1. Identify the **stack** from imports and file location, and read each file end-to-end before writing findings.
+2. Walk the cross-stack list, then the stack-specific list.
+3. For each finding: file path + line, issue, one-sentence fix. **Do not rewrite the code**; hand off to the matching generator.
 
 ## Handoffs
 
-- Need to rewrite → `qa/dotnet/skills/ui-test-author/playwright`, `qa/dotnet/skills/ui-test-author/selenium`, or `qa/dotnet/skills/ui-test-author/appium`
-- Architecture is the real problem (not the code) → `qa/dotnet/skills/page-object-design`
+- Need to rewrite → the matching generator under `qa/dotnet/skills/ui-test-author/`
+- Architecture is the real problem → `qa/dotnet/skills/page-object-design`
 - Test data shape is wrong → `qa/dotnet/skills/test-data-builder`
 - API tests in the same PR → `qa/dotnet/skills/api-test-author/review`
 - Allure reporting questions → `qa/reporting/dotnet/skills/test-reports`

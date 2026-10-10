@@ -1,322 +1,224 @@
 ---
 name: qa-ui-test-writer-playwright-dotnet
-description: Use when the user asks to scaffold Playwright UI tests in C# / .NET. Triggers: "write a Playwright test for X in C#", "add a Playwright .NET page object for screen Y", "scaffold a Playwright C# spec". Do NOT use for Selenium (`qa-ui-test-writer-selenium-dotnet`), Appium (`qa-ui-test-writer-appium-dotnet`) or reviewing tests (`qa-ui-test-review-dotnet`).
+description: Use when the user asks to scaffold Playwright UI tests in C# / .NET — NUnit test classes, page objects, BaseTest, .runsettings, signed-in state, locator scoping, web-first assertions, or device emulation. Triggers "write a Playwright test for X in C#", "add a Playwright .NET page object for screen Y", "set up Playwright with NUnit". Do NOT use for Selenium (`qa-ui-test-writer-selenium-dotnet`), Appium (`qa-ui-test-writer-appium-dotnet`) or reviewing tests (`qa-ui-test-review-dotnet`).
 ---
 
 # QA — Playwright Test & Page Object Generator (C# / .NET)
 
-Scaffolds Playwright tests and page objects in **.NET 10 + NUnit** (net8/9 supported — match the project's TFM) using `Microsoft.Playwright` and `Microsoft.Playwright.NUnit`. Uses a **base-test class pattern**: tests inherit from `PageTest` (which Microsoft's package ships) and a project-local `BaseTest` that exposes page objects via `[SetUp]`. Tests do not instantiate browsers themselves. Locators use `GetByTestId` first (`data-testid` is the standing contract with the dev team — see `qa/dotnet/skills/page-objects-from-url` for extraction and the missing-testid report), falling back to role/label semantics — never raw CSS where anything better exists.
+Scaffolds Playwright for .NET tests and page objects on **.NET 10 + NUnit 4** (net8/9 supported — match the
+project's TFM). Every test class derives from **one `BaseTest : PageTest`**, which sets the base URL and
+keeps failure evidence; the browser, headless mode, assertion timeout and test-id attribute come from one
+**`.runsettings`**; locators climb **one ladder** with `data-testid` first; every check is a **web-first
+assertion**. The code lives in `assets/`; the mechanics live in `references/`.
 
-## Stack
+## Versions
 
-- .NET 10 (net8/9 supported — match the project's TFM), C# (nullable reference types enabled)
-- NUnit 4.x
-- `Microsoft.Playwright` + `Microsoft.Playwright.NUnit`
-- Page objects under `Tests/Pages/`, test classes under `Tests/Specs/`
-- Base class under `Tests/Support/`
-- `Allure.NUnit` where the project uses Allure
+These are the only Playwright pins in this skill. Every other file links here; `Directory.Packages.props`
+in `assets/` carries the same values.
+
+| Package | Version | Note |
+|---|---|---|
+| `Microsoft.Playwright.NUnit` | **1.63.0** | Pulls in `Microsoft.Playwright` and `Microsoft.Playwright.TestAdapter`; never reference them too. .NET 1.64 is not on NuGet yet |
+| Docker image | `mcr.microsoft.com/playwright/dotnet:v1.63.0-noble` | .NET SDK 10, browsers preinstalled; the tag always equals the package version. No `-jammy` since 1.60 |
+| `NUnit` | 4.6.1 | Stay on 4.x; NUnit 5 changes `Assert.ThrowsAsync` |
+| `NUnit3TestAdapter` / `Microsoft.NET.Test.Sdk` | 6.3.1 / 18.10.1 | Both run NUnit 4 |
+| `Allure.NUnit` | 2.15.0 | `[AllureNUnit]` on `BaseTest`; `AllureApi.AddAttachment(name, type, path)` |
+| `Deque.AxeCore.Playwright` | 4.13.0 | Owned by `accessibility-testing` |
+| `PercyIO.Playwright` / `Eyes.Playwright` | 1.0.4 / 1.37.49 | Owned by `visual-regression` |
+
+**Version lane.** Detect the project's Playwright version and TFM and keep them — never up-level as a side
+effect. A 1.64-only API does not compile on 1.63, though playwright.dev's .NET pages already list some; trust
+the installed package. **From 1.64: `child.Within(parent)`** — on 1.63 write `parent.Locator(child)`;
+`GetByRef`, `RecordVideoFps` and screencast style have no 1.63 form.
+
+## Stack and layout
+
+Nullable reference types on; Central Package Management, so no `Version=` in a `.csproj`.
+
+```
+UiTests/
+├── UiTests.csproj        ui.runsettings          (Directory.Packages.props at the solution root)
+├── AuthSetup.cs          root namespace Example.UiTests — signed-in state, once per run
+├── Support/BaseTest.cs   the one lifecycle
+├── Pages/                LoginPage.cs, HomePage.cs, components shared by several pages
+└── Tests/                LoginTests.cs — one test class per feature
+```
+
+Namespaces follow the folders under one root (`Example.UiTests.Pages`). `AuthSetup` sits in the root
+namespace itself, because NUnit runs a `[SetUpFixture]` only for the namespace it is declared in.
 
 ## When to use
 
-- New `*Tests.cs` under `Tests/Specs/`
-- New page object under `Tests/Pages/`
-- New base class or helper under `Tests/Support/`
-- Adding a scenario to an existing test class
+- A new test class, page object, component object, or the `BaseTest` itself.
+- A new or rewritten `UiTests.csproj`, `Directory.Packages.props`, `.runsettings` or signed-in state.
+- Scoping or fixing locators, replacing one-shot reads with web-first assertions.
+- Running a fixture per device, viewport, colour scheme, locale or time.
 
 ## When NOT to use
 
-- Playwright TypeScript → `qa/typescript/skills/ui-test-author/playwright`
-- Playwright Java → `qa/java/skills/ui-test-author/playwright`
-- Mobile / Appium → `qa/dotnet/skills/ui-test-author/appium`
-- Selenium C# → `qa/dotnet/skills/ui-test-author/selenium`
-- Java Selenium → `qa/java/skills/ui-test-author/selenium`
-- Reviewing existing Playwright code → `qa/dotnet/skills/ui-test-author/review`
-- Designing the overall page-object hierarchy → `qa/dotnet/skills/page-object-design`
+- Native mobile apps → `qa/dotnet/skills/ui-test-author/appium`
+- Selenium → `qa/dotnet/skills/ui-test-author/selenium`
+- Reviewing Playwright code → `qa/dotnet/skills/ui-test-author/review`
+- Designing the page-object hierarchy → `qa/dotnet/skills/page-object-design`
+- Extracting page objects and test ids from a live URL → `qa/dotnet/skills/page-objects-from-url`
+- A new solution from zero (SDK, solution layout, Docker) → `qa/dotnet/skills/ui-project-setup`
+- Screenshots, video, traces and HAR beyond the `BaseTest` defaults → `qa/dotnet/skills/evidence-capture`
+- Visual regression, accessibility scans, network mocking → `visual-regression`, `accessibility-testing`,
+  `network-mocking`
+- Playwright TypeScript or Java → `qa/typescript/skills/ui-test-author/playwright`,
+  `qa/java/skills/ui-test-author/playwright`
 
 ## Inputs needed
 
-1. **Feature / page** under test (e.g. `Login`, `CheckoutCart`)
-2. **User journey** — concrete steps + the user-visible outcome to assert
-3. **Locators** — for each element: `GetByTestId` whenever the element has a `data-testid`; otherwise `GetByRole` / `GetByLabel`, then `GetByText`; CSS only as last resort. Missing testids are reported via `qa/dotnet/skills/page-objects-from-url`'s `missing-testids.md`
-4. **Auth requirement** — anonymous, or signed-in (which user role + how the session is established)
-5. **Test data** — seeded by API, by helper, or inline
+1. **Feature or page** under test (`Login`, `CheckoutCart`).
+2. **User journey** — the steps and the one user-visible outcome to assert.
+3. **Locators** — the test id for each element, or the fallback rung and a `missing-testids.md` row.
+4. **Auth** — signed out, or signed in as which role.
+5. **Test data** — seeded through the API in the class's `[SetUp]`, or a builder.
+6. **Devices and media** — which fixtures run on which emulated device.
 
-## Patterns
+## What ships with this skill
 
-### `Tests.csproj`
+| File | Holds |
+|---|---|
+| [`references/lifecycle.md`](references/lifecycle.md) | The four base classes, the SetUp/TearDown order, `ParallelScope.Self`, `ContextOptions()`, environment and runsettings keys, failure evidence, `AuthSetup`, API seeding, install / codegen / show-trace / headed commands |
+| [`references/locators.md`](references/locators.md) | The ladder, `GetBy*`, `Filter` / `And` / `Or`, component roots, `parent.Locator(child)` and the 1.64 `Within()` line, `Visible`, frames, strictness, `Describe()`, overlays, the test-id attribute, agent-facing locators |
+| [`references/assertions.md`](references/assertions.md) | The web-first set (accessible name, role, classes, URL, aria snapshots), one expected condition, no one-shot reads, timeouts, `Expect(locator, "message")`, `Assert.ThrowsAsync`, HTTP responses |
+| [`references/emulation-and-mobile-web.md`](references/emulation-and-mobile-web.md) | `Playwright.Devices[...]`, touch, viewport, media features, locale, geolocation, `Page.Clock`, offline |
+| [`assets/Directory.Packages.props`](assets/Directory.Packages.props), [`assets/UiTests.csproj`](assets/UiTests.csproj) | The pins in one place; a versionless project that picks up the runsettings |
+| [`assets/ui.runsettings`](assets/ui.runsettings) | `BrowserName`, `LaunchOptions` / `Headless`, `ExpectTimeout`, `TestIdAttribute` |
+| [`assets/BaseTest.cs`](assets/BaseTest.cs) | `BASE_URL`, `ContextOptions()` amending the base, tracing, failure evidence to NUnit and Allure |
+| [`assets/AuthSetup.cs`](assets/AuthSetup.cs) | The root-namespace `[SetUpFixture]` that saves the signed-in state |
+| [`assets/LoginPage.cs`](assets/LoginPage.cs), [`assets/HomePage.cs`](assets/HomePage.cs) | Intent methods, a `SignInForm` component, the error scoped with `parent.Locator(child)`; the landing page |
+| [`assets/LoginTests.cs`](assets/LoginTests.cs) | `Should_X_When_Y` tests, categories, pages built per test |
 
-```xml
-<Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>   <!-- or net8.0 / net9.0 to match the project -->
-    <Nullable>enable</Nullable>
-    <LangVersion>latest</LangVersion>
-    <IsPackable>false</IsPackable>
-  </PropertyGroup>
-  <ItemGroup>
-    <PackageReference Include="Microsoft.Playwright" Version="1.49.0" />
-    <PackageReference Include="Microsoft.Playwright.NUnit" Version="1.49.0" />
-    <PackageReference Include="NUnit" Version="4.2.2" />
-    <PackageReference Include="NUnit3TestAdapter" Version="4.6.0" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
-  </ItemGroup>
-</Project>
-```
-
-### Base test — `Tests/Support/BaseTest.cs`
-
-`PageTest` (from `Microsoft.Playwright.NUnit`) handles browser/context/page lifecycle per test. The project base only wires up page objects:
-
-```csharp
-using Microsoft.Playwright.NUnit;
-using NUnit.Framework;
-using Example.Tests.Pages;
-
-namespace Example.Tests.Support;
-
-public abstract class BaseTest : PageTest
-{
-    protected LoginPage LoginPage { get; private set; } = default!;
-    protected HomePage HomePage { get; private set; } = default!;
-
-    [SetUp]
-    public void InitPages()
-    {
-        LoginPage = new LoginPage(Page);
-        HomePage = new HomePage(Page);
-    }
-}
-```
-
-### Page object — `Tests/Pages/LoginPage.cs`
-
-```csharp
-using Microsoft.Playwright;
-using static Microsoft.Playwright.Assertions;
-
-namespace Example.Tests.Pages;
-
-public sealed class LoginPage
-{
-    private readonly IPage _page;
-    private readonly ILocator _email;
-    private readonly ILocator _password;
-    private readonly ILocator _submit;
-
-    public ILocator ErrorBanner { get; }
-
-    public LoginPage(IPage page)
-    {
-        _page = page;
-        _email = page.GetByLabel("Email");
-        _password = page.GetByLabel("Password");
-        _submit = page.GetByRole(AriaRole.Button, new() { Name = "Sign in" });
-        ErrorBanner = page.GetByTestId("login-error");
-    }
-
-    public Task GoToAsync() => _page.GotoAsync("/login");
-
-    public async Task SignInAsync(string email, string password)
-    {
-        await _email.FillAsync(email);
-        await _password.FillAsync(password);
-        await _submit.ClickAsync();
-    }
-
-    public Task ExpectLoadedAsync() => Expect(_email).ToBeVisibleAsync();
-}
-```
-
-### Test — `Tests/Specs/LoginTests.cs`
-
-```csharp
-using Microsoft.Playwright.NUnit;
-using NUnit.Framework;
-using Example.Tests.Support;
-using static Microsoft.Playwright.Assertions;
-
-namespace Example.Tests.Specs;
-
-[Parallelizable(ParallelScope.Self)]
-[TestFixture]
-public class LoginTests : BaseTest
-{
-    [Test, Category("smoke")]
-    public async Task Signs_In_With_Valid_Credentials()
-    {
-        await LoginPage.GoToAsync();
-        await LoginPage.SignInAsync(
-            Environment.GetEnvironmentVariable("E2E_USER")!,
-            Environment.GetEnvironmentVariable("E2E_PASSWORD")!);
-
-        await HomePage.ExpectLoadedAsync();
-        await Expect(HomePage.Greeting).ToContainTextAsync("Welcome");
-    }
-
-    [Test]
-    public async Task Shows_Error_For_Invalid_Password()
-    {
-        await LoginPage.GoToAsync();
-        await LoginPage.SignInAsync(
-            Environment.GetEnvironmentVariable("E2E_USER")!,
-            "wrong");
-
-        await Expect(LoginPage.ErrorBanner).ToBeVisibleAsync();
-        await Expect(LoginPage.ErrorBanner)
-            .ToHaveTextAsync(new System.Text.RegularExpressions.Regex("invalid credentials", System.Text.RegularExpressions.RegexOptions.IgnoreCase));
-    }
-}
-```
-
-### Authenticated state via `StorageState`
-
-Sign in once via a `[OneTimeSetUp]` in a dedicated setup fixture, persist to a JSON file, and have `PageTest` consume it by overriding `ContextOptions()`:
-
-```csharp
-using Microsoft.Playwright;
-using NUnit.Framework;
-
-namespace Example.Tests.Support;
-
-[SetUpFixture]
-public class AuthSetup
-{
-    public const string StatePath = "playwright/.auth/user.json";
-
-    [OneTimeSetUp]
-    public async Task Authenticate()
-    {
-        using var pw = await Playwright.CreateAsync();
-        var browser = await pw.Chromium.LaunchAsync();
-        var ctx = await browser.NewContextAsync();
-        var page = await ctx.NewPageAsync();
-        var login = new Pages.LoginPage(page);
-        await login.GoToAsync();
-        await login.SignInAsync(
-            Environment.GetEnvironmentVariable("E2E_USER")!,
-            Environment.GetEnvironmentVariable("E2E_PASSWORD")!);
-        await ctx.StorageStateAsync(new() { Path = StatePath });
-        await browser.CloseAsync();
-    }
-}
-
-public abstract class AuthenticatedBaseTest : BaseTest
-{
-    public override BrowserNewContextOptions ContextOptions() =>
-        new() { StorageStatePath = AuthSetup.StatePath };
-}
-```
-
-### API-seeded data
-
-```csharp
-[SetUp]
-public async Task SeedOrder()
-{
-    var res = await Page.APIRequest.PostAsync("/api/orders",
-        new() { DataObject = new { Sku = "ABC", Qty = 1 } });
-    Assert.That(res.Ok, Is.True);
-    _seededOrderId = (await res.JsonAsync())!.Value.GetProperty("id").GetString();
-}
-```
+Start from the assets: copy them, rename the root namespace, and keep their shape.
 
 ## Rules
 
-### Locator preference order (strict)
+### Lifecycle
 
-1. `page.GetByTestId("...")` — **preferred whenever the element carries a `data-testid`**; the attribute is the agreed contract with the app team. Elements missing it go in the `missing-testids.md` dev-team report (extraction workflow: `qa/dotnet/skills/page-objects-from-url`) and use a fallback below with `// TODO: missing data-testid '<suggested>'`
-2. `page.GetByRole(AriaRole.X, new() { Name = "..." })` — best fallback
-3. `page.GetByLabel("...")` — for form inputs
-4. `page.GetByPlaceholder("...")` — only when there is no label
-5. `page.GetByText("...", new() { Exact = true })` — for assertions on visible text
-6. CSS / XPath via `page.Locator("...")` — **last resort**; add `// TODO: replace with data-testid locator` and a brief reason
+- **Every test class derives from the one `BaseTest`.** No test or specialised skill calls
+  `Playwright.CreateAsync()` or declares a second base class; a role, a device or a locale is an override
+  of `ContextOptions()` on the fixture that needs it. The one other `Playwright.CreateAsync()` is
+  `AuthSetup`'s `[OneTimeSetUp]`.
+- **`ContextOptions()` amends `base.ContextOptions()`**, never returns `new()` — that drops `BaseURL`, the
+  video folder and the defaults.
+- **Parallelism is `ParallelScope.Self` only**, declared once on `BaseTest`. Never `All`, `Children` or
+  `Fixtures`: tests of one fixture share one instance and its `Page`.
+- **Launch options live in the `.runsettings`** (`BrowserName`, `LaunchOptions`, `ExpectTimeout`,
+  `TestIdAttribute` — the only keys the adapter reads). The browser is per worker, so a suite that needs
+  other launch arguments gets its own `.runsettings` and run.
+- `BASE_URL` is required: `GotoAsync("/login")` and `Page.APIRequest` resolve against it. `HEADED=1` runs
+  headed (the adapter reads it); `BROWSER=firefox` switches the browser.
+- Failure evidence is `BaseTest`'s: trace, full-page screenshot and video kept only on failure, in
+  `<WorkDirectory>/playwright-artifacts/<Class>.<Test>.{zip,png,webm}`. Its `[TearDown]` closes the context
+  itself — `PageTest` does so only after a pass — then saves the video. The video API is `PathAsync()`; the
+  docs' `GetPathAsync()` does not exist.
 
-### Page object rules
+### Locators
 
-- Locators are `readonly ILocator` fields initialized in the constructor — **not** properties that re-query the DOM
-- Constructor signature is `(IPage page)` — never take strings or config
-- Action methods are `async Task` for same-page actions; for navigation return the next page object (e.g. `Task<HomePage>`)
-- An `ExpectLoadedAsync()` method must exist and assert one landmark locator is visible
-- **No assertions inside actions** — actions perform; tests and `ExpectLoadedAsync` assert
-- **No `page.Locator("css selector")` in test classes** — wrap inside a page object
-- Nullable reference types enabled — no `!`-bang in page objects beyond constructor initialization
+1. **The ladder:** `GetByTestId` → `GetByRole` → `GetByLabel` → `GetByPlaceholder` → `GetByText` →
+   `GetByAltText` / `GetByTitle` → CSS. The first rung the element supports wins.
+2. **Test ids are PascalCase dot-separated and static** — `Login.Submit`, `OrderRow`, `OrderRow.Title` — the
+   format `fe-react` and `fe-blazor` generate. A row is picked by its content, never by an id that embeds a
+   key, an index or a state.
+3. **A fallback carries no marker in the code.** Record it in `missing-testids.md` (page, element,
+   suggested id, fallback in use). The report is the contract; no `TODO`, no comment on the locator.
+4. **Scope instead of picking.** A locator that matches many is narrowed by its component root,
+   `parent.Locator(child)`, or `Filter(new() { Has = ... })` / `Filter(new() { HasText = ... })`. `Nth()` /
+   `First` only where order is the behaviour, and then the member name says so.
+5. The `Visible` property (1.63) instead of `:visible`; `FrameLocator` / `ContentFrame` for iframes;
+   `AddLocatorHandlerAsync` for overlays that may appear; `Describe()` on every locator a test asserts on.
+6. **Never assert on an `Or()` locator** — it passes on either state.
 
-### Test rules
+### Page objects
 
-- One test fixture per feature; group scenarios with NUnit `[Category("...")]`
-- Test method names describe behavior: `Signs_In_With_Valid_Credentials`, `Shows_Error_For_Invalid_Password`
-- One logical behavior per `[Test]`. Multiple `Expect(...)` calls are fine if they verify one behavior; otherwise split.
-- **Every test asserts something.** A test that ends after an action with no assertion is not a test.
-- Use web-first assertions: `Expect(locator).ToBeVisibleAsync() / .ToHaveTextAsync(...) / .ToHaveCountAsync(n) / .ToBeEnabledAsync()`. They retry until timeout. Never `await locator.IsVisibleAsync()` then `Assert.That(result, Is.True)` — one-shot checks lose auto-waiting.
-- Prefer positive assertions over negated ones: `ToBeHiddenAsync()` over `Not.ToBeVisibleAsync()`, `ToBeDisabledAsync()` over `Not.ToBeEnabledAsync()`.
-- **One expected condition per assertion — never an `OR`.** Assert the one thing the flow produces: `ToHaveTextAsync("Saved")`, never `ToHaveTextAsync(new Regex("Saved|Success"))`; `ToHaveCountAsync(3)`, never "3 or more"; `Assert.That(x, Is.EqualTo(a))`, never `Is.EqualTo(a).Or.EqualTo(b)`, `Is.AnyOf(...)`, or a `||` inside the condition. **A regex alternation in a text or URL assertion is an `OR` in disguise** — the commonest form of this in UI tests. The rule covers text, counts, URLs, attribute values, and visible/enabled state alike. If both outcomes are genuinely reachable the test does not know what the app should do — split it into one `[Test]` per expected outcome, parameterize with `[TestCase]`, or pin down the correct behavior. The only exception is an explicit instruction to accept more than one value; record that instruction in a comment on the assertion.
-- **No `try`/`catch` in a test — and none in `[TearDown]`.** An unexpected exception must reach NUnit; an expected one is asserted with `Assert.Throws<T>`, which is an assertion, not error handling. Anything the test created is tracked and deleted in `[TearDown]` with no catch — a cleanup that fails should fail loudly rather than leak state into the next run. The suite's only catches live in **I/O helpers where narrowing one named exception is the contract** — an `IsDisplayed(By)` probe converting `NoSuchElementException` into `false`, a driver-quit helper — never a blanket `catch (Exception)`, and never a catch that lets a failed action continue into the assertions.
-- **Failures name the subject.** `Assert.That(banner.Text, Is.EqualTo("Saved"), $"success banner after saving order {orderId}")`. A UI failure reported as `Expected: "Saved" But was: ""` with no subject is indistinguishable from a locator that matched the wrong element.
-- **No `page.WaitForTimeoutAsync(ms)`** — use a web-first assertion with a `Timeout` option for conditional waits.
-- **Do not pass `WaitUntil = WaitUntilState.NetworkIdle` to `GotoAsync`.** Brittle on SPAs with long-polling / WebSockets. Navigate, then assert a user-visible landmark.
-- **Do not pre-wait before auto-waiting actions.** `ClickAsync` / `FillAsync` / `CheckAsync` already wait for actionability — `locator.WaitForAsync()` immediately before `locator.ClickAsync()` is redundant.
-- **Do not use `Force = true`.** It skips actionability checks and hides real bugs. Fix the flow — close the overlay, scroll into view — instead of forcing.
-- **`WaitForNavigationAsync` is deprecated.** Use `page.WaitForURLAsync("**/path")` or a web-first URL/landmark assertion.
-- **`RunAndWaitForResponseAsync` ordering** — wrap the trigger in the action delegate so the listener is set up before the click:
-  ```csharp
-  var response = await page.RunAndWaitForResponseAsync(
-      async () => await submit.ClickAsync(),
-      r => r.Url.Contains("/api/data") && r.Status == 200);
-  ```
-  Never call `WaitForResponseAsync` after the action — the response can arrive first.
-- **Retry loops:** never hand-roll `while (retries-- > 0) { ... Task.Delay ... }`. Raise the assertion timeout via the `Timeout` option, or for non-DOM polling use `Assert.That(() => ..., Is.EqualTo(...).After(timeout).PollEvery(interval))`.
-- Prefer web-first assertions over `page.WaitForFunctionAsync(...)` for UI state.
-- Pass `Exact = true` to `GetByText` / `GetByRole` `Name` when the expected text is a substring of other labels — otherwise a future label change causes a strict-mode violation.
-- Tag tests with NUnit `[Category("smoke")]` so projects can filter.
-- Async all the way down — never `.Result`, `.Wait()`, or `.GetAwaiter().GetResult()`.
+- Locators are built once, in the constructor: `private readonly ILocator` fields, and get-only properties
+  for the ones tests assert on (`Error`). Not expression-bodied properties: a lazy locator is no slower
+  there, but the definitions scatter.
+- A page takes `(IPage page)`. A **component** (a region reused across pages — a form, a row, a menu) takes
+  its root `ILocator` and builds its children from it, as `SignInForm` does.
+- Methods are `async Task`, named for user intent (`SignInAsync`, `AddToCartAsync`), never the widget
+  (`ClickButtonAsync`). An action that always lands on another page may return that page object.
+- The page owns its URL in `GoToAsync()`. Test classes never call `Page.GotoAsync`, `Page.Locator` or any
+  other raw `Page` method.
+- **No assertions in page objects.** They expose locators; tests assert. An optional `ExpectLoadedAsync()`
+  that asserts one landmark is the only exception.
+- Pages are built in the test class's `[SetUp]`, never as properties of `BaseTest`. No shared `BasePage`
+  until three pages share real behaviour (`page-object-design`).
 
-### Auth & storage state
+### Tests
 
-- Sign in **once** per run via `[SetUpFixture]`, persist `StorageState` to a file, and consume it by overriding `ContextOptions()` on a base class; do not log in inside every test
-- For tests that need a different role, create a separate `[SetUpFixture]` per role with its own state file
-- Anonymous tests inherit from the plain `BaseTest`
+- **Names are `Should_X_When_Y`** (`Should_ShowInvalidCredentialsError_When_PasswordIsWrong`), one test class
+  per feature.
+- **Categories tag the area and the tier:** `[Category("login")]`, `[Category("smoke")]`;
+  `[AllureFeature("Login")]` on the class.
+- One logical behaviour per test; every test asserts. Several assertions are fine when they check one
+  behaviour.
+- **Web-first assertions only** (`references/assertions.md`). No one-shot read compared later
+  (`Assert.That(await loc.IsVisibleAsync(), Is.True)`, `TextContentAsync()`); `ILocator` has no `.Text`
+  (that is Selenium's `IWebElement`).
+- **One expected condition per assertion — never an `OR`**: no `.Or.`, no `Is.AnyOf(...)`, no `||` in
+  `Assert.That`, no `Regex("a|b")` in a text or URL assertion. Split the outcomes, or use `[TestCase]`.
+- **Failures name the subject:** `Describe()` on the locator, and `Expect(locator, "message")` (1.60) where
+  the record or user matters; NUnit value assertions carry the evidence as the message.
+- **No `try` / `catch` / `finally` in a test or a hook.** An expected exception from async code is
+  `Assert.ThrowsAsync<T>` — never `Assert.Throws<T>` around a `Task`, which reports that nothing was thrown.
+  Cleanup is the class's `[TearDown]`.
+- No `if` or `for` driving assertions; `[TestCase]` / `[TestCaseSource]` instead. Tests are independent:
+  no `[Order]` chains, no shared mutable state. One long journey is one test with `[AllureStep]` methods.
+- API responses assert the exact status with the body:
+  `Assert.That(created.Status, Is.EqualTo(201), await created.TextAsync())` — never
+  `Assert.That(res.Ok, Is.True)` or `ToBeOKAsync()`.
+- Async all the way: never `.Result`, `.Wait()` or `.GetAwaiter().GetResult()`. No hardcoded credentials,
+  URLs or hostnames — `BASE_URL`, `E2E_USER`, `E2E_PASSWORD`. No `Console.WriteLine`; use the trace.
 
-### What NOT to do
+### Waiting
 
-- No `page.WaitForTimeoutAsync(ms)` — every wait must be conditional on a Locator or response
-- No `WaitUntil = WaitUntilState.NetworkIdle` — assert a landmark instead
-- No `Force = true` on `ClickAsync` / `FillAsync` / `CheckAsync` — fix the underlying flow
-- No `locator.WaitForAsync(...)` immediately before an auto-waiting action — it is redundant
-- No `WaitForNavigationAsync` (deprecated) — use `WaitForURLAsync` or a URL assertion
-- No hand-rolled retry loops with `Task.Delay` — extend the assertion timeout
-- No `page.WaitForFunctionAsync` for state covered by a web-first assertion
-- No `Not.ToBeVisibleAsync()` when `ToBeHiddenAsync()` exists; no `Not.ToBeEnabledAsync()` when `ToBeDisabledAsync()` exists
-- No `OR` in any assertion — no `.Or.`, no `Is.AnyOf(...)`, no `||` inside `Assert.That`, no `Regex("a|b")` alternation in a text/URL assertion. One expected value per assertion (see Test rules)
-- No `try`/`catch` in a `[Test]` or `[TearDown]` — expected exceptions use `Assert.Throws<T>`; catches live only in I/O helpers narrowing one named exception (see Test rules)
-- No `page.Locator("div.foo > span:nth-child(3)")` in test classes — promote to a page object with a semantic locator
-- No `page.GotoAsync(...)` directly in test classes — put it in the page object's `GoToAsync()` so it owns its URL
-- No `Console.WriteLine` for debugging in committed tests — use NUnit progress or the trace viewer instead
-- No assertions in action methods — `ExpectLoadedAsync()` is the only assertion that belongs on a page object
-- No `if`/`for` driving assertions — use NUnit `[TestCase(...)]` / `[TestCaseSource]` for parameterization
-- No shared mutable state between tests — each test gets a fresh context (via `PageTest`) and fresh page objects
-- No hardcoded credentials, base URLs, or environment hostnames — read from env vars / `appsettings.Test.json`
-- No test without at least one assertion — actions without assertions verify nothing
-- No NUnit `[Order]` chains across `[Test]` methods to model multi-step flows. Each test sets up its own state. For one journey, put the whole flow in a single test and use Allure `[AllureStep]` for the steps.
+- No `WaitForTimeoutAsync` and no `Task.Delay` for UI state; raise the matcher's timeout
+  (`ToBeVisibleAsync(new() { Timeout = 15_000 })`), or set `ExpectTimeout` once in the runsettings.
+- No `WaitUntil = WaitUntilState.NetworkIdle`; navigate, then assert a landmark.
+- No `WaitForAsync()` before an action that already auto-waits; no `Force = true` (close the overlay with
+  `AddLocatorHandlerAsync`, scroll, wait for the state).
+- No `WaitForNavigationAsync` (deprecated); `WaitForURLAsync` or `Expect(Page).ToHaveURLAsync(...)`, whose
+  string is an exact match — a glob needs `WaitForURLAsync` or a `Regex`. No page-level selector APIs
+  (`Page.ClickAsync(selector)`, `Page.InnerTextAsync(selector)`).
+- `RunAndWaitForResponseAsync(action, predicate)` starts the wait with the action. No hand-rolled retry
+  loops.
+
+### Auth and data
+
+- Sign in **once per run per role** in `AuthSetup` (root namespace), save the state, and point signed-in
+  fixtures at it in `ContextOptions()`. Never sign in inside every test.
+- Records a test needs are created through `Page.APIRequest` in the class's `[SetUp]`, with a unique value
+  per test, and deleted in its `[TearDown]`. Never seed in `[OneTimeSetUp]`.
+- Builders for any record with four or more fields (`qa/dotnet/skills/test-data-builder`).
 
 ## Generation steps
 
-1. Confirm **feature**, **scenarios**, **locators**, **auth requirement**, and **data source** with the user.
-2. For each new screen, generate or extend `Tests/Pages/{Name}Page.cs`:
-   - One `readonly ILocator` per element, initialized in the constructor with the best-available semantic locator
-   - `GoToAsync()` method that owns the URL
-   - `ExpectLoadedAsync()` that asserts one landmark
-   - One action method per user-intent action
-3. Add the page object as a property on `BaseTest` and initialize it in `[SetUp]`.
-4. Generate `Tests/Specs/{Feature}Tests.cs` inheriting from `BaseTest` (or `AuthenticatedBaseTest`):
-   - `[TestFixture]` per feature
-   - One `[Test]` per scenario
-5. For authenticated flows, ensure an `AuthSetup` `[SetUpFixture]` exists and the test inherits `AuthenticatedBaseTest`.
-6. Install Playwright browsers once via `pwsh bin/Debug/net10.0/playwright.ps1 install` (use the project's TFM in the path; or the project's bootstrap script).
-7. Run `dotnet test` — expect 0 failures. Run with `HEADED=1` (via `LaunchOptions`) to debug visually. Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run".
+1. Detect the installed Playwright, NUnit and Allure versions, the TFM, CPM and the project layout; match
+   them.
+2. Confirm the feature, scenarios, locators, auth, data and devices with the user.
+3. No `BaseTest` yet: add `assets/BaseTest.cs`, `ui.runsettings` and `RunSettingsFilePath`. One whose
+   `ContextOptions()` returns `new()`, a `[SetUpFixture]` outside the root namespace, or inline `Version=`
+   under CPM: fix that first.
+4. For each screen, write or extend `Pages/<Name>Page.cs` from `assets/LoginPage.cs`: one locator per element
+   on the highest ladder rung, components for reused regions, `GoToAsync()`, intent methods, `Describe()` on
+   asserted locators. Add a `missing-testids.md` row for every fallback.
+5. Write `Tests/<Feature>Tests.cs` from `assets/LoginTests.cs`: derives from `BaseTest`, pages built in a
+   `[SetUp]`, one `[Test]` per scenario with a `Should_X_When_Y` name and categories.
+6. For signed-in fixtures, keep `AuthSetup` in the root namespace and amend `ContextOptions()` with
+   `StorageStatePath`; for devices, amend it from `Playwright.Devices[...]`.
+7. Build, install the browser with `pwsh bin/Debug/net10.0/playwright.ps1 install chromium`, and run
+   `dotnet test` (0 failures); debug with `HEADED=1` or `PWDEBUG=1`. In a `Gate: none` plan task, run none
+   of this; report the files as "written, not run".
 
 ## Handoffs
 
-- Designing the page-object hierarchy → `qa/dotnet/skills/page-object-design`
-- Reviewing existing Playwright tests → `qa/dotnet/skills/ui-test-author/review`
+Besides the skills under "When NOT to use":
+
 - Test data builders → `qa/dotnet/skills/test-data-builder`
-- Allure reporter setup → `qa/reporting/dotnet/skills/test-reports`
+- Breakpoint matrices → `qa/dotnet/skills/responsive-testing`
+- Real-device mobile web → `qa/dotnet/skills/device-cloud`
+- Allure reporting and CI → `qa/reporting/dotnet/skills/test-reports`, `qa/cicd/dotnet/skills/ci-pipelines`

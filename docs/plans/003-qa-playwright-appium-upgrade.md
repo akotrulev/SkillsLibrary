@@ -7,12 +7,15 @@ and Python pin 1.63 until their 1.64 packages publish. Appium moves to 3. The pl
 trace, HAR — Playwright and Appium) and a shared `webmcp-testing` skill. It teaches locator scoping with
 `locator.within()`, and wires all of it into the `qa-ui-*`, `qa-bdd-*` and `qa-mobile-*` agents.
 
-**Status:** T1 and J1 landed 2026-10-10: the TypeScript Playwright 1.64 writer (SKILL.md, four references,
-six assets) and the Java Playwright 1.63 writer (SKILL.md, four references, nine assets around one
-parallel-safe `BaseTest` on allure-java 3.0), each with its stack's `ui-test-author/review` and
-`page-object-design` aligned. Built but unverified: no asset has been compiled or run (G1 does that; D24's
-TS config import and the Java build on Allure Gradle plugin 4.3.0 are the open risks). Planned
-2026-10-10. The research behind it is committed with this plan:
+**Status:** T1, J1 and N1 landed 2026-10-10: the TypeScript Playwright 1.64 writer (SKILL.md, four
+references, six assets), the Java Playwright 1.63 writer (SKILL.md, four references, nine assets around one
+parallel-safe `BaseTest` on allure-java 3.0) and the .NET Playwright 1.63 writer (SKILL.md, four references,
+eight assets: CPM props, a versionless `UiTests.csproj`, `ui.runsettings`, `BaseTest : PageTest`, a
+root-namespace `AuthSetup`), each with its stack's `ui-test-author/review` and `page-object-design` aligned;
+.NET `ui-project-setup` now scaffolds from those assets with a v1.63.0-noble Dockerfile. Built but
+unverified: no asset has been compiled or run (G1 does that; D24's TS config import, the Java build on Allure
+Gradle plugin 4.3.0, and the .NET build on NUnit3TestAdapter 6.3.1 / Test SDK 18.10.1 are the open risks).
+Planned 2026-10-10. The research behind it is committed with this plan:
 `docs/research/003-qa-playwright-appium/` (5 files). So is the read-only audit:
 `docs/audits/003-qa-playwright-appium/` (4 files). All open questions were answered on 2026-10-10:
 - Java moves to allure-java 3.0.
@@ -22,7 +25,7 @@ TS config import and the Java build on Allure Gradle plugin 4.3.0 are the open r
 - A Maestro lane is added (X1).
 - The newest Appium client majors are primary.
 
-Next: N1 (H1, the user's, blocks no task). The cost is 19 agent sessions on the subscription, each started by the user
+Next: T2 (H1, the user's, blocks no task). The cost is 19 agent sessions on the subscription, each started by the user
 from Plan Queue. Nothing else is metered.
 
 ## 1. What already exists, and what is missing
@@ -610,9 +613,46 @@ the build file.
 `System.Logger` and a message template, and continues (J1, 2026-10-10).** This settles `aJ` D47. Readings:
 the old Java rule "no catch in `@AfterMethod`" (a crashed page then fails the hook, and TestNG's default
 `configfailurepolicy=skip` skips every remaining test in the class, losing the trace and video too), or
-CLAUDE.md's narrow, logged catch in an I/O helper (chosen). The writer and the review now state the
 CLAUDE.md rule. `System.Logger` avoids adding an SLF4J pin. **Cost:** a missing screenshot shows only as a
 log line; the test's own failure still reports.
+
+**D30 — The .NET writer ships an eighth asset, `HomePage.cs`, and `LoginPage.cs` nests `SignInForm` and the
+`Credentials` record (N1, 2026-10-10).** §3.1 lists seven .NET assets. As in D23 and D27, the success journey
+needs a landing page to assert on without a raw `Page` call in the test. Readings: fold the landing page into
+`LoginPage.cs` (rejected: one type per file), or an eighth file (chosen); `SignInForm` and `Credentials` as
+files of their own (rejected: only the sign-in screen uses them), or nested (chosen). **Cost:** none for G1,
+which compiles every `.cs` asset.
+
+**D31 — The .NET `BaseTest` has no catch, and its teardown stops the trace before it takes the screenshot
+(N1, 2026-10-10).** Readings: D29's narrow, logged catch around the screenshot (rejected: D29 is earned by
+TestNG's `configfailurepolicy=skip`; NUnit records a teardown exception on that test only, still runs the
+base teardowns, and gives the next test a fresh browser — and a logged catch would need a logger the
+project does not otherwise have), or no catch with the trace saved first (chosen). **Cost:** when the page
+has crashed, the screenshot throws and that test's video is lost; its trace is kept.
+
+**D32 — .NET launch arguments live in a `.runsettings`, never in a per-class `LaunchOptionsAsync()` override
+(N1, 2026-10-10).** `BrowserTest` registers the browser as a per-worker service under one name, so the
+first fixture on a worker launches it and later fixtures reuse it whatever they override (v1.63.0
+`BrowserService.cs`, `WorkerAwareTest.cs`). Readings: a `LaunchOptionsAsync()` override on the class that
+needs a flag (unreliable under parallel workers), or a dedicated `.runsettings` with
+`<LaunchOptions><Args>['--flag']</Args></LaunchOptions>` and its own `dotnet test` run (chosen). This
+settles A1's trap for `WebMcpTests.cs`. **Cost:** a WebMCP or other flagged suite is a second run, with a
+filter that keeps its tests out of the main run.
+
+**D33 — The .NET signed-in state is `<WorkDirectory>/auth-user.json` (N1, 2026-10-10).** Readings: the old
+`playwright/.auth/user.json` relative to the current directory (rejected: `StorageStateAsync` does not create
+folders, and the current directory under `dotnet test` is not guaranteed), a `.auth/` folder created first
+(one more line in `AuthSetup`), or a file directly in NUnit's work directory, which always exists (chosen).
+It sits under `bin/`, so it is never committed. **Cost:** none.
+
+**D34 — `ui-project-setup` names the UI project `UiTests`, builds it from the writer's assets, and drops the
+`allure` dotnet tool (N1, 2026-10-10).** The assets are `UiTests.csproj`, and the CI references and
+`bdd-project-scaffold` already use `UiTests`; `dotnet new nunit` writes inline versions that fail restore
+under CPM (NU1008); and NuGet has no `allure` package (`dotnet tool install allure` fails). Readings: keep
+`PlaywrightTests` and `dotnet new nunit` and patch the csproj (two names for one project), or `UiTests`
+from the assets (chosen). **Cost:** `api-project-setup`, `performance-project-setup` and
+`mobile-project-setup` still say `PlaywrightTests` and two of them install the `allure` tool, until M3
+(mobile) and G1 (the other two) reconcile them.
 
 ## Answered questions (2026-10-10)
 
@@ -876,6 +916,58 @@ namespace. `ui-test-author/review` and `page-object-design` agree with it.
   `playwright.config.ts` (`aN` D-26); no seeding in `[OneTimeSetUp]` (D-27).
 - Apply R1–R6. Fix `aN` T4, T5, D-01, D-02, D-09, D-14–D-17 and D-29–D-30 where they sit in these files.
 - **Not in N1:** the `standards-audit` checklist (N4); `evidence-capture` and CI (N2); agents (A1/N2).
+- **As built (2026-10-10):**
+  - Landed: `ui-test-author/playwright/SKILL.md` (15,625 chars; description 489; the Versions table is the
+    only pin), four references (`lifecycle.md` 14.6k · `locators.md` 10.6k · `assertions.md` 9.8k ·
+    `emulation-and-mobile-web.md` 7.0k) and eight assets. `ui-test-author/review/SKILL.md` went from 17,123
+    to 15,558 chars, leaving ~440 for M3 (replace the Appium rows, do not add). `page-object-design/SKILL.md`
+    13,822; `ui-project-setup/SKILL.md` 14,260.
+  - Checked live today, against `microsoft/playwright-dotnet` v1.63.0 sources: `ContextTest.ContextOptions()`
+    returns `Locale = "en-US"`, `ColorScheme = Light`; `BrowserTest.BrowserTearDown` closes contexts only when
+    `TestOk()`; `WorkerAwareTest.WorkerTeardown` disposes the worker's browser on failure;
+    `PlaywrightSettingsXml` reads only `BrowserName`, `LaunchOptions`, `ExpectTimeout`, `TestIdAttribute`
+    (a top-level `<Headless>` or `<Shard>` prints "not implemented"; `LaunchOptions` children parse by
+    reflection, `Args` as a JSON array); `HEADED=1` and `BROWSER` are read by `PlaywrightSettingsProvider`;
+    the browser is a per-worker service registered once under `"Browser"`; `PlaywrightTest` has
+    `Expect(ILocator, string)`; `ILocator.Visible`, `ContentFrame` and `IFrameLocator.Owner` are properties;
+    `NormalizeAsync()` returns `Task<ILocator>`; `IVideo.PathAsync()`; `StorageStateAsync` does **not**
+    create folders (screenshots and artifacts do). NUnit 4.6.1: `[Parallelizable]` is `Inherited = true`
+    and fixture attributes are read with `inherit: true`; each inheritance level's teardown catches its own
+    exception. Allure.NUnit 2.15.0: `Allure.NUnit.AllureNUnitAttribute`, `Allure.NUnit.Attributes.AllureFeature`,
+    `AllureApi.AddAttachment(name, type, path)`. NuGet today: NUnit 4.6.1, NUnit3TestAdapter 6.3.1 (net8+,
+    runs NUnit 4), Microsoft.NET.Test.Sdk 18.10.1, Selenium.WebDriver 4.51.0; there is **no** `allure`
+    dotnet tool (flat-container 404).
+  - Differed from the plan: an eighth asset `HomePage.cs`, and `LoginPage.cs` nests `SignInForm` and the
+    `Credentials` record (D30); `BaseTest` has no catch and stops the trace before the screenshot (D31);
+    launch arguments live in a `.runsettings`, not a per-class override (D32); the signed-in state is
+    `<WorkDirectory>/auth-user.json` (D33); `ui-project-setup` names the project `UiTests`, copies the
+    writer's assets instead of `dotnet new nunit`, and drops the nonexistent `allure` dotnet tool (D34).
+  - Names assigned: root namespace `Example.UiTests` (`AuthSetup`), `Example.UiTests.Support` (`BaseTest`),
+    `.Pages`, `.Tests`; `BaseTest.RequiredEnv(name)` (public static), `[SetUp] StartTracing`,
+    `[TearDown] KeepEvidenceOnFailure`; evidence `<WorkDirectory>/playwright-artifacts/<Class>.<Test>.{zip,png,webm}`
+    with the name sanitized to `[A-Za-z0-9._-]`; raw videos `<WorkDirectory>/playwright-videos/` (deleted per
+    test); trace attached as `application/vnd.allure.playwright-trace`; `AuthSetup.UserState`; test ids
+    `Login.Form`, `Login.Email`, `Login.Password`, `Login.Submit`, `Home.Greeting` (same as T1/J1); env
+    `BASE_URL` (required), `E2E_USER`, `E2E_PASSWORD`, `HEADED`, `BROWSER`.
+  - Left for later tasks: the review's Appium rows (M3); `PlaywrightTests` in `api-project-setup:193`,
+    `performance-project-setup:136` and `mobile-project-setup:153`, and `dotnet tool install allure` in
+    `api-project-setup:39,107` and `mobile-project-setup:110` (M3 and G1 prompts updated); the
+    `// TODO: missing data-testid` mandate in step 3 of all three `qa-ui-*` agents' live-page workflow (A1
+    prompt updated).
+  - Built, unverified (Gate: none): nothing compiled or ran. `BaseTest` throws when `BASE_URL` is unset, and
+    `AuthSetup` (root namespace) signs in before every fixture under `Example.UiTests`, so G1's evidence
+    smoke must sit outside that namespace or drop `AuthSetup.cs`.
+  - Proof: `[AllureNUnit]`, `ParallelScope.Self` at `assets/BaseTest.cs:11-12`; `base.ContextOptions()`,
+    `BaseURL`, video folder at `:31-33`; trace stop → screenshot → `CloseAsync` → `SaveAsAsync` →
+    `DeleteAsync` at `:75,82,64,89,69`. Root namespace, `[SetUpFixture]`, `await using`, settings browser at
+    `assets/AuthSetup.cs:8,10,19`. `parent.Locator(child)` at `assets/LoginPage.cs:15`. `Expect(locator,
+    "message")` at `assets/LoginTests.cs:30,40`. `RunSettingsFilePath` and versionless references at
+    `assets/UiTests.csproj:7,10-14`; the four keys at `assets/ui.runsettings:4-8`. Review rows: async
+    `Assert.Throws` `review/SKILL.md:58`, inline `Version=` `:65`, `CreateAsync` `:74`, base URL `:75`,
+    `ContextOptions()` `new()` `:76`, SetUpFixture namespace `:77`, `ParallelScope` `:78`, `.Text` `:82`.
+    Third-sharer rule `page-object-design/SKILL.md:57`, no `[OneTimeSetUp]` seeding `:95`, `.runsettings`
+    `:130`. `Eyes.Playwright` `ui-project-setup/SKILL.md:39`, Docker image `:40,136`, `RunSettingsFilePath`
+    `:119`, `pwsh` show-trace `:165`.
 
 ### T2 — TypeScript evidence capture: the new skill, agent wiring, reporting and CI
 
@@ -1619,73 +1711,9 @@ Run them in order, one session each, opened from Plan Queue. Each block is compl
 | X1 | `docs` | `general-purpose` | M1, S1, T2 | ~130k |
 | G1 | `docs` | `general-purpose` | all | ~145k |
 
-Landed: T1, J1 (2026-10-10). Every other block is live.
+Landed: T1, J1, N1 (2026-10-10). Every other block is live.
 
 ---
-
-### N1 — .NET writer and scaffold: Playwright 1.63, `BaseTest : PageTest`, runsettings, a working auth fixture (general-purpose, docs)
-
-````
-You are `general-purpose`. Task N1 of docs/plans/003-qa-playwright-appium-upgrade.md: make
-qa/dotnet/skills/ui-test-author/playwright teach Microsoft.Playwright 1.63, per §3.1's .NET file set.
-Make ui-project-setup scaffold the same assets, and bring review and page-object-design in line.
-
-Read, in this order:
-1. CLAUDE.md.
-2. The plan: §1, §2.1–§2.3, §3.1, §4 (R7 and R8 especially), Decisions D2, D5, D12, D15, D18, task N1,
-   "Close-out — every task".
-3. qa/dotnet/skills/ui-test-author/playwright/SKILL.md, qa/dotnet/skills/ui-test-author/review/SKILL.md,
-   qa/dotnet/skills/page-object-design/SKILL.md, qa/dotnet/skills/ui-project-setup/SKILL.md.
-4. docs/research/003-qa-playwright-appium/playwright-releases.md §(b)–§(e); playwright-evidence.md §1.1,
-   §4.1, §5.2, §11.3.
-5. docs/audits/003-qa-playwright-appium/dotnet.md §0, §2, §3a, §3b, §3c.
-
-Build:
-- SKILL.md rewritten to §3.1 (≤ 16,000 chars), with the .NET §2 table.
-- assets/:
-  - Directory.Packages.props: CPM with the §2 pins; NUnit 4.x.
-  - UiTests.csproj: net10.0, no inline Version=, Microsoft.Playwright.NUnit only.
-  - ui.runsettings: BrowserName, LaunchOptions/Headless, ExpectTimeout, TestIdAttribute.
-  - BaseTest.cs, per R8 and evidence §11.3: BaseURL from BASE_URL, ContextOptions() amending
-    base.ContextOptions(), [AllureNUnit], Page.Video.PathAsync().
-  - AuthSetup.cs: a root-namespace [SetUpFixture], await using browser, the browser from settings.
-  - LoginPage.cs and LoginTests.cs.
-  - No comments.
-- references/lifecycle.md:
-  - PageTest / ContextTest / BrowserTest / PlaywrightTest.
-  - SetUp/TearDown order.
-  - ParallelScope.Self is the only supported scope.
-  - MSTest/xUnit packages exist, but this library covers NUnit.
-  - HEADED=1, `-- Playwright.LaunchOptions.Headless=false`, PWDEBUG.
-  - Codegen with --target csharp-nunit; show-trace via pwsh or trace.playwright.dev; PowerShell install.
-- references/locators.md (the §2.3 Within lane), references/assertions.md (Expect(locator, "message")
-  1.60, the accessible/role/class/aria assertions, Assert.ThrowsAsync) and
-  references/emulation-and-mobile-web.md (Playwright.Devices, Page.Clock).
-- ui-project-setup/SKILL.md:
-  - Re-pin the CPM table; drop Microsoft.Playwright.CLI.
-  - The .runsettings, the base fixture, and a Dockerfile from mcr.microsoft.com/playwright/dotnet:v1.63.0-noble.
-  - Applitools.Playwright → Eyes.Playwright (line 40).
-- review/SKILL.md: rows for a missing BaseURL, ContextOptions() returning new(), a SetUpFixture outside
-  the tests' namespace, Selenium .Text, Assert.Throws on async code, inline Version= under CPM, and
-  Playwright.CreateAsync in a test or [SetUp].
-- page-object-design/SKILL.md: the design rule plus the link; .runsettings instead of
-  playwright.config.ts (D-26); no seeding in [OneTimeSetUp] (D-27).
-- Apply R1–R6. Fix dotnet.md T4, T5, D-01, D-02, D-09, D-14–D-17 and D-29–D-30 where they sit in these files.
-
-Traps:
-- NUnit scopes a [SetUpFixture] to its namespace. Put AuthSetup in the root test namespace.
-- PageTest closes the context in its own teardown, and only on a pass. The derived [TearDown] runs
-  first, so it must close the context itself to finalize the video (evidence §11.3).
-- Read the runsettings keys from Playwright.TestAdapter (PlaywrightSettingsXml.cs: BrowserName,
-  LaunchOptions, ExpectTimeout, TestIdAttribute). Other keys print "not implemented".
-- The docs show Page.Video.GetPathAsync(). That is a doc bug; the API is PathAsync().
-
-Gate: none. This plan gates once, in G1. Do not run dotnet build, dotnet test, tools/token-audit.py or
-any check script.
-
-Commit: `docs(qa-dotnet): Playwright 1.63 writer and scaffold — BaseTest, runsettings, auth fixture (003 N1)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
 
 ### T2 — TypeScript evidence capture: the new skill, agent wiring, reporting and CI (general-purpose, docs)
 
@@ -1868,6 +1896,19 @@ Traps:
 - Filter strings have length limits on some runners. Group by class, not by test, and say so.
 - Verify that pwsh exists in the dotnet Playwright image before a CI step relies on it. In the image,
   browsers are preinstalled, so no install step is needed.
+- N1's BaseTest already owns the R7 defaults; the skill explains them and never adds a second hook (D4).
+  `[SetUp] StartTracing` (screenshots, snapshots, sources); `[TearDown] KeepEvidenceOnFailure`: on
+  `TestStatus.Failed` it stops the trace to a path, takes a full-page screenshot, closes the context, then
+  `SaveAsAsync`; always `DeleteAsync`. It has no catch (D31). Kept files:
+  `<WorkDirectory>/playwright-artifacts/<Class>.<Test>.{zip,png,webm}` (name sanitized to
+  `[A-Za-z0-9._-]`; WorkDirectory defaults to bin/<cfg>/net10.0); raw videos in
+  `<WorkDirectory>/playwright-videos/`, deleted per test, never uploaded. Attachments go through
+  `TestContext.AddTestAttachment(path, name)` and `AllureApi.AddAttachment(name, type, path)`, the trace as
+  `application/vnd.allure.playwright-trace`. A deliberate recording or HAR that needs launch flags goes in a
+  .runsettings, not a per-class override (D32).
+- The UI project is `UiTests` (D34), so CI paths are `UiTests/bin/<cfg>/net10.0/playwright-artifacts/`.
+  `AuthSetup` (root namespace) signs in before every fixture, so CI jobs need BASE_URL, E2E_USER and
+  E2E_PASSWORD as secrets. `[Parallelizable(ParallelScope.Self)]` sits on BaseTest, so shard by test class.
 
 Gate: none. This plan gates once, in G1. Do not run any build, test or check script.
 
@@ -1922,7 +1963,18 @@ Build:
     headless flag after the hook. Use the protected `page` field (the context is private;
     `page.context()` reaches it). BaseTest requires BASE_URL; navigate relative to it. Name tests
     Should_X_When_Y.
+  - WebMcpTests.cs: namespace Example.UiTests.Tests, `using Example.UiTests.Support;`, derives from
+    BaseTest, uses the inherited `Page` and `Expect(...)`. The launch arg cannot be a per-class override
+    (D32): ship `assets/webmcp.runsettings` repeating N1's four keys plus
+    `<LaunchOptions><Headless>true</Headless><Args>['--enable-features=WebMCP']</Args></LaunchOptions>`
+    (the adapter parses Args as a JSON array), tag the fixture `[Category("webmcp")]`, and document the two
+    runs: `dotnet test --settings webmcp.runsettings --filter TestCategory=webmcp` and the main run with
+    `--filter TestCategory!=webmcp`. `--settings` replaces the csproj's RunSettingsFilePath for that run.
+    The root-namespace AuthSetup signs in before this fixture too, so the run needs E2E_USER/E2E_PASSWORD.
 - Step 3 of each qa-ui-* loads the skill + references/<stack>.md (§5.1).
+- Step 3 of the live-page POM workflow in all three qa-ui-* agents (qa-ui-dotnet.md:44, qa-ui-java.md:45,
+  qa-ui-typescript.md:45) still mandates a `// TODO: missing data-testid` marker; replace it with R2 (the
+  `missing-testids.md` row is the contract, the code carries no marker).
 - Add ./qa/_shared/webmcp-testing to all three qa plugins in the marketplace, and one catalog row.
 - A one-line cross-reference in qa/<stack>/skills/ai-feature-testing/SKILL.md (handoffs).
 
@@ -1932,8 +1984,8 @@ Traps:
 - Playwright throws unless the browser got the literal --enable-features=WebMCP launch arg, even if an
   origin-trial token exposes the API. page.webmcp covers the main frame only. Always pass a timeout:
   the default differs by language.
-- .NET: check in Playwright.TestAdapter whether runsettings LaunchOptions accepts Args. If it does not,
-  give the WebMCP suite its own webmcp.runsettings, and record which reading you took as a dated decision.
+- .NET: settled by N1 (D32). runsettings LaunchOptions accepts Args, but the browser is launched once per
+  worker, so the WebMCP suite needs its own webmcp.runsettings and its own run.
 - TS: T1's config has two projects, `setup` and `chromium` (Desktop Chrome, signed-in storage state,
   depends on setup), a default testDir and default testMatch. G1 copies webmcp.spec.ts flat beside those
   assets, so it runs in `chromium`. Keep the spec self-contained with a file-level
@@ -2087,6 +2139,17 @@ Traps:
 - Applitools.Playwright is not on NuGet; the package is Eyes.Playwright. G1's CODE_CHECKS bans the old
   name in code.
 - Name the comparer's package and version you saw on NuGet today, in the reference and your As-built note.
+- N1's BaseTest is `Example.UiTests.Support.BaseTest : PageTest`. Samples derive from it and amend
+  `base.ContextOptions()` (BaseURL from BASE_URL is already on it; never a hardcoded BaseURL, D-22); an
+  override that returns `new()` drops BaseURL and the video folder, and BaseTest's teardown then throws.
+  Locators go through page objects (`Describe()`, `Expect(locator, "message")`), never raw `Page.` calls in a
+  test (R6). A package a sample needs is pinned in N1's Directory.Packages.props, so sample .csproj lines
+  carry no `Version=` (Deque.AxeCore.Playwright 4.13.0, PercyIO.Playwright 1.0.4 and Eyes.Playwright
+  1.37.49 are already there; add the comparer's `PackageVersion` line in the reference).
+- Lighthouse needs a persistent context on a fixed debugging port, which BaseTest's per-worker browser
+  cannot give, and `Playwright.CreateAsync()` in a test is a review blocker. A fixture deriving from
+  `PlaywrightTest` can call `BrowserType.LaunchPersistentContextAsync(...)` without it. Launch flags in
+  general belong in a .runsettings (D32).
 
 Gate: none. This plan gates once, in G1. Do not run any build, test or check script.
 
@@ -2226,7 +2289,9 @@ Read, in this order:
    test-login-tokens (+ references), language-testing (+ references), data-driven-testing,
    production-uptime-checks, inhouse-framework-conventions, api-test-author/playwright, gherkin-step-code,
    bdd-project-scaffold, bdd-reviewer, standards-audit (SKILL.md + references/conformance-checklist.md).
-4. qa/dotnet/skills/ui-test-author/playwright/assets/BaseTest.cs; qa/dotnet/skills/evidence-capture/SKILL.md.
+4. qa/dotnet/skills/ui-test-author/playwright/assets/BaseTest.cs and references/lifecycle.md §1–§5, §7;
+   qa/dotnet/skills/ui-test-author/review/SKILL.md (the Playwright rows the checklist must agree with);
+   qa/dotnet/skills/evidence-capture/SKILL.md.
 5. docs/audits/003-qa-playwright-appium/dotnet.md rows C-03, C-06, C-07, C-11, C-13, C-15, D-04, D-07,
    D-08, D-10, D-12, D-20, D-21, D-28, §1 row 49.
 
@@ -2252,6 +2317,19 @@ Build:
 Traps:
 - ToHaveURLAsync(string) is an exact match after BaseURL resolution. Globs work only in WaitForURLAsync.
 - IWebSocket has events plus IsClosed and Url only; there is no WaitForEventAsync.
+- N1's BaseTest is `Example.UiTests.Support.BaseTest : PageTest`. A sample derives from it and amends
+  `base.ContextOptions()` (which already carries BaseURL from BASE_URL, the video folder, Locale en-US and
+  ColorScheme Light); returning `new()` drops all of it. `BaseTest.RequiredEnv(name)` reads a variable.
+- Launch options are per worker and come from the .runsettings (D32): a `LaunchOptionsAsync()` override is
+  not reliable. A cloud browser (browser-cloud) is `BrowserTest.ConnectOptionsAsync()` — also per worker,
+  so a cloud run is its own `dotnet test` run with its own .runsettings or environment.
+- E11 (`Playwright.CreateAsync()` in a [Test], a [SetUp] or a fixture's [OneTimeSetUp]) is a blocker with
+  one exception: the root-namespace `AuthSetup` [SetUpFixture], as in review/SKILL.md.
+- language-testing: `ContextTest` defaults Locale to en-US, so a locale fixture sets `options.Locale` and
+  `options.TimezoneId` on the base options, with `[TestFixture("de-DE", "Europe/Berlin")]` parameters.
+- N1's Directory.Packages.props pins Microsoft.Playwright.NUnit only. A Reqnroll project that references
+  Microsoft.Playwright directly adds `<PackageVersion Include="Microsoft.Playwright" Version="1.63.0" />`;
+  bdd-project-scaffold's `..\UiTests\UiTests.csproj` reference already matches N1's project name.
 
 Gate: none. This plan gates once, in G1. Do not run any build, test or check script.
 
@@ -2420,7 +2498,13 @@ Traps:
 - Appium.WebDriver 8.0 replaced the old endpoints with mobile: commands and removed ToggleWifi,
   ToggleData, SetConnectionType and StartActivity (appium.md §2.5). Do not keep them in samples.
 - NUnit stays 4.x (D18). Under NUnit 5, Assert.ThrowsAsync would have to be awaited. Note it, but do not
-  move to NUnit 5.
+  move to NUnit 5. Pin NUnit 4.6.1, NUnit3TestAdapter 6.3.1 and Microsoft.NET.Test.Sdk 18.10.1, the values
+  N1 put in qa/dotnet/skills/ui-test-author/playwright/assets/Directory.Packages.props.
+- qa/dotnet/skills/ui-test-author/review/SKILL.md is at 15,558 chars after N1: replace its Appium rows in
+  place, do not add, and keep the file ≤ 16,000.
+- mobile-project-setup (D34): line 153 names the UI sibling `PlaywrightTests`; it is `UiTests`. Line 110
+  runs `dotnet tool install allure`, which does not exist on NuGet; point at
+  qa/reporting/dotnet/skills/test-reports for the Allure CLI instead.
 
 - Leave two things to plan 002 (docs/plans/002-mobile-plugins.md) W1, per D21: line 10 of
   mobile-screen-explorer/SKILL.md (the React Native testID mapping) and the agent's "Related agents"
@@ -2574,6 +2658,10 @@ Build:
   Appium.WebDriver 9 / WebdriverIO 10).
 - docs/skills-catalog.md: ui-test-author/reviewer → review, bdd-project-setup → bdd-project-scaffold,
   the inhouse row; check the rows T2, J2, N2, A1, S1 and X1 added.
+- D34 leftovers no task owns: in qa/dotnet/skills/api-project-setup/SKILL.md (:193) and
+  performance-project-setup/SKILL.md (:136) the UI sibling is `UiTests`, not `PlaywrightTests`; drop
+  `dotnet tool install allure` from api-project-setup (:39, :107) — NuGet has no such tool — and point at
+  qa/reporting/dotnet/skills/test-reports for the Allure CLI. Skip whatever M3 or an earlier task already fixed.
 - The final Status names what is unverified: no Appium flow ran on a device or emulator; no Maestro flow
   ran; no WebMCP test ran against a site that registers tools; the D9 comparators are recommendations. Then git mv the plan
   to docs/plans/implemented/.
@@ -2593,6 +2681,17 @@ Traps:
   LoginTest and WebMcpTest from that scratch project (they need a real app). Pass condition: the failing
   test leaves build/playwright-artifacts/<Class>.<method>.{png,zip,webm}, the passing test leaves nothing,
   and build/playwright-videos/ is empty afterwards.
+- .NET Playwright scratch project: Directory.Packages.props, UiTests.csproj and ui.runsettings (the csproj's
+  RunSettingsFilePath points at it) in one folder, with all eight .cs assets (BaseTest, AuthSetup, LoginPage,
+  HomePage, LoginTests and the rest) plus WebMcpTests.cs and any .runsettings A1 added beside them.
+  `dotnet build` → 0 errors.
+- .NET evidence smoke: BaseTest throws when BASE_URL is unset (http://localhost is enough for data: pages).
+  AuthSetup is a [SetUpFixture] in the root namespace Example.UiTests: it signs in against a real app before
+  every fixture under that namespace, and its failure fails them all. So declare the two smoke tests in a
+  namespace outside Example.UiTests (e.g. `Smoke`), deriving from Example.UiTests.Support.BaseTest, or
+  leave AuthSetup.cs, LoginTests.cs and WebMcpTests.cs out of the smoke project. Pass condition: the failing
+  test leaves bin/Debug/net10.0/playwright-artifacts/<Class>.<Test>.{zip,png,webm}, the passing test leaves
+  nothing, and bin/Debug/net10.0/playwright-videos/ is empty afterwards.
 - tools/token-audit.py exits non-zero while any size violation exists. Read the counts (≤ 160 total, 0
   description violations), not the exit code.
 - Scratch projects live under $TMPDIR and are deleted afterwards. Nothing from them is committed.

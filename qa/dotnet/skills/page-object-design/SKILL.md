@@ -43,7 +43,7 @@ Designs the **shape** of a Page Object Model in a .NET UI test project: page vs 
 |---|---|---|---|
 | **Page** | A discrete screen / route | One per URL or top-level navigation target | `LoginPage`, `CheckoutOverviewPage` |
 | **Component** | A reusable piece appearing inside multiple pages | Scoped to a parent `ILocator` / `IWebElement` | `ProductCard`, `NavigationMenu`, `Modal`, `Toast` |
-| **Flow** | An end-to-end sequence across pages | None — `static` helper or `[OneTimeSetUp]`-driven fixture | `SignInAndCheckoutAsync(user, cart)` |
+| **Flow** | An end-to-end sequence across pages | None — a `static` helper | `SignInAndCheckoutAsync(user, cart)` |
 
 Rules of thumb:
 
@@ -54,23 +54,22 @@ Rules of thumb:
 
 ### Base class hierarchy
 
-Keep it **shallow** — at most two levels.
+**Playwright: the default is no base class.** Pages take `IPage`, components take their root `ILocator`, and shared behaviour is a component field. Introduce `BasePage` only when a **third** concrete page shares real behaviour (not just the `IPage` field), and keep it to one level. **Selenium / Appium** use the thin `BasePage` / `BaseAppiumPage` their writer skills define (the driver plus one synchronization helper).
 
 ```
-BasePage              ← Page/IWebDriver field, common waits, ExpectLoadedAsync abstract method
- └─ (rarely) AuthenticatedPage — only if every signed-in page truly shares something (header, sign-out)
- └─ <ConcretePage>
+<ConcretePage>                     ← Playwright default: no base
+BasePage → <ConcretePage>          ← Playwright: only on the third real sharer; Selenium / Appium: the writer's thin base
 ```
 
 Avoid:
 
-- `BasePage → FormPage → MultiStepFormPage → CheckoutInformationPage` — four levels almost always hides imaginary abstractions
+- `BasePage → FormPage → MultiStepFormPage → CheckoutInformationPage` — four levels almost always hides imaginary abstractions, and a base class that only forwards to `IPage`
 - A `MobileBasePage` + `DesktopBasePage` before there are 3+ concrete pages on each side
 
 ### .NET driver-lifecycle implications for the design
 
-- Pages must not own their own driver lifetime — `BaseTest` (or NUnit `PageTest` in Playwright .NET) owns it. Pages take the driver via constructor.
-- For parallel test execution, the driver/Page is per-test. Use `AsyncLocal<IWebDriver>` in `DriverFactory` (Selenium / Appium) or NUnit's built-in `PageTest` (Playwright). **Never** a `public static IWebDriver Driver`.
+- Pages must not own their own driver lifetime — `BaseTest` owns it. Pages take the `IPage` / driver in the constructor and are built in the test class's `[SetUp]`, never as properties of `BaseTest`.
+- **Playwright:** the one `BaseTest : PageTest` (`qa/dotnet/skills/ui-test-author/playwright/assets/BaseTest.cs`) gives each test its own context and page, with `[Parallelizable(ParallelScope.Self)]` — the only scope Playwright supports. A role, a device or a locale is an override of `ContextOptions()` that amends `base.ContextOptions()`, never a second base class. **Selenium / Appium:** `AsyncLocal<IWebDriver>` in a `DriverFactory`. **Never** a `public static IWebDriver Driver`.
 - Async-all-the-way (Playwright .NET, Appium .NET): page method signatures return `Task` / `Task<NextPage>`. No `.Result`/`.Wait()` ever — including inside `BasePage`.
 - Selenium .NET is sync API; keep page methods sync there. **Do not** mix sync Selenium pages with async Playwright pages under the same `BasePage`.
 
@@ -86,13 +85,14 @@ Avoid the `if (Platform == "iOS") …` trap inside a single page — that condit
 
 ### Locator ownership
 
-- Locators belong **inside the page / component class** as `private readonly ILocator` fields (Playwright) or `private static readonly By` (Selenium / Appium) — never in the test.
-- A shared `Locators` constants file is an anti-smell. The only exception is brand-wide a11y test ids (e.g. a project-wide `primary-cta` test id) — keep that file small.
-- Components scoped to a parent take that parent in the constructor and query inside it. Don't re-query from the root.
+- Locators belong **inside the page / component class**, built once in the constructor — `private readonly ILocator` fields or get-only properties (Playwright), `private static readonly By` (Selenium / Appium) — never in the test.
+- A shared `Locators` constants file is an anti-smell. The only exception is brand-wide test ids (e.g. a project-wide `Nav.PrimaryCta`) — keep that file small.
+- **A component takes its parent `ILocator`** (`IWebElement` on Selenium) in the constructor and builds every child from it, so it works wherever it is mounted. The scoping mechanics — chaining from the root, `parent.Locator(child)` (the 1.63 form of the 1.64 `Within()`), `Filter(new() { Has = ... })`, strictness, positional picks — are owned by [`ui-test-author/playwright/references/locators.md`](../ui-test-author/playwright/references/locators.md); `assets/LoginPage.cs` there is the worked example.
+- Every Playwright locator follows one ladder: `GetByTestId` → `GetByRole` → `GetByLabel` → `GetByPlaceholder` → `GetByText` → `GetByAltText` / `GetByTitle` → CSS. Selenium and Appium put the test id first too, then their writer's order. Test ids are PascalCase dot-separated and static (`OrderRow`, `OrderRow.Title`); a fallback is recorded in `missing-testids.md`, never marked in the code.
 
 ### Where flow helpers live
 
-- **Playwright .NET**: `Fixtures/` static class methods or a custom `BaseTest` extending `PageTest` that seeds state in `[OneTimeSetUp]`. Don't use `[SetUp]`-per-test when state can be seeded once per worker.
+- **Playwright .NET**: a `Flows/` static class whose methods take page objects and return the resulting page. Records a test needs are seeded through `Page.APIRequest` in the test class's own `[SetUp]` and deleted in its `[TearDown]`; the signed-in session is the root-namespace `AuthSetup` `[SetUpFixture]`. **Never seed in `[OneTimeSetUp]` of a `PageTest`:** no `Page` exists there, and a record shared by a fixture's tests makes them depend on each other.
 - **Selenium .NET**: `Flows/CheckoutFlow.cs` with `public static async Task SignInAsync(...)` (when paired with async helpers) or sync static methods.
 - **Appium .NET**: same pattern as Selenium; reset app state in `[SetUp]`.
 
@@ -104,9 +104,12 @@ A flow helper does **not** own assertions — it sets up state and returns the r
 
 ```
 UiTests/
-├── BaseTest.cs                 ← extends PageTest, fixtures
+├── UiTests.csproj
+├── ui.runsettings               ← browser, headless, expect timeout, test-id attribute
+├── AuthSetup.cs                 ← root namespace: signed-in state, once per run
+├── Support/
+│   └── BaseTest.cs              ← the one lifecycle (ui-test-author/playwright assets)
 ├── Pages/
-│   ├── BasePage.cs
 │   ├── LoginPage.cs
 │   ├── Catalog/
 │   │   ├── ProductListPage.cs
@@ -118,10 +121,13 @@ UiTests/
 ├── Components/                  ← cross-feature shells
 │   ├── NavigationMenu.cs
 │   └── Toast.cs
-├── Fixtures/
-│   └── SeededCartFixture.cs
-└── playwright.config.ts (if used)
+├── Flows/
+│   └── CheckoutFlow.cs
+└── Tests/
+    └── CheckoutTests.cs         ← seeds its data in its own [SetUp]
 ```
+
+Configuration lives in the `.runsettings`; there is no `playwright.config.ts` in a .NET project.
 
 ### Selenium .NET / Appium .NET (multi-platform)
 
@@ -161,7 +167,7 @@ A page object should split when **any** are true:
 | Step-by-step flow (checkout, onboarding) | Sub-folder per step under `Pages/Checkout/` |
 | Persistent shell (nav, footer) | Extract `NavigationMenu` / `SidePanel` exposed as a field on every page that has it |
 | Modal / dialog | Return modal class from the action that opens it; assertion on the modal |
-| Cross-page widget (toast) | Hang off `BasePage` so every page exposes `Toast()` |
+| Cross-page widget (toast) | A `Toast` component property on each page that shows it, built from the page's root `ILocator` |
 
 ## Naming conventions
 
@@ -182,12 +188,11 @@ A page object should split when **any** are true:
 ## Class responsibilities
 | Class | Type | Owns | Doesn't own |
 |-------|------|------|-------------|
-| BasePage | base | `IPage`/`IWebDriver` field, wait helpers, `ExpectLoadedAsync` abstract | assertions, business logic |
-| LoginPage | page | login form locators, `SignInAsync()` | navigation to product list (returns `ProductListPage`) |
+| LoginPage | page | `GoToAsync()`, the sign-in form component, `SignInAsync()` | assertions, the landing page's locators |
 | ProductCard | component | card-internal locators, `AddToCartAsync()` | iterating the product list |
 
 ## Base hierarchy
-<3-line description>
+<Playwright: none, unless a third page shares real behaviour — then name the three and what they share>
 
 ## Multi-platform strategy
 <which of the three strategies + why>
@@ -208,9 +213,11 @@ A page object should split when **any** are true:
 - **Locators in a central constants file** — couples every page change to one file
 - **Flow class with state** — flows are functions, not stateful objects
 - **`PageFactory` + explicit `FindElement` mixed** in the same project — pick one (explicit; `PageFactory` is deprecated)
-- **`BaseTest` doing app-specific work** — bases handle infrastructure (driver, fixtures), not domain workflow
-- **`Test extends a page object`** to "reuse helpers" — push the helper into a fixture or base test
-- **`public static IWebDriver Driver`** — breaks parallel execution; use `AsyncLocal<IWebDriver>` in a factory
+- **`BaseTest` doing app-specific work** — bases handle infrastructure (driver, context options, evidence), not domain workflow; page objects are not `BaseTest` properties
+- **Playwright `BasePage` before a third concrete page shares real behaviour**, or a base that only holds `IPage`
+- **Seeding in `[OneTimeSetUp]`** of a Playwright fixture — no `Page` exists there; seed per test in `[SetUp]`
+- **`Test extends a page object`** to "reuse helpers" — push the helper into a flow
+- **`public static IWebDriver Driver`** or `ParallelScope.All` with Playwright — breaks parallel execution; Playwright uses `PageTest` with `ParallelScope.Self`, Selenium / Appium an `AsyncLocal<IWebDriver>` factory
 - **`.Result` / `.Wait()`** in `BasePage` to bridge sync test code over async Playwright — make the chain async
 
 ## Procedure
@@ -218,7 +225,7 @@ A page object should split when **any** are true:
 1. Collect inputs (skip questions answerable from the existing file tree).
 2. Map every existing class (or every screen for greenfield) onto **page / component / flow / base**.
 3. Apply splitting heuristics to anything in the wrong bucket.
-4. Pick the multi-platform strategy if relevant.
+4. Decide whether a Playwright `BasePage` is warranted: only when a third page shares real behaviour. Pick the multi-platform strategy if relevant.
 5. Produce the output: folder tree, responsibilities table, base hierarchy, migration plan (smallest refactor first).
 6. Hand off code generation to the matching generator skill.
 
