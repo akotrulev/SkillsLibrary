@@ -26,6 +26,10 @@ If the repo gitignores generated sources (KSP / Room / Hilt output under `build/
 
 | # | Check | Violation looks like | Find it with | Sev |
 |---|---|---|---|---|
+| A1 | The Kotlin version is detected, and no feature above it is used | `context(...)` or an explicit backing field in a module on Kotlin 2.3 or below; Kotlin raised as a side effect of other work | `rg -n "^kotlin\|kotlin = " gradle/libs.versions.toml`; `rg -n "context\(" $SRC -g '*.kt'` | major |
+| A2 | Context receivers are gone | `context(Foo)` with a type, not a named parameter, left from the revoked feature | `rg -n "context\(\w+[,)]" $SRC -g '*.kt'` | major |
+| A3 | `kapt` is not used `[AGP9]` | `kotlin-kapt` or `kapt(` in a build file | `rg -n "kapt" -g '*.kts' -g '*.gradle' -g 'libs.versions.toml'` | major |
+| A4 | Explicit API mode in a library module that publishes | A published library module with `public` by default and no `explicitApi()` | `rg -n "explicitApi" -g '*.kts'` | minor |
 
 ---
 
@@ -34,6 +38,22 @@ If the repo gitignores generated sources (KSP / Room / Hilt output under `build/
 
 | # | Check | Violation looks like | Find it with | Sev |
 |---|---|---|---|---|
+| B1 | No `!!` outside tests | `value!!` in app or module source | `rg -n "!!" $SRC -g '*.kt' -g '!*Test*'` | blocker |
+| B2 | No `lateinit` for an injectable dependency | `lateinit var repo: Repo` where a constructor parameter fits | `rg -n "lateinit var" $SRC -g '*.kt'` | major |
+| B3 | No `GlobalScope` | `GlobalScope.launch` / `.async` | `rg -n "GlobalScope" $SRC -g '*.kt'` | blocker |
+| B4 | Dispatchers are injected, not named in a class body | `Dispatchers.IO` / `Default` / `Main` written inside a repository or ViewModel | `rg -n "Dispatchers\.(IO\|Default\|Main)" $SRC -g '*.kt' -g '!*Module*'` | major |
+| B5 | No `runBlocking` in production code | `runBlocking` outside tests and `main` | `rg -n "runBlocking" $SRC -g '*.kt' -g '!*Test*'` | blocker |
+| B6 | `CancellationException` is rethrown | `catch (e: Exception)` / `Throwable`, or `runCatching`, around a `suspend` call with no rethrow | `rg -n "runCatching\|catch \(\w+: (Exception\|Throwable)\)" $SRC -g '*.kt'`; read each for a suspend call | major |
+| B7 | A `suspend` function that blocks is main-safe | Blocking I/O in a `suspend` function with no `withContext(ioDispatcher)`, left to the caller | `rg -n -A6 "suspend fun" $SRC -g '*.kt'`; read for blocking calls | major |
+| B8 | State is a sealed interface; `when` over it has no `else` | Three booleans for loading / error / data; an `else` branch on a sealed type | `rg -n "isLoading\|isError" $SRC -g '*.kt'`; `rg -n -B6 "else ->" $SRC -g '*.kt'` | major |
+| B9 | A UI state class is an immutable `data class` | A `var` property or a `MutableList` field in a state class; a `StateFlow` of a mutable object | `rg -n "data class \w+State" -A8 $SRC -g '*.kt'` | major |
+| B10 | No ViewModel-to-UI events; one `uiState: StateFlow` | A `SharedFlow` / `Channel` of one-off UI events exposed from a ViewModel | `rg -n "SharedFlow\|Channel<" $SRC -g '*.kt'` | major |
+| B11 | `StateFlow` is updated atomically | `_state.value = _state.value.copy(` | `rg -n "\.value = .*\.value\.copy" $SRC -g '*.kt'` | minor |
+| B12 | Flows are collected lifecycle-aware | `collectAsState()`, `launchWhenStarted` or a bare `lifecycleScope.launch { flow.collect }` in UI code | `rg -n "collectAsState\(\)\|launchWhenStarted\|lifecycleScope\.launch" $SRC -g '*.kt'` | major |
+| B13 | No mutable collection in a public signature | `MutableList` / `MutableMap` as a parameter or return type | `rg -n "(: \|-> )Mutable(List\|Map\|Set)<" $SRC -g '*.kt'` | minor |
+| B14 | `val` over `var`; no `var` never reassigned | A `var` with no reassignment | `rg -n "\bvar \w+" $SRC -g '*.kt'`; the compiler warns on never-reassigned | minor |
+| B15 | No Java-isms | `get`/`set` method pairs, `Optional`, a static-holder class, `object` holding mutable state | `rg -n "Optional<\|fun (get\|set)[A-Z]\w+\(\|^object \w+" $SRC -g '*.kt'` | minor |
+| B16 | A context parameter is not a service locator | `context(...)` carrying a repository or service used as a lookup | `rg -n "context\(" $SRC -g '*.kt'` | major |
 
 ---
 

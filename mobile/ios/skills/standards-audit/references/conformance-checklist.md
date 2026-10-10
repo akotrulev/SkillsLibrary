@@ -26,6 +26,11 @@ If the repo gitignores generated sources (R.swift, Sourcery, SwiftGen output) yo
 
 | # | Check | Violation looks like | Find it with | Sev |
 |---|---|---|---|---|
+| A1 | Swift language mode is declared, and is Swift 6 for new modules `[Swift6]` | A new module or package with `SWIFT_VERSION = 5.0` / no `swiftLanguageModes`; a Swift 5 module raised to 6 as a side effect of other work | `rg -n "SWIFT_VERSION\|swiftLanguageModes\|swift-tools-version" -g '*.pbxproj' -g '*.xcconfig' -g 'Package.swift'` | major |
+| A2 | Default actor isolation matches the module kind | An app or UI module left `nonisolated` with `@MainActor` scattered on every type, or a **library package** with `MainActor` default isolation | `rg -n "SWIFT_DEFAULT_ACTOR_ISOLATION\|defaultIsolation" -g '*.pbxproj' -g '*.xcconfig' -g 'Package.swift'`; read each target's kind | major |
+| A3 | Approachable Concurrency is a stated choice, not assumed | Code relying on `nonisolated async` running on the caller's actor in a module without `SWIFT_APPROACHABLE_CONCURRENCY` / `NonisolatedNonsendingByDefault` | `rg -n "APPROACHABLE_CONCURRENCY\|NonisolatedNonsendingByDefault\|InferIsolatedConformances" -g '*.pbxproj' -g '*.xcconfig' -g 'Package.swift'`; then `rg -n "nonisolated .*async" $SRC -g '*.swift'` | minor |
+| A4 | Newer-than-target APIs carry availability `[iOS17+]` | `@Observable` on an iOS 16 target, `Observations` below iOS 26, a Swift 6.4-only construct on a 6.2 toolchain, with no `#available` / `@available` | `rg -n "@Observable\|Observations\b\|weak let" $SRC -g '*.swift'`; compare with the deployment target | major |
+| A5 | `ObservableObject` on an iOS 17+ target is a migration finding, not new code `[iOS17+]` | `ObservableObject` / `@Published` / `@StateObject` in new code where the target is iOS 17+ | `rg -n "ObservableObject\|@Published\|@StateObject\|@ObservedObject" $SRC -g '*.swift'` | major |
 
 ---
 
@@ -34,6 +39,22 @@ If the repo gitignores generated sources (R.swift, Sourcery, SwiftGen output) yo
 
 | # | Check | Violation looks like | Find it with | Sev |
 |---|---|---|---|---|
+| B1 | No force unwrap outside tests | `value!`, `as!` or `try!` in app or module source | `rg -n "\w!\.\|\w!\)\|\w!$\|as!\|try!" $SRC -g '*.swift' -g '!*Tests*'` — read each hit; `!=` and `!` negation are not findings | blocker |
+| B2 | No implicitly unwrapped optional outside an `@IBOutlet` | `var x: T!` for a dependency or model property | `rg -n "(var\|let) \w+: [\w<>\[\]]+!" $SRC -g '*.swift'` | major |
+| B3 | No `@unchecked Sendable` or `nonisolated(unsafe)` without a written justification | The hatch with no stated invariant on its declaration | `rg -n -B2 "@unchecked Sendable\|nonisolated\(unsafe\)" $SRC -g '*.swift'` | major |
+| B4 | No `print`, `NSLog`, `debugPrint` or `dump` | A debugging call left in source | `rg -n "\b(print\|NSLog\|debugPrint\|dump)\(" $SRC -g '*.swift'` | minor |
+| B5 | `os.Logger` messages interpolate values with a privacy level, and log no secret | A `Logger` call building its message with `String(describing:)` or concatenation; a token, email or URL with a query logged `.public` | `rg -n "Logger\|logger\.\w+\(" $SRC -g '*.swift'`; read the interpolations | major |
+| B6 | No empty `catch`, no `try?` hiding a failure the user must see | `catch { }`, or `try?` whose failure leaves the UI in a success state | `rg -n "catch \{ *\}\|try\?" $SRC -g '*.swift'` | major |
+| B7 | `CancellationError` is not shown as a failure | A blanket `catch` setting a `failed` state with no `catch is CancellationError` | `rg -n -A4 "\} catch \{" $SRC -g '*.swift'` | major |
+| B8 | No blocking on async work | `DispatchSemaphore`, `.wait()`, `RunLoop.current.run` or a sleep loop bridging async code | `rg -n "DispatchSemaphore\|\.wait\(\)\|RunLoop\.current\.run" $SRC -g '*.swift'` | blocker |
+| B9 | No GCD main-queue hops in new code | `DispatchQueue.main.async` where `@MainActor` or `await MainActor.run` fits | `rg -n "DispatchQueue\.(main\|global)" $SRC -g '*.swift'` | minor |
+| B10 | No `Task.detached` without a written reason; CPU work uses `@concurrent` `[Swift6]` | `Task.detached` used to leave the main actor | `rg -n "Task\.detached" $SRC -g '*.swift'` | major |
+| B11 | Unstructured `Task { }` in a view is cancelled with the view | `Task { }` in `onAppear` or `body` with no stored handle; `.task` not used | `rg -n "Task \{" $SRC -g '*.swift'`; read the enclosing view | major |
+| B12 | Library packages are not `@MainActor` by blanket | `MainActor` default isolation on a package, or `@MainActor` on a non-UI package type | `rg -n "@MainActor" $SRC -g '*.swift'` under package targets | major |
+| B13 | No mutable global state | `static var` or a global `var` holding mutable state | `rg -n "^\s*(static )?var \w+" $SRC -g '*.swift'` at type or file scope | major |
+| B14 | Access control is the narrowest that works | `public` on an app-target type; a package type `public` with no external caller; a non-`final` class with no subclass | `rg -n "^\s*(public\|open) " $SRC -g '*.swift'` | minor |
+| B15 | Value types by default | A `class` holding plain data with no identity, `deinit` or sharing need | `rg -n "^\s*(final )?class \w+" $SRC -g '*.swift'`; read each hit | minor |
+| B16 | A callback-to-async continuation resumes exactly once | A `withChecked(Throwing)Continuation` path that does not resume, or resumes twice | `rg -n -A12 "withChecked(Throwing)?Continuation" $SRC -g '*.swift'` | major |
 
 ---
 

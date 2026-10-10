@@ -8,7 +8,7 @@ step-by-step agent that works greenfield and brownfield, a conformance audit, an
 
 **Status:** C1 landed (2026-10-11): `mobile/` exists with the five July drafts moved and renamed under
 `mobile/react-native/`, the three conformance-checklist skeletons, and `## Mobile code rules` in `CLAUDE.md`;
-the stale `frontend/react-native` pointers are repointed. S1 landed (2026-10-11): `mobile/_shared/{store-compliance,security}` with their references and the `L1…L26` / `K1…K27` audit fragments. S2 landed (2026-10-11): `mobile/_shared/{release,observability}` with their references and the `T1…T19` / `U1…U20` audit fragments. S3 landed (2026-10-11): `mobile/_shared/in-app-purchases` with its references and the `X1…X22` fragment, plus `auth/auth0-{react-native,ios,android}`. Next: N1 and R1 (each depends only on C1).
+the stale `frontend/react-native` pointers are repointed. S1 landed (2026-10-11): `mobile/_shared/{store-compliance,security}` with their references and the `L1…L26` / `K1…K27` audit fragments. S2 landed (2026-10-11): `mobile/_shared/{release,observability}` with their references and the `T1…T19` / `U1…U20` audit fragments. S3 landed (2026-10-11): `mobile/_shared/in-app-purchases` with its references and the `X1…X22` fragment, plus `auth/auth0-{react-native,ios,android}`. N1 landed (2026-10-11): `mobile/{ios,android}/skills/basics` with `references/concurrency.md` each, and rows `A1…A5`/`B1…B16` (iOS), `A1…A4`/`B1…B16` (Android). Next: R1 (depends only on C1), then I1.
 Built but unverified: everything — the plan gates once, in G1. The five drafts keep their July bodies (SDK 56
 lane, pre-sweep content) until R1 rewrites them. Flutter becomes a fourth plugin in its own plan, written
 once this one lands (O4); it is **not** in this plan's tasks. Maestro arrives on the QA side through plan 003
@@ -1035,6 +1035,8 @@ Flow conventions ~35k; writes: two SKILL.md + one `references/concurrency.md` ea
   context can apply them.
 - **Not in N1:** project setup and everything after it (I1, A1).
 
+- **As built (2026-10-11):** `mobile/ios/skills/basics/SKILL.md` (15.6k chars) + `references/concurrency.md` (11.2k) and `mobile/android/skills/basics/SKILL.md` (14.0k) + `references/concurrency.md` (9.3k); frontmatter names `mobile-ios-basics` / `mobile-android-basics`. iOS checklist rows `A1…A5`, `B1…B16`; Android `A1…A4`, `B1…B16` (`grep -n "^| [AB][0-9]" <checklist>`). The iOS skill separates Swift language mode, default actor isolation (SE-0466) and Approachable Concurrency as three switches; both skills name app-level skills in prose only. Verified at source this session: Kotlin 2.4.0 stabilises context parameters (explicit context arguments still experimental, `-Xexplicit-context-arguments`), explicit backing fields stable, context receivers revoked (kotlinlang.org/docs/whatsnew24.html). **Built but unverified:** the iOS skill is 15.6k chars — over the 14k aim, under the 16k cap; build-setting names `SWIFT_DEFAULT_ACTOR_ISOLATION` / `SWIFT_APPROACHABLE_CONCURRENCY`, `SwiftSetting.defaultIsolation`, `Observations` (iOS 26+) and the Swift 6.4 features (`await` in `defer`, `weak let`, `~Sendable`, taken from §4.2 with no semantics beyond their names) were written from recall and not re-read at swift.org / developer.apple.com; SE-0430 `sending` and `Mutex` / `OSAllocatedUnfairLock` likewise; the `rg` recipes in A/B have not been run. Not run (Gate: none): `tools/token-audit.py`, §11's script, any lint.
+
 ### R1 — React Native foundations: the five drafts rewritten, plus navigation
 
 **Stack:** `docs` · **Agent:** `general-purpose`
@@ -1450,45 +1452,9 @@ goes in an untracked `scratch/` folder inside the worktree, deleted before commi
 | W1 | `docs` | `general-purpose` | R5, I5, A6, R3, S1–S3 | ~120k |
 | G1 | `docs` | `general-purpose` | every task above | ~140k |
 
-C1, S1, S2 and S3 have landed (their blocks are deleted); every block below is live.
+C1, S1, S2, S3 and N1 have landed (their blocks are deleted); every block below is live.
 
 ---
-
-### N1 — the Swift and Kotlin coding standards (general-purpose, docs)
-
-````
-You are `general-purpose`. Task N1 of docs/plans/002-mobile-plugins.md: write `mobile-ios-basics` and
-`mobile-android-basics`, the two native coding standards.
-
-Read, in this order:
-1. CLAUDE.md (`## Mobile code rules` is the floor).
-2. The plan: §4.2, §4.3, §5, the `basics` rows of §6.3 and §6.4, §8.3, §10, task N1, and "Close-out — every task".
-3. `frontend/react/skills/basics/SKILL.md` — the shape.
-4. `mobile/{ios,android}/skills/standards-audit/references/conformance-checklist.md` — sections A and B.
-
-Build:
-- `mobile/ios/skills/basics/SKILL.md`: naming (API Design Guidelines), value vs reference types,
-  optionals (no `!` outside tests), errors, access control, the §5 concurrency standard tagged by Swift
-  version (6.2 defaults, 6.4 additions), Observation, `os.Logger`; `references/concurrency.md` —
-  isolation, `Sendable`, cancellation, and the escape hatches with their written-justification rule.
-- `mobile/android/skills/basics/SKILL.md`: Kotlin conventions, null safety (no `!!`), `val` and data
-  classes, sealed interfaces for state, structured concurrency, injected dispatchers, `Flow` /
-  `StateFlow` / `SharedFlow`, context parameters only when earned; `references/concurrency.md` —
-  scopes, cancellation, `runCatching` with coroutines, test seams.
-- Rows in sections A and B of each stack checklist.
-
-Traps:
-- Swift 6 language mode and Approachable Concurrency are separate switches — say which each rule needs.
-  The Xcode 27 template is still Swift 5 mode.
-- `@MainActor` by default is right for app/UI modules and wrong for library packages.
-- Both skills are bundled into `mobile-react-native` for native-module work (D6): an author with no app
-  context must be able to apply them. Name app-level iOS / Android skills in prose, never as a required load.
-
-Gate: none — this plan gates once, in G1. Do not run tools/token-audit.py, §11's script, or any lint.
-
-Commit: `feat(mobile N1): Swift and Kotlin coding standards`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
 
 ### R1 — React Native foundations (general-purpose, docs)
 
