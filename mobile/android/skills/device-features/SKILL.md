@@ -194,7 +194,7 @@ Inside a `Gate: none` plan task, run none of these and report "written, not run"
 - On a device: deny once → rationale; deny again → denied screen with **Open Settings**; grant in Settings → returning resumes the feature; "Only this time" re-asks next launch.
 - Biometrics with none enrolled and with a lockout: a working screen each time.
 - The photo picker works on an emulator without Play services; no storage permission is requested.
-- Dev-side tests: [`mobile-android-unit-testing`](../unit-testing/SKILL.md); device journeys belong to `qa-mobile-android`.
+- Dev-side tests: [`mobile-android-unit-testing`](../unit-testing/SKILL.md); device journeys belong to `qa-mobile-<stack>`.
 
 ## Handoffs
 

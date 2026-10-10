@@ -1,6 +1,6 @@
 ---
 name: mobile-shared-in-app-purchases
-description: Use when an app sells anything inside the app — subscriptions, consumables, unlocks — on iOS, Android or React Native. Triggers "add a subscription", "restore purchases", "user got a refund but still has access", "Apple rejected under 3.1.1", "Play flagged our billing". Server-owned entitlements, restore, refund/revocation notifications, store payment policy, cancel symmetry. Do NOT use for signing/rollout (`mobile-shared-release`), privacy/store forms (`mobile-shared-store-compliance`), or paywall visual design.
+description: Use when an app sells anything inside the app — subscriptions, consumables, unlocks — on iOS, Android or React Native. Triggers "add a subscription", "restore purchases", "refund but still has access", "Apple rejected under 3.1.1". Server-owned entitlements, restore, refund notifications, store payment policy, cancel symmetry. Do NOT use for signing/rollout (`mobile-shared-release`), privacy/store forms (`mobile-shared-store-compliance`), or paywall visual design.
 ---
 
 # Mobile — In-App Purchases

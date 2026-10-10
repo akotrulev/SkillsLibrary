@@ -33,6 +33,6 @@ struct MapContainer: UIViewRepresentable {
 
 - **`makeUIView` builds once; `updateUIView` applies state and is idempotent** — never create subviews there, never trigger state changes from it (a loop), and diff before writing (`if view.region != region`).
 - **Delegates and target-action live in the `Coordinator`**, which holds closures, not the SwiftUI view.
-- Clean up in `dismantleUIView`; `UIViewControllerRepresentable` for whole controllers (camera, document picker, `SFSafariViewController`) — and prefer the SwiftUI equivalent (`PhotosPicker`, `fileImporter`, `Link`) where it exists ([`device-features`](../device-features/SKILL.md)).
+- Clean up in `dismantleUIView`; `UIViewControllerRepresentable` for whole controllers (camera, document picker, `SFSafariViewController`) — and prefer the SwiftUI equivalent (`PhotosPicker`, `fileImporter`, `Link`) where it exists ([`device-features`](../../device-features/SKILL.md)).
 - `sizeThatFits(_:uiView:context:)` (iOS 16+) tells SwiftUI the size; without it the view takes the proposed size.
 

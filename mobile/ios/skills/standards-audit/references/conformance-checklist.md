@@ -279,7 +279,7 @@ This section holds no rows of its own. The rows are those of `mobile/_shared/sto
 | M1 | Every interactive element has an accessible name | An icon-only `Button`, an `Image` inside a control or a `TextField` with no label or text child | `rg -n '\b(Button\|Toggle\|Picker\|TextField)\b' $SRC -g '*.swift'`; read each for a label | major |
 | M2 | Controls are real controls, not tap gestures | `Text(...).onTapGesture` or `.onTapGesture` on a `VStack` / `Image` acting as a button, with no `.isButton` trait | `rg -n 'onTapGesture' $SRC -g '*.swift'` | major |
 | M3 | Readable text uses text styles and scales; Dynamic Type is never clamped on content | `.font(.system(size: …))` for body copy; `.dynamicTypeSize(...` on content; `lineLimit(1)` on meaningful text | `rg -n 'font\(\.system\(size\|dynamicTypeSize\(\.\.\.\|lineLimit\(1\)' $SRC -g '*.swift'` | major |
-| M4 | Layouts survive the accessibility sizes | A fixed `.frame(height:)` around text; an `HStack` that clips at `accessibility5` with no axis switch. requires dynamic test → `qa-mobile-ios` | `rg -n 'frame\(height:' $SRC -g '*.swift'`; `rg -n 'isAccessibilitySize\|ViewThatFits' $SRC -g '*.swift'` | major |
+| M4 | Layouts survive the accessibility sizes | A fixed `.frame(height:)` around text; an `HStack` that clips at `accessibility5` with no axis switch. requires dynamic test → `qa-mobile-<stack>` | `rg -n 'frame\(height:' $SRC -g '*.swift'`; `rg -n 'isAccessibilitySize\|ViewThatFits' $SRC -g '*.swift'` | major |
 | M5 | Touch targets are at least 44 × 44 pt | A control framed or padded below 44 pt with no larger `contentShape` / `minWidth` | `rg -n 'frame\(width: ([0-9]\|[1-3][0-9]\|4[0-3])\b' $SRC -g '*.swift'` | major |
 | M6 | State lives in traits and values, not in the label | A label such as "Menu, open", "Selected", "disabled" or containing "button" | `rg -n -i 'accessibilityLabel\("[^"]*(button\|selected\|disabled\|open\|closed\|checked)' $SRC -g '*.swift'` | minor |
 | M7 | Gesture-only operations have an accessibility action | A custom swipe, drag or long press with no `accessibilityAction(named:)` / `accessibilityActions` | `rg -n 'DragGesture\|LongPressGesture\|onLongPressGesture' $SRC -g '*.swift'` — read each for an action | major |
@@ -289,7 +289,7 @@ This section holds no rows of its own. The rows are those of `mobile/_shared/sto
 | M11 | Colour is never the only cue; contrast holds in light, dark and Increase Contrast | A state shown by colour alone with no `accessibilityDifferentiateWithoutColor` branch; hard-coded `Color(red:…)` pairs. Contrast requires a token check or device pass | `rg -n 'accessibilityDifferentiateWithoutColor\|Color\(red:\|\.red\b\|\.green\b' $SRC -g '*.swift'` | major |
 | M12 | Reduce Motion is honoured by custom animation | `withAnimation` / `PhaseAnimator` / `matchedGeometryEffect` with no `accessibilityReduceMotion` read | `rg -n 'accessibilityReduceMotion\|withAnimation\|PhaseAnimator' $SRC -g '*.swift'` | major |
 | M13 | An accessibility label is never used as a test identifier, nor an identifier as a label | `.accessibilityLabel("Login.EmailField")` | `rg -n 'accessibilityLabel\("[A-Z][A-Za-z]*\.[A-Z]' $SRC -g '*.swift'` | major |
-| M14 | Accessibility Nutrition Labels are declared only for features a device pass proved | A declaration in the release notes or Connect metadata with no recorded VoiceOver / large-text pass. requires dynamic test → `qa-mobile-ios` | read the release checklist and `docs/` for a recorded pass | minor |
+| M14 | Accessibility Nutrition Labels are declared only for features a device pass proved | A declaration in the release notes or Connect metadata with no recorded VoiceOver / large-text pass. requires dynamic test → `qa-mobile-<stack>` | read the release checklist and `docs/` for a recorded pass | minor |
 
 ---
 
@@ -395,7 +395,7 @@ This section holds no rows of its own. The rows are those of `mobile/_shared/sto
 | R7 | Region states and the error banner are tagged | A region with `Loading` / `Error` / `Empty` / `Retry` states and no ids on them; the banner and its close untagged | `rg -n 'ProgressView\|ContentUnavailableView\|Retry' $SRC -g '*.swift'` and `rg -n 'accessibilityIdentifier' -g '*Banner*.swift'` | major |
 | R8 | Reusable views compose a prefix; no wrapper exists only to carry ids | A `testIdPrefix` ignored by a terminal view; an `AppButton` that only adds an identifier | `rg -n 'testIdPrefix\|struct App(Button\|Field)' $SRC -g '*.swift'` | minor |
 | R9 | Decorative and layout views are not tagged | An identifier on a `Spacer`, a plain `VStack` or a decorative image | `rg -n 'accessibilityIdentifier' -B2 $SRC -g '*.swift'`; read the host view | nit |
-| R10 | Grouping does not hide tagged children; a container id does not replace a leaf id | `.accessibilityElement(children: .combine)` over views whose child ids the tests need; a container id with unnamed children | `rg -n 'accessibilityElement\(children' -A8 $SRC -g '*.swift'`; confirm on a simulator build's page source — requires dynamic test → `qa-mobile-ios` | major |
+| R10 | Grouping does not hide tagged children; a container id does not replace a leaf id | `.accessibilityElement(children: .combine)` over views whose child ids the tests need; a container id with unnamed children | `rg -n 'accessibilityElement\(children' -A8 $SRC -g '*.swift'`; confirm on a simulator build's page source — requires dynamic test → `qa-mobile-<stack>` | major |
 
 ---
 
@@ -418,7 +418,7 @@ This section holds no rows of its own. The rows are those of `mobile/_shared/sto
 | S12 | No force unwrap or `try!` in a test beyond a fixed fixture literal; `#require` for preconditions | `try!`, `.first!` | `rg -n 'try!\|\.first!\|\.last!' $SRC -g '*Tests*.swift'` | minor |
 | S13 | Snapshots cover single views only, never a whole screen or dynamic content | `assertSnapshot` on a root screen; a date in the frame | `rg -n 'assertSnapshot' $SRC -g '*Tests*.swift'` | minor |
 | S14 | Migration tests use an on-disk store; an in-memory store is not offered as migration proof | `isStoredInMemoryOnly: true` in a `SchemaMigrationPlan` test | `rg -n 'isStoredInMemoryOnly\|SchemaMigrationPlan' $SRC -g '*Tests*.swift'` | major |
-| S15 | Exit tests are not placed in an iOS target; no journeys or UI tests are written as unit tests | `#expect(processExitsWith:)` in an iOS test target; `XCUIApplication` in the unit plan. requires dynamic test → `qa-mobile-ios` | `rg -n 'processExitsWith\|XCUIApplication' $SRC -g '*Tests*.swift'` | minor |
+| S15 | Exit tests are not placed in an iOS target; no journeys or UI tests are written as unit tests | `#expect(processExitsWith:)` in an iOS test target; `XCUIApplication` in the unit plan. requires dynamic test → `qa-mobile-<stack>` | `rg -n 'processExitsWith\|XCUIApplication' $SRC -g '*Tests*.swift'` | minor |
 
 ---
 

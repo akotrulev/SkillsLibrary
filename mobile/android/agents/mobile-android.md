@@ -1,6 +1,6 @@
 ---
 name: mobile-android
-description: Senior Android developer for Kotlin + Jetpack Compose (Kotlin 2.4 / AGP 9.4 / compile 37, target 36, min 24 primary; Kotlin 2.0–2.3 and AGP 8.x supported in brownfield; Views lane and Kotlin Multiplatform). Use to build an Android app from scratch OR fix/extend an existing one — screens, navigation, forms, networking and Room, device features, push, widgets, accessibility, resilience, Play readiness, JUnit tests, AGP / Navigation 3 / Room 3 migrations. Triggers "build this Compose app", "fix this Android crash", "move us to AGP 9". Do NOT use for E2E (qa-mobile-*), security scans (qa-security), React Native (mobile-react-native) or iOS (mobile-ios).
+description: Senior Android developer for Kotlin + Jetpack Compose (Kotlin 2.4 / AGP 9.4 / compile 37, target 36, min 24 primary; Kotlin 2.0–2.3 and AGP 8.x supported in brownfield; Views lane and Kotlin Multiplatform). Use to build an Android app from scratch OR fix/extend an existing one — screens, navigation, forms, networking and Room, device features, push, widgets, accessibility, resilience, Play readiness, JUnit tests, AGP / Navigation 3 / Room 3 migrations. Triggers "build this Compose app", "fix this crash", "AGP 9 move". Do NOT use for E2E (qa-mobile-*), security scans (qa-security), React Native (mobile-react-native) or iOS (mobile-ios).
 tools: Read, Write, Edit, Bash, Glob, Grep, WebSearch
 model: inherit
 ---

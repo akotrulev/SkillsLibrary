@@ -1,13 +1,13 @@
 ---
 name: mobile-android-accessibility
-description: Use when a Compose or Views screen must work with TalkBack, font scale to 200%, Switch Access and the animator duration scale — semantics, contentDescription, merged descendants, roles, state descriptions, custom actions, focus, live regions, 48 dp targets. Triggers "TalkBack reads the wrong thing", "text clips at large font", "announce the result". Do NOT use for scanning (`qa-mobile-android`), field errors (`-forms`) or animation mechanics (`-animation`).
+description: Use when a Compose or Views screen must work with TalkBack, font scale to 200%, Switch Access and the animator duration scale — semantics, contentDescription, merged descendants, roles, state descriptions, custom actions, focus, live regions, 48 dp targets. Triggers "TalkBack reads the wrong thing", "text clips at large font", "announce the result". Do NOT use for scanning (`qa-mobile-<stack>`), field errors (`-forms`) or animation mechanics (`-animation`).
 ---
 
 # Android — Accessibility
 
 Standardises **authoring** accessible Android screens against **WCAG 2.2 AA** and TalkBack's conventions. The house rule: **a real control with the right semantics; never rebuild a button out of a `Box` with a click handler.** Web analog: [`fe-react-accessibility`](../../../../frontend/react/skills/accessibility/SKILL.md) — semantic-first, announcements and focus management carry over; landmarks, Tab order and skip links do not. Sibling: [`mobile-ios-accessibility`](../../../ios/skills/accessibility/SKILL.md).
 
-**Boundary — authoring, not scanning.** Proving it on a device (a TalkBack pass, Accessibility Scanner, Espresso / Appium journeys with a screen reader on) is `qa-mobile-android`'s. The dev-side automated check in a Compose test is in [`unit-testing`](../unit-testing/SKILL.md). Target size and a non-drag alternative are design decisions made first (`design/accessible-by-design`); this skill implements them. Design facts come from `design/ui-ux-pro-max` (`--stack jetpack-compose`); the corpus wins on a disagreement.
+**Boundary — authoring, not scanning.** Proving it on a device (a TalkBack pass, Accessibility Scanner, Espresso / Appium journeys with a screen reader on) is `qa-mobile-<stack>`'s. The dev-side automated check in a Compose test is in [`unit-testing`](../unit-testing/SKILL.md). Target size and a non-drag alternative are design decisions made first (`design/accessible-by-design`); this skill implements them. Design facts come from `design/ui-ux-pro-max` (`--stack jetpack-compose`); the corpus wins on a disagreement.
 
 ## Version lane
 
@@ -33,7 +33,7 @@ Detect first: Compose or Views per screen, any in-house component library that a
 
 ## When NOT to use
 
-- Scanning, TalkBack journeys, audits in CI → `qa-mobile-android` (peer)
+- Scanning, TalkBack journeys, audits in CI → `qa-mobile-<stack>` (peer)
 - Validation messages on fields → [`forms`](../forms/SKILL.md) · banner and failed regions → [`error-handling`](../error-handling/SKILL.md)
 - Reduce-motion mechanics → [`animation`](../animation/SKILL.md) · colour and type tokens → [`styling`](../styling/SKILL.md)
 - `testTag` / resource ids → [`test-ids`](../test-ids/SKILL.md) (an id is never a description)
@@ -157,7 +157,7 @@ Inside a `Gate: none` plan task, run none of these and report "written, not run"
 - A Compose test with `enableAccessibilityChecks()` per screen: no missing label, no target under 48 dp, no low contrast ([`unit-testing`](../unit-testing/SKILL.md)).
 - Accessibility Scanner on each screen; a TalkBack pass at the largest font: each row is one stop, each action reachable, the error announced once.
 - Settings → Accessibility with bold text, colour correction, remove animations and the largest display size on: nothing clips, nothing disappears.
-- Device journeys with a screen reader → `qa-mobile-android`.
+- Device journeys with a screen reader → `qa-mobile-<stack>`.
 
 ## Handoffs
 

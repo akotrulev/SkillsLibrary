@@ -59,6 +59,6 @@ fun Should_EmitOfflineThenOnline_When_NetworkReturns() = runTest {
 
 ## Storage and platform seams
 
-- **Room**: a logic test uses `Room.inMemoryDatabaseBuilder` on Robolectric with the **real** driver; a **migration test** uses the exported schemas and `MigrationTestHelper` ([`offline-and-storage`](../offline-and-storage/SKILL.md)) — an in-memory database cannot prove a migration. DAOs are never mocked.
+- **Room**: a logic test uses `Room.inMemoryDatabaseBuilder` on Robolectric with the **real** driver; a **migration test** uses the exported schemas and `MigrationTestHelper` ([`offline-and-storage`](../../offline-and-storage/SKILL.md)) — an in-memory database cannot prove a migration. DAOs are never mocked.
 - **DataStore**: a real `DataStore` over `TemporaryFolder` and a `TestScope`, never a mocked interface.
 - **Keystore-backed code** is tested through the repository fake in unit tests; the real Keystore needs a device and belongs to the integration plan.

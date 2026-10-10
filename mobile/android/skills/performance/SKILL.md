@@ -173,4 +173,4 @@ Inside a `Gate: none` plan task, run none of these and report "written, not run"
 - Crash reporter, vitals thresholds that halt a rollout → [`mobile-shared-observability`](../../../_shared/observability/SKILL.md) · [`mobile-shared-release`](../../../_shared/release/SKILL.md)
 - Gradle, R8 baseline, version catalog → [`project-setup`](../project-setup/SKILL.md) · lazy lists, stability → [`ui-components`](../ui-components/SKILL.md)
 - Wake locks, foreground services → [`system-integration`](../system-integration/SKILL.md) · jank in animation → [`animation`](../animation/SKILL.md)
-- Device journeys under load → `qa-mobile-android` (peer)
+- Device journeys under load → `qa-mobile-<stack>` (peer)

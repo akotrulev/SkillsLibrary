@@ -1,6 +1,6 @@
 ---
 name: auth-auth0-android
-description: Use when adding or fixing Auth0 sign-in in a native Kotlin / Jetpack Compose Android app with Auth0.Android — Universal Login in Custom Tabs (PKCE), App Links callback, SecureCredentialsManager on the Keystore, biometric unlock, refresh-token rotation, logout, passkeys. Triggers "add Auth0 login to the Android app", "the browser doesn't return to the app", "biometric prompt for stored credentials". Do NOT use for Auth0 concepts (`auth-auth0-concepts`), React Native (`auth-auth0-react-native`), or iOS (`auth-auth0-ios`).
+description: Use when adding/fixing Auth0 sign-in in a native Kotlin / Jetpack Compose Android app with Auth0.Android — Universal Login in Custom Tabs (PKCE), App Links callback, SecureCredentialsManager (Keystore), biometric unlock, refresh rotation, logout, passkeys. Triggers "add Auth0 login", "browser doesn't return", "biometric prompt for stored credentials". Do NOT use for Auth0 concepts (`auth-auth0-concepts`), React Native (`auth-auth0-react-native`), or iOS (`auth-auth0-ios`).
 ---
 
 # Auth — Auth0 in Android (Kotlin)

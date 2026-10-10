@@ -222,7 +222,7 @@ Inside a `Gate: none` plan task, run none of these and report "written, not run"
 - Run on an iPad in a resized window and at the largest accessibility text size: no clipped or overlapped content.
 - Leaving a screen mid-load cancels the request; Instruments (Leaks, Memory Graph) shows the controller deallocated after pop.
 - A scene-based app launches, restores its state and handles a universal link in cold and warm start.
-- Dev-side tests: logic extracted to models and tested with Swift Testing; view-controller journeys are `qa-mobile-ios`'s (peer).
+- Dev-side tests: logic extracted to models and tested with Swift Testing; view-controller journeys are `qa-mobile-<stack>`'s (peer).
 
 ## Handoffs
 

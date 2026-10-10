@@ -2,7 +2,7 @@
 
 These rules apply to every skill in this library unless a specific skill explicitly overrides them.
 
-> **Full catalog:** the per-domain inventory of every skill, agent, and published plugin — plus the scope list and the 93-command slash surface — lives in [`docs/skills-catalog.md`](docs/skills-catalog.md). Consult it to learn what exists and which agent owns it. This file holds only the behavioral rules every skill follows.
+> **Full catalog:** the per-domain inventory of every skill, agent, and published plugin — plus the scope list and the 99-command slash surface — lives in [`docs/skills-catalog.md`](docs/skills-catalog.md). Consult it to learn what exists and which agent owns it. This file holds only the behavioral rules every skill follows.
 
 ## Role
 
@@ -240,6 +240,7 @@ Each top-level folder owns a domain, is **stack-first and domain-encapsulated** 
 |---|---|---|
 | `qa/` | Test automation + manual test design, reporting, CI/CD, security scanning | `qa-java` · `qa-dotnet` · `qa-typescript` |
 | `frontend/blazor/`, `frontend/react/` | Frontend dev stacks (+ `design/`, `auth/auth0-*`) | `fe-blazor` · `fe-react` |
+| `mobile/` | Mobile dev stacks — React Native (Expo), iOS (Swift), Android (Kotlin + KMP) + the shared store-compliance / security / release / observability / in-app-purchases layer (+ `design/`, `auth/auth0-{react-native,ios,android}`) | `mobile-react-native` · `mobile-ios` · `mobile-android` |
 | `design/` | Stack-agnostic aesthetic-craft layer | bundled into `fe-*` |
 | `backend/` | Design-pattern + persistence dev stacks; the sandboxed Python upload worker (`backend/python/`); planning (`solution-planner`) + reverse-docs (`be-documenter`) | `be-dotnet` · `be-java` · `be-node` · `be-python` |
 | `observability/` | OpenTelemetry → Grafana telemetry | bundled into `be-*` |
@@ -251,5 +252,5 @@ Each top-level folder owns a domain, is **stack-first and domain-encapsulated** 
 | `tooling/` | Agent-drivable surfaces over a project — capability contract → MCP server / CLI | `tooling` |
 | `engineering-practices/` | Language-agnostic developer-workflow spine (`ep-*`) + audit lanes | bundled into all stack plugins |
 
-**Under construction — ignore, do not upload to the remote:** `mobile/`, `auth/cognito-{blazor,react}`, `communication/`.
+**Under construction — ignore, do not upload to the remote:** `auth/cognito-{blazor,react}`, `communication/`.
 

@@ -182,7 +182,7 @@ Inside a `Gate: none` plan task, run none of these and report "written, not run"
 - Airplane mode → offline or stale, never "failed", no retry attempts; emulator network at 100 % loss → the timeout body at the deadline.
 - `adb shell am kill <package>` from the home screen, then reopen → the filter and the open record are back, the data reloads, no blank screen.
 - Return from background after an expired token → one refresh, the screen current or the dialog shown, not a wall of failed regions.
-- Dev-side tests of the state transitions: [`unit-testing`](../unit-testing/SKILL.md); device journeys → `qa-mobile-android` (peer).
+- Dev-side tests of the state transitions: [`unit-testing`](../unit-testing/SKILL.md); device journeys → `qa-mobile-<stack>` (peer).
 
 ## Handoffs
 

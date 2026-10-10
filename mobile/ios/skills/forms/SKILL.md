@@ -274,4 +274,4 @@ Inside a `Gate: none` plan task, run none of these and report "written, not run"
 - Failure banner and offline copy → `mobile-ios-error-handling`
 - VoiceOver for errors → `mobile-ios-accessibility`
 - Passkeys and sign-in → `auth-auth0-ios`
-- E2E journeys → `qa-mobile-ios` (peer)
+- E2E journeys → `qa-mobile-<stack>` (peer)

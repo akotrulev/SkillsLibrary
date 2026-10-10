@@ -1,13 +1,13 @@
 ---
 name: mobile-android-unit-testing
-description: Use when Kotlin or Compose logic needs a dev-side test — JUnit 4 (JUnit 5 only where the mannodermaus plugin is present), fakes over mocks, runTest with StandardTestDispatcher, Turbine for Flow, ViewModel and region-state tests, MockWebServer, Robolectric, Compose UI test v2 (its dispatcher change), accessibility checks, Roborazzi. Triggers "unit-test this ViewModel", "my Compose test broke after v2". Do NOT use for device journeys (`qa-mobile-android`).
+description: Use when Kotlin or Compose logic needs a dev-side test — JUnit 4 (JUnit 5 only where the mannodermaus plugin is present), fakes over mocks, runTest with StandardTestDispatcher, Turbine for Flow, ViewModel and region-state tests, MockWebServer, Robolectric, Compose UI test v2 (its dispatcher change), accessibility checks, Roborazzi. Triggers "unit-test this ViewModel", "my Compose test broke after v2". Do NOT use for device journeys (`qa-mobile-<stack>`).
 ---
 
 # Android — Unit Testing (JUnit 4 + fakes)
 
 Owns **every dev-side test of logic the agent writes**: ViewModels, repositories, mappers, formatters, state machines, the request policy, and the Compose UI of a single screen. In-process, no device journeys, no real backend. Web analog: [`fe-react-component-testing`](../../../../frontend/react/skills/component-testing/SKILL.md) — test behaviour, not markup; fakes at the boundary; pure logic without a renderer carry over; jsdom and RTL queries do not. Sibling: [`mobile-ios-unit-testing`](../../../ios/skills/unit-testing/SKILL.md).
 
-**Boundary.** Real devices, real navigation, permission dialogs, deep links, TalkBack and cross-screen journeys are `qa-mobile-android`'s — **Appium (UiAutomator2)** with a **Maestro** lane (plan 003). A unit test fakes the platform, so it can never prove a system dialog or a gesture on hardware. This skill hands them the ids ([`test-ids`](../test-ids/SKILL.md)); it does not write the journeys.
+**Boundary.** Real devices, real navigation, permission dialogs, deep links, TalkBack and cross-screen journeys are `qa-mobile-<stack>`'s — **Appium (UiAutomator2)** with a **Maestro** lane (plan 003). A unit test fakes the platform, so it can never prove a system dialog or a gesture on hardware. This skill hands them the ids ([`test-ids`](../test-ids/SKILL.md)); it does not write the journeys.
 
 ## Version lane
 
@@ -35,7 +35,7 @@ Detect first: the runner (`junit`, `junit-jupiter`, `mannodermaus`), the existin
 
 ## When NOT to use
 
-- Device journeys, gestures, permission dialogs, deep links, push, TalkBack passes → `qa-mobile-android` (peer)
+- Device journeys, gestures, permission dialogs, deep links, push, TalkBack passes → `qa-mobile-<stack>` (peer)
 - Markup-only composables with no branches — a screenshot of hand-written layout is a tautology
 - API contract tests and real-backend integration → `qa-api-typescript` / `qa-api-dotnet` / `qa-api-java`
 - Writing `testTag`s → [`test-ids`](../test-ids/SKILL.md)
@@ -189,7 +189,7 @@ When Robolectric earns its cost, the Roborazzi record / verify loop, builders an
 - Time, identity, randomness, configuration and I/O enter through the constructor; no interface created only for a test.
 - `runTest` + `StandardTestDispatcher`; advance the clock explicitly; **no real sleep**; tests are independent and order-free.
 - Compose tests are v2, wait for idle before asserting launched work, and test one stateless screen with hand-built state.
-- Journeys, gestures and system dialogs go to `qa-mobile-android`.
+- Journeys, gestures and system dialogs go to `qa-mobile-<stack>`.
 
 ## What NOT to do
 
@@ -205,7 +205,7 @@ When Robolectric earns its cost, the Roborazzi record / verify loop, builders an
 1. Read the target's constructors, existing fakes, `MainDispatcherRule`, runner and Compose-test version; match them.
 2. List the behaviours worth testing; add the missing seam to the constructor, not a global.
 3. Write each test as Arrange / Act / Assert with a behaviour name; parameterize variants; put shared fakes, fixtures and builders in test support.
-4. Leave journeys as a hand-off note naming the `testTag`s, for `qa-mobile-android`.
+4. Leave journeys as a hand-off note naming the `testTag`s, for `qa-mobile-<stack>`.
 
 ## Validation
 
@@ -217,7 +217,7 @@ Inside a `Gate: none` plan task, run none of these and report "written, not run"
 
 ## Handoffs
 
-- Device journeys, gestures, TalkBack passes → `qa-mobile-android` · API contract tests → the `qa-api-<stack>` peer
+- Device journeys, gestures, TalkBack passes → `qa-mobile-<stack>` · API contract tests → the `qa-api-<stack>` peer
 - Ids → [`test-ids`](../test-ids/SKILL.md) · state ownership and seams → [`architecture`](../architecture/SKILL.md)
 - Request policy under test → [`networking`](../networking/SKILL.md) · region states → [`error-handling`](../error-handling/SKILL.md)
 - Gradle test options, JDK toolchain → [`project-setup`](../project-setup/SKILL.md)

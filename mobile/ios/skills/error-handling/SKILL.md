@@ -176,7 +176,7 @@ Inside a `Gate: none` plan task, run none of these and report "written, not run"
 - Fail a pull-to-refresh after a load → rows remain, stale marker with an age, one banner.
 - Airplane mode → offline or stale, never "failed", no retry attempts; hang the endpoint (Network Link Conditioner, 100% loss) → the timeout body at the deadline.
 - Return from background after an expired token → one refresh, the screen current or the sheet shown, not a wall of failed regions.
-- Dev-side tests of the state transitions: [`unit-testing`](../unit-testing/SKILL.md); device journeys → `qa-mobile-ios` (peer).
+- Dev-side tests of the state transitions: [`unit-testing`](../unit-testing/SKILL.md); device journeys → `qa-mobile-<stack>` (peer).
 
 ## Handoffs
 

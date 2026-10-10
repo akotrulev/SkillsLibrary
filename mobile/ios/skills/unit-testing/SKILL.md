@@ -1,20 +1,20 @@
 ---
 name: mobile-ios-unit-testing
-description: Use when Swift logic needs a dev-side test — Swift Testing (@Test, #expect, #require, parameterized arguments, confirmation, traits) with fakes over mocks, clock and UUID seams, URLProtocol stubs, @Observable models, region states, snapshot tests of single views. XCTest only for UI automation, performance and Objective-C exceptions. Triggers "unit-test this model", "fake the clock", "test the 401 ladder". Do NOT use for device journeys (`qa-mobile-ios`).
+description: Use when Swift logic needs a dev-side test — Swift Testing (@Test, #expect, #require, parameterized arguments, confirmation, traits) with fakes over mocks, clock and UUID seams, URLProtocol stubs, @Observable models, region states, snapshot tests of single views. XCTest only for UI automation, performance and Objective-C exceptions. Triggers "unit-test this model", "fake the clock", "test the 401 ladder". Do NOT use for device journeys (`qa-mobile-<stack>`).
 ---
 
 # iOS — Unit Testing (Swift Testing)
 
 Owns **every dev-side test of logic the agent writes**: models, services, mappers, formatters, state machines, the request policy. In-process, no device journeys, no network, no real backend. Web analog: [`fe-react-component-testing`](../../../../frontend/react/skills/component-testing/SKILL.md) — test behaviour, not markup; fakes at the boundary; pure logic without a renderer carry over; jsdom and RTL queries do not. Sibling: [`mobile-react-native-component-testing`](../../../react-native/skills/component-testing/SKILL.md).
 
-**Boundary.** Real devices, real navigation, permission dialogs, deep links, VoiceOver and cross-screen journeys are `qa-mobile-ios`'s — **Appium (XCUITest driver)**, with a **Maestro** lane (plan 003). A unit test fakes the platform, so it can never prove a gesture or a system dialog. This skill hands them the identifiers ([`test-ids`](../test-ids/SKILL.md)); it does not write the journeys.
+**Boundary.** Real devices, real navigation, permission dialogs, deep links, VoiceOver and cross-screen journeys are `qa-mobile-<stack>`'s — **Appium (XCUITest driver)**, with a **Maestro** lane (plan 003). A unit test fakes the platform, so it can never prove a gesture or a system dialog. This skill hands them the identifiers ([`test-ids`](../test-ids/SKILL.md)); it does not write the journeys.
 
 ## Version lane
 
 | Concern | Primary (Xcode 27 · Swift 6.2+) | Notes |
 |---|---|---|
 | Framework | **Swift Testing** — `import Testing`, `@Test`, `@Suite`, `#expect`, `#require` | The default for every new test; ships in the toolchain |
-| **XCTest only for** | UI automation (`XCUIApplication`), performance (`measure`, `XCTMetric`), Objective-C-exception tests (`XCTAssertThrowsError` on `NSException`) | Plan §4.2. UI automation journeys are `qa-mobile-ios`'s; the dev side keeps performance and Objective-C only |
+| **XCTest only for** | UI automation (`XCUIApplication`), performance (`measure`, `XCTMetric`), Objective-C-exception tests (`XCTAssertThrowsError` on `NSException`) | Plan §4.2. UI automation journeys are `qa-mobile-<stack>`'s; the dev side keeps performance and Objective-C only |
 | Both in one target | Allowed — separate files; never `XCTAssert*` inside a `@Test` or `#expect` inside an `XCTestCase` | Xcode 27 may add XCTest ↔ Swift Testing interoperability modes — unconfirmed (D24); do not rely on them |
 | Exit tests (`#expect(processExitsWith:)`) | Swift 6.2+; **macOS / Linux hosts only — not an iOS target** | Put a `precondition` / `fatalError` path behind a small non-exiting API and test that, or place the unit in a Swift package tested on the host |
 | Isolation | Test target default isolation follows the app; mark a suite `@MainActor` when it touches `@MainActor` code | `[Swift5 mode]` the same attributes, with the module's diagnostics |
@@ -33,7 +33,7 @@ Detect first: existing test target layout, XCTest vs Swift Testing mix, any exis
 
 ## When NOT to use
 
-- Device journeys, gestures, permission dialogs, deep links, push, VoiceOver passes → `qa-mobile-ios` (peer)
+- Device journeys, gestures, permission dialogs, deep links, push, VoiceOver passes → `qa-mobile-<stack>` (peer)
 - Markup-only views with no branches — a snapshot of hand-written layout is a tautology
 - API contract tests and real-backend integration → `qa-api-typescript` / `qa-api-dotnet` / `qa-api-java`
 - Writing `accessibilityIdentifier`s → [`test-ids`](../test-ids/SKILL.md)
@@ -168,7 +168,7 @@ Only where the project already uses `swift-snapshot-testing`: **one reusable vie
 - No `do`/`catch` in a test body; `#expect(throws:)` or the error reaches the runner.
 - Time, identity, randomness, configuration and I/O enter through the initializer; fakes over mocks; no protocol created only for a test.
 - No `Task.sleep` or timing in a test; tests are independent and order-free.
-- Journeys, gestures and system dialogs go to `qa-mobile-ios`.
+- Journeys, gestures and system dialogs go to `qa-mobile-<stack>`.
 
 ## What NOT to do
 
@@ -185,7 +185,7 @@ Only where the project already uses `swift-snapshot-testing`: **one reusable vie
 2. List the behaviours worth testing (the table above); add the missing seam to the initializer, not a global.
 3. Write each test as Arrange / Act / Assert with a behaviour name; parameterize variants.
 4. Add the `URLProtocol` stub, the fixed clock and the builders once, in shared test support.
-5. Leave journeys as a hand-off note naming the identifiers, for `qa-mobile-ios`.
+5. Leave journeys as a hand-off note naming the identifiers, for `qa-mobile-<stack>`.
 
 ## Validation
 
@@ -197,7 +197,7 @@ Inside a `Gate: none` plan task, run none of these and report "written, not run"
 
 ## Handoffs
 
-- Device journeys, gestures, VoiceOver passes → `qa-mobile-ios` · API contract tests → the `qa-api-<stack>` peer
+- Device journeys, gestures, VoiceOver passes → `qa-mobile-<stack>` · API contract tests → the `qa-api-<stack>` peer
 - Identifiers → [`test-ids`](../test-ids/SKILL.md) · state ownership and seams → [`architecture`](../architecture/SKILL.md)
 - Request policy under test → [`networking`](../networking/SKILL.md) · region states → [`error-handling`](../error-handling/SKILL.md)
 - Test plans and targets → [`project-setup`](../project-setup/SKILL.md)

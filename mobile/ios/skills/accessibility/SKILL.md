@@ -1,13 +1,13 @@
 ---
 name: mobile-ios-accessibility
-description: Use when a SwiftUI or UIKit screen must work with VoiceOver, Dynamic Type through the accessibility sizes, Reduce Motion and Differentiate Without Color — labels, traits, values, grouping, rotors, custom actions, focus, announcements, touch targets. Triggers "VoiceOver reads the wrong thing", "text clips at large sizes", "announce the result". Do NOT use for scanning (`qa-mobile-ios`), field errors (`-forms`) or animation mechanics (`-animation`).
+description: Use when a SwiftUI or UIKit screen must work with VoiceOver, Dynamic Type through the accessibility sizes, Reduce Motion and Differentiate Without Color — labels, traits, values, grouping, rotors, custom actions, focus, announcements, touch targets. Triggers "VoiceOver reads the wrong thing", "text clips at large sizes", "announce the result". Do NOT use for scanning (`qa-mobile-<stack>`), field errors (`-forms`) or animation mechanics (`-animation`).
 ---
 
 # iOS — Accessibility
 
 Standardises **authoring** accessible iOS screens against **WCAG 2.2 AA** and VoiceOver's conventions. The house rule: **a real control with the right label, trait and value; never rebuild semantics on a bare `View` or `UIView`.** Web analog: [`fe-react-accessibility`](../../../../frontend/react/skills/accessibility/SKILL.md) — semantic-first, announcements and focus management carry over; landmarks, Tab order and skip links do not. Sibling: [`mobile-react-native-accessibility`](../../../react-native/skills/accessibility/SKILL.md) (the same rules through RN props).
 
-**Boundary — authoring, not scanning.** Proving it on a device (a VoiceOver pass, Accessibility Inspector audit, XCUITest `performAccessibilityAudit()`, journeys with a screen reader on) is `qa-mobile-ios`'s. Target size, a non-drag alternative and accessible authentication are design decisions made first (`design/accessible-by-design`); this skill implements them. Design facts (type scale, contrast, targets) come from `design/ui-ux-pro-max` (`--stack swiftui`); the corpus wins on a disagreement.
+**Boundary — authoring, not scanning.** Proving it on a device (a VoiceOver pass, Accessibility Inspector audit, XCUITest `performAccessibilityAudit()`, journeys with a screen reader on) is `qa-mobile-<stack>`'s. Target size, a non-drag alternative and accessible authentication are design decisions made first (`design/accessible-by-design`); this skill implements them. Design facts (type scale, contrast, targets) come from `design/ui-ux-pro-max` (`--stack swiftui`); the corpus wins on a disagreement.
 
 ## Version lane
 
@@ -32,7 +32,7 @@ Detect first: SwiftUI or UIKit per screen, any in-house component library that a
 
 ## When NOT to use
 
-- Scanning, VoiceOver journeys, audits in CI → `qa-mobile-ios` (peer)
+- Scanning, VoiceOver journeys, audits in CI → `qa-mobile-<stack>` (peer)
 - Validation messages on fields → [`forms`](../forms/SKILL.md) · banner and failed regions → [`error-handling`](../error-handling/SKILL.md)
 - `withAnimation` / Reduce Motion mechanics → [`animation`](../animation/SKILL.md) · semantic colours and type tokens → [`styling`](../styling/SKILL.md)
 - `accessibilityIdentifier` → [`test-ids`](../test-ids/SKILL.md) (an identifier is never a label)
@@ -116,7 +116,7 @@ struct SaveStatus: View {
 
 ## Accessibility Nutrition Labels — readiness
 
-A voluntary App Store Connect declaration per supported feature (VoiceOver, Voice Control, Larger Text, Sufficient Contrast, Dark Interface, Differentiate Without Color, Reduced Motion, Captions, Audio Descriptions). **Declare a feature only after a device pass proved it on the common tasks** (`qa-mobile-ios`); this skill makes the code ready — labelled controls, scaling layout, contrast tokens, motion respect — and never writes the declaration. Re-check the Connect options before filing; they are not verified here.
+A voluntary App Store Connect declaration per supported feature (VoiceOver, Voice Control, Larger Text, Sufficient Contrast, Dark Interface, Differentiate Without Color, Reduced Motion, Captions, Audio Descriptions). **Declare a feature only after a device pass proved it on the common tasks** (`qa-mobile-<stack>`); this skill makes the code ready — labelled controls, scaling layout, contrast tokens, motion respect — and never writes the declaration. Re-check the Connect options before filing; they are not verified here.
 
 ## Rules
 
@@ -149,7 +149,7 @@ Inside a `Gate: none` plan task, run none of these and report "written, not run"
 - Accessibility Inspector audit on each screen: no unlabelled element, no clipped text, no target under 44 pt.
 - A VoiceOver pass at `accessibility5`: each row is one stop, each action reachable, the error announced once.
 - Settings → Accessibility with Increase Contrast, Reduce Transparency, Reduce Motion and Differentiate Without Color on: nothing disappears, nothing relies on colour.
-- Dev-side tests of the logic that picks a layout or label: [`unit-testing`](../unit-testing/SKILL.md); device journeys → `qa-mobile-ios`.
+- Dev-side tests of the logic that picks a layout or label: [`unit-testing`](../unit-testing/SKILL.md); device journeys → `qa-mobile-<stack>`.
 
 ## Handoffs
 

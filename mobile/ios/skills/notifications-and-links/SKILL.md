@@ -166,7 +166,7 @@ Inside a `Gate: none` plan task, run none of these and report "written, not run"
 - A payload with an unknown `screen` or a non-UUID id lands on home with nothing opened; a hostile link (`https://evil.example/orders/x`, `//` paths) is ignored.
 - `xcrun simctl openurl booted "https://example.com/orders/<id>"` opens the order screen on a build with the entitlement; the AASA URL returns 200, `application/json`, no redirect.
 - Sign out: the token is gone from the backend for the device.
-- Dev-side tests: `NotificationTarget(userInfo:)` and `DeepLink(url:)` against valid, malformed and hostile inputs; device journeys are `qa-mobile-ios`'s (peer).
+- Dev-side tests: `NotificationTarget(userInfo:)` and `DeepLink(url:)` against valid, malformed and hostile inputs; device journeys are `qa-mobile-<stack>`'s (peer).
 
 ## Handoffs
 
@@ -177,4 +177,4 @@ Inside a `Gate: none` plan task, run none of these and report "written, not run"
 - Live Activity push, widget refresh → `mobile-ios-system-integration`
 - Token storage → [`offline-and-storage`](../offline-and-storage/SKILL.md)
 - Push-sending service → the project's `be-*` agent
-- Link and push journeys on a device → `qa-mobile-ios` (peer)
+- Link and push journeys on a device → `qa-mobile-<stack>` (peer)

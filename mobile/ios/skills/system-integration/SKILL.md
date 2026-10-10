@@ -183,4 +183,4 @@ Inside a `Gate: none` plan task, run none of these and report "written, not run"
 - Resume revalidation, offline states → [`error-handling`](../error-handling/SKILL.md)
 - Entitlements, background modes, 4.5.3, privacy manifest → [`mobile-shared-store-compliance`](../../../_shared/store-compliance/SKILL.md)
 - Extension signing and targets in the build → [`mobile-shared-release`](../../../_shared/release/SKILL.md)
-- Widget and intent journeys on a device → `qa-mobile-ios` (peer)
+- Widget and intent journeys on a device → `qa-mobile-<stack>` (peer)

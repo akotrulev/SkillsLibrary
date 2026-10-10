@@ -39,7 +39,7 @@ object DispatchersModule {
 }
 ```
 
-The one place `Dispatchers.IO` is written. Tests replace the module with `@TestInstallIn` or build the ViewModel by hand with a `StandardTestDispatcher`. Hilt tests that boot a graph are `qa-mobile-android`'s lane; the ViewModel itself is unit-tested with constructor arguments and no Hilt.
+The one place `Dispatchers.IO` is written. Tests replace the module with `@TestInstallIn` or build the ViewModel by hand with a `StandardTestDispatcher`. Hilt tests that boot a graph are `qa-mobile-<stack>`'s lane; the ViewModel itself is unit-tested with constructor arguments and no Hilt.
 
 ## Navigation 3 and Hilt
 

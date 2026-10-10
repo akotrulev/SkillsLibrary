@@ -6,11 +6,7 @@ lane) — each with the library's plugin shape: a coding standard, the common us
 step-by-step agent that works greenfield and brownfield, a conformance audit, and a shared mobile layer
 (store compliance, security, release, observability, in-app purchases) bundled into all three.
 
-**Status:** C1 landed (2026-10-11): `mobile/` exists with the five July drafts moved and renamed under
-`mobile/react-native/`, the three conformance-checklist skeletons, and `## Mobile code rules` in `CLAUDE.md`;
-the stale `frontend/react-native` pointers are repointed. S1 landed (2026-10-11): `mobile/_shared/{store-compliance,security}` with their references and the `L1…L26` / `K1…K27` audit fragments. S2 landed (2026-10-11): `mobile/_shared/{release,observability}` with their references and the `T1…T19` / `U1…U20` audit fragments. S3 landed (2026-10-11): `mobile/_shared/in-app-purchases` with its references and the `X1…X22` fragment, plus `auth/auth0-{react-native,ios,android}`. N1 landed (2026-10-11): `mobile/{ios,android}/skills/basics` with `references/concurrency.md` each, and rows `A1…A5`/`B1…B16` (iOS), `A1…A4`/`B1…B16` (Android). R1 landed (2026-10-11): the five drafts rewritten onto SDK 57 and `mobile/react-native/skills/navigation` written, with RN checklist rows `A1…A7`, `B1…B13`, `C1…C10`, `D1…D10`, `E1…E13`, `F1…F15`. R2 landed (2026-10-11): `mobile/react-native/skills/{ui-components,forms,networking,offline-and-storage,native-modules}` with checklist rows `D10…D19`, `G1…G10`, `H1…H15`, `I1…I13`, `J1…J13`. R3 landed (2026-10-10): `mobile/react-native/skills/{device-features,notifications-and-links,animation,languages,test-ids}` with checklist rows `F15…F20`, `J14…J28`, `P1…P10`, `Q1…Q11`, `R1…R10`, and §8.5's RN mapping answered (D20 — the QA explorer's `content-desc` claim is refuted). R4 landed (2026-10-11): `mobile/react-native/skills/{accessibility,performance,error-handling,component-testing}` with `error-handling/references/{session-and-resume,writes-and-dependencies}.md` and checklist rows `M1…M13`, `N1…N13`, `O1…O22`, `S1…S12`. R5 landed (2026-10-11): `mobile/react-native/skills/{migration,code-review,standards-audit}` with `migration/references/{sdk-upgrade,new-architecture,bare-to-expo,embed-in-native-app}.md`, the RN checklist's closing section index, `mobile/react-native/agents/mobile-react-native.md` (13,888 characters, description 574 of 650) and `mobile/react-native/commands/{mobile-react-native,mobile-react-native-audit}.md`. I1 landed (2026-10-11): `mobile/ios/skills/{project-setup,architecture,ui-components,styling,navigation}` with `references/{packages-and-config,tca}.md` and checklist rows `A6…A11`, `B17…B24`, `C1…C10`, `D1…D11`, `E1…E12`, `F1…F11` (D21: MV over the corpus's MVVM rows). I2 landed (2026-10-11): `mobile/ios/skills/{forms,networking,offline-and-storage,uikit,device-features}` with `networking/references/request-policy.md`, `offline-and-storage/references/{swiftdata-migrations,keychain}.md`, `uikit/references/{uiscene-migration,interop-seams}.md`, `device-features/references/permissions.md` and checklist rows `D12…D20`, `G1…G10`, `H1…H12`, `I1…I14`, `J1…J12` (D22: new facts unconfirmed against Apple pages). I3 landed (2026-10-11): `mobile/ios/skills/{notifications-and-links,system-integration,animation,languages,test-ids}` with `notifications-and-links/references/apns-and-extensions.md`, `system-integration/references/background-and-activities.md` and checklist rows `F12…F15`, `J13…J28`, `P1…P11`, `Q1…Q11`, `R1…R10` (D23: new facts unconfirmed against Apple pages). I4 landed (2026-10-11): `mobile/ios/skills/{accessibility,performance,error-handling,unit-testing}` with `error-handling/references/{session-and-resume,writes-and-dependencies}.md` and checklist rows `M1…M14`, `N1…N13`, `O1…O21`, `S1…S15` (D24: new facts unconfirmed against Apple pages). I5 landed (2026-10-11): `mobile/ios/skills/{migration,code-review,standards-audit}` with `migration/references/{swift6-modules,observation,combine-to-async,uikit-to-swiftui,objc-to-swift,cocoapods-to-spm,ios27-sdk-and-targets}.md`, the iOS checklist's closing section index, `mobile/ios/agents/mobile-ios.md` (13,879 characters, description 640 of 650) and `mobile/ios/commands/{mobile-ios,mobile-ios-audit}.md` (D25: migration facts unconfirmed against Apple / swift.org pages). A1 landed (2026-10-10): `mobile/android/skills/{project-setup,architecture,ui-components,styling,navigation}` with `project-setup/references/gradle-config.md`, `architecture/references/hilt-and-modules.md` and checklist rows `A5…A13`, `B17…B20`, `C1…C13`, `D1…D15`, `E1…E12`, `F1…F13` (D26: no ViewModel-to-UI events over the corpus's Channel row; D27: Navigation 3 / Expressive / KSP facts partly unconfirmed). A2 landed (2026-10-10): `mobile/android/skills/{forms,networking,offline-and-storage,views-interop,device-features}` with `networking/references/{request-policy,connectivity-and-trust}.md`, `offline-and-storage/references/{room-migrations,keystore-and-secrets}.md`, `forms/references/validation-autofill-wizards.md`, `views-interop/references/recyclerview.md`, `device-features/references/{permissions,biometrics-and-credentials}.md` and checklist rows `D16…D25`, `G1…G10`, `H1…H15`, `I1…I14`, `J1…J12` (D28: Room 3 / Retrofit 3 / Compose-forms facts partly unconfirmed). A3 landed (2026-10-10): `mobile/android/skills/{notifications-and-links,system-integration,animation,languages,test-ids}` with `notifications-and-links/references/{fcm,app-links}.md`, `system-integration/references/foreground-services.md` and checklist rows `F14…F16`, `J13…J24`, `P1…P8`, `Q1…Q8`, `R1…R8` (D29: FCM registration is the Installation-ID flow; several Compose / Appium / FGS facts unconfirmed). A4 landed (2026-10-10): `mobile/android/skills/{accessibility,performance,error-handling,unit-testing}` with `error-handling/references/{session-and-resume,writes-and-dependencies}.md`, `unit-testing/references/{flows-and-seams,robolectric-and-screenshots}.md` and checklist rows `M1…M15`, `N1…N14`, `O1…O22`, `S1…S16` (D30: Robolectric / Turbine / Roborazzi versions and R8 keep-rule semantics unconfirmed). Next: A5.
-A5 landed (2026-10-10): `mobile/android/skills/{kotlin-multiplatform,migration}` with three and nine references, and Android checklist rows `A14…A19` and `W1…W11`. A6 landed (2026-10-11): `mobile/android/skills/{code-review,standards-audit}`, the checklist's closing section index (A–X, W included), `mobile/android/agents/mobile-android.md` (13,990 characters) and `mobile/android/commands/{mobile-android,mobile-android-audit}.md`. W1 landed (2026-10-10): three `mobile-*` entries in `.claude-plugin/marketplace.json` after `fe-react`, the `mobile` stack token in `plan-format.md`, `delivery-plan/SKILL.md`, `solution-planner.md` (routing to the three agents) and CLAUDE.md § Planning, and the QA peers wired (`qa-mobile-*` Related agents, the three `mobile-screen-explorer` corrected to D20, the two security-testing peer lines). Next: G1. Built but unverified: everything — the plan gates once, in G1. Flutter becomes a fourth plugin in its own plan, written
-once this one lands (O4); it is **not** in this plan's tasks. Maestro arrives on the QA side through plan 003
+**Status:** Complete — all 22 tasks landed (2026-10-10 / 11) and G1 ran the plan's only gate (2026-10-10): `mobile/` carries three plugins — `mobile-react-native` (23 skills), `mobile-ios` (23) and `mobile-android` (24, incl. Kotlin Multiplatform) — each with a step-by-step agent, two commands and a `standards-audit` checklist, plus `mobile/_shared/{store-compliance,security,release,observability,in-app-purchases}` and `auth/auth0-{react-native,ios,android}`; the planning lane accepts a `mobile` task; CLAUDE.md, `docs/skills-catalog.md` and `README.md` describe the domain. **Still unverified:** no agent has been run against a real app; every version fact is as of 2026-10-10 and SDK 58 may have shipped since; the §4.5 items were not confirmed against vendor pages; Maestro is live only once plan 003's X1 has landed. **Next:** the Flutter plan (O4), written as its own plan once this one is filed — it is not in this plan's tasks. Maestro arrives on the QA side through plan 003
 (its X1); this plan feeds it the same test ids and an EAS Workflows job (D7). Every fact in §4 was web-verified
 on 2026-10-10; the items listed under §4.5 were not.
 
@@ -1456,6 +1452,8 @@ task above.
   shipped; Maestro is live only if plan 003's X1 has landed) and what is next (the Flutter plan, O4) —
   and `git mv` this plan to `docs/plans/implemented/002-mobile-plugins.md`.
 
+- **As built (2026-10-10):** Docs: `CLAUDE.md` § Repository map `mobile/` row and the under-construction line (now `auth/cognito-{blazor,react}`, `communication/`), "93-command" → 99; `docs/skills-catalog.md` scope, plugin list, one slash-surface row (`mobile-<stack>` · `code-auditor` · 14 `design-*` · `mobile-<stack>-audit`), `99 commands total` (unique command files across the marketplace: 93 + 6 new, matches), `## Mobile dev catalog` before `## Design catalog`, "all fourteen" → "all seventeen" plugins; `README.md` layout line and a `mobile` status row. Gate: step 1 passed; step 2 first run failed with 49 — 47 `qa-mobile-ios` / `qa-mobile-android` names (no such agents; the QA peers are `qa-mobile-{java,dotnet,typescript}`) in I-/A-task files, rewritten to `qa-mobile-<stack>`, and two relative links one `../` short (`mobile/ios/skills/uikit/references/interop-seams.md`, `mobile/android/skills/unit-testing/references/flows-and-seams.md`); then `OK`. Step 3 first run: 6 skill descriptions over 500 (`auth/auth0-{ios,react-native,android}` 530/528/525, `mobile/_shared/in-app-purchases` 518, `mobile/{android,ios}/skills/basics` 507/504) and `mobile-android` agent description 657 > 650 — trimmed to under budget; final counts 109 body, 51 file, 0 description violations, nothing under `mobile/` or the three auth folders. No `ALLOW` / `LINK_EXAMPLES` additions. Built but unverified: the trimmed descriptions' trigger recall (no skill was invoked against a prompt).
+
 ## Close-out — every task
 
 Before you stop, in this order, in this file:
@@ -1513,44 +1511,6 @@ goes in an untracked `scratch/` folder inside the worktree, deleted before commi
 | A6 | `docs` | `general-purpose` | A1–A5, S1–S3, N1, I5 | ~105k |
 | G1 | `docs` | `general-purpose` | every task above | ~140k |
 
-C1, S1, S2, S3, N1, R1, R2, R3, R4, R5, I1, I2, I3, I4, I5, A1, A2, A3, A4, A5, A6 and W1 have landed (their blocks are deleted); every block below is live.
+Every task has landed (G1 last); no prompt block remains.
 
 ---
-
-### G1 — documentation, the gate, and filing the plan (general-purpose, docs)
-
-````
-You are `general-purpose`. Task G1 of docs/plans/002-mobile-plugins.md: document the mobile domain, run
-the plan's only gate, fix what it finds, and file the plan.
-
-Read, in this order:
-1. CLAUDE.md.
-2. The plan: the header, §2, §6, §9, §11, every task's As built note, and "Close-out — every task".
-3. `docs/skills-catalog.md` — the scope paragraph, the slash-command surface table, and
-   `## Frontend-React dev catalog` as the section pattern; `README.md` layout and status rows.
-
-Build:
-- CLAUDE.md § Repository map row for `mobile/`; `mobile/` off the under-construction line.
-- `docs/skills-catalog.md`: scope paragraph, three slash-surface rows, the command count recomputed
-  from the marketplace (unique command files), a `## Mobile dev catalog` section; `README.md` layout
-  line and status row.
-
-Gate (this is the last task, so it carries the plan's only gate, in run order):
-  python3 -m json.tool .claude-plugin/marketplace.json > /dev/null
-  python3 scratch/library-check.py        (§11's script, saved into an untracked scratch/ folder)
-  python3 tools/token-audit.py            (read the counts: 109 body, 51 file, nothing under mobile/ or the three new auth/ folders)
-Fix what it finds — a failure may belong to any task above, and the As built note says whose it was.
-
-Traps:
-- token-audit exits non-zero because of the 160 pre-existing violations — judge by the counts.
-- An over-budget body is fixed by moving detail into `references/`, never by deleting rules.
-- Delete `scratch/` before committing.
-
-Then rewrite `**Status:**` one last time — what the plan delivered, what is still unverified (no agent
-has been run against a real app; versions are as of 2026-10-10; SDK 58 may have shipped; Maestro is
-live only if plan 003's X1 has landed), and what is next (the Flutter plan, O4) — and `git mv` this
-plan to docs/plans/implemented/002-mobile-plugins.md.
-
-Commit: `feat(mobile G1): mobile catalog and docs, gate passed, plan filed`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
