@@ -35,7 +35,7 @@ Scaffolds Selenium 4 page objects and Mocha (or Vitest) UI tests in TypeScript s
 ## Inputs needed
 
 1. **Page name** (PascalCase: `Login`, `Product`, `Cart`)
-2. **Elements** — name + locator. Prefer `data-test`; fall back to `id`, then `css`, then `xpath`.
+2. **Elements** — name + locator. Prefer the test-id attribute — `data-testid` by default; a project whose app ships `data-test` (as the SauceDemo samples below do) uses that attribute throughout — then `id`, then `css`, then `xpath`.
 3. **Actions** — what the test does on the page and whether it navigates
 4. **Landmark element** — used in `isElementVisible` to confirm the page is loaded
 5. **Next pages** — destination page classes for navigation actions
@@ -178,7 +178,7 @@ describe("Authentication", () => {
 - Extend `BasePage`; pass `driver` to `super(driver)`
 - Element accessors return `Promise<WebElement>` (or `Promise<WebElement[]>`) — keep them one-liners
 - **No `@FindBy`** equivalents — explicit `findElement(By)` calls only
-- **Locator preference:** `By.css("[data-test='…']")` → `By.id(…)` → `By.css(…)` → `By.className(…)` → `By.xpath(…)` (last resort, leave a `// TODO`)
+- **Locator preference:** `By.css("[data-testid='…']")` (or the project's test-id attribute) → `By.id(…)` → `By.css(…)` → `By.className(…)` → `By.xpath(…)` (last resort). A fallback carries no marker in the code; it gets a `missing-testids.md` row
 - One class per page; multi-step flows in a sub-folder
 - Reusable components take a parent `WebElement` and use parent-scoped finds
 - Navigation actions return the next page object; same-page actions return `Promise<void>`
@@ -213,7 +213,7 @@ describe("Authentication", () => {
 - No `OR` in any assertion — no `to.be.oneOf([...])`, no `||` inside an `expect`, no `/a|b/` alternation. One expected value per assertion (see Test rules)
 - No `try`/`catch` in a test or cleanup hook — expected rejections use `await expect(...).rejects`; catches live only in I/O helpers narrowing one named error (see Test rules)
 - No `@FindBy`-style decorators or PageFactory analogues
-- No XPath when `data-test` could be added
+- No XPath when a test id could be added
 - No shared mutable state on pages — instantiate fresh per test
 - No business logic in page objects
 - No hardcoded URLs/credentials — go through `env`
@@ -222,7 +222,7 @@ describe("Authentication", () => {
 ## Generation steps
 
 1. Confirm **page name**, **elements + locators**, **actions**, **next pages**.
-2. Flag elements without `data-test` as tech debt; don't silently default to XPath.
+2. Record each element without a test id in `missing-testids.md`; don't silently default to XPath.
 3. Generate `src/pages/{Name}Page.ts`:
    - Constructor calls `super(driver)`
    - One element accessor method per element

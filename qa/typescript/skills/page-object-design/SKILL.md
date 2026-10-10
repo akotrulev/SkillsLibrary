@@ -54,17 +54,14 @@ Rules of thumb:
 
 ### Base class hierarchy
 
-Keep it **shallow** — at most two levels.
+**The default is no base class.** Pages take `page: Page`, components take their root `Locator`, and shared behaviour is a component field or a free function. Introduce `BasePage` only when a **third** concrete page shares real behaviour (not just the `page` field), and keep it to one level:
 
 ```
-BasePage              ← page field, common waits, expectLoaded() abstract
- └─ (rarely) AuthenticatedPage — only if every signed-in page truly shares something
- └─ <ConcretePage>
+<ConcretePage>                     ← default: no base
+BasePage → <ConcretePage>          ← only on the third real sharer
 ```
 
-Avoid: `BasePage → FormPage → MultiStepFormPage → CheckoutInformationPage` (four levels usually hide imaginary abstractions).
-
-**Composition over class hierarchy.** In TypeScript especially, you can often skip the base class entirely and use small composable helpers (`expectLoaded(page, locator)` as a free function) or a single mixin. Don't introduce `BasePage` unless 3+ concrete pages already share genuine behavior.
+Avoid: `BasePage → FormPage → MultiStepFormPage → CheckoutInformationPage` (four levels usually hide imaginary abstractions), and a base class that only forwards to `page`.
 
 ### TypeScript driver-lifecycle implications for the design
 
@@ -88,8 +85,8 @@ Avoid `if (driver.isIOS) …` inside a single page — that conditional logic in
 
 - Locators belong **inside the page / component class** as `readonly Locator` fields (Playwright) or `private readonly` getters (WebdriverIO) — never in the test (spec file).
 - A shared `locators.ts` constants module is an anti-smell. Exception: brand-wide a11y test ids (small file).
-- Components scoped to a parent take that parent `Locator` / `WebdriverIO.Element` in the constructor and query inside it via `parent.locator(...)` / `parent.$(...)`.
-- Prefer `page.getByRole` / `getByLabel` / `getByTestId` (Playwright) — keeps the design semantic and accessible-first.
+- **A component takes its parent `Locator`** (`WebdriverIO.Element` on WebdriverIO) in the constructor and builds every child from it, so it works wherever it is mounted. The scoping mechanics — chaining from the root, `within()`, `filter({ has })`, strictness, positional picks — are owned by [`ui-test-author/playwright/references/locators.md`](../ui-test-author/playwright/references/locators.md); `assets/LoginPage.ts` there is the worked example.
+- Every locator follows one ladder: `getByTestId` → `getByRole` → `getByLabel` → `getByPlaceholder` → `getByText` → `getByAltText` / `getByTitle` → CSS. Test ids are PascalCase dot-separated and static (`OrderRow`, `OrderRow.Title`); a fallback is recorded in `missing-testids.md`, never marked in the code.
 
 ### Where flow helpers live
 
@@ -114,7 +111,7 @@ e2e/
 │   └── specs/
 │       └── checkout.spec.ts
 ├── pages/
-│   ├── BasePage.ts                ← optional, only if real shared behavior
+│   ├── BasePage.ts                ← only once a third page shares real behaviour
 │   ├── LoginPage.ts
 │   ├── catalog/
 │   │   ├── ProductListPage.ts
@@ -136,12 +133,10 @@ e2e/
 e2e/
 ├── wdio.conf.ts
 ├── pages/
-│   ├── BasePage.ts
 │   ├── web/
 │   │   ├── LoginPage.ts
 │   │   └── …
 │   └── mobile/
-│       ├── BaseMobilePage.ts
 │       ├── LoginPage.ts
 │       └── …
 ├── components/
@@ -167,7 +162,7 @@ A page object should split when **any** are true:
 | Step-by-step flow (checkout, onboarding) | Sub-folder per step under `pages/checkout/` |
 | Persistent shell (nav, footer) | Extract `NavigationMenu` / `SidePanel` exposed as a field on every page that has it |
 | Modal / dialog | Return modal class from the action that opens it; assertion on the modal |
-| Cross-page widget (toast) | Hang off `BasePage` (or as a free composable) so every page exposes `toast()` |
+| Cross-page widget (toast) | A `Toast` component field on each page that shows it, built from the page's root `Locator` |
 | Test sets up state via `loginPage.signIn(...)` repeatedly | Promote to a `seededAuth` fixture using `storageState` |
 
 ## Naming conventions
@@ -190,12 +185,11 @@ A page object should split when **any** are true:
 ## Class responsibilities
 | Class | Type | Owns | Doesn't own |
 |-------|------|------|-------------|
-| BasePage | base (optional) | `page` field, wait helpers, `expectLoaded()` abstract | assertions, business logic |
-| LoginPage | page | login form locators, `signIn()` | navigation to product list (returns `ProductListPage`) |
+| LoginPage | page | `goto()`, the sign-in form component, `signIn()` | assertions, the landing page's locators |
 | ProductCard | component | card-internal locators, `addToCart()` | iterating the product list |
 
 ## Base hierarchy
-<3-line description; note if BasePage is unnecessary>
+<none, unless a third page shares real behaviour — then name the three and what they share>
 
 ## Fixture strategy (Playwright)
 <which fixtures own what; where storageState comes from>
@@ -218,7 +212,7 @@ A page object should split when **any** are true:
 - **Page returns DTOs** — that's API territory; page methods return next pages or visible text
 - **Locators in a central constants file** — couples every page change to one file
 - **Flow class with state** — flows are functions / fixtures, not stateful classes
-- **`BasePage` constructed before there are 3+ concrete pages** sharing real behavior
+- **`BasePage` before a third concrete page shares real behaviour**, or a base that only holds `page`
 - **`BaseTest` doing app-specific work** — bases handle infrastructure (page, fixtures), not domain workflow
 - **Spec file instantiates pages with `new LoginPage(page)`** — use a fixture that yields the page
 - **`storageState` setup repeated in every spec** — hoist to `playwright.config.ts` project or a fixture
@@ -231,7 +225,7 @@ A page object should split when **any** are true:
 1. Collect inputs (skip questions answerable from the existing file tree).
 2. Map every existing module (or every screen for greenfield) onto **page / component / flow-or-fixture / base**.
 3. Apply splitting heuristics to anything in the wrong bucket.
-4. Decide whether `BasePage` is warranted (do not introduce it for fewer than 3 sharing pages).
+4. Decide whether `BasePage` is warranted: only when a third page shares real behaviour.
 5. Pick the multi-platform strategy if relevant; pick fixture vs free-function for flows.
 6. Produce the output: folder tree, responsibilities table, fixture strategy, migration plan (smallest refactor first).
 7. Hand off code generation to the matching generator skill.

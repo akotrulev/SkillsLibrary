@@ -1,271 +1,198 @@
 ---
 name: qa-ui-test-writer-playwright-typescript
-description: Use when the user asks to scaffold Playwright UI tests in TypeScript — new spec files, page objects under `tests/pages/`, or a specific scenario (login, form, accessibility, visual). Triggers: "write a Playwright test for X in TypeScript", "add a Playwright TS page object for screen Y", "scaffold a Playwright spec (TS)". Do NOT use for API tests on the Playwright runner (`qa-api-test-playwright-typescript`) or reviewing specs (`qa-ui-test-review-typescript`).
+description: Use when the user asks to scaffold Playwright UI tests in TypeScript — specs, page objects, fixtures, playwright.config.ts, auth setup, locator scoping with within(), web-first assertions, or device and mobile-web emulation. Triggers "write a Playwright test for X in TypeScript", "add a Playwright page object for screen Y", "set up playwright.config.ts". Do NOT use for API tests on the Playwright runner (`qa-api-test-playwright-typescript`) or reviewing specs (`qa-ui-test-review-typescript`).
 ---
 
 # QA — Playwright Test & Page Object Generator (TypeScript)
 
-Scaffolds Playwright `@playwright/test` specs and page objects in TypeScript. Uses the **fixture-driven page object pattern**: page objects are exposed as Playwright fixtures, not constructed manually in every test. Locators use `getByTestId` first (`data-testid` is the standing contract with the dev team — see `qa/typescript/skills/page-objects-from-url` for extraction and the missing-testid report), falling back to role/label semantics — never raw CSS where anything better exists.
+Scaffolds `@playwright/test` specs, page objects and fixtures in strict TypeScript. Page objects reach
+tests as **fixtures**, locators climb **one ladder** with `data-testid` first, and every check is a
+**web-first assertion**. The code lives in `assets/`; the mechanics live in `references/`.
 
-## Stack
+## Versions
 
-- Node 24 + TypeScript (strict mode)
-- `@playwright/test` (Playwright Test runner)
-- Page objects under `tests/pages/`, specs under `tests/specs/`
-- Fixtures under `tests/fixtures/`
-- Allure reporter (`allure-playwright`) where the project uses Allure
-- `eslint-plugin-playwright` (`flat/recommended`) wired into `eslint.config.mjs` — many anti-patterns below are caught automatically
+These are the only Playwright pins in this skill. Every other file links here.
+
+| Artifact | Version | Note |
+|---|---|---|
+| `@playwright/test` | **1.64.0** | Node ≥ 20 (1.62); target Node 24, 22 maintenance |
+| Docker image | `mcr.microsoft.com/playwright:v1.64.0-noble` | The tag always equals the package version |
+| `allure-playwright`, `allure-js-commons` | 3.13.0 | Needs `@playwright/test` ≥ 1.62 |
+| `@axe-core/playwright` | 4.13.0 | Owned by `accessibility-testing` |
+| `playwright-bdd` | 9.2.1 | Owned by the BDD skills |
+
+**Version lane.** Detect the project's `@playwright/test` version first and keep it — never up-level a
+project as a side effect. A 1.64-only API has a down-level form: `child.within(parent)` →
+`parent.locator(child)`; `TestProject.default`, `--shuffle` and `describe.configure({ lock })` have none.
+Each reference tags an API with the version it shipped in.
+
+## Stack and layout
+
+- Node 24 + TypeScript (`strict: true`), Playwright Test runner, `eslint-plugin-playwright`
+  (`flat/recommended`), Allure through `allure-playwright` where the project uses Allure.
+
+```
+e2e/
+├── playwright.config.ts
+├── tests/
+│   ├── auth.setup.ts
+│   ├── fixtures.ts
+│   ├── pages/          LoginPage.ts, HomePage.ts, components shared by several pages
+│   └── specs/          login.spec.ts — one spec file per feature
+└── playwright/.auth/   signed-in state, git-ignored
+```
+
+The assets are flat so they compile as one folder; spread over this layout, only their relative imports
+change. The config leaves `testDir` at its default, so it finds the specs either way.
 
 ## When to use
 
-- New `*.spec.ts` under `tests/specs/`
-- New page object under `tests/pages/`
-- New fixture (auth state, seeded data, page-object factory) under `tests/fixtures/`
-- Adding a scenario to an existing spec
+- A new `*.spec.ts`, page object, component object or fixture.
+- A new or rewritten `playwright.config.ts`, setup project or signed-in state.
+- Scoping or fixing locators, replacing one-shot reads with web-first assertions.
+- Running the suite per device, viewport, colour scheme, locale or time.
 
 ## When NOT to use
 
-- Mobile / Appium → `qa/typescript/skills/ui-test-author/appium`
-- Java Selenium → `qa/java/skills/ui-test-author/selenium`
-- Reviewing existing Playwright code → `qa/typescript/skills/ui-test-author/review`
-- Designing the overall page-object hierarchy → `qa/typescript/skills/page-object-design`
+- Native mobile apps → `qa/typescript/skills/ui-test-author/appium`
+- Selenium WebDriverJS → `qa/typescript/skills/ui-test-author/selenium`
+- Reviewing Playwright code → `qa/typescript/skills/ui-test-author/review`
+- Designing the page-object hierarchy → `qa/typescript/skills/page-object-design`
+- Extracting page objects and test ids from a live URL → `qa/typescript/skills/page-objects-from-url`
+- Screenshots, video, traces and HAR beyond the config defaults → `qa/typescript/skills/evidence-capture`
+- Visual regression, accessibility scans, network mocking → `visual-regression`, `accessibility-testing`,
+  `network-mocking`
 
 ## Inputs needed
 
-1. **Feature / page** under test (e.g. `Login`, `CheckoutCart`)
-2. **User journey** — concrete steps + the user-visible outcome to assert
-3. **Locators** — for each element: `getByTestId` whenever the element has a `data-testid`; otherwise `getByRole` / `getByLabel`, then `getByText`; CSS only as last resort. Missing testids are reported via `qa/typescript/skills/page-objects-from-url`'s `missing-testids.md`
-4. **Auth requirement** — anonymous, or signed-in (which user role + how the session is established)
-5. **Test data** — seeded by API, by fixture, or inline
+1. **Feature or page** under test (`Login`, `CheckoutCart`).
+2. **User journey** — the steps and the one user-visible outcome to assert.
+3. **Locators** — the test id for each element, or the fallback rung and a `missing-testids.md` row.
+4. **Auth** — signed out, or signed in as which role.
+5. **Test data** — seeded through the API in a fixture, or a builder.
+6. **Devices and media** — which projects the journey runs on.
 
-## Patterns
+## What ships with this skill
 
-### Page object — `tests/pages/LoginPage.ts`
+| File | Holds |
+|---|---|
+| [`references/locators.md`](references/locators.md) | The ladder, `getBy*`, `filter` / `and` / `or`, chaining from a component root, `within()` and its neighbours, `visible()`, frames, strictness and positional picks, `describe()`, `addLocatorHandler`, the test-id attribute, agent-facing locators |
+| [`references/assertions.md`](references/assertions.md) | The web-first set (accessible name, description and error, role, classes, value, URL forms, aria snapshots), one expected condition, the one-shot-read ban, `expect.poll` / `toPass` / `expect.soft`, failure messages |
+| [`references/config-and-fixtures.md`](references/config-and-fixtures.md) | The canonical config setting by setting, fixture kinds, the setup project, `webServer`, `TestProject.default`, retries and locks, tags, the CLI, the 1.64 breaking changes, Test Agents |
+| [`references/emulation-and-mobile-web.md`](references/emulation-and-mobile-web.md) | Device projects, touch, `screen`, viewport, media features, locale and geolocation, `page.clock`, offline, and why emulation is not a device |
+| [`assets/playwright.config.ts`](assets/playwright.config.ts) | The canonical config |
+| [`assets/fixtures.ts`](assets/fixtures.ts) | Page-object fixtures, `testUser`, and `seededUser` (API-seeded, deleted in teardown) |
+| [`assets/auth.setup.ts`](assets/auth.setup.ts) | The setup project's sign-in, saving the storage state |
+| [`assets/LoginPage.ts`](assets/LoginPage.ts) | A page with intent methods and a `SignInForm` component; the form error scoped with `within()` |
+| [`assets/HomePage.ts`](assets/HomePage.ts) | The landing page the journeys assert on |
+| [`assets/login.spec.ts`](assets/login.spec.ts) | Specs with `Should_X_When_Y` names and `{ tag }` |
 
-```typescript
-import { Page, Locator, expect } from '@playwright/test';
-
-export class LoginPage {
-  readonly page: Page;
-  readonly email: Locator;
-  readonly password: Locator;
-  readonly submit: Locator;
-  readonly errorBanner: Locator;
-
-  constructor(page: Page) {
-    this.page = page;
-    this.email = page.getByLabel('Email');
-    this.password = page.getByLabel('Password');
-    this.submit = page.getByRole('button', { name: 'Sign in' });
-    this.errorBanner = page.getByTestId('login-error');
-  }
-
-  async goto(): Promise<void> {
-    await this.page.goto('/login');
-  }
-
-  async signIn(email: string, password: string): Promise<void> {
-    await this.email.fill(email);
-    await this.password.fill(password);
-    await this.submit.click();
-  }
-
-  async expectLoaded(): Promise<void> {
-    await expect(this.email).toBeVisible();
-  }
-}
-```
-
-### Fixture — `tests/fixtures/pages.ts`
-
-Expose page objects as fixtures so tests destructure them — no per-test `new LoginPage(page)` boilerplate.
-
-```typescript
-import { test as base } from '@playwright/test';
-import { LoginPage } from '../pages/LoginPage';
-import { HomePage } from '../pages/HomePage';
-
-type Pages = {
-  loginPage: LoginPage;
-  homePage: HomePage;
-};
-
-export const test = base.extend<Pages>({
-  loginPage: async ({ page }, use) => { await use(new LoginPage(page)); },
-  homePage:  async ({ page }, use) => { await use(new HomePage(page)); },
-});
-
-export { expect } from '@playwright/test';
-```
-
-### Spec — `tests/specs/login.spec.ts`
-
-```typescript
-import { test, expect } from '../fixtures/pages';
-
-test.describe('Login', () => {
-  test('signs in with valid credentials', async ({ loginPage, homePage }) => {
-    await loginPage.goto();
-    await loginPage.signIn(process.env.E2E_USER!, process.env.E2E_PASSWORD!);
-
-    await homePage.expectLoaded();
-    await expect(homePage.greeting).toContainText('Welcome');
-  });
-
-  test('shows an error for an invalid password', async ({ loginPage }) => {
-    await loginPage.goto();
-    await loginPage.signIn(process.env.E2E_USER!, 'wrong');
-
-    await expect(loginPage.errorBanner).toBeVisible();
-    await expect(loginPage.errorBanner).toHaveText(/invalid credentials/i);
-  });
-});
-```
-
-### Authenticated state via `storageState`
-
-For tests that need a signed-in session, create a global setup that signs in once and persists `storageState`:
-
-```typescript
-// tests/auth.setup.ts
-import { test as setup } from '@playwright/test';
-import { LoginPage } from './pages/LoginPage';
-
-const STATE = 'playwright/.auth/user.json';
-
-setup('authenticate', async ({ page }) => {
-  const loginPage = new LoginPage(page);
-  await loginPage.goto();
-  await loginPage.signIn(process.env.E2E_USER!, process.env.E2E_PASSWORD!);
-  await page.context().storageState({ path: STATE });
-});
-```
-
-In `playwright.config.ts`, declare a `setup` project that other projects depend on:
-
-```typescript
-projects: [
-  { name: 'setup', testMatch: /.*\.setup\.ts/ },
-  { name: 'chromium', use: { ...devices['Desktop Chrome'], storageState: STATE }, dependencies: ['setup'] },
-]
-```
-
-### API-seeded data
-
-When test data is created via API, do it in a fixture so the spec stays focused:
-
-```typescript
-export const test = base.extend<{ seededOrder: Order }>({
-  seededOrder: async ({ request }, use) => {
-    const res = await request.post('/api/orders', { data: orderFixture() });
-    expect(res.ok()).toBeTruthy();
-    const order = await res.json();
-    await use(order);
-    await request.delete(`/api/orders/${order.id}`);
-  },
-});
-```
+Start from the assets: copy them, rename, and keep their shape.
 
 ## Rules
 
-### Locator preference order (strict)
+### Locators
 
-1. `getByTestId(id)` — **preferred whenever the element carries a `data-testid`**; the attribute is the agreed contract with the app team. Elements missing it go in the `missing-testids.md` dev-team report (extraction workflow: `qa/typescript/skills/page-objects-from-url`) and use a fallback below with `// TODO: missing data-testid '<suggested>'`
-2. `getByRole(role, { name })` — best fallback; matches the accessibility tree
-3. `getByLabel(text)` — for form inputs
-4. `getByPlaceholder(text)` — only when there is no label
-5. `getByText(text, { exact })` — for assertions on visible text
-6. CSS / XPath — **last resort**; add `// TODO: replace with data-testid locator` and a brief reason
+1. **The ladder:** `getByTestId` → `getByRole` → `getByLabel` → `getByPlaceholder` → `getByText` →
+   `getByAltText` / `getByTitle` → CSS. The first rung the element supports wins.
+2. **Test ids are PascalCase dot-separated and static** — `Login.Submit`, `OrderRow`, `OrderRow.Title` —
+   the format `fe-react` and `fe-blazor` generate. A row is picked by its content, never by an id that
+   embeds a key, an index or a state.
+3. **A fallback carries no marker in the code.** Record it in `missing-testids.md` (page, element,
+   suggested id, fallback in use). The report is the contract; no `TODO`, no comment on the locator.
+4. **Scope instead of picking.** A locator that matches many is narrowed by its component root,
+   `within()`, or `filter({ has, hasText })`. `nth()` / `first()` only where order is the behaviour, and
+   then the field name says so (`newestNotification`).
+5. `visible()` (1.63) instead of `:visible`; `frameLocator` / `contentFrame()` for iframes;
+   `addLocatorHandler` for overlays that may appear; `describe()` on composed locators.
+6. **Never assert on an `or()` locator** — it passes on either state.
 
-### Page object rules
+### Page objects
 
-- Locators are `readonly Locator` instance fields initialized in the constructor — **not** functions that re-query the DOM
-- Constructor signature is `(page: Page)` — never take strings or config
-- Action methods are `async` and return `Promise<void>` for same-page actions; for navigation return the next page object (e.g. `Promise<HomePage>`)
-- An `expectLoaded(): Promise<void>` method must exist and assert one landmark locator is visible
-- **No assertions inside actions** — actions perform; tests and `expectLoaded` assert
-- **No `page.locator('css selector')` in spec files** — wrap inside a page object
+- Locators are `readonly Locator` fields built in the constructor, never functions that re-query.
+- A page takes `(page: Page)`. A **component** (a region reused across pages — a form, a row, a menu)
+  takes its root `Locator` and builds its children from it, as `SignInForm` does.
+- Methods name user intent (`signIn`, `addToCart`), never the widget (`clickButton`). They are `async`
+  and return `Promise<void>`; an action that always lands on another page may return that page object.
+- The page owns its URL in `goto()`. Specs never call `page.goto`, `page.locator` or any other raw
+  `page.` method.
+- **No assertions in page objects.** They expose locators; tests assert. An optional `expectLoaded()`
+  that asserts one landmark is the only exception.
+- No shared base class until three pages share real behaviour (`page-object-design`).
 
-### Test rules
+### Tests
 
-- Use `test.describe` to group scenarios per feature; one spec file per feature
-- Test titles describe behavior in lowercase imperative: `signs in with valid credentials`, `shows an error for an invalid password`
-- One logical behavior per `test(...)`. Multiple `expect` calls are fine if they verify one behavior; otherwise split.
-- **Every test asserts something.** A test that ends after an action with no `expect` is not a test.
-- Use web-first assertions: `expect(loc).toBeVisible()` / `.toHaveText(...)` / `.toHaveURL(...)` / `.toHaveCount(n)` / `.toBeEnabled()`. They retry until timeout. Never `expect(await loc.isVisible()).toBe(true)` or `expect(await loc.textContent()).toBe('x')` — one-shot checks lose auto-waiting.
-- Prefer positive assertions over negated ones: `toBeHidden()` over `.not.toBeVisible()`, `toBeDisabled()` over `.not.toBeEnabled()`.
-- **One expected condition per assertion — never an `OR`.** Assert the one thing the flow produces: `toHaveText('Saved')`, never `toHaveText(/Saved|Success/)`; `toHaveCount(3)`, never "3 or more"; `expect(x).toBe(a)`, never `expect([a, b]).toContain(x)` or a `||` inside an `expect`. **A regex alternation in a `toHaveText` / `toHaveURL` assertion is an `OR` in disguise** — the commonest form of this in UI tests. The rule covers text, counts, URLs, attribute values, and visible/enabled state alike. If both outcomes are genuinely reachable the test does not know what the app should do — split it into one `test(...)` per expected outcome, generate one test per row from a case array, or pin down the correct behavior. The only exception is an explicit instruction to accept more than one value; record that instruction in a comment on the assertion.
-- **No `try`/`catch` in a test — and none in the cleanup hook.** An unexpected rejection must reach the runner; an expected one is asserted with `await expect(...).rejects` / `expect(fn).toThrow()`, which is an assertion, not error handling. Anything the test created is tracked and deleted in `afterEach` with no catch — a cleanup that fails should fail loudly rather than leak state into the next run. The suite's only catches live in **I/O helpers where narrowing one named error is the contract** — an `isDisplayed()` probe, a session-teardown helper — never a bare `catch {}` or `.catch(() => {})`, and never a catch that lets a failed action continue into the assertions.
-- **Failures name the subject.** `expect(await banner.getText(), \`success banner after saving order ${orderId}\`).toBe('Saved')`. A UI failure reported as `expected '' to be 'Saved'` with no subject is indistinguishable from a locator that matched the wrong element.
-- **No `page.waitForTimeout(ms)`** — use a web-first assertion or `expect(...).toPass()` for conditional waits.
-- **Do not pass `{ waitUntil: 'networkidle' }` to `goto`.** It is brittle on SPAs with long-polling / WebSockets. Navigate, then assert a user-visible landmark.
-- **Do not pre-wait before auto-waiting actions.** `click` / `fill` / `check` already wait for actionability — `locator.waitFor({ state: 'visible' })` followed by `locator.click()` is redundant.
-- **Do not use `{ force: true }`.** It skips actionability checks and hides real bugs (covered elements, hidden inputs). Fix the flow — close the overlay, scroll into view — instead of forcing.
-- **`waitForNavigation` is deprecated.** Use `page.waitForURL('**/path')` or a web-first URL/landmark assertion.
-- **`waitForResponse` ordering:** set the listener first **without** `await`, perform the action, then `await` the promise:
-  ```typescript
-  const responsePromise = page.waitForResponse(r => r.url().includes('/api/data') && r.status() === 200);
-  await loginPage.submit.click();
-  await responsePromise;
-  ```
-  Awaiting before the action will hang; awaiting after the action races the response.
-- **Retry loops:** never hand-roll `while (retries--) { … sleep }`. Use `await expect(async () => { … }).toPass({ timeout, intervals })` or `await expect.poll(async () => …, { timeout, intervals }).toBe(...)`. Inside `toPass`, give inner assertions an explicit short `timeout` (e.g. `{ timeout: 1_000 }`) so the outer retry can iterate quickly.
-- Prefer web-first assertions over `expect.poll` for plain DOM checks (`toHaveText`, `toBeVisible`, `toHaveCount`). Reserve `expect.poll` for non-DOM polling.
-- Prefer web-first assertions over `page.waitForFunction(...)` for UI state.
-- Pass `{ exact: true }` to `getByText` / `getByRole` when the expected text is a substring of other labels on the page (`Submit` vs `Submit Order` / `Submitting…`) — otherwise a future label change causes a strict-mode violation.
-- **No `expect.soft` chains pretending to be hard assertions** — pick `expect` for blocking, `expect.soft` deliberately when the test must continue.
-- Use `test.step('...')` to label substeps; substeps show up in the HTML report and Allure.
-- **Do not use `test.describe.serial` to model multi-step flows.** Each test must set up its own state. If a flow is genuinely one journey, put the whole flow in a single test and use `test.step` for the steps.
-- Tag tests via the title or annotations: `test('@smoke logs in', ...)` so projects can filter.
+- **Names are `Should_X_When_Y`** (`Should_ShowInvalidCredentialsError_When_PasswordIsWrong`), grouped by
+  one `test.describe` per feature.
+- **Tags go in the details object:** `test('Should_…', { tag: '@smoke' }, …)` or on the `describe`;
+  never in the title.
+- One logical behaviour per test; every test asserts. Multiple `expect` calls are fine when they check one
+  behaviour.
+- **Web-first assertions only** (`references/assertions.md`). No one-shot read compared later
+  (`expect(await loc.textContent())…`), no boolean dance (`expect(res.ok()).toBeTruthy()`).
+- **One expected condition per assertion — never an `OR`**, and a regex alternation is an `OR`. Split the
+  outcomes, or generate one test per row.
+- **Failures name the subject:** ``await expect(banner, `success banner for order ${orderId}`).toHaveText('Saved')``.
+- **Data-driven tests generate one `test()` per row** from a case array outside the body. No `if` or
+  `for` inside a test drives assertions.
+- **No `try` / `catch` / `finally` in a test.** An expected rejection is `await expect(...).rejects`;
+  cleanup is fixture teardown.
+- **Every promise is awaited** — actions, assertions, Allure calls.
+- Tests are independent: no `test.describe.serial`, no shared mutable state. One long journey is one test
+  with `test.step` labels.
+- API responses in fixtures assert the exact status with the body: `expect(res.status(), await res.text()).toBe(201)`.
+- No hardcoded credentials, URLs or hostnames — `BASE_URL`, `E2E_USER`, `E2E_PASSWORD`.
+- No `console.log`; use `test.step` and the trace.
 
-### Auth & storage state
+### Waiting
 
-- Sign in **once** per browser/project via the `setup` project and `storageState`; do not log in inside every test
-- For tests that need a different role, create a separate `setup` project per role and a separate `storageState` file
-- Anonymous tests run in the default project with no `storageState`
+- No `page.waitForTimeout`. Wait on a web-first assertion, `expect.poll` or `toPass`, never a sleep.
+- No `{ waitUntil: 'networkidle' }`. Navigate, then assert a landmark.
+- No `locator.waitFor()` before an action that already auto-waits.
+- No `{ force: true }`; fix the flow (close the overlay with `addLocatorHandler`, scroll, wait for the
+  state).
+- No `waitForNavigation` (deprecated); `waitForURL` or `toHaveURL`.
+- `waitForResponse`: start the promise without `await`, perform the action, then `await` the promise.
+- No hand-rolled retry loops; `toPass({ timeout })` with short inner timeouts.
 
-### What NOT to do
+### Auth and data
 
-- No `page.waitForTimeout(ms)` — every wait must be conditional on a Locator or response
-- No `{ waitUntil: 'networkidle' }` — assert a landmark instead
-- No `{ force: true }` on `click` / `fill` / `check` — fix the underlying flow
-- No `locator.waitFor(...)` immediately before an auto-waiting action — it is redundant
-- No `waitForNavigation` (deprecated) — use `waitForURL` or a URL assertion
-- No hand-rolled retry loops — use `expect(...).toPass()` or `expect.poll(...)`
-- No `expect.poll`/`waitForFunction` for state covered by a web-first assertion
-- No `.not.toBeVisible()` when `toBeHidden()` exists; no `.not.toBeEnabled()` when `toBeDisabled()` exists
-- No `OR` in any assertion — no `||` inside an `expect`, no `expect([a, b]).toContain(x)`, no `/a|b/` alternation in a `toHaveText` / `toHaveURL`. One expected value per assertion (see Test rules)
-- No `try`/`catch` in a test or cleanup hook — expected rejections use `await expect(...).rejects`; catches live only in I/O helpers narrowing one named error (see Test rules)
-- No `test.describe.serial` to chain dependent tests — one test + `test.step`
-- No `page.locator('div.foo > span:nth-child(3)')` in specs — promote to a page object with a semantic locator
-- No `await page.goto(...)` directly in specs — put it in the page object's `goto()` so it knows its own URL
-- No `console.log` debugging in committed tests — use `test.step` and the trace viewer
-- No assertions in action methods — `expectLoaded()` is the only assertion that belongs on a page object
-- No `if`/`for` driving assertions — use parameterized tests outside the `test` body (`for (const [name, value] of cases) test(name, ...)`)
-- No shared mutable state between tests — each test gets a fresh `page` and fresh fixtures
-- No hardcoded credentials, base URLs, or environment hostnames — read from env vars / `playwright.config.ts`
-- No `expect(true).toBe(...)` boolean dance — call the real Playwright matcher with auto-waiting
-- No test without at least one `expect` — actions without assertions verify nothing
+- Sign in **once per role** in a setup project (`assets/auth.setup.ts`) and reuse the storage state
+  through `dependencies` — never sign in inside every test. A signed-out spec clears the state with
+  `test.use({ storageState: { cookies: [], origins: [] } })`.
+- Records a test needs are created through the API in a **fixture**, with a unique value per test, and
+  deleted in its teardown (`seededUser`).
+- Builders for any record with four or more fields (`qa/typescript/skills/test-data-builder`).
+
+### Config
+
+The canonical config is `assets/playwright.config.ts`, explained in `references/config-and-fixtures.md`:
+`retries: 0` (`ci-conventions`), `forbidOnly` on CI, `fullyParallel`, `html` locally and `blob` + `junit` +
+`allure-playwright` on CI, `baseURL` from `BASE_URL`, `testIdAttribute`, the failure-evidence defaults,
+`updateSnapshots: 'none'` on CI and `'missing'` locally, and a setup project. Extend that file; never
+start a second one.
 
 ## Generation steps
 
-1. Confirm **feature**, **scenarios**, **locators**, **auth requirement**, and **data source** with the user.
-2. For each new screen, generate or extend `tests/pages/{Name}Page.ts`:
-   - One `readonly Locator` per element, initialized in the constructor with the best-available semantic locator
-   - `goto()` method that owns the URL
-   - `expectLoaded()` that asserts one landmark
-   - One action method per user-intent action
-3. Register the page object as a fixture in `tests/fixtures/pages.ts`.
-4. Generate `tests/specs/{feature}.spec.ts`:
-   - `test.describe(feature, () => { ... })`
-   - One `test(...)` per scenario, destructuring the page-object fixtures
-   - Use `test.step` for non-trivial workflows
-5. For authenticated flows, ensure a `setup` project exists and the spec's project depends on it.
-6. Run `npx playwright test` — expect 0 failures — and check locators under `npx playwright test --ui` before committing. In a `Gate: none` plan task, run neither; report the files as "written, not run".
+1. Detect the installed `@playwright/test` version and the project layout; match them.
+2. Confirm the feature, scenarios, locators, auth, data and devices with the user.
+3. For each screen, write or extend `tests/pages/<Name>Page.ts` from `assets/LoginPage.ts`: one
+   `readonly Locator` per element on the highest ladder rung, components for reused regions, `goto()`,
+   intent methods. Add a `missing-testids.md` row for every fallback.
+4. Register each page object, and any seeded record, as a fixture in `tests/fixtures.ts`.
+5. Write `tests/specs/<feature>.spec.ts` from `assets/login.spec.ts`: one `test()` per scenario with a
+   `Should_X_When_Y` name, page objects from fixtures, `{ tag }`, `test.step` for long journeys.
+6. For signed-in flows, make sure the setup project exists and the spec's project depends on it.
+7. Run `npx playwright test` (0 failures) and check new locators in `npx playwright test --ui` before
+   committing. In a `Gate: none` plan task, run neither; report the files as "written, not run".
 
 ## Handoffs
 
-- Designing the page-object hierarchy → `qa/typescript/skills/page-object-design`
-- Reviewing existing Playwright tests → `qa/typescript/skills/ui-test-author/review`
+- Page-object hierarchy → `qa/typescript/skills/page-object-design`
+- Page objects and test ids from a live URL → `qa/typescript/skills/page-objects-from-url`
+- Reviewing Playwright tests → `qa/typescript/skills/ui-test-author/review`
+- Screenshots, video, screencast, trace, HAR → `qa/typescript/skills/evidence-capture`
 - Test data builders → `qa/typescript/skills/test-data-builder`
-- Allure reporter setup → `qa/reporting/typescript/skills/test-reports`
+- Breakpoint matrices → `qa/typescript/skills/responsive-testing`
+- Real-device mobile web → `qa/typescript/skills/device-cloud`
+- Allure reporting and CI → `qa/reporting/typescript/skills/test-reports`, `qa/cicd/typescript/skills/ci-pipelines`

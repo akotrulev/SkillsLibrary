@@ -7,7 +7,10 @@ and Python pin 1.63 until their 1.64 packages publish. Appium moves to 3. The pl
 trace, HAR — Playwright and Appium) and a shared `webmcp-testing` skill. It teaches locator scoping with
 `locator.within()`, and wires all of it into the `qa-ui-*`, `qa-bdd-*` and `qa-mobile-*` agents.
 
-**Status:** Planned 2026-10-10. Nothing is built. The research behind it is committed with this plan:
+**Status:** T1 landed 2026-10-10: the TypeScript Playwright 1.64 writer (SKILL.md, four references, six
+assets), with `ui-test-author/review` and `page-object-design` aligned to it. Built but unverified: no
+asset has been compiled or run (G1 does that; D24's config import is the open risk). Planned
+2026-10-10. The research behind it is committed with this plan:
 `docs/research/003-qa-playwright-appium/` (5 files). So is the read-only audit:
 `docs/audits/003-qa-playwright-appium/` (4 files). All open questions were answered on 2026-10-10:
 - Java moves to allure-java 3.0.
@@ -17,7 +20,7 @@ trace, HAR — Playwright and Appium) and a shared `webmcp-testing` skill. It te
 - A Maestro lane is added (X1).
 - The newest Appium client majors are primary.
 
-Next: H1 (the user), then T1. The cost is 19 agent sessions on the subscription, each started by the user
+Next: J1 (H1, the user's, blocks no task). The cost is 19 agent sessions on the subscription, each started by the user
 from Plan Queue. Nothing else is metered.
 
 ## 1. What already exists, and what is missing
@@ -559,6 +562,26 @@ D7. This answers plan 002's Q3 from the QA side. X1 researches Maestro first, be
 research did not cover it, and writes the facts to `docs/research/003-qa-playwright-appium/maestro.md`.
 **Cost:** a research-and-write session, and a second mobile tool to keep current.
 
+**D23 — The TS writer ships a sixth asset, `HomePage.ts` (T1, 2026-10-10).** §3.1 lists five TS assets.
+The success journey must assert on the landing page without a raw `page` call in the spec, and a second
+class inside `LoginPage.ts` would break one class per file. Readings: five files, with the landing page
+folded into `LoginPage.ts` (rejected), or a sixth file (chosen). **Cost:** none for G1, which copies
+`assets/*`.
+
+**D24 — The signed-in state path is one constant, `authFile`, exported by `fixtures.ts` and imported by
+both `playwright.config.ts` and `auth.setup.ts` (T1, 2026-10-10).** Readings: repeat the literal in the
+config and the setup file, as the Playwright docs do (two strings to keep equal), or import one constant
+(chosen). The config cannot be imported by a test file, and the setup file cannot be imported by the
+config, so `fixtures.ts` is the only shared module. **Cost:** the config loads `fixtures.ts` and the page
+objects when Playwright reads it. That is unverified until G1's `npx playwright test --list`; if it fails,
+G1 repeats the literal in the config instead.
+
+**D25 — `ui-test-author/selenium` changes only its test-id prose; its SauceDemo samples keep kebab-case
+`data-test` values (T1, 2026-10-10).** Readings: R3 applied to every sample in a touched file, or T1's
+"only the test-id line" (chosen). The samples locate the real `data-test` attributes saucedemo.com ships,
+so renaming them would break them. The prose now says `data-testid` is the default and a `data-test`
+project uses its own attribute. **Cost:** that file's samples are the one place R3 does not hold.
+
 ## Answered questions (2026-10-10)
 
 **O1 — Which Playwright version per stack: 1.64 for Node only; Java and .NET follow when their packages
@@ -656,6 +679,31 @@ Playwright 1.64, with a SKILL.md ≤ 16,000 chars and compilable assets. `ui-tes
   - visual, a11y and network (T3);
   - every other TS skill (T4);
   - CI and reporting (T2).
+- **As built (2026-10-10):**
+  - Landed: `ui-test-author/playwright/SKILL.md` (12,672 chars; the Versions table is the only pin),
+    four references (`locators.md` 9,877 · `assertions.md` 6,905 · `config-and-fixtures.md` 10,103 ·
+    `emulation-and-mobile-web.md` 5,668) and six assets. `ui-test-author/review/SKILL.md` went from
+    17,453 to 14,902 chars, leaving ~1.1k for M1's and X1's rows. `page-object-design/SKILL.md` 12,913.
+  - Differed from the plan: a sixth asset `HomePage.ts` (D23); `authFile` is exported by `fixtures.ts`
+    and imported by the config at runtime (D24); the Selenium SauceDemo samples keep their kebab
+    `data-test` values (D25). `expectLoaded()` is now optional in the writer rules, and the review row
+    "`expectLoaded()` exists on every page object" is gone: it contradicted the blocker row for `expect`
+    in page objects.
+  - Names assigned: test ids `Login.Form`, `Login.Email`, `Login.Password`, `Login.Submit`,
+    `Home.Greeting`; fixtures `loginPage`, `homePage`, `testUser` (from `E2E_USER` / `E2E_PASSWORD`,
+    throws when unset), `seededUser` (`POST /api/users` → exact 201, teardown `DELETE` → exact 204);
+    component `SignInForm`; CI junit at `test-results/junit.xml`. The config leaves `testDir` at its
+    default, so the flat copy in §6.3 finds the specs.
+  - Left for later tasks: the Appium review rows (`driver.reset()`, "Appium 2.x") for M1. The writer
+    and its references already link `qa/typescript/skills/evidence-capture`, which T2 creates.
+  - Built, unverified (Gate: none): nothing compiled or ran. The config → `fixtures.ts` runtime import
+    is unproven until G1's `npx playwright test --list`.
+  - Proof: `within()` at `qa/typescript/skills/ui-test-author/playwright/assets/LoginPage.ts:33`;
+    `retries: 0`, junit, `updateSnapshots`, `testIdAttribute`, `dependencies` at
+    `assets/playwright.config.ts:9,13,17,20,30`; exact statuses at `assets/fixtures.ts:38,44`; `{ tag }`
+    at `assets/login.spec.ts:3,15`. Review rows `test.each` → `review/SKILL.md:77`, unearned base `:79`,
+    page-level selector APIs `:90`, `:visible` `:93`, `recordHar` `:110`, Allure promises `:111`.
+    Third-sharer rule at `page-object-design/SKILL.md:57`.
 
 ### J1 — Java writer: Playwright 1.63, one parallel-safe `BaseTest`, locators, assertions, emulation
 
@@ -1503,71 +1551,9 @@ Run them in order, one session each, opened from Plan Queue. Each block is compl
 | X1 | `docs` | `general-purpose` | M1, S1, T2 | ~130k |
 | G1 | `docs` | `general-purpose` | all | ~145k |
 
-All blocks are live; none has landed.
+Landed: T1 (2026-10-10). Every other block is live.
 
 ---
-
-### T1 — TypeScript writer: Playwright 1.64, locators with `within()`, assertions, config, mobile web (general-purpose, docs)
-
-````
-You are `general-purpose`. Task T1 of docs/plans/003-qa-playwright-appium-upgrade.md: make
-qa/typescript/skills/ui-test-author/playwright teach Playwright 1.64 end to end, per §3.1's TypeScript
-file set, and bring ui-test-author/review and page-object-design in line with it.
-
-Read, in this order:
-1. CLAUDE.md.
-2. The plan: §1, §2.1–§2.3, §3.1, §4, Decisions D2, D5, D7, D11, D14, D15, task T1, "Close-out — every task".
-3. The files you rewrite: qa/typescript/skills/ui-test-author/playwright/SKILL.md,
-   qa/typescript/skills/ui-test-author/review/SKILL.md, qa/typescript/skills/page-object-design/SKILL.md,
-   and the test-id lines of qa/typescript/skills/ui-test-author/selenium/SKILL.md.
-4. docs/research/003-qa-playwright-appium/playwright-releases.md §(b) from 1.51 to 1.64, §(c), §(d), §(e);
-   docs/research/003-qa-playwright-appium/playwright-evidence.md §1.1 and §11.1.
-5. docs/audits/003-qa-playwright-appium/typescript.md §2.1–§2.4, §2.6 and the §3 rows C1, C2, C12, C28,
-   L1, L2, L9–L13.
-
-Build:
-- SKILL.md rewritten to §3.1 (≤ 16,000 chars). It holds the §2.1/§2.2 TS versions table, the only
-  Playwright pin. Every code sample moves to assets/.
-- references/locators.md, references/assertions.md, references/config-and-fixtures.md and
-  references/emulation-and-mobile-web.md, with exactly the contents §3.1 lists.
-- assets/:
-  - playwright.config.ts: retries per D7, forbidOnly, fullyParallel, local html / CI blob + junit +
-    allure-playwright (resultsDir), use.baseURL from BASE_URL, testIdAttribute, trace and video
-    retain-on-failure, screenshot only-on-failure fullPage, updateSnapshots CI 'none' else 'missing',
-    a setup project with dependencies.
-  - fixtures.ts: page-object fixtures, plus an API-seeded record fixture that deletes it in teardown.
-  - auth.setup.ts.
-  - LoginPage.ts: intent methods, and a component scoped with within().
-  - login.spec.ts: Should_X_When_Y names, { tag }.
-  - Strict TS, no comments.
-- ui-test-author/review/SKILL.md:
-  - test.each → one generated test() per row.
-  - Flag an unearned BasePage instead of demanding one.
-  - Add rows for an unscoped text locator matching many, positional nth/first, :visible, page-level
-    selector APIs, one-shot reads, trace/video not retain-on-failure, test.use({ recordHar }), and
-    floating Allure promises.
-  - ≤ 16,000 chars (it is 16,968 now).
-- page-object-design/SKILL.md: keep "a component takes its parent Locator" and link to
-  references/locators.md; the ladder order; a BasePage only on the third real sharer.
-- ui-test-author/selenium/SKILL.md: only the test-id line (data-testid default; a data-test project
-  sets the attribute).
-- Apply R1–R6 to every file you touch.
-
-Traps:
-- within() is child.within(parent) == parent.locator(child). It takes no options. Per-parent nth is
-  guaranteed only on 1.64 (releases §(c)). Do not teach testIdAttribute as a comma list; that is unverified.
-- Do not write the evidence-capture skill or prose about evidence modes; T2 owns it. Your config just
-  carries the R7 values.
-- 1.64 breaking changes go in config-and-fixtures.md: devices now apply screen, JSX follows tsconfig,
-  --update-snapshots=missing passes, hidden-iframe elements are hidden.
-- page.perform / --run-agents is UNVERIFIED. Do not mention it.
-
-Gate: none. This plan gates once, in G1. Do not run tsc, npx playwright, tools/token-audit.py or any
-check script.
-
-Commit: `docs(qa-ts): Playwright 1.64 writer — locators with within(), assertions, config, mobile web (003 T1)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
 
 ### J1 — Java writer: Playwright 1.63, one parallel-safe `BaseTest`, locators, assertions, emulation (general-purpose, docs)
 
@@ -1738,7 +1724,8 @@ Build:
   - mcr.microsoft.com/playwright:v1.64.0-noble, or npx playwright install --with-deps; not the
     archived GitHub Action.
   - Blob per shard → merge-reports.
-  - junit produced wherever it is published.
+  - junit produced wherever it is published. T1's config writes it on CI to test-results/junit.xml;
+    publish that path, or change it in the config asset and say so in your As built.
   - On failure, upload test-results/ and playwright-report/.
   - Retries 0; trace retain-on-failure.
   - The config owner is ui-test-author/playwright/assets/playwright.config.ts.
@@ -1752,6 +1739,8 @@ Traps:
 - Video has the same 7 modes as trace since 1.61. Screenshot modes are off / on / only-on-failure /
   on-first-failure. Many docs tables list fewer (evidence §12.4).
 - A screencast is lost if the page closes before stop() (issue #41608). Teach stop-before-close.
+- T1 already links qa/typescript/skills/evidence-capture from ui-test-author/playwright/SKILL.md and
+  references/config-and-fixtures.md §1 and §9 (the VP9 line). Create the skill at exactly that path.
 - Check the Allure CLI 2.x version live (npm allure-commandline or the allure2 releases). Do not copy
   2.27.0 or 2.30.0.
 
@@ -1927,6 +1916,12 @@ Traps:
   the default differs by language.
 - .NET: check in Playwright.TestAdapter whether runsettings LaunchOptions accepts Args. If it does not,
   give the WebMCP suite its own webmcp.runsettings, and record which reading you took as a dated decision.
+- TS: T1's config has two projects, `setup` and `chromium` (Desktop Chrome, signed-in storage state,
+  depends on setup), a default testDir and default testMatch. G1 copies webmcp.spec.ts flat beside those
+  assets, so it runs in `chromium`. Keep the spec self-contained with a file-level
+  `test.use({ launchOptions: { args: ['--enable-features=WebMCP'] } })`, or add a `webmcp` project with
+  `default: false` to the config asset and say so in your As built. Import `test` / `expect` from
+  `./fixtures` if the spec needs the page-object fixtures.
 - Use exactly §5.2's names. G1's check fails on any other mcp__playwright__ name under qa/.
 
 Gate: none. This plan gates once, in G1. Do not run any build, test or check script.
