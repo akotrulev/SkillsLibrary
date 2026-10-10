@@ -8,7 +8,7 @@ step-by-step agent that works greenfield and brownfield, a conformance audit, an
 
 **Status:** C1 landed (2026-10-11): `mobile/` exists with the five July drafts moved and renamed under
 `mobile/react-native/`, the three conformance-checklist skeletons, and `## Mobile code rules` in `CLAUDE.md`;
-the stale `frontend/react-native` pointers are repointed. S1 landed (2026-10-11): `mobile/_shared/{store-compliance,security}` with their references and the `L1…L26` / `K1…K27` audit fragments. S2 landed (2026-10-11): `mobile/_shared/{release,observability}` with their references and the `T1…T19` / `U1…U20` audit fragments. Next: S3, N1 and R1 (each depends only on C1).
+the stale `frontend/react-native` pointers are repointed. S1 landed (2026-10-11): `mobile/_shared/{store-compliance,security}` with their references and the `L1…L26` / `K1…K27` audit fragments. S2 landed (2026-10-11): `mobile/_shared/{release,observability}` with their references and the `T1…T19` / `U1…U20` audit fragments. S3 landed (2026-10-11): `mobile/_shared/in-app-purchases` with its references and the `X1…X22` fragment, plus `auth/auth0-{react-native,ios,android}`. Next: N1 and R1 (each depends only on C1).
 Built but unverified: everything — the plan gates once, in G1. The five drafts keep their July bodies (SDK 56
 lane, pre-sweep content) until R1 rewrites them. Flutter becomes a fourth plugin in its own plan, written
 once this one lands (O4); it is **not** in this plan's tasks. Maestro arrives on the QA side through plan 003
@@ -834,6 +834,8 @@ satisfy the deliverable grep: `docs/plans/003-qa-playwright-appium-upgrade.md` (
 `docs/plans/backend-PLAN.md`, `docs/plans/frontend-PLAN.md` F10 and Phase 5 lines, the `README.md`
 status-table `frontend` row, and `docs/plans/CONFORMANCE-AUDIT-PLAN.md` item 7.
 
+**D18 — React Native purchase libraries changed hands (S3, 2026-10-11).** The plan left the RN lane as "RevenueCat / `expo-iap` / `react-native-iap` — research which is current". Reading A: recommend one. Reading B (taken): `react-native-purchases` (RevenueCat, 10.12.2) is the default when there is no purchase backend; `expo-iap` 6.0.0 and `react-native-iap` 17.0.0 are the own-backend lanes, both published from the `hyodotdev/openiap` monorepo on 2026-10-09 (their previous repos are archived), so `references/react-native.md` pins exact versions, records the check date and tells the reader to read installed types instead of copying hook names. Also recorded: Play Billing's rule is "that major **or later**" — 8 passes today, 9 is required from 2027-08-31, and X15 reports that date.
+
 ## Answered questions (2026-10-10)
 
 **O1 — Packaging: one plugin or several?** Three plugins in one `mobile/` domain (the user; D1).
@@ -1006,6 +1008,8 @@ references and the fragment ~20k, three auth SKILL.md ~15k.
   credentials manager on Keychain / Keystore, biometric unlock, refresh-token rotation, logout that
   clears the browser session. No embedded web view login.
 - **Not in S3:** anything else stack-local.
+
+- **As built (2026-10-11):** `mobile/_shared/in-app-purchases/` (`SKILL.md` 11.0k chars; `references/{storekit,play-billing,react-native,audit-checks}.md`; rows `X1…X22`, `Stacks` column set per row) and `auth/auth0-react-native/SKILL.md` (11.3k), `auth/auth0-ios/SKILL.md` (9.5k), `auth/auth0-android/SKILL.md` (9.5k), frontmatter names `auth-auth0-react-native` / `-ios` / `-android`. Verified at source this session (npm registry, GitHub API, official docs): Play Billing Library **9.1.0** current, **8+ required since 2026-08-31, 9+ from 2027-08-31** (developer.android.com deprecation FAQ, page dated 2026-09-09); `react-native-purchases` 10.12.2, `expo-iap` 6.0.0, `react-native-iap` 17.0.0 — the last two now live in `hyodotdev/openiap` with the old `hyochan/*` / `dooboolab-community/*` repos archived (D18); `react-native-auth0` 5.11.1, Auth0.swift 3.1.0, Auth0.Android 4.1.0. **Built but unverified:** App Store Server API endpoint paths, Server Notification type names and the `AppStore.showManageSubscriptions` / win-back iOS floors (written from recall, not re-read); Play RTDN type list and `purchases.subscriptionsv2` field names (recall); the Play management URL; the US-storefront link-out status (taken from press reports — the guideline text was **not** re-read, so the row is marked unsettled and X14 asks for a re-verify); `react-native-auth0` Android platform minimum (the README fetch said API 35 — not trusted, the skill tells the reader to read the installed README); `expo-iap` hook names (skill says to read installed types); Auth0.swift `canRenew()` / `hasValid()` / `WebAuthError.userCancelled` and the Auth0.Android passkey and `assetlinks` relation wording (recall). The `rg` recipes in `X*` have not been run. Not run (Gate: none): `tools/token-audit.py`, §11's script, any lint.
 
 ### N1 — the Swift and Kotlin coding standards
 
@@ -1446,45 +1450,9 @@ goes in an untracked `scratch/` folder inside the worktree, deleted before commi
 | W1 | `docs` | `general-purpose` | R5, I5, A6, R3, S1–S3 | ~120k |
 | G1 | `docs` | `general-purpose` | every task above | ~140k |
 
-C1, S1 and S2 have landed (their blocks are deleted); every block below is live.
+C1, S1, S2 and S3 have landed (their blocks are deleted); every block below is live.
 
 ---
-
-### S3 — shared: in-app purchases and native Auth0 (general-purpose, docs)
-
-````
-You are `general-purpose`. Task S3 of docs/plans/002-mobile-plugins.md: write
-`mobile-shared-in-app-purchases` (references + fragment) and the three native Auth0 skills.
-
-Read, in this order:
-1. CLAUDE.md.
-2. The plan: §6.6, §8.3, §10, task S3, and "Close-out — every task".
-3. `auth/auth0-react/SKILL.md` (the shape) and `auth/_shared/auth0-concepts/SKILL.md` (what not to repeat).
-
-Build:
-- `mobile/_shared/in-app-purchases/SKILL.md`: the server owns entitlements; restore; refunds and
-  revocations from App Store Server Notifications v2 and RTDN; 3.1.1 (and the US-storefront link
-  exception) and Play payments policy; cancel as easy as subscribe (`design-ethical-patterns`).
-  References `storekit.md` (StoreKit 2, `Transaction.updates`, verification, App Store Server API),
-  `play-billing.md` (the current Play Billing Library major, acknowledgement, RTDN), `react-native.md`
-  (RevenueCat / `expo-iap` / `react-native-iap` — whichever research shows current and maintained).
-  Fragment rows `X1…`.
-- `auth/auth0-react-native/SKILL.md` (`auth-auth0-react-native`), `auth/auth0-ios/SKILL.md`
-  (`auth-auth0-ios`), `auth/auth0-android/SKILL.md` (`auth-auth0-android`): Universal Login in the
-  system browser with PKCE, the callback via universal link / App Link, the credentials manager on
-  Keychain / Keystore, biometric unlock, refresh-token rotation, logout that clears the browser session.
-
-Traps:
-- §4.5 marks the Play Billing Library major unverified — check it and its deprecation schedule first.
-- RN purchase libraries change hands; record the date you checked each and prefer the maintained one.
-- No embedded web-view login (RFC 8252); tokens never in `AsyncStorage` / `UserDefaults` /
-  `SharedPreferences`.
-
-Gate: none — this plan gates once, in G1. Do not run tools/token-audit.py, §11's script, or any lint.
-
-Commit: `feat(mobile S3): shared in-app purchases and native Auth0 skills`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
 
 ### N1 — the Swift and Kotlin coding standards (general-purpose, docs)
 
