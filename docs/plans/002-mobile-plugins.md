@@ -8,7 +8,7 @@ step-by-step agent that works greenfield and brownfield, a conformance audit, an
 
 **Status:** C1 landed (2026-10-11): `mobile/` exists with the five July drafts moved and renamed under
 `mobile/react-native/`, the three conformance-checklist skeletons, and `## Mobile code rules` in `CLAUDE.md`;
-the stale `frontend/react-native` pointers are repointed. S1 landed (2026-10-11): `mobile/_shared/{store-compliance,security}` with their references and the `L1…L26` / `K1…K27` audit fragments. S2 landed (2026-10-11): `mobile/_shared/{release,observability}` with their references and the `T1…T19` / `U1…U20` audit fragments. S3 landed (2026-10-11): `mobile/_shared/in-app-purchases` with its references and the `X1…X22` fragment, plus `auth/auth0-{react-native,ios,android}`. N1 landed (2026-10-11): `mobile/{ios,android}/skills/basics` with `references/concurrency.md` each, and rows `A1…A5`/`B1…B16` (iOS), `A1…A4`/`B1…B16` (Android). R1 landed (2026-10-11): the five drafts rewritten onto SDK 57 and `mobile/react-native/skills/navigation` written, with RN checklist rows `A1…A7`, `B1…B13`, `C1…C10`, `D1…D10`, `E1…E13`, `F1…F15`. R2 landed (2026-10-11): `mobile/react-native/skills/{ui-components,forms,networking,offline-and-storage,native-modules}` with checklist rows `D10…D19`, `G1…G10`, `H1…H15`, `I1…I13`, `J1…J13`. R3 landed (2026-10-10): `mobile/react-native/skills/{device-features,notifications-and-links,animation,languages,test-ids}` with checklist rows `F15…F20`, `J14…J28`, `P1…P10`, `Q1…Q11`, `R1…R10`, and §8.5's RN mapping answered (D20 — the QA explorer's `content-desc` claim is refuted). R4 landed (2026-10-11): `mobile/react-native/skills/{accessibility,performance,error-handling,component-testing}` with `error-handling/references/{session-and-resume,writes-and-dependencies}.md` and checklist rows `M1…M13`, `N1…N13`, `O1…O22`, `S1…S12`. R5 landed (2026-10-11): `mobile/react-native/skills/{migration,code-review,standards-audit}` with `migration/references/{sdk-upgrade,new-architecture,bare-to-expo,embed-in-native-app}.md`, the RN checklist's closing section index, `mobile/react-native/agents/mobile-react-native.md` (13,888 characters, description 574 of 650) and `mobile/react-native/commands/{mobile-react-native,mobile-react-native-audit}.md`. I1 landed (2026-10-11): `mobile/ios/skills/{project-setup,architecture,ui-components,styling,navigation}` with `references/{packages-and-config,tca}.md` and checklist rows `A6…A11`, `B17…B24`, `C1…C10`, `D1…D11`, `E1…E12`, `F1…F11` (D21: MV over the corpus's MVVM rows). I2 landed (2026-10-11): `mobile/ios/skills/{forms,networking,offline-and-storage,uikit,device-features}` with `networking/references/request-policy.md`, `offline-and-storage/references/{swiftdata-migrations,keychain}.md`, `uikit/references/{uiscene-migration,interop-seams}.md`, `device-features/references/permissions.md` and checklist rows `D12…D20`, `G1…G10`, `H1…H12`, `I1…I14`, `J1…J12` (D22: new facts unconfirmed against Apple pages). I3 landed (2026-10-11): `mobile/ios/skills/{notifications-and-links,system-integration,animation,languages,test-ids}` with `notifications-and-links/references/apns-and-extensions.md`, `system-integration/references/background-and-activities.md` and checklist rows `F12…F15`, `J13…J28`, `P1…P11`, `Q1…Q11`, `R1…R10` (D23: new facts unconfirmed against Apple pages). I4 landed (2026-10-11): `mobile/ios/skills/{accessibility,performance,error-handling,unit-testing}` with `error-handling/references/{session-and-resume,writes-and-dependencies}.md` and checklist rows `M1…M14`, `N1…N13`, `O1…O21`, `S1…S15` (D24: new facts unconfirmed against Apple pages). Next: I5.
+the stale `frontend/react-native` pointers are repointed. S1 landed (2026-10-11): `mobile/_shared/{store-compliance,security}` with their references and the `L1…L26` / `K1…K27` audit fragments. S2 landed (2026-10-11): `mobile/_shared/{release,observability}` with their references and the `T1…T19` / `U1…U20` audit fragments. S3 landed (2026-10-11): `mobile/_shared/in-app-purchases` with its references and the `X1…X22` fragment, plus `auth/auth0-{react-native,ios,android}`. N1 landed (2026-10-11): `mobile/{ios,android}/skills/basics` with `references/concurrency.md` each, and rows `A1…A5`/`B1…B16` (iOS), `A1…A4`/`B1…B16` (Android). R1 landed (2026-10-11): the five drafts rewritten onto SDK 57 and `mobile/react-native/skills/navigation` written, with RN checklist rows `A1…A7`, `B1…B13`, `C1…C10`, `D1…D10`, `E1…E13`, `F1…F15`. R2 landed (2026-10-11): `mobile/react-native/skills/{ui-components,forms,networking,offline-and-storage,native-modules}` with checklist rows `D10…D19`, `G1…G10`, `H1…H15`, `I1…I13`, `J1…J13`. R3 landed (2026-10-10): `mobile/react-native/skills/{device-features,notifications-and-links,animation,languages,test-ids}` with checklist rows `F15…F20`, `J14…J28`, `P1…P10`, `Q1…Q11`, `R1…R10`, and §8.5's RN mapping answered (D20 — the QA explorer's `content-desc` claim is refuted). R4 landed (2026-10-11): `mobile/react-native/skills/{accessibility,performance,error-handling,component-testing}` with `error-handling/references/{session-and-resume,writes-and-dependencies}.md` and checklist rows `M1…M13`, `N1…N13`, `O1…O22`, `S1…S12`. R5 landed (2026-10-11): `mobile/react-native/skills/{migration,code-review,standards-audit}` with `migration/references/{sdk-upgrade,new-architecture,bare-to-expo,embed-in-native-app}.md`, the RN checklist's closing section index, `mobile/react-native/agents/mobile-react-native.md` (13,888 characters, description 574 of 650) and `mobile/react-native/commands/{mobile-react-native,mobile-react-native-audit}.md`. I1 landed (2026-10-11): `mobile/ios/skills/{project-setup,architecture,ui-components,styling,navigation}` with `references/{packages-and-config,tca}.md` and checklist rows `A6…A11`, `B17…B24`, `C1…C10`, `D1…D11`, `E1…E12`, `F1…F11` (D21: MV over the corpus's MVVM rows). I2 landed (2026-10-11): `mobile/ios/skills/{forms,networking,offline-and-storage,uikit,device-features}` with `networking/references/request-policy.md`, `offline-and-storage/references/{swiftdata-migrations,keychain}.md`, `uikit/references/{uiscene-migration,interop-seams}.md`, `device-features/references/permissions.md` and checklist rows `D12…D20`, `G1…G10`, `H1…H12`, `I1…I14`, `J1…J12` (D22: new facts unconfirmed against Apple pages). I3 landed (2026-10-11): `mobile/ios/skills/{notifications-and-links,system-integration,animation,languages,test-ids}` with `notifications-and-links/references/apns-and-extensions.md`, `system-integration/references/background-and-activities.md` and checklist rows `F12…F15`, `J13…J28`, `P1…P11`, `Q1…Q11`, `R1…R10` (D23: new facts unconfirmed against Apple pages). I4 landed (2026-10-11): `mobile/ios/skills/{accessibility,performance,error-handling,unit-testing}` with `error-handling/references/{session-and-resume,writes-and-dependencies}.md` and checklist rows `M1…M14`, `N1…N13`, `O1…O21`, `S1…S15` (D24: new facts unconfirmed against Apple pages). I5 landed (2026-10-11): `mobile/ios/skills/{migration,code-review,standards-audit}` with `migration/references/{swift6-modules,observation,combine-to-async,uikit-to-swiftui,objc-to-swift,cocoapods-to-spm,ios27-sdk-and-targets}.md`, the iOS checklist's closing section index, `mobile/ios/agents/mobile-ios.md` (13,879 characters, description 640 of 650) and `mobile/ios/commands/{mobile-ios,mobile-ios-audit}.md` (D25: migration facts unconfirmed against Apple / swift.org pages). Next: A1.
 Built but unverified: everything — the plan gates once, in G1. Flutter becomes a fourth plugin in its own plan, written
 once this one lands (O4); it is **not** in this plan's tasks. Maestro arrives on the QA side through plan 003
 (its X1); this plan feeds it the same test ids and an EAS Workflows job (D7). Every fact in §4 was web-verified
@@ -847,6 +847,8 @@ status-table `frontend` row, and `docs/plans/CONFORMANCE-AUDIT-PLAN.md` item 7.
 
 **D24 — I4's new iOS facts are unconfirmed against Apple pages (I4, 2026-10-11).** §10.3 says research first. Reading A: fetch developer.apple.com / swift.org for each API before writing it. Reading B (taken): Apple's pages render client-side and the session's search returned only third-party summaries, so the skills state them with that caveat inline — the Swift-first MetricKit `MetricManager` (async `metricReports` / `diagnosticReports`; sources disagree on whether `MXMetricManager` is formally *deprecated* or *no longer recommended for new adoption* — the plan's "deprecated at 27.2" is kept and both branches are version-tagged), Swift Testing exit tests (Swift 6.2+, not on iOS targets) and the possible Xcode 27 XCTest interop modes (stated as unconfirmed, nothing relies on them), the Apple ~400 ms first-frame launch guidance (a starting target), the Accessibility Nutrition Label option names. G1's pass should confirm them against the Xcode 27 release notes.
 
+**D25 — I5's migration facts are unconfirmed against Apple / swift.org pages (I5, 2026-10-11).** §10.3 says research first. Reading A: fetch swift.org/migration, Apple's TN3187, the Xcode 27 release notes and blog.cocoapods.org for each claim before writing it. Reading B (taken): this session ran no web search or fetch, so the references state the facts from prior knowledge and tell the reader to re-read the source before a run — `swift package migrate` (SwiftPM 6.2+; flag names left to `--help`), the `-disable-dynamic-actor-isolation` downgrade flag (named as reported in the SE-0423 discussion, "confirm against the installed compiler"), the dynamic-isolation crash signatures, `SWIFT_STRICT_CONCURRENCY = complete`, `Observations` (SE-0475, iOS 26), the CocoaPods trunk freeze mechanics (read-only: existing versions keep resolving), and the Xcode 27 SDK's mandatory changes beyond §4.2's list. Nothing relies on a flag name working. G1's pass should confirm them.
+
 ## Answered questions (2026-10-10)
 
 **O1 — Packaging: one plugin or several?** Three plugins in one `mobile/` domain (the user; D1).
@@ -1280,6 +1282,8 @@ standards-audit ~4k, agent ~4k, commands ~2k.
   probes: SwiftUI vs UIKit share, Swift 6 modules, IAP present, extensions present).
 - **Not in I5:** marketplace wiring (W1).
 
+- **As built (2026-10-11):** `mobile/ios/skills/migration/SKILL.md` (9.8k chars, description 469) with seven `references/` files (one per path: `swift6-modules` 6.7k, `observation`, `combine-to-async`, `uikit-to-swiftui`, `objc-to-swift`, `cocoapods-to-spm` — carries 2026-12-02 and the pod inventory, `ios27-sdk-and-targets` — the forced SDK changes and the deployment-target raise); `code-review/SKILL.md` (10.7k, description 476) and `standards-audit/SKILL.md` (9.5k, description 466) — the latter carries the §4.2 version gate (Step 0) and the probes SwiftUI vs UIKit share, Swift language mode per module, StoreKit purchases, extensions, Objective-C count, TCA / Tuist; the checklist ends with a `## Section index` (A–X, no W; row ranges A1–A11 … V1–V8, S1–S15). `mobile-ios` agent is 13,879 characters by `wc -m` with the template's Gate sentence verbatim (`Operating rules`); written to the budget from the start by routing to skills. Related agents name `qa-mobile-java`, `qa-mobile-dotnet` and `qa-mobile-typescript` (the Maestro lane is the TypeScript peer's). Swift 6 migration: module by module, leaves first; `swift6-modules.md` § "Finding dynamic isolation checks" is the part of that move's gate that finds `@MainActor` callbacks arriving on another queue — static grep of the seams, then Thread Sanitizer + Main Thread Checker while driving each seam, and the crash signatures to search for. Built but unverified: everything — Gate: none; no web search or Apple fetch was run (D25). Proof: `wc -m` counts above; `grep -c "^| [A-X][0-9]" mobile/ios/skills/standards-audit/references/conformance-checklist.md` unchanged by this task (only the index was appended).
+
 ### A1 — Android foundations
 
 **Stack:** `docs` · **Agent:** `general-purpose`
@@ -1484,39 +1488,9 @@ goes in an untracked `scratch/` folder inside the worktree, deleted before commi
 | W1 | `docs` | `general-purpose` | R5, I5, A6, R3, S1–S3 | ~120k |
 | G1 | `docs` | `general-purpose` | every task above | ~140k |
 
-C1, S1, S2, S3, N1, R1, R2, R3, R4, R5, I1, I2, I3 and I4 have landed (their blocks are deleted); every block below is live.
+C1, S1, S2, S3, N1, R1, R2, R3, R4, R5, I1, I2, I3, I4 and I5 have landed (their blocks are deleted); every block below is live.
 
 ---
-
-### I5 — iOS migration, review, audit, agent and commands (general-purpose, docs)
-
-````
-You are `general-purpose`. Task I5 of docs/plans/002-mobile-plugins.md: write
-`mobile-ios-{migration,code-review,standards-audit}`, the `mobile-ios` agent and its two commands.
-
-Read, in this order:
-1. CLAUDE.md.
-2. The plan: §2, §6.1, §6.3, §7, §8, §10, task I5, and "Close-out — every task".
-3. `mobile/react-native/agents/mobile-react-native.md` and both RN commands (the sibling, already on budget);
-   `mobile-react-native-{code-review,standards-audit}`; `engineering-practices/standards-audit-engine/SKILL.md`.
-4. The iOS checklist in full; the frontmatter of the other iOS skills.
-
-Build:
-- `migration` per §6.3, one `references/` file per path; CocoaPods → SPM carries the 2026-12-02 date.
-- `code-review`, `standards-audit` (the §4.2 version gate; probes: SwiftUI vs UIKit share, Swift 6
-  modules, purchases, extensions), the closing section index, `mobile/ios/agents/mobile-ios.md`, and
-  `mobile/ios/commands/{mobile-ios,mobile-ios-audit}.md` — mirroring R5 on the iOS lane.
-
-Traps:
-- Agent ≤ 14,000 characters with the template's Gate sentence verbatim — R5's landed at 13,888 (`wc -m`) after a cut from 16,414, so write the Steps table and the two output shapes tight from the start and route to skills.
-- Swift 6 migration goes module by module, leaves first; dynamic isolation checks can crash at runtime —
-  `migration` says how to find them before shipping.
-
-Gate: none — this plan gates once, in G1. Do not run tools/token-audit.py, §11's script, or any lint.
-
-Commit: `feat(mobile I5): iOS migration, review, audit, agent and commands`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
 
 ### A1 — Android foundations (general-purpose, docs)
 
@@ -1679,7 +1653,7 @@ Build:
   share, KMP modules (section W), the AGP major; the closing section index.
 
 Traps:
-- Agent ≤ 14,000 characters with the template's Gate sentence verbatim.
+- Agent ≤ 14,000 characters with the template's Gate sentence verbatim — `mobile-ios.md` landed at 13,879 (`wc -m`) by routing to skills from the start; copy its shape (Steps table, two output shapes) and its Related agents naming the three `qa-mobile-<stack>` peers.
 - Section W is N/A unless KMP modules exist — the probe decides, and N/A names the probe.
 
 Gate: none — this plan gates once, in G1. Do not run tools/token-audit.py, §11's script, or any lint.
