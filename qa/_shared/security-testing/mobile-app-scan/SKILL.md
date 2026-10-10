@@ -101,7 +101,7 @@ Every report line carries `MASVS: <control-ids>` + `MASTG: <test-ids>`, the way 
   runtime hypotheses to prove there ("and here is the intercepted cleartext request").
 - **`qa/_shared/security`** — the OWASP/MAS backbone (load alongside).
 - **`qa-mobile-<stack>`** *(peer, not loaded)* — owns the functional mobile suite + page/screen objects; a
-  confirmed vuln becomes a bug report through `qa-test-case-designer`'s `bug-report-writer`.
+  confirmed vuln becomes a bug report through `qa-test-case-designer`'s `bug-report-writer`; the fix goes to `mobile-react-native` / `mobile-ios` / `mobile-android`.
 - **`mobile-app-crawler` / `mobile-screen-explorer`** *(peers)* — drive the live app to enumerate screens;
   they map *functionality*, this maps *security posture* of the binary.
 - **`dependency-scan` (`<stack>`)** — mobile third-party library CVEs from the build graph; this skill owns

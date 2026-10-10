@@ -9,7 +9,7 @@ step-by-step agent that works greenfield and brownfield, a conformance audit, an
 **Status:** C1 landed (2026-10-11): `mobile/` exists with the five July drafts moved and renamed under
 `mobile/react-native/`, the three conformance-checklist skeletons, and `## Mobile code rules` in `CLAUDE.md`;
 the stale `frontend/react-native` pointers are repointed. S1 landed (2026-10-11): `mobile/_shared/{store-compliance,security}` with their references and the `L1…L26` / `K1…K27` audit fragments. S2 landed (2026-10-11): `mobile/_shared/{release,observability}` with their references and the `T1…T19` / `U1…U20` audit fragments. S3 landed (2026-10-11): `mobile/_shared/in-app-purchases` with its references and the `X1…X22` fragment, plus `auth/auth0-{react-native,ios,android}`. N1 landed (2026-10-11): `mobile/{ios,android}/skills/basics` with `references/concurrency.md` each, and rows `A1…A5`/`B1…B16` (iOS), `A1…A4`/`B1…B16` (Android). R1 landed (2026-10-11): the five drafts rewritten onto SDK 57 and `mobile/react-native/skills/navigation` written, with RN checklist rows `A1…A7`, `B1…B13`, `C1…C10`, `D1…D10`, `E1…E13`, `F1…F15`. R2 landed (2026-10-11): `mobile/react-native/skills/{ui-components,forms,networking,offline-and-storage,native-modules}` with checklist rows `D10…D19`, `G1…G10`, `H1…H15`, `I1…I13`, `J1…J13`. R3 landed (2026-10-10): `mobile/react-native/skills/{device-features,notifications-and-links,animation,languages,test-ids}` with checklist rows `F15…F20`, `J14…J28`, `P1…P10`, `Q1…Q11`, `R1…R10`, and §8.5's RN mapping answered (D20 — the QA explorer's `content-desc` claim is refuted). R4 landed (2026-10-11): `mobile/react-native/skills/{accessibility,performance,error-handling,component-testing}` with `error-handling/references/{session-and-resume,writes-and-dependencies}.md` and checklist rows `M1…M13`, `N1…N13`, `O1…O22`, `S1…S12`. R5 landed (2026-10-11): `mobile/react-native/skills/{migration,code-review,standards-audit}` with `migration/references/{sdk-upgrade,new-architecture,bare-to-expo,embed-in-native-app}.md`, the RN checklist's closing section index, `mobile/react-native/agents/mobile-react-native.md` (13,888 characters, description 574 of 650) and `mobile/react-native/commands/{mobile-react-native,mobile-react-native-audit}.md`. I1 landed (2026-10-11): `mobile/ios/skills/{project-setup,architecture,ui-components,styling,navigation}` with `references/{packages-and-config,tca}.md` and checklist rows `A6…A11`, `B17…B24`, `C1…C10`, `D1…D11`, `E1…E12`, `F1…F11` (D21: MV over the corpus's MVVM rows). I2 landed (2026-10-11): `mobile/ios/skills/{forms,networking,offline-and-storage,uikit,device-features}` with `networking/references/request-policy.md`, `offline-and-storage/references/{swiftdata-migrations,keychain}.md`, `uikit/references/{uiscene-migration,interop-seams}.md`, `device-features/references/permissions.md` and checklist rows `D12…D20`, `G1…G10`, `H1…H12`, `I1…I14`, `J1…J12` (D22: new facts unconfirmed against Apple pages). I3 landed (2026-10-11): `mobile/ios/skills/{notifications-and-links,system-integration,animation,languages,test-ids}` with `notifications-and-links/references/apns-and-extensions.md`, `system-integration/references/background-and-activities.md` and checklist rows `F12…F15`, `J13…J28`, `P1…P11`, `Q1…Q11`, `R1…R10` (D23: new facts unconfirmed against Apple pages). I4 landed (2026-10-11): `mobile/ios/skills/{accessibility,performance,error-handling,unit-testing}` with `error-handling/references/{session-and-resume,writes-and-dependencies}.md` and checklist rows `M1…M14`, `N1…N13`, `O1…O21`, `S1…S15` (D24: new facts unconfirmed against Apple pages). I5 landed (2026-10-11): `mobile/ios/skills/{migration,code-review,standards-audit}` with `migration/references/{swift6-modules,observation,combine-to-async,uikit-to-swiftui,objc-to-swift,cocoapods-to-spm,ios27-sdk-and-targets}.md`, the iOS checklist's closing section index, `mobile/ios/agents/mobile-ios.md` (13,879 characters, description 640 of 650) and `mobile/ios/commands/{mobile-ios,mobile-ios-audit}.md` (D25: migration facts unconfirmed against Apple / swift.org pages). A1 landed (2026-10-10): `mobile/android/skills/{project-setup,architecture,ui-components,styling,navigation}` with `project-setup/references/gradle-config.md`, `architecture/references/hilt-and-modules.md` and checklist rows `A5…A13`, `B17…B20`, `C1…C13`, `D1…D15`, `E1…E12`, `F1…F13` (D26: no ViewModel-to-UI events over the corpus's Channel row; D27: Navigation 3 / Expressive / KSP facts partly unconfirmed). A2 landed (2026-10-10): `mobile/android/skills/{forms,networking,offline-and-storage,views-interop,device-features}` with `networking/references/{request-policy,connectivity-and-trust}.md`, `offline-and-storage/references/{room-migrations,keystore-and-secrets}.md`, `forms/references/validation-autofill-wizards.md`, `views-interop/references/recyclerview.md`, `device-features/references/{permissions,biometrics-and-credentials}.md` and checklist rows `D16…D25`, `G1…G10`, `H1…H15`, `I1…I14`, `J1…J12` (D28: Room 3 / Retrofit 3 / Compose-forms facts partly unconfirmed). A3 landed (2026-10-10): `mobile/android/skills/{notifications-and-links,system-integration,animation,languages,test-ids}` with `notifications-and-links/references/{fcm,app-links}.md`, `system-integration/references/foreground-services.md` and checklist rows `F14…F16`, `J13…J24`, `P1…P8`, `Q1…Q8`, `R1…R8` (D29: FCM registration is the Installation-ID flow; several Compose / Appium / FGS facts unconfirmed). A4 landed (2026-10-10): `mobile/android/skills/{accessibility,performance,error-handling,unit-testing}` with `error-handling/references/{session-and-resume,writes-and-dependencies}.md`, `unit-testing/references/{flows-and-seams,robolectric-and-screenshots}.md` and checklist rows `M1…M15`, `N1…N14`, `O1…O22`, `S1…S16` (D30: Robolectric / Turbine / Roborazzi versions and R8 keep-rule semantics unconfirmed). Next: A5.
-A5 landed (2026-10-10): `mobile/android/skills/{kotlin-multiplatform,migration}` with three and nine references, and Android checklist rows `A14…A19` and `W1…W11`. A6 landed (2026-10-11): `mobile/android/skills/{code-review,standards-audit}`, the checklist's closing section index (A–X, W included), `mobile/android/agents/mobile-android.md` (13,990 characters) and `mobile/android/commands/{mobile-android,mobile-android-audit}.md`. Built but unverified: everything — the plan gates once, in G1. Flutter becomes a fourth plugin in its own plan, written
+A5 landed (2026-10-10): `mobile/android/skills/{kotlin-multiplatform,migration}` with three and nine references, and Android checklist rows `A14…A19` and `W1…W11`. A6 landed (2026-10-11): `mobile/android/skills/{code-review,standards-audit}`, the checklist's closing section index (A–X, W included), `mobile/android/agents/mobile-android.md` (13,990 characters) and `mobile/android/commands/{mobile-android,mobile-android-audit}.md`. W1 landed (2026-10-10): three `mobile-*` entries in `.claude-plugin/marketplace.json` after `fe-react`, the `mobile` stack token in `plan-format.md`, `delivery-plan/SKILL.md`, `solution-planner.md` (routing to the three agents) and CLAUDE.md § Planning, and the QA peers wired (`qa-mobile-*` Related agents, the three `mobile-screen-explorer` corrected to D20, the two security-testing peer lines). Next: G1. Built but unverified: everything — the plan gates once, in G1. Flutter becomes a fourth plugin in its own plan, written
 once this one lands (O4); it is **not** in this plan's tasks. Maestro arrives on the QA side through plan 003
 (its X1); this plan feeds it the same test ids and an EAS Workflows job (D7). Every fact in §4 was web-verified
 on 2026-10-10; the items listed under §4.5 were not.
@@ -1432,6 +1432,8 @@ three explorer line-10 paragraphs ~3k, two security-testing peer lines ~3k; the 
   16,000 budget — the correction replaces a sentence, it does not add one.
 - **Not in W1:** CLAUDE.md map, catalog, README (G1).
 
+- **As built (2026-10-10):** `.claude-plugin/marketplace.json` — `mobile-react-native`, `mobile-ios`, `mobile-android` after `fe-react`; every `skills` array built from `ls` of the folders and every skill, command and agent path asserted to exist on disk (react-native also lists `mobile/{ios,android}/skills/basics`, D6; all three list `auth/_shared/{auth0-concepts,oidc-concepts}` per §2, which the fe-react entry lacks for oidc). `mobile` token + gloss at `plan-format.md:117`, `delivery-plan/SKILL.md` (3 lists), `solution-planner.md` (the stack lists, the `Tasks:` tally line, the routing line and the ux-patterns loader line), CLAUDE.md § Planning's one-stack bullet ("API tree and a web or app tree"). QA: the three `qa-mobile-<stack>.md` § Related agents gained one bullet; each explorer's line 10 and locator-ladder rungs 1–2 rewritten in place (rung 1 iOS `~` / Android `id=`/`resourceId`, rung 2 `content-desc` only when no `resource-id`); the two security-testing peer lines name the three dev agents. Explorer bodies grew by 164 / 164 / 98 characters (15,576 / 15,832 / 15,968 of 16,000) — the replaced sentences are longer, none added. **Built but unverified:** the explorers' other lines that still say accessibility id is the primary locator (`Accessibility id is the primary locator…`, the XPath-TODO text) were left as D20 scoped; marketplace validity, the 16,000 budget and command uniqueness are G1's checks. Not run (Gate: none).
+
 ### G1 — documentation, the gate, and filing the plan
 
 **Stack:** `docs` · **Agent:** `general-purpose`
@@ -1509,53 +1511,11 @@ goes in an untracked `scratch/` folder inside the worktree, deleted before commi
 | A4 | `docs` | `general-purpose` | S2, A2, I4 | ~145k |
 | A5 | `docs` | `general-purpose` | A1–A4 | ~125k |
 | A6 | `docs` | `general-purpose` | A1–A5, S1–S3, N1, I5 | ~105k |
-| W1 | `docs` | `general-purpose` | R5, I5, A6, R3, S1–S3 | ~120k |
 | G1 | `docs` | `general-purpose` | every task above | ~140k |
 
-C1, S1, S2, S3, N1, R1, R2, R3, R4, R5, I1, I2, I3, I4, I5, A1, A2, A3, A4, A5 and A6 have landed (their blocks are deleted); every block below is live.
+C1, S1, S2, S3, N1, R1, R2, R3, R4, R5, I1, I2, I3, I4, I5, A1, A2, A3, A4, A5, A6 and W1 have landed (their blocks are deleted); every block below is live.
 
 ---
-
-### W1 — marketplace, planning lane and QA wiring (general-purpose, docs)
-
-````
-You are `general-purpose`. Task W1 of docs/plans/002-mobile-plugins.md: list the three mobile plugins in
-the marketplace, teach the planning lane a `mobile` stack, and wire the QA mobile peers.
-
-Read, in this order:
-1. CLAUDE.md.
-2. The plan: §2, §8.5, §9, D11, task W1, and "Close-out — every task".
-3. The `fe-react` entry of `.claude-plugin/marketplace.json`.
-4. `engineering-practices/writing-plans/references/plan-format.md` §4's Stack row (line 117);
-   `backend/_shared/delivery-plan/SKILL.md` lines 43, 118, 282; `backend/_shared/agents/solution-planner.md`
-   lines 15, 61, 79, 198, 229.
-5. `qa/{java,dotnet,typescript}/agents/qa-mobile-*.md` § Related agents; line 10 of each
-   `qa/*/skills/mobile-screen-explorer/SKILL.md`; the peer lines of
-   `qa/_shared/security-testing/{mobile-app-scan,mobile-runtime-testing}/SKILL.md`.
-6. The mapping section of `mobile/react-native/skills/test-ids/SKILL.md`.
-
-Build:
-- Three marketplace entries per §9, after `fe-react`; every `skills` array built from `ls` of the
-  folders, never from memory.
-- `mobile` added to the stack lists at the cited lines and to CLAUDE.md § Planning's one-stack bullet;
-  the three agents added to the planner's routing beside `fe-react` / `fe-blazor`.
-- QA: the three dev agents named as consumers of `missing-testids.md`; each explorer's line 10 and its `~`
-  ladder rung corrected to R3's verified mapping (D20); the security-testing peer lines name where fixes go.
-
-Traps:
-- plan-format.md is the contract every plan follows — add the token and its one-phrase gloss, nothing else.
-- R3 refuted the explorers' claim (D20): Android `content-desc` is the `accessibilityLabel`, the `testID` is
-  the bare `resource-id`. Correct the line-10 sentence **and** the locator-ladder rung that says `~` is the
-  default (`~` on iOS; `id=` / UiSelector `resourceId` on Android) — nothing else in the strategy changes.
-  The explorers' kebab-case "Suggested testID" stays a hint; the dev skill derives PascalCase. Their bodies sit
-  at 15,400–15,900 of the 16,000-character budget: replace sentences in place, never add one.
-- Do not run §11's script — G1 does; a path you doubt, `ls` it.
-
-Gate: none — this plan gates once, in G1. Do not run tools/token-audit.py, §11's script, or any lint.
-
-Commit: `feat(mobile W1): marketplace entries, mobile planning lane, QA wiring`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
 
 ### G1 — documentation, the gate, and filing the plan (general-purpose, docs)
 

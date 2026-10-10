@@ -102,7 +102,7 @@ where it sharpens the label, the **MASWE v1.0.0** id. Every line: `MASVS: <ids>`
   is a WebView shell, the DOM-XSS/CSP checks there apply to its web layer.
 - **`qa-mobile-<stack>`, `mobile-app-crawler`, `mobile-screen-explorer`** *(peers, not loaded)* — own the
   functional mobile suite and live-app screen mapping; a confirmed vuln becomes a bug report via
-  `qa-test-case-designer`'s `bug-report-writer`. The crawler's device/emulator setup is reusable here.
+  `qa-test-case-designer`'s `bug-report-writer`; the fix goes to `mobile-react-native` / `mobile-ios` / `mobile-android`. The crawler's device/emulator setup is reusable here.
 - **`penetration-testing`** *(peer plugin)* — if a runtime finding is to be chained into network-altitude
   access (a foothold, lateral movement), that is its `initial-access` lane under its scope-file gates; this
   skill stops at single-app runtime proof and hands off.

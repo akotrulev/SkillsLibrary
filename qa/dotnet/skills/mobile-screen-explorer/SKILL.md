@@ -7,7 +7,7 @@ description: Use when a .NET mobile suite needs to explore the currently open An
 
 Drives the **currently running app on a connected device or emulator through the Appium MCP server**, enumerates what's on screen, and reports each element with an **accessibility-id-first** locator — so `qa/dotnet/skills/mobile-screen-objects` can emit a C# page object and `qa/dotnet/skills/ui-test-author/appium` can author the tests. This skill owns **device interaction, element discovery, and locator policy** — it does **not** generate page objects or tests (hand those off).
 
-This is the mobile counterpart of the web `qa/dotnet/skills/page-objects-from-url`: live extraction via MCP, a primary-locator contract with the dev team, and a `missing-testids.md` report for what the app fails to expose. One difference simplifies the mobile flow — the page-source XML **already contains the accessibility id** (`content-desc` on Android, `name` on iOS, both mapping to a React Native `testID`), so a single page-source read inventories structure *and* ids; there is no separate "harvest the test ids" pass.
+This is the mobile counterpart of the web `qa/dotnet/skills/page-objects-from-url`: live extraction via MCP, a primary-locator contract with the dev team, and a `missing-testids.md` report for what the app fails to expose. One difference simplifies the mobile flow — the page-source XML **already contains the accessibility id** (`name` on iOS and the bare `resource-id` on Android carry the `testID`; `content-desc` is the `accessibilityLabel`), so a single page-source read inventories structure *and* ids; there is no separate "harvest the test ids" pass.
 
 ## When to use
 
@@ -94,8 +94,8 @@ Confirm before exploring. **Ask, don't guess:**
 
 For every element choose the highest available rung and record the **C#** call. Tie every locator to an attribute you can **see in the current source** — never to a guessed one.
 
-1. `AppiumBy.AccessibilityId("…")` — **the default**; `content-desc` / `name` (= RN `testID`). Use it whenever present, even if a nicer id exists. *(On iOS, `id` / `name` / `accessibility id` are synonyms over the element's `name` attribute — confirm it's stable in this app's source before relying on it.)*
-2. `By.Id("…")` — Android `resource-id` when there's no accessibility id
+1. `AppiumBy.AccessibilityId("…")` on iOS (`name` = RN `testID`), `By.Id("…")` / `UiSelector().resourceId("…")` on Android (bare `resource-id` = RN `testID`) — **the default**. Use it whenever present, even if a nicer id exists. *(On iOS, `id` / `name` / `accessibility id` are synonyms over the element's `name` attribute — confirm it's stable in this app's source before relying on it.)*
+2. `AppiumBy.AccessibilityId("…")` — Android `content-desc` (the `accessibilityLabel`) only when there's no `resource-id`
 3. Native query when neither above is stable: `AppiumBy.AndroidUIAutomator("…")` (Android — useful when ids/accessibility metadata are missing; keep it narrow and log-readable) · `AppiumBy.IosNsPredicateString("…")` or `AppiumBy.IosClassChain("…")` (iOS — for native filtering / hierarchy scoping)
 4. `By.XPath("…")` — **last resort**, always paired with a `// TODO: missing accessibility id '<suggested>' — see missing-testids.md`. Treat a working XPath as **proof the node exists, not the final fix**: use it to learn the tree, then downgrade to a stronger native locator the moment the source exposes one.
 

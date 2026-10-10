@@ -40,7 +40,7 @@ in this document, in status reports, and when talking to the human.
 
 **Every task belongs to exactly one epic, one story, one stack and one agent, and is executed in one
 session.** The epic and story come from `epics.md` / `stories.md` by way of `epic-map.md`; the stack is
-one of `be` · `fe` · `ts` · `data` · `infra` · `qa` · `docs` · `human`; and the session budget is
+one of `be` · `fe` · `mobile` · `ts` · `data` · `infra` · `qa` · `docs` · `human`; and the session budget is
 derived by `be-shared-session-budget` while the task is being authored, not measured afterwards.
 
 > **A task that touches both the API tree and the web tree is two tasks.** There is no mixed task at
@@ -115,7 +115,7 @@ Anything not traceable to a row above is either missing from the design pack (go
 
 - **Epic** — from `epic-map.md` §1. Foundation and contract tasks are `E0`, the planner-created epic that carries no stories; every other task names an `E` id from `epics.md`.
 - **Story** — the `US` id from `stories.md` the task serves. `E0` tasks have no story and say `—`. A task under `E1..En` that serves no story is either work the backlog is missing (go add it there) or work nobody asked for.
-- **Stack** — exactly one of `be` (backend, database, migrations) · `fe` (the web client) · `ts` (shared TypeScript packages — CLI, MCP, generated clients) · `data` · `infra` · `qa` · `docs` · `human`.
+- **Stack** — exactly one of `be` (backend, database, migrations) · `fe` (the web client) · `mobile` (the native or React Native client app) · `ts` (shared TypeScript packages — CLI, MCP, generated clients) · `data` · `infra` · `qa` · `docs` · `human`.
 
 **One stack per task is a hard rule, and it is what makes the batching mechanical rather than a judgement call.** A row above that yields work in two trees yields two tasks: the endpoints are `be`, the screens that call them are `fe`, and the generated client between them is `ts`. Splitting them is not a cost — the tasks of one stack within one epic are already adjacent, so the split costs an ordering, not a session.
 
@@ -279,7 +279,7 @@ Rules:
 
 - **`Epic`, `Story` and `Stack` are on every task, or on none.** `Epic` is an `E` id from
   `epic-map.md` (`E0` for foundation and contract work); `Story` is a `US` id from `stories.md`, or
-  `—` for an `E0` task; `Stack` is exactly one of `be` · `fe` · `ts` · `data` · `infra` · `qa` ·
+  `—` for an `E0` task; `Stack` is exactly one of `be` · `fe` · `mobile` · `ts` · `data` · `infra` · `qa` ·
   `docs` · `human`. A task naming two stacks is two tasks, reported as a plan defect rather than
   resolved by picking the larger one. A `Story` id that does not exist in `stories.md`, or an `Epic`
   that does not exist in `epic-map.md`, is a defect in the citation, not licence to invent the backlog

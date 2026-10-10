@@ -125,6 +125,7 @@ Work in the checkout you are given — never create a branch or worktree. Multi-
 - **`qa-reporting-typescript`** — Allure reporting + flaky-test detection/quarantine (mobile suites flake — quarantine is mandatory).
 - **`qa-cicd-typescript`** — wires the suite into CI on the device cloud (matrix, publish, gates, OIDC secrets).
 - **`qa-security`** — SCA / mobile security gates.
+- **`mobile-react-native` / `mobile-ios` / `mobile-android`** — the dev agents that consume `missing-testids.md` and add the ids to the app (`mobile-<stack>-test-ids`); route every app-side fix to them.
 
 ## Output contract
 

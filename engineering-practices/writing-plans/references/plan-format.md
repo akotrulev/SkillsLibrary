@@ -114,7 +114,7 @@ the chat route's request shape and stream ~10k, writes ~40k, test output ~15k.
 
 | Line | Rule |
 |---|---|
-| `**Stack:**` | **Exactly one** of `be` (backend, database, migrations) · `fe` (the web client) · `ts` (shared TypeScript packages — CLI, MCP, generated clients) · `data` · `infra` · `qa` · `docs` · `human`. **A task that touches both the API tree and the web tree is two tasks** — at any size, for any reason. No estimate justifies a mixed task |
+| `**Stack:**` | **Exactly one** of `be` (backend, database, migrations) · `fe` (the web client) · `mobile` (the native or React Native client app) · `ts` (shared TypeScript packages — CLI, MCP, generated clients) · `data` · `infra` · `qa` · `docs` · `human`. **A task that touches both the API tree and the web tree is two tasks** — at any size, for any reason. No estimate justifies a mixed task |
 | `**Agent:**` | **Exactly one** exact catalog name — `be-dotnet`, `be-java`, `be-node`, `be-python`, `fe-react`, `fe-blazor`, `data-architect`, `devops-engineer`, `tooling-engineer`, `qa-api-<stack>`, … An invented agent name is the most damaging defect in a plan, because it is what an executing session binds on. A task whose agent you cannot name is a task whose stack you have not decided. `human` tasks name the person or role in an `**Owner:**` line |
 | `**Deliverable:**` | **One** observable thing that exists when the task is done, stated as a fact about the world rather than as an activity, and checkable by someone who did not do the work. It is what `Done` means. Two deliverables is two tasks; no statable deliverable is a fragment of one |
 | `**Depends on:**` | The ids this task needs that are not immediately above it, each with what it provides — or `—`. Backwards only |
