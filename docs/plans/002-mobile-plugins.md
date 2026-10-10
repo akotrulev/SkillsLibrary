@@ -8,7 +8,7 @@ step-by-step agent that works greenfield and brownfield, a conformance audit, an
 
 **Status:** C1 landed (2026-10-11): `mobile/` exists with the five July drafts moved and renamed under
 `mobile/react-native/`, the three conformance-checklist skeletons, and `## Mobile code rules` in `CLAUDE.md`;
-the stale `frontend/react-native` pointers are repointed. S1 landed (2026-10-11): `mobile/_shared/{store-compliance,security}` with their references and the `L1…L26` / `K1…K27` audit fragments. S2 landed (2026-10-11): `mobile/_shared/{release,observability}` with their references and the `T1…T19` / `U1…U20` audit fragments. S3 landed (2026-10-11): `mobile/_shared/in-app-purchases` with its references and the `X1…X22` fragment, plus `auth/auth0-{react-native,ios,android}`. N1 landed (2026-10-11): `mobile/{ios,android}/skills/basics` with `references/concurrency.md` each, and rows `A1…A5`/`B1…B16` (iOS), `A1…A4`/`B1…B16` (Android). R1 landed (2026-10-11): the five drafts rewritten onto SDK 57 and `mobile/react-native/skills/navigation` written, with RN checklist rows `A1…A7`, `B1…B13`, `C1…C10`, `D1…D10`, `E1…E13`, `F1…F15`. R2 landed (2026-10-11): `mobile/react-native/skills/{ui-components,forms,networking,offline-and-storage,native-modules}` with checklist rows `D10…D19`, `G1…G10`, `H1…H15`, `I1…I13`, `J1…J13`. R3 landed (2026-10-10): `mobile/react-native/skills/{device-features,notifications-and-links,animation,languages,test-ids}` with checklist rows `F15…F20`, `J14…J28`, `P1…P10`, `Q1…Q11`, `R1…R10`, and §8.5's RN mapping answered (D20 — the QA explorer's `content-desc` claim is refuted). R4 landed (2026-10-11): `mobile/react-native/skills/{accessibility,performance,error-handling,component-testing}` with `error-handling/references/{session-and-resume,writes-and-dependencies}.md` and checklist rows `M1…M13`, `N1…N13`, `O1…O22`, `S1…S12`. R5 landed (2026-10-11): `mobile/react-native/skills/{migration,code-review,standards-audit}` with `migration/references/{sdk-upgrade,new-architecture,bare-to-expo,embed-in-native-app}.md`, the RN checklist's closing section index, `mobile/react-native/agents/mobile-react-native.md` (13,888 characters, description 574 of 650) and `mobile/react-native/commands/{mobile-react-native,mobile-react-native-audit}.md`. I1 landed (2026-10-11): `mobile/ios/skills/{project-setup,architecture,ui-components,styling,navigation}` with `references/{packages-and-config,tca}.md` and checklist rows `A6…A11`, `B17…B24`, `C1…C10`, `D1…D11`, `E1…E12`, `F1…F11` (D21: MV over the corpus's MVVM rows). I2 landed (2026-10-11): `mobile/ios/skills/{forms,networking,offline-and-storage,uikit,device-features}` with `networking/references/request-policy.md`, `offline-and-storage/references/{swiftdata-migrations,keychain}.md`, `uikit/references/{uiscene-migration,interop-seams}.md`, `device-features/references/permissions.md` and checklist rows `D12…D20`, `G1…G10`, `H1…H12`, `I1…I14`, `J1…J12` (D22: new facts unconfirmed against Apple pages). Next: I3.
+the stale `frontend/react-native` pointers are repointed. S1 landed (2026-10-11): `mobile/_shared/{store-compliance,security}` with their references and the `L1…L26` / `K1…K27` audit fragments. S2 landed (2026-10-11): `mobile/_shared/{release,observability}` with their references and the `T1…T19` / `U1…U20` audit fragments. S3 landed (2026-10-11): `mobile/_shared/in-app-purchases` with its references and the `X1…X22` fragment, plus `auth/auth0-{react-native,ios,android}`. N1 landed (2026-10-11): `mobile/{ios,android}/skills/basics` with `references/concurrency.md` each, and rows `A1…A5`/`B1…B16` (iOS), `A1…A4`/`B1…B16` (Android). R1 landed (2026-10-11): the five drafts rewritten onto SDK 57 and `mobile/react-native/skills/navigation` written, with RN checklist rows `A1…A7`, `B1…B13`, `C1…C10`, `D1…D10`, `E1…E13`, `F1…F15`. R2 landed (2026-10-11): `mobile/react-native/skills/{ui-components,forms,networking,offline-and-storage,native-modules}` with checklist rows `D10…D19`, `G1…G10`, `H1…H15`, `I1…I13`, `J1…J13`. R3 landed (2026-10-10): `mobile/react-native/skills/{device-features,notifications-and-links,animation,languages,test-ids}` with checklist rows `F15…F20`, `J14…J28`, `P1…P10`, `Q1…Q11`, `R1…R10`, and §8.5's RN mapping answered (D20 — the QA explorer's `content-desc` claim is refuted). R4 landed (2026-10-11): `mobile/react-native/skills/{accessibility,performance,error-handling,component-testing}` with `error-handling/references/{session-and-resume,writes-and-dependencies}.md` and checklist rows `M1…M13`, `N1…N13`, `O1…O22`, `S1…S12`. R5 landed (2026-10-11): `mobile/react-native/skills/{migration,code-review,standards-audit}` with `migration/references/{sdk-upgrade,new-architecture,bare-to-expo,embed-in-native-app}.md`, the RN checklist's closing section index, `mobile/react-native/agents/mobile-react-native.md` (13,888 characters, description 574 of 650) and `mobile/react-native/commands/{mobile-react-native,mobile-react-native-audit}.md`. I1 landed (2026-10-11): `mobile/ios/skills/{project-setup,architecture,ui-components,styling,navigation}` with `references/{packages-and-config,tca}.md` and checklist rows `A6…A11`, `B17…B24`, `C1…C10`, `D1…D11`, `E1…E12`, `F1…F11` (D21: MV over the corpus's MVVM rows). I2 landed (2026-10-11): `mobile/ios/skills/{forms,networking,offline-and-storage,uikit,device-features}` with `networking/references/request-policy.md`, `offline-and-storage/references/{swiftdata-migrations,keychain}.md`, `uikit/references/{uiscene-migration,interop-seams}.md`, `device-features/references/permissions.md` and checklist rows `D12…D20`, `G1…G10`, `H1…H12`, `I1…I14`, `J1…J12` (D22: new facts unconfirmed against Apple pages). I3 landed (2026-10-11): `mobile/ios/skills/{notifications-and-links,system-integration,animation,languages,test-ids}` with `notifications-and-links/references/apns-and-extensions.md`, `system-integration/references/background-and-activities.md` and checklist rows `F12…F15`, `J13…J28`, `P1…P11`, `Q1…Q11`, `R1…R10` (D23: new facts unconfirmed against Apple pages). Next: I4.
 Built but unverified: everything — the plan gates once, in G1. Flutter becomes a fourth plugin in its own plan, written
 once this one lands (O4); it is **not** in this plan's tasks. Maestro arrives on the QA side through plan 003
 (its X1); this plan feeds it the same test ids and an EAS Workflows job (D7). Every fact in §4 was web-verified
@@ -843,6 +843,8 @@ status-table `frontend` row, and `docs/plans/CONFORMANCE-AUDIT-PLAN.md` item 7.
 
 **D22 — I2's new iOS facts are unconfirmed against Apple pages (I2, 2026-10-11).** §10.3 says research first. Reading A: fetch developer.apple.com for each API before writing it. Reading B (taken): Apple's documentation renders client-side and the session had no page fetch that returned text (the same limit I1 hit, D21), so the skills state the long-standing API shapes from prior knowledge — UIKit Observation tracking (`updateProperties()`, iOS 26 default, `UIObservationTrackingEnabled` on iOS 18), the `UIApplicationSceneManifest` keys, SwiftData `VersionedSchema` / `SchemaMigrationPlan` / `@ModelActor`, `CLLocationUpdate.liveUpdates()`, `DataScannerViewController`, the `NS…UsageDescription` key list. `uikit/references/uiscene-migration.md` tells the reader to read TN3187 against the installed SDK before editing; `device-features/references/permissions.md` says to confirm a rarely used key. Cost: G1 (or any session with a working page fetch) re-checks these; until then an audit row built on them is a finding to read, not a certainty.
 
+**D23 — I3's new iOS facts are unconfirmed against Apple pages (I3, 2026-10-11).** §10.3 says research first. Reading A: fetch developer.apple.com for each API before writing it. Reading B (taken): the session ran with no Apple page fetch (the limit I1 and I2 hit, D21, D22), so the skills state the long-standing API shapes from prior knowledge — `UNUserNotificationCenter` and APNs headers, the AASA `components` format, `BGTaskScheduler` and background `URLSession`, ActivityKit and its 4 KB / 8-hour limits, WidgetKit timelines, App Intents, String Catalogs and `FormatStyle`, `accessibilityIdentifier` grouping behaviour. The least settled are `BGContinuedProcessingTask` (iOS 26), widget push updates (iOS 26) and the `.accessibilityIdentifier`-on-a-container propagation; each is hedged in its skill and `system-integration` says to read the installed SDK. Guideline 4.5.3 for Live Activities follows the task prompt (and 4.5.4 for push, from memory); S1's fragments carry no 4.5.3 row, so J21 is this task's own. Cost: G1 (or any session with a working fetch) re-checks these; until then a row built on them is a finding to read, not a certainty.
+
 ## Answered questions (2026-10-10)
 
 **O1 — Packaging: one plugin or several?** Three plugins in one `mobile/` domain (the user; D1).
@@ -1231,6 +1233,8 @@ Activities, `BGContinuedProcessingTask`, String Catalogs ~45k; writes: five SKIL
 - Each skill per its §6.3 row. `test-ids` uses the §8.5 contract exactly as R3 recorded it.
 - **Not in I3:** quality layers and tests (I4).
 
+- **As built (2026-10-11):** `mobile/ios/skills/{notifications-and-links,system-integration,animation,languages,test-ids}/SKILL.md` — bodies about 14.2k / 15.5k / 12.5k / 12.9k / 13.2k chars, descriptions 458 / 487 / 470 / 466 / 437 chars (`wc -m` counts, no gate run); frontmatter `mobile-ios-<folder>`. References: `notifications-and-links/references/apns-and-extensions.md` (APNs headers and payloads, the service extension, the AASA file, URL schemes) and `system-integration/references/background-and-activities.md` (entitlement keys, Live Activity push, background-task skeleton, background `URLSession` checklist, extension limits). Checklist rows: `F12…F15` (payload and link validation, AASA, `canOpenURL`), `J13…J28` (notification permission, delegate, token lifecycle, extension handler, background modes, widgets, Live Activities incl. 4.5.3, App Intents, App Group, BG tasks, background sessions), `P1…P11`, `Q1…Q11`, `R1…R10`; `grep -c "^| [FJPQR][0-9]"` over the checklist counts 75 across F, J, P, Q, R. `test-ids` is the §8.5 contract exactly as R3 recorded it (D20): iOS `accessibilityIdentifier` is XCUITest `identifier` / Appium `name` / Maestro `id:`, the label is `text:`; Maestro's regex caveat carried over; the grouping rule (`.combine` hides children) is stated as XCUITest experience, not re-verified. `languages` bans new `.strings` files (migrate with Xcode's String Catalog command). `system-integration` is just under §10.2's 16,000 cap — G1's token audit decides whether the Live Activities section moves into `references/`. Research: no web search or Apple fetch (D23). Built but unverified: everything (no build, no lint). The prompt blocks below needed no rewrite: I4 reads sections M, N, O, S, which I3 did not touch.
+
 ### I4 — iOS quality layers and unit tests
 
 **Stack:** `docs` · **Agent:** `general-purpose`
@@ -1476,36 +1480,9 @@ goes in an untracked `scratch/` folder inside the worktree, deleted before commi
 | W1 | `docs` | `general-purpose` | R5, I5, A6, R3, S1–S3 | ~120k |
 | G1 | `docs` | `general-purpose` | every task above | ~140k |
 
-C1, S1, S2, S3, N1, R1, R2, R3, R4, R5, I1 and I2 have landed (their blocks are deleted); every block below is live.
+C1, S1, S2, S3, N1, R1, R2, R3, R4, R5, I1, I2 and I3 have landed (their blocks are deleted); every block below is live.
 
 ---
-
-### I3 — iOS notifications and links, system integration, motion, languages, test ids (general-purpose, docs)
-
-````
-You are `general-purpose`. Task I3 of docs/plans/002-mobile-plugins.md: write
-`mobile-ios-{notifications-and-links,system-integration,animation,languages,test-ids}`.
-
-Read, in this order:
-1. CLAUDE.md (`## Mobile code rules`).
-2. The plan: §4.2, §5, §6.3, §8.3, §8.5, §10, task I3, and "Close-out — every task".
-3. `mobile-react-native-test-ids` — the mapping R3 verified.
-4. `frontend/react/skills/{animation,languages}/SKILL.md` — rule lists.
-5. The iOS checklist, sections F, J, P, Q, R.
-
-Build:
-- Each skill per its §6.3 row, rows appended to F, J, P, Q, R.
-- `test-ids` uses §8.5's contract exactly as R3 recorded it.
-
-Traps:
-- Live Activities fall under guideline 4.5.3 (no spam or phishing); widget refresh is budgeted by the system.
-- New strings go in String Catalogs, never new `.strings` files.
-
-Gate: none — this plan gates once, in G1. Do not run tools/token-audit.py, §11's script, or any lint.
-
-Commit: `feat(mobile I3): iOS notifications, system integration, motion, languages, test ids`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
 
 ### I4 — iOS quality layers and unit tests (general-purpose, docs)
 
