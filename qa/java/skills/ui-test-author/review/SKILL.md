@@ -31,19 +31,14 @@ Reviews Java UI test code (Playwright Java, Selenium Java, Appium Java) against 
 ## Output format
 
 ```
-| Severity | Location                       | Issue                                              | Suggested fix                                                |
-|----------|--------------------------------|----------------------------------------------------|--------------------------------------------------------------|
-| blocker  | pom/LoginPage.java:42          | `Thread.sleep(2000)` — arbitrary wait              | Replace with `WebDriverWait` + `ExpectedConditions.visibilityOf` |
-| major    | pom/ProductPage.java:18        | XPath where a `data-test` attribute exists         | Switch to `By.cssSelector("[data-test='inventory-item']")`   |
-| minor    | pom/CartPage.java:55           | Inline `By.cssSelector(...)` repeated in 3 methods | Promote to `private static final By CART_BADGE`              |
+| Severity | Location                | Issue                                              | Suggested fix                                                    |
+|----------|-------------------------|----------------------------------------------------|------------------------------------------------------------------|
+| blocker  | pom/LoginPage.java:42   | `Thread.sleep(2000)` — arbitrary wait              | Replace with `WebDriverWait` + `ExpectedConditions.visibilityOf` |
+| major    | pom/ProductPage.java:18 | XPath where a `data-testid` exists                 | Switch to `By.cssSelector("[data-testid='Inventory.Item']")`     |
+| minor    | pom/CartPage.java:55    | Inline `By.cssSelector(...)` repeated in 3 methods | Promote to `private static final By CART_BADGE`                  |
 ```
 
-Severities (from `CLAUDE.md`):
-
-- **blocker** — ships a bug, breaks the build, or violates a hard rule (e.g. `Thread.sleep`, shared driver, raw credentials)
-- **major** — design or correctness issue that will hurt soon (brittle locators, assertions in page objects)
-- **minor** — style or small inconsistency (naming, missing constant)
-- **nit** — optional preference
+Severities follow `CLAUDE.md`: **blocker** (a bug, a broken build, a hard rule), **major**, **minor**, **nit**.
 
 **Do not rewrite the code during review.** If the user wants a rewrite, hand off to the matching generator skill.
 
@@ -52,43 +47,56 @@ Severities (from `CLAUDE.md`):
 | Check | Bad sign | Severity |
 |---|---|---|
 | No `Thread.sleep` / `page.waitForTimeout` | Any literal millisecond sleep | blocker |
-| Locators are semantic | Raw XPath where `data-test`/role/label exists | major |
-| Assertions live in tests, not page objects | `Assert.*` calls inside `click`/`enter*`/`select*` methods on a page class | major |
+| Locators are semantic | Raw XPath where a test id, role or label exists | major |
+| Test ids follow the contract | Kebab-case or dynamic ids (`login-submit`, `row-42`) instead of PascalCase dot-separated static ids (`Login.Submit`, `OrderRow`) | minor |
+| A fallback is recorded, not marked | A `// TODO: missing data-testid` marker or comment on a fallback locator instead of a `missing-testids.md` row | minor |
+| Assertions live in tests, not page objects | `Assert.*` / `assertThat` inside `click`/`enter*`/`select*` methods on a page class | major |
 | No business logic in page objects | Price calculation, JSON parsing, branching on app state inside POM | major |
 | Tests are independent | `@Test(dependsOnMethods = {...})` chaining a flow across tests | blocker |
 | One logical behavior per test | One `@Test` verifies login + cart + checkout | major |
-| No `try`/`catch` in a test or `@AfterMethod` | Any catch block in a `@Test`; a swallowing teardown; a blanket `catch (Exception)` in a page helper | major |
-| Failures identify the subject | Assertions with no message argument, so a failure cannot be told from a bad locator | minor |
-| Every assertion states one expected condition | `assertTrue(a \|\| b)`, `anyOf(...)` / `either().or()` matchers, `Pattern.compile("a\|b")` in a text/URL assertion | major |
-| Test names describe behavior | `test1`, `loginTest`, `clickButtonTest` | minor |
+| No `try`/`catch` in a test or a hook body | Any catch in a `@Test` or a hook body; a blanket `catch (Exception)`; a helper catch that does not log. A narrow, logged catch of one named exception inside an I/O helper is the only allowed one | major |
+| Failures identify the subject | An asserted Playwright locator with no `describe()`, or an AssertJ / TestNG value assertion with no `.as(...)` / message. Java's `assertThat(locator)` has no message parameter | minor |
+| Every assertion states one expected condition | `assertTrue(a \|\| b)`, `anyOf(...)` / `either().or()` matchers, `Pattern.compile("a\|b")` in a text/URL assertion, an assertion on an `or()` locator | major |
+| Test names are `Should_X_When_Y` | `test1`, `loginTest`, `signsInWithValidCredentials` | minor |
 | No hardcoded credentials / base URLs | Literal `admin@example.com`, hardcoded `https://staging.x.y` | major |
-| Locators promoted to `private static final By` or `private final Locator` fields | Inline locator strings re-typed across methods | minor |
+| Locators promoted to `private static final By` or `private final Locator` fields | Inline locator strings re-typed across methods; methods that re-query per call; public locator fields | minor |
 | No conditional logic driving assertions | `if (x) Assert.assertTrue(...)` instead of parameterized cases | major |
 | TestNG `@DataProvider` used for parameterization, not `for` loops in `@Test` | Loop-driven multi-case test that hides which case failed | major |
 | Build is Gradle (Kotlin DSL) for new projects | Maven `pom.xml` when project standard is Gradle | minor |
 
 ## Playwright Java smells
 
+The writer's rules and mechanics are in `qa/java/skills/ui-test-author/playwright` (`references/lifecycle.md`, `locators.md`, `assertions.md`).
+
 | Check | Bad sign | Severity |
 |---|---|---|
-| Every test asserts something | `@Test` body ends with an action and no `PlaywrightAssertions.assertThat(...)` | blocker |
-| Web-first assertions used | `Assert.assertTrue(locator.isVisible())` / `assertEquals(locator.textContent(), ...)` / `assertEquals(locator.count(), n)` | major |
-| `page.getByRole` / `getByLabel` / `getByTestId` preferred | `page.locator("css...")` in test classes | major |
-| Locators are `private final Locator` fields initialized in constructor | Methods that return `page.locator(...)` per call | minor |
-| No hardcoded sleeps | `page.waitForTimeout(...)` or `Thread.sleep(...)` anywhere | blocker |
-| No `setWaitUntil(WaitUntilState.NETWORKIDLE)` | `navigate(url, new Page.NavigateOptions().setWaitUntil(NETWORKIDLE))` | major |
-| No `setForce(true)` to bypass actionability | `.click(new Locator.ClickOptions().setForce(true))` / same on `fill` / `check` | major |
-| No redundant pre-waits before auto-waiting actions | `locator.waitFor()` immediately before `locator.click()` | minor |
-| `waitForResponse` ordering correct | `page.waitForResponse(predicate, callback)` is the runnable form — never call after the action | major |
-| Custom retry loops replaced by assertion timeouts or Awaitility | `while (retries-- > 0) { ... Thread.sleep ... }` | major |
+| Parallel-safe lifecycle | `static Playwright` / `Browser` / `BrowserContext` / `Page`, or a `ThreadLocal` holding them | blocker |
+| Suite parallelism matches the thread rule | `parallel="methods"` in `testng.xml`, or `@DataProvider(parallel = true)`, with Playwright | blocker |
+| Tests extend the one `BaseTest` | A class calls `Playwright.create()` itself, or a second base class per role / device | major |
+| Configuration methods survive group filters | A `BaseTest` hook without `alwaysRun = true` | major |
+| A base URL is set | Relative `navigate("/x")` / `request().post("/api/x")` with no `setBaseURL`, or a hardcoded host instead of `BASE_URL` | major |
+| Video kept after the close | `video.saveAs(...)` before `context.close()` — Java throws | major |
+| Code compiles on the pinned version | `within(`, `getByRef`, `setRecordVideoFps` or screencast `setFps` on 1.63; `Allure.addAttachment(...)` on allure-testng 3 | blocker |
+| `Locator` has no `getText()` | `locator.getText()` — Selenium's `WebElement` API; it does not compile | blocker |
+| Per-assertion timeouts use the matcher's options | `new AssertOptions().setTimeout(...)` — no such class; use `new LocatorAssertions.IsVisibleOptions().setTimeout(...)` | blocker |
+| `waitForResponse` is typed and ordered | `APIResponse r = page.waitForResponse(...)` (it returns `Response`); a wait started after the action instead of `waitForResponse(predicate, action)` | blocker |
+| Every test asserts something | `@Test` body ends with an action and no assertion | blocker |
+| Web-first assertions used | `assertTrue(locator.isVisible())` / `assertEquals(locator.textContent(), ...)` / `assertEquals(locator.count(), n)` | major |
+| Exact HTTP status | `assertThat(response).isOK()` or `assertTrue(response.ok())` in seeding | major |
+| Locator ladder | `page.locator("css...")` where a test id or role exists, or in a test class | major |
+| No page-level selector or deprecated APIs | `page.click(selector)`, `page.fill(selector)`, `page.innerText(selector)`, `page.type(...)`, `waitForSelector`, `querySelector` / `ElementHandle`, `waitForNavigation` | major |
+| Scoped, not positional | `.first()` / `nth()` silencing a strictness error with no reason in the name | major |
+| `visible()` over `:visible` | `:visible` in a selector on 1.63+ | minor |
+| No sleeps | `page.waitForTimeout(...)` or `Thread.sleep(...)` anywhere. In a `page.route(...)` handler it also stops the Playwright dispatcher for every event — fake latency with CDP throttling (`network-mocking/references/cdp.md`) or a stub-server delay | blocker |
+| No `NETWORKIDLE` | `setWaitUntil(WaitUntilState.NETWORKIDLE)` or `waitForLoadState(LoadState.NETWORKIDLE)` | major |
+| No `setForce(true)` | `.click(new Locator.ClickOptions().setForce(true))` / same on `fill` / `check` | major |
+| No redundant pre-waits | `locator.waitFor()` immediately before `locator.click()` | minor |
+| No hand-rolled retry loops | `while (retries-- > 0) { ... Thread.sleep ... }` | major |
 | `waitForFunction` not used for plain UI state | `page.waitForFunction("() => ...")` for visible/text checks | minor |
-| Deprecated APIs removed | `page.waitForNavigation(...)` in code | major |
-| Positive matchers preferred over `.not` | `not().isVisible()` where `isHidden()` exists | nit |
-| `setExact(true)` set for ambiguous text/role names | `getByText("Submit")` matching multiple labels (`Submit Order`, `Submitting…`) | minor |
-| Auth via `storageState`, not per-test login | Every test calls `loginPage.signIn(...)` | major |
-| `expectLoaded()` exists on every page object | No landmark assertion method | minor |
-| Tests extend `BaseTest` — no manual `Playwright.create()` | Test class manages its own Playwright/browser lifecycle | major |
-| Allure `@Step` used for non-trivial workflows | A test with 12 actions and no step labels | nit |
+| Positive matchers preferred | `not().isVisible()` where `isHidden()` exists | nit |
+| `setExact(true)` for ambiguous names | `getByText("Submit")` matching `Submit Order`, `Submitting…` | minor |
+| Auth via storage state | Every test calls `loginPage.signIn(...)` before its real behaviour | major |
+| Pages built in the test class | Page objects as `protected` fields of `BaseTest` | minor |
 
 ## Selenium Java smells
 
@@ -127,37 +135,25 @@ Severities (from `CLAUDE.md`):
 
 ## Good signals (Java)
 
-Code that looks well-written in this stack tends to share these traits:
-
-- Every page object extends a thin base (`BasePage` / `BaseAppiumPage`) with one synchronization helper
-- Locators are `private static final By` constants or `private final Locator` fields — not magic strings
-- One `@Test` per behavior, descriptive name (`successfulLogin`, `cartShowsAddedProduct`), no `dependsOnMethods`
-- Driver / Playwright / Appium driver lifecycle owned by `BaseTest` via a `ThreadLocal` factory — parallel-safe
-- `WebDriverWait` + `ExpectedConditions` (Selenium) or Playwright auto-waits (Playwright Java) — no `Thread.sleep`
-- Multi-step flows live in a sub-package (`pom/checkout/`) with each step returning the next page
-- Reusable components (cards, rows) take a parent `WebElement` / `Locator` and query inside it
-- TestNG `@DataProvider` for parameterization; failure message identifies the failing case
-- Constructor injection — no static mutable state on pages
-- Allure `@Step` annotations on non-trivial workflows for human-readable reports
+- Playwright: one `BaseTest` with instance fields under `parallel="classes"`; Selenium: a `ThreadLocal` driver factory
+- Locators are `private static final By` or `private final Locator` fields on the highest ladder rung
+- One `@Test` per behavior named `Should_X_When_Y`; web-first assertions or `WebDriverWait`, never a sleep
+- Components take a parent `WebElement` / `Locator`; a base page only where three pages share real behaviour
+- `@DataProvider` for parameterization; Allure `@Step` on non-trivial workflows
 
 ## Always-flag anti-patterns
 
-- **`OR` in an assertion.** `assertTrue(t.equals("Saved") || t.equals("Success"))`, a Hamcrest `anyOf(...)` / `either(...).or(...)`, or a `"Saved|Success"` regex alternation in a text/URL assertion — all the same defect: the test does not know what the app should render, so it passes on the wrong state and never fails when the app flips between the two. Watch for the regex form especially; it hides in `hasText(Pattern.compile(...))` and reads as a legitimate matcher. Fix by splitting into one `@Test` per expected outcome, driving it from a `@DataProvider`, or pinning the correct value.
+Each is a row above; flag it whatever else the review finds.
 
-- **Test that asserts nothing.** A `@Test` ending after a `click()` with no assertion is not a test.
-- **Page object that asserts.** Move every `Assert.*` out of the POM and into the test.
-- **`Thread.sleep` for sync.** Always a blocker, regardless of duration.
-- **Brittle locator chain.** `By.xpath("//div/div/span[3]/a")` will break on the next DOM tweak.
-- **Login-in-every-test.** Use `storageState` (Playwright), a seeded session (Selenium), or a token-injecting `@BeforeSuite`.
-- **Any `try`/`catch` in a `@Test` — or in `@AfterMethod`.** There is no legitimate one. Wrapping the body hides failures; wrapping cleanup leaks state silently. An expected exception is asserted with `assertThrows`; an unexpected one must reach TestNG; cleanup is registered and deleted in `@AfterMethod(alwaysRun = true)` with no catch. The suite's only catches belong in an I/O helper narrowing **one named** exception (`isDisplayed(By)` catching `NoSuchElementException`) — never a blanket `catch (Exception)`.
-- **A failure message that names no subject.** `expected [Saved] but found []` could be a wrong value or a locator that matched nothing — pass the message argument naming the element and the record.
-- **`@FindBy` mixed with explicit `findElement` in the same project.** Pick one.
-- **Shared static `WebDriver`** across tests. Breaks parallel execution.
-- **Any inline comment in a test body or a page-object method** (`// click login`, `// Arrange`), and any stale comment. Per `ep-code-comments` — the name is the explanation; rename or extract, never reword.
+- **`OR` in an assertion**, including a `"Saved|Success"` regex inside `hasText(Pattern.compile(...))` — it passes on the wrong state.
+- **A test that asserts nothing, or a page object that asserts.**
+- **`Thread.sleep` for sync**, and any `try`/`catch` in a `@Test` or a hook body.
+- **Static or thread-shared browser state** — `static WebDriver`, `static Playwright`, `parallel="methods"` with Playwright.
+- **Any inline comment in a test body or a page-object method**, and any stale comment — rename or extract, never reword.
 
 ## Comments in test code
 
-Load **[`ep-code-comments`](../../../../../engineering-practices/code-comments/SKILL.md)** for the rule itself, the complex-flow test that earns a doc comment, the never-comment trivia list, and the severity mapping. Its **test-code** section carries the AAA-banner rule and the exactly-three-permitted-comments list. This section supplies only the mechanics that differ here. Here it covers **page-object and screen-object bodies** as well as tests — an intent-revealing method name is the page object's documentation.
+Load **[`ep-code-comments`](../../../../../engineering-practices/code-comments/SKILL.md)** for the rule, the complex-flow test that earns a doc comment, the trivia list, the severity mapping and its **test-code** section. Here it covers **page-object and screen-object bodies** as well as tests — an intent-revealing method name is the page object's documentation.
 
 | Java mechanic | What to check |
 |---|---|
@@ -169,11 +165,9 @@ Load **[`ep-code-comments`](../../../../../engineering-practices/code-comments/S
 
 ## Procedure
 
-1. Identify the **stack** (Playwright / Selenium / Appium) from imports and file location.
-2. Read the file end-to-end before writing findings — context matters for severity.
-3. Walk the cross-stack list, then the stack-specific list.
-4. For each finding, capture: file path + line, issue, one-sentence suggested fix.
-5. **Do not rewrite the code.** Hand off to the matching generator if the user asks for a rewrite.
+1. Identify the **stack** from imports and file location, and read each file end-to-end before writing findings.
+2. Walk the cross-stack list, then the stack-specific list.
+3. For each finding: file path + line, issue, one-sentence fix. **Do not rewrite the code**; hand off to the matching generator.
 
 ## Handoffs
 

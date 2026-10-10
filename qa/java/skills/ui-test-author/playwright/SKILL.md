@@ -1,353 +1,223 @@
 ---
 name: qa-ui-test-writer-playwright-java
-description: Use when the user asks to scaffold Playwright UI tests in Java — new test classes, page objects under `src/test/java/<pkg>/pages/`, or a specific scenario (login, form, accessibility, visual). Triggers: "write a Playwright test for X in Java", "add a Playwright Java page object for screen Y", "scaffold a Playwright Java spec". Do NOT use for Selenium (`qa-ui-test-writer-selenium-java`), Appium (`qa-ui-test-writer-appium-java`) or reviewing tests (`qa-ui-test-review-java`).
+description: Use when the user asks to scaffold Playwright UI tests in Java — TestNG test classes, page objects, the parallel-safe BaseTest, signed-in state, locator scoping, web-first assertions, or device emulation. Triggers "write a Playwright test for X in Java", "add a Playwright Java page object for screen Y", "set up Playwright with TestNG". Do NOT use for Selenium (`qa-ui-test-writer-selenium-java`), Appium (`qa-ui-test-writer-appium-java`) or reviewing tests (`qa-ui-test-review-java`).
 ---
 
 # QA — Playwright Test & Page Object Generator (Java)
 
-Scaffolds Playwright tests and page objects in **Java 21 + Gradle + TestNG** using the official `com.microsoft.playwright` library (sync API). Uses a **base-test class pattern**: a `BaseTest` constructs `Browser` / `BrowserContext` / `Page` in `@BeforeMethod` and exposes page objects to subclasses; tests do not instantiate browsers themselves. Locators use `getByTestId` first (`data-testid` is the standing contract with the dev team — see `qa/java/skills/page-objects-from-url` for extraction and the missing-testid report), falling back to role/label semantics — never raw CSS where anything better exists.
+Scaffolds Playwright for Java tests and page objects on **Java 21 + Gradle (Kotlin DSL) + TestNG**, with the
+sync API. Every test class extends **one `BaseTest`** that is safe under TestNG `parallel="classes"`,
+locators climb **one ladder** with `data-testid` first, and every check is a **web-first assertion**. The
+code lives in `assets/`; the mechanics live in `references/`.
 
-## Stack
+## Versions
 
-- Java 21
-- Gradle (Kotlin DSL `build.gradle.kts`)
-- TestNG 7.x
-- `com.microsoft.playwright:playwright` (sync API)
-- Page objects under `src/test/java/<group>/pages/`, tests under `src/test/java/<group>/tests/`
-- Base test class under `src/test/java/<group>/support/`
-- `io.qameta.allure:allure-testng` where the project uses Allure
+These are the only Playwright pins in this skill. Every other file links here.
+
+| Artifact | Version | Note |
+|---|---|---|
+| `com.microsoft.playwright:playwright` | **1.63.0** | Java 1.64 is not on Maven yet; stay on 1.63 until it is |
+| Docker image | `mcr.microsoft.com/playwright/java:v1.63.0-noble` | The tag always equals the package version |
+| `io.qameta.allure:allure-testng` | 3.0.0 | Java 17+ test JVM; `Allure.attachment(..., AttachmentOptions)` |
+| `io.qameta.allure` Gradle plugin | 4.3.0 | First release that supports allure-java 3 (`allureJavaVersion.set("3.0.0")`) |
+| `org.testng:testng` / `org.assertj:assertj-core` | 7.12.0 / 3.27.7 | allure-testng 3 needs TestNG ≥ 7.10 |
+| `com.deque.html.axe-core:playwright` | 4.13.0 | Owned by `accessibility-testing` |
+
+**Version lane.** Detect the project's Playwright version first and keep it — never up-level a project as a
+side effect. A 1.64-only API does not compile on 1.63, and playwright.dev's Java pages already list some of
+them (`setFps`, `recordVideoFps`, `getByRef`), so trust the installed version over the docs page. The 1.63
+forms: **from 1.64: `child.within(parent)`** — on 1.63 write `parent.locator(child)`; `getByRef`, video fps
+and screencast style have no 1.63 form. Each reference tags an API with the version it shipped in.
+
+## Stack and layout
+
+- Java 21 toolchain, Gradle Kotlin DSL (Maven only where the project already uses it), TestNG, AssertJ for
+  non-locator values, Allure through `allure-testng`.
+
+```
+ui-tests/
+├── build.gradle.kts         settings.gradle.kts     testng.xml
+└── src/test/java/com/example/uitests/
+    ├── support/   BaseTest.java (the one lifecycle), AuthSetup.java when signed-in classes exist
+    ├── pages/     LoginPage.java, HomePage.java, components shared by several pages
+    └── tests/     LoginTest.java — one test class per feature
+```
+
+The assets are flat; each `.java` file goes under `src/test/java` at its package path, and the three build
+files go at the project root.
 
 ## When to use
 
-- New `*Test.java` under `src/test/java/<group>/tests/`
-- New page object under `src/test/java/<group>/pages/`
-- New base class or helper under `src/test/java/<group>/support/`
-- Adding a scenario to an existing test class
+- A new test class, page object, component object, or the `BaseTest` itself.
+- A new or rewritten `build.gradle.kts`, `testng.xml`, browser install task or signed-in state.
+- Scoping or fixing locators, replacing one-shot reads with web-first assertions.
+- Running a class per device, viewport, colour scheme, locale or time.
 
 ## When NOT to use
 
-- Playwright TypeScript → `qa/typescript/skills/ui-test-author/playwright`
-- Playwright .NET → `qa/dotnet/skills/ui-test-author/playwright`
-- Mobile / Appium → `qa/java/skills/ui-test-author/appium`
-- Java Selenium → `qa/java/skills/ui-test-author/selenium`
-- Reviewing existing Playwright code → `qa/java/skills/ui-test-author/review`
-- Designing the overall page-object hierarchy → `qa/java/skills/page-object-design`
+- Native mobile apps → `qa/java/skills/ui-test-author/appium`
+- Selenium → `qa/java/skills/ui-test-author/selenium`
+- Reviewing Playwright code → `qa/java/skills/ui-test-author/review`
+- Designing the page-object hierarchy → `qa/java/skills/page-object-design`
+- Extracting page objects and test ids from a live URL → `qa/java/skills/page-objects-from-url`
+- Screenshots, video, traces and HAR beyond the `BaseTest` defaults → `qa/java/skills/evidence-capture`
+- Visual regression, accessibility scans, network mocking → `visual-regression`, `accessibility-testing`,
+  `network-mocking`
+- Playwright TypeScript or .NET → `qa/typescript/skills/ui-test-author/playwright`,
+  `qa/dotnet/skills/ui-test-author/playwright`
 
 ## Inputs needed
 
-1. **Feature / page** under test (e.g. `Login`, `CheckoutCart`)
-2. **User journey** — concrete steps + the user-visible outcome to assert
-3. **Locators** — for each element: `getByTestId` whenever the element has a `data-testid`; otherwise `getByRole` / `getByLabel`, then `getByText`; CSS only as last resort. Missing testids are reported via `qa/java/skills/page-objects-from-url`'s `missing-testids.md`
-4. **Auth requirement** — anonymous, or signed-in (which user role + how the session is established)
-5. **Test data** — seeded by API, by helper, or inline
+1. **Feature or page** under test (`Login`, `CheckoutCart`).
+2. **User journey** — the steps and the one user-visible outcome to assert.
+3. **Locators** — the test id for each element, or the fallback rung and a `missing-testids.md` row.
+4. **Auth** — signed out, or signed in as which role.
+5. **Test data** — seeded through the API in the class's `@BeforeMethod`, or a builder.
+6. **Devices and media** — which classes run on which emulated device.
 
-## Patterns
+## What ships with this skill
 
-### `build.gradle.kts`
+| File | Holds |
+|---|---|
+| [`references/lifecycle.md`](references/lifecycle.md) | Why instance fields plus `parallel="classes"`, the hook order, the two hooks, environment, failure evidence, signed-in state, API seeding, install / codegen / show-trace / headed commands |
+| [`references/locators.md`](references/locators.md) | The ladder, `getBy*`, `filter` / `and` / `or`, chaining from a component root, `parent.locator(child)` and the 1.64 `within()` line, `visible()`, frames, strictness, `describe()`, `addLocatorHandler`, the test-id attribute, agent-facing locators |
+| [`references/assertions.md`](references/assertions.md) | The web-first set (accessible name, role, `containsClass`, URL, aria snapshots), one expected condition, the one-shot-read ban, timeouts, `waitForCondition`, subject naming without a message parameter, HTTP responses |
+| [`references/emulation-and-mobile-web.md`](references/emulation-and-mobile-web.md) | Explicit device options, touch, viewport, media features, locale and geolocation, `page.clock()`, offline, and why emulation is not a device |
+| [`assets/build.gradle.kts`](assets/build.gradle.kts) | The pins, Allure 3, TestNG with `testng.xml`, `PLAYWRIGHT_JAVA_SRC`, `installPlaywrightBrowsers` and a `playwright` CLI task |
+| [`assets/settings.gradle.kts`](assets/settings.gradle.kts), [`assets/testng.xml`](assets/testng.xml) | The project name; the suite with `parallel="classes"` |
+| [`assets/BaseTest.java`](assets/BaseTest.java) | The lifecycle: browser per class, context and page per test, `BASE_URL`, `HEADED`, `launchOptions()` / `contextOptions()`, failure evidence to Allure |
+| [`assets/LoginPage.java`](assets/LoginPage.java) | A page with intent methods and a `SignInForm` component; the error scoped with `parent.locator(child)` |
+| [`assets/HomePage.java`](assets/HomePage.java) | The landing page the journeys assert on |
+| [`assets/LoginTest.java`](assets/LoginTest.java) | Tests with `Should_X_When_Y` names, groups, and pages built per test |
 
-```kotlin
-plugins {
-    java
-    id("io.qameta.allure") version "2.11.2"
-}
-
-repositories { mavenCentral() }
-
-dependencies {
-    testImplementation("com.microsoft.playwright:playwright:1.49.0")
-    testImplementation("org.testng:testng:7.10.2")
-    testImplementation("io.qameta.allure:allure-testng:2.27.0")
-    testImplementation("org.assertj:assertj-core:3.26.3")
-}
-
-tasks.test {
-    useTestNG()
-    systemProperty("playwright.headless", System.getProperty("playwright.headless", "true"))
-}
-
-java {
-    toolchain { languageVersion.set(JavaLanguageVersion.of(21)) }
-}
-```
-
-### Base test — `src/test/java/com/example/support/BaseTest.java`
-
-```java
-package com.example.support;
-
-import com.example.pages.HomePage;
-import com.example.pages.LoginPage;
-import com.microsoft.playwright.*;
-import org.testng.annotations.*;
-
-import java.nio.file.Path;
-
-public abstract class BaseTest {
-    private static Playwright playwright;
-    protected static Browser browser;
-
-    protected BrowserContext context;
-    protected Page page;
-    protected LoginPage loginPage;
-    protected HomePage homePage;
-
-    @BeforeSuite(alwaysRun = true)
-    public void launchBrowser() {
-        playwright = Playwright.create();
-        boolean headless = Boolean.parseBoolean(System.getProperty("playwright.headless", "true"));
-        browser = playwright.chromium().launch(new BrowserType.LaunchOptions().setHeadless(headless));
-    }
-
-    protected Path storageState() {
-        return null;
-    }
-
-    @BeforeMethod(alwaysRun = true)
-    public void createContext() {
-        Browser.NewContextOptions options = new Browser.NewContextOptions();
-        Path state = storageState();
-        if (state != null) options.setStorageStatePath(state);
-
-        context = browser.newContext(options);
-        page = context.newPage();
-        loginPage = new LoginPage(page);
-        homePage = new HomePage(page);
-    }
-
-    @AfterMethod(alwaysRun = true)
-    public void closeContext() {
-        if (context != null) context.close();
-    }
-
-    @AfterSuite(alwaysRun = true)
-    public void closeBrowser() {
-        if (browser != null) browser.close();
-        if (playwright != null) playwright.close();
-    }
-}
-```
-
-### Page object — `src/test/java/com/example/pages/LoginPage.java`
-
-```java
-package com.example.pages;
-
-import com.microsoft.playwright.Locator;
-import com.microsoft.playwright.Page;
-import com.microsoft.playwright.options.AriaRole;
-
-import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat;
-
-public class LoginPage {
-    private final Page page;
-    private final Locator email;
-    private final Locator password;
-    private final Locator submit;
-    final Locator errorBanner;
-
-    public LoginPage(Page page) {
-        this.page = page;
-        this.email = page.getByTestId("login-email");
-        this.password = page.getByTestId("login-password");
-        // TODO: missing data-testid 'login-submit' — see missing-testids.md
-        this.submit = page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("Sign in"));
-        this.errorBanner = page.getByTestId("login-error");
-    }
-
-    public void goTo() {
-        page.navigate("/login");
-    }
-
-    public void signIn(String emailValue, String passwordValue) {
-        email.fill(emailValue);
-        password.fill(passwordValue);
-        submit.click();
-    }
-
-    public void expectLoaded() {
-        assertThat(email).isVisible();
-    }
-
-    public Locator errorBanner() {
-        return errorBanner;
-    }
-}
-```
-
-### Test — `src/test/java/com/example/tests/LoginTest.java`
-
-```java
-package com.example.tests;
-
-import com.example.support.BaseTest;
-import org.testng.annotations.Test;
-
-import java.util.regex.Pattern;
-
-import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat;
-
-@io.qameta.allure.Feature("Login")
-public class LoginTest extends BaseTest {
-
-    @Test(groups = {"login", "smoke"})
-    public void signsInWithValidCredentials() {
-        loginPage.goTo();
-        loginPage.signIn(System.getenv("E2E_USER"), System.getenv("E2E_PASSWORD"));
-
-        homePage.expectLoaded();
-        assertThat(homePage.greeting()).containsText("Welcome");
-    }
-
-    @Test(groups = "login")
-    public void showsErrorForInvalidPassword() {
-        loginPage.goTo();
-        loginPage.signIn(System.getenv("E2E_USER"), "wrong");
-
-        assertThat(loginPage.errorBanner()).isVisible();
-        assertThat(loginPage.errorBanner()).hasText(Pattern.compile("invalid credentials", Pattern.CASE_INSENSITIVE));
-    }
-}
-```
-
-### Authenticated state via `storageState`
-
-For tests that need a signed-in session, sign in once and persist `storageState` to a file.
-A fixture opts in by overriding `storageState()` — there is no second base class, and no
-`@BeforeMethod` override, so `createContext()` stays the single place page objects are built.
-
-```java
-public final class AuthState {
-    private static final Path STATE = Path.of("build/.auth/user.json");
-
-    public static synchronized Path signedIn(Browser browser) {
-        if (Files.exists(STATE)) return STATE;
-        try (BrowserContext setupCtx = browser.newContext()) {
-            LoginPage login = new LoginPage(setupCtx.newPage());
-            login.goTo();
-            login.signIn(System.getenv("E2E_USER"), System.getenv("E2E_PASSWORD"));
-            setupCtx.storageState(new BrowserContext.StorageStateOptions().setPath(STATE));
-        }
-        return STATE;
-    }
-}
-```
-
-```java
-public class CheckoutTest extends BaseTest {
-    @Override
-    protected Path storageState() {
-        return AuthState.signedIn(browser);
-    }
-}
-```
-
-### API-seeded data
-
-```java
-@BeforeMethod(dependsOnMethods = "createContext")
-public void seedOrder() {
-    APIResponse res = context.request().post("/api/orders",
-        RequestOptions.create().setData(Map.of("sku", "ABC", "qty", 1)));
-    assertThat(res).isOK();
-    this.seededOrder = res.text();
-}
-```
+Start from the assets: copy them, rename, and keep their shape.
 
 ## Rules
 
-### Locator preference order (strict)
+### Lifecycle
 
-1. `page.getByTestId("...")` — **preferred whenever the element carries a `data-testid`**; the attribute is the agreed contract with the app team. Elements missing it go in the `missing-testids.md` dev-team report (see `qa/java/skills/page-objects-from-url`) and use a fallback below with `// TODO: missing data-testid '<suggested>'`
-2. `page.getByRole(AriaRole.X, new Page.GetByRoleOptions().setName(...))` — best fallback
-3. `page.getByLabel("...")` — for form inputs
-4. `page.getByPlaceholder("...")` — only when there is no label
-5. `page.getByText("...", new Page.GetByTextOptions().setExact(true))` — for assertions on visible text
-6. CSS / XPath via `page.locator("...")` — **last resort**; add `// TODO: replace with data-testid locator` and a brief reason
+- **Every test class extends the one `BaseTest`.** No test or specialised skill calls `Playwright.create()`
+  or declares a second base class; a role, a device or a launch flag is an override of `contextOptions()` or
+  `launchOptions()` on the class that needs it.
+- **Instance fields only, and the suite runs `parallel="classes"`.** Playwright Java is not thread-safe, and
+  TestNG runs all of a class's methods on one thread in that mode. Never `static Playwright` / `Browser`,
+  never `ThreadLocal`, never `parallel="methods"`, never `@DataProvider(parallel = true)`.
+- Every configuration method is `alwaysRun = true`, so group-filtered runs keep the hooks.
+- `BASE_URL` is required: `page.navigate("/login")` and `page.request()` resolve against it. `HEADED=1` runs
+  headed. Read required variables with `requiredEnv(name)`.
+- Failure evidence is `BaseTest`'s: screenshot, trace and video kept only on failure, in
+  `build/playwright-artifacts/<Class>.<method>.{png,zip,webm}`, attached to Allure. The order is evidence,
+  then `context.close()`, then `video.saveAs` — Java's `saveAs` throws before the close.
 
-### Page object rules
+### Locators
 
-- Locators are `private final Locator` fields initialized in the constructor — **not** methods that re-query the DOM
-- Constructor signature is `(Page page)` — never take strings or config
-- Action methods return `void` for same-page actions; for navigation return the next page object (e.g. `HomePage`)
-- An `expectLoaded()` method must exist and assert one landmark locator is visible
-- **No assertions inside actions** — actions perform; tests and `expectLoaded` assert
-- **No `page.locator("css selector")` in test classes** — wrap inside a page object
+1. **The ladder:** `getByTestId` → `getByRole` → `getByLabel` → `getByPlaceholder` → `getByText` →
+   `getByAltText` / `getByTitle` → CSS. The first rung the element supports wins.
+2. **Test ids are PascalCase dot-separated and static** — `Login.Submit`, `OrderRow`, `OrderRow.Title` — the
+   format `fe-react` and `fe-blazor` generate. A row is picked by its content, never by an id that embeds a
+   key, an index or a state.
+3. **A fallback carries no marker in the code.** Record it in `missing-testids.md` (page, element,
+   suggested id, fallback in use). The report is the contract; no `TODO`, no comment on the locator.
+4. **Scope instead of picking.** A locator that matches many is narrowed by its component root,
+   `parent.locator(child)`, or `filter(new Locator.FilterOptions().setHas(...) / .setHasText(...))`.
+   `nth()` / `first()` only where order is the behaviour, and then the field name says so.
+5. `visible()` (1.63) instead of `:visible`; `frameLocator` / `contentFrame()` for iframes;
+   `addLocatorHandler` for overlays that may appear; `describe()` on every locator a test asserts on.
+6. **Never assert on an `or()` locator** — it passes on either state.
 
-### Test rules
+### Page objects
 
-- One test class per feature; group scenarios with TestNG `groups = {...}`
-- Method names describe behavior: `signsInWithValidCredentials`, `showsErrorForInvalidPassword`
-- One logical behavior per `@Test`. Multiple `assertThat(...)` calls are fine if they verify one behavior; otherwise split.
-- **Every test asserts something.** A test that ends after an action with no assertion is not a test.
-- Use web-first assertions: `PlaywrightAssertions.assertThat(locator).isVisible() / .hasText(...) / .hasCount(n) / .isEnabled()`. They retry until timeout. Never call `locator.isVisible()` and pass the boolean to `Assert.assertTrue` — one-shot checks lose auto-waiting.
-- Prefer positive assertions over negated ones: `isHidden()` over `not().isVisible()`, `isDisabled()` over `not().isEnabled()`.
-- **One expected condition per assertion — never an `OR`.** Assert the one thing the flow produces: `hasText("Saved")`, never `hasText(Pattern.compile("Saved|Success"))`; `hasCount(3)`, never "3 or more"; `assertEquals(actual, expected)`, never `assertTrue(a || b)` or a Hamcrest `anyOf(...)` / `either(...).or(...)`. **A regex alternation in a text or URL assertion is an `OR` in disguise** — the commonest form of this in UI tests. The rule covers text, counts, URLs, attribute values, and visible/enabled state alike. If both outcomes are genuinely reachable the test does not know what the app should do — split it into one `@Test` per expected outcome, drive it from a `@DataProvider`, or pin down the correct behavior. The only exception is an explicit instruction to accept more than one value; record that instruction in a comment on the assertion.
-- **No `try`/`catch` in a test — and none in `@AfterMethod`.** An unexpected exception must reach TestNG; an expected one is asserted with `assertThrows`, which is an assertion, not error handling. Anything the test created is tracked and deleted in `@AfterMethod(alwaysRun = true)` with no catch — a cleanup that fails should fail loudly rather than leak state into the next run. The suite's only catches live in **I/O helpers where narrowing one named exception is the contract** — an `isDisplayed(By)` probe converting `NoSuchElementException` into `false`, a driver-quit helper — never a blanket `catch (Exception)`, and never a catch that lets a failed action continue into the assertions.
-- **Failures name the subject.** `assertEquals(banner.getText(), "Saved", "success banner after saving order " + orderId)`. A UI failure reported as `expected [Saved] but found []` with no subject is indistinguishable from a locator that matched the wrong element.
-- **No `page.waitForTimeout(ms)`** — use a web-first assertion or `assertThat(...).isVisible(new AssertOptions().setTimeout(...))`.
-- **Do not pass `setWaitUntil(WaitUntilState.NETWORKIDLE)` to `navigate(...)`.** Brittle on SPAs with long-polling / WebSockets. Navigate, then assert a user-visible landmark.
-- **Do not pre-wait before auto-waiting actions.** `click` / `fill` / `check` already wait for actionability — `locator.waitFor()` immediately before `locator.click()` is redundant.
-- **Do not use `setForce(true)`.** It skips actionability checks and hides real bugs. Fix the flow — close the overlay, scroll into view — instead of forcing.
-- **`waitForNavigation` is deprecated.** Use `page.waitForURL("**/path")` or a web-first URL/landmark assertion.
-- **`waitForResponse` ordering** uses `page.waitForResponse(predicate, Runnable)`:
-  ```java
-  APIResponse resp = page.waitForResponse(
-      r -> r.url().contains("/api/data") && r.status() == 200,
-      () -> submit.click()
-  );
-  ```
-  Never call `waitForResponse` after the action — the response can arrive first.
-- **Retry loops:** never hand-roll `while (retries-- > 0) { ... sleep ... }`. Use `assertThat(locator)` with a longer timeout, or wrap the retry inside `Awaitility` (if added) — but prefer raising the assertion timeout via `setTimeout`.
-- Prefer web-first assertions over `page.waitForFunction(...)` for UI state.
-- Pass `setExact(true)` to `getByText` / `getByRole.setName(...)` when the expected text is a substring of other labels on the page — otherwise a future label change causes a strict-mode violation.
-- **Tag every test with the area under test** plus its suite tier: `@Test(groups = {"login", "smoke"})` — the area group (`login`, `checkout`, `search`, …) matches the feature/page the test exercises so CI can filter by area; the tier (`smoke` / `regression`) is added where it applies. Mirror the area in Allure via `@Feature("Login")` on the class and `@Story("...")` per test where the project uses Allure, so the report groups by the same areas.
+- Locators are `private final Locator` fields built in the constructor, never methods that re-query. Tests
+  reach them through accessors (`error()`), never through public fields.
+- A page takes `(Page page)`. A **component** (a region reused across pages — a form, a row, a menu) takes
+  its root `Locator` and builds its children from it, as `SignInForm` does.
+- Methods name user intent (`signIn`, `addToCart`), never the widget (`clickButton`). An action that always
+  lands on another page may return that page object; otherwise `void`.
+- The page owns its URL in `goTo()`. Test classes never call `page.navigate`, `page.locator` or any other
+  raw `page` method.
+- **No assertions in page objects.** They expose locators; tests assert. An optional `expectLoaded()` that
+  asserts one landmark is the only exception.
+- Pages are built in the test class (a `@BeforeMethod` or the test), never as fields of `BaseTest`. No shared
+  `BasePage` until three pages share real behaviour (`page-object-design`).
 
-### Auth & storage state
+### Tests
 
-- Sign in **once** per suite, persist `storageState` to a file, and load it in `BrowserContext.NewContextOptions().setStorageStatePath(...)`; do not log in inside every test
-- For tests that need a different role, create a separate base class per role with its own state file
-- Anonymous tests use a context without `storageStatePath`
+- **Names are `Should_X_When_Y`** (`Should_ShowInvalidCredentialsError_When_PasswordIsWrong`), one test class
+  per feature.
+- **Groups tag the area and the tier:** `@Test(groups = {"login", "smoke"})`; `@Feature("Login")` on the
+  class where the project uses Allure.
+- One logical behaviour per test; every test asserts. Several assertions are fine when they check one
+  behaviour.
+- **Web-first assertions only** (`references/assertions.md`). No one-shot read compared later
+  (`assertEquals(loc.textContent(), …)`, `assertTrue(loc.isVisible())`); `Locator` has no `getText()`.
+- **One expected condition per assertion — never an `OR`**, and a regex alternation is an `OR`. Split the
+  outcomes, or drive them from a `@DataProvider` (sequential).
+- **Failures name the subject.** Java's `assertThat(locator)` has no message parameter, so the locator
+  carries `describe("…")`. AssertJ assertions on values carry `.as(...)` with the evidence.
+- **No `try` / `catch` / `finally` in a test** and none in a hook body. An expected exception is
+  `assertThrows`; cleanup is the class's `@AfterMethod(alwaysRun = true)`. The only catch in the suite is
+  a narrow, logged one inside an I/O helper (`BaseTest.keepScreenshot`).
+- No `if` or `for` driving assertions. Tests are independent: no `dependsOnMethods` chains, no shared mutable
+  state. One long journey is one test with Allure `@Step` labels.
+- API responses assert the exact status with the body:
+  `assertThat(created.status()).as(created.text()).isEqualTo(201)` — never `assertThat(response).isOK()`.
+- No hardcoded credentials, URLs or hostnames — `BASE_URL`, `E2E_USER`, `E2E_PASSWORD`. No
+  `System.out.println`; use Allure steps and the trace.
 
-### What NOT to do
+### Waiting
 
-- No `page.waitForTimeout(ms)` — every wait must be conditional on a Locator or response
-- No `setWaitUntil(WaitUntilState.NETWORKIDLE)` — assert a landmark instead
-- No `setForce(true)` on `click` / `fill` / `check` — fix the underlying flow
-- No `locator.waitFor(...)` immediately before an auto-waiting action — it is redundant
-- No `waitForNavigation` (deprecated) — use `waitForURL` or a URL assertion
-- No hand-rolled retry loops with `Thread.sleep` — extend the assertion timeout
-- No `page.waitForFunction` for state covered by a web-first assertion
-- No `not().isVisible()` when `isHidden()` exists; no `not().isEnabled()` when `isDisabled()` exists
-- No `OR` in any assertion — no `||` inside `assertTrue`, no `anyOf`/`either().or()` matchers, no `Pattern.compile("a|b")` alternation in a text/URL assertion. One expected value per assertion (see Test rules)
-- No `try`/`catch` in a `@Test` or `@AfterMethod` — expected exceptions use `assertThrows`; catches live only in I/O helpers narrowing one named exception (see Test rules)
-- No `page.locator("div.foo > span:nth-child(3)")` in test classes — promote to a page object with a semantic locator
-- No `page.navigate(...)` directly in test classes — put it in the page object's `goTo()` so it owns its URL
-- No `System.out.println` for debugging in committed tests — use Allure steps and the trace viewer instead
-- No assertions in action methods — `expectLoaded()` is the only assertion that belongs on a page object
-- No `if`/`for` driving assertions — use TestNG `@DataProvider` for parameterization
-- No shared mutable state between tests — each test gets a fresh `BrowserContext` and fresh page objects
-- No hardcoded credentials, base URLs, or environment hostnames — read from env vars / system properties
-- No test without at least one assertion — actions without assertions verify nothing
-- No TestNG `dependsOnMethods` chains across `@Test` methods to model multi-step flows. Each test sets up its own state. For one journey, put the whole flow in a single test and group steps with Allure `@Step`.
+- No `page.waitForTimeout` and no `Thread.sleep` — in a test, a page object or a route handler (a sleep on
+  the Playwright thread stops all event dispatch). Wait on a web-first assertion with a longer timeout
+  (`new LocatorAssertions.IsVisibleOptions().setTimeout(...)` — there is no `AssertOptions`).
+- No `NETWORKIDLE` — not as `setWaitUntil` on `navigate`, not in `waitForLoadState`. Navigate, then assert a
+  landmark.
+- No `locator.waitFor()` before an action that already auto-waits; no `setForce(true)` (close the overlay
+  with `addLocatorHandler`, scroll, wait for the state).
+- No `waitForNavigation` (deprecated); `waitForURL` or `assertThat(page).hasURL(...)`. No page-level selector
+  APIs (`page.click(selector)`, `page.fill(selector)`, `page.type`, `waitForSelector`, `querySelector`).
+- `page.waitForResponse(predicate, action)` returns **`Response`**; start the wait and the action in one
+  call, match on URL and method, then assert the status.
+- No hand-rolled retry loops; raise the assertion timeout, or `page.waitForCondition(...)` for a non-DOM
+  condition.
+
+### Auth and data
+
+- Sign in **once per suite run per role** (`AuthSetup`, `references/lifecycle.md` §6), save the storage state
+  under `build/.auth/`, and point signed-in classes at it in `contextOptions()`. Never sign in inside every
+  test.
+- Records a test needs are created through `page.request()` in the class's `@BeforeMethod`, with a unique
+  value per test, and deleted in its `@AfterMethod(alwaysRun = true)`.
+- Builders for any record with four or more fields (`qa/java/skills/test-data-builder`).
+
+### Build
+
+The build is `assets/build.gradle.kts`: the pins above, Allure on allure-java 3, `useTestNG` with
+`testng.xml`, `PLAYWRIGHT_JAVA_SRC=src/test/java` for trace sources, `installPlaywrightBrowsers` for CI and a
+`playwright` task for codegen and show-trace. Extend that file; never start a second one.
 
 ## Generation steps
 
-1. Confirm **feature**, **scenarios**, **locators**, **auth requirement**, and **data source** with the user.
-2. For each new screen, generate or extend `src/test/java/<pkg>/pages/{Name}Page.java`:
-   - One `private final Locator` per element, initialized in the constructor with the best-available semantic locator
-   - `goTo()` method that owns the URL
-   - `expectLoaded()` that asserts one landmark
-   - One action method per user-intent action
-3. Add the page object as a `protected` field on `BaseTest` and initialize it in `@BeforeMethod`.
-4. Generate `src/test/java/<pkg>/tests/{Feature}Test.java` extending `BaseTest`:
-   - One `@Test` per scenario
-   - Use Allure `@Step` for non-trivial substeps
-5. For authenticated flows, override `storageState()` on the fixture to return `AuthState.signedIn(browser)`.
-6. Run `./gradlew test` — expect 0 failures. Run `./gradlew test -Dplaywright.headless=false` to debug visually. Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run".
+1. Detect the installed Playwright, TestNG and Allure versions and the project layout; match them.
+2. Confirm the feature, scenarios, locators, auth, data and devices with the user.
+3. If the project has no `BaseTest`, add `assets/BaseTest.java`, `testng.xml` and the build files. If it has
+   one with static Playwright fields or `parallel="methods"`, migrate it to the asset's shape first.
+4. For each screen, write or extend `pages/<Name>Page.java` from `assets/LoginPage.java`: one
+   `private final Locator` per element on the highest ladder rung, components for reused regions, `goTo()`,
+   intent methods, `describe()` on asserted locators. Add a `missing-testids.md` row for every fallback.
+5. Write `tests/<Feature>Test.java` from `assets/LoginTest.java`: extends `BaseTest`, pages built in a
+   `@BeforeMethod`, one `@Test` per scenario with a `Should_X_When_Y` name and groups.
+6. For signed-in classes, add `AuthSetup` and override `contextOptions()`; for devices, override it with the
+   device's options.
+7. Run `./gradlew installPlaywrightBrowsers test` (0 failures) and debug with `HEADED=1` or
+   `PWDEBUG=1`. In a `Gate: none` plan task, run neither; report the files as "written, not run".
 
 ## Handoffs
 
-- Designing the page-object hierarchy → `qa/java/skills/page-object-design`
-- Reviewing existing Playwright tests → `qa/java/skills/ui-test-author/review`
+- Page-object hierarchy → `qa/java/skills/page-object-design`
+- Page objects and test ids from a live URL → `qa/java/skills/page-objects-from-url`
+- Reviewing Playwright tests → `qa/java/skills/ui-test-author/review`
+- Screenshots, video, screencast, trace, HAR → `qa/java/skills/evidence-capture`
 - Test data builders → `qa/java/skills/test-data-builder`
-- Allure reporter setup → `qa/reporting/java/skills/test-reports`
+- Breakpoint matrices → `qa/java/skills/responsive-testing`
+- Real-device mobile web → `qa/java/skills/device-cloud`
+- Allure reporting and CI → `qa/reporting/java/skills/test-reports`, `qa/cicd/java/skills/ci-pipelines`

@@ -7,9 +7,11 @@ and Python pin 1.63 until their 1.64 packages publish. Appium moves to 3. The pl
 trace, HAR — Playwright and Appium) and a shared `webmcp-testing` skill. It teaches locator scoping with
 `locator.within()`, and wires all of it into the `qa-ui-*`, `qa-bdd-*` and `qa-mobile-*` agents.
 
-**Status:** T1 landed 2026-10-10: the TypeScript Playwright 1.64 writer (SKILL.md, four references, six
-assets), with `ui-test-author/review` and `page-object-design` aligned to it. Built but unverified: no
-asset has been compiled or run (G1 does that; D24's config import is the open risk). Planned
+**Status:** T1 and J1 landed 2026-10-10: the TypeScript Playwright 1.64 writer (SKILL.md, four references,
+six assets) and the Java Playwright 1.63 writer (SKILL.md, four references, nine assets around one
+parallel-safe `BaseTest` on allure-java 3.0), each with its stack's `ui-test-author/review` and
+`page-object-design` aligned. Built but unverified: no asset has been compiled or run (G1 does that; D24's
+TS config import and the Java build on Allure Gradle plugin 4.3.0 are the open risks). Planned
 2026-10-10. The research behind it is committed with this plan:
 `docs/research/003-qa-playwright-appium/` (5 files). So is the read-only audit:
 `docs/audits/003-qa-playwright-appium/` (4 files). All open questions were answered on 2026-10-10:
@@ -20,7 +22,7 @@ asset has been compiled or run (G1 does that; D24's config import is the open ri
 - A Maestro lane is added (X1).
 - The newest Appium client majors are primary.
 
-Next: J1 (H1, the user's, blocks no task). The cost is 19 agent sessions on the subscription, each started by the user
+Next: N1 (H1, the user's, blocks no task). The cost is 19 agent sessions on the subscription, each started by the user
 from Plan Queue. Nothing else is metered.
 
 ## 1. What already exists, and what is missing
@@ -379,7 +381,7 @@ Run these from the repo root, in this order, and fix what fails. A failure may b
 | Stack | Build |
 |---|---|
 | TS Playwright | `npm init -y`, then `npm i -D @playwright/test@1.64.0 typescript @types/node allure-js-commons@3.13.0 allure-playwright@3.13.0` (plus whatever the WebMCP asset imports). Copy `qa/typescript/skills/ui-test-author/playwright/assets/*` and `qa/_shared/webmcp-testing/assets/webmcp.spec.ts`. Use a strict `tsconfig`. `npx tsc --noEmit` → 0 errors. `npx playwright test --list` lists the asset tests |
-| Java Playwright | Use J1's `build.gradle.kts` + `settings.gradle.kts`, with the assets under `src/test/java` (package path from the files) plus `WebMcpTest.java`. Use `gradle` if installed; otherwise download a Gradle distribution into the scratch dir. `gradle compileTestJava` succeeds. `gradle installPlaywrightBrowsers` is defined |
+| Java Playwright | Use J1's `build.gradle.kts` + `settings.gradle.kts` + `testng.xml` at the project root, with the `.java` assets under `src/test/java` (package path from the files) plus `WebMcpTest.java`. Use `gradle` if installed; otherwise download a Gradle distribution into the scratch dir. `gradle compileTestJava` succeeds. `gradle installPlaywrightBrowsers` is defined |
 | .NET Playwright | N1's `Directory.Packages.props` + `UiTests.csproj` + the `.cs` assets + `WebMcpTests.cs`. `dotnet build` → 0 errors |
 | TS Appium | `npm i -D webdriverio@10.0.2 @wdio/globals @wdio/types @wdio/mocha-framework typescript`. Copy `qa/typescript/skills/ui-test-author/appium/assets/*`. `npx tsc --noEmit` → 0 errors |
 | Java Appium | A Gradle project with `io.appium:java-client:11.0.0`, `selenium-support` ≥ 4.50, TestNG and allure-testng 3.0.0, plus `qa/java/skills/ui-test-author/appium/assets/*`. `gradle compileTestJava` succeeds |
@@ -582,6 +584,36 @@ G1 repeats the literal in the config instead.
 so renaming them would break them. The prose now says `data-testid` is the default and a `data-test`
 project uses its own attribute. **Cost:** that file's samples are the one place R3 does not hold.
 
+**D26 — The Java `BaseTest` takes storage state, device emulation and every other context setting through
+one `protected Browser.NewContextOptions contextOptions()` hook, beside R8's `launchOptions()`, and applies
+`BASE_URL` and the video folder after calling it (J1, 2026-10-10).** Readings: a dedicated
+`storageState()` hook returning a path (the old skill's shape; emulation and locale would each need another
+hook later), or one context hook (chosen). The sign-in that writes the state file is a `@BeforeSuite`
+`AuthSetup` shown in `lifecycle.md` §6, not an asset. **Cost:** a subclass cannot change the base URL or
+the video folder, which is the point; `AuthSetup` is not compiled by G1.
+
+**D27 — The Java writer ships a seventh asset, `HomePage.java`, and `LoginPage.java` holds its component as
+a nested `SignInForm` (J1, 2026-10-10).** §3.1 lists six Java assets. As in D23, the success journey needs a
+landing page to assert on without a raw `page` call in the test. Readings: fold the landing page into
+`LoginPage.java` (rejected: one class per file), or a seventh file (chosen); `SignInForm` as its own file
+(an eighth asset) or nested (chosen, since only the sign-in screen mounts it). **Cost:** none for G1, which
+places every `.java` asset by its package.
+
+**D28 — `build.gradle.kts` registers a second `JavaExec` task, `playwright`, beside
+`installPlaywrightBrowsers` (J1, 2026-10-10).** The plan names only the install task, but `lifecycle.md`
+must teach codegen and show-trace through `com.microsoft.playwright.CLI`. Readings: a raw `java -cp …`
+command line, overriding the install task's args (misleading), or the generic task from Playwright's own
+Gradle docs (chosen): `./gradlew playwright --args="codegen --target java …"`. **Cost:** one more task in
+the build file.
+
+**D29 — `BaseTest` has exactly one catch: `keepScreenshot` catches `PlaywrightException`, logs it with
+`System.Logger` and a message template, and continues (J1, 2026-10-10).** This settles `aJ` D47. Readings:
+the old Java rule "no catch in `@AfterMethod`" (a crashed page then fails the hook, and TestNG's default
+`configfailurepolicy=skip` skips every remaining test in the class, losing the trace and video too), or
+CLAUDE.md's narrow, logged catch in an I/O helper (chosen). The writer and the review now state the
+CLAUDE.md rule. `System.Logger` avoids adding an SLF4J pin. **Cost:** a missing screenshot shows only as a
+log line; the test's own failure still reports.
+
 ## Answered questions (2026-10-10)
 
 **O1 — Which Playwright version per stack: 1.64 for Node only; Java and .NET follow when their packages
@@ -756,6 +788,42 @@ and `page-object-design` agree with it.
 - Apply R1–R6. Fix `aJ` D2, D4–D7, D26, D27, D29, D40, D45, D47, D49 and D51 where they sit in these files.
 - **Not in J1:** `evidence-capture` (J2); specialized skills switching to `BaseTest` (J3/J4);
   `page-objects-from-url` and agents (A1); reporting/CI (J2).
+- **As built (2026-10-10):**
+  - Landed: `ui-test-author/playwright/SKILL.md` (15,473 chars; body 14,925; description 486; the Versions
+    table is the only pin), four references (`lifecycle.md` 11.4k · `locators.md` 10.1k · `assertions.md`
+    8.1k · `emulation-and-mobile-web.md` 6.4k) and nine assets. `ui-test-author/review/SKILL.md` went from
+    16,210 to 15,636 chars, leaving ~360 for M2 (replace Appium rows, do not add). `page-object-design/SKILL.md`
+    13,052.
+  - Checked live today: Allure Gradle plugin **4.3.0** (Gradle Plugin Portal, 2026-09-17) is the first with
+    "Support Allure Java 3"; allure-java 3 is opted into with `allure { adapter { allureJavaVersion.set("3.0.0") } }`
+    (the plugin's default stays 2.35.5), and allure-testng 3 needs TestNG ≥ 7.10. testng.org: *"parallel="classes":
+    TestNG will run all the methods in the same class in the same thread"*, and `@Before…` run highest superclass
+    first, `@After…` in reverse. Every Java API in the assets and references was checked against the
+    playwright-java v1.63.0 sources (no `within`, `getByRef` or `setRecordVideoFps` in 1.63) and allure-java
+    3.0.0 (`Allure.attachment(String, String, InputStream, AttachmentOptions)`, `io.qameta.allure.AttachmentOptions`).
+    The Pixel 5 values in the emulation reference are Playwright's v1.63.0 descriptor
+    (`packages/isomorphic/deviceDescriptorsSource.json`).
+  - Differed from the plan: storage state and emulation ride on one `contextOptions()` hook (D26); a seventh
+    asset `HomePage.java` and a nested `LoginPage.SignInForm` component (D27); a second `JavaExec` task
+    `playwright` for codegen and show-trace (D28); one narrow, logged catch in `BaseTest` (D29). `AuthSetup`
+    (the `@BeforeSuite` that writes `build/.auth/user.json`) is a `lifecycle.md` §6 snippet, not an asset.
+    `testng.xml` sits at the project root (`useTestNG { suites("testng.xml") }`), not under
+    `src/test/resources`.
+  - Names assigned: packages `com.example.uitests.{support,pages,tests}`; `BaseTest` hooks
+    `launchOptions()`, `contextOptions()`, `requiredEnv(name)`, `protected Page page` (context is private;
+    `page.context()` reaches it); raw videos in `build/playwright-videos/` (deleted per test), kept evidence
+    in `build/playwright-artifacts/<Class>.<method>.{png,zip,webm}`; trace attached as
+    `application/vnd.allure.playwright-trace`; test ids `Login.Form`, `Login.Email`, `Login.Password`,
+    `Login.Submit`, `Home.Greeting` (same as T1); env `BASE_URL` (required), `HEADED`, `E2E_USER`, `E2E_PASSWORD`.
+  - Built, unverified (Gate: none): nothing compiled or ran. `BaseTest` throws when `BASE_URL` is unset, so
+    G1's evidence smoke must set it.
+  - Proof: instance fields and hooks at `assets/BaseTest.java:30,35,39`; test-id attribute and `HEADED` at
+    `:54-56`; `setBaseURL` at `:62`; evidence → `context.close()` → `saveAs` → `delete` at `:77,82,113,86`;
+    the one catch at `:98`; Allure 3 call at `:123`. `parallel="classes"` at `assets/testng.xml:2`. Pins,
+    Allure 3 opt-in, `PLAYWRIGHT_JAVA_SRC`, the two `JavaExec` tasks at `assets/build.gradle.kts:3,17,25,33,36,42`.
+    `parent.locator(child)` at `assets/LoginPage.java:16`. Review rows: static fields `review/SKILL.md:73`,
+    `parallel="methods"` `:74`, base URL `:77`, `getText()` `:80`, `AssertOptions` `:81`, `Response` `:82`,
+    page-level selector APIs `:87`, route-handler sleep `:90`. Third-sharer rule at `page-object-design/SKILL.md:57`.
 
 ### N1 — .NET writer and scaffold: Playwright 1.63, `BaseTest : PageTest`, runsettings, a working auth fixture
 
@@ -1551,77 +1619,9 @@ Run them in order, one session each, opened from Plan Queue. Each block is compl
 | X1 | `docs` | `general-purpose` | M1, S1, T2 | ~130k |
 | G1 | `docs` | `general-purpose` | all | ~145k |
 
-Landed: T1 (2026-10-10). Every other block is live.
+Landed: T1, J1 (2026-10-10). Every other block is live.
 
 ---
-
-### J1 — Java writer: Playwright 1.63, one parallel-safe `BaseTest`, locators, assertions, emulation (general-purpose, docs)
-
-````
-You are `general-purpose`. Task J1 of docs/plans/003-qa-playwright-appium-upgrade.md: make
-qa/java/skills/ui-test-author/playwright teach Playwright for Java 1.63, per §3.1's Java file set,
-around one parallel-safe BaseTest. Bring ui-test-author/review and page-object-design in line.
-
-Read, in this order:
-1. CLAUDE.md.
-2. The plan: §1, §2.1–§2.3, §3.1, §4 (R7 and R8 especially), Decisions D2, D5, D8, D12, D15, task J1,
-   "Close-out — every task".
-3. qa/java/skills/ui-test-author/playwright/SKILL.md, qa/java/skills/ui-test-author/review/SKILL.md,
-   qa/java/skills/page-object-design/SKILL.md.
-   docs/research/003-qa-playwright-appium/appium.md §0 and the allure-testng row of §1 (the 3.0 API change).
-4. docs/research/003-qa-playwright-appium/playwright-releases.md §(b), §(c), §(d), §(e);
-   playwright-evidence.md §1.1, §4.1, §5.2, §11.2.
-5. docs/audits/003-qa-playwright-appium/java.md §2 and §3 (Blockers and Major).
-
-Build:
-- SKILL.md rewritten to §3.1 (≤ 16,000 chars), with the Java §2 versions table. Gradle Kotlin DSL is
-  primary.
-- assets/:
-  - build.gradle.kts: the §2 pins. An installPlaywrightBrowsers JavaExec task, with
-    mainClass = "com.microsoft.playwright.CLI" and args("install", "--with-deps", "chromium"). The test
-    task sets env PLAYWRIGHT_JAVA_SRC=src/test/java and uses TestNG with testng.xml.
-  - settings.gradle.kts.
-  - testng.xml: parallel="classes".
-  - BaseTest.java, per R8 and evidence §11.2, on allure-testng 3.0:
-    Allure.attachment(name, type, stream, AttachmentOptions.withFileExtension(ext)). It has setBaseURL
-    from BASE_URL, HEADED, a protected launchOptions() hook, and the storage-state option. Check the
-    Allure Gradle plugin version that supports allure-java 3.0 on the Gradle Plugin Portal today.
-  - LoginPage.java: private final Locator fields, intent methods, a scoped component via
-    parent.locator(child).
-  - LoginTest.java.
-  - No comments.
-- references/lifecycle.md:
-  - Why instance fields plus parallel="classes".
-  - Hook order: evidence → context.close() → video.saveAs/delete.
-  - No parallel data providers. Every Java skill extends this BaseTest.
-  - Codegen via com.microsoft.playwright.CLI with --target java; say there is no TestNG target.
-  - Show-trace.
-- references/locators.md (with the §2.3 within lane), references/assertions.md and
-  references/emulation-and-mobile-web.md:
-  - Assertions: no message parameter in Java, so use describe() and AssertJ for non-locator values.
-    Cover LocatorAssertions.IsVisibleOptions().setTimeout, setDefaultAssertionTimeout, containsClass,
-    matchesAriaSnapshot and page.waitForCondition.
-  - Emulation: explicit NewContextOptions, because Java has no device registry.
-- ui-test-author/review/SKILL.md: rows for static Playwright fields, parallel="methods" with Playwright,
-  a missing base URL, getText(), AssertOptions, waitForResponse returning Response (not APIResponse),
-  page-level selector APIs, and a sleep in a route handler.
-- page-object-design/SKILL.md: the design rule plus the link; align the ladder.
-- Apply R1–R6. Fix java.md D2, D4–D7, D26, D27, D29, D40, D45, D47, D49 and D51 where they sit in these files.
-
-Traps:
-- Locator.within() is 1.64; Java is on 1.63. Teach parent.locator(child), plus one "from 1.64" line.
-- playwright.dev's Java pages already show 1.64 options (setFps, recordVideoFps, getByRef). Do not
-  use them (evidence §12.1).
-- Java Video.saveAs must run after context.close(). Keep the Video reference before closing.
-- TestNG with parallel="classes" runs a class's configuration and test methods on one thread.
-  Confirm this against testng.org before you write the rationale.
-
-Gate: none. This plan gates once, in G1. Do not run gradle, mvn, javac, tools/token-audit.py or any
-check script.
-
-Commit: `docs(qa-java): Playwright 1.63 writer — parallel-safe BaseTest, locators, assertions (003 J1)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
 
 ### N1 — .NET writer and scaffold: Playwright 1.63, `BaseTest : PageTest`, runsettings, a working auth fixture (general-purpose, docs)
 
@@ -1801,7 +1801,18 @@ Traps:
 - allure-testng 3.0 (D12): Allure.addAttachment(...) is the 2.x API and is gone. G1's CODE_CHECKS bans it
   in Java code blocks and assets.
 - The paths must equal J1's BaseTest (build/playwright-artifacts/<Class>.<method>.*). CI uploads exactly
-  that.
+  that. build/playwright-videos/ holds raw recordings that BaseTest deletes after every test; never
+  upload it.
+- J1's shape (com.example.uitests.support.BaseTest): the failure hooks are BaseTest's private keep*
+  helpers and closeContext; subclasses only override launchOptions() / contextOptions() (plan D26). The
+  skill points at that code and adds no second hook. If a default must change (for example
+  setAriaSnapshots(true) on the trace), edit BaseTest.java and lifecycle.md §5 in place and record a
+  dated decision. BaseTest's one catch (keepScreenshot, plan D29) is the pattern for any capture helper.
+- Show-trace runs through J1's `playwright` JavaExec task: ./gradlew playwright --args="show-trace <zip>"
+  (plan D28). Headed runs use HEADED=1, not -Dplaywright.headless or -Pheadless.
+- Allure Gradle plugin 4.3.0 is in J1's build.gradle.kts with allure { adapter { allureJavaVersion.set("3.0.0") } }.
+  Its allure.version selects the report runtime (3.x = Allure Report 3, 2.x = allure-commandline) and is
+  left at the plugin default. If you pin the report generator in Gradle, set allure.version there.
 
 Gate: none. This plan gates once, in G1. Do not run any build, test or check script.
 
@@ -1904,6 +1915,13 @@ Build:
   - references/java.md and dotnet.md: the §4.4 evaluate helper on 1.63, plus the from-1.64 native form.
   - assets/webmcp.spec.ts; WebMcpTest.java (extends BaseTest, overrides launchOptions() to add
     --enable-features=WebMCP); WebMcpTests.cs.
+  - WebMcpTest.java: package com.example.uitests.tests (J1's testng.xml scans that package), import
+    com.example.uitests.support.BaseTest, override
+    `protected BrowserType.LaunchOptions launchOptions()` returning
+    `new BrowserType.LaunchOptions().setArgs(List.of("--enable-features=WebMCP"))` — BaseTest stamps the
+    headless flag after the hook. Use the protected `page` field (the context is private;
+    `page.context()` reaches it). BaseTest requires BASE_URL; navigate relative to it. Name tests
+    Should_X_When_Y.
 - Step 3 of each qa-ui-* loads the skill + references/<stack>.md (§5.1).
 - Add ./qa/_shared/webmcp-testing to all three qa plugins in the marketplace, and one catalog row.
 - A one-line cross-reference in qa/<stack>/skills/ai-feature-testing/SKILL.md (handoffs).
@@ -2013,6 +2031,13 @@ Build:
   tracing().startHar().
 - Every Allure call in these files uses allure-java 3.0 (D12): Allure.attachment(...) with
   AttachmentOptions.
+- Extending BaseTest (com.example.uitests.support.BaseTest): a sample changes the context only by
+  overriding `protected Browser.NewContextOptions contextOptions()` (recordHar, viewport, reduced motion,
+  locale) and the launch by `launchOptions()` (plan D26). It never adds its own Playwright, browser or
+  failure hook — BaseTest already keeps screenshot, trace and video on failure. Seed and clean up in the
+  class's own @BeforeMethod / @AfterMethod(alwaysRun = true) with page.request() (lifecycle.md §7).
+  Non-locator results (a comparator's diff ratio, an axe violation count) are AssertJ with .as(...).
+  Emulation and media mechanics are in ui-test-author/playwright/references/emulation-and-mobile-web.md.
 
 Traps:
 - assertThat(page).hasScreenshot() and HasScreenshotOptions do not exist. G1's CODE_CHECKS fails if
@@ -2138,11 +2163,19 @@ Read, in this order:
    D33, D35, D39, D44, D46, D48, D52; plan D12 (the allure-java 3.0 sweep).
 
 Build:
-- responsive: D11, D46, D23; BaseUiTest → BaseTest.
+- responsive: D11, D46, D23; BaseUiTest → BaseTest. Viewport per class through contextOptions(); D23's
+  broken reference now points at ui-test-author/playwright/references/emulation-and-mobile-web.md.
 - realtime: WebSocketFrame.text().
 - browser-cloud: GridWebTestBase → BaseTest with parallel="classes"; the installed client version.
-- language: context per method.
-- data-driven: no parallel = true with Playwright.
+  J1's BaseTest only launches a local Chromium (`playwright.chromium().launch(launchOptions()…)` in
+  @BeforeClass, private fields), so a cloud run that must `connect(wsEndpoint)` has no seam. Add the
+  minimum one to qa/java/skills/ui-test-author/playwright/assets/BaseTest.java (for example a protected
+  method returning the Browser, defaulting to today's local launch with the HEADED stamp), update
+  lifecycle.md §3, and record a dated decision. Those two files are the only J1 paths J4 may edit.
+- language: context per method — setLocale / setTimezoneId in the class's contextOptions() override.
+- data-driven: no parallel = true with Playwright (lifecycle.md §1 explains why).
+- test-login-tokens: the signed-in state follows lifecycle.md §6 (AuthSetup @BeforeSuite, one state file
+  per role, chosen in contextOptions()).
 - production-uptime: catch the assertion error type and capture evidence; add it to Step 3 of
   qa/java/agents/qa-api-java.md.
 - inhouse: locator actions.
@@ -2316,7 +2349,11 @@ Build:
 - Package support/nativefeatures. No commented-out code. Intent accessors. Should_X_When_Y. One
   locator-constant style. AssertJ for non-Appium assertions.
 - Review rows lose AppiumDriver<MobileElement> and resetApp. Scoped components (element-scoped finds
-  first), the per-platform ladder, R2, </content> removal.
+  first), the per-platform ladder, R2, </content> removal. After J1, ui-test-author/review/SKILL.md is
+  15,636 chars: replace the Appium rows rather than adding to them, and keep the file ≤ 16,000.
+- page-object-design already says Appium uses instance fields + parallel="classes" (J1); keep that line.
+  BaseMobileTest can mirror J1's BaseTest shape: instance fields, alwaysRun hooks, requiredEnv(name), and
+  one narrow, logged catch per capture helper (plan D29).
 - ui-test-author/appium/assets/: build.gradle.kts, BaseMobileTest.java (evidence hooks per appium.md
   §9.1, on allure-testng 3.0), AppiumDriverFactory.java, a screen object, one test.
 - Every Allure call in the mobile Java skills uses allure-java 3.0 (D12).
@@ -2546,6 +2583,16 @@ Traps:
   `npx playwright@1.63.0 install chromium`, which uses the same shared browser cache.
 - No gradle or mvn on this machine. Download a Gradle distribution into the scratch dir. Never add a
   wrapper or build files to the repo.
+- Java Playwright scratch project: build.gradle.kts, settings.gradle.kts and testng.xml go at the project
+  root (the build calls useTestNG { suites("testng.xml") }); each .java asset goes under src/test/java at
+  its package path (com/example/uitests/{support,pages,tests}/), WebMcpTest.java included. J1's
+  `installPlaywrightBrowsers` passes --with-deps, which needs sudo on Linux; the npx install above is
+  enough.
+- Java evidence smoke: BaseTest throws when BASE_URL is unset, so export one (http://localhost is enough
+  for data: pages). Put the two smoke tests in com.example.uitests.tests extending BaseTest, and remove
+  LoginTest and WebMcpTest from that scratch project (they need a real app). Pass condition: the failing
+  test leaves build/playwright-artifacts/<Class>.<method>.{png,zip,webm}, the passing test leaves nothing,
+  and build/playwright-videos/ is empty afterwards.
 - tools/token-audit.py exits non-zero while any size violation exists. Read the counts (≤ 160 total, 0
   description violations), not the exit code.
 - Scratch projects live under $TMPDIR and are deleted afterwards. Nothing from them is committed.

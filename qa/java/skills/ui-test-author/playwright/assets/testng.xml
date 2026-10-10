@@ -1,0 +1,8 @@
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<suite name="UI" parallel="classes" thread-count="4">
+    <test name="Playwright">
+        <packages>
+            <package name="com.example.uitests.tests"/>
+        </packages>
+    </test>
+</suite>
