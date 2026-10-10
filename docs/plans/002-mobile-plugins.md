@@ -8,7 +8,7 @@ step-by-step agent that works greenfield and brownfield, a conformance audit, an
 
 **Status:** C1 landed (2026-10-11): `mobile/` exists with the five July drafts moved and renamed under
 `mobile/react-native/`, the three conformance-checklist skeletons, and `## Mobile code rules` in `CLAUDE.md`;
-the stale `frontend/react-native` pointers are repointed. S1 landed (2026-10-11): `mobile/_shared/{store-compliance,security}` with their references and the `L1…L26` / `K1…K27` audit fragments. S2 landed (2026-10-11): `mobile/_shared/{release,observability}` with their references and the `T1…T19` / `U1…U20` audit fragments. S3 landed (2026-10-11): `mobile/_shared/in-app-purchases` with its references and the `X1…X22` fragment, plus `auth/auth0-{react-native,ios,android}`. N1 landed (2026-10-11): `mobile/{ios,android}/skills/basics` with `references/concurrency.md` each, and rows `A1…A5`/`B1…B16` (iOS), `A1…A4`/`B1…B16` (Android). R1 landed (2026-10-11): the five drafts rewritten onto SDK 57 and `mobile/react-native/skills/navigation` written, with RN checklist rows `A1…A7`, `B1…B13`, `C1…C10`, `D1…D10`, `E1…E13`, `F1…F15`. R2 landed (2026-10-11): `mobile/react-native/skills/{ui-components,forms,networking,offline-and-storage,native-modules}` with checklist rows `D10…D19`, `G1…G10`, `H1…H15`, `I1…I13`, `J1…J13`. R3 landed (2026-10-10): `mobile/react-native/skills/{device-features,notifications-and-links,animation,languages,test-ids}` with checklist rows `F15…F20`, `J14…J28`, `P1…P10`, `Q1…Q11`, `R1…R10`, and §8.5's RN mapping answered (D20 — the QA explorer's `content-desc` claim is refuted). R4 landed (2026-10-11): `mobile/react-native/skills/{accessibility,performance,error-handling,component-testing}` with `error-handling/references/{session-and-resume,writes-and-dependencies}.md` and checklist rows `M1…M13`, `N1…N13`, `O1…O22`, `S1…S12`. R5 landed (2026-10-11): `mobile/react-native/skills/{migration,code-review,standards-audit}` with `migration/references/{sdk-upgrade,new-architecture,bare-to-expo,embed-in-native-app}.md`, the RN checklist's closing section index, `mobile/react-native/agents/mobile-react-native.md` (13,888 characters, description 574 of 650) and `mobile/react-native/commands/{mobile-react-native,mobile-react-native-audit}.md`. Next: I1.
+the stale `frontend/react-native` pointers are repointed. S1 landed (2026-10-11): `mobile/_shared/{store-compliance,security}` with their references and the `L1…L26` / `K1…K27` audit fragments. S2 landed (2026-10-11): `mobile/_shared/{release,observability}` with their references and the `T1…T19` / `U1…U20` audit fragments. S3 landed (2026-10-11): `mobile/_shared/in-app-purchases` with its references and the `X1…X22` fragment, plus `auth/auth0-{react-native,ios,android}`. N1 landed (2026-10-11): `mobile/{ios,android}/skills/basics` with `references/concurrency.md` each, and rows `A1…A5`/`B1…B16` (iOS), `A1…A4`/`B1…B16` (Android). R1 landed (2026-10-11): the five drafts rewritten onto SDK 57 and `mobile/react-native/skills/navigation` written, with RN checklist rows `A1…A7`, `B1…B13`, `C1…C10`, `D1…D10`, `E1…E13`, `F1…F15`. R2 landed (2026-10-11): `mobile/react-native/skills/{ui-components,forms,networking,offline-and-storage,native-modules}` with checklist rows `D10…D19`, `G1…G10`, `H1…H15`, `I1…I13`, `J1…J13`. R3 landed (2026-10-10): `mobile/react-native/skills/{device-features,notifications-and-links,animation,languages,test-ids}` with checklist rows `F15…F20`, `J14…J28`, `P1…P10`, `Q1…Q11`, `R1…R10`, and §8.5's RN mapping answered (D20 — the QA explorer's `content-desc` claim is refuted). R4 landed (2026-10-11): `mobile/react-native/skills/{accessibility,performance,error-handling,component-testing}` with `error-handling/references/{session-and-resume,writes-and-dependencies}.md` and checklist rows `M1…M13`, `N1…N13`, `O1…O22`, `S1…S12`. R5 landed (2026-10-11): `mobile/react-native/skills/{migration,code-review,standards-audit}` with `migration/references/{sdk-upgrade,new-architecture,bare-to-expo,embed-in-native-app}.md`, the RN checklist's closing section index, `mobile/react-native/agents/mobile-react-native.md` (13,888 characters, description 574 of 650) and `mobile/react-native/commands/{mobile-react-native,mobile-react-native-audit}.md`. I1 landed (2026-10-11): `mobile/ios/skills/{project-setup,architecture,ui-components,styling,navigation}` with `references/{packages-and-config,tca}.md` and checklist rows `A6…A11`, `B17…B24`, `C1…C10`, `D1…D11`, `E1…E12`, `F1…F11` (D21: MV over the corpus's MVVM rows). Next: I2.
 Built but unverified: everything — the plan gates once, in G1. Flutter becomes a fourth plugin in its own plan, written
 once this one lands (O4); it is **not** in this plan's tasks. Maestro arrives on the QA side through plan 003
 (its X1); this plan feeds it the same test ids and an EAS Workflows job (D7). Every fact in §4 was web-verified
@@ -839,6 +839,8 @@ status-table `frontend` row, and `docs/plans/CONFORMANCE-AUDIT-PLAN.md` item 7.
 
 **D20 — The QA explorer's test-id claim is wrong, and its Android locator rung does not reach a `testID` (R3, 2026-10-10).** §8.5 asked R3 to verify "Android `content-desc` maps to an RN `testID`" (`qa/*/skills/mobile-screen-explorer/SKILL.md:10`). Reading A (the QA text): `content-desc` / `name` both carry the `testID`, so `$('~…')` is the single cross-platform rung. Reading B (verified from RN source, `BaseViewManager.setTestId` + `ReactAccessibilityDelegate`): on Android `testID` becomes the bare `resource-id`, and `content-desc` carries `accessibilityLabel`; on iOS `testID` is `accessibilityIdentifier` (the Appium `~`). Built as B in `mobile-react-native-test-ids`. Cost: W1 changes more than the mapping sentence — the locator ladder must say `~` on iOS and `id=` / `resourceId` on Android, and the explorer's suggested kebab-case ids (`login-email`) conflict with this library's PascalCase dot-separated rule, which the dev skill resolves by treating the suggestion as a hint. The explorers are 600 characters from budget, so W1 rewrites sentences in place rather than adding any.
 
+**D21 — `architecture` is MV by default, against the swiftui corpus rows 48–49 (I1, 2026-10-11).** `design/ui-ux-pro-max/data/stacks/swiftui.csv` rows 48 "Use MVVM pattern" and 49 "Keep views dumb" say a view model per screen. Reading A (corpus wins, §10.6): MVVM default. Reading B (taken, §6.3 and I1): `@Observable` models and services, with a view model only where logic needs a test apart from the view — the corpus rows pre-date `@Observable` and describe the `ObservableObject` era. Cost: the corpus and the skill disagree on this one row; `mobile-ios-architecture` says so, and an audit must not flag an MV codebase against corpus row 48. Also: Liquid Glass API names (`glassEffect`, `GlassEffectContainer`, `.buttonStyle(.glass)`) are iOS 26 names carried from prior knowledge, unconfirmed against an Apple page for the iOS 27 SDK (§4.5-style: re-check in I3/G1 if the SDK docs are reachable).
+
 ## Answered questions (2026-10-10)
 
 **O1 — Packaging: one plugin or several?** Three plugins in one `mobile/` domain (the user; D1).
@@ -1190,6 +1192,8 @@ SKILL.md ~23k + references ~6k; rows ~6k.
   initializer injection, never a container; TCA only as an existing-codebase lane.
 - **Not in I1:** data, UIKit and device skills (I2).
 
+- **As built (2026-10-11):** `mobile/ios/skills/{project-setup,architecture,ui-components,styling,navigation}/SKILL.md` — bodies 13.7k / 11.8k / 11.0k / 10.6k / 11.3k chars, descriptions 487 / 498 / 446 / 437 / 456 chars (`wc -m` / `python3 -I` counts, no gate run); frontmatter `mobile-ios-<folder>`. References: `project-setup/references/packages-and-config.md`, `architecture/references/tca.md`. Checklist rows (`grep -c "^| [A-F][0-9]" mobile/ios/skills/standards-audit/references/conformance-checklist.md` → 79): `A6…A11`, `B17…B24`, `C1…C10`, `D1…D11`, `E1…E12`, `F1…F11`; I2's `uikit` continues D at `D12`, and I3's `notifications-and-links` continues F at `F12`. Two lane tags beyond §8.3's list were used, `[TCA]` and `[Tuist]`. Research: the web search found only third-party posts on Liquid Glass and the Xcode 27 template — no Apple page confirmed the Xcode 27 template's `SWIFT_DEFAULT_ACTOR_ISOLATION` / `SWIFT_APPROACHABLE_CONCURRENCY` values or the iOS 27 glass API signatures; the skills set both settings explicitly and tell the reader to confirm `glassEffect` / `GlassEffectContainer` / `.glass` button styles against the installed SDK (D21). Built but unverified: everything (no build, no lint). `mobile-ios-basics` (N1) has a 504-character description — over §10.2's 500; G1's token audit will flag it.
+
 ### I2 — iOS forms, networking, storage, UIKit and device features
 
 **Stack:** `docs` · **Agent:** `general-purpose`
@@ -1468,42 +1472,9 @@ goes in an untracked `scratch/` folder inside the worktree, deleted before commi
 | W1 | `docs` | `general-purpose` | R5, I5, A6, R3, S1–S3 | ~120k |
 | G1 | `docs` | `general-purpose` | every task above | ~140k |
 
-C1, S1, S2, S3, N1, R1, R2, R3, R4 and R5 have landed (their blocks are deleted); every block below is live.
+C1, S1, S2, S3, N1, R1, R2, R3, R4, R5 and I1 have landed (their blocks are deleted); every block below is live.
 
 ---
-
-### I1 — iOS foundations (general-purpose, docs)
-
-````
-You are `general-purpose`. Task I1 of docs/plans/002-mobile-plugins.md: write
-`mobile-ios-{project-setup,architecture,ui-components,styling,navigation}`.
-
-Read, in this order:
-1. CLAUDE.md (`## Mobile code rules`).
-2. The plan: §4.2, §5, §6.3, §8.3, §10, task I1, and "Close-out — every task".
-3. `mobile/ios/skills/basics/SKILL.md`.
-4. `frontend/react/skills/{project-setup,state-management,component-writer,styling,routing}/SKILL.md` —
-   headings and When-NOT clauses only (voice across the library).
-5. The iOS checklist, sections A–F.
-
-Build:
-- Each skill per its §6.3 row, rows appended to A–F.
-- `project-setup`: `SWIFT_VERSION` set to 6, warnings as errors, local Swift packages, xcconfig per
-  environment, `xcrun swift-format` + SwiftLint, test plans, scene lifecycle + launch screen, String
-  Catalog, `PrivacyInfo.xcprivacy` on day one; Tuist respected where present.
-- `architecture`: MV by default; a view model only for logic that needs a test apart from the view;
-  initializer injection, no container; TCA as an existing-codebase lane only.
-
-Traps:
-- Xcode 27's template still says `SWIFT_VERSION = 5.0`.
-- Liquid Glass is forced by the iOS 27 SDK — no opt-out advice.
-- iOS 17 is the default target; iOS 16 rows carry `[iOS16]`.
-
-Gate: none — this plan gates once, in G1. Do not run tools/token-audit.py, §11's script, or any lint.
-
-Commit: `feat(mobile I1): iOS foundations`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
 
 ### I2 — iOS forms, networking, storage, UIKit and device features (general-purpose, docs)
 
@@ -1519,7 +1490,7 @@ Read, in this order:
 5. The iOS checklist, sections D, G, H, I, J.
 
 Build:
-- Each skill per its §6.3 row, rows appended to D, G, H, I, J.
+- Each skill per its §6.3 row, rows appended to D (from D12 — I1 wrote D1–D11), G, H, I, J.
 - `networking`: one concrete client — a protocol only once a second implementation exists (a test fake
   counts); §6.5's request-level half.
 - `uikit`: the lane for UIKit codebases and the interop seams both ways; UIScene migration (TN3187).
