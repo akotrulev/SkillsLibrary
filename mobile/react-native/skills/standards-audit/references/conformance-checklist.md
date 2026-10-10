@@ -88,6 +88,16 @@ If the repo gitignores a generated native folder (`ios/`, `android/` under CNG) 
 | D7 | `[Expo UI]` Every Expo UI tree sits inside a `Host` | A file importing `@expo/ui` with no `<Host`; flex props relied on inside the native tree | `rg -l '@expo/ui' $SRC \| xargs rg -L '<Host'` | major |
 | D8 | A wrapper exists for a reason beyond forwarding a prop | `AppButton` that only sets a default or carries a `testID` around a kit control | `rg -n 'export function App\w+\(' $SRC -g '*.tsx'`; read each hit | minor |
 | D9 | The kit is New Architecture compatible and installed with `expo install` | A kit or a transitive native dependency that `expo-doctor` flags | Run `npx expo-doctor` — requires a run, report as unverified from a static read | major |
+| D10 | Tap targets are `Pressable`, not Touchable | `TouchableOpacity` / `TouchableHighlight` imported | `rg -n 'Touchable(Opacity\|Highlight)' $SRC -g '*.tsx'` | minor |
+| D11 | Images use `expo-image` | `Image` imported from `react-native` for a remote or list image | `rg -n "import \{[^}]*\bImage\b[^}]*\} from 'react-native'" $SRC -g '*.tsx'` | minor |
+| D12 | Unbounded data renders in a virtualized list | `ScrollView` mapping fetched data (`.map(` inside a `ScrollView`) | `rg -n -B3 '\.map\(' $SRC -g '*.tsx' \| rg 'ScrollView'` | major |
+| D13 | FlashList 2 carries no removed prop | `estimatedItemSize`, `estimatedListSize`, `estimatedFirstItemOffset`, `inverted`, `MasonryFlashList` on FlashList 2 | `rg -n 'estimatedItemSize\|estimatedListSize\|estimatedFirstItemOffset\|MasonryFlashList\|inverted' $SRC -g '*.tsx'` | major |
+| D14 | List rows are cheap and stable | `useQuery` or several `useContext` calls in a row; inline object / style literal or `.map` / `.filter` copy passed to `data` / `renderItem`; a new callback per row | `rg -n 'renderItem=\{' -A6 $SRC -g '*.tsx'`; read each row component | major |
+| D15 | List keys are domain ids | `keyExtractor` or `key` using the index | `rg -n 'keyExtractor.*index\|key=\{(i\|idx\|index)\}' $SRC -g '*.tsx'` | major |
+| D16 | Strings render inside `<Text>`; no falsy `&&` | `{count && <X/>}` with a number, a bare string in a `View` | `rg -n '\{\w+(\.length)? && <' $SRC -g '*.tsx'` | major |
+| D17 | Menus and sheets are native | A JS dropdown or a JS bottom-sheet library where a native menu, `formSheet` modal or route `presentation: 'formSheet'` fits | `rg -n 'bottom-sheet\|BottomSheet\|react-native-modal' $SRC package.json` | minor |
+| D18 | A data region renders loading, failed, empty and loaded, and failure never replaces the header | An early `return <Error/>` above search / filters; a list header inside the failed branch; empty shown for a failed parse | `rg -n "status === 'error'\|isError" $SRC -g '*.tsx'`; read each hit against its header | major |
+| D19 | `forwardRef` / `'use client'` are absent on React 19 | `forwardRef` on a React 19 project; a `'use client'` directive in an Expo app | `rg -n "forwardRef\|'use client'" $SRC -g '*.tsx'` | minor |
 
 ---
 
@@ -138,6 +148,16 @@ If the repo gitignores a generated native folder (`ios/`, `android/` under CNG) 
 
 | # | Check | Violation looks like | Find it with | Sev |
 |---|---|---|---|---|
+| G1 | Forms use RHF + Zod through `Controller` | `useState` per field in a multi-field form; a form value held in Zustand or Context | `rg -n 'useForm\(' $SRC -g '*.tsx'`; `rg -c 'useState' <form file>` | major |
+| G2 | One Zod schema per form, shared with the submit | Rules re-implemented in a handler, or a schema with no inferred type | `rg -n 'z\.object\(' $SRC -g '*.ts' -g '*.tsx'`; read the submit handler | minor |
+| G3 | Every `TextInput` carries input affordances and a label | No `inputMode` / `keyboardType`, `autoComplete` / `textContentType`, `returnKeyType` or `accessibilityLabel`; placeholder used as the label | `rg -n '<TextInput' -A8 $SRC -g '*.tsx'` | minor |
+| G4 | Password fields do not block the password manager or leak | `secureTextEntry` with `autoComplete="off"`; a password logged, persisted or put in a route param | `rg -n 'secureTextEntry' -B3 -A8 $SRC -g '*.tsx'`; `rg -n 'console\.(log\|info)\(.*(password\|otp)' $SRC -i` | blocker |
+| G5 | A form is a keyboard-aware scroller | A form `View` with no scroll container or keyboard handling; `keyboardShouldPersistTaps` missing (first tap only dismisses the keyboard) | `rg -n 'KeyboardAwareScrollView\|KeyboardAvoidingView\|keyboardShouldPersistTaps' $SRC -g '*.tsx'` | major |
+| G6 | Submit is guarded against double submit | A submit `Pressable` not disabled while `isSubmitting`; a replayable write with no idempotency key | `rg -n 'handleSubmit\(' -B6 $SRC -g '*.tsx' \| rg 'disabled'` | major |
+| G7 | Server errors map to fields | `ProblemDetails.errors` shown only as a generic banner; no `setError` | `rg -n 'setError\(' $SRC -g '*.ts' -g '*.tsx'` | major |
+| G8 | A failed submit keeps the user's input | `reset()` or state cleared in a `catch` / `onError` | `rg -n 'reset\(' $SRC -g '*.tsx'`; read each hit | major |
+| G9 | Validation runs on blur, async rules are debounced and cancellable | `mode: 'onChange'` with a per-keystroke request | `rg -n "mode: *'onChange'" $SRC -g '*.tsx'` | minor |
+| G10 | Form error text is announced | An error `Text` with no `accessibilityRole="alert"` (or live-region equivalent) | `rg -n 'fieldState\.error' -A2 $SRC -g '*.tsx'` | minor |
 
 ---
 
@@ -146,6 +166,21 @@ If the repo gitignores a generated native folder (`ios/`, `android/` under CNG) 
 
 | # | Check | Violation looks like | Find it with | Sev |
 |---|---|---|---|---|
+| H1 | Every request has a timeout budget by endpoint class | `fetch(` with no `AbortSignal.timeout` / budget; a hand-rolled `setTimeout` race | `rg -n 'fetch\(' $SRC -g '*.ts' -g '*.tsx'`; `rg -n 'AbortSignal\.(timeout\|any)' $SRC` | major |
+| H2 | The caller's signal is composed, not replaced | A `queryFn` that ignores `signal`, or passes only the timeout signal | `rg -n 'queryFn' -A3 $SRC -g '*.ts' -g '*.tsx'` | major |
+| H3 | `TimeoutError` and `AbortError` are told apart | An abort reported to the user as a failure, or a timeout swallowed | `rg -n 'AbortError\|TimeoutError' $SRC` | major |
+| H4 | Retries are bounded, jittered and honour `Retry-After` | Unbounded `retry: true`, a fixed delay with no jitter, `Retry-After` ignored on `429` / `503` | `rg -n 'retry(Delay)?:' $SRC -g '*.ts' -g '*.tsx'`; `rg -n -i 'retry-after' $SRC` | major |
+| H5 | No retry while offline and none for a write without an idempotency key | `networkMode: 'always'`; mutation `retry` on a non-idempotent write; retries running with `onlineManager` offline | `rg -n 'networkMode\|retry:' $SRC -g '*.ts' -g '*.tsx'` | major |
+| H6 | `focusManager` follows `AppState` and `onlineManager` follows reachability | No `AppState` → `focusManager` wiring; `refetchOnWindowFocus` / `refetchOnReconnect` disabled; queries stale after foreground | `rg -n 'focusManager\|onlineManager\|refetchOnWindowFocus\|refetchOnReconnect' $SRC` | major |
+| H7 | Responses are parsed to the endpoint's real shape | `res.json() as T`; a parse failure caught into `[]` / `null` | `rg -n '\.json\(\) as \|as Promise<' $SRC -g '*.ts' -g '*.tsx'` | major |
+| H8 | Errors are categorised and never render a raw body or `error.message` | `<Text>{error.message}</Text>`; a response body shown to the user | `rg -n '\{(error\|err)\.message\}' $SRC -g '*.tsx'` | major |
+| H9 | Query keys carry every dependency; dependent queries are gated | A key missing a filter or page; a dependent query with no `enabled`; an effect `fetch` with no abort | `rg -n 'queryKey' $SRC -g '*.ts' -g '*.tsx'`; `rg -n 'useEffect' -A4 $SRC -g '*.tsx' \| rg 'fetch\('` | major |
+| H10 | A 401 triggers one shared refresh and one replay | Refresh per request, refresh in a loop, or a redirect instead of in-place re-auth | `rg -n '401\|refreshAccessToken\|refreshToken' $SRC -g '*.ts' -g '*.tsx'` | major |
+| H11 | No secret in the client or in a log | `EXPO_PUBLIC_*SECRET`; a token, body or PII in `console.*` or the log line | `rg -n 'EXPO_PUBLIC_\w*(SECRET\|KEY\|TOKEN)' . -g '!node_modules'`; `rg -n 'console\.\w+\(.*(token\|authorization)' $SRC -i` | blocker |
+| H12 | Base URL is configuration over https | `http://` in a release URL, `localhost` / a LAN IP, a URL literal at a call site | `rg -n "http://\|localhost\|192\.168\." $SRC -g '*.ts' -g '*.tsx'` | major |
+| H13 | Sockets and SSE follow app state | A `WebSocket` opened in render or never closed; kept open in the background; reconnect loop while offline | `rg -n 'new WebSocket\|EventSource\|expo/fetch' $SRC -g '*.ts' -g '*.tsx'`; read each for cleanup and `AppState` | major |
+| H14 | Critical and optional calls are not fused | `Promise.all` spanning a critical and an optional call | `rg -n 'Promise\.all\(' $SRC -g '*.ts' -g '*.tsx'` | minor |
+| H15 | One HTTP client | Axios and `fetch` and a generated SDK all in `package.json` / used | `rg -n '"(axios\|ky\|got)"' package.json` | minor |
 
 ---
 
@@ -154,6 +189,19 @@ If the repo gitignores a generated native folder (`ios/`, `android/` under CNG) 
 
 | # | Check | Violation looks like | Find it with | Sev |
 |---|---|---|---|---|
+| I1 | Secrets are only in `expo-secure-store` | A token, key or password written to AsyncStorage, MMKV, Zustand `persist`, SQLite or a file | `rg -n "(AsyncStorage\|mmkv\|storage)\.(setItem\|set)\(['\"]\w*(token\|secret\|password\|jwt\|key)" $SRC -i`; `rg -n 'persist\(' $SRC` | blocker |
+| I2 | An encryption key is never a literal | `encryptionKey: '…'` in source, config or `EXPO_PUBLIC_*` | `rg -n 'encryptionKey' $SRC -g '*.ts' -g '*.tsx'` | blocker |
+| I3 | MMKV 4 uses `createMMKV()` and `remove()` | `new MMKV(` or `.delete(` on a v4 project; MMKV used in Expo Go | `rg -n 'new MMKV\(\|\.delete\(' $SRC`; `rg -n '"react-native-mmkv"' package.json` | major |
+| I4 | One MMKV instance per concern | `createMMKV` called inside a component or hook body | `rg -n 'createMMKV\(' $SRC` — read each for module scope | minor |
+| I5 | SQLite uses the async API with parameters | `openDatabaseSync` / `getAllSync` / `runSync` in app code; SQL built by string concatenation or template literal | `rg -n 'Sync\(' $SRC -g '*.ts' -g '*.tsx'`; `rg -n 'execAsync\(`\|runAsync\(`' $SRC` | major |
+| I6 | Migrations are versioned and ordered | Schema changed by editing `CREATE TABLE`; no `user_version` | `rg -n 'user_version\|CREATE TABLE' $SRC` | major |
+| I7 | WatermelonDB is flagged | `@nozbe/watermelondb` in dependencies (no release since 2025-04) | `rg -n 'watermelondb' package.json` | minor |
+| I8 | The Query persister is opt-in and version-busted | Whole-cache persistence; no `buster` / `maxAge`; a sensitive query persisted | `rg -n 'PersistQueryClientProvider\|persistQueryClient\|shouldDehydrateQuery\|buster' $SRC` | major |
+| I9 | Sign-out clears every local store | Secure-store, MMKV user keys, SQLite user tables or the persisted cache left after sign-out | `rg -n 'signOut\|logout' $SRC -g '*.ts' -g '*.tsx'`; read each for purge calls | major |
+| I10 | Offline writes carry idempotency keys and replay in order | A hand-built queue with no key, or unordered replay per entity | `rg -n 'resumePausedMutations\|setMutationDefaults\|outbox' $SRC` | major |
+| I11 | A conflict policy exists per synced entity | A synced entity with no `If-Match` / version / merge rule and no `409` path | `rg -n '409\|If-Match\|updated_at\|version' $SRC -g '*.ts' -g '*.tsx'` | major |
+| I12 | A storage write failure is typed at one boundary | A bare `set` / `setItemAsync` inside a component with no catch at a repository boundary; an empty `catch` | `rg -n 'setItemAsync\|\.set\(' $SRC -g '*.tsx'` | major |
+| I13 | Caches are bounded | A persisted cache or file directory with no `maxAge`, size cap or eviction | `rg -n 'maxAge\|gcTime\|cacheDirectory' $SRC` | minor |
 
 ---
 
@@ -162,6 +210,19 @@ If the repo gitignores a generated native folder (`ios/`, `android/` under CNG) 
 
 | # | Check | Violation looks like | Find it with | Sev |
 |---|---|---|---|---|
+| J1 | A native change is a config plugin or a local module | `ios/` or `android/` hand-edited in a CNG project; `ios/` / `android/` tracked in git with no bare decision recorded | `git ls-files ios android \| head`; `rg -n '"plugins"' app.json app.config.*` | major |
+| J2 | Config plugins are idempotent and tested | A plugin with no fixture test; one that appends on every run | `rg -ln 'withInfoPlist\|withAndroidManifest\|withDangerousMod' . -g '!node_modules'`; look for a sibling `*.test.ts` | minor |
+| J3 | `withDangerousMod` is the last resort | `withDangerousMod` where a typed `with*` mod exists | `rg -n 'withDangerousMod' . -g '!node_modules'` | minor |
+| J4 | A plugin sets no unreviewed exported, cleartext, ATS or backup flag | `android:exported="true"` without a reason, `usesCleartextTraffic`, `NSAllowsArbitraryLoads`, `allowBackup` set by a plugin | `rg -n 'exported\|usesCleartextTraffic\|NSAllowsArbitraryLoads\|allowBackup' . -g '!node_modules' -g '!ios/Pods'` | blocker |
+| J5 | A native dependency passes the maintenance check | Archived, no release in 12 months, New-Architecture-incompatible, or flagged by `expo-doctor` | Run `npx expo-doctor` — requires a run, report as unverified from a static read | major |
+| J6 | No native module where an SDK module or JS suffices | A local module wrapping an API an Expo SDK module already exposes | `ls modules`; compare against `docs.expo.dev/versions/latest` | minor |
+| J7 | A local module surface is narrow, typed and async | A synchronous `Function` doing I/O; untyped `Any` arguments; no `Record` | `rg -n '^\s+Function\(' modules -g '*.swift' -g '*.kt'` | major |
+| J8 | Native code follows the native standards | `!` force unwrap, `@unchecked Sendable` without a justification (Swift); `!!`, `GlobalScope` (Kotlin) in a module | `rg -n '[A-Za-z\)\]]!\.\|@unchecked Sendable' modules -g '*.swift'`; `rg -n '!!\|GlobalScope' modules -g '*.kt'` | major |
+| J9 | A module that can fail to load degrades | `requireNativeModule` for an optional capability with no fallback | `rg -n 'requireNativeModule\|requireOptionalNativeModule' $SRC modules` | major |
+| J10 | Module listeners and handles are released | `addListener` with no `remove()` on unmount; a native observer started with no `OnStopObserving` | `rg -n 'addListener\(' $SRC -g '*.tsx' -A4`; `rg -n 'OnStopObserving\|OnDestroy' modules` | major |
+| J11 | Arguments from JS are validated natively | A JS string used as a path, URL or Intent target without a check | `rg -n 'URL\(string\|File\(\|Intent\(' modules -g '*.swift' -g '*.kt'` | major |
+| J12 | A DOM component is not a list row or primary chrome and holds the WebView rules | `'use dom'` file rendered per row; no origin allow-list | `rg -ln "'use dom'" $SRC` | minor |
+| J13 | `[bare]` TurboModule / Nitro specs are typed and codegen is committed | A `Native*.ts` spec using `any`; hand-written bridge for an Expo-installed app | `rg -n 'TurboModuleRegistry' $SRC -g '*.ts'` | minor |
 
 ---
 

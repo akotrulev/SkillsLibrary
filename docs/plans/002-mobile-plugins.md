@@ -8,7 +8,7 @@ step-by-step agent that works greenfield and brownfield, a conformance audit, an
 
 **Status:** C1 landed (2026-10-11): `mobile/` exists with the five July drafts moved and renamed under
 `mobile/react-native/`, the three conformance-checklist skeletons, and `## Mobile code rules` in `CLAUDE.md`;
-the stale `frontend/react-native` pointers are repointed. S1 landed (2026-10-11): `mobile/_shared/{store-compliance,security}` with their references and the `L1…L26` / `K1…K27` audit fragments. S2 landed (2026-10-11): `mobile/_shared/{release,observability}` with their references and the `T1…T19` / `U1…U20` audit fragments. S3 landed (2026-10-11): `mobile/_shared/in-app-purchases` with its references and the `X1…X22` fragment, plus `auth/auth0-{react-native,ios,android}`. N1 landed (2026-10-11): `mobile/{ios,android}/skills/basics` with `references/concurrency.md` each, and rows `A1…A5`/`B1…B16` (iOS), `A1…A4`/`B1…B16` (Android). R1 landed (2026-10-11): the five drafts rewritten onto SDK 57 and `mobile/react-native/skills/navigation` written, with RN checklist rows `A1…A7`, `B1…B13`, `C1…C10`, `D1…D10`, `E1…E13`, `F1…F15`. Next: R2 (depends on N1, S1), then I1.
+the stale `frontend/react-native` pointers are repointed. S1 landed (2026-10-11): `mobile/_shared/{store-compliance,security}` with their references and the `L1…L26` / `K1…K27` audit fragments. S2 landed (2026-10-11): `mobile/_shared/{release,observability}` with their references and the `T1…T19` / `U1…U20` audit fragments. S3 landed (2026-10-11): `mobile/_shared/in-app-purchases` with its references and the `X1…X22` fragment, plus `auth/auth0-{react-native,ios,android}`. N1 landed (2026-10-11): `mobile/{ios,android}/skills/basics` with `references/concurrency.md` each, and rows `A1…A5`/`B1…B16` (iOS), `A1…A4`/`B1…B16` (Android). R1 landed (2026-10-11): the five drafts rewritten onto SDK 57 and `mobile/react-native/skills/navigation` written, with RN checklist rows `A1…A7`, `B1…B13`, `C1…C10`, `D1…D10`, `E1…E13`, `F1…F15`. R2 landed (2026-10-11): `mobile/react-native/skills/{ui-components,forms,networking,offline-and-storage,native-modules}` with checklist rows `D10…D19`, `G1…G10`, `H1…H15`, `I1…I13`, `J1…J13`. Next: R3 (depends on S1), then R4, I1.
 Built but unverified: everything — the plan gates once, in G1. Flutter becomes a fourth plugin in its own plan, written
 once this one lands (O4); it is **not** in this plan's tasks. Maestro arrives on the QA side through plan 003
 (its X1); this plan feeds it the same test ids and an EAS Workflows job (D7). Every fact in §4 was web-verified
@@ -1087,6 +1087,8 @@ Nitro ~40k; writes: five SKILL.md ~23k + references ~8k; rows ~6k.
   `mobile-ios-basics` and `mobile-android-basics` for the Swift / Kotlin it writes.
 - **Not in R2:** device features and links (R3).
 
+- **As built (2026-10-11):** `mobile/react-native/skills/{ui-components,forms,networking,offline-and-storage,native-modules}/SKILL.md` — bodies 13.3k / 13.0k / 13.1k / 15.5k / 14.7k chars, descriptions all under 500 (counted with `wc -m`, no gate run); frontmatter names `mobile-react-native-<folder>`. References: `networking/references/request-policy.md` (AppError, ProblemDetails, `Retry-After` parse, single-flight refresh, timeout table, circuit) and `native-modules/references/expo-modules-api.md` (Swift / Kotlin / TS wrapper samples); `ui-components`, `forms` and `offline-and-storage` have none. Checklist rows appended: `D10…D19`, `G1…G10`, `H1…H15`, `I1…I13`, `J1…J13` (J holds only `native-modules` rows; R3 continues from `J14`) — `grep -n "^| [DGHIJ][0-9]" mobile/react-native/skills/standards-audit/references/conformance-checklist.md`. R1's note says `D1…D10` but the skeleton held `D1…D9` only, so R2's first row is `D10`. Verified at source this session (web search, secondary mirrors): MMKV 4 `createMMKV()` / `remove()` / Nitro dependency / RN ≥ 0.75; FlashList 2 removals (`estimatedItemSize`, `estimatedListSize`, `estimatedFirstItemOffset`, `onBlankArea`, `inverted` → `maintainVisibleContentPosition`, `masonry` prop); TanStack Query `onlineManager` / `focusManager` RN wiring. **Built but unverified:** Expo Modules API names (`AsyncFunction`, `Record`, `OnDestroy`, `requireOptionalNativeModule`, `expo-module.config.json` shape) and `create-expo-module --local` — written from recall plus a secondary mirror, the reference tells the reader to confirm at docs.expo.dev; `AbortSignal.timeout` / `.any` availability on Hermes V1 (the skill says detect first); `react-native-keyboard-controller` component names; `expo-sqlite` 18 async API names; `@tanstack/query-sync-storage-persister` with an MMKV adapter and `setMutationDefaults` / `scope` for ordered replay; `expo-secure-store` `keychainAccessible` constant names; Legend List 3.6 props; Nitro `nitrogen` / `nitro.json` workflow; `'use dom'` semantics; sibling skill names `mobile-ios-offline-and-storage` / `mobile-android-offline-and-storage` and `mobile-ios-unit-testing` / `mobile-android-unit-testing` (§6.3 / §6.4 names, not yet written). The `rg` recipes in D10–J13 have not been run. Not run (Gate: none): `tools/token-audit.py`, §11's script, any lint.
+
 ### R3 — React Native device and platform: features, notifications and links, motion, languages, test ids
 
 **Stack:** `docs` · **Agent:** `general-purpose`
@@ -1455,45 +1457,9 @@ goes in an untracked `scratch/` folder inside the worktree, deleted before commi
 | W1 | `docs` | `general-purpose` | R5, I5, A6, R3, S1–S3 | ~120k |
 | G1 | `docs` | `general-purpose` | every task above | ~140k |
 
-C1, S1, S2, S3, N1 and R1 have landed (their blocks are deleted); every block below is live.
+C1, S1, S2, S3, N1, R1 and R2 have landed (their blocks are deleted); every block below is live.
 
 ---
-
-### R2 — React Native feature build (general-purpose, docs)
-
-````
-You are `general-purpose`. Task R2 of docs/plans/002-mobile-plugins.md: write
-`mobile-react-native-{ui-components,forms,networking,offline-and-storage,native-modules}`.
-
-Read, in this order:
-1. CLAUDE.md (`## Mobile code rules`).
-2. The plan: §4.1, §5, §6.2, §6.5, §8.3, §10, task R2, and "Close-out — every task".
-3. `frontend/react/skills/{component-writer,forms,data-fetching}/SKILL.md` — headings and rule lists.
-4. Vendor rules `mobile/react-native/vendor/react-native-guidelines/rules/list-performance-*.md` and `ui-*.md`.
-5. `mobile/_shared/security/references/react-native.md`; the frontmatter of `mobile/ios/skills/basics`
-   and `mobile/android/skills/basics`.
-6. The RN checklist, sections D, G, H, I, J.
-
-Build:
-- Each skill per its §6.2 row, with rows appended to D, G, H, I, J.
-- `networking` carries §6.5's request-level half (timeouts, retries, `Retry-After`, no retry offline);
-  `error-handling` (R4) will own the UI half.
-- `offline-and-storage`: secrets only in `expo-secure-store`; MMKV 4 with `createMMKV()`; WatermelonDB
-  flagged stale; storage-full degradation handed to `error-handling`.
-- `native-modules`: the ladder Expo SDK module → maintained community module → Expo Modules API →
-  Nitro / TurboModule in bare; a config plugin for every native change; Expo UI; it loads the two
-  native `basics` for the Swift / Kotlin it writes.
-
-Traps:
-- FlashList 2 removed `estimatedItemSize`; older samples break.
-- `prebuild --clean` is the default since SDK 57 — any hand edit to `ios/` / `android/` is lost.
-- Keep `ui-components` from swallowing navigation (R1) or animation (R3).
-
-Gate: none — this plan gates once, in G1. Do not run tools/token-audit.py, §11's script, or any lint.
-
-Commit: `feat(mobile R2): React Native feature-build skills`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
 
 ### R3 — React Native device and platform (general-purpose, docs)
 
@@ -1542,7 +1508,7 @@ Read, in this order:
 2. The plan: §4.1, §5, §6.2, §6.5, §8.3, §10, task R4, and "Close-out — every task".
 3. `frontend/react/skills/error-handling/SKILL.md` and its two references — the rule source.
 4. `frontend/react/skills/{component-testing,accessibility}/SKILL.md`.
-5. Vendor `list-performance-*.md`; `mobile-react-native-networking` (its request-level rules).
+5. Vendor `list-performance-*.md`; `mobile-react-native-networking` (its request-level rules and `references/request-policy.md`, which defines `AppError` and the retry / `Retry-After` policy `error-handling` renders), and `mobile-react-native-offline-and-storage` (which hands the storage-full degradation to you).
 6. The RN checklist, sections M, N, O, S.
 
 Build:
