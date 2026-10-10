@@ -276,6 +276,20 @@ This section holds no rows of its own. The rows are those of `mobile/_shared/sto
 
 | # | Check | Violation looks like | Find it with | Sev |
 |---|---|---|---|---|
+| M1 | Every interactive element has an accessible name | An icon-only `Button`, an `Image` inside a control or a `TextField` with no label or text child | `rg -n '\b(Button\|Toggle\|Picker\|TextField)\b' $SRC -g '*.swift'`; read each for a label | major |
+| M2 | Controls are real controls, not tap gestures | `Text(...).onTapGesture` or `.onTapGesture` on a `VStack` / `Image` acting as a button, with no `.isButton` trait | `rg -n 'onTapGesture' $SRC -g '*.swift'` | major |
+| M3 | Readable text uses text styles and scales; Dynamic Type is never clamped on content | `.font(.system(size: …))` for body copy; `.dynamicTypeSize(...` on content; `lineLimit(1)` on meaningful text | `rg -n 'font\(\.system\(size\|dynamicTypeSize\(\.\.\.\|lineLimit\(1\)' $SRC -g '*.swift'` | major |
+| M4 | Layouts survive the accessibility sizes | A fixed `.frame(height:)` around text; an `HStack` that clips at `accessibility5` with no axis switch. requires dynamic test → `qa-mobile-ios` | `rg -n 'frame\(height:' $SRC -g '*.swift'`; `rg -n 'isAccessibilitySize\|ViewThatFits' $SRC -g '*.swift'` | major |
+| M5 | Touch targets are at least 44 × 44 pt | A control framed or padded below 44 pt with no larger `contentShape` / `minWidth` | `rg -n 'frame\(width: ([0-9]\|[1-3][0-9]\|4[0-3])\b' $SRC -g '*.swift'` | major |
+| M6 | State lives in traits and values, not in the label | A label such as "Menu, open", "Selected", "disabled" or containing "button" | `rg -n -i 'accessibilityLabel\("[^"]*(button\|selected\|disabled\|open\|closed\|checked)' $SRC -g '*.swift'` | minor |
+| M7 | Gesture-only operations have an accessibility action | A custom swipe, drag or long press with no `accessibilityAction(named:)` / `accessibilityActions` | `rg -n 'DragGesture\|LongPressGesture\|onLongPressGesture' $SRC -g '*.swift'` — read each for an action | major |
+| M8 | Async results and errors are announced without stealing focus | A save or error appearing with no `AccessibilityNotification.Announcement` / `UIAccessibility.post` | `rg -n 'Announcement\|UIAccessibility\.post\|accessibilityFocused' $SRC -g '*.swift'` | major |
+| M9 | Decorative images are hidden, informative ones described | A meaningful `Image` with no label; a decorative one exposed to VoiceOver | `rg -n 'Image\(' $SRC -g '*.swift'` against `accessibilityHidden\|accessibilityLabel` | minor |
+| M10 | Headings are marked and rows are grouped into one stop | Section titles as plain `Text` on a multi-section screen; a row read as three separate elements | `rg -n 'isHeader\|accessibilityElement\(children' $SRC -g '*.swift'` | minor |
+| M11 | Colour is never the only cue; contrast holds in light, dark and Increase Contrast | A state shown by colour alone with no `accessibilityDifferentiateWithoutColor` branch; hard-coded `Color(red:…)` pairs. Contrast requires a token check or device pass | `rg -n 'accessibilityDifferentiateWithoutColor\|Color\(red:\|\.red\b\|\.green\b' $SRC -g '*.swift'` | major |
+| M12 | Reduce Motion is honoured by custom animation | `withAnimation` / `PhaseAnimator` / `matchedGeometryEffect` with no `accessibilityReduceMotion` read | `rg -n 'accessibilityReduceMotion\|withAnimation\|PhaseAnimator' $SRC -g '*.swift'` | major |
+| M13 | An accessibility label is never used as a test identifier, nor an identifier as a label | `.accessibilityLabel("Login.EmailField")` | `rg -n 'accessibilityLabel\("[A-Z][A-Za-z]*\.[A-Z]' $SRC -g '*.swift'` | major |
+| M14 | Accessibility Nutrition Labels are declared only for features a device pass proved | A declaration in the release notes or Connect metadata with no recorded VoiceOver / large-text pass. requires dynamic test → `qa-mobile-ios` | read the release checklist and `docs/` for a recorded pass | minor |
 
 ---
 
@@ -284,6 +298,19 @@ This section holds no rows of its own. The rows are those of `mobile/_shared/sto
 
 | # | Check | Violation looks like | Find it with | Sev |
 |---|---|---|---|---|
+| N1 | Nothing blocks the main thread | `Thread.sleep`, `DispatchSemaphore.wait`, `DispatchQueue.main.sync`, synchronous `Data(contentsOf:)` / `String(contentsOf:)` on a URL, in `@MainActor` or UI code | `rg -n 'Thread\.sleep\|\.wait\(\)\|DispatchSemaphore\|main\.sync\|Data\(contentsOf\|String\(contentsOf' $SRC -g '*.swift'` | blocker |
+| N2 | CPU-heavy or large-IO work runs off the main actor | Sorting / decoding / resizing / large JSON / large fetches inside a `@MainActor` method or `body`; `@concurrent` or a background actor absent | `rg -n 'JSONDecoder\(\)\.decode\|UIImage\(contentsOfFile\|\.sorted\(' $SRC -g '*.swift'` — read the isolation | major |
+| N3 | `body` is pure and cheap | A formatter, sort, filter, decode or `DateFormatter()` created inside `body` | `rg -n 'DateFormatter\(\)\|NumberFormatter\(\)\|\.sorted\|\.filter' $SRC -g '*View*.swift'` | major |
+| N4 | List identity is stable and domain-based | `ForEach(…, id: \.self)` on non-unique values; `ForEach(0..<n)` or an index as identity | `rg -n 'id: \\\.self\|ForEach\(0\.\.<\|enumerated\(\)' $SRC -g '*.swift'` | major |
+| N5 | Unbounded data is in a lazy container | `ScrollView { VStack { ForEach(items) … } }` over data of unknown size | `rg -n 'VStack' -B2 -A4 $SRC -g '*.swift' \| rg 'ForEach'` | major |
+| N6 | No `AnyView` where a generic or `@ViewBuilder` works | `AnyView(` return types | `rg -n 'AnyView' $SRC -g '*.swift'` | minor |
+| N7 | Images are downsampled to their display size | A full-resolution photo decoded for a thumbnail or avatar | `rg -n 'UIImage\(data:\|UIImage\(contentsOfFile\|Image\(uiImage' $SRC -g '*.swift'` | major |
+| N8 | Launch does only first-frame work | Synchronous network, file or database work, or non-essential SDK initialisation, in `App.init` / the root `body`; the crash reporter excepted | `rg -n 'init\(\)' -A12 $SRC -g '*App.swift'` | major |
+| N9 | Retain cycles and unowned tasks are avoided | A stored closure capturing `self` strongly; a `Task` stored in a property and not cancelled in `deinit` / `onDisappear` | `rg -n 'Task \{' -B2 $SRC -g '*.swift'`; `rg -n '\[weak self\]' $SRC -g '*.swift'` | major |
+| N10 | Caches are bounded | A `[Key: Value]` dictionary used as an unbounded cache | `rg -n 'static var .*: \[.*:.*\] = \[:\]\|NSCache' $SRC -g '*.swift'` | minor |
+| N11 | Performance is measured on a release build, with a recorded figure | An optimisation commit with no before-and-after number; budgets undefined. requires dynamic test | read the change description and the release checklist | minor |
+| N12 | One MetricKit subscription, tagged by version, forwarded to the single reporter | A second subscriber; `MXMetricManager` used with no `#available(iOS 27, *)` branch where the deployment target is 27+; `MetricManager` used with a lower target | `rg -n 'MXMetricManager\|MetricManager\|MXMetricManagerSubscriber' $SRC -g '*.swift'` | major |
+| N13 | Hangs are not hidden by tool or swallowed by reporting | A custom watchdog that restarts the app or suppresses `MXHangDiagnostic` | `rg -n 'MXHangDiagnostic\|watchdog' $SRC -g '*.swift'` | minor |
 
 ---
 
@@ -292,6 +319,27 @@ This section holds no rows of its own. The rows are those of `mobile/_shared/sto
 
 | # | Check | Violation looks like | Find it with | Sev |
 |---|---|---|---|---|
+| O1 | A region is one `LoadState` with failed, stale and offline, not booleans | `isLoading` + `error` + `data` as separate properties; no `.stale` case | `rg -n 'var isLoading\|var errorMessage\|enum LoadState' $SRC -g '*.swift'` | major |
+| O2 | No `try?` / empty `catch` turns a failure into empty | `try?` on a load assigned to `[]` / `nil`; `catch { }` | `rg -n 'try\? \|catch \{ *\}' $SRC -g '*.swift'` | major |
+| O3 | No `try!`, force unwrap or `fatalError` for a recoverable condition | `try!` on a decode / request; `!` on a server value | `rg -n 'try!\|fatalError\(\|[a-z\)]!\.' $SRC -g '*.swift'` | blocker |
+| O4 | The failure is scoped to the response-dependent subtree | An early `if case .failed … return`, or a `switch` wrapping the whole screen, hiding search and filters | `rg -n 'case \.failed' -B6 $SRC -g '*View*.swift'`; read the screen's chrome | major |
+| O5 | Every surfaced failure also raises the persistent banner | A failed region with no banner; or a banner with no inline region | `rg -n 'notifications\.raise\|Notifications' $SRC -g '*.swift'` | major |
+| O6 | The banner is top-anchored in the safe area, never auto-dismisses and has a 44 pt close | A `Task.sleep` / timer dismissing an error; banner in an `overlay` under the Dynamic Island or the keyboard; close under 44 pt | `rg -n 'Banner' -A12 $SRC -g '*.swift'`; `rg -n 'safeAreaInset' $SRC -g '*.swift'` | major |
+| O7 | The banner is deduped, capped and rolled up by cause; one host, one raise-point per path | A banner per retry; more than three visible; a feature mounting its own toast | `rg -n 'raise\(' $SRC -g '*.swift'` | major |
+| O8 | A timeout renders its own body; a cancelled request renders nothing | `.failed` set on `CancellationError` / `URLError.cancelled`; no timeout body | `rg -n 'timedOut\|\.cancelled\|CancellationError' $SRC -g '*.swift'` | major |
+| O9 | Offline is told apart from a server error and never retries | "Something went wrong" while `NWPath` is unsatisfied; a retry loop with no connectivity check | `rg -n 'isOnline\|NWPathMonitor' $SRC -g '*.swift'` | major |
+| O10 | A failed pull-to-refresh keeps the rows and marks them stale | `.refreshable` replacing the list with the failed body | `rg -n 'refreshable' -A8 $SRC -g '*.swift'` | major |
+| O11 | A 401 runs the ladder (one refresh, one replay, re-auth in place); 403 is not 401 | Navigation to login straight from a 401; sign-out on a 403 or a third-party 401; parallel refreshes | `rg -n '401\|forbidden\|403\|reauth' $SRC -g '*.swift'` | major |
+| O12 | An unsupported app version shows the forced-update screen; the check fails open | No minimum-version check; a string comparison of versions; a store URL read from the server; a blocking screen reachable around | `rg -n 'minimum\|CFBundleShortVersionString\|itms-apps\|\.numeric' $SRC -g '*.swift'` | major |
+| O13 | `scenePhase` and reconnect revalidate through the screen's one load path | A `scenePhase` handler duplicating the load; no resume revalidation; old data shown as current | `rg -n 'scenePhase\|\.refreshable' $SRC -g '*.swift'` | major |
+| O14 | Writes disable while pending and carry one idempotency key per intent | Enabled submit during a request; a new `UUID()` per attempt | `rg -n 'UUID\(\)' -B3 $SRC -g '*.swift'`; `rg -n '\.disabled\(' $SRC -g '*.swift'` | major |
+| O15 | An unknown write outcome is reconciled, not reported as failed; a rolled-back update is announced and the form keeps its input | A timeout shown as "failed"; a form cleared on failure | `rg -n 'unconfirmed\|timedOut' $SRC -g '*.swift'` | major |
+| O16 | 409 / 412 is a decision; 422 lands on fields; bulk writes report per item | A conflict auto-retried; a 422 in the banner; "failed" for a partly applied batch | `rg -n '409\|412\|422\|conflict' $SRC -g '*.swift'` | major |
+| O17 | Third parties fail in their own region and never start the 401 ladder; optional SDKs initialise after the first frame behind one adapter | A map or payment failure blanking the screen; analytics failure shown to the user | `rg -n 'import (MapKit\|StoreKit\|Firebase\|Sentry)' $SRC -g '*.swift'` | major |
+| O18 | A full disk degrades to memory with one notice; a secret is never downgraded to a weaker store | A blanket `catch` on a save; a token written to `UserDefaults` on Keychain failure | `rg -n 'fileWriteOutOfSpace\|StorageFull\|UserDefaults' $SRC -g '*.swift'` | major |
+| O19 | A `404` on a record is "gone", not retryable; empty is three kinds | A retry button on a deleted record; one generic "No data" | `rg -n '404\|notFound\|ContentUnavailableView' $SRC -g '*.swift'` | minor |
+| O20 | The UI never renders `localizedDescription`, a stack or a body | `Text(error.localizedDescription)` | `rg -n 'localizedDescription' $SRC -g '*.swift'` | major |
+| O21 | Every state and the banner carry an `accessibilityIdentifier` | A loading / error / stale / empty body with none | `rg -n 'ProgressView\|ContentUnavailableView\|StaleMarker' -A4 $SRC -g '*.swift'` | minor |
 
 ---
 
@@ -356,6 +404,21 @@ This section holds no rows of its own. The rows are those of `mobile/_shared/sto
 
 | # | Check | Violation looks like | Find it with | Sev |
 |---|---|---|---|---|
+| S1 | Swift Testing is used for new tests; XCTest only for UI automation, performance and Objective-C exceptions | New `XCTestCase` for pure logic in a project that has Swift Testing | `rg -n 'XCTestCase' $SRC -g '*Tests*.swift'` | minor |
+| S2 | No mixed assertion frameworks in one test | `XCTAssert*` inside a `@Test`; `#expect` inside an `XCTestCase` | `rg -n 'XCTAssert' $SRC -g '*.swift' -l` against `rg -n '@Test' -l` | major |
+| S3 | A test body contains no `do`/`catch`; errors are asserted with `#expect(throws:)` | `do { try … } catch { … }` in a `@Test` | `rg -n 'do \{\|catch' $SRC -g '*Tests*.swift'` | major |
+| S4 | No `if` / `for` / `switch` drives assertions; variants are `@Test(arguments:)` | A loop of `#expect`s; a conditional assertion | `rg -n '^\s*(if\|for\|switch) ' $SRC -g '*Tests*.swift'` | major |
+| S5 | Every assertion states one expected value | `#expect(x == a \|\| x == b)`; `#expect(code == 200 \|\| code == 204)` | `rg -n '#expect\(.*\|\|' $SRC -g '*Tests*.swift'` | major |
+| S6 | No `Task.sleep`, `sleep` or `DispatchQueue` timing in a test | Waiting on wall-clock time; polling | `rg -n 'Task\.sleep\|sleep\(\|asyncAfter' $SRC -g '*Tests*.swift'` | major |
+| S7 | Time, identity, randomness, config and I/O are initializer-injected; no protocol created only for a test | `Date()` / `UUID()` read inside the unit; a one-conformer `protocol …Protocol` | `rg -n 'Date\(\)\|UUID\(\)\|\.random' $SRC -g '*.swift'`; `rg -n 'protocol .*Protocol' $SRC -g '*.swift'` | major |
+| S8 | Network tests use a `URLProtocol` stub on an ephemeral session, never `URLSession.shared` or a live host | `URLSession.shared` / a real URL in a test | `rg -n 'URLSession\.shared\|https?://' $SRC -g '*Tests*.swift'` | blocker |
+| S9 | Fakes over mocks: assertions are on outcomes, not call order | A hand-rolled mock asserting invocation counts and order | `rg -n 'callCount\|wasCalled\|verify' $SRC -g '*Tests*.swift'` | minor |
+| S10 | Tests are independent: no shared mutable state, no `.serialized` hiding one | A static array mutated across tests; `.serialized` on a suite with no shared resource | `rg -n 'static var\|\.serialized' $SRC -g '*Tests*.swift'` | major |
+| S11 | Test names state behaviour; test data comes from builders for four or more fields | `func test1`, `works`; the same large literal in several tests | `rg -n '@Test\("' -c $SRC -g '*Tests*.swift'`; `rg -n 'func test[0-9]' $SRC -g '*Tests*.swift'` | minor |
+| S12 | No force unwrap or `try!` in a test beyond a fixed fixture literal; `#require` for preconditions | `try!`, `.first!` | `rg -n 'try!\|\.first!\|\.last!' $SRC -g '*Tests*.swift'` | minor |
+| S13 | Snapshots cover single views only, never a whole screen or dynamic content | `assertSnapshot` on a root screen; a date in the frame | `rg -n 'assertSnapshot' $SRC -g '*Tests*.swift'` | minor |
+| S14 | Migration tests use an on-disk store; an in-memory store is not offered as migration proof | `isStoredInMemoryOnly: true` in a `SchemaMigrationPlan` test | `rg -n 'isStoredInMemoryOnly\|SchemaMigrationPlan' $SRC -g '*Tests*.swift'` | major |
+| S15 | Exit tests are not placed in an iOS target; no journeys or UI tests are written as unit tests | `#expect(processExitsWith:)` in an iOS test target; `XCUIApplication` in the unit plan. requires dynamic test → `qa-mobile-ios` | `rg -n 'processExitsWith\|XCUIApplication' $SRC -g '*Tests*.swift'` | minor |
 
 ---
 
