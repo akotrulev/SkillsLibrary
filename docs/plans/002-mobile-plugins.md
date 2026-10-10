@@ -8,7 +8,7 @@ step-by-step agent that works greenfield and brownfield, a conformance audit, an
 
 **Status:** C1 landed (2026-10-11): `mobile/` exists with the five July drafts moved and renamed under
 `mobile/react-native/`, the three conformance-checklist skeletons, and `## Mobile code rules` in `CLAUDE.md`;
-the stale `frontend/react-native` pointers are repointed. S1 landed (2026-10-11): `mobile/_shared/{store-compliance,security}` with their references and the `L1…L26` / `K1…K27` audit fragments. S2 landed (2026-10-11): `mobile/_shared/{release,observability}` with their references and the `T1…T19` / `U1…U20` audit fragments. S3 landed (2026-10-11): `mobile/_shared/in-app-purchases` with its references and the `X1…X22` fragment, plus `auth/auth0-{react-native,ios,android}`. N1 landed (2026-10-11): `mobile/{ios,android}/skills/basics` with `references/concurrency.md` each, and rows `A1…A5`/`B1…B16` (iOS), `A1…A4`/`B1…B16` (Android). R1 landed (2026-10-11): the five drafts rewritten onto SDK 57 and `mobile/react-native/skills/navigation` written, with RN checklist rows `A1…A7`, `B1…B13`, `C1…C10`, `D1…D10`, `E1…E13`, `F1…F15`. R2 landed (2026-10-11): `mobile/react-native/skills/{ui-components,forms,networking,offline-and-storage,native-modules}` with checklist rows `D10…D19`, `G1…G10`, `H1…H15`, `I1…I13`, `J1…J13`. R3 landed (2026-10-10): `mobile/react-native/skills/{device-features,notifications-and-links,animation,languages,test-ids}` with checklist rows `F15…F20`, `J14…J28`, `P1…P10`, `Q1…Q11`, `R1…R10`, and §8.5's RN mapping answered (D20 — the QA explorer's `content-desc` claim is refuted). R4 landed (2026-10-11): `mobile/react-native/skills/{accessibility,performance,error-handling,component-testing}` with `error-handling/references/{session-and-resume,writes-and-dependencies}.md` and checklist rows `M1…M13`, `N1…N13`, `O1…O22`, `S1…S12`. Next: R5, I1.
+the stale `frontend/react-native` pointers are repointed. S1 landed (2026-10-11): `mobile/_shared/{store-compliance,security}` with their references and the `L1…L26` / `K1…K27` audit fragments. S2 landed (2026-10-11): `mobile/_shared/{release,observability}` with their references and the `T1…T19` / `U1…U20` audit fragments. S3 landed (2026-10-11): `mobile/_shared/in-app-purchases` with its references and the `X1…X22` fragment, plus `auth/auth0-{react-native,ios,android}`. N1 landed (2026-10-11): `mobile/{ios,android}/skills/basics` with `references/concurrency.md` each, and rows `A1…A5`/`B1…B16` (iOS), `A1…A4`/`B1…B16` (Android). R1 landed (2026-10-11): the five drafts rewritten onto SDK 57 and `mobile/react-native/skills/navigation` written, with RN checklist rows `A1…A7`, `B1…B13`, `C1…C10`, `D1…D10`, `E1…E13`, `F1…F15`. R2 landed (2026-10-11): `mobile/react-native/skills/{ui-components,forms,networking,offline-and-storage,native-modules}` with checklist rows `D10…D19`, `G1…G10`, `H1…H15`, `I1…I13`, `J1…J13`. R3 landed (2026-10-10): `mobile/react-native/skills/{device-features,notifications-and-links,animation,languages,test-ids}` with checklist rows `F15…F20`, `J14…J28`, `P1…P10`, `Q1…Q11`, `R1…R10`, and §8.5's RN mapping answered (D20 — the QA explorer's `content-desc` claim is refuted). R4 landed (2026-10-11): `mobile/react-native/skills/{accessibility,performance,error-handling,component-testing}` with `error-handling/references/{session-and-resume,writes-and-dependencies}.md` and checklist rows `M1…M13`, `N1…N13`, `O1…O22`, `S1…S12`. R5 landed (2026-10-11): `mobile/react-native/skills/{migration,code-review,standards-audit}` with `migration/references/{sdk-upgrade,new-architecture,bare-to-expo,embed-in-native-app}.md`, the RN checklist's closing section index, `mobile/react-native/agents/mobile-react-native.md` (13,888 characters, description 574 of 650) and `mobile/react-native/commands/{mobile-react-native,mobile-react-native-audit}.md`. Next: I1.
 Built but unverified: everything — the plan gates once, in G1. Flutter becomes a fourth plugin in its own plan, written
 once this one lands (O4); it is **not** in this plan's tasks. Maestro arrives on the QA side through plan 003
 (its X1); this plan feeds it the same test ids and an EAS Workflows job (D7). Every fact in §4 was web-verified
@@ -1165,6 +1165,12 @@ brownfield ~20k; writes: migration SKILL.md + four references ~18k, code-review 
   commands in the fe-react commands' shape.
 - **Not in R5:** marketplace wiring (W1).
 
+**As built (2026-10-11):**
+- Built to the task with no divergence. `mobile/react-native/skills/migration/SKILL.md` (8,181 chars) + four `references/` files; `code-review/SKILL.md` (8,935); `standards-audit/SKILL.md` (description 474 chars) loads the engine and carries the §4.1 version gate and the probes (Expo Router vs React Navigation, storage, native code, localization, motion, tests, release, observability, purchases); the checklist ends with a `## Section index` table (A–X, no W).
+- The agent is 13,888 characters by `wc -m` (D16 budget 14,000) with the template's Gate sentence verbatim at `mobile/react-native/agents/mobile-react-native.md` (`Operating rules`). It was first written at 16,414 and cut by removing restated skill content — I1/A1 mirrors should write to the budget from the start (the Steps table and the two output shapes are the bulk).
+- Facts re-verified this session from docs.expo.dev: SDK 54 is the last legacy-architecture SDK and `newArchEnabled` leaves `app.json` in SDK 55; `expo-brownfield` is alpha (SDK 55; `build:ios` / `build:android`, isolated vs integrated); `npx install-expo-modules` then prebuild is the bare → Expo path; one-SDK-at-a-time is Expo's own walkthrough advice. **Not verified:** the Callstack `react-native-brownfield` 5.x API surface (no search result named 5.x) — `embed-in-native-app.md` names it without version-specific calls and says to read its release notes.
+- Built but unverified: everything — Gate: none. Section A of the checklist (A1–A7) is the audit hook for `migration`.
+
 ### I1 — iOS foundations
 
 **Stack:** `docs` · **Agent:** `general-purpose`
@@ -1462,46 +1468,9 @@ goes in an untracked `scratch/` folder inside the worktree, deleted before commi
 | W1 | `docs` | `general-purpose` | R5, I5, A6, R3, S1–S3 | ~120k |
 | G1 | `docs` | `general-purpose` | every task above | ~140k |
 
-C1, S1, S2, S3, N1, R1, R2, R3 and R4 have landed (their blocks are deleted); every block below is live.
+C1, S1, S2, S3, N1, R1, R2, R3, R4 and R5 have landed (their blocks are deleted); every block below is live.
 
 ---
-
-### R5 — React Native migration, review, audit, agent and commands (general-purpose, docs)
-
-````
-You are `general-purpose`. Task R5 of docs/plans/002-mobile-plugins.md: write
-`mobile-react-native-{migration,code-review,standards-audit}`, the `mobile-react-native` agent and its
-two commands.
-
-Read, in this order:
-1. CLAUDE.md.
-2. The plan: §2, §6.1–§6.2, §7, §8, §10, task R5, and "Close-out — every task".
-3. `.skill-template/agent.md`; `frontend/react/agents/fe-react.md` (content pattern, not size).
-4. `backend/dotnet/skills/standards-audit/SKILL.md` and `engineering-practices/standards-audit-engine/SKILL.md`.
-5. `frontend/react/skills/code-review/SKILL.md` (head) and `frontend/react/commands/{fe-react,fe-react-audit}.md`.
-6. The RN checklist in full; the frontmatter of the other RN skills.
-
-Build:
-- `migration` per §6.2 with `references/{sdk-upgrade,new-architecture,bare-to-expo,embed-in-native-app}.md`;
-  one SDK per change, never inside feature work.
-- `code-review`: a diff against the RN checklist and §5, plus the §7.2 screenshot pass.
-- `standards-audit` in the `be-dotnet-standards-audit` shape on the engine: the §4.1 version gate, the
-  applicability probes (Expo vs bare, purchases present, native code present), the report path in §2;
-  append the checklist's closing section index.
-- `mobile/react-native/agents/mobile-react-native.md` per §7, tools `Read, Write, Edit, Bash, Glob, Grep, WebSearch`;
-  Related agents name `qa-mobile-typescript` for E2E — Appium, or its Maestro lane on Expo projects (D7).
-- `mobile/react-native/commands/mobile-react-native.md` and `mobile-react-native-audit.md` in the fe-react shape.
-
-Traps:
-- The agent must fit 14,000 characters (D16) — fe-react's is 29,289. Route to skills; don't restate them.
-- The template's Gate sentence must appear verbatim — §11 greps for "prompt block's `Gate:` line".
-- The audit loads the engine; it never copies the engine's procedure.
-
-Gate: none — this plan gates once, in G1. Do not run tools/token-audit.py, §11's script, or any lint.
-
-Commit: `feat(mobile R5): React Native migration, review, audit, agent and commands`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
 
 ### I1 — iOS foundations (general-purpose, docs)
 
@@ -1643,7 +1612,7 @@ Build:
   `mobile/ios/commands/{mobile-ios,mobile-ios-audit}.md` — mirroring R5 on the iOS lane.
 
 Traps:
-- Agent ≤ 14,000 characters with the template's Gate sentence verbatim.
+- Agent ≤ 14,000 characters with the template's Gate sentence verbatim — R5's landed at 13,888 (`wc -m`) after a cut from 16,414, so write the Steps table and the two output shapes tight from the start and route to skills.
 - Swift 6 migration goes module by module, leaves first; dynamic isolation checks can crash at runtime —
   `migration` says how to find them before shipping.
 
