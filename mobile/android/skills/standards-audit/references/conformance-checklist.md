@@ -483,3 +483,36 @@ This section holds no rows of its own. The rows are those of `mobile/_shared/obs
 *Owning fragment: [`mobile/_shared/in-app-purchases`](../../../../_shared/in-app-purchases/references/audit-checks.md)*
 
 This section holds no rows of its own. The rows are those of `mobile/_shared/in-app-purchases/references/audit-checks.md` whose `Stacks` column names `android`, and the ids are the fragment's — finding `X3` is row X3 of the in-app-purchases fragment. A row a static read cannot prove says **requires dynamic test → `qa-security`** and is reported as unverified, never as passed. Not applicable unless the app sells anything.
+
+---
+
+## Section index
+
+| § | Section | Rows | Owner |
+|---|---|---|---|
+| A | Version lane, toolchain & migration hygiene | A1–A19 | `project-setup`, `migration`, `basics` |
+| B | Project structure, strictness & language standard | B1–B20 | `project-setup`, `basics` |
+| C | Architecture, state & DI | C1–C13 | `architecture` |
+| D | UI components & platform conventions | D1–D25 | `ui-components`, `views-interop` |
+| E | Styling, theming & adaptive layout | E1–E12 | `styling` |
+| F | Navigation & deep links | F1–F16 | `navigation`, `notifications-and-links` |
+| G | Forms & input | G1–G10 | `forms` |
+| H | Networking & realtime | H1–H15 | `networking` |
+| I | Offline, storage & sync | I1–I14 | `offline-and-storage` |
+| J | Device features, permissions & native code | J1–J24 | `device-features`, `notifications-and-links`, `system-integration` |
+| K | Security | fragment | `mobile/_shared/security` |
+| L | Privacy & store compliance | fragment | `mobile/_shared/store-compliance` |
+| M | Accessibility | M1–M15 | `accessibility` |
+| N | Performance | N1–N14 | `performance` |
+| O | Error resilience | O1–O22 | `error-handling` |
+| P | Localization | P1–P8 | `languages` |
+| Q | Motion & gestures | Q1–Q8 | `animation` |
+| R | Testability & test ids | R1–R8 | `test-ids` |
+| S | Dev-side tests | S1–S16 | `unit-testing` |
+| T | Release & signing | fragment | `mobile/_shared/release` |
+| U | Observability & logging | fragment | `mobile/_shared/observability` |
+| V | Comments & KISS | V1–V8 | `ep-code-comments`, CLAUDE.md § Simplicity |
+| W | Kotlin Multiplatform | W1–W11 | `kotlin-multiplatform` — N/A unless KMP modules exist |
+| X | In-app purchases | fragment | `mobile/_shared/in-app-purchases` |
+
+Fragment sections hold the rows of their `audit-checks.md` whose `Stacks` column names `android`.

@@ -9,7 +9,7 @@ step-by-step agent that works greenfield and brownfield, a conformance audit, an
 **Status:** C1 landed (2026-10-11): `mobile/` exists with the five July drafts moved and renamed under
 `mobile/react-native/`, the three conformance-checklist skeletons, and `## Mobile code rules` in `CLAUDE.md`;
 the stale `frontend/react-native` pointers are repointed. S1 landed (2026-10-11): `mobile/_shared/{store-compliance,security}` with their references and the `L1…L26` / `K1…K27` audit fragments. S2 landed (2026-10-11): `mobile/_shared/{release,observability}` with their references and the `T1…T19` / `U1…U20` audit fragments. S3 landed (2026-10-11): `mobile/_shared/in-app-purchases` with its references and the `X1…X22` fragment, plus `auth/auth0-{react-native,ios,android}`. N1 landed (2026-10-11): `mobile/{ios,android}/skills/basics` with `references/concurrency.md` each, and rows `A1…A5`/`B1…B16` (iOS), `A1…A4`/`B1…B16` (Android). R1 landed (2026-10-11): the five drafts rewritten onto SDK 57 and `mobile/react-native/skills/navigation` written, with RN checklist rows `A1…A7`, `B1…B13`, `C1…C10`, `D1…D10`, `E1…E13`, `F1…F15`. R2 landed (2026-10-11): `mobile/react-native/skills/{ui-components,forms,networking,offline-and-storage,native-modules}` with checklist rows `D10…D19`, `G1…G10`, `H1…H15`, `I1…I13`, `J1…J13`. R3 landed (2026-10-10): `mobile/react-native/skills/{device-features,notifications-and-links,animation,languages,test-ids}` with checklist rows `F15…F20`, `J14…J28`, `P1…P10`, `Q1…Q11`, `R1…R10`, and §8.5's RN mapping answered (D20 — the QA explorer's `content-desc` claim is refuted). R4 landed (2026-10-11): `mobile/react-native/skills/{accessibility,performance,error-handling,component-testing}` with `error-handling/references/{session-and-resume,writes-and-dependencies}.md` and checklist rows `M1…M13`, `N1…N13`, `O1…O22`, `S1…S12`. R5 landed (2026-10-11): `mobile/react-native/skills/{migration,code-review,standards-audit}` with `migration/references/{sdk-upgrade,new-architecture,bare-to-expo,embed-in-native-app}.md`, the RN checklist's closing section index, `mobile/react-native/agents/mobile-react-native.md` (13,888 characters, description 574 of 650) and `mobile/react-native/commands/{mobile-react-native,mobile-react-native-audit}.md`. I1 landed (2026-10-11): `mobile/ios/skills/{project-setup,architecture,ui-components,styling,navigation}` with `references/{packages-and-config,tca}.md` and checklist rows `A6…A11`, `B17…B24`, `C1…C10`, `D1…D11`, `E1…E12`, `F1…F11` (D21: MV over the corpus's MVVM rows). I2 landed (2026-10-11): `mobile/ios/skills/{forms,networking,offline-and-storage,uikit,device-features}` with `networking/references/request-policy.md`, `offline-and-storage/references/{swiftdata-migrations,keychain}.md`, `uikit/references/{uiscene-migration,interop-seams}.md`, `device-features/references/permissions.md` and checklist rows `D12…D20`, `G1…G10`, `H1…H12`, `I1…I14`, `J1…J12` (D22: new facts unconfirmed against Apple pages). I3 landed (2026-10-11): `mobile/ios/skills/{notifications-and-links,system-integration,animation,languages,test-ids}` with `notifications-and-links/references/apns-and-extensions.md`, `system-integration/references/background-and-activities.md` and checklist rows `F12…F15`, `J13…J28`, `P1…P11`, `Q1…Q11`, `R1…R10` (D23: new facts unconfirmed against Apple pages). I4 landed (2026-10-11): `mobile/ios/skills/{accessibility,performance,error-handling,unit-testing}` with `error-handling/references/{session-and-resume,writes-and-dependencies}.md` and checklist rows `M1…M14`, `N1…N13`, `O1…O21`, `S1…S15` (D24: new facts unconfirmed against Apple pages). I5 landed (2026-10-11): `mobile/ios/skills/{migration,code-review,standards-audit}` with `migration/references/{swift6-modules,observation,combine-to-async,uikit-to-swiftui,objc-to-swift,cocoapods-to-spm,ios27-sdk-and-targets}.md`, the iOS checklist's closing section index, `mobile/ios/agents/mobile-ios.md` (13,879 characters, description 640 of 650) and `mobile/ios/commands/{mobile-ios,mobile-ios-audit}.md` (D25: migration facts unconfirmed against Apple / swift.org pages). A1 landed (2026-10-10): `mobile/android/skills/{project-setup,architecture,ui-components,styling,navigation}` with `project-setup/references/gradle-config.md`, `architecture/references/hilt-and-modules.md` and checklist rows `A5…A13`, `B17…B20`, `C1…C13`, `D1…D15`, `E1…E12`, `F1…F13` (D26: no ViewModel-to-UI events over the corpus's Channel row; D27: Navigation 3 / Expressive / KSP facts partly unconfirmed). A2 landed (2026-10-10): `mobile/android/skills/{forms,networking,offline-and-storage,views-interop,device-features}` with `networking/references/{request-policy,connectivity-and-trust}.md`, `offline-and-storage/references/{room-migrations,keystore-and-secrets}.md`, `forms/references/validation-autofill-wizards.md`, `views-interop/references/recyclerview.md`, `device-features/references/{permissions,biometrics-and-credentials}.md` and checklist rows `D16…D25`, `G1…G10`, `H1…H15`, `I1…I14`, `J1…J12` (D28: Room 3 / Retrofit 3 / Compose-forms facts partly unconfirmed). A3 landed (2026-10-10): `mobile/android/skills/{notifications-and-links,system-integration,animation,languages,test-ids}` with `notifications-and-links/references/{fcm,app-links}.md`, `system-integration/references/foreground-services.md` and checklist rows `F14…F16`, `J13…J24`, `P1…P8`, `Q1…Q8`, `R1…R8` (D29: FCM registration is the Installation-ID flow; several Compose / Appium / FGS facts unconfirmed). A4 landed (2026-10-10): `mobile/android/skills/{accessibility,performance,error-handling,unit-testing}` with `error-handling/references/{session-and-resume,writes-and-dependencies}.md`, `unit-testing/references/{flows-and-seams,robolectric-and-screenshots}.md` and checklist rows `M1…M15`, `N1…N14`, `O1…O22`, `S1…S16` (D30: Robolectric / Turbine / Roborazzi versions and R8 keep-rule semantics unconfirmed). Next: A5.
-A5 landed (2026-10-10): `mobile/android/skills/{kotlin-multiplatform,migration}` with three and nine references, and Android checklist rows `A14…A19` and `W1…W11`. Built but unverified: everything — the plan gates once, in G1. Flutter becomes a fourth plugin in its own plan, written
+A5 landed (2026-10-10): `mobile/android/skills/{kotlin-multiplatform,migration}` with three and nine references, and Android checklist rows `A14…A19` and `W1…W11`. A6 landed (2026-10-11): `mobile/android/skills/{code-review,standards-audit}`, the checklist's closing section index (A–X, W included), `mobile/android/agents/mobile-android.md` (13,990 characters) and `mobile/android/commands/{mobile-android,mobile-android-audit}.md`. Built but unverified: everything — the plan gates once, in G1. Flutter becomes a fourth plugin in its own plan, written
 once this one lands (O4); it is **not** in this plan's tasks. Maestro arrives on the QA side through plan 003
 (its X1); this plan feeds it the same test ids and an EAS Workflows job (D7). Every fact in §4 was web-verified
 on 2026-10-10; the items listed under §4.5 were not.
@@ -1409,6 +1409,8 @@ code-review ~4k, standards-audit ~4k, agent ~4k, commands ~2k.
   share, KMP modules (section W), AGP major.
 - **Not in A6:** marketplace wiring (W1).
 
+- **As built (2026-10-11):** `mobile/android/skills/code-review/SKILL.md` (11.7k chars, description 474) and `standards-audit/SKILL.md` (10.0k, description 475) — the latter carries the §4.3 version gate (Step 0) and the probes Compose vs Views share, AGP major, KSP vs kapt, DI, Room, Navigation 3, KMP modules (section W's N/A line must quote the empty `kotlin.multiplatform` / `commonMain` probe), Java count, Play Billing; the checklist ends with `## Section index` (A–X, row ranges A1–A19 … W1–W11, V1–V8; no rows added, none renumbered). `mobile-android` agent is 13,990 characters by `wc -m` with the template's Gate sentence verbatim (`Operating rules`, identical to `mobile-ios.md`); Related agents name `qa-mobile-java`, `qa-mobile-dotnet`, `qa-mobile-typescript`. Commands `mobile-android` and `mobile-android-audit` mirror the iOS pair. Built but unverified: everything — Gate: none; no web search was run, and `auth/auth0-android` is cited in the agent from the directory listing, not read. Proof: `wc -m` counts above; `grep -c "^| [A-X][0-9]" mobile/android/skills/standards-audit/references/conformance-checklist.md` unchanged by this task.
+
 ### W1 — marketplace, planning lane and QA wiring
 
 **Stack:** `docs` · **Agent:** `general-purpose`
@@ -1510,36 +1512,9 @@ goes in an untracked `scratch/` folder inside the worktree, deleted before commi
 | W1 | `docs` | `general-purpose` | R5, I5, A6, R3, S1–S3 | ~120k |
 | G1 | `docs` | `general-purpose` | every task above | ~140k |
 
-C1, S1, S2, S3, N1, R1, R2, R3, R4, R5, I1, I2, I3, I4, I5, A1, A2, A3, A4 and A5 have landed (their blocks are deleted); every block below is live.
+C1, S1, S2, S3, N1, R1, R2, R3, R4, R5, I1, I2, I3, I4, I5, A1, A2, A3, A4, A5 and A6 have landed (their blocks are deleted); every block below is live.
 
 ---
-
-### A6 — Android review, audit, agent and commands (general-purpose, docs)
-
-````
-You are `general-purpose`. Task A6 of docs/plans/002-mobile-plugins.md: write
-`mobile-android-{code-review,standards-audit}`, the `mobile-android` agent and its two commands.
-
-Read, in this order:
-1. CLAUDE.md.
-2. The plan: §2, §6.1, §6.4, §7, §8, §10, task A6, and "Close-out — every task".
-3. `mobile/ios/agents/mobile-ios.md`, both iOS commands, `mobile-ios-{code-review,standards-audit}`;
-   `engineering-practices/standards-audit-engine/SKILL.md`.
-4. The Android checklist in full; the frontmatter of the other Android skills.
-
-Build:
-- Mirror I5's review, audit, agent and commands on the §4.3 lane; audit probes add the Compose vs Views
-  share, KMP modules (section W), the AGP major; the closing section index.
-
-Traps:
-- Agent ≤ 14,000 characters with the template's Gate sentence verbatim — `mobile-ios.md` landed at 13,879 (`wc -m`) by routing to skills from the start; copy its shape (Steps table, two output shapes) and its Related agents naming the three `qa-mobile-<stack>` peers.
-- Section W is N/A unless KMP modules exist — the probe decides, and N/A names the probe. Section W already holds `W1…W11` and section A runs to `A19` (A5); the audit `SKILL.md` and the closing index only reference them — add no rows, renumber nothing.
-
-Gate: none — this plan gates once, in G1. Do not run tools/token-audit.py, §11's script, or any lint.
-
-Commit: `feat(mobile A6): Android review, audit, agent and commands`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
 
 ### W1 — marketplace, planning lane and QA wiring (general-purpose, docs)
 
