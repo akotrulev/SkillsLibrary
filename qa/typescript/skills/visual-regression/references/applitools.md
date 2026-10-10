@@ -1,356 +1,214 @@
-# Visual Regression — Applitools Eyes (TypeScript)
+# Visual Regression — Applitools Eyes (TypeScript / Playwright Test)
 
-Applitools Eyes is the **visual-AI** layer of the visual-regression trio. It uploads the rendered page
-to the **Ultrafast Grid**, re-renders it server-side across a configured browser/viewport/device
-matrix, and diffs with **AI-based matching** that ignores the anti-aliasing and sub-pixel noise a human
-wouldn't flag — plus **match levels** (Strict / Layout / Content / Ignore-colors) that let you say
-"this region's *layout* must match but its *text* may change." That match-level control is the real
-differentiator versus Percy's server-side **pixel** diff and the built-in **byte/pixel** diff
-(`playwright-snapshots`).
+Applitools Eyes is the **visual-AI** member of the family. The SDK uploads each checkpoint to the
+**Ultrafast Grid**, which re-renders it across a browser/viewport/device matrix and judges the diff with AI
+matching that ignores anti-aliasing noise a person would not flag. **Match levels** (Strict, Layout,
+Content, Ignore colors) say *how* a region is compared: "the layout of these figures must match, their
+numbers may change". That is the difference from Percy's pixel diff and the built-in `toHaveScreenshot`.
 
-This is an **assertion layer** on top of the page objects and specs the
-`qa-ui-test-writer-playwright-typescript` skill already authored. You do not write new page objects
-here — you add `eyes.open` / `eyes.check` / `eyes.close` around an existing flow.
+This is an **assertion layer** on page objects and fixtures from
+`qa/typescript/skills/ui-test-author/playwright`: a spec adds `eyes.check(...)` to an existing flow.
 
-## Why graduate from Percy (pixel) to Applitools (visual-AI)
+## 1. Why graduate from Percy
 
-Percy already solved the cross-platform rendering problem by rendering server-side. Applitools
-goes further on **how the diff is judged** and **how many environments render at once**:
-
-| | Percy | **Applitools Eyes (this skill)** |
+| | Percy | **Applitools Eyes** |
 |---|---|---|
-| What leaves the test | A DOM snapshot, uploaded by the `percy exec` agent | The rendered page, uploaded by the **SDK directly** (no agent) |
-| How the diff is judged | Server-side **pixel** diff | Server-side **AI** match — ignores anti-aliasing / sub-pixel noise |
-| Tolerance lever | `percyCSS` hide + `scope` (no pixel knob) | **Match levels** (Strict / Layout / Content / Ignore-colors) + region ignores |
-| Dynamic content | Hide it with `percyCSS` | **`Target.layout(region)`** — structure matches, text may differ |
-| Cross-browser/device | Re-renders at configured widths | **Ultrafast Grid** — a real browser/viewport/device **matrix** from one run |
-| Process model | Local `percy exec` agent wraps the run | **None** — SDK calls the cloud; just `APPLITOOLS_API_KEY` in env |
-| Baselines | Percy cloud, keyed by git branch, review UI | **Applitools dashboard**, keyed by app/test/branch, review UI |
-| Gate | GitHub/GitLab status check | Runner's **aggregated results** fail the build; dashboard link |
-| Cost | Paid | Paid (typically the most expensive of the three) |
+| What leaves the test | A DOM snapshot, through the `percy exec` agent | The page, uploaded by the SDK itself — no agent |
+| How the diff is judged | Server-side pixel diff | Server-side AI match |
+| Tolerance lever | `percyCSS` and `scope` | Match levels and region settings |
+| Dynamic content | Hide it | `layoutRegions(...)` — the structure still matches, the content may differ |
+| Cross-browser and devices | Widths | The Ultrafast Grid matrix from one run |
+| Gate | Status check | The runner's aggregated results fail the run |
+| Cost | Paid | Paid, usually the most expensive |
 
-State the contrast plainly: **Applitools is AI match (not pixel), match levels (not just hide-or-fail),
-and a real cross-browser grid (not just widths)** — and there's **no agent process** to wrap the run.
-
-## Setup
+## 2. Setup
 
 ```bash
 npm install --save-dev @applitools/eyes-playwright
 ```
 
-`APPLITOOLS_API_KEY` is the **only secret**. The SDK reads it from the environment automatically — there
-is **no agent to launch**, no `percy exec`-style wrapper; the SDK talks to the Applitools cloud directly.
-In CI it comes from the secret store (see the ci-pipelines cross-link), never committed. Locally:
+`APPLITOOLS_API_KEY` is the **only secret**; the SDK reads it from the environment. There is no agent to
+start and no wrapper command.
 
-```bash
-export APPLITOOLS_API_KEY=<your-api-key>   # never hardcode, never log
-```
+## 3. The model
 
-## The Eyes model + the Ultrafast Grid
+- **`VisualGridRunner`** sends checkpoints to the Ultrafast Grid. `ClassicRunner` renders one local
+  environment and gives up the grid, which is the reason to choose Applitools.
+- **`Eyes`** is one visual test bound to a runner: `open` starts it, `check` adds a checkpoint,
+  `close(false)` ends it without throwing.
+- **`runner.getAllTestResults(true)`** waits until the grid has rendered and diffed every checkpoint, then
+  throws if any test has an unresolved diff or an error. **That is the gate.** Its error names each
+  unresolved test with its dashboard link.
 
-Three objects, one lifecycle:
-
-- **`VisualGridRunner`** — the runner that ships checkpoints to the **Ultrafast Grid**, which renders
-  them server-side across your configured browser/viewport/device matrix. Construct it with a
-  concurrency cap: `new VisualGridRunner({ testConcurrency: 5 })`. (Its sibling `ClassicRunner` renders
-  locally with one environment — use `VisualGridRunner` to get the grid, which is the whole point of
-  Applitools over `playwright-snapshots`/`percy`.)
-- **`Eyes`** — one visual test session, bound to a runner: `new Eyes(runner)`. `eyes.open(page, app,
-  test, viewport)` starts it; `eyes.check(...)` adds a checkpoint; `eyes.close(false)` ends it
-  **without throwing inline**.
-- **`runner.getAllTestResults(true)`** — called **once at suite end**, it blocks until every checkpoint
-  across every `Eyes` has rendered + diffed on the grid, aggregates the results, and (with `true`)
-  throws if any test had a mismatch or error. **This is the gate** — not `eyes.close`.
-
-A `Configuration` with `addBrowser(width, height, BrowserType)` / `addDeviceEmulation(...)` is what
-makes **one local run fan out to a cross-browser/device render matrix** server-side — the thing neither
-`playwright-snapshots` nor `percy` does natively.
-
-## Configuration — the render matrix
+## 4. The render matrix
 
 ```typescript
-// support/eyes-config.ts
-import { Configuration, BrowserType, DeviceName, ScreenOrientation, BatchInfo } from '@applitools/eyes-playwright';
+import { BatchInfo, BrowserType, Configuration, DeviceName, ScreenOrientation } from '@applitools/eyes-playwright';
 
-export function buildConfiguration(): Configuration {
+export function buildEyesConfiguration(): Configuration {
   const config = new Configuration();
-  // One batch groups every test in this run in the dashboard (see "Batching" below).
-  config.setBatch(new BatchInfo({ name: 'FlexInvest Web — Visual' }));
-
-  // Each addBrowser/addDeviceEmulation adds an environment the Ultrafast Grid renders + diffs.
-  // One eyes.check() therefore produces N checkpoints — the cross-browser/device matrix.
+  config.setBatch(new BatchInfo({ name: 'Web — Visual', id: process.env.APPLITOOLS_BATCH_ID }));
   config.addBrowser(1280, 800, BrowserType.CHROME);
   config.addBrowser(1280, 800, BrowserType.FIREFOX);
   config.addBrowser(1280, 800, BrowserType.SAFARI);
-  config.addBrowser(375, 812, BrowserType.EDGE_CHROMIUM);
   config.addDeviceEmulation(DeviceName.iPhone_11, ScreenOrientation.PORTRAIT);
   config.addDeviceEmulation(DeviceName.Pixel_5, ScreenOrientation.PORTRAIT);
   return config;
 }
 ```
 
-`eyes.setConfiguration(buildConfiguration())` before `eyes.open` applies it. The matrix lives in code,
-in the repo — it's not a secret; only the API key is.
+Each `addBrowser` / `addDeviceEmulation` adds an environment, so one `check` produces one checkpoint per
+environment. The matrix is code in the repo; only the API key is secret. `APPLITOOLS_BATCH_ID`, set once per
+CI run, puts every shard's tests into one dashboard batch.
 
-## Core pattern — `open` / `check` / `close` + `getAllTestResults`
+## 5. The fixtures — the session lives in teardown, not in the test
 
-The page object exposes intent; the test stabilizes **application** state on a condition, then checks.
-No selectors in the test, no fixed waits. `eyes.close(false)` per test; the runner gates at suite end.
-
-```typescript
-// pages/dashboard.page.ts
-import { type Page, type Locator } from '@playwright/test';
-
-export class DashboardPage {
-  readonly page: Page;
-  readonly revenueCard: Locator;
-
-  constructor(page: Page) {
-    this.page = page;
-    this.revenueCard = page.getByTestId('revenue-card');
-  }
-
-  async goto(): Promise<void> {
-    await this.page.goto('/dashboard');
-  }
-
-  /** Resolves once the card's data has rendered — a condition, never a fixed wait. */
-  async waitUntilLoaded(): Promise<void> {
-    await this.revenueCard.getByRole('status').waitFor({ state: 'hidden' });
-  }
-}
-```
+The runner is **worker-scoped**: one per worker, gated when the worker shuts down. `eyes` is
+**test-scoped**: opened before the test, closed in its teardown — which runs whether the test passed or
+failed, so the test body needs no `try`/`finally`.
 
 ```typescript
-// tests/dashboard.spec.ts
-import { test } from '@playwright/test';
-import { Eyes, VisualGridRunner, Target } from '@applitools/eyes-playwright';
-import { buildConfiguration } from '../support/eyes-config';
-import { DashboardPage } from '../pages/dashboard.page';
+import { Eyes, VisualGridRunner } from '@applitools/eyes-playwright';
+import { test as base } from './fixtures';
+import { buildEyesConfiguration } from './eyes-configuration';
+import { AccountPage } from './AccountPage';
 
-// One runner for the whole file (cap concurrency on the grid).
-const runner = new VisualGridRunner({ testConcurrency: 5 });
+export const byTestId = (testId: string): string => `[data-testid="${testId}"]`;
 
-test('Should_match_dashboard_When_loaded', async ({ page }) => {
-  const eyes = new Eyes(runner);
-  eyes.setConfiguration(buildConfiguration());     // API key read from env automatically
-  await eyes.open(page, 'FlexInvest Web', 'Dashboard — revenue card', { width: 1280, height: 800 });
+type EyesTestFixtures = {
+  eyes: Eyes;
+  accountPage: AccountPage;
+};
 
-  try {
-    const dashboard = new DashboardPage(page);
-    await dashboard.goto();
-    await dashboard.waitUntilLoaded();             // stabilize on a condition first…
+type EyesWorkerFixtures = {
+  eyesRunner: VisualGridRunner;
+};
 
-    await eyes.check('Dashboard', Target.window().fully());  // …then capture the checkpoint
-  } finally {
-    await eyes.close(false);                        // end session WITHOUT throwing inline
-  }
+export const test = base.extend<EyesTestFixtures, EyesWorkerFixtures>({
+  eyesRunner: [
+    async ({}, use) => {
+      const runner = new VisualGridRunner({ testConcurrency: 5 });
+      await use(runner);
+      await runner.getAllTestResults(true);
+    },
+    { scope: 'worker' },
+  ],
+  eyes: async ({ page, eyesRunner }, use, testInfo) => {
+    const eyes = new Eyes(eyesRunner);
+    eyes.setConfiguration(buildEyesConfiguration());
+    await eyes.open(page, 'Web', testInfo.title, { width: 1280, height: 800 });
+    await use(eyes);
+    await eyes.close(false);
+  },
+  accountPage: async ({ page }, use) => {
+    await use(new AccountPage(page));
+  },
 });
 
-test.afterAll(async () => {
-  // Blocks until the grid finishes; `true` throws if any test mismatched — THE GATE.
-  await runner.getAllTestResults(true);
+export { expect } from './fixtures';
+```
+
+- `close(false)` per test, gate once per worker: every test's checkpoints finish rendering, and the run
+  fails once with the whole picture. A failure in the worker teardown fails the run and is reported as a
+  worker error rather than on one test.
+- The test name in the dashboard is `testInfo.title`, so it matches the report.
+- Applitools also ships its own Playwright fixture (`@applitools/eyes-playwright/fixture`), which manages
+  the runner, the session and the batch from `use` options. Prefer it on a greenfield TS suite after checking
+  its options against the installed SDK's types; the explicit fixture above is the model that ports to the
+  .NET and Java siblings.
+- Freeze time with the `frozenClock` auto fixture from `references/playwright-snapshots.md` §4 when the page
+  shows dates.
+
+## 6. The spec
+
+```typescript
+import { Target } from '@applitools/eyes-playwright';
+import { byTestId, test } from './eyes.fixtures';
+
+test.describe('Account', { tag: '@visual' }, () => {
+  test(
+    'Should_KeepSummaryLayout_When_BalancesChange',
+    { annotation: { type: 'no-assertion', description: 'Applitools: the Eyes runner gate is the assertion' } },
+    async ({ accountPage, eyes }) => {
+      await accountPage.open();
+
+      await eyes.check(
+        'Account summary',
+        Target.region(byTestId('Account.Summary'))
+          .layoutRegions(byTestId('Account.Balances'))
+          .ignoreRegions(byTestId('Account.LastLogin')),
+      );
+    },
+  );
 });
 ```
 
-Why `eyes.close(false)` then `getAllTestResults(true)`: `close(true)` would throw the *first* time any
-single test mismatches, aborting the rest before they render on the grid. Passing `false` lets every
-test finish; the runner then aggregates **all** results and fails the build once, at suite end, with a
-complete picture. Eyes captures **at `check` time**, like Percy — so stabilize before each `check`.
+As with Percy, the test has no `expect`: the checkpoint is judged on the grid and the worker's runner gate
+fails the run. The annotation records that exception in the test. Eyes captures at the moment of `check`, so
+the page object's wait comes first.
 
-## Match levels — the real differentiator
+## 7. Match levels
 
-A match level tells the AI *how* to compare a checkpoint against its baseline. Set it per-check via the
-`Target` fluent API; this is the analogue of Percy's `percyCSS`-hide, but richer — prefer a **region
-match level** over hiding the region entirely:
+| Level | Compares |
+|---|---|
+| **Strict** (default) | "Would a person call these the same?" — ignores rendering noise, catches real change |
+| **Layout** | Structure and position only; text, numbers and images may differ. The tool for live data |
+| **Content** | Structure and text, not exact pixels or colours |
+| **Ignore colors** | Structure and content, any colour |
 
-```typescript
-await eyes.check('Account summary', Target.window().fully()
-  // Whole-page level: Strict is the default ("looks the same to a human").
-  .layout('[data-testid="balance-figures"]')   // structure must match; the NUMBERS may change
-  .ignoreRegions('[data-testid="last-login"]') // ignore entirely (timestamp)
-  .floating('[data-testid="toast"]', 5, 5, 5, 5)); // may shift up to 5px in any direction
-```
+- A whole checkpoint: `Target.window().fully().layout()`.
+- One region: `.layoutRegions(...)` compares that region at Layout and keeps the rest of the checkpoint at
+  its own level.
+- `.ignoreRegions(...)` drops a region entirely. Reach for **Layout before Ignore**: ignoring loses
+  coverage, Layout keeps the structure asserted.
+- There is no pixel-ratio knob. The AI and the match level are the tolerance.
 
-The levels, precisely:
+## 8. Batches and the dashboard
 
-- **Strict** (default) — AI match: "would a human call these the same?" Ignores anti-aliasing /
-  rendering noise but catches real visual changes. The right default for stable UI.
-- **Layout** — only the **structure/position** of elements must match; their **content** (text,
-  numbers, images) may differ. *The killer feature for dynamic data* — baseline a populated page once
-  and it stays green as the data changes, while a broken layout still fails.
-- **Content** — like Layout but also compares text content (structure + text, not exact pixels/colors).
-- **Ignore-colors** — match structure + content but ignore color (theme/branding churn).
+`BatchInfo` groups one run's tests under one dashboard entry. The dashboard is the hosted baseline store and
+review UI; baselines are keyed by app, test and branch, and accepting a diff updates the baseline on every
+environment at once. The repo holds no images.
 
-Region levels are the surgical version: `Target.window().fully().layout(locator)` keeps the page Strict
-but treats one region as Layout. Region ignores — `.ignoreRegions(locator)` (drop entirely),
-`.layoutRegions(locator)`, `.floating(locator, ...)` (element may shift within a pixel margin),
-`.accessibility(locator, AccessibilityRegionType.LargeText)` (contrast checks) — are the analogue of
-masking, but expressed as intent.
-
-**There is no per-call pixel-ratio knob** (no `maxDiffPixelRatio` like `playwright-snapshots`). The AI plus the match
-level *is* the tolerance lever. Reach for **Layout** before you reach for ignore.
-
-## Batching + the dashboard
-
-`BatchInfo` groups one run's tests under a single entry in the **Applitools dashboard** (set it on the
-`Configuration`, as above). The dashboard is the hosted **baseline store + review UI** — the analogue
-of Percy's. Baselines are keyed by **app / test / branch**; you accept or reject diffs there, and an
-accept updates the baseline. Same "no in-repo baselines, no `-{platform}` naming" story as Percy: the
-repo holds no PNGs.
-
-To group a sharded CI run into one dashboard batch, set a stable `BATCH_ID` across shards:
-
-```typescript
-config.setBatch(new BatchInfo({
-  name: 'FlexInvest Web — Visual',
-  id: process.env.APPLITOOLS_BATCH_ID,   // same value across all shards → one batch
-}));
-```
-
-## CI integration + the gate
-
-There's **no agent to wrap the command** (the difference from Percy's `percy exec`): the SDK talks to
-the cloud directly, so CI just runs the normal Playwright command with `APPLITOOLS_API_KEY` in env. The
-build fails when `runner.getAllTestResults(true)` throws because an **unresolved diff** exists in the
-dashboard.
+## 9. CI
 
 ```yaml
-# inside your test job — see qa-ci-pipelines-typescript for the full pipeline
 - name: Visual tests (Applitools)
   env:
-    APPLITOOLS_API_KEY: ${{ secrets.APPLITOOLS_API_KEY }}   # from the secret store; never inline
-    APPLITOOLS_BATCH_ID: ${{ github.run_id }}-${{ github.run_attempt }}  # one batch across shards
-  run: npx playwright test
+    APPLITOOLS_API_KEY: ${{ secrets.APPLITOOLS_API_KEY }}
+    APPLITOOLS_BATCH_ID: ${{ github.run_id }}-${{ github.run_attempt }}
+  run: npx playwright test --project=visual
 ```
 
-Link the dashboard batch URL into Allure so reviewers jump straight to it (cross-link
-`qa-test-reports-typescript`):
-
-```typescript
-import { test } from '@playwright/test';
-import { allure } from 'allure-playwright';
-
-test.afterAll(async () => {
-  const summary = await runner.getAllTestResults(false);     // false: don't throw here…
-  const url = summary.getAllResults()[0]?.getTestResults()?.getAppUrls()?.getBatch();
-  if (url) allure.link(url, 'Applitools dashboard', 'applitools');
-  if (summary.getAllResults().some((r) => r.getException() || r.getTestResults()?.getStatus() === 'Unresolved')) {
-    throw new Error('Applitools: unresolved visual diffs — review the dashboard batch.');  // …gate explicitly
-  }
-});
-```
-
-The review-UI workflow, concretely:
-1. PR runs `playwright test`; the SDK uploads to the Ultrafast Grid, which renders + diffs against the
-   branch baseline.
-2. `getAllTestResults(true)` fails the build if any environment is **Unresolved** (new diff).
-3. A reviewer accepts/rejects in the Applitools dashboard. Accepting updates the baseline.
-4. On merge, the accepted checkpoints become the branch baseline for the next PR.
-
-> **Shortcut:** the modern TS SDK (1.32+) also offers a fixture — `import { test } from
-> '@applitools/eyes-playwright/fixture'` then `await eyes.check('Home', { fully: true, matchLevel:
-> 'Layout' })` — which manages the runner/Eyes/batch for you. Prefer it for greenfield TS specs; the
-> explicit `Eyes`/`VisualGridRunner` model shown above is the one that **ports identically to .NET and
-> Java**, so it's the canonical structure here.
+The step belongs to the nightly job (`qa/cicd/ci-conventions`). The run fails when a worker's
+`getAllTestResults(true)` throws because an unresolved diff exists; a reviewer then accepts or rejects it in
+the dashboard, and on merge the accepted checkpoints become the branch baseline.
 
 ## Anti-patterns
 
-- **`eyes.close(true)` (or `eyes.close()`) per test as the gate.** It throws on the first mismatch and
-  aborts the rest before they render. *Fix:* `eyes.close(false)` per test; gate once at suite end with
-  `runner.getAllTestResults(true)`.
-- **Using `ClassicRunner` and expecting a cross-browser grid.** ClassicRunner renders one local
-  environment. *Fix:* `VisualGridRunner` + `Configuration.addBrowser`/`addDeviceEmulation`.
-- **`await page.waitForTimeout(500)` before `eyes.check`.** Eyes captures at call time; a sleep is
-  flaky and slow. *Fix:* wait on a condition (`document.fonts.ready`, spinner hidden, `locator.waitFor`).
-- **Hiding a dynamic region when Layout would do.** Ignoring drops coverage. *Fix:* `Target.layout(
-  region)` — structure stays asserted, only content is allowed to vary.
-- **Committing `*-snapshots/` PNGs alongside Applitools.** Baselines live in the dashboard. *Fix:*
-  delete them; rely on the dashboard baseline.
-- **Hardcoding / logging `APPLITOOLS_API_KEY`.** It's a write credential. *Fix:* env only, from the CI
-  secret store, read lazily by the SDK, never echoed.
-- **A new `BatchInfo` per shard.** Splits one run across many dashboard batches. *Fix:* one stable
-  `BATCH_ID` env var shared across shards.
-- **Full-page Strict checks on a page full of live data.** Chatty reviews. *Fix:* `Target.region(
-  locator)` for the stable part, `layout`/`ignore` regions for the live bits.
+- **`try { … } finally { await eyes.close(false) }` in a test body.** *Fix:* the `eyes` fixture's teardown.
+- **`eyes.close(true)` as the gate.** One mismatch throws before the others report. *Fix:* `close(false)`
+  per test, `getAllTestResults(true)` once.
+- **`ClassicRunner` while expecting a grid.** *Fix:* `VisualGridRunner` and the matrix in §4.
+- **A sleep before `check`.** *Fix:* the page object waits on a condition.
+- **Ignoring a region Layout would cover.** *Fix:* `layoutRegions(...)`.
+- **A new `BatchInfo` id per shard.** One run scatters across batches. *Fix:* one `APPLITOOLS_BATCH_ID`.
+- **`new AccountPage(page)` or `new Eyes(...)` in a spec.** *Fix:* the fixtures.
+- **A hard-coded or logged `APPLITOOLS_API_KEY`.**
 
-## Examples
+## Rules
 
-**End-to-end: a pricing-table visual gate across a browser/device grid, reviewed in the dashboard.**
-
-```typescript
-// tests/pricing.spec.ts
-import { test } from '@playwright/test';
-import { Eyes, VisualGridRunner, Target } from '@applitools/eyes-playwright';
-import { buildConfiguration } from '../support/eyes-config';
-import { PricingPage } from '../pages/pricing.page';
-
-const runner = new VisualGridRunner({ testConcurrency: 5 });
-
-test.describe('Pricing page visual regression (Applitools)', () => {
-  test('Should_match_pricing_table_When_plans_loaded', async ({ page }) => {
-    const eyes = new Eyes(runner);
-    eyes.setConfiguration(buildConfiguration());
-    await eyes.open(page, 'FlexInvest Web', 'Pricing — plan table', { width: 1280, height: 800 });
-
-    try {
-      const pricing = new PricingPage(page);
-      await pricing.goto();
-      await pricing.waitUntilPlansRendered();              // condition, not sleep
-      await page.evaluate(() => document.fonts.ready);       // fonts settled before capture
-
-      await eyes.check('Pricing table', Target.region('[data-testid="pricing-table"]')   // element, not full page
-        .layout('[data-testid="promo-price"]')              // price A/B-tests → Layout, not ignore
-        .ignoreRegions('[data-testid="promo-banner"]'));    // rotates daily → ignore entirely
-    } finally {
-      await eyes.close(false);                              // don't throw inline
-    }
-  });
-
-  test.afterAll(async () => {
-    await runner.getAllTestResults(true);                   // grid finishes → gate the build
-  });
-});
-```
-
-Lifecycle for this test:
-1. Dev makes an intended CSS change to the pricing table.
-2. CI runs `playwright test`; the SDK ships one checkpoint per configured browser/device to the grid,
-   which renders + AI-diffs each vs the branch baseline.
-3. `getAllTestResults(true)` fails the build; the dev reviews + accepts the diff in the dashboard
-   (accepting it on **all** environments at once).
-4. On merge, the accepted renders become the branch baseline — the next PR diffs against them.
-
-## Rules (hard constraints)
-
-- Visual regression is an assertion layer on existing page objects/specs — add `eyes.check`, don't
-  author new page objects here. Page objects expose intent + locators; no selectors in tests.
-- `VisualGridRunner` (not `ClassicRunner`) + `Configuration.addBrowser`/`addDeviceEmulation` — the grid
-  is the reason to choose Applitools.
-- `eyes.close(false)` per test (never inline-throw); gate **once** at suite end with
-  `runner.getAllTestResults(true)`.
-- Stabilize **application** state on a condition before `eyes.check`; never `waitForTimeout` — Eyes
-  captures at call time.
-- Prefer a **match level** (especially `Target.layout(region)`) over hiding dynamic content; there is
-  **no per-call pixel-ratio knob** — the AI + match level is the lever.
-- `APPLITOOLS_API_KEY` is the **only** secret: env-only, from the CI secret store, read lazily by the
-  SDK, never logged or committed. No agent process to launch (unlike Percy's `percy exec`).
-- No in-repo `*-snapshots/` baselines — baselines live in the **dashboard**, keyed by app/test/branch,
-  managed via the review UI. One stable `BatchInfo` id across shards.
-- The gate is the runner's **aggregated results**; link the dashboard batch URL into Allure.
+- `VisualGridRunner` with the matrix in code; a worker-scoped runner that gates in its teardown.
+- `eyes` is a test-scoped fixture: opened before the test, `close(false)` in its teardown — never inline.
+- Stabilize on a condition before `check`; never `waitForTimeout`.
+- Prefer a match level over ignoring a region.
+- Every Eyes test carries the no-assertion annotation; the runner gate is its assertion.
+- No in-repo baselines; one batch id per run; nightly lane only.
+- `APPLITOOLS_API_KEY` is the only secret: environment only, never logged or committed.
 
 ## Cross-references
 
-- `qa-visual-regression-dotnet` — same skill, .NET / NUnit (`Applitools.Playwright`,
-  `Eyes.Check(Target.Window().Fully())`, `runner.GetAllTestResults(false)`).
-- `qa-visual-regression-java` — same skill, Java / TestNG (`com.applitools:eyes-playwright-java5`,
-  `eyes.check(Target.window().fully())`, `runner.getAllTestResults(false)`).
-- `references/percy.md` — the **hosted pixel-diff** sibling: DOM-upload agent +
-  server-side pixel diff + review UI. Applitools is the "graduate to visual-AI + match levels + grid" step.
-- `references/playwright-snapshots.md` — the **free** sibling: in-repo baselines
-  you diff yourself, with the CI-container discipline both Percy and Applitools remove.
-- `qa-ui-test-writer-playwright-typescript` — the page objects/specs `eyes.check` is called inside.
-  Author the flow there; add the visual checkpoint here.
-- `qa-ci-pipelines-typescript` — where `APPLITOOLS_API_KEY` is sourced (secrets/OIDC); no
-  agent wrapper needed.
-- `qa-test-reports-typescript` — link the Applitools dashboard batch URL into the report.
+- `qa-visual-regression-dotnet`, `qa-visual-regression-java` — the same model from .NET and Java.
+- `references/percy.md` — hosted pixel diff; the no-assertion annotation pattern.
+- `references/playwright-snapshots.md` — the free sibling, and the clock fixture.
+- `qa/typescript/skills/ui-test-author/playwright` — fixtures and page objects.
+- `qa/cicd/typescript/skills/ci-pipelines` — where `APPLITOOLS_API_KEY` comes from.

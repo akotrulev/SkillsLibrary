@@ -1,45 +1,67 @@
 ---
 name: qa-visual-regression-typescript
-description: Use when a Node 24 / TypeScript / Vitest test suite must catch unintended visual changes (Playwright pixel snapshots, Percy, or Applitools Eyes). Triggers "add visual regression tests", "screenshot diff this page", "the layout broke and no functional test caught it". Pick the tool in the decision matrix. Do NOT use for structural breakpoint/viewport assertions (use `qa-responsive-testing-typescript`) or accessibility scans (use `qa-accessibility-testing-typescript`).
+description: Use when a Playwright Test (TypeScript) suite must catch unintended visual change — built-in toHaveScreenshot baselines, Percy, or Applitools Eyes. Triggers "add visual regression tests", "screenshot diff this page", "update the visual baselines", "the layout broke and no functional test caught it". Do NOT use for breakpoint layout (qa-responsive-testing-typescript), accessibility scans (qa-accessibility-testing-typescript) or failure screenshots (qa-evidence-capture-typescript).
 ---
 
-# QA — Visual Regression (TypeScript)
+# QA — Visual Regression (TypeScript / Playwright 1.64)
 
-One registered skill, 3 tools — a project uses exactly one. Identify the project's tool
-(dependencies, docker-compose, infra config; ask one question if ambiguous), then **read the matching
-`references/<tool>.md` end-to-end before writing any code** — it carries the full model, patterns,
-templates, anti-patterns, and hard rules for that tool. This file only routes and holds the rules
-shared by every tool in the family.
+One registered skill, three tools — a project uses exactly one. Identify the project's tool (dependencies,
+CI config; ask one question if it is ambiguous), then **read the matching `references/<tool>.md` end to end
+before writing any code**. This file routes and holds the rules every tool shares.
+
+This skill pins nothing. The Playwright version and the Docker image are the **Versions** table of
+`qa/typescript/skills/ui-test-author/playwright/SKILL.md`; the image tag always equals the installed
+`@playwright/test` version.
 
 ## Tools in this family
 
 | Read | Use when |
-|------|----------|
-| `references/playwright-snapshots.md` | Built-in pixel snapshots — free, baselines live in the repo, start here |
-| `references/percy.md` | Hosted pixel-diff with a team review/approval workflow and cross-browser rendering |
-| `references/applitools.md` | Visual-AI (Eyes) — layout-aware matching, Ultrafast Grid render matrix, fewest false positives |
+|---|---|
+| `references/playwright-snapshots.md` | Built-in `toHaveScreenshot` — free, baselines committed in the repo, start here |
+| `references/percy.md` | Hosted pixel diff with a team review workflow; baselines live in Percy |
+| `references/applitools.md` | Visual AI (Eyes) — match levels and the Ultrafast Grid browser/device matrix |
 
 ## Decision matrix — pick the tool
 
 | Need | Use | Why |
-|------|-----|-----|
-| Free, baselines in your repo, you own diffing + the CI-container discipline | `references/playwright-snapshots.md` | No SaaS, no per-snapshot cost, full control |
-| Hosted baselines + human review UI + server-side **pixel** diff | `references/percy.md` | Kills the platform-rendering problem; team review workflow |
-| **Visual-AI** diffing + **match levels** for dynamic content + a real cross-browser/device grid | **`references/applitools.md`** | AI tolerance + Layout-level matching + Ultrafast Grid; most expensive |
+|---|---|---|
+| Free, baselines in your repo, you own the pinned-image discipline | `references/playwright-snapshots.md` | No SaaS, no per-snapshot cost |
+| Hosted baselines, a human review UI, server-side **pixel** diff | `references/percy.md` | Removes the platform-rendering problem; review workflow |
+| **Visual AI** with **match levels** for dynamic content and a real cross-browser/device grid | `references/applitools.md` | Layout-level matching; most expensive |
 
-**Graduation path:** start **free** with built-in snapshots; move to **Percy** when in-repo baselines
-and the platform-rendering discipline become a bottleneck and you want a review workflow; move to
-**Applitools** when anti-aliasing noise across many browsers makes even Percy's pixel diff too chatty,
-or you need **Layout-level** matching to baseline pages whose *content* changes but whose *structure*
-must not.
+**Graduation path:** start with built-in snapshots; move to Percy when in-repo baselines and the pinned
+image become the bottleneck and the team wants a review workflow; move to Applitools when pixel diffs across
+many browsers stay noisy, or a page whose *content* changes must keep its *structure*.
 
-## Shared rules (every tool in this family)
+## Shared rules (every tool)
 
-- Stabilize before snapshotting: freeze animations, clocks, and dynamic data.
-- Navigate to the state via page objects — the snapshot is the assertion, not the navigation.
-- Baseline updates are reviewed diffs; never blind-regenerate baselines in CI.
+- **Stabilize before the capture.** Data loaded — the page object waits on a condition. **Time frozen** —
+  an auto fixture calls `page.clock.setFixedTime(date)` before the page loads (clock API:
+  `qa/typescript/skills/ui-test-author/playwright/references/emulation-and-mobile-web.md` §6). Dynamic
+  regions masked or hidden. No `waitForTimeout`.
+- **Reach the state through fixtures and page objects.** A spec never constructs a page object or calls
+  `page` directly; the capture is the only new line in the test.
+- **Visual specs run in the nightly lane**, never on every PR (`qa/cicd/ci-conventions`): a `visual`
+  project with `default: false` [1.64] that the schedule runs with `--project=visual`.
+- **Baselines are reviewed, never regenerated in CI.** Built-in: the canonical config sets
+  `updateSnapshots: 'none'` on CI and baselines are written in the pinned image by a person. Hosted: a
+  person approves the diff in the vendor's UI.
+- **Failure evidence comes from the canonical config** (`trace`, `video` and `screenshot` on
+  `retain-on-failure` / `only-on-failure`) and `allure-playwright` — no `afterEach` that re-attaches
+  diffs. WebP baselines get no Allure diff widget (`qa/reporting/typescript/skills/test-reports`).
+- **Allure calls use `import * as allure from 'allure-js-commons'` and are awaited.** Prefer
+  `testInfo.attach`, which reaches both the HTML report and Allure.
+- **A hosted-tool test has no `expect`.** The vendor's review is the assertion. That exception is recorded
+  in the test as an annotation (`references/percy.md` shows it), so a reader never mistakes it for a
+  forgotten assertion.
 
-## Cross-references
+## Handoffs
 
-Each `references/<tool>.md` carries its own cross-references to sibling skills (DB verification,
-test environments, CI, chaos). Route there after picking the tool.
+- Page objects, fixtures and the canonical config → `qa/typescript/skills/ui-test-author/playwright`
+- Aria snapshots and the other web-first assertions →
+  `qa/typescript/skills/ui-test-author/playwright/references/assertions.md`
+- Failure evidence and reading a trace → `qa/typescript/skills/evidence-capture`
+- Allure mapping of diffs → `qa/reporting/typescript/skills/test-reports`
+- The nightly job and artifact upload → `qa/cicd/typescript/skills/ci-pipelines`, `qa/cicd/ci-conventions`
+- Java and .NET → `qa-visual-regression-java`, `qa-visual-regression-dotnet` (no screenshot assertion in
+  those bindings; they compare `screenshot()` output)

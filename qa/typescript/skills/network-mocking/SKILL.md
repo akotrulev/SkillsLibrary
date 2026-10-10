@@ -1,41 +1,61 @@
 ---
 name: qa-network-mocking-typescript
-description: Use when Node 24 / TypeScript / Vitest UI tests must intercept, mock, throttle, or assert browser network traffic. Triggers "mock this XHR in the UI test", "simulate slow 3G/offline", "capture a HAR", "assert the page called endpoint X". Do NOT use for direct API testing without a browser (use `qa-api-test-writer-typescript`), for load-level throttling (use the stack's `performance` skill), or for WebSocket/SSE streams (use `qa-realtime-stream-testing-typescript`).
+description: Use when Playwright Test (TypeScript) UI tests must intercept, mock, throttle or assert browser network traffic, or a non-Playwright client needs a MITM proxy. Triggers "mock this XHR in the UI test", "replay a HAR", "simulate slow 3G or offline", "assert the page called endpoint X", "check the security headers". Do NOT use for API tests without a browser (qa-api-test-writer-typescript), load-level throttling (performance) or WebSocket/SSE streams (qa-realtime-stream-testing-typescript).
 ---
 
-# QA — Network Monitoring (TypeScript)
+# QA — Network Mocking and Monitoring (TypeScript / Playwright 1.64)
 
-One registered skill, 3 tools — a project uses exactly one. Identify the project's tool
-(dependencies, docker-compose, infra config; ask one question if ambiguous), then **read the matching
-`references/<tool>.md` end-to-end before writing any code** — it carries the full model, patterns,
-templates, anti-patterns, and hard rules for that tool. This file only routes and holds the rules
-shared by every tool in the family.
+One registered skill, three layers — reach for the highest one that can express the test. Identify the
+layer, then **read the matching `references/<tool>.md` end to end before writing any code**. This file
+routes and holds the rules every layer shares.
 
-## Tools in this family
+This skill pins nothing; `@playwright/test` is in the **Versions** table of
+`qa/typescript/skills/ui-test-author/playwright/SKILL.md`.
+
+## Layers in this family
 
 | Read | Use when |
-|------|----------|
-| `references/playwright-routes.md` | Intercept/mock/assert requests inside Playwright tests — the default; stay here when possible |
-| `references/cdp.md` | Chrome DevTools Protocol — network throttling, offline mode, low-level events Playwright routes can't reach |
-| `references/proxy.md` | Out-of-browser MITM proxy — HAR capture and interception for Selenium/Appium/non-CDP browsers |
+|---|---|
+| `references/playwright-routes.md` | Mock, abort, modify or assert requests inside Playwright; HAR replay; offline; "not called" checks; security headers and TLS details. **The default** |
+| `references/cdp.md` | Chromium DevTools Protocol — real bandwidth/latency throttling, HTTP-cache disable, CPU throttling, `Performance` metrics |
+| `references/proxy.md` | An out-of-process MITM proxy for clients with no Playwright `page` — Selenium, Appium, a native HTTP client |
 
-## Decision matrix — pick the tool
+## Decision matrix
 
-| Layer | Tool | What it does | Browser support |
-|---|---|---|---|
-| **Request routing** (high level) | `page.route` → `references/playwright-routes.md` | Intercept/mock/abort/fulfill a request, assert it fired, modify in flight, HAR replay, **approximate** offline (`context.setOffline`), **per-request `setTimeout` delay** | All (Chromium/Firefox/WebKit) |
-| **DevTools Protocol** (below routing) | `newCDPSession` → **`references/cdp.md`** | **Real** bandwidth+latency throttling (throughput numbers), **HTTP-cache disable**, **CPU throttling**, security-header/`securityDetails` audit, `Performance` metrics | **Chromium-only** |
-| **External MITM proxy** | mitmproxy / system proxy → `references/proxy.md` | Out-of-browser capture for multi-process or non-Playwright stacks | Any client through the proxy |
+| Layer | What it does | Browsers |
+|---|---|---|
+| **Routing** — `page.route` / `context.route` (`references/playwright-routes.md`) | Fulfill, abort, continue, modify in flight; wait for or list requests (`page.requests()` [1.56]); console and page errors; HAR replay; `context.setOffline`; per-request delay; headers via `response.allHeaders()` and TLS via `response.securityDetails()` | Chromium, Firefox, WebKit |
+| **DevTools Protocol** — `newCDPSession` (`references/cdp.md`) | Real throughput-based throttling, cache disable, CPU throttling, performance metrics | **Chromium only** |
+| **External proxy** — `mockttp` (`references/proxy.md`) | Record, assert and fault-inject for any client that honours a proxy | Any client |
 
-**Decision rule:** reach for `page.route` **first** — it's cross-browser, typed, and covers mocking/asserting/offline. Drop to **CDP only when routing genuinely can't express the test**: real throughput-based throttling, cache-disable, CPU throttling, TLS/`securityDetails` inspection, or `Performance` metrics. CDP is more brittle — **stringly-typed** protocol method names (`'Network.emulateNetworkConditions'`), no compile-time check — and **Chromium-only**. Pay that cost deliberately.
+**Decision rule:** routing first — it is cross-browser and typed. Drop to CDP only for what routing cannot
+express: real throttling, cache disable, CPU throttling, `Performance` metrics. CDP method names are strings
+with no compile-time check, and the layer is Chromium-only. Use the proxy only when there is no `page`.
 
-## Shared rules (every tool in this family)
+## Owned next door
 
-- Intercept at the closest layer to the test runner — don't run a proxy when routes suffice.
-- Assert traffic via explicit waits on request/response predicates — never sleeps or listener races.
-- Mocked payloads come from fixtures/builders, not inline blobs duplicated across tests.
+- **WebSocket and SSE** — observing or mocking a stream (`routeWebSocket`, `framereceived`, `EventSource`) is
+  `qa/typescript/skills/realtime-stream-testing`. `route.fulfill` delivers a whole body at once, so it cannot
+  stand in for an SSE stream.
+- **HAR recording** — `context.tracing.startHar()` [1.60] in a fixture, or `contextOptions.recordHar`, is
+  `qa/typescript/skills/evidence-capture` (`references/playwright.md` §5). This skill replays and updates
+  HARs with `routeFromHAR`.
 
-## Cross-references
+## Shared rules (every layer)
 
-Each `references/<tool>.md` carries its own cross-references to sibling skills (DB verification,
-test environments, CI, chaos). Route there after picking the tool.
+- Intercept at the layer closest to the test runner — never a proxy where routes suffice.
+- Register the route or the wait **before** the action that triggers the request.
+- Assert traffic with waits on request/response predicates, or with a list read after a user-visible
+  completion signal — never after a sleep.
+- Interception lives in fixtures with intent names; a spec never calls `page.route`, `client.send` or a
+  proxy API directly.
+- Mock payloads are typed and come from builders or fixture files (`qa/typescript/skills/test-data-builder`),
+  not inline blobs repeated across tests.
+- Every handler promise is awaited or returned.
+
+## Handoffs
+
+- Page objects, fixtures and the canonical config → `qa/typescript/skills/ui-test-author/playwright`
+- Streams → `qa/typescript/skills/realtime-stream-testing`; HAR recording → `qa/typescript/skills/evidence-capture`
+- No browser at all → `qa/typescript/skills/api-test-author/writer`
+- Java and .NET → `qa-network-mocking-java`, `qa-network-mocking-dotnet`

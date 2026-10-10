@@ -1,338 +1,270 @@
-# Visual Regression — Playwright Snapshots (TypeScript)
+# Visual Regression — Playwright Snapshots (TypeScript / Playwright 1.64)
 
-## When to use this skill
+`toHaveScreenshot` compares a fresh capture against a baseline image committed to the repo. Playwright does
+the capture and the diff; you own the baselines and the environment they are rendered in. It is a **Node
+test-runner feature only** — Java, .NET and Python have no screenshot assertion. The version in brackets is
+where an API first shipped.
 
-Use when a Playwright **TypeScript** test must detect **unintended visual change** — a CSS
-regression, a broken layout, a shifted component — by comparing a fresh screenshot against a
-committed baseline image. This is the **built-in, free** layer: Playwright does the capture and the
-pixel diff, baselines live in your repo, and you own the flakiness budget. Reach for Percy or
-Applitools only when you need hosted baseline management, a human review UI, or visual-AI
-cross-browser diffing — see the decision matrix.
+Visual regression is an **assertion layer** on flows that `qa/typescript/skills/ui-test-author/playwright`
+already models: you add a page-object fixture and one capture, never new navigation code in a spec.
 
-Visual regression is an **assertion layer** that sits *on top of* your existing page objects and
-specs. You do not write new page objects here — you add a screenshot assertion to a flow the
-`qa-ui-test-writer-playwright-typescript` skill already authored.
-
-## Decision matrix — which assertion, which tool
+## 1. Which assertion
 
 | Need | Use | Why |
-|------|-----|-----|
-| Visual diff of a page/element, auto-retried + stabilized | `await expect(page).toHaveScreenshot()` | The modern API: waits for the page to stop changing, retries until match or timeout |
-| Visual diff of an element only | `await expect(locator).toHaveScreenshot()` | Scopes the capture; less flaky than full page |
-| Compare an arbitrary buffer/string you produced | `expect(buffer).toMatchSnapshot('name.png')` | Raw snapshot of bytes you control (e.g. a generated PDF/SVG, a `screenshot()` you post-processed) |
-| Free, baselines in your repo, you own diffing | **this skill** | No SaaS, no per-screenshot cost, full control |
-| Hosted baselines + PR review UI + auto-approve flow | Percy | Offloads baseline mgmt + review; paid |
-| Visual-AI diffing + cross-browser rendering grid | Applitools | Ignores anti-aliasing noise via AI; paid |
+|---|---|---|
+| A component's look | `await expect(locator).toHaveScreenshot('name.png')` | Scoped capture, least noise. The default |
+| A whole page | `await expect(page).toHaveScreenshot(...)` through a page-object method | More surface, more masks |
+| Deterministic text or bytes you generated (CSV, SVG, JSON) | `expect(value).toMatchSnapshot('orders.csv')` | No retry and no stabilization — the value must already be stable |
+| Roles, names and states, no pixels | `toMatchAriaSnapshot` | `qa/typescript/skills/ui-test-author/playwright/references/assertions.md` §2 |
 
-**Rule of thumb:** `toHaveScreenshot()` for anything rendered in the browser (it stabilizes and
-retries). `toMatchSnapshot()` only for bytes/strings you generated yourself and want to pin. Prefer
-**element** screenshots over **full-page** — they are dramatically less flaky.
+`toHaveScreenshot` captures until two consecutive screenshots match, then compares with the baseline, and
+retries until the `expect` timeout. It disables animations, hides the caret, uses CSS-pixel scale and
+waits for web fonts by default, so none of those is set again.
 
-## Setup
+## 2. Config — what this skill adds to the canonical config
 
-```bash
-npm init playwright@latest
-```
-
-`playwright.config.ts` — set global screenshot defaults once so individual tests stay clean, and
-make failures debuggable:
+The canonical config (`qa/typescript/skills/ui-test-author/playwright/assets/playwright.config.ts`) already
+sets the evidence defaults (`trace: 'retain-on-failure'`, video, screenshot) and
+`updateSnapshots: isCI ? 'none' : 'missing'`. A visual suite adds a tolerance, a baseline location and a
+`visual` project that only the nightly lane runs. Merge these keys into that config:
 
 ```typescript
-import { defineConfig, devices } from '@playwright/test';
-
-export default defineConfig({
-  testDir: './tests',
-  // Fail fast in CI; never write/update baselines implicitly on CI.
-  forbidOnly: !!process.env.CI,
-  use: {
-    baseURL: 'http://localhost:3000',
-    trace: 'on-first-retry',
+expect: {
+  toHaveScreenshot: {
+    maxDiffPixelRatio: 0.01,
+    pathTemplate: '{testDir}/__screenshots__/{testFilePath}/{arg}{-projectName}-{platform}{ext}',
   },
-  expect: {
-    toHaveScreenshot: {
-      // Global flakiness budget — override per assertion when a region needs more/less tolerance.
-      maxDiffPixelRatio: 0.01, // ≤1% of pixels may differ
-      animations: 'disabled',  // freeze CSS animations/transitions for the shot
-      scale: 'css',            // size in CSS pixels, stable across DPI
-    },
+},
+projects: [
+  { name: 'setup', testMatch: /.*\.setup\.ts/ },
+  {
+    name: 'chromium',
+    testIgnore: /.*\.visual\.spec\.ts/,
+    use: { ...devices['Desktop Chrome'], storageState: authFile },
+    dependencies: ['setup'],
   },
-  projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
-});
+  {
+    name: 'visual',
+    testMatch: /.*\.visual\.spec\.ts/,
+    use: { ...devices['Desktop Chrome'], storageState: authFile },
+    dependencies: ['setup'],
+    default: false,
+  },
+],
 ```
 
-## Where baselines live & how they're named
+- `default: false` [1.64] keeps `visual` out of a plain `npx playwright test`, so the PR lane never runs it.
+  `--project=visual` runs it, with its `setup` dependency.
+- `expect.toHaveScreenshot.pathTemplate` [1.50] moves screenshot baselines without moving aria snapshots;
+  `snapshotPathTemplate` [1.28] moves both.
+- Do not set `animations: 'disabled'`, `caret: 'hide'` or `scale: 'css'`: they are already the
+  `toHaveScreenshot` defaults.
+- Upgrading to 1.64: device descriptors now forward `screen`, so pages that read `window.screen` or screen
+  media queries may render differently. Re-baseline once in the image, or set `screen: undefined` in the
+  project.
 
-On the first run, Playwright writes a baseline next to the spec, then compares against it on every
-later run:
+## 3. Where baselines live
 
-```
-tests/
-  dashboard.spec.ts
-  dashboard.spec.ts-snapshots/
-    revenue-card-chromium-linux.png      ← {name}-{projectName}-{platform}.png
-```
+The runner default is
+`{snapshotDir}/{testFileDir}/{testFileName}-snapshots/{arg}{-projectName}{-snapshotSuffix}{ext}`, with the
+platform as the suffix: `dashboard.visual.spec.ts-snapshots/revenue-card-visual-linux.png`. Tokens:
+`{arg} {ext} {platform} {projectName} {snapshotDir} {testDir} {testFileDir} {testFileBaseName}` [1.60]
+`{testFileName} {testFilePath} {testName}`; a one-character prefix such as `{-projectName}` is written only
+when the token is not empty.
 
-The `-{platform}` suffix (`linux` / `darwin` / `win32`) is the crux of the **cross-platform
-rendering problem**: a baseline generated on a dev Mac is named `...-darwin.png` and will **not** be
-found — or worse, will subtly mismatch on font hinting/anti-aliasing — when CI runs on Linux. The
-fix is below in "The CI baseline discipline". Commit the `*-snapshots/` directories to the repo:
-**baselines are build artifacts under version control, not secrets.**
+Keep `{platform}` in any template. Browser rendering depends on the host OS, fonts and hardware, so the only
+baselines that count are the `-linux` ones written in the pinned image. A `-darwin` file from a dev box is
+never used by CI and never committed: add `__screenshots__/**/*-darwin.*` and `__screenshots__/**/*-win32.*`
+to `.gitignore`. Commit the `-linux` baselines — they are versioned test data, not secrets.
 
-## Core pattern 1 — element screenshot on a page-object-driven flow
+## 4. Fixtures and the page object
 
-The page object exposes intent and the locator; the test adds the visual assertion. No selectors in
-the test.
+Time is frozen for every visual test by an auto fixture, before any navigation. `setFixedTime` makes
+`Date.now()` return one instant while timers keep running, which is what "today is …" rendering needs. A
+page whose animation is driven by timers needs `page.clock.install()` and `pauseAt()` instead.
 
 ```typescript
-// pages/dashboard.page.ts
-import { type Page, type Locator } from '@playwright/test';
+import type { Locator, Page } from '@playwright/test';
 
 export class DashboardPage {
-  readonly page: Page;
   readonly revenueCard: Locator;
+  readonly lastSeen: Locator;
+  private readonly revenueSpinner: Locator;
 
-  constructor(page: Page) {
-    this.page = page;
-    this.revenueCard = page.getByTestId('revenue-card');
+  constructor(private readonly page: Page) {
+    this.revenueCard = page.getByTestId('Dashboard.RevenueCard');
+    this.lastSeen = page.getByTestId('Dashboard.LastSeen');
+    this.revenueSpinner = this.revenueCard.getByRole('progressbar');
   }
 
-  async goto(): Promise<void> {
+  async open(): Promise<void> {
     await this.page.goto('/dashboard');
-  }
-
-  /** Resolves once the card's data has rendered — a condition, never a fixed wait. */
-  async waitUntilLoaded(): Promise<void> {
-    await this.revenueCard.getByRole('status').waitFor({ state: 'hidden' });
+    await this.revenueSpinner.waitFor({ state: 'hidden' });
   }
 }
 ```
 
 ```typescript
-// tests/dashboard.spec.ts
-import { test, expect } from '@playwright/test';
-import { DashboardPage } from '../pages/dashboard.page';
+import { test as base } from './fixtures';
+import { DashboardPage } from './DashboardPage';
 
-test('Should_match_revenue_card_baseline_When_dashboard_loads', async ({ page }) => {
-  const dashboard = new DashboardPage(page);
-  await dashboard.goto();
-  await dashboard.waitUntilLoaded();      // stabilize on a condition first…
+export const visualNow = new Date('2026-01-15T09:00:00Z');
 
-  await expect(dashboard.revenueCard).toHaveScreenshot('revenue-card.png'); // …then assert (auto-retries)
+type VisualFixtures = {
+  frozenClock: void;
+  dashboardPage: DashboardPage;
+};
+
+export const test = base.extend<VisualFixtures>({
+  frozenClock: [
+    async ({ page }, use) => {
+      await page.clock.setFixedTime(visualNow);
+      await use();
+    },
+    { auto: true },
+  ],
+  dashboardPage: async ({ page }, use) => {
+    await use(new DashboardPage(page));
+  },
 });
+
+export { expect } from './fixtures';
 ```
 
-`toHaveScreenshot()` auto-retries the capture+compare until it matches or the `expect` timeout
-elapses, and it waits for fonts/animations to settle. You still stabilize *application* state
-(data loaded, spinners gone) yourself — Playwright cannot know your spinner is "done".
+`./fixtures` is the writer's `assets/fixtures.ts`; `visual.fixtures.ts` extends it, and visual specs import
+`test` and `expect` from it.
 
-## Core pattern 2 — taming flakiness
-
-The four sources of false diffs and the deterministic fix for each:
+## 5. The spec
 
 ```typescript
-test('Should_match_profile_page_When_dynamic_regions_neutralized', async ({ page }) => {
-  await page.goto('/profile');
+import { expect, test } from './visual.fixtures';
 
-  // 1) Fonts not yet rendered → wait on the condition, not a timeout.
-  await page.evaluate(() => document.fonts.ready);
+test.describe('Dashboard', { tag: '@visual' }, () => {
+  test('Should_MatchRevenueCardBaseline_When_DashboardLoads', async ({ dashboardPage }) => {
+    await dashboardPage.open();
 
-  // 2) Dynamic content (timestamps, avatars, ads) → mask it out (painted as a solid box).
-  await expect(page).toHaveScreenshot('profile.png', {
-    mask: [page.getByTestId('last-seen'), page.locator('img.gravatar')],
-    maskColor: '#FF00FF',
-
-    // 3) Anti-aliasing / sub-pixel noise → small tolerance. Prefer ratio over absolute.
-    maxDiffPixelRatio: 0.02,
-    // threshold is per-pixel color sensitivity (0 strict … 1 loose); default 0.2 is usually right.
-    threshold: 0.2,
-
-    // 4) Animations / carets → freeze them.
-    animations: 'disabled',
-    caret: 'hide',
-  });
-});
-```
-
-Knobs, precisely:
-
-- **`maxDiffPixels`** — absolute number of differing pixels allowed. Brittle across viewport sizes.
-- **`maxDiffPixelRatio`** — fraction (0–1) of differing pixels allowed. **Prefer this** — it scales
-  with image size.
-- **`threshold`** — per-pixel YIQ color-distance sensitivity (0 = exact, 1 = anything). Controls
-  *whether a pixel counts as different at all* before the ratio/count is applied. Default `0.2`.
-- **`mask` / `maskColor`** — overpaint dynamic regions so they can never diff.
-- **`animations: 'disabled'`** — sets CSS animations/transitions to their end state.
-- **`caret: 'hide'`** — hides the text input caret (a classic 1px flake).
-- **`stylePath`** — inject a CSS file to hide/neutralize elements (e.g. `* { caret-color: transparent }`,
-  hide live chat widgets) consistently across every screenshot.
-- **`fullPage: true`** — capture the whole scrollable page (flakier; mask aggressively).
-- **`clip`** — capture a fixed rectangle.
-
-`stylePath` for repo-wide stabilization:
-
-```typescript
-// snapshot.css
-*, *::before, *::after { transition: none !important; animation: none !important; }
-[data-testid="live-clock"], .chat-widget { visibility: hidden !important; }
-```
-
-```typescript
-expect: {
-  toHaveScreenshot: { stylePath: './snapshot.css', animations: 'disabled', maxDiffPixelRatio: 0.01 },
-},
-```
-
-## Core pattern 3 — `toMatchSnapshot()` for bytes you produced
-
-Use only when you own the buffer/string — not for live page captures (those should use
-`toHaveScreenshot()` so they stabilize and retry).
-
-```typescript
-test('Should_match_generated_invoice_pdf_baseline', async ({ page }) => {
-  const pdf = await page.pdf({ format: 'A4' });
-  expect(pdf).toMatchSnapshot('invoice.pdf'); // raw byte comparison; no stabilization
-});
-```
-
-`toMatchSnapshot()` does **not** auto-retry and does **not** stabilize. For images it accepts the
-same `threshold` / `maxDiffPixels` options, but for live pages `toHaveScreenshot()` is strictly
-better.
-
-## The CI baseline discipline (the part everyone gets wrong)
-
-Baselines are platform-specific. The only reliable workflow:
-
-1. **Never commit baselines generated on your dev box.** A `...-darwin.png` baseline is useless to a
-   Linux runner.
-2. **Generate/update baselines inside the same container CI uses.** Either run CI's Docker image
-   locally, or run an update step in CI itself:
-
-   ```bash
-   # Reproduce CI's exact rendering locally via the official image (tag must match your @playwright/test version):
-   docker run --rm --network host -v "$(pwd):/work" -w /work \
-     mcr.microsoft.com/playwright:v1.50.0-noble \
-     npx playwright test --update-snapshots
-   ```
-
-3. **`--update-snapshots` discipline.** Run it deliberately when a change is *intended*, review the
-   resulting PNGs in the diff, and commit them in the same PR as the UI change. Never wire
-   `--update-snapshots` into the normal test run — that makes every run "pass" by overwriting the
-   baseline.
-
-4. **Gate updates behind a manual/labelled CI job**, not a local push. See the github-actions
-   cross-link below for the gated `update-baselines` job pattern.
-
-On a normal CI failure Playwright emits three PNGs — `*-actual.png`, `*-expected.png`,
-`*-diff.png` — into `test-results/`. Upload them as artifacts and attach to the report:
-
-```yaml
-# inside your test job (see qa-ci-pipelines-typescript for the full pipeline)
-- name: Upload visual diff artifacts
-  if: failure()
-  uses: actions/upload-artifact@v4
-  with:
-    name: playwright-visual-diffs
-    path: |
-      test-results/**/*-actual.png
-      test-results/**/*-expected.png
-      test-results/**/*-diff.png
-    retention-days: 7
-```
-
-Attach the diff into Allure so reviewers see it inline (cross-link `qa-test-reports-typescript`):
-
-```typescript
-import { test } from '@playwright/test';
-import { allure } from 'allure-playwright';
-import { readFileSync } from 'node:fs';
-
-test.afterEach(async ({}, testInfo) => {
-  if (testInfo.status !== testInfo.expectedStatus) {
-    for (const a of testInfo.attachments) {
-      if (a.name.includes('diff') && a.path) {
-        allure.attachment('visual-diff', readFileSync(a.path), 'image/png');
-      }
-    }
-  }
-});
-```
-
-## Anti-patterns
-
-- **Committing dev-box baselines.** `...-darwin.png` baselines fail or flake on Linux CI. Generate
-  inside the CI container. *Fix:* the Docker/`--update-snapshots` workflow above.
-- **`await page.waitForTimeout(500)` before the screenshot.** A fixed sleep is both flaky and slow.
-  *Fix:* wait on a condition (`document.fonts.ready`, spinner hidden, `locator.waitFor`), then assert
-  — `toHaveScreenshot()` auto-retries the rest.
-- **Full-page screenshots of a page full of dynamic data.** Guaranteed flake. *Fix:* screenshot the
-  **element** under test; `mask` the dynamic bits; use `stylePath` to neutralize globally.
-- **Cranking `maxDiffPixelRatio` to 0.2 to "make it pass".** That blinds the test to real
-  regressions. *Fix:* find the *specific* flaky region and `mask` it; keep the ratio tight (≤0.02).
-- **Wiring `--update-snapshots` into the default test command.** Every run silently rewrites the
-  baseline, so nothing is ever caught. *Fix:* update only via a deliberate, gated step.
-- **Using `toMatchSnapshot()` for a live page.** No stabilization, no retry → flaky. *Fix:*
-  `toHaveScreenshot()` for anything the browser renders.
-- **Treating a baseline as a secret / `.gitignore`-ing `*-snapshots/`.** Then CI has nothing to
-  compare against. *Fix:* commit baselines; they are versioned build artifacts.
-
-## Examples
-
-**End-to-end: a component visual gate that survives CI.**
-
-```typescript
-// tests/pricing.spec.ts
-import { test, expect } from '@playwright/test';
-import { PricingPage } from '../pages/pricing.page';
-
-test.describe('Pricing table visual regression', () => {
-  test('Should_match_pricing_table_baseline_When_plans_loaded', async ({ page }) => {
-    const pricing = new PricingPage(page);
-    await pricing.goto();
-    await pricing.waitUntilPlansRendered();        // condition, not sleep
-    await page.evaluate(() => document.fonts.ready); // fonts settled
-
-    await expect(pricing.table).toHaveScreenshot('pricing-table.png', {
-      mask: [pricing.promoBanner],   // rotates daily — never diff it
-      maxDiffPixelRatio: 0.01,
-      animations: 'disabled',
-      caret: 'hide',
+    await expect(dashboardPage.revenueCard).toHaveScreenshot('revenue-card.png', {
+      mask: [dashboardPage.lastSeen],
     });
   });
 });
 ```
 
-Baseline lifecycle for this test:
-1. Dev makes an intended CSS change.
-2. Runs `docker run … npx playwright test pricing.spec.ts --update-snapshots` in the CI image.
-3. Reviews `pricing-table-chromium-linux.png` in the diff, commits it with the CSS change.
-4. CI compares against it on every PR; an *unintended* change now fails with a `-diff.png` artifact.
+The page object waits for the application state (the spinner gone); `toHaveScreenshot` waits for the
+rendering to settle. Playwright cannot know when your data has arrived, so the first wait is yours.
 
-## Rules (hard constraints)
+## 6. Taming false diffs
 
-- Stabilize **application** state on a condition before asserting; never `waitForTimeout`. Let
-  `toHaveScreenshot()` auto-retry the rendering settle.
-- Prefer **element** screenshots over full-page; `mask` every dynamic region.
-- Prefer `maxDiffPixelRatio` (scales with size) over `maxDiffPixels`; keep tolerance tight and mask
-  noise rather than loosening the budget.
-- **Generate baselines inside the CI container**, never on the dev box. Baselines are committed,
-  versioned build artifacts — not secrets, not `.gitignore`-d.
-- `--update-snapshots` is a deliberate, reviewed, gated action — never part of the default test run.
-- On failure, upload `*-actual/-expected/-diff.png` as artifacts and attach the diff to the report.
-- `toHaveScreenshot()` for browser-rendered content; `toMatchSnapshot()` only for bytes you produced.
-- Page objects expose intent + locators; the test owns the visual assertion. No selectors in tests.
+| Source of noise | Fix |
+|---|---|
+| Data that changes per run (timestamps, avatars, ads) | `mask: [locator]` paints a box over it (`maskColor` [1.35], default `#FF00FF`); masks cover invisible matches too |
+| A widget you never want to diff (chat launcher, cookie banner) | `stylePath: './visual.css'` [1.41] in `expect.toHaveScreenshot`, applied to every capture. There is no inline `style` option on `toHaveScreenshot` |
+| Today's date | The `frozenClock` fixture (§4) |
+| Anti-aliasing and sub-pixel noise | `maxDiffPixelRatio` (0–1, scales with image size) over `maxDiffPixels`; keep it ≤ 0.02 and mask instead of loosening |
+| Colour sensitivity per pixel | `threshold` (YIQ distance, 0 strict … 1 lax, default 0.2) — rarely changed |
+| A hover state left behind by the last action | A page-object method that moves the pointer off the element before the capture |
+| A whole page | `fullPage: true` on `expect(page)` — flakier, mask aggressively |
+
+```css
+[data-testid="Chat.Launcher"],
+[data-testid="Cookie.Banner"] {
+  visibility: hidden !important;
+}
+```
+
+## 7. Documents and generated files
+
+- **Never byte-compare a PDF.** `page.pdf()` embeds a creation date and a document id, so its bytes differ
+  on every run; it is also Chromium-only. Compare the **print rendering** instead — a page-object method
+  calls `page.emulateMedia({ media: 'print' })` and opens the document, and the spec asserts
+  `toHaveScreenshot` on the document locator. To check the PDF file itself, extract its text with the
+  project's PDF library and assert on the text.
+- `toMatchSnapshot` is for a value you produced that is deterministic: a CSV export, a generated SVG, a
+  serialized JSON. It does not retry or stabilize.
+
+## 8. PNG or WebP
+
+`toHaveScreenshot('name.webp')` [1.62] stores a lossless WebP baseline; `expect.toHaveScreenshot.type:
+'webp'` [1.64] does it for unnamed captures. WebP baselines are smaller, but `allure-playwright` builds its
+image-diff widget only from `-expected/-actual/-diff.png` triples, so a WebP failure reaches Allure as three
+separate images (`qa/reporting/typescript/skills/test-reports`). Use PNG while Allure is where diffs are
+reviewed.
+
+## 9. Updating baselines — the modes
+
+`updateSnapshots` in the config, or `--update-snapshots[=mode]` / `-u` on the command line:
+
+| Mode | Missing baseline | Mismatched baseline | Where it is used |
+|---|---|---|---|
+| `none` | not written | not written | CI — the canonical config sets it; no pipeline passes `-u` |
+| `default` (no flag) | written, and the test **fails** | not written | The 1.64 name for the old implicit behaviour |
+| `missing` | written, and the test **passes** [1.64] | not written | The canonical config locally. Before 1.64 it failed |
+| `changed` (bare `-u`) | written | rewritten | An intended UI change, in the pinned image |
+| `all` | rewritten | rewritten | A full re-baseline after a Playwright or browser upgrade |
+
+A script that relied on "`missing` fails" must switch to `default`. Locally, `missing` lets a new visual
+test pass on a dev box while writing a `-darwin` baseline; that file is ignored (§3) and the image run
+writes the real one.
+
+## 10. Writing baselines in the pinned image
+
+```bash
+docker run --rm --ipc=host \
+  -v "$PWD":/work -v /work/node_modules -w /work \
+  -e BASE_URL -e E2E_USER -e E2E_PASSWORD \
+  mcr.microsoft.com/playwright:v1.64.0-noble \
+  /bin/bash -c "npm ci && npx playwright test --project=visual --update-snapshots=changed"
+```
+
+- The tag equals the installed `@playwright/test`; on a project pinned elsewhere, use that version.
+- `--ipc=host` gives Chromium the shared memory it needs; without it the browser can crash on large pages.
+- `npm ci` runs **inside** the container, so the Linux browser binaries and native modules are installed for
+  the image. `-v /work/node_modules` keeps that install out of the host's `node_modules`.
+- From macOS, an app on the host is `BASE_URL=http://host.docker.internal:<port>`.
+- Review the changed images in the PR diff and commit them with the UI change that caused them.
+
+## 11. CI — the nightly lane
+
+The scheduled job runs `npx playwright test --project=visual` in the same image (`qa/cicd/ci-conventions`:
+visual regression is gated to the schedule or an explicit label). CI never writes a baseline. On a
+mismatch the test folder under `test-results/` holds `<name>-expected.png`, `<name>-actual.png` and
+`<name>-diff.png`, plus the trace the config keeps; `allure-playwright` turns the PNG triple into one
+diff attachment. The job uploads `test-results/` on failure like every UI job
+(`qa/cicd/typescript/skills/ci-pipelines`). Nothing re-attaches the diffs in an `afterEach`. Reading the
+failure is `qa/typescript/skills/evidence-capture`.
+
+## Anti-patterns
+
+- **Baselines from a dev box.** `-darwin` files never match Linux CI. *Fix:* §10, and ignore them (§3).
+- **A sleep or a `document.fonts.ready` step before the capture.** Fonts are already awaited and a sleep
+  races the page. *Fix:* the page object waits on the data condition.
+- **Re-setting the defaults** (`animations`, `caret`, `scale`). Noise. *Fix:* delete them.
+- **Loosening `maxDiffPixelRatio` to 0.2 to make a test pass.** It blinds the test. *Fix:* mask the region.
+- **`--update-snapshots` in a pipeline**, or `updateSnapshots` other than `'none'` on CI. Every run
+  overwrites the baseline. *Fix:* the canonical config; update in the image by hand.
+- **A PDF byte comparison.** *Fix:* §7.
+- **An `afterEach` that re-attaches diff images.** `allure-playwright` already attaches them. *Fix:* delete it.
+- **`new DashboardPage(page)` in a spec.** *Fix:* a fixture.
+- **Visual specs in the PR lane.** *Fix:* the `visual` project with `default: false`.
+
+## Rules
+
+- Stabilize on a condition in the page object; freeze time in an auto fixture; never `waitForTimeout`.
+- Element captures over full pages; `mask` every dynamic region; keep `maxDiffPixelRatio` ≤ 0.02.
+- Baselines are written in the pinned image only and committed; CI runs with `updateSnapshots: 'none'`.
+- Visual specs live in the `visual` project and run in the nightly lane.
+- `toHaveScreenshot` for anything the browser renders; `toMatchSnapshot` only for deterministic values you
+  produced; never a PDF's bytes.
+- Specs reach pages through fixtures; page objects expose locators and intent, never assertions.
+- Failure evidence and its Allure mapping come from the canonical config; nothing is re-attached.
 
 ## Cross-references
 
-- `qa-visual-regression-dotnet` — same skill, .NET / NUnit
-  (`Expect(...).ToHaveScreenshotAsync()`).
-- `qa-visual-regression-java` — same skill, Java / TestNG
-  (`assertThat(page).hasScreenshot()`).
-- `qa-ui-test-writer-playwright-typescript` — the page objects/specs these assertions layer on top
-  of. Author the flow there; add the visual gate here.
-- `references/percy.md` (`percy`, next) — hosted baseline management + PR review UI
-  when in-repo baselines become a bottleneck.
-- `references/applitools.md` — visual-AI diffing + cross-browser rendering
-  grid.
-- `qa-ci-pipelines-typescript` — artifact upload, the container-baseline discipline,
-  and the gated `update-baselines` job.
-- `qa-test-reports-typescript` — attach `-diff.png` images to the test report.
+- `qa-visual-regression-dotnet`, `qa-visual-regression-java` — the same skill without a screenshot
+  assertion: `screenshot()` plus a comparator.
+- `qa/typescript/skills/ui-test-author/playwright` — the canonical config, `fixtures.ts`, page objects.
+- `references/percy.md`, `references/applitools.md` — hosted baselines and review.
+- `qa/typescript/skills/evidence-capture` — failure evidence, traces, reading a failure.
+- `qa/reporting/typescript/skills/test-reports` — the diff widget and the WebP caveat.
+- `qa/cicd/typescript/skills/ci-pipelines`, `qa/cicd/ci-conventions` — the nightly job, the image and the
+  upload.

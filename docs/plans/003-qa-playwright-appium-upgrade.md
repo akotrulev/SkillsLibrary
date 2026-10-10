@@ -31,13 +31,19 @@ grant exactly §5.2's 33 Playwright MCP tools; each `qa-ui-*` live-page workflow
 names the `playwright-cli` fallback and follows R2; `page-objects-from-url` ×3 run on the current tools with a
 `playwright-cli` route; and `qa/_shared/webmcp-testing` (`qa-webmcp-testing-shared`: SKILL.md, three references,
 seven assets incl. a `ProductPage` per stack and `webmcp.runsettings`, D47–D48) ships in all three qa plugins
-and loads in every `qa-ui-*` Step 3. Next: T3. Built but unverified: no asset, workflow or pipeline has been
+and loads in every `qa-ui-*` Step 3. T3 landed 2026-10-10: TS `visual-regression`, `accessibility-testing` and
+`network-mocking` (three routers, eight references) on 1.64 — a nightly `visual` project, `page.clock` frozen
+time, WebP with the Allure caveat, fixtures for Percy, Eyes, axe (WCAG 2.2 AA) and Lighthouse, annotated
+no-assertion tests, headers/TLS at the routing layer, `page.requests()` for "not called", and a Vitest-fixture
+proxy (D49–D52). Next: J3. Built but unverified: no asset, workflow or pipeline has been
 compiled or run (G1 does that; D24's TS config import, the Java build on Allure Gradle plugin 4.3.0, the .NET
 build on NUnit3TestAdapter 6.3.1 / Test SDK 18.10.1, `dorny/test-reporter`'s `java-junit` parse, the trace CLI
 through the Java driver (D39) and through `playwright.ps1` (D43), the .NET shard script against a real
 `--list-tests` (D44), and the WebMCP assets' typings and the D48 scripts are the open risks; N2 had no web
 access, so its .NET spellings rest on the committed research; no WebMCP test has run against a site that
-registers tools).
+registers tools; T3 had no web access either, so its Percy, Applitools, playwright-lighthouse, mockttp and
+Vitest-fixture spellings rest on the research and the old skill text, and the TS CI references do not yet run
+`--project=visual` — G1 reconciles that).
 Planned 2026-10-10. The research behind it is committed with this plan:
 `docs/research/003-qa-playwright-appium/` (5 files). So is the read-only audit:
 `docs/audits/003-qa-playwright-appium/` (4 files). All open questions were answered on 2026-10-10:
@@ -48,7 +54,7 @@ Planned 2026-10-10. The research behind it is committed with this plan:
 - A Maestro lane is added (X1).
 - The newest Appium client majors are primary.
 
-Next: T3 (H1, the user's, blocks no task). The cost is 19 agent sessions on the subscription, each started by the user
+Next: J3 (H1, the user's, blocks no task). The cost is 19 agent sessions on the subscription, each started by the user
 from Plan Queue. Nothing else is metered.
 
 ## 1. What already exists, and what is missing
@@ -822,6 +828,44 @@ without `toolautosubmit` hangs the test) or the race (chosen). **Cost:** the wai
 code, not the research's; like the rest of the route they are unverified until a suite runs against a site that
 registers tools.
 
+**D49 — TS visual and Lighthouse specs run in their own `default: false` projects, taught as additions to
+the canonical config, not added to T1's asset (T3, 2026-10-10).** `qa/cicd/ci-conventions` gates visual
+regression to the schedule, and a plain `npx playwright test` must not run it. Readings: a `@visual` tag
+filtered with `--grep-invert` in every PR command (a second filter beside D35's `@flaky` in all three CI
+references), the two projects added to `assets/playwright.config.ts` (T1's asset, outside T3's paths, and
+every project would carry suites most never run), or a `visual` project (`testMatch: /.*\.visual\.spec\.ts/`,
+`default: false` [1.64]) and a `lighthouse` project (`workers: 1`, `default: false`) shown as config
+additions in the references, with a matching `testIgnore` on `chromium` (chosen). **Cost:** the nightly job
+must name `--project=visual` (a plain run, even nightly, skips it), which T2's CI references do not yet do —
+G1 reconciles; the snippets are not compiled by G1, since the asset does not contain them.
+
+**D50 — A test whose verdict is made outside it (Percy, Applitools, `playAudit`) records that with an
+annotation (T3, 2026-10-10).** The plan asked only to "record the Percy no-assertion exception". Readings: a
+sentence in the reference (the test itself still reads as a forgotten assertion), an artificial `expect`
+after the upload (asserts nothing), or a `{ type: 'no-assertion', description }` annotation constant per tool
+— `percyReview`, the Eyes spec's inline annotation, `lighthouseGate` — passed in the test's details, so the
+report and Allure show why (chosen, for all three, since Applitools and `playAudit` have the same shape).
+**Cost:** one more constant per fixture file, and a reviewer must accept the annotation as the record the
+house rule asks for.
+
+**D51 — TS a11y and Lighthouse evidence is attached with awaited `testInfo.attach`; no direct Allure call
+(T3, 2026-10-10).** The plan said "awaited Allure calls" for a11y. T2's `test-reports` says to prefer
+`testInfo.attach` (it reaches the HTML report and Allure) and to call `allure-js-commons` only for
+Allure-only data. Readings: `await allure.attachment(...)` in the helpers (Allure-only, and the HTML report
+loses the violations), or `testInfo.attach` inside the `a11y` and `lighthouse` fixtures (chosen). The one
+Allure-only call left in T3's files is the Percy build link, `await allure.link(...)` from `allure-js-commons`.
+**Cost:** none beyond the reading.
+
+**D52 — The TS proxy reference waits on client-visible signals and reads `MockedEndpoint.getSeenRequests()`;
+its HAR writer became a scrubbed JSON traffic log (T3, 2026-10-10).** The old reference resolved a promise
+from an un-awaited `server.on('request')` subscription with a deadline timer, and wrote a HAR from
+`server.on('response')` using `res.request.method`, a field this session could not confirm on mockttp's
+completed response. Readings: keep both and await the subscriptions (two event races and an unconfirmed
+field), or register a pass-through endpoint before the action and read its seen requests after the page
+object's completion signal, logging the unmatched pass-through requests without `authorization` / `cookie`
+headers (chosen). **Cost:** the proxy lane writes no HAR and logs no response status or headers; a HAR of a
+non-Playwright client needs another tool.
+
 ## Answered questions (2026-10-10)
 
 **O1 — Which Playwright version per stack: 1.64 for Node only; Java and .NET follow when their packages
@@ -1589,6 +1633,52 @@ that breaks R1–R6.
     TS 1.59+.
 - `qa-ui-typescript.md` Step 3: the a11y item lists the router skill only (L22).
 - **Not in T3:** responsive, realtime and the rest (T4); Java/.NET (J3/N3).
+- **As built (2026-10-10):**
+  - Landed: all eleven files rewritten — three routers (`visual-regression` 4.7k, `accessibility-testing` 3.8k,
+    `network-mocking` 4.2k chars; descriptions 484 / 460 / 492, all saying "Playwright Test") and eight
+    references (`playwright-snapshots` 13.6k, `percy` 9.0k, `applitools` 9.8k, `axe-playwright` 10.4k,
+    `lighthouse-ci` 10.1k, `playwright-routes` 18.9k, `cdp` 12.1k, `proxy` 14.9k). Every sample extends the
+    writer's `fixtures.ts`; no spec constructs a page object or calls `page`; PascalCase test ids; no
+    comments, `try`/`finally` or `allure-playwright` import in any code block (scripted scan of every fence).
+    `qa-ui-typescript.md` Step 3's a11y item is the router only.
+  - Differed from the plan: the nightly lane is a `visual` project with `default: false` (and a
+    `lighthouse` one with `workers: 1`), taught as config additions, not added to T1's asset (D49); the
+    no-assertion exception is recorded per test with an annotation on Percy, Applitools and `playAudit` tests
+    (D50); a11y and Lighthouse evidence go through awaited `testInfo.attach`, and the only direct Allure call
+    left is the Percy build link (D51); the proxy reference uses Vitest fixtures and endpoint
+    `getSeenRequests()`, and its HAR writer became a scrubbed JSON traffic log (D52). Beyond the plan:
+    security headers and TLS moved from `cdp.md` to `playwright-routes.md` §5 (D9 of `aTS`), so CDP lost its
+    `responseFor` audit and its `Offline` preset (routing owns offline); `cdp.md` captures `fromDiskCache` and
+    reads the **last** match; Lighthouse drops the PWA category (removed in Lighthouse 12); Chrome's
+    `--proxy-bypass-list=<-loopback>` added for localhost targets; the Applitools region calls are
+    `layoutRegions` / `ignoreRegions` (the old `.layout(selector)` / `.floating(...)` spellings are gone).
+  - Names assigned: fixture files `visual.fixtures.ts` (`frozenClock` auto, `visualNow`), `percy.fixtures.ts`
+    (`percy`, `percyBuildLink` auto, `percyReview`, `byTestId`), `eyes.fixtures.ts` (`eyesRunner` worker,
+    `eyes`), `a11y.fixtures.ts` (`a11y.scanPage` / `scanWithin(testId)`, `wcag22aa`, `knownViolations`,
+    `falsePositives`, `newViolations`, `blockingViolations`), `lighthouse.fixtures.ts` (`browser` worker
+    override, `lighthouse.audit`, `lighthouseGate`), `network.fixtures.ts` (`MockApi`, `Traffic`),
+    `cdp.fixtures.ts` (`CdpControls`), `proxy.fixtures.ts` (`ProxyControls`, `ShopPages`); env
+    `HAR_UPDATE=1` re-records the payments HAR; spec suffixes `.visual.spec.ts`, `.lighthouse.spec.ts`.
+  - Built, unverified (Gate: none): nothing compiled or ran. **This session had no web access**
+    (WebFetch was denied), so every vendor spelling rests on the committed research or the existing skill
+    text: `PERCY_BUILD_URL` set by `percy exec`; `Parameters<typeof percySnapshot>[2]`; Applitools
+    `layoutRegions` / `ignoreRegions` and its gate error naming the dashboard link; the `playAudit` report
+    being written before its threshold throw (the teardown attach depends on it) and Lighthouse's tab seeing
+    the test context's sign-in (the reference tells the reader to check the report); overriding the built-in
+    `browser` worker fixture typing cleanly; mockttp relative-path matchers and `thenJson`; Vitest
+    `test.extend` with `({}, use)`. `page.requests()` is described as a capped buffer without a number. The
+    TS CI references (T2's) have no step that runs `--project=visual`, so with `default: false` a nightly
+    plain run skips the visual specs — G1's prompt now carries that reconciliation.
+  - Proof: `qa/typescript/skills/visual-regression/references/playwright-snapshots.md` image + `--ipc=host` +
+    in-container `npm ci` `:212-216`, `default: false` `:51`, `pathTemplate` `:35`, `setFixedTime` `:121`,
+    WebP `:187`, PDF `:177`, modes `:199-201`, no re-attach `:233`; `percy.md` annotation `:89,134`, awaited
+    `allure.link` `:105`; `applitools.md` worker runner `:92-94`, teardown close `:101`; `axe-playwright.md`
+    `wcag22aa` `:58`, incompletes attached `:93`, assertions link `:43`; `lighthouse-ci.md` worker browser
+    `:127`, `workers: 1` `:90`, attach `:143`; `playwright-routes.md` 1.52 `:345`, `recordHar` via
+    `contextOptions` / `startHar` `:308-309`, `page.requests()` `:136`, `allHeaders()` `:265`,
+    `securityDetails()` `:276`, `context().route` `:106`, `updateContent` `:114`, URLPattern `:344`, awaited
+    `continue` `:94,101`, typed payload `:212`, realtime link `:23`; `cdp.md` last match `:124,202`;
+    `proxy.md` teardown `:157,167`, fault assertion `:291`; `qa/typescript/agents/qa-ui-typescript.md:117`.
 
 ### J3 — Java visual regression (rewritten), accessibility and network mocking on 1.63
 
@@ -2087,63 +2177,9 @@ Run them in order, one session each, opened from Plan Queue. Each block is compl
 | X1 | `docs` | `general-purpose` | M1, S1, T2 | ~130k |
 | G1 | `docs` | `general-purpose` | all | ~145k |
 
-Landed: T1, J1, N1, T2, J2, N2, A1 (2026-10-10). Every other block is live.
+Landed: T1, J1, N1, T2, J2, N2, A1, T3 (2026-10-10). Every other block is live.
 
 ---
-
-### T3 — TypeScript visual regression, accessibility and network mocking on 1.64 (general-purpose, docs)
-
-````
-You are `general-purpose`. Task T3 of docs/plans/003-qa-playwright-appium-upgrade.md: make
-qa/typescript/skills/{visual-regression,accessibility-testing,network-mocking}, with every reference
-file, teach Playwright 1.64 correctly, with no stale pin, no invalid API and no R1–R6 break.
-
-Read, in this order:
-1. CLAUDE.md.
-2. The plan: §2.1, §2.2, §4, task T3, "Close-out — every task".
-3. Every .md under qa/typescript/skills/visual-regression, accessibility-testing and network-mocking.
-4. T1's qa/typescript/skills/ui-test-author/playwright/references/assertions.md (to link it, not repeat it).
-   T2's qa/typescript/skills/evidence-capture/SKILL.md and references/playwright.md §5–§6: HAR
-   recording (`tracing.startHar` fixture, `contextOptions.recordHar`) and `testInfo.attach` live there, so
-   network-mocking keeps replay (`routeFromHAR`) and links the recording side. T2's test-reports already
-   says WebP baselines get no Allure diff widget; the visual skill links it.
-5. docs/research/003-qa-playwright-appium/playwright-evidence.md §2, §3, §6; playwright-releases.md §(d).
-6. docs/audits/003-qa-playwright-appium/typescript.md rows D1, D2, D6, D9–D11, G1, C3, C5–C8, C11,
-   C14–C18, C20, C24, C25, C27, L15, L17, L20–L23.
-
-Build:
-- Visual:
-  - v1.64.0-noble with --ipc=host and an in-container npm ci.
-  - updateSnapshots modes, incl. the 1.64 missing-passes change and CI 'none'; snapshotPathTemplate.
-  - WebP, with the no-Allure-diff caveat.
-  - page.clock.setFixedTime for "freeze clocks".
-  - No redundant defaults or font waits. Trace retain-on-failure.
-  - No PDF byte-compare.
-  - Applitools through a fixture. Record the Percy no-assertion exception. No afterEach re-attach.
-  - The allure-js-commons import, awaited.
-  - Nightly lane. Fixtures, not new XPage. Descriptions say Playwright Test.
-- A11y: wcag22aa; link the native accessible/aria assertions; awaited Allure; incompletes via
-  test.info().attach; Lighthouse in a worker fixture.
-- Network:
-  - Glob 1.52.
-  - recordHar via contextOptions or tracing.startHar.
-  - Awaited route.continue; typed payloads; context.route for popups; updateContent naming.
-  - page.requests() / consoleMessages() / pageErrors() for "not called".
-  - Headers/TLS via response.allHeaders() / securityDetails().
-  - The CDP last match; proxy teardown plus an assertion.
-  - Fixed cross-references; WebSocket mocking points at realtime-stream-testing; URLPattern (1.59+).
-- qa/typescript/agents/qa-ui-typescript.md Step 3: the a11y item lists only the router SKILL.md.
-
-Traps:
-- allure-playwright builds its diff widget only from .png triples (evidence §12.10).
-- route.fulfill delivers a body at once, so it is not an SSE stream. Leave SSE to realtime-stream-testing.
-- recordHar is a context option, not a TestOptions key: test.use({ contextOptions: { recordHar } }).
-
-Gate: none. This plan gates once, in G1. Do not run any build, test or check script.
-
-Commit: `docs(qa-ts): visual, a11y and network-mocking skills on Playwright 1.64 (003 T3)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
 
 ### J3 — Java visual regression (rewritten), accessibility and network mocking on 1.63 (general-purpose, docs)
 
@@ -2202,6 +2238,11 @@ Traps:
 - Deliberate captures (a diff image, a HAR) follow qa/java/skills/evidence-capture: the class's own
   @BeforeMethod / @AfterMethod(alwaysRun = true), files in build/playwright-artifacts/<Class>.<method>.<kind>.<ext>,
   and any catch only in a private helper (D29), never in the hook body.
+- T3 moved the TS security-header and TLS checks from CDP to the routing layer (`response.allHeaders()`,
+  `response.securityDetails()`, both all-binding); a Java CDP reference that ports the TS audit moves the
+  same way (`allHeaders()`, `securityDetails()` on the `Response`). A hosted-tool test with no assertion
+  (Percy, Applitools) carries a `no-assertion` annotation in TS (D50) — on TestNG, state the exception in the
+  test's `@Test(description = …)`.
 
 Gate: none. This plan gates once, in G1. Do not run any build, test or check script.
 
@@ -2261,6 +2302,11 @@ Traps:
   confirm its parameter order against the Allure.NUnit 2.15.0 source if you can — N2 could not).
   Screenshot options are spelled as in that reference's §1.1. HAR replay (`RouteFromHARAsync`) is
   network-mocking's; recording a HAR is evidence-capture's §5 — link it rather than repeat it.
+- T3 moved the TS security-header and TLS checks from CDP to the routing layer (`response.allHeaders()`,
+  `response.securityDetails()`, both all-binding); a .NET CDP reference that ports the TS audit moves the
+  same way (`AllHeadersAsync()`, `SecurityDetailsAsync()` on `IResponse`). A hosted-tool test with no
+  assertion (Percy, Eyes) states that exception in the test (TS uses an annotation, D50; NUnit
+  `[Description(…)]`).
 
 Gate: none. This plan gates once, in G1. Do not run any build, test or check script.
 
@@ -2290,7 +2336,10 @@ Read, in this order:
 Build:
 - responsive-testing: data rows, not if/else; test.use({ viewport }); link the emulation reference; the
   cross-reference to React.
-- realtime-stream-testing: the SSE caveat; it owns WebSocket mocking.
+- realtime-stream-testing: the SSE caveat; it owns WebSocket mocking. T3's network-mocking SKILL.md and
+  references/playwright-routes.md already send `routeWebSocket` and SSE here and say `route.fulfill`
+  cannot stand in for a stream, so realtime's text must claim both and link back to network-mocking for
+  plain HTTP.
 - browser-cloud-setup: use.connectOptions or a worker-scoped browser; the version taken from
   @playwright/test/package.json; teardown returned from globalSetup.
 - test-login-tokens: a setup project with baseURL; storage-state limits (no sessionStorage;
@@ -2813,6 +2862,11 @@ Build:
   performance-project-setup/SKILL.md (:136) the UI sibling is `UiTests`, not `PlaywrightTests`; drop
   `dotnet tool install allure` from api-project-setup (:39, :107) — NuGet has no such tool — and point at
   qa/reporting/dotnet/skills/test-reports for the Allure CLI. Skip whatever M3 or an earlier task already fixed.
+- D49 seam: T3's TS visual specs live in a `visual` project with `default: false`, so a nightly plain
+  `npx playwright test` skips them. In each of qa/cicd/typescript/skills/ci-pipelines/references/
+  {github-actions,gitlab-ci,azure-pipelines}.md, the schedule-gated visual step runs
+  `npx playwright test --project=visual` in mcr.microsoft.com/playwright:v1.64.0-noble (the minimum, one
+  step or one line each); skip whatever is already there.
 - The final Status names what is unverified: no Appium flow ran on a device or emulator; no Maestro flow
   ran; no WebMCP test ran against a site that registers tools; the D9 comparators are recommendations. Then git mv the plan
   to docs/plans/implemented/.

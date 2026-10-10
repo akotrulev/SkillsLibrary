@@ -1,320 +1,232 @@
-# Accessibility Testing — Lighthouse CI (TypeScript)
+# Accessibility Testing — Lighthouse CI (TypeScript / Playwright Test)
 
-Lighthouse is Google's headless-Chrome auditing tool; **Lighthouse CI** (`@lhci/cli`) runs it as a
-gated pipeline step that produces a **category score** (0–1) for `performance`, `accessibility`,
-`best-practices`, `seo`, and `pwa`, and **fails the build when a score drops below a threshold**. This
-is the **broad-audit + score-trend** sibling of `references/axe-playwright.md`:
-where axe gives you per-component `violations` to assert empty **inside** your functional E2E run,
-Lighthouse runs a **separate full-page pass** and gives you one number per category to gate and trend.
-Run both — they are complementary, not alternatives.
+Lighthouse is Google's headless-Chrome auditor. **Lighthouse CI** (`@lhci/cli`) runs it as a pipeline step
+that produces a **category score** (0–1) for `accessibility`, `best-practices`, `seo` and `performance`, and
+fails the build when a score drops below its threshold. It is the **broad-audit and trend** sibling of
+`references/axe-playwright.md`: axe asserts per-component `violations` inside the functional run; Lighthouse
+runs a separate full-page pass and gives one number per category. Run both.
 
-> **Lighthouse a11y is axe-powered — but reported as a *score*, not as `violations`.** Under the hood
-> Lighthouse's accessibility category runs axe-core, yet it surfaces the result as `categories.accessibility.score`
-> (a 0–1 number derived from weighted audit pass/fail), **not** as an assertable list of failing nodes.
-> That is exactly why you run both: axe-playwright gives you the per-element rule id + selector to
-> *fix*; Lighthouse CI gives you the whole-page *trend* and the perf/SEO/PWA context axe doesn't cover.
-> A Lighthouse a11y score is still the automated **floor** (~30–40% of WCAG) — pair with manual +
-> assistive-tech testing (`qa-exploratory-charter-writer`); a 1.0 a11y score is not "accessible."
+> **Lighthouse accessibility is axe-powered, but reported as a score.** The category runs axe-core and
+> surfaces a weighted pass/fail aggregate, not a list of failing nodes. axe tells a developer *what* to fix;
+> Lighthouse shows the whole-page *trend* plus the performance and SEO context axe does not cover. A score
+> of 1.0 is still only the automated floor.
 
-> **⚠️ Node-only tool — the defining nuance of this node.** Lighthouse is a **Node** tool. There is **no
-> native .NET or Java Lighthouse SDK.** TypeScript is therefore the **first-class, canonical** stack here
-> (`@lhci/cli` + `playwright-lighthouse` are real libraries). The `.NET` and `Java` siblings are **thinner
-> CLI-driven ports**: they **invoke the Lighthouse/lhci CLI** (`npx lhci autorun` / `npx lighthouse
-> <url> --output=json`) and **parse the JSON report** (`categories.*.score`) to gate their own pipeline.
-> The structure (collect → assert on score → report) ports; the *invocation* is a subprocess, not an SDK
-> call. See the sibling skills for that honest shape.
+> **Node-only tool.** There is no .NET or Java Lighthouse SDK. TypeScript is the first-class stack; the
+> .NET and Java siblings shell out to the CLI and parse its JSON (`categories.*.score`).
 
-## Setup
+Lighthouse 12 removed the PWA category; a config that asserts `categories:pwa` is stale.
+
+## 1. Setup
 
 ```bash
-npm install --save-dev @lhci/cli                  # the CI runner: collect → assert → upload
-npm install --save-dev playwright-lighthouse       # in-Playwright-test audits of stateful pages
+npm install --save-dev @lhci/cli playwright-lighthouse lighthouse
 ```
 
-`@lhci/cli` needs no API key for the default `temporary-public-storage` upload target. The only optional
-secret is an **LHCI-server token** (`LHCI_TOKEN`) if you run your own dashboard — read it lazily from the
-environment, never commit it.
+`@lhci/cli` needs no key for the `temporary-public-storage` upload target. The only optional secret is an
+LHCI server token (`LHCI_TOKEN`) for a private dashboard — environment only, never committed.
 
-## The Lighthouse model — category scores, not a violations list
+## 2. Two ways to run it
 
-A Lighthouse run loads a URL in headless Chrome and produces five **category scores** in `[0, 1]`:
+1. **`lhci autorun` with `lighthouserc.cjs`** — audits a list of URLs as a CI step. For public pages and
+   the trend dashboard.
+2. **`playwright-lighthouse`'s `playAudit`** — audits a page a Playwright test has driven to a state
+   (signed in, dialog open, cart filled), reusing the writer's page objects.
 
-- `categories.performance.score`
-- `categories.accessibility.score`
-- `categories.best-practices.score`
-- `categories.seo.score`
-- `categories.pwa.score`
+## 3. `lhci autorun` — the URL-list gate
 
-Each category score is a **weighted aggregate of individual `audits`** (e.g. `color-contrast`,
-`image-alt`, `first-contentful-paint`). The **gate is a threshold per category** (`minScore`), optionally
-plus per-audit assertions — **not** a pass/fail list of DOM violations (that's `axe-playwright`'s axe). You decide the
-conformance target once (e.g. a11y ≥ 0.9) and apply it everywhere.
-
-Two ways to run it in a TypeScript shop — cover both:
-
-1. **`lhci autorun` + `lighthouserc`** — audit a **list of URLs** as a CI step. Best for public/unauth
-   pages and the score-trend dashboard.
-2. **`playwright-lighthouse` `playAudit`** — audit a page a **Playwright test already drove to a state**
-   (logged in, modal open, cart filled). Best for authenticated/stateful flows; reuses `axe-playwright`'s page
-   objects.
-
-## `lhci autorun` + `lighthouserc` — the URL-list CI gate
-
-`lhci autorun` does three steps in one command: **collect** (run Lighthouse N times per URL, keep the
-median), **assert** (apply your score thresholds — this is the build-fail mechanism), **upload** (store
-the report). Configure it in `lighthouserc.cjs`:
+`autorun` **collects** (N runs per URL, keeps the median), **asserts** (the thresholds — the build-fail
+mechanism) and **uploads** the report.
 
 ```js
-// lighthouserc.cjs
 module.exports = {
   ci: {
     collect: {
-      // Audit these URLs. Use startServerCommand to boot the app first if it isn't already up.
       startServerCommand: 'npm run start',
-      url: ['http://localhost:3000/', 'http://localhost:3000/checkout'],
-      numberOfRuns: 3,                 // ≥3 and take the median — fights Lighthouse perf variance
+      url: ['http://localhost:3000/', 'http://localhost:3000/pricing'],
+      numberOfRuns: 3,
     },
     assert: {
       assertions: {
-        // Deterministic categories → 'error' (fail the build). a11y is axe-powered and stable.
-        'categories:accessibility':   ['error', { minScore: 0.9 }],
-        'categories:seo':             ['error', { minScore: 0.9 }],
-        'categories:best-practices':  ['error', { minScore: 0.9 }],
-        // Noisy category → 'warn' (don't hard-fail a flaky perf number; see "Perf variance" below).
-        'categories:performance':     ['warn',  { minScore: 0.8 }],
-        // Per-audit assertion: gate a specific audit, not just the category aggregate.
-        'color-contrast':             ['error', { minScore: 1 }],
+        'categories:accessibility': ['error', { minScore: 0.9 }],
+        'categories:seo': ['error', { minScore: 0.9 }],
+        'categories:best-practices': ['error', { minScore: 0.9 }],
+        'categories:performance': ['warn', { minScore: 0.8 }],
+        'color-contrast': ['error', { minScore: 1 }],
       },
     },
     upload: {
-      target: 'temporary-public-storage',   // free, no API key — public Google Cloud link, kept a few days
-      // target: 'lhci', serverBaseUrl: process.env.LHCI_SERVER_URL, token: process.env.LHCI_TOKEN,
+      target: 'temporary-public-storage',
     },
   },
 };
 ```
-
-Run it:
 
 ```bash
 npx lhci autorun --config=lighthouserc.cjs
 ```
 
-- **`ci.collect`** — `url` (the pages to audit), `startServerCommand` (boot the app; lhci waits for it),
-  `numberOfRuns` (run ≥3 and median — see below). The median report is what gets asserted/uploaded.
-- **`ci.assert.assertions`** — `'categories:<name>': [level, { minScore }]` where `level` is `'error'`
-  (fail build) or `'warn'` (report only). Per-audit assertions use the audit id as the key. There are
-  preset bundles too (`assertMatrix`, `preset: 'lighthouse:recommended'`) — start from explicit
-  assertions so the gate is legible.
-- **`ci.upload`** — `temporary-public-storage` (free, no key, public link, retained a few days) or an
-  **LHCI server** (`target: 'lhci'` + `serverBaseUrl` + `token` from env) for a private, persistent
-  trend dashboard.
+- `collect.url` lists the pages; `startServerCommand` boots the app and lhci waits for it; `numberOfRuns` ≥ 3
+  so the median absorbs variance.
+- `assert.assertions`: `'categories:<name>': [level, { minScore }]`, where `'error'` fails the build and
+  `'warn'` reports. A per-audit assertion uses the audit id as its key (`color-contrast`). Presets exist
+  (`preset: 'lighthouse:recommended'`); explicit assertions keep the gate legible.
+- `upload.target`: `temporary-public-storage` (no key, a public link kept a few days), or
+  `target: 'lhci'` with `serverBaseUrl` and `token` from the environment for a private, persistent
+  dashboard.
 
-## `playwright-lighthouse` — auditing a page your test already drove to a state
+## 4. `playAudit` — auditing a page a test drove to a state
 
-For authenticated or stateful pages, drive the app with the page objects the
-`qa-ui-test-writer-playwright-typescript` skill already authored, **then** audit. Lighthouse connects to
-the page over a **remote-debugging port**, so launch Chromium with that port and run a **single worker**
-(concurrent audits collide on the shared port):
+Lighthouse attaches to the browser over a **remote-debugging port**. That browser is owned by a
+**worker-scoped fixture** — it overrides Playwright's built-in `browser` for the Lighthouse project, so the
+page objects, `page`, the trace and the failure screenshot all keep working, and the browser closes when the
+worker ends. One port means one worker, so the project sets `workers: 1`.
 
-```ts
-// playwright.config.ts — pin one worker for the Lighthouse project
-// projects: [{ name: 'a11y-lighthouse', use: { ... }, workers: 1 }]
+```typescript
+{
+  name: 'lighthouse',
+  testMatch: /.*\.lighthouse\.spec\.ts/,
+  use: { storageState: authFile },
+  dependencies: ['setup'],
+  workers: 1,
+  default: false,
+},
 ```
 
-```ts
-// tests/dashboard.lighthouse.spec.ts
-import { test, chromium, type Browser } from '@playwright/test';
+Add that entry to the canonical config's `projects`, and `testIgnore: /.*\.lighthouse\.spec\.ts/` to the
+`chromium` project. `TestProject.workers` [1.52] and `default: false` [1.64] keep the audits single-threaded
+and out of the PR lane.
+
+```typescript
 import { playAudit } from 'playwright-lighthouse';
-import { DashboardPage } from '../pages/dashboard.page';
+import { test as base } from './fixtures';
+import { AccountPage } from './AccountPage';
 
-const PORT = 9222;
-let browser: Browser;
+export const lighthousePort = 9222;
 
-test.beforeAll(async () => {
-  // The debugging port Lighthouse attaches to; one shared port ⇒ one worker.
-  browser = await chromium.launch({ args: [`--remote-debugging-port=${PORT}`] });
-});
-test.afterAll(async () => { await browser.close(); });
+export const lighthouseGate = {
+  type: 'no-assertion',
+  description: 'playAudit fails the test when a category is below its threshold; the thresholds are the assertion',
+};
 
-test('Should_meet_a11y_score_When_dashboard_loaded_for_signed_in_user', async () => {
-  const page = await browser.newPage();
-  const dashboard = new DashboardPage(page);
-  await dashboard.gotoAsSignedInUser();          // page-object intent reused from `axe-playwright`'s authoring skill
-  await dashboard.waitUntilReady();              // stabilize on a CONDITION, never waitForTimeout
+export type Thresholds = {
+  accessibility: number;
+  'best-practices': number;
+  seo: number;
+  performance: number;
+};
 
-  await playAudit({
-    page,
-    port: PORT,
-    thresholds: {                                // NOTE: playwright-lighthouse thresholds are 0–100…
-      accessibility: 90,                         // …whereas lighthouserc minScore is 0–1. Don't mix them up.
-      'best-practices': 90,
-      seo: 90,
-      performance: 80,
+type Lighthouse = { audit: (name: string, thresholds: Thresholds) => Promise<void> };
+
+export const test = base.extend<{ lighthouse: Lighthouse; accountPage: AccountPage }>({
+  browser: [
+    async ({ playwright }, use) => {
+      const browser = await playwright.chromium.launch({ args: [`--remote-debugging-port=${lighthousePort}`] });
+      await use(browser);
+      await browser.close();
     },
-    reports: {                                   // emit html+json so a failure carries the report
-      formats: { html: true, json: true },
-      name: 'dashboard',
-      directory: 'lighthouse-reports',
-    },
-  });
-  // playAudit throws when any category is below its threshold — that thrown error IS the gate.
+    { scope: 'worker' },
+  ],
+  lighthouse: async ({ page }, use, testInfo) => {
+    const audited: string[] = [];
+    await use({
+      audit: async (name, thresholds) => {
+        audited.push(name);
+        await playAudit({
+          page,
+          port: lighthousePort,
+          thresholds,
+          reports: { formats: { html: true, json: true }, name, directory: testInfo.outputPath('lighthouse') },
+        });
+      },
+    });
+    for (const name of audited) {
+      await testInfo.attach(`${name}.html`, {
+        path: testInfo.outputPath('lighthouse', `${name}.html`),
+        contentType: 'text/html',
+      });
+    }
+  },
+  accountPage: async ({ page }, use) => {
+    await use(new AccountPage(page));
+  },
 });
+
+export { expect } from './fixtures';
 ```
 
-`playAudit` **throws** when a category score is below its threshold, which fails the test = the gate. It
-reuses the exact page objects from `axe-playwright` — this is the bridge that lets Lighthouse audit a stateful page.
-The `.NET`/`Java` analogue is "drive the page with Playwright on a debugging port, then shell out to
-`npx lighthouse --port=<port>`" — see the sibling skills.
+- The reports land in the test's own output folder, so they travel with its evidence and with the CI
+  upload of `test-results/`. The teardown attaches each HTML report — after a threshold failure too, because
+  fixture teardown runs either way.
+- `playAudit` **throws** when a category is below its threshold. That throw is the test's assertion, so the
+  spec carries the `lighthouseGate` annotation, as a Percy test does.
+- **Check what was audited.** Lighthouse opens its own tab over the debugging port. Before trusting a
+  signed-in audit, open its HTML report once and confirm the audited URL and screenshot are the signed-in
+  page, not the sign-in screen.
 
-> **Two scales, one trap:** `playwright-lighthouse` `thresholds` are **0–100**; `lighthouserc` `minScore`
-> is **0–1**. `accessibility: 90` and `minScore: 0.9` mean the same gate. Keep them straight.
+```typescript
+import { lighthouseGate, test } from './lighthouse.fixtures';
 
-## Perf variance discipline — median the noise, gate the deterministic categories
+test(
+  'Should_MeetAccessibilityAndSeoBudgets_When_AccountPageLoads',
+  { tag: '@lighthouse', annotation: lighthouseGate },
+  async ({ accountPage, lighthouse }) => {
+    await accountPage.open();
 
-Lighthouse **performance** scores are **noisy** (CPU contention, network jitter, cold caches). The a11y,
-SEO, and best-practices categories are **deterministic** (a11y is axe-powered rule checks). So:
-
-- **`numberOfRuns: 3` or more, take the median.** `lhci autorun` does this for you; for `playAudit`,
-  audit a stable page and don't gate a single cold run's perf number hard.
-- **`'error'` on a11y / SEO / best-practices** (deterministic — a regression is real).
-- **`'warn'` on performance** (noisy — a hard-fail on a flaky number trains the team to ignore the gate).
-  Trend perf over time on the dashboard instead of hard-gating a single PR.
-- Stabilize the page on a **condition** before auditing (interactivity/visibility), never a fixed sleep —
-  a half-loaded page tanks the score for the wrong reason.
-
-## Reporting the gate — Lighthouse report into Allure + CI artifact
-
-`lhci autorun` writes reports under `.lighthouseci/` (HTML + JSON + a `manifest.json` naming the median
-run) and, with `temporary-public-storage`, prints a public report URL. `playAudit` writes to its
-`reports.directory`. Surface the gate in three places (cross-link `qa-test-reports-typescript`):
-
-```ts
-// support/lighthouse-report.ts
-import { allure } from 'allure-playwright';
-import { readFileSync } from 'node:fs';
-
-/** Attach the Lighthouse HTML + JSON to Allure so a failure carries the audit without re-running. */
-export function attachLighthouseReport(htmlPath: string, jsonPath: string): void {
-  allure.attachment('lighthouse-report.html', readFileSync(htmlPath), 'text/html');
-  allure.attachment('lighthouse-report.json', readFileSync(jsonPath), 'application/json');
-}
+    await lighthouse.audit('account', { accessibility: 90, 'best-practices': 90, seo: 90, performance: 80 });
+  },
+);
 ```
 
-- **Allure** — attach the HTML + JSON report (above), so a failing gate names the dropped category and
-  the failing audits in the report without anyone re-running locally.
-- **CI artifact** — upload `.lighthouseci/` (or `lighthouse-reports/`) as a build artifact
-  (cross-link `qa-ci-pipelines-typescript`).
-- **Status check** — the LHCI GitHub App posts a status check linking the report; with
-  `temporary-public-storage` the report URL is in the job log.
+> **Two scales, one trap:** `playAudit` thresholds are **0–100**; `lighthouserc` `minScore` is **0–1**.
+> `accessibility: 90` and `minScore: 0.9` are the same gate.
 
-**No API key required** for `temporary-public-storage` — same "no secret" theme as `axe-playwright` (axe). The only
-secret is an optional `LHCI_TOKEN` for a private LHCI server, read lazily from the environment, never
-logged or committed.
+## 5. Performance variance
+
+- `numberOfRuns` ≥ 3 and the median; for `playAudit`, audit a stable page and never hard-gate one cold run's
+  performance number.
+- `'error'` on accessibility, SEO and best-practices — deterministic rule checks, so a drop is real.
+- `'warn'` on performance — noisy; a flaky hard failure trains the team to ignore the gate. Trend it on the
+  dashboard instead.
+- The page object waits on a condition before the audit; a half-loaded page scores low for the wrong reason.
+
+## 6. Reporting
+
+- `lhci autorun` writes `.lighthouseci/` (HTML, JSON and a `manifest.json` naming the median run) and prints
+  the public report URL with `temporary-public-storage`. CI uploads the folder as an artifact
+  (`qa/cicd/typescript/skills/ci-pipelines`).
+- `playAudit` reports are attached by the fixture (§4) and reach Allure through `allure-playwright`.
+- The LHCI GitHub App can post a status check linking the report.
 
 ## Anti-patterns
 
-- **Hard-`error` gating the performance score.** Perf is noisy; a flaky hard-fail trains the team to
-  ignore the gate. *Fix:* `'warn'` on performance, `'error'` on the deterministic categories (a11y / SEO
-  / best-practices); trend perf on the dashboard.
-- **`numberOfRuns: 1`.** A single run rides the variance. *Fix:* `numberOfRuns: 3`+ and median.
-- **`await page.waitForTimeout(...)` before `playAudit`.** A half-loaded page scores low for the wrong
-  reason and is flaky. *Fix:* stabilize on a condition (interactivity/visibility) first.
-- **Running `playAudit` with multiple workers on one debugging port.** Concurrent audits collide on the
-  shared port. *Fix:* one worker for the Lighthouse project.
-- **Mixing the 0–100 (`playAudit`) and 0–1 (`lighthouserc`) scales.** *Fix:* `accessibility: 90` for
-  `playAudit`, `minScore: 0.9` for `lighthouserc`.
-- **Treating a 1.0 a11y score as "accessible."** Lighthouse a11y is axe-powered → ~30–40% automated
-  floor. *Fix:* pair with manual + assistive-tech testing; trend the score, don't trust it as proof.
-- **Using Lighthouse where you wanted per-node fixes.** The score won't tell a dev *which* element fails.
-  *Fix:* run axe-playwright for the assertable rule id + selector; Lighthouse for the trend.
-- **Committing an `LHCI_TOKEN`.** *Fix:* env var, read lazily; `temporary-public-storage` needs no key
-  at all.
+- **`'error'` on the performance score.** *Fix:* `'warn'`; trend it.
+- **`numberOfRuns: 1`.** *Fix:* 3 or more, median.
+- **A sleep before `playAudit`.** *Fix:* the page object's condition.
+- **A module-level `let browser` launched in `beforeAll`.** Static mutable state, no trace, no screenshot, a
+  page never closed. *Fix:* the worker fixture that overrides `browser`.
+- **Several workers on one debugging port.** *Fix:* `workers: 1` on the Lighthouse project.
+- **Mixing the 0–100 and 0–1 scales.**
+- **A `categories:pwa` assertion.** The category is gone.
+- **An un-awaited `allure.attachment` in a sync helper.** *Fix:* the fixture's awaited `testInfo.attach`.
+- **A 1.0 accessibility score reported as "accessible".**
+- **A committed `LHCI_TOKEN`.**
 
-## Examples
+## Rules
 
-**End-to-end: `lhci autorun` gating a11y/SEO hard and perf soft, plus a stateful `playAudit` for an
-authenticated page.**
-
-```js
-// lighthouserc.cjs — the public-pages CI gate
-module.exports = {
-  ci: {
-    collect: { startServerCommand: 'npm run start', url: ['http://localhost:3000/', 'http://localhost:3000/pricing'], numberOfRuns: 3 },
-    assert: {
-      assertions: {
-        'categories:accessibility':  ['error', { minScore: 0.9 }],
-        'categories:seo':            ['error', { minScore: 0.9 }],
-        'categories:best-practices': ['error', { minScore: 0.9 }],
-        'categories:performance':    ['warn',  { minScore: 0.8 }],
-      },
-    },
-    upload: { target: 'temporary-public-storage' },
-  },
-};
-```
-
-```ts
-// tests/account.lighthouse.spec.ts — the authenticated-page gate (reuses `axe-playwright`'s page objects)
-import { test, chromium, type Browser } from '@playwright/test';
-import { playAudit } from 'playwright-lighthouse';
-import { AccountPage } from '../pages/account.page';
-
-const PORT = 9222;
-let browser: Browser;
-test.beforeAll(async () => { browser = await chromium.launch({ args: [`--remote-debugging-port=${PORT}`] }); });
-test.afterAll(async () => { await browser.close(); });
-
-test('Should_meet_a11y_and_seo_scores_When_account_page_loaded', async () => {
-  const page = await browser.newPage();
-  const account = new AccountPage(page);
-  await account.gotoAsSignedInUser();                       // intent, not selectors
-  await account.waitUntilReady();                           // condition, not sleep
-
-  await playAudit({
-    page, port: PORT,
-    thresholds: { accessibility: 90, seo: 90, 'best-practices': 90, performance: 80 },
-    reports: { formats: { html: true, json: true }, name: 'account', directory: 'lighthouse-reports' },
-  });
-});
-```
-
-Lifecycle for this gate:
-1. A dev ships a redesign that drops color contrast on the pricing page and removes a `<main>` landmark.
-2. CI runs `lhci autorun`; Lighthouse audits each URL 3× and medians the result.
-3. `categories.accessibility.score` falls below `0.9` → the assertion fails → **the build fails**, with
-   the dropped category and failing audits in the uploaded report (linked from the status check / job
-   log, and attached to Allure).
-4. The dev fixes contrast + the landmark; the score climbs back over the threshold; the gate goes green.
-   Perf stays a `warn` and is trended on the dashboard rather than hard-failing the PR.
-
-## Rules (hard constraints)
-
-- The gate is a **score threshold per category** (`minScore`), one logical assertion per category under
-  test. Test names `Should_X_When_Y`.
-- `'error'` (hard-fail) on the **deterministic** categories (accessibility / SEO / best-practices);
-  `'warn'` (report only) on the **noisy** performance category — trend perf, don't hard-gate a flaky run.
-- `numberOfRuns` ≥ 3 and take the **median** — fights Lighthouse variance.
-- `playwright-lighthouse` audits reuse existing page objects (intent, not selectors); stabilize on a
-  **condition** before `playAudit`, never `waitForTimeout`; one worker per shared debugging port.
-- Don't mix scales: `playAudit` thresholds are **0–100**, `lighthouserc` `minScore` is **0–1**.
-- **No API key** for `temporary-public-storage` (contrast `percy` `PERCY_TOKEN` / `applitools` `APPLITOOLS_API_KEY`);
-  an optional `LHCI_TOKEN` for a private server is the only secret — env, lazy, never logged.
-- A Lighthouse a11y score is axe-powered = the automated **floor** (~30–40% of WCAG), not proof. Pair
-  with manual + assistive-tech testing, and run axe-playwright for assertable per-node fixes.
+- The gate is a score threshold per category; test names are `Should_X_When_Y`.
+- `'error'` on accessibility, SEO and best-practices; `'warn'` on performance.
+- `numberOfRuns` ≥ 3; the median is what is asserted.
+- `playAudit` runs in a single-worker project whose debugging-port browser is a worker fixture; specs reach
+  pages through fixtures and carry the `lighthouseGate` annotation.
+- Reports are written to `testInfo.outputPath` and attached with an awaited `testInfo.attach`.
+- No key for `temporary-public-storage`; an optional `LHCI_TOKEN` comes from the environment only.
 
 ## Cross-references
 
-- `references/axe-playwright.md` — the **per-component assertion** sibling:
-  gate on `violations` empty **inside** the E2E run. Run both — axe to *fix* nodes, Lighthouse to *trend*
-  whole-page scores + gate perf/SEO/PWA. (Lighthouse a11y is axe-powered but reported as a score.)
-- `qa-accessibility-testing-dotnet` — same skill, .NET / NUnit. **No native SDK** → shells
-  out to `npx lhci`/`npx lighthouse --output=json` and parses `categories.*.score`.
-- `qa-accessibility-testing-java` — same skill, Java / TestNG. Same CLI-port shape.
-- `qa-ui-test-writer-playwright-typescript` — the page objects the `playwright-lighthouse` audit reuses to
-  reach a stateful page. Author the flow there; add the audit here.
-- `qa-ci-pipelines-typescript` — the `lhci autorun` job, artifact upload, and LHCI status
-  check; how the dotnet/java siblings invoke the Node CLI from their pipelines.
-- `qa-test-reports-typescript` — attach the Lighthouse HTML + JSON report to the run.
-- `qa-exploratory-charter-writer` — the manual/assistive-tech testing that covers the ~60% no automated
-  a11y score can.
+- `references/axe-playwright.md` — the per-component gate inside the functional run.
+- `qa-accessibility-testing-dotnet`, `qa-accessibility-testing-java` — the CLI-port siblings.
+- `qa/typescript/skills/ui-test-author/playwright` — the page objects, the canonical config and its
+  `projects`.
+- `qa/typescript/skills/evidence-capture` — where the reports and failure evidence land.
+- `qa/cicd/typescript/skills/ci-pipelines` — the `lhci autorun` job and artifact upload.
+- `qa-exploratory-charter-writer` — the manual and assistive-technology testing no score covers.

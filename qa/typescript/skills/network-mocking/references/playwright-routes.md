@@ -1,338 +1,413 @@
-# QA — Playwright Network Monitoring & Interception (TypeScript)
+# QA — Playwright Routing, Mocking and Traffic Assertions (TypeScript / Playwright 1.64)
 
-Intercepts, mocks, asserts, and shapes HTTP traffic in Playwright `@playwright/test` tests using TypeScript. Built on the **fixture-driven** model from `qa/typescript/skills/ui-test-author/playwright`: route handlers and request-assertion helpers are exposed as Playwright **fixtures** with intent-revealing names — never raw `page.route(...)` scattered across spec bodies. Every wait is conditional on a request/response predicate; there is **no `waitForTimeout`** anywhere in this skill.
-
-## Stack
-
-- Node 24 + TypeScript (strict mode)
-- `@playwright/test` (Playwright ≥ 1.48 — `routeWebSocket`, the post-1.43 glob semantics, `routeFromHAR` update modes)
-- Network helpers under `tests/fixtures/network/`, HAR archives under `tests/fixtures/har/`
-- Page objects under `tests/pages/`, specs under `tests/specs/` (see the UI sibling)
-- These tests run sharded in CI under `qa/cicd/typescript/skills/ci-pipelines` (`--shard`, `blob` reporter, traces on failure)
+Intercepts, mocks, asserts and shapes HTTP traffic in `@playwright/test`. Built on the fixture model of
+`qa/typescript/skills/ui-test-author/playwright`: interception and traffic checks are **fixtures with intent
+names** (`mockApi.stubOrders([...])`, `traffic.requestedUrls(...)`), never `page.route(...)` in a spec. Every
+wait is a request/response predicate or a user-visible signal; there is no `waitForTimeout`. The version in
+brackets is where an API first shipped.
 
 ## When to use
 
-- Mocking a backend or third-party response so a UI test is deterministic (stub JSON, force a `500`/`403`)
-- **Asserting** an endpoint was (or was not) called, with the expected method / payload / headers
-- Modifying a real response in flight (inject a flag, corrupt one field) to exercise an edge case
-- Recording a HAR of a flaky third-party dependency, then replaying it offline for determinism
-- Simulating offline / slow-network conditions to test loading and error states
-- Blocking noisy resources (analytics, fonts, images) to speed up or stabilize a suite
+- A backend or third-party response must be deterministic: canned JSON, a forced `500` or `403`.
+- A test asserts an endpoint was called — or was **not** — with the expected method and payload.
+- A real response is modified in flight to reach an edge case.
+- A third-party dependency is replayed from a committed HAR.
+- Offline or a slow endpoint, to test loading and error states.
+- The app shell's security headers or TLS details are checked.
+- Noisy traffic (analytics) is blocked to stabilize a suite.
 
 ## When NOT to use
 
-- Playwright .NET / Java interception → `qa/{dotnet,java}/skills/network-mocking`
-- Low-level CDP (`Network.*`, real bandwidth throttling, protocol tracing) → `qa/typescript/skills/network-mocking`
-- An HTTP proxy in front of the browser (mitmproxy, system-level capture) → `qa/typescript/skills/network-mocking`
-- Writing the page objects / specs themselves → `qa/typescript/skills/ui-test-author/playwright`
-- Pure API contract/integration tests with no browser → `qa/typescript/skills/api-test-author/writer`
+- Real bandwidth throttling, cache disable, CPU throttling, performance metrics → `references/cdp.md`
+- A client with no Playwright `page` (Selenium, Appium, native) → `references/proxy.md`
+- WebSocket or SSE streams → `qa/typescript/skills/realtime-stream-testing`
+- Recording a HAR as evidence → `qa/typescript/skills/evidence-capture` (`references/playwright.md` §5)
+- Page objects and specs themselves → `qa/typescript/skills/ui-test-author/playwright`
+- Java and .NET → `qa-network-mocking-java`, `qa-network-mocking-dotnet`
 
 ## Inputs needed
 
-Ask at most 3 questions; infer the rest from `playwright.config.ts` and existing specs.
-
-1. **What traffic** — exact endpoint(s) or URL glob/regex (`**/api/orders/**`), and is it first-party or a third-party dependency?
-2. **Intent** — mock a response, assert a call happened, modify in flight, replay a HAR, or simulate offline/latency?
-3. **Scope** — one page (`page.route`) or every page in the context including popups (`context.route`)?
+1. **Which traffic** — the endpoint as a glob, RegExp or URLPattern; first-party or third-party.
+2. **Intent** — mock, assert called, assert not called, modify, replay a HAR, offline or latency, headers.
+3. **Scope** — one page (`page.route`) or every page in the context, popups included (`context.route`).
 
 ## Decision matrix
 
-| Goal | Tool | Notes |
+| Goal | API | Notes |
 |---|---|---|
-| Return canned data, never hit the network | `route.fulfill({ json })` | `json` sets `content-type: application/json` and serializes for you |
-| Force an error status | `route.fulfill({ status: 500, json: {...} })` | The app's error path is now deterministic |
-| Block a resource (analytics, images) | `route.abort()` | `abort('blockedbyclient')` to be explicit |
-| Let it through unchanged | `route.continue()` | Goes straight to network; **skips** remaining handlers |
-| Let an **earlier-registered** handler also run | `route.fallback()` | Chains to the next matching handler instead of the network |
-| Modify a real response | `await route.fetch()` → mutate → `route.fulfill({ response, body/json })` | Preserves original status/headers unless you override |
-| Tweak the outgoing request | `route.continue({ headers, postData, url, method })` | Header tampering, payload rewrite |
-| Assert a call happened | `page.waitForRequest(pred)` / `page.waitForResponse(pred)` | Listener **before** the action; fails fast on timeout |
-| Deterministic third-party dep | `page.routeFromHAR(har, { url, notFound: 'abort' })` | Record once with `update: true`, commit, replay |
-| Whole-context offline | `context.setOffline(true)` | Cross-browser |
-| Latency simulation | delay inside the handler, then `route.continue()` | No built-in `route` throttle; real bandwidth = CDP (Chromium-only) → `qa/typescript/skills/network-mocking` |
-| Mock a WebSocket | `page.routeWebSocket(url, ws => …)` | ≥ 1.48 |
+| Canned data, never hit the network | `route.fulfill({ json })` | Sets `content-type` and serializes |
+| Force an error status | `route.fulfill({ status: 500, json })` | The error path becomes deterministic |
+| Block a resource | `route.abort('blockedbyclient')` | Analytics, fonts, images |
+| Pass it through unchanged | `route.continue()` | Goes to the network and **skips** the remaining handlers |
+| Let an earlier-registered handler run | `route.fallback()` | Chains instead of going to the network |
+| Modify a real response | `await route.fetch()`, then `route.fulfill({ response, json })` | Keeps the original status and headers |
+| Change the outgoing request | `route.continue({ headers, postData, url, method })` | The `Cookie` header cannot be overridden [1.52] — use `context.addCookies` |
+| Assert a call happened | `page.waitForRequest(url)` / `waitForResponse(url)` started **before** the action | Fails on timeout |
+| Assert a call did **not** happen | `page.requests()` [1.56] after a completion signal | A buffer of the page's most recent requests |
+| No uncaught errors or console errors | `page.pageErrors()` / `page.consoleMessages()` [1.56] | Same buffers; `filter` option [1.59] |
+| Security headers, TLS | `response.allHeaders()`, `response.securityDetails()` | Routing layer, every browser — no CDP needed |
+| Deterministic third party | `routeFromHAR(har, { url, notFound: 'abort' })` | Update with `update: true` |
+| Offline | `context.setOffline(true)` | Cross-browser |
+| A slow endpoint | A delay inside the handler, then `route.continue()` | Real throughput → `references/cdp.md` |
 
-## Patterns
+## 1. The fixtures
 
-### Route-mocking fixture — `tests/fixtures/network/mockApi.ts`
-
-Expose interception as a fixture with intent-revealing methods. Specs call `mockApi.stubOrders([...])`, not `page.route('**/api/orders', ...)`.
+`network.fixtures.ts` extends the writer's `fixtures.ts`. Mocks live in `MockApi`; traffic reads live in
+`Traffic`. Both take the test's `page`.
 
 ```typescript
-import { test as base, Page } from '@playwright/test';
+import type { Page, Request, Response } from '@playwright/test';
+import { test as base } from './fixtures';
+import { CartPage } from './CartPage';
+import { OrdersPage } from './OrdersPage';
+
+export type Order = { readonly id: string; readonly totalMinor: number; readonly currency: string };
+export type FeatureFlags = { readonly betaCheckout: boolean; readonly newPricing: boolean };
+
+const updatePaymentsHar = process.env.HAR_UPDATE === '1';
 
 export class MockApi {
   constructor(private readonly page: Page) {}
 
-  /** Serve canned orders; the real backend is never hit. */
-  async stubOrders(orders: unknown[]): Promise<void> {
-    await this.page.route('**/api/orders', (route) =>
-      route.fulfill({ json: orders }),
-    );
+  async stubOrders(orders: readonly Order[]): Promise<void> {
+    await this.page.route('**/api/orders', (route) => route.fulfill({ json: orders }));
   }
 
-  /** Force the orders endpoint to fail so the UI's error path runs. */
   async failOrdersWith(status: number): Promise<void> {
-    await this.page.route('**/api/orders', (route) =>
-      route.fulfill({ status, json: { error: 'simulated failure' } }),
+    await this.page.route('**/api/orders', (route) => route.fulfill({ status, json: { error: 'simulated' } }));
+  }
+
+  async blockAnalytics(): Promise<void> {
+    await this.page.route(/google-analytics\.com|segment\.io/, (route) => route.abort('blockedbyclient'));
+  }
+
+  async enableFlag(flag: keyof FeatureFlags): Promise<void> {
+    await this.page.route('**/api/feature-flags', async (route) => {
+      const response = await route.fetch();
+      const flags: FeatureFlags = await response.json();
+      await route.fulfill({ response, json: { ...flags, [flag]: true } });
+    });
+  }
+
+  async tagTenant(tenant: string): Promise<void> {
+    await this.page.route('**/api/**', (route) =>
+      route.continue({ headers: { ...route.request().headers(), 'x-test-tenant': tenant } }),
     );
   }
 
-  /** Drop noisy third-party traffic to stabilize and speed up the run. */
-  async blockAnalytics(): Promise<void> {
-    await this.page.route(/google-analytics\.com|segment\.io/, (route) =>
-      route.abort('blockedbyclient'),
-    );
+  async delay(url: string, ms: number): Promise<void> {
+    await this.page.route(url, async (route) => {
+      await new Promise((resolve) => setTimeout(resolve, ms));
+      await route.continue();
+    });
+  }
+
+  async stubOrdersInEveryPage(orders: readonly Order[]): Promise<void> {
+    await this.page.context().route('**/api/orders', (route) => route.fulfill({ json: orders }));
+  }
+
+  async replayPayments(): Promise<void> {
+    await this.page.routeFromHAR('tests/fixtures/har/payments.har', {
+      url: 'https://api.stripe.com/**',
+      notFound: 'abort',
+      update: updatePaymentsHar,
+      updateContent: 'attach',
+      updateMode: 'minimal',
+    });
+  }
+
+  async goOffline(): Promise<void> {
+    await this.page.context().setOffline(true);
   }
 }
 
-type NetFixtures = { mockApi: MockApi };
+export class Traffic {
+  constructor(private readonly page: Page) {}
 
-export const test = base.extend<NetFixtures>({
+  nextRequest(url: string | RegExp): Promise<Request> {
+    return this.page.waitForRequest(url);
+  }
+
+  nextResponse(url: string | RegExp): Promise<Response> {
+    return this.page.waitForResponse(url);
+  }
+
+  async requestedUrls(pattern: RegExp): Promise<string[]> {
+    const requests = await this.page.requests();
+    return requests.map((request) => request.url()).filter((url) => pattern.test(url));
+  }
+
+  async consoleErrors(): Promise<string[]> {
+    const messages = await this.page.consoleMessages();
+    return messages.filter((message) => message.type() === 'error').map((message) => message.text());
+  }
+
+  async pageErrors(): Promise<string[]> {
+    const errors = await this.page.pageErrors();
+    return errors.map((error) => error.message);
+  }
+}
+
+type NetworkFixtures = {
+  mockApi: MockApi;
+  traffic: Traffic;
+  cartPage: CartPage;
+  ordersPage: OrdersPage;
+};
+
+export const test = base.extend<NetworkFixtures>({
   mockApi: async ({ page }, use) => {
     await use(new MockApi(page));
   },
+  traffic: async ({ page }, use) => {
+    await use(new Traffic(page));
+  },
+  cartPage: async ({ page }, use) => {
+    await use(new CartPage(page));
+  },
+  ordersPage: async ({ page }, use) => {
+    await use(new OrdersPage(page));
+  },
 });
 
-export { expect } from '@playwright/test';
+export { expect } from './fixtures';
 ```
 
-```typescript
-// tests/specs/orders.spec.ts
-import { test, expect } from '../fixtures/network/mockApi';
+- Every handler returns or awaits its `fulfill` / `abort` / `continue` / `fallback` — a floating
+  `route.continue()` is a promise nobody waits for.
+- Payload types (`Order`, `FeatureFlags`) come from the project's builders
+  (`qa/typescript/skills/test-data-builder`); a large payload is served from a file with
+  `route.fulfill({ path })`, never a giant inline literal.
+- `delay` holds the one sanctioned `setTimeout` in this skill: a *simulated* slow response, inside a
+  handler, never a wait-and-hope.
 
-test('renders an empty state when there are no orders', async ({ page, mockApi }) => {
+## 2. Mocking a response
+
+```typescript
+import { expect, test } from './network.fixtures';
+
+test('Should_ShowEmptyState_When_ThereAreNoOrders', async ({ mockApi, ordersPage }) => {
   await mockApi.stubOrders([]);
-  await page.goto('/orders');
 
-  await expect(page.getByTestId('orders-empty')).toBeVisible();
+  await ordersPage.open();
+
+  await expect(ordersPage.emptyState).toBeVisible();
 });
 
-test('shows the error banner when the orders API fails', async ({ page, mockApi }) => {
+test('Should_ShowErrorBanner_When_OrdersApiFails', async ({ mockApi, ordersPage }) => {
   await mockApi.failOrdersWith(500);
-  await page.goto('/orders');
 
-  await expect(page.getByRole('alert')).toContainText(/couldn’t load orders/i);
+  await ordersPage.open();
+
+  await expect(ordersPage.errorBanner).toHaveText('We could not load your orders');
 });
 ```
 
-Register routes **before** the navigation/action that triggers them — a route registered after the request has fired won't catch it.
+Register the route **before** the navigation or action that fires the request; a route added afterwards
+never sees it.
 
-### Request-assertion helper — fail fast on a missing/mismatched call
-
-A call assertion uses the **listener-before-action** ordering: start the wait, then perform the action, then await. Awaiting before the action hangs; awaiting after races the request.
+## 3. Asserting a call — method and typed payload
 
 ```typescript
-// tests/fixtures/network/expectRequest.ts
-import { Page, Request, expect } from '@playwright/test';
+type CheckoutRequest = { readonly totalMinor: number; readonly currency: string };
 
-/**
- * Assert an outbound request matching `urlGlob` fires while `action` runs,
- * and (optionally) that its JSON payload matches. Fails fast on timeout.
- */
-export async function expectRequest(
-  page: Page,
-  urlGlob: string | RegExp,
-  action: () => Promise<void>,
-  opts: { method?: string; bodyMatches?: (json: any) => boolean; timeout?: number } = {},
-): Promise<Request> {
-  const waitFor = page.waitForRequest(
-    (req) =>
-      (typeof urlGlob === 'string' ? req.url().includes(urlGlob.replace(/\*/g, '')) : urlGlob.test(req.url())) &&
-      (!opts.method || req.method() === opts.method),
-    { timeout: opts.timeout ?? 5_000 },
+test('Should_PostCartTotal_When_UserPlacesOrder', async ({ cartPage, traffic }) => {
+  await cartPage.open();
+  const checkout = traffic.nextRequest('**/api/checkout');
+
+  await cartPage.placeOrder();
+
+  const request = await checkout;
+  const expected: CheckoutRequest = { totalMinor: 15_000, currency: 'EUR' };
+  expect(request.method(), 'checkout method').toBe('POST');
+  expect(request.postDataJSON(), 'checkout payload').toEqual(expected);
+});
+```
+
+Start the wait, act, then await it. Awaiting first hangs; starting it after the action races the request.
+Pass the glob, RegExp or URLPattern straight to `waitForRequest` — never a hand-rolled substring match.
+
+## 4. Asserting a call did NOT happen, and that the page logged no errors
+
+```typescript
+test('Should_NotCallLegacyPricing_When_CartIsRecalculated', async ({ cartPage, traffic }) => {
+  await cartPage.open();
+
+  await cartPage.recalculate();
+
+  expect(await traffic.requestedUrls(/\/api\/legacy-pricing/), 'legacy pricing calls').toEqual([]);
+});
+
+test('Should_RaiseNoPageErrors_When_CartOpens', async ({ cartPage, traffic }) => {
+  await cartPage.open();
+
+  expect(await traffic.pageErrors(), 'uncaught errors on the cart page').toEqual([]);
+});
+```
+
+- `recalculate()` returns once the new total is visible. The list is read **after** that signal, or the
+  check passes only because the request had not fired yet.
+- `page.requests()`, `page.consoleMessages()` and `page.pageErrors()` [1.56] return the page's most
+  recent buffered items — no listener to register and no array to manage. The buffer is capped, so for a
+  long flow that fires hundreds of requests, collect with `page.on('request', …)` in a fixture instead.
+  `filter` [1.59] narrows which buffered items are returned, and `clearConsoleMessages()` /
+  `clearPageErrors()` [1.59] reset them.
+- Each page has its own buffer: a popup's traffic is read from the popup.
+
+## 5. Security headers and TLS — at the routing layer
+
+```typescript
+test('Should_SendSecurityHeaders_When_AppShellLoads', async ({ homePage, traffic }) => {
+  const shell = traffic.nextResponse('/');
+
+  await homePage.goto();
+
+  const headers = await (await shell).allHeaders();
+  expect(Object.keys(headers), 'security headers on the app shell').toEqual(
+    expect.arrayContaining(['content-security-policy', 'strict-transport-security', 'x-frame-options']),
   );
+});
 
-  const [request] = await Promise.all([waitFor, action()]);
+test('Should_NegotiateTls13_When_AppShellLoads', async ({ homePage, traffic }) => {
+  const shell = traffic.nextResponse('/');
 
-  if (opts.bodyMatches) {
-    expect(opts.bodyMatches(request.postDataJSON()), 'request payload did not match').toBe(true);
-  }
-  return request;
-}
-```
+  await homePage.goto();
 
-```typescript
-test('submits the checkout with the cart total', async ({ page }) => {
-  await page.goto('/cart');
-
-  await expectRequest(
-    page,
-    '**/api/checkout',
-    () => page.getByRole('button', { name: 'Place order' }).click(),
-    { method: 'POST', bodyMatches: (b) => b.totalMinor === 15_000 && b.currency === 'EUR' },
-  );
+  const details = await (await shell).securityDetails();
+  expect(details?.protocol, 'TLS protocol of the app shell').toBe('TLS 1.3');
 });
 ```
 
-Prefer a Playwright glob/regex over hand-rolled string matching where the matcher is the whole assertion — the helper above is for the common case where you also want to assert on the payload. For a plain "was it called", `page.waitForResponse('**/api/checkout')` inside a `Promise.all` is enough.
+- `allHeaders()` returns every response header with **lower-cased** names, including the ones
+  `headers()` omits; `headerValue(name)` reads one case-insensitively.
+- `securityDetails()` returns `{ protocol, issuer, subjectName, validFrom, validTo }`, or `null` over plain
+  HTTP — so the TLS test fails loudly against an HTTP environment.
+- `'/'` is resolved against `baseURL`, so it matches the document exactly. Both checks are
+  cross-browser; CDP is not needed for either.
 
-### Asserting an endpoint was **not** called
+## 6. Modifying traffic in flight
 
-There is no negative `waitFor`. Collect matching requests over the window of the action, then assert the count.
+- **The response:** `mockApi.enableFlag('betaCheckout')` fetches the real flags and re-serves them with one
+  flag forced. Passing `response` keeps the original status and headers.
+- **The request:** `mockApi.tagTenant('tenant-42')` adds a header. A `Cookie` header set through
+  `route.continue` is ignored since 1.52; add the cookie with `context.addCookies` in a fixture.
+
+## 7. HAR replay and update
+
+Replay a committed HAR on every run, and update it on purpose:
+
+- `mockApi.replayPayments()` serves `https://api.stripe.com/**` from the HAR. `notFound: 'abort'` turns any
+  request the HAR does not hold into a failure, so a new dependency cannot slip through to the live service.
+- **Updating** is a deliberate, local run against the real dependency:
+  `HAR_UPDATE=1 npx playwright test payments.spec.ts`. With `update: true`, the requests reach the network
+  and the HAR is written when the context closes. Commit it in a dedicated PR; never update in CI.
+- The `routeFromHAR` options are `updateContent: 'embed' | 'attach'` [1.32] (`attach` stores bodies as
+  separate files: reviewable diffs) and `updateMode: 'full' | 'minimal'` [1.32] (`minimal` keeps only what
+  replay needs). `content` and `mode` are the names of the **recording** options (`recordHar`,
+  `tracing.startHar`) — a different API.
+- Recording a HAR of a whole test as evidence — `context.tracing.startHar()` [1.60] in a fixture, or
+  `use: { contextOptions: { recordHar: { path } } }` — is `qa/typescript/skills/evidence-capture`.
+  `recordHar` is a context option, never a `test.use` key.
+- Scrub tokens, cookies and personal data from a committed HAR; record against disposable test accounts.
+
+## 8. Offline and latency
 
 ```typescript
-test('does not call the legacy pricing endpoint', async ({ page }) => {
-  const calls: string[] = [];
-  page.on('request', (req) => {
-    if (req.url().includes('/api/legacy-pricing')) calls.push(req.url());
-  });
+test('Should_ShowOfflineBanner_When_NetworkDrops', async ({ mockApi, ordersPage }) => {
+  await ordersPage.open();
 
-  await page.goto('/cart');
-  await page.getByRole('button', { name: 'Recalculate' }).click();
-  await expect(page.getByTestId('cart-total')).toBeVisible(); // a real signal the flow finished
+  await mockApi.goOffline();
+  await ordersPage.refresh();
 
-  expect(calls, 'legacy pricing endpoint should be retired').toHaveLength(0);
+  await expect(ordersPage.offlineBanner).toHaveText('You are offline');
+});
+
+test('Should_KeepSpinnerVisible_When_OrdersRespondSlowly', async ({ mockApi, ordersPage }) => {
+  await mockApi.delay('**/api/orders', 1_500);
+
+  await ordersPage.open();
+
+  await expect(ordersPage.spinner).toBeVisible();
 });
 ```
 
-Gate the assertion on a **user-visible signal** that the flow completed (`toBeVisible` on the result), never on a fixed sleep — otherwise the negative check passes simply because the request hadn't fired yet.
-
-### Modify a real response in flight
-
-Fetch the live response, mutate the body, re-serve. Passing `response` keeps the original status and headers.
-
-```typescript
-await page.route('**/api/feature-flags', async (route) => {
-  const response = await route.fetch();
-  const flags = await response.json();
-  flags.betaCheckout = true;            // force the variant under test
-  await route.fulfill({ response, json: flags });
-});
-```
-
-### Header / payload tampering on the outbound request
-
-```typescript
-await page.route('**/api/**', (route) => {
-  const headers = { ...route.request().headers(), 'x-test-tenant': 'tenant-42' };
-  route.continue({ headers });
-});
-```
-
-### HAR record-then-replay for deterministic third-party deps
-
-Record once against the live dependency, commit the archive, then replay offline on every run. Use `content: 'attach'` so bodies live as separate files (reviewable diffs, no giant JSON blobs).
-
-```typescript
-// One-off recording run — set update: true, then commit tests/fixtures/har/payments.har
-await page.routeFromHAR('tests/fixtures/har/payments.har', {
-  url: '**/api.stripe.com/**',
-  update: true,
-  updateMode: 'minimal',
-  updateContent: 'attach',
-});
-```
-
-```typescript
-// Every CI run — replay. notFound: 'abort' makes any un-recorded call a hard failure
-// (so a new dependency can't silently slip through to the real network).
-test.beforeEach(async ({ page }) => {
-  await page.routeFromHAR('tests/fixtures/har/payments.har', {
-    url: '**/api.stripe.com/**',
-    notFound: 'abort',
-  });
-});
-```
-
-`recordHar` as a `test.use({ recordHar: { path, mode: 'minimal', content: 'attach' } })` context option captures the **whole** context's traffic for debugging; `routeFromHAR` is the scoped record/replay you want for a specific dependency.
-
-### Offline and latency simulation
-
-```typescript
-test('shows the offline banner when the network drops', async ({ page, context }) => {
-  await page.goto('/dashboard');
-  await expect(page.getByTestId('live-feed')).toBeVisible();
-
-  await context.setOffline(true);
-  await page.getByRole('button', { name: 'Refresh' }).click();
-
-  await expect(page.getByRole('alert')).toContainText(/you’re offline/i);
-});
-```
-
-Latency injection has **no built-in `route` throttle** — add a delay inside the handler. This is the one sanctioned `setTimeout` in this skill (it is a *simulated delay*, not a *wait-and-hope*), and it belongs in a fixture, not a spec:
-
-```typescript
-async function withLatency(page: Page, urlGlob: string, ms: number): Promise<void> {
-  await page.route(urlGlob, async (route) => {
-    await new Promise((r) => setTimeout(r, ms));
-    await route.continue();
-  });
-}
-// Test the loading spinner stays up while /api/orders is slow.
-await withLatency(page, '**/api/orders', 1_500);
-await page.goto('/orders');
-await expect(page.getByTestId('orders-spinner')).toBeVisible();
-```
-
-For real bandwidth/latency emulation (not just per-request delay) use CDP `Network.emulateNetworkConditions` — Chromium-only — covered in `qa/typescript/skills/network-mocking`.
+`delay` slows one endpoint. Real bandwidth and latency emulation is CDP's
+`Network.emulateNetworkConditions`, Chromium-only, in `references/cdp.md`.
 
 ## Rules
 
 ### Matching
-- URL patterns are a **glob** (`*` = any char except `/`; `**` spans `/`; `{a,b}` alternation), a **RegExp**, or a `(url: URL) => boolean` predicate. Prefer a glob for path shape, a regex for ids/query specifics.
-- **Glob `?` and `[]` (character classes) are not supported** since Playwright 1.43 — use a `RegExp` for those.
-- **`baseURL` gotcha:** a string pattern that does **not** start with `*` is resolved against `baseURL` via `new URL(pattern, baseURL)`; a pattern starting with `*`/`**` is treated as a raw glob and is **not** joined to `baseURL`. Don't write `'/api/orders'` expecting a glob — write `'**/api/orders'`.
 
-### Handler discipline
-- A route handler **must call exactly one** of `fulfill` / `abort` / `continue` / `fallback`. Calling none hangs the request; calling two throws.
-- **Handlers run last-registered-first.** The most recent `route(...)` wins; use `route.fallback()` to defer to an earlier handler. `route.continue()` goes straight to the network and **skips** the remaining handlers.
-- `route.fulfill({ json })` over manual `{ body: JSON.stringify(...), contentType: 'application/json' }` — the shorthand sets the header and serializes.
-- Serve large mock payloads from a file via `route.fulfill({ path: 'tests/fixtures/responses/orders.json' })`, not a giant inline literal.
-- Clean up route scope deliberately: a `page.route` lives for the page's lifetime (fresh per test here); use `page.unroute` / `page.unrouteAll({ behavior: 'wait' })` only when you re-route the same URL within one test.
+- A URL matcher is a **glob** (`*` matches any character except `/`; `**` spans `/`; `{a,b}` alternates), a
+  **RegExp**, a `(url: URL) => boolean` predicate, or a **URLPattern** — the last is in the Node API docs
+  since 1.59 and needs the `URLPattern` global (Node 24) and its type in the project's TypeScript `lib`:
+  `page.route(new URLPattern({ pathname: '/api/orders/:id' }), …)`.
+- **Glob `?` and `[]` were removed in 1.52.** Use a RegExp for single-character or character-class matches.
+- **`baseURL`:** a string that does not start with `*` is resolved against `baseURL`; one starting with `*`
+  or `**` is a raw glob. Write `'**/api/orders'`, never `'/api/orders'` expecting a glob.
+
+### Handlers
+
+- A handler calls exactly one of `fulfill` / `abort` / `continue` / `fallback`, and awaits or returns it.
+  None hangs the request; two throws.
+- **The last registered handler runs first.** `route.fallback()` defers to an earlier one;
+  `route.continue()` goes straight to the network and skips the others.
+- `route.fulfill({ json })` over `{ body: JSON.stringify(...), contentType }`.
+- A handler sees only the **first** URL of a redirect chain; assert on the final response.
+- Re-routing the same URL inside one test uses `page.unroute` / `page.unrouteAll({ behavior: 'wait' })`;
+  otherwise the route lives for the test's page.
 
 ### Scope
-- `page.route` for one page (handles its popups); `context.route` for **every** page in the context. Page-level routes take precedence over context-level for the same request.
-- Mock at the **narrowest** scope that works — context routes that leak across tests are a common source of cross-test contamination.
 
-### Assertions & waits
-- **Listener before action**: `const p = page.waitForResponse(pred); await action(); await p;` (or `Promise.all([waitFor, action])`). Never `await` the wait before firing the action.
-- Use **predicates** on `waitForRequest`/`waitForResponse` to assert method/status/url together: `r => r.url().includes('/api/x') && r.status() === 200`.
-- Read payloads with `request.postDataJSON()` / `request.headers()` and `await response.json()` / `response.status()` — don't re-parse `postData()` by hand.
-- **Negative assertions** ("endpoint not called") collect from `page.on('request', …)` and assert `.toHaveLength(0)` **after** a user-visible completion signal — never after a sleep.
-- **No `page.waitForTimeout(ms)` as a wait.** The only `setTimeout` allowed is inside a latency-injection route handler, and only there.
+- `page.route` covers one page and does **not** see a popup's first request. A flow that opens a popup — a
+  payment window, an OAuth sign-in — routes with `context.route` (`mockApi.stubOrdersInEveryPage`).
+- Mock at the narrowest scope that works; a context route reaches every page in the context.
+- Since 1.57, Chromium reports service-worker requests through context routing. If a service worker still
+  answers before your route, set `serviceWorkers: 'block'` for that project.
 
-### HAR
-- Record with `update: true` once, commit, then replay with no `update`. Re-record in a dedicated PR, never silently in CI.
-- Use `content: 'attach'` (bodies as files) for reviewable diffs; `mode: 'minimal'` unless you need timings.
-- Set `notFound: 'abort'` on replay so an un-recorded request is a hard failure, not a silent hit to the real third party.
+### Assertions and waits
 
-### Determinism & hygiene
-- If `page.route` mocks are being bypassed, set `serviceWorkers: 'block'` in the context — a Service Worker can intercept before your route does.
-- A route handler is only invoked for the **first** URL of a redirect chain — assert on the final response, not the 30x hop.
-- Never put real secrets/tokens in committed mock responses or HAR files — scrub auth headers (`content: 'attach'` + a redaction step, or a `recordHar` `urlFilter`).
+- Start the wait before the action; read buffers after a user-visible completion signal.
+- Read payloads with `request.postDataJSON()` into a typed value, and `await response.json()`; never
+  re-parse `postData()` by hand.
+- One expected value per assertion: `toBe(200)`, never "2xx".
+- No `waitForTimeout`. The only `setTimeout` is inside `MockApi.delay`.
 
-### What NOT to do
-- No `page.waitForTimeout(ms)` to "wait for the request" — use `waitForRequest`/`waitForResponse` with a predicate.
-- No raw `page.route('**/api/...', ...)` scattered through spec bodies — wrap it in a `mockApi`-style fixture with an intent name.
-- No handler that calls neither `fulfill`/`abort`/`continue`/`fallback` (hangs) or two of them (throws).
-- No `route.continue()` when you meant `route.fallback()` — `continue` skips your other handlers.
-- No `'/api/orders'` string pattern expecting glob behavior — it gets `baseURL`-resolved; write `'**/api/orders'`.
-- No glob `?`/`[abc]` since 1.43 — switch to a `RegExp`.
-- No `{ body: JSON.stringify(x), contentType: 'application/json' }` where `{ json: x }` does the same thing.
-- No giant inline JSON literal as a mock — `route.fulfill({ path })` from a fixture file.
-- No silent HAR re-record in CI (`update: true` left on) — recordings drift and tests stop testing anything.
-- No `notFound: 'fallback'` on a third-party HAR replay you intend to be hermetic — it lets un-recorded calls hit the live service.
-- No secrets/PII committed inside a mock response or HAR archive.
-- No `context.route` for something one page needs — it leaks the mock into every page in the context.
-- No asserting "not called" after a fixed sleep — gate on a user-visible completion signal.
+## What NOT to do
+
+- `page.route(...)` in a spec body — wrap it in a fixture method with an intent name.
+- `route.continue()` neither awaited nor returned.
+- `(json: any)` or a glob turned into a substring with `replace(/\*/g, '')`.
+- `route.continue()` where `route.fallback()` was meant.
+- `'/api/orders'` expecting glob behaviour; glob `?` / `[abc]`.
+- "Not called" checked after a sleep, or before the completion signal.
+- `test.use({ recordHar })` — it is not a test option.
+- `content: 'attach'` passed to `routeFromHAR` — its option is `updateContent`.
+- `update: true` left on, or a HAR re-recorded in CI.
+- `notFound: 'fallback'` on a replay meant to be hermetic.
+- `page.route` for a popup's traffic.
+- `routeWebSocket` here, or `route.fulfill` standing in for an SSE stream — that is
+  `qa/typescript/skills/realtime-stream-testing`.
+- Secrets or personal data in a mock response or a committed HAR.
 
 ## Generation steps
 
-1. Confirm **traffic** (endpoints + glob/regex), **intent** (mock / assert / modify / HAR / offline), and **scope** (page vs context).
-2. Add or extend `tests/fixtures/network/mockApi.ts` with one intent-named method per scenario (`stubOrders`, `failOrdersWith`, `blockAnalytics`). Register the fixture.
-3. For call assertions, use `expectRequest` (or a direct `waitForResponse` predicate) with listener-before-action ordering; assert payload via `postDataJSON()`.
-4. For third-party determinism, record a HAR with `update: true`, commit it under `tests/fixtures/har/` with `content: 'attach'`, then replay with `notFound: 'abort'`.
-5. For offline/latency states, use `context.setOffline(true)` and a latency-injection route helper — never `waitForTimeout`.
-6. Run `npx playwright test`; verify under `npx playwright test --ui` (the trace's Network tab shows which requests were routed vs hit the network). Run `tsc --noEmit` for strict-TS green. Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run".
+1. Confirm the traffic, the intent and the scope.
+2. Add one intent-named method per scenario to `MockApi` or `Traffic` in `network.fixtures.ts`.
+3. Write the spec through the page-object fixtures; register mocks before the action; start waits before
+   it; read buffers after the completion signal.
+4. For a third party, record the HAR once with `HAR_UPDATE=1`, commit it, replay with `notFound: 'abort'`.
+5. Run `npx playwright test` and `tsc --noEmit`; the trace's Network tab shows which requests were routed.
+   Inside a plan task marked `Gate: none`, run none of this and report the files as written, not run.
 
 ## Cross-references
 
-- **`qa/typescript/skills/ui-test-author/playwright`** — the fixture/page-object model these network fixtures layer on; `waitForResponse` ordering and the no-`waitForTimeout` discipline originate there.
-- **`qa/dotnet/skills/network-mocking`** + **`qa/java/skills/network-mocking`** — the sibling stacks porting this canonical TS skill into Playwright-for-.NET / -Java idioms.
-- **`qa/typescript/skills/network-mocking`** — low-level CDP (`Network.emulateNetworkConditions` for real throttling, protocol-level tracing) when `route` isn't enough.
-- **`qa/typescript/skills/network-mocking`** — out-of-browser HTTP capture (mitmproxy / system proxy) for multi-process or non-browser traffic.
-- **`qa/cicd/typescript/skills/ci-pipelines`** — runs these specs sharded; HAR archives and traces are uploaded as artifacts there.
-- **`qa/typescript/skills/test-data-builder`** — builds the shapes you stub into `route.fulfill({ json })`.
-- **`qa/typescript/skills/api-test-author/writer`** — when the test needs no browser, assert against the API directly instead of intercepting.
+- `qa/typescript/skills/ui-test-author/playwright` — the fixtures and page objects these extend; the
+  listener-before-action rule.
+- `references/cdp.md` — real throttling, cache, CPU and metrics below the routing layer.
+- `references/proxy.md` — clients with no Playwright `page`.
+- `qa/typescript/skills/realtime-stream-testing` — WebSocket (`routeWebSocket`) and SSE.
+- `qa/typescript/skills/evidence-capture` — HAR recording and failure evidence.
+- `qa/typescript/skills/test-data-builder` — the payload shapes.
+- `qa/typescript/skills/api-test-author/writer` — when no browser is needed.
+- `qa/cicd/typescript/skills/ci-pipelines` — runs these specs and uploads the evidence.

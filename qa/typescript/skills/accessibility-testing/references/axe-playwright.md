@@ -1,359 +1,219 @@
-# Accessibility Testing — axe-core + Playwright (TypeScript)
+# Accessibility Testing — axe-core + Playwright (TypeScript / Playwright 1.64)
 
-axe-core is the de-facto accessibility rule engine; `@axe-core/playwright` runs it **inside your
-Playwright run**, against the live DOM, and returns structured `violations[]` you assert on. This is an
-**assertion layer** on top of the page objects and specs the `qa-ui-test-writer-playwright-typescript`
-skill already authored — you inject an axe scan into an already-authored flow. You do **not** write new
-page objects here.
+`@axe-core/playwright` runs the axe-core rule engine **inside your Playwright run**, against the live DOM,
+and returns structured `violations[]` to assert on. This is an **assertion layer** on page objects and
+fixtures from `qa/typescript/skills/ui-test-author/playwright`: a spec reaches a state through a page
+object and asks the `a11y` fixture to scan it.
 
-Unlike the visual-regression family (free / Percy / Applitools), axe runs **entirely
-in-browser**: there is **no SaaS, no agent, and no API key**. The gate is local, deterministic, and free
-— `violations` is empty or it isn't.
+axe runs **entirely in the browser**: no SaaS, no agent, no API key. The gate is local and deterministic.
 
-> **What automation can and can't do.** axe-core catches roughly **30–40%** of WCAG issues — the
-> machine-checkable ones (missing `alt`, unlabeled inputs, color contrast, bad ARIA, duplicate IDs). It
-> is a **floor, not proof of accessibility**: keyboard traps, focus order, screen-reader comprehension,
-> and meaningful alt text still need manual + assistive-tech testing. Cross-link the manual/exploratory
-> angle (`qa-exploratory-charter-writer`). Treat a green axe run as "no *automated* regressions," never
-> "accessible."
+> **What automation can and cannot do.** axe catches the machine-checkable share of WCAG (roughly a third):
+> missing `alt`, unlabeled inputs, contrast, invalid ARIA, duplicate ids. Keyboard traps, focus order,
+> screen-reader comprehension and meaningful alt text still need manual and assistive-technology testing
+> (`qa-exploratory-charter-writer`). A green scan means "no *automated* regressions", never "accessible".
 
-## Setup
+## 1. Setup
 
 ```bash
-npm install --save-dev @axe-core/playwright axe-core
+npm install --save-dev @axe-core/playwright
 ```
 
-No config file, no service, no token. `AxeBuilder` bundles axe-core and injects it into the page at scan
-time; the scan happens in the browser you already launched.
+The version is in the writer's **Versions** table. `AxeBuilder` bundles axe-core and injects it at scan
+time; there is no config file and no service.
 
-## The AxeBuilder model
+## 2. The result model
 
-`new AxeBuilder({ page }).analyze()` injects axe-core, runs it against the current DOM, and resolves to
-an `AxeResults` object with four arrays:
+`analyze()` resolves to `AxeResults` with four arrays:
 
-- **`violations[]`** — failed rules. **This is the gate.** Each violation has `id` (rule id, e.g.
-  `color-contrast`), `impact` (`minor` | `moderate` | `serious` | `critical`), `help`, `helpUrl`, and
-  `nodes[]` — each node carries the failing `target` selector(s) and a `failureSummary` telling you how
-  to fix it.
-- **`passes[]`** — rules that passed (evidence, not usually asserted on).
-- **`incomplete[]`** — rules axe **could not decide** automatically (e.g. a contrast check over a
-  background image). **Not a pass** — these need manual review. Don't silently ignore them.
-- **`inapplicable[]`** — rules with no matching elements on the page.
+- **`violations[]`** — failed rules. **The gate.** Each has `id` (`color-contrast`), `impact` (`minor` |
+  `moderate` | `serious` | `critical`), `help`, `helpUrl` and `nodes[]`, each node with its `target`
+  selector and a `failureSummary`.
+- **`incomplete[]`** — rules axe could not decide (contrast over a background image). **Not a pass**: they
+  are the manual-review list, so they are attached on every scan.
+- `passes[]`, `inapplicable[]` — evidence; not asserted on.
 
-The assertion is one logical assertion per the global rules:
+`expect(results.violations, '<subject>').toEqual([])` is the assertion: on failure the diff prints every
+rule and node. Never `violations.length === 0`, which throws that information away.
 
-```typescript
-expect(results.violations).toEqual([]);
-```
+## 3. Native assertions alongside the scan
 
-## Core pattern — scan injected into a page-object-driven flow
+axe finds rule violations; it does not know what a control *should* be called. Assert the intended
+contract with the web-first set — `toHaveAccessibleName`, `toHaveAccessibleDescription`,
+`toHaveAccessibleErrorMessage`, `toHaveRole`, `toMatchAriaSnapshot` — from
+`qa/typescript/skills/ui-test-author/playwright/references/assertions.md` §1–§2. A form gets both: an axe
+scan per state, and a native assertion for the error message the story specifies (§6).
 
-The page object exposes intent and drives the app to the state under test; the test stabilizes on a
-condition, then scans. No selectors in the test, no fixed waits — axe analyzes the **live DOM at call
-time**, so the page must be in its final state before `analyze()`.
+## 4. The shared fixture — tags, excludes and attachments in one place
 
-```typescript
-// pages/checkout.page.ts
-import { type Page, type Locator } from '@playwright/test';
-
-export class CheckoutPage {
-  readonly page: Page;
-  readonly form: Locator;
-
-  constructor(page: Page) {
-    this.page = page;
-    this.form = page.getByTestId('checkout-form');
-  }
-
-  async goto(): Promise<void> {
-    await this.page.goto('/checkout');
-  }
-
-  /** Resolves once the form is interactive — a condition, never a fixed wait. */
-  async waitUntilReady(): Promise<void> {
-    await this.form.getByRole('button', { name: 'Pay now' }).waitFor({ state: 'visible' });
-  }
-}
-```
+The conformance target is **WCAG 2.2 AA**, set once. Every scan attaches its violations and its
+incompletes **before** the test asserts, so a failure carries the evidence and incompletes are visible on
+every run.
 
 ```typescript
-// tests/checkout.a11y.spec.ts
-import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
-import { CheckoutPage } from '../pages/checkout.page';
+import type { AxeResults, Result } from 'axe-core';
+import { test as base } from './fixtures';
+import { SignupPage } from './SignupPage';
 
-test('Should_have_no_a11y_violations_When_checkout_form_loaded', async ({ page }) => {
-  const checkout = new CheckoutPage(page);
-  await checkout.goto();
-  await checkout.waitUntilReady();                 // stabilize on a condition first…
+export const wcag22aa = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'];
 
-  const results = await new AxeBuilder({ page })   // …then scan the live DOM
-    .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
-    .analyze();
+export const falsePositives: ReadonlyMap<string, string> = new Map([
+  ['scrollable-region-focusable', 'A11Y-2001: misfires on the virtualized order list'],
+]);
 
-  expect(results.violations).toEqual([]);          // one logical assertion = the gate
-});
-```
+export const knownViolations: ReadonlyMap<string, string> = new Map([
+  ['color-contrast', 'A11Y-1234'],
+  ['landmark-one-main', 'A11Y-1235'],
+]);
 
-## Scoping + rule selection
+export const newViolations = (violations: Result[]): Result[] =>
+  violations.filter((violation) => !knownViolations.has(violation.id));
 
-Scope the scan and pick which rules count — the analogue of `Target.region` / match levels in the
-visual family, but here it's *which rules*, not *how lenient*:
+export const blockingViolations = (violations: Result[]): Result[] =>
+  violations.filter((violation) => violation.impact === 'critical' || violation.impact === 'serious');
 
-```typescript
-const results = await new AxeBuilder({ page })
-  .include('#checkout-form')          // scan only this component (or pass a chain/array)
-  .exclude('.third-party-widget')     // skip an embed you don't own
-  .withTags(['wcag2aa', 'wcag21aa'])  // the WCAG level that IS your gate
-  .analyze();
-```
+type A11y = {
+  scanPage: () => Promise<AxeResults>;
+  scanWithin: (testId: string) => Promise<AxeResults>;
+};
 
-- **`.include(selector)` / `.exclude(selector)`** — scan a component, not the whole page. Cleaner
-  failures, and lets you gate a new component to zero while the legacy page still has debt. `.exclude`
-  third-party iframes/widgets you can't fix.
-- **`.withTags([...])`** — pick the ruleset = pick which WCAG level is your gate. Common tags:
-  `wcag2a`, `wcag2aa`, `wcag21a`, `wcag21aa`, `wcag22aa`, plus `best-practice` (axe's own
-  recommendations beyond WCAG). **Decide your conformance target once** and apply the same tags
-  everywhere — `wcag2a wcag2aa wcag21a wcag21aa` is the common "AA" gate.
-- **`.withRules([...])` / `.disableRules([...])`** — surgical control of individual rule ids; overrides
-  tags for those rules.
-- **`.options({...})`** — raw axe-core run options (overrides `withRules`/`withTags`); reach for it last.
-
-### A shared AxeBuilder via a fixture (DRY the config)
-
-Configure tags/excludes once so every spec stays clean and consistent — the recommended pattern:
-
-```typescript
-// support/axe.fixture.ts
-import { test as base } from '@playwright/test';
-import AxeBuilder from '@axe-core/playwright';
-
-type AxeFixture = { makeAxeBuilder: () => AxeBuilder };
-
-export const test = base.extend<AxeFixture>({
-  makeAxeBuilder: async ({ page }, use) => {
-    await use(() =>
+export const test = base.extend<{ a11y: A11y; signupPage: SignupPage }>({
+  a11y: async ({ page }, use, testInfo) => {
+    const builder = (): AxeBuilder =>
       new AxeBuilder({ page })
-        .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
-        .exclude('#third-party-chat'));   // org-wide excludes live here, once
+        .withTags(wcag22aa)
+        .exclude('[data-testid="Chat.Widget"]')
+        .disableRules([...falsePositives.keys()]);
+    const analyze = async (scan: AxeBuilder): Promise<AxeResults> => {
+      const results = await scan.analyze();
+      await testInfo.attach('axe-violations.json', {
+        body: JSON.stringify(results.violations, null, 2),
+        contentType: 'application/json',
+      });
+      await testInfo.attach('axe-incomplete.json', {
+        body: JSON.stringify(results.incomplete, null, 2),
+        contentType: 'application/json',
+      });
+      return results;
+    };
+    await use({
+      scanPage: () => analyze(builder()),
+      scanWithin: (testId) => analyze(builder().include(`[data-testid="${testId}"]`)),
+    });
+  },
+  signupPage: async ({ page }, use) => {
+    await use(new SignupPage(page));
   },
 });
-export { expect } from '@playwright/test';
+
+export { expect } from './fixtures';
 ```
 
-```typescript
-import { test, expect } from '../support/axe.fixture';
+- `withTags` picks the ruleset, which is picking the WCAG level. `best-practice` adds axe's own
+  recommendations beyond WCAG; add it deliberately, never per spec.
+- `include` / `exclude` take CSS selectors; the fixture builds them from test ids, so specs pass
+  `'Signup.Form'`, never a selector. `exclude` is for embeds you do not own.
+- `disableRules` is only for a **documented** false positive, with its ticket and reason in
+  `falsePositives`. Disabling a rule to hide a real failure hides a bug.
+- `withRules([...])` runs only the named rules; `options({...})` is raw axe run options and overrides both —
+  reach for it last.
+- `testInfo.attach` lands in the Playwright report and, through `allure-playwright`, in Allure. A direct
+  Allure call would be `await allure.attachment(...)` from `allure-js-commons` — never the
+  `allure-playwright` export, never un-awaited.
 
-test('Should_have_no_a11y_violations_When_dashboard_loaded', async ({ page, makeAxeBuilder }) => {
-  await page.goto('/dashboard');
-  const results = await makeAxeBuilder().analyze();
-  expect(results.violations).toEqual([]);
+## 5. The core pattern — one scan per state
+
+```typescript
+import { expect, test } from './a11y.fixtures';
+
+test.describe('Sign-up accessibility', { tag: '@a11y' }, () => {
+  test('Should_HaveNoWcagViolations_When_SignupFormIsEmpty', async ({ signupPage, a11y }) => {
+    await signupPage.open();
+
+    const results = await a11y.scanWithin('Signup.Form');
+
+    expect(results.violations, 'axe violations in the empty sign-up form').toEqual([]);
+  });
+
+  test('Should_HaveNoWcagViolations_When_ValidationErrorsShow', async ({ signupPage, a11y }) => {
+    await signupPage.submitEmpty();
+
+    const results = await a11y.scanWithin('Signup.Form');
+
+    expect(results.violations, 'axe violations in the sign-up form with errors').toEqual([]);
+  });
 });
 ```
 
-## The triage reality — a real app has pre-existing violations
+axe analyzes the DOM **at call time**, so the page object drives the state and waits on a condition first
+(`submitEmpty()` returns once the error summary is visible). An open menu, an expanded accordion and a
+form showing errors are different DOMs with different accessibility surfaces: scan each one. Never
+`waitForTimeout` before a scan.
 
-A green-field `expect(violations).toEqual([])` only works on a clean page. Real apps have debt. The
-disciplined patterns, in order of preference:
-
-**1. Gate *new* violations only — baseline the known set.** Snapshot the current violation rule-ids and
-fail only on additions. This stops the bleeding without a big-bang fix, and every new feature ships
-clean:
+## 6. The native assertion for the same state
 
 ```typescript
-test('Should_introduce_no_new_a11y_violations_When_profile_loaded', async ({ page }) => {
-  await page.goto('/profile');
-  const results = await new AxeBuilder({ page }).withTags(['wcag2aa']).analyze();
+test('Should_AnnounceEmailRequired_When_SignupSubmittedEmpty', async ({ signupPage }) => {
+  await signupPage.submitEmpty();
 
-  // Known debt, each with a tracking ticket — shrink this list, never grow it.
-  const KNOWN = new Set(['color-contrast' /* JIRA-1234 */, 'landmark-one-main' /* JIRA-1235 */]);
-  const newViolations = results.violations.filter((v) => !KNOWN.has(v.id));
-
-  expect(newViolations).toEqual([]);   // gate additions; legacy debt tracked separately
+  await expect(signupPage.email, 'email field').toHaveAccessibleErrorMessage('Enter an email address');
 });
 ```
 
-(`toHaveScreenshot`-style snapshotting of the full violation set also works via
-`expect(results.violations).toMatchSnapshot()`, but an explicit *ticketed* allow-list is more honest —
-each entry points at the bug that will remove it.)
+The scan proves no rule broke; this test proves the field says what the story requires.
 
-**2. Disable a *documented* false-positive — never blanket-disable.** If a rule genuinely
-misfires on your markup, `.disableRules(['rule-id'])` with a ticket reference in a comment. Disabling to
-make a real failure go away is hiding a bug:
+## 7. Triage — a real app has existing violations
 
-```typescript
-const results = await new AxeBuilder({ page })
-  .disableRules(['scrollable-region-focusable'])   // axe false-positive on virtualized list — JIRA-2001
-  .analyze();
-```
+In order of preference:
 
-**3. Don't silently pass `incomplete[]`.** axe couldn't decide — surface it for manual review rather
-than treating it as green:
+1. **Gate new violations only.** Known debt lives in `knownViolations`, each with its ticket; the list only
+   shrinks. `expect(newViolations(results.violations), 'new axe violations').toEqual([])`.
+2. **Disable a documented false positive** through `falsePositives` (§4), never in a spec.
+3. **Read the incompletes.** `axe-incomplete.json` is attached on every scan; reviewing it is part of
+   accepting a new screen.
+4. **Ratchet by impact** when even the baseline is large:
+   `expect(blockingViolations(results.violations), 'critical and serious violations').toEqual([])`, then
+   widen to every impact once the backlog clears.
 
-```typescript
-if (results.incomplete.length > 0) {
-  console.warn(`axe needs manual review for: ${results.incomplete.map((i) => i.id).join(', ')}`);
-}
-```
+A snapshot of the whole violation set (`toMatchSnapshot`) also gates additions, but a ticketed allow-list is
+more honest: each entry names the bug that removes it.
 
-**4. Step the rollout by impact.** When even the baseline is huge, gate on the worst first and ratchet
-down over time:
+## 8. CI
 
-```typescript
-const blocking = results.violations.filter((v) => v.impact === 'critical' || v.impact === 'serious');
-expect(blocking).toEqual([]);   // gate critical+serious now; widen to moderate/minor later
-```
-
-## A11y-specific stabilization — scan per state, not per page
-
-axe analyzes the **live DOM at call time**. So scan **after** the page reaches the state under test, and
-scan **once per meaningful state** — an open menu, an expanded accordion, a validation-error form are
-different DOMs with different a11y surfaces. Drive the state via page-object intent, wait on a condition,
-then scan:
-
-```typescript
-test('Should_have_no_a11y_violations_When_nav_menu_open', async ({ page }) => {
-  const nav = new NavBar(page);
-  await page.goto('/');
-  await nav.openAccountMenu();                            // page-object intent
-  await nav.accountMenu.waitFor({ state: 'visible' });    // condition, not waitForTimeout
-
-  const results = await new AxeBuilder({ page }).include('[role="menu"]').analyze();
-  expect(results.violations).toEqual([]);
-});
-```
-
-Never `await page.waitForTimeout(...)` before a scan — a sleep races the DOM and makes the gate flaky.
-
-## Reporting the gate — violations into Allure, fail CI on non-empty
-
-axe gives you everything to make a failure actionable: rule id, impact, helpUrl, and the failing
-selector + fix summary. Attach the JSON and a readable summary to Allure so the report names the rule
-without anyone re-running locally (cross-link `qa-test-reports-typescript`):
-
-```typescript
-// support/a11y-report.ts
-import { type Result } from 'axe-core';
-import { allure } from 'allure-playwright';
-
-export function attachViolations(violations: Result[]): void {
-  if (violations.length === 0) return;
-  // Machine-readable: the full violation objects.
-  allure.attachment('axe-violations.json', JSON.stringify(violations, null, 2), 'application/json');
-  // Human-readable: one line per failing node.
-  const summary = violations
-    .map((v) => `[${v.impact}] ${v.id}: ${v.help}\n  ${v.helpUrl}\n  ` +
-      v.nodes.map((n) => n.target.join(' ')).join('\n  '))
-    .join('\n\n');
-  allure.attachment('axe-summary.txt', summary, 'text/plain');
-}
-```
-
-```typescript
-test('Should_have_no_a11y_violations_When_settings_loaded', async ({ page }) => {
-  await page.goto('/settings');
-  const results = await new AxeBuilder({ page }).withTags(['wcag2aa']).analyze();
-  attachViolations(results.violations);     // attach BEFORE asserting, so a failure carries the report
-  expect(results.violations).toEqual([]);
-});
-```
-
-The CI job fails because the assertion fails — no extra wiring beyond uploading the Allure results and
-the attached JSON (cross-link `qa-ci-pipelines-typescript`). There is **no API key to
-inject** here — call that out as the contrast with the visual-regression family (`percy` `PERCY_TOKEN` /
-`applitools` `APPLITOOLS_API_KEY`): axe runs in-browser, so the only thing CI needs is the artifact upload.
+The scans run inside the normal UI job; the job fails because the assertion fails. The attachments travel
+with the test's evidence (`qa/typescript/skills/evidence-capture`) and into Allure. No secret is needed —
+the contrast with Percy's and Applitools' keys.
 
 ## Anti-patterns
 
-- **`await page.waitForTimeout(500)` before `analyze()`.** axe scans the DOM at call time; a sleep
-  races it and is slow. *Fix:* wait on a condition (`locator.waitFor`, spinner hidden,
-  `document.fonts.ready` is irrelevant here — wait on *interactivity*), then scan.
-- **One scan per page, ignoring interactive states.** Menus/modals/error states have their own a11y
-  surface. *Fix:* scan per meaningful state after driving the app there.
-- **Blanket `.disableRules` / cranking tags down to make it pass.** That hides real failures. *Fix:*
-  `.disableRules` only a *documented* false-positive with a ticket; otherwise fix the markup.
-- **Treating `incomplete[]` as a pass.** axe abstained; the issue may be real. *Fix:* surface
-  incompletes for manual review.
-- **Asserting on `violations.length === 0` instead of `toEqual([])`.** The length check throws away the
-  diff. *Fix:* `expect(results.violations).toEqual([])` — the failure message names every rule + node.
-- **Scanning the whole page when the feature under test is one component.** Legacy debt drowns the new
-  regression. *Fix:* `.include(selector)` the component; gate it to zero.
-- **Calling a green axe run "accessible."** It covers ~30–40% of WCAG. *Fix:* pair with manual +
-  assistive-tech testing; treat axe as the automated floor.
-- **Duplicating tag/exclude config across every spec.** Drifts over time. *Fix:* a shared `AxeBuilder`
-  fixture.
+- **A sleep before `analyze()`.** *Fix:* the page object waits for the state.
+- **One scan per page, ignoring interactive states.** *Fix:* one scan per meaningful state.
+- **Tags that stop at WCAG 2.1 AA.** *Fix:* `wcag22aa` in the shared tag set.
+- **Tags or excludes repeated per spec.** They drift. *Fix:* the fixture.
+- **`if (results.incomplete.length) console.warn(...)`.** A condition in a test, and silent in CI. *Fix:* the
+  fixture attaches the incompletes on every scan.
+- **An un-awaited `allure.attachment` in a sync helper**, or `import { allure } from 'allure-playwright'`.
+  *Fix:* awaited `testInfo.attach`.
+- **`new AxeBuilder({ page })` or `new SignupPage(page)` in a spec.** *Fix:* the fixtures.
+- **A whole-page scan for one new component.** Legacy debt drowns the regression. *Fix:* `scanWithin`.
+- **A green scan reported as "accessible".**
 
-## Examples
+## Rules
 
-**End-to-end: a per-component a11y gate that ships new features clean against a legacy page.**
-
-```typescript
-// tests/signup.a11y.spec.ts
-import { test, expect } from '../support/axe.fixture';   // shared tags + org-wide excludes
-import { attachViolations } from '../support/a11y-report';
-import { SignupPage } from '../pages/signup.page';
-
-test.describe('Signup accessibility (axe-core)', () => {
-  test('Should_have_no_a11y_violations_When_signup_form_empty', async ({ page, makeAxeBuilder }) => {
-    const signup = new SignupPage(page);
-    await signup.goto();
-    await signup.waitUntilReady();                       // condition, not sleep
-
-    const results = await makeAxeBuilder().include('#signup-form').analyze();
-    attachViolations(results.violations);
-    expect(results.violations).toEqual([]);
-  });
-
-  test('Should_have_no_a11y_violations_When_validation_errors_shown', async ({ page, makeAxeBuilder }) => {
-    const signup = new SignupPage(page);
-    await signup.goto();
-    await signup.submitEmpty();                          // page-object intent
-    await signup.errorSummary.waitFor({ state: 'visible' });
-
-    const results = await makeAxeBuilder().include('#signup-form').analyze();
-    attachViolations(results.violations);
-    expect(results.violations).toEqual([]);              // error state has its own a11y surface
-  });
-});
-```
-
-Lifecycle for this gate:
-1. A dev adds a new field to the signup form.
-2. CI runs the E2E suite; the axe scan runs in the same browser, on the live DOM, per state.
-3. If the new field is missing a label, `violations` is non-empty — the build fails with the rule id
-   (`label`), the failing selector, and the helpUrl in the Allure attachment.
-4. The dev fixes the markup; the gate goes green. Legacy debt on other pages is tracked separately by
-   the ticketed allow-list, shrinking over time.
-
-## Rules (hard constraints)
-
-- A11y testing is an **assertion layer** on existing page objects/specs — inject the axe scan, don't
-  author new page objects here. Page objects expose intent + locators; no selectors in tests.
-- One logical assertion per test: `expect(results.violations).toEqual([])` (or a filtered subset). Test
-  names `Should_X_When_Y`.
-- Stabilize on a **condition** (interactivity/visibility) before `analyze()`; never `waitForTimeout` —
-  axe scans the live DOM at call time.
-- Scan **per meaningful state** (menu open, accordion expanded, errors shown), not once per page.
-- Pick the WCAG level deliberately via `.withTags` and apply it consistently (a shared fixture).
-- Triage with discipline: baseline known debt with **ticketed** allow-lists, `.disableRules` only
-  *documented* false-positives, and surface `incomplete[]` for manual review — never silently pass it.
-- **No SaaS, no API key** (axe runs in-browser) — the gate is local and deterministic. The only CI need
-  is the violations-JSON/Allure artifact upload.
-- axe covers ~30–40% of WCAG: it's the automated **floor**, not proof of accessibility. Pair with
-  manual + assistive-tech testing.
+- WCAG 2.2 AA tags, excludes and false positives live in one fixture.
+- One logical assertion per test: `expect(results.violations, '<subject>').toEqual([])`, or a named subset.
+- Stabilize through the page object before a scan; scan once per meaningful state.
+- Every scan attaches its violations and incompletes with an awaited `testInfo.attach`.
+- Known debt is ticketed and only shrinks; false positives are documented.
+- Specs reach pages through fixtures; selectors are built from test ids inside the fixture.
+- Pair every scan of a story's form with the native assertion for what the story specifies.
 
 ## Cross-references
 
-- `qa-accessibility-testing-dotnet` — same skill, .NET / NUnit
-  (`Deque.AxeCore.Playwright`, `new AxeBuilder(page).AnalyzeAsync()`, `result.Violations`).
-- `qa-accessibility-testing-java` — same skill, Java / TestNG
-  (`com.deque.html.axe-core:playwright`, `new AxeBuilder(page).analyze()`, `results.getViolations()`).
-- `references/lighthouse-ci.md` — the audit/score sibling: full-page
-  perf/SEO/PWA + a11y **score** threshold, a separate Lighthouse pass. Run both: axe gates, Lighthouse
-  trends.
-- `qa-ui-test-writer-playwright-typescript` — the page objects/specs the axe scan is injected into.
-  Author the flow there; add the a11y scan here.
-- `qa-ci-pipelines-typescript` — where the job fails on the assertion and the violations
-  JSON is uploaded as an artifact. Note: **no secret to inject** (contrast `percy`/`applitools`).
-- `qa-test-reports-typescript` — attach the violations JSON + readable summary to the report.
-- `qa-exploratory-charter-writer` — the manual/assistive-tech testing that covers the ~60% axe can't.
+- `qa-accessibility-testing-dotnet`, `qa-accessibility-testing-java` — the same skill on .NET and Java.
+- `references/lighthouse-ci.md` — the score-and-trend sibling.
+- `qa/typescript/skills/ui-test-author/playwright/references/assertions.md` — the native accessible and aria
+  assertions.
+- `qa/typescript/skills/evidence-capture` — the attachments and failure evidence.
+- `qa/reporting/typescript/skills/test-reports` — how the attachments appear in Allure.
+- `qa-exploratory-charter-writer` — the manual and assistive-technology testing axe cannot do.
