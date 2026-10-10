@@ -111,6 +111,16 @@ If the repo gitignores generated sources (KSP / Room / Hilt output under `build/
 | D13 | `@Preview` exists for reusable composables, covers states, uses no live data | A composable with no preview; one that calls a repository | `rg -L "@Preview" $SRC -g '*Content.kt' -g '*Screen.kt'` | minor |
 | D14 | Expressive Material APIs are used only on material3 1.5 or an existing opt-in `[M3-1.5]` | `ExperimentalMaterial3ExpressiveApi` opt-in added in a non-Expressive project | `rg -n "ExperimentalMaterial3ExpressiveApi\|MaterialExpressiveTheme" $SRC -g '*.kt'` | major |
 | D15 | `@Stable` / `@Immutable` only where the promise is true and measured | A blanket annotation on a class with a `var` or `MutableList` | `rg -n "@Stable\|@Immutable" -A4 $SRC -g '*.kt'` | minor |
+| D16 | `[Views]` A Fragment's binding is nulled in `onDestroyView` and not touched after | A `lateinit var binding` never cleared; a callback using `binding` after the view is gone | `rg -n "lateinit var binding\|_binding" $SRC -g '*.kt'`; read each Fragment for `onDestroyView` | major |
+| D17 | `[Views]` Flows are collected with `viewLifecycleOwner` inside `repeatOnLifecycle(STARTED)` | `lifecycleScope.launch { flow.collect }` with `this`; `launchWhenStarted` | `rg -n "launchWhenStarted\|launchWhenResumed\|lifecycleScope.launch" $SRC -g '*.kt'`; read each hit's owner | major |
+| D18 | `[Views]` Lists are `ListAdapter` + `DiffUtil` on the domain id | `notifyDataSetChanged()`; `areItemsTheSame` comparing positions; work in `onBindViewHolder` | `rg -n "notifyDataSetChanged\|areItemsTheSame" $SRC -g '*.kt'` | major |
+| D19 | `[Views]` A `ComposeView` in a Fragment sets `DisposeOnViewTreeLifecycleDestroyed` before `setContent` | The default strategy in a Fragment; `setContent` before the strategy | `rg -n "ComposeView" -A4 $SRC -g '*.kt' -g '*.xml'` | major |
+| D20 | `AndroidView` keeps state in `update`, releases in `onRelease`, and registers lifecycle-aware Views | A listener in `factory` capturing changing state; a `MapView` / player never released | `rg -n "AndroidView\(" -A10 $SRC -g '*.kt'` | major |
+| D21 | `[Views]` Back goes through `OnBackPressedDispatcher`, not an `onBackPressed()` override | `override fun onBackPressed`; no `enableOnBackInvokedCallback` at target 36 | `rg -n "override fun onBackPressed\|enableOnBackInvokedCallback" $SRC -g '*.kt' -g '*.xml'` | major |
+| D22 | `[Views]` New view access is ViewBinding; no `findViewById` or synthetics added | `findViewById` in new code; `kotlinx.android.synthetic` imports | `rg -n "findViewById\|kotlinx.android.synthetic" $SRC -g '*.kt'` | minor |
+| D23 | `[Views]` Layouts carry no hardcoded text or `px`; actionable images have a `contentDescription`; targets ≥ 48 dp | `android:text="Save"`; `android:layout_width="40px"`; an `ImageButton` with none | `rg -n 'android:text="[^@]\|[0-9]px"' $SRC -g '*.xml'`; `rg -L "contentDescription" $SRC -g '*.xml'` | major |
+| D24 | `[Views]` Edge-to-edge insets are applied to the View that needs them; the IME never hides the focused field | `fitsSystemWindows` hacks; no inset listener on a bottom bar; `adjustPan` forced on | `rg -n "setOnApplyWindowInsetsListener\|fitsSystemWindows\|windowSoftInputMode" $SRC -g '*.kt' -g '*.xml'` | major |
+| D25 | `[Views]` A Views screen follows the one-`uiState` rule — no `SharedFlow` / `Channel` event for navigation or errors | `Channel<…>` / `SharedFlow` collected in a Fragment to navigate or show a toast | `rg -n "Channel<\|MutableSharedFlow\|receiveAsFlow" $SRC -g '*.kt'`; read each consumer | major |
 
 ---
 
@@ -160,6 +170,16 @@ If the repo gitignores generated sources (KSP / Room / Hilt output under `build/
 
 | # | Check | Violation looks like | Find it with | Sev |
 |---|---|---|---|---|
+| G1 | Form state is one draft in `uiState`; the validator is a pure function with tests | Validation inside a composable; a regex in `onValueChange`; state copied into a `remember` | `rg -n "Regex\(\|Patterns\.\|contains\('@'\)" $SRC -g '*.kt'`; read each hit's location | major |
+| G2 | Text fields use one API per form — `TextFieldState` or value-based | Both in one screen; `remember { mutableStateOf("") }` shadowing ViewModel state | `rg -n "TextFieldState\|onValueChange" $SRC -g '*.kt'` | minor |
+| G3 | Every field sets `KeyboardOptions` type and `ImeAction`; `Next` is wired | An email field with `KeyboardType.Text`; `ImeAction.Next` with no `KeyboardActions` / focus move | `rg -n "TextField\(" -A12 $SRC -g '*.kt'`; `rg -L "KeyboardOptions" $SRC -g '*Form*.kt'` | major |
+| G4 | The IME never covers the focused field | A form with no `imePadding()` / inset handling; `adjustPan` as the fix | `rg -n "imePadding\|WindowInsets.ime\|windowSoftInputMode" $SRC -g '*.kt' -g '*.xml'`; read each form screen | major |
+| G5 | Errors appear on focus loss or submit, clear on edit, are text plus `isError` | An error raised on first keystroke; colour only; no `supportingText` | `rg -n "isError\|supportingText" $SRC -g '*.kt'` | major |
+| G6 | Server field errors map onto fields; unmapped ones show at form level | A `422` shown only as a toast; field names dropped | `rg -n "Validation\|errors\[" $SRC -g '*.kt'`; read the submit path | major |
+| G7 | A submit is guarded in the ViewModel and carries one idempotency key per draft | Only `enabled = !pending`; a key regenerated per attempt | `rg -n "Pending\|Idempotency" $SRC -g '*.kt'` | major |
+| G8 | A secret field is never in `SavedStateHandle`, `rememberSaveable`, logs or analytics | `savedStateHandle["password"]`; `rememberSaveable { mutableStateOf(password) }` | `rg -n "rememberSaveable\|savedStateHandle\[" $SRC -g '*.kt'`; read each hit's name | blocker |
+| G9 | Autofillable fields declare `ContentType`; sign-in uses Credential Manager | A login with no `contentType`; Google One Tap / `GoogleSignIn` / FIDO2 API in new code | `rg -n "ContentType\|GoogleSignIn\|BeginSignInRequest\|Fido2" $SRC -g '*.kt'` | major |
+| G10 | Interactive fields and the submit button carry a static `testTag` | A field with none; a tag built from user text or an index | `rg -n "testTag" $SRC -g '*.kt'`; compare to the field list | minor |
 
 ---
 
@@ -168,6 +188,21 @@ If the repo gitignores generated sources (KSP / Room / Hilt output under `build/
 
 | # | Check | Violation looks like | Find it with | Sev |
 |---|---|---|---|---|
+| H1 | One client per API; a second HTTP layer is not added beside an existing one | Retrofit and Ktor and a hand-rolled `HttpURLConnection` in one module | `rg -n "Retrofit.Builder\|HttpClient\(\|HttpURLConnection" $SRC -g '*.kt'` | major |
+| H2 | Every request has connect, read, write and a per-class call timeout | `OkHttpClient()` with defaults; no `callTimeout` | `rg -n "callTimeout\|readTimeout\|OkHttpClient" $SRC -g '*.kt'` | major |
+| H3 | `CancellationException` is rethrown; no `catch (e: Exception)` swallows it | `runCatching { api.call() }` around a suspend call with no rethrow | `rg -n "runCatching\|catch \(e: Exception\|catch \(e: Throwable" $SRC -g '*.kt'` | major |
+| H4 | Requests are owned by `viewModelScope` / `collectLatest`; no `GlobalScope`, no unowned scope | `GlobalScope.launch`; `CoroutineScope(Dispatchers.IO).launch` in a repository | `rg -n "GlobalScope\|CoroutineScope\(Dispatchers" $SRC -g '*.kt'` | major |
+| H5 | Retries live in one interceptor: ≤ 2 for reads, jittered, `Retry-After` honoured, none offline | A retry loop in a ViewModel and in an interceptor; fixed delay; a `POST` retried with no key | `rg -n "retry\|Retry-After\|delay\(" $SRC -g '*.kt'` | major |
+| H6 | A write retried or queued carries an `Idempotency-Key` created once per intent | No key on a `POST`; a key generated per attempt | `rg -n "Idempotency" $SRC -g '*.kt'`; read each `@POST` | major |
+| H7 | A decode failure is `Drifted` and renders as failed, never empty | `getOrDefault(emptyList())`; `ignoreUnknownKeys` with `?: emptyList()` on a required field | `rg -n "getOrDefault\|getOrNull\(\)\|emptyList\(\)" $SRC -g '*.kt'` | major |
+| H8 | The `Authenticator` refreshes once (single-flight), replays once, never loops, uses a separate client | N parallel `401`s refresh N times; the refresh client shares the authenticator | `rg -n "Authenticator\|authenticate\(" -A15 $SRC -g '*.kt'` | blocker |
+| H9 | No token, body or PII is logged; no logging interceptor in release | `Level.BODY` outside debug; `Log.d(…token…)` | `rg -n "HttpLoggingInterceptor\|Level\.BODY\|Log\.[dv]\(" $SRC -g '*.kt'` | blocker |
+| H10 | `https` only; cleartext and trust are decided in Network Security Config | `usesCleartextTraffic="true"`; a trust-all `X509TrustManager`; `HostnameVerifier { _, _ -> true }` | `rg -n "usesCleartextTraffic\|X509TrustManager\|HostnameVerifier\|cleartextTrafficPermitted" $SRC -g '*.kt' -g '*.xml'` | blocker |
+| H11 | No user CA outside `<debug-overrides>`; a pin-set has a backup pin and an expiry | `<certificates src="user"/>` in a base config; one pin; none | `rg -n 'src="user"\|<pin ' $SRC -g '*.xml'` | major |
+| H12 | The app revalidates on foreground and on reconnect; connectivity is a callback `Flow`, not a ping | A `Runtime.exec("ping")`; no refetch on return | `rg -n "registerDefaultNetworkCallback\|isReachable\|repeatOnLifecycle" $SRC -g '*.kt'` | major |
+| H13 | A WebSocket is opened only while the screen is `STARTED` and closed after; reconnect is jittered and followed by a refetch | A socket opened in a composable body or a singleton and never closed; no refetch after reconnect | `rg -n "newWebSocket\|WebSocket" $SRC -g '*.kt'` | major |
+| H14 | No blocking network or `runBlocking` on the main thread | `runBlocking` outside the `Authenticator`; `.execute()` in a ViewModel | `rg -n "runBlocking\|\.execute\(\)" $SRC -g '*.kt'` | blocker |
+| H15 | `[KMP]` The shared Ktor client sets `HttpTimeout`, bounded `HttpRequestRetry` and single-flight `Auth` | A Ktor client with no timeout plugin | `rg -n "HttpTimeout\|HttpRequestRetry\|HttpClient\(" $SRC -g '*.kt'` | major |
 
 ---
 
@@ -176,6 +211,20 @@ If the repo gitignores generated sources (KSP / Room / Hilt output under `build/
 
 | # | Check | Violation looks like | Find it with | Sev |
 |---|---|---|---|---|
+| I1 | New databases are Room 3 (`androidx.room3`) on KSP with a `SQLiteDriver`; Room 2.8 stays `[Room2]` | `kapt(`; a new database on `androidx.room`; both groups on one database | `rg -n "kapt\|androidx.room:\|androidx.room3" $SRC -g '*.kts' -g '*.toml' -g '*.kt'` | major |
+| I2 | Room 3 DAOs are `suspend` or `Flow`; no `LiveData` / Rx return types in new code; integrations come from `room3-*` artifacts | `LiveData<List<…>>` DAO on Room 3; `PagingSource` with no `room3-paging` | `rg -n "LiveData<\|Observable<\|Flowable<\|PagingSource<" $SRC -g '*.kt'` | major |
+| I3 | Every version bump has a migration and a committed schema JSON; no destructive fallback on user data | `fallbackToDestructiveMigration()` on a user database; `version` bumped, `schemas/` unchanged | `rg -n "fallbackToDestructiveMigration\|exportSchema" $SRC -g '*.kt'`; `ls */schemas` | blocker |
+| I4 | Entities, DTOs and domain types are separate; no entity in a composable | An `@Entity` carrying `@Serializable` and shown directly | `rg -n "@Entity" -A8 $SRC -g '*.kt'` | minor |
+| I5 | No main-thread database or DataStore read | `allowMainThreadQueries()`; `runBlocking { dataStore.data.first() }` | `rg -n "allowMainThreadQueries\|runBlocking" $SRC -g '*.kt'` | blocker |
+| I6 | Settings are DataStore, one instance per file; new code adds no `SharedPreferences` | `getSharedPreferences` in new code; two `preferencesDataStore` on one name | `rg -n "getSharedPreferences\|preferencesDataStore\|PreferenceManager" $SRC -g '*.kt'` | major |
+| I7 | **No `EncryptedSharedPreferences`, `EncryptedFile`, `MasterKey` or `security-crypto` in new code** | Any import of `androidx.security.crypto` | `rg -n "androidx.security.crypto\|EncryptedSharedPreferences\|MasterKey" $SRC -g '*.kt' -g '*.kts' -g '*.toml'` | major |
+| I8 | Brownfield `EncryptedSharedPreferences` is flagged with a migration owner, not rewritten as a side effect | A use with no migration note in the report | `rg -n "EncryptedSharedPreferences" $SRC -g '*.kt'` | major |
+| I9 | Secrets are Keystore-backed (Tink `Aead` over a Keystore-wrapped keyset, or a Keystore key); a decrypt failure means signed out | A token in plain DataStore, Room, files or `SharedPreferences`; a hardcoded passphrase | `rg -n "KeyGenParameterSpec\|AndroidKeysetManager\|accessToken\|refreshToken" $SRC -g '*.kt'`; read each store | blocker |
+| I10 | Backup rules exclude databases, DataStore, keyset and tokens | `allowBackup="true"` with no `dataExtractionRules` and `fullBackupContent` | `rg -n "allowBackup\|dataExtractionRules\|fullBackupContent" $SRC -g '*.xml'` | major |
+| I11 | Room (or the repository's source of truth) feeds the UI; a failed refresh keeps rows and marks them stale | A screen that blanks on a failed refresh; the network response fed straight to the UI | `rg -n "fun refresh\|observe\w*\(\)" $SRC -g '*.kt'` | major |
+| I12 | Offline writes use an outbox with idempotency keys drained by unique WorkManager work | An in-memory retry list; `GlobalScope` sync; non-unique periodic work | `rg -n "enqueueUniqueWork\|OneTimeWorkRequest\|GlobalScope" $SRC -g '*.kt'` | major |
+| I13 | A storage failure degrades to memory and surfaces; a user database is never auto-wiped | A `catch { }` around a write; `deleteDatabase` on open failure of a user database | `rg -n "SQLiteFullException\|deleteDatabase\|catch \(e: IOException" $SRC -g '*.kt'` | major |
+| I14 | Caches are size-bounded and rebuildable; writes are atomic | An unbounded cache directory; a direct overwrite of a good file | `rg -n "cacheDir\|filesDir\|renameTo\|LruCache" $SRC -g '*.kt'` | minor |
 
 ---
 
@@ -184,6 +233,18 @@ If the repo gitignores generated sources (KSP / Room / Hilt output under `build/
 
 | # | Check | Violation looks like | Find it with | Sev |
 |---|---|---|---|---|
+| J1 | Permissions are requested in context after a pre-prompt; none at launch | `requestPermissions` in `Application.onCreate` or the first screen's init | `rg -n "RequestPermission\|requestPermissions\|RequestMultiplePermissions" $SRC -g '*.kt'`; read each call site | major |
+| J2 | A denied screen works: what is unavailable, the alternative, **Open Settings**; status is rechecked on resume | A blank preview on denial; a cached `granted` flag; no Settings link | `rg -n "shouldShowRequestPermissionRationale\|ACTION_APPLICATION_DETAILS_SETTINGS" $SRC -g '*.kt'` | major |
+| J3 | The manifest declares only used permissions, with `maxSdkVersion` where retired | An unused `READ_CONTACTS`; `WRITE_EXTERNAL_STORAGE` at the current target | `rg -n "uses-permission" $SRC -g 'AndroidManifest.xml'` | major |
+| J4 | Photos and video are picked with the photo picker; `READ_MEDIA_*` only for core broad media access | `READ_MEDIA_IMAGES` or `READ_EXTERNAL_STORAGE` for an upload or avatar | `rg -n "READ_MEDIA\|READ_EXTERNAL_STORAGE\|PickVisualMedia" $SRC -g '*.kt' -g '*.xml'` | major |
+| J5 | No `MANAGE_EXTERNAL_STORAGE`; documents use SAF or MediaStore | The permission in the manifest | `rg -n "MANAGE_EXTERNAL_STORAGE" $SRC -g '*.xml'` | blocker |
+| J6 | A picked `Uri` is treated as temporary and untrusted; reads are off the main thread | `File(uri.path)`; a full bitmap decoded in a click handler | `rg -n "uri\.path\|decodeStream\|openInputStream" $SRC -g '*.kt'` | major |
+| J7 | CameraX is bound to a lifecycle owner; a system capture intent is used when enough | A camera held after the screen leaves; `CAMERA` requested for a plain photo | `rg -n "bindToLifecycle\|ProcessCameraProvider\|TakePicture" $SRC -g '*.kt'` | major |
+| J8 | Location requests coarse and fine together; precise only when needed; background is separate and declared | `ACCESS_BACKGROUND_LOCATION` in the same flow; fine-only for "stores near me" | `rg -n "ACCESS_COARSE_LOCATION\|ACCESS_FINE_LOCATION\|ACCESS_BACKGROUND_LOCATION" $SRC -g '*.kt' -g '*.xml'` | major |
+| J9 | Location updates are removed with the lifecycle and never logged | `requestLocationUpdates` with no `removeLocationUpdates` / `awaitClose` | `rg -n "requestLocationUpdates\|removeLocationUpdates\|awaitClose" $SRC -g '*.kt'` | major |
+| J10 | `BiometricPrompt` unlocks a Keystore key through a `CryptoObject`; enrolment and hardware states have screens | A success callback that sets `isUnlocked = true`; no `canAuthenticate` check | `rg -n "BiometricPrompt\|CryptoObject\|canAuthenticate\|setUserAuthenticationRequired" $SRC -g '*.kt'` | blocker |
+| J11 | Sign-in uses Credential Manager; cancellation is silent; the server owns the passkey challenge | `GoogleSignIn` / One Tap / FIDO2 in new code; the challenge generated on the device | `rg -n "CredentialManager\|GoogleSignIn\|BeginSignInRequest\|Fido2" $SRC -g '*.kt'` | major |
+| J12 | `ACCESS_LOCAL_NETWORK` is requested in context only where a feature reaches the LAN, and the target is not raised for it | The permission with no LAN feature; a targetSdk bump in the same change | `rg -n "ACCESS_LOCAL_NETWORK\|NsdManager\|targetSdk" $SRC -g '*.kt' -g '*.kts' -g '*.xml'` | major |
 
 ---
 
