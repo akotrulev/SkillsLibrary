@@ -8,7 +8,7 @@ step-by-step agent that works greenfield and brownfield, a conformance audit, an
 
 **Status:** C1 landed (2026-10-11): `mobile/` exists with the five July drafts moved and renamed under
 `mobile/react-native/`, the three conformance-checklist skeletons, and `## Mobile code rules` in `CLAUDE.md`;
-the stale `frontend/react-native` pointers are repointed. S1 landed (2026-10-11): `mobile/_shared/{store-compliance,security}` with their references and the `L1…L26` / `K1…K27` audit fragments. S2 landed (2026-10-11): `mobile/_shared/{release,observability}` with their references and the `T1…T19` / `U1…U20` audit fragments. S3 landed (2026-10-11): `mobile/_shared/in-app-purchases` with its references and the `X1…X22` fragment, plus `auth/auth0-{react-native,ios,android}`. N1 landed (2026-10-11): `mobile/{ios,android}/skills/basics` with `references/concurrency.md` each, and rows `A1…A5`/`B1…B16` (iOS), `A1…A4`/`B1…B16` (Android). R1 landed (2026-10-11): the five drafts rewritten onto SDK 57 and `mobile/react-native/skills/navigation` written, with RN checklist rows `A1…A7`, `B1…B13`, `C1…C10`, `D1…D10`, `E1…E13`, `F1…F15`. R2 landed (2026-10-11): `mobile/react-native/skills/{ui-components,forms,networking,offline-and-storage,native-modules}` with checklist rows `D10…D19`, `G1…G10`, `H1…H15`, `I1…I13`, `J1…J13`. Next: R3 (depends on S1), then R4, I1.
+the stale `frontend/react-native` pointers are repointed. S1 landed (2026-10-11): `mobile/_shared/{store-compliance,security}` with their references and the `L1…L26` / `K1…K27` audit fragments. S2 landed (2026-10-11): `mobile/_shared/{release,observability}` with their references and the `T1…T19` / `U1…U20` audit fragments. S3 landed (2026-10-11): `mobile/_shared/in-app-purchases` with its references and the `X1…X22` fragment, plus `auth/auth0-{react-native,ios,android}`. N1 landed (2026-10-11): `mobile/{ios,android}/skills/basics` with `references/concurrency.md` each, and rows `A1…A5`/`B1…B16` (iOS), `A1…A4`/`B1…B16` (Android). R1 landed (2026-10-11): the five drafts rewritten onto SDK 57 and `mobile/react-native/skills/navigation` written, with RN checklist rows `A1…A7`, `B1…B13`, `C1…C10`, `D1…D10`, `E1…E13`, `F1…F15`. R2 landed (2026-10-11): `mobile/react-native/skills/{ui-components,forms,networking,offline-and-storage,native-modules}` with checklist rows `D10…D19`, `G1…G10`, `H1…H15`, `I1…I13`, `J1…J13`. R3 landed (2026-10-10): `mobile/react-native/skills/{device-features,notifications-and-links,animation,languages,test-ids}` with checklist rows `F15…F20`, `J14…J28`, `P1…P10`, `Q1…Q11`, `R1…R10`, and §8.5's RN mapping answered (D20 — the QA explorer's `content-desc` claim is refuted). Next: R4, I1.
 Built but unverified: everything — the plan gates once, in G1. Flutter becomes a fourth plugin in its own plan, written
 once this one lands (O4); it is **not** in this plan's tasks. Maestro arrives on the QA side through plan 003
 (its X1); this plan feeds it the same test ids and an EAS Workflows job (D7). Every fact in §4 was web-verified
@@ -837,6 +837,8 @@ status-table `frontend` row, and `docs/plans/CONFORMANCE-AUDIT-PLAN.md` item 7.
 
 **D19 — R1 mapped the drafts' stale sibling names to §6.2 (2026-10-11).** The July drafts linked to skills the 23-folder set does not have (`generator`, `reviewer`, `data-access`, `offline-first`, `motion`, `testability`, `ui-conventions`, `responsive-design`, `project-scaffold`, `reference`), to `design/frontend-design` (no such folder) and to `auth/auth0-react`. Reading A: leave them until each target skill lands. Reading B (taken): rewrite every link to the §6.2 folder that owns the topic (`ui-components`, `networking`, `offline-and-storage`, `animation`, `test-ids`, `code-review`, `basics`, `project-setup`), `design/visual-identity` / `design/theme-presets` / `design/design-tokens`, and `auth0-react-native`, so the links resolve once R2–R5 land. Also taken: Zustand `persist` and the persistence table default to MMKV 4 (AsyncStorage is legacy only), and the default component-library option is "StyleSheet + Expo UI" rather than "none".
 
+**D20 — The QA explorer's test-id claim is wrong, and its Android locator rung does not reach a `testID` (R3, 2026-10-10).** §8.5 asked R3 to verify "Android `content-desc` maps to an RN `testID`" (`qa/*/skills/mobile-screen-explorer/SKILL.md:10`). Reading A (the QA text): `content-desc` / `name` both carry the `testID`, so `$('~…')` is the single cross-platform rung. Reading B (verified from RN source, `BaseViewManager.setTestId` + `ReactAccessibilityDelegate`): on Android `testID` becomes the bare `resource-id`, and `content-desc` carries `accessibilityLabel`; on iOS `testID` is `accessibilityIdentifier` (the Appium `~`). Built as B in `mobile-react-native-test-ids`. Cost: W1 changes more than the mapping sentence — the locator ladder must say `~` on iOS and `id=` / `resourceId` on Android, and the explorer's suggested kebab-case ids (`login-email`) conflict with this library's PascalCase dot-separated rule, which the dev skill resolves by treating the suggestion as a hint. The explorers are 600 characters from budget, so W1 rewrites sentences in place rather than adding any.
+
 ## Answered questions (2026-10-10)
 
 **O1 — Packaging: one plugin or several?** Three plugins in one `mobile/` domain (the user; D1).
@@ -1110,6 +1112,8 @@ SKILL.md ~23k; rows ~6k.
   which identifier Maestro's `id:` matches on each platform; the `missing-testids.md` hand-off; static
   ids for list rows; never `accessibilityLabel` as an id.
 - **Not in R3:** quality layers (R4); the QA-side correction (W1).
+
+- **As built (2026-10-10):** `mobile/react-native/skills/{device-features,notifications-and-links,animation,languages,test-ids}/SKILL.md` — bodies 13.8k / 12.1k / 13.2k / 11.9k / 14.6k chars, descriptions 486 / 451 / 471 / 464 / 438 (counted with `python3 -I`, no gate run); frontmatter names `mobile-react-native-<folder>`; no `references/` files. Checklist rows appended: `F15…F20`, `J14…J28`, `P1…P10`, `Q1…Q11`, `R1…R10` (`grep -n "^| [FJPQR][0-9]" mobile/react-native/skills/standards-audit/references/conformance-checklist.md`). R1's note says `F1…F15` but the skeleton held `F1…F14`, so R3's first F row is `F15`. **§8.5 answered** in `test-ids` § "How `testID` reaches the device", read from RN source on `main` and Maestro's docs / source: iOS `testID` → `accessibilityIdentifier` (`RCTViewComponentView.mm`); Android `testID` → `resource-id` (`BaseViewManager.setTestId` stores `R.id.react_test_id`; `ReactAccessibilityDelegate` sets `info.viewIdResourceName`), the **bare** string, not `<package>:id/…`; reactnative.dev/docs/view states **no** platform mapping. Maestro `id:` → iOS `accessibilityIdentifier` (docs.maestro.dev/platform-support/ios-uikit), Android `resource-id` (`Filters.idMatches` reads `attributes["resource-id"]`); `id`/`text` are case-insensitive regexes. **The QA explorer's claim is refuted** — Android `content-desc` is the `accessibilityLabel`, not the `testID` (D20). Verified at source this session: expo-notifications handler shape (`shouldShowBanner` / `shouldShowList`), channel-before-permission on Android 13+, `useLastNotificationResponse`, config-plugin options; Gesture Handler 3 upgrade-guide renames (`onStart`/`onEnd` → `onActivate`/`onDeactivate`, hooks, relation renames); Reanimated `ReduceMotion` enum and `useReducedMotion` semantics; expo-localization `supportedLocales` / `supportsRTL` / `forcesRTL` (the page documents RTL default-on from SDK 58); expo-image-picker, expo-location, expo-local-authentication, expo-background-task option names. **Built but unverified:** whether UiAutomator2's `id=` strategy prepends the app package to a bare `resource-id` (the skill says to read the page source and fall back to `resourceId(...)`); iOS XCUITest hiding the children of an `accessible` parent (written from experience); `scheduleOnRN` vs `runOnJS` naming per Reanimated / worklets version; Gesture Handler 3 `GestureHandlerRootView` / `runOnJS` replacements (not on the upgrade page); Lingui 6 and i18next 26 specifics (§4.1 versions only); `expo-background-fetch` deprecation; `+native-intent.tsx`, `pathPrefix` / `autoVerify` intent-filter shape and the AASA / `assetlinks.json` requirements (from recall); `LSApplicationQueriesSchemes` / `canOpenURL` deprecation (§4.2); the `rg` recipes in F15–R10 have not been run. Not run (Gate: none): `tools/token-audit.py`, §11's script, any lint.
 
 ### R4 — React Native quality layers and component tests
 
@@ -1457,45 +1461,9 @@ goes in an untracked `scratch/` folder inside the worktree, deleted before commi
 | W1 | `docs` | `general-purpose` | R5, I5, A6, R3, S1–S3 | ~120k |
 | G1 | `docs` | `general-purpose` | every task above | ~140k |
 
-C1, S1, S2, S3, N1, R1 and R2 have landed (their blocks are deleted); every block below is live.
+C1, S1, S2, S3, N1, R1, R2 and R3 have landed (their blocks are deleted); every block below is live.
 
 ---
-
-### R3 — React Native device and platform (general-purpose, docs)
-
-````
-You are `general-purpose`. Task R3 of docs/plans/002-mobile-plugins.md: write
-`mobile-react-native-{device-features,notifications-and-links,animation,languages,test-ids}` and settle
-§8.5's React Native test-id mapping.
-
-Read, in this order:
-1. CLAUDE.md (`## Mobile code rules`).
-2. The plan: §4.1, §5, §6.2, §8.3, §8.5, §10, task R3, and "Close-out — every task".
-3. `frontend/react/skills/{animation,languages,test-ids}/SKILL.md` — headings and rules.
-4. Vendor `animation-*.md` rules; the permission sections of
-   `mobile/_shared/store-compliance/references/{apple,google-play}.md`.
-5. `qa/typescript/skills/mobile-screen-explorer/SKILL.md` line 10 and its `missing-testids.md` format (~line 104).
-6. The RN checklist, sections F, J, P, Q, R.
-
-Build:
-- Each skill per its §6.2 row, rows appended to F, J, P, Q, R.
-- `device-features`: priming and a working denied path as hard rules.
-- `animation`: Gesture Handler 2.32 (SDK 57) and 3.x (SDK 58) as two tagged lanes.
-- `test-ids`: verify on reactnative.dev how `testID` surfaces on iOS and Android, and in Maestro's docs
-  which identifier its `id:` selector matches; write the mapping with its URLs and the date checked, the
-  `missing-testids.md` hand-off, static row ids, never `accessibilityLabel` as an id.
-
-Traps:
-- Gesture Handler 3 renamed callbacks (`onStart` / `onEnd` → `onActivate` / `onDeactivate`).
-- The QA explorer's "content-desc maps to testID" is the claim under test — do not edit the QA file
-  (W1 does), only record the verified answer.
-- Android 13+ needs the notification runtime permission.
-
-Gate: none — this plan gates once, in G1. Do not run tools/token-audit.py, §11's script, or any lint.
-
-Commit: `feat(mobile R3): React Native device, links, motion, languages, test ids`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
 
 ### R4 — React Native quality layers and component tests (general-purpose, docs)
 
@@ -1912,13 +1880,16 @@ Build:
   folders, never from memory.
 - `mobile` added to the stack lists at the cited lines and to CLAUDE.md § Planning's one-stack bullet;
   the three agents added to the planner's routing beside `fe-react` / `fe-blazor`.
-- QA: the three dev agents named as consumers of `missing-testids.md`; each explorer's line 10 corrected
-  to R3's verified mapping; the security-testing peer lines name where fixes go.
+- QA: the three dev agents named as consumers of `missing-testids.md`; each explorer's line 10 and its `~`
+  ladder rung corrected to R3's verified mapping (D20); the security-testing peer lines name where fixes go.
 
 Traps:
 - plan-format.md is the contract every plan follows — add the token and its one-phrase gloss, nothing else.
-- Change only the mapping sentence in the QA explorers; their locator strategy stays. Their bodies sit
-  at 15,400–15,900 of the 16,000-character budget: replace the sentence, never add one.
+- R3 refuted the explorers' claim (D20): Android `content-desc` is the `accessibilityLabel`, the `testID` is
+  the bare `resource-id`. Correct the line-10 sentence **and** the locator-ladder rung that says `~` is the
+  default (`~` on iOS; `id=` / UiSelector `resourceId` on Android) — nothing else in the strategy changes.
+  The explorers' kebab-case "Suggested testID" stays a hint; the dev skill derives PascalCase. Their bodies sit
+  at 15,400–15,900 of the 16,000-character budget: replace sentences in place, never add one.
 - Do not run §11's script — G1 does; a path you doubt, `ls` it.
 
 Gate: none — this plan gates once, in G1. Do not run tools/token-audit.py, §11's script, or any lint.

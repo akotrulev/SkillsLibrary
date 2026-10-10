@@ -140,7 +140,12 @@ If the repo gitignores a generated native folder (`ios/`, `android/` under CNG) 
 | F12 | `scheme` and link association are configured | No `scheme`, or universal links with no `associatedDomains` / `autoVerify` intent filter | `rg -n '"scheme"\|associatedDomains\|autoVerify' app.json app.config.*` | minor |
 | F13 | `useGlobalSearchParams` is not read in a list item | Re-rendering every row on each route change | `rg -n 'useGlobalSearchParams' $SRC -g '*.tsx'` | minor |
 | F14 | `[bare]` React Navigation uses native stack and a `linking` config | `@react-navigation/stack`, or no `linking.prefixes` on a bare app | `rg -n '@react-navigation/stack\|linking' $SRC package.json` | minor |
-
+| F15 | `setNotificationHandler` is set once at the root | A notification listener but no `setNotificationHandler` (nothing shows in the foreground), or a handler created inside a component | `rg -n 'setNotificationHandler\|addNotificationReceivedListener' $SRC -g '*.ts' -g '*.tsx'` | major |
+| F16 | A notification tap routes through a validated, typed target | `router.push(response.notification.request.content.data.url)`; `data` used with no schema | `rg -n 'addNotificationResponseReceivedListener\|useLastNotificationResponse' $SRC -g '*.ts' -g '*.tsx'`; read each handler | major |
+| F17 | A cold-start response is routed once and cleared | `useLastNotificationResponse` navigating in an effect with no `clearLastNotificationResponseAsync` (re-navigates on re-render) | `rg -n 'useLastNotificationResponse\|clearLastNotificationResponseAsync' $SRC -g '*.tsx'` | minor |
+| F18 | A link or push parameter never reaches `Linking.openURL`, a WebView `source`, a path or a query | `Linking.openURL(params.url)`, `source={{ uri: link }}`, a file path built from a param | `rg -n 'Linking\.openURL\|source=\{\{ *uri' $SRC -g '*.tsx' -g '*.ts'`; trace each argument to its origin | blocker |
+| F19 | Claimed link paths are narrow | `pathPrefix: "/"`, a wildcard host, or every path claimed with no validator behind it | `rg -n 'pathPrefix\|associatedDomains\|"host"' app.json app.config.*` | major |
+| F20 | Verified-link association files match the build | `assetlinks.json` fingerprint is not the release / Play app-signing key; AASA served with a redirect or wrong type. requires dynamic test → `qa-security` | `adb shell pm get-app-links <package>`; fetch both `/.well-known/` files | major |
 ---
 
 ## G — Forms & input
@@ -223,7 +228,21 @@ If the repo gitignores a generated native folder (`ios/`, `android/` under CNG) 
 | J11 | Arguments from JS are validated natively | A JS string used as a path, URL or Intent target without a check | `rg -n 'URL\(string\|File\(\|Intent\(' modules -g '*.swift' -g '*.kt'` | major |
 | J12 | A DOM component is not a list row or primary chrome and holds the WebView rules | `'use dom'` file rendered per row; no origin allow-list | `rg -ln "'use dom'" $SRC` | minor |
 | J13 | `[bare]` TurboModule / Nitro specs are typed and codegen is committed | A `Native*.ts` spec using `any`; hand-written bridge for an Expo-installed app | `rg -n 'TurboModuleRegistry' $SRC -g '*.ts'` | minor |
-
+| J14 | A permission is requested only from a user action, after a pre-prompt | `request*PermissionsAsync` in a `useEffect`, a root layout or on mount; no primer screen | `rg -n 'request[A-Za-z]*PermissionsAsync\|requestPermission\(' $SRC -g '*.tsx'`; read the caller | major |
+| J15 | The denied path is a working screen | A `granted` check with no `canAskAgain === false` branch, no alternative path, no `Linking.openSettings`; a blank view or a loop on `request` | `rg -n 'canAskAgain\|openSettings' $SRC -g '*.tsx'` — a permission hook with neither is the finding | major |
+| J16 | Permission status is re-read on foreground | A cached "denied" or "granted" never refreshed after the user changes Settings | `rg -n 'AppState' $SRC -g '*.tsx'` beside each `use*Permissions` | minor |
+| J17 | Android 13+ notification permission: channel first, then request | `getExpoPushTokenAsync` or `requestPermissionsAsync` before `setNotificationChannelAsync`; no channel at all | `rg -n 'setNotificationChannelAsync\|getExpoPushTokenAsync\|getDevicePushTokenAsync' $SRC -g '*.ts' -g '*.tsx'` | major |
+| J18 | Notification denied path keeps the information reachable | Push is the only place an order update appears; no in-app list, no Settings row | read the notifications screen against the denied state | major |
+| J19 | The push token is registered, rotated and removed | No `addPushTokenListener`; token not deleted on sign-out or account deletion; `projectId` omitted | `rg -n 'addPushTokenListener\|getExpoPushTokenAsync' $SRC -g '*.ts' -g '*.tsx'` | major |
+| J20 | Purpose strings are set in config plugins, specific and used | `Info.plist` hand-edited; "Needs camera access"; a usage description for a permission the app never requests | `rg -n 'cameraPermission\|photosPermission\|locationWhenInUsePermission\|faceIDPermission\|NS[A-Za-z]+UsageDescription' app.json app.config.*` | major |
+| J21 | Media is picked without library permission | `READ_MEDIA_IMAGES` / `READ_MEDIA_VIDEO` or a library permission requested only to pick; `READ_EXTERNAL_STORAGE` | `rg -n 'READ_MEDIA\|READ_EXTERNAL_STORAGE\|requestMediaLibraryPermissionsAsync' $SRC app.json app.config.*` | major |
+| J22 | Subscriptions, watchers and cameras are released on unmount | `watchPositionAsync` with no `.remove()`; `addListener` with no cleanup; `CameraView` kept under a hidden tab | `rg -n 'watchPositionAsync\|addNotification[A-Za-z]*Listener\|addPushTokenListener' $SRC -g '*.tsx' -A6` | major |
+| J23 | A value from a scan, file or intent is validated before use | A QR payload passed to `router.push`, `fetch` or a path | `rg -n 'onBarcodeScanned' $SRC -g '*.tsx' -A8` | major |
+| J24 | Biometrics unlock a Keychain / Keystore item, they are not the secret | `authenticateAsync().success` as the only gate in front of a token or record held in plain storage | `rg -n 'authenticateAsync' $SRC -g '*.ts' -g '*.tsx'`; compare with `requireAuthentication` in `expo-secure-store` calls | major |
+| J25 | Biometric availability is checked and a fallback exists | `authenticateAsync` with no `hasHardwareAsync` / `isEnrolledAsync`; no password path | `rg -n 'hasHardwareAsync\|isEnrolledAsync' $SRC -g '*.ts' -g '*.tsx'` | minor |
+| J26 | Background location is the product, not a default | `isAndroidBackgroundLocationEnabled: true` or `requestBackgroundPermissionsAsync` with no stated need; background asked before foreground | `rg -n 'isAndroidBackgroundLocationEnabled\|requestBackgroundPermissionsAsync\|startLocationUpdatesAsync' app.json app.config.* $SRC` | major |
+| J27 | Background tasks are defined in module scope and treated as best-effort | `TaskManager.defineTask` inside a component; a feature that depends on the task running; `expo-background-fetch` on an SDK that has `expo-background-task` | `rg -n 'defineTask\|registerTaskAsync\|expo-background-fetch' $SRC package.json` | major |
+| J28 | Exact alarms have a denied path | `SCHEDULE_EXACT_ALARM` / `USE_EXACT_ALARM` declared with no inexact fallback; `USE_EXACT_ALARM` outside an alarm or calendar app | `rg -n 'EXACT_ALARM' app.json app.config.* android` | major |
 ---
 
 ## K — Security
@@ -269,7 +288,16 @@ This section holds no rows of its own. The rows are those of `mobile/_shared/sto
 
 | # | Check | Violation looks like | Find it with | Sev |
 |---|---|---|---|---|
-
+| P1 | No hard-coded UI string once localization is on | Literal text in JSX, `accessibilityLabel`, `placeholder`, `Alert.alert`, tab titles | `rg -n '>[A-Z][a-z]+[^<{]*<\|accessibilityLabel="\|placeholder="\|Alert\.alert\("' $SRC -g '*.tsx'` | major |
+| P2 | One i18n library | `i18next` and `@lingui/core` (or two others) both installed and used | `rg -n 'i18next\|@lingui\|react-intl' package.json` | minor |
+| P3 | Plurals and interpolation live in the catalog | `count + ' items'`, a sentence built from concatenated `t()` pieces | `rg -n "t\('[^']+'\) *\+\|\+ *t\(" $SRC -g '*.ts' -g '*.tsx'` | major |
+| P4 | `Intl` objects are not built in a render path | `new Intl.*` or `toLocaleString(` inside a component body or `renderItem` | `rg -n 'new Intl\.\|toLocale(Date\|Time)?String\(' $SRC -g '*.tsx'` | minor |
+| P5 | Money and dates are formatted with the user's locale and the data's currency | A fixed `$` / `,` format, a currency derived from the locale, no `timeZone` on a displayed date | `rg -n "toFixed\(2\)\|'\$'\|currency: *'[A-Z]{3}'" $SRC -g '*.tsx'` | major |
+| P6 | Shared components use logical style properties | `marginLeft`, `paddingRight`, `left:`, `textAlign: 'left'` in a component of an app that ships an RTL language | `rg -n 'margin(Left\|Right)\|padding(Left\|Right)\|textAlign: .(left\|right)' $SRC -g '*.tsx' -g '*.ts'` | major |
+| P7 | RTL is allowed, a direction change reloads, directional icons mirror | An RTL locale shipped with RTL off; `forceRTL` with no reload; a back chevron that does not mirror | `rg -n 'I18nManager\|supportsRTL\|forcesRTL\|reloadAsync' $SRC app.json app.config.*` | minor |
+| P8 | `supportedLocales` matches the shipped catalogs; native strings are localized | A catalog with no `supportedLocales` entry or the reverse; `NS…UsageDescription` in one language only | `rg -n 'supportedLocales' app.json app.config.*`; `ls locales` | major |
+| P9 | The locale is refreshed on foreground and a saved choice wins | `getLocales()` read once at import; the user's saved language ignored | `rg -n 'getLocales\|useLocales\|changeLanguage' $SRC -g '*.ts' -g '*.tsx'` | minor |
+| P10 | A missing key degrades to the fallback, not a raw key | `fallbackLng` unset; `returnNull` / `saveMissing` left on in release | `rg -n 'fallbackLng' $SRC -g '*.ts'` | minor |
 ---
 
 ## Q — Motion & gestures
@@ -277,7 +305,17 @@ This section holds no rows of its own. The rows are those of `mobile/_shared/sto
 
 | # | Check | Violation looks like | Find it with | Sev |
 |---|---|---|---|---|
-
+| Q1 | Only `transform` and `opacity` are animated | `height`, `width`, `top`, `left`, `margin`, `padding` inside `useAnimatedStyle` or a `with*` call | `rg -n '(height\|width\|top\|left\|margin[A-Za-z]*\|padding[A-Za-z]*): *with(Timing\|Spring)' $SRC -g '*.tsx'` | major |
+| Q2 | Reduce Motion is honoured | `ReduceMotion.Never` on decorative motion; a looping or parallax animation with no reduced variant | `rg -n 'ReduceMotion\.Never\|withRepeat\|useReducedMotion' $SRC -g '*.tsx'` | major |
+| Q3 | Shared values use `.get()` / `.set()` under the React Compiler | `.value` read or written in a component the compiler compiles | `rg -n '\.value\b' $SRC -g '*.tsx'` | minor |
+| Q4 | `[SDK58]` Gesture Handler 3 callbacks use the new names | `onStart` / `onEnd` / `onChange` / `onTouchesCancelled` inside a `use*Gesture` config on 3.x | `rg -n 'onStart\|onEnd\|onChange\|onTouchesCancelled' $SRC -g '*.tsx'`; compare `react-native-gesture-handler` in `package.json` | major |
+| Q5 | The gesture API matches the installed Gesture Handler major | `Gesture.Pan()` on 3.x relations mixed with hooks, or `usePanGesture` on 2.x | `rg -n 'Gesture\.(Pan\|Tap\|Race\|Simultaneous)\|use(Pan\|Tap)Gesture' $SRC -g '*.tsx'` | major |
+| Q6 | Nothing per-frame goes through React state | `setState` in `onScroll` or an animation callback; a shared value mirrored into `useState` | `rg -n 'onScroll=\{' $SRC -g '*.tsx' -A4` | major |
+| Q7 | `GestureHandlerRootView` wraps the app once | None, or one per screen | `rg -n 'GestureHandlerRootView' $SRC -g '*.tsx'` | major |
+| Q8 | Animated lists are keyed by stable id | `key={index}` on an item with `entering` / `exiting` / `layout` | `rg -n 'key=\{(index\|i)\}' $SRC -g '*.tsx'` | minor |
+| Q9 | `useDerivedValue` derives, `useAnimatedReaction` only reacts | `useAnimatedReaction` that only writes a shared value | `rg -n 'useAnimatedReaction' $SRC -g '*.tsx' -A6` | nit |
+| Q10 | No timer choreography or unmanaged repeats | `setTimeout` sequencing an animation; `withRepeat(…, -1)` with no stop or cancel | `rg -n 'setTimeout' $SRC -g '*.tsx' -B2 -A3` | minor |
+| Q11 | Reanimated 4's worklets runtime is installed | `react-native-reanimated` 4.x with no `react-native-worklets` | `rg -n 'react-native-(reanimated\|worklets)' package.json` | major |
 ---
 
 ## R — Testability & test ids
@@ -285,7 +323,16 @@ This section holds no rows of its own. The rows are those of `mobile/_shared/sto
 
 | # | Check | Violation looks like | Find it with | Sev |
 |---|---|---|---|---|
-
+| R1 | Every interactive element carries a `testID` | A `Pressable`, `TextInput`, `Switch` or tab trigger with no `testID` | `rg -n '<(Pressable\|TextInput\|Switch\|TouchableOpacity)\b' $SRC -g '*.tsx'` and subtract those with `testID`; read the rest | major |
+| R2 | Every list container carries a `testID` | `FlatList`, `FlashList`, `ScrollView` with none | `rg -n '<(FlatList\|FlashList\|LegendList\|ScrollView)\b' $SRC -g '*.tsx'` | major |
+| R3 | A row's id is static | `testID={`Row.${item.id}`}`, an index or a GUID in an id | `rg -n 'testID=\{`[^`]*\$\{[^}]*(id\|Id\|index\|i)\}' $SRC -g '*.tsx'` | major |
+| R4 | An accessibility label is never used as an id (or the reverse) | `testID` equal to, built from or translated like `accessibilityLabel`; `accessibilityLabel="Login.EmailField"` | `rg -n 'testID=\{t\(\|accessibilityLabel="[A-Z][A-Za-z]+\.[A-Z]' $SRC -g '*.tsx'` | major |
+| R5 | Ids are PascalCase, dot-separated | kebab-case, snake_case, spaces | `rg -n 'testID="[^"]*[-_ ][^"]*"' $SRC -g '*.tsx'` | minor |
+| R6 | Every data region's states and the error banner are tagged | No `.Loading` / `.Error` / `.Retry` / `.Empty` / `.Stale` id; no banner or close id | `rg -n 'testID=.*\.(Loading\|Error\|Retry\|Empty\|Stale)' $SRC -g '*.tsx'` | major |
+| R7 | `nativeID` is not a test hook | `nativeID` used so a test can find a view | `rg -n 'nativeID=' $SRC -g '*.tsx'` | minor |
+| R8 | No wrapper or layout `View` exists only to carry an id | `AppButton` added for ids; a `testID` on a flattening layout view | `rg -n 'testID' $SRC -g '*.tsx' -B1`; read each on a `View` | nit |
+| R9 | No id appears on two distinct non-row elements | The same literal on a field and its container | `rg -oN 'testID="[^"]+"' $SRC -g '*.tsx' \| sort \| uniq -d` | major |
+| R10 | The id surfaces on the interactive element on both platforms | `testID` landed on an outer wrapper, or an `accessible` parent hides its children's ids on iOS. requires dynamic test → `qa-security` / the QA peer's page source | read `appium_get_page_source` for one screen on each platform | minor |
 ---
 
 ## S — Dev-side tests
