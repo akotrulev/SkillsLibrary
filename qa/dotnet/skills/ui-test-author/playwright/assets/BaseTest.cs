@@ -90,13 +90,13 @@ public abstract class BaseTest : PageTest
         Attach("video", "video/webm", path);
     }
 
-    private string EvidenceName() =>
+    protected string EvidenceName() =>
         Regex.Replace($"{GetType().Name}.{TestContext.CurrentContext.Test.Name}", "[^A-Za-z0-9._-]", "_");
 
-    private static string Artifact(string name, string extension) =>
+    protected static string Artifact(string name, string extension) =>
         Path.Combine(ArtifactsDirectory, $"{name}.{extension}");
 
-    private static void Attach(string name, string contentType, string path)
+    protected static void Attach(string name, string contentType, string path)
     {
         TestContext.AddTestAttachment(path, name);
         AllureApi.AddAttachment(name, contentType, path);

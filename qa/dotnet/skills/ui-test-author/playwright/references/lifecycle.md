@@ -153,7 +153,9 @@ the raw recording from `<WorkDirectory>/playwright-videos/`.
   fresh browser. The trace is already saved by then (step 2 comes first for that reason); only the video
   of that test is lost.
 - Screencasts, HAR, aria snapshots in traces and deliberate recordings belong to
-  `qa/dotnet/skills/evidence-capture`, which builds on these defaults rather than adding a second hook.
+  `qa/dotnet/skills/evidence-capture`, which builds on these defaults rather than adding a second hook. A
+  recording names and attaches its file with `BaseTest`'s protected `EvidenceName()`, `Artifact(name, ext)` and
+  `Attach(name, type, path)`.
 
 ## 7. Signed-in state: `AuthSetup`
 
@@ -228,4 +230,5 @@ The status is asserted exactly, with the body as the message. Never `Assert.That
   page objects on the ladder, rename the test `Should_X_When_Y`, derive it from `BaseTest`, and never
   commit the recording. The recorder's **Assert snapshot** button emits `ToMatchAriaSnapshotAsync`.
 - **Traces also open at trace.playwright.dev**, which loads the zip in the browser without uploading it.
-  `npx playwright show-trace` needs Node, and the `npx playwright trace …` analysis CLI is Node-only.
+  `npx playwright show-trace` needs Node. The trace analysis CLI an agent reads a failure with runs through
+  Node or `playwright.ps1`: `qa/dotnet/skills/evidence-capture`, "Reading a failure".

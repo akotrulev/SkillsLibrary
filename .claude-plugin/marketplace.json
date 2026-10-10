@@ -221,6 +221,7 @@
         "./qa/dotnet/skills/db-testing/verification-queries",
         "./qa/dotnet/skills/db-testing/testcontainers",
         "./qa/dotnet/skills/email-testing",
+        "./qa/dotnet/skills/evidence-capture",
         "./qa/dotnet/skills/feature-flag-testing",
         "./qa/dotnet/skills/file-storage-testing",
         "./qa/dotnet/skills/language-testing",

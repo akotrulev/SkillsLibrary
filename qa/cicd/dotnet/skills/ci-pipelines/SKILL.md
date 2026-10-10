@@ -27,6 +27,60 @@ shared by every tool in the family.
 - Cross-stack conventions live in `qa/cicd/ci-conventions` — load it alongside the tool reference.
 - Inside a `Gate: none` plan task, run none of the generation steps' lint, dry-run or smoke checks, and report the pipeline as "written, not run".
 
+## Sharding NUnit suites: class filters computed once
+
+**Neither `Microsoft.Playwright.NUnit` nor NUnit shards a run.** `-- Playwright.Shard=i/N` is ignored (the
+adapter prints "Playwright>Shard is not implemented") and every shard would run the whole suite. So every
+reference shards the same way, per `qa/cicd/ci-conventions` ("membership is computed once, upstream"):
+
+1. A **plan job** builds the test project, lists its tests once, splits the **test classes** into N groups
+   and publishes one filter file per shard as an artifact (`<dir>/<i>.filter`, 1-based).
+2. Each **shard job** reads `<dir>/<index>.filter` and runs `dotnet test --filter "(<filter>)"` — for UI,
+   `--filter "(<filter>)&TestCategory!=Flaky"` (`qa/reporting/dotnet/skills/flaky-test-quarantine`).
+
+`ci/nunit-shards.sh <project> <shards> <dir>`, committed in the repo and run with `bash`:
+
+```bash
+#!/usr/bin/env bash
+set -euo pipefail
+
+project="$1"
+shards="$2"
+dir="$3"
+
+mkdir -p "$dir"
+dotnet test "$project" --list-tests -- NUnit.DisplayName=FullName \
+  | sed -n '/The following Tests are available:/,$p' | sed '1d' \
+  | awk '/^[ \t]+[^ \t]/ { sub(/^[ \t]+/, ""); sub(/\([^()]*\)$/, ""); sub(/\.[^.(]+$/, ""); print (sub(/\(.*$/, "") ? $0 "\\(" : $0 ".") }' \
+  | LC_ALL=C sort -u \
+  | awk -v n="$shards" -v dir="$dir" '
+      { i = (NR - 1) % n + 1; filter[i] = filter[i] (filter[i] == "" ? "" : "|") "FullyQualifiedName~" $0 }
+      END {
+        if (NR < n) { printf "%d test classes for %d shards: lower the shard count\n", NR, n > "/dev/stderr"; exit 1 }
+        for (i = 1; i <= n; i++) print filter[i] > (dir "/" i ".filter")
+      }'
+```
+
+- **`NUnit.DisplayName=FullName`** makes `--list-tests` print `Namespace.Class.Method(args)` instead of the
+  bare method name. The first `awk` drops the method and its arguments and keeps the class.
+- **One term per class, never per test.** A filter of every test name breaks the command-line length limit
+  on some runners (8,191 characters through `cmd.exe`) and needs escaping for every argument list. A class
+  term is `FullyQualifiedName~Namespace.Class.` — the trailing `.` keeps `LoginTests` from also matching
+  `LoginTestsMobile`. A parameterized fixture (`[TestFixture("de-DE", …)]`) puts its arguments in the full
+  name, so its term is `FullyQualifiedName~Namespace.Class\(` (an escaped `(`). If one shard's file still
+  grows past a few thousand characters, shard by namespace instead.
+- **Classes are dealt round-robin in name order** (`LC_ALL=C`), so the same classes always give the same
+  shards. Balance is by class count, not duration. Only lines indented under the "available" header are read.
+- **Fewer classes than shards fails the plan job**, naming both numbers — lower the shard count rather than
+  run an empty shard.
+- `BaseTest` carries `[Parallelizable(ParallelScope.Self)]` and `AuthSetup` signs in once per run, so a
+  class never splits across shards and each shard signs in once.
+- This is the VSTest runner `UiTests.csproj` uses (`Microsoft.NET.Test.Sdk` + `NUnit3TestAdapter`). A project
+  switched to Microsoft.Testing.Platform lists and filters tests differently.
+- `BaseTest`'s failure evidence lands in `UiTests/bin/<cfg>/net10.0/playwright-artifacts/`; every UI shard
+  uploads that folder on failure (14 days) and `UiTests/bin/<cfg>/net10.0/allure-results/` on every run. What
+  the files are and how to read them is `qa/dotnet/skills/evidence-capture`.
+
 ## Cross-references
 
 Each `references/<tool>.md` carries its own cross-references to sibling skills (DB verification,

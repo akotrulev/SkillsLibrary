@@ -1,12 +1,15 @@
 # QA — GitLab CI/CD for .NET Test Suites
 
-Authors `.gitlab-ci.yml` that runs NUnit / Playwright / Testcontainers-backed integration tests on GitLab runners using .NET 10 (8/9 supported), shards for speed via `parallel:`, publishes Allure to GitLab Pages with history, fails on real failures (not flakes), and pulls secrets via `id_tokens:` cloud OIDC rather than long-lived CI/CD variables.
+Authors `.gitlab-ci.yml` that runs NUnit / Playwright / Testcontainers-backed integration tests on GitLab runners using .NET 10 (8/9 supported), shards for speed via `parallel:` and NUnit class filters, keeps the Playwright failure evidence, publishes Allure to GitLab Pages with history, fails on real failures (not flakes), and pulls secrets via `id_tokens:` cloud OIDC rather than long-lived CI/CD variables.
+
+**The UI lifecycle is not written here.** `qa/dotnet/skills/ui-test-author/playwright/assets/BaseTest.cs` owns it: it reads `BASE_URL` (required), runs headless unless `HEADED=1`, and on a failed test keeps a full-page screenshot, the trace and the video in `UiTests/bin/<cfg>/net10.0/playwright-artifacts/<Class>.<Test>.{png,zip,webm}`. The pipeline runs that as is and keeps exactly that folder. `playwright-videos/` holds raw recordings `BaseTest` deletes after every test; it is never kept. What the evidence is and how to read it is `qa/dotnet/skills/evidence-capture`. The shard filters come from `ci/nunit-shards.sh`, defined once in this skill's `SKILL.md`.
 
 This is a **true port** of this skill's GitHub Actions reference (`references/github-actions.md`) — the *same* pipeline (same stages, same shard strategy, same artifacts, same gates), re-keyed to GitLab's `.gitlab-ci.yml` vocabulary, and the .NET sibling of the canonical `qa/cicd/typescript/skills/ci-pipelines`. **Translate, don't redesign.** Only the YAML schema and a few primitives differ:
 
 | Capability | GitHub Actions | GitLab CI (this skill) |
 |---|---|---|
-| Shard fan-out | `strategy.matrix` (array == `shard-total`) | `parallel: N` → `CI_NODE_INDEX`/`CI_NODE_TOTAL` |
+| Shard fan-out | `strategy.matrix` from the `plan` job's output | `parallel: N` → `CI_NODE_INDEX`/`CI_NODE_TOTAL` |
+| Shard membership | `plan` job → `*-shards` artifact | `*-shards` job in `install` → artifact read through `needs:` |
 | DAG / ordering | `needs:` between jobs | `needs:` (DAG) + `dependencies:` (artifact scope) |
 | Cache | `actions/setup-dotnet` + `actions/cache` | `cache:key:files:[packages.lock.json]` + `policy:` |
 | JUnit summary | `dorny/test-reporter` (TRX) | native `artifacts:reports:junit:` (`--logger junit`) |
@@ -45,16 +48,16 @@ Infer everything else from `.csproj` files, `packages.lock.json` if present, and
 
 | Concern | Default | Override when |
 |---|---|---|
-| Runner | `image: mcr.microsoft.com/dotnet/sdk:10.0` on a `docker` runner | Self-hosted/shell runner only for proprietary hardware (mobile farm, GPU) |
-| .NET | 8.0 LTS via the SDK image | Newer LTS only after 3 mo GA |
+| Runner | `image: mcr.microsoft.com/dotnet/sdk:10.0` on a `docker` runner; the UI job in `mcr.microsoft.com/playwright/dotnet:v1.63.0-noble` | Self-hosted/shell runner only for proprietary hardware (mobile farm, GPU) |
+| .NET | 10 via the SDK image (match the projects' TFM) | Never up-level a down-level project |
 | NuGet cache | `cache:key:files:[packages.lock.json]` (enable lock file) + `policy:` + `--locked-mode` restore | Hash `**/*.csproj` when no lock file exists |
 | Triggers | `merge_request_event` + nightly `schedule` (set via `workflow:rules`) | `push` on the default branch only when the suite is < 5 min |
 | Test reporter | `--logger "junit;LogFilePath=..."` → `artifacts:reports:junit` + Allure NUnit adapter | Always both — JUnit feeds the MR widget, Allure feeds humans |
-| Sharding | `parallel: N`; runner reads `CI_NODE_INDEX`/`CI_NODE_TOTAL` into an NUnit `--filter` slice | Playwright `Playwright.Shard=$CI_NODE_INDEX/$CI_NODE_TOTAL`; category split via `NUnit.Where` |
+| Sharding | A `*-shards` job runs `ci/nunit-shards.sh` once; `parallel: N` runs one class filter per node | Shard by namespace when a shard's filter grows past a few thousand characters |
 | Auth to AWS / Azure / Vault | `id_tokens:` + `aud:` → assume role (OIDC) | Never long-lived cloud keys; masked+protected CI/CD variables only for unavoidable tokens |
 | Retry on failure | **Off at the pipeline level** (no `retry:` on the test job) | Per-test `[Retry(2)]` only for documented flake hotspots — never blanket `retry:` |
 | Cancel superseded | `interruptible: true` + project "auto-cancel redundant pipelines" | Keep nightly un-interruptible |
-| Artifact retention | `expire_in: 14 days` for traces/videos/HAR, `30 days` for JUnit; Allure history in cache | Bump only with a stated reason |
+| Artifact retention | `expire_in: 14 days` on the UI job (failure evidence + Allure results), `30 days` for JUnit; Allure history in cache | Bump only with a stated reason |
 | Perf gate | k6 thresholds → exit code 99 → job fails | Soft gate (`allow_failure: true`) only while a baseline is being established |
 
 ## Templates
@@ -62,13 +65,12 @@ Infer everything else from `.csproj` files, `packages.lock.json` if present, and
 ### Top-level pipeline — `.gitlab-ci.yml`
 
 ```yaml
-# Same pipeline as the github-actions sibling — GitLab vocabulary.
 stages: [install, test, merge, perf, publish]
 
 default:
   image: mcr.microsoft.com/dotnet/sdk:10.0
-  tags: [docker]              # a runner with the Docker executor
-  interruptible: true         # GitLab analogue of cancel-in-progress for superseded MR pipelines
+  tags: [docker]
+  interruptible: true
 
 workflow:
   rules:
@@ -80,18 +82,19 @@ variables:
   BUILD_CONFIGURATION: Release
   DOTNET_NOLOGO: "true"
   DOTNET_CLI_TELEMETRY_OPTOUT: "true"
-  NUGET_PACKAGES: "$CI_PROJECT_DIR/.nuget/packages"   # cacheable NuGet store in the workspace
+  NUGET_PACKAGES: "$CI_PROJECT_DIR/.nuget/packages"
 
-# Reusable NuGet cache anchor — keyed on the lock file so a dependency change busts it.
 .nuget-cache: &nuget-cache
   cache:
     key:
       files: [packages.lock.json]
     paths: [.nuget/packages/]
-    policy: pull               # test jobs read; the install job writes (below)
+    policy: pull
 ```
 
-The five stages map 1:1 onto the github-actions reusable workflows: `install` primes the NuGet cache, `test` fans out the sharded suites, `merge` is unused for .NET (kept for family symmetry; the Allure merge happens in `publish`), `perf` runs the gated k6 job, `publish` builds Allure on GitLab Pages. Enable the NuGet lock file (`<RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>` in `Directory.Build.props`) so `cache:key:files:` has a deterministic key; without it, hash `**/*.csproj`.
+- `tags: [docker]` picks a runner with the Docker executor; `interruptible: true` is the GitLab analogue of `cancel-in-progress` for superseded MR pipelines.
+- `NUGET_PACKAGES` puts the NuGet store in the workspace so it can be cached; the `.nuget-cache` anchor is keyed on the lock file, so a dependency change busts it, and test jobs only pull it.
+- The five stages map 1:1 onto the github-actions reusable workflows: `install` primes the NuGet cache and computes the shard filters, `test` fans out the sharded suites, `merge` is unused for .NET (kept for family symmetry; the Allure merge happens in `publish`), `perf` runs the gated k6 job, `publish` builds Allure on GitLab Pages. Enable the NuGet lock file (`<RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>` in `Directory.Build.props`) so `cache:key:files:` has a deterministic key; without it, hash `**/*.csproj`.
 
 ### Prime the NuGet cache — `install` stage
 
@@ -102,12 +105,36 @@ install:
     key:
       files: [packages.lock.json]
     paths: [.nuget/packages/]
-    policy: pull-push           # THIS job populates the cache; downstream jobs pull
+    policy: pull-push
   script:
-    - dotnet restore --locked-mode   # frozen, reproducible restore — fails if the lock file is stale
+    - dotnet restore --locked-mode
 ```
 
 One job owns `policy: pull-push`; every test job uses `<<: *nuget-cache` (`policy: pull`) so they never race to write the same key. `--locked-mode` is the .NET analogue of `npm ci` — it refuses to restore if `packages.lock.json` doesn't match the project references.
+
+### Shard membership — `install` stage
+
+```yaml
+api-shards:
+  stage: install
+  <<: *nuget-cache
+  script:
+    - bash ci/nunit-shards.sh ApiTests/ApiTests.csproj 2 shards/api
+  artifacts:
+    paths: [shards/api/]
+    expire_in: 1 day
+
+ui-shards:
+  stage: install
+  <<: *nuget-cache
+  script:
+    - bash ci/nunit-shards.sh UiTests/UiTests.csproj 4 shards/ui
+  artifacts:
+    paths: [shards/ui/]
+    expire_in: 1 day
+```
+
+Each job lists its project's tests once and writes `shards/<suite>/<i>.filter`. GitLab does not take a variable in `parallel:`, so the shard count is written twice — here and in the test job — and the test job checks that the two agree before it runs. Fewer test classes than shards fails this job; lower both numbers.
 
 ### Sharded NUnit job — `test` stage
 
@@ -115,36 +142,38 @@ One job owns `policy: pull-push`; every test job uses `<<: *nuget-cache` (`polic
 api-tests:
   stage: test
   <<: *nuget-cache
-  parallel: 2                   # GitLab sets CI_NODE_INDEX (1-based) and CI_NODE_TOTAL
-  # OIDC token for the cloud — no stored secret. `aud` must match the role's trust policy.
+  parallel: 2
+  needs: [api-shards]
   id_tokens:
     AWS_ID_TOKEN:
       aud: https://gitlab.example.com
   script:
+    - test "$(ls shards/api/*.filter | wc -l)" -eq "$CI_NODE_TOTAL"
+    - read -r SHARD_FILTER < "shards/api/$CI_NODE_INDEX.filter"
     - export AWS_WEB_IDENTITY_TOKEN_FILE="$(mktemp)"
     - echo "$AWS_ID_TOKEN" > "$AWS_WEB_IDENTITY_TOKEN_FILE"
     - export AWS_ROLE_ARN="arn:aws:iam::111122223333:role/qa-ci"
     - export API_BASE_URL="$(aws ssm get-parameter --name /qa/api-base-url --with-decryption --query Parameter.Value --output text)"
-    # NUnit slices the suite across CI_NODE_TOTAL runners via a modulo filter predicate.
     - >
       dotnet test ApiTests/ApiTests.csproj
       --configuration "$BUILD_CONFIGURATION"
+      --filter "($SHARD_FILTER)&TestCategory!=Slow&TestCategory!=Perf"
       --logger "junit;LogFilePath=$CI_PROJECT_DIR/reports/junit-api-$CI_NODE_INDEX.xml"
       --logger "console;verbosity=minimal"
-      --
-      NUnit.NumberOfTestWorkers=1
-      NUnit.Where="cat != Slow and cat != Perf and (test % $CI_NODE_TOTAL == $CI_NODE_INDEX - 1)"
   artifacts:
-    when: always                # collect reports even when tests fail
+    when: always
     expire_in: 30 days
     paths: [ApiTests/bin/$BUILD_CONFIGURATION/net10.0/allure-results/]
     reports:
-      junit: reports/junit-api-*.xml   # native MR test widget — no third-party action
+      junit: reports/junit-api-*.xml
 ```
 
-`parallel: N` injects `CI_NODE_INDEX` (1-based) / `CI_NODE_TOTAL`, which feed an NUnit `--where` modulo predicate — the GitLab analogue of the github-actions `NUnit.Where="test % N == i"` matrix slice, minus the array you'd otherwise keep in sync with the count. `NUnit.Where="test % N == i"` is a stand-in — replace with your real shard predicate (category split, fixture-name hash, or a committed bin map). The `junit` logger comes from the `JunitXml.TestLogger` (a.k.a. `JUnitTestLogger`) NuGet package; add it to each test project so `--logger junit` resolves.
-
-> GitLab's native test widget parses the `artifacts:reports:junit` XML directly — it is the GitLab equivalent of `dorny/test-reporter` reading TRX. `dotnet test` already exits non-zero on failure, which reds the pipeline; the widget just surfaces *which* tests failed. Do not add `allow_failure: true`.
+- `parallel: N` injects `CI_NODE_INDEX` (1-based) and `CI_NODE_TOTAL`; the job reads the filter file for its index. The `test … -eq` line fails the job when `parallel:` and the shard job's count drift apart — otherwise some classes would never run.
+- `read -r` keeps the filter's escaped `\(` intact.
+- The `id_tokens:` OIDC token is exchanged for a role; `aud` must match the role's trust policy.
+- The `junit` logger comes from the `JunitXml.TestLogger` NuGet package; add it to each test project so `--logger junit` resolves.
+- GitLab's native test widget parses the `artifacts:reports:junit` XML directly — the GitLab equivalent of `dorny/test-reporter` reading TRX. `dotnet test` already exits non-zero on failure, which reds the pipeline. Do not add `allow_failure: true`.
+- The SDK image ships no AWS CLI: the jobs that fetch through `aws ssm` assume a runner image that adds it, or install it in `before_script`.
 
 ### Integration tests with Testcontainers — `test` stage
 
@@ -162,11 +191,10 @@ integration-tests:
     DOCKER_TLS_CERTDIR: "/certs"
     DOCKER_TLS_VERIFY: "1"
     DOCKER_CERT_PATH: "/certs/client"
-    # Testcontainers must reach published ports at the dind host, not localhost.
     TESTCONTAINERS_HOST_OVERRIDE: "docker"
     TESTCONTAINERS_RYUK_DISABLED: "false"
   script:
-    - docker info                       # fail fast if dind didn't come up
+    - docker info
     - >
       dotnet test IntegrationTests/IntegrationTests.csproj
       --configuration "$BUILD_CONFIGURATION"
@@ -178,7 +206,7 @@ integration-tests:
       junit: reports/junit-integration.xml
 ```
 
-`TESTCONTAINERS_HOST_OVERRIDE: docker` is the critical line: with dind, containers' mapped ports are reachable at the `docker` service alias, not `localhost`. Keep Ryuk **enabled** — it reaps leaked containers between jobs on a warm runner. (On a runner configured with a mounted host Docker socket instead of dind, drop the `services:`/`DOCKER_*` block.)
+`docker info` fails fast if dind did not come up. `TESTCONTAINERS_HOST_OVERRIDE: docker` is the critical line: with dind, containers' mapped ports are reachable at the `docker` service alias, not `localhost`. Keep Ryuk **enabled** — it reaps leaked containers between jobs on a warm runner. (On a runner configured with a mounted host Docker socket instead of dind, drop the `services:`/`DOCKER_*` block.)
 
 ### Playwright UI shard — `test` stage
 
@@ -186,57 +214,68 @@ integration-tests:
 ui-tests:
   stage: test
   <<: *nuget-cache
-  image: mcr.microsoft.com/playwright/dotnet:v1.47.0-jammy   # browsers + deps preinstalled
+  image: mcr.microsoft.com/playwright/dotnet:v1.63.0-noble
   parallel: 4
+  needs: [ui-shards]
+  id_tokens:
+    AWS_ID_TOKEN:
+      aud: https://gitlab.example.com
   script:
+    - test "$(ls shards/ui/*.filter | wc -l)" -eq "$CI_NODE_TOTAL"
+    - read -r SHARD_FILTER < "shards/ui/$CI_NODE_INDEX.filter"
+    - export AWS_WEB_IDENTITY_TOKEN_FILE="$(mktemp)"
+    - echo "$AWS_ID_TOKEN" > "$AWS_WEB_IDENTITY_TOKEN_FILE"
+    - export AWS_ROLE_ARN="arn:aws:iam::111122223333:role/qa-ci"
+    - export BASE_URL="$(aws ssm get-parameter --name /qa/base-url --query Parameter.Value --output text)"
+    - export E2E_USER="$(aws ssm get-parameter --name /qa/e2e-user --query Parameter.Value --output text)"
+    - export E2E_PASSWORD="$(aws ssm get-parameter --name /qa/e2e-password --with-decryption --query Parameter.Value --output text)"
     - dotnet build UiTests/UiTests.csproj -c "$BUILD_CONFIGURATION"
-    # The Playwright image ships browsers; otherwise: pwsh UiTests/bin/.../playwright.ps1 install --with-deps chromium
     - >
       dotnet test UiTests/UiTests.csproj --no-build -c "$BUILD_CONFIGURATION"
+      --filter "($SHARD_FILTER)&TestCategory!=Flaky"
       --logger "junit;LogFilePath=$CI_PROJECT_DIR/reports/junit-ui-$CI_NODE_INDEX.xml"
-      --
-      Playwright.Shard=$CI_NODE_INDEX/$CI_NODE_TOTAL
   artifacts:
-    # One artifacts block per job, one expire_in — traces ride with the results here.
-    # Configure Playwright-for-.NET to keep traces on failure only so the 14-day bucket
-    # stays small; a separate `needs:`-download job would collect nothing new.
     when: always
     expire_in: 14 days
     paths:
       - UiTests/bin/$BUILD_CONFIGURATION/net10.0/allure-results/
-      - UiTests/bin/$BUILD_CONFIGURATION/net10.0/playwright-traces/
+      - UiTests/bin/$BUILD_CONFIGURATION/net10.0/playwright-artifacts/
     reports:
       junit: reports/junit-ui-*.xml
 ```
 
-Using the `mcr.microsoft.com/playwright/dotnet` image avoids the `playwright.ps1 install --with-deps` step (browsers + OS libs are baked in). If you stay on the SDK image, run the install script with `--with-deps` so system libs are present.
+- **The pinned image is the default here**: `mcr.microsoft.com/playwright/dotnet:v1.63.0-noble` carries the .NET 10 SDK and the 1.63.0 browsers with their OS libraries, so there is no install step and no `pwsh` call. The tag must equal the Playwright package version (a mismatch fails with "Executable doesn't exist"), and there is no `-jammy` .NET image since 1.60. The same image produces visual baselines (`qa/dotnet/skills/visual-regression`).
+- **No `Playwright.Shard=$CI_NODE_INDEX/$CI_NODE_TOTAL`.** `Microsoft.Playwright.NUnit` ignores it ("Playwright>Shard is not implemented") and every node would run the whole suite; the class filter is the shard. `BaseTest`'s `[Parallelizable(ParallelScope.Self)]` keeps a class on one worker, so a class is the unit.
+- **No headless flag.** `BaseTest` is headless unless `HEADED=1` (the runsettings set `Headless`), which only a local run sets.
+- `BASE_URL`, `E2E_USER` and `E2E_PASSWORD` come through OIDC: `BaseTest` throws without `BASE_URL`, and the root-namespace `AuthSetup` signs in once per shard before any fixture runs. The image ships no AWS CLI, as for the other jobs.
+- **One `artifacts:` block per job**, so the failure evidence rides with the Allure results under one `expire_in`. `playwright-artifacts/` is empty on a green run — `BaseTest` writes it on failure only — so the 14-day bucket stays small. There is no Playwright "trace config" in .NET to tune; the keep-on-failure behaviour is `BaseTest`'s code.
+- The quarantine lane is a second job with the same script minus the shard lines, running `--filter "TestCategory=Flaky"` with `allow_failure: true` and no `parallel:` — the one non-gating exception (`qa/reporting/dotnet/skills/flaky-test-quarantine`).
 
 ### Allure publish with history — `publish` stage (GitLab Pages)
 
-GitLab has no `gh-pages` branch. The native deliverable is **GitLab Pages**: a job literally named `pages` that publishes a `public/` directory. Allure trend history (the `history/` folder) is carried across pipelines in a **dedicated cache with a stable key** — the GitLab analogue of `keep_files: true` on `gh-pages`. The `pages` job collects the per-shard `allure-results/` artifacts and generates one report (the .NET analogue of `github-actions`'s gh-pages publish, since there is no Playwright blob to merge).
+GitLab has no `gh-pages` branch. The native deliverable is **GitLab Pages**: a job literally named `pages` that publishes a `public/` directory. Allure trend history (the `history/` folder) is carried across pipelines in a **dedicated cache with a stable key** — the GitLab analogue of the `gh-pages` branch. The `pages` job collects the per-shard `allure-results/` artifacts and generates one report with the one Allure CLI pin, `allure-commandline@2.46.1` (`qa/cicd/ci-conventions`), which needs Node and a JRE.
 
 ```yaml
 pages:
   stage: publish
-  image: node:24-bookworm              # allure-commandline needs Node + a JRE
+  image: node:24-bookworm
   needs:
     - job: api-tests
       artifacts: true
     - job: ui-tests
       artifacts: true
-  when: always                         # publish even when a test job failed
+  when: always
   cache:
-    key: allure-history                # stable key — NOT the lock file — so history persists
+    key: allure-history
     paths: [allure-history/]
     policy: pull-push
   before_script:
     - apt-get update && apt-get install -y default-jre-headless
   script:
-    - npm i -g allure-commandline@2.30.0
-    # Gather every shard's results.
-    - mkdir -p allure-results && find . -type d -name allure-results -not -path './allure-results' -exec cp -r {}/. allure-results/ \;
-    # Re-seed history from the prior run before generating.
-    - mkdir -p allure-results/history && cp -r allure-history/* allure-results/history/ 2>/dev/null || true
+    - npm i -g allure-commandline@2.46.1
+    - mkdir -p allure-results && find . -type d -name allure-results -path '*/bin/*' -exec cp -r {}/. allure-results/ \;
+    - cp UiTests/categories.json allure-results/
+    - mkdir -p allure-results/history && cp -r allure-history/. allure-results/history/ 2>/dev/null || true
     - allure generate allure-results --clean -o public
     - rm -rf allure-history && cp -r public/history allure-history
   artifacts:
@@ -246,7 +285,7 @@ pages:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 ```
 
-When GitLab Pages is disabled, drop the `pages` name and the Pages `rules`, keep the same script, and publish `public/` as a plain artifact with `expire_in: 90 days`.
+The stable cache key — **not** the lock file — is what lets history persist. `categories.json` is read from the results folder, so it is copied in from the test project first. When GitLab Pages is disabled, drop the `pages` name and the Pages `rules`, keep the same script, and publish `public/` as a plain artifact with `expire_in: 90 days`.
 
 ### k6 perf gate — `perf` stage
 
@@ -255,7 +294,7 @@ k6 returns exit code 99 when thresholds break; the job inherits that exit code a
 ```yaml
 k6-perf:
   stage: perf
-  image: grafana/k6:0.52.0             # pinned; upgrade in a dedicated MR
+  image: grafana/k6:0.52.0
   needs: ["api-tests"]
   rules:
     - if: $CI_PIPELINE_SOURCE == "schedule"
@@ -272,6 +311,8 @@ k6-perf:
     expire_in: 30 days
     paths: [k6-summary.json]
 ```
+
+`grafana/k6:0.52.0` is pinned; upgrade it in a dedicated MR.
 
 ## Rules
 
@@ -290,11 +331,13 @@ k6-perf:
 
 ### Sharding
 - Default: `parallel: 4` for UI, `parallel: 2` for API, 1 for integration (Testcontainers cost dominates). Tune from the slowest job on the previous 10 runs.
-- The runner reads **`CI_NODE_INDEX`** (1-based) / **`CI_NODE_TOTAL`** — GitLab injects both from `parallel: N`. Feed them into an NUnit `--where` modulo predicate or a committed shard map; never re-discover tests per shard at runtime.
+- Membership is computed **once**, in the `*-shards` job, by `ci/nunit-shards.sh` (this skill's `SKILL.md`): test classes, round-robin, one `FullyQualifiedName~` term per class. Never re-discover tests on a node, never filter by individual test names, never pass `Playwright.Shard`, and never use an `NUnit.Where` modulo predicate — none of them shards.
+- The shard count appears in the `*-shards` script and in `parallel:`; the test job's first line fails when they differ.
 
 ### Reporters
 - Always emit **both** a JUnit-shaped XML (`--logger junit` via `JunitXml.TestLogger`) into **`artifacts:reports:junit`** and Allure NUnit results. JUnit feeds GitLab's native MR widget (the `dorny/test-reporter` equivalent); Allure feeds humans with history.
 - `dotnet test` exits non-zero on failure → the pipeline reds automatically. Do not mask it with `allow_failure: true`.
+- The Allure report is generated with `allure-commandline@2.46.1` — no downloaded allure2 tarball of another version.
 
 ### Secrets
 - **`id_tokens:` OIDC only** — declare the block with the cloud's `aud:`, exchange for short-lived creds, then read secrets. No long-lived AWS keys / Azure secrets in CI/CD variables.
@@ -304,12 +347,13 @@ k6-perf:
 
 ### Retry policy
 - **No pipeline-level retry** of failed tests (no `retry:` on the test job). Retry hides bugs.
-- Per-test `[Retry(2)]` only for documented network-flake hotspots — document each with a date + issue link in an XML comment.
+- Per-test `[Retry(2)]` (two attempts) only for documented network-flake hotspots — each with a date + issue link at the test.
 - `retry:` in GitLab is for **infrastructure** failures only (`when: runner_system_failure`), never assertions. For chronic flakes, quarantine via `qa/reporting/dotnet/skills/flaky-test-quarantine`.
 
 ### Artifacts
 - JUnit + coverage: `expire_in: 30 days` (on the `api-tests` / `integration-tests` jobs).
-- Playwright traces / videos: `expire_in: 14 days` on the `ui-tests` job — one `artifacts:` block per job, one `expire_in`, so traces ride with the results there. Keep them small by retaining traces on failure only (Playwright-for-.NET trace config) rather than a `needs:`-download-then-reupload job.
+- `UiTests/bin/<cfg>/net10.0/playwright-artifacts/` and the UI Allure results: `expire_in: 14 days` on the `ui-tests` job — one `artifacts:` block per job, one `expire_in`. The evidence folder holds only failed tests' files. Never `playwright-videos/`.
+- Shard filter files: `expire_in: 1 day`.
 - Allure history: carried in a **dedicated cache** keyed on a stable string (`allure-history`), **not** the lock file.
 - Don't double-declare the same files under `paths:` and `reports:`.
 
@@ -321,7 +365,8 @@ k6-perf:
 ### What NOT to do
 - No Testcontainers without `docker:dind` (+ `TESTCONTAINERS_HOST_OVERRIDE: docker`) or a mounted host socket.
 - No long-lived cloud keys in CI/CD variables — use `id_tokens:` OIDC.
-- No `allow_failure: true` on a test job to "make it green".
+- No `allow_failure: true` on a gating test job to "make it green".
+- No Playwright image whose tag differs from the package version, and no `-jammy` .NET image.
 - No unpinned `dotnet restore` in CI — use `--locked-mode`.
 - No `--blame` in production runs (slow); enable only for a targeted hang re-run.
 - No mixing NUnit `[Parallelizable]` with `LevelOfParallelism > 1` in a fixture that owns a Testcontainer — instant flake.
@@ -333,18 +378,20 @@ k6-perf:
 
 1. Read any existing `.gitlab-ci.yml` to learn runner tags, `image:`, existing `id_tokens:`/variables, and stage conventions.
 2. Inventory test projects: `find . -name '*Tests.csproj' -not -path '*/bin/*'`. Group into API / integration / UI / perf. Confirm the NuGet lock file exists (enable it if not).
-3. Generate `.gitlab-ci.yml` with `stages: [install, test, merge, perf, publish]`, the `.nuget-cache` anchor, one `install` job (`policy: pull-push`), the sharded `api-tests` / `ui-tests` jobs, the dind `integration-tests` job, the `pages` Allure job, and the gated `k6-perf` job. Add `JunitXml.TestLogger` to each test project.
-4. Configure cloud OIDC: register GitLab as an OIDC provider, create the role with a trust policy keyed on the project/ref claims, set `id_tokens:` `aud:` to match. Document the subject claim in a header comment.
-5. Validate with **CI Lint** (Pipelines → CI Lint) or `glab ci lint`, then open a draft MR and confirm every expected job and the MR test widget appear.
+3. Generate `ci/nunit-shards.sh` from this skill's `SKILL.md`, and `.gitlab-ci.yml` with `stages: [install, test, merge, perf, publish]`, the `.nuget-cache` anchor, one `install` job (`policy: pull-push`), the `api-shards` / `ui-shards` jobs, the sharded `api-tests` / `ui-tests` jobs, the dind `integration-tests` job, the `pages` Allure job, and the gated `k6-perf` job. Add `JunitXml.TestLogger` to each test project.
+4. Configure cloud OIDC: register GitLab as an OIDC provider, create the role with a trust policy keyed on the project/ref claims, set `id_tokens:` `aud:` to match, and store `/qa/base-url`, `/qa/e2e-user` and `/qa/e2e-password` for the UI job. Document the subject claim in a header comment.
+5. Validate with **CI Lint** (Pipelines → CI Lint) or `glab ci lint`, then open a draft MR and confirm every expected job, one UI job per shard, and the MR test widget appear.
 
 ## Cross-references
 
 - **`qa/cicd/typescript/skills/ci-pipelines`** (canonical) + **`qa/cicd/java/skills/ci-pipelines`** — the same-CI siblings; the TS one shows the Playwright `blob`/`merge-reports` flow this stack replaces with a per-shard Allure merge.
 - **`references/github-actions.md`** — the structural template this ports from; the `strategy.matrix` / `dorny/test-reporter` (TRX) variant.
 - **`references/azure-pipelines.md`** — the Azure sibling; the `strategy: parallel` / service-connection variant.
+- **`qa/dotnet/skills/ui-test-author/playwright`** — `BaseTest`, `ui.runsettings` and the `UiTests` project the UI job runs.
+- **`qa/dotnet/skills/evidence-capture`** — what `playwright-artifacts/` holds and how to read a failed shard's trace.
 - **`qa/dotnet/skills/db-testing/testcontainers`** — the integration-tests job runs these (needs the `docker:dind` service shown above).
-- **`qa/dotnet/skills/network-mocking`** — runs an **external MITM proxy** (`Titanium.Web.Proxy`) the job must start/stop, whose **CA the client must trust** (per-run — no stored secret); the in-process `playwright-routes`/`cdp` specs need no extra plumbing.
-- **`qa/dotnet/skills/network-mocking`** — in-process CDP specs the `ui-tests` job runs directly.
-- **`qa/reporting/dotnet/skills/test-reports`** — adapter wiring that produces `allure-results/`.
+- **`qa/dotnet/skills/network-mocking`** — runs an **external MITM proxy** (`Titanium.Web.Proxy`) the job must start/stop, whose **CA the client must trust** (per-run — no stored secret); its in-process route and CDP specs need no extra plumbing.
+- **`qa/reporting/dotnet/skills/test-reports`** — adapter wiring that produces `allure-results/`, and `categories.json`.
+- **`qa/reporting/dotnet/skills/flaky-test-quarantine`** — the `Flaky` category and the non-gating lane.
 - **`qa/dotnet/skills/load-testing`** + **`qa/typescript/skills/load-testing`** — perf-job scripts; SLO contract in `qa/_shared/performance`.
-- **`qa/cicd/ci-conventions`** — cross-stack rules (artifact retention, OIDC) this skill enforces.
+- **`qa/cicd/ci-conventions`** — cross-stack rules (artifact retention, OIDC, the Allure CLI pin) this skill enforces.

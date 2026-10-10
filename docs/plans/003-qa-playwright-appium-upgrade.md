@@ -20,10 +20,18 @@ canonical config (D35–D37). J2 landed 2026-10-10: `qa/java/skills/evidence-cap
 `references/playwright.md`), loaded by `qa-ui-java` Step 1 / Mode A and `qa-bdd-java` Step 4; Java
 `test-reports` on allure-java 3.0 deferring to `BaseTest`, `flaky-test-quarantine` on D7, and the three Java CI
 references with a Playwright UI job uploading `build/playwright-artifacts/` (Azure gained one). The one Allure
-CLI pin holds for Java, and J1's build now pins it (D38–D41). Next: N2. Built but unverified: no asset,
-workflow or pipeline has been compiled or run (G1 does that; D24's TS config import, the Java build on Allure
-Gradle plugin 4.3.0, the .NET build on NUnit3TestAdapter 6.3.1 / Test SDK 18.10.1, `dorny/test-reporter`'s
-`java-junit` parse, and J2's trace CLI through the Java driver (D39) are the open risks).
+CLI pin holds for Java, and J1's build now pins it (D38–D41). N2 landed 2026-10-10:
+`qa/dotnet/skills/evidence-capture` (SKILL.md + `references/playwright.md`), loaded by `qa-ui-dotnet` Step 1 /
+Mode A (its Step 0 gate now names the `BaseTest` asset) and `qa-bdd-dotnet` Step 4; .NET `test-reports`
+deferring to `BaseTest` with the byte-array `AttachBody` fix, `flaky-test-quarantine` on D7, and the three .NET
+CI references sharding by NUnit class filters from one `ci/nunit-shards.sh` (no `Playwright.Shard`), uploading
+`UiTests/bin/<cfg>/net10.0/playwright-artifacts/` on failure, GitLab in the v1.63.0-noble image (D42–D46;
+`BaseTest`'s three helpers are now protected). Next: A1. Built but unverified: no asset, workflow or pipeline
+has been compiled or run (G1 does that; D24's TS config import, the Java build on Allure Gradle plugin 4.3.0,
+the .NET build on NUnit3TestAdapter 6.3.1 / Test SDK 18.10.1, `dorny/test-reporter`'s `java-junit` parse, the
+trace CLI through the Java driver (D39) and through `playwright.ps1` (D43), and the .NET shard script against a
+real `--list-tests` (D44) are the open risks; N2 had no web access, so its .NET spellings rest on the
+committed research).
 Planned 2026-10-10. The research behind it is committed with this plan:
 `docs/research/003-qa-playwright-appium/` (5 files). So is the read-only audit:
 `docs/audits/003-qa-playwright-appium/` (4 files). All open questions were answered on 2026-10-10:
@@ -34,7 +42,7 @@ Planned 2026-10-10. The research behind it is committed with this plan:
 - A Maestro lane is added (X1).
 - The newest Appium client majors are primary.
 
-Next: N2 (H1, the user's, blocks no task). The cost is 19 agent sessions on the subscription, each started by the user
+Next: A1 (H1, the user's, blocks no task). The cost is 19 agent sessions on the subscription, each started by the user
 from Plan Queue. Nothing else is metered.
 
 ## 1. What already exists, and what is missing
@@ -726,6 +734,63 @@ Gradle group filters with `alwaysRun` hooks); a category on an exception regex o
 five launches of history, restarted once by allure-java 3's new TestNG identifiers; Java gets no nightly repeat
 lane (D7 names history and the quarantine category only).
 
+**D42 — The .NET `BaseTest`'s `EvidenceName()`, `Artifact(name, ext)` and `Attach(name, type, path)` are
+protected, so a deliberate recording is named, placed and attached exactly like the failure evidence (N2,
+2026-10-10).** A receipt or HAR made in a test class's own `[SetUp]`/`[TearDown]` needs the sanitized
+`<Class>.<Test>` name, the `playwright-artifacts/` folder CI uploads, and both attachments. Readings: repeat
+the regex and the double attach in every recording class (the copies drift from `BaseTest`), a public static
+helper in `Support/` (a second owner of the naming), or widen the three private members (chosen). **Cost:** N2
+edited N1's asset (three access modifiers) and lifecycle.md §6; `BaseTest`'s protected surface grows by three
+members. G1's .NET build compiles it.
+
+**D43 — .NET agents read a failure's trace with the trace analysis CLI through Node
+(`npx playwright@1.63.0 trace …`) or the .NET driver (`pwsh bin/<cfg>/net10.0/playwright.ps1 trace …`) (N2,
+2026-10-10).** N1's lifecycle.md §9 called that CLI Node-only. `playwright.ps1` runs the 1.63 driver's
+`cli.js`, the same playwright-core program in which D39 found `addTraceCommands`. Readings: Node-only (an
+agent on a machine without Node reads nothing but the screenshot), or both routes (chosen), with lifecycle.md
+§9's sentence replaced by a link. **Cost:** inferred from D39's source reading, not run; G1 runs it without
+`pwsh` by calling the driver's node and `cli.js` directly, and if it fails, `evidence-capture` and
+`qa-ui-dotnet` Mode A fall back to Node only.
+
+**D44 — .NET CI shards by NUnit class filters computed once: one script, `ci/nunit-shards.sh`, defined in
+`qa/cicd/dotnet/skills/ci-pipelines/SKILL.md`; a shards job per sharded suite publishes `<i>.filter` files as
+an artifact; each shard job reads the file for its index (N2, 2026-10-10).** The script lists the tests with
+`dotnet test --list-tests -- NUnit.DisplayName=FullName`, reduces each to its class, deals the classes
+round-robin in name order, and writes one `FullyQualifiedName~` term per class joined by `|`, as the plan
+asked. Two additions: each term ends in `.` (or an escaped `\(` for a parameterized fixture) so `LoginTests`
+does not also match `LoginTestsMobile`, and fewer classes than shards fails the shards job. The API shards use
+it too: their `NUnit.Where="… test % N == i"` stand-in is not valid NUnit syntax. Readings: per-CI dynamic
+matrices carrying the filters in JSON (three encodings, each escaping `\(` and quotes inside YAML), the script
+copied into each of the three references, or one script plus filter files (chosen; GitHub's matrix is built
+from the same `shard-total`, Azure's `parallel:` from the same parameter, and GitLab — which takes no variable
+in `parallel:` — repeats the number and checks the file count against `CI_NODE_TOTAL`). **Cost:** one more job
+per sharded suite; balance is by class count, not duration; `NUnit.DisplayName` in `--list-tests` and the
+`\(` escape are unverified until G1 runs the script against its .NET scratch project.
+
+**D45 — .NET CI installs the browsers on the hosted agent in GitHub Actions and Azure Pipelines
+(`pwsh … playwright.ps1 install --with-deps chromium`), and runs the GitLab UI job in
+`mcr.microsoft.com/playwright/dotnet:v1.63.0-noble`; on GitHub and Azure the image is the visual-baseline
+variant (N2, 2026-10-10).** The UI jobs fetch `BASE_URL`, `E2E_USER` and `E2E_PASSWORD` through OIDC with
+`azure/login` / `AzureCLI@2`, which run inside a container job, where the image has no Azure CLI (as D40
+found for Java). A GitLab Docker-executor job runs in an image anyway, and this one carries the .NET 10 SDK
+and the browsers, so no install step and no `pwsh` call. Whether `pwsh` is in the image could not be checked
+(web access was denied in N2's session), so no CI step relies on it. Readings: the image everywhere (the OIDC
+fetch breaks on GitHub and Azure), the runner install everywhere (GitLab's SDK image would then need `pwsh`,
+equally unverified), or the split (chosen). **Cost:** a runner screenshot is not a visual baseline; GitLab's UI
+job, like every GitLab job here, assumes an AWS CLI the image lacks — stated in the reference.
+
+**D46 — The .NET quarantine bucket in `categories.json` matches Allure's `"flaky": true` flag, which Allure
+sets from history, and the quarantined set is the report's `Flaky` tag; no teardown marks a result flaky (N2,
+2026-10-10).** The plan and audit D-13 said "match the quarantine category". Allure 2 categories match a
+status, a message, a trace or the flaky flag — never a label — and Allure.NUnit has no flaky attribute.
+Readings: the old base-class `[TearDown]` that sets the flag (`FlakyMarkBase`: its `tc.flaky` is not an
+Allure.NUnit `TestResult` member — the flag lives in `statusDetails` — it cannot sit beside `BaseTest` under
+single inheritance, and whether a flag set in a teardown survives Allure.NUnit's stop could not be checked);
+the old `TimeoutException` trace regex (D-13's defect); or the flaky matcher plus the category as a tag
+(chosen, as D41 for Java). **Cost:** a quarantined test's failures land in the bucket only once history has
+marked it flaky; until then it is found by its tag. That Allure.NUnit reports NUnit categories as tags is
+unverified.
+
 ## Answered questions (2026-10-10)
 
 **O1 — Which Playwright version per stack: 1.64 for Node only; Java and .NET follow when their packages
@@ -1297,6 +1362,69 @@ N1's `BaseTest`. The .NET CI references shard with NUnit filters, run in the 1.6
   - Upload `bin/<cfg>/net10.0/playwright-artifacts/` on failure.
 - Add `./qa/dotnet/skills/evidence-capture` to `qa-dotnet` and a catalog row.
 - **Not in N2:** Appium (M3); MCP grants (A1); the `standards-audit` checklist (N4).
+- **As built (2026-10-10):**
+  - Landed: `evidence-capture/SKILL.md` (15,620 chars, ~380 left for M3's Appium line; description 488) and
+    `references/playwright.md` (§1 screenshots … §11 size and CI). Both agents wired (Step 0 gate → the
+    `BaseTest` asset, Step 1, Mode A trace reading; BDD Step 4). `test-reports` rewritten (13.7k): defers to
+    `BaseTest`, `AttachBody` passes UTF-8 bytes with `".json"`, the overload table, `[AllureNUnit]` required,
+    `categories.json` copied into the results by the publish job, the CI YAML moved out to the CI references.
+    `flaky-test-quarantine` rewritten to D7 (14.5k). `ci-pipelines/SKILL.md` gained the shared
+    `ci/nunit-shards.sh` and its rules; all three CI references rewritten with a shards job per sharded suite,
+    the class filter per shard (API too), `playwright-artifacts-<n>` on failure, the pinned Allure CLI, and no
+    YAML comments (R5). Marketplace entry added; T2's catalog row now ends "— dotnet · java · typescript".
+  - Checked today: nothing live. WebFetch, WebSearch and reads outside the repo were denied in this
+    unattended session, so every API spelling comes from `playwright-evidence.md` (§1.1, §3, §4.1, §4.3,
+    §5.2, §6, §10, §11.3) and from N1's As-built facts. Not verifiable here and not taught as fact beyond
+    them: whether `pwsh` is in `mcr.microsoft.com/playwright/dotnet:v1.63.0-noble` (no CI step relies on it,
+    D45); NUnit adapter's `NUnit.DisplayName=FullName` in `--list-tests`, and the VSTest filter's `\(` escape
+    (D44); `TracingStartHarOptions.Mode`; `AllureApi.AddScreenDiff`'s parameter order; that Allure.NUnit
+    turns NUnit categories into tags (D46); NUnit 4.6.1's `[Retry]` behaviour on exceptions (the skill
+    quotes the documentation and tells the reader to check).
+  - Differed from the plan: `BaseTest`'s `EvidenceName()`, `Artifact()` and `Attach()` became protected
+    (D42); the trace analysis CLI is documented through Node and `playwright.ps1`, replacing lifecycle.md
+    §9's "Node-only" sentence (D43); the sharding mechanics (D44); runner-installed browsers on GitHub and
+    Azure, the image on GitLab (D45); the quarantine bucket matches the history flag, not the NUnit category
+    (D46). Beyond the plan: the API shards also use the class filters (their `NUnit.Where` modulo stand-in
+    was not valid NUnit syntax); the GitHub reusable workflows declare their own `env:` (a called workflow
+    does not inherit the caller's, so `${{ env.DOTNET_VERSION }}` and `$BUILD_CONFIGURATION` were empty);
+    `actions/checkout@v6` and `upload/download-artifact@v5` as T2 verified, `setup-dotnet` kept at `@v4`
+    (v5 not verifiable today); every Allure results path is `<Project>/bin/<cfg>/net10.0/allure-results`
+    (the three files disagreed); `simple-elf/allure-report-action` and the allure2 2.27.0 / npm 2.30.0
+    pins replaced by `allure-commandline@2.46.1`; `[Retry(1)]` (one attempt, no retry) replaced by
+    `[Retry(2)]`; the custom `RetryOnFailure` attribute, the TRX-rerun step and `FlakyMarkBase` (whose
+    `tc.flaky` is not an Allure.NUnit member) removed; test-reports' "Flaky timeouts" bucket renamed
+    "Timeouts".
+  - Names assigned: `ci/nunit-shards.sh <project> <shards> <dir>` writing `<dir>/<i>.filter` (1-based);
+    GitHub job `plan` (output `shards`), Azure jobs `ApiShards` / `UiShards`, GitLab jobs `api-shards` /
+    `ui-shards` writing `shards/{api,ui}/`; shard-file artifacts `api-shards` / `ui-shards` (1 day); CI
+    artifacts `playwright-artifacts-<n>` (failure, 14 days), `allure-results-ui-<n>` / `allure-results-api-<n>`
+    (30 days); helper `Example.UiTests.Support.Evidence.ScreenshotAsync(name)`; deliberate recordings
+    `<Class>.<Test>.receipt.webm` and `<Class>.<Test>.har` via `Artifact(EvidenceName(), "<kind>.<ext>")`;
+    Reqnroll scenario evidence `<Feature>.<Scenario>` (sanitized), kept when `ScenarioContext.TestError` is
+    set (N4 writes the hook); exploratory evidence `evidence/<YYYY-MM-DD>-<topic>/`; the categories bucket
+    "Known flaky (quarantined)" first with `"flaky": true`.
+  - Built, unverified (Gate: none): nothing compiled or ran. Open points: `ci/nunit-shards.sh` against a
+    real `--list-tests` output (D44); the trace CLI through `playwright.ps1` (D43); the protected helpers
+    compile (G1's .NET build); a screencast's path while `BaseTest`'s video runs; `StartHarAsync` beside
+    `BaseTest`'s trace; the GitLab jobs' `aws` CLI in the SDK and Playwright images (a pre-existing
+    assumption, now stated). One check did run: `python3 -m json.tool .claude-plugin/marketplace.json`
+    (exit 0) after the marketplace edit — G1's §6.1 step 1, run early, as T2 did.
+  - Proof: `name: qa-evidence-capture-dotnet` and the Appium placeholder at
+    `qa/dotnet/skills/evidence-capture/SKILL.md:2,13`; R7 defaults `:61`; Reqnroll naming `:105`; deliberate
+    recordings and D42 `:108,116`; exploratory MCP ↔ CLI `:133`; reading a failure and D43 `:157,167`; PII
+    `:178`. Reference: receipt start/stop `references/playwright.md:148,166`; `AriaSnapshots` `:192`;
+    `StartHarAsync` `:245`; `AddScreenDiff` and the three-string trap `:275,277`; trace CLI `:301`. `BaseTest`
+    helpers `ui-test-author/playwright/assets/BaseTest.cs:93,96,99`; lifecycle.md `:157,234`. Agents: Mode A
+    `qa/dotnet/agents/qa-ui-dotnet.md:75`, Step 0/1 `:97,98`, BDD Step 4 `qa/dotnet/agents/qa-bdd-dotnet.md:87`.
+    `test-reports/SKILL.md`: pin `:34`, bytes `:147`, `BaseTest` owns it `:155`, CLI `:209`, bucket `:230`.
+    `flaky-test-quarantine/SKILL.md`: hotspot `:92,103`, gate filter `:133`, bucket `:162`. Script
+    `qa/cicd/dotnet/skills/ci-pipelines/SKILL.md:52,59`. CI: shards job `github-actions.md:135,295`,
+    `azure-pipelines.md:127,259`, `gitlab-ci.md:122,131`; shard filter `github-actions.md:347`,
+    `azure-pipelines.md:302`, `gitlab-ci.md:235`; failure upload `github-actions.md:365`,
+    `azure-pipelines.md:322`, `gitlab-ci.md:242`; GitLab image `gitlab-ci.md:217`; runner install
+    `github-actions.md:326`, `azure-pipelines.md:284`; Allure pin `github-actions.md:422`,
+    `azure-pipelines.md:374`, `gitlab-ci.md:275`. Marketplace `.claude-plugin/marketplace.json:224`; catalog
+    `docs/skills-catalog.md:60`.
 
 ### A1 — Agent tooling: Playwright MCP grants, `page-objects-from-url`, and the shared WebMCP skill
 
@@ -1894,84 +2022,9 @@ Run them in order, one session each, opened from Plan Queue. Each block is compl
 | X1 | `docs` | `general-purpose` | M1, S1, T2 | ~130k |
 | G1 | `docs` | `general-purpose` | all | ~145k |
 
-Landed: T1, J1, N1, T2, J2 (2026-10-10). Every other block is live.
+Landed: T1, J1, N1, T2, J2, N2 (2026-10-10). Every other block is live.
 
 ---
-
-### N2 — .NET evidence capture: the new skill, agent wiring, reporting and CI with real sharding (general-purpose, docs)
-
-````
-You are `general-purpose`. Task N2 of docs/plans/003-qa-playwright-appium-upgrade.md: create
-qa/dotnet/skills/evidence-capture (qa-evidence-capture-dotnet) per §3.2, wire it into qa-ui-dotnet and
-qa-bdd-dotnet, make .NET reporting defer to N1's BaseTest, and replace the no-op CI sharding.
-
-Read, in this order:
-1. CLAUDE.md.
-2. The plan: §3.2, §4 (R7, R8, R9), §5.1, Decisions D4, D7, task N2, "Close-out — every task".
-3. N1's output: qa/dotnet/skills/ui-test-author/playwright/assets/BaseTest.cs, ui.runsettings and
-   references/lifecycle.md.
-4. docs/research/003-qa-playwright-appium/playwright-evidence.md §0–§9 and §11.3.
-5. qa/dotnet/agents/qa-ui-dotnet.md and qa-bdd-dotnet.md (loading protocol, Step 0, Step 1, brownfield
-   Mode A).
-6. qa/reporting/dotnet/skills/{test-reports,flaky-test-quarantine}/SKILL.md;
-   qa/cicd/dotnet/skills/ci-pipelines/references/{azure-pipelines,github-actions,gitlab-ci}.md.
-7. docs/audits/003-qa-playwright-appium/dotnet.md rows T2, T6, C-04, C-05, C-08, D-13, D-31, §3f.
-8. Optional, for parity: T2's qa/typescript/skills/evidence-capture/SKILL.md (its section set; the Appium
-   placeholder sits under the intro paragraph).
-
-Build:
-- evidence-capture/SKILL.md and references/playwright.md with .NET spellings:
-  - PageScreenshotOptions.
-  - RecordVideoDir/Size; Page.Video.PathAsync / SaveAsAsync / DeleteAsync after close.
-  - Page.Screencast.StartAsync returns IAsyncDisposable; AnnotatePosition.TopRight.
-  - Tracing StartAsync/GroupAsync/StartChunkAsync/StartHarAsync.
-  - TestContext.AddTestAttachment, and AllureApi.AddAttachment(name, type, path) / AddScreenDiff.
-  - show-trace via pwsh or trace.playwright.dev.
-  - The playwright-cli equivalents of the MCP capture tools (plan §3.8).
-  - The appium placeholder line ("written by M3").
-- qa-ui-dotnet.md: Step 0's gate text points at the BaseTest asset; Step 1 loads the skill; brownfield
-  Mode A reads the trace. qa-bdd-dotnet.md loads it in its ui-test-author/playwright step. Leave tools:
-  alone (A1).
-- test-reports: the %TEMP% recipe defers to BaseTest. Fix AllureApi.AddAttachment("response.json",
-  "application/json", body), which treats the third string as a file path: pass UTF-8 bytes and ".json".
-- flaky-test-quarantine: match the quarantine category, not TimeoutException (D-13); D7 retries.
-- CI references:
-  - Delete every `-- Playwright.Shard=i/N`. A setup step runs `dotnet test --list-tests` once, splits
-    the test classes into N groups, and emits one `--filter "FullyQualifiedName~A|FullyQualifiedName~B"`
-    per shard.
-  - mcr.microsoft.com/playwright/dotnet:v1.63.0-noble (no jammy).
-  - Upload bin/<cfg>/net10.0/playwright-artifacts/ on failure.
-- Add ./qa/dotnet/skills/evidence-capture to qa-dotnet in the marketplace. In docs/skills-catalog.md, extend
-  the `evidence-capture` row T2 added under **Authoring** — it now ends "— java · typescript (dotnet next)" —
-  so it reads "— dotnet · java · typescript", instead of adding a second row.
-- Any Allure report CLI in .NET test-reports or the .NET CI references uses the ci-conventions pin,
-  `allure-commandline@2.46.1` (needs a Java runtime). J2 confirmed the one pin holds for every stack (D38):
-  there is no per-stack split.
-
-Traps:
-- Microsoft.Playwright.NUnit has no sharding. The adapter prints "Playwright>Shard is not implemented".
-- Filter strings have length limits on some runners. Group by class, not by test, and say so.
-- Verify that pwsh exists in the dotnet Playwright image before a CI step relies on it. In the image,
-  browsers are preinstalled, so no install step is needed.
-- N1's BaseTest already owns the R7 defaults; the skill explains them and never adds a second hook (D4).
-  `[SetUp] StartTracing` (screenshots, snapshots, sources); `[TearDown] KeepEvidenceOnFailure`: on
-  `TestStatus.Failed` it stops the trace to a path, takes a full-page screenshot, closes the context, then
-  `SaveAsAsync`; always `DeleteAsync`. It has no catch (D31). Kept files:
-  `<WorkDirectory>/playwright-artifacts/<Class>.<Test>.{zip,png,webm}` (name sanitized to
-  `[A-Za-z0-9._-]`; WorkDirectory defaults to bin/<cfg>/net10.0); raw videos in
-  `<WorkDirectory>/playwright-videos/`, deleted per test, never uploaded. Attachments go through
-  `TestContext.AddTestAttachment(path, name)` and `AllureApi.AddAttachment(name, type, path)`, the trace as
-  `application/vnd.allure.playwright-trace`. A deliberate recording or HAR that needs launch flags goes in a
-  .runsettings, not a per-class override (D32).
-- The UI project is `UiTests` (D34), so CI paths are `UiTests/bin/<cfg>/net10.0/playwright-artifacts/`.
-  `AuthSetup` (root namespace) signs in before every fixture, so CI jobs need BASE_URL, E2E_USER and
-  E2E_PASSWORD as secrets. `[Parallelizable(ParallelScope.Self)]` sits on BaseTest, so shard by test class.
-
-Gate: none. This plan gates once, in G1. Do not run any build, test or check script.
-
-Commit: `docs(qa-dotnet): evidence-capture skill, agent wiring, reporting, NUnit-filter sharding (003 N2)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
 
 ### A1 — Agent tooling: Playwright MCP grants, `page-objects-from-url`, and the shared WebMCP skill (general-purpose, docs)
 
@@ -2220,6 +2273,13 @@ Traps:
   cannot give, and `Playwright.CreateAsync()` in a test is a review blocker. A fixture deriving from
   `PlaywrightTest` can call `BrowserType.LaunchPersistentContextAsync(...)` without it. Launch flags in
   general belong in a .runsettings (D32).
+- BaseTest's `EvidenceName()`, `Artifact(name, ext)` and `Attach(name, type, path)` are protected (D42).
+  A visual test writes its actual and diff PNGs to `Artifact(EvidenceName(), "actual.png")` /
+  `"diff.png"`, beside the failure evidence CI already uploads, and shows them with
+  `AllureApi.AddScreenDiff` (qa/dotnet/skills/evidence-capture/references/playwright.md §6 hands it to you;
+  confirm its parameter order against the Allure.NUnit 2.15.0 source if you can — N2 could not).
+  Screenshot options are spelled as in that reference's §1.1. HAR replay (`RouteFromHARAsync`) is
+  network-mocking's; recording a HAR is evidence-capture's §5 — link it rather than repeat it.
 
 Gate: none. This plan gates once, in G1. Do not run any build, test or check script.
 
@@ -2411,6 +2471,19 @@ Traps:
 - N1's Directory.Packages.props pins Microsoft.Playwright.NUnit only. A Reqnroll project that references
   Microsoft.Playwright directly adds `<PackageVersion Include="Microsoft.Playwright" Version="1.63.0" />`;
   bdd-project-scaffold's `..\UiTests\UiTests.csproj` reference already matches N1's project name.
+- bdd-project-scaffold's `[AfterScenario]` evidence is fixed by qa/dotnet/skills/evidence-capture/SKILL.md
+  ("Reqnroll scenarios"): the same three files in `<WorkDirectory>/playwright-artifacts/`, named
+  `<Feature>.<Scenario>` with every character outside `[A-Za-z0-9._-]` replaced by `_`, kept when
+  `ScenarioContext.TestError` is set; the order is BaseTest's (stop the trace to a path, full-page
+  screenshot, close the context, `SaveAsAsync`, always `DeleteAsync`), with no catch (D31), and raw videos
+  go to `<WorkDirectory>/playwright-videos/`. Each file is attached with `TestContext.AddTestAttachment` and
+  `AllureApi.AddAttachment(name, type, path)`, the trace as `application/vnd.allure.playwright-trace`. A
+  Reqnroll hook class does not derive from BaseTest, so BaseTest's protected helpers (D42) are not available
+  to it; the hook writes its own sanitizer.
+- conformance-checklist: the CI shard row is "`Playwright.Shard` or an `NUnit.Where` modulo predicate
+  instead of class filters" — the class-filter mechanism is qa/cicd/dotnet/skills/ci-pipelines/SKILL.md
+  (D44). A retry row matches D7 as N2 wrote it in flaky-test-quarantine: `[Retry(2)]` (two attempts) only
+  on a documented hotspot; `[Retry(1)]` is a no-op.
 
 Gate: none. This plan gates once, in G1. Do not run any build, test or check script.
 
@@ -2595,6 +2668,13 @@ Traps:
 - mobile-project-setup (D34): line 153 names the UI sibling `PlaywrightTests`; it is `UiTests`. Line 110
   runs `dotnet tool install allure`, which does not exist on NuGet; point at
   qa/reporting/dotnet/skills/test-reports for the Allure CLI instead.
+- qa/dotnet/skills/evidence-capture/SKILL.md is 15,620 chars after N2. Replace its line 13 placeholder
+  ("Appium: `references/appium.md`, written by M3") with one link line and keep the file ≤ 16,000; the
+  Appium detail goes in references/appium.md. Mirror the Playwright side: Appium evidence in
+  `<WorkDirectory>/appium-artifacts/<Class>.<Test>.<ext>` (R7), the name sanitized to `[A-Za-z0-9._-]`,
+  attached with `TestContext.AddTestAttachment` and `AllureApi.AddAttachment(name, type, path)` (or the
+  byte[] overload with its extension — three strings is a path, N2's references/playwright.md §6), no catch
+  in the teardown (D31's reasoning applies to NUnit).
 
 - Leave two things to plan 002 (docs/plans/002-mobile-plugins.md) W1, per D21: line 10 of
   mobile-screen-explorer/SKILL.md (the React Native testID mapping) and the agent's "Related agents"
@@ -2788,6 +2868,20 @@ Traps:
   leave AuthSetup.cs, LoginTests.cs and WebMcpTests.cs out of the smoke project. Pass condition: the failing
   test leaves bin/Debug/net10.0/playwright-artifacts/<Class>.<Test>.{zip,png,webm}, the passing test leaves
   nothing, and bin/Debug/net10.0/playwright-videos/ is empty afterwards.
+- Settle D43 in the .NET scratch project without pwsh: `playwright.ps1` runs the node binary and
+  `package/cli.js` under bin/Debug/net10.0/.playwright/; call them directly with
+  `trace open bin/Debug/net10.0/playwright-artifacts/<Class>.<Test>.zip`, then `trace errors` and
+  `trace close`. If they fail, make the trace CLI Node-only in qa/dotnet/skills/evidence-capture (SKILL.md
+  "Reading a failure", references/playwright.md §8), the last bullet of
+  qa/dotnet/skills/ui-test-author/playwright/references/lifecycle.md §9 and qa/dotnet/agents/qa-ui-dotnet.md
+  Mode A, and record the reversal as a dated decision.
+- Settle D44 in the same project: save the `ci/nunit-shards.sh` block from
+  qa/cicd/dotnet/skills/ci-pipelines/SKILL.md under $TMPDIR, run it as
+  `bash nunit-shards.sh <scratch>/UiTests.csproj 2 <scratch>/shards` (the project needs two test classes; the
+  two smoke classes are enough), and check each `<i>.filter` holds `FullyQualifiedName~<Namespace>.<Class>.`
+  terms; then `dotnet test --no-build --filter "(<shard 1 filter>)"` runs only that shard's class. If
+  `NUnit.DisplayName=FullName` or the parsing misbehaves, fix the script in that SKILL.md (the three CI
+  references only call it). Running the script is part of this gate; nothing from it is committed.
 - tools/token-audit.py exits non-zero while any size violation exists. Read the counts (≤ 160 total, 0
   description violations), not the exit code.
 - Scratch projects live under $TMPDIR and are deleted afterwards. Nothing from them is committed.

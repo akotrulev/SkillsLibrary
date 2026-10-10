@@ -1,15 +1,17 @@
 ---
 name: qa-flaky-test-quarantine-dotnet
-description: Use when flaky tests in a .NET 10 (8/9 supported) / NUnit suite must be detected, retried, **quarantined** and reported. Triggers: "this NUnit test is flaky, stop it blocking CI", "quarantine our flaky tests but keep running them", "retry failed tests in NUnit including on exceptions". Not for Allure wiring (`qa-test-reports-dotnet`), the pipeline lanes themselves (`qa-ci-pipelines-dotnet`), or fixing the test's logic (the owning qa-*-dotnet agent).
+description: Use when flaky tests in a .NET 10 (8/9 supported) / NUnit suite must be detected, **quarantined** and reported. Triggers: "this NUnit test is flaky, stop it blocking CI", "quarantine our flaky tests but keep running them", "find which NUnit tests are flaky". Not for Allure wiring (`qa-test-reports-dotnet`), the pipeline lanes themselves (`qa-ci-pipelines-dotnet`), or fixing the test's logic (the owning qa-*-dotnet agent).
 ---
 
 # Flaky-Test Quarantine (.NET 10 / NUnit)
 
-This is the **.NET sibling** of the single-node `qa/reporting/dotnet/skills/flaky-test-quarantine/` family, **ported** from the
-canonical **Java/TestNG** file (`qa-flaky-test-quarantine-java`). The **four-move loop** is identical; only
-the runner API and the quarantine filter change. **NUnit's flaky surface is genuinely thinner than
-TestNG's** — `[Retry]` is method-level with no suite-wide auto-apply, and Allure.NUnit has no first-class
-`[Flaky]` attribute — so this file says so plainly and gives the practical .NET routes for each move.
+This is the **.NET sibling** of the single-node `flaky-test-quarantine` family, ported from the canonical
+**Java/TestNG** file (`qa-flaky-test-quarantine-java`). The **four-move loop** is identical; only the runner
+API and the quarantine filter change: an NUnit `[Category("Flaky")]` and a `dotnet test --filter`.
+
+**Retries are not this skill's to set.** `qa/cicd/ci-conventions` owns the retry policy: none, except a
+documented network-flake hotspot. With no in-run retry, NUnit never turns a red test green, so **detection
+comes from Allure history and the quarantine category**, never from a retry (plan D7).
 
 ## What "flaky" means (and what it does not)
 
@@ -19,12 +21,12 @@ assumption, an order dependency, a real-but-rare backend hiccup. It is *not*:
 - a test that **always** fails on a change → that's a **caught regression**, fix the code;
 - a test that **always** fails regardless of the change → that's a **broken test**, fix the test.
 
-> **The discipline this skill encodes.** A retry is a **band-aid**, not a cure. Retrying to green **hides
-> real bugs** (a 1-in-3 race is a real bug) and lets new flakiness slip in unnoticed. So the policy is a
-> **four-move loop**, not "just add retries":
+> **The discipline this skill encodes.** A retry hides real bugs (a 1-in-3 race is a real bug) and lets new
+> flakiness slip in unnoticed. So the policy is a **four-move loop**, not "add retries":
 >
-> 1. **Detect** — surface which tests are flaky (Allure history), don't guess.
-> 2. **Retry — once, bounded** — absorb *true* transients on the gate so one hiccup doesn't fail a clean PR.
+> 1. **Detect** — Allure history across launches marks the tests that flip.
+> 2. **Hotspot** — a *documented* network-flake hotspot may opt into one retry on its own `[Test]`, dated and
+>    linked to an issue. Nothing else retries.
 > 3. **Quarantine** — move a *known* flaky test out of the **merge gate** into a **non-gating lane** that
 >    still runs and reports it, tagged with a **ticket**. The gate stays trustworthy; the flake stays visible.
 > 4. **Report & fix-or-delete** — track flaky-rate over time; every quarantined test has an owner and a
@@ -34,313 +36,200 @@ assumption, an order dependency, a real-but-rare backend hiccup. It is *not*:
 
 | Situation | Move | Mechanism |
 |-----------|------|-----------|
-| A clean PR occasionally red on a *transient* (network blip, cold cache) | **Retry once** | `[Retry(1)]` or `[RetryOnFailure(1)]` on the prone test |
-| A *known* flaky test, ticketed, not yet fixed | **Quarantine** | `[Category("Flaky")]` + `[AllureIssue]`; excluded from gate filter, run in non-gating lane |
+| Need to *know* which tests are flaky | **Detect** | Allure history marks (Flaky, Regressed, Fixed) |
+| A third-party sandbox or infra warm-up fails a clean run now and then, and the issue is filed | **Hotspot** | `[Retry(2)]` on that test only, with `[AllureIssue]` and a date |
+| A *known* flaky test, ticketed, not yet fixed | **Quarantine** | `[Category("Flaky")]` + `[AllureIssue]`; excluded from the gate filter, run in a non-gating job |
 | A test that fails the same way every run | **Fix the code/test** | Not flakiness — a real bug; no retry, no quarantine |
 | A flaky test no one will own/fix | **Delete it** | A test you don't trust and won't fix is worse than no test |
-| Need to *know* which tests are flaky | **Detect** | Allure history-based flaky mark + flaky-rate metric |
 
-**Rule of thumb:** *transient on otherwise-green* → one retry. *Known-flaky, ticketed* → quarantine category
-+ non-gating lane. *Deterministic failure* → it's a bug, fix it. **Never** crank retries to mask a real race.
+**Rule of thumb:** *seen flaky in history* → `Flaky` category + ticket + non-gating job. *Deterministic
+failure* → it's a bug, fix it. **Never** add retries to mask a race.
 
 ## Stack
 
-- .NET 10 (8/9 supported), C# (nullable reference types on), NUnit 4.x — **async all the way** in the tests; **no
+- .NET 10 (8/9 supported), C# (nullable reference types on), NUnit 4.x — **async all the way**; **no
   `Thread.Sleep` / `Task.Delay`-as-wait** (sleeps *cause* flakiness — cross-link the condition-wait in
   `qa-db-connection-dotnet` / `qa-messaging-testing-*`)
-- `NUnit` — `[Retry(n)]` (built-in) + a custom `RetryOnFailureAttribute : IRepeatTest` (retries on errors too)
-- `[Category("Flaky")]` + `dotnet test --filter "TestCategory!=Flaky"` (gate) vs `"TestCategory=Flaky"` (lane)
-- `Allure.NUnit` — Allure's **Retries** tab + **history-based** flaky detection + the `AllureLifecycle` API
-  to mark a result flaky (cross-link `qa-test-reports-dotnet` for the full Allure wiring)
+- `Allure.NUnit` 2.15.0 — history-based detection and the categories file (cross-link
+  `qa-test-reports-dotnet` for the full Allure wiring; this skill only adds the flaky pieces)
+- `dotnet test --filter` — the gate adds `TestCategory!=Flaky`; a quarantine job runs `TestCategory=Flaky`
 
 ```
-Tests/
-├── Quarantine/
-│   └── RetryOnFailureAttribute.cs   ← custom IRepeatTest: retries on failure AND exception
-├── Support/
-│   └── FlakyMarkBase.cs             ← base fixture: marks [Category("Flaky")] results flaky in Allure
-├── allureConfig.json                ← Allure config (see qa-test-reports-dotnet)
-└── categories.json                  ← an Allure "Known flaky (quarantined)" triage bucket
+UiTests/
+├── Tests/…                 ← quarantined tests carry [Category("Flaky")] + [AllureIssue]
+└── categories.json         ← the "Known flaky (quarantined)" triage bucket, first
 ```
 
-## Move 2 — Retry, bounded (NUnit `[Retry]`, and its limits)
+## Move 1 — Detect
 
-NUnit ships `[Retry(n)]`: re-run a failed test up to `n` extra times. Keep `n` **low — 1** on the gate; the
-cap is the whole safety mechanism.
-
-```csharp
-[Test]
-[Retry(1)]   // one extra attempt to absorb a true transient — NOT a knob to crank
-public async Task Should_authorize_payment_When_card_is_valid()
-{
-    var result = await _gateway.AuthorizeAsync(Cards.Valid().WithAmount(1999).Build());
-    Assert.That(result.Status, Is.EqualTo(AuthStatus.Approved));   // one logical assertion
-}
-```
-
-> **Two real limits of built-in `[Retry]` — state them, don't trip over them:**
-> 1. **Method-level only.** It **cannot** be applied at fixture or assembly scope (NUnit issue #2452) —
->    there is **no suite-wide auto-apply** like TestNG's `IAnnotationTransformer`. You opt in per test. This
->    actually fits quarantine well: you retry the *transient-prone* gate tests deliberately, not everything.
-> 2. **Historically retries on assertion *failure*, not on an unexpected *exception*** (NUnit issue #2543).
->    A test that throws (a flaky `HttpRequestException`, say) may not be retried by `[Retry]`.
-
-For the exception case — and to make the policy explicit — use a **custom `IRepeatTest` attribute** (the
-same interface `[Retry]` implements) that re-runs on **both** failure and error:
-
-```csharp
-using System;
-using NUnit.Framework;
-using NUnit.Framework.Interfaces;
-using NUnit.Framework.Internal;
-using NUnit.Framework.Internal.Commands;
-
-[AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
-public sealed class RetryOnFailureAttribute : NUnitAttribute, IRepeatTest
-{
-    private readonly int _maxRetries;
-    public RetryOnFailureAttribute(int maxRetries = 1) => _maxRetries = maxRetries;
-
-    public TestCommand Wrap(TestCommand command) => new RetryCommand(command, _maxRetries);
-
-    private sealed class RetryCommand(TestCommand inner, int maxRetries) : DelegatingTestCommand(inner)
-    {
-        public override TestResult Execute(TestExecutionContext context)
-        {
-            var remaining = maxRetries;
-            while (true)
-            {
-                try
-                {
-                    context.CurrentResult = innerCommand.Execute(context);
-                }
-                catch (Exception ex)   // built-in [Retry] does NOT retry here — this attribute does
-                {
-                    context.CurrentResult ??= context.CurrentTest.MakeTestResult();
-                    context.CurrentResult.RecordException(ex);
-                }
-
-                if (context.CurrentResult.ResultState.Status != TestStatus.Failed || remaining-- <= 0)
-                    return context.CurrentResult;
-
-                context.CurrentResult = context.CurrentTest.MakeTestResult();   // fresh result for the re-run
-            }
-        }
-    }
-}
-```
-
-```csharp
-[Test]
-[RetryOnFailure(1)]   // re-runs on failure OR exception, bounded at 1 on the gate
-public async Task Should_load_dashboard_When_session_is_valid() { /* ... */ }
-```
-
-### CI-level alternative — re-run only the failed tests
-
-`dotnet test` has **no native rerun-failing-tests** flag (unlike Maven Surefire). The build-tool-level
-analogue is a CI step that re-runs *only* the failures from the first pass (parse the TRX, re-filter):
-
-```yaml
-- name: Tests (first pass, gate)
-  run: dotnet test --filter "TestCategory!=Flaky" --logger "trx;LogFileName=pass1.trx"
-  continue-on-error: true
-# A second step parses pass1.trx for failed FQNs and re-runs ONLY those with --filter "FullyQualifiedName=..."
-```
-
-Pick **one** retry mechanism per project (`[RetryOnFailure]` *or* the CI rerun) — stacking them multiplies
-the cap and re-introduces the masking problem.
-
-## Move 3 — Quarantine (`[Category("Flaky")]` + a non-gating lane)
-
-Quarantine = **take a known-flaky test out of the merge gate, but keep running it and reporting it.** In
-NUnit the lever is a **category** filtered at `dotnet test` time.
-
-```csharp
-using Allure.Net.Commons;
-using NUnit.Framework;
-
-public class CheckoutTests : FlakyMarkBase   // base marks Flaky-category results flaky in Allure (Move 4)
-{
-    [Test]
-    [Category("Flaky")]                 // ← out of the gate, into the quarantine lane
-    [Property("Issue", "CHECKOUT-871")] // ← the ticket tracking the de-flake — quarantine is never permanent
-    public async Task Should_settle_payment_When_gateway_is_slow()
-    {
-        // ... the intermittently-failing assertion, awaiting a real fix under CHECKOUT-871
-    }
-}
-```
-
-**The gate excludes the category; the quarantine lane includes only it and never blocks** — driven entirely
-by the `--filter` (cross-link `qa-ci-pipelines-dotnet`):
-
-```yaml
-- name: Gate suite (blocks merge)
-  run: dotnet test --filter "TestCategory!=Flaky"        # quarantined tests never block the merge
-
-- name: Quarantine lane (visibility only)
-  if: always()
-  run: dotnet test --filter "TestCategory=Flaky"         # still runs + reports
-  continue-on-error: true                                # a red quarantine lane does NOT fail the pipeline
-
-- name: Upload Allure results
-  if: always()
-  uses: actions/upload-artifact@v4
-  with: { name: allure-results, path: '**/bin/**/allure-results/' }
-```
-
-> **Why a *running* quarantine lane, not `[Ignore]` / `Explicit`.** An ignored test rots — the feature
-> drifts, the test silently lies, no one notices when it could be re-enabled. A quarantined test **still
-> runs** (off the gate), so you keep its signal, you see when it stabilises (Allure history flips it to
-> **Fixed**), and the ticket stays honest. Quarantine is a **waiting room**, not a graveyard.
-
-## Move 4 — Report the flaky flag in Allure
-
-Allure surfaces flakiness, and the **history-based auto-detection is identical across every stack** — it's a
-*report* feature, not a language one. With Allure **history enabled** (the `history/` folder carried across
-runs — see `qa-test-reports-dotnet`), Allure auto-adds the **Flaky** mark when, across the latest **5
-launches**, a test:
+**Allure's history-based detection** — identical across every stack (a *report* feature, not a language one).
+With Allure **history enabled** (the `history/` folder carried across runs — see `qa-test-reports-dotnet`),
+Allure adds the **Flaky** mark when, across the latest **5 launches**, a test:
 
 1. got **Failed** at some point within those 5 launches, **and**
 2. got **Passed** at least once since that failure, **and**
 3. is **Failed or Broken** in the **latest** launch.
 
 It tracks **5 stability marks** off history: **Flaky**, **Retried**, **Fixed** (new pass after a fail),
-**Regressed** (new fail after a pass), **Malfunctioned** (new broken). Treat **Retried** + **Flaky** as your
-quarantine *candidate* list, and **Fixed** as the signal to lift a test *out* of quarantine.
+**Regressed** (new fail after a pass), **Malfunctioned** (new broken). Treat **Flaky** and **Regressed** on an
+unchanged area as the quarantine *candidate* list, and **Fixed** as the signal to lift a test *out* of
+quarantine.
 
-> **The honest .NET divergence from Java.** Allure.NUnit has **no first-class `[Flaky]` attribute** (Java's
-> `io.qameta.allure.Flaky` has no equivalent here). Two practical routes: lean on history-based detection
-> (above), and/or **mark the result flaky programmatically** via the `AllureLifecycle` API — cleanest in a
-> base fixture keyed off the quarantine category, so a quarantined test is visibly yellow even on a green run:
+- **A changing test name splits a test's history.** A `[TestCase]` argument that is a timestamp or a GUID
+  makes a new test every run; keep generated values out of test-case arguments.
+- **Reproducing a suspect locally** — `[Repeat(20)]` on that one test runs it twenty times in sequence and
+  stops at the first failure. It is a local experiment, never committed.
+- **Reading a flaky UI failure** — its trace, screenshot and video are in
+  `bin/<cfg>/net10.0/playwright-artifacts/` (`qa/dotnet/skills/evidence-capture`). Read them before tagging.
+
+## Move 2 — The documented hotspot
+
+`ci-conventions` allows a per-test retry only for a documented network-flake hotspot. It goes on that
+`[Test]`, never on a fixture, an assembly or the pipeline:
 
 ```csharp
-using Allure.Net.Commons;
-using NUnit.Framework;
-using NUnit.Framework.Interfaces;
-
-public abstract class FlakyMarkBase
+[Test]
+[Retry(2)]
+[AllureIssue("PAY-1188")]
+[AllureDescription("Retry: payment sandbox cold starts, 2026-10-10, PAY-1188")]
+public async Task Should_AuthorizePayment_When_CardIsValid()
 {
-    [TearDown]
-    public void MarkFlakyInAllure()
-    {
-        var isQuarantined = TestContext.CurrentContext.Test.Properties["Category"]?.Contains("Flaky") == true;
-        if (isQuarantined)
-            AllureLifecycle.Instance.UpdateTestCase(tc => tc.flaky = true);   // paint it yellow in Allure
-    }
+    var result = await _gateway.AuthorizeAsync(Cards.Valid().WithAmount(1999).Build());
+
+    Assert.That(result.Status, Is.EqualTo(AuthStatus.Approved));
 }
 ```
 
-Add `[AllureIssue("CHECKOUT-871")]` (or the `[Property("Issue", …)]` above) so the **ticket** travels with
-the flagged test in the report. **A triage bucket in `categories.json`** keeps quarantined/flaky failures out
-of "real" failures (the adapter picks it up — see `qa-test-reports-dotnet`):
+- **`[Retry(n)]` counts total attempts**, not retries: `[Retry(2)]` is one run plus one retry, and
+  `[Retry(1)]` does nothing.
+- **Check what the installed NUnit retries.** NUnit's documentation has said that only an assertion failure
+  triggers a retry and an unexpected exception does not. A Playwright `Expect(...)` timeout surfaces as an
+  exception, so a UI hotspot is stubbed (`qa/dotnet/skills/network-mocking`), not retried.
+- No custom `IRepeatTest` attribute, no TRX-parse-and-rerun step, no platform retry on the test task: each
+  retries more than one documented test, which `ci-conventions` bans.
+- A hotspot retry is still a smell: its issue is reviewed every sprint, and the retry is removed when the
+  dependency is stubbed or fixed.
+
+## Move 3 — Quarantine (`[Category("Flaky")]` + a non-gating job)
+
+Quarantine = **take a known-flaky test out of the merge gate, but keep running it and reporting it.** In
+NUnit the lever is a **category**, filtered at `dotnet test` time.
+
+```csharp
+[Test]
+[Category("Flaky")]
+[AllureIssue("CHECKOUT-871")]
+public async Task Should_SettlePayment_When_GatewayIsSlow()
+{
+    await _checkout.PayWithAsync(Cards.Valid().Build());
+
+    await Expect(_checkout.SettlementBanner, "settlement banner after paying").ToHaveTextAsync("Settled");
+}
+```
+
+**The gate excludes the category; the quarantine job includes only it and never blocks:**
+
+```bash
+dotnet test UiTests/UiTests.csproj --filter "TestCategory!=Flaky"
+dotnet test UiTests/UiTests.csproj --filter "TestCategory=Flaky"
+```
+
+- On a sharded UI gate, the category joins the shard's class filter:
+  `--filter "(<shard filter>)&TestCategory!=Flaky"` (`qa-ci-pipelines-dotnet`).
+- The quarantine lane is a **separate CI job**, unsharded, with `continue-on-error: true` (GitHub),
+  `continueOnError: true` (Azure) or `allow_failure: true` (GitLab). It is the **one** non-gating exception
+  `ci-conventions` allows: it runs only `Flaky` tests, still uploads its Allure results and failure
+  evidence, and never blocks the merge.
+- No retry in the quarantine lane either: its job is to report the flake honestly.
+- `[Category]` on a fixture class quarantines every test in it — use it only when the fixture shares the
+  cause.
+
+> **Why a *running* quarantine lane, not `[Ignore]` / `[Explicit]`.** An ignored test rots — the feature
+> drifts, the test silently lies, no one notices when it could be re-enabled. A quarantined test **still
+> runs** (off the gate), so you keep its signal, you see when it stabilises (Allure history flips it to
+> **Fixed**), and the ticket stays honest. Quarantine is a **waiting room**, not a graveyard.
+
+## Move 4 — Report the flaky flag in Allure
+
+**(a) The quarantined set** is visible by its category: Allure.NUnit reports NUnit categories as tags, so
+the report's `Flaky` tag lists every quarantined test, and `[AllureIssue]` carries its ticket.
+
+**(b) The triage bucket matches the flaky flag, not an exception type.** In `categories.json`, the bucket
+uses Allure's `flaky` matcher and comes **first**, because a result takes the first category that matches:
 
 ```json
 [
-  { "name": "Known flaky (quarantined)", "matchedStatuses": ["failed", "broken"],
-    "traceRegex": ".*TimeoutException.*|.*WebDriverTimeoutException.*|.*TaskCanceledException.*" }
+  { "name": "Known flaky (quarantined)", "matchedStatuses": ["failed", "broken"], "flaky": true }
 ]
 ```
 
+Allure sets the flag from history (Move 1). Allure.NUnit has no flaky attribute, and Allure's categories
+match a status, a message, a trace or the flaky flag — not a tag — so the bucket fills with what history has
+proven flaky, and the `Flaky` tag shows what the team has quarantined. A trace regex such as
+`.*TimeoutException.*` is a failure class, not a flakiness verdict: filing every timeout as "known flaky"
+hides real regressions, and every Playwright action timeout would land there. The rest of the file is
+`qa-test-reports-dotnet`'s.
+
 **Track flaky-rate over time, not per-run green.** A single green run proves nothing about a flaky test. The
-metric that matters is *flaky-rate* (flaky marks ÷ total) trending **down** — wire it into the team dashboard
-(`qa/manual/quality-metrics`). A growing quarantine category is a smell: tagging faster than fixing.
+metric that matters is *flaky-rate* (flaky marks ÷ total tests) trending **down** — wire it into the team's
+quality dashboard (`qa/manual/quality-metrics`). A growing `Flaky` category is a smell: tagging faster than
+fixing.
 
 ## Anti-patterns
 
-- **Cranking the retry cap to make CI green.** `[Retry(5)]` doesn't fix a 1-in-3 race — it hides it. *Fix:*
-  cap the gate at **1**; quarantine the rest with a ticket.
+- **Retrying everything.** A custom `IRepeatTest` stamped on every test, a CI step that re-runs the failures
+  from the TRX, `retryCountOnTaskFailure` on the test task — each retries more than a documented hotspot,
+  which `ci-conventions` bans. *Fix:* no retry; quarantine with a ticket.
+- **Detecting flakes through retries.** With no retry, NUnit never reports "passed on retry". *Fix:* Allure
+  history and the `Flaky` category.
+- **`[Retry(1)]` as "one retry".** It is one attempt — no retry at all. *Fix:* `[Retry(2)]`, on a documented
+  hotspot only.
 - **Retrying a *deterministic* failure.** Fails every run → retrying wastes CI minutes before the same red.
   *Fix:* it's a caught regression or broken test — fix it.
-- **Assuming `[Retry]` retries on exceptions.** It historically does not (issue #2543). *Fix:* use the
-  custom `[RetryOnFailure]` that catches and re-runs on error too.
-- **Expecting `[Retry]` to work at fixture/assembly scope.** It's method-level only (issue #2452). *Fix:*
-  apply it per transient-prone test, or drive rerun from CI.
 - **`[Ignore]` / `[Explicit]` as "quarantine".** A skipped test rots and lies. *Fix:* `[Category("Flaky")]`
-  + a non-gating filtered lane that **still runs** it; keep the signal and the history.
+  + a non-gating job that **still runs** it.
 - **Quarantine with no ticket / no owner.** An untracked category only grows. *Fix:* every
-  `[Category("Flaky")]` carries `[AllureIssue]`/`[Property("Issue",…)]`; review each sprint; it must **shrink**.
-- **Stacking `[RetryOnFailure]` *and* a CI rerun.** Caps multiply; you're back to masking. *Fix:* one mechanism.
-- **Fighting a `Task.Delay`-induced flake with more retries.** The sleep is the *cause*. *Fix:* replace it
-  with a condition-wait (`WaitForAsync` from `qa-db-connection-dotnet`), then most "flakiness" disappears.
-
-## Examples
-
-**End-to-end: a transient on the gate (retried once) vs a known flaky (quarantined + tracked).**
-
-```csharp
-public class PaymentFlowTests : FlakyMarkBase
-{
-    private PaymentGateway _gateway = null!;
-
-    [SetUp]
-    public void SetUp() => _gateway = new PaymentGateway(_httpClient);   // constructor injection
-
-    // GATE test — normally deterministic. A true transient (cold-start 503) gets exactly one more shot.
-    [Test]
-    [RetryOnFailure(1)]
-    public async Task Should_authorize_payment_When_card_is_valid()
-    {
-        var result = await _gateway.AuthorizeAsync(Cards.Valid().WithAmount(1999).Build());
-        Assert.That(result.Status, Is.EqualTo(AuthStatus.Approved));
-    }
-
-    // QUARANTINED test — known to race the async settlement webhook. Off the gate, still run + flagged + ticketed.
-    [Test]
-    [Category("Flaky")]
-    [Property("Issue", "PAY-1204")]
-    public async Task Should_mark_settled_When_webhook_arrives_within_sla()
-    {
-        await _gateway.AuthorizeAsync(Cards.Valid().Build());
-        // de-flake (PAY-1204): wait on the settlement condition, not a fixed window. Until then, quarantined.
-        var settlement = await WaitFor.Async(
-            probe:     ct => _ledger.SettlementForAsync(_orderId, ct),
-            predicate: s  => s.State == SettlementState.Settled,
-            timeout:   TimeSpan.FromSeconds(10),
-            interval:  TimeSpan.FromMilliseconds(200));
-        Assert.That(settlement.State, Is.EqualTo(SettlementState.Settled));
-    }
-}
-```
-
-The gate is green if the non-flaky tests pass (one retry absorbed any transient); the quarantine lane's
-result is reported in Allure (flaky-flagged, history-tracked) but **never** fails the pipeline.
+  `[Category("Flaky")]` carries `[AllureIssue]`; review it each sprint; it must **shrink**.
+- **A "known flaky" category matched on `TimeoutException`.** *Fix:* match `"flaky": true`.
+- **A second base class for flaky marking.** UI fixtures already derive from `BaseTest`; a `FlakyMarkBase`
+  cannot sit beside it. *Fix:* the category and the history flag.
+- **Fighting a `Task.Delay`-induced flake with retries.** The sleep is the *cause*. *Fix:* replace it with a
+  condition-wait (Playwright's auto-waiting `Expect`; `WaitForAsync` in `qa-db-connection-dotnet`), then most
+  "flakiness" disappears.
 
 ## Rules (hard constraints)
 
-- **Retry is bounded and low on the gate** — `[Retry(1)]` or `[RetryOnFailure(1)]`. The cap is the safety
-  mechanism; never crank it to hide failures. Use the custom `IRepeatTest` attribute when you need
-  retry-on-exception (built-in `[Retry]` historically doesn't).
-- **One retry mechanism**, never `[RetryOnFailure]` + a CI rerun together (caps multiply). NUnit retry is
-  **method-level only** — no fixture/assembly auto-apply; opt in per prone test.
-- **Quarantine = category + non-gating lane, never `[Ignore]`.** `[Category("Flaky")]`, excluded by
-  `--filter "TestCategory!=Flaky"` on the gate, run by a `--filter "TestCategory=Flaky"` step with
-  `continue-on-error: true`. The test keeps running.
-- **Every quarantined test carries a ticket** (`[AllureIssue]` / `[Property("Issue",…)]`) and is marked flaky
-  in Allure (no attribute exists → the `AllureLifecycle.UpdateTestCase(tc => tc.flaky = true)` base-teardown
-  route, or history-based detection). The category **shrinks**; review each sprint; un-fixable → **deleted**.
-- **Allure flags flakiness via history** — identical 5-launch rule across stacks (history enabled).  Track
-  **flaky-rate trending down**, not per-run green.
+- **Retries follow `qa/cicd/ci-conventions`** — none, except `[Retry(2)]` on a documented hotspot, dated and
+  linked. Never a custom repeat attribute on every test, a CI rerun step or a platform retry on assertions.
+- **Detection = Allure history + the `Flaky` category.** NUnit's retried status is not used.
+- **Quarantine = category + non-gating job, never `[Ignore]`.** `[Category("Flaky")]`, excluded from the gate
+  with `TestCategory!=Flaky` (joined to the shard filter on a sharded gate), run by a separate
+  `TestCategory=Flaky` job that is allowed to fail. The test keeps running.
+- **Every quarantined test carries `[AllureIssue("…")]`** (an owned ticket). The category **shrinks** over
+  time; review it each sprint; a test that can't be de-flaked is **deleted**, not left in quarantine forever.
+- **The quarantine bucket matches `"flaky": true`** and is first in `categories.json`.
 - **A deterministic failure is a bug, not a flake** — fix the code/test; do not retry or quarantine it.
-- **No `Thread.Sleep` / `Task.Delay`-as-wait** — replace with condition-waits (`WaitForAsync`); async all the
-  way. Test names `Should_X_When_Y`; one logical assertion; no conditional logic in tests; builders for
-  4+-field test data; structured logging.
+- **No `Thread.Sleep` / `Task.Delay`-as-wait** — replace with condition-waits; async all the way. Test names
+  `Should_X_When_Y`; one logical assertion; no conditional logic in tests; builders for 4+-field test data;
+  structured logging.
 
 ## Cross-references
 
-- `qa-flaky-test-quarantine-java` — the **canonical** stack this is ported from. TestNG `IRetryAnalyzer` +
-  `IAnnotationTransformer` gives true **suite-wide** retry (no per-test edits) and native group-based
-  quarantine + the first-class `@Flaky` annotation — the surface NUnit is thinner than. Same four moves.
-- `qa-flaky-test-quarantine-typescript` — same four moves, Playwright/Vitest: Playwright `retries` → the
-  built-in **"flaky"** status + tag/`--grep-invert @flaky` or a separate project for the lane; Vitest `retry`.
-- `qa-test-reports-dotnet` (#?) — the **full** Allure.NUnit wiring this layers on: the adapter,
-  history/trends (required for auto-flaky detection), `categories.json`, CI publish. Base setup lives there.
+- `qa-flaky-test-quarantine-java` — the **canonical** stack this is ported from: a TestNG `flaky` group,
+  `@Flaky`, and the same history-based detection.
+- `qa-flaky-test-quarantine-typescript` — same four moves, Playwright: `{ tag: '@flaky' }` +
+  `--grep-invert @flaky` on the gate, a separate `--grep @flaky` job, and a nightly `--repeat-each` lane.
+- `qa-test-reports-dotnet` — the **full** Allure.NUnit wiring this layers on: the adapter, history/trends
+  (required for auto-flaky detection), `categories.json`, the report CLI.
+- `qa-ci-conventions-shared` — the retry policy this skill defers to.
+- `qa-evidence-capture-dotnet` — the trace, video and screenshot a flaky UI failure leaves behind, and how
+  to read them.
 - `qa-_shared-quality-metrics` — track **flaky-rate over time**; a quarantine category that grows is the
   metric to watch.
-- `qa-db-connection-dotnet` / `qa-messaging-testing-dotnet` — the
-  `WaitForAsync` **condition-wait** that *prevents* the eventual-consistency flakiness this skill quarantines.
-- `qa-ui-test-writer-playwright-dotnet` / `qa-api-test-writer-dotnet` — where the quarantined tests
-  are authored; flakiness is best fixed at the source (stable locators, intent-not-selectors).
-- `qa-ci-pipelines-dotnet` (its GitHub Actions, Azure Pipelines and GitLab CI references) — the gate-lane vs quarantine-lane job
-  wiring (`continue-on-error` on the non-gating lane).
+- `qa-db-connection-dotnet` / `qa-messaging-testing-dotnet` — the `WaitForAsync` **condition-wait** that
+  *prevents* the eventual-consistency flakiness this skill quarantines.
+- `qa-ui-test-writer-playwright-dotnet` / `qa-api-test-writer-dotnet` — where the quarantined tests are
+  authored and where `BaseTest` lives; flakiness is best fixed at the source (stable locators, web-first
+  assertions).
+- `qa-ci-pipelines-dotnet` (its GitHub Actions, Azure Pipelines and GitLab CI references) — the gate job, the
+  shard filter and the non-gating quarantine job.
