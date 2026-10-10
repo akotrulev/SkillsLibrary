@@ -8,7 +8,7 @@ step-by-step agent that works greenfield and brownfield, a conformance audit, an
 
 **Status:** C1 landed (2026-10-11): `mobile/` exists with the five July drafts moved and renamed under
 `mobile/react-native/`, the three conformance-checklist skeletons, and `## Mobile code rules` in `CLAUDE.md`;
-the stale `frontend/react-native` pointers are repointed. S1 landed (2026-10-11): `mobile/_shared/{store-compliance,security}` with their references and the `L1…L26` / `K1…K27` audit fragments. Next: S2, S3, N1 and R1 (each depends only on C1).
+the stale `frontend/react-native` pointers are repointed. S1 landed (2026-10-11): `mobile/_shared/{store-compliance,security}` with their references and the `L1…L26` / `K1…K27` audit fragments. S2 landed (2026-10-11): `mobile/_shared/{release,observability}` with their references and the `T1…T19` / `U1…U20` audit fragments. Next: S3, N1 and R1 (each depends only on C1).
 Built but unverified: everything — the plan gates once, in G1. The five drafts keep their July bodies (SDK 56
 lane, pre-sweep content) until R1 rewrites them. Flutter becomes a fourth plugin in its own plan, written
 once this one lands (O4); it is **not** in this plan's tasks. Maestro arrives on the QA side through plan 003
@@ -981,6 +981,7 @@ OTel Swift / Android, `expo-observe`, Embrace, Faro RN, Sentry, Crashlytics ~40k
   hand off to the `observability-engineer-<stack>` agents.
 - Fragments: rows `T1…` and `U1…` per §8.3.
 - **Not in S2:** in-app purchases and auth (S3).
+- **As built (2026-10-11):** `mobile/_shared/release/` (`SKILL.md` 9.5k chars; `references/{eas,fastlane,xcode-cloud,gradle-play,audit-checks}.md`; rows `T1…T19`) and `mobile/_shared/observability/` (`SKILL.md` 7.6k chars; `references/{react-native,ios,android,audit-checks}.md`; rows `U1…U20`); every row's `Stacks` names `rn`/`ios`/`android` as applies. Verified at source this session: the EAS Workflows E2E shape (`type: build` + `type: maestro`, `needs`, `build_id`, `flow_path`; the simulator / emulator setting lives in the `eas.json` profile, not the workflow), the `fingerprint` runtime-version policy, `updates.codeSigningCertificate`. OTel Android maturity is written as the split (agent API stable, instrumentations alpha) with the conflicting `1.7.0` / `1.7.0-alpha` BOM labelling recorded. **Built but unverified:** `npx expo-updates fingerprint:generate` (subcommand unconfirmed, flagged in `eas.md`); `expo-observe`'s current status; iOS phased-release percentages and 30-day pause, Play staged-rollout steps and `versionCode` ceiling, Xcode Cloud quota, Gradle Play Publisher DSL, Timber (written from recall); Apple 2.5.2 / DPLA 3.3.1(B) and Play device-and-network-abuse wording were not re-read this session; `GitHub macos-14` removal 2026-11-02 is taken from §4.4. The `rg` recipes in `T*` / `U*` have not been run. Not run (Gate: none): `tools/token-audit.py`, §11's script, any lint.
 
 ### S3 — shared: in-app purchases and native Auth0
 
@@ -1445,52 +1446,9 @@ goes in an untracked `scratch/` folder inside the worktree, deleted before commi
 | W1 | `docs` | `general-purpose` | R5, I5, A6, R3, S1–S3 | ~120k |
 | G1 | `docs` | `general-purpose` | every task above | ~140k |
 
-C1 and S1 have landed (their blocks are deleted); every block below is live.
+C1, S1 and S2 have landed (their blocks are deleted); every block below is live.
 
 ---
-
-### S2 — shared: release and observability (general-purpose, docs)
-
-````
-You are `general-purpose`. Task S2 of docs/plans/002-mobile-plugins.md: write `mobile-shared-release` and
-`mobile-shared-observability`, with their references and audit fragments.
-
-Read, in this order:
-1. CLAUDE.md.
-2. The plan: §4.4, §6.6, §8.3, §10, task S2, and "Close-out — every task".
-3. `devops/github-actions/SKILL.md` — the head and When-NOT clause (the pipeline fence).
-4. `observability/logs-traces-setup/SKILL.md` — the backend half you hand off to.
-
-Build:
-- `mobile/_shared/release/SKILL.md`: version + monotonic build number; signing with nothing in the repo
-  (App Store Connect API key, fastlane `match`, Xcode Cloud, EAS credentials, Play App Signing + upload
-  key); pinned runner image and Xcode; TestFlight and Play tracks; phased / staged rollout with a halt
-  path; OTA rules; symbol upload (dSYM, R8 mapping, Hermes source maps). References `eas.md`
-  (`runtimeVersion` with `fingerprint`, update code signing, never a native change over the air, and
-  the EAS Workflows E2E job: a simulator / emulator build, then a `type: maestro` job running the
-  project's `.maestro/` flows — written by `qa-mobile-typescript`'s Maestro lane, plan 003; no flows,
-  no job), `fastlane.md`, `xcode-cloud.md`, `gradle-play.md`.
-- `mobile/_shared/observability/SKILL.md`: one crash reporter; app → public ingest gateway → OTel
-  Collector / Alloy (`otlp` or `faro.receiver`) → Tempo / Loki / Prometheus-Mimir; batching, sampling,
-  the resource attributes (`service.name`, `service.version`, `os.*`, `device.model.identifier`,
-  `session.id`); PII scrubbing; no backend credential in the app. References `react-native.md`
-  (`expo-observe` OTel export, Embrace, Faro RN experimental, Sentry), `ios.md` (OTel Swift, MetricKit,
-  `os.Logger`), `android.md` (OTel Android agent, Crashlytics, logging).
-- Fragments `references/audit-checks.md` with rows `T1…` and `U1…` per §8.3.
-
-Traps:
-- No pipeline YAML (`devops-engineer`'s) and no Collector config (`observability-engineer-<stack>`'s) —
-  name the hand-off.
-- OTel Android maturity is reported both ways — write the split: agent API stable, instrumentations alpha.
-- OTA is bounded by Apple 2.5.2 / DPLA 3.3.1(B) and Play's device-and-network-abuse policy — state the
-  boundary, never "OTA anything".
-- GitHub's `macos-14` goes 2026-11-02 — write it as a dated fact with a re-verify note.
-
-Gate: none — this plan gates once, in G1. Do not run tools/token-audit.py, §11's script, or any lint.
-
-Commit: `feat(mobile S2): shared release and observability skills`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
 
 ### S3 — shared: in-app purchases and native Auth0 (general-purpose, docs)
 
