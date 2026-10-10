@@ -282,6 +282,21 @@ This section holds no rows of its own. The rows are those of `mobile/_shared/sto
 
 | # | Check | Violation looks like | Find it with | Sev |
 |---|---|---|---|---|
+| M1 | Every interactive element has an accessible name | An `IconButton` / `Icon` inside a clickable with `contentDescription = null` and no text child; a clickable with `contentDescription = ""` | `rg -n 'IconButton\|Icon\(' $SRC -g '*.kt'`; read each for a description or label | major |
+| M2 | Controls are real controls, not gesture handlers | `Modifier.pointerInput { detectTapGestures` or `clickable` on a bare `Box` / `Row` acting as a button with no `role` | `rg -n 'detectTapGestures\|\.clickable\s*\{' $SRC -g '*.kt'`; check `role =` / `onClickLabel` | major |
+| M3 | Text is `sp` from the theme and the system font scale is never locked | `fontSize = 14.dp`-style conversion, `fontScale` overridden in a configuration, `android:fontScale` forced, `textSize` in `dp` | `rg -n 'fontScale\|\.toSp\(\)\|textSize="[0-9.]+dp"' $SRC -g '*.kt' -g '*.xml'` | major |
+| M4 | Layouts survive 200 % font scale | A fixed `height` / `size` around text, `maxLines = 1` on meaningful text, a non-scrolling container. requires dynamic test → `qa-mobile-android` | `rg -n 'maxLines = 1\|\.height\([0-9]+\.dp\)' $SRC -g '*.kt'` | major |
+| M5 | Touch targets are at least 48 × 48 dp; the minimum is never disabled | A clickable sized below 48 dp with no `minimumInteractiveComponentSize`; `LocalMinimumInteractiveComponentSize provides Dp.Unspecified` | `rg -n 'LocalMinimumInteractiveComponentSize\|\.size\(([0-9]\|[1-3][0-9]\|4[0-7])\.dp\)' $SRC -g '*.kt'` | major |
+| M6 | State lives in semantics, not in the description | A description such as "Menu, open", "Selected", "disabled" or containing "button" | `rg -n -i 'contentDescription = .*(button\|selected\|disabled\|open\|closed\|checked)' $SRC -g '*.kt'` | minor |
+| M7 | Decorative images are `null`-described; informative ones are described | A decorative `Image` / `Icon` beside text with a duplicate description; an informative image with `null` | `rg -n 'contentDescription = null' $SRC -g '*.kt'`; read each for a text sibling | minor |
+| M8 | A row is one TalkBack stop | A list row of title + subtitle + icon that reads as three stops, with no `clickable` / `mergeDescendants` | `rg -n 'mergeDescendants\|clearAndSetSemantics' $SRC -g '*.kt'`; read the row composables | minor |
+| M9 | `clearAndSetSemantics` does not hide a tested or interactive child | `clearAndSetSemantics` over a node whose child carries a `testTag` or an action | `rg -n -B2 -A6 'clearAndSetSemantics' $SRC -g '*.kt'` | major |
+| M10 | A gesture-only operation has a custom action | `SwipeToDismissBox`, `detectDragGestures` or `combinedClickable(onLongClick` with no `customActions` or `onLongClickLabel` | `rg -n 'SwipeToDismissBox\|detectDragGestures\|onLongClick' $SRC -g '*.kt'`; `rg -n 'customActions' $SRC -g '*.kt'` | major |
+| M11 | Async results and errors are announced through a live region; focus moves only on a meaning change | A result shown with no `liveRegion`; `announceForAccessibility` or a `Toast` as the announcement; focus stolen into a banner | `rg -n 'announceForAccessibility\|Toast\.makeText\|liveRegion' $SRC -g '*.kt'` | minor |
+| M12 | State is never by colour alone | A status that differs only by `Color.Red` / `Color.Green` with no icon or text | `rg -n 'Color\.(Red\|Green)\|errorContainer' $SRC -g '*.kt'`; read each for a second cue | major |
+| M13 | The animator duration scale is honoured | Parallax, auto-play or large motion that ignores a scale of 0 (see `Q` rows). requires dynamic test → `qa-mobile-android` | `rg -n 'ANIMATOR_DURATION_SCALE\|animatorDurationScale' $SRC -g '*.kt'` | minor |
+| M14 | A Compose accessibility check exists for each main screen | No `enableAccessibilityChecks()` anywhere in the test sources | `rg -n 'enableAccessibilityChecks' -g '*.kt'` | minor |
+| M15 | `[Views]` Custom views and decoration set accessibility attributes | A custom `View` with no `AccessibilityDelegateCompat`; a decorative `ImageView` without `importantForAccessibility="no"` | `rg -n 'ImageView' $SRC -g '*.xml'`; read each for `contentDescription` / `importantForAccessibility` | major |
 
 ---
 
@@ -290,6 +305,20 @@ This section holds no rows of its own. The rows are those of `mobile/_shared/sto
 
 | # | Check | Violation looks like | Find it with | Sev |
 |---|---|---|---|---|
+| N1 | No disk, network, database or heavy compute on the main thread | `runBlocking` on a UI path, `Thread.sleep`, a synchronous `SharedPreferences.commit()`, `DataStore` `first()` in `onCreate`, `.execute()` | `rg -n 'runBlocking\|Thread\.sleep\|\.commit\(\)\|\.execute\(\)' $SRC -g '*.kt'` | blocker |
+| N2 | Heavy work runs on an injected dispatcher and checks cancellation | `withContext(Dispatchers.IO)` hard-coded; a long loop with no `ensureActive()` | `rg -n 'Dispatchers\.(IO\|Default)' $SRC -g '*.kt'` | major |
+| N3 | Release builds are minified and shrunk | `isMinifyEnabled = false` or `isShrinkResources = false` on `release` | `rg -n 'isMinifyEnabled\|isShrinkResources' -g '*.kts' -g '*.gradle'` | major |
+| N4 | A Baseline Profile and a Startup Profile exist and a benchmark proves them | No `androidx.baselineprofile` plugin and no `baseline-prof.txt`; a profile with no Macrobenchmark module | `rg -n 'androidx\.baselineprofile\|BaselineProfileRule' -g '*.kts' -g '*.kt'`; `rg --files -g 'baseline-prof.txt' -g 'startup-prof.txt'` | major |
+| N5 | Macrobenchmark runs on a non-debuggable `benchmark` build, not on an emulator | `suppressErrors` set for `DEBUGGABLE` / `EMULATOR`; no `benchmark` build type | `rg -n 'suppressErrors\|initWith\(.*release' -g '*.kts' -g '*.kt'` | minor |
+| N6 | Keep rules are narrow; global options sit in the app's rules `[AGP9]` | `-keep class ** { *; }`; `-dontobfuscate` / `-allowaccessmodification` in a library `consumer-rules.pro`; `android.enableR8.fullMode=false` | `rg -n 'keep class \*\*\|dontobfuscate\|enableR8' -g '*.pro' -g '*.keep' gradle.properties` | major |
+| N7 | The mapping file is uploaded with every release | No mapping upload step in the pipeline or the crash-reporter Gradle plugin. requires pipeline evidence → `mobile-shared-release` | `rg -n -i 'mapping\|crashlytics\|sentry' -g '*.kts' -g '*.yml'` | major |
+| N8 | Application start is lazy; no `ContentProvider` initialisation | Work in `Application.onCreate` the first frame does not need; an SDK auto-initialised by its own provider | `rg -n 'class .*: Application' -A25 $SRC -g '*.kt'`; `rg -n 'InitializationProvider\|<provider' -g '*.xml'` | major |
+| N9 | Full drawing is reported | No `reportFullyDrawn`, `ReportDrawnWhen` or `FullyDrawnReporter` for a screen that loads data | `rg -n 'reportFullyDrawn\|ReportDrawn\|FullyDrawnReporter' $SRC -g '*.kt'` | minor |
+| N10 | The splash is the `SplashScreen` API | A custom splash `Activity` or a theme-only splash on API 31+ with no `core-splashscreen` | `rg -n 'SplashScreen\|installSplashScreen\|SplashActivity' $SRC -g '*.kt' -g '*.xml'` | minor |
+| N11 | Compose state is read as late as possible; expensive work is remembered | A collection sorted / formatted in a composable body; `Modifier.offset(x.dp)` driven by scroll state instead of a lambda | `rg -n '\.sortedBy\|\.sorted\(\)\|\.filter \{' $SRC -g '*.kt'`; read hits inside `@Composable` | minor |
+| N12 | StrictMode runs in debug builds with penalties | No `StrictMode.setThreadPolicy` in a debug-only path; a permissive policy | `rg -n 'StrictMode' $SRC -g '*.kt'` | minor |
+| N13 | Memory leaks are watched in debug | No LeakCanary `debugImplementation`; a `Context` / `Activity` held by a singleton or an unowned scope | `rg -n 'leakcanary' -g '*.kts' -g 'libs.versions.toml'`; `rg -n 'GlobalScope\|CoroutineScope\(' $SRC -g '*.kt'` | minor |
+| N14 | Wake locks are bounded | `WakeLock.acquire()` with no timeout or no matching `release()` | `rg -n 'acquire\(\)\|newWakeLock' $SRC -g '*.kt'` | major |
 
 ---
 
@@ -298,6 +327,28 @@ This section holds no rows of its own. The rows are those of `mobile/_shared/sto
 
 | # | Check | Violation looks like | Find it with | Sev |
 |---|---|---|---|---|
+| O1 | A region is one sealed state with failed, stale and offline | A region modelled as `isLoading` / `error` / `data` booleans; no `Stale` case | `rg -n 'isLoading\|val error: ' $SRC -g '*.kt'`; `rg -n 'sealed (interface\|class) .*(State\|Load)' $SRC -g '*.kt'` | major |
+| O2 | A drifted response is *failed*, never empty | `runCatching { … }.getOrDefault(emptyList())`; a decode failure rendered as "No results" | `rg -n 'getOrDefault\(emptyList\|getOrElse \{ emptyList' $SRC -g '*.kt'` | blocker |
+| O3 | `CancellationException` is rethrown, never shown | `catch (e: Exception)` / `runCatching` around a `suspend` call with no rethrow; a banner on navigate-away | `rg -n 'catch \((e\|t\|error): (Exception\|Throwable)\)\|runCatching' $SRC -g '*.kt'` | blocker |
+| O4 | No raw `Throwable.message`, stack or body on screen | `Text(error.message` / `e.localizedMessage` shown to the user | `rg -n 'Text\(.*\.(message\|localizedMessage)' $SRC -g '*.kt'` | major |
+| O5 | The failure is scoped below search and filters | An early `if (state is Failed) { …; return }` above a screen that owns filters; the header inside the failing branch | `rg -n 'is .*Failed' -B3 -A8 $SRC -g '*.kt'`; read each screen with a search field | major |
+| O6 | Every surfaced failure also raises the persistent banner | A failed region with no banner raise; an error shown only in a `Snackbar` with a duration | `rg -n 'showSnackbar\|SnackbarDuration' $SRC -g '*.kt'`; `rg -n 'notifications\.raise\|NotificationsHost' $SRC -g '*.kt'` | major |
+| O7 | The banner is top-anchored in the safe area, closes only on its control, is deduped and capped | Bottom `Snackbar` for errors; no `safeDrawing` / insets padding; auto-dismiss `delay`; no cap | `rg -n 'safeDrawing\|windowInsetsPadding' $SRC -g '*.kt'`; `rg -n 'delay\(.*dismiss' $SRC -g '*.kt'` | major |
+| O8 | The banner close control is at least 48 dp and carries ids | A close icon under 48 dp; no `Notifications.Banner.Close` tag | `rg -n 'Notifications\.Banner' $SRC -g '*.kt'` | minor |
+| O9 | A ViewModel emits no error events | `SharedFlow` / `Channel` of error or snackbar effects collected by the UI | `rg -n 'Channel<\|MutableSharedFlow<' $SRC -g '*.kt'` | major |
+| O10 | Timeout has its own body; offline is not a server error; no retry control while offline | `TimedOut` and `Server` rendered identically; a retry button shown with `Offline` | `rg -n 'ApiError\.(TimedOut\|Offline)' $SRC -g '*.kt'` | major |
+| O11 | A failed refetch keeps the data and marks it stale | A pull-to-refresh failure replaces the list with the failed body | `rg -n 'PullToRefreshBox\|pullToRefresh' -A12 $SRC -g '*.kt'`; read the failure branch | major |
+| O12 | `NotFound` on a record is "gone", with no retry | A retry button on a `NotFound` record | `rg -n 'ApiError\.NotFound' $SRC -g '*.kt'` | minor |
+| O13 | Empty is three kinds | One generic "No data" for no records, no filter match and cleared filters | `rg -n -i '"No data"\|no results\|R\.string\.empty' $SRC -g '*.kt' -g '*.xml'` | minor |
+| O14 | A `401` re-authenticates in place; `403` is not `401` | A navigate-to-login on `Unauthorized`; a sign-out on a `403`; a third-party `401` starting the ladder | `rg -n 'Unauthorized' -A6 $SRC -g '*.kt'`; `rg -n 'signOut\|logout' $SRC -g '*.kt'` | major |
+| O15 | A forced-update path exists and fails open | No minimum-version check; the check failing blocks the app; the store URL taken from the response | `rg -n -i 'minimum.?version\|forceUpdate\|VersionPolicy\|AppUpdateManager' $SRC -g '*.kt'` | major |
+| O16 | The app revalidates on resume and reconnect; stale data is marked | No `LifecycleResumeEffect` / `repeatOnLifecycle` refetch; an old screen shown as current after resume | `rg -n 'LifecycleResumeEffect\|repeatOnLifecycle\|ON_RESUME' $SRC -g '*.kt'` | major |
+| O17 | Process death restores small state and reloads the rest | A filter, record id or wizard step held only in `remember` or a ViewModel field; a list in `rememberSaveable`; a model in `SavedStateHandle` | `rg -n 'SavedStateHandle\|rememberSaveable' $SRC -g '*.kt'`; verify with `adb shell am kill` — requires dynamic test → `qa-mobile-android` | major |
+| O18 | A mutation guards double submit and carries one idempotency key per intent | A submit control enabled while saving; `UUID.randomUUID()` generated inside the retry loop | `rg -n 'Idempotency-Key\|randomUUID' $SRC -g '*.kt'` | major |
+| O19 | An unknown write outcome is reconciled, not shown as failed | A timeout on a `POST` rendered as "failed" with a resend that creates a duplicate | `rg -n 'Unconfirmed\|TimedOut' $SRC -g '*.kt'` | major |
+| O20 | A third-party failure stays in its own region and never blocks first render | A flag, map or analytics SDK initialised synchronously in `Application.onCreate`; its failure shown as an app-wide error | `rg -n 'FirebaseApp\|Sentry\.init\|MapsInitializer' $SRC -g '*.kt'` | major |
+| O21 | Storage failure degrades to memory, once, with a typed error; never a weaker secret store | A blanket `catch (e: Exception)` around a write; a token falling back to `SharedPreferences` | `rg -n 'SQLiteFullException\|StorageFull\|ENOSPC' $SRC -g '*.kt'` | major |
+| O22 | Every state and the banner carry a `testTag` | A state composable with no `Modifier.testTag("<Region>.Loading\|Error\|Stale")` | `rg -n 'testTag\("[A-Za-z]+\.(Loading\|Error\|Stale)' $SRC -g '*.kt'` | minor |
 
 ---
 
@@ -354,6 +405,22 @@ This section holds no rows of its own. The rows are those of `mobile/_shared/sto
 
 | # | Check | Violation looks like | Find it with | Sev |
 |---|---|---|---|---|
+| S1 | The runner is JUnit 4; JUnit 5 only where the mannodermaus plugin is present | `org.junit.jupiter` imports in a module without `android-junit5`; two runners in one source set | `rg -n 'org\.junit\.jupiter\|mannodermaus' -g '*.kt' -g '*.kts' -g 'libs.versions.toml'` | major |
+| S2 | Fakes over mocks | `mockk<…Repository>()` / `mock(…)` of a repository, DAO, Retrofit service or ViewModel; `verify { … }` as the assertion | `rg -n 'mockk\|Mockito\|mock<\|verify\s*[({]' -g '*.kt'` | major |
+| S3 | Time and dispatchers are injected; coroutine tests use `runTest` | `Thread.sleep` or `delay` waiting on a result; `runBlocking` in a test; `Dispatchers.setMain` repeated per test instead of a rule | `rg -n 'Thread\.sleep\|runBlocking\|delay\(' -g '*Test.kt'` | major |
+| S4 | `StandardTestDispatcher` is the default; `UnconfinedTestDispatcher` is justified | `UnconfinedTestDispatcher` used so a test passes without advancing the clock | `rg -n 'UnconfinedTestDispatcher' -g '*Test.kt'` | minor |
+| S5 | Compose tests use the v2 APIs `[Compose v2]` | `androidx.compose.ui.test.junit4.createComposeRule` / `runComposeUiTest` imported from the v1 package in a new test | `rg -n 'ui\.test\.junit4\.create(Android\|Empty)?ComposeRule\|ui\.test\.runComposeUiTest' -g '*.kt'` | major |
+| S6 | A Compose test waits for idle before asserting launched work | An assertion on `viewModel` state or UI straight after `setContent` / an action that launches a coroutine | `rg -n 'setContent' -A8 -g '*Test.kt'`; look for `waitForIdle\|runOnIdle\|mainClock` | major |
+| S7 | One expected value per assertion; no `or` | `assertTrue(a \|\| b)`; a status asserted as one of two; a loop or `if` driving assertions | `rg -n 'assertTrue\(.*\|\|\|assertTrue\(.* in listOf' -g '*Test.kt'`; `rg -n '^\s+(if\|for) ' -g '*Test.kt'` | major |
+| S8 | No `try` / `catch` in a test body | A `try { … } catch` or empty `catch` inside a `@Test`; an inline `try` / `finally` for cleanup | `rg -n 'try \{\|catch \(' -g '*Test.kt'` | major |
+| S9 | Errors are asserted with `assertFailsWith` / `assertThrows`; a decode failure names path and payload | A bare exception message as the only evidence; `@Test(expected = …)` with no value check | `rg -n 'assertFailsWith\|assertThrows\|expected =' -g '*Test.kt'` | minor |
+| S10 | Test names describe behaviour | `test1`, `testLoad`, a name restating the method | `rg -n 'fun (test\|`?test)[A-Z0-9_]' -g '*Test.kt'` | minor |
+| S11 | Test data uses builders for four or more fields | The same multi-field literal duplicated across tests | `rg -n '[A-Z][A-Za-z]+\(\s*id = ' -g '*Test.kt'`; count duplicates | minor |
+| S12 | A migration test uses the real database and exported schemas | An in-memory Room database used to "test" a migration; no `MigrationTestHelper` | `rg -n 'MigrationTestHelper\|inMemoryDatabaseBuilder' -g '*.kt'` | major |
+| S13 | `MockWebServer` backs request-policy tests; no interface exists only for a test | `interface ApiClient` with one implementer and a fake; a hand-rolled fake `Call` | `rg -n 'MockWebServer\|MockResponse' -g '*.kt'`; `rg -n '^interface \w*(Client\|Api)\b' $SRC -g '*.kt'` | major |
+| S14 | Screenshot tests cover single composables, never whole screens | A Roborazzi / Paparazzi capture of a full screen or of dynamic content | `rg -n 'captureRoboImage\|assertSnapshot' -g '*.kt'` | minor |
+| S15 | Robolectric runs on the JDK 21 toolchain with a pinned SDK | No `jvmToolchain(21)` and `@Config(sdk=…)` / `robolectric.properties` unset for an SDK 36 target | `rg -n 'jvmToolchain'  -g '*.kts'`; `rg --files -g 'robolectric.properties'` | minor |
+| S16 | No journey or system dialog is attempted in a unit test | A permission dialog, an app-to-app intent or a notification tray driven from `src/test` | `rg -n 'UiAutomator\|UiDevice\|GrantPermissionRule' src/test -g '*.kt'` | minor |
 
 ---
 
