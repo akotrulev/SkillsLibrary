@@ -26,12 +26,18 @@ Mode A (its Step 0 gate now names the `BaseTest` asset) and `qa-bdd-dotnet` Step
 deferring to `BaseTest` with the byte-array `AttachBody` fix, `flaky-test-quarantine` on D7, and the three .NET
 CI references sharding by NUnit class filters from one `ci/nunit-shards.sh` (no `Playwright.Shard`), uploading
 `UiTests/bin/<cfg>/net10.0/playwright-artifacts/` on failure, GitLab in the v1.63.0-noble image (D42–D46;
-`BaseTest`'s three helpers are now protected). Next: A1. Built but unverified: no asset, workflow or pipeline
-has been compiled or run (G1 does that; D24's TS config import, the Java build on Allure Gradle plugin 4.3.0,
-the .NET build on NUnit3TestAdapter 6.3.1 / Test SDK 18.10.1, `dorny/test-reporter`'s `java-junit` parse, the
-trace CLI through the Java driver (D39) and through `playwright.ps1` (D43), and the .NET shard script against a
-real `--list-tests` (D44) are the open risks; N2 had no web access, so its .NET spellings rest on the
-committed research).
+`BaseTest`'s three helpers are now protected). A1 landed 2026-10-10: the six `qa-ui-*` / `qa-bdd-*` agents
+grant exactly §5.2's 33 Playwright MCP tools; each `qa-ui-*` live-page workflow states §5.4's registration,
+names the `playwright-cli` fallback and follows R2; `page-objects-from-url` ×3 run on the current tools with a
+`playwright-cli` route; and `qa/_shared/webmcp-testing` (`qa-webmcp-testing-shared`: SKILL.md, three references,
+seven assets incl. a `ProductPage` per stack and `webmcp.runsettings`, D47–D48) ships in all three qa plugins
+and loads in every `qa-ui-*` Step 3. Next: T3. Built but unverified: no asset, workflow or pipeline has been
+compiled or run (G1 does that; D24's TS config import, the Java build on Allure Gradle plugin 4.3.0, the .NET
+build on NUnit3TestAdapter 6.3.1 / Test SDK 18.10.1, `dorny/test-reporter`'s `java-junit` parse, the trace CLI
+through the Java driver (D39) and through `playwright.ps1` (D43), the .NET shard script against a real
+`--list-tests` (D44), and the WebMCP assets' typings and the D48 scripts are the open risks; N2 had no web
+access, so its .NET spellings rest on the committed research; no WebMCP test has run against a site that
+registers tools).
 Planned 2026-10-10. The research behind it is committed with this plan:
 `docs/research/003-qa-playwright-appium/` (5 files). So is the read-only audit:
 `docs/audits/003-qa-playwright-appium/` (4 files). All open questions were answered on 2026-10-10:
@@ -42,7 +48,7 @@ Planned 2026-10-10. The research behind it is committed with this plan:
 - A Maestro lane is added (X1).
 - The newest Appium client majors are primary.
 
-Next: A1 (H1, the user's, blocks no task). The cost is 19 agent sessions on the subscription, each started by the user
+Next: T3 (H1, the user's, blocks no task). The cost is 19 agent sessions on the subscription, each started by the user
 from Plan Queue. Nothing else is metered.
 
 ## 1. What already exists, and what is missing
@@ -791,6 +797,31 @@ the old `TimeoutException` trace regex (D-13's defect); or the flaky matcher plu
 marked it flaky; until then it is found by its tag. That Allure.NUnit reports NUnit categories as tags is
 unverified.
 
+**D47 — Each stack's WebMCP assets add a `ProductPage` page object (A1, 2026-10-10).** §3.3 and A1's prompt
+name one test file per stack (`webmcp.spec.ts`, `WebMcpTest.java`, `WebMcpTests.cs`) that uses the base test's
+`page` directly. But T1, J1 and N1 landed the writers' rule that a spec or test class calls no raw `page`
+method — the page object owns its URL in `goto()`. Readings: one file per stack with `page.goto`, `getByTestId` and `evaluate` in the
+test class or a spec-local fixture (breaks that rule in the asset meant to show it), or a `ProductPage` per stack
+that owns the URL, the `Cart.Badge` locator and the tool surface — `page.webmcp` in TS, the two `evaluate`
+scripts in Java/.NET (chosen). The assertion-side helpers (`registeredTool`, which fails with the tools it saw)
+stay in the test class, since page objects do not assert. **Cost:** one more asset per stack for G1 to copy and
+compile (`ProductPage.ts` flat beside the spec, `ProductPage.java` under `com/example/uitests/pages/`,
+`ProductPage.cs` beside the other `.cs` assets); the scripts live in one page, so a second WebMCP page moves them
+to a shared helper on that second need.
+
+**D48 — The Java/.NET 1.63 route is two in-page scripts, not webmcp.md §4.4's one (A1, 2026-10-10).**
+`SETTLED_TOOLS_JS` / `SettledToolsJs` lists the frame's tools (`tool.window === window`, string schemas
+parsed) and resolves once a named tool is present or absent, re-checking on every `toolchange` event, or when
+its timeout passes. `CALL_TOOL_JS` / `CallToolJs` is §4.4's call — object input, retried as a JSON string on
+`Failed to parse input` — raced against a timeout. Both read `document.modelContext` only: no
+`navigator.modelContext` fallback and no Firefox `invokeTool` branch, since `BaseTest` launches Chromium.
+Readings: §4.4 verbatim with registration polled from Java/C# (a sleep between reads, banned), polled with
+`waitForFunction` (it does not await an async predicate — a `Promise` is truthy, so it returns at once), or an
+event-driven wait inside the page (chosen); a call with no timeout (`evaluate` has none, so a declarative tool
+without `toolautosubmit` hangs the test) or the race (chosen). **Cost:** the wait and the race are this plan's
+code, not the research's; like the rest of the route they are unverified until a suite runs against a site that
+registers tools.
+
 ## Answered questions (2026-10-10)
 
 **O1 — Which Playwright version per stack: 1.64 for Node only; Java and .NET follow when their packages
@@ -1473,6 +1504,40 @@ N1's `BaseTest`. The .NET CI references shard with NUnit filters, run in the 1.6
   handoff section.
 - **Not in A1:** `qa-mobile-*` agents (M1–M3); `qa-security`, which is named as an owner but not edited;
   the `tooling` plugin (named, not edited); `fe-*` / `design-auditor` MCP grants (another plugin).
+- **As built (2026-10-10):**
+  - **Grants.** The six agents' `tools:` line (`:4` in each of `qa/{typescript,java,dotnet}/agents/qa-{ui,bdd}-<stack>.md`)
+    is `Read, Write, Edit, Bash, Glob, Grep, WebSearch` plus §5.2's 33 names in §5.2's order;
+    `grep -rhoE 'mcp__playwright__[a-z_]+' qa/ | sort -u` prints exactly those 33.
+  - **`qa-ui-*` live-page workflow** (TS/Java `:39`, .NET `:38`): the two-sentence prerequisite (§5.4's registration;
+    `webmcp_*` not granted, on purpose), step 2 names the `playwright-cli` fallback through `Bash` and stops only
+    when neither route is available, and step 3 is R2 (the `missing-testids.md` row names page, element and
+    fallback; no marker). The loading protocol names `qa/_shared/webmcp-testing/` (TS/Java `:18`, .NET `:18` as
+    a full path beside the shorthand), and Step 3 loads its SKILL.md + `references/<stack>.md` (.NET notes the
+    separate `webmcp.runsettings` run).
+  - **`page-objects-from-url` ×3** (15.1k / 15.3k / 15.4k chars): §5.4's registration, `--codegen=java|csharp`
+    (Java/.NET) and `--test-id-attribute`, `--no-webmcp`; `browser_verify_element_visible` to confirm the page;
+    `browser_find` for one element; hover / press-key / tabs / back for dynamic states; `browser_generate_locator`
+    per ref; a harvest with a `const attribute` first line, and the shadow-root / iframe blind spots; the attribute
+    in code (TS config `testIdAttribute`, Java `BaseTest.TEST_ID_ATTRIBUTE` → `setTestIdAttribute`, .NET runsettings
+    `TestIdAttribute`, which overwrites a code call); R2 and R3 (`Login.Submit`, `Login.PasswordReveal`, static row
+    ids); a "`playwright-cli` route" section with a step → MCP tool → CLI command table (§5, §7a–§7d).
+  - **`qa/_shared/webmcp-testing`** (`qa-webmcp-testing-shared`): SKILL.md 15,831 chars with frontmatter
+    (body ≈ 15.3k), description 483 chars;
+    `references/{typescript,java,dotnet}.md`; assets `webmcp.spec.ts` + `ProductPage.ts`, `WebMcpTest.java` +
+    `ProductPage.java`, `WebMcpTests.cs` + `ProductPage.cs` + `webmcp.runsettings` — five `Should_X_When_Y` tests per
+    stack on one example contract (`/products/sku-123`, `add_to_cart`, `Cart.Badge`). The `ProductPage` files and
+    the two-script evaluate route are D47 and D48. The SKILL.md names the removed early-2026 members once, as stale
+    material that is a finding, and teaches none of them.
+  - **TS launch flag:** the file-level `test.use({ launchOptions: { args: ['--enable-features=WebMCP'] } })`;
+    `playwright.config.ts` is unchanged, so the spec runs in `chromium` (signed in, after `setup`), tagged
+    `@webmcp`. The dedicated-project form is in `references/typescript.md` §1. Java tests are group `webmcp`;
+    .NET's fixture is `[Category("webmcp")]`.
+  - **Wiring:** `./qa/_shared/webmcp-testing` in all three qa plugins (`grep -c` → 3); one catalog row under
+    "Cross-stack"; one cross-reference line at the end of each `ai-feature-testing` "Cross-references".
+  - **Built but unverified:** nothing compiled or ran (G1). Open risks: `Page['webmcp']` and the 1.64 `tools()`
+    typing under strict TS; `asInstanceOf(InstanceOfAssertFactories.MAP)` with AssertJ 3.27.7; the C# raw-string
+    scripts; and — beyond G1's reach — whether Chromium 153's `getTools()` / `executeTool()` behave as webmcp.md §3
+    says, since no test ran against a site that registers tools.
 
 ### T3 — TypeScript visual regression, accessibility and network mocking on 1.64
 
@@ -2022,93 +2087,9 @@ Run them in order, one session each, opened from Plan Queue. Each block is compl
 | X1 | `docs` | `general-purpose` | M1, S1, T2 | ~130k |
 | G1 | `docs` | `general-purpose` | all | ~145k |
 
-Landed: T1, J1, N1, T2, J2, N2 (2026-10-10). Every other block is live.
+Landed: T1, J1, N1, T2, J2, N2, A1 (2026-10-10). Every other block is live.
 
 ---
-
-### A1 — Agent tooling: Playwright MCP grants, `page-objects-from-url`, and the shared WebMCP skill (general-purpose, docs)
-
-````
-You are `general-purpose`. Task A1 of docs/plans/003-qa-playwright-appium-upgrade.md: put the six
-qa-ui-* / qa-bdd-* agents on §5.2's Playwright MCP allowlist, update page-objects-from-url ×3 to those
-tools, and create qa/_shared/webmcp-testing (qa-webmcp-testing-shared), loaded in every qa-ui-* Step 3.
-
-Read, in this order:
-1. CLAUDE.md.
-2. The plan: §2.3, §3.3, §4 (R2, R3, R9, R10), §5, Decisions D6, D13, task A1, "Close-out — every task".
-3. docs/research/003-qa-playwright-appium/webmcp.md §0–§4, §6, §8; playwright-agent-tooling.md §2a, §3,
-   §3a, §5, §7, §8.
-4. The frontmatter, live-page POM workflow, loading protocol and Steps table of
-   qa/{typescript,java,dotnet}/agents/qa-ui-*.md, plus the frontmatter of qa/{typescript,java,dotnet}/agents/qa-bdd-*.md.
-5. qa/{typescript,java,dotnet}/skills/page-objects-from-url/SKILL.md.
-6. The launch seams: qa/typescript/skills/ui-test-author/playwright/assets/playwright.config.ts,
-   qa/java/skills/ui-test-author/playwright/assets/BaseTest.java (launchOptions()),
-   qa/dotnet/skills/ui-test-author/playwright/assets/BaseTest.cs and ui.runsettings.
-
-Build:
-- tools: in the six agents = the existing non-MCP tools + §5.2's list, verbatim.
-- Each qa-ui-* POM workflow: a two-sentence prerequisite (§5.4's registration; webmcp_* tools are not
-  granted on purpose). Each loading protocol names qa/_shared/webmcp-testing/ as in scope.
-- page-objects-from-url ×3:
-  - §5.4's registration form.
-  - browser_find for one element; hover/press_key/tabs/navigate_back for dynamic states.
-  - browser_generate_locator per ref.
-  - The test-id harvest parameterized by the attribute, with shadow-DOM and iframe blind spots noted.
-  - The attribute mirrored into code (TS testIdAttribute; Java playwright.selectors().setTestIdAttribute;
-    .NET runsettings TestIdAttribute).
-  - R2 (no marker) and R3 (PascalCase suggestions); --no-webmcp.
-  - The playwright-cli route beside the MCP route (plan §3.8, D13): when to use it, and the command for
-    each MCP step (playwright-agent-tooling.md §5, §7a–§7d).
-- Each qa-ui-* live-page workflow names the CLI fallback in one sentence (Bash is already granted).
-- qa/_shared/webmcp-testing/:
-  - SKILL.md: webmcp.md §1–§3 facts, a condensed §6 checklist, §8 risks; ≤ 16,000 chars; R9 description.
-  - references/typescript.md: native page.webmcp, §4.1–§4.3.
-  - references/java.md and dotnet.md: the §4.4 evaluate helper on 1.63, plus the from-1.64 native form.
-  - assets/webmcp.spec.ts; WebMcpTest.java (extends BaseTest, overrides launchOptions() to add
-    --enable-features=WebMCP); WebMcpTests.cs.
-  - WebMcpTest.java: package com.example.uitests.tests (J1's testng.xml scans that package), import
-    com.example.uitests.support.BaseTest, override
-    `protected BrowserType.LaunchOptions launchOptions()` returning
-    `new BrowserType.LaunchOptions().setArgs(List.of("--enable-features=WebMCP"))` — BaseTest stamps the
-    headless flag after the hook. Use the protected `page` field (the context is private;
-    `page.context()` reaches it). BaseTest requires BASE_URL; navigate relative to it. Name tests
-    Should_X_When_Y.
-  - WebMcpTests.cs: namespace Example.UiTests.Tests, `using Example.UiTests.Support;`, derives from
-    BaseTest, uses the inherited `Page` and `Expect(...)`. The launch arg cannot be a per-class override
-    (D32): ship `assets/webmcp.runsettings` repeating N1's four keys plus
-    `<LaunchOptions><Headless>true</Headless><Args>['--enable-features=WebMCP']</Args></LaunchOptions>`
-    (the adapter parses Args as a JSON array), tag the fixture `[Category("webmcp")]`, and document the two
-    runs: `dotnet test --settings webmcp.runsettings --filter TestCategory=webmcp` and the main run with
-    `--filter TestCategory!=webmcp`. `--settings` replaces the csproj's RunSettingsFilePath for that run.
-    The root-namespace AuthSetup signs in before this fixture too, so the run needs E2E_USER/E2E_PASSWORD.
-- Step 3 of each qa-ui-* loads the skill + references/<stack>.md (§5.1).
-- Step 3 of the live-page POM workflow in all three qa-ui-* agents (qa-ui-dotnet.md:44, qa-ui-java.md:45,
-  qa-ui-typescript.md:45) still mandates a `// TODO: missing data-testid` marker; replace it with R2 (the
-  `missing-testids.md` row is the contract, the code carries no marker).
-- Add ./qa/_shared/webmcp-testing to all three qa plugins in the marketplace, and one catalog row.
-- A one-line cross-reference in qa/<stack>/skills/ai-feature-testing/SKILL.md (handoffs).
-
-Traps:
-- The entry point is document.modelContext, not navigator.modelContext. unregisterTool, provideContext,
-  clearContext and requestUserInteraction are gone (webmcp.md §0). Teach none of them.
-- Playwright throws unless the browser got the literal --enable-features=WebMCP launch arg, even if an
-  origin-trial token exposes the API. page.webmcp covers the main frame only. Always pass a timeout:
-  the default differs by language.
-- .NET: settled by N1 (D32). runsettings LaunchOptions accepts Args, but the browser is launched once per
-  worker, so the WebMCP suite needs its own webmcp.runsettings and its own run.
-- TS: T1's config has two projects, `setup` and `chromium` (Desktop Chrome, signed-in storage state,
-  depends on setup), a default testDir and default testMatch. G1 copies webmcp.spec.ts flat beside those
-  assets, so it runs in `chromium`. Keep the spec self-contained with a file-level
-  `test.use({ launchOptions: { args: ['--enable-features=WebMCP'] } })`, or add a `webmcp` project with
-  `default: false` to the config asset and say so in your As built. Import `test` / `expect` from
-  `./fixtures` if the spec needs the page-object fixtures.
-- Use exactly §5.2's names. G1's check fails on any other mcp__playwright__ name under qa/.
-
-Gate: none. This plan gates once, in G1. Do not run any build, test or check script.
-
-Commit: `docs(qa): Playwright MCP allowlists, page-objects-from-url on current tools, webmcp-testing skill (003 A1)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
 
 ### T3 — TypeScript visual regression, accessibility and network mocking on 1.64 (general-purpose, docs)
 
@@ -2841,9 +2822,15 @@ Traps:
   `npx playwright@1.63.0 install chromium`, which uses the same shared browser cache.
 - No gradle or mvn on this machine. Download a Gradle distribution into the scratch dir. Never add a
   wrapper or build files to the repo.
+- WebMCP assets (A1, D47): each stack has a `ProductPage` beside its WebMCP test. TS: copy
+  qa/_shared/webmcp-testing/assets/webmcp.spec.ts and ProductPage.ts flat beside the writer's TS assets (the
+  spec imports ./fixtures and ./ProductPage, and needs no extra npm package); `npx playwright test --list`
+  shows its five tests under `chromium`. Leave both WebMCP test files out of every evidence-smoke run: they
+  need an app that registers tools (.NET: `--filter TestCategory!=webmcp`).
 - Java Playwright scratch project: build.gradle.kts, settings.gradle.kts and testng.xml go at the project
   root (the build calls useTestNG { suites("testng.xml") }); each .java asset goes under src/test/java at
-  its package path (com/example/uitests/{support,pages,tests}/), WebMcpTest.java included. J1's
+  its package path (com/example/uitests/{support,pages,tests}/), WebMcpTest.java and the WebMCP
+  ProductPage.java (pages/) included. J1's
   `installPlaywrightBrowsers` passes --with-deps, which needs sudo on Linux; the npx install above is
   enough.
 - Java evidence smoke: BaseTest throws when BASE_URL is unset, so export one (http://localhost is enough
@@ -2859,7 +2846,8 @@ Traps:
   report runtime; do not run `allureReport`.
 - .NET Playwright scratch project: Directory.Packages.props, UiTests.csproj and ui.runsettings (the csproj's
   RunSettingsFilePath points at it) in one folder, with all eight .cs assets (BaseTest, AuthSetup, LoginPage,
-  HomePage, LoginTests and the rest) plus WebMcpTests.cs and any .runsettings A1 added beside them.
+  HomePage, LoginTests and the rest) plus WebMcpTests.cs, ProductPage.cs and webmcp.runsettings from
+  qa/_shared/webmcp-testing/assets/ beside them.
   `dotnet build` → 0 errors.
 - .NET evidence smoke: BaseTest throws when BASE_URL is unset (http://localhost is enough for data: pages).
   AuthSetup is a [SetUpFixture] in the root namespace Example.UiTests: it signs in against a real app before

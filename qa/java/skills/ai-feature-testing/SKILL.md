@@ -359,3 +359,5 @@ record + Jackson; the **stochastic refusal** rung asserts a rate (idea #4), expl
 - `qa-_shared-quality-metrics` — eval **pass-rate over time**. `qa-test-reports-java` — each case as a named
   result. `qa-load-testing-java` — LLM **load/latency under concurrency** (here latency is a per-case
   *budget*, not a load profile).
+- `qa-webmcp-testing-shared` — the deterministic side of WebMCP tools a page registers (schema, `execute()`
+  contract, annotations); this skill keeps the agent evals over them.

@@ -206,3 +206,5 @@ lives in `references/details.md`. Read it before reviewing an eval suite.
 - `qa-_shared-quality-metrics` — eval **pass-rate over time**. `qa-test-reports-dotnet` — each case as a named
   result. `qa-load-testing-dotnet` — LLM **load/latency under concurrency** (here latency is a per-case
   *budget*, not a load profile).
+- `qa-webmcp-testing-shared` — the deterministic side of WebMCP tools a page registers (schema, `execute()`
+  contract, annotations); this skill keeps the agent evals over them.

@@ -197,3 +197,4 @@ The full anti-pattern catalog (exact-string asserts, unpinned judges, quarantine
 - `qa-test-login-tokens-typescript` — env + secret-store discipline for `ANTHROPIC_API_KEY`.
 - `qa-_shared-quality-metrics` — track eval pass-rate over time. `qa-test-reports-typescript` — named results.
 - `qa-load-testing-typescript` — LLM load/latency under concurrency (out of scope here; latency is a per-case budget).
+- `qa-webmcp-testing-shared` — the deterministic side of WebMCP tools a page registers (schema, `execute()` contract, annotations); this skill keeps the agent evals over them.

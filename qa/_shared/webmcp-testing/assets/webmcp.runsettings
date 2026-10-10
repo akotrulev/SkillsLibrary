@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RunSettings>
+  <Playwright>
+    <BrowserName>chromium</BrowserName>
+    <ExpectTimeout>5000</ExpectTimeout>
+    <TestIdAttribute>data-testid</TestIdAttribute>
+    <LaunchOptions>
+      <Headless>true</Headless>
+      <Args>['--enable-features=WebMCP']</Args>
+    </LaunchOptions>
+  </Playwright>
+</RunSettings>
