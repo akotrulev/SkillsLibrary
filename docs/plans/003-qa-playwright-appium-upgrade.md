@@ -7,14 +7,19 @@ and Python pin 1.63 until their 1.64 packages publish. Appium moves to 3. The pl
 trace, HAR — Playwright and Appium) and a shared `webmcp-testing` skill. It teaches locator scoping with
 `locator.within()`, and wires all of it into the `qa-ui-*`, `qa-bdd-*` and `qa-mobile-*` agents.
 
-**Status:** T1, J1 and N1 landed 2026-10-10: the TypeScript Playwright 1.64 writer (SKILL.md, four
+**Status:** T1, J1, N1 and T2 landed 2026-10-10: the TypeScript Playwright 1.64 writer (SKILL.md, four
 references, six assets), the Java Playwright 1.63 writer (SKILL.md, four references, nine assets around one
 parallel-safe `BaseTest` on allure-java 3.0) and the .NET Playwright 1.63 writer (SKILL.md, four references,
 eight assets: CPM props, a versionless `UiTests.csproj`, `ui.runsettings`, `BaseTest : PageTest`, a
 root-namespace `AuthSetup`), each with its stack's `ui-test-author/review` and `page-object-design` aligned;
-.NET `ui-project-setup` now scaffolds from those assets with a v1.63.0-noble Dockerfile. Built but
-unverified: no asset has been compiled or run (G1 does that; D24's TS config import, the Java build on Allure
-Gradle plugin 4.3.0, and the .NET build on NUnit3TestAdapter 6.3.1 / Test SDK 18.10.1 are the open risks).
+.NET `ui-project-setup` now scaffolds from those assets with a v1.63.0-noble Dockerfile. T2 added
+`qa/typescript/skills/evidence-capture` (SKILL.md + `references/playwright.md`), loaded by `qa-ui-typescript`
+Step 1 / Mode A and `qa-bdd-typescript` Step 4, and put TS `test-reports`, `flaky-test-quarantine`,
+`ci-conventions` (one Allure CLI pin, `allure-commandline@2.46.1`) and the three TS CI references on the
+canonical config (D35–D37). Next: J2. Built but unverified: no asset, workflow or pipeline has been compiled
+or run (G1 does that; D24's TS config import, the Java build on Allure Gradle plugin 4.3.0, the .NET build on
+NUnit3TestAdapter 6.3.1 / Test SDK 18.10.1, and T2's `dorny/test-reporter` `java-junit` parse of Playwright's
+junit are the open risks).
 Planned 2026-10-10. The research behind it is committed with this plan:
 `docs/research/003-qa-playwright-appium/` (5 files). So is the read-only audit:
 `docs/audits/003-qa-playwright-appium/` (4 files). All open questions were answered on 2026-10-10:
@@ -25,7 +30,7 @@ Planned 2026-10-10. The research behind it is committed with this plan:
 - A Maestro lane is added (X1).
 - The newest Appium client majors are primary.
 
-Next: T2 (H1, the user's, blocks no task). The cost is 19 agent sessions on the subscription, each started by the user
+Next: J2 (H1, the user's, blocks no task). The cost is 19 agent sessions on the subscription, each started by the user
 from Plan Queue. Nothing else is metered.
 
 ## 1. What already exists, and what is missing
@@ -654,6 +659,30 @@ from the assets (chosen). **Cost:** `api-project-setup`, `performance-project-se
 `mobile-project-setup` still say `PlaywrightTests` and two of them install the `allure` tool, until M3
 (mobile) and G1 (the other two) reconcile them.
 
+**D35 — TS quarantine is a command-line filter on the canonical config's projects, not two extra projects
+(T2, 2026-10-10).** The old `flaky-test-quarantine` added `gate` and `quarantine` projects (with
+`retries: 3` on the second). Readings: keep those projects in the config (rejected: the config asset is
+T1's, its `setup` dependency would have to be repeated on both, and the quarantine retries break D7), or
+run the gate with `--grep-invert @flaky` and the quarantine lane as a separate, non-gating job with
+`--grep @flaky` (chosen). It must be a separate job because each Playwright run cleans `test-results/` at
+its start. **Cost:** every TS CI reference's UI command carries `--grep-invert @flaky`.
+
+**D36 — The TS GitHub Actions Allure publish generates the report with the pinned CLI instead of
+`simple-elf/allure-report-action` (T2, 2026-10-10).** Readings: keep the action (it bundles its own Allure
+version, a second, unpinned CLI next to `ci-conventions`' one), or `npm i -g allure-commandline@2.46.1` plus
+`actions/setup-java@v5`, then `peaceiris/actions-gh-pages` (chosen). **Cost:** one more step, and the
+action's per-run `keep_reports` folders are gone; `gh-pages` holds the latest report with its trend
+history.
+
+**D37 — The merged `playwright-report/` is uploaded whenever `merge-reports` runs; `test-results/` is the
+failure-only upload (T2, 2026-10-10).** T2's prompt says "on failure, upload `test-results/` and
+`playwright-report/`", but on CI the config writes no `html` reporter, so `playwright-report/` exists only
+after the merge job. Readings: upload the merged report only when a shard failed (a green run has no HTML
+report), or upload it from the merge job on every run (chosen; under `retain-on-failure` a green run's
+report carries no traces or videos). GitLab has one `artifacts:` block per job, so its `e2e` job carries
+`test-results/` on every run; it only holds evidence for failed tests plus `junit.xml`. **Cost:** a small
+HTML artifact on green runs, kept 14 days.
+
 ## Answered questions (2026-10-10)
 
 **O1 — Which Playwright version per stack: 1.64 for Node only; Java and .NET follow when their packages
@@ -1016,6 +1045,57 @@ reporting and CI skills use the same evidence modes, paths and Allure import.
   - One Allure CLI pin. Keep it otherwise unchanged.
 - Add `./qa/typescript/skills/evidence-capture` to the `qa-typescript` plugin and a catalog row (R9).
 - **Not in T2:** Appium evidence (M1); MCP grants (A1); visual-diff evidence (T3).
+- **As built (2026-10-10):**
+  - Landed: `evidence-capture/SKILL.md` (12.0k chars; body 11.4k; description 499) and
+    `references/playwright.md` (16.5k; §1 screenshots … §11 size and CI). Both agents wired. `test-reports`
+    rewritten (body 15.7k), `flaky-test-quarantine` rewritten to D7, `ci-conventions` gained the
+    `--update-snapshots` rule and the one Allure pin, and all three TS CI references were rewritten for the
+    canonical config. Marketplace entry and one catalog row added.
+  - Checked live today: `allure-commandline` npm latest **2.46.1** = allure2 release 2.46.1 (2026-09-03);
+    Allure Report 3 is npm `allure` 3.20.1 (named, not pinned). allure-js 3.13.0 sources: `issue(url, name)`
+    takes the URL first; `attachment(name, content, options)` accepts `{ contentType }`; allure-vitest's
+    reporter registers its setup module itself. Playwright v1.64.0 docs: `outputDir` "is cleaned at the
+    start"; blob names are `report-<hash>-<shard>.zip`; the CI examples use `actions/checkout@v6`,
+    `setup-node@v6`, `upload-artifact@v5`, `download-artifact@v5`, `setup-java@v5`, a container job with
+    `options: --user 1001`, and Azure steps set `CI: 'true'`.
+  - Differed from the plan: quarantine by `--grep-invert @flaky` / `--grep @flaky` in separate jobs, not
+    config projects (D35); the GitHub Allure publish uses the pinned CLI, not `simple-elf` (D36); the merged
+    `playwright-report/` uploads whenever the merge runs and `test-results/` is the failure-only upload
+    (D37). T1's junit path `test-results/junit.xml` is kept; every CI reference publishes it, and the config
+    asset is unchanged. The WebdriverIO failure hook in `test-reports` (it took two screenshots) is gone;
+    WDIO failure evidence now defers to evidence-capture's Appium reference (M1). Beyond the plan, the
+    rewritten CI references fix `${{ env.NODE_VERSION }}` in reusable workflows (callers' `env` is not
+    inherited) with `node-version-file: .nvmrc`, bump the GitHub actions to the majors the Playwright 1.64
+    docs use, add a Java runtime to the GitLab `pages` job, and fetch `BASE_URL` / `E2E_USER` /
+    `E2E_PASSWORD` through OIDC in every UI job (T1's setup project needs them).
+  - Names assigned: exploratory evidence goes to `evidence/<YYYY-MM-DD>-<topic>/` (explicit filenames;
+    MCP auto-names stay in `.playwright-mcp/`); fixtures in the reference are `evidence` (`screenshot(name)`),
+    `receipt` (`chapter(title)`, `receipt.webm`) and `networkHar` (auto, `network.har`); CI artifacts
+    `blob-report-<n>` (1 day), `test-results-<n>` (failure, 14 days), `playwright-report` (14 days),
+    `allure-results-ui-<n>` / `allure-results-e2e-<n>` (30 days); the Allure CLI pin
+    `allure-commandline@2.46.1`.
+  - Built, unverified (Gate: none): no workflow, pipeline or sample ran. `dorny/test-reporter` parses
+    Playwright's junit with `reporter: java-junit` (not run); the GitLab `e2e` job assumes the AWS CLI in the
+    Playwright image, as `api-tests` already did with the Node image; whether a screencast's `path` is still
+    written when tracing or video already runs a screencast is untested (research §4.3 says only that the
+    existing configuration wins). One check did run: `python3 -m json.tool .claude-plugin/marketplace.json`
+    (exit 0) after the marketplace edit — G1's §6.1 step 1, run early.
+  - Left for later tasks: `import { allure } from 'allure-playwright'` remains in `visual-regression`
+    (`percy.md`, `applitools.md`, `playwright-snapshots.md`), `accessibility-testing` (`axe-playwright.md`,
+    `lighthouse-ci.md`) — T3 — and `browser-cloud-setup/references/details.md` — T4 (trap added to T4's
+    prompt). J2/N2 extend T2's catalog row rather than adding their own (prompts updated).
+  - Proof: `name: qa-evidence-capture-typescript` and the Appium placeholder at
+    `qa/typescript/skills/evidence-capture/SKILL.md:2,13`; R7 defaults and paths `:59`; exploratory MCP ↔ CLI
+    table `:112`; trace reading order `:134`; PII `:151`; stop-before-close `:100` and
+    `references/playwright.md:131,155`. Agents: Step 1 `qa/typescript/agents/qa-ui-typescript.md:113`, Mode A
+    trace reading `:85`, BDD Step 4 `qa/typescript/agents/qa-bdd-typescript.md:107`. `allure-js-commons`
+    import `qa/reporting/typescript/skills/test-reports/SKILL.md:110,144,167`, `resultsDir` / no
+    `outputFolder` `:73`, pin `:52,70`. `flaky-test-quarantine/SKILL.md:12,16`. `ci-conventions/SKILL.md:29,78,90`.
+    CI: junit `github-actions.md:286`, `gitlab-ci.md:209`, `azure-pipelines.md:148`; failure upload
+    `github-actions.md:303`, `azure-pipelines.md:161`, `gitlab-ci.md:207`; merge `github-actions.md:334`,
+    `gitlab-ci.md:217`, `azure-pipelines.md:187`; image `gitlab-ci.md:188`, `github-actions.md:348`,
+    `azure-pipelines.md:200`; `CI: 'true'` `azure-pipelines.md:139`. Marketplace `.claude-plugin/marketplace.json:383`;
+    catalog `docs/skills-catalog.md:60`.
 
 ### J2 — Java evidence capture: the new skill, agent wiring, reporting and CI
 
@@ -1711,72 +1791,9 @@ Run them in order, one session each, opened from Plan Queue. Each block is compl
 | X1 | `docs` | `general-purpose` | M1, S1, T2 | ~130k |
 | G1 | `docs` | `general-purpose` | all | ~145k |
 
-Landed: T1, J1, N1 (2026-10-10). Every other block is live.
+Landed: T1, J1, N1, T2 (2026-10-10). Every other block is live.
 
 ---
-
-### T2 — TypeScript evidence capture: the new skill, agent wiring, reporting and CI (general-purpose, docs)
-
-````
-You are `general-purpose`. Task T2 of docs/plans/003-qa-playwright-appium-upgrade.md: create
-qa/typescript/skills/evidence-capture (qa-evidence-capture-typescript) per §3.2, wire it into
-qa-ui-typescript and qa-bdd-typescript, and make the TS reporting and CI skills agree with it.
-
-Read, in this order:
-1. CLAUDE.md.
-2. The plan: §3.2, §4 (R7 and R9), §5.1, Decisions D4 and D7, task T2, "Close-out — every task".
-3. T1's output: qa/typescript/skills/ui-test-author/playwright/assets/playwright.config.ts and
-   references/config-and-fixtures.md.
-4. docs/research/003-qa-playwright-appium/playwright-evidence.md §0–§9 and §11.1;
-   playwright-agent-tooling.md §7c.
-5. qa/typescript/agents/qa-ui-typescript.md and qa-bdd-typescript.md (the loading protocol, the
-   brownfield Mode A section, the Steps table).
-6. qa/reporting/typescript/skills/test-reports/SKILL.md, qa/reporting/typescript/skills/flaky-test-quarantine/SKILL.md,
-   qa/cicd/typescript/skills/ci-pipelines/references/{github-actions,gitlab-ci,azure-pipelines}.md,
-   qa/cicd/ci-conventions/SKILL.md.
-7. docs/audits/003-qa-playwright-appium/typescript.md §2.5 and rows D3–D5, C6, C8, C23, C24, L3–L6.
-
-Build:
-- evidence-capture/SKILL.md and references/playwright.md, per §3.2. SKILL.md gets a placeholder line:
-  "Appium: references/appium.md, written by M1". The description follows R9. Exploratory capture lists
-  the MCP tools and their playwright-cli equivalents (video-start/stop, tracing-start/stop, screenshot)
-  per §3.8 and playwright-agent-tooling.md §5.
-- qa-ui-typescript.md: Step 1 loads the skill + reference. Brownfield Mode A reads the failure trace
-  with `npx playwright trace open <zip>` / `actions` / `errors` before changing code.
-  qa-bdd-typescript.md: Step 4 loads the skill. Do not touch tools: frontmatter (A1 owns it).
-- test-reports: allure-playwright 3 resultsDir; `import * as allure from 'allure-js-commons'`
-  everywhere; awaited attachments; native evidence defers to evidence-capture; one Allure CLI pin.
-- flaky-test-quarantine: retries defer to ci-conventions (D7). Detection comes from Allure history plus
-  a nightly --repeat-each.
-- CI references:
-  - mcr.microsoft.com/playwright:v1.64.0-noble, or npx playwright install --with-deps; not the
-    archived GitHub Action.
-  - Blob per shard → merge-reports.
-  - junit produced wherever it is published. T1's config writes it on CI to test-results/junit.xml;
-    publish that path, or change it in the config asset and say so in your As built.
-  - On failure, upload test-results/ and playwright-report/.
-  - Retries 0; trace retain-on-failure.
-  - The config owner is ui-test-author/playwright/assets/playwright.config.ts.
-- ci-conventions: Playwright --update-snapshots never runs in CI; the Allure CLI pin matches test-reports.
-- Add ./qa/typescript/skills/evidence-capture to the qa-typescript plugin in .claude-plugin/marketplace.json,
-  and a row in docs/skills-catalog.md.
-
-Traps:
-- qa-ui-typescript may not load qa/reporting. Everything the UI agent needs to capture evidence lives in
-  evidence-capture, and test-reports only maps it into Allure.
-- Video has the same 7 modes as trace since 1.61. Screenshot modes are off / on / only-on-failure /
-  on-first-failure. Many docs tables list fewer (evidence §12.4).
-- A screencast is lost if the page closes before stop() (issue #41608). Teach stop-before-close.
-- T1 already links qa/typescript/skills/evidence-capture from ui-test-author/playwright/SKILL.md and
-  references/config-and-fixtures.md §1 and §9 (the VP9 line). Create the skill at exactly that path.
-- Check the Allure CLI 2.x version live (npm allure-commandline or the allure2 releases). Do not copy
-  2.27.0 or 2.30.0.
-
-Gate: none. This plan gates once, in G1. Do not run any build, test or check script.
-
-Commit: `docs(qa-ts): evidence-capture skill, agent wiring, reporting and CI alignment (003 T2)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
 
 ### J2 — Java evidence capture: the new skill, agent wiring, reporting and CI (general-purpose, docs)
 
@@ -1796,6 +1813,10 @@ Read, in this order:
 6. qa/reporting/java/skills/{test-reports,flaky-test-quarantine}/SKILL.md;
    qa/cicd/java/skills/ci-pipelines/references/{github-actions,gitlab-ci,azure-pipelines}.md.
 7. docs/audits/003-qa-playwright-appium/java.md §2d and rows D15, D17–D19, D42, D43, V5.
+8. Optional, for parity: T2's qa/typescript/skills/evidence-capture/SKILL.md (the section set: Versions,
+   Who owns what, the three kinds of capture, failure-evidence defaults + paths, deliberate recordings,
+   exploratory capture, reading a failure, PII and retention, Rules, Handoffs; the Appium placeholder
+   sits under the intro paragraph).
 
 Build:
 - evidence-capture/SKILL.md and references/playwright.md with Java spellings:
@@ -1813,15 +1834,19 @@ Build:
   ui-test-author/playwright step. Leave tools: frontmatter alone (A1).
 - test-reports: delete the broken failure attacher and defer to BaseTest. Allure 3.0 adapter, steps and
   attachments, with one pin set. Check live which report generator reads allure-java 3.0 results
-  (allure2 commandline or Allure Report 3) and pin it. If it differs from the ci-conventions pin T2
-  set, make ci-conventions per-stack and record a dated decision.
+  (allure2 commandline or Allure Report 3) and pin it. T2 set the ci-conventions pin to
+  `allure-commandline@2.46.1` (allure2 2.46.1, Allure Report 2, installed with
+  `npm i -g allure-commandline@2.46.1` on a runner with a Java runtime). If Java needs a different
+  generator, make ci-conventions per-stack and record a dated decision.
 - flaky-test-quarantine: D7.
 - CI references:
   - UI job in mcr.microsoft.com/playwright/java:v1.63.0-noble, or ./gradlew installPlaywrightBrowsers.
   - Drop -Pheadless.
   - Upload build/playwright-artifacts/ on failure.
   - Add a Playwright-for-Java UI job to Azure Pipelines.
-- Add ./qa/java/skills/evidence-capture to qa-java in the marketplace, and a catalog row.
+- Add ./qa/java/skills/evidence-capture to qa-java in the marketplace. In docs/skills-catalog.md, extend
+  the `evidence-capture` row T2 added under **Authoring** (it ends "— typescript (java · dotnet next)")
+  to name java, instead of adding a second row.
 
 Traps:
 - Raw context.tracing does not record expect() calls (evidence §12.7). Say so; Java has no runner tracing.
@@ -1866,6 +1891,8 @@ Read, in this order:
 6. qa/reporting/dotnet/skills/{test-reports,flaky-test-quarantine}/SKILL.md;
    qa/cicd/dotnet/skills/ci-pipelines/references/{azure-pipelines,github-actions,gitlab-ci}.md.
 7. docs/audits/003-qa-playwright-appium/dotnet.md rows T2, T6, C-04, C-05, C-08, D-13, D-31, §3f.
+8. Optional, for parity: T2's qa/typescript/skills/evidence-capture/SKILL.md (its section set; the Appium
+   placeholder sits under the intro paragraph).
 
 Build:
 - evidence-capture/SKILL.md and references/playwright.md with .NET spellings:
@@ -1889,7 +1916,11 @@ Build:
     per shard.
   - mcr.microsoft.com/playwright/dotnet:v1.63.0-noble (no jammy).
   - Upload bin/<cfg>/net10.0/playwright-artifacts/ on failure.
-- Add ./qa/dotnet/skills/evidence-capture to qa-dotnet in the marketplace, and a catalog row.
+- Add ./qa/dotnet/skills/evidence-capture to qa-dotnet in the marketplace. In docs/skills-catalog.md, extend
+  the `evidence-capture` row T2 added under **Authoring** to name dotnet (once J2 has added java, the
+  stack list reads "— java · dotnet · typescript"), instead of adding a second row.
+- Any Allure report CLI in .NET test-reports or the .NET CI references uses the ci-conventions pin T2 set,
+  `allure-commandline@2.46.1` (needs a Java runtime), unless J2 recorded a per-stack split.
 
 Traps:
 - Microsoft.Playwright.NUnit has no sharding. The adapter prints "Playwright>Shard is not implemented".
@@ -2012,6 +2043,10 @@ Read, in this order:
 2. The plan: §2.1, §2.2, §4, task T3, "Close-out — every task".
 3. Every .md under qa/typescript/skills/visual-regression, accessibility-testing and network-mocking.
 4. T1's qa/typescript/skills/ui-test-author/playwright/references/assertions.md (to link it, not repeat it).
+   T2's qa/typescript/skills/evidence-capture/SKILL.md and references/playwright.md §5–§6: HAR
+   recording (`tracing.startHar` fixture, `contextOptions.recordHar`) and `testInfo.attach` live there, so
+   network-mocking keeps replay (`routeFromHAR`) and links the recording side. T2's test-reports already
+   says WebP baselines get no Allure diff widget; the visual skill links it.
 5. docs/research/003-qa-playwright-appium/playwright-evidence.md §2, §3, §6; playwright-releases.md §(d).
 6. docs/audits/003-qa-playwright-appium/typescript.md rows D1, D2, D6, D9–D11, G1, C3, C5–C8, C11,
    C14–C18, C20, C24, C25, C27, L15, L17, L20–L23.
@@ -2198,6 +2233,10 @@ Build:
 Traps:
 - Write versions as exact pins ("@playwright/test": "1.64.0"). G1's checker compares them to §2.
 - Node 20 is EOL. Write 24 (22 maintenance), never "Node ≥ 20".
+- browser-cloud-setup/references/details.md:223-232 still has `import { allure } from 'allure-playwright'`
+  and un-awaited `allure.*` calls in a sync helper (aTS D3, C8). Use `import * as allure from
+  'allure-js-commons'`, awaited, or `testInfo.attach` (evidence-capture §6), as T2's test-reports does;
+  G1's CODE_CHECKS bans the old import in code blocks.
 
 Gate: none. This plan gates once, in G1. Do not run any build, test or check script.
 
@@ -2386,6 +2425,13 @@ Traps:
 - Recording limits: Android startRecordingScreen gives 180 s per chunk. mobile: startMediaProjectionRecording
   needs Android 10+. iOS needs ffmpeg, and mobile: startXCTestScreenRecording needs iOS 17+ (appium.md §4).
 - appium-mcp tools: use exactly §5.3's names. G1's check fails on any other.
+- T2's evidence-capture/SKILL.md carries the placeholder "Appium: `references/appium.md`, written by M1"
+  as its own line under the intro paragraph; replace that line with the link. The SKILL.md has a "Who owns
+  what" table and a "three kinds of capture" table; add the Appium rows there rather than a parallel
+  section. T2's qa/reporting/typescript/skills/test-reports already defers WebdriverIO/Appium failure
+  evidence to "the base test's afterTest hook, explained in evidence-capture (its Appium reference)", so
+  the hook M1 writes is that hook. test-reports is not M1's file; if the wording no longer fits, say so in
+  As built for G1.
 
 - Leave two things to plan 002 (docs/plans/002-mobile-plugins.md) W1, per D21: line 10 of
   mobile-screen-explorer/SKILL.md (the React Native testID mapping) and the agent's "Related agents"

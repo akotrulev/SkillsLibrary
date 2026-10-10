@@ -1,8 +1,10 @@
 # QA — GitHub Actions for TypeScript Test Suites
 
-Authors `.github/workflows/*.yml` that run Vitest / Jest / Playwright / Testcontainers-backed integration tests on GitHub-hosted `ubuntu-latest` runners using Node 24 + TypeScript (strict), shard for speed via `strategy.matrix`, publish Allure (and/or Playwright's own HTML report) to GitHub Pages with history, fail on real failures (not flakes), and pull secrets via OIDC federated credentials rather than PATs or stored cloud secrets.
+Authors `.github/workflows/*.yml` that run Vitest / Jest / Playwright / Testcontainers-backed integration tests on GitHub-hosted `ubuntu-latest` runners using Node 24 + TypeScript (strict), shard for speed via `strategy.matrix`, publish Allure (and Playwright's own HTML report) to GitHub Pages with history, fail on real failures, and pull secrets via OIDC federated credentials rather than PATs or stored cloud secrets.
 
 This is a port across two axes: the .NET GitHub Actions reference (`qa/cicd/dotnet/skills/ci-pipelines`, GitHub Actions idioms) and this skill's Azure Pipelines reference (`references/azure-pipelines.md`, Node/TS tooling). Same patterns — shard, OIDC, Allure history, JUnit upload, retry policy, perf gate — re-expressed for the Actions runtime. **TypeScript is the most Actions-native of the three stacks**: Playwright ships first-class `--shard=i/N` and an official `blob` reporter → `merge-reports` flow, so the UI job replaces the per-shard Allure-merge dance with a single merge step. k6 stays the perf tool (JS-native here, same exit-99 gate as the dotnet sibling).
+
+**The Playwright config is not written here.** `qa/typescript/skills/ui-test-author/playwright/assets/playwright.config.ts` owns it: on CI it writes `blob` (to `blob-report/`), `junit` (to `test-results/junit.xml`) and `allure-playwright` (to `allure-results/`), with `retries: 0`, trace and video `retain-on-failure`, and `updateSnapshots: 'none'`. The workflow runs that config as is; it never overrides `--reporter` or the evidence modes on the command line. What the evidence is and how to read it is `qa/typescript/skills/evidence-capture`.
 
 ## When to use
 
@@ -26,7 +28,7 @@ Ask at most 3 questions.
 
 1. Which test runners? (Vitest, Jest, Playwright, k6 — and which package dirs)
 2. Sharding fan-out? (default: 4 runners for Playwright UI, 2 for Vitest API/integration, 1 for perf)
-3. Report destination? (default: Playwright HTML for UI + Allure on GitHub Pages via `gh-pages` with `keep_files`; artifact-only when Pages is unavailable)
+3. Report destination? (default: Playwright HTML for UI + Allure on GitHub Pages via `gh-pages`; artifact-only when Pages is unavailable)
 
 Infer everything else from `package.json`, `playwright.config.ts`, `vitest.config.ts`, the lockfile (`pnpm-lock.yaml` / `package-lock.json` / `yarn.lock`), and any existing workflows under `.github/workflows/`.
 
@@ -35,15 +37,16 @@ Infer everything else from `package.json`, `playwright.config.ts`, `vitest.confi
 | Concern | Default | Override when |
 |---|---|---|
 | Runner | `ubuntu-latest` (Docker pre-installed) | Self-hosted only for proprietary hardware (mobile farm, GPU) |
-| Node | 20 LTS via `actions/setup-node@v4`, version pinned by `.nvmrc` | Newer LTS only after 3 mo GA |
-| Package manager / cache | Detect from lockfile; `actions/setup-node@v4` with `cache: 'pnpm'` (or `npm`/`yarn`) + `pnpm install --frozen-lockfile` (or `npm ci`) | Match whatever the repo already uses — never switch managers in a CI PR |
+| Node | 24 (22 maintenance) via `actions/setup-node@v6` with `node-version-file: .nvmrc` | Newer LTS only after 3 mo GA |
+| Browsers | `pnpm exec playwright install --with-deps chromium` | Run the job in `mcr.microsoft.com/playwright:v1.64.0-noble` when visual baselines are compared (the tag equals the `@playwright/test` version). Never the archived `microsoft/playwright-github-action` |
+| Package manager / cache | Detect from lockfile; `actions/setup-node@v6` with `cache: 'pnpm'` (or `npm`/`yarn`) + `pnpm install --frozen-lockfile` (or `npm ci`) | Match whatever the repo already uses — never switch managers in a CI PR |
 | Triggers | `pull_request: [main]` + nightly `schedule` cron | `push` on main only when the suite is < 5 min |
-| Test reporter | Vitest/Jest: JUnit XML (`vitest --reporter=junit` / `jest-junit`) + Allure adapter. Playwright: `blob` in CI + `allure-playwright` | Always emit a JUnit-shaped XML for `dorny/test-reporter`; Playwright's HTML can stand in for Allure on UI-only repos |
+| Test reporter | Vitest/Jest: JUnit XML (`vitest --reporter=junit` / `jest-junit`) + Allure adapter. Playwright: the config's `blob` + `junit` + `allure-playwright` on CI | Never a `--reporter` override for Playwright — it drops the config's reporters |
 | Sharding | `strategy.matrix` with `fail-fast: false`; Playwright `--shard=i/N`, Vitest `--shard=i/N` (≥1.4) | Pre-computed bin file via an upstream `setup` job for uneven fixtures |
 | Auth to Azure / AWS / Key Vault | OIDC federated credential (`id-token: write`) | Never PATs, never stored long-lived cloud secrets |
-| Retry on failure | **Off at the workflow level**; `playwright.config.ts → retries: 0` in CI | Per-project `retries` / `test.fixme` only for documented flake hotspots — never blanket retry |
+| Retry on failure | **Off at the workflow level**; `retries: 0` in the Playwright config (`ci-conventions`) | A documented hotspot `describe` per `flaky-test-quarantine` — never blanket retry |
 | Concurrency | `concurrency` group per ref, `cancel-in-progress: true` for PRs | Keep nightly runs un-cancelled (`cancel-in-progress: false`) |
-| Artifact retention | 14 days for traces/videos/HAR, 30 days for JUnit + blob reports, Allure history persisted on `gh-pages` | Bump only with a stated reason (compliance, post-mortem window) |
+| Artifact retention | Failure evidence (`test-results/`, merged `playwright-report/`) 14 days; blobs 1 day; JUnit + Allure results 30 days; Allure history on `gh-pages` | Bump only with a stated reason (compliance, post-mortem window) |
 | Perf gate | k6 thresholds → script exit code 99 → step fails | Soft gate (`continue-on-error`) only while a baseline is being established |
 
 ## Templates
@@ -57,21 +60,17 @@ on:
   pull_request:
     branches: [main]
   schedule:
-    - cron: "0 2 * * *"   # nightly full suite
+    - cron: "0 2 * * *"
   workflow_dispatch:
 
-# Cancel superseded PR runs; never cancel nightly.
 concurrency:
   group: qa-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 permissions:
   contents: read
-  checks: write          # dorny/test-reporter publishes a Checks summary
-  id-token: write        # OIDC token for azure/login — NOT repo write
-
-env:
-  NODE_VERSION: '24'
+  checks: write
+  id-token: write
 
 jobs:
   api-tests:
@@ -98,11 +97,14 @@ jobs:
 
   publish-allure:
     needs: [api-tests, integration-tests, ui-tests]
-    if: ${{ !cancelled() }}     # publish even when a test job failed
+    if: ${{ !cancelled() }}
     uses: ./.github/workflows/_allure-publish.yml
 ```
 
-`if: ${{ !cancelled() }}` is the Actions equivalent of Azure's `condition: always()` minus the cancelled case — you want the report on red, but not on a user-cancelled run. The `ui-tests` reusable workflow merges its own Playwright blob reports internally (see below); `publish-allure` aggregates the Allure results from every job.
+- The `schedule` cron is the nightly full suite; `concurrency` cancels superseded PR runs and never a nightly.
+- `checks: write` lets `dorny/test-reporter` publish a Checks summary; `id-token: write` grants an OIDC token for `azure/login`, not repo write.
+- `if: ${{ !cancelled() }}` is the Actions equivalent of Azure's `condition: always()` minus the cancelled case — you want the report on red, but not on a user-cancelled run. The `ui-tests` reusable workflow merges its own Playwright blob reports (see below); `publish-allure` aggregates the Allure results from every job.
+- Reusable workflows do not inherit the caller's `env`, so every job reads the Node version from `.nvmrc`.
 
 ### Sharded Vitest job — `.github/workflows/_api-tests.yml`
 
@@ -119,21 +121,20 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     strategy:
-      fail-fast: false       # one shard failing must not kill the others
+      fail-fast: false
       matrix:
-        shard-index: [1, 2]  # length must equal shard-total
+        shard-index: [1, 2]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with: { fetch-depth: 1 }
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'      # match the repo's lockfile: 'pnpm' | 'npm' | 'yarn'
+          node-version-file: .nvmrc
+          cache: 'pnpm'
 
       - run: pnpm install --frozen-lockfile
 
-      # OIDC → Azure, then pull secrets from Key Vault. No stored secrets.
       - uses: azure/login@v2
         with:
           client-id: ${{ vars.AZURE_CLIENT_ID }}
@@ -161,11 +162,11 @@ jobs:
         with:
           name: API shard ${{ matrix.shard-index }}
           path: 'reports/junit-api-*.xml'
-          reporter: jest-junit       # parses Vitest/Jest JUnit XML
-          fail-on-error: true        # red the check on real test failures
+          reporter: jest-junit
+          fail-on-error: true
 
       - name: Upload JUnit results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         if: ${{ !cancelled() }}
         with:
           name: junit-api-${{ matrix.shard-index }}
@@ -173,7 +174,7 @@ jobs:
           retention-days: 30
 
       - name: Upload Allure results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         if: ${{ !cancelled() }}
         with:
           name: allure-results-api-${{ matrix.shard-index }}
@@ -181,7 +182,7 @@ jobs:
           retention-days: 30
 ```
 
-`vitest run --shard=i/N` (Vitest ≥1.4) splits the suite deterministically across runners — the `matrix.shard-index` array length **must equal** `shard-total`; GitHub Actions has no `strategy: parallel: N` shorthand like Azure, so the array is the source of truth. For Jest, swap to `jest --shard=${{ matrix.shard-index }}/${{ inputs.shard-total }}` and configure the `jest-junit` reporter in `jest.config.ts`. For dynamic/uneven sharding, compute the matrix JSON in an upstream `setup` job and pass it via `fromJSON(needs.setup.outputs.matrix)` — never re-discover tests at runtime per shard.
+`vitest run --shard=i/N` (Vitest ≥1.4) splits the suite deterministically across runners — the `matrix.shard-index` array length **must equal** `shard-total`; GitHub Actions has no `strategy: parallel: N` shorthand like Azure, so the array is the source of truth. `fail-fast: false` keeps one failing shard from killing the others. The secrets come from Key Vault through OIDC, with no stored secret, and each fetched value is masked before it reaches `$GITHUB_ENV`. `jest-junit` is the `dorny/test-reporter` parser for Vitest/Jest JUnit XML, and `fail-on-error: true` reds the check on real failures. For Jest, swap to `jest --shard=${{ matrix.shard-index }}/${{ inputs.shard-total }}` and configure the `jest-junit` reporter in `jest.config.ts`. For dynamic/uneven sharding, compute the matrix JSON in an upstream `setup` job and pass it via `fromJSON(needs.setup.outputs.matrix)` — never re-discover tests at runtime per shard.
 
 > Vitest's JUnit XML occasionally omits a `time` attribute that `dorny/test-reporter`'s `jest-junit` parser expects; if the check errors on a `time` undefined, pin `vitest` ≥1.6 or post-process the XML, rather than switching the reporter off.
 
@@ -198,10 +199,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version-file: .nvmrc
           cache: 'pnpm'
       - run: pnpm install --frozen-lockfile
 
@@ -229,7 +230,7 @@ jobs:
 
 ### Playwright UI shard with blob merge — `.github/workflows/_ui-tests.yml`
 
-Playwright's **native** sharding + `blob` reporter is the TS-native path: each shard writes a `blob-report/`, and a final `merge-reports` job stitches them into one HTML report (and one Allure result set). This replaces the per-shard Allure-merge dance the dotnet/java siblings need. Set `reporter: process.env.CI ? [['blob'], ['allure-playwright']] : 'html'` in `playwright.config.ts`, and `retries: 0` in CI.
+Playwright's **native** sharding + `blob` reporter is the TS-native path: each shard writes `blob-report/`, `test-results/` (the per-test failure evidence and `junit.xml`) and `allure-results/`; a final `merge-reports` job stitches the blobs into one HTML report with every trace, video and screenshot inside. This replaces the per-shard Allure-merge dance the dotnet/java siblings need.
 
 ```yaml
 on:
@@ -246,41 +247,64 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        shard-index: [1, 2, 3, 4]   # length must equal shard-total
+        shard-index: [1, 2, 3, 4]
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version-file: .nvmrc
           cache: 'pnpm'
       - run: pnpm install --frozen-lockfile
 
       - name: Install Playwright browsers + OS deps
         run: pnpm exec playwright install --with-deps chromium
 
+      - uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Fetch test credentials from Key Vault
+        run: |
+          echo "BASE_URL=$(az keyvault secret show --vault-name kv-qa --name base-url --query value -o tsv)" >> "$GITHUB_ENV"
+          echo "E2E_USER=$(az keyvault secret show --vault-name kv-qa --name e2e-user --query value -o tsv)" >> "$GITHUB_ENV"
+          PASSWORD=$(az keyvault secret show --vault-name kv-qa --name e2e-password --query value -o tsv)
+          echo "::add-mask::$PASSWORD"
+          echo "E2E_PASSWORD=$PASSWORD" >> "$GITHUB_ENV"
+
       - name: Run UI tests (shard ${{ matrix.shard-index }}/${{ inputs.shard-total }})
         run: |
-          pnpm exec playwright test \
+          pnpm exec playwright test --grep-invert @flaky \
             --shard=${{ matrix.shard-index }}/${{ inputs.shard-total }}
 
-      - name: Upload blob report
-        uses: actions/upload-artifact@v4
+      - name: Publish test report
+        uses: dorny/test-reporter@v1
         if: ${{ !cancelled() }}
         with:
-          name: blob-report-${{ matrix.shard-index }}   # unique per shard (v4 requirement)
-          path: blob-report
-          retention-days: 30
+          name: UI shard ${{ matrix.shard-index }}
+          path: test-results/junit.xml
+          reporter: java-junit
+          fail-on-error: true
 
-      - name: Upload traces (on failure only)
-        uses: actions/upload-artifact@v4
+      - name: Upload blob report
+        uses: actions/upload-artifact@v5
+        if: ${{ !cancelled() }}
+        with:
+          name: blob-report-${{ matrix.shard-index }}
+          path: blob-report
+          retention-days: 1
+
+      - name: Upload failure evidence
+        uses: actions/upload-artifact@v5
         if: failure()
         with:
-          name: playwright-traces-shard-${{ matrix.shard-index }}
+          name: test-results-${{ matrix.shard-index }}
           path: test-results
           retention-days: 14
 
       - name: Upload Allure results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         if: ${{ !cancelled() }}
         with:
           name: allure-results-ui-${{ matrix.shard-index }}
@@ -292,15 +316,15 @@ jobs:
     if: ${{ !cancelled() }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version-file: .nvmrc
           cache: 'pnpm'
       - run: pnpm install --frozen-lockfile
 
       - name: Download all blob reports
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           pattern: blob-report-*
           path: all-blob-reports
@@ -310,62 +334,68 @@ jobs:
         run: pnpm exec playwright merge-reports --reporter html ./all-blob-reports
 
       - name: Upload merged HTML report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
-          name: playwright-html-report
+          name: playwright-report
           path: playwright-report
-          retention-days: 30
+          retention-days: 14
 ```
 
-`download-artifact@v4` with `merge-multiple: true` collapses the per-shard `blob-report-*` artifacts into one folder; `merge-reports --reporter html` produces a single browsable report. On a UI-only repo you can stop here and skip Allure entirely — Playwright's HTML report with traces is a complete, lighter-weight deliverable. Keep the `allure-results-ui-*` upload only when the org standardizes on Allure across all suites.
+- The `junit.xml` the check publishes is the one the config writes on CI (`test-results/junit.xml`); the workflow never passes `--reporter`, which would replace the config's reporters and drop the blob and Allure output.
+- `test-results/` is uploaded **on failure only**: under `retain-on-failure` it holds the trace, video, screenshot and `error-context.md` of each failed test. The merged `playwright-report/` holds the same evidence for every shard and is uploaded whenever the merge runs; on a green run it carries no traces.
+- Blob names already carry the shard number, so `merge-multiple: true` collapses the per-shard artifacts into one folder without clashes.
+- `--grep-invert @flaky` keeps quarantined tests off the gate. They run in a separate, non-gating job (`pnpm exec playwright test --grep @flaky` with `continue-on-error: true`), per `qa/reporting/typescript/skills/flaky-test-quarantine` — a separate job, because each run cleans `test-results/` at its start.
+- **Running in the pinned image** instead of installing browsers: give the job `container: { image: mcr.microsoft.com/playwright:v1.64.0-noble, options: --user 1001 }` and drop the install step. The tag must equal the `@playwright/test` version. Visual baselines are only compared inside that image (`qa/typescript/skills/visual-regression`).
+- On a UI-only repo you can stop here and skip Allure entirely — the merged HTML report with traces is a complete deliverable. Keep the `allure-results-ui-*` upload when the org standardizes on Allure across all suites.
 
 ### Allure publish with history — `.github/workflows/_allure-publish.yml`
 
-History lives on a `gh-pages` branch. `peaceiris/actions-gh-pages` with `keep_files: true` preserves the prior report's `history/` folder; `simple-elf/allure-report-action` reads it back in so trend charts survive across runs. This is the Pages-native equivalent of the Azure-Blob history dance in the `azure-pipelines/typescript` sibling — no `allure-commandline` install needed.
+History lives on a `gh-pages` branch: the published report's `history/` folder is copied into the new results before `allure generate`, so trend charts survive across runs. The report is generated with the one Allure CLI pin, `allure-commandline@2.46.1` (`qa/cicd/ci-conventions`), which needs a Java runtime.
 
 ```yaml
 on:
   workflow_call:
 
 permissions:
-  contents: write    # push the generated report to gh-pages
+  contents: write
 
 jobs:
   publish-allure:
     runs-on: ubuntu-latest
     steps:
       - name: Download all Allure results
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           pattern: allure-results-*
           path: allure-results
           merge-multiple: true
 
       - name: Restore prior Allure history from gh-pages
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           ref: gh-pages
           path: gh-pages-prior
-        continue-on-error: true     # first-ever run has no gh-pages branch
+        continue-on-error: true
+
+      - uses: actions/setup-java@v5
+        with: { distribution: temurin, java-version: '21' }
 
       - name: Generate Allure report with history
-        uses: simple-elf/allure-report-action@v1.9
-        with:
-          allure_results: allure-results
-          allure_history: allure-history
-          gh_pages: gh-pages-prior
-          keep_reports: 30
+        run: |
+          npm i -g allure-commandline@2.46.1
+          mkdir -p allure-results/history
+          cp -r gh-pages-prior/history/. allure-results/history/ 2>/dev/null || true
+          allure generate allure-results -o allure-report --clean
 
       - name: Publish report to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: gh-pages
-          publish_dir: allure-history
-          keep_files: true          # preserve history/ across runs
+          publish_dir: allure-report
 ```
 
-When GitHub Pages is unavailable (private repo without Pages, policy restriction), drop the last two steps and upload `allure-history` as an artifact with `retention-days: 90` instead — you lose the hosted browse, not the report.
+`contents: write` is scoped to this job, which pushes the report. `continue-on-error: true` on the history checkout covers the first-ever run, which has no `gh-pages` branch — it is not a test step. When GitHub Pages is unavailable (private repo without Pages, policy restriction), drop the last step and upload `allure-report` as an artifact with `retention-days: 90` instead — you lose the hosted browse, not the report.
 
 ### k6 perf gate — `.github/workflows/_k6-perf.yml`
 
@@ -380,7 +410,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - uses: azure/login@v2
         with:
@@ -401,7 +431,7 @@ jobs:
         run: k6 run --out json=k6-summary.json perf/scenarios/checkout.js
 
       - name: Upload k6 summary
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         if: ${{ !cancelled() }}
         with:
           name: k6-summary
@@ -421,7 +451,7 @@ jobs:
 
 ### Package manager
 - **Detect the manager from the lockfile and match it** — `pnpm-lock.yaml` → pnpm, `package-lock.json` → npm, `yarn.lock` → yarn. Never switch managers in a CI PR.
-- Use `actions/setup-node@v4` with `cache: 'pnpm'` (or `npm`/`yarn`) — do not hand-roll `actions/cache` for `node_modules`/the store.
+- Use `actions/setup-node@v6` with `cache: 'pnpm'` (or `npm`/`yarn`) — do not hand-roll `actions/cache` for `node_modules`/the store.
 - **Frozen, reproducible installs only**: `pnpm install --frozen-lockfile` / `npm ci` / `yarn install --immutable`. Never bare `npm install` in CI.
 
 ### Sharding
@@ -430,8 +460,8 @@ jobs:
 - The `shard-index` array length **must equal** `shard-total`. GitHub Actions has no `strategy: parallel: N` shorthand — the array is the source of truth. For uneven suites, compute the matrix JSON in an upstream `setup` job and consume it with `fromJSON(needs.setup.outputs.matrix)` — never re-discover tests at runtime per shard.
 
 ### Reporters
-- Always emit a **JUnit-shaped XML** (`vitest --reporter=junit` / `jest-junit`) for `dorny/test-reporter` (`reporter: jest-junit`, a Checks summary on the PR) **plus** the human-facing report (Allure adapter, or Playwright's own HTML).
-- For Playwright, use the **`blob` reporter in CI** and merge with `npx playwright merge-reports` — this is the native sharded-report path and avoids the per-shard Allure merge.
+- Always emit a **JUnit-shaped XML** for `dorny/test-reporter` (a Checks summary on the PR) **plus** the human-facing report (Allure adapter, or Playwright's own HTML). Vitest/Jest: `vitest --reporter=junit` / `jest-junit`. Playwright: the config already writes `test-results/junit.xml` on CI — publish that file.
+- For Playwright, the config's **`blob` reporter** feeds `npx playwright merge-reports` — the native sharded-report path. Never override the reporters with `--reporter` in the workflow.
 - `fail-on-error: true` on every `test-reporter` step. The build must red on real failures. Vitest/Playwright already exit non-zero on failure — do not swallow it with `continue-on-error`.
 
 ### Secrets
@@ -442,14 +472,14 @@ jobs:
 
 ### Retry policy
 - **No workflow-level retry** of failed tests (no `nick-fields/retry` wrapping the test step, no re-run-failed automation). Retry hides bugs.
-- `playwright.config.ts → retries: 0` in CI. Per-project `retries` (or Vitest `test.retry`) is allowed only for documented network-flake hotspots (third-party sandboxes, infra warm-up). Document each one in a code comment with a date and an issue link.
+- `retries: 0` in the Playwright config (`qa/cicd/ci-conventions`). A documented network-flake hotspot opts in with `test.describe.configure({ retries: 1 })` on its own `describe`, carrying an `issue` annotation with the link and the date.
 - For genuinely flaky tests, quarantine via `qa/reporting/typescript/skills/flaky-test-quarantine` — do not auto-retry.
 
 ### Artifacts
-- JUnit results + Playwright blob/HTML reports: 30 days (`retention-days: 30`).
-- Playwright traces / videos / HAR: 14 days, **only on failure** (`if: failure()`) to keep storage bounded.
-- Allure: report + history persisted on `gh-pages` (or 90-day artifact when Pages is off).
-- `actions/upload-artifact@v4` requires **unique artifact names** per job — suffix with `${{ matrix.shard-index }}` (e.g. `blob-report-${{ matrix.shard-index }}`), or v4 fails the second upload. (This changed from v3's auto-merge behavior; the `merge-reports` job recombines them with `download-artifact@v4` + `merge-multiple: true`.)
+- Failure evidence: `test-results/` per shard **only on failure** (`if: failure()`), and the merged `playwright-report/` — 14 days.
+- Blob reports: 1 day; they only feed `merge-reports`.
+- JUnit results and Allure results: 30 days. Allure report + history persisted on `gh-pages` (or a 90-day artifact when Pages is off).
+- `actions/upload-artifact` requires **unique artifact names** per job — suffix with `${{ matrix.shard-index }}` (e.g. `blob-report-${{ matrix.shard-index }}`), or the second upload fails. The `merge-reports` job recombines them with `download-artifact` + `merge-multiple: true`.
 - Container logs (Testcontainers): attach to Allure/Playwright via the test reporter, not as a separate artifact.
 
 ### Perf gate
@@ -462,8 +492,9 @@ jobs:
 - No PATs / `GITHUB_TOKEN` for cross-cloud auth — use OIDC federation.
 - No `continue-on-error: true` on a test step to "make it green". Fix the test or quarantine it.
 - No bare `npm install` in CI — use `npm ci` / `pnpm install --frozen-lockfile` / `yarn --immutable` for reproducible installs.
-- No `playwright install` without `--with-deps` (missing system libs → silent browser crashes).
-- No reusing a static artifact name across matrix shards with v4 — it errors and breaks the blob merge.
+- No `playwright install` without `--with-deps` (missing system libs → silent browser crashes), and no `microsoft/playwright-github-action` (archived).
+- No `--reporter`, `--trace` or `--update-snapshots` on the Playwright command line in CI — the config owns all three.
+- No reusing a static artifact name across matrix shards — it errors and breaks the blob merge.
 - No `actions/*@main` or floating major-tag for **security-relevant** actions (`azure/login`, `actions-gh-pages`) — pin to a full SHA in regulated repos.
 - No printing of `$AUTH0_M2M_SECRET` (or any fetched secret) in any step, even with `|| true`.
 
@@ -474,18 +505,20 @@ jobs:
 3. Generate:
    - `.github/workflows/qa-tests.yml` (top-level orchestrator) if missing.
    - `.github/workflows/_{api,integration,ui}-tests.yml`, `_allure-publish.yml`, `_k6-perf.yml` as reusable workflows (`on: workflow_call`).
-   - Set `reporter: process.env.CI ? [['blob'], ['allure-playwright']] : 'html'` and `retries: 0` in `playwright.config.ts`; configure the JUnit reporter in `vitest.config.ts` / `jest.config.ts`.
-4. Configure one federated identity credential on the Azure AD app (or AWS IAM role) trusting `repo:ORG/REPO:ref:refs/heads/main` and `:pull_request`. Document the subject claim in the workflow header comment. Store `client-id` / `tenant-id` / `subscription-id` as repo `vars`.
+   - The Playwright config comes from `qa/typescript/skills/ui-test-author/playwright/assets/playwright.config.ts` (blob + junit + Allure on CI, `retries: 0`, evidence `retain-on-failure`); configure the JUnit reporter in `vitest.config.ts` / `jest.config.ts`.
+4. Configure one federated identity credential on the Azure AD app (or AWS IAM role) trusting `repo:ORG/REPO:ref:refs/heads/main` and `:pull_request`. Record the subject claim in the repo's CI README. Store `client-id` / `tenant-id` / `subscription-id` as repo `vars`.
 5. Validate locally with `actionlint` (and optionally `act` for a dry run), then open a draft PR and confirm every expected job, the merged Playwright report, and the Checks summary appear.
 
 ## Cross-references
 
 - **`qa/cicd/dotnet/skills/ci-pipelines`** + **`qa/cicd/java/skills/ci-pipelines`** — the same-CI siblings; consult for the NUnit/TRX and TestNG/JUnit variants (both need a per-shard Allure merge the Playwright `blob` flow avoids).
 - **`references/azure-pipelines.md`** — the Azure sibling this ports from; consult it for the variable-group / service-connection variant of the same Vitest/Playwright patterns.
-- **`qa/typescript/skills/ui-test-author/playwright`** — the `playwright.config.ts` (`blob`/`allure-playwright` reporters, `--shard`, traces) this workflow runs.
+- **`qa/typescript/skills/ui-test-author/playwright`** — owns `assets/playwright.config.ts`, the config this workflow runs.
+- **`qa/typescript/skills/evidence-capture`** — what lands in `test-results/` and `playwright-report/`, and how to read a downloaded trace.
 - **`qa/typescript/skills/db-testing/testcontainers`** — the integration-tests job runs these.
 - **`qa/typescript/skills/email-testing`** — pair Mailpit as a `services:` container or inline Testcontainers run.
 - **`qa/reporting/typescript/skills/test-reports`** — adapter wiring inside the test project that produces `allure-results/`.
+- **`qa/reporting/typescript/skills/flaky-test-quarantine`** — the `@flaky` tag the gate excludes, and the non-gating quarantine job.
 - **`qa/typescript/skills/load-testing`** — perf-job scripts; SLO contract in `qa/_shared/performance`.
 - **`devops/github-actions`** — non-QA workflow patterns (deploy, infra) live here.
-- **`qa/cicd/ci-conventions`** — cross-stack rules (artifact retention, OIDC) this skill enforces.
+- **`qa/cicd/ci-conventions`** — cross-stack rules (artifact retention, OIDC, the Allure CLI pin) this skill enforces.

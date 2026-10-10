@@ -380,6 +380,7 @@
         "./qa/typescript/skills/db-testing/verification-queries",
         "./qa/typescript/skills/db-testing/testcontainers",
         "./qa/typescript/skills/email-testing",
+        "./qa/typescript/skills/evidence-capture",
         "./qa/typescript/skills/feature-flag-testing",
         "./qa/typescript/skills/file-storage-testing",
         "./qa/typescript/skills/language-testing",

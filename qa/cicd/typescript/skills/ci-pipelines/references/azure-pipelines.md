@@ -2,6 +2,8 @@
 
 Authors `azure-pipelines.yml` for Vitest / Jest / Playwright / k6 suites on Microsoft-hosted Linux agents — sharded, Allure-published, OIDC-authenticated, with proper artifact retention and a hard perf gate.
 
+**The Playwright config is not written here.** `qa/typescript/skills/ui-test-author/playwright/assets/playwright.config.ts` owns it: on CI it writes `blob` (to `blob-report/`), `junit` (to `test-results/junit.xml`) and `allure-playwright` (to `allure-results/`), with `retries: 0`, trace and video `retain-on-failure`, and `updateSnapshots: 'none'`. Azure Pipelines does not set `CI` on its own, so every Playwright step sets `CI: 'true'`. What the evidence is and how to read it is `qa/typescript/skills/evidence-capture`.
+
 ## When to use
 
 - New QA pipeline for a TS test project (`api-tests`, `e2e`, `integration`)
@@ -28,12 +30,13 @@ Authors `azure-pipelines.yml` for Vitest / Jest / Playwright / k6 suites on Micr
 | Concern | Default | Override when |
 |---|---|---|
 | Agent pool | `ubuntu-latest` | Self-hosted only for proprietary hardware |
-| Node version | 20 LTS, pinned via `.nvmrc` | Newer LTS once it's been GA for 3 months |
-| Reporter | JUnit (`vitest --reporter=junit`) + Allure adapter | Always both |
+| Node version | 24 (22 maintenance) via `UseNode@1`, pinned by `.nvmrc` | Newer LTS once it's been GA for 3 months |
+| Browsers | `npx playwright install --with-deps chromium` | A container job on `mcr.microsoft.com/playwright:v1.64.0-noble` when visual baselines are compared (the tag equals the `@playwright/test` version) |
+| Reporter | Vitest: JUnit (`vitest --reporter=junit`) + Allure adapter. Playwright: the config's `blob` + `junit` + `allure-playwright` | Always both; never a `--reporter` override for Playwright |
 | Sharding | Playwright `--shard=i/N`; Vitest `vitest --shard` (since 1.4) | Pre-computed bin file when fixtures are uneven |
 | Auth | Workload Identity Federation (OIDC) | Never PATs |
-| Retry | **Off at pipeline level** | Per-test `test.retry()` only for documented flake hotspots |
-| Artifacts | 14 d traces/videos, 30 d JUnit, 90 d Allure | Stated reason to bump |
+| Retry | **Off at pipeline level**; `retries: 0` in the Playwright config (`ci-conventions`) | A documented hotspot `describe` per `flaky-test-quarantine` |
+| Artifacts | 14 d failure evidence and merged HTML report, 30 d JUnit, 90 d Allure | Stated reason to bump |
 | Perf gate | k6 thresholds → exit 99 → job fails | Soft gate only while baselining |
 
 ## Templates
@@ -93,7 +96,7 @@ stages:
       - template: pipelines/templates/allure-publish.yml
 ```
 
-### Playwright shard — `pipelines/templates/playwright.yml`
+### Playwright shard + merge — `pipelines/templates/playwright.yml`
 
 ```yaml
 parameters:
@@ -110,8 +113,8 @@ jobs:
     timeoutInMinutes: 45
     steps:
       - checkout: self
-      - task: NodeTool@0
-        inputs: { versionSpec: $(nodeVersion) }
+      - task: UseNode@1
+        inputs: { version: $(nodeVersion) }
 
       - script: npm ci
         displayName: Install deps
@@ -127,43 +130,74 @@ jobs:
           scriptLocation: inlineScript
           inlineScript: |
             echo "##vso[task.setvariable variable=BASE_URL;issecret=false]$(az keyvault secret show --vault-name kv-qa --name base-url --query value -o tsv)"
-            echo "##vso[task.setvariable variable=API_KEY;issecret=true]$(az keyvault secret show --vault-name kv-qa --name api-key --query value -o tsv)"
+            echo "##vso[task.setvariable variable=E2E_USER;issecret=false]$(az keyvault secret show --vault-name kv-qa --name e2e-user --query value -o tsv)"
+            echo "##vso[task.setvariable variable=E2E_PASSWORD;issecret=true]$(az keyvault secret show --vault-name kv-qa --name e2e-password --query value -o tsv)"
 
-      - script: |
-          npx playwright test \
-            --shard=$(System.JobPositionInPhase)/$(System.TotalJobsInPhase) \
-            --reporter=junit,line,allure-playwright
+      - script: npx playwright test --grep-invert @flaky --shard=$(System.JobPositionInPhase)/$(System.TotalJobsInPhase)
         displayName: Run Playwright tests
         env:
+          CI: 'true'
           BASE_URL: $(BASE_URL)
-          API_KEY: $(API_KEY)
-          PLAYWRIGHT_JUNIT_OUTPUT_NAME: $(Build.ArtifactStagingDirectory)/playwright-shard-$(System.JobPositionInPhase).xml
+          E2E_USER: $(E2E_USER)
+          E2E_PASSWORD: $(E2E_PASSWORD)
 
       - task: PublishTestResults@2
         condition: succeededOrFailed()
         inputs:
           testResultsFormat: JUnit
-          testResultsFiles: '$(Build.ArtifactStagingDirectory)/playwright-shard-*.xml'
+          testResultsFiles: 'test-results/junit.xml'
+          testRunTitle: Playwright shard $(System.JobPositionInPhase)
           failTaskOnFailedTests: true
 
       - task: PublishPipelineArtifact@1
-        condition: failed()
+        condition: succeededOrFailed()
         inputs:
-          targetPath: playwright-report
-          artifact: playwright-report-shard-$(System.JobPositionInPhase)
+          targetPath: blob-report
+          artifact: blob-report-$(System.JobPositionInPhase)
 
       - task: PublishPipelineArtifact@1
         condition: failed()
         inputs:
           targetPath: test-results
-          artifact: playwright-traces-shard-$(System.JobPositionInPhase)
+          artifact: test-results-$(System.JobPositionInPhase)
 
       - task: PublishPipelineArtifact@1
         condition: succeededOrFailed()
         inputs:
           targetPath: allure-results
           artifact: allure-results-e2e-$(System.JobPositionInPhase)
+
+  - job: MergeReports
+    dependsOn: E2E
+    condition: succeededOrFailed()
+    pool: { vmImage: ubuntu-latest }
+    steps:
+      - checkout: self
+      - task: UseNode@1
+        inputs: { version: $(nodeVersion) }
+      - script: npm ci
+        displayName: Install deps
+
+      - download: current
+        patterns: 'blob-report-*/**'
+
+      - script: |
+          mkdir -p all-blob-reports
+          cp $(Pipeline.Workspace)/blob-report-*/*.zip all-blob-reports/
+          npx playwright merge-reports --reporter html ./all-blob-reports
+        displayName: Merge shard blobs into one HTML report
+
+      - task: PublishPipelineArtifact@1
+        inputs:
+          targetPath: playwright-report
+          artifact: playwright-report
 ```
+
+- `PublishTestResults@2` reads `test-results/junit.xml`, the file the config writes on CI; the step never passes `--reporter`, which would replace the config's reporters and drop the blob and Allure output. `failTaskOnFailedTests: true` reds the job on real failures.
+- `test-results/` is published **on failure only**: under `retain-on-failure` it holds the trace, video, screenshot and `error-context.md` of each failed test. The merged `playwright-report/` carries the same evidence for every shard, and `MergeReports` runs on red (`succeededOrFailed()`).
+- Blob names already carry the shard number, so copying every shard's zip into one folder does not clash.
+- `--grep-invert @flaky` keeps quarantined tests off the gate. They run in a separate, non-gating job (`npx playwright test --grep @flaky` with `continueOnError: true`), per `qa/reporting/typescript/skills/flaky-test-quarantine` — a separate job, because each run cleans `test-results/` at its start.
+- **Running in the pinned image** instead of installing browsers: add `container: mcr.microsoft.com/playwright:v1.64.0-noble` to the `E2E` job and drop the install step. The tag must equal the `@playwright/test` version, and visual baselines are only compared inside it (`qa/typescript/skills/visual-regression`).
 
 ### Vitest API/integration — `pipelines/templates/api-tests.yml`
 
@@ -181,8 +215,8 @@ jobs:
     timeoutInMinutes: 25
     steps:
       - checkout: self
-      - task: NodeTool@0
-        inputs: { versionSpec: $(nodeVersion) }
+      - task: UseNode@1
+        inputs: { version: $(nodeVersion) }
       - script: npm ci
 
       - script: docker info
@@ -212,6 +246,8 @@ jobs:
 
 ### Allure publish with Blob-backed history — `pipelines/templates/allure-publish.yml`
 
+The report is generated with the one Allure CLI pin, `allure-commandline@2.46.1` (`qa/cicd/ci-conventions`). It needs a Java runtime; the Microsoft-hosted Ubuntu image ships one, a self-hosted agent must provide it.
+
 ```yaml
 jobs:
   - job: AllurePublish
@@ -228,18 +264,19 @@ jobs:
           scriptType: bash
           scriptLocation: inlineScript
           inlineScript: |
-            mkdir -p allure-results allure-history
-            cp -r $(Pipeline.Workspace)/allure-results-*/* allure-results/ || true
+            mkdir -p allure-results/history allure-history
+            cp -r $(Pipeline.Workspace)/allure-results-*/. allure-results/
             az storage blob download-batch \
               --account-name $(STORAGE_ACCOUNT) \
               --source allure-history \
               --destination allure-history \
               --auth-mode login || echo "no prior history"
-            cp -r allure-history/* allure-results/history/ 2>/dev/null || true
+            cp -r allure-history/. allure-results/history/ 2>/dev/null || true
 
       - script: |
-          npm install -g allure-commandline@2.30.0
+          npm i -g allure-commandline@2.46.1
           allure generate allure-results --clean -o allure-report
+        displayName: Generate Allure report
 
       - task: AzureCLI@2
         displayName: Upload new history
@@ -296,13 +333,15 @@ jobs:
 
 ### Reporters
 - JUnit + Allure on every job. `failTaskOnFailedTests: true` on every `PublishTestResults@2`.
+- Playwright: publish the config's `test-results/junit.xml`, and merge the config's blobs with `npx playwright merge-reports`. Never `--reporter` on the command line.
 
 ### Retry policy
-- No pipeline-level retry. `playwright.config.ts → retries: 0` in CI by default; only enable per-project with a JIRA link in the comment.
+- No pipeline-level retry. `retries: 0` in the Playwright config (`qa/cicd/ci-conventions`); a documented network-flake hotspot opts in with `test.describe.configure({ retries: 1 })` on its own `describe`, carrying an `issue` annotation with the link and the date.
 - For chronic flakes, quarantine via `qa/reporting/typescript/skills/flaky-test-quarantine`.
 
 ### Artifacts
-- Traces/videos/HAR: 14 d, **on failure only**.
+- Failure evidence (`test-results/` per shard, on failure only) and the merged `playwright-report/`: 14 d.
+- Blob reports: the shortest retention the pipeline allows; they only feed `MergeReports`.
 - JUnit: 30 d. Allure report: 90 d. History in Blob indefinitely.
 
 ### Perf gate
@@ -312,16 +351,17 @@ jobs:
 ### What NOT to do
 - No `windows-latest` for Linux-container tests.
 - No PATs — OIDC only.
-- No `continueOnError: true` on test tasks.
+- No `continueOnError: true` on gating test tasks (the quarantine job is the one non-gating exception).
 - No global `retryCountOnTaskFailure`.
 - No printing of `$(MY_SECRET)`.
 - No `npm install` (use `npm ci` for reproducible installs).
-- No `playwright install` without `--with-deps` (missing system libs → silent crashes).
+- No `playwright install` without `--with-deps` (missing system libs → silent crashes), and no Playwright image tag that differs from the package version.
+- No `--reporter`, `--trace` or `--update-snapshots` on the Playwright command line — the config owns all three.
 
 ## Generation steps
 
 1. Read the existing `azure-pipelines.yml` and `package.json` to learn scripts, runners, existing stages.
-2. Inventory test projects: Vitest config files, `playwright.config.ts`, `package.json` scripts.
+2. Inventory test projects: Vitest config files, `playwright.config.ts`, `package.json` scripts. The Playwright config comes from `qa/typescript/skills/ui-test-author/playwright/assets/playwright.config.ts`.
 3. Generate:
    - `azure-pipelines.yml` if missing
    - `pipelines/templates/{build,api-tests,integration-tests,playwright,allure-publish,k6-perf}.yml`
@@ -330,8 +370,12 @@ jobs:
 
 ## Cross-references
 
+- **`qa/typescript/skills/ui-test-author/playwright`** — owns `assets/playwright.config.ts`, the config this pipeline runs.
+- **`qa/typescript/skills/evidence-capture`** — what lands in `test-results/` and `playwright-report/`, and how to read a downloaded trace.
 - **`qa/typescript/skills/db-testing/testcontainers`** — integration-tests stage runs these.
 - **`qa/typescript/skills/email-testing`** — Mailpit as a service container.
 - **`qa/reporting/typescript/skills/test-reports`** — adapter wiring inside the test project.
+- **`qa/reporting/typescript/skills/flaky-test-quarantine`** — the `@flaky` tag the gate excludes, and the non-gating quarantine job.
 - **`qa/typescript/skills/load-testing`** — perf-stage scripts.
+- **`qa/cicd/ci-conventions`** — cross-stack rules (artifact retention, OIDC, the Allure CLI pin) this skill enforces.
 - **`devops/azure-pipelines`** — non-QA pipeline patterns.

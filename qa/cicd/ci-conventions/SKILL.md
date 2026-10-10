@@ -26,6 +26,7 @@ The same convention, three spellings. Use this table to translate, not to choose
 - Perf and visual-regression stages are **gated to the schedule** (or an explicit label/dispatch), never on every PR.
 - Triggers are explicit in YAML — the YAML is the source of truth, not implicit branch defaults.
 - Cancel superseded PR runs; never cancel a running nightly.
+- CI never writes a snapshot baseline. Playwright runs with `updateSnapshots: 'none'` on CI (the canonical config sets it), and no pipeline step passes `--update-snapshots` / `-u`. Baselines are updated by a person, in the pinned image, and committed knowingly.
 
 ## Sharding
 
@@ -74,7 +75,7 @@ The same convention, three spellings. Use this table to translate, not to choose
 ## Runners & containers
 
 - **Linux runners** for any Testcontainers work — Docker on Windows runners defaults to Windows containers and Linux modules fail.
-- Pin tool and image versions (`k6 v0.52.0`, `allure-commandline@2.30.0`, `postgres:17.2`) — never floating tags in CI.
+- Pin tool and image versions (`k6 v0.52.0`, `allure-commandline@2.46.1`, `postgres:17.2`) — never floating tags in CI. `allure-commandline@2.46.1` is the one Allure report CLI pin; every `test-reports` skill and `ci-pipelines` reference uses it.
 - Never mix runner-level test parallelism with a fixture that owns a container (NUnit `[Parallelizable]` + `LevelOfParallelism > 1`, TestNG parallel suites) — instant flake.
 - No `--blame`-style diagnostics in production runs (slow); enable only for a targeted hang re-run.
 
@@ -86,6 +87,7 @@ The same convention, three spellings. Use this table to translate, not to choose
 - No re-discovering tests per shard at runtime.
 - No unpinned tool/image versions.
 - No pipeline-level retry of assertions.
+- No `--update-snapshots` in a pipeline.
 - No perf metrics interpreted in YAML — exit codes only.
 
 ## Handoffs
