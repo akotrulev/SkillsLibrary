@@ -30,6 +30,15 @@ If the repo gitignores generated sources (KSP / Room / Hilt output under `build/
 | A2 | Context receivers are gone | `context(Foo)` with a type, not a named parameter, left from the revoked feature | `rg -n "context\(\w+[,)]" $SRC -g '*.kt'` | major |
 | A3 | `kapt` is not used `[AGP9]` | `kotlin-kapt` or `kapt(` in a build file | `rg -n "kapt" -g '*.kts' -g '*.gradle' -g 'libs.versions.toml'` | major |
 | A4 | Explicit API mode in a library module that publishes | A published library module with `public` by default and no `explicitApi()` | `rg -n "explicitApi" -g '*.kts'` | minor |
+| A5 | `org.jetbrains.kotlin.android` is not applied `[AGP9]` | `kotlin-android` / `org.jetbrains.kotlin.android` in a module, the root file or the catalog | `rg -n "kotlin.android\|org.jetbrains.kotlin.android" -g '*.kts' -g '*.gradle' -g 'libs.versions.toml'` | blocker |
+| A6 | The AGP 9 opt-outs are not set `[AGP9]` | `android.builtInKotlin=false`, `android.newDsl=false` or `com.android.legacy-kapt` with no dated removal task (all gone in AGP 10) | `rg -n "builtInKotlin\|newDsl\|legacy-kapt" gradle.properties -g '*.kts' -g 'libs.versions.toml'` | major |
+| A7 | SDK levels are written explicitly: compile 37, target 36, min 24 | `targetSdk` absent (AGP 9 defaults it to `compileSdk`), or raised / lowered as a side effect of other work | `rg -n "compileSdk\|targetSdk\|minSdk" -g '*.kts' -g '*.gradle'` | major |
+| A8 | A JDK 21 toolchain is declared in Gradle | No `jvmToolchain`; the build relies on the IDE's JDK | `rg -n "jvmToolchain\|JavaVersion" -g '*.kts'` | major |
+| A9 | Every version lives in `libs.versions.toml` | A version string in a `build.gradle.kts`; a `buildSrc` constants object beside the catalog; a Compose artifact with its own version | `rg -n "\"[a-z.]+:[a-z-]+:[0-9]" -g 'build.gradle.kts'`; `rg -n "object Versions\|object Deps" -g '*.kt'` | minor |
+| A10 | Annotation processors use KSP | `kapt(`, `annotationProcessor(`, `kotlin("kapt")` | `rg -n "kapt\(\|annotationProcessor\|kotlin\(\"kapt\"\)" -g '*.kts' -g '*.gradle'` | major |
+| A11 | Release builds are minified with R8 full mode and narrow keep rules | `isMinifyEnabled = false` on release, `android.enableR8.fullMode=false`, a blanket `-keep class ** { *; }` | `rg -n "isMinifyEnabled\|enableR8" -g '*.kts' gradle.properties`; `rg -n "keep class \*\*" -g '*.pro'` | major |
+| A12 | detekt, ktlint and Lint run with warnings failing the build | No `.editorconfig` / `detekt.yml` / `lint.xml`; `abortOnError = false`; a formatter auto-fixing inside a build phase | `rg -n "abortOnError\|warningsAsErrors\|detekt\|ktlint" -g '*.kts' -g '*.yml'` | minor |
+| A13 | A convention plugin or module exists only on its second user | `build-logic/` for one module; `:core:common` / `:core:ui` with one consumer | `rg -n "includeBuild\|include\(" settings.gradle.kts`; count dependents per module | major |
 
 ---
 
@@ -54,6 +63,10 @@ If the repo gitignores generated sources (KSP / Room / Hilt output under `build/
 | B14 | `val` over `var`; no `var` never reassigned | A `var` with no reassignment | `rg -n "\bvar \w+" $SRC -g '*.kt'`; the compiler warns on never-reassigned | minor |
 | B15 | No Java-isms | `get`/`set` method pairs, `Optional`, a static-holder class, `object` holding mutable state | `rg -n "Optional<\|fun (get\|set)[A-Z]\w+\(\|^object \w+" $SRC -g '*.kt'` | minor |
 | B16 | A context parameter is not a service locator | `context(...)` carrying a repository or service used as a lookup | `rg -n "context\(" $SRC -g '*.kt'` | major |
+| B17 | One activity hosts the Compose tree | An `Activity` per screen with no recorded reason | `rg -n "<activity" -g 'AndroidManifest.xml'` | minor |
+| B18 | Edge-to-edge is enabled and insets are handled in composables | No `enableEdgeToEdge()`; `fitsSystemWindows`; a hard-coded status-bar height | `rg -n "enableEdgeToEdge\|fitsSystemWindows\|statusBarHeight" $SRC -g '*.kt' -g '*.xml'` | major |
+| B19 | Predictive back is enabled; back is not overridden | No `enableOnBackInvokedCallback`; `onBackPressed()` overridden; `KEYCODE_BACK` handled | `rg -n "enableOnBackInvokedCallback\|onBackPressed\|KEYCODE_BACK" $SRC -g '*.kt' -g '*.xml'` | major |
+| B20 | The manifest does not lock orientation or resizability | `screenOrientation`, `resizeableActivity="false"`, `maxAspectRatio` (ignored at target 36 on large screens) | `rg -n "screenOrientation\|resizeableActivity\|maxAspectRatio" -g 'AndroidManifest.xml'` | major |
 
 ---
 
@@ -62,6 +75,19 @@ If the repo gitignores generated sources (KSP / Room / Hilt output under `build/
 
 | # | Check | Violation looks like | Find it with | Sev |
 |---|---|---|---|---|
+| C1 | Each screen ViewModel exposes one `uiState: StateFlow` and no other state flow | A second public `StateFlow` per field; a public `MutableStateFlow` | `rg -n "val \w+: (Mutable)?StateFlow" $SRC -g '*ViewModel.kt'` | major |
+| C2 | No ViewModel-to-UI events: one-off outcomes are state the UI consumes | A `SharedFlow` / `Channel` of effects, snackbar or navigation events exposed from a ViewModel | `rg -n "SharedFlow\|Channel<\|receiveAsFlow" $SRC -g '*ViewModel.kt'` | major |
+| C3 | State is built with `stateIn(WhileSubscribed(5_000))` from repository flows, not collected into a field in `init` | `init { viewModelScope.launch { flow.collect { _state.value = … } } }`; `SharingStarted.Eagerly` with no reason | `rg -n "stateIn\|init \{" -A4 $SRC -g '*ViewModel.kt'` | minor |
+| C4 | A ViewModel holds no `Context`, `View`, `NavController` or composable | `Context` / `Application` constructor parameter, `NavController` field | `rg -n "Context\|NavController\|AndroidViewModel" $SRC -g '*ViewModel.kt'` | major |
+| C5 | A composable never calls a repository or data source | A repository, DAO or client referenced in a `@Composable` | `rg -n "Repository\|Dao\b\|Api\b" $SRC -g '*Screen.kt' -g '*Composable*.kt'` | major |
+| C6 | Repositories are the single source of truth and are main-safe | A ViewModel reading a DAO and the network separately; a blocking call with no injected dispatcher | `rg -n "class \w+Repository" -A12 $SRC -g '*.kt'` | major |
+| C7 | A use case exists only when reused or a real rule | A `*UseCase` forwarding one repository call | `rg -n "class \w+UseCase" -A8 $SRC -g '*.kt'`; count callers | major |
+| C8 | Dependencies arrive by constructor; no locator, no static state | `lateinit` injected field, `object` holding a client, `Context.getSystemService` for own classes, a `ServiceLocator` | `rg -n "ServiceLocator\|GlobalContext\|object \w+(Client\|Repository)" $SRC -g '*.kt'` | major |
+| C9 | Hilt (when present) uses KSP and constructor injection, and was earned | `kapt(libs.hilt.compiler)`; field `@Inject lateinit var` in a ViewModel; Hilt in a one-screen app | `rg -n "hilt" -g '*.kts' -g 'libs.versions.toml'`; `rg -n "@Inject lateinit" $SRC -g '*.kt'` | major |
+| C10 | `SavedStateHandle` carries the small state that must survive process death; nothing large | A list or model stored in `SavedStateHandle`; a draft lost after process kill | `rg -n "SavedStateHandle\|savedStateHandle\[" $SRC -g '*.kt'`; kill the process and return — requires dynamic test → `qa-mobile-android` | major |
+| C11 | No LiveData or RxJava in new code | `LiveData`, `MutableLiveData`, `observeAsState`, `io.reactivex` | `rg -n "LiveData\|observeAsState\|io\.reactivex" $SRC -g '*.kt'` | minor |
+| C12 | An interface exists only with a second implementation (a test fake counts) | `interface FooRepository` with one implementer and no fake | `rg -n "^(fun )?interface \w+Repository" $SRC -g '*.kt'`; count implementers | major |
+| C13 | Modules are split by feature and only when earned | `:data` / `:domain` / `:ui` modules for one feature; a feature importing another feature's internals | `rg -n "include\(" settings.gradle.kts`; read each module's dependents | minor |
 
 ---
 
@@ -70,6 +96,21 @@ If the repo gitignores generated sources (KSP / Room / Hilt output under `build/
 
 | # | Check | Violation looks like | Find it with | Sev |
 |---|---|---|---|---|
+| D1 | A screen composable collects `uiState` lifecycle-aware; content composables are stateless | A `ViewModel` or `NavController` passed below the screen; `collectAsState()` | `rg -n "viewModel: \w+ViewModel\|collectAsState\(\)" $SRC -g '*.kt'`; read each hit's depth | major |
+| D2 | `modifier` is the first optional parameter, applied once to the root | A missing `modifier`, one applied to a child, a second `Modifier` parameter | `rg -n "@Composable" -A6 $SRC -g '*.kt'`; read signatures | minor |
+| D3 | State is hoisted; business state is not in `remember` | `remember { mutableStateOf(` holding screen data; a repository result in `rememberSaveable` | `rg -n "remember \{ mutableStateOf\|rememberSaveable" $SRC -g '*.kt'` | major |
+| D4 | Lazy lists use stable `key` (and `contentType` for mixed rows) | `items(list) { }` with no `key`; the index as a key | `rg -n "items\(\|itemsIndexed\(" -A2 $SRC -g '*.kt'` | major |
+| D5 | Long content is a lazy list, not a scrolling `Column` | `Column(Modifier.verticalScroll)` over an unbounded collection; a `LazyColumn` nested in a same-axis scroll | `rg -n "verticalScroll" -B2 -A6 $SRC -g '*.kt'` | major |
+| D6 | `LaunchedEffect` keys are the values it reads; `Unit` / `true` carries a reason | `LaunchedEffect(Unit)` that reads changing state | `rg -n "LaunchedEffect\((Unit\|true)\)" $SRC -g '*.kt'` | major |
+| D7 | Every registration is disposed; callbacks use `rememberUpdatedState` | `DisposableEffect` with an empty `onDispose`; a listener added in the body | `rg -n "DisposableEffect" -A8 $SRC -g '*.kt'` | major |
+| D8 | No work in composition: sort, filter, format or parse is hoisted or `remember`ed | `.sortedBy`, `Regex(`, `DateTimeFormatter.ofPattern(` inside a composable body | `rg -n "sortedBy\|sortedWith\|Regex\(\|ofPattern\(" $SRC -g '*.kt'` | major |
+| D9 | Each data region renders loading, loaded, empty and failed, scoped to the region | A `when` missing `Failed` or empty; a failure replacing search or the top bar | `rg -n "is \w+UiState\.Failed\|\.Failed ->" $SRC -g '*.kt'`; read each screen | major |
+| D10 | A failure is also a persistent, user-dismissed banner inside the safe area | A snackbar with `Short` / `Long` duration for a load failure, or none | `rg -n "SnackbarDuration\|showSnackbar" $SRC -g '*.kt'` | major |
+| D11 | Framework or server error text is never shown | `Text(error.message` / `e.localizedMessage` / `Throwable` in UI state | `rg -n "\.message\b\|localizedMessage" $SRC -g '*.kt'` | major |
+| D12 | Material 3 components, not imitations of another platform | A custom tab bar, back button, switch or alert drawn to look like iOS or the web | `rg -n "Box\(" -B2 -A8 $SRC -g '*TabBar*.kt' -g '*Switch*.kt'`; read custom controls | major |
+| D13 | `@Preview` exists for reusable composables, covers states, uses no live data | A composable with no preview; one that calls a repository | `rg -L "@Preview" $SRC -g '*Content.kt' -g '*Screen.kt'` | minor |
+| D14 | Expressive Material APIs are used only on material3 1.5 or an existing opt-in `[M3-1.5]` | `ExperimentalMaterial3ExpressiveApi` opt-in added in a non-Expressive project | `rg -n "ExperimentalMaterial3ExpressiveApi\|MaterialExpressiveTheme" $SRC -g '*.kt'` | major |
+| D15 | `@Stable` / `@Immutable` only where the promise is true and measured | A blanket annotation on a class with a `var` or `MutableList` | `rg -n "@Stable\|@Immutable" -A4 $SRC -g '*.kt'` | minor |
 
 ---
 
@@ -78,6 +119,18 @@ If the repo gitignores generated sources (KSP / Room / Hilt output under `build/
 
 | # | Check | Violation looks like | Find it with | Sev |
 |---|---|---|---|---|
+| E1 | One `AppTheme`; screens read `MaterialTheme.*` tokens | `Color(0xFF…)`, `TextStyle(fontSize = …)` or `RoundedCornerShape(n.dp)` in a screen file | `rg -n "Color\(0x\|fontSize = [0-9]\|RoundedCornerShape\([0-9]" $SRC -g '*.kt' -g '!*Theme*' -g '!*Color*' -g '!*Type*'` | major |
+| E2 | Dynamic colour has a recorded static fallback; dark theme follows the system | `dynamicColorScheme` with no API-31 guard; a fixed light theme; a colour that ignores dark | `rg -n "dynamic(Light\|Dark)ColorScheme\|isSystemInDarkTheme" $SRC -g '*.kt'` | minor |
+| E3 | Text is in `sp` from typography roles and scales | `fontSize` in `dp`; `Density(fontScale = 1f)`; scaling locked | `rg -n "fontSize = .*\.dp\|fontScale = 1f\|LocalDensity provides" $SRC -g '*.kt'` | major |
+| E4 | Layout survives 200% font scale: no fixed-height text containers, no `maxLines = 1` on primary text | `Modifier.height(` / `size(` around `Text`; `maxLines = 1` on a title | `rg -n "maxLines = 1\|\.height\([0-9]+\.dp\)" $SRC -g '*.kt'`; requires dynamic test → `qa-mobile-android` | major |
+| E5 | Layout branches on window size class, never on device type | `Build.MODEL`, `isTablet`, `screenWidthDp` choosing a layout | `rg -n "isTablet\|Build\.MODEL\|screenWidthDp\|smallestScreenWidthDp" $SRC -g '*.kt'` | major |
+| E6 | The window size class is read once at the top and passed down | `currentWindowAdaptiveInfo()` called in leaf composables | `rg -n "currentWindowAdaptiveInfo\|calculateWindowSizeClass" $SRC -g '*.kt'` | minor |
+| E7 | Wide windows get two panes or bounded content width; lists become grids | A phone layout stretched across an expanded window | `rg -n "widthIn\|ListDetailPaneScaffold\|NavigationSuiteScaffold\|GridCells" $SRC -g '*.kt'`; requires dynamic test → `qa-mobile-android` | major |
+| E8 | `Scaffold` `innerPadding` is applied; no `fitsSystemWindows` in Compose | `Scaffold { _ -> … }` ignoring padding; content under the status bar | `rg -n "Scaffold\(" -A8 $SRC -g '*.kt'` | major |
+| E9 | The keyboard does not cover the focused field | No `imePadding()` / `adjustResize` on a form screen | `rg -n "imePadding\|windowSoftInputMode" $SRC -g '*.kt' -g '*.xml'` | major |
+| E10 | State is never conveyed by colour alone | `error` colour with no icon or text; a green / red dot as the only status | `rg -n "colorScheme\.error\|Color\.(Red\|Green)" $SRC -g '*.kt'` | major |
+| E11 | Material 2 is not mixed with Material 3 `[M2]` | `androidx.compose.material.` imports beside `material3` | `rg -n "import androidx\.compose\.material\.[A-Z]" $SRC -g '*.kt'` | minor |
+| E12 | Material 3 Expressive is adopted only on material3 1.5 or an existing opt-in `[M3-1.5]` | `MaterialExpressiveTheme` / `MotionScheme.expressive()` in a project on 1.4 with no opt-in decision | `rg -n "MaterialExpressiveTheme\|MotionScheme\.expressive" $SRC -g '*.kt'` | major |
 
 ---
 
@@ -86,6 +139,19 @@ If the repo gitignores generated sources (KSP / Room / Hilt output under `build/
 
 | # | Check | Violation looks like | Find it with | Sev |
 |---|---|---|---|---|
+| F1 | One navigation library; routes and keys are serializable types | Both Navigation 3 and Navigation Compose in one graph; string routes (`"orders/{id}"`) | `rg -n "navigation3\|androidx.navigation" -g '*.kts' -g 'libs.versions.toml'`; `rg -n "composable\(\"" $SRC -g '*.kt'` | major |
+| F2 | Keys carry ids, not models or lambdas | A `NavKey` / route holding a model object or function | `rg -n ": NavKey" -B1 $SRC -g '*.kt'`; read each | major |
+| F3 | `NavDisplay` has the saveable-state and ViewModel-store entry decorators `[N3]` | `NavDisplay` with no `entryDecorators`; a ViewModel living past a pop | `rg -n "NavDisplay" -A8 $SRC -g '*.kt'` | major |
+| F4 | Screens take callbacks; `NavController` and the back stack stay in the host | `NavController` / `NavBackStack` passed into a leaf composable or ViewModel | `rg -n "navController: NavController\|backStack: NavBackStack" $SRC -g '*.kt'` | major |
+| F5 | A destination loads its own data from its key | A screen reading state only the previous screen populated | read each `entry<…>` / `composable<…>` body for its load | major |
+| F6 | Top-level areas use a navigation suite, each with its own back stack | A hand-built tab bar; one stack shared across tabs | `rg -n "NavigationSuiteScaffold\|NavigationBar\|NavigationRail" $SRC -g '*.kt'` | major |
+| F7 | Back is predictive and never overridden | `onBackPressed()` override, a permanently enabled `BackHandler(true)`, a custom back arrow that does not pop | `rg -n "onBackPressed\|BackHandler\|PredictiveBackHandler" $SRC -g '*.kt'` | major |
+| F8 | In-app navigation is not driven by ViewModel events or `LaunchedEffect(Unit)` | A `Channel` of navigation events; `LaunchedEffect(Unit) { navigate(…) }` | `rg -n "LaunchedEffect\(Unit\)" -A4 $SRC -g '*.kt'` | major |
+| F9 | A URI maps to keys through one pure, validated function; bad input is ignored | `intent.data` routed unchecked; an unchecked `pathSegments[1]`; a link parameter passed to `startActivity` | `rg -n "intent\.data\|pathSegments\|getQueryParameter" -A5 $SRC -g '*.kt'` | blocker |
+| F10 | Links are handled in `onCreate` and `onNewIntent` | Only one entry point handled; a `singleTop` activity that ignores new intents | `rg -n "onNewIntent\|handleIntent" $SRC -g '*.kt'` | major |
+| F11 | App Link filters are narrow `https` with `autoVerify`; a custom scheme carries no secret | `pathPattern=".*"`, an auth code or token in `myapp://`, a missing `autoVerify` | `rg -n "autoVerify\|pathPattern\|android:scheme" -g 'AndroidManifest.xml'` | major |
+| F12 | A sign-in gate on a route is client UX, not authorisation | A screen hidden by a flag with no server check noted | `rg -n "isSignedIn\|isAuthenticated" -B2 $SRC -g '*.kt'`; requires dynamic test → `qa-security` | major |
+| F13 | Adaptive navigation uses scene strategies / adaptive scaffolds, not a second graph `[N3]` | A duplicate set of tablet routes | `rg -n "SceneStrategy\|ListDetailPaneScaffold" $SRC -g '*.kt'` | minor |
 
 ---
 

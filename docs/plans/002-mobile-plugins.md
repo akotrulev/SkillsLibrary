@@ -8,7 +8,7 @@ step-by-step agent that works greenfield and brownfield, a conformance audit, an
 
 **Status:** C1 landed (2026-10-11): `mobile/` exists with the five July drafts moved and renamed under
 `mobile/react-native/`, the three conformance-checklist skeletons, and `## Mobile code rules` in `CLAUDE.md`;
-the stale `frontend/react-native` pointers are repointed. S1 landed (2026-10-11): `mobile/_shared/{store-compliance,security}` with their references and the `L1…L26` / `K1…K27` audit fragments. S2 landed (2026-10-11): `mobile/_shared/{release,observability}` with their references and the `T1…T19` / `U1…U20` audit fragments. S3 landed (2026-10-11): `mobile/_shared/in-app-purchases` with its references and the `X1…X22` fragment, plus `auth/auth0-{react-native,ios,android}`. N1 landed (2026-10-11): `mobile/{ios,android}/skills/basics` with `references/concurrency.md` each, and rows `A1…A5`/`B1…B16` (iOS), `A1…A4`/`B1…B16` (Android). R1 landed (2026-10-11): the five drafts rewritten onto SDK 57 and `mobile/react-native/skills/navigation` written, with RN checklist rows `A1…A7`, `B1…B13`, `C1…C10`, `D1…D10`, `E1…E13`, `F1…F15`. R2 landed (2026-10-11): `mobile/react-native/skills/{ui-components,forms,networking,offline-and-storage,native-modules}` with checklist rows `D10…D19`, `G1…G10`, `H1…H15`, `I1…I13`, `J1…J13`. R3 landed (2026-10-10): `mobile/react-native/skills/{device-features,notifications-and-links,animation,languages,test-ids}` with checklist rows `F15…F20`, `J14…J28`, `P1…P10`, `Q1…Q11`, `R1…R10`, and §8.5's RN mapping answered (D20 — the QA explorer's `content-desc` claim is refuted). R4 landed (2026-10-11): `mobile/react-native/skills/{accessibility,performance,error-handling,component-testing}` with `error-handling/references/{session-and-resume,writes-and-dependencies}.md` and checklist rows `M1…M13`, `N1…N13`, `O1…O22`, `S1…S12`. R5 landed (2026-10-11): `mobile/react-native/skills/{migration,code-review,standards-audit}` with `migration/references/{sdk-upgrade,new-architecture,bare-to-expo,embed-in-native-app}.md`, the RN checklist's closing section index, `mobile/react-native/agents/mobile-react-native.md` (13,888 characters, description 574 of 650) and `mobile/react-native/commands/{mobile-react-native,mobile-react-native-audit}.md`. I1 landed (2026-10-11): `mobile/ios/skills/{project-setup,architecture,ui-components,styling,navigation}` with `references/{packages-and-config,tca}.md` and checklist rows `A6…A11`, `B17…B24`, `C1…C10`, `D1…D11`, `E1…E12`, `F1…F11` (D21: MV over the corpus's MVVM rows). I2 landed (2026-10-11): `mobile/ios/skills/{forms,networking,offline-and-storage,uikit,device-features}` with `networking/references/request-policy.md`, `offline-and-storage/references/{swiftdata-migrations,keychain}.md`, `uikit/references/{uiscene-migration,interop-seams}.md`, `device-features/references/permissions.md` and checklist rows `D12…D20`, `G1…G10`, `H1…H12`, `I1…I14`, `J1…J12` (D22: new facts unconfirmed against Apple pages). I3 landed (2026-10-11): `mobile/ios/skills/{notifications-and-links,system-integration,animation,languages,test-ids}` with `notifications-and-links/references/apns-and-extensions.md`, `system-integration/references/background-and-activities.md` and checklist rows `F12…F15`, `J13…J28`, `P1…P11`, `Q1…Q11`, `R1…R10` (D23: new facts unconfirmed against Apple pages). I4 landed (2026-10-11): `mobile/ios/skills/{accessibility,performance,error-handling,unit-testing}` with `error-handling/references/{session-and-resume,writes-and-dependencies}.md` and checklist rows `M1…M14`, `N1…N13`, `O1…O21`, `S1…S15` (D24: new facts unconfirmed against Apple pages). I5 landed (2026-10-11): `mobile/ios/skills/{migration,code-review,standards-audit}` with `migration/references/{swift6-modules,observation,combine-to-async,uikit-to-swiftui,objc-to-swift,cocoapods-to-spm,ios27-sdk-and-targets}.md`, the iOS checklist's closing section index, `mobile/ios/agents/mobile-ios.md` (13,879 characters, description 640 of 650) and `mobile/ios/commands/{mobile-ios,mobile-ios-audit}.md` (D25: migration facts unconfirmed against Apple / swift.org pages). Next: A1.
+the stale `frontend/react-native` pointers are repointed. S1 landed (2026-10-11): `mobile/_shared/{store-compliance,security}` with their references and the `L1…L26` / `K1…K27` audit fragments. S2 landed (2026-10-11): `mobile/_shared/{release,observability}` with their references and the `T1…T19` / `U1…U20` audit fragments. S3 landed (2026-10-11): `mobile/_shared/in-app-purchases` with its references and the `X1…X22` fragment, plus `auth/auth0-{react-native,ios,android}`. N1 landed (2026-10-11): `mobile/{ios,android}/skills/basics` with `references/concurrency.md` each, and rows `A1…A5`/`B1…B16` (iOS), `A1…A4`/`B1…B16` (Android). R1 landed (2026-10-11): the five drafts rewritten onto SDK 57 and `mobile/react-native/skills/navigation` written, with RN checklist rows `A1…A7`, `B1…B13`, `C1…C10`, `D1…D10`, `E1…E13`, `F1…F15`. R2 landed (2026-10-11): `mobile/react-native/skills/{ui-components,forms,networking,offline-and-storage,native-modules}` with checklist rows `D10…D19`, `G1…G10`, `H1…H15`, `I1…I13`, `J1…J13`. R3 landed (2026-10-10): `mobile/react-native/skills/{device-features,notifications-and-links,animation,languages,test-ids}` with checklist rows `F15…F20`, `J14…J28`, `P1…P10`, `Q1…Q11`, `R1…R10`, and §8.5's RN mapping answered (D20 — the QA explorer's `content-desc` claim is refuted). R4 landed (2026-10-11): `mobile/react-native/skills/{accessibility,performance,error-handling,component-testing}` with `error-handling/references/{session-and-resume,writes-and-dependencies}.md` and checklist rows `M1…M13`, `N1…N13`, `O1…O22`, `S1…S12`. R5 landed (2026-10-11): `mobile/react-native/skills/{migration,code-review,standards-audit}` with `migration/references/{sdk-upgrade,new-architecture,bare-to-expo,embed-in-native-app}.md`, the RN checklist's closing section index, `mobile/react-native/agents/mobile-react-native.md` (13,888 characters, description 574 of 650) and `mobile/react-native/commands/{mobile-react-native,mobile-react-native-audit}.md`. I1 landed (2026-10-11): `mobile/ios/skills/{project-setup,architecture,ui-components,styling,navigation}` with `references/{packages-and-config,tca}.md` and checklist rows `A6…A11`, `B17…B24`, `C1…C10`, `D1…D11`, `E1…E12`, `F1…F11` (D21: MV over the corpus's MVVM rows). I2 landed (2026-10-11): `mobile/ios/skills/{forms,networking,offline-and-storage,uikit,device-features}` with `networking/references/request-policy.md`, `offline-and-storage/references/{swiftdata-migrations,keychain}.md`, `uikit/references/{uiscene-migration,interop-seams}.md`, `device-features/references/permissions.md` and checklist rows `D12…D20`, `G1…G10`, `H1…H12`, `I1…I14`, `J1…J12` (D22: new facts unconfirmed against Apple pages). I3 landed (2026-10-11): `mobile/ios/skills/{notifications-and-links,system-integration,animation,languages,test-ids}` with `notifications-and-links/references/apns-and-extensions.md`, `system-integration/references/background-and-activities.md` and checklist rows `F12…F15`, `J13…J28`, `P1…P11`, `Q1…Q11`, `R1…R10` (D23: new facts unconfirmed against Apple pages). I4 landed (2026-10-11): `mobile/ios/skills/{accessibility,performance,error-handling,unit-testing}` with `error-handling/references/{session-and-resume,writes-and-dependencies}.md` and checklist rows `M1…M14`, `N1…N13`, `O1…O21`, `S1…S15` (D24: new facts unconfirmed against Apple pages). I5 landed (2026-10-11): `mobile/ios/skills/{migration,code-review,standards-audit}` with `migration/references/{swift6-modules,observation,combine-to-async,uikit-to-swiftui,objc-to-swift,cocoapods-to-spm,ios27-sdk-and-targets}.md`, the iOS checklist's closing section index, `mobile/ios/agents/mobile-ios.md` (13,879 characters, description 640 of 650) and `mobile/ios/commands/{mobile-ios,mobile-ios-audit}.md` (D25: migration facts unconfirmed against Apple / swift.org pages). A1 landed (2026-10-10): `mobile/android/skills/{project-setup,architecture,ui-components,styling,navigation}` with `project-setup/references/gradle-config.md`, `architecture/references/hilt-and-modules.md` and checklist rows `A5…A13`, `B17…B20`, `C1…C13`, `D1…D15`, `E1…E12`, `F1…F13` (D26: no ViewModel-to-UI events over the corpus's Channel row; D27: Navigation 3 / Expressive / KSP facts partly unconfirmed). Next: A2.
 Built but unverified: everything — the plan gates once, in G1. Flutter becomes a fourth plugin in its own plan, written
 once this one lands (O4); it is **not** in this plan's tasks. Maestro arrives on the QA side through plan 003
 (its X1); this plan feeds it the same test ids and an EAS Workflows job (D7). Every fact in §4 was web-verified
@@ -849,6 +849,10 @@ status-table `frontend` row, and `docs/plans/CONFORMANCE-AUDIT-PLAN.md` item 7.
 
 **D25 — I5's migration facts are unconfirmed against Apple / swift.org pages (I5, 2026-10-11).** §10.3 says research first. Reading A: fetch swift.org/migration, Apple's TN3187, the Xcode 27 release notes and blog.cocoapods.org for each claim before writing it. Reading B (taken): this session ran no web search or fetch, so the references state the facts from prior knowledge and tell the reader to re-read the source before a run — `swift package migrate` (SwiftPM 6.2+; flag names left to `--help`), the `-disable-dynamic-actor-isolation` downgrade flag (named as reported in the SE-0423 discussion, "confirm against the installed compiler"), the dynamic-isolation crash signatures, `SWIFT_STRICT_CONCURRENCY = complete`, `Observations` (SE-0475, iOS 26), the CocoaPods trunk freeze mechanics (read-only: existing versions keep resolving), and the Xcode 27 SDK's mandatory changes beyond §4.2's list. Nothing relies on a flag name working. G1's pass should confirm them.
 
+**D26 — `architecture` forbids ViewModel-to-UI events, against the jetpack-compose corpus row 16 (A1, 2026-10-10).** `design/ui-ux-pro-max/data/stacks/jetpack-compose.csv` row 16 ("Event-based navigation") says the ViewModel emits navigation events through a `Channel` + `receiveAsFlow()`. CLAUDE.md § Design facts says the corpus wins on a design fact; §4.3 and §5 (Google's recommendations of 2026-10-05, the Mobile code rules) say one `uiState` and **no ViewModel-to-UI events**. Reading A: follow the corpus row and allow a `Channel`. Reading B (taken): a ViewModel-to-UI event is an architecture rule, not a design fact — the outcome is a field in `uiState` that the UI consumes and the ViewModel clears, and `mobile-android-architecture` says so by name. Cost: one more field per screen with a one-off outcome; the corpus row is not edited (vendored), and `mobile-android-code-review` (A6) must not flag the Channel pattern's absence as a corpus violation.
+
+**D27 — A1's new Android facts are partly unconfirmed against official pages (A1, 2026-10-10).** §10.3 says research first. Reading A: fetch every artifact version and API signature before writing it. Reading B (taken): the Navigation 3 overview page carries no coordinates or signatures, so `NavDisplay` / `rememberNavBackStack` / `entryProvider` / entry-decorator names, the `ListDetailSceneStrategy` and `material3-adaptive-navigation3` artifact, `MaterialExpressiveTheme` / `MotionScheme.expressive()` and the material3 1.5 status, KSP's version-to-Kotlin pairing, ktlint 1.8's `ktlint_official` / Composable-naming settings, the foojay resolver version and the compose-lints ruleset names are written from recall. The skills tell the reader to confirm artifacts against the release pages; no version number outside §4.3 is pinned as fact (the catalog sample uses a placeholder for KSP). Cost: A2–A6 inherit the same caveat; G1's review should re-check these items.
+
 ## Answered questions (2026-10-10)
 
 **O1 — Packaging: one plugin or several?** Three plugins in one `mobile/` domain (the user; D1).
@@ -1303,6 +1307,8 @@ Navigation 3, Material 3 1.4 / 1.5, window size classes ~45k; writes: five SKILL
   modules only when earned.
 - **Not in A1:** data, Views and device skills (A2).
 
+- **As built (2026-10-10):** `mobile/android/skills/{project-setup,architecture,ui-components,styling,navigation}/SKILL.md` — bodies 14.6k / 13.1k / 14.1k / 11.7k / 12.9k chars, descriptions 465 / 464 / 483 / 449 / 476 (`wc -m`, no gate run); frontmatter `mobile-android-<folder>`. References: `project-setup/references/gradle-config.md`, `architecture/references/hilt-and-modules.md`. Checklist rows (`grep -c "^| [A-F][0-9]" mobile/android/skills/standards-audit/references/conformance-checklist.md` → 86): `A5…A13`, `B17…B20`, `C1…C13`, `D1…D15`, `E1…E12`, `F1…F13`; A2's `views-interop` continues D at `D16`, A3's `notifications-and-links` continues F at `F14`. Lane tags used beyond §8.3's list: `[AGP8]`, `[NavCompose]`, `[N3]`, `[M3-1.5]`, `[M2]`. Verified at source this session: built-in Kotlin migration page (plugin removal, `compilerOptions`, kapt → KSP / `com.android.legacy-kapt`, `android.builtInKotlin` + `android.newDsl` opt-outs removed in AGP 10, `enableKotlin = false`) and the window-size-class breakpoints incl. Large / Extra-large behind `supportLargeAndXLargeWidth`. Built but unverified: see D27. Built but unverified overall: everything (no build, no lint, no `rg` recipe run).
+
 ### A2 — Android forms, networking, storage, Views interop and device features
 
 **Stack:** `docs` · **Agent:** `general-purpose`
@@ -1488,40 +1494,9 @@ goes in an untracked `scratch/` folder inside the worktree, deleted before commi
 | W1 | `docs` | `general-purpose` | R5, I5, A6, R3, S1–S3 | ~120k |
 | G1 | `docs` | `general-purpose` | every task above | ~140k |
 
-C1, S1, S2, S3, N1, R1, R2, R3, R4, R5, I1, I2, I3, I4 and I5 have landed (their blocks are deleted); every block below is live.
+C1, S1, S2, S3, N1, R1, R2, R3, R4, R5, I1, I2, I3, I4, I5 and A1 have landed (their blocks are deleted); every block below is live.
 
 ---
-
-### A1 — Android foundations (general-purpose, docs)
-
-````
-You are `general-purpose`. Task A1 of docs/plans/002-mobile-plugins.md: write
-`mobile-android-{project-setup,architecture,ui-components,styling,navigation}`.
-
-Read, in this order:
-1. CLAUDE.md (`## Mobile code rules`).
-2. The plan: §4.3, §5, §6.4, §8.3, §10, task A1, and "Close-out — every task".
-3. `mobile/android/skills/basics/SKILL.md`; `mobile-ios-{project-setup,architecture}` (shape across the domain).
-4. The Android checklist, sections A–F.
-
-Build:
-- Each skill per its §6.4 row, rows appended to A–F.
-- `project-setup`: AGP 9 built-in Kotlin, version catalog, explicit `targetSdk`, compile 37 / target 36 /
-  min 24, JDK 21 toolchain, KSP, R8 full mode, detekt / ktlint, edge-to-edge, predictive back.
-- `architecture`: one `uiState` per screen ViewModel, no ViewModel-to-UI events, convention plugins and
-  modules only when earned.
-
-Traps:
-- On AGP 9 never apply `org.jetbrains.kotlin.android`; kapt does not work — KSP.
-- Navigation 3 for new apps; Google's own migration page still names Navigation Compose — that is the
-  existing-app lane, not a contradiction to resolve.
-- Material 3 Expressive is stable only in 1.5 — rows tagged.
-
-Gate: none — this plan gates once, in G1. Do not run tools/token-audit.py, §11's script, or any lint.
-
-Commit: `feat(mobile A1): Android foundations`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
 
 ### A2 — Android forms, networking, storage, Views interop and device features (general-purpose, docs)
 
@@ -1536,7 +1511,9 @@ Read, in this order:
 4. The Android checklist, sections D, G, H, I, J.
 
 Build:
-- Each skill per its §6.4 row, rows appended to D, G, H, I, J.
+- Each skill per its §6.4 row, rows appended to D, G, H, I, J — A1 left D at `D15` (continue at `D16`).
+  A1's skills are `mobile-android-{project-setup,architecture,ui-components,styling,navigation}`; Android
+  decision D26 (no ViewModel-to-UI events, against corpus row 16) applies to anything you write on state.
 - `offline-and-storage`: Room 3 for new code, Room 2.8 as a lane; DataStore; Keystore / Tink.
 - `views-interop`: the Views lane and both interop directions.
 
@@ -1564,7 +1541,9 @@ Read, in this order:
 4. The Android checklist, sections F, J, P, Q, R.
 
 Build:
-- Each skill per its §6.4 row, rows appended to F, J, P, Q, R.
+- Each skill per its §6.4 row, rows appended to F, J, P, Q, R — A1 left F at `F13` (continue at `F14`);
+  `navigation` (A1) owns the URI → keys parse function, so `notifications-and-links` covers verification
+  and push routing and links to it.
 - `test-ids`: `semantics { testTagsAsResourceId = true }` once at the root, per §8.5.
 
 Traps:
