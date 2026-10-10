@@ -9,7 +9,7 @@ step-by-step agent that works greenfield and brownfield, a conformance audit, an
 **Status:** C1 landed (2026-10-11): `mobile/` exists with the five July drafts moved and renamed under
 `mobile/react-native/`, the three conformance-checklist skeletons, and `## Mobile code rules` in `CLAUDE.md`;
 the stale `frontend/react-native` pointers are repointed. S1 landed (2026-10-11): `mobile/_shared/{store-compliance,security}` with their references and the `L1…L26` / `K1…K27` audit fragments. S2 landed (2026-10-11): `mobile/_shared/{release,observability}` with their references and the `T1…T19` / `U1…U20` audit fragments. S3 landed (2026-10-11): `mobile/_shared/in-app-purchases` with its references and the `X1…X22` fragment, plus `auth/auth0-{react-native,ios,android}`. N1 landed (2026-10-11): `mobile/{ios,android}/skills/basics` with `references/concurrency.md` each, and rows `A1…A5`/`B1…B16` (iOS), `A1…A4`/`B1…B16` (Android). R1 landed (2026-10-11): the five drafts rewritten onto SDK 57 and `mobile/react-native/skills/navigation` written, with RN checklist rows `A1…A7`, `B1…B13`, `C1…C10`, `D1…D10`, `E1…E13`, `F1…F15`. R2 landed (2026-10-11): `mobile/react-native/skills/{ui-components,forms,networking,offline-and-storage,native-modules}` with checklist rows `D10…D19`, `G1…G10`, `H1…H15`, `I1…I13`, `J1…J13`. R3 landed (2026-10-10): `mobile/react-native/skills/{device-features,notifications-and-links,animation,languages,test-ids}` with checklist rows `F15…F20`, `J14…J28`, `P1…P10`, `Q1…Q11`, `R1…R10`, and §8.5's RN mapping answered (D20 — the QA explorer's `content-desc` claim is refuted). R4 landed (2026-10-11): `mobile/react-native/skills/{accessibility,performance,error-handling,component-testing}` with `error-handling/references/{session-and-resume,writes-and-dependencies}.md` and checklist rows `M1…M13`, `N1…N13`, `O1…O22`, `S1…S12`. R5 landed (2026-10-11): `mobile/react-native/skills/{migration,code-review,standards-audit}` with `migration/references/{sdk-upgrade,new-architecture,bare-to-expo,embed-in-native-app}.md`, the RN checklist's closing section index, `mobile/react-native/agents/mobile-react-native.md` (13,888 characters, description 574 of 650) and `mobile/react-native/commands/{mobile-react-native,mobile-react-native-audit}.md`. I1 landed (2026-10-11): `mobile/ios/skills/{project-setup,architecture,ui-components,styling,navigation}` with `references/{packages-and-config,tca}.md` and checklist rows `A6…A11`, `B17…B24`, `C1…C10`, `D1…D11`, `E1…E12`, `F1…F11` (D21: MV over the corpus's MVVM rows). I2 landed (2026-10-11): `mobile/ios/skills/{forms,networking,offline-and-storage,uikit,device-features}` with `networking/references/request-policy.md`, `offline-and-storage/references/{swiftdata-migrations,keychain}.md`, `uikit/references/{uiscene-migration,interop-seams}.md`, `device-features/references/permissions.md` and checklist rows `D12…D20`, `G1…G10`, `H1…H12`, `I1…I14`, `J1…J12` (D22: new facts unconfirmed against Apple pages). I3 landed (2026-10-11): `mobile/ios/skills/{notifications-and-links,system-integration,animation,languages,test-ids}` with `notifications-and-links/references/apns-and-extensions.md`, `system-integration/references/background-and-activities.md` and checklist rows `F12…F15`, `J13…J28`, `P1…P11`, `Q1…Q11`, `R1…R10` (D23: new facts unconfirmed against Apple pages). I4 landed (2026-10-11): `mobile/ios/skills/{accessibility,performance,error-handling,unit-testing}` with `error-handling/references/{session-and-resume,writes-and-dependencies}.md` and checklist rows `M1…M14`, `N1…N13`, `O1…O21`, `S1…S15` (D24: new facts unconfirmed against Apple pages). I5 landed (2026-10-11): `mobile/ios/skills/{migration,code-review,standards-audit}` with `migration/references/{swift6-modules,observation,combine-to-async,uikit-to-swiftui,objc-to-swift,cocoapods-to-spm,ios27-sdk-and-targets}.md`, the iOS checklist's closing section index, `mobile/ios/agents/mobile-ios.md` (13,879 characters, description 640 of 650) and `mobile/ios/commands/{mobile-ios,mobile-ios-audit}.md` (D25: migration facts unconfirmed against Apple / swift.org pages). A1 landed (2026-10-10): `mobile/android/skills/{project-setup,architecture,ui-components,styling,navigation}` with `project-setup/references/gradle-config.md`, `architecture/references/hilt-and-modules.md` and checklist rows `A5…A13`, `B17…B20`, `C1…C13`, `D1…D15`, `E1…E12`, `F1…F13` (D26: no ViewModel-to-UI events over the corpus's Channel row; D27: Navigation 3 / Expressive / KSP facts partly unconfirmed). A2 landed (2026-10-10): `mobile/android/skills/{forms,networking,offline-and-storage,views-interop,device-features}` with `networking/references/{request-policy,connectivity-and-trust}.md`, `offline-and-storage/references/{room-migrations,keystore-and-secrets}.md`, `forms/references/validation-autofill-wizards.md`, `views-interop/references/recyclerview.md`, `device-features/references/{permissions,biometrics-and-credentials}.md` and checklist rows `D16…D25`, `G1…G10`, `H1…H15`, `I1…I14`, `J1…J12` (D28: Room 3 / Retrofit 3 / Compose-forms facts partly unconfirmed). A3 landed (2026-10-10): `mobile/android/skills/{notifications-and-links,system-integration,animation,languages,test-ids}` with `notifications-and-links/references/{fcm,app-links}.md`, `system-integration/references/foreground-services.md` and checklist rows `F14…F16`, `J13…J24`, `P1…P8`, `Q1…Q8`, `R1…R8` (D29: FCM registration is the Installation-ID flow; several Compose / Appium / FGS facts unconfirmed). A4 landed (2026-10-10): `mobile/android/skills/{accessibility,performance,error-handling,unit-testing}` with `error-handling/references/{session-and-resume,writes-and-dependencies}.md`, `unit-testing/references/{flows-and-seams,robolectric-and-screenshots}.md` and checklist rows `M1…M15`, `N1…N14`, `O1…O22`, `S1…S16` (D30: Robolectric / Turbine / Roborazzi versions and R8 keep-rule semantics unconfirmed). Next: A5.
-Built but unverified: everything — the plan gates once, in G1. Flutter becomes a fourth plugin in its own plan, written
+A5 landed (2026-10-10): `mobile/android/skills/{kotlin-multiplatform,migration}` with three and nine references, and Android checklist rows `A14…A19` and `W1…W11`. Built but unverified: everything — the plan gates once, in G1. Flutter becomes a fourth plugin in its own plan, written
 once this one lands (O4); it is **not** in this plan's tasks. Maestro arrives on the QA side through plan 003
 (its X1); this plan feeds it the same test ids and an EAS Workflows job (D7). Every fact in §4 was web-verified
 on 2026-10-10; the items listed under §4.5 were not.
@@ -859,6 +859,8 @@ status-table `frontend` row, and `docs/plans/CONFORMANCE-AUDIT-PLAN.md` item 7.
 
 **D30 — Android quality-layer tool versions are not all confirmed (A4, 2026-10-10).** §4.3 names Robolectric 4.17; a search found only `4.17-beta-2` (Bazel registry), Turbine 1.2.0 (changelog, 2024-10-16) and Roborazzi 1.63.0 (listing, 2026-05-20), none from the vendors' release pages. Reading A (plan): 4.17 is current stable. Reading B (built): `mobile-android-unit-testing` keys every tool to "the project's catalog", marks Robolectric 4.17 stable status and the Turbine version as unconfirmed, and never raises a version. Costs: G1 or a later pass should confirm against the GitHub release pages. Compose UI test v2's dispatcher change, its package moves and the accessibility-check API were verified on developer.android.com; the R8 keep-rule semantics beyond the AGP 9.3 `keepRules` source set were not, and the skills say so.
 
+**D31 — KMP and migration facts that §4.3 did not carry (A5, 2026-10-10).** §4.3 says "Swift export alpha in Kotlin 2.4" and names `com.android.kotlin.multiplatform.library` only through the task's traps. Reading A (plan): state them as listed. Reading B (built): the library plugin's block is **`android { }` inside `kotlin { }`** on AGP 8.12+ / 9 (`androidLibrary { }` is the older, deprecated spelling), the Android app must be its own `com.android.application` module (the multiplatform plugin may not sit beside `com.android.library` / `com.android.application` under built-in Kotlin), Kotlin/Native 2.4 raises the iOS minimum to 15, and `swiftPMDependencies` is new in 2.4 — all from the vendors' pages. Costs: SKIE's Kotlin 2.4 status, the Metro / Koin Compiler Plugin versions and Navigation 3 KMP availability stay unconfirmed and are written as "check before use"; G1 or a later pass re-checks them.
+
 ## Answered questions (2026-10-10)
 
 **O1 — Packaging: one plugin or several?** Three plugins in one `mobile/` domain (the user; D1).
@@ -1388,6 +1390,8 @@ writes: two SKILL.md ~9k + migration references ~16k + KMP references ~8k; rows 
   temporary (gone in AGP 10).
 - **Not in A5:** review, audit, agent (A6).
 
+- **As built (2026-10-10):** `mobile/android/skills/kotlin-multiplatform/SKILL.md` (13,030 `wc -m`) with `references/{module-and-gradle,ios-and-swift-export,compose-multiplatform}.md` (4.4k / 4.3k / 4.3k), and `mobile/android/skills/migration/SKILL.md` (9,228) with nine references, one per path: `agp8-to-9`, `target-sdk-behaviour`, `java-kotlin-gradle-kts` (Groovy → KTS and Java → Kotlin share a file), `livedata-rx-to-flow`, `dagger-to-hilt`, `room2-to-3`, `views-to-compose`, `navigation-to-nav3`, `encrypted-prefs-replacement` (2.3k–4.8k each). No gate run. Checklist rows: `A14…A19` (AGP 9 `kotlinOptions` / `sourceSets`, `targetSdk` one level at a time, Room 2 / 3 mixing, `EncryptedSharedPreferences`, LiveData / Rx, one move per change) and `W1…W11` (Hilt in shared code, library plugin, separate app module, Android types in `commonMain`, CMP decision record, Swift export Alpha, DI shape, secrets, exported surface, per-target KSP, `commonTest`). **Differed from the plan:** nothing structural; Groovy → KTS and Java → Kotlin are one reference rather than two. Verified at source this session: the Android-KMP library plugin page (`android { }` inside `kotlin { }`, `androidLibrary { }` deprecated since AGP 9.1, opt-in host / device tests, single variant, resources off, no `BuildConfig`), the built-in Kotlin migration page (every step, the module-by-module bridge, "cannot disable in AGP 10", KMP note), the Swift export page (Alpha, limits, `embedSwiftExportForXcode`), What's new in Kotlin 2.4 (Swift export Alpha with `suspend` → `async` and `Flow` → `AsyncSequence`, `swiftPMDependencies`, iOS minimum 15, KGP needs AGP ≥ 8.5.2), the Room 3 page (package, artifacts, driver, removed APIs, converters, `@ColumnTypeConverter`, `room3-sqlite-wrapper`), Google's Views → Compose strategy page, the Navigation 3 migration guide. Built but unverified: SKIE's Kotlin 2.4 support (a search found only work on 2.4 RC in progress, no release), Metro's and Koin Compiler Plugin's current versions (the skill pins neither), the KMP Room 3 builder / constructor annotation spellings (the skill says to check the KDoc), Navigation 3 and Navigation Compose KMP availability under Compose Multiplatform, the `testTag` → iOS accessibility-identifier mapping in CMP, the `targetSdk` 35 / 36 / 37 behaviour list beyond §4.3 (the skill sends the reader to each level's behaviour-changes page), the Hilt-to-AGP-9 and `legacy-kapt` details beyond §4.3 and the migration page, WorkManager being Android-only. Built but unverified overall: everything (no build, no lint, no `rg` recipe run).
+
 ### A6 — Android review, audit, agent and commands
 
 **Stack:** `docs` · **Agent:** `general-purpose`
@@ -1506,38 +1510,9 @@ goes in an untracked `scratch/` folder inside the worktree, deleted before commi
 | W1 | `docs` | `general-purpose` | R5, I5, A6, R3, S1–S3 | ~120k |
 | G1 | `docs` | `general-purpose` | every task above | ~140k |
 
-C1, S1, S2, S3, N1, R1, R2, R3, R4, R5, I1, I2, I3, I4, I5, A1, A2, A3 and A4 have landed (their blocks are deleted); every block below is live.
+C1, S1, S2, S3, N1, R1, R2, R3, R4, R5, I1, I2, I3, I4, I5, A1, A2, A3, A4 and A5 have landed (their blocks are deleted); every block below is live.
 
 ---
-
-### A5 — Kotlin Multiplatform and Android migration (general-purpose, docs)
-
-````
-You are `general-purpose`. Task A5 of docs/plans/002-mobile-plugins.md: write
-`mobile-android-kotlin-multiplatform` and `mobile-android-migration`.
-
-Read, in this order:
-1. CLAUDE.md.
-2. The plan: the §3 verdicts, §4.3, §6.4, §8.3, §10, task A5, and "Close-out — every task".
-3. `mobile-android-{architecture,networking,offline-and-storage}`.
-4. The Android checklist, sections A and W.
-
-Build:
-- `kotlin-multiplatform` per §6.4: shared logic by default, Compose Multiplatform opt-in; the Swift
-  consumer code is `mobile-ios`'s; DI is Koin or Metro.
-- `migration` per §6.4, one `references/` file per path; AGP 8 → 9 lists each escape hatch as temporary.
-- Rows appended to A and W.
-
-Traps:
-- Hilt is Android-only — never in a shared module.
-- Swift export is alpha in Kotlin 2.4 — label it.
-- KMP library modules use `com.android.kotlin.multiplatform.library` on AGP 9.
-
-Gate: none — this plan gates once, in G1. Do not run tools/token-audit.py, §11's script, or any lint.
-
-Commit: `feat(mobile A5): Kotlin Multiplatform lane and Android migration`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
 
 ### A6 — Android review, audit, agent and commands (general-purpose, docs)
 
@@ -1558,7 +1533,7 @@ Build:
 
 Traps:
 - Agent ≤ 14,000 characters with the template's Gate sentence verbatim — `mobile-ios.md` landed at 13,879 (`wc -m`) by routing to skills from the start; copy its shape (Steps table, two output shapes) and its Related agents naming the three `qa-mobile-<stack>` peers.
-- Section W is N/A unless KMP modules exist — the probe decides, and N/A names the probe.
+- Section W is N/A unless KMP modules exist — the probe decides, and N/A names the probe. Section W already holds `W1…W11` and section A runs to `A19` (A5); the audit `SKILL.md` and the closing index only reference them — add no rows, renumber nothing.
 
 Gate: none — this plan gates once, in G1. Do not run tools/token-audit.py, §11's script, or any lint.
 

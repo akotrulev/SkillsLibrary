@@ -39,6 +39,12 @@ If the repo gitignores generated sources (KSP / Room / Hilt output under `build/
 | A11 | Release builds are minified with R8 full mode and narrow keep rules | `isMinifyEnabled = false` on release, `android.enableR8.fullMode=false`, a blanket `-keep class ** { *; }` | `rg -n "isMinifyEnabled\|enableR8" -g '*.kts' gradle.properties`; `rg -n "keep class \*\*" -g '*.pro'` | major |
 | A12 | detekt, ktlint and Lint run with warnings failing the build | No `.editorconfig` / `detekt.yml` / `lint.xml`; `abortOnError = false`; a formatter auto-fixing inside a build phase | `rg -n "abortOnError\|warningsAsErrors\|detekt\|ktlint" -g '*.kts' -g '*.yml'` | minor |
 | A13 | A convention plugin or module exists only on its second user | `build-logic/` for one module; `:core:common` / `:core:ui` with one consumer | `rg -n "includeBuild\|include\(" settings.gradle.kts`; count dependents per module | major |
+| A14 | `kotlinOptions {}` and `kotlin.sourceSets {}` are migrated `[AGP9]` | `android { kotlinOptions { … } }`, `kotlin.sourceSets.named("main") { kotlin.srcDir(…) }` or `java.directories` holding Kotlin files | `rg -n "kotlinOptions\|kotlin.sourceSets\|\.srcDir\(" -g '*.kts' -g '*.gradle'` | major |
+| A15 | `targetSdk` is raised one level at a time, and at least 36 where Play requires it | `targetSdk` jumped two levels in one change; `targetSdk` below 36 on an app updating after 2026-08-31 with no recorded extension | `rg -n "targetSdk" -g '*.kts' -g '*.gradle'`; `git log -p -S targetSdk -- '*.kts'` | major |
+| A16 | `androidx.room` and `androidx.room3` are not mixed inside one database `[Room2]` | A `@Database` importing `androidx.room3` with a DAO or converter still on `androidx.room`; `room3-sqlite-wrapper` left with no removal task | `rg -n "import androidx\.room\.\|import androidx\.room3\." $SRC -g '*.kt'` | major |
+| A17 | `EncryptedSharedPreferences`, `EncryptedFile` and `MasterKey` are not in new code | Any use outside a dated one-release migration read path | `rg -n "EncryptedSharedPreferences\|EncryptedFile\|MasterKey\|security-crypto" $SRC -g '*.kt' -g '*.kts' -g 'libs.versions.toml'` | major |
+| A18 | LiveData and RxJava are not in new code | `MutableLiveData`, `asLiveData()` or an `io.reactivex` import in a module already migrated; `SingleLiveEvent` anywhere | `rg -n "LiveData\|asLiveData\|io\.reactivex\|SingleLiveEvent" $SRC -g '*.kt'` | major |
+| A19 | A migration lands as one move per change | One commit / PR that changes AGP and Room, or Hilt and Navigation, or raises `targetSdk` beside a library move | `git log --stat -- gradle/libs.versions.toml`; read the change description | minor |
 
 ---
 
@@ -459,6 +465,17 @@ This section holds no rows of its own. The rows are those of `mobile/_shared/obs
 
 | # | Check | Violation looks like | Find it with | Sev |
 |---|---|---|---|---|
+| W1 | Hilt and Dagger are not in a shared module `[KMP]` | `@HiltViewModel`, `@Inject` Hilt modules, `@InstallIn` or a `dagger` dependency in `commonMain` / a KMP module's dependencies | `rg -n "dagger\|hilt\|@InstallIn\|@HiltViewModel" shared -g '*.kt' -g '*.kts'` | blocker |
+| W2 | A KMP library module on AGP 9 uses `com.android.kotlin.multiplatform.library` `[KMP][AGP9]` | `com.android.library` or `com.android.application` beside `org.jetbrains.kotlin.multiplatform`; `kotlin-android` in the module; the `androidLibrary { }` block | `rg -n "com.android.library\|com.android.application\|kotlin.android\|androidLibrary" shared -g '*.kts'` | blocker |
+| W3 | The Android app is its own `com.android.application` module `[KMP]` | The app and the shared code in one module that applies both the application and the multiplatform plugins | `rg -n "com.android.application\|kotlin.multiplatform" -g '*.kts'` | major |
+| W4 | `commonMain` imports no Android type `[KMP]` | `android.content.Context`, `android.app.*`, `androidx.activity` or an Android `R` in `commonMain` | `rg -n "import android\.\|import androidx\.activity\|\bR\.(string\|drawable)" shared/src/commonMain -g '*.kt'` | major |
+| W5 | Shared logic is the default; shared UI has a recorded decision `[KMP]` | Compose Multiplatform plugin applied with no decision record naming why iOS UI is not native | `rg -n "compose.multiplatform\|org.jetbrains.compose" -g '*.kts' -g 'libs.versions.toml'`; read `docs/` | major |
+| W6 | Swift export is labelled Alpha and scoped `[KMP]` | `swiftExport { }` in a shipping app's module with no decision record naming the Kotlin version it was verified on and its owner | `rg -n "swiftExport\|embedSwiftExportForXcode" -g '*.kts'` | major |
+| W7 | DI in a shared module is Koin, Metro or manual and constructor-injected `[KMP]` | `Koin.get()` / `by inject()` inside a class, a `GlobalContext` read, an `object` holding a client | `rg -n "GlobalContext\|KoinComponent\|by inject\(\)\|getKoin\(" shared -g '*.kt'` | major |
+| W8 | Secrets are not stored in shared storage `[KMP]` | A token written to shared DataStore / Room in `commonMain` with no `SecretStore` over Keystore / Keychain | `rg -n "token\|secret\|password" shared/src/commonMain -g '*.kt'` | blocker |
+| W9 | The exposed iOS surface is deliberate `[KMP]` | Every shared class public; no `internal`; generics and collection subtypes in the exported API | `rg -n "^public \|^class \|^object " shared/src/commonMain -g '*.kt'` | minor |
+| W10 | KSP is configured per target in a multiplatform module `[KMP]` | `kapt` in the module, or a processor added to `commonMain` only so `iosMain` fails to link | `rg -n "kapt\|ksp\(" shared -g '*.kts'` | major |
+| W11 | Shared logic has `commonTest` tests with fakes `[KMP]` | A shared repository or ViewModel with no `commonTest` file, or mocks in `commonTest` | `ls shared/src/commonTest`; `rg -n "mockk\|mock\(" shared/src/commonTest -g '*.kt'` | major |
 
 ---
 
