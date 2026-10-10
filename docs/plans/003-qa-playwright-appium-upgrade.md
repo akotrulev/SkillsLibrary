@@ -16,10 +16,14 @@ root-namespace `AuthSetup`), each with its stack's `ui-test-author/review` and `
 `qa/typescript/skills/evidence-capture` (SKILL.md + `references/playwright.md`), loaded by `qa-ui-typescript`
 Step 1 / Mode A and `qa-bdd-typescript` Step 4, and put TS `test-reports`, `flaky-test-quarantine`,
 `ci-conventions` (one Allure CLI pin, `allure-commandline@2.46.1`) and the three TS CI references on the
-canonical config (D35–D37). Next: J2. Built but unverified: no asset, workflow or pipeline has been compiled
-or run (G1 does that; D24's TS config import, the Java build on Allure Gradle plugin 4.3.0, the .NET build on
-NUnit3TestAdapter 6.3.1 / Test SDK 18.10.1, and T2's `dorny/test-reporter` `java-junit` parse of Playwright's
-junit are the open risks).
+canonical config (D35–D37). J2 landed 2026-10-10: `qa/java/skills/evidence-capture` (SKILL.md +
+`references/playwright.md`), loaded by `qa-ui-java` Step 1 / Mode A and `qa-bdd-java` Step 4; Java
+`test-reports` on allure-java 3.0 deferring to `BaseTest`, `flaky-test-quarantine` on D7, and the three Java CI
+references with a Playwright UI job uploading `build/playwright-artifacts/` (Azure gained one). The one Allure
+CLI pin holds for Java, and J1's build now pins it (D38–D41). Next: N2. Built but unverified: no asset,
+workflow or pipeline has been compiled or run (G1 does that; D24's TS config import, the Java build on Allure
+Gradle plugin 4.3.0, the .NET build on NUnit3TestAdapter 6.3.1 / Test SDK 18.10.1, `dorny/test-reporter`'s
+`java-junit` parse, and J2's trace CLI through the Java driver (D39) are the open risks).
 Planned 2026-10-10. The research behind it is committed with this plan:
 `docs/research/003-qa-playwright-appium/` (5 files). So is the read-only audit:
 `docs/audits/003-qa-playwright-appium/` (4 files). All open questions were answered on 2026-10-10:
@@ -30,7 +34,7 @@ Planned 2026-10-10. The research behind it is committed with this plan:
 - A Maestro lane is added (X1).
 - The newest Appium client majors are primary.
 
-Next: J2 (H1, the user's, blocks no task). The cost is 19 agent sessions on the subscription, each started by the user
+Next: N2 (H1, the user's, blocks no task). The cost is 19 agent sessions on the subscription, each started by the user
 from Plan Queue. Nothing else is metered.
 
 ## 1. What already exists, and what is missing
@@ -683,6 +687,45 @@ report carries no traces or videos). GitLab has one `artifacts:` block per job, 
 `test-results/` on every run; it only holds evidence for failed tests plus `junit.xml`. **Cost:** a small
 HTML artifact on green runs, kept 14 days.
 
+**D38 — Java keeps the one Allure report generator, allure2 `allure-commandline` 2.46.1, and J1's build pins it
+as `allure.version` (J2, 2026-10-10).** Allure's *Migrating to Allure Java 3* guide says allure-java 3 results
+open in Allure Report 2 and 3 with an unchanged file format, and allure2 2.46.0 renders the run-level errors
+3.0 writes, so no per-stack split is needed and `ci-conventions` is unchanged. But Allure Gradle plugin 4.3.0
+provisions Allure Report 3 by default. Readings: leave `allure.version` at the plugin default (a local
+`./gradlew allureReport` and the CI report then come from two generators), switch Java to Allure Report 3 with
+a per-stack pin, or set `version.set("2.46.1")` in the build (chosen). **Cost:** J2 edited two J1 files — one
+line in `assets/build.gradle.kts` and one Versions row in `ui-test-author/playwright/SKILL.md`; the Gradle report
+task downloads the `allure-commandline` zip from Maven Central instead of a Node runtime.
+
+**D39 — Java agents read a failure's trace with the trace analysis CLI, through Node
+(`npx playwright@1.63.0 trace …`) or the Java driver (`./gradlew playwright --args="trace …"`) (J2, 2026-10-10).**
+J1's lifecycle.md §8 called that CLI Node-only. playwright-core v1.63.0 registers the `trace` commands in the
+same program the Java driver's `com.microsoft.playwright.CLI` runs (`addTraceCommands` in
+`packages/playwright-core/src/cli/program.ts`), and the open trace is kept in `.playwright-cli/trace/` under the
+working directory, which J1's `JavaExec` task keeps stable. Readings: Node-only (an agent on a JVM-only machine
+reads nothing but the screenshot), or both routes (chosen), with lifecycle.md §8's sentence replaced by a link.
+**Cost:** the Gradle route is inferred from source, not run; G1's Java evidence smoke runs it once, and if it
+fails, `evidence-capture` and `qa-ui-java` Mode A fall back to Node only.
+
+**D40 — Java CI installs the browsers on the runner with `installPlaywrightBrowsers`; the pinned image is the
+visual-baseline variant (J2, 2026-10-10).** The `mcr.microsoft.com/playwright/java:v1.63.0-noble` image ships
+OpenJDK 25 and Maven, no JDK 21, no Gradle and no cloud CLI (its v1.63.0 Dockerfile), J1's build pins a Java 21
+toolchain with no resolver, and a GitHub container job runs `azure/login` inside the container, where the
+Azure CLI it needs is missing. Readings: the image as every UI job's default (JDK 21 provisioning per CI, and
+the OIDC credential fetch breaks), or the runner install as default with the image documented per CI as the
+variant for visual baselines (chosen; J2's task allows either). **Cost:** a UI screenshot from the runner is
+not a visual baseline; J3's visual job inherits the JDK and credential constraints, which its prompt now names.
+
+**D41 — Java quarantine filters the project's one `testng.xml` with Gradle groups, and its Allure category
+matches `"flaky": true` (J2, 2026-10-10).** The old skill retried every test through a suite-wide listener (cap
+1 on the gate, 3 in quarantine), kept two extra suite files, and filed every `TimeoutException` as "Known
+flaky". Readings: two suite files (each repeating J1's `parallel="classes"` and packages) or
+`excludeGroups("flaky")` / `includeGroups("flaky")` on the one suite (chosen; lifecycle.md §2 already relies on
+Gradle group filters with `alwaysRun` hooks); a category on an exception regex or on Allure's `flaky` matcher
+(chosen). A retry exists only as a per-test `RetryOnce` on a documented hotspot. **Cost:** detection waits for
+five launches of history, restarted once by allure-java 3's new TestNG identifiers; Java gets no nightly repeat
+lane (D7 names history and the quarantine category only).
+
 ## Answered questions (2026-10-10)
 
 **O1 — Which Playwright version per stack: 1.64 for Node only; Java and .NET follow when their packages
@@ -1143,6 +1186,66 @@ reporting and CI skills use the same evidence modes, paths and Allure import.
   - Add a Playwright-for-Java UI job to Azure Pipelines (`aJ` D18).
 - Add `./qa/java/skills/evidence-capture` to `qa-java` and a catalog row.
 - **Not in J2:** Appium (M2); MCP grants (A1); visual diffs (J3).
+- **As built (2026-10-10):**
+  - Landed: `evidence-capture/SKILL.md` (15,745 chars; description 489) and `references/playwright.md`
+    (§1 screenshots … §11 size and CI). Both agents wired. `test-reports` rewritten on allure-java 3.0 (15,964
+    chars; the Playwright failure attacher is gone), `flaky-test-quarantine` (14,698) and its `details.md`
+    rewritten to D7, and all three Java CI references rewritten: Playwright UI job with the
+    `installPlaywrightBrowsers` step, no `-Pheadless`, `build/playwright-artifacts/` on failure, the pinned
+    Allure CLI, and a new Azure `playwright-ui.yml` template. Marketplace entry added; T2's catalog row now
+    reads "— java · typescript (dotnet next)". `ci-conventions` is unchanged: no per-stack split.
+  - Checked live today: the allure-java 3.0.0 release notes and Allure's *Migrating to Allure Java 3* guide
+    (allurereport.org/docs/guides/allure-java-3-migration): "Results produced by Allure Java 3 can be viewed in
+    both Allure Report 3 and Allure Report 2", "The format of the result files written to disk is unchanged",
+    TestNG/JUnit 4 history restarts once, attachments shown as steps, results-dir cleanup removed. allure2
+    2.46.0 (2026-08-28) "Support run-level errors and attachments" pairs with allure-java PR #1372
+    (`{uuid}-globals.json`). allure-gradle 4.3.0 README: "By default `allure-gradle` provisions Allure 3";
+    `allure.version` 2.x switches to `allure-commandline`; `autoconfigure` and `aspectjWeaver` default true;
+    TestNG ≥ 7.10 for SDK 3; mixed 2.x/3.x adapters rejected. Maven Central: `allure-commandline` 2.46.1;
+    `allure-testng`, `allure-rest-assured`, `allure-jupiter`, `allure-cucumber7-jvm`, `allure-bom` 3.0.0. npm
+    `allure-commandline` 2.46.1. Allure categories file: `flaky (boolean)` matcher. playwright-java v1.63.0
+    sources: `Screencast.start` → `AutoCloseable` (`StartOptions` path/size/quality/onFrame; no `setFps`),
+    `ShowActionsOptions` position/cursor/duration/fontSize (no `setStyle`), `showOverlay`/`showActions` →
+    `AutoCloseable`; `AnnotatePosition` `TOP_LEFT…BOTTOM_RIGHT`; `Tracing.StartOptions`
+    `setAriaSnapshots`/`setScreenSnapshots`/`setLive`, `startHar` and `group` → `AutoCloseable`;
+    `Page.ScreenshotOptions` setters; `NewContextOptions.setRecordHar*`/`setRecordVideo*`; `HarContentPolicy`
+    `OMIT/EMBED/ATTACH`; `Locator.describe`; `Page.AriaSnapshotOptions` + `AriaSnapshotMode.AI`. playwright
+    v1.63.0 `packages/playwright-core/src/cli/program.ts` calls `addTraceCommands`; `traceUtils.ts` keeps the
+    open trace in `.playwright-cli/trace`. playwright-java v1.63.0 `utils/docker/Dockerfile.noble`: OpenJDK 25 +
+    Maven 3.9.12, no JDK 21, no Gradle. Playwright v1.63.0 `docs/src/ci.md`: the Java GitHub container example
+    uses `--user 1001` + `actions/setup-java@v5`.
+  - Differed from the plan: the report generator stays allure2 2.46.1 and J1's build pins it as
+    `allure.version` (D38); the trace analysis CLI is documented through Node and the Java driver, correcting
+    J1's lifecycle.md §8 (D39); CI installs browsers on the runner, the pinned image is the visual-baseline
+    variant (D40); quarantine filters the one `testng.xml` and the category matches `"flaky": true` (D41).
+    `test-reports` keeps only the GitHub publish snippet (Azure/GitLab publish live in the CI references) to
+    stay ≤ 16,000 chars. `BaseTest.java` and lifecycle.md §5 are unchanged: no default had to change.
+  - Names assigned: deliberate recordings `build/playwright-artifacts/<Class>.<method>.<kind>.<ext>`
+    (`receipt.webm`, `.har`); helper `com.example.uitests.support.Evidence.screenshot(name)`; Cucumber
+    scenario evidence `<Feature>.<Scenario>` with characters outside `[A-Za-z0-9._-]` replaced by `_` (J4
+    writes the hook); exploratory evidence `evidence/<YYYY-MM-DD>-<topic>/`; hotspot analyzer
+    `support.RetryOnce`; Gradle task `flakyQuarantine`; CI artifacts `playwright-artifacts-<n>` (failure, 14
+    days), `allure-results-ui-<n>` / `allure-results-api-<n>` (30 days); Azure template
+    `pipelines/templates/playwright-ui.yml`, job `PlaywrightUi`; shards 1-based (`shard-<i>-of-<N>`).
+  - Built, unverified (Gate: none): nothing compiled or ran. Open points: the trace CLI through
+    `./gradlew playwright --args="trace …"` (D39); whether a screencast's path is written while `BaseTest`'s video
+    runs; `tracing().startHar` beside `BaseTest`'s trace; Gradle `excludeGroups`/`includeGroups` applied to a suite
+    XML (TestNG's command-line groups override the suite's); the plugin's `copyCategories` running without an
+    explicit call; the GitLab jobs' `aws` CLI in `eclipse-temurin:21-jdk` (a pre-existing assumption, now stated
+    in the reference); `dorny/test-reporter` on TestNG's JUnit XML.
+  - Proof: `name: qa-evidence-capture-java` and the Appium placeholder at
+    `qa/java/skills/evidence-capture/SKILL.md:2,13`; R7 defaults `:64`; raw tracing and assertions `:98`; Cucumber
+    `:104`; exploratory MCP ↔ CLI `:132`; reading a failure `:157,166`; PII `:179`. Reference: enum position
+    `references/playwright.md:161`, helper catch `:176,183`, `setAriaSnapshots` `:216`, `group` `:238`, `startHar`
+    `:267`. Agents: Mode A `qa/java/agents/qa-ui-java.md:85`, Step 1 `:113`, BDD Step 4
+    `qa/java/agents/qa-bdd-java.md:105`. `test-reports/SKILL.md`: pins `:34`, live check `:39`, Gradle `:68,70`,
+    migration table `:86`, defer to `BaseTest` `:162`. `flaky-test-quarantine/SKILL.md`: retries `:13`, `RetryOnce`
+    `:101`, gate `:154`, quarantine task `:159`, category `:201`. CI: install `github-actions.md:267`,
+    `gitlab-ci.md:205`, `azure-pipelines.md:225`; failure upload `github-actions.md:304`, `gitlab-ci.md:222`,
+    `azure-pipelines.md:261`; Azure UI template `azure-pipelines.md:85,205,214`; Allure pin
+    `github-actions.md:358`, `gitlab-ci.md:256`, `azure-pipelines.md:309`. J1 edits:
+    `assets/build.gradle.kts:24`, `ui-test-author/playwright/SKILL.md:23`, `references/lifecycle.md:202`.
+    Marketplace `.claude-plugin/marketplace.json:75`; catalog `docs/skills-catalog.md:60`.
 
 ### N2 — .NET evidence capture: the new skill, agent wiring, reporting and CI with real sharding
 
@@ -1791,87 +1894,9 @@ Run them in order, one session each, opened from Plan Queue. Each block is compl
 | X1 | `docs` | `general-purpose` | M1, S1, T2 | ~130k |
 | G1 | `docs` | `general-purpose` | all | ~145k |
 
-Landed: T1, J1, N1, T2 (2026-10-10). Every other block is live.
+Landed: T1, J1, N1, T2, J2 (2026-10-10). Every other block is live.
 
 ---
-
-### J2 — Java evidence capture: the new skill, agent wiring, reporting and CI (general-purpose, docs)
-
-````
-You are `general-purpose`. Task J2 of docs/plans/003-qa-playwright-appium-upgrade.md: create
-qa/java/skills/evidence-capture (qa-evidence-capture-java) per §3.2, wire it into qa-ui-java and
-qa-bdd-java, and make Java reporting and CI agree with J1's BaseTest.
-
-Read, in this order:
-1. CLAUDE.md.
-2. The plan: §3.2, §4 (R7, R8, R9), §5.1, Decisions D4, D7, D12, task J2, "Close-out — every task".
-3. J1's output: qa/java/skills/ui-test-author/playwright/assets/BaseTest.java, build.gradle.kts and
-   references/lifecycle.md.
-4. docs/research/003-qa-playwright-appium/playwright-evidence.md §0–§9 and §11.2;
-   playwright-agent-tooling.md §7c.
-5. qa/java/agents/qa-ui-java.md and qa-bdd-java.md (loading protocol, brownfield Mode A, Steps).
-6. qa/reporting/java/skills/{test-reports,flaky-test-quarantine}/SKILL.md;
-   qa/cicd/java/skills/ci-pipelines/references/{github-actions,gitlab-ci,azure-pipelines}.md.
-7. docs/audits/003-qa-playwright-appium/java.md §2d and rows D15, D17–D19, D42, D43, V5.
-8. Optional, for parity: T2's qa/typescript/skills/evidence-capture/SKILL.md (the section set: Versions,
-   Who owns what, the three kinds of capture, failure-evidence defaults + paths, deliberate recordings,
-   exploratory capture, reading a failure, PII and retention, Rules, Handoffs; the Appium placeholder
-   sits under the intro paragraph).
-
-Build:
-- evidence-capture/SKILL.md and references/playwright.md with Java spellings:
-  - Page.ScreenshotOptions.
-  - setRecordVideoDir/Size; video.saveAs after close.
-  - page.screencast() as AutoCloseable, with AnnotatePosition.TOP_RIGHT.
-  - tracing start/stop/startChunk/group/startHar; setAriaSnapshots/setScreenSnapshots (1.63);
-    PLAYWRIGHT_JAVA_SRC.
-  - Allure 3.0 attachments (Allure.attachment + AttachmentOptions.withFileExtension; a trace uses type
-    application/vnd.allure.playwright-trace).
-  - show-trace via com.microsoft.playwright.CLI; the npx playwright trace CLI when Node is present.
-  - The playwright-cli equivalents of the MCP capture tools (plan §3.8).
-  - The appium placeholder line ("written by M2").
-- qa-ui-java.md: Step 1 loads it; brownfield Mode A opens the failure's trace. qa-bdd-java.md: in its
-  ui-test-author/playwright step. Leave tools: frontmatter alone (A1).
-- test-reports: delete the broken failure attacher and defer to BaseTest. Allure 3.0 adapter, steps and
-  attachments, with one pin set. Check live which report generator reads allure-java 3.0 results
-  (allure2 commandline or Allure Report 3) and pin it. T2 set the ci-conventions pin to
-  `allure-commandline@2.46.1` (allure2 2.46.1, Allure Report 2, installed with
-  `npm i -g allure-commandline@2.46.1` on a runner with a Java runtime). If Java needs a different
-  generator, make ci-conventions per-stack and record a dated decision.
-- flaky-test-quarantine: D7.
-- CI references:
-  - UI job in mcr.microsoft.com/playwright/java:v1.63.0-noble, or ./gradlew installPlaywrightBrowsers.
-  - Drop -Pheadless.
-  - Upload build/playwright-artifacts/ on failure.
-  - Add a Playwright-for-Java UI job to Azure Pipelines.
-- Add ./qa/java/skills/evidence-capture to qa-java in the marketplace. In docs/skills-catalog.md, extend
-  the `evidence-capture` row T2 added under **Authoring** (it ends "— typescript (java · dotnet next)")
-  to name java, instead of adding a second row.
-
-Traps:
-- Raw context.tracing does not record expect() calls (evidence §12.7). Say so; Java has no runner tracing.
-- The 1.59 release-note samples pass "top-right" as a string. Java takes the AnnotatePosition enum.
-- allure-testng 3.0 (D12): Allure.addAttachment(...) is the 2.x API and is gone. G1's CODE_CHECKS bans it
-  in Java code blocks and assets.
-- The paths must equal J1's BaseTest (build/playwright-artifacts/<Class>.<method>.*). CI uploads exactly
-  that. build/playwright-videos/ holds raw recordings that BaseTest deletes after every test; never
-  upload it.
-- J1's shape (com.example.uitests.support.BaseTest): the failure hooks are BaseTest's private keep*
-  helpers and closeContext; subclasses only override launchOptions() / contextOptions() (plan D26). The
-  skill points at that code and adds no second hook. If a default must change (for example
-  setAriaSnapshots(true) on the trace), edit BaseTest.java and lifecycle.md §5 in place and record a
-  dated decision. BaseTest's one catch (keepScreenshot, plan D29) is the pattern for any capture helper.
-- Show-trace runs through J1's `playwright` JavaExec task: ./gradlew playwright --args="show-trace <zip>"
-  (plan D28). Headed runs use HEADED=1, not -Dplaywright.headless or -Pheadless.
-- Allure Gradle plugin 4.3.0 is in J1's build.gradle.kts with allure { adapter { allureJavaVersion.set("3.0.0") } }.
-  Its allure.version selects the report runtime (3.x = Allure Report 3, 2.x = allure-commandline) and is
-  left at the plugin default. If you pin the report generator in Gradle, set allure.version there.
-
-Gate: none. This plan gates once, in G1. Do not run any build, test or check script.
-
-Commit: `docs(qa-java): evidence-capture skill, agent wiring, reporting and CI alignment (003 J2)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
 
 ### N2 — .NET evidence capture: the new skill, agent wiring, reporting and CI with real sharding (general-purpose, docs)
 
@@ -1917,10 +1942,11 @@ Build:
   - mcr.microsoft.com/playwright/dotnet:v1.63.0-noble (no jammy).
   - Upload bin/<cfg>/net10.0/playwright-artifacts/ on failure.
 - Add ./qa/dotnet/skills/evidence-capture to qa-dotnet in the marketplace. In docs/skills-catalog.md, extend
-  the `evidence-capture` row T2 added under **Authoring** to name dotnet (once J2 has added java, the
-  stack list reads "— java · dotnet · typescript"), instead of adding a second row.
-- Any Allure report CLI in .NET test-reports or the .NET CI references uses the ci-conventions pin T2 set,
-  `allure-commandline@2.46.1` (needs a Java runtime), unless J2 recorded a per-stack split.
+  the `evidence-capture` row T2 added under **Authoring** — it now ends "— java · typescript (dotnet next)" —
+  so it reads "— dotnet · java · typescript", instead of adding a second row.
+- Any Allure report CLI in .NET test-reports or the .NET CI references uses the ci-conventions pin,
+  `allure-commandline@2.46.1` (needs a Java runtime). J2 confirmed the one pin holds for every stack (D38):
+  there is no per-stack split.
 
 Traps:
 - Microsoft.Playwright.NUnit has no sharding. The adapter prints "Playwright>Shard is not implemented".
@@ -2133,6 +2159,15 @@ Traps:
   request.
 - Name the comparator's exact coordinates and version you saw on Maven Central today, in the reference
   and in your As-built note.
+- The pinned image (D40): mcr.microsoft.com/playwright/java:v1.63.0-noble ships OpenJDK 25 and Maven — no
+  JDK 21, no Gradle, no cloud CLI — while J1's build pins a Java 21 toolchain. J2's CI references install the
+  browsers on the runner and describe the container only as the visual-baseline variant (GitHub: keep
+  actions/setup-java 21 inside the container, and azure/login cannot run there; GitLab: apt-get
+  openjdk-21-jdk-headless as root; Azure container jobs have no sudo). The visual job and the baseline-update
+  command must work inside those limits; a visual run of a signed-in page needs its credentials another way.
+- Deliberate captures (a diff image, a HAR) follow qa/java/skills/evidence-capture: the class's own
+  @BeforeMethod / @AfterMethod(alwaysRun = true), files in build/playwright-artifacts/<Class>.<method>.<kind>.<ext>,
+  and any catch only in a private helper (D29), never in the hook body.
 
 Gate: none. This plan gates once, in G1. Do not run any build, test or check script.
 
@@ -2285,7 +2320,14 @@ Build:
 - api-test-author/playwright: exact status, not isOK(); no HttpComponents for constants.
 - gherkin-step-code: page objects take Page, not TestContext.
 - bdd-project-scaffold: Playwright 1.63.0; one discovery mechanism; Gradle paths. Leave Appium lines
-  for M2.
+  for M2. The `Hooks` class keeps failure evidence as qa/java/skills/evidence-capture/SKILL.md ("Cucumber
+  scenarios") fixes it: tracing started in `@Before`; in `@After`, on `scenario.isFailed()`, a full-page
+  screenshot and `tracing().stop(setPath)` before `context.close()`, then `video.saveAs`, and `video.delete()`
+  always; files `build/playwright-artifacts/<Feature>.<Scenario>.{png,zip,webm}` with characters outside
+  `[A-Za-z0-9._-]` replaced by `_`; raw video in `build/playwright-videos/`; attached with
+  `Allure.attachment(..., AttachmentOptions.withFileExtension(ext))`; the screenshot's narrow, logged
+  `PlaywrightException` catch in a private helper (D29). Headless unless `HEADED=1` — drop
+  `-Dplaywright.headless`, which the CI references no longer pass.
 - python-web-testing:
   - expect(...).to_be_visible() instead of networkidle, wait_for_timeout or wait_for_selector.
   - Locator APIs; outputs under the project.
@@ -2481,7 +2523,9 @@ Build:
 - ui-test-author/appium/assets/: build.gradle.kts, BaseMobileTest.java (evidence hooks per appium.md
   §9.1, on allure-testng 3.0), AppiumDriverFactory.java, a screen object, one test.
 - Every Allure call in the mobile Java skills uses allure-java 3.0 (D12).
-- evidence-capture/references/appium.md; replace the placeholder line.
+- evidence-capture/references/appium.md; replace the placeholder line ("Appium: `references/appium.md`,
+  written by M2", under the intro). J2's SKILL.md is 15,745 chars: replace the line with a one-line route
+  and add a `BaseMobileTest` row to its "Who owns what" table; do not grow it past 16,000.
 - qa-mobile-java.md: tools: = core + §5.3; the prerequisites as in M1; Step 1 wiring; keep the
   "scaffold" wording (S1 adds Step 0); the description says Appium 3.
 
@@ -2727,6 +2771,12 @@ Traps:
   LoginTest and WebMcpTest from that scratch project (they need a real app). Pass condition: the failing
   test leaves build/playwright-artifacts/<Class>.<method>.{png,zip,webm}, the passing test leaves nothing,
   and build/playwright-videos/ is empty afterwards.
+- Settle D39 in the same scratch project: `gradle playwright --args="trace open build/playwright-artifacts/<Class>.<method>.zip"`,
+  then `--args="trace errors"` and `--args="trace close"`. If they fail, make the trace CLI Node-only in
+  qa/java/skills/evidence-capture (SKILL.md "Reading a failure", references/playwright.md §8) and in
+  qa/java/agents/qa-ui-java.md Mode A step 1, and record the reversal as a dated decision.
+- J1's build.gradle.kts sets `allure { version.set("2.46.1") }` (D38). `compileTestJava` does not download a
+  report runtime; do not run `allureReport`.
 - .NET Playwright scratch project: Directory.Packages.props, UiTests.csproj and ui.runsettings (the csproj's
   RunSettingsFilePath points at it) in one folder, with all eight .cs assets (BaseTest, AuthSetup, LoginPage,
   HomePage, LoginTests and the rest) plus WebMcpTests.cs and any .runsettings A1 added beside them.

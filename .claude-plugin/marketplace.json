@@ -72,6 +72,7 @@
         "./qa/java/skills/db-testing/verification-queries",
         "./qa/java/skills/db-testing/testcontainers",
         "./qa/java/skills/email-testing",
+        "./qa/java/skills/evidence-capture",
         "./qa/java/skills/feature-flag-testing",
         "./qa/java/skills/file-storage-testing",
         "./qa/java/skills/language-testing",

@@ -198,4 +198,5 @@ The status is asserted exactly with AssertJ, the body as the description. Never
   with a `Should_X_When_Y` name, and never commit the recording. The recorder's **Assert snapshot** button
   emits `matchesAriaSnapshot`.
 - **Traces also open at trace.playwright.dev**, which loads the zip in the browser without uploading it. The
-  `npx playwright trace …` analysis CLI is Node-only.
+  `trace open | errors | actions | …` analysis commands an agent reads a failure with are in
+  `qa/java/skills/evidence-capture` (§ Reading a failure).

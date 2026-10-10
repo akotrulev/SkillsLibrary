@@ -20,6 +20,7 @@ These are the only Playwright pins in this skill. Every other file links here.
 | Docker image | `mcr.microsoft.com/playwright/java:v1.63.0-noble` | The tag always equals the package version |
 | `io.qameta.allure:allure-testng` | 3.0.0 | Java 17+ test JVM; `Allure.attachment(..., AttachmentOptions)` |
 | `io.qameta.allure` Gradle plugin | 4.3.0 | First release that supports allure-java 3 (`allureJavaVersion.set("3.0.0")`) |
+| Allure report generator | `allure-commandline` 2.46.1 | `allure.version` in the build; the cross-stack pin in `qa/cicd/ci-conventions` |
 | `org.testng:testng` / `org.assertj:assertj-core` | 7.12.0 / 3.27.7 | allure-testng 3 needs TestNG ≥ 7.10 |
 | `com.deque.html.axe-core:playwright` | 4.13.0 | Owned by `accessibility-testing` |
 
