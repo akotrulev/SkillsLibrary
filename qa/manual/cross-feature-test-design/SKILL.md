@@ -32,7 +32,7 @@ The analysis half lives in `qa/manual/requirements-breakdown` (§8 and `referenc
 
 ## Procedure
 
-1. **Read §8 table by table** and tag each row with its slice lookup (`L1`…`L8`, numbered as in `references/connections.md`). A slice id is the lookup plus the KB ids, such as `L2 RX-002 → EVT-006 → RX-006`.
+1. **Read §8 table by table** and tag each row with its slice lookup (`L1`…`L8`, numbered as in `references/connections.md`). A slice id is the lookup plus the KB ids, such as `L2 RX-002 → EVT-006 → RX-006`. With no KB, §8 carries the Code-mode ids `T<n>`, `R<n>`, `S<n>`, `I<n>`, local to the basis and stated so in §8's header, and the slice id uses them (`L2 R1 → T2 → R3`); KB ids win whenever a KB exists.
 2. **Pick the technique** for each row from the first table below.
 3. **Enumerate the coverage items** the technique defines. Pairs come from the slice, never from a cross product.
 4. **Prioritize** (below).

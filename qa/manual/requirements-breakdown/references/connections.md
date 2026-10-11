@@ -4,7 +4,7 @@ How `requirements-breakdown` fills the basis's §8 (**Connections**). Four parts
 
 **This guide reads `docs/business-model/` as data**, in the format `business-analysis:dependency-map` and `knowledge-base` define (`events.md`, `shared-data.md`, `invariants.md`, plus the grids, decision files and `interaction-map.md`). **QA never writes there.** A format change in those skills updates this file in the same commit.
 
-The ids are the KB's: `EVT-` triggers, `RX-` reactions, `INV-` invariants, `ENT-` entities, `DEC-` decisions, `E<n>` / `AREA-nnn` owners. Restate an id in §8; never copy a row.
+The ids are the KB's: `EVT-` triggers, `RX-` reactions, `INV-` invariants, `ENT-` entities, `DEC-` decisions, `E<n>` / `AREA-nnn` owners. Restate an id in §8; never copy a row. With no KB (Code mode), the ids are `T<n>` trigger, `R<n>` reaction, `S<n>` shared field and `I<n>` invariant, local to one basis and stated to be local in §8's header; KB ids win whenever a KB exists.
 
 ## 1. The KB slice
 
@@ -33,7 +33,7 @@ When the KB lacks the feature, or is stale, the agent's Code mode runs `dev:doc-
 |---|---|
 | Entry point, Kind | *Trigger* |
 | Reacted to by (one hop out) | *Reaction (owner)*: one row per reactor, owner from its area |
-| Writes, Reads | *Shared data*: each `Entity.field` another area also writes or reads; the other writers and readers are the reactors and the jobs' queries found by the trace |
+| Writes, Also written by, Reads | *Shared data*: each `Entity.field` another area also writes or reads; the other writers come from *Also written by*, the readers from the reactors and the jobs' queries found by the trace |
 | Emits | *Emits → next* |
 | Mode, On failure | *Mode*, *On failure*, copied as the trace states them (`?` stays `?`) |
 | Evidence | *Source*, tagged `#observed` |

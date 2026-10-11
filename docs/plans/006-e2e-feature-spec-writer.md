@@ -2,7 +2,7 @@
 
 **Goal:** One agent, `qa-feature-spec-writer`, run per feature as `/qa-<stack>:feature-spec`. It traces a feature once and writes two documents in the service repo: the feature document and an **e2e-only** test-case suite. Every case runs through a public surface or a test hook the deployed environment already has. A separate QA repository implements the suites; the agent writes no code and runs nothing.
 
-**Status:** E1 built 2026-10-11 (agent, command, six registrations; unverified — no gate has run). Next: E2 (skill fixes, docs, the gate). Prerequisite outside the plan: plan 005's 8 commits are not on `origin/master` (005 H1 report, D1), so the installed plugins carry neither 005 nor this plan until `git push origin master` runs. This machine's shell has no GitHub credential, so the push is the user's job.
+**Status:** E1 and E2 built 2026-10-11; the gate (§6) passed. Next: the user's `git push origin master`, then H1 (run it on two real features). Built but unverified: no run of `/qa-<stack>:feature-spec` on a real feature yet (H1). Prerequisite outside the plan: plan 005's 8 commits are not on `origin/master` (005 H1 report, D1), so the installed plugins carry neither 005 nor this plan until the push; this machine's shell has no GitHub credential, so the push is the user's job.
 
 ## 1. What already exists, and what is missing
 
@@ -136,6 +136,8 @@ Cost: a third file couples to the section headings of the other two. The gate's 
 
 **D5 — It ships in the three `qa-*` plugins, not in `dev`.** It is a QA deliverable, and `dev` stays stack-free. `be-feature-documenter` stays where it is for documentation-only runs.
 
+**D6 — (2026-10-11, E2) `test-case-writer/SKILL.md` stays over the token budget.** The gate's step 4 expected no listed file this plan changed; that file was already a violation (17576) and the §5 sentence adds 76. Reading A: trim the skill now. Reading B (taken): leave it — the violation predates this plan and trimming unrelated text exceeds E2's scope. Cost: the audit still lists the file until someone splits it.
+
 ## Answered questions (2026-10-11)
 
 **O1 — Where do the documents go:** flexinvest `docs/`, untracked.
@@ -171,6 +173,7 @@ Cost: a third file couples to the section headings of the other two. The gate's 
 - `docs/skills-catalog.md`: the `qa-*` row of the command table (`:33`) gains `:feature-spec`; one bullet under the qa/manual agents next to `qa-test-case-designer` (`:144`); the `qa/manual/` sentence (`:58`) names three agents.
 - `README.md`: the same command and agent count changes wherever it lists the `qa-*` surface.
 - Run §6. Then close out; this task deletes the last automated block, but H1's block stays, so the plan does **not** move.
+- **As built (2026-10-11):** §5's three rows applied as written — `feature-trace/SKILL.md:89-91` and `:147` (`Also written by` column in both Edges tables, sample row, self-check 9), `connections.md:7` plus its Edges-column mapping, `cross-feature-test-design/SKILL.md:35` (Code-mode `T<n>`/`R<n>`/`S<n>`/`I<n>`, local to the basis, stated in §8's header), `test-case-writer/SKILL.md:54` (named budget in Setup). Catalog `:27,:33,:58` plus a new `agents/qa-feature-spec-writer` bullet; README `:63,:104,:106` plus a `:feature-spec` row. Recounted: 65 command files, 73 registrations, 12 commands per qa stack (13 for qa-dotnet); `CLAUDE.md` "64-command" → "65-command". Gate: `json.tool` OK; `claude plugin validate .` ✔ Validation passed; `plugin-surface-check.py` OK; `qa-version-check.py` OK; `token-audit --violations-only` lists none of the new files, only `qa/manual/test-case-writer/SKILL.md` [qa-java] at 17652 (17576 before — see D6); §6 step 6: every cited heading found in both agents (`Step 4 checklist` is a bold lead-in at `be-feature-documenter.md:70`); step 7: no `TODO`/`FIXME` in changed files, §5 lines still point at the edited text. Repair: E1's commit had left the plan's tail duplicated (a second Close-out, Prompts and stale E1/E2 blocks); removed the duplicates, leaving one Prompts section with H1's block.
 
 ### H1 — run it on real features (the user)
 
@@ -208,149 +211,12 @@ Run them in order, one session each, in the SkillsLibrary checkout on `master`; 
 | # | Stack | Agent | Depends on | Budget |
 |---|---|---|---|---|
 | E1 | `docs` | `general-purpose` | — | ~110k |
-| E2 | `docs` | `general-purpose` | E1 | ~110k |
 | — | `git push origin master` | **the user** | E2 | — |
 | H1 | `human` | **the user** | E2, the push | two features |
 
-E1 landed 2026-10-11; its block is deleted. E2 and H1 are live.
+E1 and E2 landed 2026-10-11; their blocks are deleted. H1 is live.
 
 ---
-
-### E2 — the three skill fixes, the docs and the gate
-
-**Stack:** `docs` · **Agent:** `general-purpose`
-**Deliverable:** §5's three fixes are in place, the catalog and README list the agent and the command, and §6 passes.
-**Depends on:** E1 (the agent the docs describe and the gate checks).
-**Budget:** ~110k — CLAUDE.md 25k, this plan §3.3, §5, §6 and E1's As built 10k, `feature-trace/SKILL.md` 10k, `connections.md` 8k, `cross-feature-test-design/SKILL.md` 6k, `test-case-writer/SKILL.md` 10k, catalog and README sections 10k, the E1 agent for the gate's step 6 8k, edits ~10k, gate output ~10k.
-**Gate:** §6, in order. Fix what it finds: a failure may belong to E1.
-
-- Apply §5's three rows exactly as written there.
-- `docs/skills-catalog.md`: the `qa-*` row of the command table (`:33`) gains `:feature-spec`; one bullet under the qa/manual agents next to `qa-test-case-designer` (`:144`); the `qa/manual/` sentence (`:58`) names three agents.
-- `README.md`: the same command and agent count changes wherever it lists the `qa-*` surface.
-- Run §6. Then close out; this task deletes the last automated block, but H1's block stays, so the plan does **not** move.
-
-### H1 — run it on real features (the user)
-
-**Stack:** `human` · **Agent:** `human` · **Owner:** the user
-**Deliverable:** H1's As built records whether two INVENTORY rows produced documents and suites that the QA repo can automate without asking the service repo anything, and which hooks were requested.
-**Depends on:** E2, and the push (Status).
-**Gate:** the checklist in H1's prompt block.
-
-## Close-out — every task
-
-Before you stop, in this order, in this file:
-
-1. **As built** — append a dated `**As built (YYYY-MM-DD):**` bullet to your task block: what differed
-   from the plan, the ids and names you assigned, what is built but unverified, and the `file:line` or
-   command output that proves the deliverable exists. Never edit an earlier note.
-2. **Decisions** — where you built something differently from the plan, append a dated `D<n>` to
-   `## Decisions` with both readings. A divergence is recorded, never absorbed.
-3. **The blocks below yours** — rewrite, in place, every prompt block whose assumptions your work
-   changed (a renamed file, a changed signature, a moved gate), and write any block left
-   `Blocked on <your id>` from what you now know.
-4. **Your own block** — delete it, and update the line above the blocks that says which have landed.
-   Stopping mid-task: keep it, with a `Picking up from:` line. Blocked: keep it, naming the blocker and
-   its owner.
-5. **Status** — rewrite the header `**Status:**` line: what is built, what is next, what is built but
-   unverified.
-6. **Filing** — if your deletion left no blocks, rewrite `**Status:**` one final time (what the plan
-   delivered, what is still unverified) and `git mv` this plan into `docs/plans/implemented/`, same
-   name and number — a `solution-planner` pack moves its whole initiative folder.
-7. **Commit** — the code, its tests and these plan edits together, in one commit.
-
-## Prompts — one per task
-
-Run them in order, one session each, in the SkillsLibrary checkout on `master`; never create a branch. Each block is complete on its own. Only E2 runs the gate (§6). No prompt writes into any project's `docs/business-model/`. **The cost, accepted and stated once:** E1's commit is ungated, so the tree is not known to validate until E2, and the plan cannot be stopped after E1 and trusted.
-
-| # | Stack | Agent | Depends on | Budget |
-|---|---|---|---|---|
-| E1 | `docs` | `general-purpose` | — | ~110k |
-| E2 | `docs` | `general-purpose` | E1 | ~110k |
-| — | `git push origin master` | **the user** | E2 | — |
-| H1 | `human` | **the user** | E2, the push | two features |
-
-E1 landed 2026-10-11; its block is deleted. E2 and H1 are live.
-
----
-
-### E1 — the agent, its command and their registration (general-purpose, docs)
-
-````
-Task E1 of docs/plans/006-e2e-feature-spec-writer.md: write the docs-only agent
-qa-feature-spec-writer and its command /qa-<stack>:feature-spec, and register both in the three qa-*
-plugins.
-
-Read, in this order:
-1. CLAUDE.md (Planning, Comments, Test code rules).
-2. The plan: §1, §2, §3, §4, D1–D5, task E1, and "Close-out — every task".
-3. backend/_shared/agents/be-feature-documenter.md — its Steps table, "Document contract" and
-   "Step 4 checklist". You cite these by heading; do not copy them.
-4. qa/manual/agents/qa-test-case-designer.md — "Code mode", "Steps", the Step 1–5 details and
-   "Output contract". Cited, not copied.
-5. qa/manual/commands/test-cases.md — the command pattern.
-6. qa/manual/test-case-writer/SKILL.md — "Case forms", so the three new fields sit after Technique.
-7. .claude-plugin/marketplace.json — the qa-java, qa-dotnet and qa-typescript entries.
-
-Build:
-- qa/manual/agents/qa-feature-spec-writer.md per task E1's bullets.
-- qa/manual/commands/feature-spec.md.
-- Six registrations: the agent and the command in each qa-* entry, beside qa-test-case-designer and
-  test-cases.md.
-
-Traps:
-- Paths resolve against ${CLAUDE_PLUGIN_ROOT} (the plugin source is the repo root, so
-  backend/_shared/... resolves from a qa plugin too). Follow how qa-test-case-designer.md:18 words it.
-- Cite headings verbatim. E2's gate greps every one, and a paraphrased heading fails.
-- The e2e rule covers Setup and Cleanup, not only the cases: no SQL seeding, no bus publish.
-- No inline comments or TODOs in anything you write; the description stays ≤ 500 characters (count it).
-
-Gate: none — this plan gates once, in E2. Do not run claude plugin validate, tools/*.py or any compiler.
-
-Commit to master: `feat(qa): qa-feature-spec-writer — one trace, feature doc + e2e suite (006 E1)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
-
-### E2 — the three skill fixes, the docs and the gate (general-purpose, docs)
-
-````
-Task E2 of docs/plans/006-e2e-feature-spec-writer.md: apply the three skill fixes from the 005 trial,
-list the new agent and command in the catalog and README, and run the plan's only gate.
-
-Read, in this order:
-1. CLAUDE.md.
-2. The plan: §3.3, §5, §6, task E1's As built note, task E2, and "Close-out — every task".
-3. backend/_shared/feature-trace/SKILL.md — §7 Edges (:88-98), the trace-record Edges table (:146)
-   and "Self-check before handing off".
-4. qa/manual/requirements-breakdown/references/connections.md — the ids paragraph (:7) and part 2.
-5. qa/manual/cross-feature-test-design/SKILL.md — Procedure 1.
-6. qa/manual/test-case-writer/SKILL.md — Async effects (:54).
-7. docs/skills-catalog.md :33, :58, :144, and the README's qa-* surface rows.
-8. qa/manual/agents/qa-feature-spec-writer.md — for the gate's step 6.
-
-Build:
-- §5's three rows exactly as written. The Edges column is `Also written by`; the Code-mode ids are
-  T<n>/R<n>/S<n>/I<n>, local to one basis.
-- Catalog and README per task E2's bullets.
-
-Traps:
-- feature-trace has two Edges tables (the inventory and the trace-record copy); change both.
-- connections.md says a format change in the KB skills updates it in the same commit. Your change is
-  Code-mode only, so leave the KB id rules as they are.
-- The README counts agents and commands; recount, don't add one by hand.
-
-Gate (the plan's only gate, in this order, from the repo root):
-  python3 -m json.tool .claude-plugin/marketplace.json > /dev/null
-  claude plugin validate .
-  python3 tools/plugin-surface-check.py
-  python3 tools/token-audit.py --violations-only
-  python3 tools/qa-version-check.py
-  then §6 steps 6–7 by hand (grep every heading qa-feature-spec-writer.md cites; the format sweep).
-Fix what it finds — a failure may belong to E1.
-
-Commit to master: `feat(qa): Edges other writers, Code-mode ids, named async budget; docs; gate passed (006 E2)`.
-Do not file the plan: H1's block remains.
-Close out per the plan's "Close-out — every task" before you stop.
-````
 
 ### H1 — run it on real features (the user)
 

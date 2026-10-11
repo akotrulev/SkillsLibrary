@@ -86,11 +86,11 @@ Any branch where more than two inputs combine to select an outcome — pricing, 
 Per external system: what triggers the call, what is sent (business-level, not payload schemas), what comes back, and — critically — **what happens when it fails**. Timeout, retry, fallback, or unhandled. "Unhandled" is a finding.
 
 ### 7. Edges
-Where this area touches another, one hop out and no further. For every emitted event, message, outbox row or notification, search for its consumers and record each with `file:line` and its owning area. For every written field another area may read, search for the readers — scheduled jobs' queries included. Then state how each reaction runs and what happens when it fails.
+Where this area touches another, one hop out and no further. For every emitted event, message, outbox row or notification, search for its consumers and record each with `file:line` and its owning area. For every written field, search for the readers **and the other writers** — scheduled jobs' queries included. Then state how each reaction runs and what happens when it fails.
 
-| # | Entry point | Kind | Reads | Writes | Emits | Reacted to by (one hop out) | Mode | On failure | Evidence |
-|---|---|---|---|---|---|---|---|---|---|
-| 1 | `POST /bookings/{id}/cancel` | command | `Booking.status`, `Session.start` | `Booking.status`, `Session.seats_taken` | `BookingCancelled` | `BookingCancelledHandler.cs:19` (Credits) | after commit, `?` | `?` | `BookingService.cs:88-104` |
+| # | Entry point | Kind | Reads | Writes | Also written by | Emits | Reacted to by (one hop out) | Mode | On failure | Evidence |
+|---|---|---|---|---|---|---|---|---|---|---|
+| 1 | `POST /bookings/{id}/cancel` | command | `Booking.status`, `Session.start` | `Booking.status`, `Session.seats_taken` | `Booking.status`: `BookingExpiryJob.cs:31` (Scheduling) | `BookingCancelled` | `BookingCancelledHandler.cs:19` (Credits) | after commit, `?` | `?` | `BookingService.cs:88-104` |
 
 - **Kind** is `command`, `schedule`, `timeout`, `external` or `event`; **Mode** is `in request`, `after commit, <guarantee>`, `scheduled` or `best effort`; **On failure** is what the code does when the reaction fails: rolls back, retried n× then dead-letter, compensates, unhandled.
 - **A mode or guarantee the code does not show is `?`.** A library name alone proves nothing: record at-least-once only where a retry, redelivery or missing acknowledgement is visible in the code or its configuration.
@@ -144,7 +144,7 @@ You are tracing, not auditing — but you will find things. Handle them like thi
 | System | Trigger | Sends | Expects | On failure | Evidence |
 
 ### Edges
-| # | Entry point | Kind | Reads | Writes | Emits | Reacted to by (one hop out) | Mode | On failure | Evidence |
+| # | Entry point | Kind | Reads | Writes | Also written by | Emits | Reacted to by (one hop out) | Mode | On failure | Evidence |
 
 ### Intent notes (`#inferred`)
 | Observation | Probable purpose | Basis (comment / test / commit / naming) | Question for the business |
@@ -163,7 +163,7 @@ You are tracing, not auditing — but you will find things. Handle them like thi
 6. Every integration has a stated failure behavior, including "unhandled".
 7. Findings are kept out of the documentation stream and into the findings list.
 8. Every emitted event has its reactors recorded, or a negative search that names what was searched.
-9. Every written field another area reads is listed with its readers, jobs' queries included.
+9. Every written field is listed with its readers and its other writers, jobs' queries included.
 10. Every reaction states its mode and failure behavior, or `?` — never a guessed guarantee.
 
 ## Handoffs
