@@ -1,35 +1,29 @@
-from playwright.sync_api import sync_playwright
+from pathlib import Path
 
-# Example: Capturing console logs during browser automation
+from playwright.sync_api import expect, sync_playwright
 
-url = 'http://localhost:5173'  # Replace with your URL
+URL = "http://localhost:5173"
+OUTPUT = Path("evidence") / "console"
 
-console_logs = []
 
-with sync_playwright() as p:
-    browser = p.chromium.launch(headless=True)
-    page = browser.new_page(viewport={'width': 1920, 'height': 1080})
+def main() -> None:
+    OUTPUT.mkdir(parents=True, exist_ok=True)
+    messages: list[str] = []
+    with sync_playwright() as playwright:
+        browser = playwright.chromium.launch()
+        page = browser.new_page(viewport={"width": 1920, "height": 1080})
+        page.on("console", lambda message: messages.append(f"[{message.type}] {message.text}"))
 
-    # Set up console log capture
-    def handle_console_message(msg):
-        console_logs.append(f"[{msg.type}] {msg.text}")
-        print(f"Console: [{msg.type}] {msg.text}")
+        page.goto(URL)
+        page.get_by_role("link", name="Dashboard").click()
+        expect(page.get_by_role("heading", name="Dashboard")).to_be_visible()
 
-    page.on("console", handle_console_message)
+        browser.close()
 
-    # Navigate to page
-    page.goto(url)
-    page.wait_for_load_state('networkidle')
+    log_file = OUTPUT / "console.log"
+    log_file.write_text("\n".join(messages), encoding="utf-8")
+    print(f"Captured {len(messages)} console messages in {log_file}")
 
-    # Interact with the page (triggers console logs)
-    page.click('text=Dashboard')
-    page.wait_for_timeout(1000)
 
-    browser.close()
-
-# Save console logs to file
-with open('/mnt/user-data/outputs/console.log', 'w') as f:
-    f.write('\n'.join(console_logs))
-
-print(f"\nCaptured {len(console_logs)} console messages")
-print(f"Logs saved to: /mnt/user-data/outputs/console.log")
+if __name__ == "__main__":
+    main()

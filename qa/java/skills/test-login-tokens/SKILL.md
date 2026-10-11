@@ -23,7 +23,7 @@ Two cross-cutting rules shape every example:
 - Java 21
 - **`com.auth0:auth0`** — `AuthAPI` builder + `TokenHolder`; falls back to `java.net.http.HttpClient` + Jackson for device-code polling
 - **TestNG** as the runner
-- **Playwright for Java** (`com.microsoft.playwright`) for the UI auth-state seeding example
+- **Playwright for Java** (`com.microsoft.playwright`, at the pin in the **Versions** table of `qa/java/skills/ui-test-author/playwright/SKILL.md`) for the UI auth-state seeding — a `@BeforeSuite` `TokenAuthSetup` on J1's lifecycle
 - Gradle (Kotlin DSL); token plumbing under `src/test/java/.../support/auth/`; secrets via **env vars only**
 
 ## When to use
@@ -51,7 +51,7 @@ Two cross-cutting rules shape every example:
 | Credentials | `clientId` + `clientSecret` | app + **username + password** (+ `realm`) | `clientId` (public) |
 | Tenant config | M2M app authorized for the API | **ROPG grant enabled** + a DB `realm` | Device Code grant enabled; "Device" app |
 | Security caveat | Standard; keep the secret in env | **Test-only — never production** | Approval step can't be fully headless |
-| Consumer | `qa/java/skills/api-test-author/writer` | `qa/java/skills/ui-test-author/playwright` storage state | rarely in CI; tooling |
+| Consumer | `qa/java/skills/api-test-author/writer` | `TokenAuthSetup` → one state file per role, chosen in `contextOptions()` | rarely in CI; tooling |
 
 **Default to M2M** for API suites. Reach for **ROPG** only when the test genuinely needs *this user's* identity. Use **device-code** only for the niche input-constrained case.
 
@@ -78,7 +78,7 @@ Ask at most 2–3; infer the rest from the build file and existing fixtures.
 
 ## Deep-dive reference
 
-These sections live in `references/details.md` — **read it when the task touches them**: **Templates**.
+These sections live in `references/details.md` — **read it when the task touches them**: **Templates** — config, the cached providers, `Tokens`, the RestAssured client, **signed-in browser state from a token** (`TokenAuthSetup`), device-code, and the TestNG tests.
 
 ## Rules
 
@@ -101,7 +101,8 @@ These sections live in `references/details.md` — **read it when the task touch
 
 ### Stashing
 - API tests: inject the provider into the client; add the `Authorization: Bearer <token>` header (RestAssured `.header(...)`).
-- UI tests: mint once, seed the storage your SPA reads, save storage state, reuse — see `qa/java/skills/ui-test-author/playwright`.
+- UI tests: the signed-in state follows `qa/java/skills/ui-test-author/playwright/references/lifecycle.md` §6 — a `@BeforeSuite` `TokenAuthSetup` mints the token once, writes it where the SPA reads it at the `BASE_URL` origin, checks the app accepted it, and saves **one state file per role** under `build/.auth/`; each signed-in class picks its role with `setStorageStatePath(...)` in its `contextOptions()` override of `BaseTest`. Never a login or a token seed per test, never a second base class.
+- Storage state carries cookies and `localStorage` (IndexedDB only with `setIndexedDB(true)` [1.51]) — never `sessionStorage` or an in-memory token cache.
 
 ### What NOT to do
 - No token fetch per test, no uncached `requestToken`/`login` in a loop.
@@ -115,7 +116,7 @@ These sections live in `references/details.md` — **read it when the task touch
 1. Read the build file (`build.gradle.kts`) and existing test fixtures for house style and TestNG conventions.
 2. Confirm `com.auth0:auth0` is a test dependency (and `com.microsoft.playwright:playwright` if seeding UI state).
 3. Confirm the env vars are wired into the test environment (CI secret store / run config), **not** committed: `AUTH0_DOMAIN`, `AUTH0_AUDIENCE`, `AUTH0_M2M_CLIENT_ID/SECRET`, and for ROPG `AUTH0_ROPG_CLIENT_ID`, `AUTH0_TEST_USERNAME/PASSWORD`, `AUTH0_REALM`.
-4. Generate `Auth0Config.java`, `CachedTokenProvider.java` + the two providers, `Tokens.java`, plus the consumer wiring (API client header and/or Playwright state seeder).
+4. Generate `Auth0Config.java`, `CachedTokenProvider.java` + the two providers, `Tokens.java`, plus the consumer wiring (API client header and/or `TokenAuthSetup` listed in `testng.xml`, and the `contextOptions()` override on each signed-in class).
 5. Run the cache unit tests anywhere (offline); run the live token tests with the secrets present. Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run".
 
 ## Cross-references
@@ -124,6 +125,6 @@ These sections live in `references/details.md` — **read it when the task touch
 - **`auth/_shared/auth0-concepts`** — the entity/flow model (Tenant / Application / API / audience / grant types) this skill assumes.
 - **`backend/java/skills/auth0`** — the **app-side** login flow (Spring Security resource server) this skill complements. This skill never implements user-facing login; that does.
 - **`qa/java/skills/api-test-author/writer`** — the M2M consumer: where the `Bearer` header lands on the RestAssured client.
-- **`qa/java/skills/ui-test-author/playwright`** — the ROPG consumer: storage-state / fixture patterns for seeding auth without the login UI.
+- **`qa/java/skills/ui-test-author/playwright`** — the ROPG consumer: `BaseTest`, `contextOptions()` and the `AuthSetup` shape (`references/lifecycle.md` §3, §6) that `TokenAuthSetup` follows.
 - **`qa/java/skills/test-data-builder`** — provisioning/seeding the test users that ROPG authenticates as.
 - **`qa/cicd/java/skills/ci-pipelines`** — where the Auth0 secrets are sourced in CI (OIDC / encrypted secrets), never hardcoded.

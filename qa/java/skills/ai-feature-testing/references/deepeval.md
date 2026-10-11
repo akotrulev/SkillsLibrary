@@ -219,7 +219,7 @@ public final class DeepEval {
                     JsonNode report = MAPPER.readTree(latest.toFile());
                     // map each failing test case -> Allure named result (qa-test-reports-java)
                 } catch (IOException e) {
-                    Allure.addAttachment("deepeval-report-unreadable", latest + " -> " + e);
+                    Allure.attachment("deepeval-report-unreadable", latest + " -> " + e);
                 }
             });
         }

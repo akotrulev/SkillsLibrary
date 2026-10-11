@@ -300,6 +300,7 @@ failing run names the alerts without re-scanning (cross-link `qa-test-reports-ja
 ```java
 // support/ZapReportAttachment.java
 import io.qameta.allure.Allure;
+import io.qameta.allure.AttachmentOptions;
 import java.io.ByteArrayInputStream;
 import java.nio.file.Files;
 import java.util.stream.Collectors;
@@ -308,12 +309,13 @@ public final class ZapReportAttachment {
     private ZapReportAttachment() {}
 
     public static void attach(ZapBaseline.ZapResult result) throws Exception {
-        Allure.addAttachment("zap-report.html", "text/html",
-            new ByteArrayInputStream(Files.readAllBytes(result.reportHtmlPath())), ".html");
+        Allure.attachment("zap-report.html", "text/html",
+            new ByteArrayInputStream(Files.readAllBytes(result.reportHtmlPath())),
+            AttachmentOptions.withFileExtension("html"));
         String summary = result.alerts().stream()
             .map(a -> "[" + a.riskDesc() + "] " + a.alert() + " (rule " + a.pluginId() + ") x" + a.count())
             .collect(Collectors.joining("\n"));
-        Allure.addAttachment("zap-alerts.txt", summary.isEmpty() ? "no alerts" : summary);
+        Allure.attachment("zap-alerts.txt", summary.isEmpty() ? "no alerts" : summary);
     }
 }
 ```

@@ -72,7 +72,7 @@ dependencies {
     testImplementation("org.testng:testng:7.10.2")
     testImplementation("org.assertj:assertj-core:3.26.3")
     testImplementation("org.awaitility:awaitility:4.2.2")             // bounded condition-poll — never Thread.sleep
-    testImplementation("io.qameta.allure:allure-testng:2.29.0")
+    testImplementation("io.qameta.allure:allure-testng:3.0.0")
 }
 ```
 

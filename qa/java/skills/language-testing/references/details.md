@@ -1,86 +1,181 @@
 # Deep-dive details — `qa-language-testing-java`
 
-Sections moved out of SKILL.md for on-demand loading. Read what the task needs.
+Sections moved out of SKILL.md for on-demand loading. Read what the task needs. Every browser class extends J1's
+`BaseTest` (`qa/java/skills/ui-test-author/playwright/assets/BaseTest.java`) and sets its locale in
+`contextOptions()` from a `LocaleUnderTest` (SKILL.md § The locale under test), so each test method gets its own
+context.
 
 ## 1. Locale-pinned UI text — assert the DOM against the catalog (idea #1)
 
-Pin the locale on the `BrowserContext` **and** tell the app which language to load (a `?lng=` query, a cookie, or
-a `localStorage` seed — match your app). Then assert the rendered text equals the bundle entry, by key.
+Pin the locale on the context (and, for a SPA that keeps its own language, tell it in `@BeforeMethod`). Then
+assert the rendered text equals the bundle entry, by key: the left side is the live DOM, the right side is the
+same bundle the app shipped.
 
 ```java
-// src/test/java/i18n/I18nBaseTest.java — one context per locale, locale + timezone pinned
 package i18n;
 
-import com.microsoft.playwright.*;
-import com.microsoft.playwright.options.*;
-import org.testng.annotations.*;
-import java.util.Locale;
+public class HomeI18nGermanTest extends BaseTest {
+    private final LocaleUnderTest lut = LocaleUnderTest.GERMAN;
+    private HomePage homePage;
+    private DashboardPage dashboardPage;
 
-public abstract class I18nBaseTest {
-  protected Playwright playwright;
-  protected Browser browser;
-  protected BrowserContext context;
-  protected Page page;
-  protected Locale locale;
+    @Override
+    protected Browser.NewContextOptions contextOptions() {
+        return lut.contextOptions();
+    }
 
-  protected I18nBaseTest(Locale locale, String timezoneId) {
-    this.locale = locale;
-    this.timezoneId = timezoneId;
-  }
-  private final String timezoneId;
+    @BeforeMethod(alwaysRun = true)
+    public void createPages() {
+        homePage = new HomePage(page);
+        dashboardPage = new DashboardPage(page);
+    }
 
-  @BeforeClass
-  void launch() {
-    playwright = Playwright.create();
-    browser = playwright.chromium().launch();
-    context = browser.newContext(new Browser.NewContextOptions()
-        .setLocale(locale.toLanguageTag())            // e.g. "de-DE"
-        .setTimezoneId(timezoneId));                  // e.g. "Europe/Berlin"
-    context.addInitScript("localStorage.setItem('i18nextLng', '" + locale.toLanguageTag() + "')");
-    page = context.newPage();
-  }
+    @Test
+    public void Should_RenderHomeHeadingFromCatalog_When_LocaleIsGerman() {
+        homePage.open();
 
-  @AfterClass
-  void close() { context.close(); browser.close(); playwright.close(); }
+        assertThat(homePage.heading()).hasText(Catalog.t("home.title", lut.locale()));
+    }
 
-  protected String t(String key) { return Catalog.t(key, locale); }
+    @Test
+    public void Should_InterpolateGreetingWithUserName_When_LocaleIsGerman() {
+        dashboardPage.open();
+
+        assertThat(dashboardPage.greeting())
+                .hasText(Catalog.t("dashboard.greeting", lut.locale(), Map.of("name", TestUsers.STANDARD.displayName())));
+    }
 }
 ```
 
+A reworded string in `common_de.properties` updates the expectation automatically — the test asserts the
+**wiring**, not the **words**.
+
+### The locale matrix — one journey across every supported locale
+
+A class that must pass in every supported locale is a TestNG `@Factory` over `Catalog.SUPPORTED`: one instance
+per locale, each instance's `contextOptions()` carrying its locale. TestNG runs `@BeforeClass` once per
+instance, so each locale gets its own browser on the class's one thread (`parallel="classes"` holds), and each
+test its own context.
+
 ```java
-// src/test/java/i18n/HomeI18nDeTest.java  (one subclass per locale; or drive via @Factory + @DataProvider)
+public class CheckoutI18nTest extends BaseTest {
+    private final LocaleUnderTest lut;
+    private CheckoutPage checkoutPage;
+
+    @Factory(dataProvider = "supportedLocales")
+    public CheckoutI18nTest(LocaleUnderTest lut) {
+        this.lut = lut;
+    }
+
+    @DataProvider
+    public static Object[][] supportedLocales() {
+        return Catalog.SUPPORTED.stream()
+                .map(locale -> new Object[] {new LocaleUnderTest(locale, "UTC")})
+                .toArray(Object[][]::new);
+    }
+
+    @Override
+    protected Browser.NewContextOptions contextOptions() {
+        return lut.contextOptions();
+    }
+
+    @BeforeMethod(alwaysRun = true)
+    public void createPages() {
+        checkoutPage = new CheckoutPage(page);
+    }
+
+    @Test
+    public void Should_ConfirmPayment_When_CheckoutCompletesInTheLocale() {
+        checkoutPage.open();
+
+        checkoutPage.pay(Catalog.t("checkout.pay", lut.locale()));
+
+        assertThat(checkoutPage.confirmation()).hasText(Catalog.t("checkout.success", lut.locale()));
+    }
+}
+```
+
+`checkoutPage.pay(label)` clicks `getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName(label))` — the
+page object owns the locator; the test supplies the translated name. The `@Factory` data provider is `static` and
+sequential (no `parallel = true` with Playwright).
+
+## 3. Pseudo-localization — surface hardcoded strings and truncation (idea #3)
+
+Transform every source value: accent the letters, expand ~40%, wrap in sentinel brackets, leaving ICU
+`{placeholders}` untouched. Load it as a real locale (`en-XA`). Then **every visible string must be wrapped** — an
+unwrapped string is hardcoded and bypassed i18n.
+
+```java
 package i18n;
 
-import org.testng.annotations.Test;
-import java.util.Locale;
 import java.util.Map;
-import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat;
 
-public class HomeI18nDeTest extends I18nBaseTest {
-  public HomeI18nDeTest() { super(Locale.forLanguageTag("de"), "Europe/Berlin"); }
+public final class Pseudo {
+    public static final String OPEN = "[!! ";
+    public static final String CLOSE = " !!]";
+    private static final Map<Character, String> ACCENTS = Map.of(
+            'a', "á", 'e', "ḗ", 'i', "í", 'o', "ö", 'u', "ṵ", 'c', "ḉ", 'l', "ḷ", 'm', "ṁ", 'w', "ŵ");
 
-  @Test
-  public void rendersHomeHeadingInActiveLocale() {
-    page.navigate("/");
-    // left side = live DOM; right side = the SAME bundle the app shipped — resolved by KEY
-    assertThat(page.getByRole(AriaRole.HEADING)).hasText(t("home.title"));
-    assertThat(page.getByRole(AriaRole.BUTTON,
-        new Page.GetByRoleOptions().setName(t("home.cta")))).isVisible();
-  }
+    private Pseudo() {}
 
-  @Test
-  public void interpolatesGreetingWithUserName() {
-    page.navigate("/dashboard");
-    // de: "Willkommen zurück, {name}" — assert the interpolated bundle string
-    assertThat(page.getByTestId("greeting"))
-        .hasText(Catalog.t("dashboard.greeting", locale, Map.of("name", "Trinity")));
-  }
+    public static String localize(String text) {
+        StringBuilder accented = new StringBuilder();
+        boolean inPlaceholder = false;
+        for (char c : text.toCharArray()) {
+            if (c == '{') {
+                inPlaceholder = true;
+            } else if (c == '}') {
+                inPlaceholder = false;
+            }
+            accented.append(inPlaceholder ? String.valueOf(c)
+                    : ACCENTS.getOrDefault(Character.toLowerCase(c), String.valueOf(c)));
+        }
+        long letters = accented.chars().filter(Character::isLetter).count();
+        return OPEN + accented + "~".repeat((int) Math.ceil(letters * 0.4)) + CLOSE;
+    }
 }
 ```
 
-> This base, subclassed for `en`/`de`/`ar`, covers three languages with no per-locale literals. A reworded string
-> in `common_de.properties` updates the expectation automatically — the test asserts the **wiring**, not the
-> **words**.
+```java
+public class PseudoI18nTest extends BaseTest {
+    private CheckoutPage checkoutPage;
+    private Geometry geometry;
+
+    @Override
+    protected Browser.NewContextOptions contextOptions() {
+        return LocaleUnderTest.PSEUDO.contextOptions();
+    }
+
+    @BeforeMethod(alwaysRun = true)
+    public void createPages() {
+        checkoutPage = new CheckoutPage(page);
+        geometry = new Geometry(page);
+    }
+
+    @Test
+    public void Should_WrapEveryVisibleString_When_LocaleIsPseudo() {
+        checkoutPage.open();
+
+        assertThat(checkoutPage.visibleTexts())
+                .as("hardcoded strings bypassing i18n")
+                .allSatisfy(text -> assertThat(text).startsWith(Pseudo.OPEN.strip()).endsWith(Pseudo.CLOSE.strip()));
+    }
+
+    @Test
+    public void Should_NotClipSubmitLabel_When_LocaleIsPseudo() {
+        checkoutPage.open();
+
+        assertThat(geometry.horizontalClip(checkoutPage.submit())).as("submit label overflow px").isZero();
+    }
+}
+```
+
+- `checkoutPage.visibleTexts()` returns the trimmed inner texts of the page's visible text nodes after `open()`
+  has waited for the form; it is a read for an AssertJ assertion, made once the page has settled.
+- `Geometry.horizontalClip(locator)` evaluates `el => Math.max(0, el.scrollWidth - el.clientWidth)` on the
+  element; `0` is the one expected value. Pair it with `qa-visual-regression-java` for a pixel record.
+- Pseudo-loc needs **zero translators**, so it's the first i18n gate you can run — wire it into CI before any real
+  locale exists.
 
 ## 4b. Translation-key coverage — a static bundle diff (idea #4)
 
@@ -88,136 +183,116 @@ No browser, no app — just compare the `.properties` bundles. Highest-value, ch
 test. Gate the build on it.
 
 ```java
-// src/test/java/i18n/CoverageI18nTest.java
 package i18n;
 
 import org.testng.annotations.*;
+
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.regex.*;
-import static org.testng.Assert.assertTrue;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class CoverageI18nTest {
-  private Properties load(String tag) throws Exception {
-    Properties p = new Properties();
-    try (var in = getClass().getResourceAsStream("/i18n/common_" + tag + ".properties")) {
-      p.load(new java.io.InputStreamReader(in, java.nio.charset.StandardCharsets.UTF_8));
+    private static final Pattern PLACEHOLDER = Pattern.compile("\\{\\w+}");
+
+    @DataProvider
+    public static Object[][] targets() {
+        return new Object[][] {{"de"}, {"ar"}};
     }
-    return p;
-  }
 
-  @DataProvider(name = "targets")
-  Object[][] targets() { return new Object[][] {{"de"}, {"ar"}}; }
+    @Test(dataProvider = "targets")
+    public void Should_HaveEverySourceKey_When_BundleIsTranslated(String tag) throws Exception {
+        Properties target = load(tag);
 
-  @Test(dataProvider = "targets")
-  public void hasNoMissingKeys(String tag) throws Exception {
-    Set<String> source = load("en").stringPropertyNames();
-    Set<String> target = load(tag).stringPropertyNames();
-    List<String> missing = source.stream().filter(k -> !target.contains(k)).sorted().toList();
-    assertTrue(missing.isEmpty(), tag + " is missing: " + missing);       // missing → default-locale fallback
-  }
+        assertThat(load("en").stringPropertyNames()).as(tag + " missing keys").allMatch(target::containsKey);
+    }
 
-  @Test(dataProvider = "targets")
-  public void hasNoEmptyValues(String tag) throws Exception {
-    Properties target = load(tag);
-    List<String> empty = target.stringPropertyNames().stream()
-        .filter(k -> target.getProperty(k).isBlank()).sorted().toList();
-    assertTrue(empty.isEmpty(), tag + " has empty entries: " + empty);
-  }
+    @Test(dataProvider = "targets")
+    public void Should_HaveNoEmptyValues_When_BundleIsTranslated(String tag) throws Exception {
+        Properties target = load(tag);
 
-  @Test(dataProvider = "targets")
-  public void hasNoOrphanKeys(String tag) throws Exception {
-    Set<String> source = load("en").stringPropertyNames();
-    List<String> orphans = load(tag).stringPropertyNames().stream()
-        .filter(k -> !source.contains(k)).sorted().toList();
-    assertTrue(orphans.isEmpty(), tag + " has orphan keys: " + orphans);
-  }
+        assertThat(target.stringPropertyNames()).as(tag + " empty entries")
+                .noneMatch(key -> target.getProperty(key).isBlank());
+    }
 
-  @Test(dataProvider = "targets")
-  public void keepsPlaceholdersIdentical(String tag) throws Exception {
-    Properties source = load("en"), target = load(tag);
-    Pattern ph = Pattern.compile("\\{\\w+}");
-    List<String> drifted = source.stringPropertyNames().stream()
-        .filter(target::containsKey)
-        .filter(k -> !placeholders(ph, source.getProperty(k)).equals(placeholders(ph, target.getProperty(k))))
-        .sorted().toList();
-    assertTrue(drifted.isEmpty(), tag + " placeholder mismatch: " + drifted);
-  }
+    @Test(dataProvider = "targets")
+    public void Should_HaveNoOrphanKeys_When_BundleIsTranslated(String tag) throws Exception {
+        Set<String> source = load("en").stringPropertyNames();
 
-  private List<String> placeholders(Pattern ph, String s) {
-    return ph.matcher(s).results().map(MatchResult::group).sorted().toList();
-  }
+        assertThat(load(tag).stringPropertyNames()).as(tag + " orphan keys").allMatch(source::contains);
+    }
+
+    @Test(dataProvider = "targets")
+    public void Should_KeepPlaceholdersIdentical_When_BundleIsTranslated(String tag) throws Exception {
+        Properties source = load("en");
+        Properties target = load(tag);
+
+        assertThat(source.stringPropertyNames()).as(tag + " placeholder mismatch")
+                .filteredOn(target::containsKey)
+                .allMatch(key -> placeholders(source.getProperty(key)).equals(placeholders(target.getProperty(key))));
+    }
+
+    private static Properties load(String tag) throws Exception {
+        Properties properties = new Properties();
+        try (InputStream in = CoverageI18nTest.class.getResourceAsStream("/i18n/common_" + tag + ".properties")) {
+            properties.load(new InputStreamReader(Objects.requireNonNull(in, "common_" + tag), StandardCharsets.UTF_8));
+        }
+        return properties;
+    }
+
+    private static List<String> placeholders(String value) {
+        return PLACEHOLDER.matcher(value).results().map(MatchResult::group).sorted().toList();
+    }
 }
 ```
 
-> The placeholder check catches the bug a presence check misses: a translator who renders `Welcome back, {name}`
-> as `Bienvenue` (dropping `{name}`) leaves the key present but breaks interpolation. Assert the placeholder set
-> is identical.
+AssertJ's `allMatch` / `noneMatch` failure lists the offending elements, so the report names every missing,
+empty, orphan or drifted key. The placeholder check catches the bug a presence check misses: a translator who
+renders `Welcome back, {name}` as `Bienvenue` leaves the key present but breaks interpolation.
 
-## 3. Pseudo-localization — surface hardcoded strings and truncation (idea #3)
+## ICU plurals — assert the category, per language
 
-Transform every source value: accent the letters, expand ~40%, wrap in sentinel brackets. Load it as a real
-locale (`en-XA`). Then **every visible string must be wrapped** — an unwrapped string is hardcoded and bypassed
-i18n.
+English has two plural categories (one/other); Polish four; Arabic six. Exercise the **boundary counts** the
+language has, not just 1 and 2. The cases are rows; no loop drives an assertion.
 
 ```java
-// src/test/java/i18n/Pseudo.java — deterministic source→pseudo transform
 package i18n;
 
+import com.ibm.icu.text.MessageFormat;
+import com.ibm.icu.text.PluralRules;
+import org.testng.annotations.*;
+
+import java.util.Locale;
 import java.util.Map;
 
-public final class Pseudo {
-  public static final String OPEN = "[!! ", CLOSE = " !!]";
-  private static final Map<Character, String> MAP = Map.of(
-      'a', "á", 'e', "ḗ", 'i', "í", 'o', "ö", 'u', "ṵ", 'c', "ḉ", 'l', "ḷ", 'm', "ṁ", 'w', "ŵ");
+import static org.assertj.core.api.Assertions.assertThat;
 
-  private Pseudo() {}
+public class PluralI18nTest {
+    private final MessageFormat english = new MessageFormat(
+            "{count, plural, =0 {no items} one {# item} other {# items}}", Locale.ENGLISH);
 
-  /** Accent + ~40% pad + bracket-wrap, leaving ICU {placeholders} untouched. */
-  public static String localize(String text) {
-    StringBuilder accented = new StringBuilder();
-    boolean inBrace = false;
-    for (char c : text.toCharArray()) {
-      if (c == '{') inBrace = true; else if (c == '}') inBrace = false;
-      accented.append(inBrace ? c : MAP.getOrDefault(Character.toLowerCase(c), String.valueOf(c)));
+    @DataProvider
+    public static Object[][] englishCounts() {
+        return new Object[][] {{0, "no items"}, {1, "1 item"}, {2, "2 items"}, {5, "5 items"}};
     }
-    int letters = (int) accented.chars().filter(Character::isLetter).count();
-    String pad = "~".repeat((int) Math.ceil(letters * 0.4));
-    return OPEN + accented + pad + CLOSE;
-  }
+
+    @Test(dataProvider = "englishCounts")
+    public void Should_RenderEnglishPluralCategory_When_CountIs(int count, String expected) {
+        assertThat(english.format(Map.of("count", count))).isEqualTo(expected);
+    }
+
+    @Test
+    public void Should_HaveSixPluralCategories_When_LanguageIsArabic() {
+        PluralRules arabic = PluralRules.forLocale(Locale.forLanguageTag("ar"));
+
+        assertThat(arabic.getKeywords()).containsExactlyInAnyOrder("zero", "one", "two", "few", "many", "other");
+    }
 }
 ```
 
-```java
-// src/test/java/i18n/PseudoI18nTest.java — runs against the en-XA build
-package i18n;
-
-import org.testng.annotations.Test;
-import java.util.List;
-import java.util.Locale;
-import static org.testng.Assert.assertTrue;
-
-public class PseudoI18nTest extends I18nBaseTest {
-  public PseudoI18nTest() { super(Locale.forLanguageTag("en-XA"), "UTC"); }
-
-  @Test
-  public void everyVisibleStringWentThroughI18n() {
-    page.navigate("/checkout");
-    List<String> leaks = page.getByText(java.util.regex.Pattern.compile("\\S")).allInnerTexts().stream()
-        .map(String::trim)
-        .filter(s -> s.length() > 1 && !(s.contains(Pseudo.OPEN) || s.contains(Pseudo.CLOSE)))
-        .toList();
-    assertTrue(leaks.isEmpty(), "hardcoded strings bypassing i18n: " + leaks);
-  }
-
-  @Test
-  public void noLabelIsClippedUnderExpansion() {
-    page.navigate("/checkout");
-    boolean clipped = (Boolean) page.getByTestId("submit")
-        .evaluate("el => el.scrollWidth > el.clientWidth + 1");   // overflow == truncation bug
-    assertTrue(!clipped, "submit button truncates its label");
-  }
-}
-```
-
-> Pseudo-loc needs **zero translators**, so it's the first i18n gate you can run — wire it into CI before any real
-> locale exists. Pair the overflow check with `qa-visual-regression-java` for a pixel record.
+The English rows test the app's *message pattern* (its `=0` branch and the `#` placement). The Arabic test pins
+the six categories every Arabic plural message must cover; render the message at a count from each category
+(0, 1, 2, 3, 11, 100) as rows of the locale-pinned UI test.

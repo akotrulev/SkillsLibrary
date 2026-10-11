@@ -1,33 +1,29 @@
-from playwright.sync_api import sync_playwright
-import os
+from pathlib import Path
 
-# Example: Automating interaction with static HTML files using file:// URLs
+from playwright.sync_api import expect, sync_playwright
 
-html_file_path = os.path.abspath('path/to/your/file.html')
-file_url = f'file://{html_file_path}'
+HTML_FILE = Path("path/to/your/file.html").resolve()
+OUTPUT = Path("evidence") / "static-html"
 
-with sync_playwright() as p:
-    browser = p.chromium.launch(headless=True)
-    page = browser.new_page(viewport={'width': 1920, 'height': 1080})
 
-    # Navigate to local HTML file
-    page.goto(file_url)
+def main() -> None:
+    OUTPUT.mkdir(parents=True, exist_ok=True)
+    with sync_playwright() as playwright:
+        browser = playwright.chromium.launch()
+        page = browser.new_page(viewport={"width": 1920, "height": 1080})
+        page.goto(HTML_FILE.as_uri())
+        page.screenshot(path=OUTPUT / "static_page.png", full_page=True)
 
-    # Take screenshot
-    page.screenshot(path='/mnt/user-data/outputs/static_page.png', full_page=True)
+        page.get_by_role("button", name="Click Me").click()
+        page.get_by_label("Name").fill("John Doe")
+        page.get_by_label("Email").fill("john@example.com")
+        page.get_by_role("button", name="Submit").click()
+        expect(page.get_by_role("status")).to_be_visible()
 
-    # Interact with elements
-    page.click('text=Click Me')
-    page.fill('#name', 'John Doe')
-    page.fill('#email', 'john@example.com')
+        page.screenshot(path=OUTPUT / "after_submit.png", full_page=True)
+        browser.close()
+    print(f"Static HTML automation completed; screenshots in {OUTPUT}")
 
-    # Submit form
-    page.click('button[type="submit"]')
-    page.wait_for_timeout(500)
 
-    # Take final screenshot
-    page.screenshot(path='/mnt/user-data/outputs/after_submit.png', full_page=True)
-
-    browser.close()
-
-print("Static HTML automation completed!")
+if __name__ == "__main__":
+    main()

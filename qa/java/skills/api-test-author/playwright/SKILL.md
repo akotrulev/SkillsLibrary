@@ -36,11 +36,13 @@ HTTP transport changes; the discipline does not.
 
 - Java 21, Gradle (Kotlin DSL)
 - **TestNG** — the global default runner (same as the UI suite)
-- **playwright-java** (`com.microsoft.playwright:playwright`) — `APIRequest` / `APIRequestContext` /
-  `APIResponse`; no RestAssured dependency in a Playwright-first project
+- **playwright-java** (`com.microsoft.playwright:playwright`, at the pin in the **Versions** table of
+  `qa/java/skills/ui-test-author/playwright/SKILL.md`; this skill pins nothing) — `APIRequest` /
+  `APIRequestContext` / `APIResponse`; no RestAssured dependency in a Playwright-first project
 - **Jackson** (`jackson-databind` + `jackson-datatype-jsr310`) with **record DTOs** — deserialization lives in
   the client's typed overloads, never in tests
-- **Allure TestNG**; `org.apache.http.HttpStatus` for status constants
+- **AssertJ** for status and value assertions; **Allure TestNG** 3.0. Status codes are plain `int`s — no
+  HttpComponents (`org.apache.http.HttpStatus`) on the classpath just for constants
 - Layout mirrors the RestAssured sibling: `models/{api}/{resource}/`, `clients/{api}/`,
   `tests/{api}/{resource}/`, `base/BaseApiTest.java`
 
@@ -73,6 +75,11 @@ test to avoid creating a client.
 
 ## Base class template — the lifecycle lives here once
 
+API-only classes drive no browser, so they do not extend J1's `BaseTest`; `BaseApiTest` keeps its lifecycle
+rules (`ui-test-author/playwright/references/lifecycle.md` §1): instance fields, `alwaysRun` hooks,
+`parallel="classes"`, no `@DataProvider(parallel = true)`. A UI test seeds data with `page.request()` inside
+`BaseTest` (`lifecycle.md` §7). An empty token means no `Authorization` header.
+
 ```java
 package com.{org}.apitests.base;
 
@@ -96,7 +103,6 @@ public abstract class BaseApiTest {
         playwright = Playwright.create();
     }
 
-    /** One context per identity. Empty token → no Authorization header at all. */
     protected APIRequestContext newContext(String token) {
         APIRequest.NewContextOptions options = new APIRequest.NewContextOptions()
                 .setBaseURL(ConfigurationLoader.get().apiBaseUrl());
@@ -129,20 +135,19 @@ import com.{org}.apitests.base.BaseApiTest;
 import com.{org}.apitests.clients.AuthHelper;
 import com.{org}.apitests.clients.user.UserClient;
 import com.{org}.apitests.models.user.users.UserDto;
-import org.apache.http.HttpStatus;
-import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-import org.testng.asserts.SoftAssert;
 
 import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class GetUserTest extends BaseApiTest {
 
     private UserClient userClient;
     private UserClient anonymousClient;
 
-    @BeforeClass
+    @BeforeClass(alwaysRun = true)
     public void setUpClients() {
         userClient = new UserClient(newContext(AuthHelper.getToken(TestUsers.STANDARD)));
         anonymousClient = new UserClient(newContext(""));
@@ -150,35 +155,38 @@ public class GetUserTest extends BaseApiTest {
 
     @Test(description = "TC-USER-001")
     public void Should_ReturnAllUsers_When_Authorized() {
-        List<UserDto> users = userClient.getAll(HttpStatus.SC_OK);
-        Assert.assertFalse(users.isEmpty(), "Expected at least one user.");
+        List<UserDto> users = userClient.getAll(200);
+
+        assertThat(users).as("users visible to the standard user").isNotEmpty();
     }
 
     @Test(description = "TC-USER-002")
     public void Should_Return401_When_TokenMissing() {
         APIResponse response = anonymousClient.getAll();
-        Assert.assertEquals(response.status(), HttpStatus.SC_UNAUTHORIZED);
+
+        assertThat(response.status()).as(response.text()).isEqualTo(401);
     }
 
     @Test(description = "TC-USER-003")
     public void Should_ReturnMatchingUser_When_FetchedById() {
-        UserDto fromList = userClient.getAll(HttpStatus.SC_OK).getLast();
+        UserDto fromList = userClient.getAll(200).getLast();
 
-        UserDto fetched = userClient.getById(String.valueOf(fromList.id()), HttpStatus.SC_OK);
+        UserDto fetched = userClient.getById(String.valueOf(fromList.id()), 200);
 
-        SoftAssert soft = new SoftAssert();
-        soft.assertEquals(fetched.id(), fromList.id());
-        soft.assertEquals(fetched.email(), fromList.email());
-        soft.assertAll();
+        assertThat(fetched).isEqualTo(fromList);
     }
 
     @Test(description = "TC-USER-004")
     public void Should_Return404_When_UserDoesNotExist() {
         APIResponse response = userClient.getById("999999");
-        Assert.assertEquals(response.status(), HttpStatus.SC_NOT_FOUND);
+
+        assertThat(response.status()).as(response.text()).isEqualTo(404);
     }
 }
 ```
+
+The body is the status assertion's description, so a wrong status prints what the server said. `UserDto` is a
+record: one `isEqualTo` compares every field.
 
 Create/update flows keep the RestAssured sibling's cleanup discipline: track created ids, delete them in
 `@AfterMethod(alwaysRun = true)`, error bodies deserialized in the test via the client's
@@ -188,9 +196,9 @@ Create/update flows keep the RestAssured sibling's cleanup discipline: track cre
 
 | Scenario | Client overload / identity | Assertion pattern |
 |----------|----------------------------|-------------------|
-| 2xx happy path | **typed** (`int expectedStatus`) on the standard/admin context | DTO returned already status-asserted; verify fields with `SoftAssert` + `assertAll()` |
-| 401 unauthorized | **raw** on the `newContext("")` client | single `assertEquals(response.status(), SC_UNAUTHORIZED)` |
-| 403 forbidden | **raw** on a wrong-role context | single `assertEquals(SC_FORBIDDEN)` |
+| 2xx happy path | **typed** (`int expectedStatus`) on the standard/admin context | DTO returned already status-asserted; compare the record with AssertJ (`isEqualTo` / `usingRecursiveComparison()`) |
+| 401 unauthorized | **raw** on the `newContext("")` client | `assertThat(response.status()).as(response.text()).isEqualTo(401)` |
+| 403 forbidden | **raw** on a wrong-role context | `assertThat(response.status()).as(response.text()).isEqualTo(403)` |
 | 404 not found | **raw** | status assert; deserialize the `ProblemDetails`-style body via the client helper and assert the error code |
 | 400 validation | **raw** | status assert + error DTO; assert the field name in the errors map |
 | Malformed JSON / extra-missing property | **raw** via `createRaw(String)` / `Map<String, Object>` overload | status assert only — add these overloads following `api-client-writer` when the plan requires them |
@@ -209,11 +217,15 @@ Create/update flows keep the RestAssured sibling's cleanup discipline: track cre
 
 ### Test rules
 
-- Assert the **exact** status code, always, before reading the body — `response.status()`, never
-  `response.ok()` (it passes on any 2xx). Never rely on Playwright throwing for you.
+- Assert the **exact** status code, always, before reading the body — `assertThat(response.status()).as(response.text()).isEqualTo(404)`,
+  never `response.ok()` or `PlaywrightAssertions.assertThat(response).isOK()` (both pass on any 2xx). Never rely
+  on Playwright throwing for you: the context keeps `failOnStatusCode` at its default `false`.
 - Happy path uses the **typed** overload; negative scenarios use the **raw** `APIResponse` overload. Never
   re-assert the status after a typed call.
-- `HttpStatus.SC_*` constants — never raw integers. `SoftAssert` + `assertAll()` for multi-field checks.
+- Status codes are plain `int`s (`200`, `404`); multi-field checks compare the record DTO with AssertJ.
+- On 1.63 an `APIRequestContext` has no cookie methods: seed cookies with `setStorageStatePath` on
+  `APIRequest.NewContextOptions`, or use `page.request()`, which shares the browser context's cookies
+  (`browserContext.addCookies`). From 1.64: `addCookies` / `cookies` / `clearCookies` on the request context.
 - Request bodies with 4+ fields come from builders (`qa/java/skills/test-data-builder`); JSON bodies are passed
   as DTOs via `RequestOptions.create().setData(dto)` inside the client — never hand-built JSON strings in tests.
 - Tests are independent: per-test data, `@AfterMethod(alwaysRun = true)` cleanup, no `dependsOnMethods`.
@@ -227,7 +239,7 @@ Create/update flows keep the RestAssured sibling's cleanup discipline: track cre
 - No token threading per call — identity lives in the context (`setExtraHTTPHeaders` at creation), or in a
   `storageState` file shared with the UI suite for cookie-auth apps (`APIRequest.NewContextOptions.setStorageStatePath`).
 - No leaked resources — every context disposed, `playwright.close()` in `@AfterClass(alwaysRun = true)`.
-- No `response.ok()` as the status assertion; no `Thread.sleep`.
+- No `response.ok()` or `assertThat(response).isOK()` as the status assertion; no `Thread.sleep`.
 - No `ObjectMapper` in test code — deserialization lives in the client's typed overloads and error helper.
 - No hardcoded base URLs, credentials, or tokens — `ConfigurationLoader` + `AuthHelper`.
 
@@ -252,9 +264,8 @@ Create/update flows keep the RestAssured sibling's cleanup discipline: track cre
 - `qa-api-test-playwright-typescript` · `qa-api-test-playwright-dotnet` — the sibling stacks
   (@playwright/test `request` fixture · Microsoft.Playwright + NUnit); same four ideas, different bindings.
 - `qa-api-models-java` / `qa-api-client-writer-java` — DTOs / the client layer this skill consumes.
-- `qa-ui-test-writer-playwright-java` — the UI suite this skill shares the Playwright dependency with.
-- `qa-network-mocking-java` — `page.route` mocking/asserting of browser traffic (not API testing).
-- `qa-api-test-review-java` — review; its cross-stack checklist applies verbatim, plus this skill's
-  What-NOT-to-do list as Playwright-specific findings.
+- `qa-ui-test-writer-playwright-java` — the UI suite sharing the Playwright dependency.
+- `qa-network-mocking-java` — `page.route` mocking of browser traffic.
+- `qa-api-test-review-java` — review; plus this skill's What-NOT-to-do list as Playwright-specific findings.
 - `qa-test-login-tokens-java` — the tokens `newContext(token)` injects.
 - `qa-test-reports-java` — Allure TestNG wiring shared with the UI suite.

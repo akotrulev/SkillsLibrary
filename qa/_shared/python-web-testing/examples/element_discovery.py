@@ -1,40 +1,40 @@
-from playwright.sync_api import sync_playwright
+from pathlib import Path
 
-# Example: Discovering buttons and other elements on a page
+from playwright.sync_api import expect, sync_playwright
 
-with sync_playwright() as p:
-    browser = p.chromium.launch(headless=True)
-    page = browser.new_page()
+URL = "http://localhost:5173"
+OUTPUT = Path("evidence") / "element-discovery"
 
-    # Navigate to page and wait for it to fully load
-    page.goto('http://localhost:5173')
-    page.wait_for_load_state('networkidle')
 
-    # Discover all buttons on the page
-    buttons = page.locator('button').all()
-    print(f"Found {len(buttons)} buttons:")
-    for i, button in enumerate(buttons):
-        text = button.inner_text() if button.is_visible() else "[hidden]"
-        print(f"  [{i}] {text}")
+def main() -> None:
+    OUTPUT.mkdir(parents=True, exist_ok=True)
+    with sync_playwright() as playwright:
+        browser = playwright.chromium.launch()
+        page = browser.new_page()
+        page.goto(URL)
+        expect(page.get_by_role("main")).to_be_visible()
 
-    # Discover links
-    links = page.locator('a[href]').all()
-    print(f"\nFound {len(links)} links:")
-    for link in links[:5]:  # Show first 5
-        text = link.inner_text().strip()
-        href = link.get_attribute('href')
-        print(f"  - {text} -> {href}")
+        buttons = page.get_by_role("button").filter(visible=True).all_inner_texts()
+        print(f"Found {len(buttons)} visible buttons:")
+        for index, name in enumerate(buttons):
+            print(f"  [{index}] {name.strip()}")
 
-    # Discover input fields
-    inputs = page.locator('input, textarea, select').all()
-    print(f"\nFound {len(inputs)} input fields:")
-    for input_elem in inputs:
-        name = input_elem.get_attribute('name') or input_elem.get_attribute('id') or "[unnamed]"
-        input_type = input_elem.get_attribute('type') or 'text'
-        print(f"  - {name} ({input_type})")
+        links = page.get_by_role("link").filter(visible=True).all()
+        print(f"\nFound {len(links)} visible links (first 5):")
+        for link in links[:5]:
+            print(f"  - {link.inner_text().strip()} -> {link.get_attribute('href')}")
 
-    # Take screenshot for visual reference
-    page.screenshot(path='/tmp/page_discovery.png', full_page=True)
-    print("\nScreenshot saved to /tmp/page_discovery.png")
+        fields = page.locator("input, textarea, select").all()
+        print(f"\nFound {len(fields)} form fields:")
+        for field in fields:
+            name = field.get_attribute("name") or field.get_attribute("id") or "[unnamed]"
+            print(f"  - {name} ({field.get_attribute('type') or 'text'})")
 
-    browser.close()
+        screenshot = OUTPUT / "page.png"
+        page.screenshot(path=screenshot, full_page=True)
+        print(f"\nScreenshot saved to {screenshot}")
+        browser.close()
+
+
+if __name__ == "__main__":
+    main()

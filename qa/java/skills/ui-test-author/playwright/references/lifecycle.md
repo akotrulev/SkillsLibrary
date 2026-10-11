@@ -1,8 +1,8 @@
 # Lifecycle — Playwright for Java 1.63 with TestNG
 
 `assets/BaseTest.java` is the one Playwright lifecycle in the Java lane. Every Java skill that drives a
-browser — visual regression, accessibility, network mocking, responsive, language, BDD — extends it and
-amends it through its two hooks; none declares its own `Playwright.create()`. This file explains why it is
+browser — visual regression, accessibility, network mocking, responsive, language, cloud grids — extends it
+and amends it through its hooks; none declares its own `Playwright.create()`. This file explains why it is
 shaped the way it is and how to run it.
 
 ## 1. Why instance fields plus `parallel="classes"`
@@ -36,7 +36,7 @@ class is one thread, so split a large class by feature.
 
 | Hook | `BaseTest` does |
 |---|---|
-| `@BeforeClass launchBrowser` | `Playwright.create()`, the test-id attribute, `chromium().launch(launchOptions())` headless unless `HEADED=1` |
+| `@BeforeClass launchBrowser` | `Playwright.create()`, the test-id attribute, then `newBrowser(playwright)` — by default `chromium().launch(launchOptions())` headless unless `HEADED=1` |
 | `@BeforeMethod openContext` | A new context from `contextOptions()` plus `BASE_URL` and the raw-video folder; tracing started; a new page |
 | `@AfterMethod closeContext` | Failure evidence, then `context.close()`, then the video (§5) |
 | `@AfterClass closeBrowser` | `playwright.close()`, which closes the browser |
@@ -51,7 +51,7 @@ class is one thread, so split a large class by feature.
 - Page objects are built in the test class (`LoginTest.createPages()`), never as fields of `BaseTest`; a base
   class that knows every page grows without bound.
 
-## 3. The two hooks
+## 3. The hooks
 
 Override, never copy, the lifecycle:
 
@@ -65,13 +65,27 @@ protected BrowserType.LaunchOptions launchOptions() {
 protected Browser.NewContextOptions contextOptions() {
     return new Browser.NewContextOptions().setStorageStatePath(AuthSetup.USER_STATE);
 }
+
+@Override
+protected Browser newBrowser(Playwright playwright) {
+    return BrowserStackGrid.connect(playwright, GridTarget.EDGE_WINDOWS_11, getClass().getSimpleName());
+}
 ```
 
-`BaseTest` applies its own settings **after** calling the hook: headless from `HEADED`, `setBaseURL` from
-`BASE_URL` and the video folder. A subclass therefore cannot drop the base URL or the failure evidence by
-forgetting `super`. Device and media emulation go in `contextOptions()` too — see
-`emulation-and-mobile-web.md`. There is one base class: a role, a device or a launch flag is an override on
-the class that needs it, never a second base class.
+| Hook | Called | Default | Override it for |
+|---|---|---|---|
+| `launchOptions()` | by the default `newBrowser` | empty options | a launch flag (WebMCP, a debugging port) |
+| `contextOptions()` | in `@BeforeMethod`, once per test | empty options | storage state, viewport, device, locale, time zone, media |
+| `newBrowser(playwright)` | in `@BeforeClass`, after the test-id attribute is set | `chromium().launch(launchOptions())`, headless unless `HEADED=1` | a browser the class does not launch itself — `chromium().connect(wsEndpoint)` to a cloud grid (`qa/java/skills/browser-cloud-setup`) |
+
+`BaseTest` applies its own settings **after** calling the hook: headless from `HEADED` (in the default
+`newBrowser`), `setBaseURL` from `BASE_URL` and the video folder. A subclass therefore cannot drop the base URL
+or the failure evidence by forgetting `super`. An override of `newBrowser` replaces the launch, so
+`launchOptions()` and `HEADED` no longer apply to that class; the browser it returns is still released by
+`playwright.close()` in `@AfterClass`, which for a connected browser closes the connection and so ends the
+remote session. Device and media emulation go in `contextOptions()` too — see
+`emulation-and-mobile-web.md`. There is one base class: a role, a device, a launch flag or a grid target is an
+override on the class that needs it, never a second base class.
 
 ## 4. Environment
 

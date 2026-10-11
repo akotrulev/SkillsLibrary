@@ -6,7 +6,9 @@ Sections moved out of SKILL.md for on-demand loading. Read what the task needs.
 
 ### Config — `support/auth/Auth0Config.java`
 
-Non-secret config (domain, audience, realm) can have fallbacks; **secrets are read lazily** through methods so unrelated tests don't require them. No static initializer touches a secret.
+Non-secret config (domain, audience, realm) can have fallbacks; **secrets are read lazily** through methods so
+unrelated tests don't require them. No static initializer touches a secret, and importing the class fetches no
+token. `AUTH0_ROPG_CLIENT_SECRET` is optional because only a confidential ROPG application has one.
 
 ```java
 package support.auth;
@@ -27,16 +29,14 @@ public final class Auth0Config {
         return (v == null || v.isBlank()) ? fallback : v;
     }
 
-    // Non-secret — safe defaults; importing this fetches no token.
     public static String domain()   { return orDefault("AUTH0_DOMAIN", "yourco-dev.eu.auth0.com"); }
     public static String audience() { return orDefault("AUTH0_AUDIENCE", "https://api.flexinvest.test"); }
     public static String realm()    { return orDefault("AUTH0_REALM", "Username-Password-Authentication"); }
 
-    // Secrets — read lazily, only when a token is actually fetched. Never logged, never committed.
     public static String m2mClientId()      { return required("AUTH0_M2M_CLIENT_ID"); }
     public static String m2mClientSecret()  { return required("AUTH0_M2M_CLIENT_SECRET"); }
     public static String ropgClientId()     { return required("AUTH0_ROPG_CLIENT_ID"); }
-    public static String ropgClientSecret() { return orDefault("AUTH0_ROPG_CLIENT_SECRET", ""); } // confidential apps only
+    public static String ropgClientSecret() { return orDefault("AUTH0_ROPG_CLIENT_SECRET", ""); }
     public static String testUsername()     { return required("AUTH0_TEST_USERNAME"); }
     public static String testPassword()     { return required("AUTH0_TEST_PASSWORD"); }
 }
@@ -44,7 +44,9 @@ public final class Auth0Config {
 
 ### Cached token provider — `support/auth/CachedTokenProvider.java`
 
-One provider per grant, caching the token for its `getExpiresIn()`. Re-fetches ~60s early so a token never expires mid-test. **No sleep, no per-test fetch.** A `Supplier<Instant>` clock is injected (constructor injection) so the cache logic is unit-testable. `synchronized` makes the refresh safe under TestNG parallelism.
+One provider per grant, caching the token for its `getExpiresIn()`. Re-fetches ~60s early so a token never
+expires mid-test. **No sleep, no per-test fetch.** A `Supplier<Instant>` clock is injected (constructor
+injection) so the cache logic is unit-testable. `synchronized` makes the refresh safe under TestNG parallelism.
 
 ```java
 package support.auth;
@@ -63,7 +65,6 @@ public abstract class CachedTokenProvider {
         this.now = now;
     }
 
-    /** Returns (accessToken, expiresInSeconds). */
     protected abstract Fetched fetchToken() throws Exception;
 
     public synchronized String getAccessToken() throws Exception {
@@ -80,6 +81,9 @@ public abstract class CachedTokenProvider {
 }
 ```
 
+The M2M provider is the default for API-test suites; the ROPG provider mints a token **as** a specific test user
+(test-only). The `login(...)` overload that takes a realm uses the `password-realm` grant.
+
 ```java
 package support.auth;
 
@@ -88,7 +92,6 @@ import com.auth0.json.auth.TokenHolder;
 import java.time.Instant;
 import java.util.function.Supplier;
 
-/** Client Credentials (M2M) — the default for API-test suites. */
 public final class M2MTokenProvider extends CachedTokenProvider {
     private final AuthAPI authAPI = AuthAPI
         .newBuilder(Auth0Config.domain(), Auth0Config.m2mClientId(), Auth0Config.m2mClientSecret())
@@ -113,7 +116,6 @@ import com.auth0.json.auth.TokenHolder;
 import java.time.Instant;
 import java.util.function.Supplier;
 
-/** Resource Owner Password Grant — a token AS a specific test user. Test-only. */
 public final class TestUserTokenProvider extends CachedTokenProvider {
     private final AuthAPI authAPI = AuthAPI
         .newBuilder(Auth0Config.domain(), Auth0Config.ropgClientId(), Auth0Config.ropgClientSecret())
@@ -129,15 +131,16 @@ public final class TestUserTokenProvider extends CachedTokenProvider {
             .setAudience(Auth0Config.audience())
             .setScope("openid profile email")
             .execute()
-            .getBody(); // realm overload → uses the password-realm grant
+            .getBody();
         return new Fetched(holder.getAccessToken(), holder.getExpiresIn());
     }
 }
 ```
 
-### Shared, suite-wide singletons — `support/auth/Tokens.java`
+### Shared, suite-wide providers — `support/auth/Tokens.java`
 
-One token per suite, **not per test**. Expose ready-made singletons so tests never construct a provider or call `AuthAPI` directly.
+One token per suite, **not per test**. Tests never construct a provider or call `AuthAPI` directly; the token is
+cached inside the provider.
 
 ```java
 package support.auth;
@@ -145,7 +148,6 @@ package support.auth;
 public final class Tokens {
     private Tokens() {}
 
-    // Reused across the suite — the token is cached inside the provider.
     public static final M2MTokenProvider M2M = new M2MTokenProvider();
     public static final TestUserTokenProvider TEST_USER = new TestUserTokenProvider();
 }
@@ -153,7 +155,8 @@ public final class Tokens {
 
 ### Stash into an API client — `Authorization: Bearer` (RestAssured)
 
-The provider is injected (constructor injection), so a fake can be passed in unit tests. The cache makes per-request header attachment cheap.
+The provider is injected (constructor injection), so a fake can be passed in unit tests. The cache makes
+per-request header attachment cheap.
 
 ```java
 package support.auth;
@@ -181,42 +184,81 @@ public final class OrdersClient {
 }
 ```
 
-### Seed Playwright Java auth state from a token (skip the login UI)
+### Signed-in browser state from a token (skip the login UI)
 
-Mint a token as the test user, write it where the SPA expects it, save storage state once, reuse across the suite. Adapt the storage key/shape to your app. The pattern is **token in → state file out → reused by every test**, no login form.
+The UI suite's signed-in state follows J1's lifecycle (`qa/java/skills/ui-test-author/playwright/references/lifecycle.md`
+§6): **one `@BeforeSuite` writes one state file per role**, and each signed-in class picks its role in
+`contextOptions()`. This is the token variant of that `AuthSetup`: instead of driving the login form, it mints the
+test user's token and writes it where the SPA reads it, at the `BASE_URL` origin.
+
+`support/TokenAuthSetup.java`, in the `support` package beside `BaseTest`, listed in `testng.xml` as a `<class>`
+next to the `<packages>` entry:
 
 ```java
-package support.auth;
+package com.example.uitests.support;
 
-import com.microsoft.playwright.*;
-import java.nio.file.Paths;
+import com.example.uitests.pages.HomePage;
+import com.microsoft.playwright.Browser;
+import com.microsoft.playwright.BrowserContext;
+import com.microsoft.playwright.Page;
+import com.microsoft.playwright.Playwright;
+import org.testng.annotations.BeforeSuite;
+import support.auth.Tokens;
 
-public final class AuthStateSeeder {
-    private AuthStateSeeder() {}
+import java.nio.file.Path;
 
-    public static void seed(String statePath) throws Exception {
+import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat;
+
+public class TokenAuthSetup {
+    public static final Path TEST_USER_STATE = Path.of("build", ".auth", "test-user.json");
+
+    @BeforeSuite(alwaysRun = true)
+    public void saveTestUserState() throws Exception {
         String token = Tokens.TEST_USER.getAccessToken();
-
         try (Playwright playwright = Playwright.create()) {
-            Browser browser = playwright.chromium().launch();
-            BrowserContext context = browser.newContext();
+            BrowserContext context = playwright.chromium().launch()
+                    .newContext(new Browser.NewContextOptions().setBaseURL(BaseTest.requiredEnv("BASE_URL")));
             Page page = context.newPage();
-
-            page.navigate("https://app.flexinvest.test"); // origin must match for storage to apply
+            page.navigate("/");
             page.evaluate("token => window.localStorage.setItem('flexinvest.accessToken', token)", token);
-
-            context.storageState(new BrowserContext.StorageStateOptions().setPath(Paths.get(statePath)));
-            browser.close();
+            page.reload();
+            assertThat(new HomePage(page).greeting()).isVisible();
+            context.storageState(new BrowserContext.StorageStateOptions().setPath(TEST_USER_STATE));
         }
     }
 }
 ```
 
-Reuse the saved state on each context: `browser.newContext(new Browser.NewContextOptions().setStorageStatePath(Paths.get(statePath)))`. See `qa/java/skills/ui-test-author/playwright`.
+A signed-in class chooses the role in its `contextOptions()`; a signed-out class does not override it:
+
+```java
+@Override
+protected Browser.NewContextOptions contextOptions() {
+    return new Browser.NewContextOptions().setStorageStatePath(TokenAuthSetup.TEST_USER_STATE);
+}
+```
+
+- The storage key (`flexinvest.accessToken`) and its shape are the app's; read them from the SPA's auth code.
+- The page navigates to the **`BASE_URL` origin** first: `localStorage` is per origin, and a state file saved
+  from another origin never reaches the app.
+- The **greeting assertion after the reload** proves the app accepted the token before the state is saved;
+  saving straight after `setItem` would save a state the app may reject.
+- A second role is a second state file written by the same method (`build/.auth/admin.json` from an admin
+  token). The files live under `build/`, so they are rewritten every run and never committed.
+- **What storage state carries:** cookies and `localStorage`, and IndexedDB only when saved with
+  `setIndexedDB(true)` on `StorageStateOptions` [1.51]. It never carries `sessionStorage`, and never an
+  in-memory token cache (the default `auth0-spa-js` cache is in memory: configure the SPA's test build with
+  `cacheLocation: 'localstorage'`, or seed through the login UI instead).
+- The `Playwright` is created and closed inside the one method, so the thread rule holds even though
+  `@BeforeSuite` runs on its own thread (`lifecycle.md` §1).
 
 ### Device Authorization Flow — `support/auth/DeviceCodeProvider.java`
 
-Niche: input-constrained clients. The Java SDK has no device helper, so use bare `HttpClient`. Start the flow, surface the `verification_uri_complete` for approval, then **poll `/oauth/token` honoring the server-dictated `interval`** — wait on the endpoint's `authorization_pending` / `slow_down` responses, **never a fixed sleep beyond that interval**.
+Niche: input-constrained clients. The Java SDK has no device helper, so use bare `HttpClient`. Start the flow,
+surface the `verification_uri_complete` for approval, then **poll `/oauth/token` at the server-dictated
+`interval`** — `authorization_pending` means keep waiting, `slow_down` means add 5 seconds to the interval (RFC
+8628). The sleep in this helper is that protocol cadence, the one sanctioned interval in this skill; the
+deadline is the device code's `expires_in`. The `client_id` is a Device-Code-enabled public application.
 
 ```java
 package support.auth;
@@ -229,22 +271,23 @@ import java.time.Instant;
 
 public final class DeviceCodeProvider {
     private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final System.Logger LOG = System.getLogger(DeviceCodeProvider.class.getName());
     private final HttpClient http = HttpClient.newHttpClient();
 
     public String getDeviceToken() throws Exception {
         String domain = Auth0Config.domain();
-        String clientId = Auth0Config.ropgClientId(); // a Device-Code-enabled public app
+        String clientId = Auth0Config.ropgClientId();
 
         JsonNode flow = post("https://" + domain + "/oauth/device/code",
             "client_id=" + clientId + "&scope=openid%20profile%20email&audience=" + Auth0Config.audience());
-        System.out.println("Approve at: " + flow.get("verification_uri_complete").asText());
+        LOG.log(System.Logger.Level.INFO, "Approve the device login at {0}", flow.get("verification_uri_complete").asText());
 
         String deviceCode = flow.get("device_code").asText();
         Instant deadline = Instant.now().plusSeconds(flow.get("expires_in").asLong());
         long interval = flow.get("interval").asLong();
 
         while (Instant.now().isBefore(deadline)) {
-            Thread.sleep(interval * 1000); // server-dictated interval — NOT an arbitrary sleep
+            Thread.sleep(interval * 1000);
             HttpResponse<String> res = postRaw("https://" + domain + "/oauth/token",
                 "grant_type=urn:ietf:params:oauth:grant-type:device_code"
                     + "&device_code=" + deviceCode + "&client_id=" + clientId);
@@ -253,9 +296,11 @@ public final class DeviceCodeProvider {
                 return body.get("access_token").asText();
             }
             String error = body.path("error").asText();
-            if ("authorization_pending".equals(error)) { continue; }   // user hasn't approved yet
-            if ("slow_down".equals(error)) { interval += 5; continue; } // back off per spec
-            throw new IllegalStateException("Device token failed: " + error);
+            if ("slow_down".equals(error)) {
+                interval += 5;
+            } else if (!"authorization_pending".equals(error)) {
+                throw new IllegalStateException("Device token failed: " + error);
+            }
         }
         throw new IllegalStateException("Device authorization timed out before approval.");
     }
@@ -300,7 +345,8 @@ public class OrdersApiTest {
 
 ### TestNG — the provider caches, not re-fetches (offline, fake clock)
 
-The cache is the contract: one fetch, reused until near expiry. Inject the clock and count fetches with a test subclass — no network.
+The cache is the contract: one fetch, reused until near expiry. Inject the clock and count fetches with a test
+subclass — no network. Thirty minutes is well inside the hour; the hour itself is past expiry minus the skew.
 
 ```java
 package support.auth;
@@ -325,10 +371,11 @@ public class CachedTokenProviderTest {
     public void Should_ReuseToken_When_NotNearExpiry() throws Exception {
         AtomicReference<Instant> now = new AtomicReference<>(Instant.EPOCH);
         FakeProvider provider = new FakeProvider(now);
+        provider.getAccessToken();
+        now.set(Instant.EPOCH.plusSeconds(30 * 60));
 
-        assertEquals(provider.getAccessToken(), "tok-1");
-        now.set(Instant.EPOCH.plusSeconds(30 * 60)); // well inside the hour
-        assertEquals(provider.getAccessToken(), "tok-1");
+        provider.getAccessToken();
+
         assertEquals(provider.fetches, 1);
     }
 
@@ -336,11 +383,12 @@ public class CachedTokenProviderTest {
     public void Should_RefetchToken_When_PastExpiryMinusSkew() throws Exception {
         AtomicReference<Instant> now = new AtomicReference<>(Instant.EPOCH);
         FakeProvider provider = new FakeProvider(now);
+        provider.getAccessToken();
+        now.set(Instant.EPOCH.plusSeconds(3600));
 
-        assertEquals(provider.getAccessToken(), "tok-1");
-        now.set(Instant.EPOCH.plusSeconds(3600)); // at expiry → past expiry - 60s skew
-        assertEquals(provider.getAccessToken(), "tok-2");
-        assertEquals(provider.fetches, 2);
+        String token = provider.getAccessToken();
+
+        assertEquals(token, "tok-2");
     }
 }
 ```

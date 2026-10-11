@@ -56,7 +56,15 @@ fixture (D63), realtime owning WebSocket mocking and browser SSE as a fixed even
 project on `context.setStorageState`, a frozen `page.clock` for locale formats, one generated test per data row,
 uptime probes keeping trace/video/screenshot on failure (D66) and loaded by `qa-api-typescript` Step 3, locator
 actions, a Mailpit suite with no global wipe, the 1.64 request-context options, and playwright-bdd 9.2.1 on 1.64.0.
-Next: J4. Built but unverified: no asset, workflow or pipeline has been
+J4 landed 2026-10-11: the twelve remaining Java skills on `BaseTest` and 1.63 — a `newBrowser(Playwright)` hook added
+to J1's `BaseTest` for grid connects (D67), `@Factory` rows for responsive widths and locales (D68), one BrowserStack
+session per class marked once with the installed client version (D69), `WebSocketFrame.text()` and the fixed-event-set
+SSE mock, a token `AuthSetup` per lifecycle.md §6, an uptime probe that catches `AssertionError` and keeps
+trace/video/screenshot (D70) loaded by `qa-api-java` Step 3, locator actions, Awaitility mail polls, exact statuses
+without HttpComponents (`BaseApiTest` kept, D71), page objects on `Page` in the step glue, and a Cucumber 1.63
+scaffold with one discovery mechanism and `BaseTest`-shaped evidence hooks (D72); `qa/_shared/python-web-testing`
+rewritten to web-first waits on `playwright==1.63.0`; the six D12 files on allure-java 3.0.
+Next: N4. Built but unverified: no asset, workflow or pipeline has been
 compiled or run (G1 does that; D24's TS config import, the Java build on Allure Gradle plugin 4.3.0, the .NET
 build on NUnit3TestAdapter 6.3.1 / Test SDK 18.10.1, `dorny/test-reporter`'s `java-junit` parse, the trace CLI
 through the Java driver (D39) and through `playwright.ps1` (D43), the .NET shard script against a real
@@ -74,7 +82,11 @@ exclusion context, Lighthouse seeing a persistent context's sign-in, the `docker
 proxy with Selenium are open, and N2's .NET CI references neither exclude the `visual` / `lighthouse` categories
 from the gate nor point at the `docker run` job — G1 reconciles that; T4 had no web access, so its `APIResponse.timing()` / cookie spellings, `npx checkly runtimes`,
 BrowserStack's `getSessionDetails`, Checkly honouring a spec's `test.use` evidence modes (D66) and `EventSource`
-stopping on a routed `204` (D64) rest on the research and memory — none of them is in a compiled asset).
+stopping on a routed `204` (D64) rest on the research and memory — none of them is in a compiled asset; J4 had no
+web access either, so TestNG's per-instance `@BeforeClass` under `@Factory` (D68), the `IAlterSuiteListener`
+thread-count override and BrowserStack's `getSessionDetails` (D69), the Playwright jar's `pom.properties`,
+`StorageStateOptions.setIndexedDB`, Cucumber's `@After(order = 0)` running last and `Allure.attachment(String,
+String)` rest on sources read from memory — of J4's files only `BaseTest.java` is a compiled asset).
 Planned 2026-10-10. The research behind it is committed with this plan:
 `docs/research/003-qa-playwright-appium/` (5 files). So is the read-only audit:
 `docs/audits/003-qa-playwright-appium/` (4 files). All open questions were answered on 2026-10-10:
@@ -85,7 +97,7 @@ Planned 2026-10-10. The research behind it is committed with this plan:
 - A Maestro lane is added (X1).
 - The newest Appium client majors are primary.
 
-Next: J4 (H1, the user's, blocks no task). The cost is 19 agent sessions on the subscription, each started by the user
+Next: N4 (H1, the user's, blocks no task). The cost is 19 agent sessions on the subscription, each started by the user
 from Plan Queue. Nothing else is metered.
 
 ## 1. What already exists, and what is missing
@@ -1035,6 +1047,64 @@ whatever the account does), a Checkly-side project setting (not verified in this
 true } })` in each browser-check spec (chosen: plain Playwright semantics). **Cost:** a second place that states the
 R7 values, scoped to `monitoring/src/__checks__/`; that Checkly keeps and shows what `test.use` asked for is
 unverified, so the skill tells the reader to check one failed run before relying on it.
+
+**D67 — J1's `BaseTest` gains a third hook, `protected Browser newBrowser(Playwright playwright)`, whose default is
+the old local launch with the `HEADED` stamp (J4, 2026-10-11).** `browser-cloud-setup` must `connect(wsEndpoint)`,
+and `BaseTest` launched Chromium inline in `@BeforeClass` into a private field. Readings: a second base class for
+grid runs (the nine-lifecycles problem, `aJ` D22), a `BASE_URL`-style environment switch inside `BaseTest` that
+builds vendor caps (vendor code in the one lifecycle), or one overridable method the `@BeforeClass` calls after
+setting the test-id attribute (chosen; `lifecycle.md` §3 now tables the three hooks). A grid class subclasses the
+test class it reruns and overrides `newBrowser`, as a device class overrides `contextOptions()`. **Cost:** an
+override replaces the launch, so `launchOptions()` and `HEADED` no longer apply to that class; one more protected
+member for G1's Java build to compile.
+
+**D68 — A Java row matrix whose rows need different context options is a TestNG `@Factory`: one instance per row,
+each instance's `contextOptions()` reading its row (J4, 2026-10-11).** Responsive widths and supported locales are
+rows, but `BaseTest` builds the context from a per-class hook, and `aJ` D46 bans `setViewportSize` per test outside
+live-resize specs. Readings: one subclass per width or locale (a file per row), a `@DataProvider` row plus
+`page.setViewportSize` / a second context in the test (the live-resize path, and a raw `page` call in the test), or a
+`@Factory` with a static, sequential data provider (chosen). TestNG runs `@BeforeClass` once per instance, so each row
+gets its own browser on the class's one thread, and `parallel="classes"` holds. **Cost:** every row reports the same
+method name and shares `<Class>.<method>` evidence files (the data-provider caveat `evidence-capture` already
+states); a browser launch per row; the per-instance `@BeforeClass` is TestNG behaviour read from memory, not run.
+
+**D69 — A Playwright grid class is one vendor session: its verdict is marked once in `@AfterClass` from the
+failures TestNG recorded for that instance, and the session cap is set on a separate `testng-grid.xml` by an
+`IAlterSuiteListener` reading `GRID_CONCURRENCY` (J4, 2026-10-11).** The old `GridWebTestBase` connected per method
+and marked per method under `parallel="methods"` (`aJ` D3). With `BaseTest` a class holds one browser. Readings: mark
+per test (the last test overwrites the verdict, as T4's D65 found), or once per class (chosen), with the dashboard link
+attached at class level; Gradle's `threadCount` (a suite file's `thread-count` overrides it) or the listener
+(chosen), on a suite file of its own so a local `./gradlew test` never connects to the grid. **Cost:** the dashboard
+shows one verdict per class, not per test; the link sits in each test's tear-down, not on the failing step; a second
+suite file and a `gridTest` task; the listener override and `getSessionDetails` / `browser_url` are unverified.
+
+**D70 — The Java-native uptime probe keeps a failed run's trace, video and full-page screenshot under
+`SYNTHETIC_EVIDENCE_DIR` through a `ProbeEvidence` component, in `BaseTest`'s hook order (J4, 2026-10-11).** The plan
+asked to "catch the assertion error type and capture evidence". A Spring `@Scheduled` probe has no test runner, no
+`build/` folder and no Allure report. Readings: a screenshot on failure only (no trace to read the cause from), the
+probe writing into the app's working directory (lost on a pod restart, and a trace carries the synthetic user's
+session), or recording every run and keeping it only on failure on a private volume with a 14-day lifecycle, named
+`<check>.<UTC timestamp>` and announced in the warning log (chosen). The journey catches `AssertionError |
+PlaywrightException` and records the result in `finally`, so a probe that cannot launch reads as a failed check.
+**Cost:** a video and a trace recorded on every run; the volume and its lifecycle are the deployment's to provide;
+the evidence is found through the log line and the alert annotation, not a report.
+
+**D71 — `api-test-author/playwright` keeps its own `BaseApiTest` instead of extending J1's `BaseTest` (J4,
+2026-10-11).** J4's deliverable says these skills extend `BaseTest`. `BaseTest` launches Chromium in `@BeforeClass` and
+opens a context and page per test; an API-only class needs neither, only a `Playwright` and one `APIRequestContext`
+per identity. Readings: extend `BaseTest` and use `page.request()` (a browser per API class, and one identity per
+context), or keep `BaseApiTest` on the same lifecycle rules — instance fields, `alwaysRun` hooks,
+`parallel="classes"`, no parallel data providers (chosen; a UI test still seeds through `page.request()`, lifecycle.md
+§7). **Cost:** two base classes in the Java lane, one per kind of suite; a hybrid class that needs both a browser and
+several API identities extends `BaseTest` and builds its extra request contexts itself.
+
+**D72 — A Cucumber scenario's evidence name is `<feature file name>.<scenario name>` (J4, 2026-10-11).**
+`evidence-capture` (J2) names the files `<Feature>.<Scenario>`. Cucumber-JVM's `Scenario` exposes the feature
+file's URI, not the `Feature:` title. Readings: parse the title out of the `.feature` file in the hook (file I/O
+and a Gherkin parse in teardown), or take the file name without `.feature` (chosen): `login.feature` +
+`Sign in with a wrong password` → `login.Sign_in_with_a_wrong_password.{png,zip,webm}`. **Cost:** a feature file
+named differently from its `Feature:` title shows the file name in the evidence; Scenario Outline rows share one
+name, so two failing rows overwrite each other's files on disk (Allure keeps each).
 
 ## Answered questions (2026-10-10)
 
@@ -2204,6 +2274,87 @@ rules on Playwright 1.63.0. No allure-java 2.x call is left anywhere in `qa/java
   - Finish with `grep -rn "addAttachment\|allure-testng:2\|allure-cucumber7-jvm:2" qa/java qa/reporting/java`.
     It must find no code use outside M2's mobile files. A prose line naming the 2.x API as removed is fine.
 - **Not in J4:** Appium lines in `bdd-project-scaffold` (M2); the mobile skills' Allure calls (M2).
+- **As built (2026-10-11):** the twelve Java skills teach Playwright 1.63 on J1's `BaseTest` with every Playwright
+  version deferred to the writer's Versions table ("this skill pins nothing"), except `bdd-project-scaffold`, which
+  pins `playwright:1.63.0`, `allure-cucumber7-jvm:3.0.0` (on Central per J2's live check, plan line 1515), Allure
+  Gradle plugin 4.3.0 with `allureJavaVersion` 3.0.0 and `allure-commandline` 2.46.1 like J1's build. Every touched
+  sample is `Should_X_When_Y`, comment-free, and reaches the page through page objects; the one code comment left
+  in a touched file is the commented-out `io.appium:java-client:10.1.1` line in `bdd-project-scaffold`'s
+  `build.gradle.kts` (M2's; its prompt now names it). What differed from the plan:
+  - **J1 edits (the two allowed paths):** `BaseTest` gained `protected Browser newBrowser(Playwright)` — the
+    default is today's local launch with the `HEADED` stamp — and `lifecycle.md` §3 became "The hooks", a
+    three-row table (D67). §2's `launchBrowser` row and the intro line follow it.
+  - `responsive-testing`: rows are a TestNG `@Factory` (one instance per width, its `contextOptions()` setting the
+    viewport) instead of per-test `setViewportSize` (D68); page objects and a measuring `Layout` moved to a new
+    `references/page-objects-and-layout.md` (SKILL.md 15,984 chars); test ids `Nav.Desktop` / `Nav.Hamburger` /
+    `ProductGrid.Card`; the FE cross-reference is `frontend/react/skills/responsive-design` (Blazor's still says
+    kebab-case `nav-desktop`, not this plan's file).
+  - `realtime-stream-testing`: `WebSocketFrame.text()` in a `MockStreams` helper; browser SSE is a `setTimes(1)`
+    event-stream route over a `204` route (the T4/D64 shape); probes open/close in `@BeforeMethod`/`@AfterMethod`;
+    STOMP, the gotchas and the browser page objects moved to `references/details.md` (SKILL.md 22,191 → 15,831).
+  - `browser-cloud-setup`: `GridWebTestBase` is gone; a grid class subclasses a test class and overrides
+    `newBrowser` (D67), one session per class with its verdict marked once in `@AfterClass` from `ITestContext`, the
+    concurrency cap set on a `testng-grid.xml` suite by an `IAlterSuiteListener`, run by a `gridTest` task (D69);
+    `client.playwrightVersion` read from the jar's `META-INF/maven/.../pom.properties`; the session URL attached
+    with `Allure.attachment(name, content)`; `SAUCE_REGION` and `BUILD_NAME` required instead of defaulted.
+  - `language-testing`: `I18nBaseTest` is gone; a `LocaleUnderTest` record feeds each class's `contextOptions()`,
+    the matrix is a `@Factory` (D68); `page.clock().setFixedTime` before load; the vacuous `hasCSS(".+")` became a
+    measured RTL position test; the hardcoded-currency data provider was dropped (D35); plural test without a loop
+    (`PluralRules.getKeywords()`); pseudo-loc, coverage, plurals and the matrix moved to `references/details.md`
+    (SKILL.md 19,051 → 15,741).
+  - `data-driven-testing`: the parallel-rows section and the rules exclude Playwright/Appium classes; its samples
+    were renamed and de-commented. SKILL.md is 21,967 chars (was 21,232) — a size violation that predates this
+    plan; J4 did not rewrite the file.
+  - `test-login-tokens`: a `TokenAuthSetup` `@BeforeSuite` (lifecycle.md §6's shape) writes
+    `build/.auth/test-user.json` from a minted token at the `BASE_URL` origin and checks the greeting first; classes
+    pick the role in `contextOptions()`; the device-code helper logs through `System.Logger`.
+  - `production-uptime-checks`: the probe catches `AssertionError | PlaywrightException`, records the result in
+    `finally`, treats over-budget as failure, and keeps trace/video/screenshot through a new `ProbeEvidence` under
+    `SYNTHETIC_EVIDENCE_DIR` (D70); alerting HCL, secrets and a worked example moved to a new
+    `references/details.md` (SKILL.md 21,140 → 15,925). Wired into `qa-api-java.md` Step 3 with the exit gate
+    `terraform plan` → no unexpected diff.
+  - `inhouse-framework-conventions`: `PageBase.locator(key)` actions, `errorMessage()` returns a `Locator`,
+    PascalCase test ids in the screen JSON, the test class extends `BaseTest`, evidence from `BaseTest` instead of a
+    second `ITestListener`, the anti-example block became a table.
+  - Email: Mailpit's `waitFor` and IMAP's `awaitEmail` poll with Awaitility (`org.awaitility:awaitility:4.2.2`,
+    the lane's existing pin from `failure-injection-testing`; IMAP adds `pollInSameThread()`); Mailpit lost its
+    global `deleteAll()` wipe (parallel classes share the container); IMAP cleanup moved to an
+    `@AfterMethod(alwaysRun = true)` in `ImapTestBase`; the attachment test's in-lambda `try/catch` became
+    `MimeBodies.firstAttachment`; AssertJ pins 3.26.3 → 3.27.7 (§2.2).
+  - `api-test-author/playwright`: exact status with AssertJ and the body as description, plain `int` status codes
+    (no HttpComponents), records compared with one `isEqualTo` instead of `SoftAssert`; `BaseApiTest` stays its own
+    base class (D71); the 1.64 request-context cookie line.
+  - `gherkin-step-code`: page objects take the `Page` (J1's `LoginPage`, `HomePage`, `Credentials`), never
+    `TestContext`; `expectLoaded()` is gone — `Then` steps assert on exposed locators.
+  - `bdd-project-scaffold`: Playwright 1.63.0; the `@Suite`'s `@SelectClasspathResource` is the one discovery
+    mechanism (no `cucumber.features`); reports under `build/`; `HEADED=1` instead of `-Dplaywright.headless`; an
+    `installPlaywrightBrowsers` task; the `Hooks` class per `evidence-capture` § Cucumber scenarios, moved to a new
+    `references/hooks.md` to keep SKILL.md at 15,293 chars; `<Feature>` is the feature **file** name (D72).
+  - `python-web-testing`: `expect(...).to_be_visible()` replaces `networkidle` / `wait_for_timeout` /
+    `wait_for_selector`; locator APIs; outputs under `evidence/`; `playwright==1.63.0`, `pytest-playwright==0.10.0`,
+    Python ≥ 3.10; a pytest section on 0.10.0's evidence flags; `with_server.py` writes server output to
+    `evidence/servers/server-<n>.log` instead of an unread `PIPE`. `.DS_Store` deleted (it was untracked).
+  - Allure 3.0 sweep: `deepeval.md`, `dependency-scan`, `passive-scan` call `Allure.attachment(...)` (+
+    `AttachmentOptions` for streams); `db-testing/testcontainers` prose names the 3.0 call; `failure-injection-testing`
+    and `feature-flag-testing` pin `allure-testng:3.0.0`.
+  - **Unverified** (no web access in this session — WebFetch and WebSearch were denied; nothing compiled or run):
+    `pom.properties` inside the Playwright jar; BrowserStack's `getSessionDetails` / `browser_url`; TestNG running
+    `@BeforeClass` per `@Factory` instance (read from TestNG's `invokeBeforeClassMethods`, from memory);
+    `IAlterSuiteListener` overriding a suite's `thread-count`; `StorageStateOptions.setIndexedDB` as the Java
+    spelling; Cucumber running `@After(order = 0)` last; `Allure.attachment(String, String)` and allure-testng
+    showing a class-level attachment in each test's tear-down; `EventSource` stopping on a routed `204` from Java.
+    None of these files is an asset G1 compiles, except `BaseTest.java`.
+  - Proof: seam `ui-test-author/playwright/assets/BaseTest.java:51,60`, `references/lifecycle.md:54,79`; Step 3
+    `qa/java/agents/qa-api-java.md:139` (production probes); `browser-cloud-setup/references/details.md:112,118,176,223,380`;
+    `realtime-stream-testing/references/details.md:266,282,298`; `responsive-testing/SKILL.md:56`;
+    `language-testing/SKILL.md:100,120`; `data-driven-testing/SKILL.md:287`;
+    `test-login-tokens/references/details.md:212`; `production-uptime-checks/SKILL.md:142,154`,
+    `references/details.md:54`; `inhouse-framework-conventions/SKILL.md:108`; `email-testing/references/mailpit.md:129`,
+    `gmail-imap.md:205`; `api-test-author/playwright/SKILL.md:167`; `gherkin-step-code/SKILL.md:54`;
+    `bdd-project-scaffold/SKILL.md:78,82,147`, `references/hooks.md:69`. `grep -rn "addAttachment\|allure-testng:2\|allure-cucumber7-jvm:2" qa/java qa/reporting/java`
+    → prose only (`accessibility-testing/references/axe-playwright.md:247`, `ui-test-author/playwright/references/lifecycle.md:124`,
+    `ui-test-author/review/SKILL.md:79`, `evidence-capture/SKILL.md:129`, `evidence-capture/references/playwright.md:301`,
+    `test-reports/SKILL.md:90,91,286`) plus one code pin in M2's `mobile-native-features/SKILL.md:77`.
 
 ### N4 — .NET: the remaining Playwright-bearing skills and the `standards-audit` checklist
 
@@ -2550,90 +2701,9 @@ Run them in order, one session each, opened from Plan Queue. Each block is compl
 | X1 | `docs` | `general-purpose` | M1, S1, T2 | ~130k |
 | G1 | `docs` | `general-purpose` | all | ~145k |
 
-Landed: T1, J1, N1, T2, J2, N2, A1, T3 (2026-10-10), J3, N3, T4 (2026-10-11). Every other block is live.
+Landed: T1, J1, N1, T2, J2, N2, A1, T3 (2026-10-10), J3, N3, T4, J4 (2026-10-11). Every other block is live.
 
 ---
-
-### J4 — Java: the remaining Playwright-bearing skills, and `python-web-testing` (general-purpose, docs)
-
-````
-You are `general-purpose`. Task J4 of docs/plans/003-qa-playwright-appium-upgrade.md: move the remaining
-Playwright-bearing Java skills onto J1's BaseTest and Playwright 1.63 with no R1–R6 break. Wire
-production-uptime-checks into qa-api-java, and rewrite qa/_shared/python-web-testing to the house wait
-rules on 1.63.0.
-
-Read, in this order:
-1. CLAUDE.md.
-2. The plan: §2.1, §2.2, §4 (R8), §5.1, Decisions D8, D19, task J4, "Close-out — every task".
-3. Under qa/java/skills/: responsive-testing, realtime-stream-testing, browser-cloud-setup (+ references),
-   test-login-tokens (+ references), language-testing (+ references), data-driven-testing,
-   production-uptime-checks, inhouse-framework-conventions, email-testing/references/{gmail-imap,mailpit}.md,
-   api-test-author/playwright, gherkin-step-code, bdd-project-scaffold. Then qa/_shared/python-web-testing
-   (SKILL.md, examples/, scripts/).
-4. qa/java/skills/ui-test-author/playwright/assets/BaseTest.java; qa/java/skills/evidence-capture/SKILL.md.
-5. docs/audits/003-qa-playwright-appium/java.md rows D3, D8, D10, D11, D14, D21, D23, D24, D27, D32,
-   D33, D35, D39, D44, D46, D48, D52; plan D12 (the allure-java 3.0 sweep).
-
-Build:
-- responsive: D11, D46, D23; BaseUiTest → BaseTest. Viewport per class through contextOptions(); D23's
-  broken reference now points at ui-test-author/playwright/references/emulation-and-mobile-web.md.
-- realtime: WebSocketFrame.text().
-- browser-cloud: GridWebTestBase → BaseTest with parallel="classes"; the installed client version.
-  J1's BaseTest only launches a local Chromium (`playwright.chromium().launch(launchOptions()…)` in
-  @BeforeClass, private fields), so a cloud run that must `connect(wsEndpoint)` has no seam. Add the
-  minimum one to qa/java/skills/ui-test-author/playwright/assets/BaseTest.java (for example a protected
-  method returning the Browser, defaulting to today's local launch with the HEADED stamp), update
-  lifecycle.md §3, and record a dated decision. Those two files are the only J1 paths J4 may edit.
-- language: context per method — setLocale / setTimezoneId in the class's contextOptions() override.
-- data-driven: no parallel = true with Playwright (lifecycle.md §1 explains why).
-- test-login-tokens: the signed-in state follows lifecycle.md §6 (AuthSetup @BeforeSuite, one state file
-  per role, chosen in contextOptions()).
-- production-uptime: catch the assertion error type and capture evidence; add it to Step 3 of
-  qa/java/agents/qa-api-java.md.
-- inhouse: locator actions.
-- email gmail-imap.md / mailpit.md: Awaitility instead of Thread.sleep in poll helpers.
-- api-test-author/playwright: exact status, not isOK(); no HttpComponents for constants.
-- gherkin-step-code: page objects take Page, not TestContext.
-- bdd-project-scaffold: Playwright 1.63.0; one discovery mechanism; Gradle paths. Leave Appium lines
-  for M2. The `Hooks` class keeps failure evidence as qa/java/skills/evidence-capture/SKILL.md ("Cucumber
-  scenarios") fixes it: tracing started in `@Before`; in `@After`, on `scenario.isFailed()`, a full-page
-  screenshot and `tracing().stop(setPath)` before `context.close()`, then `video.saveAs`, and `video.delete()`
-  always; files `build/playwright-artifacts/<Feature>.<Scenario>.{png,zip,webm}` with characters outside
-  `[A-Za-z0-9._-]` replaced by `_`; raw video in `build/playwright-videos/`; attached with
-  `Allure.attachment(..., AttachmentOptions.withFileExtension(ext))`; the screenshot's narrow, logged
-  `PlaywrightException` catch in a private helper (D29). Headless unless `HEADED=1` — drop
-  `-Dplaywright.headless`, which the CI references no longer pass.
-- python-web-testing:
-  - expect(...).to_be_visible() instead of networkidle, wait_for_timeout or wait_for_selector.
-  - Locator APIs; outputs under the project.
-  - playwright==1.63.0 and pytest-playwright==0.10.0.
-  - Delete .DS_Store.
-- Allure 3.0 sweep (D12):
-  - Every Allure call in the files above uses Allure.attachment(...) + AttachmentOptions, with pins at 3.0.0.
-  - Then only the Allure call sites and pins in these six files, read ±20 lines around each grep hit:
-    qa/java/skills/ai-feature-testing/references/deepeval.md, db-testing/testcontainers/SKILL.md,
-    failure-injection-testing/SKILL.md, feature-flag-testing/SKILL.md,
-    security-testing/dependency-scan/SKILL.md, security-testing/passive-scan/SKILL.md.
-  - Finish with `grep -rn "addAttachment\|allure-testng:2\|allure-cucumber7-jvm:2" qa/java qa/reporting/java`.
-    It must find no code use outside the mobile skills M2 owns (prose naming the 2.x API as removed is fine).
-
-Traps:
-- allure-java 3.0 needs Java 17+ (the library is on 21). Every allure-* Java module moves to 3.0.0
-  together; do not mix majors. Check that allure-cucumber7-jvm has a 3.0.0 on Maven Central before
-  pinning it.
-- Python Playwright needs Python ≥ 3.10 since 1.61. The docs page saying 3.8 is stale (releases §(a)).
-- pytest-playwright 0.10.0 supports only on/off/retain-on-failure for --tracing/--video (evidence §11.4).
-- realtime: if the Java skill mocks SSE in the browser with a `route.fulfill` "chunked" `text/event-stream`
-  body, it is the defect T4 fixed in TS (`aTS` D13, D64): the body arrives at once and `EventSource` reconnects
-  and replays it. Teach a fixed event set (a `setTimes(1)` route over a route answering `204`) for rendering, and a
-  real SSE server for timing and `Last-Event-ID`. T4's qa/typescript/skills/realtime-stream-testing is the
-  reference shape; reading it is optional.
-
-Gate: none. This plan gates once, in G1. Do not run any build, test or check script.
-
-Commit: `docs(qa-java): remaining Playwright skills on BaseTest/1.63, python-web-testing rewrite (003 J4)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
 
 ### N4 — .NET: the remaining Playwright-bearing skills and the `standards-audit` checklist (general-purpose, docs)
 
@@ -2813,7 +2883,8 @@ Read, in this order:
 3. qa/java/agents/qa-mobile-java.md; under qa/java/skills/: ui-test-author/appium, mobile-native-features
    (+ references), mobile-screen-explorer, mobile-screen-objects, mobile-app-crawler (+ references,
    assets), device-cloud (+ references), the review skill's Appium rows, the Appium lines of
-   bdd-project-scaffold, and page-object-design's mobile lines.
+   bdd-project-scaffold, the Appium half of browser-cloud-setup (+ references/details.md), gherkin-step-code's
+   "Mobile variant", and page-object-design's mobile lines.
 4. qa/java/skills/evidence-capture/SKILL.md (J2).
 5. docs/research/003-qa-playwright-appium/appium.md §0–§9 (Java columns, §2.4, §9.1).
 6. docs/audits/003-qa-playwright-appium/mobile.md §2, §3, §5 (Java rows and cross-stack rows), §6.
@@ -2849,13 +2920,19 @@ Traps:
 - java-client 11 no longer pulls in selenium-support. WebDriverWait needs it added explicitly.
 - No TouchAction or MultiTouchAction in any code block or asset: G1's CODE_CHECKS bans them there.
   Prose and review rows may name them as removed.
-
-- T4 edited only the web half of bdd-project-scaffold (and its mobile Node line, now Node 24 / 22). The mobile
-  templates are M1's as T4 found them: the mobile `package.json` (`^` ranges, a `jsonc` comment), `wdio.conf.ts`,
-  `support/world.ts` (a `require` inside a getter) and `support/hooks.ts` (inline comments, `browser.reset?.()`, a
-  failure screenshot taken but never attached) — R1, R5 and R6 apply. T4's browser-cloud-setup now defers the
-  WebdriverIO/Appium versions to ui-test-author/appium and its mobile `wdio.conf.ts` excerpt has no comments; it is
-  not M1's file.
+- J4 edited only the web half of qa/java/skills/bdd-project-scaffold. Its mobile lines are yours as J4 found them:
+  the Stack line `io.appium:java-client` **10.1.1** (Appium 2.x), the commented-out
+  `// testImplementation("io.appium:java-client:10.1.1")  // mobile` line in its `build.gradle.kts` (the one code
+  comment left in that file — R1 and R5 apply) and the "Mobile variant" section. The web `Hooks` class now lives in
+  bdd-project-scaffold/references/hooks.md; a mobile hook mirrors its evidence shape (D72's `<feature file>.<scenario>`
+  name, `build/appium-artifacts/`).
+- qa/java/skills/browser-cloud-setup is not in your read list, but its Appium half is the mobile lane's: the Stack
+  line `io.appium:java-client` 9.x and, in references/details.md, `AppiumGridDriverFactory` and `SessionStatus`'s
+  `JavascriptExecutor` methods. J4 removed their inline comments, not their API — move them to java-client 11
+  (`UiAutomator2Options` stays; an `AndroidDriver` is no longer a `RemoteWebDriver`). The web half is J4's (D67, D69).
+- Gherkin step glue (qa/java/skills/gherkin-step-code): J4 made web page objects take the `Page`, never
+  `TestContext` (`aJ` D44). Its "Mobile variant (Appium)" snippet still calls `context.loginScreen()` — keep screen
+  objects taking the driver, not `TestContext`, the same way.
 - Leave two things to plan 002 (docs/plans/002-mobile-plugins.md) W1, per D21: line 10 of
   mobile-screen-explorer/SKILL.md (the React Native testID mapping) and the agent's "Related agents"
   section. If plan 002 has already landed them, keep its wording.
@@ -3105,6 +3182,13 @@ Build:
   job (one line each; GitLab's job already runs in the image — leave it). In all three .NET CI references the UI
   gate filter `($SHARD_FILTER)&TestCategory!=Flaky` becomes `…&TestCategory!=Flaky&TestCategory!=visual&TestCategory!=lighthouse`,
   so the nightly-only categories N3 introduced stay out of the PR gate.
+- J4 seams: J1's `BaseTest.java` now has `protected Browser newBrowser(Playwright)` (D67) — the Java build
+  compiles it with the rest. `qa/java/skills/ui-test-author/playwright/SKILL.md:83` still says "the two hooks";
+  lifecycle.md §3 now has three — make it "the hooks" (J4 could edit only `BaseTest.java` and lifecycle.md). `data-driven-testing/SKILL.md` is 21,967 chars, a pre-existing size violation J4 did
+  not rewrite (§6.5's 16,000 applies to files this plan rewrote; count it among the body violations). The D12 grep
+  leaves one code pin, `allure-testng:2.29.0` in `qa/java/skills/mobile-native-features/SKILL.md`, to M2 — if M2
+  landed without it, change it to 3.0.0. `qa/_shared/python-web-testing` pins `playwright==1.63.0` (§6.2's
+  `python` stack).
 - The final Status names what is unverified: no Appium flow ran on a device or emulator; no Maestro flow
   ran; no WebMCP test ran against a site that registers tools; the D9 comparators are recommendations. Then git mv the plan
   to docs/plans/implemented/.

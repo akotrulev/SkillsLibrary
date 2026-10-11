@@ -48,12 +48,16 @@ public abstract class BaseTest {
         return value;
     }
 
+    protected Browser newBrowser(Playwright playwright) {
+        boolean headed = "1".equals(System.getenv("HEADED"));
+        return playwright.chromium().launch(launchOptions().setHeadless(!headed));
+    }
+
     @BeforeClass(alwaysRun = true)
     public void launchBrowser() {
         playwright = Playwright.create();
         playwright.selectors().setTestIdAttribute(TEST_ID_ATTRIBUTE);
-        boolean headed = "1".equals(System.getenv("HEADED"));
-        browser = playwright.chromium().launch(launchOptions().setHeadless(!headed));
+        browser = newBrowser(playwright);
     }
 
     @BeforeMethod(alwaysRun = true)

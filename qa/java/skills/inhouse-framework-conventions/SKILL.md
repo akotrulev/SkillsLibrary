@@ -69,10 +69,10 @@ Why: changing a selector doesn't recompile. The same JSON can drive both Playwri
   "name": "LoginScreen",
   "platforms": {
     "web": {
-      "emailInput": "[data-testid='email']",
-      "passwordInput": "[data-testid='password']",
-      "signInButton": "[data-testid='sign-in']",
-      "errorMessage": "[data-testid='login-error']"
+      "emailInput": "[data-testid='Login.Email']",
+      "passwordInput": "[data-testid='Login.Password']",
+      "signInButton": "[data-testid='Login.Submit']",
+      "errorMessage": "[data-testid='Login.Error']"
     },
     "ios": {
       "emailInput": "//XCUIElementTypeTextField[@name='email']",
@@ -88,30 +88,38 @@ Why: changing a selector doesn't recompile. The same JSON can drive both Playwri
 }
 ```
 
-**Page class example**:
+**Page class example** (web, Playwright). `PageBase.locator(key)` turns the JSON key into
+`page.locator(selector(key))` and throws, naming the screen and the key, when the key is missing. Every action
+goes through a `Locator`, so it auto-waits and is strict; the page-level selector methods (`page.fill(selector)`,
+`page.click(selector)`, `page.innerText(selector)`) are discouraged by Playwright and are not used. State a test
+asserts on is exposed as a `Locator`, never a `String` read once.
 
 ```java
 public final class LoginPage extends PageBase {
+    private final Locator errorMessage;
 
     public LoginPage(Page page) {
         super(page, "LoginScreen");
+        this.errorMessage = locator("errorMessage");
     }
 
-    @Step("Sign in as {email}")
-    public void signIn(String email, String password) {
-        page.fill(selector("emailInput"), email);
-        page.fill(selector("passwordInput"), password);
-        page.click(selector("signInButton"));
+    @Step("Sign in as {user.email}")
+    public void signIn(User user) {
+        locator("emailInput").fill(user.email());
+        locator("passwordInput").fill(user.password());
+        locator("signInButton").click();
     }
 
-    public String getErrorMessage() {
-        return page.innerText(selector("errorMessage"));
+    public Locator errorMessage() {
+        return errorMessage;
     }
 }
 ```
 
 Rules:
-- **No literal selectors in page methods.** Always go through `selector("key")`.
+- **No literal selectors in page methods.** Always go through `locator("key")`.
+- **Actions run on a `Locator`**, never on the page-level selector API; anything a test asserts is returned as a
+  `Locator` so the assertion is web-first.
 - **Method names describe user intent**, not mechanics. `signIn`, not `clickSignInButton`.
 - **One page object per screen.** Composite flows live in test code or in flow helpers, not in page objects.
 - **No assertions inside page objects.** They expose state; tests assert.
@@ -122,25 +130,48 @@ Rules:
 ```java
 @Epic("Authentication")
 @Feature("Login")
-public final class LoginTests extends PlaywrightTestBase {
+public final class LoginTests extends BaseTest {
+    private LoginPage loginPage;
+    private DashboardPage dashboardPage;
+
+    @BeforeMethod(alwaysRun = true)
+    public void createPages() {
+        loginPage = new LoginPage(page);
+        dashboardPage = new DashboardPage(page);
+    }
 
     @Test
     @Story("Successful login")
-    public void should_redirect_to_dashboard_when_credentials_valid() {
+    public void Should_ShowDashboard_When_CredentialsAreValid() {
         User user = UserBuilder.aValidUser().build();
-        LoginPage login = new LoginPage(page);
 
-        login.goTo();
-        login.signIn(user.email(), user.password());
+        loginPage.goTo();
+        loginPage.signIn(user);
 
-        assertThat(page).hasURL(Pattern.compile(".*/dashboard"));
+        assertThat(dashboardPage.heading()).isVisible();
+    }
+
+    @Test
+    @Story("Rejected login")
+    public void Should_ShowError_When_PasswordIsWrong() {
+        User user = UserBuilder.aValidUser().withPassword("Wrong-" + UUID.randomUUID()).build();
+
+        loginPage.goTo();
+        loginPage.signIn(user);
+
+        assertThat(loginPage.errorMessage()).hasText("Invalid email or password");
     }
 }
 ```
 
+`test-core`'s `BaseTest` is the Java lane's one Playwright lifecycle
+(`qa/java/skills/ui-test-author/playwright/assets/BaseTest.java`): instance fields, a browser per class, a
+context and page per test, `BASE_URL`, `parallel="classes"`, and failure evidence. Page objects are built in the
+test class's own `@BeforeMethod`; tests never call `page` directly.
+
 Rules:
 - Test class per feature or screen, not per AC
-- Test name reads `should_<outcome>_when_<condition>` (Java method-name casing)
+- Test name reads `Should_<Outcome>_When_<Condition>`
 - Three-section body: Arrange / Act / Assert — single blank line between, no comments needed
 - Test data via builders (`UserBuilder.aValidUser().build()`), never inline literals
 - One logical assertion per test
@@ -170,6 +201,11 @@ public final class UserBuilder {
         return this;
     }
 
+    public UserBuilder withPassword(String password) {
+        this.password = password;
+        return this;
+    }
+
     public UserBuilder withYearsActive(int years) {
         this.yearsActive = years;
         return this;
@@ -191,7 +227,9 @@ public final class UserBuilder {
 ### Allure reporting
 
 - Decorate every test with at least `@Epic`, `@Feature`, `@Story`
-- Attach evidence on failure: screenshot, page source, network HAR (wire via a TestNG `ITestListener` in `test-core`)
+- Failure evidence (trace, video, full-page screenshot) comes from `BaseTest`'s `@AfterMethod` and lands in
+  `build/playwright-artifacts/`, attached with allure-java 3.0's `Allure.attachment(..., AttachmentOptions)` —
+  no second `ITestListener` for the same evidence (`qa/java/skills/evidence-capture`)
 - Use `@Step` on page object methods so steps appear in the Allure tree
 
 ### API tests
@@ -224,8 +262,9 @@ When rate-limited on one model, switch to another (Opus → Sonnet → Haiku) �
 ## Quality bar (reviewer checklist)
 
 - [ ] No literal selectors in page/screen methods
+- [ ] Page actions run on `locator("key")`, never `page.fill/click/innerText(selector)`
 - [ ] No `Thread.sleep` in tests
-- [ ] Test name follows `should_<outcome>_when_<condition>`
+- [ ] Test name follows `Should_X_When_Y`
 - [ ] Test data via a builder
 - [ ] Allure annotations present
 - [ ] One logical assertion per test
@@ -236,21 +275,12 @@ When rate-limited on one model, switch to another (Opus → Sonnet → Haiku) �
 
 ## Anti-examples
 
-```java
-// BAD: literal selector in page object
-public void signIn() {
-    page.click("button.signin-btn");  // ❌ selector in code
-}
-
-// BAD: sleep
-Thread.sleep(2000);  // ❌
-
-// BAD: implementation-named test
-public void test_clickLoginButton() { ... }  // ❌
-
-// BAD: inline test data
-login.signIn("user@test.com", "Password1!");  // ❌ use a builder
-
-// BAD: conditional in test
-if (env.equals("staging")) { ... } else { ... }  // ❌ use @DataProvider or fixtures
-```
+| Anti-example | Why it's wrong | Instead |
+|---|---|---|
+| `page.click("button.signin-btn")` in a page object | A selector in code, and a page-level selector method | `locator("signInButton").click()` with the selector in `*.screen.json` |
+| `String getErrorMessage()` returning `page.innerText(...)`, then `assertEquals(text, ...)` | A one-shot read races the page | expose `Locator errorMessage()`; `assertThat(loginPage.errorMessage()).hasText(...)` |
+| `Thread.sleep(2000)` | A sleep | auto-wait, web-first assertions, `test-core` `waits` |
+| `public void test_clickLoginButton()` | Names the mechanics, not the behaviour | `Should_ShowDashboard_When_CredentialsAreValid` |
+| `loginPage.signIn(new User("user@test.com", "Password1!"))` | Inline test data | `UserBuilder.aValidUser().build()` |
+| `if (env.equals("staging")) { ... } else { ... }` in a test | Conditional logic in a test | `@DataProvider` or a class per environment |
+| `assertThat(page).hasURL(...)` in a test | A raw `page` in the test | assert on a page object's locator (`dashboardPage.heading()`) |

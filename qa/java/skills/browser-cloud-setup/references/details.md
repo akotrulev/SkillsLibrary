@@ -6,17 +6,17 @@ Sections moved out of SKILL.md for on-demand loading. Read what the task needs.
 
 ### Secrets first — never in code or committed config
 
-Credentials are a username + an access key per vendor. They are read from **env vars only** and never logged. A leaked access key is a billable, exfiltratable secret (CLAUDE.md hard rule).
+Credentials are a username + an access key per vendor. They are read from **env vars only** and never logged. A leaked access key is a billable, exfiltratable secret (CLAUDE.md hard rule). An unset variable fails loudly; no credential defaults to a literal.
+
+`support/grid/GridCredentials.java`:
 
 ```java
-// src/test/java/.../support/grid/GridCredentials.java
-package support.grid;
+package com.example.uitests.support.grid;
 
 public final class GridCredentials {
     private GridCredentials() {}
 
-    /** Read a required env var or fail loudly — never default a credential to a literal. */
-    private static String required(String name) {
+    public static String required(String name) {
         String value = System.getenv(name);
         if (value == null || value.isBlank()) {
             throw new IllegalStateException(
@@ -32,111 +32,225 @@ public final class GridCredentials {
     public static BrowserStack browserStack() {
         return new BrowserStack(required("BROWSERSTACK_USERNAME"), required("BROWSERSTACK_ACCESS_KEY"));
     }
+
     public static Sauce sauce() {
-        String region = System.getenv().getOrDefault("SAUCE_REGION", "us-west-1"); // explicit — no implicit default
-        return new Sauce(required("SAUCE_USERNAME"), required("SAUCE_ACCESS_KEY"), region);
+        return new Sauce(required("SAUCE_USERNAME"), required("SAUCE_ACCESS_KEY"), required("SAUCE_REGION"));
     }
+
     public static LambdaTest lambdaTest() {
         return new LambdaTest(required("LT_USERNAME"), required("LT_ACCESS_KEY"));
+    }
+
+    public static String buildName() {
+        return required("BUILD_NAME");
     }
 }
 ```
 
-In CI these env vars come from the runner's secret store; for cloud auth (e.g. an OIDC-minted token used to reach AWS Device Farm) prefer OIDC over a long-lived PAT — see `qa/cicd/java/skills/ci-pipelines`.
+`SAUCE_REGION` is required rather than defaulted: Sauce has no implicit region, and a silent `us-west-1` sends an EU account's sessions to the wrong data centre. In CI these env vars come from the runner's secret store; for cloud auth (e.g. an OIDC-minted token used to reach AWS Device Farm) prefer OIDC over a long-lived PAT — see `qa/cicd/java/skills/ci-pipelines`.
 
 ### Web — Playwright Java on BrowserStack via `connect`
 
-The only thing that changes vs a local run is the **connection**: instead of `launch()`, connect to the grid's WebSocket endpoint with caps embedded as a URL-encoded JSON `caps` query param. **Flat caps** for BrowserStack Playwright direct-connect (not `bstack:options`). Use constructor injection / a factory, never a service locator.
+The only thing that changes vs a local run is **where the browser comes from**. J1's `BaseTest`
+(`qa/java/skills/ui-test-author/playwright/assets/BaseTest.java`) launches it in `newBrowser(playwright)`; a grid
+class overrides that one hook to `connect` to the grid's WebSocket endpoint instead. Context per test, failure
+evidence, `BASE_URL`, the test-id attribute and `parallel="classes"` stay exactly as they are locally
+(`lifecycle.md` §3).
+
+BrowserStack's Playwright direct-connect takes **flat caps** (not `bstack:options`) as a URL-encoded JSON `caps`
+query parameter. `client.playwrightVersion` is the **installed** client version, read from the jar's Maven
+metadata — a typed `"1.x"` or a stale literal makes BrowserStack pick a different server-side Playwright, and the
+skew fails remotely with a protocol error.
+
+`support/grid/GridTarget.java` and `support/grid/BrowserStackGrid.java`:
 
 ```java
-// src/test/java/.../support/grid/PlaywrightGridConnector.java
-package support.grid;
+package com.example.uitests.support.grid;
+
+public record GridTarget(String browser, String os, String osVersion, String project) {
+    public static final GridTarget CHROME_WINDOWS_11 = new GridTarget("chrome", "Windows", "11", "checkout-web");
+    public static final GridTarget EDGE_WINDOWS_11 = new GridTarget("edge", "Windows", "11", "checkout-web");
+}
+```
+
+```java
+package com.example.uitests.support.grid;
 
 import com.google.gson.Gson;
-import com.microsoft.playwright.*;
+import com.microsoft.playwright.Browser;
+import com.microsoft.playwright.Playwright;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Properties;
 
-public final class PlaywrightGridConnector {
+public final class BrowserStackGrid {
     private static final Gson GSON = new Gson();
+    private static final String PLAYWRIGHT_POM = "/META-INF/maven/com.microsoft.playwright/playwright/pom.properties";
 
-    public record GridTarget(String browser, String os, String osVersion,
-                             String buildName, String sessionName, String projectName) {}
+    private BrowserStackGrid() {}
 
-    /** Connect Playwright to BrowserStack. Caller owns the returned Browser. */
-    public Browser connectBrowserStack(Playwright playwright, GridTarget target) {
-        GridCredentials.BrowserStack creds = GridCredentials.browserStack();
-        // FLAT caps for Playwright direct-connect — NOT bstack:options.
+    public static GridSession connect(Playwright playwright, GridTarget target, String sessionName) {
+        GridCredentials.BrowserStack credentials = GridCredentials.browserStack();
         Map<String, String> caps = new LinkedHashMap<>();
         caps.put("browser", target.browser());
         caps.put("os", target.os());
         caps.put("os_version", target.osVersion());
-        caps.put("name", target.sessionName());
-        caps.put("build", target.buildName());
-        caps.put("project", target.projectName());
-        caps.put("browserstack.username", creds.userName());
-        caps.put("browserstack.accessKey", creds.accessKey());
+        caps.put("name", sessionName);
+        caps.put("build", GridCredentials.buildName());
+        caps.put("project", target.project());
+        caps.put("browserstack.username", credentials.userName());
+        caps.put("browserstack.accessKey", credentials.accessKey());
         caps.put("browserstack.networkLogs", "true");
         caps.put("browserstack.console", "errors");
-        caps.put("client.playwrightVersion", "1.x"); // pin to the installed Playwright in real config
+        caps.put("client.playwrightVersion", installedPlaywrightVersion());
+        String endpoint = "wss://cdp.browserstack.com/playwright?caps="
+                + URLEncoder.encode(GSON.toJson(caps), StandardCharsets.UTF_8);
+        return new GridSession(playwright.chromium().connect(endpoint));
+    }
 
-        String encoded = URLEncoder.encode(GSON.toJson(caps), StandardCharsets.UTF_8);
-        String wsEndpoint = "wss://cdp.browserstack.com/playwright?caps=" + encoded;
-        return playwright.chromium().connect(wsEndpoint);
+    static String installedPlaywrightVersion() {
+        try (InputStream pom = Playwright.class.getResourceAsStream(PLAYWRIGHT_POM)) {
+            Properties properties = new Properties();
+            properties.load(Objects.requireNonNull(pom, PLAYWRIGHT_POM + " is not on the classpath"));
+            return properties.getProperty("version");
+        } catch (IOException e) {
+            throw new UncheckedIOException("Cannot read the installed Playwright version from " + PLAYWRIGHT_POM, e);
+        }
     }
 }
 ```
 
-Wire it behind a TestNG base class so tests stay grid-agnostic — they use a `Page`, never the grid plumbing:
+- `chrome` and `edge` connect through `playwright.chromium()`; a `playwright-firefox` or `playwright-webkit`
+  target connects through `firefox()` / `webkit()`.
+- Gson is Playwright for Java's own dependency, so the caps add no JSON library.
+- The version comes from the Playwright jar's `pom.properties`, which Maven writes into every artifact it builds;
+  it equals the pin in the writer's **Versions** table (`ui-test-author/playwright/SKILL.md`). Not yet run in this
+  library — if the resource is missing, the `requireNonNull` message says so and the fallback is the same pin read
+  from a build property.
+
+### One session per class, one verdict per session
+
+`parallel="classes"` gives each class one `BaseTest` instance and one browser (`lifecycle.md` §1), so on a grid
+**a class is one vendor session**: its tests run in that session one after another, each in its own context.
+Marking the verdict per test would overwrite it with whichever test ran last, so the class marks it **once**, in
+`@AfterClass`, from the failures TestNG recorded for that instance — before `BaseTest.closeBrowser` releases
+the browser (subclass `@After…` methods run first). The dashboard link is attached at the same point; allure-testng
+shows a class-level attachment in every test's tear-down.
+
+`support/grid/GridSession.java`:
 
 ```java
-// src/test/java/.../support/grid/GridWebTestBase.java
-package support.grid;
+package com.example.uitests.support.grid;
 
-import com.microsoft.playwright.*;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.microsoft.playwright.Browser;
+import com.microsoft.playwright.Page;
+import io.qameta.allure.Allure;
+import org.testng.ITestContext;
 import org.testng.ITestResult;
-import org.testng.annotations.*;
 
-public abstract class GridWebTestBase {
-    private Playwright playwright;
-    private Browser browser;
-    protected Page page;
+import java.util.List;
+import java.util.Map;
 
-    @BeforeMethod
-    public void connect(java.lang.reflect.Method method) {
-        playwright = Playwright.create();
-        browser = new PlaywrightGridConnector().connectBrowserStack(playwright,
-            new PlaywrightGridConnector.GridTarget("chrome", "Windows", "11",
-                System.getenv().getOrDefault("BUILD_NAME", "local-build"),
-                method.getName(), "checkout-web"));
-        page = browser.newPage();
+public final class GridSession {
+    private static final Gson GSON = new Gson();
+
+    private final Browser browser;
+
+    GridSession(Browser browser) {
+        this.browser = browser;
     }
 
-    @AfterMethod
-    public void reportAndClose(ITestResult result) {
-        boolean passed = result.isSuccess();
-        SessionStatus.markBrowserStack(page, passed ? "passed" : "failed", result.getName());
-        browser.close();
-        playwright.close();
+    public Browser browser() {
+        return browser;
+    }
+
+    public void markOutcome(ITestContext run, Object testInstance) {
+        List<String> failed = run.getFailedTests().getAllResults().stream()
+                .filter(result -> result.getInstance() == testInstance)
+                .map(ITestResult::getName)
+                .sorted()
+                .toList();
+        String status = failed.isEmpty() ? "passed" : "failed";
+        String reason = failed.isEmpty() ? "all tests passed" : "failed: " + String.join(", ", failed);
+        Page page = browser.newPage();
+        String details = execute(page, Map.of("action", "getSessionDetails"));
+        execute(page, Map.of("action", "setSessionStatus", "arguments", Map.of("status", status, "reason", reason)));
+        page.close();
+        Allure.attachment("BrowserStack session", GSON.fromJson(details, JsonObject.class).get("browser_url").getAsString());
+    }
+
+    private static String execute(Page page, Map<String, Object> command) {
+        return String.valueOf(page.evaluate("_ => {}", "browserstack_executor: " + GSON.toJson(command)));
     }
 }
 ```
 
-> The `browserstack-node-sdk` zero-config wrapper is JS-only; the Java path is the explicit `connect` above. LambdaTest mirrors it via `wss://cdp.lambdatest.com/playwright?capabilities=<encoded LT:Options + browser caps>`. Sauce has **no** Playwright `connect` — use `saucectl` (see below).
+`browserstack_executor` commands run through `page.evaluate`, which is why the verdict opens one short-lived page
+on the session's browser. `getSessionDetails` and its `browser_url` field are BrowserStack's documented spelling
+as this library carried it; they are not yet run here, so check one session's JSON before relying on the link.
+
+### The grid class — the same tests, a different browser
+
+A grid target is an override on the class that needs it (`lifecycle.md` §3). To run an existing test class on
+a target, subclass it — TestNG runs the inherited tests again in the subclass, exactly as a device class does in
+`emulation-and-mobile-web.md` §1:
+
+```java
+package com.example.uitests.grid;
+
+import com.example.uitests.support.grid.BrowserStackGrid;
+import com.example.uitests.support.grid.GridSession;
+import com.example.uitests.support.grid.GridTarget;
+import com.example.uitests.tests.LoginTest;
+import com.microsoft.playwright.Browser;
+import com.microsoft.playwright.Playwright;
+import org.testng.ITestContext;
+import org.testng.annotations.AfterClass;
+
+public class LoginOnEdgeTest extends LoginTest {
+    private GridSession session;
+
+    @Override
+    protected Browser newBrowser(Playwright playwright) {
+        session = BrowserStackGrid.connect(playwright, GridTarget.EDGE_WINDOWS_11, getClass().getSimpleName());
+        return session.browser();
+    }
+
+    @AfterClass(alwaysRun = true)
+    public void markSession(ITestContext run) {
+        session.markOutcome(run, this);
+    }
+}
+```
+
+- One grid class per target per test class. The session name is the class name, so the dashboard reads as the
+  matrix (`LoginOnEdgeTest`, `LoginOnChromeTest`).
+- The grid classes live in their own package, run by their own suite file; the local suite's `testng.xml`
+  lists only `com.example.uitests.tests`, so a local run never connects to the grid.
+- No `@DataProvider(parallel = true)` and no `parallel="methods"`: either puts two threads on one Playwright
+  instance (`lifecycle.md` §1).
+
+> The `browserstack-node-sdk` zero-config wrapper is JS-only; the Java path is the explicit `connect` above. LambdaTest mirrors it via `wss://cdp.lambdatest.com/playwright?capabilities=<encoded LT:Options + browser caps>` and its own `lambdatest_executor` status command. Sauce has **no** Playwright `connect` — use `saucectl` (see below).
 
 ### Web — Sauce Labs (`saucectl`)
 
-**Sauce has no public ad-hoc Playwright `connect`** — you drive it with `saucectl` and a `.sauce/config.yml`, which uploads and runs the project in Sauce's cloud. `region` is mandatory and explicit. (Sauce's Playwright runner targets the Node Playwright project; for a pure-Java Playwright suite, BrowserStack or LambdaTest are the connect-based options.)
+**Sauce has no public ad-hoc Playwright `connect`** — you drive it with `saucectl` and a `.sauce/config.yml`, which uploads and runs the project in Sauce's cloud. `region` is mandatory and explicit. Sauce's Playwright runner targets the Node Playwright project; for a pure-Java Playwright suite, BrowserStack or LambdaTest are the connect-based options. `concurrency` is the plan's session cap (§ Parallelism).
 
 ```yaml
-# .sauce/config.yml — Sauce runs Playwright via saucectl (no connect())
 apiVersion: v1alpha
 kind: playwright
 sauce:
-  region: us-west-1          # explicit — no implicit default
-  concurrency: 5             # respect the plan's session cap (see § Parallelism)
+  region: us-west-1
+  concurrency: 5
 suites:
   - name: checkout-web
     platformName: "Windows 11"
@@ -145,11 +259,10 @@ suites:
 
 ### Mobile — Appium java-client on a grid
 
-For mobile the change is also one place — the **driver construction**. Build a `UiAutomator2Options` (Android) / `XCUITestOptions` (iOS), attach the vendor block via `setCapability`, and point a `new AndroidDriver(new URL(hubUrl), options)` at the vendor hub. The page objects from `qa/java/skills/ui-test-author/appium` run unchanged.
+For mobile the change is also one place — the **driver construction**. Build a `UiAutomator2Options` (Android) / `XCUITestOptions` (iOS), attach the vendor block via `setCapability`, and point a `new AndroidDriver(new URL(hubUrl), options)` at the vendor hub. The page objects from `qa/java/skills/ui-test-author/appium` run unchanged. Appium uses the W3C nested `bstack:options` block (not the flat Playwright caps); `debug` turns on visual logs, `local` routes through the tunnel, and the app is the uploaded `bs://…` id, never a local path.
 
 ```java
-// src/test/java/.../support/grid/AppiumGridDriverFactory.java
-package support.grid;
+package com.example.uitests.support.grid;
 
 import io.appium.java_client.android.AndroidDriver;
 import io.appium.java_client.android.options.UiAutomator2Options;
@@ -162,21 +275,19 @@ public final class AppiumGridDriverFactory {
     public AndroidDriver createBrowserStackAndroid(String sessionName) throws Exception {
         GridCredentials.BrowserStack creds = GridCredentials.browserStack();
         UiAutomator2Options options = new UiAutomator2Options();
-        // Appium uses the W3C nested block — bstack:options (NOT the flat Playwright caps).
         Map<String, Object> bstack = new HashMap<>();
         bstack.put("userName", creds.userName());
         bstack.put("accessKey", creds.accessKey());
         bstack.put("deviceName", "Google Pixel 8");
         bstack.put("osVersion", "14.0");
-        bstack.put("buildName", System.getenv().getOrDefault("BUILD_NAME", "local-build"));
+        bstack.put("buildName", GridCredentials.buildName());
         bstack.put("sessionName", sessionName);
         bstack.put("projectName", "checkout-mobile");
         bstack.put("networkLogs", true);
-        bstack.put("debug", true);   // visual logs / screenshots
-        bstack.put("local", true);   // route through the tunnel
+        bstack.put("debug", true);
+        bstack.put("local", true);
         options.setCapability("bstack:options", bstack);
-        // App referenced by the uploaded id, never a local path.
-        options.setCapability("appium:app", System.getenv("BS_APP_URL"));
+        options.setCapability("appium:app", GridCredentials.required("BS_APP_URL"));
 
         return new AndroidDriver(new URL("https://hub-cloud.browserstack.com/wd/hub"), options);
     }
@@ -190,8 +301,7 @@ For Sauce the hub is `https://ondemand.<region>.saucelabs.com/wd/hub` and the bl
 Pinning the right keys matters — vendors renamed them off the legacy JSON-Wire names. All three nest vendor-specifics under one object; standard W3C keys (`platformName`, `browserName`) stay on the options directly.
 
 ```java
-// src/test/java/.../support/grid/Capabilities.java — the per-vendor blocks, side by side
-package support.grid;
+package com.example.uitests.support.grid;
 
 import java.util.List;
 import java.util.Map;
@@ -239,68 +349,67 @@ public final class Capabilities {
 
 ### Parallelism — respect the plan's session cap
 
-The grid plan has a hard **concurrent-session limit**. Exceeding it queues or rejects sessions; mismatching it to the runner wastes paid slots. Map the cap onto TestNG's `thread-count` — never hard-code a number, read it from one env var (passed in as a system property) so CI and local agree.
+The grid plan has a hard **concurrent-session limit**. Exceeding it queues or rejects sessions; mismatching it to the runner wastes paid slots. With `parallel="classes"` each running class holds one session, so **`thread-count` is the number of concurrent sessions**. It is read from one env var, `GRID_CONCURRENCY`, so CI and local agree.
+
+A suite file's `thread-count` beats a command-line or Gradle `threadCount`, so the value is set on the suite itself by an `IAlterSuiteListener`, which TestNG applies before any suite runs. It must be declared in the suite file (or through `ServiceLoader`) — a `@Listeners` annotation is read too late.
+
+`testng-grid.xml` at the project root, beside J1's `testng.xml`:
 
 ```xml
-<!-- testng.xml — thread-count must be ≤ the plan's concurrent-session cap -->
 <!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
-<suite name="grid-web" parallel="methods" thread-count="5">
-  <test name="checkout">
-    <classes>
-      <class name="tests.CheckoutGridTest"/>
-    </classes>
-  </test>
+<suite name="Grid" parallel="classes">
+    <listeners>
+        <listener class-name="com.example.uitests.support.grid.GridConcurrency"/>
+    </listeners>
+    <test name="BrowserStack">
+        <packages>
+            <package name="com.example.uitests.grid"/>
+        </packages>
+    </test>
 </suite>
 ```
 
-To drive `thread-count` from the plan cap rather than a hard-coded literal, override it from a Gradle property at runtime:
+```java
+package com.example.uitests.support.grid;
+
+import org.testng.IAlterSuiteListener;
+import org.testng.xml.XmlSuite;
+
+import java.util.List;
+
+public final class GridConcurrency implements IAlterSuiteListener {
+    @Override
+    public void alter(List<XmlSuite> suites) {
+        int sessions = Integer.parseInt(GridCredentials.required("GRID_CONCURRENCY"));
+        suites.forEach(suite -> suite.setThreadCount(sessions));
+    }
+}
+```
+
+A second Gradle test task runs it, beside J1's `test` task (`assets/build.gradle.kts`):
 
 ```kotlin
-// build.gradle.kts — map GRID_CONCURRENCY onto TestNG's thread count
-tasks.test {
+tasks.register<Test>("gridTest") {
+    testClassesDirs = sourceSets["test"].output.classesDirs
+    classpath = sourceSets["test"].runtimeClasspath
     useTestNG {
-        // Plan cap from env, default 5. Never exceed the plan silently.
-        parallel = "methods"
-        threadCount = (System.getenv("GRID_CONCURRENCY") ?: "5").toInt()
+        suites("testng-grid.xml")
     }
+    environment("PLAYWRIGHT_JAVA_SRC", "src/test/java")
 }
 ```
 
-The **sharding mechanics** (matrix fan-out, `-PshardIndex`/`-PshardTotal`, merging Allure results) belong to `qa/cicd/java/skills/ci-pipelines` — cross-link it; don't re-derive it here. The rule: `total runner shards × thread-count ≤ plan session cap`.
+`GRID_CONCURRENCY=5 BUILD_NAME=nightly-42 BASE_URL=https://staging.example.test ./gradlew gridTest`. The **sharding mechanics** (matrix fan-out, `-PshardIndex`/`-PshardTotal`, merging Allure results) belong to `qa/cicd/java/skills/ci-pipelines` — cross-link it; don't re-derive it here. The rule: `total runner shards × GRID_CONCURRENCY ≤ plan session cap`.
 
-### Artifacts — surface the session URL on failure
+### Session status — Appium and Selenium drivers
 
-The grid records video, network, and console logs server-side; the value is surfacing the **dashboard session URL** in test output and Allure so a failure is one click from the replay. The session id is the driver's `getSessionId()` (Appium) or the Playwright session id.
-
-```java
-// src/test/java/.../support/grid/Artifacts.java
-package support.grid;
-
-import io.qameta.allure.Allure;
-
-public final class Artifacts {
-    private Artifacts() {}
-
-    /** Attach the vendor session URL so a failing test links straight to the replay. */
-    public static void attachSessionUrl(String sessionId) {
-        String url = "https://automate.browserstack.com/dashboard/v2/sessions/" + sessionId;
-        Allure.link("BrowserStack session", url);
-    }
-}
-```
-
-Call this in `@AfterMethod` (especially on failure). Combined with marking the session status (below), a failed run is fully diagnosable from the report without re-running locally.
-
-### Session status — tell the vendor the verdict
-
-The grid doesn't know your assertions passed; you tell it, so the dashboard reflects reality and analytics stay accurate. **Each vendor's syntax differs and is not interchangeable.**
+A Playwright grid class marks its session through `GridSession.markOutcome` (above). An Appium or Selenium session
+marks it through the driver's executor; each vendor's syntax differs and is not interchangeable.
 
 ```java
-// src/test/java/.../support/grid/SessionStatus.java
-package support.grid;
+package com.example.uitests.support.grid;
 
 import com.google.gson.Gson;
-import com.microsoft.playwright.Page;
 import java.util.Map;
 import org.openqa.selenium.JavascriptExecutor;
 
@@ -308,15 +417,6 @@ public final class SessionStatus {
     private static final Gson GSON = new Gson();
     private SessionStatus() {}
 
-    /** BrowserStack via Playwright: a JS-executor command through page.evaluate. */
-    public static void markBrowserStack(Page page, String status, String reason) {
-        String payload = GSON.toJson(Map.of(
-            "action", "setSessionStatus",
-            "arguments", Map.of("status", status, "reason", reason)));
-        page.evaluate("() => {}", "browserstack_executor: " + payload);
-    }
-
-    /** For Appium/Selenium drivers — vendor-specific executor scripts. */
     public static void markBrowserStack(JavascriptExecutor driver, String status, String reason) {
         String payload = GSON.toJson(Map.of(
             "action", "setSessionStatus", "arguments", Map.of("status", status, "reason", reason)));
@@ -333,13 +433,17 @@ public final class SessionStatus {
 }
 ```
 
+The session dashboard URL for an Appium session is built from the driver's `getSessionId()` and attached with
+`Allure.attachment("BrowserStack session", url)` (allure-java 3.0) in the same teardown that marks the status.
+
 ### Local tunnel — reach private/staging URLs from the grid
 
-When the app under test is on a private/staging host the grid can't reach, start a **tunnel** before the suite and stop it after. The tunnel binds the grid sessions to your network; tie sessions to it via the cap (`local`+`localIdentifier` / `tunnelName`).
+When the app under test is on a private/staging host the grid can't reach, start a **tunnel** before the suite and stop it after. The tunnel binds the grid sessions to your network; tie sessions to it via the cap (`local`+`localIdentifier` / `tunnelName`). The key comes from env, never a literal.
+
+`support/grid/GridTunnel.java` — BrowserStackLocal lifecycle (`browserstack-local-java`):
 
 ```java
-// src/test/java/.../support/grid/GridTunnel.java — BrowserStackLocal lifecycle (browserstack-local-java)
-package support.grid;
+package com.example.uitests.support.grid;
 
 import com.browserstack.local.Local;
 import java.util.HashMap;
@@ -354,7 +458,7 @@ public final class GridTunnel {
     public void start() throws Exception {
         GridCredentials.BrowserStack creds = GridCredentials.browserStack();
         Map<String, String> options = new HashMap<>();
-        options.put("key", creds.accessKey());          // from env, never a literal
+        options.put("key", creds.accessKey());
         options.put("localIdentifier", localIdentifier);
         options.put("forcelocal", "true");
         local.start(options);
@@ -364,19 +468,26 @@ public final class GridTunnel {
 }
 ```
 
-```java
-// A TestNG @BeforeSuite / @AfterSuite starts it once per run and stops it in teardown.
-@BeforeSuite
-public void startTunnel() throws Exception {
-    tunnel = new GridTunnel(System.getenv().getOrDefault("BUILD_NAME", "local-build"));
-    tunnel.start();
-}
+A suite-level class, listed in `testng-grid.xml` as a `<class>` beside the `<packages>` entry, starts it once per run and stops it in teardown:
 
-@AfterSuite
-public void stopTunnel() throws Exception { tunnel.stop(); }
+```java
+public class GridTunnelSetup {
+    private GridTunnel tunnel;
+
+    @BeforeSuite(alwaysRun = true)
+    public void startTunnel() throws Exception {
+        tunnel = new GridTunnel(GridCredentials.buildName());
+        tunnel.start();
+    }
+
+    @AfterSuite(alwaysRun = true)
+    public void stopTunnel() throws Exception {
+        tunnel.stop();
+    }
+}
 ```
 
-Match the `localIdentifier` to the cap (`bstack:options.localIdentifier`). For **Sauce** the binary is **Sauce Connect 5** (`sc run --region us-west-1 --tunnel-name my-tunnel`), tied via `sauce:options.tunnelName`. For **LambdaTest** it's `LT --user … --key … --tunnelName …`, tied via `LT:Options.tunnel`+`tunnelName`. Never pass the key as a literal — read it from env.
+Match the `localIdentifier` to the cap (`bstack:options.localIdentifier`, or `browserstack.localIdentifier` with `browserstack.local` in the flat Playwright caps). For **Sauce** the binary is **Sauce Connect 5** (`sc run --region us-west-1 --tunnel-name my-tunnel`), tied via `sauce:options.tunnelName`. For **LambdaTest** it's `LT --user … --key … --tunnelName …`, tied via `LT:Options.tunnel`+`tunnelName`. Never pass the key as a literal — read it from env.
 
 ### AWS Device Farm — the different paradigm
 

@@ -1,6 +1,6 @@
 # QA — Email Testing with Mailpit (Java)
 
-Scaffolds a typed Mailpit HTTP-API client (Java 21 `HttpClient` + Jackson) and TestNG / JUnit helpers that poll for a specific message, extract HTML / text / links / OTPs, download attachments, and reset the inbox between tests. Wires Mailpit into Spring Boot via `@DynamicPropertySource` so the SUT writes to the container.
+Scaffolds a typed Mailpit HTTP-API client (Java 21 `HttpClient` + Jackson) and TestNG / JUnit helpers that poll for a specific message with Awaitility, extract HTML / text / links / OTPs, and download attachments — each test isolated by its own recipient, never by wiping the shared inbox. Wires Mailpit into Spring Boot via `@DynamicPropertySource` so the SUT writes to the container.
 
 ## When to use
 
@@ -30,7 +30,7 @@ Scaffolds a typed Mailpit HTTP-API client (Java 21 `HttpClient` + Jackson) and T
 | `GET` | `/api/v1/message/{ID}` | Full message + attachments metadata |
 | `GET` | `/api/v1/message/{ID}/raw` | Raw RFC-822 |
 | `GET` | `/api/v1/message/{ID}/part/{PartID}` | Download attachment |
-| `DELETE` | `/api/v1/messages` | Wipe all / by ids |
+| `DELETE` | `/api/v1/messages` | Wipe all / by ids — local debugging only, never from a test (see Inbox isolation) |
 
 ## Templates
 
@@ -39,8 +39,9 @@ Scaffolds a typed Mailpit HTTP-API client (Java 21 `HttpClient` + Jackson) and T
 ```kotlin
 dependencies {
     testImplementation("org.testcontainers:testcontainers")
-    testImplementation("com.fasterxml.jackson.module:jackson-module-kotlin") // or jackson-databind
-    testImplementation("org.assertj:assertj-core:3.26.3")
+    testImplementation("com.fasterxml.jackson.core:jackson-databind")
+    testImplementation("org.awaitility:awaitility:4.2.2")
+    testImplementation("org.assertj:assertj-core:3.27.7")
 }
 ```
 
@@ -104,8 +105,13 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.List;
+import java.util.Optional;
+
+import static org.awaitility.Awaitility.await;
 
 public final class MailpitClient {
+
+    private static final Duration POLL_INTERVAL = Duration.ofMillis(250);
 
     private final HttpClient http = HttpClient.newBuilder()
         .connectTimeout(Duration.ofSeconds(5))
@@ -117,24 +123,24 @@ public final class MailpitClient {
         this.baseUrl = baseUrl;
     }
 
-    public MessageSummary waitFor(String toAddress, String subjectContains, Duration timeout) throws Exception {
-        long deadline = System.currentTimeMillis() + timeout.toMillis();
+    public MessageSummary waitFor(String toAddress, String subjectContains, Duration timeout) {
         String query = URLEncoder.encode("to:" + toAddress + " subject:\"" + subjectContains + "\"",
             StandardCharsets.UTF_8);
+        return await("Mailpit message to '" + toAddress + "' with subject '" + subjectContains + "'")
+            .atMost(timeout)
+            .pollInterval(POLL_INTERVAL)
+            .until(() -> firstMatch(query), Optional::isPresent)
+            .orElseThrow();
+    }
 
-        while (System.currentTimeMillis() < deadline) {
-            HttpResponse<String> resp = http.send(
-                HttpRequest.newBuilder(URI.create(baseUrl + "/api/v1/search?query=" + query + "&limit=1")).build(),
-                HttpResponse.BodyHandlers.ofString());
-            if (resp.statusCode() != 200) {
-                throw new AssertionError("Mailpit search failed: " + resp.statusCode());
-            }
-            SearchResult body = json.readValue(resp.body(), SearchResult.class);
-            if (!body.messages().isEmpty()) return body.messages().get(0);
-            Thread.sleep(250);
+    private Optional<MessageSummary> firstMatch(String query) throws Exception {
+        HttpResponse<String> resp = http.send(
+            HttpRequest.newBuilder(URI.create(baseUrl + "/api/v1/search?query=" + query + "&limit=1")).build(),
+            HttpResponse.BodyHandlers.ofString());
+        if (resp.statusCode() != 200) {
+            throw new AssertionError("Mailpit search failed: " + resp.statusCode() + " " + resp.body());
         }
-        throw new AssertionError("No Mailpit message to '" + toAddress
-            + "' with subject '" + subjectContains + "' within " + timeout);
+        return json.readValue(resp.body(), SearchResult.class).messages().stream().findFirst();
     }
 
     public Message get(String id) throws Exception {
@@ -151,16 +157,6 @@ public final class MailpitClient {
             HttpResponse.BodyHandlers.ofByteArray());
         if (resp.statusCode() != 200) throw new AssertionError("Mailpit attachment failed: " + resp.statusCode());
         return resp.body();
-    }
-
-    public void deleteAll() throws Exception {
-        HttpResponse<Void> resp = http.send(
-            HttpRequest.newBuilder(URI.create(baseUrl + "/api/v1/messages"))
-                .method("DELETE", HttpRequest.BodyPublishers.ofString("{\"ids\":[]}"))
-                .header("content-type", "application/json")
-                .build(),
-            HttpResponse.BodyHandlers.discarding());
-        if (resp.statusCode() >= 300) throw new AssertionError("Mailpit delete failed: " + resp.statusCode());
     }
 
     public record SearchResult(List<MessageSummary> messages, int total) {}
@@ -235,13 +231,8 @@ public class SignupEmailIT extends IntegrationTestBase {
 
     @Autowired private TestRestTemplate http;
 
-    @BeforeMethod
-    public void clearInbox() throws Exception {
-        mail.deleteAll();
-    }
-
     @Test
-    public void should_send_welcome_email_with_activation_link_on_signup() throws Exception {
+    public void Should_SendWelcomeEmailWithActivationLink_When_UserSignsUp() throws Exception {
         String email = "signup-" + java.util.UUID.randomUUID() + "@test.local";
 
         ResponseEntity<Void> response = http.postForEntity("/auth/signup",
@@ -263,13 +254,18 @@ public class SignupEmailIT extends IntegrationTestBase {
 ## Rules
 
 ### Inbox isolation
-- One Mailpit per JVM (`static final` in `MailpitSupport`). Clear with `DELETE /api/v1/messages` in `@BeforeMethod`.
-- Unique recipient per test: `UUID.randomUUID()`.
+- One Mailpit per JVM (`static final` in `MailpitSupport`), shared by every test class.
+- **Unique recipient per test** (`UUID.randomUUID()`) is the isolation; the search filters on it. There is **no
+  global wipe** — `DELETE /api/v1/messages` in a `@BeforeMethod` deletes the mail another class running in
+  parallel is still waiting for.
 - Never assert "the only email is X" — assert "a message matching `to + subject` exists".
 
 ### Waiting
 - Always use `waitFor` with a deadline. Default 15s.
-- **No `Thread.sleep` between send and assert.** Use the polling helper.
+- `waitFor` polls with **Awaitility** (`await(alias).atMost(timeout).pollInterval(250 ms).until(search, Optional::isPresent)`):
+  it returns the first match, fails with a `ConditionTimeoutException` naming the recipient and subject, and
+  rethrows a failed search at once. **No `Thread.sleep`** anywhere — not between send and assert, not inside the
+  poll.
 
 ### Search queries
 - Combine `to:` + `subject:` server-side. Don't list-all then loop.
@@ -291,7 +287,7 @@ public class SignupEmailIT extends IntegrationTestBase {
 - No `latest` image tag — pin `axllent/mailpit:v1.20.5`.
 - No inline regex in tests — use `EmailExtractors`.
 - No assertions on the full HTML body string.
-- No shared `MailpitClient` across threads without per-test cleanup.
+- No global inbox wipe; isolation is the unique recipient.
 
 ## Generation steps
 

@@ -98,18 +98,19 @@ public class TaxCase {
     @CsvBindByName(column = "amount_cents")  private long amountCents;
     @CsvBindByName(column = "expected_tax")  private long expectedTaxCents;
 
-    // OpenCSV needs a no-arg ctor + setters; expose intent-named getters to the test.
     public String region()         { return region; }
     public long amountCents()      { return amountCents; }
     public long expectedTaxCents() { return expectedTaxCents; }
 
-    // Name the case so a failing row reports the INPUT that broke it, not "row 7".
     @Override public String toString() {
         return "%s @ %d¢ → %d¢".formatted(region, amountCents, expectedTaxCents);
     }
 }
 ```
 
+> OpenCSV needs a no-arg constructor and setters; the test sees only the intent-named getters, and `toString()`
+> names the case so a failing row reports the **input** that broke it, not "row 7".
+>
 > Why a `record` isn't used here: OpenCSV's `@CsvBindByName` binding needs a mutable no-arg bean. For
 > **JSON** (Jackson) and **inline** rows you *can* use a `record TaxCase(String region, long amountCents,
 > long expectedTaxCents)` — Jackson binds records natively. Keep the type's **getters intent-named** either
@@ -125,19 +126,22 @@ public class TaxCalculatorTest {
     @DataProvider(name = "taxCases")
     public Object[][] taxCases() {
         return new Object[][] {
-            { "DE", 10_000L, 1_900L },   // 19% VAT
-            { "US-OR", 5_000L, 0L },     // no sales tax
-            { "GB", 2_000L, 400L },      // 20% VAT
+            { "DE", 10_000L, 1_900L },
+            { "US-OR", 5_000L, 0L },
+            { "GB", 2_000L, 400L },
         };
     }
 
     @Test(dataProvider = "taxCases")
-    public void shouldComputeTaxForRegion(String region, long amountCents, long expectedTaxCents) {
-        long tax = new TaxCalculator().taxFor(region, amountCents);   // one logical assertion per row
+    public void Should_ComputeRegionalTax_When_AmountIsGiven(String region, long amountCents, long expectedTaxCents) {
+        long tax = new TaxCalculator().taxFor(region, amountCents);
+
         assertThat(tax).as("region=%s amount=%d", region, amountCents).isEqualTo(expectedTaxCents);
     }
 }
 ```
+
+The rows are 19% VAT (DE), no sales tax (US-OR) and 20% VAT (GB); one logical assertion per row.
 
 Each row is reported as a **separate** invocation in TestNG/Allure; the `.as(...)` description (or the
 typed `toString()` below) makes a failure say **which input** broke, not just "test failed".
@@ -172,10 +176,10 @@ public final class TaxCaseProviders {
         var stream = TaxCaseProviders.class.getResourceAsStream("/data/tax-cases.csv");
         var reader = new InputStreamReader(stream, StandardCharsets.UTF_8);
         var cases = new CsvToBeanBuilder<TaxCase>(reader)
-                .withType(TaxCase.class)        // header names → @CsvBindByName fields
+                .withType(TaxCase.class)
                 .withIgnoreLeadingWhiteSpace(true)
                 .build()
-                .parse();                       // List<TaxCase>, fully typed
+                .parse();
         return cases.stream().map(c -> new Object[]{ c }).toArray(Object[][]::new);
     }
 }
@@ -183,12 +187,15 @@ public final class TaxCaseProviders {
 
 ```java
 @Test(dataProvider = "csvTaxCases", dataProviderClass = TaxCaseProviders.class)
-public void shouldComputeTaxFromCsv(TaxCase tc) {                 // one typed arg, not three loose columns
+public void Should_ComputeTax_When_CaseComesFromCsv(TaxCase tc) {
     long tax = new TaxCalculator().taxFor(tc.region(), tc.amountCents());
-    assertThat(tax).as("case=%s", tc).isEqualTo(tc.expectedTaxCents());  // tc.toString() names the row
+
+    assertThat(tax).as("case=%s", tc).isEqualTo(tc.expectedTaxCents());
 }
 ```
 
+`withType` binds header names to the `@CsvBindByName` fields and `parse()` returns a fully typed
+`List<TaxCase>`. The test takes one typed argument, not three loose columns, and `tc.toString()` names the row.
 `dataProviderClass` lets a single provider class feed tests across many test classes — the data lives once.
 
 ## Source 3 — external JSON (Jackson, for nested cases)
@@ -213,7 +220,7 @@ whole file to a `List<Row>` with a `TypeReference`.
 public static Object[][] jsonCheckoutCases() throws Exception {
     var mapper = new ObjectMapper();
     try (var in = TaxCaseProviders.class.getResourceAsStream("/data/checkout-cases.json")) {
-        List<CheckoutCase> cases = mapper.readValue(in, new TypeReference<>() {});  // nested → typed
+        List<CheckoutCase> cases = mapper.readValue(in, new TypeReference<>() {});
         return cases.stream().map(c -> new Object[]{ c }).toArray(Object[][]::new);
     }
 }
@@ -234,14 +241,14 @@ indexes where you can.
 public static Object[][] excelPricingCases() throws Exception {
     var cases = new ArrayList<TaxCase>();
     try (var in = TaxCaseProviders.class.getResourceAsStream("/data/pricing-cases.xlsx");
-         var workbook = WorkbookFactory.create(in)) {           // XSSF for .xlsx; auto-detects
+         var workbook = WorkbookFactory.create(in)) {
         var sheet = workbook.getSheetAt(0);
-        for (int r = 1; r <= sheet.getLastRowNum(); r++) {      // r=1 skips the header row
+        for (int r = 1; r <= sheet.getLastRowNum(); r++) {
             var row = sheet.getRow(r);
-            if (row == null) continue;                          // tolerate trailing blank rows
+            if (row == null) continue;
             var tc = new TaxCase();
             tc.setRegion(row.getCell(0).getStringCellValue());
-            tc.setAmountCents((long) row.getCell(1).getNumericCellValue());   // Excel numbers are doubles
+            tc.setAmountCents((long) row.getCell(1).getNumericCellValue());
             tc.setExpectedTaxCents((long) row.getCell(2).getNumericCellValue());
             cases.add(tc);
         }
@@ -249,6 +256,9 @@ public static Object[][] excelPricingCases() throws Exception {
     return cases.stream().map(c -> new Object[]{ c }).toArray(Object[][]::new);
 }
 ```
+
+`WorkbookFactory` picks XSSF for `.xlsx`; the loop starts at row 1 to skip the header and tolerates trailing
+blank rows.
 
 > **Excel gotchas to encode:** numeric cells come back as `double` (cast deliberately, watch precision on
 > money — store cents as integers, never floating dollars); a "number" a user typed may be a *text* cell
@@ -267,25 +277,35 @@ public static Iterator<Object[]> bigCsv() {
     var reader = new InputStreamReader(
         TaxCaseProviders.class.getResourceAsStream("/data/many-rows.csv"), StandardCharsets.UTF_8);
     var beanIterator = new CsvToBeanBuilder<TaxCase>(reader).withType(TaxCase.class).build().iterator();
-    return new Iterator<>() {                              // lazy adapter: one row read per next()
+    return new Iterator<>() {
         public boolean hasNext() { return beanIterator.hasNext(); }
         public Object[] next()   { return new Object[]{ beanIterator.next() }; }
     };
 }
 ```
 
-## Parallel data rows — `@DataProvider(parallel = true)`
+## Parallel data rows — `@DataProvider(parallel = true)`, never with Playwright or Appium
 
-When rows are **independent** (they are, by the test-independence rule), run them concurrently to cut wall
-time. TestNG fans the rows across its data-provider thread pool.
+When rows are **independent** (they are, by the test-independence rule) **and the test body drives no browser or
+device**, run them concurrently to cut wall time. TestNG fans the rows across its data-provider thread pool.
 
 ```java
-@DataProvider(name = "csvTaxCases", parallel = true)     // rows run concurrently
-public static Object[][] csvTaxCases() { /* … */ }
+@DataProvider(name = "csvTaxCasesInParallel", parallel = true)
+public static Object[][] csvTaxCasesInParallel() {
+    return csvTaxCases();
+}
 ```
 
 Set the pool size in the suite: `<suite data-provider-thread-count="4">`. Parallel rows demand the test body
 hold **no shared mutable state** (CLAUDE.md: no static mutable state) — each invocation must stand alone.
+
+**A Playwright or Appium test class keeps its data providers sequential.** Every row of a class runs on the same
+instance, so parallel rows would share its one `page` (or driver) and call Playwright from a thread that did not
+create it — Playwright for Java is not thread-safe. J1's `BaseTest` therefore runs the suite with
+`parallel="classes"`: the class is the unit of parallelism, and its rows run one after another on its thread
+(`qa/java/skills/ui-test-author/playwright/references/lifecycle.md` §1, plan D8). A row that needs its own
+context options (a viewport, a locale) is a `@Factory` row instead — one instance per row
+(`qa-responsive-testing-java`, `qa-language-testing-java`).
 
 ## Anti-patterns
 
@@ -313,19 +333,17 @@ hold **no shared mutable state** (CLAUDE.md: no static mutable state) — each i
 ```java
 public class TaxCalculatorTest {
 
-    private final TaxCalculator calc = new TaxCalculator();   // constructor injection; no shared mutable state
+    private final TaxCalculator calc = new TaxCalculator();
 
-    // Engineer-owned flat data → CSV.
     @Test(dataProvider = "csvTaxCases", dataProviderClass = TaxCaseProviders.class)
-    public void shouldComputeTax_whenSourcedFromCsv(TaxCase tc) {
+    public void Should_ComputeTax_When_CaseComesFromCsv(TaxCase tc) {
         assertThat(calc.taxFor(tc.region(), tc.amountCents()))
-            .as("case=%s", tc)                                // names the row in the report
+            .as("case=%s", tc)
             .isEqualTo(tc.expectedTaxCents());
     }
 
-    // Stakeholder-owned pricing → Excel, SAME body shape, SAME typed row.
     @Test(dataProvider = "excelPricingCases", dataProviderClass = TaxCaseProviders.class)
-    public void shouldComputeTax_whenSourcedFromExcel(TaxCase tc) {
+    public void Should_ComputeTax_When_CaseComesFromExcel(TaxCase tc) {
         assertThat(calc.taxFor(tc.region(), tc.amountCents()))
             .as("case=%s", tc)
             .isEqualTo(tc.expectedTaxCents());
@@ -333,19 +351,21 @@ public class TaxCalculatorTest {
 }
 ```
 
-A run produces one Allure result **per row**, each labelled with the case — so a regression points straight
-at `DE @ 10000¢ → 1900¢`, not "row 1".
+Engineer-owned flat data comes from CSV, stakeholder-owned pricing from Excel — the same body shape and the same
+typed row. A run produces one Allure result **per row**, each labelled with the case — so a regression points
+straight at `DE @ 10000¢ → 1900¢`, not "row 1".
 
 **Composing with a builder (the boundary made concrete):** a row supplies the *varying* fields; the
-**builder** (`qa-test-data-builder-java`) fills the rest with sane defaults.
+**builder** (`qa-test-data-builder-java`) fills the rest — the ObjectMother default is the unchanging 90%.
 
 ```java
 @Test(dataProvider = "csvOrderCases", dataProviderClass = OrderCaseProviders.class)
-public void shouldApplyDiscount(OrderCase row) {
-    var order = Orders.standard()                 // ObjectMother default — the unchanging 90%
-        .withRegion(row.region())                 // the row drives only what VARIES
+public void Should_ApplyDiscount_When_OrderMatchesTheRow(OrderCase row) {
+    var order = Orders.standard()
+        .withRegion(row.region())
         .withSubtotalCents(row.subtotalCents())
         .build();
+
     assertThat(discountEngine.apply(order)).isEqualTo(row.expectedDiscountCents());
 }
 ```
@@ -365,8 +385,9 @@ public void shouldApplyDiscount(OrderCase row) {
 - **Money is integer cents / `BigDecimal`, never float** (Excel/CSV round-off corrupts it). No secrets or
   real PII in committed data files (synthetic data; secrets via env — `qa-test-login-tokens-java`).
 - **Lazy `Iterator<Object[]>` for huge datasets**; `@DataProvider(parallel = true)` + suite
-  `data-provider-thread-count` for independent rows. No `Thread.sleep`; structured logging; constructor
-  injection.
+  `data-provider-thread-count` for independent rows **only where no browser or device is driven** — a
+  Playwright or Appium class keeps its rows sequential (`parallel="classes"`, plan D8). No `Thread.sleep`;
+  structured logging; constructor injection.
 
 ## Cross-references
 

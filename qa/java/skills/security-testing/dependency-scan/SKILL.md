@@ -178,6 +178,8 @@ GitHub code-scanning so findings show inline on the PR (cross-link `qa-test-repo
 ```java
 // src/test/java/security/DependencyCheckReport.java
 import io.qameta.allure.Allure;
+import io.qameta.allure.AttachmentOptions;
+import java.io.InputStream;
 import java.nio.file.*;
 
 /** Attach the Dependency-Check HTML report + a readable CVE summary to Allure. */
@@ -187,8 +189,10 @@ public final class DependencyCheckReport {
     public static void attach() throws Exception {
         Path html = REPORT_DIR.resolve("dependency-check-report.html");
         if (Files.exists(html)) {
-            Allure.addAttachment("dependency-check.html", "text/html",
-                    Files.newInputStream(html), ".html");
+            try (InputStream content = Files.newInputStream(html)) {
+                Allure.attachment("dependency-check.html", "text/html", content,
+                        AttachmentOptions.withFileExtension("html"));
+            }
         }
     }
 }

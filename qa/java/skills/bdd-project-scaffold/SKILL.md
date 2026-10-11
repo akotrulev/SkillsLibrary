@@ -17,11 +17,11 @@ This is the BDD analogue of the UI project scaffold; it assumes a Playwright (we
 - `io.cucumber:cucumber-junit-platform-engine` (the idiomatic runner — **not** the deprecated JUnit 4 `@RunWith(Cucumber.class)`)
 - `io.cucumber:cucumber-picocontainer` (DI — constructor injection, zero config: just add the dependency)
 - `org.junit:junit-bom` + `org.junit.platform:junit-platform-suite` + `junit-platform-launcher` (runtime)
-- Web: `com.microsoft.playwright:playwright` (**1.60.0**, sync API) or Selenium 4 — there is no Playwright Test runner on the JVM, you drive the automation library from step defs
+- Web: `com.microsoft.playwright:playwright` (**1.63.0**, sync API — the pin in the **Versions** table of `qa/java/skills/ui-test-author/playwright/SKILL.md`) or Selenium 4 — there is no Playwright Test runner on the JVM, you drive the automation library from step defs. The Cucumber `Hooks` class mirrors J1's `BaseTest` (it cannot extend a TestNG class): `HEADED`, `BASE_URL`, the test-id attribute and the R7 failure evidence
 - Mobile: `io.appium:java-client` **10.1.1** (Appium 2.x) on Selenium 4
 - Assertions in `Then` steps: AssertJ / Playwright `assertThat` (match the existing UI project)
 - Features under `src/test/resources/features/`; step defs + hooks + context under `src/test/java/.../steps` and `.../support`
-- `io.qameta.allure:allure-cucumber7-jvm` when the project reports through Allure (the library default)
+- `io.qameta.allure:allure-cucumber7-jvm` **3.0.0** when the project reports through Allure (the library default) — allure-java 3.0, the same major as every other `allure-*` module (Java 17+; the Allure Gradle plugin 4.3.0 rejects mixed 2.x/3.x adapters)
 
 ## When to use
 
@@ -47,8 +47,8 @@ Confirm at most 2–3.
 
 1. Read 2–3 existing files (the `build.gradle.kts`, an existing page object, `BaseTest`) to match the package, runner, and conventions.
 2. Add the Cucumber packages to the test source set via the **BOM** (one pinned version), plus the JUnit Platform suite + launcher and `cucumber-picocontainer`. Set `tasks.test { useJUnitPlatform() }`.
-3. Create the runner: a JUnit 5 `@Suite` class (`RunCucumberTest`) **and/or** `src/test/resources/junit-platform.properties` carrying glue, features path, plugins, and the tag filter.
-4. Create `support/` : the per-scenario `TestContext` (holds the Playwright `Page` / Selenium `WebDriver` + lazily-built page objects), and the lifecycle `Hooks` class (`@Before`/`@After` that own the browser/driver — **with teardown**). PicoContainer is zero-config — adding the dependency is the whole wiring step.
+3. Create the runner: a JUnit 5 `@Suite` class (`RunCucumberTest`) that **selects** the features, and `src/test/resources/junit-platform.properties` carrying glue, plugins and the tag filter. **One discovery mechanism**: the `@SelectClasspathResource("features")` selector — never also `cucumber.features`, which makes the engine ignore every discovery selector.
+4. Create `support/` : the per-scenario `TestContext` (holds the Playwright `Page` / Selenium `WebDriver` + lazily-built page objects), and the lifecycle `Hooks` class (`@Before`/`@After` that own the browser/driver and the failure evidence — **with teardown**). PicoContainer is zero-config — adding the dependency is the whole wiring step.
 5. Create the empty `src/test/resources/features/` folder and one throwaway smoke `.feature` to prove the rig parses and runs.
 6. `./gradlew test` (the engine must discover the feature and bind the smoke step) and run the smoke scenario. Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run".
 7. Report files created and hand off to `feature-file-writer` (features) + `gherkin-step-code` (steps).
@@ -60,41 +60,59 @@ Confirm at most 2–3.
 ```kotlin
 plugins {
     java
-    id("io.qameta.allure") version "2.12.0"
+    id("io.qameta.allure") version "4.3.0"
 }
 
 repositories { mavenCentral() }
 
 dependencies {
-    // BOM pins every io.cucumber:* artifact to one version
     testImplementation(platform("io.cucumber:cucumber-bom:7.34.4"))
     testImplementation("io.cucumber:cucumber-java")
     testImplementation("io.cucumber:cucumber-junit-platform-engine")
-    testImplementation("io.cucumber:cucumber-picocontainer")          // DI — zero config
+    testImplementation("io.cucumber:cucumber-picocontainer")
 
     testImplementation(platform("org.junit:junit-bom:5.11.4"))
-    testImplementation("org.junit.platform:junit-platform-suite")     // the @Suite runner
+    testImplementation("org.junit.platform:junit-platform-suite")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
-    // Driver layer — reuse whatever the UI project already uses
-    testImplementation("com.microsoft.playwright:playwright:1.60.0")  // web (or Selenium 4)
+    testImplementation("com.microsoft.playwright:playwright:1.63.0")
     // testImplementation("io.appium:java-client:10.1.1")             // mobile
 
-    testImplementation("org.assertj:assertj-core:3.26.3")
-    // Allure (library default reporting):
-    // testImplementation("io.qameta.allure:allure-cucumber7-jvm:2.35.3")
+    testImplementation("org.assertj:assertj-core:3.27.7")
+    testImplementation("io.qameta.allure:allure-cucumber7-jvm:3.0.0")
+}
+
+allure {
+    version.set("2.46.1")
+    adapter {
+        allureJavaVersion.set("3.0.0")
+    }
 }
 
 tasks.test {
     useJUnitPlatform()
-    // Surface step counts; the engine reports per-scenario
-    systemProperty("playwright.headless", System.getProperty("playwright.headless", "true"))
+    environment("PLAYWRIGHT_JAVA_SRC", "src/test/java")
+}
+
+tasks.register<JavaExec>("installPlaywrightBrowsers") {
+    classpath = sourceSets["test"].runtimeClasspath
+    mainClass.set("com.microsoft.playwright.CLI")
+    args("install", "--with-deps", "chromium")
 }
 
 java {
     toolchain { languageVersion.set(JavaLanguageVersion.of(21)) }
 }
 ```
+
+- The `io.cucumber` BOM pins every `io.cucumber:*` artifact to one version; `cucumber-picocontainer` is the whole
+  DI wiring; `junit-platform-suite` provides the `@Suite` runner.
+- The driver layer reuses whatever the UI project already uses — Playwright here, or Selenium 4.
+- The Allure plugin, report generator (`allure-commandline` 2.46.1) and allure-java 3.0 opt-in are the same as
+  J1's build (`ui-test-author/playwright/assets/build.gradle.kts`, plan D38); `allure-cucumber7-jvm` 3.0.0 is the
+  Cucumber adapter on that major.
+- Headed runs are `HEADED=1 ./gradlew test`; there is no `-Dplaywright.headless` property. The CI references install
+  the browser with `./gradlew installPlaywrightBrowsers`.
 
 > Reuse the existing page-object project rather than copying pages. If pages live in a separate Gradle module, add it as `testImplementation(project(":ui-tests"))`; if the BDD layer lives in the same module, the `pom/`/`pages/` classes are already on the test classpath.
 
@@ -103,58 +121,58 @@ java {
 ```java
 package com.example;
 
-import org.junit.platform.suite.api.ConfigurationParameter;
 import org.junit.platform.suite.api.IncludeEngines;
 import org.junit.platform.suite.api.SelectClasspathResource;
 import org.junit.platform.suite.api.Suite;
 
-import static io.cucumber.junit.platform.engine.Constants.GLUE_PROPERTY_NAME;
-import static io.cucumber.junit.platform.engine.Constants.PLUGIN_PROPERTY_NAME;
-
-// Idiomatic Cucumber 7 runner: the JUnit 5 Platform engine, NOT @RunWith(Cucumber.class) (JUnit 4, deprecated).
 @Suite
 @IncludeEngines("cucumber")
 @SelectClasspathResource("features")
-@ConfigurationParameter(key = GLUE_PROPERTY_NAME, value = "com.example.steps,com.example.support")
-@ConfigurationParameter(key = PLUGIN_PROPERTY_NAME, value = "pretty, html:target/cucumber-report.html, json:target/cucumber.json")
 public class RunCucumberTest {
 }
 ```
 
-### `src/test/resources/junit-platform.properties` — engine config (alternative / complement to the suite)
+The idiomatic Cucumber 7 runner: the JUnit 5 Platform engine, not `@RunWith(Cucumber.class)` (JUnit 4,
+deprecated). The suite only **selects** the features; every engine setting lives in one file below.
+
+### `src/test/resources/junit-platform.properties` — engine config
 
 ```properties
 cucumber.glue=com.example.steps,com.example.support
-cucumber.features=src/test/resources/features
-cucumber.plugin=pretty, html:target/cucumber-report.html, json:target/cucumber.json
-# Filter at runtime: ./gradlew test -Dcucumber.filter.tags="@smoke and not @wip"
+cucumber.plugin=pretty, html:build/cucumber-report.html, json:build/cucumber.json, io.qameta.allure.cucumber7jvm.AllureCucumber7Jvm
 cucumber.filter.tags=not @wip
-# Enable the Allure plugin when the project reports through Allure (qa-reporting-java owns this):
-# cucumber.plugin=io.qameta.allure.cucumber7jvm.AllureCucumber7Jvm
 cucumber.execution.parallel.enabled=false
 ```
 
-> Living documentation: Cucumber's built-in `html:` formatter writes a self-contained report. For CI dashboards, prefer Allure via `io.qameta.allure:allure-cucumber7-jvm` (plugin `io.qameta.allure.cucumber7jvm.AllureCucumber7Jvm`; Gherkin tags map to Allure labels via `@allure.label.<key>:<value>`) — `qa-reporting-java` owns that wiring.
+- **No `cucumber.features`.** When it is set, the Cucumber engine ignores the discovery selectors — the suite's
+  `@SelectClasspathResource` among them — so the suite and the property would be two competing discovery
+  mechanisms. The selector is the one.
+- Reports land under `build/`, the Gradle output folder, next to `build/allure-results/` and
+  `build/playwright-artifacts/`; never `target/`.
+- Filter at runtime with `./gradlew test -Dcucumber.filter.tags="@smoke and not @wip"`.
+- Drop `io.qameta.allure.cucumber7jvm.AllureCucumber7Jvm` from `cucumber.plugin` when the project does not report
+  through Allure; `qa-reporting-java` owns that wiring.
+- Scenarios run sequentially. Each one creates and closes its own `Playwright` on its thread, so turning on
+  `cucumber.execution.parallel.enabled` later keeps Playwright's thread rule; size the pool to the agent's memory.
+
+> Living documentation: Cucumber's built-in `html:` formatter writes a self-contained report. For CI dashboards, Allure via `allure-cucumber7-jvm` maps Gherkin tags to Allure labels via `@allure.label.<key>:<value>`.
 
 ### `support/TestContext.java` — shared per-scenario state (web)
 
 ```java
 package com.example.support;
 
-import com.example.pages.DashboardPage;
+import com.example.pages.HomePage;
 import com.example.pages.LoginPage;
+import com.example.pages.LoginPage.Credentials;
 import com.microsoft.playwright.Page;
 
-// One graph per scenario (PicoContainer builds it fresh, disposes after).
-// Holds the Page + lazily-built page objects so every step class shares the same Page.
-// No assertions, no logic — just state. Cucumber does NOT support step-class inheritance;
-// shared state flows through this object, constructor-injected everywhere.
 public class TestContext {
     private Page page;
     private LoginPage loginPage;
-    private DashboardPage dashboardPage;
+    private HomePage homePage;
 
-    public Page getPage() {
+    public Page page() {
         return page;
     }
 
@@ -167,56 +185,48 @@ public class TestContext {
         return loginPage;
     }
 
-    public DashboardPage dashboard() {
-        if (dashboardPage == null) dashboardPage = new DashboardPage(page);
-        return dashboardPage;
+    public HomePage home() {
+        if (homePage == null) homePage = new HomePage(page);
+        return homePage;
+    }
+
+    public Credentials registeredCustomer() {
+        return new Credentials(Hooks.requiredEnv("E2E_USER"), Hooks.requiredEnv("E2E_PASSWORD"));
     }
 }
 ```
 
-### `support/Hooks.java` — per-scenario lifecycle (web, with teardown)
+One graph per scenario: PicoContainer builds it fresh and disposes it after. It holds the `Page` and the
+lazily-built page objects so every step class shares the same `Page` — just state, no assertions. Cucumber does
+**not** support step-class inheritance, so shared state flows through this object, constructor-injected into
+every glue class. The page objects are the UI suite's own (`ui-test-author/playwright` assets): their constructor
+takes the `Page`, never `TestContext`.
 
-```java
-package com.example.support;
+### `support/Hooks.java` — per-scenario lifecycle and failure evidence (web, with teardown)
 
-import com.microsoft.playwright.Browser;
-import com.microsoft.playwright.BrowserContext;
-import com.microsoft.playwright.BrowserType;
-import com.microsoft.playwright.Playwright;
-import io.cucumber.java.After;
-import io.cucumber.java.Before;
+PicoContainer injects the same `TestContext` instance into this class **and** every step class for the current
+scenario. The hook owns the Playwright lifecycle and keeps the failure evidence exactly as
+`qa/java/skills/evidence-capture` (§ Cucumber scenarios) and J1's `BaseTest` do:
 
-// PicoContainer injects the same TestContext instance into this Hooks class AND every
-// step class for the current scenario. The hook owns the Playwright lifecycle.
-public class Hooks {
-    private final TestContext context;
-    private Playwright playwright;
-    private Browser browser;
-    private BrowserContext browserContext;
+- **`@Before(order = 0)`** — the first hook: `Playwright.create()`, the `data-testid` attribute, Chromium
+  headless unless `HEADED=1`, a context on `BASE_URL` recording raw video to `build/playwright-videos/`, tracing
+  started (screenshots, DOM snapshots, sources), a page.
+- **`@After(order = 0)`** — the last hook (Cucumber runs `@After` hooks from the highest order down, so
+  cleanup hooks at the default order still see the page). On `scenario.isFailed()`: a full-page screenshot and
+  `tracing().stop(setPath)` **before** `context.close()`; a pass calls `tracing().stop()` with no path, which
+  discards the trace. Then `context.close()`, which writes the video; on failure `video.saveAs(...)` — Java's
+  `saveAs` throws until the context is closed; `video.delete()` always; `playwright.close()`.
+- **Files** are `build/playwright-artifacts/<Feature>.<Scenario>.{png,zip,webm}` — the feature file's name and the
+  scenario name, every character outside `[A-Za-z0-9._-]` replaced by `_` — the folder the CI references upload.
+  Each kept file is attached with `Allure.attachment(name, type, stream, AttachmentOptions.withFileExtension(ext))`;
+  the trace as `application/vnd.allure.playwright-trace`.
+- **The one catch** is `keepScreenshot`'s: a narrow `PlaywrightException` catch, logged with a message template,
+  in a private helper (plan D29) — a crashed page cannot be photographed, and its trace and video must still be
+  kept. No other catch, and none in the hook bodies.
 
-    public Hooks(TestContext context) {
-        this.context = context;
-    }
-
-    @Before(order = 0)
-    public void startBrowser() {
-        playwright = Playwright.create();
-        boolean headless = Boolean.parseBoolean(System.getProperty("playwright.headless", "true"));
-        browser = playwright.chromium().launch(new BrowserType.LaunchOptions().setHeadless(headless));
-        browserContext = browser.newContext();
-        context.setPage(browserContext.newPage());
-    }
-
-    @After
-    public void stopBrowser() {
-        if (browserContext != null) browserContext.close();
-        if (browser != null) browser.close();
-        if (playwright != null) playwright.close();
-    }
-}
-```
-
-> Tagged hooks scope setup to platform: `@Before("@web")` / `@Before("@mobile")` let one project carry both a web and a mobile hook class without clashing. Always close `context → browser → playwright` in `@After` — a missing teardown leaks browsers/drivers. Launch one `Browser` per run and a fresh `BrowserContext`+`Page` per scenario for speed + isolation once the suite grows; the per-scenario form above is the simplest correct baseline.
+The class — `requiredEnv`, `openBrowser`, `closeBrowser(Scenario)` and the private `keep*` helpers mirroring
+`BaseTest`'s — is in [`references/hooks.md`](references/hooks.md), with the Scenario Outline and parallel notes.
+`<Feature>` is the feature file's name: Cucumber-JVM's `Scenario` exposes the file's URI, not the `Feature:` title.
 
 ### Smoke feature — `src/test/resources/features/smoke.feature`
 
@@ -250,4 +260,5 @@ For Appium, `TestContext` holds an `AppiumDriver` built in `@Before("@mobile")` 
 - Step definitions + POM wiring → `qa/java/skills/gherkin-step-code`
 - Page objects → `qa/java/skills/page-object-design` / `page-objects-from-url` / `mobile-screen-objects`
 - Allure reporting → `qa/reporting/java/skills/test-reports`
+- Failure-evidence rules the `Hooks` class follows, and reading a scenario's trace → `qa/java/skills/evidence-capture`
 - CI (feature/tag shard, publish report) → `qa/cicd/java/skills/ci-pipelines`

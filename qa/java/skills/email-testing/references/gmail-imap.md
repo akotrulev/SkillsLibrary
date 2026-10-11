@@ -5,7 +5,7 @@ Scaffolds a thin, intent-revealing wrapper over Jakarta Mail (`Store` / `Folder`
 This is the sibling for flows that must exercise the **genuine provider inbox** — real MX, real spam/routing, real provider quirks — not an SMTP sink or a test-SaaS server. Two consequences shape the whole skill:
 
 - **There is no per-test unique-inbox trick** (no `{uuid}@{serverId}.mailosaur.net`) and **no `DELETE all` HTTP API** (no Mailpit wipe). Isolation comes from **Gmail `+tag` / dot aliases** — `youraccount+{uuid}@gmail.com` all land in the *one* real inbox — plus a **received-date lower bound** and a **server-side search by To + Subject**. Cleanup is per-message via IMAP flags (`Flags.Flag.SEEN` / `Flags.Flag.DELETED` + close-with-expunge), not a wipe.
-- **No SDK "blocks until arrived" primitive exists.** The wait **is** a real **poll-with-deadline loop** over the IMAP search — but still **no `Thread.sleep`-only wait**: poll the search on an interval against a deadline (the same `waitFor` shape as `qa/java/skills/email-testing`). Real-provider delivery is slower, so the default budget is larger (~25s).
+- **No SDK "blocks until arrived" primitive exists.** The wait **is** a poll over the IMAP search, run by **Awaitility** against a deadline at a paced interval — **no `Thread.sleep`** anywhere, not even as the poll cadence (the same `waitFor` shape as the Mailpit reference). Real-provider delivery is slower, so the default budget is larger (~25s).
 
 ## When to use
 
@@ -51,14 +51,18 @@ Ask at most 2 questions; infer the rest from the test sources and existing suppo
 
 ```kotlin
 dependencies {
-    testImplementation("org.eclipse.angus:angus-mail:2.0.3") // Jakarta Mail 2.x (jakarta.mail.*)
-    testImplementation("org.assertj:assertj-core:3.26.3")
+    testImplementation("org.eclipse.angus:angus-mail:2.0.3")
+    testImplementation("org.awaitility:awaitility:4.2.2")
+    testImplementation("org.assertj:assertj-core:3.27.7")
 }
 ```
 
+`angus-mail` is the Jakarta Mail 2.x implementation (`jakarta.mail.*`).
+
 ### Config — `support/email/ImapConfig.java`
 
-Secrets come from the environment, validated once. Never inline the address or App Password.
+Secrets come from the environment, validated once. Never inline the address or App Password. `IMAP_USER` is the
+mailbox address (`flexinvest.qa@gmail.com`); `IMAP_PASSWORD` is a Gmail App Password or an XOAUTH2 token.
 
 ```java
 package com.flexinvest.support.email;
@@ -91,8 +95,8 @@ public final class ImapConfig {
         return new ImapConfig(
             envOr("IMAP_HOST", "imap.gmail.com"),
             (int) envLong("IMAP_PORT", 993L),
-            required("IMAP_USER"),       // e.g. flexinvest.qa@gmail.com
-            required("IMAP_PASSWORD"),   // Gmail App Password (or XOAUTH2 token)
+            required("IMAP_USER"),
+            required("IMAP_PASSWORD"),
             Duration.ofMillis(timeoutMs),
             Duration.ofMillis(pollMs));
     }
@@ -132,7 +136,17 @@ public final class ImapConfig {
 
 ### Intent-revealing wrapper — `support/email/Mailbox.java`
 
-Tests never drive `search` / `getContent` directly. They call `awaitSignupEmail`, `awaitEmail`, `markProcessed`. Connection lifecycle (connect once, poll INBOX, close on teardown) lives here — tests never leak an IMAP connection.
+Tests never drive `search` / `getContent` directly. They call `awaitSignupEmail` and `awaitEmail`. Connection lifecycle (connect once, poll INBOX, close on teardown) and cleanup live here — tests never leak an IMAP connection and never clean up inline.
+
+- The INBOX is opened **read-write** so flag/expunge cleanup works.
+- `awaitEmail` polls the server-side search with **Awaitility** until a message to `sentTo` (+ optional subject),
+  received after `since`, arrives — or the budget runs out with a `ConditionTimeoutException` naming the
+  recipient and subject. `getMessageCount()` before each search forces a NOOP, so newly delivered mail is
+  visible to the open folder. `pollInSameThread()` keeps every call to the Jakarta Mail folder on the test's
+  thread. The newest match wins.
+- Every message `awaitEmail` returns is remembered; `deleteReceived()` flags them `DELETED` and the test base
+  calls it from `@AfterMethod(alwaysRun = true)`. `close()` expunges the flagged messages — per message, never a
+  whole-INBOX wipe.
 
 ```java
 package com.flexinvest.support.email;
@@ -150,12 +164,19 @@ import jakarta.mail.search.SearchTerm;
 import jakarta.mail.search.SubjectTerm;
 
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
+import java.util.Optional;
 import java.util.Properties;
+
+import static org.awaitility.Awaitility.await;
 
 public final class Mailbox implements AutoCloseable {
 
     private final ImapConfig config;
+    private final List<Message> received = new ArrayList<>();
     private Store store;
     private Folder inbox;
 
@@ -170,55 +191,49 @@ public final class Mailbox implements AutoCloseable {
         store = session.getStore("imaps");
         store.connect(config.host(), config.port(), config.user(), config.password());
         inbox = store.getFolder("INBOX");
-        inbox.open(Folder.READ_WRITE); // read-write so flag/expunge cleanup works
+        inbox.open(Folder.READ_WRITE);
     }
 
-    /**
-     * Poll the real inbox until a message to {@code sentTo} (+ optional subject),
-     * received after {@code since}, arrives — or the deadline fires. NOT a fixed
-     * sleep: a deadline loop over the server-side IMAP search, interval-paced.
-     */
-    public Message awaitEmail(String sentTo, String subject, Date since, Duration timeoutOverride)
-            throws Exception {
-        Duration budget = timeoutOverride != null ? timeoutOverride : config.timeout();
-        Date sinceDate = since != null ? since : new Date(System.currentTimeMillis() - 60_000);
-        long deadline = System.currentTimeMillis() + budget.toMillis();
-
-        SearchTerm term = new AndTerm(
+    public Message awaitEmail(String sentTo, String subject, Date since) {
+        SearchTerm term = new AndTerm(new SearchTerm[] {
             new RecipientStringTerm(Message.RecipientType.TO, sentTo),
-            new ReceivedDateTerm(ComparisonTerm.GE, sinceDate));
-        if (subject != null) {
-            term = new AndTerm(term, new SubjectTerm(subject));
-        }
-
-        while (System.currentTimeMillis() < deadline) {
-            inbox.getMessageCount(); // forces a NOOP so newly delivered mail is visible
-            Message[] found = inbox.search(term);
-            if (found.length > 0) {
-                return found[found.length - 1]; // newest match
-            }
-            Thread.sleep(config.pollInterval().toMillis()); // poll cadence, not the wait itself
-        }
-        throw new AssertionError("No message to '" + sentTo + "'"
-            + (subject != null ? " subject '" + subject + "'" : "") + " within " + budget);
+            new ReceivedDateTerm(ComparisonTerm.GE, since),
+            new SubjectTerm(subject)});
+        Message message = await("IMAP message to '" + sentTo + "' with subject '" + subject + "'")
+            .atMost(config.timeout())
+            .pollInterval(config.pollInterval())
+            .pollInSameThread()
+            .until(() -> newest(term), Optional::isPresent)
+            .orElseThrow();
+        received.add(message);
+        return message;
     }
 
-    public Message awaitSignupEmail(String sentTo, Date since) throws Exception {
-        return awaitEmail(sentTo, "Welcome", since, null);
+    public Message awaitSignupEmail(String sentTo, Date since) {
+        return awaitEmail(sentTo, "Welcome", since);
     }
 
-    /** Cleanup is per-message, not a wipe: flag SEEN, or DELETED + expunge on close. */
-    public void markProcessed(Message message, boolean delete) throws Exception {
-        message.setFlag(delete ? Flags.Flag.DELETED : Flags.Flag.SEEN, true);
+    public void deleteReceived() throws Exception {
+        for (Message message : received) {
+            message.setFlag(Flags.Flag.DELETED, true);
+        }
+        received.clear();
+    }
+
+    private Optional<Message> newest(SearchTerm term) throws Exception {
+        inbox.getMessageCount();
+        return Arrays.stream(inbox.search(term)).reduce((older, newer) -> newer);
     }
 
     @Override
     public void close() throws Exception {
-        if (inbox != null && inbox.isOpen()) inbox.close(true); // expunge DELETED-flagged
+        if (inbox != null && inbox.isOpen()) inbox.close(true);
         if (store != null && store.isConnected()) store.close();
     }
 }
 ```
+
+A slower provider gets a larger `IMAP_TIMEOUT_MS` for the whole suite.
 
 ### Extractors — `support/email/EmailExtractors.java`
 
@@ -278,6 +293,15 @@ public final class EmailExtractors {
             return parts;
         }
 
+        public static Part firstAttachment(Message message, String mimeType) throws Exception {
+            for (Part part : attachments(message)) {
+                if (part.isMimeType(mimeType)) {
+                    return part;
+                }
+            }
+            throw new AssertionError("No " + mimeType + " attachment in '" + message.getSubject() + "'.");
+        }
+
         public static byte[] bytes(Part attachment) throws Exception {
             try (var in = attachment.getInputStream(); var out = new ByteArrayOutputStream()) {
                 in.transferTo(out);
@@ -321,6 +345,7 @@ package com.flexinvest.support;
 import com.flexinvest.support.email.ImapConfig;
 import com.flexinvest.support.email.Mailbox;
 import org.testng.annotations.AfterClass;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 
 public abstract class ImapTestBase {
@@ -328,19 +353,27 @@ public abstract class ImapTestBase {
     protected ImapConfig imapConfig;
     protected Mailbox mail;
 
-    @BeforeClass
+    @BeforeClass(alwaysRun = true)
     public void connectMailbox() throws Exception {
         imapConfig = ImapConfig.fromEnvironment();
         mail = new Mailbox(imapConfig);
         mail.connect();
     }
 
+    @AfterMethod(alwaysRun = true)
+    public void deleteReceivedMail() throws Exception {
+        mail.deleteReceived();
+    }
+
     @AfterClass(alwaysRun = true)
     public void disconnectMailbox() throws Exception {
-        if (mail != null) mail.close();
+        mail.close();
     }
 }
 ```
+
+This base drives no browser. A Playwright-Java E2E test that reads the inbox extends J1's `BaseTest` instead and
+holds a `Mailbox` field with the same three hooks.
 
 ### TestNG signup test
 
@@ -350,39 +383,37 @@ public class SignupEmailIT extends ImapTestBase {
     @Autowired private TestRestTemplate http;
 
     @Test
-    public void should_send_welcome_email_with_activation_link_on_signup() throws Exception {
+    public void Should_SendActivationLink_When_UserSignsUp() throws Exception {
         String email = imapConfig.aliasFor("signup");
-        Date since = new Date(); // time-bound the search to this test
-
+        Date since = new Date();
         ResponseEntity<Void> response = http.postForEntity("/auth/signup",
             new SignupRequest(email, "Str0ng!Passw0rd"), Void.class);
         assertEquals(response.getStatusCode(), HttpStatus.CREATED);
 
         Message message = mail.awaitSignupEmail(email, since);
-        URI activation = EmailExtractors.extractLink(message, "/activate?token=");
 
-        assertTrue(activation.getQuery().contains("token="));
-        mail.markProcessed(message, true);
+        assertThat(EmailExtractors.extractLink(message, "/activate?token=").getQuery()).startsWith("token=");
     }
 }
 ```
+
+`since` is taken at the test's start, so the search is time-bound to this test. The received message is deleted
+by `ImapTestBase` after the test, whatever its outcome.
 
 ### TestNG OTP test
 
 ```java
 @Test
-public void should_log_in_when_reset_otp_entered() throws Exception {
+public void Should_AcceptNewPassword_When_ResetOtpFromEmailIsEntered() throws Exception {
     String email = imapConfig.aliasFor("reset");
     Date since = new Date();
     http.postForEntity("/auth/reset", new ResetRequest(email), Void.class);
-
-    Message message = mail.awaitEmail(email, "Reset code", since, null);
-    String otp = EmailExtractors.extractOtp(message);
+    String otp = EmailExtractors.extractOtp(mail.awaitEmail(email, "Reset code", since));
 
     ResponseEntity<Void> verify = http.postForEntity("/auth/verify-reset",
         new VerifyResetRequest(email, otp, "Brand-N3w!"), Void.class);
+
     assertEquals(verify.getStatusCode(), HttpStatus.OK);
-    mail.markProcessed(message, true);
 }
 ```
 
@@ -390,25 +421,19 @@ public void should_log_in_when_reset_otp_entered() throws Exception {
 
 ```java
 @Test
-public void should_attach_pdf_invoice_when_invoice_emailed() throws Exception {
+public void Should_AttachPdfInvoice_When_InvoiceIsEmailed() throws Exception {
     String email = imapConfig.aliasFor("billing");
     Date since = new Date();
     http.postForEntity("/invoices/" + invoiceId + "/email", new EmailToRequest(email), Void.class);
 
-    Message message = mail.awaitEmail(email, "Invoice", since, null);
-    Part pdf = EmailExtractors.MimeBodies.attachments(message).stream()
-        .filter(p -> {
-            try { return p.isMimeType("application/pdf"); } catch (Exception e) { return false; }
-        })
-        .findFirst().orElseThrow(() -> new AssertionError("expected a PDF attachment"));
-
-    byte[] bytes = EmailExtractors.MimeBodies.bytes(pdf);
+    Part pdf = EmailExtractors.MimeBodies.firstAttachment(mail.awaitEmail(email, "Invoice", since), "application/pdf");
 
     assertThat(pdf.getFileName()).startsWith("invoice-");
-    assertThat(new String(bytes, 0, 4)).isEqualTo("%PDF"); // magic bytes
-    mail.markProcessed(message, true);
+    assertThat(new String(EmailExtractors.MimeBodies.bytes(pdf), 0, 4)).isEqualTo("%PDF");
 }
 ```
+
+`%PDF` is the PDF magic number: the content type alone does not prove the bytes are a PDF.
 
 ## Rules
 
@@ -416,16 +441,17 @@ public void should_attach_pdf_invoice_when_invoice_emailed() throws Exception {
 - **Per-test `+tag` alias** via `imapConfig.aliasFor()` — `base+{uuid}@domain` all land in the one real inbox but carry a unique recipient. Search by that exact recipient.
 - **Always received-date-bound the search** (`ReceivedDateTerm(GE, since)`) to the test's start time. The real inbox accumulates history; an unbounded search matches stale mail.
 - Search **server-side by To + Subject + received-date** (`inbox.search(term)`). Never fetch-all-then-filter client-side.
-- Cleanup is **per message**: `setFlag(SEEN)` or `setFlag(DELETED)` + `inbox.close(true)` to expunge. No Mailpit-style wipe and no Mailosaur-style throwaway inbox — never expunge the whole INBOX.
+- Cleanup is **per message** and lives in **teardown**: every message `awaitEmail` returned is flagged `DELETED` by `ImapTestBase`'s `@AfterMethod(alwaysRun = true)`, and `inbox.close(true)` expunges them. Never inline in the test, no Mailpit-style wipe and no Mailosaur-style throwaway inbox — never expunge the whole INBOX.
 
-### Waiting (poll-with-deadline, never a fixed sleep)
-- The wait is the `awaitEmail` **deadline loop** over the IMAP search. The `Thread.sleep(pollInterval)` inside it is the **poll cadence**, not the wait — there is no bare fixed sleep between send and assert.
-- Touch `getMessageCount()` (a NOOP) between polls so the open folder sees newly delivered mail.
-- Default budget ~25s (real delivery is slower than a sink). Bump per call with a comment, not globally.
+### Waiting (Awaitility over the IMAP search, never a sleep)
+- The wait is `awaitEmail`: Awaitility polls the server-side search against a deadline and fails with a `ConditionTimeoutException` naming the recipient and subject. There is no `Thread.sleep` — not between send and assert, not as the poll cadence.
+- `pollInSameThread()` — the Jakarta Mail folder is driven from the test's thread only.
+- Touch `getMessageCount()` (a NOOP) before each search so the open folder sees newly delivered mail.
+- Default budget ~25s (real delivery is slower than a sink), set by `IMAP_TIMEOUT_MS` for the suite.
 - Pace the poll (`pollInterval`, ~2s) — Gmail throttles aggressive IMAP polling.
 
 ### Connection lifecycle
-- Connect once per class (`@BeforeClass`); `close()` (store + folder) in `@AfterClass(alwaysRun = true)`. Never leak IMAP connections across tests.
+- Connect once per class (`@BeforeClass(alwaysRun = true)`); `close()` (store + folder) in `@AfterClass(alwaysRun = true)`. Never leak IMAP connections across tests.
 - Open INBOX `Folder.READ_WRITE` so flag/expunge cleanup works.
 
 ### Body assertions
@@ -441,7 +467,8 @@ public void should_attach_pdf_invoice_when_invoice_emailed() throws Exception {
 ### What NOT to do
 - No hardcoded mailbox address or App Password.
 - No unbounded search — always `ReceivedDateTerm` + exact `RecipientStringTerm`.
-- No `Thread.sleep` as the wait — use the deadline poll (the in-loop sleep is the cadence only).
+- No `Thread.sleep` — Awaitility polls the search.
+- No cleanup inside a test body — the base class's `@AfterMethod` deletes what the test received.
 - No whole-INBOX wipe/expunge — clean up per message only.
 - No assertions on the entire HTML body string.
 - No shared single alias across tests — one `+tag` per test.

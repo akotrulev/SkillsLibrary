@@ -12,9 +12,9 @@ Wires Java tests to a **hosted device/browser grid** — BrowserStack, Sauce Lab
 ## Stack
 
 - Java 21, Gradle (Kotlin DSL)
-- **Web**: `com.microsoft.playwright:playwright` connected to a cloud grid via `BrowserType.connect(wsEndpoint)`
+- **Web**: `com.microsoft.playwright:playwright` at the pin in the **Versions** table of `qa/java/skills/ui-test-author/playwright/SKILL.md` (this skill pins nothing). A grid class extends J1's `BaseTest` and overrides its `newBrowser(playwright)` hook to `chromium().connect(wsEndpoint)` (`references/lifecycle.md` §3 of that skill); context per test, failure evidence and `BASE_URL` are unchanged
 - **Mobile**: `io.appium:java-client` 9.x (`UiAutomator2Options` / `XCUITestOptions`, `AndroidDriver`/`IOSDriver`) pointed at the vendor's remote hub
-- TestNG as the runner; parallelism via `thread-count` / `data-provider-thread-count` in `testng.xml`
+- TestNG as the runner with `parallel="classes"`: one class = one browser = one grid session, so the suite's `thread-count` is the number of concurrent sessions, set from `GRID_CONCURRENCY`. Data providers stay sequential
 - Tunnels: `com.browserstack:browserstack-local-java` (`Local` class), Sauce Connect 5 (`sc` binary), LambdaTest Tunnel (`LT` binary)
 - Grid config under `src/test/java/.../support/grid/`; credentials via **env vars only** (`BROWSERSTACK_USERNAME` / `BROWSERSTACK_ACCESS_KEY`, `SAUCE_USERNAME` / `SAUCE_ACCESS_KEY`, `LT_USERNAME` / `LT_ACCESS_KEY`)
 - These suites run in CI under `qa/cicd/java/skills/ci-pipelines` — secrets injected via the runner's secret store / OIDC, sharding driven by the runner (see § Parallelism)
@@ -60,15 +60,39 @@ Ask at most 3 questions; infer the rest from the existing test project.
 
 ## Deep-dive reference
 
-These sections live in `references/details.md` — **read it when the task touches them**: **Patterns**.
+These sections live in `references/details.md` — **read it when the task touches them**: **Patterns** — secrets, the BrowserStack connect (`BrowserStackGrid`), one session per class (`GridSession`), the grid class, Sauce, Appium, capability blocks, parallelism (`testng-grid.xml` + `GridConcurrency`), session status, tunnels, Device Farm.
+
+## The web grid in one picture
+
+```java
+public class LoginOnEdgeTest extends LoginTest {
+    private GridSession session;
+
+    @Override
+    protected Browser newBrowser(Playwright playwright) {
+        session = BrowserStackGrid.connect(playwright, GridTarget.EDGE_WINDOWS_11, getClass().getSimpleName());
+        return session.browser();
+    }
+
+    @AfterClass(alwaysRun = true)
+    public void markSession(ITestContext run) {
+        session.markOutcome(run, this);
+    }
+}
+```
+
+The class reruns `LoginTest`'s tests on Edge in one BrowserStack session, marks that session's verdict once
+from the failures TestNG recorded for it, and attaches the dashboard link; `testng-grid.xml` runs the grid
+package through `./gradlew gridTest`. There is no second base class: the grid target is an override on the class
+that needs it.
 
 ## Rules
 
 ### Connection
-- **Web**: connect, don't launch. Playwright Java → BrowserStack `chromium().connect(wsEndpoint)` with **flat caps**; Sauce → `saucectl`; LambdaTest → its connect endpoint with `LT:Options`.
+- **Web**: connect, don't launch. Playwright Java → override `BaseTest.newBrowser(playwright)` to BrowserStack `chromium().connect(wsEndpoint)` with **flat caps**; Sauce → `saucectl`; LambdaTest → its connect endpoint with `LT:Options`. Never a private `Playwright.create()` or a grid base class beside `BaseTest`.
 - **Mobile**: build `UiAutomator2Options`/`XCUITestOptions`, attach the vendor block via `setCapability`, point `new AndroidDriver(new URL(hubUrl), options)` at the hub; the page objects don't change.
 - **Never mix** BrowserStack's flat Playwright caps with the W3C `bstack:options` nesting — they apply to different connection paths.
-- Pin the Playwright/Appium version cap to your installed version; a version skew is a confusing remote failure.
+- `client.playwrightVersion` is the **installed** client version, read from the Playwright jar's Maven metadata (`BrowserStackGrid.installedPlaywrightVersion()`) — never a typed `"1.x"` or a literal that drifts from the build. A version skew is a confusing remote failure.
 
 ### Capabilities
 - Use the **current** key names (`userName`/`buildName`/`sessionName`, not legacy `browserstack.user`/`version`). Vendors renamed them off JSON-Wire.
@@ -76,7 +100,8 @@ These sections live in `references/details.md` — **read it when the task touch
 - App under test is referenced by the vendor's uploaded id (`bs://…`), **never a local file path** in the cap.
 
 ### Parallelism
-- Read the concurrent-session cap from **one env var** (`GRID_CONCURRENCY`) and map it onto TestNG `thread-count`. Never hard-code silently.
+- `parallel="classes"`, never `parallel="methods"` or `@DataProvider(parallel = true)`: Playwright Java is not thread-safe, and two methods of one class would share one `page` (`lifecycle.md` §1).
+- Read the concurrent-session cap from **one env var** (`GRID_CONCURRENCY`) and set it as the grid suite's `thread-count` with an `IAlterSuiteListener` declared in `testng-grid.xml` — a suite file's `thread-count` overrides Gradle's `threadCount`. Never hard-code silently.
 - `total CI shards × thread-count ≤ plan session cap`. Sharding mechanics live in `qa/cicd/java/skills/ci-pipelines/*` — cross-link, don't duplicate.
 
 ### Secrets
@@ -85,8 +110,8 @@ These sections live in `references/details.md` — **read it when the task touch
 - Never log a credential or persist it into an artifact/HAR.
 
 ### Artifacts & status
-- Surface the **session dashboard URL** in output / Allure on failure — a failed grid run should be one click from the replay.
-- **Mark the session pass/fail** back to the vendor (`browserstack_executor` / `sauce:job-result` / `lambda-status`) in `@AfterMethod`. The dashboard must reflect reality.
+- Surface the **session dashboard URL** in Allure (`Allure.attachment("BrowserStack session", url)`, allure-java 3.0) — a failed grid run should be one click from the replay. The local failure evidence (trace, video, screenshot) still comes from `BaseTest`.
+- **Mark the session pass/fail once per session** back to the vendor (`browserstack_executor` / `sauce:job-result` / `lambda-status`). A Playwright class is one session, so it marks in `@AfterClass` from the failures recorded for that instance; marking in `@AfterMethod` lets the last test overwrite the verdict. The dashboard must reflect reality.
 
 ### Tunnels
 - Start the tunnel **before** the suite (`@BeforeSuite`), stop it in `@AfterSuite`; tie sessions via `local`+`localIdentifier` / `tunnelName`.
@@ -108,16 +133,16 @@ These sections live in `references/details.md` — **read it when the task touch
 
 1. Confirm **web vs mobile**, **vendor** (+ region for Sauce/Device Farm), **private target?** (tunnel), and the **session cap**.
 2. Add `support/grid/GridCredentials.java` with the `required(...)` env reads — no literals.
-3. **Web**: add `PlaywrightGridConnector` (BrowserStack flat-cap `connect`) + a `GridWebTestBase` that yields a `Page` and marks status in `@AfterMethod`; or scaffold `.sauce/config.yml` (Sauce) / the LambdaTest connect. **Mobile**: add `AppiumGridDriverFactory` — `UiAutomator2Options` + `setCapability("bstack:options", map)` + `new AndroidDriver(new URL(hubUrl), options)`.
-4. Map the session cap onto TestNG `thread-count` from `GRID_CONCURRENCY`; note the `shards × thread-count ≤ cap` rule and cross-link `qa/cicd/java/skills/ci-pipelines/*`.
-5. Wire artifacts (`Artifacts.attachSessionUrl`) + session status (`SessionStatus.mark…`) into `@AfterMethod`.
-6. If the target is private, add the tunnel lifecycle (`GridTunnel` in `@BeforeSuite`/`@AfterSuite`) and tie sessions via the cap.
+3. **Web**: add `GridTarget`, `BrowserStackGrid` (flat-cap `connect`, the installed client version) and `GridSession`; then one grid class per target per test class, extending that test class and overriding `newBrowser(playwright)` (J1's `BaseTest` hook); or scaffold `.sauce/config.yml` (Sauce) / the LambdaTest connect. **Mobile**: add `AppiumGridDriverFactory` — `UiAutomator2Options` + `setCapability("bstack:options", map)` + `new AndroidDriver(new URL(hubUrl), options)`.
+4. Add `testng-grid.xml` (`parallel="classes"`, the grid package) with the `GridConcurrency` listener, and the `gridTest` Gradle task; note the `shards × GRID_CONCURRENCY ≤ cap` rule and cross-link `qa/cicd/java/skills/ci-pipelines/*`.
+5. Mark each session once and attach its dashboard URL — `GridSession.markOutcome` in the grid class's `@AfterClass` (web), `SessionStatus.mark…` in the driver teardown (mobile).
+6. If the target is private, add the tunnel lifecycle (`GridTunnel` in a `@BeforeSuite`/`@AfterSuite` class listed in `testng-grid.xml`) and tie sessions via the cap.
 7. Run a single test against the grid first (one thread) to confirm the connection + caps before fanning out. Confirm the session appears on the dashboard with the right build/project tags. Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run".
 
 ## Cross-references
 
 - **`qa/typescript/skills/browser-cloud-setup`** + **`qa/dotnet/skills/browser-cloud-setup`** — sibling grid stacks. Same five moves (connect → caps → parallelism → artifacts/status → tunnel), different SDKs (`chromium.connect`/`@wdio/*-service`; Playwright .NET `ConnectAsync`/`AppiumOptions`). Structure ported, not code.
-- **`qa/java/skills/ui-test-author/playwright`** — writes the web tests/page objects this skill runs on a grid (connection patterns to extend).
+- **`qa/java/skills/ui-test-author/playwright`** — writes the web tests/page objects this skill runs on a grid, and owns `BaseTest`, whose `newBrowser(playwright)` hook a grid class overrides.
 - **`qa/java/skills/ui-test-author/appium`** — writes the mobile tests/page objects; this skill swaps the local Appium session for a grid one (same driver-factory discipline).
 - **`qa/cicd/java/skills/ci-pipelines`** — sharding/`-PshardIndex` + OIDC secret injection; this skill maps the plan cap onto those shards (don't duplicate the mechanics).
 - **`qa/java/skills/device-cloud`** — deeper cloud-Appium / device-pool specifics; this node is config/wiring, that one is the farm.

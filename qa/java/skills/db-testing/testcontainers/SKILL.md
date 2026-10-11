@@ -215,7 +215,7 @@ new GenericContainer<>("ghcr.io/myco/legacy-app:1.4.0")
 - If parallelising: one container per class via `@BeforeClass` (no shared static), and prove isolation.
 
 ### Diagnostics
-- On failure, attach container logs to the report: `POSTGRES.getLogs()` → Allure via `Allure.addAttachment(...)` in a TestNG `IInvokedMethodListener`.
+- On failure, attach container logs to the report: `POSTGRES.getLogs()` → Allure via `Allure.attachment(name, content)` (allure-java 3.0) in a TestNG `IInvokedMethodListener`.
 
 ### What NOT to do
 - No `Thread.sleep` — use the module's wait strategy.
