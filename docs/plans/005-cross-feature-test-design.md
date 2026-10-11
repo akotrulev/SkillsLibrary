@@ -10,7 +10,7 @@ session looks the connections up there instead of re-deriving them. The three `q
 then automate the new case kinds. They run scheduled jobs on demand, control the clock at a time
 boundary, fire concurrent requests, and deliver a message or webhook twice.
 
-**Status:** K1, D1, Q1, Q2, A1 and A2 landed 2026-10-11. K1: `business-analysis:dependency-map`, its golden example, the KB contract and feature slice, the three reasoning-lane edits and the `business-analyst` edits. D1: `dev:doc-feature-trace` has the seventh inventory (Edges) and the seam recipes, area and feature documents have *How it connects*, and `be-documenter` writes the dependency map. Q1: `requirements-breakdown` writes §8 Connections (schema constraints moved to the data dictionary), `qa-*:cross-feature-test-design` exists with its golden example, registered in all three `qa-*` plugins (D14 records four departures from §9.3). Built but unverified: nothing has been run (the gate is A3), and description lengths and file sizes are counted by hand or `wc` only. Q2: `test-case-writer` writes parameterized field cases and the chain, async, temporal and concurrency forms; `qa-test-case-designer` runs five steps with Code mode and the depth gate; `qa-test-planner` plans from the slice. A1: `qa-typescript:time-and-concurrency-testing` (jobs on demand, controlled clock, barrier races, duplicate delivery), the `qa-api-typescript` Step 3 / Mode B wiring and three review checks, registered in `qa-typescript` only; nothing was run, samples uncompiled. A2: `qa-java:time-and-concurrency-testing` (same shape, plus `references/helpers.md`), the `qa-api-java` wiring and three review checks, registered in `qa-java` only; nothing was run, samples uncompiled. Next: A3. O1 is answered: the automation is in this
+**Status:** K1, D1, Q1, Q2, A1, A2 and A3 landed 2026-10-11; only H1 (the user) remains. K1: `business-analysis:dependency-map`, its golden example, the KB contract and feature slice. D1: `dev:doc-feature-trace` has the seventh inventory (Edges), area and feature documents have *How it connects*, `be-documenter` writes the dependency map. Q1/Q2: `requirements-breakdown` writes §8 Connections, `cross-feature-test-design` exists in all three `qa-*` plugins, `qa-test-case-designer` runs five steps with Code mode and the depth gate (D14, D15). A1–A3: `time-and-concurrency-testing` in `qa-typescript`, `qa-java` and `qa-dotnet` (each only in its own plugin), the three `qa-api-*` wirings and the three review checks. A3 also wrote the catalog and README, and ran §11: `python3 -m json.tool` exit 0; `claude plugin validate .` `✔ Validation passed`; `plugin-surface-check.py` OK; `token-audit.py --violations-only` 0 / 89 / 0 / 53 with none of the five new SKILL.md files listed; `qa-version-check.py` OK; id cross-check 0 missing of 23 known ids; arithmetic recomputed, 0 mismatches; format sweep clean (D17 records one fix the gate forced). Built but unverified: no code sample in any `time-and-concurrency-testing` skill has been compiled or run, and whether the suites get deeper and the patterns run on a real project is H1's verdict. Next: H1.
 plan, as tasks A1–A3. The plan changes skills and agents only, so the gate (§11) proves structure, not
 quality. The new stack skills' code samples are never compiled. Whether the suites actually get deeper,
 and whether the automation patterns run, is unverified until H1 runs the lane on a real project.
@@ -735,6 +735,8 @@ Cost: the designer is 30 characters over its +2,000 bullet.
 
 **D16 — A2's skill keeps helper code in `references/helpers.md` (2026-10-11).** A1's reading: the helpers sit inline in SKILL.md. As built: Java's helpers (`MutableClock`, config, `Race`, `CronJobRunner`) are longer than TypeScript's, and inline the body was 20,988 characters against §10's 16,000; the three blocks moved out and SKILL.md points to them. Cost: a reader opens a second file for the helper code; A3 mirrors this.
 
+**D17 — The gate forced a fix in A1's file, and A3 teaches `AdjustTime` for backward clock moves (2026-10-11).** A1's reading: three review rows fit `qa-typescript` `api-test-author/review`. As built: they took that SKILL.md from 15,912 to 16,645 characters and made it the 90th body violation against §11's ≤ 89, so A3 moved its "Good signals" section to `references/good-signals.md` (15,853 characters now); the cost is a second file to open when grading a clean suite. Separately, §7.8 says "swap `TimeProvider` for `FakeTimeProvider`": `SetUtcNow` cannot go back, and the cached `WebApplicationFactory` host outlives a test, so the .NET skill resets and rewinds with `AdjustTime`; on an older `Microsoft.Extensions.TimeProvider.Testing` without it, build the factory per test.
+
 ## Answered questions (2026-10-11)
 
 **O1 — Should the stack agents automate the new case kinds (on-demand job runs, clock control,
@@ -1192,6 +1194,14 @@ carries §7.8's three checks.
 - **Before stopping:** rewrite H1's prompt block if what landed changes its checklist. Do **not** file
   the plan, because H1's block remains.
 
+**As built (2026-10-11):** as planned; §11 passed after one fix (D17).
+- `qa/dotnet/skills/time-and-concurrency-testing/SKILL.md`: 15,720 characters (`wc -m`); description 488 characters. A2's layout: `references/helpers.md` holds `CronJobRunner` (kubectl, no catch), `ApiFactory` (`FakeTimeProvider` through `ConfigureTestServices`) with the base fixture that rewinds the clock, and `Race.StartTogetherAsync` (ready signal, `TaskCompletionSource` gate, `Task.WhenAll`) with a `[Repeat(20)]` example.
+- `qa/dotnet/agents/qa-api-dotnet.md`: Step 3 entry plus a Mode B paragraph (seam or named deferral to `be-dotnet`); net +455 characters. `qa/dotnet/skills/api-test-author/review/SKILL.md`: three checks (blocker / major / major) before the 401 row. Marketplace: registered in `qa-dotnet` only (sweep: one folder per plugin, three in all).
+- Docs: `docs/skills-catalog.md` (10 BA skills, `dependency-map` bullet and KB layout and ids, `cross-feature-test-design`, five steps and Code mode, `time-and-concurrency-testing` bullet, seven inventories plus the dependency map in the reverse lane) and `README.md` (10 skills, `/business-analysis:dependency-map`, the stack-skill row, the `qa` status row: 35 code-producing nodes, 8 process skills, the unverified note).
+- APIs checked 2026-10-11: `TimeProvider` (base library from .NET 8) and `Microsoft.Extensions.TimeProvider.Testing` (Learn page of 2026-02-26 shows 10.0.0; `FakeTimeProvider` members from the library's `main` source, so not pinned to a package version: `SetUtcNow`/`Advance` forward-only and throwing backwards, `AdjustTime` rewinds, `SetLocalTimeZone`) · Hangfire 1.7.31 changelog (`TriggerJob` added, `RecurringJob.Trigger` obsolete; 1.8.x not checked) · Quartz.NET 3.x and 4.0.1 (`TriggerJob(JobKey, JobDataMap?, CancellationToken)` from the 4.x remarks; the 4.x return type was not read, `await` works either way) · NUnit 4 `[Repeat]` (stops at first failure; `StopOnFailure` since 4.3.0, `RequiredPassPercentage` NUnit 5; per-repetition `[SetUp]` is inferred from the attribute's design, not a doc sentence). Unchecked: Hangfire's `IRecurringJobManager.TriggerJob` signature on 1.8.x, `WebApplicationFactory` on .NET 8 versus 10 beyond what the skill already assumes.
+- Gate output (§11): steps 1–5 as in `Status`. Step 6: `/tmp/a3/ids.py`, 23 known ids, 0 missing. Step 7: every number in `example-cancel-booking.md` §6 recomputed against §9 and Ana's month (25 h, 24 h 00 m 00 s / 23 h 59 m 59 s / 24 h 00 m 01 s, 8 → 6, 7 → 5, £12.00, £18.00, 52 h, 18 h): 0 mismatches. Step 8: `grep "six inventories"` has matches only in this plan (it quotes the check); the KB terms appear in both files; the designer's `Step <n>` citations match the five-step table; `time-and-concurrency-testing` is in Step 3 of all three `qa-api-*` agents and all three review skills.
+- Unverified: no sample was compiled or run; the .NET `[Repeat]` and `AdjustTime` behaviour is from documentation and source only.
+
 ### H1 — try it on a real feature
 
 **Stack:** `human` · **Agent:** `human` · **Owner:** the user
@@ -1246,63 +1256,9 @@ in the checkout you are given, commit there, and never create a branch.
 | A3 | `docs` | `general-purpose` | A1, A2, Q2, Q1, D1, K1 | ~125k |
 | H1 | `human` | **the user** | A3 | one real feature |
 
-Two blocks are live (A3, H1). K1, D1, Q1, Q2, A1 and A2 have landed (their blocks are deleted).
+One block is live (H1). K1, D1, Q1, Q2, A1, A2 and A3 have landed (their blocks are deleted).
 
 ---
-
-### A3 — qa-dotnet: `time-and-concurrency-testing`, docs, the gate, and close-out (general-purpose, docs)
-
-````
-You are a general-purpose agent working in the SkillsLibrary repo. Task A3 of
-docs/plans/005-cross-feature-test-design.md: `qa-dotnet:time-and-concurrency-testing` — A1's skill for
-.NET 10 (8–9 supported) + NUnit + WebApplicationFactory — plus the qa-api-dotnet wiring and three
-review checks; then README and the catalog for everything the plan added; then the plan's only gate.
-
-Read, in this order:
-1. CLAUDE.md (Test code rules, Simplicity, Comments, Version policy, Planning).
-2. The plan: §7.8, §10, §11, D11, D13, task A3 and every As built note above it, and
-   "Close-out — every task".
-3. qa/typescript/skills/time-and-concurrency-testing/SKILL.md — the shape to mirror (and A2's, to keep
-   the three consistent).
-4. qa/dotnet/agents/qa-api-dotnet.md (Step 3 row at line ~76, input modes).
-5. qa/dotnet/skills/api-test-author/ (writer and review SKILL.md files).
-6. qa/dotnet/skills/feature-flag-testing/SKILL.md (in-process override via the factory),
-   qa/dotnet/skills/messaging-testing/SKILL.md, and the poller in qa/dotnet/skills/db-testing/.
-7. docs/skills-catalog.md grep-scoped (line 7, line 20, the "Business-analysis catalog" section, the
-   qa/manual bullets near lines 58 and 136–142, the stack-skill list near line 100, line 264) and
-   README.md lines 84, 201, 300, 353.
-
-Before writing an API into the skill, confirm it against current documentation for .NET 8, 9 and 10:
-`TimeProvider` and `FakeTimeProvider` (which package, which TFMs), Hangfire's and Quartz.NET's trigger
-APIs for the versions in use, NUnit `[Repeat]`. Record the versions you checked in your As built.
-
-Build (task A3's bullets, in order): the SKILL.md (template description with `.NET 10 (8–9) / NUnit`,
-≤ 500 characters, counted) · qa-api-dotnet (Step 3 entry, Mode B mapping, be-dotnet as hook owner;
-net ≤ 800) · review checks · marketplace registration in qa-dotnet only · catalog · README.
-
-Then the gate — §11, in order:
-  python3 -m json.tool .claude-plugin/marketplace.json > /dev/null
-  claude plugin validate .
-  python3 tools/plugin-surface-check.py
-  python3 tools/token-audit.py --violations-only
-  python3 tools/qa-version-check.py
-plus §11 steps 6–8 (id cross-check script in your scratchpad, arithmetic recompute, format sweep).
-Fix what it finds — a failure may belong to any task above you, not only to you.
-
-Traps:
-- Code reading `DateTime.UtcNow`/`DateTimeOffset.UtcNow` directly cannot be time-controlled — defer and
-  hand the `TimeProvider` seam to be-dotnet; never sleep to the boundary.
-- Shape: A2's skill keeps the clock, race-gate and cron-runner helper code in `references/helpers.md` to stay
-  under 16,000 characters (its SKILL.md is 15,953); do the same for the .NET helpers and mirror that layout.
-- A `BackgroundService` loop is usually not invocable from a test — that is a hook request, not a reason
-  to wait for its timer.
-- Token audit: SKILL.md body violations ≤ 89, agent-file violations ≤ 53, 0 description violations,
-  and none of the five new SKILL.md files listed. Relocate detail to references/ before trimming rules.
-- Do not file the plan: H1's block remains. Rewrite H1's checklist if what landed changes it.
-
-Commit: `feat(qa-dotnet): time-and-concurrency-testing; docs; gate passed (005 A3)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
 
 ### H1 — try it on a real feature (the user)
 

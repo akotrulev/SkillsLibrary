@@ -64,6 +64,9 @@ Reviews .NET API test code against the patterns enforced by `qa/dotnet/skills/ap
 | Created resources tracked and deleted in `[TearDown]` | Cleanup inlined in the test body instead of registered | major |
 | Unexpected errors fail loudly with an identifying message | Empty `catch`, catch-and-continue, or an assertion whose failure names no id/subject | major |
 | Deserialization failures name the property path and body | A bare `JsonException` trace with no `AttachBody` and no contract-drift message | major |
+| A job test never waits for the real schedule (`qa/dotnet/skills/time-and-concurrency-testing`) | A `Thread.Sleep` / `Task.Delay` or long poll until the cron fires, or the production schedule edited so the job fires soon | blocker |
+| A boundary test runs with a controlled clock or a stated skew margin | A cut-off / DST / month-end test with no replaced `TimeProvider`, no test-clock endpoint, and no margin larger than skew plus latency named in the test | major |
+| A race test has a start gate and `[Repeat]`; a duplicate-delivery test is not defeated by broker deduplication | Sequential awaits called a race; a `for` loop or `Parallelizable` as the barrier; asserting which request won; a duplicate publish with the same broker message / deduplication id | major |
 | 401 test uses a single status-code assertion | A 401 test that tries to deserialize a `ProblemDetails` body | minor |
 | `[AllureFeature]` + `[AllureStory]` + `[AllureSeverity]` on every test | Missing Allure attributes | minor |
 | TC-ID traceability when a test-case document exists (`[AllureTms(...)]` / `[Property("TmsLink", "TC-…")]` / `[AllureStory("TC-… — …")]`) | Tests generated from a TC document with no link back to the planned cases | nit |

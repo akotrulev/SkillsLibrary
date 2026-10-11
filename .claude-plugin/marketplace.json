@@ -327,6 +327,7 @@
         "./qa/dotnet/skills/security-testing/passive-scan",
         "./qa/dotnet/skills/production-uptime-checks",
         "./qa/dotnet/skills/test-data-builder",
+        "./qa/dotnet/skills/time-and-concurrency-testing",
         "./qa/dotnet/skills/ui-project-setup",
         "./qa/dotnet/skills/ui-test-author/appium",
         "./qa/dotnet/skills/ui-test-author/playwright",
