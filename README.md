@@ -16,7 +16,7 @@ The repo is a Claude Code plugin marketplace of **21 plugins**. Add it once, the
 | `fe-*` · `mobile-*` | `dev` + `design` |
 | `data` · `tooling` · `training-data` · `penetration-testing` · `security-governance` | nothing |
 
-`dev` is the delivery lane (design, planning, documentation, audits, debugging); `design` is the visual/UX craft layer with the vendored `ui-ux-pro-max` corpus. A dependency is enabled with its dependent and cannot be disabled while a dependent is on.
+`dev` is the delivery lane (design, planning, documentation, audits, debugging); `design` is the visual/UX craft layer with the vendored `ui-ux-pro-max` corpus. Installing a plugin installs its dependencies too; enabling them per project is covered below.
 
 ```shell
 /plugin marketplace add akotrulev/SkillsLibrary
@@ -48,10 +48,11 @@ The repo is a Claude Code plugin marketplace of **21 plugins**. Add it once, the
 Install at user scope, keep every `skills-library` plugin `false` in `~/.claude/settings.json`, and enable the project's set in the project's `.claude/settings.json` — the higher scope wins per plugin:
 
 ```json
-{ "enabledPlugins": { "be-java@skills-library": true, "fe-react@skills-library": true, "qa-typescript@skills-library": true } }
+{ "enabledPlugins": { "be-java@skills-library": true, "fe-react@skills-library": true, "qa-typescript@skills-library": true,
+                      "dev@skills-library": true, "design@skills-library": true } }
 ```
 
-`dev` and `design` come on with them.
+**List `dev` (and `design` for `fe-*` / `mobile-*`) explicitly.** A dependency is installed with its dependent, but an explicit `false` at user scope still wins: with the global `false` above, `claude plugin list` run inside the project shows `dev` and `design` disabled unless the project enables them itself (verified 2026-10-11). Check a project with `claude plugin list --json` from its root.
 
 ### Typing names
 
