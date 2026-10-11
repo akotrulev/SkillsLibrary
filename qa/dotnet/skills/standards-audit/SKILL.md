@@ -27,9 +27,9 @@ By default this audits the **whole suite**. The user may narrow it to one automa
 
 | Scope | Sections in play | Sections skipped | Tagged rows skipped |
 |---|---|---|---|
-| `api` | A, B, C, G, H, I, J\*, K, L, M, N | E, F | A9, A10, D3, D5, D6, D9, D10, I3, I11–I13, K9, M16 **[PW]** · D4 **[Sel]** · D12 **[Appium]** |
-| `ui` | A, B, C, E, F, G, I, J\*, K, L, M, N | H | D12 **[Appium]** · E14 **[Appium]** — keep every **[PW/Sel]** row |
-| `mobile` | A, B, C, E, F, G, I, J\*, K, L, M, N | H | A9, A10, D3, D5, D6, D9, D10, E16, E17, F2, I3, I11–I13, K9, M16 **[PW]** · D4, E13, F7 **[Sel]** — keep D12 **[Appium]**, E14 **[Appium]** |
+| `api` | A, B, C, G, H, I, J\*, K, L, M, N | E, F | A9, A10, D3, D5, D6, D9, D10, I3, I11–I13, K9, M16 **[PW]** · D4 **[Sel]** · D12, K6, L15 **[Appium]** |
+| `ui` | A, B, C, E, F, G, I, J\*, K, L, M, N | H | D12, E14, E18, K6, L15 **[Appium]** — keep every **[PW/Sel]** row |
+| `mobile` | A, B, C, E, F, G, I, J\*, K, L, M, N | H | A9, A10, D3, D5, D6, D9, D10, E16, E17, F2, I3, I11–I13, K9, M16 **[PW]** · D4, E13, F7 **[Sel]** — keep D12, E14, E18, K6, L15 **[Appium]** |
 | `all` (default) | every section the Step-1 probes find applicable | — | — |
 
 \* **J is discipline-independent** — it stays gated by its own probe (does the suite touch a DB/broker/storage/mail), in every scope. An API, UI, or mobile suite can all do external verification.

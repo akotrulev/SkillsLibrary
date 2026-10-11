@@ -118,21 +118,21 @@ The writer's rules and mechanics are in `qa/dotnet/skills/ui-test-author/playwri
 | Check | Bad sign | Severity |
 |---|---|---|
 | Page objects subclass `BaseAppiumPage` | Class extends `AppiumDriver` directly or uses raw `IWebDriver` | major |
-| `FindByAccessibilityId` → `FindById` → `FindByXPath` priority honored | XPath used where a `testID` / `accessibilityIdentifier` exists | major |
-| `AppiumElement` returned by accessors — no raw `IWebElement` | Method returns `IWebElement` | minor |
+| Per-platform ladder honored: `TestId` (iOS `AccessibilityId`, Android `Id`) → native query → XPath | XPath where a test id exists; `AccessibilityId` on Android for a React Native `testID` | major |
+| Elements stay private; the page exposes intent methods and queries | A public method returns `AppiumElement` or `IWebElement` | minor |
 | `VerifyPageLoaded()` present and asserts a landmark | Missing or empty implementation | major |
 | Navigation actions return the destination page object | Navigation method returns `void` | minor |
 | Locator strings declared as `private const string` | Locator literals inline in action methods | minor |
 | Platform branching abstracted behind a strategy / locator map | `if (Platform == "iOS") … else …` scattered across pages | major |
-| App state reset between tests (`driver.ResetApp()` / fresh install / `noReset:false`) | Tests leak data into each other through shared app state | blocker |
-| Capabilities loaded from `appsettings*.json`, not hardcoded in `[SetUp]` | `new AppiumOptions { … }` literal `deviceName = "Pixel_6"` in base | major |
-| Gestures via W3C Actions / `ExecuteScript("mobile: ...")` (Appium 2.x) | Deprecated `TouchAction` / `MultiTouchAction` calls | major |
+| App state reset between tests (fresh driver / `mobile: clearApp` / `TerminateApp` + `ActivateApp`) | Shared app state leaks between tests, or the removed `ResetApp()` / `CloseApp()` is called | blocker |
+| One platform switch (`PLATFORM`); devices, app path and URL from env through the factory | `new AppiumOptions { … }` with `DeviceName = "Pixel_6"` in a test or base, or a second selection mechanism | major |
+| Gestures via `ExecuteScript("mobile: …")` or W3C Actions; network via `mobile: setConnectivity` | `TouchAction` / `MultiAction` (removed in 6.0), `ToggleWifi`, `SetConnectionType` (removed in 8.0) | major |
 | No `Thread.Sleep` between gestures | `Thread.Sleep(1500)` after a swipe waiting for animation | blocker |
-| Test names describe user behavior on device | `Screen1Test`, `TapButton2` | minor |
+| Failure evidence comes from `BaseMobileTest` only | No screenshot or page source on failure, or a second capture hook | major |
 
 ## Good signals (.NET)
 
-- Playwright: one `BaseTest : PageTest` with `BaseURL` and failure evidence, a `.runsettings`, CPM; Selenium / Appium: a thin base page and an `AsyncLocal` driver factory
+- Playwright: one `BaseTest : PageTest` with `BaseURL` and failure evidence, a `.runsettings`, CPM; Selenium: a thin base page and an `AsyncLocal` driver factory; Appium: a thin base page, a driver factory, `BaseMobileTest`
 - Locators built once on the highest ladder rung; components take a parent `ILocator` / `IWebElement`
 - One `[Test]` per behavior named `Should_X_When_Y`, web-first assertions, `[TestCase]` parameterization
 

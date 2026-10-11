@@ -25,7 +25,7 @@ Turns a discovered element inventory into a **C# Appium page object** — a `Bas
 ## Inputs needed
 
 1. **Screen name** (PascalCase → `LoginPage`, `OrderConfirmationPage`)
-2. **Element list** — per element: name, type, and the locator-ladder rung from `mobile-screen-explorer` (accessibility id preferred; resource-id / UIAutomator / predicate / XPath fallback)
+2. **Element list** — per element: name, type, and the locator-ladder rung from `mobile-screen-explorer` (the test id first; a native query, then XPath, as fallbacks)
 3. **Landmark element** — the one element that proves the screen is visible (used by `VerifyPageLoaded()`)
 4. **Actions** — user-intent actions and, for each, whether it navigates to another screen (→ destination `*Page` class name)
 5. **Target project** — repo path and existing `AppiumTests/Pages/` location/convention to match
@@ -35,72 +35,34 @@ Turns a discovered element inventory into a **C# Appium page object** — a `Bas
 Before writing, **load `qa/dotnet/skills/ui-test-author/appium/SKILL.md`** and apply its page-object rules. The non-negotiables it defines:
 
 - Extend `BaseAppiumPage`; constructor passes `driver` to `: base(driver)` — never extend `AppiumDriver` or call `Driver.FindElement(...)` directly
-- All element access goes through the inherited finders, in ladder order: `FindByAccessibilityId` → `FindById` → native query (`AppiumBy.AndroidUIAutomator` · `AppiumBy.IosNsPredicateString` / `AppiumBy.IosClassChain`) → `FindByXPath` (+ `// TODO`). An XPath rung is a temporary scaffold, not a destination — when `mobile-screen-explorer` later reports a native locator for that element, downgrade to it and drop the TODO.
-- Each locator is a `private const string {Element}Id` constant at the top — never inline a locator string in a method
+- All element access goes through the inherited finders, in ladder order: `ByTestId` (iOS `AccessibilityId`, Android `Id`) → a native query (`ByAndroidUiAutomator` · `ByIosPredicate` / `ByIosClassChain`) → `ByXPath`. An XPath rung is a temporary scaffold, not a destination — when `mobile-screen-explorer` later reports a stronger locator for that element, downgrade to it and drop the fallback row from `missing-testids.md`.
+- Each locator is a `private const string {Element}Id` constant at the top (a fallback is `{Element}XPathFallback`) — never inline a locator string in a method
 - Return types: `void` for same-screen actions; the destination page object for navigation actions
 - **Every page object overrides `VerifyPageLoaded()`** asserting the landmark is displayed (the only assertion allowed inside a page object)
-- Returned elements are `AppiumElement` (or `IReadOnlyList<AppiumElement>`) — never raw `IWebElement` casts scattered in tests; no PageFactory / `[FindsBy]`
+- Elements stay private: a page exposes intent methods and queries (`Title()`), never an `AppiumElement`; no PageFactory / `[FindsBy]`
 - No `Thread.Sleep` — the base class's `WebDriverWait` handles timing
 - Namespace `AppiumTests.Pages`; file `AppiumTests/Pages/<Screen>Page.cs`; multi-step flows in a sub-namespace, repeating rows as components scoped to a parent `AppiumElement`
 
 ## Template
 
-```csharp
-using OpenQA.Selenium.Appium;
-using NUnit.Framework;
+The shape to emit is [`qa/dotnet/skills/ui-test-author/appium/assets/page_template.cs`](../ui-test-author/appium/assets/page_template.cs); `LoginPage.cs` beside it shows a navigating action (`SignIn` returns `OrdersPage`) and `OrderRow.cs` a scoped component. Copy and rename; do not retype.
 
-namespace AppiumTests.Pages;
-
-public class LoginPage : BaseAppiumPage
-{
-    // Locator constants — accessibility id (testID) first; fallbacks carry a TODO
-    private const string EmailFieldId    = "login-email";
-    private const string PasswordFieldId = "login-password";
-    private const string SubmitButtonId  = "login-submit";
-
-    public LoginPage(AppiumDriver driver) : base(driver) { }
-
-    public override void VerifyPageLoaded()
-    {
-        var email = FindByAccessibilityId(EmailFieldId);
-        Assert.That(email.Displayed, Is.True,
-            "Expected LoginPage to be visible but the email field was not found.");
-    }
-
-    public HomePage Login(string email, string password)
-    {
-        var emailField = FindByAccessibilityId(EmailFieldId);
-        emailField.Clear();
-        emailField.SendKeys(email);
-
-        var passwordField = FindByAccessibilityId(PasswordFieldId);
-        passwordField.Clear();
-        passwordField.SendKeys(password);
-
-        FindByAccessibilityId(SubmitButtonId).Click();
-        return new HomePage(Driver);
-    }
-}
-```
-
-For an element with no accessibility id, use the fallback finder and mark it. Prefer a native query (`AppiumBy.AndroidUIAutomator` / `AppiumBy.IosClassChain`) over XPath whenever the source exposes one; reserve XPath for when it doesn't:
+For an element with no test id, use the fallback finder and record the row in `missing-testids.md` (page, element, suggested id, fallback in use). The code carries no marker; the constant's name says it is a fallback. Prefer a native query (`ByAndroidUiAutomator` / `ByIosClassChain`) over XPath whenever the source exposes one:
 
 ```csharp
-// TODO: missing accessibility id 'login-password-reveal' — see missing-testids.md
-//       XPath is a scaffold; replace with a native locator once the app exposes one.
-private const string PasswordRevealXPath = "//*[@class='…ImageButton'][2]";
+private const string PasswordRevealXPathFallback = "//*[@class='…ImageButton'][2]";
 ```
 
 ## Procedure
 
 1. **Check for an existing page object.** Glob the project for `**/Pages/**/<Screen>Page.cs` (and `**/Pom/**`). Exists → this is an **update** (step 4). Missing and the project has no `Pages/` at all → load `qa/dotnet/skills/page-object-design` first to lay down the base class + structure.
-2. **Map every element to a constant + finder** using its locator-ladder rung. Accessibility-id elements use `FindByAccessibilityId`; fallbacks use the matching finder and carry a `// TODO` referencing `missing-testids.md`.
+2. **Map every element to a constant + finder** using its locator-ladder rung. Test-id elements use `ByTestId`; fallbacks use the matching finder and have a row in `missing-testids.md`.
 3. **Write the class** per the conventions above: constants block, constructor, `VerifyPageLoaded()` on the landmark, one intent-named action per user action (returning `void` or the destination `*Page`), one query method per datum a test reads. Stub any destination page that doesn't exist yet.
 4. **Update mode — diff before writing:**
    - New element on screen, not in class → add constant + accessor/action
    - Constant in class, element gone from screen → flag and **ask** before deleting (may belong to a state you didn't reach)
    - Element's accessibility id changed → update the constant, note it as a breaking rename for the team
-   - Fallback locator where an accessibility id now exists → upgrade to `FindByAccessibilityId`, drop the `// TODO`, remove the row from `missing-testids.md`
+   - Fallback locator where a test id now exists → upgrade to `ByTestId`, remove the row from `missing-testids.md`
    - Never reorder/rename existing public methods tests already call without flagging it
 5. **Verify:** `dotnet build` (or the project equivalent) → compiles clean. Confirm `VerifyPageLoaded()`'s landmark matches what `mobile-screen-explorer` reported for this screen. Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run".
 6. **Report:** class created/updated (diff summary), counts (accessibility-id-backed / fallback / ⚠ XPath), destination stubs created, open questions.
@@ -108,7 +70,7 @@ private const string PasswordRevealXPath = "//*[@class='…ImageButton'][2]";
 ## Rules
 
 - **Discovery is not this skill's job** — never invent a locator. If an element wasn't in the `mobile-screen-explorer` inventory, go get it there first.
-- **Accessibility-id-first** in the emitted code, matching the discovery contract; fallbacks always carry the `// TODO`.
+- **Test-id-first** in the emitted code, matching the discovery contract; every fallback has a `missing-testids.md` row and no marker in the code.
 - **`ui-test-author/appium` wins on every convention conflict** — this skill is its codegen-from-inventory front end, not a competing rulebook.
 - **No assertions outside `VerifyPageLoaded()`**, no business logic / API calls, no test code in the page object.
 - One class per screen; update in place rather than creating a parallel duplicate.

@@ -3,378 +3,272 @@ name: qa-mobile-native-features-dotnet
 description: Use when testing the device-native, OS-level capabilities a mobile app uses that a normal Appium page-object UI test doesn't exercise — permissions, push, deep links, biometrics, camera. Triggers "test our deep link opens the right screen in Appium C#", "handle the camera/location permission dialog", "test Face ID / fingerprint login on the simulator". Not for device-cloud wiring (`device-cloud`).
 ---
 
-# QA — Mobile Native Features (.NET: Appium.WebDriver + NUnit)
+# QA — Mobile Native Features (.NET: Appium.WebDriver 9 + Appium 3 + NUnit)
 
-Scaffolds Appium tests for the **device-native, OS-level capabilities** a mobile app touches but a normal
-page-object UI test never exercises — deep links, runtime permission dialogs, biometric auth, push notifications,
-and the app's background/foreground lifecycle. It sits **directly on top of `qa/dotnet/skills/ui-test-author/appium`**: the
-`BaseAppiumPage` / `AppiumDriverFactory` / `Env` lifecycle and the page objects run **unchanged** — this skill adds
-the layer that drives the OS surfaces *around* your screens.
+Appium tests for the **OS-level capabilities** a mobile app touches but a page-object UI test never exercises: deep links, runtime permission dialogs, biometrics, push notifications, the app lifecycle, the clipboard, orientation. It sits on `qa/dotnet/skills/ui-test-author/appium`: `BaseAppiumPage`, `AppiumDriverFactory`, `BaseMobileTest` and the page objects run **unchanged**. This skill adds the layer that drives the OS surfaces *around* your screens.
 
-> **The discipline this skill encodes** — four ideas that separate a correct native-feature test from a
-> page-object reflex:
+> **Four ideas separate a native-feature test from a page-object reflex:**
 >
-> 1. **A native feature lives OUTSIDE your app's DOM — it is an OS-level surface, so you drive it through the
->    device/driver API, not page-object selectors.** A runtime permission dialog, the biometric prompt, the
->    notification shade, the deep-link intent, the app's lifecycle state — none of these are elements on *your*
->    screens; they belong to Android/iOS. Reaching for `FindByAccessibilityId(...)` on the OS permission dialog is
->    the native-testing analogue of looking for an HTTP status on a gRPC call: **the surface isn't yours.** You
->    drive it with `Driver.ExecuteScript("mobile: …")`, `Driver.BackgroundApp/TerminateApp/ActivateApp`, the
->    clipboard/biometric APIs, or `Driver.SwitchTo().Alert()` — and you assert the *effect* on your own screen via
->    the page object.
-> 2. **A deep link is tested by ROUTING, not by tapping.** Launch the app via the link (`mobile: deepLink` / a URL)
->    and assert your page object shows the **right destination screen** — never reproduce the navigation by tapping
->    through the UI (that tests your taps, not the link). The link is the OS surface; the destination screen is
->    yours.
-> 3. **Biometric and the permission dialog are injected/forced for determinism — and driven for real only when the
->    flow itself is under test.** A fingerprint/face match is **injected** on the emulator/simulator
->    (`FingerPrint(int)` / `mobile: sendBiometricMatch`) — *never* a real sensor, *never* a `Thread.Sleep` waiting
->    for one. A permission grant is made **deterministic** with a capability (`autoGrantPermissions` /
->    `autoAcceptAlerts`) for the 90% of tests that just need the permission *out of the way* — and you drive the
->    real OS dialog only for the handful of tests where *the dialog flow itself* (deny → degraded UX) is under test.
-> 4. **The app lifecycle is a first-class assertion target — assert state is restored on resume, never sleep
->    through it.** Backgrounding, resuming, terminating, a push arriving — each is a `mobile:` / driver call, and
->    each is followed by a **bounded wait on the app's observable reaction** (an explicit `WebDriverWait` on the
->    restored screen), never a fixed `Thread.Sleep`. "Restored after resume" is an assertion you write, not a pause
->    you hope through.
+> 1. **A native feature lives outside your app's element tree.** A permission dialog, the biometric prompt, the notification shade, a deep-link intent and the lifecycle state belong to Android or iOS. Drive them with `mobile:` commands and the driver's device calls, then assert the *effect* on your own screen through a page object.
+> 2. **A deep link is tested by routing, not by tapping.** Launch through the link and assert the destination page. Tapping through the UI tests your taps.
+> 3. **Biometrics and permissions are injected for determinism, and driven for real only when the flow is under test.** A fingerprint or face match is injected on the emulator or simulator, never a real sensor. A permission is pre-granted by capability for the tests that only need it out of the way; the real dialog is driven for the few tests about grant versus deny.
+> 4. **The lifecycle is an assertion target.** Background, resume, terminate and a push arriving are each followed by a bounded wait on the app's reaction, never a sleep.
 
 ## Decision matrix — native surface → test shape
 
-| Native surface | Where it lives | Test shape (C#) |
-|----------------|----------------|-----------------|
-| **Deep / universal link** | OS intent / URL handler | `Driver.ExecuteScript("mobile: deepLink", {url, package/bundleId})` → assert destination **page object** is loaded (routing, not taps) |
-| **Runtime permission — out of the way** | OS permission dialog | Cap `autoGrantPermissions=true` (Android) / `autoAcceptAlerts=true` (iOS) → the dialog never appears; test the feature behind it |
-| **Runtime permission — the flow IS the test** | OS permission dialog / Springboard | Drive the real dialog: Android `mobile: changePermissions` or the `permissioncontroller` buttons; iOS `Driver.SwitchTo().Alert().Dismiss()` / `mobile: alert` → assert granted vs degraded UX |
-| **Biometric — approved** | OS biometric prompt | Android `((AndroidDriver)Driver).FingerPrint(1)`; iOS `mobile: sendBiometricMatch {type, match:true}` → assert the unlocked screen |
-| **Biometric — rejected** | OS biometric prompt | same, `match:false` → assert the fallback (PIN screen / error), not a crash |
-| **Push notification** | Notification shade / Center | Android `((AndroidDriver)Driver).OpenNotifications()` + assert + tap; iOS sim `mobile: pushNotification` → open from Center → assert deep-linked screen |
-| **Background → resume** | App lifecycle | `Driver.BackgroundApp(TimeSpan.FromSeconds(3))` → **wait** for the restored screen → assert state preserved |
-| **Terminate → relaunch** | App lifecycle | `Driver.TerminateApp(bundleId)` → `Driver.ActivateApp(bundleId)` → assert cold-vs-warm start state; `GetAppState` to verify |
-| **Clipboard** | OS pasteboard | `Driver.SetClipboardText("…", "plaintext")` → paste in-app → assert; or read what the app copied |
-| **Camera / file / photo picker** | OS picker (not your UI) | seed the file with `PushFile`, then mock/drive the picker — never automate the real camera |
-| **Orientation** | OS rotation | `Driver.Orientation = ScreenOrientation.Landscape` → assert layout reflows |
+| Native surface | Test shape (Appium.WebDriver 9) |
+|---|---|
+| **Deep / universal link** | `mobile: deepLink` → assert the destination **page object** |
+| **Permission — out of the way** | option `autoGrantPermissions` (Android) · `autoAcceptAlerts` (iOS), set in `AppiumDriverFactory` |
+| **Permission — a specific state** | Android `mobile: changePermissions` · iOS simulator `mobile: setPermission` |
+| **Permission — the dialog is the test** | `Driver.SwitchTo().Alert()` (iOS) · the `permissioncontroller` buttons (Android) → assert granted versus degraded UX |
+| **Biometric — approved / rejected** | Android `mobile: fingerprint` · iOS `mobile: sendBiometricMatch` → assert the unlocked screen, then the fallback |
+| **Push** | Android `OpenNotifications()` · iOS simulator `mobile: pushNotification` → open it → assert the routed screen |
+| **Background → resume** | `BackgroundApp(TimeSpan)` → wait on the restored screen |
+| **Terminate → relaunch** | `TerminateApp` → `ActivateApp` → `GetAppState` |
+| **Geolocation** | Android `mobile: setGeolocation` · iOS `mobile: setSimulatedLocation` → assert the location-driven screen |
+| **Clipboard** | `mobile: setClipboard` (base64) → paste → assert |
+| **Camera / file picker** | seed the file with `PushFile`, drive the picker, never the real camera |
+| **Orientation** | `Driver.Orientation = ScreenOrientation.Landscape` → assert the layout reflows |
 
 ## Stack
 
-- .NET 8, nullable reference types enabled
-- **Appium .NET client** `Appium.WebDriver` 8.x (`OpenQA.Selenium.Appium`, `.Android`, `.iOS`, `.Enums`) on
-  Selenium 4 — `AppiumDriver` exposes `BackgroundApp` / `TerminateApp` / `ActivateApp` / `GetAppState` /
-  `SetClipboardText` / `GetClipboardText` / `Orientation` / `PushFile`; `AndroidDriver` adds `FingerPrint(int)` /
-  `OpenNotifications()`
-- **NUnit** (the global default .NET runner); fluent `Assert.That(...)`
-- **Allure NUnit** for reporting (attach a screenshot of the restored/deep-linked screen per native-flow result)
-- Reuses `qa/dotnet/skills/ui-test-author/appium`'s `AppiumDriverFactory`, `BaseMobileTest`, page objects, and `Env` —
-  **unchanged**
-- App path / device caps / Appium server URL via `Env` — never hardcoded; no secrets in code
-- Native-feature helpers under `AppiumTests/Support/Native/`
-
-```xml
-<!-- AppiumTests.csproj (excerpt) — same deps as the appium/dotnet skill; nothing new for native features -->
-<PackageReference Include="Appium.WebDriver" Version="8.0.0" />
-<PackageReference Include="NUnit" Version="4.2.2" />
-<PackageReference Include="Allure.NUnit" Version="2.12.1" />
-```
+- .NET 10; the pins (`Appium.WebDriver` 9.0.0, `Selenium.Support`, NUnit 4.6.1, `Allure.NUnit` 2.15.0) are the **Versions** table of `qa/dotnet/skills/ui-test-author/appium/SKILL.md`. This skill adds no package; Appium.WebDriver 8.x is the supported lane and every helper below exists there
+- **NUnit** assertions with a subject (`Assert.That(actual, Is.EqualTo(expected), subject)`); failure evidence is `BaseMobileTest`, and this skill adds no second hook
+- Helpers live in `AppiumTests/Support/Native/`
+- Appium 3 removed the old `/appium/*` routes and Appium.WebDriver 8.0 removed `ToggleWifi`, `ToggleData`, `ToggleAirplaneMode` and `SetConnectionType`. Network state is `mobile: setConnectivity` (`wifi`, `data`, `airplaneMode`); there is no client method to call
+- `AppiumDriver` has `BackgroundApp`, `ActivateApp`, `TerminateApp`, `PushFile`, `FingerPrint(int)` and `Orientation`. `GetAppState`, the clipboard methods and `OpenNotifications()` sit on `AndroidDriver` / `IOSDriver`, which is why the helper below uses the `mobile:` form for the clipboard and a `switch` for the state
 
 ## When to use
 
-- Verifying a **deep / universal link** opens the correct in-app screen
-- Testing behavior **behind a runtime permission** (camera, location, notifications, contacts) — either with the
-  dialog auto-handled, or with the **dialog flow itself** under test (grant vs deny)
-- Testing **biometric** login / step-up on an emulator or simulator (approve and reject paths)
-- Asserting **app state survives backgrounding / resume**, a cold relaunch, or a push tap
-- Driving **clipboard**, a **camera/file/photo picker**, or **orientation** changes the app reacts to
+- A **deep or universal link** must open the right screen
+- Behavior **behind a runtime permission**, with the dialog handled or under test
+- **Biometric** login or step-up on an emulator or simulator, approve and reject
+- State that must survive **backgrounding**, a cold relaunch, or a push tap
+- **Geolocation**, **clipboard**, **picker** or **orientation** behavior
 
 ## When NOT to use
 
-- Driving **your app's own screens** via page objects → `qa/dotnet/skills/ui-test-author/appium` (this skill builds **on** it)
-- The **real-device-cloud** layer + GPS/network/biometric **cap-injection plumbing** → `qa/dotnet/skills/device-cloud`
-  (`device-cloud` = *where* the test runs + how caps are injected on a farm; `mobile-native-features` = *what* you assert on those caps — they
-  compose)
-- Asserting the **network requests** an app makes → `qa/dotnet/skills/network-mocking/*` (`mobile-native-features` = the app's *reaction* to airplane
-  mode / a permission; network-mocking = asserting the requests)
-- The Java / TypeScript native-feature stacks → `qa/{java,typescript}/skills/mobile-native-features`
-- **Token-based** auth → `qa/dotnet/skills/test-login-tokens` (biometric *unlock* vs token *auth* are different surfaces)
+- The app's own screens → `qa/dotnet/skills/ui-test-author/appium`
+- Real-device farm wiring and farm-side biometric/GPS injection → `qa/dotnet/skills/device-cloud`
+- The requests an app makes → `qa/dotnet/skills/network-mocking/*`
+- Token auth → `qa/dotnet/skills/test-login-tokens`
 
----
+## The helper
 
-## The foundation — page objects + driver lifecycle run unchanged
-
-Every test here extends `qa/dotnet/skills/ui-test-author/appium`'s `BaseMobileTest` and uses its `AppiumDriverFactory`. The
-page objects (`LoginPage`, `DashboardPage`, …) drive **your** screens exactly as before. This skill adds a thin
-`NativeFeatures` helper that owns the **OS-surface** calls, so a test reads as: *drive the OS surface → assert the
-effect on a page object.* The native call is the only new vocabulary; the assertion is still a page object.
+`NativeFeatures` owns every OS-surface call, including the ones that touch OS UI, so no test holds a raw `FindElement` or a wait. A test reads: *drive the OS surface, assert the effect on a page object.* The identifier is a package on Android and a bundle id on iOS, so one private method picks the key.
 
 ```csharp
-// AppiumTests/Support/Native/NativeFeatures.cs
+using System.Text;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Appium;
 using OpenQA.Selenium.Appium.Android;
+using OpenQA.Selenium.Appium.Enums;
+using OpenQA.Selenium.Appium.iOS;
+using OpenQA.Selenium.Support.UI;
 
 namespace AppiumTests.Support.Native;
 
-/// <summary>
-/// Owns the OS-level surfaces around the app. Every method drives a device/driver API or a `mobile:` command —
-/// never a page-object selector. The caller asserts the effect on a page object afterwards.
-/// </summary>
 public sealed class NativeFeatures(AppiumDriver driver)
 {
-    // --- 1. Deep links: launch via the OS, assert routing on a page object ---
+    private static readonly TimeSpan Timeout = TimeSpan.FromSeconds(10);
+    private const int UnenrolledFingerprintId = 99;
+    private const string PermissionDenyButtonId = "com.android.permissioncontroller:id/permission_deny_button";
+
     public void OpenDeepLink(string url, string appIdentifier) =>
-        // UiAutomator2: {url, package}; XCUITest: {url, bundleId} — see the per-platform helpers below.
         driver.ExecuteScript("mobile: deepLink", new Dictionary<string, object>
         {
             ["url"] = url,
-            ["package"] = appIdentifier,
+            [IsIos ? "bundleId" : "package"] = appIdentifier,
         });
 
-    // --- 3. Biometric: inject a match/no-match — emulator/simulator only, never a real sensor ---
-    public void ApproveFingerprint(int fingerId) =>
-        ((AndroidDriver)driver).FingerPrint(fingerId);   // enrolled finger id on the emulator
+    public void ApproveFingerprint(int fingerprintId) =>
+        driver.ExecuteScript("mobile: fingerprint", new Dictionary<string, object> { ["fingerprintId"] = fingerprintId });
+
+    public void RejectFingerprint() => ApproveFingerprint(UnenrolledFingerprintId);
 
     public void SendIosBiometric(string type, bool match) =>
-        driver.ExecuteScript("mobile: sendBiometricMatch", new Dictionary<string, object>
+        driver.ExecuteScript("mobile: sendBiometricMatch", new Dictionary<string, object> { ["type"] = type, ["match"] = match });
+
+    public void BackgroundFor(TimeSpan duration) => driver.BackgroundApp(duration);
+
+    public void Terminate(string appIdentifier) => driver.TerminateApp(appIdentifier);
+
+    public void Activate(string appIdentifier) => driver.ActivateApp(appIdentifier);
+
+    public AppState StateOf(string appIdentifier) => driver switch
+    {
+        AndroidDriver android => android.GetAppState(appIdentifier),
+        IOSDriver ios => ios.GetAppState(appIdentifier),
+        _ => throw new InvalidOperationException($"No app state for {driver.GetType().Name}"),
+    };
+
+    public void SetAndroidLocation(double latitude, double longitude) =>
+        driver.ExecuteScript("mobile: setGeolocation", new Dictionary<string, object> { ["latitude"] = latitude, ["longitude"] = longitude });
+
+    public void SetIosLocation(double latitude, double longitude) =>
+        driver.ExecuteScript("mobile: setSimulatedLocation", new Dictionary<string, object> { ["latitude"] = latitude, ["longitude"] = longitude });
+
+    public void SetClipboard(string text) =>
+        driver.ExecuteScript("mobile: setClipboard", new Dictionary<string, object>
         {
-            ["type"] = type,   // "touchId" | "faceId"
-            ["match"] = match,
+            ["content"] = Convert.ToBase64String(Encoding.UTF8.GetBytes(text)),
+            ["contentType"] = "plaintext",
         });
 
-    // --- 4. Lifecycle: background/terminate/activate — each followed by a bounded wait in the test ---
-    public void BackgroundFor(TimeSpan duration) => driver.BackgroundApp(duration);
-    public void Terminate(string bundleOrPackage) => driver.TerminateApp(bundleOrPackage);
-    public void Activate(string bundleOrPackage)  => driver.ActivateApp(bundleOrPackage);
+    public string Clipboard()
+    {
+        var base64 = (string)driver.ExecuteScript("mobile: getClipboard", new Dictionary<string, object> { ["contentType"] = "plaintext" });
+        return Encoding.UTF8.GetString(Convert.FromBase64String(base64));
+    }
 
-    // --- clipboard / orientation: OS surfaces the app reacts to ---
-    public void SetClipboard(string text) => driver.SetClipboardText(text, "plaintext");
-    public string GetClipboard()          => driver.GetClipboardText();
-    public ScreenOrientation Orientation  { set => driver.Orientation = value; }
+    public void DismissIosAlert() => driver.SwitchTo().Alert().Dismiss();
+
+    public void DenyAndroidPermission() =>
+        new WebDriverWait(driver, Timeout)
+            .Until(_ => driver.FindElements(MobileBy.Id(PermissionDenyButtonId)).FirstOrDefault(button => button.Enabled))!
+            .Click();
+
+    public void OpenAndroidNotification(string text)
+    {
+        driver.ExecuteScript("mobile: openNotifications", new Dictionary<string, object>());
+        new WebDriverWait(driver, Timeout)
+            .Until(_ => driver.FindElements(By.XPath($"//*[contains(@text, '{text}')]")).FirstOrDefault(row => row.Displayed))!
+            .Click();
+    }
+
+    public ScreenOrientation Orientation
+    {
+        set => driver.Orientation = value;
+    }
+
+    private bool IsIos => driver is IOSDriver;
 }
 ```
 
----
+The clipboard travels as **base64** in both directions: a raw string is not a valid payload.
 
-## 1. Deep / universal links — test the routing, not the taps (idea #2)
+## 1. Deep and universal links — test the routing (idea 2)
 
-A deep link's contract is: *given this URL, the app opens this screen.* So launch the app **via the link** and
-assert your page object shows the destination — never reproduce the navigation by tapping through the UI. The link
-is the OS surface (`mobile: deepLink` builds the intent / opens the URL); the destination is your screen.
+`mobile: deepLink` builds the intent on Android and opens the URL on iOS. The test never taps.
 
 ```csharp
-// Android (UiAutomator2): mobile: deepLink {url, package}
 [Test]
-public void Should_OpenOrderDetails_When_DeepLinkOpened()
+public void Should_OpenOrderDetails_When_OrderLinkIsOpened()
 {
-    var os = new NativeFeatures(Driver);
-
-    os.OpenDeepLink("myapp://orders/A-1001", "com.example.shop");   // OS routes the intent — no taps
+    new NativeFeatures(Driver).OpenDeepLink("myapp://orders/A-1001", "com.example.shop");
 
     var details = new OrderDetailsPage(Driver);
-    details.VerifyPageLoaded();                                     // page object proves the ROUTE landed
-    Assert.That(details.OrderId(), Is.EqualTo("A-1001"));           // …and carried the param through
+    details.VerifyPageLoaded();
+    Assert.That(details.OrderNumber(), Is.EqualTo("A-1001"), "order shown by the deep link");
 }
 ```
 
-> **iOS differs by where the app runs.** On the **simulator**, `mobile: deepLink` takes `{url, bundleId}` and works
-> for custom-scheme and Universal Links. On a **real iOS device** you cannot just hand the URL to the app — open it
-> through **Safari** (`Driver.Url = url` in a Safari session, then tap "Open") because a custom scheme has to be
-> resolved by the OS. Android `mobile: deepLink` (an `am start -d <url>`) is uniform across emulator and real device.
-> **Universal Links vs custom-scheme deep links:** a Universal/App Link is an `https://` URL the OS associates with
-> the app; a custom-scheme link (`myapp://`) is app-private. Test the **https** form for Universal Links so you also
-> prove the association resolved.
+- On iOS, `mobile: deepLink` works on a simulator and on a real device from iOS 16.4 and Xcode 14.3; only below that does a real device need the link opened in Safari.
+- A Universal or App Link is an `https://` URL the OS associates with the app (`apple-app-site-association`, `assetlinks.json`); a custom scheme (`myapp://`) is app-private. Test the **https** form to prove the association resolves.
 
----
+## 2. Permission dialogs — deterministic by default (idea 3)
 
-## 2. Runtime permission dialogs — deterministic by default, driven only when the flow is the test (idea #3)
+**Out of the way (most tests).** The options are set where the session is built (`AppiumDriverFactory`): `autoGrantPermissions` on Android, `autoAcceptAlerts` on iOS (`autoDismissAlerts` denies), each through `AddAdditionalAppiumOption`.
 
-The OS permission dialog is **not your UI** — it belongs to the system, its selectors differ per OS version, and
-it pops up nondeterministically. So there are two modes, and picking the right one is the whole skill:
+**A specific posture.** Android: `mobile: changePermissions` with `permissions`, `appPackage` and `action` `grant` or `revoke`, and `mobile: getPermissions`. iOS simulator: `mobile: setPermission` with `bundleId` and `access` such as `camera` → `yes`.
 
-**Mode A — get the dialog out of the way (the 90% case).** Most tests want to test *the feature behind* a
-permission, not the dialog. Grant it deterministically with a capability so the dialog never appears:
+**The dialog is the test.** Drive the real OS dialog through `NativeFeatures`, then assert the degraded path your app renders:
 
 ```csharp
-// Android: grant all manifest permissions on install — the dialog never shows
-android.AddAdditionalAppiumOption("autoGrantPermissions", true);
-
-// iOS: auto-accept any system alert that appears (or autoDismissAlerts to deny)
-ios.AddAdditionalAppiumOption("autoAcceptAlerts", true);
-```
-
-> Android also has `mobile: changePermissions` / `mobile: getPermissions` to **set a specific permission state**
-> before a flow (`granted` / `denied`) — sharper than the all-or-nothing cap when you want camera granted but
-> location denied. Prefer it when the test needs a *specific* permission posture.
-
-**Mode B — the dialog flow IS the test (the handful that matters).** When you're testing what happens on **deny**
-(degraded UX, a "go to Settings" prompt) or the grant flow itself, you must drive the **real** OS dialog — through
-the OS surface, not a page object on your screens:
-
-```csharp
-// iOS: the system alert is reachable via the standard alert API or `mobile: alert`
 [Test]
-public void Should_ShowDegradedMap_When_LocationDenied()
+public void Should_ShowManualLocationPrompt_When_LocationIsDenied()
 {
     var map = new MapPage(Driver);
-    map.TapUseMyLocation();                                  // triggers the OS permission dialog
+    map.TapUseMyLocation();
 
-    Driver.SwitchTo().Alert().Dismiss();                     // DENY on the real OS dialog (not your UI)
-    // or: Driver.ExecuteScript("mobile: alert", new Dictionary<string, object> { ["action"] = "dismiss" });
+    new NativeFeatures(Driver).DismissIosAlert();
 
-    map.VerifyManualLocationPromptShown();                   // assert the DEGRADED path your app renders
+    Assert.That(map.IsManualLocationPromptShown(), Is.True, "manual location prompt after a denied permission");
 }
 ```
 
-```csharp
-// Android: the dialog is the permissioncontroller package; drive its real buttons when the flow is under test.
-// (For determinism prefer the cap / mobile: changePermissions; only walk the buttons when testing the dialog UX.)
-Driver.FindElement(AppiumBy.Id("com.android.permissioncontroller:id/permission_deny_button")).Click();
-```
+On Android the dialog belongs to the `com.android.permissioncontroller` package, and `DenyAndroidPermission()` waits for its button by resource id. Prefer the option or `changePermissions`, and walk the buttons only when the dialog UX is under test. On iOS a foreground system alert makes the active app `com.apple.springboard`; the alert API handles that, so never hardcode button coordinates.
 
-> **iOS Springboard nuance:** when a permission/system alert is at the foreground, the active app context is
-> `com.apple.springboard`, not your app. The XCUITest alert API handles this for you; if you ever need to interact
-> with the dialog directly, `mobile: activateApp` Springboard first. Don't hardcode Springboard button coordinates.
+## 3. Biometrics — inject the match, assert the unlock and the reject (idea 3)
 
----
-
-## 3. Biometric auth — inject the match, assert the unlock (and the reject) (idea #3)
-
-A fingerprint/Face ID match is **injected** on the emulator/simulator — there is no real sensor in CI, and a
-`Thread.Sleep` waiting for a human finger is banned and pointless. Enroll biometrics on the device, trigger the
-prompt from your screen, inject the match, then assert the unlocked screen. Always test **both** the approved and
-the rejected path.
+There is no sensor in CI. Enroll on the device, trigger the prompt from your screen, inject, assert. Test both paths.
 
 ```csharp
-// Android: emulator must have a fingerprint enrolled; AndroidDriver.FingerPrint(id) injects a touch
 [Test]
-public void Should_ReachDashboard_When_FingerprintApproved()
-{
-    var login = new LoginPage(Driver);
-    login.TapBiometricSignIn();                 // YOUR screen triggers the OS biometric prompt
-
-    new NativeFeatures(Driver).ApproveFingerprint(1);   // inject a MATCH for enrolled finger id 1
-
-    var dashboard = login.AwaitDashboard();             // explicit wait inside the page object — no sleep
-    Assert.That(dashboard.IsLoaded(), Is.True);
-}
-
-[Test]
-public void Should_ShowPinFallback_When_FingerprintRejected()
+public void Should_ReachDashboard_When_FingerprintIsApproved()
 {
     var login = new LoginPage(Driver);
     login.TapBiometricSignIn();
 
-    // a non-enrolled finger id injects a NO-MATCH; assert the fallback, not a crash
-    new NativeFeatures(Driver).ApproveFingerprint(99);
+    new NativeFeatures(Driver).ApproveFingerprint(1);
 
-    Assert.That(login.IsPinFallbackShown(), Is.True);
+    Assert.That(login.AwaitDashboard().IsLoaded(), Is.True, "dashboard after an approved fingerprint");
+}
+
+[Test]
+public void Should_ShowPinFallback_When_FingerprintIsRejected()
+{
+    var login = new LoginPage(Driver);
+    login.TapBiometricSignIn();
+
+    new NativeFeatures(Driver).RejectFingerprint();
+
+    Assert.That(login.IsPinFallbackShown(), Is.True, "PIN fallback after a rejected fingerprint");
 }
 ```
 
-```csharp
-// iOS: enroll once, then send a match/no-match. Requires the sim to allow biometric enrollment.
-// ios.AddAdditionalAppiumOption("allowEnrollBiometrics", true) at session start; then:
-Driver.ExecuteScript("mobile: enrollBiometric", new Dictionary<string, object> { ["isEnabled"] = true });
-new NativeFeatures(Driver).SendIosBiometric("faceId", true);    // match
-// reject path: SendIosBiometric("faceId", false) → assert the passcode fallback screen
-```
+On an iOS simulator, call `mobile: enrollBiometric` with `isEnabled` true once, then `SendIosBiometric("faceId", true)` or `false`. No capability enrolls biometrics.
 
-> **Real-device biometric is a farm concern, not this skill's.** On a real device you can't inject a sensor read
-> locally — that's BrowserStack/Sauce sensor instrumentation (`enableBiometric` + `browserstack_executor
-> performBiometric`), which `qa/dotnet/skills/device-cloud` owns. They **compose**: write the approve/reject
-> *assertions* here, run them on the farm's injected biometric there. Never wire a real fingerprint into a test.
-
----
+A real device cannot take an injected read locally; BrowserStack and Sauce instrument the sensor, which `device-cloud` owns. Write the approve and reject assertions here and run them on the farm's injected biometric there.
 
 ## Deep-dive reference
 
-These sections live in `references/details.md` — **read it when the task touches them**: **4. Push notifications + backgrounding / resume — assert state, never sleep through it (idea #4)**.
+`references/details.md` holds **4. Push notifications and backgrounding** — read it when the task touches them.
 
-## Clipboard, pickers, orientation — the smaller OS surfaces
+## Clipboard, pickers, orientation
 
 ```csharp
-// Clipboard: seed the OS pasteboard, paste in-app, assert; or read what the app copied
-var os = new NativeFeatures(Driver);
-os.SetClipboard("PROMO2026");
-sharePage.TapPasteCode();
-Assert.That(checkoutPage.PromoField(), Is.EqualTo("PROMO2026"));
+[Test]
+public void Should_FillPromoField_When_CodeIsPasted()
+{
+    new NativeFeatures(Driver).SetClipboard("PROMO2026");
 
-// Orientation: the app should reflow, not crash
-os.Orientation = ScreenOrientation.Landscape;
-Assert.That(galleryPage.ColumnsVisible(), Is.EqualTo(3));   // layout reacts to the OS rotation
+    sharePage.TapPasteCode();
+
+    Assert.That(checkoutPage.PromoCode(), Is.EqualTo("PROMO2026"), "promo field after a paste");
+}
 ```
 
-> **Camera / photo / file pickers are an OS surface you don't automate directly.** You can't drive the real camera
-> in CI. Seed the file the picker will return with `Driver.PushFile(remotePath, bytes)`, then either mock the
-> picker or select the seeded file from the gallery picker — and assert your app handled the result. Never try to
-> "take a photo."
-
----
+A camera, photo or file picker is an OS surface you cannot drive in CI. Seed the file the picker returns with `Driver.PushFile(remotePath, bytes)`, pick it from the gallery picker, and assert how your app handled it.
 
 ## Anti-patterns
 
-| Smell | Why it's wrong | Do instead |
-|---|---|---|
-| `FindByAccessibilityId(...)` on the OS permission/biometric dialog | The dialog is the OS's UI, selectors differ per OS version, and it's nondeterministic | Drive it via the cap (`autoGrantPermissions`/`autoAcceptAlerts`), `mobile: changePermissions`, or `Driver.SwitchTo().Alert()` |
-| Testing a deep link by **tapping through** the UI to the screen | Tests your taps, not the link's routing | `mobile: deepLink` / launch the URL → assert the destination **page object** |
-| `Thread.Sleep` after backgrounding / a biometric injection / a push | Banned by CLAUDE.md; the OS reacts at its own pace | `WebDriverWait` on the restored / unlocked / deep-linked screen |
-| A **real fingerprint / camera** in the test | Impossible in CI, flaky, and unsafe | Inject biometric (`FingerPrint`/`sendBiometricMatch`); seed picker files with `PushFile` |
-| Only testing the **approve** biometric path | Reject (fallback to PIN) is where apps crash | Test both `match:true` and `match:false`/non-enrolled id |
-| Auto-granting permissions for **every** test, including the deny-UX test | The deny path never gets exercised | Mode A (cap) for feature tests; Mode B (drive the real dialog) for the flow-under-test |
-| Hardcoding Springboard / `permissioncontroller` button coordinates | OS-version-fragile | Use the XCUITest alert API / stable resource-ids; activate Springboard via `mobile: activateApp` |
-| Asserting a push was **sent** via Appium | That's a backend/push-provider concern | Assert the app's **reaction** (shade → tap → screen); push *sending* → provider sandbox |
-| Re-deriving the driver factory / page objects here | Duplicates `appium/dotnet`, drifts | Reuse `BaseMobileTest` + page objects unchanged; add only `NativeFeatures` |
+| Smell | Do instead |
+|---|---|
+| A page-object finder on the OS permission or biometric dialog | The option, `mobile: changePermissions`, or the alert API |
+| Reaching a screen by tapping to test a deep link | `mobile: deepLink` → assert the destination page |
+| `Thread.Sleep` after a background, an injection or a push | `WebDriverWait` on the restored, unlocked or routed screen |
+| A real fingerprint or camera | Inject the match; seed picker files with `PushFile` |
+| Only the approve path | Test the reject path too; reject is where apps crash |
+| A raw `FindElement` or a wait inside a test body | An intent method on `NativeFeatures` |
+| `ToggleWifi`, `ToggleData`, `SetConnectionType` | `mobile: setConnectivity` (removed in 8.0) |
+| Asserting a push was sent | Assert the app's reaction; delivery belongs to the provider's sandbox |
+| Rebuilding the driver factory or page objects here | Reuse `ui-test-author/appium`; add only `NativeFeatures` |
 
-## Examples
+## Rules
 
-**End-to-end: a deep link proves the routing discipline.** A page-object author writes a test that taps
-Home → Orders → search → row to reach order detail. The native-correct version launches
-`myapp://orders/A-1001` and asserts `OrderDetailsPage` loaded with the right id — it proves the **link routes**,
-which the tap-through test never does. Same destination screen, two completely different things proven: the OS
-surface (the link) vs your in-app navigation.
-
-**Composing with `device-cloud`.** This skill writes the *assertions* — "approved fingerprint reaches
-the dashboard", "denied location degrades gracefully". `device-cloud` owns *where they run and how the cap is injected* on a
-real-device cloud. They compose: the biometric reject test you write here runs on the farm's injected sensor there.
-The boundary mirrors gRPC's "assert the typed message" vs Testcontainers' "stand the service up" — *what you assert*
-vs *where it runs*.
-
-## Rules (hard constraints)
-
-- **The OS surface is driven by the device/driver API, never a page-object selector.** Permission dialogs,
-  biometric prompts, the notification shade, deep-link intents, lifecycle state → `mobile: …` /
-  `BackgroundApp`/`TerminateApp`/`ActivateApp` / `Driver.SwitchTo().Alert()`. Assert the **effect** on your screen
-  via the page object.
-- **Deep links are tested by routing.** Launch via `mobile: deepLink` / the URL and assert the destination page
-  object — never reproduce the navigation by tapping. Test the **https** Universal/App Link form so the association
-  is proven, not just a custom scheme.
-- **Permissions: deterministic by default, real only when the flow is the test.** Use `autoGrantPermissions` /
-  `autoAcceptAlerts` / `mobile: changePermissions` for feature tests; drive the **real** OS dialog only when the
-  grant/deny flow itself is under test, and exercise the **deny** path.
-- **Biometric is injected on emulator/simulator only** (`FingerPrint(int)` / `mobile: sendBiometricMatch`), never a
-  real sensor; test **both** approve and reject. Real-device biometric injection → `qa/dotnet/skills/device-cloud`.
-- **Lifecycle events assert restored state on a bounded wait.** `BackgroundApp` / `TerminateApp` / `ActivateApp` /
-  `GetAppState`, each followed by a `WebDriverWait` on the observable result. **No `Thread.Sleep`** anywhere —
-  including for OS animations, dialog appearance, or push delivery.
-- **Push tests assert the app's reaction, not the send.** Open the shade/Center (`OpenNotifications` /
-  `mobile: pushNotification`), assert, tap, assert the routed screen. Push *delivery* is a provider concern.
-- **Reuse `appium/dotnet` unchanged** — `BaseMobileTest`, `AppiumDriverFactory`, page objects, `Env`. Add only
-  `NativeFeatures`. App ids / device caps / server URL via `Env`; no secrets in code.
+- **The OS surface is driven by device calls and `mobile:` commands, never a page-object selector.** Assert the effect on your screen.
+- **Deep links are tested by routing**, and the https form proves the association.
+- **Permissions are deterministic by default, real only when the flow is the test**, and the deny path is exercised.
+- **Biometrics are injected on emulator or simulator only**; both approve and reject are tested, each with its own intent method (`ApproveFingerprint`, `RejectFingerprint`). Real-device injection belongs to `device-cloud`.
+- **Lifecycle events assert restored state on a bounded wait.** No `Thread.Sleep` anywhere.
+- **Clipboard content is base64** in both directions.
+- Tests are `Should_X_When_Y`, assert with NUnit and a subject, and never use `try`/`catch`. App ids and device settings come from env through `Env`; no secrets in code.
 
 ## Cross-references
 
-- **`qa/dotnet/skills/ui-test-author/appium`** — the **foundation this skill builds on**: `BaseAppiumPage` /
-  `AppiumDriverFactory` / `BaseMobileTest` / `Env`, the `AppiumOptions` capability idioms, `ExecuteScript("mobile:
-  …")` gesture commands, explicit waits, native↔WEBVIEW context switching. The page objects + driver lifecycle run
-  **unchanged**; `mobile-native-features` adds the OS-surface layer. Mirror its locator/wait idioms exactly.
-- **`qa/dotnet/skills/device-cloud`** — the **real-device-cloud layer** + GPS/network/biometric **cap-injection
-  plumbing**. `device-cloud` = *where* the test runs + *how* the cap is injected; `mobile-native-features` = *what* you assert on those caps. They
-  compose. Don't duplicate the farm wiring.
-- **`qa/java/skills/mobile-native-features`** + **`qa/typescript/skills/mobile-native-features`** — the sibling stacks (java-client
-  `InteractsWithApps`/`fingerPrint` · WebdriverIO `driver.execute('mobile: …')`); same four ideas, different client
-  idioms. Structure ported, not redesigned.
-- **`qa/dotnet/skills/network-mocking/*`** — the **boundary** on network conditioning/requests: `mobile-native-features` tests the app's *reaction*;
-  network-mocking asserts the *requests*.
-- **`qa/dotnet/skills/data-driven-testing`** — drive a **device / permission / locale matrix** via `[TestCaseSource]`
-  (one independent named case per row); this skill supplies the rows, that one the data-driven discipline.
-- **`qa/dotnet/skills/browser-cloud-setup`** — the grid/session wiring the device session connects through (under `device-cloud`).
-- **`qa/dotnet/skills/test-login-tokens`** — token-based auth, the boundary vs biometric *unlock*.
-- **`qa/reporting/dotnet/skills/test-reports`** — attach a screenshot of the deep-linked / restored / unlocked screen per
-  native-flow result.
+- **`qa/dotnet/skills/ui-test-author/appium`** — the foundation: `BaseAppiumPage`, `AppiumDriverFactory`, `BaseMobileTest`, gestures, WebView switching
+- **`qa/dotnet/skills/device-cloud`** — where the tests run and how farm-side GPS, network and biometric are injected
+- **`qa/dotnet/skills/data-driven-testing`** — a device, permission or locale matrix via `[TestCaseSource]`, one case per row
+- **`qa/dotnet/skills/test-login-tokens`** — token auth, the boundary with biometric unlock

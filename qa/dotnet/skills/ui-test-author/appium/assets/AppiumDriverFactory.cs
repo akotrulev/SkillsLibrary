@@ -1,27 +1,22 @@
 using OpenQA.Selenium.Appium;
 using OpenQA.Selenium.Appium.Android;
-using OpenQA.Selenium.Appium.Enums;
 using OpenQA.Selenium.Appium.iOS;
 
-namespace AppiumTests;
+namespace AppiumTests.Support;
 
-/// <summary>
-/// Single place that builds an <see cref="AppiumDriver"/> from a platform name.
-/// Capabilities and the server URL come from <c>Env</c> (env vars / -p:Platform=),
-/// never hardcoded. Tests and pages never instantiate a driver directly.
-/// </summary>
 public static class AppiumDriverFactory
 {
-    public static AppiumDriver Create(string platform)
-    {
-        var serverUri = new Uri(Env.AppiumServerUrl);
-        var startup = TimeSpan.FromSeconds(180);
+    private static readonly TimeSpan CommandTimeout = TimeSpan.FromSeconds(180);
 
-        return platform.ToLowerInvariant() switch
+    public static AppiumDriver Create()
+    {
+        var server = new Uri(Env.AppiumUrl);
+        var platform = Env.Required("PLATFORM");
+        return platform switch
         {
-            "android" => new AndroidDriver(serverUri, AndroidOptions(), startup),
-            "ios"     => new IOSDriver(serverUri, IosOptions(), startup),
-            _         => throw new ArgumentException($"Unknown platform: {platform}"),
+            "android" => new AndroidDriver(server, AndroidOptions(), CommandTimeout),
+            "ios" => new IOSDriver(server, IosOptions(), CommandTimeout),
+            _ => throw new ArgumentException($"PLATFORM must be android or ios, got {platform}"),
         };
     }
 
@@ -29,13 +24,13 @@ public static class AppiumDriverFactory
     {
         var options = new AppiumOptions
         {
-            AutomationName = AutomationName.AndroidUIAutomator2,
-            PlatformName   = "Android",
-            DeviceName     = Env.DeviceName,
+            AutomationName = "UiAutomator2",
+            PlatformName = "Android",
+            DeviceName = Env.Required("DEVICE_NAME"),
+            App = Env.Required("APP_PATH"),
         };
-        options.AddAdditionalAppiumOption("app", Env.AppPath);
-        options.AddAdditionalAppiumOption("noReset", true);
-        options.AddAdditionalAppiumOption("newCommandTimeout", 120);
+        options.AddAdditionalAppiumOption("autoGrantPermissions", true);
+        options.AddAdditionalAppiumOption("appium:settings[disableIdLocatorAutocompletion]", true);
         return options;
     }
 
@@ -43,11 +38,12 @@ public static class AppiumDriverFactory
     {
         var options = new AppiumOptions
         {
-            AutomationName = AutomationName.iOSXCUITest,
-            PlatformName   = "iOS",
-            DeviceName     = Env.DeviceName,
+            AutomationName = "XCUITest",
+            PlatformName = "iOS",
+            DeviceName = Env.Required("DEVICE_NAME"),
+            PlatformVersion = Env.Required("PLATFORM_VERSION"),
+            App = Env.Required("APP_PATH"),
         };
-        options.AddAdditionalAppiumOption("app", Env.AppPath);
         options.AddAdditionalAppiumOption("autoAcceptAlerts", true);
         return options;
     }

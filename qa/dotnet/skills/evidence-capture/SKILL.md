@@ -10,7 +10,7 @@ test carries, the deliberate recordings a test or an agent makes on purpose, and
 agent takes while it drives a browser. The mechanics for every capture API, in .NET spellings, are in
 [`references/playwright.md`](references/playwright.md).
 
-Appium: `references/appium.md`, written by M3
+Native mobile (Appium 3): [`references/appium.md`](references/appium.md) — `BaseMobileTest` keeps a screenshot, page source, device log and recording on failure in `<WorkDirectory>/appium-artifacts/`.
 
 ## Versions
 

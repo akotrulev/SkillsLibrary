@@ -89,7 +89,7 @@ recording only on failure on allure-java 3.0, an `AppiumDriverFactory`, a scoped
 gestures, WebView contexts and app state without `resetApp`; `NativeFeatures` on `mobile:` commands in
 `support.nativefeatures`; the farm with a presigned `PUT` that throws (D85) and a mobile Cucumber hook (D86);
 Appium reference in `evidence-capture`; and the screen, crawler, review, `browser-cloud-setup` and glue files
-cleaned. Next: M3. Built but unverified (M2): nothing compiled or ran — the Java Appium assets (an `AppiumDriver`
+cleaned. M3 landed 2026-10-11: the .NET mobile lane on Appium.WebDriver 9 / Appium 3 / NUnit 4.6.1 — `qa-mobile-dotnet` on §5.3's 28 tools with the appium-mcp prerequisites and the evidence skill at Step 1; `ui-test-author/appium` with thirteen assets (CPM props, a versionless csproj, `mobile.runsettings`, `Env`, `AppiumDriverFactory`, a `BaseMobileTest` whose `[TearDown]` keeps a screenshot, page source, device log and a recording only on failure with no catch (D88), `BaseAppiumPage`, `LoginPage`, `OrdersPage`, a scoped `OrderRow`, `OrdersTests`, `GestureExtensions` and a compiling `page_template.cs`) on `MobileBy` (D87) and the per-platform test-id ladder with the id-prefix setting; `mobile-native-features` on `mobile:` commands; `mobile-project-setup` on one `PLATFORM` mechanism; `device-cloud` without a Device Farm run (D89); the screen, crawler and review files cleaned; checklist rows C4, D12, E14 and K6 reworded and E18 and L15 added (D90); and `evidence-capture/references/appium.md`. Next: S1. Built but unverified (M3): nothing compiled or ran — the .NET Appium assets (`MobileBy`, `StartRecordingScreen` options, `WebDriverWait` from `Selenium.Support` 4.51.0, `AppiumElement.Rect`, `Manage().Logs.GetLog`) are G1's. Built but unverified (M2): nothing compiled or ran — the Java Appium assets (an `AppiumDriver`
 `switch` on `AndroidDriver` / `IOSDriver`, `UiAutomator2Options.amend`, `Allure.attachment` with a stream,
 `AndroidStartScreenRecordingOptions` / `IOSStartScreenRecordingOptions` spellings) are G1's. Built but unverified: no asset, workflow or pipeline has been
 compiled or run (G1 does that; D24's TS config import, the Java build on Allure Gradle plugin 4.3.0, the .NET
@@ -134,7 +134,7 @@ Planned 2026-10-10. The research behind it is committed with this plan:
 - A Maestro lane is added (X1).
 - The newest Appium client majors are primary.
 
-Next: M3 (H1, the user's, blocks no task). The cost is 19 agent sessions on the subscription, each started by the user
+Next: S1 (H1, the user's, blocks no task). The cost is 19 agent sessions on the subscription, each started by the user
 from Plan Queue. Nothing else is metered.
 
 ## 1. What already exists, and what is missing
@@ -1282,6 +1282,38 @@ in the file's own note). It keeps D72's `<feature file>.<scenario>` names under 
 evidence at `order = 1` and `quitDriver` at `order = 0` (Cucumber runs `@After` from the highest order down), and
 leaves the recording to `BaseMobileTest`'s pattern. **Cost:** a scenario has no device log or recording; one driver per
 scenario is the slow shape.
+
+**D87 — .NET locators are `MobileBy`, and automation names are string literals (M3, 2026-10-11).** The old skill and
+the plan's Java-flavoured wording use `AppiumBy` and `AutomationName.iOSXCUITest`. Appium.WebDriver 9.0.0 has no
+`AppiumBy`: the class is `MobileBy` (`MobileBy.cs`: `AccessibilityId`, `Id`, `IosNSPredicate`, `IosClassChain`,
+`AndroidUIAutomator`), and `AutomationName.iOSXcuiTest` holds `"XCuiTest"`. Readings: keep `AppiumBy` and the constants
+(rejected: the first does not compile, the second sends a non-canonical name); `MobileBy` and the literals
+`"UiAutomator2"` / `"XCUITest"` (chosen). Checklist E18 flags `AppiumBy`. **Cost:** the literals are not checked by the
+compiler.
+
+**D88 — The .NET `BaseMobileTest` has no catch, and its teardown stops the recording first (M3, 2026-10-11).** Research
+`appium.md` §9.2 and M2's Java `fromDevice` wrap each capture in a narrow, logged catch of `WebDriverException`. M3's
+prompt asks for D31's reasoning on NUnit: no catch in the teardown. Readings: the narrow catch (rejected: it needs a
+logger the project does not have, and the house rule allows a catch only in an I/O helper); no catch, with the
+recording stopped first and each file written as soon as it is captured (chosen). **Cost:** a dead session loses the
+evidence it cannot give, and a host that cannot stop a recording (no `ffmpeg`) fails every test's teardown loudly.
+
+**D89 — The .NET `device-cloud` states that AWS Device Farm cannot run a .NET Appium suite, and keeps no remote-run
+code (M3, 2026-10-11).** `ScheduleRunTest` has Appium types for Java, Python, Node and Ruby and none for .NET (`aM` L7).
+Readings: document the custom-environment test-spec route as an unverified deviation; or say it is unavailable and
+point to a live-session farm or a Java/TypeScript suite (chosen). So there is no `DeviceFarmRunner`, no
+`references/aws-device-farm.md` and no presigned `PUT` for .NET; the upload that remains (BrowserStack's REST endpoint)
+throws on a non-success status (`aM` C4). **Cost:** a .NET team on AWS has no .NET route.
+
+**D90 — The .NET assets are thirteen files, platform selection is the `PLATFORM` variable, and the checklist gained E18
+and L15 (M3, 2026-10-11).** §3.4 lists a base test, a driver factory, a screen object and a test. A compiled project
+needs CPM props, a csproj, a runsettings file (`NumberOfTestWorkers`), the shared `Env`, a scoped component and the
+gesture helpers, and `Selenium.Support` is declared because it is not transitive. The driver lives per fixture
+(`[OneTimeSetUp]`, `ParallelScope.Self`), as Java's per class (D84). One mechanism replaces `appsettings.<platform>.json`
+and `--filter "Platform=…"` (`aM` L15). The checklist's mobile rows C4, D12, E14 and K6 are reworded; E18 (removed client
+APIs, `AppiumBy`) and L15 (evidence on failure) are new, both **[Appium]**, and the scope table lists every tagged row
+(`mobile` keeps them; `api` and `ui` skip them). **Cost:** tests in one fixture share app state; one fixture never runs on
+two devices at once.
 
 ## Answered questions (2026-10-10)
 
@@ -2887,6 +2919,53 @@ The skills use instance-field drivers (D8), and `evidence-capture/references/app
 - **Not in M3:** TS/Java mobile; line 10 of `mobile-screen-explorer` and the agent's "Related agents"
   section (plan 002 W1, D21).
 
+**As built (2026-10-11):**
+- **Built.** The .NET mobile lane is on §2.4's primary lane. `qa-mobile-dotnet` has §5.3's 28 tools (`tools:` = the 7
+  core tools plus the list, in §5.3's order), a description naming Appium 3 / Appium.WebDriver 9 (642 chars), the five
+  appium-mcp prerequisites, Step 0's gate saying Appium 3, and Step 1 loading `evidence-capture` and its Appium
+  reference. `ui-test-author/appium/SKILL.md` (15.1k chars) has a Versions table, the ladder, scoped components,
+  gestures, WebView and app-state notes, and rules; `references/details.md` is generated from `assets/`, which hold 13
+  files: `Directory.Packages.props`, `AppiumTests.csproj`, `mobile.runsettings`, `Env.cs`, `AppiumDriverFactory.cs`,
+  `BaseMobileTest.cs`, `BaseAppiumPage.cs`, `LoginPage.cs`, `OrdersPage.cs`, `OrderRow.cs`, `OrdersTests.cs`,
+  `GestureExtensions.cs` and `page_template.cs` (namespaces `AppiumTests.{Support,Pages,Tests}`; `page_template.cs`
+  compiles, with the ctor type, the `override`, `Displayed` and `.Text` fixed). `mobile-native-features` (+
+  `references/details.md`; `NativeFeatures` on `mobile:` commands, `StateOf`, `RejectFingerprint`, base64 clipboard,
+  no `allowEnrollBiometrics`), `mobile-project-setup` (Appium 3.8.0, UiAutomator2 8.x, XCUITest 12.x, Node 24/22,
+  `Pages/`, `PLATFORM`, `UiTests`, no `dotnet tool install allure`), `device-cloud` (+ `references/details.md`: the
+  upload throws on a non-success status, the device list is `farm-devices.json`, the test quits in `[TearDown]`),
+  `mobile-screen-explorer` (line 10 untouched), `mobile-screen-objects`, `mobile-app-crawler` (the three `</content>`
+  leftovers, ids to PascalCase, `SCREENSHOTS_DIR`), the review skill's Appium rows (replaced in place, 15,917 chars),
+  and the checklist are rewritten. `evidence-capture/references/appium.md` exists (nine sections); its SKILL.md line 13
+  is one link line (15,775 chars).
+- **Sizes in chars.** `mobile-native-features/SKILL.md` 15,947; `evidence-capture/SKILL.md` 15,775;
+  `ui-test-author/review/SKILL.md` 15,917; `mobile-screen-explorer/SKILL.md` 16,958 and `mobile-app-crawler/SKILL.md`
+  17,122 (both were over 16,000 before; edited, not rewritten).
+- **Pins.** `Appium.WebDriver` 9.0.0 (its nuspec needs `Selenium.WebDriver` ≥ 4.46.0), `Selenium.WebDriver` and
+  `Selenium.Support` 4.51.0 (both exist on NuGet), NUnit 4.6.1, NUnit3TestAdapter 6.3.1, Microsoft.NET.Test.Sdk 18.10.1
+  (N1's), `Allure.NUnit` 2.15.0. `FluentAssertions` left the setup table. The client API was read from the dotnet-client
+  v9.0.0 sources on GitHub; nothing was compiled.
+- **Left to plan 002.** Line 10 of `mobile-screen-explorer/SKILL.md` and the agent's "Related agents" section.
+- **Built but unverified.** Open risks for G1:
+  - `BaseAppiumPage`: whether `WebDriverWait` and `IgnoreExceptionTypes` live in `Selenium.Support` 4.51.0 or
+    `Selenium.WebDriver` (both packages are referenced); `Until` with a nullable lambda; `AppiumElement.FindElement`
+    returning `AppiumElement`; `Driver.Contexts` / `Context`.
+  - `BaseMobileTest`: `AndroidStartScreenRecordingOptions.GetAndroidStartScreenRecordingOptions().WithTimeLimit(...)
+    .EnableForcedRestart()` chaining, `Driver.Manage().Logs.GetLog(...)`, and `AllureApi.AddAttachment(name, type,
+    byte[], ".ext")`.
+  - `AppiumDriverFactory`: `AddAdditionalAppiumOption("appium:settings[disableIdLocatorAutocompletion]", true)` (a name
+    with a colon is not re-prefixed); automation names are string literals.
+  - `NativeFeatures` and the farm classes are code blocks, not assets; compile them in the same scratch project when the
+    check can.
+  - The RN `testID` → Android `resource-id` mapping and the id-prefix setting rest on the driver README (D80).
+  - `device-cloud`: BrowserStack's `appiumVersion` capability, Appium 3 availability, the `performBiometric` /
+    `updateNetworkProfile` argument spellings and a mid-session GPS change on a farm device (no web access to the
+    vendors' pages).
+- **For G1, files M3 does not own.** `qa/cicd/dotnet/skills/ci-pipelines` upload `playwright-artifacts/` only;
+  `evidence-capture/references/appium.md` § 9 states `AppiumTests/bin/<cfg>/net10.0/appium-artifacts/` as the Appium CI
+  path (R7), and no .NET mobile job exists. `qa/dotnet/skills/browser-cloud-setup` and `bdd-project-scaffold` still carry
+  their pre-M3 Appium lines (the Reqnroll mobile hook is not written; `evidence-capture/references/appium.md` § 5 states
+  its shape). `qa/reporting/dotnet/skills/test-reports` names `BaseTest` only.
+
 ### S1 — `mobile-project-setup` for Java and TypeScript, and Step 0 in both mobile agents
 
 **Stack:** `docs` · **Agent:** `general-purpose`
@@ -3067,96 +3146,9 @@ Run them in order, one session each, opened from Plan Queue. Each block is compl
 | X1 | `docs` | `general-purpose` | M1, S1, T2 | ~130k |
 | G1 | `docs` | `general-purpose` | all | ~145k |
 
-Landed: T1, J1, N1, T2, J2, N2, A1, T3 (2026-10-10), J3, N3, T4, J4, N4, M1, M2 (2026-10-11). Every other block is live.
+Landed: T1, J1, N1, T2, J2, N2, A1, T3 (2026-10-10), J3, N3, T4, J4, N4, M1, M2, M3 (2026-10-11). Every other block is live.
 
 ---
-
-### M3 — .NET mobile: Appium 3, Appium.WebDriver 9, Appium evidence, compiling assets (general-purpose, docs)
-
-````
-You are `general-purpose`. Task M3 of docs/plans/003-qa-playwright-appium-upgrade.md: move the .NET mobile
-lane to §2.4's primary lane (Appium 3, Appium.WebDriver 9). Make its assets compile, write
-qa/dotnet/skills/evidence-capture/references/appium.md, put qa-mobile-dotnet on §5.3's grants, and
-update the mobile rows of the standards-audit checklist.
-
-Read, in this order:
-1. CLAUDE.md.
-2. The plan: §2.4, §3.2, §3.4, §4, §5.1, §5.3, §5.4, Decisions D17, D18, task M3, "Close-out — every task".
-3. qa/dotnet/agents/qa-mobile-dotnet.md; under qa/dotnet/skills/: mobile-project-setup, ui-test-author/appium
-   (SKILL.md, references/details.md, assets/*.cs), mobile-native-features (+ references),
-   mobile-screen-explorer, mobile-screen-objects, mobile-app-crawler (+ references, assets), device-cloud
-   (+ references), the review skill's Appium rows, and the mobile rows of
-   standards-audit/references/conformance-checklist.md.
-4. qa/dotnet/skills/evidence-capture/SKILL.md (N2).
-5. docs/research/003-qa-playwright-appium/appium.md §0–§9 (C# columns, §2.5, §9.2).
-6. docs/audits/003-qa-playwright-appium/mobile.md §2, §3, §5 (.NET rows and cross-stack rows), §6.
-
-Build:
-- Versions: Appium.WebDriver 9.0.0 primary (strong-named, so the solution rebuilds); 8.x supported.
-  AppiumOptions + AddAdditionalAppiumOption. The major does not track Selenium.
-- mobile-project-setup: Appium 3, UiAutomator2 8.x, XCUITest 12.x, Node 24/22. Pages/, not Screens/.
-  One platform-selection mechanism.
-- Assets compile:
-  - Fix page_template.cs (the ctor type, override, the Displayed property, .Text).
-  - Make references/details.md mirror the assets.
-  - Add BaseMobileTest.cs with evidence hooks (appium.md §9.2).
-- chromedriver_autodownload is a server flag, not a capability. Fix the scrollGesture wording. Device Farm
-  has no .NET Appium type. Teardown, not try/finally. The upload implemented, or it throws. Devices from
-  configuration. No raw FindElement in a page. L22, L23.
-- Checklist: only the mobile rows. Replace the removed APIs, and add an evidence-on-failure row. N4 reworded E11,
-  L4 and L9 and appended A9, A10, E16, E17, F10, F11, I11–I13, K9, L14, M15 and M16 (all **[PW]**/[NUnit] or
-  untagged); the mobile rows it left you are C4, D12, E14 and K6. A new row takes the next free number in its
-  section (E18, L15, …), carries **[Appium]**, and is added to standards-audit/SKILL.md's scope table, which now
-  lists every tagged row per scope (`mobile` keeps **[Appium]** rows; `api` and `ui` skip them).
-- ".NET 8" → .NET 10. R2, scoped components (element-scoped finds first), the ladder, </content> removal.
-- evidence-capture/references/appium.md; replace the placeholder line.
-- qa-mobile-dotnet.md: tools: = core + §5.3; prerequisites; Step 1 wiring; Step 0 says Appium 3;
-  the description says Appium 3.
-
-Traps:
-- Appium.WebDriver 8.0 replaced the old endpoints with mobile: commands and removed ToggleWifi,
-  ToggleData, SetConnectionType and StartActivity (appium.md §2.5). Do not keep them in samples.
-- NUnit stays 4.x (D18). Under NUnit 5, Assert.ThrowsAsync would have to be awaited. Note it, but do not
-  move to NUnit 5. Pin NUnit 4.6.1, NUnit3TestAdapter 6.3.1 and Microsoft.NET.Test.Sdk 18.10.1, the values
-  N1 put in qa/dotnet/skills/ui-test-author/playwright/assets/Directory.Packages.props.
-- qa/dotnet/skills/ui-test-author/review/SKILL.md is at 15,558 chars after N1: replace its Appium rows in
-  place, do not add, and keep the file ≤ 16,000.
-- mobile-project-setup (D34): line 153 names the UI sibling `PlaywrightTests`; it is `UiTests`. Line 110
-  runs `dotnet tool install allure`, which does not exist on NuGet; point at
-  qa/reporting/dotnet/skills/test-reports for the Allure CLI instead.
-- qa/dotnet/skills/evidence-capture/SKILL.md is 15,620 chars after N2. Replace its line 13 placeholder
-  ("Appium: `references/appium.md`, written by M3") with one link line and keep the file ≤ 16,000; the
-  Appium detail goes in references/appium.md. Mirror the Playwright side: Appium evidence in
-  `<WorkDirectory>/appium-artifacts/<Class>.<Test>.<ext>` (R7), the name sanitized to `[A-Za-z0-9._-]`,
-  attached with `TestContext.AddTestAttachment` and `AllureApi.AddAttachment(name, type, path)` (or the
-  byte[] overload with its extension — three strings is a path, N2's references/playwright.md §6), no catch
-  in the teardown (D31's reasoning applies to NUnit).
-
-- T4 edited only the web half of bdd-project-scaffold (and its mobile Node line, now Node 24 / 22). The mobile
-  templates are M1's as T4 found them: the mobile `package.json` (`^` ranges, a `jsonc` comment), `wdio.conf.ts`,
-  `support/world.ts` (a `require` inside a getter) and `support/hooks.ts` (inline comments, `browser.reset?.()`, a
-  failure screenshot taken but never attached) — R1, R5 and R6 apply. T4's browser-cloud-setup now defers the
-  WebdriverIO/Appium versions to ui-test-author/appium and its mobile `wdio.conf.ts` excerpt has no comments; it is
-  not M1's file.
-- Leave two things to plan 002 W1, per D21: line 10 of mobile-screen-explorer/SKILL.md (the React Native
-  testID mapping) and the agent's "Related agents" section. Plan 002 has landed them
-  (docs/plans/implemented/002-mobile-plugins.md); keep its wording.
-
-- M1 (qa/typescript, as built) settled things the .NET lane shares — read its D80–D82 and apply them:
-  - The per-platform ladder: UiAutomator2 prefixes every `id` lookup with `<package>:id/`, and a React Native or
-    Compose id has none, so the asset capabilities set `appium:settings[disableIdLocatorAutocompletion]` true
-    (`AddAdditionalAppiumOption`, D80). One finder per element picks `AccessibilityId` on iOS and `Id` on Android.
-  - The UiAutomator2 README warns that Google is deprecating `UiSelector`; it is the secondary rung.
-  - Recording defaults to `StartRecordingScreen` with the 180 s Android cap and the iOS ffmpeg need; the
-    `mobile:` recorders are the documented swap (D82).
-  - Appium 3 availability on a farm is checked before the client bump (qa/typescript/skills/device-cloud, § Does the
-    farm run Appium 3?).
-
-Gate: none. This plan gates once, in G1. Do not run dotnet build, appium or any check script.
-
-Commit: `docs(qa-dotnet): mobile lane on Appium 3 / Appium.WebDriver 9, compiling assets, Appium evidence (003 M3)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
 
 ### S1 — `mobile-project-setup` for Java and TypeScript, and Step 0 in both mobile agents (general-purpose, docs)
 
@@ -3169,8 +3161,9 @@ qa-mobile-java and qa-mobile-typescript a Step 0 that runs them.
 Read, in this order:
 1. CLAUDE.md.
 2. The plan: §2.4, §3.4, §3.6, §4 (R7, R9), §5.1, Decision D20, task S1, "Close-out — every task".
-3. qa/dotnet/skills/mobile-project-setup/SKILL.md (the pattern, as M3 left it) and the Step 0 row of
-   qa/dotnet/agents/qa-mobile-dotnet.md.
+3. qa/dotnet/skills/mobile-project-setup/SKILL.md (the pattern, as M3 left it: Appium 3.8.0, `appium setup`,
+   drivers 8.x / 12.x, Node 24/22, one `PLATFORM` mechanism, `.env.example`, a Pages/ layout, no Allure tool install)
+   and the Step 0 row of qa/dotnet/agents/qa-mobile-dotnet.md.
 4. qa/java/skills/ui-test-author/appium/assets/* and its SKILL.md stack section (M2);
    qa/typescript/skills/ui-test-author/appium/assets/* and its SKILL.md Versions table (M1).
 5. docs/research/003-qa-playwright-appium/appium.md §1, §2.1, §2.7.
@@ -3324,6 +3317,13 @@ Build:
   risks (the `amend` calls, the recorder `switch`, `Allure.attachment`). The NativeFeatures class in
   mobile-native-features/SKILL.md and DeviceFarmRunner in device-cloud/references/aws-device-farm.md are code
   blocks, not assets; compile them in the same scratch project when the check can.
+- §6.3's .NET Appium row: build the scratch project from qa/dotnet/skills/ui-test-author/appium/assets/ (M3, D90):
+  put Directory.Packages.props, AppiumTests.csproj and mobile.runsettings in one folder with all ten .cs files beside
+  them (the namespaces are AppiumTests.{Support,Pages,Tests}; page_template.cs compiles too). `dotnet build` → 0
+  errors. M3's As built lists its open typing risks (`WebDriverWait` from Selenium.Support 4.51.0, the recording-options
+  chain, `Manage().Logs.GetLog`, `AllureApi.AddAttachment` with bytes). The NativeFeatures class in
+  mobile-native-features/SKILL.md and the farm classes in device-cloud/references/details.md are code blocks, not
+  assets; compile them in the same scratch project when the check can (BrowserStackCredentials is in device-cloud/SKILL.md).
 - §6.3's TS Appium row installs too little. Build the scratch project from
   qa/typescript/skills/ui-test-author/appium/assets/package.json and tsconfig.json (M1, D83): the assets
   import @wdio/allure-reporter and need @types/mocha and @types/node. M1's As built lists its open typing risks

@@ -1,397 +1,165 @@
 ---
 name: qa-ui-test-writer-appium-dotnet
-description: Use when scaffolding a .NET (C#) + Appium 2.x page object or NUnit mobile UI test, following the BaseAppiumPage / AppiumDriverFactory pattern. Triggers "create a C# Appium page object for X", "add a .NET mobile page for screen Y", "write an Appium NUnit test for Z". Not for exploring a live screen (`mobile-screen-explorer`) or OS-surface features (`mobile-native-features`).
+description: Use when the user asks to scaffold a .NET (C#) + Appium 3 (Appium.WebDriver 9) page object or NUnit mobile UI test, following the BaseAppiumPage / AppiumDriverFactory / BaseMobileTest pattern. Triggers: "create a C# Appium page object for X", "add a .NET mobile page for screen Y", "write an Appium NUnit test for Z", "swipe / WebView / failure evidence in Appium C#". Do NOT use for exploring a live screen (`mobile-screen-explorer`) or OS-surface features (`mobile-native-features`).
 ---
 
 # QA — Appium .NET Page Object & Test Generator
 
-Scaffolds Appium 2.x page objects and NUnit mobile UI tests in C#, mirroring the Java and TypeScript siblings. Uses a thin `BaseAppiumPage` with `WebDriverWait`, accessibility-id-first locators, typed return values for navigation, and an `AppiumDriverFactory` that produces one driver per test for parallel-safe runs.
+Scaffolds Appium page objects and NUnit mobile UI tests in C#, mirroring the Java and TypeScript siblings. A thin `BaseAppiumPage` with `WebDriverWait`, a per-platform test-id finder, scoped components that re-resolve on every call, typed navigation, and one driver per test fixture. The compilable reference is `assets/`.
 
-> The .NET Appium client ships as the **`Appium.WebDriver`** NuGet package (namespace `OpenQA.Selenium.Appium`), built on top of Selenium 4. Its major version tracks Selenium's (8.x as of 2026). The v4→v5 jump was the big breaking change — `DesiredCapabilities` → `AppiumOptions`, `AppiumWebElement` → `AppiumElement`, generic `AndroidDriver<T>` → non-generic `AndroidDriver`. Everything below targets v5+ (verified against 8.x).
+## Versions
 
-## Stack
+| Artifact | Primary | Supported |
+|---|---|---|
+| `Appium.WebDriver` | **9.0.0** | 8.x |
+| `Selenium.WebDriver` · `Selenium.Support` | 4.51.0 (≥ 4.46 required by the client) | 4.46–4.50 |
+| Appium server | **3.8.0** | 2.19 (frozen) |
+| `appium-uiautomator2-driver` / `appium-xcuitest-driver` | 8.x / 12.x | 4.x / 9.x |
+| NUnit · adapter · Test SDK · `Allure.NUnit` | 4.6.1 · 6.3.1 · 18.10.1 · 2.15.0 | — |
+| .NET | 10 | 8, 9 (match the project's TFM) |
 
-- .NET 8, nullable reference types enabled
-- **Appium .NET client** `Appium.WebDriver` 8.x (`OpenQA.Selenium.Appium`, `.Android`, `.iOS`, `.Enums`) on Selenium 4
-- **Appium server** 2.x (started locally on `:4723`, or hit via Selenium Grid / a cloud provider)
-- **NUnit** for tests (the global default for .NET test runners)
-- **Allure NUnit** for reporting
-- `AndroidDriver` / `IOSDriver` selected by capability profile (`AppiumOptions`)
+- **Detect the project's lane first** (`Appium.WebDriver` in `Directory.Packages.props`, `appium -v`) and keep it. Appium.WebDriver 8.x is the first client built for Appium 3's `mobile:` commands, and 9.0.0's only breaking change is **strong-name signing**: a project that moves from 8.x rebuilds every project that references the client. The client's major does **not** track Selenium's.
+- 8.0 removed `ToggleWifi`, `ToggleData`, `ToggleAirplaneMode`, `SetConnectionType` and `StartActivity` (re-added in 8.1 over `mobile: startActivity`); use `mobile: setConnectivity`. `TouchAction` and `MultiAction` went in 6.0: use W3C actions or a `mobile:` gesture.
+- **There is no `AppiumBy` in .NET.** Locators are `MobileBy` (`OpenQA.Selenium.Appium`). Capabilities are `AppiumOptions` (`AutomationName`, `DeviceName`, `App`, `PlatformVersion`, `PlatformName`) plus `AddAdditionalAppiumOption`, which adds the `appium:` prefix to a bare name. There are no per-driver options classes, and `DesiredCapabilities` is long gone.
+- **NUnit stays 4.x (D18).** NUnit 5 changes `Assert.ThrowsAsync` to return a `Task` that must be awaited, and `Allure.NUnit` 2.15 on NUnit 5 is unverified. Do not move a project to NUnit 5 as a side effect.
+- A device cloud that still runs Appium 2 keeps the project on the supported lane; `device-cloud` says how to check.
 
 ## When to use
 
-- New page object under `AppiumTests/Pages/`
-- Component-level page object scoped to a parent `AppiumElement` (list row, card, sheet)
-- New NUnit mobile UI test under `AppiumTests/Tests/`
+- New page object under `AppiumTests/Pages/`, a scoped component (list row, card, sheet), or an NUnit test under `AppiumTests/Tests/`
+- Gestures, WebView switching, app state or failure evidence in an Appium C# suite
 
 ## When NOT to use
 
-- Appium Java → `qa/java/skills/ui-test-author/appium`
-- Appium TypeScript / WebdriverIO → `qa/typescript/skills/ui-test-author/appium`
-- Selenium / web → `qa/dotnet/skills/ui-test-author/selenium` or `qa/dotnet/skills/ui-test-author/playwright`
+- Appium Java → `qa/java/skills/ui-test-author/appium`; TypeScript → `qa/typescript/skills/ui-test-author/appium`
+- Selenium / web → `qa/dotnet/skills/ui-test-author/selenium` or `…/playwright`
 - Reviewing an existing page object → `qa/dotnet/skills/ui-test-author/review`
 - Designing the whole POM architecture → `qa/dotnet/skills/page-object-design`
 
 ## Inputs needed
 
-Ask only what's missing:
+1. **Screen name** (PascalCase) and **platform** — Android, iOS or both
+2. **Elements** — name plus the ladder rung from `mobile-screen-explorer`
+3. **Landmark element** for `VerifyPageLoaded`
+4. **Actions** and whether each navigates, plus the destination pages
 
-1. **Screen name** (PascalCase, e.g. `Login`, `Home`, `OrderConfirmation`)
-2. **Platform** — Android, iOS, or both (decides which locator strategies are allowed)
-3. **Elements** — for each: name + `accessibility id` (preferred), platform id, iOS predicate / Android UiAutomator selector, or XPath (last resort)
-4. **Actions** — what the test will do, and whether each navigates to a different screen
-5. **Landmark element** — the one element that proves the page is currently visible (used in `VerifyPageLoaded`)
-6. **Next pages** — destination page object class names for navigation actions
+## The assets
 
-## Locator strategy decision matrix
+`assets/` is one runnable test project (namespaces `AppiumTests.Support`, `.Pages`, `.Tests`); copy it, do not retype it.
 
-Pick the highest row that applies. Lower rows are progressively more brittle.
+| File | Holds |
+|---|---|
+| `Directory.Packages.props`, `AppiumTests.csproj`, `mobile.runsettings` | Exact pins, `net10.0`, one NUnit worker |
+| `Env.cs` | The one `Required(name)` helper and `AppiumUrl` |
+| `AppiumDriverFactory.cs` | One `AppiumDriver` from env (`PLATFORM`, `DEVICE_NAME`, `APP_PATH`, `PLATFORM_VERSION`, `APPIUM_URL`); the Android options set `appium:settings[disableIdLocatorAutocompletion]` |
+| `BaseMobileTest.cs` | Driver per fixture, the recording per test and, on failure, a screenshot, page source, device log and the recording; see `qa/dotnet/skills/evidence-capture/references/appium.md` |
+| `BaseAppiumPage.cs` | `TestId` and the other ladder finders, `IsTestIdVisible`, the abstract `VerifyPageLoaded` |
+| `LoginPage.cs`, `OrdersPage.cs`, `page_template.cs` | Screens; `SignIn` returns the destination; the template is the shape to copy |
+| `OrderRow.cs` | A scoped component: a row key, re-resolved on every call |
+| `OrdersTests.cs` | One test |
+| `GestureExtensions.cs` | `ScrollGesture`, `LongPress`, `Swipe`, `Tap` |
 
-| Strategy | API | When to use | Cross-platform? |
-|----------|-----|-------------|-----------------|
-| Accessibility id | `AppiumBy.AccessibilityId("login-email")` | **Default.** Maps to React Native `testID`, Android `content-desc`, iOS `accessibilityIdentifier` | ✅ same id both platforms |
-| Resource / native id | `By.Id("com.app:id/email")` (Android) / `AppiumBy.Id` | A stable native id exists but no accessibility id | ❌ platform-specific |
-| iOS predicate | `AppiumBy.IosNsPredicateString("type == 'XCUIElementTypeButton' AND name == 'Submit'")` | iOS-only, no accessibility id | ❌ iOS only |
-| iOS class chain | `AppiumBy.IosClassChain("**/XCUIElementTypeCell[`name == \"row\"`]")` | Deep iOS hierarchy traversal | ❌ iOS only |
-| Android UiAutomator | `AppiumBy.AndroidUIAutomator("new UiSelector().text(\"Submit\")")` | Android-only, no accessibility id, need scroll-into-view | ❌ Android only |
-| XPath | `By.XPath("//android.widget.Button[@text='Submit']")` | **Last resort.** Leave a `// TODO: replace with AccessibilityId` | ✅ but slow + fragile |
+Platform selection is one mechanism: the `PLATFORM` variable read by the factory. A run is `PLATFORM=android dotnet test`; there is no `appsettings.<platform>.json` and no `--filter "Platform=…"`.
 
-Per the Appium team, treat a working XPath as **proof the node exists, not the final locator** — use it to learn the tree, then downgrade to a native strategy (`AppiumBy.AndroidUIAutomator` / `AppiumBy.IosClassChain`) the moment the source exposes one, and drop the TODO. On iOS, `id` / `name` / `accessibility id` are synonyms over the element's `name` attribute. **Discover and verify these locators against the live app via `qa/dotnet/skills/mobile-screen-explorer` before hand-writing them**, and let `qa/dotnet/skills/mobile-screen-objects` emit the class from that inventory — this skill owns the conventions both of those defer to.
+## Locator ladder
 
-## Deep-dive reference
+A React Native `testID` is the iOS `accessibilityIdentifier` (the element's `name`) and the Android `resource-id`. The accessibility label (`content-desc`) is screen-reader text, never a test id.
 
-These sections live in `references/details.md` — **read it when the task touches them**: **Patterns**.
+| Rung | iOS | Android |
+|---|---|---|
+| 1 — the test id | `MobileBy.AccessibilityId("Login.Submit")` | `MobileBy.Id("Login.Submit")` |
+| 2 — a native query | `MobileBy.IosNSPredicate` · `MobileBy.IosClassChain` | `MobileBy.AndroidUIAutomator` |
+| 3 — XPath | last resort | last resort |
 
-## Capabilities
+- `BaseAppiumPage.TestId` picks the rung-1 form for the running platform, so a page has one accessor per element on both platforms. `ByContentDescription` is the Android `AccessibilityId` lookup for an app that exposes only a `content-desc`.
+- Android prefixes every `id` lookup with `<package>:id/`. A React Native or Compose `testTag` id has no prefix, so the option `appium:settings[disableIdLocatorAutocompletion]` set to `true` switches the prefixing off (the factory sets it). Compose also needs `testTagsAsResourceId` in the app, or the `mapTestTagToResourceId` setting on driver 8.4+. A Views app whose ids carry the package leaves the setting off. Check the live page source before choosing.
+- `UiSelector` is secondary. Google is deprecating `UiSelector`, `UiScrollable`, `UiObject` and `UiCollection`, and the UiAutomator2 driver warns this will invalidate every `-android uiautomator` locator. Reach for it only for a query no other rung can express.
+- A working XPath proves the node exists, not that it is the final locator. Downgrade it as soon as the source exposes a stronger rung. Each XPath row goes into `missing-testids.md` (page, element, fallback in use); the code carries no marker, and the constant's name says it is a fallback (`PasswordRevealXPathFallback`).
 
-Capabilities are expressed via `AppiumOptions` — never `DesiredCapabilities` (removed in v4). Use the strongly-typed properties for the common ones and `AddAdditionalAppiumOption` (which namespaces vendor caps under `appium:` automatically) for the rest. Keep profiles in `AppiumTests/Capabilities/` and load them by `-p:Platform=android|ios` / env var, never hardcoded inline.
+## Scoped components
 
-```csharp
-// Android — UiAutomator2 driver
-var android = new AppiumOptions
-{
-    AutomationName = AutomationName.AndroidUIAutomator2,   // "UiAutomator2"
-    PlatformName   = "Android",
-    DeviceName     = Env.DeviceName,                       // e.g. "Pixel_7_API_34"
-};
-android.AddAdditionalAppiumOption("appPackage", "com.example.app");
-android.AddAdditionalAppiumOption("appActivity", ".MainActivity");
-android.AddAdditionalAppiumOption("app", Env.AppPath);    // absolute path or cloud URL
-android.AddAdditionalAppiumOption("noReset", true);
-android.AddAdditionalAppiumOption("newCommandTimeout", 120);
+A repeating row cannot be found with a bare child locator, and a held element goes stale when a RecyclerView or table view recycles its cells.
 
-// iOS — XCUITest driver
-var ios = new AppiumOptions
-{
-    AutomationName = AutomationName.iOSXCUITest,           // "XCUITest"
-    PlatformName   = "iOS",
-    DeviceName     = "iPhone 15",
-};
-ios.AddAdditionalAppiumOption("platformVersion", "17.4");
-ios.AddAdditionalAppiumOption("app", Env.AppPath);
-ios.AddAdditionalAppiumOption("autoAcceptAlerts", true);
-```
+1. A component holds a **row key**, never an element. The row is found again on every call (`OrderRow.Root()`).
+2. Find the row by a visible key inside it, with **element-scoped finds first**: enumerate the rows with `FindElements`, then read the key with `row.FindElement(...)`. The ids are static; no index, no data in the locator.
+3. Only when the platform can do the whole job in one query, scope there: an iOS class chain ``**/XCUIElementTypeCell[`name == "OrderRow"`]/**/XCUIElementTypeStaticText[`name == "OrderRow.Title"`]``. Mind the `UiSelector` caveat on Android.
+4. Components do **not** extend `BaseAppiumPage`. They use a small set of scoped finds and have no `VerifyPageLoaded`; the host page owns the landmark.
+5. An Android XPath from an element starts with `.` (`.//x`); a bare `//x` can escape the element's scope.
 
-## Driver lifecycle — `AppiumDriverFactory`
+## Gestures, WebView, app state
 
-One driver per test, created in `[SetUp]` and disposed in `[TearDown]`. Never instantiate `AndroidDriver` / `IOSDriver` inside a test or page. See [`assets/AppiumDriverFactory.cs`](assets/AppiumDriverFactory.cs).
+Code for each is in [`references/details.md`](references/details.md) — read it when the task touches them.
 
-```csharp
-using OpenQA.Selenium.Appium;
-using OpenQA.Selenium.Appium.Android;
-using OpenQA.Selenium.Appium.Enums;
-using OpenQA.Selenium.Appium.iOS;
-
-namespace AppiumTests;
-
-public static class AppiumDriverFactory
-{
-    public static AppiumDriver Create(string platform)
-    {
-        var serverUri = new Uri(Env.AppiumServerUrl);          // never hardcoded
-        return platform.ToLowerInvariant() switch
-        {
-            "android" => new AndroidDriver(serverUri, AndroidOptions(), TimeSpan.FromSeconds(180)),
-            "ios"     => new IOSDriver(serverUri, IosOptions(), TimeSpan.FromSeconds(180)),
-            _         => throw new ArgumentException($"Unknown platform: {platform}"),
-        };
-    }
-    // AndroidOptions() / IosOptions() build the AppiumOptions shown above.
-}
-```
-
-```csharp
-public abstract class BaseMobileTest
-{
-    protected AppiumDriver Driver = null!;
-
-    [SetUp]
-    public void StartDriver()
-    {
-        var platform = Env.Platform;                            // "android" | "ios"
-        Driver = AppiumDriverFactory.Create(platform);
-        Driver.Manage().Timeouts().ImplicitWait = TimeSpan.Zero; // explicit waits only
-    }
-
-    [TearDown]
-    public void QuitDriver() => Driver?.Quit();
-}
-```
-
-> Keep the implicit wait at **zero** and rely on explicit `WebDriverWait` — mixing implicit + explicit waits compounds unpredictably. Parallel runs: NUnit `[Parallelizable(ParallelScope.Fixtures)]` gives each fixture its own `Driver` instance because the field is per-fixture, not static.
-
-## Explicit waits (no `Thread.Sleep`)
-
-`Thread.Sleep` is a hard CLAUDE.md violation. Use `WebDriverWait` (in `BaseAppiumPage`) for the common case, or `DefaultWait<AppiumDriver>` when you need to ignore specific exceptions or tune the polling interval — and to avoid the `DotNetSeleniumExtras` dependency.
-
-```csharp
-using OpenQA.Selenium.Support.UI;
-
-protected AppiumElement WaitForElement(By locator, int seconds = 10)
-{
-    var wait = new DefaultWait<AppiumDriver>(Driver)
-    {
-        Timeout = TimeSpan.FromSeconds(seconds),
-        PollingInterval = TimeSpan.FromMilliseconds(300),
-    };
-    wait.IgnoreExceptionTypes(typeof(NoSuchElementException), typeof(StaleElementReferenceException));
-    return wait.Until(d =>
-    {
-        var el = d.FindElement(locator);
-        return el.Displayed ? (AppiumElement)el : null;
-    })!;
-}
-
-// Wait for a condition, not an element — e.g. a spinner disappearing:
-protected void WaitUntilGone(By locator, int seconds = 10)
-{
-    var wait = new DefaultWait<AppiumDriver>(Driver) { Timeout = TimeSpan.FromSeconds(seconds) };
-    wait.Until(d => d.FindElements(locator).Count == 0);
-}
-```
-
-## Gestures (W3C Actions + `mobile:` commands)
-
-Two idioms, prefer the second when the driver supports it:
-
-**1. Driver-native `mobile:` gesture commands (preferred).** UiAutomator2 and XCUITest expose high-level gesture endpoints via `ExecuteScript` — more reliable than hand-built coordinates because the driver computes the geometry.
-
-```csharp
-// Android (UiAutomator2): scroll a container until an element is found
-Driver.ExecuteScript("mobile: scrollGesture", new Dictionary<string, object>
-{
-    ["left"] = 100, ["top"] = 300, ["width"] = 400, ["height"] = 800,
-    ["direction"] = "down",
-    ["percent"] = 3.0,
-});
-
-// Android: swipe within an element's bounds
-Driver.ExecuteScript("mobile: swipeGesture", new Dictionary<string, object>
-{
-    ["elementId"] = element.Id,
-    ["direction"] = "left",
-    ["percent"] = 0.75,
-});
-
-// Android: long press
-Driver.ExecuteScript("mobile: longClickGesture", new Dictionary<string, object>
-{
-    ["elementId"] = element.Id,
-    ["duration"] = 1500,
-});
-
-// iOS (XCUITest) equivalents: "mobile: scroll", "mobile: swipe", "mobile: pinch", "mobile: touchAndHold"
-Driver.ExecuteScript("mobile: scroll", new Dictionary<string, object>
-{
-    ["elementId"] = list.Id,
-    ["direction"] = "down",
-});
-```
-
-**2. W3C Actions API (cross-platform, coordinate-based).** Use when there is no `mobile:` command for the gesture (custom multi-touch, precise drag paths). Build a touch `PointerInputDevice`, assemble an `ActionSequence`, and call `Driver.PerformActions(...)`.
-
-```csharp
-using OpenQA.Selenium.Interactions;
-
-protected void Swipe(int startX, int startY, int endX, int endY)
-{
-    var finger = new PointerInputDevice(PointerKind.Touch, "finger");
-    var swipe = new ActionSequence(finger);
-
-    swipe.AddAction(finger.CreatePointerMove(CoordinateOrigin.Viewport, startX, startY, TimeSpan.Zero));
-    swipe.AddAction(finger.CreatePointerDown(MouseButton.Touch));
-    swipe.AddAction(finger.CreatePause(TimeSpan.FromMilliseconds(200)));
-    swipe.AddAction(finger.CreatePointerMove(CoordinateOrigin.Viewport, endX, endY, TimeSpan.FromMilliseconds(600)));
-    swipe.AddAction(finger.CreatePointerUp(MouseButton.Touch));
-
-    Driver.PerformActions(new List<ActionSequence> { swipe });
-}
-
-protected void Tap(AppiumElement element)
-{
-    var finger = new PointerInputDevice(PointerKind.Touch, "finger");
-    var tap = new ActionSequence(finger);
-    tap.AddAction(finger.CreatePointerMove(CoordinateOrigin.Viewport,
-        element.Location.X + element.Size.Width / 2,
-        element.Location.Y + element.Size.Height / 2, TimeSpan.Zero));
-    tap.AddAction(finger.CreatePointerDown(MouseButton.Touch));
-    tap.AddAction(finger.CreatePointerUp(MouseButton.Touch));
-    Driver.PerformActions(new List<ActionSequence> { tap });
-}
-```
-
-> `TouchAction` / `MultiAction` (the old `OpenQA.Selenium.Appium.MultiTouch` API) is **deprecated** — do not use it for new code. The reusable gesture helpers above belong in [`assets/GestureExtensions.cs`](assets/GestureExtensions.cs), not duplicated into each page.
-
-## Context switching (native ↔ webview)
-
-Hybrid apps embed a WebView. Switch context to drive the web content with web locators (CSS), then switch back to native. The driver exposes `Contexts` (all available) and `Context` (the current one).
-
-```csharp
-protected void RunInWebView(Action webActions)
-{
-    var native = Driver.Context;                                 // "NATIVE_APP"
-    try
-    {
-        var webview = new DefaultWait<AppiumDriver>(Driver) { Timeout = TimeSpan.FromSeconds(10) }
-            .Until(d => d.Contexts.FirstOrDefault(c => c.StartsWith("WEBVIEW")))
-            ?? throw new InvalidOperationException("No WEBVIEW context became available.");
-
-        Driver.Context = webview;                                // switch in
-        webActions();                                            // CSS selectors valid here
-    }
-    finally
-    {
-        Driver.Context = native;                                 // always switch back
-    }
-}
-
-// Usage in a hybrid page object:
-public void AcceptCookiesInWebView() => RunInWebView(() =>
-    Driver.FindElement(By.CssSelector("#cookie-accept")).Click());
-```
-
-> Don't assume `Contexts` is populated immediately — the WebView is created asynchronously; **wait** for the `WEBVIEW*` context to appear (above) rather than reading `Contexts` once. On Android, ChromeDriver must match the WebView's Chromium version (or set `chromedriverAutodownload=true` in caps).
-
-### Test — `AppiumTests/Tests/{Name}Test.cs`
-
-```csharp
-using AppiumTests.Pages;
-using Allure.NUnit.Attributes;
-using NUnit.Framework;
-
-namespace AppiumTests.Tests;
-
-[TestFixture]
-[Parallelizable(ParallelScope.Fixtures)]
-public class AuthenticationTest : BaseMobileTest
-{
-    [Test]
-    [Category("Smoke")]
-    [AllureStory("Successful login from cold start")]
-    public void Should_LandOnHome_When_CredentialsAreValid()
-    {
-        var login = new LoginPage(Driver);
-        login.VerifyPageLoaded();
-
-        var home = login.Login(Seed.Users[0], Seed.Password);
-        home.VerifyPageLoaded();
-
-        Assert.That(home.ProfileAvatar().Displayed, Is.True,
-            "Profile avatar not visible after login.");
-    }
-}
-```
-
-`BaseMobileTest` owns the per-test `AppiumDriver` via `AppiumDriverFactory` (`[SetUp]` to start, `[TearDown]` to quit). Capabilities come from `Env` (env vars / `-p:Platform=`), never hardcoded.
+- **Gestures.** Prefer a driver `mobile:` command (Android `clickGesture`, `longClickGesture`, `doubleClickGesture`, `dragGesture`, `swipeGesture`, `scrollGesture`; iOS `tap`, `touchAndHold`, `doubleTap`, `swipe`, `scroll`); fall back to W3C `PointerInputDevice` and `ActionSequence`. `GestureExtensions` holds both. A gesture sits in a page method named for its intent, never in a test; coordinates come from `AppiumElement.Rect`, never a literal.
+- `mobile: scrollGesture` scrolls **by a percent** and returns whether more content remains; it does not stop at an element. To reach one, repeat it on a bounded wait, or use iOS `mobile: scrollToElement`.
+- **WebView.** Wait for the `WEBVIEW*` context, switch, act, and switch back in a `finally` of a page helper. If the element is missing from the native page source, check the context before the locator. Android WebViews need a Chromedriver that matches the WebView: start the **server** with `--allow-insecure=uiautomator2:chromedriver_autodownload`, or point `appium:chromedriverExecutableDir` at a folder of drivers. There is no `chromedriverAutodownload` capability.
+- **App state.** `ResetApp`, `CloseApp` and `LaunchApp` are gone with the removed `/appium/app/*` routes. In order: a fresh driver per fixture (`appium:noReset` false); `mobile: clearApp` on an emulator or simulator; `TerminateApp` then `ActivateApp` for a cold start.
 
 ## Rules
 
 ### Page object rules
-- Always extend `BaseAppiumPage`; pass `driver` to `base(driver)`. Override `VerifyPageLoaded()`.
-- Element accessors return `AppiumElement` (or `IReadOnlyList<AppiumElement>`) — keep them one-liners
-- **Locator preference order**: `AppiumBy.AccessibilityId` → `By.Id` (resource-id) → `AppiumBy.IosNsPredicateString` / `AppiumBy.AndroidUIAutomator` → `By.XPath` (last resort, leave a `// TODO`). See the decision matrix.
-- **Locator constants** — declare each as `private const string {Element}Id` at the top of the class. Never inline a locator string inside an action method.
-- One class per screen; multi-step flows live in a sub-namespace
-- Reusable components take a parent `AppiumElement` and query inside it
-- Navigation methods return the next page object; same-screen actions return `void`
-- **Every page object must override `VerifyPageLoaded()`** asserting the landmark element is displayed
-- Method naming describes user intent (`Login`, `TapPrimaryAction`, `EnterEmail`), not Appium mechanics
+- Extend `BaseAppiumPage`; pass `driver` to `base(driver)`. Pages take the driver, never a test context.
+- Accessors stay private; a page exposes intent (`SignIn`, `Title()`) and queries, never an `AppiumElement`.
+- **One locator-constant style:** each id is `private const string {Element}Id` at the top of the class; a fallback is `{Element}XPathFallback`. Never inline a locator string in an action.
+- **Locator order:** the test id, a native query, XPath. On iOS `id`, `name` and `accessibility id` are synonyms over the element's `name`.
+- No raw `Driver.FindElement` in a page: every lookup goes through a base finder, and a WebView lookup through a base helper.
+- One class per screen; flows in a sub-namespace; repeating items as scoped components.
+- Navigation returns the destination page; same-screen actions return `void`.
+- Every page overrides `VerifyPageLoaded()` on its landmark. That is the only assertion in a page.
+- `IsTestIdVisible` returns `false` when the element is not displayed within the timeout, and lets anything else through.
+- Per-platform differences sit in the finder, never in an `if` inside an action.
 
 ### Test rules
-- Extend `BaseMobileTest` — it provides the per-test `AppiumDriver Driver` and any shared seed data
-- Test method names describe behavior: `Should_LandOnHome_When_CredentialsAreValid`, `Should_ShowErrorBanner_When_UserLocked`
-- Use `[Category("Smoke" | "Regression" | ...)]` to enable selective runs
-- Assertions live in the test class, **never** inside page methods (except the `VerifyPageLoaded()` landmark assertion)
-- One logical assertion per test; use NUnit `Assert.Multiple` only when verifying one behavior across several fields after a single user action
-- **One expected condition per assertion — never an `OR`.** `Assert.That(banner.Text, Is.EqualTo("Saved"))`, never `Is.EqualTo("Saved").Or.EqualTo("Success")`, `Is.AnyOf(...)`, `Does.Match("Saved|Success")`, or a `||` inside the condition. The rule covers label text, element counts, screen landmarks, attribute values, and displayed/enabled state alike — and applies per platform: when Android and iOS legitimately show different copy, that is two platform-scoped expectations, never one `OR`. If both outcomes are genuinely reachable on one platform the test does not know what the app should do — split it into one `[Test]` per expected outcome, parameterize with `[TestCase]`, or pin down the correct behavior. The only exception is an explicit instruction to accept more than one value; record that instruction in a comment on the assertion.
-- **No `try`/`catch` in a test — and none in `[TearDown]`.** An unexpected exception must reach NUnit; an expected one is asserted with `Assert.Throws<T>`, which is an assertion, not error handling. Anything the test created is tracked and deleted in `[TearDown]` with no catch — a cleanup that fails should fail loudly rather than leak state into the next run. The suite's only catches live in **I/O helpers where narrowing one named exception is the contract** — an `IsDisplayed(By)` probe converting `NoSuchElementException` into `false`, a driver-quit helper — never a blanket `catch (Exception)`, and never a catch that lets a failed action continue into the assertions.
-- **Failures name the subject.** `Assert.That(banner.Text, Is.EqualTo("Saved"), $"success banner after saving order {orderId}")`. A UI failure reported as `Expected: "Saved" But was: ""` with no subject is indistinguishable from a locator that matched the wrong element.
-- No conditional logic in tests — use `[TestCase]` / `[TestCaseSource]` parameterization
+- Extend `BaseMobileTest`; it provides `Driver`. Names are `Should_X_When_Y`. Tag with `[Category]`.
+- Assertions live in the test: `Assert.That(actual, Is.EqualTo(expected), subject)`; `Assert.Multiple` only for several fields after one action. The one exception is the page's own `VerifyPageLoaded`.
+- **One expected condition per assertion — never an `OR`.** No `.Or.`, no `Is.AnyOf`, no `||`, no `"a|b"` regex. When Android and iOS show different copy, that is two platform-scoped expectations. If two outcomes are both reachable, split into one `[Test]` per outcome.
+- No `try`/`catch` in a test or a `[TearDown]` that runs a test body; expected exceptions use `Assert.Throws<T>`. A catch lives only in an I/O helper that narrows one named exception (`IsTestIdVisible`); `BaseMobileTest` has none.
+- No `if` or loop driving an assertion; one `[TestCase]` per data row.
+- **Failures name the subject:** `Assert.That(title, Is.EqualTo(expected), $"title of order {orderNumber}")`.
 
 ### Waits
-- Default 10s `WebDriverWait` baked into `BaseAppiumPage`; `DefaultWait<AppiumDriver>` for tuned polling / ignored exceptions
-- Keep `ImplicitWait = TimeSpan.Zero` — explicit waits only; never mix the two
-- **No `Thread.Sleep`** anywhere — including for screen transitions, animations, or WebView creation; wait on a condition
+- `WebDriverWait` (10 s) for conditions, built by `BaseAppiumPage.Wait`. Keep `ImplicitWait` at zero (the default). No `Thread.Sleep` anywhere, including for transitions and animations.
 
-### Capabilities & driver lifecycle
-- Capabilities via `AppiumOptions` + `AddAdditionalAppiumOption` — never `DesiredCapabilities`
-- Always go through `AppiumDriverFactory.Create(platform)` — never `new AndroidDriver(...)` / `new IOSDriver(...)` in a test or page
-- Platform selected by `Env.Platform` (`-p:Platform=android|ios` / env var); profiles in `AppiumTests/Capabilities/`
-- One driver per test; dispose in `[TearDown]`. The Appium server URL comes from `Env.AppiumServerUrl` — never hardcoded
+### Driver lifecycle
+- **A driver per fixture**, in `[OneTimeSetUp]` and quit in `[OneTimeTearDown]`. The field is per instance, never static. `[Parallelizable(ParallelScope.Self)]` lets fixtures run side by side and keeps the tests inside one fixture serial.
+- Parallel fixtures need one device each and unique `appium:systemPort`, `appium:mjpegServerPort` and `appium:wdaLocalPort` per session; `NumberOfTestWorkers` in `mobile.runsettings` never exceeds the device count.
+- Never instantiate `AndroidDriver` or `IOSDriver` in a test; the factory does. The server URL is `APPIUM_URL`, devices and app paths come from env, never from code.
 
-### Gestures & contexts
-- Prefer `mobile:` gesture commands (`ExecuteScript`) over hand-built coordinates; fall back to W3C `PointerInputDevice` / `ActionSequence` / `PerformActions`
-- **No deprecated `TouchAction` / `MultiAction`**
-- Context switching always restores the native context in a `finally`; wait for the `WEBVIEW*` context to appear before switching
+### Failure evidence
+`BaseMobileTest` is the only failure hook. A test adds none. What it keeps and where it lands is `qa/dotnet/skills/evidence-capture/references/appium.md`.
 
-## What NOT to do
-
-- No `Thread.Sleep` / arbitrary delays — `WebDriverWait` / `DefaultWait` on a condition
-- No `Driver.FindElement(...)` outside `BaseAppiumPage` / a component scoped to its parent
-- No raw `IWebElement` returns — `AppiumElement` is the contract
-- No locator strings inline in actions — promote to a `private const string`
-- No `DesiredCapabilities` — `AppiumOptions` only (removed in client v4)
-- No deprecated `TouchAction` / `MultiAction` — W3C Actions or `mobile:` commands
-- No mixing implicit + explicit waits — keep `ImplicitWait` at zero
-- No assertions inside actions — assertions live in `VerifyPageLoaded()` and in test methods, never inside `Tap*` / `Enter*` actions
-- No `OR` in any assertion — no `.Or.`, no `Is.AnyOf(...)`, no `||` inside `Assert.That`, no `Does.Match("a|b")` alternation, and no OR-ing Android and iOS copy into one expectation. One expected value per assertion (see Test rules)
-- No `try`/`catch` in a `[Test]` or `[TearDown]` — expected exceptions use `Assert.Throws<T>`; catches live only in I/O helpers narrowing one named exception (see Test rules)
-- No multi-screen page objects — one class per screen. Tabs/sheets → their own component or sub-page.
-- No business logic / API calls inside a page object — page objects model the screen, not the workflow
-- No hardcoded device names, app paths, or server URLs — go through `Env` / `AppiumOptions`
-- No static mutable `AppiumDriver` — per-fixture instance field, so parallel fixtures stay isolated
+### What NOT to do
+- No `Driver.FindElement` outside `BaseAppiumPage` and components; no `[FindsBy]` or page factory.
+- No `TouchAction`, `ResetApp`, `ToggleWifi`, `SetConnectionType` or `DesiredCapabilities`.
+- No `AppiumBy` (it does not exist in .NET); no raw `IWebElement` returns; no assertions inside actions beyond the landmark.
+- No business logic or API calls inside a page object.
 
 ## Generation steps
 
-1. Confirm the **screen name**, **platform(s)**, **landmark element**, and the list of **elements + actions** with the user.
-2. For every element: capture the `accessibility id` (preferred) or platform resource-id. Flag any element that has neither — those become predicate / UiAutomator / XPath locators with a `// TODO` to replace once the app exposes a stable `testID`.
-3. For every action that navigates: confirm the **destination page** class name (and stub it if it doesn't exist).
-4. Generate `AppiumTests/Pages/{ScreenName}Page.cs`:
-   - One `private const string` per element
-   - Constructor passes `driver` to `base(driver)`
-   - `VerifyPageLoaded()` asserts the landmark element is displayed
-   - One action method per user-intent action, returning `void` or the destination `*Page` type
-   - One query method per piece of data the test needs to read
-5. If a destination page doesn't exist yet, create a stub or recursively generate it.
-6. Generate the test class extending `BaseMobileTest`; one `[Test]` per scenario, with assertions on user-visible outcomes.
-7. Run `dotnet test AppiumTests/AppiumTests.csproj -p:Platform=android` (or `ios`) — expect 0 failures. If the Appium server isn't reachable, check `Env.AppiumServerUrl`, that `appium server` is running (`curl -s http://127.0.0.1:4723/status` succeeds), and that the server log's `Available drivers:` line lists your driver (`uiautomator2` / `xcuitest`; `appium driver list --installed`). Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run".
+1. Confirm the screen, platforms, landmark, elements with rungs, actions and destinations.
+2. For each element with no test id, record it in `missing-testids.md`; do not silently fall back to XPath.
+3. Write `AppiumTests/Pages/<Screen>Page.cs` from `assets/page_template.cs`: constants, `VerifyPageLoaded`, intent actions, and a scoped component for each repeating group.
+4. Stub missing destination pages; write the test with one `[Test]` per scenario.
+5. Outside a `Gate: none` plan task, run `PLATFORM=android dotnet test AppiumTests` and expect zero failures. For a remote session, `curl -s http://127.0.0.1:4723/status` answers and `appium driver list --installed` lists the driver.
 
-> **A test that can't find a visible element is usually not a locator bug.** Per the Appium team, an element absent from page source is most often an accessibility, app-state, active-app (system alert/overlay), or native-vs-WebView context problem — fix that before rewriting the selector. For environment/doctor failures and driver-specific locator questions, the `@appium/mcp-documentation` server (`appium_skills`, `appium_documentation_query`) answers authoritatively; prefer it over community forums.
+A visible element missing from the page source is usually an accessibility, app-state, active-app (a system alert) or native-versus-WebView problem; fix that before the locator. For doctor failures and driver questions the Appium docs tools (`mcp__appium-mcp__appium_documentation_query`, `mcp__appium-mcp__appium_skills`, on when `APPIUM_MCP_DOCS_ENABLED=true`) answer from the official docs.
 
 ## Handoffs
 
-- Discovering / verifying locators on the live app → `qa/dotnet/skills/mobile-screen-explorer`
-- Emitting / updating the page object from a discovered inventory → `qa/dotnet/skills/mobile-screen-objects`
-- Architecting the POM structure (sub-namespaces, base classes, capabilities) → `qa/dotnet/skills/page-object-design`
-- Test data builders → `qa/dotnet/skills/test-data-builder`
-- Reviewing a page object → `qa/dotnet/skills/ui-test-author/review`
-- Authoring the test that uses this page object → `qa/manual/test-case-writer`
-- Allure reporting → `qa/reporting/dotnet/skills/test-reports`
+- Selectors on the live app → `qa/dotnet/skills/mobile-screen-explorer`
+- A class from an inventory → `qa/dotnet/skills/mobile-screen-objects`
+- POM architecture → `qa/dotnet/skills/page-object-design`
+- Test data → `qa/dotnet/skills/test-data-builder`
+- Failure evidence → `qa/dotnet/skills/evidence-capture`
+- Allure → `qa/reporting/dotnet/skills/test-reports`
+- Cloud farms → `qa/dotnet/skills/device-cloud`
+- Review → `qa/dotnet/skills/ui-test-author/review`
+- Formal test cases → the `qa-test-case-designer` agent
 
 ## Cross-references
 
-- Java sibling (TestNG + `io.appium:java-client`) → `qa/java/skills/ui-test-author/appium`
-- TypeScript sibling (WebdriverIO + `@wdio/appium-service`) → `qa/typescript/skills/ui-test-author/appium`
+- Java sibling (TestNG + `io.appium:java-client` 11) → `qa/java/skills/ui-test-author/appium`
+- TypeScript sibling (WebdriverIO 10 + `@wdio/appium-service`) → `qa/typescript/skills/ui-test-author/appium`
 - Web UI (.NET) → `qa/dotnet/skills/ui-test-author/selenium`, `qa/dotnet/skills/ui-test-author/playwright`
-- Cloud device grid (BrowserStack / Sauce / Device Farm) → `qa/dotnet/skills/browser-cloud-setup` (Step 2)
+- Cloud device grid (BrowserStack / Sauce / Device Farm) → `qa/dotnet/skills/device-cloud`
 - Network capture for non-Playwright stacks → `qa/dotnet/skills/network-mocking`

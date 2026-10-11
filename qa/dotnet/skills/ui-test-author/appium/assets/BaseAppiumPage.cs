@@ -1,60 +1,74 @@
 using OpenQA.Selenium;
 using OpenQA.Selenium.Appium;
+using OpenQA.Selenium.Appium.iOS;
 using OpenQA.Selenium.Support.UI;
 
 namespace AppiumTests.Pages;
 
-/// <summary>
-/// Base class for every Appium page object. Owns the driver and a 10s
-/// <see cref="WebDriverWait"/>, and funnels all element access through
-/// accessibility-id-first finders so locators never leak into actions.
-/// </summary>
 public abstract class BaseAppiumPage
 {
+    private static readonly TimeSpan Timeout = TimeSpan.FromSeconds(10);
+
     protected AppiumDriver Driver { get; }
-    private readonly WebDriverWait _wait;
 
-    protected BaseAppiumPage(AppiumDriver driver)
-    {
-        Driver = driver;
-        _wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
-    }
+    protected BaseAppiumPage(AppiumDriver driver) => Driver = driver;
 
-    /// <summary>Asserts this screen is currently visible via its landmark element.</summary>
     public abstract void VerifyPageLoaded();
 
-    // ── Finders (priority: AccessibilityId → Id → XPath) ─────────────────────
+    internal static By TestId(AppiumDriver driver, string id) =>
+        driver is IOSDriver ? MobileBy.AccessibilityId(id) : MobileBy.Id(id);
 
-    protected AppiumElement FindByAccessibilityId(string id) =>
-        WaitVisible(AppiumBy.AccessibilityId(id));
-
-    protected AppiumElement FindById(string id) =>
-        WaitVisible(By.Id(id));
-
-    protected AppiumElement FindByXPath(string xpath) =>
-        WaitVisible(By.XPath(xpath));
-
-    protected IReadOnlyList<AppiumElement> FindAllByAccessibilityId(string id) =>
-        Driver.FindElements(AppiumBy.AccessibilityId(id)).Cast<AppiumElement>().ToList();
-
-    /// <summary>True if the element becomes visible within the wait window; false on timeout.</summary>
-    protected bool IsElementVisible(By locator)
+    internal static WebDriverWait Wait(AppiumDriver driver, string message)
     {
-        try { return WaitVisible(locator).Displayed; }
-        catch (WebDriverTimeoutException) { return false; }
+        var wait = new WebDriverWait(driver, Timeout) { Message = message };
+        wait.IgnoreExceptionTypes(typeof(NoSuchElementException), typeof(StaleElementReferenceException));
+        return wait;
     }
 
-    // ── Internal wait (no DotNetSeleniumExtras dependency) ───────────────────
+    protected AppiumElement ByTestId(string id) => Present(TestId(Driver, id));
 
-    private AppiumElement WaitVisible(By locator) =>
-        _wait.Until(d =>
+    protected AppiumElement ByContentDescription(string description) => Present(MobileBy.AccessibilityId(description));
+
+    protected AppiumElement ByIosPredicate(string predicate) => Present(MobileBy.IosNSPredicate(predicate));
+
+    protected AppiumElement ByIosClassChain(string classChain) => Present(MobileBy.IosClassChain(classChain));
+
+    protected AppiumElement ByAndroidUiAutomator(string selector) => Present(MobileBy.AndroidUIAutomator(selector));
+
+    protected AppiumElement ByXPath(string xpath) => Present(By.XPath(xpath));
+
+    protected AppiumElement ByCss(string selector) => Present(By.CssSelector(selector));
+
+    protected void InWebView(Action webActions)
+    {
+        var native = Driver.Context;
+        var webView = Wait(Driver, "No WEBVIEW context appeared")
+            .Until(_ => Driver.Contexts.FirstOrDefault(context => context.StartsWith("WEBVIEW")))!;
+        Driver.Context = webView;
+        try
         {
-            try
-            {
-                var el = d.FindElement(locator);
-                return el.Displayed ? (AppiumElement)el : null;
-            }
-            catch (NoSuchElementException) { return null; }
-            catch (StaleElementReferenceException) { return null; }
-        })!;
+            webActions();
+        }
+        finally
+        {
+            Driver.Context = native;
+        }
+    }
+
+    protected bool IsTestIdVisible(string id)
+    {
+        var locator = TestId(Driver, id);
+        try
+        {
+            Wait(Driver, $"{locator} is not displayed").Until(_ => Driver.FindElements(locator).FirstOrDefault(e => e.Displayed));
+            return true;
+        }
+        catch (WebDriverTimeoutException)
+        {
+            return false;
+        }
+    }
+
+    private AppiumElement Present(By locator) =>
+        Wait(Driver, $"No element found for {locator}").Until(_ => Driver.FindElements(locator).FirstOrDefault())!;
 }

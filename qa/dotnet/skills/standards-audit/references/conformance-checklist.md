@@ -67,7 +67,7 @@ rg -n "<pattern>" --glob '*.cs' $TESTS
 | C1 | Any test runs alone, in any order | `[Order(...)]` chaining tests into a flow; Test B reading a row Test A created | `rg -n "\[Order\(" --glob '*.cs'` | blocker |
 | C2 | No shared mutable state between tests | `static` fields holding ids/entities mutated by tests; a `[OneTimeSetUp]`-created record that tests modify | `rg -n "static (?!readonly\|const)\w" --glob '*.cs'` | blocker |
 | C3 | No shared static driver / client | `public static IWebDriver Driver` — breaks parallel execution | `rg -n "static (IWebDriver\|IPage\|IBrowser\|AppiumDriver)" --glob '*.cs'` | blocker |
-| C4 | App/DB state reset between tests | No Respawn/reset in `[SetUp]`; **[Appium]** `noReset:true` leaking data between tests | `rg -n "Respawn\|ResetApp\|noReset" --glob '*.cs'` | blocker |
+| C4 | App/DB state reset between tests | No Respawn/reset in `[SetUp]`; **[Appium]** app state shared between tests — a driver reused across tests with no `mobile: clearApp` or `TerminateApp` + `ActivateApp` between them, or the removed `ResetApp()` / `CloseApp()` | `rg -n "Respawn\|ResetApp\|CloseApp\|noReset\|clearApp" --glob '*.cs'` | blocker |
 | C5 | Tests create the data they depend on | "Order 42 exists in staging" tests that die on the next reseed | `rg -n "= \d{2,}\b.*Id\|\"TC-\|Guid.Parse\(\"" --glob '*.cs'` | major |
 | C6 | Cleanup is deterministic and can't mask failures | Bare cleanup in `finally` that throws and replaces the real assertion error | `rg -n "finally" -A6 --glob '*.cs'` | major |
 | C7 | Parallelism settings match the fixtures **[NUnit]** | `[Parallelizable]` + `LevelOfParallelism > 1` on fixtures that own a container or share a driver | `rg -n "Parallelizable\|LevelOfParallelism" --glob '*.cs'` | major |
@@ -92,7 +92,7 @@ rg -n "<pattern>" --glob '*.cs' $TESTS
 | D9 | **[PW]** Response waits wrap the trigger | `WaitForResponseAsync` placed before/after the action instead of `RunAndWaitForResponseAsync` (race) | `rg -n "WaitForResponseAsync\|RunAndWaitForResponseAsync" --glob '*.cs'` | major |
 | D10 | No deprecated navigation waits **[PW]** | `page.WaitForNavigationAsync(...)` still in the code | `rg -n "WaitForNavigationAsync" --glob '*.cs'` | major |
 | D11 | No sync-over-async | `.Result` / `.Wait()` / `.GetAwaiter().GetResult()` — deadlocks under NUnit + Playwright | `rg -n "\.Result\b\|\.Wait\(\)\|GetAwaiter\(\)\.GetResult\(\)" --glob '*.cs'` | blocker |
-| D12 | **[Appium]** No sleep between gestures | `Thread.Sleep(1500)` after a swipe waiting for animation | covered by D1; read gesture helpers | blocker |
+| D12 | **[Appium]** No sleep between gestures | `Thread.Sleep(1500)` or `Task.Delay` after a swipe waiting for animation, instead of a `WebDriverWait` on the next screen | covered by D1; read gesture helpers | blocker |
 
 ---
 
@@ -114,10 +114,11 @@ rg -n "<pattern>" --glob '*.cs' $TESTS
 | E11 | Driver/browser lifecycle owned by one base fixture | **[Sel]** `new ChromeDriver()` in a test or `[SetUp]`. **[PW]** `Playwright.CreateAsync()` in a `[Test]`, a `[SetUp]` or a fixture's `[OneTimeSetUp]` — the root-namespace `AuthSetup` `[SetUpFixture]` is the one exception; a UI fixture not derived from the one `BaseTest : PageTest` (`ui-test-author/playwright/assets/BaseTest.cs`); a second base class per role, device or locale (those are `ContextOptions()` overrides) | `rg -n "new ChromeDriver\(\|Playwright\.CreateAsync\(" --glob '*.cs'`; `rg -n "class \w+ ?(\(.*\))? ?: ?(PageTest\|ContextTest\|BrowserTest\|PlaywrightTest)\b" --glob '*.cs'` — every hit but `BaseTest` itself needs a reason | blocker |
 | E12 | Constructor injection — no ambient statics | `Driver.Current` / service-locator lookups inside pages | `rg -n "Driver\.Current\|ServiceProvider\.GetRequiredService" --glob '*.cs'` | major |
 | E13 | **[Sel]** No deprecated `PageFactory` / `[FindsBy]` | `PageFactory.InitElements(driver, this)` | `rg -n "PageFactory\|FindsBy" --glob '*.cs'` | major |
-| E14 | **[Appium]** Platform branching abstracted | `if (Platform == "iOS") … else …` scattered across screens | `rg -n "iOS\"\|Android\"" --glob '*.cs'` | major |
+| E14 | **[Appium]** Platform branching abstracted | `if (Platform == "iOS") … else …` scattered across screens; a second platform-selection mechanism beside the `PLATFORM` variable (per-platform `appsettings` files, a `--filter "Platform=…"`) | `rg -n "\"iOS\"\|\"android\"\|PLATFORM" --glob '*.cs'` | major |
 | E15 | **[Reqnroll]** Steps delegate to page objects | Selectors, waits, or driver calls inside step definitions | `rg -n "\.Locator\(\|FindElement\(\|WaitFor" --glob '*Steps.cs'` | major |
 | E16 | **[PW]** `ContextOptions()` amends the base; parallelism is `ParallelScope.Self` | An override returning `new()` / `new BrowserNewContextOptions { … }` (drops `BaseURL`, the video folder, `Locale` and `ColorScheme`); `ParallelScope.All` / `Children` / `Fixtures` on a Playwright fixture (its tests share one `Page`); launch arguments in a `LaunchOptionsAsync()` override instead of a `.runsettings` (the browser is per worker — the first fixture wins) | `rg -n "ContextOptions\(\)" -A3 --glob '*.cs' \| rg "return new"`; `rg -n "ParallelScope\.(All\|Children\|Fixtures)" --glob '*.cs'`; `rg -n "LaunchOptionsAsync" --glob '*.cs'` | blocker |
 | E17 | **[PW]** Signed-in state from the root-namespace `AuthSetup` | `AuthSetup` (`[SetUpFixture]`) in a sub-namespace such as `X.Support` while the tests live in `X.Tests` — NUnit runs it only for its own namespace, so the state file is never written; every test signing in through the UI; a state path relative to the current directory instead of `<WorkDirectory>/auth-user.json` | `rg -n "\[SetUpFixture\]" -A3 --glob '*.cs'` — compare each namespace with the tests'; `rg -n "SignInAsync" --glob '*Tests.cs'` | blocker |
+| E18 | **[Appium]** No removed Appium client APIs | `TouchAction` / `MultiAction` (removed in client 6.0), `ToggleWifi` / `ToggleData` / `ToggleAirplaneMode` / `SetConnectionType` (removed in 8.0), `ResetApp` / `CloseApp` / `LaunchApp`, `DesiredCapabilities`, or `AppiumBy` (it does not exist in .NET; the class is `MobileBy`) — each fails to compile or throws against Appium 3. The replacements are W3C actions or a `mobile:` gesture, `mobile: setConnectivity`, and `mobile: clearApp` | `rg -n "TouchAction\|MultiAction\|ToggleWifi\|ToggleData\|ToggleAirplaneMode\|SetConnectionType\|ResetApp\|CloseApp\|LaunchApp\|DesiredCapabilities\|AppiumBy" --glob '*.cs'` | major |
 
 **E11 is not a finding on these documented owners of their own lifecycle:** the Reqnroll `[BeforeScenario]` hook
 from `bdd-project-scaffold` (a binding cannot derive from `BaseTest`, so it owns the scenario's browser and keeps
@@ -239,7 +240,7 @@ probe from `production-uptime-checks`, which is monitoring code, not a test fixt
 | K3 | Secrets read from env vars, lazily | A secret read in a static field initializer (breaks tests that don't need it) | `rg -n "static.*GetEnvironmentVariable" --glob '*.cs'` | major |
 | K4 | Config flows through one typed reader | `Configuration["..."]` string lookups scattered through tests | `rg -n "Configuration\[" --glob '*.cs'` | minor |
 | K5 | Per-environment settings are layered, not branched in code | `if (env == "staging")` choosing behaviour inside tests | `rg -n "== \"staging\"\|== \"prod" --glob '*.cs'` | minor |
-| K6 | **[Appium]** Capabilities from config, not hardcoded | `deviceName = "Pixel_6"` literal in the base fixture | `rg -n "AppiumOptions\|deviceName" --glob '*.cs'` | major |
+| K6 | **[Appium]** Devices, app path and server URL come from env or configuration | `DeviceName = "Pixel_6"` or a device list written in a C# file outside the factory; a literal `APP_PATH` or `http://127.0.0.1:4723` in a test | `rg -n "DeviceName = \"\|\.apk\|\.ipa\|4723" --glob '*.cs'` | major |
 | K7 | No user-secrets / local settings committed | `secrets.json` or a filled-in `appsettings.Local.json` in git | `git ls-files \| rg -i "secret\|\.local\."` | blocker |
 | K8 | Tokens never logged | A token written to console/Allure on failure | `rg -n "AccessToken" --glob '*.cs'` — check log/attachment paths | blocker |
 | K9 | **[PW]** A base URL is set, from `BASE_URL` | Relative `GotoAsync("/x")` / `APIRequest.PostAsync("/api/x")` with no `BaseURL` in `ContextOptions()` (they throw "Cannot navigate to invalid URL"); a hardcoded host instead of `BASE_URL`; a required variable read with `GetEnvironmentVariable(...)!` instead of `BaseTest.RequiredEnv` | `rg -n "BaseURL" --glob '*.cs'` vs `rg -n "GotoAsync\(\"/" --glob '*.cs'`; `rg -n "GetEnvironmentVariable\(.*\)!" --glob '*.cs'` | blocker |
@@ -247,7 +248,7 @@ probe from `production-uptime-checks`, which is monitoring code, not a test fixt
 ---
 
 ## L — Reporting & flake management
-*Owning skills: `qa/reporting/dotnet/skills/{test-reports,flaky-test-quarantine}`, `evidence-capture` (L4)*
+*Owning skills: `qa/reporting/dotnet/skills/{test-reports,flaky-test-quarantine}`, `evidence-capture` (L4, L15)*
 
 | # | Check | Violation looks like | Find it with | Sev |
 |---|---|---|---|---|
@@ -265,6 +266,7 @@ probe from `production-uptime-checks`, which is monitoring code, not a test fixt
 | L12 | Every quarantined test carries a ticket and gets reviewed | A `Flaky` category that only ever grows | `rg -n "Flaky" -A3 --glob '*.cs'` — check for issue links | major |
 | L13 | No sleeps in teardown/attachment helpers | `Thread.Sleep` in `[TearDown]` "waiting for attachments to flush" | covered by D1; read teardowns | blocker |
 | L14 | Allure attachments and links are recorded where a result exists | `AllureApi.AddTestAttachment` (no such method); `AllureApi.AddLink` / `AddAttachment` in `[OneTimeSetUp]` / `[OneTimeTearDown]`, where no test result is running and nothing is recorded — use `AddGlobalAttachment` there | `rg -n "AllureApi\." -B8 --glob '*.cs' \| rg "OneTime\|AllureApi"` | major |
+| L15 | **[Appium]** A failed mobile test keeps a screenshot, the page source, a device-log tail and the recording | Nothing attached on failure; evidence anywhere but `<WorkDirectory>/appium-artifacts/<Class>.<Test>.{png,xml,log,mp4}`; a second `[TearDown]` capture beside `BaseMobileTest`'s; a recording started and not stopped in the teardown (it blocks the next start); the recording kept for passing tests; a `catch` in the evidence teardown; `AllureApi.AddAttachment(name, type, body)` with a string body (three strings is a path) | `rg -n "StartRecordingScreen\|StopRecordingScreen\|GetScreenshot\|PageSource\|appium-artifacts" --glob '*.cs'` | major |
 
 ---
 
@@ -318,13 +320,13 @@ probe from `production-uptime-checks`, which is monitoring code, not a test fixt
 | B | Test naming, structure & comments | always | all |
 | C | Independence & isolation | always | all |
 | D | Waits & timing | always (tool-tagged rows follow the driver) | all — but PW/Sel-tagged rows only run under `ui`/`all`, Appium-tagged rows only under `mobile`/`all` |
-| E | Page / screen objects | UI or mobile suite present | `ui`, `mobile` — E14 **[Appium]** only under `mobile`/`all`; E13 **[Sel]**, E16, E17 **[PW]** only under `ui`/`all` |
+| E | Page / screen objects | UI or mobile suite present | `ui`, `mobile` — E14, E18 **[Appium]** only under `mobile`/`all`; E13 **[Sel]**, E16, E17 **[PW]** only under `ui`/`all` |
 | F | Locator hygiene | UI or mobile suite present | `ui`, `mobile` — F2 **[PW]**, F7 **[Sel]** only under `ui`/`all` |
 | G | Test data | always | all |
 | H | API test layering | API suite present | `api` only |
 | I | Assertion quality | always | all — I3, I11–I13 **[PW]** only under `ui`/`all` |
 | J | External verification | suite touches a DB / broker / storage / mail | all — discipline-independent, gated only by its own probe |
-| K | Config, secrets & environments | always | all — K9 **[PW]** only under `ui`/`all` |
-| L | Reporting & flake management | always — **absence is L1**, not N/A | all |
+| K | Config, secrets & environments | always | all — K9 **[PW]** only under `ui`/`all`; K6 **[Appium]** only under `mobile`/`all` |
+| L | Reporting & flake management | always — **absence is L1**, not N/A | all — L15 **[Appium]** only under `mobile`/`all` |
 | M | CI wiring | always — **absence is M1**, not N/A | all — M16 **[PW]** only under `ui`/`all` |
 | N | Coverage shape | always (mutation row needs Stryker.NET) | all |
