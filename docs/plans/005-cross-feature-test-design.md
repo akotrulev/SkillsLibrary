@@ -10,7 +10,7 @@ session looks the connections up there instead of re-deriving them. The three `q
 then automate the new case kinds. They run scheduled jobs on demand, control the clock at a time
 boundary, fire concurrent requests, and deliver a message or webhook twice.
 
-**Status:** Planned 2026-10-11. Nothing is built. Next: K1. O1 is answered: the automation is in this
+**Status:** K1 landed 2026-10-11: `business-analysis:dependency-map`, its golden example, the KB contract and feature slice, the three reasoning-lane edits and the `business-analyst` edits are written. Built but unverified: nothing has been run (the gate is A3), and the description length and file sizes are counted by hand only. Next: D1. O1 is answered: the automation is in this
 plan, as tasks A1–A3. The plan changes skills and agents only, so the gate (§11) proves structure, not
 quality. The new stack skills' code samples are never compiled. Whether the suites actually get deeper,
 and whether the automation patterns run, is unverified until H1 runs the lane on a real project.
@@ -797,6 +797,14 @@ their ids and the §5 feature slice. `state-grid`, `process-flow`, `conflict-che
   invariants)" to that plugin's description.
 - **Not in K1:** the code route (D1), anything under `qa/` (Q1, Q2, A1–A3), README and the catalog (A3).
 
+**As built (2026-10-11):** as planned, with no divergence and no §9.1 id changed.
+- `business-analysis/skills/ba-dependency-map/SKILL.md` (`name: dependency-map`, ~9.8k bytes; description 490 characters, counted by script) and `references/example-dependency-map.md` (EVT-001…007, RX-001…007, INV-001…004, ENT-003 grid with trigger-id columns, DEC-003; header and `Derived from: code by be-documenter @ a3f9c21` lines).
+- `ba-project-memory/SKILL.md`: layout, ids, INDEX `## Dependencies`, `## Feature slice` (§5 table and depth rule), handoff; 14,979 bytes.
+- `ba-entity-state-grid`, `ba-process-flow-diagram`, `ba-feature-conflict-check`: edits per the bullets; the state-grid file-format example now shows `EVT-` column headers.
+- `business-analyst.md`: net +464 characters (19,538 → 20,002), paid partly by two trims.
+- `.claude-plugin/marketplace.json`: skill registered after `ba-decision-table`; plugin description names the dependency map.
+- Unverified: no checker was run.
+
 ### D1 — dev: trace edges, "How it connects", and the documenters write the dependency map
 
 **Stack:** `docs` · **Agent:** `general-purpose`
@@ -1178,61 +1186,9 @@ in the checkout you are given, commit there, and never create a branch.
 | A3 | `docs` | `general-purpose` | A1, A2, Q2, Q1, D1, K1 | ~125k |
 | H1 | `human` | **the user** | A3 | one real feature |
 
-All eight blocks are live. None has landed.
+Seven blocks are live. K1 has landed (its block is deleted).
 
 ---
-
-### K1 — business-analysis: the dependency map, its golden example, and the KB contract (general-purpose, docs)
-
-````
-You are a general-purpose agent working in the SkillsLibrary repo. Task K1 of
-docs/plans/005-cross-feature-test-design.md: give the business-model KB a connection layer — a new
-`business-analysis:dependency-map` skill owning `events.md`, `shared-data.md` and `invariants.md`, a
-golden workshop-booking example, the KB contract and the feature slice — and make the reasoning-lane
-skills and the `business-analyst` agent read and write through it.
-
-Read, in this order:
-1. CLAUDE.md (Simplicity, Comments, Planning) and CONTRIBUTING.md "SKILL.md structure", "Writing a good
-   description", "Names and registration".
-2. The plan: §3, §4 (all), §5, §9.1, §10, D1–D4, D10, D12, task K1, and "Close-out — every task".
-3. business-analysis/skills/ba-project-memory/SKILL.md (the KB contract you extend),
-   ba-decision-table/SKILL.md (the shape a reasoning-lane skill has — copy its section skeleton),
-   ba-entity-state-grid/SKILL.md, ba-process-flow-diagram/SKILL.md, ba-feature-conflict-check/SKILL.md,
-   business-analysis/agents/business-analyst.md.
-4. backend/_shared/business-documentation/references/example-area.md — the workshop-booking domain
-   and its evidence style; your golden example must agree with it.
-5. The `business-analysis` entry in .claude-plugin/marketplace.json (grep for "ba-decision-table").
-
-Build (task K1's bullets, in order):
-- business-analysis/skills/ba-dependency-map/SKILL.md, `name: dependency-map`, description = §4.5
-  (count it: ≤ 500 characters). Formats §4.1–§4.3 are normative; procedure §4.4; checks; handoffs
-  naming qa/manual/requirements-breakdown/references/connections.md as the QA consumer.
-- references/example-dependency-map.md = §9.1 exactly (ids, effects, enforcement), with header and
-  provenance lines, the ENT-003 grid with trigger-id columns, and DEC-003.
-- ba-project-memory: layout, ids (EVT-/RX-/INV-), INDEX "## Dependencies", a "Feature slice" section
-  with §5's table and depth rule, handoffs.
-- ba-entity-state-grid, ba-process-flow-diagram, ba-feature-conflict-check, business-analyst.md: the
-  edits in task K1's bullets.
-- marketplace: register ./business-analysis/skills/ba-dependency-map after ba-decision-table; add the
-  dependency map to the plugin description.
-
-Traps:
-- The KB records what the software does and how features interact — never tests. No technique names,
-  no coverage, no test cases in anything you write (D10). "Test seeds" in conflict-check is a handoff
-  phrase, not a design.
-- Size: business-analyst.md is already over its 14,000-character budget — net growth ≤ 1,500. New and
-  edited SKILL.md files stay under 16,000 characters. Put examples in references/, never in the body.
-- §9.1's ids are a contract with Q1 and the gate. Do not renumber, add or drop an id; if a domain fact
-  forces a change, record a dated D<n> and rewrite the Q1 block below.
-- No inline comments or TODOs in the markdown you write; stable ids, sources on every row, the KB's
-  annotation grammar (`[TBD - reason]`, `⚠️ Assumption:`, `#confirmed/#inferred/#observed`).
-
-Gate: none — this plan gates once, in A3. Do not run `claude plugin validate`,
-tools/plugin-surface-check.py, tools/token-audit.py or any check script.
-
-Commit: `feat(business-analysis): dependency map — triggers, reactions, shared data, invariants (005 K1)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
 
 ### D1 — dev: trace edges, "How it connects", and the documenters write the dependency map (general-purpose, docs)
 

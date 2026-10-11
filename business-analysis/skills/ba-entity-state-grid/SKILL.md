@@ -30,7 +30,7 @@ Per `business-analysis/skills/ba-project-memory`: **read first** (`INDEX.md` + t
 ## Procedure
 
 1. **Identify the entity and enumerate its states** from the requirements *and* the existing KB model. States are business-meaningful conditions ("Submitted", "Suspended"), not implementation flags. A new feature inventing a near-synonym of an existing state ("Deactivated" vs "Suspended") is terminology drift → glossary check before adding.
-2. **Enumerate the events** — everything any feature does that can move the entity: user actions, system events, timeouts, lifecycle jobs (archival, cleanup, expiry — the classically forgotten writers).
+2. **Enumerate the events** — everything any feature does that can move the entity: user actions, system events, timeouts, lifecycle jobs (archival, cleanup, expiry — the classically forgotten writers). Once `events.md` exists, each event is a trigger there and the column header carries its `EVT-` id; grids built earlier keep free-text headers until the map is built or refreshed.
 3. **Fill the grid — every cell.** For each `state × event`: the target state, `—` (illegal by decision), or `?` (unspecified — a finding). Never leave a cell blank.
 4. **Annotate every legal transition with its owning feature** — the feature whose requirements define it, written as an `E<n>`/`AREA-` id with a label per `business-analysis:knowledge-base`. One transition claimed by two features is a **double-fire** finding; a transition no feature owns is an orphan.
 5. **Overlay the new feature** (the common case): add its events/states to the existing grid, then read the *whole* grid again — the conflicts are in the cells the new feature changed *and* the cells it silently assumed.
@@ -66,9 +66,9 @@ Each finding gets a **boundary condition** — the concrete scenario where it bi
 | Draft | in cart, not submitted | no | US40 |
 
 ## Transition grid
-Cell = target state `(owning feature id)` · `—` = illegal by decision · `?` = unspecified (finding)
+Cell = target state `(owning feature id)` · `—` = illegal by decision · `?` = unspecified (finding) · column header = the trigger's `EVT-` id in `events.md`, free text until the map exists
 
-| ↓ State \ Event → | submit | payment captured | refund requested | 90d inactivity |
+| ↓ State \ Event → | EVT-010 submit | EVT-012 payment captured | EVT-015 refund requested | EVT-019 90d inactivity |
 |---|---|---|---|---|
 | Draft | Submitted (E1) | — | — | Deleted (AREA-007) |
 | Submitted | — | Confirmed (E1) | ? | ? |
@@ -103,6 +103,7 @@ Bad: the refunds feature gets its own tidy three-state diagram (`Confirmed → R
 
 - Findings → severity + resolution recording → `business-analysis/skills/ba-feature-conflict-check`
 - A guard hides a multi-input rule set → `business-analysis/skills/ba-decision-table`
+- Events become triggers, and what else they set off becomes reactions → `business-analysis/skills/ba-dependency-map`
 - The process *between* transitions → `business-analysis/skills/ba-process-flow-diagram`
 - KB mechanics → `business-analysis/skills/ba-project-memory`
 - State-transition test design (n-switch, transition pairs) from this model → `qa/manual/test-design-techniques`

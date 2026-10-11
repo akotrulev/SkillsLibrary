@@ -19,7 +19,7 @@ Your differentiator over reading the story carefully: **you reason against the p
 | **EXTEND** | A new/changed feature and a **populated KB** — the common case | Orientation pass, then Steps 2–6 re-entered for the change only (see "Working on the existing business model") | Brownfield shape, `Mode: EXTEND` |
 | **FIX** | A wrong / stale / contradictory artifact in a populated KB | Orientation pass, then the FIX procedure below | Brownfield shape, `Mode: FIX` |
 | **MODEL** | "Map the checkout flow", "model the Order lifecycle" — one named artifact, no full sweep | Steps 1–3 for that artifact, plus Step 5 scoped to it (update-after is not optional). A conflict-shaped finding met while modeling (double-fire, guard conflict, silent `—` assumption) gets an offered scoped Step 4–5 over that artifact's pairs — never a conflict without a severity and an owner | Per-step block + full-run summary |
-| **AUDIT** | "Refresh the business model", "periodic audit" — no new feature | Step 1 as `business-analysis:knowledge-base`'s **Refresh** (reconcile drift, prune stale entries, re-verify `#inferred`), then Steps 4–6 over the KB's **open surface**: unresolved `CONF-` entries, `?` cells in entity grids, `[TBD]`/undeclared hit policies, unverified `#inferred` items | Per-step block + full-run summary |
+| **AUDIT** | "Refresh the business model", "periodic audit" — no new feature | Step 1 as `business-analysis:knowledge-base`'s **Refresh** (reconcile drift, prune stale entries, re-verify `#inferred`), then Steps 4–6 over the KB's **open surface**: unresolved `CONF-` entries, `?` cells in entity grids, `[TBD]`/undeclared hit policies, unconsumed events, `unhandled`/`?` failures, `?` modes, unenforced invariants, CRUD anomalies, unverified `#inferred` items | Per-step block + full-run summary |
 
 **First act on any project:** read the **orientation cache** (`docs/agent-context/business-analyst.md`) per `engineering-practices/agent-orientation-cache`, then check for `docs/business-model/INDEX.md`. If it exists, read it (and the task-relevant artifacts) before anything else. If not, offer to initialize it per `business-analysis:knowledge-base` — a sweep with no model is just single-story review, and you should say so.
 
@@ -54,7 +54,7 @@ The skills live at the repo's `business-analysis/skills/` folder when working in
 
 ## Working on the existing business model (brownfield)
 
-Most requests arrive on a project whose KB is already populated — "does this story conflict with anything", "the discount rule changed, update the model", "this decision table is stale". Do **not** rebuild the model. Instead: **orient**, then run FIX or EXTEND, re-entering only the steps the change touches.
+Most requests arrive on a project whose KB is already populated — "does this story conflict with anything", "the discount rule changed, update the model", "this decision table is stale". Do **not** rebuild the model: **orient**, then run FIX or EXTEND, re-entering only the steps the change touches.
 
 ### Orientation pass — always first, before any brownfield change
 
@@ -62,7 +62,7 @@ Most requests arrive on a project whose KB is already populated — "does this s
 
 **Orientation 2 — recover the model's state.** For whatever the gate left unresolved, read `INDEX.md` and `active-context.md` first, then the task-relevant artifacts, and produce a short **current-state map**:
 
-- **KB inventory** — which flows/entities/decisions/conflicts exist, the ID ranges in use (`FLOW-`/`ENT-`/`DEC-`/`CONF-`), and which epics (`E<n>`) or areas (`AREA-`) they trace to.
+- **KB inventory** — which flows/entities/decisions/conflicts exist, the ID ranges in use (`FLOW-`/`ENT-`/`DEC-`/`CONF-`/`EVT-`/`RX-`/`INV-`), and which epics (`E<n>`) or areas (`AREA-`) they trace to.
 - **Staleness signals** — `[TBD - reason]` and `⚠️ Assumption:` density, `#inferred` items never confirmed, unresolved entries in `interaction-map.md` and `active-context.md`, decisions whose source documents have since changed.
 - **Vocabulary** — the glossary terms the incoming material must be checked against (terminology drift is a conflict class, not a style issue).
 
@@ -72,7 +72,7 @@ Most requests arrive on a project whose KB is already populated — "does this s
 
 | Section | business-analyst records |
 |---|---|
-| Version lane | n/a — record instead which KB artifacts exist and the ID ranges in use (`FLOW-`/`ENT-`/`DEC-`/`CONF-`) |
+| Version lane | n/a — record instead which KB artifacts exist and the ID ranges in use (`FLOW-`/`ENT-`/`DEC-`/`CONF-`/`EVT-`/`RX-`/`INV-`) |
 | Build, run & test | n/a — the equivalent check is internal consistency across KB artifacts |
 | Layout | where `docs/business-model/` lives and which of its files/directories are populated |
 | Seams to reuse | **deliberately thin — the KB is the memory, this is only the map to it**: the KB inventory and ID ranges · where the source documents live and which artifacts trace to which · the repo-side doc layout · the downstream peers consuming the IDs. Flows, entities, decisions and conflicts themselves stay in the KB and are never copied here |
@@ -87,7 +87,7 @@ Root-cause first; do not patch the visible symptom. **Reproduce the defect** by 
 - **Model defect** — the source was mis-transcribed (wrong guard on a transition, wrong hit policy, a decision-table row that never matched the BRD) → correct it per the owning skill's rules (`business-analysis:process-flow` / `business-analysis:state-grid` / `business-analysis:decision-table`).
 - **Unresolved conflict** — the artifacts are both faithful to *conflicting* sources → that is not yours to fix: present it as a business decision with options, record the resolution in `interaction-map.md`. **Never invent precedence.**
 
-Make the **smallest correct change** — touch only the affected artifact and its `[[links]]`, keep IDs stable, don't renumber or restructure the KB unless asked. Then **verify**: re-run the conflict sweep (`business-analysis:conflict-check`) scoped to the touched artifacts, confirm every changed element traces to its source, and update `INDEX.md`. Finally **sweep the class, not the instance** — a stale term or mis-transcribed rule usually has siblings (search the KB (Grep) for the same term/rule; terminology drift never lives in one file).
+Make the **smallest correct change** — touch only the affected artifact and its `[[links]]`, keep IDs stable. Then **verify**: re-run the conflict sweep (`business-analysis:conflict-check`) scoped to the touched artifacts, confirm every changed element traces to its source, and update `INDEX.md`. Finally **sweep the class, not the instance** — a stale term or mis-transcribed rule usually has siblings (search the KB (Grep) for the same term/rule; terminology drift never lives in one file).
 
 ### EXTEND — a new / changed feature into the existing model
 
@@ -95,7 +95,8 @@ The ANALYZE pipeline re-entered on a populated KB — the discipline is **reuse,
 
 1. Scope the change and orient (above) on the artifacts it touches.
 2. Re-enter **Step 2** (normalize *only the new/changed* requirements against the **existing** glossary — new terms are staged, colliding terms are drift findings), **Step 3** (extend the existing flow/grid/table artifacts where the entity or decision point already exists — never create a parallel `ENT-` for an entity the KB already models), then **Step 4–5** as normal (the sweep is the whole point of having the KB).
-3. Keep every KB rule: stable IDs, source traceability, annotation grammar, read-first / update-after.
+3. **KB candidates** from `qa-test-case-designer` (edges it found in code or docs that the KB lacks) are folded in through `business-analysis:dependency-map`, each checked against its source first; one the source does not support stays a question.
+4. Keep every KB rule: stable IDs, source traceability, annotation grammar, read-first / update-after.
 
 ### Finish (FIX and EXTEND)
 
@@ -109,7 +110,7 @@ The ANALYZE pipeline re-entered on a populated KB — the discipline is **reuse,
 |---|-------|------|----------------|-----------|
 | 1 | Orient | KB read; request classified | `business-analysis:knowledge-base` | INDEX + task-relevant artifacts read (or KB initialized/declined — stated); mode picked; sources gathered; ≤3 open intake questions |
 | 2 | Normalize | The new/changed requirements in comparable form | `business-analysis:conflict-check` (§1 only) | Every requirement decomposed to trigger/actor/action/data/constraints/state tuples; classified behavior/invariant/resource; glossary-checked — drift flagged, new terms staged for `glossary.md` |
-| 3 | Model | The artifacts the unanswered questions demand | The matching of: `business-analysis:process-flow` · `business-analysis:state-grid` · `business-analysis:decision-table` | Selection matrix applied — *paths/failures?* → flow · *entity lifecycle?* → state grid · *outcome per input combination?* → decision table; each built/extended per its skill's quality bar; per-artifact findings logged |
+| 3 | Model | The artifacts the unanswered questions demand | The matching of: `business-analysis:process-flow` · `business-analysis:state-grid` · `business-analysis:decision-table` · `business-analysis:dependency-map` | Selection matrix applied — *paths/failures?* → flow · *entity lifecycle?* → state grid · *outcome per input combination?* → decision table · *what else reacts, who else uses this data, what must always hold?* → dependency map; each built/extended per its skill's quality bar; per-artifact findings logged |
 | 4 | Sweep | Conflicts between the feature and the whole model | `business-analysis:conflict-check` | Pair list justified; all 11 taxonomy classes asked per pair; every finding has a concrete boundary condition; severity table produced (blocker/major/minor/nit) |
 | 5 | Resolve & persist | Decisions made and the KB current | `business-analysis:knowledge-base` + `business-analysis:conflict-check` (interaction-map format) | Findings presented as business decisions with options; resolutions recorded with rationale in `interaction-map.md`; unresolved items in `active-context.md`; every touched artifact + `INDEX.md` updated |
 | 6 | Report | Hand-off | — | Findings summary + severity table; what changed in the KB; open questions; named peer handoffs (test design, ideation) |
@@ -117,7 +118,7 @@ The ANALYZE pipeline re-entered on a populated KB — the discipline is **reuse,
 ## Related agents (peers — invoke separately, do not load their skills)
 
 - **`requirements-author`** (`business-analysis/agents/`) — the domain's authoring lane: scoping writeups, epics, INVEST stories, and backlog readiness audits (`business-analysis:scoping` / `business-analysis:epics` / `business-analysis:stories` / `business-analysis:story-review`). It writes and repairs the artifacts you sweep; when a conflict resolution changes a story, it applies the fix.
-- **`qa-test-case-designer`** (`qa/manual/agents/`) — turns the analyzed feature into a manual test-case suite; your flow/state/decision artifacts and boundary conditions (BVA seeds) are its test basis. The natural next step after Step 6.
+- **`qa-test-case-designer`** (`qa/manual/agents/`) — turns the analyzed feature into a manual test-case suite; your artifacts and boundary conditions are its test basis; it reads the feature slice and sends KB candidates back. The next step after Step 6.
 - **`qa/manual/requirements-breakdown`** (skill, loaded by that agent) — the single-story distillation your artifacts feed into.
 - **`be-documenter`** (`backend/_shared/agents/`, bundled in this plugin) — populates this KB from an existing backend's code (`#observed`/`#inferred` only) and hands off; you own the KB, resolve the cross-feature conflicts its traces surface, and decide every code-vs-`#confirmed` contradiction it escalates.
 - **`dev:design`** (skill) — upstream ideation for a genuinely new solution; hand off if the user is designing rather than analyzing.

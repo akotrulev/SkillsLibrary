@@ -595,7 +595,7 @@
     },
     {
       "name": "business-analysis",
-      "description": "Self-contained senior business-analysis plugin for the REASONING lane: it checks features against the WHOLE project. It keeps a persistent per-project business-model knowledge base (docs/business-model/ — read-first / update-after, stable IDs, source traceability), maps flows in BPMN-disciplined Mermaid, builds one state × event lifecycle grid per business entity with all features overlaid, merges DMN-style decision tables with declared hit policies and mechanical completeness/overlap checks, and runs the taxonomy-driven feature-conflict sweep (11 conflict classes, mandatory boundary conditions, severity-tabled findings, resolutions recorded as business decisions). Also ships the story-writing and story-quality skills and the step-by-step business-analyst orchestrator agent (analyze / model / audit modes). Sits upstream of QA test design — its artifacts and boundary conditions are first-class test-basis inputs. The authoring lane (requirements-author: refine → requirements → epics → stories, /dev:refine) and the reverse-documentation agents (/dev:document-system, /dev:document-feature) arrive through the `dev` plugin this one depends on.",
+      "description": "Self-contained senior business-analysis plugin for the REASONING lane: it checks features against the WHOLE project. It keeps a persistent per-project business-model knowledge base (docs/business-model/ — read-first / update-after, stable IDs, source traceability), maps flows in BPMN-disciplined Mermaid, builds one state × event lifecycle grid per business entity with all features overlaid, merges DMN-style decision tables with declared hit policies and mechanical completeness/overlap checks, keeps a dependency map (triggers, reactions, shared data, invariants), and runs the taxonomy-driven feature-conflict sweep (11 conflict classes, mandatory boundary conditions, severity-tabled findings, resolutions recorded as business decisions). Also ships the story-writing and story-quality skills and the step-by-step business-analyst orchestrator agent (analyze / model / audit modes). Sits upstream of QA test design — its artifacts and boundary conditions are first-class test-basis inputs. The authoring lane (requirements-author: refine → requirements → epics → stories, /dev:refine) and the reverse-documentation agents (/dev:document-system, /dev:document-feature) arrive through the `dev` plugin this one depends on.",
       "source": "./",
       "strict": false,
       "author": {
@@ -623,6 +623,7 @@
         "./business-analysis/skills/ba-process-flow-diagram",
         "./business-analysis/skills/ba-entity-state-grid",
         "./business-analysis/skills/ba-decision-table",
+        "./business-analysis/skills/ba-dependency-map",
         "./business-analysis/skills/ba-feature-conflict-check"
       ],
       "commands": [

@@ -44,13 +44,13 @@ Decompose each of its requirements into one comparison tuple — the same six el
 | **constraints** | restrictions on it (frequency, window, amount, role) |
 | **state touched** | entity states it reads, sets, or removes |
 
-Also classify each requirement as **behavior**, **invariant** (a global "always/never" axiom), or **resource** claim (quota, budget, slot, lock) — invariant- and resource-mediated conflicts are invisible if you only compare behaviors to behaviors.
+Also classify each requirement as **behavior**, **invariant** (a global "always/never" axiom), or **resource** claim (quota, budget, slot, lock) — invariant- and resource-mediated conflicts are invisible if you only compare behaviors to behaviors. Invariant and resource claims are persisted to `invariants.md` through `business-analysis:dependency-map`.
 
 Glossary-check every term during normalization: a term used differently than `glossary.md` defines it is finding material *before* any pair is compared.
 
 ### 2. Build the pair list
 
-New feature's tuples × the KB: features sharing a **trigger**, touching the same **entity/states**, writing into the same **decision point**, consuming the same **resource**, or adjacent on a flow's **event timeline**. Everything else is a non-pair — don't brute-force the full cross product; the KB's structure prunes it.
+When `events.md` exists, the pair list is the **feature slice** (`business-analysis:knowledge-base`), plus anything the slice misses. Otherwise: new feature's tuples × the KB: features sharing a **trigger**, touching the same **entity/states**, writing into the same **decision point**, consuming the same **resource**, or adjacent on a flow's **event timeline**. Everything else is a non-pair — don't brute-force the full cross product; the KB's structure prunes it.
 
 ### 3. Sweep each pair with the taxonomy
 
@@ -70,7 +70,7 @@ New feature's tuples × the KB: features sharing a **trigger**, touching the sam
 
 ### 4. Boundary condition per finding — mandatory
 
-Every finding states the **concrete scenario where the two features collide**: "customer redeems loyalty points (B) on an order at exactly $100.00 (A's free-shipping threshold, computed *post*-discount → total drops to $87 → does shipping revert?)". A finding without a boundary condition is a suspicion, not a finding. Boundary conditions double as BVA seeds for QA.
+Every finding states the **concrete scenario where the two features collide**: "customer redeems loyalty points (B) on an order at exactly $100.00 (A's free-shipping threshold, computed *post*-discount → total drops to $87 → does shipping revert?)". A finding without a boundary condition is a suspicion, not a finding. Boundary conditions double as test seeds for QA — BVA, and the cross-feature cases of `qa-<stack>:cross-feature-test-design`.
 
 **Escalation tools** when a pair needs deeper analysis (the selection matrix): outcome-per-combination unclear → merge into a decision table (`business-analysis:decision-table`); lifecycle unclear → extend the entity grid (`business-analysis:state-grid`); paths/timeouts unclear → the flow (`business-analysis:process-flow`); **timing/interleaving between actors** → a Mermaid `sequenceDiagram` of that specific boundary scenario — the one place sequence diagrams are used, as an investigation tool, not a default artifact.
 
@@ -116,6 +116,7 @@ Bad: reading the new story alone and listing its internal ambiguities — that's
 ## Handoffs
 
 - Deeper analysis of a pair → `business-analysis:decision-table` / `business-analysis:state-grid` / `business-analysis:process-flow` per the escalation matrix
+- Findings from the connection layer (unconsumed events, orphan reactions, unenforced invariants, CRUD gaps) arrive from `business-analysis/skills/ba-dependency-map`
 - KB mechanics → `business-analysis/skills/ba-project-memory`
-- Findings resolved → the feature is ready for `qa/manual/requirements-breakdown` (boundary conditions = BVA seeds) and `qa/manual/agents/qa-test-case-designer`
+- Findings resolved → the feature is ready for `qa/manual/requirements-breakdown` (boundary conditions = test seeds: BVA, and the cross-feature cases of `qa-<stack>:cross-feature-test-design`) and `qa/manual/agents/qa-test-case-designer`
 - Full orchestration → `business-analysis/agents/business-analyst`

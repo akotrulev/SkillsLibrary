@@ -35,6 +35,9 @@ docs/business-model/
 ├── flows/<flow>.md       # one business flow per file (FLOW-nnn) — owned by business-analysis:process-flow
 ├── entities/<entity>.md  # one state model per business entity (ENT-nnn) — owned by business-analysis:state-grid
 ├── decisions/<point>.md  # one merged decision table per shared decision point (DEC-nnn) — owned by business-analysis:decision-table
+├── events.md             # triggers and reactions (EVT-, RX-) — owned by business-analysis:dependency-map
+├── shared-data.md        # CRUD matrix + shared fields — owned by business-analysis:dependency-map
+├── invariants.md         # what must always hold (INV-) — owned by business-analysis:dependency-map
 ├── interaction-map.md    # known feature interactions + their resolution decisions (CONF-nnn) — owned by business-analysis:conflict-check
 └── active-context.md     # dynamic tier: last sessions' changes + open questions/hotspots
 ```
@@ -43,7 +46,7 @@ docs/business-model/
 
 | Tier | Files | Changes |
 |---|---|---|
-| **Stable** | `glossary.md`, `system-overview.md`, `areas/`, `flows/`, `entities/`, `decisions/`, `interaction-map.md` | deliberately, when the business model actually changes |
+| **Stable** | `glossary.md`, `system-overview.md`, `areas/`, `flows/`, `entities/`, `decisions/`, `events.md`, `shared-data.md`, `invariants.md`, `interaction-map.md` | deliberately, when the business model actually changes |
 | **Dynamic** | `active-context.md` (+ the INDEX line-items) | every session that touches the model |
 
 ## The contract
@@ -69,7 +72,7 @@ Re-read **all** files, reconcile drift against the current requirements/codebase
 
 - **Size discipline.** Any file approaching ~2,000 words splits by topic; `INDEX.md` stays one line per artifact. Critical facts near the top of each file.
 - **Short declarative statements**, not essays. "Refunds allowed within 30 days (BRD §6)" — not a paragraph.
-- **Stable IDs + traceability.** Every artifact carries an ID (`AREA-`, `FLOW-`, `ENT-`, `DEC-`, `CONF-` + number); flow nodes are `FLOW-nnn.k`, decision-table rule rows are table-local `R1, R2…` under their `DEC-` id. Everything cites its source requirement — a story as `US<n>` (plus `AC<k>` where one criterion is meant), an epic as `E<n>`, otherwise the BRD section or contract path. IDs are never reused after deletion.
+- **Stable IDs + traceability.** Every artifact carries an ID (`AREA-`, `FLOW-`, `ENT-`, `DEC-`, `CONF-`, `EVT-`, `RX-`, `INV-` + number); flow nodes are `FLOW-nnn.k`, decision-table rule rows are table-local `R1, R2…` under their `DEC-` id. Everything cites its source requirement — a story as `US<n>` (plus `AC<k>` where one criterion is meant), an epic as `E<n>`, otherwise the BRD section or contract path. IDs are never reused after deletion.
 - **Feature identity.** Wherever an artifact names the feature that *owns* a transition, rule or step, the feature is an id with a label, never a bare word: the epic from the initiative that introduced it (`E2 booking`), or the area for code-derived artifacts (`AREA-003 ordering`). Two initiatives may both have an `E2`, so the label carries the initiative folder when it is not obvious (`E2 booking · 004-workshop`). A free-text feature name with no id is a traceability gap, because nothing downstream can find the story set behind it.
 - **Annotation grammar** (uniform across artifacts):
   - `[TBD - reason]` — known unknown, waiting on a decision
@@ -78,7 +81,7 @@ Re-read **all** files, reconcile drift against the current requirements/codebase
   - Confidence tags: `#confirmed` (sourced to a requirement/stakeholder decision) · `#inferred` (derived by analysis, plausible but unverified) · `#observed` (seen in the implementation or the live system, not in any doc)
 - **Record decisions with rationale.** A conflict resolution in `interaction-map.md` is a *business decision* — record who/what decided and why, not just the outcome.
 - **Skip what the repo already records.** Code structure, API shapes derivable from contracts in-repo, git history. The KB records what the software must *do* and how features *interact* — nothing else.
-- **Header on every artifact file.** Each `areas/<area>.md`, `flows/<flow>.md`, `entities/<entity>.md`, `decisions/<point>.md` file (and `system-overview.md`) opens with `**Created:** <YYYY-MM-DD>` and `**Owned by:** \`<the owning skill>\`` (e.g. `business-analysis:process-flow`; `dev:doc-business-model` for `areas/` and `system-overview.md`); on every later update, add `**Last updated:** <YYYY-MM-DD> by \`<skill>\`` beneath it rather than overwriting the creation line.
+- **Header on every artifact file.** Each `areas/<area>.md`, `flows/<flow>.md`, `entities/<entity>.md`, `decisions/<point>.md` file (and `system-overview.md`, `events.md`, `shared-data.md`, `invariants.md`) opens with `**Created:** <YYYY-MM-DD>` and `**Owned by:** \`<the owning skill>\`` (e.g. `business-analysis:process-flow`; `dev:doc-business-model` for `areas/` and `system-overview.md`); on every later update, add `**Last updated:** <YYYY-MM-DD> by \`<skill>\`` beneath it rather than overwriting the creation line.
 
 ## INDEX.md format
 
@@ -95,6 +98,10 @@ Read this file first, every session. One line per artifact; read the ones your t
 - [Checkout](flows/checkout.md) — FLOW-001; happy path + payment-failure/timeout branches
 ## Decisions
 - [Order pricing](decisions/order-pricing.md) — DEC-001; hit policy C+ (stacking); contributed by promos, loyalty, shipping
+## Dependencies
+- [Events & reactions](events.md) — 7 triggers, 7 reactions; 1 unconsumed event, 2 reactions with `?` failure
+- [Shared data](shared-data.md) — 2 entities, 2 shared fields
+- [Invariants](invariants.md) — INV-001…INV-004; 3 not enforced or unknown
 ## Cross-cutting
 - [Glossary](glossary.md) — canonical terms; "customer" ≠ "account" here
 - [Interaction map](interaction-map.md) — 4 resolved conflicts, 1 open (CONF-005)
@@ -102,12 +109,29 @@ Read this file first, every session. One line per artifact; read the ones your t
 - [Active context](active-context.md) — last touched 2026-07-12; 3 open questions
 ```
 
+## Feature slice
+
+The slice is the set of connections that matter for one feature. The input is an owner id (`E<n>`, `AREA-nnn`) or a trigger id (`EVT-nnn`). It is eight lookups, each a grep, because every row carries ids under the feature-identity rule.
+
+| # | Lookup | Where | What it yields |
+|---|---|---|---|
+| 1 | Own triggers and reactions | `events.md`, rows with *Owner* = id | What can start this feature, and what it does |
+| 2 | Downstream | follow *Emits* → reactions whose *When* is that event, repeated | What it sets off in other features |
+| 3 | Upstream | other owners' reactions whose *Emits* reach this feature's reactions | Who else can start it |
+| 4 | States depended on | for each `ENT` transition this feature makes, the target state's row in the grid | Other owners' triggers that are legal in that state, plus every `—` and `?` in the row |
+| 5 | Decisions | `decisions/` files this feature contributes rows to | The other contributors' rows |
+| 6 | Shared data | `shared-data.md` rows naming this feature's reactions | The other writers and readers |
+| 7 | Invariants | `invariants.md` rows whose *Threatened by* includes this feature's reactions | What it can break, and whether it guards against it |
+| 8 | Known interactions | `interaction-map.md` entries with this feature in *Pair* | Resolved and open conflicts, each with its boundary condition |
+
+**Depth:** two hops past the feature's own reactions. Go further where an effect moves money or cannot be undone. `business-analysis:conflict-check` uses the slice as its pair list when the map exists. QA reads it through `qa/manual/requirements-breakdown/references/connections.md`.
+
 ## Initializing a KB
 
 When no `docs/business-model/` exists and the user wants one:
 
 1. Confirm the path (default `docs/business-model/`; respect an existing docs convention if the project has one).
-2. Create `INDEX.md`, `glossary.md`, `active-context.md`, `interaction-map.md` with headers and empty sections — plus the `areas/`, `flows/`, `entities/`, `decisions/` directories.
+2. Create `INDEX.md`, `glossary.md`, `active-context.md`, `interaction-map.md` with headers and empty sections (`events.md`, `shared-data.md` and `invariants.md` are created by `business-analysis:dependency-map` on first use) — plus the `areas/`, `flows/`, `entities/`, `decisions/` directories.
 3. Do **not** backfill the whole model speculatively. The KB accretes as features are analyzed; seed it only with what the current task's analysis actually produces.
 
 **The one exception — evidence-based backfill from code.** The `be-documenter` agent deliberately populates the KB in bulk by reading an existing implementation. That does not violate the rule above, because the rule forbids *speculation*, not *volume*: every statement it writes is `#observed` with a `file:line` read that session, or `#inferred` and simultaneously raised as an open question. In `areas/` documents those tags and citations sit in the **closing evidence table** rather than inline — the body reads as a product spec (overview · setup · how it works · worked example · open questions) — but the tag per statement is still mandatory there. It never writes `#confirmed` — promotion is a human act — and it never overwrites a `#confirmed` entry, since a human's confirmation outranks a trace. See `backend/_shared/business-documentation`.
@@ -133,6 +157,7 @@ Also bad: dumping the full BRD into `flows/` verbatim. The KB is a distilled mod
 - Build/extend a flow → `business-analysis/skills/ba-process-flow-diagram`
 - Build/extend an entity state model → `business-analysis/skills/ba-entity-state-grid`
 - Build/extend a decision table → `business-analysis/skills/ba-decision-table`
+- Build/extend the triggers, reactions, shared data and invariants → `business-analysis/skills/ba-dependency-map`
 - Sweep a new/changed feature against the model → `business-analysis/skills/ba-feature-conflict-check`
 - Orchestrate the whole loop → `business-analysis/agents/business-analyst`
 - Populate the KB from an existing backend implementation (areas, system overview, and the evidence behind the flows/entities/decisions) → the `be-documenter` agent and `backend/_shared/business-documentation`
