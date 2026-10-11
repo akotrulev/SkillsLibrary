@@ -54,7 +54,7 @@ Rules of thumb:
 
 ### Base class hierarchy
 
-**Playwright: the default is no base class.** Pages take `Page`, components take their root `Locator`, and shared behaviour is a component field. Introduce `BasePage` only when a **third** concrete page shares real behaviour (not just the `page` field), and keep it to one level. **Selenium / Appium** use the thin `BasePage` / `BaseAppiumPage` their writer skills define (the driver plus one synchronization helper).
+**Playwright: the default is no base class.** Pages take `Page`, components take their root `Locator`, and shared behaviour is a component field. Introduce `BasePage` only when a **third** concrete page shares real behaviour (not just the `page` field), and keep it to one level. **Selenium / Appium** use the thin `BasePage` / `BaseAppiumPage` their writer skills define (the driver plus one synchronization helper). An Appium **component** does not extend `BaseAppiumPage`: it holds a row key and re-resolves its root on every call.
 
 ```
 <ConcretePage>                     ← Playwright default: no base
@@ -83,10 +83,10 @@ Avoid `if (platform.equals("iOS")) …` inside a single page object.
 
 ### Locator ownership
 
-- Locators belong **inside the page / component class** as `private static final By` (Selenium / Appium) or `private final Locator` fields (Playwright Java) — never in tests.
+- Locators belong **inside the page / component class** as `private static final By` (Selenium), `private static final String {ELEMENT}_ID` (Appium; a fallback is `{ELEMENT}_XPATH_FALLBACK`) or `private final Locator` fields (Playwright Java) — never in tests.
 - A shared `Locators` constants class is an anti-smell. The only exception is brand-wide a11y test ids.
 - **A component takes its parent `Locator`** (`WebElement` on Selenium) in the constructor and builds every child from it, so it works wherever it is mounted. The scoping mechanics — chaining from the root, `parent.locator(child)` (the 1.63 form of the 1.64 `within()`), `filter(setHas)`, strictness, positional picks — are owned by [`ui-test-author/playwright/references/locators.md`](../ui-test-author/playwright/references/locators.md); `assets/LoginPage.java` there is the worked example.
-- Every Playwright locator follows one ladder: `getByTestId` → `getByRole` → `getByLabel` → `getByPlaceholder` → `getByText` → `getByAltText` / `getByTitle` → CSS. Selenium and Appium put the test id first too, then their writer's order. Test ids are PascalCase dot-separated and static (`OrderRow`, `OrderRow.Title`); a fallback is recorded in `missing-testids.md`, never marked in the code.
+- Every Playwright locator follows one ladder: `getByTestId` → `getByRole` → `getByLabel` → `getByPlaceholder` → `getByText` → `getByAltText` / `getByTitle` → CSS. Selenium puts the test id first too, and Appium picks the rung per platform (iOS `accessibilityId`, Android `id`), then a native query, then XPath. Test ids are PascalCase dot-separated and static (`OrderRow`, `OrderRow.Title`); a fallback is recorded in `missing-testids.md`, never marked in the code.
 - **No `@FindBy`** when the project standard is explicit `findElement`. Don't mix the two.
 
 ### Where flow helpers live

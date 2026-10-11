@@ -3,385 +3,294 @@ name: qa-mobile-native-features-java
 description: Use when the user needs to test the **device-native, OS-level capabilities** a mobile app uses that a normal Appium page-object UI test doesn't exercise. Triggers: "test our deep link opens the right screen in Appium Java", "handle the camera/location permission dialog", "test Face ID / fingerprint login on the simulator". Not for device-cloud wiring (`qa-device-cloud-java`) or ordinary screen flows (`qa-ui-test-writer-appium-java`).
 ---
 
-# QA — Mobile Native Features (Java: Appium java-client + TestNG)
+# QA — Mobile Native Features (Java: java-client 11 + Appium 3 + TestNG)
 
-Scaffolds Appium tests for the **device-native, OS-level capabilities** a mobile app touches but a normal
-page-object UI test never exercises — deep links, runtime permission dialogs, biometric auth, push notifications,
-and the app's background/foreground lifecycle. It sits **directly on top of `qa/java/skills/ui-test-author/appium`**: the
-`BaseAppiumPage` / `AppiumDriverFactory` / `SystemPropertyUtil` lifecycle and the page objects run **unchanged** —
-this skill adds the layer that drives the OS surfaces *around* your screens.
+Appium tests for the **OS-level capabilities** a mobile app touches but a page-object UI test never exercises: deep links, runtime permission dialogs, biometrics, push notifications, the app lifecycle, the clipboard, orientation. It sits on `qa/java/skills/ui-test-author/appium`: `BaseAppiumPage`, `AppiumDriverFactory`, `BaseMobileTest` and the page objects run **unchanged**. This skill adds the layer that drives the OS surfaces *around* your screens.
 
-> **The discipline this skill encodes** — four ideas that separate a correct native-feature test from a
-> page-object reflex:
+> **Four ideas separate a native-feature test from a page-object reflex:**
 >
-> 1. **A native feature lives OUTSIDE your app's DOM — it is an OS-level surface, so you drive it through the
->    device/driver API, not page-object selectors.** A runtime permission dialog, the biometric prompt, the
->    notification shade, the deep-link intent, the app's lifecycle state — none of these are elements on *your*
->    screens; they belong to Android/iOS. Reaching for `findByAccessibilityId(...)` on the OS permission dialog is
->    the native-testing analogue of looking for an HTTP status on a gRPC call: **the surface isn't yours.** You
->    drive it with `executeScript("mobile: …")`, `((InteractsWithApps) driver)`, `((HasClipboard) driver)`, the
->    biometric injection APIs, or `driver.switchTo().alert()` — and you assert the *effect* on your own screen via
->    the page object.
-> 2. **A deep link is tested by ROUTING, not by tapping.** Launch the app via the link (`mobile: deepLink` / a URL)
->    and assert your page object shows the **right destination screen** — never reproduce the navigation by tapping
->    through the UI (that tests your taps, not the link). The link is the OS surface; the destination screen is
->    yours.
-> 3. **Biometric and the permission dialog are injected/forced for determinism — and driven for real only when the
->    flow itself is under test.** A fingerprint/face match is **injected** on the emulator/simulator
->    (`fingerPrint(int)` / `mobile: sendBiometricMatch`) — *never* a real sensor, *never* a `Thread.sleep` waiting
->    for one. A permission grant is made **deterministic** with a capability (`autoGrantPermissions` /
->    `autoAcceptAlerts`) for the 90% of tests that just need the permission *out of the way* — and you drive the
->    real OS dialog only for the handful of tests where *the dialog flow itself* (deny → degraded UX, "ask every
->    time") is the thing under test.
-> 4. **The app lifecycle is a first-class assertion target — assert state is restored on resume, never sleep
->    through it.** Backgrounding, resuming, terminating, a push arriving — each is a `mobile:` / `InteractsWithApps`
->    call, and each is followed by a **bounded wait on the app's observable reaction** (an explicit `WebDriverWait`
->    on the restored screen), never a fixed `Thread.sleep`. "Restored after resume" is an assertion you write, not a
->    pause you hope through.
+> 1. **A native feature lives outside your app's element tree.** A permission dialog, the biometric prompt, the notification shade, a deep-link intent and the lifecycle state belong to Android or iOS. Drive them with `mobile:` extensions and the driver's device commands, then assert the *effect* on your own screen through a page object.
+> 2. **A deep link is tested by routing, not by tapping.** Launch through the link and assert the destination page. Tapping through the UI tests your taps.
+> 3. **Biometrics and permissions are injected for determinism, and driven for real only when the flow is under test.** A fingerprint or face match is injected on the emulator or simulator, never a real sensor. A permission is pre-granted by capability for the tests that only need it out of the way; the real dialog is driven for the few tests about grant versus deny.
+> 4. **The lifecycle is an assertion target.** Background, resume, terminate and a push arriving are each followed by a bounded wait on the app's reaction, never a sleep.
 
 ## Decision matrix — native surface → test shape
 
-| Native surface | Where it lives | Test shape (Java) |
-|----------------|----------------|-------------------|
-| **Deep / universal link** | OS intent / URL handler | `executeScript("mobile: deepLink", {url, package/bundleId})` → assert destination **page object** is loaded (routing, not taps) |
-| **Runtime permission — out of the way** | OS permission dialog | Cap `autoGrantPermissions(true)` (Android) / `autoAcceptAlerts(true)` (iOS) → the dialog never appears; test the feature behind it |
-| **Runtime permission — the flow IS the test** | OS permission dialog / Springboard | Drive the real dialog: Android `mobile: changePermissions` or the `permissioncontroller` buttons; iOS `driver.switchTo().alert().accept()` / `mobile: alert` → assert granted vs degraded UX |
-| **Biometric — approved** | OS biometric prompt | Android `((AndroidDriver) driver).fingerPrint(1)`; iOS `mobile: sendBiometricMatch {type, match:true}` → assert the unlocked screen |
-| **Biometric — rejected** | OS biometric prompt | same, `match:false` → assert the fallback (PIN screen / error), not a crash |
-| **Push notification** | Notification shade / Center | Android `((AndroidDriver) driver).openNotifications()` + assert + tap; iOS sim `mobile: pushNotification` → open from Center → assert deep-linked screen |
-| **Background → resume** | App lifecycle | `((InteractsWithApps) driver).runAppInBackground(Duration.ofSeconds(3))` → **wait** for the restored screen → assert state preserved |
-| **Terminate → relaunch** | App lifecycle | `terminateApp(bundleId)` → `activateApp(bundleId)` → assert cold-vs-warm start state; `queryAppState` to verify |
-| **Clipboard** | OS pasteboard | `((HasClipboard) driver).setClipboardText("…")` → paste in-app → assert; or read what the app copied |
-| **Camera / file / photo picker** | OS picker (not your UI) | seed the file with `mobile: pushFile`, then mock/drive the picker — never automate the real camera |
-| **Orientation** | OS rotation | `((SupportsRotation) driver).rotate(ScreenOrientation.LANDSCAPE)` → assert layout reflows |
+| Native surface | Test shape (java-client 11) |
+|---|---|
+| **Deep / universal link** | `mobile: deepLink` → assert the destination **page object** |
+| **Permission — out of the way** | `UiAutomator2Options.setAutoGrantPermissions(true)` · `XCUITestOptions.setAutoAcceptAlerts(true)` |
+| **Permission — a specific state** | Android `mobile: changePermissions` · iOS simulator `mobile: setPermission` |
+| **Permission — the dialog is the test** | `driver.switchTo().alert()` (iOS) · the `permissioncontroller` buttons (Android) → assert granted versus degraded UX |
+| **Biometric — approved / rejected** | Android `mobile: fingerprint` · iOS `mobile: sendBiometricMatch` → assert the unlocked screen, then the fallback |
+| **Push** | Android `mobile: openNotifications` · iOS simulator `mobile: pushNotification` → open it → assert the routed screen |
+| **Background → resume** | `mobile: backgroundApp` → wait on the restored screen |
+| **Terminate → relaunch** | `terminateApp` → `activateApp` → `queryAppState` |
+| **Geolocation** | Android `mobile: setGeolocation` · iOS `mobile: setSimulatedLocation` → assert the location-driven screen |
+| **Clipboard** | `mobile: setClipboard` (base64) → paste → assert |
+| **Camera / file picker** | seed the file with `pushFile`, drive the picker, never the real camera |
+| **Orientation** | `rotate(ScreenOrientation.LANDSCAPE)` → assert the layout reflows |
 
 ## Stack
 
-- Java 21, Gradle (Kotlin DSL)
-- **Appium**: `io.appium:java-client` 9.x — `AndroidDriver` (UiAutomator2) / `IOSDriver` (XCUITest), and the
-  capability interfaces it implements: `InteractsWithApps` (background/terminate/activate/queryAppState),
-  `HasClipboard`, `SupportsRotation`, `PushesFiles`, plus `AndroidDriver.fingerPrint(int)` / `openNotifications()`
-- **TestNG** (`org.testng:testng`) — the global default Java runner; **AssertJ** (`assertThat`) for fluent assertions
-- **Allure TestNG** for reporting (attach a screenshot of the restored/deep-linked screen per native-flow result)
-- Reuses `qa/java/skills/ui-test-author/appium`'s `AppiumDriverFactory` (one `ThreadLocal<AppiumDriver>` per thread),
-  `BaseMobileTest`, page objects, and `SystemPropertyUtil` — **unchanged**
-- App path / device caps / Appium server URL via `SystemPropertyUtil` — never hardcoded; no secrets in code
-- Native-feature helpers under `src/test/java/.../support/native/`
+- Java 21, Gradle (Kotlin DSL); the pins (`io.appium:java-client` 11.0.0, `selenium-support` ≥ 4.50, TestNG, AssertJ, `allure-testng` 3.0.0) are the **Versions** table of `qa/java/skills/ui-test-author/appium/SKILL.md`. This skill adds no dependency; java-client 10.x is the supported lane and every helper below exists there
+- **AssertJ** for every assertion outside Appium; failure evidence is `BaseMobileTest`, and this skill adds no second hook
+- `WebDriverWait` and `ExpectedConditions` need `selenium-support`, which java-client 11 no longer pulls in
+- Helpers live in `src/test/java/.../support/nativefeatures/` (the package is `support.nativefeatures`; `native` is a reserved word, so `support/native/` cannot be a package)
+- The old location types `org.openqa.selenium.html5.Location` and `LocationContext` are gone (Selenium 4.35); geolocation is a `mobile:` command
 
-```kotlin
-// build.gradle.kts (excerpt) — same deps as the appium/java skill; nothing new for native features
-dependencies {
-    testImplementation("io.appium:java-client:9.3.0")   // brings InteractsWithApps, HasClipboard, SupportsRotation
-    testImplementation("org.testng:testng:7.10.2")
-    testImplementation("org.assertj:assertj-core:3.26.3")
-    testImplementation("io.qameta.allure:allure-testng:2.29.0")
-}
-```
+Appium 3 removed the old `/appium/*` routes, and java-client 11's driver methods call only `mobile:` extensions. Where this skill calls `executeScript("mobile: …")` directly, that is the same command with no wrapper in between.
 
 ## When to use
 
-- Verifying a **deep / universal link** opens the correct in-app screen
-- Testing behavior **behind a runtime permission** (camera, location, notifications, contacts) — either with the
-  dialog auto-handled, or with the **dialog flow itself** under test (grant vs deny)
-- Testing **biometric** login / step-up on an emulator or simulator (approve and reject paths)
-- Asserting **app state survives backgrounding / resume**, a cold relaunch, or a push tap
-- Driving **clipboard**, a **camera/file/photo picker**, or **orientation** changes the app reacts to
+- A **deep or universal link** must open the right screen
+- Behavior **behind a runtime permission**, with the dialog handled or under test
+- **Biometric** login or step-up on an emulator or simulator, approve and reject
+- State that must survive **backgrounding**, a cold relaunch, or a push tap
+- **Geolocation**, **clipboard**, **picker** or **orientation** behavior
 
 ## When NOT to use
 
-- Driving **your app's own screens** via page objects → `qa/java/skills/ui-test-author/appium` (this skill builds **on** it)
-- The **real-device-cloud** layer (BrowserStack/Sauce/Device Farm) + GPS/network/biometric **cap-injection plumbing**
-  → `qa/java/skills/device-cloud` (`device-cloud` is *where* the test runs + how caps are injected on a farm; `mobile-native-features` is *what* you
-  assert on those caps — they compose: run `mobile-native-features`'s biometric/permission tests on `device-cloud`'s real-device cloud)
-- Asserting the **network requests** an app makes → `qa/java/skills/network-mocking/*` (draw the line: `mobile-native-features` = the app's
-  *reaction* to airplane mode / a permission; network-mocking = asserting the requests)
-- The .NET / TypeScript native-feature stacks → `qa/{dotnet,typescript}/skills/mobile-native-features`
-- **Token-based** auth → `qa/java/skills/test-login-tokens` (biometric *unlock* vs token *auth* are different surfaces)
+- The app's own screens → `qa/java/skills/ui-test-author/appium`
+- Real-device farm wiring and farm-side biometric/GPS injection → `qa/java/skills/device-cloud`
+- The requests an app makes → `qa/java/skills/network-mocking/*`
+- Token auth → `qa/java/skills/test-login-tokens`
+- TypeScript / .NET → `qa/{typescript,dotnet}/skills/mobile-native-features`
 
----
+## The helper
 
-## The foundation — page objects + driver lifecycle run unchanged
-
-Every test here extends `qa/java/skills/ui-test-author/appium`'s `BaseMobileTest` and uses its `AppiumDriverFactory`. The
-page objects (`LoginPage`, `DashboardPage`, …) drive **your** screens exactly as before. This skill adds a thin
-`NativeFeatures` helper that owns the **OS-surface** calls, so a test reads as: *drive the OS surface → assert the
-effect on a page object.* The native call is the only new vocabulary; the assertion is still a page object.
+`NativeFeatures` owns every OS-surface call, including the ones that touch OS UI, so no test holds a raw `findElement` or a wait. A test reads: *drive the OS surface, assert the effect on a page object.* The identifier is a package on Android and a bundle id on iOS, so one private method picks the key.
 
 ```java
-// src/test/java/.../support/native/NativeFeatures.java
 package support.nativefeatures;
 
+import io.appium.java_client.AppiumBy;
 import io.appium.java_client.AppiumDriver;
-import io.appium.java_client.HasClipboard;
 import io.appium.java_client.InteractsWithApps;
-import io.appium.java_client.android.AndroidDriver;
-import org.openqa.selenium.ScreenOrientation;
+import io.appium.java_client.appmanagement.ApplicationState;
+import io.appium.java_client.ios.IOSDriver;
 import io.appium.java_client.remote.SupportsRotation;
+import org.openqa.selenium.By;
+import org.openqa.selenium.ScreenOrientation;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import java.util.Base64;
 import java.util.Map;
 
-/**
- * Owns the OS-level surfaces around the app. Every method drives a device/driver API or a `mobile:` command —
- * never a page-object selector. The caller asserts the effect on a page object afterwards.
- */
 public final class NativeFeatures {
+    private static final Duration TIMEOUT = Duration.ofSeconds(10);
+    private static final int UNENROLLED_FINGERPRINT_ID = 99;
+    private static final String PERMISSION_DENY_BUTTON_ID = "com.android.permissioncontroller:id/permission_deny_button";
+
     private final AppiumDriver driver;
 
-    public NativeFeatures(AppiumDriver driver) { this.driver = driver; }
-
-    // --- 1. Deep links: launch via the OS, assert routing on a page object ---
-    public void openDeepLink(String url, String appIdentifier) {
-        // UiAutomator2: {url, package}; XCUITest: {url, bundleId} — see the per-platform helpers below.
-        driver.executeScript("mobile: deepLink", Map.of("url", url, "package", appIdentifier));
+    public NativeFeatures(AppiumDriver driver) {
+        this.driver = driver;
     }
 
-    // --- 3. Biometric: inject a match/no-match — emulator/simulator only, never a real sensor ---
-    public void approveFingerprint(int fingerId) {
-        ((AndroidDriver) driver).fingerPrint(fingerId);   // enrolled finger id on the emulator
+    public void openDeepLink(String url, String appIdentifier) {
+        driver.executeScript("mobile: deepLink", Map.of("url", url, isIos() ? "bundleId" : "package", appIdentifier));
+    }
+
+    public void approveFingerprint(int fingerprintId) {
+        driver.executeScript("mobile: fingerprint", Map.of("fingerprintId", fingerprintId));
+    }
+
+    public void rejectFingerprint() {
+        approveFingerprint(UNENROLLED_FINGERPRINT_ID);
     }
 
     public void sendIosBiometric(String type, boolean match) {
-        driver.executeScript("mobile: sendBiometricMatch", Map.of("type", type, "match", match)); // type: touchId | faceId
+        driver.executeScript("mobile: sendBiometricMatch", Map.of("type", type, "match", match));
     }
 
-    // --- 4. Lifecycle: background/terminate/activate — each followed by a bounded wait in the test ---
     public void backgroundFor(Duration duration) {
-        ((InteractsWithApps) driver).runAppInBackground(duration);   // -1 / negative = indefinitely; activate to return
+        driver.executeScript("mobile: backgroundApp", Map.of("seconds", duration.toSeconds()));
     }
 
-    public void terminate(String bundleOrPackage) { ((InteractsWithApps) driver).terminateApp(bundleOrPackage); }
-    public void activate(String bundleOrPackage)  { ((InteractsWithApps) driver).activateApp(bundleOrPackage); }
+    public void terminate(String appIdentifier) {
+        ((InteractsWithApps) driver).terminateApp(appIdentifier);
+    }
 
-    // --- clipboard / orientation: OS surfaces the app reacts to ---
-    public void setClipboard(String text) { ((HasClipboard) driver).setClipboardText(text); }
-    public String getClipboard()          { return ((HasClipboard) driver).getClipboardText(); }
-    public void rotate(ScreenOrientation o) { ((SupportsRotation) driver).rotate(o); }
+    public void activate(String appIdentifier) {
+        ((InteractsWithApps) driver).activateApp(appIdentifier);
+    }
+
+    public ApplicationState appState(String appIdentifier) {
+        return ((InteractsWithApps) driver).queryAppState(appIdentifier);
+    }
+
+    public void setAndroidLocation(double latitude, double longitude) {
+        driver.executeScript("mobile: setGeolocation", Map.of("latitude", latitude, "longitude", longitude));
+    }
+
+    public void setIosLocation(double latitude, double longitude) {
+        driver.executeScript("mobile: setSimulatedLocation", Map.of("latitude", latitude, "longitude", longitude));
+    }
+
+    public void setClipboard(String text) {
+        String base64 = Base64.getEncoder().encodeToString(text.getBytes(StandardCharsets.UTF_8));
+        driver.executeScript("mobile: setClipboard", Map.of("content", base64, "contentType", "plaintext"));
+    }
+
+    public String clipboard() {
+        String base64 = (String) driver.executeScript("mobile: getClipboard", Map.of("contentType", "plaintext"));
+        return new String(Base64.getDecoder().decode(base64), StandardCharsets.UTF_8);
+    }
+
+    public void dismissIosAlert() {
+        driver.switchTo().alert().dismiss();
+    }
+
+    public void denyAndroidPermission() {
+        new WebDriverWait(driver, TIMEOUT)
+                .until(ExpectedConditions.elementToBeClickable(AppiumBy.id(PERMISSION_DENY_BUTTON_ID)))
+                .click();
+    }
+
+    public void openAndroidNotification(String text) {
+        driver.executeScript("mobile: openNotifications", Map.of());
+        new WebDriverWait(driver, TIMEOUT)
+                .until(ExpectedConditions.elementToBeClickable(By.xpath("//*[contains(@text, '" + text + "')]")))
+                .click();
+    }
+
+    public void rotate(ScreenOrientation orientation) {
+        ((SupportsRotation) driver).rotate(orientation);
+    }
+
+    private boolean isIos() {
+        return driver instanceof IOSDriver;
+    }
 }
 ```
 
----
+The clipboard travels as **base64** in both directions: a raw string is not a valid payload.
 
-## 1. Deep / universal links — test the routing, not the taps (idea #2)
+## 1. Deep and universal links — test the routing (idea 2)
 
-A deep link's contract is: *given this URL, the app opens this screen.* So launch the app **via the link** and
-assert your page object shows the destination — never reproduce the navigation by tapping through the UI. The link
-is the OS surface (`mobile: deepLink` builds the intent / opens the URL); the destination is your screen.
+`mobile: deepLink` builds the intent on Android and opens the URL on iOS. The test never taps.
 
 ```java
-// Android (UiAutomator2): mobile: deepLink {url, package}
 @Test
-public void Should_open_order_details_When_deep_link_opened() {
-    NativeFeatures os = new NativeFeatures(driver);
-
-    os.openDeepLink("myapp://orders/A-1001", "com.example.shop");   // OS routes the intent — no taps
+public void Should_OpenOrderDetails_When_OrderLinkIsOpened() {
+    new NativeFeatures(driver).openDeepLink("myapp://orders/A-1001", "com.example.shop");
 
     OrderDetailsPage details = new OrderDetailsPage(driver);
-    details.verifyPageLoaded();                                     // page object proves the ROUTE landed
-    assertThat(details.orderId()).isEqualTo("A-1001");              // …and carried the param through
+    details.verifyPageLoaded();
+    assertThat(details.orderNumber()).as("order shown by the deep link").isEqualTo("A-1001");
 }
 ```
 
-> **iOS differs by where the app runs.** On the **simulator**, `mobile: deepLink` takes `{url, bundleId}` and works
-> for custom-scheme and Universal Links. On a **real iOS device** you cannot just hand the URL to the app — open it
-> through **Safari** (`driver.get(url)` in a Safari session, then tap "Open") because a custom scheme has to be
-> resolved by the OS. Android `mobile: deepLink` (an `am start -d <url>`) is uniform across emulator and real device.
-> **Universal Links vs custom-scheme deep links:** a Universal/App Link is an `https://` URL the OS associates with
-> the app (verified via `apple-app-site-association` / Android `assetlinks.json`); a custom-scheme link
-> (`myapp://`) is app-private. Test the **https** form for Universal Links so you also prove the association
-> resolved — a custom scheme bypasses it.
+- On iOS, `mobile: deepLink` works on a simulator and on a real device from iOS 16.4 and Xcode 14.3; only below that does a real device need the link opened in Safari.
+- A Universal or App Link is an `https://` URL the OS associates with the app (`apple-app-site-association`, `assetlinks.json`); a custom scheme (`myapp://`) is app-private. Test the **https** form to prove the association resolves.
 
----
+## 2. Permission dialogs — deterministic by default (idea 3)
 
-## 2. Runtime permission dialogs — deterministic by default, driven only when the flow is the test (idea #3)
+**Out of the way (most tests).** The capability is set where the session is built (`AppiumDriverFactory`): `setAutoGrantPermissions(true)` on `UiAutomator2Options`, `setAutoAcceptAlerts(true)` on `XCUITestOptions` (`setAutoDismissAlerts(true)` denies).
 
-The OS permission dialog is **not your UI** — it belongs to the system, its selectors differ per OS version, and
-it pops up nondeterministically. So there are two modes, and picking the right one is the whole skill:
+**A specific posture.** Android: `mobile: changePermissions` with `permissions`, `appPackage` and `action` `grant` or `revoke`, and `mobile: getPermissions`. iOS simulator: `mobile: setPermission` with `bundleId` and `access` such as `camera` → `yes`.
 
-**Mode A — get the dialog out of the way (the 90% case).** Most tests want to test *the feature behind* a
-permission, not the dialog. Grant it deterministically with a capability so the dialog never appears:
+**The dialog is the test.** Drive the real OS dialog through `NativeFeatures`, then assert the degraded path your app renders:
 
 ```java
-// Android: grant all manifest permissions on install — the dialog never shows
-UiAutomator2Options android = new UiAutomator2Options().autoGrantPermissions(true);
-
-// iOS: auto-accept any system alert that appears (or autoDismissAlerts to deny)
-XCUITestOptions ios = new XCUITestOptions().autoAcceptAlerts(true);
-```
-
-> Android also has `mobile: changePermissions` / `mobile: getPermissions` to **set a specific permission state**
-> before a flow (`granted` / `denied`) — sharper than the all-or-nothing cap when you want camera granted but
-> location denied. Prefer it when the test needs a *specific* permission posture.
-
-**Mode B — the dialog flow IS the test (the handful that matters).** When you're testing what happens on **deny**
-(degraded UX, a "go to Settings" prompt) or the grant flow itself, you must drive the **real** OS dialog — and do
-it through the OS surface, not a page object on your screens:
-
-```java
-// iOS: the system alert is reachable via the standard alert API or `mobile: alert`
 @Test
-public void Should_show_degraded_map_When_location_denied() {
+public void Should_ShowManualLocationPrompt_When_LocationIsDenied() {
     MapPage map = new MapPage(driver);
-    map.tapUseMyLocation();                                  // triggers the OS permission dialog
+    map.tapUseMyLocation();
 
-    driver.switchTo().alert().dismiss();                     // DENY on the real OS dialog (not your UI)
-    // or: driver.executeScript("mobile: alert", Map.of("action", "dismiss"));
+    new NativeFeatures(driver).dismissIosAlert();
 
-    map.verifyManualLocationPromptShown();                   // assert the DEGRADED path your app renders
+    assertThat(map.isManualLocationPromptShown()).as("manual location prompt after a denied permission").isTrue();
 }
 ```
 
-```java
-// Android: the dialog is the permissioncontroller package; drive its real buttons when the flow is under test.
-// (For determinism prefer the cap / mobile: changePermissions; only walk the buttons when testing the dialog UX.)
-driver.findElement(io.appium.java_client.AppiumBy.id(
-    "com.android.permissioncontroller:id/permission_deny_button")).click();
-```
+On Android the dialog belongs to the `com.android.permissioncontroller` package, and `denyAndroidPermission()` waits for its button by resource id. Prefer the capability or `changePermissions`, and walk the buttons only when the dialog UX is under test. On iOS a foreground system alert makes the active app `com.apple.springboard`; the alert API handles that, so never hardcode button coordinates.
 
-> **iOS Springboard nuance:** when a permission/system alert is at the foreground, the active app context is
-> `com.apple.springboard`, not your app. The XCUITest alert API handles this for you; if you ever need to interact
-> with the dialog directly, `mobile: activateApp` Springboard first. Don't hardcode Springboard button coordinates.
+## 3. Biometrics — inject the match, assert the unlock and the reject (idea 3)
 
----
-
-## 3. Biometric auth — inject the match, assert the unlock (and the reject) (idea #3)
-
-A fingerprint/Face ID match is **injected** on the emulator/simulator — there is no real sensor in CI, and a
-`Thread.sleep` waiting for a human finger is banned and pointless. Enroll biometrics on the device, trigger the
-prompt from your screen, inject the match, then assert the unlocked screen. Always test **both** the approved and
-the rejected path.
+There is no sensor in CI. Enroll on the device, trigger the prompt from your screen, inject, assert. Test both paths.
 
 ```java
-// Android: emulator must have a fingerprint enrolled; AndroidDriver.fingerPrint(id) injects a touch
 @Test
-public void Should_reach_dashboard_When_fingerprint_approved() {
-    LoginPage login = new LoginPage(driver);
-    login.tapBiometricSignIn();                 // YOUR screen triggers the OS biometric prompt
-
-    new NativeFeatures(driver).approveFingerprint(1);   // inject a MATCH for enrolled finger id 1
-
-    DashboardPage dashboard = login.awaitDashboard();   // explicit wait inside the page object — no sleep
-    assertThat(dashboard.isLoaded()).isTrue();
-}
-
-@Test
-public void Should_show_pin_fallback_When_fingerprint_rejected() {
+public void Should_ReachDashboard_When_FingerprintIsApproved() {
     LoginPage login = new LoginPage(driver);
     login.tapBiometricSignIn();
 
-    // a non-enrolled finger id injects a NO-MATCH; assert the fallback, not a crash
-    new NativeFeatures(driver).approveFingerprint(99);
+    new NativeFeatures(driver).approveFingerprint(1);
 
-    assertThat(login.isPinFallbackShown()).isTrue();
+    assertThat(login.awaitDashboard().isLoaded()).as("dashboard after an approved fingerprint").isTrue();
+}
+
+@Test
+public void Should_ShowPinFallback_When_FingerprintIsRejected() {
+    LoginPage login = new LoginPage(driver);
+    login.tapBiometricSignIn();
+
+    new NativeFeatures(driver).rejectFingerprint();
+
+    assertThat(login.isPinFallbackShown()).as("PIN fallback after a rejected fingerprint").isTrue();
 }
 ```
 
-```java
-// iOS: enroll once, then send a match/no-match. Requires the sim to allow biometric enrollment.
-// XCUITestOptions().allowEnrollBiometrics(true) at session start; then:
-driver.executeScript("mobile: enrollBiometric", Map.of("isEnabled", true));
-new NativeFeatures(driver).sendIosBiometric("faceId", true);    // match
-// reject path: sendIosBiometric("faceId", false) → assert the passcode fallback screen
-```
+On an iOS simulator, call `mobile: enrollBiometric` with `isEnabled` true once, then `sendIosBiometric("faceId", true)` or `false`. No capability enrolls biometrics.
 
-> **Real-device biometric is a farm concern, not this skill's.** On a real device you can't inject a sensor read
-> locally — that's BrowserStack/Sauce sensor instrumentation (`enableBiometric` + `browserstack_executor
-> performBiometric`), which `qa/java/skills/device-cloud` owns. They **compose**: write the approve/reject
-> *assertions* here, run them on the farm's injected biometric there. Never wire a real fingerprint into a test.
-
----
+A real device cannot take an injected read locally; BrowserStack and Sauce instrument the sensor, which `device-cloud` owns. Write the approve and reject assertions here and run them on the farm's injected biometric there.
 
 ## Deep-dive reference
 
-These sections live in `references/details.md` — **read it when the task touches them**: **4. Push notifications + backgrounding / resume — assert state, never sleep through it (idea #4)**.
+`references/details.md` holds **4. Push notifications and backgrounding** — read it when the task touches them.
 
-## Clipboard, pickers, orientation — the smaller OS surfaces
+## Clipboard, pickers, orientation
 
 ```java
-// Clipboard: seed the OS pasteboard, paste in-app, assert; or read what the app copied
-NativeFeatures os = new NativeFeatures(driver);
-os.setClipboard("PROMO2026");
-sharePage.tapPasteCode();
-assertThat(checkoutPage.promoField()).isEqualTo("PROMO2026");
+@Test
+public void Should_FillPromoField_When_CodeIsPasted() {
+    new NativeFeatures(driver).setClipboard("PROMO2026");
 
-// Orientation: the app should reflow, not crash
-os.rotate(org.openqa.selenium.ScreenOrientation.LANDSCAPE);
-assertThat(galleryPage.columnsVisible()).isEqualTo(3);   // layout reacts to the OS rotation
+    sharePage.tapPasteCode();
+
+    assertThat(checkoutPage.promoCode()).as("promo field after a paste").isEqualTo("PROMO2026");
+}
 ```
 
-> **Camera / photo / file pickers are an OS surface you don't automate directly.** You can't drive the real camera
-> in CI. Seed the file the picker will return with `mobile: pushFile` (push an image to the device), then either
-> mock the picker or select the seeded file from the gallery picker — and assert your app handled the result. Never
-> try to "take a photo." For pure file *upload* flows, `((PushesFiles) driver).pushFile(remotePath, bytes)`.
-
----
+A camera, photo or file picker is an OS surface you cannot drive in CI. Seed the file the picker returns with `((PushesFiles) driver).pushFile(remotePath, bytes)`, pick it from the gallery picker, and assert how your app handled it.
 
 ## Anti-patterns
 
-| Smell | Why it's wrong | Do instead |
-|---|---|---|
-| `findByAccessibilityId(...)` on the OS permission/biometric dialog | The dialog is the OS's UI, selectors differ per OS version, and it's nondeterministic | Drive it via the cap (`autoGrantPermissions`/`autoAcceptAlerts`), `mobile: changePermissions`, or `driver.switchTo().alert()` |
-| Testing a deep link by **tapping through** the UI to the screen | Tests your taps, not the link's routing | `mobile: deepLink` / launch the URL → assert the destination **page object** |
-| `Thread.sleep` after backgrounding / a biometric injection / a push | Banned by CLAUDE.md; the OS reacts at its own pace | `WebDriverWait` on the restored / unlocked / deep-linked screen |
-| A **real fingerprint / camera** in the test | Impossible in CI, flaky, and unsafe | Inject biometric (`fingerPrint`/`sendBiometricMatch`); seed picker files with `mobile: pushFile` |
-| Only testing the **approve** biometric path | Reject (fallback to PIN) is where apps crash | Test both `match:true` and `match:false`/non-enrolled id |
-| Auto-granting permissions for **every** test, including the deny-UX test | The deny path never gets exercised | Mode A (cap) for feature tests; Mode B (drive the real dialog) for the flow-under-test |
-| Hardcoding Springboard / `permissioncontroller` button coordinates | OS-version-fragile | Use the XCUITest alert API / stable resource-ids; activate Springboard via `mobile: activateApp` |
-| Asserting a push was **sent** via Appium | That's a backend/push-provider concern | Assert the app's **reaction** (shade → tap → screen); push *sending* → provider sandbox |
-| Re-deriving the driver factory / page objects here | Duplicates `appium/java`, drifts | Reuse `BaseMobileTest` + page objects unchanged; add only `NativeFeatures` |
+| Smell | Do instead |
+|---|---|
+| A page-object finder on the OS permission or biometric dialog | The capability, `mobile: changePermissions`, or the alert API |
+| Reaching a screen by tapping to test a deep link | `mobile: deepLink` → assert the destination page |
+| `Thread.sleep` after a background, an injection or a push | `WebDriverWait` on the restored, unlocked or routed screen |
+| A real fingerprint or camera | Inject the match; seed picker files with `pushFile` |
+| Only the approve path | Test the reject path too; reject is where apps crash |
+| Auto-granting permissions in every test | The capability for feature tests; the real dialog for the flow under test |
+| Hardcoded Springboard or `permissioncontroller` coordinates | The alert API and stable resource ids |
+| A raw `driver.findElement` or a wait inside a test body | An intent method on `NativeFeatures` |
+| Asserting a push was sent | Assert the app's reaction; delivery belongs to the provider's sandbox |
+| Rebuilding the driver factory or page objects here | Reuse `ui-test-author/appium`; add only `NativeFeatures` |
 
-## Examples
+## Rules
 
-**End-to-end: a deep link proves the routing discipline.** A page-object author writes a test that taps
-Home → Orders → search → row to reach order detail. The native-correct version launches
-`myapp://orders/A-1001` and asserts `OrderDetailsPage` loaded with the right id — it proves the **link routes**,
-which the tap-through test never does. Same destination screen, two completely different things proven: the OS
-surface (the link) vs your in-app navigation.
-
-**Composing with `device-cloud`.** This skill writes the *assertions* — "approved fingerprint reaches
-the dashboard", "denied location degrades gracefully". `device-cloud` owns *where they run and how the cap is injected* on a
-real-device cloud (`enableBiometric` + `performBiometric`, `gpsLocation`, `networkProfile`). They compose: the
-biometric reject test you write here runs on the farm's injected sensor there. The boundary mirrors gRPC's "assert
-the typed message" vs Testcontainers' "stand the service up" — *what you assert* vs *where it runs*.
-
-## Rules (hard constraints)
-
-- **The OS surface is driven by the device/driver API, never a page-object selector.** Permission dialogs,
-  biometric prompts, the notification shade, deep-link intents, lifecycle state → `mobile: …` / `InteractsWithApps`
-  / `HasClipboard` / `driver.switchTo().alert()`. Assert the **effect** on your screen via the page object.
-- **Deep links are tested by routing.** Launch via `mobile: deepLink` / the URL and assert the destination page
-  object — never reproduce the navigation by tapping. Test the **https** Universal/App Link form so the association
-  is proven, not just a custom scheme.
-- **Permissions: deterministic by default, real only when the flow is the test.** Use `autoGrantPermissions` /
-  `autoAcceptAlerts` / `mobile: changePermissions` for feature tests; drive the **real** OS dialog only when the
-  grant/deny flow itself is under test, and exercise the **deny** path.
-- **Biometric is injected on emulator/simulator only** (`fingerPrint(int)` / `mobile: sendBiometricMatch`), never a
-  real sensor; test **both** approve and reject. Real-device biometric injection → `qa/java/skills/device-cloud`.
-- **Lifecycle events assert restored state on a bounded wait.** `runAppInBackground` / `terminateApp` /
-  `activateApp` / `queryAppState`, each followed by a `WebDriverWait` on the observable result. **No `Thread.sleep`**
-  anywhere — including for OS animations, dialog appearance, or push delivery.
-- **Push tests assert the app's reaction, not the send.** Open the shade/Center (`openNotifications` /
-  `mobile: pushNotification`), assert, tap, assert the routed screen. Push *delivery* is a provider concern.
-- **Reuse `appium/java` unchanged** — `BaseMobileTest`, `AppiumDriverFactory`, page objects, `SystemPropertyUtil`.
-  Add only `NativeFeatures`. App ids / device caps / server URL via `SystemPropertyUtil`; no secrets in code.
+- **The OS surface is driven by device commands and `mobile:` extensions, never a page-object selector.** Assert the effect on your screen.
+- **Deep links are tested by routing**, and the https form proves the association.
+- **Permissions are deterministic by default, real only when the flow is the test**, and the deny path is exercised.
+- **Biometrics are injected on emulator or simulator only**; both approve and reject are tested, each with its own intent method (`approveFingerprint`, `rejectFingerprint`). Real-device injection belongs to `device-cloud`.
+- **Lifecycle events assert restored state on a bounded wait.** No `Thread.sleep` anywhere.
+- **Push tests assert the app's reaction**, not the send.
+- **Clipboard content is base64** in both directions.
+- Tests are `Should_X_When_Y`, assert with AssertJ and a subject (`.as(...)`), and never use `try`/`catch`. App ids and device settings come from env through `Env`; no secrets in code.
 
 ## Cross-references
 
-- **`qa/java/skills/ui-test-author/appium`** — the **foundation this skill builds on**: `BaseAppiumPage` /
-  `AppiumDriverFactory` / `BaseMobileTest` / `SystemPropertyUtil`, the capability/`mobile:`-command idioms, explicit
-  waits, native↔WEBVIEW context switching. The page objects + driver lifecycle run **unchanged**; `mobile-native-features` adds the
-  OS-surface layer. Mirror its locator/wait idioms exactly.
-- **`qa/java/skills/device-cloud`** — the **real-device-cloud layer** + GPS/network/biometric **cap-injection
-  plumbing**. `device-cloud` = *where* the test runs + *how* the cap is injected; `mobile-native-features` = *what* you assert on those caps. They
-  compose (run `mobile-native-features`'s biometric/permission tests on `device-cloud`'s farm). Don't duplicate the farm wiring.
-- **`qa/typescript/skills/mobile-native-features`** + **`qa/dotnet/skills/mobile-native-features`** — the sibling stacks
-  (WebdriverIO + `driver.execute('mobile: …')` · Appium .NET + `driver.ExecuteScript("mobile: …")`); same four
-  ideas, different client idioms. Structure ported, not redesigned.
-- **`qa/java/skills/network-mocking/*`** — the **boundary** on network conditioning/requests: `mobile-native-features` tests the app's *reaction*
-  to airplane mode / a network flip; network-mocking asserts the *requests*.
-- **`qa/java/skills/data-driven-testing`** — drive a **device / permission / locale matrix** via a `@DataProvider`
-  (one independent named case per row); this skill supplies the rows, that one the data-driven discipline.
-- **`qa/java/skills/browser-cloud-setup`** — the grid/session wiring the device session connects through (under `device-cloud`).
-- **`qa/java/skills/test-login-tokens`** — token-based auth, the boundary vs biometric *unlock*.
-- **`qa/reporting/java/skills/test-reports`** — attach a screenshot of the deep-linked / restored / unlocked screen per
-  native-flow result so a failure is one click from the replay.
+- **`qa/java/skills/ui-test-author/appium`** — the foundation: `BaseAppiumPage`, `AppiumDriverFactory`, `BaseMobileTest`, gestures, WebView switching, the failure evidence
+- **`qa/java/skills/device-cloud`** — where the tests run and how farm-side GPS, network and biometric are injected
+- **`qa/java/skills/evidence-capture`** — what a failed native flow keeps
+- **`qa/typescript/skills/mobile-native-features`**, **`qa/dotnet/skills/mobile-native-features`** — the sibling stacks
+- **`qa/java/skills/network-mocking/*`** — the requests an app makes
+- **`qa/java/skills/data-driven-testing`** — a device, permission or locale matrix, one case per row
+- **`qa/java/skills/test-login-tokens`** — token auth, the boundary with biometric unlock

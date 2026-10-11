@@ -2,67 +2,48 @@
 
 Sections moved out of SKILL.md for on-demand loading. Read what the task needs.
 
-## 4. Push notifications + backgrounding / resume — assert state, never sleep through it (idea #4)
+## 4. Push notifications and backgrounding — assert state, never sleep through it (idea 4)
 
-**App lifecycle.** Backgrounding and resuming is a real user behavior that breaks fragile apps (lost form state,
-re-auth loops). Drive it with `InteractsWithApps`, then **wait on the restored screen** — a bounded
-`WebDriverWait`, never a `Thread.sleep` guessing how long the OS takes.
+**App lifecycle.** Backgrounding and resuming is a real user behavior that breaks fragile apps (lost form state, re-auth loops). Drive it through `NativeFeatures`, then **wait on the restored screen**: a bounded `WebDriverWait` inside the page object, never a `Thread.sleep` guessing how long the OS takes.
 
 ```java
 @Test
-public void Should_preserve_cart_When_app_backgrounded_and_resumed() {
+public void Should_PreserveCart_When_AppIsBackgroundedAndResumed() {
     CartPage cart = new CartPage(driver);
     cart.addItem("SKU-42");
-    assertThat(cart.itemCount()).isEqualTo(1);
 
-    NativeFeatures os = new NativeFeatures(driver);
-    os.backgroundFor(java.time.Duration.ofSeconds(3));   // home → wait → return to foreground
+    new NativeFeatures(driver).backgroundFor(Duration.ofSeconds(3));
 
-    cart.verifyPageLoaded();                              // explicit wait on the restored screen (no sleep)
-    assertThat(cart.itemCount()).isEqualTo(1);            // STATE survived the lifecycle event
+    cart.verifyPageLoaded();
+    assertThat(cart.itemCount()).as("cart items after a resume").isEqualTo(1);
 }
 ```
 
 ```java
-// Cold relaunch: terminate then activate; queryAppState confirms the transition deterministically
 @Test
-public void Should_require_login_When_app_terminated_and_relaunched() {
-    String bundle = SystemPropertyUtil.getAppBundleId();
+public void Should_RequireLogin_When_AppIsTerminatedAndRelaunched() {
+    String appId = Env.required("APP_ID");
     NativeFeatures os = new NativeFeatures(driver);
 
-    os.terminate(bundle);
-    assertThat(((io.appium.java_client.InteractsWithApps) driver).queryAppState(bundle))
-        .isEqualTo(io.appium.java_client.appmanagement.ApplicationState.NOT_RUNNING);
+    os.terminate(appId);
+    assertThat(os.appState(appId)).as("app state after terminate").isEqualTo(ApplicationState.NOT_RUNNING);
 
-    os.activate(bundle);                                  // cold start
-    LoginPage login = new LoginPage(driver);
-    login.verifyPageLoaded();                             // session did NOT survive a cold start — by design
+    os.activate(appId);
+    new LoginPage(driver).verifyPageLoaded();
 }
 ```
 
-**Push notifications.** Open the OS notification surface — *not* your app's UI — assert the notification, then tap
-it and assert the deep-linked screen (this composes with idea #2's routing assertion).
+`terminateApp` then `activateApp` is also the cold start between tests; the removed `resetApp` and `closeApp` have no replacement beyond it and `mobile: clearApp`.
+
+**Push notifications.** Open the OS notification surface, not your app's UI, assert the notification, then tap it and assert the deep-linked screen (this composes with idea 2's routing assertion).
 
 ```java
-// Android: open the notification shade via the driver, assert + tap the notification
 @Test
-public void Should_open_message_When_push_tapped() {
-    ((io.appium.java_client.android.AndroidDriver) driver).openNotifications();
+public void Should_OpenMessage_When_PushIsTapped() {
+    new NativeFeatures(driver).openAndroidNotification("New message from");
 
-    org.openqa.selenium.WebElement push = new org.openqa.selenium.support.ui.WebDriverWait(
-            driver, java.time.Duration.ofSeconds(10))
-        .until(org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated(
-            io.appium.java_client.AppiumBy.androidUIAutomator(
-                "new UiSelector().textContains(\"New message from\")")));
-    push.click();
-
-    new MessageThreadPage(driver).verifyPageLoaded();     // the push routed into the right screen
+    new MessageThreadPage(driver).verifyPageLoaded();
 }
 ```
 
-> **iOS push on the simulator** is simulated with `mobile: pushNotification` (wraps `simctl push`) carrying an APNs
-> payload; then open **Notification Center** and tap it. Asserting the *server actually sent* a push is a backend
-> concern (your push provider's sandbox), not Appium's — this skill asserts the **app's reaction** to a push, the
-> same boundary as `qa/java/skills/network-mocking/*` for requests.
-
----
+> **iOS push on the simulator** is simulated with `mobile: pushNotification` (it wraps `simctl push`) carrying an APNs payload: `bundleId` and a `payload` map with an `aps` block. Then open **Notification Center** and tap it. Asserting the *server actually sent* a push is a backend concern (your push provider's sandbox), not Appium's; this skill asserts the **app's reaction**, the same boundary as `qa/java/skills/network-mocking/*` for requests.

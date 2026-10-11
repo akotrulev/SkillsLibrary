@@ -13,7 +13,7 @@ Wires Java tests to a **hosted device/browser grid** — BrowserStack, Sauce Lab
 
 - Java 21, Gradle (Kotlin DSL)
 - **Web**: `com.microsoft.playwright:playwright` at the pin in the **Versions** table of `qa/java/skills/ui-test-author/playwright/SKILL.md` (this skill pins nothing). A grid class extends J1's `BaseTest` and overrides its `newBrowser(playwright)` hook to `chromium().connect(wsEndpoint)` (`references/lifecycle.md` §3 of that skill); context per test, failure evidence and `BASE_URL` are unchanged
-- **Mobile**: `io.appium:java-client` 9.x (`UiAutomator2Options` / `XCUITestOptions`, `AndroidDriver`/`IOSDriver`) pointed at the vendor's remote hub
+- **Mobile**: `io.appium:java-client` 11.0.0 with `selenium-support` ≥ 4.50 (`UiAutomator2Options` / `XCUITestOptions`, `AndroidDriver`/`IOSDriver`) pointed at the vendor's remote hub; java-client 10.x is the supported lane, and the pins live in `qa/java/skills/ui-test-author/appium/SKILL.md`
 - TestNG as the runner with `parallel="classes"`: one class = one browser = one grid session, so the suite's `thread-count` is the number of concurrent sessions, set from `GRID_CONCURRENCY`. Data providers stay sequential
 - Tunnels: `com.browserstack:browserstack-local-java` (`Local` class), Sauce Connect 5 (`sc` binary), LambdaTest Tunnel (`LT` binary)
 - Grid config under `src/test/java/.../support/grid/`; credentials via **env vars only** (`BROWSERSTACK_USERNAME` / `BROWSERSTACK_ACCESS_KEY`, `SAUCE_USERNAME` / `SAUCE_ACCESS_KEY`, `LT_USERNAME` / `LT_ACCESS_KEY`)

@@ -137,3 +137,93 @@ public class Hooks {
   and a mobile hook class without clashing.
 - A `Playwright` per scenario, created and closed on the scenario's thread, is the simplest shape that keeps
   Playwright's thread rule — including if `cucumber.execution.parallel.enabled` is turned on later.
+
+## Mobile hook
+
+`@Before("@mobile")` / `@After("@mobile")` for a scenario tagged `@mobile`, next to the web `Hooks`. It sits beside the project's existing `AppiumDriverFactory` (`qa/java/skills/ui-test-author/appium/assets/`), keeps the same R7 evidence as `BaseMobileTest` under `build/appium-artifacts/`, and names files the same way as the web hook (`evidenceName`). The recording (`startRecordingScreen` per scenario, kept only on failure) is added the way `BaseMobileTest` does it; `qa/java/skills/evidence-capture/references/appium.md` § 4 has the limits.
+
+```java
+package com.example.support;
+
+import io.appium.java_client.AppiumDriver;
+import io.cucumber.java.After;
+import io.cucumber.java.Before;
+import io.cucumber.java.Scenario;
+import io.qameta.allure.Allure;
+import io.qameta.allure.AttachmentOptions;
+import org.openqa.selenium.OutputType;
+import org.openqa.selenium.WebDriverException;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Optional;
+import java.util.function.Supplier;
+
+public class MobileHooks {
+    private static final Path ARTIFACTS = Path.of("build", "appium-artifacts");
+    private static final System.Logger LOG = System.getLogger(MobileHooks.class.getName());
+
+    private final TestContext context;
+
+    public MobileHooks(TestContext context) {
+        this.context = context;
+    }
+
+    @Before(value = "@mobile", order = 0)
+    public void startDriver() throws MalformedURLException {
+        context.setDriver(AppiumDriverFactory.create());
+    }
+
+    @After(value = "@mobile", order = 1)
+    public void captureEvidence(Scenario scenario) throws IOException {
+        if (!scenario.isFailed()) {
+            return;
+        }
+        AppiumDriver driver = context.driver();
+        String name = evidenceName(scenario);
+        Optional<byte[]> screenshot = fromDevice("screenshot", () -> driver.getScreenshotAs(OutputType.BYTES));
+        Optional<String> pageSource = fromDevice("page source", driver::getPageSource);
+        if (screenshot.isPresent()) {
+            keep(name, "png", "image/png", screenshot.get());
+        }
+        if (pageSource.isPresent()) {
+            keep(name, "xml", "application/xml", pageSource.get().getBytes(StandardCharsets.UTF_8));
+        }
+    }
+
+    @After(value = "@mobile", order = 0)
+    public void quitDriver() {
+        context.driver().quit();
+    }
+
+    private static String evidenceName(Scenario scenario) {
+        String uri = scenario.getUri().toString();
+        String feature = uri.substring(uri.lastIndexOf('/') + 1).replaceFirst("\\.feature$", "");
+        return (feature + "." + scenario.getName()).replaceAll("[^A-Za-z0-9._-]", "_");
+    }
+
+    private static <T> Optional<T> fromDevice(String what, Supplier<T> capture) {
+        try {
+            return Optional.ofNullable(capture.get());
+        } catch (WebDriverException e) {
+            LOG.log(System.Logger.Level.WARNING, "Could not capture {0}: {1}", what, e.getMessage());
+            return Optional.empty();
+        }
+    }
+
+    private static void keep(String name, String extension, String type, byte[] content) throws IOException {
+        Files.createDirectories(ARTIFACTS);
+        Files.write(ARTIFACTS.resolve(name + "." + extension), content);
+        Allure.attachment(name, type, new ByteArrayInputStream(content), AttachmentOptions.withFileExtension(extension));
+    }
+}
+```
+
+- Cucumber runs `@After` hooks from the highest `order` down, so the evidence is captured (order 1) before the driver quits (order 0), and a failed capture still ends in `quitDriver`.
+- A scenario's page objects take `context.driver()`, so a step reads `new LoginPage(context.driver()).signIn(email, password)`.
+- `TestContext` carries `setDriver(AppiumDriver)` and `driver()` for a mobile project, as the web one carries `setPage` and `page`.
+

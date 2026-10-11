@@ -10,7 +10,7 @@ test carries, the deliberate recordings a test or an agent makes on purpose, and
 agent takes while it drives a browser. The mechanics for every capture API, in Java spellings, are in
 [`references/playwright.md`](references/playwright.md).
 
-Appium: `references/appium.md`, written by M2
+Native mobile (Appium): [`references/appium.md`](references/appium.md).
 
 ## Versions
 
@@ -27,6 +27,7 @@ The playwright.dev Java pages already list 1.64 options that the 1.63 binding do
 | Concern | Owner |
 |---|---|
 | The failure-evidence defaults (trace, video, screenshot on failure) | `qa/java/skills/ui-test-author/playwright/assets/BaseTest.java` — its `closeContext` hook and private `keep*` helpers, explained in that skill's `references/lifecycle.md` §5. This skill explains them and never adds a second hook for the same evidence |
+| The Appium failure evidence (screenshot, page source, device log, recording) | `qa/java/skills/ui-test-author/appium/assets/BaseMobileTest.java`, explained in `references/appium.md` |
 | Capture options, deliberate recordings, exploratory capture, reading a trace, PII | **this skill** |
 | The Cucumber scenario hook that keeps the same evidence for `qa-bdd-java` | `qa/java/skills/bdd-project-scaffold` (its `Hooks` class) |
 | Mapping the evidence into Allure (adapter, history, categories, publish) | `qa/reporting/java/skills/test-reports` |

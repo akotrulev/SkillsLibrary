@@ -120,22 +120,25 @@ The writer's rules and mechanics are in `qa/java/skills/ui-test-author/playwrigh
 
 | Check | Bad sign | Severity |
 |---|---|---|
-| Page objects subclass `BaseAppiumPage` (or project equivalent) | Class extends `AppiumDriver` or raw Selenium types | major |
-| Accessibility ID first (`AppiumBy.accessibilityId(...)`) → `id` → `xpath` | XPath used when `contentDescription` / `accessibilityIdentifier` exists | major |
-| `AppiumDriver<MobileElement>` (or generic v2 `AppiumDriver`) — no raw `WebDriver` field | Page uses `WebDriver` instead of the Appium driver | minor |
+| Page objects subclass `BaseAppiumPage` (or project equivalent); a scoped component does not | Extends `AppiumDriver`; a component extends the base page | major |
+| Test id first, per platform (iOS `accessibilityId`, Android `id`) → native query → XPath | XPath where an id exists; `accessibilityId` on Android for a React Native `testID` | major |
+| `AppiumDriver`, not a raw `WebDriver` field; nothing typed `RemoteWebDriver` | `AppiumDriver<MobileElement>`; a `RemoteWebDriver` cast | major |
 | `verifyPageLoaded()` present and asserts a landmark | Missing or empty implementation | major |
 | Navigation actions return the destination page object | Navigation method returns `void` | minor |
-| Locator strings declared as `private static final By` | Locator literals inline in action methods | minor |
-| Platform branching abstracted behind a strategy/locator map | `if (platform.equals("iOS")) ... else ...` scattered across pages | major |
-| App state reset between tests (`driver.resetApp()` / fresh install / `--no-reset` off) | Tests leak data into each other through shared app state | blocker |
-| Capabilities loaded from config, not hardcoded in `@BeforeMethod` | `DesiredCapabilities` literal `setCapability("deviceName", "Pixel_6")` in base | major |
-| Gestures via `W3CActions` / `RemoteExecuteMethod` (Appium 2.x) | Deprecated `TouchAction` / `MultiTouchAction` calls | major |
+| Locators are `private static final String {ELEMENT}_ID` constants | Literals inline in action methods; a mix of `String` and `By` constants | minor |
+| Platform branching behind the finder | `if (platform.equals("iOS"))` in actions | major |
+| App state: a fresh driver, `mobile: clearApp`, or `terminateApp` + `activateApp` | Tests leak data through shared app state | blocker |
+| No removed Appium 2 calls | `resetApp`, `closeApp`, `launchApp`, a removed `/appium/*` route | blocker |
+| Capabilities from env (`UiAutomator2Options` / `XCUITestOptions`) | `DesiredCapabilities`; a literal `deviceName` in a base | major |
+| Gestures via `PointerInput` / `mobile:` gestures | `TouchAction` / `MultiTouchAction` (removed in java-client 11) | major |
+| Repeating rows are scoped components, element-scoped finds, re-resolved per call | A row element held across calls; a bare child locator | major |
+| `selenium-support` declared for `WebDriverWait` | java-client 11 without it | major |
 | No `Thread.sleep` between gestures | `Thread.sleep(1500)` after a swipe waiting for animation | blocker |
 | Test names describe user behavior on device, not screen names | `screen1Test`, `tapButton2` | minor |
 
 ## Good signals (Java)
 
-- Playwright: one `BaseTest` with instance fields under `parallel="classes"`; Selenium: a `ThreadLocal` driver factory
+- Playwright and Appium: one base test with instance fields under `parallel="classes"`; Selenium: a `ThreadLocal` driver factory
 - Locators are `private static final By` or `private final Locator` fields on the highest ladder rung
 - One `@Test` per behavior named `Should_X_When_Y`; web-first assertions or `WebDriverWait`, never a sleep
 - Components take a parent `WebElement` / `Locator`; a base page only where three pages share real behaviour

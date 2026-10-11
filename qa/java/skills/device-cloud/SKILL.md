@@ -7,17 +7,26 @@ description: Use when the user needs the **real-device-cloud specifics** of runn
 
 Runs Java Appium tests against a **managed real-device cloud** — BrowserStack App Automate, Sauce Labs Real Device Cloud, or AWS Device Farm — and owns the parts that are *specific to the farm* rather than to a generic grid: getting the app **onto** the farm, **picking the devices**, exercising **real-device-only features** (GPS, network conditions, biometrics, permissions, locale), and the **remote-run** orchestration paradigm.
 
-> **Boundary — this skill builds ON `qa/java/skills/browser-cloud-setup`, it does not repeat it.** `browser-cloud-setup` is the *wiring*: how you connect a driver to a remote hub, the `bstack:options` / `sauce:options` capability-block schemas, mapping the plan's session cap onto TestNG `thread-count`, surfacing the session URL + marking pass/fail, and starting a tunnel. All of that is assumed here and cross-linked, **not re-derived**. This skill is the layer above: the **app**, the **devices**, the **device-only capabilities**, and the **schedule-and-poll** paradigm — exactly the depth `browser-cloud-setup` said it defers to `device-cloud`.
+> **Boundary — this skill builds ON `qa/java/skills/browser-cloud-setup`, it does not repeat it.** `browser-cloud-setup` is the *wiring*: connecting a driver to a remote hub, the `bstack:options` / `sauce:options` capability-block schemas, the plan's session cap, surfacing the session URL + marking pass/fail, and starting a tunnel. This skill is the layer above: the **app**, the **devices**, the **device-only capabilities**, and the **schedule-and-poll** paradigm.
 
 ## Stack
 
 - Java 21, Gradle (Kotlin DSL)
-- **Appium**: `io.appium:java-client` 9.x (`AndroidDriver`/`IOSDriver`, `UiAutomator2Options`/`XCUITestOptions`), TestNG runner
-- **App upload (REST)**: `com.squareup.okhttp3:okhttp` 4.x + `com.google.code.gson:gson` for the BrowserStack App Automate upload endpoint
+- **Appium**: `io.appium:java-client` 11.0.0 with `selenium-support` ≥ 4.50 on Appium 3 (`AndroidDriver`/`IOSDriver`, `UiAutomator2Options`/`XCUITestOptions`), TestNG runner; java-client 10.x on Appium 2 is the supported lane, and the pins live in `qa/java/skills/ui-test-author/appium/SKILL.md`
+- **App upload (REST)**: `com.squareup.okhttp3:okhttp` 4.x + `com.google.code.gson:gson` for the BrowserStack App Automate upload endpoint; the JDK's `java.net.http.HttpClient` for Device Farm's presigned `PUT`
 - **Remote-run farm**: AWS SDK for Java v2 `software.amazon.awssdk:devicefarm` (`DeviceFarmClient`)
 - **Condition waits**: `org.awaitility:awaitility` for upload-status / run-result polling — never `Thread.sleep`
-- Farm support code under `src/test/java/.../support/farm/`; credentials via **env vars only** (`BROWSERSTACK_USERNAME` / `BROWSERSTACK_ACCESS_KEY`; AWS creds via the default provider chain / OIDC)
-- Runs in CI under `qa/cicd/java/skills/ci-pipelines`; the page objects come from `qa/java/skills/ui-test-author/appium` and run **unchanged** on the farm
+- Farm support code under `src/test/java/.../support/farm/`; every Allure call is allure-java 3.0; credentials via **env vars only** (`BROWSERSTACK_USERNAME` / `BROWSERSTACK_ACCESS_KEY`; AWS creds via the default provider chain / OIDC)
+- Runs in CI under `qa/cicd/java/skills/ci-pipelines`; the page objects from `qa/java/skills/ui-test-author/appium` run **unchanged**
+
+## Does the farm run Appium 3?
+
+The primary lane is java-client 11 on Appium 3. java-client 11 needs an Appium 3 server, so **check the vendor before bumping**; a cloud still on Appium 2 keeps the suite on java-client 10.x and Appium 2, the supported lane.
+
+1. Read the vendor's own list of Appium versions, and the capability that selects one: `appiumVersion` inside `bstack:options` (BrowserStack) or `sauce:options` (Sauce Labs). BrowserStack's public page listed only 2.x and Sauce's migration page showed 2.13.1 on 2026-10-10, so neither is assumed to offer 3.
+2. Set the capability to a 3.x value and start one session. A vendor without Appium 3 rejects it or falls back to 2; a green run does not tell which.
+3. `driver.getCapabilities()` on the started session shows what the vendor actually granted.
+4. AWS Device Farm takes its Appium version from the test spec and the host image; read the spec before the bump.
 
 ## When to use
 
@@ -33,7 +42,6 @@ Runs Java Appium tests against a **managed real-device cloud** — BrowserStack 
 - The TypeScript / .NET device-farm stacks → `qa/{typescript,dotnet}/skills/device-cloud`
 - Writing the mobile page objects / tests → `qa/java/skills/ui-test-author/appium`
 - CI shard/worker mechanics (matrix fan-out, sharding props, Allure merge) → `qa/cicd/java/skills/ci-pipelines/*` — cross-link, don't duplicate
-- Web (Playwright) cloud runs → `qa/java/skills/browser-cloud-setup`; this node is mobile real-device only
 
 ## Pick a paradigm — the choice that shapes everything
 
@@ -49,7 +57,7 @@ A device farm is one of two fundamentally different shapes. Get this right first
 | **Real-device features** | Set as caps + injected mid-session via `browserstack_executor` | Configured on the scheduled run; less interactive |
 | **This skill's focus** | App upload, device caps, device-only feature caps | `createUpload` → poll → `scheduleRun` → poll `getRun` |
 
-**Decision rule.** *Want your existing TestNG/page-object suite to drive real devices with full live control (mid-session GPS changes, biometric prompts, network flips)?* → **live-session** (BrowserStack App Automate is the canonical here). *Already deep in AWS, need private-VPC devices, or want the farm to own execution end-to-end?* → **remote-run** (Device Farm). Most teams start live-session; reach for remote-run only when AWS integration or a hands-off run is the actual requirement. Don't build an abstraction over both — wire the one you need behind the farm helpers below.
+**Decision rule.** *Want your existing TestNG/page-object suite to drive real devices with full live control (mid-session GPS changes, biometric prompts, network flips)?* → **live-session** (BrowserStack App Automate is the canonical here). *Already deep in AWS, need private-VPC devices, or want the farm to own execution end-to-end?* → **remote-run** (Device Farm). Most teams start live-session; reach for remote-run only when AWS integration or a hands-off run is the actual requirement. Don't build an abstraction over both.
 
 ---
 
@@ -59,67 +67,15 @@ These sections live in `references/details.md` — **read it when the task touch
 
 ## Remote-run farm — AWS Device Farm
 
-Device Farm is the **other paradigm**: you don't drive a live device — you upload the app and a packaged test suite, schedule a run against a **device-pool ARN**, and poll for the result. Every step that "waits" for AWS to finish is an **Awaitility condition poll**, never a `Thread.sleep`.
-
-```java
-// src/test/java/.../support/farm/DeviceFarmRunner.java
-package support.farm;
-
-import software.amazon.awssdk.services.devicefarm.DeviceFarmClient;
-import software.amazon.awssdk.services.devicefarm.model.*;
-import java.time.Duration;
-import static org.awaitility.Awaitility.await;
-
-/** Orchestrates an AWS Device Farm scheduled run: upload → poll → schedule → poll. */
-public final class DeviceFarmRunner {
-    private final DeviceFarmClient df; // built with the default credential provider chain / OIDC — no literal keys
-
-    public DeviceFarmRunner(DeviceFarmClient df) { this.df = df; }
-
-    /** Create an upload, PUT the bytes, and wait until the farm reports it processed. Returns the upload ARN. */
-    public String uploadAndAwait(String projectArn, String name, UploadType type, byte[] bytes) {
-        CreateUploadResponse created = df.createUpload(r -> r.projectArn(projectArn).name(name).type(type));
-        Upload upload = created.upload();
-        putBytesToPresignedUrl(upload.url(), bytes); // HTTP PUT to the presigned URL (OkHttp)
-
-        // Wait on the SUCCEEDED condition — never sleep a fixed interval.
-        await().atMost(Duration.ofMinutes(5)).pollInterval(Duration.ofSeconds(5)).until(() -> {
-            UploadStatus status = df.getUpload(g -> g.arn(upload.arn())).upload().status();
-            if (status == UploadStatus.FAILED) throw new IllegalStateException("upload failed: " + name);
-            return status == UploadStatus.SUCCEEDED;
-        });
-        return upload.arn();
-    }
-
-    /** Schedule the run and wait until it completes; return the aggregate result. */
-    public ExecutionResult scheduleAndAwait(String projectArn, String appArn, String testPkgArn, String devicePoolArn) {
-        ScheduleRunResponse scheduled = df.scheduleRun(r -> r
-            .projectArn(projectArn)
-            .appArn(appArn)
-            .devicePoolArn(devicePoolArn)
-            .test(t -> t.type(TestType.APPIUM_JAVA_TESTNG).testPackageArn(testPkgArn)));
-        String runArn = scheduled.run().arn();
-
-        await().atMost(Duration.ofMinutes(30)).pollInterval(Duration.ofSeconds(15)).until(() ->
-            df.getRun(g -> g.arn(runArn)).run().status() == ExecutionStatus.COMPLETED);
-
-        return df.getRun(g -> g.arn(runArn)).run().result(); // PASSED / FAILED / ERRORED
-    }
-
-    private void putBytesToPresignedUrl(String url, byte[] bytes) { /* OkHttp PUT — omitted for brevity */ }
-}
-```
-
-> **Device Farm specifics:** the test package type for a TestNG Appium suite is `APPIUM_JAVA_TESTNG_TEST_PACKAGE` (+ an `APPIUM_JAVA_TESTNG_TEST_SPEC` YAML to control the run); the app type is `ANDROID_APP` / `IOS_APP`. A **device pool** is created once (in the console or via `createDevicePool` with a device-selection rule) and referenced by ARN. AWS auth comes from the **default credential provider chain** — in CI prefer **OIDC role assumption** over a long-lived access key (see `qa/cicd/java/skills/ci-pipelines`). Artifacts (logs, video, screenshots) are fetched per-job via `listArtifacts(runArn)` after the run completes.
+Device Farm is the **other paradigm**: you upload the app and a packaged test suite, schedule a run against a **device-pool ARN**, and poll for the result. `references/aws-device-farm.md` holds the whole `DeviceFarmRunner`: `createUpload` → an HTTP `PUT` to the presigned URL (it throws on any status but `200`, so a failed upload is never a five-minute poll timeout) → poll until `SUCCEEDED` → `scheduleRun` → poll until `COMPLETED`. Every wait is an Awaitility condition, never a `Thread.sleep`. AWS auth is the default credential provider chain, and OIDC in CI.
 
 ---
 
 ## Secrets — env / provider chain only, never logged
 
-Farm credentials are a billable, exfiltratable secret (CLAUDE.md hard rule). BrowserStack is a username + access key from env; AWS is the default provider chain (OIDC in CI). Read them lazily, fail loudly if missing, never log them, never persist them into an artifact or HAR.
+Farm credentials are a billable, exfiltratable secret (CLAUDE.md hard rule). BrowserStack is a username + access key from env; AWS is the default provider chain (OIDC in CI) with the region from `AWS_REGION`, so no AWS credential class exists here. Read them lazily, fail loudly if missing, never log them, never persist them into an artifact or HAR.
 
 ```java
-// src/test/java/.../support/farm/FarmCredentials.java
 package support.farm;
 
 public final class FarmCredentials {
@@ -137,7 +93,6 @@ public final class FarmCredentials {
     public static BrowserStack browserStack() {
         return new BrowserStack(required("BROWSERSTACK_USERNAME"), required("BROWSERSTACK_ACCESS_KEY"));
     }
-    // AWS Device Farm: no creds here — use the default provider chain / OIDC, region from AWS_REGION.
 }
 ```
 
@@ -159,7 +114,7 @@ public final class FarmCredentials {
 | Permissions | `appium:autoGrantPermissions` | `appium:autoGrantPermissions` | `appium:autoGrantPermissions` |
 | Retention | apps deleted 30 days after last use | per plan | per S3 lifecycle |
 
-**Capability-block schemas** (`bstack:options` vs `sauce:options`), **session pass/fail reporting**, **parallelism → `thread-count`**, and **tunnels** are the same across these and are owned by `qa/java/skills/browser-cloud-setup` — see it for the side-by-side block table. This skill only adds the app/device/feature/remote-run layer on top.
+**Capability-block schemas** (`bstack:options` vs `sauce:options`), **session pass/fail reporting**, **parallelism** and **tunnels** are owned by `qa/java/skills/browser-cloud-setup`; this skill only adds the app/device/feature/remote-run layer on top.
 
 ---
 
@@ -172,7 +127,7 @@ public final class FarmCredentials {
 | `Thread.sleep(5000)` after a biometric/network injection | Flaky and slow; the device reacts at its own pace | `WebDriverWait` / Awaitility on the app's observable reaction |
 | `Thread.sleep` polling an AWS run | Wastes time, races the result | `await().atMost(...).until(run is COMPLETED)` |
 | Running every device on every PR | Slow, expensive, exceeds the session cap | A small intent-chosen matrix on PR; broad sweep nightly |
-| Thread count > plan session cap | Sessions queue or get rejected | Map the cap onto `thread-count` (browser-cloud-setup owns this) |
+| Concurrency > plan session cap | Sessions queue or get rejected | Keep it at or under the cap (browser-cloud-setup owns this) |
 | Credentials / access key in code or a committed config | Billable, exfiltratable secret | `required(...)` env read; AWS via OIDC |
 | Re-deriving the capability block / tunnel / status here | Duplicates `browser-cloud-setup`, drifts out of sync | Cross-link `browser-cloud-setup`; add only the farm layer |
 | Emulator caps when the test needs a real device | Biometric/GPS/network features need real hardware | Pin a real `deviceName` (App Automate default) |
@@ -186,16 +141,16 @@ public final class FarmCredentials {
 
 ### Device selection
 - Pin a real device with `deviceName` + `osVersion` (App Automate sessions are real devices by default).
-- Drive a **device matrix** from a `@DataProvider` (one independent case per device); pick devices by intent, not "all of them."
-- Keep concurrent devices ≤ the plan session cap — that cap → TestNG `thread-count` is owned by `browser-cloud-setup`.
+- Drive a **device matrix** from a `@Factory` fed by a sequential `@DataProvider` (one test-class instance per device, so a failure names it); pick devices by intent, not "all of them." A `@DataProvider(parallel = true)` with Appium is banned (D8): fan devices out across CI jobs, one device per job.
+- Keep concurrent devices ≤ the plan session cap; `parallel="classes"` and the cap are owned by `browser-cloud-setup`.
 
 ### Real-device features
 - Set static features (`gpsLocation`, `networkProfile`, `language`/`locale`/`timezone`, `deviceOrientation`, `enableBiometric`, `autoGrantPermissions`) as caps at session start.
-- Flip dynamic features mid-session via `browserstack_executor` (biometric / network) or the Appium location API (GPS).
+- Flip dynamic features mid-session via `browserstack_executor` (biometric / network) or a `mobile:` location command (GPS: Android `mobile: setGeolocation`, iOS `mobile: setSimulatedLocation`).
 - After any injection, **wait on the app's observable reaction** (explicit wait), never a `Thread.sleep`.
 
 ### Remote-run (Device Farm)
-- `createUpload` → PUT bytes → **poll until SUCCEEDED**; `scheduleRun` → **poll until COMPLETED**; both via Awaitility, never sleep.
+- `createUpload` → PUT bytes (throw on a failed PUT) → **poll until SUCCEEDED**; `scheduleRun` → **poll until COMPLETED**; both via Awaitility, never sleep.
 - AWS auth via the default provider chain / **OIDC** in CI, never a literal key. Fetch artifacts after the run via `listArtifacts`.
 
 ### Secrets & boundary
@@ -204,11 +159,12 @@ public final class FarmCredentials {
 
 ## Generation steps
 
+0. Check **Does the farm run Appium 3?** before raising the client.
 1. Confirm the **paradigm** (live-session BrowserStack/Sauce vs remote-run Device Farm) and **platform** (Android/iOS).
 2. Add `support/farm/FarmCredentials.java` (env reads; AWS via provider chain) — no literals.
-3. **Live-session**: add `AppUploader` (REST upload → `bs://…`/`custom_id`), `RealDeviceDriverFactory` (real-device caps + the device-only features the test needs), and `DeviceFeatures` for mid-session injection; drive a device matrix from a `@DataProvider`.
-4. **Remote-run**: add `DeviceFarmRunner` (`createUpload` → poll → `scheduleRun` → poll `getRun`) with Awaitility condition waits.
-5. Reuse `browser-cloud-setup`'s session-status + dashboard-URL teardown; map the device count onto `thread-count` per its rules.
+3. **Live-session**: add `AppUploader` (REST upload → `bs://…`/`custom_id`), `RealDeviceDriverFactory` (real-device caps + the device-only features the test needs), and `DeviceFeatures` for mid-session injection; drive a device matrix from a `@Factory`.
+4. **Remote-run**: add `DeviceFarmRunner` from `references/aws-device-farm.md`.
+5. Reuse `browser-cloud-setup`'s session-status + dashboard-URL teardown; map concurrency onto the plan cap per its rules.
 6. Run **one** device/session first to confirm the upload + caps + features before fanning the matrix out; confirm the session/run appears on the dashboard with the right build/project tags. Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run".
 
 ## Cross-references
@@ -216,6 +172,7 @@ public final class FarmCredentials {
 - **`qa/java/skills/browser-cloud-setup`** — the **prerequisite wiring** this skill builds on: connect, capability-block schemas, parallelism → `thread-count`, tunnels, session pass/fail + dashboard URL. This skill adds the app/device/feature/remote-run layer; that one owns the connection plumbing.
 - **`qa/typescript/skills/device-cloud`** + **`qa/dotnet/skills/device-cloud`** — sibling device-farm stacks. Same four moves (app lifecycle → device selection → real-device features → remote-run), different SDKs. Structure ported, not code.
 - **`qa/java/skills/ui-test-author/appium`** — writes the mobile page objects / tests that run **unchanged** on the farm; this skill only swaps the local session for a farm one.
-- **`qa/java/skills/data-driven-testing`** — the `@DataProvider` device-matrix mechanics (one independent case per device); this skill supplies the device list, that one the data-driven discipline.
+- **`qa/java/skills/data-driven-testing`** — the `@DataProvider` mechanics (one independent case per row); this skill supplies the device list, that one the data-driven discipline.
 - **`qa/cicd/java/skills/ci-pipelines`** — build-then-upload job, OIDC for AWS, sharding the matrix across runners (cross-link; don't duplicate).
+- **`qa/java/skills/evidence-capture/references/appium.md`** — what a failed Appium run keeps locally, and the vendor video and pass/fail marking on a farm.
 - **`qa/reporting/java/skills/test-reports`** — attach the session/run dashboard URL + device name to the report so a farm failure is one click from the replay.

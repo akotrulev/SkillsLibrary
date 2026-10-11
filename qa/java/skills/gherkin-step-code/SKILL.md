@@ -152,12 +152,12 @@ public void theCatalogContains(java.util.List<java.util.Map<String, String>> row
 
 ### Mobile variant (Appium)
 
-Same shape; the step calls the Appium page objects reached through the context:
+Same shape; the screen objects take the **driver** (`context.driver()`), never `TestContext`, as the web page objects take the `Page`:
 
 ```java
 @When("I sign in with email {string} and password {string}")
 public void iSignInWith(String email, String password) {
-    context.loginScreen().login(email, password);
+    new LoginPage(context.driver()).signIn(email, password);
 }
 ```
 

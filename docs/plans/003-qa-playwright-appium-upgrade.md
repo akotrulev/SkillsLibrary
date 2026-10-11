@@ -81,7 +81,17 @@ only on failure, a scoped `OrderRow`) and a per-platform test-id ladder with the
 WebView and app state on WDIO 10's helpers and `mobile:` extensions; the farm through a second `wdio.conf.ts`
 (BrowserStack without a WDIO 10 service, D81; AWS `APPIUM_NODE`); Appium reference in `evidence-capture` (D82); and
 the screen, crawler, native-feature, review, BDD-scaffold and Cucumber files cleaned (D83).
-Next: M2. Built but unverified: no asset, workflow or pipeline has been
+M2 landed 2026-10-11: the Java mobile lane on java-client 11 / Appium 3 / TestNG — `qa-mobile-java` on §5.3's 28
+tools with the appium-mcp prerequisites and the evidence skill at Step 1; `ui-test-author/appium` with eleven
+compilable assets (a `BaseMobileTest` whose `@AfterMethod` keeps a screenshot, page source, device log and a
+recording only on failure on allure-java 3.0, an `AppiumDriverFactory`, a scoped `OrderRow`, `testng.xml` on
+`parallel="classes"`) and the per-platform test-id ladder with the id-prefix setting (D84); W3C `PointerInput`
+gestures, WebView contexts and app state without `resetApp`; `NativeFeatures` on `mobile:` commands in
+`support.nativefeatures`; the farm with a presigned `PUT` that throws (D85) and a mobile Cucumber hook (D86);
+Appium reference in `evidence-capture`; and the screen, crawler, review, `browser-cloud-setup` and glue files
+cleaned. Next: M3. Built but unverified (M2): nothing compiled or ran — the Java Appium assets (an `AppiumDriver`
+`switch` on `AndroidDriver` / `IOSDriver`, `UiAutomator2Options.amend`, `Allure.attachment` with a stream,
+`AndroidStartScreenRecordingOptions` / `IOSStartScreenRecordingOptions` spellings) are G1's. Built but unverified: no asset, workflow or pipeline has been
 compiled or run (G1 does that; D24's TS config import, the Java build on Allure Gradle plugin 4.3.0, the .NET
 build on NUnit3TestAdapter 6.3.1 / Test SDK 18.10.1, `dorny/test-reporter`'s `java-junit` parse, the trace CLI
 through the Java driver (D39) and through `playwright.ps1` (D43), the .NET shard script against a real
@@ -124,7 +134,7 @@ Planned 2026-10-10. The research behind it is committed with this plan:
 - A Maestro lane is added (X1).
 - The newest Appium client majors are primary.
 
-Next: M2 (H1, the user's, blocks no task). The cost is 19 agent sessions on the subscription, each started by the user
+Next: M3 (H1, the user's, blocks no task). The cost is 19 agent sessions on the subscription, each started by the user
 from Plan Queue. Nothing else is metered.
 
 ## 1. What already exists, and what is missing
@@ -1245,6 +1255,33 @@ they are assets too (the page objects and the component are four files, not one)
 28.1k chars and had to come under 16,000, so the AWS orchestration class moved to
 `references/aws-device-farm.md`. **Cost:** ten asset files and a G1 install line that must come from
 `assets/package.json`.
+
+**D84 — The Java Appium assets add `Env.java`, `settings.gradle.kts`, `testng.xml` and split the page objects into
+four files, and one `AppiumDriver` is built per class (M2, 2026-10-11).** §3.4 lists a base test, a driver
+factory, a screen object and a test, plus the build file. The factory, the base test and the test share one
+`required(name)`, so it is a file; a compiled Gradle project needs its settings and a suite file for
+`parallel="classes"` (D8); and the scoped component is its own class (`OrderRow`), as in M1. Readings for the lifetime:
+a driver per method (a fresh app state per test, a session start per test), or a driver per class (chosen,
+R8, with `terminateApp` / `mobile: clearApp` for a cold state). **Cost:** tests in one class share app state, and a
+class never runs on two devices at once. `testng.xml` keeps `thread-count="1"`: parallel classes need one device and
+unique ports each, which the skill states.
+
+**D85 — `putBytesToPresignedUrl` is implemented with the JDK's `HttpClient`, and the AWS orchestrator moved to
+`references/aws-device-farm.md` (M2, 2026-10-11).** `aM` C4 offers an implementation or a throw. Readings: throw
+`UnsupportedOperationException`; or implement the `PUT` (chosen), throwing `IllegalStateException` with the file name
+and status on anything but `200`, so a failed upload is never a five-minute poll timeout. **Cost:** a `PUT` that rests
+on memory of Device Farm's presigned URLs (no `Content-Type` header), and an `IOException` /
+`InterruptedException` that `uploadAndAwait` declares instead of catching. `device-cloud/SKILL.md` was 17.8k chars,
+so as in D83 the class left it; its device matrix is a `@Factory` fed by a sequential `@DataProvider` (D8 bans
+`@DataProvider(parallel = true)` with Appium), and the farm test's driver is quit in `@AfterClass`.
+
+**D86 — The mobile Cucumber hook lives in `bdd-project-scaffold/references/hooks.md`, captures a screenshot and
+the page source only, and quits the driver in a lower-order `@After` (M2, 2026-10-11).** J4's `Hooks` is the web
+hook. Readings: extend `Hooks` with `@mobile` branches; or a second `MobileHooks` class (chosen, per `@Before("@mobile")`
+in the file's own note). It keeps D72's `<feature file>.<scenario>` names under `build/appium-artifacts/`, runs
+evidence at `order = 1` and `quitDriver` at `order = 0` (Cucumber runs `@After` from the highest order down), and
+leaves the recording to `BaseMobileTest`'s pattern. **Cost:** a scenario has no device log or recording; one driver per
+scenario is the slow shape.
 
 ## Answered questions (2026-10-10)
 
@@ -2762,6 +2799,55 @@ The skills use instance-field drivers (D8), and `evidence-capture/references/app
 - **Not in M2:** TS/.NET mobile; line 10 of `mobile-screen-explorer` and the agent's "Related agents"
   section (plan 002 W1, D21).
 
+**As built (2026-10-11):**
+- **Built.** The Java mobile lane is on §2.4's primary lane. `qa-mobile-java` has §5.3's 28 tools (`tools:` = the 7
+  core tools plus the list, in §5.3's order), a description naming java-client 11 on Appium 3 and the supported
+  lane, the five appium-mcp prerequisites, and Step 1 loading `evidence-capture/SKILL.md` and its Appium
+  reference; "scaffold" stays for S1. `ui-test-author/appium` has a Versions table, `assets/` (11 files:
+  `build.gradle.kts`, `settings.gradle.kts`, `testng.xml`, `Env.java`, `AppiumDriverFactory.java`,
+  `BaseMobileTest.java`, `BaseAppiumPage.java`, `LoginPage.java`, `OrdersPage.java`, `OrderRow.java`,
+  `OrdersTest.java`, package `com.example.mobiletests.{support,pages,tests}`), a per-platform ladder, scoped
+  components, gestures, WebView and app-state sections, and the `MigrateToV11` note. `mobile-native-features`
+  (+ `references/details.md`; `support.nativefeatures`, `rejectFingerprint`, `mobile: setGeolocation`),
+  `mobile-screen-explorer` (line 10 untouched), `mobile-screen-objects`, `mobile-app-crawler` (the three
+  `</content>` leftovers, kebab ids in the template to PascalCase), `device-cloud` (+ `references/details.md`,
+  new `references/aws-device-farm.md`), the review skill's Appium rows, the mobile lines of `bdd-project-scaffold`
+  (Stack line, build line, a `MobileHooks` section in `references/hooks.md`), `gherkin-step-code`'s mobile
+  variant (`new LoginPage(context.driver())`), `page-object-design`, and the Appium half of
+  `browser-cloud-setup` are rewritten. `evidence-capture/references/appium.md` exists (nine sections, 11.4k
+  chars); its SKILL.md lost the placeholder line, gained a one-line route and a `BaseMobileTest` row in "Who owns
+  what".
+- **Sizes in chars.** `evidence-capture/SKILL.md` 15,957 (was 15,745); `ui-test-author/review/SKILL.md` 15,992
+  (was 15,636); `ui-test-author/appium/SKILL.md` 15,962; `device-cloud/SKILL.md` 15,953 (was 17.8k);
+  `mobile-native-features/SKILL.md` 16,881 (was 26.6k; still over 16,000, which §6.5 counts).
+- **Pins.** The asset build pins java-client 11.0.0, `selenium-support` **4.51.0** (§2.4 says ≥ 4.50; 4.51.0 is the
+  newest in the research), TestNG 7.12.0, AssertJ 3.27.7, `allure-testng` 3.0.0, the Allure Gradle plugin 4.3.0 and
+  CLI 2.46.1 (J1's). The D12 pin `allure-testng:2.29.0` in `mobile-native-features` is gone.
+- **Left to plan 002.** Line 10 of `mobile-screen-explorer/SKILL.md` and the agent's "Related agents" section were
+  already corrected by plan 002 W1; M2 kept that wording.
+- **Built but unverified.** Nothing was compiled or run (G1 does it). Open risks for G1:
+  - `AppiumDriverFactory`: `UiAutomator2Options.amend(String, Object)` carrying `appium:settings[...]` and
+    `bstack:options`, `setAutoGrantPermissions` / `setAutoAcceptAlerts`, `new AndroidDriver(URL, Capabilities)`.
+  - `BaseMobileTest`: a pattern `switch` on `AndroidDriver` / `IOSDriver` (an `AppiumDriver` is not a
+    `CanRecordScreen`), `new IOSStartScreenRecordingOptions().withTimeLimit(Duration)`, `Allure.attachment(String,
+    String, InputStream, AttachmentOptions)`, `driver.manage().logs()` on java-client 11, and the order of Allure's
+    failure listener against the `@AfterMethod` (§9.1 left it unverified).
+  - `BaseAppiumPage` / `OrderRow`: `WebDriverWait(driver, Duration)` with an `AppiumDriver` as the `WebDriver`,
+    `.ignoring(StaleElementReferenceException.class)` before `.withMessage`, and `visibilityOfElementLocated`.
+  - `NativeFeatures` (a code block, not an asset): `SupportsRotation` and `InteractsWithApps` import paths on
+    java-client 11, `mobile: openNotifications` / `mobile: fingerprint` argument names, and `mobile: getClipboard`
+    returning a base64 `String`.
+  - `device-cloud/references/aws-device-farm.md`: the JDK `HttpClient` `PUT` to a presigned URL, and Device
+    Farm's Appium version for a java-client 11 suite (no web access; read from the research and the audit).
+  - The RN `testID` → Android `resource-id` mapping and the need for `disableIdLocatorAutocompletion` rest on the
+    UiAutomator2 README and secondary sources (D80); nothing ran on a device.
+- **For G1, files M2 does not own.**
+  - `qa/cicd/java/skills/ci-pipelines` references upload `build/playwright-artifacts/` only. `evidence-capture/
+    references/appium.md` §9 states `build/appium-artifacts/` as the Appium CI path (R7); a Java mobile job would
+    upload it, and none exists yet.
+  - `qa/reporting/java/skills/test-reports` names Appium in its description and defers to `BaseTest` for
+    Playwright; the Appium hook is `BaseMobileTest`, which only `evidence-capture` names.
+
 ### M3 — .NET mobile: Appium 3, Appium.WebDriver 9, Appium evidence, compiling assets
 
 **Stack:** `docs` · **Agent:** `general-purpose`
@@ -2981,96 +3067,9 @@ Run them in order, one session each, opened from Plan Queue. Each block is compl
 | X1 | `docs` | `general-purpose` | M1, S1, T2 | ~130k |
 | G1 | `docs` | `general-purpose` | all | ~145k |
 
-Landed: T1, J1, N1, T2, J2, N2, A1, T3 (2026-10-10), J3, N3, T4, J4, N4, M1 (2026-10-11). Every other block is live.
+Landed: T1, J1, N1, T2, J2, N2, A1, T3 (2026-10-10), J3, N3, T4, J4, N4, M1, M2 (2026-10-11). Every other block is live.
 
 ---
-
-### M2 — Java mobile: Appium 3, java-client 11, Appium evidence, scoped components (general-purpose, docs)
-
-````
-You are `general-purpose`. Task M2 of docs/plans/003-qa-playwright-appium-upgrade.md: move the Java mobile
-lane to §2.4's primary lane (Appium 3, java-client 11). Fix the mobile audit's Java findings, write
-qa/java/skills/evidence-capture/references/appium.md, and put qa-mobile-java on §5.3's grants.
-
-Read, in this order:
-1. CLAUDE.md.
-2. The plan: §2.4, §3.2, §3.4, §4 (R8), §5.1, §5.3, §5.4, Decisions D8, D12, D17, D20, task M2,
-   "Close-out — every task".
-3. qa/java/agents/qa-mobile-java.md; under qa/java/skills/: ui-test-author/appium, mobile-native-features
-   (+ references), mobile-screen-explorer, mobile-screen-objects, mobile-app-crawler (+ references,
-   assets), device-cloud (+ references), the review skill's Appium rows, the Appium lines of
-   bdd-project-scaffold, the Appium half of browser-cloud-setup (+ references/details.md), gherkin-step-code's
-   "Mobile variant", and page-object-design's mobile lines.
-4. qa/java/skills/evidence-capture/SKILL.md (J2).
-5. docs/research/003-qa-playwright-appium/appium.md §0–§9 (Java columns, §2.4, §9.1).
-6. docs/audits/003-qa-playwright-appium/mobile.md §2, §3, §5 (Java rows and cross-stack rows), §6.
-
-Build:
-- Versions: java-client 11.0.0 + selenium-support ≥ 4.50 primary; 10.x supported. AppiumDriver is no
-  longer a RemoteWebDriver. No TouchAction, no PageFactory. The OpenRewrite MigrateToV11 note.
-  UiAutomator2Options / XCUITestOptions.
-- selenium.html5.Location → mobile: setGeolocation. Teardown, not try/finally. The presigned upload
-  implemented, or it throws.
-- Instance fields + parallel="classes", not a static ThreadLocal (D8).
-- Gestures and WebView ported: W3C PointerInput, mobile: gestures, context switching.
-- Package support/nativefeatures. No commented-out code. Intent accessors. Should_X_When_Y. One
-  locator-constant style. AssertJ for non-Appium assertions.
-- Review rows lose AppiumDriver<MobileElement> and resetApp. Scoped components (element-scoped finds
-  first), the per-platform ladder, R2, </content> removal. After J1, ui-test-author/review/SKILL.md is
-  15,636 chars: replace the Appium rows rather than adding to them, and keep the file ≤ 16,000.
-- page-object-design already says Appium uses instance fields + parallel="classes" (J1); keep that line.
-  BaseMobileTest can mirror J1's BaseTest shape: instance fields, alwaysRun hooks, requiredEnv(name), and
-  one narrow, logged catch per capture helper (plan D29).
-- ui-test-author/appium/assets/: build.gradle.kts, BaseMobileTest.java (evidence hooks per appium.md
-  §9.1, on allure-testng 3.0), AppiumDriverFactory.java, a screen object, one test.
-- Every Allure call in the mobile Java skills uses allure-java 3.0 (D12).
-- evidence-capture/references/appium.md; replace the placeholder line ("Appium: `references/appium.md`,
-  written by M2", under the intro). J2's SKILL.md is 15,745 chars: replace the line with a one-line route
-  and add a `BaseMobileTest` row to its "Who owns what" table; do not grow it past 16,000.
-- qa-mobile-java.md: tools: = core + §5.3; the prerequisites as in M1; Step 1 wiring; keep the
-  "scaffold" wording (S1 adds Step 0); the description says Appium 3.
-
-Traps:
-- allure-testng 3.0 (D12): use Allure.attachment(...) + AttachmentOptions, as appium.md §9.1 shows.
-  Allure.addAttachment is the removed 2.x API; G1's CODE_CHECKS bans it in Java code.
-- java-client 11 no longer pulls in selenium-support. WebDriverWait needs it added explicitly.
-- No TouchAction or MultiTouchAction in any code block or asset: G1's CODE_CHECKS bans them there.
-  Prose and review rows may name them as removed.
-- J4 edited only the web half of qa/java/skills/bdd-project-scaffold. Its mobile lines are yours as J4 found them:
-  the Stack line `io.appium:java-client` **10.1.1** (Appium 2.x), the commented-out
-  `// testImplementation("io.appium:java-client:10.1.1")  // mobile` line in its `build.gradle.kts` (the one code
-  comment left in that file — R1 and R5 apply) and the "Mobile variant" section. The web `Hooks` class now lives in
-  bdd-project-scaffold/references/hooks.md; a mobile hook mirrors its evidence shape (D72's `<feature file>.<scenario>`
-  name, `build/appium-artifacts/`).
-- qa/java/skills/browser-cloud-setup is not in your read list, but its Appium half is the mobile lane's: the Stack
-  line `io.appium:java-client` 9.x and, in references/details.md, `AppiumGridDriverFactory` and `SessionStatus`'s
-  `JavascriptExecutor` methods. J4 removed their inline comments, not their API — move them to java-client 11
-  (`UiAutomator2Options` stays; an `AndroidDriver` is no longer a `RemoteWebDriver`). The web half is J4's (D67, D69).
-- Gherkin step glue (qa/java/skills/gherkin-step-code): J4 made web page objects take the `Page`, never
-  `TestContext` (`aJ` D44). Its "Mobile variant (Appium)" snippet still calls `context.loginScreen()` — keep screen
-  objects taking the driver, not `TestContext`, the same way.
-- Leave two things to plan 002 W1, per D21: line 10 of mobile-screen-explorer/SKILL.md (the React Native
-  testID mapping) and the agent's "Related agents" section. Plan 002 has landed them
-  (docs/plans/implemented/002-mobile-plugins.md); keep its wording.
-
-- M1 (qa/typescript, as built) settled things the Java lane shares — read its D80–D82 and apply them:
-  - The per-platform ladder: UiAutomator2 prefixes every `id` lookup with `<package>:id/`, and a React Native or
-    Compose id has none, so the asset capabilities set `appium:settings[disableIdLocatorAutocompletion]` true
-    (D80). Java's `AppiumBy.id` needs the same capability; say when to leave it off. One finder per element
-    picks `accessibilityId` on iOS and `id` on Android.
-  - The UiAutomator2 README warns that Google is deprecating `UiSelector`; it is the secondary rung.
-  - Recording defaults to `startRecordingScreen` with the 180 s Android cap and the iOS ffmpeg need; the
-    `mobile:` recorders are the documented swap (D82).
-  - Appium 3 availability on a farm is checked before the client bump (qa/typescript/skills/device-cloud, § Does the
-    farm run Appium 3?): BrowserStack's and Sauce's public pages did not list 3 on 2026-10-10.
-  - TS's Appium evidence reference (qa/typescript/skills/evidence-capture/references/appium.md, nine sections) is the
-    shape to mirror, including its table of recording limits.
-
-Gate: none. This plan gates once, in G1. Do not run gradle, javac, appium or any check script.
-
-Commit: `docs(qa-java): mobile lane on Appium 3 / java-client 11, Appium evidence, scoped components (003 M2)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
 
 ### M3 — .NET mobile: Appium 3, Appium.WebDriver 9, Appium evidence, compiling assets (general-purpose, docs)
 
@@ -3211,6 +3210,15 @@ Traps:
   `appium:settings[disableIdLocatorAutocompletion]` is set (D80). `.gitignore` takes test-results/,
   allure-results/ and evidence/. qa-mobile-typescript.md already has the Step 1 evidence row (M1); add only
   Step 0.
+- M2 left the Java assets as eleven files: build.gradle.kts, settings.gradle.kts, testng.xml
+  (`parallel="classes"`, `thread-count="1"`), Env.java, AppiumDriverFactory.java, BaseMobileTest.java (the evidence
+  hooks), BaseAppiumPage.java, LoginPage.java, OrdersPage.java, OrderRow.java and OrdersTest.java, in package
+  `com.example.mobiletests.{support,pages,tests}`. The Java setup skill points at them and copies none. The env
+  vars are PLATFORM, DEVICE_NAME, APP_PATH, PLATFORM_VERSION (iOS), APPIUM_URL (default `http://127.0.0.1:4723`),
+  E2E_USER, E2E_PASSWORD, E2E_ORDER_NUMBER, E2E_ORDER_TITLE and DEVICE_FARM (skips local recording). The Android
+  capability `appium:settings[disableIdLocatorAutocompletion]` is set (D80, D84). Evidence lands in
+  `build/appium-artifacts/` (R7); `.gitignore` takes build/, allure-results/ and evidence/.
+  qa-mobile-java.md already has the Step 1 evidence row and the prerequisites (M2); add only Step 0.
 
 Gate: none. This plan gates once, in G1. Do not run gradle, npm, appium or any check script.
 
@@ -3310,6 +3318,12 @@ Build:
   - §6.4: the evidence smoke in all three stacks.
   - §6.5: python3 tools/token-audit.py.
 - Fix every failure at its source. Any task above may own it.
+- §6.3's Java Appium row: build the scratch project from qa/java/skills/ui-test-author/appium/assets/
+  (build.gradle.kts, settings.gradle.kts, testng.xml at the root; the .java files under src/test/java, packages
+  from their `package` lines; M2, D84). `gradle compileTestJava` succeeds; M2's As built lists its open typing
+  risks (the `amend` calls, the recorder `switch`, `Allure.attachment`). The NativeFeatures class in
+  mobile-native-features/SKILL.md and DeviceFarmRunner in device-cloud/references/aws-device-farm.md are code
+  blocks, not assets; compile them in the same scratch project when the check can.
 - §6.3's TS Appium row installs too little. Build the scratch project from
   qa/typescript/skills/ui-test-author/appium/assets/package.json and tsconfig.json (M1, D83): the assets
   import @wdio/allure-reporter and need @types/mocha and @types/node. M1's As built lists its open typing risks
@@ -3350,8 +3364,7 @@ Build:
   compiles it with the rest. `qa/java/skills/ui-test-author/playwright/SKILL.md:83` still says "the two hooks";
   lifecycle.md §3 now has three — make it "the hooks" (J4 could edit only `BaseTest.java` and lifecycle.md). `data-driven-testing/SKILL.md` is 21,967 chars, a pre-existing size violation J4 did
   not rewrite (§6.5's 16,000 applies to files this plan rewrote; count it among the body violations). The D12 grep
-  leaves one code pin, `allure-testng:2.29.0` in `qa/java/skills/mobile-native-features/SKILL.md`, to M2 — if M2
-  landed without it, change it to 3.0.0. `qa/_shared/python-web-testing` pins `playwright==1.63.0` (§6.2's
+  left one code pin, `allure-testng:2.29.0` in `qa/java/skills/mobile-native-features/SKILL.md`; M2 removed it. `qa/_shared/python-web-testing` pins `playwright==1.63.0` (§6.2's
   `python` stack).
 - The final Status names what is unverified: no Appium flow ran on a device or emulator; no Maestro flow
   ran; no WebMCP test ran against a site that registers tools; the D9 comparators are recommendations. Then git mv the plan

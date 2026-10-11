@@ -259,20 +259,21 @@ suites:
 
 ### Mobile — Appium java-client on a grid
 
-For mobile the change is also one place — the **driver construction**. Build a `UiAutomator2Options` (Android) / `XCUITestOptions` (iOS), attach the vendor block via `setCapability`, and point a `new AndroidDriver(new URL(hubUrl), options)` at the vendor hub. The page objects from `qa/java/skills/ui-test-author/appium` run unchanged. Appium uses the W3C nested `bstack:options` block (not the flat Playwright caps); `debug` turns on visual logs, `local` routes through the tunnel, and the app is the uploaded `bs://…` id, never a local path.
+For mobile the change is also one place — the **driver construction**. Build a `UiAutomator2Options` (Android) / `XCUITestOptions` (iOS), attach the vendor block via `setCapability`, and point a `new AndroidDriver(new URL(hubUrl), options)` at the vendor hub. The page objects from `qa/java/skills/ui-test-author/appium` run unchanged. In java-client 11 an `AndroidDriver` is a `WebDriver` and a `JavascriptExecutor` but **not** a `RemoteWebDriver`, so helpers take `JavascriptExecutor` or `WebDriver`, never `RemoteWebDriver`. Appium uses the W3C nested `bstack:options` block (not the flat Playwright caps); `debug` turns on visual logs, `local` routes through the tunnel, and the app is the uploaded `bs://…` id, never a local path.
 
 ```java
 package com.example.uitests.support.grid;
 
 import io.appium.java_client.android.AndroidDriver;
 import io.appium.java_client.android.options.UiAutomator2Options;
-import java.net.URL;
+import java.net.MalformedURLException;
+import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 
 public final class AppiumGridDriverFactory {
 
-    public AndroidDriver createBrowserStackAndroid(String sessionName) throws Exception {
+    public AndroidDriver createBrowserStackAndroid(String sessionName) throws MalformedURLException {
         GridCredentials.BrowserStack creds = GridCredentials.browserStack();
         UiAutomator2Options options = new UiAutomator2Options();
         Map<String, Object> bstack = new HashMap<>();
@@ -289,7 +290,7 @@ public final class AppiumGridDriverFactory {
         options.setCapability("bstack:options", bstack);
         options.setCapability("appium:app", GridCredentials.required("BS_APP_URL"));
 
-        return new AndroidDriver(new URL("https://hub-cloud.browserstack.com/wd/hub"), options);
+        return new AndroidDriver(URI.create("https://hub-cloud.browserstack.com/wd/hub").toURL(), options);
     }
 }
 ```
@@ -404,7 +405,7 @@ tasks.register<Test>("gridTest") {
 ### Session status — Appium and Selenium drivers
 
 A Playwright grid class marks its session through `GridSession.markOutcome` (above). An Appium or Selenium session
-marks it through the driver's executor; each vendor's syntax differs and is not interchangeable.
+marks it through the driver's executor (`JavascriptExecutor`, which `AppiumDriver` implements in java-client 11); each vendor's syntax differs and is not interchangeable.
 
 ```java
 package com.example.uitests.support.grid;

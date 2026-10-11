@@ -18,7 +18,7 @@ This is the BDD analogue of the UI project scaffold; it assumes a Playwright (we
 - `io.cucumber:cucumber-picocontainer` (DI — constructor injection, zero config: just add the dependency)
 - `org.junit:junit-bom` + `org.junit.platform:junit-platform-suite` + `junit-platform-launcher` (runtime)
 - Web: `com.microsoft.playwright:playwright` (**1.63.0**, sync API — the pin in the **Versions** table of `qa/java/skills/ui-test-author/playwright/SKILL.md`) or Selenium 4 — there is no Playwright Test runner on the JVM, you drive the automation library from step defs. The Cucumber `Hooks` class mirrors J1's `BaseTest` (it cannot extend a TestNG class): `HEADED`, `BASE_URL`, the test-id attribute and the R7 failure evidence
-- Mobile: `io.appium:java-client` **10.1.1** (Appium 2.x) on Selenium 4
+- Mobile: `io.appium:java-client` **11.0.0** (Appium 3) with `selenium-support` ≥ 4.50, the pins in the **Versions** table of `qa/java/skills/ui-test-author/appium/SKILL.md`; java-client 10.x on Appium 2 is the supported lane
 - Assertions in `Then` steps: AssertJ / Playwright `assertThat` (match the existing UI project)
 - Features under `src/test/resources/features/`; step defs + hooks + context under `src/test/java/.../steps` and `.../support`
 - `io.qameta.allure:allure-cucumber7-jvm` **3.0.0** when the project reports through Allure (the library default) — allure-java 3.0, the same major as every other `allure-*` module (Java 17+; the Allure Gradle plugin 4.3.0 rejects mixed 2.x/3.x adapters)
@@ -76,7 +76,6 @@ dependencies {
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
     testImplementation("com.microsoft.playwright:playwright:1.63.0")
-    // testImplementation("io.appium:java-client:10.1.1")             // mobile
 
     testImplementation("org.assertj:assertj-core:3.27.7")
     testImplementation("io.qameta.allure:allure-cucumber7-jvm:3.0.0")
@@ -242,7 +241,14 @@ A one-line `SmokeSteps` class (in `gherkin-step-code`) binds these two steps; th
 
 ### Mobile variant (`TestContext` + hook)
 
-For Appium, `TestContext` holds an `AppiumDriver` built in `@Before("@mobile")` via the existing `AppiumDriverFactory`, and quit with `driver.quit()` in `@After("@mobile")`. Page objects extend the existing `BaseAppiumPage`. Spring users would swap `cucumber-picocontainer` for `cucumber-spring` and `@CucumberContextConfiguration` instead — mention as the alternative; PicoContainer is the zero-config default.
+For Appium, `TestContext` holds the scenario's `AppiumDriver`, built in `@Before("@mobile")` through the project's `AppiumDriverFactory` and quit in `@After("@mobile")`. A mobile project replaces the Playwright line of the `build.gradle.kts` above with:
+
+```kotlin
+    testImplementation("io.appium:java-client:11.0.0")
+    testImplementation("org.seleniumhq.selenium:selenium-support:4.51.0")
+```
+
+Page objects extend the existing `BaseAppiumPage` and take the **driver**, never `TestContext`. The hook, its failure evidence and its `<feature file>.<scenario>` names (D72) are in `references/hooks.md` § Mobile hook: the files land in `build/appium-artifacts/`. Spring users would swap `cucumber-picocontainer` for `cucumber-spring` and `@CucumberContextConfiguration` instead — mention as the alternative; PicoContainer is the zero-config default.
 
 ## Anti-patterns to flag
 

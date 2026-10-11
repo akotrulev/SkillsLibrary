@@ -1,11 +1,11 @@
 ---
 name: qa-mobile-screen-explorer-java
-description: Use when a Java mobile suite needs to explore the currently open Android/iOS app via the Appium MCP server — enumerate elements, derive accessibility-id-first locators, produce a `missing-testids.md` report. Triggers "explore this screen", "what's on the current screen", "find the locators for X". Do NOT use to emit the screen object (use `qa-mobile-screen-objects-java`), or for web pages (use `qa-page-objects-from-url-java`).
+description: Use when a Java mobile suite needs to explore the currently open Android/iOS app via the Appium MCP server — enumerate elements, derive per-platform test-id locators, produce a `missing-testids.md` report. Triggers "explore this screen", "what's on the current screen", "find the locators for X". Do NOT use to emit the screen object (use `qa-mobile-screen-objects-java`), or for web pages (use `qa-page-objects-from-url-java`).
 ---
 
 # QA — Appium Live-App Explorer (Java)
 
-Drives the **currently running app on a connected device or emulator through the Appium MCP server**, enumerates what's on screen, and reports each element with an **accessibility-id-first** locator — so `qa/java/skills/mobile-screen-objects` can emit a Java page object and `qa/java/skills/ui-test-author/appium` can author the tests. This skill owns **device interaction, element discovery, and locator policy** — it does **not** generate page objects or tests (hand those off).
+Drives the **currently running app on a connected device or emulator through the Appium MCP server**, enumerates what's on screen, and reports each element with a **per-platform test-id** locator — so `qa/java/skills/mobile-screen-objects` can emit a Java page object and `qa/java/skills/ui-test-author/appium` can author the tests. This skill owns **device interaction, element discovery, and locator policy** — it does **not** generate page objects or tests (hand those off).
 
 This is the mobile counterpart of the web `qa/java/skills/page-objects-from-url`: live extraction via MCP, a primary-locator contract with the dev team, and a `missing-testids.md` report for what the app fails to expose. One difference simplifies the mobile flow — the page-source XML **already contains the accessibility id** (`name` on iOS and the bare `resource-id` on Android carry the `testID`; `content-desc` is the `accessibilityLabel`), so a single page-source read inventories structure *and* ids; there is no separate "harvest the test ids" pass.
 
@@ -27,17 +27,17 @@ This is the mobile counterpart of the web `qa/java/skills/page-objects-from-url`
 
 ## Prerequisites
 
-The **Appium MCP server** must be connected. If its tools (`mcp__appium-mcp__appium_session_management`, `mcp__appium-mcp__appium_get_page_source`, …) are not available, stop and tell the user to add it:
+The **Appium MCP server** must be connected. If its tools (`mcp__appium-mcp__appium_session_management`, `mcp__appium-mcp__appium_get_page_source`, …) are not available, stop and tell the user to register it:
 
 ```
-claude mcp add appium-mcp -- npx -y appium-mcp@latest
+claude mcp add --scope user appium-mcp -e SCREENSHOTS_DIR=docs/app-map/screenshots -e APPIUM_MCP_DOCS_ENABLED=true -- npx -y appium-mcp@latest
 ```
 
-- A running **Appium 2.x** server at the default `http://127.0.0.1:4723`, and a device/emulator connected (`adb devices` for Android; a booted simulator / UDID for iOS). Quick health check: `curl -s http://127.0.0.1:4723/status` succeeds and the server's `Available drivers:` log line lists your driver (`uiautomator2` / `xcuitest`).
-- `appium_ai` (vision-based natural-language element finding) only works when the server is launched with `AI_VISION_ENABLED=true` — treat it as optional.
+- `appium-mcp` **embeds the UiAutomator2 and XCUITest drivers**, so a local Android or iOS session needs no separate Appium server. A server on `http://127.0.0.1:4723` is needed only for a `remoteServerUrl` session (a device farm or a shared Appium). A device must still be connected: `adb devices` for Android, a booted simulator or a UDID for iOS.
+- `SCREENSHOTS_DIR` decides where `appium_screenshot` writes. Without it the server writes to `os.tmpdir()`, so set it to `docs/app-map/screenshots` for the crawler.
+- `appium_ai` (vision-based element finding) is opt-in and needs three variables: `AI_VISION_ENABLED=true`, `AI_VISION_API_BASE_URL` and `AI_VISION_API_KEY`. Treat it as optional.
+- `appium_documentation_query` and `appium_skills` exist only when `APPIUM_MCP_DOCS_ENABLED=true`. They answer environment, doctor and driver-specific locator questions from the official Appium docs; prefer them over guessing or forums.
 - Never start a session blindly — see Session lifecycle.
-
-**Optional companion server — `@appium/mcp-documentation`.** When environment setup or a driver-specific question comes up, the Appium team's docs server answers it authoritatively (`claude mcp add appium-mcp-documentation -- npx -y @appium/mcp-documentation`). Its tools: `appium_skills` (ordered setup/troubleshoot SKILLs by `platform`/`driver`/`mode`) and `appium_documentation_query` (RAG over the official Appium + driver docs). Prefer it over guessing or community forums for setup, doctor failures, and locator-strategy questions.
 
 ## Tool reference
 
@@ -91,12 +91,17 @@ Confirm before exploring. **Ask, don't guess:**
 
 ### 4. Locator ladder (the contract)
 
-For every element choose the highest available rung and record the **Java** call. Tie every locator to an attribute you can **see in the current source** — never to a guessed one.
+For every element choose the highest available rung **for its platform** and record the **Java** call. Tie every locator to an attribute you can **see in the current source** — never to a guessed one. A React Native `testID` is the iOS `accessibilityIdentifier` (the element's `name`) and the Android `resource-id`; `content-desc` is the `accessibilityLabel`, which is screen-reader text and never a test id.
 
-1. `AppiumBy.accessibilityId("…")` on iOS (`name` = RN `testID`), `By.id("…")` / `UiSelector().resourceId("…")` on Android (bare `resource-id` = RN `testID`) — **the default**. Use it whenever present, even if a nicer id exists. *(On iOS, `id` / `name` / `accessibility id` are synonyms over the element's `name` attribute — confirm it's stable in this app's source before relying on it.)*
-2. `AppiumBy.accessibilityId("…")` — Android `content-desc` (the `accessibilityLabel`) only when there's no `resource-id`
-3. Native query when neither above is stable: `AppiumBy.androidUIAutomator("…")` (Android — useful when ids/accessibility metadata are missing; keep it narrow and log-readable) · `AppiumBy.iOSNsPredicateString("…")` or `AppiumBy.iOSClassChain("…")` (iOS — for native filtering / hierarchy scoping)
-4. `By.xpath("…")` — **last resort**, always paired with a `// TODO: missing accessibility id '<suggested>' — see missing-testids.md`. Treat a working XPath as **proof the node exists, not the final fix**: use it to learn the tree, then downgrade to a stronger native locator the moment the source exposes one.
+| Rung | iOS | Android |
+|---|---|---|
+| 1 — the test id (default) | `AppiumBy.accessibilityId("Login.Submit")` — `name`, which `id` and `accessibility id` also read | `AppiumBy.id("Login.Submit")` — the bare `resource-id` |
+| 2 — a native query | `AppiumBy.iOSNsPredicateString("…")` for an element's own attributes; `AppiumBy.iOSClassChain("…")` when it needs parent or descendant context | `AppiumBy.androidUIAutomator("…")` — secondary: Google is deprecating `UiSelector`, so keep it narrow and log-readable |
+| 3 — XPath | last resort; slow on iOS because the driver builds the whole XML first | last resort |
+
+- Android prefixes an `id` lookup with `<package>:id/`. A React Native or Compose test id has no prefix, so the session needs the capability `appium:settings[disableIdLocatorAutocompletion]` set to `true`; check the live source for which case this app is. A Views app whose ids carry the package leaves it off.
+- `AppiumBy.accessibilityId` on Android reads `content-desc`. Use it only where the source shows a stable `content-desc` and no `resource-id`.
+- Treat a working XPath as **proof the node exists, not the final fix**: learn the tree with it, then downgrade to a stronger rung the moment the source exposes one.
 
 ### 5. Report missing accessibility ids
 
@@ -107,12 +112,12 @@ Write/update `missing-testids.md` at the **test project root** — one file, one
 
 | Element | Type | Visible text / label | Suggested testID | Fallback locator in use |
 |---------|------|----------------------|------------------|-------------------------|
-| Email field   | EditText | (hint "Email")  | `login-email`  | `By.id("com.app:id/email")` |
-| Password reveal | Button | (eye icon, no text) | `login-password-reveal` | `By.xpath("//*[@class='…ImageButton'][2]")` ⚠ brittle |
+| Email field   | EditText | (hint "Email")  | `Login.Email`  | `AppiumBy.id("com.app:id/email")` |
+| Password reveal | Button | (eye icon, no text) | `Login.PasswordReveal` | `AppiumBy.xpath("//*[@class='…ImageButton'][2]")` ⚠ brittle |
 ```
 
-- Suggested ids follow `<screen>-<element>` kebab-case (match the project's existing convention if one exists).
-- Elements whose only handle is XPath get a ⚠ — those are the ones to escalate to the RN devs as `testID=` props.
+- Suggested ids are PascalCase and dot-separated, `<Screen>.<Element>` (`Login.Email`), and static: no index, no data (match the project's existing convention if one exists).
+- Elements whose only handle is XPath get a ⚠ — those are the ones to escalate to the app developers as `testID` props (React Native), `accessibilityIdentifier` (iOS) or `testTag` (Compose). This file is the contract: the code carries no marker.
 
 ### 6. Reveal dynamic state (only if in scope)
 
@@ -137,7 +142,7 @@ When reporting a screen:
 | Symptom | Likely cause | Action |
 |---------|--------------|--------|
 | `No active session` | Session not started or timed out | Attach via `appium_session_management`; only create one if none exists |
-| `Connection refused` / `curl /status` fails | Appium server not running | Tell the user to start `appium server` on `127.0.0.1:4723`; confirm the driver is in `Available drivers:` |
+| `Connection refused` / `curl /status` fails (remote session) | Appium server not running | Only for a `remoteServerUrl` session: start `appium` on `127.0.0.1:4723` and confirm the driver is in `Available drivers:`; the embedded drivers need no server |
 | Visible element absent from page source | Accessibility / app-state / active-app / context issue — **not** a locator problem | Don't write an XPath. Check for a system alert/overlay (`appium_alert`), wait out a transition, or switch context (hybrid); re-read source |
 | Element only in WebView, not native source | Wrong context | `appium_context` → switch to `WEBVIEW_*`, re-read source, then locate |
 | Lookup works intermittently / is slow on iOS | Snapshot/tree depth or active-window problem | Confirm the element's attributes in a same-state source dump; consult `appium_documentation_query` (XCUITest element-lookup guide) before tweaking selectors |
@@ -146,9 +151,9 @@ When reporting a screen:
 
 ## Rules
 
-- **Accessibility id is the primary locator** for every element that has one — no exceptions, even when a pretty `resource-id` exists. One grep-able convention, immune to i18n and layout churn.
+- **The test id is the primary locator** for every element that has one, on the rung its platform reads (iOS `accessibilityId`, Android `id`). One grep-able convention, immune to i18n and layout churn.
 - **Never invent an id that isn't in the tree.** The report *suggests* names; only locate by what the live app exposes today.
-- **Every fallback locator carries the `// TODO` marker** — that marker is the contract that it gets upgraded once the devs add the `testID`.
+- **`missing-testids.md` is the contract for every fallback locator** — each row names the screen, the element and the fallback in use. The code carries no marker.
 - **Re-read the page source after every interaction or navigation** — the tree goes stale.
 - **Ask, don't guess** — unidentified screen, ambiguous element purpose, missing UDID/credentials, unexpected state: stop and ask.
 - **Attach, don't restart** — preserve live app state; detach on close, never reinstall under `noReset`.
@@ -158,7 +163,7 @@ When reporting a screen:
 ## Anti-patterns
 
 - Starting a fresh session when one is already live (wipes the user's state)
-- Emitting `By.xpath`/`resource-id` locators for elements that *have* a `content-desc` — violates the accessibility-id contract
+- Emitting `AppiumBy.xpath` locators for elements that expose a test id or a stable `content-desc` — violates the ladder
 - Dumping every XML node into the report — capture interactables and assertion targets, not layout wrappers
 - Guessing what an icon button does from its class name instead of `appium_ai` / asking
 - Extracting from a stale page source after a tap (refresh first)
@@ -171,8 +176,8 @@ When reporting a screen:
 - Write / tag the TestNG tests → `qa/java/skills/ui-test-author/appium`
 - Screen-object architecture (base classes, sub-packages) → `qa/java/skills/page-object-design`
 - OS-surface features (permissions, push, deep links, biometrics) → `qa/java/skills/mobile-native-features`
-- Formal test cases the tests are written from → `qa/manual/test-case-writer`
-- Appium environment setup / doctor failures / driver-specific questions → the `@appium/mcp-documentation` server (`appium_skills`, `appium_documentation_query`)
+- Formal test cases the tests are written from → the `qa-test-case-designer` agent
+- Appium environment setup / doctor failures / driver-specific questions → `mcp__appium-mcp__appium_skills`, `mcp__appium-mcp__appium_documentation_query`
 
 ## Reference
 
@@ -181,4 +186,4 @@ Authoritative locator guidance distilled into the ladder and troubleshooting abo
 - UiAutomator2 element location & locators — `https://github.com/appium/appium-uiautomator2-driver#element-location`
 - XCUITest locator strategies — `https://appium.github.io/appium-xcuitest-driver/latest/reference/locator-strategies/`
 - XCUITest element-lookup troubleshooting — `https://appium.github.io/appium-xcuitest-driver/latest/guides/elements-lookup-troubleshooting/`
-- Appium skills repo (`appium/skills`) — environment setup + troubleshooting SKILLs, served by `@appium/mcp-documentation`
+- Appium skills repo (`appium/skills`) — environment setup + troubleshooting SKILLs, served by the docs tools

@@ -59,7 +59,7 @@ Report the four bucket counts before proposing any work, and tick the **Handoff 
 
 ## Prerequisites
 
-Same as `mobile-screen-explorer` — the **Appium MCP server** connected, an Appium 2.x server on `http://127.0.0.1:4723`, and a device/emulator with the app running. Load `qa/java/skills/mobile-screen-explorer/SKILL.md` before starting: its tool table, session lifecycle, locator ladder, and `missing-testids.md` format are the ones this skill applies per screen.
+Same as `mobile-screen-explorer` — the **Appium MCP server** connected (it embeds the UiAutomator2 and XCUITest drivers, so a local Android or iOS session needs no separate Appium server; one is needed only for a `remoteServerUrl` session), `SCREENSHOTS_DIR=docs/app-map/screenshots` set in the server's registration so the crawl's screenshots land in the repo instead of `os.tmpdir()`, and a device/emulator with the app running. Load `qa/java/skills/mobile-screen-explorer/SKILL.md` before starting: its tool table, session lifecycle, locator ladder, and `missing-testids.md` format are the ones this skill applies per screen.
 
 **PROCESS mode needs none of this** — it reads the existing map and the page objects on disk, so no device, session, or MCP server is required unless a screen must be re-verified.
 
@@ -112,12 +112,12 @@ Stop at the **first** of: frontier empty · max screens reached · max depth rea
 
 ### 5. Detect components (the payoff)
 
-Across all captured screens, group elements by **accessibility id** (fall back to resource-id; never group by visible text — text is data, not identity):
+Across all captured screens, group elements by their **stable id** (iOS accessibility id; Android `resource-id`, else `content-desc`; never group by visible text — text is data, not identity):
 
 | Signal | Reading | Becomes |
 |---|---|---|
 | Same id on **≥2** screens, same position band | Shared chrome | **Component** candidate (nav bar, tab bar, header, toast, search bar) |
-| A repeating sibling group **within** one screen | List/grid row | **Component** scoped to a parent `WebElement` |
+| A repeating sibling group **within** one screen | List/grid row | **Component** scoped to a lazy parent locator plus a row key |
 | Same id on **every** screen | App-wide chrome | Component + a candidate member of the base screen class |
 | Ids appearing once | Screen-specific | Stays on its screen object |
 
@@ -187,7 +187,7 @@ A crawl **will** be interrupted (session drop, device sleep, a screen needing ma
 - One page-object class per mapped screen → `qa/java/skills/mobile-screen-objects`
 - Tests against those screen objects → `qa/java/skills/ui-test-author/appium`
 - Screens gated behind permissions, push, deep links, biometrics → `qa/java/skills/mobile-native-features`
-- Turning the map into formal test cases → `qa/manual/test-case-writer`
+- Turning the map into formal test cases → the `qa-test-case-designer` agent
 - Appium environment setup / doctor failures / driver questions → the `@appium/mcp-documentation` server (`appium_skills`, `appium_documentation_query`)
 - .NET / TypeScript siblings → `qa/dotnet/skills/mobile-app-crawler` / `qa/typescript/skills/mobile-app-crawler`
 
@@ -195,5 +195,3 @@ A crawl **will** be interrupted (session drop, device sleep, a screen needing ma
 
 - `references/crawl-policy.md` — screen signatures, the safe-action denylist, bounds and defaults, resumption mechanics
 - `assets/screen-map-template.md` — the `screen-map.md` artifact template
-</content>
-</invoke>

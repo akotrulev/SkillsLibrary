@@ -24,7 +24,7 @@ signature = hash(
 | Android | current activity name (from the session's `currentActivity`) | Single-Activity apps (most React Native / Compose apps) return the same value for every screen — the anchor is then near-useless and the id set carries the whole signature. That is expected, not a failure |
 | iOS | the navigation bar's `name`, else the root window's first `XCUIElementTypeNavigationBar` / `XCUIElementTypeOther` accessibility id | Fall back to the id set alone when no nav bar exists (modals, full-screen media) |
 
-**`stableIds`** — per node, the first available of: accessibility id (`content-desc` / `name`) → `resource-id`. Nodes with neither contribute nothing.
+**`stableIds`** — per node, the first available of: iOS `name` (the accessibility id); Android `resource-id`, else `content-desc`. Nodes with none contribute nothing.
 
 ### What is deliberately excluded
 
@@ -105,7 +105,7 @@ Every bound is user-overridable at the start and **recorded in the map header**.
 
 ### Stop conditions, in precedence order
 
-1. Session lost or app crashed → stop, report the last-known screen and the crash (a crash **is** a finding: file it via `qa/manual/bug-report-writer`)
+1. Session lost or app crashed → stop, report the last-known screen and the crash (a crash **is** a finding: hand it to the `qa-test-case-designer` agent, which owns bug reports)
 2. Time box elapsed
 3. `maxScreens` reached
 4. Frontier empty (**the only clean completion**)
@@ -133,4 +133,3 @@ The map file **is** the saved state — there is no separate cursor.
 **Never** restart or reinstall the app to reach a known state — under `noReset` that discards exactly the state the map documents.
 
 **Build changed since the last run?** The map is stale evidence. Say so in the report, re-verify each signature as screens are revisited, and flag every screen whose ids moved — a shifted accessibility id is a breaking rename for any page object already built against it.
-</content>

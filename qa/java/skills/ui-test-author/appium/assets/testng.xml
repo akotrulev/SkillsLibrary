@@ -1,0 +1,8 @@
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<suite name="Mobile" parallel="classes" thread-count="1">
+    <test name="Appium">
+        <packages>
+            <package name="com.example.mobiletests.tests"/>
+        </packages>
+    </test>
+</suite>

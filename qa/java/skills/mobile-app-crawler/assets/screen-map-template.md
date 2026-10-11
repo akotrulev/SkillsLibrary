@@ -35,17 +35,17 @@
 | # | Screen | Signature | Status | Depth | Path from start | Elements (a11y-id / fallback / ⚠ XPath) | Detail |
 |---|---|---|---|---|---|---|---|
 | 1 | LoginScreen | `a1b2c3d4` | captured | 0 | *(start)* | 3 / 0 / 0 | [screens/LoginScreen.md](screens/LoginScreen.md) |
-| 2 | HomeScreen | `e5f6g7h8` | captured | 1 | Login → `login-submit` | 8 / 2 / 1 | [screens/HomeScreen.md](screens/HomeScreen.md) |
-| 3 | OrderDetailScreen | `i9j0k1l2` | captured | 2 | Home → `order-list-row` (1 of 24) | 6 / 1 / 0 | [screens/OrderDetailScreen.md](screens/OrderDetailScreen.md) |
-| 4 | SettingsScreen | `m3n4o5p6` | frontier | 2 | Home → `tab-settings` | — | — |
-| 5 | AccountClosureScreen | — | blocked | 3 | Settings → `settings-close-account` | — | denylist: destruction |
+| 2 | HomeScreen | `e5f6g7h8` | captured | 1 | Login → `Login.Submit` | 8 / 2 / 1 | [screens/HomeScreen.md](screens/HomeScreen.md) |
+| 3 | OrderDetailScreen | `i9j0k1l2` | captured | 2 | Home → `OrderRow` (1 of 24) | 6 / 1 / 0 | [screens/OrderDetailScreen.md](screens/OrderDetailScreen.md) |
+| 4 | SettingsScreen | `m3n4o5p6` | frontier | 2 | Home → `Tabs.Settings` | — | — |
+| 5 | AccountClosureScreen | — | blocked | 3 | Settings → `Settings.CloseAccount` | — | denylist: destruction |
 
 **Variants** (same screen, different state — one page object, not two)
 
 | Parent screen | Variant | Signature | Differs by |
 |---|---|---|---|
-| LoginScreen | `[validation-error]` | `a1b2c3d9` | + `login-error-banner` |
-| HomeScreen | `[empty-state]` | `e5f6g7h1` | − `order-list`, + `home-empty-cta` |
+| LoginScreen | `[validation-error]` | `a1b2c3d9` | + `Login.ErrorBanner` |
+| HomeScreen | `[empty-state]` | `e5f6g7h1` | − `Orders.List`, + `Home.EmptyCta` |
 
 ---
 
@@ -53,10 +53,10 @@
 
 ```mermaid
 graph TD
-  LoginScreen -->|login-submit| HomeScreen
-  HomeScreen -->|order-list-row| OrderDetailScreen
-  HomeScreen -->|tab-settings| SettingsScreen
-  OrderDetailScreen -->|nav-back| HomeScreen
+  LoginScreen -->|Login.Submit| HomeScreen
+  HomeScreen -->|OrderRow| OrderDetailScreen
+  HomeScreen -->|Tabs.Settings| SettingsScreen
+  OrderDetailScreen -->|Nav.Back| HomeScreen
   SettingsScreen -.->|settings-close-account BLOCKED| AccountClosureScreen
 ```
 
@@ -66,16 +66,16 @@ graph TD
 
 ## Component candidates
 
-Grouped by accessibility id across captured screens — the evidence `page-object-design` uses for its page-vs-component-vs-flow call. **Never grouped by visible text.**
+Grouped by stable id across captured screens — the evidence `page-object-design` uses for its page-vs-component-vs-flow call. **Never grouped by visible text.**
 
 | Candidate | Accessibility id(s) | Screens | Count | Reading |
 |---|---|---|---|---|
-| BottomTabBar | `tab-home`, `tab-orders`, `tab-settings` | Home, OrderDetail, Settings | 3 of 4 | App-wide chrome → component **and** a base-screen-class candidate |
-| ToastBanner | `app-toast` | Login, Home, OrderDetail | 3 of 4 | Shared chrome → component |
-| OrderRow | `order-list-row` (repeating siblings) | Home | 1 (×24) | In-screen repeater → component scoped to a parent element |
-| NavHeaderBack | `nav-back` | OrderDetail, Settings | 2 of 4 | Shared chrome → component |
+| BottomTabBar | `Tabs.Home`, `Tabs.Orders`, `Tabs.Settings` | Home, OrderDetail, Settings | 3 of 4 | App-wide chrome → component **and** a base-screen-class candidate |
+| ToastBanner | `App.Toast` | Login, Home, OrderDetail | 3 of 4 | Shared chrome → component |
+| OrderRow | `OrderRow` (repeating siblings) | Home | 1 (×24) | In-screen repeater → component scoped to a lazy parent locator plus a row key |
+| NavHeaderBack | `Nav.Back` | OrderDetail, Settings | 2 of 4 | Shared chrome → component |
 
-**Screen-specific** (appear once — stay on their own screen object): `login-email`, `login-password`, `login-submit`, `order-total`, …
+**Screen-specific** (appear once — stay on their own screen object): `Login.Email`, `Login.Password`, `Login.Submit`, `Order.Total`, …
 
 **⚠ Weak-signature screens** — {{none}}
 <!-- Screens with no stable ids, identified provisionally. A testability gap, not just a crawl inconvenience. -->
@@ -101,4 +101,3 @@ What a human or a purpose-built fixture must reach — the crawl could not, and 
 - [ ] `mobile-screen-objects` — one class per captured screen
 - [ ] `ui-test-author/appium` — tests authored
 - [ ] `missing-testids.md` — {{n}} elements escalated to the app devs
-</content>
