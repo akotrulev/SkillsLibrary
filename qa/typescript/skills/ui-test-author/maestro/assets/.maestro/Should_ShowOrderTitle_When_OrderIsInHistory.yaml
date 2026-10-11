@@ -1,0 +1,22 @@
+appId: com.example.shop
+tags:
+  - smoke
+  - orders
+env:
+  ORDER_TITLE: ${ORDER_TITLE || "Starter kit"}
+---
+- launchApp:
+    clearState: true
+- runFlow:
+    file: subflows/SignIn.yaml
+    env:
+      E2E_USER: ${E2E_USER}
+      E2E_PASSWORD: ${E2E_PASSWORD}
+- scrollUntilVisible:
+    element:
+      id: OrderRow.Title
+      text: ${ORDER_TITLE}
+- assertVisible:
+    id: OrderRow.Title
+    text: ${ORDER_TITLE}
+- takeScreenshot: orders/OrderHistory

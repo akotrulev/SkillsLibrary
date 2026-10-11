@@ -89,7 +89,7 @@ recording only on failure on allure-java 3.0, an `AppiumDriverFactory`, a scoped
 gestures, WebView contexts and app state without `resetApp`; `NativeFeatures` on `mobile:` commands in
 `support.nativefeatures`; the farm with a presigned `PUT` that throws (D85) and a mobile Cucumber hook (D86);
 Appium reference in `evidence-capture`; and the screen, crawler, review, `browser-cloud-setup` and glue files
-cleaned. M3 landed 2026-10-11: the .NET mobile lane on Appium.WebDriver 9 / Appium 3 / NUnit 4.6.1 — `qa-mobile-dotnet` on §5.3's 28 tools with the appium-mcp prerequisites and the evidence skill at Step 1; `ui-test-author/appium` with thirteen assets (CPM props, a versionless csproj, `mobile.runsettings`, `Env`, `AppiumDriverFactory`, a `BaseMobileTest` whose `[TearDown]` keeps a screenshot, page source, device log and a recording only on failure with no catch (D88), `BaseAppiumPage`, `LoginPage`, `OrdersPage`, a scoped `OrderRow`, `OrdersTests`, `GestureExtensions` and a compiling `page_template.cs`) on `MobileBy` (D87) and the per-platform test-id ladder with the id-prefix setting; `mobile-native-features` on `mobile:` commands; `mobile-project-setup` on one `PLATFORM` mechanism; `device-cloud` without a Device Farm run (D89); the screen, crawler and review files cleaned; checklist rows C4, D12, E14 and K6 reworded and E18 and L15 added (D90); and `evidence-capture/references/appium.md`. S1 landed 2026-10-11: `qa/java/skills/mobile-project-setup` (`qa-mobile-project-setup-java`) and `qa/typescript/skills/mobile-project-setup` (`qa-mobile-project-setup-typescript`), each on Appium 3.8.0 with drivers 8.x / 12.x, one `PLATFORM` mechanism, a layout around its `ui-test-author/appium` assets and a `SmokeTest` / `smoke.spec.ts` first run, and a Step 0 row in `qa-mobile-java` and `qa-mobile-typescript`, in the marketplace and the catalog. Next: X1. Built but unverified (S1): nothing compiled or ran — the three TS edits the folders need (specs glob, `../../` imports, tsconfig `include`), the Java smoke class and the `npx appium driver install` / `allowInsecure` service-arg spellings are G1's. Built but unverified (M3): nothing compiled or ran — the .NET Appium assets (`MobileBy`, `StartRecordingScreen` options, `WebDriverWait` from `Selenium.Support` 4.51.0, `AppiumElement.Rect`, `Manage().Logs.GetLog`) are G1's. Built but unverified (M2): nothing compiled or ran — the Java Appium assets (an `AppiumDriver`
+cleaned. M3 landed 2026-10-11: the .NET mobile lane on Appium.WebDriver 9 / Appium 3 / NUnit 4.6.1 — `qa-mobile-dotnet` on §5.3's 28 tools with the appium-mcp prerequisites and the evidence skill at Step 1; `ui-test-author/appium` with thirteen assets (CPM props, a versionless csproj, `mobile.runsettings`, `Env`, `AppiumDriverFactory`, a `BaseMobileTest` whose `[TearDown]` keeps a screenshot, page source, device log and a recording only on failure with no catch (D88), `BaseAppiumPage`, `LoginPage`, `OrdersPage`, a scoped `OrderRow`, `OrdersTests`, `GestureExtensions` and a compiling `page_template.cs`) on `MobileBy` (D87) and the per-platform test-id ladder with the id-prefix setting; `mobile-native-features` on `mobile:` commands; `mobile-project-setup` on one `PLATFORM` mechanism; `device-cloud` without a Device Farm run (D89); the screen, crawler and review files cleaned; checklist rows C4, D12, E14 and K6 reworded and E18 and L15 added (D90); and `evidence-capture/references/appium.md`. S1 landed 2026-10-11: `qa/java/skills/mobile-project-setup` (`qa-mobile-project-setup-java`) and `qa/typescript/skills/mobile-project-setup` (`qa-mobile-project-setup-typescript`), each on Appium 3.8.0 with drivers 8.x / 12.x, one `PLATFORM` mechanism, a layout around its `ui-test-author/appium` assets and a `SmokeTest` / `smoke.spec.ts` first run, and a Step 0 row in `qa-mobile-java` and `qa-mobile-typescript`, in the marketplace and the catalog. X1 landed 2026-10-11: `docs/research/003-qa-playwright-appium/maestro.md` (CLI 2.11.0, every fact sourced), `ui-test-author/maestro` (`qa-ui-test-writer-maestro-typescript`, a `.maestro/` sample of one flow, one subflow and `config.yaml`), `qa-mobile-typescript` offering it at Step 2 with the five granted `mcp__maestro__*` tools (D91), six Maestro rows in the TS review skill, the `evidence-capture` route line, the marketplace entry and a catalog row. Next: G1. Built but unverified (X1): no Maestro flow ran and no `maestro` CLI was installed — the sample flows' YAML, the GitHub Actions emulator job (assembled from two documented pieces, never run), `maestro check-syntax` and the EAS `maestro` job's `flow_path`/`needs` shape are G1's or the user's. Built but unverified (S1): nothing compiled or ran — the three TS edits the folders need (specs glob, `../../` imports, tsconfig `include`), the Java smoke class and the `npx appium driver install` / `allowInsecure` service-arg spellings are G1's. Built but unverified (M3): nothing compiled or ran — the .NET Appium assets (`MobileBy`, `StartRecordingScreen` options, `WebDriverWait` from `Selenium.Support` 4.51.0, `AppiumElement.Rect`, `Manage().Logs.GetLog`) are G1's. Built but unverified (M2): nothing compiled or ran — the Java Appium assets (an `AppiumDriver`
 `switch` on `AndroidDriver` / `IOSDriver`, `UiAutomator2Options.amend`, `Allure.attachment` with a stream,
 `AndroidStartScreenRecordingOptions` / `IOSStartScreenRecordingOptions` spellings) are G1's. Built but unverified: no asset, workflow or pipeline has been
 compiled or run (G1 does that; D24's TS config import, the Java build on Allure Gradle plugin 4.3.0, the .NET
@@ -134,7 +134,7 @@ Planned 2026-10-10. The research behind it is committed with this plan:
 - A Maestro lane is added (X1).
 - The newest Appium client majors are primary.
 
-Next: X1 (H1, the user's, blocks no task). The cost is 19 agent sessions on the subscription, each started by the user
+Next: G1 (H1, the user's, blocks no task). The cost is 19 agent sessions on the subscription, each started by the user
 from Plan Queue. Nothing else is metered.
 
 ## 1. What already exists, and what is missing
@@ -409,6 +409,7 @@ Left out:
 ### 5.4 Server registration (H1)
 
 ```bash
+claude mcp add --scope user maestro -- maestro mcp
 claude mcp remove playwright
 claude mcp add --scope user playwright -- npx @playwright/mcp@latest --caps=testing,storage,devtools --isolated --output-dir=.playwright-mcp
 claude mcp add --scope user appium-mcp -e SCREENSHOTS_DIR=docs/app-map/screenshots -e APPIUM_MCP_DOCS_ENABLED=true -- npx -y appium-mcp@latest
@@ -421,6 +422,19 @@ Optional: `playwright-cli install --skills -g` installs Microsoft's own `playwri
 Agents in a plugin cannot set caps on themselves, because plugin subagents ignore an `mcpServers`
 frontmatter field (`playwright-agent-tooling.md` §8a). So each `qa-ui-*` and `qa-mobile-*` agent states
 the registration it expects.
+
+### 5.5 Maestro MCP allowlist (`qa-mobile-typescript`)
+
+Source: `maestro.md` §9 (the official docs page `get-started/maestro-mcp`). Registered with
+`claude mcp add maestro -- maestro mcp`, so every name is `mcp__maestro__<tool>`:
+
+```
+mcp__maestro__list_devices, mcp__maestro__inspect_screen, mcp__maestro__take_screenshot,
+mcp__maestro__run, mcp__maestro__cheat_sheet
+```
+
+Left out: `list_cloud_devices`, `run_on_cloud` and `get_cloud_run_status` (they need `maestro login` and spend a
+cloud run), `open_maestro_viewer`, and `describe_cloud_run` (changelog 2.7.0 only; not on the docs page).
 
 ## 6. The gate (G1 only)
 
@@ -457,7 +471,7 @@ Run these from the repo root, in this order, and fix what fails. A failure may b
 
    Then add three more checks:
    - **Allowlists.** Every `mcp__playwright__<name>` under `qa/` must be in §5.2, and every
-     `mcp__appium-mcp__<name>` must be in §5.3.
+     `mcp__appium-mcp__<name>` must be in §5.3, and every `mcp__maestro__<name>` must be in §5.5.
    - **`test.each`.** A `CODE_CHECKS` entry for `\btest\.each\b`, applied to `qa/typescript/` only.
    - **allure-java 2 API.** A `CODE_CHECKS` entry for `\bAllure\.addAttachment\(`, applied to
      `qa/java/` and `qa/reporting/java/` only (D12).
@@ -498,7 +512,7 @@ Run these from the repo root, in this order, and fix what fails. A failure may b
 | TS Appium | `npm i -D webdriverio@10.0.2 @wdio/globals @wdio/types @wdio/mocha-framework typescript`. Copy `qa/typescript/skills/ui-test-author/appium/assets/*`. `npx tsc --noEmit` → 0 errors |
 | Java Appium | A Gradle project with `io.appium:java-client:11.0.0`, `selenium-support` ≥ 4.50, TestNG and allure-testng 3.0.0, plus `qa/java/skills/ui-test-author/appium/assets/*`. `gradle compileTestJava` succeeds |
 | .NET Appium | `dotnet new nunit` + `Appium.WebDriver` 9.0.0 + `qa/dotnet/skills/ui-test-author/appium/assets/*.cs`. `dotnet build` → 0 errors |
-| Maestro | Every `.yaml` under `qa/typescript/skills/ui-test-author/maestro/assets/` parses as YAML (multi-document aware). If the `maestro` CLI is installed, also run the syntax or dry-run check that X1's research names. No device run |
+| Maestro | Every `.yaml` under `qa/typescript/skills/ui-test-author/maestro/assets/` parses as YAML (multi-document aware). If the `maestro` CLI is installed (`maestro --help` lists `check-syntax`), run `maestro check-syntax <file>` on each flow and subflow; each prints `OK` (`maestro.md` §10). There is no dry-run flag. No device run |
 
 ### 6.4 Evidence smoke (Playwright, all three stacks)
 
@@ -1314,6 +1328,23 @@ and `--filter "Platform=…"` (`aM` L15). The checklist's mobile rows C4, D12, E
 APIs, `AppiumBy`) and L15 (evidence on failure) are new, both **[Appium]**, and the scope table lists every tagged row
 (`mobile` keeps them; `api` and `ui` skip them). **Cost:** tests in one fixture share app state; one fixture never runs on
 two devices at once.
+
+**D91 — `qa-mobile-typescript` gets five Maestro MCP tools, and the cloud tools stay out (X1, 2026-10-11).** The plan
+said to grant a Maestro MCP server only if one exists. Reading A (grant nothing, the plan's default for an
+unverified server): the agent discovers ids with `maestro hierarchy` from `Bash`. Reading B (built): Maestro's own
+docs page documents an MCP server inside the CLI, `maestro mcp`, with nine tools (`maestro.md` §9), so the agent
+gets `mcp__maestro__list_devices`, `inspect_screen`, `take_screenshot`, `run` and `cheat_sheet` (§5.5), registered
+with `claude mcp add maestro -- maestro mcp` (§5.4). The three cloud tools need a login and spend a cloud run;
+`open_maestro_viewer` and the changelog-only `describe_cloud_run` add nothing to authoring. **Cost:** `run`
+executes a flow on a connected device, which an agent already does through `Bash`; and the parameter lists of the
+four tools other than `run` are not on the docs page (UNVERIFIED), so the skill names none.
+
+**D92 — X1 cut other text to fit the 650-char description and the 16,000-char review skill (X1, 2026-10-11).**
+Reading A (the plan): add Maestro beside the existing wording. Reading B (built): the agent description dropped
+"Appium 2 with WebdriverIO 9 supported" (647 of 650; the Appium skill still carries that lane), and the TS review skill, already at
+16,023, lost five low-value rows (a lint nit, two nits, a second-assertion-library minor, a duplicated test-name
+minor) and some prose to make room for a six-row Maestro table (15,876 after). **Cost:** a reviewer no longer sees
+those five rows.
 
 ## Answered questions (2026-10-10)
 
@@ -3058,6 +3089,15 @@ research is allowed and expected.
 - Add the skill to `qa-typescript` in the marketplace, and a catalog row.
 - **Not in X1:** Java/.NET (Maestro is a TS-plugin lane); plan 002's React Native dev skills.
 
+**As built (2026-10-11):**
+- Research: `docs/research/003-qa-playwright-appium/maestro.md`, every fact with a URL (docs.maestro.dev, the Maestro repo's releases, `CHANGELOG.md` and `CheckSyntaxCommand.kt`, Expo's pre-packaged-jobs page and e2e example), and an UNVERIFIED list in §11.
+- Skill: `qa/typescript/skills/ui-test-author/maestro/SKILL.md` (15,984 chars, description 482), name `qa-ui-test-writer-maestro-typescript`; `assets/.maestro/{config.yaml, Should_ShowOrderTitle_When_OrderIsInHistory.yaml, subflows/SignIn.yaml}`, valid-looking YAML with no comments, never parsed (no YAML library was at hand).
+- Selectors: `id:` is the Android resource-id and the iOS `accessibilityIdentifier` (core-selectors page), and Maestro's React Native page says `testID` maps to `id`. With M1's D80 (an RN `testID` is the bare resource-id) one `id: Login.Submit` serves both platforms. `id` and `text` are regexes; a PascalCase dot id still matches itself. Repeating rows are picked by `id` plus `text`, not by `index`. Whether `id` also matches a package-prefixed resource-id is UNVERIFIED and not needed.
+- Not taught because UNVERIFIED: a subflow inheriting the caller's variables (flows pass `env` explicitly), a sleep command, an `appId` in `config.yaml`, `childOf` row scoping. The GitHub Actions emulator job is taught with a plain "joins two documented pieces, never run" line; Maestro documents only Maestro Cloud for Actions.
+- Wiring: `qa/typescript/agents/qa-mobile-typescript.md` (description 647 of 650; five `mcp__maestro__*` tools, D91; a Maestro paragraph beside the Appium MCP note; Step 2 offers the Maestro skill instead of Appium, with a `maestro test .maestro` exit gate; Step 4 names the Maestro rows). `ui-test-author/review/SKILL.md` has a "Maestro smells" table (fixed waits, reset between flows, text over id, duplicated steps, subflows in discovery, untagged flows). `evidence-capture/SKILL.md` has the route line. `.claude-plugin/marketplace.json` lists the skill under `qa-typescript`; `docs/skills-catalog.md` has the row after `ui-test-author/playwright`.
+- **The syntax-check command G1 §6.3 uses:** `maestro check-syntax <flow file>`, prints `OK` (`-` reads stdin). It exists in the changelog (1.40.0, 2.2.0) and the source but **not** in the docs' CLI reference; `maestro --help` confirms it. There is no dry-run flag on `maestro test`.
+- Built but unverified: no Maestro flow ran and the CLI was not installed. The sample YAML, the EAS `maestro` job's `needs`/`flow_path` shape and the emulator job are untested; the 2.11.0 release year is UNVERIFIED (the page shows "29 Sep" only).
+
 ### G1 — The gate, the docs reconciliation, and the close-out
 
 **Stack:** `docs` · **Agent:** `general-purpose`
@@ -3153,77 +3193,9 @@ Run them in order, one session each, opened from Plan Queue. Each block is compl
 | X1 | `docs` | `general-purpose` | M1, S1, T2 | ~130k |
 | G1 | `docs` | `general-purpose` | all | ~145k |
 
-Landed: T1, J1, N1, T2, J2, N2, A1, T3 (2026-10-10), J3, N3, T4, J4, N4, M1, M2, M3, S1 (2026-10-11). Every other block is live.
+Landed: T1, J1, N1, T2, J2, N2, A1, T3 (2026-10-10), J3, N3, T4, J4, N4, M1, M2, M3, S1, X1 (2026-10-11). Every other block is live.
 
 ---
-
-### X1 — A Maestro lane for `qa-mobile-typescript` (general-purpose, docs)
-
-````
-You are `general-purpose`. Task X1 of docs/plans/003-qa-playwright-appium-upgrade.md: research Maestro into
-docs/research/003-qa-playwright-appium/maestro.md, then write qa/typescript/skills/ui-test-author/maestro
-(qa-ui-test-writer-maestro-typescript) per §3.7, and wire it into qa-mobile-typescript.
-
-Read, in this order:
-1. CLAUDE.md.
-2. The plan: §3.7, §4, §5.1, Decisions D21, D22, task X1, "Close-out — every task".
-3. docs/plans/implemented/002-mobile-plugins.md §8.5 (the test-id contract your selectors must follow).
-4. qa/typescript/skills/ui-test-author/appium/SKILL.md (the sibling authoring skill, for shape only).
-5. qa/typescript/agents/qa-mobile-typescript.md (description and Steps);
-   qa/typescript/skills/ui-test-author/review/SKILL.md (the mobile rows);
-   qa/typescript/skills/evidence-capture/SKILL.md.
-
-Build:
-- Research first. Use WebSearch/WebFetch on primary sources: maestro.mobile.dev docs, the
-  mobile-dev-inc/maestro GitHub releases, Expo EAS Workflows docs. Write maestro.md with a URL on every
-  fact and UNVERIFIED on anything else. Cover:
-  - The current CLI version and install.
-  - Flow syntax and the core commands (launchApp, tapOn, inputText, assertVisible, assertNotVisible,
-    scrollUntilVisible, extendedWaitUntil, runFlow, runScript/evalScript, takeScreenshot,
-    startRecording/stopRecording, clearState).
-  - How id maps to a React Native testID on Android and iOS.
-  - Waiting without sleeps; env/params; includeTags/excludeTags; config.yaml.
-  - Outputs: JUnit format, test-output/debug-output dirs, failure screenshots and recordings.
-  - CI: Maestro Cloud, the EAS Workflows Maestro job, a GitHub Actions emulator job.
-  - Maestro Studio.
-  - Whether an official Maestro MCP server exists, and its tool names.
-  - Any syntax-check or dry-run command.
-- The skill per §3.7 (≤ 16,000 chars, R9 description). It covers:
-  - Maestro vs Appium.
-  - The .maestro/ layout, with subflows as the page-object analogue.
-  - Selectors on the plan 002 §8.5 contract.
-  - Waits, data, tags.
-  - Evidence and CI with JUnit.
-  - Review rows.
-  - assets/.maestro/: one flow, one subflow, config.yaml (valid YAML, no comments).
-- qa-mobile-typescript.md: Step 2 offers ui-test-author/maestro when the project runs Maestro; the
-  description (≤ 650 chars) names Maestro; Step 4 covers it.
-- ui-test-author/review: Maestro rows — fixed waits, a text selector where a test id exists,
-  duplicated steps that belong in a subflow, untagged flows, no clearState/launchApp reset between flows.
-- evidence-capture/SKILL.md: one route line, "Maestro → ui-test-author/maestro § Evidence".
-- If an official Maestro MCP server exists and you verified its tool names: add the registration and
-  grants as a dated decision, and extend the plan's §5 lists so G1's allowlist check knows them.
-  Otherwise grant nothing.
-- Add the skill to qa-typescript in the marketplace, and a catalog row.
-
-Traps:
-- This plan's research did not cover Maestro. Every Maestro fact in the skill must come from your
-  maestro.md, not memory.
-- E2E stays with the QA peer (plan 002 D7). Do not write into mobile/ or the React Native dev skills.
-- M1 left qa-mobile-typescript.md's description at 634 of 650 chars, so naming Maestro means cutting words
-  elsewhere in it; S1 added the Step 0 row (qa-mobile-typescript.md:123) before you. M1 also rewrote the Appium rows of ui-test-author/review (the
-  Appium table is yours to leave; add a separate Maestro table) and gave evidence-capture/SKILL.md an
-  "Appium: native app evidence" section and an Appium row in both tables; your route line goes beside them. Its
-  body is 14.0k of 16,000 chars.
-- M1's D80: a React Native testID is the Android resource-id with no package prefix. Check which identifier
-  Maestro's `id:` matches before writing selectors.
-- Record the syntax-check command you found (or that none exists) in your As-built note. G1 §6.3 uses it.
-
-Gate: none. This plan gates once, in G1. Do not run maestro, emulators or any check script.
-
-Commit: `docs(qa-ts): Maestro lane for qa-mobile-typescript, with research (003 X1)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
 
 ### G1 — The gate, the docs reconciliation, and the close-out (general-purpose, docs)
 
@@ -3265,6 +3237,12 @@ Build:
 - S1 wrote the two `mobile-project-setup` skills against the Appium assets without running them. §6.3's Java and TS Appium
   scratch projects should also take the skills' own steps: the three TS edits (specs glob, `../../` imports, tsconfig
   `include`) and the `SmokeTest` / `smoke.spec.ts` blocks. Compare the pins in both skills' Versions tables to §2.4.
+- X1 wrote the Maestro lane without running it. §6.3's Maestro row: parse every YAML under
+  qa/typescript/skills/ui-test-author/maestro/assets/ (multi-document aware); if `maestro` is installed, run
+  `maestro check-syntax <file>` on each flow and subflow (each prints `OK`; `maestro --help` should list it). §6.1's
+  allowlist check also covers `mcp__maestro__<name>` against §5.5 (D91). Sizes to hold: the Maestro skill 15,984
+  chars, the TS review skill 15,876, the agent description 647 of 650. The EAS `maestro` job and the GitHub Actions
+  emulator job in the Maestro skill are unrun; keep their caveat lines.
 - §6.3's TS Appium row installs too little. Build the scratch project from
   qa/typescript/skills/ui-test-author/appium/assets/package.json and tsconfig.json (M1, D83): the assets
   import @wdio/allure-reporter and need @types/mocha and @types/node. M1's As built lists its open typing risks

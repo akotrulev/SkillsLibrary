@@ -1,0 +1,14 @@
+appId: com.example.shop
+---
+- assertVisible:
+    id: Login.Submit
+- tapOn:
+    id: Login.Email
+- inputText: ${E2E_USER}
+- tapOn:
+    id: Login.Password
+- inputText: ${E2E_PASSWORD}
+- tapOn:
+    id: Login.Submit
+- assertVisible:
+    id: Orders.List

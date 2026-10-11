@@ -109,6 +109,8 @@ the teardown always, and dropped unless the test failed. The APIs and their limi
 - An agent captures through `mcp__appium-mcp__appium_screenshot` (into `SCREENSHOTS_DIR`) and
   `mcp__appium-mcp__appium_screen_recording`.
 
+**Maestro → `ui-test-author/maestro` § Evidence.**
+
 ## Deliberate recordings
 
 A deliberate recording lives in a **fixture**, never inline in a test body, and lands in

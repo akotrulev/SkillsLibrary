@@ -407,6 +407,7 @@
         "./qa/typescript/skills/production-uptime-checks",
         "./qa/typescript/skills/test-data-builder",
         "./qa/typescript/skills/ui-test-author/appium",
+        "./qa/typescript/skills/ui-test-author/maestro",
         "./qa/typescript/skills/ui-test-author/playwright",
         "./qa/typescript/skills/ui-test-author/review",
         "./qa/typescript/skills/ui-test-author/selenium",
