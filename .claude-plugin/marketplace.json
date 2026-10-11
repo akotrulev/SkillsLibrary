@@ -470,6 +470,7 @@
         "./qa/typescript/skills/security-testing/passive-scan",
         "./qa/typescript/skills/production-uptime-checks",
         "./qa/typescript/skills/test-data-builder",
+        "./qa/typescript/skills/time-and-concurrency-testing",
         "./qa/typescript/skills/ui-test-author/appium",
         "./qa/typescript/skills/ui-test-author/maestro",
         "./qa/typescript/skills/ui-test-author/playwright",

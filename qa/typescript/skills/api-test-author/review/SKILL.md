@@ -71,6 +71,9 @@ Reviews TypeScript API test code against the patterns enforced by `qa/typescript
 | Created resources tracked and deleted in `afterEach` | Cleanup inlined in the spec body instead of registered | major |
 | Unexpected errors fail loudly with an identifying message | Empty `catch`, catch-and-continue, or an assertion whose failure names no id/subject | major |
 | Zod failures name `issues[].path` + `code` and the body | A wall of raw `ZodError`, or a loosened schema hiding contract drift | major |
+| A job test never waits for the real schedule (`qa/typescript/skills/time-and-concurrency-testing`) | A sleep or long poll until the cron fires, or the production schedule edited so the job fires soon | blocker |
+| A boundary test runs with a controlled clock or a stated skew margin | A cut-off / DST / month-end test with no replaced clock, no test-clock endpoint, and no margin larger than skew plus latency named in the test | major |
+| A race test has a barrier and the runner's `repeats`; a duplicate-delivery test is not defeated by broker deduplication | Sequential `await`s called a race; a `for` loop repeating it; asserting which request won; a duplicate publish with the same broker message / deduplication id | major |
 
 ### Comments in test code
 

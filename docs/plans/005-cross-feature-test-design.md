@@ -10,7 +10,7 @@ session looks the connections up there instead of re-deriving them. The three `q
 then automate the new case kinds. They run scheduled jobs on demand, control the clock at a time
 boundary, fire concurrent requests, and deliver a message or webhook twice.
 
-**Status:** K1, D1, Q1 and Q2 landed 2026-10-11. K1: `business-analysis:dependency-map`, its golden example, the KB contract and feature slice, the three reasoning-lane edits and the `business-analyst` edits. D1: `dev:doc-feature-trace` has the seventh inventory (Edges) and the seam recipes, area and feature documents have *How it connects*, and `be-documenter` writes the dependency map. Q1: `requirements-breakdown` writes §8 Connections (schema constraints moved to the data dictionary), `qa-*:cross-feature-test-design` exists with its golden example, registered in all three `qa-*` plugins (D14 records four departures from §9.3). Built but unverified: nothing has been run (the gate is A3), and description lengths and file sizes are counted by hand or `wc` only. Q2: `test-case-writer` writes parameterized field cases and the chain, async, temporal and concurrency forms; `qa-test-case-designer` runs five steps with Code mode and the depth gate; `qa-test-planner` plans from the slice. Next: A1. O1 is answered: the automation is in this
+**Status:** K1, D1, Q1, Q2 and A1 landed 2026-10-11. K1: `business-analysis:dependency-map`, its golden example, the KB contract and feature slice, the three reasoning-lane edits and the `business-analyst` edits. D1: `dev:doc-feature-trace` has the seventh inventory (Edges) and the seam recipes, area and feature documents have *How it connects*, and `be-documenter` writes the dependency map. Q1: `requirements-breakdown` writes §8 Connections (schema constraints moved to the data dictionary), `qa-*:cross-feature-test-design` exists with its golden example, registered in all three `qa-*` plugins (D14 records four departures from §9.3). Built but unverified: nothing has been run (the gate is A3), and description lengths and file sizes are counted by hand or `wc` only. Q2: `test-case-writer` writes parameterized field cases and the chain, async, temporal and concurrency forms; `qa-test-case-designer` runs five steps with Code mode and the depth gate; `qa-test-planner` plans from the slice. A1: `qa-typescript:time-and-concurrency-testing` (jobs on demand, controlled clock, barrier races, duplicate delivery), the `qa-api-typescript` Step 3 / Mode B wiring and three review checks, registered in `qa-typescript` only; nothing was run, samples uncompiled. Next: A2. O1 is answered: the automation is in this
 plan, as tasks A1–A3. The plan changes skills and agents only, so the gate (§11) proves structure, not
 quality. The new stack skills' code samples are never compiled. Whether the suites actually get deeper,
 and whether the automation patterns run, is unverified until H1 runs the lane on a real project.
@@ -1077,6 +1077,13 @@ three checks.
 - **Not in A1:** Java and .NET (A2, A3); any product code, because a hook a test needs is `be-node`'s
   to build; README and the catalog (A3).
 
+**As built (2026-10-11):** as planned, with no divergence; the A2 and A3 prompts needed no rewrite.
+- `qa/typescript/skills/time-and-concurrency-testing/SKILL.md`: 15,744 characters (`wc -c`, under 16,000); description 489 characters. Sections: When to use · When NOT to use · Inputs · Procedure (seam order, then job in-process / job deployed / clock / concurrency / duplicate delivery / invariant) · Anti-patterns · Hard rules · Handoffs · APIs checked. Helpers A2/A3 mirror: `ControlledClock` + host override, `startTogether` barrier, `runCronJobNow` (kubectl, no catch).
+- `qa/typescript/agents/qa-api-typescript.md`: Step 3 entry plus Mode B step 6 (seam or named deferral to `be-node`); net +494 characters.
+- `qa/typescript/skills/api-test-author/review/SKILL.md`: three checks (blocker / major / major) after the Zod row. `.claude-plugin/marketplace.json`: registered in `qa-typescript` only (`python3 -m json.tool` ran once, exit 0; nothing else was run).
+- APIs checked against the published packages' type definitions and docs: Vitest 3.2, 4.0, 5.0 (`repeats` in the test options, `test(name, { repeats }, fn)`; hooks run inside the repeat loop, `run.*.js:3859`) · `cron` 3.5.0 and 4.4.0 (`CronJob.fireOnTick(): Promise<void>`, public; `@nestjs/schedule` 12.0.2 depends on `cron` 4.4.0; `SchedulerRegistry.getCronJob(name)` per docs.nestjs.com) · BullMQ 6.3.12 (duplicate `jobId` ignored per docs.bullmq.io; `Worker` accepts a processor function) · node-cron 4.6.0 (`ScheduledTask.execute()`; 3.0.3 has no public run-now) · Node 22+ for `Promise.withResolvers`. Unchecked: Vitest 2.x, `@nestjs/schedule` 4–6 beyond their `cron` 3.x dependency, BullMQ below 6.
+- Unverified: no sample was compiled or run; description and size counted with `wc` only.
+
 ### A2 — qa-java: `time-and-concurrency-testing` and the API lane wiring
 
 **Stack:** `docs` · **Agent:** `general-purpose`
@@ -1229,59 +1236,9 @@ in the checkout you are given, commit there, and never create a branch.
 | A3 | `docs` | `general-purpose` | A1, A2, Q2, Q1, D1, K1 | ~125k |
 | H1 | `human` | **the user** | A3 | one real feature |
 
-Four blocks are live. K1, D1, Q1 and Q2 have landed (their blocks are deleted).
+Three blocks are live. K1, D1, Q1, Q2 and A1 have landed (their blocks are deleted).
 
 ---
-
-### A1 — qa-typescript: `time-and-concurrency-testing` and the API lane wiring (general-purpose, docs)
-
-````
-You are a general-purpose agent working in the SkillsLibrary repo. Task A1 of
-docs/plans/005-cross-feature-test-design.md: a new `qa-typescript:time-and-concurrency-testing` skill
-that automates the temporal, concurrency and delivery cases the manual lane now designs — jobs run on
-demand, a controlled clock, concurrent requests behind a barrier, duplicate delivery — plus the
-qa-api-typescript wiring and three review checks. Your skill is the shape A2 (Java) and A3 (.NET) copy.
-
-Read, in this order:
-1. CLAUDE.md (Test code rules — no sleeps, no OR, no loops driving assertions, no try/catch in a test
-   body — Simplicity, Comments, Version policy) and CONTRIBUTING.md "SKILL.md structure",
-   "Writing a good description".
-2. The plan: §7.5, §7.8, §9.3 (cases 6, 9, 10, 11, 13), §10, D11, D13, task A1 and Q2's As built, and
-   "Close-out — every task".
-3. qa/manual/test-case-writer/SKILL.md — only its `### Case forms` section (the forms you automate).
-4. qa/typescript/agents/qa-api-typescript.md (Input modes, Step 3 row at line ~139).
-5. qa/typescript/skills/api-test-author/writer/SKILL.md (conventions) and .../review/SKILL.md.
-6. qa/typescript/skills/feature-flag-testing/SKILL.md — how the in-process host overrides a provider;
-   the clock override mirrors it.
-7. qa/typescript/skills/messaging-testing/SKILL.md and the producer section of one reference;
-   qa/typescript/skills/db-testing/verification-queries/SKILL.md "Wait-for-eventual-consistency poller".
-
-Before writing an API into the skill, confirm it against current documentation for the versions the
-stack supports (Node 24, 22): Vitest's per-test repeat option, the NestJS scheduler registry's cron job
-tick, BullMQ job/processor invocation, node-cron task invocation. Teach only what exists for those
-versions; record the versions you checked in your As built.
-
-Build (task A1's bullets, in order): the SKILL.md (description per §7.8's template, ≤ 500 characters,
-counted; one pattern per §7.8 row with a short Vitest example; anti-patterns; hard rules; handoffs) ·
-qa-api-typescript (Step 3 entry, Mode B mapping; net ≤ 800 characters) · review checks · marketplace
-registration in qa-typescript only.
-
-Traps:
-- Vitest's fake timers do not move a separately running server's clock — never teach them for an API
-  suite; the clock is replaced inside the in-process host or controlled by an environment hook.
-- A race test asserts the invariant (exactly one confirmed booking; seats ≤ capacity), never which
-  request won; repetition comes from the runner's repeat option, not a for loop.
-- A duplicate-delivery test that broker deduplication swallows proves nothing — new broker message id,
-  same business id.
-- A missing hook is a deferral named in the report and handed to be-node — no skipped test body, no
-  sleep, no waiting for the real schedule (D13).
-
-Gate: none — this plan gates once, in A3. Do not run `claude plugin validate`, the checkers,
-tools/token-audit.py, `npx tsc`, `npx vitest` or any script.
-
-Commit: `feat(qa-typescript): time-and-concurrency-testing — jobs on demand, clock, races, duplicate delivery (005 A1)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
 
 ### A2 — qa-java: `time-and-concurrency-testing` and the API lane wiring (general-purpose, docs)
 
