@@ -47,8 +47,9 @@ The `qa/` folder is the most built-out section. When a request matches one of th
 
 New-project setup = copy `qa/<stack>/` + `qa/manual/` + `qa/reporting/` + `qa/cicd/` + `qa/_shared/`.
 
-**Project scaffolding** (dotnet-only so far; version-aware — .NET 10 primary, 8/9 supported)
+**Project scaffolding** (version-aware — .NET 10 primary, 8/9 supported; `mobile-project-setup` ships for all three stacks)
 - `api-project-setup` · `ui-project-setup` · `mobile-project-setup` · `performance-project-setup` — stand up a runnable test solution from zero (flat projects, shared `TestCore`, CPM version table, per-project config); composable into one multi-module solution — dotnet
+- `mobile-project-setup` — stand up a runnable Appium 3 mobile test project from zero: Node 24, Android SDK / Xcode prerequisites, `appium setup` + `driver doctor`, the Gradle (TestNG, java-client 11) or WebdriverIO 10 (Mocha) layout around the `ui-test-author/appium` assets, capabilities from `PLATFORM` / `DEVICE_NAME` / `APP_PATH`, a first smoke; Step 0 of `qa-mobile-{java,typescript}` — java · typescript
 - `inhouse-framework-conventions` — conventions for working inside the in-house Accelerator test-automation framework (JSON-driven screens) — dotnet (java sibling `inhouse-framework-conventions` lives in `qa/java/`)
 
 **Authoring**

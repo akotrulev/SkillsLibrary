@@ -89,7 +89,7 @@ recording only on failure on allure-java 3.0, an `AppiumDriverFactory`, a scoped
 gestures, WebView contexts and app state without `resetApp`; `NativeFeatures` on `mobile:` commands in
 `support.nativefeatures`; the farm with a presigned `PUT` that throws (D85) and a mobile Cucumber hook (D86);
 Appium reference in `evidence-capture`; and the screen, crawler, review, `browser-cloud-setup` and glue files
-cleaned. M3 landed 2026-10-11: the .NET mobile lane on Appium.WebDriver 9 / Appium 3 / NUnit 4.6.1 — `qa-mobile-dotnet` on §5.3's 28 tools with the appium-mcp prerequisites and the evidence skill at Step 1; `ui-test-author/appium` with thirteen assets (CPM props, a versionless csproj, `mobile.runsettings`, `Env`, `AppiumDriverFactory`, a `BaseMobileTest` whose `[TearDown]` keeps a screenshot, page source, device log and a recording only on failure with no catch (D88), `BaseAppiumPage`, `LoginPage`, `OrdersPage`, a scoped `OrderRow`, `OrdersTests`, `GestureExtensions` and a compiling `page_template.cs`) on `MobileBy` (D87) and the per-platform test-id ladder with the id-prefix setting; `mobile-native-features` on `mobile:` commands; `mobile-project-setup` on one `PLATFORM` mechanism; `device-cloud` without a Device Farm run (D89); the screen, crawler and review files cleaned; checklist rows C4, D12, E14 and K6 reworded and E18 and L15 added (D90); and `evidence-capture/references/appium.md`. Next: S1. Built but unverified (M3): nothing compiled or ran — the .NET Appium assets (`MobileBy`, `StartRecordingScreen` options, `WebDriverWait` from `Selenium.Support` 4.51.0, `AppiumElement.Rect`, `Manage().Logs.GetLog`) are G1's. Built but unverified (M2): nothing compiled or ran — the Java Appium assets (an `AppiumDriver`
+cleaned. M3 landed 2026-10-11: the .NET mobile lane on Appium.WebDriver 9 / Appium 3 / NUnit 4.6.1 — `qa-mobile-dotnet` on §5.3's 28 tools with the appium-mcp prerequisites and the evidence skill at Step 1; `ui-test-author/appium` with thirteen assets (CPM props, a versionless csproj, `mobile.runsettings`, `Env`, `AppiumDriverFactory`, a `BaseMobileTest` whose `[TearDown]` keeps a screenshot, page source, device log and a recording only on failure with no catch (D88), `BaseAppiumPage`, `LoginPage`, `OrdersPage`, a scoped `OrderRow`, `OrdersTests`, `GestureExtensions` and a compiling `page_template.cs`) on `MobileBy` (D87) and the per-platform test-id ladder with the id-prefix setting; `mobile-native-features` on `mobile:` commands; `mobile-project-setup` on one `PLATFORM` mechanism; `device-cloud` without a Device Farm run (D89); the screen, crawler and review files cleaned; checklist rows C4, D12, E14 and K6 reworded and E18 and L15 added (D90); and `evidence-capture/references/appium.md`. S1 landed 2026-10-11: `qa/java/skills/mobile-project-setup` (`qa-mobile-project-setup-java`) and `qa/typescript/skills/mobile-project-setup` (`qa-mobile-project-setup-typescript`), each on Appium 3.8.0 with drivers 8.x / 12.x, one `PLATFORM` mechanism, a layout around its `ui-test-author/appium` assets and a `SmokeTest` / `smoke.spec.ts` first run, and a Step 0 row in `qa-mobile-java` and `qa-mobile-typescript`, in the marketplace and the catalog. Next: X1. Built but unverified (S1): nothing compiled or ran — the three TS edits the folders need (specs glob, `../../` imports, tsconfig `include`), the Java smoke class and the `npx appium driver install` / `allowInsecure` service-arg spellings are G1's. Built but unverified (M3): nothing compiled or ran — the .NET Appium assets (`MobileBy`, `StartRecordingScreen` options, `WebDriverWait` from `Selenium.Support` 4.51.0, `AppiumElement.Rect`, `Manage().Logs.GetLog`) are G1's. Built but unverified (M2): nothing compiled or ran — the Java Appium assets (an `AppiumDriver`
 `switch` on `AndroidDriver` / `IOSDriver`, `UiAutomator2Options.amend`, `Allure.attachment` with a stream,
 `AndroidStartScreenRecordingOptions` / `IOSStartScreenRecordingOptions` spellings) are G1's. Built but unverified: no asset, workflow or pipeline has been
 compiled or run (G1 does that; D24's TS config import, the Java build on Allure Gradle plugin 4.3.0, the .NET
@@ -134,7 +134,7 @@ Planned 2026-10-10. The research behind it is committed with this plan:
 - A Maestro lane is added (X1).
 - The newest Appium client majors are primary.
 
-Next: S1 (H1, the user's, blocks no task). The cost is 19 agent sessions on the subscription, each started by the user
+Next: X1 (H1, the user's, blocks no task). The cost is 19 agent sessions on the subscription, each started by the user
 from Plan Queue. Nothing else is metered.
 
 ## 1. What already exists, and what is missing
@@ -3004,6 +3004,13 @@ The skills use instance-field drivers (D8), and `evidence-capture/references/app
 - Add both to their plugins in `.claude-plugin/marketplace.json`, and catalog rows (R9).
 - **Not in S1:** the .NET setup skill (M3); device clouds (`device-cloud`); Maestro (X1).
 
+**As built (2026-10-11):**
+- Landed as planned, no divergence. `qa/java/skills/mobile-project-setup/SKILL.md` (12.8k chars, description 427) and `qa/typescript/skills/mobile-project-setup/SKILL.md` (12.7k, description 425) point at the `ui-test-author/appium` assets and copy none.
+- Java: Gradle layout under `src/test/java/com/example/mobiletests/{support,pages,tests}` (the assets are test-source), package-root rename plus the `testng.xml` `<package>` entry, `.env.example` with `APPIUM_URL`, a `SmokeTest` block on `LoginPage.verifyPageLoaded()`. TS: the ten flat assets, with root `wdio.conf.ts` / `BaseTest.ts` / `env.ts`, pages in `src/pages/mobile/`, specs in `test/specs/`, and three stated edits (`specs: ['./test/specs/*.spec.ts']`, `../../` imports, tsconfig `include`); a `smoke.spec.ts` block.
+- Drivers install with `appium driver install uiautomator2|xcuitest` (M1's form), checked with `appium driver list --installed` against 8.x / 12.x; the TS pins stay in `package.json` (8.7.0 / 12.17.1). The Appium 2 lane is one prose paragraph per skill (java-client 10.x or WebdriverIO 9.x, UiAutomator2 4.x, XCUITest 9.x), no coordinates.
+- Step 0 rows: `qa/java/agents/qa-mobile-java.md:123` and `qa/typescript/agents/qa-mobile-typescript.md:123`, exit gate "compiles (`./gradlew compileTestJava` / `npm run typecheck`), `appium driver doctor` clean, smoke green". Both skills in `.claude-plugin/marketplace.json` (`qa-java`, `qa-typescript`); one catalog row under "Project scaffolding", whose heading no longer says dotnet-only.
+- Built but unverified: nothing compiled or ran. `./gradlew allureReport` (from `test-reports`), `gradle wrapper --gradle-version 9.6` and the `@wdio/appium-service` `args.allowInsecure` key (appium.md § 10) are G1's to check.
+
 ### X1 — A Maestro lane for `qa-mobile-typescript`
 
 **Stack:** `docs` · **Agent:** `general-purpose`
@@ -3146,78 +3153,9 @@ Run them in order, one session each, opened from Plan Queue. Each block is compl
 | X1 | `docs` | `general-purpose` | M1, S1, T2 | ~130k |
 | G1 | `docs` | `general-purpose` | all | ~145k |
 
-Landed: T1, J1, N1, T2, J2, N2, A1, T3 (2026-10-10), J3, N3, T4, J4, N4, M1, M2, M3 (2026-10-11). Every other block is live.
+Landed: T1, J1, N1, T2, J2, N2, A1, T3 (2026-10-10), J3, N3, T4, J4, N4, M1, M2, M3, S1 (2026-10-11). Every other block is live.
 
 ---
-
-### S1 — `mobile-project-setup` for Java and TypeScript, and Step 0 in both mobile agents (general-purpose, docs)
-
-````
-You are `general-purpose`. Task S1 of docs/plans/003-qa-playwright-appium-upgrade.md: write
-qa/java/skills/mobile-project-setup (qa-mobile-project-setup-java) and
-qa/typescript/skills/mobile-project-setup (qa-mobile-project-setup-typescript) per §3.6, and give
-qa-mobile-java and qa-mobile-typescript a Step 0 that runs them.
-
-Read, in this order:
-1. CLAUDE.md.
-2. The plan: §2.4, §3.4, §3.6, §4 (R7, R9), §5.1, Decision D20, task S1, "Close-out — every task".
-3. qa/dotnet/skills/mobile-project-setup/SKILL.md (the pattern, as M3 left it: Appium 3.8.0, `appium setup`,
-   drivers 8.x / 12.x, Node 24/22, one `PLATFORM` mechanism, `.env.example`, a Pages/ layout, no Allure tool install)
-   and the Step 0 row of qa/dotnet/agents/qa-mobile-dotnet.md.
-4. qa/java/skills/ui-test-author/appium/assets/* and its SKILL.md stack section (M2);
-   qa/typescript/skills/ui-test-author/appium/assets/* and its SKILL.md Versions table (M1).
-5. docs/research/003-qa-playwright-appium/appium.md §1, §2.1, §2.7.
-6. The Steps tables and descriptions of qa/java/agents/qa-mobile-java.md and
-   qa/typescript/agents/qa-mobile-typescript.md.
-
-Build:
-- Two SKILL.md files (≤ 16,000 chars each, R9 description):
-  - Prerequisites: Node 24/22, JDK 21 for Java, ANDROID_HOME, an emulator image, Xcode + simulator;
-    WDA signing for real iOS devices is a human step.
-  - Appium 3: appium@3.8.0; appium setup or appium driver install uiautomator2 / xcuitest at §2.4's
-    majors; appium driver doctor; the scoped --allow-insecure <driver>:<feature> syntax.
-  - Layout. Java: Gradle around M2's build.gradle.kts and testng.xml (parallel="classes") with pages/,
-    support/, tests/. TS: WDIO 10 + Mocha + @wdio/appium-service + @wdio/allure-reporter around M1's
-    wdio.conf.ts.
-  - Capabilities from PLATFORM / DEVICE_NAME / APP_PATH, with one mechanism.
-  - First smoke: launch the app, verify the landing screen.
-  - .gitignore for the R7 paths.
-  - Pointers to device-cloud and ci-pipelines; one paragraph on the §2.4 supported lane.
-  - Reference the ui-test-author/appium assets; do not copy them.
-- Both agents: a Step 0 row ("Project scaffold — skip if a project exists", mobile-project-setup; exit
-  gate: compiles, appium driver doctor clean, smoke runs), mirroring qa-mobile-dotnet.
-- Add both skills to their plugins in .claude-plugin/marketplace.json, and catalog rows.
-
-Traps:
-- UiAutomator2 ≥ 5 and XCUITest ≥ 10 need Appium 3; Appium 2 needs UiAutomator2 4.x / XCUITest 9.x
-  (appium.md §2.3). Get the driver/server pairing right in both lanes.
-- WDIO 10 needs Node ≥ 22.19, and appium-mcp needs Node ≥ 22. Node 20 is EOL — never write it.
-- Write exact pins (appium 3.8.0, webdriverio 10.0.2, java-client 11.0.0). G1's checker compares them
-  to §2.
-- M1 left the TS assets as ten files: wdio.conf.ts, BaseTest.ts (the evidence hooks), BasePage.ts, LoginPage.ts,
-  OrdersPage.ts, OrderRow.ts, orders.spec.ts, env.ts, package.json (every exact pin) and tsconfig.json. The TS setup
-  skill points at them and copies none; its layout is that flat set under `src/pages/mobile/` and `test/specs/`
-  in the project. The env vars are PLATFORM, DEVICE_NAME, APP_PATH, PLATFORM_VERSION (iOS), E2E_USER,
-  E2E_PASSWORD, E2E_ORDER_NUMBER, E2E_ORDER_TITLE, and DEVICE_FARM (skips local recording). The pins are
-  appium-uiautomator2-driver 8.7.0 and appium-xcuitest-driver 12.17.1; the Android capability
-  `appium:settings[disableIdLocatorAutocompletion]` is set (D80). `.gitignore` takes test-results/,
-  allure-results/ and evidence/. qa-mobile-typescript.md already has the Step 1 evidence row (M1); add only
-  Step 0.
-- M2 left the Java assets as eleven files: build.gradle.kts, settings.gradle.kts, testng.xml
-  (`parallel="classes"`, `thread-count="1"`), Env.java, AppiumDriverFactory.java, BaseMobileTest.java (the evidence
-  hooks), BaseAppiumPage.java, LoginPage.java, OrdersPage.java, OrderRow.java and OrdersTest.java, in package
-  `com.example.mobiletests.{support,pages,tests}`. The Java setup skill points at them and copies none. The env
-  vars are PLATFORM, DEVICE_NAME, APP_PATH, PLATFORM_VERSION (iOS), APPIUM_URL (default `http://127.0.0.1:4723`),
-  E2E_USER, E2E_PASSWORD, E2E_ORDER_NUMBER, E2E_ORDER_TITLE and DEVICE_FARM (skips local recording). The Android
-  capability `appium:settings[disableIdLocatorAutocompletion]` is set (D80, D84). Evidence lands in
-  `build/appium-artifacts/` (R7); `.gitignore` takes build/, allure-results/ and evidence/.
-  qa-mobile-java.md already has the Step 1 evidence row and the prerequisites (M2); add only Step 0.
-
-Gate: none. This plan gates once, in G1. Do not run gradle, npm, appium or any check script.
-
-Commit: `docs(qa): mobile-project-setup for Java and TypeScript, Step 0 in qa-mobile agents (003 S1)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
 
 ### X1 — A Maestro lane for `qa-mobile-typescript` (general-purpose, docs)
 
@@ -3273,7 +3211,7 @@ Traps:
   maestro.md, not memory.
 - E2E stays with the QA peer (plan 002 D7). Do not write into mobile/ or the React Native dev skills.
 - M1 left qa-mobile-typescript.md's description at 634 of 650 chars, so naming Maestro means cutting words
-  elsewhere in it; S1 adds Step 0 before you. M1 also rewrote the Appium rows of ui-test-author/review (the
+  elsewhere in it; S1 added the Step 0 row (qa-mobile-typescript.md:123) before you. M1 also rewrote the Appium rows of ui-test-author/review (the
   Appium table is yours to leave; add a separate Maestro table) and gave evidence-capture/SKILL.md an
   "Appium: native app evidence" section and an Appium row in both tables; your route line goes beside them. Its
   body is 14.0k of 16,000 chars.
@@ -3324,6 +3262,9 @@ Build:
   chain, `Manage().Logs.GetLog`, `AllureApi.AddAttachment` with bytes). The NativeFeatures class in
   mobile-native-features/SKILL.md and the farm classes in device-cloud/references/details.md are code blocks, not
   assets; compile them in the same scratch project when the check can (BrowserStackCredentials is in device-cloud/SKILL.md).
+- S1 wrote the two `mobile-project-setup` skills against the Appium assets without running them. §6.3's Java and TS Appium
+  scratch projects should also take the skills' own steps: the three TS edits (specs glob, `../../` imports, tsconfig
+  `include`) and the `SmokeTest` / `smoke.spec.ts` blocks. Compare the pins in both skills' Versions tables to §2.4.
 - §6.3's TS Appium row installs too little. Build the scratch project from
   qa/typescript/skills/ui-test-author/appium/assets/package.json and tsconfig.json (M1, D83): the assets
   import @wdio/allure-reporter and need @types/mocha and @types/node. M1's As built lists its open typing risks
