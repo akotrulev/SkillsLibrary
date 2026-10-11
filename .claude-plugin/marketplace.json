@@ -7,7 +7,7 @@
   },
   "metadata": {
     "description": "Stack-first skills library covering QA, frontend, backend, data, and business-analysis: install one self-contained plugin per tech stack. `qa-{java,dotnet,typescript}` bundle every QA discipline — API/UI/mobile/performance/LLM/BDD authoring and verification, manual-QA process, CI/CD, reporting, and OWASP-mapped security. `fe-{blazor,react}` are step-by-step frontend dev-stack agents (scaffold → architecture → features → quality → tests → review). `be-{dotnet,java,node}` are step-by-step backend dev-stack agents for design-pattern application, ORM persistence, and Auth0/Cognito service-side auth; `be-python` is the sandboxed upload-processing worker stack (content-sniffed validation, SVG sanitising, EXIF/GPS strip, rembg, VTracer, DPI verdict, dominant colours, resize ladders, a no-network hardened container, pytest with hostile fixtures). `devops` ships the platform lane — container images, IaC, cloud deploys, and build/deploy pipelines. `data` and `business-analysis` round out the database-engineering and cross-feature requirements domains.",
-    "version": "2.31.0"
+    "version": "2.32.0"
   },
   "plugins": [
     {
@@ -132,17 +132,9 @@
         "./qa/java/commands/qa-ui-java.md",
         "./qa/manual/commands/qa-test-case-designer.md",
         "./qa/reporting/commands/qa-reporting-java.md",
-        "./qa/manual/commands/qa-bug-report-writer.md",
-        "./qa/manual/commands/qa-exploratory-charter-writer.md",
-        "./qa/manual/commands/qa-requirements-breakdown.md",
-        "./qa/manual/commands/qa-test-case-writer.md",
-        "./qa/manual/commands/qa-test-plan-writer.md",
         "./qa/manual/commands/qa-test-planner.md",
-        "./qa/manual/commands/qa-test-strategy.md",
         "./engineering-practices/commands/dev-design.md",
-        "./engineering-practices/commands/dev-plan-feature.md",
-        "./engineering-practices/commands/ep-spec-vs-code-audit.md",
-        "./engineering-practices/commands/ep-feature-audit.md"
+        "./engineering-practices/commands/dev-plan-feature.md"
       ],
       "agents": [
         "./qa/_shared/agents/qa-security.md",
@@ -286,17 +278,9 @@
         "./qa/dotnet/commands/qa-ui-dotnet.md",
         "./qa/manual/commands/qa-test-case-designer.md",
         "./qa/reporting/commands/qa-reporting-dotnet.md",
-        "./qa/manual/commands/qa-bug-report-writer.md",
-        "./qa/manual/commands/qa-exploratory-charter-writer.md",
-        "./qa/manual/commands/qa-requirements-breakdown.md",
-        "./qa/manual/commands/qa-test-case-writer.md",
-        "./qa/manual/commands/qa-test-plan-writer.md",
         "./qa/manual/commands/qa-test-planner.md",
-        "./qa/manual/commands/qa-test-strategy.md",
         "./engineering-practices/commands/dev-design.md",
-        "./engineering-practices/commands/dev-plan-feature.md",
-        "./engineering-practices/commands/ep-spec-vs-code-audit.md",
-        "./engineering-practices/commands/ep-feature-audit.md"
+        "./engineering-practices/commands/dev-plan-feature.md"
       ],
       "agents": [
         "./qa/_shared/agents/qa-security.md",
@@ -435,17 +419,9 @@
         "./qa/typescript/commands/qa-mobile-typescript.md",
         "./qa/typescript/commands/qa-performance-typescript.md",
         "./qa/typescript/commands/qa-ui-typescript.md",
-        "./qa/manual/commands/qa-bug-report-writer.md",
-        "./qa/manual/commands/qa-exploratory-charter-writer.md",
-        "./qa/manual/commands/qa-requirements-breakdown.md",
-        "./qa/manual/commands/qa-test-case-writer.md",
-        "./qa/manual/commands/qa-test-plan-writer.md",
         "./qa/manual/commands/qa-test-planner.md",
-        "./qa/manual/commands/qa-test-strategy.md",
         "./engineering-practices/commands/dev-design.md",
-        "./engineering-practices/commands/dev-plan-feature.md",
-        "./engineering-practices/commands/ep-spec-vs-code-audit.md",
-        "./engineering-practices/commands/ep-feature-audit.md"
+        "./engineering-practices/commands/dev-plan-feature.md"
       ],
       "agents": [
         "./qa/_shared/agents/qa-security.md",
@@ -535,28 +511,9 @@
       "commands": [
         "./engineering-practices/commands/code-auditor.md",
         "./frontend/blazor/commands/fe-blazor.md",
-        "./design/commands/design-visual-identity.md",
-        "./design/commands/design-tokens.md",
-        "./design/commands/design-charts.md",
-        "./design/commands/design-brand-import.md",
-        "./design/commands/design-iconography.md",
-        "./design/commands/design-theme-presets.md",
-        "./design/commands/design-ux-writing.md",
-        "./design/commands/design-ux-patterns.md",
-        "./design/commands/design-ux-review.md",
-        "./design/commands/design-ui-code-audit.md",
-        "./design/commands/design-accessible-by-design.md",
-        "./design/commands/design-ethical-patterns.md",
-        "./design/commands/design-ai-experience.md",
-        "./design/commands/design-ui-ux-pro-max.md",
-        "./design/commands/design-motion.md",
-        "./design/commands/design-landing-patterns.md",
         "./design/commands/design-auditor.md",
         "./engineering-practices/commands/dev-design.md",
-        "./engineering-practices/commands/dev-plan-feature.md",
-        "./engineering-practices/commands/ep-spec-vs-code-audit.md",
-        "./engineering-practices/commands/ep-feature-audit.md",
-        "./qa/manual/commands/qa-requirements-breakdown.md"
+        "./engineering-practices/commands/dev-plan-feature.md"
       ],
       "agents": [
         "./frontend/blazor/agents/fe-blazor.md",
@@ -643,15 +600,6 @@
       "commands": [
         "./business-analysis/commands/business-analyst.md",
         "./business-analysis/commands/dev-refine.md",
-        "./business-analysis/commands/ba-scoping-writeup.md",
-        "./business-analysis/commands/ba-epic-writer.md",
-        "./business-analysis/commands/ba-story-writer.md",
-        "./business-analysis/commands/ba-process-flow-diagram.md",
-        "./business-analysis/commands/ba-entity-state-grid.md",
-        "./business-analysis/commands/ba-decision-table.md",
-        "./business-analysis/commands/ba-feature-conflict-check.md",
-        "./business-analysis/commands/ba-story-quality-review.md",
-        "./business-analysis/commands/ba-project-memory.md",
         "./backend/_shared/commands/dev-document-system.md",
         "./backend/_shared/commands/dev-document.md"
       ],
@@ -739,28 +687,9 @@
         "./engineering-practices/commands/code-auditor.md",
         "./frontend/react/commands/fe-react.md",
         "./frontend/react/commands/fe-react-audit.md",
-        "./design/commands/design-visual-identity.md",
-        "./design/commands/design-tokens.md",
-        "./design/commands/design-charts.md",
-        "./design/commands/design-brand-import.md",
-        "./design/commands/design-iconography.md",
-        "./design/commands/design-theme-presets.md",
-        "./design/commands/design-ux-writing.md",
-        "./design/commands/design-ux-patterns.md",
-        "./design/commands/design-ux-review.md",
-        "./design/commands/design-ui-code-audit.md",
-        "./design/commands/design-accessible-by-design.md",
-        "./design/commands/design-ethical-patterns.md",
-        "./design/commands/design-ai-experience.md",
-        "./design/commands/design-ui-ux-pro-max.md",
-        "./design/commands/design-motion.md",
-        "./design/commands/design-landing-patterns.md",
         "./design/commands/design-auditor.md",
         "./engineering-practices/commands/dev-design.md",
-        "./engineering-practices/commands/dev-plan-feature.md",
-        "./engineering-practices/commands/ep-spec-vs-code-audit.md",
-        "./engineering-practices/commands/ep-feature-audit.md",
-        "./qa/manual/commands/qa-requirements-breakdown.md"
+        "./engineering-practices/commands/dev-plan-feature.md"
       ],
       "agents": [
         "./frontend/react/agents/fe-react.md",
@@ -849,25 +778,8 @@
         "./engineering-practices/commands/code-auditor.md",
         "./mobile/react-native/commands/mobile-react-native.md",
         "./mobile/react-native/commands/mobile-react-native-audit.md",
-        "./design/commands/design-ui-ux-pro-max.md",
-        "./design/commands/design-visual-identity.md",
-        "./design/commands/design-tokens.md",
-        "./design/commands/design-theme-presets.md",
-        "./design/commands/design-brand-import.md",
-        "./design/commands/design-iconography.md",
-        "./design/commands/design-charts.md",
-        "./design/commands/design-ux-patterns.md",
-        "./design/commands/design-ux-writing.md",
-        "./design/commands/design-ux-review.md",
-        "./design/commands/design-accessible-by-design.md",
-        "./design/commands/design-ethical-patterns.md",
-        "./design/commands/design-ai-experience.md",
-        "./design/commands/design-motion.md",
         "./engineering-practices/commands/dev-design.md",
-        "./engineering-practices/commands/dev-plan-feature.md",
-        "./engineering-practices/commands/ep-spec-vs-code-audit.md",
-        "./engineering-practices/commands/ep-feature-audit.md",
-        "./qa/manual/commands/qa-requirements-breakdown.md"
+        "./engineering-practices/commands/dev-plan-feature.md"
       ],
       "agents": [
         "./mobile/react-native/agents/mobile-react-native.md",
@@ -953,25 +865,8 @@
         "./engineering-practices/commands/code-auditor.md",
         "./mobile/ios/commands/mobile-ios.md",
         "./mobile/ios/commands/mobile-ios-audit.md",
-        "./design/commands/design-ui-ux-pro-max.md",
-        "./design/commands/design-visual-identity.md",
-        "./design/commands/design-tokens.md",
-        "./design/commands/design-theme-presets.md",
-        "./design/commands/design-brand-import.md",
-        "./design/commands/design-iconography.md",
-        "./design/commands/design-charts.md",
-        "./design/commands/design-ux-patterns.md",
-        "./design/commands/design-ux-writing.md",
-        "./design/commands/design-ux-review.md",
-        "./design/commands/design-accessible-by-design.md",
-        "./design/commands/design-ethical-patterns.md",
-        "./design/commands/design-ai-experience.md",
-        "./design/commands/design-motion.md",
         "./engineering-practices/commands/dev-design.md",
-        "./engineering-practices/commands/dev-plan-feature.md",
-        "./engineering-practices/commands/ep-spec-vs-code-audit.md",
-        "./engineering-practices/commands/ep-feature-audit.md",
-        "./qa/manual/commands/qa-requirements-breakdown.md"
+        "./engineering-practices/commands/dev-plan-feature.md"
       ],
       "agents": [
         "./mobile/ios/agents/mobile-ios.md",
@@ -1058,25 +953,8 @@
         "./engineering-practices/commands/code-auditor.md",
         "./mobile/android/commands/mobile-android.md",
         "./mobile/android/commands/mobile-android-audit.md",
-        "./design/commands/design-ui-ux-pro-max.md",
-        "./design/commands/design-visual-identity.md",
-        "./design/commands/design-tokens.md",
-        "./design/commands/design-theme-presets.md",
-        "./design/commands/design-brand-import.md",
-        "./design/commands/design-iconography.md",
-        "./design/commands/design-charts.md",
-        "./design/commands/design-ux-patterns.md",
-        "./design/commands/design-ux-writing.md",
-        "./design/commands/design-ux-review.md",
-        "./design/commands/design-accessible-by-design.md",
-        "./design/commands/design-ethical-patterns.md",
-        "./design/commands/design-ai-experience.md",
-        "./design/commands/design-motion.md",
         "./engineering-practices/commands/dev-design.md",
-        "./engineering-practices/commands/dev-plan-feature.md",
-        "./engineering-practices/commands/ep-spec-vs-code-audit.md",
-        "./engineering-practices/commands/ep-feature-audit.md",
-        "./qa/manual/commands/qa-requirements-breakdown.md"
+        "./engineering-practices/commands/dev-plan-feature.md"
       ],
       "agents": [
         "./mobile/android/agents/mobile-android.md",
@@ -1156,10 +1034,7 @@
         "./engineering-practices/commands/code-auditor.md",
         "./observability/commands/observability-engineer-dotnet.md",
         "./engineering-practices/commands/dev-design.md",
-        "./engineering-practices/commands/dev-plan-feature.md",
-        "./engineering-practices/commands/ep-spec-vs-code-audit.md",
-        "./engineering-practices/commands/ep-feature-audit.md",
-        "./qa/manual/commands/qa-requirements-breakdown.md"
+        "./engineering-practices/commands/dev-plan-feature.md"
       ],
       "agents": [
         "./backend/dotnet/agents/be-dotnet.md",
@@ -1241,10 +1116,7 @@
         "./engineering-practices/commands/code-auditor.md",
         "./observability/commands/observability-engineer-java.md",
         "./engineering-practices/commands/dev-design.md",
-        "./engineering-practices/commands/dev-plan-feature.md",
-        "./engineering-practices/commands/ep-spec-vs-code-audit.md",
-        "./engineering-practices/commands/ep-feature-audit.md",
-        "./qa/manual/commands/qa-requirements-breakdown.md"
+        "./engineering-practices/commands/dev-plan-feature.md"
       ],
       "agents": [
         "./backend/java/agents/be-java.md",
@@ -1322,10 +1194,7 @@
         "./engineering-practices/commands/code-auditor.md",
         "./observability/commands/observability-engineer-node.md",
         "./engineering-practices/commands/dev-design.md",
-        "./engineering-practices/commands/dev-plan-feature.md",
-        "./engineering-practices/commands/ep-spec-vs-code-audit.md",
-        "./engineering-practices/commands/ep-feature-audit.md",
-        "./qa/manual/commands/qa-requirements-breakdown.md"
+        "./engineering-practices/commands/dev-plan-feature.md"
       ],
       "agents": [
         "./backend/node/agents/be-node.md",
@@ -1399,10 +1268,7 @@
         "./backend/_shared/commands/dev-document.md",
         "./engineering-practices/commands/code-auditor.md",
         "./engineering-practices/commands/dev-design.md",
-        "./engineering-practices/commands/dev-plan-feature.md",
-        "./engineering-practices/commands/ep-spec-vs-code-audit.md",
-        "./engineering-practices/commands/ep-feature-audit.md",
-        "./qa/manual/commands/qa-requirements-breakdown.md"
+        "./engineering-practices/commands/dev-plan-feature.md"
       ],
       "agents": [
         "./backend/python/agents/be-python.md",
@@ -1465,9 +1331,7 @@
         "./devops/commands/infra-security-tester.md",
         "./engineering-practices/commands/code-auditor.md",
         "./engineering-practices/commands/dev-design.md",
-        "./engineering-practices/commands/dev-plan-feature.md",
-        "./engineering-practices/commands/ep-spec-vs-code-audit.md",
-        "./engineering-practices/commands/ep-feature-audit.md"
+        "./engineering-practices/commands/dev-plan-feature.md"
       ],
       "agents": [
         "./devops/agents/devops-engineer.md",

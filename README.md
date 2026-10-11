@@ -60,11 +60,11 @@ A 9th, **`ep-code-comments`**, also ships in **all sixteen** plugins: it is the 
 
 ### Slash commands
 
-**Every agent ships a matching slash command, and so does every skill that produces a standalone artifact with nothing to orient on.** Agents are normally picked up by description match, which is probabilistic; the command is the deterministic entry point for when you would rather *name* the workflow than hope for it. Each command loads its agent definition and runs that agent's step-by-step workflow. Called bare with no argument, it runs the agent's orientation pass against the current repo and asks what you need.
+**Commands are kept to the entry points that matter: every agent, the `dev-*` workflow, and the read-only audits.** Agents are normally picked up by description match, which is probabilistic; the command is the deterministic entry point for when you would rather *name* the workflow than hope for it. Each command loads its agent definition and runs that agent's step-by-step workflow. Called bare with no argument, it runs the agent's orientation pass against the current repo and asks what you need.
 
-**Code-touching skills deliberately have no command** — no `/qa-api-client-writer-<stack>`, no `/be-<stack>-generator`, no `/fe-<stack>-project-setup`, no `/devops-docker`. Reach them through their agent instead. The reason is orientation: an agent's first act is version detection (TFM / React major / engine version / Node major) plus reading existing files for conventions, and a skill invoked directly skips all of it — the exact way a .NET 8 repo ends up with a .NET 10 recipe. Agents are step-scoped and brownfield-capable, so "write me one API client" is a one-step agent run, not a six-step build. What keeps a command is the set with nothing to detect: prose artifacts (manual-QA writing, BA authoring), stack-agnostic design craft, the `ep-*` process entry points, and the read-only audits.
+**Skills have no wrapper commands** — every plugin skill is already slash-invocable under its own name, so `/design-tokens`, `/ba-story-writer`, `/qa-bug-report-writer` and `/ep-feature-audit` still work; they are skills, not commands. Prefer the agent for anything that touches code: an agent's first act is version detection (TFM / React major / engine version / Node major) plus reading existing files for conventions, and a skill invoked directly skips all of it — the exact way a .NET 8 repo ends up with a .NET 10 recipe. Agents are step-scoped and brownfield-capable, so "write me one API client" is a one-step agent run, not a six-step build.
 
-**`qa-java` · `qa-dotnet` · `qa-typescript`** — 23 commands each (`qa-dotnet` has 24 — see `/qa-dotnet-audit` below); substitute your stack for `<stack>`:
+**`qa-java` · `qa-dotnet` · `qa-typescript`** — 14 commands each (`qa-dotnet` has 15 — see `/qa-dotnet-audit` below); substitute your stack for `<stack>`:
 
 | Command | Argument | Runs |
 |---|---|---|
@@ -82,9 +82,9 @@ A 9th, **`ep-code-comments`**, also ships in **all sixteen** plugins: it is the 
 | `/qa-dotnet-audit` *(qa-dotnet only so far)* | *(none — or a path/section limiter)* | read-only sweep of the **test suite** against the `qa-dotnet` conventions → findings report in `docs/audits/` |
 | `/code-auditor` | spec, stories, feature, or area | read-only audit engagement, saved to `docs/audits/` |
 
-…plus the 6 manual-QA writing commands and the 4 `ep-*` process commands listed under **Shared across plugins** below.
+…plus `/dev-design` and `/dev-plan-feature`, listed under **Shared across plugins** below. The manual-QA writers (`qa-test-case-writer`, `qa-test-plan-writer`, `qa-requirements-breakdown`, `qa-bug-report-writer`, `qa-exploratory-charter-writer`, `qa-test-strategy`) are skills, invoked by name.
 
-**`fe-blazor`** — 17 commands · **`fe-react`** — 18:
+**`fe-blazor`** — 5 commands · **`fe-react`** — 6:
 
 | Command | Argument | Runs |
 |---|---|---|
@@ -92,26 +92,21 @@ A 9th, **`ep-code-comments`**, also ships in **all sixteen** plugins: it is the 
 | `/fe-react` | what to build, fix, or extend | the step-by-step React / Next.js UI workflow |
 | `/fe-react-audit` *(fe-react only)* | *(none — or a path/section limiter)* | read-only sweep of the repo against the `fe-react` conventions → findings report in `docs/audits/` |
 | `/code-auditor` | spec, stories, feature, or area | read-only audit engagement, saved to `docs/audits/` |
-| `/design-ui-ux-pro-max` | a brief, or any design question | the vendored design-intelligence corpus — **the source of truth for design facts**: generate a full design system from a brief, or search 88 styles / 192 palettes / 74 font pairings / 119 UX guidelines / 105 icons / 34 landing patterns / 17 motion presets / 25 chart types / 22 stacks, offline |
-| `/design-visual-identity` | brief or product | invent a per-brief token system + visual identity (the primary theme authority) |
-| `/design-brand-import` | brand book or assets | normalize an existing brand into a token system |
-| `/design-theme-presets` | look or mood | pick and apply one of 10 preset palette + font themes |
-| `/design-tokens` | token system to build or fix | the primitive → semantic tier discipline |
-| `/design-charts` | chart, dashboard, or data | product chart / data-viz design system |
-| `/design-iconography` | icon set or social image | one icon family + OG / social imagery |
-| `/design-motion` | a surface or product that needs motion | the product-wide intensity tier + the preset, duration, easing and teardown per trigger |
-| `/design-landing-patterns` | a marketing page + what the visitor must decide | pick from 34 landing patterns — section order, CTA placement, color strategy, conversion rules |
-| `/design-ux-writing` | screen, flow, or copy slots | microcopy voice for the slots the stack's UI skills define |
-| `/design-ux-review` | screen, flow, or app | experience-level review — Nielsen heuristics, flow friction, IA |
-| `/design-ui-code-audit` | UI source files | code-level audit against the vendored Web Interface Guidelines |
-| `/design-accessible-by-design` | screen, flow, or design | the WCAG 2.2 decisions a scan can't make — target size, drag alternatives, accessible auth, cognitive load, layout-for-translation |
-| `/design-ethical-patterns` | signup, checkout, cancel, consent, or permission flow | symmetry + the dark-pattern taxonomy prohibited under DSA Art. 25 / FTC §5 |
-| `/design-ai-experience` | AI or agent feature | how it behaves on screen — streaming, stop, approval-with-context, uncertainty, correction, labelling |
 | `/design-auditor` | *(none — or how to reach the app)* | the **whole** design audit in one run — visual identity, tokens, IA, heuristics, flow, responsiveness, UI code, copy, charts, icons, brand, motion, landing structure — read-only, saved to `docs/audits/` |
 
-…plus `/qa-requirements-breakdown` and the 4 `ep-*` process commands listed under **Shared across plugins** below.
+…plus `/dev-design` and `/dev-plan-feature`. The 16 `design-*` craft skills (`/design-ui-ux-pro-max` — **the source of truth for design facts** — `/design-visual-identity`, `/design-tokens`, `/design-ux-patterns`, `/design-ux-review`, …) are skills, invoked by name; `/design-auditor` runs them all as one audit.
 
-**`be-dotnet` · `be-java` · `be-node` · `be-python`** — 11 commands each (`be-dotnet` has 12 — see `/be-dotnet-audit` below; `be-python` has no `/observability-engineer-*`; note the backend stacks are `dotnet` / `java` / **`node`** / `python`, not the QA triplet):
+**`mobile-react-native` · `mobile-ios` · `mobile-android`** — 5 commands each:
+
+| Command | Argument | Runs |
+|---|---|---|
+| `/mobile-<stack>` | what to build, fix, or extend | the step-by-step mobile app workflow for that stack |
+| `/mobile-<stack>-audit` | *(none — or a path/section limiter)* | read-only sweep of the app against the plugin's conventions → findings report in `docs/audits/` |
+| `/code-auditor` | spec, stories, feature, or area | read-only audit engagement, saved to `docs/audits/` |
+
+…plus `/dev-design` and `/dev-plan-feature`. The `design-*` craft skills ship here too, invoked by name.
+
+**`be-dotnet` · `be-java` · `be-node` · `be-python`** — 8 commands each (`be-dotnet` has 9 — see `/be-dotnet-audit` below; `be-python` has 7 — no `/observability-engineer-*`; note the backend stacks are `dotnet` / `java` / **`node`** / `python`, not the QA triplet):
 
 | Command | Argument | Runs |
 |---|---|---|
@@ -124,17 +119,18 @@ A 9th, **`ep-code-comments`**, also ships in **all sixteen** plugins: it is the 
 | `/be-dotnet-audit` *(be-dotnet only so far)* | *(none — or a project/section limiter)* | read-only sweep of the service against the `be-dotnet` conventions (incl. the observability invariants) → findings report in `docs/audits/` |
 | `/code-auditor` | spec, stories, feature, or area | read-only audit engagement, saved to `docs/audits/` |
 
-…plus `/qa-requirements-breakdown` and the 4 `ep-*` process commands listed under **Shared across plugins** below.
+…plus `/dev-design` and `/dev-plan-feature`, listed under **Shared across plugins** below.
 
-**`devops`** — 8 commands:
+**`devops`** — 6 commands:
 
 | Command | Argument | Runs |
 |---|---|---|
 | `/devops-engineer` | what to containerize, provision, deploy, or wire | discover → **confirm the tool stack with you** → containerize → provision → deploy → pipeline → review |
 | `/devops-auditor` | *(none — or a service/path/section limiter)* | discover → **confirm the audit scope with you** → read-only sweep of the existing image, IaC, k8s, deploy target, pipeline, identity and secrets against the `devops` conventions → findings report in `docs/audits/` |
+| `/infra-security-tester` | *(none — or a cluster, cloud account, path, or area limiter)* | assess existing infrastructure's security posture — IaC/image misconfig, K8s CIS, container runtime, cloud CSPM/IAM, supply chain — authorization-gated for live probes, never fixes, report in `docs/security/` |
 | `/code-auditor` | spec, stories, feature, or area | read-only audit engagement, saved to `docs/audits/` |
 
-…plus the 4 `ep-*` process commands listed under **Shared across plugins** below. The 9 `devops-*` skills (docker, IaC, kubernetes, the three CI hosts, the two cloud deployments, environment-config) are reached through the two agents — and because devops skills are keyed to *tools* rather than stacks, both agents inspect the repo and **confirm the tool stack with you before loading a single skill**, then load only what that answer selects.
+…plus `/dev-design` and `/dev-plan-feature`, listed under **Shared across plugins** below. The 9 `devops-*` skills (docker, IaC, kubernetes, the three CI hosts, the two cloud deployments, environment-config) are reached through the two agents — and because devops skills are keyed to *tools* rather than stacks, both agents inspect the repo and **confirm the tool stack with you before loading a single skill**, then load only what that answer selects.
 
 **`penetration-testing`** — 3 commands:
 
@@ -170,36 +166,24 @@ A 9th, **`ep-code-comments`**, also ships in **all sixteen** plugins: it is the 
 | `/dataset-engineer` | what dataset to build — stage, modality, target model | spec → source/curate → synthesize → quality gate (decontamination last) → format & split → dataset card |
 | `/dataset-auditor` | dataset path or name, and its eval targets | read-only audit across 8 sections — format, contamination, duplication, PII, license, composition, splits, card |
 
-**`business-analysis`** — 9 commands:
+**`business-analysis`** — 4 commands:
 
 | Command | Argument | Runs |
 |---|---|---|
 | `/dev-refine` | a loose description of what you want built | the front door: batched questions, then `requirements.md` + `epics.md` (`E1..En`) + `stories.md` (`US1..USn`) in a new initiative folder, ready for `/dev-plan-solution`. Also extends or audits an existing backlog |
 | `/business-analyst` | feature or change to analyze | model flows, states and decisions, sweep for cross-feature conflicts, persist the KB |
-| `/ba-scoping-writeup` | vague ask or stakeholder brief | structured single-initiative scoping writeup |
-| `/ba-epic-writer` | scoped writeup | epics with a measurable outcome **and a plain-English section** (as-a/I-want/so-that, what gets built, how it fits — no technology), slicing strategy, child stories, epic DoD |
-| `/ba-story-writer` | requirement or epic | INVEST user stories with Gherkin acceptance criteria |
-| `/ba-process-flow-diagram` | requirements or feature | BPMN-disciplined Mermaid flow with swimlanes and labeled exits |
-| `/ba-entity-state-grid` | business entity | one state × event grid, all features overlaid |
-| `/ba-decision-table` | shared decision point | one merged decision table with a declared DMN hit policy |
-| `/ba-feature-conflict-check` | new feature vs the KB | pairwise sweep with the 11-class conflict taxonomy |
+| `/dev-document-system` · `/dev-document` | the system, or one feature | the reverse-documentation pair, bundled from the backend plugins — see the `be-*` table above |
 
-**Shared across plugins.** Two families ship inside other plugins rather than standing alone:
+The nine `ba-*` skills (`/ba-scoping-writeup`, `/ba-epic-writer`, `/ba-story-writer`, `/ba-story-quality-review`, `/ba-process-flow-diagram`, `/ba-entity-state-grid`, `/ba-decision-table`, `/ba-feature-conflict-check`, `/ba-project-memory`) are skills, invoked by name; the two agents above sequence them.
+
+**Shared across plugins.** The design-then-plan pair ships inside every stack plugin and `devops`:
 
 | Command | In | Runs |
 |---|---|---|
-| `/dev-design` | all eight stack plugins + `devops` | one clear feature → approved technical design/spec in `docs/specs/` (loose or multi-capability ask → `/dev-refine`) |
+| `/dev-design` | all twelve stack plugins + `devops` | one clear feature → approved technical design/spec in `docs/specs/` (loose or multi-capability ask → `/dev-refine`) |
 | `/dev-plan-feature` | ″ | approved spec → a self-contained plan document in `docs/plans/`: the gap table, the decisions, one flat ordered task list, and one paste-ready prompt per task |
-| `/ep-spec-vs-code-audit` | ″ | code vs a spec / stories → requirement register + verdicts |
-| `/ep-feature-audit` | ″ | spec-less feature trace → surfaces, inventories, defect families |
-| `/qa-test-case-writer` | `qa-*` | requirements → a Setup / Cases / Cleanup manual test-case suite |
-| `/qa-test-plan-writer` | `qa-*` | inputs in hand → the assembled feature test-plan document |
-| `/qa-requirements-breakdown` | `qa-*`, `fe-*`, `be-*` | a story / BRD / contract → a sourced test-basis document |
-| `/qa-bug-report-writer` | `qa-*` | a defect description → a formal, reproducible bug report |
-| `/qa-exploratory-charter-writer` | `qa-*` | a feature or area → a bounded session-based exploratory charter |
-| `/qa-test-strategy` | `qa-*` | a release or project → a test strategy document |
 
-`/code-auditor` ships in all eight stack plugins (`qa-*`, `fe-*`, `be-*`) and in `devops`, alongside the `ep-*` skills. If two installed plugins expose the same command name, disambiguate with `/plugin-name:command`.
+`/code-auditor` ships in all twelve stack plugins (`qa-*`, `fe-*`, `mobile-*`, `be-*`) and in `devops`, and owns both the spec-vs-code and spec-less feature audit lanes (the `ep-spec-vs-code-audit` / `ep-feature-audit` skills remain invocable for a one-off). If two installed plugins expose the same command name, disambiguate with `/plugin-name:command`.
 
 ### Use the repo directly
 
