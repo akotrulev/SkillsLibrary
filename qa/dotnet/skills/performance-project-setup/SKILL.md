@@ -1,5 +1,5 @@
 ---
-name: qa-performance-project-setup-dotnet
+name: performance-project-setup
 description: Use when starting a load/performance test project from zero in C# / .NET 10 (8-9) — solution layout, exact package versions, local setup, and run commands for a standalone NBomber console suite. Composable with the api/ui/mobile dotnet scaffolds. Triggers "scaffold a performance test project", "set up an NBomber suite from scratch", "what versions for a C# load test framework". Not for authoring the load scenarios (`load-testing`).
 ---
 
@@ -97,7 +97,7 @@ dotnet build        # exit gate: 0 errors, 0 warnings
 dotnet run --project PerfTests          # runs scenarios, writes ./reports
 ```
 
-`Directory.Packages.props` (CPM version table) + `Directory.Build.props` (settings only) are as in `qa-api-project-setup-dotnet`. **Key difference:** `PerfTests.csproj` references **only** NBomber packages — never `NUnit` / `Microsoft.NET.Test.Sdk`, even though CPM may list their versions for sibling test projects. `Program.cs` entry point shape (scenario bodies owned by `load-testing`):
+`Directory.Packages.props` (CPM version table) + `Directory.Build.props` (settings only) are as in `qa-dotnet:api-project-setup`. **Key difference:** `PerfTests.csproj` references **only** NBomber packages — never `NUnit` / `Microsoft.NET.Test.Sdk`, even though CPM may list their versions for sibling test projects. `Program.cs` entry point shape (scenario bodies owned by `load-testing`):
 
 ```csharp
 NBomberRunner

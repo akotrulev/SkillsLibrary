@@ -1,13 +1,13 @@
 ---
-name: tool-capability-contract
-description: Use when a project (or part of it) must become an agent-drivable surface — derive the capabilities, typed input/output contracts, flows and runtime dependencies into a reviewable contract document. Triggers "expose this project to an agent", "what tools should the MCP have", "spec the CLI commands". Do NOT use to implement the surface (`tool-mcp-builder` / `tool-cli-builder`), to plan a REST API (`be-shared-api-surface-plan`), or to document a feature for humans (`be-shared-feature-trace`).
+name: capability-contract
+description: Use when a project (or part of it) must become an agent-drivable surface — derive the capabilities, typed input/output contracts, flows and runtime dependencies into a reviewable contract document. Triggers "expose this project to an agent", "what tools should the MCP have", "spec the CLI commands". Do NOT use to implement the surface (`tooling:mcp-builder` / `tooling:cli-builder`), to plan a REST API (`dev:plan-api-surface`), or to document a feature for humans (`dev:doc-feature-trace`).
 ---
 
 # Capability Contract — what the tool exposes, before it exists
 
 An MCP server and a CLI are the same thing wearing different clothes: a set of **capabilities**, each with typed inputs, one predictable output shape, a fixed error vocabulary, and a stated place in a **flow**. Get that list right and both surfaces fall out of it mechanically. Get it wrong and you ship forty tools an agent cannot compose.
 
-This skill produces the **one document both builders consume**. `tool-mcp-builder` renders each capability as a tool; `tool-cli-builder` renders each capability as a subcommand. Neither invents capabilities — if it is not in this document, it is not in the surface.
+This skill produces the **one document both builders consume**. `tooling:mcp-builder` renders each capability as a tool; `tooling:cli-builder` renders each capability as a subcommand. Neither invents capabilities — if it is not in this document, it is not in the surface.
 
 **Read `references/output-contract.md` before writing any capability block.** It fixes the envelope, pagination, error body, and token budget that every capability inherits; the per-capability blocks are only meaningful as deltas against it.
 
@@ -19,9 +19,9 @@ This skill produces the **one document both builders consume**. `tool-mcp-builde
 
 ## When NOT to use
 
-- The ask is to write the server or the CLI → `tool-mcp-builder` / `tool-cli-builder`
-- The ask is to design a REST API for human/browser clients → `be-shared-api-surface-plan` owns that; this skill *consumes* its output when one exists
-- The ask is to explain a feature to a person → `be-shared-feature-trace` / `be-shared-business-documentation`
+- The ask is to write the server or the CLI → `tooling:mcp-builder` / `tooling:cli-builder`
+- The ask is to design a REST API for human/browser clients → `dev:plan-api-surface` owns that; this skill *consumes* its output when one exists
+- The ask is to explain a feature to a person → `dev:doc-feature-trace` / `dev:doc-business-model`
 - The target is a third-party HTTP API with no local project → the vendor `ai-development/mcp-builder` skill owns the API-wrapping lane; this one derives from a codebase
 
 ## Output

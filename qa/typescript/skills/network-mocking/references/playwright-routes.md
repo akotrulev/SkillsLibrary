@@ -23,7 +23,7 @@ brackets is where an API first shipped.
 - WebSocket or SSE streams → `qa/typescript/skills/realtime-stream-testing`
 - Recording a HAR as evidence → `qa/typescript/skills/evidence-capture` (`references/playwright.md` §5)
 - Page objects and specs themselves → `qa/typescript/skills/ui-test-author/playwright`
-- Java and .NET → `qa-network-mocking-java`, `qa-network-mocking-dotnet`
+- Java and .NET → `qa-java:network-mocking`, `qa-dotnet:network-mocking`
 
 ## Inputs needed
 

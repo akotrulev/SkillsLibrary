@@ -1,4 +1,4 @@
-# Deep-dive details — `qa-feature-flag-testing-typescript`
+# Deep-dive details — `qa-typescript:feature-flag-testing`
 
 Sections moved out of SKILL.md for on-demand loading. Read what the task needs.
 
@@ -76,7 +76,7 @@ describe('beta targeting for the new checkout', () => {
 ### The kill-switch lifecycle — flip mid-flight, assert graceful degradation (idea #4)
 
 `td.update(...)` propagates to the live client **as if LaunchDarkly streamed the change** — so one test proves
-the off-path engages *without a restart*. This is the flag analogue of `qa-failure-injection-testing-typescript`'s
+the off-path engages *without a restart*. This is the flag analogue of `qa-typescript:failure-injection-testing`'s
 steady → perturb → assert-degraded lifecycle (and the boundary: a *flag* flip is this skill; a *dependency fault*
 is chaos).
 
@@ -209,7 +209,7 @@ describe('checkout flow under the new-checkout flag', () => {
 
 > The off-row is **not** a formality: it is the only coverage of the path every un-migrated user is on, and the
 > only proof a rollback is safe. A multivariate flag gets one row per variation — exhaustively (`control` /
-> `treatment-a` / `treatment-b`), via the same `it.each` mechanics as `qa-data-driven-testing-typescript`.
+> `treatment-a` / `treatment-b`), via the same `it.each` mechanics as `qa-typescript:data-driven-testing`.
 
 ### Targeting via the evaluation context (idea #3)
 

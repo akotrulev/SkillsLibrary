@@ -1,5 +1,5 @@
 ---
-name: be-node-unit-testing
+name: unit-testing
 description: Use when backend TypeScript logic needs a dev-side unit test — Vitest (Jest when the repo uses it): what deserves a test, the five untestable seams (time, id, randomness, config, outbound I/O), DI over `vi.mock`, both branches of every `Result<T,E>`, Zod schema tests. In-process, no HTTP, container, or real database. Triggers "unit-test this service", "test this Zod schema", "how do I fake the clock in Vitest". Do NOT use for supertest/HTTP-level or integration tests (`qa-api-typescript`).
 ---
 
@@ -34,15 +34,15 @@ Owns **dev-side unit tests of backend logic**: construct a class or call a funct
 - A calculation: money (minor units), rounding, proration, date math.
 - A Zod schema — its accept **and** reject cases, including the error path.
 - A mapper, a branded-id conversion, an error-to-ProblemDetails translation.
-- Reproducing a bug at the unit level before fixing it (`ep-systematic-debugging` RED).
+- Reproducing a bug at the unit level before fixing it (`dev:debugging` RED).
 
 ## When NOT to use
 
 - supertest / a booted app / HTTP-level assertions → **peer** `qa-api-typescript`
 - Contract / integration / E2E, Testcontainers, real-DB seed-assert-clean → **peer** `qa-api-typescript` (`db-testing/*`)
 - Whether the tests actually catch faults (mutation score) → no TypeScript peer exists yet (StrykerJS would be its tool); see Handoffs
-- Suite-scale builders / fixtures → **peer** `qa-test-data-builder-typescript`
-- React components / hooks → `fe-react-component-testing`
+- Suite-scale builders / fixtures → **peer** `qa-typescript:test-data-builder`
+- React components / hooks → `fe-react:component-testing`
 - **Types with no runtime behavior, barrel re-exports, constants, generated clients** → don't test them at all
 
 ## Stack
@@ -253,7 +253,7 @@ const anOrder = (over: Partial<Order> = {}): Order => ({ ...defaults, ...over })
 const shipped = anOrder({ status: 'Shipped' });
 ```
 
-- Suite-scale fixtures → **peer** `qa-test-data-builder-typescript`.
+- Suite-scale fixtures → **peer** `qa-typescript:test-data-builder`.
 
 ## Async
 
@@ -299,7 +299,7 @@ const shipped = anOrder({ status: 'Shipped' });
 
 - supertest / HTTP-level, contract / integration / E2E → **peer** [`qa-api-typescript`](../../../../qa/typescript/agents/qa-api-typescript.md)
 - Real-DB verification, Testcontainers → **peer** `qa/typescript/skills/db-testing/*`
-- Do the tests actually catch faults? → no TypeScript mutation-testing skill exists yet; the siblings `qa-test-quality-check-java` (PIT) and `qa-test-quality-check-dotnet` (Stryker.NET) do. Treat mutation grading as unavailable on this stack rather than substituting a coverage number
+- Do the tests actually catch faults? → no TypeScript mutation-testing skill exists yet; the siblings `qa-java:test-quality-check` (PIT) and `qa-dotnet:test-quality-check` (Stryker.NET) do. Treat mutation grading as unavailable on this stack rather than substituting a coverage number
 - Suite-scale builders / fixtures → **peer** `qa/typescript/skills/test-data-builder`
 - Flaky triage / quarantine → **peer** `qa/reporting/typescript/skills/flaky-test-quarantine`
 - The unit needs a seam / a pattern → [`pattern-writer`](../pattern-writer/SKILL.md)

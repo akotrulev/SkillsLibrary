@@ -1,11 +1,11 @@
 ---
-name: mobile-react-native-forms
-description: Use when building or fixing a form in an Expo SDK 57 app — React Hook Form 7 + Zod 4, keyboard avoidance, input modes and autofill, secure fields, double-submit guard, ProblemDetails errors mapped with setError. Triggers "build a sign-up form", "keyboard covers the input", "server errors aren't on the fields", "autofill password". Do NOT use for fetch mechanics (`mobile-react-native-networking`), state placement (`-architecture`) or the failure banner (`-error-handling`).
+name: forms
+description: Use when building or fixing a form in an Expo SDK 57 app — React Hook Form 7 + Zod 4, keyboard avoidance, input modes and autofill, secure fields, double-submit guard, ProblemDetails errors mapped with setError. Triggers "build a sign-up form", "keyboard covers the input", "server errors aren't on the fields", "autofill password". Do NOT use for fetch mechanics (`mobile-react-native:networking`), state placement (`-architecture`) or the failure banner (`-error-handling`).
 ---
 
 # React Native — Forms
 
-Owns **input**: the schema, the form state, the keyboard, native input affordances, and mapping the server's errors back to fields. Web analog: [`fe-react-forms`](../../../../frontend/react/skills/forms/SKILL.md) — RHF + Zod carries over; Server Actions, `<form>`, `<label htmlFor>` and ARIA attributes do not.
+Owns **input**: the schema, the form state, the keyboard, native input affordances, and mapping the server's errors back to fields. Web analog: [`fe-react:forms`](../../../../frontend/react/skills/forms/SKILL.md) — RHF + Zod carries over; Server Actions, `<form>`, `<label htmlFor>` and ARIA attributes do not.
 
 ## Version lane
 
@@ -35,7 +35,7 @@ There is no `useActionState` lane — there is no server action in a native app.
 - The persistent error banner, mutation-failure UX → [`error-handling`](../error-handling/SKILL.md)
 - Camera, photo picker, file picking → [`device-features`](../device-features/SKILL.md)
 - Labels, hints, focus order in depth → [`accessibility`](../accessibility/SKILL.md)
-- Next.js forms → `fe-react-forms`
+- Next.js forms → `fe-react:forms`
 
 ## The schema — one per form
 
@@ -127,7 +127,7 @@ Fields follow the same `Controller` shape; `password` and `displayName` are omit
 | Free text | `autoCapitalize="sentences"`, `multiline` only when intended |
 
 - `inputMode` is the current prop; `keyboardType` is the legacy equivalent kept only on a project that uses it.
-- **A secure field never leaks**: `secureTextEntry` on, no logging of `field.value`, no value in a route param, no persistence of the draft to MMKV or AsyncStorage ([`mobile-shared-security`](../../../_shared/security/SKILL.md)). Disable autocorrect and suggestions on it.
+- **A secure field never leaks**: `secureTextEntry` on, no logging of `field.value`, no value in a route param, no persistence of the draft to MMKV or AsyncStorage ([`mobile-<stack>:security`](../../../_shared/security/SKILL.md)). Disable autocorrect and suggestions on it.
 - A **show / hide password** toggle is a labelled `Pressable` flipping `secureTextEntry`.
 - Pickers (date, select) use native components or `@expo/ui` ([`ui-components`](../ui-components/SKILL.md)), wired through `Controller`.
 
@@ -220,11 +220,11 @@ Inside a `Gate: none` plan task, run none of these and report "written, not run"
 - Typecheck and lint with the project's scripts clean.
 - Simulator and emulator: open the keyboard on the last field — it is visible and the submit control reachable; chain fields with `Next`; autofill a password.
 - Submit invalid → first invalid field focused, errors announced; submit with a `400 errors` body → errors on the right fields; submit twice quickly → one request.
-- Dev-side tests (RNTL 14, async `render` / `fireEvent`): `mobile-react-native-component-testing`; assert schema errors on `issues[].path` and `code`.
+- Dev-side tests (RNTL 14, async `render` / `fireEvent`): `mobile-react-native:component-testing`; assert schema errors on `issues[].path` and `code`.
 
 ## Handoffs
 
 - Client, retries, idempotency → [`networking`](../networking/SKILL.md) · banner, conflicts → [`error-handling`](../error-handling/SKILL.md)
 - Components inside the form → [`ui-components`](../ui-components/SKILL.md) · labels → [`accessibility`](../accessibility/SKILL.md)
 - Locale numbers and dates → [`languages`](../languages/SKILL.md) · ids → [`test-ids`](../test-ids/SKILL.md)
-- Secrets and storage → [`mobile-shared-security`](../../../_shared/security/SKILL.md)
+- Secrets and storage → [`mobile-<stack>:security`](../../../_shared/security/SKILL.md)

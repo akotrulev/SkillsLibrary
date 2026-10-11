@@ -1,6 +1,6 @@
 ---
-name: ba-story-writer
-description: Use when the user wants to convert a scoped requirement or BA writeup into INVEST user stories with acceptance criteria. Separates functional from non-functional AC. Triggers: "write user stories for X", "turn this into stories the team can pick up", "add acceptance criteria to this story", "split this epic". Do NOT use for high-level scoping (`ba-scoping-writeup`), test cases (qa/manual/test-case-writer), or bug reports (qa/manual/bug-report-writer).
+name: stories
+description: Use when the user wants to convert a scoped requirement or BA writeup into INVEST user stories with acceptance criteria. Separates functional from non-functional AC. Triggers: "write user stories for X", "turn this into stories the team can pick up", "add acceptance criteria to this story", "split this epic". Do NOT use for high-level scoping (`business-analysis:scoping`), test cases (qa/manual/test-case-writer), or bug reports (qa/manual/bug-report-writer).
 ---
 
 # User Story Writer
@@ -22,7 +22,7 @@ Turns a scoped requirement into a set of INVEST-quality user stories with Gherki
 
 ## Inputs needed
 
-1. **The epics** (`epics.md` from `ba-epic-writer`, ideally) and the requirements document they cover
+1. **The epics** (`epics.md` from `business-analysis:epics`, ideally) and the requirements document they cover
 2. **The user role(s)** the story is for (be specific — "logged-in admin", not "user")
 3. **Known constraints** that affect splitting (a stated delivery window, compliance sequencing, dependencies)
 
@@ -93,8 +93,8 @@ Turns a scoped requirement into a set of INVEST-quality user stories with Gherki
 
 ## Handoffs
 
-- Inside the delivery lane → `requirements-author` (`/dev-refine`) runs this skill as its Step 4 and writes the output to `docs/plans/<NNN>-<initiative>/stories.md`; the `business-analyst` sweep follows when the stories change shared business rules
+- Inside the delivery lane → `requirements-author` (`/dev:refine`) runs this skill as its Step 4 and writes the output to `docs/plans/<NNN>-<initiative>/stories.md`; the `business-analyst` sweep follows when the stories change shared business rules
 - Tests next → `qa/manual/requirements-breakdown` first (distills the stories' business logic, validations, and observable implementation notes into the test basis), then `qa/manual/test-case-writer`; or hand the whole flow to `qa/manual/agents/qa-test-case-designer`
-- Architecture, contracts, task plan → `solution-planner` (`/dev-plan-solution`)
+- Architecture, contracts, task plan → `solution-planner` (`/dev:plan-system`)
 
 Only `qa/manual/requirements-breakdown` ships in this plugin; the other `qa/*` peers and `solution-planner` are invoked separately, never loaded here.

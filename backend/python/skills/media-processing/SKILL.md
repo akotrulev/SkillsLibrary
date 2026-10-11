@@ -1,5 +1,5 @@
 ---
-name: be-python-media-processing
+name: media-processing
 description: Use when writing the Python code that processes customer-uploaded images with Pillow 12, hostile input assumed — content-sniffed validation, SVG sanitising, EXIF/GPS/XMP strip, rembg, VTracer tracing, print-DPI verdict, dominant colours, resize ladders. Triggers "validate this upload", "strip GPS from photos", "sanitise the SVG", "is this 300 DPI". Do NOT use for the Dockerfile (`sandboxed-worker`), package skeleton (`pattern-writer`) or tests (`unit-testing`).
 ---
 

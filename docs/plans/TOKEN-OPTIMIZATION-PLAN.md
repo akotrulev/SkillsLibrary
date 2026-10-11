@@ -38,7 +38,7 @@ Three cost layers: (1) **always-on** — every registered skill's `description` 
 Rewrite every `description` > 800 chars down to ≤ 500, preserving: (a) the "Use when" sentence, (b) 3–5 quoted trigger phrases, (c) the one-line "Do NOT use → sibling" fence. Cut: enumerated feature lists, multi-sentence scope prose, per-version details (all live in the body).
 
 Batches (59 files — ✅ all done 2026-07-16):
-- [x] `design/` (8): ux-review, brand-import, iconography, design-tokens, charts, ux-writing, visual-identity, ui-code-audit
+- [x] `design/` (8): ux-review, brand-import, iconography, design:tokens, charts, ux-writing, visual-identity, ui-code-audit
 - [x] `frontend/react/skills/` (20): ui-rules, installable-offline-app, animation, error-handling, basics, performance, seo, accessibility, component-testing, component-library, languages, responsive-design, code-review, styling, data-fetching, realtime, component-writer, forms, project-setup, testability
 - [x] `frontend/blazor/skills/` (16): basics, installable-offline-app, ui-rules, animation, accessibility, seo, component-testing, languages, javascript-calls, responsive-design, error-handling, styling, data-fetching, performance, component-library, realtime
 - [x] `data/` (3): elasticsearch, redis, mongodb

@@ -33,16 +33,16 @@ val Migration2To3 = object : Migration(2, 3) {
 
 ## Room 2.8 lane `[Room2]`
 
-- Imports `androidx.room.*`; `ksp("androidx.room:room-compiler:2.8.x")` — **KSP, never `kapt`** (a `kapt` Room is a finding for [`mobile-android-migration`](../../migration/SKILL.md), not a side-effect fix).
+- Imports `androidx.room.*`; `ksp("androidx.room:room-compiler:2.8.x")` — **KSP, never `kapt`** (a `kapt` Room is a finding for [`mobile-android:migration`](../../migration/SKILL.md), not a side-effect fix).
 - Built-in integrations work: `Flow` and `suspend` DAOs, plus `LiveData`, RxJava and `PagingSource` return types **in an existing codebase** — match, do not remove; do not add `LiveData` to new DAOs.
 - `Room.databaseBuilder(context, AppDatabase::class.java, "app.db")`, `setQueryExecutor` / `setQueryCoroutineContext`, `SupportSQLite` callbacks and `runInTransaction` / `withTransaction` as in the project.
-- Room 2.8 can be given a `SQLiteDriver` (`setDriver`) — the first step of a gradual Room 3 move; the full path is one file in `mobile-android-migration`.
+- Room 2.8 can be given a `SQLiteDriver` (`setDriver`) — the first step of a gradual Room 3 move; the full path is one file in `mobile-android:migration`.
 - Room 2 and Room 3 have different group ids and can coexist **in separate databases** during migration; one database is never opened by both.
 
-## Room 2 → 3 pointers (owned by `mobile-android-migration`)
+## Room 2 → 3 pointers (owned by `mobile-android:migration`)
 
 `androidx.room` → `androidx.room3` imports and `room3-*` artifacts · add `driver` · `suspend` DAOs · `runInTransaction` → `withWriteTransaction` · `openHelper` → `getSupportWrapper()` via `room3-sqlite-wrapper` for a gradual move · `InvalidationTracker.Observer` → `createFlow` · executors → `CoroutineContext` · Rx / Paging / LiveData / Guava → converter artifacts · drop `kapt` and Java annotation processing.
 
 ## Encrypted databases
 
-A sensitive database uses an encrypted `SQLiteDriver` with a Keystore-wrapped passphrase (generated once, stored through [`SecretStore`](../SKILL.md#secrets--keystore-and-tink)), or sensitive columns are sealed with the Tink `Aead` before the DAO. A passphrase in source or `BuildConfig` is a **blocker** (`mobile-shared-security` K-series).
+A sensitive database uses an encrypted `SQLiteDriver` with a Keystore-wrapped passphrase (generated once, stored through [`SecretStore`](../SKILL.md#secrets--keystore-and-tink)), or sensitive columns are sealed with the Tink `Aead` before the DAO. A passphrase in source or `BuildConfig` is a **blocker** (`mobile-<stack>:security` K-series).

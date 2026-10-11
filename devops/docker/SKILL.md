@@ -1,5 +1,5 @@
 ---
-name: devops-docker
+name: docker
 description: Use when the user asks to author or improve Dockerfiles / container images for .NET / Java / Node services, build multi-stage images, choose a base image, pin versions, optimize layers, set non-root + healthcheck, or wire image scanning. Triggers: "write a Dockerfile for X", "shrink this image", "what base image should we use". Do NOT use for orchestration (`devops/kubernetes`), pipelines (`devops/{github-actions,gitlab-ci,azure-pipelines}`), or app deploy (`devops/{aws,azure}-deployment`).
 ---
 
@@ -22,7 +22,7 @@ Authors production-grade Dockerfiles for the library's three backend stacks (.NE
 - Kubernetes manifests / Helm → `devops/kubernetes`
 - Pipeline YAML → `devops/{github-actions,gitlab-ci,azure-pipelines}`
 - App deploy specifics → `devops/{aws,azure}-deployment`
-- Local docker-compose dev workflow → out of scope here (this skill is production-shaped images). **No skill owns this yet** — the only deliberately unowned fence in the domain; improvise from the Dockerfile guidance below rather than looking for a sibling skill. (Test-fixture containers are a different thing and *are* owned: `qa-db-testing-testcontainers-{java,dotnet,typescript}`.)
+- Local docker-compose dev workflow → out of scope here (this skill is production-shaped images). **No skill owns this yet** — the only deliberately unowned fence in the domain; improvise from the Dockerfile guidance below rather than looking for a sibling skill. (Test-fixture containers are a different thing and *are* owned: `qa-<stack>:db-testcontainers`.)
 
 ## Inputs needed
 

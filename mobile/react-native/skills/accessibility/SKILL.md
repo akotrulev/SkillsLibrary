@@ -1,11 +1,11 @@
 ---
-name: mobile-react-native-accessibility
+name: accessibility
 description: Use when a React Native screen must work with VoiceOver, TalkBack, large text and Reduce Motion — role / label / state props, the aria-* equivalents, focus and announcements, custom actions, touch targets, font scaling, contrast. Triggers "make this screen accessible", "VoiceOver reads the wrong thing", "text is cut off at large sizes", "announce the result". Do NOT use for scanning (`qa-mobile-typescript`), form errors (`-forms`) or motion mechanics (`-animation`).
 ---
 
 # React Native — Accessibility
 
-Standardises **authoring** accessible RN screens, targeting **WCAG 2.2 AA** as the baseline and the platform conventions of VoiceOver (iOS) and TalkBack (Android). The house rule: **real controls with the right role, label and state; never rebuild semantics from a bare `View`.** Web analog: [`fe-react-accessibility`](../../../../frontend/react/skills/accessibility/SKILL.md) — semantic-first, live announcements and focus management carry over; HTML, ARIA landmarks, `:focus-visible`, keyboard Tab order and skip links do not.
+Standardises **authoring** accessible RN screens, targeting **WCAG 2.2 AA** as the baseline and the platform conventions of VoiceOver (iOS) and TalkBack (Android). The house rule: **real controls with the right role, label and state; never rebuild semantics from a bare `View`.** Web analog: [`fe-react:accessibility`](../../../../frontend/react/skills/accessibility/SKILL.md) — semantic-first, live announcements and focus management carry over; HTML, ARIA landmarks, `:focus-visible`, keyboard Tab order and skip links do not.
 
 **Boundary — authoring, not scanning.** This skill makes the app accessible as it is built. *Proving* it on devices (a VoiceOver / TalkBack pass, Accessibility Inspector, Android Accessibility Scanner, journeys with a screen reader on) is `qa-mobile-typescript`'s. Several WCAG 2.2 criteria (target size, a non-drag alternative, accessible authentication, consistent help) are design decisions made first — `design/accessible-by-design` decides, this skill implements.
 
@@ -36,7 +36,7 @@ Detect first: the prop family in use (`role` vs `accessibilityRole`), the compon
 - Scanning, device screen-reader journeys, audits in CI → `qa-mobile-typescript` (peer)
 - Validation message wiring on fields → [`forms`](../forms/SKILL.md) · the banner and failed regions → [`error-handling`](../error-handling/SKILL.md)
 - Reanimated Reduce Motion mechanics → [`animation`](../animation/SKILL.md) · tokens and font loading → [`styling`](../styling/SKILL.md)
-- Native Swift / Kotlin → `mobile-ios-accessibility` / `mobile-android-accessibility`
+- Native Swift / Kotlin → `mobile-ios:accessibility` / `mobile-android:accessibility`
 
 ## Lean on the platform
 

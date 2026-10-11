@@ -1,5 +1,5 @@
 ---
-name: qa-performance-shared
+name: performance-foundations
 description: Cross-stack reference for performance / load testing — workload models (smoke / average / stress / spike / soak / capacity), SLO-shaped thresholds, test-data seeding & cleanup, environment policy, observability correlation, CI integration, review checklist. Load alongside the stack's perf tool skill. Triggers (always with that sibling) "design a load test", "which workload model", "set thresholds from our SLO", "review our perf suite". Do NOT load standalone to write tool code.
 ---
 

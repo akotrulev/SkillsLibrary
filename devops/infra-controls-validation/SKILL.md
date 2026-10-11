@@ -1,6 +1,6 @@
 ---
-name: devops-infra-controls-validation
-description: Use when proving an infrastructure security control is not just CONFIGURED but actually WORKING. Static-config checks run anywhere; live-probe checks need read access to OWNED infra plus a recorded, expiring authorization line. Triggers "prove our secrets aren't in env vars", "verify TLS is actually enforced", "retest the remediated findings". Not for CSPM sweeps (`devops-cloud-posture`), cert quality (`qa-security-certificate-scan`), or git-history secrets (`qa-security-secrets-scan`).
+name: controls-validation
+description: Use when proving an infrastructure security control is not just CONFIGURED but actually WORKING. Static-config checks run anywhere; live-probe checks need read access to OWNED infra plus a recorded, expiring authorization line. Triggers "prove our secrets aren't in env vars", "verify TLS is actually enforced", "retest the remediated findings". Not for CSPM sweeps (`devops:cloud-posture`), cert quality (`qa-<stack>:certificate-scan`), or git-history secrets (`qa-<stack>:secrets-scan`).
 ---
 
 # DevOps — Infrastructure Controls Validation
@@ -21,7 +21,7 @@ carrying its own evidence line and re-runnable by id. That last property is the 
 > failure modes**: it can be *absent* (nobody configured it) or *inert* (configured and bypassed,
 > unreachable, mis-wired, or overridden). Static scanning finds the first and is structurally blind to the
 > second, because the intended state and the running state are different objects. `devops-auditor` reads
-> the manifest, `devops-iac-security` reads the template, `devops-cloud-posture` reads the account's
+> the manifest, `devops:iac-security` reads the template, `devops:cloud-posture` reads the account's
 > declared configuration — all three can be green while the running system leaks. **Every check in this
 > skill asserts the effective half**, and the family matrix below states, per control, exactly what
 > "present" means, what "effective" means, and the gap between them. If a check only re-reads the config
@@ -34,12 +34,12 @@ skill adds over the fourth.
 
 | # | Control | "Present" means | **"Effective" means** | How to validate | Owner of the *authoring* half |
 |---|---------|-----------------|-----------------------|-----------------|-------------------------------|
-| **1** | **Secrets management** | A secret store exists and the app is wired to it | The **running** workload resolves secrets *from the store*, and no secret-shaped value sits in its env / config file / IaC var / pipeline variable / state file | Dump the live task/pod/function env and diff it against the store's inventory; assert the workload identity is a role, not a key | `devops-environment-config` |
-| **1b** | **Rotation** | A rotation policy is attached | The last rotation actually **happened** within the window, and a rotated value is **picked up** by the app without a manual redeploy | `describe-secret` / `rotation-policy show` for `LastRotatedDate`; then rotate in a lower env and re-probe the app's `/health` | `devops-environment-config` |
-| **2** | **Encryption in transit** | A TLS listener / cert exists | The plaintext path is **closed or redirected**, HSTS is served, and internal service-to-service hops are TLS/mTLS too — not just the public edge | `curl -sI http://…` for a 301, `nc -z :80`, listener `SslPolicy`, mesh `PeerAuthentication STRICT` | `devops-{aws,azure}-deployment` · `devops-kubernetes` |
-| **2b** | **TLS quality** | — | *(handshake, protocol, cipher, chain, expiry)* | **Not here** — `qa-security-certificate-scan` (sslyze / testssl.sh) | `qa-security-certificate-scan` |
+| **1** | **Secrets management** | A secret store exists and the app is wired to it | The **running** workload resolves secrets *from the store*, and no secret-shaped value sits in its env / config file / IaC var / pipeline variable / state file | Dump the live task/pod/function env and diff it against the store's inventory; assert the workload identity is a role, not a key | `devops:environment-config` |
+| **1b** | **Rotation** | A rotation policy is attached | The last rotation actually **happened** within the window, and a rotated value is **picked up** by the app without a manual redeploy | `describe-secret` / `rotation-policy show` for `LastRotatedDate`; then rotate in a lower env and re-probe the app's `/health` | `devops:environment-config` |
+| **2** | **Encryption in transit** | A TLS listener / cert exists | The plaintext path is **closed or redirected**, HSTS is served, and internal service-to-service hops are TLS/mTLS too — not just the public edge | `curl -sI http://…` for a 301, `nc -z :80`, listener `SslPolicy`, mesh `PeerAuthentication STRICT` | `devops:{aws,azure}-deployment` · `devops:kubernetes` |
+| **2b** | **TLS quality** | — | *(handshake, protocol, cipher, chain, expiry)* | **Not here** — `qa-<stack>:certificate-scan` (sslyze / testssl.sh) | `qa-<stack>:certificate-scan` |
 | **3** | **Monitoring & audit logging** | Audit logging is enabled; alert rules exist | A **synthetic event actually reaches** the log store, and the alert rule it should match **actually fires** and reaches a live notification channel | Emit a canary event → query Loki/CloudWatch/Log Analytics for it → force the alarm state / fire the rule → assert the notification landed | `observability-engineer-{dotnet,java,node}` |
-| **4** | **CI/CD hardening** | A pipeline exists and deploys | It authenticates by **OIDC/WIF with no long-lived key anywhere**, actions are **SHA-pinned**, job `permissions:` are least-privilege, untrusted input never reaches a `run:` block, and prod is behind a protected branch + reviewed environment | Static parse of the workflow files **plus** an API read of the repo's secrets, rulesets, and environments — the config and the platform state must agree | `devops-{github-actions,gitlab-ci,azure-pipelines}` |
+| **4** | **CI/CD hardening** | A pipeline exists and deploys | It authenticates by **OIDC/WIF with no long-lived key anywhere**, actions are **SHA-pinned**, job `permissions:` are least-privilege, untrusted input never reaches a `run:` block, and prod is behind a protected branch + reviewed environment | Static parse of the workflow files **plus** an API read of the repo's secrets, rulesets, and environments — the config and the platform state must agree | `devops:{github-actions,gitlab-ci,azure-pipelines}` |
 
 **Two spines, per finding.** Control gaps map to **OWASP Top 10:2025** — **A02 Security Misconfiguration**
 (families 2, 4), **A04 Insecure Design** (a control with no rotation or no enforcement path was designed
@@ -140,7 +140,7 @@ curl -sI "https://$HOST/" | grep -i '^strict-transport-security:'
 Internal hops, mesh mTLS (`PeerAuthentication` STRICT, `istioctl`/`linkerd` verification), load-balancer
 minimum-TLS policy, Ingress TLS blocks, and the at-rest quick checks: **`references/secrets-and-encryption.md`**.
 
-> **The fence with `qa-security-certificate-scan`.** That skill owns **TLS quality** — protocol versions,
+> **The fence with `qa-<stack>:certificate-scan`.** That skill owns **TLS quality** — protocol versions,
 > cipher suites, forward secrecy, chain, expiry, Mozilla-policy grading, via sslyze/testssl.sh. This skill
 > owns **TLS enforcement** — that TLS is *wired to every path* and the plaintext path is closed. A perfect
 > A+ grade on `https://` is worthless while `http://` serves 200. Run both; they are orthogonal, and this
@@ -210,7 +210,7 @@ skill **re-runs and verdicts**, and nothing else in the loop edits infrastructur
 3. **Retest by id.** Re-run the *same script* (never a hand-check of the specific instance — a fix that
    patched one workflow and missed three siblings must show up), and prefix each result
    **Resolved / Resolved (differently) / Still open / Still open (regressed) / New**, per
-   `ep-standards-audit-engine`'s Mode B vocabulary. Save round N beside round 1; **never overwrite**.
+   `engineering-practices/standards-audit-engine`'s Mode B vocabulary. Save round N beside round 1; **never overwrite**.
 4. **Only re-reading the control proves resolution.** A merged PR, a green deploy, and a closed ticket are
    leads. A `PASS` line produced *this round* is evidence.
 5. **Promote the passing checks into the deploy pipeline** so the fix cannot silently regress — the
@@ -223,7 +223,7 @@ alongside the deploy job — **not** in `qa/cicd/*`, which owns the test-suite l
 perf gate, flake quarantine). The split is the library's standing fence; state it in the PR that adds them.
 
 ```yaml
-# .github/workflows/deploy.yml — a post-deploy controls gate. Cross-link devops-github-actions.
+# .github/workflows/deploy.yml — a post-deploy controls gate. Cross-link devops:github-actions.
   controls-validation:
     needs: deploy
     runs-on: ubuntu-latest
@@ -280,7 +280,7 @@ assert something about a running system that only exists after the deploy.
 - **Forcing an alarm or triggering a rotation in production without saying so.** `set-alarm-state` pages a
   human; a rotation invalidates a live credential. *Fix:* non-production by default, announced, logged,
   authorized per act.
-- **Running a broad CIS/CSPM sweep from here.** That is `devops-cloud-posture`'s job and it does it better.
+- **Running a broad CIS/CSPM sweep from here.** That is `devops:cloud-posture`'s job and it does it better.
   *Fix:* keep this suite to the four families, targeted and retestable; consume the posture report's
   findings as *input* to a validation check, not as a substitute for one.
 
@@ -288,7 +288,7 @@ assert something about a running system that only exists after the deploy.
 
 - **Validate effectiveness, never presence.** Every check asserts something about the **running** system or
   the **platform's** state. A check that only re-reads a file the static lane already read belongs to
-  `devops-auditor` / `devops-iac-security`, not here.
+  `devops-auditor` / `devops:iac-security`, not here.
 - **Checks are scripted, id-stable, and exit-coded** — one line per control (`ID VERDICT evidence`),
   non-zero exit on any `FAIL`. Ids never change or get reused; the suite is the retest.
 - **`SKIP` ≠ `PASS`.** An unrunnable check reports `SKIP` **with the reason**, and skips are counted in the
@@ -306,8 +306,8 @@ assert something about a running system that only exists after the deploy.
   script**, prefix each result with the Mode-B vocabulary, save round N beside round 1, never overwrite.
   *Resolved* is claimed only from a `PASS` produced **this round**.
 - **Own the boundary:** this skill = **targeted effectiveness validation + retest** of four named control
-  families. Broad CIS/CSPM benchmark sweeps = `devops-cloud-posture`. TLS protocol/cipher/cert quality =
-  `qa-security-certificate-scan`. Committed secrets in git history = `qa-security-secrets-scan`. Static
+  families. Broad CIS/CSPM benchmark sweeps = `devops:cloud-posture`. TLS protocol/cipher/cert quality =
+  `qa-<stack>:certificate-scan`. Committed secrets in git history = `qa-<stack>:secrets-scan`. Static
   conformance against the plugin's rules = `devops-auditor`.
 - **These gates run in the deploy pipeline** (`devops/{github-actions,gitlab-ci,azure-pipelines}`), never in
   the `qa/cicd/*` test lane. Static families on every PR; live families post-deploy, per environment.
@@ -321,7 +321,7 @@ assert something about a running system that only exists after the deploy.
 
 - `devops/agents/infra-security-tester.md` — the step-by-step owner; this skill is its **Step 5, Controls
   validation & retest**, and the retest loop above is that step's contract.
-- **`devops-cloud-posture`** — the boundary partner and the real overlap. Cloud-posture runs **broad CSPM
+- **`devops:cloud-posture`** — the boundary partner and the real overlap. Cloud-posture runs **broad CSPM
   benchmark sweeps** (Prowler / ScoutSuite across CIS + framework rows, hundreds of checks, whole account);
   this skill runs **a small targeted set proving four specific controls are effective**, and re-runs it
   after a fix. A posture finding ("CloudTrail disabled in eu-west-2") is a first-class **input** to a
@@ -329,23 +329,23 @@ assert something about a running system that only exists after the deploy.
 - `devops-auditor` — the **static conformance** sibling. Its sections G (identity & credentials), H (config
   & secrets), and I (pinning & reproducibility) declare the same rules this skill *proves*. Where a finding
   is pure static misconfig it stays with the auditor; where it needs a live probe it is this skill's.
-- `devops-environment-config` — the **authoring half of family 1**: the three-layer model, secret stores,
+- `devops:environment-config` — the **authoring half of family 1**: the three-layer model, secret stores,
   Managed Identity / IAM Role binding, startup validation, rotation strategy. It writes the control; this
   validates it. Its "What NOT to do" list is literally this skill's `SEC-*` check list.
-- `qa-security-secrets-scan` — Gitleaks / TruffleHog over the **repo and its git history**. Orthogonal:
+- `qa-<stack>:secrets-scan` — Gitleaks / TruffleHog over the **repo and its git history**. Orthogonal:
   that finds a secret that was *committed*; this finds a secret that is *live in a running workload's
   environment*. A repo can be clean while every pod leaks.
-- `qa-security-certificate-scan` — **TLS quality** (protocol, cipher, chain, expiry) via sslyze / testssl.sh.
+- `qa-<stack>:certificate-scan` — **TLS quality** (protocol, cipher, chain, expiry) via sslyze / testssl.sh.
   This skill validates TLS is **wired and enforced**; that one validates the handshake is **good**. Hand it
   the endpoint list family 2 enumerates.
 - `observability-engineer-{dotnet,java,node}` + `observability/{logs-traces-setup,metrics-setup,queries}` —
   the telemetry backend family 3 asserts against, and the owner of the fix when there is no detection
   surface. `queries` owns the LogQL/PromQL the canary check runs.
-- `devops-engineer` — **applies every fix**; this skill retests. `devops-{github-actions,gitlab-ci,azure-pipelines}`
+- `devops-engineer` — **applies every fix**; this skill retests. `devops:{github-actions,gitlab-ci,azure-pipelines}`
   own the pipeline this skill hardens *and* the deploy pipeline the gate runs in.
-- `devops-iac-security` · `devops-k8s-security` · `devops-container-runtime-security` ·
-  `devops-supply-chain-security` · `devops-threat-modeling` — the infra-security siblings. Threat-modeling supplies
+- `devops:iac-security` · `devops:kubernetes-security` · `devops:container-runtime-security` ·
+  `devops:supply-chain-security` · `devops:threat-modeling` — the infra-security siblings. Threat-modeling supplies
   *which* controls matter for this platform; supply-chain owns artifact signing/provenance (family 4's
   pinning checks stop at the reference, not the attestation).
-- `ep-standards-audit-engine` — the Mode A/B round vocabulary, evidence rules, and severity semantics the
+- `engineering-practices/standards-audit-engine` — the Mode A/B round vocabulary, evidence rules, and severity semantics the
   retest workflow borrows.

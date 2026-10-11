@@ -1,5 +1,5 @@
 ---
-name: qa-bdd-reviewer-typescript
+name: bdd-reviewer
 description: Use when reviewing existing Gherkin .feature files and TypeScript step definitions (playwright-bdd web, CucumberJS + WebdriverIO mobile) for living-documentation quality, step reusability, and correct binding/state/lifecycle. Triggers: "review these feature files", "audit our playwright-bdd step definitions", "check our BDD layer". Do NOT use to generate features (`feature-file-writer`) or step definitions (`gherkin-step-code`).
 ---
 
@@ -51,7 +51,7 @@ Audits a BDD layer across **two surfaces** — the `.feature` files (Gherkin qua
 - [ ] Cucumber-Expression captures typed explicitly (`(email: string)`), not `any`.
 - [ ] Cleanup implemented as fixture teardown (web) / `After` hook (mobile), not as Gherkin steps.
 - [ ] No hardcoded credentials/URLs — env vars / config.
-- [ ] **No inline comments in step definitions or hooks** — the step text above the binding is already the explanation, and a body long enough to need narration belongs in a page object. TSDoc only where the binding's contract can't be read off the step text and the method name; no commented-out bindings, no stray `TODO`/`FIXME`. Full rule, complex-flow test, and severities: [`ep-code-comments`](../../../../engineering-practices/code-comments/SKILL.md).
+- [ ] **No inline comments in step definitions or hooks** — the step text above the binding is already the explanation, and a body long enough to need narration belongs in a page object. TSDoc only where the binding's contract can't be read off the step text and the method name; no commented-out bindings, no stray `TODO`/`FIXME`. Full rule, complex-flow test, and severities: [`engineering-practices/code-comments`](../../../../engineering-practices/code-comments/SKILL.md).
 
 ## Binding checklist — web (playwright-bdd) model block
 

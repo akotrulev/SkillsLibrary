@@ -1,5 +1,5 @@
 ---
-name: fe-react-component-testing
+name: component-testing
 description: Use when a component, custom hook, or any front-end logic needs a dev-side test — Vitest + React Testing Library for anything that renders, plain Vitest for anything that doesn't. Triggers "unit-test this component", "test my custom hook", "test my Zod schema", "test this formatter", "test my Zustand store", "an update was not wrapped in act". Not for E2E journeys (the `qa-ui-typescript` peer).
 ---
 
@@ -240,7 +240,7 @@ it('should map a failed response to the failed state', async () => {
 
 ### Handoff
 
-Whether these assertions actually catch faults is a mutation-score question, and **StrykerJS has no skill in this library yet** — no TypeScript mutation-testing skill exists; the siblings `qa-test-quality-check-java` (PIT) and `qa-test-quality-check-dotnet` (Stryker.NET) do. Until it lands, treat mutation grading as unavailable on this stack rather than substituting a coverage number.
+Whether these assertions actually catch faults is a mutation-score question, and **StrykerJS has no skill in this library yet** — no TypeScript mutation-testing skill exists; the siblings `qa-java:test-quality-check` (PIT) and `qa-dotnet:test-quality-check` (Stryker.NET) do. Until it lands, treat mutation grading as unavailable on this stack rather than substituting a coverage number.
 
 ## Handoffs
 

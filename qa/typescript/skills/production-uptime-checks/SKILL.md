@@ -1,6 +1,6 @@
 ---
-name: qa-production-uptime-checks-typescript
-description: Use when authoring synthetic monitoring as code in Node 24 (22 supported) / TypeScript — scheduled API and Playwright-based browser checks against live staging/prod via Checkly (`@checkly/cli`). The "is it up right now" layer, distinct from CI pre-merge tests. Triggers: "add a prod uptime check", "synthetic monitor for the login flow", "monitoring as code". Not for pre-merge CI gates (`qa-ci-pipelines-typescript`) or load testing (`qa-load-testing-typescript`).
+name: production-uptime-checks
+description: Use when authoring synthetic monitoring as code in Node 24 (22 supported) / TypeScript — scheduled API and Playwright-based browser checks against live staging/prod via Checkly (`@checkly/cli`). The "is it up right now" layer, distinct from CI pre-merge tests. Triggers: "add a prod uptime check", "synthetic monitor for the login flow", "monitoring as code". Not for pre-merge CI gates (`qa-typescript:ci-pipelines`) or load testing (`qa-typescript:load-testing`).
 ---
 
 # Synthetic Monitoring as Code (Checkly · Node 24 / TypeScript) — **canonical stack**
@@ -8,7 +8,7 @@ description: Use when authoring synthetic monitoring as code in Node 24 (22 supp
 This is the **canonical** stack of the `production-uptime-checks` family. It leads in TypeScript because
 synthetic monitoring is largely a JS/TS world and **Checkly** is the strongest monitoring-as-code fit with the
 library's stack defaults: browser checks are plain `@playwright/test` specs (so they reuse the fixtures and page
-objects from `qa-ui-test-writer-playwright-typescript` verbatim), and the whole monitoring setup lives in
+objects from `qa-typescript:ui-tests-playwright` verbatim), and the whole monitoring setup lives in
 versioned TypeScript. The `dotnet` (Azure Application Insights availability tests) and `java` (Grafana Cloud
 Synthetic Monitoring) siblings are **honest ports of the discipline, not the code** — Checkly has no .NET or
 Java SDK, so each sibling re-expresses the same four ideas in its stack's most authentic tool.
@@ -22,8 +22,8 @@ hands its critical journeys to that agent for the same purpose.
 (staging/prod), continuously, alerting a human when the target is down or degraded. A synthetic check is a
 **continuously-running assertion**: you don't watch the result, you alert on its *failure*.
 
-It is **not** a CI test (once, pre-merge, against an ephemeral env — `qa-ci-pipelines-*`; § The boundary), not a
-load test (`qa-load-testing-typescript`), and not a journey author: it reuses the suite's page objects and adds
+It is **not** a CI test (once, pre-merge, against an ephemeral env — `qa-typescript:ci-pipelines`; § The boundary), not a
+load test (`qa-typescript:load-testing`), and not a journey author: it reuses the suite's page objects and adds
 the **assertion + scheduling + alerting + evidence layer**.
 
 > **The discipline this skill encodes.** A synthetic check is only worth running if its **failure reaches a
@@ -149,7 +149,7 @@ new ApiCheck('storefront-health-check', {
 });
 ```
 
-An authenticated check mints its token in a **setup script** (`qa-test-login-tokens-typescript`).
+An authenticated check mints its token in a **setup script** (`qa-typescript:test-login-tokens`).
 
 ## Check type 2 — browser checks (a real user journey, reusing your page objects)
 
@@ -226,7 +226,7 @@ then deploy**.
 | **Against** | The deployed preview/staging | The live prod/staging target |
 | **Persisted?** | No (dry-run) | Yes (a continuous monitor) |
 | **Alerts?** | No (it's a gate — green/red) | Yes (pages on failure/degradation) |
-| **Role** | A **CI test** (`qa-ci-pipelines-*` territory) | A **synthetic monitor** (this skill) |
+| **Role** | A **CI test** (`qa-typescript:ci-pipelines` territory) | A **synthetic monitor** (this skill) |
 
 **One spec, two execution modes:** the pipeline runs `checkly test --record` to gate the merge, then (on main,
 after deploy) `checkly deploy --force` — the workflow steps are in `references/details.md`.
@@ -239,7 +239,7 @@ after deploy) `checkly deploy --force` — the workflow steps are in `references
 - **A failed browser run with no trace.** On-call re-runs it by hand and the transient evidence is gone. *Fix:*
   the spec's `test.use` keeps trace, video and screenshot on failure.
 - **`maxRetries: 5` to stop the alerts.** It delays the page while users suffer. *Fix:* 1–2 retries,
-  `sameRegion: false`, and **fix the flakiness** (`qa-flaky-test-quarantine-typescript`).
+  `sameRegion: false`, and **fix the flakiness** (`qa-typescript:flaky-test-quarantine`).
 - **Re-authoring the journey inside the check.** *Fix:* import the suite's fixtures.
 - **A hard-coded URL or credential in `checkly.config.ts`.** *Fix:* `{{BASE_URL}}`, `secret: true` variables,
   `CHECKLY_API_KEY` from the CI secret store.
@@ -252,7 +252,7 @@ after deploy) `checkly deploy --force` — the workflow steps are in `references
 - **Every check has an alert channel.** Page on critical journeys, email/Slack on the rest; `sendDegraded` on
   for SLA breaches.
 - **Every browser check keeps its failure evidence** — trace and video `retain-on-failure`, a full-page
-  screenshot `only-on-failure` — and a failed run is read (`qa-evidence-capture-typescript`) before it is re-run.
+  screenshot `only-on-failure` — and a failed run is read (`qa-typescript:evidence-capture`) before it is re-run.
 - **Retries are bounded** — 1–2, `sameRegion: false`; never cranked to silence alerts.
 - **The runtime is pinned**, and browser-check code uses only the Playwright APIs that runtime ships.
 - **Wait on a condition, never a sleep.**
@@ -262,14 +262,14 @@ after deploy) `checkly deploy --force` — the workflow steps are in `references
 
 ## Cross-references
 
-- `qa-production-uptime-checks-dotnet` (Application Insights availability tests) · `qa-production-uptime-checks-java`
+- `qa-dotnet:production-uptime-checks` (Application Insights availability tests) · `qa-java:production-uptime-checks`
   (Grafana Cloud Synthetic Monitoring) — the discipline ported, not the code.
-- `qa-ui-test-writer-playwright-typescript` — the fixtures, page objects and journeys the **browser checks
+- `qa-typescript:ui-tests-playwright` — the fixtures, page objects and journeys the **browser checks
   reuse**.
-- `qa-evidence-capture-typescript` — the evidence modes the browser-check spec sets, and how a failed run's
+- `qa-typescript:evidence-capture` — the evidence modes the browser-check spec sets, and how a failed run's
   trace is read.
-- `qa-load-testing-typescript` — throughput, not uptime.
-- `qa-ci-pipelines-typescript` — the pre-merge gate against ephemeral envs; where `checkly test --record` and
+- `qa-typescript:load-testing` — throughput, not uptime.
+- `qa-typescript:ci-pipelines` — the pre-merge gate against ephemeral envs; where `checkly test --record` and
   `checkly deploy` are wired.
-- `qa-test-login-tokens-typescript` — M2M / test-user tokens for checks that hit an **authenticated** endpoint.
-- `qa-flaky-test-quarantine-typescript` — a synthetic that needs `maxRetries` cranked to stay green is flaky.
+- `qa-typescript:test-login-tokens` — M2M / test-user tokens for checks that hit an **authenticated** endpoint.
+- `qa-typescript:flaky-test-quarantine` — a synthetic that needs `maxRetries` cranked to stay green is flaky.

@@ -1,5 +1,5 @@
 ---
-name: qa-test-plan-writer
+name: test-plan-writer
 description: Use when the user asks for a feature or release test plan — the planning document that fixes scope (in/out/deferred), test approach per level, harness & tooling, environments & test data, artifacts, a scenario-level case inventory with reuse status, and entry/exit criteria. Triggers: "write a test plan for X", "plan the testing for this feature", "what do we need to test this". Do NOT use for the risk strategy alone (test-strategy), step-by-step cases (test-case-writer), or automation code.
 ---
 

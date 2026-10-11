@@ -1,6 +1,6 @@
 ---
-name: design-ux-review
-description: Use when reviewing a built UI, screenshot, mockup, or Figma flow at EXPERIENCE altitude — captures its own evidence, then Nielsen's 10 heuristics, flow friction, IA and the responsiveness budget, against `experience-plan.md` if one exists; outputs a severity-tabled findings list. Triggers "review the UX", "heuristic evaluation", "is this flow confusing". Not for code-level UI audit (`design-ui-code-audit`), a11y scans (qa `accessibility-testing`), or copy voice (`design-ux-writing`).
+name: ux-review
+description: Use when reviewing a built UI, screenshot, mockup, or Figma flow at EXPERIENCE altitude — captures its own evidence, then Nielsen's 10 heuristics, flow friction, IA and the responsiveness budget, against `experience-plan.md` if one exists; outputs a severity-tabled findings list. Triggers "review the UX", "heuristic evaluation", "is this flow confusing". Not for code-level UI audit (`design:ui-code-audit`), a11y scans (qa `accessibility-testing`), or copy voice (`design:ux-writing`).
 ---
 
 # UX heuristics — experience-level review
@@ -9,7 +9,7 @@ Reviews a design or a built UI at **experience altitude**: is the flow usable, i
 
 **What this skill owns:** the heuristic evaluation (Nielsen's 10 as review questions), flow-friction review, and IA sanity, delivered as a findings table under the house severity scale. **What it does not own:** the *code-level* UI-guideline audit ([`design/ui-code-audit`](../ui-code-audit/SKILL.md) stays at the code layer — this is the experience layer above it), automated **accessibility scanning** (a stack's / qa `accessibility-testing` runs axe/Lighthouse; this only flags a usability *heuristic* an a11y scan can't see, e.g. "no visible focus path through this flow"), **bug** hunting (qa `exploratory-charter-writer` charters an exploratory session to find *defects* — this judges the *experience* of a build that already works), copy *voice* ([`design/ux-writing`](../ux-writing/SKILL.md)), and visual *taste* ([`design/visual-identity`](../visual-identity/SKILL.md)).
 
-**Corpus authority.** The facts this skill decides with come from the vendored [`design-ui-ux-pro-max`](../ui-ux-pro-max/SKILL.md) corpus — **it is the source of truth, and where it and this skill disagree on a fact, the corpus wins.** Findings are stated against corpus guidelines rather than personal preference — each row carries a severity the review can inherit:
+**Corpus authority.** The facts this skill decides with come from the vendored [`design:corpus`](../ui-ux-pro-max/SKILL.md) corpus — **it is the source of truth, and where it and this skill disagree on a fact, the corpus wins.** Findings are stated against corpus guidelines rather than personal preference — each row carries a severity the review can inherit:
 
 ```bash
 python3 "${CLAUDE_PLUGIN_ROOT}/design/ui-ux-pro-max/scripts/search.py" "<what you observed>" --domain ux
@@ -106,11 +106,11 @@ Perceived speed is part of the experience; the budget is [`design/ux-patterns`](
 
 ## Related
 
-- [`design/ux-patterns`](../ux-patterns/SKILL.md) — the **generative** counterpart: the IA, shell, page-anatomy and responsiveness decisions this review judges a build against; `be-shared-experience-plan` carries them per initiative.
+- [`design/ux-patterns`](../ux-patterns/SKILL.md) — the **generative** counterpart: the IA, shell, page-anatomy and responsiveness decisions this review judges a build against; `dev:plan-experience` carries them per initiative.
 - [`design/ui-code-audit`](../ui-code-audit/SKILL.md) — the **code-level** UI audit one layer below this; this reviews the experience, that reviews the implementation.
 - [`design/ux-writing`](../ux-writing/SKILL.md) — owns the **wording** of labels, errors, and confirmations this review judges the *structure* of; shares the one-name-one-concept rule.
 - [`design/visual-identity`](../visual-identity/SKILL.md) — owns **visual taste**; heuristic #8 (minimalism) is the usability face of its restraint discipline.
 - A stack's `ui-rules` ([Blazor](../../frontend/blazor/skills/ui-rules/SKILL.md) · [React](../../frontend/react/skills/ui-rules/SKILL.md)) — owns the confirmation-by-object-name and empty-state *mechanics* this review defers to.
 - A stack's / qa `accessibility-testing` — runs the **automated** a11y scans; this only flags usability heuristics a scanner can't see.
 - qa `exploratory-charter-writer` — charters an exploratory session to find **defects**; this judges the **experience** of a build that already works.
-- [`design-ui-ux-pro-max`](../ui-ux-pro-max/SKILL.md) — the guideline corpus findings are cited against, plus `references/quick-reference.md` and `references/pro-rules.md`.
+- [`design:corpus`](../ui-ux-pro-max/SKILL.md) — the guideline corpus findings are cited against, plus `references/quick-reference.md` and `references/pro-rules.md`.

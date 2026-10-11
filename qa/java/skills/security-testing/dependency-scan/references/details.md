@@ -1,4 +1,4 @@
-# Deep-dive details — `qa-security-dependency-scan-java`
+# Deep-dive details — `qa-java:dependency-scan`
 
 Sections moved out of SKILL.md for on-demand loading. Read what the task needs.
 

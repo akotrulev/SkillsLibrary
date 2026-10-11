@@ -1,5 +1,5 @@
 ---
-name: fe-blazor-basics
+name: concepts
 description: Use when explaining a Blazor pattern (Static SSR / Server / WASM / Auto) — lifecycle, render modes, state containers, `[PersistentState]`, cascading, the atomic-design taxonomy. Triggers: "what's the right Blazor state container pattern", "when to use RenderMode X", "what does [PersistentState] do", "should this component own its state". Do NOT use for scaffolding (`component-writer`), reviewing (`code-review`), or non-Blazor .NET patterns (`backend/dotnet`).
 ---
 

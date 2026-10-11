@@ -1,6 +1,6 @@
 # `EncryptedSharedPreferences` → DataStore + Tink / Keystore
 
-`androidx.security:security-crypto` (`EncryptedSharedPreferences`, `EncryptedFile`, `MasterKey`) is **deprecated**. Existing use is flagged and migrated; new code never writes it. Target design: [`keystore-and-secrets`](../../offline-and-storage/references/keystore-and-secrets.md) — an **Android Keystore key**, or a **Tink `Aead` with a Keystore-wrapped keyset**, over **DataStore** for non-secret values. Rules: [`mobile-shared-security`](../../../../_shared/security/references/android.md).
+`androidx.security:security-crypto` (`EncryptedSharedPreferences`, `EncryptedFile`, `MasterKey`) is **deprecated**. Existing use is flagged and migrated; new code never writes it. Target design: [`keystore-and-secrets`](../../offline-and-storage/references/keystore-and-secrets.md) — an **Android Keystore key**, or a **Tink `Aead` with a Keystore-wrapped keyset**, over **DataStore** for non-secret values. Rules: [`mobile-<stack>:security`](../../../../_shared/security/references/android.md).
 
 ## Procedure — read old, write new, delete old
 

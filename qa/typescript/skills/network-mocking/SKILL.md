@@ -1,6 +1,6 @@
 ---
-name: qa-network-mocking-typescript
-description: Use when Playwright Test (TypeScript) UI tests must intercept, mock, throttle or assert browser network traffic, or a non-Playwright client needs a MITM proxy. Triggers "mock this XHR in the UI test", "replay a HAR", "simulate slow 3G or offline", "assert the page called endpoint X", "check the security headers". Do NOT use for API tests without a browser (qa-api-test-writer-typescript), load-level throttling (performance) or WebSocket/SSE streams (qa-realtime-stream-testing-typescript).
+name: network-mocking
+description: Use when Playwright Test (TypeScript) UI tests must intercept, mock, throttle or assert browser network traffic, or a non-Playwright client needs a MITM proxy. Triggers "mock this XHR in the UI test", "replay a HAR", "simulate slow 3G or offline", "assert the page called endpoint X", "check the security headers". Do NOT use for API tests without a browser (qa-typescript:api-tests), load-level throttling (performance) or WebSocket/SSE streams (qa-typescript:realtime-stream-testing).
 ---
 
 # QA — Network Mocking and Monitoring (TypeScript / Playwright 1.64)
@@ -58,4 +58,4 @@ with no compile-time check, and the layer is Chromium-only. Use the proxy only w
 - Page objects, fixtures and the canonical config → `qa/typescript/skills/ui-test-author/playwright`
 - Streams → `qa/typescript/skills/realtime-stream-testing`; HAR recording → `qa/typescript/skills/evidence-capture`
 - No browser at all → `qa/typescript/skills/api-test-author/writer`
-- Java and .NET → `qa-network-mocking-java`, `qa-network-mocking-dotnet`
+- Java and .NET → `qa-java:network-mocking`, `qa-dotnet:network-mocking`

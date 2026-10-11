@@ -227,4 +227,4 @@ screenshot and video.
 - `qa/dotnet/skills/ui-test-author/playwright` — `BaseTest` and page objects.
 - `qa/cicd/dotnet/skills/ci-pipelines` — the schedule gate, the secret store, the UI job's runner setup.
 - `qa/reporting/dotnet/skills/test-reports` — Allure.NUnit wiring.
-- `qa-visual-regression-typescript` (`@percy/playwright`), `qa-visual-regression-java` (`percy-playwright-java`).
+- `qa-typescript:visual-regression` (`@percy/playwright`), `qa-java:visual-regression` (`percy-playwright-java`).

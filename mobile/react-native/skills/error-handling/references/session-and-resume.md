@@ -2,7 +2,7 @@
 
 The failures where **the app changed underneath the user**: the session ended, the JS bundle on disk is older than the server expects, or the app slept for an hour. All three recover in place; all three destroy unsaved work when handled with a sign-out or reload reflex.
 
-*Deep dive for [`mobile-react-native-error-handling`](../SKILL.md). Samples have no inline comments (CLAUDE.md § Comments).*
+*Deep dive for [`mobile-react-native:error-handling`](../SKILL.md). Samples have no inline comments (CLAUDE.md § Comments).*
 
 ---
 
@@ -69,8 +69,8 @@ The root layout raises one banner entry keyed `ota.pending` while `isUpdatePendi
 - **Server-driven skew** (the API answers `426` or a `min-client` header): treat it as the same prompt when a pending update exists; when none exists, show a failed body that says to update from the store, not a retry button.
 - **Check, then fetch.** On resume call `Updates.checkForUpdateAsync()`, then `fetchUpdateAsync()` when `isAvailable`; `useUpdates()` reflects both — do not hand-roll state.
 - **Never in development.** `Updates.isEnabled` is false in dev builds and Expo Go; guard on it.
-- **Native builds lag JS.** An OTA update is only applied to a compatible native runtime (`runtimeVersion` policy — `mobile-shared-release`); a store build whose runtime is older than the server's floor needs the **forced-update path** (MASVS-CODE-2): a server-side minimum version, a blocking screen with a store link, and no other action.
-- **Report it.** The prompt shown, accepted and dismissed are events for the crash reporter, tagged with the update id so a JS error symbolicates against the right bundle (`mobile-shared-observability`).
+- **Native builds lag JS.** An OTA update is only applied to a compatible native runtime (`runtimeVersion` policy — `mobile-<stack>:release`); a store build whose runtime is older than the server's floor needs the **forced-update path** (MASVS-CODE-2): a server-side minimum version, a blocking screen with a store link, and no other action.
+- **Report it.** The prompt shown, accepted and dismissed are events for the crash reporter, tagged with the update id so a JS error symbolicates against the right bundle (`mobile-<stack>:observability`).
 
 ## App resume — revalidate, never show yesterday as current
 

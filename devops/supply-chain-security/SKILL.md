@@ -1,6 +1,6 @@
 ---
-name: devops-supply-chain-security
-description: Use when signing container images/artifacts, verifying SLSA provenance / attestations, attesting an SBOM, verifying signatures at deploy time, defending against dependency-confusion/typosquat, or hardening build-pipeline integrity — the OWASP A08 surface. Triggers "sign our images", "SLSA level 3", "dependency confusion". Do NOT use for CVE scanning or SBOM generation (`qa-security-image-infra-scan`), IaC misconfig (`devops-iac-security`), Dockerfile authoring (`devops-docker`), or CI YAML.
+name: supply-chain-security
+description: Use when signing container images/artifacts, verifying SLSA provenance / attestations, attesting an SBOM, verifying signatures at deploy time, defending against dependency-confusion/typosquat, or hardening build-pipeline integrity — the OWASP A08 surface. Triggers "sign our images", "SLSA level 3", "dependency confusion". Do NOT use for CVE scanning or SBOM generation (`qa-<stack>:image-infra-scan`), IaC misconfig (`devops:iac-security`), Dockerfile authoring (`devops:docker`), or CI YAML.
 ---
 
 # DevOps — Supply-Chain Security (Signing, Provenance & Build Integrity)
@@ -16,10 +16,10 @@ enforced at deploy).
 This skill is **language-agnostic** — every tool here is a Go binary, a CI action, or a registry setting, so
 it is one shared skill routing to `references/<topic>.md`, not a per-stack triplication. It is the
 **A08 Software and Data Integrity Failures** surface; its boundary partner
-`qa-security-image-infra-scan` owns the **A03 Software Supply Chain Failures** (vulnerability) surface.
+`qa-<stack>:image-infra-scan` owns the **A03 Software Supply Chain Failures** (vulnerability) surface.
 
 > **⚠️ The SBOM boundary — be precise; this is the whole reason both skills exist.**
-> **`qa-security-image-infra-scan` (Trivy) GENERATES and SCANS the SBOM.** It answers *"what is in this
+> **`qa-<stack>:image-infra-scan` (Trivy) GENERATES and SCANS the SBOM.** It answers *"what is in this
 > artifact, and does any of it have a known CVE?"* — `trivy image --format cyclonedx`,
 > `trivy sbom --exit-code 1`. **This skill SIGNS and ATTESTS it.** It answers *"is this artifact the one we
 > built, from the source we think, by the pipeline we think — and is this SBOM really the SBOM for
@@ -30,12 +30,12 @@ it is one shared skill routing to `references/<topic>.md`, not a per-stack tripl
 > other: a signed image full of Critical CVEs is authentic *and* vulnerable; a clean scan of an unsigned
 > image says nothing about who built it.
 
-> **⚠️ The sibling boundary — `devops-iac-security`.** Both skills sit at build/artifact posture, so they
-> get conflated. **`devops-iac-security` = IaC misconfiguration + policy-as-code** (Checkov/tfsec/Terrascan/
+> **⚠️ The sibling boundary — `devops:iac-security`.** Both skills sit at build/artifact posture, so they
+> get conflated. **`devops:iac-security` = IaC misconfiguration + policy-as-code** (Checkov/tfsec/Terrascan/
 > KICS/OPA over Terraform, Bicep, Helm, manifests — *is the declared infrastructure configured safely*).
 > **This skill = artifact integrity + provenance** (*is the thing we are about to run the thing we built*).
 > They meet at exactly one place — the **admission policy** that enforces signature verification is
-> policy-as-code authored by `devops-iac-security` / `devops-k8s-security`, and the **verification rule it
+> policy-as-code authored by `devops:iac-security` / `devops:kubernetes-security`, and the **verification rule it
 > encodes** (which identity, which issuer, which builder ID) comes from here.
 
 ## Decision matrix — sign vs attest vs verify vs detect
@@ -50,7 +50,7 @@ it is one shared skill routing to `references/<topic>.md`, not a per-stack tripl
 | Verify a **third-party** artifact before consuming it | `cosign verify` / `slsa-verifier verify-image` / `gh attestation verify` | pass/fail against the *publisher's* identity | build pipeline (pre-pull) |
 | Stop the build resolving an **internal package name from a public registry** | scoped registries + namespace reservation + source mapping (`.npmrc`, `packageSourceMapping`, Gradle `content` filters) | a resolution that *cannot* reach the public index for your namespaces | build config, permanently |
 | Detect a **typosquat / confusable** dependency name | `confused`, OSSF Scorecard, malicious-package feeds (Socket / OSV-Scanner malicious advisories) | a name-similarity + publish-anomaly finding | PR gate |
-| Find **CVEs** in the artifact / generate the SBOM | **`qa-security-image-infra-scan`** (Trivy) | CVE list, CycloneDX/SPDX SBOM | separate gate — **run both** |
+| Find **CVEs** in the artifact / generate the SBOM | **`qa-<stack>:image-infra-scan`** (Trivy) | CVE list, CycloneDX/SPDX SBOM | separate gate — **run both** |
 
 **Rule of thumb:** **sign the digest**, **attest the SBOM and the provenance to that same digest**, and
 **verify at deploy**. Detection (dep-confusion, typosquat) is a *separate, earlier* gate — signing proves
@@ -68,8 +68,8 @@ malicious package in the first place. **Both halves, or neither is worth much.**
 
 **Green ≠ safe.** A verified signature proves **authenticity and integrity**, not **safety**. It says the
 artifact is the one your pipeline produced — nothing about the CVEs inside it
-(`qa-security-image-infra-scan`), the misconfigured Terraform that deploys it (`devops-iac-security`), the
-cluster RBAC it lands in (`devops-k8s-security`), or the app's own flaws (`qa-security`). Every report from
+(`qa-<stack>:image-infra-scan`), the misconfigured Terraform that deploys it (`devops:iac-security`), the
+cluster RBAC it lands in (`devops:kubernetes-security`), or the app's own flaws (`qa-security`). Every report from
 this skill states which of the four surfaces above it covered and hands the rest off by name.
 
 ## SLSA build levels — the ladder, and what each actually requires
@@ -126,7 +126,7 @@ chmod +x /usr/local/bin/slsa-verifier
 ```
 
 > **Pin every version** — `cosign@v3.1.3`, `sigstore/cosign-installer@v4`, `slsa-verifier@v2.7.1`,
-> `actions/attest-build-provenance@v4` — for the same reason `qa-security-image-infra-scan` pins Trivy: a
+> `actions/attest-build-provenance@v4` — for the same reason `qa-<stack>:image-infra-scan` pins Trivy: a
 > silent tool upgrade that changes verification semantics turns a green gate red (or, far worse, a red gate
 > green) with nobody having made a decision. In a high-assurance pipeline, pin third-party actions by
 > **full commit SHA**, not tag — see `references/dependency-integrity.md`.
@@ -185,7 +185,7 @@ key-based fallback for the cases where keyless genuinely cannot work →
 ## Attesting the SBOM — where Trivy hands off
 
 ```bash
-# 1. qa-security-image-infra-scan (Trivy) GENERATES the SBOM. Not this skill's job.
+# 1. qa-<stack>:image-infra-scan (Trivy) GENERATES the SBOM. Not this skill's job.
 trivy image --format cyclonedx --output sbom.cdx.json "$IMAGE@$DIGEST"
 
 # 2. THIS skill binds it to the digest as a signed in-toto attestation.
@@ -198,7 +198,7 @@ cosign verify-attestation "$IMAGE@$DIGEST" \
   --certificate-oidc-issuer "https://token.actions.githubusercontent.com"
 ```
 
-The payoff is the A03 story `qa-security-image-infra-scan` describes, finally trustworthy: when the next
+The payoff is the A03 story `qa-<stack>:image-infra-scan` describes, finally trustworthy: when the next
 Log4Shell drops, you rescan the **stored SBOM** to answer "which shipped artifacts are affected?" — and a
 *signed* SBOM means the answer is evidence rather than a hopeful assumption about a file in a bucket.
 
@@ -210,7 +210,7 @@ Log4Shell drops, you rescan the **stored SBOM** to answer "which shipped artifac
 Three supported generation paths, in increasing order of assurance:
 
 ```yaml
-# --- Path A: buildx inline provenance (SLSA Build L1). Cheapest; cross-ref `devops-docker`. ---
+# --- Path A: buildx inline provenance (SLSA Build L1). Cheapest; cross-ref `devops:docker`. ---
 # Attaches a provenance + SBOM attestation to the image at build time. mode=max includes the
 # full build steps and materials; the default `mode=min` records almost nothing useful.
 - run: |
@@ -298,7 +298,7 @@ The build machine is a production system; treat it like one.
   registry password or cosign private key in CI secrets is a **blocker** finding.
 - **Pin every input.** Base images by digest (`image@sha256:…`), third-party actions by full commit SHA,
   toolchain versions to what the project targets, package managers to the manifest's declared version.
-  This is the library's **pinning invariant** (`devops-docker`, `devops/{github-actions,gitlab-ci,azure-pipelines}`)
+  This is the library's **pinning invariant** (`devops:docker`, `devops/{github-actions,gitlab-ci,azure-pipelines}`)
   — this skill's contribution is naming *why*: an unpinned mutable reference is a permanent write-access
   grant to whoever controls it.
 - **Hermetic builds.** No network fetches at build time beyond the declared, pinned dependency set: no
@@ -331,7 +331,7 @@ cosign verify "$IMAGE@$DIGEST" \
 
 ```yaml
 # 2. Cluster admission — the backstop for anything that reaches the cluster by another path
-#    (kubectl, a stale GitOps commit, a second pipeline). Authored with devops-k8s-security.
+#    (kubectl, a stale GitOps commit, a second pipeline). Authored with devops:kubernetes-security.
 apiVersion: policy.sigstore.dev/v1beta1
 kind: ClusterImagePolicy
 metadata:
@@ -371,7 +371,7 @@ library already draws for image scanning: the test lane runs the suite and publi
 lane builds, scans, signs, attests, and gates.
 
 ```yaml
-# .github/workflows/release.yml — cross-link devops-github-actions
+# .github/workflows/release.yml — cross-link devops:github-actions
 name: Build · Scan · Sign · Attest
 on:
   push:
@@ -400,7 +400,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}   # scoped, job-lived — not a static PAT
 
-      # Build and push by digest. mode=max provenance gives SLSA L1 for free (devops-docker).
+      # Build and push by digest. mode=max provenance gives SLSA L1 for free (devops:docker).
       - id: push
         run: |
           docker buildx build --push \
@@ -410,7 +410,7 @@ jobs:
             --metadata-file meta.json .
           echo "digest=$(jq -r '."containerimage.digest"' meta.json)" >> "$GITHUB_OUTPUT"
 
-      # CVE gate + SBOM generation are qa-security-image-infra-scan's job — it hands us sbom.cdx.json.
+      # CVE gate + SBOM generation are qa-<stack>:image-infra-scan's job — it hands us sbom.cdx.json.
       - uses: aquasecurity/trivy-action@0.28.0
         with:
           scan-type: image
@@ -491,7 +491,7 @@ jobs:
   controls that tag can mint signatures in your name. *Fix:* pin by full commit SHA in any job with
   signing or deploy privileges; never grant `id-token: write` to a `pull_request_target` job.
 - **Treating a verified signature as "the artifact is safe."** It proves authorship and integrity, nothing
-  more. *Fix:* run the CVE gate (`qa-security-image-infra-scan`), the IaC gate (`devops-iac-security`), and
+  more. *Fix:* run the CVE gate (`qa-<stack>:image-infra-scan`), the IaC gate (`devops:iac-security`), and
   the app-layer gates (`qa-security`) alongside; state coverage per report.
 - **Cluster-wide `enforce` admission on day one.** The first unsigned legacy image causes an outage and the
   policy gets deleted. *Fix:* ratchet — warn-only → one namespace → cluster-wide.
@@ -508,7 +508,7 @@ jobs:
   `--certificate-oidc-issuer` (never a wildcard).**
 - **Signing without enforcement does not count as done.** Ship a deploy-job `cosign verify` gate **and** a
   cluster admission policy (`policy-controller` / Kyverno), ratcheted warn → enforce.
-- **Attest, don't attach.** The SBOM (generated by `qa-security-image-infra-scan`) is bound to the digest
+- **Attest, don't attach.** The SBOM (generated by `qa-<stack>:image-infra-scan`) is bound to the digest
   with `cosign attest --type cyclonedx`; the deploy gate runs `cosign verify-attestation`.
 - **Emit build provenance and verify it** — `actions/attest-build-provenance` / `slsa-github-generator` /
   `buildx --provenance=mode=max`. State the **SLSA Build Level achieved** and what the next level requires;
@@ -524,33 +524,33 @@ jobs:
 - **CI home is the deploy pipeline** (`devops/{github-actions,gitlab-ci,azure-pipelines}`), **not** the
   `qa/cicd/*` test lane.
 - **Green ≠ safe.** A passing verification means the **integrity** surface passed. Name the handoffs —
-  CVEs (`qa-security-image-infra-scan`), IaC (`devops-iac-security`), cluster (`devops-k8s-security`),
+  CVEs (`qa-<stack>:image-infra-scan`), IaC (`devops:iac-security`), cluster (`devops:kubernetes-security`),
   app (`qa-security`) — in every report.
 - **This skill finds and gates; it does not remediate.** `devops-engineer` applies the pipeline and
   registry changes, per the library's auditor↔engineer handshake.
 
 ## Cross-references
 
-- **`qa-security-image-infra-scan`** — **the boundary partner.** Trivy **generates** the SBOM and owns
+- **`qa-<stack>:image-infra-scan`** — **the boundary partner.** Trivy **generates** the SBOM and owns
   **CVE scanning** (A03 Software Supply Chain Failures) for the image, OS packages, and IaC; this skill
   **signs and attests** what Trivy produced and owns **A08 Software and Data Integrity Failures**. Run
   both — authenticity and vulnerability are orthogonal.
-- **`devops-iac-security`** — the beside-partner in the same infra-security lane: IaC misconfiguration +
+- **`devops:iac-security`** — the beside-partner in the same infra-security lane: IaC misconfiguration +
   policy-as-code. It authors the admission policy; this skill supplies the verification rule inside it.
-- **`devops-k8s-security`** — owns **admission enforcement** (`policy-controller` `ClusterImagePolicy`,
+- **`devops:kubernetes-security`** — owns **admission enforcement** (`policy-controller` `ClusterImagePolicy`,
   Kyverno `verifyImages`, namespace opt-in labels, RBAC around the policy). The deploy-time verification
   gate is jointly owned: the *rule* is here, the *enforcement mechanism* is there.
-- **`devops-container-runtime-security`** — the runtime half; a verified image can still be exploited once
+- **`devops:container-runtime-security`** — the runtime half; a verified image can still be exploited once
   running.
-- **`devops-cloud-posture`** — registry-level controls (ECR tag immutability, ACR locks, IAM on push) live
+- **`devops:cloud-posture`** — registry-level controls (ECR tag immutability, ACR locks, IAM on push) live
   in the cloud posture sweep; the *requirement* for them is stated here.
-- **`devops-threat-modeling`** — STRIDE **T**ampering on the build pipeline is what motivates this whole
+- **`devops:threat-modeling`** — STRIDE **T**ampering on the build pipeline is what motivates this whole
   skill; the threat model scopes which of the four surfaces a given system actually needs.
-- **`devops-infra-controls-validation`** — validates that the CI/CD hardening controls named here are
+- **`devops:controls-validation`** — validates that the CI/CD hardening controls named here are
   present *and effective*, and re-tests after remediation.
 - **`devops/agents/infra-security-tester`** — the step-by-step orchestrator that loads this skill in its
   IaC-&-image-posture step and reports findings with their A08 / SLSA mapping.
-- **`devops-docker`** — image build and `buildx --provenance/--sbom`; the image this skill signs is the one
+- **`devops:docker`** — image build and `buildx --provenance/--sbom`; the image this skill signs is the one
   that skill authors. Base-image **digest pinning** is stated in both.
 - **`devops/{github-actions,gitlab-ci,azure-pipelines}`** — the **deploy pipeline** that wires the
   build → scan → sign → attest → verify chain, the OIDC permissions block, and action pinning.

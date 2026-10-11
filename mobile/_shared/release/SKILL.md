@@ -1,6 +1,6 @@
 ---
-name: mobile-shared-release
-description: Use when a mobile build must be versioned, signed, uploaded, rolled out or patched over the air — build numbers, signing without secrets in the repo, TestFlight and Play tracks, phased rollout and halt, EAS Update, symbol upload. Triggers "how do we sign in CI", "halt the rollout", "can we ship this OTA". Do NOT use for pipeline YAML (`devops-engineer`), CI test wiring (`qa-cicd-<stack>`), or store rules (`mobile-shared-store-compliance`).
+name: release
+description: Use when a mobile build must be versioned, signed, uploaded, rolled out or patched over the air — build numbers, signing without secrets in the repo, TestFlight and Play tracks, phased rollout and halt, EAS Update, symbol upload. Triggers "how do we sign in CI", "halt the rollout", "can we ship this OTA". Do NOT use for pipeline YAML (`devops-engineer`), CI test wiring (`qa-cicd-<stack>`), or store rules (`mobile-<stack>:store-compliance`).
 ---
 
 # Mobile — Release and Signing
@@ -21,9 +21,9 @@ Rules for getting a mobile build from a commit to users: **what number it carrie
 
 - Writing the CI workflow / pipeline YAML → `devops-engineer` (`devops/github-actions`, `azure-pipelines`)
 - Test sharding, Allure, device-farm wiring → `qa-cicd-<stack>`
-- App Store / Play rules and deadlines → `mobile-shared-store-compliance`
-- Where tokens live at runtime → `mobile-shared-security`
-- Crash reporter choice and telemetry → `mobile-shared-observability`
+- App Store / Play rules and deadlines → `mobile-<stack>:store-compliance`
+- Where tokens live at runtime → `mobile-<stack>:security`
+- Crash reporter choice and telemetry → `mobile-<stack>:observability`
 
 ## Version lane (verified 2026-10-10)
 
@@ -44,7 +44,7 @@ Source: github.com/actions/runner-images · developer.apple.com/news/upcoming-re
 3. **Sign with nothing in the repo.** No keystore, `.p12`, `.p8`, provisioning profile, or password in git or in the app bundle. See the table below; tool detail in the references.
 4. **Pin the toolchain.** The CI runner image **and** the Xcode version are named explicitly (`macos-15` + `Xcode 26.x`, never `macos-latest` / "latest Xcode"); the Gradle wrapper, AGP and JDK are pinned in the repo. A floating image changes the SDK under a release with no diff.
 5. **Distribute to a track first.** iOS: TestFlight internal (no review) → external (beta review) → App Store. Android: internal testing → closed → open → production. Nothing goes to production that has not sat on the previous track.
-6. **Roll out gradually, with a halt path.** iOS: *phased release* over 7 days (1 → 2 → 5 → 10 → 20 → 50 → 100 %); it can be paused up to 30 days, and **a pause stops automatic updates only — people who search and tap Update still get it**. Android: *staged rollout* by percentage; **halt** stops new installs of that version, and the fix ships as a **higher `versionCode`** (a rollback is a new, higher build of the old code). State who may halt, on which signal (crash-free users, ANR rate, error-budget burn from `mobile-shared-observability`), and the threshold.
+6. **Roll out gradually, with a halt path.** iOS: *phased release* over 7 days (1 → 2 → 5 → 10 → 20 → 50 → 100 %); it can be paused up to 30 days, and **a pause stops automatic updates only — people who search and tap Update still get it**. Android: *staged rollout* by percentage; **halt** stops new installs of that version, and the fix ships as a **higher `versionCode`** (a rollback is a new, higher build of the old code). State who may halt, on which signal (crash-free users, ANR rate, error-budget burn from `mobile-<stack>:observability`), and the threshold.
 7. **Upload symbols with every build.** A crash report without symbols is unusable. See Symbols below. A build whose symbols did not upload is not released.
 8. **Decide OTA vs store build** with the OTA rules below.
 
@@ -70,7 +70,7 @@ OTA (EAS Update, and any JS-bundle updater) changes **JavaScript and assets only
 - **Sign the updates** (code signing) so a compromised update server cannot push code.
 - **Roll out OTA like a release:** a channel per environment, a staged percentage, and a rollback (re-point the channel / republish the previous update).
 
-Anything else — "OTA any change that is not in the store binary" — is a policy violation, not a feature. `mobile-shared-store-compliance` row `L8` audits it.
+Anything else — "OTA any change that is not in the store binary" — is a policy violation, not a feature. `mobile-<stack>:store-compliance` row `L8` audits it.
 
 ## Symbols
 
@@ -81,7 +81,7 @@ Anything else — "OTA any change that is not in the store binary" — is a poli
 | **Hermes source maps** | `expo export` / Metro with `--sourcemap` | the crash reporter, keyed by release + dist | upload the **Hermes** map composed with the JS map; a plain JS map symbolicates wrong |
 | **Native debug symbols** (`.so`) | NDK build | Play Console + reporter | needed for NDK crashes |
 
-Key each upload to the exact `version (build)` the user runs — the same value the app reports as `service.version` (`mobile-shared-observability`).
+Key each upload to the exact `version (build)` the user runs — the same value the app reports as `service.version` (`mobile-<stack>:observability`).
 
 ## Output
 

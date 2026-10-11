@@ -1,12 +1,12 @@
 # Golden example — `blueprint.md`
 
-This is the filled example for `be-shared-solution-blueprint`, from a deliberately small toy initiative: **workshop-booking** — a studio lets members book seats in scheduled workshops. All five planner examples (`backend/_shared/*/references/example-*.md`) describe this same initiative, so together they form one coherent pack. **The shapes and disciplines are normative; the domain content is illustrative.** This example shows the *post-approval* state, so the question→answer loop is visible.
+This is the filled example for `dev:plan-blueprint`, from a deliberately small toy initiative: **workshop-booking** — a studio lets members book seats in scheduled workshops. All five planner examples (`backend/_shared/*/references/example-*.md`) describe this same initiative, so together they form one coherent pack. **The shapes and disciplines are normative; the domain content is illustrative.** This example shows the *post-approval* state, so the question→answer loop is visible.
 
 ---
 
 # Workshop Booking — Solution Blueprint
 
-**Date:** 2026-08-02 · **Written by:** `be-shared-solution-blueprint` · **Status:** APPROVED 2026-08-02
+**Date:** 2026-08-02 · **Written by:** `dev:plan-blueprint` · **Status:** APPROVED 2026-08-02
 **Initiative folder:** `docs/plans/001-workshop-booking/`
 **Entry mode:** NEW — empty repo, one-page business brief from the studio owner
 **Sources:** `brief.md` (owner's email, distilled via `qa/manual/requirements-breakdown`) — contributed the capability list and the cancellation policy; everything else `proposed`.
@@ -118,13 +118,13 @@ The "late cancel" consequence (does it ever block future bookings?) is **Q2** �
 
 | Area / concern | Agent | Skills it will load | Note |
 |---|---|---|---|
-| Scaffold, all three areas, persistence | `be-dotnet` | `be-dotnet-pattern-writer`, `be-dotnet-database-code`, `be-dotnet-unit-testing` | Unit tests ship with the task |
-| Service-side auth | `be-dotnet` | `be-dotnet-auth0` | SPA half is out of scope here |
-| Schema depth (index review) | `data-architect` | `data-postgresql`, `data-schema-design` | Only if the session-list query needs it |
-| Contract + integration tests | `qa-api-dotnet` | `qa-api-test-writer-dotnet` | Test basis: `api-surface.md` |
-| Access-control proof | `qa-security` | `qa-permission-testing-dotnet` | Member-vs-staff + own-booking BOLA |
-| Telemetry | `observability-engineer-dotnet` | `observability-opentelemetry-dotnet` | After the first capability's tasks land |
-| Image, IaC, pipeline, secrets | `devops-engineer` | `devops-docker`, `devops-environment-config` | |
+| Scaffold, all three areas, persistence | `be-dotnet` | `be-dotnet:patterns-apply`, `be-dotnet:persistence`, `be-dotnet:unit-testing` | Unit tests ship with the task |
+| Service-side auth | `be-dotnet` | `be-dotnet:auth0` | SPA half is out of scope here |
+| Schema depth (index review) | `data-architect` | `data:postgresql`, `data:schema-design` | Only if the session-list query needs it |
+| Contract + integration tests | `qa-api-dotnet` | `qa-dotnet:api-tests` | Test basis: `api-surface.md` |
+| Access-control proof | `qa-security` | `qa-dotnet:permission-testing` | Member-vs-staff + own-booking BOLA |
+| Telemetry | `observability-engineer-dotnet` | `be-dotnet:opentelemetry` | After the first capability's tasks land |
+| Image, IaC, pipeline, secrets | `devops-engineer` | `devops:docker`, `devops:environment-config` | |
 
 **Capabilities with no agent:** none.
 

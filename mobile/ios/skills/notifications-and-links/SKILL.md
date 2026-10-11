@@ -1,11 +1,11 @@
 ---
-name: mobile-ios-notifications-and-links
-description: Use when an iOS app needs push or local notifications, or opens from a link — APNs registration, UNUserNotificationCenter permission and delegate, notification service extension, universal links (entitlement + apple-app-site-association), URL-scheme caution. Triggers "add push", "tap opens the order", "link opens the app", "AASA". Do NOT use for route structure (`mobile-ios-navigation`), camera or location (`-device-features`), or the server that sends.
+name: push-and-deep-links
+description: Use when an iOS app needs push or local notifications, or opens from a link — APNs registration, UNUserNotificationCenter permission and delegate, notification service extension, universal links (entitlement + apple-app-site-association), URL-scheme caution. Triggers "add push", "tap opens the order", "link opens the app", "AASA". Do NOT use for route structure (`mobile-ios:navigation`), camera or location (`-device-features`), or the server that sends.
 ---
 
 # iOS — Notifications and Links
 
-Owns how the outside world gets into the app: **push and local notifications** (permission, registration, foreground display, tap, extension) and **links** (universal links, URL schemes). Both deliver **untrusted input that chooses a destination** — a payload or a URL is validated before it routes ([`mobile-shared-security`](../../../_shared/security/SKILL.md), rule K16). Where a validated URL lands is [`navigation`](../navigation/SKILL.md)'s (`onOpenURL` → route); this skill owns everything up to that call.
+Owns how the outside world gets into the app: **push and local notifications** (permission, registration, foreground display, tap, extension) and **links** (universal links, URL schemes). Both deliver **untrusted input that chooses a destination** — a payload or a URL is validated before it routes ([`mobile-<stack>:security`](../../../_shared/security/SKILL.md), rule K16). Where a validated URL lands is [`navigation`](../navigation/SKILL.md)'s (`onOpenURL` → route); this skill owns everything up to that call.
 
 ## Version lane
 
@@ -33,10 +33,10 @@ Detect the sender first (the project's own backend through APNs directly, or a v
 
 - Routes, typed destinations, restoring a path → [`navigation`](../navigation/SKILL.md)
 - Camera, location, biometrics → [`device-features`](../device-features/SKILL.md)
-- Widgets, Live Activities, App Intents, background tasks → `mobile-ios-system-integration`
+- Widgets, Live Activities, App Intents, background tasks → `mobile-ios:system-integration`
 - The sending service, the device-token table → the project's `be-*` agent
-- Store declarations (privacy manifest, entitlements as policy) → [`mobile-shared-store-compliance`](../../../_shared/store-compliance/SKILL.md)
-- Another stack → `mobile-react-native-notifications-and-links`, `mobile-android-notifications-and-links`
+- Store declarations (privacy manifest, entitlements as policy) → [`mobile-<stack>:store-compliance`](../../../_shared/store-compliance/SKILL.md)
+- Another stack → `mobile-react-native:push-and-deep-links`, `mobile-android:push-and-deep-links`
 
 ## Permission — the same lifecycle
 
@@ -44,7 +44,7 @@ The pre-prompt, the denied-is-a-working-screen rule and the foreground recheck f
 
 - **Ask in context** — after the first order is placed, not at launch. The pre-prompt says what will be sent ("Delivery updates for this order"); only Continue triggers the system prompt. Read `notificationSettings().authorizationStatus` and ask only from `.notDetermined`.
 - `.provisional` delivers quietly to the notification list without a prompt — a legitimate first step when the value is not yet proven.
-- Push **must not be required for the app to work** and must not carry promotions without an in-app opt-in and an opt-out (App Review 4.5.4, `mobile-shared-store-compliance`). Marketing and transactional notifications are separate categories the user can tell apart.
+- Push **must not be required for the app to work** and must not carry promotions without an in-app opt-in and an opt-out (App Review 4.5.4, `mobile-<stack>:store-compliance`). Marketing and transactional notifications are separate categories the user can tell apart.
 - **Denied still works**: the same information appears in an in-app list; settings shows "Notifications are off" with a button to `UIApplication.openNotificationSettingsURLString` (falls back to `openSettingsURLString`).
 - **Time Sensitive** and **Critical** interruption levels need entitlements (Critical needs an Apple approval); do not set `interruptionLevel` above `.active` for convenience.
 
@@ -81,7 +81,7 @@ Wire the delegate with `@UIApplicationDelegateAdaptor(AppDelegate.self)` in the 
 - The upload is `async` and **never blocks launch or a screen**; offline, retry on the next foreground.
 - **Delete the token server-side on sign-out and account deletion**, so the next user of the device gets nothing; call `unregisterForRemoteNotifications()` when the user turns the feature off.
 - The **Push Notifications capability** adds the `aps-environment` entitlement (`development` in debug, `production` in release, set by the provisioning profile); a build signed with the wrong environment registers but never receives.
-- The server authenticates with a **token-based APNs key (`.p8`)**, not a per-app certificate; the key lives only in the sender's secret store ([`mobile-shared-security`](../../../_shared/security/SKILL.md)). Headers and payload shape: [`references/apns-and-extensions.md`](references/apns-and-extensions.md).
+- The server authenticates with a **token-based APNs key (`.p8`)**, not a per-app certificate; the key lives only in the sender's secret store ([`mobile-<stack>:security`](../../../_shared/security/SKILL.md)). Headers and payload shape: [`references/apns-and-extensions.md`](references/apns-and-extensions.md).
 - A simulator on Xcode 14+ / iOS 16+ on Apple silicon can receive a push through `xcrun simctl push booted <bundle-id> payload.json` — handy for tap routing, no APNs involved.
 
 ## Receiving: foreground, tap, cold start
@@ -146,7 +146,7 @@ The AASA `components` shape, path exclusions, caching and testing are in [`refer
 - A universal link does not open the app when the user **types the URL** into Safari or taps a link to the same domain from that domain's own page; a long-press can choose the browser. Test through Notes, Messages or `xcrun simctl openurl`, not a Safari address bar.
 - Apple's CDN fetches the AASA, so a change lags — a device re-reads it at install or update. Never debug by editing the file in production repeatedly.
 - Opening **out**: `Link` / `openURL` only on a URL the app built from a constant host; handle the failure result. Do not probe with `canOpenURL:` (deprecated at the iOS 27 SDK); keep `LSApplicationQueriesSchemes` empty without a recorded reason.
-- Handoff, Spotlight and Siri entry points are `NSUserActivity` / App Intents — see `mobile-ios-system-integration`.
+- Handoff, Spotlight and Siri entry points are `NSUserActivity` / App Intents — see `mobile-ios:system-integration`.
 
 ## Procedure
 
@@ -172,9 +172,9 @@ Inside a `Gate: none` plan task, run none of these and report "written, not run"
 
 - URL → route, protected routes, restoration → [`navigation`](../navigation/SKILL.md)
 - Permission pattern, Settings route → [`device-features`](../device-features/SKILL.md)
-- Payload and link validation, lock-screen content, secrets → [`mobile-shared-security`](../../../_shared/security/SKILL.md)
-- Guideline 4.5.x, entitlements, background modes as policy → [`mobile-shared-store-compliance`](../../../_shared/store-compliance/SKILL.md)
-- Live Activity push, widget refresh → `mobile-ios-system-integration`
+- Payload and link validation, lock-screen content, secrets → [`mobile-<stack>:security`](../../../_shared/security/SKILL.md)
+- Guideline 4.5.x, entitlements, background modes as policy → [`mobile-<stack>:store-compliance`](../../../_shared/store-compliance/SKILL.md)
+- Live Activity push, widget refresh → `mobile-ios:system-integration`
 - Token storage → [`offline-and-storage`](../offline-and-storage/SKILL.md)
 - Push-sending service → the project's `be-*` agent
 - Link and push journeys on a device → `qa-mobile-<stack>` (peer)

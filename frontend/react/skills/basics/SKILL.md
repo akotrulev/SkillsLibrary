@@ -1,5 +1,5 @@
 ---
-name: fe-react-basics
+name: concepts
 description: Use when explaining how React 19 / the Next.js App Router actually works — Server vs Client Components and the `'use client'` boundary, hydration, hooks, `use()`/Actions/`useActionState`/`useOptimistic`, Context vs store, `ref` as a prop. Triggers "Server or Client Component here", "where does 'use client' go", "Context vs Zustand", "Hydration failed because the server rendered HTML didn't match". Not for scaffolding (`component-writer`), reviewing (`code-review`), or route files (`routing`).
 ---
 

@@ -1,6 +1,6 @@
 ---
-name: qa-responsive-testing-java
-description: Use when testing responsive layout/breakpoint behavior in Java 21 with Playwright-Java + TestNG — drive the viewport across the app's real CSS breakpoints (read from its token/theme source, never guessed), assert the layout variant at breakpoint−1 and breakpoint (BVA), verify structural geometry via bounding boxes. Triggers: "test the responsive design", "assert the nav collapses to a hamburger", "test around the breakpoints". Do NOT use for pixel-diff screenshots (qa-visual-regression-java).
+name: responsive-testing
+description: Use when testing responsive layout/breakpoint behavior in Java 21 with Playwright-Java + TestNG — drive the viewport across the app's real CSS breakpoints (read from its token/theme source, never guessed), assert the layout variant at breakpoint−1 and breakpoint (BVA), verify structural geometry via bounding boxes. Triggers: "test the responsive design", "assert the nav collapses to a hamburger", "test around the breakpoints". Do NOT use for pixel-diff screenshots (qa-java:visual-regression).
 ---
 
 # QA — Responsive / Breakpoint Testing (Java / Playwright 1.63 + TestNG)
@@ -43,7 +43,7 @@ pixel-level diffing is `visual-regression`'s job and pairs with this skill, it d
 | **Grid/column reflow** | Cards go 3-col → 2-col → 1-col at the right widths | One row per width naming its column count → `layout.columnCount(cards)` |
 | **No overflow / no clipping** | Nothing forces a horizontal scrollbar | `layout.horizontalOverflow()` is `0` |
 | **Live resize / rotation** | JS breakpoint logic reacts to a real resize | Load wide → `layout.resizeTo(narrow)` → web-first assert the swap (and back) |
-| **Whole-page look per viewport** | Everything the structural checks can't name | Hand off: `qa-visual-regression-java`, one baseline per viewport |
+| **Whole-page look per viewport** | Everything the structural checks can't name | Hand off: `qa-java:visual-regression`, one baseline per viewport |
 | **Real mobile UX (touch, DPR, UA)** | Device behavior, not CSS breakpoints | Device options per class — `ui-test-author/playwright/references/emulation-and-mobile-web.md` |
 
 ## Stack
@@ -279,12 +279,12 @@ assertion on the new variant has passed.
 
 ## Cross-references
 
-- `qa-responsive-testing-typescript` · `qa-responsive-testing-dotnet` — sibling stacks; same four ideas.
-- `qa-ui-test-writer-playwright-java` — `BaseTest`, the hooks (`lifecycle.md` §3) and the emulation reference
+- `qa-typescript:responsive-testing` · `qa-dotnet:responsive-testing` — sibling stacks; same four ideas.
+- `qa-java:ui-tests-playwright` — `BaseTest`, the hooks (`lifecycle.md` §3) and the emulation reference
   (`emulation-and-mobile-web.md`: viewport per class, device profiles, media features).
-- `qa-visual-regression-java` — the pixel complement: one baseline per viewport, after the structural checks pass.
-- `qa-accessibility-testing-java` — reflow/zoom (WCAG 1.4.10) and touch targets; run them at the same widths.
-- `qa-data-driven-testing-java` — the row pattern; here the rows feed a `@Factory` because each row needs its own
+- `qa-java:visual-regression` — the pixel complement: one baseline per viewport, after the structural checks pass.
+- `qa-java:accessibility-testing` — reflow/zoom (WCAG 1.4.10) and touch targets; run them at the same widths.
+- `qa-java:data-driven-testing` — the row pattern; here the rows feed a `@Factory` because each row needs its own
   context options.
 - `frontend/react/skills/responsive-design` (FE peer) — the dev-side skill that defines the breakpoint contract
   this skill reads; its variant-suffixed test ids (`Nav.Desktop` / `Nav.Hamburger`) are what make the variant

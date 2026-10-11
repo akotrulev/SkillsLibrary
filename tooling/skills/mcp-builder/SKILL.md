@@ -1,13 +1,13 @@
 ---
-name: tool-mcp-builder
-description: Use when a project's capabilities must reach agents as an MCP server — render a confirmed capability contract as a schema-validated server: one tool per capability, one envelope, actionable errors, a smoke test. Triggers "build an MCP for this project", "expose these functions as MCP tools". Do NOT use to derive capabilities (`tool-capability-contract`), for a terminal surface (`tool-cli-builder`), or to wrap a third-party API with no local codebase (vendor `ai-development/mcp-builder`).
+name: mcp-builder
+description: Use when a project's capabilities must reach agents as an MCP server — render a confirmed capability contract as a schema-validated server: one tool per capability, one envelope, actionable errors, a smoke test. Triggers "build an MCP for this project", "expose these functions as MCP tools". Do NOT use to derive capabilities (`tooling:capability-contract`), for a terminal surface (`tooling:cli-builder`), or to wrap a third-party API with no local codebase (vendor `ai-development/mcp-builder`).
 ---
 
 # MCP Builder — the contract, rendered as tools
 
 An MCP server is a **projection of the capability contract**, nothing more. Every design question — what tools exist, what they accept, what they return, what they refuse — was answered in `docs/specs/<NNN>-<surface>-tool-contract.md`. This skill's job is to render that document into a server that compiles, validates its inputs, and returns the same envelope from every tool.
 
-**Prerequisite: a confirmed capability contract.** No contract, no server — run `tool-capability-contract` first. Building tools from a vague description is how a surface ends up with an `execute(command: string)` tool.
+**Prerequisite: a confirmed capability contract.** No contract, no server — run `tooling:capability-contract` first. Building tools from a vague description is how a surface ends up with an `execute(command: string)` tool.
 
 **Read before writing code:** the contract's capability table, flows, and dependency section, plus `tooling/_shared/capability-contract/references/output-contract.md` — the envelope you are about to implement.
 
@@ -20,7 +20,7 @@ An MCP server is a **projection of the capability contract**, nothing more. Ever
 ## When NOT to use
 
 - No local project, just a third-party HTTP API → the vendor `ai-development/mcp-builder` skill owns the API-wrapping lane and its evaluation harness
-- The surface is for humans at a terminal → `tool-cli-builder`
+- The surface is for humans at a terminal → `tooling:cli-builder`
 - The ask is to *use* an existing MCP server → nothing to build
 
 ## Implementation lane

@@ -1,11 +1,11 @@
 ---
-name: mobile-android-views-interop
-description: Use when the Android codebase is XML Views or mixes Views and Compose — ViewBinding, Fragments and view lifecycle, RecyclerView with ListAdapter, ComposeView with DisposeOnViewTreeLifecycleDestroyed, AndroidView, edge-to-edge in Views. Triggers "add a screen to this Views app", "embed Compose in a Fragment", "wrap a View in Compose", "ComposeView leaks". Do NOT use for a new Compose screen (`mobile-android-ui-components`) or a rewrite (`-migration`).
+name: views-interop
+description: Use when the Android codebase is XML Views or mixes Views and Compose — ViewBinding, Fragments and view lifecycle, RecyclerView with ListAdapter, ComposeView with DisposeOnViewTreeLifecycleDestroyed, AndroidView, edge-to-edge in Views. Triggers "add a screen to this Views app", "embed Compose in a Fragment", "wrap a View in Compose", "ComposeView leaks". Do NOT use for a new Compose screen (`mobile-android:ui-components`) or a rewrite (`-migration`).
 ---
 
 # Android — Views and Interop
 
-Views are in **maintenance mode** (Google I/O 2026) — they are not deprecated, and most shipping apps are full of them. This skill covers the **Views lane**: how to add to and change an XML codebase safely, and the **two seams** between Views and Compose, in both directions. New screens in a Compose-first app are [`ui-components`](../ui-components/SKILL.md); moving a codebase from Views to Compose is [`mobile-android-migration`](../migration/SKILL.md). Sibling: [`mobile-ios-uikit`](../../../ios/skills/uikit/SKILL.md).
+Views are in **maintenance mode** (Google I/O 2026) — they are not deprecated, and most shipping apps are full of them. This skill covers the **Views lane**: how to add to and change an XML codebase safely, and the **two seams** between Views and Compose, in both directions. New screens in a Compose-first app are [`ui-components`](../ui-components/SKILL.md); moving a codebase from Views to Compose is [`mobile-android:migration`](../migration/SKILL.md). Sibling: [`mobile-ios:uikit`](../../../ios/skills/uikit/SKILL.md).
 
 ## Version lane
 
@@ -32,10 +32,10 @@ Detect first: `viewBinding` / `dataBinding` flags, Fragments or Activities, XML 
 ## When NOT to use
 
 - A new screen in an app that is mostly Compose → [`ui-components`](../ui-components/SKILL.md)
-- Replacing Views with Compose, Java → Kotlin, LiveData / Rx → Flow → [`mobile-android-migration`](../migration/SKILL.md)
+- Replacing Views with Compose, Java → Kotlin, LiveData / Rx → Flow → [`mobile-android:migration`](../migration/SKILL.md)
 - State ownership → [`architecture`](../architecture/SKILL.md) · routes → [`navigation`](../navigation/SKILL.md)
 - Theme and tokens → [`styling`](../styling/SKILL.md) (a Material Components XML theme is read here, written there)
-- Another stack → `mobile-ios-uikit`, `mobile-react-native-native-modules`
+- Another stack → `mobile-ios:uikit`, `mobile-react-native:native-modules`
 
 ## Inputs needed
 
@@ -131,7 +131,7 @@ fun PlayerSurface(player: Player, modifier: Modifier = Modifier) {
 - **`onRelease` releases what the View holds** (players, map handles, listeners); lifecycle-aware Views (`MapView`) also need a `LifecycleEventObserver` via `LocalLifecycleOwner` forwarding `onResume` / `onPause` / `onDestroy`.
 - `AndroidViewBinding(ItemLegacyBinding::inflate)` embeds an XML layout during a migration.
 - Do not nest a scrolling View in a scrolling composable on the same axis; give it a bounded height.
-- `WebView`: first-party content, JavaScript off by default, file access off, `shouldOverrideUrlLoading` allow-list, debugging off in release — [`mobile-shared-security`](../../../_shared/security/references/android.md) § 5.
+- `WebView`: first-party content, JavaScript off by default, file access off, `shouldOverrideUrlLoading` allow-list, debugging off in release — [`mobile-<stack>:security`](../../../_shared/security/references/android.md) § 5.
 
 ## Edge-to-edge, insets and the IME in Views
 
@@ -189,12 +189,12 @@ Inside a `Gate: none` plan task, run none of these and report "written, not run"
 - Rotate and navigate back: no crash from a stale binding; a `ComposeView` keeps its `rememberSaveable` state across a Fragment back-stack pop; LeakCanary (debug) shows no retained view.
 - With the IME open and font scale 200 %: the focused field and the list's last row stay reachable; edge-to-edge shows content under the bars with correct padding.
 - TalkBack reads every actionable View; Layout Inspector shows a flat hierarchy.
-- Dev-side tests: [`mobile-android-unit-testing`](../unit-testing/SKILL.md).
+- Dev-side tests: [`mobile-android:unit-testing`](../unit-testing/SKILL.md).
 
 ## Handoffs
 
 - New Compose screens → [`ui-components`](../ui-components/SKILL.md) · theme mapping → [`styling`](../styling/SKILL.md)
 - State and ViewModels → [`architecture`](../architecture/SKILL.md) · routes → [`navigation`](../navigation/SKILL.md)
-- Rewrites, Rx / LiveData → Flow → [`mobile-android-migration`](../migration/SKILL.md)
-- Test ids → [`test-ids`](../test-ids/SKILL.md) · accessibility → `mobile-android-accessibility`
-- WebView and manifest hardening → [`mobile-shared-security`](../../../_shared/security/SKILL.md)
+- Rewrites, Rx / LiveData → Flow → [`mobile-android:migration`](../migration/SKILL.md)
+- Test ids → [`test-ids`](../test-ids/SKILL.md) · accessibility → `mobile-android:accessibility`
+- WebView and manifest hardening → [`mobile-<stack>:security`](../../../_shared/security/SKILL.md)

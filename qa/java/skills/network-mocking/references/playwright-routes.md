@@ -470,4 +470,4 @@ public void Should_KeepSpinnerVisible_When_OrdersAreStillInFlight() {
 - `qa/java/skills/realtime-stream-testing` — WebSocket and SSE.
 - `qa/java/skills/test-data-builder` — builders for the payloads the mocks serve.
 - `qa/cicd/java/skills/ci-pipelines` — the UI job and its artifact upload.
-- `qa-network-mocking-typescript`, `qa-network-mocking-dotnet` — the sibling lanes.
+- `qa-typescript:network-mocking`, `qa-dotnet:network-mocking` — the sibling lanes.

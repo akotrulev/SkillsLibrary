@@ -208,7 +208,7 @@ the review. The build goes green once the diffs are approved, or at once when no
 
 ## Cross-references
 
-- `qa-visual-regression-dotnet`, `qa-visual-regression-java` — the same tool from .NET and Java.
+- `qa-dotnet:visual-regression`, `qa-java:visual-regression` — the same tool from .NET and Java.
 - `references/playwright-snapshots.md` — the free sibling, and the page-object and clock fixtures reused here.
 - `references/applitools.md` — the visual-AI sibling.
 - `qa/typescript/skills/ui-test-author/playwright` — the fixtures and page objects.

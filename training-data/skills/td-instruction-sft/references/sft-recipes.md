@@ -32,7 +32,7 @@ def to_messages(convo):
     return msgs
 ```
 
-PII-scrub the content (`td-data-quality`). Fix or drop turns whose real answer was wrong — the model imitates the target.
+PII-scrub the content (`training-data:data-quality`). Fix or drop turns whose real answer was wrong — the model imitates the target.
 
 ## Grounded QA from docs (the best curated domain source)
 

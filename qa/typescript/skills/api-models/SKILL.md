@@ -1,9 +1,9 @@
 ---
-name: qa-api-models-typescript
-description: Use when the user asks to create a new DTO / model / response interface in a TypeScript test project (Node 24 (22 supported) + TS strict, typically alongside supertest or axios). Triggers: "add a {Resource}Dto in TS", "create the InDto / ModDto types", "scaffold the wrapper DTO for paginated {resource} in TS". Do NOT use for the client module (`qa-api-client-writer-typescript`) or the test specs (`qa-api-test-writer-typescript`).
+name: api-models
+description: Use when the user asks to create a new DTO / model / response interface in a TypeScript test project (Node 24 (22 supported) + TS strict, typically alongside supertest or axios). Triggers: "add a {Resource}Dto in TS", "create the InDto / ModDto types", "scaffold the wrapper DTO for paginated {resource} in TS". Do NOT use for the client module (`qa-typescript:api-client-writer`) or the test specs (`qa-typescript:api-tests`).
 ---
 
-# qa-api-models-typescript
+# qa-typescript:api-models
 
 Generator skill. Scaffolds a single DTO file in the TypeScript `apitests/` package.
 
@@ -15,9 +15,9 @@ Generator skill. Scaffolds a single DTO file in the TypeScript `apitests/` packa
 
 ## When NOT to use
 
-- Reacting to a **new version of a swagger/OpenAPI spec** — start at `qa-api-spec-assets-shared`: it replaces the stored spec asset in place, derives the changed-schema work list from `git diff`, and comes back here for only the files that list names. Do not re-generate every schema because the spec moved.
+- Reacting to a **new version of a swagger/OpenAPI spec** — start at `qa-<stack>:api-spec-assets`: it replaces the stored spec asset in place, derives the changed-schema work list from `git diff`, and comes back here for only the files that list names. Do not re-generate every schema because the spec moved.
 
-- C# or Java DTOs — use `qa-api-models-dotnet` / `qa-api-models-java`.
+- C# or Java DTOs — use `qa-dotnet:api-models` / `qa-java:api-models`.
 - Runtime validation (parsing untrusted JSON, contract verification) — define a Zod/Valibot schema instead and infer the type from it.
 - Writing the client itself — use the TS API client skill.
 

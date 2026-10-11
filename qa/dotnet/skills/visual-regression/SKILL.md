@@ -1,6 +1,6 @@
 ---
-name: qa-visual-regression-dotnet
-description: Use when a .NET/NUnit Playwright suite must catch unintended visual change — screenshots against committed baselines with an image comparer, Percy, or Applitools Eyes. Triggers "add visual regression tests", "screenshot diff this page", "update the visual baselines", "the layout broke and no functional test caught it". Do NOT use for breakpoint layout (qa-responsive-testing-dotnet), accessibility scans (qa-accessibility-testing-dotnet) or failure screenshots (qa-evidence-capture-dotnet).
+name: visual-regression
+description: Use when a .NET/NUnit Playwright suite must catch unintended visual change — screenshots against committed baselines with an image comparer, Percy, or Applitools Eyes. Triggers "add visual regression tests", "screenshot diff this page", "update the visual baselines", "the layout broke and no functional test caught it". Do NOT use for breakpoint layout (qa-dotnet:responsive-testing), accessibility scans (qa-dotnet:accessibility-testing) or failure screenshots (qa-dotnet:evidence-capture).
 ---
 
 # QA — Visual Regression (.NET 10 / Playwright 1.63)
@@ -91,5 +91,5 @@ diffs across many browsers stay noisy, or a page whose *content* changes must ke
 - Failure evidence, `AddScreenDiff`, reading a trace → `qa/dotnet/skills/evidence-capture`
 - Allure wiring → `qa/reporting/dotnet/skills/test-reports`
 - The nightly job and artifact upload → `qa/cicd/dotnet/skills/ci-pipelines`, `qa/cicd/ci-conventions`
-- TypeScript and Java → `qa-visual-regression-typescript` (the runner's `toHaveScreenshot`),
-  `qa-visual-regression-java` (screenshot plus a comparator, as here)
+- TypeScript and Java → `qa-typescript:visual-regression` (the runner's `toHaveScreenshot`),
+  `qa-java:visual-regression` (screenshot plus a comparator, as here)

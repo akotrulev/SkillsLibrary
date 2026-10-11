@@ -1,9 +1,9 @@
 ---
-name: qa-api-client-writer-typescript
-description: Use when the user asks to create a new API client module (`{resource}Client.ts`) in a TypeScript API test project (Vitest + native `fetch` + Zod, Node 24 (22 supported), strict TS). Triggers: "write an API client for X", "add a {resource}Client", "scaffold the TS client for /api/{path}". Do NOT use for the Zod schemas / DTO types (`qa-api-models-typescript`) or the specs that call the client (`qa-api-test-writer-typescript`).
+name: api-client-writer
+description: Use when the user asks to create a new API client module (`{resource}Client.ts`) in a TypeScript API test project (Vitest + native `fetch` + Zod, Node 24 (22 supported), strict TS). Triggers: "write an API client for X", "add a {resource}Client", "scaffold the TS client for /api/{path}". Do NOT use for the Zod schemas / DTO types (`qa-typescript:api-models`) or the specs that call the client (`qa-typescript:api-tests`).
 ---
 
-# qa-api-client-writer-typescript
+# qa-typescript:api-client-writer
 
 Generator skill. Scaffolds a single `{resource}Client.ts` file in the TypeScript API test project under `src/clients/{api}/`, following the conventions below. Uses **native `fetch`** (built into Node 22 and 24) and **Zod** for response validation.
 
@@ -18,7 +18,7 @@ Generator skill. Scaffolds a single `{resource}Client.ts` file in the TypeScript
 - Writing the test spec — use `qa/typescript/skills/api-test-author/writer`.
 - Reviewing an existing client for convention drift — use `qa/typescript/skills/api-test-author/review`.
 - Authoring Zod schemas / DTO types — use `qa/typescript/skills/api-models` first.
-- Reacting to a **new version of a swagger/OpenAPI spec** — start at `qa/_shared/api-spec-assets` (`qa-api-spec-assets-shared`): it replaces the stored spec asset in place and derives from `git diff` exactly which client methods changed. Come back here for those methods only.
+- Reacting to a **new version of a swagger/OpenAPI spec** — start at `qa/_shared/api-spec-assets` (`qa-<stack>:api-spec-assets`): it replaces the stored spec asset in place and derives from `git diff` exactly which client methods changed. Come back here for those methods only.
 - .NET stack (RestSharp) — use `qa/dotnet/skills/api-client-writer`.
 - Java stack (RestAssured) — use `qa/java/skills/api-client-writer`.
 - Projects standardized on axios / got / supertest — these conventions assume native `fetch`.

@@ -2,7 +2,7 @@
 
 Two situational surfaces: a **write** that fails (costing work, possibly half-applied), and a **third-party dependency** that fails (someone else's JavaScript, failing on its own schedule).
 
-*Deep dive for [`fe-react-error-handling`](../SKILL.md). Load when the situation applies.*
+*Deep dive for [`fe-react:error-handling`](../SKILL.md). Load when the situation applies.*
 
 ---
 

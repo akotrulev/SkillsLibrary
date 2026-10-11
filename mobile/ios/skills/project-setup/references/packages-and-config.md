@@ -1,6 +1,6 @@
 # iOS project setup — packages, formatter and linter config
 
-Reference for `mobile-ios-project-setup`. Version facts are the skill's table; this file is the shapes.
+Reference for `mobile-ios:project-setup`. Version facts are the skill's table; this file is the shapes.
 
 ## A library package
 

@@ -1,5 +1,5 @@
 ---
-name: data-elasticsearch
+name: elasticsearch
 description: Use when designing indexes, setting up clients, securing a cluster (API keys / DLS·FLS / TLS), planning migrations, or writing queries on Elasticsearch / OpenSearch from a .NET / Java / Node backend — full-text, aggregations, vector/kNN. The destination when search outgrows Mongo, Redis, or pgvector. Triggers: "design an Elasticsearch index", "build a search query", "reindex strategy", "vector search for embeddings". Do NOT use for log shipping (`observability/logs-traces-setup`).
 ---
 

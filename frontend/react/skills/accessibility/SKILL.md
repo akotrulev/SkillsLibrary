@@ -1,5 +1,5 @@
 ---
-name: fe-react-accessibility
+name: accessibility
 description: Use when a component must work for keyboard and screen-reader users — semantic-first markup, focus management under client-side navigation, keyboard + ARIA in custom widgets via Radix/React Aria, dialog focus trap/restore, live regions. Triggers "make this component accessible", "keyboard nav for a custom widget", "focus isn't announced after navigation", "screen reader skips this control". Not for SCANNING for violations (qa `accessibility-testing`) or form validation a11y (`forms`).
 ---
 

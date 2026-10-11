@@ -1,5 +1,5 @@
 ---
-name: qa-exploratory-charter-writer
+name: exploratory-charter-writer
 description: Use when the user asks to write a session-based exploratory testing charter — bounded, mission-driven, deliberate exploration of a feature or area with a clear time-box and reportable outcome. Triggers: "write a charter for X", "plan an exploratory session for feature Y", "session-based test plan". Not for scripted test cases (test-case-writer) or filing a defect (bug-report-writer).
 ---
 

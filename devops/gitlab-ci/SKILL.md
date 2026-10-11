@@ -1,5 +1,5 @@
 ---
-name: devops-gitlab-ci
+name: gitlab-ci
 description: Use when the user asks to write, review, or modify a GitLab CI/CD pipeline (`.gitlab-ci.yml`) for build/test/deploy of Java, .NET, or TypeScript projects. Triggers: "write a `.gitlab-ci.yml` for X", "add a deploy stage to my GitLab pipeline". Do NOT use for GitHub Actions (`devops/github-actions`), Azure Pipelines (`devops/azure-pipelines`), or IaC (`devops/infrastructure-as-code`). Do NOT use for the test-suite CI lane — `qa-cicd-{java,dotnet,typescript}` owns that.
 ---
 

@@ -1,6 +1,6 @@
 ---
-name: qa-accessibility-testing-typescript
-description: Use when a Playwright Test (TypeScript) suite must scan for accessibility violations — axe-core inside UI flows, or Lighthouse CI scores. Triggers "add a11y tests", "scan for WCAG 2.2 violations", "fail CI on accessibility regressions", "set an accessibility budget". Do NOT use for the app's own accessibility implementation (the fe-* accessibility skill), pixel diffs (qa-visual-regression-typescript) or breakpoint layout (qa-responsive-testing-typescript).
+name: accessibility-testing
+description: Use when a Playwright Test (TypeScript) suite must scan for accessibility violations — axe-core inside UI flows, or Lighthouse CI scores. Triggers "add a11y tests", "scan for WCAG 2.2 violations", "fail CI on accessibility regressions", "set an accessibility budget". Do NOT use for the app's own accessibility implementation (the fe-* accessibility skill), pixel diffs (qa-typescript:visual-regression) or breakpoint layout (qa-typescript:responsive-testing).
 ---
 
 # QA — Accessibility Testing (TypeScript / Playwright 1.64)
@@ -47,7 +47,7 @@ them. `page.accessibility` was removed in 1.57 — never teach it.
 - Evidence is attached with an awaited `testInfo.attach`, which reaches the HTML report and Allure; an
   Allure-only call uses `import * as allure from 'allure-js-commons'` and is awaited.
 - Automation is the floor (roughly a third of WCAG). Keyboard, focus order and screen-reader behaviour still
-  need manual testing (`qa-exploratory-charter-writer`).
+  need manual testing (`qa-<stack>:exploratory-charter-writer`).
 
 ## Handoffs
 
@@ -55,4 +55,4 @@ them. `page.accessibility` was removed in 1.57 — never teach it.
 - Accessible-name, role and aria-snapshot assertions → its `references/assertions.md`
 - Failure evidence and traces → `qa/typescript/skills/evidence-capture`
 - The CI job and artifact upload → `qa/cicd/typescript/skills/ci-pipelines`
-- Java and .NET → `qa-accessibility-testing-java`, `qa-accessibility-testing-dotnet`
+- Java and .NET → `qa-java:accessibility-testing`, `qa-dotnet:accessibility-testing`

@@ -1,6 +1,6 @@
 ---
-name: qa-messaging-testing-java
-description: Use when a Java 21 / TestNG test suite must produce, consume, or assert messages against the project's broker — Kafka/Redpanda, AWS SQS/SNS, RabbitMQ, or Azure Service Bus. Triggers "assert the service published event X", "test the consumer's side-effect", "DLQ/DLT assertions", "seed a topic/queue in a test". Do NOT use for HTTP API assertions (use `qa-api-test-writer-java`), for message-contract verification (use `qa-api-contract-testing-java`), or for email (use `qa-email-testing-java`).
+name: messaging-testing
+description: Use when a Java 21 / TestNG test suite must produce, consume, or assert messages against the project's broker — Kafka/Redpanda, AWS SQS/SNS, RabbitMQ, or Azure Service Bus. Triggers "assert the service published event X", "test the consumer's side-effect", "DLQ/DLT assertions", "seed a topic/queue in a test". Do NOT use for HTTP API assertions (use `qa-java:api-tests`), for message-contract verification (use `qa-java:api-contract-testing`), or for email (use `qa-java:email-testing`).
 ---
 
 # QA — Messaging Testing (Java 21)
@@ -28,7 +28,7 @@ shared by every tool in the family.
 | Assert against an **Azure Service Bus** queue/topic (peek-lock, DLQ sub-queue, sessions, SQL filters) | `references/service-bus.md` | Azure-native queue/topic; explicit peek-lock settlement + DLQ sub-queue — not offsets |
 | Assert against **AWS SQS / SNS** (visibility timeout, redrive-policy DLQ, FIFO dedup, SNS fan-out) | `references/sqs.md` | AWS-native queue; delete-to-ack + visibility timeout — not a log you re-read |
 | Assert against **RabbitMQ** (exchanges, routing keys, manual `basicAck`/`nack`, DLX) | `references/rabbitmq.md` | AMQP broker; exchange/binding topology + per-message ack |
-| Assert a row was written, with no broker in the flow | `qa-db-connection-java` | Pure DB verification; reuse its Awaitility wait for the eventual-consistency side here |
+| Assert a row was written, with no broker in the flow | `qa-java:db-connection` | Pure DB verification; reuse its Awaitility wait for the eventual-consistency side here |
 
 **Rule of thumb:** *A partitioned log you read by offset, with consumer groups and an app-level DLT?* → Kafka.
 *A different broker?* → the matching sibling. *No broker at all?* → DB/API-mocking. All four messaging

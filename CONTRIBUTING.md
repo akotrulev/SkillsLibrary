@@ -51,7 +51,7 @@ Step-by-step orchestrator agents live in `<domain>/agents/<name>.md`. Copy `.ski
 
 **Vocabulary is fixed.** An agent's own operating procedure is numbered in **steps** (`## Steps`, `| # | Step | Goal | …`); the work items any plan it writes hands out are **tasks** (flat and ordered, ids prefixed by the family of work — `C1`, `B1…Bn`, `F1…Fn` — one deliverable each) — see the Planning rules in `CLAUDE.md`. Never call either a *phase* or a *slice*, in a heading, a table, or prose.
 
-**The brownfield structure is mandatory.** Every agent must be able to orient in an existing codebase/suite/schema, fix (Mode A: reproduce → triage → smallest correct change → verify → sweep the class), and extend (Mode B: reuse existing seams, re-enter only the touched steps) — not just author from zero. That means: the two-modes note up top, the four-part `## Working on existing <X> (brownfield)` section, the `Mode: FIX | EXTEND` brownfield output contract, and the `ep-*` loading sentence (or the inlined-discipline variant when the agent's plugin doesn't bundle `engineering-practices/` — see `data-architect`). An agent PR without this section is incomplete.
+**The brownfield structure is mandatory.** Every agent must be able to orient in an existing codebase/suite/schema, fix (Mode A: reproduce → triage → smallest correct change → verify → sweep the class), and extend (Mode B: reuse existing seams, re-enter only the touched steps) — not just author from zero. That means: the two-modes note up top, the four-part `## Working on existing <X> (brownfield)` section, the `Mode: FIX | EXTEND` brownfield output contract, and the `dev:*` loading sentence (or the inlined-discipline variant when the agent's plugin doesn't bundle `engineering-practices/` — see `data-architect`). An agent PR without this section is incomplete.
 
 ## Writing a good `description`
 
@@ -72,7 +72,7 @@ Bad:
 ## Naming conventions
 
 - Folders: `kebab-case`
-- Skill names in frontmatter: the domain prefix plus the folder name. Prefixes: `ep`, `be`, `fe`, `qa`, `data`, `design`, `observability`, `devops`, `secgov`, `pentest`, `purpleteam`, `ba`, `td`, `tool`, `auth`, `mobile`. A stack-scoped skill adds its stack — after the prefix in backend and frontend (`be-dotnet-pattern-writer`, `be-shared-delivery-plan`, `fe-react-data-grid`, `mobile-ios-navigation`), as a suffix in qa (`qa-api-project-setup-dotnet`). A folder that already starts with its prefix is not doubled (`design/design-tokens` → `design-tokens`). Never rename a published skill; installs resolve it by name
+- Skill names in frontmatter: the domain prefix plus the folder name. Prefixes: `ep`, `be`, `fe`, `qa`, `data`, `design`, `observability`, `devops`, `secgov`, `pentest`, `purpleteam`, `ba`, `td`, `tool`, `auth`, `mobile`. A stack-scoped skill adds its stack — after the prefix in backend and frontend (`be-dotnet:patterns-apply`, `dev:plan-delivery`, `fe-react:data-grid`, `mobile-ios:navigation`), as a suffix in qa (`qa-dotnet:api-project-setup`). A folder that already starts with its prefix is not doubled (`design/design-tokens` → `design:tokens`). Never rename a published skill; installs resolve it by name
 - Stack-specific skills: include the stack in the path (`auth/auth0-react`, not `auth/react`)
 
 ## Testing a new skill

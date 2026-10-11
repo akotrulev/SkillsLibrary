@@ -1,6 +1,6 @@
 ---
-name: qa-mobile-screen-objects-java
-description: Use when the user wants a Java Appium page object created or updated from elements already discovered on a live screen. Triggers: "create a page object for the Login screen", "add a page for the … screen", "implement the … page". Do NOT use for discovering a screen's elements (`qa-mobile-screen-explorer-java`) or web page objects (`qa-page-object-design-java`).
+name: mobile-screen-objects
+description: Use when the user wants a Java Appium page object created or updated from elements already discovered on a live screen. Triggers: "create a page object for the Login screen", "add a page for the … screen", "implement the … page". Do NOT use for discovering a screen's elements (`qa-java:mobile-screen-explorer`) or web page objects (`qa-java:page-object-design`).
 ---
 
 # QA — Appium Page Object Builder (Java)

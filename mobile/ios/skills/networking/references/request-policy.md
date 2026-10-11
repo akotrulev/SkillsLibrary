@@ -145,7 +145,7 @@ actor TokenStore {
 - **Single flight**: N concurrent `401`s share one `Task`; the others find the token already changed and just replay.
 - **Replay once.** A second `401` is `.unauthorized`, not another refresh.
 - The refresh token and access token are persisted through the Keychain with a `…ThisDeviceOnly` class ([`offline-and-storage`](../../offline-and-storage/SKILL.md)); the actor's `persist` closure is that one call.
-- A refresh that fails with `invalid_grant` clears the credentials and signals re-auth — a modal in place, biometric first where enrolled (`auth-auth0-ios`'s `CredentialsManager` is the Auth0 shape).
+- A refresh that fails with `invalid_grant` clears the credentials and signals re-auth — a modal in place, biometric first where enrolled (`mobile-ios:auth0`'s `CredentialsManager` is the Auth0 shape).
 
 ## 5. The WebSocket wrapper
 
@@ -182,5 +182,5 @@ The owner (`.task` on the screen, gated by `scenePhase == .active`) iterates `ev
 ## 6. Uploads and large downloads
 
 - User-initiated uploads under the `.upload` budget use `session.upload(for:from:)` / `upload(for:fromFile:)`; a file is streamed from disk, never loaded as `Data`.
-- A transfer that must survive suspension uses a **background `URLSession`** (`URLSessionConfiguration.background(withIdentifier:)`) — that is `mobile-ios-system-integration`'s lane.
+- A transfer that must survive suspension uses a **background `URLSession`** (`URLSessionConfiguration.background(withIdentifier:)`) — that is `mobile-ios:system-integration`'s lane.
 - Resumable downloads keep `resumeData` from `URLError.downloadTaskResumeData`; clean temp files on completion.

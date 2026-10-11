@@ -1,6 +1,6 @@
 ---
-name: qa-ai-answer-quality-testing-dotnet
-description: Use when testing a RAG feature from a .NET / NUnit suite — decompose RETRIEVAL from GENERATION so a bad answer is localized, then assert the RAG triad (context relevance · groundedness · answer relevance) plus retrieval-ranking metrics; Ragas (default), DeepEval or promptfoo. Triggers "test our RAG pipeline", "is the answer grounded in the retrieved chunks", "evaluate context precision/recall", "build a RAG golden set". Not for non-RAG LLM evals (`qa-ai-feature-testing-dotnet`).
+name: ai-answer-quality-testing
+description: Use when testing a RAG feature from a .NET / NUnit suite — decompose RETRIEVAL from GENERATION so a bad answer is localized, then assert the RAG triad (context relevance · groundedness · answer relevance) plus retrieval-ranking metrics; Ragas (default), DeepEval or promptfoo. Triggers "test our RAG pipeline", "is the answer grounded in the retrieved chunks", "evaluate context precision/recall", "build a RAG golden set". Not for non-RAG LLM evals (`qa-dotnet:ai-feature-testing`).
 ---
 
 # RAG Testing (.NET 8 / NUnit — retrieval ⊕ generation, Ragas-spined)
@@ -12,7 +12,7 @@ the chunk and hallucinated past it). **The cardinal discipline of RAG testing is
 each separately**, then assert end-to-end. An end-to-end-only suite tells you *that* the answer is wrong; it can't
 tell you *which half to fix* — which is the entire point of testing a RAG.
 
-This skill is the **RAG specialization of `qa-ai-feature-testing-dotnet`** — it inherits that skill's four ideas
+This skill is the **RAG specialization of `qa-dotnet:ai-feature-testing`** — it inherits that skill's four ideas
 (property-not-string · the-judge-is-a-versioned-artifact · an-eval-is-a-dataset · regression-vs-stochastic), its
 judge-pinning + calibration discipline, and its spine mechanics. It does **not** repeat them. What it adds is the
 **retrieval ⊕ generation decomposition**, the **RAG triad**, **retrieval-ranking metrics**, and the **golden set
@@ -52,14 +52,14 @@ that carries reference contexts** — the things a generic LLM-output test doesn
 
 **Rule of thumb:** start at the **retrieval** rows — if recall is broken, no generator fix helps. Use the
 **deterministic** ranking metrics whenever you have a labeled relevant-doc set; fall to the **LLM-judged** triad
-legs when you don't. The generation rows are `qa-ai-feature-testing-dotnet`'s ladder applied to a *grounded* answer.
+legs when you don't. The generation rows are `qa-dotnet:ai-feature-testing`'s ladder applied to a *grounded* answer.
 
 ## Two-stage testing
 
 ### Stage 1 — retrieval in isolation (deterministic when you have labels)
 
 When the golden set labels which chunk-ids are relevant per query, the retriever is a **ranking function** and you
-score it with classic IR metrics — no LLM, no cost, no flake. This is `qa-data-driven-testing-dotnet` over
+score it with classic IR metrics — no LLM, no cost, no flake. This is `qa-dotnet:data-driven-testing` over
 retrieval results.
 
 ```csharp
@@ -111,7 +111,7 @@ names the culprit.
 ## The golden set — it carries reference CONTEXTS
 
 The single structural difference from an `ai-feature-testing` dataset: each row carries the **ground-truth relevant
-contexts/chunk-ids** alongside the reference answer. Build it with `qa-data-driven-testing-dotnet` mechanics
+contexts/chunk-ids** alongside the reference answer. Build it with `qa-dotnet:data-driven-testing` mechanics
 (one row = one named case, loaded from an external file), and **never** commit real customer PII.
 
 ```jsonc
@@ -134,7 +134,7 @@ contexts/chunk-ids** alongside the reference answer. Build it with `qa-data-driv
 
 ## Choosing the spine — Ragas (default for RAG) vs DeepEval vs promptfoo
 
-The four-ideas + judge-pinning + calibration all come from `qa-ai-feature-testing-dotnet`; this skill only adds
+The four-ideas + judge-pinning + calibration all come from `qa-dotnet:ai-feature-testing`; this skill only adds
 *which* assertions. Pick **one** spine per suite:
 
 - **Ragas** (`references/ragas.md`) — the **RAG-native** framework and the default here: the four canonical RAG
@@ -142,9 +142,9 @@ The four-ideas + judge-pinning + calibration all come from `qa-ai-feature-testin
   FactualCorrectness, and a corpus→test-set **generator**. Python — driven via `Process` + `System.Text.Json`
   exactly like promptfoo/DeepEval; pin the evaluator LLM to the house-default Claude.
 - **DeepEval** — when the RAG suite lives beside a broader DeepEval suite (its `Contextual*`/`Faithfulness`/
-  `AnswerRelevancy` metrics map 1:1 to the triad). See `qa-ai-feature-testing-dotnet`'s `references/deepeval.md`.
+  `AnswerRelevancy` metrics map 1:1 to the triad). See `qa-dotnet:ai-feature-testing`'s `references/deepeval.md`.
 - **promptfoo** — when you want the declarative YAML matrix: `context-faithfulness` / `context-recall` /
-  `context-relevance` / `answer-relevance` assertions over a CSV of cases. See `qa-ai-feature-testing-dotnet`.
+  `context-relevance` / `answer-relevance` assertions over a CSV of cases. See `qa-dotnet:ai-feature-testing`.
 
 **Don't double-run the same cases on two spines.** Deterministic retrieval metrics (stage 1) you compute in-code
 regardless of spine.
@@ -185,9 +185,9 @@ metrics are *unchanged* (recall@5 still 0.85) → retrieval is fine; the fault i
 fixed context) reproduces the low faithfulness → confirmed: a prompt edit made the model embellish. The
 decomposition turned "the RAG got worse" into "this prompt change broke grounding" in two sub-tests.
 
-**Composing with the parent + data-driven + db:** the **golden set** uses `qa-data-driven-testing-dotnet`
-mechanics; the **judge** is pinned + calibrated per `qa-ai-feature-testing-dotnet`; the **index fixture** (seed the
-vector store, assert state, tear down) reuses `qa-db-testing-*-dotnet` discipline for the store; the **stochastic**
+**Composing with the parent + data-driven + db:** the **golden set** uses `qa-dotnet:data-driven-testing`
+mechanics; the **judge** is pinned + calibrated per `qa-dotnet:ai-feature-testing`; the **index fixture** (seed the
+vector store, assert state, tear down) reuses `qa-dotnet:db-*` discipline for the store; the **stochastic**
 noise-sensitivity check asserts a pass-rate (parent idea #4), not a single sample.
 
 ## Rules (hard constraints)
@@ -202,20 +202,20 @@ noise-sensitivity check asserts a pass-rate (parent idea #4), not a single sampl
   relevance only when they don't. **Never assert the answer string.**
 - **Inherit, don't repeat, the parent skill:** the four ideas, judge model-id pinning + gold-set calibration,
   regression-vs-stochastic (sample N≥3 for a rate), budgets-are-assertions, keys-via-env, no-PII all come from
-  `qa-ai-feature-testing-dotnet`. Async all the way; no `Thread.Sleep`.
+  `qa-dotnet:ai-feature-testing`. Async all the way; no `Thread.Sleep`.
 
 ## Cross-references
 
-- **`qa-ai-feature-testing-dotnet`** — the **parent**: the four ideas, the assertion ladder, judge-pinning +
+- **`qa-dotnet:ai-feature-testing`** — the **parent**: the four ideas, the assertion ladder, judge-pinning +
   calibration, the spine choice (promptfoo/DeepEval) and their references. RAG testing is its specialization; read
   it first.
 - `references/ragas.md` — the **RAG-native spine**: Ragas metrics + the corpus→test-set generator, invoked as a
   subprocess (`Process` + `System.Text.Json`), evaluator LLM pinned to Claude.
-- `qa-data-driven-testing-dotnet` — the golden-set row mechanics (one row = one named case, loaded externally).
-- `qa-db-connection-dotnet` / `…-testcontainers-dotnet` — seed/assert/tear-down the **vector or hybrid index**
+- `qa-dotnet:data-driven-testing` — the golden-set row mechanics (one row = one named case, loaded externally).
+- `qa-dotnet:db-connection` / `…-testcontainers-dotnet` — seed/assert/tear-down the **vector or hybrid index**
   the retriever reads (the RAG "DB").
-- `qa-ai-answer-quality-testing-typescript` · `qa-ai-answer-quality-testing-java` — the sibling stacks; same five ideas, Ragas/DeepEval driven
+- `qa-typescript:ai-answer-quality-testing` · `qa-java:ai-answer-quality-testing` — the sibling stacks; same five ideas, Ragas/DeepEval driven
   as a subprocess via `execa`/`ProcessBuilder`.
-- `qa-_shared-quality-metrics` — track triad + recall@k **over time** (a declining recall is a silent index/embed
-  regression). `qa-test-reports-dotnet` — each stage/case as a named result.
+- `qa-<stack>:quality-metrics` — track triad + recall@k **over time** (a declining recall is a silent index/embed
+  regression). `qa-dotnet:test-reports` — each stage/case as a named result.
 - The `qa-llm-dotnet` **agent** owns this skill alongside `ai-feature-testing` (RAG is a step of the LLM-eval run).

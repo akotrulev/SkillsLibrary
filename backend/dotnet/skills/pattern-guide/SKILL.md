@@ -1,5 +1,5 @@
 ---
-name: be-dotnet-pattern-guide
+name: patterns
 description: Use when the user asks to explain, describe, or look up a design pattern in C#/.NET (10 primary, 8-9 supported). Triggers: "what is the strategy pattern in C#", "explain CQRS with MediatR", "when should I use the repository pattern in .NET". Do NOT use for scaffolding code into a repo (use backend/dotnet/skills/pattern-writer) or for reviewing existing code (use backend/dotnet/skills/code-review).
 ---
 

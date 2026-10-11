@@ -1,11 +1,11 @@
 ---
-name: td-instruction-sft
-description: Use when building supervised fine-tuning (SFT) data for a small LLM — single/multi-turn chat, instruction/response pairs, tool-use traces, and system prompts. Triggers: "build an SFT dataset", "make instruction-tuning data", "multi-turn chat data for fine-tuning", "tool-use / function-calling training traces", "convert our support logs into SFT data". Do NOT use for pretraining text (`td-pretraining-corpus`), preference/DPO data (`td-preference-data`), or eval sets (`td-eval-sets`).
+name: instruction-sft
+description: Use when building supervised fine-tuning (SFT) data for a small LLM — single/multi-turn chat, instruction/response pairs, tool-use traces, and system prompts. Triggers: "build an SFT dataset", "make instruction-tuning data", "multi-turn chat data for fine-tuning", "tool-use / function-calling training traces", "convert our support logs into SFT data". Do NOT use for pretraining text (`training-data:pretraining-corpus`), preference/DPO data (`training-data:preference-data`), or eval sets (`training-data:eval-sets`).
 ---
 
 # Training Data — Instruction / SFT
 
-The data that turns a base model into one that follows instructions and holds a conversation. SFT quality beats SFT quantity by a wide margin for small models — **a few thousand excellent, diverse, correctly-formatted examples outperform a hundred thousand mediocre ones** (the LIMA result). This skill owns instruction/chat data end-to-end: task taxonomy → sourcing (curate and/or synthesize) → formatting → quality gate → split. It leans on `td-synthetic-generation` for the teacher-model path, `td-data-quality` for the gate, and `td-dataset-formats` for the `messages` shape.
+The data that turns a base model into one that follows instructions and holds a conversation. SFT quality beats SFT quantity by a wide margin for small models — **a few thousand excellent, diverse, correctly-formatted examples outperform a hundred thousand mediocre ones** (the LIMA result). This skill owns instruction/chat data end-to-end: task taxonomy → sourcing (curate and/or synthesize) → formatting → quality gate → split. It leans on `training-data:synthetic-generation` for the teacher-model path, `training-data:data-quality` for the gate, and `training-data:dataset-formats` for the `messages` shape.
 
 ## When to use
 
@@ -17,10 +17,10 @@ The data that turns a base model into one that follows instructions and holds a 
 
 ## When NOT to use
 
-- Raw pretraining text → `td-pretraining-corpus`
-- chosen/rejected preference data → `td-preference-data`
-- Benchmarks / held-out eval → `td-eval-sets`
-- Multimodal instruction data → `td-vision-language-data`
+- Raw pretraining text → `training-data:pretraining-corpus`
+- chosen/rejected preference data → `training-data:preference-data`
+- Benchmarks / held-out eval → `training-data:eval-sets`
+- Multimodal instruction data → `training-data:vision-language-data`
 
 ## Start from the task taxonomy, not the data you happen to have
 
@@ -28,7 +28,7 @@ An SFT set teaches a *distribution of tasks*. Decide that distribution first, th
 
 - open QA · closed/grounded QA · summarization · rewriting/editing · classification/extraction · reasoning/math · code (write/explain/fix) · multi-turn dialogue · instruction-following with constraints · refusal/safety · tool use.
 
-Weight to the product (a support bot needs dialogue + grounded QA + refusal; a coding model needs code + reasoning). Track coverage with the `meta.task` tag (`td-dataset-formats`) and report the composition table in the card. **Balance is a first-class requirement, not an afterthought** — a set that is 60% one task produces a one-task model.
+Weight to the product (a support bot needs dialogue + grounded QA + refusal; a coding model needs code + reasoning). Track coverage with the `meta.task` tag (`training-data:dataset-formats`) and report the composition table in the card. **Balance is a first-class requirement, not an afterthought** — a set that is 60% one task produces a one-task model.
 
 ## Two sourcing paths, usually blended
 
@@ -36,26 +36,26 @@ Weight to the product (a support bot needs dialogue + grounded QA + refusal; a c
 
 Real conversations are gold — they carry genuine user phrasing and real tasks. Turn them into SFT shape:
 
-- **Logs / transcripts** → `messages`, cleaned of PII (`td-data-quality`), with the good assistant turn as the target. Drop or fix turns where the real answer was wrong — the model imitates the target verbatim.
+- **Logs / transcripts** → `messages`, cleaned of PII (`training-data:data-quality`), with the good assistant turn as the target. Drop or fix turns where the real answer was wrong — the model imitates the target verbatim.
 - **Docs / FAQ / tickets** → grounded QA pairs (question + the doc-supported answer). This is the most useful curated source for a domain model.
-- **Public SFT sets** (OpenHermes, Tulu, Dolly, OASST, No Robots, code-instruct sets) — convert to `messages` (`td-dataset-formats`), keep provenance, and **decontaminate against your evals** (public sets are frequently contaminated).
+- **Public SFT sets** (OpenHermes, Tulu, Dolly, OASST, No Robots, code-instruct sets) — convert to `messages` (`training-data:dataset-formats`), keep provenance, and **decontaminate against your evals** (public sets are frequently contaminated).
 
 ### Synthesize with a teacher
 
-For coverage the real data doesn't reach, generate it (`td-synthetic-generation`): seed by crossed axes, expand with self-instruct/evol-instruct, ground QA in your corpus, grade with a pinned judge. Flag every synthetic record `synthetic-review-required`. Grounded synthesis (QA about *your* documents) is both more useful and less hallucinated than free invention.
+For coverage the real data doesn't reach, generate it (`training-data:synthetic-generation`): seed by crossed axes, expand with self-instruct/evol-instruct, ground QA in your corpus, grade with a pinned judge. Flag every synthetic record `synthetic-review-required`. Grounded synthesis (QA about *your* documents) is both more useful and less hallucinated than free invention.
 
 The strongest small-model SFT sets are **blended**: real data for authentic distribution, synthetic for coverage and difficulty tail.
 
 ## Formatting — where SFT sets quietly break
 
-- **Store structured `messages`; never bake the chat template into `content`** (`td-dataset-formats`). The trainer applies the model's own template.
+- **Store structured `messages`; never bake the chat template into `content`** (`training-data:dataset-formats`). The trainer applies the model's own template.
 - **Only the assistant turn(s) are the learning target.** Confirm the trainer masks the loss on system/user tokens (train on completions only) — training on the user's turn teaches the model to write *questions*. This is a config point but the data must be shaped for it (clean role boundaries).
 - **Multi-turn records end on `assistant`** and keep the full prior context; don't flatten a conversation into disconnected single turns if the task is dialogue.
 - **The system prompt is a distribution you choose.** Fixed (one persona), varied (many personas — improves robustness), or absent — decide deliberately and record it. If production always sends a specific system prompt, train with it.
 
 ## Tool-use traces
 
-Function-calling data needs the full trace intact (`td-dataset-formats` catalog): `tools` schema → user turn → assistant `tool_calls` (arguments as a JSON string) → `role: "tool"` result → final assistant answer. Rules:
+Function-calling data needs the full trace intact (`training-data:dataset-formats` catalog): `tools` schema → user turn → assistant `tool_calls` (arguments as a JSON string) → `role: "tool"` result → final assistant answer. Rules:
 
 - **The tool call must be valid against the schema** — wrong argument names or types teach broken calling. Validate every trace's `arguments` against its `tools` JSON Schema before keeping it.
 - Include **negative cases**: when *not* to call a tool, and how to recover from a tool error (a `tool` message carrying an error, then a graceful assistant response). A model trained only on happy-path calls hallucinates calls and can't handle failures.
@@ -63,16 +63,16 @@ Function-calling data needs the full trace intact (`td-dataset-formats` catalog)
 
 ## Quality gate
 
-Route every SFT record through `td-data-quality`: PII scrub, near-dedup (Jaccard 0.7 — paraphrase is the duplication here), and decontamination against evals. Then an **SFT-specific content check**:
+Route every SFT record through `training-data:data-quality`: PII scrub, near-dedup (Jaccard 0.7 — paraphrase is the duplication here), and decontamination against evals. Then an **SFT-specific content check**:
 
-- The assistant answer actually *follows the instruction* and is correct/grounded (LLM grade against a rubric, judge pinned — `td-synthetic-generation`).
+- The assistant answer actually *follows the instruction* and is correct/grounded (LLM grade against a rubric, judge pinned — `training-data:synthetic-generation`).
 - No truncation, no leaked template tokens, no "As an AI language model" boilerplate unless intended.
 - Length sanity — a set of one-word answers teaches terseness; a set of essays teaches padding.
 - Keep dropped records with reasons.
 
 ## Split
 
-90/5/5 or a fixed held-out test, split by dedup cluster, frozen (`td-dataset-formats`). The test split doubles as an instruction-following eval — hand its shape to `td-eval-sets` if you want scored metrics.
+90/5/5 or a fixed held-out test, split by dedup cluster, frozen (`training-data:dataset-formats`). The test split doubles as an instruction-following eval — hand its shape to `training-data:eval-sets` if you want scored metrics.
 
 ## Hard rules
 

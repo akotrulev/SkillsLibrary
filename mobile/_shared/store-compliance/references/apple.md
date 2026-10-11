@@ -102,11 +102,11 @@ An app that lets a person create an account must let them **delete it inside the
 
 An app may not download, install or execute code that introduces or changes features after review. Interpreted JavaScript run by the app's own WebKit / JavaScriptCore runtime is permitted **provided it does not change the primary purpose** of the app as reviewed.
 
-For OTA tooling (`expo-updates`, EAS Update, CodePush successors): ship JS and assets only; never native modules, never new entitlements or permissions; keep updates inside the declared runtime version (`runtimeVersion` fingerprint policy); do not use updates to enable a feature that was not in review. `mobile-shared-release` owns the mechanics; this file owns the rule.
+For OTA tooling (`expo-updates`, EAS Update, CodePush successors): ship JS and assets only; never native modules, never new entitlements or permissions; keep updates inside the declared runtime version (`runtimeVersion` fingerprint policy); do not use updates to enable a feature that was not in review. `mobile-<stack>:release` owns the mechanics; this file owns the rule.
 
 ## 8. Payments — 3.1.1, and login — 4.8
 
-- **3.1.1:** digital goods and features unlocked in the app use In-App Purchase. The repo check: no external payment link or price comparison for digital goods outside a region/entitlement where Apple permits it, no custom paywall that bypasses StoreKit. Mechanics live in `mobile-shared-in-app-purchases`.
+- **3.1.1:** digital goods and features unlocked in the app use In-App Purchase. The repo check: no external payment link or price comparison for digital goods outside a region/entitlement where Apple permits it, no custom paywall that bypasses StoreKit. Mechanics live in `mobile-<stack>:in-app-purchases`.
 - **4.8:** an app whose primary sign-in is a third-party or social login offers an equivalent login service that limits data collection to name and email, lets the user hide their email, and does not track — Sign in with Apple satisfies it. An app whose only login is the company's own account system is exempt.
 
 ## 9. Sharing data with third-party AI — 5.1.2

@@ -1,5 +1,5 @@
 ---
-name: be-java-pattern-writer
+name: patterns-apply
 description: Use when the user asks to scaffold a design pattern in Java 21 / Spring Boot 3 into the active repo. Triggers: "scaffold strategy in Spring Boot", "create a repository for X", "wire up a command handler for Y", "add a decorator for Z", "extract this if-else into a strategy", "type-safe @ConfigurationProperties for W". Do NOT use for explanations (use `backend/java/skills/pattern-guide`) or reviews (use `backend/java/skills/code-review`).
 ---
 

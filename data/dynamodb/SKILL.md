@@ -1,5 +1,5 @@
 ---
-name: data-dynamodb
+name: dynamodb
 description: Use when designing tables / access patterns, setting up clients, securing a table (fine-grained IAM, encryption, PITR), planning migrations, writing queries, or tuning Amazon DynamoDB from a .NET / Java / Node backend. Triggers: "design a DynamoDB table", "model an access pattern", "set up a GSI", "single-table design", "on-demand vs provisioned capacity". Do NOT use for relational stores, document stores with rich query (`data/mongodb`), Redis (`data/redis`), or Cosmos DB (`data/cosmosdb`).
 ---
 

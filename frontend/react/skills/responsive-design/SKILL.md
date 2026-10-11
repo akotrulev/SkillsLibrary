@@ -1,5 +1,5 @@
 ---
-name: fe-react-responsive-design
+name: responsive-design
 description: Use when a layout must adapt across screen sizes — the breakpoint contract (theme values + one TS mirror), library grid/`useMediaQuery` vs your own CSS Grid/Flexbox, alignment across breakpoint flips, container queries, and the SSR caveat (JS breakpoint hooks mismatch on hydrate). Triggers "make this page responsive", "define our breakpoints", "the layout breaks on tablet", "horizontal scrollbar on mobile". Not for token/dark-mode mechanics (`styling`).
 ---
 

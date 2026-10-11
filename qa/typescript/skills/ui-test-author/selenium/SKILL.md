@@ -1,6 +1,6 @@
 ---
-name: qa-ui-test-writer-selenium-typescript
-description: Use when the user asks to scaffold a TypeScript + Selenium 4 page object or Mocha/Vitest UI test, following the BasePage / DriverFactory pattern. Triggers: "create a Selenium page object for X in TS", "add a TypeScript Selenium page for screen Y", "write a Selenium TS UI test for Z". Not for Playwright projects (`qa-ui-test-writer-playwright-typescript`) or reviewing existing tests (`qa-ui-test-review-typescript`).
+name: ui-tests-selenium
+description: Use when the user asks to scaffold a TypeScript + Selenium 4 page object or Mocha/Vitest UI test, following the BasePage / DriverFactory pattern. Triggers: "create a Selenium page object for X in TS", "add a TypeScript Selenium page for screen Y", "write a Selenium TS UI test for Z". Not for Playwright projects (`qa-typescript:ui-tests-playwright`) or reviewing existing tests (`qa-typescript:ui-tests-review`).
 ---
 
 # QA — Selenium TypeScript Page Object & Test Generator

@@ -1,6 +1,6 @@
 ---
-name: mobile-react-native-offline-and-storage
-description: Use when an Expo SDK 57 app must persist anything — expo-secure-store for secrets, MMKV 4 createMMKV() for preferences, expo-sqlite / op-sqlite for relational data, TanStack Query cache persistence, an offline mutation queue, sync and conflicts. Triggers "where do I store the token", "work offline", "persist the cache", "MMKV v4". Do NOT use for the request layer (`mobile-react-native-networking`) or the storage-full UI (`-error-handling`).
+name: offline-and-storage
+description: Use when an Expo SDK 57 app must persist anything — expo-secure-store for secrets, MMKV 4 createMMKV() for preferences, expo-sqlite / op-sqlite for relational data, TanStack Query cache persistence, an offline mutation queue, sync and conflicts. Triggers "where do I store the token", "work offline", "persist the cache", "MMKV v4". Do NOT use for the request layer (`mobile-react-native:networking`) or the storage-full UI (`-error-handling`).
 ---
 
 # React Native — Offline and Storage
@@ -34,9 +34,9 @@ Detect first: `react-native-mmkv` major (3 → `new MMKV()` is correct for v3; n
 - The disk-full banner, memory fallback, offline indicator → [`error-handling`](../error-handling/SKILL.md)
 - Zustand store shape → [`architecture`](../architecture/SKILL.md)
 - Auth provider and credentials manager → `auth0-react-native`
-- Privacy manifest, backup exclusion rules → [`mobile-shared-store-compliance`](../../../_shared/store-compliance/SKILL.md); encryption policy → [`mobile-shared-security`](../../../_shared/security/SKILL.md)
-- Native Swift / Kotlin storage → `mobile-ios-offline-and-storage` / `mobile-android-offline-and-storage`
-- Web `localStorage` / IndexedDB → `fe-react-installable-offline-app`
+- Privacy manifest, backup exclusion rules → [`mobile-<stack>:store-compliance`](../../../_shared/store-compliance/SKILL.md); encryption policy → [`mobile-<stack>:security`](../../../_shared/security/SKILL.md)
+- Native Swift / Kotlin storage → `mobile-ios:offline-and-storage` / `mobile-android:offline-and-storage`
+- Web `localStorage` / IndexedDB → `fe-react:pwa`
 
 ## The storage ladder
 
@@ -49,7 +49,7 @@ Detect first: `react-native-mmkv` major (3 → `new MMKV()` is correct for v3; n
 | Binary files, images, downloads | `expo-file-system` in the cache or document directory | the database |
 | An encrypted large cache | MMKV with an encryption key **held in `expo-secure-store`** | a key in code or `EXPO_PUBLIC_*` |
 
-**Secrets only in `expo-secure-store`.** Nothing sensitive in `UserDefaults`, `SharedPreferences`, AsyncStorage, plain MMKV, logs or the bundle ([`mobile-shared-security`](../../../_shared/security/references/react-native.md) §1, §3).
+**Secrets only in `expo-secure-store`.** Nothing sensitive in `UserDefaults`, `SharedPreferences`, AsyncStorage, plain MMKV, logs or the bundle ([`mobile-<stack>:security`](../../../_shared/security/references/react-native.md) §1, §3).
 
 ```ts
 import * as SecureStore from 'expo-secure-store';
@@ -142,7 +142,7 @@ export function QueryProvider({ children }: { children: ReactNode }) {
 }
 ```
 
-- **Opt in per query** (`meta: { persist: true }`) — a persister writes whatever a response held. Never persist account, payment, health or token-bearing queries ([`mobile-shared-security`](../../../_shared/security/references/react-native.md) §3).
+- **Opt in per query** (`meta: { persist: true }`) — a persister writes whatever a response held. Never persist account, payment, health or token-bearing queries ([`mobile-<stack>:security`](../../../_shared/security/references/react-native.md) §3).
 - `gcTime` ≥ `maxAge` or the persisted entry is collected first; `buster` ties the cache to a build so a shape change does not hydrate stale data; a Zod parse on hydrate drops drifted entries.
 - Restored data is shown **marked stale** and revalidated on foreground and reconnect ([`networking`](../networking/SKILL.md)); the stale marker UI is [`error-handling`](../error-handling/SKILL.md)'s.
 - Clear the cache and user tables **on sign-out** and on account deletion.
@@ -182,7 +182,7 @@ Record the chosen policy per entity in the feature's doc. A `409` keeps the user
 - Offline writes carry idempotency keys, replay in order per entity and surface their state.
 - Every entity has a recorded conflict policy; default is a version check.
 - Writes can fail (disk full, quota): they throw a typed error at one boundary; the degradation is `error-handling`'s.
-- No storage call on a UI-critical path that blocks a frame; nothing sensitive in backups unless the platform class is reviewed ([`mobile-shared-store-compliance`](../../../_shared/store-compliance/SKILL.md)).
+- No storage call on a UI-critical path that blocks a frame; nothing sensitive in backups unless the platform class is reviewed ([`mobile-<stack>:store-compliance`](../../../_shared/store-compliance/SKILL.md)).
 
 ## What NOT to do
 
@@ -213,11 +213,11 @@ Inside a `Gate: none` plan task, run none of these and report "written, not run"
 - Device: write in airplane mode → item shows "not synced"; reconnect → it replays once; kill the app mid-queue → it resumes.
 - Sign out → secure-store, MMKV user keys, SQLite user tables and the persisted cache are empty.
 - Fill the disk (or force the typed error) → the write fails without a crash; behaviour is `error-handling`'s.
-- Dev-side tests with fakes for the native modules: `mobile-react-native-component-testing`.
+- Dev-side tests with fakes for the native modules: `mobile-react-native:component-testing`.
 
 ## Handoffs
 
 - Request layer, retries, idempotency → [`networking`](../networking/SKILL.md) · degradation, banner, stale → [`error-handling`](../error-handling/SKILL.md)
 - Store shape → [`architecture`](../architecture/SKILL.md) · biometrics, file picking → [`device-features`](../device-features/SKILL.md)
-- Threat model, backups → [`mobile-shared-security`](../../../_shared/security/SKILL.md), [`mobile-shared-store-compliance`](../../../_shared/store-compliance/SKILL.md)
+- Threat model, backups → [`mobile-<stack>:security`](../../../_shared/security/SKILL.md), [`mobile-<stack>:store-compliance`](../../../_shared/store-compliance/SKILL.md)
 - Native module for a storage gap → [`native-modules`](../native-modules/SKILL.md)

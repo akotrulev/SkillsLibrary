@@ -1,6 +1,6 @@
 ---
-name: mobile-ios-architecture
-description: Use when deciding where state and logic live in a SwiftUI app — MV by default with @Observable models and services, a view model only when logic needs a test apart from the view, @State / @Binding / @Bindable / @Environment ownership, initializer injection with no container. Triggers "MVVM or not", "where does this state go". Do NOT use for fetch mechanics (`mobile-ios-networking`), persistence (`-offline-and-storage`) or routes (`-navigation`). TCA is an existing-codebase lane.
+name: architecture
+description: Use when deciding where state and logic live in a SwiftUI app — MV by default with @Observable models and services, a view model only when logic needs a test apart from the view, @State / @Binding / @Bindable / @Environment ownership, initializer injection with no container. Triggers "MVVM or not", "where does this state go". Do NOT use for fetch mechanics (`mobile-ios:networking`), persistence (`-offline-and-storage`) or routes (`-navigation`). TCA is an existing-codebase lane.
 ---
 
 # iOS — Architecture and State
@@ -17,7 +17,7 @@ SwiftUI is already a state-driven view layer: a view is a function of its state,
 | Observation outside views | `withObservationTracking`; `Observations` async sequence on iOS 26+ **[Swift 6.2]** | Combine publishers are correct | — |
 | TCA / Factory / swift-dependencies | **Lane only where the codebase already uses it** — [`references/tca.md`](references/tca.md) | Same | Same |
 
-An iOS 16 project is not flagged for lacking `@Observable`; migration is [`mobile-ios-migration`](../migration/SKILL.md)'s. Swift and isolation rules (`@MainActor` default in an app module, `nonisolated` in packages) are [`basics`](../basics/SKILL.md).
+An iOS 16 project is not flagged for lacking `@Observable`; migration is [`mobile-ios:migration`](../migration/SKILL.md)'s. Swift and isolation rules (`@MainActor` default in an app module, `nonisolated` in packages) are [`basics`](../basics/SKILL.md).
 
 ## When to use
 
@@ -28,13 +28,13 @@ An iOS 16 project is not flagged for lacking `@Observable`; migration is [`mobil
 
 ## When NOT to use
 
-- `URLSession` clients, retries, token refresh → `mobile-ios-networking`
-- SwiftData / Keychain / `UserDefaults` → `mobile-ios-offline-and-storage`
+- `URLSession` clients, retries, token refresh → `mobile-ios:networking`
+- SwiftData / Keychain / `UserDefaults` → `mobile-ios:offline-and-storage`
 - Route paths and sheets → [`navigation`](../navigation/SKILL.md)
-- Form state and validation → `mobile-ios-forms`
+- Form state and validation → `mobile-ios:forms`
 - Concurrency and isolation rules → [`basics`](../basics/SKILL.md)
 - Existing UIKit view controllers → [`uikit`](../uikit/SKILL.md)
-- Another stack → `mobile-react-native-architecture`, `mobile-android-architecture`
+- Another stack → `mobile-react-native:architecture`, `mobile-android:architecture`
 
 ## Inputs needed
 
@@ -125,7 +125,7 @@ struct OrdersView: View {
 }
 ```
 
-`LoadState` is one enum — never three booleans. Rendering all of its cases, including stale and offline, is [`ui-components`](../ui-components/SKILL.md) and `mobile-ios-error-handling`.
+`LoadState` is one enum — never three booleans. Rendering all of its cases, including stale and offline, is [`ui-components`](../ui-components/SKILL.md) and `mobile-ios:error-handling`.
 
 ## Ownership — who creates, who borrows
 
@@ -208,9 +208,9 @@ Features live in local packages with dependency direction `App → Features → 
 
 - Views, previews, `.task` → [`ui-components`](../ui-components/SKILL.md)
 - Routes → [`navigation`](../navigation/SKILL.md)
-- Clients and retries → `mobile-ios-networking`
-- Persistence → `mobile-ios-offline-and-storage`
-- Failure, stale, offline UI → `mobile-ios-error-handling`
-- Tests for models → `mobile-ios-unit-testing`
-- `ObservableObject` → `@Observable` → `mobile-ios-migration`
+- Clients and retries → `mobile-ios:networking`
+- Persistence → `mobile-ios:offline-and-storage`
+- Failure, stale, offline UI → `mobile-ios:error-handling`
+- Tests for models → `mobile-ios:unit-testing`
+- `ObservableObject` → `@Observable` → `mobile-ios:migration`
 - Concurrency and isolation → [`basics`](../basics/SKILL.md)

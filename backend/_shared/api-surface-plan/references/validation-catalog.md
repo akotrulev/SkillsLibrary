@@ -91,7 +91,7 @@ Rules:
 - **401 is uniform on purpose.** "Invalid signature" vs "unknown issuer" tells an attacker how far they got. Expiry is the only useful exception.
 - **The response body carries no token content**, not even echoed claims.
 - **Clock skew tolerance** is stated once (60s is typical) rather than per endpoint.
-- **Anonymous endpoints are listed explicitly** — health, readiness, the OpenAPI document, public webhooks (which have their own signature check instead, see `be-shared-integration-plan`). An endpoint that is anonymous by omission is a finding.
+- **Anonymous endpoints are listed explicitly** — health, readiness, the OpenAPI document, public webhooks (which have their own signature check instead, see `dev:plan-integrations`). An endpoint that is anonymous by omission is a finding.
 
 ---
 

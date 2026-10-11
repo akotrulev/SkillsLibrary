@@ -1,5 +1,5 @@
 ---
-name: be-java-unit-testing
+name: unit-testing
 description: Use when backend Java logic needs a dev-side unit test — JUnit 5 + Mockito + AssertJ with no Spring context: what deserves a test, the five untestable seams (Clock, id, randomness, config, outbound I/O), fakes-over-mocks, parameterized cases, async. In-process, no container, no real database. Triggers "unit-test this service", "test this validator/calculator", "how do I fake the clock in a Java test". Do NOT use for anything that boots a Spring context — that's the `qa-api-java` peer's.
 ---
 
@@ -11,7 +11,7 @@ Owns **dev-side unit tests of backend logic**: construct a class with `new`, dri
 
 That line is worth stating twice, because Spring's slice-test annotations are routinely *called* unit tests. **A slice test is fast, not isolated.** It reads `application.yml`, builds a context, and fails for reasons unrelated to your logic. `@ExtendWith(MockitoExtension.class)` is this skill's extension; `SpringExtension` is the peer's.
 
-**Runner — house-default deviation, stated once.** `CLAUDE.md`'s Java test-runner default is **TestNG**, and that is correct for the **QA suite**. Dev-side unit tests use **JUnit 5**, because `spring-boot-starter-test` ships JUnit 5 + Mockito + AssertJ + Spring's own test support as one managed dependency, and every Boot 3.x recipe assumes the Jupiter lifecycle. Introducing TestNG into a Boot service means a second runner, a second lifecycle, and a manual dependency graph for zero gain. **Use JUnit 5 here; if the service already standardizes on TestNG, match it and don't fight it.** (Same shape as `fe-blazor-component-testing`'s xUnit-for-bUnit deviation.) `pattern-writer` previously said "plain TestNG + AssertJ" for this lane — that has been corrected to point here.
+**Runner — house-default deviation, stated once.** `CLAUDE.md`'s Java test-runner default is **TestNG**, and that is correct for the **QA suite**. Dev-side unit tests use **JUnit 5**, because `spring-boot-starter-test` ships JUnit 5 + Mockito + AssertJ + Spring's own test support as one managed dependency, and every Boot 3.x recipe assumes the Jupiter lifecycle. Introducing TestNG into a Boot service means a second runner, a second lifecycle, and a manual dependency graph for zero gain. **Use JUnit 5 here; if the service already standardizes on TestNG, match it and don't fight it.** (Same shape as `fe-blazor:component-testing`'s xUnit-for-bUnit deviation.) `pattern-writer` previously said "plain TestNG + AssertJ" for this lane — that has been corrected to point here.
 
 **This skill is not a licence to replace integration tests with mocks.** `CLAUDE.md`'s preference for real-DB integration tests over mocks governs the integration lane, which is the peer's. Some things are only provable against a real dependency:
 
@@ -35,14 +35,14 @@ That line is worth stating twice, because Spring's slice-test annotations are ro
 - A calculation: money (`BigDecimal`), rounding, proration, tax, date math.
 - A mapper, a sealed-type state transition, an exception-to-response translation.
 - A `jakarta.validation` constraint set (buildable without Spring — see below).
-- Reproducing a bug at the unit level before fixing it (`ep-systematic-debugging` RED).
+- Reproducing a bug at the unit level before fixing it (`dev:debugging` RED).
 
 ## When NOT to use
 
 - Anything that boots a context (`@SpringBootTest`, `@DataJpaTest`, `@WebMvcTest`, `@JsonTest`) → **peer** `qa-api-java`
 - Contract / integration / E2E, Testcontainers, real-DB seed-assert-clean → **peer** `qa-api-java` (`db-testing/*`)
-- Whether the tests actually catch faults (mutation score) → **peer** `qa-test-quality-check-java` (PIT/pitest)
-- Suite-scale builders / ObjectMother → **peer** `qa-test-data-builder-java`
+- Whether the tests actually catch faults (mutation score) → **peer** `qa-java:test-quality-check` (PIT/pitest)
+- Suite-scale builders / ObjectMother → **peer** `qa-java:test-data-builder`
 - **Records/DTOs with no behavior, entities, `@Configuration` classes, generated code** → don't test them at all
 
 ## Stack
@@ -233,7 +233,7 @@ var order = anOrder().withStatus(SHIPPED).build();
 ```
 
 - Java records make defaults awkward — a static factory (`anOrder()`) plus `withX` returning a new builder is the cheapest readable shape.
-- Suite-scale data / ObjectMother → **peer** `qa-test-data-builder-java`.
+- Suite-scale data / ObjectMother → **peer** `qa-java:test-data-builder`.
 
 ## Async & concurrency
 
@@ -250,7 +250,7 @@ var order = anOrder().withStatus(SHIPPED).build();
 - The class under test is **real and constructed directly** — never resolved from a context.
 - Verify RED once per new behavior.
 - No `if`/`for` driving assertions; no `try/catch` standing in for `assertThatThrownBy`.
-- No coverage-% gate here — assertion quality is measured by mutation score (**peer** `qa-test-quality-check-java`, PIT).
+- No coverage-% gate here — assertion quality is measured by mutation score (**peer** `qa-java:test-quality-check`, PIT).
 
 ## What NOT to do
 
@@ -261,7 +261,7 @@ var order = anOrder().withStatus(SHIPPED).build();
 - **`lenient()` sprinkled to silence strict stubs** — fix the stub.
 - **`verify(...)` with `any()` everywhere** — proves the call happened, not that it was right.
 - **`isEqualTo` on `BigDecimal`** — see above.
-- **`@Disabled` without a linked issue** — quarantine is `qa-flaky-test-quarantine-java`'s process.
+- **`@Disabled` without a linked issue** — quarantine is `qa-java:flaky-test-quarantine`'s process.
 - **Testing the framework** — that records have equals, that Jackson serializes, that Spring injects.
 - **Reflection to reach a private method** — extract the concept into its own class instead.
 

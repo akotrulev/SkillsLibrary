@@ -26,7 +26,7 @@ producers publish to an **exchange** with a **routing key**, and **bindings** ro
 > no synchronous return you can assert on the next line. The message is in flight; the consumer runs on its
 > own schedule; the side-effect lands "soon". So the core discipline is: **wait on a condition** for the
 > message (or its effect) to appear, with a bounded timeout — **never `Task.Delay` / `Thread.Sleep`**. This
-> is the exact lineage of `qa-db-connection-dotnet`'s `WaitForAsync` poll helper and
+> is the exact lineage of `qa-dotnet:db-connection`'s `WaitForAsync` poll helper and
 > `references/service-bus.md`'s condition-wait. RabbitMQ's pull primitive,
 > `BasicGetAsync(queue, autoAck)`, returns a message **or `null` immediately** — so the bounded **poll loop**
 > around it (get until a message appears, or a deadline passes) *is* the condition-wait; a fixed sleep is not.
@@ -152,7 +152,7 @@ public abstract class RabbitMqFixture
 
 > **Cloud / shared test broker alternative.** If your org runs against a real **test** RabbitMQ broker
 > instead of a container, read the AMQP URI (and credentials) **from env, lazily** — never hard-code it,
-> never log it (cross-link `qa-test-login-tokens-dotnet` for the secrets-from-env discipline). A container is
+> never log it (cross-link `qa-dotnet:test-login-tokens` for the secrets-from-env discipline). A container is
 > the default for CI determinism; a shared broker makes tests order-dependent unless each uses a
 > **uniquely named queue** (since a queue retains messages until they're consumed).
 
@@ -257,7 +257,7 @@ public class OrderPublishingTests : RabbitMqFixture
 
 Here the SUT is a **consumer**. The test **publishes an input message**, lets the consumer run, and waits for
 the observable side-effect (a DB row, another message) — eventually consistent, so poll a **probe** on a
-condition. This reuses `qa-db-connection-dotnet`'s `WaitForAsync` verbatim.
+condition. This reuses `qa-dotnet:db-connection`'s `WaitForAsync` verbatim.
 
 ```csharp
 [Test]
@@ -285,7 +285,7 @@ public async Task Should_write_a_shipment_row_When_an_OrderPaid_message_is_consu
 }
 ```
 
-The `WaitFor.Async` helper is the same bounded poll as `qa-db-connection-dotnet` — included here so the
+The `WaitFor.Async` helper is the same bounded poll as `qa-dotnet:db-connection` — included here so the
 node is self-contained:
 
 ```csharp
@@ -538,13 +538,13 @@ public static class Orders
 
 ## Cross-references
 
-- `qa-messaging-testing-java` — same skill, Java 21 / TestNG (`com.rabbitmq:amqp-client`:
+- `qa-java:messaging-testing` — same skill, Java 21 / TestNG (`com.rabbitmq:amqp-client`:
   `ConnectionFactory().setUri(...)`, `conn.createChannel()`, `exchangeDeclare` / `queueDeclare(..., args)` /
   `queueBind`, `basicPublish`, `basicConsume(queue, false, callback)` + `basicAck`/`basicNack`/`basicReject`,
   `basicGet` polling, Awaitility for side-effects; **Spring AMQP** `RabbitTemplate` + `@RabbitListener` +
   `QueueBuilder.deadLetterExchange(...)` noted for the listener/DLX convention; `RabbitMQContainer`). Structure
   ported, not code.
-- `qa-messaging-testing-typescript` — same skill, Node 24 + TS (`amqplib`: `amqp.connect(url)`,
+- `qa-typescript:messaging-testing` — same skill, Node 24 + TS (`amqplib`: `amqp.connect(url)`,
   `conn.createChannel()`, `assertExchange` / `assertQueue(..., { arguments: { 'x-dead-letter-exchange' } })` /
   `bindQueue`, `channel.publish`, `channel.consume(q, cb, { noAck: false })` + `channel.ack`/`nack`/`reject`,
   `channel.get` polling, `expect.poll` for side-effects, `@testcontainers/rabbitmq` `RabbitMQContainer`).
@@ -555,9 +555,9 @@ public static class Orders
   RabbitMQ's ack + DLX). Same condition-wait discipline, different broker.
 - `references/kafka.md` (`kafka`, the immediately prior sibling) — **the `rabbitmq`-vs-`kafka` boundary**:
   Kafka log + offsets + app-level DLT vs RabbitMQ queue + manual ack + broker-native DLX.
-- `qa-db-connection-dotnet` — the `WaitFor.Async` poll helper and the seeder/probe split reused for
+- `qa-dotnet:db-connection` — the `WaitFor.Async` poll helper and the seeder/probe split reused for
   the consumer side-effect assertions; the **eventual-consistency lineage** this skill leans on hardest.
-- `qa-test-login-tokens-dotnet` — when authing to a shared cloud broker with credentials from env; the
+- `qa-dotnet:test-login-tokens` — when authing to a shared cloud broker with credentials from env; the
   secrets-from-env discipline.
-- `qa-test-reports-dotnet` — attach the received message body / DLQ `x-death` reason to the Allure result.
-- `qa-test-data-builder-dotnet` — builders/ObjectMother for message payloads with 4+ fields.
+- `qa-dotnet:test-reports` — attach the received message body / DLQ `x-death` reason to the Allure result.
+- `qa-dotnet:test-data-builder` — builders/ObjectMother for message payloads with 4+ fields.

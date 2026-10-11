@@ -85,7 +85,7 @@ What was changed from upstream at import, and why:
 
 | Fork | Reason |
 |---|---|
-| `SKILL.md` rewritten in house style, renamed `design-ui-ux-pro-max` | The library's skills are `design-`-prefixed and carry a `## Review checklist` the `design-auditor` agent sweeps. The query contract, workflow, dials, domain/stack tables and zero-result rule are upstream's, unchanged in substance. |
+| `SKILL.md` rewritten in house style, renamed `design:corpus` | The library's skills are `design-`-prefixed and carry a `## Review checklist` the `design-auditor` agent sweeps. The query contract, workflow, dials, domain/stack tables and zero-result rule are upstream's, unchanged in substance. |
 | Script paths rewritten to `${CLAUDE_PLUGIN_ROOT}/design/ui-ux-pro-max/scripts/…` | The skill sits under `design/` here, not at a plugin root. |
 | `scripts/tests/`, `templates/`, the CLI, gallery and stack starter not vendored | Upstream repo tooling, not skill content. `scripts/validate_data.py` is kept so the corpus can be re-validated after a refresh. |
 | All 22 stack files retained | Deliberate: the corpus ships whole. Blazor has no upstream stack file and takes its conventions from `frontend/blazor/`. |

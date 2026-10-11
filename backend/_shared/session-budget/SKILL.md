@@ -1,6 +1,6 @@
 ---
-name: be-shared-session-budget
-description: Use when plan tasks need sizing to one session each, or each task needs a ready-to-paste prompt. Estimates a task's context cost, grows or splits it toward the session target, and writes the plan's `## Prompts — one per task` section. Triggers "how big should this task be", "is this one session", "what do I paste next". Do NOT use to sequence tasks (`be-shared-delivery-plan`), group them into epics (`be-shared-epic-map`), or execute one (Plan Queue, as the task's named agent).
+name: plan-session-budget
+description: Use when plan tasks need sizing to one session each, or each task needs a ready-to-paste prompt. Estimates a task's context cost, grows or splits it toward the session target, and writes the plan's `## Prompts — one per task` section. Triggers "how big should this task be", "is this one session", "what do I paste next". Do NOT use to sequence tasks (`dev:plan-delivery`), group them into epics (`dev:plan-epic-map`), or execute one (Plan Queue, as the task's named agent).
 ---
 
 # Session Budget — one task, one session, one prompt
@@ -12,24 +12,24 @@ Two jobs, both about the boundary between a plan and the sessions that run it.
 
 **The estimate is a target, never a gate.** It says what to aim for. It does not decide what a task is — coherence does, and coherence wins every time the two disagree. Never split a task that is one thing to get under a number, and never merge unrelated work to fill one up.
 
-**Prerequisites:** a task list from `be-shared-delivery-plan` with `Files` filled in, and `epic-map.md` for the lane structure. Sizing a task whose files are vague produces a number with nothing behind it.
+**Prerequisites:** a task list from `dev:plan-delivery` with `Files` filled in, and `epic-map.md` for the lane structure. Sizing a task whose files are vague produces a number with nothing behind it.
 
 ## When to use
 
 - Step 8 of a `solution-planner` run — sizing the authored tasks and writing the prompt blocks
 - Whenever a task is added, split, or re-scoped and its estimate needs re-deriving
 - After a task completes — the plan's `## Close-out — every task` (plan format §7) is the procedure; Step 5 says what this skill adds to it
-- From `ep-writing-plans`, for the same sizing question on a non-`solution-planner` plan
+- From `dev:plan-feature`, for the same sizing question on a non-`solution-planner` plan
 
 ## When NOT to use
 
-- Deciding the order tasks run in → `be-shared-delivery-plan`
-- Deciding which epics run at the same time → `be-shared-epic-map`
+- Deciding the order tasks run in → `dev:plan-delivery`
+- Deciding which epics run at the same time → `dev:plan-epic-map`
 - Actually running a task → the named stack agent, one prompt block per session through Plan Queue
 
 ## Output
 
-Two things, both **inside the plan document** — `docs/plans/<NNN>-<initiative>/delivery-plan.md`, or the single-file plan an `ep-writing-plans` run produced:
+Two things, both **inside the plan document** — `docs/plans/<NNN>-<initiative>/delivery-plan.md`, or the single-file plan an `dev:plan-feature` run produced:
 
 1. A **`**Budget:**`** line on every task block, with its drivers itemized, and a matching `Budget` cell in the task table.
 2. The **`## Prompts — one per task`** section — one paste-ready block per task that has not landed. See `references/prompts-section-template.md`.
@@ -215,12 +215,12 @@ Two things stay this skill's to get right, because the close-out section cannot 
 
 ## Handoffs
 
-- **← `ep-writing-plans`** — owns the plan document format these prompts live in (`engineering-practices/writing-plans/references/plan-format.md` §6). Where the two disagree on the shape, that reference wins.
-- **← `be-shared-delivery-plan`** — supplies the tasks, their files, their streams and their order. Sizing feeds straight back into how those tasks are written.
-- **← `be-shared-epic-map`** — supplies the lanes and the current wave, which is what decides who gets a prompt block.
+- **← `dev:plan-feature`** — owns the plan document format these prompts live in (`engineering-practices/writing-plans/references/plan-format.md` §6). Where the two disagree on the shape, that reference wins.
+- **← `dev:plan-delivery`** — supplies the tasks, their files, their streams and their order. Sizing feeds straight back into how those tasks are written.
+- **← `dev:plan-epic-map`** — supplies the lanes and the current wave, which is what decides who gets a prompt block.
 - **→ `be-dotnet` / `be-java` / `be-node` / `be-python` / `fe-react` / `fe-blazor`** — consume the prompt blocks and run the plan's `## Close-out — every task` when their task lands.
 - **→ plan format §7** — the `## Close-out — every task` section every plan carries, copied verbatim by Step 5.
-- **→ `ep-writing-plans`** — uses Step 1 and Step 2 for the same sizing question on plans that never went through `solution-planner`.
+- **→ `dev:plan-feature`** — uses Step 1 and Step 2 for the same sizing question on plans that never went through `solution-planner`.
 
 ## Version policy
 

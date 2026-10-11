@@ -405,7 +405,7 @@ container job, so the credential fetch stays on the runner, where the cloud CLI 
           retention-days: 14
 ```
 
-- **GitHub Actions** — as above; the job sits in the workflow `qa-ci-pipelines-java` gates to the schedule.
+- **GitHub Actions** — as above; the job sits in the workflow `qa-java:ci-pipelines` gates to the schedule.
   A `container:` job would run `azure/login` inside the image, which has no Azure CLI.
 - **Azure Pipelines** — the same `docker run` in a `script` step on the Microsoft-hosted `ubuntu-latest`
   agent, after the `AzureCLI@2` fetch; a secret variable reaches the step only through its `env:` mapping
@@ -459,4 +459,4 @@ document, or screenshot the HTML that the PDF is printed from — with this refe
   discipline.
 - `qa/cicd/java/skills/ci-pipelines` — the UI job, its artifact upload and the schedule gate.
 - `qa/reporting/java/skills/test-reports` — Allure 3 wiring.
-- `qa-visual-regression-typescript` — the Node runner's `toHaveScreenshot`, which this lane cannot use.
+- `qa-typescript:visual-regression` — the Node runner's `toHaveScreenshot`, which this lane cannot use.

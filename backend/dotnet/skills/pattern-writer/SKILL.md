@@ -1,5 +1,5 @@
 ---
-name: be-dotnet-pattern-writer
+name: patterns-apply
 description: Use when the user asks to scaffold a design pattern in C# / .NET (10 primary, 8-9 supported) into the active repo. Triggers: "scaffold strategy in C#", "create a repository pattern for X", "wire up a MediatR command handler for Y", "add a decorator for Z", "extract this if-else chain into a strategy". Do NOT use for explanations (use `backend/dotnet/skills/pattern-guide`) or reviews (use `backend/dotnet/skills/code-review`).
 ---
 

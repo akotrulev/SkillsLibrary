@@ -1,7 +1,7 @@
 # File-Storage Testing — Azure Blob Storage (Node 24 + TypeScript / Vitest)
 
 This is the **TypeScript sibling** of the `qa/typescript/skills/file-storage-testing/` node, **ported** from the
-canonical .NET stack (`qa-file-storage-testing-dotnet`, **.NET-led by the user's choice** — Azure
+canonical .NET stack (`qa-dotnet:file-storage-testing`, **.NET-led by the user's choice** — Azure
 Blob is Azure-native, the most authentic lead; the Azure SDK is first-class everywhere, so TS is the house
 default language but not the canonical stack for this node). It **closes the `qa/typescript/skills/file-storage-testing/` family**
 (s3 → azure-blob) in this stack. It is the sibling **ported from the `s3` node's structure** onto
@@ -9,7 +9,7 @@ Azure Blob — **same two assertion shapes, same eventual-consistency condition-
 SDK and its primitives change. Where S3 has buckets/keys, presigned URLs, multipart upload, and LocalStack,
 Azure Blob has containers/blobs, SAS tokens, block-blob staging, and Azurite. It reuses the same
 verification-inside-tests lineage: the standard Testcontainers fixture discipline
-and the **eventual-consistency condition-wait** (`expect.poll`) from `qa-db-connection-typescript`
+and the **eventual-consistency condition-wait** (`expect.poll`) from `qa-typescript:db-connection`
 (`db-testing/connection`). All three Azure SDKs mirror the same upload / download / exists / get-properties / list / delete + SAS +
 block-staging model, so this is a true translate-the-concepts port, not a redesign.
 
@@ -88,7 +88,7 @@ test/integration/
   test-fast equivalent is the **access tier** above.
 - **Event Grid → Storage Queue notifications** — a blob write fires a `Microsoft.Storage.BlobCreated` Event Grid
   event; routed to a **Storage Queue**, an upload produces a downstream queue message the test asserts (the
-  bridge — the Azure parallel to `s3`'s S3 → SQS, cross-link `qa-messaging-testing-typescript` `service-bus`).
+  bridge — the Azure parallel to `s3`'s S3 → SQS, cross-link `qa-typescript:messaging-testing` `service-bus`).
   **The headline `azure-blob` divergence: Azurite does NOT emit Event Grid events** — so this test runs against a real
   Azure test account, or locally asserts the **subscription wiring config** only. Flagged honestly below.
 
@@ -145,7 +145,7 @@ export async function startBlobFixture(): Promise<BlobFixture> {
 > Azurite, drop the connection string and build the client from the account endpoint + **`DefaultAzureCredential`**
 > (`new BlobServiceClient("https://<acct>.blob.core.windows.net", new DefaultAzureCredential())`); read the
 > account name/endpoint from `process.env`, never hard-code a key, never log it (cross-link
-> `qa-test-login-tokens-typescript`). Azurite is the default for CI determinism; a shared cloud account makes
+> `qa-typescript:test-login-tokens`). Azurite is the default for CI determinism; a shared cloud account makes
 > tests order-dependent unless each uses a **uniquely named container** or empties it in `beforeEach`. (Note:
 > `generateSasUrl` with a shared key needs the connection-string client; with `DefaultAzureCredential` mint a
 > **user-delegation SAS** via `getUserDelegationKey` instead.)
@@ -198,7 +198,7 @@ describe("invoice upload", () => {
 Here the SUT is a **worker**: it watches a container (or is driven by a blob event), processes an uploaded blob,
 and produces an observable side-effect — a DB row, a *derived* blob (a thumbnail), or a notification. The
 side-effect is eventually consistent, so **seed the input blob, then wait on a condition with `expect.poll`**.
-This reuses `qa-db-connection-typescript`'s discipline.
+This reuses `qa-typescript:db-connection`'s discipline.
 
 ```typescript
 import type { BlobGetPropertiesResponse } from "@azure/storage-blob";
@@ -365,7 +365,7 @@ asserts the downstream queue message — the Azure parallel to `s3`'s S3 → SQS
 >    right queue) and assert the SUT's downstream effect directly via the process-assert pattern above.
 >
 > Cross-link the s3 sibling's S3 → SQS section as the conceptual parallel, and
-> `qa-messaging-testing-typescript` for the Azure-native messaging downstream.
+> `qa-typescript:messaging-testing` for the Azure-native messaging downstream.
 
 ```typescript
 import { QueueClient } from "@azure/storage-queue";
@@ -498,22 +498,22 @@ export const invoices = {
 
 ## Cross-references
 
-- `qa-file-storage-testing-dotnet` — the **canonical** stack this is ported from (.NET 8 / NUnit,
+- `qa-dotnet:file-storage-testing` — the **canonical** stack this is ported from (.NET 8 / NUnit,
   `Azure.Storage.Blobs` `BlobServiceClient`/`BlobClient`/`BlockBlobClient`, `BlobSasBuilder` + `GenerateSasUri`,
   `Testcontainers.Azurite` `AzuriteBuilder`, `WaitFor.Async`). Structure ported, not code.
-- `qa-file-storage-testing-java` — same skill, Java 21 / TestNG (`com.azure:azure-storage-blob`
+- `qa-java:file-storage-testing` — same skill, Java 21 / TestNG (`com.azure:azure-storage-blob`
   `BlobServiceClient`/`BlobClient`/`BlockBlobClient`, `BlobServiceSasSignatureValues` + `generateSas`,
   Awaitility, `org.testcontainers:azure` `AzuriteContainer`).
 - `references/s3.md` — **the node whose structure this is ported from** AND the
   **`s3`-vs-`azure-blob` boundary**: buckets/keys + presigned URLs + multipart (`@aws-sdk/lib-storage` `Upload`) +
   LocalStack + `forcePathStyle` vs containers/blobs + SAS tokens + block-staging + Azurite + Event Grid→Storage
   Queue.
-- `qa-db-connection-typescript` — the `expect.poll` wait and the seeder/probe split reused for the
+- `qa-typescript:db-connection` — the `expect.poll` wait and the seeder/probe split reused for the
   processed-blob side-effect assertions; the **eventual-consistency lineage** this skill leans on.
-- `qa-messaging-testing-typescript` — Azure-native messaging, the natural downstream for the
+- `qa-typescript:messaging-testing` — Azure-native messaging, the natural downstream for the
   Event Grid → Storage Queue bridge (the Azure parallel to `s3`'s S3 → SQS).
-- `qa-test-login-tokens-typescript` — when running against a cloud test account; the
+- `qa-typescript:test-login-tokens` — when running against a cloud test account; the
   `DefaultAzureCredential` / secrets-from-env discipline.
-- `qa-test-reports-typescript` — attach the uploaded/derived blob's name + metadata (or the queue-message
+- `qa-typescript:test-reports` — attach the uploaded/derived blob's name + metadata (or the queue-message
   body) to the Allure result.
-- `qa-test-data-builder-typescript` — builders/ObjectMother for blob payloads with 4+ fields.
+- `qa-typescript:test-data-builder` — builders/ObjectMother for blob payloads with 4+ fields.

@@ -1,12 +1,12 @@
 # Golden example — `integrations.md`
 
-The filled example for `be-shared-integration-plan`, from the **workshop-booking** toy initiative shared by all five planner examples. **Shapes and disciplines are normative; domain content is illustrative.** A real artifact writes a full block per dependency — this example writes SendGrid in full (the degraded-mode one, where the interesting policy lives) and abbreviates Auth0, saying so.
+The filled example for `dev:plan-integrations`, from the **workshop-booking** toy initiative shared by all five planner examples. **Shapes and disciplines are normative; domain content is illustrative.** A real artifact writes a full block per dependency — this example writes SendGrid in full (the degraded-mode one, where the interesting policy lives) and abbreviates Auth0, saying so.
 
 ---
 
 # Workshop Booking — Integration Plan
 
-**Date:** 2026-08-02 · **Written by:** `be-shared-integration-plan`
+**Date:** 2026-08-02 · **Written by:** `dev:plan-integrations`
 **Blueprint:** `./blueprint.md` · **API surface:** `./api-surface.md`
 
 ## 1. Dependency register
@@ -61,12 +61,12 @@ The filled example for `be-shared-integration-plan`, from the **workshop-booking
 |---|---|
 | Local run | Mailpit |
 | Unit / component | Fake at our own `IEmailSender` seam — never assert on SendGrid's wire format |
-| Integration | `qa-email-testing-dotnet` against Mailpit |
+| Integration | `qa-dotnet:email-testing` against Mailpit |
 
 **Open questions:** none.
 
 ### X1 — Auth0 — abbreviated in this example
-A real artifact writes the full block. Notable rows: Authorization Code + PKCE (SPAs) / JWT bearer validation (API) via `be-dotnet-auth0`; JWKS cached with rotation tolerance; claim mapping `permissions[]` → the two permissions in `api-surface.md` §4; **IdP-down behavior:** already-issued tokens keep working until `exp` — new sign-ins fail with the SPA's own outage message; config keys `Auth0__Domain`, `Auth0__Audience` (non-secret, appsettings).
+A real artifact writes the full block. Notable rows: Authorization Code + PKCE (SPAs) / JWT bearer validation (API) via `be-dotnet:auth0`; JWKS cached with rotation tolerance; claim mapping `permissions[]` → the two permissions in `api-surface.md` §4; **IdP-down behavior:** already-issued tokens keep working until `exp` — new sign-ins fail with the SPA's own outage message; config keys `Auth0__Domain`, `Auth0__Audience` (non-secret, appsettings).
 
 ## 3. Secrets checklist
 

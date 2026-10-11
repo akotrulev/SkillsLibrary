@@ -2,7 +2,7 @@
 
 The failures where **the app changed underneath the user**: the session ended, the server no longer supports this build, the app slept for an hour, or the system killed the process while it sat in the background. All four recover in place; all four destroy unsaved work when handled with a sign-out reflex.
 
-*Deep dive for [`mobile-android-error-handling`](../SKILL.md). Samples have no inline comments (CLAUDE.md § Comments).*
+*Deep dive for [`mobile-android:error-handling`](../SKILL.md). Samples have no inline comments (CLAUDE.md § Comments).*
 
 ---
 
@@ -19,7 +19,7 @@ The failures where **the app changed underneath the user**: the session ended, t
 
 1. **One refresh for N concurrent 401s.** The authenticator's lock makes the first caller refresh and the rest replay with the new token; parallel refreshes revoke a rotated token family.
 2. **Replay exactly once.** `responseCount() >= 2` returns `null` → `ApiError.Unauthorized`, which goes straight to rung 3 — never back into the ladder.
-3. **Re-auth in place is a dialog, not a redirect.** Show sign-in as a `Dialog` / `ModalBottomSheet` over the mounted screen so the form, filters and scroll position survive. **Biometric re-auth is often the right rung 3** when a refresh credential sits in a Keystore key that requires user authentication (`BiometricPrompt` with a `CryptoObject`): one prompt, then replay ([`device-features`](../../device-features/SKILL.md)). Credential Manager is the sign-in provider for the dialog (`auth-auth0-android`). On success dismiss and replay the pending calls.
+3. **Re-auth in place is a dialog, not a redirect.** Show sign-in as a `Dialog` / `ModalBottomSheet` over the mounted screen so the form, filters and scroll position survive. **Biometric re-auth is often the right rung 3** when a refresh credential sits in a Keystore key that requires user authentication (`BiometricPrompt` with a `CryptoObject`): one prompt, then replay ([`device-features`](../../device-features/SKILL.md)). Credential Manager is the sign-in provider for the dialog (`mobile-android:auth0`). On success dismiss and replay the pending calls.
 4. **Sign out only from a clean surface.** A dirty form, a pending mutation or an editor with content ⇒ do not navigate; keep the dialog affordance. For long forms persist a draft through the guarded store — it may be unavailable ([`writes-and-dependencies.md`](writes-and-dependencies.md)).
 
 ```kotlin
@@ -82,11 +82,11 @@ fun compareVersions(left: String, right: String): Int {
 - **Compare numerically**, never as strings — `"1.10"` is above `"1.9"`; or compare `versionCode` (a `Long`) when the server publishes it.
 - **Check on launch and on every resume** (below), not on a timer; cache the last verdict so a cold offline start still shows a required update.
 - **The blocking screen sits at the root**, above navigation, so no deep link or restored back stack can route around it; it carries `Update.Required` and `Update.Required.Open` tags and is announced when it appears.
-- **The store link is a fixed constant** (`market://details?id=<applicationId>` with an `https://play.google.com/store/apps/details?id=` fallback) — never a URL taken from the server response, which would be an open redirect ([`mobile-shared-security`](../../../../_shared/security/SKILL.md)). Play **In-App Updates** (`AppUpdateManager`, immediate flow) is an alternative for a forced update on a Play-installed build; it does not exist off Play, so keep the store-link path.
+- **The store link is a fixed constant** (`market://details?id=<applicationId>` with an `https://play.google.com/store/apps/details?id=` fallback) — never a URL taken from the server response, which would be an open redirect ([`mobile-<stack>:security`](../../../../_shared/security/SKILL.md)). Play **In-App Updates** (`AppUpdateManager`, immediate flow) is an alternative for a forced update on a Play-installed build; it does not exist off Play, so keep the store-link path.
 - **Contract skew inside a supported version**: an unknown enum value or a missing optional field decodes to a safe default or a typed `Drifted` failure, never a crash — `Json { coerceInputValues = true }` with a default, or an `Unknown` case, so a newer server does not break an older client.
 - **Server-driven `426 Upgrade Required` or a `min-client` header** takes the same path as the policy check.
 - **Never forced for a cosmetic change**; a mandatory update is for a breaking contract, a security fix or a retired API, and the server owner sets it.
-- **Report it**: the screen shown and the update opened are events for the crash reporter, tagged with the build number ([`mobile-shared-observability`](../../../../_shared/observability/SKILL.md)).
+- **Report it**: the screen shown and the update opened are events for the crash reporter, tagged with the build number ([`mobile-<stack>:observability`](../../../../_shared/observability/SKILL.md)).
 
 ## App resume — revalidate, never show yesterday as current
 

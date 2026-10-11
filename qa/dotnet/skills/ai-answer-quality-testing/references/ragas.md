@@ -12,7 +12,7 @@ just implements the triad legs for you.
 corpus→**test-set generator**. It is **Python** — there is no NuGet — so from this .NET suite you drive it the same
 honest way the stack drives promptfoo/DeepEval: **as a subprocess** (`System.Diagnostics.Process` →
 `python eval_rag.py`) whose JSON output you parse with `System.Text.Json` and gate, the CLI-port shape of
-`qa-security-passive-scan-dotnet`. Pin the **evaluator LLM** to the house-default Claude (CLAUDE.md) —
+`qa-dotnet:passive-scan`. Pin the **evaluator LLM** to the house-default Claude (CLAUDE.md) —
 Ragas defaults to OpenAI.
 
 > **Note on the API surface.** Ragas' legacy metric API (`Faithfulness(llm=…)` + `single_turn_ascore`, and
@@ -173,7 +173,7 @@ public static class Ragas
         if (File.Exists(results))
         {
             using var doc = JsonDocument.Parse(await File.ReadAllTextAsync(results));
-            // map per-row scores -> Allure named results (qa-test-reports-dotnet)
+            // map per-row scores -> Allure named results (qa-dotnet:test-reports)
         }
         Assert.That(proc.ExitCode, Is.Zero, "RAG eval gate failed — a triad/recall metric scored below threshold");
     }
@@ -197,7 +197,7 @@ public static class Ragas
 ## Cross-references
 
 - `SKILL.md` — the RAG-testing discipline (decomposition, triad, golden-set-with-contexts) that routes here.
-- `qa-ai-feature-testing-dotnet` — the **parent**: four ideas, judge-pinning + calibration, the promptfoo / DeepEval
+- `qa-dotnet:ai-feature-testing` — the **parent**: four ideas, judge-pinning + calibration, the promptfoo / DeepEval
   spines (whose `references/deepeval.md` maps the same triad onto DeepEval's `Contextual*` metrics).
-- `qa-data-driven-testing-dotnet` — the golden-set row mechanics.
-- `qa-db-testing-*-dotnet` — seed/assert/tear-down the vector index the retriever reads.
+- `qa-dotnet:data-driven-testing` — the golden-set row mechanics.
+- `qa-dotnet:db-*` — seed/assert/tear-down the vector index the retriever reads.

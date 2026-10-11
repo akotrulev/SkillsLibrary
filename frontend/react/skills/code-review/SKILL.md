@@ -1,5 +1,5 @@
 ---
-name: fe-react-code-review
+name: conventions-review
 description: Use when reviewing React code — misplaced `'use client'`, hook-rule violations, `useEffect`-to-derive-state, missing cleanup, index keys, hydration mismatches, un-memoized context, server data in a client store, `<div onClick>` navigation, missing testids. Triggers "review this component/page", "why does this re-render", "is this 'use client' in the right place", "Rendered more hooks than during the previous render". Not for explanations (`basics`) or generating code (`component-writer`).
 ---
 
@@ -194,7 +194,7 @@ Reviews React code (React 19/18 + TypeScript — Next.js App Router / RSC primar
 
 ### Comments & TSDoc
 
-Load **[`ep-code-comments`](../../../../engineering-practices/code-comments/SKILL.md)** for the rule itself, the complex-flow test that earns a doc comment, the never-comment trivia list, and the severity mapping. This section supplies only the mechanics that differ here. It covers component bodies, hooks, and JSX (`{/* … */}`) alike.
+Load **[`engineering-practices/code-comments`](../../../../engineering-practices/code-comments/SKILL.md)** for the rule itself, the complex-flow test that earns a doc comment, the never-comment trivia list, and the severity mapping. This section supplies only the mechanics that differ here. It covers component bodies, hooks, and JSX (`{/* … */}`) alike.
 
 | React mechanic | What to check |
 |---|---|
@@ -247,7 +247,7 @@ Severities per `CLAUDE.md`:
 - **Missing effect cleanup** — leaked subscriptions/timers across navigations.
 - **`forwardRef` on React 19** — `ref` is a plain prop now.
 - **Secret / server-only import in a `'use client'` module** — the client bundle is public.
-- **Comments compensating for naming, and stale comments.** Per `ep-code-comments` — extract a sub-component or hook rather than annotate.
+- **Comments compensating for naming, and stale comments.** Per `engineering-practices/code-comments` — extract a sub-component or hook rather than annotate.
 - **An un-justified `eslint-disable-next-line react-hooks/exhaustive-deps`.** The suppression is the symptom; the stale closure it hides is the bug.
 
 ## Handoffs

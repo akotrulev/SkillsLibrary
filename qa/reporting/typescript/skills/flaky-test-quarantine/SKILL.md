@@ -1,12 +1,12 @@
 ---
-name: qa-flaky-test-quarantine-typescript
-description: Use when flaky tests in a Node 24 (22 supported) + TypeScript suite (Playwright e2e, Vitest unit) must be detected, **quarantined** and reported. Triggers: "this Playwright test is flaky, stop it blocking CI", "quarantine our flaky e2e tests but keep running them", "find which Playwright tests are flaky". Not for Allure wiring (`qa-test-reports-typescript`), the pipeline lanes (`qa-ci-pipelines-typescript`), or fixing test logic (the owning qa-*-typescript agent).
+name: flaky-test-quarantine
+description: Use when flaky tests in a Node 24 (22 supported) + TypeScript suite (Playwright e2e, Vitest unit) must be detected, **quarantined** and reported. Triggers: "this Playwright test is flaky, stop it blocking CI", "quarantine our flaky e2e tests but keep running them", "find which Playwright tests are flaky". Not for Allure wiring (`qa-typescript:test-reports`), the pipeline lanes (`qa-typescript:ci-pipelines`), or fixing test logic (the owning qa-*-typescript agent).
 ---
 
 # Flaky-Test Quarantine (Node 24 + TypeScript / Playwright + Vitest)
 
 This is the **TypeScript sibling** of the single-node `qa/reporting/typescript/skills/flaky-test-quarantine/` family, **ported** from
-the canonical **Java/TestNG** file (`qa-flaky-test-quarantine-java`). The **four-move loop** is identical;
+the canonical **Java/TestNG** file (`qa-java:flaky-test-quarantine`). The **four-move loop** is identical;
 only the runner API and the quarantine filter change.
 
 **Retries are not this skill's to set.** `qa/cicd/ci-conventions` owns the retry policy: `retries: 0`, except a
@@ -52,9 +52,9 @@ assumption, an order dependency, a real-but-rare backend hiccup. It is *not*:
 - Node 24 (22 supported), TypeScript (strict), Playwright Test (e2e — where flakiness mostly lives) + Vitest (unit)
 - **No `await page.waitForTimeout(...)` / `setTimeout` as a wait** — sleeps *cause* flakiness; use Playwright
   **auto-waiting** locators + web-first assertions + `expect.poll` (cross-link
-  `qa-ui-test-writer-playwright-typescript`)
+  `qa-typescript:ui-tests-playwright`)
 - `allure-playwright` + `allure-js-commons` — history-based flaky detection, `allure.tag` / `allure.issue`
-  (cross-link `qa-test-reports-typescript` for the full Allure wiring)
+  (cross-link `qa-typescript:test-reports` for the full Allure wiring)
 
 ```
 e2e/
@@ -77,7 +77,7 @@ with `npx playwright test --only-changed=origin/main --repeat-each=10`.
 
 **(b) Allure's history-based detection** — identical across every stack (a *report* feature, not a
 language one). With Allure **history enabled** (the `history/` folder carried across runs — see
-`qa-test-reports-typescript`), Allure adds the **Flaky** mark when, across the latest **5 launches**, a test:
+`qa-typescript:test-reports`), Allure adds the **Flaky** mark when, across the latest **5 launches**, a test:
 
 1. got **Failed** at some point within those 5 launches, **and**
 2. got **Passed** at least once since that failure, **and**
@@ -137,7 +137,7 @@ test('Should_MarkSettled_When_WebhookArrivesWithinSla', { tag: '@flaky' }, async
 ```
 
 CI runs the two lanes as **separate jobs** — each run cleans `test-results/` at its start, so two runs in one
-job would wipe the first lane's evidence (cross-link `qa-ci-pipelines-typescript`):
+job would wipe the first lane's evidence (cross-link `qa-typescript:ci-pipelines`):
 
 ```yaml
 ui-gate:
@@ -171,7 +171,7 @@ with `-t '\\[flaky\\]'`. Vitest keeps `retry: 0`; a flaky unit test is usually a
 > lane, which catch flakiness you haven't tagged yet.
 
 **A triage bucket in `categories.json`** keeps quarantined/flaky failures out of "real" failures (the
-reporter picks it up — see `qa-test-reports-typescript`):
+reporter picks it up — see `qa-typescript:test-reports`):
 
 ```json
 [
@@ -222,18 +222,18 @@ smell: tagging faster than fixing.
 
 ## Cross-references
 
-- `qa-flaky-test-quarantine-java` — the **canonical** stack this is ported from: TestNG groups for quarantine
+- `qa-java:flaky-test-quarantine` — the **canonical** stack this is ported from: TestNG groups for quarantine
   and the first-class `@Flaky` annotation. Same four moves.
-- `qa-flaky-test-quarantine-dotnet` — same four moves, NUnit: `[Category("Flaky")]` + `dotnet test --filter` for
+- `qa-dotnet:flaky-test-quarantine` — same four moves, NUnit: `[Category("Flaky")]` + `dotnet test --filter` for
   the gate vs non-gating lane.
-- `qa-test-reports-typescript` — the **full** allure-playwright wiring this layers on: the reporter,
+- `qa-typescript:test-reports` — the **full** allure-playwright wiring this layers on: the reporter,
   history/trends (required for auto-flaky detection), `categories.json`, CI publish. Base setup lives there.
-- `qa-ci-conventions-shared` — the retry policy this skill defers to.
-- `qa-_shared-quality-metrics` — track **flaky-rate over time**; a `@flaky` tag set that grows is the metric
+- `qa-<stack>:ci-conventions` — the retry policy this skill defers to.
+- `qa-<stack>:quality-metrics` — track **flaky-rate over time**; a `@flaky` tag set that grows is the metric
   to watch.
-- `qa-ui-test-writer-playwright-typescript` — where the quarantined tests are authored and where the canonical
+- `qa-typescript:ui-tests-playwright` — where the quarantined tests are authored and where the canonical
   config lives; flakiness is best fixed at the source: auto-waiting locators, web-first assertions, **no
   `waitForTimeout`**, intent-not-selectors page objects. Fix the wait and the test leaves quarantine.
-- `qa-evidence-capture-typescript` — the trace and video a flaky failure leaves behind, and how to read them.
-- `qa-ci-pipelines-typescript` (its GitHub Actions, Azure Pipelines and GitLab CI references) — the gate job,
+- `qa-typescript:evidence-capture` — the trace and video a flaky failure leaves behind, and how to read them.
+- `qa-typescript:ci-pipelines` (its GitHub Actions, Azure Pipelines and GitLab CI references) — the gate job,
   the quarantine job (`continue-on-error` on the non-gating lane) and the nightly repeat lane.

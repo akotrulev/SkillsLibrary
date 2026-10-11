@@ -19,9 +19,9 @@ You work in **two modes**; most real work is the second:
 
 The skills live at the repo's `<domain>/<stack>/skills/` folder when working inside the SkillsLibrary repo, or at `${CLAUDE_PLUGIN_ROOT}/<domain>/<stack>/skills/` when this agent runs from an installed Claude Code plugin — resolve every skill path below against whichever root exists. Load **only** the skills this agent owns plus the cross-cutting skills named here; peer domains are invoked as agents, never loaded as skills.
 
-**Always loaded, every run:** `engineering-practices/agent-orientation-cache` (frontmatter `ep-agent-orientation-cache`) — the read-validate / update-after protocol for this agent's orientation cache. It ships in **all** plugins, including `data` and `business-analysis`, so it resolves everywhere; it is not brownfield-only, because a greenfield run is what *creates* the cache.
+**Always loaded, every run:** `engineering-practices/agent-orientation-cache` — the read-validate / update-after protocol for this agent's orientation cache. It is loaded by path and registered in no plugin, so it resolves in every plugin; it is not brownfield-only, because a greenfield run is what *creates* the cache.
 
-For **brownfield** work, additionally load the bundled developer-workflow skills `engineering-practices/{systematic-debugging,verify-before-done,writing-plans}` (frontmatter names `ep-*`) — same root — when the relevant mode below calls for them. *(Only if this agent's plugin bundles the `ep-*` skills — `qa-*` and `fe-*` do. If it does not — `data`, `business-analysis` — inline the same discipline into the mode text instead, as `data-architect` does; do not reference skills the installed plugin cannot resolve.)*
+For **brownfield** work, additionally load the bundled developer-workflow skills `engineering-practices/{systematic-debugging,verify-before-done,writing-plans}` (the `dev` skills) — same root — when the relevant mode below calls for them. *(Only if this agent's plugin depends on `dev` — `qa-*`, `fe-*`, `be-*`, `mobile-*`, `devops` and `business-analysis` do. If it does not — `data`, `tooling`, `training-data`, `penetration-testing`, `security-governance` — inline the same discipline into the mode text instead, as `data-architect` does; do not reference skills the installed plugin cannot resolve.)*
 
 ## Operating rules
 
@@ -38,7 +38,7 @@ For **brownfield** work, additionally load the bundled developer-workflow skills
 
 ### Orientation pass — always first, before any brownfield change
 
-**Orientation 1 — read the cache.** Load `ep-agent-orientation-cache` and run its validation gate against `docs/agent-context/<agent-name>.md`: **TRUST** (skip orientation), **DELTA** (refresh only the sections the git delta invalidated), or **FULL** (no usable cache — derive everything). Report the verdict in one line; don't narrate the checks.
+**Orientation 1 — read the cache.** Load `engineering-practices/agent-orientation-cache` and run its validation gate against `docs/agent-context/<agent-name>.md`: **TRUST** (skip orientation), **DELTA** (refresh only the sections the git delta invalidated), or **FULL** (no usable cache — derive everything). Report the verdict in one line; don't narrate the checks.
 
 **Orientation 2 — derive the gaps.** Recover, don't author. For whatever the gate left unresolved: detect the version(s), map the layout, and inventory the **existing seams to reuse** (<POMs / API clients / DTOs / builders / fixtures / state containers / migrations / Step Catalog — per family>) and how the thing is built/run/invoked. The result is the **current-state map**.
 
@@ -59,7 +59,7 @@ For **brownfield** work, additionally load the bundled developer-workflow skills
 
 ### Mode A — Fix a <failing test / defect / red gate / slow query / stale case>
 
-Load `ep-systematic-debugging` (or apply its discipline inline). Do not jump to a fix: **reproduce first**, then **triage the failure class** (<family-specific fork — e.g. product defect vs test defect vs flake; true-positive vs false-positive; data vs schema>). Make the **smallest correct change** per the owning skill's rules — never paper over a failure by weakening an assertion or suppressing without a ticket. Then **verify** (`ep-verify-before-done`: green *for the right reason*, whole suite/build still passes) and **sweep the class** (does the same defect pattern exist elsewhere?).
+Load `dev:debugging` (or apply its discipline inline). Do not jump to a fix: **reproduce first**, then **triage the failure class** (<family-specific fork — e.g. product defect vs test defect vs flake; true-positive vs false-positive; data vs schema>). Make the **smallest correct change** per the owning skill's rules — never paper over a failure by weakening an assertion or suppressing without a ticket. Then **verify** (`dev:verify`: green *for the right reason*, whole suite/build still passes) and **sweep the class** (does the same defect pattern exist elsewhere?).
 
 ### Mode B — Extend (<add coverage / add a feature / add a lane / add a table>)
 
@@ -67,7 +67,7 @@ Scope the change, orient on the surfaces it touches, then **re-enter only the re
 
 ### Workspace (both modes)
 
-Work in the checkout you are given — never create a branch or worktree. Multi-step work gets a plan (`ep-writing-plans`). Commit/push only when asked.
+Work in the checkout you are given — never create a branch or worktree. Multi-step work gets a plan (`dev:plan-feature`). Commit/push only when asked.
 
 ## Steps
 

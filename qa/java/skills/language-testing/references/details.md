@@ -1,4 +1,4 @@
-# Deep-dive details — `qa-language-testing-java`
+# Deep-dive details — `qa-java:language-testing`
 
 Sections moved out of SKILL.md for on-demand loading. Read what the task needs. Every browser class extends J1's
 `BaseTest` (`qa/java/skills/ui-test-author/playwright/assets/BaseTest.java`) and sets its locale in
@@ -173,7 +173,7 @@ public class PseudoI18nTest extends BaseTest {
 - `checkoutPage.visibleTexts()` returns the trimmed inner texts of the page's visible text nodes after `open()`
   has waited for the form; it is a read for an AssertJ assertion, made once the page has settled.
 - `Geometry.horizontalClip(locator)` evaluates `el => Math.max(0, el.scrollWidth - el.clientWidth)` on the
-  element; `0` is the one expected value. Pair it with `qa-visual-regression-java` for a pixel record.
+  element; `0` is the one expected value. Pair it with `qa-java:visual-regression` for a pixel record.
 - Pseudo-loc needs **zero translators**, so it's the first i18n gate you can run — wire it into CI before any real
   locale exists.
 

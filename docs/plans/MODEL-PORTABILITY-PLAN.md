@@ -142,7 +142,7 @@ Fixes: **contract violation**, **decay**.
 
 - [ ] Every agent opens, immediately after the frontmatter, with a short **`## NEVER`** block — 3–6 lines, imperative, no rationale: *never write outside `docs/audits/`* · *never cite a line you did not read this run* · *never mark Resolved without a fresh re-trace* · *never act outside the scope file*. The rules already exist in these files; today they are stated mid-document in prose (`code-auditor` line 9, line 33, line 135) and a weak model loses them by page three.
 - [ ] Each agent **repeats its single most-violated invariant at the phase where it bites**, not only at the top. Repetition is a cost worth paying for exactly the load-bearing rules.
-- [ ] Same treatment for the always-on pair (`ep-agent-orientation-cache`, `ep-code-comments`) since they ride in every plugin.
+- [ ] Same treatment for the always-on pair (`engineering-practices/agent-orientation-cache`, `engineering-practices/code-comments`) since they ride in every plugin.
 
 ## 10. Stage B3 — Make procedures mechanical
 
@@ -158,7 +158,7 @@ Fixes: **fabrication**, **phase collapse**.
 
 - [ ] Tighten the existing output-contract blocks into strictly parseable key/value headers (they are already close — see `code-auditor` lines 99–127).
 - [ ] `tools/verify-artifact.py` — validates a produced audit/plan/report against its contract: required header fields present, ID format and continuity, no renumbering across rounds, **every `file:line` citation resolves to an existing line**, `#confirmed` claims carry a citation. This is the same script Stage A3 scores with, so it is built once and used twice.
-- [ ] Add a **self-verification step** as the last phase of every artifact-producing agent: run the check (or perform it manually), report the result. `ep-verify-before-done` is the existing skill; this makes it mandatory and mechanical rather than cultural.
+- [ ] Add a **self-verification step** as the last phase of every artifact-producing agent: run the check (or perform it manually), report the result. `dev:verify` is the existing skill; this makes it mandatory and mechanical rather than cultural.
 
 ## 12. Stage B5 — Cap the simultaneous load
 

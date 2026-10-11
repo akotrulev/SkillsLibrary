@@ -1,6 +1,6 @@
 ---
-name: devops-k8s-security
-description: Use when benchmarking or probing the security posture of Kubernetes — CIS scoring, framework mapping, config validation, and active validation that RBAC, NetworkPolicy, Pod Security Standards, and secrets-at-rest hold. Triggers "run CIS benchmark on our cluster", "audit our K8s RBAC", "are our network policies actually enforcing". Do NOT use for authoring manifests (`devops/kubernetes`), image or IaC CVEs (`qa-security-image-infra-scan`), or plugin-rule conformance (`devops-auditor`).
+name: kubernetes-security
+description: Use when benchmarking or probing the security posture of Kubernetes — CIS scoring, framework mapping, config validation, and active validation that RBAC, NetworkPolicy, Pod Security Standards, and secrets-at-rest hold. Triggers "run CIS benchmark on our cluster", "audit our K8s RBAC", "are our network policies actually enforcing". Do NOT use for authoring manifests (`devops/kubernetes`), image or IaC CVEs (`qa-<stack>:image-infra-scan`), or plugin-rule conformance (`devops-auditor`).
 ---
 
 # DevOps — Kubernetes Security Posture (kube-bench · Kubescape · Polaris · kube-score)
@@ -21,7 +21,7 @@ single Go binaries / container images — **language-agnostic**, one skill, no p
 anti-triplication rule).
 
 > **⚠️ The Trivy boundary — be precise; this is the whole reason both skills exist.**
-> **`qa-security-image-infra-scan` (Trivy) owns CVE matching and raw IaC misconfig**: base-OS packages
+> **`qa-<stack>:image-infra-scan` (Trivy) owns CVE matching and raw IaC misconfig**: base-OS packages
 > inside an image, the container as shipped, SBOM generation/provenance (A03), `trivy config` over
 > Terraform/Helm/K8s templates, and `trivy k8s` cluster **vulnerability** scanning. **This skill owns what
 > Trivy does not produce: a benchmark score, a framework mapping, and a validated control.** A CIS 1.10
@@ -44,7 +44,7 @@ anti-triplication rule).
 > - Record an authorization line in the run's output: **`Authorization: <cluster/context + namespaces in
 >   scope> · authorized by <name> · expires <date>`**. It is **`#volatile`** — never written to
 >   `docs/agent-context/`, never carried over from a previous run, re-confirmed every run
->   (`ep-agent-orientation-cache` treats live-resource facts this way by rule).
+>   (`engineering-practices/agent-orientation-cache` treats live-resource facts this way by rule).
 > - **Owned or throwaway clusters only.** Never a third party's cluster, never a shared cluster you do not
 >   administer. Prefer a dedicated security-test cluster or an ephemeral kind/k3d clone of production's
 >   manifests; **production is a separate, louder sign-off** than a lab, not the same one.
@@ -68,7 +68,7 @@ anti-triplication rule).
 | "Does **RBAC** actually deny what we think it denies?" | `kubectl auth can-i` matrix + Kubescape RBAC controls (see *Validating the four controls*) | the K8s API | **yes** | **A01** · ATT&CK **T1078.004** |
 | "Do **NetworkPolicies** actually block the traffic?" | live reachability probe (see *Validating the four controls*) | the pod network | **yes** | A01 · ATT&CK **T1210** |
 | "Are **Secrets encrypted at rest**?" | `EncryptionConfiguration` check + provider KMS (see *Validating the four controls*) | apiserver config / managed-cluster settings | **yes** | OWASP **A02/A04** |
-| **CVEs** in the image / OS packages / SBOM / raw IaC | **Trivy** → `qa-security-image-infra-scan` | image layers, lockfiles, IaC templates | no | A03/A02 |
+| **CVEs** in the image / OS packages / SBOM / raw IaC | **Trivy** → `qa-<stack>:image-infra-scan` | image layers, lockfiles, IaC templates | no | A03/A02 |
 
 **Rule of thumb:** **kube-score** in the PR (fast, no cluster) → **Polaris** on the chart/overlay
 (catalogued severities, same checks the webhook will enforce) → **Kubescape** for the framework picture →
@@ -255,8 +255,8 @@ kubectl get clusterrolebindings -o json \
 
 Assert an **expected answer per row** (`no` for every escalation above) — a matrix of subject × verb ×
 resource with one expected value each, which is the same discipline
-the qa stacks' `permission-testing` skills (`qa-permission-testing-dotnet`, `qa-permission-testing-java`,
-`qa-permission-testing-typescript`) apply to an API's BOLA/BFLA matrix, one layer down.
+the qa stacks' `permission-testing` skills (`qa-dotnet:permission-testing`, `qa-java:permission-testing`,
+`qa-typescript:permission-testing`) apply to an API's BOLA/BFLA matrix, one layer down.
 
 **2 — NetworkPolicy actually enforces (A01 · ATT&CK T1210).** The two failure modes are invisible in YAML:
 a namespace with **no default-deny**, and a **CNI that does not implement NetworkPolicy at all** (a plain
@@ -332,7 +332,7 @@ Every finding carries **both** a posture spine and, where the finding describes 
 | Missing resource limits (noisy-neighbour / resource-exhaustion) | A02 | **T1496** Resource Hijacking |
 
 Findings that are pure CVE matches (a vulnerable package inside the image) are **not** this skill's rows —
-they belong to Trivy and `qa-security-image-infra-scan`, mapped to A03.
+they belong to Trivy and `qa-<stack>:image-infra-scan`, mapped to A03.
 
 ## Green ≠ safe — state coverage and the handoff
 
@@ -341,13 +341,13 @@ Every report closes with what was **not** covered and who owns it:
 
 | Not covered here | Owner |
 |---|---|
-| CVEs in images, base OS packages, SBOM/provenance | `qa-security-image-infra-scan` (Trivy) |
+| CVEs in images, base OS packages, SBOM/provenance | `qa-<stack>:image-infra-scan` (Trivy) |
 | Application-layer authz — BOLA/IDOR/BFLA against the API | `qa-security` → `permission-testing` (per stack) |
 | Cross-tenant data leakage at the database layer | `data-architect` (owns that leak test) |
-| Terraform/Bicep/ARM misconfig scoring | `devops-iac-security` |
-| Cloud-account posture — IAM, exposed storage, encryption, logging | `devops-cloud-posture` |
-| Runtime threat detection, escape probing, live behavioural alerts | `devops-container-runtime-security` |
-| Artifact signing, SLSA provenance, build-pipeline integrity | `devops-supply-chain-security` |
+| Terraform/Bicep/ARM misconfig scoring | `devops:iac-security` |
+| Cloud-account posture — IAM, exposed storage, encryption, logging | `devops:cloud-posture` |
+| Runtime threat detection, escape probing, live behavioural alerts | `devops:container-runtime-security` |
+| Artifact signing, SLSA provenance, build-pipeline integrity | `devops:supply-chain-security` |
 | Whether a detection actually **fired** for any of the above | `observability-engineer-*` (the telemetry backend) |
 | Applying every fix | **`devops-engineer`** — this skill finds and retests, it does not edit infrastructure |
 
@@ -511,7 +511,7 @@ cluster credentials and a live target — exactly the two things a fork PR must 
   same run, with creation and removal both logged. Nothing else is written to the cluster.
 - **Own the boundary:** benchmark scoring · framework mapping · best-practice validation · control
   validation. **CVEs, SBOM, and raw IaC template scanning belong to Trivy**
-  (`qa-security-image-infra-scan`) — run both, and do not double-gate the same manifest check.
+  (`qa-<stack>:image-infra-scan`) — run both, and do not double-gate the same manifest check.
 - **Exceptions are ticketed and scoped to one control/check ID with a re-review date.** No blanket section
   skips, no score threshold of zero. **Ratchet the threshold upward.**
 - **Read-only on infrastructure.** This skill finds, scores, and **retests**; `devops-engineer` applies
@@ -529,15 +529,15 @@ cluster credentials and a live target — exactly the two things a fork PR must 
 - `references/polaris.md` — the check catalog by category and severity, `polaris-config.yaml` (grading,
   exemptions, custom JSON-schema checks), the dashboard and admission-webhook modes, **plus the kube-score
   test catalog** and the pick-one-gate rule between them.
-- **`qa-security-image-infra-scan`** — the **boundary partner**: Trivy owns image/OS **CVEs**, SBOM (A03),
+- **`qa-<stack>:image-infra-scan`** — the **boundary partner**: Trivy owns image/OS **CVEs**, SBOM (A03),
   `trivy config` IaC scanning, and `trivy k8s` cluster CVE scanning. This skill owns **benchmark scoring,
   framework mapping, and control validation**. Run both; do not double-gate the same manifest check.
 - **`devops-auditor`** — the **static-conformance sibling**. It sweeps the repo against *this plugin's own
   rules* (section C Kubernetes workloads, G identity & credentials) read-only and produces
   `docs/audits/<NNN>-devops-conformance-r<N>.md`. **The fence: it confirms the field is set; this runs the
   benchmark and proves the control fires.** A pure static manifest misconfig stays with the auditor.
-- `devops-iac-security` · `devops-cloud-posture` · `devops-container-runtime-security` ·
-  `devops-supply-chain-security` · `devops-threat-modeling` · `devops-infra-controls-validation` — the
+- `devops:iac-security` · `devops:cloud-posture` · `devops:container-runtime-security` ·
+  `devops:supply-chain-security` · `devops:threat-modeling` · `devops:controls-validation` — the
   sibling infra-security lanes: Terraform/Bicep misconfig scoring, CSPM/IAM, runtime detection and escape
   probing, artifact signing and provenance, the STRIDE model that scopes the assessment, and the
   secrets/encryption/monitoring control checks.
@@ -548,7 +548,7 @@ cluster credentials and a live target — exactly the two things a fork PR must 
   probes, Workload Identity / IRSA, PDB/HPA). A finding here is usually a three-line change there.
 - `qa-security` + `qa/_shared/security` — the app-layer OWASP backbone, the authorization-to-scan rule this
   skill's live gate inherits, and the ticketed-triage discipline.
-- `qa-permission-testing-{java,dotnet,typescript}` — the **application** authz matrix
+- `qa-<stack>:permission-testing` — the **application** authz matrix
   (BOLA/IDOR/BFLA). The RBAC matrix above is the same discipline one layer down, at the cluster.
 - `data-architect` — owns the **cross-tenant leak test** that proves data isolation; cluster-level isolation
   is not database-level isolation.

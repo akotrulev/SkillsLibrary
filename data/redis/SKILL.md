@@ -1,5 +1,5 @@
 ---
-name: data-redis
+name: redis
 description: Use for Redis (or Valkey) as a cache, rate limiter, distributed lock, queue, session store, leaderboard, or pub/sub from a .NET / Java / Node backend — data structures, ACL/TLS, persistence, replication/cluster, eviction. Pick the topic in the routing table, then read its reference. Triggers: "set up Redis caching", "implement a rate limiter", "RDB vs AOF", "Valkey vs Redis". Caching STRATEGY is `data/_shared/caching-patterns` — this owns the MECHANICS. Do NOT use for a system of record.
 ---
 

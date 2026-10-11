@@ -100,4 +100,4 @@ location. Authenticated-only crawl and automatic CSRF-token handling are built i
 - Baseline/passive is safe & CI; `activeScan` / rule 40026 / Nuclei headless XSS fire payloads → authorized
   non-prod env under the authorization line.
 - Reuse the project's real E2E session (`storageState`) rather than reconfiguring auth in ZAP.
-- Emit SARIF; consolidate per `qa-security-shared`. Map findings to A05/A02 + the CLNT ids.
+- Emit SARIF; consolidate per `qa-<stack>:security-foundations`. Map findings to A05/A02 + the CLNT ids.

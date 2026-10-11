@@ -1,11 +1,11 @@
 ---
-name: pentest-privilege-escalation
-description: Use to elevate a foothold's privilege on a single host during an authorized penetration test — user shell to root/SYSTEM via SUID/sudo/kernel chains (Linux) or token/service chains (Windows). Triggers "escalate this foothold to root", "from www-data to root". Not for gaining the foothold (`pentest-initial-access`), moving hosts (`pentest-lateral-movement`), or infra posture benchmarks (`infra-security-tester`). Owned/lab targets only, under a committed scope file.
+name: privilege-escalation
+description: Use to elevate a foothold's privilege on a single host during an authorized penetration test — user shell to root/SYSTEM via SUID/sudo/kernel chains (Linux) or token/service chains (Windows). Triggers "escalate this foothold to root", "from www-data to root". Not for gaining the foothold (`penetration-testing:initial-access`), moving hosts (`penetration-testing:lateral-movement`), or infra posture benchmarks (`infra-security-tester`). Owned/lab targets only, under a committed scope file.
 ---
 
 # Penetration Testing — Privilege Escalation (linPEAS/winPEAS · GTFOBins/LOLBAS · kernel/sudo/SUID chains)
 
-Privilege escalation takes the user-level foothold `pentest-initial-access` established and elevates it on the **same host** — `www-data` to `root`, a low-priv user to `SYSTEM`. The method is always the same shape: **enumerate the host thoroughly, identify a misconfiguration or a vulnerable component, exploit the least-risky vector that works.** You escalate to *prove* the path exists and its impact, not to cause damage.
+Privilege escalation takes the user-level foothold `penetration-testing:initial-access` established and elevates it on the **same host** — `www-data` to `root`, a low-priv user to `SYSTEM`. The method is always the same shape: **enumerate the host thoroughly, identify a misconfiguration or a vulnerable component, exploit the least-risky vector that works.** You escalate to *prove* the path exists and its impact, not to cause damage.
 
 > **⚠️ Authorized self-testing only — owned/lab targets, under a committed scope file.** Escalating privilege on a host is only legitimate on a machine the engagement scope file names, within its window, using techniques its "allowed techniques" list permits. **Read the scope file before every act; halt and report if the next act would fall outside it.** Kernel exploits in particular can panic a host (an availability impact indistinguishable from DoS) — they are a disruptive act, opt-in per the scope file, run against a lab replica first where feasible, and excluded from production without the separate louder sign-off.
 
@@ -14,9 +14,9 @@ Authorization: engagement=<NNN>  host=<in-scope foothold>  allowed-techniques=<l
                authorized-by=<name>  window=<start>..<expiry>  environment=lab|production(2nd sign-off)
 ```
 
-This skill is **language-agnostic** (the enumerators are scripts/binaries; the reference catalogues are sites) and is loaded by the **`penetration-tester`** agent in its **Privilege escalation** step. It owns *elevating on one host*; it does not gain the foothold (`pentest-initial-access`) or move to another host (`pentest-lateral-movement`).
+This skill is **language-agnostic** (the enumerators are scripts/binaries; the reference catalogues are sites) and is loaded by the **`penetration-tester`** agent in its **Privilege escalation** step. It owns *elevating on one host*; it does not gain the foothold (`penetration-testing:initial-access`) or move to another host (`penetration-testing:lateral-movement`).
 
-> **Two spines, stated per finding.** Escalation maps to **MITRE ATT&CK Enterprise** under **Privilege Escalation** — `T1068` Exploitation for Privilege Escalation (kernel/component), `T1548.001` Setuid/Setgid, `T1548.003` Sudo and Sudo Caching, `T1134` Access Token Manipulation (`.001` Token Impersonation), `T1543.003` Windows Service, `T1574` Hijack Execution Flow (`.009` unquoted path). Where the vector is a misconfiguration it also carries **OWASP** A05. Severity is scored **CVSS** in `pentest-reporting`.
+> **Two spines, stated per finding.** Escalation maps to **MITRE ATT&CK Enterprise** under **Privilege Escalation** — `T1068` Exploitation for Privilege Escalation (kernel/component), `T1548.001` Setuid/Setgid, `T1548.003` Sudo and Sudo Caching, `T1134` Access Token Manipulation (`.001` Token Impersonation), `T1543.003` Windows Service, `T1574` Hijack Execution Flow (`.009` unquoted path). Where the vector is a misconfiguration it also carries **OWASP** A05. Severity is scored **CVSS** in `penetration-testing:reporting`.
 
 ## The methodology — enumerate, identify, exploit the least-risky vector
 
@@ -79,16 +79,16 @@ When enumeration finds a vulnerable component rather than a misconfiguration, a 
 - **The scope file gates every act.** In-scope host, permitted techniques, within the window. Re-read before each act; halt and report if the next act would exceed it.
 - **Enumerate before exploiting; prefer the least-risky vector.** Misconfiguration abuse (GTFOBins/LOLBAS, sudo/SUID/capability) over kernel exploitation, always.
 - **Kernel/local exploits are disruptive acts** — version-matched, lab-tested first, production-excluded by default, opt-in per the scope file. **No exploit whose effect is a crash. No DoS, ever.**
-- **Two spines per finding:** ATT&CK Enterprise (Privilege Escalation tactic) + OWASP A05 where it is a misconfiguration. Score CVSS in `pentest-reporting`.
-- **Escalate on one host only** — moving to another host is `pentest-lateral-movement`.
+- **Two spines per finding:** ATT&CK Enterprise (Privilege Escalation tactic) + OWASP A05 where it is a misconfiguration. Score CVSS in `penetration-testing:reporting`.
+- **Escalate on one host only** — moving to another host is `penetration-testing:lateral-movement`.
 - **Loot redaction + artifact cleanup.** Recovered secrets → blast radius only; every dropped enumerator/exploit removed at cleanup, the removal logged.
 - **Log every act** — enumeration run, exploit command, target, timestamp, ATT&CK id — into the engagement action log.
 
 ## Cross-references
 
 - **`penetration-tester`** — the orchestrator; runs this in its **Privilege escalation** step, owns the scope-file gate.
-- **`pentest-initial-access`** — the **prior** step: supplies the user-level foothold this skill elevates.
-- **`pentest-lateral-movement`** — the **next** step: takes the elevated host as a stronger pivot; SYSTEM/root often unlocks credential material (`pentest-credential-attacks`) that enables lateral reuse.
-- **`pentest-credential-attacks`** — root/SYSTEM enables LSASS/`/etc/shadow`/keystore harvesting for reuse.
+- **`penetration-testing:initial-access`** — the **prior** step: supplies the user-level foothold this skill elevates.
+- **`penetration-testing:lateral-movement`** — the **next** step: takes the elevated host as a stronger pivot; SYSTEM/root often unlocks credential material (`penetration-testing:credential-attacks`) that enables lateral reuse.
+- **`penetration-testing:credential-attacks`** — root/SYSTEM enables LSASS/`/etc/shadow`/keystore harvesting for reuse.
 - **`infra-security-tester`** (`devops/`) — the posture sibling that would have *flagged* the misconfiguration statically (a writable service path, a permissive sudoers); this skill *proves* it escalates.
-- **`pentest-reporting`** — action log + CVSS/ATT&CK scoring of the escalation.
+- **`penetration-testing:reporting`** — action log + CVSS/ATT&CK scoring of the escalation.

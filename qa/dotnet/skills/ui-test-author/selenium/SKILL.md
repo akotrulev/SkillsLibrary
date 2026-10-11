@@ -1,5 +1,5 @@
 ---
-name: qa-ui-test-writer-selenium-dotnet
+name: ui-tests-selenium
 description: Use when the user asks to scaffold a C# / .NET 10 (8-9 supported) + Selenium 4 page object or NUnit UI test, following the BasePage / DriverFactory / NUnit pattern. Triggers: "create a Selenium page object for X in C#", "add a .NET page for screen Y", "write a Selenium NUnit test for Z". Not for Playwright projects (`ui-test-author/playwright`) or reviewing existing tests (`ui-test-author/review`).
 ---
 

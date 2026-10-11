@@ -1,6 +1,6 @@
 ---
-name: ba-process-flow-diagram
-description: Use when turning requirements (story, BRD, feature description) into a business-flow model — a BPMN-disciplined Mermaid flowchart with named actors, every decision exit labeled, failure/timeout paths modeled — to the KB. Triggers: "map the flow for this feature", "diagram the checkout process", "what are all the paths through X", "what happens when this step fails or times out". Do NOT use for entity lifecycles (`ba-entity-state-grid`), rule tables (`ba-decision-table`), or UI screen flows.
+name: process-flow
+description: Use when turning requirements (story, BRD, feature description) into a business-flow model — a BPMN-disciplined Mermaid flowchart with named actors, every decision exit labeled, failure/timeout paths modeled — to the KB. Triggers: "map the flow for this feature", "diagram the checkout process", "what are all the paths through X", "what happens when this step fails or times out". Do NOT use for entity lifecycles (`business-analysis:state-grid`), rule tables (`business-analysis:decision-table`), or UI screen flows.
 ---
 
 # BA — Flow Mapper
@@ -18,9 +18,9 @@ The notation is a **Mermaid flowchart** (text-based, diffable, token-cheap, rend
 
 ## When NOT to use
 
-- The question is "what may happen to this *entity* over its life" → `ba-entity-state-grid`
-- The question is "what outcome for every input combination" → `ba-decision-table`
-- The question is timing/interleaving between two features/systems → a Mermaid `sequenceDiagram` of the specific boundary scenario (an investigation tool inside `ba-feature-conflict-check`, not a default artifact)
+- The question is "what may happen to this *entity* over its life" → `business-analysis:state-grid`
+- The question is "what outcome for every input combination" → `business-analysis:decision-table`
+- The question is timing/interleaving between two features/systems → a Mermaid `sequenceDiagram` of the specific boundary scenario (an investigation tool inside `business-analysis:conflict-check`, not a default artifact)
 - Distilling a story into a testable breakdown → `qa/manual/requirements-breakdown`
 
 ## Contract with the KB
@@ -55,8 +55,8 @@ The timeline is scaffolding; keep it in the flow file under "Event timeline" —
 # Flow — <Name> (FLOW-001)
 
 **Created:** <YYYY-MM-DD>
-**Owned by:** `ba-process-flow-diagram`
-**Last updated:** <YYYY-MM-DD> by `ba-process-flow-diagram` — <one line what changed>
+**Owned by:** `business-analysis:process-flow`
+**Last updated:** <YYYY-MM-DD> by `business-analysis:process-flow` — <one line what changed>
 
 **Sources**: <US<n> / BRD / contract refs> · **Feature**: <E<n> label, or AREA-nnn>
 **Actors**: <list>

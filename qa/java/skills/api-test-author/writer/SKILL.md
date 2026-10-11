@@ -1,6 +1,6 @@
 ---
-name: qa-api-test-writer-java
-description: Use when the user asks to write Java API tests using RestAssured + TestNG against a REST backend. Triggers: "write a Java API test for X", "add a TestNG test method", "automate these test cases in Java". Do NOT use for GraphQL (`qa-api-test-graphql-java`), gRPC (`qa-api-test-grpc-java`), Playwright-based API tests (`qa-api-test-playwright-java`) or reviewing tests (`qa-api-test-review-java`).
+name: api-tests
+description: Use when the user asks to write Java API tests using RestAssured + TestNG against a REST backend. Triggers: "write a Java API test for X", "add a TestNG test method", "automate these test cases in Java". Do NOT use for GraphQL (`qa-java:api-tests-graphql`), gRPC (`qa-java:api-tests-grpc`), Playwright-based API tests (`qa-java:api-tests-playwright`) or reviewing tests (`qa-java:api-tests-review`).
 ---
 
 # QA — API Test Writer (Java / RestAssured + TestNG)

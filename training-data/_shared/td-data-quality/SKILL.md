@@ -1,6 +1,6 @@
 ---
-name: td-data-quality
-description: Use when cleaning, filtering, deduplicating, or decontaminating a training dataset — the gate every dataset passes before training. Triggers: "dedup this corpus", "check for eval contamination", "filter low-quality examples", "scrub PII from the SFT data", "balance the dataset by topic". Do NOT use for record schema (`td-dataset-formats`), synthesis (`td-synthetic-generation`), or corpus collection (`td-pretraining-corpus`).
+name: data-quality
+description: Use when cleaning, filtering, deduplicating, or decontaminating a training dataset — the gate every dataset passes before training. Triggers: "dedup this corpus", "check for eval contamination", "filter low-quality examples", "scrub PII from the SFT data", "balance the dataset by topic". Do NOT use for record schema (`training-data:dataset-formats`), synthesis (`training-data:synthetic-generation`), or corpus collection (`training-data:pretraining-corpus`).
 ---
 
 # Training Data — Quality, Dedup & Decontamination (cross-stage)
@@ -18,10 +18,10 @@ The quality gate every dataset — pretraining, SFT, preference, eval, VLM — p
 
 ## When NOT to use
 
-- The record schema and split boundaries → `td-dataset-formats`
-- Generating records → `td-synthetic-generation`
-- HTML/PDF extraction and boilerplate stripping → `td-pretraining-corpus`
-- Preference-pair validity (is `chosen` actually better) → `td-preference-data`
+- The record schema and split boundaries → `training-data:dataset-formats`
+- Generating records → `training-data:synthetic-generation`
+- HTML/PDF extraction and boilerplate stripping → `training-data:pretraining-corpus`
+- Preference-pair validity (is `chosen` actually better) → `training-data:preference-data`
 
 ## The order of operations (do not reorder)
 
@@ -32,7 +32,7 @@ Filtering is cheap and dedup is expensive, so filter first; decontamination must
 3. **Exact dedup** — hash the normalized payload; keep one.
 4. **Near-dedup** — MinHash/LSH clustering; keep one representative per cluster.
 5. **Quality filter** — heuristic score, classifier, or LLM grade; drop below threshold.
-6. **Split** — assign whole near-dup clusters to train/val/test (`td-dataset-formats`).
+6. **Split** — assign whole near-dup clusters to train/val/test (`training-data:dataset-formats`).
 7. **Decontaminate** — remove any train record that near-matches any test/eval record. **Last, always, no exceptions.**
 
 Log counts removed at every step into the dataset card. A pipeline that drops 80% of its data at step 5 is telling you something about the source — surface it, don't hide it.
@@ -63,7 +63,7 @@ For very large corpora, suffix-array substring dedup (à la Google's `deduplicat
 
 Method: n-gram overlap (13-gram substring match is the field-standard bar) **and** MinHash near-match at Jaccard ≥ 0.7 between each train record and the eval pool; drop the train record on a hit. For multiple-choice benchmarks, match on the question stem, not the letter answer. Record the contamination rate found (`"0.3% of train near-matched MMLU — removed"`) in the card; a *zero* rate on a web corpus usually means the check is broken, not that the corpus is clean.
 
-**Canary strings:** seed eval sets with a unique GUID (`td-dataset-formats` `canary` field). If that GUID ever appears in a corpus, you have proof of leakage and a grep-able tripwire.
+**Canary strings:** seed eval sets with a unique GUID (`training-data:dataset-formats` `canary` field). If that GUID ever appears in a corpus, you have proof of leakage and a grep-able tripwire.
 
 ## Quality filtering
 
@@ -73,7 +73,7 @@ Match the method to the stage — the bar for pretraining ("is this coherent hum
 |---|---|---|---|
 | **Heuristics** — length bounds, symbol/word ratio, % alphabetic, repeated-line ratio, stopword presence, perplexity under a small LM | cheap | Pretraining bulk filtering (the C4/Gopher/RefinedWeb rules) | Over-aggressive rules delete code, tables, and non-English — test on a sample first |
 | **Trained classifier** — fastText/logistic on "good vs bad" labels, or a reference-corpus classifier (Wikipedia-like = keep) | medium | Large corpora where heuristics plateau | The classifier inherits the bias of its "good" set — you are selecting for *resemblance to the reference*, not truth |
-| **LLM grader** — score each record 1–5 on a rubric with the Claude API | expensive per record | SFT/preference where quality is semantic; small-to-medium sets | Pin the judge model + prompt + version; grade a human-labeled calibration set first (see `td-synthetic-generation` on judge-pinning) |
+| **LLM grader** — score each record 1–5 on a rubric with the Claude API | expensive per record | SFT/preference where quality is semantic; small-to-medium sets | Pin the judge model + prompt + version; grade a human-labeled calibration set first (see `training-data:synthetic-generation` on judge-pinning) |
 
 Always keep the **dropped** records in a `rejected/` file with the reason, at least until the dataset is validated — you cannot tune a threshold you can't inspect, and an over-eager filter is discovered by reading what it threw away.
 
@@ -88,7 +88,7 @@ Always keep the **dropped** records in a `rejected/` file with the reason, at le
 A dataset's *composition* is training signal — the model learns the distribution you show it:
 
 - **Pretraining mixing weights** — up/down-sample sources to a target blend (e.g. more code, less low-quality web); state the final blend in the card. Repeating high-quality data a few epochs beats diluting with low-quality data.
-- **SFT/preference balance** — cap any single topic, template, persona, or `source` so it can't dominate; a set that is 60% "write a poem" makes a poem model. Use the `meta` tags from `td-dataset-formats` to measure and cap.
+- **SFT/preference balance** — cap any single topic, template, persona, or `source` so it can't dominate; a set that is 60% "write a poem" makes a poem model. Use the `meta` tags from `training-data:dataset-formats` to measure and cap.
 - **Report the composition table** in the card (count by `meta.topic` / `source` / `difficulty`) — skew you can't see is skew you ship.
 
 ## Hard rules

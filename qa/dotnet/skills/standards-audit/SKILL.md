@@ -1,5 +1,5 @@
 ---
-name: qa-dotnet-standards-audit
+name: standards-audit
 description: Use when auditing a .NET test suite against the qa-dotnet plugin's conventions, producing a saved, re-runnable findings report in `docs/audits/`. Scopeable to the whole suite or to just one discipline. Read-only; it never fixes. Triggers "audit our test suite against the conventions", "re-audit — what did we fix since last round", "audit just our API tests". Not for one test file (a `reviewer` skill) or fixing anything (the `qa-*-dotnet` agents).
 ---
 
@@ -42,7 +42,7 @@ A, B, C, G, I, K, L, M, N (minus the tagged rows above) are **universal** — ev
 
 ## Read before sweeping
 
-1. **[`ep-standards-audit-engine`](../../../../engineering-practices/standards-audit-engine/SKILL.md)** — the engine: Mode A/B rounds, the artifact contract, evidence rules, severity semantics, grouping/coverage policy, the 5 steps, the hostile self-review. **Read it first.**
+1. **[`engineering-practices/standards-audit-engine`](../../../../engineering-practices/standards-audit-engine/SKILL.md)** — the engine: Mode A/B rounds, the artifact contract, evidence rules, severity semantics, grouping/coverage policy, the 5 steps, the hostile self-review. **Read it first.**
 2. [`references/conformance-checklist.md`](references/conformance-checklist.md) — the 14 lettered sections (A–N) and every check. **Read end-to-end** before Step 2.
 3. `engineering-practices/standards-audit-engine/references/report-template.md` — the Round-1 / Round-N skeletons. Read before Step 3.
 
@@ -55,11 +55,11 @@ Report path: `docs/audits/<NNN>-qa-dotnet-conformance-r<N>.md`.
 | Job | Owner |
 |---|---|
 | Review one test file / one diff, inline severity table | [`api-test-author/review`](../api-test-author/review/SKILL.md) (+ [`api-test-author/playwright`](../api-test-author/playwright/SKILL.md) § Review) · [`ui-test-author/review`](../ui-test-author/review/SKILL.md) · [`bdd-reviewer`](../bdd-reviewer/SKILL.md) — this skill **rolls their checklists up to suite scale** |
-| Audit the **application** the suite tests | **peers** `be-dotnet-standards-audit` · `fe-blazor`/`fe-react` conformance audits |
+| Audit the **application** the suite tests | **peers** `be-dotnet:standards-audit` · `fe-blazor`/`fe-react` conformance audits |
 | Test-case design coverage from requirements | **peer** `qa-test-case-designer` (+ `qa/manual/requirements-breakdown`) — section N reports *suite shape*, not requirement coverage |
 | Filing a defect the suite exposed | `qa/manual/bug-report-writer` |
 | Running a security scan | **peer** `qa-security` — section K inventories secret hygiene in test code only |
-| Code vs a written spec, or a feature trace | `ep-spec-vs-code-audit` / `ep-feature-audit` / the `code-auditor` agent |
+| Code vs a written spec, or a feature trace | `dev:audit-spec` / `dev:audit-feature` / the `code-auditor` agent |
 | Applying any fix found here | the matching `qa-api-dotnet` / `qa-ui-dotnet` / `qa-mobile-dotnet` / `qa-reporting-dotnet` / `qa-cicd-dotnet` agent |
 
 ## Step 0 — the suite lane *(never skip)*
@@ -101,5 +101,5 @@ A–D, G, I, K apply to every .NET test suite. Sections that are N/A must name t
 - **One file / one diff instead** → the family reviewer skills named in the fence table.
 - **Missing `data-testid`s the suite works around (section F)** → `missing-testids.md` to the `fe-blazor` / `fe-react` peer.
 - **Requirement-coverage gaps** (not suite-shape gaps) → **peer** `qa-test-case-designer`.
-- **Application findings noticed in passing** → name them in the handoff block and point at `be-dotnet-standards-audit` / the `fe-*` audit; never score them here.
+- **Application findings noticed in passing** → name them in the handoff block and point at `be-dotnet:standards-audit` / the `fe-*` audit; never score them here.
 - **Security gates for the app** → **peer** `qa-security`.

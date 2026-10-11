@@ -1,5 +1,5 @@
 ---
-name: be-node-code-review
+name: conventions-review
 description: Use when reviewing TypeScript code (Node / NestJS / Express, strict mode) for type-safety leaks, async correctness, pattern misuse, missing discriminated-union exhaustiveness, or runtime-validation gaps. Triggers: "review this TS service", "audit for `any` usage", "is this CQRS justified", "check runtime validation at boundaries". Do NOT use for explanations (`pattern-guide`), generating code (`pattern-writer`), or React (`frontend/react/skills/code-review`).
 ---
 
@@ -102,7 +102,7 @@ Reviews TypeScript code (strict mode) against the patterns in `backend/node/skil
 
 ### Comments & TSDoc
 
-Load **[`ep-code-comments`](../../../../engineering-practices/code-comments/SKILL.md)** for the rule itself, the complex-flow test that earns a doc comment, the never-comment trivia list, and the severity mapping. This section supplies only the mechanics that differ here.
+Load **[`engineering-practices/code-comments`](../../../../engineering-practices/code-comments/SKILL.md)** for the rule itself, the complex-flow test that earns a doc comment, the never-comment trivia list, and the severity mapping. This section supplies only the mechanics that differ here.
 
 | TypeScript mechanic | What to check |
 |---|---|
@@ -150,7 +150,7 @@ Severities per `CLAUDE.md`.
 - **`for...in` over arrays** — use `for...of` / `.forEach` / `.map`
 - **`.toString()` swallowing `Error.stack`** — pass the error to the logger
 - **`unknown` in `catch` accessed as `e.message`** — narrow first
-- **Comments compensating for naming, and stale comments** — per `ep-code-comments`; a comment enumerating error cases means the `Result` union should be widened
+- **Comments compensating for naming, and stale comments** — per `engineering-practices/code-comments`; a comment enumerating error cases means the `Result` union should be widened
 
 ## Handoffs
 

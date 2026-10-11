@@ -1,11 +1,11 @@
 ---
-name: mobile-android-ui-components
-description: Use when writing Jetpack Compose UI — stateless composables with hoisted state, modifier as the first optional parameter, previews, lazy-list key and contentType, stability, side-effect APIs, Material 3 components, loading / loaded / failed regions. Triggers "build this screen", "why does it recompose", "LaunchedEffect keys". Do NOT use for ViewModels (`mobile-android-architecture`), theme tokens (`-styling`), routes (`-navigation`) or XML Views (`-views-interop`).
+name: ui-components
+description: Use when writing Jetpack Compose UI — stateless composables with hoisted state, modifier as the first optional parameter, previews, lazy-list key and contentType, stability, side-effect APIs, Material 3 components, loading / loaded / failed regions. Triggers "build this screen", "why does it recompose", "LaunchedEffect keys". Do NOT use for ViewModels (`mobile-android:architecture`), theme tokens (`-styling`), routes (`-navigation`) or XML Views (`-views-interop`).
 ---
 
 # Android — UI Components (Compose)
 
-How composables are written here: **stateless by default, state hoisted, `modifier` first among the optional parameters**, lazy lists with stable keys, side effects through the right API, Material 3 components over hand-drawn ones, and every data region rendering loading / loaded / failed (plus stale and offline). It is the Compose half of CLAUDE.md § Mobile code rules; audit rows are section D of `mobile-android-standards-audit`.
+How composables are written here: **stateless by default, state hoisted, `modifier` first among the optional parameters**, lazy lists with stable keys, side effects through the right API, Material 3 components over hand-drawn ones, and every data region rendering loading / loaded / failed (plus stale and offline). It is the Compose half of CLAUDE.md § Mobile code rules; audit rows are section D of `mobile-android:standards-audit`.
 
 ## Version lane
 
@@ -32,10 +32,10 @@ Views are in maintenance mode (I/O 2026): new screens are Compose. A Views codeb
 - Screen ViewModel, `uiState` design, DI → [`architecture`](../architecture/SKILL.md)
 - Theme, colour, typography, insets, window size classes → [`styling`](../styling/SKILL.md)
 - Routes and back stack → [`navigation`](../navigation/SKILL.md)
-- Text fields and validation → `mobile-android-forms`
+- Text fields and validation → `mobile-android:forms`
 - Animation APIs → [`animation`](../animation/SKILL.md); labels and TalkBack → [`accessibility`](../accessibility/SKILL.md)
 - Test tags → [`test-ids`](../test-ids/SKILL.md)
-- iOS / RN components → `mobile-ios-ui-components`, `mobile-react-native-ui-components`
+- iOS / RN components → `mobile-ios:ui-components`, `mobile-react-native:ui-components`
 
 ## Inputs needed
 
@@ -132,14 +132,14 @@ A collector or listener started in a composable without lifecycle awareness is a
 
 Use the component, not a hand-drawn look-alike: `Scaffold` with `topBar`, `snackbarHost`, `bottomBar`, content padding; `TopAppBar` family; `NavigationBar` / `NavigationRail` / `NavigationSuiteScaffold`; `Button` / `FilledTonalButton` / `OutlinedButton` / `TextButton`; `IconButton` with a label; `Card`; `ListItem`; `ModalBottomSheet`; `AlertDialog`; `SnackbarHost`; `PullToRefreshBox`; `OutlinedTextField`. **Never imitate iOS or the web** — no iOS-style switch, no segmented pill drawn by hand where `SingleChoiceSegmentedButtonRow` exists. Expressive components (`ButtonGroup`, `LoadingIndicator`, `FloatingToolbar`) are `[M3-1.5]` — experimental on 1.4 behind an opt-in; use them only where the project already opted in ([`styling`](../styling/SKILL.md)). Icons come from `Icons.Default` / the `material-icons-core` set or a project icon asset, with a `contentDescription` or `null` when decorative ([`accessibility`](../accessibility/SKILL.md)).
 
-Design facts — spacing, touch targets (48 dp), component choice — are `design-ui-ux-pro-max --stack jetpack-compose`; where this skill and the corpus disagree on a design fact, the corpus wins (the one deliberate exception, ViewModel-to-UI events, is in [`architecture`](../architecture/SKILL.md)).
+Design facts — spacing, touch targets (48 dp), component choice — are `design:corpus --stack jetpack-compose`; where this skill and the corpus disagree on a design fact, the corpus wins (the one deliberate exception, ViewModel-to-UI events, is in [`architecture`](../architecture/SKILL.md)).
 
 ## Every data region: loading / loaded / failed / stale / offline
 
 - **The region** is the response-dependent subtree: rows, canvas, pane. **Search, filters, the top bar and the header keep rendering** while the region shows `Loading` (a placeholder with a fixed height — no layout jump), `Failed` (a message from a string resource mapped from `FailureReason`, a Retry button, never `error.message`), or `Loaded`-empty (an empty state with the next action).
 - **Stale**: data shown while a refresh runs or after a failed refresh carries a visible "last updated" cue; **offline** is told apart from a server error and keeps cached rows visible.
 - **One persistent, user-dismissed error banner inside the safe area** accompanies every surfaced failure (a `Snackbar` with `SnackbarDuration.Indefinite` and a dismiss action, or an in-content banner) — never auto-dismissing. A drifted or undecodable response is `Failed`, not an empty list.
-- Every request has a timeout budget — [`networking`](../networking/SKILL.md). Rendering detail and the restore flow: `mobile-android-error-handling`.
+- Every request has a timeout budget — [`networking`](../networking/SKILL.md). Rendering detail and the restore flow: `mobile-android:error-handling`.
 
 ## Previews
 
@@ -178,7 +178,7 @@ Design facts — spacing, touch targets (48 dp), component choice — are `desig
 
 - ViewModel, `uiState` → [`architecture`](../architecture/SKILL.md)
 - Theme and windows → [`styling`](../styling/SKILL.md); routes → [`navigation`](../navigation/SKILL.md)
-- Forms → `mobile-android-forms`; labels → [`accessibility`](../accessibility/SKILL.md); test ids → [`test-ids`](../test-ids/SKILL.md)
+- Forms → `mobile-android:forms`; labels → [`accessibility`](../accessibility/SKILL.md); test ids → [`test-ids`](../test-ids/SKILL.md)
 - Recomposition profiling → [`performance`](../performance/SKILL.md)
 - Compose UI tests → [`unit-testing`](../unit-testing/SKILL.md)
 - Existing XML screens → [`views-interop`](../views-interop/SKILL.md)

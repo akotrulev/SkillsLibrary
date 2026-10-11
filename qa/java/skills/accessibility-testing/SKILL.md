@@ -1,6 +1,6 @@
 ---
-name: qa-accessibility-testing-java
-description: Use when a Java 21 / TestNG Playwright suite must scan for accessibility violations — axe-core inside UI flows, or Lighthouse scores for public pages. Triggers "add a11y tests", "scan for WCAG 2.2 violations", "fail CI on accessibility regressions", "set an accessibility budget". Do NOT use for the app's own accessibility implementation (the fe-* accessibility skill), pixel diffs (qa-visual-regression-java) or breakpoint layout (qa-responsive-testing-java).
+name: accessibility-testing
+description: Use when a Java 21 / TestNG Playwright suite must scan for accessibility violations — axe-core inside UI flows, or Lighthouse scores for public pages. Triggers "add a11y tests", "scan for WCAG 2.2 violations", "fail CI on accessibility regressions", "set an accessibility budget". Do NOT use for the app's own accessibility implementation (the fe-* accessibility skill), pixel diffs (qa-java:visual-regression) or breakpoint layout (qa-java:responsive-testing).
 ---
 
 # QA — Accessibility Testing (Java / Playwright 1.63)
@@ -52,7 +52,7 @@ finds *rule* violations nobody wrote a test for. The matchers and the aria-snaps
   AttachmentOptions.withFileExtension(ext))` (allure-java 3.0), made before the assertion runs.
 - Results that are not locators — a violation list, a score — are asserted with AssertJ and `.as(...)`.
 - Automation is the floor (roughly a third of WCAG). Keyboard, focus order and screen-reader behaviour still
-  need manual testing (`qa-exploratory-charter-writer`).
+  need manual testing (`qa-<stack>:exploratory-charter-writer`).
 
 ## Handoffs
 
@@ -60,4 +60,4 @@ finds *rule* violations nobody wrote a test for. The matchers and the aria-snaps
 - Accessible-name, role and aria-snapshot assertions → its `references/assertions.md`
 - Failure evidence and traces → `qa/java/skills/evidence-capture`
 - The CI job and artifact upload → `qa/cicd/java/skills/ci-pipelines`
-- TypeScript and .NET → `qa-accessibility-testing-typescript`, `qa-accessibility-testing-dotnet`
+- TypeScript and .NET → `qa-typescript:accessibility-testing`, `qa-dotnet:accessibility-testing`

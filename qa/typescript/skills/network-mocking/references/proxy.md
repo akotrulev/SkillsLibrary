@@ -33,7 +33,7 @@ a test body, never a module-level `let proxy`. Every wait is a client-visible si
 
 - Any test with a Playwright `page` → `references/playwright-routes.md` (reach for it first)
 - Throttling, cache disable, CPU, metrics → `references/cdp.md`
-- Java and .NET proxies → `qa-network-mocking-java`, `qa-network-mocking-dotnet`
+- Java and .NET proxies → `qa-java:network-mocking`, `qa-dotnet:network-mocking`
 - Writing the Selenium page objects themselves → `qa/typescript/skills/ui-test-author/selenium`
 
 ## Inputs needed
@@ -356,6 +356,6 @@ way: register the rule, drive the client, assert on its error state.
 
 - `references/playwright-routes.md` — in-Playwright routing; first choice whenever there is a `page`.
 - `references/cdp.md` — Chromium protocol hooks below routing.
-- `qa-network-mocking-java`, `qa-network-mocking-dotnet` — the sibling proxy stacks.
+- `qa-java:network-mocking`, `qa-dotnet:network-mocking` — the sibling proxy stacks.
 - `qa/typescript/skills/ui-test-author/selenium` — Selenium page objects.
 - `qa/cicd/typescript/skills/ci-pipelines` — the job that trusts the per-run CA before the client launches.

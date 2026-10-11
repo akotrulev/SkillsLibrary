@@ -1,5 +1,5 @@
 ---
-name: data-postgresql
+name: postgresql
 description: Use when designing tables, securing data (roles/RLS/audit), writing queries or migrations, choosing indexes (incl. pgvector for embeddings & RAG), caching, or tuning PostgreSQL from a .NET / Java / Node backend. Pick the topic in the routing table, then read its reference. Triggers: "design a Postgres schema", "multi-tenant RLS", "this query is slow", "pgvector / vector search". Do NOT use for other engines, cross-engine modeling (`data/_shared/schema-design`), or DB tests (qa `db-testing`).
 ---
 

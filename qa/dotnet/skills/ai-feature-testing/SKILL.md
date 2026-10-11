@@ -1,11 +1,11 @@
 ---
-name: qa-ai-feature-testing-dotnet
+name: ai-feature-testing
 description: Use when testing LLM-generated output (chatbot, RAG answer, summarizer, extraction, tool-using agent) from a .NET / NUnit suite — property, rubric (LLM-as-judge), and grounding assertions with promptfoo (default) or DeepEval as the eval spine; never exact-string equality. Triggers "test our chatbot", "eval prompt outputs", "assert the answer is grounded in the retrieved context", "G-Eval / faithfulness metric", "red-team the model". Not for RAG retrieval metrics (`ai-answer-quality-testing`).
 ---
 
 # LLM-App Testing (.NET 8 / NUnit — promptfoo via Process + Microsoft.Extensions.AI)
 
-The .NET port of the canonical `qa-ai-feature-testing-typescript`. Same four ideas, same hybrid shape — only the
+The .NET port of the canonical `qa-typescript:ai-feature-testing`. Same four ideas, same hybrid shape — only the
 *invocation* changes: promptfoo has **no .NET SDK**, so the eval spine is the `promptfoo` CLI driven as a
 subprocess and its JSON report parsed with `System.Text.Json`, while the in-code path uses
 **`Microsoft.Extensions.AI`** (the `IChatClient` abstraction) instead of `@anthropic-ai/sdk`. See the TS file for
@@ -32,7 +32,7 @@ assertion must share fixtures with non-LLM tests or wrap your own feature code.
 >    follow the system prompt" — no regex catches these. An `llm-rubric` grades them. But **pin the judge
 >    model+version**, keep the rubric in a versioned file, and **calibrate against a human-labelled gold set**
 >    (30–200); judges carry positional/verbosity/instruction-following bias and drift.
-> 3. **An eval is a DATASET of cases, not one test.** `qa-data-driven-testing-dotnet` applied to prompts:
+> 3. **An eval is a DATASET of cases, not one test.** `qa-dotnet:data-driven-testing` applied to prompts:
 >    each row = input vars + expected properties; each case independent + named so a failure points at the input.
 >    promptfoo's `tests:` block is this; the SDK path uses NUnit `[TestCaseSource]`.
 > 4. **Handle non-determinism deliberately.** Regression: pin the model, `temperature: 0` + `seed`, assert once
@@ -64,8 +64,8 @@ assertion must share fixtures with non-LLM tests or wrap your own feature code.
 
 Unlike the in-code path (where `Microsoft.Extensions.AI` is a first-class NuGet), **there is no NuGet that embeds
 promptfoo**. So the eval spine is **CLI/subprocess-driven** — the same honest port shape as
-`qa-security-passive-scan-dotnet` (`passive-scan`, ZAP via `docker run`) and
-`qa-accessibility-testing-dotnet` (`lighthouse-ci`, Lighthouse via Node): you **invoke `promptfoo` as a
+`qa-dotnet:passive-scan` (`passive-scan`, ZAP via `docker run`) and
+`qa-dotnet:accessibility-testing` (`lighthouse-ci`, Lighthouse via Node): you **invoke `promptfoo` as a
 subprocess** (`System.Diagnostics.Process` → `promptfoo eval -c config.yaml -o results.json`) and **parse the JSON
 report** (`System.Text.Json`) to gate in NUnit. The config (cases × assertions) is identical to the TS
 canonical's; only the *runner* is a `Process`, not an SDK call. Say so plainly to anyone reaching for a NuGet —
@@ -176,7 +176,7 @@ lives in `references/details.md`. Read it before reviewing an eval suite.
   in a file, **calibrate against a 30–200 human-labelled gold set**, re-calibrate on a model bump. Design against
   verbosity/positional/instruction-following bias.
 - **An eval is a dataset** — one prompt × N rows (input + expected properties), each **independent + named** (reuse
-  `qa-data-driven-testing-dotnet` `[TestCaseSource]`). One logical property per case where practical. Test names
+  `qa-dotnet:data-driven-testing` `[TestCaseSource]`). One logical property per case where practical. Test names
   `Should_X_When_Y`.
 - **Separate regression from stochastic.** Regression: pin model + `temperature: 0` + `seed`, assert once
   (re-baseline on a bump). Stochastic: sample **N≥3**, assert a **pass-RATE**. Model non-determinism is **not** test
@@ -189,22 +189,22 @@ lives in `references/details.md`. Read it before reviewing an eval suite.
 
 ## Cross-references
 
-- `qa-ai-feature-testing-typescript` — **the canonical**: promptfoo + `@anthropic-ai/sdk`, the four ideas, the
+- `qa-typescript:ai-feature-testing` — **the canonical**: promptfoo + `@anthropic-ai/sdk`, the four ideas, the
   assertion ladder, the config the spine here parses. Read it for the family rationale.
-- `qa-ai-feature-testing-java` — the Java sibling: promptfoo via `ProcessBuilder` + Jackson, the Anthropic Java SDK /
+- `qa-java:ai-feature-testing` — the Java sibling: promptfoo via `ProcessBuilder` + Jackson, the Anthropic Java SDK /
   LangChain4j in-test. Same four ideas.
-- `qa-data-driven-testing-dotnet` — **the closest-discipline sibling**: an eval IS a data-driven test
+- `qa-dotnet:data-driven-testing` — **the closest-discipline sibling**: an eval IS a data-driven test
   (`[TestCaseSource]`, one named case per row). Reuse its mechanics for the dataset.
-- `qa-flaky-test-quarantine-dotnet` — **the boundary**: model non-determinism (assert a rate) vs *test*
+- `qa-dotnet:flaky-test-quarantine` — **the boundary**: model non-determinism (assert a rate) vs *test*
   flakiness (retry/quarantine). Don't quarantine a model regression.
-- `qa-api-models-dotnet` — the **structured-output** record + `System.Text.Json` the `is-json` rung / SDK
+- `qa-dotnet:api-models` — the **structured-output** record + `System.Text.Json` the `is-json` rung / SDK
   deserialize validates.
-- `qa-security-passive-scan-dotnet` / `qa-accessibility-testing-dotnet` — the
+- `qa-dotnet:passive-scan` / `qa-dotnet:accessibility-testing` — the
   **CLI-from-.NET port-shape precedent**: a Node/CLI tool invoked via `Process`, report parsed as JSON.
 - `ai-development/*` (`claude-api`, `mcp-builder`) — **build-vs-test boundary**: those *build* the AI feature; this
-  *tests* it. `qa-test-login-tokens-dotnet` — env/secret-store discipline for `ANTHROPIC_API_KEY`.
-- `qa-_shared-quality-metrics` — eval **pass-rate over time**. `qa-test-reports-dotnet` — each case as a named
-  result. `qa-load-testing-dotnet` — LLM **load/latency under concurrency** (here latency is a per-case
+  *tests* it. `qa-dotnet:test-login-tokens` — env/secret-store discipline for `ANTHROPIC_API_KEY`.
+- `qa-<stack>:quality-metrics` — eval **pass-rate over time**. `qa-dotnet:test-reports` — each case as a named
+  result. `qa-dotnet:load-testing` — LLM **load/latency under concurrency** (here latency is a per-case
   *budget*, not a load profile).
-- `qa-webmcp-testing-shared` — the deterministic side of WebMCP tools a page registers (schema, `execute()`
+- `qa-<stack>:webmcp-testing` — the deterministic side of WebMCP tools a page registers (schema, `execute()`
   contract, annotations); this skill keeps the agent evals over them.

@@ -1,5 +1,5 @@
 ---
-name: qa-realtime-stream-testing-dotnet
+name: realtime-stream-testing
 description: Use when testing WebSocket or SSE streams in .NET 10 (8-9) / NUnit — protocol clients (`ClientWebSocket`, SignalR `HubConnection`, SSE over `HttpClient`) draining frames into a channel and asserting on conditions (never sleeps), plus Playwright .NET for in-browser frames. Triggers "test our WebSocket endpoint", "assert the SSE stream emits X", "SignalR hub test". Not for request/response HTTP (`api-test-author/writer`).
 ---
 
@@ -17,7 +17,7 @@ next line.
 > 1. **Real-time = await a message on a CONDITION, never a sleep.** Drain frames into a buffer (`Channel<T>`)
 >    or complete a `TaskCompletionSource` from the frame event, and **await it with a bounded timeout** —
 >    never `Task.Delay(2000)` standing in for "it probably arrived". The eventual-consistency lineage of
->    `qa-messaging-testing-dotnet`.
+>    `qa-dotnet:messaging-testing`.
 > 2. **Drain BEFORE you act.** Start the receive loop / subscribe the frame event **before** the action that
 >    triggers the first frames, or you race the server and lose them.
 > 3. **Assert the whole lifecycle, not just a payload.** The open handshake (HTTP **101** for WS), the frames,
@@ -38,7 +38,7 @@ next line.
 | The UI opens a WS and you want **deterministic** frames | WebSocket | **browser** — `Page.RouteWebSocketAsync` (MOCK) |
 | The UI renders an SSE feed and you want it deterministic | SSE | **browser** — a fixed event set: a `Times = 1` route over a route answering `204` |
 | SSE timing, reconnect or `Last-Event-ID` resume in the browser | SSE | **browser** against a **real SSE test server** — a route cannot stream |
-| Async **queue/topic** (a message lands, a consumer reacts) | — | **not this skill** → `qa-messaging-testing-dotnet` |
+| Async **queue/topic** (a message lands, a consumer reacts) | — | **not this skill** → `qa-dotnet:messaging-testing` |
 
 ## Stack
 
@@ -301,9 +301,9 @@ public async Task Should_ListEveryPushedNotification_When_TheFeedDeliversThem()
 
 ## Cross-references
 
-- `qa-realtime-stream-testing-java` · `qa-realtime-stream-testing-typescript` — the sibling stacks; same four
+- `qa-java:realtime-stream-testing` · `qa-typescript:realtime-stream-testing` — the sibling stacks; same four
   ideas, their own protocol clients and await primitives.
-- `qa-messaging-testing-dotnet` — discrete messages on a queue, not an open stream.
-- `qa-network-mocking-dotnet` — plain HTTP mocking and the "register before the action" rule.
-- `qa-ui-test-writer-playwright-dotnet` — `BaseTest` and page objects the browser surface builds on.
-- `qa-test-login-tokens-dotnet` — tokens for an authenticated socket, read from env, never logged.
+- `qa-dotnet:messaging-testing` — discrete messages on a queue, not an open stream.
+- `qa-dotnet:network-mocking` — plain HTTP mocking and the "register before the action" rule.
+- `qa-dotnet:ui-tests-playwright` — `BaseTest` and page objects the browser surface builds on.
+- `qa-dotnet:test-login-tokens` — tokens for an authenticated socket, read from env, never logged.

@@ -1,5 +1,5 @@
 ---
-name: observability-opentelemetry-dotnet
+name: opentelemetry
 description: Use when instrumenting a .NET service (10 primary, 8/9) with OpenTelemetry — traces, metrics, log correlation — exporting OTLP to a Collector. Triggers: "instrument this with OTel", "add traces / metrics", "wire OTLP exporter", "add a custom span / counter / histogram". Do NOT use for Java/Node (their siblings) or log shaping (`structured-logging-dotnet`).
 ---
 

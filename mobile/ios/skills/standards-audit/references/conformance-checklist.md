@@ -437,7 +437,7 @@ This section holds no rows of its own. The rows are those of `mobile/_shared/obs
 ---
 
 ## V — Comments & KISS
-*Owning skills: [`ep-code-comments`](../../../../../engineering-practices/code-comments/SKILL.md) · CLAUDE.md § Comments and § Simplicity (KISS)*
+*Owning skills: [`engineering-practices/code-comments`](../../../../../engineering-practices/code-comments/SKILL.md) · CLAUDE.md § Comments and § Simplicity (KISS)*
 
 | # | Check | Violation looks like | Find it with | Sev |
 |---|---|---|---|---|
@@ -484,7 +484,7 @@ This section holds no rows of its own. The rows are those of `mobile/_shared/in-
 | S | Dev-side tests | S1–S15 | `unit-testing` |
 | T | Release & signing | fragment | `mobile/_shared/release` |
 | U | Observability & logging | fragment | `mobile/_shared/observability` |
-| V | Comments & KISS | V1–V8 | `ep-code-comments`, CLAUDE.md § Simplicity |
+| V | Comments & KISS | V1–V8 | `engineering-practices/code-comments`, CLAUDE.md § Simplicity |
 | X | In-app purchases | fragment | `mobile/_shared/in-app-purchases` |
 
 Section W (Kotlin Multiplatform) exists on `mobile-android` only. Fragment sections hold the rows of their `audit-checks.md` whose `Stacks` column names `ios`.

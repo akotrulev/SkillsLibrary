@@ -1,5 +1,5 @@
 ---
-name: fe-react-project-setup
+name: project-setup
 description: Use when standing up a new app from zero — Next.js 15 App Router (primary) or Vite SPA (fallback) — rendering strategy per route, server/client boundary, feature folders, strict TS, ESLint/Prettier, typed env config. Triggers "create a new React/Next.js project", "scaffold a Next.js App Router app", "which rendering strategy for this route". Not for scaffolding into an existing app (`component-writer`), the route tree (`routing`), or upgrades (`migration`).
 ---
 

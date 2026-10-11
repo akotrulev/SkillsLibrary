@@ -1,13 +1,13 @@
 ---
-name: mobile-android-basics
-description: Use when writing or reviewing Kotlin — conventions, null safety, val and data classes, sealed interfaces for state, structured concurrency, injected dispatchers, Flow vs StateFlow vs SharedFlow, context parameters. Triggers "idiomatic Kotlin?", "can I use !!", "StateFlow or SharedFlow", "which dispatcher", "GlobalScope". Also the Expo native-module Kotlin standard. Do NOT use for project setup, Compose screens, or networking (`mobile-android-project-setup`, `-ui-components`, `-networking`).
+name: concepts
+description: Use when writing or reviewing Kotlin — conventions, null safety, val and data classes, sealed interfaces for state, structured concurrency, injected dispatchers, Flow vs StateFlow vs SharedFlow, context parameters. Triggers "idiomatic Kotlin?", "can I use !!", "StateFlow or SharedFlow", "which dispatcher", "GlobalScope". Also the Expo native-module Kotlin standard. Do NOT use for project setup, Compose screens, or networking (`mobile-android:project-setup`, `-ui-components`, `-networking`).
 ---
 
 # Android — The Kotlin Coding Standard
 
-How Kotlin is written in this library: official conventions, null safety with no `!!`, immutability, sealed state, structured concurrency with injected dispatchers, and Flow used for what each type is for. It is the Kotlin half of CLAUDE.md § Mobile code rules; the audit rows are sections A and B of `mobile-android-standards-audit`.
+How Kotlin is written in this library: official conventions, null safety with no `!!`, immutability, sealed state, structured concurrency with injected dispatchers, and Flow used for what each type is for. It is the Kotlin half of CLAUDE.md § Mobile code rules; the audit rows are sections A and B of `mobile-android:standards-audit`.
 
-**Reads without an app.** `mobile-react-native` loads this skill for Expo Modules and config-plugin Kotlin. Nothing here needs Compose, Hilt or a Gradle app module: apply it to a module's `.kt` files as they stand. App-level skills (`mobile-android-project-setup`, `-architecture`, `-ui-components`, `-networking`) are named for hand-off only — never required to apply this one.
+**Reads without an app.** `mobile-react-native` loads this skill for Expo Modules and config-plugin Kotlin. Nothing here needs Compose, Hilt or a Gradle app module: apply it to a module's `.kt` files as they stand. App-level skills (`mobile-android:project-setup`, `-architecture`, `-ui-components`, `-networking`) are named for hand-off only — never required to apply this one.
 
 ## Version lane — detect first, key every recipe to it
 
@@ -22,7 +22,7 @@ Read the Kotlin version (`libs.versions.toml` / `kotlin` plugin), `languageVersi
 | `kapt` | Never — KSP | Never — KSP; kapt in brownfield is a migration finding |
 | Context receivers | Removed | Removed in 2.2 — migrate to context parameters |
 
-A down-level project is not flagged for lacking a 2.4 feature. Kotlin 2.0–2.3 modules migrate through `mobile-android-migration`.
+A down-level project is not flagged for lacking a 2.4 feature. Kotlin 2.0–2.3 modules migrate through `mobile-android:migration`.
 
 ## When to use
 
@@ -32,12 +32,12 @@ A down-level project is not flagged for lacking a 2.4 feature. Kotlin 2.0–2.3 
 
 ## When NOT to use
 
-- Gradle, AGP, version catalog, detekt / ktlint → `mobile-android-project-setup`
-- Screen ViewModel shape and DI → `mobile-android-architecture`
-- Composables → `mobile-android-ui-components`
-- Retrofit / Ktor clients → `mobile-android-networking`
-- Tests → `mobile-android-unit-testing`
-- Swift → `mobile-ios-basics`
+- Gradle, AGP, version catalog, detekt / ktlint → `mobile-android:project-setup`
+- Screen ViewModel shape and DI → `mobile-android:architecture`
+- Composables → `mobile-android:ui-components`
+- Retrofit / Ktor clients → `mobile-android:networking`
+- Tests → `mobile-android:unit-testing`
+- Swift → `mobile-ios:concepts`
 
 ---
 
@@ -158,13 +158,13 @@ class OrdersRepository(
 - **A `StateFlow` of a mutable object** — equal-by-reference mutation never emits; the state is an immutable data class.
 - **`SharedFlow` for UI events** — dropped when nothing collects; model it as state.
 - **`!!` on `findViewById` / `getSystemService`** — use ViewBinding or the typed `getSystemService<T>()` and handle null.
-- **Logging with string templates** — `Log.d("tag", "$token")`: log through the project's logger with no sensitive values; telemetry is `mobile-shared-observability`'s.
+- **Logging with string templates** — `Log.d("tag", "$token")`: log through the project's logger with no sensitive values; telemetry is `mobile-<stack>:observability`'s.
 
 ## Handoffs
 
 - Scopes, cancellation, `runCatching`, test seams → [`references/concurrency.md`](references/concurrency.md)
-- Gradle, AGP 9, lint → `mobile-android-project-setup`
-- Screen ViewModel, DI → `mobile-android-architecture`
-- LiveData / RxJava → Flow, kapt → KSP → `mobile-android-migration`
-- Telemetry → `mobile-shared-observability`
-- Swift counterpart → `mobile-ios-basics`
+- Gradle, AGP 9, lint → `mobile-android:project-setup`
+- Screen ViewModel, DI → `mobile-android:architecture`
+- LiveData / RxJava → Flow, kapt → KSP → `mobile-android:migration`
+- Telemetry → `mobile-<stack>:observability`
+- Swift counterpart → `mobile-ios:concepts`

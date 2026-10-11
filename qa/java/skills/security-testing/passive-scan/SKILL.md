@@ -1,11 +1,11 @@
 ---
-name: qa-security-passive-scan-java
-description: Use when adding an OWASP ZAP baseline (passive) DAST scan as a CI build gate for a Java 21 / TestNG pipeline — passive rules only, no attack payloads, fail on new alerts above a threshold. Triggers "add a DAST gate to CI", "run ZAP against our running app", "scan for missing security headers", "passive security scan on every PR". Do NOT use for active/injection scanning (use `qa-security-active-scan`), or BOLA/IDOR logic (use `qa-permission-testing-java`).
+name: passive-scan
+description: Use when adding an OWASP ZAP baseline (passive) DAST scan as a CI build gate for a Java 21 / TestNG pipeline — passive rules only, no attack payloads, fail on new alerts above a threshold. Triggers "add a DAST gate to CI", "run ZAP against our running app", "scan for missing security headers", "passive security scan on every PR". Do NOT use for active/injection scanning (use `qa-<stack>:active-scan`), or BOLA/IDOR logic (use `qa-java:permission-testing`).
 ---
 
 # Security Testing — OWASP ZAP Baseline Scan (Java / TestNG)
 
-The Java port of the canonical `qa-security-passive-scan-typescript`. Same baseline scan model,
+The Java port of the canonical `qa-typescript:passive-scan`. Same baseline scan model,
 same exit-code build gate, same ticketed-triage discipline — re-expressed for a JVM shop, which makes the
 honest shape of this node plain.
 
@@ -110,7 +110,7 @@ demote known/accepted ones to `IGNORE`. Many teams pass on `2` (warnings tracked
 
 A real app's first run lights up with WARNs; gating on *every* alert mutes the gate. Use the **ticketed
 rules config**: tab-separated, each ZAP rule-id set to `IGNORE`/`WARN`/`FAIL`, **every `IGNORE` carrying a
-ticket + reason** — the same allow-list discipline as `qa-accessibility-testing-java`
+ticket + reason** — the same allow-list discipline as `qa-java:accessibility-testing`
 (`axe-playwright`), ported to ZAP.
 
 ```tsv
@@ -135,7 +135,7 @@ ticket + reason** — the same allow-list discipline as `qa-accessibility-testin
 ## Running the scan — the CI-first path (`zaproxy/action-baseline`)
 
 The natural home is CI. The official Action wraps the image, runs the baseline, uploads the report, and
-optionally opens a tracking issue (cross-link `qa-ci-pipelines-java`):
+optionally opens a tracking issue (cross-link `qa-java:ci-pipelines`):
 
 ```yaml
 # .github/workflows/passive-scan.yml
@@ -295,7 +295,7 @@ credentials via **env vars read lazily** (`System.getenv`), never in the committ
 ## Reporting the gate — ZAP report into Allure + CI artifact
 
 `passive-scan.py` writes `report.json`/`.html`/`.xml` to the mounted work dir. Attach to Allure so a
-failing run names the alerts without re-scanning (cross-link `qa-test-reports-java`):
+failing run names the alerts without re-scanning (cross-link `qa-java:test-reports`):
 
 ```java
 // support/ZapReportAttachment.java
@@ -322,7 +322,7 @@ public final class ZapReportAttachment {
 
 - **Allure** — attach the HTML + a readable alert summary (rule id, risk, count).
 - **CI artifact** — the Action's `artifact_name` upload, or upload the work dir (cross-link
-  `qa-ci-pipelines-java`).
+  `qa-java:ci-pipelines`).
 - **Tracking issue** — `allow_issue_writing: true` opens/updates a GitHub issue.
 
 ## Anti-patterns
@@ -371,17 +371,17 @@ These sections live in `references/details.md` — **read it when the task touch
 
 ## Cross-references
 
-- `qa-security-passive-scan-typescript` — the **canonical** skill, TS (house default; the scan is
+- `qa-typescript:passive-scan` — the **canonical** skill, TS (house default; the scan is
   language-agnostic `docker run`). This Java sibling is the `ProcessBuilder` + Jackson port of it.
-- `qa-security-passive-scan-dotnet` — same skill, .NET / NUnit. Same Docker choreography via
+- `qa-dotnet:passive-scan` — same skill, .NET / NUnit. Same Docker choreography via
   `Process` + `System.Text.Json`.
-- `qa-security-dependency-scan-java` — the **SCA** sibling that closes the
+- `qa-java:dependency-scan` — the **SCA** sibling that closes the
   `security-testing` family: JAR/transitive CVEs from your build graph vs ZAP's running-app HTTP surface.
   Different layers — run both.
-- `qa-accessibility-testing-java` — the **ticketed-baseline triage** discipline reused
+- `qa-java:accessibility-testing` — the **ticketed-baseline triage** discipline reused
   here for `-c rules.tsv`.
-- `qa-accessibility-testing-java` — the closest **port-shape precedent**: a CLI/Docker
+- `qa-java:accessibility-testing` — the closest **port-shape precedent**: a CLI/Docker
   tool invoked via `ProcessBuilder` from Java with the report parsed as JSON.
-- `qa-ci-pipelines-java` — the `zaproxy/action-baseline` job, `fail_action`, artifact
+- `qa-java:ci-pipelines` — the `zaproxy/action-baseline` job, `fail_action`, artifact
   upload, Docker availability.
-- `qa-test-reports-java` — attach the ZAP HTML/JSON report and alert summary.
+- `qa-java:test-reports` — attach the ZAP HTML/JSON report and alert summary.

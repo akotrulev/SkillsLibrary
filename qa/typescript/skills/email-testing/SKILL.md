@@ -1,6 +1,6 @@
 ---
-name: qa-email-testing-typescript
-description: Use when a Node 24 / TypeScript / Vitest test suite must capture and assert email the SUT sends. Triggers "assert the welcome email was sent", "extract the OTP/reset link from the email", "test email content/recipients". Pick the sink in the decision matrix, then read its reference file. Do NOT use for broker messages (use `qa-messaging-testing-typescript`) or for in-app notification UI (use `qa-ui-test-writer-playwright-typescript`).
+name: email-testing
+description: Use when a Node 24 / TypeScript / Vitest test suite must capture and assert email the SUT sends. Triggers "assert the welcome email was sent", "extract the OTP/reset link from the email", "test email content/recipients". Pick the sink in the decision matrix, then read its reference file. Do NOT use for broker messages (use `qa-typescript:messaging-testing`) or for in-app notification UI (use `qa-typescript:ui-tests-playwright`).
 ---
 
 # QA — Email Testing (TypeScript)

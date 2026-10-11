@@ -317,7 +317,7 @@ This section holds no rows of its own. The rows are those of `mobile/_shared/sto
 | N4 | A Baseline Profile and a Startup Profile exist and a benchmark proves them | No `androidx.baselineprofile` plugin and no `baseline-prof.txt`; a profile with no Macrobenchmark module | `rg -n 'androidx\.baselineprofile\|BaselineProfileRule' -g '*.kts' -g '*.kt'`; `rg --files -g 'baseline-prof.txt' -g 'startup-prof.txt'` | major |
 | N5 | Macrobenchmark runs on a non-debuggable `benchmark` build, not on an emulator | `suppressErrors` set for `DEBUGGABLE` / `EMULATOR`; no `benchmark` build type | `rg -n 'suppressErrors\|initWith\(.*release' -g '*.kts' -g '*.kt'` | minor |
 | N6 | Keep rules are narrow; global options sit in the app's rules `[AGP9]` | `-keep class ** { *; }`; `-dontobfuscate` / `-allowaccessmodification` in a library `consumer-rules.pro`; `android.enableR8.fullMode=false` | `rg -n 'keep class \*\*\|dontobfuscate\|enableR8' -g '*.pro' -g '*.keep' gradle.properties` | major |
-| N7 | The mapping file is uploaded with every release | No mapping upload step in the pipeline or the crash-reporter Gradle plugin. requires pipeline evidence → `mobile-shared-release` | `rg -n -i 'mapping\|crashlytics\|sentry' -g '*.kts' -g '*.yml'` | major |
+| N7 | The mapping file is uploaded with every release | No mapping upload step in the pipeline or the crash-reporter Gradle plugin. requires pipeline evidence → `mobile-<stack>:release` | `rg -n -i 'mapping\|crashlytics\|sentry' -g '*.kts' -g '*.yml'` | major |
 | N8 | Application start is lazy; no `ContentProvider` initialisation | Work in `Application.onCreate` the first frame does not need; an SDK auto-initialised by its own provider | `rg -n 'class .*: Application' -A25 $SRC -g '*.kt'`; `rg -n 'InitializationProvider\|<provider' -g '*.xml'` | major |
 | N9 | Full drawing is reported | No `reportFullyDrawn`, `ReportDrawnWhen` or `FullyDrawnReporter` for a screen that loads data | `rg -n 'reportFullyDrawn\|ReportDrawn\|FullyDrawnReporter' $SRC -g '*.kt'` | minor |
 | N10 | The splash is the `SplashScreen` API | A custom splash `Activity` or a theme-only splash on API 31+ with no `core-splashscreen` | `rg -n 'SplashScreen\|installSplashScreen\|SplashActivity' $SRC -g '*.kt' -g '*.xml'` | minor |
@@ -445,7 +445,7 @@ This section holds no rows of its own. The rows are those of `mobile/_shared/obs
 ---
 
 ## V — Comments & KISS
-*Owning skills: [`ep-code-comments`](../../../../../engineering-practices/code-comments/SKILL.md) · CLAUDE.md § Comments and § Simplicity (KISS)*
+*Owning skills: [`engineering-practices/code-comments`](../../../../../engineering-practices/code-comments/SKILL.md) · CLAUDE.md § Comments and § Simplicity (KISS)*
 
 | # | Check | Violation looks like | Find it with | Sev |
 |---|---|---|---|---|
@@ -511,7 +511,7 @@ This section holds no rows of its own. The rows are those of `mobile/_shared/in-
 | S | Dev-side tests | S1–S16 | `unit-testing` |
 | T | Release & signing | fragment | `mobile/_shared/release` |
 | U | Observability & logging | fragment | `mobile/_shared/observability` |
-| V | Comments & KISS | V1–V8 | `ep-code-comments`, CLAUDE.md § Simplicity |
+| V | Comments & KISS | V1–V8 | `engineering-practices/code-comments`, CLAUDE.md § Simplicity |
 | W | Kotlin Multiplatform | W1–W11 | `kotlin-multiplatform` — N/A unless KMP modules exist |
 | X | In-app purchases | fragment | `mobile/_shared/in-app-purchases` |
 

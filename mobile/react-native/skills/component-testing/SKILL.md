@@ -1,11 +1,11 @@
 ---
-name: mobile-react-native-component-testing
+name: component-testing
 description: Use when a React Native component, hook or logic needs a dev-side test — Jest + jest-expo + React Native Testing Library 14 (async render/fireEvent/act) for anything that renders, plain Jest for anything that doesn't, native modules faked at the boundary. Triggers "unit-test this screen", "test my hook", "RNTL v14 migration", "jest can't find native module". Do NOT use for device journeys (`qa-mobile-typescript`) or Vitest (not viable in RN).
 ---
 
 # React Native — Component & Pure-Logic Testing (Jest + RNTL 14)
 
-Owns **every dev-side test in an Expo app**, at two altitudes: **component tests** (it renders → RNTL) and **pure-logic tests** (it doesn't → plain Jest, no renderer). The split is mechanical — *does the unit need a renderer?* Web analog: [`fe-react-component-testing`](../../../../frontend/react/skills/component-testing/SKILL.md) — query-by-role-first, behaviour-over-implementation, logic-not-markup carry over; **jsdom, Vitest, `vi.*` and async Server Components do not exist here.**
+Owns **every dev-side test in an Expo app**, at two altitudes: **component tests** (it renders → RNTL) and **pure-logic tests** (it doesn't → plain Jest, no renderer). The split is mechanical — *does the unit need a renderer?* Web analog: [`fe-react:component-testing`](../../../../frontend/react/skills/component-testing/SKILL.md) — query-by-role-first, behaviour-over-implementation, logic-not-markup carry over; **jsdom, Vitest, `vi.*` and async Server Components do not exist here.**
 
 **Boundary.** Real devices, real navigation, real network and cross-screen journeys are `qa-mobile-typescript`'s — **Appium**, or its **Maestro** lane on Expo projects (plan 003). A component test fakes the native layer, so it can never prove a gesture, a permission dialog or a deep link on a device.
 
@@ -37,7 +37,7 @@ Detect first: RNTL major in `package.json`, the preset (`jest-expo`), React majo
 - Markup-only components with no branches — a snapshot of hand-written markup is a tautology
 - Writing `testID`s → [`test-ids`](../test-ids/SKILL.md); tests here **consume** them as the last-resort query
 - Request behaviour against a real API → `qa-api-typescript`
-- Native Swift / Kotlin → `mobile-ios-unit-testing` / `mobile-android-unit-testing`
+- Native Swift / Kotlin → `mobile-ios:unit-testing` / `mobile-android:unit-testing`
 
 ## Test what has behaviour
 

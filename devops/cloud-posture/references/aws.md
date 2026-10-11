@@ -61,7 +61,7 @@ What the headline AWS checks catch (map each to a CIS control + an ATT&CK Cloud 
 - **IAM** — root account MFA/access keys (`iam_root_mfa_enabled`, `iam_no_root_access_key`), unused credentials, password policy, over-permissive policies (`*:*`), access-key rotation → T1078.004 / T1098.
 - **S3** — public buckets/ACLs (`s3_bucket_public_access`), bucket encryption, block-public-access, secure-transport policy → T1530 (public storage), A02.
 - **Encryption at rest** — EBS/RDS/S3/KMS default encryption, KMS key rotation → CIS crypto controls.
-- **Encryption in transit** — ELB/CloudFront TLS policy, S3 `aws:SecureTransport` → pairs with `qa-security-certificate-scan` for the endpoint TLS.
+- **Encryption in transit** — ELB/CloudFront TLS policy, S3 `aws:SecureTransport` → pairs with `qa-<stack>:certificate-scan` for the endpoint TLS.
 - **Logging/audit** — CloudTrail enabled in all regions + log-file validation + KMS-encrypted (`cloudtrail_multi_region_enabled`), Config recorder on, VPC flow logs → T1562.008 / A09.
 - **Network exposure** — security groups open to `0.0.0.0/0` on sensitive ports, public RDS/EC2, default-VPC use → T1580.
 

@@ -1,5 +1,5 @@
 ---
-name: qa-inhouse-framework-conventions-dotnet
+name: inhouse-framework-conventions
 description: Use when working in the C# / .NET 10 (8-9 supported) Accelerator test automation framework (NUnit + RestSharp + Playwright + Appium, JSON-driven screens) or any consumer of it. Triggers: "add a test to the .NET Accelerator", "scaffold a screen for the C# Appium suite", "create a Playwright page object for X in Accelerator". Not for a suite outside the Accelerator (`page-object-design`, `ui-test-author/playwright`).
 ---
 

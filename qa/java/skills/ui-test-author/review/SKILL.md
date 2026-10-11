@@ -1,6 +1,6 @@
 ---
-name: qa-ui-test-review-java
-description: Use when the user asks to review existing Java UI test code or page objects. Triggers: "review this Playwright Java spec", "look at this Selenium page object", "is this Appium Java test any good". Do NOT use for writing new tests (`qa-ui-test-writer-playwright-java`) or reviewing a Gherkin/Cucumber layer (`qa-bdd-reviewer-java`).
+name: ui-tests-review
+description: Use when the user asks to review existing Java UI test code or page objects. Triggers: "review this Playwright Java spec", "look at this Selenium page object", "is this Appium Java test any good". Do NOT use for writing new tests (`qa-java:ui-tests-playwright`) or reviewing a Gherkin/Cucumber layer (`qa-java:bdd-reviewer`).
 ---
 
 # QA — UI Test & Page Object Reviewer (Java)
@@ -156,7 +156,7 @@ Each is a row above; flag it whatever else the review finds.
 
 ## Comments in test code
 
-Load **[`ep-code-comments`](../../../../../engineering-practices/code-comments/SKILL.md)** for the rule, the complex-flow test that earns a doc comment, the trivia list, the severity mapping and its **test-code** section. Here it covers **page-object and screen-object bodies** as well as tests — an intent-revealing method name is the page object's documentation.
+Load **[`engineering-practices/code-comments`](../../../../../engineering-practices/code-comments/SKILL.md)** for the rule, the complex-flow test that earns a doc comment, the trivia list, the severity mapping and its **test-code** section. Here it covers **page-object and screen-object bodies** as well as tests — an intent-revealing method name is the page object's documentation.
 
 | Java mechanic | What to check |
 |---|---|

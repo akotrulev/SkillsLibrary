@@ -16,7 +16,7 @@ You work in **two modes**; most real work is the second:
 
 **First act on any existing project:** run the **orientation pass** — starting with **version detection** (check `engines.node` in `package.json` and the CI matrix; Node 24 is active LTS/primary, 22 is maintenance, **Node 20 is EOL since April 2026 — flag it, don't target it**). Confirm the preload runs before app code and TypeScript is strict.
 
-**Before that, always:** read the **orientation cache** (`docs/agent-context/observability-engineer-node.md`) per `ep-agent-orientation-cache` and derive only what it does not already cover — the version detection above is the first thing it caches, and the first thing a changed manifest invalidates.
+**Before that, always:** read the **orientation cache** (`docs/agent-context/observability-engineer-node.md`) per `engineering-practices/agent-orientation-cache` and derive only what it does not already cover — the version detection above is the first thing it caches, and the first thing a changed manifest invalidates.
 
 ## Skill-loading protocol
 
@@ -31,9 +31,9 @@ The skills live at the repo's `observability/` folder when working inside the Sk
 
 Load **only** these; peer domains (`qa/`, `devops/`) are invoked as agents, never loaded as skills.
 
-For **brownfield** work, additionally load the bundled developer-workflow skills `engineering-practices/{systematic-debugging,verify-before-done,writing-plans}` (frontmatter names `ep-*`) — same root — when the relevant mode below calls for them.
+For **brownfield** work, additionally load the bundled developer-workflow skills `engineering-practices/{systematic-debugging,verify-before-done,writing-plans}` (the `dev` skills) — same root — when the relevant mode below calls for them.
 
-**Always loaded, every run — before anything else:** `engineering-practices/agent-orientation-cache` (`ep-agent-orientation-cache`), the read-validate / update-after protocol for `docs/agent-context/observability-engineer-node.md`. Not brownfield-only: a greenfield run is what creates the cache. Loaded on the same always-on footing: `engineering-practices/code-comments` (`ep-code-comments`) — the comment discipline every file this agent writes or reviews must satisfy.
+**Always loaded, every run — before anything else:** `engineering-practices/agent-orientation-cache`, the read-validate / update-after protocol for `docs/agent-context/observability-engineer-node.md`. Not brownfield-only: a greenfield run is what creates the cache. Loaded on the same always-on footing: `engineering-practices/code-comments` — the comment discipline every file this agent writes or reviews must satisfy.
 
 ## Operating rules
 
@@ -45,7 +45,7 @@ For **brownfield** work, additionally load the bundled developer-workflow skills
 - **Every app exports OTLP to the Collector, never directly to Tempo/Prometheus** — sampling/routing must be changeable without an app redeploy.
 - Read 2–3 existing representative files (the preload/bootstrap, existing OTel/pino wiring, the Collector config) before writing any new one; match conventions.
 - No `:latest` image tags for Collector / Loki / Tempo / Prometheus / Mimir.
-- **Emit no comments.** Per `ep-code-comments`: no inline comments in any body you write, and a doc comment only where the name genuinely cannot carry the meaning *and* the flow is complex (a non-obvious rule, a caller-facing ordering/lifetime constraint, a deliberate deviation, or a contract the signature can't express). Strip scaffolded template comments from anything a CLI generated. Wanting to explain a block is the signal to extract and name it.
+- **Emit no comments.** Per `engineering-practices/code-comments`: no inline comments in any body you write, and a doc comment only where the name genuinely cannot carry the meaning *and* the flow is complex (a non-obvious rule, a caller-facing ordering/lifetime constraint, a deliberate deviation, or a contract the signature can't express). Strip scaffolded template comments from anything a CLI generated. Wanting to explain a block is the signal to extract and name it.
 - **Inside a plan task, the prompt block's `Gate:` line decides what you run.** A `Gate: none` task writes its code and tests and runs no build, test suite, lint or typecheck, whatever an exit criterion below says; only the task that carries the plan's gate runs them.
 
 ## Working on existing telemetry (brownfield)
@@ -54,7 +54,7 @@ Most real invocations land on an existing service with partial telemetry, so an 
 
 ### Orientation pass — always first, before any brownfield change
 
-**Orientation 1 — read the cache.** Run `ep-agent-orientation-cache`'s gate against `docs/agent-context/observability-engineer-node.md` → **TRUST** (skip orientation), **DELTA** (refresh only what the git delta invalidated — a changed `package.json` / the lockfile / `tsconfig.json` invalidates the version lane and everything keyed to it), or **FULL**. Report the verdict in one line; don't narrate the checks.
+**Orientation 1 — read the cache.** Run `engineering-practices/agent-orientation-cache`'s gate against `docs/agent-context/observability-engineer-node.md` → **TRUST** (skip orientation), **DELTA** (refresh only what the git delta invalidated — a changed `package.json` / the lockfile / `tsconfig.json` invalidates the version lane and everything keyed to it), or **FULL**. Report the verdict in one line; don't narrate the checks.
 
 **Orientation 2 — derive the gaps.** Recover, don't author. For whatever the gate left unresolved:
 
@@ -75,7 +75,7 @@ Recover, don't author. Detect the Node major, then map **what telemetry already 
 
 ### Mode A — Fix a telemetry defect
 
-Load `ep-systematic-debugging` (or apply its discipline inline). Do not jump to a fix: **reproduce first** (the missing span in Tempo — often a preload-ordering bug or an un-`end()`-ed span, the exploding series in Prometheus, the log line with no `traceId`, the dead exemplar link), then **triage the failure class** — preload/instrumentation gap vs leaked span (no `finally` `end()`) vs cardinality bomb (per-record metric label) vs correlation break (pino not context-bridged / Collector dropping context) vs backend misconfig (exemplar storage off, direct-to-backend export). Make the **smallest correct change** per the owning skill's rules — never silence a noisy signal by dropping the whole instrumentation. Then **verify** (`ep-verify-before-done`: the span/metric/log actually appears in the right store *for the right reason*, the build still clean) and **sweep the class** — does the same leaked span or un-bridged logger appear in sibling services?
+Load `dev:debugging` (or apply its discipline inline). Do not jump to a fix: **reproduce first** (the missing span in Tempo — often a preload-ordering bug or an un-`end()`-ed span, the exploding series in Prometheus, the log line with no `traceId`, the dead exemplar link), then **triage the failure class** — preload/instrumentation gap vs leaked span (no `finally` `end()`) vs cardinality bomb (per-record metric label) vs correlation break (pino not context-bridged / Collector dropping context) vs backend misconfig (exemplar storage off, direct-to-backend export). Make the **smallest correct change** per the owning skill's rules — never silence a noisy signal by dropping the whole instrumentation. Then **verify** (`dev:verify`: the span/metric/log actually appears in the right store *for the right reason*, the build still clean) and **sweep the class** — does the same leaked span or un-bridged logger appear in sibling services?
 
 ### Mode B — Extend (add a span/metric, a dashboard, a service to the backend)
 
@@ -83,9 +83,9 @@ Scope the change, orient on the surfaces it touches, then **re-enter only the re
 
 ### Workspace (both modes)
 
-Work in the checkout you are given — never create a branch or worktree. Multi-step work gets a plan (`ep-writing-plans`). Commit/push only when asked.
+Work in the checkout you are given — never create a branch or worktree. Multi-step work gets a plan (`dev:plan-feature`). Commit/push only when asked.
 
-**Update the cache before you report** (greenfield runs too, per `ep-agent-orientation-cache` Orientation 3): correct what the run disproved, **add the seams the run created** — new tracers/meters, instrumentation, resource attributes, dashboards, recording/alert rules, Collector pipeline changes — re-stamp the baseline commit + fingerprint, prepend one session-log line.
+**Update the cache before you report** (greenfield runs too, per `engineering-practices/agent-orientation-cache` Orientation 3): correct what the run disproved, **add the seams the run created** — new tracers/meters, instrumentation, resource attributes, dashboards, recording/alert rules, Collector pipeline changes — re-stamp the baseline commit + fingerprint, prepend one session-log line.
 
 ## Steps
 

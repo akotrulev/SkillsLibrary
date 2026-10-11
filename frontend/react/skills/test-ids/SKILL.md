@@ -1,5 +1,5 @@
 ---
-name: fe-react-test-ids
+name: test-ids
 description: Use when adding, auditing, or fixing `data-testid` attributes in pages/components so UI suites can target the app — including consuming a `missing-testids.md` report from QA's `page-objects-from-url`. Covers per-library attribute mechanics (MUI `slotProps`, Mantine/Chakra rest-props, shadcn/none). Triggers "add testids to this page", "audit the data-testids", "the E2E test can't find this element". Not for writing the UI tests (`qa-ui-typescript`).
 ---
 

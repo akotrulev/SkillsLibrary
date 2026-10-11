@@ -1,6 +1,6 @@
 ---
-name: qa-data-driven-testing-java
-description: Use when one Java 21 / TestNG test body must run against **many rows of data sourced from an external file**. Triggers: "run this test for every row in a CSV / spreadsheet", "data-drive these tests from a JSON file", "parameterize this test with external test data". Do NOT use for building the objects themselves (`qa-test-data-builder-java`).
+name: data-driven-testing
+description: Use when one Java 21 / TestNG test body must run against **many rows of data sourced from an external file**. Triggers: "run this test for every row in a CSV / spreadsheet", "data-drive these tests from a JSON file", "parameterize this test with external test data". Do NOT use for building the objects themselves (`qa-java:test-data-builder`).
 ---
 
 # Data-Driven Testing (Java 21 / TestNG) — **canonical stack**
@@ -21,12 +21,12 @@ case; you never copy-paste a test method to cover a new input.
 
 It is *not*:
 
-- a **builder** constructing one richly-configured object in code (that's `qa-test-data-builder-java`; a
+- a **builder** constructing one richly-configured object in code (that's `qa-java:test-data-builder`; a
   builder makes **one** object well — data-driven feeds **many** rows; they **compose**: a row can drive a
   builder);
-- rows pulled from a **live database** at test time (that's `qa-db-verification-queries-java` — a different
+- rows pulled from a **live database** at test time (that's `qa-java:db-verification-queries` — a different
   *source*; this skill is about **static files** that are part of the test's arranged world);
-- a **cross-browser / cross-device matrix** (that's `qa-browser-cloud-setup-java` — parameterizing the
+- a **cross-browser / cross-device matrix** (that's `qa-java:browser-cloud-setup` — parameterizing the
   *environment*, not the *data*).
 
 > **The discipline this skill encodes** — four ideas, identical across all three stacks:
@@ -52,8 +52,8 @@ It is *not*:
 | Nested / hierarchical cases (a row has sub-objects or lists) | **JSON file** | Jackson `readValue(…, new TypeReference<List<Row>>(){})` |
 | Tabular data **owned/edited by non-technical stakeholders** | **Excel `.xlsx`** | Apache POI `WorkbookFactory` → bind cells → `List<Row>` |
 | Huge dataset (don't hold it all in memory) | any of the above, **lazy** | `@DataProvider` returns `Iterator<Object[]>`, reads row-by-row |
-| Rows from a **live DB / API** at test time | not this skill | `qa-db-verification-queries-java` (DB), an API client (HTTP) |
-| Each row is a whole complex domain object built in code | not this skill | `qa-test-data-builder-java` (the builder can consume one row) |
+| Rows from a **live DB / API** at test time | not this skill | `qa-java:db-verification-queries` (DB), an API client (HTTP) |
+| Each row is a whole complex domain object built in code | not this skill | `qa-java:test-data-builder` (the builder can consume one row) |
 
 **Rule of thumb:** *prefer CSV or JSON in git* (diffable, reviewable, mergeable). Reach for **Excel only**
 when the data's owner won't touch a CSV. Use **inline** when there are few enough rows that a separate file
@@ -305,7 +305,7 @@ create it — Playwright for Java is not thread-safe. J1's `BaseTest` therefore 
 `parallel="classes"`: the class is the unit of parallelism, and its rows run one after another on its thread
 (`qa/java/skills/ui-test-author/playwright/references/lifecycle.md` §1, plan D8). A row that needs its own
 context options (a viewport, a locale) is a `@Factory` row instead — one instance per row
-(`qa-responsive-testing-java`, `qa-language-testing-java`).
+(`qa-java:responsive-testing`, `qa-java:language-testing`).
 
 ## Anti-patterns
 
@@ -324,7 +324,7 @@ context options (a viewport, a locale) is a `@Factory` row instead — one insta
 - **Loading a 100k-row file into `Object[][]`.** Memory blows up at discovery. *Fix:* return
   `Iterator<Object[]>` and read lazily.
 - **Secrets or real PII in a committed data file.** It's in git history forever. *Fix:* synthetic data; real
-  secrets via env (cross-link `qa-test-login-tokens-java`).
+  secrets via env (cross-link `qa-java:test-login-tokens`).
 
 ## Examples
 
@@ -356,7 +356,7 @@ typed row. A run produces one Allure result **per row**, each labelled with the 
 straight at `DE @ 10000¢ → 1900¢`, not "row 1".
 
 **Composing with a builder (the boundary made concrete):** a row supplies the *varying* fields; the
-**builder** (`qa-test-data-builder-java`) fills the rest — the ObjectMother default is the unchanging 90%.
+**builder** (`qa-java:test-data-builder`) fills the rest — the ObjectMother default is the unchanging 90%.
 
 ```java
 @Test(dataProvider = "csvOrderCases", dataProviderClass = OrderCaseProviders.class)
@@ -383,7 +383,7 @@ public void Should_ApplyDiscount_When_OrderMatchesTheRow(OrderCase row) {
 - **Pick the source for the shape** — CSV for flat tabular, JSON for nested, Excel **only** for
   stakeholder-owned sheets, inline for a few. Prefer diffable CSV/JSON in git over binary Excel.
 - **Money is integer cents / `BigDecimal`, never float** (Excel/CSV round-off corrupts it). No secrets or
-  real PII in committed data files (synthetic data; secrets via env — `qa-test-login-tokens-java`).
+  real PII in committed data files (synthetic data; secrets via env — `qa-java:test-login-tokens`).
 - **Lazy `Iterator<Object[]>` for huge datasets**; `@DataProvider(parallel = true)` + suite
   `data-provider-thread-count` for independent rows **only where no browser or device is driven** — a
   Playwright or Appium class keeps its rows sequential (`parallel="classes"`, plan D8). No `Thread.sleep`;
@@ -391,20 +391,20 @@ public void Should_ApplyDiscount_When_OrderMatchesTheRow(OrderCase row) {
 
 ## Cross-references
 
-- `qa-data-driven-testing-dotnet` — same four ideas, NUnit: `[TestCaseSource]` (a static method/property
+- `qa-dotnet:data-driven-testing` — same four ideas, NUnit: `[TestCaseSource]` (a static method/property
   returning `IEnumerable<TestCaseData>`, named via `.SetName(...)`), CsvHelper `GetRecords<T>()`,
   `System.Text.Json` for JSON, ClosedXML for Excel. Structure ported, not code.
-- `qa-data-driven-testing-typescript` — same four ideas, Vitest `test.for` / `describe.each` and a
+- `qa-typescript:data-driven-testing` — same four ideas, Vitest `test.for` / `describe.each` and a
   test-per-row loop in Playwright (read the file at module scope), `csv-parse/sync` + `JSON.parse` + the
   `xlsx` (SheetJS) lib, **Zod** to validate/coerce parsed rows into a typed object.
-- `qa-test-data-builder-java` — the **boundary**: a builder/ObjectMother constructs **one** complex object in
+- `qa-java:test-data-builder` — the **boundary**: a builder/ObjectMother constructs **one** complex object in
   code with defaults; data-driven feeds **many** rows from a file. They **compose** — a row drives a builder's
   varying fields (see the last example).
-- `qa-db-verification-queries-java` — when the rows come from a **live database** at test time rather
+- `qa-java:db-verification-queries` — when the rows come from a **live database** at test time rather
   than a static file; the safe assertion-SQL counterpart to file-sourced data.
-- `qa-browser-cloud-setup-java` — parameterizing the **environment** (browser/device matrix) rather than
+- `qa-java:browser-cloud-setup` — parameterizing the **environment** (browser/device matrix) rather than
   the **data**; the two matrices are orthogonal and can multiply.
-- `qa-api-test-writer-java` / `qa-ui-test-writer-playwright-java` — where the data-driven test
+- `qa-java:api-tests` / `qa-java:ui-tests-playwright` — where the data-driven test
   *bodies* are authored; this skill supplies their rows.
-- `qa-test-reports-java` — each row renders as a separate, named Allure result; parameters show the
-  per-row input. `qa-_shared-quality-metrics` — coverage that scales by rows, not methods.
+- `qa-java:test-reports` — each row renders as a separate, named Allure result; parameters show the
+  per-row input. `qa-<stack>:quality-metrics` — coverage that scales by rows, not methods.

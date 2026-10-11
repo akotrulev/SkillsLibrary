@@ -1,5 +1,5 @@
 ---
-name: qa-api-contract-testing-shared
+name: contract-pact
 description: Cross-stack reference for Pact consumer-driven contract testing — mental model, Pact Broker setup, matchers, can-i-deploy, record-deployment, versioning, and the global rules every stack implementation follows. Load alongside the stack's `api-contract-testing` sibling. Triggers (always with that sibling) "set up contract testing", "how does the Pact Broker fit our pipeline", "wire can-i-deploy", "version our pacts". Do NOT load standalone to write Pact code.
 ---
 

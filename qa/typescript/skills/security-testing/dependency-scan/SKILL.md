@@ -1,5 +1,5 @@
 ---
-name: qa-security-dependency-scan-typescript
+name: dependency-scan
 description: Use when wiring SCA (dependency-vulnerability scanning) as a CI gate for a TypeScript build — `npm audit` (lockfile-driven) as the native gate over the direct + transitive tree, failing above a severity threshold, with a ticketed suppression path. Triggers: "fail the build on vulnerable dependencies", "add dependency scanning", "gate new CVEs". Do NOT use for runtime DAST → `security-testing/passive-scan`.
 ---
 
@@ -96,7 +96,7 @@ The npm severity map mirrors the Java sibling's CVSS thresholds (`failBuildOnCVS
 A real project's first audit lights up — including findings you **cannot fix today** because they're in a
 **transitive** package or are false positives. Gating on *everything* with no triage trains the team to
 mute the gate. The disciplined approach is the **ticketed allow-list** — same discipline as
-`qa-accessibility-testing-typescript` and `passive-scan`'s `rules.tsv`, ported to SCA.
+`qa-typescript:accessibility-testing` and `passive-scan`'s `rules.tsv`, ported to SCA.
 
 `npm audit` itself has no native suppression file; the two real options:
 
@@ -152,7 +152,7 @@ bump its line. Three honest responses, in order of preference:
 
 `npm audit --json` emits the full advisory set. Attach it (plus a readable summary) to Allure so a failing
 run names the CVEs without re-auditing; feed SARIF to GitHub code-scanning so findings show inline on the
-PR (cross-link `qa-test-reports-typescript`):
+PR (cross-link `qa-typescript:test-reports`):
 
 ```ts
 // support/npm-audit-report.ts — run the audit, attach JSON + summary to Allure, return the gate verdict
@@ -178,11 +178,11 @@ export function runNpmAudit(level: 'low' | 'moderate' | 'high' | 'critical' = 'h
 }
 ```
 
-- **Allure** — attach the JSON + a readable summary (cross-link `qa-test-reports-typescript`).
+- **Allure** — attach the JSON + a readable summary (cross-link `qa-typescript:test-reports`).
 - **SARIF → GitHub code-scanning** — convert `npm audit --json` to SARIF (e.g. a converter step) and feed
   `github/codeql-action/upload-sarif` so each CVE shows inline on the PR diff. OSV-Scanner emits SARIF
   natively if you prefer.
-- **CI artifact** — upload the JSON (cross-link `qa-ci-pipelines-typescript`).
+- **CI artifact** — upload the JSON (cross-link `qa-typescript:ci-pipelines`).
 
 ## Optional parse-and-assert test (the programmatic path)
 
@@ -212,7 +212,7 @@ The Java/.NET siblings parse their own tool's JSON (`dependency-check-report.jso
 ## CI wiring — the gate, the remediation complement
 
 ```yaml
-# .github/workflows/sca.yml — cross-link qa-ci-pipelines-typescript
+# .github/workflows/sca.yml — cross-link qa-typescript:ci-pipelines
 name: Dependency Scan (SCA)
 on: [pull_request]
 
@@ -322,15 +322,15 @@ Lifecycle for this gate:
 
 ## Cross-references
 
-- `qa-security-dependency-scan-java` — same skill, Java / **OWASP Dependency-Check Gradle
+- `qa-java:dependency-scan` — same skill, Java / **OWASP Dependency-Check Gradle
   plugin** (`failBuildOnCVSS`, suppression XML with `until=`); the **canonical** sibling and the cross-stack
   throughline.
-- `qa-security-dependency-scan-dotnet` — same skill, .NET / `dotnet list package --vulnerable
+- `qa-dotnet:dependency-scan` — same skill, .NET / `dotnet list package --vulnerable
   --include-transitive` + NuGet audit (`<NuGetAudit>`, `NuGetAuditLevel`).
-- `qa-security-passive-scan-typescript` — the **DAST** sibling that opened the
+- `qa-typescript:passive-scan` — the **DAST** sibling that opened the
   `security-testing` family: ZAP probes the **running app's HTTP surface**; SCA reads your **lockfile**.
   Orthogonal layers — **run both** (together they close Step 2).
-- `qa-accessibility-testing-typescript` — the **ticketed-baseline triage** discipline
+- `qa-typescript:accessibility-testing` — the **ticketed-baseline triage** discipline
   reused here for the allow-list (gate new findings, document every suppression with a ticket).
-- `qa-ci-pipelines-typescript` — the gate step, `dependency-review-action`, artifact upload.
-- `qa-test-reports-typescript` — attach the `npm audit --json` report and summary to the run.
+- `qa-typescript:ci-pipelines` — the gate step, `dependency-review-action`, artifact upload.
+- `qa-typescript:test-reports` — attach the `npm audit --json` report and summary to the run.

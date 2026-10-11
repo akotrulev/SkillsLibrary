@@ -103,5 +103,5 @@ scanner (Kubescape) and the node benchmark (kube-bench).
   spec).
 - `kubescape.md` — framework compliance (NSA/MITRE/CIS) with a compliance score; Polaris is opinionated
   workload hygiene, not framework mapping.
-- `devops-kubernetes` — the authoring skill whose output Polaris grades; a `danger` finding routes back there
+- `devops:kubernetes` — the authoring skill whose output Polaris grades; a `danger` finding routes back there
   for `devops-engineer` to fix.

@@ -57,7 +57,7 @@ Known gaps (the page's own list): types inheriting `List` / `Set` / `Map` are ig
 
 - Expose ViewModels, models, one entry-point factory. Everything else is `internal`.
 - Prefer **sealed types and plain data classes** over generics in the exported surface — erased generics and `Flow<T>` element types are where the bridge loses information.
-- A `StateFlow` exposed to Swift is observed on the main thread; the iOS side collects it into `@Observable` state ([`mobile-ios-architecture`](../../../../ios/skills/architecture/SKILL.md)).
+- A `StateFlow` exposed to Swift is observed on the main thread; the iOS side collects it into `@Observable` state ([`mobile-ios:architecture`](../../../../ios/skills/architecture/SKILL.md)).
 - Kotlin `Throwable`s do not cross as Swift errors by default; a `@Throws` annotation (Objective-C export) or the repository's `Result` / sealed failure type is how the iOS side sees a failure. Prefer the sealed failure type — the same one [`error-handling`](../../error-handling/SKILL.md) renders on Android.
 - Kotlin/Native memory: the default GC in 2.4 is the concurrent mark-and-sweep collector (`kotlin.native.binary.gc=pmcs` switches back); no threading rule is left for application code except the usual one — platform callbacks hop to the right dispatcher.
 

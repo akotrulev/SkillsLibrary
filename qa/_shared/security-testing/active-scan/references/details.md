@@ -1,4 +1,4 @@
-# Deep-dive details — `qa-security-active-scan`
+# Deep-dive details — `qa-<stack>:active-scan`
 
 Sections moved out of SKILL.md for on-demand loading. Read what the task needs.
 
@@ -92,7 +92,7 @@ jobs:
       - id: 6                           # Path Traversal
         strength: "medium"
 
-  - type: alertFilter                  # THE TRIAGE GATE — reclassify alerts (see qa-security-shared triage)
+  - type: alertFilter                  # THE TRIAGE GATE — reclassify alerts (see qa-<stack>:security-foundations triage)
     alertFilters:
       - ruleId: 10096                   # Timestamp disclosure on hashed asset names
         newRisk: "False Positive"       # flip to FP — JIRA-4101, accepted
@@ -130,11 +130,11 @@ risk** rather than the raw exit code.
 
 Practical approaches, in order of preference:
 1. Parse the **SARIF / JSON report** in the CI step and fail on counts (e.g. *any High after alertFilter*) —
-   the most portable gate, identical to how `qa-security-shared` consolidates SARIF.
+   the most portable gate, identical to how `qa-<stack>:security-foundations` consolidates SARIF.
 2. Use the official **`zaproxy/action-af`** Action, which surfaces alert counts and can fail the job.
 3. Run a small **`script`** job (issue #6928's documented workaround) that calls `controlExit(code)` based
    on `alertCounts` — flip the process exit on a High/Medium count.
 
 Bake the *known-noise* triage into the `alertFilter` job (flip FPs to "False Positive", raise the rules you
 will not regress on), then gate on **new** High/Medium alerts — the same ticketed-suppression discipline as
-`qa-security-shared`; don't repeat the rationale here.
+`qa-<stack>:security-foundations`; don't repeat the rationale here.

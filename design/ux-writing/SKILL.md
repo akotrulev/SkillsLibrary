@@ -1,5 +1,5 @@
 ---
-name: design-ux-writing
+name: ux-writing
 description: Use when writing or reviewing the words inside a UI — button labels, error and empty-state copy, confirmations, toasts, form hints, nav names — in one consistent, active, user-side voice. The stack defines the structural slots; this supplies the voice. Triggers "what should this button say", "write the error message", "microcopy for this flow", "our UI wording is inconsistent". Not for empty-state/confirmation STRUCTURE (the stack's `ui-rules`).
 ---
 

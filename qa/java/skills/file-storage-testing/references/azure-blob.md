@@ -1,14 +1,14 @@
 # File-Storage Testing — Azure Blob Storage (Java 21 / TestNG)
 
 This is the **Java sibling** of the `qa/java/skills/file-storage-testing/` node, **ported** from the canonical
-.NET stack (`qa-file-storage-testing-dotnet`, **.NET-led by the user's choice** — Azure Blob is
+.NET stack (`qa-dotnet:file-storage-testing`, **.NET-led by the user's choice** — Azure Blob is
 Azure-native, the most authentic lead). It **closes the `qa/java/skills/file-storage-testing/` family** (s3 → `azure-blob`
 azure-blob) in this stack. It is the sibling **ported from the `s3` node's structure** onto Azure Blob —
 **same two assertion shapes, same eventual-consistency condition-wait discipline**; only the store SDK and its
 primitives change. Where S3 has buckets/keys, presigned URLs, multipart upload, and LocalStack, Azure Blob has
 containers/blobs, SAS tokens, block-blob staging, and Azurite. It reuses the same verification-inside-tests
 lineage: the standard Testcontainers fixture discipline and the
-**eventual-consistency condition-wait** (Awaitility) from `qa-db-connection-java`. All three Azure SDKs
+**eventual-consistency condition-wait** (Awaitility) from `qa-java:db-connection`. All three Azure SDKs
 mirror the same upload / download / exists / get-properties / list / delete + SAS + block-staging model, so this
 is a true translate-the-concepts port, not a redesign.
 
@@ -87,7 +87,7 @@ src/test/java/integration/
   The data-plane, test-fast equivalent is the **access tier** above.
 - **Event Grid → Storage Queue notifications** — a blob write fires a `Microsoft.Storage.BlobCreated` Event
   Grid event; routed to a **Storage Queue**, an upload produces a downstream queue message the test asserts (the
-  bridge — the Azure parallel to `s3`'s S3 → SQS, cross-link `qa-messaging-testing-java` `service-bus`).
+  bridge — the Azure parallel to `s3`'s S3 → SQS, cross-link `qa-java:messaging-testing` `service-bus`).
   **The headline `azure-blob` divergence: Azurite does NOT emit Event Grid events** — so this test runs against a real
   Azure test account, or locally asserts the **subscription wiring config** only. Flagged honestly below.
 
@@ -163,7 +163,7 @@ public abstract class BlobFixture {
 > Azurite, drop the connection string and build the client from the account endpoint +
 > **`DefaultAzureCredential`** (`new BlobServiceClientBuilder().endpoint("https://<acct>.blob.core.windows.net")
 > .credential(new DefaultAzureCredentialBuilder().build()).buildClient()`); read the account name/endpoint from
-> env, never hard-code a key, never log it (cross-link `qa-test-login-tokens-java`). Azurite is the default for
+> env, never hard-code a key, never log it (cross-link `qa-java:test-login-tokens`). Azurite is the default for
 > CI determinism; a shared cloud account makes tests order-dependent unless each uses a **uniquely named
 > container** or empties it in `@BeforeMethod`. (Note: `generateSas` with a shared key needs the
 > connection-string client; with `DefaultAzureCredential` mint a **user-delegation SAS** via
@@ -216,7 +216,7 @@ public class InvoiceUploadTest extends BlobFixture {
 Here the SUT is a **worker**: it watches a container (or is driven by a blob event), processes an uploaded blob,
 and produces an observable side-effect — a DB row, a *derived* blob (a thumbnail), or a notification. The
 side-effect is eventually consistent, so **seed the input blob, then wait on a condition with Awaitility**.
-This reuses `qa-db-connection-java`'s discipline.
+This reuses `qa-java:db-connection`'s discipline.
 
 ```java
 @Test
@@ -378,7 +378,7 @@ asserts the downstream queue message — the Azure parallel to `s3`'s S3 → SQS
 > 2. **Locally, assert the wiring config only** (the event-subscription / queue binding exists and points at the
 >    right queue) and assert the SUT's downstream effect directly via the process-assert pattern above.
 >
-> Cross-link the s3 sibling's S3 → SQS section as the conceptual parallel, and `qa-messaging-testing-java`
+> Cross-link the s3 sibling's S3 → SQS section as the conceptual parallel, and `qa-java:messaging-testing`
 > for the Azure-native messaging downstream.
 
 ```java
@@ -504,21 +504,21 @@ public final class Invoices {
 
 ## Cross-references
 
-- `qa-file-storage-testing-dotnet` — the **canonical** stack this is ported from (.NET 8 / NUnit,
+- `qa-dotnet:file-storage-testing` — the **canonical** stack this is ported from (.NET 8 / NUnit,
   `Azure.Storage.Blobs` `BlobServiceClient`/`BlobClient`/`BlockBlobClient`, `BlobSasBuilder` + `GenerateSasUri`,
   `Testcontainers.Azurite` `AzuriteBuilder`, `WaitFor.Async`). Structure ported, not code.
-- `qa-file-storage-testing-typescript` — same skill, Node 24 + TS (`@azure/storage-blob`:
+- `qa-typescript:file-storage-testing` — same skill, Node 24 + TS (`@azure/storage-blob`:
   `BlobServiceClient.fromConnectionString`, `BlockBlobClient.uploadData`/`download`/`exists`/`getProperties`,
   `stageBlock`/`commitBlockList`, `generateSasUrl`, `expect.poll`, `@testcontainers/azurite`).
 - `references/s3.md` — **the node whose structure this is ported from** AND the
   **`s3`-vs-`azure-blob` boundary**: buckets/keys + presigned URLs + multipart (`S3TransferManager`) + LocalStack +
   `forcePathStyle` vs containers/blobs + SAS tokens + block-staging + Azurite + Event Grid→Storage Queue.
-- `qa-db-connection-java` — the Awaitility wait and the seeder/probe split reused for the
+- `qa-java:db-connection` — the Awaitility wait and the seeder/probe split reused for the
   processed-blob side-effect assertions; the **eventual-consistency lineage** this skill leans on.
-- `qa-messaging-testing-java` — Azure-native messaging, the natural downstream for the Event
+- `qa-java:messaging-testing` — Azure-native messaging, the natural downstream for the Event
   Grid → Storage Queue bridge (the Azure parallel to `s3`'s S3 → SQS).
-- `qa-test-login-tokens-java` — when running against a cloud test account; the `DefaultAzureCredential` /
+- `qa-java:test-login-tokens` — when running against a cloud test account; the `DefaultAzureCredential` /
   secrets-from-env discipline.
-- `qa-test-reports-java` — attach the uploaded/derived blob's name + metadata (or the queue-message body) to
+- `qa-java:test-reports` — attach the uploaded/derived blob's name + metadata (or the queue-message body) to
   the Allure result.
-- `qa-test-data-builder-java` — builders/ObjectMother for blob payloads with 4+ fields.
+- `qa-java:test-data-builder` — builders/ObjectMother for blob payloads with 4+ fields.

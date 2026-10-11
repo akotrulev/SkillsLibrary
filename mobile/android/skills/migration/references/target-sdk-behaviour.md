@@ -19,7 +19,7 @@ The 36 opt-outs that existed (`android:enableOnBackInvokedCallback`, the resizab
 3. Raise `targetSdk` alone in its own commit.
 4. Run the app on an emulator of that API level with the affected flows: back gesture, rotation, a tablet size class, permissions that changed.
 5. Fix per behaviour; do not widen manifest opt-outs to get through.
-6. Update the Play Console declarations that depend on it (foreground-service types, permissions) — [`mobile-shared-store-compliance`](../../../../_shared/store-compliance/SKILL.md).
+6. Update the Play Console declarations that depend on it (foreground-service types, permissions) — [`mobile-<stack>:store-compliance`](../../../../_shared/store-compliance/SKILL.md).
 
 ## An existing app that stays on 35
 

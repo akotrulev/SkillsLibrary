@@ -1,5 +1,5 @@
 ---
-name: fe-react-data-grid
+name: data-grid
 description: Use when building, extending, or reviewing a data grid / table — the house `<DataGrid>` on TanStack Table v9 + Tailwind, its server-side paging/sort/filter contract, and the feature surface (columns, selection, grouping, tree data, editing, virtualization, export, a11y, URL state). Triggers "add a table/grid", "our grid loads every row", "column picker", "export to CSV", "replace MUI DataGrid". Not for picking the component library (`component-library`) or the fetch layer (`data-fetching`).
 ---
 

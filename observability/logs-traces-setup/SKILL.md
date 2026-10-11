@@ -1,5 +1,5 @@
 ---
-name: observability-logs-traces-setup
+name: logs-traces
 description: Use when setting up Grafana Loki (logs) and Tempo (traces) — wire the OTel Collector to both, choose object storage (S3/GCS/Azure Blob), retention, log shipping (Grafana Alloy default), index labels, exemplar linking, multi-tenant. Triggers: "set up Loki", "ship logs to Loki", "Tempo configuration", "what storage for Loki". Do NOT use for query syntax (`queries`), dashboards (`dashboards`), or code instrumentation (`opentelemetry-{stack}` + `structured-logging-{stack}`).
 ---
 

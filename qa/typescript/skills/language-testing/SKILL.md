@@ -1,6 +1,6 @@
 ---
-name: qa-language-testing-typescript
-description: Use when writing i18n/localization tests in Node / TypeScript — Playwright pinned to a locale, asserting via the app's i18next/FormatJS catalog by key (never hardcoded literals), native `Intl` for number/date/currency formats, pseudo-localization and RTL checks. Triggers: "write an i18n test", "test German/Arabic rendering", "assert currency formatting per locale". Not for the app's own localization wiring (`fe-react-languages`) or breakpoint layout (`qa-responsive-testing-typescript`).
+name: language-testing
+description: Use when writing i18n/localization tests in Node / TypeScript — Playwright pinned to a locale, asserting via the app's i18next/FormatJS catalog by key (never hardcoded literals), native `Intl` for number/date/currency formats, pseudo-localization and RTL checks. Triggers: "write an i18n test", "test German/Arabic rendering", "assert currency formatting per locale". Not for the app's own localization wiring (`fe-react:i18n`) or breakpoint layout (`qa-typescript:responsive-testing`).
 ---
 
 # QA — i18n / Localization Testing (TypeScript / Playwright 1.64 + Vitest + Intl)
@@ -210,12 +210,12 @@ past the midpoint means the navigation sits on the right.
 
 ## Cross-references
 
-- `qa-language-testing-java` · `qa-language-testing-dotnet` — the sibling stacks (ICU4J / `ResourceBundle` ·
+- `qa-java:language-testing` · `qa-dotnet:language-testing` — the sibling stacks (ICU4J / `ResourceBundle` ·
   `CultureInfo` / `.resx`); same four ideas.
-- `qa-ui-test-writer-playwright-typescript` — the fixtures this extends; `references/emulation-and-mobile-web.md`
+- `qa-typescript:ui-tests-playwright` — the fixtures this extends; `references/emulation-and-mobile-web.md`
   for locale, time zone and `page.clock`.
-- `qa-visual-regression-typescript` — the pixel record of a pseudo-loc overflow; this skill asserts it didn't.
-- `qa-data-driven-testing-typescript` — the locale matrix is its row-binding pattern applied to locales.
-- `qa-accessibility-testing-typescript` — `html[lang]` / `dir` a11y rules; run them on the locale-pinned page.
-- `qa-test-reports-typescript` — each locale project is its own result group, so a failure says *which*
+- `qa-typescript:visual-regression` — the pixel record of a pseudo-loc overflow; this skill asserts it didn't.
+- `qa-typescript:data-driven-testing` — the locale matrix is its row-binding pattern applied to locales.
+- `qa-typescript:accessibility-testing` — `html[lang]` / `dir` a11y rules; run them on the locale-pinned page.
+- `qa-typescript:test-reports` — each locale project is its own result group, so a failure says *which*
   language broke.

@@ -1,5 +1,5 @@
 ---
-name: fe-blazor-component-writer
+name: component-writer
 description: Use when scaffolding a Blazor pattern in .NET 8/9/10 — Static SSR / Server / WASM / Auto — into the active repo. Triggers: "scaffold a Blazor component for X", "create a state container", "wire a CascadingValue", "add a [PersistentState] fetch", "compound component for tabs", "add a NotFound page", "customize the reconnect modal". Do NOT use for explanations (`basics`), reviews (`code-review`), or non-Blazor patterns (`backend/dotnet`'s generator).
 ---
 

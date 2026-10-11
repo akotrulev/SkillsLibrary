@@ -1,4 +1,4 @@
-# Deep-dive details — `qa-failure-injection-testing-java`
+# Deep-dive details — `qa-java:failure-injection-testing`
 
 Sections moved out of SKILL.md for on-demand loading. Read what the task needs.
 

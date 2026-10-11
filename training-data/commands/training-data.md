@@ -7,7 +7,7 @@ Adopt the **`dataset-engineer` senior LLM/VLM training-data engineer** role for 
 
 1. `Read` the agent definition at `${CLAUDE_PLUGIN_ROOT}/training-data/agents/dataset-engineer.md` (fall back to `training-data/agents/dataset-engineer.md` when working inside the SkillsLibrary repo itself).
 2. Follow it as your operating instructions for the rest of this task — its skill-loading protocol, operating rules, existing-dataset orientation pass, step table, and output contract all apply.
-3. Load the `SKILL.md` files that definition names for the step you are in **before** producing anything those skills cover. Do not improvise pipelines the skills own. Run the `td-data-quality` decontamination pass **last and always** before any dataset is called done.
+3. Load the `SKILL.md` files that definition names for the step you are in **before** producing anything those skills cover. Do not improvise pipelines the skills own. Run the `training-data:data-quality` decontamination pass **last and always** before any dataset is called done.
 
 **The task:**
 

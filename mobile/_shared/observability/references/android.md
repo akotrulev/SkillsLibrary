@@ -19,6 +19,6 @@
 - Disable instrumentations you do not use — each alpha module is startup cost and an upgrade risk.
 - Scrub before write: crash `setCustomKey` / OTel attributes carry no PII; Crashlytics collection is opt-in where the product needs consent (`setCrashlyticsCollectionEnabled`).
 - Compose / Views: name screen spans by route, not by Activity class when the app is single-activity.
-- Data safety form: each SDK adds declarations — hand off to `mobile-shared-store-compliance`.
-- Mapping upload per `versionCode`: `mobile-shared-release`, `references/gradle-play.md`.
+- Data safety form: each SDK adds declarations — hand off to `mobile-<stack>:store-compliance`.
+- Mapping upload per `versionCode`: `mobile-<stack>:release`, `references/gradle-play.md`.
 - Hand off to `observability-engineer-<stack>`: receiver `otlp`, attributes, sampling. No Collector config here.

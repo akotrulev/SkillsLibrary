@@ -256,6 +256,6 @@ noisier. Accessibility, best-practices and SEO are deterministic rule checks.
 - `references/axe-playwright.md` — the per-component gate, and the tool for signed-in pages.
 - `qa/java/skills/ui-test-author/playwright` — `BaseTest` and its `launchOptions()` hook.
 - `qa/cicd/java/skills/ci-pipelines` — the `lhci autorun` step and artifact upload.
-- `qa-accessibility-testing-typescript` — `playAudit` on a persistent context, for signed-in pages.
-- `qa-accessibility-testing-dotnet` — the .NET sibling.
-- `qa-exploratory-charter-writer` — the manual and assistive-technology testing no score covers.
+- `qa-typescript:accessibility-testing` — `playAudit` on a persistent context, for signed-in pages.
+- `qa-dotnet:accessibility-testing` — the .NET sibling.
+- `qa-<stack>:exploratory-charter-writer` — the manual and assistive-technology testing no score covers.

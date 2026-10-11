@@ -1,6 +1,6 @@
 ---
-name: be-shared-integration-plan
-description: Use when a planned backend needs its external dependencies specified — every system it calls, with auth, config keys (never values), limits, retry/circuit-breaker policy, and local-dev/test strategy. Triggers "what external services do we depend on", "what API keys do we need", "how do we handle it when the provider is down". Do NOT use to provision secret stores (`devops-engineer`), write client code (`be-<stack>`), or plan this service's own endpoints (`be-shared-api-surface-plan`).
+name: plan-integrations
+description: Use when a planned backend needs its external dependencies specified — every system it calls, with auth, config keys (never values), limits, retry/circuit-breaker policy, and local-dev/test strategy. Triggers "what external services do we depend on", "what API keys do we need", "how do we handle it when the provider is down". Do NOT use to provision secret stores (`devops-engineer`), write client code (`be-<stack>`), or plan this service's own endpoints (`dev:plan-api-surface`).
 ---
 
 # Integration Plan — the external dependency register
@@ -143,7 +143,7 @@ One table that makes the system's degraded behavior reviewable in one read:
 ```markdown
 # <Initiative> — Integration Plan
 
-**Date:** YYYY-MM-DD · **Written by:** `be-shared-integration-plan`
+**Date:** YYYY-MM-DD · **Written by:** `dev:plan-integrations`
 **Blueprint:** `./blueprint.md` · **API surface:** `./api-surface.md`
 
 ## 1. Dependency register
@@ -187,10 +187,10 @@ One table that makes the system's degraded behavior reviewable in one read:
 
 ## Handoffs
 
-- **→ `be-shared-delivery-plan`** (Step 6). Prerequisite tasks for blocking unknowns, plus a client-implementation task per dependency.
+- **→ `dev:plan-delivery`** (Step 6). Prerequisite tasks for blocking unknowns, plus a client-implementation task per dependency.
 - **→ `devops-engineer`** — the secrets checklist and section 7 are its work order: stores, environment config, network paths, egress rules.
 - **→ `be-<stack>`** — writes the typed clients, retry/circuit-breaker policies, and webhook handlers. Outbound M2M token acquisition is its `auth0`/`cognito` skill.
-- **→ QA peers** — `qa-network-mocking-<stack>` (stub outbound HTTP), `qa-email-testing-<stack>` (assert what was sent), `qa-messaging-testing-<stack>` (broker assertions), `qa-file-storage-testing-<stack>` (object storage), `qa-failure-injection-testing-<stack>` (prove the failure matrix is real rather than aspirational).
+- **→ QA peers** — `qa-<stack>:network-mocking` (stub outbound HTTP), `qa-<stack>:email-testing` (assert what was sent), `qa-<stack>:messaging-testing` (broker assertions), `qa-<stack>:file-storage-testing` (object storage), `qa-<stack>:failure-injection-testing` (prove the failure matrix is real rather than aspirational).
 - **→ `observability-engineer-<stack>`** — every boundary here is a span, and every `critical` dependency deserves an SLO and an alert.
 
 ## Version policy

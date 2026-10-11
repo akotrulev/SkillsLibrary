@@ -1,6 +1,6 @@
 ---
-name: mobile-android-project-setup
-description: Use when creating or hardening an Android app on AGP 9 — built-in Kotlin (no kotlin-android plugin), version catalog, explicit targetSdk, compile 37 / target 36 / min 24, JDK 21 toolchain, KSP not kapt, R8 full mode, detekt + ktlint, edge-to-edge, predictive back. Triggers "new Android app", "set up Gradle", "kapt fails on AGP 9". Do NOT use for signing and CI (`mobile-shared-release`), state design (`-architecture`) or screens (`-ui-components`).
+name: project-setup
+description: Use when creating or hardening an Android app on AGP 9 — built-in Kotlin (no kotlin-android plugin), version catalog, explicit targetSdk, compile 37 / target 36 / min 24, JDK 21 toolchain, KSP not kapt, R8 full mode, detekt + ktlint, edge-to-edge, predictive back. Triggers "new Android app", "set up Gradle", "kapt fails on AGP 9". Do NOT use for signing and CI (`mobile-<stack>:release`), state design (`-architecture`) or screens (`-ui-components`).
 ---
 
 # Android — Project Setup
@@ -29,7 +29,7 @@ Read `gradle/libs.versions.toml`, `gradle/wrapper/gradle-wrapper.properties`, ev
 | `targetSdk` | **36** | Play requires new apps **and updates** to target API 36 (since 2026-08-31; extensions to 2026-11-01) |
 | `minSdk` | **24** | House floor; raise only for a named API need |
 
-Targeting 36 turns on predictive back and ignores orientation / resizability locks on ≥ sw600dp (no opt-out at 37). An existing app that targets 35 keeps working; raising it is [`mobile-android-migration`](../migration/SKILL.md)'s, one level at a time.
+Targeting 36 turns on predictive back and ignores orientation / resizability locks on ≥ sw600dp (no opt-out at 37). An existing app that targets 35 keeps working; raising it is [`mobile-android:migration`](../migration/SKILL.md)'s, one level at a time.
 
 ## When to use
 
@@ -40,13 +40,13 @@ Targeting 36 turns on predictive back and ignores orientation / resizability loc
 
 ## When NOT to use
 
-- Signing, Play track upload, CI YAML → `mobile-shared-release`, `devops-engineer`
+- Signing, Play track upload, CI YAML → `mobile-<stack>:release`, `devops-engineer`
 - State ownership, ViewModels, DI → [`architecture`](../architecture/SKILL.md)
 - Composables → [`ui-components`](../ui-components/SKILL.md); routes → [`navigation`](../navigation/SKILL.md)
 - AGP 8 → 9, kapt → KSP, targetSdk raises → [`migration`](../migration/SKILL.md)
 - Baseline Profiles, Macrobenchmark → [`performance`](../performance/SKILL.md)
 - Kotlin Multiplatform modules → [`kotlin-multiplatform`](../kotlin-multiplatform/SKILL.md)
-- iOS or React Native setup → `mobile-ios-project-setup`, `mobile-react-native-project-setup`
+- iOS or React Native setup → `mobile-ios:project-setup`, `mobile-react-native:project-setup`
 
 ## Inputs needed
 
@@ -216,8 +216,8 @@ android {
 
 - State, ViewModels, DI, modules → [`architecture`](../architecture/SKILL.md)
 - Kotlin standard → [`basics`](../basics/SKILL.md)
-- Signing, Play, CI → `mobile-shared-release`
+- Signing, Play, CI → `mobile-<stack>:release`
 - AGP 8 → 9, kapt → KSP → [`migration`](../migration/SKILL.md)
 - Startup and R8 verification → [`performance`](../performance/SKILL.md)
-- Dependency and manifest security → `mobile-shared-security`
+- Dependency and manifest security → `mobile-<stack>:security`
 - Test ids → [`test-ids`](../test-ids/SKILL.md)

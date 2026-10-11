@@ -99,7 +99,7 @@ async function send(path: string, init: RequestInit, signal: AbortSignal, idempo
 | `write` | 30 s | The outcome is indeterminate on expiry — the idempotency key makes the replay safe |
 | `upload` | 120 s, plus progress | Resumable or presigned uploads bypass the API server |
 
-Tune from the observability data ([`mobile-shared-observability`](../../../../_shared/observability/SKILL.md)), not by feel. An **indeterminate write** (timeout or background mid-request) is not shown as failed or as saved: re-read the resource or replay with the same key — [`error-handling`](../../error-handling/SKILL.md).
+Tune from the observability data ([`mobile-<stack>:observability`](../../../../_shared/observability/SKILL.md)), not by feel. An **indeterminate write** (timeout or background mid-request) is not shown as failed or as saved: re-read the resource or replay with the same key — [`error-handling`](../../error-handling/SKILL.md).
 
 ## Circuit
 

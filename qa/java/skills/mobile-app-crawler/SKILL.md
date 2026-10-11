@@ -1,6 +1,6 @@
 ---
-name: qa-mobile-app-crawler-java
-description: Use when a Java mobile suite must walk MANY screens of a live Android/iOS app via the Appium MCP server and build a persistent, resumable screen map; also the PROCESS entry point when screens were captured but never built into page objects. Triggers "crawl the app", "map the whole app", "explore all screens then build the page objects". Do NOT use for a single screen (`qa-mobile-screen-explorer-java`) or web apps (`qa-page-objects-from-url-java`).
+name: mobile-app-crawler
+description: Use when a Java mobile suite must walk MANY screens of a live Android/iOS app via the Appium MCP server and build a persistent, resumable screen map; also the PROCESS entry point when screens were captured but never built into page objects. Triggers "crawl the app", "map the whole app", "explore all screens then build the page objects". Do NOT use for a single screen (`qa-java:mobile-screen-explorer`) or web apps (`qa-java:page-objects-from-url`).
 ---
 
 # QA — Appium App Crawler (Java)

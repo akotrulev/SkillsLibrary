@@ -121,7 +121,7 @@ npx promptfoo@latest redteam run       -c evals/redteam.yaml -o redteam-results.
 npx promptfoo@latest redteam report                       # the OWASP-categorized pass/fail dashboard
 ```
 
-Drive it from a test as a subprocess and gate on the JSON snapshot — the same shape `qa-security-passive-scan-java` uses:
+Drive it from a test as a subprocess and gate on the JSON snapshot — the same shape `qa-java:passive-scan` uses:
 
 ```java
 // RedTeamGate.java — run promptfoo redteam via ProcessBuilder, parse results.json with Jackson, gate on the RATE
@@ -196,7 +196,7 @@ corpus differs run to run. Treat it like the `qa-security` active scans, not lik
   id and the exact transcript; a leaked live secret is an incident (rotate, don't just redact).
 - **A clean red-team run ≠ "safe."** Report the `✅ core` items covered and the `⚠️`/hand-off items that need the
   eval suite, `ai-answer-quality-testing`, `qa-security`, or a manual AI pentest. Track the attack-success rate over time in
-  `qa-_shared-quality-metrics` — a rising rate is a silent safety regression.
+  `qa-<stack>:quality-metrics` — a rising rate is a silent safety regression.
 
 ## Anti-patterns
 
@@ -222,10 +222,10 @@ corpus differs run to run. Treat it like the `qa-security` active scans, not lik
   on the attacker) and the single hand-written jailbreak row that this systematic sweep scales up.
 - `references/deepeval.md` — the DeepEval eval spine; DeepTeam is its red-teaming sibling and shares its pinned-
   judge + subprocess discipline.
-- `qa-ai-answer-quality-testing-java` — LLM08 (vector/embedding weaknesses) + RAG-poisoning / indirect-injection over the
+- `qa-java:ai-answer-quality-testing` — LLM08 (vector/embedding weaknesses) + RAG-poisoning / indirect-injection over the
   retrieval layer is its specialization; decompose retrieval from generation before red-teaming a RAG app.
 - **`qa-security` agent + `qa/_shared/security`** — the peer that owns the **non-LLM** attack surface (SAST/DAST/
   SCA/TLS/container + the BOLA/IDOR/BFLA authz matrix) and carries the OWASP **web/API** Top 10 map. This file is
   the model-behavior complement; the security backbone points back here for the LLM Top 10.
 - `qa/manual/bug-report-writer` — write up a confirmed attack with its OWASP LLM id + transcript.
-- `qa-_shared-quality-metrics` — track attack-success rate per OWASP item over time (rising = silent regression).
+- `qa-<stack>:quality-metrics` — track attack-success rate per OWASP item over time (rising = silent regression).

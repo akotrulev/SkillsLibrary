@@ -1,13 +1,13 @@
 ---
-name: qa-api-test-playwright-dotnet
-description: Use when writing .NET API tests through Playwright's `IAPIRequestContext` (Microsoft.Playwright + NUnit) — usually because the project already runs Playwright for UI and wants one dependency and one report. Triggers "write API tests with Playwright in C#", "use IAPIRequestContext for endpoint X", "add API coverage to our Playwright .NET suite". Do NOT use for API suites without Playwright (`qa-api-test-writer-dotnet`, the RestSharp default).
+name: api-tests-playwright
+description: Use when writing .NET API tests through Playwright's `IAPIRequestContext` (Microsoft.Playwright + NUnit) — usually because the project already runs Playwright for UI and wants one dependency and one report. Triggers "write API tests with Playwright in C#", "use IAPIRequestContext for endpoint X", "add API coverage to our Playwright .NET suite". Do NOT use for API suites without Playwright (`qa-dotnet:api-tests`, the RestSharp default).
 ---
 
 # QA — API Test Writer (.NET / Playwright IAPIRequestContext + NUnit)
 
 Authors NUnit fixtures that test a REST backend through **Microsoft.Playwright's HTTP client** —
 `IAPIRequestContext` — instead of RestSharp. It reuses the layering and templates of the RestSharp sibling
-(`qa-api-test-writer-dotnet`): DTOs from `qa/dotnet/skills/api-models`, a `{Resource}Client` with
+(`qa-dotnet:api-tests`): DTOs from `qa/dotnet/skills/api-models`, a `{Resource}Client` with
 dual raw + typed overloads, fixtures that own scenarios, the rich happy-path template for 2xx and the strict
 `ProblemDetails` template for 4xx. Only the HTTP transport changes; the discipline does not.
 
@@ -224,13 +224,13 @@ Same table format and severities.
 
 ## Cross-references
 
-- `qa-api-test-writer-dotnet` — the **stack default** (NUnit + RestSharp); this skill is its Playwright-first
+- `qa-dotnet:api-tests` — the **stack default** (NUnit + RestSharp); this skill is its Playwright-first
   variant with the same layering, overloads and templates.
-- `qa-api-test-playwright-typescript` · `qa-api-test-playwright-java` — the sibling stacks.
-- `qa-api-models-dotnet` / `qa-api-client-writer-dotnet` — DTOs / the client layer this skill consumes.
-- `qa-ui-test-writer-playwright-dotnet` — the UI suite this skill shares the Playwright dependency with.
-- `qa-network-mocking-dotnet` — browser traffic mocking, not API testing.
-- `qa-api-test-review-dotnet` — review; its cross-stack checklist applies verbatim, and this skill's § Review
+- `qa-typescript:api-tests-playwright` · `qa-java:api-tests-playwright` — the sibling stacks.
+- `qa-dotnet:api-models` / `qa-dotnet:api-client-writer` — DTOs / the client layer this skill consumes.
+- `qa-dotnet:ui-tests-playwright` — the UI suite this skill shares the Playwright dependency with.
+- `qa-dotnet:network-mocking` — browser traffic mocking, not API testing.
+- `qa-dotnet:api-tests-review` — review; its cross-stack checklist applies verbatim, and this skill's § Review
   replaces its RestSharp rows (`qa-api-dotnet` Step 4 loads both).
-- `qa-test-login-tokens-dotnet` — the tokens `NewContextAsync(token)` injects.
-- `qa-test-reports-dotnet` — Allure NUnit wiring shared with the UI suite.
+- `qa-dotnet:test-login-tokens` — the tokens `NewContextAsync(token)` injects.
+- `qa-dotnet:test-reports` — Allure NUnit wiring shared with the UI suite.

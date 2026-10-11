@@ -1,4 +1,4 @@
-# Deep-dive details — `qa-security-dependency-scan-dotnet`
+# Deep-dive details — `qa-dotnet:dependency-scan`
 
 Sections moved out of SKILL.md for on-demand loading. Read what the task needs.
 

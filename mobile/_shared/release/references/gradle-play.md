@@ -24,7 +24,7 @@ Docs: developer.android.com/studio/publish/app-signing · developer.android.com/
 - R8 mapping: AABs upload `mapping.txt` to Play automatically when minification is on (`isMinifyEnabled = true`, R8 full mode); also upload it to the crash reporter per `versionCode`. Native debug symbols: `ndk { debugSymbolLevel = "FULL" }`.
 - Firebase Crashlytics Gradle plugin uploads mapping on `assembleRelease` / `bundleRelease` given its config; Sentry's Gradle plugin likewise.
 
-## Dated Play facts (see `mobile-shared-store-compliance`)
+## Dated Play facts (see `mobile-<stack>:store-compliance`)
 
 - Target API 36 for new apps and updates; 16 KB page size — updates blocked from 2027-02-01; developer verification enforced in BR / ID / SG / TH from 2026-09-30, global 2027. Re-verify at 2027-01-15.
 

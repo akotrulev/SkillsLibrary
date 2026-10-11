@@ -1,5 +1,5 @@
 ---
-name: qa-mobile-project-setup-dotnet
+name: mobile-project-setup
 description: Use when starting a mobile (iOS/Android) test-automation project from zero in C# / .NET 10 (8-9) — solution layout, exact package versions, Appium 3 server + drivers + emulator setup, run commands for a standalone Appium NUnit suite. Composable with the api/ui/performance dotnet scaffolds. Triggers "scaffold a mobile test project", "set up a .NET Appium suite from scratch". Not for authoring screens or tests (`ui-test-author/appium`).
 ---
 
@@ -113,7 +113,7 @@ dotnet build                            # exit gate: 0 errors, 0 warnings
 PLATFORM=android dotnet test AppiumTests
 ```
 
-Create `Directory.Packages.props` (CPM on) **before** adding packages, then add them versionless (`dotnet add AppiumTests package Appium.WebDriver`, `Selenium.WebDriver`, `Selenium.Support`, `Allure.NUnit`). Sort the copied `.cs` files into `Support/`, `Pages/` and `Tests/` to match their namespaces. `Directory.Build.props` (settings only) is exactly as in `qa-api-project-setup-dotnet`. The Allure CLI that turns `allure-results/` into a report is installed and run as `qa/reporting/dotnet/skills/test-reports` says; there is no `allure` package on NuGet to install as a dotnet tool.
+Create `Directory.Packages.props` (CPM on) **before** adding packages, then add them versionless (`dotnet add AppiumTests package Appium.WebDriver`, `Selenium.WebDriver`, `Selenium.Support`, `Allure.NUnit`). Sort the copied `.cs` files into `Support/`, `Pages/` and `Tests/` to match their namespaces. `Directory.Build.props` (settings only) is exactly as in `qa-dotnet:api-project-setup`. The Allure CLI that turns `allure-results/` into a report is installed and run as `qa/reporting/dotnet/skills/test-reports` says; there is no `allure` package on NuGet to install as a dotnet tool.
 
 ## Run
 

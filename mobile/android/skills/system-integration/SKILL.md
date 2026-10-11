@@ -1,6 +1,6 @@
 ---
-name: mobile-android-system-integration
-description: Use when an Android app must do work or appear outside its screens — WorkManager (periodic, expedited, constraints), foreground services with a type and Play declaration, Glance widgets, shortcuts, exact-alarm policy, API 37 background-audio rule. Triggers "sync in the background", "keep uploading", "add a widget", "schedule a reminder". Do NOT use for push and links (`mobile-android-notifications-and-links`), offline data design (`-offline-and-storage`), or permissions (`-device-features`).
+name: system-integration
+description: Use when an Android app must do work or appear outside its screens — WorkManager (periodic, expedited, constraints), foreground services with a type and Play declaration, Glance widgets, shortcuts, exact-alarm policy, API 37 background-audio rule. Triggers "sync in the background", "keep uploading", "add a widget", "schedule a reminder". Do NOT use for push and links (`mobile-android:push-and-deep-links`), offline data design (`-offline-and-storage`), or permissions (`-device-features`).
 ---
 
 # Android — System Integration
@@ -32,8 +32,8 @@ Sources read 2026-10-10: developer.android.com/jetpack/androidx/releases/{work,g
 - Push registration, channels, tap routing, `PendingIntent` rules → [`notifications-and-links`](../notifications-and-links/SKILL.md)
 - What is stored and how it is synced → [`offline-and-storage`](../offline-and-storage/SKILL.md)
 - Camera, location, microphone permissions → [`device-features`](../device-features/SKILL.md)
-- Play declarations as policy → [`mobile-shared-store-compliance`](../../../_shared/store-compliance/SKILL.md)
-- Another stack → `mobile-ios-system-integration`, `mobile-react-native-device-features`
+- Play declarations as policy → [`mobile-<stack>:store-compliance`](../../../_shared/store-compliance/SKILL.md)
+- Another stack → `mobile-ios:system-integration`, `mobile-react-native:device-features`
 
 ## Choosing the mechanism
 
@@ -151,7 +151,7 @@ Compose-style widgets with Glance (`glance-appwidget` 1.2.0, `glance-material3` 
 3. Write the worker (unique, constraint-minimal, idempotent) or the typed service (permission, prerequisite, stop path, `onTimeout`).
 4. Widgets: provider info, responsive layout, three states, update after sync, bitmap budget.
 5. Shortcuts and alarms: validators, denied paths, boot re-registration.
-6. Add the Play declaration to the release checklist ([`mobile-shared-release`](../../../_shared/release/SKILL.md)); tests per [`unit-testing`](../unit-testing/SKILL.md).
+6. Add the Play declaration to the release checklist ([`mobile-<stack>:release`](../../../_shared/release/SKILL.md)); tests per [`unit-testing`](../unit-testing/SKILL.md).
 
 ## Validation (exit gate)
 
@@ -170,6 +170,6 @@ Inside a `Gate: none` plan task, run none of these and report "written, not run"
 - Push, channels, tap routing, immutable `PendingIntent` → [`notifications-and-links`](../notifications-and-links/SKILL.md)
 - Offline-first repositories the worker calls → [`offline-and-storage`](../offline-and-storage/SKILL.md)
 - Location, camera, microphone permission flows → [`device-features`](../device-features/SKILL.md)
-- Play declarations and restricted permissions → [`mobile-shared-store-compliance`](../../../_shared/store-compliance/SKILL.md)
+- Play declarations and restricted permissions → [`mobile-<stack>:store-compliance`](../../../_shared/store-compliance/SKILL.md)
 - Wake locks, vitals, tracing → [`performance`](../performance/SKILL.md)
 - Dev-side worker tests → [`unit-testing`](../unit-testing/SKILL.md)

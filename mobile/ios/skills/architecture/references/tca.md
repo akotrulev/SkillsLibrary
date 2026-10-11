@@ -1,6 +1,6 @@
 # TCA and friends — the existing-codebase lane
 
-Reference for `mobile-ios-architecture`. **Use only where the codebase already depends on The Composable Architecture (1.26), Factory (3.4) or swift-dependencies (1.17).** Never introduce them to a project that did not choose them, and never rewrite a TCA feature to MV as a side effect of other work.
+Reference for `mobile-ios:architecture`. **Use only where the codebase already depends on The Composable Architecture (1.26), Factory (3.4) or swift-dependencies (1.17).** Never introduce them to a project that did not choose them, and never rewrite a TCA feature to MV as a side effect of other work.
 
 ## Detecting
 
@@ -24,4 +24,4 @@ Same rule: keep the existing container for the features that use it, route new c
 
 ## Moving off
 
-A migration away from TCA is a plan of its own and is not an architecture task; [`mobile-ios-migration`](../../migration/SKILL.md) does not include it.
+A migration away from TCA is a plan of its own and is not an architecture task; [`mobile-ios:migration`](../../migration/SKILL.md) does not include it.

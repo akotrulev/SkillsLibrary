@@ -1,6 +1,6 @@
 ---
-name: secgov-compliance-evidence-mapping
-description: Use to map the library's security controls and tests (scanners, gates, ASVS, ATT&CK coverage, hardening, detections) to compliance-framework evidence — SOC 2, PCI DSS 4.0.1, GDPR, ISO 27001:2022 — as an evidence register plus a gap list. Triggers "map our controls to SOC 2 / PCI / ISO", "compliance gap analysis". Not for running the controls (the scan/test lanes), authoring them (`secgov-security-hardening`/`secgov-detection-engineering`), or certifying compliance (a human auditor/QSA).
+name: compliance-evidence-mapping
+description: Use to map the library's security controls and tests (scanners, gates, ASVS, ATT&CK coverage, hardening, detections) to compliance-framework evidence — SOC 2, PCI DSS 4.0.1, GDPR, ISO 27001:2022 — as an evidence register plus a gap list. Triggers "map our controls to SOC 2 / PCI / ISO", "compliance gap analysis". Not for running the controls (the scan/test lanes), authoring them (`security-governance:hardening`/`security-governance:detection-engineering`), or certifying compliance (a human auditor/QSA).
 ---
 
 # Security Governance — Compliance Evidence Mapping (SOC 2 · PCI DSS · GDPR · ISO 27001 · ASVS)
@@ -9,7 +9,7 @@ The library already *runs* the controls a compliance auditor asks about — SAST
 
 This skill is **language-agnostic** (it maps controls to standards; it runs nothing) and homes in the **`security-governance`** plugin, loaded by the **`security-architect`** agent as the compliance layer of the posture picture. It **maps and identifies gaps**; it does **not** certify. Certification is a human auditor's / QSA's / lead-implementer's act — this skill produces the evidence pack they assess and the gap list the org closes.
 
-> **The load-bearing rule: this maps evidence, it does not attest to it.** A control being *mapped* to a requirement is not the control being *effective*. Evidence status is tiered — **`#present`** (the control exists and its output is an artifact you can point to), **`#partial`** (exists but incomplete/untested), **`#gap`** (no control) — and effectiveness is `devops-infra-controls-validation`'s / the test lanes' job, not this skill's. Never mark a requirement "met" from the existence of a config file; mark it `#present` with the artifact, and let validation prove it works.
+> **The load-bearing rule: this maps evidence, it does not attest to it.** A control being *mapped* to a requirement is not the control being *effective*. Evidence status is tiered — **`#present`** (the control exists and its output is an artifact you can point to), **`#partial`** (exists but incomplete/untested), **`#gap`** (no control) — and effectiveness is `devops:controls-validation`'s / the test lanes' job, not this skill's. Never mark a requirement "met" from the existence of a config file; mark it `#present` with the artifact, and let validation prove it works.
 
 ## The frameworks — pinned to current versions (2026-08)
 
@@ -36,10 +36,10 @@ One row per (control → requirement), the control mapped once and fanned out to
 
 | Control (library) | Evidence artifact | ASVS | SOC 2 | PCI 4.0.1 | ISO 27001:2022 | GDPR | Status |
 |---|---|---|---|---|---|---|---|
-| SAST gate (`qa-security-code-scan`) | CI SARIF + gate config | V1/V5 | CC7.1, CC8.1 | 6.2.4, 6.3.1 | A.8.28, A.8.25 | Art.32 | `#present` |
-| Secret rotation runbook (`secgov-secrets-hardening`) | runbook + rotation logs | V6 | CC6.1 | 8.3.9, 3.x | A.5.17, A.8.24 | Art.32 | `#partial` (emergency path untested) |
-| Strict CSP + headers (`secgov-security-hardening`) | policy + `client-side-security` block-proof | V13/V14 | CC6.6 | 6.4.3, 11.6.1 | A.8.26 | Art.25, Art.32 | `#present` |
-| Detection coverage (`secgov-detection-engineering`) | ATT&CK coverage map + validation | — | CC7.2, CC7.3 | 10.x, 11.5.x | A.8.15, A.8.16 | Art.33 | `#gap` (authored, not validated) |
+| SAST gate (`qa-<stack>:code-scan`) | CI SARIF + gate config | V1/V5 | CC7.1, CC8.1 | 6.2.4, 6.3.1 | A.8.28, A.8.25 | Art.32 | `#present` |
+| Secret rotation runbook (`security-governance:secrets-hardening`) | runbook + rotation logs | V6 | CC6.1 | 8.3.9, 3.x | A.5.17, A.8.24 | Art.32 | `#partial` (emergency path untested) |
+| Strict CSP + headers (`security-governance:hardening`) | policy + `client-side-security` block-proof | V13/V14 | CC6.6 | 6.4.3, 11.6.1 | A.8.26 | Art.25, Art.32 | `#present` |
+| Detection coverage (`security-governance:detection-engineering`) | ATT&CK coverage map + validation | — | CC7.2, CC7.3 | 10.x, 11.5.x | A.8.15, A.8.16 | Art.33 | `#gap` (authored, not validated) |
 | Cross-tenant isolation (`qa-security` BOLA/IDOR) | permission-matrix test results | V4/V8 | CC6.1, CC6.3 | 7.x | A.5.15, A.8.3 | Art.25, Art.32 | `#present` |
 
 Every row carries the **evidence artifact path** (the SARIF, the test report, the runbook, the policy — the thing an auditor points at), the **status tier**, and — for `#partial`/`#gap` — the **owning lane** to close it (`security-hardening` to author, `infra-controls-validation` to prove effective, a test lane to run). The register's most valuable output is the **gap list**: requirements with `#gap` status, prioritized, each routed to the lane that closes it.
@@ -47,7 +47,7 @@ Every row carries the **evidence artifact path** (the SARIF, the test report, th
 ## How to build it
 
 1. **Scope** — which frameworks are in play (a fintech taking cards → PCI mandatory; an EU-data SaaS → GDPR + SOC 2; ISO for enterprise sales). Do not map to a framework the org is not pursuing — noise.
-2. **Inventory the controls that already run** — read the repo for the gates/tests/hardening/detections that exist and their output artifacts (this is where `ep-agent-orientation-cache`'s seam inventory + the other lanes' reports feed in). Evidence status is read from the artifact, this session — a green pipeline is a lead, the SARIF is the evidence.
+2. **Inventory the controls that already run** — read the repo for the gates/tests/hardening/detections that exist and their output artifacts (this is where `engineering-practices/agent-orientation-cache`'s seam inventory + the other lanes' reports feed in). Evidence status is read from the artifact, this session — a green pipeline is a lead, the SARIF is the evidence.
 3. **Map via the SCF crosswalk** — control → requirement across every in-scope framework; state the ASVS level the app is verified at.
 4. **Tier the evidence** `#present`/`#partial`/`#gap` from the artifact, not the intent.
 5. **Emit the register** (Markdown for humans; OSCAL where consumed) + the prioritized **gap list**, each gap routed to its closing lane.
@@ -76,8 +76,8 @@ Every row carries the **evidence artifact path** (the SARIF, the test report, th
 ## Cross-references
 
 - **`security-architect`** (`security/agents/security-architect.md`) — the roll-up agent that loads this skill; the evidence register + gap list are a layer of its CISO posture picture, framed in NIST CSF 2.0.
-- **`devops-infra-controls-validation`** (`devops/infra-controls-validation/`) — proves a mapped control is **effective**, not just present; it converts a `#present` row into a validated one and a `#partial` into a `#gap` when the control fails its test.
+- **`devops:controls-validation`** (`devops/infra-controls-validation/`) — proves a mapped control is **effective**, not just present; it converts a `#present` row into a validated one and a `#partial` into a `#gap` when the control fails its test.
 - **`qa-security`** (`qa/_shared/agents/qa-security.md`) + its scanners — the app-layer controls (SAST/DAST/SCA/secrets/authz/TLS) that populate most register rows; their reports are the evidence artifacts.
 - **`infra-security-tester`** (`devops/agents/infra-security-tester.md`) — the infra/cloud/K8s controls (CIS benchmarks, CSPM, RBAC/network-policy) that populate the infra rows.
-- **`secgov-security-hardening`** / **`secgov-secrets-hardening`** / **`secgov-detection-engineering`** — the defensive controls whose *existence* this skill maps to evidence and whose *absence* becomes a gap routed back to them.
-- **`ba-project-memory`** *(named, not loaded)* — where data-processing/PII facts about the system live; GDPR Art.30 records-of-processing evidence draws on the business model.
+- **`security-governance:hardening`** / **`security-governance:secrets-hardening`** / **`security-governance:detection-engineering`** — the defensive controls whose *existence* this skill maps to evidence and whose *absence* becomes a gap routed back to them.
+- **`business-analysis:knowledge-base`** *(named, not loaded)* — where data-processing/PII facts about the system live; GDPR Art.30 records-of-processing evidence draws on the business model.

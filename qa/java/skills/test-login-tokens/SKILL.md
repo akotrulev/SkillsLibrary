@@ -1,6 +1,6 @@
 ---
-name: qa-test-login-tokens-java
-description: Use when the user asks to obtain Auth0 access tokens *for automated tests* in Java (TestNG). Triggers: "get an Auth0 M2M token for my RestAssured tests", "log in a test user without the UI in Java", "mint an Auth0 token for a test user". Do NOT use for Auth0 in the app itself (`auth-auth0-concepts`) or UI login journeys (`qa-ui-test-writer-playwright-java`).
+name: test-login-tokens
+description: Use when the user asks to obtain Auth0 access tokens *for automated tests* in Java (TestNG). Triggers: "get an Auth0 M2M token for my RestAssured tests", "log in a test user without the UI in Java", "mint an Auth0 token for a test user". Do NOT use for Auth0 in the app itself (`auth/_shared/auth0-concepts`) or UI login journeys (`qa-java:ui-tests-playwright`).
 ---
 
 # QA — Auth0 Test Tokens (Java / TestNG)

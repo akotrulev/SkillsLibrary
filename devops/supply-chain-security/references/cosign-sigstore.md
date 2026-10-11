@@ -68,7 +68,7 @@ cosign verify-attestation \
 An **attestation** is a signed, typed statement *about* the artifact (its SBOM, its SLSA provenance, a vuln
 scan result) — the integrity layer on top of the SBOM that Trivy *generates*. Trivy produces the SBOM; cosign
 `attest` signs and binds it to the digest; `verify-attestation` proves at deploy time that the SBOM is the one
-for this exact image. That handoff is the fence with `qa-security-image-infra-scan`.
+for this exact image. That handoff is the fence with `qa-<stack>:image-infra-scan`.
 
 ## Enforce at admission — sigstore policy-controller
 
@@ -118,6 +118,6 @@ the `qa/cicd/*` test lane.
   `slsa-verifier`, not merely checked for existence.
 - `dependency-integrity.md` — the input side (dependency-confusion / typosquat); cosign secures the output
   artifact.
-- `qa-security-image-infra-scan` — Trivy **generates** the SBOM; cosign **signs and binds** it. The boundary.
-- `devops-kubernetes` — where `devops-engineer` deploys the policy-controller admission gate this lane
+- `qa-<stack>:image-infra-scan` — Trivy **generates** the SBOM; cosign **signs and binds** it. The boundary.
+- `devops:kubernetes` — where `devops-engineer` deploys the policy-controller admission gate this lane
   recommends.

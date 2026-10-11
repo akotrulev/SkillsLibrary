@@ -1,4 +1,4 @@
-# Fixture templates — `qa-api-test-playwright-dotnet`
+# Fixture templates — `qa-dotnet:api-tests-playwright`
 
 The fixture shape SKILL.md's rules describe, on the `BasePlaywrightApiTest` from SKILL.md § Base class
 template. DTOs come from `qa/dotnet/skills/api-models`, the `{Resource}Client` from

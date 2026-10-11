@@ -1,6 +1,6 @@
 ---
-name: qa-ui-test-writer-playwright-java
-description: Use when the user asks to scaffold Playwright UI tests in Java — TestNG test classes, page objects, the parallel-safe BaseTest, signed-in state, locator scoping, web-first assertions, or device emulation. Triggers "write a Playwright test for X in Java", "add a Playwright Java page object for screen Y", "set up Playwright with TestNG". Do NOT use for Selenium (`qa-ui-test-writer-selenium-java`), Appium (`qa-ui-test-writer-appium-java`) or reviewing tests (`qa-ui-test-review-java`).
+name: ui-tests-playwright
+description: Use when the user asks to scaffold Playwright UI tests in Java — TestNG test classes, page objects, the parallel-safe BaseTest, signed-in state, locator scoping, web-first assertions, or device emulation. Triggers "write a Playwright test for X in Java", "add a Playwright Java page object for screen Y", "set up Playwright with TestNG". Do NOT use for Selenium (`qa-java:ui-tests-selenium`), Appium (`qa-java:ui-tests-appium`) or reviewing tests (`qa-java:ui-tests-review`).
 ---
 
 # QA — Playwright Test & Page Object Generator (Java)

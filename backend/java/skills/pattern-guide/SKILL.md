@@ -1,5 +1,5 @@
 ---
-name: be-java-pattern-guide
+name: patterns
 description: Use when the user asks to explain, describe, or look up a design pattern in Java 21 / Spring Boot 3. Triggers: "what is the strategy pattern in Java", "explain CQRS in Spring Boot", "when should I use the repository pattern in Spring Data", "Java records as DTOs", "sealed types for state machines". Do NOT use for scaffolding code into a repo (use `backend/java/skills/pattern-writer`) or for reviewing existing code (use `backend/java/skills/code-review`).
 ---
 

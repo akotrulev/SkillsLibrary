@@ -1,6 +1,6 @@
 ---
-name: be-shared-data-model-plan
-description: Use when an approved backend blueprint needs its DB structure planned — entity catalog, per-table column specs with keys/constraints/indexes, cross-cutting conventions, an ER diagram, and an ordered migration sequence. Triggers "plan the database structure", "what tables do we need", "what migrations and in what order". Do NOT use to write DDL/migrations/ORM code (`be-<stack>`), design indexing/partitioning/RLS depth (`data-architect`), or plan endpoints (`be-shared-api-surface-plan`).
+name: plan-data-model
+description: Use when an approved backend blueprint needs its DB structure planned — entity catalog, per-table column specs with keys/constraints/indexes, cross-cutting conventions, an ER diagram, and an ordered migration sequence. Triggers "plan the database structure", "what tables do we need", "what migrations and in what order". Do NOT use to write DDL/migrations/ORM code (`be-<stack>`), design indexing/partitioning/RLS depth (`data-architect`), or plan endpoints (`dev:plan-api-surface`).
 ---
 
 # Data Model Plan — the logical DB structure
@@ -114,7 +114,7 @@ Lookup tables, enum tables, and any row the system cannot boot without: what it 
 | Source | Data | Target tables | One-time or sync | Validated by | Delivery task |
 |---|---|---|---|---|---|
 
-State the mapping at column level only where it is non-obvious (a spreadsheet column that splits into two fields, a legacy status that has no successor value). Every import feeds a delivery task — `be-shared-delivery-plan` sequences it after the schema it targets — and names the human who validates the imported data before cutover. No source of record being replaced → one line saying so.
+State the mapping at column level only where it is non-obvious (a spreadsheet column that splits into two fields, a legacy status that has no successor value). Every import feeds a delivery task — `dev:plan-delivery` sequences it after the schema it targets — and names the human who validates the imported data before cutover. No source of record being replaced → one line saying so.
 
 ### Step 5 — Diagrams
 
@@ -140,7 +140,7 @@ stateDiagram-v2
 ```
 ````
 
-The state diagram is not decoration — every arrow that does *not* exist becomes a `409 illegal state transition` rule in `api-surface.md`. Where the project keeps a business-model KB, load `ba-entity-state-grid` and record the lifecycle there as an `ENT-nnn` state × event grid instead of drawing it twice — its `—` cells are exactly the refused transitions, and it forces you to say whether each is impossible, ignored, or an error.
+The state diagram is not decoration — every arrow that does *not* exist becomes a `409 illegal state transition` rule in `api-surface.md`. Where the project keeps a business-model KB, load `business-analysis:state-grid` and record the lifecycle there as an `ENT-nnn` state × event grid instead of drawing it twice — its `—` cells are exactly the refused transitions, and it forces you to say whether each is impossible, ignored, or an error.
 
 ### Step 6 — Ownership map (multi-service systems only)
 
@@ -168,7 +168,7 @@ Rules:
 ```markdown
 # <Initiative> — Data Model Plan
 
-**Date:** YYYY-MM-DD · **Written by:** `be-shared-data-model-plan`
+**Date:** YYYY-MM-DD · **Written by:** `dev:plan-data-model`
 **Blueprint:** `./blueprint.md` (approved YYYY-MM-DD)
 **Engine:** <engine + version> — detected | proposed
 
@@ -225,8 +225,8 @@ Rules:
 
 ## Handoffs
 
-- **→ `be-shared-experience-plan`** (Step 3, when the routing map names a frontend agent). The entity catalog is what the screens display; screens' data needs then feed the API surface.
-- **→ `be-shared-api-surface-plan`** (Step 4). Entities become resources; lifecycle transitions become state-conflict validations; unique constraints become `409 duplicate` rules; FKs become "referenced id must exist and be visible" rules.
+- **→ `dev:plan-experience`** (Step 3, when the routing map names a frontend agent). The entity catalog is what the screens display; screens' data needs then feed the API surface.
+- **→ `dev:plan-api-surface`** (Step 4). Entities become resources; lifecycle transitions become state-conflict validations; unique constraints become `409 duplicate` rules; FKs become "referenced id must exist and be visible" rules.
 - **→ `data-architect`** for engine selection, index strategy that needs plan analysis, partitioning, RLS policies, and cross-engine migration. Everything in the "Routed to" table.
 - **→ `be-<stack>`'s `database-code` skill** (via the `be-<stack>` agent) to write the entities, configurations, and migrations.
 - **→ `qa-api-<stack>`'s `db-testing` skills** — this document is the seed/assert/clean basis.

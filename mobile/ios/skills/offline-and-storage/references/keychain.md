@@ -1,6 +1,6 @@
 # Keychain — the wrapper, biometric gating, groups, wipe
 
-The rules and the audit are [`mobile-shared-security`](../../../../_shared/security/SKILL.md) § 2. This file is the Swift that satisfies them. **Every item uses a `…ThisDeviceOnly` class** — `WhenUnlockedThisDeviceOnly` by default, `AfterFirstUnlockThisDeviceOnly` where a background task, push handler or extension reads it after the first unlock.
+The rules and the audit are [`mobile-<stack>:security`](../../../../_shared/security/SKILL.md) § 2. This file is the Swift that satisfies them. **Every item uses a `…ThisDeviceOnly` class** — `WhenUnlockedThisDeviceOnly` by default, `AfterFirstUnlockThisDeviceOnly` where a background task, push handler or extension reads it after the first unlock.
 
 ## 1. One small wrapper — add-or-update, typed errors
 

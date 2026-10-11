@@ -313,6 +313,6 @@ noisier. Accessibility, best-practices and SEO are deterministic rule checks.
 - `qa/dotnet/skills/ui-test-author/playwright` — `BaseTest`, `AuthSetup`, page objects, `references/lifecycle.md`
   §1 (the base classes) and §4 (why launch options are per worker).
 - `qa/cicd/dotnet/skills/ci-pipelines` — the `lhci autorun` step and artifact upload.
-- `qa-accessibility-testing-typescript` — `playAudit` on a persistent context, the same idea in TS.
-- `qa-accessibility-testing-java` — the Java sibling, which audits public pages only.
-- `qa-exploratory-charter-writer` — the manual and assistive-technology testing no score covers.
+- `qa-typescript:accessibility-testing` — `playAudit` on a persistent context, the same idea in TS.
+- `qa-java:accessibility-testing` — the Java sibling, which audits public pages only.
+- `qa-<stack>:exploratory-charter-writer` — the manual and assistive-technology testing no score covers.

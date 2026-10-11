@@ -1,6 +1,6 @@
 ---
-name: be-shared-business-documentation
-description: Use when traced backend behavior must be written for a non-engineer in the docs/business-model/ KB under ba-project-memory's contract — one document per area: overview, setup, how it works, a worked example, open questions, a file:line evidence table. Triggers "write up what this system does for users", "turn this trace into business documentation". Do NOT use to trace the code first (`be-shared-feature-trace`), author requirements (`requirements-author`), or write findings (`ep-feature-audit`).
+name: doc-business-model
+description: Use when traced backend behavior must be written for a non-engineer in the docs/business-model/ KB under business-analysis:knowledge-base's contract — one document per area: overview, setup, how it works, a worked example, open questions, a file:line evidence table. Triggers "write up what this system does for users", "turn this trace into business documentation". Do NOT use to trace the code first (`dev:doc-feature-trace`), author requirements (`requirements-author`), or write findings (`dev:audit-feature`).
 ---
 
 # Business Documentation — the write-up a non-engineer can use
@@ -13,7 +13,7 @@ Three disciplines carry the whole skill:
 2. **Never let inference pass as fact — but keep the grammar out of the prose.** `#observed` is what the code does; `#inferred` is what you think it is for. Both tiers, and every `file:line`, live in the **closing evidence table** — the body reads like a product spec. In the body an inferred purpose is written as uncertainty ("appears to exist so that…"), and every inferred purpose is *also* a row in the open-questions list — which, for a business reader, is often the most valuable output of the whole run.
 3. **Simple, flows, examples.** Every document reads the same way: what the feature is → how it is set up → what happens, step by step, when it runs → **a full worked example with real numbers**. A reader who reads only the example still understands the feature. Short sections, plain headings, no apparatus.
 
-**Prerequisites:** a confirmed area map (`be-shared-codebase-survey`) and per-area evidence (`be-shared-feature-trace`). **Load `ba-project-memory` first** — it owns the KB layout, IDs, annotation grammar, and the read-first/update-after contract that governs every file written here.
+**Prerequisites:** a confirmed area map (`dev:doc-codebase-survey`) and per-area evidence (`dev:doc-feature-trace`). **Load `business-analysis:knowledge-base` first** — it owns the KB layout, IDs, annotation grammar, and the read-first/update-after contract that governs every file written here.
 
 ## When to use
 
@@ -22,14 +22,14 @@ Three disciplines carry the whole skill:
 
 ## When NOT to use
 
-- The code has not been traced yet → `be-shared-feature-trace`. Writing documentation from a skim is how invented rules get into a document people then trust
+- The code has not been traced yet → `dev:doc-feature-trace`. Writing documentation from a skim is how invented rules get into a document people then trust
 - The deliverable is requirements for work *to be done* → `requirements-author` (it authors intent; this recovers it)
-- The deliverable is defects → `ep-feature-audit`
+- The deliverable is defects → `dev:audit-feature`
 - The deliverable is one feature as a standalone file outside the KB → `be-feature-documenter` (same shape, `docs/features/`)
 
 ## Output — into the KB, under its contract
 
-Everything lands in **`docs/business-model/`** in the target repo, per `ba-project-memory`:
+Everything lands in **`docs/business-model/`** in the target repo, per `business-analysis:knowledge-base`:
 
 | File | Owner | This skill's role |
 |---|---|---|
@@ -37,13 +37,13 @@ Everything lands in **`docs/business-model/`** in the target repo, per `ba-proje
 | `system-overview.md` | **this skill** | What the system is, for whom, the area map, the end-to-end flows that cross areas |
 | `glossary.md` | shared | Terms found in code + the code-name → business-name mapping |
 | `INDEX.md`, `active-context.md` | shared | Updated per the KB's update-after contract |
-| `flows/`, `entities/`, `decisions/` | `ba-process-flow-diagram` · `ba-entity-state-grid` · `ba-decision-table` | **Not yours.** Produced by those skills in Step 3; you link to them by ID |
+| `flows/`, `entities/`, `decisions/` | `business-analysis:process-flow` · `business-analysis:state-grid` · `business-analysis:decision-table` | **Not yours.** Produced by those skills in Step 3; you link to them by ID |
 
-**The header block and provenance stamp are mandatory** on every file this skill writes — the `Created`/`Owned by` lines per `ba-project-memory`'s header rule, then the stamp:
+**The header block and provenance stamp are mandatory** on every file this skill writes — the `Created`/`Owned by` lines per `business-analysis:knowledge-base`'s header rule, then the stamp:
 
 ```markdown
 **Created:** YYYY-MM-DD
-**Owned by:** `be-shared-business-documentation`
+**Owned by:** `dev:doc-business-model`
 **Derived from:** code by `be-documenter` @ `<commit sha>` on YYYY-MM-DD
 ```
 
@@ -203,7 +203,7 @@ Banned everywhere above the evidence table: class names, method names, table and
 ```markdown
 # <System> — What it does
 **Created:** YYYY-MM-DD
-**Owned by:** `be-shared-business-documentation`
+**Owned by:** `dev:doc-business-model`
 **Derived from:** code by `be-documenter` @ `<sha>` on YYYY-MM-DD
 
 ## Overview

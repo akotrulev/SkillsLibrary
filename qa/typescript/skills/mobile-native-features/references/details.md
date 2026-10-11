@@ -1,4 +1,4 @@
-# Deep-dive details — `qa-mobile-native-features-typescript`
+# Deep-dive details — `qa-typescript:mobile-native-features`
 
 Sections moved out of SKILL.md for on-demand loading. Read what the task needs.
 

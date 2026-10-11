@@ -1,6 +1,6 @@
 ---
-name: qa-test-quality-check-dotnet
-description: Use when measuring TEST QUALITY (not code coverage) for a .NET 10 (8/9) suite with mutation testing — run Stryker.NET (`dotnet stryker`) to seed faults and prove the tests detect them, fail the build on a mutation-score threshold, turn surviving mutants into missing-assertion findings. Triggers: "add mutation testing", "run stryker", "is my coverage real", "tests pass but catch nothing". Do NOT use for line coverage or the JVM (`qa-test-quality-check-java`, PIT).
+name: test-quality-check
+description: Use when measuring TEST QUALITY (not code coverage) for a .NET 10 (8/9) suite with mutation testing — run Stryker.NET (`dotnet stryker`) to seed faults and prove the tests detect them, fail the build on a mutation-score threshold, turn surviving mutants into missing-assertion findings. Triggers: "add mutation testing", "run stryker", "is my coverage real", "tests pass but catch nothing". Do NOT use for line coverage or the JVM (`qa-java:test-quality-check`, PIT).
 ---
 
 # QA — Mutation Testing (Stryker.NET, C#)

@@ -12,7 +12,7 @@ just implements the triad legs for you.
 corpus→**test-set generator**. It is **Python** — there is no JVM library — so from this Java suite you drive it the
 same honest way the stack drives promptfoo/DeepEval: **as a subprocess** (`ProcessBuilder` → `python eval_rag.py`)
 whose JSON output you parse with Jackson and gate, the CLI-port shape of
-`qa-security-passive-scan-java`. Pin the **evaluator LLM** to the house-default Claude (CLAUDE.md) — Ragas
+`qa-java:passive-scan`. Pin the **evaluator LLM** to the house-default Claude (CLAUDE.md) — Ragas
 defaults to OpenAI.
 
 > **Note on the API surface.** Ragas' legacy metric API (`Faithfulness(llm=…)` + `single_turn_ascore`, and
@@ -171,7 +171,7 @@ public final class Ragas {
         Path report = Path.of(results);
         if (Files.exists(report)) {
             var rows = MAPPER.readTree(report.toFile());
-            // map per-row scores -> Allure named results (qa-test-reports-java)
+            // map per-row scores -> Allure named results (qa-java:test-reports)
         }
         assertThat(exit).as("RAG eval gate — a triad/recall metric scored below threshold").isZero();
     }
@@ -195,7 +195,7 @@ public final class Ragas {
 ## Cross-references
 
 - `SKILL.md` — the RAG-testing discipline (decomposition, triad, golden-set-with-contexts) that routes here.
-- `qa-ai-feature-testing-java` — the **parent**: four ideas, judge-pinning + calibration, the promptfoo / DeepEval
+- `qa-java:ai-feature-testing` — the **parent**: four ideas, judge-pinning + calibration, the promptfoo / DeepEval
   spines (whose `references/deepeval.md` maps the same triad onto DeepEval's `Contextual*` metrics).
-- `qa-data-driven-testing-java` — the golden-set row mechanics.
-- `qa-db-testing-*-java` — seed/assert/tear-down the vector index the retriever reads.
+- `qa-java:data-driven-testing` — the golden-set row mechanics.
+- `qa-java:db-*` — seed/assert/tear-down the vector index the retriever reads.

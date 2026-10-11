@@ -1,11 +1,11 @@
 ---
-name: mobile-ios-unit-testing
+name: unit-testing
 description: Use when Swift logic needs a dev-side test — Swift Testing (@Test, #expect, #require, parameterized arguments, confirmation, traits) with fakes over mocks, clock and UUID seams, URLProtocol stubs, @Observable models, region states, snapshot tests of single views. XCTest only for UI automation, performance and Objective-C exceptions. Triggers "unit-test this model", "fake the clock", "test the 401 ladder". Do NOT use for device journeys (`qa-mobile-<stack>`).
 ---
 
 # iOS — Unit Testing (Swift Testing)
 
-Owns **every dev-side test of logic the agent writes**: models, services, mappers, formatters, state machines, the request policy. In-process, no device journeys, no network, no real backend. Web analog: [`fe-react-component-testing`](../../../../frontend/react/skills/component-testing/SKILL.md) — test behaviour, not markup; fakes at the boundary; pure logic without a renderer carry over; jsdom and RTL queries do not. Sibling: [`mobile-react-native-component-testing`](../../../react-native/skills/component-testing/SKILL.md).
+Owns **every dev-side test of logic the agent writes**: models, services, mappers, formatters, state machines, the request policy. In-process, no device journeys, no network, no real backend. Web analog: [`fe-react:component-testing`](../../../../frontend/react/skills/component-testing/SKILL.md) — test behaviour, not markup; fakes at the boundary; pure logic without a renderer carry over; jsdom and RTL queries do not. Sibling: [`mobile-react-native:component-testing`](../../../react-native/skills/component-testing/SKILL.md).
 
 **Boundary.** Real devices, real navigation, permission dialogs, deep links, VoiceOver and cross-screen journeys are `qa-mobile-<stack>`'s — **Appium (XCUITest driver)**, with a **Maestro** lane (plan 003). A unit test fakes the platform, so it can never prove a gesture or a system dialog. This skill hands them the identifiers ([`test-ids`](../test-ids/SKILL.md)); it does not write the journeys.
 
@@ -37,7 +37,7 @@ Detect first: existing test target layout, XCTest vs Swift Testing mix, any exis
 - Markup-only views with no branches — a snapshot of hand-written layout is a tautology
 - API contract tests and real-backend integration → `qa-api-typescript` / `qa-api-dotnet` / `qa-api-java`
 - Writing `accessibilityIdentifier`s → [`test-ids`](../test-ids/SKILL.md)
-- Other stacks → `mobile-react-native-component-testing`, `mobile-android-unit-testing`
+- Other stacks → `mobile-react-native:component-testing`, `mobile-android:unit-testing`
 
 ## Test what has behaviour
 

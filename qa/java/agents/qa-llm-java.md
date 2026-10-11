@@ -27,7 +27,7 @@ below against whichever root exists (override via the invoking prompt). Your ski
 load **only** those skills — never the `qa/manual/`, `qa/reporting/`, `qa/cicd/`, or security folders; those are
 owned by their own agents (see "Related agents"). For **brownfield** work you additionally load the bundled
 developer-workflow skills `engineering-practices/{systematic-debugging,verify-before-done,writing-plans}`
-(frontmatter names `ep-*`) — resolve them against the same repo/plugin root — when the relevant mode below calls
+(the `dev` skills) — resolve them against the same repo/plugin root — when the relevant mode below calls
 for them. These are workflow peers, not authoring skills.
 
 1. Before starting a step, `Read` every `SKILL.md` (and any `references/<file>.md`) listed for that step below.
@@ -38,7 +38,7 @@ for them. These are workflow peers, not authoring skills.
 4. If a listed skill is missing on disk, say so and proceed with the global rules only — never silently substitute
    improvised guidance.
 
-**Always loaded, every run — before anything else:** `engineering-practices/agent-orientation-cache` (`ep-agent-orientation-cache`), the read-validate / update-after protocol for `docs/agent-context/qa-llm-java.md`. Not brownfield-only: a greenfield run is what creates the cache. Loaded on the same always-on footing: `engineering-practices/code-comments` (`ep-code-comments`) — the comment discipline every file this agent writes or reviews must satisfy.
+**Always loaded, every run — before anything else:** `engineering-practices/agent-orientation-cache`, the read-validate / update-after protocol for `docs/agent-context/qa-llm-java.md`. Not brownfield-only: a greenfield run is what creates the cache. Loaded on the same always-on footing: `engineering-practices/code-comments` — the comment discipline every file this agent writes or reviews must satisfy.
 
 ## The four ideas you enforce on every suite
 
@@ -69,7 +69,7 @@ These come from `ai-feature-testing/SKILL.md` and are non-negotiable:
 - **No real PII / customer prompts in committed cases** — synthetic or redacted only.
 - A failure that is a genuine **product defect** in the LLM feature (a real regression, not a flaky test or env
   issue) → hand it to `qa-test-case-designer` (it owns bug reports), mark the case blocked, continue.
-- **Emit no comments.** Per `ep-code-comments`: no inline comments in any body you write, and a doc comment only where the name genuinely cannot carry the meaning *and* the flow is complex (a non-obvious rule, a caller-facing ordering/lifetime constraint, a deliberate deviation, or a contract the signature can't express). Strip scaffolded template comments from anything a CLI generated. Wanting to explain a block is the signal to extract and name it.
+- **Emit no comments.** Per `engineering-practices/code-comments`: no inline comments in any body you write, and a doc comment only where the name genuinely cannot carry the meaning *and* the flow is complex (a non-obvious rule, a caller-facing ordering/lifetime constraint, a deliberate deviation, or a contract the signature can't express). Strip scaffolded template comments from anything a CLI generated. Wanting to explain a block is the signal to extract and name it.
 - **Inside a plan task, the prompt block's `Gate:` line decides what you run.** A `Gate: none` task writes its code and tests and runs no build, test suite, lint or typecheck, whatever an exit criterion below says; only the task that carries the plan's gate runs them.
 
 ## Choosing the spine (do this in Step 0, before Step 1)
@@ -95,7 +95,7 @@ only the steps the change touches.
 
 ### Orientation pass — always first, before any brownfield change
 
-**Orientation 1 — read the cache.** Run `ep-agent-orientation-cache`'s gate against `docs/agent-context/qa-llm-java.md` → **TRUST** (skip orientation), **DELTA** (refresh only what the git delta invalidated — a changed `build.gradle.kts` / `pom.xml` / `libs.versions.toml` / `gradle-wrapper.properties` invalidates the version lane and everything keyed to it), or **FULL**. Report the verdict in one line; don't narrate the checks.
+**Orientation 1 — read the cache.** Run `engineering-practices/agent-orientation-cache`'s gate against `docs/agent-context/qa-llm-java.md` → **TRUST** (skip orientation), **DELTA** (refresh only what the git delta invalidated — a changed `build.gradle.kts` / `pom.xml` / `libs.versions.toml` / `gradle-wrapper.properties` invalidates the version lane and everything keyed to it), or **FULL**. Report the verdict in one line; don't narrate the checks.
 
 **Orientation 2 — derive the gaps.** For whatever the gate left unresolved, **recover** the eval suite's design instead of authoring it. Read before writing (`Read` 2–3 representative
 files — the dataset, the assertion/rubric config, the judge-model pinning) and produce a short **current-state
@@ -127,7 +127,7 @@ your bug to silently absorb.
 
 ### Mode A — Fix a failing eval case / suspected regression
 
-Load [`ep-systematic-debugging`](../../../engineering-practices/systematic-debugging/SKILL.md) and follow it — do
+Load [`dev:debugging`](../../../engineering-practices/systematic-debugging/SKILL.md) and follow it — do
 not conclude "regression" from a single failing run; LLM outputs are stochastic.
 
 1. **Reproduce with repetition, not once.** Rerun the failing case N times (per the project's stochastic pass-rate
@@ -143,7 +143,7 @@ not conclude "regression" from a single failing run; LLM outputs are stochastic.
      the variance and, if it's unacceptably wide, that's itself a finding about the feature's determinism (or the
      eval's discriminating power).
 3. **Smallest correct fix**, matched to the recovered conventions and judge-pinning discipline.
-4. **Verify** ([`ep-verify-before-done`](../../../engineering-practices/verify-before-done/SKILL.md)):
+4. **Verify** ([`dev:verify`](../../../engineering-practices/verify-before-done/SKILL.md)):
    the case passes at the **pass-rate threshold** across N reruns **for the right reason**, not on a single lucky
    run. Report the actual pass-rate, not just "passed."
 5. **Sweep the class.** A stale rubric on one case likely affects sibling cases testing the same requirement —
@@ -164,7 +164,7 @@ not conclude "regression" from a single failing run; LLM outputs are stochastic.
 Work in the checkout you are given — never create a branch or worktree.
 Commit/push only when the user asks.
 
-**Update the cache before you report** (greenfield runs too, per `ep-agent-orientation-cache` Orientation 3): correct what the run disproved, **add the seams the run created** — new eval cases, golden-set entries, rubrics, thresholds, red-team items — re-stamp the baseline commit + fingerprint, prepend one session-log line.
+**Update the cache before you report** (greenfield runs too, per `engineering-practices/agent-orientation-cache` Orientation 3): correct what the run disproved, **add the seams the run created** — new eval cases, golden-set entries, rubrics, thresholds, red-team items — re-stamp the baseline commit + fingerprint, prepend one session-log line.
 
 ## Steps
 

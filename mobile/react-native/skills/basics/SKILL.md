@@ -1,6 +1,6 @@
 ---
-name: mobile-react-native-basics
-description: Use when explaining or checking React Native + Expo fundamentals on SDK 57 — New Architecture, Hermes V1, JS/UI/worklet threads, React Compiler, the web-React to RN map (no RSC, DOM, CSS cascade or SEO), Expo as the framework. Triggers "RN equivalent of X", "why no server component", "JS thread vs UI thread", "Expo Go vs dev build". Do NOT use for scaffolding (`mobile-react-native-project-setup`), routes (`-navigation`), screens (`-ui-components`) or React web (`fe-react-basics`).
+name: concepts
+description: Use when explaining or checking React Native + Expo fundamentals on SDK 57 — New Architecture, Hermes V1, JS/UI/worklet threads, React Compiler, the web-React to RN map (no RSC, DOM, CSS cascade or SEO), Expo as the framework. Triggers "RN equivalent of X", "why no server component", "JS thread vs UI thread", "Expo Go vs dev build". Do NOT use for scaffolding (`mobile-react-native:project-setup`), routes (`-navigation`), screens (`-ui-components`) or React web (`fe-react:concepts`).
 ---
 
 # React Native / Expo — Basics
@@ -17,7 +17,7 @@ Detect the Expo SDK, React Native and React majors from `package.json` first; ke
 | Next `[SDK58]` | 58 (beta) | 0.88 RC | 19.3 | Becomes primary the day it ships stable |
 | Supported | 55–56 | 0.83 / 0.85 | 19.2 | SDK 56 + Hermes V1 has a Reanimated memory regression fixed in `expo@57.0.9` — steer to 57 |
 | Floor | 54 | 0.81 | 19.1 | Last SDK where the legacy architecture can be on — migration bridge only |
-| Below 54 | — | — | — | A finding plus a `mobile-react-native-migration` run; never author for it |
+| Below 54 | — | — | — | A finding plus a `mobile-react-native:migration` run; never author for it |
 
 `[SDK58]` deltas, named where each skill owns them: native tabs stable at `expo-router/native-tabs`, Gesture Handler 3, Reanimated 4.7 + worklets 0.13, scene lifecycle default (iOS 27), AGP 9, Expo Router core reworked.
 
@@ -46,7 +46,7 @@ Detect the Expo SDK, React Native and React majors from `package.json` first; ke
 - Screens and components → [`ui-components`](../ui-components/SKILL.md)
 - State library choice → [`architecture`](../architecture/SKILL.md)
 - Animation → [`animation`](../animation/SKILL.md); lists and profiling → [`performance`](../performance/SKILL.md)
-- React **web** → `fe-react-basics`
+- React **web** → `fe-react:concepts`
 
 ## No server render
 

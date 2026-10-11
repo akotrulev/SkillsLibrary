@@ -1,6 +1,6 @@
 ---
-name: mobile-android-animation
-description: Use when a Compose app needs motion or gestures — AnimatedVisibility, animate*AsState, Transition, AnimatedContent, shared-element transitions, predictive-back animation, drag and swipe gestures — and the Reduce Motion floor (animator duration scale). Triggers "animate this", "hero transition", "swipe to dismiss", "respect remove animations". Do NOT use for route structure (`mobile-android-navigation`), Views animators (`-views-interop`), or what to animate (design).
+name: animation
+description: Use when a Compose app needs motion or gestures — AnimatedVisibility, animate*AsState, Transition, AnimatedContent, shared-element transitions, predictive-back animation, drag and swipe gestures — and the Reduce Motion floor (animator duration scale). Triggers "animate this", "hero transition", "swipe to dismiss", "respect remove animations". Do NOT use for route structure (`mobile-android:navigation`), Views animators (`-views-interop`), or what to animate (design).
 ---
 
 # Android — Animation and Gestures
@@ -37,7 +37,7 @@ Sources read 2026-10-10: developer.android.com/develop/ui/compose/animation/{int
 - Choosing a motion style or timing language → design (`design/ui-ux-pro-max`)
 - Spinners and skeletons as a loading state → [`error-handling`](../error-handling/SKILL.md) (the region states) and [`ui-components`](../ui-components/SKILL.md)
 - XML animators → [`views-interop`](../views-interop/SKILL.md)
-- Another stack → `mobile-ios-animation`, `mobile-react-native-animation`
+- Another stack → `mobile-ios:animation`, `mobile-react-native:animation`
 
 ## Choosing the API
 

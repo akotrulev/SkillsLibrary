@@ -1,9 +1,9 @@
 ---
-name: qa-api-models-java
-description: Use when the user asks to create a new DTO / model class / response object in a Java test project (Java 21 + Jackson, typically alongside RestAssured). Triggers: "add a {Resource}Dto in Java", "create the InDto / ModDto record", "scaffold the wrapper DTO for paginated {resource} in Java". Do NOT use for the client that calls the endpoint (`qa-api-client-writer-java`) or the test itself (`qa-api-test-writer-java`).
+name: api-models
+description: Use when the user asks to create a new DTO / model class / response object in a Java test project (Java 21 + Jackson, typically alongside RestAssured). Triggers: "add a {Resource}Dto in Java", "create the InDto / ModDto record", "scaffold the wrapper DTO for paginated {resource} in Java". Do NOT use for the client that calls the endpoint (`qa-java:api-client-writer`) or the test itself (`qa-java:api-tests`).
 ---
 
-# qa-api-models-java
+# qa-java:api-models
 
 Generator skill. Scaffolds a single DTO file in the Java `apitests` module.
 
@@ -15,11 +15,11 @@ Generator skill. Scaffolds a single DTO file in the Java `apitests` module.
 
 ## When NOT to use
 
-- Reacting to a **new version of a swagger/OpenAPI spec** — start at `qa-api-spec-assets-shared`: it replaces the stored spec asset in place, derives the changed-DTO work list from `git diff`, and comes back here for only the files that list names. Do not re-generate every DTO because the spec moved.
+- Reacting to a **new version of a swagger/OpenAPI spec** — start at `qa-<stack>:api-spec-assets`: it replaces the stored spec asset in place, derives the changed-DTO work list from `git diff`, and comes back here for only the files that list names. Do not re-generate every DTO because the spec moved.
 
-- C# or TypeScript DTOs — use `qa-api-models-dotnet` / `qa-api-models-typescript`.
+- C# or TypeScript DTOs — use `qa-dotnet:api-models` / `qa-typescript:api-models`.
 - Production domain models — these DTOs are test-project-only.
-- Writing the client itself — use `qa-api-client-writer-java`.
+- Writing the client itself — use `qa-java:api-client-writer`.
 
 ## Folder & naming convention
 

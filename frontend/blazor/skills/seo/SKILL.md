@@ -1,5 +1,5 @@
 ---
-name: fe-blazor-seo
+name: seo
 description: Use when public/crawlable Blazor pages must rank and preview correctly (.NET 8/9/10) — static SSR for public routes, `<PageTitle>`/`<HeadContent>` meta + OG tags, streaming placeholders that stay in the response, a real 404 (`NotFoundPage` net10; `Router` `NotFound` net8/9), canonical URLs, sitemap, JSON-LD. Triggers: "make these pages crawlable / SEO-friendly", "set per-page meta and OG tags", "my page shows blank to Google". Do NOT use for the tab-title convention (`ui-rules`).
 ---
 

@@ -19,7 +19,7 @@ Messaging tests assert one of two things about an **async** flow:
 > no synchronous return you can assert on the next line. The message is in flight; the consumer runs on its
 > own schedule; the side-effect lands "soon". So the core discipline is: **wait on a condition** for the
 > message (or its effect) to appear, with a bounded timeout — **never `Task.Delay` / `Thread.Sleep`**. This
-> is the exact lineage of `qa-db-connection-dotnet`'s `WaitForAsync` poll helper. Service Bus gives you a *better*
+> is the exact lineage of `qa-dotnet:db-connection`'s `WaitForAsync` poll helper. Service Bus gives you a *better*
 > primitive than polling for the receive side: `ReceiveMessageAsync(maxWaitTime)` **long-polls** — it
 > blocks up to a bounded window for a message to arrive, then returns it or `null`. That bounded wait *is*
 > the condition-wait; a fixed sleep is not.
@@ -135,7 +135,7 @@ public abstract class ServiceBusFixture
 > **Cloud test namespace alternative.** If your org runs against a real **test** Service Bus namespace
 > instead of the emulator, read the connection string (or an Azure AD token via
 > `DefaultAzureCredential` + the namespace FQDN) **from env, lazily** — never hard-code it, never log it
-> (cross-link `qa-test-login-tokens-dotnet` for the token-acquisition discipline). The emulator is the
+> (cross-link `qa-dotnet:test-login-tokens` for the token-acquisition discipline). The emulator is the
 > default for CI determinism; a shared cloud namespace makes tests order-dependent unless each uses a
 > unique queue/subscription.
 
@@ -206,7 +206,7 @@ public class OrderPublishingTests : ServiceBusFixture
 
 Here the SUT is a **consumer**. The test **seeds a message**, lets the consumer run, and waits for the
 observable side-effect (a DB row, another message) — the side-effect is eventually consistent, so poll a
-**probe** on a condition. This reuses `qa-db-connection-dotnet`'s `WaitForAsync` verbatim.
+**probe** on a condition. This reuses `qa-dotnet:db-connection`'s `WaitForAsync` verbatim.
 
 ```csharp
 [Test]
@@ -236,7 +236,7 @@ public async Task Should_write_a_shipment_row_When_an_OrderPaid_message_is_consu
 }
 ```
 
-The `WaitFor.Async` helper is the same bounded poll as `qa-db-connection-dotnet` — included here so the
+The `WaitFor.Async` helper is the same bounded poll as `qa-dotnet:db-connection` — included here so the
 node is self-contained:
 
 ```csharp
@@ -478,19 +478,19 @@ public static class Orders
 
 ## Cross-references
 
-- `qa-messaging-testing-java` — same skill, Java 21 / TestNG (`com.azure:azure-messaging-servicebus`:
+- `qa-java:messaging-testing` — same skill, Java 21 / TestNG (`com.azure:azure-messaging-servicebus`:
   `new ServiceBusClientBuilder().connectionString(...)`, `.receiver().queueName(...).receiveMode(PEEK_LOCK)`,
   `receiveMessages(maxMessages, maxWaitTime)`, `SubQueue.DEAD_LETTER`, Awaitility for side-effects,
   `Testcontainers` Service Bus emulator module). Structure ported, not code.
-- `qa-messaging-testing-typescript` — same skill, Node 24 + TS (`@azure/service-bus`:
+- `qa-typescript:messaging-testing` — same skill, Node 24 + TS (`@azure/service-bus`:
   `new ServiceBusClient(connStr)`, `createReceiver(queue, { receiveMode, subQueueType: "deadLetter" })`,
   `receiveMessages(maxCount, { maxWaitTimeInMs })`, `expect.poll` for side-effects, Testcontainers emulator).
 - `references/sqs.md` (`sqs`, next in family) — AWS SQS/SNS on LocalStack; visibility timeout +
   redrive-policy DLQ — same condition-wait discipline, different broker. Then Kafka (`kafka`, offset-based) and
   RabbitMQ (`rabbitmq`, AMQP exchanges) close the family.
-- `qa-db-connection-dotnet` — the `WaitFor.Async` poll helper and the seeder/probe split reused for
+- `qa-dotnet:db-connection` — the `WaitFor.Async` poll helper and the seeder/probe split reused for
   the consumer side-effect assertions; the **eventual-consistency lineage** this skill leans on hardest.
-- `qa-test-login-tokens-dotnet` — when authing to a cloud test namespace with an Azure AD token
+- `qa-dotnet:test-login-tokens` — when authing to a cloud test namespace with an Azure AD token
   (`DefaultAzureCredential`) instead of the emulator connection string; secrets-from-env discipline.
-- `qa-test-reports-dotnet` — attach the received message body / DLQ reason to the Allure result.
-- `qa-test-data-builder-dotnet` — builders/ObjectMother for message payloads with 4+ fields.
+- `qa-dotnet:test-reports` — attach the received message body / DLQ reason to the Allure result.
+- `qa-dotnet:test-data-builder` — builders/ObjectMother for message payloads with 4+ fields.

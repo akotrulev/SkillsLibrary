@@ -1,5 +1,5 @@
 ---
-name: ba-project-memory
+name: knowledge-base
 description: Use when reading or updating a project's persistent business-model knowledge base (docs/business-model/) — the shared protocol every business-analysis skill loads before modeling flows, states, decisions, or sweeping for feature conflicts. Triggers: "read the KB before answering", "check what the KB already says about X", "initialise docs/business-model/ for this repo". Do NOT use for code/architecture memory (that's the repo's CLAUDE.md) or test artifacts (qa/*).
 ---
 
@@ -30,12 +30,12 @@ Lives **in the target repo**, versioned with the code, diffable and PR-reviewabl
 docs/business-model/
 ├── INDEX.md              # loaded first, every session — one line per artifact + relevance hook
 ├── glossary.md           # canonical terms; the terminology-drift defense
-├── system-overview.md    # what the system is, for whom, the area map + cross-area journeys — owned by be-shared-business-documentation
-├── areas/<area>.md       # one functional area per file (AREA-nnn): overview, setup, how it works, worked example, open questions, closing evidence table — owned by be-shared-business-documentation
-├── flows/<flow>.md       # one business flow per file (FLOW-nnn) — owned by ba-process-flow-diagram
-├── entities/<entity>.md  # one state model per business entity (ENT-nnn) — owned by ba-entity-state-grid
-├── decisions/<point>.md  # one merged decision table per shared decision point (DEC-nnn) — owned by ba-decision-table
-├── interaction-map.md    # known feature interactions + their resolution decisions (CONF-nnn) — owned by ba-feature-conflict-check
+├── system-overview.md    # what the system is, for whom, the area map + cross-area journeys — owned by dev:doc-business-model
+├── areas/<area>.md       # one functional area per file (AREA-nnn): overview, setup, how it works, worked example, open questions, closing evidence table — owned by dev:doc-business-model
+├── flows/<flow>.md       # one business flow per file (FLOW-nnn) — owned by business-analysis:process-flow
+├── entities/<entity>.md  # one state model per business entity (ENT-nnn) — owned by business-analysis:state-grid
+├── decisions/<point>.md  # one merged decision table per shared decision point (DEC-nnn) — owned by business-analysis:decision-table
+├── interaction-map.md    # known feature interactions + their resolution decisions (CONF-nnn) — owned by business-analysis:conflict-check
 └── active-context.md     # dynamic tier: last sessions' changes + open questions/hotspots
 ```
 
@@ -78,7 +78,7 @@ Re-read **all** files, reconcile drift against the current requirements/codebase
   - Confidence tags: `#confirmed` (sourced to a requirement/stakeholder decision) · `#inferred` (derived by analysis, plausible but unverified) · `#observed` (seen in the implementation or the live system, not in any doc)
 - **Record decisions with rationale.** A conflict resolution in `interaction-map.md` is a *business decision* — record who/what decided and why, not just the outcome.
 - **Skip what the repo already records.** Code structure, API shapes derivable from contracts in-repo, git history. The KB records what the software must *do* and how features *interact* — nothing else.
-- **Header on every artifact file.** Each `areas/<area>.md`, `flows/<flow>.md`, `entities/<entity>.md`, `decisions/<point>.md` file (and `system-overview.md`) opens with `**Created:** <YYYY-MM-DD>` and `**Owned by:** \`<the owning skill>\`` (e.g. `ba-process-flow-diagram`; `be-shared-business-documentation` for `areas/` and `system-overview.md`); on every later update, add `**Last updated:** <YYYY-MM-DD> by \`<skill>\`` beneath it rather than overwriting the creation line.
+- **Header on every artifact file.** Each `areas/<area>.md`, `flows/<flow>.md`, `entities/<entity>.md`, `decisions/<point>.md` file (and `system-overview.md`) opens with `**Created:** <YYYY-MM-DD>` and `**Owned by:** \`<the owning skill>\`` (e.g. `business-analysis:process-flow`; `dev:doc-business-model` for `areas/` and `system-overview.md`); on every later update, add `**Last updated:** <YYYY-MM-DD> by \`<skill>\`` beneath it rather than overwriting the creation line.
 
 ## INDEX.md format
 

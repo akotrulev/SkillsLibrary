@@ -1,6 +1,6 @@
 ---
-name: qa-page-objects-from-url-dotnet
-description: Use when the user gives a website URL or an HTML page and wants a Page Object Model extracted/built/updated from it for a .NET Playwright suite. Triggers: "build a POM from this URL", "extract locators from this page", "update the LoginPage object from the live site". Do NOT use for designing the POM structure (`qa-page-object-design-dotnet`) or Appium screens (`qa-mobile-screen-objects-dotnet`).
+name: page-objects-from-url
+description: Use when the user gives a website URL or an HTML page and wants a Page Object Model extracted/built/updated from it for a .NET Playwright suite. Triggers: "build a POM from this URL", "extract locators from this page", "update the LoginPage object from the live site". Do NOT use for designing the POM structure (`qa-dotnet:page-object-design`) or Appium screens (`qa-dotnet:mobile-screen-objects`).
 ---
 
 # QA — POM Builder from Live Page (.NET)

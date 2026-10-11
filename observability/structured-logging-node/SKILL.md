@@ -1,5 +1,5 @@
 ---
-name: observability-structured-logging-node
+name: structured-logging
 description: Use when setting up or refactoring logging in a Node 24 (22 maintenance) + TypeScript service — pino (preferred) or winston, JSON output, correlation IDs via AsyncLocalStorage, shipping to Loki. Triggers: "set up structured logging in Node", "use pino in NestJS / Express", "add a request ID middleware", "redact secrets from logs". Do NOT use for .NET/Java (their siblings) or tracing/metrics (`opentelemetry-node`).
 ---
 

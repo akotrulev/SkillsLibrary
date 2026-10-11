@@ -1,6 +1,6 @@
 ---
-name: qa-language-testing-java
-description: Use when writing i18n/localization tests in Java 21 — Playwright-Java + TestNG pinned to a locale, asserting via the app's own `ResourceBundle` catalog by key, plus ICU4J formatting, pseudo-localization, and RTL checks. Triggers "write an i18n test in Java", "test German/Arabic rendering with Playwright-Java", "check RTL layout". Do NOT use for the frontend's own localization wiring (the `fe-*` `localization` skill), or for breakpoint layout (`qa-responsive-testing-java`).
+name: language-testing
+description: Use when writing i18n/localization tests in Java 21 — Playwright-Java + TestNG pinned to a locale, asserting via the app's own `ResourceBundle` catalog by key, plus ICU4J formatting, pseudo-localization, and RTL checks. Triggers "write an i18n test in Java", "test German/Arabic rendering with Playwright-Java", "check RTL layout". Do NOT use for the frontend's own localization wiring (the `fe-*` `localization` skill), or for breakpoint layout (`qa-java:responsive-testing`).
 ---
 
 # QA — i18n / Localization Testing (Java 21 / Playwright 1.63 + TestNG + ICU4J)
@@ -257,12 +257,12 @@ locale-pinned tests pass, the coverage diff passes (there's no key at all), but 
 
 ## Cross-references
 
-- `qa-language-testing-typescript` · `qa-language-testing-dotnet` — the sibling stacks; same four ideas.
-- `qa-ui-test-writer-playwright-java` — `BaseTest`, `contextOptions()` (`lifecycle.md` §3) and the emulation
+- `qa-typescript:language-testing` · `qa-dotnet:language-testing` — the sibling stacks; same four ideas.
+- `qa-java:ui-tests-playwright` — `BaseTest`, `contextOptions()` (`lifecycle.md` §3) and the emulation
   reference (`emulation-and-mobile-web.md` §5 locale/time zone, §6 `page.clock()`).
-- `qa-visual-regression-java` — pairs with the pseudo-loc **overflow** check: a pixel diff records *how* the
+- `qa-java:visual-regression` — pairs with the pseudo-loc **overflow** check: a pixel diff records *how* the
   layout broke; this skill asserts *that* it didn't.
-- `qa-data-driven-testing-java` — the row pattern; the locale matrix feeds a `@Factory` because each locale needs
+- `qa-java:data-driven-testing` — the row pattern; the locale matrix feeds a `@Factory` because each locale needs
   its own context options.
-- `qa-accessibility-testing-java` — `html[lang]` / `dir` a11y rules; run them together on the locale-pinned page.
-- `qa-test-reports-java` — name each locale in the report so a failure says *which* language broke.
+- `qa-java:accessibility-testing` — `html[lang]` / `dir` a11y rules; run them together on the locale-pinned page.
+- `qa-java:test-reports` — name each locale in the report so a failure says *which* language broke.

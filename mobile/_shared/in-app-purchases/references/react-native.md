@@ -62,4 +62,4 @@ const { connected, subscriptions, fetchProducts, requestPurchase, finishTransact
 - **Three-state + offline region** for the paywall: products loading, loaded, failed; offline is told apart from a store error; every call has a timeout.
 - **`testID`** on every purchase, restore and manage control (`Paywall.Subscribe.Monthly`, `Paywall.Restore`) — never the price text.
 - **Config plugin** changes (billing permission, StoreKit config) go through the plugin, not hand edits; EAS builds produce the test binary; sandbox/licence testers are QA setup.
-- **OTA updates** must not change purchase flows beyond what review saw (`mobile-shared-store-compliance` L8).
+- **OTA updates** must not change purchase flows beyond what review saw (`mobile-<stack>:store-compliance` L8).

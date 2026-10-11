@@ -1,11 +1,11 @@
 ---
-name: mobile-android-test-ids
+name: test-ids
 description: Use when adding, auditing or fixing test ids so Appium and Maestro can target a Compose or Views app — Modifier.testTag with testTagsAsResourceId at the root, android:id in Views, static row ids, PascalCase naming, never contentDescription as an id. Triggers "add test tags", "E2E can't find this element", "content-desc vs testTag", a `missing-testids.md`. Do NOT use for writing device tests (`qa-mobile-*`).
 ---
 
 # Android — Testability (`testTag` writer)
 
-Adds and audits test ids on Compose and Views so device suites locate elements by one stable id. It is the dev-side half of a loop QA owns: `qa-mobile-*`'s `mobile-screen-explorer` reads the live page source and files a `missing-testids.md`; this skill consumes that report. The RN twin is [`mobile-react-native-test-ids`](../../../react-native/skills/test-ids/SKILL.md) (it carries the verified Appium / Maestro selector semantics) — the naming, static-row and "one attribute only" rules carry over unchanged.
+Adds and audits test ids on Compose and Views so device suites locate elements by one stable id. It is the dev-side half of a loop QA owns: `qa-mobile-*`'s `mobile-screen-explorer` reads the live page source and files a `missing-testids.md`; this skill consumes that report. The RN twin is [`mobile-react-native:test-ids`](../../../react-native/skills/test-ids/SKILL.md) (it carries the verified Appium / Maestro selector semantics) — the naming, static-row and "one attribute only" rules carry over unchanged.
 
 ## Version lane
 

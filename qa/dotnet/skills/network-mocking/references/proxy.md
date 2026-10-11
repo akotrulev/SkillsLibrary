@@ -43,7 +43,7 @@ below was read from the `Titanium.Web.Proxy` sources at the 7.0.22 release commi
 
 - A Playwright `IPage` exists → `references/playwright-routes.md` (no certificate, in-process)
 - Real throttling, cache disable, performance metrics → `references/cdp.md`
-- The TypeScript and Java proxy stacks → `qa-network-mocking-typescript` (mockttp), `qa-network-mocking-java`
+- The TypeScript and Java proxy stacks → `qa-typescript:network-mocking` (mockttp), `qa-java:network-mocking`
   (BrowserUp)
 - Writing the Selenium or Appium page objects themselves → `qa/dotnet/skills/ui-test-author/selenium`,
   `qa/dotnet/skills/ui-test-author/appium`
@@ -398,4 +398,4 @@ public class CheckoutProxyTests
 - `qa/dotnet/skills/ui-test-author/selenium`, `qa/dotnet/skills/ui-test-author/appium` — the page objects of
   non-Playwright clients.
 - `qa/cicd/dotnet/skills/ci-pipelines` — the job that runs these tests and uploads `playwright-artifacts/`.
-- `qa-network-mocking-typescript` (mockttp), `qa-network-mocking-java` (BrowserUp) — the sibling proxy stacks.
+- `qa-typescript:network-mocking` (mockttp), `qa-java:network-mocking` (BrowserUp) — the sibling proxy stacks.

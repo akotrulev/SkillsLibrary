@@ -1,5 +1,5 @@
 ---
-name: qa-ci-conventions-shared
+name: ci-conventions
 description: Cross-stack, cross-CI rules every `ci-pipelines` skill enforces — pipeline shape (PR lane vs nightly), shard defaults, OIDC-only secrets, dual reporters (native + Allure), no-retry policy, artifact retention. Load alongside the per-CI tool reference. Triggers (always with `ci-pipelines`) "what shape should our test pipeline be", "PR lane vs nightly", "how many shards", "why is retry banned in CI". Not for platform YAML (the stack's `ci-pipelines`) or deploy pipelines (the `devops` plugin).
 ---
 

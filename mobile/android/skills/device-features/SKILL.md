@@ -1,11 +1,11 @@
 ---
-name: mobile-android-device-features
-description: Use when an Android app touches device capabilities — runtime permissions with a pre-prompt and denied path, the photo picker, CameraX, precise vs approximate location, BiometricPrompt, Credential Manager and passkeys, SAF, ACCESS_LOCAL_NETWORK. Triggers "ask for camera access", "pick a photo", "denied path". Do NOT use for push and links (`mobile-android-notifications-and-links`), widgets (`-system-integration`) or Keystore storage (`-offline-and-storage`).
+name: device-features
+description: Use when an Android app touches device capabilities — runtime permissions with a pre-prompt and denied path, the photo picker, CameraX, precise vs approximate location, BiometricPrompt, Credential Manager and passkeys, SAF, ACCESS_LOCAL_NETWORK. Triggers "ask for camera access", "pick a photo", "denied path". Do NOT use for push and links (`mobile-android:push-and-deep-links`), widgets (`-system-integration`) or Keystore storage (`-offline-and-storage`).
 ---
 
 # Android — Device Features
 
-Owns **asking the user for a capability and using it well**: the permission recipe, the pickers that need no permission, camera, location, biometrics and credentials. Store policy for each permission is [`mobile-shared-store-compliance`](../../../_shared/store-compliance/references/google-play.md) § 5; the secure-coding rules are [`mobile-shared-security`](../../../_shared/security/references/android.md). Sibling: [`mobile-ios-device-features`](../../../ios/skills/device-features/SKILL.md).
+Owns **asking the user for a capability and using it well**: the permission recipe, the pickers that need no permission, camera, location, biometrics and credentials. Store policy for each permission is [`mobile-<stack>:store-compliance`](../../../_shared/store-compliance/references/google-play.md) § 5; the secure-coding rules are [`mobile-<stack>:security`](../../../_shared/security/references/android.md). Sibling: [`mobile-ios:device-features`](../../../ios/skills/device-features/SKILL.md).
 
 ## Version lane
 
@@ -32,12 +32,12 @@ Owns **asking the user for a capability and using it well**: the permission reci
 
 ## When NOT to use
 
-- Push, notification permission, App Links → `mobile-android-notifications-and-links`
-- WorkManager, foreground services, widgets, exact alarms → `mobile-android-system-integration`
+- Push, notification permission, App Links → `mobile-android:push-and-deep-links`
+- WorkManager, foreground services, widgets, exact alarms → `mobile-android:system-integration`
 - Where secrets are stored, Keystore key setup → [`offline-and-storage`](../offline-and-storage/SKILL.md)
-- Sign-in provider setup (Auth0 Universal Login) → `auth-auth0-android`
-- Store declaration forms and policy dates → [`mobile-shared-store-compliance`](../../../_shared/store-compliance/SKILL.md)
-- Another stack → `mobile-ios-device-features`, `mobile-react-native-device-features`
+- Sign-in provider setup (Auth0 Universal Login) → `mobile-android:auth0`
+- Store declaration forms and policy dates → [`mobile-<stack>:store-compliance`](../../../_shared/store-compliance/SKILL.md)
+- Another stack → `mobile-ios:device-features`, `mobile-react-native:device-features`
 
 ## The permission recipe
 
@@ -87,7 +87,7 @@ fun CameraGate(
 - The pre-prompt is **shown before the system dialog** and says what the feature does with the data; "Not now" leads to the alternative path (typing, the picker), not to a dead end. Do not repeat a declined pre-prompt in the same session.
 - **The denied screen works**: it states what is unavailable, offers an alternative where one exists, and links to `Settings.ACTION_APPLICATION_DETAILS_SETTINGS` (`openAppSettings`). It never shows a blank preview.
 - **One-time and auto-reset permissions**: since Android 11 the user can grant "Only this time", and unused apps' permissions auto-reset. Treat every launch as possibly *not granted* and never cache `Granted` across process starts.
-- Every permission is declared in the manifest with a `maxSdkVersion` where it is retired; **declare only what is used** — the permission list is audited ([`mobile-shared-store-compliance`](../../../_shared/store-compliance/SKILL.md) `L`-series). Table of permissions, request calls and policy notes: [`references/permissions.md`](references/permissions.md).
+- Every permission is declared in the manifest with a `maxSdkVersion` where it is retired; **declare only what is used** — the permission list is audited ([`mobile-<stack>:store-compliance`](../../../_shared/store-compliance/SKILL.md) `L`-series). Table of permissions, request calls and policy notes: [`references/permissions.md`](references/permissions.md).
 - Request state lives in the ViewModel when more than one composable reacts to it; the **launcher** is created in the composable (it needs the `ActivityResultRegistry`).
 
 ## Photos and files — the pickers
@@ -108,7 +108,7 @@ Button(onClick = {
 - The returned `Uri` is **temporary**: copy what you need, or `takePersistableUriPermission` for SAF documents; never assume a `file` path. Read and decode off the main thread.
 - SAF for documents: `OpenDocument(arrayOf("application/pdf"))`, `CreateDocument`, `OpenDocumentTree`; **no `MANAGE_EXTERNAL_STORAGE`**. Saving a user-visible photo or download uses MediaStore insert (no permission from API 29).
 - Treat a picked file as untrusted input: check MIME against content (not the extension), size-limit, never `Runtime.exec` or `loadLibrary` from it.
-- Sharing out: `ShareCompat` / `Intent.createChooser` with `FileProvider` URIs and `FLAG_GRANT_READ_URI_PERMISSION`; `FileProvider` paths narrowed to a subfolder ([`mobile-shared-security`](../../../_shared/security/references/android.md) § 1).
+- Sharing out: `ShareCompat` / `Intent.createChooser` with `FileProvider` URIs and `FLAG_GRANT_READ_URI_PERMISSION`; `FileProvider` paths narrowed to a subfolder ([`mobile-<stack>:security`](../../../_shared/security/references/android.md) § 1).
 
 ## Camera — CameraX
 
@@ -138,7 +138,7 @@ fun CameraPreview(controller: LifecycleCameraController, modifier: Modifier = Mo
 ## Location — precise and approximate
 
 - **Ask for both `ACCESS_COARSE_LOCATION` and `ACCESS_FINE_LOCATION` in one request**; Android 12+ lets the user grant **approximate only**, and the app works with it. Ask for fine only when the feature needs street-level precision (turn-by-turn, "nearest door"); coarse is enough for "stores near me".
-- Foreground only by default. **Background location is a separate, later request**, needs a declaration and a stated core need, and a foreground service reaches location only as a continuation of a user-initiated action (`mobile-android-system-integration`).
+- Foreground only by default. **Background location is a separate, later request**, needs a declaration and a stated core need, and a foreground service reaches location only as a continuation of a user-initiated action (`mobile-android:system-integration`).
 - For a one-shot "where am I", use `FusedLocationProviderClient.getCurrentLocation(Priority.PRIORITY_BALANCED_POWER_ACCURACY, cancellationToken)` — cancel it with the screen; for updates, a `callbackFlow` over `requestLocationUpdates` that removes updates in `awaitClose`, collected in `repeatOnLifecycle(STARTED)`.
 - Play's Location Permissions policy (**2027-01-27**) points to the **location button** as the recommended minimum scope for precise location — use it where a feature needs a one-time fix.
 - Location is personal data: declared in the Data safety form, never logged, never sent unless the feature needs it, and the "location services off" state is a handled screen (`SettingsClient.checkLocationSettings`).
@@ -194,13 +194,13 @@ Inside a `Gate: none` plan task, run none of these and report "written, not run"
 - On a device: deny once → rationale; deny again → denied screen with **Open Settings**; grant in Settings → returning resumes the feature; "Only this time" re-asks next launch.
 - Biometrics with none enrolled and with a lockout: a working screen each time.
 - The photo picker works on an emulator without Play services; no storage permission is requested.
-- Dev-side tests: [`mobile-android-unit-testing`](../unit-testing/SKILL.md); device journeys belong to `qa-mobile-<stack>`.
+- Dev-side tests: [`mobile-android:unit-testing`](../unit-testing/SKILL.md); device journeys belong to `qa-mobile-<stack>`.
 
 ## Handoffs
 
-- Push permission, deep links → `mobile-android-notifications-and-links`
-- Foreground-service types, widgets, exact alarms → `mobile-android-system-integration`
+- Push permission, deep links → `mobile-android:push-and-deep-links`
+- Foreground-service types, widgets, exact alarms → `mobile-android:system-integration`
 - Keystore keys, secrets → [`offline-and-storage`](../offline-and-storage/SKILL.md)
-- Permission declarations, Data safety → [`mobile-shared-store-compliance`](../../../_shared/store-compliance/SKILL.md)
-- Manifest, FileProvider, WebView hardening → [`mobile-shared-security`](../../../_shared/security/SKILL.md)
-- Sign-in form → [`forms`](../forms/SKILL.md) · TalkBack, 48 dp → `mobile-android-accessibility`
+- Permission declarations, Data safety → [`mobile-<stack>:store-compliance`](../../../_shared/store-compliance/SKILL.md)
+- Manifest, FileProvider, WebView hardening → [`mobile-<stack>:security`](../../../_shared/security/SKILL.md)
+- Sign-in form → [`forms`](../forms/SKILL.md) · TalkBack, 48 dp → `mobile-android:accessibility`

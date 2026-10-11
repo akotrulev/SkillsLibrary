@@ -1,5 +1,5 @@
 ---
-name: fe-blazor-component-testing
+name: component-testing
 description: Use when writing dev-side tests for Blazor — bUnit v2 for anything that renders, plain NUnit/xUnit for anything that doesn't. Triggers: "unit-test this Blazor component", "write bUnit tests", "mock IJSRuntime in a component test", "test this validator", "test my state container". Do NOT use for E2E/browser journeys (the `qa-ui-dotnet` peer) or data-testid authoring (`test-ids`).
 ---
 
@@ -182,7 +182,7 @@ public void Should_RaiseChangedOnce_When_ValueIsSet()
 }
 ```
 
-Conventions, seams, doubles policy and anti-patterns for this altitude are the same ones the backend stack documents in depth — see [`be-dotnet-unit-testing`](../../../../backend/dotnet/skills/unit-testing/SKILL.md) for the full treatment (NUnit constraint model, NSubstitute traps, `FakeTimeProvider`, parameterized cases, builders). Do not duplicate it here; the fence is only *where the code runs*, and the discipline is identical.
+Conventions, seams, doubles policy and anti-patterns for this altitude are the same ones the backend stack documents in depth — see [`be-dotnet:unit-testing`](../../../../backend/dotnet/skills/unit-testing/SKILL.md) for the full treatment (NUnit constraint model, NSubstitute traps, `FakeTimeProvider`, parameterized cases, builders). Do not duplicate it here; the fence is only *where the code runs*, and the discipline is identical.
 
 ## Handoffs
 

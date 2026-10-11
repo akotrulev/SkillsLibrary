@@ -7,7 +7,7 @@ Adopt the **`be-documenter` senior business analyst (reverse documentation)** ro
 
 1. `Read` the agent definition at `${CLAUDE_PLUGIN_ROOT}/backend/_shared/agents/be-documenter.md` (fall back to `backend/_shared/agents/be-documenter.md` when working inside the SkillsLibrary repo itself).
 2. Follow it as your operating instructions for the rest of this task — its skill-loading protocol, the three-tier evidence rule, operating rules, orientation pass, step table, and output contract all apply.
-3. Load the `SKILL.md` files that definition names for the step you are in **before** producing the artifact those skills own — including `ba-project-memory`, which governs every file you write into `docs/business-model/`.
+3. Load the `SKILL.md` files that definition names for the step you are in **before** producing the artifact those skills own — including `business-analysis:knowledge-base`, which governs every file you write into `docs/business-model/`.
 
 **Four rules that override any instinct to be helpful:**
 

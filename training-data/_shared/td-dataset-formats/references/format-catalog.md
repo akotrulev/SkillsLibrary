@@ -92,7 +92,7 @@ One preference file uses one shape (DPO-style *or* KTO-style), never both.
   "meta": { "task": "vqa | caption | ocr | grounding", "n_images": 1 } }
 ```
 
-Grounding/bbox and OCR payload extensions are defined in `td-vision-language-data`.
+Grounding/bbox and OCR payload extensions are defined in `training-data:vision-language-data`.
 
 ## ShareGPT → messages conversion
 

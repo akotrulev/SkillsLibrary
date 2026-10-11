@@ -1,6 +1,6 @@
 ---
-name: be-shared-epic-map
-description: Use when a backlog's epics need arranging into what can be built at the same time — cross-epic dependencies, the disjoint-file-set parallelism rule, and the wave table that says how many sessions an operator can open at once. Triggers "which epics can run in parallel", "what has to land first", "how many lanes does this plan have". Do NOT use to write epics (`ba-epic-writer`), to order tasks (`be-shared-delivery-plan`), or to size them (`be-shared-session-budget`).
+name: plan-epic-map
+description: Use when a backlog's epics need arranging into what can be built at the same time — cross-epic dependencies, the disjoint-file-set parallelism rule, and the wave table that says how many sessions an operator can open at once. Triggers "which epics can run in parallel", "what has to land first", "how many lanes does this plan have". Do NOT use to write epics (`business-analysis:epics`), to order tasks (`dev:plan-delivery`), or to size them (`dev:plan-session-budget`).
 ---
 
 # Epic Map — what can be built at the same time
@@ -21,10 +21,10 @@ It exists as its own document because it is the thing that actually gets checked
 
 ## When NOT to use
 
-- Writing the epics themselves → `ba-epic-writer`, via `requirements-author`
-- Ordering tasks and binding them to agents → `be-shared-delivery-plan`
-- Sizing tasks or writing the prompts → `be-shared-session-budget`
-- Deciding which of two concurrent *tasks* is safe → `be-shared-delivery-plan`'s streams table, which applies the same rule one level down
+- Writing the epics themselves → `business-analysis:epics`, via `requirements-author`
+- Ordering tasks and binding them to agents → `dev:plan-delivery`
+- Sizing tasks or writing the prompts → `dev:plan-session-budget`
+- Deciding which of two concurrent *tasks* is safe → `dev:plan-delivery`'s streams table, which applies the same rule one level down
 
 ## Output
 
@@ -108,7 +108,7 @@ Where the operator will run the plan alone, back to back, say that too — the w
 ```markdown
 # <Initiative> — Epic Map
 
-**Date:** YYYY-MM-DD · **Written by:** `be-shared-epic-map`
+**Date:** YYYY-MM-DD · **Written by:** `dev:plan-epic-map`
 **Pack:** `./epics.md` · `./stories.md` · `./blueprint.md` · `./delivery-plan.md`
 
 > `E0` is planner-created: it carries no stories and does not appear in `epics.md`.
@@ -157,7 +157,7 @@ Where the operator will run the plan alone, back to back, say that too — the w
 | Collapsing two colliding epics into one serial lane | Serialises work that only collided on a DI registration. Pull the registration into `E0` and keep both lanes |
 | `E2 depends on E1` with no reason | Unfalsifiable, so it is never removed, so the critical path never gets shorter |
 | Renumbering the backlog's epics to make the waves read better | Breaks every `US` and `E` citation in `stories.md` and in `delivery-plan.md` — its task blocks, its task table and every one of its prompt blocks |
-| Putting `E0` in `epics.md` | It has no outcome a person can state, so it fails `ba-epic-writer`'s own gate. It is a planner construct and belongs here |
+| Putting `E0` in `epics.md` | It has no outcome a person can state, so it fails `business-analysis:epics`'s own gate. It is a planner construct and belongs here |
 | A wave table with no lane counts | The operator's question is "how many sessions can I open", and the document declines to answer it |
 | Treating one epic as one lane always | Two independent stories inside an epic are two sessions the plan never offered |
 
@@ -175,10 +175,10 @@ Where the operator will run the plan alone, back to back, say that too — the w
 ## Handoffs
 
 - **← `requirements-author`** — supplies `epics.md` and `stories.md`. Their ids are read, never rewritten.
-- **← `be-shared-solution-blueprint`** — supplies the functional areas and the routing map that place each epic in a file tree.
-- **→ `be-shared-delivery-plan`** — consumes the lanes and the waves: the streams table is this document's lanes at task altitude, and the task order respects the wave order.
-- **→ `be-shared-session-budget`** — the lanes and the wave order are what its prompt blocks in the plan's `## Prompts — one per task` section are ordered by.
-- **→ `ba-epic-writer`** (back upstream) — when Step 3 finds two epics that are genuinely intertwined, the slicing is the defect and it is fixed there, not here.
+- **← `dev:plan-blueprint`** — supplies the functional areas and the routing map that place each epic in a file tree.
+- **→ `dev:plan-delivery`** — consumes the lanes and the waves: the streams table is this document's lanes at task altitude, and the task order respects the wave order.
+- **→ `dev:plan-session-budget`** — the lanes and the wave order are what its prompt blocks in the plan's `## Prompts — one per task` section are ordered by.
+- **→ `business-analysis:epics`** (back upstream) — when Step 3 finds two epics that are genuinely intertwined, the slicing is the defect and it is fixed there, not here.
 
 ## Version policy
 

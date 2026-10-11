@@ -1,6 +1,6 @@
 ---
-name: qa-api-contract-testing-dotnet
-description: Use when the user asks to set up consumer-driven contract testing with Pact in a .NET 10 (8-9 supported) service (PactNet v5+). Triggers: "set up Pact for our .NET service", "PactNet consumer test for X", "verify our .NET provider against Y's contract". Do NOT use for a single API's own tests (`qa-api-test-writer-dotnet`) or other stacks' Pact setup.
+name: api-contract-testing
+description: Use when the user asks to set up consumer-driven contract testing with Pact in a .NET 10 (8-9 supported) service (PactNet v5+). Triggers: "set up Pact for our .NET service", "PactNet consumer test for X", "verify our .NET provider against Y's contract". Do NOT use for a single API's own tests (`qa-dotnet:api-tests`) or other stacks' Pact setup.
 ---
 
 # QA — Contract Testing with Pact (.NET / PactNet)

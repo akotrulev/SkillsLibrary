@@ -1,6 +1,6 @@
 ---
-name: qa-file-storage-testing-typescript
-description: Use when a Node 24 / TypeScript / Vitest test suite must assert object-storage side-effects (AWS S3 via LocalStack or Azure Blob via Azurite). Triggers "assert the export landed in the bucket", "test the presigned-URL flow", "verify blob metadata/tier". Pick the store in the decision matrix, then read its reference file. Do NOT use for database assertions (use `qa-db-connection-typescript`) or for broker messages (use `qa-messaging-testing-typescript`).
+name: file-storage-testing
+description: Use when a Node 24 / TypeScript / Vitest test suite must assert object-storage side-effects (AWS S3 via LocalStack or Azure Blob via Azurite). Triggers "assert the export landed in the bucket", "test the presigned-URL flow", "verify blob metadata/tier". Pick the store in the decision matrix, then read its reference file. Do NOT use for database assertions (use `qa-typescript:db-connection`) or for broker messages (use `qa-typescript:messaging-testing`).
 ---
 
 # QA — File Storage Testing (TypeScript)
@@ -24,8 +24,8 @@ shared by every tool in the family.
 |------|-----|-----|
 | Assert against **AWS S3** (buckets/keys, multipart, presigned URLs, versioning, lifecycle, S3→SQS events) | **`references/s3.md`** | AWS-native object store; `@aws-sdk/client-s3` is the first-class Node client; LocalStack runs it locally |
 | Assert against **Azure Blob Storage** (containers/blobs, SAS tokens, blob tiers, Event Grid → Storage Queue) | `references/azure-blob.md` | Azure-native; container/blob not bucket/key, SAS not presigned, Azurite not LocalStack |
-| Assert a **message** was produced/consumed, no object store in the flow | `qa-messaging-testing-typescript` | Pure queue assertion; here SQS appears only as the *downstream* of an S3 event |
-| Assert a **DB row** was written, no object store | `qa-db-connection-typescript` | Pure DB verification; reuse its `expect.poll` for the eventual side here |
+| Assert a **message** was produced/consumed, no object store in the flow | `qa-typescript:messaging-testing` | Pure queue assertion; here SQS appears only as the *downstream* of an S3 event |
+| Assert a **DB row** was written, no object store | `qa-typescript:db-connection` | Pure DB verification; reuse its `expect.poll` for the eventual side here |
 
 **Rule of thumb:** *AWS bucket + keys, presigned URLs, S3 events?* → S3. *Azure container + blobs, SAS?* →
 azure-blob. *A queue with no object?* → messaging. *A row with no object?* → db-testing.

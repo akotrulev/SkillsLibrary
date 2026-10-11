@@ -1,11 +1,11 @@
 ---
-name: qa-realtime-stream-testing-java
-description: Use when testing WebSocket or SSE streams in Java 21 / TestNG — protocol clients (OkHttp WebSocket/SSE, Spring STOMP, WebClient + StepVerifier) draining frames into a queue and asserting on conditions (Awaitility, never sleeps), plus Playwright for in-browser frames. Triggers: "test our WebSocket endpoint", "assert the SSE stream emits X", "real-time updates test". Do NOT use for request/response HTTP (`qa-api-test-writer-java`).
+name: realtime-stream-testing
+description: Use when testing WebSocket or SSE streams in Java 21 / TestNG — protocol clients (OkHttp WebSocket/SSE, Spring STOMP, WebClient + StepVerifier) draining frames into a queue and asserting on conditions (Awaitility, never sleeps), plus Playwright for in-browser frames. Triggers: "test our WebSocket endpoint", "assert the SSE stream emits X", "real-time updates test". Do NOT use for request/response HTTP (`qa-java:api-tests`).
 ---
 
 # WebSocket & SSE Testing (Java 21 / TestNG / Playwright 1.63)
 
-The Java expression of the family the .NET sibling leads (`qa-realtime-stream-testing-dotnet`): the four ideas
+The Java expression of the family the .NET sibling leads (`qa-dotnet:realtime-stream-testing`): the four ideas
 and the section order are the same; the protocol clients are OkHttp / Spring, the await primitive is Awaitility /
 `BlockingQueue.poll`, and the browser surface is Playwright for Java on J1's `BaseTest`.
 
@@ -45,7 +45,7 @@ synchronous return you can assert on the next line:
 | The UI opens a WS and you want **deterministic** frames (no real server) | WebSocket | **browser** — `routeWebSocket` (mock) |
 | The UI **renders** a fixed set of SSE events | SSE | **browser** — a one-time `text/event-stream` route over a `204` route |
 | SSE **timing**, reconnect or `Last-Event-ID` resume | SSE | a **real SSE server** — the protocol client, or the browser against it |
-| Async **queue/topic** (OrderPlaced lands on a queue, a consumer reacts) | — | **not this skill** → `qa-messaging-testing-java` etc. |
+| Async **queue/topic** (OrderPlaced lands on a queue, a consumer reacts) | — | **not this skill** → `qa-java:messaging-testing` etc. |
 
 ## Stack
 
@@ -231,13 +231,13 @@ assert through the protocol client (`references/details.md`), or drive the brows
 
 ## Cross-references
 
-- `qa-realtime-stream-testing-dotnet` — the family lead: raw `ClientWebSocket`, SignalR `HubConnection`,
+- `qa-dotnet:realtime-stream-testing` — the family lead: raw `ClientWebSocket`, SignalR `HubConnection`,
   `SseParser`, a `Channel<T>` deadline, Playwright-.NET observe/mock.
-- `qa-realtime-stream-testing-typescript` — the `ws` lib / native `WebSocket`, `EventSource`, Playwright-TS; its
+- `qa-typescript:realtime-stream-testing` — the `ws` lib / native `WebSocket`, `EventSource`, Playwright-TS; its
   `MockStreams` is the same fixed-event-set shape.
-- `qa-messaging-testing-java` — the **eventual-consistency lineage** and the **boundary**: messaging = discrete
+- `qa-java:messaging-testing` — the **eventual-consistency lineage** and the **boundary**: messaging = discrete
   queue/topic messages; this skill = an open WS/SSE stream.
-- `qa-network-mocking-java` — the **HTTP** mock counterpart and the "register before the action" rule; this skill
+- `qa-java:network-mocking` — the **HTTP** mock counterpart and the "register before the action" rule; this skill
   owns WebSocket mocking and browser SSE.
-- `qa-ui-test-writer-playwright-java` — `BaseTest` and the page-object rules the browser surface layers on.
-- `qa-test-login-tokens-java` — tokens for an authenticated socket, read from env, never logged.
+- `qa-java:ui-tests-playwright` — `BaseTest` and the page-object rules the browser surface layers on.
+- `qa-java:test-login-tokens` — tokens for an authenticated socket, read from env, never logged.

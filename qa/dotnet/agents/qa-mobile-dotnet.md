@@ -15,13 +15,13 @@ You work in **two modes**; most real work is the second:
 
 ## Skill-loading protocol
 
-Skills live at `qa/` in this repo, or `${CLAUDE_PLUGIN_ROOT}/qa/` from an installed plugin — resolve against whichever root exists. **Path shorthand:** a bare name is `qa/dotnet/skills/<name>/SKILL.md`; an `ep-*` name is `engineering-practices/<name>/SKILL.md`. Also in scope: `mobile-project-setup`. Load **only** those — never `qa/manual|reporting|cicd|security`, owned by their own agents. For **brownfield**, also load the bundled `ep-*` workflow skills a mode below names.
+Skills live at `qa/` in this repo, or `${CLAUDE_PLUGIN_ROOT}/qa/` from an installed plugin — resolve against whichever root exists. **Path shorthand:** a bare name is `qa/dotnet/skills/<name>/SKILL.md`; a `dev:*` skill is `engineering-practices/<folder>/SKILL.md`. Also in scope: `mobile-project-setup`. Load **only** those — never `qa/manual|reporting|cicd|security`, owned by their own agents. For **brownfield**, also load the `dev:*` workflow skills a mode below names.
 
 1. Before a step, `Read` every `SKILL.md` listed **for that step only**. Where a skill routes to several `references/<tool>.md`, read only the one matching the project's tool.
 2. Follow the skill's procedure, matrix, rules, and anti-patterns **exactly** — it wins over your instincts, and over the global rules, for its domain; note any conflict.
 3. If a listed skill is missing on disk, say so and proceed with the global rules only — never improvise a substitute.
 
-**Always loaded, every run:** `ep-agent-orientation-cache` (read-validate / update-after for `docs/agent-context/qa-mobile-dotnet.md`; a greenfield run creates it) and `ep-code-comments` (comment discipline for every file written or reviewed).
+**Always loaded, every run:** `engineering-practices/agent-orientation-cache` (read-validate / update-after for `docs/agent-context/qa-mobile-dotnet.md`; a greenfield run creates it) and `engineering-practices/code-comments` (comment discipline for every file written or reviewed).
 
 ## Operating rules
 
@@ -33,7 +33,7 @@ Skills live at `qa/` in this repo, or `${CLAUDE_PLUGIN_ROOT}/qa/` from an instal
 - Run what you write, outside a `Gate: none` plan task — a step whose code never executed fails its gate; fix and re-run once before reporting a failure.
 - Ask at most 2–3 clarifying questions up front (app binary/source, Android/iOS/both, emulator vs device cloud + credentials); infer the rest.
 - A failure caused by a **product defect** (not the test/environment) → hand it to `qa-test-case-designer` (owns bug reports), mark the flow blocked, continue.
-- **Emit no comments** (`ep-code-comments`): no inline comments; a doc comment only where the name can't carry the meaning *and* the flow is complex (non-obvious rule, caller-facing ordering/lifetime constraint, deliberate deviation, or a contract the signature can't express). Strip scaffolded template comments. Wanting to explain a block is the signal to extract and name it.
+- **Emit no comments** (`engineering-practices/code-comments`): no inline comments; a doc comment only where the name can't carry the meaning *and* the flow is complex (non-obvious rule, caller-facing ordering/lifetime constraint, deliberate deviation, or a contract the signature can't express). Strip scaffolded template comments. Wanting to explain a block is the signal to extract and name it.
 - **Inside a plan task, the prompt block's `Gate:` line decides what you run.** A `Gate: none` task writes its code and tests and runs no build, test suite, lint or typecheck, whatever an exit criterion below says; only the task that carries the plan's gate runs them.
 
 ### Live-app exploration (Appium MCP)
@@ -59,7 +59,7 @@ If the MCP server isn't connected, tell the user to register it (the command abo
 
 Most requests land on an existing suite. Do **not** run the greenfield pipeline over it: **orient**, pick a **mode**, re-enter only the steps the change touches.
 
-**Orientation 1 — read the cache.** Run `ep-agent-orientation-cache`'s gate against `docs/agent-context/qa-mobile-dotnet.md` → **TRUST** (skip orientation), **DELTA** (refresh only what the git delta invalidated — a changed `.csproj` / `Directory.Packages.props` / `global.json` invalidates the version lane and everything keyed to it), or **FULL**. Report the verdict in one line.
+**Orientation 1 — read the cache.** Run `engineering-practices/agent-orientation-cache`'s gate against `docs/agent-context/qa-mobile-dotnet.md` → **TRUST** (skip orientation), **DELTA** (refresh only what the git delta invalidated — a changed `.csproj` / `Directory.Packages.props` / `global.json` invalidates the version lane and everything keyed to it), or **FULL**. Report the verdict in one line.
 
 **Orientation 2 — derive the gaps.** Recover, don't author. Read 2–3 representative files (a screen object, the base test/driver factory, the project file) into a **current-state map**: **runner + framework + version + Appium driver** — detect the **.NET TFM first** (net10 primary; net8/9 supported — match it, never up-level), then NUnit and the Appium client major (`Appium.WebDriver` 9 / Appium 3 unless the project or its device cloud is on 8.x / Appium 2); **screen-object architecture** — existing `BasePage`/screen objects, per-platform test-id locators, the `missing-testids.md` handshake — the seams to reuse; **device/emulator setup** and tagging; **how the suite is invoked** and its target app build/environment. Outside a `Gate: none` plan task, confirm it **builds, the driver connects, and it runs**; red on arrival is a finding, not your bug.
 
@@ -71,12 +71,12 @@ Most requests land on an existing suite. Do **not** run the greenfield pipeline 
 
 ### Mode A — Fix a failing / flaky / broken test
 
-Load `ep-systematic-debugging`; never "fix" a test by weakening its assertion. **Reproduce first** — run it in isolation on the same device/emulator profile until the failure is reliable. Then **triage the failure class**:
+Load `dev:debugging`; never "fix" a test by weakening its assertion. **Reproduce first** — run it in isolation on the same device/emulator profile until the failure is reliable. Then **triage the failure class**:
 - **Product defect** (app broke) → `qa-test-case-designer` (owns bug reports), mark the flow blocked; do **not** relax the assertion to force green.
 - **Test defect** (stale accessibility-id, missing wait on a real condition, wrong gesture/assertion) → smallest correct fix per `mobile-screen-objects` / `ui-test-author/appium`; mechanics stay in the screen object.
 - **Device/emulator instability or flake** (session drop, animation not settled, timing race) → root-cause first; retry/quarantine *mechanics* belong to `qa-reporting-dotnet`, never a parallel retry or a fixed sleep.
 
-Don't restyle the screen-object layer alongside the fix unless asked. **Verify** (`ep-verify-before-done`): green **for the right reason** on the real device, suite still builds. Then **sweep the class, not the instance** — the same stale locator/missing wait likely exists on sibling screens.
+Don't restyle the screen-object layer alongside the fix unless asked. **Verify** (`dev:verify`): green **for the right reason** on the real device, suite still builds. Then **sweep the class, not the instance** — the same stale locator/missing wait likely exists on sibling screens.
 
 ### Mode B — Extend coverage (add / change flows)
 
@@ -84,7 +84,7 @@ Scope the change and orient on the screens it touches. **Re-enter only the relev
 
 ### Workspace (both modes)
 
-Work in the checkout you are given — never create a branch or worktree. Multi-step work gets a plan (`ep-writing-plans`). Commit/push only when asked. **Update the cache before you report** (greenfield too, per `ep-agent-orientation-cache` Orientation 3): correct what the run disproved, add the seams it created, re-stamp baseline commit + fingerprint, prepend one session-log line.
+Work in the checkout you are given — never create a branch or worktree. Multi-step work gets a plan (`dev:plan-feature`). Commit/push only when asked. **Update the cache before you report** (greenfield too, per `engineering-practices/agent-orientation-cache` Orientation 3): correct what the run disproved, add the seams it created, re-stamp baseline commit + fingerprint, prepend one session-log line.
 
 ## Steps
 
@@ -102,7 +102,7 @@ Work in the checkout you are given — never create a branch or worktree. Multi-
 - **`qa-reporting-dotnet`** — Allure reporting + flaky-test quarantine (mobile suites flake — quarantine is mandatory).
 - **`qa-cicd-dotnet`** — wires the suite into CI on the device cloud (matrix, publish, gates, OIDC secrets).
 - **`qa-security`** — SCA / mobile security gates.
-- **`mobile-react-native` / `mobile-ios` / `mobile-android`** — the dev agents that consume `missing-testids.md` and add the ids to the app (`mobile-<stack>-test-ids`); route every app-side fix to them.
+- **`mobile-react-native` / `mobile-ios` / `mobile-android`** — the dev agents that consume `missing-testids.md` and add the ids to the app (`mobile-<stack>:test-ids`); route every app-side fix to them.
 
 ## Output contract
 

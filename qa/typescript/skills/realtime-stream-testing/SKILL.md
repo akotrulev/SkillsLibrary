@@ -1,9 +1,9 @@
 ---
-name: qa-realtime-stream-testing-typescript
-description: Use when testing real-time **WebSocket** and **Server-Sent-Events (SSE)** streams in Node 24 (22 supported) + TypeScript (Vitest / Playwright). Triggers: "test our WebSocket chat endpoint with ws", "assert the server pushes N SSE events then closes", "wait for a websocket frame without a setTimeout". Do NOT use for request/response HTTP (`qa-api-test-writer-typescript`) or broker messages (`qa-messaging-testing-typescript`).
+name: realtime-stream-testing
+description: Use when testing real-time **WebSocket** and **Server-Sent-Events (SSE)** streams in Node 24 (22 supported) + TypeScript (Vitest / Playwright). Triggers: "test our WebSocket chat endpoint with ws", "assert the server pushes N SSE events then closes", "wait for a websocket frame without a setTimeout". Do NOT use for request/response HTTP (`qa-typescript:api-tests`) or broker messages (`qa-typescript:messaging-testing`).
 ---
 
-# WebSocket & SSE Testing (Node 24 + TypeScript) — **ported from the canonical `qa-realtime-stream-testing-dotnet`**
+# WebSocket & SSE Testing (Node 24 + TypeScript) — **ported from the canonical `qa-dotnet:realtime-stream-testing`**
 
 > The four ideas and the section order match the .NET file; only the client library (`ws` / native
 > `WebSocket`) and the await primitive (a promise-with-timeout, Vitest `vi.waitFor`) change.
@@ -52,7 +52,7 @@ This skill pins nothing. The Playwright version is the **Versions** table of
 | The UI opens a WS and you want **deterministic** frames (no real server) | WebSocket | **browser** — `routeWebSocket` (MOCK) |
 | The UI renders a **fixed set** of SSE events | SSE | **browser** — one fulfilled `text/event-stream` body, then `204` (§ Browser surface 3) |
 | The UI must handle events **over time**, reconnect or resume from `Last-Event-ID` | SSE | a real test SSE server — protocol-client for the server, or the browser against it; **not** `page.route` |
-| Async **queue/topic** (OrderPlaced lands on a queue, a consumer reacts) | — | **not this skill** → `qa-messaging-testing-typescript` |
+| Async **queue/topic** (OrderPlaced lands on a queue, a consumer reacts) | — | **not this skill** → `qa-typescript:messaging-testing` |
 
 ## Stack
 
@@ -228,12 +228,12 @@ and assert through the protocol client (`references/details.md`), or drive the b
 
 ## Cross-references
 
-- `qa-realtime-stream-testing-dotnet` (**the canonical file**) · `qa-realtime-stream-testing-java` — the
+- `qa-dotnet:realtime-stream-testing` (**the canonical file**) · `qa-java:realtime-stream-testing` — the
   sibling stacks; same four ideas.
-- `qa-messaging-testing-typescript` — the **eventual-consistency lineage** and the **boundary**: messaging =
+- `qa-typescript:messaging-testing` — the **eventual-consistency lineage** and the **boundary**: messaging =
   discrete queue/topic messages; this skill = an open WS/SSE stream.
-- `qa-network-mocking-typescript` — **plain HTTP** mocking (`route.fulfill`, HAR, offline) and the "register
+- `qa-typescript:network-mocking` — **plain HTTP** mocking (`route.fulfill`, HAR, offline) and the "register
   before the action" rule; it routes WebSocket and SSE here.
-- `qa-ui-test-writer-playwright-typescript` — the page-object fixtures the **browser-surface** tests extend.
-- `qa-evidence-capture-typescript` — reading a failed browser test's trace, which carries WebSocket frames.
-- `qa-test-login-tokens-typescript` — tokens for an authenticated socket, read from env, never logged.
+- `qa-typescript:ui-tests-playwright` — the page-object fixtures the **browser-surface** tests extend.
+- `qa-typescript:evidence-capture` — reading a failed browser test's trace, which carries WebSocket frames.
+- `qa-typescript:test-login-tokens` — tokens for an authenticated socket, read from env, never logged.

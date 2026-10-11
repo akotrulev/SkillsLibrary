@@ -491,4 +491,4 @@ public async Task Should_ShowOrders_When_HeldRequestIsReleased()
 - `qa/dotnet/skills/realtime-stream-testing` — WebSocket and SSE.
 - `qa/dotnet/skills/test-data-builder` — builders for the payloads the mocks serve.
 - `qa/cicd/dotnet/skills/ci-pipelines` — the UI job and its artifact upload.
-- `qa-network-mocking-typescript`, `qa-network-mocking-java` — the sibling lanes.
+- `qa-typescript:network-mocking`, `qa-java:network-mocking` — the sibling lanes.

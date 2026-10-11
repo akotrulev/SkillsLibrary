@@ -1,4 +1,4 @@
-# Deep-dive details — `qa-feature-flag-testing-java`
+# Deep-dive details — `qa-java:feature-flag-testing`
 
 Sections moved out of SKILL.md for on-demand loading. Read what the task needs.
 
@@ -106,7 +106,7 @@ public class CheckoutFlagTest {
 
 > The off-row is **not** a formality: it is the only coverage of the path every un-migrated user is on, and the
 > only proof a rollback is safe. A multivariate flag gets one row per variation — exhaustively (`control` /
-> `treatment-a` / `treatment-b`), via the same `@DataProvider` mechanics as `qa-data-driven-testing-java`.
+> `treatment-a` / `treatment-b`), via the same `@DataProvider` mechanics as `qa-java:data-driven-testing`.
 
 ### Targeting via the evaluation context (idea #3)
 
@@ -213,7 +213,7 @@ public class BetaTargetingTest {
 ### The kill-switch lifecycle — flip mid-flight, assert graceful degradation (idea #4)
 
 `td.update(...)` propagates to the live client **as if LaunchDarkly streamed the change** — so one test proves
-the off-path engages *without a restart*. This is the flag analogue of `qa-failure-injection-testing-java`'s
+the off-path engages *without a restart*. This is the flag analogue of `qa-java:failure-injection-testing`'s
 steady → perturb → assert-degraded lifecycle (and the boundary: a *flag* flip is this skill; a *dependency fault*
 is chaos).
 

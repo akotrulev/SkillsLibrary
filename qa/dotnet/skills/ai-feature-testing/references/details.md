@@ -1,4 +1,4 @@
-# Deep-dive details — `qa-ai-feature-testing-dotnet`
+# Deep-dive details — `qa-dotnet:ai-feature-testing`
 
 Sections moved out of SKILL.md for on-demand loading. Read what the task needs.
 
@@ -82,7 +82,7 @@ public class EvalTests
 ```
 
 > **CI gate:** `promptfoo eval` exits non-zero when any assertion fails — wire it directly as a pipeline step
-> (`qa-ci-pipelines-dotnet`) for the declarative path, *or* drive it through NUnit (above) when
+> (`qa-dotnet:ci-pipelines`) for the declarative path, *or* drive it through NUnit (above) when
 > you want the result in the same suite + Allure. Both honor the four ideas.
 
 ## The SDK path — `Microsoft.Extensions.AI` in NUnit (the second half of the hybrid)
@@ -163,8 +163,8 @@ public class SummarizerTests
 ```
 
 > **Reporting:** route each promptfoo case and each NUnit test into Allure as a named result
-> (`qa-test-reports-dotnet`) so an eval failure names the *case*; track the suite's **pass-rate over time**
-> (`qa-_shared-quality-metrics`) — a slow decline is a silent model/prompt regression.
+> (`qa-dotnet:test-reports`) so an eval failure names the *case*; track the suite's **pass-rate over time**
+> (`qa-<stack>:quality-metrics`) — a slow decline is a silent model/prompt regression.
 
 # The four ideas — deep dive in code
 
@@ -222,7 +222,7 @@ answer,context,human_label,__expected
 
 ## Idea #3 — an eval is a dataset (data-driven, `data-driven-testing`)
 
-An eval is `qa-data-driven-testing-dotnet` pointed at prompts: separate **data** (rows of input + expected
+An eval is `qa-dotnet:data-driven-testing` pointed at prompts: separate **data** (rows of input + expected
 properties) from **logic** (the prompt + the assertion engine). promptfoo reads the dataset from a CSV exactly as
 `data-driven-testing`'s NUnit `[TestCaseSource]` reads rows. When the SDK path needs the dataset in code, use `[TestCaseSource]`
 returning `IEnumerable<TestCaseData>` with `.SetName(...)` so each case is named — reuse `data-driven-testing`'s mechanics, don't
@@ -252,7 +252,7 @@ public async Task Should_refuse_lockpicking_When_sampled_repeatedly()
 }
 ```
 
-> **Boundary vs `qa-flaky-test-quarantine-dotnet`:** a model that refuses 4/5 times is **behaving as
+> **Boundary vs `qa-dotnet:flaky-test-quarantine`:** a model that refuses 4/5 times is **behaving as
 > designed** — natural variance you assert a *rate* on, NOT a flaky test to retry-and-quarantine. Quarantining it
 > hides a real safety regression the day it drops to 2/5. `flaky-test-quarantine` is for a *test* that's flaky for infra reasons;
 > this is a *model* that's stochastic by nature. Don't apply `flaky-test-quarantine`'s retry to a model-behavior assertion.
@@ -260,7 +260,7 @@ public async Task Should_refuse_lockpicking_When_sampled_repeatedly()
 ## Structured-output validation (the `is-json` analogue in code)
 
 When the app forces JSON (tool use, extraction), the structural contract is deterministic — reuse the
-`qa-api-models-dotnet` / `System.Text.Json` muscle. In promptfoo it's `is-json` with a schema; in code
+`qa-dotnet:api-models` / `System.Text.Json` muscle. In promptfoo it's `is-json` with a schema; in code
 it's a deserialize + validate at the boundary:
 
 ```csharp
@@ -314,7 +314,7 @@ public async Task Should_call_getWeather_for_Paris()
 - **A vague rubric** (`llm-rubric: "is good"`). Not a contract. *Fix:* a specific, scoped rubric with an explicit
   pass bar (grounded? answers the question? exact figure?).
 - **Hardcoding `ANTHROPIC_API_KEY` / committing it / in `promptfooconfig.yaml`.** *Fix:* env, read lazily; secrets
-  via `qa-test-login-tokens-dotnet`'s discipline. **No real PII** in committed cases (synthetic).
+  via `qa-dotnet:test-login-tokens`'s discipline. **No real PII** in committed cases (synthetic).
 - **No cost/latency ceiling.** The suite quietly costs money; an agent can loop. *Fix:* `cost`/`latency` budgets;
   cap `MaxOutputTokens`.
 - **Testing RAG by asserting the answer string.** The risk is *hallucination*. *Fix:* assert **faithfulness /
@@ -329,7 +329,7 @@ instantly; the `llm-rubric` rung (pinned + calibrated judge) catches a faithfuln
 (`--repeat 5`) asserts the refusal **rate** held. Any failure → non-zero exit → PR blocked, with the failing
 **case named** in the parsed report + Allure.
 
-**Composing with `data-driven-testing` + `flaky-test-quarantine` + api-models:** the **dataset** uses `qa-data-driven-testing-dotnet`
+**Composing with `data-driven-testing` + `flaky-test-quarantine` + api-models:** the **dataset** uses `qa-dotnet:data-driven-testing`
 `[TestCaseSource]` mechanics (one named case per row); the **structured-output** rung reuses an
-`qa-api-models-dotnet` record + `System.Text.Json`; the **stochastic refusal** rung asserts a rate (idea #4),
-explicitly *not* handed to `qa-flaky-test-quarantine-dotnet`.
+`qa-dotnet:api-models` record + `System.Text.Json`; the **stochastic refusal** rung asserts a rate (idea #4),
+explicitly *not* handed to `qa-dotnet:flaky-test-quarantine`.

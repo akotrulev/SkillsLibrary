@@ -1,5 +1,5 @@
 ---
-name: qa-db-testing-testcontainers-dotnet
+name: db-testcontainers
 description: Use when scaffolding .NET integration tests backed by a real database (Postgres / SQL Server / Mongo / Redis) via Testcontainers. Triggers "spin up a real Postgres for these tests", "Testcontainers fixture for X", "stop mocking the DB in IntegrationTests". Not for query guardrails (`db-testing/verification-queries`) or connect/seed/clean against an existing DB (`db-testing/connection`).
 ---
 

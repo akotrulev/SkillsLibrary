@@ -1,6 +1,6 @@
 ---
-name: qa-webmcp-testing-shared
-description: Use when a web app registers WebMCP tools (`document.modelContext`, declarative forms) and a UI suite must test them — registration and lifecycle, schema quality, the `execute()` contract, annotation truthfulness, UI-path parity, security. Triggers: "test our WebMCP tools", "page.webmcp", "which tools does this page register". Do NOT use for LLM/agent evals (`ai-feature-testing`), building an MCP server (`tooling` `tool-mcp-builder`), or prompt-injection attacks (`qa-security`).
+name: webmcp-testing
+description: Use when a web app registers WebMCP tools (`document.modelContext`, declarative forms) and a UI suite must test them — registration and lifecycle, schema quality, the `execute()` contract, annotation truthfulness, UI-path parity, security. Triggers: "test our WebMCP tools", "page.webmcp", "which tools does this page register". Do NOT use for LLM/agent evals (`ai-feature-testing`), building an MCP server (`tooling` `tooling:mcp-builder`), or prompt-injection attacks (`qa-security`).
 ---
 
 # WebMCP testing (shared)
@@ -21,11 +21,11 @@ re-check a detail before a gate depends on it.
 
 ## When NOT to use
 
-- Whether an LLM agent picks the right tool and arguments → `qa-ai-feature-testing-<stack>`. Those evals
+- Whether an LLM agent picks the right tool and arguments → `qa-<stack>:ai-feature-testing`. Those evals
   are probabilistic and stay out of this deterministic gate.
-- Building an MCP server for a project → the `tooling` plugin's `tool-mcp-builder`.
+- Building an MCP server for a project → the `tooling` plugin's `tooling:mcp-builder`.
 - Attacking tool descriptions or outputs (prompt injection, hostile UGC) → `qa-security`.
-- The UI journey itself → `qa-ui-test-writer-playwright-<stack>`.
+- The UI journey itself → `qa-<stack>:ui-tests-playwright`.
 
 ## The API (spec IDL, matching Chromium main)
 
@@ -222,6 +222,6 @@ leaving the page drops the tool.
 ## Handoffs
 
 - The base test or config these assets extend, and the UI half of the parity check →
-  `qa-ui-test-writer-playwright-<stack>`; failure evidence → `qa-evidence-capture-<stack>`.
-- Agent evals → `qa-ai-feature-testing-<stack>`; the MCP server side → `tool-mcp-builder`; attacks →
+  `qa-<stack>:ui-tests-playwright`; failure evidence → `qa-<stack>:evidence-capture`.
+- Agent evals → `qa-<stack>:ai-feature-testing`; the MCP server side → `tooling:mcp-builder`; attacks →
   `qa-security`.

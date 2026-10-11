@@ -1,5 +1,5 @@
 ---
-name: fe-blazor-accessibility
+name: accessibility
 description: Use when making a Blazor app (.NET 8/9/10) accessible as you build — semantic-first markup, focus management under enhanced navigation (`FocusOnNavigate`, dialog focus traps), keyboard + ARIA in custom widgets, live-region announcements, skip links, icon-button labels. Triggers: "make this Blazor component accessible", "keyboard nav for a custom widget", "focus isn't announced after navigation". Do NOT use to SCAN for violations (qa `accessibility-testing`) or form validation a11y (`forms`).
 ---
 

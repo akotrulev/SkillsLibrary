@@ -17,5 +17,5 @@
 - **`os.Logger` privacy:** interpolated values are redacted by default (`<private>`); never mark `.public` on a token, email or identifier. Telemetry forwarded off-device is filtered separately — `os.Logger` redaction does not apply once the value is exported.
 - Batch with `BatchSpanProcessor` / `BatchLogRecordProcessor`; persist to disk where the exporter supports it (OTel Swift persistence exporter); flush on `scenePhase == .background`, with `beginBackgroundTask` bounding the flush.
 - URLSession instrumentation: allow-list attributes, drop query strings and bodies; name spans by route template.
-- Privacy manifest: add the Required Reason API entries these SDKs trigger (`UserDefaults`, file timestamp, boot time); list the collected data types; ATT only when tracking, which telemetry normally is not (`mobile-shared-store-compliance`).
-- Symbols: dSYM upload per archive (`mobile-shared-release`, `references/fastlane.md` / `xcode-cloud.md`).
+- Privacy manifest: add the Required Reason API entries these SDKs trigger (`UserDefaults`, file timestamp, boot time); list the collected data types; ATT only when tracking, which telemetry normally is not (`mobile-<stack>:store-compliance`).
+- Symbols: dSYM upload per archive (`mobile-<stack>:release`, `references/fastlane.md` / `xcode-cloud.md`).

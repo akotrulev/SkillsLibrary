@@ -1,5 +1,5 @@
 ---
-name: fe-react-component-writer
+name: component-writer
 description: Use when scaffolding a new page, component, hook, context, or boundary into the active repo (Next.js App Router or Vite) — reusable component, form, custom hook, context+consumer, compound component, container/presentation split, error or Suspense boundary. Triggers "scaffold a component/page for X", "extract this into a custom hook", "create a context provider", "add a new screen". Not for explanations (`basics`), reviews (`code-review`), or route topology (`routing`).
 ---
 

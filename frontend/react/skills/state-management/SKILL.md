@@ -1,5 +1,5 @@
 ---
-name: fe-react-state-management
+name: state-management
 description: Use when state has outgrown `useState` or lives in the wrong place — local state, lifted state, Context + reducer, Zustand, Redux Toolkit, Jotai, and the server-vs-client-state split (TanStack Query / RSC own server state). Triggers "what's the right state library here", "Redux Toolkit vs Zustand", "Context or store", "I'm prop-drilling everywhere", "this state is out of sync across pages". Not for forms (`forms`) or data fetching itself (`data-fetching`).
 ---
 

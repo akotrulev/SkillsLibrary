@@ -1,13 +1,13 @@
 ---
-name: mobile-ios-basics
-description: Use when writing or reviewing Swift — API Design Guidelines naming, value vs reference types, optionals, errors, access control, the Swift 6 concurrency standard (default isolation, Sendable, cancellation), Observation, os.Logger. Triggers "is this Swift idiomatic", "@MainActor by default or not", "can I use !", "Sendable error". Also the Expo native-module Swift standard. Do NOT use for project setup, SwiftUI screens, or networking (`mobile-ios-project-setup`, `-ui-components`, `-networking`).
+name: concepts
+description: Use when writing or reviewing Swift — API Design Guidelines naming, value vs reference types, optionals, errors, access control, the Swift 6 concurrency standard (default isolation, Sendable, cancellation), Observation, os.Logger. Triggers "is this Swift idiomatic", "@MainActor by default or not", "can I use !", "Sendable error". Also the Expo native-module Swift standard. Do NOT use for project setup, SwiftUI screens, or networking (`mobile-ios:project-setup`, `-ui-components`, `-networking`).
 ---
 
 # iOS — The Swift Coding Standard
 
-How Swift is written in this library: names that read as English at the call site, value types by default, no force unwrap, typed errors, the narrowest access control, the Swift 6 concurrency standard, `@Observable` and `os.Logger`. The audit rows are sections A and B of `mobile-ios-standards-audit`.
+How Swift is written in this library: names that read as English at the call site, value types by default, no force unwrap, typed errors, the narrowest access control, the Swift 6 concurrency standard, `@Observable` and `os.Logger`. The audit rows are sections A and B of `mobile-ios:standards-audit`.
 
-**Reads without an app.** This skill is also loaded by `mobile-react-native` for Expo Modules and config-plugin Swift. Nothing here needs a SwiftUI app or an Xcode project: apply it to a module's `.swift` files as they stand. Where a rule depends on the module kind, it says so. App-level skills (`mobile-ios-project-setup`, `-architecture`, `-ui-components`, `-networking`) are named for hand-off only — never required to apply this one.
+**Reads without an app.** This skill is also loaded by `mobile-react-native` for Expo Modules and config-plugin Swift. Nothing here needs a SwiftUI app or an Xcode project: apply it to a module's `.swift` files as they stand. Where a rule depends on the module kind, it says so. App-level skills (`mobile-ios:project-setup`, `-architecture`, `-ui-components`, `-networking`) are named for hand-off only — never required to apply this one.
 
 ## Version lane — detect first, key every recipe to it
 
@@ -28,7 +28,7 @@ These are **three separate switches**; a rule below that needs one says which. S
 | `@Observable` | iOS 17+ | iOS 17+; on iOS 16 `ObservableObject` is correct |
 | `Observations` async sequence | iOS 26+ **[Swift 6.2]** | iOS 26+ |
 
-Swift 5-mode modules are migrated **one module at a time** (`mobile-ios-migration`). Below Swift 6.2, `@MainActor` is annotated explicitly and `@concurrent` does not exist — a down-level project is not flagged for lacking them.
+Swift 5-mode modules are migrated **one module at a time** (`mobile-ios:migration`). Below Swift 6.2, `@MainActor` is annotated explicitly and `@concurrent` does not exist — a down-level project is not flagged for lacking them.
 
 ## When to use
 
@@ -38,12 +38,12 @@ Swift 5-mode modules are migrated **one module at a time** (`mobile-ios-migratio
 
 ## When NOT to use
 
-- Creating the project, targets, xcconfig, SwiftLint → `mobile-ios-project-setup`
-- Choosing app architecture or state ownership → `mobile-ios-architecture`
-- SwiftUI views and previews → `mobile-ios-ui-components`
-- `URLSession` clients and retries → `mobile-ios-networking`
-- Tests → `mobile-ios-unit-testing`
-- Kotlin → `mobile-android-basics`
+- Creating the project, targets, xcconfig, SwiftLint → `mobile-ios:project-setup`
+- Choosing app architecture or state ownership → `mobile-ios:architecture`
+- SwiftUI views and previews → `mobile-ios:ui-components`
+- `URLSession` clients and retries → `mobile-ios:networking`
+- Tests → `mobile-ios:unit-testing`
+- Kotlin → `mobile-android:concepts`
 
 ---
 
@@ -173,11 +173,11 @@ In an app module with default `MainActor` isolation the explicit `@MainActor` ab
 
 On iOS 17+ **`@Observable` replaces `ObservableObject`** — no `@Published`, no `objectWillChange`, no `@StateObject`. SwiftUI re-renders only the views that read a changed property.
 
-- `@Observable final class` for a shared model; `@State` owns it in the view that creates it, `@Environment` / a plain property passes it down, `@Bindable` makes a binding to its properties. Ownership details are `mobile-ios-architecture`'s.
+- `@Observable final class` for a shared model; `@State` owns it in the view that creates it, `@Environment` / a plain property passes it down, `@Bindable` makes a binding to its properties. Ownership details are `mobile-ios:architecture`'s.
 - **`@ObservationIgnored`** on properties a view must not track (a task handle, a logger).
 - **`@Observable` inherits the module's default isolation** — in an app module that is `@MainActor`, which is what a UI model wants. A non-UI `@Observable` in a package is annotated deliberately.
 - **Outside SwiftUI**, `withObservationTracking`, or on iOS 26+ the **`Observations`** async sequence **[Swift 6.2]**. No new Combine pipelines.
-- **iOS 16:** `ObservableObject` + `@Published` is correct for that target; migration is `mobile-ios-migration`'s.
+- **iOS 16:** `ObservableObject` + `@Published` is correct for that target; migration is `mobile-ios:migration`'s.
 
 ## Logging — `os.Logger` only
 
@@ -210,8 +210,8 @@ Logger.sync.info("Synced \(count, privacy: .public) orders for \(accountID, priv
 ## Handoffs
 
 - Concurrency depth, escape-hatch justifications → [`references/concurrency.md`](references/concurrency.md)
-- Project, targets, Swift 6 mode, lint → `mobile-ios-project-setup`
-- State ownership and architecture → `mobile-ios-architecture`
-- Swift 5 → 6, `ObservableObject` → `@Observable` → `mobile-ios-migration`
-- Telemetry and crash export → `mobile-shared-observability`
-- Kotlin counterpart → `mobile-android-basics`
+- Project, targets, Swift 6 mode, lint → `mobile-ios:project-setup`
+- State ownership and architecture → `mobile-ios:architecture`
+- Swift 5 → 6, `ObservableObject` → `@Observable` → `mobile-ios:migration`
+- Telemetry and crash export → `mobile-<stack>:observability`
+- Kotlin counterpart → `mobile-android:concepts`

@@ -1,6 +1,6 @@
 ---
-name: ba-decision-table
-description: Use when a business decision point is touched by rules from one or more features — build ONE merged DMN-style decision table per decision point with a declared hit policy, run completeness and overlap checks, persist to the KB. Triggers: "what price does this order pay", "do these discounts stack", "which rule wins when both match". Do NOT use for process flows (`ba-process-flow-diagram`), entity lifecycles (`ba-entity-state-grid`), or decision-table TEST design.
+name: decision-table
+description: Use when a business decision point is touched by rules from one or more features — build ONE merged DMN-style decision table per decision point with a declared hit policy, run completeness and overlap checks, persist to the KB. Triggers: "what price does this order pay", "do these discounts stack", "which rule wins when both match". Do NOT use for process flows (`business-analysis:process-flow`), entity lifecycles (`business-analysis:state-grid`), or decision-table TEST design.
 ---
 
 # BA — Decision Modeler
@@ -22,7 +22,7 @@ Overlap/completeness checking **is** conflict detection. That's the whole reason
 ## When NOT to use
 
 - Single-rule decisions with no foreseeable second contributor — a line in the flow's steps table suffices
-- Process paths → `ba-process-flow-diagram`; lifecycles → `ba-entity-state-grid`
+- Process paths → `business-analysis:process-flow`; lifecycles → `business-analysis:state-grid`
 - Deriving **test cases** from a decision table (rule coverage, collapsed tables) → `qa/manual/test-design-techniques` owns those mechanics; this skill produces the table they consume
 
 ## Contract with the KB
@@ -48,7 +48,7 @@ The hit policy is the table's declared rule about **multiple matches**. Choosing
 ## Procedure
 
 1. **Name the decision point** and its output(s) ("order shipping cost: money"). One table = one question.
-2. **Collect every contributing rule from every feature** — the KB's existing table plus the new feature's requirements. Tag each rule row with its owning feature (an `E<n>`/`AREA-` id with a label, per `ba-project-memory`) + source (`US<n> AC<k>`, BRD section).
+2. **Collect every contributing rule from every feature** — the KB's existing table plus the new feature's requirements. Tag each rule row with its owning feature (an `E<n>`/`AREA-` id with a label, per `business-analysis:knowledge-base`) + source (`US<n> AC<k>`, BRD section).
 3. **Enumerate the inputs** and their value ranges/partitions. Inputs must be glossary-checked (two features using "total" differently — pre- vs post-discount — is terminology drift that fakes agreement).
 4. **Build the merged table**; declare the hit policy.
 5. **Run the completeness check**: sweep the input-combination space (collapse with `-` don't-cares); every combination matching no rule → a **gap** finding with the concrete combination as its boundary condition.
@@ -61,8 +61,8 @@ The hit policy is the table's declared rule about **multiple matches**. Choosing
 # Decision — Order shipping cost (DEC-002)
 
 **Created:** <YYYY-MM-DD>
-**Owned by:** `ba-decision-table`
-**Last updated:** <YYYY-MM-DD> by `ba-decision-table` — <one line what changed>
+**Owned by:** `business-analysis:decision-table`
+**Last updated:** <YYYY-MM-DD> by `business-analysis:decision-table` — <one line what changed>
 
 **Question**: what shipping does an order pay? **Output**: money
 **Hit policy**: F (business decided: free-shipping beats flat-rate — BRD §5.1)

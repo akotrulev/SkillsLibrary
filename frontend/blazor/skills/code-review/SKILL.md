@@ -1,5 +1,5 @@
 ---
-name: fe-blazor-code-review
+name: conventions-review
 description: Use when reviewing Blazor code (.NET 8/9/10) — component misuse, lifecycle bugs, missing dispose, double-fetch on prerender, `Action` instead of `EventCallback`, mis-scoped or hardcoded render modes, missing data-testids, UI-correctness smells, JS interop pitfalls. Triggers: "review this Blazor page", "why does this fetch twice", "audit JS interop", "audit the testids". Do NOT use for explanations (`basics`), generating code (`component-writer`), or non-Blazor .NET (`backend/dotnet`'s reviewer).
 ---
 
@@ -143,7 +143,7 @@ Reviews Blazor code (.NET 8/9/10 — Static SSR / Server / WASM / Interactive Au
 
 ### Comments & XML documentation
 
-Load **[`ep-code-comments`](../../../../engineering-practices/code-comments/SKILL.md)** for the rule itself, the complex-flow test that earns a doc comment, the never-comment trivia list, and the severity mapping. This section supplies only the mechanics that differ here. It covers `@code` blocks, code-behind, **and markup** (`@* … *@`, `<!-- … -->`) alike.
+Load **[`engineering-practices/code-comments`](../../../../engineering-practices/code-comments/SKILL.md)** for the rule itself, the complex-flow test that earns a doc comment, the never-comment trivia list, and the severity mapping. This section supplies only the mechanics that differ here. It covers `@code` blocks, code-behind, **and markup** (`@* … *@`, `<!-- … -->`) alike.
 
 | Blazor mechanic | What to check |
 |---|---|
@@ -190,7 +190,7 @@ Severities per `CLAUDE.md`.
 - **`new HttpClient()`** per call — use `IHttpClientFactory` typed clients
 - **`@key={index}` on reorderable lists** — reuse confused with rerender
 - **Server-only secrets in code that compiles to WASM** (the WASM bundle is public)
-- **Comments compensating for naming, and stale comments** — per `ep-code-comments`; a narrated `@code` block means the logic belongs in a service or a child component
+- **Comments compensating for naming, and stale comments** — per `engineering-practices/code-comments`; a narrated `@code` block means the logic belongs in a service or a child component
 
 ## Handoffs
 

@@ -31,7 +31,7 @@ not typed records.
 
 - Mock, abort, modify, hold, assert, HAR replay, offline, security headers, TLS → `references/playwright-routes.md`
 - A client with no Playwright `Page`, or cross-browser capture → `references/proxy.md`
-- TypeScript and .NET CDP → `qa-network-mocking-typescript`, `qa-network-mocking-dotnet`
+- TypeScript and .NET CDP → `qa-typescript:network-mocking`, `qa-dotnet:network-mocking`
 
 ## Inputs needed
 
@@ -348,4 +348,4 @@ budget", and both report. A missing metric is `null`, which AssertJ reports as a
 - `qa/java/skills/ui-test-author/playwright` — `BaseTest`, page objects, `references/assertions.md` §5.
 - `qa/java/skills/evidence-capture` — traces and reading a failure.
 - `qa/cicd/java/skills/ci-pipelines` — the UI job (Chromium).
-- `qa-network-mocking-typescript`, `qa-network-mocking-dotnet` — the sibling lanes.
+- `qa-typescript:network-mocking`, `qa-dotnet:network-mocking` — the sibling lanes.

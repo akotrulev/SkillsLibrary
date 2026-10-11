@@ -108,4 +108,4 @@ Introductory, promotional and win-back offers come from `product.subscription?.p
 
 - `Transaction.updates`, `currentEntitlements`, `AppStore.sync()` — iOS 15+. `AppStore.showManageSubscriptions` — iOS 15+. Win-back offers — iOS 18+.
 - SwiftUI: `SubscriptionStoreView` / `StoreView` give a system paywall (iOS 17+); they do not change the server-ownership rule.
-- `SKPaymentQueue` / receipt files / `verifyReceipt` are the legacy lane: flag, migrate with `mobile-ios-migration`, never extend.
+- `SKPaymentQueue` / receipt files / `verifyReceipt` are the legacy lane: flag, migrate with `mobile-ios:migration`, never extend.

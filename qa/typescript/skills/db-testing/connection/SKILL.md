@@ -1,6 +1,6 @@
 ---
-name: qa-db-connection-typescript
-description: Use when the user asks to connect from Node + TypeScript tests to a real database (Postgres / MySQL / Mongo) to seed fixtures, run read-only assertion queries, and clean up safely. Triggers: "connect from our Vitest tests to Postgres", "node-postgres probe for the orders table", "seed and clean a SQL fixture without leaks". Do NOT use for the container lifecycle (`qa-db-testing-testcontainers-typescript`) or SQL-safety guardrails (`qa-db-verification-queries-typescript`).
+name: db-connection
+description: Use when the user asks to connect from Node + TypeScript tests to a real database (Postgres / MySQL / Mongo) to seed fixtures, run read-only assertion queries, and clean up safely. Triggers: "connect from our Vitest tests to Postgres", "node-postgres probe for the orders table", "seed and clean a SQL fixture without leaks". Do NOT use for the container lifecycle (`qa-typescript:db-testcontainers`) or SQL-safety guardrails (`qa-typescript:db-verification-queries`).
 ---
 
 # QA — DB Testing Client (TypeScript / Node 24)

@@ -17,7 +17,7 @@ One row per protected resource. **Always** localize the string in the `InfoPlist
 | Local network | `NSLocalNetworkUsageDescription` (+ `NSBonjourServices`) | no API — appears on first use | first connection |
 | Motion | `NSMotionUsageDescription` | `CMMotionActivityManager.authorizationStatus()` | first query |
 | Speech | `NSSpeechRecognitionUsageDescription` | `SFSpeechRecognizer.authorizationStatus()` | `SFSpeechRecognizer.requestAuthorization` |
-| Notifications | none | `UNUserNotificationCenter.notificationSettings()` | `requestAuthorization` — `mobile-ios-notifications-and-links` |
+| Notifications | none | `UNUserNotificationCenter.notificationSettings()` | `requestAuthorization` — `mobile-ios:push-and-deep-links` |
 | Tracking (ATT) | `NSUserTrackingUsageDescription` | `ATTrackingManager.trackingAuthorizationStatus` | `ATTrackingManager.requestTrackingAuthorization` after the pre-prompt; **EU alternative from iOS 27.2** — store-compliance owns it |
 
 ## Needs no permission
@@ -38,7 +38,7 @@ Recheck on `scenePhase == .active`.
 
 ## Required Reason and privacy manifest
 
-Permission **prompts** are not manifest entries, but code that backs these features often touches Required Reason APIs (file timestamps when caching a photo, disk space before a recording, `UserDefaults` for "pre-prompt shown"). Add the matching `NSPrivacyAccessedAPITypes` entries; confirm with Archive → *Generate Privacy Report* ([`mobile-shared-store-compliance`](../../../../_shared/store-compliance/references/apple.md) § 2). Collected data (location, photos, contacts) is declared in `NSPrivacyCollectedDataTypes` and in the App Privacy answers.
+Permission **prompts** are not manifest entries, but code that backs these features often touches Required Reason APIs (file timestamps when caching a photo, disk space before a recording, `UserDefaults` for "pre-prompt shown"). Add the matching `NSPrivacyAccessedAPITypes` entries; confirm with Archive → *Generate Privacy Report* ([`mobile-<stack>:store-compliance`](../../../../_shared/store-compliance/references/apple.md) § 2). Collected data (location, photos, contacts) is declared in `NSPrivacyCollectedDataTypes` and in the App Privacy answers.
 
 ## The pre-prompt, once
 

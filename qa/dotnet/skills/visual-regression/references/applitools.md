@@ -259,5 +259,5 @@ A functional failure in an Eyes class still gets `BaseTest`'s trace, screenshot 
 - `qa/dotnet/skills/ui-test-author/playwright` — `BaseTest` and page objects.
 - `qa/cicd/dotnet/skills/ci-pipelines` — the schedule gate and the secret store.
 - `qa/reporting/dotnet/skills/test-reports` — Allure.NUnit wiring, global attachments.
-- `qa-visual-regression-typescript` (`@applitools/eyes-playwright`), `qa-visual-regression-java`
+- `qa-typescript:visual-regression` (`@applitools/eyes-playwright`), `qa-java:visual-regression`
   (`eyes-playwright-java5`).

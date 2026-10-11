@@ -1,6 +1,6 @@
 # Workshop Booking — Experience Plan
 
-**Date:** 2026-08-27 · **Written by:** `be-shared-experience-plan` · **Discipline:** `design-ux-patterns`
+**Date:** 2026-08-27 · **Written by:** `dev:plan-experience` · **Discipline:** `design:app-structure`
 **Inputs:** `./blueprint.md` (§2 capabilities, §3b FLOW-001/002, §6 routing) · `./data-model.md`
 **Frontend agent:** `fe-react` — per the routing map (Next.js App Router, MUI)
 

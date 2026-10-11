@@ -1,6 +1,6 @@
 ---
-name: mobile-shared-security
-description: Use when writing or reviewing mobile app code that stores data, talks to a server, handles auth tokens, opens links, hosts a WebView or exports components — secure coding keyed to OWASP MASVS 2.1, MASWE and MASTG. Triggers "where do tokens live", "is this safe to ship", "review mobile security". Do NOT use for scanning a built APK/IPA (qa `mobile-app-scan`), device testing (`mobile-runtime-testing`), or store rules (`mobile-shared-store-compliance`).
+name: security
+description: Use when writing or reviewing mobile app code that stores data, talks to a server, handles auth tokens, opens links, hosts a WebView or exports components — secure coding keyed to OWASP MASVS 2.1, MASWE and MASTG. Triggers "where do tokens live", "is this safe to ship", "review mobile security". Do NOT use for scanning a built APK/IPA (qa `mobile-app-scan`), device testing (`mobile-runtime-testing`), or store rules (`mobile-<stack>:store-compliance`).
 ---
 
 # Mobile — Secure Coding (MASVS 2.1)
@@ -20,9 +20,9 @@ The dev-side half of mobile security: the rules an agent follows **while writing
 
 - A built artifact needs scanning → qa `mobile-app-scan` (peer, not loaded)
 - Pinning, storage-at-runtime, jailbreak / root, tamper resistance must be *proven* → qa `mobile-runtime-testing` (peer, not loaded)
-- App Store / Play rules (privacy manifest, deletion, declarations) → `mobile-shared-store-compliance`
+- App Store / Play rules (privacy manifest, deletion, declarations) → `mobile-<stack>:store-compliance`
 - Server-side auth, rate limits, authorisation → the `be-*` stack (MASVS-AUTH-1 lives there)
-- Auth0 integration mechanics → `auth-auth0-react-native` / `auth-auth0-ios` / `auth-auth0-android`
+- Auth0 integration mechanics → `mobile-react-native:auth0` / `mobile-ios:auth0` / `mobile-android:auth0`
 
 ## Version lane (verified 2026-10-10)
 
@@ -111,7 +111,7 @@ Resilience is defence in depth for apps whose threat model includes a hostile de
 | PRIVACY-1 minimise data | Request the narrowest permission, at the moment of use; collect only what a feature needs | 0066 · 0069 | A `0254–0257` · I `0360` `0362` |
 | PRIVACY-2 prevent identification | No stable device identifier for tracking; pseudonymise analytics | 0067 · 0068 | A `0318` `0319` · I `0281` |
 | PRIVACY-3 transparency | Declared SDK data matches behaviour (manifest, Data safety) | 0070 · 0072 · 0073 · 0074 | A `0206` · I `0281` |
-| PRIVACY-4 user control | Consent before collection, deletion in-app, preferences honoured | 0071 · 0076 · 0077 · 0078 | store rules → `mobile-shared-store-compliance` |
+| PRIVACY-4 user control | Consent before collection, deletion in-app, preferences honoured | 0071 · 0076 · 0077 · 0078 | store rules → `mobile-<stack>:store-compliance` |
 
 ## What a source read cannot prove
 
@@ -136,7 +136,7 @@ Every report carries the line: *static read only — MASVS-NETWORK-2, STORAGE ru
 | M3 | Insecure Authentication / Authorization | AUTH-2 · AUTH-3; server side is the backend's |
 | M4 | Insufficient Input / Output Validation | CODE-4 · PLATFORM-1 · PLATFORM-2 |
 | M5 | Insecure Communication | NETWORK-1 · NETWORK-2 |
-| M6 | Inadequate Privacy Controls | PRIVACY-1…4 · STORAGE-2; store rules in `mobile-shared-store-compliance` |
+| M6 | Inadequate Privacy Controls | PRIVACY-1…4 · STORAGE-2; store rules in `mobile-<stack>:store-compliance` |
 | M7 | Insufficient Binary Protections | RESILIENCE-1…4 · CODE-3 — defence in depth |
 | M8 | Security Misconfiguration | PLATFORM-1 · NETWORK-1 · CODE-3 — exported components, cleartext, debuggable |
 | M9 | Insecure Data Storage | STORAGE-1 · STORAGE-2 |
@@ -161,7 +161,7 @@ Every report carries the line: *static read only — MASVS-NETWORK-2, STORAGE ru
 ## Related skills & peers
 
 - qa `mobile-app-scan` / `mobile-runtime-testing` *(peers, not loaded)* — the static-binary and device halves; fixes land back here
-- `mobile-shared-store-compliance` — privacy manifest, deletion, declarations
-- `mobile-shared-release` — signing keys, CI secrets
-- `auth-auth0-react-native` · `auth-auth0-ios` · `auth-auth0-android` — token handling in the Auth0 SDKs
+- `mobile-<stack>:store-compliance` — privacy manifest, deletion, declarations
+- `mobile-<stack>:release` — signing keys, CI secrets
+- `mobile-react-native:auth0` · `mobile-ios:auth0` · `mobile-android:auth0` — token handling in the Auth0 SDKs
 - `be-*` stacks — server-side authorisation (MASVS-AUTH-1)

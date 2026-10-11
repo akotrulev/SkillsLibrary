@@ -26,7 +26,7 @@ command and event are wrapped in one `cdp` fixture with intent names (`throttle`
 
 - Mock, abort, modify, assert, HAR replay, offline, security headers, TLS → `references/playwright-routes.md`
 - A non-Playwright client, or cross-browser capture → `references/proxy.md`
-- Java and .NET CDP → `qa-network-mocking-java`, `qa-network-mocking-dotnet`
+- Java and .NET CDP → `qa-java:network-mocking`, `qa-dotnet:network-mocking`
 
 ## Inputs needed
 
@@ -295,5 +295,5 @@ budget", and both report.
 - `references/playwright-routes.md` — the layer above; reach for it first, including for headers and TLS.
 - `references/proxy.md` — out-of-browser capture for non-Playwright clients.
 - `qa/typescript/skills/ui-test-author/playwright` — the fixtures and page objects these extend.
-- `qa-network-mocking-java`, `qa-network-mocking-dotnet` — the same hooks in Java and .NET.
+- `qa-java:network-mocking`, `qa-dotnet:network-mocking` — the same hooks in Java and .NET.
 - `qa/cicd/typescript/skills/ci-pipelines` — runs these specs in the Chromium project.

@@ -1,9 +1,9 @@
 ---
-name: qa-api-client-writer-dotnet
-description: Use when the user asks to create a new API client or `*Client.cs` file in the Accelerator `ApiTests` project (RestSharp, .NET 10 (8-9 supported)). Triggers: "write an API client for X", "add a Client.cs for the {resource} endpoints", "scaffold {Resource}Client". Do NOT use for DTOs (`qa-api-models-dotnet`) or the tests themselves (`qa-api-test-writer-dotnet`).
+name: api-client-writer
+description: Use when the user asks to create a new API client or `*Client.cs` file in the Accelerator `ApiTests` project (RestSharp, .NET 10 (8-9 supported)). Triggers: "write an API client for X", "add a Client.cs for the {resource} endpoints", "scaffold {Resource}Client". Do NOT use for DTOs (`qa-dotnet:api-models`) or the tests themselves (`qa-dotnet:api-tests`).
 ---
 
-# qa-api-client-writer-dotnet
+# qa-dotnet:api-client-writer
 
 Generator skill. Scaffolds a single `{Resource}Client.cs` file in the Accelerator `ApiTests` project, following the conventions below.
 
@@ -18,7 +18,7 @@ Generator skill. Scaffolds a single `{Resource}Client.cs` file in the Accelerato
 - Writing the test fixture or test cases — that's `qa/dotnet/skills/api-test-author/writer`.
 - Reviewing an existing client for convention drift — that's a reviewer skill.
 - Authoring DTOs the client returns — use `qa/dotnet/skills/api-models` first, then come back here.
-- Reacting to a **new version of a swagger/OpenAPI spec** — start at `qa/_shared/api-spec-assets` (`qa-api-spec-assets-shared`): it replaces the stored spec asset in place and derives from `git diff` exactly which client methods changed. Come back here for those methods only.
+- Reacting to a **new version of a swagger/OpenAPI spec** — start at `qa/_shared/api-spec-assets` (`qa-<stack>:api-spec-assets`): it replaces the stored spec asset in place and derives from `git diff` exactly which client methods changed. Come back here for those methods only.
 - Java stack (RestAssured) — use `qa/java/skills/api-client-writer`.
 - TypeScript stack (native `fetch` + Zod) — use `qa/typescript/skills/api-client-writer`.
 - Any non-.NET / non-RestSharp stack not covered by the siblings above.

@@ -1,11 +1,11 @@
 ---
-name: qa-security-active-scan
+name: active-scan
 description: Use when running an ACTIVE / full DAST scan against a running app you own — injecting SQLi/XSS/path-traversal payloads — driven by ZAP's YAML Automation Framework. Never run against production or a shared environment. Triggers "run an active DAST scan", "set up a ZAP full scan", "attack our API from its OpenAPI spec", "add a pre-release DAST gate". Not for the passive PR gate (`passive-scan`), known CVEs (`nuclei`), or authz (`permission-testing`).
 ---
 
 # Security Testing — ZAP Automation Framework (active / full DAST, shared)
 
-The **active-scan** sibling of the passive `qa-security-testing-passive-scan-*` skills. Where baseline
+The **active-scan** sibling of the passive `qa-<stack>:passive-scan` skills. Where baseline
 *observes* a running app and flags what it can see (headers, cookie flags, info leaks) with **no
 payloads**, this skill drives the **active scanner** that *injects* SQLi / XSS / path-traversal payloads
 to confirm injection-class vulnerabilities — via the modern **YAML Automation Framework (AF)**, the
@@ -13,7 +13,7 @@ recommended replacement for the legacy packaged scripts.
 
 This is **language-agnostic** — a `docker run` over a declarative `plan.yaml`, no Java/.NET/TS SDK in the
 gate. That is *why* it is one shared skill, not triplicated: there is nothing per-stack to wrap. Load
-**`qa-security-shared` alongside it** for the OWASP map, the authorization-to-scan rule, the ticketed-triage
+**`qa-<stack>:security-foundations` alongside it** for the OWASP map, the authorization-to-scan rule, the ticketed-triage
 discipline, and SARIF → code-scanning consolidation — this skill does not repeat those tables.
 
 > **Naming / governance.** Refer to it as **"ZAP by Checkmarx (formerly OWASP ZAP)"**. ZAP **left OWASP**
@@ -26,11 +26,11 @@ discipline, and SARIF → code-scanning consolidation — this skill does not re
 | Need | Use | Why |
 |------|-----|-----|
 | **Active** DAST — inject SQLi/XSS/traversal payloads, confirm injection on a **throwaway env you own** | **this skill (AF `activeScan`)** | The active scanner mutates state; the AF is the modern declarative way to drive it |
-| Passive header/cookie/info-leak gate on **every PR** (no payloads, safe, ~1 min) | `qa-security-testing-passive-scan-{java,dotnet,typescript}` | Passive only — observes, never attacks; right for the per-PR gate |
+| Passive header/cookie/info-leak gate on **every PR** (no payloads, safe, ~1 min) | `qa-<stack>:passive-scan` | Passive only — observes, never attacks; right for the per-PR gate |
 | Authenticated **API** DAST from an OpenAPI/GraphQL/SOAP/Postman spec | **this skill** (AF importers / `zap-api-scan.py -t … -f openapi -U`) | AF imports the spec, seeds URLs, auto-tunes the active scan for APIs |
-| **Schema-driven property fuzzing** (generate cases from the spec, assert 5xx/contract breaks) | `qa-security-testing-api-fuzzing` (Schemathesis) | Property-based fuzzing of the spec, not ZAP's attack rules |
-| **Template / known-CVE** scanning of hosts/services | `qa-security-known-vuln-scan` | Community CVE/misconfig templates, not a spider+active-rule DAST |
-| The OWASP map, scan-authorization rule, triage discipline, SARIF consolidation | `qa-security-shared` | The backbone every security skill hangs off — load it alongside |
+| **Schema-driven property fuzzing** (generate cases from the spec, assert 5xx/contract breaks) | `qa-<stack>:api-fuzzing` (Schemathesis) | Property-based fuzzing of the spec, not ZAP's attack rules |
+| **Template / known-CVE** scanning of hosts/services | `qa-<stack>:known-vuln-scan` | Community CVE/misconfig templates, not a spider+active-rule DAST |
+| The OWASP map, scan-authorization rule, triage discipline, SARIF consolidation | `qa-<stack>:security-foundations` | The backbone every security skill hangs off — load it alongside |
 
 **Rule of thumb:** active DAST is **slow, attack-bearing, and unsafe against prod/shared** — it is *not* a
 per-PR gate. Run it against an **ephemeral, authorized** environment on a slower cadence (nightly /
@@ -72,7 +72,7 @@ These sections live in `references/details.md` — **read it when the task touch
 
 > **The `activeScan` job *injects* SQLi / XSS / path-traversal / command-injection payloads and will
 > create, mutate, and delete data. It must never run against production or any shared environment.** This is
-> the hard `qa-security-shared` authorization-to-scan rule — deferred there, restated loud here because this
+> the hard `qa-<stack>:security-foundations` authorization-to-scan rule — deferred there, restated loud here because this
 > is the skill that actually fires the payloads.
 
 - Active → a **throwaway environment you own and are explicitly authorized to attack**: a
@@ -119,7 +119,7 @@ browser-based path; pick the method that matches the app.
 
 - **Bearer / API tokens**: use the **`replacer`** job (shown above) to inject `Authorization: Bearer …` on
   every request — the simplest path for token-auth APIs. Acquire the token however the project does (see
-  `qa-test-login-tokens-{java,dotnet,typescript}`).
+  `qa-<stack>:test-login-tokens`).
 - **Secrets via env vars, read lazily — never in the committed plan/context.** Reference them as `${ZAP_USER}`
   / `${ZAP_PASS}` / `${ZAP_BEARER}` placeholders; ZAP resolves them from the process environment at run time.
   No credentials in `plan.yaml`, `*.context`, or `cmd_options` (global rule: no secrets in config).
@@ -129,8 +129,8 @@ browser-based path; pick the method that matches the app.
 ## Running it — GitHub Action + raw Docker
 
 CI is the natural home. The official **`zaproxy/action-af`** Action runs an AF plan, uploads the report, and
-can open a tracking issue (cross-link `qa-ci-pipelines-{java,dotnet,typescript}` +
-`qa-security-shared` for the SARIF upload step):
+can open a tracking issue (cross-link `qa-<stack>:ci-pipelines` +
+`qa-<stack>:security-foundations` for the SARIF upload step):
 
 ```yaml
 # .github/workflows/zap-active.yml — active DAST on a slower cadence, NOT every PR
@@ -189,9 +189,9 @@ Emit **two** reports from the AF `report` jobs (shown in the plan): a **SARIF** 
 
 - **SARIF** → upload to the platform's code-scanning surface (`github/codeql-action/upload-sarif`) so
   findings show **inline on the PR/commit**, de-duplicate run-over-run, and track fixed/new state — the same
-  consolidation `qa-security-shared` mandates across every tool.
+  consolidation `qa-<stack>:security-foundations` mandates across every tool.
 - **HTML/JSON** → attach to **Allure** + upload as a CI artifact so a failing run names the alerts without
-  re-scanning. Cross-link `qa-test-reports-{java,dotnet,typescript}`.
+  re-scanning. Cross-link `qa-<stack>:test-reports`.
 - Bake known-noise triage into the **`alertFilter`** job (FPs → "False Positive", must-fix rules raised),
   then gate on **new** High/Medium alerts.
 
@@ -205,7 +205,7 @@ Emit **two** reports from the AF `report` jobs (shown in the plan): a **SARIF** 
 
 > The active scan **complements, does not replace** SCA / dependency-scan (A03), **functional
 > access-control testing** (A01 / API1 / API3 / API5 — BOLA/IDOR/BFLA, which scanners are blind to; see
-> `qa-security-shared` and the stack-native `permission-testing`), and **manual penetration testing**
+> `qa-<stack>:security-foundations` and the stack-native `permission-testing`), and **manual penetration testing**
 > for business-logic abuse. A clean active scan does **not** mean "secure" — it means the injection-class
 > automatable layer passed. State that in every report.
 
@@ -213,7 +213,7 @@ Emit **two** reports from the AF `report` jobs (shown in the plan): a **SARIF** 
 
 - **Running the active scan against prod or a shared env.** It injects payloads and mutates/destroys data.
   *Fix:* an authorized, **throwaway env you own** (Testcontainers/compose), spun on a readiness condition;
-  confirm authorization first. (The hard `qa-security-shared` rule.)
+  confirm authorization first. (The hard `qa-<stack>:security-foundations` rule.)
 - **Scanning before the app is ready** (sleep-then-scan). Races startup → false-clean / connection errors.
   *Fix:* wait on a **condition** (`compose up --wait` / a Testcontainers wait strategy / an HTTP-health poll
   loop) — never a fixed sleep.
@@ -224,7 +224,7 @@ Emit **two** reports from the AF `report` jobs (shown in the plan): a **SARIF** 
   muted or flaps. *Fix:* `alertFilter` to flip ticketed FPs and raise must-fix rules, then gate on **new**
   High/Medium from the parsed SARIF.
 - **Blanket-flipping alerts to "False Positive" to make it green.** Buries real findings. *Fix:* every
-  `alertFilter` FP carries a ticket + reason; shrink the list over time (the `qa-security-shared` discipline).
+  `alertFilter` FP carries a ticket + reason; shrink the list over time (the `qa-<stack>:security-foundations` discipline).
 - **Putting credentials/tokens in the committed `plan.yaml` / `*.context`.** *Fix:* `${ENV}` placeholders
   resolved from process env, read lazily; pass secrets via CI secrets → container env.
 - **Treating a clean active scan as "secure."** It covers injection-class flaws on the crawled surface only —
@@ -240,7 +240,7 @@ Emit **two** reports from the AF `report` jobs (shown in the plan): a **SARIF** 
 
 - **Active scan = attack payloads + state mutation.** Never against prod or a shared env — only a throwaway
   env you own and are **authorized** to attack, spun on a readiness condition (never a fixed sleep). Defer
-  the rule to `qa-security-shared`; obey it here.
+  the rule to `qa-<stack>:security-foundations`; obey it here.
 - **Prefer the YAML Automation Framework** (`zap.sh -cmd -autorun plan.yaml`) over the legacy packaged
   scripts; reach for `zap-api-scan.py` only for the one-shot API convenience.
 - **No language SDK for the gate** — it is a `docker run` over a declarative plan; that is why this is one
@@ -255,14 +255,14 @@ Emit **two** reports from the AF `report` jobs (shown in the plan): a **SARIF** 
 
 ## Cross-references
 
-- `qa-security-shared` — **load alongside**: the OWASP map, the authorization-to-scan rule, the ticketed
+- `qa-<stack>:security-foundations` — **load alongside**: the OWASP map, the authorization-to-scan rule, the ticketed
   triage discipline, and SARIF → code-scanning consolidation this skill defers to (does not repeat).
-- `qa-security-testing-passive-scan-{java,dotnet,typescript}` — the **passive**, every-PR sibling
+- `qa-<stack>:passive-scan` — the **passive**, every-PR sibling
   (`passive-scan.py`, no payloads, safe). This skill is the active/AF counterpart; run both, different layers.
-- `qa-security-testing-api-fuzzing` — Schemathesis schema-driven property fuzzing (generate cases from the
+- `qa-<stack>:api-fuzzing` — Schemathesis schema-driven property fuzzing (generate cases from the
   spec) — complementary to ZAP's attack-rule DAST.
-- `qa-security-known-vuln-scan` — template/known-CVE host scanning — a different layer again.
-- `qa-test-login-tokens-{java,dotnet,typescript}` — acquire the bearer/user tokens the `replacer` job injects.
-- `qa-ci-pipelines-{java,dotnet,typescript}` + `qa-security-shared` — the `zaproxy/action-af`
+- `qa-<stack>:known-vuln-scan` — template/known-CVE host scanning — a different layer again.
+- `qa-<stack>:test-login-tokens` — acquire the bearer/user tokens the `replacer` job injects.
+- `qa-<stack>:ci-pipelines` + `qa-<stack>:security-foundations` — the `zaproxy/action-af`
   job, SARIF upload, artifact, slower cadence (nightly/pre-release, not per-PR).
-- `qa-test-reports-{java,dotnet,typescript}` — attach the HTML/JSON report + alert summary.
+- `qa-<stack>:test-reports` — attach the HTML/JSON report + alert summary.

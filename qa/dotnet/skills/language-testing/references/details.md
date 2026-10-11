@@ -1,4 +1,4 @@
-# Deep-dive details — `qa-language-testing-dotnet`
+# Deep-dive details — `qa-dotnet:language-testing`
 
 Sections moved out of SKILL.md for on-demand loading. Read what the task needs. Every browser fixture here
 derives from `BaseTest` (`qa/dotnet/skills/ui-test-author/playwright/assets/BaseTest.cs`) and takes its culture
@@ -178,7 +178,7 @@ public class PseudoI18nTests(string locale, string timezoneId) : BaseTest
 ```
 
 Pseudo-loc needs **zero translators**, so it is the first i18n gate to wire into CI. Pair the overflow check
-with `qa-visual-regression-dotnet` for a pixel record.
+with `qa-dotnet:visual-regression` for a pixel record.
 
 ## 4b. Translation-key coverage — a static resource diff (idea #4)
 
@@ -298,7 +298,7 @@ public class PluralI18nTests
 
 ## Locale matrix — one journey across every supported culture
 
-`qa-data-driven-testing-dotnet`'s row binding applied to cultures: the fixture is the row, so each culture gets
+`qa-dotnet:data-driven-testing`'s row binding applied to cultures: the fixture is the row, so each culture gets
 its own context with its own `Locale` and `TimezoneId`, and the rows run as parallel fixtures.
 
 ```csharp

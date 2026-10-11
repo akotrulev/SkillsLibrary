@@ -1,5 +1,5 @@
 ---
-name: qa-api-spec-assets-shared
+name: api-spec-assets
 description: Use when an OpenAPI/Swagger spec is handed to an API test suite — store it as a dated, committed asset, and on every later update derive from `git diff` exactly which DTOs and clients must change. Cross-stack. Triggers "here is the swagger json", "the API changed — update our DTOs/clients", "update from the diff". Do NOT use to author the DTOs/clients themselves (`api-models` / `api-client-writer`), to write tests (`api-test-author/*`), or for Pact contracts (`api-contract-testing`).
 ---
 
@@ -199,5 +199,5 @@ Renamed: <old name> → <new name (today)>   ← last step, after the edits land
 
 - The DTO/client code itself belongs to `api-models` / `api-client-writer` — this skill produces the *work list*, they produce the code.
 - New tests for new endpoints and new boundary/negative cases belong to `api-test-author/*`; a formal technique-derived case suite belongs to `qa-test-case-designer`.
-- Consumer-driven contracts (Pact) are a different lane entirely: `api-contract-testing` + `qa-api-contract-testing-shared`. This skill diffs a spec the provider handed over; Pact verifies a contract the consumer wrote.
+- Consumer-driven contracts (Pact) are a different lane entirely: `api-contract-testing` + `qa-<stack>:contract-pact`. This skill diffs a spec the provider handed over; Pact verifies a contract the consumer wrote.
 - Generating a client with an OpenAPI **codegen tool** is out of scope and generally rejected in this library: the suite's clients and DTOs follow house conventions the stack skills own, and a codegen run overwrites them.

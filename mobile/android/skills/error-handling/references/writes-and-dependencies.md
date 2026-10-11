@@ -2,7 +2,7 @@
 
 Three surfaces where the failure is **not a read**: a write that costs work (and may have half-happened), a third-party SDK that fails on its own schedule, and the device running out of room.
 
-*Deep dive for [`mobile-android-error-handling`](../SKILL.md). Samples have no inline comments (CLAUDE.md § Comments).*
+*Deep dive for [`mobile-android:error-handling`](../SKILL.md). Samples have no inline comments (CLAUDE.md § Comments).*
 
 ---
 
@@ -90,7 +90,7 @@ Maps, payment sheets, push, analytics, crash reporters, feature flags, chat widg
 - **A permission denied is not a failure** — it is the working denied screen ([`device-features`](../../device-features/SKILL.md)).
 - **A third party's `401` or `5xx` is never your session's problem** — it never starts the `401` ladder.
 - **Load heavy embeds lazily** (a static map snapshot that mounts the live `MapView` on interaction) so the failure is cheap and launch is faster ([`performance`](../../performance/SKILL.md)).
-- **Privacy**: a third-party failure report goes through the same redaction as any telemetry ([`mobile-shared-observability`](../../../../_shared/observability/SKILL.md)).
+- **Privacy**: a third-party failure report goes through the same redaction as any telemetry ([`mobile-<stack>:observability`](../../../../_shared/observability/SKILL.md)).
 
 ## Storage is full — degrade to memory, say it once
 

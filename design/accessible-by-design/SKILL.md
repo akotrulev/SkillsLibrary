@@ -1,5 +1,5 @@
 ---
-name: design-accessible-by-design
+name: accessibility
 description: Use when the accessibility decision is a DESIGN decision — the WCAG 2.2 criteria code cannot fix (target size, non-drag alternative, accessible auth, redundant entry, consistent help, focus not obscured), cognitive design, and layout for translation (expansion, RTL, CJK). Triggers "is this design accessible", "WCAG 2.2 compliance", "European Accessibility Act", "will this survive translation". Not for accessible markup (a stack's `accessibility`) or scanning a build (qa `accessibility-testing`).
 ---
 
@@ -17,7 +17,7 @@ Owns the accessibility work that happens **before there is code to audit**: the 
 
 Automated tooling catches a minority of WCAG failures and almost none of the seven criteria below — they are not scannable, because a machine cannot tell whether an alternative path *exists*, only whether an attribute does. Decide here; author there; prove it in QA.
 
-**Corpus authority.** The facts this skill decides with come from the vendored [`design-ui-ux-pro-max`](../ui-ux-pro-max/SKILL.md) corpus — **it is the source of truth, and where it and this skill disagree on a fact, the corpus wins.** Search one **observable outcome** at a time with explicit accessibility terms — `"focus not obscured"`, `"dragging movements"`, `"accessible authentication"`, `"error summary validation"` — then, if needed, the component domain, then the stack:
+**Corpus authority.** The facts this skill decides with come from the vendored [`design:corpus`](../ui-ux-pro-max/SKILL.md) corpus — **it is the source of truth, and where it and this skill disagree on a fact, the corpus wins.** Search one **observable outcome** at a time with explicit accessibility terms — `"focus not obscured"`, `"dragging movements"`, `"accessible authentication"`, `"error summary validation"` — then, if needed, the component domain, then the stack:
 
 ```bash
 python3 "${CLAUDE_PLUGIN_ROOT}/design/ui-ux-pro-max/scripts/search.py" "<observable outcome>" --domain ux
@@ -112,4 +112,4 @@ Localization mechanics belong to a stack's `languages` skill; the **layout const
 - [`design/ux-patterns`](../ux-patterns/SKILL.md) — density (§5), wizards and forms (§3/§4), first run (§8): the decisions this skill constrains.
 - [`design/ux-writing`](../ux-writing/SKILL.md) — plain language, one-name-one-concept, and the no-visual-references rule, which is this discipline expressed in copy.
 - [`design/design-tokens`](../design-tokens/SKILL.md) — where the focus-indicator and target-size decisions become tokens.
-- [`design-ui-ux-pro-max`](../ui-ux-pro-max/SKILL.md) — outcome-searchable accessibility guidelines and the canonical pre-delivery checklist.
+- [`design:corpus`](../ui-ux-pro-max/SKILL.md) — outcome-searchable accessibility guidelines and the canonical pre-delivery checklist.

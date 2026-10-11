@@ -1,5 +1,5 @@
 ---
-name: qa-db-connection-dotnet
+name: db-connection
 description: Use when connecting from .NET 10 (8-9) tests to a real database (Postgres / SQL Server / SQLite / Mongo) to seed fixtures, run read-only assertion queries, and clean up safely. Triggers "connect from these tests to Postgres", "assert the row was written in SQL", "seed and clean a SQL fixture without leaks". Not for container lifecycle (`db-testing/testcontainers`) or query guardrails (`db-testing/verification-queries`).
 ---
 

@@ -1,6 +1,6 @@
 # Falco — runtime threat detection + detection validation (deep dive)
 
-The blue half of `devops-container-runtime-security`: an eBPF DaemonSet that watches kernel syscalls on every
+The blue half of `devops:container-runtime-security`: an eBPF DaemonSet that watches kernel syscalls on every
 node and fires the moment a container misbehaves — **then the discipline of asserting the rule actually
 fired.** This file is the full deployment / rule-authoring / validation reference; the SKILL.md holds the
 decision matrix.

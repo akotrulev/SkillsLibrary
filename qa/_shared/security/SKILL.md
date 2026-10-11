@@ -1,5 +1,5 @@
 ---
-name: qa-security-shared
+name: security-foundations
 description: Cross-stack security-testing backbone — maps OWASP Top 10 (2025) and API Security Top 10 (2023) risks to this library's scanner gates and stack-native security skills, with severity/gating policy, the authorization-to-scan rule, and triage discipline. The planning layer the `qa-security` agent drives step by step. Triggers "what security testing do we need", "map our coverage to OWASP", "which security skill applies", "triage these findings". Do NOT load standalone to run a scan.
 ---
 

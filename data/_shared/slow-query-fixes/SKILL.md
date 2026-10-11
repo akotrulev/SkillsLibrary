@@ -1,5 +1,5 @@
 ---
-name: data-slow-query-fixes
+name: query-tuning
 description: Use when the user is diagnosing a slow query or designing an index across any SQL or document engine — applying universal principles (selectivity, projection, paging, plan analysis, ESR rule) before reaching for engine-specific tactics. Triggers: "why is this query slow", "design an index for X", "should I paginate with offset", "ESR rule", "missing index", "N+1 query". Do NOT use for engine-specific syntax (use `data/<db>`) or caching layer questions (use `data/_shared/caching-patterns`).
 ---
 

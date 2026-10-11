@@ -224,9 +224,9 @@ test(
 ## Cross-references
 
 - `references/axe-playwright.md` — the per-component gate inside the functional run.
-- `qa-accessibility-testing-dotnet`, `qa-accessibility-testing-java` — the CLI-port siblings.
+- `qa-dotnet:accessibility-testing`, `qa-java:accessibility-testing` — the CLI-port siblings.
 - `qa/typescript/skills/ui-test-author/playwright` — the page objects, the canonical config and its
   `projects`.
 - `qa/typescript/skills/evidence-capture` — where the reports and failure evidence land.
 - `qa/cicd/typescript/skills/ci-pipelines` — the `lhci autorun` job and artifact upload.
-- `qa-exploratory-charter-writer` — the manual and assistive-technology testing no score covers.
+- `qa-<stack>:exploratory-charter-writer` — the manual and assistive-technology testing no score covers.

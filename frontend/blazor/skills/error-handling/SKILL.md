@@ -1,5 +1,5 @@
 ---
-name: fe-blazor-error-handling
+name: error-handling
 description: Use when a Blazor app (.NET 8/9/10) must fail safely and recover — `ErrorBoundary` placement, `OnErrorAsync` logging, interactive-Server reconnection UX (net10 `ReconnectModal`, circuit pause/resume), Polly on `HttpClient`, three-state data regions with retry, actionable empty states. Triggers: "an unhandled exception blanks my app", "add error boundaries", "show a reconnect UI when the circuit drops". Do NOT use to PRODUCE the categorized error (`data-fetching` — this RENDERS it).
 ---
 

@@ -1,11 +1,11 @@
 ---
-name: mobile-android-error-handling
-description: Use when a failure must not blank a Compose screen — loading/loaded/failed/stale/offline regions, failure scoped below search and filters, the safe-area error banner, timeouts rendered, 401 re-auth in place, forced update on version skew, lifecycle resume, process-death restore, write failures, third-party failures, full-disk degradation. Triggers "list empty when API fails", "session expired mid-form". Do NOT use for producing the ApiError or retries (`mobile-android-networking`).
+name: error-handling
+description: Use when a failure must not blank a Compose screen — loading/loaded/failed/stale/offline regions, failure scoped below search and filters, the safe-area error banner, timeouts rendered, 401 re-auth in place, forced update on version skew, lifecycle resume, process-death restore, write failures, third-party failures, full-disk degradation. Triggers "list empty when API fails", "session expired mid-form". Do NOT use for producing the ApiError or retries (`mobile-android:networking`).
 ---
 
 # Android — Error Resilience
 
-Owns **failing safely and recovering**: **rendering** failure, staleness and offline so a broken region never looks like an empty one, and recovering in place from a dead session, a version the server no longer supports, a killed process, a backgrounded write or a full disk. Web analog: [`fe-react-error-handling`](../../../../frontend/react/skills/error-handling/SKILL.md) — every rule carries over with the mobile delta below; `error.tsx`, hydration, multi-tab and chunk-load errors do not exist here. Siblings: [`mobile-ios-error-handling`](../../../ios/skills/error-handling/SKILL.md), [`mobile-react-native-error-handling`](../../../react-native/skills/error-handling/SKILL.md) (OTA skew is RN-only).
+Owns **failing safely and recovering**: **rendering** failure, staleness and offline so a broken region never looks like an empty one, and recovering in place from a dead session, a version the server no longer supports, a killed process, a backgrounded write or a full disk. Web analog: [`fe-react:error-handling`](../../../../frontend/react/skills/error-handling/SKILL.md) — every rule carries over with the mobile delta below; `error.tsx`, hydration, multi-tab and chunk-load errors do not exist here. Siblings: [`mobile-ios:error-handling`](../../../ios/skills/error-handling/SKILL.md), [`mobile-react-native:error-handling`](../../../react-native/skills/error-handling/SKILL.md) (OTA skew is RN-only).
 
 Division of labour with [`networking`](../networking/SKILL.md): it **produces** the categorised `ApiError` (`Offline`, `TimedOut`, `Unauthorized`, `NotFound`, `Conflict`, `RateLimited`, `Validation`, `Server`, `Drifted` — `networking/references/request-policy.md`), applies the timeout budget and bounded retries. This skill **renders** it.
 
@@ -19,7 +19,7 @@ Division of labour with [`networking`](../networking/SKILL.md): it **produces** 
 | Resume | `LifecycleResumeEffect` / `repeatOnLifecycle(STARTED)` | `[Views]` `Lifecycle.Event.ON_START` observer |
 | Offline signal | `ConnectivityManager` default-network callback → `Flow` (`networking`'s `Connectivity`) | Never a ping |
 | Process death | `SavedStateHandle` + `rememberSaveable`, then a reload | [`references/session-and-resume.md`](references/session-and-resume.md) |
-| Crash / ANR reporting | One reporter + Android vitals — [`mobile-shared-observability`](../../../_shared/observability/SKILL.md) | A `!!`, an unchecked index or a `lateinit` read is **not** a recoverable error — prevent it |
+| Crash / ANR reporting | One reporter + Android vitals — [`mobile-<stack>:observability`](../../../_shared/observability/SKILL.md) | A `!!`, an unchecked index or a `lateinit` read is **not** a recoverable error — prevent it |
 | Forced update | Server minimum version → blocking screen (MASVS-CODE-2); Play In-App Updates is the store half | [`references/session-and-resume.md`](references/session-and-resume.md) |
 
 Detect first: the existing banner / snackbar host, the `LoadState` / `ApiError` types, the wired crash reporter — extend them, never add a second.
@@ -34,8 +34,8 @@ Detect first: the existing banner / snackbar host, the `LoadState` / `ApiError` 
 - Producing the error, retries, `Retry-After`, token-refresh mechanics → [`networking`](../networking/SKILL.md)
 - Persisting data, the write queue, conflicts → [`offline-and-storage`](../offline-and-storage/SKILL.md)
 - Field validation messages → [`forms`](../forms/SKILL.md)
-- Crash-reporter setup, mapping upload → [`mobile-shared-observability`](../../../_shared/observability/SKILL.md)
-- Other stacks → `mobile-react-native-error-handling`, `mobile-ios-error-handling`
+- Crash-reporter setup, mapping upload → [`mobile-<stack>:observability`](../../../_shared/observability/SKILL.md)
+- Other stacks → `mobile-react-native:error-handling`, `mobile-ios:error-handling`
 
 ## The failure surfaces
 
@@ -189,5 +189,5 @@ Inside a `Gate: none` plan task, run none of these and report "written, not run"
 - The categorised error, timeouts, retries, token refresh → [`networking`](../networking/SKILL.md)
 - Persistence and the write queue → [`offline-and-storage`](../offline-and-storage/SKILL.md) · field errors → [`forms`](../forms/SKILL.md)
 - Ids → [`test-ids`](../test-ids/SKILL.md) · announcements → [`accessibility`](../accessibility/SKILL.md)
-- Crash reporter, mapping upload → [`mobile-shared-observability`](../../../_shared/observability/SKILL.md) · min-version policy → [`mobile-shared-release`](../../../_shared/release/SKILL.md)
-- Auth provider / Credential Manager → `auth-auth0-android`
+- Crash reporter, mapping upload → [`mobile-<stack>:observability`](../../../_shared/observability/SKILL.md) · min-version policy → [`mobile-<stack>:release`](../../../_shared/release/SKILL.md)
+- Auth provider / Credential Manager → `mobile-android:auth0`

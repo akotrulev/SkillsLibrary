@@ -1,11 +1,11 @@
 ---
-name: mobile-react-native-performance
-description: Use when an Expo SDK 57 app janks, starts slowly or ships a heavy bundle — the vendored list rules (virtualize, stable references, item types), the React Compiler and manual memoization, startup via expo-observe, Expo Atlas bundle analysis, React Native DevTools, Hermes, images. Triggers "list scrolls slowly", "cold start is slow", "bundle is huge", "do I still need useMemo". Do NOT use for animation (`mobile-react-native-animation`) or failure UI.
+name: performance
+description: Use when an Expo SDK 57 app janks, starts slowly or ships a heavy bundle — the vendored list rules (virtualize, stable references, item types), the React Compiler and manual memoization, startup via expo-observe, Expo Atlas bundle analysis, React Native DevTools, Hermes, images. Triggers "list scrolls slowly", "cold start is slow", "bundle is huge", "do I still need useMemo". Do NOT use for animation (`mobile-react-native:animation`) or failure UI.
 ---
 
 # React Native — Performance
 
-Owns **frame budget, startup and bundle size**: the list rules, what the React Compiler changes about memoization, how to measure startup in production, and how to find what is in the bundle. The JS thread and the UI thread each have a ~16 ms budget at 60 Hz (~8 ms at 120 Hz); blowing it is a correctness bug under CLAUDE.md § Mobile code rules, not polish. Web analog: [`fe-react-performance`](../../../../frontend/react/skills/performance/SKILL.md) — measure-first and bundle discipline carry over; RSC streaming, Core Web Vitals, `next/script` and `next/image` do not.
+Owns **frame budget, startup and bundle size**: the list rules, what the React Compiler changes about memoization, how to measure startup in production, and how to find what is in the bundle. The JS thread and the UI thread each have a ~16 ms budget at 60 Hz (~8 ms at 120 Hz); blowing it is a correctness bug under CLAUDE.md § Mobile code rules, not polish. Web analog: [`fe-react:performance`](../../../../frontend/react/skills/performance/SKILL.md) — measure-first and bundle discipline carry over; RSC streaming, Core Web Vitals, `next/script` and `next/image` do not.
 
 ## Version lane
 
@@ -39,8 +39,8 @@ Detect first: whether the compiler is on (`app.json` / `babel.config.js`), which
 - Reanimated, gestures, UI-thread animation → [`animation`](../animation/SKILL.md)
 - Which list library and how rows are authored → [`ui-components`](../ui-components/SKILL.md)
 - Request timing, caching → [`networking`](../networking/SKILL.md)
-- Crash reporting, release-health thresholds → [`mobile-shared-observability`](../../../_shared/observability/SKILL.md)
-- Native Swift / Kotlin → `mobile-ios-performance` / `mobile-android-performance`
+- Crash reporting, release-health thresholds → [`mobile-<stack>:observability`](../../../_shared/observability/SKILL.md)
+- Native Swift / Kotlin → `mobile-ios:performance` / `mobile-android:performance`
 
 ## List rules — the vendored set
 
@@ -108,10 +108,10 @@ export default function RootLayout() {
 }
 ```
 
-- **`expo-observe` (beta)** — `ObserveRoot` around the root layout gives time to first render; `markInteractive()` on the screen where the user can act gives time to interactive (per-route cold and warm times with the Expo Router integration, SDK 56+). It exports OpenTelemetry signals to EAS Observe or your own endpoint, and it does not dispatch from debug builds. It is **not** a crash reporter and has no native crash reporting — keep the one reporter from [`mobile-shared-observability`](../../../_shared/observability/SKILL.md). Verify its current status at docs.expo.dev before adopting.
+- **`expo-observe` (beta)** — `ObserveRoot` around the root layout gives time to first render; `markInteractive()` on the screen where the user can act gives time to interactive (per-route cold and warm times with the Expo Router integration, SDK 56+). It exports OpenTelemetry signals to EAS Observe or your own endpoint, and it does not dispatch from debug builds. It is **not** a crash reporter and has no native crash reporting — keep the one reporter from [`mobile-<stack>:observability`](../../../_shared/observability/SKILL.md). Verify its current status at docs.expo.dev before adopting.
 - **Keep the first screen light:** render the shell first; defer heavy libraries to the screen that needs them (a dynamic `import()` or an inline `require` inside the function); no synchronous `JSON.parse` of a large file, no sync storage scan, no SDK `init` that blocks (initialise analytics after first render).
 - **Hold the splash until the data the first screen needs is ready**, not until everything is — `expo-splash-screen` `preventAutoHideAsync()` / `hideAsync()` once, from the root.
-- **Set a budget and gate on it** (cold start to interactive on a mid-range Android) with the release-health thresholds ([`mobile-shared-release`](../../../_shared/release/SKILL.md)); a Baseline Profile is the Android native lane's.
+- **Set a budget and gate on it** (cold start to interactive on a mid-range Android) with the release-health thresholds ([`mobile-<stack>:release`](../../../_shared/release/SKILL.md)); a Baseline Profile is the Android native lane's.
 - **Inline requires** are on by default in Metro for Expo — do not disable them.
 
 ## Bundle — find it, then cut it
@@ -171,6 +171,6 @@ Inside a `Gate: none` plan task, run none of these and report "written, not run"
 ## Handoffs
 
 - Animation and gestures → [`animation`](../animation/SKILL.md) · list authoring → [`ui-components`](../ui-components/SKILL.md)
-- Crash reporter, release-health thresholds → [`mobile-shared-observability`](../../../_shared/observability/SKILL.md), [`mobile-shared-release`](../../../_shared/release/SKILL.md)
+- Crash reporter, release-health thresholds → [`mobile-<stack>:observability`](../../../_shared/observability/SKILL.md), [`mobile-<stack>:release`](../../../_shared/release/SKILL.md)
 - State placement → [`architecture`](../architecture/SKILL.md) · fonts and assets → [`styling`](../styling/SKILL.md)
 - Device-level profiling and load → `qa-mobile-typescript` (peer)

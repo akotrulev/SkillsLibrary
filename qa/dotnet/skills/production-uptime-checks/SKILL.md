@@ -1,12 +1,12 @@
 ---
-name: qa-production-uptime-checks-dotnet
-description: Use when authoring synthetic monitoring as code from the .NET / Azure stack — scheduled availability tests and scripted checks against live staging/prod via Azure Application Insights. The "is it up right now" layer, distinct from CI pre-merge tests. Triggers: "add a prod uptime check", "synthetic monitor for the login flow", "monitoring as code". Not for pre-merge CI gates (`qa-ci-pipelines-dotnet`) or load testing (`qa-load-testing-dotnet`).
+name: production-uptime-checks
+description: Use when authoring synthetic monitoring as code from the .NET / Azure stack — scheduled availability tests and scripted checks against live staging/prod via Azure Application Insights. The "is it up right now" layer, distinct from CI pre-merge tests. Triggers: "add a prod uptime check", "synthetic monitor for the login flow", "monitoring as code". Not for pre-merge CI gates (`qa-dotnet:ci-pipelines`) or load testing (`qa-dotnet:load-testing`).
 ---
 
 # Synthetic Monitoring as Code (Azure App Insights · .NET 10) — **ported from the TypeScript/Checkly canonical**
 
 The **dotnet** sibling of the `production-uptime-checks` family. The canonical stack is
-`qa-production-uptime-checks-typescript` (**Checkly `@checkly/cli`**). This file **ports the discipline, not the
+`qa-typescript:production-uptime-checks` (**Checkly `@checkly/cli`**). This file **ports the discipline, not the
 code** — with an honest divergence: **Checkly has no .NET SDK**, so the .NET-native tool is **Azure Application
 Insights availability tests**, the way to write the probe **in C# end-to-end** and alert through the App
 Insights an Azure shop already runs. If your team is happy writing TypeScript for monitoring, Checkly is the
@@ -17,8 +17,8 @@ from your pipeline.
 
 **Synthetic monitoring** = scripted checks that run **on a schedule against a deployed, live target**
 (staging/prod), alerting a human when the target is down or degraded. It is **not** a CI test (once, pre-merge,
-ephemeral env — `qa-ci-pipelines-*`), **not** a load test (`qa-load-testing-dotnet`), and **not** a journey
-author — it *reuses* the page objects from `qa-ui-test-writer-playwright-dotnet` and adds the assertion,
+ephemeral env — `qa-dotnet:ci-pipelines`), **not** a load test (`qa-dotnet:load-testing`), and **not** a journey
+author — it *reuses* the page objects from `qa-dotnet:ui-tests-playwright` and adds the assertion,
 scheduling and alerting layer.
 
 > **The discipline this skill encodes** (identical to the canonical):
@@ -188,7 +188,7 @@ across **multiple evaluation periods**, never by retrying inside the probe.
 
 ## The boundary — a synthetic monitor vs a CI gate
 
-| | CI test (`qa-ci-pipelines-*`) | Synthetic monitor (this skill) |
+| | CI test (`qa-dotnet:ci-pipelines`) | Synthetic monitor (this skill) |
 |---|---|---|
 | **When** | Pre-merge / pre-promote, once | On a schedule, forever |
 | **Against** | An ephemeral env | The live prod/staging target |
@@ -219,7 +219,7 @@ the probe runs them against the live env (the monitor).
 
 - **Synthetics run against a LIVE target, post-deploy, on a schedule — never as the merge gate.**
 - **Assert an SLA, not just a status code**; **every check has an alert**; absorb transients with the alert
-  window, never with retries inside the probe (`qa-flaky-test-quarantine-dotnet`).
+  window, never with retries inside the probe (`qa-dotnet:flaky-test-quarantine`).
 - **A browser probe keeps trace, full-page screenshot and video on failure**, in `BaseTest`'s order, under
   `SYNTHETIC_EVIDENCE_DIR`, and puts the paths in the result.
 - **Catch only `PlaywrightException`** in the journey; record the verdict in `finally`; flush with the
@@ -230,14 +230,14 @@ the probe runs them against the live env (the monitor).
 
 ## Cross-references
 
-- `qa-production-uptime-checks-typescript` — the **canonical** stack (Checkly); prefer it if your team writes TS.
-- `qa-production-uptime-checks-java` — Grafana Cloud Synthetic Monitoring and the `@Scheduled` Playwright-Java
+- `qa-typescript:production-uptime-checks` — the **canonical** stack (Checkly); prefer it if your team writes TS.
+- `qa-java:production-uptime-checks` — Grafana Cloud Synthetic Monitoring and the `@Scheduled` Playwright-Java
   probe; the same evidence shape.
-- `qa-ui-test-writer-playwright-dotnet` — the page objects the probe reuses, and `BaseTest`'s evidence order.
-- `qa-evidence-capture-dotnet` — reading a kept trace (`trace open` / `show-trace`, trace.playwright.dev).
-- `qa-load-testing-dotnet` — throughput, not uptime.
-- `qa-ci-pipelines-dotnet` — the pre-merge gate, and where `az deployment` / `terraform apply` and the probe
+- `qa-dotnet:ui-tests-playwright` — the page objects the probe reuses, and `BaseTest`'s evidence order.
+- `qa-dotnet:evidence-capture` — reading a kept trace (`trace open` / `show-trace`, trace.playwright.dev).
+- `qa-dotnet:load-testing` — throughput, not uptime.
+- `qa-dotnet:ci-pipelines` — the pre-merge gate, and where `az deployment` / `terraform apply` and the probe
   image build are wired.
-- `qa-test-login-tokens-dotnet` — M2M / test-user tokens for probes hitting an authenticated endpoint.
-- `qa-flaky-test-quarantine-dotnet` — a probe that needs the alert window widened to stay green is flaky; fix
+- `qa-dotnet:test-login-tokens` — M2M / test-user tokens for probes hitting an authenticated endpoint.
+- `qa-dotnet:flaky-test-quarantine` — a probe that needs the alert window widened to stay green is flaky; fix
   the cause.

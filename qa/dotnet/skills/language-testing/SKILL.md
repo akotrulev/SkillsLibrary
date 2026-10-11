@@ -1,5 +1,5 @@
 ---
-name: qa-language-testing-dotnet
+name: language-testing
 description: Use when writing i18n/localization tests in .NET 10 (8-9) — Playwright .NET + NUnit pinned to a locale, asserting via the app's own `.resx`/`IStringLocalizer` catalog by key (never hardcoded literals), `CultureInfo` for number/date/currency formats, pseudo-localization and RTL checks. Triggers "write an i18n test in C#", "test German/Arabic rendering", "assert currency formatting per culture". Not for the app's own localization wiring (the `fe-*` stack's `localization`).
 ---
 
@@ -283,10 +283,10 @@ transform and the `en-XA` fixture) · **4b. Translation-key coverage** (the stat
 
 ## Cross-references
 
-- `qa-language-testing-typescript` (canonical) · `qa-language-testing-java` — the sibling stacks; same four ideas.
-- `qa-ui-test-writer-playwright-dotnet` — `BaseTest`, `ContextOptions()` and the emulation reference (locale,
+- `qa-typescript:language-testing` (canonical) · `qa-java:language-testing` — the sibling stacks; same four ideas.
+- `qa-dotnet:ui-tests-playwright` — `BaseTest`, `ContextOptions()` and the emulation reference (locale,
   time zone, `Page.Clock`).
-- `qa-visual-regression-dotnet` — the pixel record that pairs with the pseudo-loc overflow check.
-- `qa-data-driven-testing-dotnet` — the row pattern; here the rows are fixture parameters.
-- `qa-accessibility-testing-dotnet` — `html[lang]` / `dir` rules; run them on the culture-pinned page.
-- `qa-test-reports-dotnet` — each culture as a named result, so a failure says which language broke.
+- `qa-dotnet:visual-regression` — the pixel record that pairs with the pseudo-loc overflow check.
+- `qa-dotnet:data-driven-testing` — the row pattern; here the rows are fixture parameters.
+- `qa-dotnet:accessibility-testing` — `html[lang]` / `dir` rules; run them on the culture-pinned page.
+- `qa-dotnet:test-reports` — each culture as a named result, so a failure says which language broke.

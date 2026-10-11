@@ -1,6 +1,6 @@
 ---
-name: qa-db-connection-java
-description: Use when the user asks to connect from Java 21 tests to a real database (Postgres / MySQL / SQL Server / Mongo) to seed fixtures, run read-only assertion queries, and clean up safely. Triggers: "connect from our TestNG tests to Postgres", "JdbcTemplate probe for the orders table", "seed and clean a SQL fixture without leaks". Do NOT use for container lifecycle (`qa-db-testing-testcontainers-java`) or query guardrails (`qa-db-verification-queries-java`).
+name: db-connection
+description: Use when the user asks to connect from Java 21 tests to a real database (Postgres / MySQL / SQL Server / Mongo) to seed fixtures, run read-only assertion queries, and clean up safely. Triggers: "connect from our TestNG tests to Postgres", "JdbcTemplate probe for the orders table", "seed and clean a SQL fixture without leaks". Do NOT use for container lifecycle (`qa-java:db-testcontainers`) or query guardrails (`qa-java:db-verification-queries`).
 ---
 
 # QA — DB Testing Client (Java 21 + Spring Boot 3)

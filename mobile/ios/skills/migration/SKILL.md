@@ -1,6 +1,6 @@
 ---
-name: mobile-ios-migration
-description: Use when an iOS project changes lane — Swift 5 → 6 per module, ObservableObject → @Observable, Combine → async / Observations, UIKit → SwiftUI screen by screen, Objective-C → Swift, CocoaPods → SPM before the 2026-12-02 trunk freeze, the iOS 27 SDK's forced changes, a deployment-target raise. Triggers "move us to Swift 6", "drop CocoaPods", "we link iOS 27 next month". Do NOT use for feature work, a fresh app (`mobile-ios-project-setup`) or a minor dependency bump.
+name: migration
+description: Use when an iOS project changes lane — Swift 5 → 6 per module, ObservableObject → @Observable, Combine → async / Observations, UIKit → SwiftUI screen by screen, Objective-C → Swift, CocoaPods → SPM before the 2026-12-02 trunk freeze, the iOS 27 SDK's forced changes, a deployment-target raise. Triggers "move us to Swift 6", "drop CocoaPods", "we link iOS 27 next month". Do NOT use for feature work, a fresh app (`mobile-ios:project-setup`) or a minor dependency bump.
 ---
 
 # iOS — Migration
@@ -27,8 +27,8 @@ Owns changing the **language mode, framework, dependency manager, SDK or deploym
 - New app → [`project-setup`](../project-setup/SKILL.md)
 - Feature work, a bug fix → the agent's FIX / EXTEND modes; they never up-level a lane
 - A patch / minor dependency bump, or a package major with no lane change — dependency hygiene
-- An Expo project's native side → `mobile-react-native-migration`; this skill covers only the Swift an Expo module contains
-- Android → `mobile-android-migration`
+- An Expo project's native side → `mobile-react-native:migration`; this skill covers only the Swift an Expo module contains
+- Android → `mobile-android:migration`
 
 ## Inputs needed
 
@@ -95,6 +95,6 @@ Order 0 moves first when their date is near; the numbered ones follow by depende
 - UIKit lane, scene lifecycle, interop seams → [`uikit`](../uikit/SKILL.md)
 - State ownership after the move → [`architecture`](../architecture/SKILL.md)
 - Store model migrations (SwiftData `VersionedSchema`) → [`offline-and-storage`](../offline-and-storage/SKILL.md)
-- Privacy manifest, signing, SDK upload requirements → `mobile-shared-store-compliance`, `mobile-shared-release`
+- Privacy manifest, signing, SDK upload requirements → `mobile-<stack>:store-compliance`, `mobile-<stack>:release`
 - Review the migration diff → [`code-review`](../code-review/SKILL.md); conformance after the move → [`standards-audit`](../standards-audit/SKILL.md)
 - Tests that lock the move → [`unit-testing`](../unit-testing/SKILL.md); device journeys → peer `qa-mobile-java` / `qa-mobile-dotnet` / `qa-mobile-typescript`

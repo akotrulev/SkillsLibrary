@@ -30,7 +30,7 @@ Adopting prebuild means `ios/` and `android/` become **generated and gitignored*
 2. **Translate each native edit** from the pre-flight list into the cheapest home, in this order: built-in `app.json` field → the library's own config plugin → a small local config plugin (`withInfoPlist`, `withAndroidManifest`, `withAppDelegate`…) ([`native-modules`](../../native-modules/SKILL.md)). Native source files that cannot be generated move into a local Expo module.
 3. **Prove it on a scratch copy of the folders:** move `ios/` and `android/` aside, run `npx expo prebuild --clean`, build both, diff the generated projects against the moved ones. The diff is what your plugins still miss.
 4. **Commit the config, then remove `ios/` and `android/` from git** and add them to `.gitignore`. Do not do the removal in the same commit as the first plugin.
-5. **EAS / CI.** `eas build` runs prebuild itself; local scripts call `expo prebuild` or `expo run:*`. Re-state signing and entitlements in config ([`mobile-shared-release`](../../../../_shared/release/SKILL.md)).
+5. **EAS / CI.** `eas build` runs prebuild itself; local scripts call `expo prebuild` or `expo run:*`. Re-state signing and entitlements in config ([`mobile-<stack>:release`](../../../../_shared/release/SKILL.md)).
 6. **Re-run** a development build, a release build and the primary flows on both platforms.
 
 ## Traps

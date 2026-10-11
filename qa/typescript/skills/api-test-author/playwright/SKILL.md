@@ -1,13 +1,13 @@
 ---
-name: qa-api-test-playwright-typescript
-description: Use when the user asks to write TypeScript API tests on the Playwright runner (@playwright/test `request` fixture / APIRequestContext + Zod) — usually because the project already runs Playwright for UI and wants one runner, one report, one trace. Triggers: "write API tests with Playwright", "use the request fixture for endpoint X". Do NOT use for plain Node API suites without Playwright (`qa-api-test-writer-typescript`) or UI tests (`qa-ui-test-writer-playwright-typescript`).
+name: api-tests-playwright
+description: Use when the user asks to write TypeScript API tests on the Playwright runner (@playwright/test `request` fixture / APIRequestContext + Zod) — usually because the project already runs Playwright for UI and wants one runner, one report, one trace. Triggers: "write API tests with Playwright", "use the request fixture for endpoint X". Do NOT use for plain Node API suites without Playwright (`qa-typescript:api-tests`) or UI tests (`qa-typescript:ui-tests-playwright`).
 ---
 
 # QA — API Test Writer (TypeScript / Playwright 1.64 + APIRequestContext + Zod)
 
 Authors `*.spec.ts` files that test a REST backend through **Playwright's own HTTP client** —
 `APIRequestContext` — instead of a browser. It reuses the **Schema/types + Client + Spec** layering of the
-Vitest sibling (`qa-api-test-writer-typescript`): Zod schemas from `qa/typescript/skills/api-models`, a
+Vitest sibling (`qa-typescript:api-tests`): Zod schemas from `qa/typescript/skills/api-models`, a
 `{resource}Client` factory with dual raw + typed methods, spec files that own scenarios and assertions. Only the
 transport and the runner change; the discipline does not. This skill pins nothing: the Playwright version is the
 **Versions** table of `qa/typescript/skills/ui-test-author/playwright/SKILL.md`; each API below carries the
@@ -172,7 +172,7 @@ test.describe('POST /api/users', () => {
 | Statuses come back, never thrown | `failOnStatusCode` on `request.newContext` [1.51] (and per request) — leave it `false`, the default | `true` turns a 4xx into an exception: an assertion never runs and every negative test dies. Never set it in `use` or a context the specs assert through |
 | Assert a redirect itself | `maxRedirects: 0` on the context [1.52] or the request | The response **is** the `302`; assert its status and `location` header. The default follows the redirect chain |
 | Cookie-authenticated app | `ctx.addCookies([{ name, value, url }])`, `ctx.cookies()`, `ctx.clearCookies()` [1.64] | Add the session cookie in the identity fixture instead of a header; read `cookies()` to assert the server set one (`Set-Cookie`). Below 1.64: pass `storageState` (the UI suite's signed-in file, `qa/typescript/skills/test-login-tokens`) to `newContext` |
-| Latency budget on one call | `await response.timing()` [1.62] | The request's timing phases in ms; assert the total against the endpoint's budget with the value in the message. A load profile is `qa-load-testing-typescript`, not this |
+| Latency budget on one call | `await response.timing()` [1.62] | The request's timing phases in ms; assert the total against the endpoint's budget with the value in the message. A load profile is `qa-typescript:load-testing`, not this |
 | TLS on the API host | `await response.securityDetails()` [1.61] | `{ protocol, issuer, subjectName, validFrom, validTo }`, or `null` over plain HTTP; assert the protocol |
 
 ```ts
@@ -247,12 +247,12 @@ calls of a failed test (`qa/typescript/skills/evidence-capture`).
 
 ## Cross-references
 
-- `qa-api-test-writer-typescript` — the **stack default** (Vitest + fetch + Zod); same Schema + Client + Spec
+- `qa-typescript:api-tests` — the **stack default** (Vitest + fetch + Zod); same Schema + Client + Spec
   spine.
-- `qa-api-test-playwright-java` · `qa-api-test-playwright-dotnet` — the sibling stacks; same four ideas.
-- `qa-api-models-typescript` / `qa-api-client-writer-typescript` — schemas / the client layer.
-- `qa-ui-test-writer-playwright-typescript` — the UI suite this skill shares a runner with.
-- `qa-network-mocking-typescript` — `page.route` mocking of browser traffic (not API testing).
-- `qa-api-test-review-typescript` — review; plus this skill's What-NOT-to-do list.
-- `qa-test-login-tokens-typescript` — the tokens and signed-in state the identity fixtures inject.
-- `qa-test-reports-typescript` — `allure-playwright` wiring so API and UI results land in one report.
+- `qa-java:api-tests-playwright` · `qa-dotnet:api-tests-playwright` — the sibling stacks; same four ideas.
+- `qa-typescript:api-models` / `qa-typescript:api-client-writer` — schemas / the client layer.
+- `qa-typescript:ui-tests-playwright` — the UI suite this skill shares a runner with.
+- `qa-typescript:network-mocking` — `page.route` mocking of browser traffic (not API testing).
+- `qa-typescript:api-tests-review` — review; plus this skill's What-NOT-to-do list.
+- `qa-typescript:test-login-tokens` — the tokens and signed-in state the identity fixtures inject.
+- `qa-typescript:test-reports` — `allure-playwright` wiring so API and UI results land in one report.

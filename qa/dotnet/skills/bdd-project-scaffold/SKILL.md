@@ -1,5 +1,5 @@
 ---
-name: qa-bdd-project-setup-dotnet
+name: bdd-project-setup
 description: Use when adding the Reqnroll (SpecFlow successor) BDD layer onto a .NET 10 (8-9) UI/mobile test project, or standing up a Reqnroll + NUnit project from zero. Triggers "set up Reqnroll", "add a BDD layer to our Playwright/Appium tests in C#", "wire Reqnroll DI and hooks". Not for writing feature files (`feature-file-writer`), step definitions (`gherkin-step-code`), or page objects (`page-object-design`).
 ---
 

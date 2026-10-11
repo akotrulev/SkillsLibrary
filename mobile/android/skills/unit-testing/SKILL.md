@@ -1,11 +1,11 @@
 ---
-name: mobile-android-unit-testing
+name: unit-testing
 description: Use when Kotlin or Compose logic needs a dev-side test — JUnit 4 (JUnit 5 only where the mannodermaus plugin is present), fakes over mocks, runTest with StandardTestDispatcher, Turbine for Flow, ViewModel and region-state tests, MockWebServer, Robolectric, Compose UI test v2 (its dispatcher change), accessibility checks, Roborazzi. Triggers "unit-test this ViewModel", "my Compose test broke after v2". Do NOT use for device journeys (`qa-mobile-<stack>`).
 ---
 
 # Android — Unit Testing (JUnit 4 + fakes)
 
-Owns **every dev-side test of logic the agent writes**: ViewModels, repositories, mappers, formatters, state machines, the request policy, and the Compose UI of a single screen. In-process, no device journeys, no real backend. Web analog: [`fe-react-component-testing`](../../../../frontend/react/skills/component-testing/SKILL.md) — test behaviour, not markup; fakes at the boundary; pure logic without a renderer carry over; jsdom and RTL queries do not. Sibling: [`mobile-ios-unit-testing`](../../../ios/skills/unit-testing/SKILL.md).
+Owns **every dev-side test of logic the agent writes**: ViewModels, repositories, mappers, formatters, state machines, the request policy, and the Compose UI of a single screen. In-process, no device journeys, no real backend. Web analog: [`fe-react:component-testing`](../../../../frontend/react/skills/component-testing/SKILL.md) — test behaviour, not markup; fakes at the boundary; pure logic without a renderer carry over; jsdom and RTL queries do not. Sibling: [`mobile-ios:unit-testing`](../../../ios/skills/unit-testing/SKILL.md).
 
 **Boundary.** Real devices, real navigation, permission dialogs, deep links, TalkBack and cross-screen journeys are `qa-mobile-<stack>`'s — **Appium (UiAutomator2)** with a **Maestro** lane (plan 003). A unit test fakes the platform, so it can never prove a system dialog or a gesture on hardware. This skill hands them the ids ([`test-ids`](../test-ids/SKILL.md)); it does not write the journeys.
 
@@ -39,7 +39,7 @@ Detect first: the runner (`junit`, `junit-jupiter`, `mannodermaus`), the existin
 - Markup-only composables with no branches — a screenshot of hand-written layout is a tautology
 - API contract tests and real-backend integration → `qa-api-typescript` / `qa-api-dotnet` / `qa-api-java`
 - Writing `testTag`s → [`test-ids`](../test-ids/SKILL.md)
-- Other stacks → `mobile-react-native-component-testing`, `mobile-ios-unit-testing`
+- Other stacks → `mobile-react-native:component-testing`, `mobile-ios:unit-testing`
 
 ## Test what has behaviour
 

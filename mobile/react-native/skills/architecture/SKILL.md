@@ -1,6 +1,6 @@
 ---
-name: mobile-react-native-architecture
-description: Use when laying out or choosing state in an Expo SDK 57 app — feature-first folders, server state in TanStack Query 5, client state in Zustand 5 or Context, route params as state, React Compiler effects. Triggers "what state library", "Zustand vs Context", "I'm prop-drilling", "persist across restarts". Do NOT use for fetch mechanics (`mobile-react-native-networking`), forms (`-forms`), offline queues (`-offline-and-storage`) or route params (`-navigation`).
+name: architecture
+description: Use when laying out or choosing state in an Expo SDK 57 app — feature-first folders, server state in TanStack Query 5, client state in Zustand 5 or Context, route params as state, React Compiler effects. Triggers "what state library", "Zustand vs Context", "I'm prop-drilling", "persist across restarts". Do NOT use for fetch mechanics (`mobile-react-native:networking`), forms (`-forms`), offline queues (`-offline-and-storage`) or route params (`-navigation`).
 ---
 
 # React Native — Architecture and State
@@ -35,7 +35,7 @@ On a React 18 project the classic equivalents (`useContext`, `forwardRef`) are c
 - Offline cache persistence, mutation queue → [`offline-and-storage`](../offline-and-storage/SKILL.md)
 - Route params as routing → [`navigation`](../navigation/SKILL.md)
 - Concepts → [`basics`](../basics/SKILL.md)
-- React web → `fe-react-state-management`
+- React web → `fe-react:state-management`
 
 ## Feature-first layout
 

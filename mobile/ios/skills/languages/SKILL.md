@@ -1,11 +1,11 @@
 ---
-name: mobile-ios-languages
-description: Use when an iOS app must support more than one language or region — String Catalogs (.xcstrings), String(localized:), plural and device variations, FormatStyle for numbers, dates and money, RTL layout, per-app language, localized purpose strings. Triggers "add Spanish", "translate the app", "Arabic layout flips", "date shows wrong format". Do NOT use for copy voice (`design-ux-writing`), text scale (`mobile-ios-accessibility`) or the web (`fe-react-languages`).
+name: i18n
+description: Use when an iOS app must support more than one language or region — String Catalogs (.xcstrings), String(localized:), plural and device variations, FormatStyle for numbers, dates and money, RTL layout, per-app language, localized purpose strings. Triggers "add Spanish", "translate the app", "Arabic layout flips", "date shows wrong format". Do NOT use for copy voice (`design:ux-writing`), text scale (`mobile-ios:accessibility`) or the web (`fe-react:i18n`).
 ---
 
 # iOS — Localization and Globalization
 
-Two jobs: **localization** (swap the text via catalogs) and **globalization** (format numbers, dates, money and plurals for the locale — always relevant, even with one language). On iOS the **device owns the locale and the per-app language**, and the system mirrors layout for RTL on its own as long as the code uses leading/trailing. Web analog: [`fe-react-languages`](../../../../frontend/react/skills/languages/SKILL.md) — stable ids, plurals in the catalog, no concatenated sentences; routing by locale prefix does not carry over. Sibling: [`mobile-react-native-languages`](../../../react-native/skills/languages/SKILL.md).
+Two jobs: **localization** (swap the text via catalogs) and **globalization** (format numbers, dates, money and plurals for the locale — always relevant, even with one language). On iOS the **device owns the locale and the per-app language**, and the system mirrors layout for RTL on its own as long as the code uses leading/trailing. Web analog: [`fe-react:i18n`](../../../../frontend/react/skills/languages/SKILL.md) — stable ids, plurals in the catalog, no concatenated sentences; routing by locale prefix does not carry over. Sibling: [`mobile-react-native:i18n`](../../../react-native/skills/languages/SKILL.md).
 
 ## Version lane
 
@@ -30,11 +30,11 @@ Two jobs: **localization** (swap the text via catalogs) and **globalization** (f
 
 ## When NOT to use
 
-- Wording, tone, microcopy → [`design-ux-writing`](../../../../design/ux-writing/SKILL.md)
-- Dynamic Type, VoiceOver language → `mobile-ios-accessibility`
+- Wording, tone, microcopy → [`design:ux-writing`](../../../../design/ux-writing/SKILL.md)
+- Dynamic Type, VoiceOver language → `mobile-ios:accessibility`
 - Layout mechanics, safe areas, size classes → [`styling`](../styling/SKILL.md)
-- App Store listing text per locale → [`mobile-shared-release`](../../../_shared/release/SKILL.md)
-- The web app's locale routing → [`fe-react-languages`](../../../../frontend/react/skills/languages/SKILL.md)
+- App Store listing text per locale → [`mobile-<stack>:release`](../../../_shared/release/SKILL.md)
+- The web app's locale routing → [`fe-react:i18n`](../../../../frontend/react/skills/languages/SKILL.md)
 
 ## String Catalogs
 
@@ -120,10 +120,10 @@ Inside a `Gate: none` plan task, run none of these and report "written, not run"
 
 ## Handoffs
 
-- Wording and voice → [`design-ux-writing`](../../../../design/ux-writing/SKILL.md)
-- Dynamic Type, VoiceOver language, accessibility strings → `mobile-ios-accessibility`
+- Wording and voice → [`design:ux-writing`](../../../../design/ux-writing/SKILL.md)
+- Dynamic Type, VoiceOver language, accessibility strings → `mobile-ios:accessibility`
 - Layout, size classes, mirrored icons in the design system → [`styling`](../styling/SKILL.md)
 - Purpose strings per resource → [`device-features`](../device-features/SKILL.md)
 - Notification copy by key → [`notifications-and-links`](../notifications-and-links/SKILL.md)
-- Store listing per locale, screenshots → [`mobile-shared-release`](../../../_shared/release/SKILL.md)
+- Store listing per locale, screenshots → [`mobile-<stack>:release`](../../../_shared/release/SKILL.md)
 - Test ids that ignore language → [`test-ids`](../test-ids/SKILL.md)

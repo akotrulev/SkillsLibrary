@@ -1,11 +1,11 @@
 ---
-name: pentest-recon-enumeration
-description: Use to map the in-scope attack surface at the start of an authorized penetration test — subdomains, hosts, ports, services, web tech — passive-first, rate-bounded, never outside the engagement scope file. Triggers "enumerate the attack surface", "recon this authorized target". Not for exploiting what you find (`pentest-initial-access`), infra posture benchmarks (`infra-security-tester`), or proving a single app vuln (`qa-security`). Owned/lab targets only, under a committed scope file.
+name: recon-enumeration
+description: Use to map the in-scope attack surface at the start of an authorized penetration test — subdomains, hosts, ports, services, web tech — passive-first, rate-bounded, never outside the engagement scope file. Triggers "enumerate the attack surface", "recon this authorized target". Not for exploiting what you find (`penetration-testing:initial-access`), infra posture benchmarks (`infra-security-tester`), or proving a single app vuln (`qa-security`). Owned/lab targets only, under a committed scope file.
 ---
 
 # Penetration Testing — Recon & Attack-Surface Enumeration (amass · subfinder · httpx · nmap · masscan · Shodan/Censys)
 
-Recon is the first step of an authorized kill chain: turn "here is a scope" into "here is exactly what is reachable and running inside it." You enumerate subdomains, resolve live hosts, sweep ports, fingerprint services and web tech — **only against assets the engagement scope file names**, passive-first, and rate-bounded so a sweep never becomes a denial-of-service. Everything you find is a lead for `pentest-initial-access`; recon itself sends no exploit.
+Recon is the first step of an authorized kill chain: turn "here is a scope" into "here is exactly what is reachable and running inside it." You enumerate subdomains, resolve live hosts, sweep ports, fingerprint services and web tech — **only against assets the engagement scope file names**, passive-first, and rate-bounded so a sweep never becomes a denial-of-service. Everything you find is a lead for `penetration-testing:initial-access`; recon itself sends no exploit.
 
 > **⚠️ Authorized self-testing only — owned/lab targets, under a committed scope file.** This skill enumerates the surface of **your own** systems (or a designated throwaway/lab environment) to find the holes before an attacker does. It is the defensive act of attacking yourself under authorization. Every run is gated by the engagement scope file and its `#volatile` authorization line; the scope file's in-scope hosts/CIDRs are the **only** things you may touch, its hard exclusions are never touched even if reachable, and its blast-radius cap bounds every sweep. Active scanning against a third party you do not own or have written authorization to test is not testing — it is an attack. **Read the scope file before every act; if the next act would fall outside it, halt the run and report.**
 
@@ -14,9 +14,9 @@ Authorization: engagement=<NNN>  in-scope=<hosts/CIDRs/domains>  exclusions=<nev
                authorized-by=<name>  window=<start>..<expiry>  environment=lab|production(2nd sign-off)
 ```
 
-This skill is **language-agnostic** (every tool is a Go/C/CLI binary — no per-stack split, per the library's anti-triplication rule) and is loaded by the **`penetration-tester`** agent in its **Recon** step. It owns *finding* the surface; it does **not** exploit it (`pentest-initial-access`), benchmark its posture (`infra-security-tester`), or prove an app vuln (`qa-security`).
+This skill is **language-agnostic** (every tool is a Go/C/CLI binary — no per-stack split, per the library's anti-triplication rule) and is loaded by the **`penetration-tester`** agent in its **Recon** step. It owns *finding* the surface; it does **not** exploit it (`penetration-testing:initial-access`), benchmark its posture (`infra-security-tester`), or prove an app vuln (`qa-security`).
 
-> **Two spines, stated per finding.** Recon actions map to the **MITRE ATT&CK Enterprise** matrix under the **Reconnaissance** and **Discovery** tactics — `T1595` Active Scanning (`.001` Scanning IP Blocks, `.002` Vulnerability Scanning), `T1592` Gather Victim Host Information, `T1590` Gather Victim Network Information, `T1595.003`/`T1596` for passive index reads, `T1046` Network Service Discovery, `T1594` Search Victim-Owned Websites. Where a finding is a *misconfiguration* (an exposed admin panel, a stale subdomain) it additionally carries its **OWASP** category (A05 Misconfiguration). Severity is scored **CVSS** in the final report, not the blocker/major/minor/nit table (see `pentest-reporting`).
+> **Two spines, stated per finding.** Recon actions map to the **MITRE ATT&CK Enterprise** matrix under the **Reconnaissance** and **Discovery** tactics — `T1595` Active Scanning (`.001` Scanning IP Blocks, `.002` Vulnerability Scanning), `T1592` Gather Victim Host Information, `T1590` Gather Victim Network Information, `T1595.003`/`T1596` for passive index reads, `T1046` Network Service Discovery, `T1594` Search Victim-Owned Websites. Where a finding is a *misconfiguration* (an exposed admin panel, a stale subdomain) it additionally carries its **OWASP** category (A05 Misconfiguration). Severity is scored **CVSS** in the final report, not the blocker/major/minor/nit table (see `penetration-testing:reporting`).
 
 ## Passive-first — the ordering that bounds blast radius
 
@@ -77,7 +77,7 @@ httpx -l subs.txt -ports 80,443,8080,8443 -status-code -title -o live-ports.txt
 
 - **Install (pinned):** `go install github.com/projectdiscovery/httpx/cmd/httpx@v1.10.0`.
 - Low footprint (one request per host), but it *is* a request to the target — inside scope only. `-rl <n>` rate-limits if the target is fragile.
-- Output feeds `pentest-initial-access`: a live host + its tech stack + an interesting title (`admin`, `login`, a framework version) is a lead.
+- Output feeds `penetration-testing:initial-access`: a live host + its tech stack + an interesting title (`admin`, `login`, a framework version) is a lead.
 
 ## Fast port sweep — masscan (rate-capped, exclude-file-bounded)
 
@@ -144,15 +144,15 @@ censys search 'services.service_name: RDP and ip: 203.0.113.10'
 - **Cap every active sweep.** `masscan --rate` capped + `--excludefile`; `nmap` politer timing (`-T2` for fragile/prod, never `-T5`); rate-limit httpx against fragile targets. **No sweep may risk availability — no DoS, ever.**
 - **Production is a separate, louder gate than lab** (per the engagement scope file). Default target is lab/throwaway; a production sweep needs the second sign-off and the lowest rates.
 - **Two spines per finding:** ATT&CK Enterprise technique id (Recon/Discovery tactic) + OWASP where it is a misconfiguration. Score CVSS in the final report.
-- **Recon finds; it does not exploit.** An open port, a live admin panel, a stale subdomain is a *lead* handed to `pentest-initial-access` — this skill never sends an exploit.
+- **Recon finds; it does not exploit.** An open port, a live admin panel, a stale subdomain is a *lead* handed to `penetration-testing:initial-access` — this skill never sends an exploit.
 - **Loot/secret redaction + no secrets in tooling config.** API keys env-injected; internal detail in recon output handled per the scope file, never committed raw.
-- **Log every act.** Each sweep/probe — command, target, timestamp, ATT&CK id — goes into the engagement action log as it runs (per `pentest-reporting`).
+- **Log every act.** Each sweep/probe — command, target, timestamp, ATT&CK id — goes into the engagement action log as it runs (per `penetration-testing:reporting`).
 - Green ≠ clear — an empty result means *this scope, this window, from here*. State the coverage and hand off.
 
 ## Cross-references
 
 - **`penetration-tester`** (`security/agents/penetration-tester.md`) — the orchestrator that runs this skill in its **Recon** step and owns the scope-file gate this skill enforces.
-- **`pentest-initial-access`** — the **next** step: it takes the live hosts, open ports, and services this skill found (plus a `qa-security` `exploit-validation` proof) and chains them into a foothold. Recon feeds it; it does the exploiting.
+- **`penetration-testing:initial-access`** — the **next** step: it takes the live hosts, open ports, and services this skill found (plus a `qa-security` `exploit-validation` proof) and chains them into a foothold. Recon feeds it; it does the exploiting.
 - **`infra-security-tester`** (`devops/`) — the **posture** sibling: it benchmarks and probes infrastructure config (CIS, kube-hunter, CSPM). Its findings can scope this recon; it does not run the offensive chain.
 - **`qa-security`** (`qa/_shared/agents/qa-security.md`) — the app-layer detect/validate lane; its `exploit-validation` single-vuln proof is exploitation feedstock for the next step, not recon.
-- **`pentest-reporting`** — where every recon act is logged (action log) and every surface finding is scored (CVSS) and mapped (ATT&CK).
+- **`penetration-testing:reporting`** — where every recon act is logged (action log) and every surface finding is scored (CVSS) and mapped (ATT&CK).

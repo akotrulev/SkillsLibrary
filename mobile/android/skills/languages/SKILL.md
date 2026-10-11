@@ -1,6 +1,6 @@
 ---
-name: mobile-android-languages
-description: Use when an Android app must support more than one language or region — string resources, plurals, per-app language (LocaleConfig, AppCompatDelegate / LocaleManager), RTL layout, locale-aware number, date and money formatting. Triggers "add a language", "plural is wrong", "RTL layout broken", "let the user pick a language". Do NOT use for wording and tone (`design-ux-writing`), text scaling (`mobile-android-accessibility`), or Play listing text (`mobile-shared-release`).
+name: i18n
+description: Use when an Android app must support more than one language or region — string resources, plurals, per-app language (LocaleConfig, AppCompatDelegate / LocaleManager), RTL layout, locale-aware number, date and money formatting. Triggers "add a language", "plural is wrong", "RTL layout broken", "let the user pick a language". Do NOT use for wording and tone (`design:ux-writing`), text scaling (`mobile-android:accessibility`), or Play listing text (`mobile-<stack>:release`).
 ---
 
 # Android — Localization and Globalization
@@ -31,12 +31,12 @@ Source read 2026-10-10: developer.android.com/guide/topics/resources/app-languag
 
 ## When NOT to use
 
-- Wording, tone, microcopy → [`design-ux-writing`](../../../../design/ux-writing/SKILL.md)
+- Wording, tone, microcopy → [`design:ux-writing`](../../../../design/ux-writing/SKILL.md)
 - Font scale, TalkBack language → [`accessibility`](../accessibility/SKILL.md)
 - Layout mechanics, insets, window sizes → [`styling`](../styling/SKILL.md)
-- Play listing text per locale → [`mobile-shared-release`](../../../_shared/release/SKILL.md)
-- The web app's locale routing → [`fe-react-languages`](../../../../frontend/react/skills/languages/SKILL.md)
-- Another stack → `mobile-ios-languages`, `mobile-react-native-languages`
+- Play listing text per locale → [`mobile-<stack>:release`](../../../_shared/release/SKILL.md)
+- The web app's locale routing → [`fe-react:i18n`](../../../../frontend/react/skills/languages/SKILL.md)
+- Another stack → `mobile-ios:i18n`, `mobile-react-native:i18n`
 
 ## String resources
 
@@ -130,10 +130,10 @@ Inside a `Gate: none` plan task, run none of these and report "written, not run"
 
 ## Handoffs
 
-- Wording, tone, error copy → [`design-ux-writing`](../../../../design/ux-writing/SKILL.md)
+- Wording, tone, error copy → [`design:ux-writing`](../../../../design/ux-writing/SKILL.md)
 - Font scale and TalkBack → [`accessibility`](../accessibility/SKILL.md)
 - Edge insets, RTL layout structure → [`styling`](../styling/SKILL.md)
 - Locale in requests → [`networking`](../networking/SKILL.md)
 - Number parsing in fields → [`forms`](../forms/SKILL.md)
-- Store listing localization → [`mobile-shared-release`](../../../_shared/release/SKILL.md)
+- Store listing localization → [`mobile-<stack>:release`](../../../_shared/release/SKILL.md)
 - Locale and RTL screenshot tests → [`unit-testing`](../unit-testing/SKILL.md)

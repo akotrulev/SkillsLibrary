@@ -1,17 +1,17 @@
 ---
-name: mobile-android-offline-and-storage
-description: Use when an Android app must persist data — Room 3 (KSP, SQLiteDriver) for new code and Room 2.8 as a lane, DataStore, Keystore + Tink in place of the deprecated EncryptedSharedPreferences, backup rules, WorkManager sync, Paging 3, offline-first repositories. Triggers "where do I store this", "migrate the schema", "token storage", "works offline". Do NOT use for fetch mechanics (`mobile-android-networking`) or the offline UI (`-error-handling`).
+name: offline-and-storage
+description: Use when an Android app must persist data — Room 3 (KSP, SQLiteDriver) for new code and Room 2.8 as a lane, DataStore, Keystore + Tink in place of the deprecated EncryptedSharedPreferences, backup rules, WorkManager sync, Paging 3, offline-first repositories. Triggers "where do I store this", "migrate the schema", "token storage", "works offline". Do NOT use for fetch mechanics (`mobile-android:networking`) or the offline UI (`-error-handling`).
 ---
 
 # Android — Offline and Storage
 
-Owns **where data lives on the device and how it syncs**: the database, preferences, secrets, files and caches, and the offline-first repository that stitches them to the network. The failure *UI* is `mobile-android-error-handling`'s; the request is [`networking`](../networking/SKILL.md)'s; this skill owns the **degradation** (a full disk, a corrupt database, a wiped cache). Security rules are [`mobile-shared-security`](../../../_shared/security/references/android.md) § 3–4; sibling: [`mobile-ios-offline-and-storage`](../../../ios/skills/offline-and-storage/SKILL.md).
+Owns **where data lives on the device and how it syncs**: the database, preferences, secrets, files and caches, and the offline-first repository that stitches them to the network. The failure *UI* is `mobile-android:error-handling`'s; the request is [`networking`](../networking/SKILL.md)'s; this skill owns the **degradation** (a full disk, a corrupt database, a wiped cache). Security rules are [`mobile-<stack>:security`](../../../_shared/security/references/android.md) § 3–4; sibling: [`mobile-ios:offline-and-storage`](../../../ios/skills/offline-and-storage/SKILL.md).
 
 ## Version lane
 
 | Concern | Primary | Brownfield / lane |
 |---|---|---|
-| Database | **Room 3.0** (`androidx.room3:room3-runtime` / `room3-compiler`, 3.0.3) — **KSP only**, `suspend` / `Flow` DAOs, a `SQLiteDriver` is required | **Room 2.8** (`androidx.room`) `[Room2]` — correct for an existing app; coexists with Room 3 (own group id); migration is `mobile-android-migration` |
+| Database | **Room 3.0** (`androidx.room3:room3-runtime` / `room3-compiler`, 3.0.3) — **KSP only**, `suspend` / `Flow` DAOs, a `SQLiteDriver` is required | **Room 2.8** (`androidx.room`) `[Room2]` — correct for an existing app; coexists with Room 3 (own group id); migration is `mobile-android:migration` |
 | Room integrations | Paging, Rx, Guava, LiveData are **not built in** — separate `room3-paging` / `-rxjava3` / `-guava` / `-livedata` converter artifacts | Room 2.8 has them built in |
 | Preferences | **DataStore** (Preferences or Proto) | Existing plain `SharedPreferences` for non-secret flags — migrate with `SharedPreferencesMigration`, not as a side effect |
 | Secrets | **Android Keystore key, or Tink `Aead` with a Keystore-wrapped keyset** | `EncryptedSharedPreferences` / `EncryptedFile` / `MasterKey` — **deprecated: flagged and migrated, never written in new code** |
@@ -32,11 +32,11 @@ Owns **where data lives on the device and how it syncs**: the database, preferen
 ## When NOT to use
 
 - The HTTP call, retries, refresh logic → [`networking`](../networking/SKILL.md)
-- Offline indicator, stale marker, banner → `mobile-android-error-handling`
+- Offline indicator, stale marker, banner → `mobile-android:error-handling`
 - State ownership → [`architecture`](../architecture/SKILL.md)
-- Long-running, foreground, exact-time work → `mobile-android-system-integration`
-- Room 2 → 3, `EncryptedSharedPreferences` migration steps → `mobile-android-migration`
-- Another stack → `mobile-ios-offline-and-storage`, `mobile-react-native-offline-and-storage`
+- Long-running, foreground, exact-time work → `mobile-android:system-integration`
+- Room 2 → 3, `EncryptedSharedPreferences` migration steps → `mobile-android:migration`
+- Another stack → `mobile-ios:offline-and-storage`, `mobile-react-native:offline-and-storage`
 
 ## Where does it go?
 
@@ -49,7 +49,7 @@ Owns **where data lives on the device and how it syncs**: the database, preferen
 | User-visible documents | MediaStore or SAF | [`device-features`](../device-features/SKILL.md) |
 | Ephemeral screen state | `SavedStateHandle` / `rememberSaveable` | Survives process death, not a reinstall; never a secret |
 
-Secrets are **never** `BuildConfig`, resources or `assets/`; they are public ([`mobile-shared-security`](../../../_shared/security/SKILL.md)).
+Secrets are **never** `BuildConfig`, resources or `assets/`; they are public ([`mobile-<stack>:security`](../../../_shared/security/SKILL.md)).
 
 ## Room 3
 
@@ -170,9 +170,9 @@ class OrdersRepository @Inject constructor(
 }
 ```
 
-- **Reads**: the screen collects `observe()`; `refresh()` runs on entry, on foreground and on reconnect; a failed refresh leaves the cached rows on screen and **marks them stale** — the data is shown, the banner says why (`mobile-android-error-handling`).
+- **Reads**: the screen collects `observe()`; `refresh()` runs on entry, on foreground and on reconnect; a failed refresh leaves the cached rows on screen and **marks them stale** — the data is shown, the banner says why (`mobile-android:error-handling`).
 - **Writes** are applied locally with `SyncState.Pending`, and a row is added to an **outbox table** with a stable idempotency key created once per user intent. The UI reflects the pending state; it never pretends the server has it.
-- **The outbox drains in a WorkManager `CoroutineWorker`** with a `NetworkType.CONNECTED` constraint, unique work (`enqueueUniqueWork(…, ExistingWorkPolicy.KEEP, …)`) and `BackoffPolicy.EXPONENTIAL`. Each item is sent with its key; success deletes the row, a `409` / `422` marks it **conflicted** for the user, a `5xx` leaves it for retry. The worker is idempotent — it can run twice. Foreground or exact-time work is `mobile-android-system-integration`.
+- **The outbox drains in a WorkManager `CoroutineWorker`** with a `NetworkType.CONNECTED` constraint, unique work (`enqueueUniqueWork(…, ExistingWorkPolicy.KEEP, …)`) and `BackoffPolicy.EXPONENTIAL`. Each item is sent with its key; success deletes the row, a `409` / `422` marks it **conflicted** for the user, a `5xx` leaves it for retry. The worker is idempotent — it can run twice. Foreground or exact-time work is `mobile-android:system-integration`.
 - **Conflicts** have a stated policy per entity: server wins (default, overwrite the row), last-write-wins by `updatedAt`, or **ask the user** for fields where silent loss is unacceptable. Never merge silently.
 - Deletes are a tombstone (`deletedAt`) until synced.
 - **Paging**: Paging 3 with a `RemoteMediator` over Room 3 (`room3-paging`) when the list is long; otherwise a `Flow` DAO.
@@ -222,14 +222,14 @@ Inside a `Gate: none` plan task, run none of these and report "written, not run"
 - Migration tests walk every version to current with `MigrationTestHelper` (Room 2 lane) or the Room 3 equivalent against the committed schemas.
 - Airplane mode: the screen shows cached rows marked stale; a queued write drains after reconnect exactly once; the process killed mid-write leaves a consistent database.
 - `adb shell run-as <package>` shows no plaintext token in `shared_prefs` or `databases`; a backup/restore dry run (`bmgr`) excludes them.
-- Dev-side tests: [`mobile-android-unit-testing`](../unit-testing/SKILL.md).
+- Dev-side tests: [`mobile-android:unit-testing`](../unit-testing/SKILL.md).
 
 ## Handoffs
 
 - Request, refresh, retries → [`networking`](../networking/SKILL.md)
-- Stale marker, banner, storage-degraded copy → `mobile-android-error-handling`
+- Stale marker, banner, storage-degraded copy → `mobile-android:error-handling`
 - Biometric-bound keys → [`device-features`](../device-features/SKILL.md)
-- Foreground services, exact work → `mobile-android-system-integration`
-- Keystore, backup, WebView data rules → [`mobile-shared-security`](../../../_shared/security/SKILL.md)
-- Room 2 → 3, `EncryptedSharedPreferences` replacement → `mobile-android-migration`
-- Account deletion data purge → [`mobile-shared-store-compliance`](../../../_shared/store-compliance/SKILL.md)
+- Foreground services, exact work → `mobile-android:system-integration`
+- Keystore, backup, WebView data rules → [`mobile-<stack>:security`](../../../_shared/security/SKILL.md)
+- Room 2 → 3, `EncryptedSharedPreferences` replacement → `mobile-android:migration`
+- Account deletion data purge → [`mobile-<stack>:store-compliance`](../../../_shared/store-compliance/SKILL.md)

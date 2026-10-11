@@ -1,11 +1,11 @@
 ---
-name: purpleteam-atomic-simulation
-description: Use to run MITRE ATT&CK techniques against an authorized lab/owned environment, so a paired assertion proves the guardrails still fire — the red half of a purple-team run. Atomic Red Team + Caldera + Stratus. Owned/lab only, under a committed scope file. Triggers "simulate T1003 against our lab", "test our detections for drift". Not for exploiting a real target (`pentest-initial-access`), proving one app vuln (`qa-security`), or asserting the detection fired (`purpleteam-detection-validation`).
+name: atomic-simulation
+description: Use to run MITRE ATT&CK techniques against an authorized lab/owned environment, so a paired assertion proves the guardrails still fire — the red half of a purple-team run. Atomic Red Team + Caldera + Stratus. Owned/lab only, under a committed scope file. Triggers "simulate T1003 against our lab", "test our detections for drift". Not for exploiting a real target (`penetration-testing:initial-access`), proving one app vuln (`qa-security`), or asserting the detection fired (`penetration-testing:detection-validation`).
 ---
 
 # Purple Team — Atomic Simulation (Atomic Red Team · Apache Caldera · Stratus Red Team)
 
-Atomic simulation is the **red half of purple**: you *deliberately* run a known MITRE ATT&CK technique — or a chained sequence of them — against **your own authorized environment**, so the paired blue half (`purpleteam-detection-validation`) can go and check whether the guardrail, SIEM rule, or alert that is *supposed* to catch it actually fired. This is not exploitation to gain access; the technique is expected, scheduled, scoped, and cleaned up. Its whole purpose is to answer one question per technique: **detected, or not?**
+Atomic simulation is the **red half of purple**: you *deliberately* run a known MITRE ATT&CK technique — or a chained sequence of them — against **your own authorized environment**, so the paired blue half (`penetration-testing:detection-validation`) can go and check whether the guardrail, SIEM rule, or alert that is *supposed* to catch it actually fired. This is not exploitation to gain access; the technique is expected, scheduled, scoped, and cleaned up. Its whole purpose is to answer one question per technique: **detected, or not?**
 
 Run on a schedule, it catches **security drift** — the detection that worked in March and silently broke in August (a log source stopped shipping, a rule was disabled during an incident, a field was renamed, a SIEM upgrade changed parsing). A detection is a hypothesis until a real technique fires against it; drift is what turns a green coverage map into a false one.
 
@@ -16,7 +16,7 @@ Authorization: engagement=<NNN>  in-scope=<hosts/accounts/clusters>  exclusions=
                authorized-by=<name>  window=<start>..<expiry>  environment=lab|production(2nd sign-off)
 ```
 
-This skill is **language-agnostic** (every tool is a PowerShell module, a Go binary, or a Python server — no per-stack split, per the library's anti-triplication rule) and is loaded by the **`purple-team-engineer`** agent in its **Simulate** step. It owns *running the technique and cleaning it up*; it does **not** assert whether the detection fired — that is the blue half, `purpleteam-detection-validation`, which the agent runs immediately after against the log/alert store.
+This skill is **language-agnostic** (every tool is a PowerShell module, a Go binary, or a Python server — no per-stack split, per the library's anti-triplication rule) and is loaded by the **`purple-team-engineer`** agent in its **Simulate** step. It owns *running the technique and cleaning it up*; it does **not** assert whether the detection fired — that is the blue half, `penetration-testing:detection-validation`, which the agent runs immediately after against the log/alert store.
 
 > **The single spine is MITRE ATT&CK Enterprise (v19, pinned).** Every simulated technique is named by its ATT&CK **technique id** — `T1003.001` LSASS memory, `T1021.001` RDP, `T1059.001` PowerShell, `T1110` brute force — the shared language red simulation and blue detection both speak. **Pin the version** (v19, 2026-04-28): technique/tactic ids move between versions — v18 added structured **Detection Strategies / Analytics / Data Components**, and **v19 retired `Defense Evasion` and split it in two — `Stealth` keeps the old id `TA0005`, and `Defense Impairment` is the new `TA0112`**, so a technique catalogued under the old tactic slug is now mis-mapped. **The per-technique report gate is detected / not-detected**, *not* the offensive CVSS score the kill-chain lane uses — a simulation proves whether a control works, not how bad a vuln is. Where a not-detected technique is a genuine gap, its urgency is scored on the library's blocker/major/minor/nit table via the detection it should have tripped, never CVSS.
 
@@ -24,13 +24,13 @@ This skill is **language-agnostic** (every tool is a PowerShell module, a Go bin
 
 Atomic simulation is never run alone. The value is the **pair**, one technique at a time:
 
-1. **Pick the technique** from the threat model or the detection you want to prove (`secgov-detection-engineering` authored a rule for `T1003.001` — does it fire?).
+1. **Pick the technique** from the threat model or the detection you want to prove (`security-governance:detection-engineering` authored a rule for `T1003.001` — does it fire?).
 2. **Simulate** it here — smallest atomic that exercises the behavior, logged as it runs.
-3. **Validate** it in the blue half (`purpleteam-detection-validation`) — query the log/alert store, assert the alert fired for that ATT&CK id.
+3. **Validate** it in the blue half (`penetration-testing:detection-validation`) — query the log/alert store, assert the alert fired for that ATT&CK id.
 4. **Clean up** the atomic's artifacts and **verify** the cleanup.
 5. **Record** the outcome: detected / not-detected / partial, per ATT&CK id, into the purple-team result matrix (VECTR or the report).
 
-Run this pair on a schedule and the matrix becomes a **drift monitor**: a technique that was `detected` last round and is `not-detected` this round is a regression to route to `secgov-detection-engineering` (rule broke) or `observability-engineer-*` (telemetry broke).
+Run this pair on a schedule and the matrix becomes a **drift monitor**: a technique that was `detected` last round and is `not-detected` this round is a regression to route to `security-governance:detection-engineering` (rule broke) or `observability-engineer-*` (telemetry broke).
 
 ## Decision matrix — which tool for which surface
 
@@ -100,7 +100,7 @@ stratus status                                          # what is warm / detonat
 
 ## Anti-patterns
 
-- **Running an atomic with no paired detection check.** Detonating `T1003.001` and not asking "did anything catch it?" is noise, not a purple-team run. *Fix:* every simulate is immediately followed by `purpleteam-detection-validation` for the same ATT&CK id.
+- **Running an atomic with no paired detection check.** Detonating `T1003.001` and not asking "did anything catch it?" is noise, not a purple-team run. *Fix:* every simulate is immediately followed by `penetration-testing:detection-validation` for the same ATT&CK id.
 - **`Invoke-AtomicTest <technique>` with no `-TestNumbers`.** Runs every atomic under the technique, some more intrusive than intended. *Fix:* select one test, read `-ShowDetailsBrief` first, run it, clean it up.
 - **Skipping `-Cleanup` / `stratus cleanup`.** Leaves users, files, services, or cloud resources behind — a §5 cleanup violation and, in the cloud, an ongoing cost. *Fix:* cleanup is part of every technique's run, followed by a verification that the artifact is gone.
 - **Letting a Caldera operation run unbounded.** An autonomous planner can pivot further than the scope allows. *Fix:* deploy agents only on in-scope hosts, cap the operation, re-read the scope file before starting, abort on an out-of-scope next step.
@@ -116,17 +116,17 @@ stratus status                                          # what is warm / detonat
 - **Every technique is cleaned up and the cleanup is verified.** `-Cleanup` / `stratus cleanup` / the operation's reverse cleanup runs, then you confirm the artifact is gone — enumerated in the report's cleanup-verification section.
 - **No DoS, ever** — not as a technique, not as a side effect. A simulation proves a detection fires; it never risks the availability of the in-scope service.
 - **The spine is ATT&CK Enterprise, pinned (v19).** Every simulated technique carries its technique id; cloud/K8s atomics carry the Cloud/Containers id. The report gate is **detected / not-detected**, not CVSS.
-- **Simulate then validate — never simulate alone.** The red run is half the loop; the paired `purpleteam-detection-validation` assertion is the other half and the actual deliverable.
-- **Log every technique as it runs** — tool, technique id, target, timestamp — into the engagement action log (per `pentest-reporting`), so the run is reproducible and provably in scope.
+- **Simulate then validate — never simulate alone.** The red run is half the loop; the paired `penetration-testing:detection-validation` assertion is the other half and the actual deliverable.
+- **Log every technique as it runs** — tool, technique id, target, timestamp — into the engagement action log (per `penetration-testing:reporting`), so the run is reproducible and provably in scope.
 - **Pin the tools and the atomics.** Module version *and* atomics-folder commit for Atomic Red Team; Caldera 5.3.0 (`apache/caldera`); Stratus v2.32.1 — "we ran the atomic" is not reproducible without them.
 - **Redaction.** Anything a technique recovers (a dumped credential, a token) is handled per the loot rule — reported as *that it was recovered + blast radius*, never contents; nothing sensitive committed under `docs/security/`.
 
 ## Cross-references
 
 - **`purple-team-engineer`** (`security/agents/purple-team-engineer.md`) — the orchestrator that runs this skill in its **Simulate** step and owns the scope-file gate this skill enforces; it pairs each simulation with the blue assertion.
-- **`purpleteam-detection-validation`** — the **blue half**, run immediately after each technique: it queries the log/alert store and asserts the detection fired for that ATT&CK id. Simulation without it is noise.
-- **`secgov-detection-engineering`** (`security/detection-engineering/`, `security-governance` plugin) — **authors** the Sigma rules/detections this lane validates. A technique with no authored detection is a coverage gap to route there; a not-detected technique whose rule exists is a broken rule to route there. Author there, validate here.
+- **`penetration-testing:detection-validation`** — the **blue half**, run immediately after each technique: it queries the log/alert store and asserts the detection fired for that ATT&CK id. Simulation without it is noise.
+- **`security-governance:detection-engineering`** (`security/detection-engineering/`, `security-governance` plugin) — **authors** the Sigma rules/detections this lane validates. A technique with no authored detection is a coverage gap to route there; a not-detected technique whose rule exists is a broken rule to route there. Author there, validate here.
 - **`penetration-tester`** (`security/agents/penetration-tester.md`) — the offensive sibling in the same plugin: it **exploits** to prove an attacker can chain findings into impact; this **simulates** known atomics to prove the guardrails *detect* them. Shared ATT&CK Enterprise spine and the same §5 authorization machinery; a chain `penetration-tester` completed undetected is the exact hypothesis for a new detection to simulate here.
-- **`observability-engineer-*`** + **`observability-queries`** / **`observability-dashboards`** *(peers, named not loaded)* — own the telemetry substrate (Loki/Prometheus/Tempo, the log/alert pipeline) the blue half queries. A technique that fired but produced no log the SIEM could see is a **telemetry gap** routed to them, not a passing control.
-- **`pentest-reporting`** (`security/pentest-reporting/`) — where every simulated technique is written to the action log and where the cleanup-verification section is closed.
+- **`observability-engineer-*`** + **`be-<stack>:queries`** / **`be-<stack>:dashboards`** *(peers, named not loaded)* — own the telemetry substrate (Loki/Prometheus/Tempo, the log/alert pipeline) the blue half queries. A technique that fired but produced no log the SIEM could see is a **telemetry gap** routed to them, not a passing control.
+- **`penetration-testing:reporting`** (`security/pentest-reporting/`) — where every simulated technique is written to the action log and where the cleanup-verification section is closed.
 - **`infra-security-tester`** (`devops/`) — the posture sibling; its Cloud/Containers benchmark findings can scope which cloud techniques (Stratus) are worth simulating.

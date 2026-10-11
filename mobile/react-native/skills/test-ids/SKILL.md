@@ -1,11 +1,11 @@
 ---
-name: mobile-react-native-test-ids
+name: test-ids
 description: Use when adding, auditing or fixing `testID` props so Appium and Maestro can target an Expo SDK 57 app — including consuming a `missing-testids.md` from QA's screen explorer. Covers how testID surfaces on iOS and Android, static row ids, PascalCase naming, never accessibilityLabel as an id. Triggers "add testIDs", "E2E can't find this element", "content-desc vs testID". Do NOT use for writing the device tests (`qa-mobile-typescript`).
 ---
 
 # React Native — Testability (`testID` writer)
 
-Adds and audits `testID` on React Native components so device suites locate elements by one stable id. It is the dev-side half of a loop QA owns: `qa-mobile-typescript`'s `mobile-screen-explorer` reads the live page source and files a `missing-testids.md`; this skill consumes that report. Web analog: [`fe-react-test-ids`](../../../../frontend/react/skills/test-ids/SKILL.md) — the naming, static-row and "one attribute only" rules carry over unchanged; `data-testid`, per-library slot props and DOM verification do not.
+Adds and audits `testID` on React Native components so device suites locate elements by one stable id. It is the dev-side half of a loop QA owns: `qa-mobile-typescript`'s `mobile-screen-explorer` reads the live page source and files a `missing-testids.md`; this skill consumes that report. Web analog: [`fe-react:test-ids`](../../../../frontend/react/skills/test-ids/SKILL.md) — the naming, static-row and "one attribute only" rules carry over unchanged; `data-testid`, per-library slot props and DOM verification do not.
 
 ## Version lane
 

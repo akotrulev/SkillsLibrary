@@ -1,5 +1,5 @@
 ---
-name: fe-react-installable-offline-app
+name: pwa
 description: Use when the app must be installable and/or work offline — manifest, service worker via Serwist (Next.js) or `vite-plugin-pwa`, precache vs runtime caching, the update lifecycle (a waiting worker needs skip-waiting), offline UX with queued writes, and that API/RSC data isn't cached by default. Triggers: "make this installable", "add offline support", "PWA won't update after deploy", "add to home screen". Do NOT use for server-side caching (`data-fetching`) or live-data reconnection (`realtime`).
 ---
 

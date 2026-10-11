@@ -59,7 +59,7 @@ What the headline Azure checks catch (each → a CIS control + an ATT&CK Cloud t
 - **Entra ID / IAM** — MFA for privileged users, guest-access restrictions, legacy auth blocked, over-privileged role assignments → T1078.004 / T1098.
 - **Storage** — public blob containers / anonymous access (`storage_public_access`), secure-transfer-required, minimum TLS version → T1530, A02.
 - **Encryption at rest** — Storage/SQL/Disk encryption, Key Vault soft-delete + purge protection, key rotation → CIS crypto controls.
-- **Encryption in transit** — App Service HTTPS-only + min TLS, SQL `Enforce TLS`, secure-transfer on storage → pairs with `qa-security-certificate-scan`.
+- **Encryption in transit** — App Service HTTPS-only + min TLS, SQL `Enforce TLS`, secure-transfer on storage → pairs with `qa-<stack>:certificate-scan`.
 - **Logging/audit** — Activity Log retention + diagnostic settings, SQL auditing, Key Vault logging, Defender for Cloud plans on → T1562.008, A09.
 - **Network exposure** — NSGs allowing `*`/Internet on RDP/SSH/DB ports, public SQL/Storage endpoints, missing Private Endpoints → T1580.
 

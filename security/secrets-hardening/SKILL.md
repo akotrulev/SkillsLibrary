@@ -1,20 +1,20 @@
 ---
-name: secgov-secrets-hardening
-description: Use to fix the secret after it is found — rotation runbooks, wiring the app to a secret store (Vault / cloud secret manager / SOPS / ESO), and preventing recurrence (pre-commit + CI gates, dynamic credentials). The defensive complement to secrets-scan, which only detects. Triggers "rotate this leaked credential", "wire the app to a secret store". Not for detecting secrets (`secrets-scan`), typed app config (`devops-environment-config`), or exploiting a recovered secret (`penetration-tester`).
+name: secrets-hardening
+description: Use to fix the secret after it is found — rotation runbooks, wiring the app to a secret store (Vault / cloud secret manager / SOPS / ESO), and preventing recurrence (pre-commit + CI gates, dynamic credentials). The defensive complement to secrets-scan, which only detects. Triggers "rotate this leaked credential", "wire the app to a secret store". Not for detecting secrets (`secrets-scan`), typed app config (`devops:environment-config`), or exploiting a recovered secret (`penetration-tester`).
 ---
 
 # Security Governance — Secrets Hardening (rotation runbooks · secret-store wiring · recurrence prevention)
 
 `secrets-scan` (Gitleaks + TruffleHog) answers *"is there a secret in the code/history?"* and stops at **"rotate it."** This skill owns the **rotate-it and never-again**: the rotation runbook that revokes the leaked credential at its source without an outage, the secret store the app should read from instead of a `.env`, and the gates + dynamic-credential patterns that stop the next leak from happening. It is the **defensive complement to detection**: `secrets-scan` detects, this hardens.
 
-This skill is **language-agnostic** (Vault, the cloud secret managers, SOPS, ESO are all CLI/API-driven; the app-side is a typed client) and homes in the **`security-governance`** plugin, loaded by the **`security-architect`** agent when the posture roll-up finds a secrets gap. Deep app-side wiring (the typed config binding, the DI registration) hands off to `devops-environment-config` / `be-*` / `fe-*`; this skill owns the **store choice, the rotation runbook, and the recurrence gate**.
+This skill is **language-agnostic** (Vault, the cloud secret managers, SOPS, ESO are all CLI/API-driven; the app-side is a typed client) and homes in the **`security-governance`** plugin, loaded by the **`security-architect`** agent when the posture roll-up finds a secrets gap. Deep app-side wiring (the typed config binding, the DI registration) hands off to `devops:environment-config` / `be-*` / `fe-*`; this skill owns the **store choice, the rotation runbook, and the recurrence gate**.
 
 > **The load-bearing rule inherited from `secrets-scan`: rotate first, purge second.** A secret committed and then "deleted" is **still in the git history** and is compromised the moment it lands on a remote — assume it is public. **Rotate the credential at its source before anything else**; only then purge history (`git filter-repo` / BFG) if required. Deleting the line without rotating is theatre.
 
 ## Two spines, stated per finding
 
 - **OWASP** — leaked/weakly-managed secrets map to **A02:2025 Security Misconfiguration** (hardcoded/plaintext secrets) and **A07:2025 Authentication Failures** (static, long-lived, un-rotated credentials — the 2021 list called this "Identification & Authentication Failures"). A leaked credential that grants access is also the **initial-access feedstock** the offensive lane consumes — which is exactly why rotation is urgent.
-- **Compliance** — secret rotation and access control are explicit controls in every framework: **PCI DSS 8.3.9 / 3.x** (key management, credential rotation), **SOC 2 CC6.1** (logical access), **ISO 27001:2022 A.5.17 / A.8.24** (authentication information, cryptographic key management), **NIST CSF 2.0 PR.AA**. `secgov-compliance-evidence-mapping` maps a working rotation control to these.
+- **Compliance** — secret rotation and access control are explicit controls in every framework: **PCI DSS 8.3.9 / 3.x** (key management, credential rotation), **SOC 2 CC6.1** (logical access), **ISO 27001:2022 A.5.17 / A.8.24** (authentication information, cryptographic key management), **NIST CSF 2.0 PR.AA**. `security-governance:compliance-evidence-mapping` maps a working rotation control to these.
 
 Severity on the library's **blocker/major/minor/nit** table (a live leaked credential granting production access is a **blocker**).
 
@@ -58,7 +58,7 @@ Rotation cleans up; the gate stops the next leak:
 
 This skill decides the store and the pattern; the language-specific binding is the owning stack's:
 
-- **`devops-environment-config`** — the typed config classes, the layering (defaults → per-env → secrets-from-store), startup schema validation, and the K8s/deploy wiring (ESO manifests, Vault agent sidecar).
+- **`devops:environment-config`** — the typed config classes, the layering (defaults → per-env → secrets-from-store), startup schema validation, and the K8s/deploy wiring (ESO manifests, Vault agent sidecar).
 - **`be-*` / `fe-*`** — the DI registration of the typed secret client, the `IHttpClientFactory`/SDK credential provider reading the store.
 - This skill states *"read `DB_PASSWORD` from Vault path `secret/data/app/db`, TTL 1h, dynamic"* — they write the code that does it.
 
@@ -80,14 +80,14 @@ This skill decides the store and the pattern; the language-specific binding is t
 - **Close the leak channel** — inject from the store at runtime so there is no committed secret; back it with a pre-commit hook + the `secrets-scan` CI gate.
 - **Least privilege + a TTL** on every issued credential; a named owner and a defined RTO per credential type.
 - **Never log the value** — the rotation/audit log records who/when/why; the report states blast radius, never contents (loot redaction).
-- **This skill decides the store + runbook; the app-side binding hands off** to `devops-environment-config` / `be-*` / `fe-*`.
+- **This skill decides the store + runbook; the app-side binding hands off** to `devops:environment-config` / `be-*` / `fe-*`.
 
 ## Cross-references
 
-- **`qa-security-secrets-scan`** (`qa/_shared/security-testing/secrets-scan/`) — the **detection** half and the trigger for this skill: it finds the secret and says "rotate"; this owns the rotation, the store, and the gate that stops recurrence. Its rotate-not-delete rule is inherited here.
+- **`qa-<stack>:secrets-scan`** (`qa/_shared/security-testing/secrets-scan/`) — the **detection** half and the trigger for this skill: it finds the secret and says "rotate"; this owns the rotation, the store, and the gate that stops recurrence. Its rotate-not-delete rule is inherited here.
 - **`security-architect`** (`security/agents/security-architect.md`) — the roll-up agent that loads this skill when the posture picture shows static/long-lived credentials or a leaked secret.
-- **`devops-environment-config`** (`devops/environment-config/`) — owns the typed config classes, secret-store deploy wiring (ESO/Vault agent), layering, and startup validation; this skill hands the store choice + rotation contract to it.
-- **`devops-infra-controls-validation`** (`devops/infra-controls-validation/`) — validates the secrets/encryption control is not just present but **effective**; a rotation runbook this skill authors is what it retests.
+- **`devops:environment-config`** (`devops/environment-config/`) — owns the typed config classes, secret-store deploy wiring (ESO/Vault agent), layering, and startup validation; this skill hands the store choice + rotation contract to it.
+- **`devops:controls-validation`** (`devops/infra-controls-validation/`) — validates the secrets/encryption control is not just present but **effective**; a rotation runbook this skill authors is what it retests.
 - **`penetration-tester`** (`security/agents/penetration-tester.md`) — the offensive consumer: an un-rotated leaked credential is its `initial-access` / `credential-attacks` feedstock. Rotation urgency is measured against how fast that lane could use it.
-- **`secgov-compliance-evidence-mapping`** — maps a working rotation control to PCI 8.3.9 / SOC 2 CC6.1 / ISO A.5.17 / A.8.24 evidence.
-- **`secgov-detection-engineering`** — the tripwire counterpart: author a detection for *use* of a credential from an unexpected source, so a leak that slips the gate is still caught in the logs.
+- **`security-governance:compliance-evidence-mapping`** — maps a working rotation control to PCI 8.3.9 / SOC 2 CC6.1 / ISO A.5.17 / A.8.24 evidence.
+- **`security-governance:detection-engineering`** — the tripwire counterpart: author a detection for *use* of a credential from an unexpected source, so a leak that slips the gate is still caught in the logs.

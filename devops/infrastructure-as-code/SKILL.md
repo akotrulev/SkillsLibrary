@@ -1,5 +1,5 @@
 ---
-name: devops-infrastructure-as-code
+name: iac
 description: Use when the user asks to author Infrastructure as Code with Bicep (Azure) or Terraform (multi-cloud / AWS). Triggers: "write Bicep for X", "Terraform module for Y", "should this be Bicep or Terraform", "module structure for our IaC repo". Do NOT use for pipeline YAML (`devops/{github-actions,gitlab-ci,azure-pipelines}`), app deploys (`devops/{aws,azure}-deployment`), or app-level config (`devops/environment-config`).
 ---
 

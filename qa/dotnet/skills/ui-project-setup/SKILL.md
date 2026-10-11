@@ -1,5 +1,5 @@
 ---
-name: qa-ui-project-setup-dotnet
+name: ui-project-setup
 description: Use when starting a web-UI test-automation project from zero in C# / .NET 10 (8-9) — solution layout, exact package versions, browser/local setup, and run commands for a standalone Playwright (default) or Selenium NUnit suite. Composable with the api/mobile/performance dotnet scaffolds. Triggers "scaffold a UI test project", "set up a .NET Playwright suite from scratch", "create the solution structure for UI tests". Not for authoring pages or tests (`ui-test-author/playwright`).
 ---
 
@@ -112,7 +112,7 @@ BASE_URL=https://staging.example.test E2E_USER=qa@example.test E2E_PASSWORD="$E2
 
 `dotnet test` against a reachable app is the exit gate: green. The sample login tests and `AuthSetup` need a real account; a project with no signed-in tests deletes `AuthSetup.cs`. Do not start from `dotnet new nunit` — its csproj carries inline versions that break restore under CPM.
 
-For **Selenium** instead: add `PackageVersion` lines for `Selenium.WebDriver` and `Selenium.Support`, reference them versionlessly, and follow `qa/dotnet/skills/ui-test-author/selenium`; there is no browser-binary step. `Directory.Build.props` carries settings only, exactly as in `qa-api-project-setup-dotnet`.
+For **Selenium** instead: add `PackageVersion` lines for `Selenium.WebDriver` and `Selenium.Support`, reference them versionlessly, and follow `qa/dotnet/skills/ui-test-author/selenium`; there is no browser-binary step. `Directory.Build.props` carries settings only, exactly as in `qa-dotnet:api-project-setup`.
 
 ## The `.runsettings`
 

@@ -1,5 +1,5 @@
 ---
-name: mobile-react-native-device-features
+name: device-features
 description: Use when an Expo SDK 57 app must reach hardware or OS services — expo-camera, expo-image-picker, expo-location, expo-local-authentication, haptics, sharing, file system, expo-background-task — and ask for the permission first. Triggers "scan a QR code", "pick a photo", "use the user's location", "Face ID login", "permission denied dead end". Do NOT use for push or links (`-notifications-and-links`), custom native code (`-native-modules`), or secret storage (`-offline-and-storage`).
 ---
 
@@ -32,7 +32,7 @@ Detect the installed SDK from `expo` in `package.json`; never add a module the p
 - Push tokens, notification permission, universal links → [`notifications-and-links`](../notifications-and-links/SKILL.md)
 - A capability no SDK or community module covers → [`native-modules`](../native-modules/SKILL.md)
 - Tokens, credentials, encrypted records → [`offline-and-storage`](../offline-and-storage/SKILL.md)
-- The store-side declaration rules (purpose strings, Play declarations) → [`mobile-shared-store-compliance`](../../../_shared/store-compliance/SKILL.md)
+- The store-side declaration rules (purpose strings, Play declarations) → [`mobile-<stack>:store-compliance`](../../../_shared/store-compliance/SKILL.md)
 
 ## The permission lifecycle (hard rules)
 
@@ -82,13 +82,13 @@ export function ScannerGate({ children }: { children: React.ReactNode }) {
 - **Re-read the status on foreground.** The user may have changed it in Settings: refresh on `AppState` `active` (the `use*Permissions` hooks' `get` function), and never cache "denied" across sessions.
 - **Ask for the least.** Foreground before background; coarse before precise; the picker before library access; a one-shot capture before continuous capture.
 - **The purpose string is specific** ("Used to scan receipts for expense claims"); "Needs camera access" is an App Review rejection. Authored in the config plugin, in every shipped language ([`languages`](../languages/SKILL.md)).
-- **Declare only what you request.** An unused `NSLocationAlwaysAndWhenInUseUsageDescription` or `ACCESS_BACKGROUND_LOCATION` is a store finding ([`mobile-shared-store-compliance`](../../../_shared/store-compliance/SKILL.md)).
+- **Declare only what you request.** An unused `NSLocationAlwaysAndWhenInUseUsageDescription` or `ACCESS_BACKGROUND_LOCATION` is a store finding ([`mobile-<stack>:store-compliance`](../../../_shared/store-compliance/SKILL.md)).
 
 ## Camera and scanning — `expo-camera`
 
 - `useCameraPermissions()` → the gate above. `CameraView` renders only inside the granted branch.
 - `CameraView` with `onBarcodeScanned` and `barcodeScannerSettings={{ barcodeTypes: ['qr'] }}` — list only the types you parse. Debounce: the callback fires per frame; set a ref or state on the first hit and ignore the rest.
-- A scanned value is **untrusted input**: validate it with a schema before it routes, opens a URL, or reaches a request ([`mobile-shared-security`](../../../_shared/security/SKILL.md)).
+- A scanned value is **untrusted input**: validate it with a schema before it routes, opens a URL, or reaches a request ([`mobile-<stack>:security`](../../../_shared/security/SKILL.md)).
 - Unmount releases the camera; do not keep a `CameraView` mounted under a hidden tab. Mute the preview (`active={false}`) while a modal covers it.
 - `cameraPermission: false` in the plugin blocks the Android `CAMERA` permission when a dependency adds it unasked.
 
@@ -99,7 +99,7 @@ export function ScannerGate({ children }: { children: React.ReactNode }) {
 - `selectionLimit` with `allowsMultipleSelection: true`; `0` means the system maximum — set a number you can upload.
 - Read `result.canceled` before `result.assets`; a cancel is not an error.
 - Downscale and re-encode **before** upload (`quality`, or an image manipulator); a 12 MP original on a cell link is a timeout. Strip location EXIF you do not need.
-- Never request `READ_MEDIA_IMAGES` / `READ_MEDIA_VIDEO` for picking — Play blocks the declaration unless the picker cannot serve core functionality ([`mobile-shared-store-compliance`](../../../_shared/store-compliance/SKILL.md)).
+- Never request `READ_MEDIA_IMAGES` / `READ_MEDIA_VIDEO` for picking — Play blocks the declaration unless the picker cannot serve core functionality ([`mobile-<stack>:store-compliance`](../../../_shared/store-compliance/SKILL.md)).
 - `photosPermission` sets `NSPhotoLibraryUsageDescription`; it is needed only if you read or save to the library.
 
 ## Location — `expo-location`
@@ -120,7 +120,7 @@ export function ScannerGate({ children }: { children: React.ReactNode }) {
 
 - Check `hasHardwareAsync()` **and** `isEnrolledAsync()` before offering the control; neither → hide it and keep the password path.
 - `authenticateAsync({ promptMessage })` returns `{ success: true }` or `{ success: false, error }`. Handle `user_cancel` silently; handle `lockout` with the fallback; never treat `success: false` as an exception to swallow.
-- **Biometrics unlock a secret, they are not the secret.** The result of `authenticateAsync` is a boolean on the JS thread and can be faked on a rooted device; gate access to a Keychain / Keystore item with `requireAuthentication` in `expo-secure-store`, so the OS enforces it ([`offline-and-storage`](../offline-and-storage/SKILL.md), [`mobile-shared-security`](../../../_shared/security/SKILL.md)).
+- **Biometrics unlock a secret, they are not the secret.** The result of `authenticateAsync` is a boolean on the JS thread and can be faked on a rooted device; gate access to a Keychain / Keystore item with `requireAuthentication` in `expo-secure-store`, so the OS enforces it ([`offline-and-storage`](../offline-and-storage/SKILL.md), [`mobile-<stack>:security`](../../../_shared/security/SKILL.md)).
 - `faceIDPermission` sets `NSFaceIDUsageDescription`; without it iOS falls back to the passcode silently.
 - `disableDeviceFallback` and `fallbackLabel` are product decisions — default to the device passcode fallback so a user with a changed face is not locked out.
 
@@ -152,7 +152,7 @@ export function ScannerGate({ children }: { children: React.ReactNode }) {
 3. Write the gate (pre-prompt → granted → denied-askable → denied-settings) with a stable test id on each state.
 4. Wire the feature; clean up subscriptions, cameras and watchers in the unmount path.
 5. Validate any value that came from the device (a scan, a file name) before it is used.
-6. Set the purpose strings in `app.json` plugins, in every shipped language; note them for [`mobile-shared-store-compliance`](../../../_shared/store-compliance/SKILL.md).
+6. Set the purpose strings in `app.json` plugins, in every shipped language; note them for [`mobile-<stack>:store-compliance`](../../../_shared/store-compliance/SKILL.md).
 
 ## Validation
 
@@ -170,8 +170,8 @@ Inside a `Gate: none` plan task, run none of these and report "written, not run"
 - Push permission, channels, tokens, deep links → [`notifications-and-links`](../notifications-and-links/SKILL.md)
 - Config plugins for a native change, a custom module → [`native-modules`](../native-modules/SKILL.md)
 - Secure storage, queued writes → [`offline-and-storage`](../offline-and-storage/SKILL.md)
-- Purpose strings, Play declarations, data-safety → [`mobile-shared-store-compliance`](../../../_shared/store-compliance/SKILL.md)
-- Untrusted scan / file input, Keychain, pinning → [`mobile-shared-security`](../../../_shared/security/SKILL.md)
+- Purpose strings, Play declarations, data-safety → [`mobile-<stack>:store-compliance`](../../../_shared/store-compliance/SKILL.md)
+- Untrusted scan / file input, Keychain, pinning → [`mobile-<stack>:security`](../../../_shared/security/SKILL.md)
 - Failure UI for a full disk or a failed capture → [`error-handling`](../error-handling/SKILL.md)
 - Test ids on the primer and denied screens → [`test-ids`](../test-ids/SKILL.md)
 - Permission dialogs in a device journey → `qa-mobile-typescript` (peer)

@@ -72,7 +72,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 ```
 
 - The root is built by the **composition root** from initializer-injected parts — the scene delegate does not create dependencies ad hoc. If the project holds services in a singleton today, keep that shape in the move and flag it; replacing it is not part of this task.
-- **`route(_:)` is the one function turning a URL or activity into a destination** — the same one `onOpenURL` uses on the SwiftUI side ([`navigation`](../../navigation/SKILL.md)). It validates scheme, host and parameters first; a link is untrusted input (`mobile-shared-security` § 5).
+- **`route(_:)` is the one function turning a URL or activity into a destination** — the same one `onOpenURL` uses on the SwiftUI side ([`navigation`](../../navigation/SKILL.md)). It validates scheme, host and parameters first; a link is untrusted input (`mobile-<stack>:security` § 5).
 - A cold start from a link delivers it in `willConnectTo` options; a warm start delivers it through `openURLContexts` / `continue`. Both paths route.
 
 ## 4. Slim the app delegate
@@ -95,7 +95,7 @@ Code that read `UIApplication.shared.delegate.window` or `UIApplication.shared.k
 
 ## 5. State and lifecycle
 
-- App-level lifecycle callbacks (`applicationDidBecomeActive`, `applicationWillResignActive`) become scene callbacks (`sceneDidBecomeActive`, `sceneWillResignActive`, `sceneDidEnterBackground`) — the **app-switcher cover** for sensitive screens ([`mobile-shared-security`](../../../../_shared/security/references/ios.md) § 3) moves to `sceneWillResignActive`.
+- App-level lifecycle callbacks (`applicationDidBecomeActive`, `applicationWillResignActive`) become scene callbacks (`sceneDidBecomeActive`, `sceneWillResignActive`, `sceneDidEnterBackground`) — the **app-switcher cover** for sensitive screens ([`mobile-<stack>:security`](../../../../_shared/security/references/ios.md) § 3) moves to `sceneWillResignActive`.
 - Old state restoration (`application(_:shouldSaveSecureApplicationState:)`) becomes `stateRestorationActivity(for:)` and `scene(_:restoreInteractionStateWith:)`.
 - Background tasks and notifications stay on the app delegate / `UNUserNotificationCenter`; they are not per scene.
 

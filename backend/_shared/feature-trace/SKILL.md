@@ -1,15 +1,15 @@
 ---
-name: be-shared-feature-trace
-description: Use when one functional area of an existing backend must be read in depth to recover what it actually does — following every entry point through auth, validation, domain rules, persistence and failure into six file:line-evidenced inventories. Triggers "trace how this area works", "what business rules are in this module". Do NOT use to split a codebase into areas first (`be-shared-codebase-survey`), write documentation (`be-shared-business-documentation`), or find defects (`ep-feature-audit`).
+name: doc-feature-trace
+description: Use when one functional area of an existing backend must be read in depth to recover what it actually does — following every entry point through auth, validation, domain rules, persistence and failure into six file:line-evidenced inventories. Triggers "trace how this area works", "what business rules are in this module". Do NOT use to split a codebase into areas first (`dev:doc-codebase-survey`), write documentation (`dev:doc-business-model`), or find defects (`dev:audit-feature`).
 ---
 
 # Feature Trace — recovering behavior from code
 
-Depth, one area at a time. The output is not prose — it is **structured evidence**: six inventories, every item tagged with the file and line it came from, ready for `be-shared-business-documentation` to turn into something a business reader can use.
+Depth, one area at a time. The output is not prose — it is **structured evidence**: six inventories, every item tagged with the file and line it came from, ready for `dev:doc-business-model` to turn into something a business reader can use.
 
 The discipline that makes it worth doing: **separate what the code does from what you think it means.** Every item you extract is `#observed` with a `file:line` read this session. Intent is a separate, clearly-marked layer — and where intent is not recoverable, the honest output is the behavior plus a question.
 
-**Prerequisite:** a confirmed area from `be-shared-codebase-survey`, with its entry points and its assigned depth.
+**Prerequisite:** a confirmed area from `dev:doc-codebase-survey`, with its entry points and its assigned depth.
 
 ## When to use
 
@@ -19,8 +19,8 @@ The discipline that makes it worth doing: **separate what the code does from wha
 
 ## When NOT to use
 
-- The areas are not mapped yet → `be-shared-codebase-survey`
-- The deliverable is defect findings with severities → `ep-feature-audit`. **Same technique, different question**: that skill asks what is wrong, this asks what is true. If you notice a defect while tracing, record it as a finding to report — do not switch modes and start auditing
+- The areas are not mapped yet → `dev:doc-codebase-survey`
+- The deliverable is defect findings with severities → `dev:audit-feature`. **Same technique, different question**: that skill asks what is wrong, this asks what is true. If you notice a defect while tracing, record it as a finding to report — do not switch modes and start auditing
 - The deliverable is the readable write-up → that is the next skill; this one produces the evidence it consumes
 
 ## Output
@@ -150,10 +150,10 @@ You are tracing, not auditing — but you will find things. Handle them like thi
 
 ## Handoffs
 
-- **→ `ba-process-flow-diagram`** — the orchestration and failure paths become `FLOW-nnn` diagrams.
-- **→ `ba-entity-state-grid`** — inventory 4 becomes `ENT-nnn` state × event grids; the refused transitions are its `—` cells with meaning.
-- **→ `ba-decision-table`** — inventory 5 becomes `DEC-nnn` tables with a declared hit policy; the completeness check exposes the input combinations the code never handles.
-- **→ `be-shared-business-documentation`** — all six inventories become the area's end-user write-up.
+- **→ `business-analysis:process-flow`** — the orchestration and failure paths become `FLOW-nnn` diagrams.
+- **→ `business-analysis:state-grid`** — inventory 4 becomes `ENT-nnn` state × event grids; the refused transitions are its `—` cells with meaning.
+- **→ `business-analysis:decision-table`** — inventory 5 becomes `DEC-nnn` tables with a declared hit policy; the completeness check exposes the input combinations the code never handles.
+- **→ `dev:doc-business-model`** — all six inventories become the area's end-user write-up.
 - **→ `code-auditor`** — the findings list, when it turns out to be the interesting part.
 - **→ `qa-test-case-designer`** — the rules and validations are a test basis; the thresholds are BVA seeds.
 

@@ -1,11 +1,11 @@
 ---
-name: mobile-android-styling
-description: Use when theming a Compose app — Material 3 theme and tokens (1.4 stable vs Expressive in 1.5), dynamic colour, typography in sp, window size classes and adaptive layout, large-screen rules at target 36 / 37, edge-to-edge insets. Triggers "set up the theme", "dark mode", "tablet layout", "status bar overlaps". Do NOT use for component structure (`mobile-android-ui-components`), routes (`-navigation`) or TalkBack (`-accessibility`).
+name: styling
+description: Use when theming a Compose app — Material 3 theme and tokens (1.4 stable vs Expressive in 1.5), dynamic colour, typography in sp, window size classes and adaptive layout, large-screen rules at target 36 / 37, edge-to-edge insets. Triggers "set up the theme", "dark mode", "tablet layout", "status bar overlaps". Do NOT use for component structure (`mobile-android:ui-components`), routes (`-navigation`) or TalkBack (`-accessibility`).
 ---
 
 # Android — Styling, Theming and Adaptive Layout
 
-One theme, tokens instead of literals: `MaterialTheme` colour scheme, typography and shapes read through `MaterialTheme.*`; dynamic colour with a fallback; sizes in `dp` and text in `sp`; layout that adapts to **window size classes** rather than device type; insets handled in composables. Design facts come from `design-ui-ux-pro-max --stack jetpack-compose`; audit rows are section E of `mobile-android-standards-audit`.
+One theme, tokens instead of literals: `MaterialTheme` colour scheme, typography and shapes read through `MaterialTheme.*`; dynamic colour with a fallback; sizes in `dp` and text in `sp`; layout that adapts to **window size classes** rather than device type; insets handled in composables. Design facts come from `design:corpus --stack jetpack-compose`; audit rows are section E of `mobile-android:standards-audit`.
 
 ## Version lane
 
@@ -32,8 +32,8 @@ Never raise the Compose BOM or opt into Expressive as a side effect of a styling
 - Composable structure, state, lists → [`ui-components`](../ui-components/SKILL.md)
 - Motion → [`animation`](../animation/SKILL.md); contrast and TalkBack → [`accessibility`](../accessibility/SKILL.md)
 - Navigation containers' behaviour → [`navigation`](../navigation/SKILL.md)
-- String resources, RTL, locale formatting → `mobile-android-languages`
-- iOS / RN theming → `mobile-ios-styling`, `mobile-react-native-styling`
+- String resources, RTL, locale formatting → `mobile-android:i18n`
+- iOS / RN theming → `mobile-ios:styling`, `mobile-react-native:styling`
 
 ## Inputs needed
 
@@ -80,7 +80,7 @@ fun AppTheme(
 - **Text sizes in `sp`**, drawn from `MaterialTheme.typography` (`displayLarge … labelSmall`); a screen picks a role, not a size. Custom fonts load through `FontFamily(Font(R.font.x, weight))` or downloadable fonts, with a fallback, and are wired once into `AppTypography`.
 - **Text scales to 200% without clipping**: no fixed `height` / `size` on a text container, `minHeight` instead; `maxLines` with an ellipsis only for secondary text; primary content wraps. **Never lock scaling** (`Density(fontScale = 1f)`, `TextUnit` in `dp`).
 - **Line height and tracking** come with the role; do not override per screen. Numbers in tables use `fontFeatureSettings = "tnum"`.
-- Corpus: `design-ui-ux-pro-max --stack jetpack-compose` and `--domain typography` for pairings; the platform default (Roboto Flex / the system font) is correct unless a brand font is specified.
+- Corpus: `design:corpus --stack jetpack-compose` and `--domain typography` for pairings; the platform default (Roboto Flex / the system font) is correct unless a brand font is specified.
 
 ## Window size classes and adaptive layout
 
@@ -109,7 +109,7 @@ val showTwoPane = sizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EX
 - **Content draws behind the system bars from target 35**; `enableEdgeToEdge()` in `onCreate` ([`project-setup`](../project-setup/SKILL.md)). The window's insets are consumed by composables, not by `android:fitsSystemWindows` or hard-coded dp.
 - **`Scaffold` passes `innerPadding`** — apply it to the content root (`Modifier.padding(innerPadding)` or `contentPadding` of a lazy list). A `Scaffold` whose `innerPadding` is ignored is a finding.
 - **Outside a `Scaffold`**: `Modifier.windowInsetsPadding(WindowInsets.safeDrawing)`, `.statusBarsPadding()`, `.navigationBarsPadding()`; a full-bleed image ignores them on purpose and its text re-applies them.
-- **Keyboard**: `Modifier.imePadding()` (with `android:windowSoftInputMode="adjustResize"`); a field the keyboard covers is a defect (`mobile-android-forms`).
+- **Keyboard**: `Modifier.imePadding()` (with `android:windowSoftInputMode="adjustResize"`); a field the keyboard covers is a defect (`mobile-android:forms`).
 - Gesture-nav and 3-button bars, display cutouts (`WindowInsets.displayCutout`) and a foldable's hinge are inset sources; `safeDrawing` covers them.
 
 ## Rules
@@ -144,5 +144,5 @@ val showTwoPane = sizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EX
 - Navigation suite and panes → [`navigation`](../navigation/SKILL.md)
 - Contrast, scaling, TalkBack → [`accessibility`](../accessibility/SKILL.md)
 - Motion scheme → [`animation`](../animation/SKILL.md)
-- Dark-mode preference storage → `mobile-android-offline-and-storage`
+- Dark-mode preference storage → `mobile-android:offline-and-storage`
 - M2 → M3, XML theme → [`migration`](../migration/SKILL.md), [`views-interop`](../views-interop/SKILL.md)

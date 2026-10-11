@@ -1,4 +1,4 @@
-# Deep-dive details — `qa-realtime-stream-testing-typescript`
+# Deep-dive details — `qa-typescript:realtime-stream-testing`
 
 Sections moved out of SKILL.md for on-demand loading. Read what the task needs.
 
@@ -310,7 +310,7 @@ it is exactly what a mocked `page.route` body cannot reproduce (SKILL.md § Brow
 - **Auth on the socket** — token in the **query string** (`?access_token=…`), via **subprotocol**
   (`new WebSocket(url, [token])` → `Sec-WebSocket-Protocol`), or in the **first frame**; `ws` also accepts
   `{ headers: { Authorization: … } }`. Read the token from **env, lazily, never logged**
-  (`qa-test-login-tokens-typescript`). A browser `EventSource` **cannot set headers** → query-param or cookie
+  (`qa-typescript:test-login-tokens`). A browser `EventSource` **cannot set headers** → query-param or cookie
   auth.
 - **Heartbeat (ping/pong):** `ws` exposes `'ping'`/`'pong'`; assert the app-level heartbeat / that a missed
   pong triggers the SUT's reconnect.

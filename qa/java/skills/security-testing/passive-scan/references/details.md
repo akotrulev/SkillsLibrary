@@ -1,4 +1,4 @@
-# Deep-dive details — `qa-security-passive-scan-java`
+# Deep-dive details — `qa-java:passive-scan`
 
 Sections moved out of SKILL.md for on-demand loading. Read what the task needs.
 

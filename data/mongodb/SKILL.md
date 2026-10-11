@@ -1,5 +1,5 @@
 ---
-name: data-mongodb
+name: mongodb
 description: Use when designing collections/documents, embed-vs-reference, security (auth/roles/encryption), queries or aggregation pipelines, indexes, or tuning MongoDB from a .NET / Java / Node backend. Pick the topic in the routing table, then read its reference. Triggers: "design a Mongo collection", "write an aggregation pipeline", "this Mongo query is slow", "embed or reference?". Do NOT use for relational engines, cross-engine modeling (`data/_shared/schema-design`), or DB tests (qa `db-testing`).
 ---
 

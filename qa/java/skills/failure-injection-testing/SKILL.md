@@ -1,6 +1,6 @@
 ---
-name: qa-failure-injection-testing-java
-description: Use when writing fault-injection / resilience tests in Java 21 / TestNG with Toxiproxy via Testcontainers — inject latency, drops, and bandwidth caps on a dependency (DB, API, broker, cache) and assert the app degrades gracefully. Triggers: "test the app survives a slow database", "inject a connection drop", "assert the circuit breaker opens". Do NOT use for load/throughput testing (`qa-load-testing-java`).
+name: failure-injection-testing
+description: Use when writing fault-injection / resilience tests in Java 21 / TestNG with Toxiproxy via Testcontainers — inject latency, drops, and bandwidth caps on a dependency (DB, API, broker, cache) and assert the app degrades gracefully. Triggers: "test the app survives a slow database", "inject a connection drop", "assert the circuit breaker opens". Do NOT use for load/throughput testing (`qa-java:load-testing`).
 ---
 
 # QA — Chaos / Fault-Injection Testing (Java 21 / Toxiproxy + Testcontainers + TestNG)
@@ -28,11 +28,11 @@ happy-path skill in this library: the REST/gRPC authors assert *the dependency a
 >    inject the toxic → assert degraded → remove the toxic → assert recovery.` Toxiproxy's control API (port 8474)
 >    lets you mutate the fault mid-test via `proxy.toxics().latency(...)` / `.timeout(...)` and `toxic.remove()`, so
 >    one test proves **both** that the app degrades under fault **and** that it heals once the fault clears (the
->    drain-then-assert lifecycle of `qa-realtime-stream-testing-java`, applied to faults).
+>    drain-then-assert lifecycle of `qa-java:realtime-stream-testing`, applied to faults).
 > 4. **Assert the resilience PATTERN, not the fault.** The toxic is the *given*, not the assertion. Assert the
 >    **behaviour it provokes**: the retry count, the circuit-breaker state transition (closed → open → half-open →
 >    closed via resilience4j), the honored timeout (fails *fast*, not hangs), the fallback payload served. This is
->    what `qa-network-mocking-java` can *observe* but never *inject* — observe vs break.
+>    what `qa-java:network-mocking` can *observe* but never *inject* — observe vs break.
 
 ## Decision matrix — fault scenario → toxic → what you assert
 
@@ -128,7 +128,7 @@ public class SlowDependencyTest extends BaseChaosTest {
 ## The full lifecycle — steady → inject → degraded → remove → recovered (idea #3)
 
 One test proves the app **degrades under fault and heals when it clears**. This is the chaos analogue of the
-drain-then-assert lifecycle in `qa-realtime-stream-testing-java`.
+drain-then-assert lifecycle in `qa-java:realtime-stream-testing`.
 
 ```java
 @Test
@@ -304,9 +304,9 @@ failing?*
 
 **Composing with the dependency families.** The thing you fault is stood up by Testcontainers
 (`ToxiproxyContainer` next to a `PostgreSQLContainer` / `KafkaContainer` on a shared `Network`); the dependency
-itself is exercised happy-path by `qa-db-testing-testcontainers-java` / `qa-messaging-testing-java`. Chaos adds the proxy in
+itself is exercised happy-path by `qa-java:db-testcontainers` / `qa-java:messaging-testing`. Chaos adds the proxy in
 front and asserts the resilience layer — it **composes** with those skills, it doesn't replace them. A
-data-driven fault matrix (toxic × parameter) binds cleanly via `qa-data-driven-testing-java`.
+data-driven fault matrix (toxic × parameter) binds cleanly via `qa-java:data-driven-testing`.
 
 ## Rules (hard constraints)
 
@@ -330,17 +330,17 @@ data-driven fault matrix (toxic × parameter) binds cleanly via `qa-data-driven-
 
 ## Cross-references
 
-- `qa-failure-injection-testing-dotnet` · `qa-failure-injection-testing-typescript` — the sibling stacks (`Toxiproxy.Net` + Polly ·
+- `qa-dotnet:failure-injection-testing` · `qa-typescript:failure-injection-testing` — the sibling stacks (`Toxiproxy.Net` + Polly ·
   `toxiproxy-node-client` + Vitest); same four ideas, same lifecycle, different client lib + resilience library.
-- `qa-network-mocking-java` — the **closest neighbor and the inverse**: that stands up a MITM proxy
+- `qa-java:network-mocking` — the **closest neighbor and the inverse**: that stands up a MITM proxy
   to **observe/mock** out-of-browser requests; this stands up Toxiproxy to **inject transport faults**. Observe vs
   break. Read it for the proxy-in-the-middle model; draw the boundary cleanly.
-- `qa-data-driven-testing-java` — drive a **fault matrix** (toxic × parameter × expected pattern) via
+- `qa-java:data-driven-testing` — drive a **fault matrix** (toxic × parameter × expected pattern) via
   row-binding instead of copy-pasted `@Test` methods.
-- `qa-db-testing-testcontainers-java` · `qa-messaging-testing-java` — the
+- `qa-java:db-testcontainers` · `qa-java:messaging-testing` — the
   dependencies you fault (DB / broker connections through the proxy); they cover the happy path this inverts.
-- `qa-realtime-stream-testing-java` — shares the **lifecycle discipline** (steady → perturb → assert → recover)
+- `qa-java:realtime-stream-testing` — shares the **lifecycle discipline** (steady → perturb → assert → recover)
   and bounded-condition waits (Awaitility, never sleep).
-- `qa-load-testing-java` — behaviour under **load/volume** vs behaviour under **fault** (this skill); they
+- `qa-java:load-testing` — behaviour under **load/volume** vs behaviour under **fault** (this skill); they
   answer different questions.
-- `qa-test-reports-java` — render each fault scenario as a named result.
+- `qa-java:test-reports` — render each fault scenario as a named result.

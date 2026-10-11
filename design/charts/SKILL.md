@@ -1,5 +1,5 @@
 ---
-name: design-charts
+name: charts
 description: Use when charts live INSIDE a product UI that already has a brand — an analytics screen or embedded dashboard. Adds a viz palette deliberately disjoint from the app's brand and status colors so a series never reads as "error", the do-not list (pie past 5 categories, dual axes, 3D), and stat-tile/KPI-row layout. Triggers "design our analytics screen", "add charts to this dashboard", "our chart colors clash with the brand". Not for ops/RED-USE dashboards (`grafana-dashboards`).
 ---
 
@@ -9,7 +9,7 @@ Owns the **design** of product-facing charts, dashboards, and reports, stack-agn
 
 **What this skill owns:** the chart-type choice, the viz palette system, dashboard composition and stat-tile anatomy, and chart-element discipline. **What it does not own:** the charting-library code (Recharts / Chart.js / a Blazor chart component — a future stack `charts` skill), the queries that feed a chart (`data/`), metric *definitions* and SLO targets ([`qa/manual/quality-metrics`](../../qa/manual/quality-metrics/SKILL.md)), and **ops/service** dashboards ([`observability/dashboards`](../../observability/dashboards/SKILL.md) owns RED/USE/golden-signals — this skill owns *product* dashboards a user reads).
 
-**Corpus authority.** The facts this skill decides with come from the vendored [`design-ui-ux-pro-max`](../ui-ux-pro-max/SKILL.md) corpus — **it is the source of truth, and where it and this skill disagree on a fact, the corpus wins.** 25 chart types, each with its data-volume threshold, color guidance, accessibility grade and risk, a11y fallback, and library notes:
+**Corpus authority.** The facts this skill decides with come from the vendored [`design:corpus`](../ui-ux-pro-max/SKILL.md) corpus — **it is the source of truth, and where it and this skill disagree on a fact, the corpus wins.** 25 chart types, each with its data-volume threshold, color guidance, accessibility grade and risk, a11y fallback, and library notes:
 
 ```bash
 python3 "${CLAUDE_PLUGIN_ROOT}/design/ui-ux-pro-max/scripts/search.py" "<the question the chart answers>" --domain chart
@@ -102,4 +102,4 @@ A dashboard is read top-left first, in an F/Z scan. Compose to that, not as a un
 - [`observability/dashboards`](../../observability/dashboards/SKILL.md) — **ops/service** dashboards (RED / USE / golden signals). This skill owns *product* dashboards; that one owns operational ones.
 - [`qa/manual/quality-metrics`](../../qa/manual/quality-metrics/SKILL.md) — *defines* the metrics and SLO targets a dashboard then visualizes.
 - A stack's `error-resilience` ([Blazor](../../frontend/blazor/skills/error-handling/SKILL.md) · [React](../../frontend/react/skills/error-handling/SKILL.md)) — the loading/empty/error state *structure* this skill's composition rule depends on.
-- [`design-ui-ux-pro-max`](../ui-ux-pro-max/SKILL.md) — the 25-chart `chart` domain with per-type accessibility grades and library notes.
+- [`design:corpus`](../ui-ux-pro-max/SKILL.md) — the 25-chart `chart` domain with per-type accessibility grades and library notes.

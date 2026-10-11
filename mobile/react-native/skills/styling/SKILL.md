@@ -1,6 +1,6 @@
 ---
-name: mobile-react-native-styling
-description: Use when styling or adapting layout in an Expo SDK 57 app — `StyleSheet.create`, typed tokens, `useColorScheme` dark mode, type scale, safe-area insets, `useWindowDimensions`, tablets, foldables, the one-styling-authority rule. Triggers "set up tokens", "dark mode", "content under the notch", "work on iPad / foldable". Do NOT use for a kit's theme (`mobile-react-native-component-library`), palette choice (`design/visual-identity`), screens (`-ui-components`) or web CSS.
+name: styling
+description: Use when styling or adapting layout in an Expo SDK 57 app — `StyleSheet.create`, typed tokens, `useColorScheme` dark mode, type scale, safe-area insets, `useWindowDimensions`, tablets, foldables, the one-styling-authority rule. Triggers "set up tokens", "dark mode", "content under the notch", "work on iPad / foldable". Do NOT use for a kit's theme (`mobile-react-native:component-library`), palette choice (`design/visual-identity`), screens (`-ui-components`) or web CSS.
 ---
 
 # React Native — Styling and Adaptive Layout
@@ -34,7 +34,7 @@ Design facts (palette, type, spacing, platform convention) come from `design/ui-
 - Choosing the palette and fonts → `design/visual-identity`, `design/theme-presets`; token tier discipline → `design/design-tokens`
 - Contrast, font scaling, touch targets audit → [`accessibility`](../accessibility/SKILL.md)
 - Screens, `Pressable`, lists → [`ui-components`](../ui-components/SKILL.md)
-- React web CSS → `fe-react-styling`
+- React web CSS → `fe-react:styling`
 
 ## The styling authority
 

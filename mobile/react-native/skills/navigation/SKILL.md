@@ -1,11 +1,11 @@
 ---
-name: mobile-react-native-navigation
-description: Use when adding or fixing routes in an Expo Router app on SDK 57 — file routes, typed routes, dynamic params, protected routes, modals and sheets, native tabs, linking config; also the React Navigation 7.5 lane for bare RN. Triggers "add a screen", "protect these routes", "make this a modal", "native tabs", "typed href". Do NOT use for links from push or the system (`mobile-react-native-notifications-and-links`), project setup (`-project-setup`) or fetching (`-networking`).
+name: navigation
+description: Use when adding or fixing routes in an Expo Router app on SDK 57 — file routes, typed routes, dynamic params, protected routes, modals and sheets, native tabs, linking config; also the React Navigation 7.5 lane for bare RN. Triggers "add a screen", "protect these routes", "make this a modal", "native tabs", "typed href". Do NOT use for links from push or the system (`mobile-react-native:push-and-deep-links`), project setup (`-project-setup`) or fetching (`-networking`).
 ---
 
 # React Native — Navigation (Expo Router)
 
-Owns the **route tree**: which file makes a screen, how screens nest and share chrome, typed params, who may reach what, modals and sheets, native tabs, and the linking config. Incoming links from notifications and the system are [`notifications-and-links`](../notifications-and-links/SKILL.md)'s; this skill owns the files and the navigation between them. Web analog: [`fe-react-routing`](../../../../frontend/react/skills/routing/SKILL.md) — the file-convention idea carries over, RSC and middleware do not.
+Owns the **route tree**: which file makes a screen, how screens nest and share chrome, typed params, who may reach what, modals and sheets, native tabs, and the linking config. Incoming links from notifications and the system are [`notifications-and-links`](../notifications-and-links/SKILL.md)'s; this skill owns the files and the navigation between them. Web analog: [`fe-react:routing`](../../../../frontend/react/skills/routing/SKILL.md) — the file-convention idea carries over, RSC and middleware do not.
 
 ## Version lane
 
@@ -36,7 +36,7 @@ Detect: `expo-router` in `package.json` → this lane; `@react-navigation/native
 - What a route fetches → [`networking`](../networking/SKILL.md)
 - What an error route looks like → [`error-handling`](../error-handling/SKILL.md)
 - Auth provider wiring → `auth0-react-native`
-- Next.js routing → `fe-react-routing`
+- Next.js routing → `fe-react:routing`
 
 ## File conventions
 

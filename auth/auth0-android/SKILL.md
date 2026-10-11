@@ -1,11 +1,11 @@
 ---
-name: auth-auth0-android
-description: Use when adding/fixing Auth0 sign-in in a native Kotlin / Jetpack Compose Android app with Auth0.Android — Universal Login in Custom Tabs (PKCE), App Links callback, SecureCredentialsManager (Keystore), biometric unlock, refresh rotation, logout, passkeys. Triggers "add Auth0 login", "browser doesn't return", "biometric prompt for stored credentials". Do NOT use for Auth0 concepts (`auth-auth0-concepts`), React Native (`auth-auth0-react-native`), or iOS (`auth-auth0-ios`).
+name: auth0
+description: Use when adding/fixing Auth0 sign-in in a native Kotlin / Jetpack Compose Android app with Auth0.Android — Universal Login in Custom Tabs (PKCE), App Links callback, SecureCredentialsManager (Keystore), biometric unlock, refresh rotation, logout, passkeys. Triggers "add Auth0 login", "browser doesn't return", "biometric prompt for stored credentials". Do NOT use for Auth0 concepts (`auth/_shared/auth0-concepts`), React Native (`mobile-react-native:auth0`), or iOS (`mobile-ios:auth0`).
 ---
 
 # Auth — Auth0 in Android (Kotlin)
 
-Wires **Auth0.Android** into a Compose app. **Universal Login in the system browser (Custom Tabs) with PKCE is the only login flow** — no embedded `WebView` login (RFC 8252). Concepts: `auth-auth0-concepts` / `auth-oidc-concepts`.
+Wires **Auth0.Android** into a Compose app. **Universal Login in the system browser (Custom Tabs) with PKCE is the only login flow** — no embedded `WebView` login (RFC 8252). Concepts: `auth/_shared/auth0-concepts` / `auth/_shared/oidc-concepts`.
 
 ## Version lane (checked 2026-10-10)
 
@@ -24,9 +24,9 @@ Wires **Auth0.Android** into a Compose app. **Universal Login in the system brow
 
 ## When NOT to use
 
-- Auth0 entities, `audience`, RBAC → `auth-auth0-concepts`
-- RN / Expo → `auth-auth0-react-native`; Swift → `auth-auth0-ios`
-- Keystore / storage rules in general → `mobile-shared-security`
+- Auth0 entities, `audience`, RBAC → `auth/_shared/auth0-concepts`
+- RN / Expo → `mobile-react-native:auth0`; Swift → `mobile-ios:auth0`
+- Keystore / storage rules in general → `mobile-<stack>:security`
 - Backend validation → `backend/*/auth0`
 
 ## Setup
@@ -104,7 +104,7 @@ val credentialsManager = SecureCredentialsManager(
 )
 ```
 
-- `SecureCredentialsManager` encrypts the credentials with a **Keystore-held AES key**; the encrypted blob sits in app-private storage — the **only** sanctioned place. Tokens never go to `SharedPreferences` in the clear, DataStore, Room, files or logs (`mobile-shared-security` K2).
+- `SecureCredentialsManager` encrypts the credentials with a **Keystore-held AES key**; the encrypted blob sits in app-private storage — the **only** sanctioned place. Tokens never go to `SharedPreferences` in the clear, DataStore, Room, files or logs (`mobile-<stack>:security` K2).
 - Biometric prompts need a `FragmentActivity` (Compose hosts: `FragmentActivity`/`AppCompatActivity`), a **secured lock screen**, and a `BiometricPolicy` (`Session(seconds)`, `Always`, `AppLifecycle`). `isBiometricSessionValid()` / `clearBiometricSession()` control it.
 - A changed lock screen can invalidate the Keystore key: stored credentials become undecryptable until the user signs in again. Treat the resulting `CredentialsManagerException` as **signed out**, not a crash.
 - Create **one** manager (injected singleton). Save/get are thread-safe; do not run renewals from parallel managers.
@@ -162,6 +162,6 @@ Auth0.Android 4.x supports passkey sign-up/login through the Authentication API 
 
 ## Handoffs
 
-- Concepts → `auth-auth0-concepts`; storage rules → `mobile-shared-security`
-- Project / Gradle / manifest → `mobile-android-project-setup`; links → `mobile-android-notifications-and-links`
-- Networking → `mobile-android-networking`; purchase user link → `mobile-shared-in-app-purchases`
+- Concepts → `auth/_shared/auth0-concepts`; storage rules → `mobile-<stack>:security`
+- Project / Gradle / manifest → `mobile-android:project-setup`; links → `mobile-android:push-and-deep-links`
+- Networking → `mobile-android:networking`; purchase user link → `mobile-<stack>:in-app-purchases`

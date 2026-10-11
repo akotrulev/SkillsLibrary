@@ -1,6 +1,6 @@
 ---
-name: qa-accessibility-testing-dotnet
-description: Use when a .NET/NUnit Playwright suite must scan for accessibility violations — axe-core per UI state at WCAG 2.2 AA (Deque.AxeCore.Playwright) or Lighthouse category scores. Triggers "add a11y tests", "scan for WCAG violations", "fail CI on accessibility regressions", "set an accessibility budget". Do NOT use for the app's own a11y implementation (the fe-* stack's accessibility skill), pixel diffs (qa-visual-regression-dotnet) or breakpoints (qa-responsive-testing-dotnet).
+name: accessibility-testing
+description: Use when a .NET/NUnit Playwright suite must scan for accessibility violations — axe-core per UI state at WCAG 2.2 AA (Deque.AxeCore.Playwright) or Lighthouse category scores. Triggers "add a11y tests", "scan for WCAG violations", "fail CI on accessibility regressions", "set an accessibility budget". Do NOT use for the app's own a11y implementation (the fe-* stack's accessibility skill), pixel diffs (qa-dotnet:visual-regression) or breakpoints (qa-dotnet:responsive-testing).
 ---
 
 # QA — Accessibility Testing (.NET 10 / Playwright 1.63)
@@ -60,7 +60,7 @@ the **broad audit and trend**. They are complementary; many teams run both.
   files, also through `TestContext.AddTestAttachment`.
 - **No `try`/`catch`/`finally` in a test; no `if` or `Console.WriteLine` deciding what a test reports.**
 - An automated scan is the **floor, not proof**: keyboard traps, focus order and screen-reader comprehension
-  need manual and assistive-technology testing (`qa-exploratory-charter-writer`).
+  need manual and assistive-technology testing (`qa-<stack>:exploratory-charter-writer`).
 
 ## Handoffs
 
@@ -68,4 +68,4 @@ the **broad audit and trend**. They are complementary; many teams run both.
 - Accessible-name, role and aria-snapshot assertions → its `references/assertions.md`
 - Failure evidence beside the scans → `qa/dotnet/skills/evidence-capture`
 - The UI job and the Lighthouse step → `qa/cicd/dotnet/skills/ci-pipelines`
-- TypeScript and Java → `qa-accessibility-testing-typescript`, `qa-accessibility-testing-java`
+- TypeScript and Java → `qa-typescript:accessibility-testing`, `qa-java:accessibility-testing`

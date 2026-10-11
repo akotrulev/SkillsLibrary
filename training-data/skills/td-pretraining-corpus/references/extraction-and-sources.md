@@ -11,7 +11,7 @@ text = trafilatura.extract(html, include_comments=False, include_tables=True,
 # PDF — text layer
 import pymupdf
 text = "\n".join(page.get_text("text") for page in pymupdf.open(path))
-# scanned/complex layout → Marker (marker-pdf) or a VLM-OCR pass (td-vision-language-data)
+# scanned/complex layout → Marker (marker-pdf) or a VLM-OCR pass (training-data:vision-language-data)
 
 # Code — read directly, filter by language/size, drop generated/minified/vendored
 ```

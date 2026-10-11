@@ -1,17 +1,17 @@
 ---
-name: secgov-standards-audit
+name: standards-audit
 description: Use to audit a repo's defensive-security artifacts against the security-governance plugin's conventions — Sigma detections, CSP/headers/WAF policy, secret-store wiring and rotation runbooks, the compliance evidence register — as a saved, re-runnable findings report in `docs/audits/`. Read-only; never fixes. Triggers "audit our detections against the conventions", "conformance audit of our security hardening". Do NOT use to run a scan or exploit, or to audit application code.
 ---
 
 # security-governance Conformance Audit
 
-Audit an existing repo's **defensive-security artifacts** against the conventions this plugin defines — the hard rules each `secgov-*` skill owns, plus the artifact contract the `security-architect` agent holds itself to — and produce **one saved report**: every finding evidenced at `file:line`, severity-tabled, mapped to the skill that owns the fix.
+Audit an existing repo's **defensive-security artifacts** against the conventions this plugin defines — the hard rules each `security-governance` skill owns, plus the artifact contract the `security-architect` agent holds itself to — and produce **one saved report**: every finding evidenced at `file:line`, severity-tabled, mapped to the skill that owns the fix.
 
 **Read-only analysis.** The audit points; `security-architect` fixes.
 
 ## Read before sweeping
 
-1. **[`ep-standards-audit-engine`](../../engineering-practices/standards-audit-engine/SKILL.md)** — the engine: Mode A/B rounds, the artifact contract, evidence rules, severity semantics, grouping/coverage policy, the 5 steps, the hostile self-review. **Read it first.**
+1. **[`engineering-practices/standards-audit-engine`](../../engineering-practices/standards-audit-engine/SKILL.md)** — the engine: Mode A/B rounds, the artifact contract, evidence rules, severity semantics, grouping/coverage policy, the 5 steps, the hostile self-review. **Read it first.**
 2. [`references/conformance-checklist.md`](references/conformance-checklist.md) — the 14 lettered sections (A–N), 127 checks, the **absence rule**, and the pinned-standards table. **Read end-to-end** before Step 2.
 3. `engineering-practices/standards-audit-engine/references/report-template.md` — the Round-1 / Round-N skeletons. Read before Step 3.
 
@@ -30,8 +30,8 @@ The object is the **governance artifact**: a Sigma rule and its test fixtures, a
 | Job | Owner |
 |---|---|
 | Reviewing one diff, inline, no artifact | the stack plugin's own `code-review` skill — this plugin has no per-diff sibling, because a policy or a detection is reviewed as a whole artifact, not as a hunk |
-| Code vs a written spec / stories / ACs | `ep-spec-vs-code-audit` (or the `code-auditor` agent) |
-| "How does feature X actually work / where is it defective" | `ep-feature-audit` |
+| Code vs a written spec / stories / ACs | `dev:audit-spec` (or the `code-auditor` agent) |
+| "How does feature X actually work / where is it defective" | `dev:audit-feature` |
 | **Detecting** a vulnerability or a committed secret | **peer** `qa-security` (SAST/DAST/SCA/`secrets-scan`) — section H audits the *hardening*, it is not a scanner |
 | **Proving** a weakness is exploitable, or running a kill chain | **peer** `penetration-tester` — the offensive lane produces proof, not conformance findings |
 | **Proving** an authored detection actually fires | **peer** `purple-team-engineer` — section D9 reports *authored vs validated*; it never validates |
@@ -40,7 +40,7 @@ The object is the **governance artifact**: a Sigma rule and its test fixtures, a
 | Deciding **whether** a control should exist, and the risk it carries | **peer** `security-architect` — posture, not conformance |
 | Applying any fix found here | `security-architect` (see Handoffs) |
 
-**Why the `penetration-testing` plugin has no audit of its own.** Its outputs are per-engagement reports and scope files — point-in-time records, not standing artifacts that drift. Its rules are enforced as **blocking pre-conditions** by the §5 safety gates and the mandatory `pentest-reporting` sections, so a post-hoc sweep finds only what the gates already refused to allow, and mostly finds it too late to fix. The one residual the gates cannot cover — sensitive material that reached a **committed** file — is **section M** of this checklist, which sweeps `docs/security/**` and `detections/**` whoever authored them. Only the redaction rule crosses that boundary; the offensive findings themselves are never re-verdicted here.
+**Why the `penetration-testing` plugin has no audit of its own.** Its outputs are per-engagement reports and scope files — point-in-time records, not standing artifacts that drift. Its rules are enforced as **blocking pre-conditions** by the §5 safety gates and the mandatory `penetration-testing:reporting` sections, so a post-hoc sweep finds only what the gates already refused to allow, and mostly finds it too late to fix. The one residual the gates cannot cover — sensitive material that reached a **committed** file — is **section M** of this checklist, which sweeps `docs/security/**` and `detections/**` whoever authored them. Only the redaction rule crosses that boundary; the offensive findings themselves are never re-verdicted here.
 
 ## Step 0 — the standards & tooling pin lane *(never skip)*
 
@@ -78,10 +78,10 @@ A and H apply to every repo — A is the gate, and every repo has a config surfa
 
 ## Handoffs
 
-- **Apply the fixes** → the **`security-architect`** agent. The artifacts this audit sweeps are exactly the ones inside its write fence (`docs/security/**`, `detections/**`), so a nonconforming rule, policy, runbook, or register is fixed there — loading the owning `secgov-*` skill for the rule. The priority table is the handoff artifact.
+- **Apply the fixes** → the **`security-architect`** agent. The artifacts this audit sweeps are exactly the ones inside its write fence (`docs/security/**`, `detections/**`), so a nonconforming rule, policy, runbook, or register is fixed there — loading the owning `security-governance:*` skill for the rule. The priority table is the handoff artifact.
 - **App / infra wiring** (per-request nonce emission, framework middleware, ESO manifests, edge WAF deploy, the pre-commit hook and CI secret gate) → `fe-*` / `be-*` / `devops-engineer`. This audit reports the policy defect; they wire the fix.
 - **A `logsource` the stack never ships (D2)** → `observability-engineer-*` own the telemetry substrate. A rule with no data behind it is a telemetry gap, not a rule gap.
 - **"Authored but never validated" (D9)** → `purple-team-engineer` runs the validation. That is a missing proof, not a defect to fix.
-- **A vulnerability or committed secret found while reading (H2, H7)** → report it here at its severity **and** name `qa-security` for the scan lane and `secgov-secrets-hardening` for the rotation. Do not start rotating.
+- **A vulnerability or committed secret found while reading (H2, H7)** → report it here at its severity **and** name `qa-security` for the scan lane and `security-governance:secrets-hardening` for the rotation. Do not start rotating.
 - **Whether a control should exist at all, and what risk its absence carries** → `security-architect`'s posture picture. That is the coverage note, not a finding.
-- **The maintainer, not the audited repo** → any place a `secgov-*` skill's own cited standard version conflicts with the checklist's verified table. An open question, never a finding against the user's code.
+- **The maintainer, not the audited repo** → any place a `security-governance` skill's own cited standard version conflicts with the checklist's verified table. An open question, never a finding against the user's code.

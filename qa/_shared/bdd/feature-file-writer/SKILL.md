@@ -1,5 +1,5 @@
 ---
-name: qa-feature-file-writer
+name: feature-files
 description: Use when turning a manual test-case suite (or raw acceptance criteria) into clean, reusable Gherkin feature files for living documentation — framework-agnostic. Triggers: "convert these test cases to Gherkin", "write feature files for this suite", "structure these scenarios with a Background", "make these steps declarative". Do NOT use to generate step-definition code (the stack's `gherkin-step-code`), scaffold the BDD project (`bdd-project-scaffold`), or design test cases (`test-case-writer`).
 ---
 

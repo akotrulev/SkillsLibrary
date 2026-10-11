@@ -1,6 +1,6 @@
 ---
-name: qa-network-mocking-dotnet
-description: Use when .NET/NUnit UI tests must intercept, mock, hold, throttle or assert browser network traffic — Playwright routes, CDP throttling, or an out-of-browser MITM proxy for Selenium/Appium. Triggers "mock this XHR in the UI test", "simulate slow 3G/offline", "replay a HAR", "assert the page called X", "check the security headers". Do NOT use for API tests without a browser (qa-api-test-writer-dotnet), load (qa-load-testing-dotnet) or WebSocket/SSE streams (qa-realtime-stream-testing-dotnet).
+name: network-mocking
+description: Use when .NET/NUnit UI tests must intercept, mock, hold, throttle or assert browser network traffic — Playwright routes, CDP throttling, or an out-of-browser MITM proxy for Selenium/Appium. Triggers "mock this XHR in the UI test", "simulate slow 3G/offline", "replay a HAR", "assert the page called X", "check the security headers". Do NOT use for API tests without a browser (qa-dotnet:api-tests), load (qa-dotnet:load-testing) or WebSocket/SSE streams (qa-dotnet:realtime-stream-testing).
 ---
 
 # QA — Network Mocking (.NET 10 / Playwright 1.63)
@@ -57,4 +57,4 @@ and Chromium-only. The proxy is for when there is no `IPage` at all.
 - API tests without a browser → `qa/dotnet/skills/api-test-author`
 - Payload builders → `qa/dotnet/skills/test-data-builder`
 - The CI job → `qa/cicd/dotnet/skills/ci-pipelines`
-- TypeScript and Java → `qa-network-mocking-typescript`, `qa-network-mocking-java`
+- TypeScript and Java → `qa-typescript:network-mocking`, `qa-java:network-mocking`

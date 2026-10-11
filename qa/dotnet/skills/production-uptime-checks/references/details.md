@@ -1,4 +1,4 @@
-# Deep-dive details — `qa-production-uptime-checks-dotnet`
+# Deep-dive details — `qa-dotnet:production-uptime-checks`
 
 Sections moved out of SKILL.md for on-demand loading. Read what the task needs.
 
@@ -46,7 +46,7 @@ resource healthTest 'Microsoft.Insights/webtests@2022-06-15' = {
   file — the template never hardcodes one environment for all.
 
 Deploy it from the pipeline (`az deployment group create` / `terraform apply`), never the portal —
-`qa-ci-pipelines-dotnet`.
+`qa-dotnet:ci-pipelines`.
 
 ## 2. Alerts and the action group
 

@@ -19,7 +19,7 @@ Resolve every `qa/...` path against the repo root (`qa/`) or, from an installed 
 2. Where a skill routes to one of several `references/<tool>.md`, read only the one matching the project's tool.
 3. If a listed skill is missing on disk, say so and proceed with the global rules only — never substitute improvised guidance.
 
-**Always loaded, every run:** `ep-agent-orientation-cache` (read-validate / update-after for `docs/agent-context/qa-performance-java.md` — a greenfield run creates it) and `ep-code-comments` (the comment discipline for every file written or reviewed). For **brownfield** work also load the bundled `ep-{systematic-debugging,verify-before-done,writing-plans}` when the mode calls for them.
+**Always loaded, every run:** `engineering-practices/agent-orientation-cache` (read-validate / update-after for `docs/agent-context/qa-performance-java.md` — a greenfield run creates it) and `engineering-practices/code-comments` (the comment discipline for every file written or reviewed). For **brownfield** work also load the bundled `ep-{systematic-debugging,verify-before-done,writing-plans}` when the mode calls for them.
 
 ## Operating rules
 
@@ -31,7 +31,7 @@ Resolve every `qa/...` path against the repo root (`qa/`) or, from an installed 
 - Work **one step at a time**; don't start N+1 until N's exit gate passes. If invoked for a single step, do only that. Run what you write, outside a `Gate: none` plan task — smoke profile first, full profile only against the confirmed target; if a run fails, fix and re-run once before reporting.
 - Ask at most 2–3 clarifying questions up front (target endpoints + environment and authorization, traffic profile / SLOs, credentials source); infer the rest.
 - A run exposing a **product defect** (errors under load, leaks, races — not a test/environment problem) → write it up via `qa/manual/bug-report-writer/SKILL.md` with the workload profile and numbers, mark the scenario blocked, continue.
-- Per `ep-code-comments`: emit no inline comments; a doc comment only where the name can't carry the meaning and the flow is complex. Strip scaffolded template comments.
+- Per `engineering-practices/code-comments`: emit no inline comments; a doc comment only where the name can't carry the meaning and the flow is complex. Strip scaffolded template comments.
 - **Inside a plan task, the prompt block's `Gate:` line decides what you run.** A `Gate: none` task writes its code and tests and runs no build, test suite, lint or typecheck, whatever an exit criterion below says; only the task that carries the plan's gate runs them.
 
 ## Working on existing code (brownfield)
@@ -40,7 +40,7 @@ Most requests land on a script that already exists ("failing the gate", "add a s
 
 ### Orientation pass — always first
 
-**Orientation 1 — read the cache.** Run `ep-agent-orientation-cache`'s gate against `docs/agent-context/qa-performance-java.md` → **TRUST** (skip orientation), **DELTA** (refresh only what the git delta invalidated — a changed `build.gradle.kts` / `pom.xml` / `libs.versions.toml` / `gradle-wrapper.properties` invalidates the version lane and everything keyed to it), or **FULL**. Report the verdict in one line; don't narrate the checks.
+**Orientation 1 — read the cache.** Run `engineering-practices/agent-orientation-cache`'s gate against `docs/agent-context/qa-performance-java.md` → **TRUST** (skip orientation), **DELTA** (refresh only what the git delta invalidated — a changed `build.gradle.kts` / `pom.xml` / `libs.versions.toml` / `gradle-wrapper.properties` invalidates the version lane and everything keyed to it), or **FULL**. Report the verdict in one line; don't narrate the checks.
 
 **Orientation 2 — derive the gaps.** Recover, don't author. Read 2–3 representative files (the load simulation, the threshold/SLA config, the CI invocation) → a short **current-state map**: **tool + version + workload model** (Gatling Java DSL, simulation/scenario shape, injection profile); **seams to reuse** — DTOs/payload shapes mirrored from the functional suite, existing scenarios/injection profiles, the SLA/threshold definitions (Gatling `assertions`); **how it's invoked** (`./gradlew gatlingRun` + the CI perf-gate command) and the target environment (dedicated vs shared — this drives the noise triage below); **baseline** — the last known-good percentiles. Outside a `Gate: none` plan task, confirm it **runs and produces a report** on arrival; if not, that's a finding, not your bug to absorb.
 
@@ -59,13 +59,13 @@ Most requests land on a script that already exists ("failing the gate", "add a s
 
 ### Mode A — Fix a failing gate / suspected regression
 
-Load `ep-systematic-debugging`; never conclude "regression"/"flake" without evidence, and never loosen a threshold to go green. **Reproduce first** — re-run on the same environment and load, capturing percentiles, error rate, throughput. Then **triage the failure class**:
+Load `dev:debugging`; never conclude "regression"/"flake" without evidence, and never loosen a threshold to go green. **Reproduce first** — re-run on the same environment and load, capturing percentiles, error rate, throughput. Then **triage the failure class**:
 
 - **Real regression** (genuinely degraded vs baseline) → itself a finding: write it up via `bug-report-writer` with the comparison evidence (p95/p99, error rate, throughput vs baseline). The gate correctly failed — do not raise the threshold to hide it.
 - **Script/config defect** (stale DTO/payload after an API change, wrong ramp/injection profile, a threshold that never reflected a real SLA) → smallest correct fix, re-deriving the threshold from an actual SLA, not "whatever passes."
 - **Environment noise** (shared infra, concurrent jobs, unrelated load) → rerun on a clean/dedicated environment before concluding; if it recurs, flag the environment as unfit for gating.
 
-**Verify** (`ep-verify-before-done`): green **for the right reason** — fixed script, confirmed noise, or a correctly-derived threshold — reporting the actual metrics. Then **sweep the class**: a stale payload shape likely affects every scenario hitting that endpoint.
+**Verify** (`dev:verify`): green **for the right reason** — fixed script, confirmed noise, or a correctly-derived threshold — reporting the actual metrics. Then **sweep the class**: a stale payload shape likely affects every scenario hitting that endpoint.
 
 ### Mode B — Extend (add a scenario / workload)
 
@@ -73,7 +73,7 @@ Scope the change and orient on the scenarios and thresholds it touches. **Re-ent
 
 ### Workspace (both modes)
 
-Work in the checkout you are given — never create a branch or worktree. Multi-step work gets a plan (`ep-writing-plans`). Commit/push only when asked. **Update the cache before you report** (greenfield runs too): correct what the run disproved, add the seams it created, re-stamp the baseline commit + fingerprint, prepend one session-log line.
+Work in the checkout you are given — never create a branch or worktree. Multi-step work gets a plan (`dev:plan-feature`). Commit/push only when asked. **Update the cache before you report** (greenfield runs too): correct what the run disproved, add the seams it created, re-stamp the baseline commit + fingerprint, prepend one session-log line.
 
 ## Steps
 

@@ -1,11 +1,11 @@
 ---
-name: mobile-ios-forms
-description: Use when building or fixing a SwiftUI form — Form and sections, @FocusState field order, validation timing, textContentType for autofill and passkeys, keyboard toolbar, submit state, server errors mapped onto fields. Triggers "build a sign-up form", "keyboard hides the field", "autofill not offered", "server errors don't land on fields". Do NOT use for the request itself (`mobile-ios-networking`), state ownership (`-architecture`) or UIKit forms (`-uikit`).
+name: forms
+description: Use when building or fixing a SwiftUI form — Form and sections, @FocusState field order, validation timing, textContentType for autofill and passkeys, keyboard toolbar, submit state, server errors mapped onto fields. Triggers "build a sign-up form", "keyboard hides the field", "autofill not offered", "server errors don't land on fields". Do NOT use for the request itself (`mobile-ios:networking`), state ownership (`-architecture`) or UIKit forms (`-uikit`).
 ---
 
 # iOS — Forms
 
-A SwiftUI form is a value (the draft), a validator (a pure function over it), a focus order, and a submit that can fail per field. House rules from the web (`fe-react-forms`) that carry over: **one validator is the source of truth, errors appear on the field that caused them, submit is guarded against double taps, a server rejection lands on the right field.** Rules that do not carry over: Zod, RHF, Server Actions, `aria-*`.
+A SwiftUI form is a value (the draft), a validator (a pure function over it), a focus order, and a submit that can fail per field. House rules from the web (`fe-react:forms`) that carry over: **one validator is the source of truth, errors appear on the field that caused them, submit is guarded against double taps, a server rejection lands on the right field.** Rules that do not carry over: Zod, RHF, Server Actions, `aria-*`.
 
 ## Version lane
 
@@ -32,10 +32,10 @@ Design facts (field heights, labels, keyboard behaviour): `design/ui-ux-pro-max`
 - A single search field or filter — `@State` and `.searchable`, no form machinery
 - Building the request, retries, timeouts → [`networking`](../networking/SKILL.md)
 - Where the draft model lives, `@Bindable` vs `@Environment` → [`architecture`](../architecture/SKILL.md)
-- A load / failed region around a form's data → [`ui-components`](../ui-components/SKILL.md); the failure banner → `mobile-ios-error-handling`
+- A load / failed region around a form's data → [`ui-components`](../ui-components/SKILL.md); the failure banner → `mobile-ios:error-handling`
 - Photos, camera, files picked inside a form → [`device-features`](../device-features/SKILL.md)
 - UIKit form screens → [`uikit`](../uikit/SKILL.md)
-- Another stack → `mobile-react-native-forms`, `mobile-android-forms`
+- Another stack → `mobile-react-native:forms`, `mobile-android:forms`
 
 ## Inputs needed
 
@@ -74,8 +74,8 @@ enum SignUpValidator {
 }
 ```
 
-- **The validator is a pure function over the draft** — no view, no network — so a Swift Testing test calls it directly (`mobile-ios-unit-testing`).
-- **Messages are localized at creation** (`String(localized:)`, String Catalog — `mobile-ios-languages`), never a raw server string.
+- **The validator is a pure function over the draft** — no view, no network — so a Swift Testing test calls it directly (`mobile-ios:unit-testing`).
+- **Messages are localized at creation** (`String(localized:)`, String Catalog — `mobile-ios:i18n`), never a raw server string.
 - Field-level errors are keyed by an enum, not a string, so the focus enum and the error map share one vocabulary.
 
 ## The view
@@ -160,11 +160,11 @@ struct FieldError: View {
 ```
 
 - **`Form` and `Section`, not a `ScrollView` of stacks** — the system gives grouped styling, Dynamic Type, and keyboard avoidance. A custom layout re-implements all three.
-- **Error text sits beside its field and is not colour alone** — the message is text; `mobile-ios-accessibility` adds the VoiceOver wiring so the error is read with the field.
+- **Error text sits beside its field and is not colour alone** — the message is text; `mobile-ios:accessibility` adds the VoiceOver wiring so the error is read with the field.
 - **`.submitLabel` + `.onSubmit` chain the fields**; the last field's Return submits. `@FocusState` moves focus to the first invalid field after a failed submit.
 - **`isSubmitting` guards re-entry** at the top of `send()`, not only through `.disabled` — Return on the keyboard bypasses a disabled button.
-- **Test ids** on every control and on the error text — static, PascalCase dot-separated, never the label ([`mobile-ios-test-ids`](../test-ids/SKILL.md)).
-- `SecureField` and `UITextContentType.oneTimeCode` keep input out of the keyboard cache and the pasteboard history; never disable secure entry to "help" a UI test ([`mobile-shared-security`](../../../_shared/security/SKILL.md)).
+- **Test ids** on every control and on the error text — static, PascalCase dot-separated, never the label ([`mobile-ios:test-ids`](../test-ids/SKILL.md)).
+- `SecureField` and `UITextContentType.oneTimeCode` keep input out of the keyboard cache and the pasteboard history; never disable secure entry to "help" a UI test ([`mobile-<stack>:security`](../../../_shared/security/SKILL.md)).
 
 ## Validation timing
 
@@ -220,7 +220,7 @@ An indeterminate outcome (the app was backgrounded mid-submit, the response neve
 | One-time code | `.oneTimeCode` (the SMS code appears above the keyboard) | `.numberPad` |
 | Name, address, phone | `.givenName`, `.postalCode`, `.telephoneNumber` … | per field |
 
-- **Associated Domains** `webcredentials:` is what lets password autofill and passkeys offer saved credentials for your domain; passkey creation itself is `auth-auth0-ios`'s lane.
+- **Associated Domains** `webcredentials:` is what lets password autofill and passkeys offer saved credentials for your domain; passkey creation itself is `mobile-ios:auth0`'s lane.
 - Set `.textInputAutocapitalization(.never)` and `.autocorrectionDisabled()` on emails, usernames and codes.
 - `.scrollDismissesKeyboard(.interactively)` lets the user drag the keyboard away; a `.keyboard` toolbar `Done` button is the way out of a `.numberPad`, which has no Return.
 - Numeric fields use `TextField(value:format:)` with `.keyboardType(.decimalPad)` rather than parsing strings by hand; the `FormatStyle` also handles the user's locale separators.
@@ -265,13 +265,13 @@ Inside a `Gate: none` plan task, run none of these and report "written, not run"
 - Build with warnings as errors; run the project's `swift-format` / SwiftLint configuration.
 - On a device or simulator: Return walks the fields in order and the last one submits; the password manager offers a credential on the sign-in form; an invalid submit focuses the first invalid field; Dynamic Type at the largest accessibility size keeps every field reachable.
 - A double tap on submit sends one request.
-- Dev-side tests: the validator and the error mapper as Swift Testing cases ([`mobile-ios-unit-testing`](../unit-testing/SKILL.md)).
+- Dev-side tests: the validator and the error mapper as Swift Testing cases ([`mobile-ios:unit-testing`](../unit-testing/SKILL.md)).
 
 ## Handoffs
 
 - The request, retries, ProblemDetails → [`networking`](../networking/SKILL.md)
 - Draft persistence → [`offline-and-storage`](../offline-and-storage/SKILL.md)
-- Failure banner and offline copy → `mobile-ios-error-handling`
-- VoiceOver for errors → `mobile-ios-accessibility`
-- Passkeys and sign-in → `auth-auth0-ios`
+- Failure banner and offline copy → `mobile-ios:error-handling`
+- VoiceOver for errors → `mobile-ios:accessibility`
+- Passkeys and sign-in → `mobile-ios:auth0`
 - E2E journeys → `qa-mobile-<stack>` (peer)

@@ -1,4 +1,4 @@
-# Deep-dive details — `qa-security-passive-scan-dotnet`
+# Deep-dive details — `qa-dotnet:passive-scan`
 
 Sections moved out of SKILL.md for on-demand loading. Read what the task needs.
 

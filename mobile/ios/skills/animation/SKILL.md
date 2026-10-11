@@ -1,11 +1,11 @@
 ---
-name: mobile-ios-animation
-description: Use when a SwiftUI (or UIKit) app needs motion or gestures — withAnimation, animation(_:value:), transitions, matchedGeometryEffect and zoom navigation transitions, PhaseAnimator, keyframeAnimator, DragGesture, and the Reduce Motion floor. Triggers "animate this", "swipe to dismiss", "drag", "hero transition", "respect reduce motion". Do NOT use for whether to animate (`design-motion`), screen navigation (`mobile-ios-navigation`) or jank profiling (`-performance`).
+name: animation
+description: Use when a SwiftUI (or UIKit) app needs motion or gestures — withAnimation, animation(_:value:), transitions, matchedGeometryEffect and zoom navigation transitions, PhaseAnimator, keyframeAnimator, DragGesture, and the Reduce Motion floor. Triggers "animate this", "swipe to dismiss", "drag", "hero transition", "respect reduce motion". Do NOT use for whether to animate (`design:motion`), screen navigation (`mobile-ios:navigation`) or jank profiling (`-performance`).
 ---
 
 # iOS — Animation and Gestures
 
-Motion on iOS is **state-driven**: the view is a function of state, and an animation is the system interpolating between two states. This skill owns SwiftUI animation, transitions, gestures, the UIKit equivalents for a UIKit lane, and the **Reduce Motion floor**. Whether and where to animate is design's call ([`design-motion`](../../../../design/motion/SKILL.md)). Design facts: `design/ui-ux-pro-max` `--stack swiftui` rows 33 (`withAnimation`), 34 (`.animation` modifier) and 35 (respect reduced motion, High).
+Motion on iOS is **state-driven**: the view is a function of state, and an animation is the system interpolating between two states. This skill owns SwiftUI animation, transitions, gestures, the UIKit equivalents for a UIKit lane, and the **Reduce Motion floor**. Whether and where to animate is design's call ([`design:motion`](../../../../design/motion/SKILL.md)). Design facts: `design/ui-ux-pro-max` `--stack swiftui` rows 33 (`withAnimation`), 34 (`.animation` modifier) and 35 (respect reduced motion, High).
 
 ## Version lane
 
@@ -32,11 +32,11 @@ An API newer than the deployment target needs `#available`; never raise the targ
 
 ## When NOT to use
 
-- Where motion belongs in the product, durations, restraint → [`design-motion`](../../../../design/motion/SKILL.md)
+- Where motion belongs in the product, durations, restraint → [`design:motion`](../../../../design/motion/SKILL.md)
 - Pushing, presenting and tab changes → [`navigation`](../navigation/SKILL.md)
-- Hitches, dropped frames, Instruments → `mobile-ios-performance`
-- Roles, labels, focus as an accessibility requirement → `mobile-ios-accessibility`
-- Another stack → `mobile-react-native-animation`, `mobile-android-animation`
+- Hitches, dropped frames, Instruments → `mobile-ios:performance`
+- Roles, labels, focus as an accessibility requirement → `mobile-ios:accessibility`
+- Another stack → `mobile-react-native:animation`, `mobile-android:animation`
 
 ## Rules
 
@@ -155,10 +155,10 @@ Inside a `Gate: none` plan task, run none of these and report "written, not run"
 
 ## Handoffs
 
-- Where / whether, durations, restraint → [`design-motion`](../../../../design/motion/SKILL.md)
+- Where / whether, durations, restraint → [`design:motion`](../../../../design/motion/SKILL.md)
 - Push, present, tab transitions → [`navigation`](../navigation/SKILL.md)
-- Hitches, Instruments, `body` cost → `mobile-ios-performance`
-- VoiceOver actions, Reduce Motion as accessibility, Differentiate Without Color → `mobile-ios-accessibility`
+- Hitches, Instruments, `body` cost → `mobile-ios:performance`
+- VoiceOver actions, Reduce Motion as accessibility, Differentiate Without Color → `mobile-ios:accessibility`
 - Liquid Glass, materials → [`styling`](../styling/SKILL.md)
 - Test ids on animated targets → [`test-ids`](../test-ids/SKILL.md)
 - Haptic feedback on gesture end → [`device-features`](../device-features/SKILL.md)

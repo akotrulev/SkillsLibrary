@@ -1,6 +1,6 @@
 ---
-name: be-dotnet-unit-testing
-description: Use when backend C# logic needs a dev-side unit test — NUnit 4 + NSubstitute + FakeTimeProvider: the five untestable seams, fakes-over-mocks, async assertions. In-process, no HTTP, container, or real database. Triggers "unit-test this handler", "test this validator/calculator", "how do I fake the clock in a test". Do NOT use for contract/integration tests through the transport (`qa-api-dotnet`), mutation scoring (`qa-test-quality-check-dotnet`), or Blazor (`fe-blazor-component-testing`).
+name: unit-testing
+description: Use when backend C# logic needs a dev-side unit test — NUnit 4 + NSubstitute + FakeTimeProvider: the five untestable seams, fakes-over-mocks, async assertions. In-process, no HTTP, container, or real database. Triggers "unit-test this handler", "test this validator/calculator", "how do I fake the clock in a test". Do NOT use for contract/integration tests through the transport (`qa-api-dotnet`), mutation scoring (`qa-dotnet:test-quality-check`), or Blazor (`fe-blazor:component-testing`).
 ---
 
 # .NET — Unit Testing (NUnit 4 + NSubstitute)
@@ -30,16 +30,16 @@ Owns **dev-side unit tests of backend logic**: instantiate a class directly, dri
 - A calculation: money, rounding, proration, tax, totals, date math.
 - A mapper / `Result<T,E>`-style branch / error-to-ProblemDetails translation.
 - A validator (FluentValidation rules, custom validation attributes).
-- Reproducing a bug at the unit level before fixing it (`ep-systematic-debugging`'s repro step).
+- Reproducing a bug at the unit level before fixing it (`dev:debugging`'s repro step).
 
 ## When NOT to use
 
 - Contract / integration / E2E tests through the API → **peer** `qa-api-dotnet`
 - Real-DB seed-assert-clean, Testcontainers → **peer** `qa-api-dotnet` (`db-testing/*`)
-- Grading whether the tests actually catch faults (mutation score) → **peer** `qa-test-quality-check-dotnet` (Stryker.NET)
-- Blazor components → `fe-blazor-component-testing` (bUnit)
-- Test-suite *architecture* at scale — page objects, ObjectMother, shared fixtures across hundreds of tests → **peer** `qa-api-dotnet` + `qa-test-data-builder-dotnet`
-- Auditing an existing suite → **peer** `qa-dotnet-standards-audit`
+- Grading whether the tests actually catch faults (mutation score) → **peer** `qa-dotnet:test-quality-check` (Stryker.NET)
+- Blazor components → `fe-blazor:component-testing` (bUnit)
+- Test-suite *architecture* at scale — page objects, ObjectMother, shared fixtures across hundreds of tests → **peer** `qa-api-dotnet` + `qa-dotnet:test-data-builder`
+- Auditing an existing suite → **peer** `qa-dotnet:standards-audit`
 - **DTOs, records with no behavior, EF configurations, DI registration code, generated code** → don't test them at all (see below)
 
 ## Stack
@@ -209,7 +209,7 @@ public void Should_RoundHalfAwayFromZero_When_ThirdDecimalPresent(decimal input,
 var order = new OrderBuilder().WithStatus(OrderStatus.Shipped).Build();
 ```
 
-- Suite-scale test data — ObjectMother, shared fixtures across many projects, DB seeding — is the **peer** `qa-test-data-builder-dotnet`'s lane.
+- Suite-scale test data — ObjectMother, shared fixtures across many projects, DB seeding — is the **peer** `qa-dotnet:test-data-builder`'s lane.
 
 ## Async & concurrency
 
@@ -227,7 +227,7 @@ var order = new OrderBuilder().WithStatus(OrderStatus.Shipped).Build();
 - Fake at the boundary you own; the class under test is real and constructed directly (`new`, never resolved from a container).
 - Every test the run generates must actually fail if the behavior breaks — verify RED at least once per new behavior.
 - No conditional logic, no loops driving assertions, no `try/catch` standing in for `Assert.Throws`.
-- No coverage-percentage gate here; whether the assertions are any good is measured by mutation score — **peer** `qa-test-quality-check-dotnet`.
+- No coverage-percentage gate here; whether the assertions are any good is measured by mutation score — **peer** `qa-dotnet:test-quality-check`.
 
 ## What NOT to do
 
@@ -235,7 +235,7 @@ var order = new OrderBuilder().WithStatus(OrderStatus.Shipped).Build();
 - **`WebApplicationFactory` / `Testcontainers` in this project** — that's the peer's suite; if it appears here, the fence has moved.
 - **Substituting `DbContext`, `HttpClient`, `TimeProvider`, or an SDK type** — wrap it.
 - **Asserting whole-object equality** on a record with 15 fields when the test is about one — assert the field, or the reader can't tell what broke.
-- **`[Ignore]` without a linked issue** — a quarantined test is `qa-flaky-test-quarantine-dotnet`'s process, not a comment.
+- **`[Ignore]` without a linked issue** — a quarantined test is `qa-dotnet:flaky-test-quarantine`'s process, not a comment.
 - **Testing the framework** — that `record` equality works, that FluentValidation validates, that MediatR dispatches.
 - **A test per method** instead of per behavior — a 3-branch method needs 3+ tests; a 1-branch method may need 0.
 - **Mirroring the implementation** so a behavior-preserving refactor breaks the suite. If it breaks, it was coupled to structure.

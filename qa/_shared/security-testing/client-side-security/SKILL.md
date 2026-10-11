@@ -1,5 +1,5 @@
 ---
-name: qa-security-client-side-security
+name: client-side-security
 description: Use for dynamic client-side security testing the server-side scanners are blind to — DOM-based XSS, CSP validation, and SPA-specific DAST. Language-agnostic, runs against an owned/authorized non-prod env. Triggers "test for DOM XSS", "does our CSP actually block injection", "SPA security scan", "validate our security headers", "client-side prototype pollution". Do NOT use for server-side injection (`active-scan`/`exploit-validation`) or access-control (`permission-testing`).
 ---
 
@@ -14,11 +14,11 @@ crawl an SPA the way a browser does.**
 
 This skill is **language-agnostic** (Dalfox, ZAP, Nuclei, the CSP tools are CLI binaries / browser
 harnesses) and lives in the **`qa-security` agent's Step 4b** dynamic lane, pairing with
-`qa-security-shared` (the OWASP backbone) — load that alongside. It is the **test half of the `fe-*`
+`qa-<stack>:security-foundations` (the OWASP backbone) — load that alongside. It is the **test half of the `fe-*`
 handshake**: the `security-hardening` skill *authors* the strict CSP / security headers into the
 `fe-react` / `fe-blazor` app; this skill *proves in a real browser that they hold*. Same shape as the
 existing `data-testid` / `missing-testids.md` contract — the frontend skill writes the artifact, the test
-skill asserts it. Sink findings route **back** to `fe-react-component-writer` / `fe-blazor-component-writer`
+skill asserts it. Sink findings route **back** to `fe-react:component-writer` / `fe-blazor:component-writer`
 (`dangerouslySetInnerHTML` / `MarkupString`), never fixed here.
 
 > **⚠️ Injecting a payload is active testing — authorized non-prod env only.** Everything that *fires a
@@ -139,7 +139,7 @@ npm i -g retire@5.4.3
   Injection is active testing; a blind callback exfiltrates. *Fix:* non-prod authorized env for injection;
   self-hosted interactsh for any data-carrying callback; both under the authorization line.
 - **Fixing a DOM-XSS sink inside this skill.** The sink (`innerHTML`/`dangerouslySetInnerHTML`/`MarkupString`)
-  is the frontend's code. *Fix:* route it to `fe-react-component-writer`/`fe-blazor-component-writer`; this skill
+  is the frontend's code. *Fix:* route it to `fe-react:component-writer`/`fe-blazor:component-writer`; this skill
   proves and reports.
 - **Ignoring `report-to` because `report-uri` "works."** `report-uri` is deprecated; `report-to` (CSP L3,
   Baseline Mar 2026) needs the `Reporting-Endpoints` header and is header-only (not `<meta>`). *Fix:* assert
@@ -167,11 +167,11 @@ npm i -g retire@5.4.3
 
 ## Cross-references
 
-- `qa-security-shared` — the OWASP backbone (A05 Injection, A02 Misconfiguration, A03 supply chain), the
+- `qa-<stack>:security-foundations` — the OWASP backbone (A05 Injection, A02 Misconfiguration, A03 supply chain), the
   authorization rule, triage, SARIF consolidation. **Load alongside.**
-- `qa-security-active-scan` — the **server-side** DAST sibling (headers, injection through HTTP). This skill
+- `qa-<stack>:active-scan` — the **server-side** DAST sibling (headers, injection through HTTP). This skill
   owns the **client/browser** layer it is blind to. Run both.
-- `qa-security-exploit-validation` — the exploitation sibling for **server-side** injection classes (SQLi,
+- `qa-<stack>:exploit-validation` — the exploitation sibling for **server-side** injection classes (SQLi,
   SSRF, SSTI…). A confirmed DOM XSS that needs chaining hands off there / to `penetration-testing`.
 - `qa/<stack>/skills/security-testing/dependency-scan` — **application** SCA (lockfile CVEs); Retire.js here
   catches vulnerable libs in the **shipped browser bundle** (a different surface). Boundary partners.

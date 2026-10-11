@@ -1,5 +1,5 @@
 ---
-name: fe-blazor-styling
+name: styling
 description: Use when styling a Blazor app (.NET 8/9/10) with CSS — CSS isolation (`.razor.css`) and `::deep`, design tokens as CSS custom properties, a type scale (`clamp()`), dark mode, and the CSS-isolation-vs-Tailwind decision. Triggers: "scope this component's CSS", "why doesn't my `::deep` selector work", "set up design tokens in Blazor", "dark mode with CSS". Do NOT use for a component library's own theme system (`component-library`) or the palette/font design itself (`design/visual-identity`).
 ---
 

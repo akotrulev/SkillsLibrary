@@ -1,11 +1,11 @@
 ---
-name: td-dataset-formats
-description: Use when deciding how a training dataset is stored on disk — record schema, chat format, VLM image references, provenance/license fields, splits, and shard layout. Triggers: "what format should the SFT data be", "JSONL schema for a chat dataset", "how do I lay out train/val/test", "shard a pretraining corpus", "ShareGPT vs OpenAI messages format". Do NOT use for quality filtering (`td-data-quality`), synthesis (`td-synthetic-generation`), or engine-specific storage DDL (`data/<db>`).
+name: dataset-formats
+description: Use when deciding how a training dataset is stored on disk — record schema, chat format, VLM image references, provenance/license fields, splits, and shard layout. Triggers: "what format should the SFT data be", "JSONL schema for a chat dataset", "how do I lay out train/val/test", "shard a pretraining corpus", "ShareGPT vs OpenAI messages format". Do NOT use for quality filtering (`training-data:data-quality`), synthesis (`training-data:synthetic-generation`), or engine-specific storage DDL (`data/<db>`).
 ---
 
 # Training Data — Dataset Formats & Layout (cross-stage)
 
-The on-disk contract every training dataset in this domain obeys: the record schema, the conversation format, how VLM examples reference images, the provenance/license fields that ride on every record, and how splits and shards are laid out. Stage skills (`td-pretraining-corpus`, `td-instruction-sft`, `td-preference-data`, `td-eval-sets`, `td-vision-language-data`) fill in *what* goes in a record; this skill fixes *how* it is stored so every downstream tool — the tokenizer, the trainer, the auditor — reads it the same way.
+The on-disk contract every training dataset in this domain obeys: the record schema, the conversation format, how VLM examples reference images, the provenance/license fields that ride on every record, and how splits and shards are laid out. Stage skills (`training-data:pretraining-corpus`, `training-data:instruction-sft`, `training-data:preference-data`, `training-data:eval-sets`, `training-data:vision-language-data`) fill in *what* goes in a record; this skill fixes *how* it is stored so every downstream tool — the tokenizer, the trainer, the auditor — reads it the same way.
 
 ## When to use
 
@@ -17,10 +17,10 @@ The on-disk contract every training dataset in this domain obeys: the record sch
 
 ## When NOT to use
 
-- Deduplication, decontamination, quality filtering → `td-data-quality`
-- Generating records with a teacher model → `td-synthetic-generation`
-- Corpus collection / cleaning mechanics → `td-pretraining-corpus`
-- Image-specific record content (bbox, OCR, VQA) → `td-vision-language-data`
+- Deduplication, decontamination, quality filtering → `training-data:data-quality`
+- Generating records with a teacher model → `training-data:synthetic-generation`
+- Corpus collection / cleaning mechanics → `training-data:pretraining-corpus`
+- Image-specific record content (bbox, OCR, VQA) → `training-data:vision-language-data`
 
 ## The one rule: JSONL, one example per line
 
@@ -68,7 +68,7 @@ Rules:
 - **Roles are `system` | `user` | `assistant` | `tool`.** Exactly one leading `system` message at most; roles alternate `user`/`assistant` after it; a multi-turn record ends on `assistant` (that is the target the model learns to produce).
 - **ShareGPT (`conversations` with `from`/`value`) is an import format, not the authoring format.** Convert it to `messages` on ingest (`from: human → user`, `from: gpt → assistant`) so one shape flows downstream. Note the conversion in `source`.
 - **Do not pre-apply the chat template.** Store structured `messages`; the trainer applies the model's own template (ChatML, Llama-3, Gemma, Qwen — they differ). A dataset with `<|im_start|>` baked into `content` is locked to one model and re-tokenizes wrong on another. The *only* exception is a raw-text pretraining corpus (below), which has no roles.
-- **Tool-use traces** carry `tool_calls` on the assistant message and a following `role: "tool"` message with the result; keep the JSON of the call intact — see `td-instruction-sft`.
+- **Tool-use traces** carry `tool_calls` on the assistant message and a following `role: "tool"` message with the result; keep the JSON of the call intact — see `training-data:instruction-sft`.
 - **The `system` prompt is training signal, not decoration.** Decide deliberately whether it is fixed, varied, or absent, and record the choice in the dataset card — the model learns the distribution you show it.
 
 ## Pretraining record — raw text
@@ -92,7 +92,7 @@ DPO/ORPO/KTO records share a prompt and two responses:
   "rejected":[ { "role": "assistant", "content": "the worse response" } ] }
 ```
 
-`prompt` is a `messages` array (may include `system`); `chosen`/`rejected` are the *continuations* only, so the trainer can concatenate prompt+chosen and prompt+rejected. KTO (single response + a boolean label) uses `completion` + `label` instead — pick one shape per file, never mix. Detail lives in `td-preference-data`.
+`prompt` is a `messages` array (may include `system`); `chosen`/`rejected` are the *continuations* only, so the trainer can concatenate prompt+chosen and prompt+rejected. KTO (single response + a boolean label) uses `completion` + `label` instead — pick one shape per file, never mix. Detail lives in `training-data:preference-data`.
 
 ## VLM record — image references
 
@@ -108,14 +108,14 @@ Multimodal records put images *inside* the message content as typed parts, never
 ```
 
 - **Reference images by relative `path` into a sibling `images/` directory — not base64, not a remote URL.** Base64 bloats the JSONL 33% and makes it un-greppable; a URL rots and leaks reads to a third party at train time. Store the bytes once, reference by path. Base64 is an *export* concern only, produced at load time if a trainer demands it.
-- **One image is one file, deduped by content hash** (see `td-data-quality`) — the same picture referenced by ten records is ten `path`s to one file, not ten copies.
-- Image token placement, resolution, interleaving, bbox/OCR payloads → `td-vision-language-data`.
+- **One image is one file, deduped by content hash** (see `training-data:data-quality`) — the same picture referenced by ten records is ten `path`s to one file, not ten copies.
+- Image token placement, resolution, interleaving, bbox/OCR payloads → `training-data:vision-language-data`.
 
 ## Splits — train / validation / test
 
-- **Three splits, split *before* any tuning decision, and split by a de-duplication key, not by row.** If near-duplicate documents land on both sides of the train/test line, the eval is contaminated and the numbers lie. Group by `source` document / near-dup cluster (from `td-data-quality`) and assign whole clusters to one split.
+- **Three splits, split *before* any tuning decision, and split by a de-duplication key, not by row.** If near-duplicate documents land on both sides of the train/test line, the eval is contaminated and the numbers lie. Group by `source` document / near-dup cluster (from `training-data:data-quality`) and assign whole clusters to one split.
 - Default ratios: **98 / 1 / 1** for large pretraining corpora, **90 / 5 / 5** for SFT/preference sets, or a fixed-size held-out test (e.g. 1–2k examples) when the set is small. State the actual counts in the card.
-- **The test split is drawn once and frozen.** It is also the decontamination target: nothing in train may near-match anything in test/eval (that check is `td-data-quality`'s job, but the split boundary is defined here).
+- **The test split is drawn once and frozen.** It is also the decontamination target: nothing in train may near-match anything in test/eval (that check is `training-data:data-quality`'s job, but the split boundary is defined here).
 - File layout: `train.jsonl` / `val.jsonl` / `test.jsonl` per dataset, plus a `manifest.json` (below).
 
 ## On-disk layout
@@ -141,7 +141,7 @@ Every dataset ships a `docs/datasets/<name>-card.md` before it is considered don
 
 - **What it is** — stage (pretraining/SFT/preference/eval), modality (text/VLM), intended use, one example record.
 - **Provenance** — every `source` value with its count, license, and how it was obtained; the teacher model + prompt-batch id for synthetic portions.
-- **Construction** — curation and synthesis steps, the exact quality filters and dedup/decontamination applied (link the `td-data-quality` run), split method and counts.
+- **Construction** — curation and synthesis steps, the exact quality filters and dedup/decontamination applied (link the `training-data:data-quality` run), split method and counts.
 - **Composition** — coverage/balance table by `meta` (topic/difficulty/language/task), so skew is visible.
 - **Limitations & risks** — known gaps, biases, PII-handling, license constraints on downstream use, and anything the synthetic portion could not be verified for.
 

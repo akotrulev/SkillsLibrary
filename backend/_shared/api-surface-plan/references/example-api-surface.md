@@ -1,12 +1,12 @@
 # Golden example — `api-surface.md`
 
-The filled example for `be-shared-api-surface-plan`, from the **workshop-booking** toy initiative shared by all five planner examples. **Shapes and disciplines are normative; domain content is illustrative.** A real artifact writes a contract block for *every* endpoint — this example writes one in full (the booking-creation endpoint, where the interesting rules live) and abbreviates the rest, saying so.
+The filled example for `dev:plan-api-surface`, from the **workshop-booking** toy initiative shared by all five planner examples. **Shapes and disciplines are normative; domain content is illustrative.** A real artifact writes a contract block for *every* endpoint — this example writes one in full (the booking-creation endpoint, where the interesting rules live) and abbreviates the rest, saying so.
 
 ---
 
 # Workshop Booking — API Surface Plan
 
-**Date:** 2026-08-02 · **Written by:** `be-shared-api-surface-plan`
+**Date:** 2026-08-02 · **Written by:** `dev:plan-api-surface`
 **Blueprint:** `./blueprint.md` · **Data model:** `./data-model.md`
 
 ## 1. API-wide contract

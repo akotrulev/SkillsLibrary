@@ -1,12 +1,12 @@
 # Golden example — `data-model.md`
 
-The filled example for `be-shared-data-model-plan`, from the **workshop-booking** toy initiative shared by all five planner examples (`backend/_shared/*/references/example-*.md`). **Shapes and disciplines are normative; domain content is illustrative.** A real artifact writes a full table block for *every* entity — this example writes two in full (`sessions`, `bookings`, the load-bearing ones) and abbreviates the rest, saying so.
+The filled example for `dev:plan-data-model`, from the **workshop-booking** toy initiative shared by all five planner examples (`backend/_shared/*/references/example-*.md`). **Shapes and disciplines are normative; domain content is illustrative.** A real artifact writes a full table block for *every* entity — this example writes two in full (`sessions`, `bookings`, the load-bearing ones) and abbreviates the rest, saying so.
 
 ---
 
 # Workshop Booking — Data Model Plan
 
-**Date:** 2026-08-02 · **Written by:** `be-shared-data-model-plan`
+**Date:** 2026-08-02 · **Written by:** `dev:plan-data-model`
 **Blueprint:** `./blueprint.md` (approved 2026-08-02)
 **Engine:** PostgreSQL 18 — proposed (greenfield), approved with the blueprint
 
@@ -107,7 +107,7 @@ A real artifact writes these in full. Shape notes only: `members` carries `auth0
 
 | Source | Data | Target tables | One-time or sync | Validated by | Delivery task |
 |---|---|---|---|---|---|
-| Owner's spreadsheet (CSV export) | Member list; future bookings already taken | `members`, `bookings` (against sessions staff schedule first) | One-time import at go-live; spreadsheet then read-only | Owner reviews the imported lists before cutover | go-live import — sequenced by `be-shared-delivery-plan` after migration 3 |
+| Owner's spreadsheet (CSV export) | Member list; future bookings already taken | `members`, `bookings` (against sessions staff schedule first) | One-time import at go-live; spreadsheet then read-only | Owner reviews the imported lists before cutover | go-live import — sequenced by `dev:plan-delivery` after migration 3 |
 
 ## 5. Diagrams
 

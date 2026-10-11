@@ -1,6 +1,6 @@
 ---
-name: be-shared-experience-plan
-description: Use when an approved blueprint with user-facing areas needs its experience planned before the API — actors and tasks, journeys with steps counted, the screen map and app shell, per-screen specs, and the screen ↔ endpoint matrix. Triggers "plan the screens", "what does the user actually see", "design the navigation". Do NOT use to build the UI (`fe-<stack>`), judge a built UI (`design-ux-review`), plan tables (`be-shared-data-model-plan`) or endpoints (`be-shared-api-surface-plan`).
+name: plan-experience
+description: Use when an approved blueprint with user-facing areas needs its experience planned before the API — actors and tasks, journeys with steps counted, the screen map and app shell, per-screen specs, and the screen ↔ endpoint matrix. Triggers "plan the screens", "what does the user actually see", "design the navigation". Do NOT use to build the UI (`fe-<stack>`), judge a built UI (`design:ux-review`), plan tables (`dev:plan-data-model`) or endpoints (`dev:plan-api-surface`).
 ---
 
 # Experience Plan — what the user sees, before the API exists
@@ -9,7 +9,7 @@ The plan altitude for the user's side of the system: **who uses it, what they ar
 
 **Prerequisites:** an **approved** `blueprint.md` whose routing map binds at least one area to `fe-react` / `fe-blazor`, and a written `data-model.md`. The blueprint's *User-facing capabilities* and *Primary actors* columns and its §3b flows are the inputs; the entity catalog is what the screens display. Runs **before** `api-surface.md` — the screens' data needs are one of that step's inputs.
 
-**Discipline:** load [`design/ux-patterns`](../../../design/ux-patterns/SKILL.md) (`design-ux-patterns`) before writing — its task-inventory → IA method, shell decision table, page-type anatomy and responsiveness budget are the rules this artifact applies. This skill owns the *artifact and its place in the pack*; that skill owns the *UX rules*. Neither loads a `fe-*` stack skill.
+**Discipline:** load [`design/ux-patterns`](../../../design/ux-patterns/SKILL.md) (`design:app-structure`) before writing — its task-inventory → IA method, shell decision table, page-type anatomy and responsiveness budget are the rules this artifact applies. This skill owns the *artifact and its place in the pack*; that skill owns the *UX rules*. Neither loads a `fe-*` stack skill.
 
 ## When to use
 
@@ -111,7 +111,7 @@ Once, at the end, from `ux-patterns` §5–§9: **density** (and why) · **accel
 ```markdown
 # <Initiative> — Experience Plan
 
-**Date:** YYYY-MM-DD · **Written by:** `be-shared-experience-plan` · **Discipline:** `design-ux-patterns`
+**Date:** YYYY-MM-DD · **Written by:** `dev:plan-experience` · **Discipline:** `design:app-structure`
 **Inputs:** `./blueprint.md` (§2 capabilities, §3b flows, §6 routing) · `./data-model.md`
 **Frontend agent:** `fe-react` | `fe-blazor` — per the routing map
 
@@ -168,9 +168,9 @@ Once, at the end, from `ux-patterns` §5–§9: **density** (and why) · **accel
 
 ## Handoffs
 
-- **→ `be-shared-api-surface-plan`** (next step) — §4's data-needed lines are its input; it returns to fill §5.
-- **→ `be-shared-delivery-plan`** — every frontend task binds `fe-react` / `fe-blazor` with `design-ux-patterns` in its skills, cites the screen ids it delivers, and inherits §6's budget as acceptance criteria; a capability's last task is worded from its journey.
-- **→ `fe-react` / `fe-blazor`** — takes §2–§4 as the IA decision in its Step 1 (validates, does not redesign; disagreement is a `delivery-plan.md` §7 deviation) and applies `design-ux-patterns` per page in Step 2.
+- **→ `dev:plan-api-surface`** (next step) — §4's data-needed lines are its input; it returns to fill §5.
+- **→ `dev:plan-delivery`** — every frontend task binds `fe-react` / `fe-blazor` with `design:app-structure` in its skills, cites the screen ids it delivers, and inherits §6's budget as acceptance criteria; a capability's last task is worded from its journey.
+- **→ `fe-react` / `fe-blazor`** — takes §2–§4 as the IA decision in its Step 1 (validates, does not redesign; disagreement is a `delivery-plan.md` §7 deviation) and applies `design:app-structure` per page in Step 2.
 - **→ `design/ux-review`** — at build review, cites the screen id / nav-map row a finding contradicts.
 - **→ `qa-test-case-designer` / `qa-ui-<stack>`** — the journeys are their end-to-end test basis.
 

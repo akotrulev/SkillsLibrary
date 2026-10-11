@@ -37,7 +37,7 @@ The .NET binding, checked against playwright-dotnet v1.63.0 (`ICDPSession.cs`, `
 - Mock, abort, modify, hold, assert, HAR replay, offline, security headers, TLS → `references/playwright-routes.md`
 - A client with no Playwright `IPage`, or cross-browser capture → `references/proxy.md`
 - Writing the page objects themselves → `qa/dotnet/skills/ui-test-author/playwright`
-- TypeScript and Java CDP → `qa-network-mocking-typescript`, `qa-network-mocking-java`
+- TypeScript and Java CDP → `qa-typescript:network-mocking`, `qa-java:network-mocking`
 
 ## Inputs needed
 
@@ -320,4 +320,4 @@ the page had not finished rendering. The two assertions are one behaviour, "rend
 - `qa/dotnet/skills/ui-test-author/playwright` — `BaseTest`, page objects, `references/assertions.md` §5.
 - `qa/dotnet/skills/evidence-capture` — traces and reading a failure.
 - `qa/cicd/dotnet/skills/ci-pipelines` — the UI job (Chromium).
-- `qa-network-mocking-typescript`, `qa-network-mocking-java` — the sibling lanes.
+- `qa-typescript:network-mocking`, `qa-java:network-mocking` — the sibling lanes.

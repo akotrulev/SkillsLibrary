@@ -1,6 +1,6 @@
 ---
-name: be-shared-api-surface-plan
-description: Use when a planned data model needs its API surface specified — a service → resource → endpoint table with typed request/response bodies, the shared validation/error catalog, and pagination/versioning contract. Triggers "what endpoints do we need", "plan the API surface", "spec the REST contract". Do NOT use to write controllers/DTOs/clients (`be-<stack>`), write API tests (`qa-api-<stack>`), manage an OpenAPI file (`qa/_shared/api-spec-assets`), or plan tables (`be-shared-data-model-plan`).
+name: plan-api-surface
+description: Use when a planned data model needs its API surface specified — a service → resource → endpoint table with typed request/response bodies, the shared validation/error catalog, and pagination/versioning contract. Triggers "what endpoints do we need", "plan the API surface", "spec the REST contract". Do NOT use to write controllers/DTOs/clients (`be-<stack>`), write API tests (`qa-api-<stack>`), manage an OpenAPI file (`qa/_shared/api-spec-assets`), or plan tables (`dev:plan-data-model`).
 ---
 
 # API Surface Plan — the contract, before the code
@@ -143,7 +143,7 @@ The per-endpoint blocks then carry deltas only.
 
 - **Pagination, filtering, sorting** — the exact parameter names, defaults, maximums, and the stable-sort rule. One contract for every list endpoint.
 - **Versioning & deprecation** — how a breaking change ships, what notice consumers get, how a deprecated endpoint announces itself (`Deprecation` / `Sunset` headers).
-- **Webhooks the API emits**, if any — event names, payload shapes, delivery guarantees, signature scheme, retry policy. (Webhooks the API *receives* are `be-shared-integration-plan`'s.)
+- **Webhooks the API emits**, if any — event names, payload shapes, delivery guarantees, signature scheme, retry policy. (Webhooks the API *receives* are `dev:plan-integrations`'s.)
 - **Consumers** — which frontend, service, or partner uses which resource. This is what makes a later breaking-change assessment possible.
 
 ---
@@ -153,7 +153,7 @@ The per-endpoint blocks then carry deltas only.
 ```markdown
 # <Initiative> — API Surface Plan
 
-**Date:** YYYY-MM-DD · **Written by:** `be-shared-api-surface-plan`
+**Date:** YYYY-MM-DD · **Written by:** `dev:plan-api-surface`
 **Blueprint:** `./blueprint.md` · **Data model:** `./data-model.md`
 
 ## 1. API-wide contract
@@ -207,13 +207,13 @@ The per-endpoint blocks then carry deltas only.
 
 ## Handoffs
 
-- **→ `be-shared-experience-plan`** — hand back its §5 screen ↔ endpoint matrix, filled.
-- **→ `be-shared-integration-plan`** (Step 5). Any endpoint that calls out to a third party names it there.
+- **→ `dev:plan-experience`** — hand back its §5 screen ↔ endpoint matrix, filled.
+- **→ `dev:plan-integrations`** (Step 5). Any endpoint that calls out to a third party names it there.
 - **→ `be-<stack>` agents** — `api-models` equivalents and controllers/handlers come from these tables.
 - **→ `qa-api-<stack>`** — this is the contract-test basis. The standard validation set is the negative-test matrix; the endpoint table is the positive one.
 - **→ `qa-security`** — the Auth column is the BOLA/IDOR/BFLA permission matrix.
 - **→ `fe-react` / `fe-blazor`** — the response shapes and the error envelope are what their data-fetching and error-handling layers bind to.
-- **→ `qa/_shared/api-spec-assets`** — once a real OpenAPI document exists in the repo, that skill owns it and its diff-driven updates; this plan becomes the design record, not the source of truth. On a greenfield build, `be-shared-delivery-plan` schedules a standard task (after the last endpoint task) for the `be-<stack>` agent to generate and commit that asset from the implemented surface — the plan does not write it itself.
+- **→ `qa/_shared/api-spec-assets`** — once a real OpenAPI document exists in the repo, that skill owns it and its diff-driven updates; this plan becomes the design record, not the source of truth. On a greenfield build, `dev:plan-delivery` schedules a standard task (after the last endpoint task) for the `be-<stack>` agent to generate and commit that asset from the implemented surface — the plan does not write it itself.
 
 ## Version policy
 

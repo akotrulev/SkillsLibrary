@@ -1,11 +1,11 @@
 ---
-name: mobile-react-native-native-modules
-description: Use when an Expo SDK 57 app needs native code — the ladder (Expo SDK module, maintained community module, Expo Modules API in Swift / Kotlin, Nitro / TurboModule in bare), config plugins for every native change, Expo UI, DOM components. Triggers "is there a native module for", "write a Swift module", "edit Info.plist", "config plugin". Do NOT use for camera, location or push features (`mobile-react-native-device-features`, `-notifications-and-links`) or project setup.
+name: native-modules
+description: Use when an Expo SDK 57 app needs native code — the ladder (Expo SDK module, maintained community module, Expo Modules API in Swift / Kotlin, Nitro / TurboModule in bare), config plugins for every native change, Expo UI, DOM components. Triggers "is there a native module for", "write a Swift module", "edit Info.plist", "config plugin". Do NOT use for camera, location or push features (`mobile-react-native:device-features`, `-notifications-and-links`) or project setup.
 ---
 
 # React Native — Native Modules
 
-Owns **going native**: deciding whether to, which rung of the ladder, how an Expo module and a config plugin are written, and how native UI is reached. **The Swift and Kotlin written here follow the native standards** — load [`mobile-ios-basics`](../../../ios/skills/basics/SKILL.md) for every `.swift` file and [`mobile-android-basics`](../../../android/skills/basics/SKILL.md) for every `.kt` file before writing them; both read without an app project.
+Owns **going native**: deciding whether to, which rung of the ladder, how an Expo module and a config plugin are written, and how native UI is reached. **The Swift and Kotlin written here follow the native standards** — load [`mobile-ios:concepts`](../../../ios/skills/basics/SKILL.md) for every `.swift` file and [`mobile-android:concepts`](../../../android/skills/basics/SKILL.md) for every `.kt` file before writing them; both read without an app project.
 
 ## Version lane
 
@@ -37,8 +37,8 @@ Detect first: `ios/` and `android/` tracked in git (**bare**) or ignored (**CNG*
 - Scaffold, EAS, `app.config.ts` basics → [`project-setup`](../project-setup/SKILL.md)
 - A UI kit choice → [`component-library`](../component-library/SKILL.md)
 - Upgrading SDK, bare → Expo → [`migration`](../migration/SKILL.md)
-- A fully native app → `mobile-ios-*` / `mobile-android-*`
-- Pinning, RASP libraries, manifest hardening → [`mobile-shared-security`](../../../_shared/security/SKILL.md)
+- A fully native app → `mobile-ios` / `mobile-android`
+- Pinning, RASP libraries, manifest hardening → [`mobile-<stack>:security`](../../../_shared/security/SKILL.md)
 
 ## The ladder — climb only as far as needed
 
@@ -80,10 +80,10 @@ export default withScannerPermissions;
 - **Never hand-edit `ios/` or `android/`** in a CNG project — `prebuild --clean` is the default since SDK 57 and discards it. If a native edit is already there and untracked, move it into a plugin **now**, then re-run prebuild to prove the plugin reproduces it.
 - Prefer the declarative surface first: `ios.infoPlist`, `ios.entitlements`, `android.permissions`, `android.blockedPermissions`, `expo-build-properties` for Gradle / Podfile properties, `expo-font`, `expo-splash-screen`. Write a plugin only where none fits.
 - **Compose with the `with*` mods** (`withInfoPlist`, `withEntitlementsPlist`, `withAndroidManifest`, `withGradleProperties`, `withAppBuildGradle`, `withDangerousMod` as the last resort). Mods are idempotent: running twice must not duplicate.
-- **A plugin is audited like a hand edit**: it must not set `android:exported="true"` on a component without a reason, `usesCleartextTraffic`, `NSAllowsArbitraryLoads`, `allowBackup`; read the **generated** manifest and plist once after prebuild ([`mobile-shared-security`](../../../_shared/security/references/react-native.md) §6).
-- **Permission strings and declarations** come from [`mobile-shared-store-compliance`](../../../_shared/store-compliance/SKILL.md); each declared permission has a use in code ([`device-features`](../device-features/SKILL.md)).
+- **A plugin is audited like a hand edit**: it must not set `android:exported="true"` on a component without a reason, `usesCleartextTraffic`, `NSAllowsArbitraryLoads`, `allowBackup`; read the **generated** manifest and plist once after prebuild ([`mobile-<stack>:security`](../../../_shared/security/references/react-native.md) §6).
+- **Permission strings and declarations** come from [`mobile-<stack>:store-compliance`](../../../_shared/store-compliance/SKILL.md); each declared permission has a use in code ([`device-features`](../device-features/SKILL.md)).
 - Test a plugin: a Jest test that runs the plugin against a fixture config and asserts the resulting `Info.plist` / manifest object — a pure function, no device.
-- A native change needs a **new development build or EAS build**; it never ships through an OTA update ([`mobile-shared-release`](../../../_shared/release/SKILL.md)).
+- A native change needs a **new development build or EAS build**; it never ships through an OTA update ([`mobile-<stack>:release`](../../../_shared/release/SKILL.md)).
 
 ## Local Expo module
 
@@ -104,9 +104,9 @@ Rules for a module:
 - **Async by default** — `AsyncFunction`; a synchronous `Function` only for a trivial, instant read. Native work never blocks the JS thread or the UI thread; heavy work moves to a background queue (Swift) or an injected dispatcher (Kotlin).
 - **Errors are typed** — throw an `Exception` subclass with a code; the JS wrapper maps it to the app's error type. No silent catch.
 - **Lifecycle** — register `OnCreate` / `OnDestroy` / `OnStartObserving`; a module that holds a listener or a hardware handle releases it; events stop when no JS listener remains.
-- **Swift follows `mobile-ios-basics`** (Swift 6 isolation, no force unwrap, `os.Logger`, narrowest access); **Kotlin follows `mobile-android-basics`** (no `!!`, structured concurrency, injected dispatchers). Read the matching basics before the first line.
+- **Swift follows `mobile-ios:concepts`** (Swift 6 isolation, no force unwrap, `os.Logger`, narrowest access); **Kotlin follows `mobile-android:concepts`** (no `!!`, structured concurrency, injected dispatchers). Read the matching basics before the first line.
 - **Untrusted input** — arguments from JS are validated natively before they reach a file path, a URL or an Intent.
-- **Tests** — the TypeScript wrapper with Jest and a fake native module; Swift / Kotlin logic that is not API glue is pulled into a plain class and tested with `mobile-ios-unit-testing` / `mobile-android-unit-testing` patterns. Device behaviour is `qa-mobile-typescript`'s.
+- **Tests** — the TypeScript wrapper with Jest and a fake native module; Swift / Kotlin logic that is not API glue is pulled into a plain class and tested with `mobile-ios:unit-testing` / `mobile-android:unit-testing` patterns. Device behaviour is `qa-mobile-typescript`'s.
 - A module that fails to link or load **crashes at startup** — wrap optional modules with `requireOptionalNativeModule` and degrade, and record the dependency in [`error-handling`](../error-handling/SKILL.md)'s third-party-failure rule.
 
 ## Expo UI — native SwiftUI and Compose primitives
@@ -115,7 +115,7 @@ Rules for a module:
 
 ## DOM components
 
-A file with `'use dom'` at the top renders **web** React inside a WebView on native and as plain DOM on web. Use it for a rich-text editor, a chart library or a code-heavy widget that exists only for the web. Props cross the boundary as serialisable data; functions are async actions. It is a WebView — apply the WebView rules in [`mobile-shared-security`](../../../_shared/security/references/react-native.md) §4 (origin allow-list, no untrusted URL, no bridge `eval`) and the cost warning: not for list rows, not for a primary navigation surface.
+A file with `'use dom'` at the top renders **web** React inside a WebView on native and as plain DOM on web. Use it for a rich-text editor, a chart library or a code-heavy widget that exists only for the web. Props cross the boundary as serialisable data; functions are async actions. It is a WebView — apply the WebView rules in [`mobile-<stack>:security`](../../../_shared/security/references/react-native.md) §4 (origin allow-list, no untrusted URL, no bridge `eval`) and the cost warning: not for list rows, not for a primary navigation surface.
 
 ## Bare React Native — Nitro and TurboModules
 
@@ -169,5 +169,5 @@ Inside a `Gate: none` plan task, run none of these and report "written, not run"
 - Features built on SDK modules → [`device-features`](../device-features/SKILL.md), [`notifications-and-links`](../notifications-and-links/SKILL.md)
 - Kit and Expo UI components → [`component-library`](../component-library/SKILL.md) · scaffold, EAS → [`project-setup`](../project-setup/SKILL.md)
 - Bare ↔ Expo, SDK upgrades → [`migration`](../migration/SKILL.md)
-- Swift standard → [`mobile-ios-basics`](../../../ios/skills/basics/SKILL.md) · Kotlin standard → [`mobile-android-basics`](../../../android/skills/basics/SKILL.md)
-- Manifest, pinning, WebView → [`mobile-shared-security`](../../../_shared/security/SKILL.md) · permissions, privacy manifest → [`mobile-shared-store-compliance`](../../../_shared/store-compliance/SKILL.md)
+- Swift standard → [`mobile-ios:concepts`](../../../ios/skills/basics/SKILL.md) · Kotlin standard → [`mobile-android:concepts`](../../../android/skills/basics/SKILL.md)
+- Manifest, pinning, WebView → [`mobile-<stack>:security`](../../../_shared/security/SKILL.md) · permissions, privacy manifest → [`mobile-<stack>:store-compliance`](../../../_shared/store-compliance/SKILL.md)

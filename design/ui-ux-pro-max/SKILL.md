@@ -1,5 +1,5 @@
 ---
-name: design-ui-ux-pro-max
+name: corpus
 description: Use when a design decision needs the vendored design corpus — styles, palettes, font pairings, UX guidelines, icons, landing patterns, motion presets, chart types, stack UI rules — or a `--design-system` block from a brief. Every `design/` skill queries it first. Triggers "what palette for a fintech dashboard", "pick a font pairing", "generate a design system", "what does the UX corpus say about X". Not for the judgment layered on top — that stays with the owning `design/*` skill.
 metadata:
   author: nextlevelbuilder
@@ -12,7 +12,7 @@ metadata:
 
 Everything runs **offline** against the pinned snapshot under `data/`. No network call, no API key, no external dependency beyond Python 3.
 
-**What this skill owns:** the searchable corpus and its query contract, the `--design-system` generator and its persistence layout, the two reference rulesets (`references/quick-reference.md` — 119 UX guidelines by priority; `references/pro-rules.md` — native/mobile polish rules + the canonical pre-delivery checklist). **What it does not own:** any of the decisions the other `design/` skills make with the results — identity ([`design-visual-identity`](../visual-identity/SKILL.md)), token tiers ([`design-tokens`](../design-tokens/SKILL.md)), IA and page anatomy ([`design-ux-patterns`](../ux-patterns/SKILL.md)), the audit ([`design-auditor`](../agents/design-auditor.md)).
+**What this skill owns:** the searchable corpus and its query contract, the `--design-system` generator and its persistence layout, the two reference rulesets (`references/quick-reference.md` — 119 UX guidelines by priority; `references/pro-rules.md` — native/mobile polish rules + the canonical pre-delivery checklist). **What it does not own:** any of the decisions the other `design/` skills make with the results — identity ([`design:visual-identity`](../visual-identity/SKILL.md)), token tiers ([`design:tokens`](../design-tokens/SKILL.md)), IA and page anatomy ([`design:app-structure`](../ux-patterns/SKILL.md)), the audit ([`design-auditor`](../agents/design-auditor.md)).
 
 ## When to use
 
@@ -115,7 +115,7 @@ python3 ".../search.py" "<query>" --design-system --variance <1-10> --motion <1-
 | `--motion` | Subtle micro-interactions | Standard scroll/stagger motion | Complex choreography (pin, Flip, SplitText) |
 | `--density` | Spacious (24–96px scale) | Standard (16–64px, default) | Dense/dashboard (8–32px scale) |
 
-`--motion` attaches a ready-to-use GSAP snippet matched to the resolved tier ([`design-motion`](../motion/SKILL.md) owns how to apply it). `--density` overrides the `--space-*` variable table in the ASCII/markdown/`MASTER.md` output. An unset dial leaves that part of the output unchanged.
+`--motion` attaches a ready-to-use GSAP snippet matched to the resolved tier ([`design:motion`](../motion/SKILL.md) owns how to apply it). `--density` overrides the `--space-*` variable table in the ASCII/markdown/`MASTER.md` output. An unset dial leaves that part of the output unchanged.
 
 ## Step 3 — supplement with domain searches
 
@@ -125,18 +125,18 @@ python3 ".../search.py" "<keyword>" --domain <domain> [-n <max_results>]
 
 | Need | Domain | Example | House skill that consumes it |
 |---|---|---|---|
-| Product-type patterns | `product` | `"entertainment social"` | [`design-visual-identity`](../visual-identity/SKILL.md) |
-| Style options | `style` | `"glassmorphism dark"` | [`design-visual-identity`](../visual-identity/SKILL.md) |
-| Color palettes | `color` | `"entertainment vibrant"` | [`design-visual-identity`](../visual-identity/SKILL.md) · [`design-theme-presets`](../theme-presets/SKILL.md) · [`design-brand-import`](../brand-import/SKILL.md) |
-| Font pairings | `typography` | `"playful modern"` | [`design-visual-identity`](../visual-identity/SKILL.md) |
-| Individual Google Fonts | `google-fonts` | `"sans serif variable"` | [`design-visual-identity`](../visual-identity/SKILL.md) |
-| Chart recommendations | `chart` | `"real-time dashboard"` | [`design-charts`](../charts/SKILL.md) |
-| UX best practices | `ux` | `"error summary validation"` | [`design-ux-patterns`](../ux-patterns/SKILL.md) · [`design-ux-review`](../ux-review/SKILL.md) · [`design-accessible-by-design`](../accessible-by-design/SKILL.md) |
-| Landing-page structure | `landing` | `"hero social-proof"` | [`design-landing-patterns`](../landing-patterns/SKILL.md) |
-| Icon recommendations | `icons` | `"decorative icon aria hidden"` | [`design-iconography`](../iconography/SKILL.md) |
-| GSAP motion presets | `gsap` | `"scroll reveal stagger"` | [`design-motion`](../motion/SKILL.md) |
+| Product-type patterns | `product` | `"entertainment social"` | [`design:visual-identity`](../visual-identity/SKILL.md) |
+| Style options | `style` | `"glassmorphism dark"` | [`design:visual-identity`](../visual-identity/SKILL.md) |
+| Color palettes | `color` | `"entertainment vibrant"` | [`design:visual-identity`](../visual-identity/SKILL.md) · [`design:theme-presets`](../theme-presets/SKILL.md) · [`design:brand-import`](../brand-import/SKILL.md) |
+| Font pairings | `typography` | `"playful modern"` | [`design:visual-identity`](../visual-identity/SKILL.md) |
+| Individual Google Fonts | `google-fonts` | `"sans serif variable"` | [`design:visual-identity`](../visual-identity/SKILL.md) |
+| Chart recommendations | `chart` | `"real-time dashboard"` | [`design:charts`](../charts/SKILL.md) |
+| UX best practices | `ux` | `"error summary validation"` | [`design:app-structure`](../ux-patterns/SKILL.md) · [`design:ux-review`](../ux-review/SKILL.md) · [`design:accessibility`](../accessible-by-design/SKILL.md) |
+| Landing-page structure | `landing` | `"hero social-proof"` | [`design:landing-patterns`](../landing-patterns/SKILL.md) |
+| Icon recommendations | `icons` | `"decorative icon aria hidden"` | [`design:iconography`](../iconography/SKILL.md) |
+| GSAP motion presets | `gsap` | `"scroll reveal stagger"` | [`design:motion`](../motion/SKILL.md) |
 | React/Next.js performance | `react` | `"rerender memo list"` | [`frontend/react`](../../frontend/react/) |
-| App/native interface rules | `web` | `"accessibilityLabel safe-areas"` | [`design-accessible-by-design`](../accessible-by-design/SKILL.md) |
+| App/native interface rules | `web` | `"accessibilityLabel safe-areas"` | [`design:accessibility`](../accessible-by-design/SKILL.md) |
 
 Domain is auto-detected when `--domain` is omitted, but auto-detection misroutes overlapping terms (e.g. "font" matches both `typography` and `google-fonts`). If results look off-topic, pass `--domain` explicitly.
 
@@ -168,7 +168,7 @@ python3 ".../search.py" "keyboard focus modal" --domain ux
 python3 ".../search.py" "suspense streaming bundle" --stack nextjs
 ```
 
-Then synthesize design system + domain results, layer the owning skill's judgment ([`design-visual-identity`](../visual-identity/SKILL.md) for the look, [`design-landing-patterns`](../landing-patterns/SKILL.md) for the section order), and implement.
+Then synthesize design system + domain results, layer the owning skill's judgment ([`design:visual-identity`](../visual-identity/SKILL.md) for the look, [`design:landing-patterns`](../landing-patterns/SKILL.md) for the section order), and implement.
 
 ## Output formats
 
@@ -196,10 +196,10 @@ Refreshing from upstream is a **snapshot** operation, recorded in [`design/ATTRI
 
 ## Related
 
-- [`design-visual-identity`](../visual-identity/SKILL.md) — turns `style`/`color`/`typography`/`product` results into one per-brief direction.
-- [`design-tokens`](../design-tokens/SKILL.md) — takes the generator's `--color-*` / `--space-*` block into primitive→semantic→component tiers.
-- [`design-motion`](../motion/SKILL.md) — owns how the `gsap` presets are applied and gated behind `prefers-reduced-motion`.
-- [`design-landing-patterns`](../landing-patterns/SKILL.md) — owns the `landing` section-order and conversion patterns.
-- [`design-ux-patterns`](../ux-patterns/SKILL.md) · [`design-ux-review`](../ux-review/SKILL.md) — consume `--domain ux` for design and for review.
-- [`design-ui-code-audit`](../ui-code-audit/SKILL.md) — pairs the Vercel guidelines with `--stack` and `--domain react` rules.
+- [`design:visual-identity`](../visual-identity/SKILL.md) — turns `style`/`color`/`typography`/`product` results into one per-brief direction.
+- [`design:tokens`](../design-tokens/SKILL.md) — takes the generator's `--color-*` / `--space-*` block into primitive→semantic→component tiers.
+- [`design:motion`](../motion/SKILL.md) — owns how the `gsap` presets are applied and gated behind `prefers-reduced-motion`.
+- [`design:landing-patterns`](../landing-patterns/SKILL.md) — owns the `landing` section-order and conversion patterns.
+- [`design:app-structure`](../ux-patterns/SKILL.md) · [`design:ux-review`](../ux-review/SKILL.md) — consume `--domain ux` for design and for review.
+- [`design:ui-code-audit`](../ui-code-audit/SKILL.md) — pairs the Vercel guidelines with `--stack` and `--domain react` rules.
 - [`design-auditor`](../agents/design-auditor.md) — the whole-design audit; queries this corpus per section.

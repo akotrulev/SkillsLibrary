@@ -1,5 +1,5 @@
 ---
-name: be-node-pattern-guide
+name: patterns
 description: Use when explaining or looking up a design pattern in TypeScript (strict mode) for Node / NestJS / Express backends. Triggers: "what is the strategy pattern in TS", "tagged union vs class hierarchy", "branded types for ids", "result type vs exceptions". Do NOT use for scaffolding (`pattern-writer`), reviews (`code-review`), or React-specific patterns (`frontend/react/skills/basics`).
 ---
 

@@ -7,7 +7,7 @@ Adopt the **`be-feature-documenter` feature documentation** role for this task.
 
 1. `Read` the agent definition at `${CLAUDE_PLUGIN_ROOT}/backend/_shared/agents/be-feature-documenter.md` (fall back to `backend/_shared/agents/be-feature-documenter.md` when working inside the SkillsLibrary repo itself).
 2. Follow it as your operating instructions for the rest of this task — its skill-loading protocol, the three-tier evidence rule, operating rules, steps, and document contract all apply.
-3. Load the `SKILL.md` files that definition names for the step you are in **before** producing the artifact they own — `be-shared-feature-trace` is the tracing engine (skip nothing in its 10-stop path); `be-shared-business-documentation`'s shape sections and golden example fix how the document reads.
+3. Load the `SKILL.md` files that definition names for the step you are in **before** producing the artifact they own — `dev:doc-feature-trace` is the tracing engine (skip nothing in its 10-stop path); `dev:doc-business-model`'s shape sections and golden example fix how the document reads.
 
 **Four rules that override any instinct to be helpful:**
 
@@ -20,4 +20,4 @@ Adopt the **`be-feature-documenter` feature documentation** role for this task.
 
 $ARGUMENTS
 
-If no feature was given above, ask for one — this agent documents a described feature, not a whole system (that is `/dev-document-system`).
+If no feature was given above, ask for one — this agent documents a described feature, not a whole system (that is `/dev:document-system`).

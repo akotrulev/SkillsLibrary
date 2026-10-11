@@ -127,8 +127,8 @@ graph TD
 
 **Reading it.** `M2` cuts one half of an **AND** — which is enough to defeat `P2` entirely, and is the cheapest
 control in the tree. The `Q` subtree is pure supply chain and routes wholesale to
-`devops-supply-chain-security`; the `P` subtree routes to `devops-k8s-security` +
-`devops-container-runtime-security`; `R` routes to `devops-cloud-posture`. One tree, three lanes, one shared
+`devops:supply-chain-security`; the `P` subtree routes to `devops:kubernetes-security` +
+`devops:container-runtime-security`; `R` routes to `devops:cloud-posture`. One tree, three lanes, one shared
 priority ordering — this is what makes the tree the sequencing input the assessment plan needs.
 
 ## Scoring and rolling up

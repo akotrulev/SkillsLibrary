@@ -1,6 +1,6 @@
 # Output contract — the shape every capability returns
 
-Decided once for the whole surface. Per-capability blocks state only their deltas. Both `tool-mcp-builder` and `tool-cli-builder` implement this file literally; if the two surfaces disagree on a response shape, this file is what they were supposed to agree on.
+Decided once for the whole surface. Per-capability blocks state only their deltas. Both `tooling:mcp-builder` and `tooling:cli-builder` implement this file literally; if the two surfaces disagree on a response shape, this file is what they were supposed to agree on.
 
 The reader is an agent with a token budget and no ability to re-read a truncated payload. Every rule below exists because of that.
 

@@ -1,11 +1,11 @@
 ---
-name: qa-data-driven-testing-dotnet
+name: data-driven-testing
 description: Use when one .NET 10 (8-9) / NUnit test body must run against many rows of data from an external file. Triggers "run this test for every row in a CSV / spreadsheet", "data-drive these tests from a JSON file", "parameterize this NUnit test with external test data". Not for building the objects themselves (`test-data-builder`).
 ---
 
 # Data-Driven Testing (.NET 10 / NUnit)
 
-> **Ported from the canonical `qa-data-driven-testing-java`.** The four ideas and the section order are
+> **Ported from the canonical `qa-java:data-driven-testing`.** The four ideas and the section order are
 > identical; only the runner API (NUnit `[TestCaseSource]` instead of TestNG `@DataProvider`) and the
 > parsing libraries (CsvHelper / `System.Text.Json` / ClosedXML) change. See the Java file for the rationale
 > behind the family; this file is the C# expression of the same discipline.
@@ -14,9 +14,9 @@ A **data-driven test** is **one test body** exercised against **many input rows*
 **outside the test code** — an external CSV / JSON / Excel file checked into the repo. Add a row, get a
 case; you never copy-paste a `[Test]` to cover a new input.
 
-It is *not*: a **builder** constructing one richly-configured object in code (`qa-test-data-builder-dotnet`
+It is *not*: a **builder** constructing one richly-configured object in code (`qa-dotnet:test-data-builder`
 — one object well, vs many rows; they **compose**); rows pulled from a **live database**
-(`qa-db-verification-queries-dotnet`); or a **cross-browser/-device matrix** (`qa-browser-cloud-setup-dotnet`
+(`qa-dotnet:db-verification-queries`); or a **cross-browser/-device matrix** (`qa-dotnet:browser-cloud-setup`
 — parameterizing the *environment*, not the *data*).
 
 > **The discipline this skill encodes** — four ideas, identical across all three stacks:
@@ -41,8 +41,8 @@ It is *not*: a **builder** constructing one richly-configured object in code (`q
 | Nested / hierarchical cases (a row has sub-objects or lists) | **JSON file** | `JsonSerializer.Deserialize<List<Row>>(…)` |
 | Tabular data **owned/edited by non-technical stakeholders** | **Excel `.xlsx`** | ClosedXML `XLWorkbook` → bind cells → `IEnumerable<Row>` |
 | Huge dataset (don't hold it all in memory) | any of the above, **lazy** | source method `yield return`s one `TestCaseData` per row |
-| Rows from a **live DB / API** at test time | not this skill | `qa-db-verification-queries-dotnet` (DB), an API client (HTTP) |
-| Each row is a whole complex domain object built in code | not this skill | `qa-test-data-builder-dotnet` (the builder can consume one row) |
+| Rows from a **live DB / API** at test time | not this skill | `qa-dotnet:db-verification-queries` (DB), an API client (HTTP) |
+| Each row is a whole complex domain object built in code | not this skill | `qa-dotnet:test-data-builder` (the builder can consume one row) |
 
 **Rule of thumb:** *prefer CSV or JSON in git* (diffable, reviewable, mergeable). Reach for **Excel only**
 when the data's owner won't touch a CSV. Use **inline `[TestCase]`** when there are few enough rows that a
@@ -271,7 +271,7 @@ public class TaxCalculatorTests
 - **Rows that need their own browser context** (a viewport, a locale, a device) are fixture parameters —
   `[TestFixture(...)]` / `[TestFixtureSource]` — not test cases: each row is its own fixture with its own
   `ContextOptions()`, and the rows run in parallel under `ParallelScope.Self`
-  (`qa-responsive-testing-dotnet`, `qa-language-testing-dotnet`).
+  (`qa-dotnet:responsive-testing`, `qa-dotnet:language-testing`).
 - The worker count is `[assembly: LevelOfParallelism(4)]` or `dotnet test -- NUnit.NumberOfTestWorkers=4`.
 
 ## Anti-patterns
@@ -292,7 +292,7 @@ public class TaxCalculatorTests
 - **Instance state in a `[TestCaseSource]`.** It resolves at discovery before `[SetUp]`; an instance
   dependency is null. *Fix:* keep the source **static** and self-contained.
 - **Secrets or real PII in a committed data file.** It's in git history forever. *Fix:* synthetic data; real
-  secrets via env (cross-link `qa-test-login-tokens-dotnet`).
+  secrets via env (cross-link `qa-dotnet:test-login-tokens`).
 
 ## Examples
 
@@ -317,7 +317,7 @@ A run produces one NUnit/Allure result **per row**, each labelled with the case 
 straight at `CSV: DE @ 10000¢ → 1900¢`, not "(1)".
 
 **Composing with a builder (the boundary made concrete):** a row supplies the *varying* fields; the
-**builder** (`qa-test-data-builder-dotnet`) fills the rest with sane defaults.
+**builder** (`qa-dotnet:test-data-builder`) fills the rest with sane defaults.
 
 ```csharp
 [TestCaseSource(typeof(OrderCaseSources), nameof(OrderCaseSources.CsvOrderCases))]
@@ -347,26 +347,26 @@ public void Should_ApplyTheRowsDiscount_When_TheOrderIsPriced(OrderCase row)
   stakeholder-owned sheets, inline for a few. Prefer diffable CSV/JSON in git over binary Excel.
 - **Money is integer cents / `decimal`, never `double`** (round-off corrupts it); `CultureInfo.InvariantCulture`
   for CsvHelper. No secrets or real PII in committed data files (synthetic; secrets via env —
-  `qa-test-login-tokens-dotnet`).
+  `qa-dotnet:test-login-tokens`).
 - **Lazy `yield return` for huge datasets**; `ParallelScope.All` only for fixtures with no per-test instance
   state — **never for Playwright or Appium**, whose rows stay `ParallelScope.Self` (or become fixture
   parameters when each needs its own context). No `Thread.Sleep`; structured logging; nullable enabled.
 
 ## Cross-references
 
-- `qa-data-driven-testing-java` — **the canonical file**: same four ideas, TestNG `@DataProvider` (returning
+- `qa-java:data-driven-testing` — **the canonical file**: same four ideas, TestNG `@DataProvider` (returning
   `Object[][]` / `Iterator<Object[]>`, `dataProviderClass`, `parallel = true`), OpenCSV `CsvToBean`, Jackson
   `TypeReference`, Apache POI. Read it for the family rationale.
-- `qa-data-driven-testing-typescript` — same four ideas, Vitest `test.for` / `describe.each` and a
+- `qa-typescript:data-driven-testing` — same four ideas, Vitest `test.for` / `describe.each` and a
   test-per-row loop in Playwright, `csv-parse/sync` + `JSON.parse` + the `xlsx` (SheetJS) lib, **Zod** to
   validate/coerce parsed rows.
-- `qa-test-data-builder-dotnet` — the **boundary**: a builder/ObjectMother constructs **one** complex object
+- `qa-dotnet:test-data-builder` — the **boundary**: a builder/ObjectMother constructs **one** complex object
   in code with defaults; data-driven feeds **many** rows from a file. They **compose** — a row drives a
   builder's varying fields (see the last example).
-- `qa-db-verification-queries-dotnet` — when rows come from a **live database** at test time rather than
+- `qa-dotnet:db-verification-queries` — when rows come from a **live database** at test time rather than
   a static file; the safe assertion-SQL counterpart to file-sourced data.
-- `qa-browser-cloud-setup-dotnet` — parameterizing the **environment** (browser/device matrix) rather
+- `qa-dotnet:browser-cloud-setup` — parameterizing the **environment** (browser/device matrix) rather
   than the **data**; orthogonal matrices that can multiply.
-- `qa-api-test-writer-dotnet` / `qa-ui-test-writer-playwright-dotnet` — where the data-driven test
-  *bodies* are authored; this skill supplies their rows. `qa-test-reports-dotnet` — each row renders as a
+- `qa-dotnet:api-tests` / `qa-dotnet:ui-tests-playwright` — where the data-driven test
+  *bodies* are authored; this skill supplies their rows. `qa-dotnet:test-reports` — each row renders as a
   separate, named result.

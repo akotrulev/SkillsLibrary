@@ -6,7 +6,7 @@ plugin. Skill names drop the domain and stack prefixes the plugin namespace alre
 (`/fe-react:fe-react-forms` → `/fe-react:forms`). Commands follow one scheme, and no name collides with
 another name in the same plugin or with a Claude Code built-in.
 
-**Status:** M1 landed 2026-10-11: `.claude-plugin/marketplace.json` lists the 21 plugins at version 3.0.0 with `dependencies`, all 64 command files sit at their §4 paths, and `tools/plugin-surface-check.py` exists. **Built but unverified:** nothing has been run (the plan gates once, in D1) — not `claude plugin validate`, the checker, the token audit or the version check. Prose still cites old names until R1. R1 is next. Baseline (2026-10-11) for D1: `claude plugin validate .` passes, `tools/token-audit.py` exits 1 on 90 pre-existing body-budget violations, and a typical project loads **25,281** always-on description tokens for 219 skill entries covering 182 distinct skills.
+**Status:** M1 and R1 landed 2026-10-11. M1: `.claude-plugin/marketplace.json` lists the 21 plugins at version 3.0.0 with `dependencies`, the 64 command files sit at their §4 paths, and `tools/plugin-surface-check.py` exists. R1: all 459 renamed skills carry their §5 `name:` and old skill names, §4 slash forms and family wildcards are rewritten across 730 files (D12 lists where R1 went beyond §6). D1 is next. **Built but unverified:** nothing has been run (the plan gates once, in D1) — not `claude plugin validate`, the checker, the token audit, the version check or a YAML parse of the rewritten descriptions. README, catalog, CLAUDE.md and CONTRIBUTING still describe the old bundling layout until D1. Baseline (2026-10-11) for D1: `claude plugin validate .` passes, `tools/token-audit.py` exits 1 on 90 pre-existing body-budget violations, and a typical project loads **25,281** always-on description tokens for 219 skill entries covering 182 distinct skills.
 ---
 
 ## 1. What already exists, and what is missing
@@ -761,6 +761,20 @@ are never edited, so the old-name sweep (§9.6) excludes them.
 **D11 — `mobile-react-native` stops registering the iOS and Android `basics` skills.** The RN agent
 loads them by path. Otherwise the plugin would hold three skills named `concepts`.
 
+**D12 — R1 went beyond §6 in four places (2026-10-11).** (a) `design/ui-ux-pro-max/SKILL.md` got the full
+rewrite, not only its `name:` line: it is this library's own wrapper and its body links the other
+`design/` skills by their old names, while the rest of the vendored corpus is untouched. (b) Old names
+that §5 does not list but the prose used (`qa-_shared-quality-metrics`, `qa-_shared-ci-conventions`,
+`qa-security-testing-passive-scan-*`, `qa-security-testing-dependency-scan-*`, `qa-{stack}-api-test-author`)
+were rewritten to the skill they meant. (c) Bare agent and command-file identifiers (`qa-api-java`,
+`qa-cicd-<stack>`, `devops-engineer`, `qa-security`) stay as written, per D4 and §6 step 4; the five
+`be-*/fe-*/devops-engineer` agent lists were restored after the slash regex hit them. (d) The older
+plans in `docs/plans/` that are not under `implemented/` (`CONFORMANCE-AUDIT-PLAN.md`,
+`TOKEN-OPTIMIZATION-PLAN.md`, `backend-PLAN.md`, `frontend-PLAN.md`, `fine-tuning-house-models.md`) and
+`meta/PLAN.md` got the mechanical pass only; their wildcard and brace wording (`ep-*`, `be-{…}-pattern-writer`)
+is history of finished work and stays. Cost: a reader of those plans sees a mix of new `plugin:name` forms
+and old family wildcards.
+
 ## Answered questions (2026-10-11)
 
 **O1 — Can a plugin declare dependencies?** Yes, with `dependencies` in `plugin.json` or the marketplace
@@ -851,6 +865,7 @@ token audit.
   skill, a command file, `marketplace.json`, and `docs/skills-catalog.md`.
 - **Not in R1:** rewriting README, catalog or CLAUDE.md *sections* (D1). R1's mechanical pass does run
   over them, so D1 starts from correct names.
+- **As built (2026-10-11):** 459 `SKILL.md` files carry their §5 `name:` (the 460th, `ai-development/claude-api`, keeps `claude-api`; `git diff -U0 | grep -c '^+name: '` → 459). The mechanical pass (scratchpad script, not committed) rewrote old skill names and §4 slash forms in 729 files, and the hand edits brought the diff to 730 files. Per-stack `<stack>` rows were expanded (519 old names, 0 folder mismatches), and a name is written `<plugin>:<new>` for a single registrant, `<category>-<stack>:<new>` for a whole category, and the folder path for unregistered skills. Hand edits: the 76 wildcard sites (`ep-*` → "the `dev` skills" / `dev:*` / "the always-on internals (`engineering-practices/{agent-orientation-cache,code-comments}`)", `qa-ci-pipelines-*` and `qa-test-reports-*` → `qa-<stack>:ci-pipelines` / `qa-<stack>:test-reports`, `pentest-*` / `secgov-*` / `ba-*` / `td-*` / `tool-*` → role words or `<plugin>`), plus brace and `<stack>` forms of old names (`qa-ci-pipelines-{java,dotnet,typescript}`, `devops-{github-actions,…}`, `mobile-<stack>-test-ids`, …). Counts and "bundled" claims falsified by the layout were fixed in agents and skills (`.skill-template/agent.md:22`, `backend/_shared/agents/solution-planner.md:64`, the `be-*` agents' "same plugin, `/dev:…`" notes). **Built but unverified:** no gate was run; the checker, `claude plugin validate`, YAML parsing of the 261 rewritten `description:` lines (only a `: ` count comparison was done) and the token audit all wait for D1. Proof: after the pass, the leftover scan for old §5 names in §6's scope returns only the folder-name brace list `business-analysis/skills/{ba-process-flow-diagram,ba-decision-table,ba-entity-state-grid}` (`backend/_shared/agents/solution-planner.md:63`, a path), and the only `/old-command` matches are the five `be-*/fe-*/devops-engineer` agent lists, which are not commands.
 
 ### D1 — documentation, the gate, and close-out
 
@@ -934,54 +949,9 @@ Run them in order, one session each, opened from Plan Queue. Each block is compl
 | D1 | `docs` | `general-purpose` | M1, R1 | ~125k |
 | H1 | `human` | **the user** | D1, pushed | minutes |
 
-M1 has landed; its block is deleted. The R1, D1 and H1 blocks are live.
+M1 and R1 have landed; their blocks are deleted. The D1 and H1 blocks are live.
 
 ---
-
-### R1 — skill renames and reference rewrite (general-purpose, docs)
-
-````
-You are `general-purpose`. Task R1 of docs/plans/004-plugin-surface-rework.md: give every skill its
-§5 name and rewrite every reference to old skill names and old command forms.
-
-Deliverable: every registered and unregistered `SKILL.md` carries its §5 `name:`, and no file in §6's
-scope contains an old skill name from §5 or an old typed command form from §4.
-
-Read, in this order:
-1. CLAUDE.md.
-2. The plan: §2.2 (who registers what), §4, §5, §6, D2, D3, D10, task R1, M1's "As built" notes, and
-   "Close-out — every task".
-3. `.claude-plugin/marketplace.json`, through a script that prints each skill folder with the plugins
-   that register it.
-
-Build:
-- A one-off rewrite script in the session scratchpad (never committed) that parses §5's tables out of
-  the plan, expands `<stack>` rows by their Stacks column, maps each folder to its `<plugin>:` form per
-  §6 step 2, and applies §6 steps 1–4 to §6's scope. Run `--dry-run` first, read the per-name counts,
-  then apply.
-- §6 step 5: hand-edit every family wildcard (`ep-*`, `qa-ci-pipelines-*`, `secgov-*`,
-  `qa-test-reports-*`, `pentest-*`, `ba-*`, `be-shared-*`, `auth-auth0-*`), reading each sentence.
-- §6 step 6: fix counts in skill and agent prose that the new layout falsifies (for example "ships in
-  all sixteen plugins").
-- Spot-check diffs: `backend/java/agents/be-java.md`, one `qa/java/skills/*/SKILL.md`, one
-  `design/*/SKILL.md`, one command file, `marketplace.json`, `docs/skills-catalog.md`.
-
-Traps:
-- Several folders equal their old name (`design/design-tokens`, `business-analysis/skills/ba-*`,
-  `training-data/*/td-*`). §6's lookbehind `(?<![\w/.-])` and lookahead `(?![\w-]|/)` are what keep
-  those paths intact. A dry-run hit inside a path means the regex is wrong.
-- `design-ui-ux-pro-max` is renamed. The product name `ui-ux-pro-max` and the vendored corpus's own
-  files are not.
-- Agent identifiers without a leading slash (`code-auditor`, `solution-planner`, `qa-security`) are
-  not skill names. Leave them.
-- Never touch `docs/plans/implemented/`, `docs/audits/`, `docs/research/` or this plan file (D10).
-
-**Gate: none** — this plan gates once, in D1. Do not run `claude plugin validate`, the checker or the
-token audit.
-
-Commit: `refactor(skills): topic-only skill names, references rewritten to plugin:name (004 R1)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
 
 ### D1 — documentation, the gate, and close-out (general-purpose, docs)
 
@@ -1020,6 +990,15 @@ Traps:
   the baseline, not a failure. The number must not rise.
 - The validator's advice about missing README install lines is cleared by §7's one-line-per-plugin
   install list. Check its output after writing README.
+- R1 already rewrote every old skill name, §4 slash form and family wildcard in README, the catalog,
+  CLAUDE.md and CONTRIBUTING mechanically. What it left for you is **layout prose**: "bundled into all
+  stack plugins", the `ep-*` counts ("6 … skills", "all sixteen plugins", "eight stack plugins"), the
+  `dev-*` command-family paragraph and bare `dev-design` / `dev-plan-feature` mentions in the catalog,
+  and "Skill names carry the … prefix" claims. Search for those before you rewrite.
+- Bare agent and command-file identifiers (`qa-api-java`, `devops-engineer`, `qa-security`) are meant to
+  stay (D12 c); the §9.6 sweep must not flag them.
+- R1 did not parse the YAML of the 261 rewritten `description:` lines (no PyYAML in the isolated
+  interpreter); `claude plugin validate .` is the first real parse, so read its output for frontmatter errors.
 - After the gate, write H1's prompt-block checklist from what actually landed (plugin names, typed
   forms, the measured token figure). Then **do not** move the plan: H1 still holds a block.
 

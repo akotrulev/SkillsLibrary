@@ -1,6 +1,6 @@
 ---
-name: qa-flaky-test-quarantine-java
-description: Use when flaky tests in a Java 21 / TestNG suite must be detected, **quarantined** and reported. Triggers: "this test is flaky, stop it blocking the pipeline", "quarantine the flaky tests but keep running them", "find which TestNG tests are flaky". Not for Allure wiring (`qa-test-reports-java`), the pipeline lanes (`qa-ci-pipelines-java`), or fixing test logic (the owning qa-*-java agent).
+name: flaky-test-quarantine
+description: Use when flaky tests in a Java 21 / TestNG suite must be detected, **quarantined** and reported. Triggers: "this test is flaky, stop it blocking the pipeline", "quarantine the flaky tests but keep running them", "find which TestNG tests are flaky". Not for Allure wiring (`qa-java:test-reports`), the pipeline lanes (`qa-java:ci-pipelines`), or fixing test logic (the owning qa-*-java agent).
 ---
 
 # Flaky-Test Quarantine (Java 21 / TestNG) — **canonical stack**
@@ -49,9 +49,9 @@ assumption, an order dependency, a real-but-rare backend hiccup. It is *not*:
 ## Stack
 
 - Java 21, TestNG 7.12.0 — **no `Thread.sleep`** anywhere (flakiness is usually *caused* by sleeps; cross-link
-  the condition-wait in `qa-db-connection-java` / `qa-messaging-testing-*`)
+  the condition-wait in `qa-java:db-connection` / `qa-java:messaging-testing`)
 - `io.qameta.allure:allure-testng:3.0.0` — the `@Flaky` annotation, history-based detection and the
-  categories file (cross-link `qa-test-reports-java` for the full Allure wiring; this skill only adds the
+  categories file (cross-link `qa-java:test-reports` for the full Allure wiring; this skill only adds the
   flaky pieces)
 - Gradle Kotlin DSL — the gate `test` task excludes the `flaky` group; a **`flakyQuarantine`** task runs only
   that group with `ignoreFailures`
@@ -68,7 +68,7 @@ testng.xml                          ← the project's one suite; the Gradle task
 ## Move 1 — Detect
 
 **Allure's history-based detection** — identical across every stack (a *report* feature, not a language one).
-With Allure **history enabled** (the `history/` folder carried across runs — see `qa-test-reports-java`),
+With Allure **history enabled** (the `history/` folder carried across runs — see `qa-java:test-reports`),
 Allure adds the **Flaky** mark when, across the latest **5 launches**, a test:
 
 1. got **Failed** at some point within those 5 launches, **and**
@@ -174,7 +174,7 @@ val flakyQuarantine by tasks.registering(Test::class) {
   filter.
 - No retry in the quarantine lane either: its job is to report the flake honestly.
 - CI runs the two lanes as **separate jobs**, the quarantine one non-gating (cross-link
-  `qa-ci-pipelines-java`), so a quarantine failure's evidence never mixes with the gate's.
+  `qa-java:ci-pipelines`), so a quarantine failure's evidence never mixes with the gate's.
 
 The quarantine lane is the **one** non-gating exception `ci-conventions` allows: it runs only `flaky` tests,
 still reports them to Allure, and never blocks the merge.
@@ -202,7 +202,7 @@ result takes the first category that matches:
 ]
 ```
 
-The rest of the file is `qa-test-reports-java`'s. A trace regex such as `.*TimeoutException.*` is a failure
+The rest of the file is `qa-java:test-reports`'s. A trace regex such as `.*TimeoutException.*` is a failure
 class, not a flakiness verdict: filing every timeout as "known flaky" hides real regressions.
 
 **Track flaky-rate over time, not per-run green.** A single green run proves nothing about a flaky test. The
@@ -224,8 +224,8 @@ quality dashboard (`qa/manual/quality-metrics`). A growing `flaky` group is a sm
   `@Test(groups = "flaky")` carries `@Issue("…")`; review the group every sprint; it must **shrink**.
 - **A "known flaky" category matched on `TimeoutException`.** *Fix:* match `"flaky": true`.
 - **Fighting a sleep-induced flake with retries.** A `Thread.sleep`-based wait is the *cause*. *Fix:* replace
-  it with a condition-wait (Playwright's auto-waiting assertions; Awaitility in `qa-db-connection-java` /
-  `qa-messaging-testing-*`), then most "flakiness" disappears.
+  it with a condition-wait (Playwright's auto-waiting assertions; Awaitility in `qa-java:db-connection` /
+  `qa-java:messaging-testing`), then most "flakiness" disappears.
 
 ## Deep-dive reference
 
@@ -249,20 +249,20 @@ These sections live in `references/details.md` — **read it when the task touch
 
 ## Cross-references
 
-- `qa-flaky-test-quarantine-dotnet` — same four moves, NUnit: `[Category("Flaky")]` + `dotnet test --filter
+- `qa-dotnet:flaky-test-quarantine` — same four moves, NUnit: `[Category("Flaky")]` + `dotnet test --filter
   "TestCategory!=Flaky"` for the gate vs a non-gating filtered run; Allure.NUnit flaky + history.
-- `qa-flaky-test-quarantine-typescript` — same four moves, Playwright: `{ tag: '@flaky' }` +
+- `qa-typescript:flaky-test-quarantine` — same four moves, Playwright: `{ tag: '@flaky' }` +
   `--grep-invert @flaky` on the gate, a separate `--grep @flaky` job, and a nightly `--repeat-each` lane.
-- `qa-test-reports-java` — the **full** Allure wiring this layers on: `allure-testng` 3.0, the weaver,
+- `qa-java:test-reports` — the **full** Allure wiring this layers on: `allure-testng` 3.0, the weaver,
   history/trends (required for auto-flaky detection), `categories.json`, CI publish.
-- `qa-ci-conventions-shared` — the retry policy this skill defers to.
-- `qa-_shared-quality-metrics` — track **flaky-rate over time**; a quarantine group that grows is the metric
+- `qa-<stack>:ci-conventions` — the retry policy this skill defers to.
+- `qa-<stack>:quality-metrics` — track **flaky-rate over time**; a quarantine group that grows is the metric
   to watch.
-- `qa-db-connection-java` / `qa-messaging-testing-java` — the **condition-wait** (Awaitility) that *prevents*
+- `qa-java:db-connection` / `qa-java:messaging-testing` — the **condition-wait** (Awaitility) that *prevents*
   the eventual-consistency flakiness this skill quarantines.
-- `qa-ui-test-writer-playwright-java` — where the quarantined UI tests are authored and where `BaseTest` and
+- `qa-java:ui-tests-playwright` — where the quarantined UI tests are authored and where `BaseTest` and
   `testng.xml` live; flakiness is best fixed at the source (stable locators, web-first assertions).
-- `qa-evidence-capture-java` — the trace, video and screenshot a flaky failure leaves behind, and how to read
+- `qa-java:evidence-capture` — the trace, video and screenshot a flaky failure leaves behind, and how to read
   them.
-- `qa-ci-pipelines-java` (its GitHub Actions, Azure Pipelines and GitLab CI references) — the gate job and the
+- `qa-java:ci-pipelines` (its GitHub Actions, Azure Pipelines and GitLab CI references) — the gate job and the
   non-gating quarantine job.

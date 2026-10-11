@@ -2,7 +2,7 @@
 
 Three surfaces where the failure is **not a read**: a write that costs work (and may have half-happened), a third-party SDK that fails on its own schedule, and the device itself running out of room.
 
-*Deep dive for [`mobile-react-native-error-handling`](../SKILL.md). Samples have no inline comments (CLAUDE.md § Comments).*
+*Deep dive for [`mobile-react-native:error-handling`](../SKILL.md). Samples have no inline comments (CLAUDE.md § Comments).*
 
 ---
 

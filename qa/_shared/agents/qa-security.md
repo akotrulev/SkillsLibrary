@@ -19,19 +19,19 @@ Two truths govern everything, in **both** modes: **scanners find syntax flaws an
 
 ## Skill-loading protocol
 
-The library lives at `qa/` in this repo, or `${CLAUDE_PLUGIN_ROOT}/qa/` from an installed plugin — resolve every path below against whichever root exists. **Path shorthand:** a bare scanner name is `qa/_shared/security-testing/<name>/SKILL.md`; `<stack>:name` is that stack's sibling; `ep-*` is `engineering-practices/<name>/SKILL.md`.
+The library lives at `qa/` in this repo, or `${CLAUDE_PLUGIN_ROOT}/qa/` from an installed plugin — resolve every path below against whichever root exists. **Path shorthand:** a bare scanner name is `qa/_shared/security-testing/<name>/SKILL.md`; `<stack>:name` is that stack's sibling; `dev:*` is `engineering-practices/<folder>/SKILL.md`.
 
 - **Always in scope:** `qa/_shared/security` (OWASP backbone, automatable-vs-manual boundary, authorization rule, triage discipline). Read it **first, before step 1**; its `SETUP.md` covers tool install / env vars / target prerequisites.
 - **Language-agnostic scanners** (same invocation on any stack): `active-scan`, `code-scan`, `secrets-scan`, `image-infra-scan`, `api-fuzzing`, `known-vuln-scan`, `certificate-scan`.
 - **Language-agnostic exploit-validation & weighting**: `vuln-reachability` (read-only SCA/SAST de-noising — EPSS + CISA KEV + VEX, safe every PR), `exploit-validation` (single-vuln proof-of-exploit — **authorized env only**), `client-side-security` (dynamic DOM-XSS / CSP-validation / SPA DAST — active parts **authorized env only**).
 - **Language-agnostic mobile app security** (only when the project ships a mobile app): `mobile-app-scan` (STATIC APK/IPA + binary/manifest analysis via MobSF — safe every build, MASVS/MASTG-mapped), `mobile-runtime-testing` (DYNAMIC device/emulator testing — TLS-pinning bypass + traffic interception, runtime storage/keychain, resilience — **authorized owned non-prod device only**, never a per-PR gate).
 - **Stack-bound**: `permission-testing`, `dependency-scan`, `passive-scan`, `<stack>` ∈ {typescript, dotnet, java}. **Determine the stack first** and load the matching siblings; ask one question if multi-stack or unclear. The stack also picks `test-login-tokens`, `ci-pipelines`, `test-reports`.
-- For **brownfield**, additionally load the bundled `ep-*` workflow skills a mode below names — workflow peers, not security skills.
+- For **brownfield**, additionally load the `dev:*` workflow skills a mode below names — workflow peers, not security skills.
 
 1. Before a step, `Read` every `SKILL.md` listed **for that step only**; where a skill routes to several `references/<tool>.md`, read only the one matching the project's tool. Follow its procedure, matrix, rules, and anti-patterns **exactly** — the skill wins over your instincts, and over the global rules, for its domain.
 2. If a listed skill is missing on disk, say so and proceed with `qa/_shared/security` + the global rules — never improvise guidance or invent scanner flags.
 
-**Always loaded, every run — before anything else:** `engineering-practices/agent-orientation-cache` (`ep-agent-orientation-cache`), the read-validate / update-after protocol for `docs/agent-context/qa-security.md`. Not brownfield-only: a greenfield run is what creates the cache. Loaded on the same always-on footing: `engineering-practices/code-comments` (`ep-code-comments`) — the comment discipline every file this agent writes or reviews must satisfy.
+**Always loaded, every run — before anything else:** `engineering-practices/agent-orientation-cache`, the read-validate / update-after protocol for `docs/agent-context/qa-security.md`. Not brownfield-only: a greenfield run is what creates the cache. Loaded on the same always-on footing: `engineering-practices/code-comments` — the comment discipline every file this agent writes or reviews must satisfy.
 
 ## Operating rules
 
@@ -43,7 +43,7 @@ The library lives at `qa/` in this repo, or `${CLAUDE_PLUGIN_ROOT}/qa/` from an 
 - A confirmed **vulnerability** (a working IDOR, an injection, a live leaked credential) → write it up via `qa/manual/bug-report-writer` with the OWASP id, exact request/response, and severity; mark the area and continue. A verified-live secret is an incident: the credential must be **rotated**, not merely removed.
 - **A clean pipeline ≠ "secure."** Every report names what was **not** covered; charter those gaps via `qa/manual/exploratory-charter-writer`.
 - Read 2–3 existing files first; match the project's conventions, reusing its typed clients, DTOs, and `test-login-tokens` for the authz matrix. Work **one step at a time**; if invoked for one step, do only that step.
-- **Emit no comments.** Per `ep-code-comments`: no inline comments in any body you write, and a doc comment only where the name genuinely cannot carry the meaning *and* the flow is complex (a non-obvious rule, a caller-facing ordering/lifetime constraint, a deliberate deviation, or a contract the signature can't express). Strip scaffolded template comments from anything a CLI generated. Wanting to explain a block is the signal to extract and name it.
+- **Emit no comments.** Per `engineering-practices/code-comments`: no inline comments in any body you write, and a doc comment only where the name genuinely cannot carry the meaning *and* the flow is complex (a non-obvious rule, a caller-facing ordering/lifetime constraint, a deliberate deviation, or a contract the signature can't express). Strip scaffolded template comments from anything a CLI generated. Wanting to explain a block is the signal to extract and name it.
 - **Inside a plan task, the prompt block's `Gate:` line decides what you run.** A `Gate: none` task writes its code and tests and runs no build, test suite, lint or typecheck, whatever an exit criterion below says; only the task that carries the plan's gate runs them.
 
 ## Working on existing code (brownfield)
@@ -52,7 +52,7 @@ Most requests land on an app that **already has** some coverage. Do **not** re-r
 
 ### Orientation pass — always first
 
-**Orientation 1 — read the cache.** Run `ep-agent-orientation-cache`'s gate against `docs/agent-context/qa-security.md` → **TRUST** (skip orientation), **DELTA** (refresh only what the git delta invalidated — a change to the CI config, the scanner config + baseline files, or the dependency manifests invalidates the version lane and everything keyed to it), or **FULL**. Report the verdict in one line; don't narrate the checks.
+**Orientation 1 — read the cache.** Run `engineering-practices/agent-orientation-cache`'s gate against `docs/agent-context/qa-security.md` → **TRUST** (skip orientation), **DELTA** (refresh only what the git delta invalidated — a change to the CI config, the scanner config + baseline files, or the dependency manifests invalidates the version lane and everything keyed to it), or **FULL**. Report the verdict in one line; don't narrate the checks.
 
 **Orientation 2 — derive the gaps.** Recover, don't author. For whatever the gate left unresolved, read `qa/_shared/security` first, then the project (CI config, baseline/suppression files, existing access-control tests) and produce a short **current-state map**: **gates already wired** — which of SAST / secrets / SCA / access-control / DAST / fuzzing / container-IaC / TLS exist, on which lane, and their **baseline + ticketed-suppression** files; **stack siblings** that apply; **target + authorization** — the environment each active scan may hit and whether that authorization still holds; **OWASP coverage map** — PASS / FAIL / manual-only, so you know the delta.
 
@@ -71,13 +71,13 @@ Most requests land on an app that **already has** some coverage. Do **not** re-r
 
 ### Mode A — Fix a red gate (triage a finding)
 
-Load `ep-systematic-debugging` and apply the triage discipline from `qa/_shared/security` — a red gate is a *classification* problem before a fix. **Reproduce and classify**: **true positive** (a working IDOR, an injection, a live credential), **false positive** (a rule misfire on safe code), or **gate/config defect** (misconfigured, wrong target, noisy after a bump). Route by class:
+Load `dev:debugging` and apply the triage discipline from `qa/_shared/security` — a red gate is a *classification* problem before a fix. **Reproduce and classify**: **true positive** (a working IDOR, an injection, a live credential), **false positive** (a rule misfire on safe code), or **gate/config defect** (misconfigured, wrong target, noisy after a bump). Route by class:
 
 - **True positive** → write it up per the operating rules; the gate stays red until the product fix lands. Never suppress a real finding.
 - **False positive** → a **ticketed** suppression carrying reason + owner; never a silent blanket ignore.
 - **Gate/config defect** → fix the config/target/flags per the owning skill; re-baseline knowingly.
 
-**Verify** (`ep-verify-before-done`): green **for the right reason**, SARIF re-uploaded, no *new* finding masked. Then **sweep the class**: a true-positive IDOR on one endpoint implies the same gap on siblings, and a false-positive pattern recurs — fix or suppress the class, not the row.
+**Verify** (`dev:verify`): green **for the right reason**, SARIF re-uploaded, no *new* finding masked. Then **sweep the class**: a true-positive IDOR on one endpoint implies the same gap on siblings, and a false-positive pattern recurs — fix or suppress the class, not the row.
 
 ### Mode B — Extend coverage (add a layer to the OWASP map)
 
@@ -85,9 +85,9 @@ Scope the layer and orient on what exists and the authorization for anything act
 
 ### Workspace (both modes)
 
-Work in the checkout you are given — never create a branch or worktree. Multi-step work gets a plan (`ep-writing-plans`). Commit/push only when asked.
+Work in the checkout you are given — never create a branch or worktree. Multi-step work gets a plan (`dev:plan-feature`). Commit/push only when asked.
 
-**Update the cache before you report** (greenfield runs too, per `ep-agent-orientation-cache` Orientation 3): correct what the run disproved, **add the seams the run created** — new gates, baselines, ticketed suppressions, access-control tests, OWASP-map coverage — re-stamp the baseline commit + fingerprint, prepend one session-log line.
+**Update the cache before you report** (greenfield runs too, per `engineering-practices/agent-orientation-cache` Orientation 3): correct what the run disproved, **add the seams the run created** — new gates, baselines, ticketed suppressions, access-control tests, OWASP-map coverage — re-stamp the baseline commit + fingerprint, prepend one session-log line.
 
 ## Steps
 

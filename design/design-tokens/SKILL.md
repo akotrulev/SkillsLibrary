@@ -1,6 +1,6 @@
 ---
-name: design-tokens
-description: Use when building or auditing the variable layer a design system runs on — primitive → semantic → component token tiers, the color/type/spacing/radius/elevation scales, dark mode as a semantic swap. Owns the discipline `design-visual-identity` feeds and `styling` consumes. Triggers "set up design tokens", "define the spacing/type scale", "hardcoded hex values everywhere". Not for palette/type CHOICE (`design-visual-identity`) or CSS mechanics (the stack's `styling`).
+name: tokens
+description: Use when building or auditing the variable layer a design system runs on — primitive → semantic → component token tiers, the color/type/spacing/radius/elevation scales, dark mode as a semantic swap. Owns the discipline `design:visual-identity` feeds and `styling` consumes. Triggers "set up design tokens", "define the spacing/type scale", "hardcoded hex values everywhere". Not for palette/type CHOICE (`design:visual-identity`) or CSS mechanics (the stack's `styling`).
 ---
 
 # Design Tokens — the token system discipline
@@ -9,7 +9,7 @@ Owns the **structure** of a design-token system, stack-agnostic: how many tiers,
 
 **What this skill owns:** the token *system* — the tier model, the naming rules, the category set and each category's scale shape, theming as a semantic remap, and the delivery format decision. **What it does not own:** the *values* (which blue, which type pairing — that's [`design/visual-identity`](../visual-identity/SKILL.md)'s per-brief taste, or an existing brand via [`design/brand-import`](../brand-import/SKILL.md)), and the *application mechanics* (how a token becomes CSS in a `.razor.css`, how contrast is verified — the stack's `styling` / `accessibility`). Taste picks values → this skill gives them structure → the stack's `styling` renders that structure as CSS.
 
-**Corpus authority.** The facts this skill decides with come from the vendored [`design-ui-ux-pro-max`](../ui-ux-pro-max/SKILL.md) corpus — **it is the source of truth, and where it and this skill disagree on a fact, the corpus wins.** The corpus's `--design-system` output is the **input** to this skill: it emits a concrete `--color-*` set (all 17 semantic slots), a `--space-*` scale tuned by the `--density` dial, and the type roles. Take those values as the primitive/semantic starting point rather than inventing scales:
+**Corpus authority.** The facts this skill decides with come from the vendored [`design:corpus`](../ui-ux-pro-max/SKILL.md) corpus — **it is the source of truth, and where it and this skill disagree on a fact, the corpus wins.** The corpus's `--design-system` output is the **input** to this skill: it emits a concrete `--color-*` set (all 17 semantic slots), a `--space-*` scale tuned by the `--density` dial, and the type roles. Take those values as the primitive/semantic starting point rather than inventing scales:
 
 ```bash
 python3 "${CLAUDE_PLUGIN_ROOT}/design/ui-ux-pro-max/scripts/search.py" "<brief>" --design-system --density <1-10> -f markdown
@@ -97,4 +97,4 @@ Dark mode and brand variants are a **semantic remap only — primitives never fo
 - [`design/brand-import`](../brand-import/SKILL.md) — the brownfield path: an existing brand book normalized into this tier model.
 - [`design/theme-presets`](../theme-presets/SKILL.md) — preset themes; their palettes are **primitive-tier starting values** you assign semantic roles to.
 - A stack's `styling` ([Blazor](../../frontend/blazor/skills/styling/SKILL.md) · [React](../../frontend/react/skills/styling/SKILL.md)) — consumes this structure and owns the CSS mechanics (isolation, `clamp()` type sizing, `var(--token)` application). It defers the tier/naming rules here.
-- [`design-ui-ux-pro-max`](../ui-ux-pro-max/SKILL.md) — `--design-system` emits the concrete `--color-*` / `--space-*` values these tiers encode.
+- [`design:corpus`](../ui-ux-pro-max/SKILL.md) — `--design-system` emits the concrete `--color-*` / `--space-*` values these tiers encode.

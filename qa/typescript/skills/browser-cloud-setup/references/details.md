@@ -1,4 +1,4 @@
-# Deep-dive details — `qa-browser-cloud-setup-typescript`
+# Deep-dive details — `qa-typescript:browser-cloud-setup`
 
 Sections moved out of SKILL.md for on-demand loading. Read what the task needs.
 

@@ -1,5 +1,5 @@
 ---
-name: fe-blazor-state-management
+name: state-management
 description: Use when managing state in Blazor (.NET 8/9/10 — Server / WASM / Auto) — scoped DI services, CascadingValue, `[PersistentState]`, circuit-eviction persistence, Fluxor for Redux-style, prerender → interactive hand-off. Triggers: "where should this state live in Blazor", "share state across components", "CascadingValue vs scoped service", "persist data across prerender". Do NOT use for component scaffolding (`component-writer`), forms (`forms`), or React (its sibling).
 ---
 

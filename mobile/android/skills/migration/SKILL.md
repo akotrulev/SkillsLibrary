@@ -1,6 +1,6 @@
 ---
-name: mobile-android-migration
-description: Use when an Android project changes lane — AGP 8 → 9 (built-in Kotlin, compilerOptions, kapt → KSP), Views → Compose, Java → Kotlin, Groovy → KTS, LiveData / RxJava → Flow, Dagger → Hilt, Navigation Compose → Navigation 3, Room 2 → 3, a targetSdk raise, EncryptedSharedPreferences replacement. Triggers "move us to AGP 9", "kapt fails", "drop LiveData". Do NOT use for feature work, a new app (`mobile-android-project-setup`) or a minor dependency bump.
+name: migration
+description: Use when an Android project changes lane — AGP 8 → 9 (built-in Kotlin, compilerOptions, kapt → KSP), Views → Compose, Java → Kotlin, Groovy → KTS, LiveData / RxJava → Flow, Dagger → Hilt, Navigation Compose → Navigation 3, Room 2 → 3, a targetSdk raise, EncryptedSharedPreferences replacement. Triggers "move us to AGP 9", "kapt fails", "drop LiveData". Do NOT use for feature work, a new app (`mobile-android:project-setup`) or a minor dependency bump.
 ---
 
 # Android — Migration
@@ -29,7 +29,7 @@ Owns changing the **toolchain, framework, library generation or target SDK** of 
 - Feature work, bug fix → the agent's FIX / EXTEND modes; they never up-level a lane
 - A patch / minor dependency bump with no lane change — dependency hygiene
 - Moving KMP modules to the library plugin → covered in [`agp8-to-9`](references/agp8-to-9.md); the KMP design itself is [`kotlin-multiplatform`](../kotlin-multiplatform/SKILL.md)
-- iOS → `mobile-ios-migration`; an Expo project's native side → `mobile-react-native-migration`
+- iOS → `mobile-ios:migration`; an Expo project's native side → `mobile-react-native:migration`
 
 ## Inputs needed
 

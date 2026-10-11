@@ -1,5 +1,5 @@
 ---
-name: qa-api-project-setup-dotnet
+name: api-project-setup
 description: Use when starting an API test-automation project from zero in C# / .NET 10 (8-9) — solution layout, exact package versions, local setup, and run commands for a standalone RestSharp + NUnit suite. Composable with the ui/mobile/performance dotnet scaffolds. Triggers "scaffold an API test project", "set up a .NET API test suite from scratch", "create the solution structure for API tests". Not for adding tests to an existing suite (`api-test-author/writer`).
 ---
 
@@ -189,7 +189,7 @@ Flat solution + shared `TestCore` + CPM make this purely additive. To add a sibl
 3. Promote anything both modules need (env config binding, auth-token helper, Allure setup) **up into `TestCore`**. Keep discipline-specific helpers (RestClient factory, page-object base) in their own project.
 4. `dotnet test` runs every test project; `dotnet test ApiTests` runs one. Add a `.slnf` solution filter per discipline (`api.slnf`, `ui.slnf`) for focused IDE load / CI sharding instead of splitting into multiple solutions.
 
-The same recipe folds in `AppiumTests` (Appium) and a `PerfTests` console project (NBomber — see `qa-performance-project-setup-dotnet`).
+The same recipe folds in `AppiumTests` (Appium) and a `PerfTests` console project (NBomber — see `qa-dotnet:performance-project-setup`).
 
 ## Setup checklist
 

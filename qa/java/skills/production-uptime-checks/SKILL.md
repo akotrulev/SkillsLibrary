@@ -1,11 +1,11 @@
 ---
-name: qa-production-uptime-checks-java
-description: Use when authoring synthetic monitoring as code from the JVM stack — scheduled probe checks (HTTP/ping/DNS/TCP) and scripted checks against live staging/prod via Grafana Cloud Synthetic Monitoring + Terraform. The "is it up right now" layer, distinct from CI pre-merge tests. Triggers: "add a prod uptime check", "synthetic monitor for the login flow", "monitoring as code". Not for pre-merge CI gates (`qa-ci-pipelines-java`) or load testing (`qa-load-testing-java`).
+name: production-uptime-checks
+description: Use when authoring synthetic monitoring as code from the JVM stack — scheduled probe checks (HTTP/ping/DNS/TCP) and scripted checks against live staging/prod via Grafana Cloud Synthetic Monitoring + Terraform. The "is it up right now" layer, distinct from CI pre-merge tests. Triggers: "add a prod uptime check", "synthetic monitor for the login flow", "monitoring as code". Not for pre-merge CI gates (`qa-java:ci-pipelines`) or load testing (`qa-java:load-testing`).
 ---
 
 # Synthetic Monitoring as Code (Grafana Cloud Synthetic Monitoring · Java 21)
 
-The **java** sibling of the family whose canonical stack is `qa-production-uptime-checks-typescript` (**Checkly
+The **java** sibling of the family whose canonical stack is `qa-typescript:production-uptime-checks` (**Checkly
 `@checkly/cli`**). This file **ports the discipline, not the code** — and the port has an honest divergence:
 **Checkly has no official Java SDK** (browser checks are Playwright-JS). The JVM/observability-native tool is
 **Grafana Cloud Synthetic Monitoring**, chosen because it **matches the library's observability default**
@@ -14,8 +14,8 @@ already run. The four ideas are the canonical's; only the tool changes.
 
 > **An honest note on "JVM-native".** Grafana Synthetic Monitoring's *scripted/browser* checks are **k6 scripts
 > (JavaScript)** — there's no JVM scripting surface. So the rich journey layer has **two routes**: (A) k6 scripts
-> in Grafana SM (cross-link `qa-load-testing-typescript`), or (B) the **Java-native route** — a Spring Boot
-> `@Scheduled` **Playwright-Java** probe that reuses the `qa-ui-test-writer-playwright-java` page objects,
+> in Grafana SM (cross-link `qa-typescript:load-testing`), or (B) the **Java-native route** — a Spring Boot
+> `@Scheduled` **Playwright-Java** probe that reuses the `qa-java:ui-tests-playwright` page objects,
 > publishes metrics to Prometheus and **keeps a trace, video and screenshot of every failed run**. The cheap
 > HTTP/ping/TCP layer needs no scripting in either route — it's pure Terraform config-as-code.
 
@@ -24,9 +24,9 @@ already run. The four ideas are the canonical's; only the tool changes.
 **Synthetic monitoring** = scripted checks that run **on a schedule against a deployed, live target**
 (staging/prod), continuously, alerting a human when the target is down or degraded. A synthetic check is a
 **continuously-running assertion**: you don't watch the result, you alert on its *failure*. It is **not** a **CI
-test** (once, pre-merge, against an ephemeral env — `qa-ci-pipelines-*`), **not** a **load test**
-(`qa-load-testing-java` / `-typescript` find the breaking point), and **not** a **journey author** — it *reuses*
-the page objects authored by `qa-ui-test-writer-playwright-java`.
+test** (once, pre-merge, against an ephemeral env — `qa-java:ci-pipelines`), **not** a **load test**
+(`qa-java:load-testing` / `-typescript` find the breaking point), and **not** a **journey author** — it *reuses*
+the page objects authored by `qa-java:ui-tests-playwright`.
 
 > **The discipline this skill encodes** (identical to the canonical):
 >
@@ -58,7 +58,7 @@ scripted/browser check or a Java-native probe. Don't script-check what an HTTP p
 - Terraform `grafana/grafana` provider — `grafana_synthetic_monitoring_check` as **config-as-code**
 - `com.microsoft.playwright:playwright` at the pin in the **Versions** table of
   `qa/java/skills/ui-test-author/playwright/SKILL.md` (this skill pins nothing) — the Java-native probe;
-  **reuse** the page objects from `qa-ui-test-writer-playwright-java`
+  **reuse** the page objects from `qa-java:ui-tests-playwright`
 - `io.micrometer:micrometer-registry-prometheus` — the probe's `synthetic_check_*` metrics
 - Gradle (Kotlin DSL) for the probe app; secrets via env, read lazily, never logged
 
@@ -99,7 +99,7 @@ resource "grafana_synthetic_monitoring_check" "storefront_health" {
 shape; `fail_if_not_ssl` covers the TLS layer; multiple `probes` (regions) tell a regional blip from a real
 outage; the check's `frequency` is the cadence, and the emitted **`probe_http_duration_seconds`** is the latency
 the alert gates on. For non-HTTP reachability use the `ping`, `tcp` or `dns` block; for a chained API flow,
-`multihttp`. Deploy with `terraform apply` from the pipeline (`qa-ci-pipelines-java`).
+`multihttp`. Deploy with `terraform apply` from the pipeline (`qa-java:ci-pipelines`).
 
 ## Check type 2 — the journey layer (k6, or the Java-native probe)
 
@@ -228,22 +228,22 @@ the `@Scheduled` probe against the live env (the monitor).
 - **A failed journey keeps its trace, video and full-page screenshot** under `SYNTHETIC_EVIDENCE_DIR`, in
   `evidence-capture`'s hook order, with the one narrow, logged screenshot catch; a passed run keeps nothing.
 - **The journey's catch names `AssertionError` and `PlaywrightException`**; the result is recorded in `finally`.
-- **Absorb transients without masking.** `for = "5m"`, never retry-to-green (`qa-flaky-test-quarantine-java`).
+- **Absorb transients without masking.** `for = "5m"`, never retry-to-green (`qa-java:flaky-test-quarantine`).
 - **Wait on a condition, never a sleep.**
 - **Monitoring-as-code.** Checks + alert rules in Terraform, the probe in a deployed `@Scheduled` app.
-- **The journey probe REUSES the page objects** from `qa-ui-test-writer-playwright-java`.
+- **The journey probe REUSES the page objects** from `qa-java:ui-tests-playwright`.
 - **Secrets from env, never logged.** Constructor injection only; structured logging (message templates).
 
 ## Cross-references
 
-- `qa-production-uptime-checks-typescript` — the **canonical** stack (Checkly). **If your team will write TS for
+- `qa-typescript:production-uptime-checks` — the **canonical** stack (Checkly). **If your team will write TS for
   monitoring, prefer Checkly even in a JVM shop.**
-- `qa-production-uptime-checks-dotnet` — **Azure App Insights availability tests**; its `TrackAvailability` probe
+- `qa-dotnet:production-uptime-checks` — **Azure App Insights availability tests**; its `TrackAvailability` probe
   is the parallel to the `@Scheduled` probe here.
-- `qa-ui-test-writer-playwright-java` — authors the page objects the **Java-native probe reuses**.
-- `qa-evidence-capture-java` — the failure-evidence rules `ProbeEvidence` applies, and how to read a trace.
-- `qa-load-testing-typescript` — the k6 muscle Route A reuses; `qa-load-testing-java` (Gatling) is load, not uptime.
-- `qa-ci-pipelines-java` — the pre-merge gate boundary, and where `terraform apply` + the probe deploy are wired.
-- `qa-test-login-tokens-java` — tokens for checks hitting an **authenticated** live endpoint.
-- `qa-flaky-test-quarantine-java` — a check that needs `for` widened to stay green is *flaky*.
+- `qa-java:ui-tests-playwright` — authors the page objects the **Java-native probe reuses**.
+- `qa-java:evidence-capture` — the failure-evidence rules `ProbeEvidence` applies, and how to read a trace.
+- `qa-typescript:load-testing` — the k6 muscle Route A reuses; `qa-java:load-testing` (Gatling) is load, not uptime.
+- `qa-java:ci-pipelines` — the pre-merge gate boundary, and where `terraform apply` + the probe deploy are wired.
+- `qa-java:test-login-tokens` — tokens for checks hitting an **authenticated** live endpoint.
+- `qa-java:flaky-test-quarantine` — a check that needs `for` widened to stay green is *flaky*.
 - `observability` (the Grafana / Loki / Prometheus / Tempo stack) — what the synthetic metrics natively feed.

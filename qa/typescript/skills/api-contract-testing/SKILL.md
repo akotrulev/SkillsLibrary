@@ -1,6 +1,6 @@
 ---
-name: qa-api-contract-testing-typescript
-description: Use when the user asks to set up consumer-driven contract testing with Pact in a Node 24 (22 supported) + TypeScript service (`@pact-foundation/pact` PactV3+). Triggers: "set up Pact for our Node service", "PactV3 consumer test in TS for X", "verify our TS provider against Y's contract". Do NOT use for the Broker / `can-i-deploy` model (`qa-api-contract-testing-shared`) or live-service API tests (`qa-api-test-writer-typescript`).
+name: api-contract-testing
+description: Use when the user asks to set up consumer-driven contract testing with Pact in a Node 24 (22 supported) + TypeScript service (`@pact-foundation/pact` PactV3+). Triggers: "set up Pact for our Node service", "PactV3 consumer test in TS for X", "verify our TS provider against Y's contract". Do NOT use for the Broker / `can-i-deploy` model (`qa-<stack>:contract-pact`) or live-service API tests (`qa-typescript:api-tests`).
 ---
 
 # QA — Contract Testing with Pact (TypeScript / `@pact-foundation/pact`)

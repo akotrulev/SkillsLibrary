@@ -1,6 +1,6 @@
 # Gradle configuration — AGP 9 reference
 
-Detail for [`mobile-android-project-setup`](../SKILL.md). Check each version against developer.android.com/build/releases/gradle-plugin before writing it.
+Detail for [`mobile-android:project-setup`](../SKILL.md). Check each version against developer.android.com/build/releases/gradle-plugin before writing it.
 
 ## `settings.gradle.kts`
 

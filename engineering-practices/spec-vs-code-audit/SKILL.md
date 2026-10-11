@@ -1,6 +1,6 @@
 ---
-name: ep-spec-vs-code-audit
-description: Use when a written spec — or a pile of user stories / ACs / tickets — must become one deduped requirement register, each verdicted against the code (Met/Partial/Missing/Divergent/Unverifiable) with `file:line` evidence. Triggers "check the implementation against this spec", "which acceptance criteria are not built yet", "build a requirement register from these tickets". Multi-spec, saved to `docs/audits/` → the `code-auditor` agent (SPEC lane). Not for spec-less features (`ep-feature-audit`).
+name: audit-spec
+description: Use when a written spec — or a pile of user stories / ACs / tickets — must become one deduped requirement register, each verdicted against the code (Met/Partial/Missing/Divergent/Unverifiable) with `file:line` evidence. Triggers "check the implementation against this spec", "which acceptance criteria are not built yet", "build a requirement register from these tickets". Multi-spec, saved to `docs/audits/` → the `code-auditor` agent (SPEC lane). Not for spec-less features (`dev:audit-feature`).
 ---
 
 # Spec-Compliance Audit
@@ -45,9 +45,9 @@ This skill is the **SPEC lane** of the `code-auditor` agent, and carries both mo
 
 ## When NOT to use
 
-- No spec — the ask is "tell me what this feature does" → `ep-feature-audit`
+- No spec — the ask is "tell me what this feature does" → `dev:audit-feature`
 - The spec itself needs distilling into testable rules for QA → `qa/manual/requirements-breakdown` (run it *first* when the spec is raw prose; this skill consumes its output)
-- Requirements conflict with *other requirements*, not with code → `ba-feature-conflict-check`
+- Requirements conflict with *other requirements*, not with code → `business-analysis:conflict-check`
 - The user wants the gaps fixed → hand findings to the owning stack agent; this skill never edits product code
 
 ## Evidence policy — static-first, execute opt-in
@@ -102,7 +102,7 @@ This is the step that makes everything downstream repeatable. It runs even when 
 - **Source citation** — every source that states it (`STORY-14 §AC-2`, `spec.md:88`). Multiple citations on one entry is normal and is exactly the point
 - **Stable ID** — see 1.3
 
-**1.3 Section and ID.** Group requirements into **lettered sections** (A, B, C…) by theme — the same lettering `ep-feature-audit` uses for surfaces, so the two audits' reports cross-read. Sections are the unit Mode B summarizes, so pick them by what a reader would want a verdict on as a whole ("A. Authentication", "B. Order placement"), not by which document the requirement came from.
+**1.3 Section and ID.** Group requirements into **lettered sections** (A, B, C…) by theme — the same lettering `dev:audit-feature` uses for surfaces, so the two audits' reports cross-read. Sections are the unit Mode B summarizes, so pick them by what a reader would want a verdict on as a whole ("A. Authentication", "B. Order placement"), not by which document the requirement came from.
 
 IDs are `<letter><n>` (`A1`, `A2`, `B1`) assigned in section order. Where a source has its own ID, carry it in a `Source` column — never as the primary ID, because two stories can both call something "AC-2". **IDs are permanent**: once written to the register they are never renumbered, reused, or reordered, in any round, forever.
 
@@ -126,7 +126,7 @@ Later amendments (a new story arrives, a requirement is descoped) **append** to 
 ```markdown
 # Requirement Register — <feature>
 **Sources:** <each doc/story + version/date>  **Created:** <YYYY-MM-DD>  **Rounds:** r1 <date>, r2 <date>
-**Written by:** `ep-spec-vs-code-audit` (via `code-auditor`)
+**Written by:** `dev:audit-spec` (via `code-auditor`)
 **Requirements:** <n> verdicted · <n> out of scope · <n> conflicts open
 
 ## A. Orders
@@ -184,7 +184,7 @@ Organized **by register section**, each closed with a rollup — the same shape 
 # Spec-Compliance Audit — <feature> — Round 1
 
 **Register:** `docs/audits/<...>-requirements.md`  **Scope:** <repo/service audited>  **Date:** <YYYY-MM-DD>
-**Written by:** `ep-spec-vs-code-audit` (via `code-auditor`)
+**Written by:** `dev:audit-spec` (via `code-auditor`)
 **Evidence mode:** static | static + <commands run>
 **Requirements:** <n> verdicted · <n> out of audit scope
 
@@ -248,7 +248,7 @@ Read the register and the latest round's report. Inventory: every ID, its last v
 
 ### 2. Re-verify every item — fresh
 
-**Re-trace each requirement's code path from scratch.** A claim that something was fixed, a linked commit, a green test, a changelog entry: all are leads, none are evidence (`ep-verify-before-done` discipline). Re-read the code as if round N−1 never happened; then compare.
+**Re-trace each requirement's code path from scratch.** A claim that something was fixed, a linked commit, a green test, a changelog entry: all are leads, none are evidence (`dev:verify` discipline). Re-read the code as if round N−1 never happened; then compare.
 
 Scope of a re-audit, in order:
 1. Every previously non-`Met` requirement (that's the point of the round)
@@ -279,7 +279,7 @@ Same section structure, plus per-section rollups and a delta header.
 # Spec-Compliance Audit — <feature> — Round <N>
 
 **Register:** `<path>`  **Previous round:** `<path>` (<date>)  **Date:** <YYYY-MM-DD>
-**Written by:** `ep-spec-vs-code-audit` (via `code-auditor`)
+**Written by:** `dev:audit-spec` (via `code-auditor`)
 **Evidence mode:** static | static + <commands run>
 **Re-verify scope:** all non-Met · their sections · previously-Met touched by the diff
 **Register changes this round:** <"none" | "+3 requirements (D1–D3), 1 descoped">

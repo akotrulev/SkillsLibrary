@@ -1,5 +1,5 @@
 ---
-name: fe-blazor-component-library
+name: component-library
 description: Use when choosing or wiring a Blazor UI component library (.NET 8/9/10) — MudBlazor (default) vs Fluent UI vs Radzen vs enterprise vs none — plus setup, theming/dark mode, DataGrid, dialog/snackbar services, and each library's render-mode gotchas. Triggers: "which Blazor component library", "set up MudBlazor / Fluent UI / Radzen", "why don't my MudBlazor components render under static SSR". Do NOT use for hand-rolled CSS/tokens/`::deep` (`styling`) or `data-testid` mechanics (`test-ids`).
 ---
 

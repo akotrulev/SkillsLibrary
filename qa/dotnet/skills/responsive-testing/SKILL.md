@@ -1,5 +1,5 @@
 ---
-name: qa-responsive-testing-dotnet
+name: responsive-testing
 description: Use when testing responsive layout/breakpoint behavior in .NET 10 (8-9) with Playwright .NET + NUnit — drive the viewport across the app's real CSS breakpoints (read from its token/theme source, never guessed), assert the layout variant at breakpoint−1 and breakpoint (BVA), verify geometry via bounding boxes. Triggers "test the responsive design", "assert the nav collapses to a hamburger", "test around the breakpoints". Not for pixel diffs (`visual-regression`).
 ---
 
@@ -43,7 +43,7 @@ pixel-level diffing is `visual-regression`'s job and pairs with this skill, it d
 | **Grid/column reflow** | Cards go 3-col → 2-col → 1-col at the right widths | One fixture row per width naming its column count → `_layout.ColumnCountAsync(cards)` |
 | **No overflow / no clipping** | Nothing forces a horizontal scrollbar | `_layout.HorizontalOverflowAsync()` is `0` |
 | **Live resize / rotation** | JS breakpoint logic reacts to a real resize | Load wide → `_layout.ResizeToAsync(narrow)` → web-first assert the swap (and back) |
-| **Whole-page look per viewport** | Everything the structural checks can't name | Hand off: `qa-visual-regression-dotnet`, one baseline per viewport |
+| **Whole-page look per viewport** | Everything the structural checks can't name | Hand off: `qa-dotnet:visual-regression`, one baseline per viewport |
 | **Real mobile UX (touch, DPR, UA)** | Device behavior, not CSS breakpoints | `Playwright.Devices[...]` per fixture — `ui-test-author/playwright/references/emulation-and-mobile-web.md` |
 
 ## Stack
@@ -274,13 +274,13 @@ must hold); under interactive render modes, the live-resize test proves the inte
 
 ## Cross-references
 
-- `qa-responsive-testing-typescript` · `qa-responsive-testing-java` — sibling stacks; same four ideas.
-- `qa-ui-test-writer-playwright-dotnet` — `BaseTest`, `ContextOptions()` (`lifecycle.md` §4) and the emulation
+- `qa-typescript:responsive-testing` · `qa-java:responsive-testing` — sibling stacks; same four ideas.
+- `qa-dotnet:ui-tests-playwright` — `BaseTest`, `ContextOptions()` (`lifecycle.md` §4) and the emulation
   reference (`emulation-and-mobile-web.md`: viewport per fixture, device profiles, media features).
-- `qa-visual-regression-dotnet` — the pixel complement: one baseline per viewport, after the structural checks
+- `qa-dotnet:visual-regression` — the pixel complement: one baseline per viewport, after the structural checks
   pass.
-- `qa-accessibility-testing-dotnet` — reflow/zoom (WCAG 1.4.10) and touch targets, at the same widths.
-- `qa-data-driven-testing-dotnet` — the row pattern; here rows are fixture parameters (each needs its own
+- `qa-dotnet:accessibility-testing` — reflow/zoom (WCAG 1.4.10) and touch targets, at the same widths.
+- `qa-dotnet:data-driven-testing` — the row pattern; here rows are fixture parameters (each needs its own
   context options).
 - `frontend/blazor/skills/responsive-design` (FE peer) — the dev-side skill that defines the breakpoint contract
   this skill reads. Its variant-suffixed test ids are what make the swap assertable; in this library's

@@ -1,5 +1,5 @@
 ---
-name: qa-security-code-scan
+name: code-scan
 description: Use when adding static application security testing (SAST) with Opengrep/Semgrep rulesets as a PR gate — scan source for injection, crypto, and auth flaws; language-agnostic CLI/Docker, no running app needed. Triggers: "add SAST", "run Semgrep in CI", "static security scan". Not for dependency CVEs → the stack's `security-testing/dependency-scan`.
 ---
 
@@ -13,7 +13,7 @@ the source tree directly, fast, every PR. This is a **single `qa/_shared/` skill
 invocation are identical from any test stack — a Java, .NET, or TypeScript test suite all shell out to the
 same binary; only the `--config` ruleset changes to match the scanned codebase's language.
 
-> **Load `qa-security-shared` alongside this skill.** The OWASP Top-10 map, the
+> **Load `qa-<stack>:security-foundations` alongside this skill.** The OWASP Top-10 map, the
 > automatable-vs-manual boundary, the **ticketed-suppression triage discipline**, and the SARIF →
 > code-scanning consolidation live there — this skill references them rather than duplicating, and carries
 > only the SAST-specific tool, invocation, gating flags, and rules.
@@ -49,7 +49,7 @@ either binary — substitute `opengrep` for `semgrep` in the commands.
 **Rule of thumb:** SAST reads **your source** for *how you wrote it*; SCA reads your **dependency tree** for
 *what you pulled in*; DAST reads the **running app** for *how it behaves over HTTP*. They are orthogonal —
 a clean SAST run says nothing about a Log4Shell in a transitive dep or a missing CSP header at runtime.
-**Run all four layers** (see `qa-security-shared` § the layer map).
+**Run all four layers** (see `qa-<stack>:security-foundations` § the layer map).
 
 ## Setup — CLI or Docker, and the opengrep-vs-semgrep choice
 
@@ -120,7 +120,7 @@ config/rule problems surface as a failure, not a silent skip).
 ## Diff-aware / baseline scanning — gate NEW, don't drown in legacy
 
 A real codebase's first SAST run lights up. The discipline (defer the full framing to
-`qa-security-shared` § the triage gate) is: **baseline the existing findings once, then gate only NEW
+`qa-<stack>:security-foundations` § the triage gate) is: **baseline the existing findings once, then gate only NEW
 findings.** Semgrep/Opengrep do this with a baseline commit:
 
 ```bash
@@ -149,7 +149,7 @@ test/fixtures/**     # intentionally-vulnerable test fixtures
 ```
 
 ```java
-// Inline, line-scoped suppression — always carry the rule-id + a ticket (qa-security-shared discipline).
+// Inline, line-scoped suppression — always carry the rule-id + a ticket (qa-<stack>:security-foundations discipline).
 String q = "SELECT * FROM users WHERE id = " + id; // nosemgrep: java.lang.security.audit.sqli — JIRA-5120 false positive: id is an int bound upstream, re-review 2026-Q4
 ```
 
@@ -162,7 +162,7 @@ String q = "SELECT * FROM users WHERE id = " + id; // nosemgrep: java.lang.secur
 - **Baseline + gate-NEW** via `--baseline-commit` (above) is the primary mechanism for existing findings;
   reserve inline `nosemgrep` for documented false-positives / accepted-risk. **Shrink the set over time** —
   never grow it to make a real finding disappear (the same allow-list discipline as the SCA suppression file
-  and the axe baselines; see `qa-security-shared`).
+  and the axe baselines; see `qa-<stack>:security-foundations`).
 
 ## Custom rules (brief) — org-specific anti-patterns
 
@@ -204,13 +204,13 @@ semgrep scan --config p/owasp-top-ten --error \
 
 - **SARIF → code-scanning** — `github/codeql-action/upload-sarif` surfaces each finding **inline on the PR
   diff**, de-duplicates run-over-run, and tracks new/fixed state. Standardize on SARIF across the whole
-  security family (see `qa-security-shared` § consolidate findings).
+  security family (see `qa-<stack>:security-foundations` § consolidate findings).
 - **JSON → Allure + artifact** — attach a parsed finding summary to **Allure** (cross-link
-  `qa-test-reports-{stack}`) and upload `results.{sarif,json}` as a CI artifact so a failing run names
+  `qa-<stack>:test-reports`) and upload `results.{sarif,json}` as a CI artifact so a failing run names
   the findings without re-scanning.
 
 ```yaml
-# .github/workflows/sast.yml — cross-link qa-ci-pipelines-{stack}, qa-_shared/ci-conventions
+# .github/workflows/sast.yml — cross-link qa-<stack>:ci-pipelines, qa-<stack>:ci-conventions
 name: SAST
 on: [pull_request]
 
@@ -250,14 +250,14 @@ SAST maps primarily to the **source-pattern** Top-10 items: **A05 Injection** (S
 from tainted input via taint analysis), **A06 Insecure Design** patterns (unsafe deserialization, dangerous
 defaults), and **A02 Security Misconfiguration / Cryptographic** code patterns (ECB/DES, disabled TLS
 verification, weak hashing). Tag each finding with its `owasp`/`cwe` metadata and consolidate via the OWASP
-map in `qa-security-shared`.
+map in `qa-<stack>:security-foundations`.
 
 > **The blind spot — SAST finds *source-pattern* flaws and is blind to *runtime / logic* flaws.** It cannot
 > know that invoice `42` belongs to another user (**A01 Broken Access Control** — that's a functional
 > `permission-testing` matrix), nor whether a missing security header ships at runtime (**DAST**), nor
 > whether a transitive dep has a CVE (**SCA**). **A SAST-clean codebase is not "secure"** — it means the
 > automatable source-pattern layer passed. Pair SAST with **DAST + functional access-control + a manual
-> pentest** for business-logic abuse. Say so in every report (see `qa-security-shared`).
+> pentest** for business-logic abuse. Say so in every report (see `qa-<stack>:security-foundations`).
 
 ## Anti-patterns
 
@@ -294,7 +294,7 @@ map in `qa-security-shared`.
   registry packs (`p/owasp-top-ten` for the Top-10 map, `p/security-audit`, the language pack).
 - **Baseline existing findings and gate NEW ones** (`--baseline-commit`); inline `// nosemgrep: <rule-id>`
   and `.semgrepignore` carry a **ticket + reason**; scope every suppression to one rule/path; shrink the set
-  over time (the `qa-security-shared` triage discipline).
+  over time (the `qa-<stack>:security-foundations` triage discipline).
 - **No secrets in scan config** — any platform token via env, lazily; the OSS local-ruleset path needs none.
 - Emit **SARIF** → code-scanning (inline PR findings) **and** JSON → Allure + CI artifact.
 - **Prefer Opengrep** as the truly-OSS default (taint/inter-procedural restored, LGPL-2.1, Semgrep-compatible
@@ -304,14 +304,14 @@ map in `qa-security-shared`.
 
 ## Cross-references
 
-- `qa-security-shared` — **load alongside**: the OWASP Top-10 map, the automatable-vs-manual boundary, the
+- `qa-<stack>:security-foundations` — **load alongside**: the OWASP Top-10 map, the automatable-vs-manual boundary, the
   ticketed-suppression triage discipline, SARIF → code-scanning consolidation, and the scan-authorization
   rules this skill defers to.
-- `qa-security-testing-dependency-scan-{java,dotnet,typescript}` — **SCA**: scans the **dependency tree**
+- `qa-<stack>:dependency-scan` — **SCA**: scans the **dependency tree**
   for known CVEs (build graph, not source). Orthogonal layer — run both.
-- `qa-security-active-scan` / `qa-security-testing-passive-scan-{stack}` — **DAST**:
+- `qa-<stack>:active-scan` / `qa-<stack>:passive-scan` — **DAST**:
   probes the **running app** over HTTP. SAST never runs the app; orthogonal — run both.
-- `qa-security-secrets-scan` — finds **leaked credentials** in source + git history (a different
+- `qa-<stack>:secrets-scan` — finds **leaked credentials** in source + git history (a different
   source concern from insecure-code-pattern SAST).
 - `qa/<stack>/skills/security-testing/permission-testing` — the **functional** BOLA/IDOR/BFLA matrix for
   A01, the access-control flaw SAST is blind to.

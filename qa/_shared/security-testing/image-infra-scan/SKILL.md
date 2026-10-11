@@ -1,5 +1,5 @@
 ---
-name: qa-security-image-infra-scan
+name: image-infra-scan
 description: Use when scanning the layers application SCA cannot see — base-OS packages inside a container image, the image as shipped (embedded secrets, `USER root`), and IaC (Terraform, Kubernetes manifests, Helm, Dockerfiles) — with Trivy as a CI build gate. Language-agnostic, any stack. Triggers "scan our image for CVEs", "add Trivy to the pipeline", "scan our Terraform/K8s manifests", "generate an SBOM". Not for lockfile CVEs (`dependency-scan`), a running app (`zap-*`), or source flaws (`sast`).
 ---
 
@@ -11,17 +11,17 @@ gate cannot see**: the **base OS image** (`apt`/`apk`/`yum` packages baked into 
 secrets and a misconfigured `USER root`), and **Infrastructure-as-Code** (Terraform, CloudFormation,
 Kubernetes manifests, Helm charts, Dockerfiles). It also **generates and scans SBOMs**. It needs **no
 running app** and **no per-language split** — a single `docker run` / binary invocation works from any
-pipeline, which is why it lives as one shared skill (see `qa-security-shared` on the
+pipeline, which is why it lives as one shared skill (see `qa-<stack>:security-foundations` on the
 language-agnostic-binary shape).
 
-This skill is **lang-agnostic** and pairs with `qa-security-shared` (the OWASP backbone). It owns the
+This skill is **lang-agnostic** and pairs with `qa-<stack>:security-foundations` (the OWASP backbone). It owns the
 **Trivy invocation, gating flags, SBOM, IaC config scanning, and report parsing**; the master ref owns the
 **OWASP map** (esp. **A03 Software Supply Chain Failures**, **A02 Security Misconfiguration**), the
 **ticketed-triage discipline**, and **SARIF → code-scanning consolidation** — load it alongside, don't
 re-derive it here.
 
 > **⚠️ The SCA boundary — be precise; this is the whole reason both skills exist.** Application
-> `dependency-scan` (`qa-security-testing-dependency-scan-{java,dotnet,typescript}`) owns
+> `dependency-scan` (`qa-<stack>:dependency-scan`) owns
 > **application dependency CVEs from the build graph / lockfile** (npm / Gradle / NuGet — direct +
 > transitive, gated on a CVSS threshold by the native tool). **This skill owns the three layers SCA is
 > blind to:** the **base OS image packages**, the **container image as shipped** (filesystem, embedded
@@ -176,7 +176,7 @@ Aqua Vulnerability Database — misconfig policies) and accepts custom **Rego** 
 
 ## Triage — ticketed `.trivyignore`, gate NEW
 
-Defer the full discipline to `qa-security-shared` (baseline once → gate NEW hard → every suppression
+Defer the full discipline to `qa-<stack>:security-foundations` (baseline once → gate NEW hard → every suppression
 carries a ticket + reason + expiry → shrink over time). Trivy's mechanism is `.trivyignore` (CVE IDs **and**
 IaC check IDs) or the richer `.trivyignore.yaml` with **expiry dates**:
 
@@ -225,14 +225,14 @@ trivy image --format template --template "@contrib/html.tpl" --output trivy.html
 ```
 
 - **SARIF** → `github/codeql-action/upload-sarif` so each finding shows inline on the PR (cross-link
-  `qa-ci-pipelines-*`).
+  `qa-<stack>:ci-pipelines`).
 - **HTML/JSON** → attach to **Allure** + upload as a CI artifact so a failing run names the findings without
-  re-scanning (cross-link `qa-test-reports-*`).
+  re-scanning (cross-link `qa-<stack>:test-reports`).
 
 ### CI wiring — the official `aquasecurity/trivy-action`
 
 ```yaml
-# .github/workflows/container-scan.yml — cross-link qa-ci-pipelines-*
+# .github/workflows/container-scan.yml — cross-link qa-<stack>:ci-pipelines
 name: Container & IaC Scan
 on: [pull_request]
 
@@ -287,7 +287,7 @@ jobs:
 
 The action exposes `scan-type` (`image`/`fs`/`repo`/`config`/`sbom`/`k8s`), `exit-code`, `severity`,
 `ignore-unfixed`, and `format`/`output` — the same flags as the CLI. **GitLab CI / Azure Pipelines** run the
-identical two-pass via `aquasec/trivy` Docker steps (cross-link `qa-ci-pipelines-{gitlab-ci,azure-pipelines}-*`).
+identical two-pass via `aquasec/trivy` Docker steps (cross-link `qa-<stack>:ci-pipelines`).
 
 ## Anti-patterns
 
@@ -310,7 +310,7 @@ identical two-pass via `aquasec/trivy` Docker steps (cross-link `qa-ci-pipelines
   including a real one. *Fix:* scope each entry to a **specific CVE / AVD check ID**, with a ticket and an
   `expired_at` expiry; shrink the file, never grow it.
 - **Treating an image-clean scan as "the app is secure."** Trivy is blind to broken access control, business
-  logic, and the running HTTP surface. *Fix:* run the full layer set per `qa-security-shared` — SCA, DAST,
+  logic, and the running HTTP surface. *Fix:* run the full layer set per `qa-<stack>:security-foundations` — SCA, DAST,
   access-control matrix; a green Trivy run means the **image / OS / IaC** layers passed, nothing more.
 - **No SBOM, so no supply-chain provenance.** When the next Log4Shell drops you can't answer "which shipped
   artifacts are affected?" without rebuilding everything. *Fix:* `--format cyclonedx`/`spdx-json` as a
@@ -331,27 +331,27 @@ identical two-pass via `aquasec/trivy` Docker steps (cross-link `qa-ci-pipelines
   provenance; rescan the stored SBOM (`trivy sbom`) when new CVEs land.
 - **Triage with a ticketed `.trivyignore`/`.trivyignore.yaml`**: scope to a specific CVE/AVD ID, with a
   ticket + reason + **`expired_at`** expiry; gate NEW findings hard; shrink the file (defer the full
-  discipline to `qa-security-shared`). Prefer the real fix (bump the base image / fix the IaC setting) over
+  discipline to `qa-<stack>:security-foundations`). Prefer the real fix (bump the base image / fix the IaC setting) over
   a suppression.
 - **Emit SARIF** → code-scanning for inline PR findings; attach the HTML/JSON to **Allure** + a CI artifact.
 - **Pin the Trivy version** and **cache `~/.cache/trivy`** in CI. **No secrets** (registry creds, tokens) in
   scan config — env vars, read lazily.
 - A clean Trivy run ≠ "secure" — it means the **image / OS / IaC** layers passed. Run the full layer set
-  (`qa-security-shared`).
+  (`qa-<stack>:security-foundations`).
 
 ## Cross-references
 
-- `qa-security-shared` — the OWASP backbone (A03 Software Supply Chain, A02 Misconfiguration), the
+- `qa-<stack>:security-foundations` — the OWASP backbone (A03 Software Supply Chain, A02 Misconfiguration), the
   ticketed-triage discipline, SARIF → code-scanning consolidation, the layer map, and the
   authorization-to-scan rules. **Load alongside this skill** — it owns the concepts this one applies.
-- `qa-security-testing-dependency-scan-{java,dotnet,typescript}` — **application** dependency-CVE SCA
+- `qa-<stack>:dependency-scan` — **application** dependency-CVE SCA
   (build graph / lockfile, CVSS-gated by the native tool). The **boundary partner**: SCA owns app-deps,
   Trivy owns OS image + container + IaC. `trivy fs`/`image` overlap on app lockfiles — let SCA own them.
   **Run both layers.**
-- `qa-security-active-scan` — the **DAST** sibling (running-app HTTP surface);
+- `qa-<stack>:active-scan` — the **DAST** sibling (running-app HTTP surface);
   orthogonal to image/IaC scanning.
-- `qa-ci-pipelines-{github-actions,gitlab-ci,azure-pipelines}-*` + `qa/cicd/ci-conventions` — wire the
+- `qa-<stack>:ci-pipelines` + `qa/cicd/ci-conventions` — wire the
   two-pass image + IaC gates, `aquasecurity/trivy-action`, the Trivy DB cache, and the SARIF upload.
-- `qa-test-reports-*` — attach the Trivy HTML/JSON report to the run.
+- `qa-<stack>:test-reports` — attach the Trivy HTML/JSON report to the run.
 - `qa/_shared/agents/qa-security.md` — the step-by-step orchestrator that runs this as the **build-artifact gate**
   (Step 5).

@@ -1,4 +1,4 @@
-# Deep-dive details — `qa-browser-cloud-setup-java`
+# Deep-dive details — `qa-java:browser-cloud-setup`
 
 Sections moved out of SKILL.md for on-demand loading. Read what the task needs.
 

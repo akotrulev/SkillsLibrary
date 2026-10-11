@@ -1,5 +1,5 @@
 ---
-name: design-iconography
+name: iconography
 description: Use when choosing, using, or auditing icons and OG/social imagery as a SYSTEM — one icon family per product, the library decision (Phosphor default, per the vendored corpus · Heroicons · Lucide · Material Symbols), inline-SVG discipline, icon-vs-label choice, OG-image craft. Triggers: "which icon library", "our icons look inconsistent", "make an OG/social image". Do NOT use for the token system (`design/design-tokens`), palette/type taste (`design/visual-identity`), or a logo.
 ---
 
@@ -9,7 +9,7 @@ Owns icons and share imagery as a *system*, stack-agnostic: one family, one libr
 
 **What this skill owns:** the icon-family decision, the library choice, inline-SVG discipline, the icon+label policy, and OG/social-image craft. **What it does not own:** the *color values* (`design/visual-identity` taste + `design/design-tokens` structure — icons consume `currentColor`, they don't define palette), the accessible-label *mechanics* and the icon-only-button *rule* (a stack's `accessibility` / `ui-rules` — this skill points there), a component library's install/theming (a stack's `component-library`), or logo *creation* (off-mission).
 
-**Corpus authority.** The facts this skill decides with come from the vendored [`design-ui-ux-pro-max`](../ui-ux-pro-max/SKILL.md) corpus — **it is the source of truth, and where it and this skill disagree on a fact, the corpus wins.** 105 curated icons carry their library, import code, usage, style, **semantic role**, and **allowed contexts** — the last two decide whether a glyph may be decorative, meaningful, or interactive in a given spot:
+**Corpus authority.** The facts this skill decides with come from the vendored [`design:corpus`](../ui-ux-pro-max/SKILL.md) corpus — **it is the source of truth, and where it and this skill disagree on a fact, the corpus wins.** 105 curated icons carry their library, import code, usage, style, **semantic role**, and **allowed contexts** — the last two decide whether a glyph may be decorative, meaningful, or interactive in a given spot:
 
 ```bash
 python3 "${CLAUDE_PLUGIN_ROOT}/design/ui-ux-pro-max/scripts/search.py" "<icon purpose> <context>" --domain icons
@@ -52,7 +52,7 @@ Prefer one well-maintained open library over hand-drawing. Default order:
 
 Ship icons as inline SVG (or the framework's per-icon component), not `<img>` or icon fonts — inline SVG inherits color, scales crisply, and is accessible.
 
-- **Color via `currentColor`.** The SVG's `stroke`/`fill` is `currentColor` so the icon takes the surrounding text `color` — a semantic token (per `design-tokens`) flows in for free, hover/disabled states follow, and the icon never hardcodes a hex. Hardcoded `fill="#333"` in an icon is the same smell as a raw hex in a component.
+- **Color via `currentColor`.** The SVG's `stroke`/`fill` is `currentColor` so the icon takes the surrounding text `color` — a semantic token (per `design:tokens`) flows in for free, hover/disabled states follow, and the icon never hardcodes a hex. Hardcoded `fill="#333"` in an icon is the same smell as a raw hex in a component.
 - **Size via `em` or a spacing/size token, not magic px.** `width: 1em; height: 1em` ties the icon to its text's font-size so it scales with the type; use a token when it must be fixed. Avoid per-use pixel values scattered through markup.
 - **Import from one place.** A single icon module/package, tree-shaken — no `.svg` files copy-pasted ad hoc across the codebase.
 - **Accessibility: decorative vs meaningful.**
@@ -73,7 +73,7 @@ The Open Graph image is the app's thumbnail in every link preview (social, chat,
 - **Dimensions:** 1200×630 (≈1.91:1) is the safe cross-platform size; it downsamples cleanly to the square/rounded crops some clients apply.
 - **Safe zone:** keep essential text and logo within the central ~80% — outer edges get cropped by various clients. Assume a rounded-corner mask.
 - **Legibility at thumbnail size:** large type, high contrast, one focal message. Body-copy-sized text vanishes in a feed. Test by shrinking the image to ~200px wide — if the message is gone, it's too busy.
-- **On-brand and consistent:** use the app's tokens/typeface (via `design-tokens` / `brand-import`); a templated per-page OG image (title + logo on a brand field) beats a generic screenshot.
+- **On-brand and consistent:** use the app's tokens/typeface (via `design:tokens` / `brand-import`); a templated per-page OG image (title + logo on a brand field) beats a generic screenshot.
 - **Provide the tags:** `og:image` (+ `og:title`/`og:description`) and `twitter:card` — the emission and per-route wiring is the stack's SEO concern ([`seo-discoverability`](../../frontend/blazor/skills/seo/SKILL.md)); the *image design* is here.
 
 ## Review checklist
@@ -94,4 +94,4 @@ The Open Graph image is the app's thumbnail in every link preview (social, chat,
 - A stack's `ui-rules` ([Blazor](../../frontend/blazor/skills/ui-rules/SKILL.md) · [React](../../frontend/react/skills/ui-rules/SKILL.md)) — owns the **icon-only-button** decision rule this skill applies.
 - A stack's `accessibility` ([Blazor](../../frontend/blazor/skills/accessibility/SKILL.md) · [React](../../frontend/react/skills/accessibility/SKILL.md)) — owns the accessible-name **mechanics** for meaningful icons.
 - A stack's `seo-discoverability` ([Blazor](../../frontend/blazor/skills/seo/SKILL.md) · [React](../../frontend/react/skills/seo/SKILL.md)) — emits the `og:image` / `twitter:card` tags for the social image designed here.
-- [`design-ui-ux-pro-max`](../ui-ux-pro-max/SKILL.md) — the 105-icon `icons` domain, with semantic role and allowed contexts per glyph.
+- [`design:corpus`](../ui-ux-pro-max/SKILL.md) — the 105-icon `icons` domain, with semantic role and allowed contexts per glyph.

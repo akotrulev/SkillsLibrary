@@ -38,11 +38,11 @@ class SecretStore @Inject constructor(
 - Room columns holding secrets are encrypted with the same `Aead` before they reach the DAO, or the whole database uses an encrypted driver with a Keystore-wrapped passphrase — never a hardcoded passphrase.
 - Tokens: **access token in memory (and the Keystore-backed store for restart), refresh token only in the Keystore-backed store.** Logout deletes the store, the keyset, the database rows and WebView data.
 
-**Brownfield `EncryptedSharedPreferences`:** flagged (audit row I-series), not rewritten here. The migration reads old, writes new, deletes old, in one release — `mobile-android-migration`.
+**Brownfield `EncryptedSharedPreferences`:** flagged (audit row I-series), not rewritten here. The migration reads old, writes new, deletes old, in one release — `mobile-android:migration`.
 
 ## Backup and device transfer
 
-`allowBackup` defaults to true. Declare `android:dataExtractionRules` (Android 12+) **and** `android:fullBackupContent` (11 and below): exclude the database, DataStore files, the keyset prefs and anything token-shaped, or set `allowBackup="false"` when the app has no restore need. **Keystore keys never restore to another device**, so an encrypted blob restored without its key is dead — exclude both. Rules and the audit are [`mobile-shared-security`](../../../../_shared/security/references/android.md) § 3.
+`allowBackup` defaults to true. Declare `android:dataExtractionRules` (Android 12+) **and** `android:fullBackupContent` (11 and below): exclude the database, DataStore files, the keyset prefs and anything token-shaped, or set `allowBackup="false"` when the app has no restore need. **Keystore keys never restore to another device**, so an encrypted blob restored without its key is dead — exclude both. Rules and the audit are [`mobile-<stack>:security`](../../../../_shared/security/references/android.md) § 3.
 
 ## Storage failures degrade to memory
 

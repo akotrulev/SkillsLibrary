@@ -49,7 +49,7 @@ Steps (written for option (a); adapt if (b) is chosen):
 
 Applies to whichever files survive Phase 2.
 
-- [ ] 3.1 Replace `superpowers:test-driven-development` / `superpowers:systematic-debugging` with `ep-test-driven-development` / `ep-systematic-debugging` (the library's adapted names).
+- [ ] 3.1 Replace `superpowers:test-driven-development` / `superpowers:systematic-debugging` with `ep-test-driven-development` / `dev:debugging` (the library's adapted names).
 - [ ] 3.2 Delete the personal-skills-directory note (`~/.claude/skills`, `~/.agents/skills/` Codex path) — irrelevant to this repo's layout.
 - [ ] 3.3 Delete the deployment-checklist items "push to your fork" / "contribute back via PR" — upstream leftovers; replace with the library's actual finish step (update the domain plan/handoff docs, commit).
 - [ ] 3.4 Fix the `@`-link self-contradiction: `@graphviz-conventions.dot` and `@testing-skills-with-subagents.md` use the force-load syntax the same skill forbids. Change to plain-name references with "read when…" guidance.

@@ -1,11 +1,11 @@
 ---
-name: td-preference-data
-description: Use when building preference / alignment data for a small LLM — chosen/rejected pairs for DPO/ORPO, KTO labels, ranking data, on-policy sampling, and constitutional self-critique pairs. Triggers: "make DPO pairs", "build preference data", "chosen/rejected dataset", "on-policy preference data for my model", "constitutional AI self-critique pairs". Do NOT use for SFT/instruction data (`td-instruction-sft`), eval sets (`td-eval-sets`), or judge/generation mechanics (`td-synthetic-generation`).
+name: preference-data
+description: Use when building preference / alignment data for a small LLM — chosen/rejected pairs for DPO/ORPO, KTO labels, ranking data, on-policy sampling, and constitutional self-critique pairs. Triggers: "make DPO pairs", "build preference data", "chosen/rejected dataset", "on-policy preference data for my model", "constitutional AI self-critique pairs". Do NOT use for SFT/instruction data (`training-data:instruction-sft`), eval sets (`training-data:eval-sets`), or judge/generation mechanics (`training-data:synthetic-generation`).
 ---
 
 # Training Data — Preference / Alignment
 
-The data that tunes a model's *behavior* after SFT — which of two responses is better, so DPO/ORPO/KTO can push the model toward the preferred one. Preference data has one job and one failure mode: it must encode a **real, consistent preference with a meaningful margin**, and it fails when the two responses differ by noise (the model learns nothing) or when the "preferred" one isn't actually better (the model learns the wrong thing). This skill owns pair construction; it uses `td-synthetic-generation` for sampling+judging and `td-dataset-formats` for the `chosen`/`rejected` shape.
+The data that tunes a model's *behavior* after SFT — which of two responses is better, so DPO/ORPO/KTO can push the model toward the preferred one. Preference data has one job and one failure mode: it must encode a **real, consistent preference with a meaningful margin**, and it fails when the two responses differ by noise (the model learns nothing) or when the "preferred" one isn't actually better (the model learns the wrong thing). This skill owns pair construction; it uses `training-data:synthetic-generation` for sampling+judging and `training-data:dataset-formats` for the `chosen`/`rejected` shape.
 
 ## When to use
 
@@ -17,10 +17,10 @@ The data that tunes a model's *behavior* after SFT — which of two responses is
 
 ## When NOT to use
 
-- Instruction/SFT data → `td-instruction-sft`
-- Held-out eval / benchmarks → `td-eval-sets`
-- The pairwise-judge prompt and bias controls → `td-synthetic-generation` (this skill calls it)
-- Multimodal preference data → `td-vision-language-data`
+- Instruction/SFT data → `training-data:instruction-sft`
+- Held-out eval / benchmarks → `training-data:eval-sets`
+- The pairwise-judge prompt and bias controls → `training-data:synthetic-generation` (this skill calls it)
+- Multimodal preference data → `training-data:vision-language-data`
 
 ## Pick the format first — it constrains everything
 
@@ -31,7 +31,7 @@ The data that tunes a model's *behavior* after SFT — which of two responses is
 | **KTO** | `prompt` + `completion` + boolean `label` | You have thumbs-up/down signals, not pairs — unpaired is fine, cheaper to collect |
 | **Ranking (PPO/reward-model)** | prompt + n ranked responses | You're training a reward model, not doing direct preference optimization |
 
-One preference file uses **one** shape (`td-dataset-formats`). For a small model, **DPO on clean pairs is the usual choice** — it skips the reward-model machinery and is stable.
+One preference file uses **one** shape (`training-data:dataset-formats`). For a small model, **DPO on clean pairs is the usual choice** — it skips the reward-model machinery and is stable.
 
 ## The prompt set decides what you align
 
@@ -45,7 +45,7 @@ Preference data teaches "given *these* prompts, prefer *this* behavior." Draw th
 
 ### Off-policy (from a teacher)
 
-Sample n responses to each prompt at temperature (n=4–8 — variance is the point), judge them with the **pinned, calibrated judge** (`td-synthetic-generation`), take the top as `chosen` and a **plausibly-worse** one as `rejected`. Record `margin` and `judge_reason` in `meta`.
+Sample n responses to each prompt at temperature (n=4–8 — variance is the point), judge them with the **pinned, calibrated judge** (`training-data:synthetic-generation`), take the top as `chosen` and a **plausibly-worse** one as `rejected`. Record `margin` and `judge_reason` in `meta`.
 
 ### On-policy (from the student) — usually stronger
 
@@ -64,11 +64,11 @@ Generate a response, critique it against an explicit principle, revise. `(revise
 
 ## Quality gate
 
-Route pairs through `td-data-quality`: dedup prompts, PII scrub, decontaminate prompts against evals. Then preference-specific checks: drop ties, check the margin distribution isn't collapsed, check the length-bias distribution, and spot-audit `judge_reason` on a sample so a human confirms the judge's calls hold up. Keep dropped pairs with reasons.
+Route pairs through `training-data:data-quality`: dedup prompts, PII scrub, decontaminate prompts against evals. Then preference-specific checks: drop ties, check the margin distribution isn't collapsed, check the length-bias distribution, and spot-audit `judge_reason` on a sample so a human confirms the judge's calls hold up. Keep dropped pairs with reasons.
 
 ## Split
 
-Split by prompt dedup cluster so the same prompt never straddles train/test (`td-dataset-formats`). A held-out preference test lets you measure preference accuracy after tuning.
+Split by prompt dedup cluster so the same prompt never straddles train/test (`training-data:dataset-formats`). A held-out preference test lets you measure preference accuracy after tuning.
 
 ## Hard rules
 
@@ -81,6 +81,6 @@ Split by prompt dedup cluster so the same prompt never straddles train/test (`td
 
 ## Fences
 
-- `td-instruction-sft` produces the SFT model preference tuning runs *on top of* — preference data is a second stage, not a replacement.
-- The sampling-and-judging *mechanics* (n-sampling, the pairwise-judge prompt, position/length bias controls, calibration) live in `td-synthetic-generation`; this skill owns the *pair-construction discipline* (margin, ties, on-policy, format choice).
-- Scoring the tuned model's alignment is `td-eval-sets`.
+- `training-data:instruction-sft` produces the SFT model preference tuning runs *on top of* — preference data is a second stage, not a replacement.
+- The sampling-and-judging *mechanics* (n-sampling, the pairwise-judge prompt, position/length bias controls, calibration) live in `training-data:synthetic-generation`; this skill owns the *pair-construction discipline* (margin, ties, on-policy, format choice).
+- Scoring the tuned model's alignment is `training-data:eval-sets`.

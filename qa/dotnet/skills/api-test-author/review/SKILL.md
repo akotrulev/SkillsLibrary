@@ -1,5 +1,5 @@
 ---
-name: qa-api-test-review-dotnet
+name: api-tests-review
 description: Use when the user asks to review existing .NET API test code (NUnit + RestSharp) for quality. Triggers: "review this API test", "look at OrderTests.cs", "spot issues in this *Action / client class". Not for generating new tests → `api-test-author/writer`.
 ---
 
@@ -71,7 +71,7 @@ Reviews .NET API test code against the patterns enforced by `qa/dotnet/skills/ap
 
 ### Comments in test code
 
-Load **[`ep-code-comments`](../../../../../engineering-practices/code-comments/SKILL.md)** for the rule itself, the complex-flow test that earns a doc comment, the never-comment trivia list, and the severity mapping. Its **test-code** section carries the AAA-banner rule and the exactly-three-permitted-comments list. This section supplies only the mechanics that differ here.
+Load **[`engineering-practices/code-comments`](../../../../../engineering-practices/code-comments/SKILL.md)** for the rule itself, the complex-flow test that earns a doc comment, the never-comment trivia list, and the severity mapping. Its **test-code** section carries the AAA-banner rule and the exactly-three-permitted-comments list. This section supplies only the mechanics that differ here.
 
 | .NET mechanic | What to check |
 |---|---|

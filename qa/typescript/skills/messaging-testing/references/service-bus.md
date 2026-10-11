@@ -17,7 +17,7 @@ Messaging tests assert one of two things about an **async** flow:
 > no synchronous return you can assert on the next line. The message is in flight; the consumer runs on its
 > own schedule; the side-effect lands "soon". So the core discipline is: **wait on a condition** for the
 > message (or its effect) to appear, with a bounded timeout — **never `setTimeout` / `page.waitForTimeout`**.
-> This is the exact lineage of `qa-db-connection-typescript`'s `expect.poll` usage. Service Bus gives you a *better* primitive than
+> This is the exact lineage of `qa-typescript:db-connection`'s `expect.poll` usage. Service Bus gives you a *better* primitive than
 > polling for the receive side: `receiveMessages(maxCount, { maxWaitTimeInMs })` **long-polls** — it waits up
 > to a bounded window for messages, then returns what arrived (possibly an empty array). That bounded wait
 > *is* the condition-wait; a fixed sleep is not.
@@ -149,7 +149,7 @@ export async function startServiceBusBroker(): Promise<Broker> {
 > **Cloud test namespace alternative.** If your org runs against a real **test** Service Bus namespace
 > instead of the emulator, read the connection string (or an Azure AD token via `DefaultAzureCredential` +
 > the namespace FQDN, `@azure/identity`) **from `process.env`, lazily** — never hard-code it, never log it
-> (cross-link `qa-test-login-tokens-typescript` for the token-acquisition discipline). The emulator is the
+> (cross-link `qa-typescript:test-login-tokens` for the token-acquisition discipline). The emulator is the
 > default for CI determinism; a shared cloud namespace makes tests order-dependent unless each uses a unique
 > queue/subscription.
 
@@ -218,7 +218,7 @@ describe("order publishing", () => {
 
 Here the SUT is a **consumer**. The test **seeds a message**, lets the consumer run, and waits for the
 observable side-effect (a DB row, another message) — the side-effect is eventually consistent, so use
-`expect.poll` to wait on a condition. This reuses `qa-db-connection-typescript`'s discipline.
+`expect.poll` to wait on a condition. This reuses `qa-typescript:db-connection`'s discipline.
 
 ```typescript
 it("writes a shipment row when an OrderPaid message is consumed", async () => {
@@ -452,18 +452,18 @@ export const anOrder = () => new OrderBuilder().status("Pending");
 
 ## Cross-references
 
-- `qa-messaging-testing-dotnet` — the **canonical** stack, .NET 8 / NUnit
+- `qa-dotnet:messaging-testing` — the **canonical** stack, .NET 8 / NUnit
   (`Azure.Messaging.ServiceBus`: `new ServiceBusClient(...)`, `CreateReceiver(queue, options)`,
   `ReceiveMessageAsync(maxWaitTime)`, `SubQueue.DeadLetter`, `WaitFor.Async` poll). This file is ported from it.
-- `qa-messaging-testing-java` — same skill, Java 21 / TestNG
+- `qa-java:messaging-testing` — same skill, Java 21 / TestNG
   (`azure-messaging-servicebus`: `ServiceBusClientBuilder`, `receiveMessages(n, maxWaitTime)`,
   `SubQueue.DEAD_LETTER`, Awaitility).
 - `references/sqs.md` (`sqs`, next in family) — AWS SQS/SNS on LocalStack; visibility timeout +
   redrive-policy DLQ — same condition-wait discipline, different broker. Then Kafka (`kafka`, offset-based) and
   RabbitMQ (`rabbitmq`, AMQP exchanges) close the family.
-- `qa-db-connection-typescript` — the `expect.poll` and seeder/probe split reused for the consumer
+- `qa-typescript:db-connection` — the `expect.poll` and seeder/probe split reused for the consumer
   side-effect assertions; the **eventual-consistency lineage** this skill leans on hardest.
-- `qa-test-login-tokens-typescript` — when authing to a cloud test namespace with an Azure AD token
+- `qa-typescript:test-login-tokens` — when authing to a cloud test namespace with an Azure AD token
   (`@azure/identity` `DefaultAzureCredential`) instead of the emulator connection string; secrets-from-env.
-- `qa-test-reports-typescript` — attach the received message body / DLQ reason to the Allure result.
-- `qa-test-data-builder-typescript` — builders for message payloads with 4+ fields.
+- `qa-typescript:test-reports` — attach the received message body / DLQ reason to the Allure result.
+- `qa-typescript:test-data-builder` — builders for message payloads with 4+ fields.

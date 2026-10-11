@@ -1,6 +1,6 @@
 ---
-name: mobile-shared-in-app-purchases
-description: Use when an app sells anything inside the app — subscriptions, consumables, unlocks — on iOS, Android or React Native. Triggers "add a subscription", "restore purchases", "refund but still has access", "Apple rejected under 3.1.1". Server-owned entitlements, restore, refund notifications, store payment policy, cancel symmetry. Do NOT use for signing/rollout (`mobile-shared-release`), privacy/store forms (`mobile-shared-store-compliance`), or paywall visual design.
+name: in-app-purchases
+description: Use when an app sells anything inside the app — subscriptions, consumables, unlocks — on iOS, Android or React Native. Triggers "add a subscription", "restore purchases", "refund but still has access", "Apple rejected under 3.1.1". Server-owned entitlements, restore, refund notifications, store payment policy, cancel symmetry. Do NOT use for signing/rollout (`mobile-<stack>:release`), privacy/store forms (`mobile-<stack>:store-compliance`), or paywall visual design.
 ---
 
 # Mobile — In-App Purchases
@@ -21,11 +21,11 @@ Owns **the money path**: what is bought, who decides the user is entitled, how a
 
 ## When NOT to use
 
-- Signing, tracks, rollout → `mobile-shared-release`
-- Privacy manifest, Data safety, account deletion → `mobile-shared-store-compliance`
-- Secrets and token storage rules → `mobile-shared-security`
-- Auth sign-in → `auth-auth0-react-native` / `auth-auth0-ios` / `auth-auth0-android`
-- Paywall layout, copy and consent design → `design-ethical-patterns`, `design-ux-writing` (corpus-led)
+- Signing, tracks, rollout → `mobile-<stack>:release`
+- Privacy manifest, Data safety, account deletion → `mobile-<stack>:store-compliance`
+- Secrets and token storage rules → `mobile-<stack>:security`
+- Auth sign-in → `mobile-react-native:auth0` / `mobile-ios:auth0` / `mobile-android:auth0`
+- Paywall layout, copy and consent design → `design:dark-patterns`, `design:ux-writing` (corpus-led)
 - The backend that stores entitlements → the `be-*` agent for that stack (this skill defines the contract it must meet)
 
 ## Version lane (verified 2026-10-10)
@@ -81,7 +81,7 @@ Console-only facts (agreements, tax, price tiers, offer eligibility, program enr
 
 ## Cancel as easy as subscribe
 
-Per `design-ethical-patterns` (symmetry; FTC click-to-cancel; DSA Art. 25): the path to **manage / cancel** has no more steps than the path to buy. In the app that means a visible *Manage subscription* row in Settings that deep-links to the store's management screen (`AppStore.showManageSubscriptions(in:)` · the Play subscriptions URL for the package), the renewal date and price shown next to it, no cancellation survey as a gate, no hidden trial-to-paid switch, and a pre-renewal reminder for annual plans. A purchase made on one platform is cancelled on that platform — say which one.
+Per `design:dark-patterns` (symmetry; FTC click-to-cancel; DSA Art. 25): the path to **manage / cancel** has no more steps than the path to buy. In the app that means a visible *Manage subscription* row in Settings that deep-links to the store's management screen (`AppStore.showManageSubscriptions(in:)` · the Play subscriptions URL for the package), the renewal date and price shown next to it, no cancellation survey as a gate, no hidden trial-to-paid switch, and a pre-renewal reminder for annual plans. A purchase made on one platform is cancelled on that platform — say which one.
 
 ## Procedure
 
@@ -121,7 +121,7 @@ Per `design-ethical-patterns` (symmetry; FTC click-to-cancel; DSA Art. 25): the 
 
 ## Handoffs
 
-- Store forms and privacy → `mobile-shared-store-compliance`
+- Store forms and privacy → `mobile-<stack>:store-compliance`
 - Test-only purchase flows, sandbox accounts, E2E → qa `mobile-*` peers (not loaded)
 - Backend webhook implementation → `be-dotnet` / `be-java` / `be-node`
-- Auth of the purchasing user → the stack's `auth-auth0-*`
+- Auth of the purchasing user → the stack's `mobile-<stack>:auth0`

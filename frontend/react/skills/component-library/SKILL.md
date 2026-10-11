@@ -1,5 +1,5 @@
 ---
-name: fe-react-component-library
+name: component-library
 description: Use when picking or wiring the UI component library an app is built on — shadcn/ui + Tailwind (default) vs Mantine vs MUI vs Chakra vs none — plus theme/`ThemeProvider` + dark mode, DataGrid, dialog/toast surface, and the RSC `'use client'` boundary each forces. Triggers "which component library", "set up MUI/Mantine/Chakra/shadcn", "why do MUI components error in a Server Component". Not for hand-written CSS/tokens (`styling`) or forms (`forms`).
 ---
 

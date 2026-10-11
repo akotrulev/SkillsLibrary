@@ -1,5 +1,5 @@
 ---
-name: qa-security-mobile-app-scan
+name: mobile-app-scan
 description: Use when an Android APK/AAB or iOS IPA must be scanned STATICALLY (MobSF, no device) — hardcoded secrets, weak crypto, storage config, a permissive manifest/Info.plist, cleartext traffic, missing binary hardening. Any mobile stack, MASVS/MASTG-mapped, safe every build. Triggers "scan our APK/IPA", "run MobSF static analysis", "check the network security config". Not for runtime testing on a device (`mobile-runtime-testing`), a web API (`active-scan`), or lockfile CVEs (`dependency-scan`).
 ---
 

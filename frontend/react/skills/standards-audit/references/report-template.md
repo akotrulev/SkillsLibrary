@@ -14,7 +14,7 @@ Saved to `docs/audits/<NNN>-fe-react-conformance-r<N>.md`. Never overwrite a pre
 # fe-react Conformance Audit — <repo name> — Round 1
 
 **Date:** <YYYY-MM-DD> · **Branch:** <branch> · **Commit:** <short sha>
-**Auditor:** `fe-react-standards-audit` (read-only — no product code was changed)
+**Auditor:** `fe-react:standards-audit` (read-only — no product code was changed)
 
 ## 1. Detected lane
 
@@ -135,7 +135,7 @@ purpose**. Recorded so a later round doesn't re-litigate them — each carries o
 
 **Date:** <YYYY-MM-DD> · **Branch:** <branch> · **Commit:** <short sha>
 **Prior round:** `docs/audits/<file>-r<N-1>.md` (<date>, commit <sha>)
-**Auditor:** `fe-react-standards-audit` (read-only)
+**Auditor:** `fe-react:standards-audit` (read-only)
 
 ## 1. Movement
 

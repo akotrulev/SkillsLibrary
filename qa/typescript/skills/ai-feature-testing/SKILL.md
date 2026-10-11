@@ -1,6 +1,6 @@
 ---
-name: qa-ai-feature-testing-typescript
-description: Use when testing LLM-generated output (chatbot, summarizer, extraction, tool-using agent) from a TypeScript suite — property, rubric (LLM-as-judge) and grounding assertions on a promptfoo (default) or DeepEval spine; never exact-string equality. Triggers: "test our chatbot", "eval prompt outputs", "deepeval / G-Eval / faithfulness metric". Do NOT use for RAG retrieval-vs-generation metrics (`qa-ai-answer-quality-testing-typescript`) or deterministic API tests (`qa-api-test-writer-typescript`).
+name: ai-feature-testing
+description: Use when testing LLM-generated output (chatbot, summarizer, extraction, tool-using agent) from a TypeScript suite — property, rubric (LLM-as-judge) and grounding assertions on a promptfoo (default) or DeepEval spine; never exact-string equality. Triggers: "test our chatbot", "eval prompt outputs", "deepeval / G-Eval / faithfulness metric". Do NOT use for RAG retrieval-vs-generation metrics (`qa-typescript:ai-answer-quality-testing`) or deterministic API tests (`qa-typescript:api-tests`).
 ---
 
 # LLM-App Testing (Node 24 / TypeScript — promptfoo + Anthropic SDK)
@@ -32,7 +32,7 @@ with non-LLM tests.
 >    prompt, and **calibrate it against a human-labelled gold set** (30–200 examples) — judges carry
 >    positional, verbosity, and instruction-following bias, and a judge that looks right on three examples drifts
 >    in production.
-> 3. **An eval is a DATASET of cases, not one test.** This is `qa-data-driven-testing-typescript` applied to
+> 3. **An eval is a DATASET of cases, not one test.** This is `qa-typescript:data-driven-testing` applied to
 >    prompts: each row = an **input** (vars) + its **expected properties** (assertions). Add a row, get a case;
 >    each case is independent and individually named so a failure points at the input that broke it. promptfoo's
 >    `tests:` block *is* this; the SDK path uses Vitest `test.for`.
@@ -176,7 +176,7 @@ The full anti-pattern catalog (exact-string asserts, unpinned judges, quarantine
   test), keep the rubric in a file, and **calibrate against a human-labelled gold set** (30–200) before trusting
   it. Re-calibrate on a model bump. Design against verbosity/positional/instruction-following bias.
 - **An eval is a dataset** — one prompt × N rows (input + expected properties), each row an **independent, named**
-  case (reuse `qa-data-driven-testing-typescript` mechanics; don't reinvent parsing). One logical property per
+  case (reuse `qa-typescript:data-driven-testing` mechanics; don't reinvent parsing). One logical property per
   case where practical.
 - **Separate regression from stochastic.** Regression: pin model + `temperature: 0` + `seed`, assert once (and
   re-baseline on a model bump — it's not truly deterministic). Stochastic: sample **N≥3** and assert a **pass-RATE
@@ -189,12 +189,12 @@ The full anti-pattern catalog (exact-string asserts, unpinned judges, quarantine
 
 ## Cross-references
 
-- `qa-ai-feature-testing-{dotnet,java}` — sibling stacks (promptfoo as a subprocess + provider-SDK-in-test). Same four ideas.
-- `qa-data-driven-testing-typescript` — an eval IS a data-driven test; reuse its row-binding mechanics.
-- `qa-flaky-test-quarantine-typescript` — the boundary: model non-determinism (assert a rate) is NOT test flakiness (retry/quarantine).
-- `qa-api-models-typescript` — the Zod schema the `is-json` rung / SDK `safeParse` validates.
+- `qa-{dotnet,java}:ai-feature-testing` — sibling stacks (promptfoo as a subprocess + provider-SDK-in-test). Same four ideas.
+- `qa-typescript:data-driven-testing` — an eval IS a data-driven test; reuse its row-binding mechanics.
+- `qa-typescript:flaky-test-quarantine` — the boundary: model non-determinism (assert a rate) is NOT test flakiness (retry/quarantine).
+- `qa-typescript:api-models` — the Zod schema the `is-json` rung / SDK `safeParse` validates.
 - `ai-development/*` — build-vs-test boundary: they build the AI feature, this tests it.
-- `qa-test-login-tokens-typescript` — env + secret-store discipline for `ANTHROPIC_API_KEY`.
-- `qa-_shared-quality-metrics` — track eval pass-rate over time. `qa-test-reports-typescript` — named results.
-- `qa-load-testing-typescript` — LLM load/latency under concurrency (out of scope here; latency is a per-case budget).
-- `qa-webmcp-testing-shared` — the deterministic side of WebMCP tools a page registers (schema, `execute()` contract, annotations); this skill keeps the agent evals over them.
+- `qa-typescript:test-login-tokens` — env + secret-store discipline for `ANTHROPIC_API_KEY`.
+- `qa-<stack>:quality-metrics` — track eval pass-rate over time. `qa-typescript:test-reports` — named results.
+- `qa-typescript:load-testing` — LLM load/latency under concurrency (out of scope here; latency is a per-case budget).
+- `qa-<stack>:webmcp-testing` — the deterministic side of WebMCP tools a page registers (schema, `execute()` contract, annotations); this skill keeps the agent evals over them.

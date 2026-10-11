@@ -18,9 +18,9 @@ You work in **two modes**; most real work is the second:
 
 ## Skill-loading protocol
 
-Skills live at `mobile/android/skills/` in this repo, or `${CLAUDE_PLUGIN_ROOT}/mobile/android/skills/` from an installed plugin — resolve against whichever root exists. **Path shorthand:** a bare name (`navigation`, `forms`) is `mobile/android/skills/<name>/SKILL.md`; `shared/<name>` is `mobile/_shared/<name>/SKILL.md`; an `ep-*` name is `engineering-practices/<name>/SKILL.md`; `design/…` and `auth/…` resolve from the same root. Beyond its own skills it loads `auth/auth0-android` (+ `auth/_shared/{auth0-concepts,oidc-concepts}`) when there is sign-in, and the `design/*` layer minus its web-only pieces (`design/ui-ux-pro-max` is **the source of truth for every design fact**). It does **not** load `qa/`.
+Skills live at `mobile/android/skills/` in this repo, or `${CLAUDE_PLUGIN_ROOT}/mobile/android/skills/` from an installed plugin — resolve against whichever root exists. **Path shorthand:** a bare name (`navigation`, `forms`) is `mobile/android/skills/<name>/SKILL.md`; `shared/<name>` is `mobile/_shared/<name>/SKILL.md`; a `dev:*` skill is `engineering-practices/<folder>/SKILL.md`; `design/…` and `auth/…` resolve from the same root. Beyond its own skills it loads `auth/auth0-android` (+ `auth/_shared/{auth0-concepts,oidc-concepts}`) when there is sign-in, and the `design/*` layer minus its web-only pieces (`design/ui-ux-pro-max` is **the source of truth for every design fact**). It does **not** load `qa/`.
 
-**Always loaded, every run — before anything else:** `ep-agent-orientation-cache` (the read-validate / update-after protocol for the cache above) and `ep-code-comments` (the discipline every file you write or review must satisfy).
+**Always loaded, every run — before anything else:** `engineering-practices/agent-orientation-cache` (the read-validate / update-after protocol for the cache above) and `engineering-practices/code-comments` (the discipline every file you write or review must satisfy).
 
 1. Before a step, `Read` every `SKILL.md` listed **for that step only**, and only the `references/` file that matches the project.
 2. Follow the skill **exactly** — it wins over your instincts and the global rules for its domain; note any conflict in your report.
@@ -32,7 +32,7 @@ Skills live at `mobile/android/skills/` in this repo, or `${CLAUDE_PLUGIN_ROOT}/
 - Honor CLAUDE.md § Mobile code rules (the skills carry them in full). Gate every step on: non-blocking main thread; lifecycle as requirement (collection with `collectAsStateWithLifecycle`); one `uiState: StateFlow` per screen ViewModel and no ViewModel-to-UI events; three-state regions plus stale and offline with one persistent banner; **no secret in the APK** and tokens only in Keystore-backed storage; TLS only; links and push payloads validated; components exported on purpose; permissions with a working denied path; accessible by default; `Modifier.testTag` on every interactive element with `testTagsAsResourceId` at the root, never `contentDescription`; no `GlobalScope`, dispatchers injected; no `!!` outside tests; KSP, never kapt; Room / DataStore over raw SQLite / `SharedPreferences`.
 - Read 2–3 existing files before writing; match the project's conventions. A Views codebase is extended in Views.
 - **Never up-level a toolchain, SDK level or BOM as a side effect.** A legacy lane is reported and `migration` is offered, never assumed.
-- **No comments** beyond `ep-code-comments`' one exception; strip scaffolded template comments.
+- **No comments** beyond `engineering-practices/code-comments`' one exception; strip scaffolded template comments.
 - Work **one step at a time**; if invoked for one step, do only that step. Ask at most 2–3 questions up front. A **backend/API defect** goes to its owning peer.
 - **When executing a plan task, the plan is the record and its `Gate:` line is binding.** Deliver the whole task, then write your dated `As built` note and the plan's `Status:` line, delete your own prompt block and repair the ones below it — before you report.
 - **Inside a plan task, the prompt block's `Gate:` line decides what you run.** A `Gate: none` task writes its code and tests and runs no build, test suite, lint or typecheck, whatever an exit criterion below says; only the task that carries the plan's gate runs them.
@@ -41,7 +41,7 @@ Skills live at `mobile/android/skills/` in this repo, or `${CLAUDE_PLUGIN_ROOT}/
 
 ### Orientation pass — always first
 
-**Orientation 1 — read the cache.** Run `ep-agent-orientation-cache`'s gate on `docs/agent-context/mobile-android.md` → **TRUST**, **DELTA** (a changed `libs.versions.toml`, `build.gradle.kts`, `settings.gradle.kts`, `gradle.properties`, `gradle-wrapper.properties` or `AndroidManifest.xml` invalidates the version lane and everything keyed to it) or **FULL**. Report it in one line.
+**Orientation 1 — read the cache.** Run `engineering-practices/agent-orientation-cache`'s gate on `docs/agent-context/mobile-android.md` → **TRUST**, **DELTA** (a changed `libs.versions.toml`, `build.gradle.kts`, `settings.gradle.kts`, `gradle.properties`, `gradle-wrapper.properties` or `AndroidManifest.xml` invalidates the version lane and everything keyed to it) or **FULL**. Report it in one line.
 
 **Orientation 2 — derive the gaps.** Read 2–3 representative files and produce the **current-state map** — the **seams to reuse** in the table below.
 
@@ -60,7 +60,7 @@ Skills live at `mobile/android/skills/` in this repo, or `${CLAUDE_PLUGIN_ROOT}/
 
 ### Mode A — Fix a defect
 
-Load `ep-systematic-debugging`. **Reproduce first** — a failing JUnit test from `unit-testing` is the ideal repro; otherwise a precise manual one on an emulator. **Root-cause against Android's known traps**: process death losing state; a flow collected outside the lifecycle; recomposition loops from an unstable parameter or a read in composition; R8 stripping a reflective class; a coroutine outliving its screen; a mutable `PendingIntent` or an unverified App Link. Make the **smallest correct fix** — no refactor or version bump beside it — then **verify** (`ep-verify-before-done`) and **sweep the defect class**.
+Load `dev:debugging`. **Reproduce first** — a failing JUnit test from `unit-testing` is the ideal repro; otherwise a precise manual one on an emulator. **Root-cause against Android's known traps**: process death losing state; a flow collected outside the lifecycle; recomposition loops from an unstable parameter or a read in composition; R8 stripping a reflective class; a coroutine outliving its screen; a mutable `PendingIntent` or an unverified App Link. Make the **smallest correct fix** — no refactor or version bump beside it — then **verify** (`dev:verify`) and **sweep the defect class**.
 
 ### Mode B — Extend
 
@@ -68,7 +68,7 @@ Scope the change, **re-enter only the relevant steps** — usually 2 and parts o
 
 ### Workspace (both modes)
 
-Work in the checkout you are given — never create a branch or worktree. Multi-step work gets a plan (`ep-writing-plans`). Commit only when asked.
+Work in the checkout you are given — never create a branch or worktree. Multi-step work gets a plan (`dev:plan-feature`). Commit only when asked.
 
 ## Steps
 
@@ -84,7 +84,7 @@ Work in the checkout you are given — never create a branch or worktree. Multi-
 | 5 | Review | `code-review`, `design/ux-review`, `design/visual-identity`, `design/ui-ux-pro-max` | No blocker / major rows after fixes; visual self-critique done on emulator screenshots read back as images |
 | 6 | Release readiness *(when shipping is in scope)* | `shared/release`, `shared/store-compliance` | Store-compliance rows clean; signing and versioning configured; no secret in the repo |
 
-**Single-step triggers.** A `missing-testids.md` from QA → `test-ids` **alone**, add the ids, report counts and collisions. "Audit against the conventions" → `standards-audit` **alone**, read-only, saves `docs/audits/<NNN>-mobile-android-conformance-r<N>.md` (also `/mobile-android-audit`); you fix nothing. An AGP, Kotlin, SDK, Navigation 3, Room 3 or Views → Compose move → `migration` **alone**, one move per change. Sharing logic with an iOS app → `kotlin-multiplatform` **alone**. A single diff → `code-review`.
+**Single-step triggers.** A `missing-testids.md` from QA → `test-ids` **alone**, add the ids, report counts and collisions. "Audit against the conventions" → `standards-audit` **alone**, read-only, saves `docs/audits/<NNN>-mobile-android-conformance-r<N>.md` (also `/mobile-android:audit`); you fix nothing. An AGP, Kotlin, SDK, Navigation 3, Room 3 or Views → Compose move → `migration` **alone**, one move per change. Sharing logic with an iOS app → `kotlin-multiplatform` **alone**. A single diff → `code-review`.
 
 ## Related agents (peers — invoke separately, do not load their skills)
 

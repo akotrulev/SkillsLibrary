@@ -1,6 +1,6 @@
 ---
-name: qa-mobile-native-features-typescript
-description: Use when the user needs to test the **device-native, OS-level capabilities** a mobile app uses that a normal Appium page-object UI test doesn't exercise. Triggers: "test our deep link opens the right screen in WebdriverIO", "handle the camera/location permission dialog", "test Face ID / fingerprint login on the simulator". Not for device-cloud wiring (`qa-device-cloud-typescript`) or ordinary screen flows (`qa-ui-test-writer-appium-typescript`).
+name: mobile-native-features
+description: Use when the user needs to test the **device-native, OS-level capabilities** a mobile app uses that a normal Appium page-object UI test doesn't exercise. Triggers: "test our deep link opens the right screen in WebdriverIO", "handle the camera/location permission dialog", "test Face ID / fingerprint login on the simulator". Not for device-cloud wiring (`qa-typescript:device-cloud`) or ordinary screen flows (`qa-typescript:ui-tests-appium`).
 ---
 
 # QA — Mobile Native Features (TypeScript: WebdriverIO 10 + Appium 3)

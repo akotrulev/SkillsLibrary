@@ -1,5 +1,5 @@
 ---
-name: be-dotnet-database-code
+name: persistence
 description: Use when setting up or refactoring persistence in .NET (10 primary, 8-9) — EF Core `DbContext` design, configurations, migrations, query patterns, transactions, optimistic concurrency, tuning. Triggers: "set up EF Core for X", "AsNoTracking vs tracking", "EF migrations workflow", "row version concurrency", "this LINQ query is slow". Do NOT use for raw-SQL data access (`data/<db>`), cross-engine migrations (`data/_shared/migrations`), or Java / Node persistence.
 ---
 

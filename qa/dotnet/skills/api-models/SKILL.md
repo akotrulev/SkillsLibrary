@@ -1,9 +1,9 @@
 ---
-name: qa-api-models-dotnet
+name: api-models
 description: Use when creating a new DTO, model class, or response object in a .NET 10 (8-9) / System.Text.Json API test project. Triggers "add a {Resource}Dto", "create the InDto / ModDto for the {resource} endpoint", "scaffold the wrapper DTO for paginated {resource}". Not for the client that calls the endpoint (`api-client-writer`) or the test itself (`api-test-author/writer`).
 ---
 
-# qa-api-models-dotnet
+# qa-dotnet:api-models
 
 Generator skill. Scaffolds a single DTO file in the Accelerator `ApiTests` project.
 
@@ -15,10 +15,10 @@ Generator skill. Scaffolds a single DTO file in the Accelerator `ApiTests` proje
 
 ## When NOT to use
 
-- Java or TypeScript DTOs — use `qa-api-models-java` / `qa-api-models-typescript`.
+- Java or TypeScript DTOs — use `qa-java:api-models` / `qa-typescript:api-models`.
 - Production domain models — DTOs here exist only for the test project.
-- Writing the client itself — use `qa-api-client-writer-dotnet`.
-- Reacting to a **new version of a swagger/OpenAPI spec** — start at `qa-api-spec-assets-shared`: it replaces the stored spec asset in place, derives the changed-DTO work list from `git diff`, and comes back here for only the files that list names. Do not re-generate every DTO because the spec moved.
+- Writing the client itself — use `qa-dotnet:api-client-writer`.
+- Reacting to a **new version of a swagger/OpenAPI spec** — start at `qa-<stack>:api-spec-assets`: it replaces the stored spec asset in place, derives the changed-DTO work list from `git diff`, and comes back here for only the files that list names. Do not re-generate every DTO because the spec moved.
 
 ## Folder & naming convention
 

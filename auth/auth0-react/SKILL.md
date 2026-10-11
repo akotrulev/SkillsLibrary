@@ -1,5 +1,5 @@
 ---
-name: auth-auth0-react
+name: auth0
 description: Use when setting up or modifying Auth0 in a React 19/18 + TypeScript app — two lanes: `@auth0/nextjs-auth0` for the Next.js App Router (middleware, server-side session in RSC/Actions/handlers) and `@auth0/auth0-react` for a Vite/CRA SPA (Auth Code + PKCE, protected routes). Triggers "add Auth0 login", "protect a route", "read the session in a Server Component", "attach the access token to fetch". Not for backend token validation or provider concepts (`auth0-concepts`).
 ---
 
@@ -304,7 +304,7 @@ export const config = {
 };
 ```
 
-The middleware mounts the auth routes **and** rolls the session cookie — it is required, not optional. See [`fe-react-routing`](../../frontend/react/skills/routing/SKILL.md) for the `matcher` rules.
+The middleware mounts the auth routes **and** rolls the session cookie — it is required, not optional. See [`fe-react:routing`](../../frontend/react/skills/routing/SKILL.md) for the `matcher` rules.
 
 ### 3. Reading the session
 

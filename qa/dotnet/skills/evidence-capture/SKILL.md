@@ -1,5 +1,5 @@
 ---
-name: qa-evidence-capture-dotnet
+name: evidence-capture
 description: Use when a Playwright .NET (NUnit) suite or agent session must keep evidence — failure screenshots, video, screencast receipts, traces, HAR — or a failure's trace must be read before a fix. Triggers "keep trace and video on failure", "record a screencast of this flow", "open the trace for this failing test", "capture evidence via Playwright MCP". Do NOT use for writing tests or BaseTest (ui-test-author/playwright), Allure wiring (test-reports) or visual baselines (visual-regression).
 ---
 

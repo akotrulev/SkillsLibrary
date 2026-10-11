@@ -1,6 +1,6 @@
 ---
-name: qa-load-testing-dotnet
-description: Use when the user asks to design or author NBomber performance / load tests in .NET 10 (8-9 supported) (C#). Triggers: "write an NBomber scenario for X", "NBomber load test for our .NET API", "ramp profile for spike in NBomber". Not for scaffolding the project (`qa-performance-project-setup-dotnet`), fault injection under normal load (`failure-injection-testing`) or uptime probes (`production-uptime-checks`).
+name: load-testing
+description: Use when the user asks to design or author NBomber performance / load tests in .NET 10 (8-9 supported) (C#). Triggers: "write an NBomber scenario for X", "NBomber load test for our .NET API", "ramp profile for spike in NBomber". Not for scaffolding the project (`qa-dotnet:performance-project-setup`), fault injection under normal load (`failure-injection-testing`) or uptime probes (`production-uptime-checks`).
 ---
 
 # QA — Performance Testing with NBomber (.NET 8)

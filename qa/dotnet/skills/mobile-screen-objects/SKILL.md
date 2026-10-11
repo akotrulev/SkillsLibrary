@@ -1,6 +1,6 @@
 ---
-name: qa-mobile-screen-objects-dotnet
-description: Use when the user wants a .NET (C#) Appium page object created or updated from elements already discovered on a live screen. Triggers: "create a page object for the Login screen", "add a page for the … screen", "implement the … page". Do NOT use for discovering a screen's elements (`qa-mobile-screen-explorer-dotnet`) or web page objects (`qa-page-object-design-dotnet`).
+name: mobile-screen-objects
+description: Use when the user wants a .NET (C#) Appium page object created or updated from elements already discovered on a live screen. Triggers: "create a page object for the Login screen", "add a page for the … screen", "implement the … page". Do NOT use for discovering a screen's elements (`qa-dotnet:mobile-screen-explorer`) or web page objects (`qa-dotnet:page-object-design`).
 ---
 
 # QA — Appium Page Object Builder (.NET)

@@ -1,6 +1,6 @@
 ---
-name: pentest-initial-access
-description: Use to turn a validated vulnerability into an actual foothold during an authorized penetration test. Consumes a qa-security exploit-validation proof as feedstock. Triggers "get a foothold from this validated vuln", "chain the confirmed SQLi into a shell". Not for proving a single vuln without chaining (`qa-security`), escalating (`pentest-privilege-escalation`), or scanning (`pentest-recon-enumeration`). Owned/lab only, under a committed scope file; production a separate gate.
+name: initial-access
+description: Use to turn a validated vulnerability into an actual foothold during an authorized penetration test. Consumes a qa-security exploit-validation proof as feedstock. Triggers "get a foothold from this validated vuln", "chain the confirmed SQLi into a shell". Not for proving a single vuln without chaining (`qa-security`), escalating (`penetration-testing:privilege-escalation`), or scanning (`penetration-testing:recon-enumeration`). Owned/lab only, under a committed scope file; production a separate gate.
 ---
 
 # Penetration Testing — Initial Access / Exploitation (Metasploit · sqlmap · custom exploit)
@@ -14,13 +14,13 @@ Authorization: engagement=<NNN>  target=<in-scope host>  allowed-techniques=<lis
                authorized-by=<name>  window=<start>..<expiry>  environment=lab|production(2nd sign-off)
 ```
 
-This skill is **language-agnostic** and is loaded by the **`penetration-tester`** agent in its **Exploitation** step. It owns *gaining the foothold*; it does not *find* the surface (`pentest-recon-enumeration`), *prove a single vuln in isolation* (`qa-security` `exploit-validation` — its feedstock), or *escalate* the foothold (`pentest-privilege-escalation`).
+This skill is **language-agnostic** and is loaded by the **`penetration-tester`** agent in its **Exploitation** step. It owns *gaining the foothold*; it does not *find* the surface (`penetration-testing:recon-enumeration`), *prove a single vuln in isolation* (`qa-security` `exploit-validation` — its feedstock), or *escalate* the foothold (`penetration-testing:privilege-escalation`).
 
 ## The boundary vs `exploit-validation` (sqlmap appears in both — draw it sharply)
 
 Both this skill and `qa-security`'s `exploit-validation` use sqlmap. The line is the **altitude and goal**:
 
-| | `qa-security` `exploit-validation` | **this skill** `pentest-initial-access` |
+| | `qa-security` `exploit-validation` | **this skill** `penetration-testing:initial-access` |
 |---|---|---|
 | Question | *Does this one detected vuln actually fire, and how far does it reach?* | *Can I chain a proven vuln into a foothold/session?* |
 | sqlmap depth | Prove the injection + its blast radius: `--dump` a table, confirm the DB, redacted | **Gain a shell**: `--os-shell`, `--os-pwn`, `--file-write` a webshell, `--file-read` a credential file |
@@ -29,7 +29,7 @@ Both this skill and `qa-security`'s `exploit-validation` use sqlmap. The line is
 
 **`exploit-validation` feeds `initial-access`.** A validated SQLi from `exploit-validation` is the input; this skill takes it from "the injection works" to "I have a shell." It does not itself re-validate — it consumes the proof and chains it.
 
-> **Two spines, stated per finding.** Exploitation maps to **MITRE ATT&CK Enterprise** — `T1190` Exploit Public-Facing Application, `T1133` External Remote Services, `T1078` Valid Accounts (where access is via reused creds), `T1210` Exploitation of Remote Services (internal), `T1059` Command and Scripting Interpreter (the shell you land). The web/API weakness that gave access carries its **OWASP/WSTG** id (e.g. A03 Injection). Severity is scored **CVSS** in `pentest-reporting`, not the blocker/major/minor/nit table.
+> **Two spines, stated per finding.** Exploitation maps to **MITRE ATT&CK Enterprise** — `T1190` Exploit Public-Facing Application, `T1133` External Remote Services, `T1078` Valid Accounts (where access is via reused creds), `T1210` Exploitation of Remote Services (internal), `T1059` Command and Scripting Interpreter (the shell you land). The web/API weakness that gave access carries its **OWASP/WSTG** id (e.g. A03 Injection). Severity is scored **CVSS** in `penetration-testing:reporting`, not the blocker/major/minor/nit table.
 
 ## Metasploit Framework — the exploitation engine
 
@@ -91,9 +91,9 @@ When no module fits, a custom exploit (or a public PoC adapted to the target) is
 
 A session from this step is the input to the next:
 
-- **`pentest-privilege-escalation`** takes the foothold's user-level session and elevates it (SUID/sudo/kernel/token).
-- **`pentest-lateral-movement`** takes the foothold as a pivot point into other in-scope hosts.
-- **`pentest-credential-attacks`** harvests credentials from the foothold to reuse.
+- **`penetration-testing:privilege-escalation`** takes the foothold's user-level session and elevates it (SUID/sudo/kernel/token).
+- **`penetration-testing:lateral-movement`** takes the foothold as a pivot point into other in-scope hosts.
+- **`penetration-testing:credential-attacks`** harvests credentials from the foothold to reuse.
 
 This skill stops at the foothold; it does not escalate or pivot itself.
 
@@ -104,7 +104,7 @@ This skill stops at the foothold; it does not escalate or pivot itself.
 - **Using `--os-shell`/`--os-pwn` to "validate" a vuln.** That conflates the lanes and over-reaches proof. *Fix:* single-vuln proof is `exploit-validation`'s `--dump`-level job; foothold acts belong here, only on an already-validated injection.
 - **Running a custom/PoC exploit you have not read.** *Fix:* understand it, lab-test it, know its crash risk before the authorized target.
 - **Exfiltrating a file's contents into the report.** A `--file-read`/`--dump` result is loot. *Fix:* report *that* it was accessible + blast radius; never the contents; nothing sensitive under `docs/security/`.
-- **Leaving the meterpreter session / webshell / workspace artifact behind.** *Fix:* every session, dropped webshell, and planted artifact is enumerated and removed at cleanup (per `pentest-post-exploitation` + `pentest-reporting`), the removal logged.
+- **Leaving the meterpreter session / webshell / workspace artifact behind.** *Fix:* every session, dropped webshell, and planted artifact is enumerated and removed at cleanup (per `penetration-testing:post-exploitation` + `penetration-testing:reporting`), the removal logged.
 - **Treating a foothold as license to roam.** The foothold does not widen scope. *Fix:* the scope file still bounds every subsequent act; an out-of-scope host reachable from the foothold is out of scope.
 
 ## Rules (hard constraints)
@@ -115,7 +115,7 @@ This skill stops at the foothold; it does not escalate or pivot itself.
 - **No DoS, ever** — not as a technique, not as an accepted side effect against production. A crash-risk exploit is scope-gated and excluded from production by default.
 - **C2 containment:** the payload handler and every session transport stay inside the authorized environment; no callback egresses scope.
 - **Production is a separate, louder gate than lab.** Default target is lab/throwaway; a foothold on production needs the second sign-off.
-- **Two spines per finding:** ATT&CK Enterprise technique id + the OWASP/WSTG id of the weakness. Score CVSS in `pentest-reporting`.
+- **Two spines per finding:** ATT&CK Enterprise technique id + the OWASP/WSTG id of the weakness. Score CVSS in `penetration-testing:reporting`.
 - **Loot redaction + artifact cleanup.** File/DB contents are never in the report (blast radius only); every session/webshell/workspace artifact is removed at cleanup and the removal logged.
 - **Log every act** — module/command, payload, target, timestamp, ATT&CK id — into the engagement action log as it runs.
 
@@ -123,7 +123,7 @@ This skill stops at the foothold; it does not escalate or pivot itself.
 
 - **`penetration-tester`** — the orchestrator; runs this in its **Exploitation** step, owns the scope-file gate.
 - **`qa-security`** `exploit-validation` (`qa/_shared/security-testing/exploit-validation`) — the **feedstock**: proves *one* vuln fires + its blast radius, stops there. This skill chains that proof into a foothold. The single-vuln-proof vs foothold boundary is the whole reason both exist.
-- **`pentest-recon-enumeration`** — the **prior** step: supplies the live hosts, open ports, and services (and the nmap XML for `db_import`) this skill exploits.
-- **`pentest-privilege-escalation`** · **`pentest-lateral-movement`** · **`pentest-credential-attacks`** — the **next** steps that build on the foothold.
-- **`pentest-post-exploitation`** — owns the cleanup discipline for every session/artifact this step creates.
-- **`pentest-reporting`** — the action log (every exploit act) + CVSS/ATT&CK scoring of the access gained.
+- **`penetration-testing:recon-enumeration`** — the **prior** step: supplies the live hosts, open ports, and services (and the nmap XML for `db_import`) this skill exploits.
+- **`penetration-testing:privilege-escalation`** · **`penetration-testing:lateral-movement`** · **`penetration-testing:credential-attacks`** — the **next** steps that build on the foothold.
+- **`penetration-testing:post-exploitation`** — owns the cleanup discipline for every session/artifact this step creates.
+- **`penetration-testing:reporting`** — the action log (every exploit act) + CVSS/ATT&CK scoring of the access gained.

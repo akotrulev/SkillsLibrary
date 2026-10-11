@@ -207,7 +207,7 @@ the dashboard, and on merge the accepted checkpoints become the branch baseline.
 
 ## Cross-references
 
-- `qa-visual-regression-dotnet`, `qa-visual-regression-java` — the same model from .NET and Java.
+- `qa-dotnet:visual-regression`, `qa-java:visual-regression` — the same model from .NET and Java.
 - `references/percy.md` — hosted pixel diff; the no-assertion annotation pattern.
 - `references/playwright-snapshots.md` — the free sibling, and the clock fixture.
 - `qa/typescript/skills/ui-test-author/playwright` — fixtures and page objects.

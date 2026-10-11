@@ -1,11 +1,11 @@
 ---
-name: mobile-react-native-languages
-description: Use when an Expo SDK 57 app must support more than one language or region — expo-localization, i18next or Lingui catalogs, ICU plurals, hoisted Intl formatters, RTL via I18nManager, per-app language on iOS and Android, localized purpose strings. Triggers "add Spanish", "translate the app", "Arabic layout flips", "date shows wrong format". Do NOT use for web i18n routing (`fe-react-languages`), copy voice (`design-ux-writing`), or text scale (`-accessibility`).
+name: i18n
+description: Use when an Expo SDK 57 app must support more than one language or region — expo-localization, i18next or Lingui catalogs, ICU plurals, hoisted Intl formatters, RTL via I18nManager, per-app language on iOS and Android, localized purpose strings. Triggers "add Spanish", "translate the app", "Arabic layout flips", "date shows wrong format". Do NOT use for web i18n routing (`fe-react:i18n`), copy voice (`design:ux-writing`), or text scale (`-accessibility`).
 ---
 
 # React Native — Localization and Globalization
 
-Two jobs: **localization** (swap the text via catalogs) and **globalization** (format numbers, dates, money and plurals for the locale — always relevant, even with one language). Web analog: [`fe-react-languages`](../../../../frontend/react/skills/languages/SKILL.md) — keys as stable ids, ICU in the catalog, never concatenated sentences. What does not carry over: routing by locale prefix, `next-intl`, server components, hreflang. On a phone the **device** owns the locale, and the OS can change it while the app runs.
+Two jobs: **localization** (swap the text via catalogs) and **globalization** (format numbers, dates, money and plurals for the locale — always relevant, even with one language). Web analog: [`fe-react:i18n`](../../../../frontend/react/skills/languages/SKILL.md) — keys as stable ids, ICU in the catalog, never concatenated sentences. What does not carry over: routing by locale prefix, `next-intl`, server components, hreflang. On a phone the **device** owns the locale, and the OS can change it while the app runs.
 
 ## Version lane
 
@@ -30,10 +30,10 @@ Detect the installed i18n library first; never add a second.
 
 ## When NOT to use
 
-- Wording, tone, microcopy → [`design-ux-writing`](../../../../design/ux-writing/SKILL.md)
+- Wording, tone, microcopy → [`design:ux-writing`](../../../../design/ux-writing/SKILL.md)
 - Font scaling, dynamic type, screen-reader language → [`accessibility`](../accessibility/SKILL.md)
 - Layout mirroring mechanics, logical styles → [`styling`](../styling/SKILL.md)
-- The web app's locale routing → [`fe-react-languages`](../../../../frontend/react/skills/languages/SKILL.md)
+- The web app's locale routing → [`fe-react:i18n`](../../../../frontend/react/skills/languages/SKILL.md)
 
 ## The shared half: catalogs and the translate function
 
@@ -85,7 +85,7 @@ export function initI18n(saved: string | null) {
 }
 ```
 
-- **Purpose strings, `CFBundleDisplayName` and the app name** are native resources, localized through the plugin / `locales` config, not through i18next: `NSCameraUsageDescription` in English only is a gap in a Spanish app ([`device-features`](../device-features/SKILL.md), [`mobile-shared-store-compliance`](../../../_shared/store-compliance/SKILL.md)). Store listing text is per-locale in the store consoles — a release concern ([`mobile-shared-release`](../../../_shared/release/SKILL.md)).
+- **Purpose strings, `CFBundleDisplayName` and the app name** are native resources, localized through the plugin / `locales` config, not through i18next: `NSCameraUsageDescription` in English only is a gap in a Spanish app ([`device-features`](../device-features/SKILL.md), [`mobile-<stack>:store-compliance`](../../../_shared/store-compliance/SKILL.md)). Store listing text is per-locale in the store consoles — a release concern ([`mobile-<stack>:release`](../../../_shared/release/SKILL.md)).
 - A mixed-locale iOS app needs `ios.infoPlist.CFBundleAllowMixedLocalizations: true`.
 
 ## Culture-aware formatting — hoist the formatter
@@ -163,10 +163,10 @@ Inside a `Gate: none` plan task, run none of these and report "written, not run"
 
 ## Handoffs
 
-- Wording and tone of source copy → [`design-ux-writing`](../../../../design/ux-writing/SKILL.md)
+- Wording and tone of source copy → [`design:ux-writing`](../../../../design/ux-writing/SKILL.md)
 - Logical properties, mirrored styles → [`styling`](../styling/SKILL.md)
 - Dynamic type, screen-reader language → [`accessibility`](../accessibility/SKILL.md)
 - Persisting the choice → [`offline-and-storage`](../offline-and-storage/SKILL.md)
 - Localized permission strings → [`device-features`](../device-features/SKILL.md)
-- Store listings per locale → [`mobile-shared-release`](../../../_shared/release/SKILL.md)
+- Store listings per locale → [`mobile-<stack>:release`](../../../_shared/release/SKILL.md)
 - Catalog and hoisting checks in review → [`code-review`](../code-review/SKILL.md)

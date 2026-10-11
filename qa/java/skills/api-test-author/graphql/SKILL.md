@@ -1,17 +1,17 @@
 ---
-name: qa-api-test-graphql-java
-description: Use when scaffolding black-box **GraphQL** API tests in Java 21 with RestAssured + TestNG and Jackson. Triggers: "write a Java GraphQL test for query/mutation X", "assert the errors array on a GraphQL response", "test partial GraphQL data + errors". Do NOT use for REST (`qa-api-test-writer-java`) or gRPC (`qa-api-test-grpc-java`).
+name: api-tests-graphql
+description: Use when scaffolding black-box **GraphQL** API tests in Java 21 with RestAssured + TestNG and Jackson. Triggers: "write a Java GraphQL test for query/mutation X", "assert the errors array on a GraphQL response", "test partial GraphQL data + errors". Do NOT use for REST (`qa-java:api-tests`) or gRPC (`qa-java:api-tests-grpc`).
 ---
 
 # QA — GraphQL API Test Writer (Java 21 / RestAssured + TestNG + Jackson)
 
-> **Ported from the canonical `qa-api-test-graphql-typescript`.** The four ideas and the section order
+> **Ported from the canonical `qa-typescript:api-tests-graphql`.** The four ideas and the section order
 > are identical; only the runner (TestNG instead of Vitest), the HTTP client (RestAssured instead of `fetch`),
 > and the typing (Jackson POJOs + AssertJ/TestNG assertions instead of Zod `parse`) change. See the TypeScript
 > file for the family rationale.
 
 Scaffolds black-box API tests in Java against a deployed **GraphQL** backend. It reuses the **Action + POJO +
-Test** layering of the REST sibling (`qa-api-test-writer-java`) but adapts every layer to the one fact
+Test** layering of the REST sibling (`qa-java:api-tests`) but adapts every layer to the one fact
 that makes GraphQL testing its own discipline: **a GraphQL response is one HTTP 200 carrying a `{ data, errors }`
 envelope, and the assertion lives in that envelope, not in `response.getStatusCode()`.**
 
@@ -32,7 +32,7 @@ envelope, and the assertion lives in that envelope, not in `response.getStatusCo
 >    `errors[]` envelope once and reuse it.
 > 4. **Pick the operation type deliberately.** A **query** asserts shape + values. A **mutation** asserts the
 >    returned payload **and round-trips a read** to prove the change persisted. A **subscription** is a
->    long-lived stream over WebSocket (`graphql-ws`) — that's `qa-realtime-stream-testing-java`; cross-link, don't
+>    long-lived stream over WebSocket (`graphql-ws`) — that's `qa-java:realtime-stream-testing`; cross-link, don't
 >    reimplement.
 
 ## Decision matrix — operation type → test shape
@@ -44,7 +44,7 @@ envelope, and the assertion lives in that envelope, not in `response.getStatusCo
 | **Query — partial** | Partial success is handled | one resolved field asserted on `data` **and** the failing field's `errors[]` entry asserted by `path` |
 | **Mutation** (write) | The change happened and persisted | assert the mutation payload → **round-trip a query** → assert the new state is readable |
 | **Mutation — input validation** | Bad input rejected cleanly | `errors` non-empty with `extensions.code == "BAD_USER_INPUT"`; `data.<field>` null |
-| **Subscription** (stream) | Server pushes events over time | **not this skill** → `qa-realtime-stream-testing-java` |
+| **Subscription** (stream) | Server pushes events over time | **not this skill** → `qa-java:realtime-stream-testing` |
 | **Introspection** | Schema exposes the expected types/fields | query `__schema`/`__type` → assert presence; in prod assert introspection **disabled** |
 | **Persisted queries (APQ)** | Only registered hashes execute | hash-only → `PERSISTED_QUERY_NOT_FOUND` → register (query+hash) → hash-only now resolves |
 
@@ -222,11 +222,11 @@ public void persistedQueryRejectsUnregisteredHashThenResolvesOnceRegistered() th
 - **`assertThat(getErrors()).isNotEmpty()` and stopping.** "Some error" is not a contract. *Fix:* assert the
   specific `extensions.code` and `path`.
 - **Deserializing inside the action / parsing `Map<String,Object>` in the test.** *Fix:* the action returns the
-  typed envelope POJO via `response.as(new TypeRef<>(){})`; model the data with a POJO (`qa-api-models-java`).
+  typed envelope POJO via `response.as(new TypeRef<>(){})`; model the data with a POJO (`qa-java:api-models`).
 - **`Thread.sleep`.** Banned by CLAUDE.md (and RestAssured is synchronous). Reaching for this skill for
-  **subscriptions** → `qa-realtime-stream-testing-java`.
+  **subscriptions** → `qa-java:realtime-stream-testing`.
 - **Hardcoding the endpoint / committing the token.** *Fix:* `SystemPropertyUtil` / env, read lazily; secrets
-  via `qa-test-login-tokens-java`.
+  via `qa-java:test-login-tokens`.
 
 ## Examples
 
@@ -256,17 +256,17 @@ the error shape, don't settle for a status" discipline, different envelope.
 - **A mutation test round-trips a read** to prove persistence; data created in a test is cleaned up in
   `@AfterMethod` (cleanup guarded so it can't mask a failure).
 - **TestNG + RestAssured + Jackson + AssertJ**; `HttpStatus.SC_*` constants, never raw ints. Subscriptions →
-  `qa-realtime-stream-testing-java`. Endpoint + token via `SystemPropertyUtil`/env, lazy, never logged. No
+  `qa-java:realtime-stream-testing`. Endpoint + token via `SystemPropertyUtil`/env, lazy, never logged. No
   `Thread.sleep`.
 
 ## Cross-references
 
-- `qa-api-test-graphql-typescript` — **the canonical file**: same four ideas, Vitest + native `fetch` +
+- `qa-typescript:api-tests-graphql` — **the canonical file**: same four ideas, Vitest + native `fetch` +
   Zod (`GetUserDataSchema.parse` / `GraphQLErrorsSchema`). Read it for the family rationale.
-- `qa-api-test-graphql-dotnet` — the .NET sibling (NUnit + `HttpClient` + `System.Text.Json` records);
+- `qa-dotnet:api-tests-graphql` — the .NET sibling (NUnit + `HttpClient` + `System.Text.Json` records);
   same four ideas, different libs.
-- `qa-api-test-writer-java` — the **REST sibling** this extends: the Action + POJO + Test layering,
+- `qa-java:api-tests` — the **REST sibling** this extends: the Action + POJO + Test layering,
   `RequestSpecBuilder`, `response.as(...)`, `SystemPropertyUtil`, and the cleanup discipline.
-- `qa-realtime-stream-testing-java` — **GraphQL subscriptions** (graphql-ws over WebSocket) live here.
-- `qa-api-models-java` — generate the typed `data` POJOs / operation models in isolation.
-- `qa-test-login-tokens-java` — obtain the bearer token for authenticated operations.
+- `qa-java:realtime-stream-testing` — **GraphQL subscriptions** (graphql-ws over WebSocket) live here.
+- `qa-java:api-models` — generate the typed `data` POJOs / operation models in isolation.
+- `qa-java:test-login-tokens` — obtain the bearer token for authenticated operations.

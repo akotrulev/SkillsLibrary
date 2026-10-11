@@ -1,6 +1,6 @@
 # Hilt and modules — reference
 
-Detail for [`mobile-android-architecture`](../SKILL.md). Hilt Gradle plugin 2.59+ requires AGP 9; AGP 8 stays on ≤ 2.58.
+Detail for [`mobile-android:architecture`](../SKILL.md). Hilt Gradle plugin 2.59+ requires AGP 9; AGP 8 stays on ≤ 2.58.
 
 ## Setup (KSP)
 

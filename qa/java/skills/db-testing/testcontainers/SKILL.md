@@ -1,6 +1,6 @@
 ---
-name: qa-db-testing-testcontainers-java
-description: Use when the user asks to scaffold Java 21 + Spring Boot 3 + TestNG (or JUnit 5) integration tests backed by a real database (Postgres / SQL Server / MongoDB / Redis) via Testcontainers-Java. Triggers: "spin up Postgres for the integration tests", "Testcontainers for the Spring Boot tests", "stop using H2 in tests". Do NOT use for query guardrails (`qa-db-verification-queries-java`) or connect/seed/clean against an existing DB (`qa-db-connection-java`).
+name: db-testcontainers
+description: Use when the user asks to scaffold Java 21 + Spring Boot 3 + TestNG (or JUnit 5) integration tests backed by a real database (Postgres / SQL Server / MongoDB / Redis) via Testcontainers-Java. Triggers: "spin up Postgres for the integration tests", "Testcontainers for the Spring Boot tests", "stop using H2 in tests". Do NOT use for query guardrails (`qa-java:db-verification-queries`) or connect/seed/clean against an existing DB (`qa-java:db-connection`).
 ---
 
 # QA — DB Testing with Testcontainers (Java)

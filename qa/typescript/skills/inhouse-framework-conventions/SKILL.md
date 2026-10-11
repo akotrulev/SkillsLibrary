@@ -1,6 +1,6 @@
 ---
-name: qa-inhouse-framework-conventions-typescript
-description: Use when working in the TypeScript Accelerator test automation framework (Node 24 (22 supported) + @playwright/test + WebdriverIO/Appium + Vitest, JSON-driven page objects) or any consumer of it. Triggers: "add a test to the TS Accelerator", "scaffold a screen for the WebdriverIO suite", "create a Playwright page object for X in Accelerator". Not for a suite outside the Accelerator (`qa-page-object-design-typescript`, `qa-ui-test-writer-playwright-typescript`).
+name: inhouse-framework-conventions
+description: Use when working in the TypeScript Accelerator test automation framework (Node 24 (22 supported) + @playwright/test + WebdriverIO/Appium + Vitest, JSON-driven page objects) or any consumer of it. Triggers: "add a test to the TS Accelerator", "scaffold a screen for the WebdriverIO suite", "create a Playwright page object for X in Accelerator". Not for a suite outside the Accelerator (`qa-typescript:page-object-design`, `qa-typescript:ui-tests-playwright`).
 ---
 
 # Accelerator Conventions (TypeScript)

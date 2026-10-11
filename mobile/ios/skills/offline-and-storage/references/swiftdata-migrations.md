@@ -83,7 +83,7 @@ enum NotesMigrationPlan: SchemaMigrationPlan {
 
 - **The container is created with the plan**: `ModelContainer(for: schema, migrationPlan: NotesMigrationPlan.self)`.
 - **One stage per consecutive pair**; a V1 install updating to V3 runs V1→V2→V3.
-- A custom stage touching many rows batches its saves; it runs before the UI shows and **counts against the launch budget** — measure with Instruments (`mobile-ios-performance`).
+- A custom stage touching many rows batches its saves; it runs before the UI shows and **counts against the launch budget** — measure with Instruments (`mobile-ios:performance`).
 
 ## 4. Test it
 

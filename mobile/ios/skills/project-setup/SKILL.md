@@ -1,6 +1,6 @@
 ---
-name: mobile-ios-project-setup
-description: Use when creating or hardening an iOS app on Xcode 27 — Swift 6 mode set explicitly (the template still says 5.0), warnings as errors, local Swift packages as modules, xcconfig per environment, swift-format + SwiftLint, test plans, scene lifecycle, launch screen, String Catalog, PrivacyInfo.xcprivacy. Triggers "new iOS app", "split into packages", "set up xcconfig". Do NOT use for signing and CI (`mobile-shared-release`), state design (`-architecture`) or screens (`-ui-components`).
+name: project-setup
+description: Use when creating or hardening an iOS app on Xcode 27 — Swift 6 mode set explicitly (the template still says 5.0), warnings as errors, local Swift packages as modules, xcconfig per environment, swift-format + SwiftLint, test plans, scene lifecycle, launch screen, String Catalog, PrivacyInfo.xcprivacy. Triggers "new iOS app", "split into packages", "set up xcconfig". Do NOT use for signing and CI (`mobile-<stack>:release`), state design (`-architecture`) or screens (`-ui-components`).
 ---
 
 # iOS — Project Setup
@@ -22,7 +22,7 @@ Read the `.xcodeproj` / `.xcworkspace` / `Project.swift` / `Package.swift`, `swi
 | Dependencies | **SPM**; CocoaPods trunk goes read-only **2026-12-02** → [`migration`](../migration/SKILL.md) | SPM |
 | UIKit-only app | `[UIKit]` lane — [`uikit`](../uikit/SKILL.md); still gets the same strictness | Same |
 
-The Xcode template's `SWIFT_VERSION = 5.0` is the trap: strict-concurrency errors you expect are silent. **A project that is already Swift 5-mode is migrated one module at a time (`mobile-ios-migration`), never flipped wholesale.**
+The Xcode template's `SWIFT_VERSION = 5.0` is the trap: strict-concurrency errors you expect are silent. **A project that is already Swift 5-mode is migrated one module at a time (`mobile-ios:migration`), never flipped wholesale.**
 
 ## When to use
 
@@ -33,12 +33,12 @@ The Xcode template's `SWIFT_VERSION = 5.0` is the trap: strict-concurrency error
 
 ## When NOT to use
 
-- Signing, provisioning, TestFlight, Xcode Cloud → `mobile-shared-release`
+- Signing, provisioning, TestFlight, Xcode Cloud → `mobile-<stack>:release`
 - App architecture and state ownership → [`architecture`](../architecture/SKILL.md)
 - Writing screens → [`ui-components`](../ui-components/SKILL.md); routes → [`navigation`](../navigation/SKILL.md)
-- Required Reason APIs and the privacy questionnaire → `mobile-shared-store-compliance`
+- Required Reason APIs and the privacy questionnaire → `mobile-<stack>:store-compliance`
 - Auth → `auth0-ios`; CI YAML → `devops-engineer`
-- React Native / Expo project setup → `mobile-react-native-project-setup`; Android → `mobile-android-project-setup`
+- React Native / Expo project setup → `mobile-react-native:project-setup`; Android → `mobile-android:project-setup`
 
 ## Inputs needed
 
@@ -61,7 +61,7 @@ App/
   TestPlans/          Unit.xctestplan, UI.xctestplan
 Packages/
   Core/               Package.swift — models, formatting, no UI
-  Networking/         Package.swift — see mobile-ios-networking
+  Networking/         Package.swift — see mobile-ios:networking
   Features/           Package.swift — one library target per feature
 .swiftlint.yml
 .swift-format
@@ -173,8 +173,8 @@ Both are mandatory against the iOS 27 SDK (TN3187).
 
 - Architecture and state → [`architecture`](../architecture/SKILL.md)
 - Swift standard, concurrency → [`basics`](../basics/SKILL.md)
-- Signing, CI, TestFlight → `mobile-shared-release`
-- Privacy manifest depth → `mobile-shared-store-compliance`
+- Signing, CI, TestFlight → `mobile-<stack>:release`
+- Privacy manifest depth → `mobile-<stack>:store-compliance`
 - Swift 5 → 6, CocoaPods → SPM → [`migration`](../migration/SKILL.md)
-- Dependencies' security → `mobile-shared-security`
+- Dependencies' security → `mobile-<stack>:security`
 - Test ids → [`test-ids`](../test-ids/SKILL.md)

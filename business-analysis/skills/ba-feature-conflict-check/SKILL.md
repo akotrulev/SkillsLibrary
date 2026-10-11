@@ -1,6 +1,6 @@
 ---
-name: ba-feature-conflict-check
-description: Use when checking a new or changed feature against the WHOLE project's business model for conflicts — normalize into trigger/actor/action/data/constraint/state tuples, sweep pairwise against the KB with the 11-class taxonomy; every finding gets a boundary condition. Triggers: "does this feature conflict with anything", "sweep this story against the model", "cross-feature impact check". Do NOT use for single-doc ambiguity flagging (`requirements-breakdown`) or scoping (`ba-scoping-writeup`).
+name: conflict-check
+description: Use when checking a new or changed feature against the WHOLE project's business model for conflicts — normalize into trigger/actor/action/data/constraint/state tuples, sweep pairwise against the KB with the 11-class taxonomy; every finding gets a boundary condition. Triggers: "does this feature conflict with anything", "sweep this story against the model", "cross-feature impact check". Do NOT use for single-doc ambiguity flagging (`requirements-breakdown`) or scoping (`business-analysis:scoping`).
 ---
 
 # BA — Feature Conflict Sweep
@@ -14,7 +14,7 @@ Without the KB there is nothing to sweep against — the value scales with what 
 - A new feature/story arrives in a project with a business-model KB — before it's built or test-designed
 - An existing feature changes (new rule, new state, new trigger)
 - Periodic audit: "sweep the whole model for unresolved interactions"
-- Another `ba-*` skill logged conflict-shaped findings that need severity + resolution
+- Another `business-analysis` skill logged conflict-shaped findings that need severity + resolution
 
 ## When NOT to use
 
@@ -29,7 +29,7 @@ Per `business-analysis/skills/ba-project-memory`: **read first** — `INDEX.md`,
 
 ## Procedure
 
-> **Audit form (no new feature).** On the "periodic audit / refresh the model" trigger there is no feature to normalize, so **§1 is skipped** and the pair list (§2) is the KB's own **open surface** rather than a feature × KB cross: unresolved `CONF-` entries, `?` cells in entity grids, `[TBD]`/undeclared hit policies in decision tables, and unverified `#inferred` items. §3 (taxonomy), §4 (boundary condition per finding), and §5 (severity table + recorded resolutions) are unchanged. Pair the refresh procedure in `ba-project-memory` first (reconcile drift, prune, re-verify `#inferred`), then sweep that open surface.
+> **Audit form (no new feature).** On the "periodic audit / refresh the model" trigger there is no feature to normalize, so **§1 is skipped** and the pair list (§2) is the KB's own **open surface** rather than a feature × KB cross: unresolved `CONF-` entries, `?` cells in entity grids, `[TBD]`/undeclared hit policies in decision tables, and unverified `#inferred` items. §3 (taxonomy), §4 (boundary condition per finding), and §5 (severity table + recorded resolutions) are unchanged. Pair the refresh procedure in `business-analysis:knowledge-base` first (reconcile drift, prune, re-verify `#inferred`), then sweep that open surface.
 
 ### 1. Normalize the new feature
 
@@ -72,7 +72,7 @@ New feature's tuples × the KB: features sharing a **trigger**, touching the sam
 
 Every finding states the **concrete scenario where the two features collide**: "customer redeems loyalty points (B) on an order at exactly $100.00 (A's free-shipping threshold, computed *post*-discount → total drops to $87 → does shipping revert?)". A finding without a boundary condition is a suspicion, not a finding. Boundary conditions double as BVA seeds for QA.
 
-**Escalation tools** when a pair needs deeper analysis (the selection matrix): outcome-per-combination unclear → merge into a decision table (`ba-decision-table`); lifecycle unclear → extend the entity grid (`ba-entity-state-grid`); paths/timeouts unclear → the flow (`ba-process-flow-diagram`); **timing/interleaving between actors** → a Mermaid `sequenceDiagram` of that specific boundary scenario — the one place sequence diagrams are used, as an investigation tool, not a default artifact.
+**Escalation tools** when a pair needs deeper analysis (the selection matrix): outcome-per-combination unclear → merge into a decision table (`business-analysis:decision-table`); lifecycle unclear → extend the entity grid (`business-analysis:state-grid`); paths/timeouts unclear → the flow (`business-analysis:process-flow`); **timing/interleaving between actors** → a Mermaid `sequenceDiagram` of that specific boundary scenario — the one place sequence diagrams are used, as an investigation tool, not a default artifact.
 
 ### 5. Report — the severity table
 
@@ -115,7 +115,7 @@ Bad: reading the new story alone and listing its internal ambiguities — that's
 
 ## Handoffs
 
-- Deeper analysis of a pair → `ba-decision-table` / `ba-entity-state-grid` / `ba-process-flow-diagram` per the escalation matrix
+- Deeper analysis of a pair → `business-analysis:decision-table` / `business-analysis:state-grid` / `business-analysis:process-flow` per the escalation matrix
 - KB mechanics → `business-analysis/skills/ba-project-memory`
 - Findings resolved → the feature is ready for `qa/manual/requirements-breakdown` (boundary conditions = BVA seeds) and `qa/manual/agents/qa-test-case-designer`
 - Full orchestration → `business-analysis/agents/business-analyst`

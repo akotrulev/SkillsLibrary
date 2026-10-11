@@ -1,5 +1,5 @@
 ---
-name: qa-security-certificate-scan
+name: certificate-scan
 description: Use when gating an endpoint's TLS/SSL handshake in CI — deprecated protocols (SSLv2/3, TLS 1.0/1.1), weak ciphers, broken forward secrecy, certificate validity/chain/expiry, and known issues — with sslyze (lead, native Mozilla-policy gate) or testssl.sh. Read-only; the one scan safe against production. Triggers "scan our TLS config", "check for weak ciphers", "when does our cert expire", "fail CI on deprecated TLS". Not for HTTP headers/cookies (`passive-scan`) or app CVEs (`sast`).
 ---
 
@@ -13,14 +13,14 @@ and **testssl.sh** as the zero-dependency Bash alternative.
 
 This is a **single language-agnostic skill** under `qa/_shared/security-testing/` — both tools are CLIs /
 Docker images invoked identically from any pipeline. There is nothing to gain from a per-stack split (the
-backbone's leaner-shape principle — don't triplicate a `docker run`). Load **`qa-security-shared`**
+backbone's leaner-shape principle — don't triplicate a `docker run`). Load **`qa-<stack>:security-foundations`**
 alongside for the OWASP map, the ticketed-triage discipline, and SARIF consolidation.
 
 > **🟢 A TLS scan is passive and prod-safe — the one scan that is safe against production by nature.** A
 > TLS scan is a **handshake probe**: it opens connections, reads what the server offers, inspects the
 > presented certificate, and closes — **no payloads, no state mutation, no exploitation**. Unlike an
 > *active* DAST scan (ZAP full / API fuzzing — which inject payloads and **must never touch prod or a
-> shared env**, per `qa-security-shared`), a TLS scan is **read-only**, so it is **safe to run against a
+> shared env**, per `qa-<stack>:security-foundations`), a TLS scan is **read-only**, so it is **safe to run against a
 > production endpoint** and is a natural **pre-release / scheduled** gate as well as a per-PR gate against
 > an ephemeral env. The single caveat: a scan opens many short connections, so **do not hammer a
 > rate-limited or WAF-fronted prod endpoint** in a tight loop — schedule it, and respect rate limits.
@@ -31,9 +31,9 @@ alongside for the OWASP map, the ticketed-triage discipline, and SARIF consolida
 |------|-----|-----|
 | TLS gate with an **explicit, enforced policy** + native non-zero exit | **sslyze `--mozilla_config`** (LEAD) | Checks against **Mozilla intermediate/old/modern** and **exits non-zero on non-compliance** — the cleanest native CI gate; no custom parsing |
 | TLS scan on a runner with **no Python / no Docker pull**, or you want CSV/HTML too | **testssl.sh** | Pure Bash, zero deps; machine-readable CSV + two JSON shapes + HTML — but you **gate by parsing JSON severity** (no built-in Mozilla policy) |
-| HTTP **security headers** incl. **HSTS**, cookie flags, CSP, info leaks | `qa-security-testing-passive-scan-{stack}` | Header layer is **ZAP's** — adjacent but distinct; this skill probes the handshake *below* the headers. (TLS tools surface HSTS presence too, but the header gate is ZAP's.) |
-| App-layer **active** attack scan (SQLi/XSS/traversal payloads) | `qa-security-active-scan` | Sends payloads, mutates state — **never prod**. TLS scan never sends a payload. |
-| The OWASP map, triage discipline, scan-authorization rules, SARIF | `qa-security-shared` | The spine; load it alongside this tool skill. |
+| HTTP **security headers** incl. **HSTS**, cookie flags, CSP, info leaks | `qa-<stack>:passive-scan` | Header layer is **ZAP's** — adjacent but distinct; this skill probes the handshake *below* the headers. (TLS tools surface HSTS presence too, but the header gate is ZAP's.) |
+| App-layer **active** attack scan (SQLi/XSS/traversal payloads) | `qa-<stack>:active-scan` | Sends payloads, mutates state — **never prod**. TLS scan never sends a payload. |
+| The OWASP map, triage discipline, scan-authorization rules, SARIF | `qa-<stack>:security-foundations` | The spine; load it alongside this tool skill. |
 
 **Rule of thumb:** prefer **sslyze** as the gate (its native Mozilla-profile exit code *is* the policy —
 no parsing, the bar is in one flag). Reach for **testssl.sh** when you can't run sslyze, want the HTML
@@ -145,7 +145,7 @@ fi
 echo "No HIGH/CRITICAL TLS findings."
 ```
 
-Same triage discipline as the rest of the family (`qa-security-shared`): **gate NEW regressions hard**;
+Same triage discipline as the rest of the family (`qa-<stack>:security-foundations`): **gate NEW regressions hard**;
 known, documented exceptions are tracked with a ticket (see Triage), not by quietly lowering the bar.
 
 ## Prod-safe note (it bears repeating)
@@ -158,7 +158,7 @@ endpoint for per-PR runs where the cert/config matches prod.
 
 ## Triage — documented exceptions, gate the new regressions
 
-Defer the full discipline to `qa-security-shared` (baseline once · gate NEW hard · every suppression
+Defer the full discipline to `qa-<stack>:security-foundations` (baseline once · gate NEW hard · every suppression
 carries a ticket + reason + expiry · shrink the list). For TLS specifically:
 
 - **Pin the Mozilla profile** so the bar is explicit and auditable (`--mozilla_config=intermediate`, in
@@ -232,7 +232,7 @@ jobs:
   exception, not a global downgrade.
 - **No ticket on a documented exception** — silently scanning a legacy host with `--mozilla_config=old`
   (or excluding it) with no record. *Fix:* every relaxation is a **ticketed, expiring** accepted risk
-  (`qa-security-shared` triage); the global profile stays strict.
+  (`qa-<stack>:security-foundations` triage); the global profile stays strict.
 - **Assuming SARIF works** — wiring `upload-sarif` against sslyze/testssl.sh output. Neither emits SARIF.
   *Fix:* attach JSON/HTML as an artifact + Allure, or convert JSON→SARIF deliberately.
 - **Secrets in scan config** — putting an API key / auth token in the scan command to reach a gated
@@ -247,23 +247,23 @@ jobs:
   fail on `severity >= HIGH` (its exit code is not a policy verdict).
 - **Pin the Mozilla profile** (`intermediate` default) explicitly so the bar is auditable and can't drift.
 - **Gate NEW regressions hard; documented exceptions are ticketed** (with reason + expiry) — never relax
-  the global profile to pass one legacy host. Defer the full triage discipline to `qa-security-shared`.
+  the global profile to pass one legacy host. Defer the full triage discipline to `qa-<stack>:security-foundations`.
 - **Map findings to OWASP A04 (transport crypto) / A02 (protocol-cipher config)**; a pinned `intermediate`
   profile also satisfies the **PCI-DSS** early-TLS/weak-cipher bar — cite the profile.
 - **Neither tool emits SARIF** — attach JSON/HTML to Allure + CI artifact, or convert JSON→SARIF
   deliberately; don't assume `upload-sarif` accepts raw output.
 - **No secrets in scan config** — env vars read lazily; the target host is config, not a secret.
 - A clean TLS scan covers **only** the transport layer — pair with the ZAP header baseline, DAST, SCA,
-  and the rest of the layer map (`qa-security-shared`). Green TLS ≠ "secure."
+  and the rest of the layer map (`qa-<stack>:security-foundations`). Green TLS ≠ "secure."
 
 ## Cross-references
 
-- `qa-security-shared` — the spine: OWASP map (A04/A02), the ticketed-triage discipline, SARIF
+- `qa-<stack>:security-foundations` — the spine: OWASP map (A04/A02), the ticketed-triage discipline, SARIF
   consolidation, the layer map. **Load alongside this skill.**
-- `qa-security-testing-passive-scan-{java,dotnet,typescript}` — the **HTTP security-header** gate
+- `qa-<stack>:passive-scan` — the **HTTP security-header** gate
   (HSTS, CSP, cookie flags) — the **adjacent** layer *above* the handshake; ZAP owns headers, this owns
   the TLS handshake/cipher layer. Coordinate on HSTS.
-- `qa-security-active-scan` — the app-layer **active** DAST scan (payloads, never
+- `qa-<stack>:active-scan` — the app-layer **active** DAST scan (payloads, never
   prod). Contrast: the TLS scan never sends a payload and is prod-safe.
 - `qa/<stack>/skills/security-testing/dependency-scan` — SCA (A03); orthogonal layer.
 - `qa/reporting/<stack>/skills/test-reports` — attach the sslyze JSON / testssl.sh HTML report.

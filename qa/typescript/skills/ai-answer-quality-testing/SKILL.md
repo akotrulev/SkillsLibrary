@@ -1,6 +1,6 @@
 ---
-name: qa-ai-answer-quality-testing-typescript
-description: Use when testing a RAG feature from a Node 24 / TypeScript suite — decompose RETRIEVAL from GENERATION so a bad answer is localized, then assert the RAG triad (context relevance · groundedness · answer relevance) plus retrieval-ranking metrics. Triggers: "test our RAG pipeline", "is the answer grounded in the retrieved chunks", "evaluate context precision/recall". Do NOT use for non-RAG LLM output (`qa-ai-feature-testing-typescript`) or deterministic API tests (`qa-api-test-writer-typescript`).
+name: ai-answer-quality-testing
+description: Use when testing a RAG feature from a Node 24 / TypeScript suite — decompose RETRIEVAL from GENERATION so a bad answer is localized, then assert the RAG triad (context relevance · groundedness · answer relevance) plus retrieval-ranking metrics. Triggers: "test our RAG pipeline", "is the answer grounded in the retrieved chunks", "evaluate context precision/recall". Do NOT use for non-RAG LLM output (`qa-typescript:ai-feature-testing`) or deterministic API tests (`qa-typescript:api-tests`).
 ---
 
 # RAG Testing (Node 24 / TypeScript — retrieval ⊕ generation, Ragas-spined)
@@ -12,7 +12,7 @@ the chunk and hallucinated past it). **The cardinal discipline of RAG testing is
 each separately**, then assert end-to-end. An end-to-end-only suite tells you *that* the answer is wrong; it can't
 tell you *which half to fix* — which is the entire point of testing a RAG.
 
-This skill is the **RAG specialization of `qa-ai-feature-testing-typescript`** — it inherits that skill's four ideas
+This skill is the **RAG specialization of `qa-typescript:ai-feature-testing`** — it inherits that skill's four ideas
 (property-not-string · the-judge-is-a-versioned-artifact · an-eval-is-a-dataset · regression-vs-stochastic), its
 judge-pinning + calibration discipline, and its spine mechanics. It does **not** repeat them. What it adds is the
 **retrieval ⊕ generation decomposition**, the **RAG triad**, **retrieval-ranking metrics**, and the **golden set
@@ -52,7 +52,7 @@ that carries reference contexts** — the things a generic LLM-output test doesn
 
 **Rule of thumb:** start at the **retrieval** rows — if recall is broken, no generator fix helps. Use the
 **deterministic** ranking metrics whenever you have a labeled relevant-doc set; fall to the **LLM-judged** triad
-legs when you don't. The generation rows are `qa-ai-feature-testing-typescript`'s ladder applied to a *grounded*
+legs when you don't. The generation rows are `qa-typescript:ai-feature-testing`'s ladder applied to a *grounded*
 answer.
 
 ## Two-stage testing
@@ -60,7 +60,7 @@ answer.
 ### Stage 1 — retrieval in isolation (deterministic when you have labels)
 
 When the golden set labels which chunk-ids are relevant per query, the retriever is a **ranking function** and you
-score it with classic IR metrics — no LLM, no cost, no flake. This is `qa-data-driven-testing-typescript` over
+score it with classic IR metrics — no LLM, no cost, no flake. This is `qa-typescript:data-driven-testing` over
 retrieval results.
 
 ```typescript
@@ -108,7 +108,7 @@ names the culprit.
 ## The golden set — it carries reference CONTEXTS
 
 The single structural difference from an `ai-feature-testing` dataset: each row carries the **ground-truth relevant
-contexts/chunk-ids** alongside the reference answer. Build it with `qa-data-driven-testing-typescript` mechanics
+contexts/chunk-ids** alongside the reference answer. Build it with `qa-typescript:data-driven-testing` mechanics
 (one row = one named case, loaded from an external file), and **never** commit real customer PII.
 
 ```jsonc
@@ -131,7 +131,7 @@ contexts/chunk-ids** alongside the reference answer. Build it with `qa-data-driv
 
 ## Choosing the spine — Ragas (default for RAG) vs DeepEval vs promptfoo
 
-The four-ideas + judge-pinning + calibration all come from `qa-ai-feature-testing-typescript`; this skill only adds
+The four-ideas + judge-pinning + calibration all come from `qa-typescript:ai-feature-testing`; this skill only adds
 *which* assertions. Pick **one** spine per suite:
 
 - **Ragas** (`references/ragas.md`) — the **RAG-native** framework and the default here: the four canonical RAG
@@ -139,9 +139,9 @@ The four-ideas + judge-pinning + calibration all come from `qa-ai-feature-testin
   FactualCorrectness, and a corpus→test-set **generator**. Python — driven as a subprocess (`execa`) exactly like
   promptfoo/DeepEval; pin the evaluator LLM to the house-default Claude.
 - **DeepEval** — when the RAG suite lives beside a broader DeepEval suite (its `Contextual*`/`Faithfulness`/
-  `AnswerRelevancy` metrics map 1:1 to the triad). See `qa-ai-feature-testing-typescript`'s `references/deepeval.md`.
+  `AnswerRelevancy` metrics map 1:1 to the triad). See `qa-typescript:ai-feature-testing`'s `references/deepeval.md`.
 - **promptfoo** — when you want the declarative YAML matrix: `context-faithfulness` / `context-recall` /
-  `context-relevance` / `answer-relevance` assertions over a CSV of cases. See `qa-ai-feature-testing-typescript`.
+  `context-relevance` / `answer-relevance` assertions over a CSV of cases. See `qa-typescript:ai-feature-testing`.
 
 **Don't double-run the same cases on two spines.** Deterministic retrieval metrics (stage 1) you compute in-code
 regardless of spine.
@@ -182,9 +182,9 @@ metrics are *unchanged* (recall@5 still 0.85) → retrieval is fine; the fault i
 fixed context) reproduces the low faithfulness → confirmed: a prompt edit made the model embellish. The
 decomposition turned "the RAG got worse" into "this prompt change broke grounding" in two sub-tests.
 
-**Composing with the parent + data-driven + db:** the **golden set** uses `qa-data-driven-testing-typescript`
-mechanics; the **judge** is pinned + calibrated per `qa-ai-feature-testing-typescript`; the **index fixture** (seed the
-vector store, assert state, tear down) reuses `qa-db-testing-*-typescript` discipline for the store; the
+**Composing with the parent + data-driven + db:** the **golden set** uses `qa-typescript:data-driven-testing`
+mechanics; the **judge** is pinned + calibrated per `qa-typescript:ai-feature-testing`; the **index fixture** (seed the
+vector store, assert state, tear down) reuses `qa-typescript:db-*` discipline for the store; the
 **stochastic** noise-sensitivity check asserts a pass-rate (parent idea #4), not a single sample.
 
 ## Rules (hard constraints)
@@ -199,20 +199,20 @@ vector store, assert state, tear down) reuses `qa-db-testing-*-typescript` disci
   relevance only when they don't. **Never assert the answer string.**
 - **Inherit, don't repeat, the parent skill:** the four ideas, judge model-id pinning + gold-set calibration,
   regression-vs-stochastic (sample N≥3 for a rate), budgets-are-assertions, keys-via-env, no-PII all come from
-  `qa-ai-feature-testing-typescript`. `strict: true`; no `waitForTimeout`.
+  `qa-typescript:ai-feature-testing`. `strict: true`; no `waitForTimeout`.
 
 ## Cross-references
 
-- **`qa-ai-feature-testing-typescript`** — the **parent**: the four ideas, the assertion ladder, judge-pinning +
+- **`qa-typescript:ai-feature-testing`** — the **parent**: the four ideas, the assertion ladder, judge-pinning +
   calibration, the spine choice (promptfoo/DeepEval) and their references. RAG testing is its specialization; read
   it first.
 - `references/ragas.md` — the **RAG-native spine**: Ragas metrics + the corpus→test-set generator, invoked as a
   subprocess (`execa`), evaluator LLM pinned to Claude.
-- `qa-data-driven-testing-typescript` — the golden-set row mechanics (one row = one named case, loaded externally).
-- `qa-db-connection-typescript` / `…-testcontainers-typescript` — seed/assert/tear-down the **vector or hybrid
+- `qa-typescript:data-driven-testing` — the golden-set row mechanics (one row = one named case, loaded externally).
+- `qa-typescript:db-connection` / `…-testcontainers-typescript` — seed/assert/tear-down the **vector or hybrid
   index** the retriever reads (the RAG "DB").
-- `qa-ai-answer-quality-testing-dotnet` · `qa-ai-answer-quality-testing-java` — the sibling stacks; same five ideas, Ragas/DeepEval driven as a
+- `qa-dotnet:ai-answer-quality-testing` · `qa-java:ai-answer-quality-testing` — the sibling stacks; same five ideas, Ragas/DeepEval driven as a
   subprocess via `Process`/`ProcessBuilder`.
-- `qa-_shared-quality-metrics` — track triad + recall@k **over time** (a declining recall is a silent index/embed
-  regression). `qa-test-reports-typescript` — each stage/case as a named result.
+- `qa-<stack>:quality-metrics` — track triad + recall@k **over time** (a declining recall is a silent index/embed
+  regression). `qa-typescript:test-reports` — each stage/case as a named result.
 - The `qa-llm-typescript` **agent** owns this skill alongside `ai-feature-testing` (RAG is a step of the LLM-eval run).

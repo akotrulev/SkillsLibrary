@@ -1,6 +1,6 @@
 ---
-name: qa-api-test-review-typescript
-description: Use when the user asks to review existing TypeScript API test code (Vitest + native fetch + Zod) for quality. Triggers: "review this Vitest API spec", "look at getUser.spec.ts", "spot issues in this {resource}Client.ts". Do NOT use for writing new tests (`qa-api-test-writer-typescript`) or reviewing UI tests (`qa-ui-test-review-typescript`).
+name: api-tests-review
+description: Use when the user asks to review existing TypeScript API test code (Vitest + native fetch + Zod) for quality. Triggers: "review this Vitest API spec", "look at getUser.spec.ts", "spot issues in this {resource}Client.ts". Do NOT use for writing new tests (`qa-typescript:api-tests`) or reviewing UI tests (`qa-typescript:ui-tests-review`).
 ---
 
 # QA — API Test Reviewer (TypeScript / Vitest + fetch + Zod)
@@ -74,7 +74,7 @@ Reviews TypeScript API test code against the patterns enforced by `qa/typescript
 
 ### Comments in test code
 
-Load **[`ep-code-comments`](../../../../../engineering-practices/code-comments/SKILL.md)** for the rule itself, the complex-flow test that earns a doc comment, the never-comment trivia list, and the severity mapping. Its **test-code** section carries the AAA-banner rule and the exactly-three-permitted-comments list. This section supplies only the mechanics that differ here.
+Load **[`engineering-practices/code-comments`](../../../../../engineering-practices/code-comments/SKILL.md)** for the rule itself, the complex-flow test that earns a doc comment, the never-comment trivia list, and the severity mapping. Its **test-code** section carries the AAA-banner rule and the exactly-three-permitted-comments list. This section supplies only the mechanics that differ here.
 
 | TypeScript mechanic | What to check |
 |---|---|

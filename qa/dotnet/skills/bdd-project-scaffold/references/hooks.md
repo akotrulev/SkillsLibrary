@@ -1,4 +1,4 @@
-# `BrowserHooks.cs` — `qa-bdd-project-setup-dotnet`
+# `BrowserHooks.cs` — `qa-dotnet:bdd-project-setup`
 
 The per-scenario Playwright lifecycle and failure evidence for a Reqnroll web project. The contract it
 implements is in `SKILL.md` § `Support/BrowserHooks.cs`; the evidence rules are

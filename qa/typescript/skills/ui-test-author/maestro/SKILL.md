@@ -1,6 +1,6 @@
 ---
-name: qa-ui-test-writer-maestro-typescript
-description: Use when a project runs Maestro for mobile E2E (typically Expo / React Native) and a flow, subflow or `.maestro/` workspace must be written, tagged, run in CI or reviewed. Triggers "write a Maestro flow for X", "add a subflow", "run Maestro in EAS Workflows", "Maestro JUnit report". Do NOT use for Appium/WebdriverIO tests (`qa-ui-test-writer-appium-typescript`), web UI (`qa-ui-test-writer-playwright-typescript`) or live-screen discovery (`qa-mobile-screen-explorer-typescript`).
+name: ui-tests-maestro
+description: Use when a project runs Maestro for mobile E2E (typically Expo / React Native) and a flow, subflow or `.maestro/` workspace must be written, tagged, run in CI or reviewed. Triggers "write a Maestro flow for X", "add a subflow", "run Maestro in EAS Workflows", "Maestro JUnit report". Do NOT use for Appium/WebdriverIO tests (`qa-typescript:ui-tests-appium`), web UI (`qa-typescript:ui-tests-playwright`) or live-screen discovery (`qa-typescript:mobile-screen-explorer`).
 ---
 
 # QA — Maestro Flow Author (TypeScript lane)
@@ -40,7 +40,7 @@ One tool per project. Never mix both runners in one suite; a project that needs 
 - Appium / WebdriverIO → `qa/typescript/skills/ui-test-author/appium`
 - Web UI → `qa/typescript/skills/ui-test-author/playwright`
 - Finding the ids on a live screen → `qa/typescript/skills/mobile-screen-explorer`
-- Adding `testID` to the app → the `mobile-react-native-test-ids` dev skill, through `missing-testids.md`
+- Adding `testID` to the app → the `mobile-react-native:test-ids` dev skill, through `missing-testids.md`
 
 ## The layout
 

@@ -1,11 +1,11 @@
 ---
-name: mobile-react-native-networking
-description: Use when an Expo SDK 57 app must call an API — fetch + TanStack Query 5, focusManager on AppState, onlineManager on NetInfo, AbortSignal timeout budgets, bounded retries with Retry-After, no retry offline, ProblemDetails, token refresh, WebSocket / SSE paused on background. Triggers "request hangs on cell", "retry storm", "refresh token race". Do NOT use for the failure UI (`mobile-react-native-error-handling`), forms, or persisted caches (`-offline-and-storage`).
+name: networking
+description: Use when an Expo SDK 57 app must call an API — fetch + TanStack Query 5, focusManager on AppState, onlineManager on NetInfo, AbortSignal timeout budgets, bounded retries with Retry-After, no retry offline, ProblemDetails, token refresh, WebSocket / SSE paused on background. Triggers "request hangs on cell", "retry storm", "refresh token race". Do NOT use for the failure UI (`mobile-react-native:error-handling`), forms, or persisted caches (`-offline-and-storage`).
 ---
 
 # React Native — Networking
 
-Owns the **request-level half** of resilience: how a call is made, cancelled, timed out, retried, authenticated, and categorised, and how realtime connections live and die with the app. The **UI half** (failed region, banner, stale marker, retry button) is [`error-handling`](../error-handling/SKILL.md)'s; this skill produces the categorised error it renders. Web analog: [`fe-react-data-fetching`](../../../../frontend/react/skills/data-fetching/SKILL.md) — the timeout, ordering and critical-vs-optional rules carry over; RSC, Server Actions and `revalidateTag` do not.
+Owns the **request-level half** of resilience: how a call is made, cancelled, timed out, retried, authenticated, and categorised, and how realtime connections live and die with the app. The **UI half** (failed region, banner, stale marker, retry button) is [`error-handling`](../error-handling/SKILL.md)'s; this skill produces the categorised error it renders. Web analog: [`fe-react:data-fetching`](../../../../frontend/react/skills/data-fetching/SKILL.md) — the timeout, ordering and critical-vs-optional rules carry over; RSC, Server Actions and `revalidateTag` do not.
 
 ## Version lane
 
@@ -36,7 +36,7 @@ Detect `@tanstack/react-query` major and whether a client (`ky`, Axios, a genera
 - Form submit UX and `setError` → [`forms`](../forms/SKILL.md)
 - Auth provider setup → `auth0-react-native`; token storage → [`offline-and-storage`](../offline-and-storage/SKILL.md)
 - Push registration with the server → [`notifications-and-links`](../notifications-and-links/SKILL.md)
-- Next.js fetch / caching → `fe-react-data-fetching`
+- Next.js fetch / caching → `fe-react:data-fetching`
 
 ## The client — one module, one place for the budget
 
@@ -64,7 +64,7 @@ export async function api<T>(
 }
 ```
 
-- **The base URL is `process.env.EXPO_PUBLIC_API_URL`** — public by design; no secret travels in it. `https` only; a cleartext or ATS exception carries a recorded reason ([`mobile-shared-security`](../../../_shared/security/SKILL.md)).
+- **The base URL is `process.env.EXPO_PUBLIC_API_URL`** — public by design; no secret travels in it. `https` only; a cleartext or ATS exception carries a recorded reason ([`mobile-<stack>:security`](../../../_shared/security/SKILL.md)).
 - **Every call has a timeout budget by endpoint class** — a request on a dying cell link otherwise waits minutes. Budgets are longer than on web; set them in one table, not at call sites.
 - **Compose, never replace**: `AbortSignal.any([queryClientSignal, AbortSignal.timeout(ms)])`. The caller's signal is TanStack's, so leaving the screen cancels the request.
 - **`TimeoutError` is a failure** (render the timeout body); **`AbortError` is not** (the user left) — never notify on it.
@@ -188,12 +188,12 @@ Inside a `Gate: none` plan task, run none of these and report "written, not run"
 - On a device with the network throttled: a request past its budget rejects at the deadline with `TimeoutError`; leaving the screen aborts silently.
 - Airplane mode: no retry attempts appear in the network log; reconnect refetches stale queries.
 - A `503` with `Retry-After: 5` is retried after 5 s, not sooner; an expired access token causes exactly one refresh for N concurrent calls.
-- Dev-side tests (fake `fetch`, fake timers): `mobile-react-native-component-testing`.
+- Dev-side tests (fake `fetch`, fake timers): `mobile-react-native:component-testing`.
 
 ## Handoffs
 
 - Failed region, banner, stale, OTA skew → [`error-handling`](../error-handling/SKILL.md)
 - Persisted cache, mutation queue, token storage → [`offline-and-storage`](../offline-and-storage/SKILL.md)
 - State ownership → [`architecture`](../architecture/SKILL.md) · field errors → [`forms`](../forms/SKILL.md)
-- Cleartext, pinning, secrets → [`mobile-shared-security`](../../../_shared/security/SKILL.md)
+- Cleartext, pinning, secrets → [`mobile-<stack>:security`](../../../_shared/security/SKILL.md)
 - API contract tests → `qa-api-typescript` (peer)

@@ -3,7 +3,7 @@
 The last section of the plan document, and the reason the document is queueable whole. It answers one
 question — **what do I paste into a fresh session** — and it answers it as something runnable rather
 than something to read. It lives **inside** the plan (`docs/plans/<NNN>-<initiative>/delivery-plan.md`,
-or the single-file plan an `ep-writing-plans` run produced). There is no `NEXT-PROMPTS.md`.
+or the single-file plan an `dev:plan-feature` run produced). There is no `NEXT-PROMPTS.md`.
 
 **One block per task that has not landed.** No fewer: a task with no block is a session nobody knows
 they can open. No more: **a landed task's block is deleted**, because a prompt for finished work is a
@@ -164,8 +164,8 @@ the whole plan and fixes what it catches.
 You are `be-dotnet`. Task B1 of docs/plans/003-workshop-booking/delivery-plan.md: implement the
 Workshops and Sessions resources so a studio admin can publish a workshop and add sessions to it.
 
-Read your agent definition, then load exactly these skills: `be-dotnet-pattern-writer`,
-`be-dotnet-database-code`, `be-dotnet-unit-testing`.
+Read your agent definition, then load exactly these skills: `be-dotnet:patterns-apply`,
+`be-dotnet:persistence`, `be-dotnet:unit-testing`.
 
 Read, in this order — these sections only, not the whole artifacts:
 1. CLAUDE.md, including the Backend code rules and the Comments rules.

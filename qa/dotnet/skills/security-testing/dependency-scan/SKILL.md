@@ -1,5 +1,5 @@
 ---
-name: qa-security-dependency-scan-dotnet
+name: dependency-scan
 description: Use when wiring SCA (dependency-vulnerability scanning) as a CI gate for a .NET build — `dotnet list package --vulnerable` over the direct + transitive tree, failing above a severity threshold, with a ticketed suppression path. Triggers "fail the build on vulnerable dependencies", "add dependency scanning", "gate new CVEs". Not for runtime DAST (`security-testing/passive-scan`) or container/IaC layers (`image-infra-scan`).
 ---
 
@@ -110,7 +110,7 @@ TS sibling's `npm audit --audit-level=high`.
 A real project's first scan lights up — including findings you **cannot fix today** because they're in a
 **transitive** package or are false positives. Gating on *everything* with no triage trains the team to
 mute the gate. The disciplined approach is the **ticketed suppression** — same discipline as
-`qa-accessibility-testing-dotnet` and `passive-scan`'s `rules.tsv`, ported to SCA.
+`qa-dotnet:accessibility-testing` and `passive-scan`'s `rules.tsv`, ported to SCA.
 
 ```xml
 <!-- Directory.Build.props (or the .csproj) — ticketed, per-advisory suppression -->
@@ -152,7 +152,7 @@ bump its line. Three honest responses, in order of preference:
 ## Report → Allure + SARIF / GitHub code-scanning
 
 `dotnet list package --vulnerable --format json` emits the full finding set. Attach it (plus a summary) to
-Allure so a failing run names the CVEs without re-scanning (cross-link `qa-test-reports-dotnet`):
+Allure so a failing run names the CVEs without re-scanning (cross-link `qa-dotnet:test-reports`):
 
 ```csharp
 // Support/DependencyScanReport.cs — run the scan, attach JSON + summary to Allure, return the findings
@@ -181,11 +181,11 @@ public static class DependencyScanReport
 }
 ```
 
-- **Allure** — attach the JSON + a readable summary (cross-link `qa-test-reports-dotnet`).
+- **Allure** — attach the JSON + a readable summary (cross-link `qa-dotnet:test-reports`).
 - **SARIF → GitHub code-scanning** — convert the JSON to SARIF (a converter step) and feed
   `github/codeql-action/upload-sarif` so each CVE shows inline on the PR. (OWASP Dependency-Check emits
   SARIF natively if you use it for cross-stack parity.)
-- **CI artifact** — upload the JSON (cross-link `qa-ci-pipelines-dotnet`).
+- **CI artifact** — upload the JSON (cross-link `qa-dotnet:ci-pipelines`).
 
 ## Optional parse-and-assert test (the programmatic path)
 
@@ -232,7 +232,7 @@ The Java/TS siblings parse their own tool's JSON the same way. Test name `Should
 ## CI wiring — the gate, the remediation complement
 
 ```yaml
-# .github/workflows/sca.yml — cross-link qa-ci-pipelines-dotnet
+# .github/workflows/sca.yml — cross-link qa-dotnet:ci-pipelines
 name: Dependency Scan (SCA)
 on: [pull_request]
 
@@ -310,16 +310,16 @@ These sections live in `references/details.md` — **read it when the task touch
 
 ## Cross-references
 
-- `qa-security-dependency-scan-java` — same skill, Java / **OWASP Dependency-Check Gradle
+- `qa-java:dependency-scan` — same skill, Java / **OWASP Dependency-Check Gradle
   plugin** (`failBuildOnCVSS`, suppression XML with `until=`); the **canonical** sibling and the cross-stack
   throughline.
-- `qa-security-dependency-scan-typescript` — same skill, TS / `npm audit` (`--audit-level`,
+- `qa-typescript:dependency-scan` — same skill, TS / `npm audit` (`--audit-level`,
   `--json`, `overrides`/`.nsprc`).
-- `qa-security-passive-scan-dotnet` — the **DAST** sibling that opened the `security-testing`
+- `qa-dotnet:passive-scan` — the **DAST** sibling that opened the `security-testing`
   family: ZAP probes the **running app's HTTP surface**; SCA reads your **build graph**. Orthogonal layers
   — **run both** (together they close Step 2).
-- `qa-accessibility-testing-dotnet` — the **ticketed-baseline triage** discipline
+- `qa-dotnet:accessibility-testing` — the **ticketed-baseline triage** discipline
   reused here for the suppression list (gate new findings, document every suppression with a ticket).
-- `qa-ci-pipelines-dotnet` — the gate step, `dependency-review-action`, artifact upload.
-- `qa-test-reports-dotnet` — attach the `dotnet list package --vulnerable --format json` report to the
+- `qa-dotnet:ci-pipelines` — the gate step, `dependency-review-action`, artifact upload.
+- `qa-dotnet:test-reports` — attach the `dotnet list package --vulnerable --format json` report to the
   run.

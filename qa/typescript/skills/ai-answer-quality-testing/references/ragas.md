@@ -11,7 +11,7 @@ just implements the triad legs for you.
 **Faithfulness**, **ResponseRelevancy**, and LLM- *and* non-LLM **context precision/recall** metrics, plus a
 corpus→**test-set generator**. It is **Python** — there is no Node package — so from this TS suite you drive it the
 same honest way the stack drives promptfoo/DeepEval: **as a subprocess** (`execa` → `python eval_rag.py`) whose
-JSON/CSV output you parse and gate, the CLI-port shape of `qa-security-passive-scan-typescript`. Pin the
+JSON/CSV output you parse and gate, the CLI-port shape of `qa-typescript:passive-scan`. Pin the
 **evaluator LLM** to the house-default Claude (CLAUDE.md) — Ragas defaults to OpenAI.
 
 > **Note on the API surface.** Ragas' legacy metric API (`Faithfulness(llm=…)` + `single_turn_ascore`, and
@@ -162,7 +162,7 @@ export async function runRagGate(): Promise<void> {
   });
   // the script exits non-zero when any metric mean falls below its threshold — that is the gate
   const report = JSON.parse(await readFile("evals/.results/rag.json", "utf8"));
-  void report;   // map per-row scores -> Allure named results (qa-test-reports-typescript)
+  void report;   // map per-row scores -> Allure named results (qa-typescript:test-reports)
   if (exitCode !== 0) throw new Error("RAG eval gate failed — a triad/recall metric scored below threshold");
 }
 ```
@@ -184,7 +184,7 @@ export async function runRagGate(): Promise<void> {
 ## Cross-references
 
 - `SKILL.md` — the RAG-testing discipline (decomposition, triad, golden-set-with-contexts) that routes here.
-- `qa-ai-feature-testing-typescript` — the **parent**: four ideas, judge-pinning + calibration, the promptfoo /
+- `qa-typescript:ai-feature-testing` — the **parent**: four ideas, judge-pinning + calibration, the promptfoo /
   DeepEval spines (whose `references/deepeval.md` maps the same triad onto DeepEval's `Contextual*` metrics).
-- `qa-data-driven-testing-typescript` — the golden-set row mechanics.
-- `qa-db-testing-*-typescript` — seed/assert/tear-down the vector index the retriever reads.
+- `qa-typescript:data-driven-testing` — the golden-set row mechanics.
+- `qa-typescript:db-*` — seed/assert/tear-down the vector index the retriever reads.

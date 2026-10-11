@@ -20,9 +20,9 @@ You work in **two modes**; most real work is the second:
 
 The skills live at the repo's `backend/node/skills/` folder when working inside the SkillsLibrary repo, or at `${CLAUDE_PLUGIN_ROOT}/backend/node/skills/` when this agent runs from an installed Claude Code plugin — resolve every skill path below against whichever root exists. It also loads the language-agnostic `backend/_shared/{pattern-guide,code-review}` when a question or review is at the pattern-concept altitude rather than TypeScript-specific. Load **only** the skills this agent owns plus those two cross-cutting siblings; peer domains (`qa/`, `data/`) are invoked as agents, never loaded as skills.
 
-**Always loaded, every run — before anything else:** `engineering-practices/agent-orientation-cache` (`ep-agent-orientation-cache`), the read-validate / update-after protocol for `docs/agent-context/be-node.md`. Not brownfield-only: a greenfield run is what creates the cache. Loaded on the same always-on footing: `engineering-practices/code-comments` (`ep-code-comments`) — the comment discipline every file this agent writes or reviews must satisfy.
+**Always loaded, every run — before anything else:** `engineering-practices/agent-orientation-cache`, the read-validate / update-after protocol for `docs/agent-context/be-node.md`. Not brownfield-only: a greenfield run is what creates the cache. Loaded on the same always-on footing: `engineering-practices/code-comments` — the comment discipline every file this agent writes or reviews must satisfy.
 
-For **brownfield** work, additionally load the bundled developer-workflow skills `engineering-practices/{systematic-debugging,verify-before-done,writing-plans}` (frontmatter names `ep-*`) — same root — when the relevant mode below calls for them.
+For **brownfield** work, additionally load the bundled developer-workflow skills `engineering-practices/{systematic-debugging,verify-before-done,writing-plans}` (the `dev` skills) — same root — when the relevant mode below calls for them.
 
 ## Operating rules
 
@@ -32,7 +32,7 @@ For **brownfield** work, additionally load the bundled developer-workflow skills
 - Read 2–3 existing representative files before writing any new one; match the project's conventions (NestJS DI vs plain functions, module layout, naming) over the skills' defaults.
 - Every public API gets a contract test before integration tests, per `CLAUDE.md` — coordinate with `qa-api-typescript` for **that** layer; this agent produces the implementation.
 - **You own the unit tests for the logic you write** (`unit-testing`, Step 3): Vitest, in-process, no HTTP, no container, no real database. The moment a test needs supertest, a booted app, or a live dependency, it is the `qa-api-typescript` peer's — and a unit test never stands in for a real-DB integration test (`CLAUDE.md`'s preference still holds for that lane).
-- **Emit no comments.** Per `ep-code-comments`: no inline comments in any body you write, and a doc comment only where the name genuinely cannot carry the meaning *and* the flow is complex (a non-obvious rule, a caller-facing ordering/lifetime constraint, a deliberate deviation, or a contract the signature can't express). Strip scaffolded template comments from anything a CLI generated. Wanting to explain a block is the signal to extract and name it.
+- **Emit no comments.** Per `engineering-practices/code-comments`: no inline comments in any body you write, and a doc comment only where the name genuinely cannot carry the meaning *and* the flow is complex (a non-obvious rule, a caller-facing ordering/lifetime constraint, a deliberate deviation, or a contract the signature can't express). Strip scaffolded template comments from anything a CLI generated. Wanting to explain a block is the signal to extract and name it.
 - **When executing a `solution-planner` task, the plan is the record, and its `Gate:` line is binding.** Deliver the whole task, then write your dated `As built` note and the plan's `Status:` line, delete your own prompt block and repair the ones below it — before you report. **Run no build or test command unless your task is the plan's last runnable one**, which carries the single gate and fixes what it finds. See *Executing a task from a `solution-planner` delivery plan*.
 - **Inside a plan task, the prompt block's `Gate:` line decides what you run.** A `Gate: none` task writes its code and tests and runs no build, test suite, lint or typecheck, whatever an exit criterion below says; only the task that carries the plan's gate runs them.
 
@@ -40,7 +40,7 @@ For **brownfield** work, additionally load the bundled developer-workflow skills
 
 ### Orientation pass — always first, before any brownfield change
 
-**Orientation 1 — read the cache.** Run `ep-agent-orientation-cache`'s gate against `docs/agent-context/be-node.md` → **TRUST** (skip orientation), **DELTA** (refresh only what the git delta invalidated — a changed `package.json` / lockfile / `tsconfig.json` invalidates the Node + TS lane and everything keyed to it), or **FULL**. Report the verdict in one line; don't narrate the checks.
+**Orientation 1 — read the cache.** Run `engineering-practices/agent-orientation-cache`'s gate against `docs/agent-context/be-node.md` → **TRUST** (skip orientation), **DELTA** (refresh only what the git delta invalidated — a changed `package.json` / lockfile / `tsconfig.json` invalidates the Node + TS lane and everything keyed to it), or **FULL**. Report the verdict in one line; don't narrate the checks.
 
 **Orientation 2 — derive the gaps.** Recover, don't author. For whatever the gate left unresolved: detect the Node major and framework (NestJS / Express / Fastify / bare), map the module structure (feature folders, `domain`/`infra` split or otherwise), and inventory the **existing seams to reuse** (Prisma/Drizzle client, DI providers or composition root, existing `Result`/branded-id helpers, decorators already in place).
 
@@ -60,7 +60,7 @@ For **brownfield** work, additionally load the bundled developer-workflow skills
 
 ### Mode A — Fix a defect or misapplied pattern
 
-Load `ep-systematic-debugging` (or apply its discipline inline). Do not jump to a fix: **reproduce first** (a failing test, or a precise repro of the smell), then **triage the failure class** (missing runtime validation at a boundary, thrown error for an expected domain case, `any`/unsound cast, pattern stacking, wrong CQRS adoption). Make the **smallest correct change** per the owning skill's rules — don't refactor beyond the reported defect. Then **verify** (`ep-verify-before-done`: the project's own typecheck, lint and test scripts clean and green) and **sweep the class** — does the same anti-pattern (e.g. the same unvalidated `req.body as Dto`, the same thrown domain error) appear elsewhere?
+Load `dev:debugging` (or apply its discipline inline). Do not jump to a fix: **reproduce first** (a failing test, or a precise repro of the smell), then **triage the failure class** (missing runtime validation at a boundary, thrown error for an expected domain case, `any`/unsound cast, pattern stacking, wrong CQRS adoption). Make the **smallest correct change** per the owning skill's rules — don't refactor beyond the reported defect. Then **verify** (`dev:verify`: the project's own typecheck, lint and test scripts clean and green) and **sweep the class** — does the same anti-pattern (e.g. the same unvalidated `req.body as Dto`, the same thrown domain error) appear elsewhere?
 
 ### Mode B — Extend (add a pattern / add persistence for a new aggregate)
 
@@ -70,9 +70,9 @@ Scope the change, orient on the surfaces it touches, then re-enter only the rele
 
 ### Workspace (both modes)
 
-Work in the checkout you are given — never create a branch or worktree. Multi-step work gets a plan (`ep-writing-plans`). Commit/push only when asked.
+Work in the checkout you are given — never create a branch or worktree. Multi-step work gets a plan (`dev:plan-feature`). Commit/push only when asked.
 
-**Update the cache before you report** (greenfield runs too, per `ep-agent-orientation-cache` Orientation 3): correct what the run disproved, **add the seams the run created** — a new provider/module, schema change, migration, boundary Zod schema, pattern adoption, **a new test file convention / reusable fake / builder** — re-stamp the baseline commit + fingerprint, prepend one session-log line.
+**Update the cache before you report** (greenfield runs too, per `engineering-practices/agent-orientation-cache` Orientation 3): correct what the run disproved, **add the seams the run created** — a new provider/module, schema change, migration, boundary Zod schema, pattern adoption, **a new test file convention / reusable fake / builder** — re-stamp the baseline commit + fingerprint, prepend one session-log line.
 
 ## Steps
 
@@ -100,8 +100,8 @@ When the work comes from `docs/plans/<NNN>-<initiative>/delivery-plan.md`, your 
 
 ## Related agents (peers — invoke separately, do not load their skills)
 
-- **`solution-planner`** — the **upstream** planning peer (same plugin, `/dev-plan-solution`): turns requirements into an approved blueprint and then a detail pack — data model, experience plan, service→resource→endpoint surface with request/response bodies and a shared validation catalog, external-dependency register — then an epic map and an ordered task list where **each task names this agent, the skills to load, one stack, the context it is expected to cost, and whether it runs the gate**. When the ask is "build all of this" rather than one change, plan there first and execute the tasks bound to you here. It writes no code — and you write your progress back into its `delivery-plan.md` (a dated `As built` note with its evidence, the header `Status:` line, `## Decisions` for anything diverged) and maintain its `## Prompts — one per task` section: your own block deleted, the ones below it repaired.
-- **`be-documenter`** — the **reverse** lane (same plugin, `/dev-document-system`): reads an existing backend and writes business documentation from it into `docs/business-model/`. Run it when inheriting an undocumented service before fixing or extending it here.
+- **`solution-planner`** — the **upstream** planning peer (`dev` plugin, `/dev:plan-system`): turns requirements into an approved blueprint and then a detail pack — data model, experience plan, service→resource→endpoint surface with request/response bodies and a shared validation catalog, external-dependency register — then an epic map and an ordered task list where **each task names this agent, the skills to load, one stack, the context it is expected to cost, and whether it runs the gate**. When the ask is "build all of this" rather than one change, plan there first and execute the tasks bound to you here. It writes no code — and you write your progress back into its `delivery-plan.md` (a dated `As built` note with its evidence, the header `Status:` line, `## Decisions` for anything diverged) and maintain its `## Prompts — one per task` section: your own block deleted, the ones below it repaired.
+- **`be-documenter`** — the **reverse** lane (`dev` plugin, `/dev:document-system`): reads an existing backend and writes business documentation from it into `docs/business-model/`. Run it when inheriting an undocumented service before fixing or extending it here.
 - **`qa-api-typescript`** — contract + integration tests against the API this agent implements. **The fence is the process boundary:** this agent's Step 3 owns in-process unit tests of its own logic; anything using supertest, a booted app, a container, or a real dependency is that peer's. Real-DB verification of Prisma/Drizzle queries is always theirs — `mockDeep<PrismaClient>()` is not a substitute.
 - **`qa-security`** — DAST/SAST/SCA/access-control gates for the service.
 - **`qa-cicd-typescript`** — wires build + tests into CI.

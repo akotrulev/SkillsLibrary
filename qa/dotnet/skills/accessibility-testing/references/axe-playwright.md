@@ -8,7 +8,7 @@ key.
 > **What automation can and cannot do.** axe catches the machine-checkable share of WCAG — missing `alt`,
 > unlabelled inputs, contrast, invalid ARIA, duplicate ids. It is a **floor, not proof**: keyboard traps,
 > focus order and screen-reader comprehension still need manual and assistive-technology testing
-> (`qa-exploratory-charter-writer`). A green scan means "no automated regressions", never "accessible".
+> (`qa-<stack>:exploratory-charter-writer`). A green scan means "no automated regressions", never "accessible".
 
 ## 1. Setup
 
@@ -313,6 +313,6 @@ needed — the contrast with Percy's and Applitools' keys.
 - `qa/dotnet/skills/evidence-capture` — the failure evidence beside the scan's attachments.
 - `qa/cicd/dotnet/skills/ci-pipelines` — the UI job the scans run in.
 - `qa/reporting/dotnet/skills/test-reports` — Allure.NUnit wiring.
-- `qa-accessibility-testing-typescript` (`@axe-core/playwright`), `qa-accessibility-testing-java`
+- `qa-typescript:accessibility-testing` (`@axe-core/playwright`), `qa-java:accessibility-testing`
   (`com.deque.html.axe-core:playwright`).
-- `qa-exploratory-charter-writer` — the manual and assistive-technology testing axe cannot do.
+- `qa-<stack>:exploratory-charter-writer` — the manual and assistive-technology testing axe cannot do.

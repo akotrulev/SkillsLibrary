@@ -1,5 +1,5 @@
 ---
-name: qa-mobile-screen-explorer-dotnet
+name: mobile-screen-explorer
 description: Use when a .NET mobile suite needs to explore the currently open Android/iOS app on a real device or emulator through the Appium MCP server — enumerate elements, derive per-platform test-id locators, and produce a `missing-testids.md` report. Triggers "explore this screen", "what's on the current screen", "find the locators for X", "inventory this app screen". Not for emitting the screen object (`mobile-screen-objects`) or authoring the test (`ui-test-author/appium`).
 ---
 

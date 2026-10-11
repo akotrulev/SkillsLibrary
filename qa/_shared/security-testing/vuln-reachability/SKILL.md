@@ -1,5 +1,5 @@
 ---
-name: qa-security-vuln-reachability
+name: vuln-reachability
 description: Use to de-noise an existing SCA/SAST gate so it fires on EXPLOITABLE-AND-REACHABLE, not raw CVSS — a post-processing stage that joins scanner output on CVE id against CISA KEV + EPSS + VEX, then rewrites the verdict. Read-only, no re-scan, safe every PR. Language-agnostic. Triggers "our CVE gate is too noisy", "gate on exploitability not CVSS", "add EPSS/KEV weighting". Do NOT use to run a scan (`dependency-scan`/`image-infra-scan`/`code-scan`) or to exploit a CVE (`exploit-validation`).
 ---
 
@@ -18,7 +18,7 @@ running unchanged and stay authoritative on *"is the vulnerable component presen
 function of their output + cached public feeds** — it joins on the CVE id, so it works identically for Trivy,
 Grype, `npm audit`, OWASP Dependency-Check, and `dotnet list --vulnerable`. It is **read-only and safe on
 every PR** — it reads public feeds and local scanner JSON, sends no payloads, and needs no authorization gate
-(the one exploit-weighting skill that doesn't). It pairs with `qa-security-shared` (the OWASP backbone,
+(the one exploit-weighting skill that doesn't). It pairs with `qa-<stack>:security-foundations` (the OWASP backbone,
 esp. **A03:2025 Software Supply Chain Failures**) — load that alongside.
 
 ## The single most important rule: never multiply EPSS by CVSS
@@ -170,13 +170,13 @@ finding, correctly demoted. Add a VEX `not_affected / vulnerable_code_not_in_exe
 
 ## Cross-references
 
-- `qa-security-shared` — the OWASP backbone (**A03:2025 Software Supply Chain**), the triage discipline
+- `qa-<stack>:security-foundations` — the OWASP backbone (**A03:2025 Software Supply Chain**), the triage discipline
   (ticketed suppressions, gate NEW) this skill sharpens. **Load alongside.**
 - `qa/<stack>/skills/security-testing/dependency-scan` (npm audit · OWASP DC · `dotnet list --vulnerable`) ·
-  `qa-security-image-infra-scan` (Trivy) · `qa-security-code-scan` (Opengrep/Semgrep) — the **detection
+  `qa-<stack>:image-infra-scan` (Trivy) · `qa-<stack>:code-scan` (Opengrep/Semgrep) — the **detection
   gates** whose output this skill enriches. It re-scans none of them; it re-decides their verdicts. This is
   the single biggest quality-of-life win for those gates.
-- `qa-security-exploit-validation` — the sibling that *proves* a reachable CVE is exploitable. Reachability
+- `qa-<stack>:exploit-validation` — the sibling that *proves* a reachable CVE is exploitable. Reachability
   says "the code is on the execute path"; exploit-validation fires the payload. This skill prioritizes what
   that one then proves.
 - `qa/manual/bug-report-writer` — an ACT/ATTEND verdict on a real CVE is written up with its KEV/EPSS/VEX

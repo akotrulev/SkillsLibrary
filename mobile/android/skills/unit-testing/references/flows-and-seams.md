@@ -1,6 +1,6 @@
 # Android — Flows and seams in tests
 
-*Deep dive for [`mobile-android-unit-testing`](../SKILL.md). Samples have no inline comments (CLAUDE.md § Comments).*
+*Deep dive for [`mobile-android:unit-testing`](../SKILL.md). Samples have no inline comments (CLAUDE.md § Comments).*
 
 ---
 

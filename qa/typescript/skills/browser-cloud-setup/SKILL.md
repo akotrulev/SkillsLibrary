@@ -1,6 +1,6 @@
 ---
-name: qa-browser-cloud-setup-typescript
-description: Use when the user needs to run TypeScript Playwright (web) or WebdriverIO/Appium (mobile) tests on a **hosted cloud grid**. Triggers: "run our Playwright tests on BrowserStack", "wire WebdriverIO to Sauce Labs", "set up LambdaTest caps for our Appium TS tests". Not for real-device app upload and device matrices (`qa-device-cloud-typescript`) or writing the tests (`qa-ui-test-writer-playwright-typescript`).
+name: browser-cloud-setup
+description: Use when the user needs to run TypeScript Playwright (web) or WebdriverIO/Appium (mobile) tests on a **hosted cloud grid**. Triggers: "run our Playwright tests on BrowserStack", "wire WebdriverIO to Sauce Labs", "set up LambdaTest caps for our Appium TS tests". Not for real-device app upload and device matrices (`qa-typescript:device-cloud`) or writing the tests (`qa-typescript:ui-tests-playwright`).
 ---
 
 # QA — Cloud Grid Config (TypeScript: Playwright + WebdriverIO/Appium)

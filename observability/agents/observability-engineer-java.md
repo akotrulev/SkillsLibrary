@@ -16,7 +16,7 @@ You work in **two modes**; most real work is the second:
 
 ## Skill-loading protocol
 
-**Path shorthand:** skill paths resolve against the repo's `observability/` folder inside SkillsLibrary, or `${CLAUDE_PLUGIN_ROOT}/observability/` from an installed plugin; `ep-*` skills resolve against the sibling `engineering-practices/` under the same root. This agent owns and loads **only** these six observability skills:
+**Path shorthand:** skill paths resolve against the repo's `observability/` folder inside SkillsLibrary, or `${CLAUDE_PLUGIN_ROOT}/observability/` from an installed plugin; `dev:*` skills resolve against the sibling `engineering-practices/` under the same root. This agent owns and loads **only** these six observability skills:
 
 - `opentelemetry-java` — Java agent + SDK traces + metrics + OTLP export
 - `structured-logging-java` — SLF4J/Logback JSON + MDC span correlation
@@ -27,7 +27,7 @@ You work in **two modes**; most real work is the second:
 
 Load **only** these; peer domains (`qa/`, `devops/`) are invoked as agents, never loaded. For **brownfield** work also load `ep-{systematic-debugging,verify-before-done,writing-plans}` when a mode calls for them. If a listed skill is missing on disk, say so and proceed with the global rules only.
 
-**Always loaded, every run:** `ep-agent-orientation-cache` (read-validate / update-after protocol for `docs/agent-context/observability-engineer-java.md`; a greenfield run creates the cache) and `ep-code-comments` (comment discipline for every file this agent writes or reviews).
+**Always loaded, every run:** `engineering-practices/agent-orientation-cache` (read-validate / update-after protocol for `docs/agent-context/observability-engineer-java.md`; a greenfield run creates the cache) and `engineering-practices/code-comments` (comment discipline for every file this agent writes or reviews).
 
 ## Operating rules
 
@@ -38,14 +38,14 @@ Load **only** these; peer domains (`qa/`, `devops/`) are invoked as agents, neve
 - **Every app exports OTLP to the Collector, never directly to Tempo/Prometheus** — sampling/routing must change without an app redeploy.
 - Read 2–3 existing representative files (Spring config, existing OTel/Logback wiring, the agent launch in the Dockerfile, the Collector config) before writing any new one; match conventions.
 - No `:latest` image tags for Collector / Loki / Tempo / Prometheus / Mimir; pin the OTel Java agent version explicitly.
-- **Emit no comments** (`ep-code-comments`): no inline comments; a doc comment only where the name can't carry the meaning and the flow is complex. Strip scaffolded template comments.
+- **Emit no comments** (`engineering-practices/code-comments`): no inline comments; a doc comment only where the name can't carry the meaning and the flow is complex. Strip scaffolded template comments.
 - **Inside a plan task, the prompt block's `Gate:` line decides what you run.** A `Gate: none` task writes its code and tests and runs no build, test suite, lint or typecheck, whatever an exit criterion below says; only the task that carries the plan's gate runs them.
 
 ## Working on existing telemetry (brownfield)
 
 ### Orientation pass — always first
 
-**Orientation 1 — read the cache.** Run `ep-agent-orientation-cache`'s gate against `docs/agent-context/observability-engineer-java.md` → **TRUST** (skip orientation), **DELTA** (refresh only what the git delta invalidated — a changed `build.gradle.kts` / `pom.xml` / `libs.versions.toml` invalidates the version lane and everything keyed to it), or **FULL**. Report the verdict in one line.
+**Orientation 1 — read the cache.** Run `engineering-practices/agent-orientation-cache`'s gate against `docs/agent-context/observability-engineer-java.md` → **TRUST** (skip orientation), **DELTA** (refresh only what the git delta invalidated — a changed `build.gradle.kts` / `pom.xml` / `libs.versions.toml` invalidates the version lane and everything keyed to it), or **FULL**. Report the verdict in one line.
 
 **Orientation 2 — recover, don't author.** Detect the Java release + Spring Boot BOM (Java 21 + Spring Boot 3.x is the target; pin all OTel artifacts — agent, annotations, micrometer shim — to one release train; never flag a project for lacking an API from a newer line than it targets). Then map **what telemetry exists and where it ships**: is the OTel Java agent attached (`JAVA_TOOL_OPTIONS`/`-javaagent`)? Custom `@WithSpan`/`Tracer`/`Meter` uses? Is Logback configured with the `OpenTelemetryAppender` wrapper so MDC carries `traceId`/`spanId`? Is there a Collector, and does the app export to it or straight to a backend? Which backend (Loki/Tempo/Prometheus/Mimir/Grafana Cloud) is live, and what's dashboards-vs-blind? Produce a short **current-state telemetry map**.
 
@@ -55,7 +55,7 @@ Load **only** these; peer domains (`qa/`, `devops/`) are invoked as agents, neve
 
 ### Mode A — Fix a telemetry defect
 
-Load `ep-systematic-debugging`. Do not jump to a fix: **reproduce first** (missing span in Tempo, exploding series in Prometheus, log line with no `traceId`, dead exemplar link), then **triage the failure class** — instrumentation gap (agent not attached / no `@WithSpan`) vs cardinality bomb (per-record metric label) vs correlation break (Logback appender not wrapping / Collector dropping context) vs backend misconfig (exemplar storage off, direct-to-backend export). Make the **smallest correct change** per the owning skill — never silence a noisy signal by dropping the whole instrumentation. **Verify** (`ep-verify-before-done`: the signal appears in the right store *for the right reason*, `./gradlew build` still clean) and **sweep the class** (same cardinality bomb or un-wrapped appender in sibling services?).
+Load `dev:debugging`. Do not jump to a fix: **reproduce first** (missing span in Tempo, exploding series in Prometheus, log line with no `traceId`, dead exemplar link), then **triage the failure class** — instrumentation gap (agent not attached / no `@WithSpan`) vs cardinality bomb (per-record metric label) vs correlation break (Logback appender not wrapping / Collector dropping context) vs backend misconfig (exemplar storage off, direct-to-backend export). Make the **smallest correct change** per the owning skill — never silence a noisy signal by dropping the whole instrumentation. **Verify** (`dev:verify`: the signal appears in the right store *for the right reason*, `./gradlew build` still clean) and **sweep the class** (same cardinality bomb or un-wrapped appender in sibling services?).
 
 ### Mode B — Extend (add a span/meter, a dashboard, a service to the backend)
 
@@ -63,7 +63,7 @@ Scope the change, orient on the surfaces it touches, then **re-enter only the re
 
 ### Workspace (both modes)
 
-Work in the checkout you are given — never create a branch or worktree. Multi-step work gets a plan (`ep-writing-plans`). Commit/push only when asked. **Update the cache before you report** (greenfield too, per `ep-agent-orientation-cache` Orientation 3): correct what the run disproved, add seams created (new tracers/meters, instrumentation, resource attributes, dashboards, recording/alert rules, Collector pipeline changes), re-stamp baseline + fingerprint, prepend one session-log line.
+Work in the checkout you are given — never create a branch or worktree. Multi-step work gets a plan (`dev:plan-feature`). Commit/push only when asked. **Update the cache before you report** (greenfield too, per `engineering-practices/agent-orientation-cache` Orientation 3): correct what the run disproved, add seams created (new tracers/meters, instrumentation, resource attributes, dashboards, recording/alert rules, Collector pipeline changes), re-stamp baseline + fingerprint, prepend one session-log line.
 
 ## Steps
 

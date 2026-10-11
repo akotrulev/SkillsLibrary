@@ -1,5 +1,5 @@
 ---
-name: devops-threat-modeling
+name: threat-modeling
 description: Use to threat-model a system BEFORE testing it — DFDs, STRIDE-per-element, attack trees, and a threat register routing each threat to the lane that tests it. Triggers "threat model this service", "STRIDE analysis", "what should the security assessment cover". Do NOT use to run a scanner or benchmark (`devops/{k8s-security,iac-security,cloud-posture,container-runtime-security}`), to attack (`qa-security`, `penetration-tester`), or to plan an assessment (`security-test-planner`).
 ---
 
@@ -37,7 +37,7 @@ Shostack's method-agnostic frame is the spine of a run; STRIDE and attack trees 
 | Enumerate technical threats element-by-element | **STRIDE-per-element** | `references/stride.md` |
 | Reason about *a specific attacker goal* in depth | **Attack tree** | `references/attack-trees.md` |
 | Model privacy threats (regulated personal data) | **LINDDUN** (alongside STRIDE) | `references/stride.md` (Where STRIDE runs out) |
-| Model business-logic abuse (legal steps, illegal outcome) | **abuse cases / decision tables** | `qa/manual/test-design-techniques`, `ba-decision-table` |
+| Model business-logic abuse (legal steps, illegal outcome) | **abuse cases / decision tables** | `qa/manual/test-design-techniques`, `business-analysis:decision-table` |
 | Risk-centric, business-impact-first pass on a high-stakes system | **PASTA** (7-stage) | `references/stride.md` |
 
 **STRIDE is the default** for a service or platform. Reach for an attack tree only after STRIDE surfaces a high-value goal worth decomposing (cross-tenant data read, cluster-admin, supply-chain compromise) — the tree explains *how far a single objective reaches*, which STRIDE's breadth does not.
@@ -110,7 +110,7 @@ Write one file per system to `docs/security/threat-models/` on the current branc
 docs/security/threat-models/<NNN>-<system>.md
 ```
 
-`<NNN>` is zero-padded, minted once per system and reused when the model is revised (never renumbered), per the library-wide `<NNN>-<slug>` convention. The document contains: the **DFD** (Mermaid), the **STRIDE table per element** (applicable letters answered, "n/a because —" where blank), any **attack trees**, and the **prioritized threat register with the routing table**. Open it with `**Date:** <YYYY-MM-DD>` · `**Author:** \`devops-threat-modeling\`` · the system + version lane · the scope (what was in and out of the model). Threat IDs (`T-01…`) are permanent so a downstream lane and a later revision cite the same row.
+`<NNN>` is zero-padded, minted once per system and reused when the model is revised (never renumbered), per the library-wide `<NNN>-<slug>` convention. The document contains: the **DFD** (Mermaid), the **STRIDE table per element** (applicable letters answered, "n/a because —" where blank), any **attack trees**, and the **prioritized threat register with the routing table**. Open it with `**Date:** <YYYY-MM-DD>` · `**Author:** \`devops:threat-modeling\`` · the system + version lane · the scope (what was in and out of the model). Threat IDs (`T-01…`) are permanent so a downstream lane and a later revision cite the same row.
 
 ## Anti-patterns
 
@@ -120,7 +120,7 @@ docs/security/threat-models/<NNN>-<system>.md
 - **Boundaries drawn but crossings not enumerated.** The boundary is where the threats live; a crossing with no rows is the gap. *Fix:* enumerate every crossing twice (sender + receiver).
 - **A vague threat.** "Injection risk" can't be tested or routed. *Fix:* actor + action + consequence, specific enough that the downstream lane knows exactly what to try.
 - **Modelling once and never revisiting.** The model rots as the architecture changes. *Fix:* it is diagram-as-code beside the repo; revise it on an architecture change and re-route the new threats (question 4).
-- **Threat-modelling business logic with STRIDE.** A refund loop is a legal sequence with an illegal outcome — STRIDE won't see it. *Fix:* abuse cases / `ba-decision-table` / `qa/manual/test-design-techniques`.
+- **Threat-modelling business logic with STRIDE.** A refund loop is a legal sequence with an illegal outcome — STRIDE won't see it. *Fix:* abuse cases / `business-analysis:decision-table` / `qa/manual/test-design-techniques`.
 
 ## Rules (hard constraints)
 
@@ -140,4 +140,4 @@ docs/security/threat-models/<NNN>-<system>.md
 - `qa-security` — the app-layer executor for authz/authn/injection/exposure threats (`permission-testing`, the `_shared/security-testing/*` scanners, `exploit-validation`); the threat model this produces replaces its inline Step-1 model.
 - `penetration-tester` (`security/` domain) — the executor for threats whose real impact is a multi-stage chain.
 - `data-architect` — owns the data-tier trust boundary and the cross-tenant leak test that proves a tenancy threat's mitigation holds.
-- `ba-process-flow-diagram` / `ba-decision-table` — the requirements-side flow/decision modelling; the fence is business process (theirs) vs security threats (this).
+- `business-analysis:process-flow` / `business-analysis:decision-table` — the requirements-side flow/decision modelling; the fence is business process (theirs) vs security threats (this).

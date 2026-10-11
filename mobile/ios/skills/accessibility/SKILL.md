@@ -1,11 +1,11 @@
 ---
-name: mobile-ios-accessibility
+name: accessibility
 description: Use when a SwiftUI or UIKit screen must work with VoiceOver, Dynamic Type through the accessibility sizes, Reduce Motion and Differentiate Without Color — labels, traits, values, grouping, rotors, custom actions, focus, announcements, touch targets. Triggers "VoiceOver reads the wrong thing", "text clips at large sizes", "announce the result". Do NOT use for scanning (`qa-mobile-<stack>`), field errors (`-forms`) or animation mechanics (`-animation`).
 ---
 
 # iOS — Accessibility
 
-Standardises **authoring** accessible iOS screens against **WCAG 2.2 AA** and VoiceOver's conventions. The house rule: **a real control with the right label, trait and value; never rebuild semantics on a bare `View` or `UIView`.** Web analog: [`fe-react-accessibility`](../../../../frontend/react/skills/accessibility/SKILL.md) — semantic-first, announcements and focus management carry over; landmarks, Tab order and skip links do not. Sibling: [`mobile-react-native-accessibility`](../../../react-native/skills/accessibility/SKILL.md) (the same rules through RN props).
+Standardises **authoring** accessible iOS screens against **WCAG 2.2 AA** and VoiceOver's conventions. The house rule: **a real control with the right label, trait and value; never rebuild semantics on a bare `View` or `UIView`.** Web analog: [`fe-react:accessibility`](../../../../frontend/react/skills/accessibility/SKILL.md) — semantic-first, announcements and focus management carry over; landmarks, Tab order and skip links do not. Sibling: [`mobile-react-native:accessibility`](../../../react-native/skills/accessibility/SKILL.md) (the same rules through RN props).
 
 **Boundary — authoring, not scanning.** Proving it on a device (a VoiceOver pass, Accessibility Inspector audit, XCUITest `performAccessibilityAudit()`, journeys with a screen reader on) is `qa-mobile-<stack>`'s. Target size, a non-drag alternative and accessible authentication are design decisions made first (`design/accessible-by-design`); this skill implements them. Design facts (type scale, contrast, targets) come from `design/ui-ux-pro-max` (`--stack swiftui`); the corpus wins on a disagreement.
 
@@ -36,7 +36,7 @@ Detect first: SwiftUI or UIKit per screen, any in-house component library that a
 - Validation messages on fields → [`forms`](../forms/SKILL.md) · banner and failed regions → [`error-handling`](../error-handling/SKILL.md)
 - `withAnimation` / Reduce Motion mechanics → [`animation`](../animation/SKILL.md) · semantic colours and type tokens → [`styling`](../styling/SKILL.md)
 - `accessibilityIdentifier` → [`test-ids`](../test-ids/SKILL.md) (an identifier is never a label)
-- Other stacks → `mobile-react-native-accessibility`, `mobile-android-accessibility`
+- Other stacks → `mobile-react-native:accessibility`, `mobile-android:accessibility`
 
 ## Lean on the platform
 
@@ -156,4 +156,4 @@ Inside a `Gate: none` plan task, run none of these and report "written, not run"
 - Field-level error wiring → [`forms`](../forms/SKILL.md) · failure surfaces → [`error-handling`](../error-handling/SKILL.md)
 - Reduce Motion mechanics → [`animation`](../animation/SKILL.md) · tokens and Liquid Glass → [`styling`](../styling/SKILL.md)
 - Identifiers → [`test-ids`](../test-ids/SKILL.md) · localized labels → [`languages`](../languages/SKILL.md)
-- Store declarations → [`mobile-shared-store-compliance`](../../../_shared/store-compliance/SKILL.md)
+- Store declarations → [`mobile-<stack>:store-compliance`](../../../_shared/store-compliance/SKILL.md)

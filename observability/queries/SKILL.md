@@ -1,5 +1,5 @@
 ---
-name: observability-queries
+name: queries
 description: Use when the user asks to write LogQL (Loki) or PromQL (Prometheus / Mimir) queries for dashboards, alerts, or ad-hoc investigation. Triggers: "write a LogQL for error logs in service X", "PromQL for p95 latency", "rate vs irate", "histogram_quantile recipe", "filter logs by trace id", "join metrics with labels". Do NOT use for dashboard layout (use `observability/dashboards`) or code instrumentation (use `observability/opentelemetry-{dotnet,java,node}`).
 ---
 

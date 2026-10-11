@@ -1,5 +1,5 @@
 ---
-name: qa-security-secrets-scan
+name: secrets-scan
 description: Use when scanning a repo and its git history for committed secrets — Gitleaks as the fast PR gate, TruffleHog to verify whether leaked credentials are live — blocking new leaks via pre-commit + CI. Language-agnostic (CLI/Docker). Triggers: "scan for leaked secrets", "add Gitleaks to CI", "a key was committed to the repo". Not for secrets inside a mobile binary (`mobile-app-scan`) or code flaws (`code-scan`).
 ---
 
@@ -14,10 +14,10 @@ read your code structure and your dependency tree; this reads for *literal secre
 been committed*. Maps to **OWASP A02:2025 Security Misconfiguration** and **A07:2025 Authentication
 Failures** (leaked credentials are a direct authn failure).
 
-> **One architectural fact (per `qa-security-shared`).** Gitleaks and TruffleHog are **language-agnostic
+> **One architectural fact (per `qa-<stack>:security-foundations`).** Gitleaks and TruffleHog are **language-agnostic
 > binaries** — they scan bytes and git objects, not a parsed AST or a package manager. A three-language
 > split gains nothing, so this is a **single shared skill** under `qa/_shared/security-testing/`, invoked
-> identically from any stack's pipeline. Don't triplicate a `docker run`. Load `qa-security-shared`
+> identically from any stack's pipeline. Don't triplicate a `docker run`. Load `qa-<stack>:security-foundations`
 > alongside it for the OWASP map, the ticketed-triage discipline, and the SARIF → code-scanning spine — this
 > skill carries only the secrets-specific tools, the git-history gotcha, and the rotate-not-delete rule.
 
@@ -142,11 +142,11 @@ The only correct response to a **true-positive** secret:
 This is exactly why **`gitleaks detect` (full history)** matters and a HEAD-only scan is a false comfort: the
 secret you need to rotate is almost always one already buried in a past commit.
 
-## Triage — ticketed allowlist + baseline (per `qa-security-shared`)
+## Triage — ticketed allowlist + baseline (per `qa-<stack>:security-foundations`)
 
 A real repo's first scan lights up — test fixtures with fake keys, example configs, already-rotated values
 still in history. Gating on *every* finding mutes the gate; the discipline (identical to the SCA suppression
-file and the axe baseline — defer to `qa-security-shared` for the full framing):
+file and the axe baseline — defer to `qa-<stack>:security-foundations` for the full framing):
 
 1. **Baseline the current state once** — `gitleaks detect --report-path baseline.json`, then run with
    `--baseline-path baseline.json` so existing findings are ignored and only **NEW** secrets fail. (Or
@@ -192,17 +192,17 @@ paths = ['''examples/terraform/.*''']
 ## Reporting — SARIF → code-scanning, JSON/junit → Allure
 
 Standardize on **SARIF** for inline PR findings and a human report for the run (per the
-`qa-security-shared` SARIF spine):
+`qa-<stack>:security-foundations` SARIF spine):
 
 - **Gitleaks** → `--report-format sarif --report-path gitleaks.sarif` for code-scanning; `--report-format
   junit` (or `json`) to attach to **Allure** + as a CI artifact.
 - **TruffleHog** → `--json` for a machine-readable artifact; the verified findings are the ones that gate.
 - Upload SARIF via `github/codeql-action/upload-sarif` so each leak shows **inline on the PR diff**,
-  de-duplicates run-over-run, and tracks fixed/new state (cross-link `qa-test-reports-{stack}`,
-  `qa-ci-pipelines-{stack}`).
+  de-duplicates run-over-run, and tracks fixed/new state (cross-link `qa-<stack>:test-reports`,
+  `qa-<stack>:ci-pipelines`).
 
 ```yaml
-# .github/workflows/secrets-scan.yml — cross-link qa-ci-pipelines-*
+# .github/workflows/secrets-scan.yml — cross-link qa-<stack>:ci-pipelines
 name: Secrets Scan
 on: [pull_request]
 
@@ -278,21 +278,21 @@ jobs:
 - Emit **SARIF** → code-scanning (inline PR findings) + **JSON/junit** → Allure + CI artifact.
 - **No secrets in the scanner config** (license, registry auth) — env vars, read lazily, never committed.
 - Map findings to **OWASP A02:2025 / A07:2025**; a clean secrets scan ≠ "secure" — run the other layers
-  (SAST, SCA, DAST) too (per `qa-security-shared`).
+  (SAST, SCA, DAST) too (per `qa-<stack>:security-foundations`).
 
 ## Cross-references
 
-- `qa-security-shared` — **load alongside this skill**: the OWASP map (A02/A07), the ticketed-triage
+- `qa-<stack>:security-foundations` — **load alongside this skill**: the OWASP map (A02/A07), the ticketed-triage
   discipline, the SARIF → code-scanning consolidation, and the layer map this skill plugs into (secrets =
   one layer; a clean scan says nothing about the others).
-- `qa-security-code-scan` — the **insecure-code-patterns / taint-flow** sibling (reads your source
+- `qa-<stack>:code-scan` — the **insecure-code-patterns / taint-flow** sibling (reads your source
   structure; secrets scanning reads for literal credentials — orthogonal).
-- `qa-security-testing-dependency-scan-{java,dotnet,typescript}` — the **SCA** sibling (reads your
+- `qa-<stack>:dependency-scan` — the **SCA** sibling (reads your
   **build graph** for vulnerable deps; secrets scanning reads your **source + history** for credentials).
-- `qa-ci-pipelines-{stack}` (+ `qa/cicd/ci-conventions`) — the gate step, full-history
+- `qa-<stack>:ci-pipelines` (+ `qa/cicd/ci-conventions`) — the gate step, full-history
   checkout, SARIF + artifact upload.
-- `qa-test-reports-{stack}` — attach the junit/JSON report to the run.
+- `qa-<stack>:test-reports` — attach the junit/JSON report to the run.
 - `qa/manual/bug-report-writer` — write up a confirmed leaked-credential finding (with the rotation step as
   the fix, not "delete the line").
-- `qa/_shared/agents/qa-security` — the step-by-step orchestrator that loads `qa-security-shared` + this tool skill
+- `qa/_shared/agents/qa-security` — the step-by-step orchestrator that loads `qa-<stack>:security-foundations` + this tool skill
   in the per-PR static-gate step.

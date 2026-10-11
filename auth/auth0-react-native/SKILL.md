@@ -1,11 +1,11 @@
 ---
-name: auth-auth0-react-native
-description: Use when adding/fixing Auth0 sign-in in a React Native / Expo app with `react-native-auth0` — Universal Login in the system browser (PKCE), universal / App Link callback, credentials manager, biometric unlock, refresh rotation, logout. Triggers "add Auth0 login", "callback never returns to the app", "biometric unlock". Do NOT use for Auth0 concepts (`auth-auth0-concepts`), native Swift/Kotlin apps (`auth-auth0-ios` / `auth-auth0-android`), or React web (`auth-auth0-react`).
+name: auth0
+description: Use when adding/fixing Auth0 sign-in in a React Native / Expo app with `react-native-auth0` — Universal Login in the system browser (PKCE), universal / App Link callback, credentials manager, biometric unlock, refresh rotation, logout. Triggers "add Auth0 login", "callback never returns to the app", "biometric unlock". Do NOT use for Auth0 concepts (`auth/_shared/auth0-concepts`), native Swift/Kotlin apps (`mobile-ios:auth0` / `mobile-android:auth0`), or React web (`fe-react:auth0`).
 ---
 
 # Auth — Auth0 in React Native / Expo
 
-Wires `react-native-auth0` into an Expo (development build / CNG) or bare React Native app. **Universal Login in the system browser with PKCE is the only login flow** — RFC 8252 forbids embedded web-view login, and Auth0's Native application type has no client secret. Entities, `audience`, RBAC and claims are `auth-auth0-concepts`; flow and token theory is `auth-oidc-concepts`. Not repeated here.
+Wires `react-native-auth0` into an Expo (development build / CNG) or bare React Native app. **Universal Login in the system browser with PKCE is the only login flow** — RFC 8252 forbids embedded web-view login, and Auth0's Native application type has no client secret. Entities, `audience`, RBAC and claims are `auth/_shared/auth0-concepts`; flow and token theory is `auth/_shared/oidc-concepts`. Not repeated here.
 
 ## Version lane (checked 2026-10-10)
 
@@ -25,10 +25,10 @@ Wires `react-native-auth0` into an Expo (development build / CNG) or bare React 
 
 ## When NOT to use
 
-- Auth0 entity model, `audience`, RBAC → `auth-auth0-concepts`; generic OAuth/OIDC → `auth-oidc-concepts`
-- Native Swift app → `auth-auth0-ios`; Kotlin app → `auth-auth0-android`
+- Auth0 entity model, `audience`, RBAC → `auth/_shared/auth0-concepts`; generic OAuth/OIDC → `auth/_shared/oidc-concepts`
+- Native Swift app → `mobile-ios:auth0`; Kotlin app → `mobile-android:auth0`
 - Backend token validation → `backend/*/auth0` skills
-- Where else secrets and tokens may live → `mobile-shared-security`
+- Where else secrets and tokens may live → `mobile-<stack>:security`
 
 ## Inputs needed
 
@@ -103,13 +103,13 @@ export function SessionControls() {
 }
 ```
 
-- `authorize()` opens the system browser (`ASWebAuthenticationSession` on iOS, Custom Tabs on Android); the SDK runs PKCE. With no `scope` it requests `openid profile email` — add `offline_access` to receive a refresh token, and `audience` or the access token is opaque (`auth-auth0-concepts`).
+- `authorize()` opens the system browser (`ASWebAuthenticationSession` on iOS, Custom Tabs on Android); the SDK runs PKCE. With no `scope` it requests `openid profile email` — add `offline_access` to receive a refresh token, and `audience` or the access token is opaque (`auth/_shared/auth0-concepts`).
 - Errors are a state, not a crash: `a0.browser_not_available` (no browser on the device) and a user cancel are different outcomes; map both to messages and keep the app usable.
 - Signed-out vs loading vs error is a three-state region; `testID` on every control, PascalCase dot-separated.
 
 ## Credentials and session restore
 
-- **Storage is the SDK's**: Keychain on iOS; on Android the credentials are encrypted with a Keystore-held key and stored in app-private storage. **Tokens are never copied to `AsyncStorage`, MMKV, `expo-secure-store` by hand, or logs** — `mobile-shared-security` K2.
+- **Storage is the SDK's**: Keychain on iOS; on Android the credentials are encrypted with a Keystore-held key and stored in app-private storage. **Tokens are never copied to `AsyncStorage`, MMKV, `expo-secure-store` by hand, or logs** — `mobile-<stack>:security` K2.
 - With `Auth0Provider`, credentials are saved on login and cleared on logout automatically. Without it (the `new Auth0({...})` client) call `auth0.credentialsManager` `saveCredentials` yourself.
 - At launch: `hasValidCredentials()` → `getCredentials()`; `getCredentials()` renews an expired access token with the refresh token and is safe to call concurrently. A renewal failure (`invalid_grant`, revoked, rotated away) means **signed out**, not retry forever.
 
@@ -148,7 +148,7 @@ const localAuthenticationOptions = {
 <Auth0Provider domain={...} clientId={...} localAuthenticationOptions={localAuthenticationOptions}>
 ```
 
-- Retrieving credentials then prompts Face ID / Touch ID / the Android biometric prompt. The prompt text and `NSFaceIDUsageDescription` (iOS purpose string) must be specific — `mobile-shared-store-compliance` L4.
+- Retrieving credentials then prompts Face ID / Touch ID / the Android biometric prompt. The prompt text and `NSFaceIDUsageDescription` (iOS purpose string) must be specific — `mobile-<stack>:store-compliance` L4.
 - It protects *retrieval of stored credentials on this device*; it is not a second factor at the server. Test it on a **real iOS device** (the simulator does not exercise it).
 - A device with no secured lock screen cannot enrol — the denied path is a working screen (password login, still PKCE).
 
@@ -190,8 +190,8 @@ Rotation is a tenant setting and the SDK stores the rotated token for you. Two p
 
 ## Handoffs
 
-- Concepts → `auth-auth0-concepts`, `auth-oidc-concepts`
-- Token storage rules → `mobile-shared-security`; purchase user link → `mobile-shared-in-app-purchases`
-- Expo project, config plugins, builds → `mobile-react-native-project-setup`; deep links → `mobile-react-native-notifications-and-links`
-- Server state / API client → `mobile-react-native-networking`
+- Concepts → `auth/_shared/auth0-concepts`, `auth/_shared/oidc-concepts`
+- Token storage rules → `mobile-<stack>:security`; purchase user link → `mobile-<stack>:in-app-purchases`
+- Expo project, config plugins, builds → `mobile-react-native:project-setup`; deep links → `mobile-react-native:push-and-deep-links`
+- Server state / API client → `mobile-react-native:networking`
 - Backend validation → `backend/dotnet/skills/auth0` / `backend/java/skills/auth0`

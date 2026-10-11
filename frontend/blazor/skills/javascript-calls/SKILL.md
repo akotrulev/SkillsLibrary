@@ -1,5 +1,5 @@
 ---
-name: fe-blazor-javascript-calls
+name: js-interop
 description: Use when a Blazor component (.NET 8/9/10) genuinely needs JavaScript — collocated `.razor.js` ES modules as `IJSObjectReference`, interop in `OnAfterRenderAsync` (never `OnInitializedAsync`), `IAsyncDisposable` teardown + the `JSDisconnectedException` trap, `[JSInvokable]` callbacks. Triggers: "call this JS library from Blazor", "wrap a browser API", "why does my JS interop throw during prerender". Do NOT use where C# suffices (interop is the last resort) or for motion/observers (`animation`).
 ---
 

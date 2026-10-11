@@ -1,6 +1,6 @@
 ---
-name: be-shared-codebase-survey
-description: Use when an existing backend must be split into functional areas before it can be documented — inventory every entry point and external surface, group them by business capability (not technical layer), then confirm the split with the human. Triggers "split this codebase into areas", "what are the functional areas here". Do NOT use to trace one area in depth (`be-shared-feature-trace`), write documentation (`be-shared-business-documentation`), or find defects (`ep-feature-audit`).
+name: doc-codebase-survey
+description: Use when an existing backend must be split into functional areas before it can be documented — inventory every entry point and external surface, group them by business capability (not technical layer), then confirm the split with the human. Triggers "split this codebase into areas", "what are the functional areas here". Do NOT use to trace one area in depth (`dev:doc-feature-trace`), write documentation (`dev:doc-business-model`), or find defects (`dev:audit-feature`).
 ---
 
 # Codebase Survey — the area map and the reading plan
@@ -17,13 +17,13 @@ It also produces the thing that keeps the whole exercise honest: a **coverage le
 
 ## When NOT to use
 
-- One area is already named and needs tracing → `be-shared-feature-trace`
+- One area is already named and needs tracing → `dev:doc-feature-trace`
 - The area map already exists and is confirmed → go straight to tracing (re-survey only what the git delta touched)
-- The goal is finding defects → `ep-feature-audit` (it decomposes into *surfaces* for fault-finding, not *areas* for comprehension)
+- The goal is finding defects → `dev:audit-feature` (it decomposes into *surfaces* for fault-finding, not *areas* for comprehension)
 
 ## Output
 
-The area map and reading plan. On a `be-documenter` run they are presented for confirmation and then recorded in the KB's `system-overview.md` (per `ba-project-memory`) — the full per-surface coverage ledger included, as that file's Coverage appendix, so the KB can back its own coverage claim. The orientation cache holds only the surface **counts** and the parked list; a 120-controller ledger belongs in the KB, not in a file meant to orient a run in one read.
+The area map and reading plan. On a `be-documenter` run they are presented for confirmation and then recorded in the KB's `system-overview.md` (per `business-analysis:knowledge-base`) — the full per-surface coverage ledger included, as that file's Coverage appendix, so the KB can back its own coverage claim. The orientation cache holds only the surface **counts** and the parked list; a 120-controller ledger belongs in the KB, not in a file meant to orient a run in one read.
 
 ---
 
@@ -171,11 +171,11 @@ If the human has no opinion (common — they may know the business but not the c
 
 ## Handoffs
 
-- **→ `be-shared-feature-trace`** — the reading plan drives it, one area at a time, in the confirmed order.
-- **→ `be-shared-business-documentation`** — the area names become `areas/<area>.md`; the Foundations table and the coverage ledger become part of `system-overview.md`.
-- **→ `ba-project-memory`** — the area map is recorded in `system-overview.md` under the KB contract.
+- **→ `dev:doc-feature-trace`** — the reading plan drives it, one area at a time, in the confirmed order.
+- **→ `dev:doc-business-model`** — the area names become `areas/<area>.md`; the Foundations table and the coverage ledger become part of `system-overview.md`.
+- **→ `business-analysis:knowledge-base`** — the area map is recorded in `system-overview.md` under the KB contract.
 - **→ `code-auditor`** — if the survey's findings are dominated by defects rather than capabilities, the user wants an audit, not documentation. Say so.
-- **→ `be-shared-solution-blueprint`** — a confirmed area map of an existing system is directly reusable as the functional-area decomposition of a plan to extend it.
+- **→ `dev:plan-blueprint`** — a confirmed area map of an existing system is directly reusable as the functional-area decomposition of a plan to extend it.
 
 ## Version policy
 

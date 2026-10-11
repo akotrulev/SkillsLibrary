@@ -1,6 +1,6 @@
 ---
-name: devops-container-runtime-security
-description: Use to test the RUNNING cluster's attack surface and runtime behaviour. kube-hunter probes a live cluster from an attacker's viewpoint (authorization-gated `--active` mode); Falco detects container escape at syscall level. Triggers "probe our running cluster", "is our cluster exploitable from a pod", "deploy Falco". Not for static image/IaC scanning (`qa-security-image-infra-scan`), CIS scoring of manifests (`devops-k8s-security`), or app exploitation (`qa-security`).
+name: container-runtime-security
+description: Use to test the RUNNING cluster's attack surface and runtime behaviour. kube-hunter probes a live cluster from an attacker's viewpoint (authorization-gated `--active` mode); Falco detects container escape at syscall level. Triggers "probe our running cluster", "is our cluster exploitable from a pod", "deploy Falco". Not for static image/IaC scanning (`qa-<stack>:image-infra-scan`), CIS scoring of manifests (`devops:kubernetes-security`), or app exploitation (`qa-security`).
 ---
 
 # DevOps — Container & Runtime Security (kube-hunter · Falco)
@@ -33,7 +33,7 @@ Authorization: cluster=<owned/lab cluster id or context>  scope=<in-scope namesp
 This skill is **language-agnostic** (both tools are Go/CLI binaries + a DaemonSet — no per-stack split, per
 the library's anti-triplication rule) and sits in the **infra-security lane**, orchestrated by the
 **`infra-security-tester`** agent. It owns the **runtime + probing** surface; it does **not** score manifests
-(that is `devops-k8s-security`) or scan shipped artifacts (that is `qa-security-image-infra-scan`). See the
+(that is `devops:kubernetes-security`) or scan shipped artifacts (that is `qa-<stack>:image-infra-scan`). See the
 fences below — they are the whole reason three skills exist.
 
 > **Two spines, stated per finding.** A kube-hunter probe finding and a Falco detection map to the **MITRE
@@ -47,16 +47,16 @@ fences below — they are the whole reason three skills exist.
 
 | Skill | Surface | Question it answers | State |
 |-------|---------|---------------------|-------|
-| **`qa-security-image-infra-scan`** (Trivy) | **Static** — image layers, IaC templates, SBOM | "Is the artifact we *ship* clean?" | **Shipped** — pre-deploy |
-| **`devops-k8s-security`** (kube-bench · Kubescape · Polaris) | **Static config** — manifests + cluster config vs CIS/NSA benchmark | "Is the cluster *configured* to a benchmark?" | **Declared** — posture score |
+| **`qa-<stack>:image-infra-scan`** (Trivy) | **Static** — image layers, IaC templates, SBOM | "Is the artifact we *ship* clean?" | **Shipped** — pre-deploy |
+| **`devops:kubernetes-security`** (kube-bench · Kubescape · Polaris) | **Static config** — manifests + cluster config vs CIS/NSA benchmark | "Is the cluster *configured* to a benchmark?" | **Declared** — posture score |
 | **this skill** (kube-hunter · Falco) | **Runtime** — the *running* cluster's reachable surface + live syscall behaviour | "Is the running cluster *exploitable*, and does it *notice* when attacked?" | **Live** — actual behaviour |
 
-- **vs `qa-security-image-infra-scan` (Trivy):** Trivy reads the image and IaC **as files, statically, before
+- **vs `qa-<stack>:image-infra-scan` (Trivy):** Trivy reads the image and IaC **as files, statically, before
   deploy** — CVEs in the base OS, a `USER root` in the Dockerfile, a bad Terraform setting. This skill probes
   the **running cluster** (kube-hunter) and watches **live syscalls** (Falco). A clean Trivy scan says nothing
   about a kubelet you left open on `:10250` or a pod that just spawned `/bin/bash` — **different surface**
   (runtime vs static). Run both.
-- **vs `devops-k8s-security` (sibling):** that runs **CIS/benchmark/best-practice posture *scoring*** of
+- **vs `devops:kubernetes-security` (sibling):** that runs **CIS/benchmark/best-practice posture *scoring*** of
   manifests + cluster config (kube-bench, Kubescape, Polaris) — a *declared* state graded against a standard.
   This skill is **runtime threat detection + active exploitation probing** — kube-hunter proves the exposure
   is reachable and firing, Falco proves the cluster *detects* the attack. A field set correctly in a manifest
@@ -94,7 +94,7 @@ detection is the most common false comfort in this lane.
 > does not do the active reachability/exploit probe kube-hunter does, so it is still the right tool for this
 > specific question. State this honestly to the user. **Successors / alternatives for the runtime-probe
 > surface:** for enforcement-grade runtime, **Tetragon** (Cilium, in-kernel LSM block/kill) or **KubeArmor**;
-> for benchmark posture, **Kubescape** (`devops-k8s-security`). Because kube-hunter is archived, **pin the
+> for benchmark posture, **Kubescape** (`devops:kubernetes-security`). Because kube-hunter is archived, **pin the
 > last published image digest** and treat it as frozen — no upstream fixes are coming.
 
 ```bash
@@ -285,7 +285,7 @@ kubectl delete pod canary -n security-testing
 
 Trivy also has a **runtime/cluster mode** (`trivy k8s`) that scans running workloads' images and configs from
 the K8s API. **That is still static scanning of what is deployed** (image CVEs, manifest misconfig read live)
-— it is **not** attack-surface probing or syscall detection. It belongs to **`qa-security-image-infra-scan`**,
+— it is **not** attack-surface probing or syscall detection. It belongs to **`qa-<stack>:image-infra-scan`**,
 not here. Use `trivy k8s` to answer "what CVEs are in the images currently running"; use **kube-hunter** for
 "is the running cluster reachable/exploitable" and **Falco** for "does the cluster detect an attack in
 progress." Different questions — run all three; do not fold Trivy's static k8s scan into this skill.
@@ -309,12 +309,12 @@ progress." Different questions — run all three; do not fold Trivy's static k8s
   handoff) before relying on detection; if there is no backend, report "no detection surface to assert
   against" honestly.
 - **Treating kube-hunter as a CVE scanner.** It is archived for that purpose and Aqua points to Trivy. *Fix:*
-  use it only for attack-surface/reachability probing; use Trivy (`qa-security-image-infra-scan`) for CVEs.
+  use it only for attack-surface/reachability probing; use Trivy (`qa-<stack>:image-infra-scan`) for CVEs.
 - **Caching the authorization in the orientation cache.** Authorization is `#volatile` — it expires with the
   window. *Fix:* re-confirm per run; never persist it to `docs/agent-context/`.
 - **Confusing this with the benchmark sibling.** Running kube-bench/Polaris and thinking you tested runtime.
   *Fix:* a benchmark grades *config*; kube-hunter probes *reachability* and Falco watches *behaviour* — run
-  `devops-k8s-security` for the score, this skill for the live surface.
+  `devops:kubernetes-security` for the score, this skill for the live surface.
 - **The legacy eBPF probe on Falco 0.44+.** It was removed. *Fix:* `driver.kind=modern_ebpf` (or the kernel
   module) — the modern driver is the K8s-recommended default.
 
@@ -335,7 +335,7 @@ progress." Different questions — run all three; do not fold Trivy's static k8s
 - **Two spines per finding:** runtime probe/detection → **MITRE ATT&CK Containers** technique ID; config
   exposure → **OWASP** (A01/A05) as well. Tag every custom rule with its ATT&CK technique.
 - **Own the boundary:** this skill = **running-cluster probing (kube-hunter) + runtime detection (Falco)**;
-  Trivy/`qa-security-image-infra-scan` = **static image/IaC**; `devops-k8s-security` = **benchmark posture
+  Trivy/`qa-<stack>:image-infra-scan` = **static image/IaC**; `devops:kubernetes-security` = **benchmark posture
   scoring**. Run all three — orthogonal surfaces. Do not fold `trivy k8s` in here.
 - **kube-hunter is archived** — say so honestly, **pin the last published image digest**, and name the
   enforcement-grade successors (Tetragon / KubeArmor) where the user needs blocking, not just detection.
@@ -349,14 +349,14 @@ progress." Different questions — run all three; do not fold Trivy's static k8s
 
 - **`infra-security-tester`** (`devops/agents/infra-security-tester.md`) — the step-by-step orchestrator that runs
   this skill in its **K8s & runtime** step; owns the scope/authorization gate this skill enforces.
-- **`devops-k8s-security`** (sibling) — CIS/NSA **benchmark posture scoring** of manifests + cluster
+- **`devops:kubernetes-security`** (sibling) — CIS/NSA **benchmark posture scoring** of manifests + cluster
   config (kube-bench · Kubescape · Polaris). The static-config sibling: it grades the *declared* state; this
   skill probes the *running* one. Run both.
-- **`qa-security-image-infra-scan`** (Trivy) — **static** image/IaC/SBOM scanning of the shipped artifact,
+- **`qa-<stack>:image-infra-scan`** (Trivy) — **static** image/IaC/SBOM scanning of the shipped artifact,
   incl. `trivy k8s`. The static-vs-runtime boundary partner: it owns everything read as a file; this skill
   owns the live cluster. Run both.
-- **`devops-iac-security`** · **`devops-cloud-posture`** · **`devops-supply-chain-security`** ·
-  **`devops-threat-modeling`** · **`devops-infra-controls-validation`** (siblings) — the rest of the
+- **`devops:iac-security`** · **`devops:cloud-posture`** · **`devops:supply-chain-security`** ·
+  **`devops:threat-modeling`** · **`devops:controls-validation`** (siblings) — the rest of the
   infra-security lane; `threat-modeling` feeds the scope this skill probes within.
 - **`observability-engineer-{dotnet,java,node}`** + `observability/{queries,dashboards}` — **where Falco
   alerts land.** The blue half needs a telemetry backend (Loki/Alertmanager) to assert against; wire

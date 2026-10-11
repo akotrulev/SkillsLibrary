@@ -1,11 +1,11 @@
 ---
-name: qa-ai-feature-testing-java
-description: Use when testing LLM-generated output (chatbot, RAG answer, summarizer, extraction, tool-using agent) from a Java 21 / TestNG suite — property, rubric (LLM-as-judge), and grounding assertions with promptfoo (default) or DeepEval as the eval spine; never exact-string equality. Triggers: "test our chatbot", "eval prompt outputs", "assert the answer is grounded in the retrieved context", "G-Eval / faithfulness metric". Do NOT use for RAG retrieval metrics (`qa-ai-answer-quality-testing-java`).
+name: ai-feature-testing
+description: Use when testing LLM-generated output (chatbot, RAG answer, summarizer, extraction, tool-using agent) from a Java 21 / TestNG suite — property, rubric (LLM-as-judge), and grounding assertions with promptfoo (default) or DeepEval as the eval spine; never exact-string equality. Triggers: "test our chatbot", "eval prompt outputs", "assert the answer is grounded in the retrieved context", "G-Eval / faithfulness metric". Do NOT use for RAG retrieval metrics (`qa-java:ai-answer-quality-testing`).
 ---
 
 # LLM-App Testing (Java 21 / TestNG — promptfoo via ProcessBuilder + LangChain4j)
 
-The Java port of the canonical `qa-ai-feature-testing-typescript`. Same four ideas, same hybrid shape — only the
+The Java port of the canonical `qa-typescript:ai-feature-testing`. Same four ideas, same hybrid shape — only the
 *invocation* changes: promptfoo has **no Java SDK**, so the eval spine is the `promptfoo` CLI driven via
 `ProcessBuilder` and its JSON report parsed with Jackson, while the in-code path uses **LangChain4j** (or the
 Anthropic Java SDK) instead of `@anthropic-ai/sdk`. See the TS file for the family rationale.
@@ -32,7 +32,7 @@ share fixtures with non-LLM tests or wrap your own feature code.
 >    follow the system prompt" — no regex catches these. An `llm-rubric` grades them. But **pin the judge
 >    model+version**, keep the rubric in a versioned file, and **calibrate against a human-labelled gold set**
 >    (30–200); judges carry positional/verbosity/instruction-following bias and drift.
-> 3. **An eval is a DATASET of cases, not one test.** `qa-data-driven-testing-java` applied to prompts:
+> 3. **An eval is a DATASET of cases, not one test.** `qa-java:data-driven-testing` applied to prompts:
 >    each row = input vars + expected properties; each case independent + named so a failure points at the input.
 >    promptfoo's `tests:` block is this; the SDK path uses TestNG `@DataProvider`.
 > 4. **Handle non-determinism deliberately.** Regression: pin the model, `temperature: 0` + `seed`, assert once
@@ -64,8 +64,8 @@ share fixtures with non-LLM tests or wrap your own feature code.
 
 Unlike the in-code path (where LangChain4j is a first-class Maven/Gradle artifact), **there is no library that
 embeds promptfoo on the JVM**. So the eval spine is **CLI/subprocess-driven** — the same honest port shape as
-`qa-security-passive-scan-java` (`passive-scan`, ZAP via `docker run`) and
-`qa-accessibility-testing-java` (`lighthouse-ci`, Lighthouse via Node): you **invoke `promptfoo` via
+`qa-java:passive-scan` (`passive-scan`, ZAP via `docker run`) and
+`qa-java:accessibility-testing` (`lighthouse-ci`, Lighthouse via Node): you **invoke `promptfoo` via
 `ProcessBuilder`** (`promptfoo eval -c config.yaml -o results.json`) and **parse the JSON report** with **Jackson**
 to gate in TestNG. The config (cases × assertions) is identical to the TS canonical's; only the *runner* is a
 `Process`, not an SDK call. Say so plainly to anyone reaching for a JVM promptfoo library — there isn't one.
@@ -212,7 +212,7 @@ answer,context,human_label,__expected
 
 ## Idea #3 — an eval is a dataset (data-driven, `data-driven-testing`)
 
-An eval is `qa-data-driven-testing-java` pointed at prompts: separate **data** (rows of input + expected
+An eval is `qa-java:data-driven-testing` pointed at prompts: separate **data** (rows of input + expected
 properties) from **logic** (the prompt + the assertion engine). promptfoo reads the dataset from a CSV exactly as
 `data-driven-testing`'s TestNG `@DataProvider` reads rows (OpenCSV `CsvToBean` → a typed row). When the SDK path needs the dataset in
 code, use a `@DataProvider` returning `Object[][]` / `Iterator<Object[]>` so each case is named — reuse `data-driven-testing`'s
@@ -241,7 +241,7 @@ public void shouldRefuseLockpickingWhenSampledRepeatedly() {
 }
 ```
 
-> **Boundary vs `qa-flaky-test-quarantine-java`:** a model that refuses 4/5 times is **behaving as
+> **Boundary vs `qa-java:flaky-test-quarantine`:** a model that refuses 4/5 times is **behaving as
 > designed** — natural variance you assert a *rate* on, NOT a flaky test to retry-and-quarantine (TestNG
 > `IRetryAnalyzer`). Quarantining it hides a real safety regression the day it drops to 2/5. `flaky-test-quarantine` is for a *test*
 > that's flaky for infra reasons; this is a *model* that's stochastic by nature. Don't apply `flaky-test-quarantine`'s retry to a
@@ -250,7 +250,7 @@ public void shouldRefuseLockpickingWhenSampledRepeatedly() {
 ## Structured-output validation (the `is-json` analogue in code)
 
 When the app forces JSON (tool use, extraction), the structural contract is deterministic — reuse the
-`qa-api-models-java` / Jackson muscle. In promptfoo it's `is-json` with a schema (above); in code it's a
+`qa-java:api-models` / Jackson muscle. In promptfoo it's `is-json` with a schema (above); in code it's a
 deserialize + validate at the boundary:
 
 ```java
@@ -300,7 +300,7 @@ public void shouldCallGetWeatherForParis() {
 - **A vague rubric** (`llm-rubric: "is good"`). Not a contract. *Fix:* a specific, scoped rubric with an explicit
   pass bar (grounded? answers the question? exact figure?).
 - **Hardcoding `ANTHROPIC_API_KEY` / committing it / in `promptfooconfig.yaml`.** *Fix:* env, read lazily; secrets
-  via `qa-test-login-tokens-java`'s discipline. **No real PII** in committed cases (synthetic).
+  via `qa-java:test-login-tokens`'s discipline. **No real PII** in committed cases (synthetic).
 - **No cost/latency ceiling.** The suite quietly costs money; an agent can loop. *Fix:* `cost`/`latency` budgets;
   cap `maxTokens`.
 - **Testing RAG by asserting the answer string.** The risk is *hallucination*. *Fix:* assert **faithfulness /
@@ -315,10 +315,10 @@ instantly; the `llm-rubric` rung (pinned + calibrated judge) catches a faithfuln
 (`--repeat 5`) asserts the refusal **rate** held. Any failure → non-zero exit → PR blocked, with the failing
 **case named** in the parsed report + Allure.
 
-**Composing with `data-driven-testing` + `flaky-test-quarantine` + api-models:** the **dataset** uses `qa-data-driven-testing-java` `@DataProvider`
-mechanics (one named case per row, OpenCSV-bound); the **structured-output** rung reuses an `qa-api-models-java`
+**Composing with `data-driven-testing` + `flaky-test-quarantine` + api-models:** the **dataset** uses `qa-java:data-driven-testing` `@DataProvider`
+mechanics (one named case per row, OpenCSV-bound); the **structured-output** rung reuses an `qa-java:api-models`
 record + Jackson; the **stochastic refusal** rung asserts a rate (idea #4), explicitly *not* handed to
-`qa-flaky-test-quarantine-java`.
+`qa-java:flaky-test-quarantine`.
 
 ## Rules (hard constraints)
 
@@ -329,7 +329,7 @@ record + Jackson; the **stochastic refusal** rung asserts a rate (idea #4), expl
   in a file, **calibrate against a 30–200 human-labelled gold set**, re-calibrate on a model bump. Design against
   verbosity/positional/instruction-following bias.
 - **An eval is a dataset** — one prompt × N rows (input + expected properties), each **independent + named** (reuse
-  `qa-data-driven-testing-java` `@DataProvider`). One logical property per case where practical. Test names
+  `qa-java:data-driven-testing` `@DataProvider`). One logical property per case where practical. Test names
   describe behavior.
 - **Separate regression from stochastic.** Regression: pin model + `temperature: 0` + `seed`, assert once
   (re-baseline on a bump). Stochastic: sample **N≥3**, assert a **pass-RATE**. Model non-determinism is **not** test
@@ -342,22 +342,22 @@ record + Jackson; the **stochastic refusal** rung asserts a rate (idea #4), expl
 
 ## Cross-references
 
-- `qa-ai-feature-testing-typescript` — **the canonical**: promptfoo + `@anthropic-ai/sdk`, the four ideas, the
+- `qa-typescript:ai-feature-testing` — **the canonical**: promptfoo + `@anthropic-ai/sdk`, the four ideas, the
   assertion ladder, the config the spine here parses. Read it for the family rationale.
-- `qa-ai-feature-testing-dotnet` — the .NET sibling: promptfoo via `Process` + `System.Text.Json`,
+- `qa-dotnet:ai-feature-testing` — the .NET sibling: promptfoo via `Process` + `System.Text.Json`,
   `Microsoft.Extensions.AI` in-test. Same four ideas.
-- `qa-data-driven-testing-java` — **the closest-discipline sibling**: an eval IS a data-driven test
+- `qa-java:data-driven-testing` — **the closest-discipline sibling**: an eval IS a data-driven test
   (`@DataProvider`, one named case per row, OpenCSV). Reuse its mechanics for the dataset.
-- `qa-flaky-test-quarantine-java` — **the boundary**: model non-determinism (assert a rate) vs *test*
+- `qa-java:flaky-test-quarantine` — **the boundary**: model non-determinism (assert a rate) vs *test*
   flakiness (`IRetryAnalyzer` / quarantine). Don't quarantine a model regression.
-- `qa-api-models-java` — the **structured-output** record + Jackson the `is-json` rung / SDK deserialize
+- `qa-java:api-models` — the **structured-output** record + Jackson the `is-json` rung / SDK deserialize
   validates.
-- `qa-security-passive-scan-java` / `qa-accessibility-testing-java` — the
+- `qa-java:passive-scan` / `qa-java:accessibility-testing` — the
   **CLI-from-JVM port-shape precedent**: a Node/CLI tool invoked via `ProcessBuilder`, report parsed with Jackson.
 - `ai-development/*` (`claude-api`, `mcp-builder`) — **build-vs-test boundary**: those *build* the AI feature; this
-  *tests* it. `qa-test-login-tokens-java` — env/secret-store discipline for `ANTHROPIC_API_KEY`.
-- `qa-_shared-quality-metrics` — eval **pass-rate over time**. `qa-test-reports-java` — each case as a named
-  result. `qa-load-testing-java` — LLM **load/latency under concurrency** (here latency is a per-case
+  *tests* it. `qa-java:test-login-tokens` — env/secret-store discipline for `ANTHROPIC_API_KEY`.
+- `qa-<stack>:quality-metrics` — eval **pass-rate over time**. `qa-java:test-reports` — each case as a named
+  result. `qa-java:load-testing` — LLM **load/latency under concurrency** (here latency is a per-case
   *budget*, not a load profile).
-- `qa-webmcp-testing-shared` — the deterministic side of WebMCP tools a page registers (schema, `execute()`
+- `qa-<stack>:webmcp-testing` — the deterministic side of WebMCP tools a page registers (schema, `execute()`
   contract, annotations); this skill keeps the agent evals over them.

@@ -44,7 +44,7 @@ What the headline GCP checks catch (each → a CIS control + an ATT&CK Cloud tec
 - **IAM** — over-broad primitive roles (`roles/owner`/`editor` on users), service-account key age/rotation, user-managed SA keys, `allUsers`/`allAuthenticatedUsers` bindings → T1078.004 / T1098.
 - **Cloud Storage** — buckets public to `allUsers`/`allAuthenticatedUsers`, uniform bucket-level access off → T1530, A02.
 - **Encryption at rest** — CMEK on storage/SQL/disks where required, KMS key rotation period → CIS crypto controls.
-- **Encryption in transit** — Load Balancer TLS policy, Cloud SQL `require SSL` → pairs with `qa-security-certificate-scan`.
+- **Encryption in transit** — Load Balancer TLS policy, Cloud SQL `require SSL` → pairs with `qa-<stack>:certificate-scan`.
 - **Logging/audit** — Cloud Audit Logs (Admin/Data Access) enabled, log sinks + retention, no disabled logging → T1562.008, A09.
 - **Network exposure** — firewall rules allowing `0.0.0.0/0` on SSH/RDP/DB ports, default network use, public Compute/SQL instances → T1580.
 

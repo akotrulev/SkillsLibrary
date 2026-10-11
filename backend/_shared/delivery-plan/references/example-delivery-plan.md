@@ -1,6 +1,6 @@
 # Golden example — `delivery-plan.md`
 
-The filled example for `be-shared-delivery-plan`, from the **workshop-booking** toy initiative shared
+The filled example for `dev:plan-delivery`, from the **workshop-booking** toy initiative shared
 by all the planner examples. **Shapes and disciplines are normative; domain content is illustrative.**
 A real artifact writes a full block for *every* task — this example writes four representative ones (a
 foundation task, a backend capability task, the frontend task that actually delivers that capability,
@@ -109,7 +109,7 @@ graph, not a wave-by-wave march through it. The scannable index is the task tabl
 ### C4 — Error middleware + shared DTOs + endpoint-module convention
 
 **Epic:** `E0` Contract + foundations · **Story:** — · **Stack:** `be` · **Stream:** `foundations-api` · **Order:** 6
-**Agent:** `be-dotnet` · **Skills:** `be-dotnet-pattern-writer`, `be-dotnet-unit-testing`
+**Agent:** `be-dotnet` · **Skills:** `be-dotnet:patterns-apply`, `be-dotnet:unit-testing`
 **Deliverable:** every failure returns the documented `application/problem+json` envelope, and a module
 can self-register its routes without editing `Program.cs`.
 **Depends on:** C2 (config + startup validation)
@@ -141,7 +141,7 @@ written by C2 ~4k, 4 files created and 1 modified 9.5k, commit and diff read-bac
 ### B2 — Bookings resource
 
 **Epic:** `E2` Booking · **Story:** `US6`–`US9` · **Stack:** `be` · **Stream:** `booking-api` · **Order:** 12
-**Agent:** `be-dotnet` · **Skills:** `be-dotnet-pattern-writer`, `be-dotnet-database-code`, `be-dotnet-unit-testing`
+**Agent:** `be-dotnet` · **Skills:** `be-dotnet:patterns-apply`, `be-dotnet:persistence`, `be-dotnet:unit-testing`
 **Deliverable:** the four booking endpoints implement their documented behaviour, validation and
 capacity guard — book, my-bookings, cancel, attend.
 **Depends on:** C7 (the capacity constraint), C3 (auth), C4 (envelope + seam)
@@ -174,7 +174,7 @@ read-back 6k, churn ×1.2
 ### F2 — Book + my-bookings screens (S3, S4)
 
 **Epic:** `E2` Booking · **Story:** `US10` · **Stack:** `fe` · **Stream:** `booking-ui` · **Order:** 13
-**Agent:** `fe-react` · **Skills:** `fe-react-component-writer`, `fe-react-data-fetching`, `design-ux-patterns`
+**Agent:** `fe-react` · **Skills:** `fe-react:component-writer`, `fe-react:data-fetching`, `design:app-structure`
 **Deliverable:** a member can book a session, see it under their bookings, cancel it, and be told when
 a session is full — journey J2, end to end. **This is the task that delivers `E2`.**
 **Depends on:** C6 (shell + typed client), F1 (the session detail page the Book action lives on), B2 (the endpoints)
@@ -204,7 +204,7 @@ and 2 modified 15k, commit and diff read-back 6k, churn ×1.2
 ### B7 — the gate and the close-out
 
 **Epic:** `E0` Contract + foundations · **Story:** — · **Stack:** `be` · **Stream:** `foundations-api` · **Order:** 20
-**Agent:** `be-dotnet` · **Skills:** `be-dotnet-code-review`
+**Agent:** `be-dotnet` · **Skills:** `be-dotnet:conventions-review`
 **Deliverable:** the whole solution builds, the whole suite passes, the format check is clean, and
 `docs/repository-state.md` says what is built and what is unverified.
 **Depends on:** every task above it — this is the plan's only gate
@@ -353,8 +353,8 @@ resource.
 **Cancel and attend are unwritten**, and `lateCancel` plus the 409 transition set land with cancel.
 The task's unfinished bullets are that list.
 
-Read your agent definition, then load exactly these skills: `be-dotnet-pattern-writer`,
-`be-dotnet-database-code`, `be-dotnet-unit-testing`.
+Read your agent definition, then load exactly these skills: `be-dotnet:patterns-apply`,
+`be-dotnet:persistence`, `be-dotnet:unit-testing`.
 
 Read, in this order — these sections only, not the whole artifacts:
 1. CLAUDE.md — the Backend code rules, the Test code rules and the Comments rules.

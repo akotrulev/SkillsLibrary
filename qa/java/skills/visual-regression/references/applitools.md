@@ -224,5 +224,5 @@ A functional failure in an Eyes class still gets `BaseTest`'s screenshot, trace 
 - `references/percy.md` — the hosted pixel-diff sibling.
 - `qa/java/skills/ui-test-author/playwright` — `BaseTest` and page objects.
 - `qa/cicd/java/skills/ci-pipelines` — the schedule gate and the secret store.
-- `qa-visual-regression-typescript` (`@applitools/eyes-playwright`), `qa-visual-regression-dotnet`
+- `qa-typescript:visual-regression` (`@applitools/eyes-playwright`), `qa-dotnet:visual-regression`
   (`Eyes.Playwright`).

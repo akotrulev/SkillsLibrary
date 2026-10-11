@@ -135,6 +135,6 @@ The justification for `TokenCache` is on its declaration: *"Every access to the 
 
 - **Callbacks / delegates → `async`:** one `withChecked(Throwing)Continuation` per callback, in one adapter, resumed once; do not scatter continuations through feature code.
 - **Delegates that deliver a stream → `AsyncStream`**; finish the stream in the delegate's teardown and set `onTermination` to cancel the source.
-- **Combine → `async` / `Observations`** [Swift 6.2, iOS 26+] is `mobile-ios-migration`'s path; new code does not add Combine.
+- **Combine → `async` / `Observations`** [Swift 6.2, iOS 26+] is `mobile-ios:migration`'s path; new code does not add Combine.
 - **`DispatchQueue.main.async` → `@MainActor`** or `await MainActor.run { }`; GCD survives only in a legacy API that demands a queue.
 - **Objective-C completion handlers** import as `async` automatically; a handler that can be called more than once does not, and gets an `AsyncStream` adapter.

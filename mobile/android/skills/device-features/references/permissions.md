@@ -1,6 +1,6 @@
 # Permissions — manifest entries, request calls, policy
 
-One row per capability. A runtime permission is requested from the screen that needs it, after a pre-prompt; Play policy for the restricted ones is [`mobile-shared-store-compliance`](../../../../_shared/store-compliance/references/google-play.md) § 5. Confirm a rarely used permission against the Android *Manifest.permission* reference for the target API before shipping.
+One row per capability. A runtime permission is requested from the screen that needs it, after a pre-prompt; Play policy for the restricted ones is [`mobile-<stack>:store-compliance`](../../../../_shared/store-compliance/references/google-play.md) § 5. Confirm a rarely used permission against the Android *Manifest.permission* reference for the target API before shipping.
 
 | Capability | Manifest | Request | Prefer instead |
 |---|---|---|---|
@@ -17,7 +17,7 @@ One row per capability. A runtime permission is requested from the screen that n
 | Bluetooth | `BLUETOOTH_SCAN`, `BLUETOOTH_CONNECT`, `BLUETOOTH_ADVERTISE` (API 31+), `neverForLocation` flag where true | `RequestMultiplePermissions` | companion device pairing (`CompanionDeviceManager`) |
 | Nearby Wi-Fi | `NEARBY_WIFI_DEVICES` (API 33+) | `RequestPermission` | — |
 | Local network (API 37) | `ACCESS_LOCAL_NETWORK` | `RequestPermission` | — |
-| Notifications | `POST_NOTIFICATIONS` (API 33+) | `mobile-android-notifications-and-links` | — |
+| Notifications | `POST_NOTIFICATIONS` (API 33+) | `mobile-android:push-and-deep-links` | — |
 | Biometrics | `USE_BIOMETRIC` (normal permission, no prompt) | `BiometricPrompt` | — |
 | Body sensors / activity recognition | `BODY_SENSORS`, `ACTIVITY_RECOGNITION` | `RequestPermission` | Health Connect with its own permission model |
 | Phone state / call log / SMS | restricted by Play | — | do not request without a policy-qualifying core function |
@@ -42,4 +42,4 @@ One row per capability. A runtime permission is requested from the screen that n
 
 ## Data that backs a feature
 
-Permission **prompts** are not store declarations, but the data behind them is: location, photos, contacts and audio are declared in Data safety; their handling (retention, deletion on account removal) follows [`mobile-shared-store-compliance`](../../../../_shared/store-compliance/SKILL.md).
+Permission **prompts** are not store declarations, but the data behind them is: location, photos, contacts and audio are declared in Data safety; their handling (retention, deletion on account removal) follows [`mobile-<stack>:store-compliance`](../../../../_shared/store-compliance/SKILL.md).

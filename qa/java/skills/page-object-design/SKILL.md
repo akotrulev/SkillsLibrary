@@ -1,6 +1,6 @@
 ---
-name: qa-page-object-design-java
-description: Use when the user is designing the page object structure for a Java UI test project. Triggers: "design page objects for app X in Java", "how should I structure pom/ for TestNG", "split this giant page". Do NOT use for extracting locators from a live URL (`qa-page-objects-from-url-java`) or Appium screens (`qa-mobile-screen-objects-java`).
+name: page-object-design
+description: Use when the user is designing the page object structure for a Java UI test project. Triggers: "design page objects for app X in Java", "how should I structure pom/ for TestNG", "split this giant page". Do NOT use for extracting locators from a live URL (`qa-java:page-objects-from-url`) or Appium screens (`qa-java:mobile-screen-objects`).
 ---
 
 # QA — Page Object Architect (Java)

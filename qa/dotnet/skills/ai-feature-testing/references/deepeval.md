@@ -11,7 +11,7 @@ research-backed metrics, an `LLMTestCase`/`EvaluationDataset` model, `assert_tes
 `deepeval test run` (CI gate). It is **Python** — there is **no NuGet** — so from this .NET suite you drive it the
 same honest way the stack drives any non-managed tool: **as a subprocess** (`System.Diagnostics.Process` →
 `deepeval test run`) whose JSON snapshot you parse with `System.Text.Json` and gate, exactly the CLI-port shape of
-`qa-security-passive-scan-dotnet` and `qa-accessibility-testing-dotnet`. Say so plainly to anyone reaching
+`qa-dotnet:passive-scan` and `qa-dotnet:accessibility-testing`. Say so plainly to anyone reaching
 for a NuGet — there isn't one.
 
 The **four ideas are unchanged** (property-not-string · judge-is-an-artifact · eval-is-a-dataset ·
@@ -163,7 +163,7 @@ for golden in dataset.evals_iterator():           # pytest-parametrize-style; ea
 
 DeepEval scores one `actual_output`; to prove a **reliable** behavior (a safety refusal, a creative constraint)
 sample N≥3 and assert a **rate** — the same discipline as the promptfoo `--repeat` path. This is **not** a flaky
-test to quarantine (boundary vs `qa-flaky-test-quarantine-dotnet`): a dropped refusal rate is a real regression.
+test to quarantine (boundary vs `qa-dotnet:flaky-test-quarantine`): a dropped refusal rate is a real regression.
 
 ```python
 def test_refuses_unsafe_request_at_least_4_of_5():
@@ -216,7 +216,7 @@ public static class DeepEval
         if (latest is not null)
         {
             using var doc = JsonDocument.Parse(await File.ReadAllTextAsync(latest));
-            // map each failing test case -> Allure named result (qa-test-reports-dotnet)
+            // map each failing test case -> Allure named result (qa-dotnet:test-reports)
         }
         Assert.That(proc.ExitCode, Is.Zero, "DeepEval gate failed — a metric scored below threshold");
     }
@@ -244,9 +244,9 @@ public static class DeepEval
 - This skill's `SKILL.md` — the promptfoo spine (the default) + the routing decision that sends you here.
 - `references/details.md` — the in-code `Microsoft.Extensions.AI`-in-NUnit path (the third option when an
   assertion must live in C# beside non-LLM tests).
-- `qa-data-driven-testing-dotnet` — the dataset mechanics `EvaluationDataset`/`Golden` mirror.
-- `qa-flaky-test-quarantine-dotnet` — the boundary: a dropped metric **rate** is a regression, not a flake.
+- `qa-dotnet:data-driven-testing` — the dataset mechanics `EvaluationDataset`/`Golden` mirror.
+- `qa-dotnet:flaky-test-quarantine` — the boundary: a dropped metric **rate** is a regression, not a flake.
 - `qa-security` agent + `qa/_shared/security-testing/*` — DeepTeam covers the model-behavior attack surface those
   network/code scanners can't reach.
-- `qa-test-reports-dotnet` / `qa-_shared-quality-metrics` — each DeepEval case as a named result; track metric
+- `qa-dotnet:test-reports` / `qa-<stack>:quality-metrics` — each DeepEval case as a named result; track metric
   pass-rate over time (a declining rate = a silent regression).

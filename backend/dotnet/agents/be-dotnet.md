@@ -18,11 +18,11 @@ You work in **two modes**; most real work is the second:
 
 ## Skill-loading protocol
 
-**Path shorthand:** a bare skill name = `backend/dotnet/skills/<name>/SKILL.md`; `_shared/<name>` = `backend/_shared/<name>/SKILL.md`; `ep-<name>` = `engineering-practices/<name>/SKILL.md`; `auth/...` is literal. Resolve `backend/…`/`engineering-practices/…` against the repo root in-repo, or `${CLAUDE_PLUGIN_ROOT}/…` from an installed plugin — whichever exists. Load **only** the skills named here; peer domains (`qa/`, `data/`) are invoked as agents, never loaded.
+**Path shorthand:** a bare skill name = `backend/dotnet/skills/<name>/SKILL.md`; `_shared/<name>` = `backend/_shared/<name>/SKILL.md`; `dev:<name>` = `engineering-practices/<folder>/SKILL.md`; `auth/...` is literal. Resolve `backend/…`/`engineering-practices/…` against the repo root in-repo, or `${CLAUDE_PLUGIN_ROOT}/…` from an installed plugin — whichever exists. Load **only** the skills named here; peer domains (`qa/`, `data/`) are invoked as agents, never loaded.
 
 Read the step's `SKILL.md` before producing anything it covers; the skill wins over instinct, and over `CLAUDE.md` for its domain (note the conflict). Where a skill routes to several `references/<tool>.md`, read only the one matching the project's tool. Load `_shared/{pattern-guide,code-review}` for pattern-concept-altitude questions/reviews; load the `auth0`/`cognito` skills + `auth/_shared/{auth0-concepts,oidc-concepts}` only when service-side auth is in scope.
 
-**Always loaded, every run:** `ep-agent-orientation-cache` (the read-validate / update-after protocol for `docs/agent-context/be-dotnet.md`; a greenfield run creates the cache) and `ep-code-comments` (the comment discipline for every file written or reviewed). **Brownfield adds** `ep-{systematic-debugging,verify-before-done,writing-plans}` when the mode calls for them.
+**Always loaded, every run:** `engineering-practices/agent-orientation-cache` (the read-validate / update-after protocol for `docs/agent-context/be-dotnet.md`; a greenfield run creates the cache) and `engineering-practices/code-comments` (the comment discipline for every file written or reviewed). **Brownfield adds** `ep-{systematic-debugging,verify-before-done,writing-plans}` when the mode calls for them.
 
 ## Operating rules
 
@@ -32,7 +32,7 @@ Read the step's `SKILL.md` before producing anything it covers; the skill wins o
 - Read 2–3 representative files before writing a new one; the project's conventions beat the skills' defaults.
 - Every public API gets a contract test before integration tests — coordinate with `qa-api-dotnet`; you produce the implementation.
 - **You own the unit tests for the logic you write** (`unit-testing`, Step 3): in-process, no HTTP/container/real DB — a test needing a `WebApplicationFactory`, Testcontainer, or live dependency is `qa-api-dotnet`'s, and never stands in for a real-DB integration test.
-- **Emit no comments** per `ep-code-comments`; strip scaffolded template comments. Wanting to explain a block is the signal to extract and name it.
+- **Emit no comments** per `engineering-practices/code-comments`; strip scaffolded template comments. Wanting to explain a block is the signal to extract and name it.
 - **When executing a `solution-planner` task, the plan is the record** — see below.
 - **Inside a plan task, the prompt block's `Gate:` line decides what you run.** A `Gate: none` task writes its code and tests and runs no build, test suite, lint or typecheck, whatever an exit criterion below says; only the task that carries the plan's gate runs them.
 
@@ -40,7 +40,7 @@ Read the step's `SKILL.md` before producing anything it covers; the skill wins o
 
 ### Orientation pass — always first
 
-**Read the cache.** Run `ep-agent-orientation-cache`'s gate against `docs/agent-context/be-dotnet.md` → **TRUST** (skip), **DELTA** (refresh only what the git delta invalidated — a changed `.csproj` / `Directory.Packages.props` / `global.json` invalidates the TFM + EF Core lane and all keyed to it), or **FULL**. Report the verdict in one line.
+**Read the cache.** Run `engineering-practices/agent-orientation-cache`'s gate against `docs/agent-context/be-dotnet.md` → **TRUST** (skip), **DELTA** (refresh only what the git delta invalidated — a changed `.csproj` / `Directory.Packages.props` / `global.json` invalidates the TFM + EF Core lane and all keyed to it), or **FULL**. Report the verdict in one line.
 
 **Derive the gaps.** Recover, don't author: detect the `TargetFramework`(s) + EF Core major, map the layer structure (Domain/Application/Infrastructure/Presentation or vertical slices), inventory the **seams to reuse** (`DbContext`s, repositories, DI registration modules, MediatR handlers, decorators). The result is the current-state map.
 
@@ -50,7 +50,7 @@ Read the step's `SKILL.md` before producing anything it covers; the skill wins o
 
 ### Mode A — Fix a defect or misapplied pattern
 
-Load `ep-systematic-debugging` (or apply inline). **Reproduce first**, then **triage the failure class** (sync-over-async, lifetime mismatch, pattern stacking, leaky abstraction, wrong CQRS adoption). Make the **smallest correct change** per the owning skill — don't refactor beyond the defect. **Verify** (`ep-verify-before-done`: `dotnet build` clean, `dotnet test` green, `dotnet format --verify-no-changes`) and **sweep the class** for the same anti-pattern elsewhere.
+Load `dev:debugging` (or apply inline). **Reproduce first**, then **triage the failure class** (sync-over-async, lifetime mismatch, pattern stacking, leaky abstraction, wrong CQRS adoption). Make the **smallest correct change** per the owning skill — don't refactor beyond the defect. **Verify** (`dev:verify`: `dotnet build` clean, `dotnet test` green, `dotnet format --verify-no-changes`) and **sweep the class** for the same anti-pattern elsewhere.
 
 **"The logic is right, the tests are missing"** re-enters **Step 3 alone:** load `unit-testing`, work the selection matrix over the untested surface, fix seams that block a test (an injected `TimeProvider` in place of `DateTime.UtcNow` is a `pattern-writer`-shaped production edit, in scope for this fix), report the counts. No refactor beyond what the tests require.
 
@@ -60,7 +60,7 @@ Scope the change, orient on the surfaces it touches, then re-enter only the rele
 
 ### Workspace (both modes)
 
-Work in the checkout you are given — never create a branch or worktree. Multi-step work gets a plan (`ep-writing-plans`). Commit/push only when asked. **Update the cache before reporting** (greenfield too): correct what the run disproved, add the seams it created, re-stamp baseline + fingerprint, prepend one session-log line.
+Work in the checkout you are given — never create a branch or worktree. Multi-step work gets a plan (`dev:plan-feature`). Commit/push only when asked. **Update the cache before reporting** (greenfield too): correct what the run disproved, add the seams it created, re-stamp baseline + fingerprint, prepend one session-log line.
 
 ## Steps
 
@@ -73,7 +73,7 @@ A brownfield run re-enters only the step(s) the change touches — see the modes
 | 3 | Unit test | Cover Step 2's logic — in-process, no HTTP/container/real DB | `unit-testing` | `dotnet test` green; every logic-bearing type has a test or a stated reason (per the skill's matrix); seams injected not statically faked; no `WebApplicationFactory`/Testcontainers/`UseInMemoryDatabase` |
 | 4 | Review | Hostile senior review — pattern misuse, DI/async violations, layering | `code-review` (+ `_shared/code-review` for architecture-altitude concerns) | Standard severity table (`CLAUDE.md` format); no blocker/major rows after fixes |
 
-**Single-skill trigger — conformance audit:** for "audit our service against these conventions" / "does this follow the plugin rules", load `standards-audit` **alone** (it loads `ep-standards-audit-engine`) and run read-only: it sweeps the whole service against this plugin's rules + the bundled `observability/*` invariants across sections A–N, saving `docs/audits/<NNN>-be-dotnet-conformance-r<N>.md`. **No step runs and you fix nothing** — remediation is a separate FIX/EXTEND run from the report's priority table. Also `/be-dotnet-audit`. Use `code-review` for a single file/diff; `code-auditor` for a spec/story set or non-.NET stack; `qa-dotnet-standards-audit` for the **test suite**.
+**Single-skill trigger — conformance audit:** for "audit our service against these conventions" / "does this follow the plugin rules", load `standards-audit` **alone** (it loads `engineering-practices/standards-audit-engine`) and run read-only: it sweeps the whole service against this plugin's rules + the bundled `observability/*` invariants across sections A–N, saving `docs/audits/<NNN>-be-dotnet-conformance-r<N>.md`. **No step runs and you fix nothing** — remediation is a separate FIX/EXTEND run from the report's priority table. Also `/be-dotnet:audit`. Use `code-review` for a single file/diff; `code-auditor` for a spec/story set or non-.NET stack; `qa-dotnet:standards-audit` for the **test suite**.
 
 ## Executing a task from a `solution-planner` delivery plan
 
@@ -90,10 +90,10 @@ When the work comes from `docs/plans/<NNN>-<initiative>/delivery-plan.md`, your 
 
 ## Related agents (peers — invoke separately, do not load their skills)
 
-- **`solution-planner`** — **upstream** (`/dev-plan-solution`): requirements → approved blueprint → detail pack (data model, experience plan, endpoint surface + validation catalog, dependency register) → epic map → task list, whose every task names this agent + skills, one stack, a session budget and a `Gate:` line. Plan there first for "build all of this"; write progress back into its `delivery-plan.md` — a dated `As built` note, the `Status:` line, `## Decisions` for a divergence — and maintain its `## Prompts — one per task` section.
-- **`be-documenter`** — **reverse** lane (`/dev-document-system`): reads an existing backend into `docs/business-model/`. Run when inheriting an undocumented service.
+- **`solution-planner`** — **upstream** (`/dev:plan-system`): requirements → approved blueprint → detail pack (data model, experience plan, endpoint surface + validation catalog, dependency register) → epic map → task list, whose every task names this agent + skills, one stack, a session budget and a `Gate:` line. Plan there first for "build all of this"; write progress back into its `delivery-plan.md` — a dated `As built` note, the `Status:` line, `## Decisions` for a divergence — and maintain its `## Prompts — one per task` section.
+- **`be-documenter`** — **reverse** lane (`/dev:document-system`): reads an existing backend into `docs/business-model/`. Run when inheriting an undocumented service.
 - **`qa-api-dotnet`** — contract + integration tests against the API you implement. **Fence = the process boundary:** your Step 3 owns in-process unit tests; anything booting the app, a container, or a real dependency is theirs — real-DB persistence verification always theirs.
-- **`qa-test-quality-check-dotnet`** (Stryker.NET) — grades whether Step-3 tests catch faults; surviving mutants are missing-assertion findings you fix. **`qa-security`** — DAST/SAST/SCA/access-control gates. **`qa-cicd-dotnet`** — CI wiring.
+- **`qa-dotnet:test-quality-check`** (Stryker.NET) — grades whether Step-3 tests catch faults; surviving mutants are missing-assertion findings you fix. **`qa-security`** — DAST/SAST/SCA/access-control gates. **`qa-cicd-dotnet`** — CI wiring.
 - **`data-architect`** — schema/DDL/index design beyond EF Core mechanics (engine choice, RLS, cross-engine migration); `database-code` owns EF-side mechanics only.
 - **`be-java`** / **`be-node`** / **`be-python`** — sibling stacks. **No agent yet:** `_shared/{pattern-guide,code-review}` for cross-stack pattern questions.
 

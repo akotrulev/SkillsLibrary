@@ -1,5 +1,5 @@
 ---
-name: be-dotnet-code-review
+name: conventions-review
 description: Use when the user asks to review C# / .NET (10 primary, 8-9 supported) code for design-pattern misuse, over-abstraction, hidden coupling, async violations, or DI anti-patterns. Triggers: "review this for pattern misuse", "is this CQRS justified", "check for service-locator usage", "spot smells in this service", "review my DI registration". Do NOT use for explanations (use `backend/dotnet/skills/pattern-guide`) or for generating new code (use `backend/dotnet/skills/pattern-writer`).
 ---
 
@@ -109,7 +109,7 @@ Severity column maps directly to the output table.
 
 ### Comments & XML documentation
 
-Load **[`ep-code-comments`](../../../../engineering-practices/code-comments/SKILL.md)** for the rule itself, the complex-flow test that earns a doc comment, the never-comment trivia list, and the severity mapping. This section supplies only the mechanics that differ here.
+Load **[`engineering-practices/code-comments`](../../../../engineering-practices/code-comments/SKILL.md)** for the rule itself, the complex-flow test that earns a doc comment, the never-comment trivia list, and the severity mapping. This section supplies only the mechanics that differ here.
 
 | .NET mechanic | What to check |
 |---|---|
@@ -156,7 +156,7 @@ Severities (from `CLAUDE.md`):
 - **`DbContext` injected into every service.** A `DbContext` injected widely tends to become the "service" — push behind a real abstraction or keep it in a thin data layer.
 - **Decorators with two concerns.** "LoggingAndRetryDecorator" — split.
 - **`public abstract class XBase` with one subclass.** Subclassing isn't the pattern; composition is.
-- **Comments compensating for naming, and stale comments.** A body that needs a step-by-step commentary needs extracting; a comment that no longer matches the code is a confident lie. Both per `ep-code-comments` — the fix is the rename or the extraction, never a reword.
+- **Comments compensating for naming, and stale comments.** A body that needs a step-by-step commentary needs extracting; a comment that no longer matches the code is a confident lie. Both per `engineering-practices/code-comments` — the fix is the rename or the extraction, never a reword.
 
 ## Handoffs
 

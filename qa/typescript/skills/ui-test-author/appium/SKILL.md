@@ -1,6 +1,6 @@
 ---
-name: qa-ui-test-writer-appium-typescript
-description: Use when the user asks to scaffold a TypeScript + WebdriverIO 10 (Appium 3) page object or Mocha mobile UI test. Triggers: "create an Appium page object for X in TS", "add a WebdriverIO mobile page for screen Y", "write an Appium TS test for Z", "swipe / WebView / failure evidence in WDIO". Do NOT use for web UI (`qa-ui-test-writer-playwright-typescript`) or live-screen discovery (`qa-mobile-screen-explorer-typescript`).
+name: ui-tests-appium
+description: Use when the user asks to scaffold a TypeScript + WebdriverIO 10 (Appium 3) page object or Mocha mobile UI test. Triggers: "create an Appium page object for X in TS", "add a WebdriverIO mobile page for screen Y", "write an Appium TS test for Z", "swipe / WebView / failure evidence in WDIO". Do NOT use for web UI (`qa-typescript:ui-tests-playwright`) or live-screen discovery (`qa-typescript:mobile-screen-explorer`).
 ---
 
 # QA — Appium TypeScript Page Object & Test Generator

@@ -1,11 +1,11 @@
 ---
-name: qa-data-driven-testing-typescript
-description: Use when one Node 24 (22 supported) / TypeScript test body must run against **many rows of data sourced from an external file**. Triggers: "run this test for every row in a CSV / spreadsheet", "data-drive these tests from a JSON file", "parameterize these Playwright/Vitest tests with external data". Do NOT use for building single test objects (`qa-test-data-builder-typescript`) or seeding a database (`qa-db-connection-typescript`).
+name: data-driven-testing
+description: Use when one Node 24 (22 supported) / TypeScript test body must run against **many rows of data sourced from an external file**. Triggers: "run this test for every row in a CSV / spreadsheet", "data-drive these tests from a JSON file", "parameterize these Playwright/Vitest tests with external data". Do NOT use for building single test objects (`qa-typescript:test-data-builder`) or seeding a database (`qa-typescript:db-connection`).
 ---
 
 # Data-Driven Testing (Node 24 / TypeScript — Vitest + Playwright)
 
-> **Ported from the canonical `qa-data-driven-testing-java`.** The four ideas and the section order are
+> **Ported from the canonical `qa-java:data-driven-testing`.** The four ideas and the section order are
 > identical; only the runner API (Vitest `test.for` / a Playwright test-per-row loop instead of TestNG
 > `@DataProvider`) and the parsing libraries (`csv-parse` / `JSON.parse` / `xlsx`) change — plus one
 > stack-native addition: **Zod** validates and coerces parsed rows, because in TS the file content arrives
@@ -15,9 +15,9 @@ A **data-driven test** is **one test body** exercised against **many input rows*
 **outside the test code** — an external CSV / JSON / Excel file checked into the repo. Add a row, get a
 case; you never copy-paste a test to cover a new input.
 
-It is *not*: a **builder** constructing one richly-configured object in code (`qa-test-data-builder-typescript`
+It is *not*: a **builder** constructing one richly-configured object in code (`qa-typescript:test-data-builder`
 — one object well, vs many rows; they **compose**); rows pulled from a **live database**
-(`qa-db-verification-queries-typescript`); or a **cross-browser/-device matrix** (`qa-browser-cloud-setup-typescript`
+(`qa-typescript:db-verification-queries`); or a **cross-browser/-device matrix** (`qa-typescript:browser-cloud-setup`
 — parameterizing the *environment*, not the *data*).
 
 > **The discipline this skill encodes** — four ideas, identical across all three stacks:
@@ -43,8 +43,8 @@ It is *not*: a **builder** constructing one richly-configured object in code (`q
 | Nested / hierarchical cases (a row has sub-objects or lists) | **JSON file** | `JSON.parse` → `z.array(RowSchema).parse(...)` |
 | Tabular data **owned/edited by non-technical stakeholders** | **Excel `.xlsx`** | `xlsx` (SheetJS) `sheet_to_json` → Zod-validated `Row[]` |
 | Huge dataset (don't hold it all in memory) | CSV, **streaming** | `csv-parse` async iterator (`for await (const row of parse(...))`) |
-| Rows from a **live DB / API** at test time | not this skill | `qa-db-verification-queries-typescript` (DB), `fetch` (HTTP) |
-| Each row is a whole complex domain object built in code | not this skill | `qa-test-data-builder-typescript` (the builder can consume one row) |
+| Rows from a **live DB / API** at test time | not this skill | `qa-typescript:db-verification-queries` (DB), `fetch` (HTTP) |
+| Each row is a whole complex domain object built in code | not this skill | `qa-typescript:test-data-builder` (the builder can consume one row) |
 
 **Rule of thumb:** *prefer CSV or JSON in git* (diffable, reviewable, mergeable). Reach for **Excel only**
 when the data's owner won't touch a CSV. Use **inline `test.for`** when there are few enough rows that a
@@ -266,8 +266,8 @@ web-first.
 - **Titles must be unique** — Playwright refuses two tests with the same title in one file, so `label` must
   differ per row; a duplicate row is a data defect the run reports at collection.
 - **A row that sets a browser option** (viewport, locale, time zone) generates a `test.describe` per row with
-  `test.use({ ... })` inside it — `test.use` is not allowed inside a test. `qa-responsive-testing-typescript` and
-  `qa-language-testing-typescript` use exactly that shape.
+  `test.use({ ... })` inside it — `test.use` is not allowed inside a test. `qa-typescript:responsive-testing` and
+  `qa-typescript:language-testing` use exactly that shape.
 - In a CommonJS Playwright project (no `"type": "module"`), resolve the file with `path.join(__dirname, ...)`
   instead of `import.meta.url`.
 
@@ -290,7 +290,7 @@ Streaming keeps the **parse** flat; the runner still needs every row at collecti
 collect at module scope (Vitest supports top-level `await`; `Array.fromAsync(streamTaxCases(path))` on Node 22
 and 24) and hand the array to `test.for`. Never assert rows one by one inside a single streaming test — that is
 the loop-in-a-test this skill exists to replace. A dataset too large to name every row is a load or batch job
-(`qa-load-testing-typescript`), not a data-driven suite.
+(`qa-typescript:load-testing`), not a data-driven suite.
 
 ## Anti-patterns
 
@@ -310,7 +310,7 @@ the loop-in-a-test this skill exists to replace. A dataset too large to name eve
 - **Money as floating-point.** JS `number` is a double; `0.1 + 0.2` corrupts totals. *Fix:* **integer cents**;
   assert on those.
 - **Secrets or real PII in a committed data file.** It's in git history forever. *Fix:* synthetic data; real
-  secrets via env (cross-link `qa-test-login-tokens-typescript`).
+  secrets via env (cross-link `qa-typescript:test-login-tokens`).
 
 ## Examples
 
@@ -318,7 +318,7 @@ One loader feeds the Vitest body and the Playwright journey above; each run repo
 titled by its input (`DE_10000`), never "row 1".
 
 **Composing with a builder (the boundary made concrete):** a row supplies the *varying* fields; the
-**builder** (`qa-test-data-builder-typescript`) fills the rest with sane defaults.
+**builder** (`qa-typescript:test-data-builder`) fills the rest with sane defaults.
 
 ```typescript
 test.for(loadCsvOrderCases(ordersCsv))("Should_ApplyExpectedDiscount_When_RegionIs $region", (row) => {
@@ -345,21 +345,21 @@ The builder supplies the unchanging defaults; the row drives only what **varies*
   stakeholder-owned sheets, inline for a few. Prefer diffable CSV/JSON in git over binary Excel.
 - **Money is integer cents, never float**; a malformed row **throws at load** (Zod), it does not flow through
   as `NaN`. No secrets or real PII in committed data files (synthetic; secrets via env —
-  `qa-test-login-tokens-typescript`).
+  `qa-typescript:test-login-tokens`).
 - Titles are `Should_X_When_Y` plus the row's input, unique per file. No `waitForTimeout`; no inline comments;
   page objects reach Playwright tests as fixtures; `strict: true`.
 
 ## Cross-references
 
-- `qa-data-driven-testing-java` (**the canonical file**: TestNG `@DataProvider`, OpenCSV, Jackson, POI) ·
-  `qa-data-driven-testing-dotnet` (NUnit `[TestCaseSource]`, CsvHelper, `System.Text.Json`, ClosedXML) — the
+- `qa-java:data-driven-testing` (**the canonical file**: TestNG `@DataProvider`, OpenCSV, Jackson, POI) ·
+  `qa-dotnet:data-driven-testing` (NUnit `[TestCaseSource]`, CsvHelper, `System.Text.Json`, ClosedXML) — the
   sibling stacks; same four ideas.
-- `qa-test-data-builder-typescript` — the **boundary**: a builder constructs **one** complex object in code
+- `qa-typescript:test-data-builder` — the **boundary**: a builder constructs **one** complex object in code
   with defaults; data-driven feeds **many** rows from a file. They **compose** — a row drives a builder's
   varying fields (see the last example).
-- `qa-db-verification-queries-typescript` — when rows come from a **live database** at test time rather
+- `qa-typescript:db-verification-queries` — when rows come from a **live database** at test time rather
   than a static file; the assertion-query counterpart to file-sourced data.
-- `qa-browser-cloud-setup-typescript` — parameterizing the **environment** (browser/device matrix) via
+- `qa-typescript:browser-cloud-setup` — parameterizing the **environment** (browser/device matrix) via
   Playwright projects rather than the **data**; orthogonal matrices that can multiply.
-- `qa-ui-test-writer-playwright-typescript` — the fixtures and page objects the data-driven journey reuses.
-  `qa-test-reports-typescript` — each row renders as a separate, named result.
+- `qa-typescript:ui-tests-playwright` — the fixtures and page objects the data-driven journey reuses.
+  `qa-typescript:test-reports` — each row renders as a separate, named result.

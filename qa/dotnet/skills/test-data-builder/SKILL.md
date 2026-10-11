@@ -1,5 +1,5 @@
 ---
-name: qa-test-data-builder-dotnet
+name: test-data-builder
 description: Use when creating test data builders or ObjectMothers in a .NET 10 (8-9) test project to replace duplicated inline literals across tests with named, intention-revealing factories. Triggers "create a builder for User in C#", "set up test data for X in .NET", "extract this fixture into an OrderBuilder". Not for driving one test from an external data file (`data-driven-testing`).
 ---
 

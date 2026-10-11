@@ -1,11 +1,11 @@
 ---
-name: mobile-android-kotlin-multiplatform
-description: Use when Kotlin code must be shared between Android and iOS — shared logic by default (Room, DataStore, Ktor, kotlinx.serialization, KMP ViewModel, Koin or Metro), the com.android.kotlin.multiplatform.library plugin on AGP 9, the iOS framework and Swift export (alpha), Compose Multiplatform as opt-in shared UI. Triggers "share this with iOS", "set up KMP", "Hilt in a shared module". Do NOT use for the Swift consumer code (`mobile-ios-*`) or Android-only work.
+name: kotlin-multiplatform
+description: Use when Kotlin code must be shared between Android and iOS — shared logic by default (Room, DataStore, Ktor, kotlinx.serialization, KMP ViewModel, Koin or Metro), the com.android.kotlin.multiplatform.library plugin on AGP 9, the iOS framework and Swift export (alpha), Compose Multiplatform as opt-in shared UI. Triggers "share this with iOS", "set up KMP", "Hilt in a shared module". Do NOT use for the Swift consumer code (`mobile-ios`) or Android-only work.
 ---
 
 # Android — Kotlin Multiplatform
 
-Owns the **KMP lane** of the Android plugin: what to share, how a shared module is built on AGP 9, how it reaches iOS, and when shared UI (Compose Multiplatform) is earned. **Shared logic is the default; shared UI is opt-in.** The Swift that *consumes* the shared module — the Xcode project, SwiftUI views, the Swift Package wiring — is [`mobile-ios`](../../../ios/skills/basics/SKILL.md)'s; this skill produces the framework and states what it exposes. Audit rows are section W of `mobile-android-standards-audit`.
+Owns the **KMP lane** of the Android plugin: what to share, how a shared module is built on AGP 9, how it reaches iOS, and when shared UI (Compose Multiplatform) is earned. **Shared logic is the default; shared UI is opt-in.** The Swift that *consumes* the shared module — the Xcode project, SwiftUI views, the Swift Package wiring — is [`mobile-ios`](../../../ios/skills/basics/SKILL.md)'s; this skill produces the framework and states what it exposes. Audit rows are section W of `mobile-android:standards-audit`.
 
 ## Version lane
 
@@ -32,9 +32,9 @@ Detect first: an existing `shared` module, its Kotlin version and DI choice are 
 ## When NOT to use
 
 - Android-only code, no iOS app → the plain skills ([`architecture`](../architecture/SKILL.md), [`offline-and-storage`](../offline-and-storage/SKILL.md))
-- The Swift side: calling the framework, SwiftUI, SPM in Xcode → `mobile-ios-*`
+- The Swift side: calling the framework, SwiftUI, SPM in Xcode → `mobile-ios`
 - Moving an AGP 8 / Kotlin-only project to AGP 9 → [`migration`](../migration/SKILL.md)
-- A React Native project → `mobile-react-native-*`; this skill does not bridge to JS
+- A React Native project → `mobile-react-native`; this skill does not bridge to JS
 - A web / desktop KMP target — out of scope; the lane is Android + iOS
 
 ## Inputs needed
@@ -106,7 +106,7 @@ kotlin {
 - **Ktor**: the engine is the only platform-specific line; timeouts, cancellation, retry rules and ProblemDetails mapping follow [`networking`](../networking/SKILL.md) — the policy does not change, the client does.
 - **Room 3** needs a `SQLiteDriver`; in a shared module that is `BundledSQLiteDriver` so SQLite behaves the same on both platforms. KSP runs **per target** (`kspAndroid`, `kspIosArm64`, `kspIosSimulatorArm64`); the database is built from a platform `actual` that supplies the file path. Schema rules and migrations: [`offline-and-storage`](../offline-and-storage/SKILL.md). Confirm the exact KMP builder / constructor annotations against the `androidx.room3` KDoc for the version in use.
 - **DataStore** is KMP — the file path is the platform actual.
-- **Secrets never live in shared storage.** The shared code calls a `SecretStore` interface; Keystore / Keychain implement it ([`mobile-shared-security`](../../../_shared/security/references/android.md)).
+- **Secrets never live in shared storage.** The shared code calls a `SecretStore` interface; Keystore / Keychain implement it ([`mobile-<stack>:security`](../../../_shared/security/references/android.md)).
 
 ## Reaching iOS
 
@@ -161,5 +161,5 @@ Compose Multiplatform shares the UI as well. It is chosen deliberately, per proj
 - Client policy → [`networking`](../networking/SKILL.md); storage and sync → [`offline-and-storage`](../offline-and-storage/SKILL.md)
 - Gradle, catalog, SDK levels → [`project-setup`](../project-setup/SKILL.md)
 - Moving to AGP 9 / the library plugin → [`migration`](../migration/SKILL.md)
-- Consuming the framework in Swift → `mobile-ios-basics` and `mobile-ios-architecture`
+- Consuming the framework in Swift → `mobile-ios:concepts` and `mobile-ios:architecture`
 - Test seams and fakes → [`unit-testing`](../unit-testing/SKILL.md)

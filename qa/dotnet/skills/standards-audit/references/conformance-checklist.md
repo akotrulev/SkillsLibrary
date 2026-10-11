@@ -2,7 +2,7 @@
 
 The audit's spine. Section letters and check numbers are **permanent** — a finding is `<letter><n>` (`D1`, `F3`) and keeps that ID across every round, forever. Never renumber; append new checks at the end of a section with the next free number.
 
-**Every row is about TEST CODE.** If a row tempts you toward the application under test, stop — that belongs to `be-dotnet-standards-audit` / the `fe-*` audits (see the skill's scope fence).
+**Every row is about TEST CODE.** If a row tempts you toward the application under test, stop — that belongs to `be-dotnet:standards-audit` / the `fe-*` audits (see the skill's scope fence).
 
 **How to read a row.** *Check* = the invariant. *Violation looks like* = what disqualifies it. *Find it with* = a mechanical lead (a hit is never a finding — read the code). *Sev* = the default severity; adjust for real impact and say why.
 
@@ -55,7 +55,7 @@ rg -n "<pattern>" --glob '*.cs' $TESTS
 | B11 | XML doc only where the name genuinely cannot carry the meaning | `/// <summary>Tests the get endpoint.</summary>` above `Should_Return_200_When_…`; `///` on every locator field or builder property | `rg -n -B1 "^\s*/// <summary>" --glob '*.cs'` — check what each sits above | minor |
 | B12 | Surviving comments are true and load-bearing | A comment describing an assertion or a flow the test no longer performs | Read the code around every comment B10/B11 surfaced; grep cannot decide this one | major |
 
-**B10–B12 are the audit face of [`ep-code-comments`](../../../../../engineering-practices/code-comments/SKILL.md)** — read it for the rule, the exactly-three-permitted-comments list for test code, the AAA-banner rule, and the family-vs-per-finding reporting split (B10 is one family with a count and 3–5 cited sites; each **B12** stale comment is its own finding). Three local notes: **B9 already owns commented-out tests**, a skip carrying no reason stays **A5**, and **a comment explaining a locator is an F-section finding** — `// the third span is the price` means the locator is positional, so fix the locator and cross-reference rather than filing it here.
+**B10–B12 are the audit face of [`engineering-practices/code-comments`](../../../../../engineering-practices/code-comments/SKILL.md)** — read it for the rule, the exactly-three-permitted-comments list for test code, the AAA-banner rule, and the family-vs-per-finding reporting split (B10 is one family with a count and 3–5 cited sites; each **B12** stale comment is its own finding). Three local notes: **B9 already owns commented-out tests**, a skip carrying no reason stays **A5**, and **a comment explaining a locator is an F-section finding** — `// the third span is the price` means the locator is positional, so fix the locator and cross-reference rather than filing it here.
 
 ---
 

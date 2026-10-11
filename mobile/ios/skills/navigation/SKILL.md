@@ -1,6 +1,6 @@
 ---
-name: mobile-ios-navigation
-description: Use when adding routes or containers in SwiftUI — NavigationStack(path:) with typed routes, NavigationSplitView, sheets and full-screen covers, TabView with the Tab API, and onOpenURL mapped to a route. Triggers "add a screen", "navigate programmatically", "deep link into a detail", "tabs on iPad". Do NOT use for push and universal-link setup (`mobile-ios-notifications-and-links`), state ownership (`-architecture`) or view structure (`-ui-components`).
+name: navigation
+description: Use when adding routes or containers in SwiftUI — NavigationStack(path:) with typed routes, NavigationSplitView, sheets and full-screen covers, TabView with the Tab API, and onOpenURL mapped to a route. Triggers "add a screen", "navigate programmatically", "deep link into a detail", "tabs on iPad". Do NOT use for push and universal-link setup (`mobile-ios:push-and-deep-links`), state ownership (`-architecture`) or view structure (`-ui-components`).
 ---
 
 # iOS — Navigation
@@ -30,11 +30,11 @@ Use the `Tab` API where the deployment target is iOS 18+; `.tabItem` remains rig
 
 ## When NOT to use
 
-- APNs, universal-link entitlements and AASA, scheme validation → `mobile-ios-notifications-and-links`
+- APNs, universal-link entitlements and AASA, scheme validation → `mobile-ios:push-and-deep-links`
 - Model ownership, the composition root → [`architecture`](../architecture/SKILL.md)
 - View internals → [`ui-components`](../ui-components/SKILL.md)
-- Not-found and failure screens → `mobile-ios-error-handling`
-- RN / Compose routing → `mobile-react-native-navigation`, `mobile-android-navigation`
+- Not-found and failure screens → `mobile-ios:error-handling`
+- RN / Compose routing → `mobile-react-native:navigation`, `mobile-android:navigation`
 
 ## Inputs needed
 
@@ -196,10 +196,10 @@ Paths of `Codable` routes survive relaunch via `@SceneStorage` (store the encode
 
 ## Handoffs
 
-- Push, universal links, schemes → `mobile-ios-notifications-and-links`
+- Push, universal links, schemes → `mobile-ios:push-and-deep-links`
 - Models, injection → [`architecture`](../architecture/SKILL.md)
 - Views, `.task` loads → [`ui-components`](../ui-components/SKILL.md)
 - Tab bar and split-view look, iPad → [`styling`](../styling/SKILL.md)
-- Not-found, failed states → `mobile-ios-error-handling`
-- Test ids → `mobile-ios-test-ids`
-- `NavigationView` → `NavigationStack` → `mobile-ios-migration`
+- Not-found, failed states → `mobile-ios:error-handling`
+- Test ids → `mobile-ios:test-ids`
+- `NavigationView` → `NavigationStack` → `mobile-ios:migration`

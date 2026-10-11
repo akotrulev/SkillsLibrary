@@ -1,6 +1,6 @@
 # Golden example — `epic-map.md`
 
-The filled example for `be-shared-epic-map`, from the **workshop-booking** toy initiative shared by all the planner examples. **Shapes and disciplines are normative; domain content is illustrative.**
+The filled example for `dev:plan-epic-map`, from the **workshop-booking** toy initiative shared by all the planner examples. **Shapes and disciplines are normative; domain content is illustrative.**
 
 Two things to read for rather than copy: `E0` is planner-created and carries no stories, and `E1` splits into two lanes because two of its stories share no files — the cheapest parallelism in the plan, and invisible if nobody looks for it.
 
@@ -8,7 +8,7 @@ Two things to read for rather than copy: `E0` is planner-created and carries no 
 
 # Workshop Booking — Epic Map
 
-**Date:** 2026-08-02 · **Written by:** `be-shared-epic-map`
+**Date:** 2026-08-02 · **Written by:** `dev:plan-epic-map`
 **Pack:** `./epics.md` · `./stories.md` · `./blueprint.md` · `./delivery-plan.md`
 
 > `E0` is planner-created: it carries no stories and does not appear in `epics.md`.

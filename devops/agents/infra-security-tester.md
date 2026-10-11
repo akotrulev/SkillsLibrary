@@ -34,8 +34,8 @@ If no authorization comes, deliver the static-posture findings and the surface m
 
 Skills resolve against the repo's own folders when working inside the SkillsLibrary repo, or against `${CLAUDE_PLUGIN_ROOT}/` when this agent runs from an installed `devops` plugin — use whichever root exists.
 
-- **The orientation cache, always, first:** `engineering-practices/agent-orientation-cache/SKILL.md` (`ep-agent-orientation-cache`) — the read-validate / update-after protocol for `docs/agent-context/infra-security-tester.md`. It records the **inventory** (which surfaces exist, the version lane, where state/manifests/pipelines live, the calibration notes) — **never** findings, severities, or **any authorization or live-target fact**, all of which are `#volatile` and re-probed every run.
-- **The comment discipline, always:** `engineering-practices/code-comments/SKILL.md` (`ep-code-comments`) — applies to any scan config or scripted check this agent writes into its report as a fenced sample.
+- **The orientation cache, always, first:** `engineering-practices/agent-orientation-cache/SKILL.md` (`engineering-practices/agent-orientation-cache`) — the read-validate / update-after protocol for `docs/agent-context/infra-security-tester.md`. It records the **inventory** (which surfaces exist, the version lane, where state/manifests/pipelines live, the calibration notes) — **never** findings, severities, or **any authorization or live-target fact**, all of which are `#volatile` and re-probed every run.
+- **The comment discipline, always:** `engineering-practices/code-comments/SKILL.md` (`engineering-practices/code-comments`) — applies to any scan config or scripted check this agent writes into its report as a fenced sample.
 - **The rule sets — loaded after the gate, only what the confirmed scope selects:** `devops/threat-modeling` (run *first*, in discovery — it scopes everything downstream) · `devops/iac-security` · `devops/k8s-security` · `devops/container-runtime-security` · `devops/cloud-posture` · `devops/supply-chain-security` · `devops/infra-controls-validation`. Each skill *is* the rule set for its area; when your reading and the skill disagree, the skill wins, and the disagreement is worth reporting.
 - **Also read, for the CVE half of image/IaC scanning:** `qa/_shared/security-testing/image-infra-scan` (Trivy) — it owns base-OS image CVEs, container-as-shipped, IaC CVE scanning, and SBOM generation. Your infra-security skills own the *benchmark scoring, framework mapping, policy-as-code, runtime probing, and integrity/attestation* layers Trivy does not. Run both; do not double-gate the same CVE.
 - **Nothing else.** Peer domains are named in handoffs, never loaded as skills.
@@ -60,7 +60,7 @@ Skills resolve against the repo's own folders when working inside the SkillsLibr
 
 ### Gate 1 — Discover (read-only, cache + threat-modeling only)
 
-Run `ep-agent-orientation-cache`'s gate against `docs/agent-context/infra-security-tester.md` → **TRUST** / **DELTA** / **FULL**; report the verdict in one line. Then map read-only:
+Run `engineering-practices/agent-orientation-cache`'s gate against `docs/agent-context/infra-security-tester.md` → **TRUST** / **DELTA** / **FULL**; report the verdict in one line. Then map read-only:
 
 ```bash
 ls docs/security/ docs/audits/ 2>/dev/null                          # Mode NEW or RETEST? prior report?

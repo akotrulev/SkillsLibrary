@@ -1,17 +1,17 @@
 ---
-name: design-motion
-description: Use when deciding what a UI's motion is — the intensity tier (subtle / standard / complex), which of the 17 vendored presets fits each trigger (hover, scroll reveal, page transition, skeleton…), and each one's duration/easing/cleanup contract, from the corpus's `gsap` domain. Triggers "what animation should this have", "our animations feel random", "how long should this transition be". Not for whether motion serves the brief (`design-visual-identity`) or how it is coded (a stack's `animation`).
+name: motion
+description: Use when deciding what a UI's motion is — the intensity tier (subtle / standard / complex), which of the 17 vendored presets fits each trigger (hover, scroll reveal, page transition, skeleton…), and each one's duration/easing/cleanup contract, from the corpus's `gsap` domain. Triggers "what animation should this have", "our animations feel random", "how long should this transition be". Not for whether motion serves the brief (`design:visual-identity`) or how it is coded (a stack's `animation`).
 ---
 
 # Motion design — the tier, the preset, the floor
 
-Owns the **motion catalog**: which of the seven motion categories a surface needs, at which of the three intensity tiers, with what duration, easing, do/don't, and cleanup obligation. The catalog is not invented here — it is the `gsap` domain of the vendored corpus ([`design-ui-ux-pro-max`](../ui-ux-pro-max/SKILL.md)), **the source of truth for every value in it.** This skill is how the catalog is chosen from and applied.
+Owns the **motion catalog**: which of the seven motion categories a surface needs, at which of the three intensity tiers, with what duration, easing, do/don't, and cleanup obligation. The catalog is not invented here — it is the `gsap` domain of the vendored corpus ([`design:corpus`](../ui-ux-pro-max/SKILL.md)), **the source of truth for every value in it.** This skill is how the catalog is chosen from and applied.
 
 **The three-way fence:**
 
 | | Owns | Who |
 |---|---|---|
-| **Whether** motion serves the brief at all, and what the one orchestrated moment is | the intent | [`design-visual-identity`](../visual-identity/SKILL.md) |
+| **Whether** motion serves the brief at all, and what the one orchestrated moment is | the intent | [`design:visual-identity`](../visual-identity/SKILL.md) |
 | **What** the motion is — category, tier, duration, easing, the do/don't | the catalog | **this skill** |
 | **How** it is built in the codebase | the mechanics | a stack's `animation` ([Blazor](../../frontend/blazor/skills/animation/SKILL.md) · [React](../../frontend/react/skills/animation/SKILL.md)) |
 
@@ -22,7 +22,7 @@ Owns the **motion catalog**: which of the seven motion categories a surface need
 - A brief carries a motion dial (`--motion 1-10` on the design-system generator) and it has to become concrete presets.
 - A scroll, stagger, parallax, page-transition, skeleton, or carousel behavior is being specified.
 
-Do **not** use it to decide whether the page should animate at all (`design-visual-identity`), or to write the animation code (the stack's `animation`).
+Do **not** use it to decide whether the page should animate at all (`design:visual-identity`), or to write the animation code (the stack's `animation`).
 
 ## Query the catalog first
 
@@ -44,7 +44,7 @@ The tier is a **product-level decision**, not a per-element one. A product picks
 | **Standard** | motion that has a point of view without asking for attention | most product marketing, SaaS sites, content products | `--motion 4-7` |
 | **Complex** | choreography as part of the product's argument | launch pages, portfolios, storytelling, brand moments | `--motion 8-10` |
 
-**The application lane is Subtle by default.** A grid, a form, a settings page gets press/hover/region-enter feedback and nothing more — the same rule `design-visual-identity` states as "in the application lane motion is feedback only, never atmosphere."
+**The application lane is Subtle by default.** A grid, a form, a settings page gets press/hover/region-enter feedback and nothing more — the same rule `design:visual-identity` states as "in the application lane motion is feedback only, never atmosphere."
 
 ## The seven categories
 
@@ -69,7 +69,7 @@ These hold at every tier, and the corpus repeats them across rows because they a
 3. **Every loop and listener is killed.** `repeat: -1` tweens, pointer handlers, timers, ScrollTriggers and SplitText splits leak on SPA route changes unless explicitly torn down — `useGSAP` scope in React, the framework's cleanup hook elsewhere, `split.revert()` to restore real text nodes for assistive tech.
 4. **Offscreen and hidden means stopped.** IntersectionObserver pauses animation that has scrolled away; `visibilitychange` pauses work in a background tab. A shimmer running behind a hidden tab is pure battery cost.
 5. **Motion never carries meaning alone,** and never blocks. Exit animations cap at ~250ms so navigation stays responsive; a loader under ~300ms of wait should not appear at all.
-6. **Auto-advancing content is stoppable.** A carousel needs visible previous/next *and* play/pause, pauses on hover and on focus inside it, announces the current slide without moving focus, and does not auto-advance under reduced motion. This is WCAG 2.2 territory, not taste — see [`design-accessible-by-design`](../accessible-by-design/SKILL.md).
+6. **Auto-advancing content is stoppable.** A carousel needs visible previous/next *and* play/pause, pauses on hover and on focus inside it, announces the current slide without moving focus, and does not auto-advance under reduced motion. This is WCAG 2.2 territory, not taste — see [`design:accessibility`](../accessible-by-design/SKILL.md).
 7. **Never parallax body copy or interactive controls.** Decorative and background layers only; parallaxed reading text hurts comprehension and triggers motion sickness.
 8. **Reveal is not a content-hiding strategy.** Below-the-fold content that is invisible by default needs a no-JS fallback, or crawlers and assistive tech see an empty page.
 
@@ -95,8 +95,8 @@ These hold at every tier, and the corpus repeats them across rows because they a
 
 ## Related
 
-- [`design-ui-ux-pro-max`](../ui-ux-pro-max/SKILL.md) — the `gsap` domain that is this skill's catalog, and the `--motion` dial that resolves the tier.
-- [`design-visual-identity`](../visual-identity/SKILL.md) — decides whether motion serves the brief and what the one orchestrated moment is.
-- [`design-accessible-by-design`](../accessible-by-design/SKILL.md) — the WCAG 2.2 side of pause/stop, focus, and non-motion alternatives.
-- [`design-landing-patterns`](../landing-patterns/SKILL.md) — the landing patterns whose "recommended effects" column names the motion a section expects.
+- [`design:corpus`](../ui-ux-pro-max/SKILL.md) — the `gsap` domain that is this skill's catalog, and the `--motion` dial that resolves the tier.
+- [`design:visual-identity`](../visual-identity/SKILL.md) — decides whether motion serves the brief and what the one orchestrated moment is.
+- [`design:accessibility`](../accessible-by-design/SKILL.md) — the WCAG 2.2 side of pause/stop, focus, and non-motion alternatives.
+- [`design:landing-patterns`](../landing-patterns/SKILL.md) — the landing patterns whose "recommended effects" column names the motion a section expects.
 - A stack's `animation` ([Blazor](../../frontend/blazor/skills/animation/SKILL.md) · [React](../../frontend/react/skills/animation/SKILL.md)) — builds the chosen preset.

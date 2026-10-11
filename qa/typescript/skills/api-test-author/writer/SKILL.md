@@ -1,6 +1,6 @@
 ---
-name: qa-api-test-writer-typescript
-description: Use when the user asks to write TypeScript API tests using Vitest + native fetch + Zod against a REST backend. Triggers: "write a TS API test for X", "add a Vitest spec for endpoint Y", "automate these test cases in TypeScript". Do NOT use for API tests on the Playwright runner (`qa-api-test-playwright-typescript`), GraphQL or gRPC (`qa-api-test-graphql-typescript` / `qa-api-test-grpc-typescript`), or reviewing tests (`qa-api-test-review-typescript`).
+name: api-tests
+description: Use when the user asks to write TypeScript API tests using Vitest + native fetch + Zod against a REST backend. Triggers: "write a TS API test for X", "add a Vitest spec for endpoint Y", "automate these test cases in TypeScript". Do NOT use for API tests on the Playwright runner (`qa-typescript:api-tests-playwright`), GraphQL or gRPC (`qa-typescript:api-tests-graphql` / `qa-typescript:api-tests-grpc`), or reviewing tests (`qa-typescript:api-tests-review`).
 ---
 
 # QA — API Test Writer (TypeScript / Vitest + fetch + Zod)

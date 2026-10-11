@@ -81,6 +81,6 @@ Together they answer the three A08 questions: *is it ours* (cosign), *how was it
 - `../SKILL.md` — the router; SLSA owns the "how was this built, and can we prove it" (build provenance) row.
 - `cosign-sigstore.md` — the signing/attestation transport and the admission-gate enforcement.
 - `dependency-integrity.md` — provenance covers *your* build; dependency integrity covers what you pulled in.
-- `qa-security-image-infra-scan` — the SBOM generator SLSA provenance is often bundled with.
+- `qa-<stack>:image-infra-scan` — the SBOM generator SLSA provenance is often bundled with.
 - `devops/{github-actions,gitlab-ci,azure-pipelines}` — where the isolated builder and the verify gate are
   wired (the deploy pipeline, not `qa/cicd/*`).

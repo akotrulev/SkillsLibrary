@@ -72,7 +72,7 @@ the CIS PDF — quote it into the finding so `devops-engineer` has the change wi
   count as safe. Sample the WARNs and resolve each to a real PASS/FAIL by hand.
 - **INFO** — informational, no action.
 - Scope with `--check 1.2.6,1.2.7` (only these) or `--skip 1.2.6` (accepted-risk, ticketed). Every skip
-  carries a ticket + reason, exactly like the `.trivyignore` discipline in `qa-security-image-infra-scan`.
+  carries a ticket + reason, exactly like the `.trivyignore` discipline in `qa-<stack>:image-infra-scan`.
 
 ## Spines
 
@@ -89,5 +89,5 @@ mitigates (`T1611` Escape to Host for privileged-pod controls, `T1078.003` for R
   filesystem, Kubescape for the API-visible posture and the extra frameworks. Run both; they see different
   surfaces.
 - `polaris.md` — best-practice *manifest* validation (static, pre-merge); kube-bench scores the *running node*.
-- `qa-security-image-infra-scan` — Trivy for image/IaC CVEs (`trivy k8s` for cluster CVEs) — a different
+- `qa-<stack>:image-infra-scan` — Trivy for image/IaC CVEs (`trivy k8s` for cluster CVEs) — a different
   surface from benchmark scoring.

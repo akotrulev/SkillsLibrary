@@ -1,4 +1,4 @@
-# Deep-dive details — `qa-ai-feature-testing-java`
+# Deep-dive details — `qa-java:ai-feature-testing`
 
 Sections moved out of SKILL.md for on-demand loading. Read what the task needs.
 
@@ -75,7 +75,7 @@ public class EvalTest {
 ```
 
 > **CI gate:** `promptfoo eval` exits non-zero when any assertion fails — wire it directly as a pipeline step
-> (`qa-ci-pipelines-java`) for the declarative path, *or* drive it through TestNG (above) when you
+> (`qa-java:ci-pipelines`) for the declarative path, *or* drive it through TestNG (above) when you
 > want the result in the same suite + Allure. Both honor the four ideas.
 
 ## The SDK path — LangChain4j in TestNG (the second half of the hybrid)
@@ -159,5 +159,5 @@ public class SummarizerTest {
 ```
 
 > **Reporting:** route each promptfoo case and each TestNG test into Allure as a named result
-> (`qa-test-reports-java`) so an eval failure names the *case*; track the suite's **pass-rate over time**
-> (`qa-_shared-quality-metrics`) — a slow decline is a silent model/prompt regression.
+> (`qa-java:test-reports`) so an eval failure names the *case*; track the suite's **pass-rate over time**
+> (`qa-<stack>:quality-metrics`) — a slow decline is a silent model/prompt regression.

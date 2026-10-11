@@ -70,7 +70,7 @@ grep -EnoI "$SECRET_RE"
 ```
 
 `[STATIC]` The store's own hygiene — no secret committed to the repo/history (the *presence* check that pairs
-with `qa-security-secrets-scan`):
+with `qa-<stack>:secrets-scan`):
 
 ```bash
 gitleaks git . --redact --report-format sarif --report-path gitleaks.sarif --exit-code 1
@@ -141,7 +141,7 @@ kubectl get pod -n NS POD -o json | jq -e '
 ## Family 2 — Encryption in transit
 
 The control is not "TLS is configured" but "plaintext does not serve and modern TLS is enforced." This lane
-validates it is **wired and enforced**; `qa-security-certificate-scan` (sslyze/testssl) owns the cert/cipher
+validates it is **wired and enforced**; `qa-<stack>:certificate-scan` (sslyze/testssl) owns the cert/cipher
 *quality* depth — call it for the grade, validate enforcement here.
 
 `[LIVE]` The plaintext path must redirect, not serve:
@@ -180,11 +180,11 @@ EBS/managed-disk encryption, RDS/SQL TDE, and the K8s etcd check above.
 
 - `../SKILL.md` — the harness and the control-family matrix; this reference is Families 1 and 2 in depth.
 - `monitoring-and-pipeline.md` — Families 3 and 4.
-- `qa-security-secrets-scan` — the *committed-secret* presence scan (gitleaks/TruffleHog); this lane validates
+- `qa-<stack>:secrets-scan` — the *committed-secret* presence scan (gitleaks/TruffleHog); this lane validates
   the runtime *plumbing* is a store reference, not a literal.
-- `qa-security-certificate-scan` — sslyze/testssl for TLS cert/cipher **quality**; this lane validates TLS is
+- `qa-<stack>:certificate-scan` — sslyze/testssl for TLS cert/cipher **quality**; this lane validates TLS is
   **wired and enforced**.
-- `devops-environment-config` — the authoring sibling; a finding routes there for `devops-engineer` to fix,
+- `devops:environment-config` — the authoring sibling; a finding routes there for `devops-engineer` to fix,
   then this lane retests.
-- `devops-cloud-posture` — broad CSPM benchmark scanning of encryption/IAM; this lane is targeted
+- `devops:cloud-posture` — broad CSPM benchmark scanning of encryption/IAM; this lane is targeted
   effectiveness validation + retest of specific controls.

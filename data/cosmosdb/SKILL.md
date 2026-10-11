@@ -1,5 +1,5 @@
 ---
-name: data-cosmosdb
+name: cosmosdb
 description: Use when designing containers / partition keys, setting up clients, securing an account (Entra data-plane RBAC, CMK), planning migrations, writing queries, or tuning Azure Cosmos DB from a .NET / Java / Node backend. Triggers: "design a Cosmos container", "pick a partition key", "RU/s tuning", "autoscale vs provisioned vs serverless", "passwordless Cosmos with Entra ID". Do NOT use for relational stores, Mongo Atlas (`data/mongodb`), or DynamoDB (`data/dynamodb`).
 ---
 

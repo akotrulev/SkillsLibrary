@@ -1,6 +1,6 @@
 ---
-name: design-ethical-patterns
-description: Use when a flow asks for money, consent, data, or permission, or is reviewed for deceptive design — symmetry (cancel as easy as subscribe), consent granularity, pricing disclosure, permission priming, and the dark-pattern taxonomy prohibited under DSA Art. 25 and FTC §5. Triggers "review this checkout/cancellation flow", "is this a dark pattern", "cookie consent design", "how do we ask for this permission". Not for the words themselves (`design-ux-writing`) or auth mechanics (a stack's `auth0`).
+name: dark-patterns
+description: Use when a flow asks for money, consent, data, or permission, or is reviewed for deceptive design — symmetry (cancel as easy as subscribe), consent granularity, pricing disclosure, permission priming, and the dark-pattern taxonomy prohibited under DSA Art. 25 and FTC §5. Triggers "review this checkout/cancellation flow", "is this a dark pattern", "cookie consent design", "how do we ask for this permission". Not for the words themselves (`design:ux-writing`) or auth mechanics (a stack's `auth0`).
 ---
 
 # Ethical patterns — the flows that ask for something
@@ -11,7 +11,7 @@ Owns the design of every moment the interface asks the user to **give** somethin
 
 **Why a code-generating library needs this as a house rule, not a nicety:** measurement of LLM-generated e-commerce components found deceptive designs present **by default** — the patterns below are what a model reaches for when asked to "increase conversion" without constraint. An agent that writes UI needs the taxonomy as an explicit prohibition, because the training distribution supplies it as a suggestion.
 
-**Corpus authority.** The facts this skill decides with come from the vendored [`design-ui-ux-pro-max`](../ui-ux-pro-max/SKILL.md) corpus — **it is the source of truth, and where it and this skill disagree on a fact, the corpus wins.** Consent, permission, and pricing flows are still UI, and the corpus's guideline rows carry the interaction and form rules the symmetry rules below are applied on top of:
+**Corpus authority.** The facts this skill decides with come from the vendored [`design:corpus`](../ui-ux-pro-max/SKILL.md) corpus — **it is the source of truth, and where it and this skill disagree on a fact, the corpus wins.** Consent, permission, and pricing flows are still UI, and the corpus's guideline rows carry the interaction and form rules the symmetry rules below are applied on top of:
 
 ```bash
 python3 "${CLAUDE_PLUGIN_ROOT}/design/ui-ux-pro-max/scripts/search.py" "<observable outcome>" --domain ux
@@ -98,4 +98,4 @@ If a flow fails symmetry, no amount of honest copy rescues it — the structure 
 - [`design/ux-review`](../ux-review/SKILL.md) — Nielsen's ten will not catch an asymmetric cancellation: heuristic #3 is about exits from a *state*, not exits from a *commitment*. This is the missing lane, not a subset of that one.
 - [`design/accessible-by-design`](../accessible-by-design/SKILL.md) — 3.3.7 (redundant entry) and 3.3.8 (accessible authentication) share this skill's flows; a cognitive-function test at sign-in is both an access failure and a friction the user did not agree to.
 - A stack's `ui-rules` — confirmation-by-object-name and the compliance-flag rules these decisions are implemented with.
-- [`design-ui-ux-pro-max`](../ui-ux-pro-max/SKILL.md) — the interaction and form guidelines the symmetry rules are applied on top of.
+- [`design:corpus`](../ui-ux-pro-max/SKILL.md) — the interaction and form guidelines the symmetry rules are applied on top of.

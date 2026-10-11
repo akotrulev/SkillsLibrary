@@ -1,6 +1,6 @@
 ---
-name: td-eval-sets
-description: Use when building held-out evaluation data to measure a small LLM/VLM you trained — golden test sets, multiple-choice/exact-match items, rubric and LLM-judge data, contamination checks, and canary strings. Triggers: "build an eval set for my model", "golden test set", "how do I measure my fine-tuned model", "LLM-as-judge eval data", "check my model isn't contaminated". Do NOT use for training data itself (`td-instruction-sft` etc.), or the eval-running harness (qa `ai-feature-testing`).
+name: eval-sets
+description: Use when building held-out evaluation data to measure a small LLM/VLM you trained — golden test sets, multiple-choice/exact-match items, rubric and LLM-judge data, contamination checks, and canary strings. Triggers: "build an eval set for my model", "golden test set", "how do I measure my fine-tuned model", "LLM-as-judge eval data", "check my model isn't contaminated". Do NOT use for training data itself (`training-data:instruction-sft` etc.), or the eval-running harness (qa `ai-feature-testing`).
 ---
 
 # Training Data — Evaluation Sets
@@ -19,16 +19,16 @@ The held-out data that answers "did the model actually get better?" An eval set 
 
 - Training data of any stage → the stage skills
 - Running the eval / asserting pass-rates / red-teaming → qa `ai-feature-testing`, `ai-answer-quality-testing` (peers)
-- Preference *training* data → `td-preference-data`
-- VLM-specific eval item content → `td-vision-language-data`
+- Preference *training* data → `training-data:preference-data`
+- VLM-specific eval item content → `training-data:vision-language-data`
 
 ## The cardinal rule: the eval set is sacred and isolated
 
 Everything about an eval set follows from one requirement — **nothing the model trained on may appear in it, and nothing in it may leak back into training**:
 
-- **Draw it before training and freeze it.** The frozen test split from `td-dataset-formats` is one input; a purpose-built eval is another. Once frozen, it does not change between model versions — a moving eval can't show a trend.
-- **It is the decontamination target** (`td-data-quality`): every train record is checked against it and dropped on a near-match. Run the check and report the rate in the eval card.
-- **Seed canary strings** — a unique GUID per eval set embedded in items (`td-dataset-formats` `canary`). If it ever surfaces in a corpus or a model's output, you have proof of leakage.
+- **Draw it before training and freeze it.** The frozen test split from `training-data:dataset-formats` is one input; a purpose-built eval is another. Once frozen, it does not change between model versions — a moving eval can't show a trend.
+- **It is the decontamination target** (`training-data:data-quality`): every train record is checked against it and dropped on a near-match. Run the check and report the rate in the eval card.
+- **Seed canary strings** — a unique GUID per eval set embedded in items (`training-data:dataset-formats` `canary`). If it ever surfaces in a corpus or a model's output, you have proof of leakage.
 - **Never tune on the test set.** Keep a separate `dev`/`val` set for iteration; the test set is looked at rarely and never optimized against. Optimizing against your eval is how you get a model that aces the eval and fails in production.
 
 ## Match the item type to what you're measuring
@@ -50,7 +50,7 @@ For open-ended quality, the eval *item* carries the rubric or reference the judg
 - **Write the rubric into the item** (or reference a shared rubric id) — the criteria, each scored, so scoring is consistent across items and runs.
 - **Pin the judge** (model id + prompt + version, recorded in the eval card) and **calibrate it against a human-labeled subset** before trusting it. Report the human-agreement rate — an uncalibrated judge is an unknown ruler.
 - **Keep the judge's reason** per scored output so a human can spot-audit and so regressions are debuggable.
-- Guard the same biases as `td-synthetic-generation`: position (randomize), length (control), self-preference (a judge favoring its own family).
+- Guard the same biases as `training-data:synthetic-generation`: position (randomize), length (control), self-preference (a judge favoring its own family).
 
 The QA `ai-answer-quality-testing` skill owns the RAG-triad and retrieval metrics if the model is a RAG system — build the golden set with reference contexts and hand off.
 
@@ -58,21 +58,21 @@ The QA `ai-answer-quality-testing` skill owns the RAG-triad and retrieval metric
 
 An eval that tests one capability certifies one capability. Cover:
 
-- **Every task bucket the SFT set targeted** (`td-instruction-sft` taxonomy) — so you can see per-capability regression, not just an average.
+- **Every task bucket the SFT set targeted** (`training-data:instruction-sft` taxonomy) — so you can see per-capability regression, not just an average.
 - **Difficulty spread** including a hard tail — an eval of only easy items saturates and stops discriminating.
 - **Safety/refusal** — does the model refuse what it should and comply with what it should.
-- **The failure modes you tuned against** (from `td-preference-data`) — did the preference tuning actually fix them.
+- **The failure modes you tuned against** (from `training-data:preference-data`) — did the preference tuning actually fix them.
 - **Public benchmarks** relevant to the model (MMLU, GSM8K, HumanEval, HellaSwag; VLM: VQAv2, TextVQA, DocVQA, MMMU) as a comparability anchor — but a small domain model is best judged on a **domain eval you build**, not only public leaderboards it wasn't built for.
 
 Report per-bucket counts in the eval card; a per-bucket score table is far more useful than a single number.
 
 ## Build small, label carefully
 
-Eval quality outweighs eval size — **a few hundred carefully-verified items beat ten thousand auto-generated unverified ones**, because a wrong gold answer silently penalizes a correct model. If you synthesize eval items with a teacher (`td-synthetic-generation`), a human verifies the gold answers before they count. Never let the model-under-test (or its own family, for a judge) grade its own eval unchecked.
+Eval quality outweighs eval size — **a few hundred carefully-verified items beat ten thousand auto-generated unverified ones**, because a wrong gold answer silently penalizes a correct model. If you synthesize eval items with a teacher (`training-data:synthetic-generation`), a human verifies the gold answers before they count. Never let the model-under-test (or its own family, for a judge) grade its own eval unchecked.
 
 ## Output
 
-Eval items in the `td-dataset-formats` eval shape (`messages` + `reference` + `eval` block + optional `canary`), a frozen `test.jsonl`, and an eval card documenting: item types, scoring method, the pinned judge + calibration result, coverage table, contamination rate found, and the public benchmarks included.
+Eval items in the `training-data:dataset-formats` eval shape (`messages` + `reference` + `eval` block + optional `canary`), a frozen `test.jsonl`, and an eval card documenting: item types, scoring method, the pinned judge + calibration result, coverage table, contamination rate found, and the public benchmarks included.
 
 ## Hard rules
 

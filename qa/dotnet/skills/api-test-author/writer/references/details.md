@@ -1,4 +1,4 @@
-# Deep-dive details — `qa-api-test-writer-dotnet`
+# Deep-dive details — `qa-dotnet:api-tests`
 
 Sections moved out of SKILL.md for on-demand loading. Read what the task needs.
 

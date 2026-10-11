@@ -1,5 +1,5 @@
 ---
-name: ep-code-comments
+name: code-comments
 description: The shared comment discipline every code-writing and code-reviewing skill applies — only complex code carries a comment, and only a short doc comment on a method, class, or type; no inline comments; stale comments deleted rather than updated. Loaded by a writer, reviewer, or audit skill, which supplies its own language's syntax. Do NOT invoke directly or route a user request here. Do NOT use for documentation artifacts (docs/plans, docs/specs) — this governs source-code comments only.
 ---
 
@@ -76,5 +76,5 @@ Emit no comments except where the complex-flow test is genuinely met, and then o
 ## Handoffs
 
 - **A reviewer applying this** supplies its language's doc-comment and suppression syntax, then grades per the table above.
-- **An audit applying this** supplies the `Find it with` recipe and the permanent finding ID; report shapes come from [`ep-standards-audit-engine`](../standards-audit-engine/SKILL.md).
+- **An audit applying this** supplies the `Find it with` recipe and the permanent finding ID; report shapes come from [`engineering-practices/standards-audit-engine`](../standards-audit-engine/SKILL.md).
 - **Documentation artifacts are out of scope** — plans, specs, business-model documents, and audit reports are governed by the skills that own them.

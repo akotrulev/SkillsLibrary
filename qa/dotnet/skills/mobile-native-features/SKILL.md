@@ -1,5 +1,5 @@
 ---
-name: qa-mobile-native-features-dotnet
+name: mobile-native-features
 description: Use when testing the device-native, OS-level capabilities a mobile app uses that a normal Appium page-object UI test doesn't exercise — permissions, push, deep links, biometrics, camera. Triggers "test our deep link opens the right screen in Appium C#", "handle the camera/location permission dialog", "test Face ID / fingerprint login on the simulator". Not for device-cloud wiring (`device-cloud`).
 ---
 

@@ -8,12 +8,12 @@ the single most useful fact in this file.
 
 | Tool | Status | Verdict |
 |---|---|---|
-| **tfsec** (Aqua) | **Merged into Trivy.** Last release `v1.28.14`, 2 May 2025; repo self-describes as "now part of Trivy" | **Do not adopt.** Its entire check library lives in `trivy config` — `qa-security-image-infra-scan` already runs it. Migrate an inherited tfsec job to Trivy |
+| **tfsec** (Aqua) | **Merged into Trivy.** Last release `v1.28.14`, 2 May 2025; repo self-describes as "now part of Trivy" | **Do not adopt.** Its entire check library lives in `trivy config` — `qa-<stack>:image-infra-scan` already runs it. Migrate an inherited tfsec job to Trivy |
 | **Terrascan** (Tenable) | **Archived** 20 Nov 2025. No maintenance, no new provider coverage, no CVE fixes | **Do not adopt.** Migrate to Checkov (its OPA-based policies map onto Rego, so an existing custom policy set ports to Conftest with modest effort) |
 | **KICS** (Checkmarx) | Active. 2,400+ queries across 20+ IaC formats. **Its GitHub Action was compromised 23 Mar 2026** | **Niche adopt** — breadth, not depth. See the caveats below |
 | **Checkov** (Palo Alto) | Active, weekly releases | **Primary.** `references/checkov.md` |
 | **Conftest / OPA** (CNCF) | Active | **The org-rules layer.** `references/opa-conftest.md` |
-| **Trivy** (Aqua) | Active | The lightweight built-in gate — **owned by `qa-security-image-infra-scan`**, not this skill |
+| **Trivy** (Aqua) | Active | The lightweight built-in gate — **owned by `qa-<stack>:image-infra-scan`**, not this skill |
 
 > **Why the two deaths matter for this skill's design.** The original tool list for this skill named
 > `Checkov · tfsec · Terrascan · KICS · OPA/Conftest` as the tool family. Research collapsed it: tfsec's value
@@ -34,7 +34,7 @@ trivy config ./infra --severity HIGH,CRITICAL --exit-code 1
 Check IDs carried over: tfsec's `aws-s3-enable-bucket-encryption` is Trivy's `AVD-AWS-0088`. Existing
 `#tfsec:ignore:<id>` comments **are still honoured by Trivy's misconfig scanner**, so the migration does not
 force a suppression rewrite — but new suppressions should use `.trivyignore.yaml` with `expired_at`, per
-`qa-security-image-infra-scan`.
+`qa-<stack>:image-infra-scan`.
 
 ## Terrascan — migrate off
 
@@ -86,7 +86,7 @@ license to run a lane.** Commercial tools are named so a licensed team knows whe
 | Tool | Where it fits | What it adds over the OSS path |
 |---|---|---|
 | **Prisma Cloud** (Palo Alto) | The commercial platform **behind Checkov** | Central policy management, cross-repo baselines, severity metadata for every check, drift correlation between the IaC finding and the running resource. `checkov --bc-api-key` connects an OSS run to it |
-| **Wiz** | CSPM + IaC-to-cloud correlation | Traces a template finding to the running resource and its actual internet exposure — the "is this reachable" question a static scan cannot answer. Sits mostly in `devops-cloud-posture`'s lane |
+| **Wiz** | CSPM + IaC-to-cloud correlation | Traces a template finding to the running resource and its actual internet exposure — the "is this reachable" question a static scan cannot answer. Sits mostly in `devops:cloud-posture`'s lane |
 | **Snyk IaC** | PR-native IaC scanning | Developer-workflow polish and inline PR fixes; overlaps Checkov's catalogue closely |
 | **Microsoft Defender for Cloud (DevOps security)** | Azure DevOps / GitHub | Rolls IaC findings into the same posture view as the Azure runtime posture — relevant given the library's Azure DevOps default |
 | **HashiCorp Sentinel** | Terraform Cloud/Enterprise policy | The commercial peer of OPA/Conftest, enforced at the **apply** gate rather than the PR. Rego does not port to it |
@@ -99,7 +99,7 @@ org-specific policy-as-code half, which most platforms charge extra for or expre
 
 - `references/checkov.md` — the primary scanner.
 - `references/opa-conftest.md` — the org-rules layer, and the migration target for Terrascan policies.
-- `qa-security-image-infra-scan` — **owns Trivy**, including the absorbed tfsec check library. Migrate
+- `qa-<stack>:image-infra-scan` — **owns Trivy**, including the absorbed tfsec check library. Migrate
   inherited tfsec jobs there, not here.
-- `devops-cloud-posture` — where the "is the finding reachable in the running account" question actually
+- `devops:cloud-posture` — where the "is the finding reachable in the running account" question actually
   belongs (Prowler / ScoutSuite, and the commercial CSPM lane).

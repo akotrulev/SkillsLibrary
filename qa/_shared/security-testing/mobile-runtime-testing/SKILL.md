@@ -1,5 +1,5 @@
 ---
-name: qa-security-mobile-runtime-testing
+name: mobile-runtime-testing
 description: Use when a mobile app must be tested DYNAMICALLY on a device you own — TLS-pinning bypass + traffic interception, runtime storage/keychain, logging, session tokens, jailbreak-detection efficacy. MASVS/MASTG-mapped; Frida, objection, mitmproxy. Authorization-gated, never a per-PR gate. Triggers "bypass SSL pinning", "what does the app store at runtime", "test our jailbreak detection". Not for static analysis (`mobile-app-scan`), a web API (`active-scan`), or a kill chain (`penetration-testing`).
 ---
 

@@ -1,5 +1,5 @@
 ---
-name: fe-blazor-languages
+name: i18n
 description: Use when a Blazor app (.NET 8/9/10) must support multiple languages — `IStringLocalizer<T>` + `.resx`, the two culture pipelines (Server = `RequestLocalization` + culture cookie; WASM = startup culture, satellite assemblies), the cookie-based culture switch, `@bind:culture`, RTL. Triggers: "add multi-language support", "let users switch language", "why are my WASM dates in the wrong culture". Do NOT use for display-format policy (`ui-rules`) or i18n test assertions (qa `language-testing`).
 ---
 

@@ -1,11 +1,11 @@
 ---
-name: mobile-ios-test-ids
+name: test-ids
 description: Use when adding, auditing or fixing `accessibilityIdentifier` so Appium (XCUITest driver) and Maestro can target an iOS app — including consuming a `missing-testids.md` from QA's screen explorer. Covers SwiftUI and UIKit, static row ids, PascalCase naming, grouping that hides children, never accessibilityLabel as an id. Triggers "add test ids", "E2E can't find this element". Do NOT use for writing the device tests (`qa-mobile-<stack>`).
 ---
 
 # iOS — Testability (`accessibilityIdentifier` writer)
 
-Adds and audits `accessibilityIdentifier` on SwiftUI and UIKit views so device suites locate elements by one stable id. It is the dev-side half of a loop QA owns: `qa-mobile-<stack>`'s explorer reads the live page source and files a `missing-testids.md`; this skill consumes that report. Sibling and contract source: [`mobile-react-native-test-ids`](../../../react-native/skills/test-ids/SKILL.md) (the verified cross-platform mapping) — the naming, static-row and "one attribute only" rules carry over unchanged. Web analog: [`fe-react-test-ids`](../../../../frontend/react/skills/test-ids/SKILL.md).
+Adds and audits `accessibilityIdentifier` on SwiftUI and UIKit views so device suites locate elements by one stable id. It is the dev-side half of a loop QA owns: `qa-mobile-<stack>`'s explorer reads the live page source and files a `missing-testids.md`; this skill consumes that report. Sibling and contract source: [`mobile-react-native:test-ids`](../../../react-native/skills/test-ids/SKILL.md) (the verified cross-platform mapping) — the naming, static-row and "one attribute only" rules carry over unchanged. Web analog: [`fe-react:test-ids`](../../../../frontend/react/skills/test-ids/SKILL.md).
 
 ## Version lane
 
@@ -24,7 +24,7 @@ Adds and audits `accessibilityIdentifier` on SwiftUI and UIKit views so device s
 | **Maestro** `id:` | `accessibilityIdentifier` — Maestro docs: "translates this to the `id` selector… the gold standard for reliable tests"; `accessibilityLabel` is matched by `text:` | `id: "Login.EmailField"` |
 | **Android peer** | The same string on the other platform: Compose `Modifier.testTag` with `testTagsAsResourceId = true` → `resource-id`; Views `android:id`; React Native `testID` lands on both | Appium `id=Login.EmailField` / Maestro `id:` |
 
-So **one string serves Appium and Maestro on every stack**. Notes carried from R3 (`mobile-react-native-test-ids`, D20):
+So **one string serves Appium and Maestro on every stack**. Notes carried from R3 (`mobile-react-native:test-ids`, D20):
 
 - **`accessibilityLabel` / `accessibilityHint` are for people** — translated, spoken by VoiceOver, edited with copy. They are **never** an identifier and an identifier is **never** copied into a label. On iOS the Appium `label` attribute is the VoiceOver label; `name` is the identifier **or, when no identifier is set, the label** — so a missing id can look present in the page source. Check the **attribute**, not just that something has a name.
 - Maestro's `id` (and `text`) are **case-insensitive regular expressions**: the `.` in `Login.EmailField` also matches any character. Escape it (`Login\.EmailField`) when two ids differ only at a dot.
@@ -40,9 +40,9 @@ So **one string serves Appium and Maestro on every stack**. Notes carried from R
 ## When NOT to use
 
 - Writing page objects or device tests → `qa-mobile-<stack>` (peer; plan 003)
-- Labels, traits, VoiceOver order → `mobile-ios-accessibility`
+- Labels, traits, VoiceOver order → `mobile-ios:accessibility`
 - Choosing or building components → [`ui-components`](../ui-components/SKILL.md)
-- Another stack → `mobile-react-native-test-ids`, `mobile-android-test-ids`
+- Another stack → `mobile-react-native:test-ids`, `mobile-android:test-ids`
 
 ## Output format
 
@@ -198,7 +198,7 @@ QA's explorer writes, per screen, a table of `Element | Type | Visible text / la
 ## Handoffs
 
 - Page objects, Appium and Maestro flows, device runs → `qa-mobile-<stack>` (peer; plan 003)
-- Labels, traits, order, Dynamic Type → `mobile-ios-accessibility`
+- Labels, traits, order, Dynamic Type → `mobile-ios:accessibility`
 - Components that emit ids by default → [`ui-components`](../ui-components/SKILL.md)
 - Region states and banner ids → [`error-handling`](../error-handling/SKILL.md)
-- Hygiene as part of a broader review → `mobile-ios-code-review`
+- Hygiene as part of a broader review → `mobile-ios:conventions-review`

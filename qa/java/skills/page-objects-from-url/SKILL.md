@@ -1,6 +1,6 @@
 ---
-name: qa-page-objects-from-url-java
-description: Use when the user gives a website URL or an HTML page and wants a Page Object Model extracted/built/updated from it for a Java Playwright suite. Triggers: "build a POM from this URL", "extract locators from this page", "update the LoginPage object from the live site". Do NOT use for designing the POM structure (`qa-page-object-design-java`) or Appium screens (`qa-mobile-screen-objects-java`).
+name: page-objects-from-url
+description: Use when the user gives a website URL or an HTML page and wants a Page Object Model extracted/built/updated from it for a Java Playwright suite. Triggers: "build a POM from this URL", "extract locators from this page", "update the LoginPage object from the live site". Do NOT use for designing the POM structure (`qa-java:page-object-design`) or Appium screens (`qa-java:mobile-screen-objects`).
 ---
 
 # QA — POM Builder from Live Page (Java)

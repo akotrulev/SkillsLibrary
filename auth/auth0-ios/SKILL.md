@@ -1,11 +1,11 @@
 ---
-name: auth-auth0-ios
-description: Use when adding/fixing Auth0 sign-in in a native Swift / SwiftUI iOS app with Auth0.swift — Universal Login via ASWebAuthenticationSession (PKCE), universal-link callback, CredentialsManager on the Keychain, biometric unlock, refresh rotation, logout. Triggers "add Auth0 login", "callback doesn't return", "Face ID for stored credentials". Do NOT use for Auth0 concepts (`auth-auth0-concepts`), React Native (`auth-auth0-react-native`), or Android (`auth-auth0-android`).
+name: auth0
+description: Use when adding/fixing Auth0 sign-in in a native Swift / SwiftUI iOS app with Auth0.swift — Universal Login via ASWebAuthenticationSession (PKCE), universal-link callback, CredentialsManager on the Keychain, biometric unlock, refresh rotation, logout. Triggers "add Auth0 login", "callback doesn't return", "Face ID for stored credentials". Do NOT use for Auth0 concepts (`auth/_shared/auth0-concepts`), React Native (`mobile-react-native:auth0`), or Android (`mobile-android:auth0`).
 ---
 
 # Auth — Auth0 in iOS (Swift)
 
-Wires **Auth0.swift** into a SwiftUI (or UIKit) app. **Universal Login in `ASWebAuthenticationSession` with PKCE is the only login flow** — no embedded `WKWebView` login (RFC 8252). Concepts: `auth-auth0-concepts` / `auth-oidc-concepts`.
+Wires **Auth0.swift** into a SwiftUI (or UIKit) app. **Universal Login in `ASWebAuthenticationSession` with PKCE is the only login flow** — no embedded `WKWebView` login (RFC 8252). Concepts: `auth/_shared/auth0-concepts` / `auth/_shared/oidc-concepts`.
 
 ## Version lane (checked 2026-10-10)
 
@@ -25,9 +25,9 @@ Wires **Auth0.swift** into a SwiftUI (or UIKit) app. **Universal Login in `ASWeb
 
 ## When NOT to use
 
-- Concepts, RBAC, `audience` → `auth-auth0-concepts`
-- RN / Expo → `auth-auth0-react-native`; Kotlin → `auth-auth0-android`
-- Keychain / ATS rules in general → `mobile-shared-security`
+- Concepts, RBAC, `audience` → `auth/_shared/auth0-concepts`
+- RN / Expo → `mobile-react-native:auth0`; Kotlin → `mobile-android:auth0`
+- Keychain / ATS rules in general → `mobile-<stack>:security`
 - Backend validation → `backend/*/auth0`
 
 ## Setup
@@ -105,7 +105,7 @@ let credentials = try await credentialsManager.credentials()
 
 - The manager stores in the **Keychain** and renews an expired access token with the stored refresh token; renewed credentials are saved automatically — do not call `store(credentials:)` again.
 - `credentials()`, `renew()` and the API/SSO variants are thread-safe only through **one** manager instance — do not create several.
-- `clear()` removes the default entry; `clearAll()` removes every entry for the service/access group, so give Auth0 its own `storeKey` / service. Never copy tokens to `UserDefaults` or the app's own files (`mobile-shared-security` K2).
+- `clear()` removes the default entry; `clearAll()` removes every entry for the service/access group, so give Auth0 its own `storeKey` / service. Never copy tokens to `UserDefaults` or the app's own files (`mobile-<stack>:security` K2).
 - Transient renewal failures (network, 429, 5xx) can be retried with `maxRetries: 1`; this only works if the tenant's **rotation overlap period** is ≥ 180 s. A hard failure (`invalid_grant`, reuse detected) means signed out.
 
 ### API calls
@@ -131,12 +131,12 @@ credentialsManager.enableBiometrics(
 ```
 
 - Policies: `.default`, `.always`, `.session(timeoutInSeconds:)`, `.appLifecycle()`; `evaluationPolicy: .deviceOwnerAuthentication` allows passcode fallback. `clearBiometricSession()` / `isBiometricSessionValid()` give explicit control.
-- Needs `NSFaceIDUsageDescription` (specific text — `mobile-shared-store-compliance` L4). Biometrics gate **retrieval on this device**; they are not a server factor. `userProfile()` reads the Keychain **without** the prompt, so keep sensitive data out of the ID-token claims you display unguarded.
+- Needs `NSFaceIDUsageDescription` (specific text — `mobile-<stack>:store-compliance` L4). Biometrics gate **retrieval on this device**; they are not a server factor. `userProfile()` reads the Keychain **without** the prompt, so keep sensitive data out of the ID-token claims you display unguarded.
 - The cancelled / unavailable path is a working screen, not a dead end.
 
 ## Sign in with Apple through Auth0
 
-Rule 4.8: if third-party/social login is the primary sign-in, offer Sign in with Apple. Use the native `ASAuthorizationAppleIDProvider` sheet and exchange the Apple authorization code with `Auth0.authentication().login(appleAuthorizationCode:...)` (native social login in the SDK; enable the Apple connection in Auth0). On account deletion the **Apple token must be revoked** server-side (`mobile-shared-store-compliance` L6).
+Rule 4.8: if third-party/social login is the primary sign-in, offer Sign in with Apple. Use the native `ASAuthorizationAppleIDProvider` sheet and exchange the Apple authorization code with `Auth0.authentication().login(appleAuthorizationCode:...)` (native social login in the SDK; enable the Apple connection in Auth0). On account deletion the **Apple token must be revoked** server-side (`mobile-<stack>:store-compliance` L6).
 
 ## Passkeys
 
@@ -171,6 +171,6 @@ Auth0.swift supports passkey sign-up/login with the Authentication API; it needs
 
 ## Handoffs
 
-- Concepts → `auth-auth0-concepts`; storage rules → `mobile-shared-security`
-- Project / SPM / entitlements → `mobile-ios-project-setup`; links → `mobile-ios-notifications-and-links`
-- Networking → `mobile-ios-networking`; purchase user link → `mobile-shared-in-app-purchases`
+- Concepts → `auth/_shared/auth0-concepts`; storage rules → `mobile-<stack>:security`
+- Project / SPM / entitlements → `mobile-ios:project-setup`; links → `mobile-ios:push-and-deep-links`
+- Networking → `mobile-ios:networking`; purchase user link → `mobile-<stack>:in-app-purchases`

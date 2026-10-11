@@ -14,7 +14,7 @@ The skeleton written to `docs/agent-context/<agent-name>.md`. The **header block
 **Baseline commit:** <full sha>
 **Fingerprint:** <path>@<sha256:8>, <path>@<sha256:8>, ...
 
-> Written and maintained by the `<agent-name>` agent per `ep-agent-orientation-cache`.
+> Written and maintained by the `<agent-name>` agent per `engineering-practices/agent-orientation-cache`.
 > A map of what this code **is** — never findings (`docs/audits/`), plans (`docs/plans/`), or specs (`docs/specs/`).
 > Lines are `#confirmed` unless tagged `#inferred` or `#volatile`. Volatile lines are always re-probed.
 

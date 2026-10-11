@@ -195,7 +195,7 @@ They meet in exactly one place: a user-facing failure should be traceable from a
 
 ## Workflow
 
-1. **Write the tracking plan first** — `docs/analytics/tracking-plan.md`, one row per event, each with a named metric/decision. Source the metrics from `ba-scoping-writeup` output when it exists. **Do not open an SDK doc yet.**
+1. **Write the tracking plan first** — `docs/analytics/tracking-plan.md`, one row per event, each with a named metric/decision. Source the metrics from `business-analysis:scoping` output when it exists. **Do not open an SDK doc yet.**
 2. **Choose the tool** via the decision tree; record the reason in one line. Settle **data residency + consent posture now** — both are architectural.
 3. **Read the one `references/<tool>.md`** — packages, provider wiring, the route-change subscription, identify/alias, replay + masking config, proxy setup.
 4. **Build the typed emitter** (`analytics/events.ts` + `analytics/track.ts`): the event union, the consent gate, the PII scrub, the single vendor import.

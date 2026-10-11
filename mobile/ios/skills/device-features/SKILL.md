@@ -1,11 +1,11 @@
 ---
-name: mobile-ios-device-features
-description: Use when an iOS app touches device capabilities — permissions with Info.plist usage strings and a pre-prompt, PhotosPicker, AVFoundation camera, Core Location, LocalAuthentication, haptics, ShareLink, fileImporter. Triggers "ask for camera access", "pick a photo", "get the user's location", "Face ID to unlock", "denied path". Do NOT use for push and links (`mobile-ios-notifications-and-links`), widgets and background work (`-system-integration`) or Keychain (`-offline-and-storage`).
+name: device-features
+description: Use when an iOS app touches device capabilities — permissions with Info.plist usage strings and a pre-prompt, PhotosPicker, AVFoundation camera, Core Location, LocalAuthentication, haptics, ShareLink, fileImporter. Triggers "ask for camera access", "pick a photo", "get the user's location", "Face ID to unlock", "denied path". Do NOT use for push and links (`mobile-ios:push-and-deep-links`), widgets and background work (`-system-integration`) or Keychain (`-offline-and-storage`).
 ---
 
 # iOS — Device Features
 
-Every capability follows one shape: **prefer the system picker that needs no permission → ask in context, after a pre-prompt, with a specific purpose string → treat denial as a working screen → release the resource when the screen goes.** Rules: CLAUDE.md § Mobile code rules (permissions, lifecycle) and [`mobile-shared-security`](../../../_shared/security/SKILL.md). Design facts: `design/ui-ux-pro-max` `--stack swiftui`.
+Every capability follows one shape: **prefer the system picker that needs no permission → ask in context, after a pre-prompt, with a specific purpose string → treat denial as a working screen → release the resource when the screen goes.** Rules: CLAUDE.md § Mobile code rules (permissions, lifecycle) and [`mobile-<stack>:security`](../../../_shared/security/SKILL.md). Design facts: `design/ui-ux-pro-max` `--stack swiftui`.
 
 ## Version lane
 
@@ -18,7 +18,7 @@ Every capability follows one shape: **prefer the system picker that needs no per
 | Haptics | `.sensoryFeedback(_:trigger:)` | `UIImpactFeedbackGenerator` / `UINotificationFeedbackGenerator` |
 | Share | `ShareLink` (iOS 16+) | Same |
 | Files | `.fileImporter` / `.fileExporter` | Same |
-| Tracking | `ATTrackingManager` + `NSUserTrackingUsageDescription` — [`mobile-shared-store-compliance`](../../../_shared/store-compliance/SKILL.md) | Same |
+| Tracking | `ATTrackingManager` + `NSUserTrackingUsageDescription` — [`mobile-<stack>:store-compliance`](../../../_shared/store-compliance/SKILL.md) | Same |
 
 An API newer than the deployment target needs `#available`; never raise the target for a feature ([`project-setup`](../project-setup/SKILL.md)).
 
@@ -32,19 +32,19 @@ An API newer than the deployment target needs `#available`; never raise the targ
 
 ## When NOT to use
 
-- APNs, `UNUserNotificationCenter`, universal links → `mobile-ios-notifications-and-links`
-- Widgets, App Intents, Live Activities, background tasks → `mobile-ios-system-integration`
+- APNs, `UNUserNotificationCenter`, universal links → `mobile-ios:push-and-deep-links`
+- Widgets, App Intents, Live Activities, background tasks → `mobile-ios:system-integration`
 - Storing the secret that biometrics unlock → [`offline-and-storage`](../offline-and-storage/SKILL.md) (`references/keychain.md`)
-- A custom native C / Objective-C bridge for React Native → `mobile-react-native-native-modules`
-- Permission declarations as store policy → [`mobile-shared-store-compliance`](../../../_shared/store-compliance/SKILL.md)
-- Another stack → `mobile-react-native-device-features`, `mobile-android-device-features`
+- A custom native C / Objective-C bridge for React Native → `mobile-react-native:native-modules`
+- Permission declarations as store policy → [`mobile-<stack>:store-compliance`](../../../_shared/store-compliance/SKILL.md)
+- Another stack → `mobile-react-native:device-features`, `mobile-android:device-features`
 
 ## The permission recipe
 
 Every protected capability in order:
 
 1. **Can a system UI do it without permission?** `PhotosPicker`, `fileImporter`, the document camera (`VNDocumentCameraViewController`), `ShareLink` read or write through the user's explicit choice — **no permission, no `Info.plist` key.** Use them first.
-2. **Declare a purpose string** — one `NS…UsageDescription` per resource, **specific to this app's use** ("Take a photo of your receipt to attach it to the expense"), localized in the String Catalog's `InfoPlist` strings. A missing key crashes the app at the request; a generic string is a review rejection (`mobile-shared-store-compliance` § purpose strings).
+2. **Declare a purpose string** — one `NS…UsageDescription` per resource, **specific to this app's use** ("Take a photo of your receipt to attach it to the expense"), localized in the String Catalog's `InfoPlist` strings. A missing key crashes the app at the request; a generic string is a review rejection (`mobile-<stack>:store-compliance` § purpose strings).
 3. **Read the status; ask only from `notDetermined`.** The system prompt appears once; after a denial the only route is Settings.
 4. **Pre-prompt in context**, from the moment the user taps the feature: a screen or sheet saying what the permission is for, with **Continue** and **Not now**. Only Continue triggers the system prompt. Never at launch.
 5. **Denied is a working screen**: say what is unavailable, offer the alternative (a picker instead of the camera, manual address instead of location), and a button to `UIApplication.openSettingsURLString`. A denied status is rechecked on `scenePhase == .active` — the user may have changed it in Settings.
@@ -153,14 +153,14 @@ enum BiometricError: Error { case unavailable }
 - Declare `NSFaceIDUsageDescription` — without it Face ID falls back to the passcode or fails.
 - **`.deviceOwnerAuthentication` includes the passcode fallback**; `.deviceOwnerAuthenticationWithBiometrics` is for flows that must be biometric and have their own fallback. A user without enrolment reaches the fallback path, not a dead end.
 - **A `true` from `evaluatePolicy` is a UI convenience, not authentication of a secret.** Anything that matters is a Keychain item behind `SecAccessControl` with `.biometryCurrentSet` — the secret is released only by the OS ([`offline-and-storage` `references/keychain.md`](../offline-and-storage/references/keychain.md); `MASWE-0020`). A user cancel (`LAError.userCancel`) is not an error banner.
-- Re-auth on resume for sensitive screens: call on `scenePhase` returning to `.active` after a stated interval, and cover content while inactive (`mobile-shared-security` § 3).
+- Re-auth on resume for sensitive screens: call on `scenePhase` returning to `.active` after a stated interval, and cover content while inactive (`mobile-<stack>:security` § 3).
 
 ## Haptics, share and links out
 
 - `.sensoryFeedback(.success, trigger: didSave)` (iOS 17) after a user-initiated result; no haptics for passive events or on every scroll tick; respect that the system disables them under Low Power or Silent settings automatically.
 - `ShareLink(item: url, subject: Text(title), message: Text(summary))` for a URL or `Transferable`; a share of a **file or image** provides it as `Transferable` with a preview. The share sheet is the system's — no custom sheet.
 - Opening other apps: `Link` / `openURL`; `canOpenURL:` is deprecated by the iOS 27 SDK, so do not probe for installed apps — open and handle failure, and keep `LSApplicationQueriesSchemes` empty unless a recorded reason exists.
-- The pasteboard: never read at launch; a secret is never copied (`mobile-shared-security` § 4).
+- The pasteboard: never read at launch; a secret is never copied (`mobile-<stack>:security` § 4).
 
 ## Rules
 
@@ -204,9 +204,9 @@ Inside a `Gate: none` plan task, run none of these and report "written, not run"
 
 ## Handoffs
 
-- Notifications and links → `mobile-ios-notifications-and-links` · system surfaces → `mobile-ios-system-integration`
+- Notifications and links → `mobile-ios:push-and-deep-links` · system surfaces → `mobile-ios:system-integration`
 - Keychain behind biometrics → [`offline-and-storage`](../offline-and-storage/SKILL.md)
-- Purpose strings and Required Reason entries as store policy → [`mobile-shared-store-compliance`](../../../_shared/store-compliance/SKILL.md)
-- Audit of what the app asks → [`mobile-shared-security`](../../../_shared/security/SKILL.md)
+- Purpose strings and Required Reason entries as store policy → [`mobile-<stack>:store-compliance`](../../../_shared/store-compliance/SKILL.md)
+- Audit of what the app asks → [`mobile-<stack>:security`](../../../_shared/security/SKILL.md)
 - UIKit controllers (document camera, pickers) → [`uikit`](../uikit/SKILL.md)
-- Accessibility of the pre-prompt → `mobile-ios-accessibility`
+- Accessibility of the pre-prompt → `mobile-ios:accessibility`

@@ -1,4 +1,4 @@
-# Deep-dive details — `qa-flaky-test-quarantine-java`
+# Deep-dive details — `qa-java:flaky-test-quarantine`
 
 Sections moved out of SKILL.md for on-demand loading. Read what the task needs.
 
@@ -35,7 +35,7 @@ second occurrence earns it a ticket and the `flaky` group. The second races the 
 it waits on the settlement condition (Awaitility, never a fixed sleep) and lives in quarantine under PAY-1204
 until the race is fixed.
 
-CI shape — two jobs, so the quarantine lane can never block the merge (cross-link `qa-ci-pipelines-java` for
+CI shape — two jobs, so the quarantine lane can never block the merge (cross-link `qa-java:ci-pipelines` for
 the full workflow):
 
 ```yaml

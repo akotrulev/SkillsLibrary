@@ -1,4 +1,4 @@
-# Deep-dive details — `qa-production-uptime-checks-typescript`
+# Deep-dive details — `qa-typescript:production-uptime-checks`
 
 Sections moved out of SKILL.md for on-demand loading. Read what the task needs.
 
@@ -80,7 +80,7 @@ In CI, `CHECKLY_API_KEY` and `CHECKLY_ACCOUNT_ID` come from the secret store, ne
 ## The CI workflow — gate, then deploy
 
 The pipeline runs `checkly test --record` to gate the merge, then (on main,
-after deploy) `checkly deploy --force` to promote the monitoring config (`qa-ci-pipelines-typescript` wires it):
+after deploy) `checkly deploy --force` to promote the monitoring config (`qa-typescript:ci-pipelines` wires it):
 
 ```yaml
 - name: Synthetic dry-run (gate the PR)

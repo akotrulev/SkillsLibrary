@@ -1,5 +1,5 @@
 ---
-name: qa-requirements-breakdown
+name: requirements-breakdown
 description: Use when the user hands over a story, BRD, acceptance criteria, API contract, or a loose feature description and wants it distilled into a structured, sourced test-basis document before any test cases are written. Triggers: "summarize the business logic of this story", "turn this spec into a testable breakdown", "what are the rules/validations in this doc". Not for the test cases themselves (test-case-writer) or a test plan (test-plan-writer).
 ---
 

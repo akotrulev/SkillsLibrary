@@ -1,4 +1,4 @@
-# `Hooks.java` — `qa-bdd-project-setup-java`
+# `Hooks.java` — `qa-java:bdd-project-setup`
 
 The per-scenario Playwright lifecycle and failure evidence for a Cucumber-JVM web project. The contract it
 implements is in `SKILL.md` § `support/Hooks.java`; the evidence rules are `qa/java/skills/evidence-capture`'s

@@ -1,6 +1,6 @@
 ---
-name: mobile-ios-standards-audit
-description: Use to audit a whole iOS app (Swift, SwiftUI, UIKit) against the mobile-ios plugin's conventions — version lane, structure, UI, navigation, data, device and extension code, accessibility, resilience, test ids, security and store fragments — as a saved, re-runnable report in `docs/audits/`. Read-only. Triggers "audit our iOS app against the plugin conventions". Do NOT use to review one diff (`mobile-ios-code-review`) or check code against a spec (`code-auditor`).
+name: standards-audit
+description: Use to audit a whole iOS app (Swift, SwiftUI, UIKit) against the mobile-ios plugin's conventions — version lane, structure, UI, navigation, data, device and extension code, accessibility, resilience, test ids, security and store fragments — as a saved, re-runnable report in `docs/audits/`. Read-only. Triggers "audit our iOS app against the plugin conventions". Do NOT use to review one diff (`mobile-ios:conventions-review`) or check code against a spec (`code-auditor`).
 ---
 
 # mobile-ios Conformance Audit
@@ -13,7 +13,7 @@ State the mode — Mode A (baseline) or Mode B (re-audit) — and the target pat
 
 ## Read before sweeping
 
-1. **[`ep-standards-audit-engine`](../../../../engineering-practices/standards-audit-engine/SKILL.md)** — Mode A/B rounds, the artifact contract, evidence rules, severity semantics, grouping and coverage policy, the five steps, the hostile self-review. **Read it first**; this file adds only what is specific to iOS.
+1. **[`engineering-practices/standards-audit-engine`](../../../../engineering-practices/standards-audit-engine/SKILL.md)** — Mode A/B rounds, the artifact contract, evidence rules, severity semantics, grouping and coverage policy, the five steps, the hostile self-review. **Read it first**; this file adds only what is specific to iOS.
 2. [`references/conformance-checklist.md`](references/conformance-checklist.md) — sections A–X and every check; the section index at its end. **Read end-to-end** before Step 2.
 3. `engineering-practices/standards-audit-engine/references/report-template.md` — the Round-1 / Round-N skeletons. Read before Step 3.
 4. The fragments for sections K, L, T, U, X: `mobile/_shared/{security,store-compliance,release,observability,in-app-purchases}/references/audit-checks.md` — rows whose `Stacks` column names `ios`.
@@ -27,8 +27,8 @@ Report path: `docs/audits/<NNN>-mobile-ios-conformance-r<N>.md`.
 | Job | Owner |
 |---|---|
 | Review one diff, inline table, no artifact, screenshot pass | [`code-review`](../code-review/SKILL.md) — this skill reuses its rows at repo scale |
-| Code vs a written spec / stories | `ep-spec-vs-code-audit` (or the `code-auditor` agent) |
-| How one feature works, where it is defective | `ep-feature-audit` |
+| Code vs a written spec / stories | `dev:audit-spec` (or the `code-auditor` agent) |
+| How one feature works, where it is defective | `dev:audit-feature` |
 | Proof of pinning, on-disk data, resilience controls on a built IPA | **peer** `qa-security` (`mobile-app-scan`, `mobile-runtime-testing`) — a row a static read cannot prove is reported **unverified**, never passed |
 | E2E suites, device journeys | **peer** `qa-mobile-java` / `qa-mobile-dotnet` / `qa-mobile-typescript` |
 | Design heuristics on screens | `design/ux-review` on simulator screenshots |
@@ -86,4 +86,4 @@ A–C, E, G, H, K, L, M, N, O, R, V apply to every app. A section that is N/A mu
 - **Security-flavoured and unverified rows (K, part of L, T)** → peer `qa-security`
 - **E2E gaps and test-id coverage proof** → peer `qa-mobile-java` / `qa-mobile-dotnet` / `qa-mobile-typescript`
 - **Design review of screens** → `design/ux-review`
-- **A spec or feature trace** → `ep-spec-vs-code-audit` / `ep-feature-audit` / `code-auditor`
+- **A spec or feature trace** → `dev:audit-spec` / `dev:audit-feature` / `code-auditor`

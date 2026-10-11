@@ -241,7 +241,7 @@ rg -n "<pattern>" --glob '*.csproj'    # project-level checks
 ---
 
 ## M — Testability & unit tests
-*Owning skills: `unit-testing` (M7–M9, and the constructive half of M2) · `code-review` (M1–M6) · the **contract/integration/E2E** suite → **peer** `qa-api-dotnet` / `qa-dotnet-standards-audit`*
+*Owning skills: `unit-testing` (M7–M9, and the constructive half of M2) · `code-review` (M1–M6) · the **contract/integration/E2E** suite → **peer** `qa-api-dotnet` / `qa-dotnet:standards-audit`*
 
 | # | Check | Violation looks like | Find it with | Sev |
 |---|---|---|---|---|
@@ -275,7 +275,7 @@ rg -n "<pattern>" --glob '*.csproj'    # project-level checks
 | N11 | Surviving comments are true and load-bearing | A comment describing behaviour the method no longer has — the comment is the defect, and deletion is the fix | Read the code around every comment N9/N10 surfaced; grep cannot decide this one | major |
 | N12 | Suppressions carry their justification | `#pragma warning disable` or `[SuppressMessage]` with no `Justification` and no reason recorded | `rg -n "#pragma warning disable\|SuppressMessage" --glob '*.cs'` | minor |
 
-**N9–N12 are the audit face of [`ep-code-comments`](../../../../../engineering-practices/code-comments/SKILL.md)** — read it for the rule, the complex-flow test that earns XML doc, the never-comment trivia list, and the family-vs-per-finding reporting split (N9 is one family with a count and 3–5 cited sites; each **N11** stale comment is its own finding). Two local notes: attributes, serializer/OpenAPI annotations, and analyzer directives are **not** comments, and **N7 already owns commented-out code** — don't double-file it.
+**N9–N12 are the audit face of [`engineering-practices/code-comments`](../../../../../engineering-practices/code-comments/SKILL.md)** — read it for the rule, the complex-flow test that earns XML doc, the never-comment trivia list, and the family-vs-per-finding reporting split (N9 is one family with a count and 3–5 cited sites; each **N11** stale comment is its own finding). Two local notes: attributes, serializer/OpenAPI annotations, and analyzer directives are **not** comments, and **N7 already owns commented-out code** — don't double-file it.
 
 ---
 

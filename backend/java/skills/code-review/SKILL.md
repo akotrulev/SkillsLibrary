@@ -1,5 +1,5 @@
 ---
-name: be-java-code-review
+name: conventions-review
 description: Use when reviewing Java 21 / Spring Boot 3 code for design-pattern misuse, over-abstraction, threading violations, transactional boundary bugs, DI anti-patterns, or modern-Java omissions (no records / sealed types). Triggers: "review this for pattern misuse", "is this CQRS justified", "check for @Transactional misuse". Do NOT use for explanations (`pattern-guide`) or generating new code (`pattern-writer`).
 ---
 
@@ -108,7 +108,7 @@ Detect the reviewed project's Java release and Spring Boot major first. Don't fl
 
 ### Comments & Javadoc
 
-Load **[`ep-code-comments`](../../../../engineering-practices/code-comments/SKILL.md)** for the rule itself, the complex-flow test that earns a doc comment, the never-comment trivia list, and the severity mapping. This section supplies only the mechanics that differ here.
+Load **[`engineering-practices/code-comments`](../../../../engineering-practices/code-comments/SKILL.md)** for the rule itself, the complex-flow test that earns a doc comment, the never-comment trivia list, and the severity mapping. This section supplies only the mechanics that differ here.
 
 | Java mechanic | What to check |
 |---|---|
@@ -157,7 +157,7 @@ Severities per `CLAUDE.md`:
 - **`e.printStackTrace()`** in production paths.
 - **CQRS adopted for two endpoints** "for future-proofing".
 - **`@Async` returning `void`.** Exceptions vanish; return `CompletableFuture<?>` and chain `.exceptionally`.
-- **Comments compensating for naming, and stale comments.** A body that needs a step-by-step commentary needs extracting; a comment that no longer matches the code is a confident lie. Both per `ep-code-comments` — the fix is the rename or the extraction, never a reword.
+- **Comments compensating for naming, and stale comments.** A body that needs a step-by-step commentary needs extracting; a comment that no longer matches the code is a confident lie. Both per `engineering-practices/code-comments` — the fix is the rename or the extraction, never a reword.
 
 ## Handoffs
 

@@ -1,5 +1,5 @@
 ---
-name: observability-opentelemetry-node
+name: opentelemetry
 description: Use when instrumenting a Node 24 (22 maintenance) + TypeScript service (NestJS / Express / Fastify) with OpenTelemetry — traces, metrics, log correlation — exporting OTLP to a Collector. Triggers: "instrument this Node service with OTel", "add a custom span / counter", "auto-instrument http and pg", "trace context propagation". Do NOT use for .NET/Java (their siblings) or log shaping (`structured-logging-node`).
 ---
 

@@ -1,6 +1,6 @@
 ---
-name: td-synthetic-generation
-description: Use when generating training data with a teacher model (the Claude API) — distillation, self-instruct/evol-instruct, self-critique, and preference-pair generation. Triggers: "generate SFT data with Claude", "synthesize instruction pairs", "distill from a teacher model", "make DPO pairs by sampling and judging", "evol-instruct harder prompts". Do NOT use for the record schema (`td-dataset-formats`), dedup/decontamination (`td-data-quality`), or API mechanics (`ai-development/claude-api`).
+name: synthetic-generation
+description: Use when generating training data with a teacher model (the Claude API) — distillation, self-instruct/evol-instruct, self-critique, and preference-pair generation. Triggers: "generate SFT data with Claude", "synthesize instruction pairs", "distill from a teacher model", "make DPO pairs by sampling and judging", "evol-instruct harder prompts". Do NOT use for the record schema (`training-data:dataset-formats`), dedup/decontamination (`training-data:data-quality`), or API mechanics (`ai-development/claude-api`).
 ---
 
 # Training Data — Synthetic Generation (cross-stage engine)
@@ -19,8 +19,8 @@ Producing training data with a teacher model rather than collecting it. This is 
 
 ## When NOT to use
 
-- The on-disk record shape → `td-dataset-formats`
-- Dedup, decontamination, PII → `td-data-quality` (always run after generation)
+- The on-disk record shape → `training-data:dataset-formats`
+- Dedup, decontamination, PII → `training-data:data-quality` (always run after generation)
 - Collecting/cleaning real corpora → the stage skills
 - Raw API usage questions → `ai-development/claude-api`
 
@@ -57,11 +57,11 @@ Filtering generated data is where false quality is caught. An LLM judge is stand
 
 ### 4. Dedup and decontaminate — hand off, don't skip
 
-Generation *always* produces near-duplicates (the teacher has favorite phrasings). Route every synthetic batch through `td-data-quality`: near-dedup at Jaccard 0.7, and decontaminate against your eval targets — **a teacher that has seen a benchmark will happily regenerate it**, so synthetic data is a prime contamination source. This is not optional cleanup; it is part of generation.
+Generation *always* produces near-duplicates (the teacher has favorite phrasings). Route every synthetic batch through `training-data:data-quality`: near-dedup at Jaccard 0.7, and decontaminate against your eval targets — **a teacher that has seen a benchmark will happily regenerate it**, so synthetic data is a prime contamination source. This is not optional cleanup; it is part of generation.
 
 ### 5. Format — the stage shape
 
-Emit records in the stage's shape from `td-dataset-formats` (`messages` for SFT, `chosen`/`rejected` for preference, the eval item for eval), with the full envelope, `source: "synthetic:<model-id>"`, the batch id, and the judge metadata.
+Emit records in the stage's shape from `training-data:dataset-formats` (`messages` for SFT, `chosen`/`rejected` for preference, the eval item for eval), with the full envelope, `source: "synthetic:<model-id>"`, the batch id, and the judge metadata.
 
 ## Preference pairs by sampling and judging
 
@@ -71,7 +71,7 @@ The common way to build DPO data without human labelers:
 2. Sample **n responses at temperature** (n=4–8) — variance is the whole point; greedy gives you nothing to prefer between.
 3. Judge them into a ranking with the pinned judge and rubric; the top becomes `chosen`, a lower one `rejected`. Pick a `rejected` that is *plausibly worse*, not garbage — the model learns the *margin*, and "great vs obvious trash" teaches nothing useful.
 4. Record the `margin` and `judge_reason` in `meta`.
-5. Optionally add **on-policy** rejects: sample from the *student* model being trained, so the pairs target its actual failure modes rather than the teacher's. Detail in `td-preference-data`.
+5. Optionally add **on-policy** rejects: sample from the *student* model being trained, so the pairs target its actual failure modes rather than the teacher's. Detail in `training-data:preference-data`.
 
 ## Constitutional / self-critique data
 
@@ -89,7 +89,7 @@ Generate a first response, then ask the teacher to critique it against a stated 
 - **Diversity is engineered at the seed stage** (crossed axes + grounding + prompt rotation + sampling temperature), never hoped for at the end.
 - **Every synthetic record is `synthetic:<exact-model-id>` + batch id + `synthetic-review-required`.** It is a draft, not verified truth.
 - **The judge is pinned and calibrated** against human labels before it is trusted at scale; its reasons are kept for audit.
-- **Synthetic batches are deduped and decontaminated** through `td-data-quality` — the teacher is a contamination source.
+- **Synthetic batches are deduped and decontaminated** through `training-data:data-quality` — the teacher is a contamination source.
 - **Generate small → validate → scale.** Never generate the full set before validating the prompt on a sample.
 - **Respect the teacher model's terms of use**, decided and recorded before generating at scale.
 

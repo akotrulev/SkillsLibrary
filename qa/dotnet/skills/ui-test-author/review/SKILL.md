@@ -1,6 +1,6 @@
 ---
-name: qa-ui-test-review-dotnet
-description: Use when the user asks to review existing .NET UI test code or page objects. Triggers: "review this Playwright C# spec", "look at this NUnit page object", "is this Appium .NET test any good". Do NOT use for writing new tests (`qa-ui-test-writer-playwright-dotnet`) or a whole-suite audit (`qa-dotnet-standards-audit`).
+name: ui-tests-review
+description: Use when the user asks to review existing .NET UI test code or page objects. Triggers: "review this Playwright C# spec", "look at this NUnit page object", "is this Appium .NET test any good". Do NOT use for writing new tests (`qa-dotnet:ui-tests-playwright`) or a whole-suite audit (`qa-dotnet:standards-audit`).
 ---
 
 # QA — UI Test & Page Object Reviewer (.NET / C#)
@@ -149,7 +149,7 @@ Each is a row above; flag it whatever else the review finds.
 
 ## Comments in test code
 
-Load **[`ep-code-comments`](../../../../../engineering-practices/code-comments/SKILL.md)** for the rule, the complex-flow test that earns a doc comment, the trivia list, the severity mapping and its **test-code** section. Here it covers **page-object and screen-object bodies** as well as tests — an intent-revealing method name is the page object's documentation.
+Load **[`engineering-practices/code-comments`](../../../../../engineering-practices/code-comments/SKILL.md)** for the rule, the complex-flow test that earns a doc comment, the trivia list, the severity mapping and its **test-code** section. Here it covers **page-object and screen-object bodies** as well as tests — an intent-revealing method name is the page object's documentation.
 
 | .NET mechanic | What to check |
 |---|---|

@@ -1,13 +1,13 @@
 ---
-name: design-landing-patterns
-description: Use when structuring a MARKETING page — section order, primary-CTA placement, color strategy, effects and conversion rules from the 34 vendored landing patterns, picked from the product type rather than defaulting to hero-features-CTA. Triggers "structure the landing page", "what sections should this page have", "where does the CTA go", "design the pricing/waitlist page". Not for the look itself (`design-visual-identity`) or an application's IA (`design-ux-patterns`).
+name: landing-patterns
+description: Use when structuring a MARKETING page — section order, primary-CTA placement, color strategy, effects and conversion rules from the 34 vendored landing patterns, picked from the product type rather than defaulting to hero-features-CTA. Triggers "structure the landing page", "what sections should this page have", "where does the CTA go", "design the pricing/waitlist page". Not for the look itself (`design:visual-identity`) or an application's IA (`design:app-structure`).
 ---
 
 # Landing patterns — the section order a marketing page earns
 
-Owns the **structure** of a page whose job is to persuade in one visit: which of the 34 patterns fits the product, what sections it runs in what order, where the primary CTA sits, what color strategy the sections use, and the conversion rules the pattern carries. The catalog is the `landing` domain of the vendored corpus ([`design-ui-ux-pro-max`](../ui-ux-pro-max/SKILL.md)) — **the source of truth for every pattern, its section order, and its conversion rules.**
+Owns the **structure** of a page whose job is to persuade in one visit: which of the 34 patterns fits the product, what sections it runs in what order, where the primary CTA sits, what color strategy the sections use, and the conversion rules the pattern carries. The catalog is the `landing` domain of the vendored corpus ([`design:corpus`](../ui-ux-pro-max/SKILL.md)) — **the source of truth for every pattern, its section order, and its conversion rules.**
 
-**Where this sits:** [`design-visual-identity`](../visual-identity/SKILL.md)'s marketing lane decides the *look* — the hero thesis, the signature element, the one aesthetic risk. This skill decides the *skeleton* those choices are hung on. [`design-ux-patterns`](../ux-patterns/SKILL.md) owns the other side of the fence: an **application's** IA, shell, and page anatomy. A brief with a marketing site and the app behind it uses both, and the app never inherits the landing page's structure.
+**Where this sits:** [`design:visual-identity`](../visual-identity/SKILL.md)'s marketing lane decides the *look* — the hero thesis, the signature element, the one aesthetic risk. This skill decides the *skeleton* those choices are hung on. [`design:app-structure`](../ux-patterns/SKILL.md) owns the other side of the fence: an **application's** IA, shell, and page anatomy. A brief with a marketing site and the app behind it uses both, and the app never inherits the landing page's structure.
 
 ## When to use
 
@@ -16,7 +16,7 @@ Owns the **structure** of a page whose job is to persuade in one visit: which of
 - The `--design-system` generator returned a pattern and it has to become real sections.
 - Deciding where the primary CTA goes, and how many CTAs the page gets.
 
-Do **not** use it for an application's navigation and page anatomy (`design-ux-patterns`), for the visual direction (`design-visual-identity`), or for the words in the sections (`design-ux-writing`).
+Do **not** use it for an application's navigation and page anatomy (`design:app-structure`), for the visual direction (`design:visual-identity`), or for the words in the sections (`design:ux-writing`).
 
 ## Query the catalog first
 
@@ -53,7 +53,7 @@ Pick from **what the visitor must decide**, not from what looks impressive. The 
 2. **The primary CTA appears at least twice** — in or near the hero, and again after the argument that earns it. The corpus states the placement per pattern (sticky hero + bottom, post-testimonials, per-step mini-CTAs); take it from the row.
 3. **One primary action per page.** Secondary actions are visually secondary (Contact Sales primary / Login secondary, not two equal buttons). A page with two primary CTAs has none.
 4. **CTA label contrast is verified against the button fill at 4.5:1**, with 7:1 only where the product explicitly targets AAA normal text. This is in the corpus's color-strategy column for a reason — the accent-on-accent CTA is the most common contrast failure on a landing page.
-5. **Every auto-moving element is stoppable.** Testimonial carousels, logo marquees, background video, screenshot carousels, countdown tickers: visible previous/next and play/pause, pause on hover and on focus inside, stop under `prefers-reduced-motion`, and never move focus on rotation. [`design-motion`](../motion/SKILL.md) owns the timing; [`design-accessible-by-design`](../accessible-by-design/SKILL.md) owns the criterion.
+5. **Every auto-moving element is stoppable.** Testimonial carousels, logo marquees, background video, screenshot carousels, countdown tickers: visible previous/next and play/pause, pause on hover and on focus inside, stop under `prefers-reduced-motion`, and never move focus on rotation. [`design:motion`](../motion/SKILL.md) owns the timing; [`design:accessibility`](../accessible-by-design/SKILL.md) owns the criterion.
 6. **Motion is the pattern's, not the page's.** The recommended-effects column names what the pattern expects (parallax hero, card hover lift, staggered bento reveal, scroll-jacked journey). Realise it at the product's motion tier — and scroll-jacking always keeps a normal vertical navigation path and disables under reduced motion.
 7. **Progressive disclosure in staged patterns.** Funnels and step patterns show only what the current step needs, with a progress indicator and a mini-CTA per step.
 8. **Mobile is the pattern, not a squeeze of it.** Bento grids stack, comparison tables become cards or scroll in their own container, horizontal journeys fall back to vertical. A pattern that only works with hover does not work on a phone — every hover-revealed value must also be reachable without a pointer.
@@ -64,9 +64,9 @@ Pick from **what the visitor must decide**, not from what looks impressive. The 
 
 1. **Name the visitor's decision** in one sentence, then pick the family, then query `--domain landing` with the product terms and that decision.
 2. **Take the row whole** — section order, CTA placement, color strategy, effects, conversion rules.
-3. **Map each section to content that exists.** A pattern section with no real content becomes a fake one (three invented testimonials, a logo wall of clip art) — drop the section or change pattern. Fabricated proof is a legal problem as well as a design one; [`design-ethical-patterns`](../ethical-patterns/SKILL.md) owns that line.
-4. **Hand the look to `design-visual-identity`** — the pattern says *hero*, the identity says *what the hero is*.
-5. **Hand the copy to [`design-ux-writing`](../ux-writing/SKILL.md)** — section headings and CTA labels are voice decisions, and "Get started" is rarely the best label the page can carry.
+3. **Map each section to content that exists.** A pattern section with no real content becomes a fake one (three invented testimonials, a logo wall of clip art) — drop the section or change pattern. Fabricated proof is a legal problem as well as a design one; [`design:dark-patterns`](../ethical-patterns/SKILL.md) owns that line.
+4. **Hand the look to `design:visual-identity`** — the pattern says *hero*, the identity says *what the hero is*.
+5. **Hand the copy to [`design:ux-writing`](../ux-writing/SKILL.md)** — section headings and CTA labels are voice decisions, and "Get started" is rarely the best label the page can carry.
 
 ## Review checklist
 
@@ -82,9 +82,9 @@ Pick from **what the visitor must decide**, not from what looks impressive. The 
 
 ## Related
 
-- [`design-ui-ux-pro-max`](../ui-ux-pro-max/SKILL.md) — the `landing` domain that is this skill's catalog.
-- [`design-visual-identity`](../visual-identity/SKILL.md) — the marketing lane's look: hero thesis, signature element, the one risk.
-- [`design-ux-patterns`](../ux-patterns/SKILL.md) — the application counterpart: IA, shell, page anatomy.
-- [`design-motion`](../motion/SKILL.md) — the tier and preset behind the recommended-effects column.
-- [`design-ux-writing`](../ux-writing/SKILL.md) — section headings, value props, and CTA labels.
-- [`design-ethical-patterns`](../ethical-patterns/SKILL.md) — urgency, scarcity, and proof claims that cross into deceptive design.
+- [`design:corpus`](../ui-ux-pro-max/SKILL.md) — the `landing` domain that is this skill's catalog.
+- [`design:visual-identity`](../visual-identity/SKILL.md) — the marketing lane's look: hero thesis, signature element, the one risk.
+- [`design:app-structure`](../ux-patterns/SKILL.md) — the application counterpart: IA, shell, page anatomy.
+- [`design:motion`](../motion/SKILL.md) — the tier and preset behind the recommended-effects column.
+- [`design:ux-writing`](../ux-writing/SKILL.md) — section headings, value props, and CTA labels.
+- [`design:dark-patterns`](../ethical-patterns/SKILL.md) — urgency, scarcity, and proof claims that cross into deceptive design.

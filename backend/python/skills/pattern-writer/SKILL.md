@@ -1,5 +1,5 @@
 ---
-name: be-python-pattern-writer
+name: patterns-apply
 description: Use when scaffolding Python 3.13/3.14 backend or worker code into the repo — a src-layout uv + ruff + mypy --strict package, a tagged-union Result, Protocol-injected collaborators, pydantic-settings, frozen dataclasses, JSON logging, a composition root. Triggers "set up the Python worker package", "add a Result type here". Do NOT use for explanations (`pattern-guide`), review (`code-review`), image/SVG/model code (`media-processing`) or the Dockerfile (`sandboxed-worker`).
 ---
 

@@ -1,6 +1,6 @@
 ---
-name: tool-cli-builder
-description: Use when a project's capabilities must be driven from a terminal or a script — render a confirmed capability contract as a subcommand CLI with typed flags, a `--json` mode, meaningful exit codes, and a smoke test. Triggers "build a CLI for this project", "expose these functions as commands", "we need a command-line tool for X". Do NOT use to derive the capabilities first (`tool-capability-contract`), to build an MCP surface (`tool-mcp-builder`), or to write CI pipeline YAML (`devops/*`).
+name: cli-builder
+description: Use when a project's capabilities must be driven from a terminal or a script — render a confirmed capability contract as a subcommand CLI with typed flags, a `--json` mode, meaningful exit codes, and a smoke test. Triggers "build a CLI for this project", "expose these functions as commands", "we need a command-line tool for X". Do NOT use to derive the capabilities first (`tooling:capability-contract`), to build an MCP surface (`tooling:mcp-builder`), or to write CI pipeline YAML (`devops/*`).
 ---
 
 # CLI Builder — the contract, rendered as commands
@@ -19,7 +19,7 @@ A CLI is the same capability contract as an MCP server, addressed to a shell ins
 
 ## When NOT to use
 
-- The surface is for an agent over a protocol → `tool-mcp-builder` (build both from one contract when both are wanted)
+- The surface is for an agent over a protocol → `tooling:mcp-builder` (build both from one contract when both are wanted)
 - The ask is CI pipeline configuration → `devops/*` owns pipelines; this skill builds the tool a pipeline step *calls*
 - The project already has a CLI and the ask is to *use* it → nothing to build
 

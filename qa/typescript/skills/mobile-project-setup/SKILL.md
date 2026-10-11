@@ -1,5 +1,5 @@
 ---
-name: qa-mobile-project-setup-typescript
+name: mobile-project-setup
 description: Use when starting a mobile (iOS/Android) test project from zero in TypeScript — Node 24, WebdriverIO 10 + Mocha, exact pins, Appium 3 server + drivers + emulator setup, capabilities from environment variables, a first smoke run. Triggers "scaffold a mobile test project", "set up a WebdriverIO Appium suite from scratch". Do NOT use for authoring screens or tests (`ui-test-author/appium`), or device clouds (`device-cloud`).
 ---
 

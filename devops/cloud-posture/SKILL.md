@@ -1,6 +1,6 @@
 ---
-name: devops-cloud-posture
-description: Use when checking a LIVE cloud account's security posture (CSPM) across AWS/Azure/GCP with Prowler and ScoutSuite. Reads a cloud account via credentials, so it needs recorded, expiring, read-only authorization against an OWNED account. Triggers "scan our AWS account for misconfigurations", "CIS benchmark on our Azure subscription". Not for pre-deploy IaC (`devops-iac-security`), running K8s (`devops-k8s-security`), image/OS CVEs (`qa-security-image-infra-scan`), or repo gates (`devops-auditor`).
+name: cloud-posture
+description: Use when checking a LIVE cloud account's security posture (CSPM) across AWS/Azure/GCP with Prowler and ScoutSuite. Reads a cloud account via credentials, so it needs recorded, expiring, read-only authorization against an OWNED account. Triggers "scan our AWS account for misconfigurations", "CIS benchmark on our Azure subscription". Not for pre-deploy IaC (`devops:iac-security`), running K8s (`devops:kubernetes-security`), image/OS CVEs (`qa-<stack>:image-infra-scan`), or repo gates (`devops-auditor`).
 ---
 
 # DevOps — Cloud Security Posture (Prowler / ScoutSuite)
@@ -22,12 +22,12 @@ This skill is **language-agnostic** (a cloud account has no stack) and owns the 
 | A **browsable HTML posture picture** for an engineer/auditor to read by service | `scout <provider>` | the live cloud API | ScoutSuite ruleset |
 | **Multi-cloud in one report** (AWS + Azure + GCP side by side) | ScoutSuite per provider, or Prowler per provider + aggregate | the live cloud APIs | — |
 | Map a finding to an **adversary technique** | Prowler output → MITRE ATT&CK **Cloud/IaaS** matrix | (post-processing) | ATT&CK Cloud |
-| **IaC template** misconfig BEFORE deploy (Terraform/Bicep/ARM/Helm) | **`devops-iac-security`** (Checkov/tfsec) | files on disk | CIS |
-| **Running K8s** workloads, RBAC, network policy, pod security | **`devops-k8s-security`** (kube-bench/Kubescape) | the K8s API | CIS-K8s |
-| **Image / OS-package CVEs**, IaC template CVEs, SBOM | **`qa-security-image-infra-scan`** (Trivy) | the built image / files | A03/A02 |
+| **IaC template** misconfig BEFORE deploy (Terraform/Bicep/ARM/Helm) | **`devops:iac-security`** (Checkov/tfsec) | files on disk | CIS |
+| **Running K8s** workloads, RBAC, network policy, pod security | **`devops:kubernetes-security`** (kube-bench/Kubescape) | the K8s API | CIS-K8s |
+| **Image / OS-package CVEs**, IaC template CVEs, SBOM | **`qa-<stack>:image-infra-scan`** (Trivy) | the built image / files | A03/A02 |
 | Whether a delivery **gate exists in the repo** (static conformance) | **`devops-auditor`** | repo files (read-only) | plugin rules |
 
-**Rule of thumb:** **`prowler <provider>`** is the gate (machine output, severity/status filters, benchmark mapping); **`scout <provider>`** is the human report (one HTML file, browse by service). Run **Prowler for the gate, ScoutSuite for the read**. Both hit the **live account** — that is the fence against `devops-iac-security` (templates on disk), `qa-security-image-infra-scan` (the image), and `devops-auditor` (repo files, never the account).
+**Rule of thumb:** **`prowler <provider>`** is the gate (machine output, severity/status filters, benchmark mapping); **`scout <provider>`** is the human report (one HTML file, browse by service). Run **Prowler for the gate, ScoutSuite for the read**. Both hit the **live account** — that is the fence against `devops:iac-security` (templates on disk), `qa-<stack>:image-infra-scan` (the image), and `devops-auditor` (repo files, never the account).
 
 ## Setup — pin the version, use a venv
 
@@ -47,7 +47,7 @@ pip install scoutsuite==5.14.0
 scout --help
 ```
 
-> **Pin the version** (`prowler==5.38.0`, `scoutsuite==5.14.0`, `prowlercloud/prowler:5.38.0` — never `:stable`/`:latest`) so a new check turning a green run red is a deliberate bump you reviewed, not a surprise that gets the scan disabled. Same discipline as the Trivy DB pin in `qa-security-image-infra-scan`.
+> **Pin the version** (`prowler==5.38.0`, `scoutsuite==5.14.0`, `prowlercloud/prowler:5.38.0` — never `:stable`/`:latest`) so a new check turning a green run red is a deliberate bump you reviewed, not a surprise that gets the scan disabled. Same discipline as the Trivy DB pin in `qa-<stack>:image-infra-scan`.
 
 ## The read-only credential model — non-negotiable
 
@@ -220,8 +220,8 @@ jobs:
 - **Scanning a third party's account, or an account you can't name an authorizer for.** *Fix:* owned accounts only, with the recorded expiring authorization line — no exceptions.
 - **`:stable`/`:latest` or an unpinned `pip install prowler`.** A new check silently turns the nightly red and the gate gets disabled. *Fix:* pin `prowler==5.38.0` / `prowlercloud/prowler:5.38.0` / `scoutsuite==5.14.0`.
 - **Blanket mutelist ("mute all Highs" / a whole-service ignore).** Buries the next real finding. *Fix:* scope each entry to a specific check + resource, with a ticket and a re-review date; shrink the file.
-- **Treating a clean CSPM run as "the cloud is secure."** Prowler/ScoutSuite see **configuration**, not the running K8s workloads (`devops-k8s-security`), the image CVEs (`qa-security-image-infra-scan`), the app's access control (`qa-security`), or whether a detected control actually *fires* (`purple-team`). *Fix:* a green posture run means the **account configuration** layer passed — run the full infra layer set.
-- **Confusing IaC scanning with posture.** A clean `checkov`/`tfsec` on the Terraform says nothing about drift, console changes, or resources created outside IaC. *Fix:* run **both** — `devops-iac-security` on the templates, this skill on the live account.
+- **Treating a clean CSPM run as "the cloud is secure."** Prowler/ScoutSuite see **configuration**, not the running K8s workloads (`devops:kubernetes-security`), the image CVEs (`qa-<stack>:image-infra-scan`), the app's access control (`qa-security`), or whether a detected control actually *fires* (`purple-team`). *Fix:* a green posture run means the **account configuration** layer passed — run the full infra layer set.
+- **Confusing IaC scanning with posture.** A clean `checkov`/`tfsec` on the Terraform says nothing about drift, console changes, or resources created outside IaC. *Fix:* run **both** — `devops:iac-security` on the templates, this skill on the live account.
 - **Once-a-quarter manual scans.** Posture drifts continuously (a public bucket appears the day after the scan). *Fix:* the scheduled nightly job.
 
 ## Rules (hard constraints)
@@ -238,11 +238,11 @@ jobs:
 ## Cross-references
 
 - `references/aws.md` · `references/azure.md` · `references/gcp.md` — the per-provider Prowler/ScoutSuite invocation, read-only IAM/role setup, org-wide scanning, and the commercial-tool note (Wiz / Prisma Cloud / Prowler Pro / Defender for Cloud). **Read the matching one before scanning.**
-- `devops-iac-security` — Checkov/tfsec/Terrascan on **IaC templates before deploy** (the *intended* state on disk). The boundary partner: this skill scans the **deployed account** (the *actual* state, incl. drift). **Run both.**
-- `devops-k8s-security` — kube-bench/Kubescape on **running K8s** workloads/RBAC/network policy. Cloud posture covers the account around the cluster; this covers inside it.
-- `devops-container-runtime-security` — kube-hunter/Falco runtime probing; the runtime sibling to this configuration-time scan.
-- `devops-supply-chain-security` · `devops-threat-modeling` · `devops-infra-controls-validation` — the other infra-security skills the `infra-security-tester` agent orchestrates alongside this one.
-- `qa-security-image-infra-scan` — Trivy for **image/OS-package CVEs, IaC-template CVEs, and SBOM** — a different surface (the artifact, not the account).
+- `devops:iac-security` — Checkov/tfsec/Terrascan on **IaC templates before deploy** (the *intended* state on disk). The boundary partner: this skill scans the **deployed account** (the *actual* state, incl. drift). **Run both.**
+- `devops:kubernetes-security` — kube-bench/Kubescape on **running K8s** workloads/RBAC/network policy. Cloud posture covers the account around the cluster; this covers inside it.
+- `devops:container-runtime-security` — kube-hunter/Falco runtime probing; the runtime sibling to this configuration-time scan.
+- `devops:supply-chain-security` · `devops:threat-modeling` · `devops:controls-validation` — the other infra-security skills the `infra-security-tester` agent orchestrates alongside this one.
+- `qa-<stack>:image-infra-scan` — Trivy for **image/OS-package CVEs, IaC-template CVEs, and SBOM** — a different surface (the artifact, not the account).
 - `devops-auditor` — read-only **static** conformance: does a gate exist in the repo. **The fence:** the auditor reads repo files and never authenticates to the account; this skill reads the **live account** and never opens the repo's conformance rule set.
 - `infra-security-tester` (agent) — the step-by-step orchestrator that runs this as its **Step-4 cloud-posture & IAM** pass, under its scope/authorization gate.
 - `devops-engineer` — the remediation peer: this skill finds and retests, `devops-engineer` applies the fix.

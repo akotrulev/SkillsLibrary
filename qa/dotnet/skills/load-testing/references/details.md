@@ -1,4 +1,4 @@
-# Deep-dive details — `qa-load-testing-dotnet`
+# Deep-dive details — `qa-dotnet:load-testing`
 
 Sections moved out of SKILL.md for on-demand loading. Read what the task needs.
 

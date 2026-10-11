@@ -1,5 +1,5 @@
 ---
-name: be-java-auth0
+name: auth0
 description: Use when setting up or modifying Auth0 in a Java 21 + Spring Boot 3 service — JWT validation with a Spring Security resource server, method-level RBAC via `@PreAuthorize`, Client Credentials M2M, custom claim mapping. Triggers: "add Auth0 to my Spring Boot API", "validate Auth0 JWTs in Java", "wire @PreAuthorize with permissions". Do NOT use for SPA flows (`auth/auth0-react`/`auth0-blazor`), Cognito (the `cognito` sibling), or concepts (`auth/_shared/auth0-concepts`).
 ---
 

@@ -1,5 +1,5 @@
 ---
-name: design-theme-presets
+name: theme-presets
 description: Use to apply one of 10 preset color+font themes as primitive-tier starting values for an artifact (deck, doc, HTML page) or a quick-start web-app palette — when a brief does not warrant a bespoke identity. Triggers: "apply a preset theme", "style this deck/page with a theme", "quick theme". Do NOT use to INVENT a bespoke identity (`design/visual-identity`), match an EXISTING brand (`design/brand-import`), or for token tier discipline (`design/design-tokens`).
 metadata:
   version: "1.1.0"
@@ -19,7 +19,7 @@ doc, an HTML page — or use it as a quick-start palette for a web app.
 > Factory is the quick-start when a brief doesn't warrant a bespoke
 > [`design/visual-identity`](../visual-identity/SKILL.md) system.
 
-**Corpus authority.** The facts this skill decides with come from the vendored [`design-ui-ux-pro-max`](../ui-ux-pro-max/SKILL.md) corpus — **it is the source of truth, and where it and this skill disagree on a fact, the corpus wins.** The 10 presets below remain the artifact/quick-start lane, but for a **web app** the corpus's 192 product palettes are the larger and better-matched set — query it before settling for a preset:
+**Corpus authority.** The facts this skill decides with come from the vendored [`design:corpus`](../ui-ux-pro-max/SKILL.md) corpus — **it is the source of truth, and where it and this skill disagree on a fact, the corpus wins.** The 10 presets below remain the artifact/quick-start lane, but for a **web app** the corpus's 192 product palettes are the larger and better-matched set — query it before settling for a preset:
 
 ```bash
 python3 "${CLAUDE_PLUGIN_ROOT}/design/ui-ux-pro-max/scripts/search.py" "<product type> <mood>" --domain color
@@ -101,7 +101,7 @@ a web app:
    color.
 
 Beyond the palette/font quick-start, everything else (composition, dark mode,
-the full neutral ramp) is `design-tokens` / `visual-identity` work — a preset
+the full neutral ramp) is `design:tokens` / `visual-identity` work — a preset
 theme gets you started, it doesn't finish the system.
 
 ## Create your Own Theme

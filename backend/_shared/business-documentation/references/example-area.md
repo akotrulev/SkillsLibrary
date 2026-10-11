@@ -1,6 +1,6 @@
 # Golden example — `areas/<area>.md`
 
-The filled example for `be-shared-business-documentation`: one area document as a `be-documenter` run would write it into `docs/business-model/areas/credits-and-charges.md`. The system is the same **workshop-booking** toy the planner examples build — imagined here as an *inherited* codebase being documented after the fact. **Shape, tone, the example discipline and the evidence table are normative; domain content and citations are illustrative.**
+The filled example for `dev:doc-business-model`: one area document as a `be-documenter` run would write it into `docs/business-model/areas/credits-and-charges.md`. The system is the same **workshop-booking** toy the planner examples build — imagined here as an *inherited* codebase being documented after the fact. **Shape, tone, the example discipline and the evidence table are normative; domain content and citations are illustrative.**
 
 Note what the example demonstrates: a body that reads like a product spec — plain headings, numbered steps, formulas written as plain-text math with `Where:`, one running cast, and a worked example whose arithmetic carries through to the final result — with every `file:line`, tier tag and code noun confined to the closing table. Optional sections that do not apply (there is no *Scope* section here because the area applies to every member) are dropped, and the search that proved it is a row in the table.
 
@@ -9,7 +9,7 @@ Note what the example demonstrates: a body that reads like a product spec — pl
 # AREA-004 — Session credits & charges
 
 **Created:** 2026-08-02
-**Owned by:** `be-shared-business-documentation`
+**Owned by:** `dev:doc-business-model`
 **Derived from:** code by `be-documenter` @ `a3f9c21` on 2026-08-02
 **Models:** [FLOW-004 pricing a booking] · [ENT-003 accrued charge lifecycle] · [DEC-002 credit / overage split]
 

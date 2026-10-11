@@ -1,11 +1,11 @@
 ---
-name: mobile-ios-networking
-description: Use when an iOS app must call an API — URLSession async/await + Codable, one concrete client, timeout budgets per endpoint class, Task cancellation, bounded retries with Retry-After, no retry offline, ProblemDetails, a token-refresh actor, URLSessionWebSocketTask. Triggers "request hangs on cell", "retry storm", "refresh token race". Do NOT use for the failure UI (`mobile-ios-error-handling`), forms, or persistence (`-offline-and-storage`).
+name: networking
+description: Use when an iOS app must call an API — URLSession async/await + Codable, one concrete client, timeout budgets per endpoint class, Task cancellation, bounded retries with Retry-After, no retry offline, ProblemDetails, a token-refresh actor, URLSessionWebSocketTask. Triggers "request hangs on cell", "retry storm", "refresh token race". Do NOT use for the failure UI (`mobile-ios:error-handling`), forms, or persistence (`-offline-and-storage`).
 ---
 
 # iOS — Networking
 
-Owns the **request-level half** of resilience: how a call is made, cancelled, timed out, retried, authenticated and categorised, and how a socket lives and dies with the app. The **UI half** (failed region, banner, stale marker, retry button) is `mobile-ios-error-handling`'s; this skill produces the categorised error it renders. Web analog: [`fe-react-data-fetching`](../../../../frontend/react/skills/data-fetching/SKILL.md) — the timeout, ordering and critical-vs-optional rules carry over; RSC, Server Actions and cache tags do not.
+Owns the **request-level half** of resilience: how a call is made, cancelled, timed out, retried, authenticated and categorised, and how a socket lives and dies with the app. The **UI half** (failed region, banner, stale marker, retry button) is `mobile-ios:error-handling`'s; this skill produces the categorised error it renders. Web analog: [`fe-react:data-fetching`](../../../../frontend/react/skills/data-fetching/SKILL.md) — the timeout, ordering and critical-vs-optional rules carry over; RSC, Server Actions and cache tags do not.
 
 ## Version lane
 
@@ -31,14 +31,14 @@ Detect an existing client first (Alamofire, Moya, a generated OpenAPI client, an
 
 ## When NOT to use
 
-- Rendering failure, the banner, offline indicator, forced-update prompt → `mobile-ios-error-handling`
+- Rendering failure, the banner, offline indicator, forced-update prompt → `mobile-ios:error-handling`
 - Persisting responses, an offline write queue, sync and conflicts → [`offline-and-storage`](../offline-and-storage/SKILL.md)
 - Where server data lives in the view tree → [`architecture`](../architecture/SKILL.md)
 - Form submit UX and field errors → [`forms`](../forms/SKILL.md)
-- Auth provider setup (Universal Login, `CredentialsManager`) → `auth-auth0-ios`; token storage → [`offline-and-storage`](../offline-and-storage/SKILL.md)
-- Registering a device token with the server → `mobile-ios-notifications-and-links`
-- Background uploads that outlive the app → `mobile-ios-system-integration`
-- Another stack → `mobile-react-native-networking`, `mobile-android-networking`
+- Auth provider setup (Universal Login, `CredentialsManager`) → `mobile-ios:auth0`; token storage → [`offline-and-storage`](../offline-and-storage/SKILL.md)
+- Registering a device token with the server → `mobile-ios:push-and-deep-links`
+- Background uploads that outlive the app → `mobile-ios:system-integration`
+- Another stack → `mobile-react-native:networking`, `mobile-android:networking`
 
 ## One concrete client
 
@@ -84,7 +84,7 @@ final class APIClient: Sendable {
 }
 ```
 
-- **The base URL comes from an `.xcconfig` value surfaced through `Info.plist`** — it is public by design; no secret rides in it. `https` only; an ATS exception carries a recorded reason ([`mobile-shared-security`](../../../_shared/security/SKILL.md) § 1).
+- **The base URL comes from an `.xcconfig` value surfaced through `Info.plist`** — it is public by design; no secret rides in it. `https` only; an ATS exception carries a recorded reason ([`mobile-<stack>:security`](../../../_shared/security/SKILL.md) § 1).
 - **`Endpoint<Response>` is a value** (path, method, query, body, name) built by name in one file — no string URLs at call sites, and a route table that fails a test when a `{placeholder}` is left unsubstituted.
 - **A decode failure throws `APIError.drifted`** — never `try?` into an empty array. A single-object endpoint is not decoded as a list. The UI renders *failed*, not *empty*.
 - **Never log a URL with a query secret, a body, or a token**; log status, endpoint name and the correlation id through `os.Logger` with `privacy: .public` only on those.
@@ -184,7 +184,7 @@ A view revalidates with `.onChange(of: scenePhase) { _, phase in if phase == .ac
 
 ## Realtime — `URLSessionWebSocketTask`
 
-Pull above; push is a socket the app opens **only while foregrounded and the screen needs it.** Open on `scenePhase == .active`, cancel on `.background` (iOS suspends idle sockets anyway), reconnect with jittered backoff only when `isOnline`, and **revalidate what the stream feeds** after every reconnect — messages were missed. Receive in one `Task` that is cancelled with its owner; decode each frame like any response and drop-and-count a malformed one. Background delivery is push (`mobile-ios-notifications-and-links`), not a held-open socket. The wrapper is in [`references/request-policy.md`](references/request-policy.md).
+Pull above; push is a socket the app opens **only while foregrounded and the screen needs it.** Open on `scenePhase == .active`, cancel on `.background` (iOS suspends idle sockets anyway), reconnect with jittered backoff only when `isOnline`, and **revalidate what the stream feeds** after every reconnect — messages were missed. Receive in one `Task` that is cancelled with its owner; decode each frame like any response and drop-and-count a malformed one. Background delivery is push (`mobile-ios:push-and-deep-links`), not a held-open socket. The wrapper is in [`references/request-policy.md`](references/request-policy.md).
 
 ## Rules
 
@@ -227,12 +227,12 @@ Inside a `Gate: none` plan task, run none of these and report "written, not run"
 - On a device with the Network Link Conditioner on "100% loss": a request past its budget fails at the deadline with a timeout; leaving the screen cancels silently.
 - Airplane mode: no retry attempts in the network log; reconnect refetches.
 - A `503` with `Retry-After: 5` retries after 5 s, not sooner; N concurrent `401`s cause exactly one refresh.
-- Dev-side tests (`URLProtocol` stub, injected clock for backoff): [`mobile-ios-unit-testing`](../unit-testing/SKILL.md).
+- Dev-side tests (`URLProtocol` stub, injected clock for backoff): [`mobile-ios:unit-testing`](../unit-testing/SKILL.md).
 
 ## Handoffs
 
-- Failed region, banner, stale, forced update → `mobile-ios-error-handling`
+- Failed region, banner, stale, forced update → `mobile-ios:error-handling`
 - Persisted cache, write queue, token storage → [`offline-and-storage`](../offline-and-storage/SKILL.md)
 - State ownership → [`architecture`](../architecture/SKILL.md) · field errors → [`forms`](../forms/SKILL.md)
-- ATS, pinning, secrets → [`mobile-shared-security`](../../../_shared/security/SKILL.md)
+- ATS, pinning, secrets → [`mobile-<stack>:security`](../../../_shared/security/SKILL.md)
 - API contract tests → `qa-api-typescript` / `qa-api-dotnet` / `qa-api-java` (peer of the backend)

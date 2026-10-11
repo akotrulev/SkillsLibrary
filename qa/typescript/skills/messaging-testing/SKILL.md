@@ -1,6 +1,6 @@
 ---
-name: qa-messaging-testing-typescript
-description: Use when a Node 24 / TypeScript / Vitest suite must produce, consume, or assert messages against the project's broker (Kafka, SQS/SNS, RabbitMQ, Service Bus). Triggers "assert the service published event X", "test the consumer's side-effect", "DLQ/DLT assertions", "seed a topic in a test". Do NOT use for HTTP API assertions (use `qa-api-test-writer-typescript`), for message-contract verification (use `qa-api-contract-testing-typescript`), or for email (use `qa-email-testing-typescript`).
+name: messaging-testing
+description: Use when a Node 24 / TypeScript / Vitest suite must produce, consume, or assert messages against the project's broker (Kafka, SQS/SNS, RabbitMQ, Service Bus). Triggers "assert the service published event X", "test the consumer's side-effect", "DLQ/DLT assertions", "seed a topic in a test". Do NOT use for HTTP API assertions (use `qa-typescript:api-tests`), for message-contract verification (use `qa-typescript:api-contract-testing`), or for email (use `qa-typescript:email-testing`).
 ---
 
 # QA — Messaging Testing (TypeScript)
@@ -28,7 +28,7 @@ shared by every tool in the family.
 | Assert against an **Azure Service Bus** queue/topic (peek-lock, DLQ sub-queue, sessions, SQL filters) | `references/service-bus.md` | Azure-native queue/topic; explicit peek-lock settlement + DLQ sub-queue — not offsets |
 | Assert against **AWS SQS / SNS** (visibility timeout, redrive-policy DLQ, FIFO dedup, SNS fan-out) | `references/sqs.md` | AWS-native queue; delete-to-ack + visibility timeout — not a log you re-read |
 | Assert against **RabbitMQ** (exchanges, routing keys, manual ack/nack, DLX) | `references/rabbitmq.md` | AMQP broker; exchange/binding topology + per-message ack |
-| Assert a row was written, with no broker in the flow | `qa-db-connection-typescript` | Pure DB verification; reuse its `expect.poll` for the eventual-consistency side here |
+| Assert a row was written, with no broker in the flow | `qa-typescript:db-connection` | Pure DB verification; reuse its `expect.poll` for the eventual-consistency side here |
 
 **Rule of thumb:** *A partitioned log you read by offset, with consumer groups and an app-level DLT?* → Kafka.
 *A different broker?* → the matching sibling. *No broker at all?* → DB/API-mocking. All four messaging

@@ -1,5 +1,5 @@
 ---
-name: be-python-unit-testing
+name: unit-testing
 description: Use when Python worker or backend logic needs a dev-side pytest test — what deserves one, the seams to inject (time, model session, filesystem), self-proving hostile fixture builders (GPS JPEG, decompression bomb, polyglot, script SVG), rejection tables, the `model` marker. In-process only. Triggers "unit-test the validator", "build a hostile fixture". Do NOT use for the container-level contract the TypeScript side calls (`qa-api-typescript`) or image scanning (`qa-security`).
 ---
 
@@ -18,7 +18,7 @@ Detect `requires-python` and the Pillow major from `uv.lock` first. pytest 8.x; 
 - A function `media-processing` or `pattern-writer` produced has behaviour: a sniff, a sanitiser, a strip, a verdict, a ladder, a `match` over a `Result`
 - A rejection reason needs pinning before a refactor
 - A Pillow behaviour the pipeline depends on must stay pinned across upgrades (metadata fallbacks, `exif_transpose`, `thumbnail` never upscaling)
-- Reproducing a defect at the unit level before fixing it (`ep-systematic-debugging` RED)
+- Reproducing a defect at the unit level before fixing it (`dev:debugging` RED)
 
 ## When NOT to use
 

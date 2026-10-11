@@ -1,6 +1,6 @@
 ---
-name: qa-security-passive-scan-typescript
-description: Use when adding an OWASP ZAP **baseline** (passive) DAST scan as a CI gate for a Node 24 / TypeScript / Vitest pipeline. Triggers "add a DAST gate to CI", "run ZAP against our running app", "scan for missing security headers", "passive security scan on every PR". Do NOT use for active/injection scanning (`qa-security-active-scan`), known-CVE matching (`qa-security-known-vuln-scan`), TLS config (`qa-security-certificate-scan`), or BOLA/IDOR logic (`qa-permission-testing-typescript`).
+name: passive-scan
+description: Use when adding an OWASP ZAP **baseline** (passive) DAST scan as a CI gate for a Node 24 / TypeScript / Vitest pipeline. Triggers "add a DAST gate to CI", "run ZAP against our running app", "scan for missing security headers", "passive security scan on every PR". Do NOT use for active/injection scanning (`qa-<stack>:active-scan`), known-CVE matching (`qa-<stack>:known-vuln-scan`), TLS config (`qa-<stack>:certificate-scan`), or BOLA/IDOR logic (`qa-typescript:permission-testing`).
 ---
 
 # Security Testing — OWASP ZAP Baseline Scan (TypeScript)
@@ -103,7 +103,7 @@ on `2` (warnings tracked, not blocking) and hard-fail only on `1`.
 A real app's first ZAP run lights up with WARNs. Gating on *every* alert trains the team to ignore the
 gate. The disciplined approach is the **ticketed rules config**: a tab-separated file that sets each ZAP
 rule-id to `IGNORE`, `WARN`, or `FAIL`, with **every `IGNORE` carrying a ticket + reason** — the exact
-same allow-list discipline as `qa-accessibility-testing-typescript`, ported to ZAP.
+same allow-list discipline as `qa-typescript:accessibility-testing`, ported to ZAP.
 
 ```tsv
 # .zap/rules.tsv — tab-separated: <rule-id>	<IGNORE|WARN|FAIL>	(reason)
@@ -129,7 +129,7 @@ same allow-list discipline as `qa-accessibility-testing-typescript`, ported to Z
 
 The natural home is CI. The official Action wraps the image, runs the baseline, uploads the report
 artifact, and (optionally) opens a tracking GitHub issue (cross-link
-`qa-ci-pipelines-typescript`):
+`qa-typescript:ci-pipelines`):
 
 ```yaml
 # .github/workflows/passive-scan.yml
@@ -294,7 +294,7 @@ the committed context file or `cmd_options` (global rule: no secrets in code).
 
 `passive-scan.py` writes `report.json` / `report.html` / `report.xml` to the mounted work dir; the Action
 uploads them as an artifact and (optionally) opens a tracking issue. Surface the gate in Allure too, so a
-failing run names the alerts without re-scanning (cross-link `qa-test-reports-typescript`):
+failing run names the alerts without re-scanning (cross-link `qa-typescript:test-reports`):
 
 ```ts
 // support/zap-report.ts
@@ -314,7 +314,7 @@ export function attachZapReport(result: ZapResult): void {
 
 - **Allure** — attach the HTML + a readable alert summary (rule id, risk, count).
 - **CI artifact** — the Action's `artifact_name` upload, or upload the work dir yourself (cross-link
-  `qa-ci-pipelines-typescript`).
+  `qa-typescript:ci-pipelines`).
 - **Tracking issue** — `allow_issue_writing: true` opens/updates a GitHub issue with the WARN/FAIL set.
 
 ## Anti-patterns
@@ -364,17 +364,17 @@ These sections live in `references/details.md` — **read it when the task touch
 
 ## Cross-references
 
-- `qa-security-passive-scan-dotnet` — same skill, .NET / NUnit. Same Docker choreography via
+- `qa-dotnet:passive-scan` — same skill, .NET / NUnit. Same Docker choreography via
   `Process` + `System.Text.Json` report parsing.
-- `qa-security-passive-scan-java` — same skill, Java / TestNG. Same shape via `ProcessBuilder` +
+- `qa-java:passive-scan` — same skill, Java / TestNG. Same shape via `ProcessBuilder` +
   Jackson.
-- `qa-security-dependency-scan-typescript` — the **SCA** sibling that closes the
+- `qa-typescript:dependency-scan` — the **SCA** sibling that closes the
   `security-testing` family: dependency/library CVEs from your lockfile vs ZAP's running-app HTTP surface.
   Different layers — run both.
-- `qa-accessibility-testing-typescript` — the **ticketed-baseline triage** discipline
+- `qa-typescript:accessibility-testing` — the **ticketed-baseline triage** discipline
   reused here for `-c rules.tsv` (gate new findings, document every suppression with a ticket).
-- `qa-accessibility-testing-typescript` — the closest **port-shape precedent**: a
+- `qa-typescript:accessibility-testing` — the closest **port-shape precedent**: a
   CLI/Docker tool invoked from each stack with the report parsed as JSON.
-- `qa-ci-pipelines-typescript` — the `zaproxy/action-baseline` job, `fail_action`, artifact
+- `qa-typescript:ci-pipelines` — the `zaproxy/action-baseline` job, `fail_action`, artifact
   upload, Docker availability on the runner.
-- `qa-test-reports-typescript` — attach the ZAP HTML/JSON report and alert summary to the run.
+- `qa-typescript:test-reports` — attach the ZAP HTML/JSON report and alert summary to the run.

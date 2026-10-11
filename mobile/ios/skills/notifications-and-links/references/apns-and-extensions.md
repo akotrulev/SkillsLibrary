@@ -68,7 +68,7 @@ final class NotificationService: UNNotificationServiceExtension {
 - The extension is a **separate process with a tight memory cap**: no app UI code, a small image download only, no Core Data stack. Share data with the app through an **App Group** container or a shared Keychain access group, never through a global.
 - A decryption key lives in the **Keychain access group** both targets share, with `AfterFirstUnlockThisDeviceOnly` — a push can arrive while the device is locked ([`offline-and-storage` `references/keychain.md`](../../offline-and-storage/references/keychain.md)). A notification that cannot be decrypted shows a generic body ("You have a new message"), never the ciphertext.
 - Attachments: `UNNotificationAttachment` from a file downloaded into the extension's temporary directory; check the type and size before attaching.
-- An extension that touches a Required Reason API needs its own `PrivacyInfo.xcprivacy` entry ([`mobile-shared-store-compliance`](../../../../_shared/store-compliance/SKILL.md)).
+- An extension that touches a Required Reason API needs its own `PrivacyInfo.xcprivacy` entry ([`mobile-<stack>:store-compliance`](../../../../_shared/store-compliance/SKILL.md)).
 
 ## Universal links — the AASA file
 
@@ -98,4 +98,4 @@ final class NotificationService: UNNotificationServiceExtension {
 
 ## URL schemes
 
-`CFBundleURLTypes` in `Info.plist` claims `myapp://`. Any app can claim the same scheme, and nothing proves who sent the URL — so a scheme URL carries **no secret and triggers no destructive action**; treat it exactly as `DeepLink(url:)` treats a universal link, and never accept an auth code or token through one without PKCE and `state` validation ([`mobile-shared-security`](../../../../_shared/security/SKILL.md)). Prefer `ASWebAuthenticationSession` for an OAuth redirect; its https callback form (where the OS supports it) is bound to a domain the way a universal link is.
+`CFBundleURLTypes` in `Info.plist` claims `myapp://`. Any app can claim the same scheme, and nothing proves who sent the URL — so a scheme URL carries **no secret and triggers no destructive action**; treat it exactly as `DeepLink(url:)` treats a universal link, and never accept an auth code or token through one without PKCE and `state` validation ([`mobile-<stack>:security`](../../../../_shared/security/SKILL.md)). Prefer `ASWebAuthenticationSession` for an OAuth redirect; its https callback form (where the OS supports it) is bound to a domain the way a universal link is.

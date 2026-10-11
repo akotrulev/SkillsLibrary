@@ -20,7 +20,7 @@ This node **ports the service-bus structure** onto Kafka: the **same two asserti
 > synchronous return you can assert on the next line. The record is in flight; the consumer runs on its own
 > schedule; the side-effect lands "soon". So the core discipline is: **wait on a condition** for the record
 > (or its effect) to appear, with a bounded timeout — **never `Thread.sleep`**. This is the exact lineage of
-> `qa-db-connection-java`'s Awaitility usage and `references/service-bus.md`'s condition-wait.
+> `qa-java:db-connection`'s Awaitility usage and `references/service-bus.md`'s condition-wait.
 > Kafka gives you **`consumer.poll(Duration)`** as the receive-side primitive: it long-polls up to a bounded
 > window for records, then returns them or an empty batch. A **bounded poll loop** (poll until you have the
 > records you expect, or a deadline passes) *is* the condition-wait; a fixed sleep is not.
@@ -147,7 +147,7 @@ public abstract class KafkaTestBase {
 
 > **Cloud / shared test cluster alternative.** If your org runs against a real **test** Kafka cluster instead
 > of a container, read `bootstrap.servers` and the SASL/SSL credentials **from env, lazily** — never hard-code
-> them, never log them (cross-link `qa-test-login-tokens-java` for the secrets-from-env discipline). A
+> them, never log them (cross-link `qa-java:test-login-tokens` for the secrets-from-env discipline). A
 > container is the default for CI determinism; a shared cluster makes tests order-dependent unless each uses a
 > **uniquely named topic** and a **fresh consumer group** (because the log isn't drained between tests).
 
@@ -252,7 +252,7 @@ public class OrderPublishingTest extends KafkaTestBase {
 
 Here the SUT is a **consumer** (a `@KafkaListener` or a poll loop). The test **produces an input record**, lets
 the consumer run, and waits for the observable side-effect — eventually consistent, so use **Awaitility** to
-poll a probe on a condition. This reuses `qa-db-connection-java`'s discipline verbatim.
+poll a probe on a condition. This reuses `qa-java:db-connection`'s discipline verbatim.
 
 ```java
 import static org.awaitility.Awaitility.await;
@@ -470,11 +470,11 @@ public final class Orders {
 
 ## Cross-references
 
-- `qa-messaging-testing-dotnet` — same skill, .NET 8 / NUnit (`Confluent.Kafka`:
+- `qa-dotnet:messaging-testing` — same skill, .NET 8 / NUnit (`Confluent.Kafka`:
   `ProducerBuilder`/`ConsumerBuilder`, `consumer.Consume(TimeSpan)` poll, `AutoOffsetReset.Earliest`,
   `EnableAutoCommit=false` + `Commit()`, `WaitFor.Async` for side-effects, `Testcontainers.Kafka`
   `KafkaContainer`). Structure ported, not code.
-- `qa-messaging-testing-typescript` — same skill, Node 24 + TS (`kafkajs`: `consumer.subscribe({
+- `qa-typescript:messaging-testing` — same skill, Node 24 + TS (`kafkajs`: `consumer.subscribe({
   fromBeginning: true })` + `consumer.run({ eachMessage })` collecting into a buffer, `expect.poll` for the
   buffer and for side-effects, `@testcontainers/kafka` `KafkaContainer`). Note: kafkajs has **no synchronous
   `poll()`** — the buffer + `expect.poll` is the port of this file's bounded poll loop.
@@ -484,9 +484,9 @@ public final class Orders {
 - `references/sqs.md` (`sqs`, the immediately prior sibling) — AWS SQS; **the `kafka`-vs-`sqs` boundary**:
   delete-to-ack + visibility timeout + redrive-policy DLQ vs Kafka commit-offset + re-readable log + app-level
   DLT. Same condition-wait discipline, different broker model.
-- `qa-db-connection-java` — the Awaitility poll and seeder/probe split reused for the consumer
+- `qa-java:db-connection` — the Awaitility poll and seeder/probe split reused for the consumer
   side-effect assertions; the **eventual-consistency lineage** this skill leans on hardest.
-- `qa-test-login-tokens-java` — when running against a shared cloud cluster with SASL/OAuth creds; the
+- `qa-java:test-login-tokens` — when running against a shared cloud cluster with SASL/OAuth creds; the
   secrets-from-env discipline.
-- `qa-test-reports-java` — attach the consumed record value / DLT payload to the Allure result.
-- `qa-test-data-builder-java` — builders/ObjectMother for record payloads with 4+ fields.
+- `qa-java:test-reports` — attach the consumed record value / DLT payload to the Allure result.
+- `qa-java:test-data-builder` — builders/ObjectMother for record payloads with 4+ fields.

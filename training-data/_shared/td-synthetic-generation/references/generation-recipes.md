@@ -27,7 +27,7 @@ User: Here are example instructions:
 Write 10 new ones in the same spirit but on different content. Vary difficulty and format.
 ```
 
-Pool, near-dedup (`td-data-quality`), then generate responses in a second pass.
+Pool, near-dedup (`training-data:data-quality`), then generate responses in a second pass.
 
 ## Evol-instruct — deepen an instruction
 
@@ -80,7 +80,7 @@ RESPONSE B:
 # 2. Submit via the Message Batches API (ai-development/claude-api).
 # 3. On completion, parse → attach envelope (id, source="synthetic:<model-id>",
 #    batch_id, created_at) → write JSONL.
-# 4. Route the batch through td-data-quality (near-dedup + decontaminate).
+# 4. Route the batch through training-data:data-quality (near-dedup + decontaminate).
 # 5. Judge/grade survivors with the pinned judge → drop below threshold, keep reasons.
 ```
 

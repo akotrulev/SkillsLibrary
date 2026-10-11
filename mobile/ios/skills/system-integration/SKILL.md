@@ -1,11 +1,11 @@
 ---
-name: mobile-ios-system-integration
-description: Use when an iOS app reaches outside its own screens — App Intents and App Shortcuts, WidgetKit widgets and controls, Live Activities, BGTaskScheduler, BGContinuedProcessingTask, background URLSession. Triggers "add a widget", "Siri / Shortcuts action", "Live Activity for delivery", "run work in the background", "upload after the app closes". Do NOT use for push setup (`mobile-ios-notifications-and-links`), foreground networking (`-networking`) or SwiftData (`-offline-and-storage`).
+name: system-integration
+description: Use when an iOS app reaches outside its own screens — App Intents and App Shortcuts, WidgetKit widgets and controls, Live Activities, BGTaskScheduler, BGContinuedProcessingTask, background URLSession. Triggers "add a widget", "Siri / Shortcuts action", "Live Activity for delivery", "run work in the background", "upload after the app closes". Do NOT use for push setup (`mobile-ios:push-and-deep-links`), foreground networking (`-networking`) or SwiftData (`-offline-and-storage`).
 ---
 
 # iOS — System Integration
 
-The app is not always on screen. Widgets, Siri and Shortcuts, Live Activities and background work let the **system** run a slice of the app on its own schedule — and the system, not the app, decides when. Every surface here shares three rules: **the system budgets it** (refreshes, runtime, updates are allowances, not promises), **it runs outside the app's UI** (a separate process or a cold launch — no singleton state), and **its input is untrusted** (a Shortcut parameter, a background wake and a push-driven update are all data to validate). Rules: CLAUDE.md § Mobile code rules (lifecycle, secrets) and [`mobile-shared-security`](../../../_shared/security/SKILL.md).
+The app is not always on screen. Widgets, Siri and Shortcuts, Live Activities and background work let the **system** run a slice of the app on its own schedule — and the system, not the app, decides when. Every surface here shares three rules: **the system budgets it** (refreshes, runtime, updates are allowances, not promises), **it runs outside the app's UI** (a separate process or a cold launch — no singleton state), and **its input is untrusted** (a Shortcut parameter, a background wake and a push-driven update are all data to validate). Rules: CLAUDE.md § Mobile code rules (lifecycle, secrets) and [`mobile-<stack>:security`](../../../_shared/security/SKILL.md).
 
 ## Version lane
 
@@ -29,19 +29,19 @@ Facts below are long-standing API shapes from prior knowledge, not re-confirmed 
 
 ## When NOT to use
 
-- Registering for push, universal links → `mobile-ios-notifications-and-links`
+- Registering for push, universal links → `mobile-ios:push-and-deep-links`
 - Foreground requests, timeouts, retries → [`networking`](../networking/SKILL.md)
 - The store the widget reads → [`offline-and-storage`](../offline-and-storage/SKILL.md)
 - Camera, location, biometrics → [`device-features`](../device-features/SKILL.md)
-- Entitlements and background modes as store policy → [`mobile-shared-store-compliance`](../../../_shared/store-compliance/SKILL.md)
-- Another stack → `mobile-android-system-integration` (widgets, WorkManager)
+- Entitlements and background modes as store policy → [`mobile-<stack>:store-compliance`](../../../_shared/store-compliance/SKILL.md)
+- Another stack → `mobile-android:system-integration` (widgets, WorkManager)
 
 ## Sharing with an extension
 
 A widget, an intent extension and a Live Activity UI are **separate targets and processes**. They share code through a **local Swift package** and data through an **App Group container** (a SwiftData store or a file there) or a shared Keychain access group — never a singleton.
 
 - **The extension reads; the app writes.** Put the data the widget shows in a small, read-optimised snapshot the app refreshes; the extension never opens the full database to render.
-- `UserDefaults(suiteName:)` for a group is a Required Reason API (the group-container reason code); declare it in the extension target's `PrivacyInfo.xcprivacy` ([`mobile-shared-store-compliance`](../../../_shared/store-compliance/SKILL.md)).
+- `UserDefaults(suiteName:)` for a group is a Required Reason API (the group-container reason code); declare it in the extension target's `PrivacyInfo.xcprivacy` ([`mobile-<stack>:store-compliance`](../../../_shared/store-compliance/SKILL.md)).
 - **No token or secret in the group container in clear** — a widget does not need the session; give it the already-fetched, non-sensitive snapshot. What a widget shows is visible on a locked screen: mark sensitive views `.privacySensitive()` and honour `redactionReasons`.
 
 ## App Intents and App Shortcuts
@@ -134,7 +134,7 @@ func startDelivery(reference: String, state: DeliveryAttributes.ContentState) th
 
 - `NSSupportsLiveActivities` = `YES` in `Info.plist`; start it **from the foreground** on a user action (push-to-start from iOS 17.2 is the server-driven exception). Check `ActivityAuthorizationInfo().areActivitiesEnabled` — the user can switch Live Activities off, and that path still works (the order screen shows the same status).
 - **Guideline 4.5.3 applies**: Apple services are not for spam, phishing or unsolicited messages — a Live Activity is for something the user started and is waiting on, **never a promotion, a re-engagement nudge or a persistent ad**. End it when the event ends (`activity.end(_:dismissalPolicy:)`); one that runs without an event is a rejection and a trust loss.
-- **Content is small and public**: `ContentState` and `attributes` are `Codable` and capped at **4 KB** in total; the Lock Screen shows it to anyone holding the phone, so no sensitive data (`.privacySensitive()`, redacted `isLuminanceReduced` states) ([`mobile-shared-security`](../../../_shared/security/SKILL.md)).
+- **Content is small and public**: `ContentState` and `attributes` are `Codable` and capped at **4 KB** in total; the Lock Screen shows it to anyone holding the phone, so no sensitive data (`.privacySensitive()`, redacted `isLuminanceReduced` states) ([`mobile-<stack>:security`](../../../_shared/security/SKILL.md)).
 - **Updates are budgeted.** Local `activity.update(_:)` works while the app can run; a remote update is an APNs push with `apns-push-type: liveactivity` to the **activity's own push token** (`activity.pushTokenUpdates`, uploaded like a device token — [`references/background-and-activities.md`](references/background-and-activities.md)); high-frequency updates need `NSSupportsLiveActivitiesFrequentUpdates` and still throttle. A `staleDate` makes the UI say "out of date" instead of lying.
 - An activity lives at most **8 hours active**; design for it being **ended by the system**. The widget extension draws the UI (`ActivityConfiguration`: Lock Screen, Dynamic Island); `Text(timerInterval:)` for countdowns, never per-second updates.
 
@@ -147,7 +147,7 @@ func startDelivery(reference: String, state: DeliveryAttributes.ContentState) th
 | A user-started long task that must outlive the screen | `BGContinuedProcessingTaskRequest` (iOS 26) | Runs with system progress UI the user can cancel |
 | Upload or download after the user leaves | background `URLSession` | The system does the transfer, wakes the app after |
 
-- **Register at launch, before the app finishes launching** — `BGTaskScheduler.shared.register(forTaskWithIdentifier:using:launchHandler:)` (or the SwiftUI `.backgroundTask(.appRefresh(id))` scene modifier), with every identifier in `BGTaskSchedulerPermittedIdentifiers` and the matching `UIBackgroundModes` (`fetch`, `processing`). Declare **only the modes the app uses** ([`mobile-shared-store-compliance`](../../../_shared/store-compliance/SKILL.md)).
+- **Register at launch, before the app finishes launching** — `BGTaskScheduler.shared.register(forTaskWithIdentifier:using:launchHandler:)` (or the SwiftUI `.backgroundTask(.appRefresh(id))` scene modifier), with every identifier in `BGTaskSchedulerPermittedIdentifiers` and the matching `UIBackgroundModes` (`fetch`, `processing`). Declare **only the modes the app uses** ([`mobile-<stack>:store-compliance`](../../../_shared/store-compliance/SKILL.md)).
 - A task **reschedules itself** on entry, sets `expirationHandler` to cancel its work and save progress, and **always calls `setTaskCompleted(success:)`** — or the system penalises the next wake.
 - **Nothing is guaranteed.** The system skips a task for a low battery, Low Power Mode, a force-quit app or low usage. Background refresh is a head start, never the only path to correct data ([`error-handling`](../error-handling/SKILL.md) — resume revalidates).
 - `BGContinuedProcessingTask`: submit **from the foreground on a direct user action**, report real `progress`, stop when cancelled — the replacement for `beginBackgroundTask` hacks on long exports. `beginBackgroundTask` is for **finishing a write** as the app leaves (seconds), not for work.
@@ -177,10 +177,10 @@ Inside a `Gate: none` plan task, run none of these and report "written, not run"
 
 ## Handoffs
 
-- Push registration, universal links, widget and activity deep links → `mobile-ios-notifications-and-links`
+- Push registration, universal links, widget and activity deep links → `mobile-ios:push-and-deep-links`
 - Request policy for background transfers → [`networking`](../networking/SKILL.md)
 - The shared store → [`offline-and-storage`](../offline-and-storage/SKILL.md)
 - Resume revalidation, offline states → [`error-handling`](../error-handling/SKILL.md)
-- Entitlements, background modes, 4.5.3, privacy manifest → [`mobile-shared-store-compliance`](../../../_shared/store-compliance/SKILL.md)
-- Extension signing and targets in the build → [`mobile-shared-release`](../../../_shared/release/SKILL.md)
+- Entitlements, background modes, 4.5.3, privacy manifest → [`mobile-<stack>:store-compliance`](../../../_shared/store-compliance/SKILL.md)
+- Extension signing and targets in the build → [`mobile-<stack>:release`](../../../_shared/release/SKILL.md)
 - Widget and intent journeys on a device → `qa-mobile-<stack>` (peer)

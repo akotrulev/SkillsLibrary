@@ -1,4 +1,4 @@
-# Deep-dive details — `qa-production-uptime-checks-java`
+# Deep-dive details — `qa-java:production-uptime-checks`
 
 Sections moved out of SKILL.md for on-demand loading. Read what the task needs.
 

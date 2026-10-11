@@ -1,11 +1,11 @@
 ---
-name: mobile-android-networking
-description: Use when an Android app must call an API — Retrofit 3 + OkHttp (Ktor 3.6 in the KMP lane), kotlinx.serialization, timeout budgets per endpoint class, coroutine cancellation, bounded retries with Retry-After, no retry offline, ProblemDetails, OkHttp Authenticator refresh, WebSocket, Network Security Config. Triggers "request hangs on cell", "retry storm", "refresh token race". Do NOT use for the failure UI (`mobile-android-error-handling`), forms, or Room (`-offline-and-storage`).
+name: networking
+description: Use when an Android app must call an API — Retrofit 3 + OkHttp (Ktor 3.6 in the KMP lane), kotlinx.serialization, timeout budgets per endpoint class, coroutine cancellation, bounded retries with Retry-After, no retry offline, ProblemDetails, OkHttp Authenticator refresh, WebSocket, Network Security Config. Triggers "request hangs on cell", "retry storm", "refresh token race". Do NOT use for the failure UI (`mobile-android:error-handling`), forms, or Room (`-offline-and-storage`).
 ---
 
 # Android — Networking
 
-Owns the **request-level half** of resilience: how a call is made, cancelled, timed out, retried, authenticated and categorised, and how a socket lives and dies with the app. The **UI half** (failed region, banner, stale marker) is `mobile-android-error-handling`'s; this skill produces the categorised error it renders. Web analog: [`fe-react-data-fetching`](../../../../frontend/react/skills/data-fetching/SKILL.md) — timeout, ordering and critical-vs-optional rules carry over; RSC, Server Actions and cache tags do not. Sibling: [`mobile-ios-networking`](../../../ios/skills/networking/SKILL.md).
+Owns the **request-level half** of resilience: how a call is made, cancelled, timed out, retried, authenticated and categorised, and how a socket lives and dies with the app. The **UI half** (failed region, banner, stale marker) is `mobile-android:error-handling`'s; this skill produces the categorised error it renders. Web analog: [`fe-react:data-fetching`](../../../../frontend/react/skills/data-fetching/SKILL.md) — timeout, ordering and critical-vs-optional rules carry over; RSC, Server Actions and cache tags do not. Sibling: [`mobile-ios:networking`](../../../ios/skills/networking/SKILL.md).
 
 ## Version lane
 
@@ -30,14 +30,14 @@ Detect an existing client first (Retrofit, Ktor, a generated OpenAPI client, an 
 
 ## When NOT to use
 
-- Failed region, banner, offline indicator, forced-update prompt → `mobile-android-error-handling`
+- Failed region, banner, offline indicator, forced-update prompt → `mobile-android:error-handling`
 - Persisting responses, an offline write queue, sync → [`offline-and-storage`](../offline-and-storage/SKILL.md)
 - Where server data lives → [`architecture`](../architecture/SKILL.md)
 - Form submit UX, field errors → [`forms`](../forms/SKILL.md)
-- Auth provider setup → `auth-auth0-android`; token storage → [`offline-and-storage`](../offline-and-storage/SKILL.md)
-- FCM token registration → `mobile-android-notifications-and-links`
-- Uploads that outlive the process → `mobile-android-system-integration`
-- Another stack → `mobile-ios-networking`, `mobile-react-native-networking`
+- Auth provider setup → `mobile-android:auth0`; token storage → [`offline-and-storage`](../offline-and-storage/SKILL.md)
+- FCM token registration → `mobile-android:push-and-deep-links`
+- Uploads that outlive the process → `mobile-android:system-integration`
+- Another stack → `mobile-ios:networking`, `mobile-react-native:networking`
 
 ## One concrete client
 
@@ -88,7 +88,7 @@ object NetworkModule {
 }
 ```
 
-- **The base URL is `BuildConfig` from a Gradle property** — public by design; no secret rides in it. `https` only; a cleartext exception carries a recorded reason ([`mobile-shared-security`](../../../_shared/security/SKILL.md) § 2).
+- **The base URL is `BuildConfig` from a Gradle property** — public by design; no secret rides in it. `https` only; a cleartext exception carries a recorded reason ([`mobile-<stack>:security`](../../../_shared/security/SKILL.md) § 2).
 - **`Json { ignoreUnknownKeys = true; explicitNulls = false }` is one instance**, configured once; a DTO is a `@Serializable` data class separate from the domain model.
 - **A decode failure becomes `ApiError.Drifted`** — never `runCatching { … }.getOrDefault(emptyList())`. A single-object endpoint is never decoded as a list. The UI renders *failed*, not *empty*.
 - **Never log a URL with a query secret, a body or a token.** The only logging interceptor is `HttpLoggingInterceptor` at `Level.BASIC` in debug builds, with `redactHeader("Authorization")`; none is planted in release.
@@ -181,7 +181,7 @@ Revalidate on foreground (`repeatOnLifecycle(STARTED)`) and when a `Connectivity
 
 ## Realtime — WebSocket
 
-Pull above; push is a socket the app opens **only while a screen needs it and the app is in `STARTED`.** OkHttp's `WebSocket` (or Ktor's, in the KMP lane) is opened in a `repeatOnLifecycle(STARTED)` block or a `callbackFlow`, closed with `close(1000, …)` when the screen stops, reconnected with jittered backoff only when `isOnline`, and **the data it feeds is revalidated after every reconnect** — messages were missed. A malformed frame is dropped and counted, never crashes the collector. Background delivery is FCM (`mobile-android-notifications-and-links`), not a held-open socket (Doze closes it). Wrapper in [`references/request-policy.md`](references/request-policy.md).
+Pull above; push is a socket the app opens **only while a screen needs it and the app is in `STARTED`.** OkHttp's `WebSocket` (or Ktor's, in the KMP lane) is opened in a `repeatOnLifecycle(STARTED)` block or a `callbackFlow`, closed with `close(1000, …)` when the screen stops, reconnected with jittered backoff only when `isOnline`, and **the data it feeds is revalidated after every reconnect** — messages were missed. A malformed frame is dropped and counted, never crashes the collector. Background delivery is FCM (`mobile-android:push-and-deep-links`), not a held-open socket (Doze closes it). Wrapper in [`references/request-policy.md`](references/request-policy.md).
 
 ## Network Security Config
 
@@ -232,8 +232,8 @@ Inside a `Gate: none` plan task, run none of these and report "written, not run"
 
 ## Handoffs
 
-- Failed region, banner, stale, forced update → `mobile-android-error-handling`
+- Failed region, banner, stale, forced update → `mobile-android:error-handling`
 - Persisted cache, write queue, token storage → [`offline-and-storage`](../offline-and-storage/SKILL.md)
 - State ownership → [`architecture`](../architecture/SKILL.md) · field errors → [`forms`](../forms/SKILL.md)
-- Cleartext, pinning, secrets → [`mobile-shared-security`](../../../_shared/security/SKILL.md)
+- Cleartext, pinning, secrets → [`mobile-<stack>:security`](../../../_shared/security/SKILL.md)
 - API contract tests → `qa-api-typescript` / `qa-api-dotnet` / `qa-api-java` (peer of the backend)

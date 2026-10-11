@@ -176,7 +176,7 @@ conftest test tfplan.json --policy ./policy
   plugin's pinning invariant applies to it exactly as it does to actions and base images.
 - The same Rego installed in **OPA Gatekeeper** as a `ConstraintTemplate` turns the PR check into an
   admission-time guardrail. Author once, enforce twice — a manifest that never went through CI still cannot
-  land. Cross-link `devops-kubernetes` for the Gatekeeper install and `devops-k8s-security` for validating
+  land. Cross-link `devops:kubernetes` for the Gatekeeper install and `devops:kubernetes-security` for validating
   that admission actually blocks.
 
 ## Anti-patterns specific to this lane

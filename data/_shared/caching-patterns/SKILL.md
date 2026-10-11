@@ -1,5 +1,5 @@
 ---
-name: data-caching-patterns
+name: caching
 description: Use when the user is choosing a caching strategy in front of any database — cache-aside vs read-through vs write-through vs write-back vs refresh-ahead, invalidation, key design, TTL strategy, stampede protection. Triggers: "pick a caching strategy", "how should we invalidate this cache", "cache key naming", "TTL for X", "stampede protection", "negative caching". Do NOT use for Redis-specific commands (use `data/redis`) or for engine-specific tuning (use `data/<db>`).
 ---
 

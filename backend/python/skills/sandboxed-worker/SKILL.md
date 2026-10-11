@@ -1,5 +1,5 @@
 ---
-name: be-python-sandboxed-worker
+name: sandboxed-worker
 description: Use when containerising a Python worker that handles untrusted uploads — a multi-stage uv Dockerfile with weights baked at build, no outbound network, non-root, read-only rootfs, dropped capabilities, per-job memory/CPU/wall-clock limits. Triggers "Dockerfile for the Python worker", "no network for the upload processor", "limit memory per job". Do NOT use for .NET/Java/Node images (`devops/docker`), Kubernetes manifests (`devops/kubernetes`) or the processing code (`media-processing`).
 ---
 

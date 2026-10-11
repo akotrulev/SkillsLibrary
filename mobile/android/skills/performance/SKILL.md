@@ -1,11 +1,11 @@
 ---
-name: mobile-android-performance
-description: Use when an Android app janks, hangs, launches slowly, hits ANRs or leaks — Baseline and Startup Profiles, Macrobenchmark, AGP 9 R8 keep-rule strictness, App Startup, Android vitals thresholds, Compose recomposition tracing, Perfetto, StrictMode. Triggers "scroll jank", "slow cold start", "ANR rate", "R8 broke release". Do NOT use for crash-reporter setup (`mobile-shared-observability`) or animation design (`-animation`).
+name: performance
+description: Use when an Android app janks, hangs, launches slowly, hits ANRs or leaks — Baseline and Startup Profiles, Macrobenchmark, AGP 9 R8 keep-rule strictness, App Startup, Android vitals thresholds, Compose recomposition tracing, Perfetto, StrictMode. Triggers "scroll jank", "slow cold start", "ANR rate", "R8 broke release". Do NOT use for crash-reporter setup (`mobile-<stack>:observability`) or animation design (`-animation`).
 ---
 
 # Android — Performance
 
-Owns **frames, startup, ANRs, memory and shrinking**. The main thread has a frame budget (16.7 ms at 60 Hz, 8.3 ms at 120 Hz) and Play measures the result: a user-perceived ANR or a slow start lowers store visibility, so a budget is a correctness rule (CLAUDE.md § Mobile: the UI thread never blocks). Web analog: [`fe-react-performance`](../../../../frontend/react/skills/performance/SKILL.md) — measure-first and budgets carry over; Core Web Vitals, bundles and RSC do not. Sibling: [`mobile-ios-performance`](../../../ios/skills/performance/SKILL.md).
+Owns **frames, startup, ANRs, memory and shrinking**. The main thread has a frame budget (16.7 ms at 60 Hz, 8.3 ms at 120 Hz) and Play measures the result: a user-perceived ANR or a slow start lowers store visibility, so a budget is a correctness rule (CLAUDE.md § Mobile: the UI thread never blocks). Web analog: [`fe-react:performance`](../../../../frontend/react/skills/performance/SKILL.md) — measure-first and budgets carry over; Core Web Vitals, bundles and RSC do not. Sibling: [`mobile-ios:performance`](../../../ios/skills/performance/SKILL.md).
 
 ## Version lane
 
@@ -29,12 +29,12 @@ Detect first: whether a `baselineprofile` / `macrobenchmark` module exists, the 
 
 ## When NOT to use
 
-- Crash-reporter and OTel setup, release-health thresholds → [`mobile-shared-observability`](../../../_shared/observability/SKILL.md)
+- Crash-reporter and OTel setup, release-health thresholds → [`mobile-<stack>:observability`](../../../_shared/observability/SKILL.md)
 - Animation design and the animator duration scale → [`animation`](../animation/SKILL.md)
 - Request timing, retries, caching → [`networking`](../networking/SKILL.md)
 - Lazy-list authoring, stability, side effects → [`ui-components`](../ui-components/SKILL.md)
 - Gradle and R8 baseline setup → [`project-setup`](../project-setup/SKILL.md)
-- Other stacks → `mobile-react-native-performance`, `mobile-ios-performance`
+- Other stacks → `mobile-react-native:performance`, `mobile-ios:performance`
 
 ## Budgets — set them before measuring
 
@@ -42,7 +42,7 @@ Detect first: whether a `baselineprofile` / `macrobenchmark` module exists, the 
 |---|---|---|
 | Main-thread work | Input answered inside a frame; **no disk, network, database or heavy compute on it** | StrictMode in debug, Perfetto, Macrobenchmark `FrameTimingMetric` |
 | **User-perceived ANR** | **0.47 %** of daily sessions (8 % per phone model) — over it lowers store visibility | Android vitals |
-| **Crash** | **1.09 %** (8 % per model) | Android vitals; [`mobile-shared-observability`](../../../_shared/observability/SKILL.md) |
+| **Crash** | **1.09 %** (8 % per model) | Android vitals; [`mobile-<stack>:observability`](../../../_shared/observability/SKILL.md) |
 | **Slow start** | Bad when cold **≥ 5 s**, warm **≥ 2 s**, hot **≥ 1.5 s** to initial display | Android vitals; `StartupTimingMetric` |
 | **Excessive partial wake locks** | **5 %** (enforced since 2026-03-01) | Android vitals; [`system-integration`](../system-integration/SKILL.md) |
 | Memory | Memory vitals affect visibility from **Feb 2027**; no unbounded growth across a navigate-and-back loop | Memory Profiler, LeakCanary in debug |
@@ -120,7 +120,7 @@ fun coldStartup() = benchmarkRule.measureRepeated(
 | Narrow `-keep` over blanket rules; **never `-keep class ** { *; }`** | Defeats shrinking and obfuscation and hides the real gap |
 | Global options (`-dontobfuscate`, `-dontoptimize`, `-allowaccessmodification`) belong in the **app's** rules, not a library's consumer file | AGP 9 filters global options out of library consumer rules |
 | Keep an annotated member set (`-keepclassmembers class * { @pkg.Keep *; }`) rather than a package | Survives refactors; `-keepclassmembers` alone does not keep the owning class — pair it with `-keep` or `-keepclasseswithmembers` (**built but unverified** against the R8 pages for the AGP in use) |
-| Upload the **mapping file** with every release | Obfuscated crashes need retracing — [`mobile-shared-release`](../../../_shared/release/SKILL.md) |
+| Upload the **mapping file** with every release | Obfuscated crashes need retracing — [`mobile-<stack>:release`](../../../_shared/release/SKILL.md) |
 | `[AGP9.3+]` Use the R8 Configuration Analyzer to find the broadest rules that block optimisation | Narrow them one at a time |
 
 `isMinifyEnabled = true` and `isShrinkResources = true` on release, `proguard-android-optimize.txt` as the default file; a release with `isMinifyEnabled = false` is a size and startup finding.
@@ -129,7 +129,7 @@ fun coldStartup() = benchmarkRule.measureRepeated(
 
 - Leaks: a `Context` / `Activity` held by a singleton, a `ViewModel` or a coroutine launched in an unowned scope; an unremoved listener; a `Bitmap` held past its screen. **LeakCanary in debug builds**; the Memory Profiler heap dump after a repeated navigate-and-back loop is the proof.
 - Images: a loader with downsampling (Coil) at the displayed size, never a full-resolution bitmap in a list.
-- Size: AAB with R8 + resource shrinking, `resourceConfigurations` / language splits, WebP or vector assets, no unused ABIs; **16 KB page size** alignment is a Play requirement ([`mobile-shared-store-compliance`](../../../_shared/store-compliance/SKILL.md)).
+- Size: AAB with R8 + resource shrinking, `resourceConfigurations` / language splits, WebP or vector assets, no unused ABIs; **16 KB page size** alignment is a Play requirement ([`mobile-<stack>:store-compliance`](../../../_shared/store-compliance/SKILL.md)).
 - Wake locks and background work are measured by vitals: prefer WorkManager, release every `WakeLock`, and use a timeout on `acquire`.
 
 ## Rules
@@ -170,7 +170,7 @@ Inside a `Gate: none` plan task, run none of these and report "written, not run"
 
 ## Handoffs
 
-- Crash reporter, vitals thresholds that halt a rollout → [`mobile-shared-observability`](../../../_shared/observability/SKILL.md) · [`mobile-shared-release`](../../../_shared/release/SKILL.md)
+- Crash reporter, vitals thresholds that halt a rollout → [`mobile-<stack>:observability`](../../../_shared/observability/SKILL.md) · [`mobile-<stack>:release`](../../../_shared/release/SKILL.md)
 - Gradle, R8 baseline, version catalog → [`project-setup`](../project-setup/SKILL.md) · lazy lists, stability → [`ui-components`](../ui-components/SKILL.md)
 - Wake locks, foreground services → [`system-integration`](../system-integration/SKILL.md) · jank in animation → [`animation`](../animation/SKILL.md)
 - Device journeys under load → `qa-mobile-<stack>` (peer)

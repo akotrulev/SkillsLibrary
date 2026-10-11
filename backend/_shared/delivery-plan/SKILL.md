@@ -1,6 +1,6 @@
 ---
-name: be-shared-delivery-plan
-description: Use when a design pack (blueprint, data model, API surface, integrations, epic map) must become an ordered task list — one flat sequence, each task with one deliverable, stack and agent, plus streams and a reconcile against half-built code. Triggers "what order do we build this in", "turn the plan into tasks". Do NOT use to size tasks or write prompts (`be-shared-session-budget`), plan epic parallelism (`be-shared-epic-map`), write code (`be-<stack>`) or audit code (`code-auditor`).
+name: plan-delivery
+description: Use when a design pack (blueprint, data model, API surface, integrations, epic map) must become an ordered task list — one flat sequence, each task with one deliverable, stack and agent, plus streams and a reconcile against half-built code. Triggers "what order do we build this in", "turn the plan into tasks". Do NOT use to size tasks or write prompts (`dev:plan-session-budget`), plan epic parallelism (`dev:plan-epic-map`), write code (`be-<stack>`) or audit code (`code-auditor`).
 ---
 
 # Delivery Plan — the ordered, agent-bound task list
@@ -41,7 +41,7 @@ in this document, in status reports, and when talking to the human.
 **Every task belongs to exactly one epic, one story, one stack and one agent, and is executed in one
 session.** The epic and story come from `epics.md` / `stories.md` by way of `epic-map.md`; the stack is
 one of `be` · `fe` · `mobile` · `ts` · `data` · `infra` · `qa` · `docs` · `human`; and the session budget is
-derived by `be-shared-session-budget` while the task is being authored, not measured afterwards.
+derived by `dev:plan-session-budget` while the task is being authored, not measured afterwards.
 
 > **A task that touches both the API tree and the web tree is two tasks.** There is no mixed task at
 > any size, and no estimate justifies one.
@@ -73,15 +73,15 @@ produces a plan that is one lane wide.
 ## When NOT to use
 
 - Executing the plan → the named stack agent per task, one prompt block per session through Plan Queue
-- Deciding which epics run at the same time → `be-shared-epic-map`, which this skill consumes
-- Sizing the tasks and writing `## Prompts — one per task` → `be-shared-session-budget`, which runs on this skill's output
-- A generic non-backend multi-step task → `ep-writing-plans`
+- Deciding which epics run at the same time → `dev:plan-epic-map`, which this skill consumes
+- Sizing the tasks and writing `## Prompts — one per task` → `dev:plan-session-budget`, which runs on this skill's output
+- A generic non-backend multi-step task → `dev:plan-feature`
 - Auditing what got built against what was specified → `code-auditor`
 
 ## Output
 
 **One self-contained file: `docs/plans/<NNN>-<initiative>/delivery-plan.md`**, beside the rest of the pack. **The whole initiative folder moves to `docs/plans/implemented/<NNN>-<initiative>/` once every task has landed** — done by the task that deletes the last prompt block, per the format reference §8 — so `docs/plans/` lists what is in flight. `NNN`'s high-water mark spans both folders; a moved plan's number stays spent. It carries the context,
-the streams, the tasks, the decisions and the paste-ready prompt per task. `be-shared-session-budget`
+the streams, the tasks, the decisions and the paste-ready prompt per task. `dev:plan-session-budget`
 derives the `**Budget:**` lines and authors the `## Prompts — one per task` section inside this
 document — there is no companion prompt file.
 
@@ -105,7 +105,7 @@ Do not brainstorm tasks. Read them out of the detail pack, in this order — the
 | `api-surface.md` shared schemas + section 4 | Shared DTOs and the validation/error middleware — **once**, before any endpoint |
 | `api-surface.md` endpoint blocks | One task per resource (not per endpoint — a resource's CRUD set is one coherent task) |
 | `integrations.md` dependency blocks | One client task per external system |
-| `experience-plan.md` §2 + §4 screen catalog | The **app-shell task** (shell, nav, home — once, bound to `fe-react` / `fe-blazor` with `design-ux-patterns`), then one frontend task per screen or per journey's screen set (a list and its detail are one coherent task), each after the endpoints it calls and citing its screen ids |
+| `experience-plan.md` §2 + §4 screen catalog | The **app-shell task** (shell, nav, home — once, bound to `fe-react` / `fe-blazor` with `design:app-structure`), then one frontend task per screen or per journey's screen set (a list and its detail are one coherent task), each after the endpoints it calls and citing its screen ids |
 | `api-surface.md` outbound webhooks + background work | Job/consumer tasks |
 | `api-surface.md` endpoint map (once the resource tasks exist) | **The OpenAPI-asset task** — one standard task, after the last endpoint task: the `be-<stack>` agent generates the spec from the implemented surface and commits it canonicalized as `{service}-openapi-YYYY-MM-DD.json`, so `qa/_shared/api-spec-assets` has its canonical input from day one and every later contract change flows through that skill's diff-driven lane instead of being reverse-engineered. Greenfield plans include it by default; skip only when the repo already keeps the asset |
 
@@ -245,7 +245,7 @@ The block is the plan format's task block (`plan-format.md` §4) plus the epic/s
 ### B3 — Orders resource
 
 **Epic:** `E2` Ordering · **Story:** `US7` · **Stack:** `be` · **Stream:** `ordering-api` · **Order:** 12
-**Agent:** `be-dotnet` · **Skills:** `be-dotnet-pattern-writer`, `be-dotnet-database-code`, `be-dotnet-unit-testing`
+**Agent:** `be-dotnet` · **Skills:** `be-dotnet:patterns-apply`, `be-dotnet:persistence`, `be-dotnet:unit-testing`
 **Deliverable:** the five Orders endpoints are live and reachable — a caller with the `orders:write`
 permission can place, cancel and close an order, and list or get their own.
 **Depends on:** C1 (schema, auth wiring, shared DTOs + error middleware)
@@ -284,7 +284,7 @@ Rules:
   resolved by picking the larger one. A `Story` id that does not exist in `stories.md`, or an `Epic`
   that does not exist in `epic-map.md`, is a defect in the citation, not licence to invent the backlog
   entry.
-- **`Budget` is derived by `be-shared-session-budget` while the task is authored**, and it carries its
+- **`Budget` is derived by `dev:plan-session-budget` while the task is authored**, and it carries its
   drivers itemized — what the session actually loads — so a reader can tell a 110k of many small files
   from a 110k of one large one. It is a target, never a gate: one deliverable, one stack and one agent
   all outrank it. Re-derive it whenever the task's `Files`, `Skills` or cited sections change; a stale
@@ -309,7 +309,7 @@ Rules:
   names it assigned, and what is built but unverified. It is the durable record, appended and never
   edited backwards.
 - **`Agent` is an exact catalog name**, picked from the routing-map catalog in `blueprint.md` (authored
-  by `be-shared-solution-blueprint` — that catalog is the single authoritative list; `be-dotnet`,
+  by `dev:plan-blueprint` — that catalog is the single authoritative list; `be-dotnet`,
   `data-architect`, `qa-api-<stack>` are the shape). An invented name is the most damaging defect in
   the pack, because Mission Control and every executing session bind on this string. Same for skill
   names. When the chosen stack has no skill for a concern the task needs (e.g. `be-node` currently
@@ -350,7 +350,7 @@ Rules:
   and it is split.
 - **Frontend tasks cite their screens.** A task bound to `fe-react` / `fe-blazor` names the
   `experience-plan.md` screen ids it delivers (`S3`, `S4`) and the journey it completes (`J1`), lists
-  `design-ux-patterns` in its skills, and carries `experience-plan.md` §6's responsiveness budget as
+  `design:app-structure` in its skills, and carries `experience-plan.md` §6's responsiveness budget as
   bullets verbatim; the capability's last task is usually this one, and its deliverable is the journey's
   behavioural sentence.
 - **`Not in <id>` per task** — mostly to keep the executing agent out of a peer's lane, and to name
@@ -383,7 +383,7 @@ is the progress indicator — what is left to run is exactly what is still writt
 
 ### Step 6 — Write `## Prompts — one per task`
 
-**`be-shared-session-budget` authors this section, inside this document.** What this skill owes it is
+**`dev:plan-session-budget` authors this section, inside this document.** What this skill owes it is
 what a block is built from: a task block with `Epic` / `Story` / `Stack` / `Agent` / `Skills` /
 `Files` / `Budget` / `Gate` filled in, and a streams table that says which lanes exist.
 
@@ -510,7 +510,7 @@ Run this **before** re-sequencing anything, when a plan and partially-built code
 4. **Escalate every divergence.** Usually the code is right and the plan is stale — but you never silently rewrite the plan to match, because the other possibility is a defect. Present both readings, recommend one, and append the resolution to the plan's `## Decisions` as a dated `D<n>`.
 5. **Sweep the class.** If one task diverged because the plan assumed a convention the project does not use, every other pending task assuming it is also wrong. Fix them together.
 6. **Check the baseline.** Does the repo build and do its tests pass *right now*? A plan that assumes a green baseline while the build is red is wrong from task one. Report a red state as a finding — it is not yours to silently fix.
-7. **Re-sequence what remains**, then have `be-shared-session-budget` re-derive the budgets that changed and rewrite `## Prompts — one per task` **from what you found** — not from what it previously said. Delete the blocks of tasks the reconcile found `Done`; restore a block for a task whose prompt was deleted on a claim the code does not support, and say so in `Status:`.
+7. **Re-sequence what remains**, then have `dev:plan-session-budget` re-derive the budgets that changed and rewrite `## Prompts — one per task` **from what you found** — not from what it previously said. Delete the blocks of tasks the reconcile found `Done`; restore a block for a task whose prompt was deleted on a claim the code does not support, and say so in `Status:`.
 
 Report the reconcile as counts plus the divergences in full:
 
@@ -631,12 +631,12 @@ that lands anything.>
 
 ## Handoffs
 
-- **← `be-shared-epic-map`** — supplies the epics, the lanes and the waves. The streams table is its §2
+- **← `dev:plan-epic-map`** — supplies the epics, the lanes and the waves. The streams table is its §2
   at task altitude, and the order respects its §3.
-- **← `ep-writing-plans`** — owns the plan document format this skill writes in
+- **← `dev:plan-feature`** — owns the plan document format this skill writes in
   (`engineering-practices/writing-plans/references/plan-format.md`). Where the two disagree on the
   shape of the document, that reference wins; this skill owns only the additions above.
-- **→ `be-shared-session-budget`** — sizes these tasks, writes the `Budget:` lines back onto them, and
+- **→ `dev:plan-session-budget`** — sizes these tasks, writes the `Budget:` lines back onto them, and
   authors `## Prompts — one per task` inside this document.
 - **→ `be-dotnet` / `be-java` / `be-node` / `be-python` / `fe-react` / `fe-blazor`** — execute the
   tasks bound to them, write the `As built` note and the `Status:` line, delete their own prompt block

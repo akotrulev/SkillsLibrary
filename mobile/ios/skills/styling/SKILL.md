@@ -1,6 +1,6 @@
 ---
-name: mobile-ios-styling
-description: Use when styling SwiftUI — Liquid Glass (forced by the iOS 27 SDK) on system chrome and custom glass surfaces, semantic colours, Dynamic Type text styles, asset-catalog colour and image tokens, dark mode, size classes, resizable iPad windows. Triggers "custom colours", "my bar looks flat", "support iPad", "Dynamic Type clips". Do NOT use for view structure (`mobile-ios-ui-components`), routes (`-navigation`) or motion (`-animation`).
+name: styling
+description: Use when styling SwiftUI — Liquid Glass (forced by the iOS 27 SDK) on system chrome and custom glass surfaces, semantic colours, Dynamic Type text styles, asset-catalog colour and image tokens, dark mode, size classes, resizable iPad windows. Triggers "custom colours", "my bar looks flat", "support iPad", "Dynamic Type clips". Do NOT use for view structure (`mobile-ios:ui-components`), routes (`-navigation`) or motion (`-animation`).
 ---
 
 # iOS — Styling, Liquid Glass and Adaptive Layout
@@ -31,10 +31,10 @@ A project built with an older SDK keeps its look until it moves; **never advise 
 
 - Structure, states, lists → [`ui-components`](../ui-components/SKILL.md)
 - Route containers, tabs, sheets → [`navigation`](../navigation/SKILL.md)
-- Motion and transitions → `mobile-ios-animation`
-- VoiceOver and Differentiate Without Color mechanics → `mobile-ios-accessibility`
+- Motion and transitions → `mobile-ios:animation`
+- VoiceOver and Differentiate Without Color mechanics → `mobile-ios:accessibility`
 - Brand identity from scratch → `design/visual-identity`
-- Android Material → `mobile-android-styling`; RN → `mobile-react-native-styling`
+- Android Material → `mobile-android:styling`; RN → `mobile-react-native:styling`
 
 ## Inputs needed
 
@@ -128,7 +128,7 @@ Spacing, radii and sizes are a small set of named constants (a `Spacing` enum of
 
 - Views and states → [`ui-components`](../ui-components/SKILL.md)
 - Tabs, split view, sheets → [`navigation`](../navigation/SKILL.md)
-- Transitions, Reduce Motion → `mobile-ios-animation`
-- VoiceOver, Differentiate Without Color → `mobile-ios-accessibility`
+- Transitions, Reduce Motion → `mobile-ios:animation`
+- VoiceOver, Differentiate Without Color → `mobile-ios:accessibility`
 - Brand, tokens, palettes → `design/visual-identity`, `design/design-tokens`
 - UIKit appearance → [`uikit`](../uikit/SKILL.md)

@@ -1,6 +1,6 @@
 ---
-name: qa-mobile-app-crawler-dotnet
-description: Use when a .NET mobile suite needs to walk MANY screens of a live app through the Appium MCP server, accumulating a resumable screen map — or as the PROCESS entry point when screens were captured but never built into page objects. Triggers "crawl the app", "map the whole app", "explore all screens then build the page objects". Not for one screen (`qa-mobile-screen-explorer-dotnet`), a screen object (`qa-mobile-screen-objects-dotnet`), or tests (`qa-ui-test-writer-appium-dotnet`).
+name: mobile-app-crawler
+description: Use when a .NET mobile suite needs to walk MANY screens of a live app through the Appium MCP server, accumulating a resumable screen map — or as the PROCESS entry point when screens were captured but never built into page objects. Triggers "crawl the app", "map the whole app", "explore all screens then build the page objects". Not for one screen (`qa-dotnet:mobile-screen-explorer`), a screen object (`qa-dotnet:mobile-screen-objects`), or tests (`qa-dotnet:ui-tests-appium`).
 ---
 
 # QA — Appium App Crawler (.NET)

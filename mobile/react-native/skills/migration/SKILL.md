@@ -1,6 +1,6 @@
 ---
-name: mobile-react-native-migration
-description: Use when an Expo / React Native project changes lane — an Expo SDK upgrade (one SDK per change), moving from the legacy to the New Architecture on SDK 54, bare → Expo (`install-expo-modules`, adopting prebuild), or embedding RN in an existing native app (`expo-brownfield`, Callstack). Triggers "upgrade to SDK 57", "we are on SDK 52", "adopt CNG", "add React Native to our iOS app". Do NOT use for feature work, minor bumps or a fresh app (`mobile-react-native-project-setup`).
+name: migration
+description: Use when an Expo / React Native project changes lane — an Expo SDK upgrade (one SDK per change), moving from the legacy to the New Architecture on SDK 54, bare → Expo (`install-expo-modules`, adopting prebuild), or embedding RN in an existing native app (`expo-brownfield`, Callstack). Triggers "upgrade to SDK 57", "we are on SDK 52", "adopt CNG", "add React Native to our iOS app". Do NOT use for feature work, minor bumps or a fresh app (`mobile-react-native:project-setup`).
 ---
 
 # React Native / Expo — Migration
@@ -63,7 +63,7 @@ Owns changing the **version lane or workflow** of an existing project. Every oth
 - **Install natives with `npx expo install <pkg>`**, never `add`, so the version matches the SDK.
 - **A hand edit in a generated `ios/` or `android/` is the defect class.** Under CNG it is erased by the next `prebuild --clean`; the fix is a config plugin ([`native-modules`](../native-modules/SKILL.md)), applied to every instance found.
 - **Rebuild the development build after any native dependency change** — a JS reload cannot load new native code.
-- **An OTA update crosses a lane only through a new build.** Bump the runtime version with the SDK; never publish an update built on SDK *n+1* to a binary built on *n* ([`mobile-shared-release`](../../../_shared/release/SKILL.md)).
+- **An OTA update crosses a lane only through a new build.** Bump the runtime version with the SDK; never publish an update built on SDK *n+1* to a binary built on *n* ([`mobile-<stack>:release`](../../../_shared/release/SKILL.md)).
 - **Pin what the lane pins.** Reanimated 4 needs `react-native-worklets` and the New Architecture; NativeWind stays on Reanimated 3 until its own release says otherwise; Gesture Handler is 2.32 on SDK 57 and 3.x on SDK 58 — different APIs ([`animation`](../animation/SKILL.md)).
 - **No `@react-navigation/*` imports in an Expo Router app** — SDK 56 forked the core; the codemod is `npx expo-codemod sdk-56-expo-router-react-navigation-replace`.
 
@@ -91,7 +91,7 @@ Owns changing the **version lane or workflow** of an existing project. Every oth
 - Concepts and the web-React map → [`basics`](../basics/SKILL.md)
 - Config plugins, Expo Modules → [`native-modules`](../native-modules/SKILL.md)
 - Project scaffold and config → [`project-setup`](../project-setup/SKILL.md)
-- Signing, runtime versions, OTA, EAS → `mobile-shared-release`
+- Signing, runtime versions, OTA, EAS → `mobile-<stack>:release`
 - Review the migration diff → [`code-review`](../code-review/SKILL.md)
 - Conformance after the move → [`standards-audit`](../standards-audit/SKILL.md)
 - Dev-side tests that lock the move → [`component-testing`](../component-testing/SKILL.md)

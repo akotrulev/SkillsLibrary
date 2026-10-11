@@ -1,6 +1,6 @@
 ---
-name: ep-writing-plans
-description: Use when you have an approved spec or clear requirements and need an implementation plan before touching code — one self-contained document: context, decisions, an ordered task list and one paste-ready prompt per task, run through Plan Queue. Triggers: after `ep-brainstorming` approves a design, "write the implementation plan", "break this spec into tasks". Do NOT use to design the idea itself (`ep-brainstorming`), to execute a written plan, or for a single trivial edit.
+name: plan-feature
+description: Use when you have an approved spec or clear requirements and need an implementation plan before touching code — one self-contained document: context, decisions, an ordered task list and one paste-ready prompt per task, run through Plan Queue. Triggers: after `dev:design` approves a design, "write the implementation plan", "break this spec into tasks". Do NOT use to design the idea itself (`dev:design`), to execute a written plan, or for a single trivial edit.
 ---
 
 # Writing Plans

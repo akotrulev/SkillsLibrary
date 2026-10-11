@@ -1,6 +1,6 @@
 ---
-name: devops-iac-security
-description: Use when scanning Infrastructure-as-Code for misconfiguration beyond Trivy's built-in checks — deep Terraform, `terraform plan`, and org-specific policy-as-code (Checkov, OPA/Conftest). Triggers "scan our Terraform for misconfig", "add Checkov to CI", "OPA/Conftest policy for our Helm charts". Not for a live cluster (`devops-k8s-security`), a live cloud account (`devops-cloud-posture`), plugin-rule conformance (`devops-auditor`), or the built-in IaC gate (`qa-security-image-infra-scan`).
+name: iac-security
+description: Use when scanning Infrastructure-as-Code for misconfiguration beyond Trivy's built-in checks — deep Terraform, `terraform plan`, and org-specific policy-as-code (Checkov, OPA/Conftest). Triggers "scan our Terraform for misconfig", "add Checkov to CI", "OPA/Conftest policy for our Helm charts". Not for a live cluster (`devops:kubernetes-security`), a live cloud account (`devops:cloud-posture`), plugin-rule conformance (`devops-auditor`), or the built-in IaC gate (`qa-<stack>:image-infra-scan`).
 ---
 
 # DevOps — IaC Security (Checkov & policy-as-code)
@@ -17,15 +17,15 @@ configs, with **graph-based** checks that reason across resources), and **OPA/Co
 any structured config, which is how **org-specific** rules that no vendor ships get enforced. It runs in the
 **deploy pipeline** (`devops/{github-actions,gitlab-ci,azure-pipelines}`), never the `qa/cicd/*` test lane.
 
-> **⚠️ Authorization: none needed — and say so.** Unlike its infra-security siblings (`devops-k8s-security` probes a
-> live cluster, `devops-cloud-posture` reads a live account), IaC scanning is **purely static**: it reads
+> **⚠️ Authorization: none needed — and say so.** Unlike its infra-security siblings (`devops:kubernetes-security` probes a
+> live cluster, `devops:cloud-posture` reads a live account), IaC scanning is **purely static**: it reads
 > files in the repo and sends nothing anywhere. There is no live target, no blast radius, and no
 > authorization line to record. That is the whole point — this is the **shift-left, safe-on-every-PR** gate
 > that runs unattended on forks and untrusted branches. The one caveat is `--download-external-modules`,
 > which fetches remote Terraform modules (network egress, third-party code) — treat that as a deliberate
 > opt-in, not a default.
 
-> **⚠️ THE FENCE — vs `qa-security-image-infra-scan` (Trivy `config`). Read this before adding a second
+> **⚠️ THE FENCE — vs `qa-<stack>:image-infra-scan` (Trivy `config`). Read this before adding a second
 > gate.** Trivy **already scans IaC**: `trivy config ./infra` runs the misconfig scanner (the absorbed tfsec
 > check library) over Terraform, CloudFormation, Kubernetes, Helm, and Dockerfiles, and that skill already
 > owns it as the A02 gate. **Do not duplicate it.** This skill's distinct value is exactly three things:
@@ -54,9 +54,9 @@ Use the **Cloud** and **Containers** matrices, not Enterprise — the matrix is 
 misconfig maps to a technique; when it doesn't, say so rather than inventing one.
 
 > **Green ≠ safe.** A clean Checkov run means **the templates in this repo** passed **these** checks. It says
-> nothing about: what is *actually running* (drift — someone changed it in the portal; `devops-cloud-posture`
-> and `devops-k8s-security` read the live state), whether the app on top is exploitable
-> (`qa-security-*`), whether the image is patched (`qa-security-image-infra-scan`), or whether a rule your
+> nothing about: what is *actually running* (drift — someone changed it in the portal; `devops:cloud-posture`
+> and `devops:kubernetes-security` read the live state), whether the app on top is exploitable
+> (the `qa-<stack>` security skills), whether the image is patched (`qa-<stack>:image-infra-scan`), or whether a rule your
 > org cares about even exists as a check (that is the policy-as-code half — write it). Every report names
 > what it covered and what it handed off.
 
@@ -64,7 +64,7 @@ misconfig maps to a technique; when it doesn't, say so rather than inventing one
 
 | Need | Use | Reads | Notes |
 |---|---|---|---|
-| A **first, cheap** IaC gate on a repo with no scanner at all | **Trivy `config`** (`qa-security-image-infra-scan`) | IaC templates | One binary you already run for images. Start here; escalate when you outgrow it |
+| A **first, cheap** IaC gate on a repo with no scanner at all | **Trivy `config`** (`qa-<stack>:image-infra-scan`) | IaC templates | One binary you already run for images. Start here; escalate when you outgrow it |
 | **Deep Terraform** — modules, variables, cross-resource **graph** checks | **Checkov** `-d .` | `.tf` + resolved module graph | The headline. `references/checkov.md` |
 | Gate the **evaluated plan**, not the template | **Checkov** `--framework terraform_plan` | `terraform plan` JSON | Sees resolved vars/locals/module outputs. `references/checkov.md` |
 | **Org-specific** rule no built-in check expresses | **OPA/Conftest** (or a Checkov custom policy) | any structured config | The policy-as-code half. `references/opa-conftest.md` |
@@ -74,7 +74,7 @@ misconfig maps to a technique; when it doesn't, say so rather than inventing one
 | **CI/CD pipeline** config hardening | **Checkov** `--framework github_actions,gitlab_ci` | workflow YAML | Unpinned actions, `pull_request_target`, secret exposure (A03) |
 | Broad multi-format coverage on an exotic IaC format | **KICS** | 20+ IaC formats | Breadth over depth; see `references/other-scanners.md` (incl. its 2026 action compromise) |
 | **tfsec** / **Terrascan** | **Do not adopt** | — | tfsec merged into Trivy (EOL May 2025); Terrascan archived Nov 2025. `references/other-scanners.md` |
-| A **live** cluster / cloud account | `devops-k8s-security` / `devops-cloud-posture` | the K8s API / cloud APIs | Different lane — running state, not intended state |
+| A **live** cluster / cloud account | `devops:kubernetes-security` / `devops:cloud-posture` | the K8s API / cloud APIs | Different lane — running state, not intended state |
 | Conformance against **this plugin's own rules** | `devops-auditor` | the repo | Different question — see the fence below |
 
 **Rule of thumb:** **Checkov is the gate**, **Conftest is the org rulebook**, **plan scanning is the
@@ -378,7 +378,7 @@ jobs:
   invariant, and not theoretical: KICS's own GitHub Action was compromised in March 2026
   (`references/other-scanners.md`).
 - **SARIF → code-scanning** so each finding lands inline on the PR diff, de-duped run-over-run — the same
-  consolidation `qa-security-shared` prescribes.
+  consolidation `qa-<stack>:security-foundations` prescribes.
 - **GitLab CI / Azure Pipelines** run the identical two-pass via the `bridgecrew/checkov` and
   `openpolicyagent/conftest` Docker images; cross-link `devops/{gitlab-ci,azure-pipelines}`.
 
@@ -414,12 +414,12 @@ jobs:
   `references/other-scanners.md`.
 - **Treating a clean IaC scan as "the infrastructure is secure."** It says the *templates* passed *these*
   checks. It knows nothing about drift, runtime, or the rules you never encoded. *Fix:* state the coverage
-  and the handoffs (`devops-cloud-posture` for live state, `devops-k8s-security` for the cluster,
-  `devops-infra-controls-validation` for whether the controls actually work).
+  and the handoffs (`devops:cloud-posture` for live state, `devops:kubernetes-security` for the cluster,
+  `devops:controls-validation` for whether the controls actually work).
 
 ## Rules (hard constraints)
 
-- **Own the boundary with Trivy.** `qa-security-image-infra-scan`'s `trivy config` is the lightweight
+- **Own the boundary with Trivy.** `qa-<stack>:image-infra-scan`'s `trivy config` is the lightweight
   built-in IaC gate; this skill owns **deep Terraform + graph checks, plan scanning, and policy-as-code**.
   **One scanner gates a given misconfig class** — the other runs informational or is scoped away. Never
   double-gate.
@@ -450,27 +450,27 @@ jobs:
 
 ## Cross-references
 
-- **`qa-security-image-infra-scan`** — **the most important fence.** Trivy's `config` scanner already covers
+- **`qa-<stack>:image-infra-scan`** — **the most important fence.** Trivy's `config` scanner already covers
   IaC misconfig with the absorbed tfsec check library, and stays the lightweight default. This skill owns
   depth (graph checks), plan scanning, and policy-as-code. **One scanner gates a given class; run the other
   informational.** That skill also owns the image/OS/SBOM layers this one never touches.
-- `devops-k8s-security` — the **live cluster** sibling (kube-bench CIS scoring, Kubescape, kube-hunter,
+- `devops:kubernetes-security` — the **live cluster** sibling (kube-bench CIS scoring, Kubescape, kube-hunter,
   RBAC/network-policy validation). This skill checks the manifest; that one checks the cluster it produced.
-- `devops-cloud-posture` — the **live cloud account** sibling (Prowler / ScoutSuite CSPM). This skill checks
+- `devops:cloud-posture` — the **live cloud account** sibling (Prowler / ScoutSuite CSPM). This skill checks
   intended state; that one finds the drift and the resources IaC never created.
-- `devops-supply-chain-security` — artifact signing, SLSA provenance, dependency confusion (**A03**). Adjacent
+- `devops:supply-chain-security` — artifact signing, SLSA provenance, dependency confusion (**A03**). Adjacent
   on the CI/CD surface: this skill scans the pipeline **config**, that one secures the **artifacts** it
   produces.
-- `devops-threat-modeling` — STRIDE / attack trees. Upstream: the threat model says which misconfig classes
+- `devops:threat-modeling` — STRIDE / attack trees. Upstream: the threat model says which misconfig classes
   matter for **this** system, which is what a custom policy should encode.
-- `devops-infra-controls-validation` — proves encryption / secrets management / monitoring controls are not
+- `devops:controls-validation` — proves encryption / secrets management / monitoring controls are not
   just declared but **effective**. This skill proves the setting is in the template; that one proves it works.
 - `infra-security-tester` (agent) — the step-by-step orchestrator that runs this skill as its **IaC & image
   posture** step, before the live-cluster and cloud-posture steps.
 - **`devops-auditor`** — the **static conformance** sibling. It sweeps the repo against the `devops` plugin's
   own twelve-section rule set into `docs/audits/`; this skill runs scanners and policy engines and gates a
   build. Fence: who owns the rule — the plugin's conventions vs a scanner catalogue plus your policies.
-- **`devops-infrastructure-as-code`** — the **authoring** sibling. It writes the Bicep/Terraform this skill
+- **`devops:iac`** — the **authoring** sibling. It writes the Bicep/Terraform this skill
   scans, and its Rules (tags mandatory, identity-based auth, `prevent_destroy`, remote+locked state) are
   exactly the rules worth encoding as custom policies so they are enforced rather than remembered.
 - **`devops-engineer`** — the peer that **applies every fix**. This skill finds and re-scans; it does not edit

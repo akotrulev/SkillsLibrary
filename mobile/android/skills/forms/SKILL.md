@@ -1,11 +1,11 @@
 ---
-name: mobile-android-forms
-description: Use when building or fixing a Compose form — text-field state, validation timing, KeyboardOptions and KeyboardActions field order, autofill ContentType and Credential Manager, IME insets, submit state, server errors mapped onto fields. Triggers "build a sign-up form", "keyboard hides the field", "autofill not offered", "server errors don't land on fields". Do NOT use for the request (`mobile-android-networking`), state ownership (`-architecture`) or XML forms (`-views-interop`).
+name: forms
+description: Use when building or fixing a Compose form — text-field state, validation timing, KeyboardOptions and KeyboardActions field order, autofill ContentType and Credential Manager, IME insets, submit state, server errors mapped onto fields. Triggers "build a sign-up form", "keyboard hides the field", "autofill not offered", "server errors don't land on fields". Do NOT use for the request (`mobile-android:networking`), state ownership (`-architecture`) or XML forms (`-views-interop`).
 ---
 
 # Android — Forms
 
-A form is **a draft, a validator and a submit**, all behind the screen ViewModel's one `uiState`. This skill owns field state, validation timing, keyboard and autofill behaviour and how a server rejection lands on a field. The request is [`networking`](../networking/SKILL.md)'s; where the draft lives is [`architecture`](../architecture/SKILL.md)'s. Web analog: [`fe-react-forms`](../../../../frontend/react/skills/forms/SKILL.md) — field-level errors, server errors mapped back, a pending submit that cannot double-fire all carry over; React Hook Form and Zod do not.
+A form is **a draft, a validator and a submit**, all behind the screen ViewModel's one `uiState`. This skill owns field state, validation timing, keyboard and autofill behaviour and how a server rejection lands on a field. The request is [`networking`](../networking/SKILL.md)'s; where the draft lives is [`architecture`](../architecture/SKILL.md)'s. Web analog: [`fe-react:forms`](../../../../frontend/react/skills/forms/SKILL.md) — field-level errors, server errors mapped back, a pending submit that cannot double-fire all carry over; React Hook Form and Zod do not.
 
 ## Version lane
 
@@ -29,11 +29,11 @@ Confirm the BOM and whether the screen already uses `TextFieldState` before choo
 
 - The HTTP call, retries, timeouts → [`networking`](../networking/SKILL.md)
 - Where the draft is owned, `SavedStateHandle` → [`architecture`](../architecture/SKILL.md)
-- Failure banner and the failed region → `mobile-android-error-handling`
+- Failure banner and the failed region → `mobile-android:error-handling`
 - Stateless composable structure, previews → [`ui-components`](../ui-components/SKILL.md)
 - XML `TextInputLayout` forms → [`views-interop`](../views-interop/SKILL.md)
 - Passkey and Credential Manager *wiring* → [`device-features`](../device-features/SKILL.md)
-- Another stack → `mobile-ios-forms`, `mobile-react-native-forms`
+- Another stack → `mobile-ios:forms`, `mobile-react-native:forms`
 
 ## Inputs needed
 
@@ -204,7 +204,7 @@ Errors raise on focus loss or submit, clear on edit, and are text plus `isError`
 
 ## Server errors land on the field
 
-Parse the response in [`networking`](../networking/SKILL.md) into a typed `ApiError.Validation(fields: Map<String, List<String>>)` (ProblemDetails `errors`); the ViewModel maps wire names to `SignUpField` and writes them to `uiState.errors`. An unmapped field name becomes a **form-level** error above the button — never dropped. A `409` (taken, stale version) marks its field or the form; a `5xx` / timeout leaves the form **editable with its values intact** and raises the failure banner (`mobile-android-error-handling`); a double tap during `Pending` is ignored; the idempotency key is created once per draft.
+Parse the response in [`networking`](../networking/SKILL.md) into a typed `ApiError.Validation(fields: Map<String, List<String>>)` (ProblemDetails `errors`); the ViewModel maps wire names to `SignUpField` and writes them to `uiState.errors`. An unmapped field name becomes a **form-level** error above the button — never dropped. A `409` (taken, stale version) marks its field or the form; a `5xx` / timeout leaves the form **editable with its values intact** and raises the failure banner (`mobile-android:error-handling`); a double tap during `Pending` is ignored; the idempotency key is created once per draft.
 
 ## Autofill and sign-in
 
@@ -262,6 +262,6 @@ Inside a `Gate: none` plan task, run none of these and report "written, not run"
 - Request, budgets, ProblemDetails parsing → [`networking`](../networking/SKILL.md)
 - Draft persistence, secrets storage → [`offline-and-storage`](../offline-and-storage/SKILL.md)
 - Credential Manager, passkeys, biometrics → [`device-features`](../device-features/SKILL.md)
-- Failure banner, failed region → `mobile-android-error-handling`
-- Labels, 48 dp, TalkBack → `mobile-android-accessibility`
+- Failure banner, failed region → `mobile-android:error-handling`
+- Labels, 48 dp, TalkBack → `mobile-android:accessibility`
 - Test ids → [`test-ids`](../test-ids/SKILL.md)

@@ -1,5 +1,5 @@
 ---
-name: qa-api-test-writer-dotnet
+name: api-tests
 description: Use when scaffolding .NET API tests (NUnit + RestSharp) — new fixtures, new test methods on an existing `*Tests.cs`, or a specific scenario (happy path, 4xx with ProblemDetails, 401). Triggers "write an API test for X", "add a 404 test to YTests", "scaffold an ApiTests fixture for Z". Not for GraphQL (`api-test-author/graphql`), gRPC (`api-test-author/grpc`), or Playwright-based API tests (`api-test-author/playwright`).
 ---
 

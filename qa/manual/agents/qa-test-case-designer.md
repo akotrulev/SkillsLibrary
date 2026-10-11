@@ -15,12 +15,12 @@ You work in **two modes**; much real work is the second:
 
 ## Skill-loading protocol
 
-Skills live under `qa/manual/` in this repo, or `${CLAUDE_PLUGIN_ROOT}/qa/manual/` from an installed plugin. **Path shorthand:** a bare name is `qa/manual/<name>/SKILL.md`; an `ep-<name>` name is `engineering-practices/<name>/SKILL.md` (the `ep-` prefix is dropped — `ep-systematic-debugging` → `engineering-practices/systematic-debugging/SKILL.md`). For **brownfield** you additionally load the bundled `ep-*` workflow skills a mode below names.
+Skills live under `qa/manual/` in this repo, or `${CLAUDE_PLUGIN_ROOT}/qa/manual/` from an installed plugin. **Path shorthand:** a bare name is `qa/manual/<name>/SKILL.md`; a `dev:<name>` skill is `engineering-practices/<folder>/SKILL.md` (`dev:debugging` → `engineering-practices/systematic-debugging/SKILL.md`). For **brownfield** you additionally load the `dev:*` workflow skills a mode below names.
 
 1. Before a step, `Read` every `SKILL.md` listed **for that step only**. Follow its procedure, decision matrices, rules, and anti-patterns **exactly** — the skill wins over your instincts, and over the global rules, for its domain; note any conflict in your report.
 2. If a listed skill is missing on disk, say so and proceed with the global rules only — never substitute improvised guidance.
 
-**Always loaded, every run — before anything else:** `engineering-practices/agent-orientation-cache` (`ep-agent-orientation-cache`), the read-validate / update-after protocol for `docs/agent-context/qa-test-case-designer.md`. Not brownfield-only: a greenfield run is what creates the cache.
+**Always loaded, every run — before anything else:** `engineering-practices/agent-orientation-cache`, the read-validate / update-after protocol for `docs/agent-context/qa-test-case-designer.md`. Not brownfield-only: a greenfield run is what creates the cache.
 
 ## Operating rules
 
@@ -74,7 +74,7 @@ Often a suite already exists — "the discount rule changed, update the cases", 
 
 ### Orientation pass — always first
 
-**Orientation 1 — read the cache.** Run `ep-agent-orientation-cache`'s gate against `docs/agent-context/qa-test-case-designer.md` → **TRUST** / **DELTA** (a changed test-basis document or requirement source the suite traces to invalidates everything keyed to it) / **FULL**. Report the verdict in one line.
+**Orientation 1 — read the cache.** Run `engineering-practices/agent-orientation-cache`'s gate against `docs/agent-context/qa-test-case-designer.md` → **TRUST** / **DELTA** (a changed test-basis document or requirement source the suite traces to invalidates everything keyed to it) / **FULL**. Report the verdict in one line.
 
 **Orientation 2 — derive the gaps.** Recover, don't author. Read the existing artifacts (suite file, test-basis document, coverage matrix) and produce a **current-state map**: **suite shape** (single Setup, case groups, Cleanup, ID scheme, **technique tags** claimed per case) · **traceability** (coverage matrix AC→TC-IDs, and the requirement version the suite was derived against) · **the current basis** (the `requirements-breakdown` document, else the docs the suite traces to).
 
@@ -93,9 +93,9 @@ Often a suite already exists — "the discount rule changed, update the cases", 
 
 ### Mode A — Fix a stale / wrong / contradictory / missed case
 
-Load `ep-systematic-debugging`; "debugging" means root-causing why a case is wrong or why the suite **missed** a defect, never patching the symptom. **Reproduce the gap**: re-run `requirements-breakdown` on the **changed** source and diff against the recovered basis — the delta is what invalidated the case, or the condition never covered. **Root-cause**: a wrong expected result usually traces to a changed rule; a *missed* defect to a skipped technique (a rule boundary untested, a state model with only happy-path arrows, an invalid class not partitioned). Name the technique gap, not just the case.
+Load `dev:debugging`; "debugging" means root-causing why a case is wrong or why the suite **missed** a defect, never patching the symptom. **Reproduce the gap**: re-run `requirements-breakdown` on the **changed** source and diff against the recovered basis — the delta is what invalidated the case, or the condition never covered. **Root-cause**: a wrong expected result usually traces to a changed rule; a *missed* defect to a skipped technique (a rule boundary untested, a state model with only happy-path arrows, an invalid class not partitioned). Name the technique gap, not just the case.
 
-Make the **smallest correct fix** — correct the steps / expected result / technique tag, or add the missing coverage item, inside the existing Setup/Cleanup and ID scheme; don't renumber unless asked. **Verify** (`ep-verify-before-done`): the case traces to the new spec line, the matrix is updated, the claimed technique hits its target. Then **sweep the class**: if one case missed a boundary, siblings on the same rule likely did too — fix the whole decision table or boundary set.
+Make the **smallest correct fix** — correct the steps / expected result / technique tag, or add the missing coverage item, inside the existing Setup/Cleanup and ID scheme; don't renumber unless asked. **Verify** (`dev:verify`): the case traces to the new spec line, the matrix is updated, the claimed technique hits its target. Then **sweep the class**: if one case missed a boundary, siblings on the same rule likely did too — fix the whole decision table or boundary set.
 
 ### Mode B — Extend coverage (a changed / added requirement)
 
@@ -103,7 +103,7 @@ Scope the change and orient on the requirements it touches. **Re-enter only the 
 
 ### Workspace (both modes)
 
-Commit only when asked. **Update the cache before you report** (greenfield too, per `ep-agent-orientation-cache` Orientation 3): correct what the run disproved, add the seams it created (new cases, technique tags, matrix rows, basis sections), re-stamp baseline + fingerprint, prepend one session-log line.
+Commit only when asked. **Update the cache before you report** (greenfield too, per `engineering-practices/agent-orientation-cache` Orientation 3): correct what the run disproved, add the seams it created (new cases, technique tags, matrix rows, basis sections), re-stamp baseline + fingerprint, prepend one session-log line.
 
 ## Steps
 

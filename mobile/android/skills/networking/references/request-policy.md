@@ -126,7 +126,7 @@ class TokenAuthenticator @Inject constructor(
 ```
 
 - The `synchronized` block plus the **"token changed while I waited"** check is the single-flight: the first caller refreshes, the rest see a new token and replay without refreshing.
-- `responseCount() >= 2` stops a loop where the replay also returns `401`; returning `null` surfaces `ApiError.Unauthorized`, and the UI re-authenticates **in place** (a modal, biometric as the common third rung — `mobile-android-error-handling`).
+- `responseCount() >= 2` stops a loop where the replay also returns `401`; returning `null` surfaces `ApiError.Unauthorized`, and the UI re-authenticates **in place** (a modal, biometric as the common third rung — `mobile-android:error-handling`).
 - `runBlocking` is acceptable **only here**: `Authenticator` is a blocking OkHttp contract on an OkHttp thread, never the main thread. A comment is not needed; the class doc states the constraint.
 - The refresh uses a **separate** client without this authenticator (a `Lazy<AuthApi>` built on a plain `OkHttpClient`), or it recurses.
 - A refresh that is rejected (`invalid_grant`) clears the stored session and emits "signed out" to the session holder — it does not loop.

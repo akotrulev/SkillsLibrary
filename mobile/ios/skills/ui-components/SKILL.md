@@ -1,6 +1,6 @@
 ---
-name: mobile-ios-ui-components
-description: Use when writing SwiftUI views — small views, #Preview, .task for loads cancelled with the view, loading / loaded / failed / stale / offline regions, List and lazy stacks, SF Symbols, no work in body. Triggers "build this screen", "view is slow to render", "load data when it appears", "add a preview". Do NOT use for state ownership (`mobile-ios-architecture`), theming (`-styling`), routes (`-navigation`), forms (`-forms`) or UIKit (`-uikit`).
+name: ui-components
+description: Use when writing SwiftUI views — small views, #Preview, .task for loads cancelled with the view, loading / loaded / failed / stale / offline regions, List and lazy stacks, SF Symbols, no work in body. Triggers "build this screen", "view is slow to render", "load data when it appears", "add a preview". Do NOT use for state ownership (`mobile-ios:architecture`), theming (`-styling`), routes (`-navigation`), forms (`-forms`) or UIKit (`-uikit`).
 ---
 
 # iOS — SwiftUI Views
@@ -32,11 +32,11 @@ Do not flag an iOS 16 project for lacking an iOS 17 API; do not apply an iOS 17 
 - Where the state lives; view-model decisions → [`architecture`](../architecture/SKILL.md)
 - Colour, type, materials, Liquid Glass, iPad layout → [`styling`](../styling/SKILL.md)
 - Routes, sheets, tabs → [`navigation`](../navigation/SKILL.md)
-- Forms and text input → `mobile-ios-forms`
-- VoiceOver detail → `mobile-ios-accessibility`; test ids → `mobile-ios-test-ids`
-- Animation → `mobile-ios-animation`
+- Forms and text input → `mobile-ios:forms`
+- VoiceOver detail → `mobile-ios:accessibility`; test ids → `mobile-ios:test-ids`
+- Animation → `mobile-ios:animation`
 - UIKit controllers → [`uikit`](../uikit/SKILL.md)
-- RN / Compose screens → `mobile-react-native-ui-components`, `mobile-android-ui-components`
+- RN / Compose screens → `mobile-react-native:ui-components`, `mobile-android:ui-components`
 
 ## Inputs needed
 
@@ -79,7 +79,7 @@ struct OrderRow: View {
 
 - `.task(id:)` restarts — and cancels the previous run — when `id` changes; use it for search text and filters.
 - A cancelled load is not a failure: `catch is CancellationError` returns without setting `failed`.
-- **Returning to the foreground revalidates:** observe `@Environment(\.scenePhase)` and reload on `.active` — detail in `mobile-ios-error-handling`.
+- **Returning to the foreground revalidates:** observe `@Environment(\.scenePhase)` and reload on `.active` — detail in `mobile-ios:error-handling`.
 - Nothing in `body` or an `init` does I/O.
 
 ## Every data region has states
@@ -113,9 +113,9 @@ struct OrdersContent: View {
 ```
 
 - **A drifted or undecodable response is `failed`, never empty.** The view never shows `error.localizedDescription` from a framework or server; it shows a message you wrote.
-- **Every failure also raises the one persistent banner** inside the safe area, closed only by the user, and offline is told apart from a server error — the mechanics are `mobile-ios-error-handling`.
+- **Every failure also raises the one persistent banner** inside the safe area, closed only by the user, and offline is told apart from a server error — the mechanics are `mobile-ios:error-handling`.
 - A Dynamic-Type-safe `ProgressView` or a skeleton on first load; a spinner that blocks the screen is wrong when stale data can be shown.
-- **Test ids** (`accessibilityIdentifier`, PascalCase, dot-separated, static) on every interactive element and container — never the label — are `mobile-ios-test-ids`' rule; samples carry them.
+- **Test ids** (`accessibilityIdentifier`, PascalCase, dot-separated, static) on every interactive element and container — never the label — are `mobile-ios:test-ids`' rule; samples carry them.
 
 ## Lists and long content
 
@@ -191,7 +191,7 @@ Every reusable view ships `#Preview`s for its **states** — loading, loaded, em
 - State ownership → [`architecture`](../architecture/SKILL.md)
 - Colour, type, Liquid Glass → [`styling`](../styling/SKILL.md)
 - Routes and sheets → [`navigation`](../navigation/SKILL.md)
-- Forms → `mobile-ios-forms`; clients → `mobile-ios-networking`
-- Banner, offline, resume → `mobile-ios-error-handling`
-- Labels, traits, Dynamic Type sizes → `mobile-ios-accessibility`
-- Test ids → `mobile-ios-test-ids`; render cost → `mobile-ios-performance`
+- Forms → `mobile-ios:forms`; clients → `mobile-ios:networking`
+- Banner, offline, resume → `mobile-ios:error-handling`
+- Labels, traits, Dynamic Type sizes → `mobile-ios:accessibility`
+- Test ids → `mobile-ios:test-ids`; render cost → `mobile-ios:performance`

@@ -1,6 +1,6 @@
 ---
-name: be-dotnet-standards-audit
-description: Use to audit a whole .NET service against the be-dotnet plugin's conventions — patterns, DI, async, EF Core, API contract, auth, observability — as a saved, re-runnable findings report in `docs/audits/`. Read-only; never fixes. Triggers "audit our .NET service against the plugin conventions", "conformance audit of this C# codebase". Do NOT use to review one diff (`be-dotnet-code-review`), check code against a spec (`code-auditor`), or audit a test suite (`qa-dotnet-standards-audit`).
+name: standards-audit
+description: Use to audit a whole .NET service against the be-dotnet plugin's conventions — patterns, DI, async, EF Core, API contract, auth, observability — as a saved, re-runnable findings report in `docs/audits/`. Read-only; never fixes. Triggers "audit our .NET service against the plugin conventions", "conformance audit of this C# codebase". Do NOT use to review one diff (`be-dotnet:conventions-review`), check code against a spec (`code-auditor`), or audit a test suite (`qa-dotnet:standards-audit`).
 ---
 
 # be-dotnet Conformance Audit
@@ -13,7 +13,7 @@ State the mode — Mode A (baseline) or Mode B (re-audit) — and the target pat
 
 ## Read before sweeping
 
-1. **[`ep-standards-audit-engine`](../../../../engineering-practices/standards-audit-engine/SKILL.md)** — the engine: Mode A/B rounds, the artifact contract, evidence rules, severity semantics, grouping/coverage policy, the 5 steps, the hostile self-review. **Read it first.**
+1. **[`engineering-practices/standards-audit-engine`](../../../../engineering-practices/standards-audit-engine/SKILL.md)** — the engine: Mode A/B rounds, the artifact contract, evidence rules, severity semantics, grouping/coverage policy, the 5 steps, the hostile self-review. **Read it first.**
 2. [`references/conformance-checklist.md`](references/conformance-checklist.md) — the 14 lettered sections (A–N) and every check. **Read end-to-end** before Step 2.
 3. `engineering-practices/standards-audit-engine/references/report-template.md` — the Round-1 / Round-N skeletons. Read before Step 3.
 
@@ -26,9 +26,9 @@ Report path: `docs/audits/<NNN>-be-dotnet-conformance-r<N>.md`.
 | Job | Owner |
 |---|---|
 | Review one file / one diff, inline severity table, no artifact | [`code-review`](../code-review/SKILL.md) — this skill **reuses its checklists at repo scale** |
-| Code vs a written spec / stories / ACs | `ep-spec-vs-code-audit` (or the `code-auditor` agent) |
-| "How does feature X actually work / where is it defective" | `ep-feature-audit` |
-| Auditing the **test suite** that covers this service | **peer** `qa-dotnet-standards-audit` — this skill audits production code only |
+| Code vs a written spec / stories / ACs | `dev:audit-spec` (or the `code-auditor` agent) |
+| "How does feature X actually work / where is it defective" | `dev:audit-feature` |
+| Auditing the **test suite** that covers this service | **peer** `qa-dotnet:standards-audit` — this skill audits production code only |
 | Attacking authz / injection (proving exploitability) | **peer** `qa-security` — section I inventories the gates; it does not attack them |
 | Schema / DDL / index design, cross-engine migration strategy | **peer** `data-architect` — section G covers EF Core mechanics only |
 | Applying any fix found here | the `be-dotnet` agent (Mode FIX / EXTEND) |
@@ -70,4 +70,4 @@ A–F, J, K, M, N apply to every .NET service. Sections that are N/A must name t
 - **Security-flavoured findings (I2–I6, K1)** → **peer** `qa-security` owns proving exploitability.
 - **Schema/index/migration strategy beyond EF mechanics (section G)** → **peer** `data-architect`.
 - **Observability gaps (section L)** → the `observability-engineer-dotnet` sibling agent in this plugin.
-- **Code vs a spec, or a feature trace** → `ep-spec-vs-code-audit` / `ep-feature-audit` / the `code-auditor` agent.
+- **Code vs a spec, or a feature trace** → `dev:audit-spec` / `dev:audit-feature` / the `code-auditor` agent.

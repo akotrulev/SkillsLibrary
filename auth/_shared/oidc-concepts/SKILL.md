@@ -1,5 +1,5 @@
 ---
-name: auth-oidc-concepts
+name: oidc-concepts
 description: Use when explaining OAuth 2.0 / OpenID Connect concepts that are the same across providers — roles, Authorization Code + PKCE, Client Credentials, ID vs access vs refresh tokens, JWT validation, rotation, scopes vs RBAC — plus the Auth0-vs-Cognito comparison that picks the provider skill. Triggers: "explain Authorization Code + PKCE", "ID token vs access token", "Auth0 vs Cognito differences". Do NOT use for provider-specific setup (`auth/auth0-*` / `auth/cognito-*`).
 ---
 

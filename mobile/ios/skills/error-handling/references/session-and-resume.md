@@ -2,7 +2,7 @@
 
 The failures where **the app changed underneath the user**: the session ended, the server no longer supports this build, or the app slept for an hour. All three recover in place; all three destroy unsaved work when handled with a sign-out reflex.
 
-*Deep dive for [`mobile-ios-error-handling`](../SKILL.md). Samples have no inline comments (CLAUDE.md § Comments).*
+*Deep dive for [`mobile-ios:error-handling`](../SKILL.md). Samples have no inline comments (CLAUDE.md § Comments).*
 
 ---
 
@@ -76,11 +76,11 @@ struct VersionPolicy: Decodable, Sendable {
 - **Compare numerically** (`.numeric`), never as strings — `"1.10"` is above `"1.9"`.
 - **Check on launch and on every resume** (below), not on a timer; cache the last verdict so a cold offline start still shows a required update.
 - **The blocking screen sits at the root**, above navigation, so no deep link or restored state can route around it; it carries `Update.Required` and `Update.Required.Open` identifiers and is announced when it appears.
-- **The store link is a fixed `itms-apps://` / `https://apps.apple.com/app/id…` constant** — never a URL taken from the server response, which would be an open redirect. (`mobile-shared-security`.)
+- **The store link is a fixed `itms-apps://` / `https://apps.apple.com/app/id…` constant** — never a URL taken from the server response, which would be an open redirect. (`mobile-<stack>:security`.)
 - **Contract skew inside a supported version**: an unknown enum case or a missing optional field must decode to a safe default or a typed `drifted` failure, never a crash — decode enums with an `unknown` fallback case so a newer server does not break an older client.
 - **Server-driven `426 Upgrade Required` or a `min-client` header** takes the same path as the policy check.
 - **Never forced for a cosmetic change**; a mandatory update is for a breaking contract, a security fix or a retired API, and the server owner sets it.
-- **Report it**: the screen shown and the update opened are events for the crash reporter, tagged with the build number (`mobile-shared-observability`).
+- **Report it**: the screen shown and the update opened are events for the crash reporter, tagged with the build number (`mobile-<stack>:observability`).
 
 ## App resume — revalidate, never show yesterday as current
 

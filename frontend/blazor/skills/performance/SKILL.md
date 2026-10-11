@@ -1,6 +1,6 @@
 ---
-name: fe-blazor-performance
-description: Use when a Blazor app (.NET 8/9/10) is slow or must stay fast — render perf (`@key`, `ShouldRender`, `Virtualize`), WASM startup (trimming, lazy loading, the AOT decision), interactive-Server scale (circuit memory, Azure SignalR), diagnostics + budgets. Triggers: "my grid re-renders too much", "the WASM app takes forever to load", "should I AOT-compile". Do NOT use for CSS (`styling`), live-data functionality (`realtime`), DB tuning (`data/*`), or load-testing (`qa-load-testing-dotnet`).
+name: performance
+description: Use when a Blazor app (.NET 8/9/10) is slow or must stay fast — render perf (`@key`, `ShouldRender`, `Virtualize`), WASM startup (trimming, lazy loading, the AOT decision), interactive-Server scale (circuit memory, Azure SignalR), diagnostics + budgets. Triggers: "my grid re-renders too much", "the WASM app takes forever to load", "should I AOT-compile". Do NOT use for CSS (`styling`), live-data functionality (`realtime`), DB tuning (`data/*`), or load-testing (`qa-dotnet:load-testing`).
 ---
 
 # Blazor — Performance

@@ -1,11 +1,11 @@
 ---
-name: mobile-react-native-ui-components
-description: Use when writing or fixing a screen or component in an Expo SDK 57 app — Pressable, expo-image, FlashList 2 / Legend List, native menus and modals, text-in-Text, compound components, the loading / loaded / failed region in markup, empty states. Triggers "build this screen", "my list janks", "image flickers", "native menu". Do NOT use for routes (`mobile-react-native-navigation`), animation (`-animation`), theming (`-styling`) or the failure UI (`-error-handling`).
+name: ui-components
+description: Use when writing or fixing a screen or component in an Expo SDK 57 app — Pressable, expo-image, FlashList 2 / Legend List, native menus and modals, text-in-Text, compound components, the loading / loaded / failed region in markup, empty states. Triggers "build this screen", "my list janks", "image flickers", "native menu". Do NOT use for routes (`mobile-react-native:navigation`), animation (`-animation`), theming (`-styling`) or the failure UI (`-error-handling`).
 ---
 
 # React Native — UI Components
 
-Owns **writing a screen or a component**: composition, the primitive to reach for, lists, images, menus and modals, and the three-state region in markup. Web analog: [`fe-react-component-writer`](../../../../frontend/react/skills/component-writer/SKILL.md) + [`fe-react-ui-rules`](../../../../frontend/react/skills/ui-rules/SKILL.md) — the composition rules carry over; RSC, `'use client'`, `<Link>` and semantic HTML do not.
+Owns **writing a screen or a component**: composition, the primitive to reach for, lists, images, menus and modals, and the three-state region in markup. Web analog: [`fe-react:component-writer`](../../../../frontend/react/skills/component-writer/SKILL.md) + [`fe-react:ui-rules`](../../../../frontend/react/skills/ui-rules/SKILL.md) — the composition rules carry over; RSC, `'use client'`, `<Link>` and semantic HTML do not.
 
 Design facts (type scale, spacing, touch target, platform convention) come from `design/ui-ux-pro-max` (`--stack react-native`); where the corpus disagrees with this skill, the corpus wins.
 
@@ -38,7 +38,7 @@ Detect first: `@shopify/flash-list` major, `@legendapp/list`, `expo-image`, `rea
 - What the failed region shows, the banner, retry, stale marker → [`error-handling`](../error-handling/SKILL.md)
 - Inputs and validation → [`forms`](../forms/SKILL.md); test ids → [`test-ids`](../test-ids/SKILL.md); labels and roles → [`accessibility`](../accessibility/SKILL.md)
 - Fetching → [`networking`](../networking/SKILL.md)
-- Next.js components → `fe-react-component-writer`
+- Next.js components → `fe-react:component-writer`
 
 ## Inputs needed
 
@@ -187,7 +187,7 @@ Inside a `Gate: none` plan task, run none of these and report "written, not run"
 - Typecheck and lint with the project's scripts (`eslint-config-expo/flat`) clean.
 - On a simulator and an emulator: scroll the list fast — no blank cells; rotate; turn text size to maximum — nothing clips.
 - Throttle the network and force an error: header and filters stay, the rows body swaps to the failed slot.
-- Dev-side component tests: `mobile-react-native-component-testing`.
+- Dev-side component tests: `mobile-react-native:component-testing`.
 
 ## Handoffs
 

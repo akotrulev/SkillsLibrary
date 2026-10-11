@@ -1,5 +1,5 @@
 ---
-name: qa-failure-injection-testing-dotnet
+name: failure-injection-testing
 description: Use when writing fault-injection / resilience tests in .NET 10 (8-9) / NUnit with Toxiproxy via Testcontainers (`Toxiproxy.Net`) — inject latency, drops, and bandwidth caps on a dependency (DB, API, broker, cache) and assert the app degrades gracefully. Triggers "test the app survives a slow database", "inject a connection drop", "assert the circuit breaker opens". Not for load/throughput testing (`load-testing`).
 ---
 
@@ -32,7 +32,7 @@ resilience library (**Polly**), and the runner (NUnit) change.
 >    degrades under fault **and** that it heals once the fault clears.
 > 4. **Assert the resilience PATTERN, not the fault.** Assert the **behaviour it provokes**: the retry count, the
 >    Polly circuit-breaker state transition (Closed → Open → HalfOpen → Closed), the honored timeout (fails *fast*,
->    not hangs), the fallback payload served. This is what `qa-network-mocking-dotnet` can *observe* but
+>    not hangs), the fallback payload served. This is what `qa-dotnet:network-mocking` can *observe* but
 >    never *inject* — observe vs break.
 
 ## Decision matrix — fault scenario → toxic → what you assert
@@ -284,8 +284,8 @@ failing?*
 
 **Composing with the dependency families.** The thing you fault is stood up by Testcontainers
 (`ToxiproxyContainer` next to a `PostgreSqlContainer` on a shared `Network`); the dependency itself is exercised
-happy-path by `qa-db-testing-testcontainers-dotnet` / `qa-messaging-testing-dotnet`. Chaos adds the proxy in front and
-asserts the resilience layer — it **composes**. A data-driven fault matrix binds via `qa-data-driven-testing-dotnet`.
+happy-path by `qa-dotnet:db-testcontainers` / `qa-dotnet:messaging-testing`. Chaos adds the proxy in front and
+asserts the resilience layer — it **composes**. A data-driven fault matrix binds via `qa-dotnet:data-driven-testing`.
 
 ## Rules (hard constraints)
 
@@ -307,17 +307,17 @@ asserts the resilience layer — it **composes**. A data-driven fault matrix bin
 
 ## Cross-references
 
-- `qa-failure-injection-testing-java` · `qa-failure-injection-testing-typescript` — the sibling stacks (Toxiproxy + Testcontainers +
+- `qa-java:failure-injection-testing` · `qa-typescript:failure-injection-testing` — the sibling stacks (Toxiproxy + Testcontainers +
   resilience4j · toxiproxy-node-client + Vitest); this is the **port of the Java canonical**. Same four ideas, same
   lifecycle, different client lib + resilience library (Polly).
-- `qa-network-mocking-dotnet` — the **closest neighbor and the inverse**: that stands up a MITM proxy
+- `qa-dotnet:network-mocking` — the **closest neighbor and the inverse**: that stands up a MITM proxy
   (`Titanium.Web.Proxy`) to **observe/mock** out-of-browser requests; this stands up Toxiproxy to **inject transport
   faults**. Observe vs break.
-- `qa-data-driven-testing-dotnet` — drive a **fault matrix** (toxic × parameter × expected pattern) via
+- `qa-dotnet:data-driven-testing` — drive a **fault matrix** (toxic × parameter × expected pattern) via
   `[TestCaseSource]` instead of copy-pasted `[Test]` methods.
-- `qa-db-testing-testcontainers-dotnet` · `qa-messaging-testing-dotnet` — the dependencies you fault (DB / broker
+- `qa-dotnet:db-testcontainers` · `qa-dotnet:messaging-testing` — the dependencies you fault (DB / broker
   connections through the proxy); they cover the happy path this inverts.
-- `qa-realtime-stream-testing-dotnet` — shares the **lifecycle discipline** (steady → perturb → assert →
+- `qa-dotnet:realtime-stream-testing` — shares the **lifecycle discipline** (steady → perturb → assert →
   recover) and bounded-condition waits (never `Task.Delay`-as-a-wait).
-- `qa-load-testing-dotnet` — behaviour under **load/volume** vs behaviour under **fault** (this skill).
-- `qa-test-reports-dotnet` — render each fault scenario as a named result.
+- `qa-dotnet:load-testing` — behaviour under **load/volume** vs behaviour under **fault** (this skill).
+- `qa-dotnet:test-reports` — render each fault scenario as a named result.

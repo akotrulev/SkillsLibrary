@@ -40,7 +40,7 @@ export async function saveRefreshToken(token: string): Promise<void> {
 
 - `keychainAccessible` is the iOS access class (`ios.md` §2); `WHEN_UNLOCKED_THIS_DEVICE_ONLY` unless background refresh needs `AFTER_FIRST_UNLOCK_THIS_DEVICE_ONLY`.
 - `requireAuthentication: true` gates reads behind biometrics; a feature that unlocks on a biometric **boolean** from `expo-local-authentication` and then reads an unprotected token is `MASWE-0020`.
-- Access tokens live in memory; only the refresh token is persisted. `Auth0`'s credentials manager (`auth-auth0-react-native`) handles storage — do not hand-roll beside it.
+- Access tokens live in memory; only the refresh token is persisted. `Auth0`'s credentials manager (`mobile-react-native:auth0`) handles storage — do not hand-roll beside it.
 - Server state belongs in TanStack Query's cache, which is in-memory by default; persisting the query cache to `AsyncStorage` persists whatever the responses contained — exclude sensitive queries from the persister (`dehydrateOptions.shouldDehydrateQuery`).
 
 ## 4. WebView and links (PLATFORM-1, PLATFORM-2, CODE-4)
@@ -69,4 +69,4 @@ Manifest and `Info.plist` changes go through config plugins (CLAUDE.md § Mobile
 ## 7. Logging and OTA (STORAGE-2, CODE-1)
 
 - No `console.log` of tokens, PII or payloads in release (`babel-plugin-transform-remove-console` or a guarded logger); crash reporters receive scrubbed breadcrumbs.
-- OTA updates (`expo-updates`): enable **code signing** of updates; scope updates to a `runtimeVersion` fingerprint; never ship native changes OTA. Whether signature verification rejects a tampered update → **requires dynamic test → `qa-security`**. Store rules for OTA are in `mobile-shared-store-compliance`.
+- OTA updates (`expo-updates`): enable **code signing** of updates; scope updates to a `runtimeVersion` fingerprint; never ship native changes OTA. Whether signature verification rejects a tampered update → **requires dynamic test → `qa-security`**. Store rules for OTA are in `mobile-<stack>:store-compliance`.

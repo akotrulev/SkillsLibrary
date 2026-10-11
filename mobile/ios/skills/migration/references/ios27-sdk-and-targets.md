@@ -21,7 +21,7 @@ Steps, one commit each:
 2. Fix the scene lifecycle and launch screen (they block the archive).
 3. Remove the glass opt-out; screenshot light / dark / large text / iPad; fix collisions.
 4. Review `@State` sites and the deprecated APIs.
-5. Archive; run the store-compliance rows ([`mobile-shared-store-compliance`](../../../../_shared/store-compliance/SKILL.md)); confirm Swift 6 settings were **not** changed by the new template (the Xcode 27 template still defaults `SWIFT_VERSION = 5.0` — [`project-setup`](../../project-setup/SKILL.md)).
+5. Archive; run the store-compliance rows ([`mobile-<stack>:store-compliance`](../../../../_shared/store-compliance/SKILL.md)); confirm Swift 6 settings were **not** changed by the new template (the Xcode 27 template still defaults `SWIFT_VERSION = 5.0` — [`project-setup`](../../project-setup/SKILL.md)).
 
 Raising the Xcode version is not raising the Swift language mode or the deployment target: three settings, three decisions.
 

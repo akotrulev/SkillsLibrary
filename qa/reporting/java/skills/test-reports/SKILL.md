@@ -1,6 +1,6 @@
 ---
-name: qa-test-reports-java
-description: Use when setting up Allure reporting for a Java test suite (TestNG + RestAssured, TestNG + Playwright Java, TestNG + Selenium Java, TestNG + Appium Java, JUnit Jupiter) on allure-java 3.0. Triggers: "set up Allure for our Gradle TestNG project", "wire Allure attachments in Java", "publish Allure report from our Java CI". Not for flaky-test quarantine (`qa-flaky-test-quarantine-java`), pipeline YAML (`qa-ci-pipelines-java`) or Playwright failure evidence (`qa-evidence-capture-java`).
+name: test-reports
+description: Use when setting up Allure reporting for a Java test suite (TestNG + RestAssured, TestNG + Playwright Java, TestNG + Selenium Java, TestNG + Appium Java, JUnit Jupiter) on allure-java 3.0. Triggers: "set up Allure for our Gradle TestNG project", "wire Allure attachments in Java", "publish Allure report from our Java CI". Not for flaky-test quarantine (`qa-java:flaky-test-quarantine`), pipeline YAML (`qa-java:ci-pipelines`) or Playwright failure evidence (`qa-java:evidence-capture`).
 ---
 
 # QA — Allure Reporting (Java / TestNG & JUnit Jupiter)

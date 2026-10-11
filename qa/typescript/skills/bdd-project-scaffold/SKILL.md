@@ -1,5 +1,5 @@
 ---
-name: qa-bdd-project-setup-typescript
+name: bdd-project-setup
 description: Use when adding a BDD/Gherkin layer onto a TypeScript UI/mobile test project, or standing one up from zero — playwright-bdd (on the Playwright Test runner) for web, CucumberJS + WebdriverIO + Appium for mobile. Triggers: "set up playwright-bdd", "add a BDD layer to our Playwright tests in TS", "wire bddgen and fixtures". Do NOT use to write feature files (`feature-file-writer`), generate step definitions (`gherkin-step-code`), or build page objects (`page-object-design`).
 ---
 

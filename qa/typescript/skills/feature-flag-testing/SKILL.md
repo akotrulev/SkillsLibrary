@@ -1,6 +1,6 @@
 ---
-name: qa-feature-flag-testing-typescript
-description: Use when testing feature-flagged code in Node 24 (22 supported) / TypeScript / Vitest — pin flag state in-process with OpenFeature's `InMemoryProvider` or LaunchDarkly's `TestData` fixture (never a live flag service), cover BOTH sides of every flag, drive targeting through the evaluation context. Triggers: "test a feature flag", "test both sides of a flag", "pin a flag state in tests". Do NOT use for the endpoint tests themselves (`qa-api-test-writer-typescript`).
+name: feature-flag-testing
+description: Use when testing feature-flagged code in Node 24 (22 supported) / TypeScript / Vitest — pin flag state in-process with OpenFeature's `InMemoryProvider` or LaunchDarkly's `TestData` fixture (never a live flag service), cover BOTH sides of every flag, drive targeting through the evaluation context. Triggers: "test a feature flag", "test both sides of a flag", "pin a flag state in tests". Do NOT use for the endpoint tests themselves (`qa-typescript:api-tests`).
 ---
 
 # QA — Feature-Flag Testing (Node 24 + TypeScript / OpenFeature + LaunchDarkly `TestData` + Vitest)
@@ -10,7 +10,7 @@ Scaffolds **deterministic feature-flag tests** in TypeScript for code whose beha
 **`InMemoryProvider`** as the test spine, and [**LaunchDarkly**](https://launchdarkly.com)'s Node server SDK
 **`TestData`** fixture as the named real-provider path (the two compose: production code talks OpenFeature, the
 LaunchDarkly OpenFeature provider sits behind it, and `TestData` pins what that provider sees). This is a
-**ported sibling** of the **canonical** `qa-feature-flag-testing-java` — same four ideas, same fixtures, same
+**ported sibling** of the **canonical** `qa-java:feature-flag-testing` — same four ideas, same fixtures, same
 section order; the SDK surface is `@openfeature/server-sdk` + `@launchdarkly/node-server-sdk` and the runner is
 Vitest.
 
@@ -27,7 +27,7 @@ Vitest.
 >    multivariate flag); a suite that only runs with the flag on has zero coverage of the path your users on the
 >    old experience are living in — and zero proof the rollback is safe. Every flag-touching behavior gets a
 >    **matrix**: on/off for a boolean, every variation for a multivariate — bound as parameterized rows
->    (`qa-data-driven-testing-typescript` mechanics, `it.each`), not copy-pasted test blocks.
+>    (`qa-typescript:data-driven-testing` mechanics, `it.each`), not copy-pasted test blocks.
 > 3. **Targeting rules are tested via the evaluation context.** "Beta users get the new checkout" is a *rule*,
 >    not a constant — so the test feeds **user/segment attributes** through the `EvaluationContext` (OpenFeature)
 >    / `LDContext` (LaunchDarkly) and asserts the right variation lands for a matching context, a non-matching
@@ -35,7 +35,7 @@ Vitest.
 >    evaluation engine runs your rule — you're testing the targeting semantics, not a hand-rolled stub of them.
 > 4. **Flag lifecycle is part of the discipline.** A kill-switch only earns its name if flipping it **mid-flight**
 >    actually degrades gracefully — `td.update(...)` propagates to a live client like a streamed change, so one
->    test proves the off-path engages *without a restart* (the flag analogue of `qa-failure-injection-testing-typescript`'s
+>    test proves the off-path engages *without a restart* (the flag analogue of `qa-typescript:failure-injection-testing`'s
 >    heal-and-recover). And flag state is **cleaned between tests** (fresh provider/fixture per test or rebuilt
 >    in `beforeEach`) so a pinned flag never leaks into the next test — test independence.
 
@@ -111,7 +111,7 @@ management or rollout strategy: creating flags in the dashboard, percentage roll
 experimentation/A-B *analytics*, or flag-cleanup tooling are platform ops, out of scope. Two adjacent boundaries
 worth drawing every time: stale-flag hygiene (a flag whose both-sides tests have asserted the same behavior for
 months is a removal candidate — flag it in review, don't let the matrix rot), and the kill-switch *off-path
-behavior* (this skill) vs a *dependency fault* behind it (`qa-failure-injection-testing-typescript`).
+behavior* (this skill) vs a *dependency fault* behind it (`qa-typescript:failure-injection-testing`).
 
 ## Anti-patterns
 
@@ -156,10 +156,10 @@ rule with the fallthrough asserted, and a kill-switch flip test. Same flag, dete
 covered.
 
 **Composing with the neighbors.** The branch under test often *contains* the things other skills assert — the
-on-path writes a new table (`qa-db-connection-typescript`), emits a new event
-(`qa-messaging-testing-typescript`), or renders a new page (`qa-ui-test-writer-playwright-typescript`). This
+on-path writes a new table (`qa-typescript:db-connection`), emits a new event
+(`qa-typescript:messaging-testing`), or renders a new page (`qa-typescript:ui-tests-playwright`). This
 skill pins which branch runs; those skills assert what the branch does. The variation matrix binds through
-`qa-data-driven-testing-typescript`; the kill-switch degradation assertion borders `qa-failure-injection-testing-typescript`
+`qa-typescript:data-driven-testing`; the kill-switch degradation assertion borders `qa-typescript:failure-injection-testing`
 (flag flip vs dependency fault — adjacent, not the same).
 
 ## Rules (hard constraints)
@@ -185,16 +185,16 @@ skill pins which branch runs; those skills assert what the branch does. The vari
 
 ## Cross-references
 
-- `qa-feature-flag-testing-java` — the **canonical** stack this sibling is ported from (`dev.openfeature:sdk` +
+- `qa-java:feature-flag-testing` — the **canonical** stack this sibling is ported from (`dev.openfeature:sdk` +
   `launchdarkly-java-server-sdk` `TestData` + TestNG); same four ideas, same fixtures, different SDK surface.
-- `qa-feature-flag-testing-dotnet` — the other sibling (`OpenFeature` NuGet + `LaunchDarkly.ServerSdk` `TestData`
+- `qa-dotnet:feature-flag-testing` — the other sibling (`OpenFeature` NuGet + `LaunchDarkly.ServerSdk` `TestData`
   + NUnit).
-- `qa-data-driven-testing-typescript` — the **matrix mechanics** the on/off/variation table binds through
+- `qa-typescript:data-driven-testing` — the **matrix mechanics** the on/off/variation table binds through
   (`it.each` row-binding); this skill defines *what* the rows are, that one defines *how* rows drive tests.
-- `qa-failure-injection-testing-typescript` — the **kill-switch boundary**: the off-path of a flag flip is this skill;
+- `qa-typescript:failure-injection-testing` — the **kill-switch boundary**: the off-path of a flag flip is this skill;
   a faulted dependency behind the feature is chaos. The lifecycle shape (steady → perturb → assert-degraded) is shared.
-- `qa-api-test-writer-typescript` · `qa-ui-test-writer-playwright-typescript` — the branch under test
+- `qa-typescript:api-tests` · `qa-typescript:ui-tests-playwright` — the branch under test
   is usually an API or UI behavior; those skills own the assertion style inside each pinned branch.
-- `qa-test-login-tokens-typescript` — the same "test fixture over live service" posture applied to auth;
+- `qa-typescript:test-login-tokens` — the same "test fixture over live service" posture applied to auth;
   pairs when targeting rules key off claims-derived attributes.
-- `qa-test-reports-typescript` — render the flag matrix as named results (one per variation row).
+- `qa-typescript:test-reports` — render the flag matrix as named results (one per variation row).

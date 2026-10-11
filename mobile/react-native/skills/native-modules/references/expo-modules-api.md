@@ -1,6 +1,6 @@
 # Expo Modules API — a local module
 
-Loaded by [`SKILL.md`](../SKILL.md). Verify exact API names against `docs.expo.dev/modules` for the project's SDK before relying on a signature here (§10 rule 3). The Swift sample follows [`mobile-ios-basics`](../../../../ios/skills/basics/SKILL.md), the Kotlin sample [`mobile-android-basics`](../../../../android/skills/basics/SKILL.md). Samples carry no inline comments.
+Loaded by [`SKILL.md`](../SKILL.md). Verify exact API names against `docs.expo.dev/modules` for the project's SDK before relying on a signature here (§10 rule 3). The Swift sample follows [`mobile-ios:concepts`](../../../../ios/skills/basics/SKILL.md), the Kotlin sample [`mobile-android:concepts`](../../../../android/skills/basics/SKILL.md). Samples carry no inline comments.
 
 ## `expo-module.config.json`
 

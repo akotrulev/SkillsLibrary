@@ -17,7 +17,7 @@ Messaging tests assert one of two things about an **async** flow:
 > no synchronous return you can assert on the next line. The message is in flight; the consumer runs on its
 > own schedule; the side-effect lands "soon". So the core discipline is: **wait on a condition** for the
 > message (or its effect) to appear, with a bounded timeout — **never `Thread.sleep`**. This is the exact
-> lineage of `qa-db-connection-java`'s Awaitility usage. Service Bus gives you a *better* primitive than polling for the receive side:
+> lineage of `qa-java:db-connection`'s Awaitility usage. Service Bus gives you a *better* primitive than polling for the receive side:
 > `receiveMessages(maxMessages, maxWaitTime)` **long-polls** — it blocks up to a bounded window for messages,
 > then returns what arrived (possibly empty). That bounded wait *is* the condition-wait; a fixed sleep is not.
 
@@ -135,7 +135,7 @@ public abstract class ServiceBusTestBase {
 > **Cloud test namespace alternative.** If your org runs against a real **test** Service Bus namespace
 > instead of the emulator, read the connection string (or an Azure AD token via `DefaultAzureCredential` +
 > the namespace FQDN) **from env, lazily** — never hard-code it, never log it (cross-link
-> `qa-test-login-tokens-java` for the token-acquisition discipline). The emulator is the default for CI
+> `qa-java:test-login-tokens` for the token-acquisition discipline). The emulator is the default for CI
 > determinism; a shared cloud namespace makes tests order-dependent unless each uses a unique
 > queue/subscription.
 
@@ -208,7 +208,7 @@ public class OrderPublishingTest extends ServiceBusTestBase {
 
 Here the SUT is a **consumer**. The test **seeds a message**, lets the consumer run, and waits for the
 observable side-effect (a DB row, another message) — the side-effect is eventually consistent, so use
-**Awaitility** to poll a probe on a condition. This reuses `qa-db-connection-java`'s discipline.
+**Awaitility** to poll a probe on a condition. This reuses `qa-java:db-connection`'s discipline.
 
 ```java
 import static org.awaitility.Awaitility.await;
@@ -454,18 +454,18 @@ public final class Orders {
 
 ## Cross-references
 
-- `qa-messaging-testing-dotnet` — the **canonical** stack, .NET 8 / NUnit
+- `qa-dotnet:messaging-testing` — the **canonical** stack, .NET 8 / NUnit
   (`Azure.Messaging.ServiceBus`: `new ServiceBusClient(...)`, `CreateReceiver(queue, options)`,
   `ReceiveMessageAsync(maxWaitTime)`, `SubQueue.DeadLetter`, `WaitFor.Async` poll). This file is ported from it.
-- `qa-messaging-testing-typescript` — same skill, Node 24 + TS (`@azure/service-bus`:
+- `qa-typescript:messaging-testing` — same skill, Node 24 + TS (`@azure/service-bus`:
   `new ServiceBusClient(connStr)`, `createReceiver(queue, { subQueueType: "deadLetter" })`,
   `receiveMessages(maxCount, { maxWaitTimeInMs })`, `expect.poll`).
 - `references/sqs.md` (`sqs`, next in family) — AWS SQS/SNS on LocalStack; visibility timeout +
   redrive-policy DLQ — same condition-wait discipline, different broker. Then Kafka (`kafka`, offset-based) and
   RabbitMQ (`rabbitmq`, AMQP exchanges) close the family.
-- `qa-db-connection-java` — the Awaitility poll and seeder/probe split reused for the consumer
+- `qa-java:db-connection` — the Awaitility poll and seeder/probe split reused for the consumer
   side-effect assertions; the **eventual-consistency lineage** this skill leans on hardest.
-- `qa-test-login-tokens-java` — when authing to a cloud test namespace with an Azure AD token
+- `qa-java:test-login-tokens` — when authing to a cloud test namespace with an Azure AD token
   (`DefaultAzureCredential`) instead of the emulator connection string; secrets-from-env discipline.
-- `qa-test-reports-java` — attach the received message body / DLQ reason to the Allure result.
-- `qa-test-data-builder-java` — builders/ObjectMother for message payloads with 4+ fields.
+- `qa-java:test-reports` — attach the received message body / DLQ reason to the Allure result.
+- `qa-java:test-data-builder` — builders/ObjectMother for message payloads with 4+ fields.

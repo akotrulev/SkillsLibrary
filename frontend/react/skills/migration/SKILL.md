@@ -1,5 +1,5 @@
 ---
-name: fe-react-migration
+name: migration
 description: Use when upgrading a React or Next.js codebase across a major — React 18→19 (removed APIs, `forwardRef`, React Compiler) or Next 14→15 (async `params`/`searchParams`/`cookies()`, caching defaults flipped) — or porting Pages Router→App Router incrementally. Covers the official codemods and what they miss. Triggers "upgrade us to React 19", "migrate to Next 15", "move off the Pages Router", "params is a Promise now". Not for a fresh project (`project-setup`).
 ---
 
@@ -133,7 +133,7 @@ Re-opt in explicitly where you relied on it: `fetch(url, { cache: 'force-cache' 
 
 ## Verification (every migration, non-negotiable)
 
-Per [`ep-verify-before-done`](../../../../engineering-practices/verify-before-done/SKILL.md) — an upgrade you haven't run is not done. Inside a `Gate: none` plan task, run none of these checks and report the upgrade as "written, not run"; the plan's gate task runs them.
+Per [`dev:verify`](../../../../engineering-practices/verify-before-done/SKILL.md) — an upgrade you haven't run is not done. Inside a `Gate: none` plan task, run none of these checks and report the upgrade as "written, not run"; the plan's gate task runs them.
 
 1. `<pm> build` clean · `tsc --noEmit` 0 errors · lint 0 warnings
 2. `<pm> test` green (Vitest) — plus the `qa-ui-typescript` peer's E2E suite if one exists; a major upgrade is exactly when E2E earns its cost

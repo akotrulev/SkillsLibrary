@@ -1,4 +1,4 @@
-# Deep-dive details — `qa-ai-feature-testing-typescript`
+# Deep-dive details — `qa-typescript:ai-feature-testing`
 
 Sections moved out of SKILL.md for on-demand loading. Read what the task needs.
 
@@ -64,8 +64,8 @@ test("answer is faithful to the provided context", async () => {
 ```
 
 > **Reporting:** route each promptfoo case and each Vitest test into Allure as a named result
-> (`qa-test-reports-typescript`) so an eval failure names the *case* — and track the suite's **pass-rate over
-> time** as a quality metric (`qa-_shared-quality-metrics`); a slow decline is a silent model/prompt regression.
+> (`qa-typescript:test-reports`) so an eval failure names the *case* — and track the suite's **pass-rate over
+> time** as a quality metric (`qa-<stack>:quality-metrics`); a slow decline is a silent model/prompt regression.
 
 
 # The four ideas — deep dive in code
@@ -150,7 +150,7 @@ answer,context,human_label,__expected
 
 ## Idea #3 — an eval is a dataset (data-driven, `data-driven-testing`)
 
-An eval suite is `qa-data-driven-testing-typescript` pointed at prompts: separate the **data** (rows of
+An eval suite is `qa-typescript:data-driven-testing` pointed at prompts: separate the **data** (rows of
 input + expected properties) from the **logic** (the one prompt + the assertion engine). promptfoo reads the
 dataset from a CSV/YAML/JSON file exactly as `data-driven-testing` reads test rows — same discipline, same "add a row, get a
 case", same "name the case so a failure reports the input that broke it". Reach for `data-driven-testing`'s mechanics (real parser,
@@ -206,7 +206,7 @@ test("refuses lock-picking instructions at least 4 of 5 times", async () => {
 });
 ```
 
-> **Boundary vs `qa-flaky-test-quarantine-typescript`:** a model that refuses 4/5 times is **behaving as
+> **Boundary vs `qa-typescript:flaky-test-quarantine`:** a model that refuses 4/5 times is **behaving as
 > designed** — that's natural variance you assert a *rate* on, NOT a flaky test to retry-and-quarantine. If you
 > quarantine it, you hide a real safety regression the day it drops to 2/5. `flaky-test-quarantine` handles a *test* that's
 > non-deterministic for infra reasons (timing, network); this idea handles a *model* that's non-deterministic by
@@ -215,7 +215,7 @@ test("refuses lock-picking instructions at least 4 of 5 times", async () => {
 ## Structured-output validation (the `is-json` analogue in code)
 
 When the app forces the model into JSON (tool use, structured extraction), the structural contract is testable
-deterministically — reuse the `qa-api-models-typescript` / Zod muscle. In promptfoo it's `is-json` with a
+deterministically — reuse the `qa-typescript:api-models` / Zod muscle. In promptfoo it's `is-json` with a
 schema (above); in the SDK path it's a Zod `safeParse` at the boundary:
 
 ```typescript
@@ -269,9 +269,9 @@ asserts the refusal **rate** held. Any failure → non-zero exit → the PR is b
 named** in the report. The whole gate is a diffable YAML + CSV a reviewer can read.
 
 **Composing with `data-driven-testing` + `flaky-test-quarantine` + api-models (the boundaries made concrete):** the **dataset** is built with
-`qa-data-driven-testing-typescript` mechanics (one row per case, named); the **structured-output** rung reuses a
-`qa-api-models-typescript` Zod schema; the **stochastic refusal** rung asserts a rate (idea #4), explicitly
-*not* handed to `qa-flaky-test-quarantine-typescript` — a dropped refusal rate is a regression, not a
+`qa-typescript:data-driven-testing` mechanics (one row per case, named); the **structured-output** rung reuses a
+`qa-typescript:api-models` Zod schema; the **stochastic refusal** rung asserts a rate (idea #4), explicitly
+*not* handed to `qa-typescript:flaky-test-quarantine` — a dropped refusal rate is a regression, not a
 flake.
 
 
@@ -295,7 +295,7 @@ flake.
 - **`expect(res.errors).toBeDefined()`-style bare assertions** — `llm-rubric: "is good"`. "Good" isn't a contract.
   *Fix:* a specific, scoped rubric with an explicit pass bar (grounded? answers the question? exact figure?).
 - **Hardcoding `ANTHROPIC_API_KEY` / committing it.** *Fix:* env, read lazily; secrets via
-  `qa-test-login-tokens-typescript`'s discipline (env + secret store), never in `promptfooconfig.yaml`.
+  `qa-typescript:test-login-tokens`'s discipline (env + secret store), never in `promptfooconfig.yaml`.
 - **Committing real PII / customer prompts as eval cases.** It's in git forever. *Fix:* synthetic cases; redact.
 - **No cost/latency ceiling.** An eval suite quietly costs real money and an agent can loop. *Fix:* `cost` /
   `latency` budget assertions; cap `max_tokens`.
@@ -307,5 +307,5 @@ flake.
 > **Why promptfoo is the spine.** It's declarative (a reviewer reads the YAML, not test code), provider-agnostic
 > (swap `anthropic:` for a local model with one line), ships the whole assertion ladder including the
 > model-graded ones, and emits a JSON report the .NET / Java siblings parse by shelling out — exactly the
-> CLI-from-every-stack shape of `qa-security-passive-scan-typescript` and
-> `qa-accessibility-testing-typescript`. The SDK path below is the second half of the hybrid.
+> CLI-from-every-stack shape of `qa-typescript:passive-scan` and
+> `qa-typescript:accessibility-testing`. The SDK path below is the second half of the hybrid.

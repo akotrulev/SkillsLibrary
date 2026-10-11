@@ -34,7 +34,7 @@ npx expo install expo-brownfield
 - **Push, deep links, auth:** the host owns the OS entry points and forwards validated payloads to RN ([`notifications-and-links`](../../notifications-and-links/SKILL.md)); tokens stay in the host's Keychain / Keystore.
 - **Startup cost:** RN initialisation is lazy where the product allows; measure cold start before and after ([`performance`](../../performance/SKILL.md)).
 - **Back and lifecycle** cross the boundary explicitly — a hardware back press or a swipe-back must reach the right owner.
-- **Release:** the artifact is built by CI from the producer; the host pins an exact version ([`mobile-shared-release`](../../../../_shared/release/SKILL.md)).
+- **Release:** the artifact is built by CI from the producer; the host pins an exact version ([`mobile-<stack>:release`](../../../../_shared/release/SKILL.md)).
 
 ## Done when
 

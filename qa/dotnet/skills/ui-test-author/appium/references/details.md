@@ -1,4 +1,4 @@
-# Deep-dive details — `qa-ui-test-writer-appium-dotnet`
+# Deep-dive details — `qa-dotnet:ui-tests-appium`
 
 Sections moved out of SKILL.md for on-demand loading. Every block below is a copy of a file in `assets/`; when they differ, the asset wins.
 

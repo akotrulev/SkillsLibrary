@@ -1,5 +1,5 @@
 ---
-name: ep-standards-audit-engine
+name: audit-engine
 description: The shared procedure behind every stack's conformance audit — Mode A/B rounds, the artifact contract, evidence rules, severity semantics, grouping policy, and the report templates. Loaded by a stack's `<plugin>-conformance-audit` skill, which supplies the rule set. Do NOT invoke directly or route a user request here — it carries no rules of its own, so an audit run from this file alone would have nothing to check against. Always enter through the stack skill or its `/<plugin>-audit` command.
 ---
 
@@ -11,8 +11,8 @@ This engine is the **CONVENTION lane**, the third of the library's three read-on
 
 | Lane | Spine | Owner |
 |---|---|---|
-| **SPEC** | A requirement register consolidated from *the user's* spec / stories / ACs | `ep-spec-vs-code-audit` (via the `code-auditor` agent) |
-| **FEATURE** | A lettered surface decomposition of one feature, no spec in hand | `ep-feature-audit` |
+| **SPEC** | A requirement register consolidated from *the user's* spec / stories / ACs | `dev:audit-spec` (via the `code-auditor` agent) |
+| **FEATURE** | A lettered surface decomposition of one feature, no spec in hand | `dev:audit-feature` |
 | **CONVENTION** | *The plugin's own* fixed rule set, swept across the whole codebase | **this engine** + a stack checklist |
 
 ## Division of labour

@@ -1,6 +1,6 @@
 ---
-name: mobile-react-native-project-setup
-description: Use when standing up or configuring an Expo SDK 57 app — `create-expo-app` default template, development builds over Expo Go, CNG and `prebuild --clean`, config plugins, `src/app` layout, strict TS, flat ESLint, `expo-doctor`, EAS Build/Submit/Update/Workflows, pnpm monorepos. Triggers "new Expo app", "add a config plugin", "dev build vs Expo Go". Do NOT use for signing and rollout (`mobile-shared-release`), routes (`-navigation`), screens (`-ui-components`) or kits (`-component-library`).
+name: project-setup
+description: Use when standing up or configuring an Expo SDK 57 app — `create-expo-app` default template, development builds over Expo Go, CNG and `prebuild --clean`, config plugins, `src/app` layout, strict TS, flat ESLint, `expo-doctor`, EAS Build/Submit/Update/Workflows, pnpm monorepos. Triggers "new Expo app", "add a config plugin", "dev build vs Expo Go". Do NOT use for signing and rollout (`mobile-<stack>:release`), routes (`-navigation`), screens (`-ui-components`) or kits (`-component-library`).
 ---
 
 # React Native / Expo — Project Setup
@@ -29,7 +29,7 @@ Never up-level a project's SDK as a side effect of setup work. The New Architect
 
 ## When NOT to use
 
-- Versioning, signing, store tracks, OTA policy → `mobile-shared-release`
+- Versioning, signing, store tracks, OTA policy → `mobile-<stack>:release`
 - Pipeline YAML → `devops-engineer`
 - Route tree, deep links → [`navigation`](../navigation/SKILL.md)
 - Component kit or theme → [`component-library`](../component-library/SKILL.md), [`styling`](../styling/SKILL.md)
@@ -119,7 +119,7 @@ Route files are thin: they compose feature organisms from `src/features/*`; busi
 - **ESLint flat config** — `eslint-config-expo/flat` in `eslint.config.js`; `pnpm expo lint` runs it. Keep `react-hooks` exhaustive-deps on.
 - **`npx expo-doctor`** clean — it checks versions, config and React Native Directory compatibility.
 - **Prettier** shared config.
-- **Env:** `EXPO_PUBLIC_*` is inlined into the bundle in plain text — public only. A real secret never ships in the bundle (`mobile-shared-security`); tokens live in `expo-secure-store` at runtime.
+- **Env:** `EXPO_PUBLIC_*` is inlined into the bundle in plain text — public only. A real secret never ships in the bundle (`mobile-<stack>:security`); tokens live in `expo-secure-store` at runtime.
 - **Lockfile + `packageManager`** committed.
 
 ## EAS in one view
@@ -131,7 +131,7 @@ eas build --profile production --platform all
 eas submit --platform ios
 ```
 
-`development` builds the dev client, `preview` is internal distribution, `production` is store-ready. EAS Update ships JS and asset changes only; EAS Workflows is EAS's own pipeline config. Profiles, secrets, build numbers, rollout and halt are in `mobile-shared-release`.
+`development` builds the dev client, `preview` is internal distribution, `production` is store-ready. EAS Update ships JS and asset changes only; EAS Workflows is EAS's own pipeline config. Profiles, secrets, build numbers, rollout and halt are in `mobile-<stack>:release`.
 
 ## Monorepo
 
@@ -158,6 +158,6 @@ Keep **native dependencies in the app package** (`vendor/.../rules/monorepo-nati
 - Kit and theme → [`component-library`](../component-library/SKILL.md), [`styling`](../styling/SKILL.md)
 - State layout → [`architecture`](../architecture/SKILL.md)
 - Native modules, Expo Modules API → [`native-modules`](../native-modules/SKILL.md)
-- Signing, tracks, OTA → `mobile-shared-release`
+- Signing, tracks, OTA → `mobile-<stack>:release`
 - SDK upgrade, bare → Expo → [`migration`](../migration/SKILL.md)
 - `testID` hand-off → [`test-ids`](../test-ids/SKILL.md)

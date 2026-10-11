@@ -1,6 +1,6 @@
 ---
-name: qa-page-objects-from-url-typescript
-description: Use when the user gives a website URL or an HTML page and wants a Page Object Model extracted/built/updated from it for a TypeScript Playwright suite. Triggers: "build a POM from this URL", "extract locators from this page", "update the LoginPage object from the live site". Do NOT use for designing the page-object structure (`qa-page-object-design-typescript`) or mobile screens (`qa-mobile-screen-objects-typescript`).
+name: page-objects-from-url
+description: Use when the user gives a website URL or an HTML page and wants a Page Object Model extracted/built/updated from it for a TypeScript Playwright suite. Triggers: "build a POM from this URL", "extract locators from this page", "update the LoginPage object from the live site". Do NOT use for designing the page-object structure (`qa-typescript:page-object-design`) or mobile screens (`qa-typescript:mobile-screen-objects`).
 ---
 
 # QA — POM Builder from Live Page (TypeScript)

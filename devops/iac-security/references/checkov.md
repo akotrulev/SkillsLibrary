@@ -16,10 +16,10 @@ findings into what the team thinks is "the Terraform gate," and the exit code st
 
 Two frameworks deserve a note:
 
-- **`secrets`** overlaps `qa-security-secrets-scan` (Gitleaks + TruffleHog) totally. **Skip it here** — that
+- **`secrets`** overlaps `qa-<stack>:secrets-scan` (Gitleaks + TruffleHog) totally. **Skip it here** — that
   skill owns secrets, with its own allow-list and triage. `--skip-framework secrets`.
-- **`sca_package` / `sca_image`** overlap `qa-security-dependency-scan-*` and
-  `qa-security-image-infra-scan`. Same rule: **skip them**, those skills own their layers.
+- **`sca_package` / `sca_image`** overlap `qa-<stack>:dependency-scan` and
+  `qa-<stack>:image-infra-scan`. Same rule: **skip them**, those skills own their layers.
 
 ## Check IDs and the severity asymmetry
 

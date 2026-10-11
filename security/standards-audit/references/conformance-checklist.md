@@ -38,7 +38,7 @@ There is no TFM here. The lane is the set of **standards and tool versions the r
 | NIST CSF | **2.0** | 6 functions incl. **Govern**, 106 subcategories |
 | NIST OSCAL | **1.2.x** | the **Mapping Model** landed in 1.2.1 (Mar 2026) |
 
-> **The skills and this table agree — keep it that way.** The `secgov-*` skills were reconciled against the sources above on 2026-08-20 (the OWASP ids were on 2021 numbering, the sigma-cli pin was two majors behind, the CRS pin claimed "current" for what is actually the LTS line, and one ATT&CK tactic id — `TA0060` for Stealth — did not exist). If they ever drift apart again, the engine's "the owning skill wins, and report the disagreement" rule settles *rule* conflicts, **not** factual errors in a cited standard: audit against the verified table above, and raise the skill text as an **open question for the maintainer**, never as a finding against the audited repo. **Re-verify the whole table before each round** — every row in it moved at least once in the twelve months before this was written.
+> **The skills and this table agree — keep it that way.** The `security-governance` skills were reconciled against the sources above on 2026-08-20 (the OWASP ids were on 2021 numbering, the sigma-cli pin was two majors behind, the CRS pin claimed "current" for what is actually the LTS line, and one ATT&CK tactic id — `TA0060` for Stealth — did not exist). If they ever drift apart again, the engine's "the owning skill wins, and report the disagreement" rule settles *rule* conflicts, **not** factual errors in a cited standard: audit against the verified table above, and raise the skill text as an **open question for the maintainer**, never as a finding against the audited repo. **Re-verify the whole table before each round** — every row in it moved at least once in the twelve months before this was written.
 
 **Recipes** use `rg` (ripgrep), which honours `.gitignore`. Without it, `grep -rn --exclude-dir=node_modules --exclude-dir=.git` is equivalent. Set the artifact roots once:
 
@@ -57,12 +57,12 @@ rg -n "<pattern>" $DET -g '*.yml' -g '*.yaml'
 >
 > `/dev/null` makes the recipe a guaranteed no-op instead of a repo-wide sweep. This is the same class of bug `CONFORMANCE-AUDIT-PLAN.md` §9 records for the react build ("shell-recipe bugs") — the variable is fine, the *unset* variable is not.
 
-**Owning skills:** [`secgov-detection-engineering`](../../detection-engineering/SKILL.md) · [`secgov-security-hardening`](../../security-hardening/SKILL.md) · [`secgov-secrets-hardening`](../../secrets-hardening/SKILL.md) · [`secgov-compliance-evidence-mapping`](../../compliance-evidence-mapping/SKILL.md) · the [`security-architect`](../../agents/security-architect.md) agent contract (section L) · [`ep-code-comments`](../../../engineering-practices/code-comments/SKILL.md) (section N).
+**Owning skills:** [`security-governance:detection-engineering`](../../detection-engineering/SKILL.md) · [`security-governance:hardening`](../../security-hardening/SKILL.md) · [`security-governance:secrets-hardening`](../../secrets-hardening/SKILL.md) · [`security-governance:compliance-evidence-mapping`](../../compliance-evidence-mapping/SKILL.md) · the [`security-architect`](../../agents/security-architect.md) agent contract (section L) · [`engineering-practices/code-comments`](../../../engineering-practices/code-comments/SKILL.md) (section N).
 
 ---
 
 ## A — Adoption map, standards pins & version lane
-*Owning skills: all four `secgov-*` skills + the `security-architect` agent contract*
+*Owning skills: all four `security-governance` skills + the `security-architect` agent contract*
 
 | # | Check | Violation looks like | Find it with | Sev |
 |---|---|---|---|---|
@@ -80,7 +80,7 @@ rg -n "<pattern>" $DET -g '*.yml' -g '*.yaml'
 ---
 
 ## B — Detection repository & the detection-as-code pipeline
-*Owning skill: [`secgov-detection-engineering`](../../detection-engineering/SKILL.md)*
+*Owning skill: [`security-governance:detection-engineering`](../../detection-engineering/SKILL.md)*
 
 | # | Check | Violation looks like | Find it with | Sev |
 |---|---|---|---|---|
@@ -97,7 +97,7 @@ rg -n "<pattern>" $DET -g '*.yml' -g '*.yaml'
 ---
 
 ## C — Sigma rule anatomy, ATT&CK mapping & correlations
-*Owning skill: [`secgov-detection-engineering`](../../detection-engineering/SKILL.md)*
+*Owning skill: [`security-governance:detection-engineering`](../../detection-engineering/SKILL.md)*
 
 | # | Check | Violation looks like | Find it with | Sev |
 |---|---|---|---|---|
@@ -114,7 +114,7 @@ rg -n "<pattern>" $DET -g '*.yml' -g '*.yaml'
 ---
 
 ## D — Detection testing, tuning & the telemetry contract
-*Owning skill: [`secgov-detection-engineering`](../../detection-engineering/SKILL.md)*
+*Owning skill: [`security-governance:detection-engineering`](../../detection-engineering/SKILL.md)*
 
 | # | Check | Violation looks like | Find it with | Sev |
 |---|---|---|---|---|
@@ -131,7 +131,7 @@ rg -n "<pattern>" $DET -g '*.yml' -g '*.yaml'
 ---
 
 ## E — Content-Security-Policy
-*Owning skill: [`secgov-security-hardening`](../../security-hardening/SKILL.md)*
+*Owning skill: [`security-governance:hardening`](../../security-hardening/SKILL.md)*
 
 | # | Check | Violation looks like | Find it with | Sev |
 |---|---|---|---|---|
@@ -149,7 +149,7 @@ rg -n "<pattern>" $DET -g '*.yml' -g '*.yaml'
 ---
 
 ## F — The secure-headers baseline
-*Owning skill: [`secgov-security-hardening`](../../security-hardening/SKILL.md)*
+*Owning skill: [`security-governance:hardening`](../../security-hardening/SKILL.md)*
 
 > **Applies only where the repo emits headers it controls** (app middleware, reverse-proxy/ingress, CDN config). A library with no HTTP surface is N/A. A repo that emits *some* of the baseline is **in scope and incomplete** — see the absence rule.
 
@@ -169,7 +169,7 @@ rg -n "<pattern>" $DET -g '*.yml' -g '*.yaml'
 ---
 
 ## G — WAF ruleset & rollout discipline
-*Owning skill: [`secgov-security-hardening`](../../security-hardening/SKILL.md)*
+*Owning skill: [`security-governance:hardening`](../../security-hardening/SKILL.md)*
 
 | # | Check | Violation looks like | Find it with | Sev |
 |---|---|---|---|---|
@@ -186,9 +186,9 @@ rg -n "<pattern>" $DET -g '*.yml' -g '*.yaml'
 ---
 
 ## H — Secret store & the leak channel
-*Owning skill: [`secgov-secrets-hardening`](../../secrets-hardening/SKILL.md)*
+*Owning skill: [`security-governance:secrets-hardening`](../../secrets-hardening/SKILL.md)*
 
-> **Fence:** *detecting* a committed secret is `qa-security-secrets-scan`'s lane. This section audits the **hardening artifacts** — the store wiring, the gates, the credential lifetime. H2/H7 are here because a live secret found while reading a config is a blocker you report wherever you find it, not because this audit is a scanner.
+> **Fence:** *detecting* a committed secret is `qa-<stack>:secrets-scan`'s lane. This section audits the **hardening artifacts** — the store wiring, the gates, the credential lifetime. H2/H7 are here because a live secret found while reading a config is a blocker you report wherever you find it, not because this audit is a scanner.
 
 | # | Check | Violation looks like | Find it with | Sev |
 |---|---|---|---|---|
@@ -205,7 +205,7 @@ rg -n "<pattern>" $DET -g '*.yml' -g '*.yaml'
 ---
 
 ## I — Rotation runbooks
-*Owning skill: [`secgov-secrets-hardening`](../../secrets-hardening/SKILL.md)*
+*Owning skill: [`security-governance:secrets-hardening`](../../secrets-hardening/SKILL.md)*
 
 | # | Check | Violation looks like | Find it with | Sev |
 |---|---|---|---|---|
@@ -222,7 +222,7 @@ rg -n "<pattern>" $DET -g '*.yml' -g '*.yaml'
 ---
 
 ## J — Compliance scope & crosswalk authority
-*Owning skill: [`secgov-compliance-evidence-mapping`](../../compliance-evidence-mapping/SKILL.md)*
+*Owning skill: [`security-governance:compliance-evidence-mapping`](../../compliance-evidence-mapping/SKILL.md)*
 
 | # | Check | Violation looks like | Find it with | Sev |
 |---|---|---|---|---|
@@ -238,14 +238,14 @@ rg -n "<pattern>" $DET -g '*.yml' -g '*.yaml'
 ---
 
 ## K — The evidence register & gap list
-*Owning skill: [`secgov-compliance-evidence-mapping`](../../compliance-evidence-mapping/SKILL.md)*
+*Owning skill: [`security-governance:compliance-evidence-mapping`](../../compliance-evidence-mapping/SKILL.md)*
 
 | # | Check | Violation looks like | Find it with | Sev |
 |---|---|---|---|---|
 | K1 | Every row names an evidence artifact by path | "We have SAST" with no SARIF, report, or config path an auditor can open — a claim, not evidence | read the register's rows end to end | major |
 | K2 | Every cited artifact exists | A row pointing at a path that is not in the repo — the register outlived the artifact | for each cited path: `ls <path>` | major |
 | K3 | Status is tiered `#present` / `#partial` / `#gap`, read from the artifact | Rows marked "met" or "yes", or a tier assigned from intent rather than from opening the artifact | `rg -n "#present\|#partial\|#gap\|\bmet\b\|\byes\b" $SEC/compliance 2>/dev/null` | major |
-| K4 | `#present` never silently means "effective" | A row claiming the control works with no validation artifact behind it — mapped ≠ effective, and proving it is `devops-infra-controls-validation`'s / the test lanes' job | cross-check every `#present` row against a validation report | major |
+| K4 | `#present` never silently means "effective" | A row claiming the control works with no validation artifact behind it — mapped ≠ effective, and proving it is `devops:controls-validation`'s / the test lanes' job | cross-check every `#present` row against a validation report | major |
 | K5 | A green pipeline is never the evidence | A row citing a CI badge or "pipeline passing" instead of the run's artifact | `rg -ni "pipeline\|badge\|green\|passing" $SEC/compliance 2>/dev/null` | major |
 | K6 | Every `#partial` / `#gap` names the closing lane | Gaps recorded but unrouted — the routed gap list is the deliverable's whole point | read every non-`#present` row | major |
 | K7 | The gap list is prioritized, not just enumerated | An unordered list with no leverage ordering, so the reader picks by position | read the gap list | minor |
@@ -273,7 +273,7 @@ rg -n "<pattern>" $DET -g '*.yml' -g '*.yaml'
 ---
 
 ## M — Redaction & sensitive material in committed security artifacts
-*Owning source: [`secgov-secrets-hardening`](../../secrets-hardening/SKILL.md)'s never-log-the-value rule + the loot-redaction rule every `security/` skill opens with*
+*Owning source: [`security-governance:secrets-hardening`](../../secrets-hardening/SKILL.md)'s never-log-the-value rule + the loot-redaction rule every `security/` skill opens with*
 
 > **This is the one section that sweeps artifacts the governance lane did not author.** It covers everything under `docs/security/**` and `detections/**` — including the `penetration-tester` and `purple-team-engineer` reports that land beside the governance artifacts — because the offensive lane's runtime gates stop the *act*, and nothing re-checks the *file* after it lands. **Only the redaction rule crosses that boundary.** The offensive findings themselves, their CVSS scores, and their kill-chain conclusions stay `penetration-tester`'s and are never re-verdicted here.
 
@@ -291,7 +291,7 @@ rg -n "<pattern>" $DET -g '*.yml' -g '*.yaml'
 ---
 
 ## N — Artifact structure, config hygiene & comments
-*Owning sources: [`ep-code-comments`](../../../engineering-practices/code-comments/SKILL.md) + the global **Comments** rules in `CLAUDE.md`*
+*Owning sources: [`engineering-practices/code-comments`](../../../engineering-practices/code-comments/SKILL.md) + the global **Comments** rules in `CLAUDE.md`*
 
 | # | Check | Violation looks like | Find it with | Sev |
 |---|---|---|---|---|
@@ -304,7 +304,7 @@ rg -n "<pattern>" $DET -g '*.yml' -g '*.yaml'
 | N7 | Sigma's own prose fields are used instead of comments | `description` / `falsepositives` / `references` left empty while the same content sits in a `#` block above the rule, where no tool can read it | compare each rule's comment block against its populated fields | minor |
 | N8 | No secret-shaped placeholder that reads as real | `password: CHANGEME_prod_2026` — indistinguishable from a real value at a glance, and it trains the reader to skim past H2 | (H2's recipe) then read each hit | minor |
 
-**N4–N7 are the audit face of [`ep-code-comments`](../../../engineering-practices/code-comments/SKILL.md)** — read it for the rule, the complex-flow test, and the never-comment-the-trivial list. Two local notes. **The reporting split:** N5 ("no inline comments") is reported as **one finding family** — a count, 3–5 representative `file:line`s, the worst offender, one fix direction — while each **N6** stale comment is **its own finding**, because each is a distinct false statement. **What is not a comment:** a Sigma `description`/`falsepositives`/`references` field, a `# ------` separator generated by `sigma convert`, and an analyzer/linter directive are structured content or tool directives, not prose — leave them alone. And **N4 already owns commented-out rules**; do not double-file them under N5.
+**N4–N7 are the audit face of [`engineering-practices/code-comments`](../../../engineering-practices/code-comments/SKILL.md)** — read it for the rule, the complex-flow test, and the never-comment-the-trivial list. Two local notes. **The reporting split:** N5 ("no inline comments") is reported as **one finding family** — a count, 3–5 representative `file:line`s, the worst offender, one fix direction — while each **N6** stale comment is **its own finding**, because each is a distinct false statement. **What is not a comment:** a Sigma `description`/`falsepositives`/`references` field, a `# ------` separator generated by `sigma convert`, and an analyzer/linter directive are structured content or tool directives, not prose — leave them alone. And **N4 already owns commented-out rules**; do not double-file them under N5.
 
 ---
 

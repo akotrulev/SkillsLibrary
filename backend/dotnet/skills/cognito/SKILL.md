@@ -1,5 +1,5 @@
 ---
-name: be-dotnet-cognito
+name: cognito
 description: Use when setting up AWS Cognito (user pools) in an ASP.NET Core service (.NET 10 primary, 8/9) — validating Cognito access-token JWTs (issuer/JWKS, no `aud`, `token_use=access`), resource-server scope policies, `cognito:groups` roles, Client Credentials M2M. Triggers: "add Cognito to my ASP.NET Core API", "why does my Cognito token have no audience". Do NOT use for the Blazor SPA flow (`auth/cognito-blazor`), Auth0 (the `auth0` sibling), or generic OIDC (`auth/_shared/oidc-concepts`).
 ---
 

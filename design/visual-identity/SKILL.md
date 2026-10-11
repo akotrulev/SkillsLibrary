@@ -1,13 +1,13 @@
 ---
-name: design-visual-identity
-description: Use when a shipping web app needs its visual identity — one per-brief direction (palette, type, spacing, layout, motion) handed down as tokens; a MARKETING page gets a hero and one aesthetic risk, an APPLICATION the modern-app recipe. Triggers "give this app a look", "make this UI not look AI-generated", "pick a palette and fonts". Not for CSS mechanics (the stack's `styling`), token naming (`design-tokens`), a brand book (`design-brand-import`), or presets (`design-theme-presets`).
+name: visual-identity
+description: Use when a shipping web app needs its visual identity — one per-brief direction (palette, type, spacing, layout, motion) handed down as tokens; a MARKETING page gets a hero and one aesthetic risk, an APPLICATION the modern-app recipe. Triggers "give this app a look", "make this UI not look AI-generated", "pick a palette and fonts". Not for CSS mechanics (the stack's `styling`), token naming (`design:tokens`), a brand book (`design:brand-import`), or presets (`design:theme-presets`).
 ---
 
 # Frontend Design
 
 Approach this as the design lead at a small studio known for giving every client a visual identity that could not be mistaken for anyone else's. The client has already rejected proposals that felt templated, and is paying for a distinctive point of view: make deliberate, opinionated choices about palette, typography, and layout that are specific to *this* brief, and take one real aesthetic risk you can justify — where the lane below allows it.
 
-**Corpus authority.** The facts this skill decides with come from the vendored [`design-ui-ux-pro-max`](../ui-ux-pro-max/SKILL.md) corpus — **it is the source of truth, and where it and this skill disagree on a fact, the corpus wins.** Query it before choosing a style, palette, or type pairing:
+**Corpus authority.** The facts this skill decides with come from the vendored [`design:corpus`](../ui-ux-pro-max/SKILL.md) corpus — **it is the source of truth, and where it and this skill disagree on a fact, the corpus wins.** Query it before choosing a style, palette, or type pairing:
 
 ```bash
 python3 "${CLAUDE_PLUGIN_ROOT}/design/ui-ux-pro-max/scripts/search.py" "<product> <industry> <keywords>" --design-system -p "<Project>"

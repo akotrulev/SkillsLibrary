@@ -21,7 +21,7 @@ Messaging tests assert one of two things about an **async** flow:
 > synchronous return you can assert on the next line. The message is in flight; the consumer runs on its own
 > schedule; the side-effect lands "soon". So the core discipline is: **wait on a condition** for the message
 > (or its effect) to appear, with a bounded timeout — **never `Task.Delay` / `Thread.Sleep`**. This is the
-> exact lineage of `qa-db-connection-dotnet`'s `WaitForAsync` poll and `references/service-bus.md`'s
+> exact lineage of `qa-dotnet:db-connection`'s `WaitForAsync` poll and `references/service-bus.md`'s
 > condition-wait. SQS gives you the **`WaitTimeSeconds` long-poll** as a better primitive than spin-polling for
 > the receive side: `ReceiveMessageAsync` with `WaitTimeSeconds` blocks up to a bounded window (max **20s**)
 > for a message to arrive, then returns it or an empty `Messages` list. That bounded wait *is* the
@@ -145,7 +145,7 @@ public abstract class SqsFixture
 > **Cloud test queue alternative.** If your org runs against a real **test** AWS account instead of LocalStack,
 > drop the `ServiceURL` override and let the SDK resolve the real endpoint; read the region from env and the
 > credentials from the **default AWS credential chain** (instance role / SSO / env vars) — never hard-code an
-> access key, never log it (cross-link `qa-test-login-tokens-dotnet` for the secrets-from-env discipline).
+> access key, never log it (cross-link `qa-dotnet:test-login-tokens` for the secrets-from-env discipline).
 > LocalStack is the default for CI determinism; a shared cloud queue makes tests order-dependent unless each
 > uses a uniquely named queue.
 
@@ -219,7 +219,7 @@ public class OrderPublishingTests : SqsFixture
 
 Here the SUT is a **consumer**. The test **seeds a message**, lets the consumer run, and waits for the
 observable side-effect (a DB row, another message) — the side-effect is eventually consistent, so poll a
-**probe** on a condition. This reuses `qa-db-connection-dotnet`'s `WaitForAsync` verbatim.
+**probe** on a condition. This reuses `qa-dotnet:db-connection`'s `WaitForAsync` verbatim.
 
 ```csharp
 [Test]
@@ -251,7 +251,7 @@ public async Task Should_write_a_shipment_row_When_an_OrderPaid_message_is_consu
 }
 ```
 
-The `WaitFor.Async` helper is the same bounded poll as `qa-db-connection-dotnet` and ``service-bus`` Service Bus —
+The `WaitFor.Async` helper is the same bounded poll as `qa-dotnet:db-connection` and ``service-bus`` Service Bus —
 included so the node is self-contained:
 
 ```csharp
@@ -571,20 +571,20 @@ public static class Orders
 
 ## Cross-references
 
-- `qa-messaging-testing-java` — same skill, Java 21 / TestNG (`software.amazon.awssdk:sqs`/`sns`:
+- `qa-java:messaging-testing` — same skill, Java 21 / TestNG (`software.amazon.awssdk:sqs`/`sns`:
   `SqsClient.builder().endpointOverride(...)`, `receiveMessage(b -> b.waitTimeSeconds(10)...)`,
   `RedrivePolicy` attribute, Awaitility for side-effects, `org.testcontainers:localstack`
   `LocalStackContainer`). Structure ported, not code.
-- `qa-messaging-testing-typescript` — same skill, Node 24 + TS (`@aws-sdk/client-sqs`/`client-sns`:
+- `qa-typescript:messaging-testing` — same skill, Node 24 + TS (`@aws-sdk/client-sqs`/`client-sns`:
   `new SQSClient({ endpoint })`, `ReceiveMessageCommand({ WaitTimeSeconds: 10 })`, `expect.poll` for
   side-effects, `@testcontainers/localstack`).
 - `references/service-bus.md` (`service-bus`, the **structure this node is ported from**) — Azure Service
   Bus on the emulator; **the `service-bus`-vs-`sqs` boundary**: Service Bus peek-lock + DLQ *sub-queue* vs SQS
   visibility-timeout + redrive-policy *DLQ queue* — same condition-wait discipline, different settlement.
   Kafka (`kafka`, offset-based) and RabbitMQ (`rabbitmq`, AMQP exchanges) close the family.
-- `qa-db-connection-dotnet` — the `WaitFor.Async` poll helper and the seeder/probe split reused for
+- `qa-dotnet:db-connection` — the `WaitFor.Async` poll helper and the seeder/probe split reused for
   the consumer side-effect assertions; the **eventual-consistency lineage** this skill leans on hardest.
-- `qa-test-login-tokens-dotnet` — when running against a cloud test account; the default-credential-chain
+- `qa-dotnet:test-login-tokens` — when running against a cloud test account; the default-credential-chain
   + secrets-from-env discipline.
-- `qa-test-reports-dotnet` — attach the received message body / DLQ payload to the Allure result.
-- `qa-test-data-builder-dotnet` — builders/ObjectMother for message payloads with 4+ fields.
+- `qa-dotnet:test-reports` — attach the received message body / DLQ payload to the Allure result.
+- `qa-dotnet:test-data-builder` — builders/ObjectMother for message payloads with 4+ fields.

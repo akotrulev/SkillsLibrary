@@ -18,7 +18,7 @@ Messaging tests assert one of two things about an **async** flow:
 > synchronous return you can assert on the next line. The message is in flight; the consumer runs on its own
 > schedule; the side-effect lands "soon". So the core discipline is: **wait on a condition** for the message
 > (or its effect) to appear, with a bounded timeout — **never `setTimeout` / `page.waitForTimeout`**. This is
-> the exact lineage of `qa-db-connection-typescript`'s `expect.poll` usage and
+> the exact lineage of `qa-typescript:db-connection`'s `expect.poll` usage and
 > `references/service-bus.md`'s condition-wait. SQS gives you the **`WaitTimeSeconds`
 > long-poll** as a better primitive than spin-polling for the receive side: `ReceiveMessageCommand` with
 > `WaitTimeSeconds` waits up to a bounded window (max **20s**) for a message to arrive, then returns it or an
@@ -130,7 +130,7 @@ export async function startSqsBroker(): Promise<Broker> {
 > **Cloud test account alternative.** If your org runs against a real **test** AWS account instead of
 > LocalStack, drop the `endpoint` override and let the SDK resolve the real endpoint; read the region from
 > `process.env` and let the SDK use the **default credential chain** (instance role / SSO / env vars) — never
-> hard-code an access key, never log it (cross-link `qa-test-login-tokens-typescript` for the secrets-from-env
+> hard-code an access key, never log it (cross-link `qa-typescript:test-login-tokens` for the secrets-from-env
 > discipline). LocalStack is the default for CI determinism; a shared cloud queue makes tests order-dependent
 > unless each uses a uniquely named queue.
 
@@ -204,7 +204,7 @@ describe("order publishing", () => {
 
 Here the SUT is a **consumer**. The test **seeds a message**, lets the consumer run, and waits for the
 observable side-effect (a DB row, another message) — the side-effect is eventually consistent, so use
-`expect.poll` to wait on a condition. This reuses `qa-db-connection-typescript`'s discipline.
+`expect.poll` to wait on a condition. This reuses `qa-typescript:db-connection`'s discipline.
 
 ```typescript
 import { SendMessageCommand } from "@aws-sdk/client-sqs";
@@ -510,19 +510,19 @@ export const anOrder = () => new OrderBuilder().status("Pending");
 
 ## Cross-references
 
-- `qa-messaging-testing-dotnet` — the **canonical** stack, .NET 8 / NUnit (`AWSSDK.SQS`:
+- `qa-dotnet:messaging-testing` — the **canonical** stack, .NET 8 / NUnit (`AWSSDK.SQS`:
   `new AmazonSQSClient(creds, new AmazonSQSConfig { ServiceURL })`, `ReceiveMessageAsync(WaitTimeSeconds)`,
   `RedrivePolicy` attribute, `WaitFor.Async` poll, `Testcontainers.LocalStack`). This file is ported from it.
-- `qa-messaging-testing-java` — same skill, Java 21 / TestNG (`software.amazon.awssdk:sqs`/`sns`:
+- `qa-java:messaging-testing` — same skill, Java 21 / TestNG (`software.amazon.awssdk:sqs`/`sns`:
   `SqsClient.builder().endpointOverride(...)`, `receiveMessage(b -> b.waitTimeSeconds(10)...)`, Awaitility,
   `org.testcontainers:localstack`).
 - `references/service-bus.md` (`service-bus`, the **structure this node is ported from**) — Azure
   Service Bus on the emulator; **the `service-bus`-vs-`sqs` boundary**: Service Bus peek-lock + DLQ *sub-queue* vs SQS
   visibility-timeout + redrive-policy *DLQ queue* — same condition-wait discipline, different settlement.
   Kafka (`kafka`, offset-based) and RabbitMQ (`rabbitmq`, AMQP exchanges) close the family.
-- `qa-db-connection-typescript` — the `expect.poll` and seeder/probe split reused for the consumer
+- `qa-typescript:db-connection` — the `expect.poll` and seeder/probe split reused for the consumer
   side-effect assertions; the **eventual-consistency lineage** this skill leans on hardest.
-- `qa-test-login-tokens-typescript` — when running against a cloud test account; the default-credential
+- `qa-typescript:test-login-tokens` — when running against a cloud test account; the default-credential
   -chain + secrets-from-env discipline.
-- `qa-test-reports-typescript` — attach the received message body / DLQ payload to the Allure result.
-- `qa-test-data-builder-typescript` — builders for message payloads with 4+ fields.
+- `qa-typescript:test-reports` — attach the received message body / DLQ payload to the Allure result.
+- `qa-typescript:test-data-builder` — builders for message payloads with 4+ fields.

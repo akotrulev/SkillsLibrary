@@ -1,5 +1,5 @@
 ---
-name: be-java-cognito
+name: cognito
 description: Use when setting up AWS Cognito (user pools) in a Java 21 + Spring Boot 3 service — validating Cognito access-token JWTs with a Spring Security resource server (issuer-uri, no `aud`, `token_use=access`), scope + `cognito:groups` authorities, `@PreAuthorize`, Client Credentials M2M. Triggers: "add Cognito to my Spring Boot API", "why does my Cognito token have no audience". Do NOT use for the React SPA flow (`auth/cognito-react`), Auth0 (the `auth0` sibling), or generic OIDC concepts.
 ---
 

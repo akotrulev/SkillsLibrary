@@ -1,6 +1,6 @@
 ---
-name: qa-ui-test-review-typescript
-description: Use when the user asks to review existing TypeScript UI test code or page objects. Triggers: "review this Playwright spec", "look at this page object class", "is this WebdriverIO test any good". Do NOT use for writing new tests (`qa-ui-test-writer-playwright-typescript`) or reviewing a Gherkin layer (`qa-bdd-reviewer-typescript`).
+name: ui-tests-review
+description: Use when the user asks to review existing TypeScript UI test code or page objects. Triggers: "review this Playwright spec", "look at this page object class", "is this WebdriverIO test any good". Do NOT use for writing new tests (`qa-typescript:ui-tests-playwright`) or reviewing a Gherkin layer (`qa-typescript:bdd-reviewer`).
 ---
 
 # QA — UI Test & Page Object Reviewer (TypeScript)
@@ -172,11 +172,11 @@ assertions with a subject, an auth setup project, seeded data deleted in fixture
 - **Any `try` / `catch` in a test or a cleanup hook.** An expected rejection is `await expect(...).rejects`;
   cleanup is fixture teardown. The only catches belong in I/O helpers narrowing one named error.
 - **`any` / `as unknown as X`** in fixtures or page objects.
-- **Any inline comment** in a test body or page-object method, and any stale comment (`ep-code-comments`).
+- **Any inline comment** in a test body or page-object method, and any stale comment (`engineering-practices/code-comments`).
 
 ## Comments in test code
 
-Load **[`ep-code-comments`](../../../../../engineering-practices/code-comments/SKILL.md)** for the rule, the
+Load **[`engineering-practices/code-comments`](../../../../../engineering-practices/code-comments/SKILL.md)** for the rule, the
 complex-flow test that earns a doc comment, the trivia list and the severity mapping. Its **test-code**
 section carries the AAA-banner rule and the three permitted comments. Here it also covers page-object and
 screen-object bodies: an intent-revealing method name is the page object's documentation.

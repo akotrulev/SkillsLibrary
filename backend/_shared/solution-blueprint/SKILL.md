@@ -1,6 +1,6 @@
 ---
-name: be-shared-solution-blueprint
-description: Use when turning a business case, requirements set, or loose direction into an approved HIGH-LEVEL backend plan — areas, architecture, stack, and a routing map binding each area to the agent that builds it. Ends in a blocking human approval gate before any detail. Triggers "plan the backend for…", "which agents should build what". Do NOT use for the detail pack (the `be-shared-*` detail skills), requirements (`requirements-author`), schema depth (`data-architect`), or code (`be-<stack>`).
+name: plan-blueprint
+description: Use when turning a business case, requirements set, or loose direction into an approved HIGH-LEVEL backend plan — areas, architecture, stack, and a routing map binding each area to the agent that builds it. Ends in a blocking human approval gate before any detail. Triggers "plan the backend for…", "which agents should build what". Do NOT use for the detail pack (the `dev:plan-*` detail skills), requirements (`requirements-author`), schema depth (`data-architect`), or code (`be-<stack>`).
 ---
 
 # Solution Blueprint — the high-level backend plan
@@ -16,7 +16,7 @@ The blueprint is the document the human approves. Everything downstream — data
 ## When NOT to use
 
 - The requirements themselves are missing or contradictory → `requirements-author` / `business-analyst` first. Planning against guessed requirements produces a document indistinguishable from a real plan, which is what makes it dangerous
-- The blueprint is already approved → move to `be-shared-data-model-plan`
+- The blueprint is already approved → move to `dev:plan-data-model`
 - The ask is a single endpoint or a bug fix → no blueprint; that is a `be-<stack>` task directly
 
 ## Output
@@ -31,7 +31,7 @@ The blueprint is the document the human approves. Everything downstream — data
 |---|---|
 | `#confirmed` | Stated by the human — in this session or in a requirements document. Never read out of code; that is `#observed` |
 | `#inferred` | Your reasoning from indirect evidence — the human should scan these |
-| `#observed` | Read out of existing code/behavior rather than a document — `ba-project-memory`'s grammar is the canonical definition; in the documenter lane it always carries `file:line` |
+| `#observed` | Read out of existing code/behavior rather than a document — `business-analysis:knowledge-base`'s grammar is the canonical definition; in the documenter lane it always carries `file:line` |
 | `[TBD - <owner>, <by when>]` | Genuinely unknown; has a named owner. **Not** a synonym for vague |
 | `⚠️ Assumption:` | You proceeded on an unconfirmed premise. Every one of these is also a line in Open Questions |
 
@@ -69,7 +69,7 @@ A **functional area** is a coherent slice of business capability that could plau
 | Area | Short noun phrase |
 | Epics | The `E` ids from `epics.md` this area serves — `E1, E3`, or `E0` for a cross-cutting foundation. This is the join the whole pack is later checked on |
 | Purpose | One sentence — the capability, in business terms |
-| User-facing capabilities | The things a person can *do* here, one short sentence each in the user's voice (*"a member books a session"*, *"an admin publishes a workshop"*) — empty for areas nothing user-facing sits on. `be-shared-delivery-plan` sequences user-facing work one capability at a time, so this column is what it sequences on; an area with none is planned layer-first |
+| User-facing capabilities | The things a person can *do* here, one short sentence each in the user's voice (*"a member books a session"*, *"an admin publishes a workshop"*) — empty for areas nothing user-facing sits on. `dev:plan-delivery` sequences user-facing work one capability at a time, so this column is what it sequences on; an area with none is planned layer-first |
 | Primary actors | Who or what drives it (end user, admin, scheduled job, external system) |
 | Key entities | The 2–5 nouns it owns — the seed of `data-model.md` |
 | In scope | What this initiative builds for it |
@@ -82,8 +82,8 @@ Rules:
 - **6–8 areas is a lot.** Beyond that, either the initiative should be decomposed into separate initiatives (each with its own folder and its own executable plan), or several "areas" are really one. Say which.
 - **Out of scope is not optional.** The most common plan defect is an unstated boundary that someone later reads as included.
 - Every area gets at least one entity or it is not an area — it is a cross-cutting concern (auth, logging, config), which belongs in the architecture section instead.
-- **Name the actors and propose the shell when anything is user-facing.** Where the table has a non-empty *User-facing capabilities* column, add a short §2b: one line per actor with their two or three most frequent tasks (*verb + object + outcome*), and the **app shell** — sidebar / top nav / hybrid, from `design/ux-patterns` §2's table — as a `proposed` row with its one-line reason. This is what lets the approver judge the experience at the gate; the nav map, journeys and screens are `be-shared-experience-plan`'s in Step 3, not the blueprint's. An initiative with no user-facing capability writes "no user-facing area" and skips the section.
-- **Ask about existing data.** If any area replaces a current system of record (a spreadsheet, a legacy app, a manual process), the data living there is in scope or out — say which. What must come across, and whether it is a one-time import or an ongoing sync, is a scope boundary and usually an open question; the mapping detail belongs to `be-shared-data-model-plan`'s backfill section.
+- **Name the actors and propose the shell when anything is user-facing.** Where the table has a non-empty *User-facing capabilities* column, add a short §2b: one line per actor with their two or three most frequent tasks (*verb + object + outcome*), and the **app shell** — sidebar / top nav / hybrid, from `design/ux-patterns` §2's table — as a `proposed` row with its one-line reason. This is what lets the approver judge the experience at the gate; the nav map, journeys and screens are `dev:plan-experience`'s in Step 3, not the blueprint's. An initiative with no user-facing capability writes "no user-facing area" and skips the section.
+- **Ask about existing data.** If any area replaces a current system of record (a spreadsheet, a legacy app, a manual process), the data living there is in scope or out — say which. What must come across, and whether it is a one-time import or an ongoing sync, is a scope boundary and usually an open question; the mapping detail belongs to `dev:plan-data-model`'s backfill section.
 
 ### Step 3 — Decide the architecture style
 
@@ -173,7 +173,7 @@ The two failure exits in that diagram are the point of drawing it. A flow with o
 
 **The hit policy is never invented.** If nobody has decided what happens when two rules both apply, that is a `[TBD]` and an open question — an invented precedence rule is a business decision made silently by whoever wrote the table.
 
-Load `ba-process-flow-diagram` and `ba-decision-table` for the full discipline (the event-timeline pass, swimlane rules, the completeness/overlap procedure, the KB file formats). They are bundled alongside this skill. Where the project keeps a business-model KB, the models belong in it as `FLOW-nnn` / `DEC-nnn` artifacts and the blueprint links them by ID rather than duplicating them.
+Load `business-analysis:process-flow` and `business-analysis:decision-table` for the full discipline (the event-timeline pass, swimlane rules, the completeness/overlap procedure, the KB file formats). They are loaded by path. Where the project keeps a business-model KB, the models belong in it as `FLOW-nnn` / `DEC-nnn` artifacts and the blueprint links them by ID rather than duplicating them.
 
 ### Step 4 — Settle the tech stack
 
@@ -197,7 +197,7 @@ Version policy: **detected wins**. Never propose an up-level runtime as a side e
 
 ### Step 5 — Name the external systems (architecture altitude only)
 
-One line each: system, what it does for us, direction (we call it / it calls us / both), and criticality (does the feature fail without it, or degrade?). Depth — auth method, config keys, retry policy, sandbox strategy — belongs to `be-shared-integration-plan` in Step 5. Here you only need enough to make the architecture and the risk list honest.
+One line each: system, what it does for us, direction (we call it / it calls us / both), and criticality (does the feature fail without it, or degrade?). Depth — auth method, config keys, retry policy, sandbox strategy — belongs to `dev:plan-integrations` in Step 5. Here you only need enough to make the architecture and the risk list honest.
 
 ### Step 6 — Build the routing map
 
@@ -205,14 +205,14 @@ One line each: system, what it does for us, direction (we call it / it calls us 
 
 | Area / concern | Agent | Skills it will load | Note |
 |---|---|---|---|
-| Screens, shell, navigation (`experience-plan.md` S1–Sn) | `fe-react` | `design-ux-patterns`, `fe-react-component-writer`, `fe-react-routing` | Builds from the experience plan; IA is decided there, not re-derived |
-| Ordering domain + persistence | `be-dotnet` | `be-dotnet-pattern-writer`, `be-dotnet-database-code`, `be-dotnet-unit-testing` | Unit tests ship with the task, not after |
-| Schema, indexes, tenancy enforcement | `data-architect` | `data-postgresql`, `data-schema-design` | Beyond ORM mechanics |
-| Service-side auth | `be-dotnet` | `be-dotnet-auth0` | Frontend half is `fe-react` |
-| Telemetry | `observability-engineer-dotnet` | `observability-opentelemetry-dotnet` | Runs after the first capability's tasks land |
-| Contract + integration tests | `qa-api-dotnet` | `qa-api-test-writer-dotnet` | Test basis is `api-surface.md` |
-| Access-control proof | `qa-security` | `qa-permission-testing-dotnet` | BOLA/IDOR over the auth column |
-| Image, IaC, pipeline, secrets | `devops-engineer` | `devops-docker`, `devops-environment-config` | |
+| Screens, shell, navigation (`experience-plan.md` S1–Sn) | `fe-react` | `design:app-structure`, `fe-react:component-writer`, `fe-react:routing` | Builds from the experience plan; IA is decided there, not re-derived |
+| Ordering domain + persistence | `be-dotnet` | `be-dotnet:patterns-apply`, `be-dotnet:persistence`, `be-dotnet:unit-testing` | Unit tests ship with the task, not after |
+| Schema, indexes, tenancy enforcement | `data-architect` | `data:postgresql`, `data:schema-design` | Beyond ORM mechanics |
+| Service-side auth | `be-dotnet` | `be-dotnet:auth0` | Frontend half is `fe-react` |
+| Telemetry | `observability-engineer-dotnet` | `be-dotnet:opentelemetry` | Runs after the first capability's tasks land |
+| Contract + integration tests | `qa-api-dotnet` | `qa-dotnet:api-tests` | Test basis is `api-surface.md` |
+| Access-control proof | `qa-security` | `qa-dotnet:permission-testing` | BOLA/IDOR over the auth column |
+| Image, IaC, pipeline, secrets | `devops-engineer` | `devops:docker`, `devops:environment-config` | |
 
 **The agent catalog** — pick only from these names:
 
@@ -234,7 +234,7 @@ If a needed capability has no agent, say so plainly and name the skill or the hu
 
 **Then record the execution model — one line, and it is an answer, not an inference.** The routing map says *which* agents build the system; the execution model says *how the run happens*, and the delivery plan's sequencing shape is chosen from it. Ask it in the Step-9 question batch:
 
-| Execution model | Recognized by | Selects (in `be-shared-delivery-plan` Step 2) |
+| Execution model | Recognized by | Selects (in `dev:plan-delivery` Step 2) |
 |---|---|---|
 | **One operator, sequential batches** | One person drives one session at a time; the integration/E2E pass happens once at the end; nothing has to be demonstrable before the last batch | `agent-batched` — a contract wave, then one batch per backend module, then one per frontend screen area |
 | **Concurrent lanes / Mission Control** | Several lanes run at once, or a stakeholder wants the first capability working early | `feature-complete` — one capability at a time, each usable end to end |
@@ -291,7 +291,7 @@ In `DETAIL` mode, where the human supplied the high-level plan, the gate is shor
 ```markdown
 # <Initiative> — Solution Blueprint
 
-**Date:** YYYY-MM-DD · **Written by:** `be-shared-solution-blueprint` · **Status:** DRAFT — awaiting approval
+**Date:** YYYY-MM-DD · **Written by:** `dev:plan-blueprint` · **Status:** DRAFT — awaiting approval
 **Initiative folder:** `docs/plans/<NNN>-<initiative>/`
 **Entry mode:** NEW | DETAIL | RESUME | EXTEND — <what settled it>
 **Sources:** <requirements docs, stories, KB entries, repo paths — with what each contributed>
@@ -400,10 +400,10 @@ flowchart LR
 
 ## Handoffs
 
-- **Approved →** `be-shared-data-model-plan` (Step 2). The Key entities column is its input. Then **`be-shared-experience-plan` (Step 3)** whenever the routing map names `fe-react` / `fe-blazor` — §2's capabilities, §2b's actors and shell, and §3b's flows are its inputs.
+- **Approved →** `dev:plan-data-model` (Step 2). The Key entities column is its input. Then **`dev:plan-experience` (Step 3)** whenever the routing map names `fe-react` / `fe-blazor` — §2's capabilities, §2b's actors and shell, and §3b's flows are its inputs.
 - **Requirements too thin →** `requirements-author`, or `business-analyst` when the ask may conflict with existing features. Their `docs/business-model/` KB is a first-class input here.
 - **Architecture turns on a pattern question →** `backend/_shared/pattern-guide` for the concept card (loaded, not delegated).
-- **Flows and decision rules need the full modelling discipline →** `ba-process-flow-diagram` / `ba-decision-table` (loaded, not delegated); `ba-entity-state-grid` for entity lifecycles, which `be-shared-data-model-plan` also draws.
+- **Flows and decision rules need the full modelling discipline →** `business-analysis:process-flow` / `business-analysis:decision-table` (loaded, not delegated); `business-analysis:state-grid` for entity lifecycles, which `dev:plan-data-model` also draws.
 - **Engine choice or tenancy enforcement needs real depth →** state the requirement here, route the decision to `data-architect`.
 - **The blueprint reveals the ask spans multiple systems →** propose the decomposition, plan the first one; one initiative folder per system.
 

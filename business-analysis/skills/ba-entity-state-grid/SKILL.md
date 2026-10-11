@@ -1,6 +1,6 @@
 ---
-name: ba-entity-state-grid
-description: Use when modeling a business entity's lifecycle (Order, Subscription, User…) as one state × event table shared across ALL features, each transition annotated by its owning feature — persisted to the KB. Triggers: "what states can an order be in", "model the subscription lifecycle", "which feature moves it to Cancelled". Do NOT use for process/step flows (`ba-process-flow-diagram`), rule tables (`ba-decision-table`), or state-transition TEST design (`test-design-techniques`).
+name: state-grid
+description: Use when modeling a business entity's lifecycle (Order, Subscription, User…) as one state × event table shared across ALL features, each transition annotated by its owning feature — persisted to the KB. Triggers: "what states can an order be in", "model the subscription lifecycle", "which feature moves it to Cancelled". Do NOT use for process/step flows (`business-analysis:process-flow`), rule tables (`business-analysis:decision-table`), or state-transition TEST design (`test-design-techniques`).
 ---
 
 # BA — State Modeler
@@ -18,8 +18,8 @@ Models a business entity's lifecycle as **one state model per entity — never p
 
 ## When NOT to use
 
-- Multi-step process paths between actors → `ba-process-flow-diagram`
-- Input-combination → outcome rules → `ba-decision-table`
+- Multi-step process paths between actors → `business-analysis:process-flow`
+- Input-combination → outcome rules → `business-analysis:decision-table`
 - Deriving state-transition **test cases**, n-switch coverage, transition-pair mechanics → `qa/manual/test-design-techniques` §4 owns those; this skill produces the model they consume
 - An "entity" with two states and one transition — note it in the flow file instead; a grid earns its keep at ≥3 states or ≥2 features touching the lifecycle
 
@@ -32,7 +32,7 @@ Per `business-analysis/skills/ba-project-memory`: **read first** (`INDEX.md` + t
 1. **Identify the entity and enumerate its states** from the requirements *and* the existing KB model. States are business-meaningful conditions ("Submitted", "Suspended"), not implementation flags. A new feature inventing a near-synonym of an existing state ("Deactivated" vs "Suspended") is terminology drift → glossary check before adding.
 2. **Enumerate the events** — everything any feature does that can move the entity: user actions, system events, timeouts, lifecycle jobs (archival, cleanup, expiry — the classically forgotten writers).
 3. **Fill the grid — every cell.** For each `state × event`: the target state, `—` (illegal by decision), or `?` (unspecified — a finding). Never leave a cell blank.
-4. **Annotate every legal transition with its owning feature** — the feature whose requirements define it, written as an `E<n>`/`AREA-` id with a label per `ba-project-memory`. One transition claimed by two features is a **double-fire** finding; a transition no feature owns is an orphan.
+4. **Annotate every legal transition with its owning feature** — the feature whose requirements define it, written as an `E<n>`/`AREA-` id with a label per `business-analysis:knowledge-base`. One transition claimed by two features is a **double-fire** finding; a transition no feature owns is an orphan.
 5. **Overlay the new feature** (the common case): add its events/states to the existing grid, then read the *whole* grid again — the conflicts are in the cells the new feature changed *and* the cells it silently assumed.
 6. **Run the conflict-surface checklist** (below) and log findings.
 
@@ -47,7 +47,7 @@ Per `business-analysis/skills/ba-project-memory`: **read first** (`INDEX.md` + t
 | **Unreachable / dead state** | a state with no inbound transitions, or no outbound ones that isn't terminal by decision | gap |
 | **Guard conflict** | same transition, two features demand different guards ("only admin" vs "any owner") | contradictory rules / permission |
 
-Each finding gets a **boundary condition** — the concrete scenario where it bites ("subscription expires (A) while the upgrade payment (B) is mid-capture") — and goes to `ba-feature-conflict-check` for the severity table + resolution recording.
+Each finding gets a **boundary condition** — the concrete scenario where it bites ("subscription expires (A) while the upgrade payment (B) is mid-capture") — and goes to `business-analysis:conflict-check` for the severity table + resolution recording.
 
 ## Entity file format (`docs/business-model/entities/<entity>.md`)
 
@@ -55,8 +55,8 @@ Each finding gets a **boundary condition** — the concrete scenario where it bi
 # Entity — Order (ENT-001)
 
 **Created:** <YYYY-MM-DD>
-**Owned by:** `ba-entity-state-grid`
-**Last updated:** <YYYY-MM-DD> by `ba-entity-state-grid` — <one line what changed>
+**Owned by:** `business-analysis:state-grid`
+**Last updated:** <YYYY-MM-DD> by `business-analysis:state-grid` — <one line what changed>
 
 **Sources**: <refs> · **Features touching this lifecycle**: E1 checkout, E2 fulfillment, E4 refunds, AREA-007 archival
 

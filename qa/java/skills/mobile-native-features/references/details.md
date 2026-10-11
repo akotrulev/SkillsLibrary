@@ -1,4 +1,4 @@
-# Deep-dive details — `qa-mobile-native-features-java`
+# Deep-dive details — `qa-java:mobile-native-features`
 
 Sections moved out of SKILL.md for on-demand loading. Read what the task needs.
 

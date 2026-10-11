@@ -1,5 +1,5 @@
 ---
-name: qa-bdd-reviewer-dotnet
+name: bdd-reviewer
 description: Use when reviewing or auditing existing Gherkin `.feature` files and Reqnroll step definitions in C#/.NET for living-documentation quality, step reusability, and correct binding/DI/lifecycle. Triggers "review these feature files", "audit our Reqnroll step definitions", "are these Gherkin scenarios good", "check our BDD layer". Not for generating features (`feature-file-writer`) or step definitions (`gherkin-step-code`).
 ---
 
@@ -56,7 +56,7 @@ Audits a BDD layer across **two surfaces** — the `.feature` files (Gherkin qua
 - [ ] Cleanup implemented as an `[AfterScenario]` hook, not as Gherkin steps.
 - [ ] `[ScenarioDependencies]` is static, returns `IServiceCollection`, and does not manually register `[Binding]` classes.
 - [ ] No hardcoded credentials/URLs — env vars / config.
-- [ ] **No inline comments in step definitions or hooks** — the step text above the binding is already the explanation, and a body long enough to need narration belongs in a page object. XML doc only where the binding's contract can't be read off the step text and the method name; no commented-out bindings, no stray `TODO`/`FIXME`. Full rule, complex-flow test, and severities: [`ep-code-comments`](../../../../engineering-practices/code-comments/SKILL.md).
+- [ ] **No inline comments in step definitions or hooks** — the step text above the binding is already the explanation, and a body long enough to need narration belongs in a page object. XML doc only where the binding's contract can't be read off the step text and the method name; no commented-out bindings, no stray `TODO`/`FIXME`. Full rule, complex-flow test, and severities: [`engineering-practices/code-comments`](../../../../engineering-practices/code-comments/SKILL.md).
 
 ## Output format
 

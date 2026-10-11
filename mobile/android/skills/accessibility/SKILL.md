@@ -1,11 +1,11 @@
 ---
-name: mobile-android-accessibility
+name: accessibility
 description: Use when a Compose or Views screen must work with TalkBack, font scale to 200%, Switch Access and the animator duration scale — semantics, contentDescription, merged descendants, roles, state descriptions, custom actions, focus, live regions, 48 dp targets. Triggers "TalkBack reads the wrong thing", "text clips at large font", "announce the result". Do NOT use for scanning (`qa-mobile-<stack>`), field errors (`-forms`) or animation mechanics (`-animation`).
 ---
 
 # Android — Accessibility
 
-Standardises **authoring** accessible Android screens against **WCAG 2.2 AA** and TalkBack's conventions. The house rule: **a real control with the right semantics; never rebuild a button out of a `Box` with a click handler.** Web analog: [`fe-react-accessibility`](../../../../frontend/react/skills/accessibility/SKILL.md) — semantic-first, announcements and focus management carry over; landmarks, Tab order and skip links do not. Sibling: [`mobile-ios-accessibility`](../../../ios/skills/accessibility/SKILL.md).
+Standardises **authoring** accessible Android screens against **WCAG 2.2 AA** and TalkBack's conventions. The house rule: **a real control with the right semantics; never rebuild a button out of a `Box` with a click handler.** Web analog: [`fe-react:accessibility`](../../../../frontend/react/skills/accessibility/SKILL.md) — semantic-first, announcements and focus management carry over; landmarks, Tab order and skip links do not. Sibling: [`mobile-ios:accessibility`](../../../ios/skills/accessibility/SKILL.md).
 
 **Boundary — authoring, not scanning.** Proving it on a device (a TalkBack pass, Accessibility Scanner, Espresso / Appium journeys with a screen reader on) is `qa-mobile-<stack>`'s. The dev-side automated check in a Compose test is in [`unit-testing`](../unit-testing/SKILL.md). Target size and a non-drag alternative are design decisions made first (`design/accessible-by-design`); this skill implements them. Design facts come from `design/ui-ux-pro-max` (`--stack jetpack-compose`); the corpus wins on a disagreement.
 
@@ -37,7 +37,7 @@ Detect first: Compose or Views per screen, any in-house component library that a
 - Validation messages on fields → [`forms`](../forms/SKILL.md) · banner and failed regions → [`error-handling`](../error-handling/SKILL.md)
 - Reduce-motion mechanics → [`animation`](../animation/SKILL.md) · colour and type tokens → [`styling`](../styling/SKILL.md)
 - `testTag` / resource ids → [`test-ids`](../test-ids/SKILL.md) (an id is never a description)
-- Other stacks → `mobile-react-native-accessibility`, `mobile-ios-accessibility`
+- Other stacks → `mobile-react-native:accessibility`, `mobile-ios:accessibility`
 
 ## Lean on the platform
 
@@ -164,4 +164,4 @@ Inside a `Gate: none` plan task, run none of these and report "written, not run"
 - Field-level error wiring → [`forms`](../forms/SKILL.md) · failure surfaces → [`error-handling`](../error-handling/SKILL.md)
 - Motion setting → [`animation`](../animation/SKILL.md) · tokens and dynamic colour → [`styling`](../styling/SKILL.md)
 - Ids → [`test-ids`](../test-ids/SKILL.md) · localized descriptions → [`languages`](../languages/SKILL.md)
-- Accessibility declarations and store rules → [`mobile-shared-store-compliance`](../../../_shared/store-compliance/SKILL.md)
+- Accessibility declarations and store rules → [`mobile-<stack>:store-compliance`](../../../_shared/store-compliance/SKILL.md)

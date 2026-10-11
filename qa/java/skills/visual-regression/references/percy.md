@@ -186,4 +186,4 @@ There is no diff image to upload: the diff lives in Percy, linked from the statu
 - `references/applitools.md` — visual AI, match levels and a browser/device grid.
 - `qa/java/skills/ui-test-author/playwright` — `BaseTest` and page objects.
 - `qa/cicd/java/skills/ci-pipelines` — the schedule gate, the secret store, the UI job's runner setup.
-- `qa-visual-regression-typescript` (`@percy/playwright`), `qa-visual-regression-dotnet` (`PercyIO.Playwright`).
+- `qa-typescript:visual-regression` (`@percy/playwright`), `qa-dotnet:visual-regression` (`PercyIO.Playwright`).

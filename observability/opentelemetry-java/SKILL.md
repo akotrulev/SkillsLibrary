@@ -1,5 +1,5 @@
 ---
-name: observability-opentelemetry-java
+name: opentelemetry
 description: Use when instrumenting a Java 21 / Spring Boot 3 service with OpenTelemetry — traces, metrics, log correlation — via the auto-instrumentation agent or the SDK, exporting OTLP to a Collector. Triggers: "instrument with OTel", "add Java auto-instrumentation agent", "add a custom @WithSpan", "Micrometer to OTel". Do NOT use for .NET/Node (their siblings) or log shaping (`structured-logging-java`).
 ---
 

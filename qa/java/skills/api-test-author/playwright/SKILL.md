@@ -1,13 +1,13 @@
 ---
-name: qa-api-test-playwright-java
-description: Use when the user asks to write Java API tests through Playwright's APIRequestContext (playwright-java + TestNG + Jackson) — usually because the project already runs Playwright-Java for UI and wants one dependency and one report. Triggers: "write API tests with Playwright in Java", "use APIRequestContext for endpoint X", "add API coverage to our Playwright Java suite". Do NOT use for API suites without Playwright (`qa-api-test-writer-java`, the RestAssured default).
+name: api-tests-playwright
+description: Use when the user asks to write Java API tests through Playwright's APIRequestContext (playwright-java + TestNG + Jackson) — usually because the project already runs Playwright-Java for UI and wants one dependency and one report. Triggers: "write API tests with Playwright in Java", "use APIRequestContext for endpoint X", "add API coverage to our Playwright Java suite". Do NOT use for API suites without Playwright (`qa-java:api-tests`, the RestAssured default).
 ---
 
 # QA — API Test Writer (Java / Playwright APIRequestContext + TestNG)
 
 Authors `*Test` classes that test a REST backend through **playwright-java's HTTP client** —
 `APIRequestContext` — instead of RestAssured. It reuses the **DTO + Client + Test** layering of the RestAssured
-sibling (`qa-api-test-writer-java`): record DTOs from `qa/java/skills/api-models`, a
+sibling (`qa-java:api-tests`): record DTOs from `qa/java/skills/api-models`, a
 `{Resource}Client` with dual raw + typed overloads, test classes that own scenarios and assertions. Only the
 HTTP transport changes; the discipline does not.
 
@@ -259,13 +259,13 @@ Create/update flows keep the RestAssured sibling's cleanup discipline: track cre
 
 ## Cross-references
 
-- `qa-api-test-writer-java` — the **stack default** (RestAssured + TestNG); this skill is the variant
+- `qa-java:api-tests` — the **stack default** (RestAssured + TestNG); this skill is the variant
   for Playwright-first projects. Shared spine: DTO + Client + Test, dual raw/typed overloads, cleanup discipline.
-- `qa-api-test-playwright-typescript` · `qa-api-test-playwright-dotnet` — the sibling stacks
+- `qa-typescript:api-tests-playwright` · `qa-dotnet:api-tests-playwright` — the sibling stacks
   (@playwright/test `request` fixture · Microsoft.Playwright + NUnit); same four ideas, different bindings.
-- `qa-api-models-java` / `qa-api-client-writer-java` — DTOs / the client layer this skill consumes.
-- `qa-ui-test-writer-playwright-java` — the UI suite sharing the Playwright dependency.
-- `qa-network-mocking-java` — `page.route` mocking of browser traffic.
-- `qa-api-test-review-java` — review; plus this skill's What-NOT-to-do list as Playwright-specific findings.
-- `qa-test-login-tokens-java` — the tokens `newContext(token)` injects.
-- `qa-test-reports-java` — Allure TestNG wiring shared with the UI suite.
+- `qa-java:api-models` / `qa-java:api-client-writer` — DTOs / the client layer this skill consumes.
+- `qa-java:ui-tests-playwright` — the UI suite sharing the Playwright dependency.
+- `qa-java:network-mocking` — `page.route` mocking of browser traffic.
+- `qa-java:api-tests-review` — review; plus this skill's What-NOT-to-do list as Playwright-specific findings.
+- `qa-java:test-login-tokens` — the tokens `newContext(token)` injects.
+- `qa-java:test-reports` — Allure TestNG wiring shared with the UI suite.

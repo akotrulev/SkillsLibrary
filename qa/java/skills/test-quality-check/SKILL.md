@@ -1,6 +1,6 @@
 ---
-name: qa-test-quality-check-java
-description: Use when measuring TEST QUALITY (not code coverage) for a Java 21 / Kotlin suite with mutation testing — run PIT/pitest to seed faults into JVM bytecode and prove the tests detect them, fail the build on a mutation-score threshold, turn surviving mutants into missing-assertion findings. Triggers: "add mutation testing", "run pitest", "is my coverage real", "tests pass but catch nothing". Do NOT use for line coverage or .NET (`qa-test-quality-check-dotnet`, Stryker.NET).
+name: test-quality-check
+description: Use when measuring TEST QUALITY (not code coverage) for a Java 21 / Kotlin suite with mutation testing — run PIT/pitest to seed faults into JVM bytecode and prove the tests detect them, fail the build on a mutation-score threshold, turn surviving mutants into missing-assertion findings. Triggers: "add mutation testing", "run pitest", "is my coverage real", "tests pass but catch nothing". Do NOT use for line coverage or .NET (`qa-dotnet:test-quality-check`, Stryker.NET).
 ---
 
 # QA — Mutation Testing (PIT / pitest, Java/Kotlin)

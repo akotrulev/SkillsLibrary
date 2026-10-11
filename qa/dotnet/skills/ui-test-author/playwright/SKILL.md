@@ -1,6 +1,6 @@
 ---
-name: qa-ui-test-writer-playwright-dotnet
-description: Use when the user asks to scaffold Playwright UI tests in C# / .NET — NUnit test classes, page objects, BaseTest, .runsettings, signed-in state, locator scoping, web-first assertions, or device emulation. Triggers "write a Playwright test for X in C#", "add a Playwright .NET page object for screen Y", "set up Playwright with NUnit". Do NOT use for Selenium (`qa-ui-test-writer-selenium-dotnet`), Appium (`qa-ui-test-writer-appium-dotnet`) or reviewing tests (`qa-ui-test-review-dotnet`).
+name: ui-tests-playwright
+description: Use when the user asks to scaffold Playwright UI tests in C# / .NET — NUnit test classes, page objects, BaseTest, .runsettings, signed-in state, locator scoping, web-first assertions, or device emulation. Triggers "write a Playwright test for X in C#", "add a Playwright .NET page object for screen Y", "set up Playwright with NUnit". Do NOT use for Selenium (`qa-dotnet:ui-tests-selenium`), Appium (`qa-dotnet:ui-tests-appium`) or reviewing tests (`qa-dotnet:ui-tests-review`).
 ---
 
 # QA — Playwright Test & Page Object Generator (C# / .NET)

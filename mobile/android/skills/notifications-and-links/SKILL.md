@@ -1,11 +1,11 @@
 ---
-name: mobile-android-notifications-and-links
-description: Use when an Android app needs push or local notifications, or opens from a link — FCM registration, notification channels, POST_NOTIFICATIONS, tap routing, immutable PendingIntent, full-screen-intent policy, App Links verification (assetlinks.json). Triggers "add push", "tap opens the order", "link opens the app". Do NOT use for the URI-to-keys parser (`mobile-android-navigation`), runtime permissions generally (`-device-features`), or the sending server.
+name: push-and-deep-links
+description: Use when an Android app needs push or local notifications, or opens from a link — FCM registration, notification channels, POST_NOTIFICATIONS, tap routing, immutable PendingIntent, full-screen-intent policy, App Links verification (assetlinks.json). Triggers "add push", "tap opens the order", "link opens the app". Do NOT use for the URI-to-keys parser (`mobile-android:navigation`), runtime permissions generally (`-device-features`), or the sending server.
 ---
 
 # Android — Notifications and Links
 
-Owns how the outside world gets into the app: **push and local notifications** (permission, channels, registration, tap, `PendingIntent`) and **links** (App Links verification, intent filters). Both deliver **untrusted input that chooses a destination**, validated before it routes ([`mobile-shared-security`](../../../_shared/security/SKILL.md), rule K16). [`navigation`](../navigation/SKILL.md) owns the pure URI → keys function; this skill owns everything up to calling it — it does not re-implement the parser.
+Owns how the outside world gets into the app: **push and local notifications** (permission, channels, registration, tap, `PendingIntent`) and **links** (App Links verification, intent filters). Both deliver **untrusted input that chooses a destination**, validated before it routes ([`mobile-<stack>:security`](../../../_shared/security/SKILL.md), rule K16). [`navigation`](../navigation/SKILL.md) owns the pure URI → keys function; this skill owns everything up to calling it — it does not re-implement the parser.
 
 ## Version lane
 
@@ -35,8 +35,8 @@ Detect the sender first (FCM, or a vendor SDK that wraps it) and keep it — nev
 - Camera, location, the generic permission pattern → [`device-features`](../device-features/SKILL.md)
 - WorkManager, foreground services, widgets, alarms → [`system-integration`](../system-integration/SKILL.md)
 - The sending service and the registration table → the project's `be-*` agent
-- Play declarations as policy → [`mobile-shared-store-compliance`](../../../_shared/store-compliance/SKILL.md)
-- Another stack → `mobile-ios-notifications-and-links`, `mobile-react-native-notifications-and-links`
+- Play declarations as policy → [`mobile-<stack>:store-compliance`](../../../_shared/store-compliance/SKILL.md)
+- Another stack → `mobile-ios:push-and-deep-links`, `mobile-react-native:push-and-deep-links`
 
 ## Permission — the same lifecycle
 
@@ -134,7 +134,7 @@ fun openOrder(context: Context, orderId: String): PendingIntent {
 
 ## Full-screen intents and ads
 
-`USE_FULL_SCREEN_INTENT` is auto-granted at target 34+ **only to calling and alarm apps**; others must ask the user and the Play declaration applies ([`mobile-shared-store-compliance`](../../../_shared/store-compliance/SKILL.md), L18). Never use it to surface a promotion. Check `NotificationManager.canUseFullScreenIntent()` and fall back to a normal heads-up. A non-calling, non-alarm app that declares it is a major finding.
+`USE_FULL_SCREEN_INTENT` is auto-granted at target 34+ **only to calling and alarm apps**; others must ask the user and the Play declaration applies ([`mobile-<stack>:store-compliance`](../../../_shared/store-compliance/SKILL.md), L18). Never use it to surface a promotion. Check `NotificationManager.canUseFullScreenIntent()` and fall back to a normal heads-up. A non-calling, non-alarm app that declares it is a major finding.
 
 ## Links — App Links first, schemes with caution
 
@@ -188,8 +188,8 @@ Inside a `Gate: none` plan task, run none of these and report "written, not run"
 - URI → keys, restore, signed-out replay → [`navigation`](../navigation/SKILL.md)
 - Permission pattern, Settings route → [`device-features`](../device-features/SKILL.md)
 - Upload job, widgets, alarms, foreground services → [`system-integration`](../system-integration/SKILL.md)
-- Payload and link validation, lock-screen content, `PendingIntent`, exported components → [`mobile-shared-security`](../../../_shared/security/SKILL.md)
-- Full-screen intent and exported-component policy → [`mobile-shared-store-compliance`](../../../_shared/store-compliance/SKILL.md)
+- Payload and link validation, lock-screen content, `PendingIntent`, exported components → [`mobile-<stack>:security`](../../../_shared/security/SKILL.md)
+- Full-screen intent and exported-component policy → [`mobile-<stack>:store-compliance`](../../../_shared/store-compliance/SKILL.md)
 - Token and registration storage → [`offline-and-storage`](../offline-and-storage/SKILL.md)
 - Push-sending service → the project's `be-*` agent
 - Link and push journeys on a device → `qa-mobile-*` (peer)

@@ -1,5 +1,5 @@
 ---
-name: data-schema-design
+name: schema-design
 description: Use when choosing which database engine fits a workload, or designing a data model across any SQL or document engine — engine selection, entities, identifiers, soft delete, multi-tenancy, audit trails, money, enums — before engine-specific DDL. Triggers: "which database for this workload", "does Postgres suffice or do I need Mongo/Redis", "embed or reference", "multi-tenant model". Do NOT use for engine-specific syntax (`data/<db>`) or query optimization (`slow-query-fixes`).
 ---
 

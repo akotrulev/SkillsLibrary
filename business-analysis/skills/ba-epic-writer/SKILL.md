@@ -1,6 +1,6 @@
 ---
-name: ba-epic-writer
-description: Use when converting a scoped requirements document into one or more epics — one capability-sized outcome each, sliced into user stories, with a measurable outcome and a plain-English section (user-story line, what gets built, how it fits) carrying no technology at all. Triggers: "write an epic for X", "slice this requirements doc into epics", "what are the epics for this initiative". Do NOT use for high-level scoping (`ba-scoping-writeup`) or individual stories with AC (`ba-story-writer`).
+name: epics
+description: Use when converting a scoped requirements document into one or more epics — one capability-sized outcome each, sliced into user stories, with a measurable outcome and a plain-English section (user-story line, what gets built, how it fits) carrying no technology at all. Triggers: "write an epic for X", "slice this requirements doc into epics", "what are the epics for this initiative". Do NOT use for high-level scoping (`business-analysis:scoping`) or individual stories with AC (`business-analysis:stories`).
 ---
 
 # Epic Writer
@@ -22,7 +22,7 @@ The middle of the **requirements → epics → stories** chain. Takes a scoped r
 
 ## Inputs needed
 
-1. **The requirements document** (`requirements.md` from `ba-scoping-writeup`, ideally) — its §4 capabilities are what the epics cover, exactly once each
+1. **The requirements document** (`requirements.md` from `business-analysis:scoping`, ideally) — its §4 capabilities are what the epics cover, exactly once each
 2. **Success measures** — from `requirements.md` §6, or the epic's own where one capability has its own signal
 3. **Constraints that affect slicing** — from `requirements.md` §5; compliance, contractual sequencing, a deadline
 4. **Known dependencies** — work that must complete before, or alongside
@@ -220,8 +220,8 @@ An epic is one capability a person gets. Size follows from that, not from a cale
 
 ## Handoffs
 
-- Inside the delivery lane → `requirements-author` (`/dev-refine`) runs this skill as its Step 3 and writes `docs/plans/<NNN>-<initiative>/epics.md`
+- Inside the delivery lane → `requirements-author` (`/dev:refine`) runs this skill as its Step 3 and writes `docs/plans/<NNN>-<initiative>/epics.md`
 - Up-stream (vague requirement) → `business-analysis/skills/ba-scoping-writeup`
 - Down-stream (story refinement) → `business-analysis/skills/ba-story-writer`
 - Epics/stories authored elsewhere need a readiness audit → `business-analysis/skills/ba-story-quality-review`
-- Architecture, contracts, task plan → `solution-planner` (`/dev-plan-solution`), a peer agent invoked separately
+- Architecture, contracts, task plan → `solution-planner` (`/dev:plan-system`), a peer agent invoked separately

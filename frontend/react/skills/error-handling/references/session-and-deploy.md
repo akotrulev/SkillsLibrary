@@ -2,7 +2,7 @@
 
 The two failures where **the app itself changed underneath the user** — their session ended, or their tab outlived its build. Both are recoverable in place, and both destroy unsaved work when handled with a redirect or a reload reflex.
 
-*Deep dive for [`fe-react-error-handling`](../SKILL.md). Load when the situation applies.*
+*Deep dive for [`fe-react:error-handling`](../SKILL.md). Load when the situation applies.*
 
 ---
 

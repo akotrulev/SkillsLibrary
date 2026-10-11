@@ -1,6 +1,6 @@
 ---
-name: qa-test-reports-dotnet
-description: Use when setting up Allure reporting for a .NET test suite (NUnit + RestSharp, NUnit + Playwright .NET, NUnit + Appium .NET, xUnit). Triggers: "set up Allure for our NUnit project", "wire Allure attachments in .NET", "publish Allure report from our .NET CI". Not for flaky-test quarantine (`qa-flaky-test-quarantine-dotnet`) or pipeline YAML (`qa-ci-pipelines-dotnet`).
+name: test-reports
+description: Use when setting up Allure reporting for a .NET test suite (NUnit + RestSharp, NUnit + Playwright .NET, NUnit + Appium .NET, xUnit). Triggers: "set up Allure for our NUnit project", "wire Allure attachments in .NET", "publish Allure report from our .NET CI". Not for flaky-test quarantine (`qa-dotnet:flaky-test-quarantine`) or pipeline YAML (`qa-dotnet:ci-pipelines`).
 ---
 
 # QA — Allure Reporting (.NET / NUnit & xUnit)

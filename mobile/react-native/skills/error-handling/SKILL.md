@@ -1,11 +1,11 @@
 ---
-name: mobile-react-native-error-handling
-description: Use when a failure must not blank an Expo SDK 57 screen — expo-router ErrorBoundary, loading/loaded/failed/stale/offline regions, the safe-area error banner, timeouts rendered, 401 re-auth in place, OTA-update skew, app resume, mutation and third-party failures, storage-full degradation. Triggers "app goes white on error", "list empty when API fails", "session expired mid-form". Do NOT use for producing the AppError or retries (`mobile-react-native-networking`).
+name: error-handling
+description: Use when a failure must not blank an Expo SDK 57 screen — expo-router ErrorBoundary, loading/loaded/failed/stale/offline regions, the safe-area error banner, timeouts rendered, 401 re-auth in place, OTA-update skew, app resume, mutation and third-party failures, storage-full degradation. Triggers "app goes white on error", "list empty when API fails", "session expired mid-form". Do NOT use for producing the AppError or retries (`mobile-react-native:networking`).
 ---
 
 # React Native — Error Resilience
 
-Owns **failing safely and recovering** on a phone: catching render exceptions before the screen goes white, **rendering** failure, staleness and offline correctly so a broken region never looks like an empty one, and recovering in place from a dead session, a stale OTA bundle, a backgrounded write or a full disk. Web analog: [`fe-react-error-handling`](../../../../frontend/react/skills/error-handling/SKILL.md) — every rule carries over with the mobile delta below; `error.tsx`, `global-error.tsx`, hydration, multi-tab and `ChunkLoadError` do not exist here.
+Owns **failing safely and recovering** on a phone: catching render exceptions before the screen goes white, **rendering** failure, staleness and offline correctly so a broken region never looks like an empty one, and recovering in place from a dead session, a stale OTA bundle, a backgrounded write or a full disk. Web analog: [`fe-react:error-handling`](../../../../frontend/react/skills/error-handling/SKILL.md) — every rule carries over with the mobile delta below; `error.tsx`, `global-error.tsx`, hydration, multi-tab and `ChunkLoadError` do not exist here.
 
 Division of labour with [`networking`](../networking/SKILL.md): it **produces** the categorised `AppError` (`kind`, `status`, `correlationId`, `retryAfterMs`, `retryable` — `networking/references/request-policy.md`), applies the timeout budget and bounded retries. This skill **renders** it. Two skills, one seam.
 
@@ -15,7 +15,7 @@ Division of labour with [`networking`](../networking/SKILL.md): it **produces** 
 |---|---|---|
 | Route boundary | `export function ErrorBoundary({ error, retry })` from a route or layout file | `expo-router` renders it in place of that route; `retry` re-renders the route |
 | Region boundary | `react-error-boundary` | Works unchanged in RN |
-| Root reporting | `reportError` / `ErrorUtils.setGlobalHandler` → the crash reporter | One reporter — [`mobile-shared-observability`](../../../_shared/observability/SKILL.md); `expo-observe`'s `ObserveErrorBoundary` is **preview** (JS only, no native crashes) |
+| Root reporting | `reportError` / `ErrorUtils.setGlobalHandler` → the crash reporter | One reporter — [`mobile-<stack>:observability`](../../../_shared/observability/SKILL.md); `expo-observe`'s `ObserveErrorBoundary` is **preview** (JS only, no native crashes) |
 | OTA | `expo-updates` — `useUpdates()`, `Updates.reloadAsync()` | Not in Expo Go; skew detail in [`references/session-and-resume.md`](references/session-and-resume.md) |
 | Offline signal | TanStack Query `onlineManager` (NetInfo) | Mounted by `networking` |
 | `[SDK58]` | no change to these rules | Router core is reworked — re-read the `ErrorBoundary` export docs on upgrade |
@@ -33,8 +33,8 @@ Detect first: `expo-updates`, the wired crash reporter, TanStack Query, and any 
 - Producing the error, retries, `Retry-After`, token refresh mechanics → [`networking`](../networking/SKILL.md)
 - Persisting data, the mutation queue, conflicts → [`offline-and-storage`](../offline-and-storage/SKILL.md)
 - Field validation messages → [`forms`](../forms/SKILL.md)
-- Crash-reporter setup, symbols → [`mobile-shared-observability`](../../../_shared/observability/SKILL.md)
-- Native Swift / Kotlin → `mobile-ios-error-handling` / `mobile-android-error-handling`
+- Crash-reporter setup, symbols → [`mobile-<stack>:observability`](../../../_shared/observability/SKILL.md)
+- Native Swift / Kotlin → `mobile-ios:error-handling` / `mobile-android:error-handling`
 
 ## The failure surfaces
 
@@ -202,5 +202,5 @@ Inside a `Gate: none` plan task, run none of these and report "written, not run"
 - Persistence and the mutation queue → [`offline-and-storage`](../offline-and-storage/SKILL.md)
 - Field errors → [`forms`](../forms/SKILL.md) · list slots → [`ui-components`](../ui-components/SKILL.md)
 - Ids → [`test-ids`](../test-ids/SKILL.md) · roles, announcements → [`accessibility`](../accessibility/SKILL.md)
-- Crash reporter, symbols → [`mobile-shared-observability`](../../../_shared/observability/SKILL.md) · OTA release channels → `mobile-shared-release`
+- Crash reporter, symbols → [`mobile-<stack>:observability`](../../../_shared/observability/SKILL.md) · OTA release channels → `mobile-<stack>:release`
 - Auth provider / credentials manager → `auth0-react-native`

@@ -1,6 +1,6 @@
 ---
-name: mobile-shared-store-compliance
-description: Use when a mobile app is about to ship or changes what it does — before a release, on adding a permission, SDK, account system, tracking or purchases, or near a store deadline. Triggers "will App Store review pass this", "Play rejected the update", "do we need a privacy manifest", "account deletion rules". Do NOT use for signing and rollout (`mobile-shared-release`), IAP mechanics (`mobile-shared-in-app-purchases`), or scanning a built binary (qa `mobile-app-scan`).
+name: store-compliance
+description: Use when a mobile app is about to ship or changes what it does — before a release, on adding a permission, SDK, account system, tracking or purchases, or near a store deadline. Triggers "will App Store review pass this", "Play rejected the update", "do we need a privacy manifest", "account deletion rules". Do NOT use for signing and rollout (`mobile-<stack>:release`), IAP mechanics (`mobile-<stack>:in-app-purchases`), or scanning a built binary (qa `mobile-app-scan`).
 ---
 
 # Mobile — Store Compliance
@@ -21,9 +21,9 @@ Turns the App Store and Google Play rules that **code or config can satisfy** in
 
 ## When NOT to use
 
-- Signing, build numbers, tracks, phased rollout, OTA rules → `mobile-shared-release`
-- StoreKit / Play Billing mechanics and guideline 3.1.1 implementation → `mobile-shared-in-app-purchases`
-- Secure-coding rules (storage, TLS, WebView) → `mobile-shared-security`
+- Signing, build numbers, tracks, phased rollout, OTA rules → `mobile-<stack>:release`
+- StoreKit / Play Billing mechanics and guideline 3.1.1 implementation → `mobile-<stack>:in-app-purchases`
+- Secure-coding rules (storage, TLS, WebView) → `mobile-<stack>:security`
 - Scanning a built APK/AAB/IPA → qa `mobile-app-scan` (peer, not loaded)
 - Accessibility implementation → the stack's `accessibility` skill (this skill only lists the store-facing label)
 
@@ -105,8 +105,8 @@ Inventory: Expo SDK 57 app, Auth0 login with Google + email, Firebase Analytics,
 
 ## Related skills & peers
 
-- `mobile-shared-security` — secure-coding rules; MASVS-PRIVACY overlaps here (permission minimisation, tracking domains)
-- `mobile-shared-release` — signing, tracks, OTA mechanics
-- `mobile-shared-in-app-purchases` — 3.1.1 and Play payments policy implementation
+- `mobile-<stack>:security` — secure-coding rules; MASVS-PRIVACY overlaps here (permission minimisation, tracking domains)
+- `mobile-<stack>:release` — signing, tracks, OTA mechanics
+- `mobile-<stack>:in-app-purchases` — 3.1.1 and Play payments policy implementation
 - `design/ethical-patterns` — permission priming, consent symmetry
 - qa `mobile-app-scan` *(peer, not loaded)* — scans the built binary for what the store scanner will also find

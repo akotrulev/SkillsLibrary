@@ -260,7 +260,7 @@ failure is `qa/typescript/skills/evidence-capture`.
 
 ## Cross-references
 
-- `qa-visual-regression-dotnet`, `qa-visual-regression-java` — the same skill without a screenshot
+- `qa-dotnet:visual-regression`, `qa-java:visual-regression` — the same skill without a screenshot
   assertion: `screenshot()` plus a comparator.
 - `qa/typescript/skills/ui-test-author/playwright` — the canonical config, `fixtures.ts`, page objects.
 - `references/percy.md`, `references/applitools.md` — hosted baselines and review.

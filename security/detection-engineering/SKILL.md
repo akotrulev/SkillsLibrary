@@ -1,5 +1,5 @@
 ---
-name: secgov-detection-engineering
+name: detection-engineering
 description: Use to author and test security detections as code — Sigma rules and alert-as-code that catch attacker behavior in logs at runtime, mapped to MITRE ATT&CK and unit-tested against sample logs. Blue-team, language-agnostic. Triggers "write a Sigma rule", "turn this pentest finding into a detection". Not for scanning code (`qa-security`), running the attack (`penetration-tester`), validating a detection fires (`purple-team-engineer`), or app dashboards (`observability`).
 ---
 
@@ -7,7 +7,7 @@ description: Use to author and test security detections as code — Sigma rules 
 
 Detection engineering is the standing blue-team counterpart to the offensive lanes: where `penetration-tester` proves an attacker can chain findings into impact and `qa-security` finds the vulnerable code, this skill authors the **detections that catch the attacker's behavior in your logs at runtime** — and proves each one fires on a true event and stays quiet on a benign one. It is **detection-as-code**: rules live in Git, are reviewed in pull requests, unit-tested against log samples, converted to your SIEM's query language, and promoted through a pipeline — never click-authored in a console where no one can review or roll them back.
 
-This skill is **language-agnostic** (Sigma is vendor-neutral YAML; sigma-cli/pySigma are Python; the backends are your SIEM) and homes in the **`security-governance`** plugin, loaded by the **`security-architect`** agent. The **`purple-team-engineer`** agent (`penetration-testing` plugin) does not load this skill — it **consumes the detections authored here** as feedstock: its `purpleteam-detection-validation` reads these Sigma rule files, converts them with `sigma-cli`, and asserts each fires. This skill **authors** detections; it does not run the attacks (`penetration-tester`) or assert the detection fired against a live simulation (`purple-team-engineer`).
+This skill is **language-agnostic** (Sigma is vendor-neutral YAML; sigma-cli/pySigma are Python; the backends are your SIEM) and homes in the **`security-governance`** plugin, loaded by the **`security-architect`** agent. The **`purple-team-engineer`** agent (`penetration-testing` plugin) does not load this skill — it **consumes the detections authored here** as feedstock: its `penetration-testing:detection-validation` reads these Sigma rule files, converts them with `sigma-cli`, and asserts each fires. This skill **authors** detections; it does not run the attacks (`penetration-tester`) or assert the detection fired against a live simulation (`purple-team-engineer`).
 
 > **This is defensive authoring — no gate, but no telemetry means no detection.** Writing and converting Sigma rules touches no live target, so this skill carries no authorization gate (unlike the offensive lanes). Its one hard prerequisite is a **telemetry source**: a detection that queries a log field your stack never emits is a **gap, not a passing control**. Confirm the data source exists before claiming coverage.
 
@@ -84,7 +84,7 @@ Author the base rules, then a correlation that references them by `id`. Not ever
 
 Detections are software artifacts. The lifecycle, in a Git repo with CI (GitHub Actions / GitLab CI):
 
-1. **Hypothesis** — a detection starts from a *source*: an ATT&CK technique in the threat model (`devops-threat-modeling`), a `penetration-tester` finding ("we reached domain admin and nothing alerted"), an incident, or a new CVE's exploitation behavior. Name the source in the rule's `references`.
+1. **Hypothesis** — a detection starts from a *source*: an ATT&CK technique in the threat model (`devops:threat-modeling`), a `penetration-tester` finding ("we reached domain admin and nothing alerted"), an incident, or a new CVE's exploitation behavior. Name the source in the rule's `references`.
 2. **Author** the Sigma rule (or alert-as-code — below), `status: experimental`.
 3. **Lint** — `sigma check rules/` in CI: schema, required fields, ATT&CK tags present, UUID unique.
 4. **Unit-test the detection** — this is the step teams skip and it is the point of the lane. Run the rule against a **known-true** log sample (it must fire) *and* a **known-benign** sample (it must stay quiet). A rule that fires on both is a false-positive machine; a rule that fires on neither is dead. Store the samples beside the rule (`tests/`), redacted of any real secret/PII.
@@ -120,7 +120,7 @@ Detections are software artifacts. The lifecycle, in a Git repo with CI (GitHub 
 - **`security-architect`** (`security/agents/security-architect.md`) — the roll-up agent that loads this skill: an ATT&CK coverage gap in the posture picture becomes a detection to author here.
 - **`purple-team-engineer`** (`security/agents/purple-team-engineer.md`, `penetration-testing` plugin) — the **validation** half: `atomic-simulation` runs the technique, `detection-validation` asserts this rule fired. You author; it proves. Shared ATT&CK spine.
 - **`penetration-tester`** (`security/agents/penetration-tester.md`) — offensive **input**: a chain that reached impact undetected is the exact hypothesis for a new detection ("author the rule that would have caught the LSASS dump → lateral hop").
-- **`devops-threat-modeling`** (`devops/threat-modeling/`) — the threat register scopes *which* techniques to write detections for first; it routes threats to the lanes that test them, this authors the standing detections.
-- **`observability-engineer-*`** + **`observability-queries`** *(peers, named not loaded)* — own the telemetry substrate (Loki/Prometheus/Tempo, the log/metric pipeline) your detections query, and the query-language mechanics. A missing `logsource` is a handoff to them. This lane authors the **security** analytics; they own the app-health RED/USE dashboards.
+- **`devops:threat-modeling`** (`devops/threat-modeling/`) — the threat register scopes *which* techniques to write detections for first; it routes threats to the lanes that test them, this authors the standing detections.
+- **`observability-engineer-*`** + **`be-<stack>:queries`** *(peers, named not loaded)* — own the telemetry substrate (Loki/Prometheus/Tempo, the log/metric pipeline) your detections query, and the query-language mechanics. A missing `logsource` is a handoff to them. This lane authors the **security** analytics; they own the app-health RED/USE dashboards.
 - **`qa-security`** (`qa/_shared/agents/qa-security.md`) — the fence partner: it detects the *vulnerability in the code/config*; this detects the *attacker behavior in the logs at runtime*. A SAST finding is a fix; a detection is a tripwire for when the fix is missed.
-- **`secgov-security-hardening`** / **`secgov-secrets-hardening`** — the other defensive-engineering siblings in this plugin: hardening *prevents*, detection *catches what prevention missed* — defense in depth, authored together.
+- **`security-governance:hardening`** / **`security-governance:secrets-hardening`** — the other defensive-engineering siblings in this plugin: hardening *prevents*, detection *catches what prevention missed* — defense in depth, authored together.

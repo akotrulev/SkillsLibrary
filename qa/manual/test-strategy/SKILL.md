@@ -1,5 +1,5 @@
 ---
-name: qa-test-strategy
+name: test-strategy
 description: Use when the user asks for help building a test strategy, risk-based test plan, coverage matrix, test-pyramid sizing, or release quality gates. Triggers: "build a test strategy for X", "what tests should we have for this release", "risk-based plan for the migration". Not for one feature's test plan (test-plan-writer) or step-by-step cases (test-case-writer).
 ---
 

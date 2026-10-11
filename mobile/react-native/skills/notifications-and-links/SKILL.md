@@ -1,11 +1,11 @@
 ---
-name: mobile-react-native-notifications-and-links
+name: push-and-deep-links
 description: Use when an Expo SDK 57 app needs push or local notifications, or opens from a link — expo-notifications (permission, Android 13+ runtime prompt, channels, Expo / APNs / FCM tokens, tap routing), universal links and Android App Links through Expo Router. Triggers "add push", "tap opens the order", "link opens the app", "assetlinks". Do NOT use for hardware permissions (`-device-features`), route structure (`-navigation`), or the server that sends.
 ---
 
 # React Native — Notifications and Links
 
-Owns how the outside world gets into the app: **push and local notifications** (permission, channel, token, foreground display, tap) and **links** (universal links, Android App Links, custom schemes). Both deliver **untrusted input that chooses a destination** — a payload or a URL is validated before it routes ([`mobile-shared-security`](../../../_shared/security/SKILL.md)). Route structure and typed `href`s are [`navigation`](../navigation/SKILL.md)'s.
+Owns how the outside world gets into the app: **push and local notifications** (permission, channel, token, foreground display, tap) and **links** (universal links, Android App Links, custom schemes). Both deliver **untrusted input that chooses a destination** — a payload or a URL is validated before it routes ([`mobile-<stack>:security`](../../../_shared/security/SKILL.md)). Route structure and typed `href`s are [`navigation`](../navigation/SKILL.md)'s.
 
 ## Version lane
 
@@ -33,7 +33,7 @@ Detect whether the project sends through Expo Push or straight APNs / FCM; keep 
 - Camera, location, biometrics → [`device-features`](../device-features/SKILL.md)
 - The route tree, protected routes, typed `href` → [`navigation`](../navigation/SKILL.md)
 - Sending from a backend → the project's `be-*` agent; this skill owns the token's lifecycle on the device and the receive side
-- Store declarations → [`mobile-shared-store-compliance`](../../../_shared/store-compliance/SKILL.md)
+- Store declarations → [`mobile-<stack>:store-compliance`](../../../_shared/store-compliance/SKILL.md)
 
 ## Notification permission — the same lifecycle, plus Android 13+
 
@@ -103,7 +103,7 @@ function routeFromNotification(data: unknown) {
 
 - **Signed-out taps**: stash the validated target, route to sign-in, resume after — the `Stack.Protected` redirect in [`navigation`](../navigation/SKILL.md) carries the intent.
 - No PII in a payload (it passes through APNs / FCM); send an id and fetch the content after the tap.
-- Local notifications: `scheduleNotificationAsync` with a `trigger`. Exact-time delivery on Android 12+ needs `SCHEDULE_EXACT_ALARM`, which is **denied by default since Android 13** — give the denied path (an inexact reminder), and prefer inexact unless the product is an alarm or calendar ([`mobile-shared-store-compliance`](../../../_shared/store-compliance/SKILL.md)).
+- Local notifications: `scheduleNotificationAsync` with a `trigger`. Exact-time delivery on Android 12+ needs `SCHEDULE_EXACT_ALARM`, which is **denied by default since Android 13** — give the denied path (an inexact reminder), and prefer inexact unless the product is an alarm or calendar ([`mobile-<stack>:store-compliance`](../../../_shared/store-compliance/SKILL.md)).
 - Badge counts come from the server's truth, set with `setBadgeCountAsync`; clear on read.
 
 ## Links — universal links, App Links, schemes
@@ -118,7 +118,7 @@ Expo Router turns a URL into a route: `https://example.com/orders/42` opens `app
 
 - **Prefer verified https links to a custom scheme.** Any app can claim a custom scheme; a verified link is bound to your domain. Keep a `scheme` for development builds and the OAuth redirect.
 - Narrow the paths: `pathPrefix` or an explicit list, not `/`. Every path you claim is a path you must validate.
-- **A link is untrusted input.** Route params are parsed with a schema at the screen ([`navigation`](../navigation/SKILL.md) F6); the host and path are allow-listed; **a link parameter never reaches `Linking.openURL`, a WebView `source`, a file path or a query** ([`mobile-shared-security`](../../../_shared/security/SKILL.md)).
+- **A link is untrusted input.** Route params are parsed with a schema at the screen ([`navigation`](../navigation/SKILL.md) F6); the host and path are allow-listed; **a link parameter never reaches `Linking.openURL`, a WebView `source`, a file path or a query** ([`mobile-<stack>:security`](../../../_shared/security/SKILL.md)).
 - `+native-intent.tsx` rewrites an incoming URL before routing — the place to map a legacy or marketing path to a real route, and to drop what you do not recognise.
 - A link that needs sign-in: route into the protected layout and let the redirect resume it; never open a screen's data before the session is known.
 - Opening **out**: `Linking.openURL` only on a string the app built from a constant host; `canOpenURL` on iOS needs `LSApplicationQueriesSchemes` and is deprecated at the iOS 27 SDK — try `openURL` and handle the rejection.
@@ -149,8 +149,8 @@ Inside a `Gate: none` plan task, run none of these and report "written, not run"
 
 - Hardware permission pattern, location, camera → [`device-features`](../device-features/SKILL.md)
 - Routes, protected layouts, typed `href`, `+native-intent` placement → [`navigation`](../navigation/SKILL.md)
-- Payload / link validation rules, allow-lists, WebView → [`mobile-shared-security`](../../../_shared/security/SKILL.md)
-- Exact alarms, notification disclosures, Data safety → [`mobile-shared-store-compliance`](../../../_shared/store-compliance/SKILL.md)
+- Payload / link validation rules, allow-lists, WebView → [`mobile-<stack>:security`](../../../_shared/security/SKILL.md)
+- Exact alarms, notification disclosures, Data safety → [`mobile-<stack>:store-compliance`](../../../_shared/store-compliance/SKILL.md)
 - Token storage on the device → [`offline-and-storage`](../offline-and-storage/SKILL.md)
 - Push-sending service, device-token table → the project's `be-*` agent
 - Link and push journeys on a device → `qa-mobile-typescript` (peer)

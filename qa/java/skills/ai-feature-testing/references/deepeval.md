@@ -11,7 +11,7 @@ research-backed metrics, an `LLMTestCase`/`EvaluationDataset` model, `assert_tes
 `deepeval test run` (CI gate). It is **Python** — there is **no JVM library** — so from this Java suite you drive
 it the same honest way the stack drives any off-JVM tool: **as a subprocess** (`ProcessBuilder` →
 `deepeval test run`) whose JSON snapshot you parse with Jackson and gate, exactly the CLI-port shape of
-`qa-security-passive-scan-java` and `qa-accessibility-testing-java`. Say so plainly to anyone reaching for
+`qa-java:passive-scan` and `qa-java:accessibility-testing`. Say so plainly to anyone reaching for
 a Maven/Gradle artifact — there isn't one.
 
 The **four ideas are unchanged** (property-not-string · judge-is-an-artifact · eval-is-a-dataset ·
@@ -163,7 +163,7 @@ for golden in dataset.evals_iterator():           # pytest-parametrize-style; ea
 
 DeepEval scores one `actual_output`; to prove a **reliable** behavior (a safety refusal, a creative constraint)
 sample N≥3 and assert a **rate** — the same discipline as the promptfoo `--repeat` path. This is **not** a flaky
-test to quarantine (boundary vs `qa-flaky-test-quarantine-java`): a dropped refusal rate is a real regression.
+test to quarantine (boundary vs `qa-java:flaky-test-quarantine`): a dropped refusal rate is a real regression.
 
 ```python
 def test_refuses_unsafe_request_at_least_4_of_5():
@@ -217,7 +217,7 @@ public final class DeepEval {
             files.max(Comparator.comparing(Path::toString)).ifPresent(latest -> {
                 try {
                     JsonNode report = MAPPER.readTree(latest.toFile());
-                    // map each failing test case -> Allure named result (qa-test-reports-java)
+                    // map each failing test case -> Allure named result (qa-java:test-reports)
                 } catch (IOException e) {
                     Allure.attachment("deepeval-report-unreadable", latest + " -> " + e);
                 }
@@ -249,9 +249,9 @@ public final class DeepEval {
 - This skill's `SKILL.md` — the promptfoo spine (the default) + the routing decision that sends you here.
 - `references/details.md` — the in-code LangChain4j-in-TestNG path (the third option when an assertion must live
   in Java beside non-LLM tests).
-- `qa-data-driven-testing-java` — the dataset mechanics `EvaluationDataset`/`Golden` mirror.
-- `qa-flaky-test-quarantine-java` — the boundary: a dropped metric **rate** is a regression, not a flake.
+- `qa-java:data-driven-testing` — the dataset mechanics `EvaluationDataset`/`Golden` mirror.
+- `qa-java:flaky-test-quarantine` — the boundary: a dropped metric **rate** is a regression, not a flake.
 - `qa-security` agent + `qa/_shared/security-testing/*` — DeepTeam covers the model-behavior attack surface those
   network/code scanners can't reach.
-- `qa-test-reports-java` / `qa-_shared-quality-metrics` — each DeepEval case as a named result; track metric
+- `qa-java:test-reports` / `qa-<stack>:quality-metrics` — each DeepEval case as a named result; track metric
   pass-rate over time (a declining rate = a silent regression).

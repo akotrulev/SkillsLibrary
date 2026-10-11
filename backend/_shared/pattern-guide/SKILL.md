@@ -1,5 +1,5 @@
 ---
-name: be-shared-pattern-guide
+name: pattern-catalog
 description: Use when explaining a design pattern in language-agnostic terms — intent, when to use, when not to, trade-offs, what it looks like across stacks. Triggers: "what is the Strategy pattern", "when should I use Repository", "compare CQRS to plain service+repo", "should I use the Saga pattern here". Do NOT use for stack-specific code, scaffolding, or reviewing (`backend/<stack>/skills/{reference,generator,reviewer}`).
 ---
 

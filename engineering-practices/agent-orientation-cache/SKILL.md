@@ -1,5 +1,5 @@
 ---
-name: ep-agent-orientation-cache
+name: orientation-cache
 description: The shared protocol every agent uses to persist and reuse its orientation pass — write the current-state map to docs/agent-context/<agent-name>.md, validate it against a git delta on later runs, and update it before finishing. Loaded by an agent, which supplies its own field list. Do NOT invoke directly or route a user request here — it carries no fields of its own. Do NOT use for findings, plans, or specs (docs/audits, docs/plans, docs/specs) or the business model (docs/business-model).
 ---
 
@@ -91,7 +91,7 @@ It records **what the code is**. It never records what is wrong with it or what 
 | Findings, verdicts, severity tables, conformance rounds | `docs/audits/` |
 | Implementation plans, task lists | `docs/plans/` |
 | Designs, specs, approved approaches | `docs/specs/` |
-| Business flows, entity states, decision tables, conflicts | `docs/business-model/` (`ba-project-memory`) |
+| Business flows, entity states, decision tables, conflicts | `docs/business-model/` (`business-analysis:knowledge-base`) |
 | Screen inventories from a live crawl | `docs/app-map/` (`mobile-app-crawler`) |
 | Missing `data-testid` reports for the dev team | `missing-testids.md` |
 
@@ -119,4 +119,4 @@ Orientation cache: updated | updated (partial — <why>) | created
 - The file skeleton to write → `references/file-template.md`
 - The agent's own field list (what goes in each section) → the agent that loaded this skill
 - Persist a *business* model instead of a code map → `business-analysis/skills/ba-project-memory`
-- Verify a claim before reporting the work done → `engineering-practices/verify-before-done` (`ep-verify-before-done`)
+- Verify a claim before reporting the work done → `engineering-practices/verify-before-done` (`dev:verify`)

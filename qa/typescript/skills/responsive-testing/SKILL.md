@@ -1,6 +1,6 @@
 ---
-name: qa-responsive-testing-typescript
-description: Use when testing responsive layout/breakpoint behavior in TypeScript with Playwright — drive the viewport across the app's real CSS breakpoints (read from its token/theme source, never guessed), assert the layout variant at breakpoint−1 and breakpoint (BVA), verify geometry via bounding boxes. Triggers: "test the responsive design", "assert the nav collapses to a hamburger", "test around the breakpoints". Do NOT use for pixel-diff screenshots (qa-visual-regression-typescript).
+name: responsive-testing
+description: Use when testing responsive layout/breakpoint behavior in TypeScript with Playwright — drive the viewport across the app's real CSS breakpoints (read from its token/theme source, never guessed), assert the layout variant at breakpoint−1 and breakpoint (BVA), verify geometry via bounding boxes. Triggers: "test the responsive design", "assert the nav collapses to a hamburger", "test around the breakpoints". Do NOT use for pixel-diff screenshots (qa-typescript:visual-regression).
 ---
 
 # QA — Responsive / Breakpoint Testing (TypeScript / Playwright 1.64)
@@ -49,7 +49,7 @@ breakpoint coverage that reference hands over.
 | **Grid/column reflow** | Cards go 3-col → 2-col → 1-col at the right widths | Rows carry `columns`; `expect.poll(() => layout.columnCount(cards))` |
 | **No overflow / no clipping** | Nothing forces a horizontal scrollbar | `Layout.horizontalOverflow()` is `0` |
 | **Live resize / rotation** | JS breakpoint logic reacts to a real resize | Load wide → `layout.resizeTo(narrow)` → web-first assert the swap (and back) |
-| **Whole-page look per viewport** | Everything the structural checks can't name | Hand off: `qa-visual-regression-typescript`, one baseline per viewport project |
+| **Whole-page look per viewport** | Everything the structural checks can't name | Hand off: `qa-typescript:visual-regression`, one baseline per viewport project |
 | **Real mobile UX (touch, DPR, UA)** | Device behavior, not CSS breakpoints | Device projects in `emulation-and-mobile-web.md` §1–§2; real devices → `qa/typescript/skills/device-cloud` |
 
 ## Stack
@@ -122,7 +122,7 @@ for (const row of navRows) {
 
 `nav.responsive.spec.ts`. The swap is exclusive, so both sides are asserted: one behaviour, two expectations.
 The `for` generates one independent, individually-named test per row — it is outside every test body, which
-is the sanctioned parameterization (`qa-data-driven-testing-typescript`).
+is the sanctioned parameterization (`qa-typescript:data-driven-testing`).
 
 ## Geometry rows — reflow, overflow, alignment
 
@@ -244,15 +244,15 @@ waits for the collapsed state before the resize back, so the test never grows a 
 
 ## Cross-references
 
-- `qa-responsive-testing-java` · `qa-responsive-testing-dotnet` — sibling stacks (Playwright-Java + TestNG ·
+- `qa-java:responsive-testing` · `qa-dotnet:responsive-testing` — sibling stacks (Playwright-Java + TestNG ·
   Playwright .NET + NUnit); same four ideas, different APIs.
-- `qa-ui-test-writer-playwright-typescript` — the fixtures this extends, and
+- `qa-typescript:ui-tests-playwright` — the fixtures this extends, and
   `references/emulation-and-mobile-web.md` for viewport, `screen`, device projects and media features.
-- `qa-visual-regression-typescript` — the pixel complement: one baseline per viewport project, after the
+- `qa-typescript:visual-regression` — the pixel complement: one baseline per viewport project, after the
   structural checks pass.
-- `qa-accessibility-testing-typescript` — reflow/zoom (WCAG 1.4.10) and touch-target sizes at mobile widths
+- `qa-typescript:accessibility-testing` — reflow/zoom (WCAG 1.4.10) and touch-target sizes at mobile widths
   overlap with a11y scans; run them at the same widths.
-- `qa-data-driven-testing-typescript` — the breakpoint rows are its row-binding pattern applied to widths.
-- `frontend/react/skills/responsive-design` (`fe-react-responsive-design`, the FE peer) — the dev-side skill
+- `qa-typescript:data-driven-testing` — the breakpoint rows are its row-binding pattern applied to widths.
+- `frontend/react/skills/responsive-design` (`fe-react:responsive-design`, the FE peer) — the dev-side skill
   that defines the breakpoint contract this skill reads; its variant-suffixed test ids (`Nav.Desktop` /
   `Nav.Hamburger`) are what make the variant swap assertable.

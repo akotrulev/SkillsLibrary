@@ -1,11 +1,11 @@
 ---
-name: qa-security-passive-scan-dotnet
+name: passive-scan
 description: Use when adding an OWASP ZAP baseline (passive) DAST scan as a CI build gate for a .NET / NUnit pipeline — spider a running app for a bounded time and run ZAP's passive rules (headers, cookie flags, info leaks) with no attack payloads, failing on new alerts above a threshold. Triggers "add a DAST gate to CI", "run ZAP against our running app", "scan for missing security headers". Not for active scanning (`active-scan`), known CVEs (`nuclei`), or TLS config (`certificate-scan`).
 ---
 
 # Security Testing — OWASP ZAP Baseline Scan (.NET / NUnit)
 
-The .NET port of the canonical `qa-security-passive-scan-typescript`. Same baseline scan model,
+The .NET port of the canonical `qa-typescript:passive-scan`. Same baseline scan model,
 same exit-code build gate, same ticketed-triage discipline — re-expressed for a .NET shop, which makes the
 honest shape of this node plain.
 
@@ -109,7 +109,7 @@ demote known/accepted ones to `IGNORE`. Many teams pass on `2` (warnings tracked
 
 A real app's first run lights up with WARNs; gating on *every* alert mutes the gate. Use the **ticketed
 rules config**: tab-separated, each ZAP rule-id set to `IGNORE`/`WARN`/`FAIL`, **every `IGNORE` carrying a
-ticket + reason** — the same allow-list discipline as `qa-accessibility-testing-dotnet`
+ticket + reason** — the same allow-list discipline as `qa-dotnet:accessibility-testing`
 (`axe-playwright`), ported to ZAP.
 
 ```tsv
@@ -134,7 +134,7 @@ ticket + reason** — the same allow-list discipline as `qa-accessibility-testin
 ## Running the scan — the CI-first path (`zaproxy/action-baseline`)
 
 The natural home is CI. The official Action wraps the image, runs the baseline, uploads the report, and
-optionally opens a tracking issue (cross-link `qa-ci-pipelines-dotnet`):
+optionally opens a tracking issue (cross-link `qa-dotnet:ci-pipelines`):
 
 ```yaml
 # .github/workflows/passive-scan.yml
@@ -303,7 +303,7 @@ context file or `cmd_options` (global rule: no secrets in code).
 ## Reporting the gate — ZAP report into Allure + CI artifact
 
 `passive-scan.py` writes `report.json`/`.html`/`.xml` to the mounted work dir. Attach to Allure so a
-failing run names the alerts without re-scanning (cross-link `qa-test-reports-dotnet`):
+failing run names the alerts without re-scanning (cross-link `qa-dotnet:test-reports`):
 
 ```csharp
 // Support/ZapReportAttachment.cs
@@ -324,7 +324,7 @@ public static class ZapReportAttachment
 
 - **Allure** — attach the HTML + a readable alert summary (rule id, risk, count).
 - **CI artifact** — the Action's `artifact_name` upload, or upload the work dir (cross-link
-  `qa-ci-pipelines-dotnet`).
+  `qa-dotnet:ci-pipelines`).
 - **Tracking issue** — `allow_issue_writing: true` opens/updates a GitHub issue.
 
 ## Anti-patterns
@@ -374,17 +374,17 @@ These sections live in `references/details.md` — **read it when the task touch
 
 ## Cross-references
 
-- `qa-security-passive-scan-typescript` — the **canonical** skill, TS (house default; the scan is
+- `qa-typescript:passive-scan` — the **canonical** skill, TS (house default; the scan is
   language-agnostic `docker run`). This .NET sibling is the `Process` + `System.Text.Json` port of it.
-- `qa-security-passive-scan-java` — same skill, Java / TestNG. Same Docker choreography via
+- `qa-java:passive-scan` — same skill, Java / TestNG. Same Docker choreography via
   `ProcessBuilder` + Jackson.
-- `qa-security-dependency-scan-dotnet` — the **SCA** sibling that closes the
+- `qa-dotnet:dependency-scan` — the **SCA** sibling that closes the
   `security-testing` family: NuGet/transitive CVEs from your project vs ZAP's running-app HTTP surface.
   Different layers — run both.
-- `qa-accessibility-testing-dotnet` — the **ticketed-baseline triage** discipline
+- `qa-dotnet:accessibility-testing` — the **ticketed-baseline triage** discipline
   reused here for `-c rules.tsv`.
-- `qa-accessibility-testing-dotnet` — the closest **port-shape precedent**: a
+- `qa-dotnet:accessibility-testing` — the closest **port-shape precedent**: a
   CLI/Docker tool invoked via `Process` from .NET with the report parsed as JSON.
-- `qa-ci-pipelines-dotnet` — the `zaproxy/action-baseline` job, `fail_action`, artifact
+- `qa-dotnet:ci-pipelines` — the `zaproxy/action-baseline` job, `fail_action`, artifact
   upload, Docker availability.
-- `qa-test-reports-dotnet` — attach the ZAP HTML/JSON report and alert summary.
+- `qa-dotnet:test-reports` — attach the ZAP HTML/JSON report and alert summary.

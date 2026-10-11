@@ -1,5 +1,5 @@
 ---
-name: be-python-code-review
+name: conventions-review
 description: Use when reviewing Python 3.12–3.14 worker or backend code for typing leaks, swallowed exceptions, module state, blocking async, unsafe subprocess/path/deserialisation, Pillow metadata mistakes, SVG sanitiser gaps, missing per-job isolation. Triggers "review this Python module", "is this worker hardened". Do NOT use for explanations (`pattern-guide`), generating code (`pattern-writer` / `media-processing`), or the Dockerfile beyond its checklist row (`sandboxed-worker`).
 ---
 
@@ -32,7 +32,7 @@ Reviews Python code against `pattern-writer`, `media-processing`, `sandboxed-wor
 | Composition root is the only constructor site | `new_session(...)` inside a function called per job; `Settings()` built in a module body | major |
 | No module-level mutable state | `_cache = {}`, `_session = None` + lazy init, `global` | major |
 | Unearned abstraction | ABC with one subclass, `*Manager` / `*Utils` class, a layer that forwards | major — inline it |
-| Comments per `ep-code-comments` | inline comment, commented-out code, docstring restating the signature | minor; wrong or covering-for-unclear-code → major |
+| Comments per `engineering-practices/code-comments` | inline comment, commented-out code, docstring restating the signature | minor; wrong or covering-for-unclear-code → major |
 
 ### Errors and control flow
 

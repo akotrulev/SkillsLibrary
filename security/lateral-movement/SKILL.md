@@ -1,6 +1,6 @@
 ---
-name: pentest-lateral-movement
-description: Use to move from one compromised host to other in-scope systems during an authorized penetration test — credential reuse, AD attack-path mapping, K8s/cloud pivots. Triggers "pivot from this foothold to the subnet", "map the AD attack paths to Domain Admin". Not for gaining the foothold (`pentest-initial-access`), escalating (`pentest-privilege-escalation`), or cracking creds (`pentest-credential-attacks`). Owned/lab only, under a committed scope file; never touch out-of-scope hosts.
+name: lateral-movement
+description: Use to move from one compromised host to other in-scope systems during an authorized penetration test — credential reuse, AD attack-path mapping, K8s/cloud pivots. Triggers "pivot from this foothold to the subnet", "map the AD attack paths to Domain Admin". Not for gaining the foothold (`penetration-testing:initial-access`), escalating (`penetration-testing:privilege-escalation`), or cracking creds (`penetration-testing:credential-attacks`). Owned/lab only, under a committed scope file; never touch out-of-scope hosts.
 ---
 
 # Penetration Testing — Lateral Movement (NetExec · impacket · BloodHound CE · ligolo-ng/chisel/sshuttle · K8s pivots)
@@ -14,9 +14,9 @@ Authorization: engagement=<NNN>  in-scope-hosts=<CIDRs/hosts>  exclusions=<never
                authorized-by=<name>  window=<start>..<expiry>  environment=lab|production(2nd sign-off)
 ```
 
-This skill is **language-agnostic** and is loaded by the **`penetration-tester`** agent in its **Lateral movement** step. It owns *reaching other in-scope hosts*; the credentials it reuses come from `pentest-credential-attacks` (its feedstock).
+This skill is **language-agnostic** and is loaded by the **`penetration-tester`** agent in its **Lateral movement** step. It owns *reaching other in-scope hosts*; the credentials it reuses come from `penetration-testing:credential-attacks` (its feedstock).
 
-> **Two spines, stated per finding.** Lateral movement maps to **MITRE ATT&CK Enterprise**: `T1021` Remote Services (`.002` SMB/Admin Shares, `.004` SSH, `.006` WinRM), `T1550` Use Alternate Authentication Material (`.002` Pass the Hash, `.003` Pass the Ticket), `T1078` Valid Accounts, `T1572` Protocol Tunneling + `T1090.001` Internal Proxy (pivoting), `T1482` Domain Trust Discovery / `T1069` Permission Groups Discovery (AD mapping), `T1528` Steal Application Access Token + `T1550.001` (K8s). Score CVSS in `pentest-reporting`.
+> **Two spines, stated per finding.** Lateral movement maps to **MITRE ATT&CK Enterprise**: `T1021` Remote Services (`.002` SMB/Admin Shares, `.004` SSH, `.006` WinRM), `T1550` Use Alternate Authentication Material (`.002` Pass the Hash, `.003` Pass the Ticket), `T1078` Valid Accounts, `T1572` Protocol Tunneling + `T1090.001` Internal Proxy (pivoting), `T1482` Domain Trust Discovery / `T1069` Permission Groups Discovery (AD mapping), `T1528` Steal Application Access Token + `T1550.001` (K8s). Score CVSS in `penetration-testing:reporting`.
 
 ## Credential reuse — NetExec (nxc), the CrackMapExec successor
 
@@ -123,19 +123,19 @@ A compromised pod's mounted ServiceAccount token (`/var/run/secrets/kubernetes.i
 ## Rules (hard constraints)
 
 - **The scope file bounds every hop.** Only in-scope hosts touched; a host made reachable by a pivot but not in scope is never touched. Re-read before each hop; halt and report on an out-of-scope next act.
-- **Credentials come from `pentest-credential-attacks`** (feedstock); this skill reuses them, it does not capture/crack them.
+- **Credentials come from `penetration-testing:credential-attacks`** (feedstock); this skill reuses them, it does not capture/crack them.
 - **Spraying is lockout-risk** — threshold-agreed, capped, production-excluded by default. **No DoS, ever.**
 - **Prefer quiet, artifact-minimal techniques** (wmiexec over psexec; DCOnly/Stealth collection; sshuttle's no-drop pivot) and enumerate/remove every artifact at cleanup.
-- **Two spines per finding:** ATT&CK Enterprise (Lateral Movement / Credential Access / Discovery tactics) + CVSS in `pentest-reporting`.
+- **Two spines per finding:** ATT&CK Enterprise (Lateral Movement / Credential Access / Discovery tactics) + CVSS in `penetration-testing:reporting`.
 - **Loot redaction:** AD graph, creds, tickets → blast radius only, segregated per the scope file's data-handling, never committed.
 - **Log every act** — command, target, timestamp, ATT&CK id — into the engagement action log.
 
 ## Cross-references
 
 - **`penetration-tester`** — the orchestrator; runs this in its **Lateral movement** step, owns the scope-file gate.
-- **`pentest-initial-access`** — supplies the foothold used as the pivot.
-- **`pentest-credential-attacks`** — the **feedstock**: captures/cracks the credentials this skill reuses (hashes → PtH, cracked passwords → spray).
-- **`pentest-privilege-escalation`** — root/SYSTEM on a host often unlocks the credential material that enables the next lateral hop.
-- **`pentest-post-exploitation`** — owns cleanup of every pivot binary, TUN interface, forged ticket, and created pod this step leaves.
+- **`penetration-testing:initial-access`** — supplies the foothold used as the pivot.
+- **`penetration-testing:credential-attacks`** — the **feedstock**: captures/cracks the credentials this skill reuses (hashes → PtH, cracked passwords → spray).
+- **`penetration-testing:privilege-escalation`** — root/SYSTEM on a host often unlocks the credential material that enables the next lateral hop.
+- **`penetration-testing:post-exploitation`** — owns cleanup of every pivot binary, TUN interface, forged ticket, and created pod this step leaves.
 - **`infra-security-tester`** (`devops/`) — the posture sibling; its K8s/cloud/network-policy findings scope where a pivot could go. `data-architect` owns the cross-tenant isolation this step would test.
-- **`pentest-reporting`** — action log + CVSS/ATT&CK scoring of every hop and the AD path.
+- **`penetration-testing:reporting`** — action log + CVSS/ATT&CK scoring of every hop and the AD path.

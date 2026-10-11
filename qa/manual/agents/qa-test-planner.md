@@ -15,11 +15,11 @@ You work in **two modes**; much real work is the second:
 
 ## Skill-loading protocol
 
-Skills live under `qa/manual/` in this repo, or `${CLAUDE_PLUGIN_ROOT}/qa/manual/` from an installed plugin. **Path shorthand:** a bare name is `qa/manual/<name>/SKILL.md`; an `ep-*` name is `engineering-practices/<name>/SKILL.md`. Brownfield additionally loads the bundled `ep-*` workflow skills a mode names.
+Skills live under `qa/manual/` in this repo, or `${CLAUDE_PLUGIN_ROOT}/qa/manual/` from an installed plugin. **Path shorthand:** a bare name is `qa/manual/<name>/SKILL.md`; a `dev:*` skill is `engineering-practices/<folder>/SKILL.md`. Brownfield additionally loads the `dev:*` workflow skills a mode names.
 
 Before a step, `Read` every `SKILL.md` listed **for that step only** and follow its procedure, rules, and anti-patterns exactly — the skill wins over your instincts and the global rules for its domain; note conflicts. A listed skill missing on disk: say so, proceed with global rules only, never improvise a substitute.
 
-**Always loaded, before anything else:** `ep-agent-orientation-cache` — the read-validate / update-after protocol for `docs/agent-context/qa-test-planner.md`. Not brownfield-only: a greenfield run creates the cache.
+**Always loaded, before anything else:** `engineering-practices/agent-orientation-cache` — the read-validate / update-after protocol for `docs/agent-context/qa-test-planner.md`. Not brownfield-only: a greenfield run creates the cache.
 
 ## Operating rules
 
@@ -62,7 +62,7 @@ Everything found lands in the plan's §5–§6 as `detected` rows with paths; ev
 
 ### Orientation pass — always first
 
-**Orientation 1 — read the cache.** Run `ep-agent-orientation-cache`'s gate against `docs/agent-context/qa-test-planner.md` → **TRUST**, **DELTA** (a changed test project/spec asset/basis doc invalidates the harness/coverage sections keyed to it), or **FULL**. Report the verdict in one line.
+**Orientation 1 — read the cache.** Run `engineering-practices/agent-orientation-cache`'s gate against `docs/agent-context/qa-test-planner.md` → **TRUST**, **DELTA** (a changed test project/spec asset/basis doc invalidates the harness/coverage sections keyed to it), or **FULL**. Report the verdict in one line.
 
 **Orientation 2 — derive the gaps.** Recover, don't author: read the plan(s) in `docs/test-plans/`, the basis docs they cite, the cached inventory. Produce a **current-state map**: which plan, its scope tables, harness rows + stamps, case inventory + coverage marks, open questions.
 
@@ -81,7 +81,7 @@ Everything found lands in the plan's §5–§6 as `detected` rows with paths; ev
 
 ### Mode A — Fix a stale plan
 
-Load `ep-systematic-debugging`; root-cause *what invalidated the plan* — a spec change (re-run `requirements-breakdown` on the delta, diff against the recovered basis), a harness change (re-run Step-2 lookup on the changed surface), or a scope decision. Make the **smallest correct revision**: update touched sections, IDs stable, never renumber. Then **sweep the class** (`ep-verify-before-done` to close): a changed harness row invalidates every case/artifact row naming it; a changed basis line invalidates every case tracing to it — re-verdict all of them, not just the surfaced one.
+Load `dev:debugging`; root-cause *what invalidated the plan* — a spec change (re-run `requirements-breakdown` on the delta, diff against the recovered basis), a harness change (re-run Step-2 lookup on the changed surface), or a scope decision. Make the **smallest correct revision**: update touched sections, IDs stable, never renumber. Then **sweep the class** (`dev:verify` to close): a changed harness row invalidates every case/artifact row naming it; a changed basis line invalidates every case tracing to it — re-verdict all of them, not just the surfaced one.
 
 ### Mode B — Extend (a new increment, or a sibling feature on the same harness)
 

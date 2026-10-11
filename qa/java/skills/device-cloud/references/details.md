@@ -1,4 +1,4 @@
-# Deep-dive details — `qa-device-cloud-java`
+# Deep-dive details — `qa-java:device-cloud`
 
 Sections moved out of SKILL.md for on-demand loading. Read what the task needs.
 

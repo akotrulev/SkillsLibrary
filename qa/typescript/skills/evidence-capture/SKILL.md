@@ -1,5 +1,5 @@
 ---
-name: qa-evidence-capture-typescript
+name: evidence-capture
 description: Use when a Playwright or Appium/WebdriverIO TypeScript suite or agent must keep evidence — screenshots, video, traces, HAR, page source, device logs, recordings — or read a failure's evidence before a fix. Triggers "keep trace and video on failure", "record a screencast", "keep a recording when the mobile test fails". Do NOT use for writing tests or config (ui-test-author/*), Allure wiring (test-reports) or visual baselines (visual-regression).
 ---
 

@@ -1,6 +1,6 @@
 ---
-name: qa-api-test-review-java
-description: Use when the user asks to review existing Java API test code (RestAssured + TestNG) for quality. Triggers: "review this RestAssured test", "look at OrderTest.java", "spot issues in this {Resource}Client class". Do NOT use for writing new tests (`qa-api-test-writer-java`) or measuring test quality with mutation testing (`qa-test-quality-check-java`).
+name: api-tests-review
+description: Use when the user asks to review existing Java API test code (RestAssured + TestNG) for quality. Triggers: "review this RestAssured test", "look at OrderTest.java", "spot issues in this {Resource}Client class". Do NOT use for writing new tests (`qa-java:api-tests`) or measuring test quality with mutation testing (`qa-java:test-quality-check`).
 ---
 
 # QA — API Test Reviewer (Java / RestAssured + TestNG)
@@ -71,7 +71,7 @@ Reviews Java API test code against the patterns enforced by `qa/java/skills/api-
 
 ### Comments in test code
 
-Load **[`ep-code-comments`](../../../../../engineering-practices/code-comments/SKILL.md)** for the rule itself, the complex-flow test that earns a doc comment, the never-comment trivia list, and the severity mapping. Its **test-code** section carries the AAA-banner rule and the exactly-three-permitted-comments list. This section supplies only the mechanics that differ here.
+Load **[`engineering-practices/code-comments`](../../../../../engineering-practices/code-comments/SKILL.md)** for the rule itself, the complex-flow test that earns a doc comment, the never-comment trivia list, and the severity mapping. Its **test-code** section carries the AAA-banner rule and the exactly-three-permitted-comments list. This section supplies only the mechanics that differ here.
 
 | Java mechanic | What to check |
 |---|---|

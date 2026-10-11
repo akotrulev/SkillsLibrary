@@ -1,11 +1,11 @@
 ---
-name: mobile-react-native-animation
-description: Use when an Expo SDK 57 app needs motion or gestures — Reanimated 4 + react-native-worklets, Gesture Handler 2.32 on SDK 57 vs 3.x on SDK 58 (different APIs), layout and entering/exiting animations, UI-thread-only props, Reduce Motion. Triggers "animate this", "swipe to dismiss", "drag", "press feedback janks", "gesture callback renamed". Do NOT use for whether to animate (`design-motion`), navigation transitions (`-navigation`), or list performance (`-performance`).
+name: animation
+description: Use when an Expo SDK 57 app needs motion or gestures — Reanimated 4 + react-native-worklets, Gesture Handler 2.32 on SDK 57 vs 3.x on SDK 58 (different APIs), layout and entering/exiting animations, UI-thread-only props, Reduce Motion. Triggers "animate this", "swipe to dismiss", "drag", "press feedback janks", "gesture callback renamed". Do NOT use for whether to animate (`design:motion`), navigation transitions (`-navigation`), or list performance (`-performance`).
 ---
 
 # React Native — Animation and Gestures
 
-Motion on a phone runs on the **UI thread** or it janks. This skill owns Reanimated 4 (worklets), the gesture layer, layout animations and the **Reduce Motion floor**. Whether and where to animate is design's call ([`design-motion`](../../../../design/motion/SKILL.md)); a web CSS transition does not exist here. Web analog: [`fe-react-animation`](../../../../frontend/react/skills/animation/SKILL.md) — the "reduced motion is a hard floor" and "transform and opacity only" rules carry over; CSS keyframes, `AnimatePresence` and View Transitions do not.
+Motion on a phone runs on the **UI thread** or it janks. This skill owns Reanimated 4 (worklets), the gesture layer, layout animations and the **Reduce Motion floor**. Whether and where to animate is design's call ([`design:motion`](../../../../design/motion/SKILL.md)); a web CSS transition does not exist here. Web analog: [`fe-react:animation`](../../../../frontend/react/skills/animation/SKILL.md) — the "reduced motion is a hard floor" and "transform and opacity only" rules carry over; CSS keyframes, `AnimatePresence` and View Transitions do not.
 
 ## Version lane
 
@@ -29,7 +29,7 @@ Motion on a phone runs on the **UI thread** or it janks. This skill owns Reanima
 
 ## When NOT to use
 
-- Where motion belongs in the product, durations, restraint → [`design-motion`](../../../../design/motion/SKILL.md)
+- Where motion belongs in the product, durations, restraint → [`design:motion`](../../../../design/motion/SKILL.md)
 - Screen transitions, native stack and tab animations → [`navigation`](../navigation/SKILL.md)
 - Jank from list rendering → [`performance`](../performance/SKILL.md)
 - Native menus, sheets, system modals (already animated by the OS) → [`ui-components`](../ui-components/SKILL.md)
@@ -187,7 +187,7 @@ Inside a `Gate: none` plan task, run none of these and report "written, not run"
 
 ## Handoffs
 
-- Where / whether, durations, restraint → [`design-motion`](../../../../design/motion/SKILL.md)
+- Where / whether, durations, restraint → [`design:motion`](../../../../design/motion/SKILL.md)
 - Screen transitions, native stack / tabs → [`navigation`](../navigation/SKILL.md)
 - Jank, list rendering, profiling → [`performance`](../performance/SKILL.md)
 - Roles, labels, focus and Reduce Motion as an accessibility requirement → [`accessibility`](../accessibility/SKILL.md)

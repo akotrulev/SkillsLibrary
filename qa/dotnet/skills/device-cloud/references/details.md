@@ -1,4 +1,4 @@
-# Deep-dive details — `qa-device-cloud-dotnet`
+# Deep-dive details — `qa-dotnet:device-cloud`
 
 Sections moved out of SKILL.md for on-demand loading. Read what the task needs.
 

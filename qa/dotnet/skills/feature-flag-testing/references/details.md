@@ -1,4 +1,4 @@
-# Deep-dive details — `qa-feature-flag-testing-dotnet`
+# Deep-dive details — `qa-dotnet:feature-flag-testing`
 
 Sections moved out of SKILL.md for on-demand loading. Read what the task needs.
 
@@ -93,7 +93,7 @@ public class CheckoutFlagTests
 > The off-row is **not** a formality: it is the only coverage of the path every un-migrated user is on, and the
 > only proof a rollback is safe. A multivariate flag gets one row per variation — exhaustively (`control` /
 > `treatment-a` / `treatment-b`), via the same `[TestCase]`/`[TestCaseSource]` mechanics as
-> `qa-data-driven-testing-dotnet`.
+> `qa-dotnet:data-driven-testing`.
 
 ### Targeting via the evaluation context (idea #3)
 
@@ -195,7 +195,7 @@ public class BetaTargetingTests
 ### The kill-switch lifecycle — flip mid-flight, assert graceful degradation (idea #4)
 
 `td.Update(...)` propagates to the live client **as if LaunchDarkly streamed the change** — so one test proves
-the off-path engages *without a restart*. This is the flag analogue of `qa-failure-injection-testing-dotnet`'s
+the off-path engages *without a restart*. This is the flag analogue of `qa-dotnet:failure-injection-testing`'s
 steady → perturb → assert-degraded lifecycle (and the boundary: a *flag* flip is this skill; a *dependency fault*
 is chaos).
 

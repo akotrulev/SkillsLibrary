@@ -12,7 +12,7 @@ Checked 2026-10-10 against developer.android.com/google/play/billing/release-not
 
 - **Current: 9.1.0** (2026-06-18; Billing Choice APIs). 9.0.0 (2026-05-19) changed the blocked-Play-Store response from `ERROR` to `BILLING_UNAVAILABLE`.
 - The rule in the table is "that version **or later**": from 2027-08-31 an update must be on **9+**. A project on 8.x passes today and has a dated deadline — report it as a finding with the date.
-- Detect from `com.android.billingclient:billing-ktx:<version>` in `build.gradle(.kts)` / the version catalog. Never raise it as a side effect; `mobile-android-migration` owns the upgrade (follow the PBL 9 migration guide).
+- Detect from `com.android.billingclient:billing-ktx:<version>` in `build.gradle(.kts)` / the version catalog. Never raise it as a side effect; `mobile-android:migration` owns the upgrade (follow the PBL 9 migration guide).
 
 ## Connect, query, launch
 
@@ -87,7 +87,7 @@ suspend fun handle(purchase: Purchase) {
 ## Management, policy
 
 - Manage/cancel deep link: `https://play.google.com/store/account/subscriptions?sku=<productId>&package=<packageName>`.
-- Digital goods use Play Billing unless a program applies (user-choice billing, alternative billing, external offers — country- and enrolment-gated, re-verify at support.google.com/googleplay/android-developer). `mobile-shared-store-compliance` owns the Console-only items.
+- Digital goods use Play Billing unless a program applies (user-choice billing, alternative billing, external offers — country- and enrolment-gated, re-verify at support.google.com/googleplay/android-developer). `mobile-<stack>:store-compliance` owns the Console-only items.
 - Offers: base plan + offer ids come from `subscriptionOfferDetails`; eligibility is the store's decision.
 - Testing: licence testers and internal-test tracks are QA fixtures; do not ship test product ids.
 

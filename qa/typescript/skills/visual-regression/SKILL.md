@@ -1,6 +1,6 @@
 ---
-name: qa-visual-regression-typescript
-description: Use when a Playwright Test (TypeScript) suite must catch unintended visual change — built-in toHaveScreenshot baselines, Percy, or Applitools Eyes. Triggers "add visual regression tests", "screenshot diff this page", "update the visual baselines", "the layout broke and no functional test caught it". Do NOT use for breakpoint layout (qa-responsive-testing-typescript), accessibility scans (qa-accessibility-testing-typescript) or failure screenshots (qa-evidence-capture-typescript).
+name: visual-regression
+description: Use when a Playwright Test (TypeScript) suite must catch unintended visual change — built-in toHaveScreenshot baselines, Percy, or Applitools Eyes. Triggers "add visual regression tests", "screenshot diff this page", "update the visual baselines", "the layout broke and no functional test caught it". Do NOT use for breakpoint layout (qa-typescript:responsive-testing), accessibility scans (qa-typescript:accessibility-testing) or failure screenshots (qa-typescript:evidence-capture).
 ---
 
 # QA — Visual Regression (TypeScript / Playwright 1.64)
@@ -63,5 +63,5 @@ many browsers stay noisy, or a page whose *content* changes must keep its *struc
 - Failure evidence and reading a trace → `qa/typescript/skills/evidence-capture`
 - Allure mapping of diffs → `qa/reporting/typescript/skills/test-reports`
 - The nightly job and artifact upload → `qa/cicd/typescript/skills/ci-pipelines`, `qa/cicd/ci-conventions`
-- Java and .NET → `qa-visual-regression-java`, `qa-visual-regression-dotnet` (no screenshot assertion in
+- Java and .NET → `qa-java:visual-regression`, `qa-dotnet:visual-regression` (no screenshot assertion in
   those bindings; they compare `screenshot()` output)

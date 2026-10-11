@@ -1,5 +1,5 @@
 ---
-name: qa-security-dependency-scan-java
+name: dependency-scan
 description: Use when wiring SCA (dependency-vulnerability scanning) as a CI gate for a Java build — OWASP Dependency-Check Gradle plugin scanning the direct + transitive tree against CVE feeds, failing above a CVSS threshold, with a ticketed suppression file. Triggers: "fail the build on vulnerable dependencies", "add dependency scanning", "gate new CVEs". Not for runtime DAST → `security-testing/passive-scan`.
 ---
 
@@ -114,7 +114,7 @@ A real project's first SCA run lights up — including findings you **cannot fix
 **transitive** dependency or are false positives. Gating on *every* CVE with no triage trains the team to
 mute the gate. The disciplined approach is the **ticketed suppression file**: each `<suppress>` carries a
 specific CVE/coordinate, a **`<notes>` ticket + reason**, and ideally an **`until=` expiry** — the same
-allow-list discipline as `qa-accessibility-testing-java` and `passive-scan`'s `rules.tsv`, ported
+allow-list discipline as `qa-java:accessibility-testing` and `passive-scan`'s `rules.tsv`, ported
 to SCA.
 
 ```xml
@@ -173,7 +173,7 @@ bump its line. Three honest responses, in order of preference:
 
 Dependency-Check writes `dependency-check-report.{html,json,sarif}` to `build/reports/`. Attach the HTML +
 a parsed summary to Allure so a failing run names the CVEs without re-scanning, and feed the **SARIF** to
-GitHub code-scanning so findings show inline on the PR (cross-link `qa-test-reports-java`):
+GitHub code-scanning so findings show inline on the PR (cross-link `qa-java:test-reports`):
 
 ```java
 // src/test/java/security/DependencyCheckReport.java
@@ -198,11 +198,11 @@ public final class DependencyCheckReport {
 }
 ```
 
-- **Allure** — attach the HTML report (cross-link `qa-test-reports-java`).
+- **Allure** — attach the HTML report (cross-link `qa-java:test-reports`).
 - **SARIF → GitHub code-scanning** — `formats = listOf(..., "SARIF")`, then
   `github/codeql-action/upload-sarif` surfaces each CVE inline on the PR diff.
 - **CI artifact** — upload `build/reports/dependency-check-report.*` (cross-link
-  `qa-ci-pipelines-java`).
+  `qa-java:ci-pipelines`).
 
 ## Optional parse-and-assert test (the programmatic path)
 
@@ -248,7 +248,7 @@ The `.NET`/TS siblings parse their own tool's JSON (`dotnet list package --vulne
 ## CI wiring — the gate, the NVD cache, the remediation complement
 
 ```yaml
-# .github/workflows/sca.yml — cross-link qa-ci-pipelines-java
+# .github/workflows/sca.yml — cross-link qa-java:ci-pipelines
 name: Dependency Scan (SCA)
 on: [pull_request]
 
@@ -336,15 +336,15 @@ These sections live in `references/details.md` — **read it when the task touch
 
 ## Cross-references
 
-- `qa-security-dependency-scan-typescript` — same skill, TS / `npm audit` (`--audit-level`,
+- `qa-typescript:dependency-scan` — same skill, TS / `npm audit` (`--audit-level`,
   `--json`, `npm audit fix`, `overrides`/`.nsprc`; Dependency-Check as the shared option).
-- `qa-security-dependency-scan-dotnet` — same skill, .NET / `dotnet list package --vulnerable
+- `qa-dotnet:dependency-scan` — same skill, .NET / `dotnet list package --vulnerable
   --include-transitive` + NuGet audit (`<NuGetAudit>`, `NuGetAuditLevel`).
-- `qa-security-passive-scan-java` — the **DAST** sibling that opened the `security-testing`
+- `qa-java:passive-scan` — the **DAST** sibling that opened the `security-testing`
   family: ZAP probes the **running app's HTTP surface**; SCA reads your **dependency tree**. Orthogonal
   layers — **run both** (together they close Step 2).
-- `qa-accessibility-testing-java` — the **ticketed-baseline triage** discipline reused
+- `qa-java:accessibility-testing` — the **ticketed-baseline triage** discipline reused
   here for the suppression file (gate new findings, document every suppression with a ticket).
-- `qa-ci-pipelines-java` — the gate step, `dependency-review-action`, NVD-cache, artifact +
+- `qa-java:ci-pipelines` — the gate step, `dependency-review-action`, NVD-cache, artifact +
   SARIF upload.
-- `qa-test-reports-java` — attach the Dependency-Check HTML/JSON report to the run.
+- `qa-java:test-reports` — attach the Dependency-Check HTML/JSON report to the run.

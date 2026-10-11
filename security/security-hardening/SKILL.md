@@ -1,5 +1,5 @@
 ---
-name: secgov-security-hardening
+name: hardening
 description: Use to author the controls that turn misconfiguration findings into fixes — a strict Content-Security-Policy, the OWASP secure-headers set, and WAF rules (OWASP CRS on Coraza/ModSecurity). The authoring half of the fe-* / client-side-security handshake — author here, test there. Triggers "write a strict CSP", "harden our security headers". Not for testing the CSP blocks (`client-side-security`), nonce wiring (`fe-react`/`fe-blazor`), or exploiting a missing header (`penetration-tester`).
 ---
 
@@ -13,7 +13,7 @@ This skill is **language-agnostic** (a CSP string, an HTTP header set, and a CRS
 
 ## Two spines, stated per control
 
-- **OWASP — the primary spine.** Missing/weak CSP, permissive headers, no HSTS → **A02:2025 Security Misconfiguration** (the number moved from A05:2021). A strict CSP is defense-in-depth for **A05:2025 Injection** (which covers XSS). WAF rules front **A05:2025 Injection** broadly. *(Both were A03 under the 2021 list; the 2025 edition moved Injection to A05 and gave A03 to Software Supply Chain Failures — a mis-numbered control maps to the wrong compliance evidence row.)* Each authored control names the OWASP category it closes and, where it maps, the **ASVS 5.0** requirement (V13/V14 config & headers) — `secgov-compliance-evidence-mapping` turns those into framework evidence.
+- **OWASP — the primary spine.** Missing/weak CSP, permissive headers, no HSTS → **A02:2025 Security Misconfiguration** (the number moved from A05:2021). A strict CSP is defense-in-depth for **A05:2025 Injection** (which covers XSS). WAF rules front **A05:2025 Injection** broadly. *(Both were A03 under the 2021 list; the 2025 edition moved Injection to A05 and gave A03 to Software Supply Chain Failures — a mis-numbered control maps to the wrong compliance evidence row.)* Each authored control names the OWASP category it closes and, where it maps, the **ASVS 5.0** requirement (V13/V14 config & headers) — `security-governance:compliance-evidence-mapping` turns those into framework evidence.
 - **PCI DSS 4.0.1 — where payment pages are in scope.** Req **6.4.3** (script inventory + integrity) and **11.6.1** (HTTP-header + script-tamper monitoring on payment pages) are directly served by a strict CSP with SRI and a reporting endpoint — the two most under-prepared 4.0.1 controls; name them when the app takes card data.
 
 Severity on the library's **blocker/major/minor/nit** table (a public site with no CSP and no HSTS is **major→blocker** depending on data sensitivity).
@@ -97,10 +97,10 @@ The WAF is the edge control that blocks attack traffic before it reaches the app
 
 ## Cross-references
 
-- **`qa-security-client-side-security`** (`qa/_shared/security-testing/client-side-security/`) — the **test half** of the handshake: it proves the CSP blocks (the `securitypolicyviolation` `disposition: "enforce"` proof), grades the deployed headers (MDN Observatory), and crawls the SPA. This skill writes what that one tests; a failing test routes back here.
+- **`qa-<stack>:client-side-security`** (`qa/_shared/security-testing/client-side-security/`) — the **test half** of the handshake: it proves the CSP blocks (the `securitypolicyviolation` `disposition: "enforce"` proof), grades the deployed headers (MDN Observatory), and crawls the SPA. This skill writes what that one tests; a failing test routes back here.
 - **`security-architect`** (`security/agents/security-architect.md`) — the roll-up agent that loads this skill when the posture picture shows a missing/weak CSP, header gaps, or no WAF.
 - **`fe-react`** / **`fe-blazor`** *(peers, named not loaded)* — own the app-level wiring: emitting the per-request nonce, the framework middleware, sink-safe rendering. This skill hands them the policy + nonce contract; DOM-sink fixes route to their component writers.
 - **`devops-engineer`** (`devops/agents/devops-engineer.md`) — deploys the WAF at the edge (ingress/Envoy/Caddy) and sets headers at the reverse proxy when they belong there rather than in-app.
-- **`devops-infra-controls-validation`** (`devops/infra-controls-validation/`) — validates the encryption-in-transit / header controls are present **and effective**; the HSTS/CSP this skill authors is what it retests.
-- **`secgov-compliance-evidence-mapping`** — maps the authored CSP/headers/WAF to A02/ASVS V13-V14/PCI 6.4.3+11.6.1 evidence.
-- **`secgov-detection-engineering`** — the tripwire counterpart: author a detection on CSP-violation reports and WAF blocks, so an attempted injection is *seen*, not just blocked silently.
+- **`devops:controls-validation`** (`devops/infra-controls-validation/`) — validates the encryption-in-transit / header controls are present **and effective**; the HSTS/CSP this skill authors is what it retests.
+- **`security-governance:compliance-evidence-mapping`** — maps the authored CSP/headers/WAF to A02/ASVS V13-V14/PCI 6.4.3+11.6.1 evidence.
+- **`security-governance:detection-engineering`** — the tripwire counterpart: author a detection on CSP-violation reports and WAF blocks, so an attempted injection is *seen*, not just blocked silently.

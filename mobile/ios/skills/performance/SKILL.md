@@ -1,11 +1,11 @@
 ---
-name: mobile-ios-performance
-description: Use when an iOS app hangs, drops frames, launches slowly, leaks memory or ships heavy — Instruments (SwiftUI, Time Profiler, Hangs, Hitches, Allocations, App Launch, Swift Tasks), hang and launch budgets, work off the main actor, SwiftUI body cost, MetricKit by version, app size. Triggers "UI freezes", "scroll jank", "slow cold start". Do NOT use for crash-reporter setup (`mobile-shared-observability`) or animation design (`-animation`).
+name: performance
+description: Use when an iOS app hangs, drops frames, launches slowly, leaks memory or ships heavy — Instruments (SwiftUI, Time Profiler, Hangs, Hitches, Allocations, App Launch, Swift Tasks), hang and launch budgets, work off the main actor, SwiftUI body cost, MetricKit by version, app size. Triggers "UI freezes", "scroll jank", "slow cold start". Do NOT use for crash-reporter setup (`mobile-<stack>:observability`) or animation design (`-animation`).
 ---
 
 # iOS — Performance
 
-Owns **hangs, hitches, launch, memory and size**. The main thread has a frame budget (16.7 ms at 60 Hz, 8.3 ms at 120 Hz ProMotion) and a **hang threshold: the main thread blocked ≥ 250 ms** — a hang is a correctness failure, not polish (CLAUDE.md § Mobile: the UI thread never blocks). Web analog: [`fe-react-performance`](../../../../frontend/react/skills/performance/SKILL.md) — measure-first and budgets carry over; Core Web Vitals, bundle splitting and RSC do not. Sibling: [`mobile-react-native-performance`](../../../react-native/skills/performance/SKILL.md).
+Owns **hangs, hitches, launch, memory and size**. The main thread has a frame budget (16.7 ms at 60 Hz, 8.3 ms at 120 Hz ProMotion) and a **hang threshold: the main thread blocked ≥ 250 ms** — a hang is a correctness failure, not polish (CLAUDE.md § Mobile: the UI thread never blocks). Web analog: [`fe-react:performance`](../../../../frontend/react/skills/performance/SKILL.md) — measure-first and budgets carry over; Core Web Vitals, bundle splitting and RSC do not. Sibling: [`mobile-react-native:performance`](../../../react-native/skills/performance/SKILL.md).
 
 ## Version lane
 
@@ -28,11 +28,11 @@ Detect first: the deployment target (decides the MetricKit branch), whether a cr
 
 ## When NOT to use
 
-- Crash-reporter and OTel setup, release-health thresholds → [`mobile-shared-observability`](../../../_shared/observability/SKILL.md)
+- Crash-reporter and OTel setup, release-health thresholds → [`mobile-<stack>:observability`](../../../_shared/observability/SKILL.md)
 - Animation design and Reduce Motion → [`animation`](../animation/SKILL.md)
 - Request timing, retries, cache policy → [`networking`](../networking/SKILL.md)
 - List and view authoring → [`ui-components`](../ui-components/SKILL.md)
-- Other stacks → `mobile-react-native-performance`, `mobile-android-performance`
+- Other stacks → `mobile-react-native:performance`, `mobile-android:performance`
 
 ## Budgets — set them before measuring
 
@@ -87,7 +87,7 @@ enum Thumbnailer {
 - **Do nothing before the first frame that the first frame does not need.** Defer SDK initialisation (analytics, crash reporter beyond the minimum, feature flags) to after the first render; the crash reporter starts first, the rest follow in a `.task` on the root.
 - **No synchronous network, file or database work in `App.init` or the root `body`**; load from `.task` and render a skeleton.
 - Keep dynamic libraries and static initialisers few; a large `+load`-style static or global initialisation runs before `main`.
-- Measure with the **App Launch** template (pre-main vs post-main) and watch the Organizer's launch time per version; a regression is a release-blocker candidate in the review (`mobile-shared-release`).
+- Measure with the **App Launch** template (pre-main vs post-main) and watch the Organizer's launch time per version; a regression is a release-blocker candidate in the review (`mobile-<stack>:release`).
 
 ## Memory
 
@@ -98,7 +98,7 @@ enum Thumbnailer {
 
 ## MetricKit — production hangs, launches and diagnostics
 
-Subscribe **once**, at app start, and forward to the **same pipeline as the crash reporter** (one reporter — [`mobile-shared-observability`](../../../_shared/observability/references/ios.md)):
+Subscribe **once**, at app start, and forward to the **same pipeline as the crash reporter** (one reporter — [`mobile-<stack>:observability`](../../../_shared/observability/references/ios.md)):
 
 ```swift
 @available(iOS 27, *)
@@ -116,8 +116,8 @@ final class LegacyMetricsSubscriber: NSObject, MXMetricManagerSubscriber {
 ```
 
 - The iOS 27 form is **tagged `[iOS27]`**; the `MXMetricManager` form is tagged `[iOS ≤ 26]` and is the only branch while the deployment target is below 27. The exact `MetricManager` member names are unconfirmed against Apple's page (D24) — compile against the Xcode 27 SDK before relying on them.
-- MetricKit delivers aggregated payloads at most about daily — good for trends and per-version regressions, **not a live rollout gate**. Hang diagnostics carry call-stack trees; symbolicate with the archive's dSYMs (`mobile-shared-release`).
-- Payloads are telemetry: strip identifiers before forwarding off-device (`mobile-shared-observability`).
+- MetricKit delivers aggregated payloads at most about daily — good for trends and per-version regressions, **not a live rollout gate**. Hang diagnostics carry call-stack trees; symbolicate with the archive's dSYMs (`mobile-<stack>:release`).
+- Payloads are telemetry: strip identifiers before forwarding off-device (`mobile-<stack>:observability`).
 
 ## App size
 
@@ -160,6 +160,6 @@ Inside a `Gate: none` plan task, run none of these and report "written, not run"
 
 ## Handoffs
 
-- Crash reporter, OTel, symbols → [`mobile-shared-observability`](../../../_shared/observability/SKILL.md) · release gates → [`mobile-shared-release`](../../../_shared/release/SKILL.md)
+- Crash reporter, OTel, symbols → [`mobile-<stack>:observability`](../../../_shared/observability/SKILL.md) · release gates → [`mobile-<stack>:release`](../../../_shared/release/SKILL.md)
 - Views and lists → [`ui-components`](../ui-components/SKILL.md) · state ownership → [`architecture`](../architecture/SKILL.md)
 - Background transfers → [`system-integration`](../system-integration/SKILL.md) · persistence cost → [`offline-and-storage`](../offline-and-storage/SKILL.md)

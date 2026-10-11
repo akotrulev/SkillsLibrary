@@ -135,7 +135,7 @@ STRIDE enumerates **technical property violations**. It is weak on, and must be 
 
 - **Business-logic abuse** — a legal sequence of legal operations with an illegal outcome (refund loops,
   coupon stacking, negative quantities). Model these as **abuse cases** or an attack tree; the library's
-  `qa/manual/test-design-techniques` decision tables and `ba-decision-table` are the better instruments.
+  `qa/manual/test-design-techniques` decision tables and `business-analysis:decision-table` are the better instruments.
 - **Privacy** — "we collect it lawfully but retain it forever" is not a STRIDE letter. **LINDDUN**
   (Linkability, Identifiability, Non-repudiation, Detectability, Disclosure of information, Unawareness,
   Non-compliance) is the privacy-specific counterpart; run it alongside STRIDE when the system holds

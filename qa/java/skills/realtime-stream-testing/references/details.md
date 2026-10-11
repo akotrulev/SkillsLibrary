@@ -1,4 +1,4 @@
-# Deep-dive details — `qa-realtime-stream-testing-java`
+# Deep-dive details — `qa-java:realtime-stream-testing`
 
 Sections moved out of SKILL.md for on-demand loading. Read what the task needs.
 
@@ -323,7 +323,7 @@ public final class MockStreams {
   send a large message and assert it arrives whole.
 - **Auth on the socket** — token in the **query string** (`?access_token=…`), via **subprotocol**
   (`builder.header("Sec-WebSocket-Protocol", token)`), or in the **first frame** after connect. Read the token
-  from **env, lazily, never logged** (`qa-test-login-tokens-java`). A *browser* `EventSource` **cannot set
+  from **env, lazily, never logged** (`qa-java:test-login-tokens`). A *browser* `EventSource` **cannot set
   headers** → query-param or cookie auth.
 - **Heartbeat (ping/pong):** OkHttp's `pingInterval(...)` drives client pings; assert the app-level heartbeat /
   that a missed pong triggers the SUT's reconnect. STOMP heartbeats via `setDefaultHeartbeat`.
@@ -338,7 +338,7 @@ probe.connect(baseWsUri() + "/ws/secure",
         request -> request.header("Sec-WebSocket-Protocol", TestTokens.accessToken()));
 ```
 
-**A 4+-field frame payload comes from a builder (`qa-test-data-builder-java`):**
+**A 4+-field frame payload comes from a builder (`qa-java:test-data-builder`):**
 
 ```java
 ChatMessage payload = ChatMessages.standard().withText("hello").withRoom("general").build();

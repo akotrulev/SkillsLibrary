@@ -1,6 +1,6 @@
 ---
-name: ep-feature-audit
-description: Use when ONE feature or area of an existing codebase must be traced with no spec in hand — what it does, which validations and gates it enforces, and where it is defective. Triggers "how does feature X actually work", "what validations does the checkout flow have", "map this module's integrations", "find the defects in this area". Multi-feature and saved to `docs/audits/` → the `code-auditor` agent (its FEATURE lane). Not for verifying a written spec (`ep-spec-vs-code-audit`).
+name: audit-feature
+description: Use when ONE feature or area of an existing codebase must be traced with no spec in hand — what it does, which validations and gates it enforces, and where it is defective. Triggers "how does feature X actually work", "what validations does the checkout flow have", "map this module's integrations", "find the defects in this area". Multi-feature and saved to `docs/audits/` → the `code-auditor` agent (its FEATURE lane). Not for verifying a written spec (`dev:audit-spec`).
 ---
 
 # Feature Audit
@@ -18,7 +18,7 @@ This is **read-only analysis** on product code. The audit points; owners fix. Th
 | Work | The three inventories → findings | Re-trace each finding + sweep its defect family |
 | Output | `…-audit-r1.md` | `…-audit-r<N>.md` — every finding prefixed **Resolved** / **Still open**, every surface closed with a rollup |
 
-Where `ep-spec-vs-code-audit` persists a requirement register, this skill's **report is its own register**: the surface letters, finding IDs, and defect families are the stable spine every later round reuses. That is why the report is saved to a file, not just narrated.
+Where `dev:audit-spec` persists a requirement register, this skill's **report is its own register**: the surface letters, finding IDs, and defect families are the stable spine every later round reuses. That is why the report is saved to a file, not just narrated.
 
 State the mode — Mode A (baseline) or Mode B (re-audit) — and the feature in the first line of output, so the reader knows whether the report is a baseline or a delta.
 
@@ -40,18 +40,18 @@ This skill is the **FEATURE lane** of the `code-auditor` agent, and carries both
 
 ## When NOT to use
 
-- A spec exists and the ask is "does the code meet it" → `ep-spec-vs-code-audit`
+- A spec exists and the ask is "does the code meet it" → `dev:audit-spec`
 - The ask is really "find security vulnerabilities" → `qa-security` agent (this audit *inventories* authz gates; it doesn't attack them)
 - The ask is whole-codebase health, not one feature → decompose first; audit one area at a time
 - The user wants the findings fixed → the owning `be-*`/`fe-*` agent; never edit product code here
 
 ## Evidence policy — static-first, execute opt-in
 
-Same policy as `ep-spec-vs-code-audit`: evidence is **read code** by default; running builds/tests or probing a live app is an explicit per-audit opt-in that corroborates a code trace but never replaces it.
+Same policy as `dev:audit-spec`: evidence is **read code** by default; running builds/tests or probing a live app is an explicit per-audit opt-in that corroborates a code trace but never replaces it.
 
 ## Evidence rules (non-negotiable)
 
-Identical to `ep-spec-vs-code-audit` — keep the two skills' discipline aligned:
+Identical to `dev:audit-spec` — keep the two skills' discipline aligned:
 
 1. Every claim cites `file:line` you actually read; a grep hit is a lead, not evidence.
 2. Tag `#confirmed` (path traced end-to-end) vs `#inferred` (naming/config/convention); an inference chain of more than one link is a guess — say so.
@@ -103,7 +103,7 @@ Each finding is one row of the priority table plus a short section containing, i
 4. **Class** — data issue / code issue / logical conflict, one per finding (table below)
 5. **Suggested fix direction** — one line pointing where; never the applied fix
 
-**Class every finding.** Class is orthogonal to severity and to defect family: severity says how much it hurts, the family groups by shared cause, the class says *what kind of wrong it is* and therefore *who can act*. Exactly one class per finding; the Priority table is split into the three, in this order (keep the definitions aligned with `ep-spec-vs-code-audit`):
+**Class every finding.** Class is orthogonal to severity and to defect family: severity says how much it hurts, the family groups by shared cause, the class says *what kind of wrong it is* and therefore *who can act*. Exactly one class per finding; the Priority table is split into the three, in this order (keep the definitions aligned with `dev:audit-spec`):
 
 | Class | The defect lives in… | Typical here | Unblocked by |
 |---|---|---|---|
@@ -123,7 +123,7 @@ Keep signal high: cap detailed findings at ~30; aggregate the rest in one overfl
 # AUDIT — <feature>: <sub-areas covered> — Round 1
 
 **Date:** <YYYY-MM-DD>  **Scope:** <in / out, named>  **Evidence mode:** static | static + <commands run>
-**Written by:** `ep-feature-audit` (via `code-auditor`)
+**Written by:** `dev:audit-feature` (via `code-auditor`)
 **Question driving the audit:** <the driving question, verbatim>
 
 ## Summary
@@ -190,7 +190,7 @@ Read the prior report. Inventory its surface letters, finding IDs, severities, d
 
 ### 2. Re-verify — fresh, then sweep the family
 
-**Re-trace each finding's code path from scratch.** A "we fixed that" claim, a linked commit, a green test: leads, not evidence (`ep-verify-before-done` discipline). Read the code as if round N−1 never happened; then compare.
+**Re-trace each finding's code path from scratch.** A "we fixed that" claim, a linked commit, a green test: leads, not evidence (`dev:verify` discipline). Read the code as if round N−1 never happened; then compare.
 
 Then **sweep the defect family** of every finding that moved. A fix applied at one site routinely misses its siblings, and the family grouping in the prior report exists precisely to make that sweep cheap. Family siblings found now are new findings continuing the sequence — not "the old finding, still open".
 
@@ -220,7 +220,7 @@ Same surface structure and section order as round 1, plus status prefixes and a 
 # AUDIT — <feature> — Round <N>
 
 **Date:** <YYYY-MM-DD>  **Previous round:** `<path>` (<date>)  **Evidence mode:** static | static + <commands run>
-**Written by:** `ep-feature-audit` (via `code-auditor`)
+**Written by:** `dev:audit-feature` (via `code-auditor`)
 **Question driving the audit:** <verbatim — restated, or the new one if it changed>
 **Re-verify scope:** <"prior findings + defect families" | "+ surface B re-traced, narrative had changed">
 

@@ -1,4 +1,4 @@
-# Deep-dive details — `qa-language-testing-typescript`
+# Deep-dive details — `qa-typescript:language-testing`
 
 Sections moved out of SKILL.md for on-demand loading. Read what the task needs.
 
@@ -244,7 +244,7 @@ test('Should_NotClipSubmitLabel_When_TextExpandsByFortyPercent', { tag: '@pseudo
 reports how many pixels the label overflows (`scrollWidth - clientWidth`), never a bare `false`.
 
 > Pseudo-loc needs **zero translators**, so it's the first i18n gate you can run — wire it into CI before any
-> real locale exists. Pair the overflow check with `qa-visual-regression-typescript` when you want a pixel
+> real locale exists. Pair the overflow check with `qa-typescript:visual-regression` when you want a pixel
 > record of the breakage.
 
 ## 4b. Translation-key coverage — a static catalog diff (idea #4)
@@ -368,4 +368,4 @@ for (const lng of SUPPORTED_LOCALES) {
 ```
 
 The `for` generates one independent, individually-named test per locale outside every test body — the
-sanctioned parameterization (`qa-data-driven-testing-typescript`).
+sanctioned parameterization (`qa-typescript:data-driven-testing`).

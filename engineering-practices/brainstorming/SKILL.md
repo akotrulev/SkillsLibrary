@@ -1,6 +1,6 @@
 ---
-name: ep-brainstorming
-description: Use when turning an ad-hoc idea or one feature request into an approved design/spec before any code is written. Triggers "let's build X", "add a feature that…", "help me design…", "how should we approach…". Chains into `ep-writing-plans`; command `/dev-design`. Do NOT use when the *what* is still loose or spans several capabilities (`/dev-refine`, `requirements-author`), while a step-by-step agent runs its own design gate, for pure Q&A, or once a design is approved.
+name: design
+description: Use when turning an ad-hoc idea or one feature request into an approved design/spec before any code is written. Triggers "let's build X", "add a feature that…", "help me design…", "how should we approach…". Chains into `dev:plan-feature`; command `/dev:design`. Do NOT use when the *what* is still loose or spans several capabilities (`/dev:refine`, `requirements-author`), while a step-by-step agent runs its own design gate, for pure Q&A, or once a design is approved.
 ---
 
 # Brainstorming Ideas Into Designs
@@ -9,13 +9,13 @@ Help turn ideas into fully formed designs and specs through natural collaborativ
 
 **Which front door.** The library has two, and they do not overlap:
 
-| | `/dev-design` (this skill) | `/dev-refine` (`requirements-author`) |
+| | `/dev:design` (this skill) | `/dev:refine` (`requirements-author`) |
 |---|---|---|
 | The input | **One feature** whose requirements are already clear | A loose ask — the *what* is still open, or it spans several capabilities |
 | The question | *How* should we build it | *What* are we building, for whom, and what is out |
-| The output | `docs/specs/NNN-<topic>-design.md` → `/dev-plan-feature` | `docs/plans/<NNN>-<initiative>/{requirements,epics,stories}.md` → `/dev-plan-solution` |
+| The output | `docs/specs/NNN-<topic>-design.md` → `/dev:plan-feature` | `docs/plans/<NNN>-<initiative>/{requirements,epics,stories}.md` → `/dev:plan-system` |
 
-If, while brainstorming, the idea turns out to be several capabilities or the requirements keep moving, stop and hand to `/dev-refine` — do not decompose it into sub-project specs here.
+If, while brainstorming, the idea turns out to be several capabilities or the requirements keep moving, stop and hand to `/dev:refine` — do not decompose it into sub-project specs here.
 
 Start by understanding the current project context, then ask questions one at a time to refine the idea. Once you understand what you're building, present the design and get user approval.
 
@@ -34,7 +34,7 @@ Complete these items in order:
 5. **Write design doc** — save to `docs/specs/NNN-<topic>-design.md` (resolved under the current project's root — the repo the session is working in — never this skills-library checkout or a global config directory, unless the user explicitly asks for a global copy) and commit on the current branch
 6. **Spec self-review** — quick inline check for placeholders, contradictions, ambiguity, scope (see below)
 7. **User reviews written spec** — ask user to review the spec file before proceeding
-8. **Transition to implementation** — invoke `ep-writing-plans` skill to create implementation plan
+8. **Transition to implementation** — invoke `dev:plan-feature` skill to create implementation plan
 
 ## Process Flow
 
@@ -48,7 +48,7 @@ digraph brainstorming {
     "Write design doc" [shape=box];
     "Spec self-review\n(fix inline)" [shape=box];
     "User reviews spec?" [shape=diamond];
-    "Invoke ep-writing-plans skill" [shape=doublecircle];
+    "Invoke dev:plan-feature skill" [shape=doublecircle];
 
     "Explore project context" -> "Ask clarifying questions";
     "Ask clarifying questions" -> "Propose 2-3 approaches";
@@ -59,11 +59,11 @@ digraph brainstorming {
     "Write design doc" -> "Spec self-review\n(fix inline)";
     "Spec self-review\n(fix inline)" -> "User reviews spec?";
     "User reviews spec?" -> "Write design doc" [label="changes requested"];
-    "User reviews spec?" -> "Invoke ep-writing-plans skill" [label="approved"];
+    "User reviews spec?" -> "Invoke dev:plan-feature skill" [label="approved"];
 }
 ```
 
-**The terminal state is invoking `ep-writing-plans`.** It is the only skill brainstorming hands to: a `qa-*`/`fe-*`/`be-*` generator or any other implementation skill would start building before a plan exists.
+**The terminal state is invoking `dev:plan-feature`.** It is the only skill brainstorming hands to: a `qa-*`/`fe-*`/`be-*` generator or any other implementation skill would start building before a plan exists.
 
 ## The Process
 
@@ -71,7 +71,7 @@ digraph brainstorming {
 
 - Check out the current project state first (files, docs, recent commits)
 - Before asking detailed questions, assess scope: if the request describes multiple independent subsystems (e.g., "build a platform with chat, file storage, billing, and analytics"), flag this immediately. Don't spend questions refining details of a project that needs to be decomposed first.
-- If the request is several capabilities rather than one feature, it is an initiative, not a design: hand it to `/dev-refine` (`requirements-author`), which writes the requirements, epics and stories that `/dev-plan-solution` then turns into a task list. Come back here only for a single feature that needs a technical design.
+- If the request is several capabilities rather than one feature, it is an initiative, not a design: hand it to `/dev:refine` (`requirements-author`), which writes the requirements, epics and stories that `/dev:plan-system` then turns into a task list. Come back here only for a single feature that needs a technical design.
 - For appropriately-scoped projects, ask questions one at a time to refine the idea
 - Prefer multiple choice questions when possible, but open-ended is fine too
 - Only one question per message - if a topic needs more exploration, break it into multiple questions
@@ -111,7 +111,7 @@ digraph brainstorming {
 - Write the validated design (spec) to `docs/specs/NNN-<topic>-design.md`
   - `NNN` is a zero-padded sequential number, scoped to `docs/specs/`: list the folder, take the highest existing `NNN` prefix, use `highest + 1` (start at `001` if the folder is empty or doesn't exist yet). Never reuse or renumber an existing file's number.
   - (User preferences for spec location override this default)
-  - The document opens with `# [Topic] Design` followed by `**Date:** [YYYY-MM-DD] · **Written by:** \`ep-brainstorming\`` before the rest of the spec content.
+  - The document opens with `# [Topic] Design` followed by `**Date:** [YYYY-MM-DD] · **Written by:** \`dev:design\`` before the rest of the spec content.
 - Commit the design document to git
 
 > **Branch boundary:** stay on the current branch — writing a spec never creates or checks out a branch or worktree, and committing the *spec document* is fine even on `main` (a design doc is not implementation). Writing the spec does not start implementation; Plan Queue runs the plan later, in its own worktree.
@@ -135,7 +135,7 @@ Wait for the user's response. If they request changes, make them and re-run the 
 
 **Implementation:**
 
-- Invoke the `ep-writing-plans` skill to create a detailed implementation plan; no other skill comes next.
+- Invoke the `dev:plan-feature` skill to create a detailed implementation plan; no other skill comes next.
 
 ## Key Principles
 

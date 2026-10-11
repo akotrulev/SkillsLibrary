@@ -1,5 +1,5 @@
 ---
-name: qa-gherkin-step-code-dotnet
+name: gherkin-step-code
 description: Use when turning Gherkin `.feature` files into Reqnroll step definitions in C#/.NET, implementing each step against existing Page Object Models. Triggers "generate Reqnroll step definitions for these features", "bind these Gherkin steps to our page objects", "split the step definitions by domain". Not for writing the `.feature` files (`feature-file-writer`), scaffolding Reqnroll DI/hooks (`bdd-project-scaffold`), or building page objects (`page-object-design`).
 ---
 

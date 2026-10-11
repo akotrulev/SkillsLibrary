@@ -1,6 +1,6 @@
 ---
-name: mobile-ios-code-review
-description: Use when reviewing a Swift / SwiftUI / UIKit diff — force unwraps, blocking the main thread, Swift 6 isolation escape hatches, work in `body`, missing timeouts and failed states, secrets outside the Keychain, unvalidated links and push payloads, untagged elements — plus a simulator screenshot pass. Triggers "review this screen", "review this PR", "is this Swift ok". Do NOT use for a whole-repo audit (`mobile-ios-standards-audit`), explanations (`-basics`) or writing code.
+name: conventions-review
+description: Use when reviewing a Swift / SwiftUI / UIKit diff — force unwraps, blocking the main thread, Swift 6 isolation escape hatches, work in `body`, missing timeouts and failed states, secrets outside the Keychain, unvalidated links and push payloads, untagged elements — plus a simulator screenshot pass. Triggers "review this screen", "review this PR", "is this Swift ok". Do NOT use for a whole-repo audit (`mobile-ios:standards-audit`), explanations (`-basics`) or writing code.
 ---
 
 # iOS — Code Review

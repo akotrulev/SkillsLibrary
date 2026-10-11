@@ -1,5 +1,5 @@
 ---
-name: qa-bdd-reviewer-java
+name: bdd-reviewer
 description: Use when reviewing or auditing existing Gherkin .feature files and Cucumber-JVM step definitions in Java for living-documentation quality, step reusability, and correct binding/DI/lifecycle. Triggers: "review these feature files", "audit our Cucumber step definitions", "are these Gherkin scenarios good", "check our BDD layer". Do NOT use to generate features (use `qa/_shared/bdd/feature-file-writer`) or step definitions (use `qa/java/skills/gherkin-step-code`).
 ---
 
@@ -52,7 +52,7 @@ Audits a BDD layer across **two surfaces** — the `.feature` files (Gherkin qua
 - [ ] Cleanup implemented as an `@After` hook, not as Gherkin steps.
 - [ ] Idiomatic JUnit 5 Platform runner (`@Suite` + `cucumber-junit-platform-engine`), not the deprecated JUnit 4 `@RunWith(Cucumber.class)`; glue path + plugins configured.
 - [ ] No hardcoded credentials/URLs — env vars / system properties.
-- [ ] **No inline comments in step definitions or hooks** — the step text above the binding is already the explanation, and a body long enough to need narration belongs in a page object. Javadoc only where the binding's contract can't be read off the step text and the method name; no commented-out bindings, no stray `TODO`/`FIXME`. Full rule, complex-flow test, and severities: [`ep-code-comments`](../../../../engineering-practices/code-comments/SKILL.md).
+- [ ] **No inline comments in step definitions or hooks** — the step text above the binding is already the explanation, and a body long enough to need narration belongs in a page object. Javadoc only where the binding's contract can't be read off the step text and the method name; no commented-out bindings, no stray `TODO`/`FIXME`. Full rule, complex-flow test, and severities: [`engineering-practices/code-comments`](../../../../engineering-practices/code-comments/SKILL.md).
 
 ## Output format
 

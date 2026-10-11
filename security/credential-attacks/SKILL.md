@@ -1,6 +1,6 @@
 ---
-name: pentest-credential-attacks
-description: Use to recover and crack credentials during an authorized penetration test — offline/online cracking, LAN capture, secrets harvesting. Every recovered secret is reported as blast radius, never contents. Triggers "crack these captured hashes", "harvest creds from the foothold". Not for reusing creds across hosts (`pentest-lateral-movement`), gaining the foothold (`pentest-initial-access`), or escalating (`pentest-privilege-escalation`). Owned/lab only, under a committed scope file.
+name: credential-attacks
+description: Use to recover and crack credentials during an authorized penetration test — offline/online cracking, LAN capture, secrets harvesting. Every recovered secret is reported as blast radius, never contents. Triggers "crack these captured hashes", "harvest creds from the foothold". Not for reusing creds across hosts (`penetration-testing:lateral-movement`), gaining the foothold (`penetration-testing:initial-access`), or escalating (`penetration-testing:privilege-escalation`). Owned/lab only, under a committed scope file.
 ---
 
 # Penetration Testing — Credential Attacks (hashcat · hydra · Responder · secrets harvesting)
@@ -14,9 +14,9 @@ Authorization: engagement=<NNN>  target=<in-scope host/segment>  allowed-techniq
                authorized-by=<name>  window=<start>..<expiry>  environment=lab|production(2nd sign-off)
 ```
 
-This skill is **language-agnostic** and is loaded by the **`penetration-tester`** agent in its **Lateral movement** / post-foothold steps. It *recovers and cracks* credentials; **`pentest-lateral-movement`** *reuses* them (its consumer).
+This skill is **language-agnostic** and is loaded by the **`penetration-tester`** agent in its **Lateral movement** / post-foothold steps. It *recovers and cracks* credentials; **`penetration-testing:lateral-movement`** *reuses* them (its consumer).
 
-> **Two spines, stated per finding.** Maps to **MITRE ATT&CK Enterprise** under **Credential Access**: `T1110` Brute Force (`.001` Password Guessing, `.002` Password Cracking, `.003` Password Spraying), `T1557.001` LLMNR/NBT-NS Poisoning, `T1003` OS Credential Dumping (`.001` LSASS, `.002` SAM, `.006` DCSync), `T1555` Credentials from Password Stores, `T1552` Unsecured Credentials (`.001` In Files, `.005` Cloud Instance Metadata API). Score CVSS in `pentest-reporting`; the finding's value is the **strength/exposure signal** ("cracked in <1 min under best64 — password policy inadequate"), not the plaintext.
+> **Two spines, stated per finding.** Maps to **MITRE ATT&CK Enterprise** under **Credential Access**: `T1110` Brute Force (`.001` Password Guessing, `.002` Password Cracking, `.003` Password Spraying), `T1557.001` LLMNR/NBT-NS Poisoning, `T1003` OS Credential Dumping (`.001` LSASS, `.002` SAM, `.006` DCSync), `T1555` Credentials from Password Stores, `T1552` Unsecured Credentials (`.001` In Files, `.005` Cloud Instance Metadata API). Score CVSS in `penetration-testing:reporting`; the finding's value is the **strength/exposure signal** ("cracked in <1 min under best64 — password policy inadequate"), not the plaintext.
 
 ## Offline cracking — hashcat (never touches the target)
 
@@ -63,7 +63,7 @@ sudo responder -I eth0             # active poisoning (no -A) — answers for ot
 ```
 
 - **`-A` passive analyze is the safe default** — it proves the exposure (which hosts would have been poisoned) without redirecting anyone's traffic. Active poisoning is a scope-file opt-in against a designated non-production segment only.
-- **Relay caveat:** captured auths + impacket `ntlmrelayx` can authenticate to *other* hosts — escalating "capture" into "RCE on a third host." That is a lateral act (`pentest-lateral-movement`) and needs the target in scope.
+- **Relay caveat:** captured auths + impacket `ntlmrelayx` can authenticate to *other* hosts — escalating "capture" into "RCE on a third host." That is a lateral act (`penetration-testing:lateral-movement`) and needs the target in scope.
 - **Install (pinned):** `git clone` `lgandx/Responder` at v3.2.2.0 + `pip3 install -r requirements.txt` (needs root); ships in Kali. Captures land in `logs/`.
 - **ATT&CK:** `T1557` AiTM, `T1557.001` LLMNR/NBT-NS Poisoning. Report *that* hashes were captured + their reach, never the hash material.
 
@@ -91,15 +91,15 @@ From a foothold (especially post-escalation), credentials sit in memory, files, 
 - **The scope file gates every active act.** hydra/Responder/harvesting only against in-scope targets/segments, within the window. Re-read before each act; halt and report on an out-of-scope next act.
 - **Online/active is lockout- and disruption-risk** — low thread counts, spray over guess, agreed thresholds, passive Responder by default, production-excluded by default. **No DoS, ever.**
 - **hashcat is offline** — no target contact; gate is possession + lab boundary; report the strength signal, not the plaintext.
-- **This skill recovers; `pentest-lateral-movement` reuses.** Don't pivot from here.
-- **Two spines per finding:** ATT&CK Enterprise (Credential Access tactic) + CVSS in `pentest-reporting`.
+- **This skill recovers; `penetration-testing:lateral-movement` reuses.** Don't pivot from here.
+- **Two spines per finding:** ATT&CK Enterprise (Credential Access tactic) + CVSS in `penetration-testing:reporting`.
 - **Log every act** — tool/command, target, timestamp, ATT&CK id — into the engagement action log; remove every dropped tool/capture at cleanup.
 
 ## Cross-references
 
 - **`penetration-tester`** — the orchestrator; runs this in its credential/lateral steps, owns the scope-file gate.
-- **`pentest-lateral-movement`** — the **consumer**: reuses the hashes (PtH) and cracked passwords (spray) this skill recovers.
-- **`pentest-initial-access`** — supplies the foothold from which harvesting runs.
-- **`pentest-privilege-escalation`** — root/SYSTEM unlocks LSASS/`/etc/shadow`/keystore access for harvesting.
+- **`penetration-testing:lateral-movement`** — the **consumer**: reuses the hashes (PtH) and cracked passwords (spray) this skill recovers.
+- **`penetration-testing:initial-access`** — supplies the foothold from which harvesting runs.
+- **`penetration-testing:privilege-escalation`** — root/SYSTEM unlocks LSASS/`/etc/shadow`/keystore access for harvesting.
 - **`qa-security`** — the app-layer lane; an SSRF it detects is the path to IMDS credential theft this skill proves.
-- **`pentest-reporting`** — action log + CVSS/ATT&CK scoring; the blast-radius (redacted) record of every recovered credential.
+- **`penetration-testing:reporting`** — action log + CVSS/ATT&CK scoring; the blast-radius (redacted) record of every recovered credential.

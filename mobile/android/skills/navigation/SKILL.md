@@ -1,6 +1,6 @@
 ---
-name: mobile-android-navigation
-description: Use when adding screens, tabs or deep links in Compose — Navigation 3 (NavDisplay, back stack you own, typed NavKey routes) for new apps; Navigation Compose 2.10 type-safe routes for existing ones; adaptive scenes, App Links mapped to a route, predictive back. Triggers "add a screen", "navigate after save", "deep link into a detail". Do NOT use for assetlinks.json and push links (`mobile-android-notifications-and-links`) or ViewModel state (`-architecture`).
+name: navigation
+description: Use when adding screens, tabs or deep links in Compose — Navigation 3 (NavDisplay, back stack you own, typed NavKey routes) for new apps; Navigation Compose 2.10 type-safe routes for existing ones; adaptive scenes, App Links mapped to a route, predictive back. Triggers "add a screen", "navigate after save", "deep link into a detail". Do NOT use for assetlinks.json and push links (`mobile-android:push-and-deep-links`) or ViewModel state (`-architecture`).
 ---
 
 # Android — Navigation
@@ -20,7 +20,7 @@ description: Use when adding screens, tabs or deep links in Compose — Navigati
 | Predictive back | `NavDisplay` animates it; target 36 on | `NavHost` animates it; `enableOnBackInvokedCallback` |
 | Views / Fragments `[Views]` | n/a — see [`views-interop`](../views-interop/SKILL.md) | Fragment Navigation component |
 
-Check the exact artifacts and versions (`androidx.navigation3:navigation3-runtime` / `-ui`, `androidx.lifecycle:lifecycle-viewmodel-navigation3`) against developer.android.com/jetpack/androidx/releases/navigation3 when writing. **An existing Navigation Compose app is not flagged for lacking Navigation 3**; migration is [`mobile-android-migration`](../migration/SKILL.md)'s and is incremental per graph.
+Check the exact artifacts and versions (`androidx.navigation3:navigation3-runtime` / `-ui`, `androidx.lifecycle:lifecycle-viewmodel-navigation3`) against developer.android.com/jetpack/androidx/releases/navigation3 when writing. **An existing Navigation Compose app is not flagged for lacking Navigation 3**; migration is [`mobile-android:migration`](../migration/SKILL.md)'s and is incremental per graph.
 
 ## When to use
 
@@ -30,12 +30,12 @@ Check the exact artifacts and versions (`androidx.navigation3:navigation3-runtim
 
 ## When NOT to use
 
-- `assetlinks.json`, link verification, push payload routing, `PendingIntent` → `mobile-android-notifications-and-links`
+- `assetlinks.json`, link verification, push payload routing, `PendingIntent` → `mobile-android:push-and-deep-links`
 - Where a screen's state lives → [`architecture`](../architecture/SKILL.md)
 - Composable structure → [`ui-components`](../ui-components/SKILL.md); window size classes → [`styling`](../styling/SKILL.md)
 - Transition and back animations → [`animation`](../animation/SKILL.md)
 - XML nav graphs and Fragments → [`views-interop`](../views-interop/SKILL.md)
-- iOS / RN → `mobile-ios-navigation`, `mobile-react-native-navigation`
+- iOS / RN → `mobile-ios:navigation`, `mobile-react-native:navigation`
 
 ## Inputs needed
 
@@ -163,7 +163,7 @@ NavHost(navController, startDestination = OrdersList) {
 
 ## Handoffs
 
-- Link verification, push → `mobile-android-notifications-and-links`
+- Link verification, push → `mobile-android:push-and-deep-links`
 - Screen state, entry ViewModels → [`architecture`](../architecture/SKILL.md)
 - Window classes, rails → [`styling`](../styling/SKILL.md)
 - Back and transition animation → [`animation`](../animation/SKILL.md)

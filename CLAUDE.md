@@ -63,7 +63,7 @@ You are a senior AI engineer and a senior automation QA engineer. You follow bes
 
 **When work is planned — a feature, a migration, an assessment, any multi-step build — the unit of work is a task.** Every skill, agent, command, and report in this library uses the same word for it.
 
-**The plan document format is a contract:** [`engineering-practices/writing-plans/references/plan-format.md`](engineering-practices/writing-plans/references/plan-format.md). It is the shape the Plan Queue VS Code plugin queues, and `ep-writing-plans`, `be-shared-delivery-plan` and `be-shared-session-budget` all produce it. Read it before writing a plan; the rules below are the parts that bind everywhere else in this library.
+**The plan document format is a contract:** [`engineering-practices/writing-plans/references/plan-format.md`](engineering-practices/writing-plans/references/plan-format.md). It is the shape the Plan Queue VS Code plugin queues, and `dev:plan-feature`, `dev:plan-delivery` and `dev:plan-session-budget` all produce it. Read it before writing a plan; the rules below are the parts that bind everywhere else in this library.
 
 - **One self-contained file.** The plan carries the context, the decisions, the tasks **and** one paste-ready prompt per task in a closing `## Prompts — one per task` section. There is no companion prompt or handoff file — the document is queued and handed over whole.
 - **The narrative comes first; the tasks come last.** `## 1. What already exists, and what is missing` is a `| Need | Today | Gap |` table, and every task traces to a row of it. Then the sections that decide the work, then `## Decisions` (`D1…Dn`, each with what it costs) and the answered/open questions, then the tasks.
@@ -252,7 +252,7 @@ Each top-level folder owns a domain, is **stack-first and domain-encapsulated** 
 | `business-analysis/` | Upstream requirements authoring + cross-feature reasoning | `business-analysis` |
 | `training-data/` | LLM/VLM training-data engineering | `training-data` |
 | `tooling/` | Agent-drivable surfaces over a project — capability contract → MCP server / CLI | `tooling` |
-| `engineering-practices/` | Language-agnostic developer-workflow spine (`ep-*`) + audit lanes | bundled into all stack plugins |
+| `engineering-practices/` | Language-agnostic developer-workflow spine (the `dev` plugin) + audit lanes | bundled into all stack plugins |
 
 **Under construction — ignore, do not upload to the remote:** `auth/cognito-{blazor,react}`, `communication/`.
 

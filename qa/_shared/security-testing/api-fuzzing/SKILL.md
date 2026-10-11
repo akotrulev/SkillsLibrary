@@ -1,5 +1,5 @@
 ---
-name: qa-security-testing-api-fuzzing
+name: api-fuzzing
 description: Use when fuzzing an API from its OpenAPI/GraphQL schema with Schemathesis — property-based generated requests that catch 5xx crashes and contract violations, wired as a CI gate. Language-agnostic (CLI/Docker), any stack. Triggers: "fuzz our API", "schema-based negative testing", "run Schemathesis in CI". Not for authorization/BOLA (`permission-testing`) or a crawling DAST scan (`active-scan`).
 ---
 
@@ -9,7 +9,7 @@ Property-based fuzzing of an OpenAPI/GraphQL API against a **running** app. A si
 skill: **Schemathesis** is a Python CLI / Docker image / GitHub Action that reads your app's **schema** and
 its live **HTTP surface** — it does not care what language the app is written in, so there is no
 three-stack split (the architectural fact the master ref spells out). Load this **alongside**
-`qa-security-shared` (the OWASP map, the authorization-to-scan rule, the triage discipline live there —
+`qa-<stack>:security-foundations` (the OWASP map, the authorization-to-scan rule, the triage discipline live there —
 this skill defers to them and does not re-state them in full).
 
 **Schemathesis** (v4.x, MIT; used in CI by Spotify, WordPress, JetBrains, Red Hat) generates **thousands**
@@ -20,7 +20,7 @@ an undeclared status." It finds the request you didn't think to write.
 
 > **⚠️ Fuzzing SENDS GENERATED REQUESTS and can mutate state.** Schemathesis will `POST`/`PUT`/`PATCH`/
 > `DELETE` with generated bodies — it can create, corrupt, and delete data. It is an **active** tool. Per
-> the master ref's authorization-to-scan rule (`qa-security-shared`): **never run it against production or
+> the master ref's authorization-to-scan rule (`qa-<stack>:security-foundations`): **never run it against production or
 > a shared environment.** Point it only at a **throwaway env you own and are authorized to attack** — a
 > Testcontainers/compose-spun ephemeral app, ready on a wait strategy. Use a **seeded test tenant** and **clean up after**. See the safe-env callout
 > below.
@@ -30,9 +30,9 @@ an undeclared status." It finds the request you didn't think to write.
 | Need | Use | Why |
 |------|-----|-----|
 | **Property** checks across thousands of generated inputs from the spec (schema conformance, malformed-input 500s, status/content-type conformance) on a **running** app | **this skill (Schemathesis)** | Generative + property-based; finds the inputs you didn't write; non-zero exit → build gate |
-| Deep **active attack** scan — inject SQLi/XSS/traversal payloads, crawl, attack rules | `qa-security-active-scan` (DAST) | ZAP *attacks* with a payload library; Schemathesis *fuzzes from the schema* and checks conformance — different engines, different findings |
-| **Example-based** functional contract / conformance ("this request → this exact response") | `qa-{stack}-api-test-author` | Hand-written, deterministic, asserts business behavior on known examples — not generative |
-| **BOLA / BFLA / IDOR** — does User A reach User B's object? | `qa-{stack}-security-testing-permission-testing` | Authz logic; a fuzzer's requests are well-formed HTTP and it has no cross-user object map — **it cannot find BOLA** |
+| Deep **active attack** scan — inject SQLi/XSS/traversal payloads, crawl, attack rules | `qa-<stack>:active-scan` (DAST) | ZAP *attacks* with a payload library; Schemathesis *fuzzes from the schema* and checks conformance — different engines, different findings |
+| **Example-based** functional contract / conformance ("this request → this exact response") | `qa-{stack}:api-tests` | Hand-written, deterministic, asserts business behavior on known examples — not generative |
+| **BOLA / BFLA / IDOR** — does User A reach User B's object? | `qa-{stack}:permission-testing` | Authz logic; a fuzzer's requests are well-formed HTTP and it has no cross-user object map — **it cannot find BOLA** |
 | Business-logic / sensitive-flow abuse (API6) | manual pentest (master ref) | Logic flaws are invisible to generators; humans only |
 
 **Rule of thumb:** Schemathesis is your **spec-driven property fuzzer** — it proves the API behaves like its
@@ -130,13 +130,13 @@ schemathesis run https://app.example.com/openapi.json \
 ```
 
 - **JUnit XML** (`--report junit`) → the pipeline's test-report surface and Allure (cross-link
-  `qa-test-reports-*`) — a failing run names each failing operation/check without re-running.
+  `qa-<stack>:test-reports`) — a failing run names each failing operation/check without re-running.
 - **VCR cassettes** (`--report vcr`) and **HAR** (`--report har`) capture the **exact requests** for
   **repro** — attach them as CI artifacts so a confirmed finding is replayable outside CI.
 
 ## The safe-env + auth callout (defer the rule to the master ref, but state it)
 
-**Run only against a throwaway env you own.** Per `qa-security-shared`'s authorization-to-scan rule, an
+**Run only against a throwaway env you own.** Per `qa-<stack>:security-foundations`'s authorization-to-scan rule, an
 active tool that sends generated mutating requests must never touch prod or a shared environment. Concretely:
 
 - **Spin an ephemeral target** — Testcontainers / `docker compose up --wait`. Wait on a **readiness condition** (healthcheck / `--wait`), never a sleep
@@ -151,7 +151,7 @@ schemathesis run https://app.example.com/openapi.json \
   --header "Authorization: Bearer $API_TOKEN"       # $API_TOKEN from the environment, not the file
 ```
 
-Acquire the token from `qa-{stack}-test-login-tokens` (M2M / ROPG for a seeded test user) and inject it via
+Acquire the token from `qa-{stack}:test-login-tokens` (M2M / ROPG for a seeded test user) and inject it via
 an **env var read at runtime**. Never put a token in the workflow YAML, a config file, or the command line
 literal (global rule: no secrets in code/config).
 
@@ -197,7 +197,7 @@ jobs:
           API_TOKEN: ${{ secrets.API_TOKEN }}      # injected as env, referenced via --header in args
       - name: Publish JUnit to Allure
         if: always()
-        run: cp reports/schemathesis-junit.xml allure-results/    # cross-link qa-test-reports-*
+        run: cp reports/schemathesis-junit.xml allure-results/    # cross-link qa-<stack>:test-reports
       - uses: actions/upload-artifact@v4
         if: always()
         with: { name: schemathesis-report, path: reports/ }
@@ -205,7 +205,7 @@ jobs:
 
 The job: **spin the app** (`compose up --wait`) → **fuzz** (`schemathesis/action`, exit non-zero gates the
 job) → **publish** the JUnit XML to the test report + Allure and upload the VCR/HAR repro as an artifact.
-Cross-link `qa-ci-pipelines-*` for the OIDC-secret + artifact wiring.
+Cross-link `qa-<stack>:ci-pipelines` for the OIDC-secret + artifact wiring.
 
 ## OWASP mapping (what it covers — and what it does NOT)
 
@@ -217,9 +217,9 @@ Cross-link `qa-ci-pipelines-*` for the OIDC-secret + artifact wiring.
 | Response/spec drift, undocumented fields, schema non-conformance | **API9 Improper Inventory Management** (spec/inventory conformance) |
 
 > **It does NOT find:** **BOLA/BFLA/IDOR** (API1/API3/API5 — authz logic; fuzzer sends well-formed HTTP with
-> no cross-user object map → use `qa-{stack}-security-testing-permission-testing`) or **business-logic /
+> no cross-user object map → use `qa-{stack}:permission-testing`) or **business-logic /
 > sensitive-flow abuse** (API6 — manual pentest). A green Schemathesis run is **not** "API secure." Defer
-> the scanner-blind-spot framing to `qa-security-shared` and say so in every report.
+> the scanner-blind-spot framing to `qa-<stack>:security-foundations` and say so in every report.
 
 ## Anti-patterns
 
@@ -250,9 +250,9 @@ Cross-link `qa-ci-pipelines-*` for the OIDC-secret + artifact wiring.
   (`--report junit`) into the CI test report + Allure, and keep **VCR/HAR** for repro.
 - **Active tool — never fuzz prod or a shared env.** Target a **throwaway env you own**
   (Testcontainers/compose), ready on a **wait condition** (never a sleep), with a **seeded test tenant** and
-  **cleanup after**. (Defers to `qa-security-shared`'s authorization-to-scan rule.)
+  **cleanup after**. (Defers to `qa-<stack>:security-foundations`'s authorization-to-scan rule.)
 - **No secrets in config:** the auth token comes from an **env var read lazily** (`--header
-  "Authorization: Bearer $API_TOKEN"`), sourced from `qa-{stack}-test-login-tokens`; never committed.
+  "Authorization: Bearer $API_TOKEN"`), sourced from `qa-{stack}:test-login-tokens`; never committed.
 - Run **`--checks all`** by default; run the **`stateful`** step when the spec declares OpenAPI `links`.
 - For any gated failure, **pin `--hypothesis-seed` + keep the cassette** so it reproduces deterministically.
 - Treat **schema-conformance** failures as real defects (app or spec); never blanket-suppress them.
@@ -261,16 +261,16 @@ Cross-link `qa-ci-pipelines-*` for the OIDC-secret + artifact wiring.
 
 ## Cross-references
 
-- `qa-security-shared` — the **master ref**: OWASP Top 10:2025 / API 10:2023 map, the **authorization-to-scan**
+- `qa-<stack>:security-foundations` — the **master ref**: OWASP Top 10:2025 / API 10:2023 map, the **authorization-to-scan**
   rule this skill defers to, the triage discipline, the scanner-blind-spot framing. Load **alongside** this.
-- `qa-security-active-scan` — the **DAST active attack** scan (payload injection,
+- `qa-<stack>:active-scan` — the **DAST active attack** scan (payload injection,
   crawl) — a different engine from spec-driven property fuzzing; run both.
-- `qa-{stack}-security-testing-permission-testing` — the functional **BOLA/BFLA/IDOR** authz matrix the
+- `qa-{stack}:permission-testing` — the functional **BOLA/BFLA/IDOR** authz matrix the
   fuzzer **cannot** find; the highest-value layer most teams miss.
-- `qa-{stack}-api-test-author` — **example-based** functional contract/conformance tests (hand-written,
+- `qa-{stack}:api-tests` — **example-based** functional contract/conformance tests (hand-written,
   deterministic) — the non-generative counterpart.
-- `qa-{stack}-test-login-tokens` — acquire the M2M/ROPG token (for a seeded test user) injected via
+- `qa-{stack}:test-login-tokens` — acquire the M2M/ROPG token (for a seeded test user) injected via
   `--header`, read lazily from env.
-- `qa-test-reports-*` — attach the JUnit XML + VCR/HAR repro.
-- `qa-ci-pipelines-*` + `qa-_shared-ci-conventions` — wire the `schemathesis/action` job,
+- `qa-<stack>:test-reports` — attach the JUnit XML + VCR/HAR repro.
+- `qa-<stack>:ci-pipelines` + `qa-<stack>:ci-conventions` — wire the `schemathesis/action` job,
   OIDC secrets, artifact upload.

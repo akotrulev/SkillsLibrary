@@ -1,11 +1,11 @@
 ---
-name: ba-scoping-writeup
-description: Use when turning a vague business problem, stakeholder request, or feature idea into a structured single-initiative scoping writeup. Carries the elicitation question bank for thin briefs. Triggers: "do a BA writeup for X", "help me scope this initiative", "we got a PRD/BRD — what's actually in scope". Do NOT use for writing user stories (`ba-story-writer`), cross-feature conflict checks (`ba-feature-conflict-check`), or single-doc test distillation (`qa/manual/requirements-breakdown`).
+name: scoping
+description: Use when turning a vague business problem, stakeholder request, or feature idea into a structured single-initiative scoping writeup. Carries the elicitation question bank for thin briefs. Triggers: "do a BA writeup for X", "help me scope this initiative", "we got a PRD/BRD — what's actually in scope". Do NOT use for writing user stories (`business-analysis:stories`), cross-feature conflict checks (`business-analysis:conflict-check`), or single-doc test distillation (`qa/manual/requirements-breakdown`).
 ---
 
 # Initiative Scoping
 
-Converts an ambiguous business request into a structured artifact engineering and product can act on. Output is decision-ready: actors, capabilities, constraints, success measures, scope, risks, and open questions — separated and labeled. Inside the delivery lane this document **is** `docs/plans/<NNN>-<initiative>/requirements.md`, written by `requirements-author` (`/dev-refine`); standalone, it is the scoping writeup handed to whoever plans next.
+Converts an ambiguous business request into a structured artifact engineering and product can act on. Output is decision-ready: actors, capabilities, constraints, success measures, scope, risks, and open questions — separated and labeled. Inside the delivery lane this document **is** `docs/plans/<NNN>-<initiative>/requirements.md`, written by `requirements-author` (`/dev:refine`); standalone, it is the scoping writeup handed to whoever plans next.
 
 ## When to use
 
@@ -17,7 +17,7 @@ Converts an ambiguous business request into a structured artifact engineering an
 ## When NOT to use
 
 - The requirement is already crisp and just needs user stories → `business-analysis/skills/ba-story-writer`
-- The user wants a technical design / ADR for one already-clear feature → `/dev-design` (`ep-brainstorming`)
+- The user wants a technical design / ADR for one already-clear feature → `/dev:design` (`dev:design`)
 - The user wants meeting minutes or a status update → not this domain
 
 ## Inputs needed
@@ -120,6 +120,6 @@ This is the shape of `requirements.md`. Ten sections, this order, none dropped �
 
 ## Handoffs
 
-- Inside the delivery lane → `requirements-author` (`/dev-refine`) runs this skill as its Step 2 and continues into `ba-epic-writer` and `ba-story-writer`
+- Inside the delivery lane → `requirements-author` (`/dev:refine`) runs this skill as its Step 2 and continues into `business-analysis:epics` and `business-analysis:stories`
 - Standalone and tight enough to refine? → `business-analysis/skills/ba-epic-writer`, then `business-analysis/skills/ba-story-writer`
 - QA needs the testable distillation (business logic, validations, observable implementation notes)? → `qa/manual/requirements-breakdown` — don't re-derive it here; this document is one of its inputs. It ships in this plugin; every other `qa/*` peer is invoked separately, never loaded here.

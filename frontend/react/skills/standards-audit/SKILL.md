@@ -1,6 +1,6 @@
 ---
-name: fe-react-standards-audit
-description: Use to audit a whole React/Next.js codebase against the fe-react plugin's own conventions, producing a saved, re-runnable findings report in `docs/audits/`. Read-only — it never fixes. Triggers "audit our codebase against the plugin conventions", "does this app follow the fe-react rules", "re-audit — what did we fix since last round". Not for one diff (`fe-react-code-review`), code vs a product spec (`ep-spec-vs-code-audit`), or fixing anything (the `fe-react` agent).
+name: standards-audit
+description: Use to audit a whole React/Next.js codebase against the fe-react plugin's own conventions, producing a saved, re-runnable findings report in `docs/audits/`. Read-only — it never fixes. Triggers "audit our codebase against the plugin conventions", "does this app follow the fe-react rules", "re-audit — what did we fix since last round". Not for one diff (`fe-react:conventions-review`), code vs a product spec (`dev:audit-spec`), or fixing anything (the `fe-react` agent).
 ---
 
 # fe-react Conformance Audit
@@ -22,9 +22,9 @@ Load the **owning skill's `SKILL.md`** (named per section in the checklist) when
 
 | Job | Owner | Why not this skill |
 |---|---|---|
-| Review one diff / a few files, inline severity table | [`fe-react-code-review`](../code-review/SKILL.md) | No saved artifact, no round tracking, no whole-repo sweep. This skill **reuses** its checklists at repo scale |
-| Code vs a written spec / stories / ACs | `ep-spec-vs-code-audit` (or the `code-auditor` agent) | Their spine is a requirement register built from *the user's* sources; this skill's spine is *the plugin's* rules |
-| "How does feature X actually work / where is it defective" | `ep-feature-audit` | Behaviour tracing of one area, no fixed rule set |
+| Review one diff / a few files, inline severity table | [`fe-react:conventions-review`](../code-review/SKILL.md) | No saved artifact, no round tracking, no whole-repo sweep. This skill **reuses** its checklists at repo scale |
+| Code vs a written spec / stories / ACs | `dev:audit-spec` (or the `code-auditor` agent) | Their spine is a requirement register built from *the user's* sources; this skill's spine is *the plugin's* rules |
+| "How does feature X actually work / where is it defective" | `dev:audit-feature` | Behaviour tracing of one area, no fixed rule set |
 | Multi-lane audit engagement, stakeholder report, other stacks | `code-auditor` agent | Stack-agnostic and lane-driven. Hand off when the ask grows past "does the React code follow our conventions" |
 | Attacking authz / injection / DAST | `qa-security` peer | This inventories gates; it does not attack them |
 | Running axe / Lighthouse / E2E to *prove* a11y or perf | `qa-ui-typescript` / `qa-security` peers | Static conformance only — see the evidence policy |
@@ -186,9 +186,9 @@ Highest-leverage remaining: <one line>
 ## Handoffs
 
 - **Apply the fixes** → the `fe-react` agent, Mode FIX (a defect) or EXTEND (a missing capability). The priority table is the handoff artifact.
-- **One file / one diff instead** → [`fe-react-code-review`](../code-review/SKILL.md).
-- **Code vs a spec or story set** → `ep-spec-vs-code-audit` / the `code-auditor` agent (SPEC lane).
-- **"What does this feature actually do"** → `ep-feature-audit`.
+- **One file / one diff instead** → [`fe-react:conventions-review`](../code-review/SKILL.md).
+- **Code vs a spec or story set** → `dev:audit-spec` / the `code-auditor` agent (SPEC lane).
+- **"What does this feature actually do"** → `dev:audit-feature`.
 - **Prove the a11y / perf / security findings dynamically** → peers `qa-ui-typescript` (axe, E2E), `qa-security` (DAST/SCA/access control), `qa-cicd-typescript` (gate the conformance run in CI).
 - **Design-craft altitude** (is it *good*, not just conforming) → `design/ui-code-audit` (code-level) and `design/ux-review` (experience-level), run by the `fe-react` agent's Step 5.
 - **Section M findings** double as the `missing-testids.md` handshake input for `qa-ui-typescript` / [`test-ids`](../test-ids/SKILL.md).

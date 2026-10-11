@@ -38,7 +38,7 @@ failure, so a proxy run's evidence travels with the rest.
 
 - A Playwright test → `references/playwright-routes.md` (and `references/cdp.md` for throttling)
 - Writing the Selenium page objects themselves → `qa/java/skills/ui-test-author/selenium`
-- TypeScript and .NET proxy lanes → `qa-network-mocking-typescript` (mockttp), `qa-network-mocking-dotnet`
+- TypeScript and .NET proxy lanes → `qa-typescript:network-mocking` (mockttp), `qa-dotnet:network-mocking`
   (Titanium.Web.Proxy)
 
 ## Inputs needed
@@ -312,4 +312,4 @@ public class CheckoutProxyTest extends ProxyTest {
 - `qa/java/skills/ui-test-author/selenium` — Selenium page objects and the driver base class.
 - `qa/java/skills/ui-test-author/appium` — the Appium driver lifecycle.
 - `qa/cicd/java/skills/ci-pipelines` — the job that starts the browser and uploads the evidence.
-- `qa-network-mocking-typescript`, `qa-network-mocking-dotnet` — the sibling lanes.
+- `qa-typescript:network-mocking`, `qa-dotnet:network-mocking` — the sibling lanes.

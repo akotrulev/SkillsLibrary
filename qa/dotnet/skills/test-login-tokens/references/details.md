@@ -1,4 +1,4 @@
-# Deep-dive details — `qa-test-login-tokens-dotnet`
+# Deep-dive details — `qa-dotnet:test-login-tokens`
 
 Sections moved out of SKILL.md for on-demand loading. Read what the task needs.
 

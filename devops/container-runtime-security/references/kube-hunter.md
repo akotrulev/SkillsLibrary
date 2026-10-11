@@ -1,6 +1,6 @@
 # kube-hunter — cluster attack-surface probing (deep dive)
 
-The red half of `devops-container-runtime-security`: probe a **running** Kubernetes cluster from an
+The red half of `devops:container-runtime-security`: probe a **running** Kubernetes cluster from an
 **attacker's viewpoint**, enumerate the reachable surface, and — under the loud authorization gate — **prove
 the exposure is exploitable**. This file is the full command/mode/gate reference; the SKILL.md holds the
 decision matrix and the one-line active gate.
@@ -11,7 +11,7 @@ decision matrix and the one-line active gate.
 > for attack-surface *probing*** because Trivy does not do the active reachability/exploit probe kube-hunter
 > does — but treat it as **frozen**: pin the last published image digest, expect no fixes.
 > **Enforcement-grade successors** for the runtime surface: **Tetragon** (Cilium — in-kernel LSM block/kill)
-> and **KubeArmor**; for benchmark posture, **Kubescape** (`devops-k8s-security`).
+> and **KubeArmor**; for benchmark posture, **Kubescape** (`devops:kubernetes-security`).
 
 ## The authorization gate — restated, because one mode exploits
 
@@ -162,10 +162,10 @@ found). Map each:
 
 ## Fences (restated)
 
-- **vs Trivy (`qa-security-image-infra-scan`):** Trivy reads images/IaC/SBOM **as files, statically**;
+- **vs Trivy (`qa-<stack>:image-infra-scan`):** Trivy reads images/IaC/SBOM **as files, statically**;
   kube-hunter probes the **running cluster's reachability**. Trivy for CVEs, kube-hunter for exploitable
   surface. Aqua itself points CVE users to Trivy — do not use kube-hunter as a CVE scanner.
-- **vs `devops-k8s-security`:** benchmark scoring (kube-bench/Kubescape/Polaris) grades the *declared* config
+- **vs `devops:kubernetes-security`:** benchmark scoring (kube-bench/Kubescape/Polaris) grades the *declared* config
   against CIS/NSA; kube-hunter proves the *running* surface is reachable. A benchmark pass ≠ not exploitable.
 - **vs the exploit-validation lane (`qa-security`):** that proves a single **app-layer** vuln fires;
   kube-hunter proves **cluster/infra** surface is reachable. Different layer.

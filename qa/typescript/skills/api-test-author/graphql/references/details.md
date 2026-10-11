@@ -1,4 +1,4 @@
-# Deep-dive details — `qa-api-test-graphql-typescript`
+# Deep-dive details — `qa-typescript:api-tests-graphql`
 
 Sections moved out of SKILL.md for on-demand loading. Read what the task needs.
 

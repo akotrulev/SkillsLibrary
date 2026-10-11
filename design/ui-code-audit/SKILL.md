@@ -1,6 +1,6 @@
 ---
-name: design-ui-code-audit
-description: Use for a CODE-level UI audit — read UI source files and flag violations of the vendored Vercel Web Interface Guidelines: missing aria-labels, `<div onClick>` navigation, unlabeled inputs, `transition: all`. Runs offline against the pinned snapshot. Triggers "audit my UI code against web interface guidelines", "pre-ship UI code audit", "review this markup before we ship". Not for experience-level review (`design-ux-review`) or axe/Lighthouse scanning (qa `accessibility-testing`).
+name: ui-code-audit
+description: Use for a CODE-level UI audit — read UI source files and flag violations of the vendored Vercel Web Interface Guidelines: missing aria-labels, `<div onClick>` navigation, unlabeled inputs, `transition: all`. Runs offline against the pinned snapshot. Triggers "audit my UI code against web interface guidelines", "pre-ship UI code audit", "review this markup before we ship". Not for experience-level review (`design:ux-review`) or axe/Lighthouse scanning (qa `accessibility-testing`).
 metadata:
   author: vercel
   version: "1.1.0"
@@ -16,7 +16,7 @@ the animation honor `prefers-reduced-motion`). It does **not** judge flows,
 information architecture, or visual taste — those are other skills (see the
 fence below).
 
-**Corpus authority.** The facts this skill decides with come from the vendored [`design-ui-ux-pro-max`](../ui-ux-pro-max/SKILL.md) corpus — **it is the source of truth, and where it and this skill disagree on a fact, the corpus wins.** The Vercel snapshot below is one of two rulesets: the corpus adds 119 UX guidelines with paired good/bad code examples, 44 React/Next performance rules, and per-stack conventions for all 22 supported stacks. Run both:
+**Corpus authority.** The facts this skill decides with come from the vendored [`design:corpus`](../ui-ux-pro-max/SKILL.md) corpus — **it is the source of truth, and where it and this skill disagree on a fact, the corpus wins.** The Vercel snapshot below is one of two rulesets: the corpus adds 119 UX guidelines with paired good/bad code examples, 44 React/Next performance rules, and per-stack conventions for all 22 supported stacks. Run both:
 
 ```bash
 python3 "${CLAUDE_PLUGIN_ROOT}/design/ui-ux-pro-max/scripts/search.py" "<pattern you found>" --domain ux

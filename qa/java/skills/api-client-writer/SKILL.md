@@ -1,9 +1,9 @@
 ---
-name: qa-api-client-writer-java
-description: Use when the user asks to create a new API client class (`{Resource}Client.java`) in a Java API test project (RestAssured + TestNG + Gradle, Java 21). Triggers: "write an API client for X", "add a {Resource}Client", "scaffold the Java client for /api/{path}". Do NOT use for DTOs (`qa-api-models-java`) or the tests themselves (`qa-api-test-writer-java`).
+name: api-client-writer
+description: Use when the user asks to create a new API client class (`{Resource}Client.java`) in a Java API test project (RestAssured + TestNG + Gradle, Java 21). Triggers: "write an API client for X", "add a {Resource}Client", "scaffold the Java client for /api/{path}". Do NOT use for DTOs (`qa-java:api-models`) or the tests themselves (`qa-java:api-tests`).
 ---
 
-# qa-api-client-writer-java
+# qa-java:api-client-writer
 
 Generator skill. Scaffolds a single `{Resource}Client.java` file in the Java API test project under `src/test/java/.../clients/{api}/`, following the conventions below.
 
@@ -18,7 +18,7 @@ Generator skill. Scaffolds a single `{Resource}Client.java` file in the Java API
 - Writing the test fixture / `@Test` methods — use `qa/java/skills/api-test-author/writer`.
 - Reviewing an existing client for convention drift — use `qa/java/skills/api-test-author/review`.
 - Authoring DTOs the client returns — use `qa/java/skills/api-models` first.
-- Reacting to a **new version of a swagger/OpenAPI spec** — start at `qa/_shared/api-spec-assets` (`qa-api-spec-assets-shared`): it replaces the stored spec asset in place and derives from `git diff` exactly which client methods changed. Come back here for those methods only.
+- Reacting to a **new version of a swagger/OpenAPI spec** — start at `qa/_shared/api-spec-assets` (`qa-<stack>:api-spec-assets`): it replaces the stored spec asset in place and derives from `git diff` exactly which client methods changed. Come back here for those methods only.
 - .NET stack (RestSharp) — use `qa/dotnet/skills/api-client-writer`.
 - TypeScript stack (`fetch` + Zod) — use `qa/typescript/skills/api-client-writer`.
 - Any non-RestAssured / non-Java stack not covered by the siblings above.

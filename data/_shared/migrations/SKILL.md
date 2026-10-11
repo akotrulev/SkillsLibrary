@@ -1,5 +1,5 @@
 ---
-name: data-migrations
+name: migrations
 description: Use when the user is choosing a migration tool, structuring a migration set, or planning an online-safe DDL/data change across any SQL or document store. Triggers: "pick a migration tool", "write a Flyway / EF / Prisma migration for X", "online-safe schema change", "rename a column safely", "backfill plan for table Y", "expand-contract pattern". Do NOT use for engine-specific schema design (use `data/<db>`) or for one-off ad-hoc DML against prod.
 ---
 

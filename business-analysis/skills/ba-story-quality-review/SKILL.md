@@ -1,6 +1,6 @@
 ---
-name: ba-story-quality-review
-description: Use when stories or epics were authored by someone else (client, another team, a PO) and need a review-only readiness audit before refinement or test design — INVEST, AC quality, testability, dependency hygiene. Triggers: "review these stories", "are these stories ready for the sprint", "prep these tickets for refinement", "are these ACs testable". Do NOT use to write or fix stories (`ba-story-writer`), shape epics (`ba-epic-writer`), or scope a vague ask (`ba-scoping-writeup`).
+name: story-review
+description: Use when stories or epics were authored by someone else (client, another team, a PO) and need a review-only readiness audit before refinement or test design — INVEST, AC quality, testability, dependency hygiene. Triggers: "review these stories", "are these stories ready for the sprint", "prep these tickets for refinement", "are these ACs testable". Do NOT use to write or fix stories (`business-analysis:stories`), shape epics (`business-analysis:epics`), or scope a vague ask (`business-analysis:scoping`).
 ---
 
 # Backlog Reviewer
@@ -110,7 +110,7 @@ Calibrate to the stated purpose: for a *testability* review, silent validations 
 <The findings that would stall `qa/manual/requirements-breakdown` — silent validations, contradictions, unfalsifiable AC — so QA knows exactly what to chase. "None" if clean.>
 
 ## Recommended next step
-<one sentence: e.g. "Route US13/US14 to ba-story-writer for repair; US12 can proceed to requirements-breakdown now.">
+<one sentence: e.g. "Route US13/US14 to business-analysis:stories for repair; US12 can proceed to requirements-breakdown now.">
 ```
 
 Story and epic ids are quoted as the source backlog writes them; where the backlog has none, assign `US<n>`/`E<n>` in reading order and say so, so the findings are citable.
@@ -121,7 +121,7 @@ Story and epic ids are quoted as the source backlog writes them; where the backl
 - Every finding cites its location (story ID + AC number) so the author can act without re-reading the review.
 - Verdicts are per story; a batch never gets one blended verdict.
 - Don't manufacture findings to look thorough — a clean story gets ✅ and zero rows.
-- Don't re-litigate product decisions; review the story's *quality*, not whether the feature is a good idea (that was settled upstream in `ba-scoping-writeup`).
+- Don't re-litigate product decisions; review the story's *quality*, not whether the feature is a good idea (that was settled upstream in `business-analysis:scoping`).
 
 ## Anti-patterns to flag in the backlog
 

@@ -1,4 +1,4 @@
-# Deep-dive details — `qa-realtime-stream-testing-dotnet`
+# Deep-dive details — `qa-dotnet:realtime-stream-testing`
 
 Sections moved out of SKILL.md for on-demand loading. Read what the task needs.
 
@@ -363,7 +363,7 @@ One type per file in a project; they share a block here only to keep the referen
 - **Auth on the socket** — whichever the contract uses: the **query string** (`?access_token=…`, what SignalR
   uses because browsers cannot set WS headers), a **subprotocol** (`options.AddSubProtocol(token)` →
   `Sec-WebSocket-Protocol`), or the **first frame**. Read the token from env, lazily, never logged
-  (`qa-test-login-tokens-dotnet`). A server-side `HttpClient` can set `Authorization` on SSE; a browser
+  (`qa-dotnet:test-login-tokens`). A server-side `HttpClient` can set `Authorization` on SSE; a browser
   `EventSource` cannot set headers — query or cookie auth.
 - **Heartbeat (ping/pong):** control frames are handled below the pump; assert the application-level heartbeat
   if the app sends one, and SignalR's `KeepAliveInterval` / `ServerTimeout` behaviour.
@@ -387,7 +387,7 @@ var token = await Tokens.TestUser.GetAccessTokenAsync();
 await probe.ConnectAsync(new Uri($"{BaseWsUri}/ws/secure"), options => options.AddSubProtocol(token));
 ```
 
-**A builder for a 4+-field frame payload** (`qa-test-data-builder-dotnet`):
+**A builder for a 4+-field frame payload** (`qa-dotnet:test-data-builder`):
 
 ```csharp
 var payload = ChatMessages.Standard().WithText("hello").WithRoom("general").Build();

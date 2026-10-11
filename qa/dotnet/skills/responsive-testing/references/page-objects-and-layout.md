@@ -1,4 +1,4 @@
-# Page objects and the `Layout` helper — `qa-responsive-testing-dotnet`
+# Page objects and the `Layout` helper — `qa-dotnet:responsive-testing`
 
 The support code the samples in `SKILL.md` call. Page objects expose **variant intent** and the regions a test
 measures; `Layout` **measures and returns numbers**. Neither asserts — the test does. All of it sits in the

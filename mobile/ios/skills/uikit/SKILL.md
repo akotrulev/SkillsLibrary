@@ -1,11 +1,11 @@
 ---
-name: mobile-ios-uikit
-description: Use when the iOS codebase is UIKit or mixes UIKit and SwiftUI — view controllers, Auto Layout, diffable data sources, UIKit Observation tracking, UIHostingController / UIHostingConfiguration / UIViewRepresentable seams both ways, and the UIScene lifecycle move (TN3187). Triggers "add a screen to this UIKit app", "embed SwiftUI", "wrap a UIKit view", "scene delegate". Do NOT use for new SwiftUI screens (`mobile-ios-ui-components`) or rewrites (`-migration`).
+name: uikit
+description: Use when the iOS codebase is UIKit or mixes UIKit and SwiftUI — view controllers, Auto Layout, diffable data sources, UIKit Observation tracking, UIHostingController / UIHostingConfiguration / UIViewRepresentable seams both ways, and the UIScene lifecycle move (TN3187). Triggers "add a screen to this UIKit app", "embed SwiftUI", "wrap a UIKit view", "scene delegate". Do NOT use for new SwiftUI screens (`mobile-ios:ui-components`) or rewrites (`-migration`).
 ---
 
 # iOS — UIKit
 
-The lane for apps where UIKit **is** the codebase. **A UIKit codebase is not a defect.** This skill extends it in its own idiom, bridges to SwiftUI where a screen earns it, and never proposes a rewrite — screen-by-screen UIKit → SwiftUI is [`mobile-ios-migration`](../migration/SKILL.md)'s, and only on request. Design facts: `design/ui-ux-pro-max` `--stack swiftui` for platform conventions; a UIKit screen follows the same HIG.
+The lane for apps where UIKit **is** the codebase. **A UIKit codebase is not a defect.** This skill extends it in its own idiom, bridges to SwiftUI where a screen earns it, and never proposes a rewrite — screen-by-screen UIKit → SwiftUI is [`mobile-ios:migration`](../migration/SKILL.md)'s, and only on request. Design facts: `design/ui-ux-pro-max` `--stack swiftui` for platform conventions; a UIKit screen follows the same HIG.
 
 ## Version lane
 
@@ -33,9 +33,9 @@ Detect first: storyboards, `AppDelegate`/`SceneDelegate`, Objective-C, third-par
 - A new SwiftUI screen in an app that is mostly SwiftUI → [`ui-components`](../ui-components/SKILL.md)
 - Rewriting UIKit to SwiftUI, Objective-C → Swift, storyboard removal → [`migration`](../migration/SKILL.md)
 - State ownership of `@Observable` models → [`architecture`](../architecture/SKILL.md)
-- Routes and universal links → [`navigation`](../navigation/SKILL.md), `mobile-ios-notifications-and-links`
+- Routes and universal links → [`navigation`](../navigation/SKILL.md), `mobile-ios:push-and-deep-links`
 - Colour, type, Liquid Glass → [`styling`](../styling/SKILL.md)
-- Another stack → `mobile-react-native-native-modules`, `mobile-android-views-interop`
+- Another stack → `mobile-react-native:native-modules`, `mobile-android:views-interop`
 
 ## View controllers — small, owned, cancelled
 
@@ -84,8 +84,8 @@ final class OrdersViewController: UIViewController {
 - **A `Task` the controller starts is cancelled when the screen goes** — store the handle, cancel in `viewDidDisappear` / `deinit`. Loading in `viewIsAppearing` (iOS 13+, with correct geometry) beats `viewWillAppear`.
 - **The main thread never blocks**: no `Data(contentsOf:)`, Keychain loops, Core Data fetches on `viewContext` of thousands of rows, or image decoding in `cellForItemAt`.
 - `[weak self]` in a stored closure or long-lived `Task`; **no retain cycle through a delegate** — delegate properties are `weak`.
-- Three data states plus stale and offline — render them in the region (`UIContentUnavailableConfiguration` on iOS 17+ for empty and failed; a status view above that) while the search bar and header keep working; `mobile-ios-error-handling` owns the banner.
-- Every interactive view and every list container sets `accessibilityIdentifier` — static PascalCase dot-separated ([`mobile-ios-test-ids`](../test-ids/SKILL.md)).
+- Three data states plus stale and offline — render them in the region (`UIContentUnavailableConfiguration` on iOS 17+ for empty and failed; a status view above that) while the search bar and header keep working; `mobile-ios:error-handling` owns the banner.
+- Every interactive view and every list container sets `accessibilityIdentifier` — static PascalCase dot-separated ([`mobile-ios:test-ids`](../test-ids/SKILL.md)).
 
 ## Auto Layout
 
@@ -228,6 +228,6 @@ Inside a `Gate: none` plan task, run none of these and report "written, not run"
 
 - Rewrites, Objective-C, storyboard removal → [`migration`](../migration/SKILL.md)
 - Models, injection → [`architecture`](../architecture/SKILL.md) · views → [`ui-components`](../ui-components/SKILL.md)
-- Links and push routing → [`navigation`](../navigation/SKILL.md), `mobile-ios-notifications-and-links`
-- Test ids → [`mobile-ios-test-ids`](../test-ids/SKILL.md) · accessibility → `mobile-ios-accessibility`
+- Links and push routing → [`navigation`](../navigation/SKILL.md), `mobile-ios:push-and-deep-links`
+- Test ids → [`mobile-ios:test-ids`](../test-ids/SKILL.md) · accessibility → `mobile-ios:accessibility`
 - Pickers, camera, location → [`device-features`](../device-features/SKILL.md)

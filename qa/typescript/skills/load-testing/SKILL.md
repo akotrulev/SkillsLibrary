@@ -1,6 +1,6 @@
 ---
-name: qa-load-testing-typescript
-description: Use when the user asks to design or author k6 (Grafana k6) performance / load tests in JavaScript/TypeScript. Triggers: "write a k6 script for endpoint X", "design a k6 average load test", "spike test in k6". Not for fault injection under normal load (`qa-failure-injection-testing-typescript`) or uptime probes (`qa-production-uptime-checks-typescript`).
+name: load-testing
+description: Use when the user asks to design or author k6 (Grafana k6) performance / load tests in JavaScript/TypeScript. Triggers: "write a k6 script for endpoint X", "design a k6 average load test", "spike test in k6". Not for fault injection under normal load (`qa-typescript:failure-injection-testing`) or uptime probes (`qa-typescript:production-uptime-checks`).
 ---
 
 # QA — Performance Testing with k6 (TypeScript / JavaScript)

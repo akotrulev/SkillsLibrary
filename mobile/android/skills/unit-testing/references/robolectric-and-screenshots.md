@@ -1,6 +1,6 @@
 # Android — Robolectric, Roborazzi and test data
 
-*Deep dive for [`mobile-android-unit-testing`](../SKILL.md).*
+*Deep dive for [`mobile-android:unit-testing`](../SKILL.md).*
 
 ---
 
