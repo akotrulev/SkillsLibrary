@@ -1,366 +1,461 @@
-# Visual Regression — Playwright Snapshots (.NET / NUnit)
+# Visual Regression — Screenshot plus Comparer (.NET 10 / Microsoft.Playwright 1.63 + NUnit)
 
-The .NET port of the canonical `qa-visual-regression-typescript`. Same concepts,
-same flake-control discipline, same CI-container baseline rule — re-expressed in `Microsoft.Playwright`
-+ `Microsoft.Playwright.NUnit` idioms. **One key difference from the TS runner:** .NET has **no
-`--update-snapshots` CLI flag** — you regenerate a baseline by deleting it and re-running (inside the
-CI container). That distinction is called out throughout.
+Microsoft.Playwright has **no screenshot assertion**: `toHaveScreenshot` is a Node test-runner feature, and
+the .NET `IPageAssertions` / `ILocatorAssertions` in 1.63 have no screenshot or snapshot member, no options
+class for one, and no `--update-snapshots`. This reference builds the free lane from three parts that do
+exist:
 
-## When to use this skill
+1. `Locator.ScreenshotAsync(...)` with the determinism options, taken after the page object has reached a
+   stable state;
+2. an image comparer, `Codeuctivity.ImageSharpCompare`, against a PNG baseline committed in the repo;
+3. an NUnit assertion on the measured difference, with the expected, actual and diff images kept and shown
+   in Allure's image-diff widget when they differ.
 
-Use when a Playwright **.NET / NUnit** test must detect **unintended visual change** — a CSS
-regression, a broken layout, a shifted component — by comparing a fresh screenshot against a
-committed baseline. This is the **built-in, free** layer: Playwright does the capture and the pixel
-diff, baselines live in your repo, you own the flakiness budget. Reach for Percy or Applitools
-(`applitools`) only for hosted baseline management, a review UI, or visual-AI diffing — see the matrix.
+Baselines are written **only** in `mcr.microsoft.com/playwright/dotnet:v1.63.0-noble`, the image whose tag
+equals the Playwright version. The samples derive from `Example.UiTests.Support.BaseTest`
+(`qa/dotnet/skills/ui-test-author/playwright/assets/BaseTest.cs`), which already keeps a trace, screenshot and
+video for every failed test.
 
-Visual regression is an **assertion layer** on top of your existing page objects and specs. You do
-not author new page objects here — you add a screenshot assertion to a flow
-`qa-ui-test-writer-playwright-dotnet` already built.
+## 1. Setup
 
-## Decision matrix — which assertion, which tool
+The comparer, checked on NuGet on 2026-10-11:
 
-| Need | Use | Why |
-|------|-----|-----|
-| Visual diff of a page/element, auto-retried + stabilized | `await Expect(Page).ToHaveScreenshotAsync()` | Waits for the page to settle; retries until match or timeout |
-| Visual diff of an element only | `await Expect(locator).ToHaveScreenshotAsync()` | Scopes the capture; far less flaky than full page |
-| Compare an arbitrary buffer you produced | `await Expect(Page).ToMatchSnapshotAsync(bytes, "name.png")` | Raw byte snapshot you control (generated PDF/SVG, post-processed shot) |
-| Free, baselines in your repo, you own diffing | **this skill** | No SaaS, no per-screenshot cost, full control |
-| Hosted baselines + PR review UI | Percy | Offloads baseline mgmt + review; paid |
-| Visual-AI diffing + cross-browser grid | Applitools | Ignores anti-aliasing noise via AI; paid |
+| Package | Version | Facts |
+|---|---|---|
+| `Codeuctivity.ImageSharpCompare` | **4.1.390** | The latest release (published 2026-05-13). Targets net8.0, net9.0 and net10.0. Apache-2.0. One dependency: `SixLabors.ImageSharp` 3.1.12 |
 
-**Rule of thumb:** `ToHaveScreenshotAsync()` for anything rendered in the browser (it stabilizes and
-retries). `ToMatchSnapshotAsync()` only for bytes you generated. Prefer **element** screenshots over
-**full-page** — they are dramatically less flaky.
+It is a recommendation, not a Playwright fact (plan D9): Playwright names no comparer. `Verify.Playwright`
+(3.1.1) was the other candidate; it is a snapshot framework (received/verified files beside the source,
+DiffEngine, a byte comparison unless another comparer package is added) rather than a comparison function,
+so it would replace this lane's baseline store and update command instead of serving them (plan D58).
 
-## Setup
+**The ImageSharp licence.** `SixLabors.ImageSharp` is under the Six Labors Split License: Apache-2.0 when
+it is a *transitive* dependency (installed by a package unrelated to Six Labors, as here), or a direct
+dependency of open-source software or of a company under USD 1M annual revenue; otherwise a commercial
+licence. Reference only `Codeuctivity.ImageSharpCompare` — a direct `PackageReference` to
+`SixLabors.ImageSharp` brings the revenue clause into play.
+
+Add the pin beside the writer's in `Directory.Packages.props`:
 
 ```xml
-<!-- Tests.csproj -->
+<PackageVersion Include="Codeuctivity.ImageSharpCompare" Version="4.1.390" />
+```
+
+and two items to `UiTests.csproj` — the reference (no `Version=` under central package management) and the
+project folder, written into the test assembly at build time:
+
+```xml
 <ItemGroup>
-  <PackageReference Include="Microsoft.Playwright.NUnit" Version="1.50.0" />
-  <PackageReference Include="NUnit" Version="4.*" />
-  <PackageReference Include="NUnit3TestAdapter" Version="4.*" />
-  <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.*" />
+  <PackageReference Include="Codeuctivity.ImageSharpCompare" />
+  <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+    <_Parameter1>ProjectDirectory</_Parameter1>
+    <_Parameter2>$(MSBuildProjectDirectory)</_Parameter2>
+  </AssemblyAttribute>
 </ItemGroup>
 ```
 
-```bash
-pwsh bin/Debug/net10.0/playwright.ps1 install --with-deps chromium   # use the project's TFM in the path
-```
-
-Inheriting `PageTest` gives you `Page` and the `Expect` assertion entry point. There is no
-`playwright.config.ts` equivalent — screenshot defaults are passed **per assertion** via the options
-object, or centralized in a base test class. The expect timeout (how long `ToHaveScreenshotAsync`
-auto-retries) is set globally:
-
 ```csharp
-// BaseVisualTest.cs — centralize the screenshot policy so individual tests stay clean.
-using Microsoft.Playwright;
-using Microsoft.Playwright.NUnit;
+using System.Reflection;
 
-public abstract class BaseVisualTest : PageTest
+namespace Example.UiTests.Support;
+
+public static class ProjectPaths
 {
-    // How long ToHaveScreenshotAsync auto-retries the capture+compare.
-    public override BrowserNewContextOptions ContextOptions() => new() { BaseURL = "http://localhost:3000" };
-
-    protected static LocatorAssertionsToHaveScreenshotOptions Defaults() => new()
-    {
-        MaxDiffPixelRatio = 0.01,                       // ≤1% of pixels may differ
-        Animations = ScreenshotAnimations.Disabled,     // freeze CSS animations/transitions
-        Scale = ScreenshotScale.Css,                    // CSS pixels, stable across DPI
-    };
+    public static readonly string Root = typeof(ProjectPaths).Assembly
+        .GetCustomAttributes<AssemblyMetadataAttribute>()
+        .Single(attribute => attribute.Key == "ProjectDirectory")
+        .Value!;
 }
 ```
 
+- `dotnet test` runs from `bin/<cfg>/net10.0/`, so a relative baseline path would read and write copies under
+  `bin/`, and an update would never reach the repository. The `AssemblyMetadata` item records the project's
+  folder when the project builds; `ProjectPaths.Root` reads it back. `qa/dotnet/skills/network-mocking`
+  resolves its committed HAR files through the same helper.
+- The path is the build machine's. Build and run on the same filesystem — the commands in §7 and §8 do both
+  inside the container.
+
+## 2. The baseline store
+
+```
+UiTests/Baselines/
+└── linux-chromium/
+    ├── Pricing.PlanTable.png
+    └── Checkout.Summary.png
+```
+
+- The folder is `<os>-<browser>`: `<os>` is `linux`, `macos` or `windows`; `<browser>` is `PlaywrightTest.BrowserName`
+  (`chromium` from `ui.runsettings`).
+- Only `linux-chromium/` is ever written, because baselines come only from the pinned image (§7). A run on a
+  Mac looks up `macos-chromium/`, finds nothing and fails with "no baseline" — instead of comparing a macOS
+  rendering against a Linux one and failing with a diff nobody can act on.
+- File names are the PascalCase dot-separated subject (`Pricing.PlanTable`), the same shape as the test ids.
+- Baselines are **committed**: versioned test inputs, not secrets and not build output.
+
+## 3. Capture options — `LocatorScreenshotOptions`
+
+`Locator.ScreenshotAsync(new LocatorScreenshotOptions { ... })` returns `byte[]` (PNG by default); `Path` also
+writes the file and creates its folder. It waits for the element to be visible and stable, scrolls it into
+view and clips to it, and the screenshotter waits for web fonts. It does **not** wait for the app's data, and
+unlike the Node runner it takes **one** capture — there is no retry-until-two-captures-match. The page object
+waits for the ready state first. Spellings as in `qa/dotnet/skills/evidence-capture/references/playwright.md` §1.1:
+
+| Option | Use |
+|---|---|
+| `Animations = ScreenshotAnimations.Disabled` | Finite animations jump to their end, infinite ones reset |
+| `Caret = ScreenshotCaret.Hide` | The text caret, a classic 1-px flake (already the default) |
+| `Scale = ScreenshotScale.Css` | One image pixel per CSS pixel, whatever the device scale factor |
+| `Mask = IEnumerable<ILocator>` | Paints each match with a solid box (`#FF00FF`; `MaskColor` [1.35]) in actual and baseline alike, so the region can never differ |
+| `Style = "<css>"` [1.41] | CSS applied only during the capture; pierces shadow DOM and iframes. There is no `StylePath` in .NET |
+| `OmitBackground = true` | A transparent background (not for JPEG) |
+| `Type = ScreenshotType.Png` | The default. WebP [1.62] works, but a PNG baseline is what a reviewer opens in a PR diff, and what `AddScreenDiff` shows |
+
+- `LocatorScreenshotOptions` has no `FullPage` or `Clip`; those are `PageScreenshotOptions`. Prefer an
+  element: a full-page baseline changes with every unrelated edit and needs masks everywhere.
+- Viewport, time zone and reduced motion are context settings: the test class amends `base.ContextOptions()`
+  (§5). The clock is frozen with `Page.Clock.SetFixedTimeAsync(...)` in the class's `[SetUp]`, before the page
+  object navigates (`ui-test-author/playwright/references/emulation-and-mobile-web.md` §4, §6).
+
+## 4. The helper — `Support/VisualCheck.cs`
+
+One helper captures, compares, keeps and attaches. The test builds it in its own `[SetUp]` with `BaseTest`'s
+evidence paths, calls `CompareAsync`, and asserts on the result.
+
 ```csharp
-// SetUp once (e.g. in a [SetUpFixture]) — global retry budget for screenshot assertions.
-SetDefaultExpectTimeout(10_000);
+using Allure.Net.Commons;
+using Codeuctivity.ImageSharpCompare;
+using Microsoft.Playwright;
+using NUnit.Framework;
+using SixLabors.ImageSharp;
+
+namespace Example.UiTests.Support;
+
+public sealed class VisualCheck(string browserName, string actualPath, string diffPath)
+{
+    public const double AllowedDifferentPixelsPercent = 0.05;
+    private const int PixelColorShiftTolerance = 12;
+    private const string HideLiveWidgets = "[data-testid='Chat.Launcher'] { visibility: hidden !important; }";
+    private static readonly bool UpdateBaselines = Environment.GetEnvironmentVariable("UPDATE_BASELINES") == "1";
+
+    private readonly string _baselineDirectory = Path.Combine(ProjectPaths.Root, "Baselines", $"{OperatingSystemName()}-{browserName}");
+
+    public async Task<VisualDiff> CompareAsync(ILocator target, IEnumerable<ILocator> masked, string subject)
+    {
+        await target.ScreenshotAsync(new()
+        {
+            Path = actualPath,
+            Animations = ScreenshotAnimations.Disabled,
+            Caret = ScreenshotCaret.Hide,
+            Scale = ScreenshotScale.Css,
+            Mask = masked,
+            Style = HideLiveWidgets,
+        });
+        var baseline = Path.Combine(_baselineDirectory, $"{subject}.png");
+        if (UpdateBaselines)
+        {
+            Directory.CreateDirectory(_baselineDirectory);
+            File.Copy(actualPath, baseline, overwrite: true);
+        }
+        if (!File.Exists(baseline))
+        {
+            throw new InvalidOperationException($"No baseline at {baseline}; this run's capture is {actualPath}. Baselines are written only in the pinned image (playwright-snapshots.md §7)");
+        }
+        var diff = Measure(subject, baseline);
+        if (diff.DifferentPixelsPercent <= AllowedDifferentPixelsPercent)
+        {
+            File.Delete(actualPath);
+            return diff;
+        }
+        using var mask = ImageSharpCompare.CalcDiffMaskImage(actualPath, baseline, ResizeOption.Resize, PixelColorShiftTolerance);
+        await mask.SaveAsPngAsync(diffPath);
+        AllureApi.AddScreenDiff(baseline, actualPath, diffPath);
+        TestContext.AddTestAttachment(actualPath, "actual");
+        TestContext.AddTestAttachment(diffPath, "diff");
+        return diff;
+    }
+
+    private VisualDiff Measure(string subject, string baseline) =>
+        ImageSharpCompare.ImagesHaveEqualSize(actualPath, baseline)
+            ? new VisualDiff(subject, true, ImageSharpCompare.CalcDiff(actualPath, baseline, ResizeOption.DontResize, PixelColorShiftTolerance).PixelErrorPercentage)
+            : new VisualDiff(subject, false, 100);
+
+    private static string OperatingSystemName() =>
+        OperatingSystem.IsLinux() ? "linux" : OperatingSystem.IsMacOS() ? "macos" : "windows";
+}
+
+public sealed record VisualDiff(string Subject, bool SameSize, double DifferentPixelsPercent);
 ```
 
-## Where baselines live & how they're named
+- **Kept files** sit beside `BaseTest`'s failure evidence: the test passes `Artifact(EvidenceName(), "actual.png")`
+  and `Artifact(EvidenceName(), "diff.png")` — `<WorkDirectory>/playwright-artifacts/<Class>.<Test>.{actual,diff}.png`,
+  the folder the CI references upload on failure. On a match the capture is deleted, so a green run keeps
+  nothing.
+- **The diff image** is ImageSharpCompare's mask: black where the images agree, the per-channel difference
+  where they do not. A size mismatch grows both images to the larger size first (`ResizeOption.Resize`), so
+  the diff still shows where the box changed.
+- **Allure** gets one `application/vnd.allure.image.diff` attachment from `AllureApi.AddScreenDiff(expectedPngPath,
+  actualPngPath, diffPngPath)` — expected first, checked against the Allure.NUnit 2.15.0 source
+  (`AllureApi.cs`; its doc comments swap "actual" and "expected", the parameter names and the JSON it writes
+  do not). It is attached **before** the test's assertion fails, so the report carries it. The TRX and the
+  IDE get the actual and diff files through `TestContext.AddTestAttachment`.
+- **No baseline is a failure, never a silent pass.** The capture is kept so a reviewer can see what the
+  missing baseline would be.
+- **`UPDATE_BASELINES=1`** writes every capture as its baseline before comparing, so the run passes and the
+  new PNGs show in `git diff`. It is set only by §7's command — never in CI (`qa/cicd/ci-conventions`).
+- The comparer's API is synchronous (file I/O and pixel loops); only the screenshot and the PNG write are
+  awaited. The `if`s live in the helper; the test stays a straight line.
 
-On first run Playwright writes a baseline; on later runs it compares against it. The naming carries a
-platform suffix (`linux` / `darwin` / `windows`):
-
-```
-Tests/
-  DashboardTests.cs
-  DashboardTests.cs-snapshots/
-    revenue-card-chromium-linux.png      ← {name}-{browser}-{platform}.png
-```
-
-The `-{platform}` suffix is the crux of the **cross-platform rendering problem**: a baseline
-generated on a dev Mac (`...-darwin.png`) will not match — and is not even looked up — on a Linux
-runner. The fix is in "The CI baseline discipline". Commit the `*-snapshots/` directories:
-**baselines are versioned build artifacts, not secrets.**
-
-## Core pattern 1 — element screenshot on a page-object-driven flow
-
-The page object exposes intent and the locator; the test adds the visual assertion. No selectors in
-the test.
+## 5. The page object and the test
 
 ```csharp
-// Pages/DashboardPage.cs
 using Microsoft.Playwright;
 
-public sealed class DashboardPage
+namespace Example.UiTests.Pages;
+
+public sealed class PricingPage
 {
     private readonly IPage _page;
-    public ILocator RevenueCard { get; }
 
-    public DashboardPage(IPage page)
+    public PricingPage(IPage page)
     {
         _page = page;
-        RevenueCard = page.GetByTestId("revenue-card");
+        PlanTable = page.GetByTestId("Pricing.PlanTable").Describe("Plan table");
+        PromoBadge = PlanTable.GetByTestId("Pricing.PromoBadge").Describe("Promo badge");
+        PromoPrice = PlanTable.GetByTestId("Pricing.PromoPrice").Describe("Promo price");
+        RotatingContent = [PromoBadge];
     }
 
-    public Task GotoAsync() => _page.GotoAsync("/dashboard");
+    public ILocator PlanTable { get; }
 
-    /// <summary>Resolves once the card's data has rendered — a condition, never a fixed wait.</summary>
-    public Task WaitUntilLoadedAsync() =>
-        RevenueCard.GetByRole(AriaRole.Status).WaitForAsync(new() { State = WaitForSelectorState.Hidden });
+    public ILocator PromoBadge { get; }
+
+    public ILocator PromoPrice { get; }
+
+    public IReadOnlyList<ILocator> RotatingContent { get; }
+
+    public async Task OpenAsync()
+    {
+        await _page.GotoAsync("/pricing");
+        await PlanTable.WaitForAsync();
+    }
 }
 ```
 
+`OpenAsync()` returns once the plan table is visible; the app renders it only after the plans arrive (its
+skeleton has its own test id). `RotatingContent` names what changes daily, so the page object — not the test
+— owns which regions are masked. `GotoAsync("/pricing")` resolves against the `BaseURL` that `BaseTest` reads
+from `BASE_URL`; nothing here hard-codes a host.
+
 ```csharp
-// DashboardTests.cs
+using Example.UiTests.Pages;
+using Example.UiTests.Support;
 using Microsoft.Playwright;
-using Microsoft.Playwright.NUnit;
 using NUnit.Framework;
 
-[TestFixture]
-[Parallelizable(ParallelScope.Self)]
-public sealed class DashboardTests : BaseVisualTest
-{
-    [Test]
-    public async Task Should_Match_RevenueCardBaseline_When_DashboardLoads()
-    {
-        var dashboard = new DashboardPage(Page);
-        await dashboard.GotoAsync();
-        await dashboard.WaitUntilLoadedAsync();   // stabilize on a condition first…
+namespace Example.UiTests.Tests;
 
-        await Expect(dashboard.RevenueCard).ToHaveScreenshotAsync("revenue-card.png", new()
-        {
-            MaxDiffPixelRatio = 0.01,
-            Animations = ScreenshotAnimations.Disabled,
-        });                                        // …then assert (auto-retries)
+[Category("visual")]
+public class PricingVisualTests : BaseTest
+{
+    private PricingPage _pricingPage = null!;
+    private VisualCheck _visual = null!;
+
+    public override BrowserNewContextOptions ContextOptions()
+    {
+        var options = base.ContextOptions();
+        options.ViewportSize = new() { Width = 1280, Height = 720 };
+        options.TimezoneId = "UTC";
+        options.ReducedMotion = ReducedMotion.Reduce;
+        return options;
+    }
+
+    [SetUp]
+    public async Task PrepareVisualCheck()
+    {
+        await Page.Clock.SetFixedTimeAsync(new DateTime(2026, 10, 10, 9, 0, 0, DateTimeKind.Utc));
+        _pricingPage = new PricingPage(Page);
+        _visual = new VisualCheck(BrowserName, Artifact(EvidenceName(), "actual.png"), Artifact(EvidenceName(), "diff.png"));
+    }
+
+    [Test]
+    public async Task Should_MatchApprovedPlanTable_When_PlansLoad()
+    {
+        await _pricingPage.OpenAsync();
+
+        var diff = await _visual.CompareAsync(_pricingPage.PlanTable, _pricingPage.RotatingContent, "Pricing.PlanTable");
+
+        Assert.That(diff.DifferentPixelsPercent, Is.LessThanOrEqualTo(VisualCheck.AllowedDifferentPixelsPercent), $"{diff}; expected, actual and diff are attached");
     }
 }
 ```
 
-`ToHaveScreenshotAsync()` auto-retries the capture+compare until it matches or the expect timeout
-elapses, and waits for fonts/animations to settle. You still stabilize *application* state (data
-loaded, spinners gone) yourself — Playwright cannot know your spinner is "done".
+- `ContextOptions()` amends `base.ContextOptions()`, which already carries `BaseURL`, the video folder,
+  `Locale = "en-US"` and `ColorScheme = Light`. Returning `new()` would drop them and fail `BaseTest`'s
+  teardown. A signed-in page adds `options.StorageStatePath = AuthSetup.UserState` here
+  (`ui-test-author/playwright/references/lifecycle.md` §4, §7).
+- The class's `[SetUp]` runs after `BaseTest.StartTracing`, so the page exists; the clock is frozen before
+  the page object navigates, so the app's first `Date.now()` already reads the fixed instant.
+- `Artifact(...)` and `EvidenceName()` are `BaseTest`'s protected helpers (plan D42); they name the files
+  exactly as the failure evidence is named.
+- One logical assertion: the difference is within the allowance. The message is the `VisualDiff` record
+  (subject, same size, percentage), and the three images are already in Allure.
+- One comparison per test, so `<Class>.<Test>` identifies the images. `[Category("visual")]` keeps the class
+  out of the PR gate.
 
-## Core pattern 2 — taming flakiness
+## 6. Tolerance — the comparer's knobs
 
-The four sources of false diffs and the deterministic fix for each:
+| Knob | Meaning | Here |
+|---|---|---|
+| `pixelColorShiftTolerance` (the last parameter of `CalcDiff` / `CalcDiffMaskImage`) | A pixel counts as different only when \|ΔR\| + \|ΔG\| + \|ΔB\| exceeds it (0–765) | `12` |
+| `ICompareResult.PixelErrorPercentage` | The share of differing pixels, 0–100 | gated at `0.05` |
+| `ICompareResult.PixelErrorCount` / `MeanError` / `AbsoluteError` | The count, and the mean and summed colour error | for messages |
+| `ResizeOption.DontResize` / `Resize` | Throw `ImageSharpCompareException("Size of images differ.")` on a size mismatch, or grow both images first | `DontResize` for the measure, `Resize` for the diff image |
+| A mask image (`CalcDiff(actual, expected, maskPath, …)`) | A third PNG whose pixels state the tolerated difference per pixel | not used — `Mask` at capture time follows the element |
 
-```csharp
-[Test]
-public async Task Should_Match_ProfilePage_When_DynamicRegionsNeutralized()
-{
-    await Page.GotoAsync("/profile");
+- **Gate on `PixelErrorPercentage`**, after checking the sizes: a size mismatch is reported as 100 % and
+  `SameSize = false`, never as an exception from inside the comparer.
+- Keep the allowance tight (≤ 0.1 %). Mask the noisy region instead of loosening the whole image.
+- Prefer `Mask` over a mask image: a locator mask follows the element wherever the layout puts it; a mask
+  image is a set of coordinates that breaks on the next layout change.
+- A size mismatch means the element's box changed — a real layout change, or a viewport the class forgot to
+  fix in `ContextOptions()`.
 
-    // 1) Fonts not yet rendered → wait on the condition, not a timeout.
-    await Page.EvaluateAsync("document.fonts.ready");
+## 7. Generating and updating baselines — only in the pinned image
 
-    await Expect(Page).ToHaveScreenshotAsync("profile.png", new()
-    {
-        // 2) Dynamic content (timestamps, avatars) → mask it (painted as a solid box).
-        Mask = new[] { Page.GetByTestId("last-seen"), Page.Locator("img.gravatar") },
-        MaskColor = "#FF00FF",
+Rendering differs by OS, fonts, GPU and browser build, so a baseline is valid only where it was made. The
+pinned image (`mcr.microsoft.com/playwright/dotnet:v1.63.0-noble`) carries the .NET 10 SDK and the 1.63
+browsers, so the container builds and runs the project itself:
 
-        // 3) Anti-aliasing / sub-pixel noise → small tolerance. Prefer ratio over absolute.
-        MaxDiffPixelRatio = 0.02,
-        Threshold = 0.2,   // per-pixel color sensitivity (0 strict … 1 loose); default 0.2
-
-        // 4) Animations / carets → freeze them.
-        Animations = ScreenshotAnimations.Disabled,
-        Caret = ScreenshotCaret.Hide,
-    });
-}
+```bash
+docker run --rm --platform linux/amd64 --ipc=host \
+  -v "$PWD":/work -w /work \
+  -e BASE_URL -e E2E_USER -e E2E_PASSWORD -e UPDATE_BASELINES=1 \
+  mcr.microsoft.com/playwright/dotnet:v1.63.0-noble \
+  dotnet test UiTests -c Release --filter TestCategory=visual
 ```
 
-Knobs, precisely:
+- `--platform linux/amd64` matches the CI runners; on an Apple-silicon Mac it emulates amd64 instead of
+  pulling the arm64 image, whose rendering is not guaranteed to match.
+- `--ipc=host` is Playwright's Docker recommendation for Chromium.
+- The build inside the container records `ProjectDirectory` as `/work/UiTests`, which is the mounted
+  repository — so the update lands in the working tree.
+- `BASE_URL` must be reachable **from inside** the container: a deployed test environment, or
+  `host.docker.internal` for an app on the developer's machine. `E2E_USER` / `E2E_PASSWORD` are needed
+  whenever `AuthSetup.cs` is in the project — the root-namespace `[SetUpFixture]` signs in before any fixture
+  under `Example.UiTests` runs.
+- The container restores into its own NuGet cache on every run; mount one
+  (`-v "$HOME/.nuget/packages":/root/.nuget/packages`) to skip the download. It runs as root, so on a Linux
+  host the new PNGs and `bin/`/`obj/` come out root-owned — `chown` them, and delete `UiTests/bin` and
+  `UiTests/obj` before the next host build.
+- Then review every changed PNG in `git diff` and commit them in the PR that changed the UI.
+- Drop `UPDATE_BASELINES=1` and the same command **verifies** in the image — the way to reproduce a nightly
+  failure locally.
 
-- **`MaxDiffPixels`** — absolute number of differing pixels allowed. Brittle across viewport sizes.
-- **`MaxDiffPixelRatio`** — fraction (0–1) of differing pixels allowed. **Prefer this** — scales with
-  image size.
-- **`Threshold`** — per-pixel YIQ color-distance sensitivity (0 exact … 1 anything). Decides whether
-  a pixel counts as different *at all* before the ratio is applied. Default `0.2`.
-- **`Mask` / `MaskColor`** — overpaint dynamic regions so they can never diff.
-- **`Animations = ScreenshotAnimations.Disabled`** — sets CSS animations/transitions to end state.
-- **`Caret = ScreenshotCaret.Hide`** — hides the text caret (a classic 1px flake).
-- **`StylePath`** — inject a CSS file to neutralize elements (carets, live widgets) across every shot.
-- **`FullPage = true`** — whole scrollable page (flakier; mask aggressively).
-- **`Clip`** — capture a fixed rectangle.
+## 8. The nightly visual job
 
-`StylePath` for repo-wide stabilization:
-
-```css
-/* snapshot.css */
-*, *::before, *::after { transition: none !important; animation: none !important; }
-[data-testid="live-clock"], .chat-widget { visibility: hidden !important; }
-```
-
-```csharp
-await Expect(Page).ToHaveScreenshotAsync("home.png", new()
-{
-    StylePath = "snapshot.css",
-    Animations = ScreenshotAnimations.Disabled,
-    MaxDiffPixelRatio = 0.01,
-});
-```
-
-## Core pattern 3 — `ToMatchSnapshotAsync()` for bytes you produced
-
-Use only when you own the buffer — not for live page captures (those should use
-`ToHaveScreenshotAsync()` so they stabilize and retry).
-
-```csharp
-[Test]
-public async Task Should_Match_GeneratedInvoicePdf_Baseline()
-{
-    var pdf = await Page.PdfAsync(new() { Format = "A4" });
-    await Expect(Page).ToMatchSnapshotAsync(pdf, new() { Name = "invoice.pdf" });
-}
-```
-
-`ToMatchSnapshotAsync()` does **not** auto-retry and does **not** stabilize. For live pages
-`ToHaveScreenshotAsync()` is strictly better.
-
-## The CI baseline discipline (the part everyone gets wrong)
-
-Baselines are platform-specific. The only reliable workflow:
-
-1. **Never commit baselines generated on your dev box.** A `...-darwin.png` baseline is useless to a
-   Linux runner.
-2. **Generate/update baselines inside the same container CI uses.** Run CI's image locally, or a
-   dedicated update step in CI. **.NET has no `--update-snapshots` flag** — you regenerate by
-   **deleting the baseline PNG and re-running** (a missing baseline is auto-created on the next run):
-
-   ```bash
-   # Reproduce CI's exact rendering via the official image (tag must match your Microsoft.Playwright version):
-   docker run --rm -v "$(pwd):/work" -w /work mcr.microsoft.com/playwright/dotnet:v1.50.0-noble bash -c '
-     rm -f Tests/*.cs-snapshots/*-linux.png   # drop stale baselines
-     dotnet test                              # missing baselines are regenerated, then compared
-   '
-   ```
-
-3. **Regeneration discipline.** Delete-and-rerun deliberately when a change is *intended*, review the
-   regenerated PNGs in the diff, and commit them in the same PR as the UI change. Never automate
-   blanket baseline deletion in the normal test run — that makes every run "pass".
-4. **Gate regeneration behind a manual/labelled CI job**, not a local push. See the github-actions
-   cross-link for the gated `update-baselines` job pattern.
-
-On a normal failure Playwright writes `*-actual.png`, `*-expected.png`, `*-diff.png` into the test
-output. Upload them as artifacts and attach to the report:
+The job runs §7's command without `UPDATE_BASELINES`. It is a `docker run` step on the runner, not a
+container job, so the credential fetch stays on the runner, where the cloud CLI is (plan D60):
 
 ```yaml
-# inside your test job (see qa-ci-pipelines-dotnet for the full pipeline)
-- name: Upload visual diff artifacts
-  if: failure()
-  uses: actions/upload-artifact@v4
-  with:
-    name: playwright-visual-diffs
-    path: '**/test-results/**/*-{actual,expected,diff}.png'
-    retention-days: 7
+  visual:
+    if: github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v6
+      - uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+      - name: Fetch test credentials from Key Vault
+        run: |
+          echo "BASE_URL=$(az keyvault secret show --vault-name kv-qa --name base-url --query value -o tsv)" >> "$GITHUB_ENV"
+          echo "E2E_USER=$(az keyvault secret show --vault-name kv-qa --name e2e-user --query value -o tsv)" >> "$GITHUB_ENV"
+          PASSWORD=$(az keyvault secret show --vault-name kv-qa --name e2e-password --query value -o tsv)
+          echo "::add-mask::$PASSWORD"
+          echo "E2E_PASSWORD=$PASSWORD" >> "$GITHUB_ENV"
+      - name: Visual tests in the pinned image
+        run: |
+          docker run --rm --ipc=host -v "$PWD":/work -w /work \
+            -e BASE_URL -e E2E_USER -e E2E_PASSWORD \
+            mcr.microsoft.com/playwright/dotnet:v1.63.0-noble \
+            dotnet test UiTests -c Release --filter TestCategory=visual
+      - name: Upload visual evidence
+        uses: actions/upload-artifact@v5
+        if: failure()
+        with:
+          name: playwright-artifacts-visual
+          path: UiTests/bin/Release/net10.0/playwright-artifacts
+          retention-days: 14
+      - name: Upload Allure results
+        uses: actions/upload-artifact@v5
+        if: ${{ !cancelled() }}
+        with:
+          name: allure-results-visual
+          path: UiTests/bin/Release/net10.0/allure-results
+          retention-days: 30
 ```
 
-Attach the diff into Allure so reviewers see it inline (cross-link `qa-test-reports-dotnet`):
+- **GitHub Actions** — as above; the job sits in the workflow `qa-ci-pipelines-dotnet` gates to the schedule.
+  A `container:` job would run `azure/login` inside the image, which has no Azure CLI.
+- **Azure Pipelines** — the same `docker run` in a `script` step on the Microsoft-hosted `ubuntu-latest` agent,
+  after the `AzureCLI@2` fetch; a secret variable reaches the step only through its `env:` mapping
+  (`E2E_PASSWORD: $(E2E_PASSWORD)`).
+- **GitLab CI** — `image: mcr.microsoft.com/playwright/dotnet:v1.63.0-noble` with `rules: - if:
+  $CI_PIPELINE_SOURCE == "schedule"`; the `script` is the `dotnet test` line. The image has no cloud CLI, so
+  `BASE_URL`, `E2E_USER` and `E2E_PASSWORD` come from masked, protected CI/CD variables.
+- **The PR gate excludes the category**: its filter carries `&TestCategory!=visual` beside
+  `TestCategory!=Flaky` (`qa/cicd/dotnet/skills/ci-pipelines`).
 
-```csharp
-[TearDown]
-public void AttachVisualDiff()
-{
-    if (TestContext.CurrentContext.Result.Outcome.Status != NUnit.Framework.Interfaces.TestStatus.Failed)
-        return;
-    foreach (var png in Directory.EnumerateFiles(TestContext.CurrentContext.WorkDirectory, "*-diff.png",
-                 SearchOption.AllDirectories))
-        AllureApi.AddAttachment("visual-diff", "image/png", png);
-}
-```
+## 9. A generated PDF is not a visual target
+
+`Page.PdfAsync()` embeds a creation date and a document ID, so its bytes never equal a baseline, and a byte
+comparison is no visual check. Assert the document's text with a PDF library in the suite that owns the
+document, or screenshot the HTML the PDF is printed from — with this reference's helper.
 
 ## Anti-patterns
 
-- **Committing dev-box baselines.** `...-darwin.png` fails/flakes on Linux CI. *Fix:* the Docker
-  delete-and-rerun workflow above.
-- **`await Page.WaitForTimeoutAsync(500)` before the screenshot.** Flaky and slow. *Fix:* wait on a
-  condition (`document.fonts.ready`, spinner hidden, `Locator.WaitForAsync`), then assert —
-  `ToHaveScreenshotAsync()` auto-retries the rest.
-- **Full-page screenshots of a page full of dynamic data.** Guaranteed flake. *Fix:* screenshot the
-  **element**; `Mask` the dynamic bits; `StylePath` to neutralize globally.
-- **Cranking `MaxDiffPixelRatio` to 0.2 to "make it pass".** Blinds the test to real regressions.
-  *Fix:* `Mask` the specific flaky region; keep the ratio tight (≤0.02).
-- **Auto-deleting baselines in the default test run.** Every run silently regenerates, so nothing is
-  caught. *Fix:* delete only via a deliberate, gated step.
-- **Using `ToMatchSnapshotAsync()` for a live page.** No stabilization, no retry → flaky. *Fix:*
-  `ToHaveScreenshotAsync()` for anything the browser renders.
-- **`.gitignore`-ing `*-snapshots/`.** Then CI has nothing to compare against. *Fix:* commit
-  baselines; they are versioned artifacts.
+- **A screenshot assertion on `Expect(Page)` or `Expect(locator)`, an options class for one, or a
+  delete-and-rerun baseline workflow.** None exists in Microsoft.Playwright. *Fix:* §4.
+- **A baseline made on a dev box or a CI runner without the image.** *Fix:* §7, nowhere else.
+- **A missing baseline that silently becomes the new baseline.** Every run then passes. *Fix:* fail on a
+  missing baseline; write baselines only with `UPDATE_BASELINES=1` in the image.
+- **Baselines read relative to `bin/`.** An update never reaches the repo. *Fix:* `ProjectPaths.Root` and the
+  `ProjectDirectory` metadata (§1).
+- **`Task.Delay` or `WaitForTimeoutAsync` before the capture.** *Fix:* the page object's ready signal, the
+  frozen clock, masks.
+- **A full-page capture of a data-heavy page.** *Fix:* the element, with its rotating regions masked.
+- **Raising the allowance until it passes.** *Fix:* mask the noisy region; keep the tolerance tight.
+- **A `ContextOptions()` override that returns `new()`, or a hard-coded `BaseURL`.** *Fix:* amend
+  `base.ContextOptions()`; `BASE_URL` reaches it through `BaseTest`.
+- **`Playwright.CreateAsync()` or a second browser in a visual class.** *Fix:* derive from `BaseTest`.
+- **A `try`/`finally` or a re-attaching `[TearDown]` in the test class.** *Fix:* the helper attaches;
+  `BaseTest` keeps the failure evidence.
+- **A direct `SixLabors.ImageSharp` package reference.** *Fix:* reach it through the comparer (§1).
+- **Visual tests in the PR gate.** *Fix:* `[Category("visual")]` and the nightly job.
 
-## Examples
+## Rules
 
-**End-to-end: a component visual gate that survives CI.**
-
-```csharp
-[TestFixture]
-[Parallelizable(ParallelScope.Self)]
-public sealed class PricingTests : BaseVisualTest
-{
-    [Test]
-    public async Task Should_Match_PricingTableBaseline_When_PlansLoaded()
-    {
-        var pricing = new PricingPage(Page);
-        await pricing.GotoAsync();
-        await pricing.WaitUntilPlansRenderedAsync();          // condition, not sleep
-        await Page.EvaluateAsync("document.fonts.ready");      // fonts settled
-
-        await Expect(pricing.Table).ToHaveScreenshotAsync("pricing-table.png", new()
-        {
-            Mask = new[] { pricing.PromoBanner },   // rotates daily — never diff it
-            MaxDiffPixelRatio = 0.01,
-            Animations = ScreenshotAnimations.Disabled,
-            Caret = ScreenshotCaret.Hide,
-        });
-    }
-}
-```
-
-Baseline lifecycle for this test:
-1. Dev makes an intended CSS change.
-2. In the CI image, `rm` the stale `pricing-table-chromium-linux.png` and `dotnet test` to regenerate.
-3. Reviews the regenerated PNG in the diff, commits it with the CSS change.
-4. CI compares against it on every PR; an *unintended* change now fails with a `-diff.png` artifact.
-
-## Rules (hard constraints)
-
-- Stabilize **application** state on a condition before asserting; never `WaitForTimeoutAsync`. Let
-  `ToHaveScreenshotAsync()` auto-retry the rendering settle.
-- Prefer **element** screenshots over full-page; `Mask` every dynamic region.
-- Prefer `MaxDiffPixelRatio` over `MaxDiffPixels`; keep tolerance tight and mask noise rather than
-  loosening the budget.
-- **Generate baselines inside the CI container**, never on the dev box. Baselines are committed,
-  versioned build artifacts — not secrets, not `.gitignore`-d.
-- **.NET has no `--update-snapshots`** — regenerate by deleting the baseline and re-running, as a
-  deliberate, reviewed, gated action; never blanket-delete in the default test run.
-- On failure, upload `*-actual/-expected/-diff.png` as artifacts and attach the diff to the report.
-- `ToHaveScreenshotAsync()` for browser-rendered content; `ToMatchSnapshotAsync()` only for bytes you
-  produced.
-- Page objects expose intent + locators; the test owns the visual assertion. No selectors in tests.
-- Async all the way — `await` every Playwright call; no `.Result` / `.Wait()`.
+- .NET has no screenshot assertion: capture with `Locator.ScreenshotAsync`, compare with
+  `Codeuctivity.ImageSharpCompare` 4.1.390, assert the percentage with NUnit and a message.
+- Baselines live in `UiTests/Baselines/<os>-<browser>/`, are committed, and are written only in
+  `mcr.microsoft.com/playwright/dotnet:v1.63.0-noble`, by a person, with `UPDATE_BASELINES=1`.
+- Stabilize through the page object, the frozen clock, `ContextOptions()` and masks — never a sleep.
+- Actual and diff images land in `<WorkDirectory>/playwright-artifacts/<Class>.<Test>.{actual,diff}.png` and
+  are shown with `AllureApi.AddScreenDiff(expected, actual, diff)`.
+- Visual classes carry `[Category("visual")]` and run nightly.
 
 ## Cross-references
 
-- `qa-visual-regression-typescript` — the **canonical** skill this ports
-  (`@playwright/test` `toHaveScreenshot()`, `--update-snapshots`, `playwright.config.ts` defaults).
-- `qa-visual-regression-java` — the Java / TestNG sibling
-  (`assertThat(page).hasScreenshot()`).
-- `qa-ui-test-writer-playwright-dotnet` — the page objects/specs these assertions layer on top of.
-- `references/percy.md` (`percy`, next) — hosted baseline management + PR review UI.
-- `references/applitools.md` — visual-AI diffing + cross-browser grid.
-- `qa-ci-pipelines-dotnet` — artifact upload, the container-baseline discipline, the
-  gated `update-baselines` job.
-- `qa-test-reports-dotnet` — attach `-diff.png` images to the test report.
+- `qa/dotnet/skills/ui-test-author/playwright` — `BaseTest`, page objects, `Directory.Packages.props` and its
+  Versions table.
+- `qa/dotnet/skills/ui-test-author/playwright/references/emulation-and-mobile-web.md` — viewport, media
+  features and `Page.Clock`.
+- `qa/dotnet/skills/evidence-capture` — screenshot options in full, the failure evidence, `AddScreenDiff`.
+- `references/percy.md`, `references/applitools.md` — the hosted siblings, which remove the pinned-image
+  discipline.
+- `qa/cicd/dotnet/skills/ci-pipelines` — the UI job, its artifact upload and the schedule gate.
+- `qa/reporting/dotnet/skills/test-reports` — Allure.NUnit wiring.
+- `qa-visual-regression-typescript` — the Node runner's `toHaveScreenshot`, which this lane cannot use;
+  `qa-visual-regression-java` — the same lane with a Java comparator.

@@ -1,388 +1,318 @@
-# Accessibility Testing — axe-core + Playwright (.NET / NUnit)
+# Accessibility Testing — axe-core + Playwright (.NET 10 / Microsoft.Playwright 1.63 + NUnit)
 
-The .NET port of the canonical `qa-accessibility-testing-typescript`. Same axe-core rule
-engine, same `violations`-as-the-gate model, same triage discipline — re-expressed in
-`Deque.AxeCore.Playwright` + `Microsoft.Playwright.NUnit` idioms, async all the way down.
+`Deque.AxeCore.Playwright` runs the axe-core rule engine **inside your Playwright run**, against the live DOM,
+and returns an `AxeResult` you assert on. It is an **assertion layer** on page objects that already exist: a
+scan is added to a flow the page objects drive. axe runs entirely in the browser — no SaaS, no agent, no API
+key.
 
-axe-core is the de-facto accessibility rule engine; `Deque.AxeCore.Playwright` runs it **inside your
-Playwright run**, against the live DOM, and returns a structured `AxeResult` you assert on. This is an
-**assertion layer** on top of the page objects and specs `qa-ui-test-writer-playwright-dotnet` already
-authored — you inject an axe scan into an already-authored flow. You do **not** write new page objects
-here.
+> **What automation can and cannot do.** axe catches the machine-checkable share of WCAG — missing `alt`,
+> unlabelled inputs, contrast, invalid ARIA, duplicate ids. It is a **floor, not proof**: keyboard traps,
+> focus order and screen-reader comprehension still need manual and assistive-technology testing
+> (`qa-exploratory-charter-writer`). A green scan means "no automated regressions", never "accessible".
 
-Unlike the visual-regression family (free / Percy / Applitools), axe runs **entirely
-in-browser**: there is **no SaaS, no agent, and no API key**. The gate is local, deterministic, and free
-— `Violations` is empty or it isn't.
+## 1. Setup
 
-> **What automation can and can't do.** axe-core catches roughly **30–40%** of WCAG issues — the
-> machine-checkable ones (missing `alt`, unlabeled inputs, color contrast, bad ARIA, duplicate IDs). It
-> is a **floor, not proof of accessibility**: keyboard traps, focus order, screen-reader comprehension,
-> and meaningful alt text still need manual + assistive-tech testing. Cross-link the manual/exploratory
-> angle (`qa-exploratory-charter-writer`). Treat a green axe run as "no *automated* regressions," never
-> "accessible."
-
-## Setup
+`Deque.AxeCore.Playwright` **4.13.0** (checked on NuGet on 2026-10-11: the latest stable; a 4.14.0 alpha
+exists) is already in the writer's `Directory.Packages.props`, so the project only references it:
 
 ```xml
-<!-- Tests.csproj -->
 <ItemGroup>
-  <PackageReference Include="Microsoft.Playwright.NUnit" Version="1.50.0" />
-  <PackageReference Include="Deque.AxeCore.Playwright" Version="4.*" />
-  <PackageReference Include="NUnit" Version="4.*" />
-  <PackageReference Include="NUnit3TestAdapter" Version="4.*" />
-  <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.*" />
+  <PackageReference Include="Deque.AxeCore.Playwright" />
 </ItemGroup>
 ```
 
-No config file, no service, no token. `AxeBuilder` bundles axe-core and injects it into the page at scan
-time; the scan happens in the browser you already launched. (The package versions track axe-core's
-major.minor — `Deque.AxeCore.Playwright` 4.11.x bundles axe-core 4.11.x.)
+Exact, never a floating `4.*`. The package targets .NET Standard 2.1, bundles axe-core 4.13 and injects it at
+scan time; it brings `Deque.AxeCore.Commons` 4.13.0 (the result and option types). Playwright, NUnit and
+Allure.NUnit come from the writer's project (`qa/dotnet/skills/ui-test-author/playwright/assets/UiTests.csproj`).
 
-## The AxeBuilder model
+## 2. The API — extension methods, no builder
 
-`await new AxeBuilder(page).AnalyzeAsync()` injects axe-core, runs it against the current DOM, and
-returns an `AxeResult` with four arrays:
+The .NET package exposes **extension methods**, not a builder class (read from
+`dequelabs/axe-core-nuget` at the 4.13.0 release, `packages/playwright/src`). The builder you know from the
+TypeScript (`new AxeBuilder({ page })`) and Java (`new AxeBuilder(page)`) packages does not exist in .NET:
 
-- **`Violations`** — failed rules. **This is the gate.** Each `AxeResultItem` has `Id` (rule id, e.g.
-  `color-contrast`), `Impact` (`minor` | `moderate` | `serious` | `critical`), `Help`, `HelpUrl`, and
-  `Nodes` — each `AxeResultNode` carries the failing `Target` selector(s) and a `FailureSummary` telling
-  you how to fix it.
-- **`Passes`** — rules that passed (evidence, not usually asserted on).
-- **`Incomplete`** — rules axe **could not decide** automatically (e.g. a contrast check over a
-  background image). **Not a pass** — these need manual review. Don't silently ignore them.
-- **`Inapplicable`** — rules with no matching elements on the page.
+| Call | Scans |
+|---|---|
+| `await page.RunAxe(AxeRunOptions? options = null)` | The whole page |
+| `await page.RunAxe(AxeRunContext context, AxeRunOptions? options = null)` | The page, limited by `Include` / `Exclude` CSS selectors (`List<AxeSelector>`) |
+| `await locator.RunAxe(AxeRunOptions? options = null)` | The elements the locator matches — the component scan |
 
-> There is also an extension shortcut, `await page.RunAxe()`, which returns the same `AxeResult`. Prefer
-> the explicit `new AxeBuilder(page)` form — it's the one that takes scoping/tag calls and ports
-> identically to TS/Java.
+`RunAxeLegacy` exists on both and is marked obsolete — "a last resort", in Deque's words; never use it.
 
-The assertion is one logical assertion per the global rules:
+`AxeRunOptions` (namespace `Deque.AxeCore.Commons`) picks the ruleset:
 
-```csharp
-Assert.That(result.Violations, Is.Empty);
-```
+| Property | Meaning |
+|---|---|
+| `RunOnly = RunOnlyOptions.Tags("wcag2a", …)` | Only rules with these tags — picking the tags is picking the WCAG level. `RunOnlyOptions.Rules(...)` names rules instead |
+| `Rules = new Dictionary<string, RuleOptions> { ["rule-id"] = new() { Enabled = false } }` | Turns individual rules off (or on) on top of `RunOnly` |
+| `ResultTypes`, `Iframes`, `Selectors`, `XPath`, `Ancestry`, `FrameWaitTime` | Raw axe run options — reach for them last |
 
-## Core pattern — scan injected into a page-object-driven flow
+The result, `AxeResult`:
 
-The page object exposes intent and drives the app to the state under test; the test stabilizes on a
-condition, then scans. No selectors in the test, no fixed waits — axe analyzes the **live DOM at call
-time**, so the page must be in its final state before `AnalyzeAsync()`. Inherit `PageTest` for the
-managed `Page`.
+| Member | Meaning |
+|---|---|
+| `Violations` | Failed rules — **the gate** |
+| `Incomplete` | Rules axe could not decide (contrast over an image). **Not a pass** — a person reviews them |
+| `Passes` / `Inapplicable` | Evidence; rarely asserted |
 
-```csharp
-// Pages/CheckoutPage.cs
-using Microsoft.Playwright;
+Each `AxeResultItem` has `Id` (`color-contrast`), `Impact` (`minor` · `moderate` · `serious` · `critical`),
+`Help`, `HelpUrl`, `Tags` and `Nodes`. Each `AxeResultNode` has `Target` — an `AxeSelector` whose
+`ToString()` is the selector path, through frames and shadow roots — `Html` and the `Any` / `All` / `None`
+checks that explain the failure.
 
-public sealed class CheckoutPage
-{
-    private readonly IPage _page;
-    public ILocator Form => _page.GetByTestId("checkout-form");
+## 3. The native assertions come first
 
-    public CheckoutPage(IPage page) => _page = page;
+axe finds rule violations; it does not know what a control *should* be called. Assert the intended contract
+with `ToHaveAccessibleNameAsync`, `ToHaveAccessibleDescriptionAsync`, `ToHaveAccessibleErrorMessageAsync`,
+`ToHaveRoleAsync` and `ToMatchAriaSnapshotAsync` from
+`qa/dotnet/skills/ui-test-author/playwright/references/assertions.md` §1–§2. A form gets both: an axe scan per
+state, and a native assertion for the error message the story specifies (§5).
 
-    public Task GotoAsync() => _page.GotoAsync("/checkout");
+## 4. The shared helper — `Support/A11yScan.cs`
 
-    /// <summary>Resolves once the form is interactive — a condition, never a fixed wait.</summary>
-    public Task WaitUntilReadyAsync() =>
-        Form.GetByRole(AriaRole.Button, new() { Name = "Pay now" })
-            .WaitForAsync(new() { State = WaitForSelectorState.Visible });
-}
-```
+The conformance target is **WCAG 2.2 AA**, set once. Every scan attaches its violations and its incompletes
+**before** the test asserts, so a failure carries the evidence and incompletes are visible on every run.
 
 ```csharp
-// Tests/CheckoutAccessibilityTests.cs
-using Deque.AxeCore.Playwright;
-using Microsoft.Playwright.NUnit;
-using NUnit.Framework;
-
-[TestFixture]
-public class CheckoutAccessibilityTests : PageTest
-{
-    [Test]
-    public async Task Should_have_no_a11y_violations_When_checkout_form_loaded()
-    {
-        var checkout = new CheckoutPage(Page);
-        await checkout.GotoAsync();
-        await checkout.WaitUntilReadyAsync();              // stabilize on a condition first…
-
-        var result = await new AxeBuilder(Page)            // …then scan the live DOM
-            .WithTags(new[] { "wcag2a", "wcag2aa", "wcag21a", "wcag21aa" })
-            .AnalyzeAsync();
-
-        Assert.That(result.Violations, Is.Empty);          // one logical assertion = the gate
-    }
-}
-```
-
-## Scoping + rule selection
-
-Scope the scan and pick which rules count — the analogue of `Target.Region` / match levels in the
-visual family, but here it's *which rules*, not *how lenient*:
-
-```csharp
-var result = await new AxeBuilder(Page)
-    .Include("#checkout-form")           // scan only this component
-    .Exclude(".third-party-widget")      // skip an embed you don't own
-    .WithTags(new[] { "wcag2aa", "wcag21aa" })   // the WCAG level that IS your gate
-    .AnalyzeAsync();
-```
-
-- **`.Include(selector)` / `.Exclude(selector)`** — scan a component, not the whole page. Cleaner
-  failures, and lets you gate a new component to zero while the legacy page still has debt. `.Exclude`
-  third-party iframes/widgets you can't fix.
-- **`.WithTags([...])`** — pick the ruleset = pick which WCAG level is your gate. Common tags:
-  `wcag2a`, `wcag2aa`, `wcag21a`, `wcag21aa`, `wcag22aa`, plus `best-practice`. **Decide your
-  conformance target once** and apply the same tags everywhere — `wcag2a wcag2aa wcag21a wcag21aa` is
-  the common "AA" gate.
-- **`.WithRules([...])` / `.DisableRules([...])`** — surgical control of individual rule ids; overrides
-  tags for those rules.
-- **`.Options(...)`** — raw axe-core run options (overrides `WithRules`/`WithTags`); reach for it last.
-
-### A shared AxeBuilder factory (DRY the config)
-
-Configure tags/excludes once via an injected helper so every test stays clean and consistent — the
-constructor-injection-friendly analogue of the TS fixture:
-
-```csharp
-// Support/AxeScanner.cs
-using Deque.AxeCore.Playwright;
-using Microsoft.Playwright;
-
-public static class AxeScanner
-{
-    private static readonly string[] WcagAa = { "wcag2a", "wcag2aa", "wcag21a", "wcag21aa" };
-
-    /// <summary>Org-wide tags + excludes in one place — call .Include(...) per test as needed.</summary>
-    public static AxeBuilder ForPage(IPage page) =>
-        new AxeBuilder(page).WithTags(WcagAa).Exclude("#third-party-chat");
-}
-```
-
-```csharp
-var result = await AxeScanner.ForPage(Page).Include("#dashboard").AnalyzeAsync();
-Assert.That(result.Violations, Is.Empty);
-```
-
-## The triage reality — a real app has pre-existing violations
-
-A green-field `Is.Empty` only works on a clean page. Real apps have debt. The disciplined patterns, in
-order of preference:
-
-**1. Gate *new* violations only — baseline the known set.** Fail only on additions. This stops the
-bleeding without a big-bang fix, and every new feature ships clean:
-
-```csharp
-[Test]
-public async Task Should_introduce_no_new_a11y_violations_When_profile_loaded()
-{
-    await Page.GotoAsync("/profile");
-    var result = await AxeScanner.ForPage(Page).AnalyzeAsync();
-
-    // Known debt, each with a tracking ticket — shrink this set, never grow it.
-    var known = new HashSet<string> { "color-contrast" /* JIRA-1234 */, "landmark-one-main" /* JIRA-1235 */ };
-    var newViolations = result.Violations.Where(v => !known.Contains(v.Id)).ToList();
-
-    Assert.That(newViolations, Is.Empty);    // gate additions; legacy debt tracked separately
-}
-```
-
-**2. Disable a *documented* false-positive — never blanket-disable.** If a rule genuinely misfires on
-your markup, `.DisableRules(...)` with a ticket reference in a comment. Disabling to make a real failure
-go away is hiding a bug:
-
-```csharp
-var result = await new AxeBuilder(Page)
-    .DisableRules(new[] { "scrollable-region-focusable" })   // axe false-positive on virtualized list — JIRA-2001
-    .AnalyzeAsync();
-```
-
-**3. Don't silently pass `Incomplete`.** axe couldn't decide — surface it for manual review rather than
-treating it as green:
-
-```csharp
-if (result.Incomplete.Length > 0)
-    TestContext.Out.WriteLine($"axe needs manual review for: {string.Join(", ", result.Incomplete.Select(i => i.Id))}");
-```
-
-**4. Step the rollout by impact.** When even the baseline is huge, gate on the worst first and ratchet
-down over time:
-
-```csharp
-var blocking = result.Violations.Where(v => v.Impact is "critical" or "serious").ToList();
-Assert.That(blocking, Is.Empty);     // gate critical+serious now; widen to moderate/minor later
-```
-
-## A11y-specific stabilization — scan per state, not per page
-
-axe analyzes the **live DOM at call time**. So scan **after** the page reaches the state under test, and
-scan **once per meaningful state** — an open menu, an expanded accordion, a validation-error form are
-different DOMs with different a11y surfaces. Drive the state via page-object intent, wait on a condition,
-then scan:
-
-```csharp
-[Test]
-public async Task Should_have_no_a11y_violations_When_nav_menu_open()
-{
-    var nav = new NavBar(Page);
-    await Page.GotoAsync("/");
-    await nav.OpenAccountMenuAsync();                                 // page-object intent
-    await nav.AccountMenu.WaitForAsync(new() { State = WaitForSelectorState.Visible });  // condition
-
-    var result = await new AxeBuilder(Page).Include("[role='menu']").AnalyzeAsync();
-    Assert.That(result.Violations, Is.Empty);
-}
-```
-
-Never call a fixed `Task.Delay(...)` / `Thread.Sleep` before a scan — it races the DOM and makes the gate
-flaky.
-
-## Reporting the gate — violations into Allure, fail CI on non-empty
-
-axe gives you everything to make a failure actionable: rule id, impact, helpUrl, and the failing
-selector + fix summary. Attach the JSON and a readable summary to Allure so the report names the rule
-without anyone re-running locally (cross-link `qa-test-reports-dotnet`):
-
-```csharp
-// Support/A11yReport.cs
 using System.Text;
-using System.Text.Json;
 using Allure.Net.Commons;
 using Deque.AxeCore.Commons;
+using Deque.AxeCore.Playwright;
+using Microsoft.Playwright;
 
-public static class A11yReport
+namespace Example.UiTests.Support;
+
+public sealed class A11yScan(IPage page)
 {
-    public static void Attach(IReadOnlyList<AxeResultItem> violations)
+    public static readonly IReadOnlyDictionary<string, string> FalsePositives = new Dictionary<string, string>
     {
-        if (violations.Count == 0) return;
-        // Machine-readable: the full violation objects.
-        AllureApi.AddAttachment("axe-violations.json", "application/json",
-            Encoding.UTF8.GetBytes(JsonSerializer.Serialize(violations)));
-        // Human-readable: one line per failing node.
-        var sb = new StringBuilder();
-        foreach (var v in violations)
-        {
-            sb.AppendLine($"[{v.Impact}] {v.Id}: {v.Help}").AppendLine($"  {v.HelpUrl}");
-            foreach (var n in v.Nodes) sb.AppendLine($"  {string.Join(" ", n.Target.Selectors)}");
-        }
-        AllureApi.AddAttachment("axe-summary.txt", "text/plain", Encoding.UTF8.GetBytes(sb.ToString()));
+        ["scrollable-region-focusable"] = "A11Y-2001: misfires on the virtualized order list",
+    };
+
+    public static readonly IReadOnlyDictionary<string, string> KnownViolations = new Dictionary<string, string>
+    {
+        ["color-contrast"] = "A11Y-1234",
+        ["landmark-one-main"] = "A11Y-1235",
+    };
+
+    private const string ThirdPartyChat = "[data-testid='Chat.Widget']";
+
+    public async Task<AxeResult> ScanPageAsync()
+    {
+        var result = await page.RunAxe(new AxeRunContext { Exclude = [new AxeSelector(ThirdPartyChat)] }, Options());
+        Attach(result);
+        return result;
+    }
+
+    public async Task<AxeResult> ScanAsync(ILocator region)
+    {
+        var result = await region.RunAxe(Options());
+        Attach(result);
+        return result;
+    }
+
+    public static IEnumerable<string> NewViolations(IEnumerable<AxeResultItem> violations) =>
+        violations.Select(rule => rule.Id).Where(id => !KnownViolations.ContainsKey(id));
+
+    public static IEnumerable<string> BlockingViolations(IEnumerable<AxeResultItem> violations) =>
+        violations.Where(rule => rule.Impact is "critical" or "serious").Select(rule => rule.Id);
+
+    private static AxeRunOptions Options() => new()
+    {
+        RunOnly = RunOnlyOptions.Tags("wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"),
+        Rules = FalsePositives.Keys.ToDictionary(rule => rule, _ => new RuleOptions { Enabled = false }),
+    };
+
+    private static void Attach(AxeResult result)
+    {
+        AttachRules("axe-violations", result.Violations);
+        AttachRules("axe-incomplete", result.Incomplete);
+    }
+
+    private static void AttachRules(string name, AxeResultItem[] rules)
+    {
+        var text = $"{rules.Length} rule(s)\n{string.Join('\n', rules.Select(Describe))}";
+        AllureApi.AddAttachment(name, "text/plain", Encoding.UTF8.GetBytes(text), ".txt");
+    }
+
+    private static string Describe(AxeResultItem rule) =>
+        $"[{rule.Impact}] {rule.Id}: {rule.Help} ({rule.HelpUrl})\n  {string.Join(", ", rule.Nodes.Select(node => node.Target))}";
+}
+```
+
+- **The tags are the WCAG level.** `wcag22aa` is the 2.2 AA addition; `best-practice` adds axe's own
+  recommendations beyond WCAG — add it here deliberately, never per test.
+- **`ScanAsync(ILocator)`** scans what a page object's locator matches, so the test passes
+  `_signupPage.Form`, never a selector, and the scan honours the project's test-id attribute.
+  **`ScanPageAsync()`** scans the page and excludes embeds you do not own; `AxeRunContext` takes CSS selectors
+  only, which is why the one exclusion is a constant here.
+- **A rule is disabled only for a documented false positive**, with its ticket and reason in
+  `FalsePositives`. Disabling a rule to hide a real failure hides a bug.
+- The two dictionaries are read-only constants, not shared mutable state.
+- The attachments are plain text — rule, impact, help link and the failing selectors — one pair per scan,
+  so the Allure report names the fix without a local re-run. Three strings to `AddAttachment` would be read
+  as a file path; the bytes overload takes an extension (`qa/dotnet/skills/evidence-capture/references/playwright.md` §6).
+
+## 5. The core pattern — one scan per state
+
+```csharp
+using Microsoft.Playwright;
+
+namespace Example.UiTests.Pages;
+
+public sealed class SignupPage
+{
+    private readonly IPage _page;
+    private readonly ILocator _submit;
+
+    public SignupPage(IPage page)
+    {
+        _page = page;
+        Form = page.GetByTestId("Signup.Form").Describe("Sign-up form");
+        Email = Form.GetByTestId("Signup.Email").Describe("Email field");
+        ErrorSummary = Form.GetByTestId("Signup.ErrorSummary").Describe("Error summary");
+        _submit = Form.GetByTestId("Signup.Submit");
+    }
+
+    public ILocator Form { get; }
+
+    public ILocator Email { get; }
+
+    public ILocator ErrorSummary { get; }
+
+    public async Task OpenAsync()
+    {
+        await _page.GotoAsync("/signup");
+        await Form.WaitForAsync();
+    }
+
+    public async Task SubmitEmptyAsync()
+    {
+        await OpenAsync();
+        await _submit.ClickAsync();
+        await ErrorSummary.WaitForAsync();
     }
 }
 ```
 
 ```csharp
-[Test]
-public async Task Should_have_no_a11y_violations_When_settings_loaded()
+using Example.UiTests.Pages;
+using Example.UiTests.Support;
+using NUnit.Framework;
+
+namespace Example.UiTests.Tests;
+
+[Category("a11y")]
+public class SignupAccessibilityTests : BaseTest
 {
-    await Page.GotoAsync("/settings");
-    var result = await new AxeBuilder(Page).WithTags(new[] { "wcag2aa" }).AnalyzeAsync();
-    A11yReport.Attach(result.Violations);     // attach BEFORE asserting, so a failure carries the report
-    Assert.That(result.Violations, Is.Empty);
+    private SignupPage _signupPage = null!;
+    private A11yScan _a11y = null!;
+
+    [SetUp]
+    public void CreatePages()
+    {
+        _signupPage = new SignupPage(Page);
+        _a11y = new A11yScan(Page);
+    }
+
+    [Test]
+    public async Task Should_HaveNoWcagViolations_When_SignupFormIsEmpty()
+    {
+        await _signupPage.OpenAsync();
+
+        var result = await _a11y.ScanAsync(_signupPage.Form);
+
+        Assert.That(result.Violations.Select(rule => rule.Id), Is.Empty, "axe violations in the empty sign-up form");
+    }
+
+    [Test]
+    public async Task Should_HaveNoWcagViolations_When_ValidationErrorsShow()
+    {
+        await _signupPage.SubmitEmptyAsync();
+
+        var result = await _a11y.ScanAsync(_signupPage.Form);
+
+        Assert.That(result.Violations.Select(rule => rule.Id), Is.Empty, "axe violations in the sign-up form with errors");
+    }
+
+    [Test]
+    public async Task Should_AnnounceEmailRequired_When_SignupSubmittedEmpty()
+    {
+        await _signupPage.SubmitEmptyAsync();
+
+        await Expect(_signupPage.Email, "email field after an empty submit").ToHaveAccessibleErrorMessageAsync("Enter an email address");
+    }
 }
 ```
 
-The CI job fails because the assertion fails — no extra wiring beyond uploading the Allure results and
-the attached JSON (cross-link `qa-ci-pipelines-dotnet`). There is **no API key to inject**
-here — call that out as the contrast with the visual-regression family (`percy` `PERCY_TOKEN` / `applitools`
-`APPLITOOLS_API_KEY`): axe runs in-browser, so the only thing CI needs is the artifact upload.
+- axe analyzes the DOM **at call time**, so the page object drives the state and waits on a condition first:
+  `OpenAsync()` returns once the form is visible, `SubmitEmptyAsync()` once the error summary is. An open menu,
+  an expanded accordion and a form showing errors are different DOMs with different accessibility
+  surfaces — scan each one. Never `Task.Delay` or `WaitForTimeoutAsync` before a scan.
+- Asserting the **rule ids** makes the failure message the list of ids; the attachment holds the detail. One
+  logical assertion per test, with a message naming the subject.
+- The third test is §3's native assertion: the scan proves no rule broke; this test proves the field says
+  what the story requires. `Expect(locator, "message")` [1.60] names the subject in the failure.
+- `GotoAsync("/signup")` resolves against `BaseTest`'s `BaseURL` from `BASE_URL`. The `a11y` category runs in
+  the normal UI job; it is only a filter handle.
+
+## 6. Triage — a real app has existing violations
+
+In order of preference:
+
+1. **Gate new violations only.** Known debt lives in `KnownViolations`, each with its ticket; the dictionary
+   only shrinks: `Assert.That(A11yScan.NewViolations(result.Violations), Is.Empty, "new axe violations on the dashboard")`.
+2. **Disable a documented false positive** through `FalsePositives` (§4), never in a test.
+3. **Read the incompletes.** `axe-incomplete` is attached on every scan; reviewing it is part of accepting a
+   new screen. There is no `if` and no `Console.WriteLine` for them in a test.
+4. **Ratchet by impact** when even the debt is large:
+   `Assert.That(A11yScan.BlockingViolations(result.Violations), Is.Empty, "critical and serious violations")`,
+   then widen to every impact once the backlog clears.
+
+## 7. CI
+
+The scans run inside the normal UI job (`qa/cicd/dotnet/skills/ci-pipelines`); the job fails because the
+assertion fails. A failed scan's test also gets `BaseTest`'s trace, screenshot and video in
+`<WorkDirectory>/playwright-artifacts/`, and the attachments travel in the Allure results. No secret is
+needed — the contrast with Percy's and Applitools' keys.
 
 ## Anti-patterns
 
-- **`Task.Delay(500)` / `Thread.Sleep` before `AnalyzeAsync()`.** axe scans the DOM at call time; a
-  sleep races it and is slow (and `Thread.Sleep` violates the global rules). *Fix:* wait on a condition
-  (`Locator.WaitForAsync`, spinner hidden), then scan.
-- **One scan per page, ignoring interactive states.** Menus/modals/error states have their own a11y
-  surface. *Fix:* scan per meaningful state after driving the app there.
-- **Blanket `.DisableRules` / cranking tags down to make it pass.** That hides real failures. *Fix:*
-  `.DisableRules` only a *documented* false-positive with a ticket; otherwise fix the markup.
-- **Treating `Incomplete` as a pass.** axe abstained; the issue may be real. *Fix:* surface incompletes
-  for manual review.
-- **Asserting on `result.Violations.Count == 0` with a bare bool.** The bool throws away the diff.
-  *Fix:* `Assert.That(result.Violations, Is.Empty)` — NUnit prints the collection contents on failure.
-- **Scanning the whole page when the feature under test is one component.** Legacy debt drowns the new
-  regression. *Fix:* `.Include(selector)` the component; gate it to zero.
-- **Blocking on the async SDK with `.Result` / `.GetAwaiter().GetResult()`.** Violates async-all-the-way.
-  *Fix:* `await AnalyzeAsync()`.
-- **Calling a green axe run "accessible."** It covers ~30–40% of WCAG. *Fix:* pair with manual +
-  assistive-tech testing; treat axe as the automated floor.
+- **`new AxeBuilder(...)` in .NET.** The package has no builder. *Fix:* `RunAxe` on the locator or the page.
+- **`RunAxeLegacy`.** Obsolete, to be removed. *Fix:* `RunAxe`.
+- **`Task.Delay` or `WaitForTimeoutAsync` before a scan.** *Fix:* the page object waits for the state.
+- **One scan per page, ignoring interactive states.** *Fix:* one scan per meaningful state.
+- **Tags that stop at WCAG 2.1 AA.** *Fix:* `wcag22aa` in `Options()`.
+- **Tags or exclusions repeated per test.** They drift. *Fix:* the helper.
+- **`if (result.Incomplete.Length > 0) TestContext.Out.WriteLine(…)`.** A condition in a test, and silent in
+  CI. *Fix:* the helper attaches the incompletes on every scan.
+- **`Page.GotoAsync` or `RunAxe` in a test.** *Fix:* the page objects and the helper.
+- **`Assert.That(result.Violations.Length == 0, Is.True)`.** The boolean drops the evidence. *Fix:* the rule
+  ids `Is.Empty`, with a message.
+- **A whole-page scan for one new component.** Legacy debt drowns the regression. *Fix:* `ScanAsync(locator)`.
+- **`.Result` or `.GetAwaiter().GetResult()` on `RunAxe`.** *Fix:* await it.
+- **A `Version=` on the `PackageReference` or a floating `4.*`.** *Fix:* `Directory.Packages.props` pins 4.13.0.
+- **A green scan reported as "accessible".**
 
-## Examples
+## Rules
 
-**End-to-end: a per-component a11y gate that ships new features clean against a legacy page.**
-
-```csharp
-// Tests/SignupAccessibilityTests.cs
-using Deque.AxeCore.Playwright;
-using Microsoft.Playwright.NUnit;
-using NUnit.Framework;
-
-[TestFixture]
-public class SignupAccessibilityTests : PageTest
-{
-    [Test]
-    public async Task Should_have_no_a11y_violations_When_signup_form_empty()
-    {
-        var signup = new SignupPage(Page);
-        await signup.GotoAsync();
-        await signup.WaitUntilReadyAsync();                       // condition, not sleep
-
-        var result = await AxeScanner.ForPage(Page).Include("#signup-form").AnalyzeAsync();
-        A11yReport.Attach(result.Violations);
-        Assert.That(result.Violations, Is.Empty);
-    }
-
-    [Test]
-    public async Task Should_have_no_a11y_violations_When_validation_errors_shown()
-    {
-        var signup = new SignupPage(Page);
-        await signup.GotoAsync();
-        await signup.SubmitEmptyAsync();                          // page-object intent
-        await signup.ErrorSummary.WaitForAsync(new() { State = WaitForSelectorState.Visible });
-
-        var result = await AxeScanner.ForPage(Page).Include("#signup-form").AnalyzeAsync();
-        A11yReport.Attach(result.Violations);
-        Assert.That(result.Violations, Is.Empty);                // error state has its own a11y surface
-    }
-}
-```
-
-Lifecycle for this gate:
-1. A dev adds a new field to the signup form.
-2. CI runs the E2E suite; the axe scan runs in the same browser, on the live DOM, per state.
-3. If the new field is missing a label, `Violations` is non-empty — the build fails with the rule id
-   (`label`), the failing selector, and the helpUrl in the Allure attachment.
-4. The dev fixes the markup; the gate goes green. Legacy debt on other pages is tracked separately by
-   the ticketed allow-list, shrinking over time.
-
-## Rules (hard constraints)
-
-- A11y testing is an **assertion layer** on existing page objects/specs — inject the axe scan, don't
-  author new page objects here. Page objects expose intent + locators; no selectors in tests.
-- One logical assertion per test: `Assert.That(result.Violations, Is.Empty)` (or a filtered subset).
-  Test names `Should_X_When_Y`.
-- Async all the way: `await AnalyzeAsync()` — never `.Result` / `.GetAwaiter().GetResult()`.
-- Stabilize on a **condition** (interactivity/visibility) before `AnalyzeAsync()`; never `Thread.Sleep`
-  / fixed `Task.Delay` — axe scans the live DOM at call time.
-- Scan **per meaningful state** (menu open, accordion expanded, errors shown), not once per page.
-- Pick the WCAG level deliberately via `.WithTags` and apply it consistently (a shared factory).
-- Triage with discipline: baseline known debt with **ticketed** allow-lists, `.DisableRules` only
-  *documented* false-positives, and surface `Incomplete` for manual review — never silently pass it.
-- **No SaaS, no API key** (axe runs in-browser) — the gate is local and deterministic. The only CI need
-  is the violations-JSON/Allure artifact upload.
-- axe covers ~30–40% of WCAG: it's the automated **floor**, not proof of accessibility. Pair with
-  manual + assistive-tech testing.
+- `Deque.AxeCore.Playwright` 4.13.0, pinned in `Directory.Packages.props`.
+- WCAG 2.2 AA tags, exclusions and false positives live in one helper, built in the class's `[SetUp]`.
+- One logical assertion per test: the violation ids `Is.Empty` with a message naming the subject, or a named
+  subset.
+- Stabilize through the page object before a scan; scan once per meaningful state.
+- Every scan attaches its violations and incompletes with `AllureApi.AddAttachment(name, type, bytes, ".txt")`.
+- Known debt is ticketed and only shrinks; false positives are documented.
+- Tests reach pages through page objects and pass locators, never selectors.
+- Pair every scan of a story's form with the native assertion for what the story specifies.
 
 ## Cross-references
 
-- `qa-accessibility-testing-typescript` — the **canonical** skill, TS / Vitest+Playwright
-  (`new AxeBuilder({ page }).analyze()`, `results.violations`).
-- `qa-accessibility-testing-java` — same skill, Java / TestNG
-  (`com.deque.html.axe-core:playwright`, `new AxeBuilder(page).analyze()`, `results.getViolations()`).
-- `references/lighthouse-ci.md` — the audit/score sibling: full-page
-  perf/SEO/PWA + a11y **score** threshold, a separate Lighthouse pass. Run both: axe gates, Lighthouse
-  trends.
-- `qa-ui-test-writer-playwright-dotnet` — the page objects/specs the axe scan is injected into. Author
-  the flow there; add the a11y scan here.
-- `qa-ci-pipelines-dotnet` — where the job fails on the assertion and the violations JSON
-  is uploaded as an artifact. Note: **no secret to inject** (contrast `percy`/`applitools`).
-- `qa-test-reports-dotnet` — attach the violations JSON + readable summary to the report.
-- `qa-exploratory-charter-writer` — the manual/assistive-tech testing that covers the ~60% axe can't.
+- `references/lighthouse-ci.md` — the score-and-trend sibling.
+- `qa/dotnet/skills/ui-test-author/playwright` — `BaseTest`, page objects, `references/assertions.md`.
+- `qa/dotnet/skills/evidence-capture` — the failure evidence beside the scan's attachments.
+- `qa/cicd/dotnet/skills/ci-pipelines` — the UI job the scans run in.
+- `qa/reporting/dotnet/skills/test-reports` — Allure.NUnit wiring.
+- `qa-accessibility-testing-typescript` (`@axe-core/playwright`), `qa-accessibility-testing-java`
+  (`com.deque.html.axe-core:playwright`).
+- `qa-exploratory-charter-writer` — the manual and assistive-technology testing axe cannot do.

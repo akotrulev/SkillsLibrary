@@ -1,99 +1,59 @@
-# Accessibility Testing — Lighthouse CI (.NET / NUnit)
+# Accessibility Testing — Lighthouse (.NET 10 / Microsoft.Playwright 1.63 + NUnit)
 
-The .NET port of the canonical `qa-accessibility-testing-typescript`. Same Lighthouse
-auditing model, same score-threshold gate, same perf-variance discipline — but re-expressed for a .NET
-shop, which forces the honest shape of this node.
+Lighthouse is Google's Chrome auditor. It scores a page per **category** — `accessibility`,
+`best-practices`, `seo`, `performance` — from 0 to 1, and a gate fails when a score drops below its threshold.
+It is the **broad-audit and trend** sibling of `references/axe-playwright.md`: axe asserts the exact failing
+rules **inside** the functional run; Lighthouse runs a separate full-page pass and gives one number per
+category. Its accessibility category runs axe-core underneath, so a perfect score is still the automated
+floor, not proof.
 
-Lighthouse is Google's headless-Chrome auditing tool; **Lighthouse CI** runs it as a gated step that
-produces a **category score** (0–1) for `performance`, `accessibility`, `best-practices`, `seo`, and
-`pwa`, and **fails the build when a score drops below a threshold**. This is the **broad-audit +
-score-trend** sibling of `references/axe-playwright.md`: where axe gives you
-per-component `Violations` to assert empty **inside** your functional E2E run, Lighthouse runs a
-**separate full-page pass** and gives you one number per category to gate and trend. Run both.
+> **Lighthouse is a Node tool.** There is no NuGet Lighthouse package. .NET runs it as a pipeline step
+> (`lhci autorun`) or as a subprocess (`npx lighthouse`) from a test, and parses the JSON report.
 
-> **Lighthouse a11y is axe-powered — but reported as a *score*, not as `Violations`.** Under the hood
-> Lighthouse's accessibility category runs axe-core, yet it surfaces the result as
-> `categories.accessibility.score` (a 0–1 number derived from weighted audit pass/fail), **not** as an
-> assertable list of failing nodes. That is exactly why you run both: axe-playwright gives you the
-> per-element rule id + selector to *fix*; Lighthouse CI gives you the whole-page *trend* and the
-> perf/SEO/PWA context axe doesn't cover. A Lighthouse a11y score is still the automated **floor**
-> (~30–40% of WCAG) — pair with manual + assistive-tech testing (`qa-exploratory-charter-writer`).
+## 1. Setup
 
-> **⚠️ Node-only tool — the defining nuance of this node.** Lighthouse is a **Node** tool. **There is no
-> native .NET Lighthouse SDK and no NuGet binding.** So unlike axe-playwright, where
-> `Deque.AxeCore.Playwright` was a first-class .NET package, here .NET is a **thinner, CLI-driven** stack:
-> you **invoke the Lighthouse/lhci CLI as a subprocess** (`npx lhci autorun` / `npx lighthouse <url>
-> --output=json`) and **parse the JSON report** (`categories.*.score`) to gate the pipeline. The
-> structure (collect → assert on score → report) ports from the TS canonical; the *invocation* is a
-> `Process`, not an SDK call. Say this plainly to anyone reaching for a NuGet — there isn't one.
-
-## Setup
-
-There is no NuGet package — Lighthouse runs via Node. Your CI image needs Node + Chrome; install the CLI
-once per job:
+Node 24 on the runner, plus the two CLIs as exact dev dependencies in the repository's `package.json`
+(checked on npm on 2026-10-11; `lighthouse` 13.5.0 needs Node ≥ 22.19):
 
 ```bash
-npm install --save-dev @lhci/cli      # the CI runner: collect → assert → upload (language-agnostic)
-# stateful-page audits shell out to: npx lighthouse <url> --output=json
+npm install --save-dev --save-exact @lhci/cli@0.15.1 lighthouse@13.5.0
 ```
 
-Your test project just needs Playwright + NUnit + a JSON parser (`System.Text.Json`, already in the BCL):
+`@lhci/cli` needs no key for the `temporary-public-storage` upload target. The only optional secret is an
+LHCI-server token (`LHCI_TOKEN`) — from the secret store, never committed or logged. The PWA category was
+removed in Lighthouse 12; never configure or assert it. The JSON parsing below uses `System.Text.Json` from the
+BCL, so no package is added.
 
-```xml
-<!-- Tests.csproj -->
-<ItemGroup>
-  <PackageReference Include="Microsoft.Playwright.NUnit" Version="1.50.0" />
-  <PackageReference Include="NUnit" Version="4.*" />
-  <PackageReference Include="NUnit3TestAdapter" Version="4.*" />
-  <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.*" />
-</ItemGroup>
-```
+## 2. Two ways to run it
 
-`@lhci/cli` needs no API key for the default `temporary-public-storage` upload target. The only optional
-secret is an **LHCI-server token** (`LHCI_TOKEN`) — read it lazily from the environment, never commit it.
+| Way | What it audits | Gate |
+|---|---|---|
+| `lhci autorun` with `lighthouserc.cjs` (§3) | A list of public URLs, each run three times, median kept | `lhci`'s assertions; a pipeline step |
+| An NUnit fixture that launches its own Chromium and runs `npx lighthouse` against it (§4) | One page per test — signed in or public — reported in the TRX and Allure | NUnit on the parsed scores |
 
-## The Lighthouse model — category scores, not a violations list
+The first is the default for public pages: it needs no .NET at all. Use the second for a signed-in page, or
+when the score belongs in the test report beside the suite's other results.
 
-A Lighthouse run loads a URL in headless Chrome and produces five **category scores** in `[0, 1]`:
-`categories.performance.score`, `categories.accessibility.score`, `categories.best-practices.score`,
-`categories.seo.score`, `categories.pwa.score`. Each is a **weighted aggregate of individual `audits`**
-(e.g. `color-contrast`, `image-alt`, `first-contentful-paint`). The **gate is a threshold per category**
-(`minScore`) — **not** a pass/fail list of DOM violations (that's `axe-playwright`'s axe).
-
-Two ways to run it from a .NET pipeline — cover both:
-
-1. **`lhci autorun` + `lighthouserc`** — a **language-agnostic** CI step that audits a list of URLs and
-   gates on score. The same `lighthouserc` as the TS canonical; .NET doesn't change it.
-2. **Shell out to `npx lighthouse` from a test** — drive a **stateful page** with Playwright .NET, then
-   run Lighthouse against the page's debugging port, parse the JSON, and assert the score in NUnit.
-
-## `lhci autorun` + `lighthouserc` — the URL-list CI gate (language-agnostic)
-
-`lhci autorun` does **collect** (run Lighthouse N times per URL, keep the median), **assert** (apply your
-score thresholds — the build-fail mechanism), and **upload** (store the report), all from one CLI command
-your .NET pipeline calls. The config is identical to the TS canonical — .NET doesn't own it, the CLI does:
+## 3. `lhci autorun` — the URL-list gate
 
 ```js
-// lighthouserc.cjs
 module.exports = {
   ci: {
     collect: {
-      startServerCommand: 'dotnet run --project src/Web',   // boot YOUR app (any stack)
-      url: ['http://localhost:5000/', 'http://localhost:5000/checkout'],
-      numberOfRuns: 3,                 // ≥3 and take the median — fights Lighthouse perf variance
+      url: [`${process.env.BASE_URL}/`, `${process.env.BASE_URL}/pricing`],
+      numberOfRuns: 3,
     },
     assert: {
       assertions: {
-        'categories:accessibility':   ['error', { minScore: 0.9 }],   // deterministic → fail build
-        'categories:seo':             ['error', { minScore: 0.9 }],
-        'categories:best-practices':  ['error', { minScore: 0.9 }],
-        'categories:performance':     ['warn',  { minScore: 0.8 }],    // noisy → report only
-        'color-contrast':             ['error', { minScore: 1 }],      // per-audit assertion
+        'categories:accessibility': ['error', { minScore: 0.9 }],
+        'categories:best-practices': ['error', { minScore: 0.9 }],
+        'categories:seo': ['error', { minScore: 0.9 }],
+        'categories:performance': ['warn', { minScore: 0.8 }],
+        'color-contrast': ['error', { minScore: 1 }],
       },
     },
     upload: {
-      target: 'temporary-public-storage',   // free, no API key — public link, kept a few days
-      // target: 'lhci', serverBaseUrl: process.env.LHCI_SERVER_URL, token: process.env.LHCI_TOKEN,
+      target: 'temporary-public-storage',
     },
   },
 };
@@ -103,243 +63,256 @@ module.exports = {
 npx lhci autorun --config=lighthouserc.cjs
 ```
 
-`'categories:<name>': [level, { minScore }]` where `level` is `'error'` (fail build) or `'warn'` (report
-only). This is the same gate as the TS canonical — reach for it whenever you're auditing public URLs.
+- `'categories:<name>': [level, { minScore }]` — `error` fails the step, `warn` reports only. An audit id
+  (`color-contrast`) can be asserted on its own.
+- `numberOfRuns: 3` and the median fight Lighthouse's variance.
+- `BASE_URL` is the deployed test environment the UI job already uses — never a hard-coded
+  `http://localhost:5000`. `lhci` launches its own Chrome, found through `CHROME_PATH` when it is not on the
+  default path.
 
-## Shelling out to `npx lighthouse` — auditing a stateful page driven by Playwright .NET
+## 4. A Lighthouse fixture with its own Chromium
 
-For authenticated/stateful pages, drive the app with the page objects the
-`qa-ui-test-writer-playwright-dotnet` skill already authored, then run Lighthouse against the page's
-**remote-debugging port** and assert the parsed score. Launch Chromium with the port, drive to state,
-then shell out — **async all the way down** (no `.Result`/`.Wait()`):
+Lighthouse attaches to a running Chromium through a **remote-debugging port** and audits in **its own tab, in
+the browser's default context**. `BaseTest` cannot provide either:
+
+- its browser is `BrowserTest`'s per-worker service, launched once from the runsettings `LaunchOptions` and
+  shared by every fixture on that worker (plan D32) — one fixed port per worker at best, and parallel workers
+  on one machine collide on it;
+- its context is a new, isolated context per test, so a sign-in there is not what Lighthouse's tab sees.
+
+So the Lighthouse fixture derives from **`PlaywrightTest`** — the base class that gives `Playwright` and
+`BrowserName` and launches nothing — and launches a **persistent context** itself: a Chromium whose one
+context *is* the default context, on a port chosen per test. `Playwright.CreateAsync()` never appears in it
+(plan D61).
 
 ```csharp
-// Support/Lighthouse.cs — the CLI-port helper: subprocess + JSON parse (no SDK exists)
 using System.Diagnostics;
+using System.Net;
+using System.Net.Sockets;
 using System.Text.Json;
+using Allure.Net.Commons;
+using NUnit.Framework;
 
-public sealed record LighthouseReport(JsonElement Root)
-{
-    /// <summary>The 0–1 score for a category, e.g. "accessibility", "performance", "seo".</summary>
-    public double CategoryScore(string category) =>
-        Root.GetProperty("categories").GetProperty(category).GetProperty("score").GetDouble();
-}
+namespace Example.UiTests.Support;
 
 public static class Lighthouse
 {
-    /// <summary>Runs `npx lighthouse` against an already-open Chrome on <paramref name="port"/>, parses the JSON.</summary>
-    public static async Task<LighthouseReport> AuditAsync(string url, int port)
-    {
-        var outPath = Path.Combine(Path.GetTempPath(), $"lh-{Guid.NewGuid():N}.json");
-        var psi = new ProcessStartInfo
-        {
-            FileName = "npx",
-            ArgumentList = { "lighthouse", url, "--output=json", $"--output-path={outPath}",
-                             $"--port={port}", "--quiet", "--only-categories=accessibility,seo,best-practices,performance" },
-            RedirectStandardError = true,
-            UseShellExecute = false,
-        };
-        using var proc = Process.Start(psi)
-            ?? throw new InvalidOperationException("Could not start `npx lighthouse` — is Node on PATH?");
-        var stderr = await proc.StandardError.ReadToEndAsync();
-        await proc.WaitForExitAsync();
-        if (proc.ExitCode != 0)
-            throw new InvalidOperationException($"lighthouse exited {proc.ExitCode}: {stderr}");
+    public static readonly IReadOnlyList<string> GatedCategories = ["accessibility", "best-practices", "seo"];
+    private static readonly TimeSpan AuditTimeout = TimeSpan.FromMinutes(2);
 
-        await using var stream = File.OpenRead(outPath);
-        using var doc = await JsonDocument.ParseAsync(stream);
-        return new LighthouseReport(doc.RootElement.Clone());
+    public static int FreePort()
+    {
+        using var listener = new TcpListener(IPAddress.Loopback, 0);
+        listener.Start();
+        return ((IPEndPoint)listener.LocalEndpoint).Port;
+    }
+
+    public static async Task<IReadOnlyDictionary<string, double>> AuditAsync(string url, int port, string reportPath)
+    {
+        var logPath = Path.ChangeExtension(reportPath, ".log");
+        Directory.CreateDirectory(Path.GetDirectoryName(reportPath)!);
+        var start = new ProcessStartInfo("npx")
+        {
+            ArgumentList =
+            {
+                "--no-install", "lighthouse", url,
+                $"--port={port}",
+                $"--only-categories={string.Join(',', GatedCategories)}",
+                "--output=json", $"--output-path={reportPath}",
+                "--quiet",
+            },
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+        };
+        using var lighthouse = Process.Start(start) ?? throw new InvalidOperationException("npx did not start; Node 24 must be on PATH");
+        var output = lighthouse.StandardOutput.ReadToEndAsync();
+        var errors = lighthouse.StandardError.ReadToEndAsync();
+        using var deadline = new CancellationTokenSource(AuditTimeout);
+        using (deadline.Token.Register(() => lighthouse.Kill(entireProcessTree: true)))
+        {
+            await lighthouse.WaitForExitAsync();
+        }
+        await File.WriteAllTextAsync(logPath, await output + await errors);
+        Attach("lighthouse-log", "text/plain", logPath);
+        if (lighthouse.ExitCode != 0)
+        {
+            throw new InvalidOperationException($"Lighthouse exited {lighthouse.ExitCode} (it is killed after {AuditTimeout}); log: {logPath}");
+        }
+        Attach("lighthouse-report", "application/json", reportPath);
+        using var report = JsonDocument.Parse(await File.ReadAllTextAsync(reportPath));
+        var categories = report.RootElement.GetProperty("categories");
+        return GatedCategories.ToDictionary(category => category, category => categories.GetProperty(category).GetProperty("score").GetDouble());
+    }
+
+    private static void Attach(string name, string contentType, string path)
+    {
+        AllureApi.AddAttachment(name, contentType, path);
+        TestContext.AddTestAttachment(path, name);
     }
 }
 ```
 
 ```csharp
-// Tests/DashboardLighthouseTests.cs
+using Microsoft.Playwright;
+
+namespace Example.UiTests.Pages;
+
+public sealed class AccountPage
+{
+    private readonly IPage _page;
+
+    public AccountPage(IPage page)
+    {
+        _page = page;
+        Header = page.GetByTestId("Account.Header").Describe("Account header");
+    }
+
+    public ILocator Header { get; }
+
+    public string Url => _page.Url;
+
+    public async Task OpenAsync()
+    {
+        await _page.GotoAsync("/account");
+        await Header.WaitForAsync();
+    }
+}
+```
+
+```csharp
+using Example.UiTests.Pages;
+using Example.UiTests.Support;
 using Microsoft.Playwright;
 using Microsoft.Playwright.NUnit;
+using Microsoft.Playwright.TestAdapter;
 using NUnit.Framework;
 
-[TestFixture]
-public class DashboardLighthouseTests
+namespace Example.UiTests.Tests;
+
+[Category("lighthouse")]
+[Parallelizable(ParallelScope.Self)]
+public class AccountLighthouseTests : PlaywrightTest
 {
-    private const int Port = 9222;
+    private const double MinimumScore = 0.9;
+    private int _debuggingPort;
+    private IBrowserContext _chromium = null!;
+    private AccountPage _accountPage = null!;
+
+    [SetUp]
+    public async Task LaunchAuditableChromium()
+    {
+        _debuggingPort = Lighthouse.FreePort();
+        _chromium = await Playwright.Chromium.LaunchPersistentContextAsync(string.Empty, new()
+        {
+            BaseURL = BaseTest.RequiredEnv("BASE_URL"),
+            Headless = PlaywrightSettingsProvider.LaunchOptions.Headless,
+            Args = [$"--remote-debugging-port={_debuggingPort}"],
+        });
+        await _chromium.SetStorageStateAsync(AuthSetup.UserState);
+        _accountPage = new AccountPage(_chromium.Pages[0]);
+    }
+
+    [TearDown]
+    public async Task CloseChromium() => await _chromium.CloseAsync();
 
     [Test]
-    public async Task Should_meet_a11y_score_When_dashboard_loaded_for_signed_in_user()
+    public async Task Should_ScoreAtLeast90InEveryGatedCategory_When_AccountPageIsAudited()
     {
-        using var pw = await Playwright.CreateAsync();
-        // The debugging port Lighthouse attaches to.
-        await using var browser = await pw.Chromium.LaunchAsync(
-            new() { Args = new[] { $"--remote-debugging-port={Port}" } });
-        var page = await browser.NewPageAsync();
+        await _accountPage.OpenAsync();
 
-        var dashboard = new DashboardPage(page);
-        await dashboard.GotoAsSignedInUserAsync();        // page-object intent reused from `axe-playwright`'s skill
-        await dashboard.WaitUntilReadyAsync();            // stabilize on a CONDITION, never Task.Delay/Thread.Sleep
+        var scores = await Lighthouse.AuditAsync(_accountPage.Url, _debuggingPort, ReportPath());
 
-        var report = await Lighthouse.AuditAsync("http://localhost:5000/dashboard", Port);
-
-        Assert.That(report.CategoryScore("accessibility"), Is.GreaterThanOrEqualTo(0.9));  // the gate
+        Assert.That(scores.Where(score => score.Value < MinimumScore), Is.Empty, "Lighthouse categories under 0.9 on the signed-in account page");
     }
+
+    private string ReportPath() =>
+        Path.Combine(TestContext.CurrentContext.WorkDirectory, "playwright-artifacts", $"{GetType().Name}.{TestContext.CurrentContext.Test.Name}.lighthouse.json");
 }
 ```
 
-> **Scale note:** Lighthouse JSON `categories.*.score` is **0–1** (assert `>= 0.9`). The TS
-> `playwright-lighthouse` `thresholds` are 0–100; you're parsing raw Lighthouse JSON here, so it's 0–1.
+- **`LaunchPersistentContextAsync(string.Empty, …)`** creates a temporary profile and returns its context,
+  which already holds one page (`Pages[0]`). Chrome honours `--remote-debugging-port` only with a non-default
+  profile, which the temporary one is. `Playwright.Chromium` is explicit: Lighthouse audits Chromium whatever
+  the runsettings `BrowserName` says. `Headless` follows the runsettings and `HEADED=1` through
+  `PlaywrightSettingsProvider` — the values `AuthSetup` uses.
+- **The port is per test.** `FreePort()` asks the OS for a free loopback port; fixtures run in parallel on
+  different ports. The OS can hand the port to another process between the check and the launch; the window
+  is short, and a collision fails the launch loudly.
+- **Signed in through the shared state.** `SetStorageStateAsync(AuthSetup.UserState)` [1.59] loads the cookies
+  and local storage `AuthSetup` saved before any fixture under `Example.UiTests` ran. Lighthouse's tab opens in
+  this same context, and Lighthouse 13.5.0 clears only file systems, the shader cache, service workers and
+  cache storage before it audits (`clearStorageTypes` in `core/config/constants.js`) — cookies and local
+  storage survive. A public page drops the `SetStorageStateAsync` line.
+- **`OpenAsync()` first, then the audit.** The page object navigates and waits for the signed-in header, so a
+  broken sign-in fails as a visible assertion instead of a good score for the login page. Its `Url` property
+  is the absolute URL Lighthouse loads in its own tab.
+- **Every gated category is one assertion.** The categories under 0.9 must be empty; the message names the
+  page and NUnit prints each failing pair. Performance is not gated here (§5). Scores are **0–1** in the JSON
+  report (the TS `playwright-lighthouse` thresholds are 0–100).
+- **The subprocess has a deadline**, not a sleep: after `AuditTimeout` the registration kills the process
+  tree, the exit code is non-zero, and the failure names the log. Both streams are read while the process
+  runs, so a full pipe cannot block it. `npx --no-install` runs the pinned `lighthouse` from `node_modules` and
+  never downloads another version. On Windows the executable is `npx.cmd`.
+- **The evidence is the report.** This fixture is not `BaseTest`, so there is no trace, screenshot or video;
+  the JSON report (with Lighthouse's own final screenshot) and the log go to
+  `<WorkDirectory>/playwright-artifacts/<Class>.<Test>.lighthouse.{json,log}` — the folder CI uploads on
+  failure — and are attached to Allure and the TRX before the assertion.
+- **`[Category("lighthouse")]`** keeps the class out of the PR gate; a scheduled job runs
+  `--filter TestCategory=lighthouse`, like the `visual` category in `qa/dotnet/skills/visual-regression`.
+- A second Lighthouse class moves the two hooks into a shared base on that second need, not before.
 
-## Perf variance discipline — median the noise, gate the deterministic categories
+## 5. Performance variance
 
-Lighthouse **performance** scores are **noisy** (CPU contention, network jitter, cold caches). The a11y,
-SEO, and best-practices categories are **deterministic** (a11y is axe-powered rule checks). So:
+Performance scores are noisy — CPU contention, network jitter, cold caches — and parallel fixtures make them
+noisier. Accessibility, best-practices and SEO are deterministic rule checks.
 
-- **`numberOfRuns: 3`+ and median** in `lighthouserc`; for the shell-out path, audit a stable page and
-  don't hard-gate a single cold run's perf number — assert perf with a margin or trend it instead.
-- **`'error'` on a11y / SEO / best-practices** (deterministic — a regression is real); **`'warn'` on
-  performance** (noisy — a hard-fail on a flaky number trains the team to ignore the gate).
-- Stabilize the page on a **condition** before auditing (`Locator.WaitForAsync`, spinner hidden), never a
-  fixed `Task.Delay` / `Thread.Sleep` — a half-loaded page tanks the score for the wrong reason.
+- `error` on the deterministic categories, `warn` on performance in `lhci`; the NUnit fixture does not audit
+  performance at all.
+- `numberOfRuns: 3` and the median in `lhci`; a single cold run is never a performance gate.
+- Audit a page that is fully served — the page object's ready signal — never after a sleep.
 
-## Reporting the gate — Lighthouse report into Allure + CI artifact
+## 6. Reporting
 
-`lhci autorun` writes reports under `.lighthouseci/` (HTML + JSON + `manifest.json` naming the median
-run) and prints a public report URL with `temporary-public-storage`. The shell-out path writes the JSON
-you parsed. Attach it to Allure so a failing gate names the dropped category without re-running
-(cross-link `qa-test-reports-dotnet`):
-
-```csharp
-// Support/LighthouseReportAttachment.cs
-using Allure.Net.Commons;
-
-public static class LighthouseReportAttachment
-{
-    public static void Attach(string jsonPath, string? htmlPath = null)
-    {
-        AllureApi.AddAttachment("lighthouse-report.json", "application/json", File.ReadAllBytes(jsonPath));
-        if (htmlPath is not null)
-            AllureApi.AddAttachment("lighthouse-report.html", "text/html", File.ReadAllBytes(htmlPath));
-    }
-}
-```
-
-- **Allure** — attach the HTML + JSON report so a failing gate names the dropped category and failing
-  audits without anyone re-running locally.
-- **CI artifact** — upload `.lighthouseci/` as a build artifact (cross-link
-  `qa-ci-pipelines-dotnet`); the .NET pipeline calls the same Node CLI.
-- **Status check** — the LHCI GitHub App posts a status check linking the report; with
-  `temporary-public-storage` the report URL is in the job log.
-
-**No API key required** for `temporary-public-storage` — same "no secret" theme as `axe-playwright` (axe). The only
-secret is an optional `LHCI_TOKEN` for a private LHCI server, read lazily from the environment, never
-logged or committed.
+- **Allure and the TRX** — the fixture attaches the JSON report and the log before it asserts.
+- **CI artifact** — `lhci autorun` writes `.lighthouseci/` (HTML, JSON, `manifest.json`); upload it from the
+  step (`qa/cicd/dotnet/skills/ci-pipelines`). The fixture's report and log are already in
+  `playwright-artifacts/`, which the UI job uploads on failure.
+- **Status check** — the LHCI GitHub App posts one linking the report; with `temporary-public-storage` the
+  report URL is in the job log.
 
 ## Anti-patterns
 
-- **Looking for a NuGet Lighthouse SDK.** There isn't one — Lighthouse is Node-only. *Fix:* shell out to
-  `npx lighthouse` / `npx lhci autorun` and parse the JSON.
-- **Hard-`error` gating the performance score.** Perf is noisy. *Fix:* `'warn'` on performance, `'error'`
-  on the deterministic categories; trend perf.
-- **`numberOfRuns: 1`.** A single run rides the variance. *Fix:* `numberOfRuns: 3`+ and median.
-- **Blocking on the subprocess with `.Result` / `.Wait()` / `Thread.Sleep` before the audit.** Violates
-  async-all-the-way and races the DOM. *Fix:* `await proc.WaitForExitAsync()`; stabilize on a condition
-  (`Locator.WaitForAsync`) first.
-- **Running multiple audits concurrently on one debugging port.** They collide. *Fix:* serialize the
-  Lighthouse fixture (no `[Parallelizable]` on those tests) or use distinct ports.
-- **Treating a 1.0 a11y score as "accessible."** Lighthouse a11y is axe-powered → ~30–40% automated
-  floor. *Fix:* pair with manual + assistive-tech testing; run axe-playwright for assertable
-  per-node fixes.
-- **Committing an `LHCI_TOKEN`.** *Fix:* env var, read lazily; `temporary-public-storage` needs no key.
+- **Looking for a NuGet Lighthouse SDK.** There is none. *Fix:* `lhci autorun`, or §4's subprocess.
+- **`Playwright.CreateAsync()` in a test or `[SetUp]`.** A review blocker. *Fix:* derive from `PlaywrightTest`
+  and use its `Playwright`.
+- **`Browser.NewPageAsync()` for a signed-in audit.** It opens a new, isolated context; Lighthouse audits the
+  default one, signed out. *Fix:* a persistent context.
+- **A fixed `--remote-debugging-port=9222`.** Parallel fixtures collide. *Fix:* `FreePort()` per test.
+- **The debugging port in `ui.runsettings` for `BaseTest`'s browser.** One port per worker, and still the
+  wrong context. *Fix:* §4.
+- **A hard-coded `http://localhost:5000`.** *Fix:* `BASE_URL`.
+- **Hard-gating performance.** *Fix:* `warn` and trend it.
+- **The `pwa` category.** Removed in Lighthouse 12.
+- **`Task.Delay` before the audit, or a wait with no deadline.** *Fix:* a fully served page; the deadline.
+- **`.Result`, `.Wait()` or `.GetAwaiter().GetResult()` on the process or the file reads.** *Fix:* await them.
+- **Committing `LHCI_TOKEN`.**
 
-## Examples
+## Rules
 
-**End-to-end: `lhci autorun` gating public pages, plus a Playwright .NET shell-out for an authenticated
-page.**
-
-```js
-// lighthouserc.cjs — the public-pages CI gate (language-agnostic; the .NET pipeline calls the CLI)
-module.exports = {
-  ci: {
-    collect: { startServerCommand: 'dotnet run --project src/Web', url: ['http://localhost:5000/', 'http://localhost:5000/pricing'], numberOfRuns: 3 },
-    assert: { assertions: {
-      'categories:accessibility':  ['error', { minScore: 0.9 }],
-      'categories:seo':            ['error', { minScore: 0.9 }],
-      'categories:best-practices': ['error', { minScore: 0.9 }],
-      'categories:performance':    ['warn',  { minScore: 0.8 }],
-    } },
-    upload: { target: 'temporary-public-storage' },
-  },
-};
-```
-
-```csharp
-// Tests/AccountLighthouseTests.cs — the authenticated-page gate (reuses `axe-playwright`'s page objects)
-[TestFixture]
-public class AccountLighthouseTests
-{
-    private const int Port = 9222;
-
-    [Test]
-    public async Task Should_meet_a11y_and_seo_scores_When_account_page_loaded()
-    {
-        using var pw = await Playwright.CreateAsync();
-        await using var browser = await pw.Chromium.LaunchAsync(
-            new() { Args = new[] { $"--remote-debugging-port={Port}" } });
-        var page = await browser.NewPageAsync();
-
-        var account = new AccountPage(page);
-        await account.GotoAsSignedInUserAsync();          // intent, not selectors
-        await account.WaitUntilReadyAsync();              // condition, not sleep
-
-        var report = await Lighthouse.AuditAsync("http://localhost:5000/account", Port);
-
-        Assert.Multiple(() =>                             // one logical gate: "scores meet thresholds"
-        {
-            Assert.That(report.CategoryScore("accessibility"), Is.GreaterThanOrEqualTo(0.9));
-            Assert.That(report.CategoryScore("seo"),           Is.GreaterThanOrEqualTo(0.9));
-        });
-    }
-}
-```
-
-Lifecycle for this gate:
-1. A dev ships a redesign that drops color contrast on the pricing page and removes a `<main>` landmark.
-2. CI runs `lhci autorun`; Lighthouse audits each URL 3× and medians the result.
-3. `categories.accessibility.score` falls below `0.9` → the assertion fails → **the build fails**, with
-   the dropped category and failing audits in the uploaded report (linked from the status check / job
-   log, and attached to Allure).
-4. The dev fixes contrast + the landmark; the score climbs back over the threshold; the gate goes green.
-   Perf stays a `warn` and is trended rather than hard-failing the PR.
-
-## Rules (hard constraints)
-
-- **No native .NET SDK** — invoke the Lighthouse/lhci CLI as a subprocess and parse `categories.*.score`
-  from the JSON. The gate is a **score threshold per category** (`minScore` / `Is.GreaterThanOrEqualTo`),
-  one logical assertion per category under test. Test names `Should_X_When_Y`.
-- Async all the way: `await proc.WaitForExitAsync()`, `await JsonDocument.ParseAsync(...)` — never
-  `.Result`/`.Wait()`/`Thread.Sleep`.
-- `'error'` (hard-fail) on the **deterministic** categories (accessibility / SEO / best-practices);
-  `'warn'` on the **noisy** performance category — trend perf, don't hard-gate a flaky run.
-- `numberOfRuns` ≥ 3 and take the **median**.
-- Shell-out audits reuse existing page objects (intent, not selectors); stabilize on a **condition**
-  before auditing, never `Task.Delay`/`Thread.Sleep`; serialize tests sharing a debugging port.
-- Lighthouse JSON `categories.*.score` is **0–1** (assert `>= 0.9`).
-- **No API key** for `temporary-public-storage` (contrast `percy` `PERCY_TOKEN` / `applitools` `APPLITOOLS_API_KEY`);
-  an optional `LHCI_TOKEN` for a private server is the only secret — env, lazy, never logged.
-- A Lighthouse a11y score is axe-powered = the automated **floor** (~30–40% of WCAG), not proof. Pair
-  with manual + assistive-tech testing, and run axe-playwright for assertable per-node fixes.
+- `@lhci/cli@0.15.1` and `lighthouse@13.5.0`, exact dev dependencies; Node 24.
+- The public URL-list gate is `lhci autorun`. An NUnit audit derives from `PlaywrightTest`, launches a
+  persistent Chromium context on a free port, loads `AuthSetup`'s state for a signed-in page, and bounds the
+  subprocess.
+- Gate accessibility, best-practices and SEO (`≥ 0.9`); warn on performance; no PWA.
+- Scores are 0–1; one assertion per audited page — the categories under the minimum are empty.
+- Reports and logs land in `<WorkDirectory>/playwright-artifacts/` and are attached before the assertion.
 
 ## Cross-references
 
-- `qa-accessibility-testing-typescript` — the **canonical** skill, TS (first-class
-  `@lhci/cli` + `playwright-lighthouse`). This .NET sibling is the CLI-driven port of it.
-- `qa-accessibility-testing-java` — same skill, Java / TestNG. Same CLI-port shape
-  (`ProcessBuilder` + Jackson + AssertJ).
-- `references/axe-playwright.md` — the **per-component assertion** sibling: gate
-  on `Violations` empty **inside** the E2E run (`Deque.AxeCore.Playwright`, a real NuGet). Run both — axe
-  to *fix* nodes, Lighthouse to *trend* whole-page scores + gate perf/SEO/PWA.
-- `qa-ui-test-writer-playwright-dotnet` — the page objects the shell-out audit reuses to reach a stateful
-  page. Author the flow there; add the audit here.
-- `qa-ci-pipelines-dotnet` — the `lhci autorun` job (the .NET pipeline calls the Node CLI),
-  artifact upload, and LHCI status check.
-- `qa-test-reports-dotnet` — attach the Lighthouse HTML + JSON report to the run.
-- `qa-exploratory-charter-writer` — the manual/assistive-tech testing that covers the ~60% no automated
-  a11y score can.
+- `references/axe-playwright.md` — the per-component gate inside the UI run.
+- `qa/dotnet/skills/ui-test-author/playwright` — `BaseTest`, `AuthSetup`, page objects, `references/lifecycle.md`
+  §1 (the base classes) and §4 (why launch options are per worker).
+- `qa/cicd/dotnet/skills/ci-pipelines` — the `lhci autorun` step and artifact upload.
+- `qa-accessibility-testing-typescript` — `playAudit` on a persistent context, the same idea in TS.
+- `qa-accessibility-testing-java` — the Java sibling, which audits public pages only.
+- `qa-exploratory-charter-writer` — the manual and assistive-technology testing no score covers.

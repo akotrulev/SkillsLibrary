@@ -1,387 +1,263 @@
-# Visual Regression — Applitools Eyes (.NET / NUnit)
+# Visual Regression — Applitools Eyes (.NET 10 / Microsoft.Playwright 1.63 + NUnit)
 
-The .NET port of the canonical `qa-visual-regression-typescript`. Same visual-AI model, same
-Ultrafast Grid matrix, same dashboard review workflow — re-expressed in `Applitools.Playwright` +
-`Microsoft.Playwright.NUnit` idioms. Applitools Eyes uploads the rendered page to the **Ultrafast
-Grid**, re-renders it server-side across a configured browser/viewport/device matrix, and diffs with
-**AI-based matching** that ignores anti-aliasing / sub-pixel noise — plus **match levels** (Strict /
-Layout / Content / Ignore-colors). That match-level control is the real differentiator versus Percy's
-server-side **pixel** diff and the built-in **byte/pixel** diff.
+Applitools Eyes uploads the page to the **Ultrafast Grid**, re-renders it server-side across a configured
+browser, viewport and device matrix, and compares each render with **visual AI** that ignores anti-aliasing
+and sub-pixel noise. **Match levels** (Strict, Layout, Content) decide how strictly a region is compared.
+That control is what Percy's pixel diff and the comparer lane lack. Baselines live in the Applitools
+dashboard; a person accepts or rejects differences there.
 
-This is an **assertion layer** on top of the page objects and specs
-`qa-ui-test-writer-playwright-dotnet` already authored. You do not write new page objects here — you
-add `Eyes.Open` / `Eyes.Check` / `Eyes.Close` around an existing flow.
+The .NET SDK is the NuGet package **`Eyes.Playwright`** (the assembly `Eyes.Playwright.DotNet`, namespaces
+`Applitools.Playwright` and `Applitools.Playwright.Fluent`). A package named after the vendor plus
+`.Playwright` does not exist on NuGet, and restore fails on it. An Eyes class derives from
+`Example.UiTests.Support.BaseTest` (`qa/dotnet/skills/ui-test-author/playwright/assets/BaseTest.cs`) and adds
+`Check(...)` to a flow the page objects drive.
 
-## Why graduate from Percy (pixel) to Applitools (visual-AI)
+## Why graduate from Percy to Applitools
 
-Percy already solved the cross-platform rendering problem by rendering server-side. Applitools
-goes further on **how the diff is judged** and **how many environments render at once**:
-
-| | Percy | **Applitools Eyes (this skill)** |
+| | Percy | **Applitools Eyes** |
 |---|---|---|
-| What leaves the test | A DOM snapshot, uploaded by the `percy exec` agent | The rendered page, uploaded by the **SDK directly** (no agent) |
-| How the diff is judged | Server-side **pixel** diff | Server-side **AI** match — ignores anti-aliasing / sub-pixel noise |
-| Tolerance lever | `percyCSS` hide + `scope` (no pixel knob) | **Match levels** (Strict / Layout / Content / Ignore-colors) + region ignores |
-| Dynamic content | Hide it with `percyCSS` | **`Target.Layout(region)`** — structure matches, text may differ |
-| Cross-browser/device | Re-renders at configured widths | **Ultrafast Grid** — a real browser/viewport/device **matrix** from one run |
-| Process model | Local `percy exec` agent wraps the run | **None** — SDK calls the cloud; just `APPLITOOLS_API_KEY` in env |
-| Baselines | Percy cloud, keyed by git branch, review UI | **Applitools dashboard**, keyed by app/test/branch, review UI |
-| Gate | GitHub/GitLab status check | Runner's **aggregated results** fail the build; dashboard link |
-| Cost | Paid | Paid (typically the most expensive of the three) |
+| What leaves the test | A DOM snapshot, through the `percy exec` agent | The page, uploaded by the **SDK itself** — no agent |
+| How the diff is judged | Server-side **pixel** diff | Server-side **visual AI** |
+| Tolerance lever | `percyCSS` hide and `scope` | **Match levels** per region, plus ignore and floating regions |
+| Dynamic content | Hide it | **`Layout(locator)`** — the structure must match, the text may change |
+| Browsers and devices | Re-rendered at configured widths | **Ultrafast Grid** — a real browser/viewport/device matrix from one run |
+| Gate | A status check | The runner's results fail the run; the dashboard holds the review |
+| Cost | Paid | Paid, usually the most expensive |
 
-State the contrast plainly: **Applitools is AI match (not pixel), match levels (not just hide-or-fail),
-and a real cross-browser grid (not just widths)** — and there's **no agent process** to wrap the run.
+## 1. Setup
 
-## Setup
-
-There is **no agent to launch** (the difference from Percy's Node `@percy/cli`): the .NET SDK talks to
-the Applitools cloud directly, so the only dependency is the NuGet package.
+`Eyes.Playwright` 1.37.49 (published 2026-10-01; checked on NuGet on 2026-10-11) is already in the writer's
+`Directory.Packages.props`, so the project only references it:
 
 ```xml
-<!-- Tests.csproj -->
 <ItemGroup>
-  <PackageReference Include="Microsoft.Playwright.NUnit" Version="1.50.0" />
-  <PackageReference Include="Applitools.Playwright" Version="3.*" />
-  <PackageReference Include="NUnit" Version="4.*" />
-  <PackageReference Include="NUnit3TestAdapter" Version="4.*" />
-  <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.*" />
+  <PackageReference Include="Eyes.Playwright" />
 </ItemGroup>
 ```
 
-`APPLITOOLS_API_KEY` is the **only secret** — the SDK reads it from the environment automatically. In CI
-it comes from the secret store (see the ci-pipelines cross-link), never committed. Locally `export
-APPLITOOLS_API_KEY=<key>`.
+It targets .NET Standard 2.0 and brings `Eyes.Images` 3.68.9 (the `Configuration`, `BatchInfo`, runner and
+results types) and `Eyes.Core` 4.71.0. No agent to launch. `APPLITOOLS_API_KEY` is the **only** secret; the SDK
+reads it from the environment. It comes from the CI secret store and is never committed or logged.
 
-## The Eyes model + the Ultrafast Grid
+## 2. The model — every call is synchronous
 
-Three objects, one lifecycle:
+The public API of `Eyes.Playwright` 1.37.49, read from the package's assembly metadata (the SDK publishes no
+sources):
 
-- **`VisualGridRunner`** — the runner that ships checkpoints to the **Ultrafast Grid**, which renders
-  them server-side across your configured browser/viewport/device matrix. Construct it with a
-  concurrency cap: `new VisualGridRunner(new RunnerOptions().TestConcurrency(5))`. (Its sibling
-  `ClassicRunner` renders locally with one environment — use `VisualGridRunner` to get the grid, the
-  whole point of Applitools over `playwright-snapshots`/`percy`.)
-- **`Eyes`** — one visual test session, bound to a runner: `new Eyes(runner)`. `Eyes.Open(page, app,
-  test, viewport)` starts it; `Eyes.Check(...)` adds a checkpoint; `Eyes.Close(false)` ends it
-  **without throwing inline**.
-- **`runner.GetAllTestResults(true)`** — called **once at suite end**, it blocks until every checkpoint
-  across every `Eyes` has rendered + diffed on the grid, aggregates the results, and (with `true`)
-  throws if any test had a mismatch or error. **This is the gate** — not `Eyes.Close`.
+| Type | Members used here |
+|---|---|
+| `Applitools.VisualGrid.VisualGridRunner` | `new VisualGridRunner(new RunnerOptions().TestConcurrency(5))`; `GetAllTestResults(bool shouldThrowException)` → `TestResultsSummary` |
+| `Applitools.Playwright.Eyes` | `new Eyes(runner)`; `SetConfiguration(IConfiguration)`; `Open(IPage, string appName, string testName, RectangleSize viewportSize)` → `IPage`; `Check(string tag, ICheckSettings)`; `CloseAsync()`; `AbortAsync()` |
+| `Applitools.Playwright.Fluent.Target` | `Window()`, `Region(ILocator)` (also `string` selector, `IElementHandle`, `Region`), `Frame(ILocator)` |
+| `Applitools.TestResultsSummary` | `GetAllResults()` → `TestResultContainer[]`, each with `TestResults` (`Name`, `Status`, `Url`, `AppUrls.Batch`) and `Exception` |
 
-A `Configuration` with `AddBrowser(width, height, BrowserType)` / `AddDeviceEmulation(...)` is what
-makes **one local run fan out to a cross-browser/device render matrix** server-side — the thing neither
-`playwright-snapshots` nor `percy` does natively.
+- **`Open`, `Check` and `Close` return no `Task`.** `CloseAsync()` and `AbortAsync()` return `void` — the
+  name means "close without waiting for the grid", not a task to await. `Close(bool)` blocks for that test's
+  results; the runner's `GetAllTestResults` blocks for all of them. There is nothing to `await` on the Eyes
+  side and no `OpenAsync`/`CheckAsync` to look for.
+- **`VisualGridRunner`** ships checkpoints to the grid. Its sibling `ClassicRunner` renders locally in one
+  environment — use the grid, which is the reason to choose Applitools.
+- **`GetAllTestResults(false)`** waits until every checkpoint of every `Eyes` on that runner has been rendered
+  and compared, and returns them; `true` throws instead when any differs. §4 takes the results and asserts
+  on them, so the failure message carries each checkpoint's link.
 
-## Configuration — the render matrix
+## 3. The render matrix and the results — `Support/EyesConfig.cs`
 
 ```csharp
-// Support/EyesConfig.cs
+using System.Text;
+using Allure.Net.Commons;
 using Applitools;
 using Applitools.VisualGrid;
+
+namespace Example.UiTests.Support;
 
 public static class EyesConfig
 {
-    public static Configuration Build()
+    public static Configuration ForGrid()
     {
         var config = new Configuration();
-        // One batch groups every test in this run in the dashboard (see "Batching" below).
-        config.SetBatch(new BatchInfo("FlexInvest Web — Visual"));
-
-        // Each AddBrowser/AddDeviceEmulation adds an environment the Ultrafast Grid renders + diffs.
-        // One Eyes.Check() therefore produces N checkpoints — the cross-browser/device matrix.
+        config.SetAppName("Shop Web");
+        config.SetBatch(new BatchInfo("Shop Web — Visual") { Id = BaseTest.RequiredEnv("APPLITOOLS_BATCH_ID") });
         config.AddBrowser(1280, 800, BrowserType.CHROME);
         config.AddBrowser(1280, 800, BrowserType.FIREFOX);
         config.AddBrowser(1280, 800, BrowserType.SAFARI);
-        config.AddBrowser(375, 812, BrowserType.EDGE_CHROMIUM);
-        config.AddDeviceEmulation(DeviceName.iPhone_11, ScreenOrientation.Portrait);
         config.AddDeviceEmulation(DeviceName.Pixel_5, ScreenOrientation.Portrait);
         return config;
     }
-}
-```
 
-`eyes.SetConfiguration(EyesConfig.Build())` before `Eyes.Open` applies it. The matrix lives in code, in
-the repo — it's not a secret; only the API key is.
-
-## Core pattern — `Open` / `Check` / `Close` + `GetAllTestResults`
-
-The page object exposes intent; the test stabilizes **application** state on a condition, then checks.
-No selectors in the test, no fixed waits. `Eyes.Close(false)` per test; the runner gates at suite end.
-Share **one runner** across the fixture via `[OneTimeSetUp]`/`[OneTimeTearDown]`.
-
-```csharp
-// Pages/DashboardPage.cs
-using Microsoft.Playwright;
-
-public sealed class DashboardPage
-{
-    private readonly IPage _page;
-    public ILocator RevenueCard { get; }
-
-    public DashboardPage(IPage page)
+    public static IReadOnlyList<string> Unresolved(TestResultsSummary summary)
     {
-        _page = page;
-        RevenueCard = page.GetByTestId("revenue-card");
+        var results = summary.GetAllResults();
+        var lines = results.Select(Describe).ToList();
+        AllureApi.AddGlobalAttachment("applitools-results", "text/plain", Encoding.UTF8.GetBytes(string.Join('\n', lines)), ".txt");
+        return results
+            .Where(result => result.Exception is not null || result.TestResults?.Status != TestResultsStatus.Passed)
+            .Select(Describe)
+            .ToList();
     }
 
-    public Task GotoAsync() => _page.GotoAsync("/dashboard");
-
-    /// <summary>Resolves once the card's data has rendered — a condition, never a fixed wait.</summary>
-    public Task WaitUntilLoadedAsync() =>
-        RevenueCard.GetByRole(AriaRole.Status).WaitForAsync(new() { State = WaitForSelectorState.Hidden });
+    private static string Describe(TestResultContainer result) =>
+        $"{result.TestResults?.Name}: {result.TestResults?.Status} {result.TestResults?.Url} {result.Exception?.Message}";
 }
 ```
 
+- Every `AddBrowser` / `AddDeviceEmulation` is one more render of every checkpoint — one `Check` here
+  produces four comparisons. `BrowserType` (`Applitools`) and `DeviceName`, `ScreenOrientation`
+  (`Applitools.VisualGrid`) are enums of the SDK, not Playwright's.
+- **One batch per run.** Each test class has its own runner (§4), so the classes share a batch only through a
+  stable id. CI sets `APPLITOOLS_BATCH_ID` to the run id (GitHub: `${{ github.run_id }}-${{ github.run_attempt }}`);
+  locally, export any value. `BaseTest.RequiredEnv` fails with the variable's name when it is missing.
+- **The results are attached with `AllureApi.AddGlobalAttachment`**, because they arrive in
+  `[OneTimeTearDown]`, where no test is running: `AddAttachment` and `AddLink` record nothing there (both
+  check for a running test or fixture in Allure.NUnit 2.15.0), while a global attachment belongs to the run.
+  Each line carries the checkpoint's dashboard URL.
+- The matrix is code in the repository, not a secret; only the API key is.
+
+## 4. The core pattern
+
 ```csharp
-// DashboardTests.cs
-using Applitools;
 using Applitools.Playwright;
+using Applitools.Playwright.Fluent;
+using Applitools.Utils.Geometry;
 using Applitools.VisualGrid;
-using Microsoft.Playwright;
-using Microsoft.Playwright.NUnit;
+using Example.UiTests.Pages;
+using Example.UiTests.Support;
 using NUnit.Framework;
 
-[TestFixture]
-[Parallelizable(ParallelScope.Self)]
-public sealed class DashboardTests : PageTest
+namespace Example.UiTests.Tests;
+
+[Category("visual")]
+public class PricingEyesTests : BaseTest
 {
-    private static readonly VisualGridRunner Runner =
-        new(new RunnerOptions().TestConcurrency(5));   // one runner for the suite
+    private VisualGridRunner _runner = null!;
+    private Eyes _eyes = null!;
+    private PricingPage _pricingPage = null!;
+
+    [OneTimeSetUp]
+    public void CreateRunner() => _runner = new VisualGridRunner(new RunnerOptions().TestConcurrency(5));
+
+    [SetUp]
+    public async Task OpenEyes()
+    {
+        await Page.Clock.SetFixedTimeAsync(new DateTime(2026, 10, 10, 9, 0, 0, DateTimeKind.Utc));
+        _pricingPage = new PricingPage(Page);
+        _eyes = new Eyes(_runner);
+        _eyes.SetConfiguration(EyesConfig.ForGrid());
+        _eyes.Open(Page, "Shop Web", EvidenceName(), new RectangleSize(1280, 800));
+    }
 
     [Test]
-    public async Task Should_Match_Dashboard_When_Loaded()
+    [Description("No assertion: the Ultrafast Grid compares this checkpoint; this class's [OneTimeTearDown] fails the run on any difference, reviewed in the Applitools dashboard.")]
+    public async Task Should_MatchApprovedPlanTable_When_PlansLoad()
     {
-        var eyes = new Eyes(Runner);
-        eyes.SetConfiguration(EyesConfig.Build());     // API key read from env automatically
-        await eyes.OpenAsync(Page, "FlexInvest Web", "Dashboard — revenue card",
-            new RectangleSize(1280, 800));
+        await _pricingPage.OpenAsync();
 
-        try
-        {
-            var dashboard = new DashboardPage(Page);
-            await dashboard.GotoAsync();
-            await dashboard.WaitUntilLoadedAsync();    // stabilize on a condition first…
-
-            await eyes.CheckAsync("Dashboard", Target.Window().Fully());  // …then capture the checkpoint
-        }
-        finally
-        {
-            await eyes.CloseAsync(false);              // end session WITHOUT throwing inline
-        }
+        _eyes.Check("Pricing.PlanTable", Target.Region(_pricingPage.PlanTable)
+            .Layout(_pricingPage.PromoPrice)
+            .Ignore(_pricingPage.PromoBadge));
     }
+
+    [TearDown]
+    public void CloseEyes() => _eyes.CloseAsync();
 
     [OneTimeTearDown]
-    public void GateOnVisualResults()
+    public void GateOnEyesResults()
     {
-        // Blocks until the grid finishes; `true` throws if any test mismatched — THE GATE.
-        Runner.GetAllTestResults(true);
+        var unresolved = EyesConfig.Unresolved(_runner.GetAllTestResults(false));
+
+        Assert.That(unresolved, Is.Empty, "Applitools checkpoints that differ from their baseline — accept or reject them in the dashboard");
     }
 }
 ```
 
-Why `Eyes.Close(false)` then `GetAllTestResults(true)`: `Close(true)` would throw the *first* time any
-single test mismatches, aborting the rest before they render on the grid. Passing `false` lets every
-test finish; the runner then aggregates **all** results and fails the build once, at suite end, with a
-complete picture. The `Eyes`/`Target` calls have async overloads (`OpenAsync`/`CheckAsync`/`CloseAsync`)
-— use them, async-all-the-way; `GetAllTestResults` is the one blocking call (a deliberate barrier at
-teardown). Eyes captures **at `Check` time**, like Percy — so stabilize before each `Check`.
+- `PricingPage` is the page object from `references/playwright-snapshots.md` §5. Eyes captures **at `Check`
+  time**, so `OpenAsync()` returning on the visible table is what makes the checkpoint stable.
+- **Cleanup lives in the hooks**, never in a `try`/`finally` in the test: `CloseAsync()` in the class's
+  `[TearDown]` ends the Eyes test whether the test passed or threw, and NUnit runs it before `BaseTest`'s
+  teardown closes the context.
+- **The runner is an instance field built in `[OneTimeSetUp]`.** NUnit runs a fixture's tests on one instance,
+  one after another (`BaseTest`'s `ParallelScope.Self`), and parallel fixtures each own their runner — no
+  `static` runner shared across workers. The cost: the gate fires once per class, and `TestConcurrency` applies
+  per class, so size it to the account's limit divided by the worker count.
+- **The gate is `GateOnEyesResults`.** NUnit reports a failed `[OneTimeTearDown]` against the fixture, and the
+  run fails; the message lists each unresolved checkpoint with its dashboard URL. Never `Close(true)` per test:
+  it waits for that test alone and serializes the grid.
+- The Eyes test name is `BaseTest`'s `EvidenceName()` (`<Class>.<Test>`), the same name as the failure
+  evidence.
+- **The test has no assertion, and says so** in `[Description("No assertion: …")]` — the NUnit form of the
+  TS lane's `no-assertion` annotation (plan D50).
 
-## Match levels — the real differentiator
+## 5. Match levels — the real differentiator
 
-A match level tells the AI *how* to compare a checkpoint against its baseline. Set it per-check via the
-`Target` fluent API; this is the analogue of Percy's `percyCSS`-hide, but richer — prefer a **region
-match level** over hiding the region entirely:
+`Target.Window()` (the viewport; `.Fully()` for the whole page) or `Target.Region(locator)` starts the check
+settings. Each region call takes an `ILocator`, a CSS selector string, an `IElementHandle`, or a `Region`:
 
-```csharp
-await eyes.CheckAsync("Account summary", Target.Window().Fully()
-    // Whole-page level: Strict is the default ("looks the same to a human").
-    .Layout("[data-testid=\"balance-figures\"]")    // structure must match; the NUMBERS may change
-    .Ignore("[data-testid=\"last-login\"]")         // ignore entirely (timestamp)
-    .Floating("[data-testid=\"toast\"]", 5, 5, 5, 5)); // may shift up to 5px in any direction
-```
+| Call | Effect |
+|---|---|
+| (default) Strict | Visual AI: "would a person call these the same?" — the right default for stable UI |
+| `.Layout(locator)` / `.Layout()` | Only the structure and position must match; text, numbers and images may change |
+| `.Content(locator)` / `.Content()` | Structure and text must match; colours and exact pixels may not |
+| `.Strict(locator)` | A Strict region inside a looser check |
+| `.IgnoreColors(locator)` / `.IgnoreColors()` | Structure and content, colours ignored |
+| `.Ignore(locator)` | Not compared at all |
+| `.Floating(locator, maxUp, maxDown, maxLeft, maxRight)` | May move by that many pixels in each direction |
+| `.Accessibility(locator, AccessibilityRegionType.LargeText)` | Marks a region for Applitools' contrast checks |
+| `.WithName(name)` | Names the checkpoint when `Check(settings)` is called without a tag |
 
-The levels, precisely:
+**There is no pixel-ratio knob.** Reach for `Layout` before `Ignore`: an ignored region drops coverage, a
+Layout region keeps its structure under test while its data changes.
 
-- **Strict** (default) — AI match: "would a human call these the same?" Ignores anti-aliasing /
-  rendering noise but catches real visual changes. The right default for stable UI.
-- **Layout** — only the **structure/position** of elements must match; their **content** (text,
-  numbers, images) may differ. *The killer feature for dynamic data* — baseline a populated page once
-  and it stays green as the data changes, while a broken layout still fails.
-- **Content** — like Layout but also compares text content (structure + text, not exact pixels/colors).
-- **Ignore-colors** — match structure + content but ignore color (theme/branding churn).
+## 6. CI and the review
 
-Region levels are the surgical version: `Target.Window().Fully().Layout(locator)` keeps the page Strict
-but treats one region as Layout. Region ignores — `.Ignore(locator)` (drop entirely), `.Layout(locator)`,
-`.Floating(locator, ...)` (element may shift within a pixel margin), `.Accessibility(locator,
-AccessibilityRegionType.LargeText)` — are the analogue of masking, but expressed as intent.
+The SDK talks to the cloud, so the nightly job runs `dotnet test UiTests -c Release --filter TestCategory=visual`
+with `APPLITOOLS_API_KEY` and `APPLITOOLS_BATCH_ID` set — on the UI job's runner, with its browser install and
+credential fetch (`qa/cicd/dotnet/skills/ci-pipelines`). Rendering happens on the grid, so it does not need the
+pinned image.
 
-**There is no per-call pixel-ratio knob** (no `MaxDiffPixelRatio` like `playwright-snapshots`). The AI plus the match level
-*is* the tolerance lever. Reach for **Layout** before you reach for ignore.
+1. The run uploads each checkpoint; the grid renders every configured environment and compares each with
+   its baseline.
+2. A class with a difference fails its `[OneTimeTearDown]`, and the run fails.
+3. A reviewer accepts or rejects in the dashboard — once for all environments of a checkpoint. Accepting
+   updates the baseline.
+4. On merge, the accepted renders are the branch baseline for the next run.
 
-## Batching + the dashboard
-
-`BatchInfo` groups one run's tests under a single entry in the **Applitools dashboard** (set it on the
-`Configuration`, as above). The dashboard is the hosted **baseline store + review UI** — the analogue of
-Percy's. Baselines are keyed by **app / test / branch**; you accept or reject diffs there, and an accept
-updates the baseline. Same "no in-repo baselines, no `-{platform}` naming" story as Percy: the repo
-holds no PNGs.
-
-To group a sharded CI run into one dashboard batch, set a stable batch id across shards:
-
-```csharp
-var batch = new BatchInfo("FlexInvest Web — Visual");
-var batchId = Environment.GetEnvironmentVariable("APPLITOOLS_BATCH_ID");
-if (!string.IsNullOrEmpty(batchId)) batch.Id = batchId;   // same value across all shards → one batch
-config.SetBatch(batch);
-```
-
-## CI integration + the gate
-
-There's **no agent to wrap the command** (the difference from Percy's `percy exec`): the SDK talks to
-the cloud directly, so CI just runs `dotnet test` with `APPLITOOLS_API_KEY` in env. The build fails when
-`runner.GetAllTestResults(true)` throws because an **unresolved diff** exists in the dashboard.
-
-```yaml
-# inside your test job — see qa-ci-pipelines-dotnet for the full pipeline
-- name: Visual tests (Applitools)
-  env:
-    APPLITOOLS_API_KEY: ${{ secrets.APPLITOOLS_API_KEY }}   # from the secret store; never inline
-    APPLITOOLS_BATCH_ID: ${{ github.run_id }}-${{ github.run_attempt }}  # one batch across shards
-  run: dotnet test
-```
-
-Link the dashboard batch URL into Allure so reviewers jump straight to it (cross-link
-`qa-test-reports-dotnet`):
-
-```csharp
-[OneTimeTearDown]
-public void LinkAndGate()
-{
-    var summary = Runner.GetAllTestResults(false);   // false: collect without throwing here…
-    foreach (var c in summary.GetAllResults())
-    {
-        var url = c.TestResults?.AppUrls?.Batch;
-        if (!string.IsNullOrEmpty(url))
-        {
-            AllureApi.AddTestAttachment("Applitools dashboard", "text/uri-list",
-                System.Text.Encoding.UTF8.GetBytes(url));
-            break;
-        }
-    }
-    if (summary.GetAllResults().Any(r => r.Exception != null ||
-        r.TestResults?.Status == TestResultsStatus.Unresolved))
-        throw new Exception("Applitools: unresolved visual diffs — review the dashboard batch."); // …gate
-}
-```
-
-The review-UI workflow, concretely:
-1. PR runs `dotnet test`; the SDK uploads to the Ultrafast Grid, which renders + diffs against the
-   branch baseline.
-2. `GetAllTestResults(true)` fails the build if any environment is **Unresolved** (new diff).
-3. A reviewer accepts/rejects in the Applitools dashboard. Accepting updates the baseline.
-4. On merge, the accepted checkpoints become the branch baseline for the next PR.
+A functional failure in an Eyes class still gets `BaseTest`'s trace, screenshot and video.
 
 ## Anti-patterns
 
-- **`Eyes.Close(true)` (or `Eyes.Close()`) per test as the gate.** It throws on the first mismatch and
-  aborts the rest before they render. *Fix:* `Eyes.Close(false)` per test; gate once at suite end with
-  `runner.GetAllTestResults(true)`.
-- **Using `ClassicRunner` and expecting a cross-browser grid.** ClassicRunner renders one local
-  environment. *Fix:* `VisualGridRunner` + `Configuration.AddBrowser`/`AddDeviceEmulation`.
-- **`await Page.WaitForTimeoutAsync(500)` before `Eyes.Check`.** Eyes captures at call time; a sleep is
-  flaky and slow. *Fix:* wait on a condition (`document.fonts.ready`, spinner hidden, `Locator.WaitForAsync`).
-- **`.Result` / `.Wait()` on the async Eyes calls.** Violates async-all-the-way. *Fix:* `await
-  OpenAsync`/`CheckAsync`/`CloseAsync`; only `GetAllTestResults` is the deliberate teardown barrier.
-- **Hiding a dynamic region when Layout would do.** Ignoring drops coverage. *Fix:* `Target.Layout(
-  region)` — structure stays asserted, only content is allowed to vary.
-- **Committing `*-snapshots/` PNGs alongside Applitools.** Baselines live in the dashboard. *Fix:*
-  delete them; rely on the dashboard baseline.
-- **Hardcoding / logging `APPLITOOLS_API_KEY`.** It's a write credential. *Fix:* env only, from the CI
-  secret store, read lazily by the SDK, never echoed.
-- **A new `BatchInfo` per shard.** Splits one run across many dashboard batches. *Fix:* one stable
-  `APPLITOOLS_BATCH_ID` env var shared across shards.
-- **Full-page Strict checks on a page full of live data.** Chatty reviews. *Fix:* `Target.Region(
-  locator)` for the stable part, `Layout`/`Ignore` regions for the live bits.
+- **The package named after the vendor plus `.Playwright`.** It is not on NuGet. *Fix:* `Eyes.Playwright`.
+- **`await` on an Eyes call, or a hunt for `OpenAsync` / `CheckAsync`.** The SDK is synchronous; `CloseAsync()`
+  returns `void`. *Fix:* §2.
+- **`try { … } finally { _eyes.Close(false); }` in a test.** *Fix:* `CloseAsync()` in the class's `[TearDown]`.
+- **A `static` runner shared by every class.** Static mutable state across parallel workers. *Fix:* one runner
+  per class, built in `[OneTimeSetUp]`, gated in `[OneTimeTearDown]`.
+- **`Close(true)` per test as the gate.** *Fix:* the runner's results, once per class.
+- **`AllureApi.AddLink` or `AddAttachment` in `[OneTimeTearDown]`.** No test is running; nothing is recorded.
+  *Fix:* `AllureApi.AddGlobalAttachment`.
+- **`ClassicRunner` and expecting a cross-browser grid.** *Fix:* `VisualGridRunner` and the `Configuration`
+  matrix.
+- **`Task.Delay` or `WaitForTimeoutAsync` before `Check`.** *Fix:* the page object's ready signal.
+- **`Ignore` where `Layout` would do.** *Fix:* Layout keeps the structure asserted.
+- **A new batch per class or shard.** *Fix:* one `APPLITOOLS_BATCH_ID` per run.
+- **An Eyes test without the `[Description("No assertion: …")]`.** It reads as a forgotten assertion.
+- **A `Version=` on the `PackageReference` or a floating `3.*`.** *Fix:* `Directory.Packages.props` pins 1.37.49.
 
-## Examples
+## Rules
 
-**End-to-end: a pricing-table visual gate across a browser/device grid, reviewed in the dashboard.**
-
-```csharp
-[TestFixture]
-[Parallelizable(ParallelScope.Self)]
-public sealed class PricingTests : PageTest
-{
-    private static readonly VisualGridRunner Runner =
-        new(new RunnerOptions().TestConcurrency(5));
-
-    [Test]
-    public async Task Should_Match_PricingTable_When_PlansLoaded()
-    {
-        var eyes = new Eyes(Runner);
-        eyes.SetConfiguration(EyesConfig.Build());
-        await eyes.OpenAsync(Page, "FlexInvest Web", "Pricing — plan table",
-            new RectangleSize(1280, 800));
-
-        try
-        {
-            var pricing = new PricingPage(Page);
-            await pricing.GotoAsync();
-            await pricing.WaitUntilPlansRenderedAsync();          // condition, not sleep
-            await Page.EvaluateAsync("document.fonts.ready");      // fonts settled before capture
-
-            await eyes.CheckAsync("Pricing table",
-                Target.Region("[data-testid=\"pricing-table\"]")  // element, not full page
-                    .Layout("[data-testid=\"promo-price\"]")      // price A/B-tests → Layout, not ignore
-                    .Ignore("[data-testid=\"promo-banner\"]"));   // rotates daily → ignore entirely
-        }
-        finally
-        {
-            await eyes.CloseAsync(false);                         // don't throw inline
-        }
-    }
-
-    [OneTimeTearDown]
-    public void GateOnVisualResults() => Runner.GetAllTestResults(true);  // grid finishes → gate
-}
-```
-
-Lifecycle for this test:
-1. Dev makes an intended CSS change to the pricing table.
-2. CI runs `dotnet test`; the SDK ships one checkpoint per configured browser/device to the grid, which
-   renders + AI-diffs each vs the branch baseline.
-3. `GetAllTestResults(true)` fails the build; the dev reviews + accepts the diff in the dashboard
-   (accepting it on **all** environments at once).
-4. On merge, the accepted renders become the branch baseline — the next PR diffs against them.
-
-## Rules (hard constraints)
-
-- Visual regression is an assertion layer on existing page objects/specs — add `Eyes.Check`, don't
-  author new page objects here. Page objects expose intent + locators; no selectors in tests.
-- `VisualGridRunner` (not `ClassicRunner`) + `Configuration.AddBrowser`/`AddDeviceEmulation` — the grid
-  is the reason to choose Applitools.
-- `Eyes.Close(false)` per test (never inline-throw); gate **once** at suite end with
-  `runner.GetAllTestResults(true)`. Async-all-the-way on `OpenAsync`/`CheckAsync`/`CloseAsync`.
-- Stabilize **application** state on a condition before `Eyes.Check`; never `WaitForTimeoutAsync` — Eyes
-  captures at call time.
-- Prefer a **match level** (especially `Target.Layout(region)`) over hiding dynamic content; there is
-  **no per-call pixel-ratio knob** — the AI + match level is the lever.
-- `APPLITOOLS_API_KEY` is the **only** secret: env-only, from the CI secret store, read lazily by the
-  SDK, never logged or committed. No agent process to launch (unlike Percy's `percy exec`).
-- No in-repo `*-snapshots/` baselines — baselines live in the **dashboard**, keyed by app/test/branch,
-  managed via the review UI. One stable `BatchInfo` id across shards.
-- The gate is the runner's **aggregated results**; link the dashboard batch URL into Allure.
+- Derive from `BaseTest`; reach the state through page objects; freeze the clock in `[SetUp]`.
+- `VisualGridRunner` per class in `[OneTimeSetUp]`; `Eyes` per test in `[SetUp]`; `CloseAsync()` in
+  `[TearDown]`; `GetAllTestResults(false)` and an assertion on the unresolved list in `[OneTimeTearDown]`.
+- Prefer a match level (`Layout`) over hiding a region; there is no pixel budget.
+- `APPLITOOLS_API_KEY` from the secret store only; one batch id per run.
+- The test states its missing assertion in `[Description("No assertion: …")]`.
+- `Eyes.Playwright` 1.37.49 through central package management.
 
 ## Cross-references
 
-- `qa-visual-regression-typescript` — the **canonical** skill this ports
-  (`@applitools/eyes-playwright`, `eyes.check(Target.window().fully())`, `runner.getAllTestResults`).
-- `qa-visual-regression-java` — the Java / TestNG sibling (`com.applitools:eyes-playwright-java5`,
-  `eyes.check(Target.window().fully())`, `runner.getAllTestResults(false)`).
-- `references/percy.md` — the **hosted pixel-diff** sibling: DOM-upload agent +
-  server-side pixel diff + review UI. Applitools is the "graduate to visual-AI + match levels + grid" step.
-- `references/playwright-snapshots.md` — the **free** sibling: in-repo baselines you
-  diff yourself, with the CI-container discipline both Percy and Applitools remove.
-- `qa-ui-test-writer-playwright-dotnet` — the page objects/specs `Eyes.Check` is called inside.
-- `qa-ci-pipelines-dotnet` — where `APPLITOOLS_API_KEY` is sourced; no agent wrapper needed.
-- `qa-test-reports-dotnet` — link the Applitools dashboard batch URL into the report.
+- `references/playwright-snapshots.md` — the free sibling, and `PricingPage`.
+- `references/percy.md` — the hosted pixel-diff sibling.
+- `qa/dotnet/skills/ui-test-author/playwright` — `BaseTest` and page objects.
+- `qa/cicd/dotnet/skills/ci-pipelines` — the schedule gate and the secret store.
+- `qa/reporting/dotnet/skills/test-reports` — Allure.NUnit wiring, global attachments.
+- `qa-visual-regression-typescript` (`@applitools/eyes-playwright`), `qa-visual-regression-java`
+  (`eyes-playwright-java5`).

@@ -41,7 +41,15 @@ against `src/test/resources/baselines/<os>-<browser>/`, with baselines and the n
 image through `docker run` (D53); every sample on `BaseTest`; axe 4.13.0 at WCAG 2.2 AA with attached
 incompletes; Lighthouse for public pages on `BaseTest`'s Chromium and a free port (D55); a held route instead of a
 handler sleep (D54); headers/TLS at the routing layer; per-class Applitools runners (D56); the archived BrowserUp
-kept with a warning (D57). Next: N3. Built but unverified: no asset, workflow or pipeline has been
+kept with a warning (D57). N3 landed 2026-10-11: .NET `visual-regression`, `accessibility-testing` and
+`network-mocking` (three routers, eight references) on 1.63 — `Locator.ScreenshotAsync` plus
+`Codeuctivity.ImageSharpCompare` 4.1.390 (D58) against `UiTests/Baselines/<os>-<browser>/` found through
+`ProjectPaths.Root` (D59), shown with `AllureApi.AddScreenDiff`, baselines and the nightly job in the v1.63.0-noble
+image through `docker run` (D60); Percy linked with `AddLink`, a synchronous Eyes API gated in `[OneTimeTearDown]`
+with `AddGlobalAttachment`; axe on `RunAxe` (the .NET package has no `AxeBuilder`) at WCAG 2.2 AA; Lighthouse from a
+`PlaywrightTest` fixture on a persistent context and a free port, signed-in pages included (D61); a held route,
+headers/TLS at the routing layer, `PostDataJSON()` records, and a Titanium 7.0.22 proxy that never touches the OS
+trust store; §6.1's package check narrowed to the package id (D62). Next: T4. Built but unverified: no asset, workflow or pipeline has been
 compiled or run (G1 does that; D24's TS config import, the Java build on Allure Gradle plugin 4.3.0, the .NET
 build on NUnit3TestAdapter 6.3.1 / Test SDK 18.10.1, `dorny/test-reporter`'s `java-junit` parse, the trace CLI
 through the Java driver (D39) and through `playwright.ps1` (D43), the .NET shard script against a real
@@ -53,7 +61,11 @@ Vitest-fixture spellings rest on the research and the old skill text, and the TS
 libraries' sources, but nothing ran: the comparator flow, the `docker run` visual job, Lighthouse attached to
 Playwright's Chromium, Applitools `BatchInfo.setId` / `getAllTestResults(boolean)` (no published sources) and
 BrowserUp on Java 21 are open, and J2's Java CI references still describe the visual container job — G1
-reconciles that too).
+reconciles that too; N3 read its pins from NuGet and npm and its spellings from sources (the Eyes API from the
+assembly metadata, since it publishes none), but nothing ran: `VisualCheck`, the Eyes calls, `RunAxe` with an
+exclusion context, Lighthouse seeing a persistent context's sign-in, the `docker run` visual job and the Titanium
+proxy with Selenium are open, and N2's .NET CI references neither exclude the `visual` / `lighthouse` categories
+from the gate nor point at the `docker run` job — G1 reconciles that).
 Planned 2026-10-10. The research behind it is committed with this plan:
 `docs/research/003-qa-playwright-appium/` (5 files). So is the read-only audit:
 `docs/audits/003-qa-playwright-appium/` (4 files). All open questions were answered on 2026-10-10:
@@ -64,7 +76,7 @@ Planned 2026-10-10. The research behind it is committed with this plan:
 - A Maestro lane is added (X1).
 - The newest Appium client majors are primary.
 
-Next: N3 (H1, the user's, blocks no task). The cost is 19 agent sessions on the subscription, each started by the user
+Next: T4 (H1, the user's, blocks no task). The cost is 19 agent sessions on the subscription, each started by the user
 from Plan Queue. Nothing else is metered.
 
 ## 1. What already exists, and what is missing
@@ -377,7 +389,7 @@ Run these from the repo root, in this order, and fix what fails. A failure may b
    "todo marker": r"// TODO: missing data-testid",
    "fabricated visual api": r"hasScreenshot\(|HasScreenshotOptions|ToHaveScreenshotAsync|ToMatchSnapshotAsync",
    "dotnet shard no-op": r"Playwright\.Shard",
-   "nonexistent package": r"Applitools\.Playwright",
+   "nonexistent package": r'Include="Applitools\.Playwright"|add package Applitools\.Playwright\b',
    "deprecated allure import": r"import \{ allure \} from 'allure-playwright'",
    "removed appium api": r"AppiumDriver<MobileElement>|\bresetApp\(|\bResetApp\(|selenium\.html5|\bTouchAction\b|\bMultiTouchAction\b",
    "nonexistent capability": r"chromedriverAutodownload",
@@ -923,6 +935,61 @@ Central, and its repository is archived. Readings: move the reference to a maint
 WireMock 3 — a new tool taught without a verified API), drop the reference (the Selenium and Appium agents lose
 their traffic layer), or keep it with the warning and fix its samples (chosen). **Cost:** the Java lane's
 non-Playwright traffic capture rests on an unmaintained library that was not run on Java 21.
+
+**D58 — The .NET comparer is `Codeuctivity.ImageSharpCompare` 4.1.390, not `Verify.Playwright` (N3, 2026-10-11).**
+D9 asked for a comparer verified on NuGet and named two candidates. `Verify.Playwright` 3.1.1 (needs
+`Microsoft.Playwright` ≥ 1.61 and Verify 31.20) is a snapshot framework: received/verified files beside the source
+file, DiffEngine, a byte comparison unless another comparer package is added, and its own accept workflow.
+`Codeuctivity.ImageSharpCompare` 4.1.390 (2026-05-13; net8/9/10; Apache-2.0) is a function over two PNGs with a
+per-pixel colour tolerance, a differing-pixel percentage and a diff image. Readings: Verify (it would replace the
+committed `<os>-<browser>` store, `UPDATE_BASELINES=1` and the pinned-image rule that the Java and TS lanes share),
+or ImageSharpCompare under a small `VisualCheck` helper (chosen). **Cost:** `VisualCheck` is this library's code,
+not a vendor's; the comparer pulls `SixLabors.ImageSharp` 3.1.12, which the Six Labors Split License grants under
+Apache-2.0 only as a transitive dependency (or for open source / companies under USD 1M revenue), so a project must
+not reference it directly; the comparer remains a recommendation (D9).
+
+**D59 — .NET tests find committed files through one `ProjectDirectory` assembly-metadata item read by
+`Support/ProjectPaths.Root` (N3, 2026-10-11).** `dotnet test` runs from `bin/<cfg>/net10.0/`, so visual baselines
+and the replayed HAR need the project folder, and an update must write back to it. Readings: paths relative to
+`TestContext.WorkDirectory` (reads copies in `bin/`, updates never reach the repo), `[CallerFilePath]` (rewritten by
+`PathMap` / deterministic CI builds), a required environment variable (one more thing every run must set), or an
+`AssemblyMetadataAttribute` written from `$(MSBuildProjectDirectory)` by the csproj (chosen; one helper, two users —
+visual-regression's baselines and network-mocking's HAR). **Cost:** two csproj lines a project adds (shown in the
+references, not in N1's asset); the recorded path is the build machine's, so a host build run inside a container
+breaks — the visual commands build inside the container.
+
+**D60 — The .NET nightly visual job and the baseline update run `mcr.microsoft.com/playwright/dotnet:v1.63.0-noble`
+with `docker run` from a runner step (N3, 2026-10-11).** As D53 found for Java, a GitHub or Azure container job runs
+`azure/login` / `AzureCLI@2` inside an image with no cloud CLI (D45), so it can only test pages that need no fetched
+credentials. Readings: the container job N2's CI references describe as the visual variant, or the credential fetch
+on the runner and `docker run … dotnet test UiTests -c Release --filter TestCategory=visual` with `-e` (chosen;
+GitLab, whose job already runs in the image, takes masked CI/CD variables). Unlike Java the image already carries
+the .NET 10 SDK, so nothing is installed. **Cost:** a NuGet restore on every run unless a cache is mounted;
+root-owned files on a Linux host; N2's GitHub and Azure "Running in the pinned image" bullets still describe the
+container job, and the .NET UI gate filters do not yet exclude `TestCategory=visual` / `lighthouse` — G1's prompt
+carries both reconciliations.
+
+**D61 — The .NET Lighthouse fixture derives from `PlaywrightTest`, not `BaseTest`, and launches a persistent
+Chromium context on a free port (N3, 2026-10-11).** N3's deliverable says every sample derives from `BaseTest`.
+Lighthouse audits in its own tab in the browser's **default** context, through a remote-debugging port. `BaseTest`'s
+browser is `BrowserTest`'s per-worker service launched from the runsettings (D32) — at best one fixed port per
+worker, colliding across parallel workers — and its context is a non-default, per-test one, so a signed-in state
+there never reaches Lighthouse. Readings: `BaseTest` plus a runsettings `--remote-debugging-port` (wrong context,
+fixed port), J3's public-pages-only lane (D55; impossible on .NET's shared browser), or a `PlaywrightTest` fixture
+calling `Playwright.Chromium.LaunchPersistentContextAsync("", …)` with a `TcpListener`-chosen port and
+`SetStorageStateAsync(AuthSetup.UserState)` [1.59] for signed-in pages (chosen; no `Playwright.CreateAsync()`).
+Lighthouse 13.5.0 clears only file systems, shader cache, service workers and cache storage before a run
+(`core/config/constants.js`), so cookies and local storage survive. **Cost:** the one .NET sample outside
+`BaseTest`; no trace, screenshot or video for a Lighthouse test — its JSON report and log are the evidence;
+Chromium only; `SetStorageStateAsync` on a persistent context reaching Lighthouse's tab is unverified.
+
+**D62 — §6.1's "nonexistent package" check matches the package id, not the namespace (N3, 2026-10-11).** The
+`Eyes.Playwright` 1.37.49 assembly's public types live in `Applitools.Playwright` and `Applitools.Playwright.Fluent`
+(read from its metadata), so `r"Applitools\.Playwright"` would fail every correct `using` line. Readings: keep the
+pattern and write the Eyes sample without `using` lines (fully qualified names still contain the string), or match
+the package id only — `Include="Applitools.Playwright"` in a `PackageReference` / `PackageVersion`, or
+`add package Applitools.Playwright` (chosen). **Cost:** a prose mention of the wrong package name in a code block is
+no longer caught; the references name the real package in prose.
 
 ## Answered questions (2026-10-10)
 
@@ -1869,6 +1936,88 @@ every sample derives from N1's `BaseTest`.
 - **Network:** glob 1.52; the CDP `JsonElement?` payload (D-05); D-18; cross-references (X-01).
 - Change ".NET 8" labels to .NET 10 in these files.
 - **Not in N3:** the remaining .NET skills (N4).
+- **As built (2026-10-11):**
+  - Landed: all eleven files rewritten — three routers (`visual-regression` 7.0k, `accessibility-testing` 4.9k,
+    `network-mocking` 4.6k chars; descriptions 492 / 478 / 496) and eight references (`playwright-snapshots` 24.6k,
+    `percy` 11.2k, `applitools` 14.7k, `axe-playwright` 14.9k, `lighthouse-ci` 15.4k, `playwright-routes` 23.5k,
+    `cdp` 14.6k, `proxy` 19.1k). Every Playwright sample derives from `Example.UiTests.Support.BaseTest` and amends
+    `base.ContextOptions()` (the Lighthouse fixture is the one exception, D61; the proxy samples drive Selenium, so
+    they own their driver in `[SetUp]`/`[TearDown]`); page objects own `GotoAsync` and `Describe()`d locators; no
+    `try`/`finally`, `Task.Delay`, `Thread.Sleep`, `WaitForTimeoutAsync`, comment, floating version or `Version=`
+    on a `PackageReference` in any code block; PascalCase test ids; `Should_X_When_Y` names; every title says .NET 10.
+    Scripted scan of the eleven files: no fabricated screenshot API, no `Playwright.Shard`, no `since … 1.43`.
+  - **The comparer, checked on NuGet today:** `Codeuctivity.ImageSharpCompare` **4.1.390** (published 2026-05-13;
+    net8.0/net9.0/net10.0; Apache-2.0; depends on `SixLabors.ImageSharp` 3.1.12, Six Labors Split License).
+    API read at its release commit `7f3d2a0`: `ImagesHaveEqualSize(path, path)`, `CalcDiff(actual, expected,
+    ResizeOption, pixelColorShiftTolerance)` → `ICompareResult` (`MeanError`, `AbsoluteError`, `PixelErrorCount`,
+    `PixelErrorPercentage` 0–100), `CalcDiffMaskImage(...)` → ImageSharp `Image`; `DontResize` throws
+    `ImageSharpCompareException("Size of images differ.")`. The other candidate, `Verify.Playwright`, is 3.1.1 (D58).
+  - Also checked today: Allure.NUnit 2.15.0 source — `AddScreenDiff(expectedPngPath, actualPngPath, diffPngPath)`
+    (expected first; the doc comments swap the words, the parameters and the JSON do not) plus a `byte[]` overload;
+    `AddLink` / `AddAttachment` do nothing without a running test (`HasTest` / `HasTestOrFixture`), so
+    `[OneTimeTearDown]` uses `AddGlobalAttachment`. `@percy/cli` 1.32.11 `exec.js` exports `PERCY_BUILD_URL`;
+    `PercyIO.Playwright` 1.0.4 (`Percy.cs`): static, synchronous `Percy.Snapshot(IPage, string, object|options)`
+    returning `JObject?`, swallowing every error, no-op when the healthcheck fails. `Eyes.Playwright` 1.37.49
+    (2026-10-01; no published sources — its public API read from the assembly metadata, with `Eyes.Images` 3.68.9):
+    `Applitools.Playwright.Eyes.Open(IPage, app, test, RectangleSize)` → `IPage`, `Check(...)` void,
+    `CloseAsync()` / `AbortAsync()` return **void**, `Applitools.VisualGrid.VisualGridRunner`,
+    `GetAllTestResults(bool)` → `TestResultsSummary`, `Target.Region(ILocator)`, `.Layout/.Ignore/.Floating/…`,
+    `BrowserType.CHROME`, `DeviceName.Pixel_5`, `ScreenOrientation.Portrait`, `TestResultsStatus.Passed`.
+    `Deque.AxeCore.Playwright` 4.13.0 (latest stable; sources at the release commit): **no `AxeBuilder`** — the API is
+    `page.RunAxe(AxeRunOptions?)`, `page.RunAxe(AxeRunContext, AxeRunOptions?)`, `locator.RunAxe(AxeRunOptions?)`,
+    `RunOnlyOptions.Tags(...)`, `AxeResultNode.Target` an `AxeSelector`. npm: `lighthouse` 13.5.0 (Node ≥ 22.19),
+    `@lhci/cli` 0.15.1; Lighthouse's `clearStorageTypes` (D61). playwright-dotnet v1.63.0: `IRequest.PostDataJSON()`
+    is a **method**; `RouteFulfillOptions.Json` is serialized with default `JsonSerializer` options (PascalCase
+    records); `ICDPSessionEvent.OnEvent` is `EventHandler<JsonElement?>`; `IPage.RequestsAsync()` (100),
+    `ConsoleMessagesAsync()`, `PageErrorsAsync()` (200); `IResponse.AllHeadersAsync()`, `SecurityDetailsAsync()` →
+    `ResponseSecurityDetailsResult`; `LaunchPersistentContextAsync("")` makes a temporary profile;
+    `IBrowserContext.SetStorageStateAsync(path)`; `PlaywrightSettingsProvider.LaunchOptions`; routes dispatched with
+    `_ = OnRouteAsync(route)` and `RouteHandler` awaiting the route's handling. `Titanium.Web.Proxy` 7.0.22
+    (2026-10-10, net10.0 only) at its release commit: `new ProxyServer()` defaults `userTrustRootCertificate: true`,
+    `Start(bool changeSystemProxySettings = true)`, `TrustRootCertificate(bool machineTrusted)` (the old sample's
+    `userTrusted:` did not compile), port 0 written back to `endPoint.Port`. `Selenium.WebDriver` / `.Support` 4.51.0.
+  - Differed from the plan: the comparer (D58); the `ProjectDirectory` metadata and `ProjectPaths.Root` (D59); the
+    nightly visual job as `docker run` (D60); the Lighthouse fixture on `PlaywrightTest` (D61); §6.1's package check
+    narrowed (D62). Beyond the plan: the axe reference rebuilt on `RunAxe` (the old `AxeBuilder` does not exist in
+    .NET — the audit missed it); the Eyes reference made synchronous (the old `OpenAsync`/`CheckAsync`/awaited
+    `CloseAsync(false)` do not exist); security headers and TLS moved from `cdp.md` to `playwright-routes.md` §5, so
+    CDP lost `ResponseFor`, `SecurityHeaders` and `CdpBaseTest`; the `Task.Delay` latency handler became a held
+    route (`MockApi.HoldOrdersAsync()` / `HeldRequests.Release()`, as J3's D54); `PostDataJSON` used as a method,
+    payloads compared as records (D-18); `Json =` replaced by `JsonSerializerOptions.Web` bodies; the proxy keeps the
+    root CA out of the OS store and pins it in `HttpClient`, its predicate-waiter machinery became reads after a
+    client-visible signal (as T3's D52), its fault test gained an assertion, and its HAR pseudo-code became a scrubbed
+    JSON traffic log; Percy's build link is `AllureApi.AddLink` during the test.
+  - Names assigned: `Support/VisualCheck` (`CompareAsync(target, masked, subject)`, `AllowedDifferentPixelsPercent`
+    0.05, tolerance 12) + `VisualDiff`; `Support/ProjectPaths.Root`; `Support/PercySnapshots.Capture(name, options)`;
+    `Support/EyesConfig` (`ForGrid()`, `Unresolved(summary)`); `Support/A11yScan` (`ScanPageAsync`, `ScanAsync(ILocator)`,
+    `FalsePositives`, `KnownViolations`, `NewViolations`, `BlockingViolations`); `Support/Lighthouse` (`FreePort`,
+    `AuditAsync`, `GatedCategories`); `Support/MockApi` (+ `HeldRequests`), `Support/Traffic`, records `Order`,
+    `CheckoutRequest`; `Support/CdpControls` (`NextResponseAsync`), `CapturedResponse`, `NetworkPreset`;
+    `Support/Proxy/ProxyControls`, `ProxiedClients`, `SeenRequest`; page objects `PricingPage`, `SignupPage`,
+    `AccountPage`, `OrdersPage`, `CartPage`, `AppShellPage`, `ProfilePage`, `DashboardPage`, `Pages/Selenium/CartScreen`;
+    NUnit categories `visual`, `lighthouse`, `a11y`, `proxy`; env `UPDATE_BASELINES=1`, `HAR_UPDATE=1`,
+    `APPLITOOLS_BATCH_ID`; baselines `UiTests/Baselines/<os>-<browser>/<Subject>.png`; HAR
+    `UiTests/Fixtures/Har/payments.har`; kept files `<WorkDirectory>/playwright-artifacts/<Class>.<Test>.{actual,diff}.png`,
+    `.lighthouse.{json,log}`, `.traffic.json`.
+  - Built, unverified (Gate: none): nothing compiled or ran. Open points: `VisualCheck` and the ImageSharpCompare
+    calls; `Percy.Snapshot` with an anonymous options object; the Eyes API read from metadata, not run (and its
+    `APPLITOOLS_API_KEY` environment read rests on the SDK's convention); `RunAxe` with an `AxeRunContext` exclusion;
+    `SetStorageStateAsync` on a persistent context reaching Lighthouse's tab, and `Process.Kill` from the deadline
+    registration; a held route under parallel fixtures; the `docker run` visual job and the in-container
+    `ProjectDirectory`; Titanium 7.0.22's `ProxyServer(userTrustRootCertificate: false)` with Selenium 4.51 and
+    `--ignore-certificate-errors`. Observation for J3's lane (not edited, R12): Lighthouse does not clear cookies or
+    local storage, so the Java reference's "Lighthouse resets the origin's storage" is only partly right; its
+    public-pages limit still holds because the audited tab is in a different context.
+  - Proof: no screenshot assertion `visual-regression/SKILL.md:12`; comparer pin `:28` and
+    `references/playwright-snapshots.md:25,41`; `ProjectDirectory` `:51`; `AddScreenDiff(baseline, actual, diff)`
+    `:171`; evidence paths `:277`; `[Category("visual")]` `:257`; pinned-image update `:333`; nightly `docker run`
+    `:382`. Percy `AddLink` and no-assertion description `references/percy.md:109,137`. Eyes sync `Open`,
+    `CloseAsync()` in `[TearDown]`, global attachment, gate `references/applitools.md:146,161,92,166`. axe — no
+    builder `accessibility-testing/references/axe-playwright.md:32`, `RunAxe` `:102,109`, WCAG 2.2 AA tags `:122`.
+    Lighthouse free port, persistent context, storage state, no PWA `references/lighthouse-ci.md:103,205,211,24`,
+    `clearStorageTypes` `:244`. Routes — held route `network-mocking/references/playwright-routes.md:132`,
+    `PostDataJSON()` `:156`, headers/TLS `:324,334`, glob 1.52 `:428`, cross-references `:487-488`; CDP
+    `JsonElement?` `references/cdp.md:17,117`; proxy trust `references/proxy.md:90,104`.
 
 ### T4 — TypeScript: the remaining Playwright-bearing skills
 
@@ -2302,73 +2451,9 @@ Run them in order, one session each, opened from Plan Queue. Each block is compl
 | X1 | `docs` | `general-purpose` | M1, S1, T2 | ~130k |
 | G1 | `docs` | `general-purpose` | all | ~145k |
 
-Landed: T1, J1, N1, T2, J2, N2, A1, T3 (2026-10-10), J3 (2026-10-11). Every other block is live.
+Landed: T1, J1, N1, T2, J2, N2, A1, T3 (2026-10-10), J3, N3 (2026-10-11). Every other block is live.
 
 ---
-
-### N3 — .NET visual regression (rewritten), accessibility and network mocking on 1.63 (general-purpose, docs)
-
-````
-You are `general-purpose`. Task N3 of docs/plans/003-qa-playwright-appium-upgrade.md: make
-qa/dotnet/skills/{visual-regression,accessibility-testing,network-mocking} teach only APIs that exist in
-Microsoft.Playwright 1.63. Rewrite visual regression as screenshot plus comparator (D9), with every
-sample deriving from N1's BaseTest.
-
-Read, in this order:
-1. CLAUDE.md.
-2. The plan: §2.1, §2.2, §4, Decision D9, task N3, "Close-out — every task".
-3. Every .md under qa/dotnet/skills/visual-regression, accessibility-testing and network-mocking.
-4. qa/dotnet/skills/ui-test-author/playwright/assets/BaseTest.cs and references/lifecycle.md.
-5. docs/research/003-qa-playwright-appium/playwright-evidence.md §1, §2, §6, §13.
-6. docs/audits/003-qa-playwright-appium/dotnet.md rows T1, T3, D-03, D-05, D-06, D-11, D-18, D-22,
-   D-23, X-01, §1 row 49.
-
-Build:
-- Visual:
-  - Rewrite references/playwright-snapshots.md: LocatorScreenshotOptions; a comparer you verify on NuGet
-    today (candidates Verify.Playwright, Codeuctivity.ImageSharpCompare); AllureApi.AddScreenDiff;
-    baselines only in mcr.microsoft.com/playwright/dotnet:v1.63.0-noble.
-  - SKILL.md stops saying built-in.
-  - Eyes.Playwright; AddGlobalAttachment/AddLink instead of AddTestAttachment; BaseURL from config.
-- A11y: Deque 4.13.0 exact; Lighthouse via a persistent context and a free port; no pwa category.
-- Network: glob 1.52; the CDP JsonElement? payload; D-18; cross-references.
-- ".NET 8" labels → .NET 10 in these files.
-
-Traps:
-- ToHaveScreenshotAsync, ToMatchSnapshotAsync and LocatorAssertionsToHaveScreenshotOptions do not
-  exist. G1's CODE_CHECKS fails if they survive in a code block or an asset.
-- Applitools.Playwright is not on NuGet; the package is Eyes.Playwright. G1's CODE_CHECKS bans the old
-  name in code.
-- Name the comparer's package and version you saw on NuGet today, in the reference and your As-built note.
-- N1's BaseTest is `Example.UiTests.Support.BaseTest : PageTest`. Samples derive from it and amend
-  `base.ContextOptions()` (BaseURL from BASE_URL is already on it; never a hardcoded BaseURL, D-22); an
-  override that returns `new()` drops BaseURL and the video folder, and BaseTest's teardown then throws.
-  Locators go through page objects (`Describe()`, `Expect(locator, "message")`), never raw `Page.` calls in a
-  test (R6). A package a sample needs is pinned in N1's Directory.Packages.props, so sample .csproj lines
-  carry no `Version=` (Deque.AxeCore.Playwright 4.13.0, PercyIO.Playwright 1.0.4 and Eyes.Playwright
-  1.37.49 are already there; add the comparer's `PackageVersion` line in the reference).
-- Lighthouse needs a persistent context on a fixed debugging port, which BaseTest's per-worker browser
-  cannot give, and `Playwright.CreateAsync()` in a test is a review blocker. A fixture deriving from
-  `PlaywrightTest` can call `BrowserType.LaunchPersistentContextAsync(...)` without it. Launch flags in
-  general belong in a .runsettings (D32).
-- BaseTest's `EvidenceName()`, `Artifact(name, ext)` and `Attach(name, type, path)` are protected (D42).
-  A visual test writes its actual and diff PNGs to `Artifact(EvidenceName(), "actual.png")` /
-  `"diff.png"`, beside the failure evidence CI already uploads, and shows them with
-  `AllureApi.AddScreenDiff` (qa/dotnet/skills/evidence-capture/references/playwright.md §6 hands it to you;
-  confirm its parameter order against the Allure.NUnit 2.15.0 source if you can — N2 could not).
-  Screenshot options are spelled as in that reference's §1.1. HAR replay (`RouteFromHARAsync`) is
-  network-mocking's; recording a HAR is evidence-capture's §5 — link it rather than repeat it.
-- T3 moved the TS security-header and TLS checks from CDP to the routing layer (`response.allHeaders()`,
-  `response.securityDetails()`, both all-binding); a .NET CDP reference that ports the TS audit moves the
-  same way (`AllHeadersAsync()`, `SecurityDetailsAsync()` on `IResponse`). A hosted-tool test with no
-  assertion (Percy, Eyes) states that exception in the test (TS uses an annotation, D50; NUnit
-  `[Description(…)]`).
-
-Gate: none. This plan gates once, in G1. Do not run any build, test or check script.
-
-Commit: `docs(qa-dotnet): visual (screenshot + comparer), a11y and network skills on Playwright 1.63 (003 N3)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
 
 ### T4 — TypeScript: the remaining Playwright-bearing skills (general-purpose, docs)
 
@@ -2511,7 +2596,7 @@ what N1–N3 teach.
 
 Read, in this order:
 1. CLAUDE.md.
-2. The plan: §2.1, §2.2, §4 (R8), §5.1, task N4, "Close-out — every task".
+2. The plan: §2.1, §2.2, §4 (R8), §5.1, D58–D62, task N3's As-built note, task N4, "Close-out — every task".
 3. Under qa/dotnet/skills/: responsive-testing, realtime-stream-testing, browser-cloud-setup (+ references),
    test-login-tokens (+ references), language-testing (+ references), data-driven-testing,
    production-uptime-checks, inhouse-framework-conventions, api-test-author/playwright, gherkin-step-code,
@@ -2570,6 +2655,17 @@ Traps:
   instead of class filters" — the class-filter mechanism is qa/cicd/dotnet/skills/ci-pipelines/SKILL.md
   (D44). A retry row matches D7 as N2 wrote it in flaky-test-quarantine: `[Retry(2)]` (two attempts) only
   on a documented hotspot; `[Retry(1)]` is a no-op.
+- conformance-checklist and N3: the checklist audits what N3's three skills teach, verified at source in N3:
+  `Deque.AxeCore.Playwright` 4.13.0 has **no `AxeBuilder`** (`page.RunAxe(...)` / `locator.RunAxe(...)`, never
+  `RunAxeLegacy`); `AllureApi.AddTestAttachment` does not exist, and `AddLink` / `AddAttachment` record nothing in
+  `[OneTimeTearDown]` (`AddGlobalAttachment` there); the Applitools package is `Eyes.Playwright` and its API is
+  synchronous (`Open`, `Check`, `CloseAsync()` returning void — no `OpenAsync`/`CheckAsync`, nothing to await);
+  `IRequest.PostDataJSON()` is a method; a CDP `OnEvent` payload is `JsonElement?`; a visual comparison is
+  `Locator.ScreenshotAsync` + `Codeuctivity.ImageSharpCompare` + `AllureApi.AddScreenDiff`, with `visual` and
+  `lighthouse` categories kept out of the PR gate. The rule "a UI fixture derives from BaseTest" has one documented
+  exception: a Lighthouse fixture on `PlaywrightTest` that calls `Playwright.Chromium.LaunchPersistentContextAsync`
+  (D61) — that is not `Playwright.CreateAsync()`, so E11 does not fire on it. A sample that needs the project folder
+  uses `Support/ProjectPaths.Root` (D59), not a path relative to `bin/`.
 
 Gate: none. This plan gates once, in G1. Do not run any build, test or check script.
 
@@ -2930,6 +3026,12 @@ Build:
   Also: the Java `test` task in J1's assets/build.gradle.kts does not exclude the `visual` group; the visual
   reference shows `excludeGroups("visual")` and a `visualTest` task as additions a project makes, so leave the
   asset alone unless a check needs it.
+- D60 seam: the .NET visual job is N3's `docker run` step (qa/dotnet/skills/visual-regression/references/
+  playwright-snapshots.md §8). In qa/cicd/dotnet/skills/ci-pipelines/references/{github-actions,azure-pipelines}.md
+  the "Running in the pinned image" bullet still describes a container job; point each at that §8 for the visual
+  job (one line each; GitLab's job already runs in the image — leave it). In all three .NET CI references the UI
+  gate filter `($SHARD_FILTER)&TestCategory!=Flaky` becomes `…&TestCategory!=Flaky&TestCategory!=visual&TestCategory!=lighthouse`,
+  so the nightly-only categories N3 introduced stay out of the PR gate.
 - The final Status names what is unverified: no Appium flow ran on a device or emulator; no Maestro flow
   ran; no WebMCP test ran against a site that registers tools; the D9 comparators are recommendations. Then git mv the plan
   to docs/plans/implemented/.

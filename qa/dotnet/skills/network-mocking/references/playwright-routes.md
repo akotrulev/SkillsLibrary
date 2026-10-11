@@ -1,380 +1,494 @@
-# QA — Playwright Network Monitoring & Interception (C# / .NET)
+# QA — Playwright Routing, Mocking and Traffic Assertions (.NET 10 / Microsoft.Playwright 1.63 + NUnit)
 
-Intercepts, mocks, asserts, and shapes HTTP traffic in Playwright `Microsoft.Playwright` + NUnit tests on .NET 8. Built on the **`PageTest` base-class** model from `qa/dotnet/skills/ui-test-author/playwright`: route handlers and request-assertion helpers are wrapped in intent-revealing helper classes exposed through `BaseTest`, never raw `RouteAsync(...)` calls scattered across `[Test]` methods. Every wait is conditional on a request/response predicate; there is **no `WaitForTimeoutAsync`** as a wait anywhere in this skill.
-
-This is the **.NET port of the canonical** `qa/typescript/skills/network-mocking` — same patterns (mock / assert / modify-in-flight / HAR / offline / latency), re-expressed in `Microsoft.Playwright` async idioms.
-
-## Stack
-
-- .NET 8, C# (nullable reference types enabled), async all the way (`*Async`, never `.Result`/`.Wait()`)
-- NUnit 4.x + `Microsoft.Playwright` + `Microsoft.Playwright.NUnit` (Playwright ≥ 1.49)
-- Network helpers under `Tests/Support/Network/`, HAR archives under `Tests/Fixtures/Har/`
-- Page objects under `Tests/Pages/`, test classes under `Tests/Specs/` (see the UI sibling)
-- These tests run sharded in CI under `qa/cicd/dotnet/skills/ci-pipelines`
+Intercepts, mocks, holds, asserts and shapes HTTP traffic in Playwright for .NET with NUnit. Every sample
+derives from `Example.UiTests.Support.BaseTest` (`qa/dotnet/skills/ui-test-author/playwright/assets/BaseTest.cs`),
+which owns the browser, a context and page per test, and the failure evidence. Route handlers and traffic
+reads live in two helpers, `MockApi` and `Traffic`, built in the class's own `[SetUp]`; a test calls intent
+methods, never `Page.RouteAsync(...)`. Every wait is a request or response predicate or a page object's
+completion signal. Async all the way: every Playwright call is awaited, never `.Result` or `.Wait()`.
 
 ## When to use
 
-- Mocking a backend or third-party response so a UI test is deterministic (stub JSON, force a `500`/`403`)
-- **Asserting** an endpoint was (or was not) called, with the expected method / payload / headers
-- Modifying a real response in flight (inject a flag, corrupt one field) to exercise an edge case
-- Recording a HAR of a flaky third-party dependency, then replaying it offline for determinism
-- Simulating offline / slow-network conditions to test loading and error states
-- Blocking noisy resources (analytics, fonts, images) to speed up or stabilize a suite
+- Mock a backend or third-party response so a UI test is deterministic — canned JSON, a forced `500`.
+- **Assert** an endpoint was called, with the expected method and payload — or was **not** called.
+- Assert the app shell's **security headers** and **TLS** details.
+- Modify a real response in flight (force a feature flag) or tag an outgoing request.
+- Replay a committed HAR of a third-party dependency.
+- Show the loading state while a request is **held**, or the offline state.
 
 ## When NOT to use
 
-- Playwright TypeScript / Java interception → `qa/{typescript,java}/skills/network-mocking`
-- Low-level CDP (`Network.*`, real bandwidth throttling, protocol tracing) → `qa/dotnet/skills/network-mocking`
-- An HTTP proxy in front of the browser (mitmproxy, system-level capture) → `qa/dotnet/skills/network-mocking`
-- Writing the page objects / test classes themselves → `qa/dotnet/skills/ui-test-author/playwright`
-- Pure API contract/integration tests with no browser → `qa/dotnet/skills/api-test-author/writer`
+- Real bandwidth and latency, cache disable, CPU throttling, performance metrics → `references/cdp.md`
+- A client with no Playwright `IPage` (Selenium, Appium, `HttpClient`) → `references/proxy.md`
+- Recording a HAR as evidence → `qa/dotnet/skills/evidence-capture` §5
+- WebSocket and SSE → `qa/dotnet/skills/realtime-stream-testing`
+- No browser at all → `qa/dotnet/skills/api-test-author`
+- Writing the page objects themselves → `qa/dotnet/skills/ui-test-author/playwright`
 
 ## Inputs needed
 
-Ask at most 3 questions; infer the rest from the test project and existing tests.
-
-1. **What traffic** — exact endpoint(s) or URL glob/regex (`**/api/orders/**`), and is it first-party or a third-party dependency?
-2. **Intent** — mock a response, assert a call happened, modify in flight, replay a HAR, or simulate offline/latency?
-3. **Scope** — one page (`Page.RouteAsync`) or every page in the context including popups (`Context.RouteAsync`)?
+1. **What traffic** — the endpoint(s) as a glob or `Regex`, first-party or third-party.
+2. **Intent** — mock, hold, assert called / not called, modify, HAR replay, offline, headers or TLS.
+3. **Scope** — the test's page (`Page.RouteAsync`) or every page of the context including popups
+   (`Context.RouteAsync`).
 
 ## Decision matrix
 
-| Goal | Tool | Notes |
+| Goal | Call | Note |
 |---|---|---|
-| Return canned data, never hit the network | `route.FulfillAsync(new() { Json = obj })` | `Json` sets `content-type: application/json` and serializes |
-| Force an error status | `route.FulfillAsync(new() { Status = 500, Json = ... })` | The app's error path is now deterministic |
-| Block a resource (analytics, images) | `route.AbortAsync()` | `AbortAsync("blockedbyclient")` to be explicit |
-| Let it through unchanged | `route.ContinueAsync()` | Goes straight to network; **skips** remaining handlers |
-| Let an **earlier-registered** handler also run | `route.FallbackAsync()` | Chains to the next matching handler instead of the network |
-| Modify a real response | `await route.FetchAsync()` → mutate → `route.FulfillAsync(new() { Response = r, Body = ... })` | Preserves original status/headers unless overridden |
-| Tweak the outgoing request | `route.ContinueAsync(new() { Headers = ..., PostData = ... })` | Header tampering, payload rewrite |
-| Assert a call happened | `RunAndWaitForRequestAsync` / `RunAndWaitForResponseAsync` | Action lambda first — the API shape removes the listener-ordering pitfall |
-| Deterministic third-party dep | `RouteFromHARAsync(har, new() { Url = ..., NotFound = HarNotFound.Abort })` | Record once with `Update = true`, commit, replay |
-| Whole-context offline | `Context.SetOfflineAsync(true)` | Cross-browser |
-| Latency simulation | `await Task.Delay(ms)` inside the handler, then `route.ContinueAsync()` | No built-in `route` throttle; real bandwidth = CDP (Chromium-only) → `qa/dotnet/skills/network-mocking` |
+| Canned data, never hit the network | `route.FulfillAsync(new() { Status = 200, ContentType = "application/json", Body = json })` | `Json = obj` also works but serializes with System.Text.Json **defaults** — PascalCase for C# records (§1) |
+| A forced error | `route.FulfillAsync(new() { Status = 500, … })` | The app's error path becomes deterministic |
+| Block a resource | `route.AbortAsync("blockedbyclient")` | Analytics, ads, fonts |
+| Let it through unchanged | `route.ContinueAsync()` | Goes to the network and **skips** the remaining handlers |
+| Defer to an earlier handler | `route.FallbackAsync()` | Chains to the next matching handler |
+| Modify a real response | `route.FetchAsync()` → edit `TextAsync()` → `route.FulfillAsync(new() { Response = response, Body = … })` | Keeps the real status and headers |
+| Tag the outgoing request | `route.ContinueAsync(new() { Headers = headers })` | A `Cookie` header set here is ignored since 1.52 |
+| Hold a request, release it later | a handler that awaits a `TaskCompletionSource`, then continues | Playwright dispatches each route without blocking the others (§8) |
+| Assert a call happened | `Page.RunAndWaitForRequestAsync(action, glob)` / `RunAndWaitForResponseAsync(action, predicate)` in a page object | The action runs **inside** the wait |
+| Assert a call did not happen | `Page.RequestsAsync()` after the completion signal | The page's recent requests; no listener |
+| Security headers, TLS | `response.AllHeadersAsync()`, `response.SecurityDetailsAsync()` | Cross-browser; no CDP |
+| Deterministic third party | `Page.RouteFromHARAsync(har, new() { Url = …, NotFound = HarNotFound.Abort })` | Update deliberately (§7) |
+| Offline | `Context.SetOfflineAsync(true)` | Cross-browser |
 
-## Patterns
+## 1. The helpers
 
-### Route-mocking helper — `Tests/Support/Network/MockApi.cs`
-
-Wrap interception in a helper with intent-revealing methods. Tests call `MockApi.StubOrdersAsync([...])`, not `Page.RouteAsync("**/api/orders", ...)`.
+`MockApi` owns every route; `Traffic` reads what the page sent. Both wrap the `IPage` `BaseTest` opened and
+own no lifecycle — the context, and with it every route, is closed after each test.
 
 ```csharp
+using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
 using Microsoft.Playwright;
 
-namespace Example.Tests.Support.Network;
+namespace Example.UiTests.Support;
 
-public sealed class MockApi
+public sealed record Order(string Id, string Status, long TotalMinor);
+
+public sealed record CheckoutRequest(long TotalMinor, string Currency);
+
+public sealed class MockApi(IPage page)
 {
-    private readonly IPage _page;
+    private static readonly string PaymentsHar = Path.Combine(ProjectPaths.Root, "Fixtures", "Har", "payments.har");
+    private static readonly bool HarUpdate = Environment.GetEnvironmentVariable("HAR_UPDATE") == "1";
 
-    public MockApi(IPage page) => _page = page;
+    public Task StubOrdersAsync(IReadOnlyList<Order> orders) =>
+        page.RouteAsync("**/api/orders", route => FulfillJsonAsync(route, 200, "application/json", orders));
 
-    /// <summary>Serve canned orders; the real backend is never hit.</summary>
-    public Task StubOrdersAsync(object[] orders) =>
-        _page.RouteAsync("**/api/orders", route =>
-            route.FulfillAsync(new RouteFulfillOptions { Json = orders }));
-
-    /// <summary>Force the orders endpoint to fail so the UI's error path runs.</summary>
     public Task FailOrdersWithAsync(int status) =>
-        _page.RouteAsync("**/api/orders", route =>
-            route.FulfillAsync(new RouteFulfillOptions
-            {
-                Status = status,
-                Json = new { error = "simulated failure" },
-            }));
+        page.RouteAsync("**/api/orders", route => FulfillJsonAsync(route, status, "application/problem+json", new { title = "Simulated failure", status }));
 
-    /// <summary>Drop noisy third-party traffic to stabilize and speed up the run.</summary>
     public Task BlockAnalyticsAsync() =>
-        _page.RouteAsync(new Regex(@"google-analytics\.com|segment\.io"), route =>
-            route.AbortAsync("blockedbyclient"));
-}
-```
+        page.Context.RouteAsync(new Regex(@"google-analytics\.com|segment\.io"), route => route.AbortAsync("blockedbyclient"));
 
-Expose it on `BaseTest` so test classes get `MockApi` ready in `[SetUp]` (mirrors how the UI sibling wires page objects):
+    public Task EnableFlagAsync(string flag) =>
+        page.RouteAsync("**/api/feature-flags", async route =>
+        {
+            var response = await route.FetchAsync();
+            var flags = JsonNode.Parse(await response.TextAsync())!.AsObject();
+            flags[flag] = true;
+            await route.FulfillAsync(new() { Response = response, Body = flags.ToJsonString() });
+        });
 
-```csharp
-public abstract class NetworkBaseTest : PageTest
-{
-    protected MockApi MockApi { get; private set; } = default!;
+    public Task TagTenantAsync(string tenantId) =>
+        page.RouteAsync("**/api/**", route => route.ContinueAsync(new()
+        {
+            Headers = new Dictionary<string, string>(route.Request.Headers) { ["x-test-tenant"] = tenantId },
+        }));
 
-    [SetUp]
-    public void InitNetwork() => MockApi = new MockApi(Page);
-}
-```
-
-```csharp
-// Tests/Specs/OrdersTests.cs
-[TestFixture]
-public class OrdersTests : NetworkBaseTest
-{
-    [Test]
-    public async Task Renders_Empty_State_When_There_Are_No_Orders()
+    public async Task<HeldRequests> HoldOrdersAsync()
     {
-        await MockApi.StubOrdersAsync([]);
-        await Page.GotoAsync("/orders");
-
-        await Expect(Page.GetByTestId("orders-empty")).ToBeVisibleAsync();
+        var held = new HeldRequests();
+        await page.RouteAsync("**/api/orders", held.HoldAsync);
+        return held;
     }
 
-    [Test]
-    public async Task Shows_Error_Banner_When_Orders_Api_Fails()
-    {
-        await MockApi.FailOrdersWithAsync(500);
-        await Page.GotoAsync("/orders");
+    public Task ReplayPaymentsAsync() =>
+        page.RouteFromHARAsync(PaymentsHar, new()
+        {
+            Url = "https://api.stripe.com/**",
+            NotFound = HarNotFound.Abort,
+            Update = HarUpdate,
+            UpdateContent = RouteFromHarUpdateContentPolicy.Attach,
+            UpdateMode = HarMode.Minimal,
+        });
 
-        await Expect(Page.GetByRole(AriaRole.Alert))
-            .ToContainTextAsync(new Regex("couldn’t load orders", RegexOptions.IgnoreCase));
+    public Task GoOfflineAsync() => page.Context.SetOfflineAsync(true);
+
+    private static Task FulfillJsonAsync(IRoute route, int status, string contentType, object payload) =>
+        route.FulfillAsync(new()
+        {
+            Status = status,
+            ContentType = contentType,
+            Body = JsonSerializer.Serialize(payload, JsonSerializerOptions.Web),
+        });
+
+    public sealed class HeldRequests
+    {
+        private readonly TaskCompletionSource _released = new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        internal async Task HoldAsync(IRoute route)
+        {
+            await _released.Task;
+            await route.ContinueAsync();
+        }
+
+        public void Release() => _released.TrySetResult();
     }
 }
 ```
 
-Register routes **before** the navigation/action that triggers them — a route registered after the request has fired won't catch it.
-
-### Request-assertion helper — fail fast on a missing/mismatched call
-
-`RunAndWaitForRequestAsync` takes the **action lambda first**, then the URL/predicate — the API shape sets up the listener before running the action, so the listener-before-action ordering pitfall (a footgun in the TS sibling) cannot happen here.
-
 ```csharp
-// Tests/Support/Network/RequestAssertions.cs
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using Microsoft.Playwright;
+
+namespace Example.UiTests.Support;
+
+public sealed class Traffic(IPage page)
+{
+    public async Task<IReadOnlyList<string>> RequestedUrlsAsync(Regex url) =>
+        (await page.RequestsAsync()).Select(request => request.Url).Where(url.IsMatch).ToList();
+
+    public Task<IReadOnlyList<string>> PageErrorsAsync() => page.PageErrorsAsync();
+
+    public static T JsonBody<T>(IRequest request) =>
+        request.PostDataJSON()?.Deserialize<T>(JsonSerializerOptions.Web)
+        ?? throw new InvalidOperationException($"{request.Method} {request.Url} has no JSON body; post data: {request.PostData}");
+}
+```
+
+- **JSON naming.** `RouteFulfillOptions.Json` serializes with `JsonSerializer.Serialize(json)` and default
+  options (playwright-dotnet v1.63.0, `Route.cs`), so a C# record goes out as `{"TotalMinor":…}`. An API that
+  speaks camelCase gets `JsonSerializerOptions.Web` through `FulfillJsonAsync`, and reads back through
+  `Traffic.JsonBody` with the same options. A large payload is a fixture file:
+  `route.FulfillAsync(new() { Path = Path.Combine(ProjectPaths.Root, "Fixtures", "Responses", "orders.json") })`.
+- **`PostDataJSON()` is a method** returning `JsonElement?` — not a property. `JsonBody` deserializes it into
+  the record, and a body that is not JSON fails with the method, the URL and the raw post data in the message.
+- **`ProjectPaths.Root`** is the project folder, written into the test assembly at build time — the same
+  helper `qa/dotnet/skills/visual-regression`'s `references/playwright-snapshots.md` §1 adds for baselines.
+  `dotnet test` runs from `bin/<cfg>/net10.0/`, so a relative fixture path would read a copy and a HAR update
+  would write into `bin/`:
+
+  ```xml
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+      <_Parameter1>ProjectDirectory</_Parameter1>
+      <_Parameter2>$(MSBuildProjectDirectory)</_Parameter2>
+    </AssemblyAttribute>
+  </ItemGroup>
+  ```
+
+  ```csharp
+  using System.Reflection;
+
+  namespace Example.UiTests.Support;
+
+  public static class ProjectPaths
+  {
+      public static readonly string Root = typeof(ProjectPaths).Assembly
+          .GetCustomAttributes<AssemblyMetadataAttribute>()
+          .Single(attribute => attribute.Key == "ProjectDirectory")
+          .Value!;
+  }
+  ```
+- The payload records sit next to the helpers; a payload with four or more fields gets a builder
+  (`qa/dotnet/skills/test-data-builder`).
+
+## 2. Mocking a response
+
+```csharp
+using Example.UiTests.Pages;
+using Example.UiTests.Support;
 using NUnit.Framework;
 
-namespace Example.Tests.Support.Network;
+namespace Example.UiTests.Tests;
 
-public static class RequestAssertions
+public class OrdersNetworkTests : BaseTest
 {
-    /// <summary>
-    /// Assert a request matching <paramref name="urlGlob"/> fires while <paramref name="action"/> runs,
-    /// optionally matching method and JSON payload. Fails fast on timeout.
-    /// </summary>
-    public static async Task<IRequest> ExpectRequestAsync(
-        IPage page,
-        string urlGlob,
-        Func<Task> action,
-        string? method = null,
-        Func<JsonElement, bool>? bodyMatches = null)
+    private MockApi _mockApi = null!;
+    private OrdersPage _ordersPage = null!;
+
+    [SetUp]
+    public void CreateHelpers()
     {
-        var request = await page.RunAndWaitForRequestAsync(action, urlGlob);
+        _mockApi = new MockApi(Page);
+        _ordersPage = new OrdersPage(Page);
+    }
 
-        if (method is not null)
-            Assert.That(request.Method, Is.EqualTo(method), "request method did not match");
+    [Test]
+    public async Task Should_ShowEmptyState_When_ThereAreNoOrders()
+    {
+        await _mockApi.StubOrdersAsync([]);
 
-        if (bodyMatches is not null)
-            Assert.That(bodyMatches(request.PostDataJSON!.Value), Is.True, "request payload did not match");
+        await _ordersPage.NavigateAsync();
 
-        return request;
+        await Expect(_ordersPage.EmptyState, "orders empty state").ToBeVisibleAsync();
+    }
+
+    [Test]
+    public async Task Should_ShowErrorBanner_When_OrdersApiFails()
+    {
+        await _mockApi.FailOrdersWithAsync(500);
+
+        await _ordersPage.NavigateAsync();
+
+        await Expect(_ordersPage.ErrorBanner, "orders error banner").ToHaveTextAsync("We couldn't load your orders");
     }
 }
 ```
 
+- `_mockApi` is a field built in `[SetUp]`, which NUnit runs after `BaseTest` opened the page. Register the
+  route **before** the navigation or action that fires the request; a route added afterwards catches nothing.
+- `OrdersPage.NavigateAsync()` only navigates; `OpenAsync()` navigates and returns once the list is visible.
+  The difference matters in §8, where the list never arrives while a request is held. `GotoAsync("/orders")`
+  resolves against `BaseTest`'s `BaseURL`.
+- Every locator the page object returns carries `Describe(...)`, and `Expect(locator, "message")` [1.60] names
+  the subject in a failure.
+- §3–§8 are further tests of classes shaped like this one: `_cartPage`, `_appShellPage` and
+  `_traffic = new Traffic(Page)` are fields built in the same `[SetUp]`.
+
+## 3. Asserting a call — method and typed payload
+
+The page object starts the wait and performs the action in one call, so the request cannot fire first:
+
 ```csharp
-[Test]
-public async Task Submits_The_Checkout_With_The_Cart_Total()
-{
-    await Page.GotoAsync("/cart");
-
-    await RequestAssertions.ExpectRequestAsync(
-        Page,
-        "**/api/checkout",
-        action: () => Page.GetByRole(AriaRole.Button, new() { Name = "Place order" }).ClickAsync(),
-        method: "POST",
-        bodyMatches: b => b.GetProperty("totalMinor").GetInt32() == 15_000
-                       && b.GetProperty("currency").GetString() == "EUR");
-}
+public Task<IRequest> PlaceOrderAsync() =>
+    _page.RunAndWaitForRequestAsync(() => _placeOrder.ClickAsync(), "**/api/checkout");
 ```
-
-`IRequest.PostDataJSON` is a `JsonElement?` property — read it directly; don't re-parse `PostData` by hand. For a plain "was it called", `RunAndWaitForResponseAsync(action, "**/api/checkout")` is enough.
-
-### Asserting an endpoint was **not** called
-
-There is no negative wait. Collect matching requests over the window of the action via the `Request` event, then assert the count.
 
 ```csharp
 [Test]
-public async Task Does_Not_Call_The_Legacy_Pricing_Endpoint()
+public async Task Should_PostCartTotal_When_OrderIsPlaced()
 {
-    var calls = new List<string>();
-    Page.Request += (_, req) =>
+    await _cartPage.OpenAsync();
+
+    var checkout = await _cartPage.PlaceOrderAsync();
+
+    Assert.Multiple(() =>
     {
-        if (req.Url.Contains("/api/legacy-pricing")) calls.Add(req.Url);
-    };
-
-    await Page.GotoAsync("/cart");
-    await Page.GetByRole(AriaRole.Button, new() { Name = "Recalculate" }).ClickAsync();
-    await Expect(Page.GetByTestId("cart-total")).ToBeVisibleAsync(); // real signal the flow finished
-
-    Assert.That(calls, Is.Empty, "legacy pricing endpoint should be retired");
-}
-```
-
-Gate the assertion on a **user-visible signal** that the flow completed (`ToBeVisibleAsync` on the result), never on a fixed delay — otherwise the negative check passes simply because the request hadn't fired yet.
-
-### Modify a real response in flight
-
-Fetch the live response, mutate the body, re-serve. Passing `Response` keeps the original status and headers; `System.Text.Json.Nodes.JsonNode` gives a mutable tree.
-
-```csharp
-using System.Text.Json.Nodes;
-
-await Page.RouteAsync("**/api/feature-flags", async route =>
-{
-    var response = await route.FetchAsync();
-    var flags = JsonNode.Parse(await response.TextAsync())!;
-    flags["betaCheckout"] = true;             // force the variant under test
-    await route.FulfillAsync(new RouteFulfillOptions
-    {
-        Response = response,
-        Body = flags.ToJsonString(),
-    });
-});
-```
-
-### Header / payload tampering on the outbound request
-
-```csharp
-await Page.RouteAsync("**/api/**", route =>
-{
-    var headers = new Dictionary<string, string>(route.Request.Headers) { ["x-test-tenant"] = "tenant-42" };
-    return route.ContinueAsync(new RouteContinueOptions { Headers = headers });
-});
-```
-
-### HAR record-then-replay for deterministic third-party deps
-
-Record once against the live dependency, commit the archive, then replay offline on every run. Use `HarContentPolicy.Attach` so bodies live as separate files (reviewable diffs).
-
-```csharp
-// One-off recording run — Update = true, then commit Tests/Fixtures/Har/payments.har
-await Page.RouteFromHARAsync("Tests/Fixtures/Har/payments.har", new PageRouteFromHAROptions
-{
-    Url = "**/api.stripe.com/**",
-    Update = true,
-    UpdateMode = HarMode.Minimal,
-    UpdateContent = RouteFromHarUpdateContentPolicy.Attach,
-});
-```
-
-```csharp
-// Every CI run — replay. NotFound = Abort makes any un-recorded call a hard failure
-// (so a new dependency can't silently slip through to the real network).
-[SetUp]
-public async Task ReplayPaymentsHar()
-{
-    await Page.RouteFromHARAsync("Tests/Fixtures/Har/payments.har", new PageRouteFromHAROptions
-    {
-        Url = "**/api.stripe.com/**",
-        NotFound = HarNotFound.Abort,
+        Assert.That(checkout.Method, Is.EqualTo("POST"), $"checkout request method; post data: {checkout.PostData}");
+        Assert.That(Traffic.JsonBody<CheckoutRequest>(checkout), Is.EqualTo(new CheckoutRequest(15_000, "EUR")), "checkout request body");
     });
 }
 ```
 
-`BrowserNewContextOptions.RecordHarPath` (set via the `PageTest` `ContextOptions()` override) captures the **whole** context's traffic for debugging; `RouteFromHARAsync` is the scoped record/replay you want for a specific dependency.
+- The two assertions are one behaviour — "the order is posted with the cart total" — and `Assert.Multiple`
+  reports both. Record equality compares every field, and NUnit prints both records on a mismatch, so the
+  payload is in the failure — never `Assert.That(bodyMatches(…), Is.True)`, which drops it.
+- For "it was called and answered", `RunAndWaitForResponseAsync(action, response => …)` returns the
+  `IResponse`; assert its exact `Status` with the body as the message
+  (`ui-test-author/playwright/references/assertions.md` §7).
 
-### Offline and latency simulation
+## 4. Asserting a call did NOT happen, and that the page raised no errors
 
 ```csharp
 [Test]
-public async Task Shows_The_Offline_Banner_When_The_Network_Drops()
+public async Task Should_NotCallLegacyPricing_When_CartIsRecalculated()
 {
-    await Page.GotoAsync("/dashboard");
-    await Expect(Page.GetByTestId("live-feed")).ToBeVisibleAsync();
+    await _cartPage.OpenAsync();
 
-    await Context.SetOfflineAsync(true);
-    await Page.GetByRole(AriaRole.Button, new() { Name = "Refresh" }).ClickAsync();
+    await _cartPage.RecalculateAsync();
 
-    await Expect(Page.GetByRole(AriaRole.Alert))
-        .ToContainTextAsync(new Regex("you’re offline", RegexOptions.IgnoreCase));
+    Assert.That(await _traffic.RequestedUrlsAsync(new Regex("/api/legacy-pricing")), Is.Empty, "legacy pricing calls");
+}
+
+[Test]
+public async Task Should_RaiseNoPageErrors_When_CartOpens()
+{
+    await _cartPage.OpenAsync();
+
+    Assert.That(await _traffic.PageErrorsAsync(), Is.Empty, "uncaught errors on the cart page");
 }
 ```
 
-Latency injection has **no built-in `route` throttle** — `await Task.Delay` inside the handler. This is the one sanctioned delay in this skill (a *simulated* delay, not a *wait-and-hope*), and it belongs in a helper, not a test:
+- `RecalculateAsync()` returns once the new total is visible. The list is read **after** that signal, or the
+  check passes only because the request had not fired yet.
+- `Page.RequestsAsync()`, `ConsoleMessagesAsync()` and `PageErrorsAsync()` [1.56] return the page's most recent
+  buffered items — no listener to register, no list to manage. The buffer is capped (100 requests, 200 console
+  messages and errors in 1.63), so for a long flow subscribe to `Page.Request` in the class's `[SetUp]` and
+  collect into a `ConcurrentQueue<string>` instead.
+- Each page has its own buffer: a popup's traffic is read from the popup's `IPage`.
+
+## 5. Security headers and TLS — at the routing layer
+
+The page object's `OpenAsync()` returns the `IResponse` that `GotoAsync` gave it — the document, after any
+redirects:
 
 ```csharp
-static Task WithLatencyAsync(IPage page, string urlGlob, int ms) =>
-    page.RouteAsync(urlGlob, async route =>
-    {
-        await Task.Delay(ms);
-        await route.ContinueAsync();
-    });
+[Test]
+public async Task Should_SendSecurityHeaders_When_AppShellLoads()
+{
+    var shell = await _appShellPage.OpenAsync();
 
-// Test the loading spinner stays up while /api/orders is slow.
-await WithLatencyAsync(Page, "**/api/orders", 1_500);
-await Page.GotoAsync("/orders");
-await Expect(Page.GetByTestId("orders-spinner")).ToBeVisibleAsync();
+    var headers = await shell.AllHeadersAsync();
+
+    Assert.That(headers.Keys, Is.SupersetOf(new[] { "content-security-policy", "strict-transport-security", "x-frame-options" }), "security headers on the app shell");
+}
+
+[Test]
+public async Task Should_NegotiateTls13_When_AppShellLoads()
+{
+    var shell = await _appShellPage.OpenAsync();
+
+    var tls = await shell.SecurityDetailsAsync();
+
+    Assert.That(tls?.Protocol, Is.EqualTo("TLS 1.3"), $"TLS details of {shell.Url}: issuer {tls?.Issuer}, subject {tls?.SubjectName}");
+}
 ```
 
-For real bandwidth/latency emulation (not just per-request delay) use CDP `Network.emulateNetworkConditions` — Chromium-only — covered in `qa/dotnet/skills/network-mocking`.
+- `AllHeadersAsync()` returns every response header with **lower-cased** names, including the ones the
+  `Headers` property omits; `HeaderValueAsync(name)` reads one case-insensitively. NUnit's superset failure
+  prints the keys that were there.
+- `SecurityDetailsAsync()` returns a `ResponseSecurityDetailsResult` (`Protocol`, `Issuer`, `SubjectName`,
+  `ValidFrom`, `ValidTo`) — or `null` over plain HTTP, which the assertion reports as `null` instead of a
+  `NullReferenceException`.
+- Both checks are cross-browser. CDP is not needed for either.
+
+## 6. Modifying traffic in flight
+
+- **The response:** `_mockApi.EnableFlagAsync("betaCheckout")` fetches the real flags and re-serves them with
+  one flag forced. Passing the `IAPIResponse` as `Response` keeps the real status and headers.
+- **The request:** `_mockApi.TagTenantAsync("tenant-42")` adds a header. A `Cookie` header set through
+  `route.ContinueAsync` is ignored since 1.52 — add the cookie with `Context.AddCookiesAsync(...)` in the class's
+  `[SetUp]`.
+
+## 7. HAR replay and update
+
+- `_mockApi.ReplayPaymentsAsync()` serves `https://api.stripe.com/**` from the committed
+  `UiTests/Fixtures/Har/payments.har`. `HarNotFound.Abort` turns any request the HAR does not hold into a
+  failure, so a new dependency cannot slip through to the live service; `HarNotFound.Fallback` would let it.
+- **Updating** is a deliberate, local run against the real dependency:
+  `HAR_UPDATE=1 dotnet test UiTests --filter "FullyQualifiedName~PaymentsTests"`. With `Update = true` the
+  requests reach the network and the HAR is written when the context closes — which `BaseTest` does after the
+  test — into the project folder, through `ProjectPaths.Root`. Commit it in a dedicated PR; never update in CI.
+- `UpdateContent = RouteFromHarUpdateContentPolicy.Attach` stores bodies as separate files (reviewable diffs);
+  `UpdateMode = HarMode.Minimal` keeps only what replay needs. The **recording** options —
+  `Context.Tracing.StartHarAsync(path, options)` [1.60] per test, or `RecordHarPath` in the class's
+  `ContextOptions()` — are evidence, owned by `qa/dotnet/skills/evidence-capture` §5.
+- Scrub tokens, cookies and personal data from a committed HAR; record against disposable test accounts.
+
+## 8. Offline, and a request held in flight
+
+```csharp
+[Test]
+public async Task Should_ShowOfflineBanner_When_NetworkDrops()
+{
+    await _ordersPage.OpenAsync();
+
+    await _mockApi.GoOfflineAsync();
+    await _ordersPage.RefreshAsync();
+
+    await Expect(_ordersPage.OfflineBanner, "offline banner").ToHaveTextAsync("You are offline");
+}
+
+[Test]
+public async Task Should_KeepSpinnerVisible_When_OrdersAreStillInFlight()
+{
+    await _mockApi.HoldOrdersAsync();
+
+    await _ordersPage.NavigateAsync();
+
+    await Expect(_ordersPage.Spinner, "orders spinner").ToBeVisibleAsync();
+}
+
+[Test]
+public async Task Should_ShowOrders_When_HeldRequestIsReleased()
+{
+    var orders = await _mockApi.HoldOrdersAsync();
+    await _ordersPage.NavigateAsync();
+
+    orders.Release();
+
+    await Expect(_ordersPage.List, "orders list").ToBeVisibleAsync();
+}
+```
+
+- **Holding is how a test shows a slow response.** The handler awaits the `TaskCompletionSource` and only then
+  continues the route. playwright-dotnet dispatches every route on its own task (`_ = OnRouteAsync(route)` in
+  v1.63.0's `Page.cs`) and waits for the route to be handled (`RouteHandler.HandleInternalAsync`), so a held
+  route blocks nothing else — the page keeps loading, the assertions keep polling. The loading state is
+  observable for as long as the test needs, with no timing in the test at all.
+- `Release()` lets the request go to the network. A held request that is never released ends with the context,
+  which `BaseTest` closes after the test.
+- **Never `Task.Delay(ms)` in a handler** as a "slow" response: the test then races a number — too short and the
+  spinner is gone before the assertion, too long and the suite slows down — and `Thread.Sleep` would also block a
+  thread-pool thread.
+- **Real bandwidth and latency** — a page that must load *slowly* rather than *not yet* — is CDP's
+  `Network.emulateNetworkConditions`, Chromium-only, in `references/cdp.md`.
+- **A delay the client must time out on** (a request that answers after the app's 10-second timeout) belongs
+  to the server: a test endpoint or a stub server that delays on purpose.
 
 ## Rules
 
 ### Matching
-- URL patterns are a **glob** (`*` = any char except `/`; `**` spans `/`; `{a,b}` alternation), a **`Regex`**, or a `Func<string,bool>` predicate. Prefer a glob for path shape, a `Regex` for ids/query specifics.
-- **Glob `?` and `[]` (character classes) are not supported** since Playwright 1.43 — use a `Regex` for those.
-- **`BaseURL` gotcha:** a string pattern that does **not** start with `*` is resolved against `BaseURL`; a pattern starting with `*`/`**` is treated as a raw glob and is **not** joined to `BaseURL`. Don't write `"/api/orders"` expecting a glob — write `"**/api/orders"`.
 
-### Handler discipline
-- A route handler **must call exactly one** of `FulfillAsync` / `AbortAsync` / `ContinueAsync` / `FallbackAsync`. Calling none hangs the request; calling two throws.
-- **Handlers run last-registered-first.** The most recent `RouteAsync(...)` wins; use `route.FallbackAsync()` to defer to an earlier handler. `route.ContinueAsync()` goes straight to the network and **skips** the remaining handlers.
-- `route.FulfillAsync(new() { Json = obj })` over manual `Body = JsonSerializer.Serialize(...)` + `ContentType` — `Json` sets the header and serializes.
-- Serve large mock payloads from a file via `route.FulfillAsync(new() { Path = "Tests/Fixtures/Responses/orders.json" })`, not a giant inline literal.
-- `route.Request` is a property (no `Async`); `route.FetchAsync()` is the awaited network call.
+- A URL matcher is a **glob** (`*` matches any character except `/`; `**` spans `/`; `{a,b}` alternates), a
+  `Regex`, or a `Func<string, bool>`.
+- **Glob `?` and `[]` are not supported since Playwright 1.52** — use a `Regex` for a single-character
+  wildcard or a character class.
+- **The base URL gotcha:** a string that does not start with `*` is resolved against the context's `BaseURL`;
+  one that starts with `*` / `**` is a raw glob. Write `"**/api/orders"`, not `"/api/orders"` expecting a glob.
+
+### Handlers
+
+- A handler calls **exactly one** of `FulfillAsync`, `AbortAsync`, `ContinueAsync`, `FallbackAsync` — now, or
+  later on a held route. None, and the request waits forever; two, and the second throws.
+- Handlers run **last registered first**. `FallbackAsync()` defers to the next matching handler;
+  `ContinueAsync()` goes straight to the network and skips them.
+- `route.Request` is a property; `route.FetchAsync()` is the awaited network call.
 
 ### Scope
-- `Page.RouteAsync` for one page (handles its popups); `Context.RouteAsync` for **every** page in the context. Page-level routes take precedence over context-level for the same request.
-- Mock at the **narrowest** scope that works — context routes that leak across tests are a common source of cross-test contamination. `PageTest` gives a fresh context per test, so prefer `Page.RouteAsync`.
 
-### Assertions & waits
-- Use `RunAndWaitForRequestAsync(action, urlOrPredicate)` / `RunAndWaitForResponseAsync(...)` — the **action lambda is the first argument**, so the listener is always armed before the action runs. Never wire a manual `WaitForResponseAsync` *after* the click.
-- Use **predicates** to assert method/status/url together: `r => r.Url.Contains("/api/x") && r.Status == 200`.
-- Read payloads with `request.PostDataJSON` (a `JsonElement?` property) / `request.Headers` and `await response.JsonAsync()` / `response.Status` — don't re-parse `PostData` by hand.
-- **Negative assertions** ("endpoint not called") collect from the `Page.Request` event and assert `Is.Empty` **after** a user-visible completion signal — never after a delay.
-- **No `Page.WaitForTimeoutAsync(ms)` as a wait.** The only `Task.Delay` allowed is inside a latency-injection route handler, and only there. Never `Thread.Sleep`, never `.Result`/`.Wait()`.
+- `Page.RouteAsync` covers that page only. A popup is a new page, so a mock it needs is
+  `Context.RouteAsync(...)`. `BaseTest` gives each test a fresh context, so a context route cannot leak into
+  the next test.
+- A service worker can answer before a route does: `options.ServiceWorkers = ServiceWorkerPolicy.Block` in the
+  class's `ContextOptions()` (amending `base.ContextOptions()`) when mocks are bypassed.
+- A route sees only the first request of a redirect chain — assert on the final response.
 
-### HAR
-- Record with `Update = true` once, commit, then replay with no `Update`. Re-record in a dedicated PR, never silently in CI.
-- Use `RouteFromHarUpdateContentPolicy.Attach` (bodies as files) for reviewable diffs; `HarMode.Minimal` unless you need timings.
-- Set `NotFound = HarNotFound.Abort` on replay so an un-recorded request is a hard failure, not a silent hit to the real third party.
+### Assertions and waits
 
-### Determinism & hygiene
-- If `RouteAsync` mocks are being bypassed, set `ServiceWorkers = ServiceWorkerPolicy.Block` in `ContextOptions()` — a Service Worker can intercept before your route does.
-- A route handler is only invoked for the **first** URL of a redirect chain — assert on the final response, not the 30x hop.
-- Never put real secrets/tokens in committed mock responses or HAR files — scrub auth headers (use `RecordHarContent = HarContentPolicy.Omit` or a redaction step).
+- `RunAndWaitForRequestAsync(action, matcher)` / `RunAndWaitForResponseAsync(action, matcher)` in a page
+  object — the action runs inside the wait. Never a listener registered after the click.
+- "Not called" reads `Page.RequestsAsync()` after a user-visible completion signal.
+- Non-locator values — a method, a parsed body, a header set — are `Assert.That` with one expected value and
+  a message carrying the evidence.
 
-### What NOT to do
-- No `Page.WaitForTimeoutAsync(ms)` / `Thread.Sleep` to "wait for the request" — use `RunAndWaitForRequestAsync`/`RunAndWaitForResponseAsync` with a predicate.
-- No raw `Page.RouteAsync("**/api/...", ...)` scattered through `[Test]` methods — wrap it in a `MockApi`-style helper with an intent name.
-- No handler that calls neither `FulfillAsync`/`AbortAsync`/`ContinueAsync`/`FallbackAsync` (hangs) or two of them (throws).
-- No `route.ContinueAsync()` when you meant `route.FallbackAsync()` — `Continue` skips your other handlers.
-- No `"/api/orders"` string pattern expecting glob behavior — it gets `BaseURL`-resolved; write `"**/api/orders"`.
-- No glob `?`/`[abc]` since 1.43 — switch to a `Regex`.
-- No `Body = JsonSerializer.Serialize(x)` + `ContentType = "application/json"` where `Json = x` does the same.
-- No giant inline JSON literal as a mock — `route.FulfillAsync(new() { Path = ... })` from a fixture file.
-- No silent HAR re-record in CI (`Update = true` left on) — recordings drift and tests stop testing anything.
-- No `NotFound = HarNotFound.Fallback` on a third-party HAR replay you intend to be hermetic — it lets un-recorded calls hit the live service.
-- No secrets/PII committed inside a mock response or HAR archive.
-- No `Context.RouteAsync` for something one page needs — it leaks the mock into every page in the context.
-- No asserting "not called" after a fixed delay — gate on a user-visible completion signal.
-- No `.Result` / `.Wait()` / `.GetAwaiter().GetResult()` on any Playwright call — async all the way.
+## What NOT to do
+
+- No `Task.Delay` or `Thread.Sleep` in a route handler or a test — hold the request, throttle with CDP, or
+  delay the server.
+- No `Page.RouteAsync(...)` or `Page.GotoAsync(...)` in a `[Test]` method — a `MockApi` method and a page
+  object.
+- No `request.PostDataJSON!.Value` — it is a method, `PostDataJSON()`.
+- No `Assert.That(predicate(body), Is.True, "payload did not match")` — deserialize and compare records.
+- No glob `?` or `[abc]` — a `Regex`.
+- No `"/api/orders"` string expecting glob behaviour.
+- No giant inline JSON literal — a record, or a fixture file under `ProjectPaths.Root`.
+- No `Update = true` left on in CI; no `HarNotFound.Fallback` on a replay meant to be hermetic.
+- No security-header or TLS audit through CDP — `AllHeadersAsync()` and `SecurityDetailsAsync()` cover it.
+- No `ContextOptions()` override that returns `new()` — amend `base.ContextOptions()`.
+- No secrets in a mock or a committed HAR.
 
 ## Generation steps
 
-1. Confirm **traffic** (endpoints + glob/regex), **intent** (mock / assert / modify / HAR / offline), and **scope** (page vs context).
-2. Add or extend `Tests/Support/Network/MockApi.cs` with one intent-named method per scenario (`StubOrdersAsync`, `FailOrdersWithAsync`, `BlockAnalyticsAsync`). Expose it on `NetworkBaseTest` via `[SetUp]`.
-3. For call assertions, use `RequestAssertions.ExpectRequestAsync` (or a direct `RunAndWaitForResponseAsync` predicate); assert payload via `PostDataJSON`.
-4. For third-party determinism, record a HAR with `Update = true`, commit it under `Tests/Fixtures/Har/` with `Attach` content, then replay with `NotFound = HarNotFound.Abort`.
-5. For offline/latency states, use `Context.SetOfflineAsync(true)` and a `Task.Delay` latency helper — never `WaitForTimeoutAsync`/`Thread.Sleep`.
-6. Run `dotnet test`; verify with the trace viewer's Network tab (which requests were routed vs hit the network). Build with nullable warnings as errors for strict-null green.
+1. Confirm the **traffic**, the **intent** and the **scope**.
+2. Add one intent-named method per scenario to `MockApi`; read requests through `Traffic` or a page-object
+   method that wraps `RunAndWaitForRequestAsync` / `RunAndWaitForResponseAsync`.
+3. Build both helpers and the page objects in the test class's `[SetUp]`.
+4. For a third party, replay a committed HAR with `HarNotFound.Abort`; update it with `HAR_UPDATE=1`, locally.
+5. For loading and offline states, hold the request or go offline — never a sleep.
+6. Read a failure's trace (`qa/dotnet/skills/evidence-capture`, "Reading a failure"): its network view shows
+   which requests were routed and which reached the network.
 
 ## Cross-references
 
-- **`qa/typescript/skills/network-mocking`** — the canonical skill this ports from; consult it for the conceptual model and the glob/Service-Worker notes.
-- **`qa/java/skills/network-mocking`** — the sibling Java port (`route.resume()`, no `setJson`/`json()`).
-- **`qa/dotnet/skills/ui-test-author/playwright`** — the `PageTest` base-class / page-object model these network helpers layer on; `RunAndWaitForResponseAsync` ordering and the no-`WaitForTimeoutAsync` discipline originate there.
-- **`qa/dotnet/skills/network-mocking`** — low-level CDP (`Network.emulateNetworkConditions` for real throttling) when `RouteAsync` isn't enough.
-- **`qa/dotnet/skills/network-mocking`** — out-of-browser HTTP capture for multi-process or non-browser traffic.
-- **`qa/cicd/dotnet/skills/ci-pipelines`** — runs these tests sharded; HAR archives and traces are uploaded as artifacts there.
-- **`qa/dotnet/skills/test-data-builder`** — builds the shapes you stub into `route.FulfillAsync(new() { Json = ... })`.
-- **`qa/dotnet/skills/api-test-author/writer`** — when the test needs no browser, assert against the API directly.
+- `references/cdp.md` — real throttling, cache disable, CPU throttling, metrics (Chromium only).
+- `references/proxy.md` — a client with no Playwright `IPage`.
+- `qa/dotnet/skills/ui-test-author/playwright` — `BaseTest`, page objects, `references/assertions.md` §7.
+- `qa/dotnet/skills/evidence-capture` — HAR recording, traces.
+- `qa/dotnet/skills/realtime-stream-testing` — WebSocket and SSE.
+- `qa/dotnet/skills/test-data-builder` — builders for the payloads the mocks serve.
+- `qa/cicd/dotnet/skills/ci-pipelines` — the UI job and its artifact upload.
+- `qa-network-mocking-typescript`, `qa-network-mocking-java` — the sibling lanes.

@@ -1,41 +1,60 @@
 ---
 name: qa-network-mocking-dotnet
-description: Use when .NET / NUnit UI tests must intercept, mock, throttle, or assert browser network traffic — Playwright routes, raw CDP (throttling/offline), or an out-of-browser MITM proxy. Triggers "mock this XHR in the UI test", "simulate slow 3G/offline", "capture a HAR", "assert the page called endpoint X". Pick the layer, then read its reference file. Not for browser-less API tests (`api-test-author/writer`), load-level throttling (`load-testing`), or WS/SSE (`realtime-stream-testing`).
+description: Use when .NET/NUnit UI tests must intercept, mock, hold, throttle or assert browser network traffic — Playwright routes, CDP throttling, or an out-of-browser MITM proxy for Selenium/Appium. Triggers "mock this XHR in the UI test", "simulate slow 3G/offline", "replay a HAR", "assert the page called X", "check the security headers". Do NOT use for API tests without a browser (qa-api-test-writer-dotnet), load (qa-load-testing-dotnet) or WebSocket/SSE streams (qa-realtime-stream-testing-dotnet).
 ---
 
-# QA — Network Monitoring (.NET 8 / C#)
+# QA — Network Mocking (.NET 10 / Playwright 1.63)
 
-One registered skill, 3 tools — a project uses exactly one. Identify the project's tool
-(dependencies, docker-compose, infra config; ask one question if ambiguous), then **read the matching
-`references/<tool>.md` end-to-end before writing any code** — it carries the full model, patterns,
-templates, anti-patterns, and hard rules for that tool. This file only routes and holds the rules
-shared by every tool in the family.
+One registered skill, three tools. Identify the layer the test needs, then **read the matching
+`references/<tool>.md` end to end before writing any code**. This file routes and holds the rules every tool
+shares. The Playwright pin is in the **Versions** table of `qa/dotnet/skills/ui-test-author/playwright/SKILL.md`.
 
 ## Tools in this family
 
 | Read | Use when |
-|------|----------|
-| `references/playwright-routes.md` | Intercept/mock/assert requests inside Playwright tests — the default; stay here when possible |
-| `references/cdp.md` | Chrome DevTools Protocol — network throttling, offline mode, low-level events Playwright routes can't reach |
-| `references/proxy.md` | Out-of-browser MITM proxy — HAR capture and interception for Selenium/Appium/non-CDP browsers |
+|---|---|
+| `references/playwright-routes.md` | Mock, abort, modify, hold, assert, HAR replay, offline, security headers and TLS — inside a Playwright test. **The default** |
+| `references/cdp.md` | Chrome DevTools Protocol — real bandwidth throttling, cache disable, CPU throttling, performance metrics. Chromium only |
+| `references/proxy.md` | An out-of-process MITM proxy (`Titanium.Web.Proxy`) for clients with no Playwright `IPage` — Selenium, Appium, `HttpClient`, several processes |
 
-## Decision matrix — pick the tool
+## Decision matrix — pick the layer
 
-| Layer | Tool | What it does | Browser support |
+| Layer | Tool | What it does | Browsers |
 |---|---|---|---|
-| **Request routing** (high level) | `RouteAsync` → `references/playwright-routes.md` | Intercept/mock/abort/fulfill, assert it fired, modify in flight, HAR replay, **approximate** offline (`SetOfflineAsync`), **per-request `Task.Delay`** | All (Chromium/Firefox/WebKit) |
-| **DevTools Protocol** (below routing) | `NewCDPSessionAsync` → **`references/cdp.md`** | **Real** bandwidth+latency throttling, **HTTP-cache disable**, **CPU throttling**, security-header/`securityDetails` audit, `Performance` metrics | **Chromium-only** |
-| **External MITM proxy** | mitmproxy / system proxy → `references/proxy.md` | Out-of-browser capture for multi-process or non-Playwright stacks | Any client through the proxy |
+| **Request routing** | `Page.RouteAsync` / `Context.RouteAsync` → `references/playwright-routes.md` | Fulfill, abort, modify in flight, **hold a request and release it**, assert a call happened or did not (`Page.RequestsAsync()`), HAR replay, offline, `AllHeadersAsync()` and `SecurityDetailsAsync()` | Chromium, Firefox, WebKit |
+| **DevTools Protocol** | `Context.NewCDPSessionAsync(Page)` → `references/cdp.md` | **Real** throughput and latency, HTTP-cache disable, CPU throttling, `Performance` metrics | Chromium only |
+| **External MITM proxy** | `Titanium.Web.Proxy` → `references/proxy.md` | Capture and fault-inject for a client that is not Playwright | Any client that honours a proxy |
 
-**Decision rule:** reach for `RouteAsync` **first** — cross-browser, typed, covers mocking/asserting/offline. Drop to **CDP only when routing genuinely can't express the test**: real throughput-based throttling, cache-disable, CPU throttling, TLS/`securityDetails` inspection, or `Performance` metrics. CDP is more brittle — **stringly-typed** protocol method names (`"Network.emulateNetworkConditions"`), no compile-time check — and **Chromium-only**.
+**Decision rule:** reach for routing first — it is cross-browser, typed and covers mocking, assertions,
+offline, security headers and TLS. Drop to CDP only for what routing cannot express: real bandwidth, cache
+disable, CPU throttling, performance metrics. CDP is stringly typed (`"Network.emulateNetworkConditions"`)
+and Chromium-only. The proxy is for when there is no `IPage` at all.
 
-## Shared rules (every tool in this family)
+## Shared rules (every tool)
 
-- Intercept at the closest layer to the test runner — don't run a proxy when routes suffice.
-- Assert traffic via explicit waits on request/response predicates — never sleeps or listener races.
-- Mocked payloads come from fixtures/builders, not inline blobs duplicated across tests.
+- **Every Playwright sample derives from `Example.UiTests.Support.BaseTest`**, which owns the browser, a
+  context and page per test, and the failure evidence. A class changes the context only by amending
+  `base.ContextOptions()` (`ServiceWorkers`, `Offline`) — never `new()`, which drops `BaseURL` and the video
+  folder — and never adds `Playwright.CreateAsync()`, a browser or a failure hook.
+- Route, CDP and proxy calls live in a helper with intent names (`MockApi`, `Traffic`, `CdpControls`,
+  `ProxyControls`) built in the class's own `[SetUp]`; a test never calls `Page.RouteAsync(...)` or
+  `SendAsync(...)`, and reaches pages through page objects.
+- **No `Task.Delay` in a route handler as a "slow response", and never `Thread.Sleep`.** Hold the request
+  and release it (`references/playwright-routes.md` §8), use CDP throttling, or slow the server.
+- Wait on request and response predicates or a page object's completion signal — never a sleep, never a
+  listener registered after the action.
+- Every assertion states one expected value and carries the evidence in its message — the payload, the
+  header set, the URL list. Never a bare boolean.
+- Mocked payloads come from records, builders or fixture files, not inline blobs repeated across tests.
+- Recording a HAR as evidence (`Context.Tracing.StartHarAsync(...)` [1.60], `RecordHarPath`) is
+  `qa/dotnet/skills/evidence-capture` §5; this skill replays one.
 
-## Cross-references
+## Handoffs
 
-Each `references/<tool>.md` carries its own cross-references to sibling skills (DB verification,
-test environments, CI, chaos). Route there after picking the tool.
+- `BaseTest`, page objects, `Directory.Packages.props` → `qa/dotnet/skills/ui-test-author/playwright`
+- HAR recording and other evidence → `qa/dotnet/skills/evidence-capture`
+- WebSocket and SSE → `qa/dotnet/skills/realtime-stream-testing`
+- API tests without a browser → `qa/dotnet/skills/api-test-author`
+- Payload builders → `qa/dotnet/skills/test-data-builder`
+- The CI job → `qa/cicd/dotnet/skills/ci-pipelines`
+- TypeScript and Java → `qa-network-mocking-typescript`, `qa-network-mocking-java`
