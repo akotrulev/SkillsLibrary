@@ -78,6 +78,17 @@ Fixed in the system today, not configurable: the late-cancellation cut-off (24 h
 
 **Result:** at most one overage charge per member per month on their account, and a fresh credit balance.
 
+## How it connects
+
+**Starts from:**
+
+- **Bookings** (AREA-003): a confirmed booking is priced here, and a cancelled booking — by the member or by staff — has its credits returned here.
+- **Scheduling** (AREA-002): when staff cancel a whole session, every confirmed booking on it is cancelled by staff, one cancellation per booking, so each member's credits come back.
+
+**Sets off:** nothing outside this area. Pricing, returns and posting finish here; no other area is told.
+
+**Shares:** this area reads bookings, which **Bookings** owns. Credits used is changed only by this area's three flows.
+
 ## Example
 
 **Setup**
@@ -153,6 +164,12 @@ Walking through the two lines that matter:
 | Cancelling | Returned credits never re-price an earlier accrual | no reader of returned credits outside future pricing (search: `ReturnedCredits` under `src/`); **Q2** | `#observed` |
 | Monthly posting | One charge per member; accruals marked posted; credits used reset to 0 | `OverageChargeJob.cs:40-58`; [ENT-003] | `#observed` |
 | Monthly posting | Zero-sum months post nothing | `OverageChargeJob.cs:44` | `#observed` |
+| How it connects | A confirmed booking is priced (EVT-005 → RX-004) | `CreditPricingService.cs:31`; `BookingConfirmed.cs:6` | `#observed` |
+| How it connects | A cancelled booking, by member or staff, has its credits returned (EVT-006 → RX-006) | `BookingCancelledHandler.cs:19-33`; `BookingCancelled.cs:8` | `#observed` |
+| How it connects | A staff session cancellation cancels each confirmed booking and emits one cancellation per booking (EVT-004 → RX-005 → EVT-006) | `SessionService.cs:70-96` | `#observed` |
+| How it connects | Pricing and returns run after the booking change is saved; pricing is retried 3 times and then parked, the return has no failure path; at-least-once, no idempotency key found (RX-004, RX-006; INV-004) | `Outbox.cs:22`; `BookingCancelledHandler.cs:19-33`; no key (search: `IdempotencyKey`, `Processed` under `src/`) | `#observed` |
+| How it connects | Nothing outside the area is set off | search: `Publish`, `Emit`, `Outbox.Add` under `src/Credits/` — none | `#observed` |
+| How it connects | This area only reads bookings owned by Bookings (RX-004, RX-006); credits used is written only by pricing, return and posting (RX-004, RX-006, RX-007) | `CreditPricingService.cs:31`, `BookingCancelledHandler.cs:19`, `OverageChargeJob.cs:58`; no other writer (search: `CreditsUsed` under `src/`) | `#observed` |
 | Who can do what | Member sees own balances only | `CreditEndpoints.cs:21` (`credits:own`) | `#observed` |
 | Who can do what | Staff manage plans, tiers, overrides; staff cancellations always return credits | `PlanAdminEndpoints.cs:17` (`workshops:manage`) · `BookingCancelledHandler.cs:21` | `#observed` |
 | Open questions | Late cancellation forfeits credits, no fee | `BookingCancelledHandler.cs:27`; no fee path (search: `LateFee`, `Penalty` under `src/`); **Q4** | `#observed` |

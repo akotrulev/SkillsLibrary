@@ -147,6 +147,66 @@ Prisma's `schema.prisma` is a single high-value read: constraints, defaults, cas
 
 ---
 
+## Part 3b — Following a seam (the Edges inventory)
+
+Stop 9 and the Edges inventory need three answers per emitted event or written field: **who reacts**, **who reads**, and **how the reaction runs**. Take the emitted type's name and its string form (topic, queue, routing key, event name) and search both.
+
+**Reading the mode from the code.** Record only what is visible; everything else is `?`:
+
+| What the code shows | Mode | Delivery guarantee |
+|---|---|---|
+| The handler is called by the publisher before the request's save or commit | `in request` | — (it rolls back with the request) |
+| An in-process listener bound to the commit (after-commit phase, dispatch after `SaveChanges`) | `after commit` | `?` unless a retry or a persisted queue is visible — a listener with no retry loses the event if the process dies, which is a finding, not a guarantee |
+| An outbox table written in the request's transaction, drained by a relay | `after commit` | at-least-once **only** where the relay's retry or redelivery is in the code; the retry count and the dead-letter route are the *On failure* |
+| A broker consumer | `after commit` | The broker's name proves nothing. Record at-least-once where a retry policy, a negative acknowledgement or a redelivery setting is visible; record exactly-once never from a library claim alone; otherwise `?` |
+| A consumer that checks a processed-id, idempotency key or unique constraint before acting | — | Note the key: it is the invariant's *Enforced* cell |
+| A schedule's handler | `scheduled` | Look for a run marker or lock; none found is `?` for a re-run, with the search named |
+
+**Readers of a field.** Search the field's property, column and serialized names; then read the `Where`/`Select` clauses and raw SQL of every scheduled job and report, because a job's selection is a read the rest of the code never shows.
+
+### .NET
+
+```bash
+# consumers of an event type — in-process notifications and broker consumers
+grep -rn 'INotificationHandler<Event>\|IDomainEventHandler<Event>\|IConsumer<Event>\|IHandleMessages<Event>' --include=*.cs src/
+# publishers and dispatch moment — in request, or after SaveChanges
+grep -rn 'Publish(\|PublishAsync(\|DomainEvents\|SaveChangesInterceptor\|AddEntityFrameworkOutbox\|UseBusOutbox\|OutboxMessage' --include=*.cs src/
+# retry and idempotency evidence
+grep -rn 'UseMessageRetry\|UseDelayedRedelivery\|Polly\|ProcessedMessage\|IdempotencyKey' --include=*.cs src/
+# readers of a field, including jobs
+grep -rn '\.<Field>\b' --include=*.cs src/ | grep -i 'Where\|Select\|OrderBy\|Job\|Worker'
+```
+
+### Java 21 + Spring Boot 3.x
+
+```bash
+# consumers
+grep -rn '@EventListener\|@TransactionalEventListener\|@KafkaListener\|@RabbitListener\|@SqsListener\|@JmsListener' --include=*.java src/
+# dispatch moment — AFTER_COMMIT is the default phase of @TransactionalEventListener
+grep -rn 'publishEvent(\|@TransactionalEventListener\|phase =\|outbox\|Outbox' --include=*.java src/
+# retry and idempotency evidence
+grep -rn '@Retryable\|RetryTemplate\|DefaultErrorHandler\|@DltHandler\|DeadLetter\|processed_message\|idempotenc' --include=*.java src/
+# readers of a field, including jobs and repository queries
+grep -rn '<field>\|findBy<Field>\|@Query' --include=*.java src/
+```
+
+### Node 24 / 22 + TypeScript
+
+```bash
+# consumers
+grep -rn "@OnEvent(\|@EventPattern(\|@MessagePattern(\|\.on(['\"]<event>\|consumer\.run\|new Worker(" --include=*.ts src/
+# dispatch moment — emitted inside the request, or from an outbox relay
+grep -rn 'emit(\|emitAsync(\|eventEmitter\|outbox\|queue\.add(' --include=*.ts src/
+# retry and idempotency evidence
+grep -rn 'attempts:\|backoff\|removeOnFail\|deadLetter\|processedMessage\|idempotencyKey' --include=*.ts src/
+# readers of a field, including jobs
+grep -rn '<field>' --include=*.ts src/
+```
+
+A Node `EventEmitter` is synchronous and in-process: its handlers run `in request` unless the emit sits after the commit. A queue's own retry settings (BullMQ `attempts`, `backoff`) are the visible retry; without them the guarantee is `?`.
+
+---
+
 ## Part 4 — Cross-stack: the git-archaeology pass
 
 When a rule's purpose is not recoverable from the code, before you give up and file an open question:

@@ -37,6 +37,7 @@ Everything lands in **`docs/business-model/`** in the target repo, per `business
 | `system-overview.md` | **this skill** | What the system is, for whom, the area map, the end-to-end flows that cross areas |
 | `glossary.md` | shared | Terms found in code + the code-name → business-name mapping |
 | `INDEX.md`, `active-context.md` | shared | Updated per the KB's update-after contract |
+| `events.md`, `shared-data.md`, `invariants.md` | `business-analysis:dependency-map` | **Not yours.** Written by `be-documenter` in Step 3 from the Edges inventories |
 | `flows/`, `entities/`, `decisions/` | `business-analysis:process-flow` · `business-analysis:state-grid` · `business-analysis:decision-table` | **Not yours.** Produced by those skills in Step 3; you link to them by ID |
 
 **The header block and provenance stamp are mandatory** on every file this skill writes — the `Created`/`Owned by` lines per `business-analysis:knowledge-base`'s header rule, then the stamp:
@@ -68,6 +69,7 @@ On a later update, add `**Last updated:** YYYY-MM-DD by \`<skill>\`` beneath the
 ## How it works
 ### <Flow — named by its trigger or by what the user does>
 ### <Flow …>
+## How it connects             ← only when something crosses the area boundary
 ## Example
 ## Who can do what            ← only when more than one kind of user, or admin actions exist
 ## Open questions
@@ -126,6 +128,10 @@ One sub-section per **flow**. A flow is one trigger: something a user does, a sc
 - **Result is mandatory.** What changes for the user or the account: the transaction posted, the state the record ends in, the message shown. It is the payoff of the flow and the line support will quote.
 - **What stops it / what the user sees** — only where the code refuses with a user-visible outcome — a short table: Situation · What the user sees · What happens. Drop it when there is nothing to show.
 - **One flow per trigger, not per endpoint.** Three endpoints that make up one checkout are one flow. Link a `FLOW-nnn` / `DEC-nnn` by ID where the path branches heavily; never duplicate the diagram.
+
+### How it connects
+
+Three short lists in business words, from the Edges inventory: **Starts from** (which other areas' actions or schedules start this one), **Sets off** (what this area causes elsewhere), **Shares** (data other areas also change or read). Name areas by `AREA-nnn` and label. The `EVT-`/`RX-` ids, code and the delivery mode live in the evidence table. Nothing crosses the boundary: drop the section and record the negative search as a row.
 
 ### Example
 
@@ -278,6 +284,7 @@ When the KB already holds documentation for an area and the code has moved:
 9. Every file carries its `Created`/`Owned by` header and provenance stamp; `INDEX.md` has a line for everything added; `active-context.md` has this session at the top.
 10. The glossary records both vocabularies and flags every drift.
 11. Nothing unreachable is documented as a capability.
+12. How it connects is present, or its negative search is an evidence row.
 
 ## Handoffs
 

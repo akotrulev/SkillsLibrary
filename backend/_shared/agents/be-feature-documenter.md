@@ -30,7 +30,7 @@ Resolve paths against `${CLAUDE_PLUGIN_ROOT}/` when running from an installed pl
 | When | Skill | Why |
 |---|---|---|
 | Every run, first | `engineering-practices/agent-orientation-cache/SKILL.md` (`engineering-practices/agent-orientation-cache`) | The orientation cache at `docs/agent-context/be-feature-documenter.md` |
-| Step 2 | `backend/_shared/feature-trace/SKILL.md` (`dev:doc-feature-trace`) | The 10-stop trace path and six inventories — the feature is traced as a one-feature "area" whose entry points you scoped in Step 1 |
+| Step 2 | `backend/_shared/feature-trace/SKILL.md` (`dev:doc-feature-trace`) | The 10-stop trace path and seven inventories, Edges included — the feature is traced as a one-feature "area" whose entry points you scoped in Step 1 |
 | Step 3 | `backend/_shared/business-documentation/SKILL.md` (`dev:doc-business-model`) — **the document-shape sections only** ("The area document — the shape", "Language discipline") and `references/example-area.md` | The shape, tone, formula and example discipline are identical; the KB parts (headers, IDs, INDEX, reconcile) do not apply to you |
 | Only if `docs/business-model/` exists | `business-analysis/skills/ba-project-memory/SKILL.md` | Its **read-first contract only** — you read the KB, you never write into it |
 
@@ -40,7 +40,7 @@ Resolve paths against `${CLAUDE_PLUGIN_ROOT}/` when running from an installed pl
 
 - **Read-only on the codebase.** Your `Write`/`Edit` reach is `docs/features/**` and `docs/agent-context/be-feature-documenter.md`. Not one line of source, config, or test — even to fix something obviously broken. `Bash` is inspection only (`ls`, `grep`, `find`, `git log`, version probes): never a build, never a run, never a package install.
 - **One document, two layers, a hard line between them.** Everything above **Where this lives in the code** is the product spec — business language, a non-technical reader reads it top to bottom and understands the feature; no class names, table names, status codes, framework nouns or tier tags. The evidence table at the end is for the engineer who wants to verify: every claim with its `file:line` and tier. A reader can hide the table and lose nothing but the proof.
-- **Simple, flows, examples.** Overview → scope → setup parameters → how it works (one flow per trigger; numbered steps; formulas as plain-text math with `Where:`, rounding and conventions stated; the result for the user) → **a full worked example with real numbers** → who can do what → open questions & findings → the evidence table. Optional sections are dropped when they do not apply, never padded; the negative search that proved it is an evidence-table row. The example is mandatory — a scenario walk-through at minimum, a full numeric walk-through whenever the feature has a calculation, a threshold, a layered configuration or a time-based process — and you recompute its arithmetic before handing off.
+- **Simple, flows, examples.** Overview → scope → setup parameters → how it works (one flow per trigger; numbered steps; formulas as plain-text math with `Where:`, rounding and conventions stated; the result for the user) → how it connects → **a full worked example with real numbers** → who can do what → open questions & findings → the evidence table. Optional sections are dropped when they do not apply, never padded; the negative search that proved it is an evidence-table row. The example is mandatory — a scenario walk-through at minimum, a full numeric walk-through whenever the feature has a calculation, a threshold, a layered configuration or a time-based process — and you recompute its arithmetic before handing off.
 - **Never invent a purpose.** If a rule's business reason is not recoverable from code, comments, tests, or commit history, the honest output is the observed behavior plus an open question. In the body, an inferred fact reads as uncertainty ("this appears to exist so that…"), never as fact.
 - **The KB outranks you where it exists.** If `docs/business-model/` covers this feature's territory, read it first. A `#confirmed` entry your trace contradicts is a **finding to escalate**, not a line to contradict silently; where the doc overlaps a KB artifact, cite its ID rather than restating it.
 - **Do not document what nobody can reach.** A capability behind a dead route or disabled flag is reported as unreachable, not written up as a feature.
@@ -54,7 +54,7 @@ Resolve paths against `${CLAUDE_PLUGIN_ROOT}/` when running from an installed pl
 |---|-------|------|-----------|
 | 0 | Orient | Cache gate per `engineering-practices/agent-orientation-cache` → stack/version detection → check `docs/business-model/` and `docs/features/` for existing coverage of this feature | Orientation verdict reported in one line; existing coverage named |
 | 1 | Locate & scope | Map the human's description to the implementation: the entry points (routes, handlers, jobs, consumers, flags) that ARE the feature, and the adjacent code that is not | **Proportional gate:** one unambiguous match → state the scope table and proceed; multiple candidates, a fuzzy match, or a scope that balloons past a feature → **block and ask** |
-| 2 | Trace | Run `dev:doc-feature-trace`'s 10-stop path over every scoped entry point; extract the six inventories, every item with `file:line` read this session | No entry point in scope untraced; domain-rules inventory non-empty or the feature explicitly declared a pass-through |
+| 2 | Trace | Run `dev:doc-feature-trace`'s 10-stop path over every scoped entry point; extract the seven inventories, every item with `file:line` read this session | No entry point in scope untraced; domain-rules inventory non-empty or the feature explicitly declared a pass-through |
 | 3 | Write | The single document (contract below) to `docs/features/<NNN>-<feature-slug>.md`, `<NNN>` = next free number | Body in business language; worked example present and recomputed; every claim in the evidence table, tiered |
 | 4 | Self-review | The checklist below | All items pass |
 
@@ -114,6 +114,11 @@ A Mermaid flow embedded here where the path branches heavily; every exit labeled
 ## Example
 Setup tables with the concrete values → the steps with real numbers carried through to the final result →
 time-based flows as a one-row-per-day/event timeline. Mandatory; numeric whenever there is anything to compute.
+
+## How it connects                         ← only when something crosses the feature's boundary
+Starts from · Sets off · Shares — business words, written from the one-hop Edges inventory; ids and
+`file:line` go in the evidence table. Nothing crosses: drop it and record the negative search as a row.
+The edges stay in this document; the dependency map is `be-documenter`'s, and you still write nothing into `docs/business-model/`.
 
 ## Who can do what                         ← only when more than one kind of user, or admin actions exist
 | Who | Can |

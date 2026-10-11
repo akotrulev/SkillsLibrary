@@ -10,7 +10,7 @@ session looks the connections up there instead of re-deriving them. The three `q
 then automate the new case kinds. They run scheduled jobs on demand, control the clock at a time
 boundary, fire concurrent requests, and deliver a message or webhook twice.
 
-**Status:** K1 landed 2026-10-11: `business-analysis:dependency-map`, its golden example, the KB contract and feature slice, the three reasoning-lane edits and the `business-analyst` edits are written. Built but unverified: nothing has been run (the gate is A3), and the description length and file sizes are counted by hand only. Next: D1. O1 is answered: the automation is in this
+**Status:** K1 and D1 landed 2026-10-11. K1: `business-analysis:dependency-map`, its golden example, the KB contract and feature slice, the three reasoning-lane edits and the `business-analyst` edits. D1: `dev:doc-feature-trace` has the seventh inventory (Edges) and the seam recipes, area and feature documents have *How it connects*, and `be-documenter` writes the dependency map. Built but unverified: nothing has been run (the gate is A3), and description lengths and file sizes are counted by hand only. Next: Q1. O1 is answered: the automation is in this
 plan, as tasks A1–A3. The plan changes skills and agents only, so the gate (§11) proves structure, not
 quality. The new stack skills' code samples are never compiled. Whether the suites actually get deeper,
 and whether the automation patterns run, is unverified until H1 runs the lane on a real project.
@@ -862,6 +862,14 @@ feature documents carry an optional **How it connects** section. `be-documenter`
 - **Not in D1:** anything under `qa/`; editing `business-analysis/` (read only); the audit lane
   (`dev:audit-feature` could use Edges later, but not here); README and the catalog (A3).
 
+**As built (2026-10-11):** as planned, with no divergence; Q1's and Q2's prompts needed no rewrite.
+- `backend/_shared/feature-trace/SKILL.md`: stop 7 and stop 9 reworded, `### 7. Edges` (§8.1's columns, one example row, the `?`-unless-visible rule and the named-negative-search rule), `### Edges` in the record shape, self-check items 8–10, handoff to `business-analysis:dependency-map`; description 492 characters (counted by hand).
+- `references/trace-recipes.md`: new `## Part 3b — Following a seam`: a mode table (what the code shows → mode → guarantee, `?` unless a retry, ack or key is visible) and per-stack search blocks for .NET, Java and Node.
+- `business-documentation/SKILL.md`: `## How it connects` in the shape and as a section, an output-table row for the three map files, self-check item 12; net +782 characters.
+- `example-area.md`: `## How it connects` for AREA-004 and six evidence rows citing EVT-004/005/006 and RX-004/005/006/007, INV-004; no existing text or number changed.
+- `be-documenter.md`: seven inventories (Step 2), Step 3 writes the three files, Step 5 runs the map's checks, report counts in both shapes; net +582 characters. `be-feature-documenter.md`: seven (lines 33, 57), `## How it connects` in the document contract, still no KB writes.
+- Unverified: no checker was run, and the sizes are counted by hand; the Part 3b search patterns were not run against a real codebase (H1).
+
 ### Q1 — qa/manual: the Connections basis section and the cross-feature test-design skill
 
 **Stack:** `docs` · **Agent:** `general-purpose`
@@ -1186,53 +1194,9 @@ in the checkout you are given, commit there, and never create a branch.
 | A3 | `docs` | `general-purpose` | A1, A2, Q2, Q1, D1, K1 | ~125k |
 | H1 | `human` | **the user** | A3 | one real feature |
 
-Seven blocks are live. K1 has landed (its block is deleted).
+Six blocks are live. K1 and D1 have landed (their blocks are deleted).
 
 ---
-
-### D1 — dev: trace edges, "How it connects", and the documenters write the dependency map (general-purpose, docs)
-
-````
-You are a general-purpose agent working in the SkillsLibrary repo. Task D1 of
-docs/plans/005-cross-feature-test-design.md: make the code trace follow seams — a seventh inventory,
-Edges, one hop outside the area — give area and feature documents a "How it connects" section, and have
-be-documenter write the dependency map K1 defined.
-
-Read, in this order:
-1. CLAUDE.md (Simplicity, Comments).
-2. The plan: §4.1–§4.3, §8 (all), §9.1, §10, D7, task D1 and K1's As built, and "Close-out — every task".
-3. business-analysis/skills/ba-dependency-map/SKILL.md and references/example-dependency-map.md (as
-   K1 landed them — the formats you write into).
-4. backend/_shared/feature-trace/SKILL.md and references/trace-recipes.md (sections 3 "Scheduled jobs"
-   and the per-stack search blocks — reuse their idioms).
-5. backend/_shared/business-documentation/SKILL.md ("The area document — the shape", "Output", "Self-check")
-   and references/example-area.md.
-6. backend/_shared/agents/be-documenter.md (Steps table, line 121) and be-feature-documenter.md
-   (lines 33, 57, its document shape).
-7. backend/_shared/codebase-survey/SKILL.md, only the entry-point categories table (jobs, consumers).
-
-Build (task D1's bullets, in order): feature-trace (stop 7, stop 9, seven inventories, Edges, record
-shape, self-check, description, handoff) · trace-recipes "Following a seam" per stack · business-
-documentation (How it connects, the output-table row, self-check) · example-area.md How it connects for
-AREA-004 + evidence rows citing EVT-/RX- ids from §9.1 · be-documenter (seven inventories, Step 3
-writes the three files, Step 5 runs the map's checks, report counts) · be-feature-documenter (seven,
-How it connects, still no KB writes).
-
-Traps:
-- The body of an area or feature document never contains class names, status codes, framework nouns
-  or tier tags — How it connects is business language; ids and file:line live in the evidence table.
-- Never write #confirmed; the provenance stamp is mandatory on every KB file be-documenter writes.
-- A delivery guarantee the code does not make visible is `?` — the recipes must not teach guessing
-  "at-least-once" from a library name alone.
-- Size: business-documentation and be-documenter are over budget — net growth ≤ 1,500 characters each.
-- example-area.md's numbers and existing text do not change; you only add a section and evidence rows.
-
-Gate: none — this plan gates once, in A3. Do not run `claude plugin validate`, the checkers,
-tools/token-audit.py or any script.
-
-Commit: `feat(dev): trace edges one hop out, How it connects, documenters write the dependency map (005 D1)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
 
 ### Q1 — qa/manual: the Connections basis section and the cross-feature test-design skill (general-purpose, docs)
 

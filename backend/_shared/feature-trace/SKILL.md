@@ -1,11 +1,11 @@
 ---
 name: doc-feature-trace
-description: Use when one functional area of an existing backend must be read in depth to recover what it actually does — following every entry point through auth, validation, domain rules, persistence and failure into six file:line-evidenced inventories. Triggers "trace how this area works", "what business rules are in this module". Do NOT use to split a codebase into areas first (`dev:doc-codebase-survey`), write documentation (`dev:doc-business-model`), or find defects (`dev:audit-feature`).
+description: Use when one functional area of an existing backend must be read in depth to recover what it actually does — following every entry point through auth, validation, domain rules, persistence and failure into seven file:line-evidenced inventories. Triggers "trace how this area works", "what business rules are in this module". Do NOT use to split a codebase into areas first (`dev:doc-codebase-survey`), write documentation (`dev:doc-business-model`), or find defects (`dev:audit-feature`).
 ---
 
 # Feature Trace — recovering behavior from code
 
-Depth, one area at a time. The output is not prose — it is **structured evidence**: six inventories, every item tagged with the file and line it came from, ready for `dev:doc-business-model` to turn into something a business reader can use.
+Depth, one area at a time. The output is not prose — it is **structured evidence**: seven inventories, every item tagged with the file and line it came from, ready for `dev:doc-business-model` to turn into something a business reader can use.
 
 The discipline that makes it worth doing: **separate what the code does from what you think it means.** Every item you extract is `#observed` with a `file:line` read this session. Intent is a separate, clearly-marked layer — and where intent is not recoverable, the honest output is the behavior plus a question.
 
@@ -47,14 +47,14 @@ For **every** entry point in the area, walk this path in order. Each stop answer
 | 4. **Preconditions & lookups** | What must already be true? | Referenced things that must exist, be visible, and be in a permitted state |
 | 5. **Orchestration** | What happens, in what order? | The steps; what is transactional; what is best-effort; what is fire-and-forget |
 | 6. **Domain rules** | What does the business logic actually decide? | Every branch, threshold, calculation, and eligibility condition — **the highest-value stop** |
-| 7. **Persistence** | What is remembered, and what does it constrain? | State changes, DB constraints (constraints *are* rules), audit trails, soft deletes |
+| 7. **Persistence** | What is remembered, and what does it constrain? | State changes as `Entity.field` reads and writes, DB constraints (constraints *are* rules), audit trails, soft deletes |
 | 8. **External calls** | What crosses an organisational boundary? | Which system, when, what is sent, what happens if it fails |
-| 9. **Events emitted** | What else reacts? | Events/messages published — these are the seams to other areas |
+| 9. **Events emitted — and who reacts** | What else reacts? | Events, messages, outbox rows and notifications published — the seams to other areas — and for each one its consumers, one hop out (see Edges) |
 | 10. **Failure paths** | What does the user experience when it goes wrong? | Every error branch, and what it means in business terms |
 
 **Follow the call, do not skim the file.** A handler that reads as five clean lines routinely delegates to a service holding twenty conditions. Depth `full` means you followed those calls to where decisions are actually made; depth `shallow` means you stopped at stop 5 and said so.
 
-## The six inventories
+## The seven inventories
 
 ### 1. Capabilities
 What a user or system can make this area do. One line each, as a verb phrase in business language, with its actor and its entry point.
@@ -84,6 +84,18 @@ Any branch where more than two inputs combine to select an outcome — pricing, 
 
 ### 6. Integrations
 Per external system: what triggers the call, what is sent (business-level, not payload schemas), what comes back, and — critically — **what happens when it fails**. Timeout, retry, fallback, or unhandled. "Unhandled" is a finding.
+
+### 7. Edges
+Where this area touches another, one hop out and no further. For every emitted event, message, outbox row or notification, search for its consumers and record each with `file:line` and its owning area. For every written field another area may read, search for the readers — scheduled jobs' queries included. Then state how each reaction runs and what happens when it fails.
+
+| # | Entry point | Kind | Reads | Writes | Emits | Reacted to by (one hop out) | Mode | On failure | Evidence |
+|---|---|---|---|---|---|---|---|---|---|
+| 1 | `POST /bookings/{id}/cancel` | command | `Booking.status`, `Session.start` | `Booking.status`, `Session.seats_taken` | `BookingCancelled` | `BookingCancelledHandler.cs:19` (Credits) | after commit, `?` | `?` | `BookingService.cs:88-104` |
+
+- **Kind** is `command`, `schedule`, `timeout`, `external` or `event`; **Mode** is `in request`, `after commit, <guarantee>`, `scheduled` or `best effort`; **On failure** is what the code does when the reaction fails: rolls back, retried n× then dead-letter, compensates, unhandled.
+- **A mode or guarantee the code does not show is `?`.** A library name alone proves nothing: record at-least-once only where a retry, redelivery or missing acknowledgement is visible in the code or its configuration.
+- **A negative claim names its search**: "no consumer of `BookingCancelled` — searched `BookingCancelled`, `booking.cancelled` under `src/`".
+- Stop at one hop. The consumer's own emitted events are recorded as the consumer's row when its area is traced.
 
 ## Evidence rules
 
@@ -131,6 +143,9 @@ You are tracing, not auditing — but you will find things. Handle them like thi
 ### Integrations
 | System | Trigger | Sends | Expects | On failure | Evidence |
 
+### Edges
+| # | Entry point | Kind | Reads | Writes | Emits | Reacted to by (one hop out) | Mode | On failure | Evidence |
+
 ### Intent notes (`#inferred`)
 | Observation | Probable purpose | Basis (comment / test / commit / naming) | Question for the business |
 
@@ -147,13 +162,17 @@ You are tracing, not auditing — but you will find things. Handle them like thi
 5. Refused state transitions are recorded, not just the permitted ones.
 6. Every integration has a stated failure behavior, including "unhandled".
 7. Findings are kept out of the documentation stream and into the findings list.
+8. Every emitted event has its reactors recorded, or a negative search that names what was searched.
+9. Every written field another area reads is listed with its readers, jobs' queries included.
+10. Every reaction states its mode and failure behavior, or `?` — never a guessed guarantee.
 
 ## Handoffs
 
 - **→ `business-analysis:process-flow`** — the orchestration and failure paths become `FLOW-nnn` diagrams.
 - **→ `business-analysis:state-grid`** — inventory 4 becomes `ENT-nnn` state × event grids; the refused transitions are its `—` cells with meaning.
 - **→ `business-analysis:decision-table`** — inventory 5 becomes `DEC-nnn` tables with a declared hit policy; the completeness check exposes the input combinations the code never handles.
-- **→ `dev:doc-business-model`** — all six inventories become the area's end-user write-up.
+- **→ `business-analysis:dependency-map`** — the Edges inventories become `events.md`, `shared-data.md` and `invariants.md`; a `be-documenter` run writes them, `be-feature-documenter` does not.
+- **→ `dev:doc-business-model`** — all seven inventories become the area's end-user write-up; Edges become its *How it connects* section.
 - **→ `code-auditor`** — the findings list, when it turns out to be the interesting part.
 - **→ `qa-test-case-designer`** — the rules and validations are a test basis; the thresholds are BVA seeds.
 
