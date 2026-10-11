@@ -1,404 +1,269 @@
-# Accessibility Testing — axe-core + Playwright (Java / TestNG)
+# Accessibility Testing — axe-core + Playwright (Java / Playwright 1.63 + TestNG)
 
-The Java port of the canonical `qa-accessibility-testing-typescript`. Same axe-core rule
-engine, same `violations`-as-the-gate model, same triage discipline — re-expressed in
-`com.deque.html.axe-core:playwright` + Playwright-Java + TestNG idioms.
+`com.deque.html.axe-core:playwright` runs the axe-core rule engine **inside your Playwright run**, against the
+live DOM, and returns an `AxeResults` you assert on. It is an **assertion layer** on page objects that already
+exist: a scan is added to a flow the page objects drive. axe runs entirely in the browser — no SaaS, no
+agent, no API key.
 
-axe-core is the de-facto accessibility rule engine; the Deque Playwright binding runs it **inside your
-Playwright run**, against the live DOM, and returns a structured `AxeResults` you assert on. This is an
-**assertion layer** on top of the page objects and specs `qa-ui-test-writer-playwright-java` already
-authored — you inject an axe scan into an already-authored flow. You do **not** write new page objects
-here.
+> **What automation can and cannot do.** axe catches the machine-checkable share of WCAG — missing
+> `alt`, unlabelled inputs, contrast, invalid ARIA, duplicate ids. It is a **floor, not proof**: keyboard
+> traps, focus order and screen-reader comprehension still need manual and assistive-technology testing
+> (`qa-exploratory-charter-writer`). A green scan means "no automated regressions", never "accessible".
 
-Unlike the visual-regression family (free / Percy / Applitools), axe runs **entirely
-in-browser**: there is **no SaaS, no agent, and no API key**. The gate is local, deterministic, and free
-— `getViolations()` is empty or it isn't.
-
-> **What automation can and can't do.** axe-core catches roughly **30–40%** of WCAG issues — the
-> machine-checkable ones (missing `alt`, unlabeled inputs, color contrast, bad ARIA, duplicate IDs). It
-> is a **floor, not proof of accessibility**: keyboard traps, focus order, screen-reader comprehension,
-> and meaningful alt text still need manual + assistive-tech testing. Cross-link the manual/exploratory
-> angle (`qa-exploratory-charter-writer`). Treat a green axe run as "no *automated* regressions," never
-> "accessible."
-
-## Setup
+## 1. Setup
 
 ```kotlin
-// build.gradle.kts
 dependencies {
-    testImplementation("com.microsoft.playwright:playwright:1.50.0")
-    testImplementation("com.deque.html.axe-core:playwright:4.+")
-    testImplementation("org.testng:testng:7.+")
-    testImplementation("org.assertj:assertj-core:3.+")
+    testImplementation("com.deque.html.axe-core:playwright:4.13.0")
 }
 ```
 
-```xml
-<!-- or Maven -->
-<dependency>
-  <groupId>com.deque.html.axe-core</groupId>
-  <artifactId>playwright</artifactId>
-  <version>4.+</version>
-  <scope>test</scope>
-</dependency>
-```
+Exact, never `4.+` — a Maven `+` range is not even a valid version. The artifact bundles axe-core and
+injects it at scan time; its version tracks axe-core's major and minor (checked on Maven Central on
+2026-10-11: 4.13.0 is the latest). Playwright, TestNG, AssertJ and allure-testng come from J1's build
+(`qa/java/skills/ui-test-author/playwright/assets/build.gradle.kts`).
 
-No config file, no service, no token. `AxeBuilder` bundles axe-core and injects it into the page at scan
-time; the scan happens in the browser you already launched. (The artifact version tracks axe-core's
-major.minor.)
+## 2. The model
 
-## The AxeBuilder model
+`new AxeBuilder(page).analyze()` returns `com.deque.html.axecore.results.AxeResults`:
 
-`new AxeBuilder(page).analyze()` injects axe-core, runs it against the current DOM, and returns an
-`AxeResults` with four lists:
+| List | Meaning |
+|---|---|
+| `getViolations()` | Failed rules — **the gate** |
+| `getIncomplete()` | Rules axe could not decide (contrast over an image). **Not a pass** — a person reviews them |
+| `getPasses()` / `getInapplicable()` | Evidence; rarely asserted |
 
-- **`getViolations()`** — failed rules. **This is the gate.** Each `Rule` has `getId()` (rule id, e.g.
-  `color-contrast`), `getImpact()` (`minor` | `moderate` | `serious` | `critical`), `getHelp()`,
-  `getHelpUrl()`, and `getNodes()` — each `CheckedNode` carries the failing `getTarget()` selector(s)
-  and a `getFailureSummary()` telling you how to fix it.
-- **`getPasses()`** — rules that passed (evidence, not usually asserted on).
-- **`getIncomplete()`** — rules axe **could not decide** automatically (e.g. a contrast check over a
-  background image). **Not a pass** — these need manual review. Don't silently ignore them.
-- **`getInapplicable()`** — rules with no matching elements on the page.
+Each `Rule` has `getId()` (`color-contrast`), `getImpact()` (`minor` · `moderate` · `serious` · `critical`),
+`getHelp()`, `getHelpUrl()`, `getTags()` and `getNodes()`. Each `CheckedNode` has `getTarget()` — an `Object`
+holding the selector path, so print it with `String.valueOf` — `getHtml()` and `getFailureSummary()`.
+`isErrored()` / `getErrorMessage()` report a scan that failed to run.
 
-The assertion is one logical assertion per the global rules (AssertJ):
+## 3. The native assertions come first
 
-```java
-assertThat(results.getViolations()).isEmpty();
-```
+axe finds rule violations; it does not know what a control *should* be called. Assert the intended contract
+with `hasAccessibleName`, `hasAccessibleDescription`, `hasAccessibleErrorMessage` [1.50], `hasRole` [1.44]
+and `matchesAriaSnapshot` from `qa/java/skills/ui-test-author/playwright/references/assertions.md` §1–§2. A
+form gets both: an axe scan per state, and a native assertion for the error message the story specifies
+(§6).
 
-## Core pattern — scan injected into a page-object-driven flow
+## 4. The shared helper — `support/A11yScan.java`
 
-The page object exposes intent and drives the app to the state under test; the test stabilizes on a
-condition, then scans. No selectors in the test, no fixed waits — axe analyzes the **live DOM at call
-time**, so the page must be in its final state before `analyze()`.
+The conformance target is **WCAG 2.2 AA**, set once. Every scan attaches its violations and its
+incompletes **before** the test asserts, so a failure carries the evidence and incompletes are visible on
+every run.
 
 ```java
-// pages/CheckoutPage.java
-import com.microsoft.playwright.Locator;
-import com.microsoft.playwright.Page;
-import com.microsoft.playwright.options.AriaRole;
-import com.microsoft.playwright.options.WaitForSelectorState;
+package com.example.uitests.support;
 
-public final class CheckoutPage {
-    private final Page page;
-
-    public CheckoutPage(Page page) { this.page = page; }
-
-    public Locator form() { return page.getByTestId("checkout-form"); }
-
-    public void goTo() { page.navigate("/checkout"); }
-
-    /** Resolves once the form is interactive — a condition, never a fixed wait. */
-    public void waitUntilReady() {
-        form().getByRole(AriaRole.BUTTON, new Locator.GetByRoleOptions().setName("Pay now"))
-              .waitFor(new Locator.WaitForOptions().setState(WaitForSelectorState.VISIBLE));
-    }
-}
-```
-
-```java
-// tests/CheckoutAccessibilityTest.java
 import com.deque.html.axecore.playwright.AxeBuilder;
 import com.deque.html.axecore.results.AxeResults;
-import java.util.List;
-import org.testng.annotations.Test;
-import static org.assertj.core.api.Assertions.assertThat;
-
-public class CheckoutAccessibilityTest extends BasePlaywrightTest {  // provides the managed Page
-
-    @Test
-    public void Should_have_no_a11y_violations_When_checkout_form_loaded() {
-        CheckoutPage checkout = new CheckoutPage(page);
-        checkout.goTo();
-        checkout.waitUntilReady();                              // stabilize on a condition first…
-
-        AxeResults results = new AxeBuilder(page)               // …then scan the live DOM
-            .withTags(List.of("wcag2a", "wcag2aa", "wcag21a", "wcag21aa"))
-            .analyze();
-
-        assertThat(results.getViolations()).isEmpty();          // one logical assertion = the gate
-    }
-}
-```
-
-## Scoping + rule selection
-
-Scope the scan and pick which rules count — the analogue of `Target.region` / match levels in the visual
-family, but here it's *which rules*, not *how lenient*:
-
-```java
-AxeResults results = new AxeBuilder(page)
-    .include(List.of("#checkout-form"))         // scan only this component
-    .exclude(List.of(".third-party-widget"))    // skip an embed you don't own
-    .withTags(List.of("wcag2aa", "wcag21aa"))   // the WCAG level that IS your gate
-    .analyze();
-```
-
-- **`.include(List)` / `.exclude(List)`** — scan a component, not the whole page. Cleaner failures, and
-  lets you gate a new component to zero while the legacy page still has debt. `.exclude` third-party
-  iframes/widgets you can't fix.
-- **`.withTags(List)`** — pick the ruleset = pick which WCAG level is your gate. Common tags: `wcag2a`,
-  `wcag2aa`, `wcag21a`, `wcag21aa`, `wcag22aa`, plus `best-practice`. **Decide your conformance target
-  once** and apply the same tags everywhere — `wcag2a wcag2aa wcag21a wcag21aa` is the common "AA" gate.
-- **`.withRules(List)` / `.disableRules(List)`** — surgical control of individual rule ids; overrides
-  tags for those rules.
-- **`.options(String)`** — raw axe-core run options as JSON (overrides `withRules`/`withTags`); reach for
-  it last.
-
-### A shared AxeBuilder factory (DRY the config)
-
-Configure tags/excludes once via a helper so every test stays clean and consistent — the analogue of the
-TS fixture:
-
-```java
-// support/AxeScanner.java
-import com.deque.html.axecore.playwright.AxeBuilder;
-import com.microsoft.playwright.Page;
-import java.util.List;
-
-public final class AxeScanner {
-    private static final List<String> WCAG_AA = List.of("wcag2a", "wcag2aa", "wcag21a", "wcag21aa");
-    private AxeScanner() {}
-
-    /** Org-wide tags + excludes in one place — call .include(...) per test as needed. */
-    public static AxeBuilder forPage(Page page) {
-        return new AxeBuilder(page).withTags(WCAG_AA).exclude(List.of("#third-party-chat"));
-    }
-}
-```
-
-```java
-AxeResults results = AxeScanner.forPage(page).include(List.of("#dashboard")).analyze();
-assertThat(results.getViolations()).isEmpty();
-```
-
-## The triage reality — a real app has pre-existing violations
-
-A green-field `isEmpty()` only works on a clean page. Real apps have debt. The disciplined patterns, in
-order of preference:
-
-**1. Gate *new* violations only — baseline the known set.** Fail only on additions. This stops the
-bleeding without a big-bang fix, and every new feature ships clean:
-
-```java
-@Test
-public void Should_introduce_no_new_a11y_violations_When_profile_loaded() {
-    page.navigate("/profile");
-    AxeResults results = AxeScanner.forPage(page).analyze();
-
-    // Known debt, each with a tracking ticket — shrink this set, never grow it.
-    Set<String> known = Set.of("color-contrast" /* JIRA-1234 */, "landmark-one-main" /* JIRA-1235 */);
-    List<Rule> newViolations = results.getViolations().stream()
-        .filter(v -> !known.contains(v.getId()))
-        .toList();
-
-    assertThat(newViolations).isEmpty();     // gate additions; legacy debt tracked separately
-}
-```
-
-**2. Disable a *documented* false-positive — never blanket-disable.** If a rule genuinely misfires on
-your markup, `.disableRules(...)` with a ticket reference in a comment. Disabling to make a real failure
-go away is hiding a bug:
-
-```java
-AxeResults results = new AxeBuilder(page)
-    .disableRules(List.of("scrollable-region-focusable"))   // axe false-positive on virtualized list — JIRA-2001
-    .analyze();
-```
-
-**3. Don't silently pass `getIncomplete()`.** axe couldn't decide — surface it for manual review rather
-than treating it as green:
-
-```java
-if (!results.getIncomplete().isEmpty()) {
-    String ids = results.getIncomplete().stream().map(Rule::getId).collect(Collectors.joining(", "));
-    System.out.println("axe needs manual review for: " + ids);   // or your structured logger
-}
-```
-
-**4. Step the rollout by impact.** When even the baseline is huge, gate on the worst first and ratchet
-down over time:
-
-```java
-List<Rule> blocking = results.getViolations().stream()
-    .filter(v -> "critical".equals(v.getImpact()) || "serious".equals(v.getImpact()))
-    .toList();
-assertThat(blocking).isEmpty();     // gate critical+serious now; widen to moderate/minor later
-```
-
-## A11y-specific stabilization — scan per state, not per page
-
-axe analyzes the **live DOM at call time**. So scan **after** the page reaches the state under test, and
-scan **once per meaningful state** — an open menu, an expanded accordion, a validation-error form are
-different DOMs with different a11y surfaces. Drive the state via page-object intent, wait on a condition,
-then scan:
-
-```java
-@Test
-public void Should_have_no_a11y_violations_When_nav_menu_open() {
-    NavBar nav = new NavBar(page);
-    page.navigate("/");
-    nav.openAccountMenu();                                              // page-object intent
-    nav.accountMenu().waitFor(new Locator.WaitForOptions()
-        .setState(WaitForSelectorState.VISIBLE));                      // condition, not a sleep
-
-    AxeResults results = new AxeBuilder(page).include(List.of("[role='menu']")).analyze();
-    assertThat(results.getViolations()).isEmpty();
-}
-```
-
-Never `page.waitForTimeout(...)` / `Thread.sleep(...)` before a scan — it races the DOM and makes the
-gate flaky.
-
-## Reporting the gate — violations into Allure, fail CI on non-empty
-
-axe gives you everything to make a failure actionable: rule id, impact, helpUrl, and the failing
-selector + fix summary. Attach the JSON and a readable summary to Allure so the report names the rule
-without anyone re-running locally (cross-link `qa-test-reports-java`):
-
-```java
-// support/A11yReport.java
 import com.deque.html.axecore.results.Rule;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.microsoft.playwright.Page;
 import io.qameta.allure.Allure;
+import io.qameta.allure.AttachmentOptions;
+
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
-public final class A11yReport {
-    private static final ObjectMapper MAPPER = new ObjectMapper();
-    private A11yReport() {}
+public final class A11yScan {
+    public static final List<String> WCAG_22_AA = List.of("wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa");
+    public static final Map<String, String> FALSE_POSITIVES = Map.of(
+            "scrollable-region-focusable", "A11Y-2001: misfires on the virtualized order list");
+    public static final Map<String, String> KNOWN_VIOLATIONS = Map.of(
+            "color-contrast", "A11Y-1234",
+            "landmark-one-main", "A11Y-1235");
 
-    public static void attach(List<Rule> violations) throws Exception {
-        if (violations.isEmpty()) return;
-        // Machine-readable: the full violation objects.
-        Allure.addAttachment("axe-violations.json", "application/json",
-            new ByteArrayInputStream(MAPPER.writeValueAsBytes(violations)), ".json");
-        // Human-readable: one line per failing node.
-        StringBuilder sb = new StringBuilder();
-        for (Rule v : violations) {
-            sb.append('[').append(v.getImpact()).append("] ").append(v.getId())
-              .append(": ").append(v.getHelp()).append("\n  ").append(v.getHelpUrl()).append('\n');
-            v.getNodes().forEach(n -> sb.append("  ").append(String.join(" ", n.getTarget())).append('\n'));
-        }
-        Allure.addAttachment("axe-summary.txt", "text/plain",
-            new ByteArrayInputStream(sb.toString().getBytes(StandardCharsets.UTF_8)), ".txt");
+    private final Page page;
+
+    public A11yScan(Page page) {
+        this.page = page;
+    }
+
+    public AxeResults scanPage() {
+        return analyze(builder());
+    }
+
+    public AxeResults scanWithin(String testId) {
+        return analyze(builder().include("[data-testid='" + testId + "']"));
+    }
+
+    public static List<Rule> newViolations(List<Rule> violations) {
+        return violations.stream().filter(rule -> !KNOWN_VIOLATIONS.containsKey(rule.getId())).toList();
+    }
+
+    public static List<Rule> blockingViolations(List<Rule> violations) {
+        return violations.stream()
+                .filter(rule -> "critical".equals(rule.getImpact()) || "serious".equals(rule.getImpact()))
+                .toList();
+    }
+
+    private AxeBuilder builder() {
+        return new AxeBuilder(page)
+                .withTags(WCAG_22_AA)
+                .exclude("[data-testid='Chat.Widget']")
+                .disableRules(List.copyOf(FALSE_POSITIVES.keySet()));
+    }
+
+    private static AxeResults analyze(AxeBuilder scan) {
+        AxeResults results = scan.analyze();
+        attach("axe-violations", results.getViolations());
+        attach("axe-incomplete", results.getIncomplete());
+        return results;
+    }
+
+    private static void attach(String name, List<Rule> rules) {
+        String text = rules.stream()
+                .map(A11yScan::describe)
+                .collect(Collectors.joining("\n", rules.size() + " rule(s)\n", ""));
+        Allure.attachment(name, "text/plain",
+                new ByteArrayInputStream(text.getBytes(StandardCharsets.UTF_8)),
+                AttachmentOptions.withFileExtension("txt"));
+    }
+
+    private static String describe(Rule rule) {
+        String targets = rule.getNodes().stream()
+                .map(node -> String.valueOf(node.getTarget()))
+                .collect(Collectors.joining(", "));
+        return "[" + rule.getImpact() + "] " + rule.getId() + ": " + rule.getHelp() + " (" + rule.getHelpUrl() + ")\n  " + targets;
     }
 }
 ```
 
+- `withTags(List)` picks the ruleset, which is picking the WCAG level. `best-practice` adds axe's own
+  recommendations beyond WCAG; add it here deliberately, never per test.
+- `include` / `exclude` take a CSS selector (or a list, `FromFrames`, `FromShadowDom`); the helper builds
+  them from test ids, so a test passes `"Signup.Form"`, never a selector. `exclude` is for embeds you do not
+  own.
+- `disableRules` is only for a **documented** false positive, with its ticket and reason in
+  `FALSE_POSITIVES`. Disabling a rule to hide a real failure hides a bug.
+- `withRules(List)` runs only the named rules; `options(AxeRunOptions)` is raw axe run options and overrides
+  both — reach for it last.
+- The three maps and the list are immutable constants (`List.of`, `Map.of`), not shared mutable state.
+- The attachments are plain text — rule, impact, help link and the failing selectors — one per scan, so the
+  Allure report names the fix without a local re-run.
+
+## 5. The core pattern — one scan per state
+
 ```java
-@Test
-public void Should_have_no_a11y_violations_When_settings_loaded() throws Exception {
-    page.navigate("/settings");
-    AxeResults results = new AxeBuilder(page).withTags(List.of("wcag2aa")).analyze();
-    A11yReport.attach(results.getViolations());     // attach BEFORE asserting, so a failure carries it
-    assertThat(results.getViolations()).isEmpty();
+package com.example.uitests.tests;
+
+import com.deque.html.axecore.results.AxeResults;
+import com.deque.html.axecore.results.Rule;
+import com.example.uitests.pages.SignupPage;
+import com.example.uitests.support.A11yScan;
+import com.example.uitests.support.BaseTest;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
+import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+
+public class SignupAccessibilityTest extends BaseTest {
+    private SignupPage signupPage;
+    private A11yScan a11y;
+
+    @BeforeMethod(alwaysRun = true)
+    public void createPages() {
+        signupPage = new SignupPage(page);
+        a11y = new A11yScan(page);
+    }
+
+    @Test(groups = "a11y")
+    public void Should_HaveNoWcagViolations_When_SignupFormIsEmpty() {
+        signupPage.open();
+
+        AxeResults results = a11y.scanWithin("Signup.Form");
+
+        assertThat(results.getViolations()).extracting(Rule::getId)
+                .as("axe violations in the empty sign-up form").isEmpty();
+    }
+
+    @Test(groups = "a11y")
+    public void Should_HaveNoWcagViolations_When_ValidationErrorsShow() {
+        signupPage.submitEmpty();
+
+        AxeResults results = a11y.scanWithin("Signup.Form");
+
+        assertThat(results.getViolations()).extracting(Rule::getId)
+                .as("axe violations in the sign-up form with errors").isEmpty();
+    }
+
+    @Test(groups = "a11y")
+    public void Should_AnnounceEmailRequired_When_SignupSubmittedEmpty() {
+        signupPage.submitEmpty();
+
+        assertThat(signupPage.email()).hasAccessibleErrorMessage("Enter an email address");
+    }
 }
 ```
 
-The CI job fails because the assertion fails — no extra wiring beyond uploading the Allure results and
-the attached JSON (cross-link `qa-ci-pipelines-java`). There is **no API key to inject**
-here — call that out as the contrast with the visual-regression family (`percy` `PERCY_TOKEN` / `applitools`
-`APPLITOOLS_API_KEY`): axe runs in-browser, so the only thing CI needs is the artifact upload.
+- axe analyzes the DOM **at call time**, so the page object drives the state and waits on a condition
+  first: `open()` returns once the form is visible, `submitEmpty()` once the error summary is. An open menu,
+  an expanded accordion and a form showing errors are different DOMs with different accessibility
+  surfaces — scan each one. Never `Thread.sleep` or `waitForTimeout` before a scan.
+- `extracting(Rule::getId)` makes the failure message the list of rule ids; the attachment holds the
+  detail. One logical assertion per test.
+- AssertJ's `assertThat` and Playwright's `assertThat` are both static-imported; Java picks by argument
+  type (`List` versus `Locator`).
+- The third test is §3's native assertion: the scan proves no rule broke; this test proves the field says
+  what the story requires. `email()` returns a locator with `describe("Email field")`, which names it in the
+  failure.
+
+## 6. Triage — a real app has existing violations
+
+In order of preference:
+
+1. **Gate new violations only.** Known debt lives in `KNOWN_VIOLATIONS`, each with its ticket; the map only
+   shrinks: `assertThat(A11yScan.newViolations(results.getViolations())).extracting(Rule::getId).as("new axe violations").isEmpty()`.
+2. **Disable a documented false positive** through `FALSE_POSITIVES` (§4), never in a test.
+3. **Read the incompletes.** `axe-incomplete` is attached on every scan; reviewing it is part of accepting
+   a new screen. There is no `if` and no `println` for them in a test.
+4. **Ratchet by impact** when even the debt is large:
+   `assertThat(A11yScan.blockingViolations(results.getViolations())).extracting(Rule::getId).as("critical and serious violations").isEmpty()`,
+   then widen to every impact once the backlog clears.
+
+## 7. CI
+
+The scans run inside the normal UI job (`qa/cicd/java/skills/ci-pipelines`); the job fails because the
+assertion fails. A failed scan's test also gets `BaseTest`'s screenshot, trace and video in
+`build/playwright-artifacts/`, and the attachments travel in the Allure results. No secret is needed — the
+contrast with Percy's and Applitools' keys.
 
 ## Anti-patterns
 
-- **`page.waitForTimeout(500)` / `Thread.sleep` before `analyze()`.** axe scans the DOM at call time; a
-  sleep races it and is slow (and violates the global rules). *Fix:* wait on a condition
-  (`Locator.waitFor`, spinner hidden), then scan.
-- **One scan per page, ignoring interactive states.** Menus/modals/error states have their own a11y
-  surface. *Fix:* scan per meaningful state after driving the app there.
-- **Blanket `.disableRules` / cranking tags down to make it pass.** That hides real failures. *Fix:*
-  `.disableRules` only a *documented* false-positive with a ticket; otherwise fix the markup.
-- **Treating `getIncomplete()` as a pass.** axe abstained; the issue may be real. *Fix:* surface
-  incompletes for manual review.
-- **Asserting on `getViolations().size() == 0` with a bare boolean.** The bool throws away the diff.
-  *Fix:* `assertThat(results.getViolations()).isEmpty()` — AssertJ prints the collection on failure.
-- **Scanning the whole page when the feature under test is one component.** Legacy debt drowns the new
-  regression. *Fix:* `.include(...)` the component; gate it to zero.
-- **Calling a green axe run "accessible."** It covers ~30–40% of WCAG. *Fix:* pair with manual +
-  assistive-tech testing; treat axe as the automated floor.
-- **Duplicating tag/exclude config across every test.** Drifts over time. *Fix:* a shared `AxeScanner`
-  factory.
+- **`Thread.sleep` or `waitForTimeout` before `analyze()`.** *Fix:* the page object waits for the state.
+- **One scan per page, ignoring interactive states.** *Fix:* one scan per meaningful state.
+- **Tags that stop at WCAG 2.1 AA.** *Fix:* `wcag22aa` in `WCAG_22_AA`.
+- **Tags or excludes repeated per test.** They drift. *Fix:* the helper.
+- **`if (!results.getIncomplete().isEmpty()) System.out.println(…)`.** A condition in a test, and silent in
+  CI. *Fix:* the helper attaches the incompletes on every scan.
+- **`new AxeBuilder(page)` or `page.navigate` in a test.** *Fix:* the helper and the page objects.
+- **A whole-page scan for one new component.** Legacy debt drowns the regression. *Fix:* `scanWithin`.
+- **`String.join(" ", node.getTarget())`.** `getTarget()` returns `Object`; it does not compile.
+  *Fix:* `String.valueOf(node.getTarget())`.
+- **`Allure.addAttachment(...)`.** Removed in allure-java 3.0. *Fix:* `Allure.attachment(..., AttachmentOptions)`.
+- **A green scan reported as "accessible".**
 
-## Examples
+## Rules
 
-**End-to-end: a per-component a11y gate that ships new features clean against a legacy page.**
-
-```java
-// tests/SignupAccessibilityTest.java
-import com.deque.html.axecore.playwright.AxeBuilder;
-import com.deque.html.axecore.results.AxeResults;
-import java.util.List;
-import org.testng.annotations.Test;
-import static org.assertj.core.api.Assertions.assertThat;
-
-public class SignupAccessibilityTest extends BasePlaywrightTest {
-
-    @Test
-    public void Should_have_no_a11y_violations_When_signup_form_empty() throws Exception {
-        SignupPage signup = new SignupPage(page);
-        signup.goTo();
-        signup.waitUntilReady();                                  // condition, not sleep
-
-        AxeResults results = AxeScanner.forPage(page).include(List.of("#signup-form")).analyze();
-        A11yReport.attach(results.getViolations());
-        assertThat(results.getViolations()).isEmpty();
-    }
-
-    @Test
-    public void Should_have_no_a11y_violations_When_validation_errors_shown() throws Exception {
-        SignupPage signup = new SignupPage(page);
-        signup.goTo();
-        signup.submitEmpty();                                     // page-object intent
-        signup.errorSummary().waitFor();                         // condition
-
-        AxeResults results = AxeScanner.forPage(page).include(List.of("#signup-form")).analyze();
-        A11yReport.attach(results.getViolations());
-        assertThat(results.getViolations()).isEmpty();           // error state has its own a11y surface
-    }
-}
-```
-
-Lifecycle for this gate:
-1. A dev adds a new field to the signup form.
-2. CI runs the E2E suite; the axe scan runs in the same browser, on the live DOM, per state.
-3. If the new field is missing a label, `getViolations()` is non-empty — the build fails with the rule
-   id (`label`), the failing selector, and the helpUrl in the Allure attachment.
-4. The dev fixes the markup; the gate goes green. Legacy debt on other pages is tracked separately by
-   the ticketed allow-list, shrinking over time.
-
-## Rules (hard constraints)
-
-- A11y testing is an **assertion layer** on existing page objects/specs — inject the axe scan, don't
-  author new page objects here. Page objects expose intent + locators; no selectors in tests.
-- One logical assertion per test: `assertThat(results.getViolations()).isEmpty()` (or a filtered
-  subset). Test names `Should_X_When_Y`.
-- Stabilize on a **condition** (interactivity/visibility) before `analyze()`; never `waitForTimeout` /
-  `Thread.sleep` — axe scans the live DOM at call time.
-- Scan **per meaningful state** (menu open, accordion expanded, errors shown), not once per page.
-- Pick the WCAG level deliberately via `.withTags` and apply it consistently (a shared factory).
-- Triage with discipline: baseline known debt with **ticketed** allow-lists, `.disableRules` only
-  *documented* false-positives, and surface `getIncomplete()` for manual review — never silently pass it.
-- **No SaaS, no API key** (axe runs in-browser) — the gate is local and deterministic. The only CI need
-  is the violations-JSON/Allure artifact upload.
-- axe covers ~30–40% of WCAG: it's the automated **floor**, not proof of accessibility. Pair with
-  manual + assistive-tech testing.
+- `com.deque.html.axe-core:playwright:4.13.0`, exact.
+- WCAG 2.2 AA tags, excludes and false positives live in one helper, built in the class's `@BeforeMethod`.
+- One logical assertion per test: the violation ids `isEmpty()` with `.as("<subject>")`, or a named subset.
+- Stabilize through the page object before a scan; scan once per meaningful state.
+- Every scan attaches its violations and incompletes with `Allure.attachment(..., AttachmentOptions)`.
+- Known debt is ticketed and only shrinks; false positives are documented.
+- Tests reach pages through page objects; selectors are built from test ids inside the helper.
+- Pair every scan of a story's form with the native assertion for what the story specifies.
 
 ## Cross-references
 
-- `qa-accessibility-testing-typescript` — the **canonical** skill, TS / Vitest+Playwright
-  (`new AxeBuilder({ page }).analyze()`, `results.violations`).
-- `qa-accessibility-testing-dotnet` — same skill, .NET / NUnit
-  (`Deque.AxeCore.Playwright`, `new AxeBuilder(page).AnalyzeAsync()`, `result.Violations`).
-- `references/lighthouse-ci.md` — the audit/score sibling: full-page
-  perf/SEO/PWA + a11y **score** threshold, a separate Lighthouse pass. Run both: axe gates, Lighthouse
-  trends.
-- `qa-ui-test-writer-playwright-java` — the page objects/specs the axe scan is injected into. Author the
-  flow there; add the a11y scan here.
-- `qa-ci-pipelines-java` — where the job fails on the assertion and the violations JSON is
-  uploaded as an artifact. Note: **no secret to inject** (contrast `percy`/`applitools`).
-- `qa-test-reports-java` — attach the violations JSON + readable summary to the report.
-- `qa-exploratory-charter-writer` — the manual/assistive-tech testing that covers the ~60% axe can't.
+- `references/lighthouse-ci.md` — the score-and-trend sibling for public pages.
+- `qa/java/skills/ui-test-author/playwright` — `BaseTest`, page objects, `references/assertions.md`.
+- `qa/java/skills/evidence-capture` — the failure evidence beside the scan's attachments.
+- `qa/cicd/java/skills/ci-pipelines` — the UI job the scans run in.
+- `qa-accessibility-testing-typescript` (`@axe-core/playwright`), `qa-accessibility-testing-dotnet`
+  (`Deque.AxeCore.Playwright`).
+- `qa-exploratory-charter-writer` — the manual and assistive-technology testing axe cannot do.

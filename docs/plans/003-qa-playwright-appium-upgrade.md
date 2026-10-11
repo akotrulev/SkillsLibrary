@@ -35,7 +35,13 @@ and loads in every `qa-ui-*` Step 3. T3 landed 2026-10-10: TS `visual-regression
 `network-mocking` (three routers, eight references) on 1.64 — a nightly `visual` project, `page.clock` frozen
 time, WebP with the Allure caveat, fixtures for Percy, Eyes, axe (WCAG 2.2 AA) and Lighthouse, annotated
 no-assertion tests, headers/TLS at the routing layer, `page.requests()` for "not called", and a Vitest-fixture
-proxy (D49–D52). Next: J3. Built but unverified: no asset, workflow or pipeline has been
+proxy (D49–D52). J3 landed 2026-10-11: Java `visual-regression`, `accessibility-testing` and `network-mocking`
+(three routers, eight references) on 1.63 — `locator.screenshot` plus `com.github.romankh3:image-comparison:4.4.0`
+against `src/test/resources/baselines/<os>-<browser>/`, with baselines and the nightly job in the v1.63.0-noble
+image through `docker run` (D53); every sample on `BaseTest`; axe 4.13.0 at WCAG 2.2 AA with attached
+incompletes; Lighthouse for public pages on `BaseTest`'s Chromium and a free port (D55); a held route instead of a
+handler sleep (D54); headers/TLS at the routing layer; per-class Applitools runners (D56); the archived BrowserUp
+kept with a warning (D57). Next: N3. Built but unverified: no asset, workflow or pipeline has been
 compiled or run (G1 does that; D24's TS config import, the Java build on Allure Gradle plugin 4.3.0, the .NET
 build on NUnit3TestAdapter 6.3.1 / Test SDK 18.10.1, `dorny/test-reporter`'s `java-junit` parse, the trace CLI
 through the Java driver (D39) and through `playwright.ps1` (D43), the .NET shard script against a real
@@ -43,7 +49,11 @@ through the Java driver (D39) and through `playwright.ps1` (D43), the .NET shard
 access, so its .NET spellings rest on the committed research; no WebMCP test has run against a site that
 registers tools; T3 had no web access either, so its Percy, Applitools, playwright-lighthouse, mockttp and
 Vitest-fixture spellings rest on the research and the old skill text, and the TS CI references do not yet run
-`--project=visual` — G1 reconciles that).
+`--project=visual` — G1 reconciles that; J3 read its pins from Maven Central and npm and its spellings from the
+libraries' sources, but nothing ran: the comparator flow, the `docker run` visual job, Lighthouse attached to
+Playwright's Chromium, Applitools `BatchInfo.setId` / `getAllTestResults(boolean)` (no published sources) and
+BrowserUp on Java 21 are open, and J2's Java CI references still describe the visual container job — G1
+reconciles that too).
 Planned 2026-10-10. The research behind it is committed with this plan:
 `docs/research/003-qa-playwright-appium/` (5 files). So is the read-only audit:
 `docs/audits/003-qa-playwright-appium/` (4 files). All open questions were answered on 2026-10-10:
@@ -54,7 +64,7 @@ Planned 2026-10-10. The research behind it is committed with this plan:
 - A Maestro lane is added (X1).
 - The newest Appium client majors are primary.
 
-Next: J3 (H1, the user's, blocks no task). The cost is 19 agent sessions on the subscription, each started by the user
+Next: N3 (H1, the user's, blocks no task). The cost is 19 agent sessions on the subscription, each started by the user
 from Plan Queue. Nothing else is metered.
 
 ## 1. What already exists, and what is missing
@@ -865,6 +875,54 @@ field), or register a pass-through endpoint before the action and read its seen 
 object's completion signal, logging the unmatched pass-through requests without `authorization` / `cookie`
 headers (chosen). **Cost:** the proxy lane writes no HAR and logs no response status or headers; a HAR of a
 non-Playwright client needs another tool.
+
+**D53 — The Java visual job and the baseline-update command run `mcr.microsoft.com/playwright/java:v1.63.0-noble`
+with `docker run` from a runner step, not as a container job (J3, 2026-10-11).** D40 left the visual job three
+limits: the image has no JDK 21 (J1's toolchain), no Gradle and no cloud CLI, and Azure container jobs have no
+`sudo`. Readings: a container job per CI as J2's references describe it (GitHub keeps `setup-java` inside, but
+`azure/login` cannot run there, so signed-in pages are out; Azure cannot `apt-get` JDK 21), or one `docker run`
+command, run as the image's root user, that installs `openjdk-21-jdk-headless` and runs `./gradlew visualTest`,
+with the credentials fetched on the runner first and passed in with `-e` (chosen; GitLab, whose job already runs
+in an image, takes them from masked CI/CD variables). The same command with `UPDATE_BASELINES=1` and
+`--platform linux/amd64` is the local baseline update. **Cost:** an `apt-get` of JDK 21 on every visual run and
+no Gradle cache unless one is mounted; root-owned files on a Linux host; J2's three CI references still describe
+the container-job variant — G1's prompt carries the one-line reconciliation.
+
+**D54 — A Java test shows a loading state by holding the route, not by delaying it (J3, 2026-10-11).** The plan
+said "no `Thread.sleep` in route handlers (CDP throttling or a server-side delay)". Readings: CDP throttling only
+(Chromium-only, slows every request, and timing-dependent), a server-side delay only (needs a test endpoint for
+every loading state), or a handler that stores the `Route` and returns — playwright-java's `Router.handle`
+reports that as `PendingHandler` and the request waits until the test calls `resume()` (chosen, as
+`MockApi.holdOrders()` / `HeldRequests.release()`), keeping CDP for real bandwidth and the server for client
+timeouts. **Cost:** a held request shows "not yet", never "slowly"; the deferred-handling path is read from
+v1.63.0 source, not run.
+
+**D55 — Java Lighthouse audits public pages only, through `lhci autorun` or a TestNG test attached to
+`BaseTest`'s own Chromium on a free debugging port; JSON in these skills is read with Gson (J3, 2026-10-11).**
+`aJ` D13 found the old test audited a different context on a fixed port. Readings: drop the TestNG audit and keep
+only `lhci` (no score in the test report), keep a private `Playwright.create()` with `--remote-debugging-port=9222`
+(a review blocker, and parallel classes collide), or `launchOptions()` adding a port chosen with
+`new ServerSocket(0)` in the class constructor (chosen). Gson is Playwright for Java's own compile-scope
+dependency (2.14.0 in 1.63), so the Lighthouse report, mocked payloads and CDP payloads add no JSON library;
+Jackson (a new pin) was the other reading. **Cost:** a signed-in page has no Lighthouse score in the Java lane; a
+short race between choosing the port and Chromium binding it; Lighthouse attaching to a Playwright-launched
+headless Chromium is unverified from Java.
+
+**D56 — Each Applitools class owns its `VisualGridRunner` and gates in its own `@AfterClass` (J3, 2026-10-11).**
+The plan asked for `@AfterMethod` instead of `try`/`finally`. Readings: one `static` runner gated in
+`@AfterSuite` (the old shape: static mutable state shared by parallel class threads), `eyes.close(false)` plus an
+assertion per test (serializes the grid, and its multi-environment result is unclear), or a runner instance field
+from `@BeforeClass`, `eyes.closeAsync()` in `@AfterMethod(alwaysRun = true)` and `runner.getAllTestResults(true)` in
+`@AfterClass(alwaysRun = true)` (chosen), with one `APPLITOOLS_BATCH_ID` per run so the classes share a dashboard
+batch. **Cost:** a visual difference fails a configuration method of the class, not the test; `testConcurrency`
+applies per class.
+
+**D57 — `network-mocking/references/proxy.md` keeps BrowserUp Proxy, pinned at its last release, with the
+archive stated (J3, 2026-10-11).** `com.browserup:browserup-proxy-core` 2.1.2 (December 2020) is the latest on
+Central, and its repository is archived. Readings: move the reference to a maintained proxy (mitmproxy or
+WireMock 3 — a new tool taught without a verified API), drop the reference (the Selenium and Appium agents lose
+their traffic layer), or keep it with the warning and fix its samples (chosen). **Cost:** the Java lane's
+non-Playwright traffic capture rests on an unmaintained library that was not run on Java 21.
 
 ## Answered questions (2026-10-10)
 
@@ -1714,6 +1772,73 @@ sample extends J1's `BaseTest`.
 - Every Allure call in these files uses allure-java 3.0 (D12): `Allure.attachment(...)` with
   `AttachmentOptions`.
 - **Not in J3:** the remaining Java skills (J4).
+- **As built (2026-10-11):**
+  - Landed: all eleven files rewritten — three routers (`visual-regression` 6.2k, `accessibility-testing` 4.4k,
+    `network-mocking` 4.4k chars; descriptions 499 / 461 / 496) and eight references (`playwright-snapshots`
+    23.5k, `percy` 9.1k, `applitools` 11.5k, `axe-playwright` 12.9k, `lighthouse-ci` 12.9k, `playwright-routes`
+    21.5k, `cdp` 15.1k, `proxy` 14.5k). Every Playwright sample extends `com.example.uitests.support.BaseTest`,
+    changes the context only through `contextOptions()` and the launch only through `launchOptions()`, and builds
+    its helpers and page objects in its own `@BeforeMethod(alwaysRun = true)`; no `Playwright.create()`, no
+    `try`/`finally`, no `Thread.sleep`, no comment and no `Allure.addAttachment` in any code block; PascalCase
+    test ids; `Should_X_When_Y` names (scripted scan of every fence; the only hits were the `/*` inside globs).
+  - **The comparator, checked on Maven Central today:** `com.github.romankh3:image-comparison:4.4.0` — the
+    latest on Central (metadata `lastUpdated` 2021-03-28; a `v4.5.0` git tag was never published), pure JDK/AWT,
+    Java 8+. Its API was read at the `v4.4.0` tag: `new ImageComparison(BufferedImage, BufferedImage)`,
+    `setAllowingPercentOfDifferentPixels`, `setPixelToleranceLevel`, `setExcludedAreas`, `compareImages()` →
+    `ImageComparisonResult` with `getImageComparisonState()` (`MATCH` / `MISMATCH` / `SIZE_MISMATCH`), `getResult()`
+    and `getDifferencePercent()` (mean colour difference, `0` on a match — so the gate is the state).
+  - Also checked today: Maven Central — `io.percy:percy-playwright-java` 1.2.1, `com.applitools:eyes-playwright-java5`
+    5.86.9, `com.deque.html.axe-core:playwright` 4.13.0, `com.browserup:browserup-proxy-core` 2.1.2 (Dec 2020; the
+    GitHub repo is archived), `org.seleniumhq.selenium:selenium-java` 4.51.0; Playwright 1.63.0's pom brings Gson
+    2.14.0 at compile scope. npm — `@percy/cli` 1.32.11, `@lhci/cli` 0.15.1, `lighthouse` 13.5.0. Sources —
+    percy-playwright-java v1.2.1 (`snapshot(String, Map<String,Object>)`, a no-op returning `null` when the agent's
+    healthcheck fails); the eyes-playwright-java5 5.86.9 sources jar (`com.applitools.eyes.playwright.visualgrid.VisualGridRunner`,
+    `Target.region(Locator)`, `layout/ignore/strict/content(Locator)`, `floating(Locator, up, down, left, right)`,
+    `Eyes.open(Page, String, String, RectangleSize)`, `closeAsync()`) and eyes-common-java5 5.71.4
+    (`com.applitools.eyes.visualgrid.BrowserType`, `DeviceName.Pixel_2`); axe-core-maven-html v4.13.0
+    (`AxeBuilder.include/exclude(String)`, `withTags/disableRules(List)`, `Node.getTarget()` returns `Object`);
+    playwright-java v1.63.0 (`Page.requests()`, `pageErrors()`, `consoleMessages(options)`, `Response.allHeaders()`,
+    `securityDetails()` → `SecurityDetails` public fields, `RouteFromHAROptions` setters, and `Router.handle`
+    returning `PendingHandler` when a handler returns without handling the route); playwright v1.63.0
+    `screenshotter.ts` awaits `document.fonts.ready` before every screenshot; BrowserUp v2.1.2
+    (`HarRequest.getMethod()` returns the `HttpMethod` enum, `Har.writeTo(File)`, `waitForQuiescence` returns
+    `boolean`).
+  - Differed from the plan: the visual job and the baseline-update command run the pinned image with `docker run`
+    from a runner step, not a container job (D53); a loading state is shown by holding the route, not by a delay
+    (D54); the Java Lighthouse test attaches to `BaseTest`'s own Chromium on a free debugging port and audits public
+    pages only, with Gson for every JSON read in these skills (D55); each Applitools class owns its runner and gates
+    in `@AfterClass` (D56); `proxy.md` keeps the archived BrowserUp with a warning (D57). Beyond the plan:
+    security headers and TLS moved from `cdp.md` to `playwright-routes.md` §5 (as T3 did), so CDP lost its
+    `responseFor` audit, its `CdpBaseTest` and its detach hook (the session ends with the context `BaseTest`
+    closes); the old proxy sample compared the `HttpMethod` enum to `"POST"` and could never pass — fixed; its
+    `ClientUtil` placeholder method returning `null` is gone; the PDF example is dropped with the reason (§9);
+    the Percy build link (`PERCY_BUILD_URL`, unverified) is dropped — the status check carries it.
+  - Names assigned: helpers `support.VisualCheck` (`compare(target, masked, baselineName)`), `support.EyesConfig.forGrid()`,
+    `support.A11yScan` (`scanPage`, `scanWithin(testId)`, `WCAG_22_AA`, `FALSE_POSITIVES`, `KNOWN_VIOLATIONS`,
+    `newViolations`, `blockingViolations`), `support.Lighthouse` (`freePort`, `audit`, `GATED_CATEGORIES`),
+    `support.MockApi` (+ `MockApi.HeldRequests.release()`), `support.Traffic` (`requestedUrls`, `pageErrors`,
+    `jsonBody`), `support.CdpControls` (+ `CapturedResponse`), `support.NetworkPresets`, `support.proxy.ProxyControls`,
+    `support.proxy.ProxyTest`; page objects `PricingPage`, `SignupPage`, `OrdersPage` (`navigate()` vs `open()`),
+    `CartPage`, `AppShellPage`, `ProfilePage`, `DashboardPage`; TestNG groups `visual`, `a11y`, `lighthouse`; Gradle
+    task `visualTest`; env `UPDATE_BASELINES=1`, `HAR_UPDATE=1`, `APPLITOOLS_BATCH_ID`; baselines
+    `src/test/resources/baselines/<os>-<browser>/<Subject>.png`; kept files
+    `build/playwright-artifacts/<Class>.<method>.{actual,diff}.png`, `.lighthouse.{json,log}`, `.har` (proxy).
+  - Built, unverified (Gate: none): nothing compiled or ran. Open points: `BatchInfo.setId` and
+    `getAllTestResults(boolean)` live in an Applitools jar whose sources were not published, so they rest on the
+    old skill text and the SDK's long-standing API; Lighthouse attaching to a Playwright-launched headless Chromium
+    through `--remote-debugging-port` (the `playwright-lighthouse` pattern) was not run from Java; the
+    `docker run` visual job and JDK 21 install were not run; BrowserUp 2.1.2 was not run on Java 21 or beside
+    Selenium 4.51; the comparator remains a recommendation (D9).
+  - Proof: no screenshot assertion `visual-regression/SKILL.md:12`; comparator pin and gate exclusion
+    `references/playwright-snapshots.md:36,42`; masks and style `:158-159`; Allure 3 attach `:191`; update command
+    in the pinned image `:350-351`; nightly `docker run` job `:394-396`; PDF dropped `:419`; Percy pins and
+    no-assertion description `references/percy.md:32,37,107`; Eyes pin, hooks and description
+    `references/applitools.md:31,127,138,143`; axe pin and WCAG 2.2 tags `accessibility-testing/references/axe-playwright.md:17,72`,
+    incompletes attached `:113`, native assertion `:198`; Lighthouse public-pages limitation, pins, free port,
+    launch hook, one assertion `references/lighthouse-ci.md:13,27,112,174,187`; no handler sleep
+    `network-mocking/SKILL.md:42`; routes — hold `references/playwright-routes.md:50,129,389`, `mockApi` declared
+    `:216`, `page.requests()` `:183,307`, headers/TLS `:323,331`, `startHar` link `:361`, glob 1.52 `:409`; CDP
+    `browserName` gate `references/cdp.md:87-89`, last match `:244`; proxy pin and enum `references/proxy.md:22,236`.
 
 ### N3 — .NET visual regression (rewritten), accessibility and network mocking on 1.63
 
@@ -2177,78 +2302,9 @@ Run them in order, one session each, opened from Plan Queue. Each block is compl
 | X1 | `docs` | `general-purpose` | M1, S1, T2 | ~130k |
 | G1 | `docs` | `general-purpose` | all | ~145k |
 
-Landed: T1, J1, N1, T2, J2, N2, A1, T3 (2026-10-10). Every other block is live.
+Landed: T1, J1, N1, T2, J2, N2, A1, T3 (2026-10-10), J3 (2026-10-11). Every other block is live.
 
 ---
-
-### J3 — Java visual regression (rewritten), accessibility and network mocking on 1.63 (general-purpose, docs)
-
-````
-You are `general-purpose`. Task J3 of docs/plans/003-qa-playwright-appium-upgrade.md: make
-qa/java/skills/{visual-regression,accessibility-testing,network-mocking} teach only APIs that exist in
-Playwright Java 1.63. Rewrite visual regression as screenshot plus comparator (D9), with every sample
-extending J1's BaseTest.
-
-Read, in this order:
-1. CLAUDE.md.
-2. The plan: §2.1, §2.2, §4, Decisions D8, D9, task J3, "Close-out — every task".
-3. Every .md under qa/java/skills/visual-regression, accessibility-testing and network-mocking.
-4. qa/java/skills/ui-test-author/playwright/assets/BaseTest.java and references/lifecycle.md.
-5. docs/research/003-qa-playwright-appium/playwright-evidence.md §1, §2, §6, §13.
-6. docs/audits/003-qa-playwright-appium/java.md rows D1, D9, D12, D13, D16, D19, D21, D25, D31, D32,
-   D36, D37, V2.
-
-Build:
-- Visual:
-  - Rewrite references/playwright-snapshots.md: Locator.ScreenshotOptions (mask, animations, caret,
-    style); baselines in src/test/resources/baselines/<os>-<browser>/; a comparator you verify on Maven
-    Central today (candidate com.github.romankh3:image-comparison); the diff attached to Allure;
-    baselines generated only in mcr.microsoft.com/playwright/java:v1.63.0-noble.
-  - SKILL.md says Java has no screenshot assertion and stops saying "built-in".
-  - Exact Percy/Applitools versions; @AfterMethod, not try/finally; fix or drop the PDF example;
-    Gradle paths.
-- A11y: axe 4.13.0 exact; BasePlaywrightTest → BaseTest; if/println → an attachment; the Lighthouse
-  auth limitation stated (public pages only); wcag22aa.
-- Network: glob 1.52; declare mockApi; no Thread.sleep in route handlers (CDP throttling or a server-side
-  delay); fix the CDP findFirst test; define browserName; fix cross-references; page.requests();
-  tracing().startHar().
-- Every Allure call in these files uses allure-java 3.0 (D12): Allure.attachment(...) with
-  AttachmentOptions.
-- Extending BaseTest (com.example.uitests.support.BaseTest): a sample changes the context only by
-  overriding `protected Browser.NewContextOptions contextOptions()` (recordHar, viewport, reduced motion,
-  locale) and the launch by `launchOptions()` (plan D26). It never adds its own Playwright, browser or
-  failure hook — BaseTest already keeps screenshot, trace and video on failure. Seed and clean up in the
-  class's own @BeforeMethod / @AfterMethod(alwaysRun = true) with page.request() (lifecycle.md §7).
-  Non-locator results (a comparator's diff ratio, an axe violation count) are AssertJ with .as(...).
-  Emulation and media mechanics are in ui-test-author/playwright/references/emulation-and-mobile-web.md.
-
-Traps:
-- assertThat(page).hasScreenshot() and HasScreenshotOptions do not exist. G1's CODE_CHECKS fails if
-  either survives in a code block or an asset.
-- Java route handlers run on the Playwright dispatch thread. A sleep there stalls all events, not one
-  request.
-- Name the comparator's exact coordinates and version you saw on Maven Central today, in the reference
-  and in your As-built note.
-- The pinned image (D40): mcr.microsoft.com/playwright/java:v1.63.0-noble ships OpenJDK 25 and Maven — no
-  JDK 21, no Gradle, no cloud CLI — while J1's build pins a Java 21 toolchain. J2's CI references install the
-  browsers on the runner and describe the container only as the visual-baseline variant (GitHub: keep
-  actions/setup-java 21 inside the container, and azure/login cannot run there; GitLab: apt-get
-  openjdk-21-jdk-headless as root; Azure container jobs have no sudo). The visual job and the baseline-update
-  command must work inside those limits; a visual run of a signed-in page needs its credentials another way.
-- Deliberate captures (a diff image, a HAR) follow qa/java/skills/evidence-capture: the class's own
-  @BeforeMethod / @AfterMethod(alwaysRun = true), files in build/playwright-artifacts/<Class>.<method>.<kind>.<ext>,
-  and any catch only in a private helper (D29), never in the hook body.
-- T3 moved the TS security-header and TLS checks from CDP to the routing layer (`response.allHeaders()`,
-  `response.securityDetails()`, both all-binding); a Java CDP reference that ports the TS audit moves the
-  same way (`allHeaders()`, `securityDetails()` on the `Response`). A hosted-tool test with no assertion
-  (Percy, Applitools) carries a `no-assertion` annotation in TS (D50) — on TestNG, state the exception in the
-  test's `@Test(description = …)`.
-
-Gate: none. This plan gates once, in G1. Do not run any build, test or check script.
-
-Commit: `docs(qa-java): visual (screenshot + comparator), a11y and network skills on Playwright 1.63 (003 J3)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
 
 ### N3 — .NET visual regression (rewritten), accessibility and network mocking on 1.63 (general-purpose, docs)
 
@@ -2867,6 +2923,13 @@ Build:
   {github-actions,gitlab-ci,azure-pipelines}.md, the schedule-gated visual step runs
   `npx playwright test --project=visual` in mcr.microsoft.com/playwright:v1.64.0-noble (the minimum, one
   step or one line each); skip whatever is already there.
+- D53 seam: the Java visual job is J3's `docker run` step (qa/java/skills/visual-regression/references/
+  playwright-snapshots.md §8), but the "Running in the pinned image" bullet of each
+  qa/cicd/java/skills/ci-pipelines/references/{github-actions,gitlab-ci,azure-pipelines}.md still describes a
+  container job. Point each bullet at §8 for the visual job (one line each); keep its description of the image.
+  Also: the Java `test` task in J1's assets/build.gradle.kts does not exclude the `visual` group; the visual
+  reference shows `excludeGroups("visual")` and a `visualTest` task as additions a project makes, so leave the
+  asset alone unless a check needs it.
 - The final Status names what is unverified: no Appium flow ran on a device or emulator; no Maestro flow
   ran; no WebMCP test ran against a site that registers tools; the D9 comparators are recommendations. Then git mv the plan
   to docs/plans/implemented/.

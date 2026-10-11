@@ -1,41 +1,59 @@
 ---
 name: qa-network-mocking-java
-description: Use when Java 21 / TestNG UI tests must intercept, mock, throttle, or assert browser network traffic — Playwright routes, raw CDP, or an out-of-browser MITM proxy. Triggers "mock this XHR in the UI test", "simulate slow 3G/offline", "capture a HAR", "assert the page called endpoint X". Do NOT use for direct API testing without a browser (use `qa-api-test-writer-java`), for load throttling (`qa-load-testing-java`), or for WebSocket/SSE streams (use `qa-realtime-stream-testing-java`).
+description: Use when Java/TestNG UI tests must intercept, mock, slow down or assert browser network traffic — Playwright routes, CDP throttling, or an out-of-browser MITM proxy for Selenium/Appium. Triggers "mock this XHR in the UI test", "simulate slow 3G/offline", "replay a HAR", "assert the page called endpoint X", "check the security headers". Do NOT use for API tests without a browser (qa-api-test-writer-java), load (qa-load-testing-java) or WebSocket/SSE streams (qa-realtime-stream-testing-java).
 ---
 
-# QA — Network Monitoring (Java 21)
+# QA — Network Mocking (Java / Playwright 1.63)
 
-One registered skill, 3 tools — a project uses exactly one. Identify the project's tool
-(dependencies, docker-compose, infra config; ask one question if ambiguous), then **read the matching
-`references/<tool>.md` end-to-end before writing any code** — it carries the full model, patterns,
-templates, anti-patterns, and hard rules for that tool. This file only routes and holds the rules
-shared by every tool in the family.
+One registered skill, three tools. Identify the layer the test needs, then **read the matching
+`references/<tool>.md` end to end before writing any code**. This file routes and holds the rules every tool
+shares. The Playwright pin is in the **Versions** table of `qa/java/skills/ui-test-author/playwright/SKILL.md`.
 
 ## Tools in this family
 
 | Read | Use when |
-|------|----------|
-| `references/playwright-routes.md` | Intercept/mock/assert requests inside Playwright tests — the default; stay here when possible |
-| `references/cdp.md` | Chrome DevTools Protocol — network throttling, offline mode, low-level events Playwright routes can't reach |
-| `references/proxy.md` | Out-of-browser MITM proxy — HAR capture and interception for Selenium/Appium/non-CDP browsers |
+|---|---|
+| `references/playwright-routes.md` | Mock, abort, modify, hold, assert, HAR replay, offline, security headers and TLS — inside a Playwright test. **The default** |
+| `references/cdp.md` | Chrome DevTools Protocol — real bandwidth throttling, cache disable, CPU throttling, performance metrics. Chromium only |
+| `references/proxy.md` | An out-of-process MITM proxy for clients with no Playwright `Page` — Selenium, Appium, several processes |
 
-## Decision matrix — pick the tool
+## Decision matrix — pick the layer
 
-| Layer | Tool | What it does | Browser support |
+| Layer | Tool | What it does | Browsers |
 |---|---|---|---|
-| **Request routing** (high level) | `page.route` → `references/playwright-routes.md` | Intercept/mock/abort/fulfill, assert it fired, modify in flight, HAR replay, **approximate** offline (`context.setOffline`), **per-request `Thread.sleep`** | All (Chromium/Firefox/WebKit) |
-| **DevTools Protocol** (below routing) | `newCDPSession` → **`references/cdp.md`** | **Real** bandwidth+latency throttling, **HTTP-cache disable**, **CPU throttling**, security-header/`securityDetails` audit, `Performance` metrics | **Chromium-only** |
-| **External MITM proxy** | mitmproxy / system proxy → `references/proxy.md` | Out-of-browser capture for multi-process or non-Playwright stacks | Any client through the proxy |
+| **Request routing** | `page.route` / `page.context().route` → `references/playwright-routes.md` | Fulfill, abort, modify in flight, **hold a request and release it**, assert a call happened or did not (`page.requests()` [1.56]), HAR replay, offline, `allHeaders()` and `securityDetails()` | Chromium, Firefox, WebKit |
+| **DevTools Protocol** | `page.context().newCDPSession(page)` → `references/cdp.md` | **Real** throughput and latency, HTTP-cache disable, CPU throttling, `Performance` metrics | Chromium only |
+| **External MITM proxy** | BrowserUp Proxy → `references/proxy.md` | Capture and fault-inject for a client that is not Playwright | Any client that honours a proxy |
 
-**Decision rule:** reach for `page.route` **first** — cross-browser, typed, covers mocking/asserting/offline. Drop to **CDP only when routing genuinely can't express the test**: real throughput-based throttling, cache-disable, CPU throttling, TLS/`securityDetails` inspection, or `Performance` metrics. CDP is more brittle — **stringly-typed** protocol method names (`"Network.emulateNetworkConditions"`), no compile-time check — and **Chromium-only**.
+**Decision rule:** reach for routing first — it is cross-browser, typed and covers mocking, assertions,
+offline, security headers and TLS. Drop to CDP only for what routing cannot express: real bandwidth, cache
+disable, CPU throttling, performance metrics. CDP is stringly typed (`"Network.emulateNetworkConditions"`)
+and Chromium-only. The proxy is for when there is no `Page` at all.
 
-## Shared rules (every tool in this family)
+## Shared rules (every tool)
 
-- Intercept at the closest layer to the test runner — don't run a proxy when routes suffice.
-- Assert traffic via explicit waits on request/response predicates — never sleeps or listener races.
-- Mocked payloads come from fixtures/builders, not inline blobs duplicated across tests.
+- **Every Playwright sample extends `com.example.uitests.support.BaseTest`**, which owns Playwright, the
+  browser, a context and page per test, and the failure evidence. A class changes the context only through
+  `contextOptions()` (`setServiceWorkers`, `setRecordHarPath`, `setOffline`) and never adds its own
+  `Playwright.create()`, browser or failure hook.
+- Route, CDP and proxy calls live in a helper with intent names (`MockApi`, `Traffic`, `CdpControls`,
+  `ProxyControls`) built in the class's own `@BeforeMethod`; a test never calls `page.route(...)` or
+  `client.send(...)`.
+- **No `Thread.sleep` in a route handler, ever.** Java runs route handlers on the thread that is inside a
+  Playwright call, which also dispatches every other event of that Playwright instance — a sleep there stalls
+  all of them, not one request. Hold the request and release it (`references/playwright-routes.md` §8), use
+  CDP throttling, or slow the server.
+- Wait on request and response predicates or a page object's completion signal — never a sleep or a
+  listener registered after the action.
+- Mocked payloads come from records, builders or fixture files, not inline blobs repeated across tests.
+- Recording a HAR as evidence (`tracing().startHar(...)` [1.60], `setRecordHarPath`) is
+  `qa/java/skills/evidence-capture` §5; this skill replays one.
 
-## Cross-references
+## Handoffs
 
-Each `references/<tool>.md` carries its own cross-references to sibling skills (DB verification,
-test environments, CI, chaos). Route there after picking the tool.
+- `BaseTest`, page objects and the build → `qa/java/skills/ui-test-author/playwright`
+- HAR recording and other evidence → `qa/java/skills/evidence-capture`
+- WebSocket and SSE → `qa/java/skills/realtime-stream-testing`
+- API tests without a browser → `qa/java/skills/api-test-author`
+- The CI job → `qa/cicd/java/skills/ci-pipelines`
+- TypeScript and .NET → `qa-network-mocking-typescript`, `qa-network-mocking-dotnet`

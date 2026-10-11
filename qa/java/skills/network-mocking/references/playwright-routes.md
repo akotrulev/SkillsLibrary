@@ -1,392 +1,473 @@
-# QA — Playwright Network Monitoring & Interception (Java)
+# QA — Playwright Routing, Mocking and Traffic Assertions (Java / Playwright 1.63 + TestNG)
 
-Intercepts, mocks, asserts, and shapes HTTP traffic in Playwright `com.microsoft.playwright` (sync API) + TestNG tests on Java 21. Built on the **base-test class** model from `qa/java/skills/ui-test-author/playwright`: route handlers and request-assertion helpers are wrapped in intent-revealing helper classes exposed through `BaseTest`, never raw `page.route(...)` calls scattered across `@Test` methods. Every wait is conditional on a request/response predicate; there is **no `page.waitForTimeout`** as a wait anywhere in this skill.
+Intercepts, mocks, holds, asserts and shapes HTTP traffic in Playwright for Java (sync API) with TestNG.
+Every sample extends `com.example.uitests.support.BaseTest`
+(`qa/java/skills/ui-test-author/playwright/assets/BaseTest.java`), which owns Playwright, the browser, a
+context and page per test, and the failure evidence. Route handlers and traffic reads live in two helpers,
+`MockApi` and `Traffic`, built in the class's own `@BeforeMethod`; a test calls intent methods, never
+`page.route(...)`. Every wait is a request or response predicate or a page object's completion signal.
 
-This is the **Java port of the canonical** `qa/typescript/skills/network-mocking` — same patterns (mock / assert / modify-in-flight / HAR / offline / latency), re-expressed in the `com.microsoft.playwright` sync idioms. Two binding differences drive most of the porting: Java uses **`route.resume()`** (not `continue()`, a reserved word), and Java's `Route`/`Request`/`Response` have **no JSON helpers** (`setJson`/`postDataJSON`/`json()`) — you parse with Jackson/Gson.
-
-## Stack
-
-- Java 21 + Gradle (Kotlin DSL)
-- TestNG 7.x + `com.microsoft.playwright:playwright` (sync API, Playwright ≥ 1.49)
-- AssertJ for non-locator assertions; Jackson (`com.fasterxml.jackson`) for JSON payload parsing
-- Network helpers under `src/test/java/<pkg>/support/network/`, HAR archives under `src/test/resources/har/`
-- Page objects under `src/test/java/<pkg>/pages/`, tests under `src/test/java/<pkg>/tests/` (see the UI sibling)
-- These tests run sharded in CI under `qa/cicd/java/skills/ci-pipelines`
+Two binding differences drive the Java shape: the method is **`route.resume()`** (`continue` is a reserved
+word), and Java's `Route`, `Request` and `Response` have **no JSON helpers** (`setJson`, `postDataJSON`,
+`json()`). JSON goes through Gson — Playwright for Java already depends on it (2.14.0 in 1.63) and exposes it
+in its API — so no JSON library is added. Gson reads and writes Java records.
 
 ## When to use
 
-- Mocking a backend or third-party response so a UI test is deterministic (stub JSON, force a `500`/`403`)
-- **Asserting** an endpoint was (or was not) called, with the expected method / payload / headers
-- Modifying a real response in flight (inject a flag, corrupt one field) to exercise an edge case
-- Recording a HAR of a flaky third-party dependency, then replaying it offline for determinism
-- Simulating offline / slow-network conditions to test loading and error states
-- Blocking noisy resources (analytics, fonts, images) to speed up or stabilize a suite
+- Mock a backend or third-party response so a UI test is deterministic — canned JSON, a forced `500`.
+- **Assert** an endpoint was called, with the expected method and payload — or was **not** called.
+- Assert the app shell's **security headers** and **TLS** details.
+- Modify a real response in flight (force a feature flag) or tag an outgoing request.
+- Replay a committed HAR of a third-party dependency.
+- Show the loading state while a request is **held**, or the offline state.
 
 ## When NOT to use
 
-- Playwright TypeScript / .NET interception → `qa/{typescript,dotnet}/skills/network-mocking`
-- Low-level CDP (`Network.*`, real bandwidth throttling, protocol tracing) → `qa/java/skills/network-mocking`
-- An HTTP proxy in front of the browser (mitmproxy, system-level capture) → `qa/java/skills/network-mocking`
-- Writing the page objects / tests themselves → `qa/java/skills/ui-test-author/playwright`
-- Pure API contract/integration tests with no browser → `qa/java/skills/api-test-author/writer`
+- Real bandwidth and latency, cache disable, CPU throttling, performance metrics → `references/cdp.md`
+- A client with no Playwright `Page` (Selenium, Appium) → `references/proxy.md`
+- Recording a HAR as evidence → `qa/java/skills/evidence-capture` §5
+- WebSocket and SSE → `qa/java/skills/realtime-stream-testing`
+- No browser at all → `qa/java/skills/api-test-author`
 
 ## Inputs needed
 
-Ask at most 3 questions; infer the rest from the test project and existing tests.
-
-1. **What traffic** — exact endpoint(s) or URL glob/regex (`**/api/orders/**`), and is it first-party or a third-party dependency?
-2. **Intent** — mock a response, assert a call happened, modify in flight, replay a HAR, or simulate offline/latency?
-3. **Scope** — one page (`page.route`) or every page in the context including popups (`context.route`)?
+1. **What traffic** — the endpoint(s) as a glob or `Pattern`, first-party or third-party.
+2. **Intent** — mock, hold, assert called / not called, modify, HAR replay, offline, headers or TLS.
+3. **Scope** — the test's page (`page.route`) or every page of the context including popups
+   (`page.context().route`).
 
 ## Decision matrix
 
-| Goal | Tool | Notes |
+| Goal | Call | Note |
 |---|---|---|
-| Return canned data, never hit the network | `route.fulfill(new FulfillOptions().setContentType("application/json").setBody(json))` | Java has **no `setJson`** — set content type + body |
-| Force an error status | `route.fulfill(new FulfillOptions().setStatus(500).setContentType("application/json").setBody(...))` | The app's error path is now deterministic |
-| Block a resource (analytics, images) | `route.abort()` | `route.abort("blockedbyclient")` to be explicit |
-| Let it through unchanged | `route.resume()` | **`resume`, not `continue`**; goes to network, **skips** remaining handlers |
-| Let an **earlier-registered** handler also run | `route.fallback()` | Chains to the next matching handler instead of the network |
-| Modify a real response | `route.fetch()` → parse `text()` → mutate → `route.fulfill(setResponse(r).setBody(...))` | Preserves original status/headers unless overridden |
-| Tweak the outgoing request | `route.resume(new ResumeOptions().setHeaders(...).setPostData(...))` | Header tampering, payload rewrite |
-| Assert a call happened | `page.waitForRequest(url, Runnable)` / `page.waitForResponse(pred, Runnable)` | The `Runnable` runs inside the wait — the API shape removes the listener-ordering pitfall |
-| Deterministic third-party dep | `page.routeFromHAR(har, new RouteFromHAROptions().setUrl(...).setNotFound(HarNotFound.ABORT))` | Record once with `setUpdate(true)`, commit, replay |
-| Whole-context offline | `context.setOffline(true)` | Cross-browser |
-| Latency simulation | `Thread.sleep(ms)` inside the handler, then `route.resume()` | Sync API has no async delay; no built-in `route` throttle; real bandwidth = CDP (Chromium-only) → `qa/java/skills/network-mocking` |
+| Canned data, never hit the network | `route.fulfill(new Route.FulfillOptions().setStatus(200).setContentType("application/json").setBody(json))` | No `setJson` in Java; `setPath(Path)` serves a fixture file |
+| A forced error | `route.fulfill(...setStatus(500)...)` | The app's error path becomes deterministic |
+| Block a resource | `route.abort("blockedbyclient")` | Analytics, ads, fonts |
+| Let it through unchanged | `route.resume()` | Goes to the network and **skips** the remaining handlers |
+| Defer to an earlier handler | `route.fallback()` | Chains to the next matching handler |
+| Modify a real response | `route.fetch()` → edit `text()` → `route.fulfill(...setResponse(response).setBody(...))` | Keeps the real status and headers |
+| Tag the outgoing request | `route.resume(new Route.ResumeOptions().setHeaders(headers))` | A `Cookie` header set here is ignored since 1.52 |
+| Hold a request, release it later | keep the `Route`, call `resume()` from the test | The Java router treats an unhandled return as a pending handler |
+| Assert a call happened | `page.waitForRequest(glob, action)` / `page.waitForResponse(predicate, action)` | The action runs **inside** the wait |
+| Assert a call did not happen | `page.requests()` [1.56] after the completion signal | The page's recent requests; no listener |
+| Security headers, TLS | `response.allHeaders()`, `response.securityDetails()` | Cross-browser; no CDP |
+| Deterministic third party | `page.routeFromHAR(har, new Page.RouteFromHAROptions().setUrl(...).setNotFound(HarNotFound.ABORT))` | Update deliberately (§7) |
+| Offline | `page.context().setOffline(true)` | Cross-browser |
 
-## Patterns
+## 1. The helpers
 
-### Route-mocking helper — `support/network/MockApi.java`
-
-Wrap interception in a helper with intent-revealing methods. Tests call `mockApi.stubOrders(...)`, not `page.route("**/api/orders", ...)`.
+`MockApi` owns every route; `Traffic` reads what the page sent. Both wrap the `page` `BaseTest` opened and own
+no lifecycle — the context, and with it every route, is closed after each test.
 
 ```java
-package com.example.support.network;
+package com.example.uitests.support;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.microsoft.playwright.APIResponse;
 import com.microsoft.playwright.Page;
 import com.microsoft.playwright.Route;
+import com.microsoft.playwright.options.HarMode;
+import com.microsoft.playwright.options.HarNotFound;
+import com.microsoft.playwright.options.RouteFromHarUpdateContentPolicy;
 
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 public final class MockApi {
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final Gson GSON = new Gson();
+    private static final Path PAYMENTS_HAR = Path.of("src", "test", "resources", "har", "payments.har");
+    private static final boolean HAR_UPDATE = "1".equals(System.getenv("HAR_UPDATE"));
+
     private final Page page;
 
     public MockApi(Page page) {
         this.page = page;
     }
 
-    /** Serve canned orders; the real backend is never hit. */
-    public void stubOrders(List<?> orders) {
+    public void stubOrders(List<Order> orders) {
+        String body = GSON.toJson(orders);
         page.route("**/api/orders", route -> route.fulfill(new Route.FulfillOptions()
+                .setStatus(200)
                 .setContentType("application/json")
-                .setBody(writeJson(orders))));
+                .setBody(body)));
     }
 
-    /** Force the orders endpoint to fail so the UI's error path runs. */
     public void failOrdersWith(int status) {
         page.route("**/api/orders", route -> route.fulfill(new Route.FulfillOptions()
                 .setStatus(status)
-                .setContentType("application/json")
-                .setBody("{\"error\":\"simulated failure\"}")));
+                .setContentType("application/problem+json")
+                .setBody("{\"title\":\"Simulated failure\",\"status\":" + status + "}")));
     }
 
-    /** Drop noisy third-party traffic to stabilize and speed up the run. */
     public void blockAnalytics() {
-        page.route(Pattern.compile("google-analytics\\.com|segment\\.io"),
-                route -> route.abort("blockedbyclient"));
+        page.context().route(Pattern.compile("google-analytics\\.com|segment\\.io"), route -> route.abort("blockedbyclient"));
     }
 
-    private static String writeJson(Object value) {
-        try {
-            return MAPPER.writeValueAsString(value);
-        } catch (Exception e) {
-            throw new IllegalStateException("failed to serialize mock body", e);
+    public void enableFlag(String flag) {
+        page.route("**/api/feature-flags", route -> {
+            APIResponse response = route.fetch();
+            JsonObject flags = JsonParser.parseString(response.text()).getAsJsonObject();
+            flags.addProperty(flag, true);
+            route.fulfill(new Route.FulfillOptions().setResponse(response).setBody(flags.toString()));
+        });
+    }
+
+    public void tagTenant(String tenantId) {
+        page.route("**/api/**", route -> {
+            Map<String, String> headers = new HashMap<>(route.request().headers());
+            headers.put("x-test-tenant", tenantId);
+            route.resume(new Route.ResumeOptions().setHeaders(headers));
+        });
+    }
+
+    public HeldRequests holdOrders() {
+        HeldRequests held = new HeldRequests();
+        page.route("**/api/orders", held::hold);
+        return held;
+    }
+
+    public void replayPayments() {
+        page.routeFromHAR(PAYMENTS_HAR, new Page.RouteFromHAROptions()
+                .setUrl("https://api.stripe.com/**")
+                .setNotFound(HarNotFound.ABORT)
+                .setUpdate(HAR_UPDATE)
+                .setUpdateContent(RouteFromHarUpdateContentPolicy.ATTACH)
+                .setUpdateMode(HarMode.MINIMAL));
+    }
+
+    public void goOffline() {
+        page.context().setOffline(true);
+    }
+
+    public static final class HeldRequests {
+        private final List<Route> held = new ArrayList<>();
+
+        private void hold(Route route) {
+            held.add(route);
+        }
+
+        public void release() {
+            held.forEach(Route::resume);
+            held.clear();
         }
     }
 }
 ```
 
-`MockApi` holds no lifecycle — it wraps the `page` the base class already created, so build it
-in the test that stubs. A second base class for one assignment would only add an ordering
-contract (`dependsOnMethods`) for the reader to trace.
-
 ```java
-// tests/OrdersTest.java
-public class OrdersTest extends BaseTest {
+package com.example.uitests.support;
 
-    @Test
-    public void rendersEmptyStateWhenThereAreNoOrders() {
-        MockApi mockApi = new MockApi(page);
-        mockApi.stubOrders(List.of());
-        page.navigate("/orders");
-
-        assertThat(page.getByTestId("orders-empty")).isVisible();
-    }
-
-    @Test
-    public void showsErrorBannerWhenOrdersApiFails() {
-        mockApi.failOrdersWith(500);
-        page.navigate("/orders");
-
-        assertThat(page.getByRole(AriaRole.ALERT))
-                .containsText(Pattern.compile("couldn’t load orders", Pattern.CASE_INSENSITIVE));
-    }
-}
-```
-
-Register routes **before** the navigation/action that triggers them — a route registered after the request has fired won't catch it.
-
-### Request-assertion helper — fail fast on a missing/mismatched call
-
-`page.waitForRequest(url, Runnable)` runs the `Runnable` **inside** the wait — the API shape arms the listener before the action runs, so the listener-before-action ordering pitfall (a footgun in the TS sibling) cannot happen here.
-
-```java
-package com.example.support.network;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 import com.microsoft.playwright.Page;
 import com.microsoft.playwright.Request;
 
-import java.util.function.Predicate;
+import java.util.List;
+import java.util.regex.Pattern;
 
-import static org.assertj.core.api.Assertions.assertThat;
+public final class Traffic {
+    private static final Gson GSON = new Gson();
 
-public final class RequestAssertions {
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private final Page page;
 
-    private RequestAssertions() {}
-
-    /**
-     * Assert a request matching {@code urlGlob} fires while {@code action} runs,
-     * optionally matching method and JSON payload. Fails fast on timeout.
-     */
-    public static Request expectRequest(Page page, String urlGlob, Runnable action,
-                                        String method, Predicate<JsonNode> bodyMatches) {
-        Request request = page.waitForRequest(urlGlob, action);
-
-        if (method != null) {
-            assertThat(request.method()).as("request method").isEqualTo(method);
-        }
-        if (bodyMatches != null) {
-            JsonNode body = parse(request.postData());
-            assertThat(bodyMatches.test(body)).as("request payload").isTrue();
-        }
-        return request;
+    public Traffic(Page page) {
+        this.page = page;
     }
 
-    private static JsonNode parse(String postData) {
-        try {
-            return MAPPER.readTree(postData);
-        } catch (Exception e) {
-            throw new IllegalStateException("request had no JSON body", e);
-        }
+    public List<String> requestedUrls(Pattern url) {
+        return page.requests().stream().map(Request::url).filter(seen -> url.matcher(seen).find()).toList();
     }
+
+    public List<String> pageErrors() {
+        return page.pageErrors();
+    }
+
+    public static <T> T jsonBody(Request request, Class<T> type) {
+        return GSON.fromJson(request.postData(), type);
+    }
+}
+```
+
+The payloads are records next to the helpers — `record Order(String id, String status, long totalMinor)`,
+`record CheckoutRequest(long totalMinor, String currency)` — and a payload with four or more fields gets a
+builder (`qa/java/skills/test-data-builder`).
+
+## 2. Mocking a response
+
+```java
+package com.example.uitests.tests;
+
+import com.example.uitests.pages.OrdersPage;
+import com.example.uitests.support.BaseTest;
+import com.example.uitests.support.MockApi;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
+import java.util.List;
+
+import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat;
+
+public class OrdersNetworkTest extends BaseTest {
+    private MockApi mockApi;
+    private OrdersPage ordersPage;
+
+    @BeforeMethod(alwaysRun = true)
+    public void createHelpers() {
+        mockApi = new MockApi(page);
+        ordersPage = new OrdersPage(page);
+    }
+
+    @Test
+    public void Should_ShowEmptyState_When_ThereAreNoOrders() {
+        mockApi.stubOrders(List.of());
+
+        ordersPage.navigate();
+
+        assertThat(ordersPage.emptyState()).isVisible();
+    }
+
+    @Test
+    public void Should_ShowErrorBanner_When_OrdersApiFails() {
+        mockApi.failOrdersWith(500);
+
+        ordersPage.navigate();
+
+        assertThat(ordersPage.errorBanner()).hasText("We couldn't load your orders");
+    }
+}
+```
+
+- `mockApi` is a field built in `@BeforeMethod`, so every test has it. Register the route **before** the
+  navigation or action that fires the request; a route added afterwards catches nothing.
+- `OrdersPage.navigate()` only navigates; `open()` navigates and returns once the list is visible. The
+  difference matters in §8, where the list never arrives while a request is held.
+- Every locator the page object returns carries `describe(...)`, which names it in a failure.
+- §3–§8 are further tests of classes shaped like this one: `cartPage`, `appShellPage` and
+  `traffic = new Traffic(page)` are fields built in the same `@BeforeMethod`, and the class adds AssertJ's
+  static `assertThat` beside Playwright's — Java picks by argument type.
+
+## 3. Asserting a call — method and typed payload
+
+The page object starts the wait and performs the action in one call, so the request cannot fire first:
+
+```java
+public Request placeOrder() {
+    return page.waitForRequest("**/api/checkout", placeOrderButton::click);
 }
 ```
 
 ```java
 @Test
-public void submitsTheCheckoutWithTheCartTotal() {
-    page.navigate("/cart");
+public void Should_PostCartTotal_When_OrderIsPlaced() {
+    cartPage.open();
 
-    RequestAssertions.expectRequest(
-            page,
-            "**/api/checkout",
-            () -> page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("Place order")).click(),
-            "POST",
-            body -> body.get("totalMinor").asInt() == 15_000
-                 && "EUR".equals(body.get("currency").asText()));
+    Request checkout = cartPage.placeOrder();
+
+    assertThat(checkout.method()).as("checkout request method").isEqualTo("POST");
+    assertThat(Traffic.jsonBody(checkout, CheckoutRequest.class)).as("checkout request body")
+            .isEqualTo(new CheckoutRequest(15_000, "EUR"));
 }
 ```
 
-Java's `Request` has **no `postDataJSON()`** — parse `request.postData()` with Jackson. For a plain "was it called", `page.waitForResponse("**/api/checkout", action)` is enough.
+- Java's `Request` has no `postDataJSON()`; `Traffic.jsonBody` parses `postData()` into the record, and
+  record equality compares every field, so the failure prints both records.
+- The two assertions are one behaviour — "the order is posted with the cart total". These assertions are
+  AssertJ's (`org.assertj.core.api.Assertions.assertThat`), with `.as(...)` naming the subject.
+- For "it was called and answered", `page.waitForResponse(response -> …, action)` returns the `Response`;
+  assert its exact `status()` with the body as the description
+  (`ui-test-author/playwright/references/assertions.md` §7).
 
-### Asserting an endpoint was **not** called
-
-There is no negative wait. Collect matching requests over the window of the action via `page.onRequest`, then assert the list is empty.
+## 4. Asserting a call did NOT happen, and that the page raised no errors
 
 ```java
 @Test
-public void doesNotCallTheLegacyPricingEndpoint() {
-    List<String> calls = new ArrayList<>();
-    page.onRequest(req -> {
-        if (req.url().contains("/api/legacy-pricing")) calls.add(req.url());
-    });
+public void Should_NotCallLegacyPricing_When_CartIsRecalculated() {
+    cartPage.open();
 
-    page.navigate("/cart");
-    page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("Recalculate")).click();
-    assertThat(page.getByTestId("cart-total")).isVisible(); // real signal the flow finished
+    cartPage.recalculate();
 
-    org.assertj.core.api.Assertions.assertThat(calls).as("legacy pricing should be retired").isEmpty();
+    assertThat(traffic.requestedUrls(Pattern.compile("/api/legacy-pricing"))).as("legacy pricing calls").isEmpty();
+}
+
+@Test
+public void Should_RaiseNoPageErrors_When_CartOpens() {
+    cartPage.open();
+
+    assertThat(traffic.pageErrors()).as("uncaught errors on the cart page").isEmpty();
 }
 ```
 
-Gate the assertion on a **user-visible signal** that the flow completed (`isVisible()` on the result), never on a fixed sleep — otherwise the negative check passes simply because the request hadn't fired yet.
+- `recalculate()` returns once the new total is visible. The list is read **after** that signal, or the
+  check passes only because the request had not fired yet.
+- `page.requests()`, `page.consoleMessages()` and `page.pageErrors()` [1.56] return the page's most recent
+  buffered items — no listener to register, no list to manage. The buffer is capped, so for a long flow
+  register `page.onRequest(...)` in the class's `@BeforeMethod` instead. `clearConsoleMessages()` /
+  `clearPageErrors()` reset them.
+- Each page has its own buffer: a popup's traffic is read from the popup's `Page`.
 
-### Modify a real response in flight
+## 5. Security headers and TLS — at the routing layer
 
-Fetch the live response, mutate the body, re-serve. Passing the original `response` keeps its status and headers; Jackson's `ObjectNode` gives a mutable tree.
-
-```java
-page.route("**/api/feature-flags", route -> {
-    APIResponse response = route.fetch();
-    try {
-        ObjectNode flags = (ObjectNode) MAPPER.readTree(response.text());
-        flags.put("betaCheckout", true);                 // force the variant under test
-        route.fulfill(new Route.FulfillOptions()
-                .setResponse(response)
-                .setBody(MAPPER.writeValueAsString(flags)));
-    } catch (Exception e) {
-        throw new IllegalStateException("failed to rewrite feature-flags body", e);
-    }
-});
-```
-
-### Header / payload tampering on the outbound request
-
-```java
-page.route("**/api/**", route -> {
-    Map<String, String> headers = new HashMap<>(route.request().headers());
-    headers.put("x-test-tenant", "tenant-42");
-    route.resume(new Route.ResumeOptions().setHeaders(headers));
-});
-```
-
-### HAR record-then-replay for deterministic third-party deps
-
-Record once against the live dependency, commit the archive, then replay offline on every run. Use `HarContentPolicy.ATTACH` so bodies live as separate files (reviewable diffs).
-
-```java
-// One-off recording run — setUpdate(true), then commit src/test/resources/har/payments.har
-page.routeFromHAR(Path.of("src/test/resources/har/payments.har"), new Page.RouteFromHAROptions()
-        .setUrl("**/api.stripe.com/**")
-        .setUpdate(true)
-        .setUpdateMode(HarMode.MINIMAL)
-        .setUpdateContent(RouteFromHarUpdateContentPolicy.ATTACH));
-```
-
-```java
-// Every CI run — replay. NotFound.ABORT makes any un-recorded call a hard failure
-// (so a new dependency can't silently slip through to the real network).
-@BeforeMethod(alwaysRun = true, dependsOnMethods = "createContext")
-public void replayPaymentsHar() {
-    page.routeFromHAR(Path.of("src/test/resources/har/payments.har"), new Page.RouteFromHAROptions()
-            .setUrl("**/api.stripe.com/**")
-            .setNotFound(HarNotFound.ABORT));
-}
-```
-
-`new Browser.NewContextOptions().setRecordHarPath(...)` on the context captures the **whole** context's traffic for debugging; `routeFromHAR` is the scoped record/replay you want for a specific dependency.
-
-### Offline and latency simulation
+The page object's `open()` returns the `Response` that `page.navigate` gave it — the document, after any
+redirects:
 
 ```java
 @Test
-public void showsTheOfflineBannerWhenTheNetworkDrops() {
-    page.navigate("/dashboard");
-    assertThat(page.getByTestId("live-feed")).isVisible();
+public void Should_SendSecurityHeaders_When_AppShellLoads() {
+    Response shell = appShellPage.open();
 
-    context.setOffline(true);
-    page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("Refresh")).click();
+    assertThat(shell.allHeaders().keySet()).as("security headers on the app shell")
+            .contains("content-security-policy", "strict-transport-security", "x-frame-options");
+}
 
-    assertThat(page.getByRole(AriaRole.ALERT))
-            .containsText(Pattern.compile("you’re offline", Pattern.CASE_INSENSITIVE));
+@Test
+public void Should_NegotiateTls13_When_AppShellLoads() {
+    Response shell = appShellPage.open();
+
+    assertThat(shell.securityDetails()).as("TLS details of the app shell")
+            .extracting(details -> details.protocol).isEqualTo("TLS 1.3");
 }
 ```
 
-Latency injection has **no built-in `route` throttle**, and the sync handler has no async delay — `Thread.sleep` inside the handler is the documented idiom. This is the one sanctioned `Thread.sleep` in this skill: it is a *simulated fault-injection delay inside an interception handler*, **not** a test-body wait (which the global rules forbid). It belongs in a helper, not a test:
+- `allHeaders()` returns every response header with **lower-cased** names, including the ones `headers()`
+  omits; `headerValue(name)` reads one case-insensitively.
+- `securityDetails()` returns a `SecurityDetails` with public fields `protocol`, `issuer`, `subjectName`,
+  `validFrom`, `validTo` — or `null` over plain HTTP, which AssertJ reports as "expecting actual not to be
+  null" instead of a `NullPointerException`.
+- Both checks are cross-browser. CDP is not needed for either.
+
+## 6. Modifying traffic in flight
+
+- **The response:** `mockApi.enableFlag("betaCheckout")` fetches the real flags and re-serves them with one
+  flag forced. Passing the `APIResponse` to `setResponse` keeps the real status and headers.
+- **The request:** `mockApi.tagTenant("tenant-42")` adds a header. A `Cookie` header set through
+  `route.resume` is ignored since 1.52 — add the cookie with `page.context().addCookies(...)` in the class's
+  `@BeforeMethod`.
+
+## 7. HAR replay and update
+
+- `mockApi.replayPayments()` serves `https://api.stripe.com/**` from the committed HAR.
+  `HarNotFound.ABORT` turns any request the HAR does not hold into a failure, so a new dependency cannot slip
+  through to the live service; `HarNotFound.FALLBACK` would let it.
+- **Updating** is a deliberate, local run against the real dependency: `HAR_UPDATE=1 ./gradlew test --tests
+  '*PaymentsTest'`. With `setUpdate(true)` the requests reach the network and the HAR is written when the
+  context closes — which `BaseTest` does after the test. Commit it in a dedicated PR; never update in CI.
+- `setUpdateContent(RouteFromHarUpdateContentPolicy.ATTACH)` stores bodies as separate files (reviewable
+  diffs); `setUpdateMode(HarMode.MINIMAL)` keeps only what replay needs. The **recording** options —
+  `tracing().startHar(path, options)` [1.60] per test, or `setRecordHarPath(...)` in the class's
+  `contextOptions()` — are evidence, owned by `qa/java/skills/evidence-capture` §5.
+- Scrub tokens, cookies and personal data from a committed HAR; record against disposable test accounts.
+
+## 8. Offline, and a request held in flight
 
 ```java
-static void withLatency(Page page, String urlGlob, long ms) {
-    page.route(urlGlob, route -> {
-        try {
-            Thread.sleep(ms);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-        route.resume();
-    });
+@Test
+public void Should_ShowOfflineBanner_When_NetworkDrops() {
+    ordersPage.open();
+
+    mockApi.goOffline();
+    ordersPage.refresh();
+
+    assertThat(ordersPage.offlineBanner()).hasText("You are offline");
 }
 
-// Test the loading spinner stays up while /api/orders is slow.
-withLatency(page, "**/api/orders", 1_500);
-page.navigate("/orders");
-assertThat(page.getByTestId("orders-spinner")).isVisible();
+@Test
+public void Should_KeepSpinnerVisible_When_OrdersAreStillInFlight() {
+    mockApi.holdOrders();
+
+    ordersPage.navigate();
+
+    assertThat(ordersPage.spinner()).isVisible();
+}
 ```
 
-For real bandwidth/latency emulation (not just per-request delay) use CDP `Network.emulateNetworkConditions` — Chromium-only — covered in `qa/java/skills/network-mocking`.
+- **Holding is how Java simulates a slow response.** The handler stores the `Route` and returns without
+  fulfilling it; playwright-java's router (`Router.java`, v1.63.0) treats that as a pending handler, so the
+  request waits until something calls `resume()`, `fulfill()` or `abort()` on it. The loading state is then
+  observable for as long as the test needs, with no timing in the test at all.
+- A test that goes on past the loading state releases the request: `MockApi.HeldRequests orders =
+  mockApi.holdOrders();` … `orders.release();` then asserts the list. A held request that is never released
+  ends with the context, which `BaseTest` closes after the test.
+- **Never `Thread.sleep` in a handler.** Java runs a route handler on the thread that is inside a
+  Playwright call, the same thread that dispatches every other event of that Playwright instance — the
+  sleep freezes them all, not one request, and the review treats it as a blocker.
+- **Real bandwidth and latency** — a page that must load *slowly* rather than *not yet* — is CDP's
+  `Network.emulateNetworkConditions`, Chromium-only, in `references/cdp.md`.
+- **A delay the client must time out on** (a request that answers after the app's 10-second timeout)
+  belongs to the server: a test endpoint or a stub server that delays on purpose.
 
 ## Rules
 
 ### Matching
-- URL patterns are a **glob** (`*` = any char except `/`; `**` spans `/`; `{a,b}` alternation), a **`Pattern`**, or a `Predicate<String>`. Prefer a glob for path shape, a `Pattern` for ids/query specifics.
-- **Glob `?` and `[]` (character classes) are not supported** since Playwright 1.43 — use a `Pattern` for those.
-- **`baseURL` gotcha:** a string pattern that does **not** start with `*` is resolved against the context base URL; a pattern starting with `*`/`**` is treated as a raw glob and is **not** joined to it. Don't write `"/api/orders"` expecting a glob — write `"**/api/orders"`.
 
-### Handler discipline
-- A route handler **must call exactly one** of `fulfill` / `abort` / `resume` / `fallback`. Calling none hangs the request; calling two throws.
-- **Java uses `route.resume()`, not `continue()`** (`continue` is a reserved word). Continuation options ride on `Route.ResumeOptions`.
-- **Handlers run last-registered-first.** The most recent `page.route(...)` wins; use `route.fallback()` to defer to an earlier handler. `route.resume()` goes straight to the network and **skips** the remaining handlers.
-- Java's `Route.FulfillOptions` has **no `setJson`** — `setContentType("application/json").setBody(json)`; byte bodies use the separate `setBodyBytes(byte[])`.
-- Serve large mock payloads from a file via `route.fulfill(new FulfillOptions().setPath(Path.of("src/test/resources/responses/orders.json")))`, not a giant inline literal.
+- A URL matcher is a **glob** (`*` matches any character except `/`; `**` spans `/`; `{a,b}` alternates), a
+  `java.util.regex.Pattern`, or a `Predicate<String>`.
+- **Glob `?` and `[]` are not supported since Playwright 1.52** — use a `Pattern` for a single-character
+  wildcard or a character class.
+- **The base URL gotcha:** a string that does not start with `*` is resolved against the context's base URL;
+  one that starts with `*` / `**` is a raw glob. Write `"**/api/orders"`, not `"/api/orders"` expecting a glob.
+
+### Handlers
+
+- A handler calls **exactly one** of `fulfill`, `abort`, `resume`, `fallback` — now, or later on a held
+  route. None, and the request waits forever; two, and the second throws.
+- Handlers run **last registered first**. `fallback()` defers to the next matching handler; `resume()` goes
+  straight to the network and skips them.
+- A handler runs on the Playwright dispatch thread: no `Thread.sleep`, no blocking wait, no latch.
+- Serve large payloads from a fixture file with `setPath(Path.of("src/test/resources/responses/orders.json"))`.
 
 ### Scope
-- `page.route` for one page (handles its popups); `context.route` for **every** page in the context. Page-level routes take precedence over context-level for the same request.
-- Mock at the **narrowest** scope that works — context routes that leak across tests are a common source of cross-test contamination. `BaseTest` gives a fresh context per `@BeforeMethod`, so prefer `page.route`.
 
-### Assertions & waits
-- Use `page.waitForRequest(url, Runnable)` / `page.waitForResponse(pred, Runnable)` — the `Runnable` runs **inside** the wait, so the listener is always armed before the action. Never wire a manual `onResponse` listener *after* the click.
-- Use **predicates** to assert method/status/url together: `r -> r.url().contains("/api/x") && r.status() == 200`.
-- Read payloads with `request.postData()` (parse with Jackson — there is no `postDataJSON()`) / `request.headers()`, and `response.text()` (parse — there is no `json()`) / `response.status()`.
-- **Negative assertions** ("endpoint not called") collect from `page.onRequest` and assert the list `isEmpty()` **after** a user-visible completion signal — never after a sleep.
-- **No `page.waitForTimeout(ms)` as a wait.** The only `Thread.sleep` allowed is inside a latency-injection route handler, and only there.
+- `page.route` covers that page only. A popup is a new page, so a mock it needs is
+  `page.context().route(...)`. `BaseTest` gives each test a fresh context, so a context route cannot leak into
+  the next test.
+- A service worker can answer before a route does: `setServiceWorkers(ServiceWorkerPolicy.BLOCK)` in the
+  class's `contextOptions()` when mocks are bypassed.
+- A route sees only the first request of a redirect chain — assert on the final response.
 
-### HAR
-- Record with `setUpdate(true)` once, commit, then replay with no update. Re-record in a dedicated PR, never silently in CI.
-- Use `RouteFromHarUpdateContentPolicy.ATTACH` (bodies as files) for reviewable diffs; `HarMode.MINIMAL` unless you need timings.
-- Set `setNotFound(HarNotFound.ABORT)` on replay so an un-recorded request is a hard failure, not a silent hit to the real third party.
+### Assertions and waits
 
-### Determinism & hygiene
-- If `page.route` mocks are being bypassed, set `new Browser.NewContextOptions().setServiceWorkers(ServiceWorkerPolicy.BLOCK)` — a Service Worker can intercept before your route does.
-- A route handler is only invoked for the **first** URL of a redirect chain — assert on the final response, not the 30x hop.
-- Never put real secrets/tokens in committed mock responses or HAR files — scrub auth headers (use `setRecordHarContent(HarContentPolicy.OMIT)` or a redaction step).
+- `page.waitForRequest(matcher, action)` / `page.waitForResponse(matcher, action)` in a page object — the
+  action runs inside the wait. Never a listener registered after the click.
+- "Not called" reads `page.requests()` after a user-visible completion signal.
+- Non-locator values — a method, a parsed body, a header set — are AssertJ with `.as(...)`, one expected
+  value each.
 
-### What NOT to do
-- No `page.waitForTimeout(ms)` to "wait for the request" — use `waitForRequest`/`waitForResponse` with a predicate.
-- No raw `page.route("**/api/...", ...)` scattered through `@Test` methods — wrap it in a `MockApi`-style helper with an intent name.
-- No handler that calls neither `fulfill`/`abort`/`resume`/`fallback` (hangs) or two of them (throws).
-- No `route.resume()` when you meant `route.fallback()` — `resume` skips your other handlers.
-- No reaching for `route.continue()` — it does not exist in Java; the method is `route.resume()`.
-- No `"/api/orders"` string pattern expecting glob behavior — it gets baseURL-resolved; write `"**/api/orders"`.
-- No glob `?`/`[abc]` since 1.43 — switch to a `Pattern`.
-- No giant inline JSON literal as a mock — `route.fulfill(... setPath(...))` from a fixture file.
-- No silent HAR re-record in CI (`setUpdate(true)` left on) — recordings drift and tests stop testing anything.
-- No `HarNotFound.FALLBACK` on a third-party HAR replay you intend to be hermetic — it lets un-recorded calls hit the live service.
-- No secrets/PII committed inside a mock response or HAR archive.
-- No `context.route` for something one page needs — it leaks the mock into every page in the context.
-- No asserting "not called" after a fixed sleep — gate on a user-visible completion signal.
-- No `Thread.sleep` anywhere except inside a latency-injection route handler — never as a test-body wait.
+## What NOT to do
+
+- No `Thread.sleep` in a route handler or a test — hold the request, throttle with CDP, or delay the server.
+- No `page.route(...)` in a `@Test` method — a `MockApi` method with an intent name.
+- No `mockApi` used without being built in `@BeforeMethod`.
+- No `route.continue()` — the Java method is `route.resume()`.
+- No glob `?` or `[abc]` — a `Pattern`.
+- No `"/api/orders"` string expecting glob behaviour.
+- No giant inline JSON literal — a record through Gson, or a fixture file.
+- No `setUpdate(true)` left on in CI; no `HarNotFound.FALLBACK` on a replay meant to be hermetic.
+- No security-header or TLS audit through CDP — `allHeaders()` and `securityDetails()` cover it.
+- No secrets in a mock or a committed HAR.
 
 ## Generation steps
 
-1. Confirm **traffic** (endpoints + glob/regex), **intent** (mock / assert / modify / HAR / offline), and **scope** (page vs context).
-2. Add or extend `support/network/MockApi.java` with one intent-named method per scenario (`stubOrders`, `failOrdersWith`, `blockAnalytics`). Construct it in the test that stubs — it wraps `page` and owns no lifecycle.
-3. For call assertions, use `RequestAssertions.expectRequest` (or a direct `page.waitForResponse` predicate); parse the payload from `postData()` with Jackson.
-4. For third-party determinism, record a HAR with `setUpdate(true)`, commit it under `src/test/resources/har/` with `ATTACH` content, then replay with `setNotFound(HarNotFound.ABORT)`.
-5. For offline/latency states, use `context.setOffline(true)` and a `Thread.sleep` latency helper inside a route handler — never `page.waitForTimeout`.
-6. Run `./gradlew test`; verify with the trace viewer's Network tab (which requests were routed vs hit the network).
+1. Confirm the **traffic**, the **intent** and the **scope**.
+2. Add one intent-named method per scenario to `MockApi`; read requests through `Traffic` or a page-object
+   method that wraps `waitForRequest` / `waitForResponse`.
+3. Build both helpers and the page objects in the test class's `@BeforeMethod(alwaysRun = true)`.
+4. For a third party, replay a committed HAR with `HarNotFound.ABORT`; update it with `HAR_UPDATE=1`, locally.
+5. For loading and offline states, hold the request or go offline — never a sleep.
+6. Read a failure's trace (`qa/java/skills/evidence-capture`): its Network tab shows which requests were
+   routed and which reached the network.
 
 ## Cross-references
 
-- **`qa/typescript/skills/network-mocking`** — the canonical skill this ports from; consult it for the conceptual model and the glob/Service-Worker notes.
-- **`qa/dotnet/skills/network-mocking`** — the sibling .NET port (`route.ContinueAsync`, `RouteFulfillOptions.Json`, `PostDataJSON`).
-- **`qa/java/skills/ui-test-author/playwright`** — the base-test / page-object model these network helpers layer on; `waitForResponse` ordering and the no-`waitForTimeout` discipline originate there.
-- **`qa/java/skills/network-mocking`** — low-level CDP (`Network.emulateNetworkConditions` for real throttling) when `page.route` isn't enough.
-- **`qa/java/skills/network-mocking`** — out-of-browser HTTP capture for multi-process or non-browser traffic.
-- **`qa/cicd/java/skills/ci-pipelines`** — runs these tests sharded; HAR archives and traces are uploaded as artifacts there.
-- **`qa/java/skills/test-data-builder`** — builds the shapes you serialize into `route.fulfill(...setBody(...))`.
-- **`qa/java/skills/api-test-author/writer`** — when the test needs no browser, assert against the API directly.
+- `references/cdp.md` — real throttling, cache disable, CPU throttling, metrics (Chromium only).
+- `references/proxy.md` — a client with no Playwright `Page`.
+- `qa/java/skills/ui-test-author/playwright` — `BaseTest`, page objects, `references/assertions.md` §7.
+- `qa/java/skills/evidence-capture` — HAR recording, traces.
+- `qa/java/skills/realtime-stream-testing` — WebSocket and SSE.
+- `qa/java/skills/test-data-builder` — builders for the payloads the mocks serve.
+- `qa/cicd/java/skills/ci-pipelines` — the UI job and its artifact upload.
+- `qa-network-mocking-typescript`, `qa-network-mocking-dotnet` — the sibling lanes.
