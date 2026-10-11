@@ -6,7 +6,7 @@ plugin. Skill names drop the domain and stack prefixes the plugin namespace alre
 (`/fe-react:fe-react-forms` → `/fe-react:forms`). Commands follow one scheme, and no name collides with
 another name in the same plugin or with a Claude Code built-in.
 
-**Status:** M1, R1 and D1 landed 2026-10-11. The marketplace lists 21 plugins at 3.0.0 with `dependencies`, 459 skills carry their §5 names, the docs describe the new layout, and §9's gate passed in D1: `json.tool` exit 0, `claude plugin validate .` and `--strict` both "✔ Validation passed" with no advice, `tools/plugin-surface-check.py` OK, token audit 0 skill-description and 0 agent-description violations with 89 body violations (baseline 90), `tools/qa-version-check.py` OK, old-name sweep 0 matches. Always-on `desc(tok)` for `dev` + `design` + `be-java` + `fe-react` + `qa-typescript` + `data` + `business-analysis` is **20,217** against the 25,281 baseline (−5,064). H1 is next and is the user's. **Built but unverified:** install behaviour — whether an installed plugin pulls in a new dependency on `/plugin marketplace update` (Q1), the `dev` / `design` dependency enablement in a real project, and that an agent still loads its skills by path from an installed cache. Nothing is pushed.
+**Status:** Done 2026-10-11 — M1, R1, D1 and H1 landed. The marketplace ships 21 plugins at 3.0.0; `dev` and `design` arrive as dependencies; skill names are topic-only; commands follow one scheme; §9's gate passed and a live session on the installed revision lists exactly the designed surface (H1). Always-on descriptions for the seven-plugin set fell from 25,281 to 20,217 tokens. **Still unverified:** an end-to-end agent run that loads a path-only skill from an installed cache (the files are present in the cache, the run was not made); whether `/plugin marketplace update` pulls a *newly declared* dependency into an already-installed plugin (Q1 — only the fresh-install path was observed).
 ---
 
 ## 1. What already exists, and what is missing
@@ -788,6 +788,14 @@ a brace list of three folder names the sweep matched; it now lists the three pat
 claim that `business-analysis` bundles the documenters is replaced by `dev` registering them (§2.2).
 Cost: a description that names a sibling in the same plugin by bare name reads as ambiguous outside that plugin.
 
+**D14 — Projects enable `dev` and `design` explicitly (2026-10-11, H1).** §7 and the D1 README said a
+dependency "comes on with" its dependent. With every `skills-library` plugin `false` at user scope (§7's
+own advice), `claude plugin list --json` run inside a project that enables only `fe-react` shows `dev`
+and `design` **disabled** — also after removing their user-scope keys instead of setting them `false`.
+The explicit user-scope `false` wins over dependency enablement. README now tells users to list `dev`
+(and `design` for `fe-*` / `mobile-*`) in the project's `enabledPlugins` (commit `5042cb9`). Cost: one
+or two extra lines per project, and a project that forgets them silently loses `/dev:*`.
+
 ## Answered questions (2026-10-11)
 
 **O1 — Can a plugin declare dependencies?** Yes, with `dependencies` in `plugin.json` or the marketplace
@@ -809,11 +817,15 @@ of its skills into all 19. `dev` is the standalone plugin it never had.
 
 **O6 — Is one plugin per category installed per project?** Yes; the user stated it on 2026-10-11.
 
+**O7 — Does installing a plugin pull in its declared dependency? (was Q1)** On a **fresh install**, yes:
+`claude plugin install be-dotnet@skills-library` reported "+ 1 dependency: dev" and
+`mobile-react-native@skills-library` "+ 1 dependency: design" (2026-10-11). Whether
+`/plugin marketplace update` adds a newly declared dependency to an already-installed plugin was not
+observed — `dev` was already installed when the other plugins were updated. Enablement is D14.
+
 ## Open questions
 
-| # | Question | Options | Blocks | Owner |
-|---|---|---|---|---|
-| Q1 | Does an already-installed plugin pull in a newly declared dependency on `/plugin marketplace update`, or only on install? | Not documented. Either way, H1 installs `dev` / `design` explicitly if they are missing | Nothing in M1–D1; H1 records the answer | the user |
+None. Q1 is answered as O7.
 
 ## 11. Tasks
 
@@ -922,6 +934,23 @@ under two plugins.
 **Depends on:** D1, and the plan's commits on `origin/master`.
 **Budget:** a few minutes, no subscription cost beyond one short agent run.
 **Gate:** the checklist in H1's prompt block.
+- **As built (2026-10-11):** Run by Claude on the user's machine at the user's request. Marketplace at
+  `64e593d` (3.0.0). All user-scope installs updated from `bc2514a` to `64e593d`; stale project/local-scope
+  installs in agentic-shop, building-site-manager and tcms updated too. Every `*@skills-library` set to
+  `false` in `~/.claude/settings.json`; 14 projects enable their own set (11 committed, 3 local-only).
+  Fresh installs pulled `dev` / `design` as dependencies (O7), but they stay disabled unless the project
+  lists them (D14). A headless session in `RiderProjects/admin-ui` (`fe-react` + `dev` + `design`) listed
+  agents `dev:{code-auditor,solution-planner,be-documenter,be-feature-documenter,requirements-author}`,
+  `design:design-auditor`, `fe-react:fe-react`; `/dev:` = `refine design plan-feature plan-system
+  document-system document-feature audit` plus the planning, doc and audit skills; `/design:` = `audit`
+  plus the 16 craft skills; `/fe-react` and `/fe-react:audit` present; no duplicates; none of
+  `orientation-cache`, `code-comments`, `audit-engine`, `ep-brainstorming` listed. Path-loaded files
+  (`engineering-practices/{code-comments,agent-orientation-cache,standards-audit-engine}`,
+  `qa/manual/requirements-breakdown`, `auth/_shared/auth0-concepts`) exist in
+  `~/.claude/plugins/cache/skills-library/dev/64e593dc57af/`. `claude plugin details` reports
+  `Agents (0)` and no commands for every plugin, `be-java` included, so it ignores agents and commands
+  declared in a `strict: false` marketplace entry; its always-on figure (`dev` ~2,891 tok) therefore
+  undercounts, and `tools/token-audit.py` stays the measure. Not done: a live `/dev:audit` run.
 
 ## Close-out — every task
 
@@ -963,23 +992,4 @@ Run them in order, one session each, opened from Plan Queue. Each block is compl
 | D1 | `docs` | `general-purpose` | M1, R1 | ~125k |
 | H1 | `human` | **the user** | D1, pushed | minutes |
 
-M1, R1 and D1 have landed; their blocks are deleted. The H1 block is live.
-
----
-
-### H1 — verify the installed result (the user)
-
-Run in a real project, after the commits are on `origin/master`. Tick each item; any miss stays here.
-
-- [ ] `/plugin marketplace update skills-library` shows version **3.0.0**.
-- [ ] User scope: every `*@skills-library` entry is `false` in `~/.claude/settings.json`. In the project's `.claude/settings.json` set, for example,
-      `{ "enabledPlugins": { "be-java@skills-library": true, "fe-react@skills-library": true, "qa-typescript@skills-library": true } }`.
-- [ ] `/plugin` lists **`dev`** (and **`design`** with `fe-react`) as installed and enabled without you enabling them. If not, install them
-      (`/plugin install dev@skills-library`, `/plugin install design@skills-library`) and **record the answer to Q1** (did the update pull the new dependency, or only a fresh install?) in the plan's open questions.
-- [ ] `/dev:` lists `refine`, `design`, `plan-feature`, `plan-system`, `document-system`, `document-feature`, `audit`; `/design:` lists `audit` and the craft skills (`corpus`, `tokens`, `visual-identity`, …).
-- [ ] The front doors answer: `/be-java`, `/fe-react`, `/qa-typescript:api`, `/data` (if enabled), `/devops` (if enabled). Old forms (`/qa-api-typescript`, `/dev-design`, `/code-auditor`) are gone.
-- [ ] No skill appears under two plugins in the `/` menu, and none of the unregistered internals (`orientation-cache`, `code-comments`, `audit-engine`, `claude-api`) is listed.
-- [ ] `claude plugin details be-java` (and `fe-react`, `qa-typescript`): the always-on description figure is in line with the measured **20,217** tokens for the seven-plugin set (`dev` + `design` + `be-java` + `fe-react` + `qa-typescript` + `data` + `business-analysis`), against 25,281 before.
-- [ ] One short `/dev:audit` run on a small project: the agent loads its skills by path (it reads `engineering-practices/code-comments` and `orientation-cache` without error).
-
-Then delete this block, rewrite `Status` one final time (what the plan delivered, what is still unverified), and `git mv docs/plans/004-plugin-surface-rework.md docs/plans/implemented/` in the same commit.
+M1, R1, D1 and H1 have landed; their blocks are deleted, and the plan is filed in `docs/plans/implemented/`.
