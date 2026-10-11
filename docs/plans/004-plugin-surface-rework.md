@@ -6,12 +6,7 @@ plugin. Skill names drop the domain and stack prefixes the plugin namespace alre
 (`/fe-react:fe-react-forms` → `/fe-react:forms`). Commands follow one scheme, and no name collides with
 another name in the same plugin or with a Claude Code built-in.
 
-**Status:** Not started. M1 is next. Nothing is built. The baseline was measured on 2026-10-11:
-`claude plugin validate .` passes, `tools/token-audit.py` exits 1 on 90 pre-existing body-budget
-violations, and a typical project (`be-java` + `fe-react` + `qa-typescript` + `data` +
-`business-analysis`) loads **25,281 always-on description tokens** for 219 skill entries covering 182
-distinct skills.
-
+**Status:** M1 landed 2026-10-11: `.claude-plugin/marketplace.json` lists the 21 plugins at version 3.0.0 with `dependencies`, all 64 command files sit at their §4 paths, and `tools/plugin-surface-check.py` exists. **Built but unverified:** nothing has been run (the plan gates once, in D1) — not `claude plugin validate`, the checker, the token audit or the version check. Prose still cites old names until R1. R1 is next. Baseline (2026-10-11) for D1: `claude plugin validate .` passes, `tools/token-audit.py` exits 1 on 90 pre-existing body-budget violations, and a typical project loads **25,281** always-on description tokens for 219 skill entries covering 182 distinct skills.
 ---
 
 ## 1. What already exists, and what is missing
@@ -831,6 +826,7 @@ the checker ~5k, commit and diff read-back 6k, churn ×1.2.
 - Write `tools/plugin-surface-check.py` per §8.
 - **Not in M1:** any `SKILL.md` `name:` change or prose rewrite (R1); README, catalog, CLAUDE.md and
   CONTRIBUTING (D1). Command bodies keep their old prose; R1 rewrites their slash mentions.
+- **As built (2026-10-11):** no divergence from the plan. Per-plugin skills/agents/commands counts match §2.2's expected-counts table for all 21 plugins (`dev` 17/5/5, `design` 16/1/1, `qa-dotnet` 86/11/12, `mobile-android` 30/1/2). `marketplace.json` was edited line by line (`dev` and `design` inserted first in `plugins`; `dependencies` sits after `category`), parses with `json.loads`, and has 64 unique command paths that all exist. 55 command files were `git mv`d and `engineering-practices/commands/{dev-design,dev-plan-feature}.md` were `git rm`d. Per-stack commands moved to `qa/cicd/<stack>/commands/cicd.md`, `qa/reporting/<stack>/commands/reporting.md` and `observability/commands/<stack>/observability.md`. Descriptions were rewritten for the `fe-*`, `mobile-*`, `be-*`, `business-analysis`, `devops`, `data`, `tooling`, `penetration-testing`, `security-governance` entries and `metadata`; `qa-dotnet`'s only changed to `/qa-dotnet:audit`. Command file bodies still hold old prose (R1). `RESERVED` in the checker is §3.3's list. Proof: `python3 -m json.tool .claude-plugin/marketplace.json` exits 0; `tools/plugin-surface-check.py` is the checker, **not run**.
 
 ### R1 — skill renames and reference rewrite
 
@@ -938,54 +934,9 @@ Run them in order, one session each, opened from Plan Queue. Each block is compl
 | D1 | `docs` | `general-purpose` | M1, R1 | ~125k |
 | H1 | `human` | **the user** | D1, pushed | minutes |
 
-No task has landed yet; all four blocks are live.
+M1 has landed; its block is deleted. The R1, D1 and H1 blocks are live.
 
 ---
-
-### M1 — marketplace restructure, command moves, and the surface checker (general-purpose, docs)
-
-````
-You are `general-purpose`. Task M1 of docs/plans/004-plugin-surface-rework.md: restructure the
-marketplace into §2.2's 21 plugins with dependencies, move every command to its §4 path, and write the
-surface checker.
-
-Deliverable: `.claude-plugin/marketplace.json` lists the 21 plugins of §2.2 with their `dependencies`,
-version `3.0.0`, and every command at its §4 path; `tools/plugin-surface-check.py` implements §8.
-
-Read, in this order:
-1. CLAUDE.md.
-2. The plan: §1, §2 (all of it — §2.2 is the target, §2.3 is why removals are safe), §3, §4, §8,
-   D1–D9, task M1, and "Close-out — every task".
-3. `tools/token-audit.py` — the shape the checker copies (stdlib, ROOT from the script path, exit code).
-4. In `.claude-plugin/marketplace.json`, only the descriptions of `be-dotnet`, `be-java`, `be-node`,
-   `be-python`, `business-analysis`, `fe-blazor`, `fe-react` and `metadata` — read them through a
-   script, not the whole file.
-
-Build:
-- A Python edit script (session scratchpad) that removes, adds and repoints entries line by line,
-  adds the `dev` and `design` entries and every `dependencies` array per §2.2, sets version 3.0.0,
-  and asserts the result with `json.loads`. Print each plugin's skills/agents/commands counts and
-  compare them with §2.2's expected-counts table.
-- `git mv` every command file per §4 and `git rm` the two wrappers (D6).
-- The rewritten descriptions (§2.2 and task M1's bullets).
-- `tools/plugin-surface-check.py` per §8, with §3.3's list as `RESERVED`.
-
-Traps:
-- Never `json.dumps` the whole file: two descriptions keep a literal `—` escape and a round-trip
-  silently rewrites them. Edit lines.
-- `qa/cicd/commands/` and `qa/reporting/commands/` hold one file per stack, and they all become
-  `cicd.md` / `reporting.md`. They must move into per-stack folders or they overwrite each other. The
-  same applies to the observability commands.
-- `qa/manual/requirements-breakdown` stays in the three `qa-*` plugins only. `backend/_shared/{pattern-guide,code-review}`
-  stay in the `be-*` plugins. Everything else under `backend/_shared/` moves to `dev`.
-- Agent files do not move and agent identifiers do not change (D4). Only `agents` arrays change.
-
-**Gate: none** — this plan gates once, in D1. Do not run `claude plugin validate`, the checker,
-`tools/token-audit.py` or `tools/qa-version-check.py`.
-
-Commit: `refactor(plugins): dev + design plugins with dependencies, commands moved to one scheme (004 M1)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
 
 ### R1 — skill renames and reference rewrite (general-purpose, docs)
 
