@@ -10,7 +10,7 @@ session looks the connections up there instead of re-deriving them. The three `q
 then automate the new case kinds. They run scheduled jobs on demand, control the clock at a time
 boundary, fire concurrent requests, and deliver a message or webhook twice.
 
-**Status:** K1, D1 and Q1 landed 2026-10-11. K1: `business-analysis:dependency-map`, its golden example, the KB contract and feature slice, the three reasoning-lane edits and the `business-analyst` edits. D1: `dev:doc-feature-trace` has the seventh inventory (Edges) and the seam recipes, area and feature documents have *How it connects*, and `be-documenter` writes the dependency map. Q1: `requirements-breakdown` writes §8 Connections (schema constraints moved to the data dictionary), `qa-*:cross-feature-test-design` exists with its golden example, registered in all three `qa-*` plugins (D14 records four departures from §9.3). Built but unverified: nothing has been run (the gate is A3), and description lengths and file sizes are counted by hand or `wc` only. Next: Q2. O1 is answered: the automation is in this
+**Status:** K1, D1, Q1 and Q2 landed 2026-10-11. K1: `business-analysis:dependency-map`, its golden example, the KB contract and feature slice, the three reasoning-lane edits and the `business-analyst` edits. D1: `dev:doc-feature-trace` has the seventh inventory (Edges) and the seam recipes, area and feature documents have *How it connects*, and `be-documenter` writes the dependency map. Q1: `requirements-breakdown` writes §8 Connections (schema constraints moved to the data dictionary), `qa-*:cross-feature-test-design` exists with its golden example, registered in all three `qa-*` plugins (D14 records four departures from §9.3). Built but unverified: nothing has been run (the gate is A3), and description lengths and file sizes are counted by hand or `wc` only. Q2: `test-case-writer` writes parameterized field cases and the chain, async, temporal and concurrency forms; `qa-test-case-designer` runs five steps with Code mode and the depth gate; `qa-test-planner` plans from the slice. Next: A1. O1 is answered: the automation is in this
 plan, as tasks A1–A3. The plan changes skills and agents only, so the gate (§11) proves structure, not
 quality. The new stack skills' code samples are never compiled. Whether the suites actually get deeper,
 and whether the automation patterns run, is unverified until H1 runs the lane on a real project.
@@ -724,6 +724,15 @@ schedule would look like coverage and give none.
 
 Cost: the example and the plan's §9.3 no longer match line for line. §9.3 stays as the yardstick for H1; the example is what the skill teaches.
 
+**D15 — Q2 departs from §7.3/§7.5 in two places (2026-10-11).**
+
+| # | Plan said | Built | Why |
+|---|---|---|---|
+| 1 | §7.5 lists five forms | A sixth, *Chains*: a case that chains reactions attaches a check to each step the next depends on | §6.3 already requires it, and the writer is where cases are formatted |
+| 2 | *Temporal cases*: "Setup names the *Environment needs*" | "the Setup or the case's Preconditions name them" | Q1's golden example puts the duplicate-delivery need in the case's Preconditions column |
+
+Cost: the designer is 30 characters over its +2,000 bullet.
+
 ## Answered questions (2026-10-11)
 
 **O1 — Should the stack agents automate the new case kinds (on-demand job runs, clock control,
@@ -1010,6 +1019,12 @@ and it is registered in all three `qa-*` plugins.
   parameterized cases`.
 - **Not in Q2:** the stack automation (A1–A3); README, the catalog and the gate (A3).
 
+**As built (2026-10-11):** as planned, with two small additions recorded as D15; the A1–A3 blocks needed no rewrite (the async, temporal and concurrency wording is §7.5's).
+- `qa/manual/test-case-writer/SKILL.md`: `### Case forms` (parameterized field cases, layer groups, async, temporal, concurrency, chains), procedure step 1, a layer-heading placeholder in the output template, a quality-bar item and a handoff to `cross-feature-test-design`; the Example moved to `references/example-login.md`; 21,778 → 18,128 characters.
+- `qa/manual/agents/qa-test-case-designer.md`: five-step table, Step 2 detail, Code mode, two input rows, the depth gate and layer list in Step 5, every "Step <n>" renumbered, output contract (layers, connections, KB candidates, *Environment needs*), related agents; 22,377 → 24,407 characters (net +2,030, 30 over the bullet, with trims elsewhere in the file).
+- `qa/manual/agents/qa-test-planner.md`: slice read through `connections.md`, the code-only scan lists jobs, consumers and other writers, inventory rows tagged with a layer; net +~400 characters.
+- Unverified: no checker was run; sizes counted with `len()` and `wc`. `requirements-breakdown`'s intro already said "Steps 1–2", so it needed no edit.
+
 ### A1 — qa-typescript: `time-and-concurrency-testing` and the API lane wiring
 
 **Stack:** `docs` · **Agent:** `general-purpose`
@@ -1214,55 +1229,9 @@ in the checkout you are given, commit there, and never create a branch.
 | A3 | `docs` | `general-purpose` | A1, A2, Q2, Q1, D1, K1 | ~125k |
 | H1 | `human` | **the user** | A3 | one real feature |
 
-Five blocks are live. K1, D1 and Q1 have landed (their blocks are deleted).
+Four blocks are live. K1, D1, Q1 and Q2 have landed (their blocks are deleted).
 
 ---
-
-### Q2 — qa/manual: the suite and the two agents (general-purpose, docs)
-
-````
-You are a general-purpose agent working in the SkillsLibrary repo. Task Q2 of
-docs/plans/005-cross-feature-test-design.md: test-case-writer gains parameterized field cases and the
-chain/async/temporal/concurrency forms; qa-test-case-designer becomes five steps with a Code mode and a
-depth gate; qa-test-planner plans from the slice.
-
-Read, in this order:
-1. CLAUDE.md (Test code rules, Simplicity, Comments, Planning).
-2. The plan: §6.1, §7.1–§7.7, §10, D7–D10, task Q2 and the As built notes of K1, D1 and Q1, and
-   "Close-out — every task".
-3. What Q1 landed: qa/manual/cross-feature-test-design/SKILL.md, qa/manual/requirements-breakdown/
-   SKILL.md §8 and references/connections.md, and the headings of
-   qa/manual/cross-feature-test-design/references/example-cancel-booking.md.
-4. qa/manual/test-case-writer/SKILL.md, qa/manual/agents/qa-test-case-designer.md,
-   qa/manual/agents/qa-test-planner.md.
-5. backend/_shared/feature-trace/SKILL.md — the 10-stop table and "7. Edges" only (Code mode loads it).
-
-Build (task Q2's bullets, in order): test-case-writer (§7.5; Example moved to references/
-example-login.md; net ≤ 0) · qa-test-case-designer (inputs, Code mode, five steps, Step 2 detail,
-Step 3/5, renumbering, output contract, KB candidates, related agents; net ≤ 2,000 characters) ·
-qa-test-planner (§7.7; net ≤ 800).
-
-Traps:
-- Renumbering: every "Step <n>" in qa-test-case-designer.md (orientation, Mode A/B, Exploration
-  mode, output contracts) and requirements-breakdown's intro must match the five-step table.
-- The depth gate's severities are exactly §7.4's; the layer is counted from the technique, not a new
-  column.
-- One expected condition per case: a concurrency case whose outcome the spec does not pin expects the
-  open question — never "A or B".
-- Q1's golden example already writes the §7.5 forms (`within 10 s (#assumption), <observable>`; the
-  duplicate-delivery *Environment needs* line; an `Expected: open question` row). Match them, or
-  change the example in the same commit. The depth gate accepts a `?` failure that became an open
-  question or a stated deferral naming the question and the missing hook.
-- A1–A3 automate the exact case forms you write. If your wording of "Environment needs", the async
-  expected result or the concurrency form differs from §7.5, rewrite the A1–A3 blocks below to match.
-
-Gate: none — this plan gates once, in A3. Do not run `claude plugin validate`, the checkers,
-tools/token-audit.py or any script.
-
-Commit: `feat(qa): five-step test-case designer with Code mode and depth gate (005 Q2)` with the body
-line `BREAKING (format): suites group cases by layer; field constraints are parameterized cases`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
 
 ### A1 — qa-typescript: `time-and-concurrency-testing` and the API lane wiring (general-purpose, docs)
 
@@ -1279,7 +1248,7 @@ Read, in this order:
    "Writing a good description".
 2. The plan: §7.5, §7.8, §9.3 (cases 6, 9, 10, 11, 13), §10, D11, D13, task A1 and Q2's As built, and
    "Close-out — every task".
-3. qa/manual/test-case-writer/SKILL.md — only the §7.5 additions Q2 made (the forms you automate).
+3. qa/manual/test-case-writer/SKILL.md — only its `### Case forms` section (the forms you automate).
 4. qa/typescript/agents/qa-api-typescript.md (Input modes, Step 3 row at line ~139).
 5. qa/typescript/skills/api-test-author/writer/SKILL.md (conventions) and .../review/SKILL.md.
 6. qa/typescript/skills/feature-flag-testing/SKILL.md — how the in-process host overrides a provider;

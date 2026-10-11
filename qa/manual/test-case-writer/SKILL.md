@@ -35,7 +35,7 @@ The output is always the Markdown suite below. Gherkin is **not** an output of t
 
 ## Procedure
 
-1. **Map coverage items to cases.** One case per coverage item, or one case per group of *valid* items that can safely share a run (several valid partitions in one case is fine; **never two invalid inputs in one case**). Carry the technique and the condition's source line onto each case.
+1. **Map coverage items to cases.** One case per coverage item, or one case per group of *valid* items that can safely share a run (several valid partitions in one case is fine; **never two invalid inputs in one case**). Coverage items for one field in one direction become one parameterized case (*Case forms*). Carry the technique and the condition's source line, and for a cross-feature item its slice id, onto each case.
 2. **Factor shared preconditions into a single Setup** block — environment, seeded data, auth, feature flags that every (or most) cases need. Per-case `Preconditions` then list only the *delta* from Setup. A delta that must be *re-established* (a counter reset, a fresh session) is written as the case's first step, not as a precondition — a precondition describes state, it does not act.
 3. **Write each case's text** per *Writing the case text well* below: intent-altitude steps, one observable expected result, concrete data.
 4. **Write a Cleanup block** that restores the starting state — delete created records, reset flags/counters (e.g. failed-login counter), revoke tokens, log out. Every suite ends with Cleanup, even if it's "no residual state — nothing to clean" (state that explicitly).
@@ -46,6 +46,15 @@ The output is always the Markdown suite below. Gherkin is **not** an output of t
 ### Standalone fallback — no coverage-item list yet
 
 When the skill is invoked directly with a raw story / AC set / exploratory session report and no basis document exists: load `qa/manual/requirements-breakdown` and write the basis document first, then load `qa/manual/test-design-techniques` and walk its default recipe (EP → BVA → decision table → state transition → use-case → error-guessing sweep) to produce the coverage-item list, then run the procedure above. Do not skip to cases from the story — the anti-example below is what that produces.
+
+### Case forms
+
+- **Parameterized field cases.** Coverage items for one field in one direction (valid or invalid) become one case. Its data rows read `value → expected`, one invalid value per row, so a row never carries two invalid inputs. A CSV export writes one line per row.
+- **Layer groups.** Under `### Cases`, group the cases under layer headings: Field validation · Rules · States · Data · Interactions · Temporal · Concurrency · Scenarios. The layer comes from the case's technique (the table in `qa-test-case-designer`'s Step 5); an empty layer gets no heading. IDs do not change with the grouping.
+- **Async effects.** The expected result reads `within <budget>, <observable>`, and the observable is polled. The budget is one value, taken from the reaction's mode or from the NFR; an invented one is tagged `#assumption`. A fixed wait is never written.
+- **Temporal cases.** the Setup or the case's Preconditions name the *Environment needs*: a way to run `<schedule>` on demand, or to set the clock to `<instant>` in `<timezone>`. A case the environment cannot support is still written, and the need goes into the hand-off notes.
+- **Concurrency cases.** Two actors act at the same instant, and the case has one expected outcome. When the spec does not decide it, the expected result is the open question and the case is P1 — never "A or B".
+- **Chains.** A case that chains reactions attaches a check to each step the next step depends on.
 
 ## Output format
 
@@ -68,6 +77,8 @@ A suite is **Setup → Cases → Cleanup**. The Setup runs once before the cases
 - **Reset**: failed-login counter = 0
 
 ### Cases
+
+#### <Layer heading>
 
 | ID | Title | Priority | Type | Technique | Source | Preconditions (delta from Setup) | Steps | Expected Result | Test Data |
 |----|-------|----------|------|-----------|--------|----------------------------------|-------|-----------------|-----------|
@@ -117,6 +128,7 @@ The **suite** must:
 
 - [ ] Open with a **Setup** block holding every shared precondition (no precondition repeated across 10 rows)
 - [ ] Close with a **Cleanup** block that restores the starting state (or states "nothing to clean")
+- [ ] Group cases under **layer headings**, with field constraints as parameterized cases
 - [ ] Name the **techniques applied** in the header and the basis document it was derived from
 - [ ] Live at `docs/test-cases/<NNN>-<slug>.md` (or the project's stated convention)
 
@@ -150,67 +162,7 @@ Don't improvise the cases — derive them. The full method (definitions, coverag
 
 ## Example
 
-### Input
-
-> **Story**: As a user, I want to log in with my email and password so I can access my account.
->
-> **AC1**: Given a valid email and password, when I click sign in, I am redirected to /dashboard.
-> **AC2**: Given an invalid email or password, I see "Invalid credentials" without leaking which was wrong.
-> **AC3**: After 5 consecutive failed attempts, the account is locked for 15 minutes.
-> **AC4**: Password field is masked by default with a toggle to reveal.
-
-### Output
-
-```markdown
-## Test Cases: User Login
-
-**Source**: STORY-1247 — basis `docs/test-cases/007-user-login-basis.md`
-**Coverage**: full
-**Techniques applied**: equivalence partitioning, BVA (3-value on the 5-attempt lockout threshold), error guessing (whitespace, SQLi)
-**Generated**: 2026-05-27
-
-### Setup (run once before the suite)
-- **Environment**: staging, build `<sha>`; lockout window = 15 min, threshold = 5 attempts
-- **Data seeded**: user `user@test.com` / `Valid123!` exists, account **not locked**, failed-attempt counter = 0 (TC-LOGIN-004/005 re-run this reset as their first step because TC-LOGIN-002/003 consume attempts)
-- **State**: tester starts logged out, on a clean browser session
-
-### Cases
-
-| ID | Title | Priority | Type | Technique | Source | Preconditions (delta) | Steps | Expected Result | Test Data |
-|----|-------|----------|------|-----------|--------|-----------------------|-------|-----------------|-----------|
-| TC-LOGIN-001 | Successful login with valid credentials | P1 | positive | EP (valid) | AC1 | — | 1. Navigate to `/login`<br>2. Enter email<br>3. Enter password<br>4. Click "Sign in" | Redirected to `/dashboard`. Session cookie set. | `user@test.com` / `Valid123!` |
-| TC-LOGIN-002 | Login rejected with invalid password | P1 | negative | EP (invalid) | AC2 | — | 1. Navigate to `/login`<br>2. Enter valid email<br>3. Enter wrong password<br>4. Click "Sign in" | Stays on `/login`. Error: "Invalid credentials". | `user@test.com` / `WrongPass1!` |
-| TC-LOGIN-003 | Login rejected with non-existent email | P1 | negative | EP (invalid) | AC2 | — | 1. Navigate to `/login`<br>2. Enter email that does not exist<br>3. Enter any password<br>4. Click "Sign in" | Stays on `/login`. Error: "Invalid credentials" (same message as TC-LOGIN-002, not "user not found"). | `nobody@test.com` / `Valid123!` |
-| TC-LOGIN-004 | 4 failed attempts do not lock (boundary − 1) | P1 | negative | BVA (3-value) | AC3 | — | 1. Reset the failed-attempt counter to 0 and confirm the account is unlocked<br>2. Repeat TC-LOGIN-002 four times | After 4th attempt: still "Invalid credentials", account **not** locked. | `user@test.com` / `WrongPass1!` × 4 |
-| TC-LOGIN-005 | Account locks on the 5th failed attempt (boundary) | P1 | negative | BVA (3-value) | AC3 | — | 1. Reset the failed-attempt counter to 0 and confirm the account is unlocked<br>2. Repeat TC-LOGIN-002 five times | After 5th attempt: "Account locked. Try again in 15 minutes." | `user@test.com` / `WrongPass1!` × 5 |
-| TC-LOGIN-006 | Locked account rejects valid password | P1 | negative | state transition | AC3 | starts where TC-LOGIN-005 left off (account locked) | 1. Navigate to `/login`<br>2. Enter valid email<br>3. Enter correct password<br>4. Click "Sign in" | Error: "Account locked. Try again in 15 minutes." Not redirected. | `user@test.com` / `Valid123!` |
-| TC-LOGIN-007 | Account unlocks after 15 minutes | P2 | positive | BVA (time) | AC3 | account locked at time T (TC-LOGIN-005) | 1. Wait 15 minutes from T<br>2. Navigate to `/login`<br>3. Enter valid credentials<br>4. Click "Sign in" | Redirected to `/dashboard`. | `user@test.com` / `Valid123!` |
-| TC-LOGIN-008 | Password field masked by default | P2 | positive | EP | AC4 | — | 1. Navigate to `/login`<br>2. Type into password field | Characters render as `•` or `*`. | `Valid123!` |
-| TC-LOGIN-009 | Email field trims whitespace | P3 | positive | error guessing | `#assumption` | — | 1. Navigate to `/login`<br>2. Enter `" user@test.com "` with leading/trailing space<br>3. Enter valid password<br>4. Sign in | Logs in successfully (whitespace trimmed). | `" user@test.com "` / `Valid123!` |
-| TC-LOGIN-010 | SQL injection attempt rejected safely | P1 | negative | error guessing | `#assumption` (security baseline) | — | 1. Navigate to `/login`<br>2. Enter email: `' OR '1'='1`<br>3. Enter any password<br>4. Sign in | Error: "Invalid credentials". No SQL error leaks. No login granted. | `' OR '1'='1` / `anything` |
-
-### Cleanup (always runs)
-- Reset the failed-attempt counter to 0 and **unlock** `user@test.com` (TC-LOGIN-005/006 lock it)
-- Revoke any session/cookie issued by TC-LOGIN-001
-- Log out; clear the browser session
-- No records created → none to delete
-
-## Coverage Summary
-
-| Acceptance Criterion | Test Cases | Covered? |
-|---------------------|------------|----------|
-| AC1: Valid login redirects to dashboard | TC-LOGIN-001 | ✅ |
-| AC2: Invalid credentials show generic error | TC-LOGIN-002, TC-LOGIN-003 | ✅ |
-| AC3: Account locks after 5 failures, 15 min | TC-LOGIN-004 (boundary − 1), TC-LOGIN-005 (boundary), TC-LOGIN-006, TC-LOGIN-007 | ✅ |
-| AC4: Password masked by default | TC-LOGIN-008 | ⚠️ reveal-toggle half of AC4 not yet covered — add a case |
-
-## Notes
-
-- TC-LOGIN-004/005 split the 5-attempt lockout into boundary − 1 (4 → not locked) and boundary (5 → locked) — 3-value BVA on the threshold, per `qa/manual/test-design-techniques`.
-- AC4's reveal-toggle half has no case yet — the ⚠️ in the coverage summary is the honest signal; add `TC-LOGIN-011` for it.
-- TC-LOGIN-009 (whitespace trimming) is not in the ACs — `#assumption`, P3 until the PO confirms; it joins the regression floor only if promoted to P1/P2.
-- TC-LOGIN-010 (SQL injection) is implicit in the security baseline; `#assumption` but P1 regardless, so it is in the regression floor from day one.
-```
+A full worked suite (a login story, ten cases, coverage summary) is in [`references/example-login.md`](references/example-login.md). It predates layer groups and parameterized field cases.
 
 ## Anti-example
 
@@ -240,6 +192,7 @@ Why the first row fails every rule in *Writing the case text well*: **"authentic
 
 - Distill the source docs into a concise, sourced test-basis document first → `qa/manual/requirements-breakdown`
 - Decide *which* cases to write (partitions, boundaries, rules, transitions) → `qa/manual/test-design-techniques`
+- Decide which cases cover a feature's connections (chains, foreign states, shared data, schedules, concurrency) → `qa/manual/cross-feature-test-design`
 - Orchestrate the full documentation → suite flow → `qa/manual/agents/qa-test-case-designer`
 - Size the test investment by risk first → `qa/manual/test-strategy`
 - Unscripted probing beyond the scripted cases → `qa/manual/exploratory-charter-writer`
