@@ -15,12 +15,12 @@ rg -n "<pattern>" --glob '*.cs' $TESTS
 
 **The tool lane gates everything.** Rows tagged **[NUnit]**, **[PW]** (Playwright .NET), **[Sel]** (Selenium 4), **[Appium]**, **[RestSharp]**, **[Reqnroll]**, **[TC]** (Testcontainers) apply only when that tool is in use. A suite that doesn't use a tool is **N/A** for its rows, never in violation. Where the project has a documented house convention that differs from a plugin default, record a **deviation**, not a finding.
 
-**Owning skills:** `qa/dotnet/skills/{api-test-author/*,ui-test-author/*,page-object-design,page-objects-from-url,mobile-screen-explorer,mobile-screen-objects,api-client-writer,api-models,test-data-builder,data-driven-testing,db-testing/*,test-login-tokens,test-quality-check,load-testing,bdd-*}` · `qa/reporting/dotnet/skills/{test-reports,flaky-test-quarantine}` · `qa/cicd/{ci-conventions,dotnet/skills/ci-pipelines}` · `qa/_shared/performance` · `qa/manual/{test-strategy,quality-metrics}`.
+**Owning skills:** `qa/dotnet/skills/{api-test-author/*,ui-test-author/*,evidence-capture,visual-regression,accessibility-testing,network-mocking,page-object-design,page-objects-from-url,mobile-screen-explorer,mobile-screen-objects,api-client-writer,api-models,test-data-builder,data-driven-testing,db-testing/*,test-login-tokens,test-quality-check,load-testing,bdd-*}` · `qa/reporting/dotnet/skills/{test-reports,flaky-test-quarantine}` · `qa/cicd/{ci-conventions,dotnet/skills/ci-pipelines}` · `qa/_shared/performance` · `qa/manual/{test-strategy,quality-metrics}`.
 
 ---
 
 ## A — Build health & suite lane
-*Owning skills: `api-project-setup`, `ui-project-setup`, `mobile-project-setup`, `performance-project-setup`*
+*Owning skills: `api-project-setup`, `ui-project-setup`, `mobile-project-setup`, `performance-project-setup`, `ui-test-author/playwright` (A9, A10)*
 
 | # | Check | Violation looks like | Find it with | Sev |
 |---|---|---|---|---|
@@ -32,6 +32,8 @@ rg -n "<pattern>" --glob '*.cs' $TESTS
 | A6 | `Nullable` enabled in test projects too | `<Nullable>` missing, so `!`-bangs and null surprises spread through fixtures | `rg -n "<Nullable>" --glob '*Tests.csproj' --glob '*.props'` | minor |
 | A7 | Shared infrastructure lives in one place | Every test project re-implementing its own base fixture / driver factory / config reader | `rg -l "class Base\w*Test" --glob '*.cs'` | minor |
 | A8 | Tooling versions pinned | Floating package versions or `latest` container tags in fixtures | `rg -o "Version=\"[^\"]+\"" --glob '*Tests.csproj' \| sort -u`; `rg -n ":latest" --glob '*.cs'` | minor |
+| A9 | **[PW]** Only APIs that exist in the pinned binding (1.63) | `ToHaveScreenshotAsync` / `ToMatchSnapshotAsync` (no .NET screenshot assertion exists); `Page.Video.GetPathAsync()` (the API is `PathAsync()`); `Within(`, `GetByRef`, `RecordVideoFps` (1.64-only); `new AxeBuilder(` (`Deque.AxeCore.Playwright` 4.13.0 has `page.RunAxe(...)` / `locator.RunAxe(...)`); `AllureApi.AddTestAttachment` (does not exist); Eyes `OpenAsync` / `CheckAsync` / an awaited `CloseAsync()` (`Eyes.Playwright` is synchronous); `request.PostDataJSON` without `()` (a method); `ws.WaitForEventAsync(...)` or `IsClosed()` on `IWebSocket` (events, plus the `IsClosed` and `Url` properties) | `rg -n "ToHaveScreenshotAsync\|ToMatchSnapshotAsync\|GetPathAsync\|AxeBuilder\|AddTestAttachment\|[Ee]yes\w*\.(Open\|Check)Async\|PostDataJSON[^(]\|WaitForEventAsync\|IsClosed\(" --glob '*.cs'` | blocker |
+| A10 | **[PW]** One Playwright version across packages and images | The `mcr.microsoft.com/playwright/dotnet:v<x>-noble` tag in a Dockerfile or pipeline ≠ the `Microsoft.Playwright.NUnit` version (the image's browsers are built for its own version); a floating `Microsoft.Playwright*` version (`1.*`); `Microsoft.Playwright` and `Microsoft.Playwright.NUnit` both referenced by one project; a `-jammy` .NET image (none since 1.60) | `rg -n "playwright/dotnet:v" .`; `rg -n "Microsoft\.Playwright" --glob '*.props' --glob '*.csproj'` — compare the two | major |
 
 ---
 
@@ -109,11 +111,21 @@ rg -n "<pattern>" --glob '*.cs' $TESTS
 | E8 | Navigation methods return the destination page | Navigation returns `void` and the test news up the next page itself | `rg -n "public (async )?(Task\|void) (GoTo\|Navigate\|Open)\w*" --glob '*.cs'` | minor |
 | E9 | Repeating rows/cards are scoped components | One page object re-querying the whole DOM per row instead of a component scoped to a parent locator | Read list/table page objects | major |
 | E10 | Locators are fields, not re-created per access | Properties calling `Page.Locator(...)` on every get; locator strings re-typed across methods | `rg -n "=> (Page\|_page)\.Locator\(" --glob '*.cs'` | minor |
-| E11 | Driver/browser lifecycle owned by a base fixture + factory | `new ChromeDriver()` / `Playwright.CreateAsync()` inside a test or `[SetUp]` | `rg -n "new ChromeDriver\(\|Playwright\.CreateAsync\(" --glob '*.cs'` | blocker |
+| E11 | Driver/browser lifecycle owned by one base fixture | **[Sel]** `new ChromeDriver()` in a test or `[SetUp]`. **[PW]** `Playwright.CreateAsync()` in a `[Test]`, a `[SetUp]` or a fixture's `[OneTimeSetUp]` — the root-namespace `AuthSetup` `[SetUpFixture]` is the one exception; a UI fixture not derived from the one `BaseTest : PageTest` (`ui-test-author/playwright/assets/BaseTest.cs`); a second base class per role, device or locale (those are `ContextOptions()` overrides) | `rg -n "new ChromeDriver\(\|Playwright\.CreateAsync\(" --glob '*.cs'`; `rg -n "class \w+ ?(\(.*\))? ?: ?(PageTest\|ContextTest\|BrowserTest\|PlaywrightTest)\b" --glob '*.cs'` — every hit but `BaseTest` itself needs a reason | blocker |
 | E12 | Constructor injection — no ambient statics | `Driver.Current` / service-locator lookups inside pages | `rg -n "Driver\.Current\|ServiceProvider\.GetRequiredService" --glob '*.cs'` | major |
 | E13 | **[Sel]** No deprecated `PageFactory` / `[FindsBy]` | `PageFactory.InitElements(driver, this)` | `rg -n "PageFactory\|FindsBy" --glob '*.cs'` | major |
 | E14 | **[Appium]** Platform branching abstracted | `if (Platform == "iOS") … else …` scattered across screens | `rg -n "iOS\"\|Android\"" --glob '*.cs'` | major |
 | E15 | **[Reqnroll]** Steps delegate to page objects | Selectors, waits, or driver calls inside step definitions | `rg -n "\.Locator\(\|FindElement\(\|WaitFor" --glob '*Steps.cs'` | major |
+| E16 | **[PW]** `ContextOptions()` amends the base; parallelism is `ParallelScope.Self` | An override returning `new()` / `new BrowserNewContextOptions { … }` (drops `BaseURL`, the video folder, `Locale` and `ColorScheme`); `ParallelScope.All` / `Children` / `Fixtures` on a Playwright fixture (its tests share one `Page`); launch arguments in a `LaunchOptionsAsync()` override instead of a `.runsettings` (the browser is per worker — the first fixture wins) | `rg -n "ContextOptions\(\)" -A3 --glob '*.cs' \| rg "return new"`; `rg -n "ParallelScope\.(All\|Children\|Fixtures)" --glob '*.cs'`; `rg -n "LaunchOptionsAsync" --glob '*.cs'` | blocker |
+| E17 | **[PW]** Signed-in state from the root-namespace `AuthSetup` | `AuthSetup` (`[SetUpFixture]`) in a sub-namespace such as `X.Support` while the tests live in `X.Tests` — NUnit runs it only for its own namespace, so the state file is never written; every test signing in through the UI; a state path relative to the current directory instead of `<WorkDirectory>/auth-user.json` | `rg -n "\[SetUpFixture\]" -A3 --glob '*.cs'` — compare each namespace with the tests'; `rg -n "SignInAsync" --glob '*Tests.cs'` | blocker |
+
+**E11 is not a finding on these documented owners of their own lifecycle:** the Reqnroll `[BeforeScenario]` hook
+from `bdd-project-scaffold` (a binding cannot derive from `BaseTest`, so it owns the scenario's browser and keeps
+`BaseTest`'s evidence); the Lighthouse fixture on `PlaywrightTest` from `accessibility-testing`, which calls
+`Playwright.Chromium.LaunchPersistentContextAsync` on a free port (plan 003 D61) — not `Playwright.CreateAsync()`;
+`BasePlaywrightApiTest : PlaywrightTest` from `api-test-author/playwright` (API-only, no browser); a grid fixture
+that derives from a test class and overrides `ConnectOptionsAsync()` (`browser-cloud-setup`); and a production
+probe from `production-uptime-checks`, which is monitoring code, not a test fixture.
 
 ---
 
@@ -131,6 +143,8 @@ rg -n "<pattern>" --glob '*.cs' $TESTS
 | F7 | No `IJavaScriptExecutor` click workarounds **[Sel]** | `ExecuteScript("arguments[0].click()", el)` papering over actionability | `rg -n "arguments\[0\]\.click" --glob '*.cs'` | major |
 | F8 | Ambiguous text/role matches disambiguated **[PW]** | `GetByText("Submit")` matching `Submit Order` and `Submitting…` with no `Exact = true` | `rg -n "GetByText\(" --glob '*.cs'` | minor |
 | F9 | A `missing-testids.md` report exists where testids are absent | The suite works around missing testids silently instead of handing the list to the FE team | `ls missing-testids.md **/missing-testids.md 2>/dev/null` | minor |
+| F10 | A fallback locator is recorded, not marked | A `// TODO: missing data-testid` marker — or any comment — on a fallback locator instead of a `missing-testids.md` row naming the page, the element, the suggested id and the fallback in use | `rg -n "TODO.*testid\|missing data-testid" --glob '*.cs'` | minor |
+| F11 | Test ids are PascalCase dot-separated and static | Kebab-case (`login-submit`) or dynamic ids (`row-42`, a GUID, an index, a state) in `GetByTestId(...)` instead of `Login.Submit` / `OrderRow` with the row picked by its content | `rg -n "GetByTestId\(\"[a-z]" --glob '*.cs'`; `rg -n "GetByTestId\(\\$\"" --glob '*.cs'` | minor |
 
 ---
 
@@ -173,7 +187,7 @@ rg -n "<pattern>" --glob '*.cs' $TESTS
 ---
 
 ## I — Assertion quality
-*Owning skills: `api-test-author/review`, `ui-test-author/review`*
+*Owning skills: `api-test-author/review`, `ui-test-author/review`, `visual-regression` (I12), `accessibility-testing` (I13)*
 
 | # | Check | Violation looks like | Find it with | Sev |
 |---|---|---|---|---|
@@ -187,6 +201,9 @@ rg -n "<pattern>" --glob '*.cs' $TESTS
 | I8 | No `try/catch` around the test body | A catch swallowing the assertion failure | `rg -n "try" -A4 --glob '*Test*.cs'` | major |
 | I9 | Error-path assertions don't over-reach | A 401 test trying to deserialize a body the middleware never returns | `rg -n "401\|Unauthorized" -A6 --glob '*.cs'` | minor |
 | I10 | No snapshot/approval file standing in for a real assertion | An approval test as the only coverage of a behaviour, with the file never reviewed | `rg -n "Approvals\|Verify\(\|\.approved\." --glob '*.cs'` | minor |
+| I11 | **[PW]** URL assertions can pass | `ToHaveURLAsync("**/dashboard")` — the string is an exact match of the whole URL after `BaseURL` resolution, so a glob never matches; a glob belongs in `WaitForURLAsync`, a partial match in `ToHaveURLAsync(new Regex("/dashboard$"))` | `rg -n "ToHaveURLAsync\(\"[^\"]*\*" --glob '*.cs'` | major |
+| I12 | **[PW]** Visual regression is a screenshot plus a comparer | A fabricated screenshot assertion (`ToHaveScreenshotAsync`, `ToMatchSnapshotAsync`) presented as built-in, instead of `Locator.ScreenshotAsync` + a comparer (`Codeuctivity.ImageSharpCompare`) + `AllureApi.AddScreenDiff`; baselines read relative to `bin/` instead of `ProjectPaths.Root`; baselines recorded outside the pinned `mcr.microsoft.com/playwright/dotnet` image; the `Applitools.Playwright` package id (the package is `Eyes.Playwright`) | `rg -n "ToHaveScreenshotAsync\|ToMatchSnapshotAsync\|ImageSharpCompare\|AddScreenDiff\|ProjectPaths" --glob '*.cs'`; `rg -n "Applitools\.Playwright\"" --glob '*.csproj' --glob '*.props'` | major |
+| I13 | **[PW]** Accessibility scans assert at WCAG 2.2 AA through `RunAxe` | A scan with no tags (every rule, every level) or below 2.2 AA; `RunAxeLegacy`; violations filtered with no recorded reason; a Lighthouse `pwa` category (removed upstream) | `rg -n "RunAxe\|Tags\(\|wcag" --glob '*.cs'`; `rg -n "pwa" --glob '*.cs' --glob '*.json'` | major |
 
 ---
 
@@ -213,7 +230,7 @@ rg -n "<pattern>" --glob '*.cs' $TESTS
 ---
 
 ## K — Config, secrets & environments
-*Owning skills: `qa/cicd/ci-conventions`, `test-login-tokens`, `db-testing/connection`*
+*Owning skills: `qa/cicd/ci-conventions`, `test-login-tokens`, `db-testing/connection`, `ui-test-author/playwright` (K9)*
 
 | # | Check | Violation looks like | Find it with | Sev |
 |---|---|---|---|---|
@@ -225,27 +242,29 @@ rg -n "<pattern>" --glob '*.cs' $TESTS
 | K6 | **[Appium]** Capabilities from config, not hardcoded | `deviceName = "Pixel_6"` literal in the base fixture | `rg -n "AppiumOptions\|deviceName" --glob '*.cs'` | major |
 | K7 | No user-secrets / local settings committed | `secrets.json` or a filled-in `appsettings.Local.json` in git | `git ls-files \| rg -i "secret\|\.local\."` | blocker |
 | K8 | Tokens never logged | A token written to console/Allure on failure | `rg -n "AccessToken" --glob '*.cs'` — check log/attachment paths | blocker |
+| K9 | **[PW]** A base URL is set, from `BASE_URL` | Relative `GotoAsync("/x")` / `APIRequest.PostAsync("/api/x")` with no `BaseURL` in `ContextOptions()` (they throw "Cannot navigate to invalid URL"); a hardcoded host instead of `BASE_URL`; a required variable read with `GetEnvironmentVariable(...)!` instead of `BaseTest.RequiredEnv` | `rg -n "BaseURL" --glob '*.cs'` vs `rg -n "GotoAsync\(\"/" --glob '*.cs'`; `rg -n "GetEnvironmentVariable\(.*\)!" --glob '*.cs'` | blocker |
 
 ---
 
 ## L — Reporting & flake management
-*Owning skills: `qa/reporting/dotnet/skills/{test-reports,flaky-test-quarantine}`*
+*Owning skills: `qa/reporting/dotnet/skills/{test-reports,flaky-test-quarantine}`, `evidence-capture` (L4)*
 
 | # | Check | Violation looks like | Find it with | Sev |
 |---|---|---|---|---|
 | L1 | Allure is wired per test project | No `Allure.NUnit`, no `allureConfig.json` copied to output — CI produces no human-readable report | `rg -n "Allure" --glob '*Tests.csproj'`; `ls **/allureConfig.json` | major |
 | L2 | Every test carries feature/story/severity metadata | Missing `[AllureFeature]`/`[AllureStory]`/`[AllureSeverity]`, or an `[AllureFeature("misc")]` catch-all | `rg -c "AllureFeature" --glob '*.cs'` vs test count; `rg -n "AllureFeature\(\"misc" --glob '*.cs'` | minor |
 | L3 | API failures attach the response body **before** asserting | A red build showing a status-code message and no body | `rg -n "AttachBody" --glob '*.cs'` vs error-path tests | minor |
-| L4 | UI failures attach screenshot **and** trace | Only a screenshot, or nothing, on a Playwright failure | `rg -n "AddAttachment\|trace.zip\|Tracing\." --glob '*.cs'` | major |
+| L4 | UI failures keep trace, full-page screenshot **and** video | **[PW]** Only a screenshot, or nothing, on a failure; evidence anywhere but `<WorkDirectory>/playwright-artifacts/<Class>.<Test>.{zip,png,webm}` (Reqnroll: `<Feature>.<Scenario>`); a second `[TearDown]`, base class or action attribute for the same evidence beside `BaseTest`'s; a `catch` in the evidence teardown; `SaveAsAsync` before `Context.CloseAsync()`; each file not attached to both NUnit (`TestContext.AddTestAttachment`) and Allure | `rg -n "AddAttachment\|AddTestAttachment\|Tracing\.\|SaveAsAsync" --glob '*.cs'` | major |
 | L5 | Allure history is preserved across runs | A trendless report — flake detection impossible | CI config: history restore/publish step | major |
 | L6 | One reporter convention | `Allure.NUnit` and `Allure.XUnit` writing into the same `allure-results/` | `rg -n "Allure\.(NUnit\|XUnit)" --glob '*.csproj'` | major |
 | L7 | `allure-results/` is an artifact, not committed | The results directory tracked in git | `git ls-files \| rg "allure-results"` | minor |
 | L8 | Attachments carry no secrets/PII, and aren't huge | Tokens, connection strings, or 5 MB logs attached per test | `rg -n "AddAttachment" -B4 --glob '*.cs'` | blocker |
-| L9 | Retry is bounded and per-test, not blanket | `[Retry(3+)]` broadly applied, or retry used to hide a deterministic failure | `rg -n "\[Retry\(\|RetryOnFailure" --glob '*.cs'` | major |
+| L9 | Retries only on a documented hotspot | Any `[Retry]` on a test with no dated `[AllureIssue]` / description naming the hotspot (`qa/cicd/ci-conventions`: no retries otherwise); `[Retry(3+)]`; `[Retry(1)]` believed to retry (NUnit counts attempts — it is one run, no retry; `[Retry(2)]` is one retry); a retry hiding a deterministic failure | `rg -n "\[Retry\(\|RetryOnFailure" -B3 --glob '*.cs'` | major |
 | L10 | One retry mechanism only | `[Retry]` **and** a CI-level rerun (caps multiply, flake hidden twice over) | compare L9 with the CI config | major |
 | L11 | Quarantine is a category + non-gating lane, never `[Ignore]` | Flaky tests silently `[Ignore]`d — coverage lost with no trail | `rg -n "\[Category\(\"Flaky\|\[Ignore\(" --glob '*.cs'` | major |
 | L12 | Every quarantined test carries a ticket and gets reviewed | A `Flaky` category that only ever grows | `rg -n "Flaky" -A3 --glob '*.cs'` — check for issue links | major |
 | L13 | No sleeps in teardown/attachment helpers | `Thread.Sleep` in `[TearDown]` "waiting for attachments to flush" | covered by D1; read teardowns | blocker |
+| L14 | Allure attachments and links are recorded where a result exists | `AllureApi.AddTestAttachment` (no such method); `AllureApi.AddLink` / `AddAttachment` in `[OneTimeSetUp]` / `[OneTimeTearDown]`, where no test result is running and nothing is recorded — use `AddGlobalAttachment` there | `rg -n "AllureApi\." -B8 --glob '*.cs' \| rg "OneTime\|AllureApi"` | major |
 
 ---
 
@@ -268,6 +287,8 @@ rg -n "<pattern>" --glob '*.cs' $TESTS
 | M12 | Runner parallelism doesn't fight fixture-owned containers | Matrix parallelism plus `LevelOfParallelism > 1` on container fixtures | compare CI config with C7 | major |
 | M13 | Perf gate honours the tool's exit code **[NBomber]** | YAML interpreting perf metrics, or softening the exit code | read the perf stage | major |
 | M14 | Artifact retention matches the convention | Traces/videos kept always (cost) or results kept 1 day (no forensics) | read the upload steps | nit |
+| M15 | **[NUnit]** Shards split by class filters computed once | `Playwright.Shard` (the adapter ignores it — "not implemented" — so every shard runs the whole suite) or an `NUnit.Where` modulo predicate instead of class filters from one `ci/nunit-shards.sh` (`qa/cicd/dotnet/skills/ci-pipelines`) | `rg -n "Playwright\.Shard\|NUnit\.Where" .github azure-pipelines.yml .gitlab-ci.yml`; `rg -n "Shard" --glob '*.runsettings'` | major |
+| M16 | **[PW]** Nightly-only and separate-run categories stay out of the PR gate | The UI gate filter runs `visual`, `lighthouse` or `grid` fixtures (they need the pinned image, a free port or cloud credentials); visual baselines updated outside the `mcr.microsoft.com/playwright/dotnet` image job; no upload of `playwright-artifacts/` on failure | `rg -n "TestCategory" .github azure-pipelines.yml .gitlab-ci.yml`; `rg -n "playwright-artifacts" .github azure-pipelines.yml .gitlab-ci.yml` | major |
 
 ---
 
@@ -293,17 +314,17 @@ rg -n "<pattern>" --glob '*.cs' $TESTS
 
 | Letter | Section | Conditional? | Discipline |
 |---|---|---|---|
-| A | Build health & suite lane | always | all |
+| A | Build health & suite lane | always (A9, A10 **[PW]** follow the driver) | all — A9, A10 **[PW]** only under `ui`/`all` |
 | B | Test naming, structure & comments | always | all |
 | C | Independence & isolation | always | all |
 | D | Waits & timing | always (tool-tagged rows follow the driver) | all — but PW/Sel-tagged rows only run under `ui`/`all`, Appium-tagged rows only under `mobile`/`all` |
-| E | Page / screen objects | UI or mobile suite present | `ui`, `mobile` — E14 **[Appium]** only under `mobile`/`all`; E13 **[Sel]** only under `ui`/`all` |
+| E | Page / screen objects | UI or mobile suite present | `ui`, `mobile` — E14 **[Appium]** only under `mobile`/`all`; E13 **[Sel]**, E16, E17 **[PW]** only under `ui`/`all` |
 | F | Locator hygiene | UI or mobile suite present | `ui`, `mobile` — F2 **[PW]**, F7 **[Sel]** only under `ui`/`all` |
 | G | Test data | always | all |
 | H | API test layering | API suite present | `api` only |
-| I | Assertion quality | always | all — I3 **[PW]** only under `ui`/`all` |
+| I | Assertion quality | always | all — I3, I11–I13 **[PW]** only under `ui`/`all` |
 | J | External verification | suite touches a DB / broker / storage / mail | all — discipline-independent, gated only by its own probe |
-| K | Config, secrets & environments | always | all |
+| K | Config, secrets & environments | always | all — K9 **[PW]** only under `ui`/`all` |
 | L | Reporting & flake management | always — **absence is L1**, not N/A | all |
-| M | CI wiring | always — **absence is M1**, not N/A | all |
+| M | CI wiring | always — **absence is M1**, not N/A | all — M16 **[PW]** only under `ui`/`all` |
 | N | Coverage shape | always (mutation row needs Stryker.NET) | all |

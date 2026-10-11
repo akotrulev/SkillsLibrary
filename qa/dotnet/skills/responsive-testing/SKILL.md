@@ -3,7 +3,7 @@ name: qa-responsive-testing-dotnet
 description: Use when testing responsive layout/breakpoint behavior in .NET 10 (8-9) with Playwright .NET + NUnit — drive the viewport across the app's real CSS breakpoints (read from its token/theme source, never guessed), assert the layout variant at breakpoint−1 and breakpoint (BVA), verify geometry via bounding boxes. Triggers "test the responsive design", "assert the nav collapses to a hamburger", "test around the breakpoints". Not for pixel diffs (`visual-regression`).
 ---
 
-# QA — Responsive / Breakpoint Testing (.NET / Playwright + NUnit)
+# QA — Responsive / Breakpoint Testing (.NET 10 / Playwright 1.63 + NUnit)
 
 Tests that a web app's layout **adapts correctly across viewport widths**: the right layout variant renders on
 each side of every CSS breakpoint, related elements stay aligned with each other when the breakpoint flips, and
@@ -24,35 +24,40 @@ pixel-level diffing is `visual-regression`'s job and pairs with this skill, it d
 >    overlap/gap bugs) that a "test at 375/768/1440" matrix sails past. Representative in-range widths are the
 >    *smoke* layer on top, not the substitute.
 > 3. **Assert structure, not pixels.** Three assertion families, all robust to content changes: **variant swap**
->    (hamburger visible + full nav hidden, grid renders 3 columns vs 1 — derived from bounding-box rows);
->    **relative geometry** (children share a left edge, sibling boxes don't overlap, child stays inside parent)
->    via `BoundingBoxAsync()` comparisons with a small tolerance — never absolute coordinates; **overflow** (no
->    horizontal scroll: `scrollWidth <= clientWidth` on the document, no element's right edge past the viewport).
+>    (hamburger visible + full nav hidden), **relative geometry** (column count from bounding-box rows, shared
+>    left edges, no overlap — with a small tolerance, never absolute coordinates), and **overflow** (no
+>    horizontal scroll: `scrollWidth - clientWidth` is `0`).
 > 4. **Fresh-load and live-resize are different code paths — test both where both happen.** CSS media queries
->    respond to `Page.SetViewportSizeAsync` live, but JS/interop breakpoint logic (`matchMedia` listeners,
->    Blazor `MudBreakpointProvider` / resize interop, JS-chosen component variants) may only run on load — or
->    break only on live resize. Default to **navigating at the target viewport** (viewport set in
->    `ContextOptions()`); add explicit **live-resize** tests for surfaces users actually resize (desktop window
->    drag, orientation flip), asserting with `Expect(...)` web-first assertions after the resize — never
->    `Task.Delay`/`WaitForTimeoutAsync`.
+>    respond to a live resize, but JS/interop breakpoint logic (`matchMedia` listeners, MudBlazor's
+>    `MudBreakpointProvider`, JS-chosen component variants) may only run on load — or break only on live
+>    resize. Default to **loading at the target viewport** (set in the fixture's `ContextOptions()`); add
+>    explicit **live-resize** tests for surfaces users actually resize, asserting with web-first `Expect(...)`
+>    after the resize — never `Task.Delay`/`WaitForTimeoutAsync`.
 
 ## Decision matrix — responsive surface → test shape
 
 | Surface | What you're proving | Test shape |
 |---------|---------------------|------------|
-| **Layout variant per breakpoint** | The right structure renders on each side of the boundary | Navigate at bp−1 and bp → assert the variant marker (`ToBeVisibleAsync`/`ToBeHiddenAsync` on nav/hamburger/drawer) |
-| **Element alignment** | Related elements stay aligned when the breakpoint flips | `BoundingBoxAsync()` — equal left edges / tops within tolerance, at each boundary width |
-| **Grid/column reflow** | Cards go 3-col → 2-col → 1-col at the right widths | Group card boxes by `Y` → assert row lengths per width |
-| **No overflow / no clipping** | Nothing forces a horizontal scrollbar or escapes its container | `scrollWidth <= clientWidth`; child box within parent box |
-| **Live resize / rotation** | JS breakpoint logic reacts to a real resize | Load wide → `SetViewportSizeAsync` narrow → web-first assert the swap (and back) |
+| **Layout variant per breakpoint** | The right structure renders on each side of the boundary | One fixture row per width (bp−1, bp) naming the variant shown and the one hidden → `ToBeVisibleAsync` / `ToBeHiddenAsync` |
+| **Element alignment** | Related elements stay aligned when the breakpoint flips | `_layout.LeftEdgeSpreadAsync(...)` ≤ tolerance, at each boundary width |
+| **Grid/column reflow** | Cards go 3-col → 2-col → 1-col at the right widths | One fixture row per width naming its column count → `_layout.ColumnCountAsync(cards)` |
+| **No overflow / no clipping** | Nothing forces a horizontal scrollbar | `_layout.HorizontalOverflowAsync()` is `0` |
+| **Live resize / rotation** | JS breakpoint logic reacts to a real resize | Load wide → `_layout.ResizeToAsync(narrow)` → web-first assert the swap (and back) |
 | **Whole-page look per viewport** | Everything the structural checks can't name | Hand off: `qa-visual-regression-dotnet`, one baseline per viewport |
-| **Real mobile UX (touch, DPR, UA)** | Device behavior, not CSS breakpoints | `Playwright.Devices["iPhone 15"]` profiles in `ui-test-author/playwright` — out of scope here |
+| **Real mobile UX (touch, DPR, UA)** | Device behavior, not CSS breakpoints | `Playwright.Devices[...]` per fixture — `ui-test-author/playwright/references/emulation-and-mobile-web.md` |
 
 ## Stack
 
-- .NET 8, **Microsoft.Playwright.NUnit** (`PageTest`), NUnit
-- **The app's own breakpoint source** — mirrored into one `Breakpoints` class (the analogue of language-testing's
-  supported-culture list). Where the app defines them:
+- .NET 10 (8/9 supported — match the project's TFM), NUnit 4, **Microsoft.Playwright.NUnit** at the pins in the
+  **Versions** table of `qa/dotnet/skills/ui-test-author/playwright/SKILL.md` (this skill pins nothing).
+- Every fixture **derives from N1's `BaseTest`** (`ui-test-author/playwright/assets/BaseTest.cs`): `BASE_URL`,
+  failure evidence, `ParallelScope.Self`. No second base class, no `Playwright.CreateAsync()`.
+- **Viewport per fixture, in `ContextOptions()`**, amending `base.ContextOptions()`
+  (`emulation-and-mobile-web.md` §3). A row matrix is **fixture parameters**: one `[TestFixture(width, …)]` per
+  row, the constructor takes the row, and `ContextOptions()` sets that row's width. `SetViewportSizeAsync`
+  happens only inside live-resize tests, through `Layout.ResizeToAsync`.
+- A fixed height (`Breakpoints.Height`, 720) — width is the variable under test.
+- **The app's own breakpoint source**, mirrored into one `Breakpoints` class:
 
 | App uses | Breakpoints live in | Defaults (px) |
 |---|---|---|
@@ -62,186 +67,222 @@ pixel-level diffing is `visual-regression`'s job and pairs with this skill, it d
 | Tailwind | `tailwind.config` `screens` / v4 `@theme` | sm 640 · md 768 · lg 1024 · xl 1280 · 2xl 1536 |
 | Bespoke CSS | the tokens file / one `breakpoints.css` | whatever it says — read it |
 
-- Viewport set via `ContextOptions()` per fixture (one fixture/parameterization per viewport class) — never
-  `SetViewportSizeAsync` scattered per test except in explicit live-resize tests
-- A fixed height per class (e.g. 720) — width is the variable under test; height only matters for fold checks
+## Page objects and the `Layout` helper
+
+`Breakpoints`, the `AppShellPage` and `ProductsPage` page objects and the `Layout` helper are in
+[`references/page-objects-and-layout.md`](references/page-objects-and-layout.md). Page objects expose variant
+intent (`_appShell.Nav(NavVariant.Hamburger)` → `GetByTestId("Nav.Hamburger")`), never boxes. `Layout`
+**measures and returns numbers** — `ColumnCountAsync(cards)`, `HorizontalOverflowAsync()`,
+`LeftEdgeSpreadAsync(...)`, `OverlapDepthAsync(a, b)` — plus `ResizeToAsync(width)` for live-resize tests. The
+test asserts; a helper never does.
+
+## Boundary rows — the core pattern
+
+Each row states the width **and** what that width must show. The test body has no branch: NUnit builds one
+fixture instance per `[TestFixture]` row, `ContextOptions()` gives each instance its viewport, and the row's
+expected values are the assertion's operands.
 
 ```csharp
-// Responsive/Breakpoints.cs — the ONE place widths live (mirror of the app's source)
-public static class Breakpoints
+using Example.UiTests.Pages;
+using Example.UiTests.Support;
+using Microsoft.Playwright;
+using NUnit.Framework;
+
+namespace Example.UiTests.Tests;
+
+[TestFixture(Breakpoints.Md - 1, NavVariant.Hamburger, NavVariant.Desktop)]
+[TestFixture(Breakpoints.Md, NavVariant.Desktop, NavVariant.Hamburger)]
+public class NavBoundaryTests(int width, NavVariant shown, NavVariant hidden) : BaseTest
 {
-    public const int Sm = 640;
-    public const int Md = 768;
-    public const int Lg = 1024;
-    public const int Xl = 1280;
+    private AppShellPage _appShell = null!;
 
-    /// <summary>BVA pair for a min-width breakpoint: last width BELOW it, first width AT it.</summary>
-    public static IEnumerable<int> Around(int bp) => new[] { bp - 1, bp };
-}
-```
-
-## Boundary matrix — the core pattern
-
-```csharp
-[TestFixture]
-public class NavResponsiveTests : PageTest
-{
-    private static IEnumerable<int> AroundMd => Breakpoints.Around(Breakpoints.Md);
-
-    [TestCaseSource(nameof(AroundMd))]
-    public async Task Should_Render_Correct_Nav_Variant_At_Md_Boundary(int width)
+    public override BrowserNewContextOptions ContextOptions()
     {
-        await Page.SetViewportSizeAsync(width, 720);
-        await Page.GotoAsync("/");                          // fresh load AT the width (idea #4)
-
-        var fullNav = Page.GetByTestId("nav-desktop");
-        var hamburger = Page.GetByTestId("nav-hamburger");
-        if (width < Breakpoints.Md)
-        {
-            await Expect(hamburger).ToBeVisibleAsync();
-            await Expect(fullNav).ToBeHiddenAsync();        // the swap is exclusive — assert BOTH sides
-        }
-        else
-        {
-            await Expect(fullNav).ToBeVisibleAsync();
-            await Expect(hamburger).ToBeHiddenAsync();
-        }
-    }
-}
-```
-
-## Geometry assertions — alignment, reflow, overlap
-
-```csharp
-// Responsive/LayoutAssert.cs — reusable structural helpers
-public static class LayoutAssert
-{
-    private const float Tolerance = 1f; // sub-pixel rendering — never assert exact coordinates
-
-    public static async Task LeftAlignedAsync(params ILocator[] locators)
-    {
-        var boxes = await Task.WhenAll(locators.Select(l => l.BoundingBoxAsync()));
-        var reference = boxes[0]!.X;
-        Assert.That(boxes.Select(b => b!.X), Is.All.EqualTo(reference).Within(Tolerance),
-            "elements must share a left edge");
+        var options = base.ContextOptions();
+        options.ViewportSize = Breakpoints.Viewport(width);
+        return options;
     }
 
-    /// <summary>Cards grouped into visual rows by Y → column count of the first row.</summary>
-    public static async Task<int> ColumnCountAsync(ILocator cards)
-    {
-        var boxes = await Task.WhenAll((await cards.AllAsync()).Select(c => c.BoundingBoxAsync()));
-        var firstRowY = boxes.Min(b => b!.Y);
-        return boxes.Count(b => Math.Abs(b!.Y - firstRowY) <= Tolerance);
-    }
+    [SetUp]
+    public void CreatePages() => _appShell = new AppShellPage(Page);
 
-    public static async Task NoHorizontalOverflowAsync(IPage page)
+    [Test]
+    public async Task Should_ShowOnlyTheRowsNavVariant_When_LoadedAtTheRowsWidth()
     {
-        var overflow = await page.EvaluateAsync<int>(
-            "() => document.documentElement.scrollWidth - document.documentElement.clientWidth");
-        Assert.That(overflow, Is.LessThanOrEqualTo(0), "page must not scroll horizontally");
-    }
+        await _appShell.OpenAsync();
 
-    public static async Task NoOverlapAsync(ILocator a, ILocator b)
-    {
-        var (ba, bb) = (await a.BoundingBoxAsync(), await b.BoundingBoxAsync());
-        var separated =
-            ba!.X + ba.Width <= bb!.X + Tolerance || bb.X + bb.Width <= ba.X + Tolerance ||
-            ba.Y + ba.Height <= bb.Y + Tolerance || bb.Y + bb.Height <= ba.Y + Tolerance;
-        Assert.That(separated, Is.True, "elements must not overlap");
+        await Expect(_appShell.Nav(shown), $"{shown} navigation at {width}px").ToBeVisibleAsync();
+        await Expect(_appShell.Nav(hidden), $"{hidden} navigation at {width}px").ToBeHiddenAsync();
     }
 }
 ```
 
+- The swap is exclusive, so both sides are asserted: one behaviour, two expectations.
+- `Breakpoints.Md - 1` is a constant expression, so it is legal in an attribute; so are the enum values.
+- Each row is its own NUnit fixture, so `BaseTest`'s `ParallelScope.Self` runs the rows in parallel, each with
+  its own page. Never `ParallelScope.All` with a `[TestCase]` per width that resizes the page.
+- `BaseTest` names failure evidence `<Class>.<Test>`, the same for every row: two rows failing in one run write
+  the same files in `playwright-artifacts/`. The NUnit result, the TRX and Allure keep the rows apart (the
+  fixture name carries its arguments), and the assertion message names the width.
+
+## Geometry rows — reflow, overflow, alignment
+
 ```csharp
-// grid reflow across breakpoints, one data-driven body
-[TestCase(Breakpoints.Md - 1, 1)]
-[TestCase(Breakpoints.Md, 2)]
-[TestCase(Breakpoints.Lg - 1, 2)]
-[TestCase(Breakpoints.Lg, 3)]
-public async Task Should_Reflow_Product_Grid_At_Boundary(int width, int expectedColumns)
+[TestFixture(Breakpoints.Md - 1, 1)]
+[TestFixture(Breakpoints.Md, 2)]
+[TestFixture(Breakpoints.Lg - 1, 2)]
+[TestFixture(Breakpoints.Lg, 3)]
+public class ProductGridBoundaryTests(int width, int columns) : BaseTest
 {
-    await Page.SetViewportSizeAsync(width, 720);
-    await Page.GotoAsync("/products");
-    var cards = Page.GetByTestId("product-card");
-    await Expect(cards.First).ToBeVisibleAsync();
-    Assert.That(await LayoutAssert.ColumnCountAsync(cards), Is.EqualTo(expectedColumns));
-    await LayoutAssert.NoHorizontalOverflowAsync(Page);
+    private ProductsPage _productsPage = null!;
+    private Layout _layout = null!;
+
+    public override BrowserNewContextOptions ContextOptions()
+    {
+        var options = base.ContextOptions();
+        options.ViewportSize = Breakpoints.Viewport(width);
+        return options;
+    }
+
+    [SetUp]
+    public void CreatePages()
+    {
+        _productsPage = new ProductsPage(Page);
+        _layout = new Layout(Page);
+    }
+
+    [Test]
+    public async Task Should_ShowTheRowsColumnCount_When_LoadedAtTheRowsWidth()
+    {
+        await _productsPage.OpenAsync();
+
+        Assert.That(await _layout.ColumnCountAsync(_productsPage.Cards), Is.EqualTo(columns), $"columns at {width}px");
+    }
+
+    [Test]
+    public async Task Should_NotScrollHorizontally_When_LoadedAtTheRowsWidth()
+    {
+        await _productsPage.OpenAsync();
+
+        Assert.That(await _layout.HorizontalOverflowAsync(), Is.Zero, $"horizontal overflow at {width}px");
+    }
+
+    [Test]
+    public async Task Should_KeepFiltersBesideResults_When_LoadedAtTheRowsWidth()
+    {
+        await _productsPage.OpenAsync();
+
+        Assert.That(await _layout.OverlapDepthAsync(_productsPage.Filters, _productsPage.Results),
+            Is.LessThanOrEqualTo(Layout.TolerancePx), $"filters overlapping results at {width}px");
+    }
 }
 ```
+
+- `_productsPage.OpenAsync()` returns once the first card is visible, and the viewport is fixed for the whole
+  test, so the measurement reads a settled layout. The message carries the row into the failure.
+- Alignment is the same shape:
+  `Assert.That(await _layout.LeftEdgeSpreadAsync(form.Title, form.Email, form.Submit), Is.LessThanOrEqualTo(Layout.TolerancePx))`.
 
 ## Live resize — the JS-breakpoint code path (idea #4)
 
 ```csharp
-[Test]
-public async Task Should_Swap_Nav_On_Live_Shrink_And_Restore_On_Grow()
+public class NavLiveResizeTests : BaseTest
 {
-    await Page.SetViewportSizeAsync(Breakpoints.Lg, 720);
-    await Page.GotoAsync("/");
-    await Expect(Page.GetByTestId("nav-desktop")).ToBeVisibleAsync();
+    private AppShellPage _appShell = null!;
+    private Layout _layout = null!;
 
-    await Page.SetViewportSizeAsync(Breakpoints.Md - 1, 720);              // shrink across the boundary
-    await Expect(Page.GetByTestId("nav-hamburger")).ToBeVisibleAsync();    // web-first assertion waits — no sleep
-    await Expect(Page.GetByTestId("nav-desktop")).ToBeHiddenAsync();
+    public override BrowserNewContextOptions ContextOptions()
+    {
+        var options = base.ContextOptions();
+        options.ViewportSize = Breakpoints.Viewport(Breakpoints.Lg);
+        return options;
+    }
 
-    await Page.SetViewportSizeAsync(Breakpoints.Lg, 720);                  // and back — resize listeners leak state
-    await Expect(Page.GetByTestId("nav-desktop")).ToBeVisibleAsync();
+    [SetUp]
+    public void CreatePages()
+    {
+        _appShell = new AppShellPage(Page);
+        _layout = new Layout(Page);
+    }
+
+    [Test]
+    public async Task Should_ShowHamburgerNav_When_WindowShrinksBelowMd()
+    {
+        await _appShell.OpenAsync();
+
+        await _layout.ResizeToAsync(Breakpoints.Md - 1);
+
+        await Expect(_appShell.Nav(NavVariant.Hamburger)).ToBeVisibleAsync();
+        await Expect(_appShell.Nav(NavVariant.Desktop)).ToBeHiddenAsync();
+    }
+
+    [Test]
+    public async Task Should_RestoreDesktopNav_When_WindowGrowsBackToLg()
+    {
+        await _appShell.OpenAsync();
+        await _layout.ResizeToAsync(Breakpoints.Md - 1);
+        await Expect(_appShell.Nav(NavVariant.Hamburger)).ToBeVisibleAsync();
+
+        await _layout.ResizeToAsync(Breakpoints.Lg);
+
+        await Expect(_appShell.Nav(NavVariant.Desktop)).ToBeVisibleAsync();
+        await Expect(_appShell.Nav(NavVariant.Hamburger)).ToBeHiddenAsync();
+    }
 }
 ```
 
-> **Blazor SUT note:** MudBlazor's `MudHidden`/`MudBreakpointProvider` and hand-rolled `matchMedia` interop are
-> exactly the JS-path logic idea #4 targets — under **static SSR** the C# breakpoint services don't run at all
-> (CSS-only responsiveness must hold), and under interactive render modes the live-resize test proves the interop
-> actually re-fires. Test both a fresh load per boundary width *and* a live resize on interactive surfaces.
+The grow test asserts the shrink first only as its arrange step's completion signal — the web-first assertion
+waits for the collapsed state before the resize back. After a resize, measure geometry only once a web-first
+assertion on the new variant has passed.
+
+**Blazor SUT:** under static SSR, MudBlazor's breakpoint services and `matchMedia` interop don't run (CSS alone
+must hold); under interactive render modes, the live-resize test proves the interop re-fires. Test both.
 
 ## Anti-patterns
 
-- **Hardcoding magic widths per test** (`SetViewportSizeAsync(768, …)` scattered everywhere). Rots when design
-  moves the breakpoint. *Fix:* one `Breakpoints` class mirroring the app's source; tests reference it.
-- **Testing only representative widths** (375/768/1440) and skipping the boundaries. Misses every off-by-one in
-  the media queries — the exact bug class responsive testing exists for. *Fix:* bp−1 and bp per breakpoint.
-- **Asserting absolute coordinates** (`Assert.That(box.X, Is.EqualTo(312))`). Breaks on any content, font, or
-  scrollbar change. *Fix:* relative geometry — equal edges, containment, non-overlap, with a 1px tolerance.
-- **Asserting only one side of a variant swap.** The hamburger being visible doesn't prove the desktop nav is
-  gone — both can render (duplicate DOM bugs). *Fix:* assert visible **and** the counterpart hidden.
-- **`Task.Delay`/`WaitForTimeoutAsync` after a resize.** Flaky and slow. *Fix:* `Expect(...)` web-first
-  assertions auto-wait; for raw geometry, poll the measurement (`Assert.ThatAsync` / retry on condition).
-- **Screenshot-only responsive coverage.** A pixel diff says *something* changed, not *what rule* broke, and it
-  drowns in noise per viewport. *Fix:* structural assertions here; `visual-regression` per viewport as the
-  complement.
-- **Testing breakpoints with device profiles** (`Devices["iPhone 15"]`). Profiles pin DPR/UA/touch — great for
-  mobile UX, wrong for isolating a CSS boundary (the width isn't at your breakpoint). *Fix:* plain viewport for
-  boundaries; device profiles for device journeys.
-- **Only testing shrink.** Grow paths (mobile → desktop) exercise different listener/state code and un-collapse
-  logic. *Fix:* resize both directions in the live-resize test.
+- **Magic widths per test**, or **only representative widths** (375/768/1440). Rots when design moves the
+  breakpoint, and misses every off-by-one. *Fix:* one `Breakpoints` class; bp−1 and bp rows per breakpoint.
+- **`if (width < Breakpoints.Md)` in the test body.** A branch hides which expectation ran. *Fix:* the row names
+  what it must show (`shown` / `hidden`, `columns`).
+- **`Page.SetViewportSizeAsync` at the top of every test.** Resizes a page loaded at another width — the
+  live-resize path, not a fresh load — and calls `Page` from the test. *Fix:* the viewport per fixture in
+  `ContextOptions()`; `ResizeToAsync` only in live-resize tests.
+- **Asserting absolute coordinates** (`box.X == 312`), or **only one side of a swap** (both can render). *Fix:*
+  relative geometry with `Layout.TolerancePx`; the shown variant visible **and** the other hidden.
+- **`Task.Delay`/`WaitForTimeoutAsync` after a resize.** *Fix:* web-first assertions auto-wait; measure after one.
+- **Testing breakpoints with device profiles** (`Playwright.Devices["iPhone 13"]`). Profiles pin DPR/UA/touch.
+  *Fix:* plain viewport for boundaries; device fixtures for device journeys.
+- **Only testing shrink**, or a private `Playwright.CreateAsync()`. *Fix:* resize both directions; derive from
+  `BaseTest`.
 
 ## Rules (hard constraints)
 
 - **The breakpoint list lives in one `Breakpoints` class that mirrors the app's own definition** — no width
   literals in tests.
-- **Every breakpoint gets a bp−1 / bp boundary pair** (fresh load at each); representative widths are additive.
-- **Assertions are structural**: variant swap (both sides), relative bounding-box geometry with tolerance,
-  overflow math. Never absolute coordinates; never pixel diffs (that's `visual-regression`).
-- **No horizontal overflow at any tested width** — the cheapest, highest-value responsive assertion; run it in
-  every responsive test.
+- **Every breakpoint gets a bp−1 / bp row pair** (fresh load at each); representative widths are additive.
+- **Rows carry the expectation** (`shown`/`hidden`, `columns`); a test body never branches on the width.
+- **Assertions are structural**: variant swap (both sides), relative geometry with tolerance, overflow `0`.
+  Never absolute coordinates; never pixel diffs (that's `visual-regression`).
+- **No horizontal overflow at any tested width** — the cheapest, highest-value responsive assertion.
 - **Live-resize tests exist for resize-reachable surfaces**, resize both directions, and use web-first
   assertions — no `Task.Delay`.
-- **Viewport is configured** (fixture `ContextOptions` / `TestCaseSource` widths), not improvised — except the
-  deliberate resize inside live-resize tests.
-- One logical assertion per test; data-driven iteration over breakpoints (`TestCaseSource`, per
-  `qa-data-driven-testing-dotnet`), never copy-pasted tests; nullable reference types enabled; async all the way.
+- **Viewport per fixture in `ContextOptions()`**, amending `base.ContextOptions()`; rows are `[TestFixture]`
+  parameters — except the deliberate resize inside live-resize tests. Tests reach the page only through page
+  objects and `Layout`.
+- Every fixture derives from `BaseTest`; parallelism stays `ParallelScope.Self`; test names `Should_X_When_Y`;
+  test ids PascalCase dot-separated (`Nav.Desktop`, `ProductGrid.Card`).
 
 ## Cross-references
 
-- `qa-responsive-testing-typescript` · `qa-responsive-testing-java` — sibling stacks (Playwright Test ·
-  Playwright-Java + TestNG); same four ideas, different APIs.
-- `qa-ui-test-writer-playwright-dotnet` — base fixture/POM conventions; responsive adds the width dimension.
-  Page objects expose variant intent (`Navigation.IsCollapsedAsync()`), not boxes — geometry helpers live beside
-  the tests.
+- `qa-responsive-testing-typescript` · `qa-responsive-testing-java` — sibling stacks; same four ideas.
+- `qa-ui-test-writer-playwright-dotnet` — `BaseTest`, `ContextOptions()` (`lifecycle.md` §4) and the emulation
+  reference (`emulation-and-mobile-web.md`: viewport per fixture, device profiles, media features).
 - `qa-visual-regression-dotnet` — the pixel complement: one baseline per viewport, after the structural checks
   pass.
-- `qa-accessibility-testing-dotnet` — reflow/zoom (WCAG 1.4.10) and touch-target sizes at mobile widths overlap
-  with a11y scans; run them at the same widths.
-- `qa-data-driven-testing-dotnet` — the breakpoint matrix is its row-binding pattern applied to widths.
+- `qa-accessibility-testing-dotnet` — reflow/zoom (WCAG 1.4.10) and touch targets, at the same widths.
+- `qa-data-driven-testing-dotnet` — the row pattern; here rows are fixture parameters (each needs its own
+  context options).
 - `frontend/blazor/skills/responsive-design` (FE peer) — the dev-side skill that defines the breakpoint contract
-  this skill reads; its testid rules (variant-suffixed `nav-desktop`/`nav-hamburger`) are what make the variant
-  swap assertable.
+  this skill reads. Its variant-suffixed test ids are what make the swap assertable; in this library's
+  PascalCase form they are `Nav.Desktop` / `Nav.Hamburger` (CLAUDE.md). `frontend/react/skills/responsive-design`
+  is the React peer of the same contract.

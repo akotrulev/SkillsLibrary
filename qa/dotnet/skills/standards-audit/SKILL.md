@@ -25,16 +25,16 @@ If the user actually wants the app audited, say so and name the right skill inst
 
 By default this audits the **whole suite**. The user may narrow it to one automation discipline instead — useful when a repo owns multiple suites (e.g. an API project and a Playwright project) and only one changed:
 
-| Scope | Sections in play | Sections skipped | D/E/F/I rows skipped |
+| Scope | Sections in play | Sections skipped | Tagged rows skipped |
 |---|---|---|---|
-| `api` | A, B, C, G, H, I, J\*, K, L, M, N | E, F | D3, D5, D6, D9, D10 **[PW]** · D4 **[Sel]** · D12 **[Appium]** · I3 **[PW]** |
-| `ui` | A, B, C, E, F, G, I, J\*, K, L, M, N | H | D12 **[Appium]** · E14 **[Appium]** — keep D3–D6/D9/D10 **[PW/Sel]**, I3 **[PW]** |
-| `mobile` | A, B, C, E, F, G, I, J\*, K, L, M, N | H | D3–D6, D9, D10 **[PW/Sel]** · E13 **[Sel]**, F2 **[PW]**, F7 **[Sel]** — keep D12 **[Appium]**, E14 **[Appium]** |
+| `api` | A, B, C, G, H, I, J\*, K, L, M, N | E, F | A9, A10, D3, D5, D6, D9, D10, I3, I11–I13, K9, M16 **[PW]** · D4 **[Sel]** · D12 **[Appium]** |
+| `ui` | A, B, C, E, F, G, I, J\*, K, L, M, N | H | D12 **[Appium]** · E14 **[Appium]** — keep every **[PW/Sel]** row |
+| `mobile` | A, B, C, E, F, G, I, J\*, K, L, M, N | H | A9, A10, D3, D5, D6, D9, D10, E16, E17, F2, I3, I11–I13, K9, M16 **[PW]** · D4, E13, F7 **[Sel]** — keep D12 **[Appium]**, E14 **[Appium]** |
 | `all` (default) | every section the Step-1 probes find applicable | — | — |
 
 \* **J is discipline-independent** — it stays gated by its own probe (does the suite touch a DB/broker/storage/mail), in every scope. An API, UI, or mobile suite can all do external verification.
 
-A, B, C, G, I (minus the tagged rows above), K, L, M, N are **universal** — every scope runs them, because suite hygiene, secrets, reporting, and CI wiring aren't discipline-specific.
+A, B, C, G, I, K, L, M, N (minus the tagged rows above) are **universal** — every scope runs them, because suite hygiene, secrets, reporting, and CI wiring aren't discipline-specific.
 
 **State the resolved scope** in the start announcement and as the first line of the report's **§2 Scope & coverage** (`**Discipline scope:** api | ui | mobile | all`), ahead of the `In scope: <dirs>` line. If the task doesn't say, ask: *"Audit the whole suite, or just API / UI / mobile automation?"*
 
@@ -54,7 +54,7 @@ Report path: `docs/audits/<NNN>-qa-dotnet-conformance-r<N>.md`.
 
 | Job | Owner |
 |---|---|
-| Review one test file / one diff, inline severity table | [`api-test-author/review`](../api-test-author/review/SKILL.md) · [`ui-test-author/review`](../ui-test-author/review/SKILL.md) · [`bdd-reviewer`](../bdd-reviewer/SKILL.md) — this skill **rolls their checklists up to suite scale** |
+| Review one test file / one diff, inline severity table | [`api-test-author/review`](../api-test-author/review/SKILL.md) (+ [`api-test-author/playwright`](../api-test-author/playwright/SKILL.md) § Review) · [`ui-test-author/review`](../ui-test-author/review/SKILL.md) · [`bdd-reviewer`](../bdd-reviewer/SKILL.md) — this skill **rolls their checklists up to suite scale** |
 | Audit the **application** the suite tests | **peers** `be-dotnet-standards-audit` · `fe-blazor`/`fe-react` conformance audits |
 | Test-case design coverage from requirements | **peer** `qa-test-case-designer` (+ `qa/manual/requirements-breakdown`) — section N reports *suite shape*, not requirement coverage |
 | Filing a defect the suite exposed | `qa/manual/bug-report-writer` |
@@ -74,7 +74,7 @@ rg -n "LevelOfParallelism|Parallelizable" --glob '*.cs'
 git log --oneline -5
 ```
 
-Record: **runner** (NUnit primary / xUnit / MSTest) · **TFM + `Nullable`** · **UI driver** (Playwright .NET / Selenium 4 / Appium 2 / none) · **API stack** (RestSharp / Playwright `APIRequestContext` / HttpClient) · **assertion library** (`Assert.That` house rule vs FluentAssertions) · **BDD** (Reqnroll present?) · **Testcontainers / DB access?** · **Allure wired?** · **CI host** · **parallelism settings** · **perf tool** (NBomber?).
+Record: **runner** (NUnit primary / xUnit / MSTest) · **TFM + `Nullable`** · **UI driver** (Playwright .NET and its version / Selenium 4 / Appium / none) · **API stack** (RestSharp / Playwright `APIRequestContext` / HttpClient) · **assertion library** (`Assert.That` house rule vs FluentAssertions) · **BDD** (Reqnroll present?) · **Testcontainers / DB access?** · **Allure wired?** · **CI host** · **parallelism settings** · **perf tool** (NBomber?).
 
 **The lane gates every finding.** Do not flag a suite for lacking a tool it doesn't use (no Playwright → the Playwright rows are N/A, not violations), and judge assertion/DI style against the **project's** stated convention where one exists (a documented FluentAssertions house style is a deviation to note, not a finding). A suite on xUnit is not "wrong" for lacking NUnit attributes — map the rule to the runner in use and say so.
 

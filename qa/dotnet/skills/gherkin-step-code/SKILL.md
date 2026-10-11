@@ -3,16 +3,16 @@ name: qa-gherkin-step-code-dotnet
 description: Use when turning Gherkin `.feature` files into Reqnroll step definitions in C#/.NET, implementing each step against existing Page Object Models. Triggers "generate Reqnroll step definitions for these features", "bind these Gherkin steps to our page objects", "split the step definitions by domain". Not for writing the `.feature` files (`feature-file-writer`), scaffolding Reqnroll DI/hooks (`bdd-project-scaffold`), or building page objects (`page-object-design`).
 ---
 
-# Reqnroll Step Bindings + POM Implementation (C# / .NET 8)
+# Reqnroll Step Bindings + POM Implementation (C# / .NET 10)
 
-Parses `.feature` files (and the **Step Catalog** from `feature-file-writer`) into Reqnroll `[Binding]` classes, **split by domain**, with parameterized Cucumber-Expression steps, and **implements each step by calling existing page-object intent methods**. Assertions live in `Then` steps; page objects only act and expose `ExpectLoadedAsync()`. The Reqnroll project, DI container, hooks, and `ScenarioState` already exist (from `bdd-project-scaffold`).
+Parses `.feature` files (and the **Step Catalog** from `feature-file-writer`) into Reqnroll `[Binding]` classes, **split by domain**, with parameterized Cucumber-Expression steps, and **implements each step by calling existing page-object intent methods**. `Given`/`When` steps act; **only `Then` steps assert**, on the locators the page objects expose. The Reqnroll project, DI container, hooks, failure evidence and `ScenarioState` already exist (from `bdd-project-scaffold`).
 
 ## Stack
 
-- Reqnroll.NUnit 3.3.x + `Reqnroll.Microsoft.Extensions.DependencyInjection`
-- C# / .NET 8, `async Task` step methods (Playwright web) or sync (Appium mobile)
-- Page objects from the existing UI/mobile project (`qa/dotnet/skills/page-object-design`)
-- `Microsoft.Playwright.Assertions` (web-first `Expect`) for `Then` steps
+- Reqnroll.NUnit 3.3.x + `Reqnroll.Microsoft.Extensions.DependencyInjection`, at the pins in `bdd-project-scaffold`
+- C# / .NET 10 (8/9 supported — match the host project), `async Task` step methods (Playwright web) or sync (Appium mobile)
+- Page objects from the existing UI/mobile project (`qa/dotnet/skills/ui-test-author/playwright` assets, `qa/dotnet/skills/page-object-design`) — `LoginPage`, `HomePage`, `LoginPage.Credentials`
+- `Microsoft.Playwright.Assertions` (web-first `Expect`) for `Then` steps, at the Playwright version in `qa/dotnet/skills/ui-test-author/playwright`'s **Versions** table
 
 ## When to use
 
@@ -48,11 +48,11 @@ Default to Cucumber Expressions (`{string}`, `{int}`, `{word}`, `{decimal}`, enu
 
 ### 3. Inject shared state via the constructor — never new up the page or use the context bag
 
-Step classes take `ScenarioState` (the scoped DI object from the scaffold) in the constructor. The page/driver was created in the `[BeforeScenario]` hook; steps reach page objects through `_state`. No static fields, no `ScenarioContext["key"]` bag for typed state.
+Step classes take `ScenarioState` (the scoped DI object from the scaffold) in the constructor. The page/driver was created in the `[BeforeScenario]` hook; steps reach page objects through `state`. No static fields, no `ScenarioContext["key"]` bag for typed state.
 
 ### 4. Steps are thin; mechanics live in page objects
 
-A step body is one or two page-object calls. **No selectors, no `IPage.Locator(...)`, no waits in step definitions** — those belong in the page object. `Given`/`When` act; `Then` asserts with web-first `Expect(...)`. Page objects never assert (except `ExpectLoadedAsync()`).
+A step body is one or two page-object calls. **No selectors, no `IPage.Locator(...)`, no waits in step definitions** — those belong in the page object. `Given`/`When` act and **never assert** — not even a "page loaded" check, which would make the precondition a hidden assertion; `Then` asserts with web-first `Expect(...)` on a locator the page object exposes (`state.Home.Greeting`). Page objects never assert. No `try`/`catch` in a step.
 
 ### 5. Async all the way (web)
 
@@ -71,53 +71,52 @@ If a step needs a page object/method that doesn't exist, stop and build it via `
 ### Step definition — `StepDefinitions/AuthenticationSteps.cs` (Playwright/web)
 
 ```csharp
-using Microsoft.Playwright;
+using Example.BddTests.Support;
+using Example.UiTests.Pages;
+using Example.UiTests.Support;
 using Reqnroll;
-using Bdd.Tests.Support;
 using static Microsoft.Playwright.Assertions;
 
-namespace Bdd.Tests.StepDefinitions;
+namespace Example.BddTests.StepDefinitions;
 
 [Binding]
-public sealed class AuthenticationSteps
+public sealed class AuthenticationSteps(ScenarioState state)
 {
-    private readonly ScenarioState _state;
-
-    public AuthenticationSteps(ScenarioState state) => _state = state;
-
     [Given("I am on the login page")]
-    public async Task GivenIAmOnTheLoginPage()
-    {
-        await _state.Login.GoToAsync();
-        await _state.Login.ExpectLoadedAsync();
-    }
+    public async Task GivenIAmOnTheLoginPage() => await state.Login.GoToAsync();
 
     [When("I sign in as a registered customer")]
-    public async Task WhenISignInAsRegisteredCustomer() =>
-        await _state.Login.SignInAsync(
-            Environment.GetEnvironmentVariable("E2E_USER")!,
-            Environment.GetEnvironmentVariable("E2E_PASSWORD")!);
+    public async Task WhenISignInAsARegisteredCustomer() =>
+        await state.Login.SignInAsync(new LoginPage.Credentials(BaseTest.RequiredEnv("E2E_USER"), BaseTest.RequiredEnv("E2E_PASSWORD")));
 
     [When("I sign in with email {string} and password {string}")]
     public async Task WhenISignInWith(string email, string password) =>
-        await _state.Login.SignInAsync(email, password);
+        await state.Login.SignInAsync(new LoginPage.Credentials(email, password));
 
-    [Then("I land on the dashboard")]
-    public async Task ThenILandOnTheDashboard() =>
-        await _state.Dashboard.ExpectLoadedAsync();
+    [Then("I see my greeting")]
+    public async Task ThenISeeMyGreeting() =>
+        await Expect(state.Home.Greeting).ToBeVisibleAsync();
 
     [Then("I see the error {string}")]
     public async Task ThenISeeTheError(string message) =>
-        await Expect(_state.Login.ErrorBanner).ToHaveTextAsync(message);
+        await Expect(state.Login.Error).ToHaveTextAsync(message);
 }
 ```
+
+- `LoginPage`, `HomePage` and `LoginPage.Credentials` are the UI project's page objects
+  (`qa/dotnet/skills/ui-test-author/playwright/assets/`), reached through the `ProjectReference` the scaffold
+  adds — never copied into the BDD project.
+- Credentials come from `BaseTest.RequiredEnv`, which fails naming the missing variable; never
+  `Environment.GetEnvironmentVariable(...)!`.
+- The `Given` only navigates. Whether the page is ready is the `When`'s concern — Playwright's actions wait for
+  their element — and whether the outcome happened is the `Then`'s.
 
 ### Custom parameter type — `Support/Transforms.cs`
 
 ```csharp
 using Reqnroll;
 
-namespace Bdd.Tests.Support;
+namespace Example.BddTests.Support;
 
 [Binding]
 public sealed class Transforms
@@ -134,7 +133,7 @@ Same shape, but step methods are synchronous and call the Appium page objects:
 ```csharp
 [When("I sign in with email {string} and password {string}")]
 public void WhenISignInWith(string email, string password) =>
-    _state.LoginScreen.Login(email, password);
+    state.LoginScreen.Login(email, password);
 ```
 
 ## Procedure
@@ -154,8 +153,10 @@ public void WhenISignInWith(string email, string password) =>
 - `IPage.Locator(...)`, CSS, or waits inside step definitions — promote to a page object.
 - `new LoginPage(page)` or static state inside a step — inject `ScenarioState`.
 - `ScenarioContext["x"]` string-bag for typed state — use DI.
-- Assertions inside page-object actions, or `When`/`Given` doing assertions.
-- `Thread.Sleep` / `WaitForTimeoutAsync` / `.Result` / `.Wait()`.
+- Assertions inside page-object actions, or `When`/`Given` doing assertions (a "page loaded" `Expect` in a `Given` included).
+- `Thread.Sleep` / `WaitForTimeoutAsync` / `.Result` / `.Wait()`; `NetworkIdle`, `Force = true` or `WaitForNavigationAsync` in a page object a step calls.
+- An `OR` in a `Then` (`Regex("Saved|Success")`, `Is.AnyOf(...)`) — one expected outcome per step.
+- `try`/`catch` in a step or a hook.
 - Regex step expressions where a Cucumber Expression reads cleaner.
 - Implementing Cleanup as Gherkin/steps instead of an `[AfterScenario]` hook.
 

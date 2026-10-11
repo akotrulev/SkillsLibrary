@@ -64,7 +64,17 @@ trace/video/screenshot (D70) loaded by `qa-api-java` Step 3, locator actions, Aw
 without HttpComponents (`BaseApiTest` kept, D71), page objects on `Page` in the step glue, and a Cucumber 1.63
 scaffold with one discovery mechanism and `BaseTest`-shaped evidence hooks (D72); `qa/_shared/python-web-testing`
 rewritten to web-first waits on `playwright==1.63.0`; the six D12 files on allure-java 3.0.
-Next: N4. Built but unverified: no asset, workflow or pipeline has been
+N4 landed 2026-10-11: the twelve remaining .NET skills on `BaseTest` and 1.63 — responsive widths and locales as
+NUnit fixture parameters amending `ContextOptions()` (D73), WebSocket frames through `Page.WebSocket` +
+`FrameReceived` + a `TaskCompletionSource` and the fixed-event-set SSE mock, grid fixtures overriding
+`BrowserTest.ConnectOptionsAsync()` in their own `TestCategory=grid` run (D74), a token body for `AuthSetup` at
+`BASE_URL`'s origin (D77), a `PlaywrightTest`-based API base with per-test contexts and a § Review that
+`qa-api-dotnet` Step 4 now loads (D75), an uptime probe catching only `PlaywrightException` and keeping
+trace/video/screenshot, run from the pinned image and loaded by `qa-api-dotnet` Step 3 (D76), locator actions and a
+`Regex` URL assertion, a `Given` that only acts, a Reqnroll scaffold on `Microsoft.Playwright.NUnit` 1.63.0 with
+`BaseTest`-shaped `[AfterScenario]` evidence (D78), the C-07 BDD review rows, and a conformance checklist whose E11
+matches R8 (D79) with fifteen new or reworded rows (A9, A10, E16, E17, F10, F11, I11–I13, K9, L4, L9, L14, M15, M16).
+Next: M1. Built but unverified: no asset, workflow or pipeline has been
 compiled or run (G1 does that; D24's TS config import, the Java build on Allure Gradle plugin 4.3.0, the .NET
 build on NUnit3TestAdapter 6.3.1 / Test SDK 18.10.1, `dorny/test-reporter`'s `java-junit` parse, the trace CLI
 through the Java driver (D39) and through `playwright.ps1` (D43), the .NET shard script against a real
@@ -86,7 +96,13 @@ stopping on a routed `204` (D64) rest on the research and memory — none of the
 web access either, so TestNG's per-instance `@BeforeClass` under `@Factory` (D68), the `IAlterSuiteListener`
 thread-count override and BrowserStack's `getSessionDetails` (D69), the Playwright jar's `pom.properties`,
 `StorageStateOptions.setIndexedDB`, Cucumber's `@After(order = 0)` running last and `Allure.attachment(String,
-String)` rest on sources read from memory — of J4's files only `BaseTest.java` is a compiled asset).
+String)` rest on sources read from memory — of J4's files only `BaseTest.java` is a compiled asset; N4 had no web
+access either, so `BrowserTest.ConnectOptionsAsync()`'s signature (D74), `IPage.WebSocket` firing before a socket's
+first frame, `IWebSocketRoute.Send` being synchronous, `SseItem<T>.EventId`, every .NET `Expect` failure being a
+`PlaywrightException` (D76), `TelemetryClient.FlushAsync(CancellationToken)`, Reqnroll's after-hook order, the
+`Allure.Reqnroll` package and `Allure.ReqnrollPlugin` assembly names (D78), Reqnroll 3.3.4 being current and
+`Assert.MultipleAsync` rest on memory — none of N4's files is a compiled asset, and the .NET UI gate filter does not
+yet exclude `TestCategory=grid` — G1 reconciles that with the `visual` / `lighthouse` exclusions).
 Planned 2026-10-10. The research behind it is committed with this plan:
 `docs/research/003-qa-playwright-appium/` (5 files). So is the read-only audit:
 `docs/audits/003-qa-playwright-appium/` (4 files). All open questions were answered on 2026-10-10:
@@ -97,7 +113,7 @@ Planned 2026-10-10. The research behind it is committed with this plan:
 - A Maestro lane is added (X1).
 - The newest Appium client majors are primary.
 
-Next: N4 (H1, the user's, blocks no task). The cost is 19 agent sessions on the subscription, each started by the user
+Next: M1 (H1, the user's, blocks no task). The cost is 19 agent sessions on the subscription, each started by the user
 from Plan Queue. Nothing else is metered.
 
 ## 1. What already exists, and what is missing
@@ -1105,6 +1121,83 @@ and a Gherkin parse in teardown), or take the file name without `.feature` (chos
 `Sign in with a wrong password` → `login.Sign_in_with_a_wrong_password.{png,zip,webm}`. **Cost:** a feature file
 named differently from its `Feature:` title shows the file name in the evidence; Scenario Outline rows share one
 name, so two failing rows overwrite each other's files on disk (Allure keeps each).
+
+**D73 — A .NET row matrix whose rows need different context options is a set of NUnit fixture parameters
+(N4, 2026-10-11).** Responsive widths and supported locales are rows, but `BaseTest` builds the context from
+`ContextOptions()`, and `aN` C-11 bans `SetViewportSizeAsync` per test outside live-resize specs. Readings: a
+`[TestCase]` per width that reads `TestContext.CurrentContext.Test.Arguments` inside `ContextOptions()` (implicit
+coupling to argument positions), a `[TestCase]` plus `SetViewportSizeAsync` in the test (the live-resize path and a
+raw `Page` call), a subclass per row (a file per width), or `[TestFixture(width, …)]` / `[TestFixtureSource]` rows
+passed to a primary constructor that `ContextOptions()` reads (chosen — the same shape the plan prescribed for
+locales). Each row is its own fixture, so the rows run in parallel under `ParallelScope.Self`. **Cost:**
+`BaseTest.EvidenceName()` is `<Class>.<Test>`, the same for every row, so two rows failing in one run write the same
+files in `playwright-artifacts/` (and may race); the NUnit result, TRX and Allure keep the rows apart. Putting the
+fixture arguments into `EvidenceName()` is an edit to N1's asset, outside N4's paths — a later plan's call.
+
+**D74 — A .NET cloud-grid run overrides `BrowserTest.ConnectOptionsAsync()` on a grid fixture derived from the test
+class it reruns, in its own `TestCategory=grid` run (N4, 2026-10-11).** `BrowserTest` registers the browser per
+worker, and the first fixture on a worker decides launch-or-connect for every later one (D32). Readings: a `GRID`
+environment switch inside `BaseTest` (vendor code in the one lifecycle, and N1's asset), a separate `UiTests.Grid`
+project (no filter, but the root `AuthSetup` would not cover it), or a `[Category("grid")]` subclass in
+`Example.UiTests.Grid` whose `ConnectOptionsAsync()` returns BrowserStack's flat-caps endpoint, run with
+`--filter TestCategory=grid -- NUnit.NumberOfTestWorkers=$GRID_CONCURRENCY` (chosen). The session cap is the worker
+count (one session per worker). The verdict is marked per test from the grid fixture's `[TearDown]`: a failed test
+makes the worker dispose its browser, so a session's only failure is always its last mark. The tunnel's
+`[SetUpFixture]` sits in the grid namespace, so a local run never opens it. **Cost:** the local/PR UI filter must
+exclude `TestCategory!=grid` (G1's D60 seam line now names it); `ConnectOptionsAsync()`'s signature
+`Task<(string, BrowserTypeConnectOptions?)?>` is from memory of the v1.63 sources — N4 had no web access — and no
+asset compiles it; `getSessionDetails` / `browser_url` remain BrowserStack spellings from T4/J4.
+
+**D75 — The .NET Playwright API base derives from `PlaywrightTest` and opens its identity contexts per test (N4,
+2026-10-11).** The old `BasePlaywrightApiTest` called `Playwright.CreateAsync()` in `[OneTimeSetUp]` — E11's
+blocker shape. Readings: keep a per-fixture `IPlaywright` as Java's D71 does (E11 would fire on the library's own
+recipe), or `BasePlaywrightApiTest : PlaywrightTest` — the driver from `PlaywrightTest`'s `[SetUp]`, contexts built in
+the fixture's `[SetUp]` from a cached token and disposed in the base `[TearDown]`, `ParallelScope.Self` (chosen; the
+playwright.dev .NET API-testing sample has the same shape). **Cost:** a context per test instead of per fixture
+(cheap — no browser), and the .NET and Java API bases now differ in lifecycle; the fixture moved to a new
+`references/templates.md` to keep SKILL.md ≤ 16,000 chars. The skill's test names moved to `Should_X_When_Y` (R4),
+so it no longer shares the RestSharp writer's `[Action]_[Condition]_[ExpectedOutcome]` shape.
+
+**D76 — The .NET uptime probe catches only `PlaywrightException`, keeps evidence through `ProbeEvidence`, and runs
+as a scheduled container from the pinned image (N4, 2026-10-11).** `aN` D-20 found a blanket `catch (Exception)`, no
+evidence, `ct` unused, no `BaseURL` and no word on installing browsers. Readings: catch `Exception` and log (what
+D-20 rejects), no catch (a failed assertion would skip recording its message), or catch the one named exception
+every Playwright action timeout and `Expect` failure throws in .NET, record the verdict in `finally`, and keep trace,
+screenshot and video on failure in `BaseTest`'s order under `SYNTHETIC_EVIDENCE_DIR` (chosen, as J4's D70). Host:
+a Timer Function on Consumption (cannot launch Chromium), or an Azure Container Apps job on a cron trigger built
+`FROM mcr.microsoft.com/playwright/dotnet:v1.63.0-noble`, with a Premium/Dedicated custom container as the
+alternative (chosen). **Cost:** a trace and video recorded on every run; the volume and its 14-day lifecycle are the
+deployment's to provide; that every .NET `Expect` failure is a `PlaywrightException` is read from memory of the
+assertion implementation, not run.
+
+**D77 — The token-seeded signed-in state is a second body of N1's `AuthSetup`, not a new class (N4, 2026-10-11).**
+`aN` D-21 found a product URL, a second path convention and no storage-state limits. Readings: a separate
+`TokenAuthSetup` writing its own file (two state paths, and fixtures would have to choose), or the same root-namespace
+`AuthSetup` class with the same `UserState` (`<WorkDirectory>/auth-user.json`), its body minting a token, building
+the context with `StorageState` at `BASE_URL`'s origin, checking the greeting, then saving (chosen). **Cost:** a
+project picks one body; the storage key is the app's and must be looked up; the device-code poll moved from a
+catch-and-continue on `ErrorApiException` to reading the JSON `error` field over `HttpClient`.
+
+**D78 — The Reqnroll scaffold references `Microsoft.Playwright.NUnit`, shares the UI runsettings, and closes after
+every other hook (N4, 2026-10-11).** Readings for the package: `Microsoft.Playwright` directly (a new
+`PackageVersion` line, and the hook would hardcode the browser), or `Microsoft.Playwright.NUnit` 1.63.0, already
+pinned by N1, bringing `PlaywrightSettingsProvider` (chosen; `RunSettingsFilePath` points at
+`../UiTests/ui.runsettings`). Readings for the browser's lifetime: per test run (a static field or a container
+lifetime the hooks cannot see) or per scenario (chosen, as J4's Cucumber hooks). The closing hook is
+`[AfterScenario(Order = 20_000)]` so cleanup hooks at the default 10,000 run first; `using` / `await using` close the
+driver and browser without a `try`/`finally`. Reporting is `Allure.Reqnroll` 2.15.0 with `Allure.ReqnrollPlugin`
+in `reqnroll.json`'s `bindingAssemblies`. **Cost:** a browser launch per scenario; Reqnroll's ascending order for
+after-hooks, the `Allure.Reqnroll` package id, its plugin assembly name and Reqnroll 3.3.4 being current are from
+memory, unverified (no web access); none of these files is an asset G1 compiles.
+
+**D79 — The checklist's E11 keeps one exception and lists the documented owners it does not reach (N4,
+2026-10-11).** E11 flags `Playwright.CreateAsync()` in a `[Test]`, `[SetUp]` or a fixture's `[OneTimeSetUp]`, with
+the root `AuthSetup` as the one exception (review/SKILL.md). Five recipes in the library own their lifecycle without
+that call or outside a test fixture: the Reqnroll hook (D78), the Lighthouse `PlaywrightTest` fixture (D61), the
+API base (D75), a grid fixture (D74) and the uptime probe (D76). Readings: widen the exception list inside E11's
+row (it stops reading as one rule), or keep E11 as review/SKILL.md words it and add a note under section E naming
+those five as not E11 findings (chosen). **Cost:** an auditor must read the note; a new lifecycle owner elsewhere
+needs a line there.
 
 ## Answered questions (2026-10-10)
 
@@ -2392,6 +2485,97 @@ teach.
   marker (R2 wording) (C-03).
 - Change ".NET 8" labels to .NET 10 in these files.
 - **Not in N4:** mobile rows of the checklist (M3).
+- **As built (2026-10-11):** the twelve .NET skills teach Microsoft.Playwright 1.63 on N1's `BaseTest` (or, where a
+  fixture cannot be one, on a documented owner — D75, D78, D76) with every Playwright version deferred to the
+  writer's Versions table ("this skill pins nothing"), except `bdd-project-scaffold`, which names
+  `Microsoft.Playwright.NUnit` 1.63.0 under CPM. Every touched sample is `Should_X_When_Y`, comment-free, reaches the
+  page through page objects or helpers built in `[SetUp]`, and carries no `try`/`catch`/`finally` in a test; the
+  remaining catches are named-exception helpers (`AwaitFrame`, the probe's `PlaywrightException`), and the one
+  `try`/`finally` releases a semaphore in `CachedTokenProvider`. Every title says .NET 10; the two ".NET 8" hits left
+  are version notes (realtime's .NET 8 SSE line parser). What differed from the plan:
+  - `responsive-testing`: rows are `[TestFixture(width, shown, hidden)]` parameters with the viewport amended in
+    `ContextOptions()` (D73); `Breakpoints` (const, `Viewport(width)`), `AppShellPage`/`NavVariant`, `ProductsPage`
+    and a measuring `Layout` moved to a new `references/page-objects-and-layout.md` (SKILL.md 15,957 chars);
+    `Nav.Desktop` / `Nav.Hamburger` / `ProductGrid.Card`. The Blazor FE peer still writes kebab-case ids (not this
+    plan's file).
+  - `realtime-stream-testing`: OBSERVE is `SocketWatch` — `Page.WebSocket` subscribed before the action, each
+    matching socket's `FrameReceived` completing a `TaskCompletionSource`, awaited with `WaitAsync(timeout)`; a
+    `ClosedAsync` twin and an `IsClosed` property assertion. MOCK is `MockStreams` (`frame.Text == "subscribe"`), and
+    browser SSE a `Times = 1` event-set route over a `204` route (T4's D64). `AwaitFrame`, the probes, SignalR,
+    the gotchas, the page objects and the layout moved to `references/details.md` (SKILL.md 25,170 bytes → 15,963
+    chars); the probes' empty catches became channel completion with the pump's exception; `SseItem<T>.EventId`
+    replaced the nonexistent `ReconnectionId`.
+  - `browser-cloud-setup`: D74 — `GridConnection` / `GridSession` / `CheckoutTestsOnBrowserStack`, the worker
+    count as the session cap (the old `LevelOfParallelism(5)` and a guard that guarded nothing are gone), the
+    tunnel `[SetUpFixture]` scoped to `Example.UiTests.Grid`, `BUILD_NAME` and `SAUCE_REGION` required,
+    `client.playwrightVersion` from the loaded assembly; the Appium half defers its pin to `ui-test-author/appium`.
+  - `test-login-tokens`: D77 — `AuthSetup`'s token body at `BASE_URL`'s origin and `AuthSetup.UserState`; a
+    storage-state table (cookies, localStorage, IndexedDB with `IndexedDB = true` [1.51], never `sessionStorage`,
+    never the Auth0 SPA SDK's in-memory cache); `AUTH0_DOMAIN`/`AUTH0_AUDIENCE` required (no product defaults);
+    the device-code poll reads the JSON error over `HttpClient`.
+  - `language-testing`: `[TestFixture("de-DE", "Europe/Berlin")]` / `[TestFixtureSource(SupportedLocales.All)]` on
+    `BaseTest` with `Locale` and `TimezoneId` amended (D73); `Page.Clock.SetFixedTimeAsync` before load; the RTL
+    test measures `AppShellPage.NavigationSideAsync()` instead of a vacuous `ToHaveCSSAsync(".+")`; the
+    literal-asserting `NumberFormatInfo` test was dropped (it contradicted idea #2). Page objects, pseudo-loc,
+    coverage, ICU and the matrix moved to `references/details.md` (SKILL.md 20,046 bytes → 14,906 chars).
+  - `data-driven-testing`: the parallel-rows section and the rules exclude Playwright/Appium fixtures and send
+    context-per-row matrices to fixture parameters; samples renamed and de-commented. SKILL.md is 19,630 chars — a
+    size violation that predates this plan; N4 did not rewrite the file.
+  - `production-uptime-checks`: D76 — `CheckoutJourneyProbe` reusing N1's `LoginPage` with `BaseURL` from
+    `SYNTHETIC_BASE_URL`, `ProbeEvidence`, `ProbeSettings`, a Container Apps job `Program.cs` and a
+    `v1.63.0-noble` Dockerfile; Bicep (now with a `healthUrl` param), alerts, secrets and a worked example moved to a
+    new `references/details.md` (SKILL.md 21,567 bytes → 15,345 chars). Wired into `qa-api-dotnet.md` Step 3 with the
+    exit gate `az deployment group what-if` → no unexpected change; Step 4 now also loads
+    `api-test-author/playwright` § Review when Step 2 used it (C-15).
+  - `inhouse-framework-conventions`: `PageBase.Locator(key)` fields built in the constructor, `ILocator
+    ErrorMessage`, `ToHaveURLAsync(new Regex("/dashboard$"))`, tests on `BaseTest`, PascalCase ids in the screen
+    JSON, evidence from `BaseTest`, the anti-example block a table; the builder rule now matches its code.
+  - `api-test-author/playwright`: D75; cleanup is `[TearDown]` only with `Assert.MultipleAsync` over the recorded
+    ids (C-06); a § Review table (C-15); a request-context options table (`FailOnStatusCode` off [1.51],
+    `MaxRedirects` [1.52], the 1.64 cookie line); fixture + create/round-trip test in a new `references/templates.md`.
+  - `gherkin-step-code`: `Given` only navigates (C-13); steps take N1's `LoginPage` / `HomePage` /
+    `LoginPage.Credentials` through `ScenarioState`; credentials through `BaseTest.RequiredEnv`; namespace
+    `Example.BddTests`.
+  - `bdd-project-scaffold`: D78 — CPM additions (Reqnroll 3.3.4 ×2, `Allure.Reqnroll` 2.15.0), a versionless
+    `Bdd.Tests.csproj` on the UI runsettings, `ScenarioState.Open(page)`, and `BrowserHooks` per
+    `evidence-capture` § Reqnroll scenarios in a new `references/hooks.md`.
+  - `bdd-reviewer`: C-07 rows — one expected condition, no `try`/`catch` in steps or hooks, no `NetworkIdle` /
+    `Force` / deprecated waits / page-level selector APIs / URL globs, runsettings browser + `BASE_URL`, failure
+    evidence; severities follow.
+  - `standards-audit`: E11 reworded to R8 (D79, with the non-finding note under section E); L4 now trace +
+    screenshot + video in `playwright-artifacts/`; L9 matches D7 (`[Retry(2)]` on a documented hotspot,
+    `[Retry(1)]` a no-op). New rows: **A9** nonexistent APIs (the fabricated screenshot API, `GetPathAsync`, 1.64-only
+    calls, `AxeBuilder`, `AddTestAttachment`, async Eyes, `PostDataJSON` as a property, `WaitForEventAsync`,
+    `IsClosed()`), **A10** package/image version mismatch, **E16** `ContextOptions()` + `ParallelScope.Self` +
+    runsettings launch options, **E17** root-namespace `AuthSetup`, **F10** the TODO marker, **F11** PascalCase ids,
+    **I11** `ToHaveURLAsync` glob, **I12** visual = screenshot + comparer (`ProjectPaths.Root`, pinned image,
+    `Eyes.Playwright`), **I13** `RunAxe` at WCAG 2.2 AA (no `pwa`), **K9** missing `BaseURL`, **L14** Allure calls
+    where a result exists, **M15** `Playwright.Shard` / `NUnit.Where` instead of class filters, **M16**
+    `visual`/`lighthouse`/`grid` out of the PR gate. SKILL.md's scope table lists every tagged row per scope.
+  - Names assigned: `Breakpoints`, `NavVariant`, `AppShellPage`, `ProductsPage`, `Layout`; `SocketWatch`,
+    `MockStreams`, `DashboardPage`, `StatusPage`, `NotificationsPage`, `WebSocketProbe.CloseAsync`, `SseEvent`;
+    `GridCredentials`, `GridConnection`, `GridSession`, `DriverSessionStatus`, `GridTunnel`, `GridTunnelSetup`,
+    category `grid`; `SupportedLocales`, `LandingPage`, `CartPage`, `OrderPage`, `CheckoutPage`, `ScreenSide`;
+    `CheckoutJourneyProbe`, `ProbeEvidence`, `ProbeSettings`, env `SYNTHETIC_BASE_URL` / `SYNTHETIC_USER` /
+    `SYNTHETIC_PASSWORD` / `SYNTHETIC_EVIDENCE_DIR` / `REGION_NAME`; `Example.BddTests`, `ScenarioState.Open`,
+    `BrowserHooks`; `AUTH0_DEVICE_CLIENT_ID`.
+  - **Unverified** (no web access — WebFetch was denied; nothing compiled or run): `BrowserTest.ConnectOptionsAsync()`'s
+    exact signature; `IPage.WebSocket` firing before the socket's first frame and `IWebSocket.Close` being an
+    `EventHandler<IWebSocket>`; `IWebSocketRoute.Send` being synchronous; `EventSource` stopping on a routed `204`
+    (T4's D64 risk); `SseItem<T>.EventId` (.NET 10); every .NET `Expect` failure being a `PlaywrightException`;
+    `TelemetryClient.FlushAsync(CancellationToken)`; Reqnroll's after-hook order, `Allure.Reqnroll` /
+    `Allure.ReqnrollPlugin` and Reqnroll 3.3.4 being current; `Assert.MultipleAsync`; ICU4N's `PluralRules.Select`;
+    BrowserStack's `getSessionDetails`. None of N4's files is an asset G1 compiles.
+  - Self-check (author hygiene, not the gate): a scripted scan of the 23 touched files' code blocks finds no
+    fabricated screenshot API, `Playwright.Shard`, TODO marker, floating Playwright version, inline comment or glob
+    `ToHaveURLAsync`; every backticked skill name resolves and every relative `.md` link exists.
+  - Proof: `responsive-testing/SKILL.md:93`; `realtime-stream-testing/SKILL.md:110,186,214,228`;
+    `browser-cloud-setup/references/details.md:104,107,317`; `test-login-tokens/references/details.md:207,234,235`;
+    `language-testing/SKILL.md:54,107,118,239`; `data-driven-testing/SKILL.md:251,266`;
+    `production-uptime-checks/SKILL.md:112,128,142`; `qa/dotnet/agents/qa-api-dotnet.md:76,77`;
+    `inhouse-framework-conventions/SKILL.md:111,150`; `api-test-author/playwright/SKILL.md:80,159,178,193`;
+    `gherkin-step-code/SKILL.md:86`; `bdd-project-scaffold/SKILL.md:27,81`, `references/hooks.md:56,61`;
+    `bdd-reviewer/SKILL.md:49,53,55`; `standards-audit/references/conformance-checklist.md:35,36,114,119,120,122,146,147,204-206,245,257,262,267,290,291`.
 
 ### M1 — TypeScript mobile: Appium 3, WebdriverIO 10, Appium evidence, scoped components
 
@@ -2701,100 +2885,9 @@ Run them in order, one session each, opened from Plan Queue. Each block is compl
 | X1 | `docs` | `general-purpose` | M1, S1, T2 | ~130k |
 | G1 | `docs` | `general-purpose` | all | ~145k |
 
-Landed: T1, J1, N1, T2, J2, N2, A1, T3 (2026-10-10), J3, N3, T4, J4 (2026-10-11). Every other block is live.
+Landed: T1, J1, N1, T2, J2, N2, A1, T3 (2026-10-10), J3, N3, T4, J4, N4 (2026-10-11). Every other block is live.
 
 ---
-
-### N4 — .NET: the remaining Playwright-bearing skills and the `standards-audit` checklist (general-purpose, docs)
-
-````
-You are `general-purpose`. Task N4 of docs/plans/003-qa-playwright-appium-upgrade.md: move the remaining
-Playwright-bearing .NET skills onto N1's BaseTest and 1.63 with no R1–R6 break. Wire
-production-uptime-checks into qa-api-dotnet, and make the standards-audit checklist audit for exactly
-what N1–N3 teach.
-
-Read, in this order:
-1. CLAUDE.md.
-2. The plan: §2.1, §2.2, §4 (R8), §5.1, D58–D62, task N3's As-built note, task N4, "Close-out — every task".
-3. Under qa/dotnet/skills/: responsive-testing, realtime-stream-testing, browser-cloud-setup (+ references),
-   test-login-tokens (+ references), language-testing (+ references), data-driven-testing,
-   production-uptime-checks, inhouse-framework-conventions, api-test-author/playwright, gherkin-step-code,
-   bdd-project-scaffold, bdd-reviewer, standards-audit (SKILL.md + references/conformance-checklist.md).
-4. qa/dotnet/skills/ui-test-author/playwright/assets/BaseTest.cs and references/lifecycle.md §1–§5, §7;
-   qa/dotnet/skills/ui-test-author/review/SKILL.md (the Playwright rows the checklist must agree with);
-   qa/dotnet/skills/evidence-capture/SKILL.md.
-5. docs/audits/003-qa-playwright-appium/dotnet.md rows C-03, C-06, C-07, C-11, C-13, C-15, D-04, D-07,
-   D-08, D-10, D-12, D-20, D-21, D-28, §1 row 49.
-
-Build:
-- responsive: D-10, C-11.
-- realtime: ws.FrameReceived + TaskCompletionSource; IsClosed is a property; frame.Text.
-- browser-cloud: no Playwright.CreateAsync in [SetUp].
-- test-login-tokens: D-21.
-- language: PageTest + ContextOptions() + fixture parameters.
-- data-driven: no ParallelScope.All for Playwright.
-- production-uptime: D-20 and evidence on failure; add it to Step 3 of qa/dotnet/agents/qa-api-dotnet.md.
-- inhouse: ToHaveURLAsync(new Regex(...)); locators.
-- api-test-author/playwright: no try/finally; the review link.
-- gherkin-step-code: C-13.
-- bdd-project-scaffold: 1.63.0 under CPM; [AfterScenario] evidence per evidence-capture.
-- bdd-reviewer: the C-07 rows.
-- conformance-checklist: E11 matches R8. Add rows for a missing BaseURL, a ToHaveURLAsync glob,
-  Playwright.Shard, the fabricated screenshot API, a package/image version mismatch, and a TODO comment
-  on a fallback locator. Table rows may name these; only code blocks are checked. Leave the mobile rows
-  for M3.
-- ".NET 8" labels → .NET 10 in these files.
-
-Traps:
-- ToHaveURLAsync(string) is an exact match after BaseURL resolution. Globs work only in WaitForURLAsync.
-- IWebSocket has events plus IsClosed and Url only; there is no WaitForEventAsync.
-- N1's BaseTest is `Example.UiTests.Support.BaseTest : PageTest`. A sample derives from it and amends
-  `base.ContextOptions()` (which already carries BaseURL from BASE_URL, the video folder, Locale en-US and
-  ColorScheme Light); returning `new()` drops all of it. `BaseTest.RequiredEnv(name)` reads a variable.
-- Launch options are per worker and come from the .runsettings (D32): a `LaunchOptionsAsync()` override is
-  not reliable. A cloud browser (browser-cloud) is `BrowserTest.ConnectOptionsAsync()` — also per worker,
-  so a cloud run is its own `dotnet test` run with its own .runsettings or environment.
-- E11 (`Playwright.CreateAsync()` in a [Test], a [SetUp] or a fixture's [OneTimeSetUp]) is a blocker with
-  one exception: the root-namespace `AuthSetup` [SetUpFixture], as in review/SKILL.md.
-- language-testing: `ContextTest` defaults Locale to en-US, so a locale fixture sets `options.Locale` and
-  `options.TimezoneId` on the base options, with `[TestFixture("de-DE", "Europe/Berlin")]` parameters.
-- N1's Directory.Packages.props pins Microsoft.Playwright.NUnit only. A Reqnroll project that references
-  Microsoft.Playwright directly adds `<PackageVersion Include="Microsoft.Playwright" Version="1.63.0" />`;
-  bdd-project-scaffold's `..\UiTests\UiTests.csproj` reference already matches N1's project name.
-- bdd-project-scaffold's `[AfterScenario]` evidence is fixed by qa/dotnet/skills/evidence-capture/SKILL.md
-  ("Reqnroll scenarios"): the same three files in `<WorkDirectory>/playwright-artifacts/`, named
-  `<Feature>.<Scenario>` with every character outside `[A-Za-z0-9._-]` replaced by `_`, kept when
-  `ScenarioContext.TestError` is set; the order is BaseTest's (stop the trace to a path, full-page
-  screenshot, close the context, `SaveAsAsync`, always `DeleteAsync`), with no catch (D31), and raw videos
-  go to `<WorkDirectory>/playwright-videos/`. Each file is attached with `TestContext.AddTestAttachment` and
-  `AllureApi.AddAttachment(name, type, path)`, the trace as `application/vnd.allure.playwright-trace`. A
-  Reqnroll hook class does not derive from BaseTest, so BaseTest's protected helpers (D42) are not available
-  to it; the hook writes its own sanitizer.
-- conformance-checklist: the CI shard row is "`Playwright.Shard` or an `NUnit.Where` modulo predicate
-  instead of class filters" — the class-filter mechanism is qa/cicd/dotnet/skills/ci-pipelines/SKILL.md
-  (D44). A retry row matches D7 as N2 wrote it in flaky-test-quarantine: `[Retry(2)]` (two attempts) only
-  on a documented hotspot; `[Retry(1)]` is a no-op.
-- conformance-checklist and N3: the checklist audits what N3's three skills teach, verified at source in N3:
-  `Deque.AxeCore.Playwright` 4.13.0 has **no `AxeBuilder`** (`page.RunAxe(...)` / `locator.RunAxe(...)`, never
-  `RunAxeLegacy`); `AllureApi.AddTestAttachment` does not exist, and `AddLink` / `AddAttachment` record nothing in
-  `[OneTimeTearDown]` (`AddGlobalAttachment` there); the Applitools package is `Eyes.Playwright` and its API is
-  synchronous (`Open`, `Check`, `CloseAsync()` returning void — no `OpenAsync`/`CheckAsync`, nothing to await);
-  `IRequest.PostDataJSON()` is a method; a CDP `OnEvent` payload is `JsonElement?`; a visual comparison is
-  `Locator.ScreenshotAsync` + `Codeuctivity.ImageSharpCompare` + `AllureApi.AddScreenDiff`, with `visual` and
-  `lighthouse` categories kept out of the PR gate. The rule "a UI fixture derives from BaseTest" has one documented
-  exception: a Lighthouse fixture on `PlaywrightTest` that calls `Playwright.Chromium.LaunchPersistentContextAsync`
-  (D61) — that is not `Playwright.CreateAsync()`, so E11 does not fire on it. A sample that needs the project folder
-  uses `Support/ProjectPaths.Root` (D59), not a path relative to `bin/`.
-- realtime: if the .NET skill mocks SSE in the browser with a `RouteAsync` / `FulfillAsync` "chunked"
-  `text/event-stream` body, it is the defect T4 fixed in TS (`aTS` D13, D64): the body arrives at once and
-  `EventSource` reconnects and replays it. Teach a fixed event set (a `Times = 1` route over a route answering
-  `204`) for rendering, and a real SSE server for timing and `Last-Event-ID`.
-
-Gate: none. This plan gates once, in G1. Do not run any build, test or check script.
-
-Commit: `docs(qa-dotnet): remaining Playwright skills on BaseTest/1.63, conformance checklist aligned (003 N4)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
 
 ### M1 — TypeScript mobile: Appium 3, WebdriverIO 10, Appium evidence, scoped components (general-purpose, docs)
 
@@ -2975,7 +3068,11 @@ Build:
 - chromedriver_autodownload is a server flag, not a capability. Fix the scrollGesture wording. Device Farm
   has no .NET Appium type. Teardown, not try/finally. The upload implemented, or it throws. Devices from
   configuration. No raw FindElement in a page. L22, L23.
-- Checklist: only the mobile rows. Replace the removed APIs, and add an evidence-on-failure row.
+- Checklist: only the mobile rows. Replace the removed APIs, and add an evidence-on-failure row. N4 reworded E11,
+  L4 and L9 and appended A9, A10, E16, E17, F10, F11, I11–I13, K9, L14, M15 and M16 (all **[PW]**/[NUnit] or
+  untagged); the mobile rows it left you are C4, D12, E14 and K6. A new row takes the next free number in its
+  section (E18, L15, …), carries **[Appium]**, and is added to standards-audit/SKILL.md's scope table, which now
+  lists every tagged row per scope (`mobile` keeps **[Appium]** rows; `api` and `ui` skip them).
 - ".NET 8" → .NET 10. R2, scoped components (element-scoped finds first), the ladder, </content> removal.
 - evidence-capture/references/appium.md; replace the placeholder line.
 - qa-mobile-dotnet.md: tools: = core + §5.3; prerequisites; Step 1 wiring; Step 0 says Appium 3;
@@ -3180,8 +3277,9 @@ Build:
   playwright-snapshots.md §8). In qa/cicd/dotnet/skills/ci-pipelines/references/{github-actions,azure-pipelines}.md
   the "Running in the pinned image" bullet still describes a container job; point each at that §8 for the visual
   job (one line each; GitLab's job already runs in the image — leave it). In all three .NET CI references the UI
-  gate filter `($SHARD_FILTER)&TestCategory!=Flaky` becomes `…&TestCategory!=Flaky&TestCategory!=visual&TestCategory!=lighthouse`,
-  so the nightly-only categories N3 introduced stay out of the PR gate.
+  gate filter `($SHARD_FILTER)&TestCategory!=Flaky` becomes `…&TestCategory!=Flaky&TestCategory!=visual&TestCategory!=lighthouse&TestCategory!=grid`,
+  so the nightly-only categories N3 introduced and N4's cloud-grid fixtures (D74, their own `TestCategory=grid` run)
+  stay out of the PR gate.
 - J4 seams: J1's `BaseTest.java` now has `protected Browser newBrowser(Playwright)` (D67) — the Java build
   compiles it with the rest. `qa/java/skills/ui-test-author/playwright/SKILL.md:83` still says "the two hooks";
   lifecycle.md §3 now has three — make it "the hooks" (J4 could edit only `BaseTest.java` and lifecycle.md). `data-driven-testing/SKILL.md` is 21,967 chars, a pre-existing size violation J4 did

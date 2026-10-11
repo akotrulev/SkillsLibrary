@@ -3,7 +3,7 @@ name: qa-data-driven-testing-dotnet
 description: Use when one .NET 10 (8-9) / NUnit test body must run against many rows of data from an external file. Triggers "run this test for every row in a CSV / spreadsheet", "data-drive these tests from a JSON file", "parameterize this NUnit test with external test data". Not for building the objects themselves (`test-data-builder`).
 ---
 
-# Data-Driven Testing (.NET 8 / NUnit)
+# Data-Driven Testing (.NET 10 / NUnit)
 
 > **Ported from the canonical `qa-data-driven-testing-java`.** The four ideas and the section order are
 > identical; only the runner API (NUnit `[TestCaseSource]` instead of TestNG `@DataProvider`) and the
@@ -51,7 +51,7 @@ body never knows which one fed it.
 
 ## Stack
 
-- .NET 8, NUnit 4.x — `[TestCaseSource]` / `[TestCase]` / `[Values]`; nullable reference types on
+- .NET 10 (8/9 supported — match the TFM), NUnit 4.x — `[TestCaseSource]` / `[TestCase]` / `[Values]`; nullable reference types on
 - `CsvHelper` — CSV → typed records (`GetRecords<T>()`, `ClassMap` for header mapping); RFC-4180 quoting
 - `System.Text.Json` — JSON → typed list (`JsonSerializer.Deserialize`, source-gen optional)
 - `ClosedXML` — Excel `.xlsx` reading (`XLWorkbook`), no Office install, no COM (the modern POI-equivalent)
@@ -81,10 +81,8 @@ fits CLAUDE.md's prefer-immutability rule; CsvHelper and `System.Text.Json` both
 ```csharp
 namespace Acme.Tests.Data;
 
-// CsvHelper maps by header name (see the ClassMap); System.Text.Json maps by property name; ClosedXML sets per column.
 public sealed record TaxCase(string Region, long AmountCents, long ExpectedTaxCents)
 {
-    // Name the case so a failing row reports the INPUT that broke it, not "TestCaseSource(2)".
     public override string ToString() => $"{Region} @ {AmountCents}¢ → {ExpectedTaxCents}¢";
 }
 ```
@@ -97,25 +95,24 @@ named cases and computed data.
 ```csharp
 public class TaxCalculatorTests
 {
-    private readonly TaxCalculator _calc = new();   // constructor-style init; no shared mutable state
+    private readonly TaxCalculator _calc = new();
 
-    [TestCase("DE",    10_000L, 1_900L)]   // 19% VAT
-    [TestCase("US-OR",  5_000L,     0L)]   // no sales tax
-    [TestCase("GB",     2_000L,   400L)]   // 20% VAT
-    public void Should_ComputeTax_For_Region(string region, long amountCents, long expectedTaxCents)
+    [TestCase("DE", 10_000L, 1_900L)]
+    [TestCase("US-OR", 5_000L, 0L)]
+    [TestCase("GB", 2_000L, 400L)]
+    public void Should_ReturnTheRegionsTax_When_AnAmountIsTaxed(string region, long amountCents, long expectedTaxCents)
     {
-        Assert.That(_calc.TaxFor(region, amountCents), Is.EqualTo(expectedTaxCents));  // one logical assertion
+        Assert.That(_calc.TaxFor(region, amountCents), Is.EqualTo(expectedTaxCents));
     }
 
-    // The source-method form: name each case so a failure says WHICH input broke.
     private static IEnumerable<TestCaseData> InlineCases()
     {
-        yield return new TestCaseData(new TaxCase("DE",    10_000L, 1_900L)).SetName("DE 19% VAT");
-        yield return new TestCaseData(new TaxCase("US-OR",  5_000L,     0L)).SetName("Oregon no tax");
+        yield return new TestCaseData(new TaxCase("DE", 10_000L, 1_900L)).SetName("DE 19% VAT");
+        yield return new TestCaseData(new TaxCase("US-OR", 5_000L, 0L)).SetName("Oregon no tax");
     }
 
     [TestCaseSource(nameof(InlineCases))]
-    public void Should_ComputeTax_From_Source(TaxCase tc)
+    public void Should_ReturnTheRowsTax_When_TheRowComesFromASource(TaxCase tc)
         => Assert.That(_calc.TaxFor(tc.Region, tc.AmountCents), Is.EqualTo(tc.ExpectedTaxCents));
 }
 ```
@@ -165,17 +162,19 @@ public static class TaxCaseSources
     public static IEnumerable<TestCaseData> CsvTaxCases()
     {
         using var reader = new StreamReader(Path.Combine(DataDir, "tax-cases.csv"));
-        using var csv = new CsvReader(reader, CultureInfo.InvariantCulture);   // invariant: '.' decimals, no locale surprises
+        using var csv = new CsvReader(reader, CultureInfo.InvariantCulture);
         csv.Context.RegisterClassMap<TaxCaseMap>();
-        foreach (var tc in csv.GetRecords<TaxCase>())                          // typed rows, RFC-4180 quoting handled
-            yield return new TestCaseData(tc).SetName($"CSV: {tc}");           // tc.ToString() names the row
+        foreach (var tc in csv.GetRecords<TaxCase>())
+        {
+            yield return new TestCaseData(tc).SetName($"CSV: {tc}");
+        }
     }
 }
 ```
 
 ```csharp
 [TestCaseSource(typeof(TaxCaseSources), nameof(TaxCaseSources.CsvTaxCases))]
-public void Should_ComputeTax_From_Csv(TaxCase tc)          // one typed arg, not three loose columns
+public void Should_ReturnTheRowsTax_When_TheRowComesFromCsv(TaxCase tc)
     => Assert.That(_calc.TaxFor(tc.Region, tc.AmountCents), Is.EqualTo(tc.ExpectedTaxCents));
 ```
 
@@ -204,8 +203,10 @@ public static IEnumerable<TestCaseData> JsonCheckoutCases()
 {
     var json = File.ReadAllText(Path.Combine(DataDir, "checkout-cases.json"));
     var opts = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-    foreach (var c in JsonSerializer.Deserialize<List<CheckoutCase>>(json, opts)!)   // nested → typed
-        yield return new TestCaseData(c).SetName($"JSON: {c.Name}");                 // Name is the row label
+    foreach (var c in JsonSerializer.Deserialize<List<CheckoutCase>>(json, opts)!)
+    {
+        yield return new TestCaseData(c).SetName($"JSON: {c.Name}");
+    }
 }
 ```
 
@@ -223,12 +224,11 @@ public static IEnumerable<TestCaseData> ExcelPricingCases()
 {
     using var workbook = new XLWorkbook(Path.Combine(DataDir, "pricing-cases.xlsx"));
     var sheet = workbook.Worksheet(1);
-    // RowsUsed() skips trailing blanks; Skip(1) drops the header row.
     foreach (var row in sheet.RowsUsed().Skip(1))
     {
         var tc = new TaxCase(
-            Region:           row.Cell(1).GetString(),
-            AmountCents:      (long)row.Cell(2).GetDouble(),     // Excel numbers are doubles
+            Region: row.Cell(1).GetString(),
+            AmountCents: (long)row.Cell(2).GetDouble(),
             ExpectedTaxCents: (long)row.Cell(3).GetDouble());
         yield return new TestCaseData(tc).SetName($"XLSX: {tc}");
     }
@@ -248,19 +248,31 @@ A `[TestCaseSource]` that builds a `List<TestCaseData>` **materializes every row
 already does this — `GetRecords<T>()` is itself lazy and each row is yielded.) Keep the source as an iterator
 method, not an eager `.ToList()`, for large files.
 
-## Parallel data rows — `[Parallelizable]`
+## Parallel data rows — `[Parallelizable]`, never for Playwright
 
-When rows are **independent** (they are, by the test-independence rule), run them concurrently to cut wall
-time. NUnit parallelizes test cases within a fixture when told to:
+When rows are **independent** and the fixture holds **no per-test instance state**, run them concurrently to
+cut wall time. NUnit parallelizes the cases of one fixture when told to:
 
 ```csharp
-[TestFixture]
-[Parallelizable(ParallelScope.All)]            // the source's cases run concurrently
-public class TaxCalculatorTests { /* … */ }
+[Parallelizable(ParallelScope.All)]
+public class TaxCalculatorTests
+{
+    private readonly TaxCalculator _calc = new();
+}
 ```
 
-Set the worker count via `[assembly: LevelOfParallelism(4)]`. Parallel rows demand the test body hold **no
-shared mutable state** (CLAUDE.md: no static mutable state) — each case must stand alone.
+- `ParallelScope.All` runs every case on **one fixture instance**, concurrently — safe only when the fixture's
+  fields are read-only and the cases share nothing (a pure-function calculator, a parser).
+- **Never on a Playwright (or Appium) fixture.** `PageTest` — and the `BaseTest` every .NET UI fixture derives
+  from — keeps `Page` and `Context` in instance properties, so two rows of one fixture running at once overwrite
+  each other's page. Playwright supports only `ParallelScope.Self`, which `BaseTest` declares: rows run one
+  after another inside the fixture, fixtures run in parallel
+  (`qa/dotnet/skills/ui-test-author/playwright/references/lifecycle.md` §3).
+- **Rows that need their own browser context** (a viewport, a locale, a device) are fixture parameters —
+  `[TestFixture(...)]` / `[TestFixtureSource]` — not test cases: each row is its own fixture with its own
+  `ContextOptions()`, and the rows run in parallel under `ParallelScope.Self`
+  (`qa-responsive-testing-dotnet`, `qa-language-testing-dotnet`).
+- The worker count is `[assembly: LevelOfParallelism(4)]` or `dotnet test -- NUnit.NumberOfTestWorkers=4`.
 
 ## Anti-patterns
 
@@ -275,7 +287,7 @@ shared mutable state** (CLAUDE.md: no static mutable state) — each case must s
 - **Money as Excel/CSV floating-point.** `double` round-off corrupts totals. *Fix:* **integer cents** (or
   `decimal`); assert on those. (Use `CultureInfo.InvariantCulture` in CsvHelper so `.`/`,` decimals don't
   flip by locale.)
-- **Unnamed cases.** `Should_ComputeTax_From_Csv(TaxCase)` with no `.SetName` shows as `(1)`, `(2)`… *Fix:*
+- **Unnamed cases.** `Should_ReturnTheRowsTax_When_TheRowComesFromCsv(TaxCase)` with no `.SetName` shows as `(1)`, `(2)`… *Fix:*
   `TestCaseData(...).SetName($"…{tc}")` so the **input** is in the failure.
 - **Instance state in a `[TestCaseSource]`.** It resolves at discovery before `[SetUp]`; an instance
   dependency is null. *Fix:* keep the source **static** and self-contained.
@@ -287,17 +299,16 @@ shared mutable state** (CLAUDE.md: no static mutable state) — each case must s
 **End-to-end: same test body, three sources, one typed row, named failures.**
 
 ```csharp
-[TestFixture]
 public class TaxCalculatorTests
 {
-    private readonly TaxCalculator _calc = new();   // no shared mutable state
+    private readonly TaxCalculator _calc = new();
 
     [TestCaseSource(typeof(TaxCaseSources), nameof(TaxCaseSources.CsvTaxCases))]
-    public void Should_ComputeTax_When_SourcedFromCsv(TaxCase tc)
+    public void Should_ReturnTheRowsTax_When_SourcedFromCsv(TaxCase tc)
         => Assert.That(_calc.TaxFor(tc.Region, tc.AmountCents), Is.EqualTo(tc.ExpectedTaxCents));
 
     [TestCaseSource(typeof(TaxCaseSources), nameof(TaxCaseSources.ExcelPricingCases))]
-    public void Should_ComputeTax_When_SourcedFromExcel(TaxCase tc)   // SAME body shape, SAME typed row
+    public void Should_ReturnTheRowsTax_When_SourcedFromExcel(TaxCase tc)
         => Assert.That(_calc.TaxFor(tc.Region, tc.AmountCents), Is.EqualTo(tc.ExpectedTaxCents));
 }
 ```
@@ -310,12 +321,13 @@ straight at `CSV: DE @ 10000¢ → 1900¢`, not "(1)".
 
 ```csharp
 [TestCaseSource(typeof(OrderCaseSources), nameof(OrderCaseSources.CsvOrderCases))]
-public void Should_ApplyDiscount(OrderCase row)
+public void Should_ApplyTheRowsDiscount_When_TheOrderIsPriced(OrderCase row)
 {
-    var order = Orders.Standard()            // ObjectMother default — the unchanging 90%
-        .WithRegion(row.Region)              // the row drives only what VARIES
+    var order = Orders.Standard()
+        .WithRegion(row.Region)
         .WithSubtotalCents(row.SubtotalCents)
         .Build();
+
     Assert.That(_discountEngine.Apply(order), Is.EqualTo(row.ExpectedDiscountCents));
 }
 ```
@@ -336,8 +348,9 @@ public void Should_ApplyDiscount(OrderCase row)
 - **Money is integer cents / `decimal`, never `double`** (round-off corrupts it); `CultureInfo.InvariantCulture`
   for CsvHelper. No secrets or real PII in committed data files (synthetic; secrets via env —
   `qa-test-login-tokens-dotnet`).
-- **Lazy `yield return` for huge datasets**; `[Parallelizable]` + `[assembly: LevelOfParallelism]` for
-  independent rows. No `Thread.Sleep`; structured logging; constructor injection; nullable enabled.
+- **Lazy `yield return` for huge datasets**; `ParallelScope.All` only for fixtures with no per-test instance
+  state — **never for Playwright or Appium**, whose rows stay `ParallelScope.Self` (or become fixture
+  parameters when each needs its own context). No `Thread.Sleep`; structured logging; nullable enabled.
 
 ## Cross-references
 

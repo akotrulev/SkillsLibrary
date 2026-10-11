@@ -20,11 +20,11 @@ Two cross-cutting rules shape every example:
 
 ## Stack
 
-- .NET 8, C# (nullable reference types enabled)
-- **`Auth0.AuthenticationApi`** NuGet — `AuthenticationApiClient` + `GetTokenAsync` overloads; falls back to `HttpClient` + `System.Text.Json` for device-code polling
+- .NET 10 (8/9 supported — match the project's TFM), C# (nullable reference types enabled)
+- **`Auth0.AuthenticationApi`** NuGet — `AuthenticationApiClient` + `GetTokenAsync` overloads; `HttpClient` + `System.Text.Json` for device-code polling
 - **NUnit** as the runner
-- **Playwright .NET** (`Microsoft.Playwright`) for the UI auth-state seeding example
-- Token plumbing under `Tests/Support/Auth/`; secrets via **env vars only**
+- **Microsoft.Playwright.NUnit** for the UI auth-state seeding, at the pins in the **Versions** table of `qa/dotnet/skills/ui-test-author/playwright/SKILL.md` (this skill pins nothing)
+- Token plumbing under `Tests/Support/Auth/`; secrets and every tenant/API URL via **env vars only**
 
 ## When to use
 
@@ -46,7 +46,7 @@ Two cross-cutting rules shape every example:
 |---|---|---|---|
 | User context? | **None** — token represents a *service* | **A specific test user** (their roles/perms) | A specific user (interactive consent once) |
 | Serves which test | API tests against protected endpoints | UI auth-state seeding; per-user API tests | CLI / input-constrained clients |
-| `GetTokenAsync` request | `ClientCredentialsTokenRequest` | `ResourceOwnerTokenRequest` | `DeviceCodeTokenRequest` (poll) |
+| `GetTokenAsync` request | `ClientCredentialsTokenRequest` | `ResourceOwnerTokenRequest` | `StartDeviceFlowAsync`, then a polled `/oauth/token` |
 | `grant_type` (inferred) | `client_credentials` | `password` / `password-realm` (when `Realm` set) | `urn:ietf:params:oauth:grant-type:device_code` |
 | Credentials | `ClientId` + `ClientSecret` | app + **username + password** (+ `Realm`) | `ClientId` (public) |
 | Tenant config | M2M app authorized for the API | **ROPG grant enabled** + a DB `Realm` | Device Code grant enabled; "Device" app |
@@ -70,11 +70,11 @@ Ask at most 2–3; infer the rest from the test project and existing fixtures.
 | `new AuthenticationApiClient(new Uri($"https://{domain}/"))` | The auth client. Stateless; one instance is fine to share. |
 | `await client.GetTokenAsync(new ClientCredentialsTokenRequest { ... })` | **M2M** token. Returns `AccessTokenResponse` (`AccessToken`, `ExpiresIn`, `TokenType`). |
 | `await client.GetTokenAsync(new ResourceOwnerTokenRequest { ... })` | **ROPG**. Set `Realm` → grant becomes `password-realm`; omit `Realm` → plain `password`. |
-| `await client.GetTokenAsync(new DeviceCodeTokenRequest { ... })` | **Device-code** exchange — poll while the user approves. |
+| `await client.GetTokenAsync(new DeviceCodeTokenRequest { ... })` | **Device-code** exchange. It throws `ErrorApiException` while approval is pending, so the poll goes to `/oauth/token` directly instead. |
 | `await client.StartDeviceFlowAsync(new DeviceCodeRequest { ... })` | Start the device flow → `device_code`, `user_code`, `verification_uri_complete`, `interval`, `expires_in`. |
 | `AccessTokenResponse { AccessToken, ExpiresIn, TokenType, Scope, RefreshToken }` | The shape every grant returns. `grant_type` is inferred from the request type. |
 
-`ExpiresIn` is in seconds. For device-code, the SDK throws an `ErrorApiException` whose payload carries `authorization_pending` / `slow_down` while the user hasn't approved — catch and keep polling at the server-dictated `Interval`.
+`ExpiresIn` is in seconds. For device-code, the token endpoint answers `authorization_pending` / `slow_down` while the user hasn't approved. Poll `/oauth/token` with `HttpClient` at the server-dictated `Interval` and read the JSON `error` field — no exception caught and swallowed (`references/details.md`).
 
 ## Deep-dive reference
 
@@ -104,7 +104,8 @@ These sections live in `references/details.md` — **read it when the task touch
 
 ### Stashing
 - API tests: inject the provider into the client; set `request.Headers.Authorization = new("Bearer", token)`.
-- UI tests: mint once, seed the storage your SPA reads, save `StorageState`, reuse — see `qa/dotnet/skills/ui-test-author/playwright`.
+- UI tests: the **token body of `AuthSetup`** — the root-namespace `[SetUpFixture]` from `qa/dotnet/skills/ui-test-author/playwright` (`references/lifecycle.md` §7) — mints once, seeds the storage your SPA reads at **`BASE_URL`'s origin**, checks the app accepted it, and saves the state to the same `<WorkDirectory>/auth-user.json` (`AuthSetup.UserState`) the UI-login body writes. Fixtures point at it in `ContextOptions()`; nothing else changes.
+- **A storage state carries cookies and `localStorage`** — IndexedDB only with `IndexedDB = true` [1.51], **never `sessionStorage`**, and never a token the app keeps only in memory (the Auth0 SPA SDK's default `cacheLocation: 'memory'`). Such an app signs in through the UI body instead (table in `references/details.md`).
 
 ### What NOT to do
 - No token fetch per test, no uncached `GetTokenAsync` in a loop.
@@ -113,13 +114,15 @@ These sections live in `references/details.md` — **read it when the task touch
 - No ROPG against a production tenant or with real user credentials.
 - No secret or token in source, logs, user-secrets committed to the repo.
 - No reading secrets in a static initializer — it breaks tests that don't need them.
+- No hardcoded app or tenant URL, and no second state-file path — `BASE_URL`, `AUTH0_DOMAIN`, `AuthSetup.UserState`.
+- No `Playwright.CreateAsync()` in a fixture or `[SetUp]` to seed state — only in `AuthSetup`'s `[OneTimeSetUp]`.
 
 ## Generation steps
 
 1. Read the test project (`.csproj`, existing fixtures) for house style and NUnit conventions.
 2. Confirm `Auth0.AuthenticationApi` is referenced (`dotnet add package Auth0.AuthenticationApi`).
-3. Confirm the env vars are wired into the test environment (CI secret store / launch profile), **not** committed: `AUTH0_DOMAIN`, `AUTH0_AUDIENCE`, `AUTH0_M2M_CLIENT_ID/SECRET`, and for ROPG `AUTH0_ROPG_CLIENT_ID`, `AUTH0_TEST_USERNAME/PASSWORD`, `AUTH0_REALM`.
-4. Generate `Auth0Config.cs`, `CachedTokenProvider.cs`, `Tokens.cs`, plus the consumer wiring (API client header and/or Playwright state seeder).
+3. Confirm the env vars are wired into the test environment (CI secret store / launch profile), **not** committed: `AUTH0_DOMAIN`, `AUTH0_AUDIENCE`, `AUTH0_M2M_CLIENT_ID/SECRET`, for ROPG `AUTH0_ROPG_CLIENT_ID`, `AUTH0_TEST_USERNAME/PASSWORD`, `AUTH0_REALM`, for device-code `AUTH0_DEVICE_CLIENT_ID`, and `BASE_URL` for UI seeding.
+4. Generate `Auth0Config.cs`, `CachedTokenProvider.cs`, `Tokens.cs`, plus the consumer wiring (API client header and/or the token body of `AuthSetup`).
 5. Run the cache unit tests anywhere (offline); run the live token tests with the secrets present. Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run".
 
 ## Cross-references

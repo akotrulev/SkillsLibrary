@@ -3,7 +3,7 @@ name: qa-bdd-reviewer-dotnet
 description: Use when reviewing or auditing existing Gherkin `.feature` files and Reqnroll step definitions in C#/.NET for living-documentation quality, step reusability, and correct binding/DI/lifecycle. Triggers "review these feature files", "audit our Reqnroll step definitions", "are these Gherkin scenarios good", "check our BDD layer". Not for generating features (`feature-file-writer`) or step definitions (`gherkin-step-code`).
 ---
 
-# Reqnroll / Gherkin Reviewer (C# / .NET 8)
+# Reqnroll / Gherkin Reviewer (C# / .NET 10)
 
 Audits a BDD layer across **two surfaces** — the `.feature` files (Gherkin quality / living documentation) and the Reqnroll step definitions + support code (binding correctness, reuse, DI, async, library rules). Returns findings in the standard table; does not rewrite code.
 
@@ -45,10 +45,14 @@ Audits a BDD layer across **two surfaces** — the `.feature` files (Gherkin qua
 - [ ] Cucumber Expressions (`{string}`/`{int}`/…) over regex unless regex is genuinely needed.
 - [ ] Shared state injected via `ScenarioState` (scoped DI) through the constructor — no static mutable state, no `new`-ing page objects, no `ScenarioContext` string-bag for typed state.
 - [ ] No selectors / `IPage.Locator(...)` / waits in step definitions — mechanics live in page objects.
-- [ ] `Then` steps assert (web-first `Expect`); `Given`/`When` don't assert; page objects don't assert (except `ExpectLoadedAsync()`).
+- [ ] `Then` steps assert (web-first `Expect`); `Given`/`When` don't assert — not even a "page loaded" check; page objects never assert.
+- [ ] **Every assertion states one expected condition** — no `Is.AnyOf(...)`, `.Or.`, `||` inside `Assert.That`, `Regex("a|b")` in a text or URL assertion, or an assertion on an `Or()` locator.
+- [ ] **No `try`/`catch` (or `finally`) in a step or a hook** — an expected exception is `Assert.ThrowsAsync<T>`; cleanup is an `[AfterScenario]` hook.
 - [ ] `async Task` steps for Playwright; every page-object call awaited; no `.Result`/`.Wait()`/`async void`.
-- [ ] No `Thread.Sleep` / `WaitForTimeoutAsync` — auto-wait + web-first assertions only.
-- [ ] Browser/driver lifecycle in `[BeforeScenario]`/`[AfterScenario]` hooks with **teardown** (no leaked browsers); not in step constructors.
+- [ ] No `Thread.Sleep` / `Task.Delay` / `WaitForTimeoutAsync` — auto-wait + web-first assertions only.
+- [ ] The page objects a step calls use no `WaitUntil = WaitUntilState.NetworkIdle`, no `Force = true`, no `WaitForNavigationAsync` and no page-level selector API (`Page.ClickAsync(selector)`, `Page.InnerTextAsync(selector)`); URL checks use `ToHaveURLAsync(new Regex(...))`, never a glob string.
+- [ ] Browser/driver lifecycle in `[BeforeScenario]`/`[AfterScenario]` hooks with **teardown** (no leaked browsers); not in step constructors. The browser comes from the runsettings and the context's `BaseURL` from `BASE_URL` — no hardcoded browser, headless flag or host.
+- [ ] **Failure evidence**: the closing `[AfterScenario]` keeps a trace, a full-page screenshot and the video when `ScenarioContext.TestError` is set — in `<WorkDirectory>/playwright-artifacts/<Feature>.<Scenario>.{zip,png,webm}`, attached to NUnit and Allure, in `BaseTest`'s order with no catch (`qa/dotnet/skills/evidence-capture`, `bdd-project-scaffold`).
 - [ ] Cleanup implemented as an `[AfterScenario]` hook, not as Gherkin steps.
 - [ ] `[ScenarioDependencies]` is static, returns `IServiceCollection`, and does not manually register `[Binding]` classes.
 - [ ] No hardcoded credentials/URLs — env vars / config.
@@ -68,8 +72,8 @@ After the table, add an **Overall** paragraph (2–3 sentences) and a **Traceabi
 
 ## Severity guide
 
-- **blocker**: undefined/ambiguous step that fails the run; leaked browser/driver; ships a bug.
-- **major**: imperative/UI-coupled Gherkin; selectors or `new`/static state in steps; assertion in a page object; conjunction step that hides a second behavior.
+- **blocker**: undefined/ambiguous step that fails the run; leaked browser/driver; `Thread.Sleep`/`Task.Delay` as a wait; ships a bug.
+- **major**: imperative/UI-coupled Gherkin; selectors or `new`/static state in steps; assertion in a page object or a `Given`/`When`; an `OR` in an assertion; `try`/`catch` in a step or hook; `NetworkIdle`, `Force = true` or a deprecated wait; no failure evidence on a failed scenario; conjunction step that hides a second behavior.
 - **minor**: duplicate steps that should be parameterized; missing tags; naming.
 - **nit**: optional phrasing/style preferences.
 

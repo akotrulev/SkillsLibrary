@@ -5,7 +5,7 @@ description: Use when working in the C# / .NET 10 (8-9 supported) Accelerator te
 
 # Accelerator Conventions
 
-The Accelerator is a C# / .NET 8 test automation framework with separate projects for `AppiumTests`, `PlaywrightTests`, `ApiTests`, and `TestCore`. It uses a JSON-driven screen pattern, NUnit, Allure for reporting, BrowserStack for cloud execution, and a two-agent Claude Code workflow (Opus planner + Sonnet implementer).
+The Accelerator is a C# / .NET 10 test automation framework (8/9 supported — match the repo's TFM) with separate projects for `AppiumTests`, `PlaywrightTests`, `ApiTests`, and `TestCore`. It uses a JSON-driven screen pattern, NUnit, Allure for reporting, BrowserStack for cloud execution, and a two-agent Claude Code workflow (Opus planner + Sonnet implementer). Its Playwright version is the one in the **Versions** table of `qa/dotnet/skills/ui-test-author/playwright/SKILL.md`; this skill pins nothing.
 
 This skill encodes the conventions that distinguish "Accelerator code" from generic test automation.
 
@@ -61,10 +61,10 @@ Why: changing a selector doesn't recompile. The same JSON can drive both Playwri
   "name": "LoginScreen",
   "platforms": {
     "web": {
-      "emailInput": "[data-testid='email']",
-      "passwordInput": "[data-testid='password']",
-      "signInButton": "[data-testid='sign-in']",
-      "errorMessage": "[data-testid='login-error']"
+      "emailInput": "[data-testid='Login.Email']",
+      "passwordInput": "[data-testid='Login.Password']",
+      "signInButton": "[data-testid='Login.Submit']",
+      "errorMessage": "[data-testid='Login.Error']"
     },
     "ios": {
       "emailInput": "//XCUIElementTypeTextField[@name='email']",
@@ -80,53 +80,96 @@ Why: changing a selector doesn't recompile. The same JSON can drive both Playwri
 }
 ```
 
-**Page class example**:
+**Page class example** (web, Playwright). `PageBase.Locator(key)` turns the JSON key into
+`Page.Locator(Selector(key))` and throws, naming the screen and the key, when the key is missing. Every action
+goes through an `ILocator`, so it auto-waits and is strict; the page-level selector methods
+(`Page.FillAsync(selector)`, `Page.ClickAsync(selector)`, `Page.InnerTextAsync(selector)`) are discouraged by
+Playwright and are not used. State a test asserts on is exposed as an `ILocator`, never a `string` read once.
 
 ```csharp
 public sealed class LoginPage : PageBase
 {
-    public LoginPage(IPage page) : base(page, "LoginScreen") { }
+    private readonly ILocator _email;
+    private readonly ILocator _password;
+    private readonly ILocator _signIn;
 
-    public async Task SignInAsync(string email, string password)
+    public LoginPage(IPage page) : base(page, "LoginScreen")
     {
-        await Page.FillAsync(Selector("emailInput"), email);
-        await Page.FillAsync(Selector("passwordInput"), password);
-        await Page.ClickAsync(Selector("signInButton"));
+        _email = Locator("emailInput");
+        _password = Locator("passwordInput");
+        _signIn = Locator("signInButton");
+        ErrorMessage = Locator("errorMessage").Describe("Sign-in error");
     }
 
-    public Task<string> GetErrorMessageAsync() =>
-        Page.InnerTextAsync(Selector("errorMessage"));
+    public ILocator ErrorMessage { get; }
+
+    public async Task GoToAsync() => await Page.GotoAsync("/login");
+
+    [AllureStep("Sign in")]
+    public async Task SignInAsync(User user)
+    {
+        await _email.FillAsync(user.Email);
+        await _password.FillAsync(user.Password);
+        await _signIn.ClickAsync();
+    }
 }
 ```
 
 Rules:
-- **No literal selectors in page methods.** Always go through `Selector("key")`.
+- **No literal selectors in page methods.** Always go through `Locator("key")`; locators are built once, in
+  the constructor.
+- **Actions run on an `ILocator`**, never on the page-level selector API; anything a test asserts is returned as
+  an `ILocator` so the assertion is web-first.
 - **Method names describe user intent**, not mechanics. `SignInAsync`, not `ClickSignInButton`.
 - **One page object per screen.** Composite flows live in test code or in flow helpers, not in page objects.
 - **No assertions inside page objects.** They expose state; tests assert.
+- **Locators in JSON are `data-testid`-first for web**, PascalCase dot-separated (`Login.Submit`) — the format
+  the dev team's `fe-*` agents generate.
 
 ### Test structure
 
 ```csharp
-[TestFixture]
 [AllureSuite("Authentication")]
-public sealed class LoginTests : PlaywrightTestBase
+[AllureFeature("Login")]
+public sealed class LoginTests : BaseTest
 {
+    private LoginPage _loginPage = null!;
+
+    [SetUp]
+    public void CreatePages() => _loginPage = new LoginPage(Page);
+
     [Test]
-    [AllureFeature("Login")]
     [AllureStory("Successful login")]
-    public async Task Should_Redirect_To_Dashboard_When_Credentials_Valid()
+    public async Task Should_RedirectToTheDashboard_When_CredentialsAreValid()
     {
         var user = UserBuilder.AValidUser().Build();
-        var login = new LoginPage(Page);
 
-        await login.GoToAsync();
-        await login.SignInAsync(user.Email, user.Password);
+        await _loginPage.GoToAsync();
+        await _loginPage.SignInAsync(user);
 
-        await Expect(Page).ToHaveURLAsync("**/dashboard");
+        await Expect(Page).ToHaveURLAsync(new Regex("/dashboard$"));
+    }
+
+    [Test]
+    [AllureStory("Rejected login")]
+    public async Task Should_ShowAnError_When_ThePasswordIsWrong()
+    {
+        var user = UserBuilder.AValidUser().WithPassword($"Wrong-{Guid.NewGuid():N}").Build();
+
+        await _loginPage.GoToAsync();
+        await _loginPage.SignInAsync(user);
+
+        await Expect(_loginPage.ErrorMessage).ToHaveTextAsync("Invalid email or password");
     }
 }
 ```
+
+- **`TestCore`'s Playwright base is `BaseTest`** from `qa/dotnet/skills/ui-test-author/playwright`
+  (`assets/BaseTest.cs`): `BASE_URL`, failure evidence, `ParallelScope.Self`. Page objects are built in the
+  test class's own `[SetUp]`; tests never call a `Page` method directly.
+- **`ToHaveURLAsync(string)` is an exact match** of the whole URL after `BaseURL` resolution, so a glob such as
+  `"**/dashboard"` never matches. Match part of the URL with a `Regex` (`new Regex("/dashboard$")`); a glob
+  belongs in `WaitForURLAsync`.
 
 Rules:
 - Test class per feature or screen, not per AC
@@ -142,7 +185,7 @@ Every domain object gets a builder. Builders:
 - Live in `*Tests/Builders/`
 - Use the `A<Name>` / `An<Name>` naming for the fluent entry: `UserBuilder.AValidUser()`, `OrderBuilder.AnOrderWith(...)`
 - Provide sensible defaults — calling `.Build()` with no chained methods produces a valid object
-- Are immutable internally — each `With*` method returns a new builder
+- Return `this` from each `With*` method for fluent chaining; `Build()` returns an immutable record
 
 ```csharp
 public sealed class UserBuilder
@@ -152,8 +195,25 @@ public sealed class UserBuilder
     private int _yearsActive = 1;
 
     public static UserBuilder AValidUser() => new();
-    public UserBuilder WithEmail(string email) { _email = email; return this; }
-    public UserBuilder WithYearsActive(int years) { _yearsActive = years; return this; }
+
+    public UserBuilder WithEmail(string email)
+    {
+        _email = email;
+        return this;
+    }
+
+    public UserBuilder WithPassword(string password)
+    {
+        _password = password;
+        return this;
+    }
+
+    public UserBuilder WithYearsActive(int years)
+    {
+        _yearsActive = years;
+        return this;
+    }
+
     public User Build() => new(_email, _password, _yearsActive);
 }
 ```
@@ -167,8 +227,10 @@ public sealed class UserBuilder
 
 ### Allure reporting
 
-- Decorate every test with at least `[AllureSuite]`, `[AllureFeature]`, `[AllureStory]`
-- Attach evidence on failure: screenshot, page source, network HAR
+- Decorate every test with at least `[AllureSuite]`, `[AllureFeature]`, `[AllureStory]` (on the class or the test)
+- Web failure evidence (trace, video, full-page screenshot) comes from `BaseTest`'s `[TearDown]` into
+  `<WorkDirectory>/playwright-artifacts/`, attached to NUnit and Allure — no second hook for the same evidence
+  (`qa/dotnet/skills/evidence-capture`)
 - Use `[AllureStep]` on page object methods so steps appear in the Allure tree
 
 ### API tests
@@ -201,6 +263,8 @@ When rate-limited on one model, switch to another (Opus → Sonnet → Haiku) �
 ## Quality bar (reviewer checklist)
 
 - [ ] No literal selectors in page/screen methods
+- [ ] Page actions run on `Locator("key")`, never `Page.FillAsync/ClickAsync/InnerTextAsync(selector)`
+- [ ] URL assertions use a `Regex`, never a glob string in `ToHaveURLAsync`
 - [ ] No `Thread.Sleep` / `WaitForTimeout` / `Task.Delay` in tests
 - [ ] Test name follows `Should_X_When_Y`
 - [ ] Test data via a builder
@@ -213,21 +277,13 @@ When rate-limited on one model, switch to another (Opus → Sonnet → Haiku) �
 
 ## Anti-examples
 
-```csharp
-// BAD: literal selector in page object
-public async Task SignInAsync() {
-    await Page.ClickAsync("button.signin-btn");  // ❌ selector in code
-}
-
-// BAD: sleep
-await Task.Delay(2000);  // ❌
-
-// BAD: implementation-named test
-public async Task Test_ClickLoginButton() { ... }  // ❌
-
-// BAD: inline test data
-await login.SignInAsync("user@test.com", "Password1!");  // ❌ use a builder
-
-// BAD: conditional in test
-if (env == "staging") { ... } else { ... }  // ❌ use parameterized tests or fixtures
-```
+| Anti-example | Why it's wrong | Instead |
+|---|---|---|
+| `await Page.ClickAsync("button.signin-btn")` in a page object | A selector in code, and a page-level selector method | `_signIn.ClickAsync()` built from `Locator("signInButton")`, the selector in `*.screen.json` |
+| `Task<string> GetErrorMessageAsync()` returning `Page.InnerTextAsync(...)`, then `Assert.That(text, ...)` | A one-shot read races the page | expose `ILocator ErrorMessage`; `Expect(_loginPage.ErrorMessage).ToHaveTextAsync(...)` |
+| `await Expect(Page).ToHaveURLAsync("**/dashboard")` | The string is an exact match after `BaseURL` resolution — it never passes | `ToHaveURLAsync(new Regex("/dashboard$"))` |
+| `await Task.Delay(2000)` | A sleep | auto-wait, web-first assertions, `TestCore.Waits` |
+| `public async Task Test_ClickLoginButton()` | Names the mechanics, not the behaviour | `Should_RedirectToTheDashboard_When_CredentialsAreValid` |
+| `await _loginPage.SignInAsync(new User("user@test.com", "Password1!", 1))` | Inline test data | `UserBuilder.AValidUser().Build()` |
+| `if (env == "staging") { … } else { … }` in a test | Conditional logic in a test | `[TestCase]` / `[TestCaseSource]` or a fixture per environment |
+| A `LoginTests` class with its own `Playwright.CreateAsync()` | A second lifecycle beside `BaseTest` | derive from `BaseTest` |

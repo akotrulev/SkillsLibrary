@@ -3,391 +3,307 @@ name: qa-realtime-stream-testing-dotnet
 description: Use when testing WebSocket or SSE streams in .NET 10 (8-9) / NUnit — protocol clients (`ClientWebSocket`, SignalR `HubConnection`, SSE over `HttpClient`) draining frames into a channel and asserting on conditions (never sleeps), plus Playwright .NET for in-browser frames. Triggers "test our WebSocket endpoint", "assert the SSE stream emits X", "SignalR hub test". Not for request/response HTTP (`api-test-author/writer`).
 ---
 
-# WebSocket & SSE Testing (.NET 8 / NUnit) — **canonical stack**
+# WebSocket & SSE Testing (.NET 10 / NUnit) — **canonical stack**
 
-This is the **canonical** stack of the `qa/dotnet/skills/realtime-stream-testing/` node — a **NEW family, not a port**. **.NET
-leads here by judgment** (the "lead where the tool is most authentic" call `service-bus`/`kafka`/`flaky-test-quarantine` made): .NET has the
-**richest *native* real-time story** of the three — raw `System.Net.WebSockets.ClientWebSocket` (the protocol
-itself), the first-party `SignalR` `HubConnection` (the hub layer, with built-in reconnect/heartbeat/groups),
-and built-in SSE parsing (`System.Net.ServerSentEvents.SseParser` on .NET 9+) — **all in the BCL, no
-third-party client dependency**. That makes it the cleanest reference for every discipline; the `java`
-(OkHttp `WebSocket` + Awaitility / OkHttp-SSE) and `typescript` (`ws` / native `WebSocket` + `eventsource` +
-Vitest `vi.waitFor`) siblings **port the disciplines, not the code** — the protocol-client libraries and the
-await primitive genuinely differ per stack, while the **Playwright browser surface is near-identical** across
-all three.
-
-Real-time tests assert one of two things about a **continuously-open stream** — a connection that has no
-single synchronous return you can assert on the next line:
-
-- **A WebSocket** — a *bidirectional*, full-duplex channel (text **or** binary), no built-in reconnect. Used
-  for chat, collaboration, live trading, anything interactive. You assert frames **in both directions** plus
-  the open/close lifecycle.
-- **An SSE stream** — a *server→client-only*, text/UTF-8 channel over **plain HTTP** (no upgrade handshake),
-  with **auto-reconnect + `Last-Event-ID`** built into the protocol. Used for notification feeds, progress
-  streams, server-pushed dashboards. You assert the sequence of `data:`/`event:`/`id:` events and that the
-  client resumes from `Last-Event-ID`.
+The **canonical** stack of the `realtime-stream-testing` family: .NET has the richest first-party real-time
+story — `ClientWebSocket`, SignalR's `HubConnection`, `SseParser`. The siblings port the disciplines, not the
+code; the Playwright browser surface is near-identical in all three. This skill owns **WebSocket
+mocking and browser SSE**; plain HTTP mocking is `qa/dotnet/skills/network-mocking`. A real-time test
+asserts on a **continuously-open stream** — a connection with no single synchronous return to assert on the
+next line.
 
 > **The discipline this skill encodes — four ideas, identical across all three stacks:**
 >
-> 1. **Real-time = await a message on a CONDITION, never a sleep.** A stream delivers "soon", on the server's
->    schedule. Drain incoming frames into a buffer (`Channel<T>`) and **await the expected frame / count with
->    a bounded `CancellationTokenSource` timeout** — never `await Task.Delay(2000)` standing in for "it
->    probably arrived". This is the *exact* eventual-consistency lineage of `qa-messaging-testing-dotnet`
->    (a stream frame is a message that arrives later).
-> 2. **Drain BEFORE you act.** Start the receive loop / arm the `WaitForWebSocketAsync` promise **before** the
->    action that triggers the first frames, or you race the server and lose them. (The same ordering rule as
->    `qa-network-mocking-dotnet`'s "register routes before navigation".)
-> 3. **Assert the whole lifecycle, not just a payload.** The open handshake (HTTP **101 Switching Protocols**
->    for WS), the frames, **and** the clean close (`WebSocketCloseStatus.NormalClosure` = code **1000**, or the
->    contract's documented close code). "Server emits N then closes" = await `count == N`, *then* assert the
->    close — never assert count inside a sleep-bounded window.
-> 4. **Two transports × two surfaces — choose deliberately.** **Transport:** WebSocket (bidirectional) vs SSE
->    (server→client, auto-reconnect). **Surface:** protocol-client (connect from test code, no browser —
->    backend/contract verification) vs browser (the app's UI opens the socket — Playwright `OBSERVE` or
->    `MOCK`). Pick the narrowest surface that proves the behaviour.
+> 1. **Real-time = await a message on a CONDITION, never a sleep.** Drain frames into a buffer (`Channel<T>`)
+>    or complete a `TaskCompletionSource` from the frame event, and **await it with a bounded timeout** —
+>    never `Task.Delay(2000)` standing in for "it probably arrived". The eventual-consistency lineage of
+>    `qa-messaging-testing-dotnet`.
+> 2. **Drain BEFORE you act.** Start the receive loop / subscribe the frame event **before** the action that
+>    triggers the first frames, or you race the server and lose them.
+> 3. **Assert the whole lifecycle, not just a payload.** The open handshake (HTTP **101** for WS), the frames,
+>    **and** the clean close (`WebSocketCloseStatus.NormalClosure` = **1000**, or the contract's code). "Emits
+>    N then closes" = await `count == N`, *then* assert the close.
+> 4. **Two transports × two surfaces — choose deliberately.** WebSocket vs SSE; **protocol-client** (connect
+>    from test code — backend/contract verification) vs **browser** (the app's UI opens the stream —
+>    Playwright OBSERVE or MOCK). Pick the narrowest surface that proves the behaviour.
 
 ## Decision matrix — which transport, which surface, which tool
 
 | Situation | Transport | Surface / Tool |
 |-----------|-----------|----------------|
-| Backend WS endpoint, no browser involved (chat, trading feed) | WebSocket | **protocol-client** — `ClientWebSocket` |
-| The endpoint is a **SignalR hub** (groups, reconnect, RPC-style) | WebSocket | **protocol-client** — SignalR `HubConnection` (real client) |
-| Server pushes a one-way feed (notifications, progress, live dashboard) | SSE | **protocol-client** — `SseParser` / streamed `HttpClient` |
-| The app's **UI** opens a WS and you assert what crosses the wire | WebSocket | **browser** — Playwright `WaitForWebSocketAsync` + `FrameReceived` (OBSERVE) |
-| The UI opens a WS and you want **deterministic** frames (no real server) | WebSocket | **browser** — Playwright `RouteWebSocketAsync` (MOCK) |
-| The UI consumes an SSE feed and you want it deterministic | SSE | **browser** — `Page.RouteAsync` returning a chunked `text/event-stream` body |
-| Async **queue/topic** (OrderPlaced lands on a queue, a consumer reacts) | — | **not this skill** → `qa-messaging-testing-dotnet` etc. |
-
-**Rule of thumb:** *bidirectional, interactive?* → WebSocket. *Server-push-only feed?* → SSE (cheaper, plain
-HTTP, free reconnect). *Testing the protocol contract?* → protocol-client. *Testing the UI's use of the
-stream?* → browser (observe if the real server is fine, mock if you need determinism). *A discrete message on
-a queue, not an open stream?* → that's `messaging-testing`, not this skill.
+| Backend WS endpoint, no browser involved | WebSocket | **protocol-client** — `ClientWebSocket` |
+| The endpoint is a **SignalR hub** | WebSocket | **protocol-client** — SignalR `HubConnection` |
+| Server pushes a one-way feed (notifications, progress) | SSE | **protocol-client** — `SseParser` over a streamed `HttpClient` |
+| The app's **UI** opens a WS; assert what crosses the wire | WebSocket | **browser** — `Page.WebSocket` + `FrameReceived` + `TaskCompletionSource` (OBSERVE) |
+| The UI opens a WS and you want **deterministic** frames | WebSocket | **browser** — `Page.RouteWebSocketAsync` (MOCK) |
+| The UI renders an SSE feed and you want it deterministic | SSE | **browser** — a fixed event set: a `Times = 1` route over a route answering `204` |
+| SSE timing, reconnect or `Last-Event-ID` resume in the browser | SSE | **browser** against a **real SSE test server** — a route cannot stream |
+| Async **queue/topic** (a message lands, a consumer reacts) | — | **not this skill** → `qa-messaging-testing-dotnet` |
 
 ## Stack
 
-- .NET 8, C# (nullable reference types on), NUnit 4.x — **async all the way** (`ConnectAsync`, `ReceiveAsync`,
-  `SendAsync`, `CloseAsync`; never `.Result` / `.Wait()` / `.GetAwaiter().GetResult()`)
-- `System.Net.WebSockets.ClientWebSocket` (BCL) — the raw protocol client
+- .NET 10 (8/9 supported — match the TFM), C# with nullable on, NUnit 4 — **async all the way**
+- `System.Net.WebSockets.ClientWebSocket` — the raw protocol client
 - `Microsoft.AspNetCore.SignalR.Client` (`HubConnection`) — only when the endpoint is a SignalR hub
-- `System.Net.ServerSentEvents` `SseParser` (.NET 9+) for SSE; on .NET 8, a hand-rolled line parser over a
-  streamed `HttpClient` response (shown below)
-- `System.Threading.Channels` (`Channel<T>`) — the frame buffer the test awaits on; `CancellationTokenSource`
-  (`CancelAfter`) is the **bounded condition-wait** primitive
-- `Microsoft.AspNetCore.Mvc.Testing` `WebApplicationFactory` **on a real Kestrel port** for in-process WS/SSE
-  integration tests (the in-memory `TestServer` historically can't do the WS upgrade — aspnetcore#31911)
-- Browser surface: `Microsoft.Playwright` + `Microsoft.Playwright.NUnit` (≥ **1.48** for `RouteWebSocketAsync`),
-  built on the `PageTest` base from `qa-ui-test-writer-playwright-dotnet`
-- The SUT's stream client is **constructor-injected** with its URL / an `HttpClient` — never a hard-coded URL
-  read inside a `[Test]`
+- `System.Net.ServerSentEvents` `SseParser` (.NET 9+; `SseItem<T>.EventId` from .NET 10); on .NET 8 a line
+  parser over the streamed response
+- `System.Threading.Channels` (`Channel<T>`) — the frame buffer; `CancellationTokenSource(timeout)` and
+  `Task.WaitAsync(timeout)` — the bounded condition-waits
+- `WebApplicationFactory` **on a real Kestrel port** for in-process WS/SSE integration tests (the in-memory
+  `TestServer` cannot do the WS upgrade — aspnetcore#31911)
+- Browser surface: **Microsoft.Playwright.NUnit** at the pins in the **Versions** table of
+  `qa/dotnet/skills/ui-test-author/playwright/SKILL.md` (this skill pins nothing; `RouteWebSocketAsync` needs
+  ≥ 1.48). Every browser fixture **derives from that skill's `BaseTest`**; tests reach the page through page
+  objects and the `SocketWatch` / `MockStreams` helpers, never raw `Page` calls.
+- The SUT's stream client is **constructor-injected** with its URL / `HttpClient`
 
-```
-IntegrationTests/
-├── Realtime/
-│   ├── WebSocketProbe.cs        ← test-side WS client: connect, drain frames into a Channel, await on a condition
-│   ├── SseProbe.cs              ← test-side SSE client: stream + parse events into a Channel
-│   └── AwaitFrame.cs            ← the bounded condition-wait helpers (no Task.Delay as a wait)
-├── Fixtures/
-│   └── AppFixture.cs            ← WebApplicationFactory on a real Kestrel port (WS upgrade needs it)
-├── ChatWebSocketTests.cs        ← protocol-client WS
-├── NotificationsSseTests.cs     ← protocol-client SSE
-└── Specs/
-    └── LiveFeedBrowserTests.cs  ← Playwright observe + mock (browser surface)
-```
+## WebSocket vs SSE — what changes in the test
 
-## WebSocket vs SSE — when each, and what changes in the test
-
-| | **WebSocket** | **SSE (Server-Sent Events)** |
+| | **WebSocket** | **SSE** |
 |---|---|---|
-| Direction | Bidirectional (client ↔ server) | Server → client only |
-| Payload | Text **or** binary | Text/UTF-8 only (`data:` lines) |
-| Transport | HTTP **upgrade** (101 Switching Protocols) | Plain HTTP streaming `text/event-stream` |
-| Reconnect | **None built-in** — you implement/assert it | **Built-in** — auto-reconnect honoring `retry:` + `Last-Event-ID` |
-| Browser API | `WebSocket` (Playwright can observe **and** mock) | `EventSource` (just HTTP — observe/mock via `Page.RouteAsync`) |
-| Test focus | Full-duplex frames + open/close lifecycle | Event sequence + resume-from-`Last-Event-ID` |
-| Pick it for | Chat, collaboration, interactive/trading | Notification feeds, progress, server-pushed dashboards |
+| Shape | Bidirectional, text or binary, HTTP **upgrade** (101) | Server → client, UTF-8 `data:` lines over plain HTTP |
+| Reconnect | **None built-in** — you implement/assert it | **Built-in** — `retry:`, `Last-Event-ID`; a `204` stops it |
+| Browser | Playwright observes **and** mocks it | `EventSource`; a route answers it once |
 
 ## The bounded condition-wait — the heart of every real-time test
 
-A frame arrives whenever the server sends it. The test must **await the condition** (a frame, or the Nth
-frame) with a **timeout**, returning the instant it holds and *failing* if it never does. Drain frames into a
-`Channel<T>` and read with a `CancellationTokenSource` deadline — this is the WS/SSE analogue of
-`qa-messaging-testing-dotnet`'s `ReceiveMessageAsync(maxWaitTime)` long-poll and `WaitFor.Async`.
+A frame arrives whenever the server sends it. The test **awaits the condition** with a **timeout**, returning
+the instant it holds and *failing* when it never does — a failure that names what was missing, never a silent
+pass. Two primitives, and nothing else:
 
-```csharp
-namespace IntegrationTests.Realtime;
-
-/// <summary>
-/// Bounded reads off a frame Channel. A timeout is a deterministic FAILURE ("no frame arrived in the window"),
-/// not a silent pass. This is the only sanctioned wait in the skill — there is no bare Task.Delay-as-wait.
-/// </summary>
-public static class AwaitFrame
-{
-    /// <summary>Await the next frame, or fail if none arrives within <paramref name="timeout"/>.</summary>
-    public static async Task<T> NextAsync<T>(ChannelReader<T> reader, TimeSpan timeout)
-    {
-        using var cts = new CancellationTokenSource(timeout);
-        try
-        {
-            return await reader.ReadAsync(cts.Token);   // returns the instant a frame is queued
-        }
-        catch (OperationCanceledException)
-        {
-            throw new TimeoutException($"No frame arrived within {timeout}.");
-        }
-    }
-
-    /// <summary>Collect exactly <paramref name="count"/> frames, or fail on timeout.</summary>
-    public static async Task<IReadOnlyList<T>> TakeAsync<T>(ChannelReader<T> reader, int count, TimeSpan timeout)
-    {
-        using var cts = new CancellationTokenSource(timeout);
-        var frames = new List<T>(count);
-        try
-        {
-            while (frames.Count < count)
-                frames.Add(await reader.ReadAsync(cts.Token));
-            return frames;
-        }
-        catch (OperationCanceledException)
-        {
-            throw new TimeoutException($"Expected {count} frames, got {frames.Count} within {timeout}.");
-        }
-    }
-}
-```
-
-> **No bare `Task.Delay`/`Thread.Sleep` anywhere as a wait.** The deadline lives *inside* `CancellationTokenSource`;
-> the read returns immediately when a frame is queued. A fixed sleep races the server — it's slow when the
-> frame is fast and flaky when the frame is slow.
+| Surface | Primitive | Fails with |
+|---|---|---|
+| Protocol client | Frames drained into a `Channel<T>`; `AwaitFrame.NextAsync(reader, timeout)` / `TakeAsync(reader, n, timeout)` read under a `CancellationTokenSource` deadline | `TimeoutException` listing the frames that did arrive |
+| Browser (Playwright) and SignalR | A `TaskCompletionSource` completed from the frame event or `On<T>` handler, awaited with `.WaitAsync(timeout)` | `TimeoutException` at the await |
 
 ## Deep-dive reference
 
-These sections live in `references/details.md` — **read it when the task touches them**: **Protocol-client 1 — raw WebSocket (`ClientWebSocket`)**; **Protocol-client 3 — SSE (`SseParser` / streamed `HttpClient`)**.
-
-## Protocol-client 2 — SignalR hub (`HubConnection`)
-
-When the endpoint is a **SignalR hub**, use the **real client** — `HubConnection` reassembles messages,
-handles the heartbeat, and (with `WithAutomaticReconnect`) reconnects, so you assert at the *hub* level. The
-message-await primitive is a `TaskCompletionSource<T>` completed inside the `On<T>` handler and awaited with a
-timeout — register the handler **before** the action that triggers the server-to-client call.
-
-```csharp
-[Test]
-public async Task Should_receive_a_ReceiveMessage_When_a_peer_sends_to_the_group()
-{
-    await using var connection = new HubConnectionBuilder()
-        .WithUrl($"{BaseUri}/hubs/chat")
-        .WithAutomaticReconnect()                  // exercise reconnect behaviour
-        .Build();
-
-    var received = new TaskCompletionSource<string>(TaskCreationOptions.RunContinuationsAsynchronously);
-    connection.On<string, string>("ReceiveMessage", (user, text) => received.TrySetResult($"{user}:{text}"));  // arm BEFORE start
-
-    await connection.StartAsync();                 // awaits the negotiate + connect; no sleep needed
-    await connection.InvokeAsync("SendToGroup", "general", "hi");
-
-    // Await the server→client push on a condition: the TCS, raced against a timeout.
-    var message = await received.Task.WaitAsync(TimeSpan.FromSeconds(5));
-
-    Assert.That(message, Is.EqualTo("alice:hi"));
-}
-```
-
-> SignalR's first-class **reconnect** (`WithAutomaticReconnect`) and **keep-alive** (`KeepAliveInterval` /
-> `ServerTimeout`) mean you assert *behaviour* (did it reconnect, did it survive a dropped ping) rather than
-> hand-rolling the protocol. `connection.StartAsync()` *is* the condition-wait for "connected" — never sleep
-> after it. `received.Task.WaitAsync(timeout)` fails deterministically if the push never comes.
+[`references/details.md`](references/details.md) holds **0. `AwaitFrame`** (the channel reads, the one helper
+with a `catch`) and the protocol-client surfaces — **1. raw WebSocket (`WebSocketProbe`)**, **2. SignalR hub
+(`HubConnection`)**, **3. SSE (`SseProbe`)** — plus **Disciplines & gotchas** (auth on the socket,
+reconnection, heartbeat, fragmentation, the Kestrel port), the project layout and **Examples**. Read it when
+the task touches them.
 
 ## Browser surface 1 — OBSERVE WebSocket frames (Playwright)
 
-When the **app's UI** opens the socket and the real backend is fine, **observe** the frames Playwright sees.
-Arm `WaitForWebSocketAsync` (or subscribe `Page.WebSocket`) **before** the action that opens it. Layer this on
-the `PageTest` base from `qa-ui-test-writer-playwright-dotnet` and wrap it in an intent-named helper, never raw
-event wiring in a `[Test]`.
+When the **app's UI** opens the socket and the real backend is fine, observe the frames the page receives.
+`IWebSocket` has events (`FrameReceived`, `FrameSent`, `Close`, `SocketError`) and two properties, `IsClosed`
+and `Url` — **there is no `WaitForEventAsync` on it**. So `SocketWatch` subscribes `Page.WebSocket` **before**
+the action, hooks each matching socket's `FrameReceived`, and completes a `TaskCompletionSource` when a frame
+matches; the test awaits it with `WaitAsync(timeout)`.
 
 ```csharp
-[Test]
-public async Task Should_push_a_price_update_over_the_dashboard_socket()
+using System.Text.RegularExpressions;
+using Microsoft.Playwright;
+
+namespace Example.UiTests.Support;
+
+public sealed class SocketWatch(IPage page)
 {
-    // Arm the WS wait BEFORE navigating — the socket opens on load.
-    var wsTask = Page.WaitForWebSocketAsync();
-    await Page.GotoAsync("/dashboard");
-
-    var ws = await wsTask;
-    Assert.That(ws.Url, Does.Contain("/ws/prices"));
-
-    // Await a frame on a condition (FrameReceived predicate), not a sleep.
-    var frame = await ws.WaitForEventAsync("framereceived",
-        new() { Predicate = f => f.Text.Contains("\"symbol\":\"ACME\"") });
-
-    Assert.That(frame.Text, Does.Contain("\"price\""));
-    await Expect(Page.GetByTestId("acme-price")).Not.ToBeEmptyAsync();   // the user-visible effect of the frame
-}
-```
-
-`IWebSocket` exposes `FrameSent` / `FrameReceived` events (`IWebSocketFrame.Text` / `.Binary`), `Close`, and
-`IsClosed()` — enough to assert direction, payload, and lifecycle of what the page actually sends/receives.
-
-## Browser surface 2 — MOCK WebSocket frames (Playwright `RouteWebSocketAsync`, ≥ 1.48)
-
-When you need **deterministic** frames (the real server is flaky, slow, or you're exercising an edge case),
-**mock** the socket with `Page.RouteWebSocketAsync` (added in Playwright **1.48**). By default the routed
-socket does **not** connect to the real server — you script both directions. Register it **before** the page
-opens the socket.
-
-```csharp
-[Test]
-public async Task Should_render_the_alert_banner_When_the_socket_pushes_an_outage()
-{
-    // Mock the socket: when the page sends "subscribe", push a canned outage frame back.
-    await Page.RouteWebSocketAsync("**/ws/alerts", ws =>
+    public Task<IWebSocketFrame> FrameAsync(Regex url, Func<string, bool> matches)
     {
-        ws.OnMessage(message =>
+        var frame = new TaskCompletionSource<IWebSocketFrame>(TaskCreationOptions.RunContinuationsAsynchronously);
+        page.WebSocket += (_, socket) =>
         {
-            if (message.Contains("subscribe"))
-                ws.Send("""{ "type": "outage", "region": "EU" }""");   // server→page, fully deterministic
-        });
-    });
+            if (url.IsMatch(socket.Url))
+            {
+                socket.FrameReceived += (_, received) =>
+                {
+                    if (received.Text is { } text && matches(text))
+                    {
+                        frame.TrySetResult(received);
+                    }
+                };
+            }
+        };
+        return frame.Task;
+    }
 
-    await Page.GotoAsync("/status");
-
-    await Expect(Page.GetByRole(AriaRole.Alert)).ToContainTextAsync("EU outage");
-}
-```
-
-> **Pass-through / intercept-and-modify:** call `ws.ConnectToServer()` inside the handler to get the
-> *server-side* route — forward most frames to the real backend and rewrite only the one under test. **Caveat
-> (Playwright #33370):** driving server-initiated frames *on demand* from the route (outside a message
-> handler) has had quirks — for "server spontaneously emits" scenarios, an observe test against a real test
-> server is more reliable than a mock. **SSE has no dedicated Playwright API** — `EventSource` is just a
-> streaming HTTP GET, so mock it with `Page.RouteAsync` returning a chunked `text/event-stream` body (or
-> observe it via `Page.Response`); a protocol-client SSE test is usually cleaner for asserting the server's
-> event sequence.
-
-## Disciplines & gotchas (apply to every real-time test)
-
-- **Await a condition, never a sleep** — the `AwaitFrame` channel reads / `TaskCompletionSource.WaitAsync` /
-  `WaitForEventAsync(predicate)`. No `Task.Delay`-as-wait, no `Thread.Sleep`, no `Page.WaitForTimeoutAsync`.
-- **Lifecycle:** `ConnectAsync` throwing *is* the failed-handshake assertion (a non-101 upgrade throws); always
-  `CloseAsync(NormalClosure, …)` in teardown and assert the close code where the contract specifies one. Build
-  the drain channel **before** connecting to avoid a race on the first frames.
-- **Server emits N then closes:** `AwaitFrame.TakeAsync(reader, N, timeout)` then assert the close event —
-  never assert the count inside a sleep-bounded window.
-- **Reconnection / backoff:** drop the server (or `ws.Close()` the route) and assert the client reconnects
-  with increasing intervals (SignalR `WithAutomaticReconnect`; SSE reconnects natively, honoring `retry:` and
-  resending `Last-Event-ID` so the server resumes — assert missed events are replayed from that id).
-- **Fragmentation / backpressure:** raw `ClientWebSocket` delivers *frames*, not messages — the `EndOfMessage`
-  reassembly loop above is mandatory; send a large message that spans multiple frames and assert it
-  reassembles. SignalR reassembles for you.
-- **Auth on the socket** — cover all three patterns the contract might use: token in the **query string**
-  (`?access_token=…`, what SignalR uses because browsers can't set WS headers), token via **subprotocol**
-  (`_socket.Options.AddSubProtocol(token)` → `Sec-WebSocket-Protocol`), or token in the **first frame** after
-  connect. Read the token from **env, lazily, never logged** (cross-link `qa-test-login-tokens-dotnet`). For
-  SSE, a server-side `HttpClient` can set `Authorization`, but a *browser* `EventSource` **cannot set headers**
-  → query-param or cookie auth.
-- **Heartbeat (ping/pong):** assert the server's keep-alive and that a missed pong triggers reconnect
-  (SignalR `KeepAliveInterval` / `ServerTimeout`); the raw protocol's control frames are handled below your
-  pump, so assert at the application-heartbeat level if the app sends one.
-- **WS upgrade in integration tests** needs a **real Kestrel port** — the in-memory `TestServer` handler can't
-  perform the upgrade (aspnetcore#31911). Boot `WebApplicationFactory` and host on a real port.
-
-## Anti-patterns
-
-- **`await Task.Delay(2000)` then read one frame.** Races the server; slow when fast, flaky when slow. *Fix:*
-  `AwaitFrame.NextAsync(reader, timeout)` — returns the instant the frame queues, fails if it never does.
-- **Reading `ReceiveAsync` once and assuming you got the whole message.** A logical message can span frames;
-  you'll assert on a truncated payload. *Fix:* loop until `result.EndOfMessage`.
-- **Buffering the SSE response** (`GetAsync` without `ResponseHeadersRead`). The test hangs waiting for an
-  open-ended stream to "finish". *Fix:* `HttpCompletionOption.ResponseHeadersRead` + stream the body.
-- **Subscribing/arming the listener *after* the action.** The first frames fire before you're listening and
-  you miss them. *Fix:* start the pump / arm `WaitForWebSocketAsync` / register `On<T>` **before** the trigger.
-- **Never closing the socket** (or asserting only the payload). The connection leaks across tests and you
-  never catch a bad close code. *Fix:* `CloseAsync(NormalClosure, …)` in teardown; assert `CloseStatus`.
-- **`Thread.Sleep` to "let it reconnect".** *Fix:* assert the reconnected state on a condition (SignalR
-  exposes `State`; await the next frame after the drop).
-- **Asserting on `ClientWebSocket` for a SignalR endpoint.** You'd re-implement negotiate/handshake/framing.
-  *Fix:* use the real `HubConnection`.
-- **Reaching for this skill for a queue/topic.** A discrete message landing on Service Bus/SQS/Kafka is *not*
-  an open stream. *Fix:* `qa-messaging-testing-dotnet` and its siblings.
-- **Token hard-coded or logged.** *Fix:* env, read lazily, never logged (`qa-test-login-tokens-dotnet`).
-
-## Examples
-
-**End-to-end: a WebSocket request/response round-trip with a clean close, asserted lifecycle-first.**
-
-```csharp
-[TestFixture]
-public class EchoSocketTests : AppFixture
-{
-    [Test]
-    public async Task Should_echo_a_message_and_close_with_code_1000()
+    public Task<IWebSocket> ClosedAsync(Regex url)
     {
-        await using var probe = new WebSocketProbe();
-        await probe.ConnectAsync(new Uri($"{BaseWsUri}/ws/echo"));   // 101 upgrade or ConnectAsync throws
-
-        await probe.SendAsync("ping");
-        var echoed = await AwaitFrame.NextAsync(probe.Frames, TimeSpan.FromSeconds(5));
-        Assert.That(echoed, Is.EqualTo("ping"));
-
-        await probe.DisposeAsync();                                  // clean close handshake
-        Assert.That(probe.CloseStatus, Is.EqualTo(WebSocketCloseStatus.NormalClosure));  // code 1000
+        var closed = new TaskCompletionSource<IWebSocket>(TaskCreationOptions.RunContinuationsAsynchronously);
+        page.WebSocket += (_, socket) =>
+        {
+            if (url.IsMatch(socket.Url))
+            {
+                socket.Close += (_, closedSocket) => closed.TrySetResult(closedSocket);
+            }
+        };
+        return closed.Task;
     }
 }
 ```
 
-**Auth via subprotocol (token on the handshake, read from env, never logged):**
-
 ```csharp
-await probe.ConnectAsync(
-    new Uri($"{BaseWsUri}/ws/secure"),
-    configure: opts => opts.AddSubProtocol(TestTokens.AccessToken()));   // env-sourced; see qa-test-login-tokens-dotnet
+using System.Text.RegularExpressions;
+using Example.UiTests.Pages;
+using Example.UiTests.Support;
+using NUnit.Framework;
+
+namespace Example.UiTests.Tests;
+
+public class LiveFeedBrowserTests : BaseTest
+{
+    private static readonly Regex PricesSocket = new("/ws/prices$");
+    private static readonly TimeSpan FrameTimeout = TimeSpan.FromSeconds(10);
+
+    private SocketWatch _sockets = null!;
+    private MockStreams _streams = null!;
+    private DashboardPage _dashboard = null!;
+    private StatusPage _status = null!;
+    private NotificationsPage _notifications = null!;
+
+    [SetUp]
+    public void CreateHelpers()
+    {
+        _sockets = new SocketWatch(Page);
+        _streams = new MockStreams(Page);
+        _dashboard = new DashboardPage(Page);
+        _status = new StatusPage(Page);
+        _notifications = new NotificationsPage(Page);
+    }
+
+    [Test]
+    public async Task Should_ShowTheAcmePrice_When_ThePriceSocketPushesAnAcmeFrame()
+    {
+        var acmeFrame = _sockets.FrameAsync(PricesSocket, text => text.Contains("\"symbol\":\"ACME\""));
+
+        await _dashboard.OpenAsync();
+
+        var frame = await acmeFrame.WaitAsync(FrameTimeout);
+        await Expect(_dashboard.AcmePrice, $"ACME price after frame {frame.Text}").Not.ToBeEmptyAsync();
+    }
+
+    [Test]
+    public async Task Should_CloseThePriceSocket_When_TheUserSignsOut()
+    {
+        var closed = _sockets.ClosedAsync(PricesSocket);
+        await _dashboard.OpenAsync();
+
+        await _dashboard.SignOutAsync();
+
+        var socket = await closed.WaitAsync(FrameTimeout);
+        Assert.That(socket.IsClosed, Is.True, $"{socket.Url} after sign-out");
+    }
+}
 ```
 
-**Composing with a test-data builder for the frame payload (4+ fields → builder, per the global rules):**
+- `FrameAsync` and `ClosedAsync` are called **before** the action; the returned task is awaited after it.
+- The frame's payload is `IWebSocketFrame.Text` (or `.Binary`), never the frame itself as a string;
+  `IsClosed` is a property, not a method.
+- A missed frame fails at the `WaitAsync` line; `BaseTest` keeps the trace.
+
+## Browser surface 2 — MOCK WebSocket frames (`RouteWebSocketAsync`)
+
+When you need **deterministic** frames, mock the socket with `Page.RouteWebSocketAsync` (≥ 1.48). By default
+the routed socket does **not** connect to the server — you script both directions. Register it **before** the
+page opens the socket.
 
 ```csharp
-var payload = ChatMessages.Standard().WithText("hello").WithRoom("general").Build();   // qa-test-data-builder-dotnet
-await probe.SendAsync(JsonSerializer.Serialize(payload));
+using System.Text.Json;
+using Microsoft.Playwright;
+
+namespace Example.UiTests.Support;
+
+public sealed class MockStreams(IPage page)
+{
+    public Task PushOutageOnSubscribeAsync(string region) =>
+        page.RouteWebSocketAsync("**/ws/alerts", socket =>
+            socket.OnMessage(frame =>
+            {
+                if (frame.Text == "subscribe")
+                {
+                    socket.Send(JsonSerializer.Serialize(new { type = "outage", region }));
+                }
+            }));
+
+    public async Task ServeNotificationsAsync(params string[] messages)
+    {
+        await page.RouteAsync("**/api/notifications/stream", route => route.FulfillAsync(new() { Status = 204 }));
+        await page.RouteAsync("**/api/notifications/stream", route => route.FulfillAsync(new()
+        {
+            Status = 200,
+            ContentType = "text/event-stream",
+            Body = string.Concat(messages.Select((message, index) => $"id: {index + 1}\ndata: {message}\n\n")),
+        }), new() { Times = 1 });
+    }
+}
 ```
+
+```csharp
+[Test]
+public async Task Should_ShowTheOutageBanner_When_TheAlertSocketPushesAnOutage()
+{
+    await _streams.PushOutageOnSubscribeAsync("EU");
+
+    await _status.OpenAsync();
+
+    await Expect(_status.AlertBanner).ToContainTextAsync("EU outage");
+}
+```
+
+- `OnMessage` receives an `IWebSocketFrame`; compare `frame.Text`, never the frame.
+- **Pass-through / rewrite:** `socket.ConnectToServer()` inside the handler returns the server side — forward
+  most frames, rewrite the one under test. For "the server spontaneously emits" scenarios, an OBSERVE test
+  against a real test server is more reliable than driving the route on demand (Playwright #33370).
+
+## Browser surface 3 — SSE in the browser: a fixed event set, then `204`
+
+`EventSource` is a plain HTTP `GET`. A route **cannot stream**: `FulfillAsync` sends one body and ends the
+response, so the page reads every event at once — and then `EventSource` **reconnects and fetches them again**.
+A "chunked `text/event-stream`" route body is that defect. `MockStreams.ServeNotificationsAsync` serves the
+events once (`Times = 1`) over a route answering `204`, which the SSE spec defines as "stop reconnecting";
+routes match newest first, so the `Times = 1` route answers the first request and the `204` every one after.
+
+```csharp
+[Test]
+public async Task Should_ListEveryPushedNotification_When_TheFeedDeliversThem()
+{
+    await _streams.ServeNotificationsAsync("Build 42 passed", "Deploy started");
+
+    await _notifications.OpenAsync();
+
+    await Expect(_notifications.Items).ToHaveTextAsync(["Build 42 passed", "Deploy started"]);
+}
+```
+
+- This proves **rendering** only. Timing between events, the reconnect after a drop, `retry:` and the
+  `Last-Event-ID` resume need a **real SSE test server** — or the protocol-client `SseProbe`
+  (`references/details.md` §3) for the server's own sequence.
+- That every browser stops on a routed `204` is the SSE spec's rule, not yet run here; if a browser keeps
+  reconnecting, the duplicated list shows it at once.
+
+## Anti-patterns
+
+- **`await Task.Delay(2000)` then read one frame.** Races the server. *Fix:* `AwaitFrame.NextAsync` /
+  `TaskCompletionSource` + `WaitAsync(timeout)`.
+- **`ws.WaitForEventAsync(...)`, `ws.IsClosed()`, `OnMessage(message => message.Contains(...))`.** None compiles
+  against `IWebSocket` / `IWebSocketRoute`. *Fix:* `FrameReceived` + a `TaskCompletionSource`; `IsClosed` is a
+  property; `frame.Text`.
+- **A "chunked" `text/event-stream` route body for browser SSE.** It arrives at once and replays on reconnect.
+  *Fix:* the fixed event set + `204`; a real server for timing.
+- **Subscribing after the action.** The first frames fire before you listen. *Fix:* arm first, act, then await.
+- Protocol-client mistakes — one `ReceiveAsync` per message, a buffered SSE response, a socket never closed,
+  `ClientWebSocket` against a SignalR hub — are listed in `references/details.md`.
 
 ## Rules (hard constraints)
 
-- **Real-time = await a condition, never a sleep.** Drain into a `Channel<T>`, await with a
-  `CancellationTokenSource` deadline (`AwaitFrame`) / `TaskCompletionSource.WaitAsync(timeout)` /
-  Playwright `WaitForEventAsync(predicate)`. **No `Task.Delay`/`Thread.Sleep`/`WaitForTimeoutAsync` as a wait.**
-- **Drain before you act** — start the receive pump / arm `WaitForWebSocketAsync` / register `On<T>` **before**
-  the trigger, or you race the first frames.
-- **Assert the whole lifecycle** — the 101 upgrade (`ConnectAsync` throwing = the negative assertion), the
-  frames, **and** the clean close (`WebSocketCloseStatus.NormalClosure` / the contract's close code). "N then
-  close" = take N, *then* assert close.
-- **Reassemble fragments** on raw `ClientWebSocket` (`EndOfMessage` loop); use `HubConnection` for SignalR
-  (don't hand-roll the protocol); `HttpCompletionOption.ResponseHeadersRead` for SSE (never buffer the stream).
-- **Pick the transport and surface deliberately** — WS (bidirectional) vs SSE (server-push, free reconnect);
-  protocol-client (contract) vs browser (observe if the real server suffices, `RouteWebSocketAsync` to mock).
-- **Auth tokens from env, read lazily, never logged** (query / subprotocol / first-frame; browser `EventSource`
-  can't set headers — query/cookie). WS upgrade integration tests need a **real Kestrel port**.
-- **Async all the way** (`await` every call; `await using` the probes; never `.Result`/`.Wait()`); the SUT's
-  stream client is **constructor-injected** with its URL/`HttpClient`; test names `Should_X_When_Y`; one
-  logical assertion per test; builders for 4+-field payloads; structured logging; no secrets in code.
+- **Real-time = await a condition, never a sleep.** `AwaitFrame` channel reads,
+  `TaskCompletionSource.WaitAsync(timeout)`; no `Task.Delay`/`Thread.Sleep`/`WaitForTimeoutAsync` as a wait.
+- **Drain before you act** — start the pump / subscribe `Page.WebSocket` / register `On<T>` / route the socket
+  **before** the trigger.
+- **Assert the whole lifecycle** — the 101 upgrade (`ConnectAsync` throwing is the negative assertion), the
+  frames, **and** the clean close. "N then close" = take N, *then* assert the close.
+- **Browser SSE is a fixed event set + `204`**; timing, reconnect and `Last-Event-ID` go to a real server.
+- **Browser fixtures derive from `BaseTest`** and reach the page through page objects and helpers built in
+  `[SetUp]`; no `Playwright.CreateAsync()`, no `try`/`catch`/`finally` in a test.
+- **Auth tokens from env, never logged**; async all the way; `Should_X_When_Y` names; PascalCase test ids.
 
 ## Cross-references
 
-- `qa-realtime-stream-testing-java` — same skill, Java 21 / TestNG: **OkHttp `WebSocket`** (`newWebSocket` +
-  `WebSocketListener` draining into a `BlockingQueue`) / Java-WebSocket, **Awaitility** (`await().atMost().until(...)`)
-  as the condition-wait, **OkHttp-SSE** (`EventSources` + `EventSourceListener`) or Spring `WebClient`
-  `Flux<ServerSentEvent>` + `StepVerifier` for SSE, Playwright-Java (`page.waitForWebSocket`,
-  `ws.onFrameReceived`, `page.routeWebSocket`). Structure ported, not code.
-- `qa-realtime-stream-testing-typescript` — same skill, Node 24 + TS: the **`ws`** lib / native global
-  `WebSocket` (the **Node-22** boundary — polyfill via `undici` on Node 20, which is EOL — flag it), a promise-with-timeout +
-  Vitest **`vi.waitFor`** as the condition-wait, native `EventSource` / the **`eventsource`** package for SSE,
-  Playwright-TS (`page.waitForEvent('websocket')`, `ws.on('framereceived')`, `page.routeWebSocket`).
-- `qa-messaging-testing-dotnet` — the **eventual-consistency lineage** this skill leans on:
-  a stream frame is a message that arrives later. The **boundary**: messaging = discrete messages on a
-  queue/topic with a consumer; this skill = an open, continuous WS/SSE stream. Same condition-wait discipline,
-  different shape. (Plus `-sqs` `sqs` / `-kafka` `kafka` / `-rabbitmq` `rabbitmq`.)
-- `qa-network-mocking-dotnet` — the **HTTP** request/mock counterpart and the
-  source of the "register before the action" ordering rule; use it for plain request/response, this skill for
-  the open socket. (SSE-in-the-browser mocking reuses its `Page.RouteAsync`.)
-- `qa-ui-test-writer-playwright-dotnet` — the `PageTest` base / page objects the **browser-surface** tests
-  layer on; the no-`WaitForTimeoutAsync` discipline originates there.
-- `qa-test-login-tokens-dotnet` — tokens for an authenticated socket (query / subprotocol / first-frame),
-  read from env, never logged.
+- `qa-realtime-stream-testing-java` · `qa-realtime-stream-testing-typescript` — the sibling stacks; same four
+  ideas, their own protocol clients and await primitives.
+- `qa-messaging-testing-dotnet` — discrete messages on a queue, not an open stream.
+- `qa-network-mocking-dotnet` — plain HTTP mocking and the "register before the action" rule.
+- `qa-ui-test-writer-playwright-dotnet` — `BaseTest` and page objects the browser surface builds on.
+- `qa-test-login-tokens-dotnet` — tokens for an authenticated socket, read from env, never logged.
