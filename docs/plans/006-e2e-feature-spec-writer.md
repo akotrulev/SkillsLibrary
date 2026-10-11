@@ -2,7 +2,7 @@
 
 **Goal:** One agent, `qa-feature-spec-writer`, run per feature as `/qa-<stack>:feature-spec`. It traces a feature once and writes two documents in the service repo: the feature document and an **e2e-only** test-case suite. Every case runs through a public surface or a test hook the deployed environment already has. A separate QA repository implements the suites; the agent writes no code and runs nothing.
 
-**Status:** Planned 2026-10-11. Nothing built. Next: E1. Prerequisite outside the plan: plan 005's 8 commits are not on `origin/master` (005 H1 report, D1), so the installed plugins carry neither 005 nor this plan until `git push origin master` runs. This machine's shell has no GitHub credential, so the push is the user's job.
+**Status:** E1 built 2026-10-11 (agent, command, six registrations; unverified — no gate has run). Next: E2 (skill fixes, docs, the gate). Prerequisite outside the plan: plan 005's 8 commits are not on `origin/master` (005 H1 report, D1), so the installed plugins carry neither 005 nor this plan until `git push origin master` runs. This machine's shell has no GitHub credential, so the push is the user's job.
 
 ## 1. What already exists, and what is missing
 
@@ -157,6 +157,7 @@ Cost: a third file couples to the section headings of the other two. The gate's 
 - Command: the same shape as `test-cases.md`, adopting the new agent; `argument-hint: [feature sentence + entry points | #<inventory row>]`.
 - Register the agent and the command in all three `qa-*` plugin entries, next to `qa-test-case-designer` and `test-cases.md`.
 - **Not in E1:** the §5 skill fixes, the catalog and README, and the gate (all E2).
+- **As built (2026-10-11):** as planned, no divergence. `qa/manual/agents/qa-feature-spec-writer.md` (description 440 chars, 5-step table, e2e rule, report) and `qa/manual/commands/feature-spec.md`; registered in qa-java, qa-dotnet and qa-typescript beside `qa-test-case-designer` / `test-cases.md` (`.claude-plugin/marketplace.json`, 6 added lines, `json.tool` OK). Cited headings, for E2's step 6: be-feature-documenter — `Steps`, `Document contract — \`docs/features/<NNN>-<feature-slug>.md\``, `Step 4 checklist`; qa-test-case-designer — `Code mode — a feature in the code → test basis`, `Steps`, `Step 1 detail`…`Step 5 detail`, `Output contract`. Unverified: the gate has not run; `Step 4 checklist` is a bold lead-in, not a `#` heading, so grep it as text.
 
 ### E2 — the three skill fixes, the docs and the gate
 
@@ -211,7 +212,64 @@ Run them in order, one session each, in the SkillsLibrary checkout on `master`; 
 | — | `git push origin master` | **the user** | E2 | — |
 | H1 | `human` | **the user** | E2, the push | two features |
 
-All three blocks are live.
+E1 landed 2026-10-11; its block is deleted. E2 and H1 are live.
+
+---
+
+### E2 — the three skill fixes, the docs and the gate
+
+**Stack:** `docs` · **Agent:** `general-purpose`
+**Deliverable:** §5's three fixes are in place, the catalog and README list the agent and the command, and §6 passes.
+**Depends on:** E1 (the agent the docs describe and the gate checks).
+**Budget:** ~110k — CLAUDE.md 25k, this plan §3.3, §5, §6 and E1's As built 10k, `feature-trace/SKILL.md` 10k, `connections.md` 8k, `cross-feature-test-design/SKILL.md` 6k, `test-case-writer/SKILL.md` 10k, catalog and README sections 10k, the E1 agent for the gate's step 6 8k, edits ~10k, gate output ~10k.
+**Gate:** §6, in order. Fix what it finds: a failure may belong to E1.
+
+- Apply §5's three rows exactly as written there.
+- `docs/skills-catalog.md`: the `qa-*` row of the command table (`:33`) gains `:feature-spec`; one bullet under the qa/manual agents next to `qa-test-case-designer` (`:144`); the `qa/manual/` sentence (`:58`) names three agents.
+- `README.md`: the same command and agent count changes wherever it lists the `qa-*` surface.
+- Run §6. Then close out; this task deletes the last automated block, but H1's block stays, so the plan does **not** move.
+
+### H1 — run it on real features (the user)
+
+**Stack:** `human` · **Agent:** `human` · **Owner:** the user
+**Deliverable:** H1's As built records whether two INVENTORY rows produced documents and suites that the QA repo can automate without asking the service repo anything, and which hooks were requested.
+**Depends on:** E2, and the push (Status).
+**Gate:** the checklist in H1's prompt block.
+
+## Close-out — every task
+
+Before you stop, in this order, in this file:
+
+1. **As built** — append a dated `**As built (YYYY-MM-DD):**` bullet to your task block: what differed
+   from the plan, the ids and names you assigned, what is built but unverified, and the `file:line` or
+   command output that proves the deliverable exists. Never edit an earlier note.
+2. **Decisions** — where you built something differently from the plan, append a dated `D<n>` to
+   `## Decisions` with both readings. A divergence is recorded, never absorbed.
+3. **The blocks below yours** — rewrite, in place, every prompt block whose assumptions your work
+   changed (a renamed file, a changed signature, a moved gate), and write any block left
+   `Blocked on <your id>` from what you now know.
+4. **Your own block** — delete it, and update the line above the blocks that says which have landed.
+   Stopping mid-task: keep it, with a `Picking up from:` line. Blocked: keep it, naming the blocker and
+   its owner.
+5. **Status** — rewrite the header `**Status:**` line: what is built, what is next, what is built but
+   unverified.
+6. **Filing** — if your deletion left no blocks, rewrite `**Status:**` one final time (what the plan
+   delivered, what is still unverified) and `git mv` this plan into `docs/plans/implemented/`, same
+   name and number — a `solution-planner` pack moves its whole initiative folder.
+7. **Commit** — the code, its tests and these plan edits together, in one commit.
+
+## Prompts — one per task
+
+Run them in order, one session each, in the SkillsLibrary checkout on `master`; never create a branch. Each block is complete on its own. Only E2 runs the gate (§6). No prompt writes into any project's `docs/business-model/`. **The cost, accepted and stated once:** E1's commit is ungated, so the tree is not known to validate until E2, and the plan cannot be stopped after E1 and trusted.
+
+| # | Stack | Agent | Depends on | Budget |
+|---|---|---|---|---|
+| E1 | `docs` | `general-purpose` | — | ~110k |
+| E2 | `docs` | `general-purpose` | E1 | ~110k |
+| — | `git push origin master` | **the user** | E2 | — |
+| H1 | `human` | **the user** | E2, the push | two features |
+
+E1 landed 2026-10-11; its block is deleted. E2 and H1 are live.
 
 ---
 

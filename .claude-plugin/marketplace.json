@@ -220,6 +220,7 @@
         "./qa/java/commands/performance.md",
         "./qa/java/commands/ui.md",
         "./qa/manual/commands/test-cases.md",
+        "./qa/manual/commands/feature-spec.md",
         "./qa/reporting/java/commands/reporting.md",
         "./qa/manual/commands/test-plan.md"
       ],
@@ -233,6 +234,7 @@
         "./qa/java/agents/qa-performance-java.md",
         "./qa/java/agents/qa-ui-java.md",
         "./qa/manual/agents/qa-test-case-designer.md",
+        "./qa/manual/agents/qa-feature-spec-writer.md",
         "./qa/manual/agents/qa-test-planner.md",
         "./qa/reporting/agents/qa-reporting-java.md"
       ]
@@ -358,6 +360,7 @@
         "./qa/dotnet/commands/performance.md",
         "./qa/dotnet/commands/ui.md",
         "./qa/manual/commands/test-cases.md",
+        "./qa/manual/commands/feature-spec.md",
         "./qa/reporting/dotnet/commands/reporting.md",
         "./qa/manual/commands/test-plan.md"
       ],
@@ -371,6 +374,7 @@
         "./qa/dotnet/agents/qa-performance-dotnet.md",
         "./qa/dotnet/agents/qa-ui-dotnet.md",
         "./qa/manual/agents/qa-test-case-designer.md",
+        "./qa/manual/agents/qa-feature-spec-writer.md",
         "./qa/manual/agents/qa-test-planner.md",
         "./qa/reporting/agents/qa-reporting-dotnet.md"
       ]
@@ -485,6 +489,7 @@
         "./qa/_shared/commands/security.md",
         "./qa/cicd/typescript/commands/cicd.md",
         "./qa/manual/commands/test-cases.md",
+        "./qa/manual/commands/feature-spec.md",
         "./qa/reporting/typescript/commands/reporting.md",
         "./qa/typescript/commands/api.md",
         "./qa/typescript/commands/bdd.md",
@@ -498,6 +503,7 @@
         "./qa/_shared/agents/qa-security.md",
         "./qa/cicd/agents/qa-cicd-typescript.md",
         "./qa/manual/agents/qa-test-case-designer.md",
+        "./qa/manual/agents/qa-feature-spec-writer.md",
         "./qa/manual/agents/qa-test-planner.md",
         "./qa/reporting/agents/qa-reporting-typescript.md",
         "./qa/typescript/agents/qa-api-typescript.md",
