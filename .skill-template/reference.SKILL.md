@@ -1,5 +1,6 @@
 ---
 name: <skill-name>
+# name rule: topic only — no domain or stack prefix, unique within its plugin, not a reserved name (CONTRIBUTING.md, "Names and registration")
 description: Use when the user asks to explain, describe, or look up <concept> in <stack>. Triggers: "what is X", "explain X in <stack>", "when should I use X". Do NOT use for scaffolding code (use <sibling generator>) or reviewing existing code (use <sibling reviewer>).
 ---
 

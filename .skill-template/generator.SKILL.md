@@ -1,5 +1,6 @@
 ---
 name: <skill-name>
+# name rule: topic only — no domain or stack prefix, unique within its plugin, not a reserved name (CONTRIBUTING.md, "Names and registration")
 description: Use when the user asks to scaffold, generate, create, or set up <thing> in <stack>. Triggers: "scaffold X", "create a Y for Z", "set up <thing>". Do NOT use for explaining concepts (use <sibling reference>) or reviewing existing code (use <sibling reviewer>).
 ---
 

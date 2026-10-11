@@ -1,6 +1,6 @@
 ---
 name: story-review
-description: Use when stories or epics were authored by someone else (client, another team, a PO) and need a review-only readiness audit before refinement or test design — INVEST, AC quality, testability, dependency hygiene. Triggers: "review these stories", "are these stories ready for the sprint", "prep these tickets for refinement", "are these ACs testable". Do NOT use to write or fix stories (`business-analysis:stories`), shape epics (`business-analysis:epics`), or scope a vague ask (`business-analysis:scoping`).
+description: Use when stories or epics were authored by someone else (client, another team, a PO) and need a review-only readiness audit before refinement or test design — INVEST, AC quality, testability, dependency hygiene. Triggers: "review these stories", "are these stories ready for the sprint", "prep these tickets for refinement", "are these ACs testable". Do NOT use to write or fix stories (`stories`), shape epics (`epics`), or scope a vague ask (`scoping`).
 ---
 
 # Backlog Reviewer

@@ -1,6 +1,6 @@
 ---
 name: eval-sets
-description: Use when building held-out evaluation data to measure a small LLM/VLM you trained — golden test sets, multiple-choice/exact-match items, rubric and LLM-judge data, contamination checks, and canary strings. Triggers: "build an eval set for my model", "golden test set", "how do I measure my fine-tuned model", "LLM-as-judge eval data", "check my model isn't contaminated". Do NOT use for training data itself (`training-data:instruction-sft` etc.), or the eval-running harness (qa `ai-feature-testing`).
+description: Use when building held-out evaluation data to measure a small LLM/VLM you trained — golden test sets, multiple-choice/exact-match items, rubric and LLM-judge data, contamination checks, and canary strings. Triggers: "build an eval set for my model", "golden test set", "how do I measure my fine-tuned model", "LLM-as-judge eval data", "check my model isn't contaminated". Do NOT use for training data itself (`instruction-sft` etc.), or the eval-running harness (qa `ai-feature-testing`).
 ---
 
 # Training Data — Evaluation Sets

@@ -1,6 +1,6 @@
 ---
 name: process-flow
-description: Use when turning requirements (story, BRD, feature description) into a business-flow model — a BPMN-disciplined Mermaid flowchart with named actors, every decision exit labeled, failure/timeout paths modeled — to the KB. Triggers: "map the flow for this feature", "diagram the checkout process", "what are all the paths through X", "what happens when this step fails or times out". Do NOT use for entity lifecycles (`business-analysis:state-grid`), rule tables (`business-analysis:decision-table`), or UI screen flows.
+description: Use when turning requirements (story, BRD, feature description) into a business-flow model — a BPMN-disciplined Mermaid flowchart with named actors, every decision exit labeled, failure/timeout paths modeled — to the KB. Triggers: "map the flow for this feature", "diagram the checkout process", "what are all the paths through X", "what happens when this step fails or times out". Do NOT use for entity lifecycles (`state-grid`), rule tables (`decision-table`), or UI screen flows.
 ---
 
 # BA — Flow Mapper

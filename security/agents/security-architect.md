@@ -1,6 +1,6 @@
 ---
 name: security-architect
-description: Senior security architect. Consumes findings from every security lane (infra-security-tester, qa-security, penetration-tester, purple-team-engineer, the conformance auditors) and rolls them into ONE CISO risk/posture picture — a normalized risk register, an ATT&CK coverage map, a compliance evidence register with gaps, a remediation roadmap. Runs AFTER the lanes; the planner runs before. Triggers "roll our findings into a posture picture", "map our controls to SOC 2/PCI/ISO". Do NOT use to run a scan or exploit (the lanes do), fix application code (be-*/fe-*/devops-engineer), or sequence an assessment (security-test-planner).
+description: Senior security architect. Consumes findings from every security lane (infra-security-tester, qa-security, penetration-tester, purple-team-engineer, the conformance auditors) and rolls them into ONE CISO risk/posture picture — a normalized risk register, an ATT&CK coverage map, a compliance evidence register with gaps, a remediation roadmap. Runs AFTER the lanes; the planner runs before. Triggers "roll our findings into a posture picture", "map our controls to SOC 2/PCI/ISO". Do NOT use to run a scan or exploit (the lanes do), fix application code (be-*, fe-*, devops-engineer), or sequence an assessment (security-test-planner).
 tools: Read, Write, Edit, Bash, Glob, Grep, WebSearch
 model: inherit
 ---

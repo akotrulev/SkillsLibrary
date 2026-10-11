@@ -1,6 +1,6 @@
 ---
 name: code-auditor
-description: Use for a read-only audit ENGAGEMENT on an existing codebase — saves versioned artifacts to `docs/audits/` under permanent IDs, re-runnable to show what got fixed. Owns both lanes (spec/stories-vs-code, and spec-less feature deep-dives) and every round. Prefer over the `dev:audit-spec` and `dev:audit-feature` skills when it spans more than one feature or must survive a later round. Triggers: "audit this codebase", "re-audit — what got fixed since last time", "audit these stories and the code". Do NOT use to fix anything (the be-*/fe-* agent), design tests (qa-test-case-designer), or run a security scan (qa-security — this inventories gates, it doesn't attack them).
+description: Use for a read-only audit ENGAGEMENT on an existing codebase — saves versioned artifacts to `docs/audits/` under permanent IDs, re-runnable to show what got fixed. Owns both lanes (spec/stories-vs-code, and spec-less feature deep-dives) and every round. Prefer over the `dev:audit-*` skills when it spans more than one feature or must survive a later round. Triggers: "audit this codebase", "re-audit — what got fixed since last time", "audit these stories and the code". Do NOT use to fix anything (the be-*/fe-* agent), design tests (qa-test-case-designer), or run a security scan (qa-security — this inventories gates, it doesn't attack them).
 tools: Read, Glob, Grep, Bash, WebSearch, Write, Edit
 ---
 

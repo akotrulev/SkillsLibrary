@@ -1,6 +1,6 @@
 ---
 name: initial-access
-description: Use to turn a validated vulnerability into an actual foothold during an authorized penetration test. Consumes a qa-security exploit-validation proof as feedstock. Triggers "get a foothold from this validated vuln", "chain the confirmed SQLi into a shell". Not for proving a single vuln without chaining (`qa-security`), escalating (`penetration-testing:privilege-escalation`), or scanning (`penetration-testing:recon-enumeration`). Owned/lab only, under a committed scope file; production a separate gate.
+description: Use to turn a validated vulnerability into an actual foothold during an authorized penetration test. Consumes a qa-security exploit-validation proof as feedstock. Triggers "get a foothold from this validated vuln", "chain the confirmed SQLi into a shell". Not for proving a single vuln without chaining (`qa-security`), escalating (`privilege-escalation`), or scanning (`recon-enumeration`). Owned/lab only, under a committed scope file; production a separate gate.
 ---
 
 # Penetration Testing — Initial Access / Exploitation (Metasploit · sqlmap · custom exploit)

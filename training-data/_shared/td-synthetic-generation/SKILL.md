@@ -1,6 +1,6 @@
 ---
 name: synthetic-generation
-description: Use when generating training data with a teacher model (the Claude API) — distillation, self-instruct/evol-instruct, self-critique, and preference-pair generation. Triggers: "generate SFT data with Claude", "synthesize instruction pairs", "distill from a teacher model", "make DPO pairs by sampling and judging", "evol-instruct harder prompts". Do NOT use for the record schema (`training-data:dataset-formats`), dedup/decontamination (`training-data:data-quality`), or API mechanics (`ai-development/claude-api`).
+description: Use when generating training data with a teacher model (the Claude API) — distillation, self-instruct/evol-instruct, self-critique, and preference-pair generation. Triggers: "generate SFT data with Claude", "synthesize instruction pairs", "distill from a teacher model", "make DPO pairs by sampling and judging", "evol-instruct harder prompts". Do NOT use for the record schema (`dataset-formats`), dedup/decontamination (`data-quality`), or API mechanics (`ai-development/claude-api`).
 ---
 
 # Training Data — Synthetic Generation (cross-stage engine)

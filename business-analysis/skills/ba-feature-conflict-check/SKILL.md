@@ -1,6 +1,6 @@
 ---
 name: conflict-check
-description: Use when checking a new or changed feature against the WHOLE project's business model for conflicts — normalize into trigger/actor/action/data/constraint/state tuples, sweep pairwise against the KB with the 11-class taxonomy; every finding gets a boundary condition. Triggers: "does this feature conflict with anything", "sweep this story against the model", "cross-feature impact check". Do NOT use for single-doc ambiguity flagging (`requirements-breakdown`) or scoping (`business-analysis:scoping`).
+description: Use when checking a new or changed feature against the WHOLE project's business model for conflicts — normalize into trigger/actor/action/data/constraint/state tuples, sweep pairwise against the KB with the 11-class taxonomy; every finding gets a boundary condition. Triggers: "does this feature conflict with anything", "sweep this story against the model", "cross-feature impact check". Do NOT use for single-doc ambiguity flagging (`requirements-breakdown`) or scoping (`scoping`).
 ---
 
 # BA — Feature Conflict Sweep

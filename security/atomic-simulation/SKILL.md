@@ -1,6 +1,6 @@
 ---
 name: atomic-simulation
-description: Use to run MITRE ATT&CK techniques against an authorized lab/owned environment, so a paired assertion proves the guardrails still fire — the red half of a purple-team run. Atomic Red Team + Caldera + Stratus. Owned/lab only, under a committed scope file. Triggers "simulate T1003 against our lab", "test our detections for drift". Not for exploiting a real target (`penetration-testing:initial-access`), proving one app vuln (`qa-security`), or asserting the detection fired (`penetration-testing:detection-validation`).
+description: Use to run MITRE ATT&CK techniques against an authorized lab/owned environment, so a paired assertion proves the guardrails still fire — the red half of a purple-team run. Atomic Red Team + Caldera + Stratus. Owned/lab only, under a committed scope file. Triggers "simulate T1003 against our lab", "test our detections for drift". Not for exploiting a real target (`initial-access`), proving one app vuln (`qa-security`), or asserting the detection fired (`detection-validation`).
 ---
 
 # Purple Team — Atomic Simulation (Atomic Red Team · Apache Caldera · Stratus Red Team)

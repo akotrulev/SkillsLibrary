@@ -1,6 +1,6 @@
 ---
 name: credential-attacks
-description: Use to recover and crack credentials during an authorized penetration test — offline/online cracking, LAN capture, secrets harvesting. Every recovered secret is reported as blast radius, never contents. Triggers "crack these captured hashes", "harvest creds from the foothold". Not for reusing creds across hosts (`penetration-testing:lateral-movement`), gaining the foothold (`penetration-testing:initial-access`), or escalating (`penetration-testing:privilege-escalation`). Owned/lab only, under a committed scope file.
+description: Use to recover and crack credentials during an authorized penetration test — offline/online cracking, LAN capture, secrets harvesting. Every recovered secret is reported as blast radius, never contents. Triggers "crack these captured hashes", "harvest creds from the foothold". Not for reusing creds across hosts (`lateral-movement`), gaining the foothold (`initial-access`), or escalating (`privilege-escalation`). Owned/lab only, under a committed scope file.
 ---
 
 # Penetration Testing — Credential Attacks (hashcat · hydra · Responder · secrets harvesting)

@@ -2,7 +2,7 @@
 
 These rules apply to every skill in this library unless a specific skill explicitly overrides them.
 
-> **Full catalog:** the per-domain inventory of every skill, agent, and published plugin — plus the scope list and the 66-command slash surface — lives in [`docs/skills-catalog.md`](docs/skills-catalog.md). Consult it to learn what exists and which agent owns it. This file holds only the behavioral rules every skill follows.
+> **Full catalog:** the per-domain inventory of every skill, agent, and published plugin — plus the scope list and the 64-command slash surface — lives in [`docs/skills-catalog.md`](docs/skills-catalog.md). Consult it to learn what exists and which agent owns it. This file holds only the behavioral rules every skill follows.
 
 ## Role
 
@@ -236,23 +236,23 @@ Per stack:
 
 ## Repository map
 
-Each top-level folder owns a domain, is **stack-first and domain-encapsulated** (a folder's skills are loaded only by its own agents), and ships as one or more marketplace plugins. Full per-skill detail is in [`docs/skills-catalog.md`](docs/skills-catalog.md).
+Each top-level folder owns a domain, is **stack-first and domain-encapsulated** (a folder's skills are loaded only by its own agents), and ships as one or more marketplace plugins (21 in all). **Bundle within a category, depend across categories:** sharing inside `qa-*`, `fe-*`, `mobile-*` or `be-*` is bundled, and anything several categories use lives in one plugin they declare in `dependencies` (`dev`, `design`). Full per-skill detail is in [`docs/skills-catalog.md`](docs/skills-catalog.md).
 
 | Folder | Domain | Plugin(s) |
 |---|---|---|
 | `qa/` | Test automation + manual test design, reporting, CI/CD, security scanning | `qa-java` · `qa-dotnet` · `qa-typescript` |
 | `frontend/blazor/`, `frontend/react/` | Frontend dev stacks (+ `design/`, `auth/auth0-*`) | `fe-blazor` · `fe-react` |
 | `mobile/` | Mobile dev stacks — React Native (Expo), iOS (Swift), Android (Kotlin + KMP) + the shared store-compliance / security / release / observability / in-app-purchases layer (+ `design/`, `auth/auth0-{react-native,ios,android}`) | `mobile-react-native` · `mobile-ios` · `mobile-android` |
-| `design/` | Stack-agnostic aesthetic-craft layer | bundled into `fe-*` |
+| `design/` | Stack-agnostic aesthetic-craft layer | `design` (a dependency of `fe-*` and `mobile-*`) |
 | `backend/` | Design-pattern + persistence dev stacks; the sandboxed Python upload worker (`backend/python/`); planning (`solution-planner`) + reverse-docs (`be-documenter`) | `be-dotnet` · `be-java` · `be-node` · `be-python` |
-| `observability/` | OpenTelemetry → Grafana telemetry | bundled into `be-*` |
+| `observability/` | OpenTelemetry → Grafana telemetry | bundled within the category into `be-dotnet` · `be-java` · `be-node` |
 | `data/` | Database engineering (8 engines) | `data` |
 | `devops/` | Platform/delivery + infra-security | `devops` |
 | `security/` | Offensive (pentest + purple-team) and defensive/governance lanes | `penetration-testing` · `security-governance` |
 | `business-analysis/` | Upstream requirements authoring + cross-feature reasoning | `business-analysis` |
 | `training-data/` | LLM/VLM training-data engineering | `training-data` |
 | `tooling/` | Agent-drivable surfaces over a project — capability contract → MCP server / CLI | `tooling` |
-| `engineering-practices/` | Language-agnostic developer-workflow spine (the `dev` plugin) + audit lanes | bundled into all stack plugins |
+| `engineering-practices/` | Language-agnostic developer-workflow spine + audit lanes; also `backend/_shared` planning and documentation | `dev` (a dependency of `qa-*`, `fe-*`, `mobile-*`, `be-*`, `devops`, `business-analysis`) |
 
 **Under construction — ignore, do not upload to the remote:** `auth/cognito-{blazor,react}`, `communication/`.
 

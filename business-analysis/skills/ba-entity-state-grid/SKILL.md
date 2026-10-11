@@ -1,6 +1,6 @@
 ---
 name: state-grid
-description: Use when modeling a business entity's lifecycle (Order, Subscription, User…) as one state × event table shared across ALL features, each transition annotated by its owning feature — persisted to the KB. Triggers: "what states can an order be in", "model the subscription lifecycle", "which feature moves it to Cancelled". Do NOT use for process/step flows (`business-analysis:process-flow`), rule tables (`business-analysis:decision-table`), or state-transition TEST design (`test-design-techniques`).
+description: Use when modeling a business entity's lifecycle (Order, Subscription, User…) as one state × event table shared across ALL features, each transition annotated by its owning feature — persisted to the KB. Triggers: "what states can an order be in", "model the subscription lifecycle", "which feature moves it to Cancelled". Do NOT use for process/step flows (`process-flow`), rule tables (`decision-table`), or state-transition TEST design (`test-design-techniques`).
 ---
 
 # BA — State Modeler

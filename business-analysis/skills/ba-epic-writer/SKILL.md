@@ -1,6 +1,6 @@
 ---
 name: epics
-description: Use when converting a scoped requirements document into one or more epics — one capability-sized outcome each, sliced into user stories, with a measurable outcome and a plain-English section (user-story line, what gets built, how it fits) carrying no technology at all. Triggers: "write an epic for X", "slice this requirements doc into epics", "what are the epics for this initiative". Do NOT use for high-level scoping (`business-analysis:scoping`) or individual stories with AC (`business-analysis:stories`).
+description: Use when converting a scoped requirements document into one or more epics — one capability-sized outcome each, sliced into user stories, with a measurable outcome and a plain-English section (user-story line, what gets built, how it fits) carrying no technology at all. Triggers: "write an epic for X", "slice this requirements doc into epics", "what are the epics for this initiative". Do NOT use for high-level scoping (`scoping`) or individual stories with AC (`stories`).
 ---
 
 # Epic Writer

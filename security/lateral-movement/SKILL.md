@@ -1,6 +1,6 @@
 ---
 name: lateral-movement
-description: Use to move from one compromised host to other in-scope systems during an authorized penetration test — credential reuse, AD attack-path mapping, K8s/cloud pivots. Triggers "pivot from this foothold to the subnet", "map the AD attack paths to Domain Admin". Not for gaining the foothold (`penetration-testing:initial-access`), escalating (`penetration-testing:privilege-escalation`), or cracking creds (`penetration-testing:credential-attacks`). Owned/lab only, under a committed scope file; never touch out-of-scope hosts.
+description: Use to move from one compromised host to other in-scope systems during an authorized penetration test — credential reuse, AD attack-path mapping, K8s/cloud pivots. Triggers "pivot from this foothold to the subnet", "map the AD attack paths to Domain Admin". Not for gaining the foothold (`initial-access`), escalating (`privilege-escalation`), or cracking creds (`credential-attacks`). Owned/lab only, under a committed scope file; never touch out-of-scope hosts.
 ---
 
 # Penetration Testing — Lateral Movement (NetExec · impacket · BloodHound CE · ligolo-ng/chisel/sshuttle · K8s pivots)

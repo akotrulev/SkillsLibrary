@@ -6,7 +6,7 @@ plugin. Skill names drop the domain and stack prefixes the plugin namespace alre
 (`/fe-react:fe-react-forms` → `/fe-react:forms`). Commands follow one scheme, and no name collides with
 another name in the same plugin or with a Claude Code built-in.
 
-**Status:** M1 and R1 landed 2026-10-11. M1: `.claude-plugin/marketplace.json` lists the 21 plugins at version 3.0.0 with `dependencies`, the 64 command files sit at their §4 paths, and `tools/plugin-surface-check.py` exists. R1: all 459 renamed skills carry their §5 `name:` and old skill names, §4 slash forms and family wildcards are rewritten across 730 files (D12 lists where R1 went beyond §6). D1 is next. **Built but unverified:** nothing has been run (the plan gates once, in D1) — not `claude plugin validate`, the checker, the token audit, the version check or a YAML parse of the rewritten descriptions. README, catalog, CLAUDE.md and CONTRIBUTING still describe the old bundling layout until D1. Baseline (2026-10-11) for D1: `claude plugin validate .` passes, `tools/token-audit.py` exits 1 on 90 pre-existing body-budget violations, and a typical project loads **25,281** always-on description tokens for 219 skill entries covering 182 distinct skills.
+**Status:** M1, R1 and D1 landed 2026-10-11. The marketplace lists 21 plugins at 3.0.0 with `dependencies`, 459 skills carry their §5 names, the docs describe the new layout, and §9's gate passed in D1: `json.tool` exit 0, `claude plugin validate .` and `--strict` both "✔ Validation passed" with no advice, `tools/plugin-surface-check.py` OK, token audit 0 skill-description and 0 agent-description violations with 89 body violations (baseline 90), `tools/qa-version-check.py` OK, old-name sweep 0 matches. Always-on `desc(tok)` for `dev` + `design` + `be-java` + `fe-react` + `qa-typescript` + `data` + `business-analysis` is **20,217** against the 25,281 baseline (−5,064). H1 is next and is the user's. **Built but unverified:** install behaviour — whether an installed plugin pulls in a new dependency on `/plugin marketplace update` (Q1), the `dev` / `design` dependency enablement in a real project, and that an agent still loads its skills by path from an installed cache. Nothing is pushed.
 ---
 
 ## 1. What already exists, and what is missing
@@ -775,6 +775,19 @@ plans in `docs/plans/` that are not under `implemented/` (`CONFORMANCE-AUDIT-PLA
 is history of finished work and stays. Cost: a reader of those plans sees a mix of new `plugin:name` forms
 and old family wildcards.
 
+**D13 — D1 fixed four things the gate found, which M1 and R1 had left (2026-10-11).** (a) 21 skill
+descriptions and 3 agent descriptions went over the 500 / 650-character caps because R1's
+`<plugin>:<name>` forms are longer than the old names. Reading "fix" as "shorten": a reference to a skill
+of the **same plugin** inside a `description:` now uses the bare name (`training-data:eval-sets` →
+`eval-sets`), which resolves inside its plugin, and three wordings were trimmed (`code-auditor`,
+`business-analyst`, `penetration-tester`). The alternative, raising the caps, was rejected because the
+budget is what keeps the listing under 1% of context. (b) The sweep matched `/devops-engineer` inside
+"be-*/fe-*/devops-engineer" in four agents and `marketplace.json`, which R1 had restored as agent lists;
+they now read "be-*, fe-*, devops-engineer", so §9.6 needs no exception. (c) `solution-planner.md:63` held
+a brace list of three folder names the sweep matched; it now lists the three paths. (d) The old catalog
+claim that `business-analysis` bundles the documenters is replaced by `dev` registering them (§2.2).
+Cost: a description that names a sibling in the same plugin by bare name reads as ambiguous outside that plugin.
+
 ## Answered questions (2026-10-11)
 
 **O1 — Can a plugin declare dependencies?** Yes, with `dependencies` in `plugin.json` or the marketplace
@@ -897,6 +910,7 @@ churn ×1.2.
 - Run §9. Then write H1's prompt-block checklist from what actually landed, rewrite `Status`, and
   **leave the plan in `docs/plans/`**: H1 still holds a block.
 - **Not in D1:** pushing, editing the user's `~/.claude/settings.json`, reinstalling plugins (H1).
+- **As built (2026-10-11):** README now opens with the 21-plugin install list (one line per plugin, `dev` and `design` included), the dependency table, per-project `enabledPlugins` and the typing rules (§7), a `dev` / internals section, and one command table per plugin plus `dev` and `design`; the "Code-touching skills deliberately have no command" paragraph and the `ep-*` paragraphs are gone. The catalog's scope paragraph is a registration table with the unregistered list, its command section is a typed-form table (64 files, 70 registrations), and the per-domain "bundled" lines for `design`, `observability`, `solution-planner`, the documenters, `engineering-practices` and the orientation cache / code-comments are rewritten. CLAUDE.md: "64-command", the Repository map's `design/`, `observability/`, `engineering-practices/` rows and the plugin sentence. CONTRIBUTING: a "Names and registration" section (§2.1, §3.1–§3.3, the checker) replaces the prefix rule and the old naming bullet. The three `.skill-template/*.SKILL.md` carry the name rule beside `name:`. Gate output is in `Status`; strict also passed. Divergences are D13. Proof: `python3 tools/plugin-surface-check.py` → `OK`; `python3 tools/token-audit.py --violations-only | grep 'budget violations'` → 0 / 89 / 0 / 53; the sweep script (scratchpad, not committed) → `hits 0`.
 
 ### H1 — verify the installed result
 
@@ -949,70 +963,23 @@ Run them in order, one session each, opened from Plan Queue. Each block is compl
 | D1 | `docs` | `general-purpose` | M1, R1 | ~125k |
 | H1 | `human` | **the user** | D1, pushed | minutes |
 
-M1 and R1 have landed; their blocks are deleted. The D1 and H1 blocks are live.
+M1, R1 and D1 have landed; their blocks are deleted. The H1 block is live.
 
 ---
 
-### D1 — documentation, the gate, and close-out (general-purpose, docs)
-
-````
-You are `general-purpose`. Task D1 of docs/plans/004-plugin-surface-rework.md: document the new plugin
-surface, then run the plan's only gate and fix whatever it finds.
-
-Deliverable: §9's gate passes end to end; README, `docs/skills-catalog.md`, CLAUDE.md, CONTRIBUTING
-and `.skill-template/*` describe the §2 layout, §3 rules and §4 names.
-
-Read, in this order:
-1. CLAUDE.md.
-2. The plan: §2, §3, §4, §7, §9, the Decisions, task D1, the "As built" notes of M1 and R1, and
-   "Close-out — every task".
-3. `README.md` — the install section and §"Slash commands".
-4. `docs/skills-catalog.md` — only "Scope & published plugins" and "Slash-command surface".
-5. `CONTRIBUTING.md` and `.skill-template/*.SKILL.md`.
-
-Build: task D1's bullets — README per §7, the catalog's two sections, CLAUDE.md's count and
-Repository-map rows, CONTRIBUTING's "Names and registration" section, and the template note.
-
-Gate (this is the last runnable task, so it carries the plan's only gate, in run order):
-  python3 -m json.tool .claude-plugin/marketplace.json > /dev/null
-  claude plugin validate .                 # must end "✔ Validation passed"
-  claude plugin validate . --strict        # record the result; fix only dependency problems
-  python3 tools/plugin-surface-check.py    # must print OK
-  python3 tools/token-audit.py --violations-only   # 0 description violations, ≤ 90 body violations
-  python3 tools/token-audit.py             # record dev+design+be-java+fe-react+qa-typescript+data+business-analysis desc(tok) vs 25,281
-  python3 tools/qa-version-check.py        # must print OK
-  the §9.6 old-name sweep                  # zero matches in §6's scope
-Fix what it finds, because a failure may belong to M1 or R1. Use the checker's and the sweep's output
-as the fix list.
-
-Traps:
-- `tools/token-audit.py --violations-only` exits 1 on the 90 pre-existing body violations. That is
-  the baseline, not a failure. The number must not rise.
-- The validator's advice about missing README install lines is cleared by §7's one-line-per-plugin
-  install list. Check its output after writing README.
-- R1 already rewrote every old skill name, §4 slash form and family wildcard in README, the catalog,
-  CLAUDE.md and CONTRIBUTING mechanically. What it left for you is **layout prose**: "bundled into all
-  stack plugins", the `ep-*` counts ("6 … skills", "all sixteen plugins", "eight stack plugins"), the
-  `dev-*` command-family paragraph and bare `dev-design` / `dev-plan-feature` mentions in the catalog,
-  and "Skill names carry the … prefix" claims. Search for those before you rewrite.
-- Bare agent and command-file identifiers (`qa-api-java`, `devops-engineer`, `qa-security`) are meant to
-  stay (D12 c); the §9.6 sweep must not flag them.
-- R1 did not parse the YAML of the 261 rewritten `description:` lines (no PyYAML in the isolated
-  interpreter); `claude plugin validate .` is the first real parse, so read its output for frontmatter errors.
-- After the gate, write H1's prompt-block checklist from what actually landed (plugin names, typed
-  forms, the measured token figure). Then **do not** move the plan: H1 still holds a block.
-
-Commit: `docs(plugins): dependency layout, naming rules and command tables; gate passed (004 D1)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
-
 ### H1 — verify the installed result (the user)
 
-**Blocked on D1** — D1 writes this checklist when it lands, from the plugin names, typed forms and
-token figure that actually shipped. It covers: commits on `origin/master`; `/plugin marketplace update
-skills-library`; switching the skills-library plugins to `false` in `~/.claude/settings.json` and
-enabling a project's set in its `.claude/settings.json` (§7); confirming `dev` / `design` installed as
-dependencies (installing them explicitly if Q1's answer is "only on install", and recording that
-answer); `/dev:` and `/design:` listing what §4 says; `claude plugin details be-java` for the
-always-on figure; one short `/dev:audit` run to prove an agent still loads its skills by path. Then
-the user deletes this block, rewrites `Status`, and moves the plan to `docs/plans/implemented/`.
+Run in a real project, after the commits are on `origin/master`. Tick each item; any miss stays here.
+
+- [ ] `/plugin marketplace update skills-library` shows version **3.0.0**.
+- [ ] User scope: every `*@skills-library` entry is `false` in `~/.claude/settings.json`. In the project's `.claude/settings.json` set, for example,
+      `{ "enabledPlugins": { "be-java@skills-library": true, "fe-react@skills-library": true, "qa-typescript@skills-library": true } }`.
+- [ ] `/plugin` lists **`dev`** (and **`design`** with `fe-react`) as installed and enabled without you enabling them. If not, install them
+      (`/plugin install dev@skills-library`, `/plugin install design@skills-library`) and **record the answer to Q1** (did the update pull the new dependency, or only a fresh install?) in the plan's open questions.
+- [ ] `/dev:` lists `refine`, `design`, `plan-feature`, `plan-system`, `document-system`, `document-feature`, `audit`; `/design:` lists `audit` and the craft skills (`corpus`, `tokens`, `visual-identity`, …).
+- [ ] The front doors answer: `/be-java`, `/fe-react`, `/qa-typescript:api`, `/data` (if enabled), `/devops` (if enabled). Old forms (`/qa-api-typescript`, `/dev-design`, `/code-auditor`) are gone.
+- [ ] No skill appears under two plugins in the `/` menu, and none of the unregistered internals (`orientation-cache`, `code-comments`, `audit-engine`, `claude-api`) is listed.
+- [ ] `claude plugin details be-java` (and `fe-react`, `qa-typescript`): the always-on description figure is in line with the measured **20,217** tokens for the seven-plugin set (`dev` + `design` + `be-java` + `fe-react` + `qa-typescript` + `data` + `business-analysis`), against 25,281 before.
+- [ ] One short `/dev:audit` run on a small project: the agent loads its skills by path (it reads `engineering-practices/code-comments` and `orientation-cache` without error).
+
+Then delete this block, rewrite `Status` one final time (what the plan delivered, what is still unverified), and `git mv docs/plans/004-plugin-surface-rework.md docs/plans/implemented/` in the same commit.

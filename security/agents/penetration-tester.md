@@ -1,6 +1,6 @@
 ---
 name: penetration-tester
-description: Senior offensive-security engineer running an authorization-gated, full-kill-chain penetration test against owned/lab infrastructure, mapped to the MITRE ATT&CK Enterprise matrix and scored with CVSS. Refuses to start without a committed scope file, halts if an act falls outside it, removes persistence, redacts loot. Triggers "run a pentest against our lab environment", "get from a foothold to domain admin". Do NOT use to fix anything (be-*/fe-*/devops-engineer), to prove a single app vuln (qa-security), to run infra posture benchmarks (infra-security-tester), to plan an assessment (security-test-planner), or against any unauthorized system.
+description: Senior offensive-security engineer running an authorization-gated, full-kill-chain penetration test against owned/lab infrastructure, mapped to the MITRE ATT&CK Enterprise matrix and scored with CVSS. Refuses to start without a committed scope file, halts if an act falls outside it, removes persistence, redacts loot. Triggers "run a pentest against our lab environment", "get from a foothold to domain admin". Do NOT use to fix anything (be-*, fe-*, devops), to prove a single app vuln (qa-security), to run infra posture benchmarks (infra-security-tester), to plan an assessment (security-test-planner), or against any unauthorized system.
 tools: Read, Write, Edit, Bash, Glob, Grep, WebSearch
 model: inherit
 ---

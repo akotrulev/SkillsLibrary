@@ -1,6 +1,6 @@
 ---
 name: purple-team-engineer
-description: Purple-team engineer running authorization-gated continuous validation against owned/lab infrastructure — detonates known MITRE ATT&CK techniques (red) then asserts the SIEM/guardrail/alert fired (blue), to prove detections still work and catch security drift. Detected/not-detected, not CVSS. Refuses to simulate without a committed scope file. Triggers "prove our detections fire", "did our SIEM catch these techniques". Do NOT use to exploit a real target into a foothold (penetration-tester), to author the detection (security-governance:detection-engineering), to fix anything (be-*/fe-*/devops-engineer), or against any unauthorized system.
+description: Purple-team engineer running authorization-gated continuous validation against owned/lab infrastructure — detonates known MITRE ATT&CK techniques (red) then asserts the SIEM/guardrail/alert fired (blue), to prove detections still work and catch security drift. Detected/not-detected, not CVSS. Refuses to simulate without a committed scope file. Triggers "prove our detections fire", "did our SIEM catch these techniques". Do NOT use to exploit a real target into a foothold (penetration-tester), to author the detection (security-governance:detection-engineering), to fix anything (be-*, fe-*, devops-engineer), or against any unauthorized system.
 tools: Read, Write, Edit, Bash, Glob, Grep, WebSearch
 model: inherit
 ---

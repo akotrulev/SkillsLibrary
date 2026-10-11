@@ -51,7 +51,7 @@ Step-by-step orchestrator agents live in `<domain>/agents/<name>.md`. Copy `.ski
 
 **Vocabulary is fixed.** An agent's own operating procedure is numbered in **steps** (`## Steps`, `| # | Step | Goal | …`); the work items any plan it writes hands out are **tasks** (flat and ordered, ids prefixed by the family of work — `C1`, `B1…Bn`, `F1…Fn` — one deliverable each) — see the Planning rules in `CLAUDE.md`. Never call either a *phase* or a *slice*, in a heading, a table, or prose.
 
-**The brownfield structure is mandatory.** Every agent must be able to orient in an existing codebase/suite/schema, fix (Mode A: reproduce → triage → smallest correct change → verify → sweep the class), and extend (Mode B: reuse existing seams, re-enter only the touched steps) — not just author from zero. That means: the two-modes note up top, the four-part `## Working on existing <X> (brownfield)` section, the `Mode: FIX | EXTEND` brownfield output contract, and the `dev:*` loading sentence (or the inlined-discipline variant when the agent's plugin doesn't bundle `engineering-practices/` — see `data-architect`). An agent PR without this section is incomplete.
+**The brownfield structure is mandatory.** Every agent must be able to orient in an existing codebase/suite/schema, fix (Mode A: reproduce → triage → smallest correct change → verify → sweep the class), and extend (Mode B: reuse existing seams, re-enter only the touched steps) — not just author from zero. That means: the two-modes note up top, the four-part `## Working on existing <X> (brownfield)` section, the `Mode: FIX | EXTEND` brownfield output contract, and the `dev:*` loading sentence (or the inlined-discipline variant when the agent's plugin doesn't depend on `dev` — see `data-architect`). An agent PR without this section is incomplete.
 
 ## Writing a good `description`
 
@@ -72,8 +72,27 @@ Bad:
 ## Naming conventions
 
 - Folders: `kebab-case`
-- Skill names in frontmatter: the domain prefix plus the folder name. Prefixes: `ep`, `be`, `fe`, `qa`, `data`, `design`, `observability`, `devops`, `secgov`, `pentest`, `purpleteam`, `ba`, `td`, `tool`, `auth`, `mobile`. A stack-scoped skill adds its stack — after the prefix in backend and frontend (`be-dotnet:patterns-apply`, `dev:plan-delivery`, `fe-react:data-grid`, `mobile-ios:navigation`), as a suffix in qa (`qa-dotnet:api-project-setup`). A folder that already starts with its prefix is not doubled (`design/design-tokens` → `design:tokens`). Never rename a published skill; installs resolve it by name
 - Stack-specific skills: include the stack in the path (`auth/auth0-react`, not `auth/react`)
+- Folders do not move when a skill is renamed — paths are how agents load skills, and about 140 files cite them. A `name:` may differ from its folder.
+
+## Names and registration
+
+**Bundle within a category, depend across categories.** One plugin per category is installed per project (`qa-*`, `fe-*`, `mobile-*`, `be-*` are the categories with several stacks; every other plugin is its own). Sharing inside a category is bundled and duplicates nothing. Anything used by more than one category is registered in exactly one plugin (`dev`, `design`) and the others declare it in `dependencies` by bare name. A skill folder or agent file is never registered by plugins of two categories. Internals loaded by path (`engineering-practices/{agent-orientation-cache,code-comments,standards-audit-engine}`, `auth/_shared/*`) are not registered.
+
+**Skills**
+- `name:` is the topic only. The plugin namespace already carries the domain and the stack, so a name never starts with the plugin's name or a domain prefix (`be-`, `fe-`, `qa-`, `mobile-`, `ba-`, `ep-`, `td-`, `tool-`, `secgov-`, `pentest-`, `purpleteam-`, `auth-`, `be-shared-`, `mobile-shared-`) and never ends in a stack token or `-shared`. The forms skill of `fe-react` is named `forms` and typed `/fe-react:forms`.
+- Unique within every plugin that registers it, counting command names too: skills and commands share one slash namespace per plugin.
+- One meaning per word: `-setup` creates a project, `-review` reviews, `audit` is a saved read-only sweep, `concepts` explains how a framework works.
+
+**Commands**
+- A plugin's front-door agent command is the plugin's name (`/fe-react`, `/be-java`, `/data`, `/devops`).
+- Every read-only conformance audit is `audit` (`/be-dotnet:audit`, `/design:audit`, `/dev:audit`).
+- Every other command is a short role or topic (`/qa-java:api`, `/penetration-testing:pentest`).
+- Agent identifiers do not change (`code-auditor`, `solution-planner`, `devops-engineer`); plans' `Agent:` lines bind on them. Only command file names change.
+
+**Reserved names.** No skill name or command stem may equal a Claude Code built-in (list as of 2026-10-11): `add-dir agents artifacts bug clear claude-api code-review compact config context cost dataviz doctor effort exit export fast feedback fewer-permission-prompts focus help hooks ide init install-github-app keybindings-help login logout loop mcp memory migrate-installer model output-style permissions plan plugin plugin-authoring pr-comments privacy-settings release-notes resume review rewind run schedule security-review simplify status statusline terminal-setup todos update-config upgrade usage vim workflow-authoring`.
+
+**Before a commit that touches `.claude-plugin/marketplace.json` or a `name:`**, `python3 tools/plugin-surface-check.py` must print `OK`; it enforces unique names per plugin, the reserved list, no prefixes, one category per skill and agent, resolvable dependencies with no cycle, and that every registered path exists. Rename a skill only with the references that cite it, and record it in the plan that renamed it.
 
 ## Testing a new skill
 
@@ -96,3 +115,4 @@ Skills are versioned via git. If you make a breaking change to a skill's output 
 - [ ] At least one full example in the skill
 - [ ] Tested with 3+ trigger phrases
 - [ ] Listed in the appropriate section of the root `README.md` status table
+- [ ] `name:` is the topic only and `python3 tools/plugin-surface-check.py` prints `OK`
