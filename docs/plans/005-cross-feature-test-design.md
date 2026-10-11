@@ -10,7 +10,7 @@ session looks the connections up there instead of re-deriving them. The three `q
 then automate the new case kinds. They run scheduled jobs on demand, control the clock at a time
 boundary, fire concurrent requests, and deliver a message or webhook twice.
 
-**Status:** K1, D1, Q1, Q2 and A1 landed 2026-10-11. K1: `business-analysis:dependency-map`, its golden example, the KB contract and feature slice, the three reasoning-lane edits and the `business-analyst` edits. D1: `dev:doc-feature-trace` has the seventh inventory (Edges) and the seam recipes, area and feature documents have *How it connects*, and `be-documenter` writes the dependency map. Q1: `requirements-breakdown` writes §8 Connections (schema constraints moved to the data dictionary), `qa-*:cross-feature-test-design` exists with its golden example, registered in all three `qa-*` plugins (D14 records four departures from §9.3). Built but unverified: nothing has been run (the gate is A3), and description lengths and file sizes are counted by hand or `wc` only. Q2: `test-case-writer` writes parameterized field cases and the chain, async, temporal and concurrency forms; `qa-test-case-designer` runs five steps with Code mode and the depth gate; `qa-test-planner` plans from the slice. A1: `qa-typescript:time-and-concurrency-testing` (jobs on demand, controlled clock, barrier races, duplicate delivery), the `qa-api-typescript` Step 3 / Mode B wiring and three review checks, registered in `qa-typescript` only; nothing was run, samples uncompiled. Next: A2. O1 is answered: the automation is in this
+**Status:** K1, D1, Q1, Q2, A1 and A2 landed 2026-10-11. K1: `business-analysis:dependency-map`, its golden example, the KB contract and feature slice, the three reasoning-lane edits and the `business-analyst` edits. D1: `dev:doc-feature-trace` has the seventh inventory (Edges) and the seam recipes, area and feature documents have *How it connects*, and `be-documenter` writes the dependency map. Q1: `requirements-breakdown` writes §8 Connections (schema constraints moved to the data dictionary), `qa-*:cross-feature-test-design` exists with its golden example, registered in all three `qa-*` plugins (D14 records four departures from §9.3). Built but unverified: nothing has been run (the gate is A3), and description lengths and file sizes are counted by hand or `wc` only. Q2: `test-case-writer` writes parameterized field cases and the chain, async, temporal and concurrency forms; `qa-test-case-designer` runs five steps with Code mode and the depth gate; `qa-test-planner` plans from the slice. A1: `qa-typescript:time-and-concurrency-testing` (jobs on demand, controlled clock, barrier races, duplicate delivery), the `qa-api-typescript` Step 3 / Mode B wiring and three review checks, registered in `qa-typescript` only; nothing was run, samples uncompiled. A2: `qa-java:time-and-concurrency-testing` (same shape, plus `references/helpers.md`), the `qa-api-java` wiring and three review checks, registered in `qa-java` only; nothing was run, samples uncompiled. Next: A3. O1 is answered: the automation is in this
 plan, as tasks A1–A3. The plan changes skills and agents only, so the gate (§11) proves structure, not
 quality. The new stack skills' code samples are never compiled. Whether the suites actually get deeper,
 and whether the automation patterns run, is unverified until H1 runs the lane on a real project.
@@ -733,6 +733,8 @@ Cost: the example and the plan's §9.3 no longer match line for line. §9.3 stay
 
 Cost: the designer is 30 characters over its +2,000 bullet.
 
+**D16 — A2's skill keeps helper code in `references/helpers.md` (2026-10-11).** A1's reading: the helpers sit inline in SKILL.md. As built: Java's helpers (`MutableClock`, config, `Race`, `CronJobRunner`) are longer than TypeScript's, and inline the body was 20,988 characters against §10's 16,000; the three blocks moved out and SKILL.md points to them. Cost: a reader opens a second file for the helper code; A3 mirrors this.
+
 ## Answered questions (2026-10-11)
 
 **O1 — Should the stack agents automate the new case kinds (on-demand job runs, clock control,
@@ -1125,6 +1127,14 @@ carries §7.8's three checks.
 - **Marketplace.** Register `./qa/java/skills/time-and-concurrency-testing` in `qa-java` only.
 - **Not in A2:** TypeScript and .NET; product code; README and the catalog (A3).
 
+**As built (2026-10-11):** as planned, with one structural difference: the helper code lives in a reference file (D16).
+- `qa/java/skills/time-and-concurrency-testing/SKILL.md`: 15,953 characters (`wc -m`, under 16,000); description 483 characters. Same sections and order as A1's (When to use · When NOT to use · Inputs · Procedure · Anti-patterns · Hard rules · Handoffs · APIs checked). `references/helpers.md` holds `CronJobRunner` (kubectl, no catch), `MutableClock` + `ControlledClockConfig` (`@TestConfiguration` + `@Primary`), and `Race.startTogether` (ready latch + start latch).
+- ShedLock trap taught: default `PROXY_METHOD` applies the lock on a direct call and a held lock silently skips; `lockAtLeastFor` keeps it held after success and uses the lock provider's clock, not the app `Clock`; so release the lock row before each run (`DELETE … WHERE name = :name` in a probe) and assert each run executed.
+- `qa/java/agents/qa-api-java.md`: Step 3 entry plus brownfield Mode B step 6 (seam or named deferral to `be-java`); net +485 characters (23,467 → 23,952).
+- `qa/java/skills/api-test-author/review/SKILL.md`: three checks (blocker / major / major) after the Jackson row. `.claude-plugin/marketplace.json`: registered in `qa-java` only (`python3 -m json.tool` exit 0; nothing else run).
+- APIs checked (documentation and search, not compiled): Spring Framework docs on `@MockitoBean` (bean override arrived in Framework 6.2; the Boot-side `@MockBean` deprecation in 3.4 and removal in 4.0 is from secondary sources only) · Spring Boot 3.5.16 is the last OSS 3.5 release · ShedLock README (`PROXY_METHOD` default since 4.0, lock applies on direct call, held lock skips) · Quartz `Scheduler.triggerJob(JobKey)` per the 2.1.7 javadoc listing (async behaviour stated from knowledge, not extracted from the page) · TestNG annotations page, 7.10.1 `@BeforeMethod(firstTimeOnly)` javadoc (default runs per invocation), latest 7.12.0 · Awaitility via the repo's existing pins. Unchecked: `PROXY_SCHEDULER` direct-call behaviour (inferred), Boot 3.2/3.3 `@MockBean` behaviour (known, not looked up), Quartz 2.5 vs Boot-managed version.
+- Unverified: no sample was compiled or run; description and size counted with `wc` only.
+
 ### A3 — qa-dotnet: `time-and-concurrency-testing`, docs, the gate, and close-out
 
 **Stack:** `docs` · **Agent:** `general-purpose`
@@ -1236,54 +1246,9 @@ in the checkout you are given, commit there, and never create a branch.
 | A3 | `docs` | `general-purpose` | A1, A2, Q2, Q1, D1, K1 | ~125k |
 | H1 | `human` | **the user** | A3 | one real feature |
 
-Three blocks are live. K1, D1, Q1, Q2 and A1 have landed (their blocks are deleted).
+Two blocks are live (A3, H1). K1, D1, Q1, Q2, A1 and A2 have landed (their blocks are deleted).
 
 ---
-
-### A2 — qa-java: `time-and-concurrency-testing` and the API lane wiring (general-purpose, docs)
-
-````
-You are a general-purpose agent working in the SkillsLibrary repo. Task A2 of
-docs/plans/005-cross-feature-test-design.md: `qa-java:time-and-concurrency-testing` — A1's skill for
-Java 21 + TestNG + Spring Boot 3.x — plus the qa-api-java wiring and three review checks.
-
-Read, in this order:
-1. CLAUDE.md (Test code rules, Simplicity, Comments, Version policy).
-2. The plan: §7.5, §7.8, §9.3 (cases 6, 9, 10, 11, 13), §10, D11, D13, task A2 and the As built notes
-   of Q2 and A1, and "Close-out — every task".
-3. qa/typescript/skills/time-and-concurrency-testing/SKILL.md — the shape to mirror, section for section.
-4. qa/java/agents/qa-api-java.md (Input modes, Step 3 row at line ~139).
-5. qa/java/skills/api-test-author/writer/SKILL.md and .../review/SKILL.md.
-6. qa/java/skills/feature-flag-testing/SKILL.md (in-process override) and the Awaitility section of
-   qa/java/skills/failure-injection-testing/SKILL.md.
-7. qa/java/skills/messaging-testing/SKILL.md, the producer section of one reference, and the poller in
-   qa/java/skills/db-testing/verification-queries/SKILL.md.
-
-Before writing an API into the skill, confirm it against current documentation for the Spring Boot 3.x
-minors the stack supports: the test-time bean override for a `java.time.Clock` bean (which annotation
-exists in which minor — teach the up-level form only with its down-level twin), calling a `@Scheduled`
-method through the context, Quartz `triggerJob`, TestNG `invocationCount`, ShedLock's behaviour when
-the scheduled method is called directly. Record the versions you checked in your As built.
-
-Build (task A2's bullets, in order): the SKILL.md (template description with `Java 21 / TestNG`,
-≤ 500 characters, counted) · qa-api-java (Step 3 entry, Mode B mapping, be-java as hook owner; net ≤ 800)
-· review checks · marketplace registration in qa-java only.
-
-Traps:
-- TestNG, not JUnit, is the Java test runner here (CLAUDE.md Stack defaults) — repeat with
-  `invocationCount`, not `@RepeatedTest`.
-- A ShedLock lock left by the previous run can make an idempotency re-run silently do nothing — the
-  test would pass for the wrong reason.
-- Code calling `Instant.now()`/`LocalDateTime.now()` without a `Clock` cannot be time-controlled —
-  defer and hand the seam to be-java; never sleep to the boundary.
-- Same race, duplicate-delivery and deferral rules as A1 (§7.8, D13).
-
-Gate: none — this plan gates once, in A3. Do not run `claude plugin validate`, the checkers,
-tools/token-audit.py, `./gradlew` or any script.
-
-Commit: `feat(qa-java): time-and-concurrency-testing — jobs on demand, clock, races, duplicate delivery (005 A2)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
 
 ### A3 — qa-dotnet: `time-and-concurrency-testing`, docs, the gate, and close-out (general-purpose, docs)
 
@@ -1327,6 +1292,8 @@ Fix what it finds — a failure may belong to any task above you, not only to yo
 Traps:
 - Code reading `DateTime.UtcNow`/`DateTimeOffset.UtcNow` directly cannot be time-controlled — defer and
   hand the `TimeProvider` seam to be-dotnet; never sleep to the boundary.
+- Shape: A2's skill keeps the clock, race-gate and cron-runner helper code in `references/helpers.md` to stay
+  under 16,000 characters (its SKILL.md is 15,953); do the same for the .NET helpers and mirror that layout.
 - A `BackgroundService` loop is usually not invocable from a test — that is a hook request, not a reason
   to wait for its timer.
 - Token audit: SKILL.md body violations ≤ 89, agent-file violations ≤ 53, 0 description violations,

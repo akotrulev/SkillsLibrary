@@ -191,6 +191,7 @@
         "./qa/java/skills/security-testing/passive-scan",
         "./qa/java/skills/production-uptime-checks",
         "./qa/java/skills/test-data-builder",
+        "./qa/java/skills/time-and-concurrency-testing",
         "./qa/java/skills/ui-test-author/appium",
         "./qa/java/skills/ui-test-author/playwright",
         "./qa/java/skills/ui-test-author/review",

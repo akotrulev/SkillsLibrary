@@ -45,6 +45,9 @@ Reviews Java API test code against the patterns enforced by `qa/java/skills/api-
 | Created resources tracked and deleted in `@AfterMethod(alwaysRun = true)` | Cleanup inlined in the test body instead of registered | major |
 | Unexpected errors fail loudly with an identifying message | Empty `catch`, catch-and-continue, or an assertion whose failure names no id/subject | major |
 | Deserialization failures name the Jackson path and body | A bare `MismatchedInputException` trace with no attached body | major |
+| A job test never waits for the real schedule (`qa/java/skills/time-and-concurrency-testing`) | A `Thread.sleep` or long poll until the cron fires, or the production schedule edited so the job fires soon | blocker |
+| A boundary test runs with a controlled clock or a stated skew margin | A cut-off / DST / month-end test with no replaced `Clock`, no test-clock endpoint, and no margin larger than skew plus latency named in the test | major |
+| A race test has a start gate and `invocationCount`; a duplicate-delivery test is not defeated by broker deduplication | Sequential calls called a race; a `for` loop or `threadPoolSize` as the barrier; asserting which request won; a duplicate publish with the same broker message / deduplication id | major |
 | Every assertion states one expected condition | `assertTrue(s == SC_OK \|\| s == SC_NO_CONTENT)`, `anyOf(...)` / `either().or()` matchers — on a status, a field, a size, or a duration | major |
 | Test names describe behavior | `test1`, `testGet`, `it_works` | minor |
 | Deserialization uses a typed DTO | `Map<String,Object>` / `jsonPath().get(...)` in assertions | major |
