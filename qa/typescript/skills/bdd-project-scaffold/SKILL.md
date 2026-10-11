@@ -3,7 +3,7 @@ name: qa-bdd-project-setup-typescript
 description: Use when adding a BDD/Gherkin layer onto a TypeScript UI/mobile test project, or standing one up from zero — playwright-bdd (on the Playwright Test runner) for web, CucumberJS + WebdriverIO + Appium for mobile. Triggers: "set up playwright-bdd", "add a BDD layer to our Playwright tests in TS", "wire bddgen and fixtures". Do NOT use to write feature files (`feature-file-writer`), generate step definitions (`gherkin-step-code`), or build page objects (`page-object-design`).
 ---
 
-# BDD Project Scaffold (TypeScript / Node 24)
+# BDD Project Scaffold (TypeScript / Node 24, 22 maintenance)
 
 Wires a **BDD/Gherkin layer** onto a TypeScript test project: packages, runner config, the `features/` folder, the state/driver-sharing mechanism, the per-scenario lifecycle, and the smoke `.feature` that proves the rig parses and runs. It produces the **empty rig** — no feature files, no step logic; those come from `feature-file-writer` and `gherkin-step-code`.
 
@@ -20,16 +20,23 @@ TypeScript has **no single BDD framework** that spans web and mobile — the run
 
 The two paths never share a runner. A project that tests **both** scaffolds both rigs side by side (a `web/` and a `mobile/` folder), not one merged config. The central difference downstream — **fixtures vs World** — is taught in full by `gherkin-step-code`.
 
-## Stack (pinned, verify latest at author time)
+## Stack
 
-**Web — playwright-bdd**
-- Node ≥ 20, TypeScript (`strict: true`)
-- `playwright-bdd` (latest line **9.2.x**), peer `@playwright/test` **≥ 1.44**
-- Model: `npx bddgen` compiles `features/**/*.feature` → generated Playwright specs in `.features-gen/`; `npx playwright test` runs them (free parallelism, auto-wait, trace/video, HTML report)
-- Page objects shared as **fixtures**; reporting via Playwright reporters + built-in `cucumberReporter('html', …)`
+**Web — playwright-bdd** — the pins are the **Versions** table of `qa/typescript/skills/ui-test-author/playwright/SKILL.md`:
+
+| Package | Version |
+|---|---|
+| `@playwright/test` | 1.64.0 |
+| `playwright-bdd` | 9.2.1 |
+| `allure-playwright`, `allure-js-commons` | 3.13.0 (needs `@playwright/test` ≥ 1.62) |
+
+- Node 24 (22 maintenance; Node 20 is EOL — flag it), TypeScript (`strict: true`)
+- Model: `npx bddgen` compiles `features/**/*.feature` → generated Playwright specs in `.features-gen/`; `npx playwright test` runs them (free parallelism, auto-wait, the failure evidence, HTML report)
+- Page objects shared as **fixtures**; reporting via Playwright reporters, Allure, and the built-in `cucumberReporter('html', …)`
+- On a project pinned to an older `@playwright/test`, keep its version and pick the `playwright-bdd` and `allure-playwright` lines that support it — never up-level the project as a side effect
 
 **Mobile — CucumberJS + WebdriverIO**
-- Node ≥ 20, TypeScript (`strict: true`), ESM
+- Node 24 (22 maintenance), TypeScript (`strict: true`), ESM
 - `@cucumber/cucumber` (latest line **13.0.x**), `webdriverio` 9.x, `@wdio/appium-service`, `@wdio/cucumber-framework`, `appium` 2.x + the platform driver
 - ⚠️ **Version-compat check:** `@wdio/cucumber-framework` often pins an **older** `@cucumber/cucumber` line than the latest standalone 13.x — pin the version it expects, don't force 13.x blindly. Verify the peer range before locking the lockfile.
 - Reporting via `@wdio/allure-reporter`; standalone CucumberJS HTML formatter is bundled in `@cucumber/cucumber`
@@ -68,55 +75,80 @@ Confirm at most 2–3.
 
 ### `package.json` (deps)
 
-```jsonc
+```json
 {
   "scripts": {
     "bddgen": "bddgen",
     "test:bdd": "bddgen && playwright test"
   },
   "devDependencies": {
-    "@playwright/test": "^1.49.0",
-    "playwright-bdd": "^9.2.0",
-    "typescript": "^5.6.0"
+    "@playwright/test": "1.64.0",
+    "playwright-bdd": "9.2.1",
+    "allure-playwright": "3.13.0",
+    "allure-js-commons": "3.13.0"
   }
 }
 ```
 
+Exact versions, no `^`: the browser build and the Docker image tag (`mcr.microsoft.com/playwright:v1.64.0-noble`)
+must equal the installed `@playwright/test`. `typescript` stays at the project's existing version.
+
 ### `playwright.config.ts`
 
 ```typescript
-import { defineConfig } from '@playwright/test';
-import { defineBddConfig, cucumberReporter } from 'playwright-bdd';
+import { defineConfig, devices } from '@playwright/test';
+import { cucumberReporter, defineBddConfig } from 'playwright-bdd';
 
-// bddgen compiles .feature files into Playwright specs in this generated dir.
+const isCI = !!process.env.CI;
+
 const testDir = defineBddConfig({
   features: 'features/**/*.feature',
   steps: 'steps/**/*.ts',
 });
 
 export default defineConfig({
-  testDir, // <- the GENERATED dir, not 'features/'
+  testDir,
+  forbidOnly: isCI,
+  fullyParallel: true,
+  retries: 0,
   reporter: [
     ['html', { open: 'never' }],
-    // Living documentation — playwright-bdd's built-in Cucumber HTML formatter:
+    ['allure-playwright', { resultsDir: 'allure-results' }],
     cucumberReporter('html', { outputFile: 'cucumber-report/index.html' }),
   ],
-  use: { trace: 'on-first-retry' },
-  projects: [{ name: 'chromium', use: { browserName: 'chromium' } }],
+  use: {
+    baseURL: process.env.BASE_URL,
+    testIdAttribute: 'data-testid',
+    trace: 'retain-on-failure',
+    video: 'retain-on-failure',
+    screenshot: { mode: 'only-on-failure', fullPage: true },
+  },
+  projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
 });
 ```
 
-> Living documentation: `cucumberReporter('html', …)` emits the Cucumber HTML report (it depends internally on `@cucumber/html-formatter`); the Playwright HTML reporter gives traces/video for free. For CI dashboards prefer Allure — `qa-reporting-typescript` owns that wiring.
+- `testDir` is the **generated** dir `bddgen` writes, never `features/`.
+- The evidence settings are the writer's failure defaults: trace and video `retain-on-failure`, a full-page
+  screenshot `only-on-failure`. They work with `retries: 0` (`qa/cicd/ci-conventions`); `on-first-retry` records
+  nothing without a retry. What each mode keeps and how a failed scenario's trace is read is
+  `qa/typescript/skills/evidence-capture`.
+- `cucumberReporter('html', …)` is the living documentation (it depends internally on `@cucumber/html-formatter`);
+  the Playwright HTML report carries the trace, video and screenshot of a failed scenario; Allure is the CI
+  dashboard, its labels and history owned by `qa-reporting-typescript`. Attach calls come from `allure-js-commons`,
+  awaited.
+- A signed-in suite adds the writer's `setup` project and `storageState` (`references/config-and-fixtures.md` §3
+  of `ui-test-author/playwright`).
 
 ### `steps/fixtures.ts` — page objects as fixtures (NO World)
 
+Page objects come from the existing page-object project and are exposed as fixtures; every step destructures
+the ones it needs. This is the playwright-bdd analogue of a World/DI container — there is no World here.
+
 ```typescript
 import { test as base, createBdd } from 'playwright-bdd';
-import { LoginPage } from '../pages/LoginPage'; // the existing page-object project
 import { DashboardPage } from '../pages/DashboardPage';
+import { LoginPage } from '../pages/LoginPage';
 
-// Page objects are exposed as fixtures; every step destructures the ones it needs.
-// This is the playwright-bdd analogue of a World/DI container — there is no World here.
 type Fixtures = {
   loginPage: LoginPage;
   dashboardPage: DashboardPage;

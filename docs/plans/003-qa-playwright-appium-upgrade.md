@@ -49,7 +49,14 @@ image through `docker run` (D60); Percy linked with `AddLink`, a synchronous Eye
 with `AddGlobalAttachment`; axe on `RunAxe` (the .NET package has no `AxeBuilder`) at WCAG 2.2 AA; Lighthouse from a
 `PlaywrightTest` fixture on a persistent context and a free port, signed-in pages included (D61); a held route,
 headers/TLS at the routing layer, `PostDataJSON()` records, and a Titanium 7.0.22 proxy that never touches the OS
-trust store; §6.1's package check narrowed to the package id (D62). Next: T4. Built but unverified: no asset, workflow or pipeline has been
+trust store; §6.1's package check narrowed to the package id (D62). T4 landed 2026-10-11: the twelve remaining
+Playwright-bearing TS skills on 1.64 — responsive rows with `test.use({ viewport })` and a measuring `Layout`
+fixture (D63), realtime owning WebSocket mocking and browser SSE as a fixed event set plus `204` (D64), grid runs on
+`use.connectOptions` or a worker-scoped `browser` marking one verdict per session (D65), a token-seeding setup
+project on `context.setStorageState`, a frozen `page.clock` for locale formats, one generated test per data row,
+uptime probes keeping trace/video/screenshot on failure (D66) and loaded by `qa-api-typescript` Step 3, locator
+actions, a Mailpit suite with no global wipe, the 1.64 request-context options, and playwright-bdd 9.2.1 on 1.64.0.
+Next: J4. Built but unverified: no asset, workflow or pipeline has been
 compiled or run (G1 does that; D24's TS config import, the Java build on Allure Gradle plugin 4.3.0, the .NET
 build on NUnit3TestAdapter 6.3.1 / Test SDK 18.10.1, `dorny/test-reporter`'s `java-junit` parse, the trace CLI
 through the Java driver (D39) and through `playwright.ps1` (D43), the .NET shard script against a real
@@ -65,7 +72,9 @@ reconciles that too; N3 read its pins from NuGet and npm and its spellings from 
 assembly metadata, since it publishes none), but nothing ran: `VisualCheck`, the Eyes calls, `RunAxe` with an
 exclusion context, Lighthouse seeing a persistent context's sign-in, the `docker run` visual job and the Titanium
 proxy with Selenium are open, and N2's .NET CI references neither exclude the `visual` / `lighthouse` categories
-from the gate nor point at the `docker run` job — G1 reconciles that).
+from the gate nor point at the `docker run` job — G1 reconciles that; T4 had no web access, so its `APIResponse.timing()` / cookie spellings, `npx checkly runtimes`,
+BrowserStack's `getSessionDetails`, Checkly honouring a spec's `test.use` evidence modes (D66) and `EventSource`
+stopping on a routed `204` (D64) rest on the research and memory — none of them is in a compiled asset).
 Planned 2026-10-10. The research behind it is committed with this plan:
 `docs/research/003-qa-playwright-appium/` (5 files). So is the read-only audit:
 `docs/audits/003-qa-playwright-appium/` (4 files). All open questions were answered on 2026-10-10:
@@ -76,7 +85,7 @@ Planned 2026-10-10. The research behind it is committed with this plan:
 - A Maestro lane is added (X1).
 - The newest Appium client majors are primary.
 
-Next: T4 (H1, the user's, blocks no task). The cost is 19 agent sessions on the subscription, each started by the user
+Next: J4 (H1, the user's, blocks no task). The cost is 19 agent sessions on the subscription, each started by the user
 from Plan Queue. Nothing else is metered.
 
 ## 1. What already exists, and what is missing
@@ -990,6 +999,42 @@ pattern and write the Eyes sample without `using` lines (fully qualified names s
 the package id only — `Include="Applitools.Playwright"` in a `PackageReference` / `PackageVersion`, or
 `add package Applitools.Playwright` (chosen). **Cost:** a prose mention of the wrong package name in a code block is
 no longer caught; the references name the real package in prose.
+
+**D63 — `responsive-testing` gains a `references/fixtures.md` (T4, 2026-10-11).** §3 names no reference for it, and
+the skill had none. Moving the samples onto page objects and a measuring `Layout` fixture (R6, `aTS` C13) put the
+SKILL.md at 18,916 chars. Readings: keep the fixture code inline and exceed §6.5's 16,000 for a skill this plan
+rewrote, cut the geometry helpers to stay under it, or move `responsive.fixtures.ts` into a reference and keep a
+summary in SKILL.md (chosen; 15,918 chars). **Cost:** one more file G1's checks read; the fixtures are one click away
+from the samples that use them.
+
+**D64 — Browser SSE is mocked as a fixed event set followed by `204`, never as a "stream" (T4, 2026-10-11).** `aTS`
+D13 said to state the caveat or prefer the protocol-client test. `route.fulfill` ends the response after one body, so
+`EventSource` reads every event at once and reconnects, fetching them again. Readings: the caveat alone, sending
+every SSE scenario to a real server (a page that merely renders three notifications then needs one), or
+`MockStreams.serveNotifications`: a `{ times: 1 }` route with the events registered over a route answering `204`,
+which the SSE spec defines as "stop reconnecting" (chosen), with timing, reconnect and `Last-Event-ID` left to a real
+SSE server. **Cost:** the mock proves rendering only; that `EventSource` stops on a routed `204` in all three
+browsers is unverified until a suite runs it.
+
+**D65 — A cloud grid holds one session per worker, and the session's verdict is marked once, in the worker
+teardown (T4, 2026-10-11).** `aTS` C9 asked for `use.connectOptions` or a worker-scoped `browser`; the old fixture
+marked status per test on a per-test session. Readings: keep a session per test (the billable shape C9 removes), mark
+per test on a shared session (each test overwrites the last verdict), or collect failed titles in a worker fixture
+and mark the session `failed` with them — or `passed` — before closing it, while an auto test fixture attaches the
+session URL to each failed test (chosen; route 2). `use.connectOptions` (route 1) stays the zero-code route for a
+suite that does not mark status. **Cost:** the dashboard shows one verdict per worker session, not per test; the
+per-test link is the attachment; `getSessionDetails` / `hashed_id` are BrowserStack spellings carried from the old
+skill and memory, unverified in this session.
+
+**D66 — A Checkly browser-check spec states the R7 evidence modes itself with `test.use` (T4, 2026-10-11).**
+`qa-evidence-capture-typescript` says the failure-evidence defaults live in the config asset only. Checkly runs the
+spec under its own runner configuration, not the suite's `playwright.config.ts`, so the config's `trace`, `video` and
+`screenshot` never reach a probe. Readings: leave probes on Checkly's defaults (what a failed run keeps is then
+whatever the account does), a Checkly-side project setting (not verified in this session), or a file-level
+`test.use({ trace: 'retain-on-failure', video: 'retain-on-failure', screenshot: { mode: 'only-on-failure', fullPage:
+true } })` in each browser-check spec (chosen: plain Playwright semantics). **Cost:** a second place that states the
+R7 values, scoped to `monitoring/src/__checks__/`; that Checkly keeps and shows what `test.use` asked for is
+unverified, so the skill tells the reader to check one failed run before relying on it.
 
 ## Answered questions (2026-10-10)
 
@@ -2057,6 +2102,60 @@ every sample derives from N1's `BaseTest`.
 - **bdd-project-scaffold:** `@playwright/test` 1.64.0, allure-playwright 3.13.0, trace
   `retain-on-failure`, Node 24/22.
 - **Not in T4:** Appium lines in `bdd-project-scaffold` and `cucumberjs-appium.md` (M1).
+- **As built (2026-10-11):** the twelve skills landed on 1.64 with every Playwright version deferred to the
+  writer's Versions table ("this skill pins nothing"), except `bdd-project-scaffold`, whose web `package.json`
+  pins `@playwright/test` 1.64.0, `playwright-bdd` 9.2.1 and `allure-playwright` / `allure-js-commons` 3.13.0
+  exactly. Every touched sample is `Should_X_When_Y`, comment-free, and reaches the page through page objects and
+  fixtures; the only code-block comments left in the touched files are the mobile templates of
+  `bdd-project-scaffold` (M1's, prompt updated). What differed from the plan:
+  - `responsive-testing`: rows carry `shown`/`hidden`/`columns`; one `describe` + `test.use({ viewport })` per row;
+    a `Layout` fixture measures and the test asserts (`expect.poll`). The fixture code moved to a new
+    `responsive-testing/references/fixtures.md` to keep SKILL.md ≤ 16,000 chars (D63). Cross-reference is now
+    `frontend/react/skills/responsive-design` (`Nav.Desktop` / `Nav.Hamburger`).
+  - `realtime-stream-testing`: claims WebSocket mocking and browser SSE and links back to `network-mocking` for
+    plain HTTP; the SSE mock is a fixed event set plus `204` (D64). `WsHarness`, the browser fixtures and the
+    gotchas list moved to `references/details.md` (SKILL.md 22,783 → ~15,950 chars); socket.io moved there as
+    Protocol-client 2; cleanup is `onTestFinished`.
+  - `browser-cloud-setup`: route 1 `use.connectOptions`, route 2 a worker-scoped `browser` override that marks the
+    session once per worker (D65); `playwrightVersion` read with `createRequire` from the project root; `globalSetup`
+    returns `tunnel.stop`; the session URL is an awaited `testInfo.attach` (the old `allure-playwright` import is
+    gone). The mobile Stack line now defers WebdriverIO/Appium versions to `ui-test-author/appium`.
+  - `test-login-tokens`: a `token.setup.ts` in the writer's `setup` project — `context.setStorageState` [1.59] at
+    the `baseURL` origin, the greeting checked, then `storageState({ path: authFile })` — plus a storage-state
+    table (cookies/localStorage yes; IndexedDB with `indexedDB: true`; never `sessionStorage`; never an in-memory
+    auth0-spa-js cache).
+  - `language-testing`: the old fixture overrode Playwright's `locale` with a catalog key; it is now a separate
+    `lng` option beside `locale`/`timezoneId`, and the fixture freezes time with `page.clock.setFixedTime` before the
+    page loads (a `RelativeTimeFormat` sample). RTL and pseudo specs are selected by tags with
+    `grep`/`grepInvert`, not `test.skip`. Fixed `IntlMessageFormat` being called as a function. ICU plurals and the
+    locale matrix moved to `references/details.md` (SKILL.md 18,920 → 14,105 chars).
+  - `data-driven-testing`: Vitest rows are typed objects; Playwright generates one test per row through a fixture;
+    streaming collects at module scope instead of asserting inside one test; titles must be unique. SKILL.md is
+    19,423 chars (was 19,174) — a size violation that predates this plan and that T4 did not rewrite.
+  - `production-uptime-checks`: browser-check specs set the R7 evidence with `test.use` and run on the writer's
+    fixtures (D66); `runtimeId: '2024.02'` is gone from the sample, replaced by prose pinning the newest id from
+    `npx checkly runtimes`; the missing `RetryStrategyBuilder` import is fixed; secrets and the CI workflow moved to
+    `references/details.md` (SKILL.md 21,416 → 15,993 chars). Wired into `qa-api-typescript.md` Step 3 with the exit
+    gate `npx checkly test --record` → green.
+  - `inhouse-framework-conventions`: `PageBase.locator(key)` actions and `errorMessage: Locator`; PascalCase test
+    ids in the screen JSON; the anti-example block became a table. `mailpit.md`: `deleteAll()` and the `beforeEach`
+    wipe are gone; isolation is `uniqueRecipient(flow)` or the writer's `seededUser`.
+  - `api-test-author/playwright`: a `createdUsers` fixture deletes in teardown and asserts every status; TC-IDs
+    moved from titles into `{ tag }`; a context-options table for `failOnStatusCode` [1.51] (stays `false`),
+    `maxRedirects` [1.52], `addCookies`/`cookies`/`clearCookies` [1.64], `timing()` [1.62] and
+    `securityDetails()` [1.61].
+  - `playwright-bdd.md`: Node 24/22; `seededOrder` asserts `201` with the body before parsing, deletes with `204`;
+    steps read credentials from a `testUser` fixture; page objects never assert.
+  - **Unverified** (no web access in this session; nothing compiled or run): `APIResponse.timing()`'s field names
+    and whether `timing()` / `securityDetails()` return promises (the samples `await` them); the
+    `apiRequestContext` cookie method signatures (read from the research's names only); `npx checkly runtimes`;
+    BrowserStack's `getSessionDetails` executor and its `hashed_id`; Checkly honouring a spec's `test.use` trace
+    and video modes; `DataTable` exported by `playwright-bdd`; Vitest `onTestFinished` and `it.for`. None of these
+    files is an asset G1 compiles.
+  - Proof: `qa/typescript/agents/qa-api-typescript.md:139` (Step 3 row);
+    `qa/typescript/skills/realtime-stream-testing/SKILL.md` § Browser surface 3;
+    `qa/typescript/skills/browser-cloud-setup/references/details.md` § Web — route 1 / route 2;
+    `qa/typescript/skills/bdd-project-scaffold/SKILL.md` § `package.json` (deps).
 
 ### J4 — Java: the remaining Playwright-bearing skills, and `python-web-testing`
 
@@ -2451,64 +2550,9 @@ Run them in order, one session each, opened from Plan Queue. Each block is compl
 | X1 | `docs` | `general-purpose` | M1, S1, T2 | ~130k |
 | G1 | `docs` | `general-purpose` | all | ~145k |
 
-Landed: T1, J1, N1, T2, J2, N2, A1, T3 (2026-10-10), J3, N3 (2026-10-11). Every other block is live.
+Landed: T1, J1, N1, T2, J2, N2, A1, T3 (2026-10-10), J3, N3, T4 (2026-10-11). Every other block is live.
 
 ---
-
-### T4 — TypeScript: the remaining Playwright-bearing skills (general-purpose, docs)
-
-````
-You are `general-purpose`. Task T4 of docs/plans/003-qa-playwright-appium-upgrade.md: bring the remaining
-Playwright-bearing TS skills onto 1.64 with no stale pin and no R1–R6 break, and wire
-production-uptime-checks into qa-api-typescript.
-
-Read, in this order:
-1. CLAUDE.md.
-2. The plan: §2.1, §2.2, §4, §5.1, Decision D7, task T4, "Close-out — every task".
-3. Under qa/typescript/skills/: responsive-testing, realtime-stream-testing, browser-cloud-setup (+ references),
-   test-login-tokens (+ references), language-testing (+ references), data-driven-testing,
-   production-uptime-checks, inhouse-framework-conventions, email-testing/references/mailpit.md,
-   api-test-author/playwright, gherkin-step-code/references/playwright-bdd.md, bdd-project-scaffold.
-4. T1's references/emulation-and-mobile-web.md and config-and-fixtures.md (to link, not repeat);
-   qa/typescript/skills/evidence-capture/SKILL.md (T2).
-5. docs/audits/003-qa-playwright-appium/typescript.md rows C4, C9, C10, C13, C19, C21, C29, D7, D8, D13,
-   L7, L8, L14, L19, L20; docs/research/003-qa-playwright-appium/playwright-releases.md §(b) 1.61–1.64.
-
-Build:
-- responsive-testing: data rows, not if/else; test.use({ viewport }); link the emulation reference; the
-  cross-reference to React.
-- realtime-stream-testing: the SSE caveat; it owns WebSocket mocking. T3's network-mocking SKILL.md and
-  references/playwright-routes.md already send `routeWebSocket` and SSE here and say `route.fulfill`
-  cannot stand in for a stream, so realtime's text must claim both and link back to network-mocking for
-  plain HTTP.
-- browser-cloud-setup: use.connectOptions or a worker-scoped browser; the version taken from
-  @playwright/test/package.json; teardown returned from globalSetup.
-- test-login-tokens: a setup project with baseURL; storage-state limits (no sessionStorage;
-  indexedDB: true); context.setStorageState.
-- language-testing: page.clock for time-dependent formats.
-- data-driven-testing: generated tests, no loops in a test.
-- production-uptime-checks: evidence on probe failure (link evidence-capture); add it to Step 3 of
-  qa/typescript/agents/qa-api-typescript.md.
-- inhouse-framework-conventions: locator-based actions. mailpit.md: no global wipe.
-- api-test-author/playwright: no finally; request-context cookies (1.64); failOnStatusCode,
-  maxRedirects; APIResponse.timing() / securityDetails().
-- playwright-bdd.md: Node 24/22; check status before parsing.
-- bdd-project-scaffold: @playwright/test 1.64.0, allure-playwright 3.13.0, trace retain-on-failure,
-  Node 24/22. Leave its Appium lines for M1.
-
-Traps:
-- Write versions as exact pins ("@playwright/test": "1.64.0"). G1's checker compares them to §2.
-- Node 20 is EOL. Write 24 (22 maintenance), never "Node ≥ 20".
-- browser-cloud-setup/references/details.md:223-232 still has `import { allure } from 'allure-playwright'`
-  and un-awaited `allure.*` calls in a sync helper (aTS D3, C8). Use `import * as allure from
-  'allure-js-commons'`, awaited, or `testInfo.attach` (evidence-capture §6), as T2's test-reports does;
-  G1's CODE_CHECKS bans the old import in code blocks.
-
-Gate: none. This plan gates once, in G1. Do not run any build, test or check script.
-
-Commit: `docs(qa-ts): remaining Playwright skills on 1.64, uptime probes wired (003 T4)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
 
 ### J4 — Java: the remaining Playwright-bearing skills, and `python-web-testing` (general-purpose, docs)
 
@@ -2579,6 +2623,11 @@ Traps:
   pinning it.
 - Python Playwright needs Python ≥ 3.10 since 1.61. The docs page saying 3.8 is stale (releases §(a)).
 - pytest-playwright 0.10.0 supports only on/off/retain-on-failure for --tracing/--video (evidence §11.4).
+- realtime: if the Java skill mocks SSE in the browser with a `route.fulfill` "chunked" `text/event-stream`
+  body, it is the defect T4 fixed in TS (`aTS` D13, D64): the body arrives at once and `EventSource` reconnects
+  and replays it. Teach a fixed event set (a `setTimes(1)` route over a route answering `204`) for rendering, and a
+  real SSE server for timing and `Last-Event-ID`. T4's qa/typescript/skills/realtime-stream-testing is the
+  reference shape; reading it is optional.
 
 Gate: none. This plan gates once, in G1. Do not run any build, test or check script.
 
@@ -2666,6 +2715,10 @@ Traps:
   exception: a Lighthouse fixture on `PlaywrightTest` that calls `Playwright.Chromium.LaunchPersistentContextAsync`
   (D61) — that is not `Playwright.CreateAsync()`, so E11 does not fire on it. A sample that needs the project folder
   uses `Support/ProjectPaths.Root` (D59), not a path relative to `bin/`.
+- realtime: if the .NET skill mocks SSE in the browser with a `RouteAsync` / `FulfillAsync` "chunked"
+  `text/event-stream` body, it is the defect T4 fixed in TS (`aTS` D13, D64): the body arrives at once and
+  `EventSource` reconnects and replays it. Teach a fixed event set (a `Times = 1` route over a route answering
+  `204`) for rendering, and a real SSE server for timing and `Last-Event-ID`.
 
 Gate: none. This plan gates once, in G1. Do not run any build, test or check script.
 
@@ -2730,6 +2783,12 @@ Traps:
   the hook M1 writes is that hook. test-reports is not M1's file; if the wording no longer fits, say so in
   As built for G1.
 
+- T4 edited only the web half of bdd-project-scaffold (and its mobile Node line, now Node 24 / 22). The mobile
+  templates are M1's as T4 found them: the mobile `package.json` (`^` ranges, a `jsonc` comment), `wdio.conf.ts`,
+  `support/world.ts` (a `require` inside a getter) and `support/hooks.ts` (inline comments, `browser.reset?.()`, a
+  failure screenshot taken but never attached) — R1, R5 and R6 apply. T4's browser-cloud-setup now defers the
+  WebdriverIO/Appium versions to ui-test-author/appium and its mobile `wdio.conf.ts` excerpt has no comments; it is
+  not M1's file.
 - Leave two things to plan 002 (docs/plans/002-mobile-plugins.md) W1, per D21: line 10 of
   mobile-screen-explorer/SKILL.md (the React Native testID mapping) and the agent's "Related agents"
   section. If plan 002 has already landed them, keep its wording.
@@ -2791,6 +2850,12 @@ Traps:
 - No TouchAction or MultiTouchAction in any code block or asset: G1's CODE_CHECKS bans them there.
   Prose and review rows may name them as removed.
 
+- T4 edited only the web half of bdd-project-scaffold (and its mobile Node line, now Node 24 / 22). The mobile
+  templates are M1's as T4 found them: the mobile `package.json` (`^` ranges, a `jsonc` comment), `wdio.conf.ts`,
+  `support/world.ts` (a `require` inside a getter) and `support/hooks.ts` (inline comments, `browser.reset?.()`, a
+  failure screenshot taken but never attached) — R1, R5 and R6 apply. T4's browser-cloud-setup now defers the
+  WebdriverIO/Appium versions to ui-test-author/appium and its mobile `wdio.conf.ts` excerpt has no comments; it is
+  not M1's file.
 - Leave two things to plan 002 (docs/plans/002-mobile-plugins.md) W1, per D21: line 10 of
   mobile-screen-explorer/SKILL.md (the React Native testID mapping) and the agent's "Related agents"
   section. If plan 002 has already landed them, keep its wording.
@@ -2858,6 +2923,12 @@ Traps:
   byte[] overload with its extension — three strings is a path, N2's references/playwright.md §6), no catch
   in the teardown (D31's reasoning applies to NUnit).
 
+- T4 edited only the web half of bdd-project-scaffold (and its mobile Node line, now Node 24 / 22). The mobile
+  templates are M1's as T4 found them: the mobile `package.json` (`^` ranges, a `jsonc` comment), `wdio.conf.ts`,
+  `support/world.ts` (a `require` inside a getter) and `support/hooks.ts` (inline comments, `browser.reset?.()`, a
+  failure screenshot taken but never attached) — R1, R5 and R6 apply. T4's browser-cloud-setup now defers the
+  WebdriverIO/Appium versions to ui-test-author/appium and its mobile `wdio.conf.ts` excerpt has no comments; it is
+  not M1's file.
 - Leave two things to plan 002 (docs/plans/002-mobile-plugins.md) W1, per D21: line 10 of
   mobile-screen-explorer/SKILL.md (the React Native testID mapping) and the agent's "Related agents"
   section. If plan 002 has already landed them, keep its wording.
@@ -3009,7 +3080,9 @@ Build:
   never taught on a 1.63 lane) and one Appium line (3 primary / 2 supported; java-client 11 /
   Appium.WebDriver 9 / WebdriverIO 10).
 - docs/skills-catalog.md: ui-test-author/reviewer → review, bdd-project-setup → bdd-project-scaffold,
-  the inhouse row; check the rows T2, J2, N2, A1, S1 and X1 added.
+  the inhouse row; check the rows T2, J2, N2, A1, S1 and X1 added. Its "Known orphans" line (:31) still lists
+  `production-uptime-checks-{dotnet,java,typescript}`: T4, J4 and N4 wire each into its `qa-api-<stack>` Step 3,
+  so drop the stacks whose agent now loads it (grep the three agents).
 - D34 leftovers no task owns: in qa/dotnet/skills/api-project-setup/SKILL.md (:193) and
   performance-project-setup/SKILL.md (:136) the UI sibling is `UiTests`, not `PlaywrightTests`; drop
   `dotnet tool install allure` from api-project-setup (:39, :107) — NuGet has no such tool — and point at

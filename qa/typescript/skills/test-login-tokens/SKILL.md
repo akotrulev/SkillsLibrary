@@ -21,7 +21,7 @@ Two cross-cutting rules shape every example:
 ## When to use
 
 - An API-test suite (`qa/typescript/skills/api-test-author/*`) needs a `Bearer` token to call protected endpoints → **M2M**
-- A UI suite needs to skip the login form by seeding an authenticated browser session → **ROPG** → `storageState`
+- A UI suite needs to skip the login form by seeding an authenticated browser session → **ROPG** → a token-seeding setup project → `storageState`
 - You need a token *as a particular seeded test user* (with that user's roles/permissions) → **ROPG**
 - A CLI/headless tool or a device without a browser needs to authenticate → **device-code**
 - You're re-fetching a token on every test and want to cache it correctly
@@ -44,7 +44,7 @@ Two cross-cutting rules shape every example:
 | Tenant config | M2M app authorized for the API | **ROPG grant enabled** on the app + a DB `realm` | Device Code grant enabled; "Device" app |
 | Interactivity | None | None | One-time browser approval per device code |
 | Security caveat | Standard; keep the secret in env | **Test-only — never production**; needs a real password | Approval step can't be fully headless |
-| Consumer | `qa/typescript/skills/api-test-author/*` | `qa/typescript/skills/ui-test-author/*` `storageState` + API tests | rarely in CI; tooling |
+| Consumer | `qa/typescript/skills/api-test-author/*` | a Playwright setup project → `storageState`; per-user API tests | rarely in CI; tooling |
 
 **Default to M2M** for API suites. Reach for **ROPG** only when the test genuinely needs *this user's* identity (their permissions, their data). Use **device-code** only for the niche input-constrained case.
 
@@ -94,7 +94,8 @@ These sections live in `references/details.md` — **read it when the task touch
 
 ### Stashing
 - API tests: inject the provider into the client; add `Authorization: Bearer <token>` per request (the cache makes this cheap).
-- UI tests: mint once in `globalSetup`, seed the storage your SPA reads, save `storageState`, reuse — see `qa/typescript/skills/ui-test-author/playwright`.
+- UI tests: a token-seeding **setup project** (`*.setup.ts`, the model `qa/typescript/skills/ui-test-author/playwright` teaches in `references/config-and-fixtures.md` §3) mints once, loads the token into its context with `context.setStorageState(...)` [1.59] at the config's `baseURL` origin, checks the app is signed in, and saves `storageState` for the dependent projects. Never `globalSetup` and never a hardcoded URL.
+- A storage state carries cookies and `localStorage`, and IndexedDB only when saved with `indexedDB: true` [1.51]. It **never** carries `sessionStorage` (re-seed it with `context.addInitScript`) or an in-memory token (auth0-spa-js's default cache) — `references/details.md` has the table.
 
 ### What NOT to do
 - No token fetch per test, no uncached `clientCredentialsGrant` in a loop.
@@ -108,7 +109,7 @@ These sections live in `references/details.md` — **read it when the task touch
 1. Read `package.json` (Vitest vs Jest; Playwright present?) and existing `tests/` fixtures for house style.
 2. Confirm `auth0` is installed (`npm i -D auth0`) — or decide on bare `fetch` if you'd rather not add it.
 3. Confirm the env vars are wired into the test environment (CI secret store / `.env.test`), **not** committed: `AUTH0_DOMAIN`, `AUTH0_AUDIENCE`, `AUTH0_M2M_CLIENT_ID/SECRET`, and for ROPG `AUTH0_ROPG_CLIENT_ID`, `AUTH0_TEST_USERNAME/PASSWORD`, `AUTH0_REALM`.
-4. Generate `auth0.config.ts`, `token-provider.ts`, `tokens.ts`, plus the consumer wiring (API client header and/or Playwright `globalSetup`).
+4. Generate `auth0.config.ts`, `token-provider.ts`, `tokens.ts`, plus the consumer wiring (API client header and/or a token-seeding `token.setup.ts` in the Playwright `setup` project).
 5. Run the cache unit test anywhere (offline); run the live token tests with the secrets present. Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run".
 
 ## Cross-references
@@ -117,6 +118,6 @@ These sections live in `references/details.md` — **read it when the task touch
 - **`auth/_shared/auth0-concepts`** — the entity/flow model (Tenant / Application / API / audience / grant types) this skill assumes. Read it to understand *why* M2M vs ROPG.
 - **`auth/auth0-react`**, **`backend/dotnet/skills/auth0`**, **`backend/java/skills/auth0`**, **`auth/auth0-blazor`** — the **app-side** login flows this skill complements. This skill never implements user-facing login; those do.
 - **`qa/typescript/skills/api-test-author/writer`** — the M2M consumer: where the `Bearer` header lands on the API client.
-- **`qa/typescript/skills/ui-test-author/playwright`** — the ROPG consumer: `storageState` / fixture patterns for seeding auth without the login UI.
+- **`qa/typescript/skills/ui-test-author/playwright`** — the ROPG consumer: the setup project, `authFile` and the projects that start from it (`references/config-and-fixtures.md` §3).
 - **`qa/typescript/skills/test-data-builder`** — provisioning/seeding the test users that ROPG authenticates as.
 - **`qa/cicd/typescript/skills/ci-pipelines`** — where the Auth0 secrets are sourced in CI (OIDC / encrypted secrets), never hardcoded.

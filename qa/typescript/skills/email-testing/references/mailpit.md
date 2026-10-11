@@ -1,6 +1,7 @@
 # QA — Email Testing with Mailpit (TypeScript)
 
-Scaffolds a typed Mailpit HTTP-API client and Vitest / Playwright helpers that poll for a specific message (by recipient + subject), extract HTML / text body / links / OTPs, download attachments, and reset the inbox between tests.
+Scaffolds a typed Mailpit HTTP-API client and Vitest / Playwright helpers that poll for a specific message (by recipient + subject), extract HTML / text body / links / OTPs, download attachments. Tests share one Mailpit and isolate by **recipient**: every test sends to its own unique
+address and searches for it, so nothing is ever wiped.
 
 ## When to use
 
@@ -31,7 +32,7 @@ Scaffolds a typed Mailpit HTTP-API client and Vitest / Playwright helpers that p
 | `GET` | `/api/v1/message/{ID}/raw` | Raw RFC-822 |
 | `GET` | `/api/v1/message/{ID}/part/{PartID}` | Download attachment |
 | `GET` | `/api/v1/message/{ID}/headers` | All headers |
-| `DELETE` | `/api/v1/messages` | Wipe all / by ids |
+| `DELETE` | `/api/v1/messages` | Delete by ids — with no ids it deletes **every** message, so a test never calls it |
 
 ## Templates
 
@@ -130,14 +131,6 @@ export class MailpitClient {
     return Buffer.from(await res.arrayBuffer());
   }
 
-  async deleteAll(): Promise<void> {
-    const res = await fetch(`${this.baseUrl}/api/v1/messages`, {
-      method: 'DELETE',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ ids: [] }),
-    });
-    if (!res.ok) throw new Error(`Mailpit delete failed: ${res.status}`);
-  }
 }
 ```
 
@@ -161,23 +154,28 @@ export function extractFirstLink(html: string, mustContain: string): URL {
 }
 ```
 
+### Unique recipients — `tests/integration/email/recipients.ts`
+
+```ts
+export const uniqueRecipient = (flow: string): string => `${flow}-${crypto.randomUUID()}@test.local`;
+```
+
 ### Vitest test — signup welcome
 
 ```ts
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import request from 'supertest';
 import { MailpitClient } from './email/mailpit-client';
 import { extractFirstLink } from './email/extractors';
+import { uniqueRecipient } from './email/recipients';
 import { createApp } from '../../src/app';
 
 const mail = new MailpitClient();
 const app = createApp();
 
-beforeEach(() => mail.deleteAll());
-
 describe('signup', () => {
-  it('sends a welcome email with an activation link', async () => {
-    const email = `signup-${crypto.randomUUID()}@test.local`;
+  it('Should_SendWelcomeEmailWithActivationLink_When_UserSignsUp', async () => {
+    const email = uniqueRecipient('signup');
 
     await request(app).post('/auth/signup').send({ email, password: 'Str0ng!Passw0rd' }).expect(201);
 
@@ -195,55 +193,59 @@ describe('signup', () => {
 
 ### Playwright fixture — `tests/e2e/fixtures/mailpit.ts`
 
-```ts
-import { test as base } from '@playwright/test';
-import { MailpitClient } from './mailpit-client';
+It extends the writer's fixtures (`qa/typescript/skills/ui-test-author/playwright/assets/fixtures.ts`), whose
+`seededUser` creates a user with a unique address through the API and deletes it in teardown — the unique
+recipient the flow needs. The fixture wipes nothing.
 
-export const test = base.extend<{ mail: MailpitClient }>({
+```ts
+import { test as base } from './fixtures';
+import { MailpitClient } from './mailpit-client';
+import { ResetPasswordPage } from './ResetPasswordPage';
+
+export const test = base.extend<{ mail: MailpitClient; resetPasswordPage: ResetPasswordPage }>({
   mail: async ({}, use) => {
-    const m = new MailpitClient(process.env.MAILPIT_API);
-    await m.deleteAll();
-    await use(m);
+    await use(new MailpitClient());
+  },
+  resetPasswordPage: async ({ page }, use) => {
+    await use(new ResetPasswordPage(page));
   },
 });
-export { expect } from '@playwright/test';
+
+export { expect } from './fixtures';
 ```
 
 ```ts
-import { test, expect } from './fixtures/mailpit';
 import { extractOtp } from './extractors';
+import { expect, test } from './fixtures/mailpit';
 
-test('reset password via OTP', async ({ page, mail }) => {
-  const email = 'existing-user@test.local';
-  await page.goto('/auth/reset');
-  await page.getByLabel('Email').fill(email);
-  await page.getByRole('button', { name: 'Send code' }).click();
+test('Should_ConfirmNewPassword_When_EmailedResetCodeIsEntered', async ({ resetPasswordPage, mail, seededUser }) => {
+  await resetPasswordPage.requestCode(seededUser.email);
+  const summary = await mail.waitFor(seededUser.email, 'Reset code');
+  const otp = extractOtp((await mail.get(summary.ID)).Text);
 
-  const summary = await mail.waitFor(email, 'Reset code');
-  const full = await mail.get(summary.ID);
-  const otp = extractOtp(full.Text);
+  await resetPasswordPage.resetWith(otp, `N3w-${crypto.randomUUID()}`);
 
-  await page.getByLabel('Code').fill(otp);
-  await page.getByLabel('New password').fill('Brand-N3w!');
-  await page.getByRole('button', { name: 'Reset' }).click();
-  await expect(page.getByText('Password updated')).toBeVisible();
+  await expect(resetPasswordPage.confirmation).toHaveText('Password updated');
 });
 ```
+
+`ResetPasswordPage` owns `/auth/reset`: `requestCode(email)` fills the address and sends it, `resetWith(code,
+password)` completes the form, and `confirmation` is the `Locator` the test asserts on.
 
 ### Attachment assertion
 
 ```ts
-it('emails a PDF invoice', async () => {
-  const email = 'billing@test.local';
-  await request(app).post(`/invoices/${invoiceId}/email`).expect(202);
+it('Should_AttachPdfInvoice_When_InvoiceIsEmailed', async () => {
+  const email = uniqueRecipient('invoice');
+  const invoice = await request(app).post('/invoices').send({ customerEmail: email }).expect(201);
+  await request(app).post(`/invoices/${invoice.body.id}/email`).expect(202);
 
   const summary = await mail.waitFor(email, 'Invoice');
   const full = await mail.get(summary.ID);
-  const pdf = full.Attachments.find((a) => a.ContentType === 'application/pdf')!;
+  const [pdf] = full.Attachments.filter((a) => a.ContentType === 'application/pdf');
+  expect(pdf, `attachments: ${JSON.stringify(full.Attachments)}`).toMatchObject({ FileName: expect.stringMatching(/^invoice-/) });
   const bytes = await mail.downloadAttachment(summary.ID, pdf.PartID);
 
-  expect(pdf.FileName).toMatch(/^invoice-/);
-  expect(bytes.byteLength).toBeGreaterThan(1024);
   expect(bytes.subarray(0, 4)).toEqual(Buffer.from('%PDF'));
 });
 ```
@@ -251,8 +253,10 @@ it('emails a PDF invoice', async () => {
 ## Rules
 
 ### Inbox isolation
-- One Mailpit instance per test process (`globalSetup`); clear with `DELETE /api/v1/messages` in `beforeEach`.
-- Unique recipient per test: `crypto.randomUUID()`.
+- One Mailpit container per run (Vitest `globalSetup`), shared by every worker; it is discarded at teardown.
+- **Isolation is the recipient, never a wipe.** Every test sends to its own address (`uniqueRecipient(flow)`, or
+  the writer's `seededUser`) and searches `to:` that address. A `DELETE /api/v1/messages` — in a `beforeEach` or a
+  fixture — deletes every worker's mail under a parallel run and fails tests that have nothing to do with it.
 - Never assert "the only email is X" — assert "a message matching `to + subject` exists".
 
 ### Waiting
@@ -280,7 +284,7 @@ it('emails a PDF invoice', async () => {
 ### What NOT to do
 - No hardcoded ports — read from `getMappedPort()`.
 - No `latest` image tag — pin `axllent/mailpit:v1.20.5`.
-- No shared inbox across tests without a `beforeEach` cleanup.
+- No global wipe (`DELETE /api/v1/messages`) anywhere in the suite; no fixed recipient shared by two tests.
 - No inline regex — centralise in `extractors.ts`.
 - No assertions on the entire HTML string.
 
@@ -294,7 +298,7 @@ it('emails a PDF invoice', async () => {
    - `tests/integration/email/extractors.ts`
    - Concrete `{flow}-email.int.test.ts` per scenario
 4. Add `MAILPIT_API` / `SMTP_HOST` / `SMTP_PORT` to the SUT's test profile.
-5. Run `npm run test:integration` (or the existing script).
+5. Run `npm run test:integration` (or the existing script). Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run".
 
 ## Cross-references
 

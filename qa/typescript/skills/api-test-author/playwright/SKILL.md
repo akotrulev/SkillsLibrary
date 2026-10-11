@@ -3,87 +3,86 @@ name: qa-api-test-playwright-typescript
 description: Use when the user asks to write TypeScript API tests on the Playwright runner (@playwright/test `request` fixture / APIRequestContext + Zod) — usually because the project already runs Playwright for UI and wants one runner, one report, one trace. Triggers: "write API tests with Playwright", "use the request fixture for endpoint X". Do NOT use for plain Node API suites without Playwright (`qa-api-test-writer-typescript`) or UI tests (`qa-ui-test-writer-playwright-typescript`).
 ---
 
-# QA — API Test Writer (TypeScript / Playwright + APIRequestContext + Zod)
+# QA — API Test Writer (TypeScript / Playwright 1.64 + APIRequestContext + Zod)
 
 Authors `*.spec.ts` files that test a REST backend through **Playwright's own HTTP client** —
 `APIRequestContext` — instead of a browser. It reuses the **Schema/types + Client + Spec** layering of the
-Vitest sibling (`qa-api-test-writer-typescript`): Zod schemas from `qa/typescript/skills/api-models`,
-a `{resource}Client` factory with dual raw + typed methods, spec files that own scenarios and assertions. Only
-the transport and the runner change; the discipline does not.
+Vitest sibling (`qa-api-test-writer-typescript`): Zod schemas from `qa/typescript/skills/api-models`, a
+`{resource}Client` factory with dual raw + typed methods, spec files that own scenarios and assertions. Only the
+transport and the runner change; the discipline does not. This skill pins nothing: the Playwright version is the
+**Versions** table of `qa/typescript/skills/ui-test-author/playwright/SKILL.md`; each API below carries the
+version it shipped in.
 
-> **The discipline this skill encodes** — four ideas that separate a correct Playwright API suite from a
-> `fetch` reflex ported into the wrong runner:
+> **The discipline this skill encodes:**
 >
 > 1. **The `APIRequestContext` is the auth boundary, not the call site.** Base URL and the `Authorization`
->    header are set **once, at context creation** (`playwright.config.ts` `use.baseURL` /
->    `request.newContext({ extraHTTPHeaders })`). One context per identity — standard user, admin, anonymous —
->    never a token argument threaded through every call. Every context you create yourself is disposed
->    (`await ctx.dispose()`), in the fixture's teardown.
-> 2. **The per-test `request` fixture is free; custom identities come from fixtures.** `@playwright/test`
->    hands every test a fresh, config-respecting, auto-disposed `APIRequestContext` — that is the default
->    identity. Additional identities (admin, anonymous, wrong-role) are **worker/test fixtures** that create,
->    yield, and dispose a context — never module-level singletons, never per-call `newContext()` litter.
-> 3. **You are here for one runner, one report, one trace.** The value of Playwright API testing is that API
->    specs share the UI suite's config, projects, HTML/Allure report, tracing, and CI wiring — and that a
->    cookie-authenticated app can share **`storageState`** between a logged-in browser and API calls. If the
->    project has no Playwright UI suite, the stack default is `api-test-author/writer` (Vitest + fetch).
-> 4. **The layering survives the runner swap.** Specs still never touch HTTP directly: a `{resource}Client`
->    factory wraps the context (`create{Resource}Client(ctx: APIRequestContext)`), the raw method returns the
->    Playwright `APIResponse` unasserted, the typed method asserts the **exact** status and `Schema.parse`s
->    the body. The only signature change from the fetch client: the factory takes a **context**, because the
->    context — not a `jwt` string — now carries the identity.
+>    header are set **once, at context creation** (`use.baseURL` / `request.newContext({ extraHTTPHeaders })`),
+>    or the session cookie is added to the context. One context per identity — standard user, admin, anonymous —
+>    never a token argument threaded through every call. Every context you create is disposed in its fixture's
+>    teardown.
+> 2. **The per-test `request` fixture is free; custom identities come from fixtures.** `@playwright/test` hands
+>    every test a fresh, config-respecting, auto-disposed `APIRequestContext` — the default identity. Other
+>    identities are fixtures that create, yield, and dispose a context.
+> 3. **You are here for one runner, one report, one trace.** API specs share the UI suite's config, projects,
+>    HTML/Allure report, tracing, and CI wiring. If the project has no Playwright UI suite, the stack default is
+>    `api-test-author/writer` (Vitest + fetch).
+> 4. **The layering survives the runner swap.** Specs never touch HTTP directly: `create{Resource}Client(ctx)`
+>    wraps the context, the raw method returns the `APIResponse` unasserted, the typed method asserts the
+>    **exact** status and `Schema.parse`s the body.
 
 ## Stack
 
-- Node 24 + TypeScript (strict mode)
-- **@playwright/test** as the test runner — API specs live beside the UI specs, same `playwright.config.ts`
-- **`APIRequestContext`** for HTTP — the built-in `request` fixture for the default identity, fixture-created
-  contexts for other identities; no `fetch`/axios/supertest in a Playwright project
-- **Zod** for request/response schemas and runtime validation (`qa/typescript/skills/api-models`)
-- **Allure** via `allure-playwright` where the project uses Allure
-- Project layout: `src/clients/{api}/`, `src/models/{api}/{resource}/`, `tests/api/{resource}/`,
-  `tests/fixtures.ts`, `playwright.config.ts` (a dedicated `api` project with `use.baseURL` pointing at the API)
+- Node 24 (22 maintenance) + TypeScript (strict mode)
+- **@playwright/test** as the runner — API specs live beside the UI specs, same `playwright.config.ts`
+- **`APIRequestContext`** for HTTP — no `fetch`/axios/supertest in a Playwright project
+- **Zod** for request/response schemas (`qa/typescript/skills/api-models`)
+- **Allure** via `allure-playwright` where the project uses Allure; calls from `allure-js-commons`, awaited
+- Layout: `src/clients/{api}/`, `src/models/{api}/{resource}/`, `tests/api/{resource}/`, `tests/fixtures.ts`,
+  and a dedicated `api` project in `playwright.config.ts` with `use.baseURL` pointing at the API
 
 ## Layering contract — who does what
 
 | Layer | Owner skill | Responsibility |
 |-------|-------------|----------------|
-| `models/{api}/{resource}/{resource}.schema.ts` (Zod) + `.types.ts` (`z.infer`) | `qa/typescript/skills/api-models` | Body shapes, JSON-key mapping, runtime validation |
-| `clients/{api}/{resource}Client.ts` — `create{Resource}Client(ctx: APIRequestContext)` | `qa/typescript/skills/api-client-writer` conventions, context-based variant | Request building on the context; raw method returns `APIResponse` unasserted; typed method asserts exact status + `Schema.parse(await res.json())` |
-| `tests/fixtures.ts` | **this skill** | Identity fixtures: token via `authHelper` → `request.newContext({ extraHTTPHeaders })` → yield client → `dispose()` |
-| `tests/api/{resource}/{operation}{Resource}.spec.ts` | **this skill** | Scenario choice, arrange/act/assert, test data, cleanup |
+| `models/{api}/{resource}/{resource}.schema.ts` (Zod) + `.types.ts` | `qa/typescript/skills/api-models` | Body shapes, JSON-key mapping, runtime validation |
+| `clients/{api}/{resource}Client.ts` — `create{Resource}Client(ctx: APIRequestContext)` | `qa/typescript/skills/api-client-writer` conventions | Raw method returns `APIResponse` unasserted; typed method asserts exact status + `Schema.parse(await res.json())` |
+| `tests/fixtures.ts` | **this skill** | Identity fixtures (token or cookie → context → client → `dispose()`) and created-data cleanup |
+| `tests/api/{resource}/{operation}{Resource}.spec.ts` | **this skill** | Scenario choice, arrange/act/assert, test data |
 
-If a schema/type or client a spec needs is missing, run the owner skill first — never call `request.get(...)`
-inline in a spec to avoid generating a client.
+If a schema or client a spec needs is missing, run the owner skill first — never call `request.get(...)` inline.
 
 ## When to use
 
 - The project already runs Playwright for UI and wants API coverage in the same suite/report
-- Hybrid suites where API specs and UI specs must share config, projects, tracing, and `storageState`
+- Hybrid suites where API specs and UI specs share config, projects, tracing, and signed-in state
 - New `{operation}{Resource}.spec.ts` under `tests/api/`, or new scenarios on an existing one
 
 ## When NOT to use
 
-- No Playwright in the project → `qa/typescript/skills/api-test-author/writer` (Vitest + fetch + Zod, the stack default)
-- API calls **inside a UI test** (seed data, then drive the browser) → that is the UI suite's arrange step; conventions in `qa/typescript/skills/ui-test-author/playwright`
-- Mocking/intercepting the browser's network traffic → `qa/typescript/skills/network-mocking` (`page.route` is not API testing)
+- No Playwright in the project → `qa/typescript/skills/api-test-author/writer` (Vitest + fetch + Zod)
+- API calls **inside a UI test** (seed, then drive the browser) → the UI suite's arrange step
+  (`qa/typescript/skills/ui-test-author/playwright`)
+- Mocking the browser's network traffic → `qa/typescript/skills/network-mocking`
 - GraphQL / gRPC → the protocol siblings under `qa/typescript/skills/api-test-author/`
-- Reviewing existing tests → `qa/typescript/skills/api-test-author/review` (cross-stack checklist applies; add this skill's anti-patterns below)
+- Reviewing existing tests → `qa/typescript/skills/api-test-author/review`
 
-## Fixtures template — identities as contexts
+## Fixtures template — identities as contexts, cleanup as teardown
 
-`tests/fixtures.ts` extends the base test with one fixture per identity. Tokens come from `authHelper`;
-every created context is disposed after use.
+`userClient` is the standard identity, `adminClient` the elevated one, `anonymousClient` sends no
+`Authorization` header (it reuses the built-in `request` fixture, which needs no dispose). `createdUsers`
+collects ids a test creates and deletes them in its teardown — the test body has no `try`/`finally`, and a
+failing delete fails the test loudly with every status as evidence.
 
 ```ts
-import { test as base, APIRequestContext } from '@playwright/test';
-import { createUserClient, UserClient } from '../src/clients/user/userClient.js';
+import { test as base, expect } from '@playwright/test';
 import { authHelper, TestUsers } from '../src/clients/authHelper.js';
+import { createUserClient, type UserClient } from '../src/clients/user/userClient.js';
 
 type ApiFixtures = {
-  userClient: UserClient;       // standard identity
-  adminClient: UserClient;      // elevated identity
-  anonymousClient: UserClient;  // no Authorization header at all
+  userClient: UserClient;
+  adminClient: UserClient;
+  anonymousClient: UserClient;
+  createdUsers: string[];
 };
 
 export const test = base.extend<ApiFixtures>({
@@ -104,155 +103,156 @@ export const test = base.extend<ApiFixtures>({
     await ctx.dispose();
   },
   anonymousClient: async ({ request }, use) => {
-    // the built-in fixture has no auth header when the config sets none — reuse it, no dispose needed
     await use(createUserClient(request));
   },
+  createdUsers: async ({ adminClient }, use) => {
+    const ids: string[] = [];
+    await use(ids);
+    const statuses = await Promise.all(ids.map(async (id) => (await adminClient.remove(id)).status()));
+    expect(statuses, `cleanup of users ${ids.join(', ')}`).toEqual(ids.map(() => 204));
+  },
 });
-export { expect } from '@playwright/test';
+
+export { expect };
 ```
 
 ## Spec template
 
+The case id rides in the test's details as a tag, so the title stays `Should_X_When_Y`.
+
 ```ts
-import { test, expect } from '../../fixtures.js';
 import { ProblemDetailsSchema } from '../../../src/models/user/users/user.types.js';
 import { validUser } from '../../../src/fixtures/user.js';
+import { expect, test } from '../../fixtures.js';
 
 test.describe('GET /api/users', () => {
-  test('TC-USER-001: returns all users when authorized', async ({ userClient }) => {
+  test('Should_ReturnUsers_When_TokenIsValid', { tag: '@TC-USER-001' }, async ({ userClient }) => {
     const users = await userClient.getAllTyped(200);
 
     expect(users.length).toBeGreaterThan(0);
   });
 
-  test('TC-USER-002: returns 401 when the token is missing', async ({ anonymousClient }) => {
+  test('Should_Return401_When_TokenIsMissing', { tag: '@TC-USER-002' }, async ({ anonymousClient }) => {
     const response = await anonymousClient.getAll();
 
     expect(response.status()).toBe(401);
   });
 
-  test('TC-USER-004: returns 404 when the user does not exist', async ({ userClient }) => {
+  test('Should_Return404WithProblem_When_UserDoesNotExist', { tag: '@TC-USER-004' }, async ({ userClient }) => {
     const response = await userClient.getById('999999');
 
-    expect(response.status()).toBe(404);
-    const problem = ProblemDetailsSchema.parse(await response.json());
-    expect(problem.title).toBeTruthy();
+    expect(response.status(), await response.text()).toBe(404);
+    expect(ProblemDetailsSchema.parse(await response.json()).status).toBe(404);
   });
 });
 
 test.describe('POST /api/users', () => {
-  const createdIds: string[] = [];
-
-  // Cleanup is registered, never inlined: the test body stays linear with no
-  // try/finally, and the hook carries no try/catch — a failing cleanup fails loudly.
-  test.afterEach(async ({ adminClient }) => {
-    for (const id of createdIds) await adminClient.remove(id);
-    createdIds.length = 0;
-  });
-
-  test('TC-USER-010: creates a user when the body is valid', async ({ adminClient }) => {
-    const body = validUser().build(); // builder — see qa/typescript/skills/test-data-builder
+  test('Should_CreateUser_When_BodyIsValid', { tag: '@TC-USER-010' }, async ({ adminClient, createdUsers }) => {
+    const body = validUser().build();
 
     const created = await adminClient.createTyped(body, 201);
-    createdIds.push(String(created.id));
+    createdUsers.push(String(created.id));
 
-    expect.soft(created.email).toBe(body.email);
-    expect.soft(created.firstName).toBe(body.firstName);
+    expect(created).toMatchObject({ email: body.email, firstName: body.firstName });
   });
 
-  test('TC-USER-011: returns 400 with a field error when email is missing', async ({ adminClient }) => {
-    const body = validUser().email(null).build();
+  test('Should_Return400WithEmailError_When_EmailIsMissing', { tag: '@TC-USER-011' }, async ({ adminClient }) => {
+    const response = await adminClient.create(validUser().email(null).build());
 
-    const response = await adminClient.create(body);
-
-    expect(response.status()).toBe(400);
-    const problem = ProblemDetailsSchema.parse(await response.json());
-    expect(problem.errors?.email?.length).toBeGreaterThan(0);
+    expect(response.status(), await response.text()).toBe(400);
+    expect(ProblemDetailsSchema.parse(await response.json()).errors).toHaveProperty('email');
   });
 });
 ```
+
+## Context options, cookies and the response's own evidence
+
+| Need | API | Notes |
+|---|---|---|
+| Statuses come back, never thrown | `failOnStatusCode` on `request.newContext` [1.51] (and per request) — leave it `false`, the default | `true` turns a 4xx into an exception: an assertion never runs and every negative test dies. Never set it in `use` or a context the specs assert through |
+| Assert a redirect itself | `maxRedirects: 0` on the context [1.52] or the request | The response **is** the `302`; assert its status and `location` header. The default follows the redirect chain |
+| Cookie-authenticated app | `ctx.addCookies([{ name, value, url }])`, `ctx.cookies()`, `ctx.clearCookies()` [1.64] | Add the session cookie in the identity fixture instead of a header; read `cookies()` to assert the server set one (`Set-Cookie`). Below 1.64: pass `storageState` (the UI suite's signed-in file, `qa/typescript/skills/test-login-tokens`) to `newContext` |
+| Latency budget on one call | `await response.timing()` [1.62] | The request's timing phases in ms; assert the total against the endpoint's budget with the value in the message. A load profile is `qa-load-testing-typescript`, not this |
+| TLS on the API host | `await response.securityDetails()` [1.61] | `{ protocol, issuer, subjectName, validFrom, validTo }`, or `null` over plain HTTP; assert the protocol |
+
+```ts
+test('Should_IssueSessionCookie_When_UserSignsIn', { tag: '@TC-AUTH-003' }, async ({ sessionClient }) => {
+  await sessionClient.signIn(validUser().build());
+
+  expect(await sessionClient.cookieNames()).toContain('session');
+});
+```
+
+`sessionClient` is a client over a fixture-owned context whose `cookieNames()` reads `ctx.cookies()` [1.64].
+The context's trace (`APIRequestContext.tracing` [1.60]) and the runner's `trace: 'retain-on-failure'` record the
+calls of a failed test (`qa/typescript/skills/evidence-capture`).
 
 ## Scenario → pattern matrix
 
 | Scenario | Client method / identity | Assertion pattern |
 |----------|--------------------------|-------------------|
-| 2xx happy path | **typed** on `userClient`/`adminClient` | DTO returned already status-asserted + Zod-validated; verify fields with `expect.soft(...)` |
-| 401 unauthorized | **raw** on `anonymousClient` | single `expect(response.status()).toBe(401)` |
-| 403 forbidden | **raw** on a wrong-role identity fixture | single `expect(response.status()).toBe(403)` |
-| 404 not found | **raw** | status assert + `ProblemDetailsSchema.parse(await response.json())` when the backend emits one |
-| 400 validation | **raw** | status assert + `ProblemDetailsSchema.parse(...)`; assert the field key in `errors` |
-| Malformed JSON / extra-missing property | **raw** via the client's `createRaw(string)` / `createUnchecked(...)` | status assert only — add these methods via `api-client-writer` when the plan requires them |
+| 2xx happy path | **typed** on `userClient`/`adminClient` | DTO already status-asserted + Zod-validated; `toMatchObject` on the fields |
+| 401 / 403 | **raw** on `anonymousClient` / a wrong-role identity | one exact `expect(response.status()).toBe(...)` |
+| 404 / 400 | **raw** | exact status + `ProblemDetailsSchema.parse(await response.json())` |
+| Malformed JSON / extra-missing property | **raw** via `createRaw(string)` / `createUnchecked(...)` | exact status — add the methods via `api-client-writer` |
+| Redirect | **raw** on a `maxRedirects: 0` context | exact `302` + the `location` header |
 | Eventually-consistent state | **raw/typed** inside `expect.poll` | `await expect.poll(async () => (await client.getById(id)).status(), { timeout: 10_000 }).toBe(200)` |
 
 ## Rules
 
 ### Spec structure & naming
 
-- API specs live in `tests/api/{resource}/`, one file per operation: `{operation}{Resource}.spec.ts`, run by a
-  dedicated `api` **project** in `playwright.config.ts` (no browser, `use.baseURL` = the API root; UI projects
-  don't pick them up and vice versa).
-- One `test.describe(...)` per endpoint; titles read like behavior sentences and carry the TC-ID when a
-  test-case document drives generation (or `allure.tms(...)` where `allure-playwright` is wired).
-- Identities are **fixtures**, not setup code: a spec asks for `adminClient` in its parameter list. No
-  `beforeAll` creating shared contexts, no module-level clients.
+- API specs live in `tests/api/{resource}/`, one file per operation, run by a dedicated `api` **project**
+  (no browser, `use.baseURL` = the API root).
+- One `test.describe(...)` per endpoint; names are `Should_X_When_Y`; the TC-ID is a `{ tag }` in the test's
+  details (or `await allure.tms(...)` from `allure-js-commons` where Allure is wired).
+- Identities are **fixtures**: a spec asks for `adminClient` in its parameter list. No `beforeAll` creating
+  shared contexts, no module-level clients.
 
 ### Test rules
 
-- Assert the **exact** status code, always, before reading the body — `expect(response.status()).toBe(201)`,
-  never `expect(response).toBeOK()` (it passes on any 2xx, so a 204 from a broken create still "passes").
-  Never set `failOnStatusCode: true` — a thrown error is not an assertion and kills the 4xx tests.
-- Happy path uses the **typed** client method; negative scenarios use the **raw** method. Never re-assert the
-  status after a typed call.
-- Parse every 2xx body through the Zod schema (the typed method already does); error bodies are parsed in the
-  spec via `ProblemDetailsSchema.parse(await response.json())`. Never read `(await response.json()).field`
-  without a parse.
-- One logical behavior per test; `expect.soft(...)` for multiple fields of one response.
-- Tests are independent: per-test data, cleanup in `finally` (or `afterEach`) wrapped so it never masks a
-  failure, no execution-order assumptions — the suite must survive `--workers=4 --shard=2/2`.
-- Rows that differ only in data → a `for (const …)` over a **const test-case table generating `test(...)` calls**
-  (the Playwright-idiomatic parameterization), never conditionals inside one test body.
-- No `page`, no `browser` — an API spec that asks for the `page` fixture is a UI test in the wrong folder.
+- Assert the **exact** status code before reading the body — `toBe(201)`, never `toBeOK()` (any 2xx passes).
+  `failOnStatusCode` stays `false` (§ Context options).
+- Happy path uses the **typed** client method; negative scenarios use the **raw** method.
+- Parse every body through its Zod schema; never read `(await response.json()).field` unparsed.
+- One logical behavior per test; `toMatchObject` (or `expect.soft`) for several fields of one response.
+- Tests are independent: per-test data, **cleanup in a fixture's teardown** (`createdUsers`) or `afterEach` —
+  never a `try`/`finally` in the test body. The suite must survive `--workers=4 --shard=2/2`.
+- Rows that differ only in data → a `for` over a const case table **generating `test(...)` calls**, outside
+  every test body (`qa/typescript/skills/data-driven-testing`) — never conditionals inside one test.
+- No `page`, no `browser` — an API spec that asks for `page` is a UI test in the wrong folder.
 - Eventual consistency → `expect.poll` / `expect(...).toPass()`, never `waitForTimeout`.
 
 ### What NOT to do
 
 - No raw `request.get(...)` / `ctx.post(...)` in specs — every request goes through a `{resource}Client`.
 - No `fetch` / axios / supertest inside a Playwright project — one HTTP client, one trace.
-- No token threading per call — identity lives in the context (`extraHTTPHeaders` at creation) or in
-  `storageState` for cookie-auth apps (share the UI suite's logged-in state file; see
-  `qa/typescript/skills/test-login-tokens`).
-- No undisposed contexts — every `newContext()` has a `dispose()` in the fixture teardown.
-- No `toBeOK()` as the status assertion; no `failOnStatusCode: true`.
+- No token threading per call — identity lives in the context (headers or cookies at creation).
+- No undisposed contexts; no `toBeOK()`; no `failOnStatusCode: true`; no `finally`.
 - No hardcoded base URLs or tokens — `baseURL` from the config/env, tokens via `authHelper`.
-- No mixing UI steps and API assertions in one test — pure API specs stay in the `api` project; API-as-arrange
-  inside a UI test belongs to the UI suite's conventions.
 
 ## Generation steps
 
-1. Confirm the project runs Playwright (a `playwright.config.ts` and `@playwright/test` dependency). If not,
-   stop and route to `api-test-author/writer` — say why.
-2. Determine the **source of truth**: OpenAPI/Swagger spec, test-case document (map one `test(...)` per TC-ID,
-   id in the title), or verbal scenarios.
-3. Ensure the `api` project exists in `playwright.config.ts` (`use.baseURL`, no browser); add it if missing.
-4. For each resource in scope, verify the Zod schema + types and the context-based `{resource}Client` exist —
-   create missing ones via `api-models`, then the client following `api-client-writer` conventions with the
-   `(ctx: APIRequestContext)` factory signature.
-5. Add the identity fixtures the planned scenarios need (standard / admin / anonymous / wrong-role) to
-   `tests/fixtures.ts`.
+1. Confirm the project runs Playwright (a `playwright.config.ts` and `@playwright/test`). If not, route to
+   `api-test-author/writer` — say why.
+2. Determine the **source of truth**: OpenAPI, a test-case document (one `test(...)` per TC-ID, the id as a
+   tag), or verbal scenarios.
+3. Ensure the `api` project exists in `playwright.config.ts` (`use.baseURL`, no browser).
+4. Verify the Zod schemas and the context-based `{resource}Client` exist — create missing ones via `api-models`
+   and `api-client-writer` with the `(ctx: APIRequestContext)` factory signature.
+5. Add the identity and cleanup fixtures the planned scenarios need to `tests/fixtures.ts`.
 6. Author one spec file per operation from the scenario matrix.
-7. Run the project's own typecheck script (with the package manager `packageManager` names), then `npx playwright test --project=api` — expect 0 type errors, 0 failures. Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run".
+7. Run the project's own typecheck script, then `npx playwright test --project=api` — expect 0 type errors, 0
+   failures. Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run".
 
 ## Cross-references
 
-- `qa-api-test-writer-typescript` — the **stack default** (Vitest + fetch + Zod); this skill is the
-  variant for Playwright-first projects. Shared spine: Schema + Client + Spec, dual raw/typed methods,
-  `ProblemDetails` discipline, builder-based test data.
-- `qa-api-test-playwright-java` · `qa-api-test-playwright-dotnet` — the sibling stacks
-  (playwright-java + TestNG · Microsoft.Playwright + NUnit); same four ideas, different bindings.
-- `qa-api-models-typescript` / `qa-api-client-writer-typescript` — schemas / the client layer this skill consumes.
-- `qa-ui-test-writer-playwright-typescript` — the UI suite this skill shares a runner with; API-as-arrange lives there.
-- `qa-network-mocking-typescript` — `page.route` mocking/asserting of browser traffic (not API testing).
-- `qa-api-test-review-typescript` — review; its cross-stack checklist applies verbatim, plus this
-  skill's What-NOT-to-do list as Playwright-specific findings.
-- `qa-test-login-tokens-typescript` — the tokens the identity fixtures inject.
+- `qa-api-test-writer-typescript` — the **stack default** (Vitest + fetch + Zod); same Schema + Client + Spec
+  spine.
+- `qa-api-test-playwright-java` · `qa-api-test-playwright-dotnet` — the sibling stacks; same four ideas.
+- `qa-api-models-typescript` / `qa-api-client-writer-typescript` — schemas / the client layer.
+- `qa-ui-test-writer-playwright-typescript` — the UI suite this skill shares a runner with.
+- `qa-network-mocking-typescript` — `page.route` mocking of browser traffic (not API testing).
+- `qa-api-test-review-typescript` — review; plus this skill's What-NOT-to-do list.
+- `qa-test-login-tokens-typescript` — the tokens and signed-in state the identity fixtures inject.
 - `qa-test-reports-typescript` — `allure-playwright` wiring so API and UI results land in one report.

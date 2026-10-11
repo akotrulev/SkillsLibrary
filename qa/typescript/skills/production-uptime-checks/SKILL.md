@@ -5,15 +5,16 @@ description: Use when authoring synthetic monitoring as code in Node 24 (22 supp
 
 # Synthetic Monitoring as Code (Checkly · Node 24 / TypeScript) — **canonical stack**
 
-This is the **canonical** stack of the `qa/typescript/skills/production-uptime-checks/` family. It leads in TypeScript because
-synthetic monitoring is largely a JS/TS world and **Checkly `@checkly/cli`** is the strongest
-monitoring-as-code fit with the library's stack defaults: browser checks are plain `@playwright/test` specs
-(so they reuse the page objects from `qa-ui-test-writer-playwright-typescript` verbatim), and the whole
-monitoring setup lives in versioned TypeScript. The `dotnet` (Azure Application Insights availability tests)
-and `java` (Grafana Cloud Synthetic Monitoring) siblings are **honest ports of the discipline, not the
-code** — Checkly has **no official .NET or Java SDK** (TS/JS-only; browser checks are Playwright-JS), so each
-sibling re-expresses the same four ideas in its stack's most authentic tool. The *concepts* are identical;
-the tool changes.
+This is the **canonical** stack of the `production-uptime-checks` family. It leads in TypeScript because
+synthetic monitoring is largely a JS/TS world and **Checkly** is the strongest monitoring-as-code fit with the
+library's stack defaults: browser checks are plain `@playwright/test` specs (so they reuse the fixtures and page
+objects from `qa-ui-test-writer-playwright-typescript` verbatim), and the whole monitoring setup lives in
+versioned TypeScript. The `dotnet` (Azure Application Insights availability tests) and `java` (Grafana Cloud
+Synthetic Monitoring) siblings are **honest ports of the discipline, not the code** — Checkly has no .NET or
+Java SDK, so each sibling re-expresses the same four ideas in its stack's most authentic tool.
+
+`qa-api-typescript` loads this skill in its Step 3 when a suite is promoted to production probes; `qa-ui-typescript`
+hands its critical journeys to that agent for the same purpose.
 
 ## What synthetic monitoring is (and what it is not)
 
@@ -21,29 +22,22 @@ the tool changes.
 (staging/prod), continuously, alerting a human when the target is down or degraded. A synthetic check is a
 **continuously-running assertion**: you don't watch the result, you alert on its *failure*.
 
-It is **not**:
-
-- a **CI test** — CI tests run **once, pre-merge, against an ephemeral env** to gate a change
-  (`qa-ci-pipelines-*`). A synthetic runs **forever, post-deploy, against the real thing**. Same Playwright
-  muscle, opposite execution model. (Checkly's selling point: the *same* spec serves both — see § The boundary.)
-- a **load test** — `qa-load-testing-typescript` drives throughput to find the breaking point. A synthetic fires one
-  scripted journey every N minutes to answer "is it working *right now*". (Note the overlap: k6 *can* run as a
-  synthetic via Grafana Synthetic Monitoring — the Java sibling.)
-- a **journey author** — this skill *reuses* the page objects authored by
-  `qa-ui-test-writer-playwright-typescript`; it is the **assertion + scheduling + alerting layer**, not a new author.
+It is **not** a CI test (once, pre-merge, against an ephemeral env — `qa-ci-pipelines-*`; § The boundary), not a
+load test (`qa-load-testing-typescript`), and not a journey author: it reuses the suite's page objects and adds
+the **assertion + scheduling + alerting + evidence layer**.
 
 > **The discipline this skill encodes.** A synthetic check is only worth running if its **failure reaches a
-> human fast and means something**. So:
+> human fast, means something, and explains itself**. So:
 >
-> 1. **Two check types, both as code** — cheap **API/uptime checks** (status + latency + body shape) for the
->    "is the endpoint up" layer, and **browser checks** (a real user journey) for the "can a user actually do
->    the thing" layer. Both live in the repo, reviewed and deployed via a CLI — never hand-clicked in a SaaS UI.
+> 1. **Two check types, both as code** — cheap **API/uptime checks** (status + latency + body shape) for "is the
+>    endpoint up", and **browser checks** (a real user journey) for "can a user actually do the thing". Both
+>    live in the repo, reviewed and deployed via a CLI — never hand-clicked in a SaaS UI.
 > 2. **Assert an SLA, not just pass/fail** — a 200 that takes 8 seconds is a regression. Gate on a **latency
 >    budget** (`degradedResponseTime`/`maxResponseTime`) and body shape, not just the status code.
-> 3. **Alert on the failure** — a check no one is paged on is a check that does nothing. Wire an alert
->    channel and a retry strategy so a single transient blip doesn't page someone at 3am, but a real outage does.
-> 4. **Wait on a condition, never a sleep** — the same discipline as the rest of the library. Poll on a
->    condition; never `waitForTimeout`/`setTimeout` to "let it settle".
+> 3. **Alert on the failure, with its evidence** — a check no one is paged on does nothing, and a page that
+>    says only "failed" sends on-call to re-run it by hand. Wire an alert channel and a bounded retry, and keep
+>    the trace, video and screenshot of every failed browser run.
+> 4. **Wait on a condition, never a sleep** — Playwright auto-waits; never `waitForTimeout`/`setTimeout`.
 
 ## Decision matrix — which check for which job
 
@@ -55,38 +49,39 @@ It is **not**:
 | Is a raw TCP port / service reachable? | **TCP check** | `TcpCheck` | `responseTime` + `responseData` |
 | Should several checks share schedule/locations/alerts? | **group** | `CheckGroup` | (shared config, not itself a check) |
 
-**Rule of thumb:** *every endpoint* gets a cheap API check (seconds to run, run them often). *Every
-business-critical journey* (login, checkout, search) gets a browser check (run less often, costs more). Don't
-browser-check what an API check can prove.
+Every endpoint gets a cheap API check; every business-critical journey a browser check.
 
 ## Stack
 
-- Node 24 + TypeScript (strict mode) — **no `waitForTimeout` / `setTimeout`-as-wait** anywhere
+- Node 24 (22 maintenance) + TypeScript (strict mode) — **no `waitForTimeout` / `setTimeout`-as-wait** anywhere
 - `checkly` (npm) — constructs import from `checkly/constructs`; the `checkly` CLI is the deploy tool
-- `@playwright/test` — browser-check bodies are plain Playwright specs; **reuse** the page objects from
-  `qa-ui-test-writer-playwright-typescript` (cross-link — this skill does not author them)
-- Checkly cloud — runs the deployed checks on a schedule from global `locations`; alerting + dashboards live there
+- `@playwright/test` — browser-check bodies are plain Playwright specs on the writer's fixtures
+  (`qa/typescript/skills/ui-test-author/playwright/assets/fixtures.ts`). This skill pins nothing; the suite's
+  version is the writer's **Versions** table
+- **The Checkly runtime decides which Playwright runs the check.** Pin `runtimeId` in `checkly.config.ts` to the
+  newest id `npx checkly runtimes` lists, and read the Playwright version that runtime ships from the same
+  output. It can lag the suite's own version: a browser-check spec, and every page object it imports, uses only
+  APIs that runtime has (a 1.64-only API such as `locator.within()` fails there — use `parent.locator(child)`)
+- Checkly cloud — runs the deployed checks on a schedule from global `locations`; alerting + results live there
 - Secrets via env, read lazily, never logged (`CHECKLY_API_KEY`, `CHECKLY_ACCOUNT_ID`, target creds)
 
 ```
 monitoring/
-├── checkly.config.ts              ← project identity (logicalId) + shared check defaults + CLI config
+├── checkly.config.ts       project identity (logicalId) + shared check defaults + runtime + CLI config
 ├── src/
-│   ├── alert-channels.ts          ← EmailAlertChannel / SlackAlertChannel / PagerdutyAlertChannel (shared)
-│   ├── api.check.ts               ← ApiCheck — the uptime/health + SLA layer
-│   ├── home.check.ts              ← BrowserCheck pointing at home.spec.ts
+│   ├── alert-channels.ts   EmailAlertChannel / SlackAlertChannel / PagerdutyAlertChannel (shared)
+│   ├── api.check.ts        ApiCheck — the uptime/health + SLA layer
+│   ├── login.check.ts      BrowserCheck pointing at login.spec.ts
 │   └── __checks__/
-│       └── home.spec.ts           ← a @playwright/test spec — REUSES tests/pages/* page objects
-└── package.json                   ← "checkly" devDependency; npm scripts wrapping the CLI
+│       └── login.spec.ts   a @playwright/test spec on tests/fixtures.ts
+└── package.json            "checkly" devDependency; npm scripts wrapping the CLI
 ```
 
 ## Monitoring-as-code — the project, the constructs, the lifecycle
 
-The whole monitoring setup is **versioned TypeScript** deployed to Checkly's cloud, which then runs the
-checks continuously from global locations. Nothing is hand-clicked in the UI.
-
-**`checkly.config.ts`** — project identity (`logicalId`, a *stable* identifier — changing it deletes and
-recreates everything) plus shared defaults inherited by every check:
+**`checkly.config.ts`** — project identity plus shared defaults inherited by every check. `logicalId` is the
+resource-graph key: renaming it deletes and recreates everything. Checks run from several `locations` to catch
+regional outages; browser checks run a little less often than API checks; `testMatch` auto-discovers the specs.
 
 ```typescript
 import { defineConfig } from 'checkly';
@@ -94,74 +89,75 @@ import { Frequency } from 'checkly/constructs';
 
 export default defineConfig({
   projectName: 'Acme Storefront Monitoring',
-  logicalId: 'acme-storefront-monitoring',          // STABLE — the resource-graph key; do not rename casually
+  logicalId: 'acme-storefront-monitoring',
   checks: {
-    frequency: Frequency.EVERY_5M,                  // default cadence; per-check overrides allowed
-    locations: ['us-east-1', 'eu-west-1'],          // run from multiple regions to catch regional outages
+    frequency: Frequency.EVERY_5M,
+    locations: ['us-east-1', 'eu-west-1'],
     tags: ['storefront', 'production'],
-    runtimeId: '2024.02',                           // pin the runtime so checks don't drift on upgrades
     browserChecks: {
-      frequency: Frequency.EVERY_10M,               // browser checks cost more — run them a little less often
-      testMatch: '**/__checks__/**/*.spec.ts',      // auto-discover Playwright specs as browser checks
+      frequency: Frequency.EVERY_10M,
+      testMatch: '**/__checks__/**/*.spec.ts',
     },
   },
   cli: { runLocation: 'eu-west-1', reporters: ['list'] },
 });
 ```
 
-**The lifecycle is two verbs** — this *is* the synthetic-vs-CI boundary (see § The boundary):
+Add `runtimeId` under `checks`, set to the newest id `npx checkly runtimes` prints — a pinned runtime keeps the
+checks from drifting when Checkly changes its default.
 
-```bash
-npx checkly login                        # one-time, or CHECKLY_API_KEY + CHECKLY_ACCOUNT_ID in CI
-npx checkly test --record                # DRY-RUN on Checkly's cloud — nothing persisted; gate a PR on this
-npx checkly deploy --force               # PERSIST the checks → they now run on schedule + alert, forever
-npx checkly trigger                      # run the already-deployed checks on demand (e.g. post-deploy smoke)
-```
+**The lifecycle** — this *is* the synthetic-vs-CI boundary (§ The boundary):
 
-Every construct's **first constructor arg is a stable `logicalId`** — Checkly diffs the resource graph by it
-to know what to create/update/delete on `deploy`.
+| Command | Does |
+|---|---|
+| `npx checkly login` | one-time; in CI, `CHECKLY_API_KEY` + `CHECKLY_ACCOUNT_ID` instead |
+| `npx checkly test --record` | a **dry-run** on Checkly's cloud — nothing persisted; gates a PR, and records the run's results |
+| `npx checkly deploy --force` | **persists** the checks — they now run on schedule and alert |
+| `npx checkly trigger` | runs the deployed checks on demand (a post-deploy smoke) |
+| `npx checkly runtimes` | lists the runtimes and the Playwright version each ships |
+
+Every construct's **first constructor arg is a stable `logicalId`** — Checkly diffs the resource graph by it.
 
 ## Check type 1 — API / uptime checks (status + latency + body shape)
 
-`ApiCheck` is the cheap layer: hit an endpoint on a schedule, assert status, **latency budget**, and body
-shape. **Assert the SLA, not just the status** — that's what makes it a monitor and not a ping.
+`ApiCheck` is the cheap layer: hit an endpoint on a schedule, assert status, **latency budget**, and body shape.
+Above `degradedResponseTime` the run is DEGRADED (an alert if the channel sends degraded); above
+`maxResponseTime` it FAILS. The URL interpolates `{{BASE_URL}}` from the environment.
 
 ```typescript
-import { ApiCheck, AssertionBuilder } from 'checkly/constructs';
+import { ApiCheck, AssertionBuilder, RetryStrategyBuilder } from 'checkly/constructs';
 import { emailChannel, slackChannel } from './alert-channels';
 
 new ApiCheck('storefront-health-check', {
   name: 'Storefront API — health + SLA',
   alertChannels: [emailChannel, slackChannel],
-  degradedResponseTime: 2000,            // > 2s → DEGRADED (alerts if the channel sends degraded) — the SLA warn
-  maxResponseTime: 5000,                 // > 5s → FAILED — the hard latency budget; a slow 200 is a regression
+  degradedResponseTime: 2000,
+  maxResponseTime: 5000,
   request: {
     method: 'GET',
-    url: '{{BASE_URL}}/api/health',      // {{ENV_VAR}} interpolation — base URL from the environment, not hard-coded
+    url: '{{BASE_URL}}/api/health',
     followRedirects: true,
     skipSSL: false,
     assertions: [
       AssertionBuilder.statusCode().equals(200),
-      AssertionBuilder.responseTime().lessThan(2000),          // latency assertion = the SLA, asserted every run
-      AssertionBuilder.jsonBody('$.status').equals('healthy'),  // body SHAPE, not just 2xx
+      AssertionBuilder.responseTime().lessThan(2000),
+      AssertionBuilder.jsonBody('$.status').equals('healthy'),
       AssertionBuilder.jsonBody('$.dependencies.database').equals('up'),
     ],
   },
-  retryStrategy: RetryStrategyBuilder.fixedStrategy({ maxRetries: 2, baseBackoffSeconds: 30 }),
+  retryStrategy: RetryStrategyBuilder.linearStrategy({ maxRetries: 2, baseBackoffSeconds: 30, sameRegion: false }),
 });
 ```
 
-A check that needs auth uses a **setup script** to mint a token (cross-link `qa-test-login-tokens-typescript`
-for M2M tokens against the live target) and stashes it on the request — never a hard-coded credential.
+An authenticated check mints its token in a **setup script** (`qa-test-login-tokens-typescript`).
 
 ## Check type 2 — browser checks (a real user journey, reusing your page objects)
 
-A `BrowserCheck` body is a **plain `@playwright/test` spec**. It **reuses the page objects** authored by
-`qa-ui-test-writer-playwright-typescript` — same intent-not-selectors discipline, same `getByRole`/`getByLabel`
-locators. This skill does **not** author the journey; it schedules it against the live target and alerts on it.
+A `BrowserCheck` body is a **plain `@playwright/test` spec** on the same fixtures the CI suite uses — the same
+page objects, the same intent-not-selectors discipline. This skill does **not** author the journey; it
+schedules it against the live target, alerts on it and keeps its evidence.
 
 ```typescript
-// monitoring/src/home.check.ts — wraps the spec as a scheduled, alerting browser check
 import { BrowserCheck, Frequency } from 'checkly/constructs';
 import * as path from 'path';
 import { emailChannel, pagerdutyChannel } from './alert-channels';
@@ -169,59 +165,60 @@ import { emailChannel, pagerdutyChannel } from './alert-channels';
 new BrowserCheck('storefront-login-journey', {
   name: 'Storefront — login + add-to-cart journey',
   frequency: Frequency.EVERY_10M,
-  alertChannels: [emailChannel, pagerdutyChannel],   // a broken checkout journey pages on-call
+  alertChannels: [emailChannel, pagerdutyChannel],
   code: { entrypoint: path.join(__dirname, '__checks__/login.spec.ts') },
 });
 ```
 
+`monitoring/src/login.check.ts` — a broken checkout journey pages on-call.
+
 ```typescript
-// monitoring/src/__checks__/login.spec.ts — a NORMAL Playwright spec; reuses tests/pages/* verbatim
-import { test, expect } from '@playwright/test';
-import { LoginPage } from '../../../tests/pages/login.page';   // ← the SAME page object the CI suite uses
-import { CartPage } from '../../../tests/pages/cart.page';
+import { expect, test } from '../../../tests/fixtures';
 
-test('user can log in and add an item to the cart', async ({ page }) => {
-  const login = new LoginPage(page);
-  await login.goto();
-  // creds from env, read lazily, never logged or committed — set as Checkly secret env vars
-  await login.signInAs(process.env.SYNTHETIC_USER!, process.env.SYNTHETIC_PASSWORD!);
+test.use({
+  trace: 'retain-on-failure',
+  video: 'retain-on-failure',
+  screenshot: { mode: 'only-on-failure', fullPage: true },
+});
 
-  const cart = new CartPage(page);
-  await cart.addFirstFeaturedItem();
+test('Should_AddFeaturedItemToCart_When_SyntheticUserSignsIn', async ({ loginPage, cartPage, testUser }) => {
+  await loginPage.signIn(testUser);
 
-  // Playwright auto-waits on the condition — NO waitForTimeout to "let the cart update"
-  await expect(cart.itemCount).toHaveText('1');
+  await cartPage.addFirstFeaturedItem();
+
+  await expect(cartPage.itemCount).toHaveText('1');
 });
 ```
 
+`monitoring/src/__checks__/login.spec.ts`. `testUser` reads `E2E_USER` / `E2E_PASSWORD` lazily — set them as
+Checkly **secret** environment variables for the synthetic user. The spec signs in itself: Checkly runs the
+spec, not the suite's `playwright.config.ts`, so there is no setup project and no `storageState` file.
+
+## Evidence when a probe fails
+
+A page at 3 a.m. must say *what* broke, not only *that* something did.
+
+- **Browser checks keep the R7 evidence.** Checkly runs the spec, not the canonical config, so the spec states
+  the failure-evidence defaults itself with the `test.use` above: trace and video `retain-on-failure`, a
+  full-page screenshot `only-on-failure`. A passing run keeps nothing, so every-minute probes stay cheap. Never
+  `'on'` — a probe runs thousands of times a week.
+- **Read the failed run before re-running it.** The failed run's result page carries what the run kept
+  (screenshots, trace, video, logs). A downloaded `trace.zip` is read exactly like a CI failure:
+  `npx playwright trace open <zip>`, then `trace errors` and `trace actions` (`qa/typescript/skills/evidence-capture`,
+  "Reading a failure"). Check that a failed run's result shows the trace before the first incident relies on it
+  — what is kept, and for how long, is the Checkly account's setting.
+- **API checks** keep the request, the response and the timing phases of a failed run in the check result —
+  assert the body shape (`jsonBody`) so the failure names the field that broke, not only the status.
+- **PII.** A trace and a video carry what the synthetic user typed and saw: it is a dedicated, disposable
+  account, never a real customer.
+
 ## Deep-dive reference
 
-These sections live in `references/details.md` — **read it when the task touches them**: **Alerting + SLA thresholds — the part that makes it a monitor**.
-
-## Secrets from env, never logged
-
-Target URLs, API keys, and test-user creds come from the environment — read lazily, never committed, never
-logged. Checkly's own env vars carry a **`secret: true`** flag that makes them write-only (masked in output,
-traces, and the UI):
-
-```typescript
-// In a check or group:
-environmentVariables: [
-  { key: 'BASE_URL', value: 'https://staging.acme.example' },
-  { key: 'SYNTHETIC_PASSWORD', value: process.env.SYNTHETIC_PASSWORD!, secret: true },  // write-only, masked
-],
-```
-
-```bash
-# CI auth — never in checkly.config.ts:
-export CHECKLY_API_KEY=...        # from the CI secret store
-export CHECKLY_ACCOUNT_ID=...
-npx checkly test -e BASE_URL=https://staging.acme.example --record   # override per run
-```
+These sections live in `references/details.md` — **read it when the task touches them**: **Alerting + SLA
+thresholds — the part that makes it a monitor**; **Secrets from env, never logged**; **The CI workflow — gate,
+then deploy**.
 
 ## The boundary — `checkly test` (CI gate) vs `checkly deploy` (continuous monitor)
-
-This is the synthetic-vs-CI distinction made concrete, and it's the whole reason the family exists:
 
 | | `checkly test` | `checkly deploy` |
 |---|---|---|
@@ -231,123 +228,48 @@ This is the synthetic-vs-CI distinction made concrete, and it's the whole reason
 | **Alerts?** | No (it's a gate — green/red) | Yes (pages on failure/degradation) |
 | **Role** | A **CI test** (`qa-ci-pipelines-*` territory) | A **synthetic monitor** (this skill) |
 
-The payoff of monitoring-as-code: **one spec, two execution modes** — you don't maintain a separate CI test
-and a separate monitor. The CI pipeline runs `checkly test --record` to gate the merge, then (on merge to
-main, after deploy) runs `checkly deploy --force` to promote the monitoring config:
-
-```yaml
-# .github/workflows — cross-link qa-ci-pipelines for the full pipeline
-- name: Synthetic dry-run (gate the PR)
-  run: npx checkly test --record --reporter=github
-  env: { CHECKLY_API_KEY: ${{ secrets.CHECKLY_API_KEY }}, CHECKLY_ACCOUNT_ID: ${{ secrets.CHECKLY_ACCOUNT_ID }} }
-
-- name: Deploy the monitors (main only, post-deploy)
-  if: github.ref == 'refs/heads/main'
-  run: npx checkly deploy --force
-  env: { CHECKLY_API_KEY: ${{ secrets.CHECKLY_API_KEY }}, CHECKLY_ACCOUNT_ID: ${{ secrets.CHECKLY_ACCOUNT_ID }} }
-```
+**One spec, two execution modes:** the pipeline runs `checkly test --record` to gate the merge, then (on main,
+after deploy) `checkly deploy --force` — the workflow steps are in `references/details.md`.
 
 ## Anti-patterns
 
-- **Asserting only the status code.** A 200 that takes 9 seconds is a user-facing regression a status check
-  misses. *Fix:* assert a **latency budget** (`maxResponseTime` / `responseTime().lessThan(...)`) and the body
-  **shape** (`jsonBody('$.x')`), not just `statusCode().equals(200)`.
-- **A check with no alert channel.** It runs, it goes red, no one knows. *Fix:* attach an `alertChannel`
-  (page on critical journeys, email/Slack on the rest); a synthetic *is* its alert.
-- **`maxRetries: 5` to stop the alerts.** That's the flaky-quarantine masking knob — it just delays the page
-  while users suffer. *Fix:* bound retries (1–2), retry `sameRegion: false` to tell a regional blip from a real
-  outage, and **fix the underlying flakiness** (cross-link `qa-flaky-test-quarantine-typescript`).
-- **`page.waitForTimeout(3000)` to "let it settle".** A fixed sleep is flaky and slow, and it's banned across
-  this library. *Fix:* Playwright auto-waits; assert on the condition (`expect(locator).toHaveText(...)`).
-- **Hand-clicking checks in the Checkly UI.** Unversioned, unreviewed, undiffable, lost on account churn.
-  *Fix:* monitoring-as-code in `checkly.config.ts` + constructs, deployed via the CLI from CI.
-- **Running synthetics as the merge gate against an ephemeral env.** That's a CI test, not a monitor — wrong
-  tool. *Fix:* `checkly test` gates the PR; `checkly deploy` runs the monitor against the *live* target. Keep
-  them distinct (`qa-ci-pipelines-*`).
-- **Re-authoring the journey inside the check.** Duplicated selectors that drift from the CI suite. *Fix:*
-  the browser-check spec **imports the same page objects** from `qa-ui-test-writer-playwright-typescript`.
-- **A hard-coded URL or credential in `checkly.config.ts`.** Committed secrets, no env separation. *Fix:*
-  `{{BASE_URL}}` interpolation + `secret: true` env vars + `CHECKLY_API_KEY` from the CI secret store, lazily.
-
-## Examples
-
-**End-to-end: a cheap uptime check + a critical-journey browser check, sharing a group and an alert.**
-
-```typescript
-// monitoring/src/storefront.ts
-import { ApiCheck, BrowserCheck, AssertionBuilder, Frequency } from 'checkly/constructs';
-import * as path from 'path';
-import { storefrontGroup } from './alert-channels';   // group carries locations + alerts + retry
-
-// Cheap, frequent: is the API up and within SLA?
-new ApiCheck('home-api', {
-  name: 'Home API',
-  group: storefrontGroup,
-  frequency: Frequency.EVERY_1M,                       // run the cheap one often
-  maxResponseTime: 3000,
-  request: {
-    method: 'GET',
-    url: '{{BASE_URL}}/api/products?featured=true',
-    assertions: [
-      AssertionBuilder.statusCode().equals(200),
-      AssertionBuilder.responseTime().lessThan(1500),
-      AssertionBuilder.jsonBody('$.items.length').greaterThan(0),  // shape: there ARE featured products
-    ],
-  },
-});
-
-// Expensive, less frequent: can a user actually complete the journey?
-new BrowserCheck('checkout-journey', {
-  name: 'Checkout journey',
-  group: storefrontGroup,
-  frequency: Frequency.EVERY_15M,
-  code: { entrypoint: path.join(__dirname, '__checks__/checkout.spec.ts') },  // reuses tests/pages/*
-});
-```
-
-The API check fires every minute and pages if the storefront is down or slow; the browser check fires every
-15 minutes and pages if a user can't actually check out — both alert through the group's channel, both
-deployed with `checkly deploy`, both runnable as a PR gate with `checkly test --record`.
+- **Asserting only the status code.** A 200 that takes 9 seconds is a user-facing regression. *Fix:* a
+  **latency budget** and the body **shape**, not just `statusCode().equals(200)`.
+- **A check with no alert channel.** It goes red and no one knows. *Fix:* an `alertChannel` on every check.
+- **A failed browser run with no trace.** On-call re-runs it by hand and the transient evidence is gone. *Fix:*
+  the spec's `test.use` keeps trace, video and screenshot on failure.
+- **`maxRetries: 5` to stop the alerts.** It delays the page while users suffer. *Fix:* 1–2 retries,
+  `sameRegion: false`, and **fix the flakiness** (`qa-flaky-test-quarantine-typescript`).
+- **Re-authoring the journey inside the check.** *Fix:* import the suite's fixtures.
+- **A hard-coded URL or credential in `checkly.config.ts`.** *Fix:* `{{BASE_URL}}`, `secret: true` variables,
+  `CHECKLY_API_KEY` from the CI secret store.
 
 ## Rules (hard constraints)
 
-- **Synthetics run against a LIVE target, post-deploy, on a schedule — never as the merge gate.** `checkly
-  test` (dry-run) may gate a PR; `checkly deploy` is the continuous monitor. Keep the two modes distinct
-  (`qa-ci-pipelines-*` owns the pre-merge gate against ephemeral envs).
-- **Assert an SLA, not just a status code.** Every API check gates on a **latency budget**
-  (`maxResponseTime` / `responseTime().lessThan`) and body **shape** (`jsonBody`), not only `200`.
-- **Every check has an alert channel.** A synthetic *is* its alert; an un-alerted check does nothing. Page on
-  critical journeys, email/Slack on the rest; `sendDegraded` on for SLA breaches.
-- **Retries are bounded.** 1–2, `sameRegion: false` to distinguish a regional blip from a real outage —
-  never cranked to silence alerts (that's the flaky-quarantine masking anti-pattern).
-- **Wait on a condition, never a sleep.** Playwright auto-waits; `expect(...).toHaveText/poll`. No
-  `waitForTimeout` / `setTimeout`-as-wait anywhere.
-- **Monitoring-as-code, in the repo.** Checks live in `checkly.config.ts` + constructs, reviewed and deployed
-  via the CLI — never hand-clicked in the SaaS UI.
-- **Browser checks REUSE the page objects** from `qa-ui-test-writer-playwright-typescript` — intent, not
-  selectors; this skill is the assertion/scheduling/alerting layer, not a journey author.
-- **Secrets from env, never logged.** `{{BASE_URL}}` interpolation, `secret: true` env vars, `CHECKLY_API_KEY`
-  from the CI secret store, read lazily. Tests: behavioral names, one logical assertion, no conditional logic.
+- **Synthetics run against a LIVE target, post-deploy, on a schedule — never as the merge gate.** `checkly test`
+  (dry-run) may gate a PR; `checkly deploy` is the continuous monitor.
+- **Assert an SLA, not just a status code** — a latency budget and the body shape on every API check.
+- **Every check has an alert channel.** Page on critical journeys, email/Slack on the rest; `sendDegraded` on
+  for SLA breaches.
+- **Every browser check keeps its failure evidence** — trace and video `retain-on-failure`, a full-page
+  screenshot `only-on-failure` — and a failed run is read (`qa-evidence-capture-typescript`) before it is re-run.
+- **Retries are bounded** — 1–2, `sameRegion: false`; never cranked to silence alerts.
+- **The runtime is pinned**, and browser-check code uses only the Playwright APIs that runtime ships.
+- **Wait on a condition, never a sleep.**
+- **Browser checks reuse the suite's fixtures and page objects** — this skill never authors a journey.
+- **Secrets from env, never logged.** Test names `Should_X_When_Y`; one logical assertion; no conditional logic;
+  no inline comments in the code.
 
 ## Cross-references
 
-- `qa-production-uptime-checks-dotnet` — same four ideas, the **.NET-native** tool: **Azure Application Insights
-  availability tests** (Standard tests as config-as-code via Bicep/Terraform + custom `TrackAvailability` with
-  a Playwright-.NET / `HttpClient` probe pushing results to App Insights). Honest divergence: **no Checkly
-  .NET SDK** — App Insights is the way to write the probe in C# end-to-end. Discipline ported, not code.
-- `qa-production-uptime-checks-java` — same four ideas, the **JVM/observability-native** tool: **Grafana Cloud
-  Synthetic Monitoring** (k6 scripts + HTTP/ping/TCP probe checks, managed via the Grafana Terraform provider)
-  — matches the library's Grafana observability default. Honest divergence: **no Checkly Java SDK**. Discipline
-  ported, not code.
-- `qa-ui-test-writer-playwright-typescript` — authors the page objects + journeys that the **browser checks
-  reuse**. This skill schedules and alerts on them; it does not author them. Mirror its intent-not-selectors discipline.
-- `qa-load-testing-typescript` — k6 load testing (throughput), NOT uptime. The overlap: k6 *can* run as a synthetic via
-  Grafana Synthetic Monitoring (the Java sibling). Synthetics check "is it working"; k6 checks "how much can it take".
-- `qa-ci-pipelines-typescript` (its GitHub Actions, Azure Pipelines and GitLab CI references) — the **pre-merge gate against
-  ephemeral envs** boundary; also where `checkly test --record` (gate) + `checkly deploy` (promote) are wired.
-- `qa-test-login-tokens-typescript` — M2M / test-user tokens for checks that hit an **authenticated** live
-  endpoint (setup script mints the token; creds from env, lazily).
-- `qa-flaky-test-quarantine-typescript` — a synthetic that needs `maxRetries` cranked to stay green is
-  *flaky*; bound the retries and fix the root cause rather than masking the alert.
-- `qa-test-reports-typescript` — surfacing `checkly test --record` run results / traces (the synthetic's
-  reporting layer beyond the Checkly dashboard).
+- `qa-production-uptime-checks-dotnet` (Application Insights availability tests) · `qa-production-uptime-checks-java`
+  (Grafana Cloud Synthetic Monitoring) — the discipline ported, not the code.
+- `qa-ui-test-writer-playwright-typescript` — the fixtures, page objects and journeys the **browser checks
+  reuse**.
+- `qa-evidence-capture-typescript` — the evidence modes the browser-check spec sets, and how a failed run's
+  trace is read.
+- `qa-load-testing-typescript` — throughput, not uptime.
+- `qa-ci-pipelines-typescript` — the pre-merge gate against ephemeral envs; where `checkly test --record` and
+  `checkly deploy` are wired.
+- `qa-test-login-tokens-typescript` — M2M / test-user tokens for checks that hit an **authenticated** endpoint.
+- `qa-flaky-test-quarantine-typescript` — a synthetic that needs `maxRetries` cranked to stay green is flaky.

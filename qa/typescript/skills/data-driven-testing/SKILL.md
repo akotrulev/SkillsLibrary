@@ -78,23 +78,23 @@ In TS the file content arrives **untyped** — CSV cells are all strings, `JSON.
 **fails loudly with the offending field** instead of silently flowing through as `NaN`.
 
 ```typescript
-// tests/data/tax-case.ts
 import { z } from "zod";
 
 export const TaxCaseSchema = z.object({
   region: z.string().min(1),
-  amountCents: z.coerce.number().int(),      // CSV gives "10000" (string) → coerced to 10000
+  amountCents: z.coerce.number().int(),
   expectedTaxCents: z.coerce.number().int(),
 });
 
-export type TaxCase = z.infer<typeof TaxCaseSchema>;   // the typed row the test body sees
+export type TaxCase = z.infer<typeof TaxCaseSchema>;
 
-// Name the case so a failing row reports the INPUT that broke it, not "row 7".
-export const label = (c: TaxCase) => `${c.region} @ ${c.amountCents}¢ → ${c.expectedTaxCents}¢`;
+export const label = (c: TaxCase) => `${c.region}_${c.amountCents}`;
 ```
 
-The test body depends on `TaxCase`, never on a column order or a tuple index — so changing the file format
-(CSV → JSON) never touches a test.
+`tests/data/tax-case.ts`. `z.coerce` turns the CSV's `"10000"` into `10000`; `TaxCase` is the typed row the test
+body sees; `label` names the case by its **input**, so a failing row reports `DE_10000`, not "row 7". The test
+body depends on `TaxCase`, never on a column order or a tuple index — so changing the file format (CSV → JSON)
+never touches a test.
 
 ## Source 1 — inline (`test.for`)
 
@@ -104,20 +104,22 @@ as one value and exposes the context.
 
 ```typescript
 import { test, expect } from "vitest";
+import type { TaxCase } from "./data/tax-case";
 import { TaxCalculator } from "../src/tax-calculator";
 
-const cases: [string, number, number][] = [
-  ["DE", 10_000, 1_900],   // 19% VAT
-  ["US-OR", 5_000, 0],     // no sales tax
-  ["GB", 2_000, 400],      // 20% VAT
+const cases: readonly TaxCase[] = [
+  { region: "DE", amountCents: 10_000, expectedTaxCents: 1_900 },
+  { region: "US-OR", amountCents: 5_000, expectedTaxCents: 0 },
+  { region: "GB", amountCents: 2_000, expectedTaxCents: 400 },
 ];
 
-test.for(cases)("computes tax for %s on %i¢", ([region, amount, expected]) => {
-  expect(new TaxCalculator().taxFor(region, amount)).toBe(expected);   // one logical assertion per row
+test.for(cases)("Should_ChargeExpectedTax_When_RegionIs $region on $amountCents", (tc) => {
+  expect(new TaxCalculator().taxFor(tc.region, tc.amountCents)).toBe(tc.expectedTaxCents);
 });
 ```
 
-The title placeholders (`%s`, `%i`) interpolate the row, so a failure names **which input** broke.
+The title placeholders (`$region`, `$amountCents`) interpolate the row, so a failure names **which input**
+broke — DE at 19 %, US-OR with no sales tax, GB at 20 %.
 `describe.each` does the same at the suite level when each row needs its own `beforeEach`/teardown.
 
 ## Source 2 — external CSV (`csv-parse`)
@@ -136,7 +138,6 @@ GB,2000,400
 ```
 
 ```typescript
-// tests/data/load-cases.ts
 import { readFileSync } from "node:fs";
 import { parse } from "csv-parse/sync";
 import { z } from "zod";
@@ -144,29 +145,33 @@ import { TaxCaseSchema, type TaxCase } from "./tax-case";
 
 export function loadCsvTaxCases(path: string): TaxCase[] {
   const records = parse(readFileSync(path, "utf8"), {
-    columns: true,           // first line = headers → array of { region, amountCents, ... } string objects
+    columns: true,
     skip_empty_lines: true,
     trim: true,
   });
-  return z.array(TaxCaseSchema).parse(records);   // validate ALL rows + coerce strings → numbers; throws on a bad row
+  return z.array(TaxCaseSchema).parse(records);
 }
 ```
 
+`tests/data/load-cases.ts`. `columns: true` maps the header line onto string-valued objects; the Zod parse
+validates **all** rows, coerces strings to numbers and throws on a bad row, naming the field.
+
 ```typescript
-// tests/tax-calculator.test.ts
+import { fileURLToPath } from "node:url";
 import { test, expect } from "vitest";
 import { loadCsvTaxCases } from "./data/load-cases";
-import { label, type TaxCase } from "./data/tax-case";
+import type { TaxCase } from "./data/tax-case";
 import { TaxCalculator } from "../src/tax-calculator";
 
-const cases = loadCsvTaxCases(new URL("./data/tax-cases.csv", import.meta.url).pathname);
+const cases = loadCsvTaxCases(fileURLToPath(new URL("./data/tax-cases.csv", import.meta.url)));
 
-test.for(cases)("$region tax", (tc: TaxCase) => {   // one typed arg, not three loose columns
+test.for(cases)("Should_ChargeExpectedTax_When_RegionIs $region", (tc: TaxCase) => {
   expect(new TaxCalculator().taxFor(tc.region, tc.amountCents)).toBe(tc.expectedTaxCents);
 });
 ```
 
-> Vitest interpolates object fields in the title with `$field` (`"$region tax"`). Resolve the file path
+> `tests/tax-calculator.test.ts`: one typed argument, not three loose columns. Vitest interpolates object
+> fields in the title with `$field`. Resolve the file path
 > relative to the test module (`import.meta.url`), not the process cwd, so the test runs from anywhere.
 
 ## Source 3 — external JSON (native, for nested cases)
@@ -189,7 +194,7 @@ When a case has **sub-objects or lists** (a CSV can't express nesting cleanly), 
 ```typescript
 const CheckoutCaseSchema = z.object({
   name: z.string(),
-  items: z.array(z.object({ sku: z.string(), qty: z.number().int() })),   // nested → typed
+  items: z.array(z.object({ sku: z.string(), qty: z.number().int() })),
   coupon: z.string().nullable(),
   expectedTotalCents: z.number().int(),
 });
@@ -216,8 +221,8 @@ import * as XLSX from "xlsx";
 export function loadExcelTaxCases(path: string): TaxCase[] {
   const wb = XLSX.read(readFileSync(path), { type: "buffer" });
   const sheet = wb.Sheets[wb.SheetNames[0]];
-  const rows = XLSX.utils.sheet_to_json(sheet);     // header row → array of objects (values typed by the cell)
-  return z.array(TaxCaseSchema).parse(rows);        // coerce + validate; throws naming the bad cell
+  const rows = XLSX.utils.sheet_to_json(sheet);
+  return z.array(TaxCaseSchema).parse(rows);
 }
 ```
 
@@ -230,32 +235,41 @@ export function loadExcelTaxCases(path: string): TaxCase[] {
 ## Playwright — one `test()` per row (read at module scope)
 
 Playwright runs in Node, so you read and parse the file **at module/collection scope** — at the top of the
-spec, **not inside a test** — and generate **one `test()` per row** in a loop. This is the *sanctioned* loop:
-it creates independent, individually-reported tests, not a single test that loops internally.
+spec, **not inside a test** — and generate **one `test()` per row**. This is the *sanctioned* loop: it sits
+outside every test body and creates independent, individually-reported tests, not a single test that loops
+internally. The page object reaches the test as a fixture (`qa/typescript/skills/ui-test-author/playwright`).
 
 ```typescript
-// tests/checkout.spec.ts
-import { test, expect } from "@playwright/test";
+import { fileURLToPath } from "node:url";
 import { loadCsvTaxCases } from "./data/load-cases";
 import { label } from "./data/tax-case";
-import { CheckoutPage } from "./pages/checkout-page";   // page object — ui-test-author/playwright
+import { expect, test } from "./fixtures";
 
-const cases = loadCsvTaxCases(new URL("./data/tax-cases.csv", import.meta.url).pathname);
+const cases = loadCsvTaxCases(fileURLToPath(new URL("./data/tax-cases.csv", import.meta.url)));
 
 for (const tc of cases) {
-  test(`shows ${label(tc)}`, async ({ page }) => {       // ONE test per row — each reported, each retryable
-    const checkout = new CheckoutPage(page);
-    await checkout.goto();
-    await checkout.enterRegion(tc.region);               // page object exposes intent, not selectors
-    await checkout.enterAmountCents(tc.amountCents);
-    await expect(checkout.taxField).toHaveText(`${tc.expectedTaxCents}¢`);   // one logical assertion
+  test(`Should_ShowExpectedTax_When_Cart_${label(tc)}`, async ({ checkoutPage }) => {
+    await checkoutPage.goto();
+
+    await checkoutPage.priceCart(tc.region, tc.amountCents);
+
+    await expect(checkoutPage.tax).toHaveText(`${tc.expectedTaxCents}¢`);
   });
 }
 ```
 
-> Generating tests in a loop is fine; **looping with assertions *inside one* `test()` is not** — a failure on
-> row 3 would abort rows 4-N and report one result for all of them. One `test()` per row keeps each
-> independent, retryable, and reported (cross-link `qa-flaky-test-quarantine-typescript` for per-test retry).
+`tests/checkout.spec.ts`. `priceCart` is the page object's intent; `tax` is a `Locator`, so the assertion is
+web-first.
+
+- **Looping with assertions *inside one* `test()` is never the answer** — a failure on row 3 would abort rows
+  4-N and report one result for all of them. One `test()` per row keeps each independent and reported.
+- **Titles must be unique** — Playwright refuses two tests with the same title in one file, so `label` must
+  differ per row; a duplicate row is a data defect the run reports at collection.
+- **A row that sets a browser option** (viewport, locale, time zone) generates a `test.describe` per row with
+  `test.use({ ... })` inside it — `test.use` is not allowed inside a test. `qa-responsive-testing-typescript` and
+  `qa-language-testing-typescript` use exactly that shape.
+- In a CommonJS Playwright project (no `"type": "module"`), resolve the file with `path.join(__dirname, ...)`
+  instead of `import.meta.url`.
 
 ## Streaming rows for huge datasets
 
@@ -268,12 +282,15 @@ import { createReadStream } from "node:fs";
 
 export async function* streamTaxCases(path: string): AsyncGenerator<TaxCase> {
   const parser = createReadStream(path).pipe(parse({ columns: true, trim: true }));
-  for await (const record of parser) yield TaxCaseSchema.parse(record);   // one row at a time
+  for await (const record of parser) yield TaxCaseSchema.parse(record);
 }
 ```
 
-(For Vitest, await-collect into an array before `test.for`, or assert inside a single streaming test only if
-order independence is preserved.)
+Streaming keeps the **parse** flat; the runner still needs every row at collection to name a test after it. So
+collect at module scope (Vitest supports top-level `await`; `Array.fromAsync(streamTaxCases(path))` on Node 22
+and 24) and hand the array to `test.for`. Never assert rows one by one inside a single streaming test — that is
+the loop-in-a-test this skill exists to replace. A dataset too large to name every row is a load or batch job
+(`qa-load-testing-typescript`), not a data-driven suite.
 
 ## Anti-patterns
 
@@ -297,22 +314,21 @@ order independence is preserved.)
 
 ## Examples
 
-**End-to-end: same loader feeds a Vitest unit body and a Playwright journey, named failures.** (Shown
-above.) A run produces one result **per row** — Vitest titles via `$region`, Playwright via the `label(tc)`
-title — so a regression points straight at `DE @ 10000¢ → 1900¢`, not "row 1".
+One loader feeds the Vitest body and the Playwright journey above; each run reports one result **per row**,
+titled by its input (`DE_10000`), never "row 1".
 
 **Composing with a builder (the boundary made concrete):** a row supplies the *varying* fields; the
 **builder** (`qa-test-data-builder-typescript`) fills the rest with sane defaults.
 
 ```typescript
-test.for(loadCsvOrderCases(ordersCsv))("applies discount for $region", (row) => {
-  const order = anOrder()                 // builder default — the unchanging 90%
-    .withRegion(row.region)               // the row drives only what VARIES
-    .withSubtotalCents(row.subtotalCents)
-    .build();
+test.for(loadCsvOrderCases(ordersCsv))("Should_ApplyExpectedDiscount_When_RegionIs $region", (row) => {
+  const order = anOrder().withRegion(row.region).withSubtotalCents(row.subtotalCents).build();
+
   expect(discountEngine.apply(order)).toBe(row.expectedDiscountCents);
 });
 ```
+
+The builder supplies the unchanging defaults; the row drives only what **varies**.
 
 ## Rules (hard constraints)
 
@@ -330,16 +346,14 @@ test.for(loadCsvOrderCases(ordersCsv))("applies discount for $region", (row) => 
 - **Money is integer cents, never float**; a malformed row **throws at load** (Zod), it does not flow through
   as `NaN`. No secrets or real PII in committed data files (synthetic; secrets via env —
   `qa-test-login-tokens-typescript`).
-- **Streaming async-iterator for huge datasets**. No `waitForTimeout`; `strict: true`; page objects expose
-  intent, not selectors.
+- Titles are `Should_X_When_Y` plus the row's input, unique per file. No `waitForTimeout`; no inline comments;
+  page objects reach Playwright tests as fixtures; `strict: true`.
 
 ## Cross-references
 
-- `qa-data-driven-testing-java` — **the canonical file**: same four ideas, TestNG `@DataProvider` (returning
-  `Object[][]` / `Iterator<Object[]>`, `dataProviderClass`, `parallel = true`), OpenCSV `CsvToBean`, Jackson
-  `TypeReference`, Apache POI. Read it for the family rationale.
-- `qa-data-driven-testing-dotnet` — same four ideas, NUnit `[TestCaseSource]` (`IEnumerable<TestCaseData>` +
-  `.SetName(...)`), CsvHelper `GetRecords<T>()` + a `ClassMap`, `System.Text.Json`, ClosedXML for Excel.
+- `qa-data-driven-testing-java` (**the canonical file**: TestNG `@DataProvider`, OpenCSV, Jackson, POI) ·
+  `qa-data-driven-testing-dotnet` (NUnit `[TestCaseSource]`, CsvHelper, `System.Text.Json`, ClosedXML) — the
+  sibling stacks; same four ideas.
 - `qa-test-data-builder-typescript` — the **boundary**: a builder constructs **one** complex object in code
   with defaults; data-driven feeds **many** rows from a file. They **compose** — a row drives a builder's
   varying fields (see the last example).
@@ -347,6 +361,5 @@ test.for(loadCsvOrderCases(ordersCsv))("applies discount for $region", (row) => 
   than a static file; the assertion-query counterpart to file-sourced data.
 - `qa-browser-cloud-setup-typescript` — parameterizing the **environment** (browser/device matrix) via
   Playwright projects rather than the **data**; orthogonal matrices that can multiply.
-- `qa-ui-test-writer-playwright-typescript` — the page objects the data-driven journey reuses; this skill
-  supplies their rows. `qa-flaky-test-quarantine-typescript` — per-row retry/flaky handling for the
-  generated tests. `qa-test-reports-typescript` — each row renders as a separate, named result.
+- `qa-ui-test-writer-playwright-typescript` — the fixtures and page objects the data-driven journey reuses.
+  `qa-test-reports-typescript` — each row renders as a separate, named result.

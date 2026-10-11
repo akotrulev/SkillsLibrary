@@ -70,10 +70,10 @@ Why: changing a selector doesn't recompile/rebuild. The same JSON can drive both
   "name": "LoginScreen",
   "platforms": {
     "web": {
-      "emailInput": "[data-testid='email']",
-      "passwordInput": "[data-testid='password']",
-      "signInButton": "[data-testid='sign-in']",
-      "errorMessage": "[data-testid='login-error']"
+      "emailInput": "[data-testid='Login.Email']",
+      "passwordInput": "[data-testid='Login.Password']",
+      "signInButton": "[data-testid='Login.Submit']",
+      "errorMessage": "[data-testid='Login.Error']"
     },
     "ios": {
       "emailInput": "//XCUIElementTypeTextField[@name='email']",
@@ -89,22 +89,35 @@ Why: changing a selector doesn't recompile/rebuild. The same JSON can drive both
 }
 ```
 
-**Page class example** (web, Playwright):
+**Page class example** (web, Playwright). `PageBase.locator(key)` turns the JSON key into
+`this.page.locator(selector)` and throws, naming the screen and the key, when the key is missing. Every action
+goes through that **`Locator`** — `locator.fill()`, `locator.click()` — never the page-level selector methods
+(`page.fill(selector)`, `page.click(selector)`, `page.innerText(selector)`), which Playwright discourages: a
+locator auto-waits, is strict about matching one element, and shows its name in the trace. State the test
+asserts on is exposed as a `Locator`, so the assertion is web-first and retries; a `Promise<string>` getter
+invites a one-shot read that races the page.
 
 ```typescript
+import type { Locator, Page } from '@playwright/test';
+import type { Credentials } from '../builders/user-builder';
+import { PageBase } from '@accelerator/test-core';
+
 export class LoginPage extends PageBase {
+  readonly errorMessage: Locator;
+
   constructor(page: Page) {
     super(page, 'LoginScreen');
+    this.errorMessage = this.locator('errorMessage');
   }
 
-  async signIn(email: string, password: string): Promise<void> {
-    await this.page.fill(this.selector('emailInput'), email);
-    await this.page.fill(this.selector('passwordInput'), password);
-    await this.page.click(this.selector('signInButton'));
+  async goTo(): Promise<void> {
+    await this.page.goto('/login');
   }
 
-  getErrorMessage(): Promise<string> {
-    return this.page.innerText(this.selector('errorMessage'));
+  async signIn(user: Credentials): Promise<void> {
+    await this.locator('emailInput').fill(user.email);
+    await this.locator('passwordInput').fill(user.password);
+    await this.locator('signInButton').click();
   }
 }
 ```
@@ -128,20 +141,30 @@ Rules:
 
 ```typescript
 test.describe('Authentication › Login', () => {
-  test('redirects to dashboard when credentials are valid', async ({ page, loginPage }) => {
-    const user = aValidUser().build();
-
+  test('Should_ShowDashboard_When_CredentialsAreValid', async ({ loginPage, dashboardPage, registeredUser }) => {
     await loginPage.goTo();
-    await loginPage.signIn(user.email, user.password);
 
-    await expect(page).toHaveURL(/\/dashboard/);
+    await loginPage.signIn(registeredUser);
+
+    await expect(dashboardPage.heading).toBeVisible();
+  });
+
+  test('Should_ShowError_When_PasswordIsWrong', async ({ loginPage, registeredUser }) => {
+    await loginPage.goTo();
+
+    await loginPage.signIn(aValidUser().withEmail(registeredUser.email).withPassword('Wrong-Passw0rd!').build());
+
+    await expect(loginPage.errorMessage).toHaveText('Invalid email or password');
   });
 });
 ```
 
+`registeredUser` is a fixture that creates the user through the API client and deletes it in its teardown, so
+every test owns its data.
+
 Rules:
 - One spec file per feature or screen, not per AC
-- Test title reads as a behavior sentence: `'<outcome> when <condition>'`
+- Test names are `Should_<Outcome>_When_<Condition>`
 - Three-section body: Arrange / Act / Assert — single blank line between, no comments needed
 - Test data via builders/factories (`aValidUser().build()`), never inline literals
 - One logical assertion per test
@@ -163,6 +186,7 @@ export class UserBuilder {
   private yearsActive = 1;
 
   withEmail(email: string): this { this.email = email; return this; }
+  withPassword(password: string): this { this.password = password; return this; }
   withYearsActive(years: number): this { this.yearsActive = years; return this; }
   build(): User { return { email: this.email, password: this.password, yearsActive: this.yearsActive }; }
 }
@@ -173,15 +197,15 @@ export const aValidUser = (): UserBuilder => new UserBuilder();
 ### Waits
 
 - **Never** use `page.waitForTimeout(...)`, `browser.pause(...)`, or `setTimeout`-based sleeps in test code
-- Use Playwright's auto-waiting (`click`, `fill`, `expect(...).toBeVisible()`)
+- Use Playwright's auto-waiting (`locator.click()`, `locator.fill()`, `expect(locator).toBeVisible()`)
 - For WebdriverIO/Appium, use the helpers in `test-core` `waits` — `waitUntilVisible`, `waitUntilStable` (backed by `waitUntil`, never fixed pauses)
 - If you need a wait that doesn't exist, add it to `test-core` `waits`, don't inline it
 
 ### Allure reporting
 
-- Tag every test with at least suite / feature / story metadata (`allure.epic`, `allure.feature`, `allure.story` or the `@playwright/test` tags wired to the Allure reporter)
-- Attach evidence on failure: screenshot, page source, network HAR
-- Use `allure.step(...)` (or step decorators) on page object methods so steps appear in the Allure tree
+- Tag every test with at least suite / feature / story metadata — `await allure.epic(...)`, `await allure.feature(...)`, `await allure.story(...)` from `import * as allure from 'allure-js-commons'` (never the deprecated `allure` export of `allure-playwright`), or the `@playwright/test` `{ tag }` details the reporter maps
+- Failure evidence on the web suite is the Playwright config's defaults — trace and video `retain-on-failure`, a full-page screenshot `only-on-failure` (`qa/typescript/skills/evidence-capture`) — not a hand-written `afterEach`; the mobile suite's evidence hook belongs to `qa/typescript/skills/ui-test-author/appium`
+- Page object methods wrap their actions in an awaited `test.step(...)` (Playwright) so steps appear in the trace, the HTML report and the Allure tree
 
 ### API tests
 
@@ -212,9 +236,9 @@ When rate-limited on one model, switch to another (Opus → Sonnet → Haiku) �
 
 ## Quality bar (reviewer checklist)
 
-- [ ] No literal selectors in page/screen methods
+- [ ] No literal selectors in page/screen methods; actions go through `Locator`s, never `page.fill/click/innerText(selector)`
 - [ ] No `waitForTimeout` / `browser.pause` / `setTimeout` sleeps in tests
-- [ ] Test title reads as a behavior sentence
+- [ ] Test name is `Should_X_When_Y`
 - [ ] Test data via a builder
 - [ ] Allure metadata present
 - [ ] One logical assertion per test
@@ -226,24 +250,12 @@ When rate-limited on one model, switch to another (Opus → Sonnet → Haiku) �
 
 ## Anti-examples
 
-```typescript
-// BAD: literal selector in page object
-async signIn() {
-  await this.page.click('button.signin-btn');  // ❌ selector in code
-}
-
-// BAD: sleep
-await page.waitForTimeout(2000);  // ❌
-
-// BAD: implementation-named test
-test('clicks the login button', ...);  // ❌
-
-// BAD: inline test data
-await loginPage.signIn('user@test.com', 'Password1!');  // ❌ use a builder
-
-// BAD: conditional in test
-if (env === 'staging') { ... } else { ... }  // ❌ use parameterized tests or fixtures
-
-// BAD: untyped escape hatch
-const body: any = await res.json();  // ❌ validate with Zod
-```
+| Anti-example | Why it's wrong | Instead |
+|---|---|---|
+| `await this.page.click('button.signin-btn')` in a page object | A selector in code, and a page-level selector method | `this.locator('signInButton').click()` with the selector in `*.screen.json` |
+| `getErrorMessage(): Promise<string>` read once, then `expect(text).toBe(...)` | A one-shot read races the page | expose `errorMessage: Locator`; `await expect(loginPage.errorMessage).toHaveText(...)` |
+| `await page.waitForTimeout(2000)` | A sleep | auto-wait, web-first assertions, `test-core` `waits` |
+| `test('clicks the login button', ...)` | Names the mechanics, not the behaviour | `Should_ShowDashboard_When_CredentialsAreValid` |
+| `await loginPage.signIn({ email: 'user@test.com', password: 'Password1!' })` | Inline test data | a builder: `aValidUser().build()` or a fixture-created user |
+| `if (env === 'staging') { ... } else { ... }` in a test | Conditional logic in a test | a parameterized test or a fixture per environment |
+| `const body: any = await res.json()` | An untyped escape hatch | parse with the Zod schema |

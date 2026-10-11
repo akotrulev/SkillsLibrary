@@ -12,8 +12,8 @@ Wires TypeScript tests to a **hosted device/browser grid** — BrowserStack, Sau
 ## Stack
 
 - Node 24 + TypeScript (strict mode)
-- **Web**: `@playwright/test` connected to a cloud grid via `chromium.connect({ wsEndpoint })`, the `browserstack-node-sdk` wrapper, or `saucectl`
-- **Mobile**: WebdriverIO 9.x + Appium 2.x with `@wdio/browserstack-service` / `@wdio/sauce-service` (or raw `bstack:options`/`sauce:options`/`LT:Options` caps)
+- **Web**: `@playwright/test` connected to a cloud grid through the built-in `use.connectOptions` or a worker-scoped `browser` fixture override, the `browserstack-node-sdk` wrapper, or `saucectl`. The Playwright version is the **Versions** table of `qa/typescript/skills/ui-test-author/playwright/SKILL.md`; the grid's version cap is read from the installed `@playwright/test/package.json`
+- **Mobile**: WebdriverIO + Appium with `@wdio/browserstack-service` / `@wdio/sauce-service` (or raw `bstack:options`/`sauce:options`/`LT:Options` caps), at the versions `qa/typescript/skills/ui-test-author/appium` pins
 - Tunnels: `browserstack-local` (npm), Sauce Connect 5 (`sc` binary), LambdaTest Tunnel (`LT` binary)
 - Grid config under `tests/support/grid/`; credentials via **env vars only** (`BROWSERSTACK_USERNAME` / `BROWSERSTACK_ACCESS_KEY`, `SAUCE_USERNAME` / `SAUCE_ACCESS_KEY`, `LT_USERNAME` / `LT_ACCESS_KEY`)
 - These suites run in CI under `qa/cicd/typescript/skills/ci-pipelines` — secrets injected via the runner's secret store / OIDC, sharding driven by the runner (see § Parallelism)
@@ -64,10 +64,10 @@ These sections live in `references/details.md` — **read it when the task touch
 ## Rules
 
 ### Connection
-- **Web**: connect, don't launch. Playwright → BrowserStack `chromium.connect({ wsEndpoint })` with **flat caps**; Sauce → `saucectl`; LambdaTest → its connect endpoint with `LT:Options`.
+- **Web**: connect, don't launch — **once per worker**. Set `use.connectOptions: { wsEndpoint }` on the grid project (no fixture code), or override the worker-scoped `browser` fixture when the session must be marked or the endpoint is built per worker. Never `connect()` inside a test-scoped fixture: it opens a billable grid session per test. BrowserStack takes **flat caps**; Sauce → `saucectl`; LambdaTest → its connect endpoint with `LT:Options`.
 - **Mobile**: set `user`/`key`/`hostname` + the vendor service in `wdio.conf.ts`; the page objects don't change.
 - **Never mix** BrowserStack's flat Playwright caps with the W3C `bstack:options` nesting — they apply to different connection paths.
-- Pin the Playwright/Appium version cap to your installed version; a version skew is a confusing remote failure.
+- The Playwright version cap is **read** from `@playwright/test/package.json`, never typed in — a skew between the client and the grid is a confusing remote failure. The Appium version cap follows the installed Appium.
 
 ### Capabilities
 - Use the **current** key names (`userName`/`buildName`/`sessionName`, not legacy `browserstack.user`/`version`). Vendors renamed them off JSON-Wire.
@@ -84,11 +84,12 @@ These sections live in `references/details.md` — **read it when the task touch
 - Never log a credential or persist it into an artifact/HAR.
 
 ### Artifacts & status
-- Surface the **session dashboard URL** in output / Allure on failure — a failed grid run should be one click from the replay.
+- Surface the **session dashboard URL** on failure with an awaited `testInfo.attach` (or `await allure.link(...)` from `allure-js-commons`) — a failed grid run should be one click from the replay. Never the deprecated `allure` export of `allure-playwright`.
+- Playwright's own failure evidence (trace, video, screenshot — `qa/typescript/skills/evidence-capture`) is still recorded client-side; the grid's video is the complement, not the replacement.
 - **Mark the session pass/fail** back to the vendor (`setSessionStatus` / `sauce:job-result` / `lambda-status`), or let the `@wdio/*-service` do it. The dashboard must reflect reality.
 
 ### Tunnels
-- Start the tunnel **before** the suite, stop it in teardown; tie sessions via `local`+`localIdentifier` / `tunnelName`.
+- Start the tunnel in `globalSetup` and **return its teardown** from it, so the instance that stops is the one that started; tie sessions via `local`+`localIdentifier` / `tunnelName`.
 - Tunnel key from env, never a literal. One tunnel identifier per run so parallel runs don't collide.
 
 ### Waits
@@ -107,10 +108,10 @@ These sections live in `references/details.md` — **read it when the task touch
 
 1. Confirm **web vs mobile**, **vendor** (+ region for Sauce/Device Farm), **private target?** (tunnel), and the **session cap**.
 2. Add `tests/support/grid/credentials.ts` with the `required(...)` env reads — no literals.
-3. **Web**: add `playwrightConnect.ts` (BrowserStack flat-cap `connect`) + a `gridFixture` that yields a `page` and marks status in teardown; or scaffold `.sauce/config.yml` (Sauce) / the LambdaTest connect. **Mobile**: edit `wdio.conf.ts` — `user`/`key`/`hostname` + vendor service + `bstack:options`/`sauce:options`/`LT:Options` caps.
+3. **Web**: add `playwrightConnect.ts` (the flat-cap endpoint with the version read from `package.json`), then either a grid project with `use.connectOptions` or `gridFixture.ts` overriding the worker-scoped `browser` and marking the session in its teardown; or scaffold `.sauce/config.yml` (Sauce) / the LambdaTest endpoint. **Mobile**: edit `wdio.conf.ts` — `user`/`key`/`hostname` + vendor service + `bstack:options`/`sauce:options`/`LT:Options` caps.
 4. Map the session cap onto `workers` / `maxInstances` from `GRID_CONCURRENCY`; note the `shards × workers ≤ cap` rule and cross-link `qa/cicd/typescript/skills/ci-pipelines/*`.
-5. Wire artifacts (`attachSessionUrl`) + session status (`markSessionStatus`) into the fixture teardown.
-6. If the target is private, add the tunnel lifecycle (`GridTunnel` start/stop in global setup/teardown) and tie sessions via the cap.
+5. Wire the session URL (`gridEvidence`, awaited `testInfo.attach`) and the session status (`markSession`, once per worker) into the fixture teardowns.
+6. If the target is private, add the tunnel lifecycle (`GridTunnel` started in `globalSetup`, which returns `tunnel.stop`) and tie sessions via the cap.
 7. Run a single spec against the grid first (one worker) to confirm the connection + caps before fanning out. Confirm the session appears on the dashboard with the right build/project tags. Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run".
 
 ## Cross-references

@@ -15,19 +15,17 @@ function required(name: string): string {
   return v;
 }
 
-/** Non-secret config — safe to have defaults; no token is fetched just by importing this. */
 export const auth0Config = {
   domain: process.env.AUTH0_DOMAIN ?? 'yourco-dev.eu.auth0.com',
   audience: process.env.AUTH0_AUDIENCE ?? 'https://api.flexinvest.test',
   realm: process.env.AUTH0_REALM ?? 'Username-Password-Authentication',
 } as const;
 
-/** Secrets — read lazily, only when a token is actually fetched. Never logged, never committed. */
 export const auth0Secrets = {
   m2mClientId: () => required('AUTH0_M2M_CLIENT_ID'),
   m2mClientSecret: () => required('AUTH0_M2M_CLIENT_SECRET'),
   ropgClientId: () => required('AUTH0_ROPG_CLIENT_ID'),
-  ropgClientSecret: () => process.env.AUTH0_ROPG_CLIENT_SECRET, // optional: only for confidential apps
+  ropgClientSecret: () => process.env.AUTH0_ROPG_CLIENT_SECRET,
   testUser: () => ({
     username: required('AUTH0_TEST_USERNAME'),
     password: required('AUTH0_TEST_PASSWORD'),
@@ -48,9 +46,8 @@ export interface TokenSet {
   expiresAtMs: number;
 }
 
-const SKEW_MS = 60_000; // refresh 60s before the token actually expires
+const SKEW_MS = 60_000;
 
-/** Caches a single token for its lifetime. Subclasses supply how to fetch one. */
 export abstract class CachedTokenProvider {
   private cached: TokenSet | null = null;
 
@@ -68,7 +65,6 @@ export abstract class CachedTokenProvider {
   }
 }
 
-/** Client Credentials (M2M) — the default for API-test suites. */
 export class M2MTokenProvider extends CachedTokenProvider {
   private readonly client = new AuthenticationClient({
     domain: auth0Config.domain,
@@ -84,12 +80,11 @@ export class M2MTokenProvider extends CachedTokenProvider {
   }
 }
 
-/** Resource Owner Password Grant — a token AS a specific test user. Test-only. */
 export class TestUserTokenProvider extends CachedTokenProvider {
   private readonly client = new AuthenticationClient({
     domain: auth0Config.domain,
     clientId: auth0Secrets.ropgClientId(),
-    clientSecret: auth0Secrets.ropgClientSecret(), // undefined for public apps — fine
+    clientSecret: auth0Secrets.ropgClientSecret(),
   });
 
   protected async fetchToken() {
@@ -99,7 +94,7 @@ export class TestUserTokenProvider extends CachedTokenProvider {
       password,
       audience: auth0Config.audience,
       scope: 'openid profile email',
-      realm: auth0Config.realm, // → uses the password-realm grant
+      realm: auth0Config.realm,
     });
     return { accessToken: data.access_token, expiresInSec: data.expires_in };
   }
@@ -113,7 +108,6 @@ One token per suite/worker, **not per test**. Export ready-made singletons so sp
 ```ts
 import { M2MTokenProvider, TestUserTokenProvider } from './token-provider';
 
-/** Reused across the whole worker — the token is cached inside the provider. */
 export const m2mTokens = new M2MTokenProvider();
 export const testUserTokens = new TestUserTokenProvider();
 ```
@@ -141,38 +135,61 @@ export class OrdersClient {
 }
 ```
 
-### Seed Playwright auth state from a token (skip the login UI)
+### Seed Playwright auth state from a token — a setup project
 
-Mint a token as the test user, write it where the SPA expects it, save `storageState` once, and reuse it across specs. Most Auth0 SPAs read the session from `localStorage` (auth0-spa-js cache key) — adapt the key/shape to your app, or simpler: set an app-level token your app trusts. The pattern is **token in → storageState file out → reused by every test**, no login form.
+Mint a token as the test user, put it where the SPA reads it, check the app is signed in, and save the state once
+for every test — **token in → state file out → reused by every test**, no login form. It is a **setup project**,
+the model `qa/typescript/skills/ui-test-author/playwright` teaches (`references/config-and-fixtures.md` §3):
+it shows in the report, gets fixtures and a trace, and its origin is the config's `baseURL` (from `BASE_URL`),
+never a URL typed into the file. The writer's config already runs `*.setup.ts` as the `setup` project and starts
+the browser projects from `authFile`; this file is a second `*.setup.ts` beside (or instead of) its UI sign-in.
 
 ```ts
-// global-setup.ts — runs once before the suite
-import { chromium } from '@playwright/test';
-import { testUserTokens } from './tests/integration/auth/tokens';
+import { authFile, expect, test as setup } from './fixtures';
+import { testUserTokens } from './integration/auth/tokens';
 
-export default async function globalSetup() {
-  const token = await testUserTokens.getAccessToken();
-  const browser = await chromium.launch();
-  const page = await browser.newPage();
+const TOKEN_KEY = 'flexinvest.accessToken';
 
-  await page.goto('https://app.flexinvest.test'); // origin must match for storage to apply
-  await page.evaluate((accessToken) => {
-    // Shape this to whatever your SPA reads on boot. Example: a simple app token store.
-    window.localStorage.setItem('flexinvest.accessToken', accessToken);
-  }, token);
-
-  await page.context().storageState({ path: 'tests/.auth/user.json' });
-  await browser.close();
+function tokenState(baseURL: string | undefined, accessToken: string) {
+  if (baseURL === undefined) {
+    throw new Error('baseURL is not set: export BASE_URL before seeding the signed-in state');
+  }
+  return {
+    cookies: [],
+    origins: [{ origin: new URL(baseURL).origin, localStorage: [{ name: TOKEN_KEY, value: accessToken }] }],
+  };
 }
+
+setup('Should_StoreSignedInState_When_TestUserTokenIsSeeded', async ({ context, baseURL, homePage }) => {
+  const accessToken = await testUserTokens.getAccessToken();
+  await context.setStorageState(tokenState(baseURL, accessToken));
+
+  await homePage.goto();
+
+  await expect(homePage.greeting).toBeVisible();
+  await context.storageState({ path: authFile });
+});
 ```
 
-```ts
-// playwright.config.ts (excerpt) — every test starts already authenticated
-export default {
-  globalSetup: './global-setup.ts',
-  use: { storageState: 'tests/.auth/user.json' },
-};
-```
+`tests/token.setup.ts`. `context.setStorageState(state)` [1.59] loads the token into the setup test's own context
+without a new one; the greeting proves the app accepted it before the state is saved. Shape `TOKEN_KEY` and the
+value to whatever your SPA reads on boot. On a project below 1.59, write the same object to `authFile` with
+`fs.writeFile` and let the dependent projects load it — that skips the check, so the first UI test is the check.
+
+**What a storage state can and cannot carry:**
+
+| Where the app keeps the token | Storage state | Do this |
+|---|---|---|
+| Cookies, `localStorage` | saved and restored | the setup project above |
+| IndexedDB (Firebase Auth and similar) | only with `context.storageState({ path: authFile, indexedDB: true })` [1.51] | add `indexedDB: true` to the save |
+| `sessionStorage` | **never saved** | a fixture that re-seeds it with `context.addInitScript(...)` before the app boots, from a value the setup wrote to its own file |
+| Memory only (auth0-spa-js's default `cacheLocation: 'memory'`) | nothing to save | the UI sign-in setup (`assets/auth.setup.ts`), or a test build that sets `cacheLocation: 'localstorage'` |
+
+- One setup test and one state file per identity (`user.json`, `admin.json`), each feeding its own project.
+- `context.setStorageState(...)` [1.59] also switches identity **inside** a test — a fixture that loads
+  `admin.json` into the current context — without opening a second context.
+- The state file holds a live token: `playwright/.auth/` is git-ignored, and the token's `expires_in` must
+  outlast the run. A suite longer than the token lifetime re-runs the setup per shard, not per test.
 
 ### Device Authorization Flow — `tests/integration/auth/device-code.ts`
 
@@ -204,13 +221,11 @@ async function startDeviceFlow(clientId: string) {
   }>;
 }
 
-/** Wait the server-dictated interval — NOT a hardcoded sleep. */
 const waitInterval = (sec: number) => new Promise((r) => setTimeout(r, sec * 1000));
 
 export async function getDeviceToken(): Promise<string> {
-  const clientId = auth0Secrets.ropgClientId(); // a "Device Code"-enabled public app
+  const clientId = auth0Secrets.ropgClientId();
   const flow = await startDeviceFlow(clientId);
-  // Surface this for approval (CI: a pre-authorized device; local: open the URL).
   console.log(`Approve at: ${flow.verification_uri_complete}`);
 
   const deadline = Date.now() + flow.expires_in * 1000;
@@ -229,8 +244,8 @@ export async function getDeviceToken(): Promise<string> {
     });
     const body = await res.json();
     if (res.ok) return body.access_token as string;
-    if (body.error === 'authorization_pending') continue; // user hasn't approved yet
-    if (body.error === 'slow_down') { interval += 5; continue; } // back off per spec
+    if (body.error === 'authorization_pending') continue;
+    if (body.error === 'slow_down') { interval += 5; continue; }
     throw new Error(`device token failed: ${body.error}`);
   }
   throw new Error('Device authorization timed out before approval.');
@@ -274,9 +289,9 @@ describe('CachedTokenProvider', () => {
     const p = new FakeProvider(() => now);
 
     expect(await p.getAccessToken()).toBe('tok-1');
-    now = 30 * 60 * 1000; // 30 min later, well inside the hour
+    now = 30 * 60 * 1000;
     expect(await p.getAccessToken()).toBe('tok-1');
-    expect(p.fetches).toBe(1); // only fetched once
+    expect(p.fetches).toBe(1);
   });
 
   it('Should_RefetchToken_When_PastExpiryMinusSkew', async () => {
@@ -284,7 +299,7 @@ describe('CachedTokenProvider', () => {
     const p = new FakeProvider(() => now);
 
     expect(await p.getAccessToken()).toBe('tok-1');
-    now = 3600 * 1000; // exactly at expiry → past expiry - 60s skew
+    now = 3600 * 1000;
     expect(await p.getAccessToken()).toBe('tok-2');
     expect(p.fetches).toBe(2);
   });

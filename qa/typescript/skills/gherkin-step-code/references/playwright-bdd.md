@@ -6,17 +6,16 @@ The **web** path of the TypeScript `gherkin-step-code` family. Binds Gherkin ste
 
 ## Stack
 
-- `playwright-bdd` 9.2.x on `@playwright/test` ≥ 1.44, Node ≥ 20, TypeScript strict
+- `playwright-bdd` and `@playwright/test` at the versions in the **Versions** table of `qa/typescript/skills/ui-test-author/playwright/SKILL.md` (9.2.1 on 1.64.0); Node 24 (22 maintenance — Node 20 is EOL, flag it); TypeScript strict
 - Step files under `steps/`, page objects from the existing UI project under `pages/`
 - `createBdd(test)` exported from `steps/fixtures.ts` (the scaffold owns that file)
 - Run: `npx bddgen` (compiles `.feature` → specs in `.features-gen/`) then `npx playwright test`
 
 ## The fixtures model (the core difference from .NET/Java/mobile)
 
-There is **no World and no DI container**. Page objects are Playwright **fixtures**: declared once in `steps/fixtures.ts` via `base.extend<Fixtures>(...)`, then **destructured as the step's argument**. Every step is an **arrow function** whose single argument is the fixture object.
+There is **no World and no DI container**. Page objects are Playwright **fixtures**: declared once in `steps/fixtures.ts` via `base.extend<Fixtures>(...)`, then **destructured as the step's argument**. Every step is an **arrow function** whose single argument is the fixture object. The recap below is `steps/fixtures.ts` as `bdd-project-scaffold` writes it — do not re-create it.
 
 ```typescript
-// steps/fixtures.ts (from bdd-project-scaffold) — recap, do not re-create
 import { test as base, createBdd } from 'playwright-bdd';
 import { LoginPage } from '../pages/LoginPage';
 import { DashboardPage } from '../pages/DashboardPage';
@@ -43,46 +42,52 @@ import { Given, When, Then } from './fixtures';
 
 Given('I am on the login page', async ({ loginPage }) => {
   await loginPage.goto();
-  await loginPage.expectLoaded();
 });
 
-When('I sign in as a registered customer', async ({ loginPage }) => {
-  await loginPage.signIn(process.env.E2E_USER!, process.env.E2E_PASSWORD!);
+When('I sign in as a registered customer', async ({ loginPage, testUser }) => {
+  await loginPage.signIn(testUser);
 });
 
 When(
   'I sign in with email {string} and password {string}',
   async ({ loginPage }, email: string, password: string) => {
-    await loginPage.signIn(email, password);
+    await loginPage.signIn({ email, password });
   },
 );
 
 Then('I land on the dashboard', async ({ dashboardPage }) => {
-  await dashboardPage.expectLoaded();
+  await expect(dashboardPage.heading).toBeVisible();
 });
 
 Then('I see the error {string}', async ({ loginPage }, message: string) => {
-  await expect(loginPage.errorBanner).toHaveText(message);
+  await expect(loginPage.error).toHaveText(message);
 });
 ```
+
+`testUser` is a fixture that reads `E2E_USER` / `E2E_PASSWORD` lazily and fails fast when they are unset, as the
+writer's `assets/fixtures.ts` does — a step never reads `process.env` itself.
 
 Note the argument order: the **fixture object first**, then the Cucumber-Expression captures (`email`, `password`, `message`) typed explicitly. `{string}` → `string`, `{int}` → `number`, `{float}` → `number`.
 
 ### A fixture that needs a different page object
 
-When a step needs a page object not yet in `Fixtures`, **add it to `steps/fixtures.ts`** (don't construct it in the step):
+When a step needs a page object not yet in `Fixtures`, **add it to `steps/fixtures.ts`** (don't construct it in the step) — one more key in the `Fixtures` type and one more entry in `extend`:
 
 ```typescript
-// in steps/fixtures.ts
 type Fixtures = { loginPage: LoginPage; dashboardPage: DashboardPage; cartPage: CartPage };
-// ...
-cartPage: async ({ page }, use) => { await use(new CartPage(page)); },
+
+export const test = base.extend<Fixtures>({
+  loginPage: async ({ page }, use) => { await use(new LoginPage(page)); },
+  dashboardPage: async ({ page }, use) => { await use(new DashboardPage(page)); },
+  cartPage: async ({ page }, use) => { await use(new CartPage(page)); },
+});
 ```
 
 ### Custom parameter type
 
+`steps/parameter-types.ts` — used as `When('the order was placed {daysAgo}', async ({ … }, when: Date) => { … })`:
+
 ```typescript
-// steps/parameter-types.ts
 import { createBdd } from 'playwright-bdd';
 import { test } from './fixtures';
 
@@ -93,32 +98,38 @@ defineParameterType({
   regexp: /(\d+) days? ago/,
   transformer: (n: string) => new Date(Date.now() - Number(n) * 86_400_000),
 });
-// usage: When('the order was placed {daysAgo}', async ({ … }, when: Date) => { … });
 ```
 
 ### Data tables and doc strings
 
 ```typescript
-When('I add the following items to the cart', async ({ cartPage }, table) => {
-  for (const row of table.hashes()) {
-    await cartPage.addItem(row.sku, Number(row.qty));
-  }
+When('I add the following items to the cart', async ({ cartPage }, table: DataTable) => {
+  await cartPage.addItems(table.hashes().map((row) => ({ sku: row.sku, quantity: Number(row.qty) })));
 });
 ```
 
-The data-table is the **last** parameter, after the fixture object and any inline captures.
+The data-table is the **last** parameter, after the fixture object and any inline captures. The step maps the
+rows into the page object's own type and hands them over in one call; iterating over them is the page object's
+job (`addItems`), so the step stays one line of intent. `DataTable` is imported from `playwright-bdd`.
 
 ### Cleanup → fixture teardown (NOT a step)
 
 The `feature-file-writer` Cleanup handoff is implemented as **teardown inside a fixture** (the scaffold owns `fixtures.ts`), after the `await use(...)` line — or via an `After` from `createBdd(test)` for scenario-scoped teardown. Never a Gherkin step.
 
+A seeding fixture in `steps/fixtures.ts` asserts the **exact** status, with the body as evidence, **before** it
+parses the body — a `500` page parsed as JSON would fail with a meaningless syntax error. The body goes through
+the schema, and the teardown after `use` is the Cleanup handoff, with its own exact status:
+
 ```typescript
-// in steps/fixtures.ts — a fixture that seeds then cleans up
 seededOrder: async ({ request }, use) => {
-  const res = await request.post('/api/orders', { data: orderFixture() });
-  const order = await res.json();
+  const created = await request.post('/api/orders', { data: anOrder().build() });
+  expect(created.status(), await created.text()).toBe(201);
+  const order = OrderSchema.parse(await created.json());
+
   await use(order);
-  await request.delete(`/api/orders/${order.id}`); // teardown == the Cleanup handoff
+
+  const deleted = await request.delete(`/api/orders/${order.id}`);
+  expect(deleted.status(), await deleted.text()).toBe(204);
 },
 ```
 
@@ -128,7 +139,8 @@ seededOrder: async ({ request }, use) => {
 - **Destructure fixtures, never `new`** a page object inside a step.
 - `async` bodies; `await` every page-object call; no floating promises.
 - **No `page.locator(...)` / CSS / waits in steps** — promote to the page object.
-- `Then` asserts with web-first `expect(locator)…` (auto-retry); `Given`/`When` never assert; page objects assert only in `expectLoaded()`.
+- `Then` asserts with web-first `expect(locator)…` (auto-retry); `Given`/`When` never assert; page objects never assert — they expose `Locator`s.
+- A seeding fixture checks the exact status before it parses a response body.
 - **No `page.waitForTimeout`** — auto-wait + web-first assertions only.
 - `bddgen` runs **before** `playwright test`; point `testDir` at the generated dir, never `features/`.
 - No hardcoded credentials/URLs — env vars / config.
@@ -140,7 +152,9 @@ seededOrder: async ({ request }, use) => {
 - Forgetting to register a needed page object as a fixture (constructing it ad hoc).
 - Running `playwright test` without a prior `bddgen` (stale generated specs).
 - `page.locator(...)` / selectors / `waitForTimeout` in a step body.
-- Assertions in `Given`/`When`, or inside page-object actions.
+- Assertions in `Given`/`When`, or inside page objects.
+- A fixture that reads `res.json()` before checking `res.status()`.
+- `process.env` read inside a step instead of a credentials fixture.
 
 ## Cross-references
 
