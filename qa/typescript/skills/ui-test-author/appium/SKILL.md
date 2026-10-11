@@ -1,256 +1,183 @@
 ---
 name: qa-ui-test-writer-appium-typescript
-description: Use when the user asks to scaffold a TypeScript + WebdriverIO (Appium service) page object or Mocha/Vitest mobile UI test. Triggers: "create an Appium page object for X in TS", "add a WebdriverIO mobile page for screen Y", "write an Appium TS test for Z". Do NOT use for web UI (`qa-ui-test-writer-playwright-typescript`) or live-screen discovery (`qa-mobile-screen-explorer-typescript`).
+description: Use when the user asks to scaffold a TypeScript + WebdriverIO 10 (Appium 3) page object or Mocha mobile UI test. Triggers: "create an Appium page object for X in TS", "add a WebdriverIO mobile page for screen Y", "write an Appium TS test for Z", "swipe / WebView / failure evidence in WDIO". Do NOT use for web UI (`qa-ui-test-writer-playwright-typescript`) or live-screen discovery (`qa-mobile-screen-explorer-typescript`).
 ---
 
 # QA — Appium TypeScript Page Object & Test Generator
 
-Scaffolds WebdriverIO + Appium page objects and Mocha (or Vitest) mobile UI tests in TypeScript strict mode, mirroring the Java and .NET siblings. Uses a thin `BasePage` with accessibility-id-first selectors, typed return values for navigation, and a session per worker for parallel-safe runs.
+Scaffolds WebdriverIO + Appium page objects and Mocha mobile UI tests in TypeScript strict mode, mirroring the Java and .NET siblings. A thin `BasePage` with accessibility-id-first helpers, scoped components that re-resolve lazily, typed navigation, and one session per worker. The compilable reference is `assets/`.
 
-> WebdriverIO with the `@wdio/appium-service` is the de-facto TypeScript client for Appium 2.x — it bootstraps the Appium server, handles capabilities, and exposes `browser.$` / `browser.$$` over the WebDriver protocol. Native `appium-webdriver` bindings exist but are rarely used for new projects.
+> WebdriverIO with `@wdio/appium-service` is the TypeScript client for Appium: it starts the Appium server, takes the capabilities, and exposes `browser`, `$` and `$$` over the WebDriver protocol.
 
-## Stack
+## Versions
 
-- Node 24, TypeScript strict mode (`"strict": true`)
-- **WebdriverIO** 9.x with `@wdio/appium-service` (manages the Appium 2.x server)
-- **Mocha** (or **Vitest** — pick one and stay consistent) with `@wdio/mocha-framework`
-- **Allure WDIO reporter** (`@wdio/allure-reporter`)
-- ESM modules
-- `appium` 2.x with the relevant driver (`appium-uiautomator2-driver` / `appium-xcuitest-driver`)
+| Artifact | Primary | Supported |
+|---|---|---|
+| `appium` | **3.8.0** | 2.19 (frozen) |
+| `appium-uiautomator2-driver` / `appium-xcuitest-driver` | 8.7.0 / 12.17.1 | 4.x / 9.x |
+| `webdriverio`, `@wdio/cli`, `@wdio/appium-service`, `@wdio/globals` | **10.0.2** | 9.x |
+| `@wdio/mocha-framework` / `@wdio/types` / `@wdio/allure-reporter` | 10.0.1 | 9.x |
+| Node | 24 (WDIO 10 needs ≥ 22.19) | 22 |
+
+- **Detect the project's lane first** (`webdriverio` major in `package.json`, `appium -v`) and keep it. WDIO 10 refuses an Appium 2 server, so a project on a device cloud that still runs Appium 2 stays on WDIO 9 (`device-cloud` says how to check).
+- A WDIO 9 project differs in three places: `$` is not strict, `touchAction` still exists (never use it), and `stopRecordingScreen` takes positional arguments. Everything else here holds.
+- Capabilities carry the `appium:` prefix (`'appium:automationName'`, `'appium:app'`); unprefixed `automationName` and `deviceName` select nothing in WDIO 10.
+- Install the drivers once: `appium driver install uiautomator2`, `appium driver install xcuitest`, then `appium driver doctor uiautomator2`.
+- Mocha (`@wdio/mocha-framework`) is the runner; Cucumber is the BDD alternative (`gherkin-step-code/references/cucumberjs-appium.md`). WDIO's runner has no Vitest framework.
 
 ## When to use
 
-- New page object under `src/pages/mobile/`
-- Component-level page object scoped to a parent `WebdriverIO.Element`
-- New mobile UI test under `test/specs/`
+- A page object under `src/pages/mobile/`, a scoped component, or a Mocha test under `test/specs/`
+- Gestures, WebView switching, app lifecycle or failure evidence in a WDIO mobile suite
 
 ## When NOT to use
 
-- Appium .NET → `qa/dotnet/skills/ui-test-author/appium`
-- Appium Java → `qa/java/skills/ui-test-author/appium`
-- Selenium / web TS → `qa/typescript/skills/ui-test-author/selenium` or `qa/typescript/skills/ui-test-author/playwright`
-- Reviewing an existing page object → `qa/typescript/skills/ui-test-author/review`
+- Appium .NET / Java → `qa/dotnet/skills/ui-test-author/appium` / `qa/java/skills/ui-test-author/appium`
+- Web TS → `qa/typescript/skills/ui-test-author/playwright` or `…/selenium`
+- Reviewing a page object → `qa/typescript/skills/ui-test-author/review`
 - POM architecture → `qa/typescript/skills/page-object-design`
 
 ## Inputs needed
 
-1. **Screen name** (PascalCase: `Login`, `Home`, `OrderConfirmation`)
-2. **Platform** — Android, iOS, or both (decides selector strategies allowed)
-3. **Elements** — for each: name + `accessibility id` (preferred), platform id, predicate / UIAutomator selector, or XPath (last resort)
-4. **Actions** — what the test does, and whether each navigates
-5. **Landmark element** — used in `verifyPageLoaded` to confirm the screen is visible
-6. **Next pages** — destination page classes for navigation actions
+1. **Screen name** (PascalCase) and **platform** — Android, iOS or both
+2. **Elements** — name plus the ladder rung from `mobile-screen-explorer`
+3. **Landmark element** for `verifyPageLoaded`
+4. **Actions** and whether each navigates, plus the destination pages
 
-## Patterns
+## The assets
 
-### `BasePage` (already in the project)
+`assets/` is one runnable project; copy it, do not retype it.
 
-```ts
-import type { ChainablePromiseElement } from "webdriverio";
+| File | Holds |
+|---|---|
+| `wdio.conf.ts` | Mocha, the `appium` service, capabilities per `PLATFORM` from env, the evidence hooks |
+| `BaseTest.ts` | `beforeTest` / `afterTest`: a recording started per test, and on failure a screenshot, page source, device log and the recording; see `qa/typescript/skills/evidence-capture/references/appium.md` |
+| `BasePage.ts` | `byTestId` and the other ladder helpers, `testIdSelector`, `isElementVisible`, the abstract `verifyPageLoaded` |
+| `LoginPage.ts`, `OrdersPage.ts` | Screens; `signIn` returns the destination |
+| `OrderRow.ts` | A scoped component: a row key, re-resolved on every call |
+| `orders.spec.ts` | One test |
+| `package.json`, `tsconfig.json`, `env.ts` | Exact pins, strict config, the one `requiredEnv` helper |
 
-export abstract class BasePage {
-  private static readonly TIMEOUT = 10_000;
+## Locator ladder
 
-  // ── Selector helpers ─────────────────────────────────────────────────────
-  // Priority: accessibility id → id → -ios predicate / android uiautomator → xpath
+A React Native `testID` is the iOS `accessibilityIdentifier` (the element's `name`) and the Android `resource-id`. The accessibility label (`content-desc`) is screen-reader text, never a test id.
 
-  protected byAccessibilityId(id: string): ChainablePromiseElement {
-    return $(`~${id}`);
-  }
+| Rung | iOS | Android |
+|---|---|---|
+| 1 — the test id | `$('~Login.Submit')` | `$('id=Login.Submit')` |
+| 2 — a native query | `-ios predicate string:` · `-ios class chain:` | `android=new UiSelector()…` |
+| 3 — XPath | last resort | last resort |
 
-  protected byId(id: string): ChainablePromiseElement {
-    return $(`id=${id}`);
-  }
+- `BasePage.byTestId` (and `testIdSelector` for components) pick the rung-1 form for the running platform, so a page has one accessor per element on both platforms. `byContentDescription` is the Android `~` lookup for an app that exposes only a `content-desc`.
+- Android prefixes every `id` lookup with `<package>:id/`. A React Native or Compose `testTag` id has no prefix, so the capability `'appium:settings[disableIdLocatorAutocompletion]': true` switches the prefixing off (the asset sets it). Compose also needs `testTagsAsResourceId` in the app, or the `mapTestTagToResourceId` setting on driver 8.4+. A Views app whose ids carry the package leaves the setting off. Check the live page source before choosing.
+- `~id` on Android matches `content-desc`. It finds a test id only where the developers put the id in `accessibilityLabel`, which they should not; use it (`byContentDescription`) only for an app that exposes nothing else.
+- `UiSelector` is secondary: Google is deprecating `UiSelector`, `UiScrollable`, `UiObject` and `UiCollection`, and the UiAutomator2 driver warns it will invalidate every `android=` locator. Reach for it only for a query no other rung can express, and plan for its removal.
+- A working XPath proves the node exists, not that it is the final locator. Downgrade it as soon as the source exposes a stronger rung. Each XPath row goes into `missing-testids.md` (page, element, fallback in use); the code carries no marker, and the constant's name says it is a fallback (`PASSWORD_REVEAL_XPATH_FALLBACK`).
+- Discover and verify ids on the live app through `mobile-screen-explorer`, and emit classes through `mobile-screen-objects`.
 
-  protected byIosPredicate(predicate: string): ChainablePromiseElement {
-    return $(`-ios predicate string:${predicate}`);
-  }
+## Scoped components
 
-  protected byAndroidUiAutomator(selector: string): ChainablePromiseElement {
-    return $(`android=${selector}`);
-  }
+WDIO 10's `$` is strict: it throws `StrictSelectorError` when a selector matches more than one element, **at every step of a chain** (`$(a).$(b)`). A repeating row therefore cannot be found with a bare child selector.
 
-  protected byXPath(xpath: string): ChainablePromiseElement {
-    return $(xpath);
-  }
+1. A component holds a **row key**, never an element. The row is found again on every call, so a recycled list cell cannot go stale.
+2. Find the row by a visible key inside it, with **element-scoped finds first**: `$$('~OrderRow').findSeries(...)` enumerates the rows and `row.$('~OrderRow.Number')` reads the key within each (see `assets/OrderRow.ts`). The ids are static; no index, no data in the locator.
+3. Only when the platform can do the whole job in one query, scope there: an iOS class chain ``-ios class chain:**/XCUIElementTypeCell[`name == "OrderRow"`]/**/XCUIElementTypeStaticText[`name == "OrderRow.Title"`]``. Mind the `UiSelector` caveat above on Android.
+4. Components do **not** extend `BasePage`. They use `$` and `$$` through a small set of scoped finds, and have no `verifyPageLoaded`; the host page owns the landmark.
+5. `$(selector, { strict: false })` opts one call out, and `strictSelectors: false` the whole config. Treat both as a smell: a selector that matches twice is a locator bug. Fix it by narrowing the selector or scoping it to a container.
 
-  async isElementVisible(el: ChainablePromiseElement): Promise<boolean> {
-    await el.waitForDisplayed({ timeout: BasePage.TIMEOUT });
-    return el.isDisplayed();
-  }
+## Gestures
 
-  abstract verifyPageLoaded(): Promise<void>;
-}
-```
+| Need | WDIO 10 |
+|---|---|
+| Tap an element or coordinates | `await $('~Cart.Checkout').tap()` · `browser.tap({ x, y })` |
+| Scroll an element into view | `await $('~Orders.Footer').scrollIntoView()` |
+| Swipe | `await browser.swipe({ direction: 'left', scrollableElement: $('~Gallery.Carousel') })` |
+| Long press, drag, pinch, zoom | `longPress()`, `dragAndDrop()`, `pinch()`, `zoom()` |
+| A path no helper covers | `browser.action('pointer', { parameters: { pointerType: 'touch' } }).move({ x, y }).down().up().perform()` |
+| A driver gesture | `await browser.execute('mobile: swipeGesture', { elementId, direction: 'left', percent: 0.75 })` on Android; `mobile: swipe` on iOS |
 
-Every page extends `BasePage` and goes through these selector helpers — never `browser.$(...)` directly outside `BasePage`.
+`touchAction`, on `browser` and on an element, is removed in WDIO 10 and the Appium 3 server dropped the `touch/*` routes. The helpers take a `scrollableElement` or a direction; coordinates are device-specific, so compute any target from `element.getRect()`. On iOS coordinates are in points, not screenshot pixels.
 
-### Page object — `src/pages/mobile/LoginPage.ts`
+## WebView
 
-```ts
-import { expect } from "@wdio/globals";
-import { BasePage } from "./BasePage";
-import { HomePage } from "./HomePage";
-
-export class LoginPage extends BasePage {
-  private static readonly EMAIL_FIELD_ID = "login-email";
-  private static readonly PASSWORD_FIELD_ID = "login-password";
-  private static readonly SUBMIT_BUTTON_ID = "login-submit";
-
-  private get emailField()    { return this.byAccessibilityId(LoginPage.EMAIL_FIELD_ID); }
-  private get passwordField() { return this.byAccessibilityId(LoginPage.PASSWORD_FIELD_ID); }
-  private get submitButton()  { return this.byAccessibilityId(LoginPage.SUBMIT_BUTTON_ID); }
-
-  async verifyPageLoaded(): Promise<void> {
-    await expect(this.emailField).toBeDisplayed({
-      message: "Expected LoginPage to be visible but the email field was not found.",
-    });
-  }
-
-  async login(email: string, password: string): Promise<HomePage> {
-    await this.emailField.clearValue();
-    await this.emailField.setValue(email);
-    await this.passwordField.clearValue();
-    await this.passwordField.setValue(password);
-    await this.submitButton.click();
-    return new HomePage();
-  }
-}
-```
-
-### Component page object — scoped to a parent element
+A hybrid app exposes more than one context. Read them, switch by what the page says, and come back:
 
 ```ts
-import type { ChainablePromiseElement } from "webdriverio";
-import { BasePage } from "./BasePage";
-import { OrderDetailsPage } from "./OrderDetailsPage";
-
-export class OrderRow extends BasePage {
-  constructor(private readonly parent: ChainablePromiseElement) {
-    super();
-  }
-
-  title()  { return this.parent.$("~order-title"); }
-  amount() { return this.parent.$("~order-amount"); }
-
-  async open(): Promise<OrderDetailsPage> {
-    await this.parent.click();
-    return new OrderDetailsPage();
-  }
-
-  async verifyPageLoaded(): Promise<void> {
-    // Component itself; the host page owns the screen landmark.
-    await this.title().waitForDisplayed();
-  }
-}
+await browser.switchContext({ title: 'Checkout' });
+await $('#card-number').setValue(card);
+await browser.switchContext('NATIVE_APP');
 ```
 
-Container page:
+- `switchContext({ title })` and `switchContext({ url })` take a string or a regular expression, match inside the app under test, and on Android select the right page of the WebView. `browser.getContexts()` lists the candidates with their titles and URLs.
+- If the element is missing from the native page source, check the context before the locator.
+- Android WebViews need a Chromedriver that matches the WebView. Start the server with `--allow-insecure=uiautomator2:chromedriver_autodownload`, or point `appium:chromedriverExecutableDir` at a folder of drivers. The capability does not exist.
 
-```ts
-async orderRows(): Promise<OrderRow[]> {
-  const els = await $$("~order-row");
-  return els.map(el => new OrderRow(el as ChainablePromiseElement));
-}
-```
+## App state between tests
 
-### Sub-flow pages — namespaced sub-folder
+The old `reset` and `resetApp` calls are gone with the removed `/appium/app/*` routes. Use, in this order:
 
-Multi-step flows live in `src/pages/mobile/onboarding/{WelcomePage,ConsentPage,ProfilePage}.ts`. Each extends `BasePage` and returns the next page.
+1. A fresh session per spec file (the default, with `appium:noReset: false`).
+2. `await browser.execute('mobile: clearApp', { appId })` (`bundleId` on iOS) on an emulator or simulator.
+3. `terminateApp` then `activateApp` for a cold start.
 
-### Test — `test/specs/authentication.spec.ts`
-
-```ts
-import { expect } from "@wdio/globals";
-import { LoginPage } from "../../src/pages/mobile/LoginPage";
-import { seed } from "../support/seed";
-
-describe("Authentication", () => {
-  it("successful login lands on home", async () => {
-    const login = new LoginPage();
-    await login.verifyPageLoaded();
-
-    const home = await login.login(seed.users[0], seed.password);
-    await home.verifyPageLoaded();
-
-    await expect(home.profileAvatar()).toBeDisplayed();
-  });
-});
-```
-
-WDIO owns the driver session via `wdio.conf.ts`; one session per worker is automatic when `maxInstances > 1`. Capabilities (platformName, deviceName, app, automationName) live in `wdio.conf.ts` and are selected via the `--suite` flag or env vars.
+Other removed endpoints have `mobile:` replacements: `mobile: backgroundApp`, `mobile: getClipboard` and `mobile: setClipboard` (base64), `mobile: lock`, `mobile: setConnectivity`, `mobile: pressKey`, `mobile: startActivity`. WDIO's wrappers call them; do not hand-roll HTTP.
 
 ## Rules
 
 ### Page object rules
-- Extend `BasePage`; pages do not take a `driver` parameter — WDIO's `browser` is implicit
-- Element accessors return `ChainablePromiseElement` (no `await` needed at the accessor — chaining handles it)
-- **Selector preference order**: `~accessibility-id` → `id=…` → `-ios predicate string:…` / `android=…` → XPath (last resort, leave a `// TODO`). Per the Appium team, treat a working XPath as **proof the node exists, not the final locator** — downgrade to a native strategy (`android=…` / `-ios class chain:…`) once the source exposes one, and drop the TODO. On iOS, `id` / `name` / `accessibility id` are synonyms over the element's `name` attribute. **Discover and verify these selectors against the live app via `qa/typescript/skills/mobile-screen-explorer` before hand-writing them**, and let `qa/typescript/skills/mobile-screen-objects` emit the class from that inventory — this skill owns the conventions both of those defer to.
-- **Selector constants** — declare each as `private static readonly` at the top of the class. Never inline a selector string inside an action method.
-- One class per screen; multi-step flows live in a sub-folder
-- Reusable components take a parent element in their constructor and query inside it
-- Navigation actions return the next page object; same-screen actions return `Promise<void>`
-- **Every page object must implement `verifyPageLoaded()`** asserting the landmark element is displayed
-- Method naming describes user intent (`login`, `tapPrimaryAction`, `enterEmail`), not WDIO mechanics
+- Extend `BasePage`; pages take no driver (WDIO's `browser` is implicit); `$` appears only in `BasePage` and in components.
+- Accessors return `ChainablePromiseElement`, are `private`, and each id is a `private static readonly` constant at the top of the class. A page exposes intent (`signIn`, `title()`), never an element.
+- One class per screen; flows in a sub-folder; repeating items as scoped components.
+- Navigation returns the destination page; same-screen actions return `Promise<void>`.
+- Every page implements `verifyPageLoaded()` on its landmark. That is the only assertion in a page.
+- `isElementVisible` returns `false` when the element is not displayed within the timeout, and rethrows anything else.
+- Per-platform differences sit in a locator map in the page, never an `if (browser.isIOS)` inside an action.
 
 ### Test rules
-- Use Mocha `describe` / `it` (or Vitest `describe` / `test`) — no class inheritance in TS tests
-- Test names describe behavior: `"successful login lands on home"`, `"locked user sees error banner"`
-- Tag groups via spec file path or Mocha grep (`--mochaOpts.grep "@smoke"`)
-- Assertions live in the test, never in pages (except the `verifyPageLoaded()` landmark assertion)
-- Every assertion has a `message`: `expect(x).toBeDisplayed({ message: "why this matters" })`
-- Use `expect.soft` (Vitest) or aggregate `await Promise.all([...])` patterns when verifying multiple fields after one user action
-- **One expected condition per assertion — never an `OR`.** `await expect(banner).toHaveText('Saved')`, never `toHaveText(/Saved|Success/)`, `expect(['Saved', 'Success']).toContain(text)`, or a `||` inside an `expect`. The rule covers label text, element counts, screen landmarks, attribute values, and displayed/enabled state alike — and applies per platform: when Android and iOS legitimately show different copy, that is two platform-scoped expectations, never one `OR`. If both outcomes are genuinely reachable on one platform the test does not know what the app should do — split it into one `it(...)` per expected outcome, generate one test per row from a case array, or pin down the correct behavior. The only exception is an explicit instruction to accept more than one value; record that instruction in a comment on the assertion.
-- **No `try`/`catch` in a test — and none in the cleanup hook.** An unexpected rejection must reach the runner; an expected one is asserted with `await expect(...).rejects` / `expect(fn).toThrow()`, which is an assertion, not error handling. Anything the test created is tracked and deleted in `afterEach` with no catch — a cleanup that fails should fail loudly rather than leak state into the next run. The suite's only catches live in **I/O helpers where narrowing one named error is the contract** — an `isDisplayed()` probe, a session-teardown helper — never a bare `catch {}` or `.catch(() => {})`, and never a catch that lets a failed action continue into the assertions.
-- **Failures name the subject.** `expect(await banner.getText(), \`success banner after saving order ${orderId}\`).toBe('Saved')`. A UI failure reported as `expected '' to be 'Saved'` with no subject is indistinguishable from a locator that matched the wrong element.
+- Mocha `describe` / `it`; no inheritance. Names are `Should_X_When_Y`.
+- Tag by file path or `--mochaOpts.grep "@smoke"`.
+- Assertions live in the test. An element matcher carries a message: `toBeDisplayed({ message: '…' })`. A value matcher takes none, so the subject goes into the value: `expect({ orderNumber, title }).toEqual({ orderNumber, title: expected })`.
+- **One expected condition per assertion — never an `OR`.** No `||`, no `/a|b/`, no `expect([a, b]).toContain(x)`. When Android and iOS show different copy, that is two platform-scoped expectations. If two outcomes are both reachable, split into one `it` per outcome.
+- No `try`/`catch` in a test or a cleanup hook. Expected rejections use `await expect(promise).rejects`. A catch lives only in an I/O helper that narrows one named error (`isElementVisible`, `BaseTest.tolerate`).
+- No `if` or loop driving an assertion; one `it` per data row.
+- Tests and hooks are `async`, every promise awaited.
 
 ### Waits
-- Default 10s `waitForDisplayed` baked into `BasePage`
-- WDIO's auto-wait covers most element resolution; for conditional waits use `waitForDisplayed` / `waitForEnabled` / `waitUntil(...)`
-- **No `await new Promise(r => setTimeout(r, n))`** for synchronization — ever, including for screen transitions or animations
-- **No `browser.pause(n)`** — `pause` is a `setTimeout` in WDIO's clothing
+- WDIO auto-waits element commands. For a condition use `waitForDisplayed`, `waitForEnabled` or `browser.waitUntil(...)`.
+- No `browser.pause(n)` and no `setTimeout` for synchronization, including for transitions and animations.
 
-### Driver / session lifecycle
-- Capabilities (`platformName`, `deviceName`, `app`, `automationName`) configured in `wdio.conf.ts`, parameterised by env vars (`PLATFORM`, `DEVICE`, `APP_PATH`)
-- Appium server is auto-started by `@wdio/appium-service` — do not run `appium` manually and hardcode `http://localhost:4723`
-- One session per WDIO worker; parallel runs handled by `maxInstances` in config
-- For cloud providers (BrowserStack, Sauce) swap `services: ['appium']` for the provider's service
+### Session
+- Capabilities live in `wdio.conf.ts`, from env (`PLATFORM`, `DEVICE_NAME`, `APP_PATH`); no hardcoded device, path or URL.
+- The `appium` service starts the server; never start one by hand. A device cloud swaps the service (`device-cloud`).
+- `appium:settings[<name>]` capabilities start a session with a setting already set.
+
+### Failure evidence
+`BaseTest.ts` is the only failure hook. A spec adds none. What it keeps and where it lands is `evidence-capture/references/appium.md`.
 
 ### What NOT to do
-
-- No `setTimeout` / `browser.pause` waits — use `waitForDisplayed`, `waitForEnabled`, or `waitUntil`
-- No `browser.$(...)` outside `BasePage` — the selector helpers are the single funnel
-- No assertions inside page methods (except the `verifyPageLoaded()` landmark)
-- No `OR` in any assertion — no `||` inside an `expect`, no `expect([a, b]).toContain(x)`, no `/a|b/` alternation, and no OR-ing Android and iOS copy into one expectation. One expected value per assertion (see Test rules)
-- No `try`/`catch` in a test or cleanup hook — expected rejections use `await expect(...).rejects`; catches live only in I/O helpers narrowing one named error (see Test rules)
-- No XPath when an `accessibility id` could be added to the app — flag as tech debt
-- No shared mutable state on page objects — instantiate fresh per test
-- No business logic / API calls in page objects — pages model the screen, tests own the workflow
-- No hardcoded device names, app paths, or server URLs — go through `wdio.conf.ts` and env vars
-- No `any` in page or test code — strict TS
-- No `as unknown as ChainablePromiseElement` casts to suppress typing problems — fix the selector helper instead
+- No `browser.$` outside `BasePage` and components; no assertions in page actions beyond the landmark.
+- No `any`, no casts such as `as unknown as ChainablePromiseElement`.
+- No shared mutable state on pages; instantiate per test.
+- No business logic or API calls in a page object.
+- No `setTimeout`, `browser.pause`, `touchAction`, `resetApp` or `driver.reset()`.
 
 ## Generation steps
 
-1. Confirm **screen name**, **platform(s)**, **landmark element**, **elements + selectors**, **actions**, **next pages**.
-2. For each element with no `accessibility id`: flag whether one can be added to the app. Don't silently fall back to XPath.
-3. Generate `src/pages/mobile/{ScreenName}Page.ts`:
-   - One `private static readonly` selector constant per element
-   - One `private get` accessor per element (returns `ChainablePromiseElement`)
-   - `verifyPageLoaded()` asserts the landmark element is displayed
-   - One action method per user-intent action (`Promise<void>` or `Promise<NextPage>`)
-   - For repeating items, an `async {component}s(): Promise<Component[]>` method
-4. If a destination page is missing, stub it or recursively generate it.
-5. Generate the spec file using `describe`/`it`; one `it(...)` per scenario, with assertions on user-visible outcomes.
-6. Run `npx wdio run wdio.conf.ts --suite mobile` — expect 0 failures. Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run". If the Appium service fails to start, check that the relevant driver (`uiautomator2` / `xcuitest`) is installed via `appium driver list --installed`; a manually-run server should answer `curl -s http://127.0.0.1:4723/status` and list your driver under `Available drivers:`.
+1. Confirm the screen, platforms, landmark, elements with rungs, actions and destinations.
+2. For each element with no test id, record it in `missing-testids.md`; do not silently fall back to XPath.
+3. Write `src/pages/mobile/<Screen>Page.ts`: constants, private accessors, `verifyPageLoaded`, intent actions, and a scoped component for each repeating group.
+4. Stub missing destination pages; write the spec with one `it` per scenario.
+5. Outside a `Gate: none` plan task, run `npx wdio run wdio.conf.ts` and expect zero failures. If the service fails to start, run `appium driver list --installed`. A server run by hand answers `curl -s http://127.0.0.1:4723/status`.
 
-> **A test that can't find a visible element is usually not a locator bug.** Per the Appium team, an element absent from page source is most often an accessibility, app-state, active-app (system alert/overlay), or native-vs-WebView context problem — fix that before rewriting the selector. For environment/doctor failures and driver-specific locator questions, the `@appium/mcp-documentation` server (`appium_skills`, `appium_documentation_query`) answers authoritatively; prefer it over community forums.
+A visible element missing from the page source is usually an accessibility, app-state, active-app (a system alert) or native-versus-WebView problem; fix that before the locator. For doctor failures and driver questions the Appium docs tools (`mcp__appium-mcp__appium_documentation_query`, `mcp__appium-mcp__appium_skills`, on when `APPIUM_MCP_DOCS_ENABLED=true`) answer from the official docs.
 
 ## Handoffs
 
-- Discovering / verifying selectors on the live app → `qa/typescript/skills/mobile-screen-explorer`
-- Emitting / updating the page object from a discovered inventory → `qa/typescript/skills/mobile-screen-objects`
-- POM architecture (capabilities profiles, sub-folders, base classes) → `qa/typescript/skills/page-object-design`
-- Test data builders → `qa/typescript/skills/test-data-builder`
-- Reviewing a page object → `qa/typescript/skills/ui-test-author/review`
-- Allure reporting → `qa/reporting/typescript/skills/test-reports`
+- Selectors on the live app → `qa/typescript/skills/mobile-screen-explorer`
+- A class from an inventory → `qa/typescript/skills/mobile-screen-objects`
+- POM architecture → `qa/typescript/skills/page-object-design`
+- Test data → `qa/typescript/skills/test-data-builder`
+- Failure evidence → `qa/typescript/skills/evidence-capture`
+- Allure → `qa/reporting/typescript/skills/test-reports`
+- Cloud farms → `qa/typescript/skills/device-cloud`
+- Review → `qa/typescript/skills/ui-test-author/review`

@@ -2,60 +2,66 @@
 
 Sections moved out of SKILL.md for on-demand loading. Read what the task needs.
 
-## 4. Push notifications + backgrounding / resume — assert state, never sleep through it (idea #4)
+## 4. Push notifications and backgrounding — assert state, never sleep through it (idea 4)
 
-**App lifecycle.** Backgrounding and resuming is a real user behavior that breaks fragile apps (lost form state,
-re-auth loops). Drive it with the device command, then **wait on the restored screen** — `waitForDisplayed`, never
-`browser.pause` guessing how long the OS takes.
+**App lifecycle.** Backgrounding and resuming breaks fragile apps (lost form state, re-auth loops). Drive it with the device command, then wait on the restored screen.
 
 ```ts
-it("preserves the cart when the app is backgrounded and resumed", async () => {
-  const cart = new CartPage();
-  await cart.addItem("SKU-42");
-  await expect(cart.itemCount()).toHaveText("1");
+describe('Cart lifecycle', () => {
+  it('Should_KeepCartItem_When_AppIsBackgroundedAndResumed', async () => {
+    const cart = new CartPage();
+    await cart.addItem('SKU-42');
+    await new NativeFeatures().backgroundFor(3);
 
-  const os = new NativeFeatures();
-  await os.backgroundFor(3);            // home → wait → return to foreground
+    await cart.verifyPageLoaded();
 
-  await cart.verifyPageLoaded();        // explicit wait on the restored screen (no pause)
-  await expect(cart.itemCount()).toHaveText("1"); // STATE survived the lifecycle event
+    await expect(cart.itemCount()).toHaveText('1');
+  });
+
+  it('Should_RequireLogin_When_AppIsTerminatedAndRelaunched', async () => {
+    const os = new NativeFeatures();
+    const appIdentifier = requiredEnv('APP_ID');
+
+    await os.terminate(appIdentifier);
+    expect({ appIdentifier, state: await os.appState(appIdentifier) }).toEqual({ appIdentifier, state: 1 });
+    await os.activate(appIdentifier);
+
+    await new LoginPage().verifyPageLoaded();
+  });
+});
+```
+
+`mobile: queryAppState` returns `1` for not running, `2` suspended, `3` background and `4` foreground, so the transition is asserted rather than waited out.
+
+**Push notifications.** Open the OS notification surface, assert the notification, tap it, and assert the routed screen.
+
+```ts
+describe('Push', () => {
+  it('Should_OpenMessageThread_When_PushIsTapped', async () => {
+    const shade = new NotificationShade();
+    await shade.open();
+
+    await shade.tap('New message from');
+
+    await new MessageThreadPage().verifyPageLoaded();
+  });
 });
 ```
 
 ```ts
-// Cold relaunch: terminate then activate; queryAppState confirms the transition deterministically
-it("requires login when the app is terminated and relaunched", async () => {
-  const bundle = process.env.APP_BUNDLE_ID!;
-  const os = new NativeFeatures();
+import { $, browser } from '@wdio/globals';
 
-  await os.terminate(bundle);
-  await expect(await driver.queryAppState(bundle)).toBe(1); // 1 = not running
+export class NotificationShade {
+  async open(): Promise<void> {
+    await browser.openNotifications();
+  }
 
-  await os.activate(bundle);            // cold start
-  const login = new LoginPage();
-  await login.verifyPageLoaded();       // session did NOT survive a cold start — by design
-});
+  async tap(textFragment: string): Promise<void> {
+    const notification = $(`android=new UiSelector().textContains("${textFragment}")`);
+    await notification.waitForDisplayed({ timeout: 10_000 });
+    await notification.click();
+  }
+}
 ```
 
-**Push notifications.** Open the OS notification surface — *not* your app's UI — assert the notification, then tap
-it and assert the deep-linked screen (this composes with idea #2's routing assertion).
-
-```ts
-// Android: open the notification shade via the driver, assert + tap the notification
-it("opens the message thread when the push is tapped", async () => {
-  await driver.openNotifications();
-
-  const push = $('android=new UiSelector().textContains("New message from")');
-  await push.waitForDisplayed({ timeout: 10_000 });
-  await push.click();
-
-  await new MessageThreadPage().verifyPageLoaded(); // the push routed into the right screen
-});
-```
-
-> **iOS push on the simulator** is simulated with `mobile: pushNotification` (wraps `simctl push`) carrying an APNs
-> payload; then open **Notification Center** and tap it. Asserting the *server actually sent* a push is a backend
-> concern (your push provider's sandbox), not Appium's — this skill asserts the **app's reaction** to a push, the
-> same boundary as `qa/typescript/skills/network-mocking/*` for requests.
-
----
+The notification shade is not your app, so this is one of the few places a `UiSelector` is the practical query; `NotificationShade` keeps it narrow and out of the page objects. On the **iOS simulator**, `mobile: pushNotification { bundleId, payload: { aps: { alert: '…' } } }` delivers the payload, then open Notification Center and tap it. Asserting that the server sent a push is a provider concern, not Appium's; this skill asserts the app's reaction.

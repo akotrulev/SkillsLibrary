@@ -24,7 +24,7 @@ This is the multi-screen layer above `qa/typescript/skills/mobile-screen-explore
 - **One screen** → `qa/typescript/skills/mobile-screen-explorer` (don't spin up a crawl for a single extraction)
 - Emitting / updating a page-object class → `qa/typescript/skills/mobile-screen-objects`
 - Designing where screens/components/flows live → `qa/typescript/skills/page-object-design`
-- Writing or tagging the Mocha/Jasmine tests → `qa/typescript/skills/ui-test-author/appium`
+- Writing or tagging the Mocha tests → `qa/typescript/skills/ui-test-author/appium`
 - Web apps in a browser → `qa/typescript/skills/page-objects-from-url`
 - OS-surface features (permission dialogs, push, deep links, biometrics) → `qa/typescript/skills/mobile-native-features`
 - **Fuzzing / monkey-testing for crashes** — this is a *structured inventory* crawl, not a stability sweep. Random-input robustness belongs to `qa/typescript/skills/failure-injection-testing` and the platform monkey tools
@@ -59,7 +59,7 @@ Report the four bucket counts before proposing any work, and tick the **Handoff 
 
 ## Prerequisites
 
-Same as `mobile-screen-explorer` — the **Appium MCP server** connected, an Appium 2.x server on `http://127.0.0.1:4723`, and a device/emulator with the app running. Load `qa/typescript/skills/mobile-screen-explorer/SKILL.md` before starting: its tool table, session lifecycle, locator ladder, and `missing-testids.md` format are the ones this skill applies per screen.
+Same as `mobile-screen-explorer` — the **Appium MCP server** connected (it embeds the UiAutomator2 and XCUITest drivers, so a local Android or iOS session needs no separate Appium server; one is needed only for a `remoteServerUrl` session), `SCREENSHOTS_DIR=docs/app-map/screenshots` set in the server's registration so the crawl's screenshots land in the repo instead of `os.tmpdir()`, and a device/emulator with the app running. Load `qa/typescript/skills/mobile-screen-explorer/SKILL.md` before starting: its tool table, session lifecycle, locator ladder, and `missing-testids.md` format are the ones this skill applies per screen.
 
 **PROCESS mode needs none of this** — it reads the existing map and the page objects on disk, so no device, session, or MCP server is required unless a screen must be re-verified.
 
@@ -112,12 +112,12 @@ Stop at the **first** of: frontier empty · max screens reached · max depth rea
 
 ### 5. Detect components (the payoff)
 
-Across all captured screens, group elements by **accessibility id** (fall back to resource-id; never group by visible text — text is data, not identity):
+Across all captured screens, group elements by their **stable id** (iOS accessibility id; Android `resource-id`, else `content-desc`; never group by visible text — text is data, not identity):
 
 | Signal | Reading | Becomes |
 |---|---|---|
 | Same id on **≥2** screens, same position band | Shared chrome | **Component** candidate (nav bar, tab bar, header, toast, search bar) |
-| A repeating sibling group **within** one screen | List/grid row | **Component** scoped to a parent `ChainablePromiseElement` |
+| A repeating sibling group **within** one screen | List/grid row | **Component** scoped to a lazy parent locator plus a row key |
 | Same id on **every** screen | App-wide chrome | Component + a candidate member of the base screen class |
 | Ids appearing once | Screen-specific | Stays on its screen object |
 
@@ -195,5 +195,3 @@ A crawl **will** be interrupted (session drop, device sleep, a screen needing ma
 
 - `references/crawl-policy.md` — screen signatures, the safe-action denylist, bounds and defaults, resumption mechanics
 - `assets/screen-map-template.md` — the `screen-map.md` artifact template
-</content>
-</invoke>

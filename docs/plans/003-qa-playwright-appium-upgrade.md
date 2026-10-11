@@ -74,7 +74,14 @@ trace/video/screenshot, run from the pinned image and loaded by `qa-api-dotnet` 
 `Regex` URL assertion, a `Given` that only acts, a Reqnroll scaffold on `Microsoft.Playwright.NUnit` 1.63.0 with
 `BaseTest`-shaped `[AfterScenario]` evidence (D78), the C-07 BDD review rows, and a conformance checklist whose E11
 matches R8 (D79) with fifteen new or reworded rows (A9, A10, E16, E17, F10, F11, I11–I13, K9, L4, L9, L14, M15, M16).
-Next: M1. Built but unverified: no asset, workflow or pipeline has been
+M1 landed 2026-10-11: the TS mobile lane on Appium 3 / WebdriverIO 10 / Mocha — `qa-mobile-typescript` on §5.3's 28
+tools with the appium-mcp prerequisites and the evidence skill at Step 1; `ui-test-author/appium` with ten compilable
+assets (a `wdio.conf.ts`, a `BaseTest.ts` whose `afterTest` keeps a screenshot, page source, device log and a recording
+only on failure, a scoped `OrderRow`) and a per-platform test-id ladder with the id-prefix setting (D80); gestures,
+WebView and app state on WDIO 10's helpers and `mobile:` extensions; the farm through a second `wdio.conf.ts`
+(BrowserStack without a WDIO 10 service, D81; AWS `APPIUM_NODE`); Appium reference in `evidence-capture` (D82); and
+the screen, crawler, native-feature, review, BDD-scaffold and Cucumber files cleaned (D83).
+Next: M2. Built but unverified: no asset, workflow or pipeline has been
 compiled or run (G1 does that; D24's TS config import, the Java build on Allure Gradle plugin 4.3.0, the .NET
 build on NUnit3TestAdapter 6.3.1 / Test SDK 18.10.1, `dorny/test-reporter`'s `java-junit` parse, the trace CLI
 through the Java driver (D39) and through `playwright.ps1` (D43), the .NET shard script against a real
@@ -102,7 +109,11 @@ first frame, `IWebSocketRoute.Send` being synchronous, `SseItem<T>.EventId`, eve
 `PlaywrightException` (D76), `TelemetryClient.FlushAsync(CancellationToken)`, Reqnroll's after-hook order, the
 `Allure.Reqnroll` package and `Allure.ReqnrollPlugin` assembly names (D78), Reqnroll 3.3.4 being current and
 `Assert.MultipleAsync` rest on memory — none of N4's files is a compiled asset, and the .NET UI gate filter does not
-yet exclude `TestCategory=grid` — G1 reconciles that with the `visual` / `lighthouse` exclusions).
+yet exclude `TestCategory=grid` — G1 reconciles that with the `visual` / `lighthouse` exclusions); M1 read WDIO 10 types and commands from the packed 10.0.2 tarballs and its pins from npm, but nothing
+ran: the TS Appium assets are not type-checked, §6.3's TS Appium install line is too short (use
+`assets/package.json`), the `appium:settings[disableIdLocatorAutocompletion]` need for React Native ids and the
+device-farm facts (BrowserStack/Sauce Appium 3, Device Farm `APPIUM_NODE`) rest on READMEs and the research, and
+`browser-cloud-setup` still says a BrowserStack service sets the status).
 Planned 2026-10-10. The research behind it is committed with this plan:
 `docs/research/003-qa-playwright-appium/` (5 files). So is the read-only audit:
 `docs/audits/003-qa-playwright-appium/` (4 files). All open questions were answered on 2026-10-10:
@@ -113,7 +124,7 @@ Planned 2026-10-10. The research behind it is committed with this plan:
 - A Maestro lane is added (X1).
 - The newest Appium client majors are primary.
 
-Next: M1 (H1, the user's, blocks no task). The cost is 19 agent sessions on the subscription, each started by the user
+Next: M2 (H1, the user's, blocks no task). The cost is 19 agent sessions on the subscription, each started by the user
 from Plan Queue. Nothing else is metered.
 
 ## 1. What already exists, and what is missing
@@ -1198,6 +1209,42 @@ API base (D75), a grid fixture (D74) and the uptime probe (D76). Readings: widen
 row (it stops reading as one rule), or keep E11 as review/SKILL.md words it and add a note under section E naming
 those five as not E11 findings (chosen). **Cost:** an auditor must read the note; a new lifecycle owner elsewhere
 needs a line there.
+
+**D80 — The Android test-id rung needs the id-prefix setting, and one `byTestId` helper picks the rung per
+platform (M1, 2026-10-11).** The plan's ladder (D6, plan 002 §8.5) says a React Native `testID` is the iOS `name`
+and the Android `resource-id`. UiAutomator2 prefixes every `id` lookup with `<package>:id/` unless the setting
+`disableIdLocatorAutocompletion` is on, and a React Native or Compose id carries no prefix (UiAutomator2 README,
+Settings API). Readings: write `$('id=Login.Submit')` and leave the prefix to the reader; or set
+`'appium:settings[disableIdLocatorAutocompletion]': true` in the asset capabilities, explain when to leave it off
+(a Views app whose ids carry the package), and give `BasePage` one `byTestId` (`~id` on iOS, `id=id` on Android)
+plus `testIdSelector` for components (chosen). **Cost:** a Views app flips the setting; the mapping and the
+setting are from the driver README and secondary sources, not a device run (G1, and the user's first device run,
+settle it). M2 and M3 write the same ladder and setting.
+
+**D81 — On WDIO 10 BrowserStack connects without a vendor service, and the status is set in the config's
+`afterTest` (M1, 2026-10-11).** The plan says the farm runs through `wdio.conf.ts` plus a service (`aM` L6).
+`@wdio/browserstack-service` was at 9.39.4 on 2026-10-11 with a peer of `@wdio/cli` ≤ 9, so it does not install on
+WDIO 10; `@wdio/sauce-service` has a 10.0.2. Readings: stay on WDIO 9 for every BrowserStack project; or connect
+through `hostname` / `user` / `key` and `bstack:options` in a second config that imports the local one, and mark the
+session with the `setSessionStatus` executor (chosen, with the service named where one exists). **Cost:** a hand-rolled
+status call, and `browser-cloud-setup` (T4) still describes the service doing it; `device-cloud` states how to check
+the vendor's Appium version before bumping, and the supported lane stays WDIO 9.
+
+**D82 — The asset recording uses `startRecordingScreen`, and the `mobile:` recorders are a documented swap
+(M1, 2026-10-11).** §3.2 allows either. `startRecordingScreen` works on every supported OS and API level;
+`mobile: startMediaProjectionRecording` needs Android 10+ and `mobile: startXCTestScreenRecording` iOS 17+. Readings:
+default to the native recorders and branch on the platform version in the hook; or default to
+`startRecordingScreen` with `timeLimit: 180` and `forceRestart`, and show the swap in `references/appium.md` §4.1
+(chosen). **Cost:** Android tests over 180 s need ffmpeg on the Appium host, and iOS needs ffmpeg always; the
+reference states both.
+
+**D83 — The TS Appium assets include `package.json`, `tsconfig.json` and `env.ts`, and `device-cloud` gained a
+reference file (M1, 2026-10-11).** §3.4 lists a config, a base test, a screen object and a test. A compiled asset
+set needs exact pins and a strict config, and the config, the spec and the scaffold share one `requiredEnv`, so
+they are assets too (the page objects and the component are four files, not one). `device-cloud/SKILL.md` was
+28.1k chars and had to come under 16,000, so the AWS orchestration class moved to
+`references/aws-device-farm.md`. **Cost:** ten asset files and a G1 install line that must come from
+`assets/package.json`.
 
 ## Answered questions (2026-10-10)
 
@@ -2625,6 +2672,55 @@ teach.
 - **Not in M1:** Java/.NET mobile (M2/M3); the shared mobile security skills (`qa-security`'s); line 10 of
   `mobile-screen-explorer` and the agent's "Related agents" section (plan 002 W1, D21).
 
+**As built (2026-10-11):**
+- **Built.** The TS mobile lane is on §2.4's primary lane. `qa-mobile-typescript` has §5.3's 28 tools
+  (`tools:` = the 7 core tools plus the list, in §5.3's order), a 634-char description naming Appium 3 and the
+  supported lane, the five appium-mcp prerequisites, and Step 1 loading `evidence-capture/SKILL.md` and its
+  Appium reference. `ui-test-author/appium` has a Versions table, `assets/` (10 files: `wdio.conf.ts`,
+  `BaseTest.ts`, `BasePage.ts`, `LoginPage.ts`, `OrdersPage.ts`, `OrderRow.ts`, `orders.spec.ts`, `env.ts`,
+  `package.json`, `tsconfig.json`), a per-platform ladder, scoped components, gestures, WebView and app-state
+  sections. `mobile-native-features` (+ `references/details.md`), `mobile-screen-explorer`,
+  `mobile-screen-objects`, `mobile-app-crawler` (the three `</content>` leftovers, `SCREENSHOTS_DIR`, the id
+  grouping), `device-cloud` (+ new `references/aws-device-farm.md`), the review skill's Appium rows, the mobile
+  half of `bdd-project-scaffold` (exact pins, no comments, a `Before`/`After` pair that attaches the failure
+  screenshot and page source) and `cucumberjs-appium.md` (`this.attach`) are rewritten.
+  `evidence-capture/references/appium.md` exists (10.1k chars); its SKILL.md lost the placeholder line, gained an
+  Appium row in both tables and an "Appium: native app evidence" section, and its description is 448 chars.
+  Sizes in bytes (`wc -c`, so an upper bound on chars): `evidence-capture/SKILL.md` 13.9k, `ui-test-author/appium`
+  14.6k, `mobile-native-features` 14.8k, `device-cloud` 15.9k; `mobile-screen-explorer/SKILL.md` is 17.5k (it was
+  16.7k; it was edited, not rewritten).
+- **Left to plan 002.** Line 10 of `mobile-screen-explorer/SKILL.md` and the agent's "Related agents" section were
+  already corrected by plan 002 W1 (`docs/plans/implemented/002-mobile-plugins.md`); M1 kept that wording.
+- **Pins read from npm on 2026-10-11:** `webdriverio`, `@wdio/cli`, `@wdio/appium-service`, `@wdio/globals` 10.0.2;
+  `@wdio/mocha-framework`, `@wdio/types`, `@wdio/allure-reporter`, `@wdio/cucumber-framework` 10.0.1; `appium`
+  3.8.0; `appium-uiautomator2-driver` 8.7.0; `appium-xcuitest-driver` **12.17.1** (§2.4 says 12.x; the research
+  table's 12.16.0 is one release old); `@cucumber/cucumber` 13.3.0; `@types/node` 24.19.2; `@types/mocha`
+  10.0.10; `typescript` **5.9.3** (the registry's latest is 7.0.2; WDIO's types were not checked against it).
+  WDIO 10 types and the WDIO 10 command sources (`mobile:` wrappers, `ElementArray`, `findSeries`, `strict`)
+  were read from the packed 10.0.2 tarballs; nothing was run.
+- **Built but unverified.** No asset was type-checked or run (G1 does it). Open risks for G1:
+  - **§6.3's TS Appium install line is short.** The assets import `@wdio/allure-reporter` and `@wdio/logger`
+    (hoisted from `webdriverio`) and need `@types/mocha` and `@types/node`; `ui-test-author/appium/assets/package.json`
+    holds the exact set, and `tsconfig.json` the strict config (`types`: `node`, `mocha`, `@wdio/globals/types`,
+    `@wdio/mocha-framework`). Use them for the scratch project.
+  - The `appium:settings[disableIdLocatorAutocompletion]` capability key's type in `Options.Testrunner`, the
+    `reporters` option `disableWebdriverScreenshotsReporting` type, and `.js` import suffixes under NodeNext.
+  - `cucumberOpts.import` (the scaffold used `require`; the project is ESM), the `Before` hook's `mobile: clearApp`
+    on a real device, and `afterScenario` being the Cucumber twin of `afterTest`.
+  - `browser.execute<number, [Record<string, string>]>` generics, `$$().findSeries` returning `undefined` on no
+    match (the type says `Element`), and `stopRecordingScreen` positional arguments on WDIO 9.
+  - The RN `testID` → Android `resource-id` mapping and the need for `disableIdLocatorAutocompletion` rest on the
+    UiAutomator2 README and secondary sources (D80); nothing ran on a device.
+  - `device-cloud`: BrowserStack's `appiumVersion` capability and Appium 3 availability, Sauce's, and the Device
+    Farm `APPIUM_NODE` package/spec contents (no web access to those docs; the types come from the research and
+    the audit); `GET <hub>/status` through a vendor hub.
+- **For G1, files M1 does not own.**
+  - `qa/reporting/typescript/skills/test-reports` line 101 still fits: the hook is `BaseTest.ts`'s `afterTest`.
+    Under Cucumber the same capture runs in `afterScenario`, which `evidence-capture/references/appium.md` §5 says.
+  - `qa/typescript/skills/browser-cloud-setup` (`references/details.md:203,234,286`) still says the vendor service
+    sets the status and manages the tunnel. `@wdio/browserstack-service` has no WDIO 10 build (D81).
+  - The review checklist rows and the .NET/Java siblings keep their own wording until M2/M3.
+
 ### M2 — Java mobile: Appium 3, java-client 11, Appium evidence, scoped components
 
 **Stack:** `docs` · **Agent:** `general-purpose`
@@ -2885,82 +2981,9 @@ Run them in order, one session each, opened from Plan Queue. Each block is compl
 | X1 | `docs` | `general-purpose` | M1, S1, T2 | ~130k |
 | G1 | `docs` | `general-purpose` | all | ~145k |
 
-Landed: T1, J1, N1, T2, J2, N2, A1, T3 (2026-10-10), J3, N3, T4, J4, N4 (2026-10-11). Every other block is live.
+Landed: T1, J1, N1, T2, J2, N2, A1, T3 (2026-10-10), J3, N3, T4, J4, N4, M1 (2026-10-11). Every other block is live.
 
 ---
-
-### M1 — TypeScript mobile: Appium 3, WebdriverIO 10, Appium evidence, scoped components (general-purpose, docs)
-
-````
-You are `general-purpose`. Task M1 of docs/plans/003-qa-playwright-appium-upgrade.md: move the TS mobile
-lane to §2.4's primary lane (Appium 3, WebdriverIO 10, Mocha). Fix the mobile audit's TS findings, write
-qa/typescript/skills/evidence-capture/references/appium.md, and put qa-mobile-typescript on §5.3's
-grants.
-
-Read, in this order:
-1. CLAUDE.md.
-2. The plan: §2.4, §3.2, §3.4, §4, §5.1, §5.3, §5.4, Decisions D10, D17, D20, task M1, "Close-out — every task".
-3. qa/typescript/agents/qa-mobile-typescript.md; under qa/typescript/skills/: ui-test-author/appium,
-   mobile-native-features, mobile-screen-explorer, mobile-screen-objects, mobile-app-crawler (+ references,
-   assets), device-cloud, the review skill's Appium rows, the Appium lines of bdd-project-scaffold, and
-   gherkin-step-code/references/cucumberjs-appium.md.
-4. qa/typescript/skills/evidence-capture/SKILL.md (T2).
-5. docs/research/003-qa-playwright-appium/appium.md §0–§9 (WebdriverIO columns and §9.3).
-6. docs/audits/003-qa-playwright-appium/mobile.md §2, §3, §5 (TS rows and cross-stack rows), §6.
-
-Build:
-- Versions: Appium 3 / WDIO 10 primary, Appium 2 / WDIO 9 supported. appium:-prefixed capabilities.
-  Strict $.
-- Mocha, not Vitest. The farm through wdio.conf.ts + a service. APPIUM_NODE on Device Farm. How to check
-  a vendor's Appium version.
-- mobile: extensions instead of the removed endpoints. Review rows lose resetApp/reset().
-- Gestures and WebView ported: browser.action('pointer'), WDIO 10 tap/swipe, switchContext({ title | url }).
-- Scoped components: a lazy parent locator plus a row key, with element-scoped finds first. UiSelector is
-  secondary, because Google is deprecating it.
-- Per-platform ladder: a React Native testID is the iOS accessibilityIdentifier and the Android
-  resource-id, matching plan 002 §8.5.
-- isElementVisible returns false on timeout. setClipboard takes base64.
-- Remove the agent's browser.pause exception; keep its "scaffold" wording (S1 adds Step 0). Remove
-  </content> leftovers and TODO markers. cucumberjs-appium.md attaches its screenshot.
-- ui-test-author/appium/assets/: wdio.conf.ts, a base test with an afterTest evidence hook (screenshot,
-  page source, logcat/syslog, a recording kept only on failure), a screen object, one test.
-- evidence-capture/references/appium.md per §3.2; replace the placeholder line in SKILL.md.
-- qa-mobile-typescript.md:
-  - tools: = core tools + §5.3.
-  - The appium-mcp prerequisites (embedded drivers; a server only for remoteServerUrl;
-    SCREENSHOTS_DIR; AI-vision variables; docs tools need APPIUM_MCP_DOCS_ENABLED).
-  - Step 1 wiring (§5.1).
-  - The description (≤ 650 chars) says Appium 3.
-
-Traps:
-- WDIO 10's $ throws when a selector matches more than one element, at every step of a chain.
-  stopRecordingScreen takes one options object.
-- Recording limits: Android startRecordingScreen gives 180 s per chunk. mobile: startMediaProjectionRecording
-  needs Android 10+. iOS needs ffmpeg, and mobile: startXCTestScreenRecording needs iOS 17+ (appium.md §4).
-- appium-mcp tools: use exactly §5.3's names. G1's check fails on any other.
-- T2's evidence-capture/SKILL.md carries the placeholder "Appium: `references/appium.md`, written by M1"
-  as its own line under the intro paragraph; replace that line with the link. The SKILL.md has a "Who owns
-  what" table and a "three kinds of capture" table; add the Appium rows there rather than a parallel
-  section. T2's qa/reporting/typescript/skills/test-reports already defers WebdriverIO/Appium failure
-  evidence to "the base test's afterTest hook, explained in evidence-capture (its Appium reference)", so
-  the hook M1 writes is that hook. test-reports is not M1's file; if the wording no longer fits, say so in
-  As built for G1.
-
-- T4 edited only the web half of bdd-project-scaffold (and its mobile Node line, now Node 24 / 22). The mobile
-  templates are M1's as T4 found them: the mobile `package.json` (`^` ranges, a `jsonc` comment), `wdio.conf.ts`,
-  `support/world.ts` (a `require` inside a getter) and `support/hooks.ts` (inline comments, `browser.reset?.()`, a
-  failure screenshot taken but never attached) — R1, R5 and R6 apply. T4's browser-cloud-setup now defers the
-  WebdriverIO/Appium versions to ui-test-author/appium and its mobile `wdio.conf.ts` excerpt has no comments; it is
-  not M1's file.
-- Leave two things to plan 002 (docs/plans/002-mobile-plugins.md) W1, per D21: line 10 of
-  mobile-screen-explorer/SKILL.md (the React Native testID mapping) and the agent's "Related agents"
-  section. If plan 002 has already landed them, keep its wording.
-
-Gate: none. This plan gates once, in G1. Do not run tsc, wdio, appium or any check script.
-
-Commit: `docs(qa-ts): mobile lane on Appium 3 / WebdriverIO 10, Appium evidence, scoped components (003 M1)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
 
 ### M2 — Java mobile: Appium 3, java-client 11, Appium evidence, scoped components (general-purpose, docs)
 
@@ -3026,9 +3049,22 @@ Traps:
 - Gherkin step glue (qa/java/skills/gherkin-step-code): J4 made web page objects take the `Page`, never
   `TestContext` (`aJ` D44). Its "Mobile variant (Appium)" snippet still calls `context.loginScreen()` — keep screen
   objects taking the driver, not `TestContext`, the same way.
-- Leave two things to plan 002 (docs/plans/002-mobile-plugins.md) W1, per D21: line 10 of
-  mobile-screen-explorer/SKILL.md (the React Native testID mapping) and the agent's "Related agents"
-  section. If plan 002 has already landed them, keep its wording.
+- Leave two things to plan 002 W1, per D21: line 10 of mobile-screen-explorer/SKILL.md (the React Native
+  testID mapping) and the agent's "Related agents" section. Plan 002 has landed them
+  (docs/plans/implemented/002-mobile-plugins.md); keep its wording.
+
+- M1 (qa/typescript, as built) settled things the Java lane shares — read its D80–D82 and apply them:
+  - The per-platform ladder: UiAutomator2 prefixes every `id` lookup with `<package>:id/`, and a React Native or
+    Compose id has none, so the asset capabilities set `appium:settings[disableIdLocatorAutocompletion]` true
+    (D80). Java's `AppiumBy.id` needs the same capability; say when to leave it off. One finder per element
+    picks `accessibilityId` on iOS and `id` on Android.
+  - The UiAutomator2 README warns that Google is deprecating `UiSelector`; it is the secondary rung.
+  - Recording defaults to `startRecordingScreen` with the 180 s Android cap and the iOS ffmpeg need; the
+    `mobile:` recorders are the documented swap (D82).
+  - Appium 3 availability on a farm is checked before the client bump (qa/typescript/skills/device-cloud, § Does the
+    farm run Appium 3?): BrowserStack's and Sauce's public pages did not list 3 on 2026-10-10.
+  - TS's Appium evidence reference (qa/typescript/skills/evidence-capture/references/appium.md, nine sections) is the
+    shape to mirror, including its table of recording limits.
 
 Gate: none. This plan gates once, in G1. Do not run gradle, javac, appium or any check script.
 
@@ -3103,9 +3139,19 @@ Traps:
   failure screenshot taken but never attached) — R1, R5 and R6 apply. T4's browser-cloud-setup now defers the
   WebdriverIO/Appium versions to ui-test-author/appium and its mobile `wdio.conf.ts` excerpt has no comments; it is
   not M1's file.
-- Leave two things to plan 002 (docs/plans/002-mobile-plugins.md) W1, per D21: line 10 of
-  mobile-screen-explorer/SKILL.md (the React Native testID mapping) and the agent's "Related agents"
-  section. If plan 002 has already landed them, keep its wording.
+- Leave two things to plan 002 W1, per D21: line 10 of mobile-screen-explorer/SKILL.md (the React Native
+  testID mapping) and the agent's "Related agents" section. Plan 002 has landed them
+  (docs/plans/implemented/002-mobile-plugins.md); keep its wording.
+
+- M1 (qa/typescript, as built) settled things the .NET lane shares — read its D80–D82 and apply them:
+  - The per-platform ladder: UiAutomator2 prefixes every `id` lookup with `<package>:id/`, and a React Native or
+    Compose id has none, so the asset capabilities set `appium:settings[disableIdLocatorAutocompletion]` true
+    (`AddAdditionalAppiumOption`, D80). One finder per element picks `AccessibilityId` on iOS and `Id` on Android.
+  - The UiAutomator2 README warns that Google is deprecating `UiSelector`; it is the secondary rung.
+  - Recording defaults to `StartRecordingScreen` with the 180 s Android cap and the iOS ffmpeg need; the
+    `mobile:` recorders are the documented swap (D82).
+  - Appium 3 availability on a farm is checked before the client bump (qa/typescript/skills/device-cloud, § Does the
+    farm run Appium 3?).
 
 Gate: none. This plan gates once, in G1. Do not run dotnet build, appium or any check script.
 
@@ -3127,7 +3173,7 @@ Read, in this order:
 3. qa/dotnet/skills/mobile-project-setup/SKILL.md (the pattern, as M3 left it) and the Step 0 row of
    qa/dotnet/agents/qa-mobile-dotnet.md.
 4. qa/java/skills/ui-test-author/appium/assets/* and its SKILL.md stack section (M2);
-   qa/typescript/skills/ui-test-author/appium/assets/* and its SKILL.md stack section (M1).
+   qa/typescript/skills/ui-test-author/appium/assets/* and its SKILL.md Versions table (M1).
 5. docs/research/003-qa-playwright-appium/appium.md §1, §2.1, §2.7.
 6. The Steps tables and descriptions of qa/java/agents/qa-mobile-java.md and
    qa/typescript/agents/qa-mobile-typescript.md.
@@ -3156,6 +3202,15 @@ Traps:
 - WDIO 10 needs Node ≥ 22.19, and appium-mcp needs Node ≥ 22. Node 20 is EOL — never write it.
 - Write exact pins (appium 3.8.0, webdriverio 10.0.2, java-client 11.0.0). G1's checker compares them
   to §2.
+- M1 left the TS assets as ten files: wdio.conf.ts, BaseTest.ts (the evidence hooks), BasePage.ts, LoginPage.ts,
+  OrdersPage.ts, OrderRow.ts, orders.spec.ts, env.ts, package.json (every exact pin) and tsconfig.json. The TS setup
+  skill points at them and copies none; its layout is that flat set under `src/pages/mobile/` and `test/specs/`
+  in the project. The env vars are PLATFORM, DEVICE_NAME, APP_PATH, PLATFORM_VERSION (iOS), E2E_USER,
+  E2E_PASSWORD, E2E_ORDER_NUMBER, E2E_ORDER_TITLE, and DEVICE_FARM (skips local recording). The pins are
+  appium-uiautomator2-driver 8.7.0 and appium-xcuitest-driver 12.17.1; the Android capability
+  `appium:settings[disableIdLocatorAutocompletion]` is set (D80). `.gitignore` takes test-results/,
+  allure-results/ and evidence/. qa-mobile-typescript.md already has the Step 1 evidence row (M1); add only
+  Step 0.
 
 Gate: none. This plan gates once, in G1. Do not run gradle, npm, appium or any check script.
 
@@ -3173,7 +3228,7 @@ docs/research/003-qa-playwright-appium/maestro.md, then write qa/typescript/skil
 Read, in this order:
 1. CLAUDE.md.
 2. The plan: §3.7, §4, §5.1, Decisions D21, D22, task X1, "Close-out — every task".
-3. docs/plans/002-mobile-plugins.md §8.5 (the test-id contract your selectors must follow).
+3. docs/plans/implemented/002-mobile-plugins.md §8.5 (the test-id contract your selectors must follow).
 4. qa/typescript/skills/ui-test-author/appium/SKILL.md (the sibling authoring skill, for shape only).
 5. qa/typescript/agents/qa-mobile-typescript.md (description and Steps);
    qa/typescript/skills/ui-test-author/review/SKILL.md (the mobile rows);
@@ -3216,6 +3271,13 @@ Traps:
 - This plan's research did not cover Maestro. Every Maestro fact in the skill must come from your
   maestro.md, not memory.
 - E2E stays with the QA peer (plan 002 D7). Do not write into mobile/ or the React Native dev skills.
+- M1 left qa-mobile-typescript.md's description at 634 of 650 chars, so naming Maestro means cutting words
+  elsewhere in it; S1 adds Step 0 before you. M1 also rewrote the Appium rows of ui-test-author/review (the
+  Appium table is yours to leave; add a separate Maestro table) and gave evidence-capture/SKILL.md an
+  "Appium: native app evidence" section and an Appium row in both tables; your route line goes beside them. Its
+  body is 14.0k of 16,000 chars.
+- M1's D80: a React Native testID is the Android resource-id with no package prefix. Check which identifier
+  Maestro's `id:` matches before writing selectors.
 - Record the syntax-check command you found (or that none exists) in your As-built note. G1 §6.3 uses it.
 
 Gate: none. This plan gates once, in G1. Do not run maestro, emulators or any check script.
@@ -3248,6 +3310,10 @@ Build:
   - §6.4: the evidence smoke in all three stacks.
   - §6.5: python3 tools/token-audit.py.
 - Fix every failure at its source. Any task above may own it.
+- §6.3's TS Appium row installs too little. Build the scratch project from
+  qa/typescript/skills/ui-test-author/appium/assets/package.json and tsconfig.json (M1, D83): the assets
+  import @wdio/allure-reporter and need @types/mocha and @types/node. M1's As built lists its open typing risks
+  (the settings capability key, the reporter option, `.js` suffixes under NodeNext).
 - README.md: the qa rows for the 3 evidence-capture skills, webmcp-testing, the 2 new
   mobile-project-setup skills and ui-test-author/maestro, and the counts.
 - CLAUDE.md version policy: one Playwright line (Node 1.64 / Java·.NET·Python 1.63; a 1.64-only API is

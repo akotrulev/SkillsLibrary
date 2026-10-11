@@ -1,21 +1,21 @@
 ---
 name: qa-evidence-capture-typescript
-description: Use when a Playwright TypeScript suite or agent session must keep evidence — failure screenshots, video, screencast receipts, traces, HAR — or a failure's trace must be read before a fix. Triggers "keep trace and video on failure", "record a screencast of this flow", "open the trace for this failure", "capture evidence while exploring via Playwright MCP". Do NOT use for writing tests or the config (ui-test-author/playwright), Allure wiring (test-reports) or visual baselines (visual-regression).
+description: Use when a Playwright or Appium/WebdriverIO TypeScript suite or agent must keep evidence — screenshots, video, traces, HAR, page source, device logs, recordings — or read a failure's evidence before a fix. Triggers "keep trace and video on failure", "record a screencast", "keep a recording when the mobile test fails". Do NOT use for writing tests or config (ui-test-author/*), Allure wiring (test-reports) or visual baselines (visual-regression).
 ---
 
-# QA — Evidence Capture (TypeScript / Playwright 1.64)
+# QA — Evidence Capture (TypeScript: Playwright 1.64 and Appium 3)
 
 Decides **what evidence a run keeps, where it lands, and how it is read back**: the failure evidence every
 test carries, the deliberate recordings a test or an agent makes on purpose, and the exploratory capture an
 agent takes while it drives a browser. The mechanics for every capture API are in
-[`references/playwright.md`](references/playwright.md).
-
-Appium: `references/appium.md`, written by M1
+[`references/playwright.md`](references/playwright.md) for a browser, and in
+[`references/appium.md`](references/appium.md) for a native mobile app.
 
 ## Versions
 
 This skill pins nothing. The Playwright, Docker and `allure-playwright` versions are the **Versions** table
-of `qa/typescript/skills/ui-test-author/playwright/SKILL.md`. Each API below is tagged with the version it
+of `qa/typescript/skills/ui-test-author/playwright/SKILL.md`; the WebdriverIO and Appium versions are the
+**Versions** table of `qa/typescript/skills/ui-test-author/appium/SKILL.md`. Each API below is tagged with the version it
 shipped in; on an older project, check the tag before teaching the API.
 
 ## Who owns what
@@ -23,6 +23,7 @@ shipped in; on an older project, check the tag before teaching the API.
 | Concern | Owner |
 |---|---|
 | The failure-evidence defaults (`trace`, `video`, `screenshot` in `use`) | `qa/typescript/skills/ui-test-author/playwright/assets/playwright.config.ts` — the one config. This skill explains it and never adds a second hook for the same evidence |
+| The Appium failure hook (screenshot, page source, device log, a recording kept on failure) | `qa/typescript/skills/ui-test-author/appium/assets/BaseTest.ts`, wired in `wdio.conf.ts`. `references/appium.md` explains it; no spec adds another |
 | Capture modes, deliberate recordings, exploratory capture, reading a trace, PII | **this skill** |
 | Mapping the evidence into Allure (trace type, diff widget, labels) | `qa/reporting/typescript/skills/test-reports` |
 | Uploading and retaining the evidence in CI | `qa/cicd/typescript/skills/ci-pipelines` and `qa/cicd/ci-conventions` |
@@ -49,9 +50,9 @@ shipped in; on an older project, check the tag before teaching the API.
 
 | Kind | Who starts it | API | Lands in |
 |---|---|---|---|
-| **Failure evidence** | the runner, from the config | `use.trace` / `use.video` / `use.screenshot`, plus `error-context.md` [1.53] | `test-results/<one folder per test>/` → the HTML report, the blob, `allure-results/` |
+| **Failure evidence** | the runner, from the config | `use.trace` / `use.video` / `use.screenshot`, plus `error-context.md` [1.53]. Appium: the `afterTest` hook | `test-results/<one folder per test>/` → the HTML report, the blob, `allure-results/`. Appium: `test-results/appium/<test title>/` and Allure |
 | **Deliberate recording** | a fixture, on purpose | `page.screencast` [1.59], `context.tracing.startHar()` [1.60], `testInfo.attach()` | the test's `testInfo.outputPath(...)`, then attached |
-| **Exploratory capture** | an agent, live | Playwright MCP capture tools, or `playwright-cli` | `evidence/<YYYY-MM-DD>-<topic>/` (explicit filenames); `.playwright-mcp/` for auto-named MCP output |
+| **Exploratory capture** | an agent, live | Playwright MCP capture tools, or `playwright-cli`; for a native app the Appium MCP tools | `evidence/<YYYY-MM-DD>-<topic>/` (explicit filenames); `.playwright-mcp/` for auto-named MCP output; `docs/app-map/screenshots/` for Appium screenshots |
 
 `test-results/` is **cleaned at the start of every run**. Nothing that must survive a second run is
 written there by hand; exploratory evidence goes to `evidence/`.
@@ -91,6 +92,22 @@ Choosing a different mode:
 - A mode is set in the config asset (per project where a project differs), never inside a spec. A local
   run that needs everything uses `npx playwright test --trace on`; there is no `--video` or `--screenshot`
   flag.
+
+## Appium: native app evidence
+
+The hook keeps, for a failed test only: a screenshot, the page source, the device log tail (`logcat` or
+`syslog`) and the screen recording. A passing test keeps nothing; the recording is started per test, stopped in
+the teardown always, and dropped unless the test failed. The APIs and their limits are in
+`references/appium.md`; the ones that decide a run:
+
+- Android's `startRecordingScreen` gives **180 s per chunk**, and anything longer needs ffmpeg on the Appium host.
+  `mobile: startMediaProjectionRecording` needs Android 10+. iOS recording needs **ffmpeg**, and
+  `mobile: startXCTestScreenRecording` needs iOS 17+.
+- WDIO 10's `stopRecordingScreen` takes one options object.
+- On a device farm nothing is recorded locally (`DEVICE_FARM=1`); the vendor's session URL and the pass/fail
+  mark are the evidence.
+- An agent captures through `mcp__appium-mcp__appium_screenshot` (into `SCREENSHOTS_DIR`) and
+  `mcp__appium-mcp__appium_screen_recording`.
 
 ## Deliberate recordings
 
@@ -171,12 +188,15 @@ the browser without uploading it.
   awaited `testInfo.attach`.
 - A screencast is stopped before its page closes.
 - Exploratory evidence uses explicit filenames under `evidence/<YYYY-MM-DD>-<topic>/`, never `test-results/`.
-- A failure is read from `error-context.md` and the trace before code changes.
+- A failure is read from `error-context.md` and the trace before code changes; a mobile failure from its screenshot,
+  page source and log tail.
+- The Appium evidence lives in `BaseTest.ts` only; a recording is never kept for a passing test or recorded
+  locally on a device farm.
 - Nothing captured is committed; nothing real is recorded.
 
 ## Handoffs
 
-- The config and the base fixtures → `qa/typescript/skills/ui-test-author/playwright`
+- The config and the base fixtures → `qa/typescript/skills/ui-test-author/playwright`; the mobile base test → `qa/typescript/skills/ui-test-author/appium`
 - Allure mapping of the evidence → `qa/reporting/typescript/skills/test-reports`
 - Upload paths and retention → `qa/cicd/typescript/skills/ci-pipelines`, `qa/cicd/ci-conventions`
 - Visual diffs → `qa/typescript/skills/visual-regression`

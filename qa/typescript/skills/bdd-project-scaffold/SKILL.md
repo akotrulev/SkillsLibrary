@@ -37,8 +37,8 @@ The two paths never share a runner. A project that tests **both** scaffolds both
 
 **Mobile — CucumberJS + WebdriverIO**
 - Node 24 (22 maintenance), TypeScript (`strict: true`), ESM
-- `@cucumber/cucumber` (latest line **13.0.x**), `webdriverio` 9.x, `@wdio/appium-service`, `@wdio/cucumber-framework`, `appium` 2.x + the platform driver
-- ⚠️ **Version-compat check:** `@wdio/cucumber-framework` often pins an **older** `@cucumber/cucumber` line than the latest standalone 13.x — pin the version it expects, don't force 13.x blindly. Verify the peer range before locking the lockfile.
+- The WebdriverIO and Appium pins are the **Versions** table of `qa/typescript/skills/ui-test-author/appium` (Appium 3 with WebdriverIO 10 primary; Appium 2 with WebdriverIO 9 supported); `@cucumber/cucumber` 13.3.0 with `@wdio/cucumber-framework` 10.0.1
+- ⚠️ **Version-compat check:** `@wdio/cucumber-framework` pins a `@cucumber/cucumber` peer range (`^13.2.1` for 10.0.1) — keep inside it. Verify the peer range before locking the lockfile.
 - Reporting via `@wdio/allure-reporter`; standalone CucumberJS HTML formatter is bundled in `@cucumber/cucumber`
 
 ## When to use
@@ -178,94 +178,106 @@ Feature: BDD rig smoke
 
 ### `package.json` (deps)
 
-```jsonc
+```json
 {
+  "type": "module",
   "scripts": {
     "test:bdd": "wdio run ./wdio.conf.ts"
   },
   "devDependencies": {
-    "@cucumber/cucumber": "^13.0.0",      // ⚠️ pin to the version @wdio/cucumber-framework expects
-    "@wdio/cli": "^9.0.0",
-    "@wdio/cucumber-framework": "^9.0.0",
-    "@wdio/appium-service": "^9.0.0",
-    "@wdio/allure-reporter": "^9.0.0",
-    "webdriverio": "^9.0.0",
-    "appium": "^2.11.0",
-    "typescript": "^5.6.0"
+    "@cucumber/cucumber": "13.3.0",
+    "@types/node": "24.19.2",
+    "@wdio/allure-reporter": "10.0.1",
+    "@wdio/appium-service": "10.0.2",
+    "@wdio/cli": "10.0.2",
+    "@wdio/cucumber-framework": "10.0.1",
+    "@wdio/globals": "10.0.2",
+    "@wdio/types": "10.0.1",
+    "appium": "3.8.0",
+    "appium-uiautomator2-driver": "8.7.0",
+    "appium-xcuitest-driver": "12.17.1",
+    "typescript": "5.9.3",
+    "webdriverio": "10.0.2"
   }
 }
 ```
+
+The pins are exact. Install only the driver for the platform under test, and keep the Appium 2 / WebdriverIO 9 lane on a project or a device cloud that has not moved.
 
 ### `wdio.conf.ts`
 
 ```typescript
 import type { Options } from '@wdio/types';
+import { requiredEnv } from './env.js';
 
 export const config: Options.Testrunner = {
   runner: 'local',
   framework: 'cucumber',
   specs: ['./features/**/*.feature'],
-  // WebdriverIO manages the Appium server — no manual `appium` process.
-  services: [['appium', { args: { relaxedSecurity: true } }]],
+  services: ['appium'],
   cucumberOpts: {
-    require: ['./steps/**/*.ts', './support/**/*.ts'], // World + hooks live in support/
+    import: ['./steps/**/*.ts', './support/**/*.ts'],
     timeout: 60_000,
   },
-  reporters: [['allure', { outputDir: 'allure-results' }]],
+  reporters: [['allure', { outputDir: 'allure-results', disableWebdriverScreenshotsReporting: true }]],
   capabilities: [{
     platformName: 'Android',
     'appium:automationName': 'UiAutomator2',
-    'appium:deviceName': process.env.DEVICE_NAME ?? 'emulator-5554',
-    'appium:app': process.env.APP_PATH,
+    'appium:deviceName': requiredEnv('DEVICE_NAME'),
+    'appium:app': requiredEnv('APP_PATH'),
+    'appium:settings[disableIdLocatorAutocompletion]': true,
   }],
 };
 ```
+
+`@wdio/appium-service` manages the Appium server, so no `appium` process runs by hand. `requiredEnv` is the helper in `ui-test-author/appium/assets/env.ts`, and that skill explains the capability block and the id-prefix setting.
 
 ### `support/world.ts` — custom World (the state container)
 
 ```typescript
 import { World, setWorldConstructor, type IWorldOptions } from '@cucumber/cucumber';
-import type { LoginScreen } from '../pages/mobile/LoginScreen';
+import { LoginPage } from '../pages/mobile/LoginPage.js';
 
-// CucumberJS shares state across steps via the World, NOT fixtures.
-// The driver is the WebdriverIO `browser` (global, started by @wdio/appium-service);
-// the World holds the lazily-built screen objects so every step shares them.
 export class CustomWorld extends World {
-  private _login?: LoginScreen;
+  private loginPage?: LoginPage;
 
   constructor(options: IWorldOptions) {
     super(options);
   }
 
-  get login(): LoginScreen {
-    // built lazily against the global WDIO `browser`
-    this._login ??= new (require('../pages/mobile/LoginScreen').LoginScreen)();
-    return this._login;
+  get login(): LoginPage {
+    this.loginPage ??= new LoginPage();
+    return this.loginPage;
   }
 }
 
 setWorldConstructor(CustomWorld);
 ```
 
+CucumberJS shares state through the World, not fixtures. The driver is the WebdriverIO `browser`, a global the runner starts, so the World holds only the screen objects, built lazily on first use.
+
 ### `support/hooks.ts` — per-scenario lifecycle (with teardown)
 
 ```typescript
-import { Before, After, type ITestCaseHookParameter } from '@cucumber/cucumber';
-import type { CustomWorld } from './world';
+import { After, Before, Status, type ITestCaseHookParameter } from '@cucumber/cucumber';
+import { browser } from '@wdio/globals';
+import { requiredEnv } from '../env.js';
+import type { CustomWorld } from './world.js';
 
-// WebdriverIO + @wdio/appium-service start/stop the session per worker, so the
-// Before/After hooks reset app state per scenario and own the Cleanup handoff.
 Before(async function (this: CustomWorld) {
-  await browser.reset?.(); // fresh app state per scenario; or relaunch the activity
+  const appId = requiredEnv('APP_ID');
+  await browser.execute('mobile: clearApp', browser.isIOS ? { bundleId: appId } : { appId });
 });
 
 After(async function (this: CustomWorld, scenario: ITestCaseHookParameter) {
-  if (scenario.result?.status === 'FAILED') {
-    await browser.takeScreenshot(); // attach to Allure in the reporter
+  if (scenario.result?.status === Status.FAILED) {
+    this.attach(Buffer.from(await browser.takeScreenshot(), 'base64'), 'image/png');
+    this.attach(await browser.getPageSource(), 'application/xml');
   }
-  // Cleanup handoff from feature-file-writer is implemented HERE, never as Gherkin.
 });
 ```
+
+`Before` gives each scenario fresh app state through `mobile: clearApp`, which works on an emulator or simulator; on a real device a new session is the reset. `After` attaches the screenshot and page source to the scenario, and the Cleanup handoff from `feature-file-writer` is implemented here, never as Gherkin. The recording, the device log and the rest of the failure evidence are `qa/typescript/skills/evidence-capture/references/appium.md`.
 
 ### `features/smoke.feature` — throwaway rig check
 
@@ -283,7 +295,7 @@ Feature: BDD rig smoke
 - **Web:** introducing a World or a DI container — playwright-bdd uses fixtures; reaching for `setWorldConstructor` here is wrong.
 - **Mobile:** sharing state via module-level mutable variables instead of the World — violates "no static mutable state."
 - **Mobile:** launching/quitting the Appium server by hand instead of `@wdio/appium-service`.
-- **Mobile:** forcing `@cucumber/cucumber@13` when `@wdio/cucumber-framework` pins an older line — broken peer deps.
+- **Mobile:** an `@cucumber/cucumber` version outside the range `@wdio/cucumber-framework` takes as a peer — broken peer deps.
 - Putting browser/driver lifecycle in a step body instead of a fixture (web) / `Before` hook (mobile).
 - Missing teardown — leaked browser contexts (web) or app sessions (mobile).
 - Re-declaring page objects in the BDD project instead of importing the existing UI project.

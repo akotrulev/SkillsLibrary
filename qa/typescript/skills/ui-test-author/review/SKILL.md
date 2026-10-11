@@ -130,16 +130,23 @@ Severities (from `CLAUDE.md`):
 
 | Check | Bad sign | Severity |
 |---|---|---|
-| Screen objects share behaviour by composition | A `BaseMobilePage` with fewer than three real sharers; a class extending `WebdriverIO.Browser` | major |
-| Accessibility id first (`~accessibilityId`) → id → XPath | XPath where `accessibilityIdentifier` / `contentDescription` exists | major |
+| Screen objects share behaviour by composition | A `BasePage` with fewer than three real sharers; a class extending `WebdriverIO.Browser`; a scoped component that extends `BasePage` | major |
+| Test id first, per platform (iOS `~id`, Android `id=`) → native query → XPath | XPath where an `accessibilityIdentifier` or a `resource-id` exists; `~id` on Android for a React Native `testID` | major |
 | Typed element accessors | A page returns `any` or `unknown` | minor |
 | `verifyPageLoaded()` asserts a landmark | Missing or empty | major |
 | Navigation returns the destination screen object | Returns `void` | minor |
-| Locator strings are `private readonly` fields or module constants | Literals inline in action methods | minor |
-| Platform branching behind a locator map | `if (driver.isIOS) … else …` across pages | major |
-| App state reset between tests (`driver.reset()` / fresh install / `noReset:false`) | Tests leak data through shared app state | blocker |
-| Capabilities from env-driven `wdio.conf.ts` | `deviceName: 'Pixel_6'` hardcoded in a spec | major |
-| Gestures via W3C Actions / `driver.execute('mobile: ...')` (Appium 2.x) | Deprecated `TouchAction` | major |
+| Locator strings are `private static readonly` constants | Literals inline in action methods | minor |
+| Platform branching behind a locator map | `if (browser.isIOS) … else …` across pages or actions | major |
+| App state between tests: a fresh session, `mobile: clearApp`, or `terminateApp` + `activateApp` | Tests leak data through shared app state | blocker |
+| No removed Appium 2 calls | `driver.reset()`, `resetApp`, `closeApp`, or a hand-rolled call to a removed `/appium/*` route | blocker |
+| Capabilities from an env-driven `wdio.conf.ts`, with the `appium:` prefix | `deviceName: 'Pixel_6'` hardcoded in a spec; an unprefixed `automationName` | major |
+| Gestures via `tap` / `swipe` / `browser.action('pointer')` / `mobile:` | `touchAction`, which WDIO 10 removed | major |
+| Repeating rows are scoped components that re-resolve on every call | A row element held across calls, or a bare child selector that matches in every row | major |
+| WDIO 10 `$` left strict | `{ strict: false }` or `strictSelectors: false` to silence a `StrictSelectorError` | major |
+| Mocha (or Cucumber) is the runner | Vitest or Jest specs under `wdio run` | major |
+| `isElementVisible` returns `false` on a timeout | A "visible" helper that only returns `true` or throws | minor |
+| Clipboard content is base64 | `setClipboard('text', 'plaintext')` | major |
+| Failure evidence comes from `BaseTest`'s `afterTest` | A spec with its own screenshot hook, or no evidence on failure | major |
 | No `browser.pause` between gestures | `browser.pause(1500)` after a swipe | blocker |
 | Test names describe behaviour on the device | `'screen1Test'`, `'tap button 2'` | minor |
 

@@ -101,4 +101,3 @@ What a human or a purpose-built fixture must reach — the crawl could not, and 
 - [ ] `mobile-screen-objects` — one class per captured screen
 - [ ] `ui-test-author/appium` — tests authored
 - [ ] `missing-testids.md` — {{n}} elements escalated to the app devs
-</content>

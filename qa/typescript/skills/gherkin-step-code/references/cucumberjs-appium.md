@@ -6,7 +6,7 @@ The **mobile** path of the TypeScript `gherkin-step-code` family. Binds Gherkin 
 
 ## Stack
 
-- `@cucumber/cucumber` 13.x (⚠️ pin to the line `@wdio/cucumber-framework` expects — verify the peer range), `webdriverio` 9.x, `@wdio/appium-service`, `appium` 2.x
+- `@cucumber/cucumber` 13.3.0 inside the peer range of `@wdio/cucumber-framework` 10.0.1 (`^13.2.1`; verify it before locking), `webdriverio` and `appium` at the pins of `qa/typescript/skills/ui-test-author/appium` (Appium 3 / WDIO 10 primary; Appium 2 / WDIO 9 supported), `@wdio/appium-service`
 - Step files under `steps/`, the World + hooks under `support/`, screen objects from the existing mobile project under `pages/mobile/`
 - `CustomWorld` from `support/world.ts` (the scaffold owns it); `expect` from `@wdio/globals`
 - Run: `npx wdio run ./wdio.conf.ts`
@@ -17,14 +17,15 @@ CucumberJS has **no fixtures**. State is shared via the **World** — the `this`
 
 Because the World **is** `this`, every step and hook must be a **`function` expression — never an arrow function** (arrows capture the outer `this` and lose the World). Type `this` explicitly as `CustomWorld`.
 
+`support/world.ts` comes from `bdd-project-scaffold`; do not re-create it.
+
 ```typescript
-// support/world.ts (from bdd-project-scaffold) — recap, do not re-create
 import { World, setWorldConstructor } from '@cucumber/cucumber';
-import { LoginScreen } from '../pages/mobile/LoginScreen';
+import { LoginPage } from '../pages/mobile/LoginPage';
 
 export class CustomWorld extends World {
-  private _login?: LoginScreen;
-  get login(): LoginScreen { return (this._login ??= new LoginScreen()); }
+  private _login?: LoginPage;
+  get login(): LoginPage { return (this._login ??= new LoginPage()); }
 }
 setWorldConstructor(CustomWorld);
 ```
@@ -66,18 +67,18 @@ Note: `function` (not arrow), `this: CustomWorld` typed, Cucumber-Expression cap
 
 ### A screen object the World doesn't yet expose
 
-Add the getter to `CustomWorld` (don't `new` it in the step):
+Add the getter to `CustomWorld` in `support/world.ts` (don't `new` it in the step):
 
 ```typescript
-// in support/world.ts
-private _dashboard?: DashboardScreen;
-get dashboard(): DashboardScreen { return (this._dashboard ??= new DashboardScreen()); }
+private _dashboard?: DashboardPage;
+get dashboard(): DashboardPage { return (this._dashboard ??= new DashboardPage()); }
 ```
 
 ### Custom parameter type
 
+`support/parameter-types.ts`:
+
 ```typescript
-// support/parameter-types.ts
 import { defineParameterType } from '@cucumber/cucumber';
 
 defineParameterType({
@@ -99,18 +100,22 @@ When('I add the following items to the cart', async function (this: CustomWorld,
 
 ### Cleanup → `After` hook (NOT a step)
 
-The `feature-file-writer` Cleanup handoff is implemented in the scaffold's `support/hooks.ts` as an `After` hook — never a Gherkin step.
+The `feature-file-writer` Cleanup handoff is implemented in the scaffold's `support/hooks.ts` as an `After` hook — never a Gherkin step. The same hook keeps the failure evidence: the screenshot is **attached to the scenario**, so it reaches the Cucumber report and Allure instead of being discarded.
 
 ```typescript
-// support/hooks.ts (scaffold owns it) — recap
-import { After, type ITestCaseHookParameter } from '@cucumber/cucumber';
+import { After, Status, type ITestCaseHookParameter } from '@cucumber/cucumber';
+import { browser } from '@wdio/globals';
 import type { CustomWorld } from './world';
 
 After(async function (this: CustomWorld, scenario: ITestCaseHookParameter) {
-  if (scenario.result?.status === 'FAILED') await browser.takeScreenshot();
-  await this.api?.deleteSeededData(); // the Cleanup handoff lives here, never in Gherkin
+  if (scenario.result?.status === Status.FAILED) {
+    this.attach(Buffer.from(await browser.takeScreenshot(), 'base64'), 'image/png');
+  }
+  await this.api?.deleteSeededData();
 });
 ```
+
+`browser.takeScreenshot()` returns base64, so the hook decodes it before `attach`. Page source, device log and the recording are `qa/typescript/skills/evidence-capture/references/appium.md`; under Cucumber its hook runs in `afterScenario`, not `afterTest`.
 
 ## Hard rules (mobile)
 
@@ -120,19 +125,20 @@ After(async function (this: CustomWorld, scenario: ITestCaseHookParameter) {
 - **No `browser.$(...)` / selectors / waits in steps** — promote to the screen object.
 - `Then` asserts with WDIO `expect(...)` (auto-retry); `Given`/`When` never assert; screen objects assert only in `verifyPageLoaded()`.
 - **No `browser.pause(ms)`** — use WDIO's auto-waiting matchers or `browser.waitUntil(condition)` on a condition.
-- **Version-compat:** keep `@cucumber/cucumber` on the line `@wdio/cucumber-framework` pins; don't force the latest standalone major.
+- **Version-compat:** keep `@cucumber/cucumber` inside the peer range of `@wdio/cucumber-framework`; do not force a newer standalone major.
 - No hardcoded credentials/URLs — env vars / config.
 
 ## Anti-patterns to flag (mobile)
 
 - An **arrow-function** step (`Given('…', async () => …)`) — loses `this`/World; state becomes inaccessible.
 - Fixture-style destructuring (`async ({ login }) => …`) — that's the playwright-bdd model, wrong here.
-- `new LoginScreen()` inside a step instead of a World getter.
+- `new LoginPage()` inside a step instead of a World getter.
 - Module-level mutable state shared between steps instead of the World — violates "no static mutable state."
 - Launching/quitting the Appium server by hand instead of `@wdio/appium-service`.
 - `browser.$(...)` / selectors / `browser.pause(ms)` in a step body.
 - Assertions in `Given`/`When`, or inside screen-object actions.
-- Forcing `@cucumber/cucumber@13` against an older `@wdio/cucumber-framework` peer.
+- A failure screenshot taken and thrown away: it must be attached with `this.attach`.
+- An `@cucumber/cucumber` version outside the `@wdio/cucumber-framework` peer range.
 
 ## Cross-references
 
