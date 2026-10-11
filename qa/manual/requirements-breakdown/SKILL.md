@@ -7,7 +7,7 @@ description: Use when the user hands over a story, BRD, acceptance criteria, API
 
 Turns raw, scattered, or partial inputs — a user story, a BRD section, acceptance criteria, an API contract, a state diagram, a Figma flow, or just a paragraph describing part of a feature — into **one concise, structured document that captures everything a tester needs to know about the feature**: its business logic, the high-level implementation details that affect observable behavior, every validation, and every restriction.
 
-This is the **ISTQB test-analysis step**: the inputs are the *test basis*; this skill analyzes them to produce a distilled, testable feature breakdown. It is the artifact that **precedes** test design. It does not enumerate cases, pick techniques, or assign coverage — it produces the single source of truth those steps consume. It backs **Step 1 of the `qa/manual/agents/qa-test-case-designer` agent** ("Analyze the test basis").
+This is the **ISTQB test-analysis step**: the inputs are the *test basis*; this skill analyzes them to produce a distilled, testable feature breakdown. It is the artifact that **precedes** test design. It does not enumerate cases, pick techniques, or assign coverage — it produces the single source of truth those steps consume. It backs **Steps 1–2 of the `qa/manual/agents/qa-test-case-designer` agent** ("Analyze the test basis" and "Map the connections").
 
 ## When to use
 
@@ -54,31 +54,33 @@ Confirm before analyzing. Ask only what's missing, at most 2–3 questions:
    | Requirements / BRD | numbered requirements | rules, restrictions, dependencies between requirements |
    | API contract (OpenAPI/Swagger) | endpoints + schemas | per-field validations, required/optional, formats, auth/restrictions, status codes |
    | State diagram / workflow | states + events | the state model, legal/illegal transitions, guards |
-   | Business-model KB artifact (`docs/business-model/` flow/entity/decision file) | the artifact's tables + IDs | rules/transitions with sources already traced; open questions + `⚠️ Assumption` items carry over as flags |
-   | Feature document (`docs/features/<NNN>-<slug>.md` from `be-feature-documenter`) | its numbered steps, formulas, "who can do what" table and evidence table | steps → rules (BR) and states; formulas + worked example → data dictionary ranges and rounding; "who can do what" → actors; its open questions carry over; rows tiered `#inferred` there stay `#assumption` here |
+   | Business-model KB artifact (`docs/business-model/` flow/entity/decision file) and the §8 slice | the artifact's tables + IDs | rules/transitions with sources already traced; open questions + `⚠️ Assumption` items carry over as flags; the slice becomes §8 (`references/connections.md`) |
+   | Feature document (`docs/features/<NNN>-<slug>.md` from `be-feature-documenter`) | its numbered steps, formulas, "who can do what" table and evidence table | steps → rules (BR) and states; formulas + worked example → data dictionary ranges and rounding; "who can do what" → actors; its open questions carry over; rows tiered `#inferred` there stay `#assumption` here; *How it connects* → §8 |
+   | Code-trace evidence (`dev:doc-feature-trace`, run by the agent's Code mode) | the trace's inventories, `file:line` on every row | rules, states and validations tagged `#observed`; the Edges inventory → §8; intent the code cannot show → `#assumption` + question |
    | Exploratory session report (`exploratory-charter-writer` output, live app) | observations, findings, test-case candidates | every row sourced `#observed <session/finding id>`; a candidate becomes a BR/V row, a finding a V row with the *actual* violation behavior; anything the docs contradict is a ⚠️ conflict, not a fact |
    | Business-rules table | the rules | the rule set (candidate decision table) |
    | Loose description / partial feature | the prose | best-effort extraction; gaps become Open questions — heaviest flagging |
 
-   **OpenAPI, mechanically.** Walk the contract rather than reading it as prose — each keyword lands in one place:
+   **OpenAPI, mechanically.** Walk the contract rather than reading it as prose — each keyword lands in one place, and schema constraints go to the data dictionary, never to one validation row each:
 
    | Schema / operation keyword | Lands in |
    |---|---|
-   | `required` array | data dictionary `Required = yes`; one V row per required field ("missing → 400 `<error shape>`") |
-   | `minimum` / `maximum` / `exclusiveMinimum` / `minLength` / `maxLength` / `minItems` / `maxItems` | data dictionary *Range*; one V row per bound (note open vs closed) |
-   | `enum` / `pattern` / `format` | data dictionary *Format*; one V row per field ("value outside enum → …") |
+   | `required` array | data dictionary `Required = yes` |
+   | `minimum` / `maximum` / `exclusiveMinimum` / `minLength` / `maxLength` / `minItems` / `maxItems` | data dictionary *Range* (note open vs closed) |
+   | `enum` / `pattern` / `format` | data dictionary *Format* |
    | `default` / `nullable` / `readOnly` | data dictionary *Notes* |
-   | each `4xx` response + its schema | the *On violation* column of the matching V row; a `4xx` with no V row is an Open question ("what triggers 409?") |
-   | `security` / scopes per operation | actors & roles; one restriction row per operation-scope pair |
+   | each `4xx` response + its schema | the *On violation* column of the data-dictionary field it rejects; a `4xx` that no field or rule explains is an Open question ("what triggers 409?") |
+   | `security` / scopes per operation | actors & roles; one V row per operation-scope pair — authorization is a rule |
    | `x-`-extensions, `description` prose | rules (BR) only when they state a decision; otherwise ignored |
 
    A constraint the schema states and the prose contradicts is a ⚠️ conflict row.
 
-3. **Extract into the seven sections** (see Output). For each, pull from the inputs and cite the source line/section.
+3. **Extract into sections 1–7** (see Output). For each, pull from the inputs and cite the source line/section.
 4. **Separate business logic from implementation detail.** Business logic = *what the system decides and why* (rules, calculations, outcomes). Implementation detail = *how*, captured only when observable (server-side re-validation, async processing, caching, expiry windows, pagination sizes, rate limits).
-5. **Catalog every validation and every restriction** as a discrete, testable line — input, rule, and the message/outcome on violation. These are the rawest material for the boundary/negative cases test design will derive.
+5. **Catalog every business validation and every restriction** as a discrete, testable line — cross-field, state-dependent, authorization and rule-based, each with the message/outcome on violation. Plain schema constraints are not V rows: they sit in the data dictionary, where EP and BVA read them.
 6. **Sweep for the silent / contradictory / untestable** and log each as an Open question or `#assumption`.
-7. **Keep it lean.** Re-read; cut anything that doesn't help someone design or run a test.
+7. **Map the connections (§8)** per `references/connections.md`: slice the KB first, trace the code where the KB is missing or stale, read the docs only as the thin fallback. Every row cites a source; an edge nobody can confirm is an open question.
+8. **Keep it lean.** Re-read; cut anything that doesn't help someone design or run a test.
 
 ## Output format
 
@@ -108,11 +110,11 @@ The decisions the system makes and why. Each rule is a discrete "if … then …
 | BR-2 | Discount and free-shipping cannot both apply to one order | BRD §4.2 |
 
 ## 4. Validations & restrictions
-Every input constraint and every restriction, as a testable line. This is the seed for negative + boundary design.
+Business validations and restrictions only: cross-field, state-dependent, authorization and rule-based. Schema constraints (required, range, length, enum, pattern, format) are in §6.
 | # | Field / action | Rule | On violation | Source |
 |---|---|---|---|---|
-| V-1 | Email | required, valid format | inline error "Enter a valid email" | AC1 |
-| V-2 | Quantity | integer 1–99 | rejected, field highlighted | API schema `qty` |
+| V-1 | Email | must not already belong to another account | inline error "Email already registered" | AC1 |
+| V-2 | Quantity | at most the stock on hand | rejected, field highlighted | STORY-1247 AC4 |
 | V-3 | Refund | only within 30 days of purchase | button hidden / 403 | BRD §6 |
 
 ## 5. Workflow & states *(if the feature has stateful behavior)*
@@ -123,17 +125,36 @@ States, the events that move between them, and which transitions are illegal.
 *(or "No stateful behavior — single-shot action.")*
 
 ## 6. Data dictionary
-Every input field — the raw material for equivalence partitioning / boundary analysis.
-| Field | Type | Required | Range / format | Notes |
-|---|---|---|---|---|
-| email | string | yes | RFC-5322 | trimmed before validation |
-| quantity | int | yes | 1–99 | default 1 |
+Every input field with every schema constraint — the raw material for equivalence partitioning / boundary analysis.
+| Field | Type | Required | Range / format | On violation | Notes |
+|---|---|---|---|---|---|
+| email | string | yes | RFC-5322 | 400 `invalid_email` | trimmed before validation |
+| quantity | int | yes | 1–99 | 400 `invalid_quantity` | default 1 |
 
 ## 7. High-level implementation notes *(observable behavior only)*
 Things a black-box tester must account for, not internal architecture.
-- Validation enforced **server-side as well as** client-side (V-1, V-2)
+- Schema constraints (§6) enforced **server-side as well as** client-side
 - Order confirmation email sent **asynchronously** (may lag a few seconds)
 - Session/token expires after 15 min of inactivity
+
+## 8. Connections
+**Built from:** KB slice @ <date> | code trace @ <sha> | docs only (thin) — <what was missing>
+
+### Triggers and chains
+| Trigger | Reaction (owner) | Effects | Emits → next | Mode | On failure | Source |
+### States this feature relies on
+| Entity · state | Other owners' triggers legal here | `—` / `?` cells | Source |
+### Shared data
+| Field / entity | Other writers | Other readers | Source |
+### Invariants
+| INV | Statement | Threatened here by | Enforced? | Source |
+### Known interactions
+| CONF | Pair | Boundary condition | Status |
+### KB candidates
+<edges found in code or docs that the KB lacks — handed to `business-analyst`>
+*(or "Not built — single-feature basis" when this skill runs standalone)*
+
+Every row cites a source: a KB id, `file:line #observed`, or a document line. Filled §8: `qa/manual/cross-feature-test-design/references/example-cancel-booking.md`.
 
 ## Open questions & flags
 Ambiguous, contradictory, silent, or untestable items — resolve with the author before test design.
@@ -147,11 +168,12 @@ Ambiguous, contradictory, silent, or untestable items — resolve with the autho
 
 The document must:
 
-- [ ] Fit on ~1–2 pages — distilled, not a re-typing of the spec
+- [ ] Fit on one to two pages, plus §8 — distilled, not a re-typing of the spec
 - [ ] Have **every rule, validation, and restriction traced to a source** line/section
 - [ ] Separate **business logic** (what/why) from **observable implementation detail** (how, only when testers see it) — and omit non-observable internals
 - [ ] List every input field in the data dictionary with type, required, and range/format
-- [ ] Express each validation as a discrete testable line (field → rule → outcome on violation)
+- [ ] Express each business validation as a discrete testable line (field → rule → outcome on violation); schema constraints sit in the data dictionary with their `On violation`
+- [ ] Write §8 from the KB slice, a trace or the docs, every row sourced, every unconfirmed edge an open question, and no edge written to the KB
 - [ ] Surface **every** silent/contradictory/untestable item under Open questions — none swept under the rug
 - [ ] Tag any stated-but-unconfirmed behavior `#assumption`
 - [ ] State "None in the source" for empty sections rather than dropping them
@@ -160,66 +182,7 @@ This document does **not**: enumerate test cases, name test techniques, assign p
 
 ## Example
 
-### Input
-
-> **Story**: As a shopper, I want a promo code at checkout so I get a discount.
-> **AC1**: A valid, active promo code reduces the order total by its percentage.
-> **AC2**: An expired or unknown code shows "This code isn't valid" and the total is unchanged.
-> **AC3**: Only one promo code per order.
-> Promo codes are 6–10 uppercase alphanumeric characters. (from the API schema)
-
-### Output
-
-```markdown
-# Test Basis — Checkout Promo Codes
-
-**Sources**: STORY-2210 (AC1–AC3); checkout API schema `POST /cart/promo` field `code`
-**Scope**: Applying a promo code at checkout. Out: creating/managing codes (admin), stacking with loyalty points.
-**Analyzed**: 2026-06-09
-**Status**: draft — pending author confirmation of the flagged items below
-
-## 1. Summary
-Shoppers enter a promo code at checkout to reduce the order total by a percentage. Codes can be valid, expired, or unknown; at most one applies per order.
-
-## 2. Actors & roles
-| Actor | Can do here |
-|---|---|
-| Shopper | Apply one promo code to their own cart |
-
-## 3. Business logic & rules
-| # | Rule | Source |
-|---|---|---|
-| BR-1 | A valid, active code reduces the total by its percentage | AC1 |
-| BR-2 | An expired or unknown code leaves the total unchanged | AC2 |
-| BR-3 | At most one promo code per order | AC3 |
-
-## 4. Validations & restrictions
-| # | Field / action | Rule | On violation | Source |
-|---|---|---|---|---|
-| V-1 | code | 6–10 chars, uppercase alphanumeric | (format rejection behavior not specified) | API schema |
-| V-2 | code | must exist and be active | "This code isn't valid", total unchanged | AC2 |
-| V-3 | apply code | only one per order | (behavior on 2nd code not specified) | AC3 |
-
-## 5. Workflow & states
-No stateful behavior — applying a code is a single-shot action on the cart.
-
-## 6. Data dictionary
-| Field | Type | Required | Range / format | Notes |
-|---|---|---|---|---|
-| code | string | yes | 6–10 chars, A–Z 0–9 | case sensitivity vs. lowercase input unspecified |
-
-## 7. High-level implementation notes
-- Discount is a **percentage** of order total (AC1) — rounding rule not specified.
-- Validation presumably server-side (it checks code existence/active state) — confirm client also blocks malformed input.
-
-## Open questions & flags
-- ❓ V-1: what happens to a code outside 6–10 chars or with lowercase/symbols — inline format error, or treated as "not valid" (V-2)?
-- ❓ BR-3/V-3: applying a *second* code — does it replace the first, or is it rejected with a message?
-- ❓ Rounding: 15% off $9.99 — round how?
-- 🏷️ `#assumption`: codes are case-sensitive (schema says uppercase) until confirmed.
-```
-
-Notice the output is shorter than a full case suite, every row cites a source, and the four things the story never actually answered are flagged instead of guessed.
+A filled basis, with its input, is in `references/example-promo-codes.md`.
 
 ## Anti-example
 
@@ -229,15 +192,16 @@ Bad response: a list of test cases (TC-001, TC-002…). That's `test-case-writer
 
 Also bad: re-typing the entire spec verbatim into prose, or silently writing "expired codes show an error and the total stays the same" as fact when the spec left the second-code behavior undefined.
 
-Good response: the structured document above — concise, sourced, with the genuine gaps flagged for the author.
+Good response: the structured document of the example — concise, sourced, with the genuine gaps flagged for the author.
 
 ## Handoffs
 
 - Derive the techniques / coverage items from this basis → `qa/manual/test-design-techniques`
+- Turn §8 Connections into coverage items → `qa/manual/cross-feature-test-design`
 - Format the cases into a Setup → Cases → Cleanup suite → `qa/manual/test-case-writer`
 - Orchestrate the full doc → basis → suite flow → `qa/manual/agents/qa-test-case-designer`
 - Risk-rank the conditions before designing → `qa/manual/test-strategy`
 - Build the basis from a live app when docs are thin → Exploration mode in `qa/manual/agents/qa-test-case-designer` + `qa/manual/exploratory-charter-writer`
 - File defects noticed while analyzing → `qa/manual/bug-report-writer`
-- Cross-feature conflicts / the whole-project business model (this skill is single-feature) → `business-analysis/skills/ba-feature-conflict-check` + `business-analysis/agents/business-analyst`
+- Building the connections into the KB (this skill only reads it) → `business-analysis/skills/ba-dependency-map`; cross-feature conflicts / the whole-project business model → `business-analysis/skills/ba-feature-conflict-check` + `business-analysis/agents/business-analyst`
 - The doc is a vague initiative that needs scoping (not testing) → `business-analysis/skills/ba-scoping-writeup` + `business-analysis/agents/requirements-author`

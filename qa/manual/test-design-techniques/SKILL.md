@@ -139,7 +139,7 @@ Conditions: `Credit score ≥ 700?`, `Income verified?`, `Existing customer?` �
 | **All-states** (weakest) | every state visited | dead states; misses transition logic |
 | **Invalid transitions** | every illegal event/state cell rejected | "can I skip payment?" security/logic holes |
 
-Default target: **0-switch (all valid transitions) + all invalid transitions rejected.** Go to 1-switch for high-risk workflows (checkout, approvals, payments).
+Default target: **0-switch (all valid transitions) + all invalid transitions rejected.** Go to 1-switch for high-risk workflows (checkout, approvals, payments), and add round-trip coverage (every lifecycle loop) where states cycle.
 
 **Worked example — order: `Draft → Submitted → Paid → Shipped`; `Submitted → Cancelled`:**
 
@@ -221,8 +221,12 @@ Pick by the **shape of the requirement**, then combine:
 | Many independent parameters, can't test all combos | **Pairwise** | Force high-risk rows; classification tree to visualize |
 | Many dimensions needing a clear coverage picture | **Classification tree** | Pairwise as the combination rule |
 | "What did we miss" / known-fragile areas | **Error guessing** | Always layer on top of the systematic set |
+| An entity two features touch | CRUD → `cross-feature-test-design` | |
+| A reaction chain across features | Scenario-based → `cross-feature-test-design` | |
+| Another owner's trigger in a shared state | Cross-owner state transition → `cross-feature-test-design` | |
+| A schedule or timeout | Temporal → `cross-feature-test-design` | |
 
-**Default recipe for a feature from documentation:** EP → BVA → decision table for the rule combos → state transition for any workflow → use-case for end-to-end flows → error-guessing sweep → (pairwise only if a config matrix appears). The `qa-test-case-designer` agent runs exactly this order.
+**Default recipe for a feature from documentation:** EP → BVA → decision table for the rule combos → state transition for any workflow → use-case for end-to-end flows → error-guessing sweep → (pairwise only if a config matrix appears) → `cross-feature-test-design` when the basis has §8 entries. The `qa-test-case-designer` agent runs exactly this order.
 
 ## Combining techniques (the part people skip)
 

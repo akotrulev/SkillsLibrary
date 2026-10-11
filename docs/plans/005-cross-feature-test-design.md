@@ -10,7 +10,7 @@ session looks the connections up there instead of re-deriving them. The three `q
 then automate the new case kinds. They run scheduled jobs on demand, control the clock at a time
 boundary, fire concurrent requests, and deliver a message or webhook twice.
 
-**Status:** K1 and D1 landed 2026-10-11. K1: `business-analysis:dependency-map`, its golden example, the KB contract and feature slice, the three reasoning-lane edits and the `business-analyst` edits. D1: `dev:doc-feature-trace` has the seventh inventory (Edges) and the seam recipes, area and feature documents have *How it connects*, and `be-documenter` writes the dependency map. Built but unverified: nothing has been run (the gate is A3), and description lengths and file sizes are counted by hand only. Next: Q1. O1 is answered: the automation is in this
+**Status:** K1, D1 and Q1 landed 2026-10-11. K1: `business-analysis:dependency-map`, its golden example, the KB contract and feature slice, the three reasoning-lane edits and the `business-analyst` edits. D1: `dev:doc-feature-trace` has the seventh inventory (Edges) and the seam recipes, area and feature documents have *How it connects*, and `be-documenter` writes the dependency map. Q1: `requirements-breakdown` writes §8 Connections (schema constraints moved to the data dictionary), `qa-*:cross-feature-test-design` exists with its golden example, registered in all three `qa-*` plugins (D14 records four departures from §9.3). Built but unverified: nothing has been run (the gate is A3), and description lengths and file sizes are counted by hand or `wc` only. Next: Q2. O1 is answered: the automation is in this
 plan, as tasks A1–A3. The plan changes skills and agents only, so the gate (§11) proves structure, not
 quality. The new stack skills' code samples are never compiled. Whether the suites actually get deeper,
 and whether the automation patterns run, is unverified until H1 runs the lane on a real project.
@@ -713,6 +713,17 @@ do not change product code. A job that cannot be triggered, or a clock that cann
 becomes a named request to `be-<stack>`. A skipped test, a long sleep or a test that waits for the real
 schedule would look like coverage and give none.
 
+**D14 — Q1's golden example departs from §9.3 in four places (2026-10-11).**
+
+| # | §9.3 reading | As built | Why |
+|---|---|---|---|
+| 1 | Cases 2–4 are "BVA 3-value (temporal)" | Layer is **rule**: BVA on DEC-003's threshold | §7.4 counts BVA on a rule threshold as the rule layer; the temporal technique is for a `schedule`/`timeout` trigger, and the cut-off is neither |
+| 2 | Case 5 is "staff cancel 10 h ahead: the credits come back" | Staff cancel Ana's overage-priced *Sculpture masterclass* booking: 2 credits back (7 → 5) **and** the £6.00 accrual removed | The ENT-003 cell Accrued × EVT-006 → Removed (R1/R3's "accrual removed") had no case in the sixteen |
+| 3 | Cases 14–16 list four refusals | Case 14 unknown id, 15 another member's booking, 16 a parameterized pair (already cancelled; session started), one expectation per row | Keeps sixteen cases and one expected condition per row; status codes are `#assumption` |
+| 4 | §6.1: an `unhandled`/`?` failure always gets a P1 case | The example defers RX-006's failure (needs a fault-injection seam) and the other timezone-dependent boundary instants, each with a stated reason and an open question (OQ-1, OQ-2); the skill allows "a stated deferral naming the question and the missing hook" | The sixteen cases of §9.3 have none for either, and §7.4's gate accepts an open question |
+
+Cost: the example and the plan's §9.3 no longer match line for line. §9.3 stays as the yardstick for H1; the example is what the skill teaches.
+
 ## Answered questions (2026-10-11)
 
 **O1 — Should the stack agents automate the new case kinds (on-demand job runs, clock control,
@@ -945,6 +956,15 @@ and it is registered in all three `qa-*` plugins.
 - **Commit message:** carries `BREAKING (format): basis §4 holds business validations only; schema
   constraints move to the data dictionary; new §8 Connections`.
 - **Not in Q1:** `test-case-writer` and the two agents (Q2); the stack automation (A1–A3); README, the catalog and the gate (A3).
+
+**As built (2026-10-11):** as planned, with four small divergences recorded as D14.
+- `qa/manual/requirements-breakdown/SKILL.md`: input shapes (KB + slice, *How it connects* → §8, a code-trace row), OpenAPI walk per §7.2, §4 business validations only, §6 `On violation`, `## 8. Connections` in §7.1's shape, procedure step 7, quality bar, intro "Steps 1–2", handoffs; 15,862 bytes (15,669 characters, counted by `wc`), so it stays under 16,000 only because the Example moved verbatim to `references/example-promo-codes.md` (with a header note that it predates the rebalancing).
+- `requirements-breakdown/references/connections.md`: the four parts (KB slice with the eight lookups and their greps, Edges → §8 column map, docs-only fallback, KB candidates); states that QA reads `docs/business-model/` as data and never writes it.
+- `qa/manual/cross-feature-test-design/SKILL.md` (`name: cross-feature-test-design`, 9,064 bytes; description 491 characters, counted by `wc`): §6.1 technique table, stopping criteria, priority, "an open question is an expected result", sources (CTAL-TA v4.0 §3.2.1–§3.2.3, Rapps & Weyuker 1985), anti-example, handoffs. A slice id is the lookup `L1`…`L8` plus the KB ids.
+- `references/example-cancel-booking.md`: the EVT-002 slice, §8 as `requirements-breakdown` writes it, the coverage-item list, all sixteen cases as headlines, full rows for TC-CANCEL-001, 008 and 009, and a recomputed arithmetic table (30 Mar booking: 1 credit, 2 × £6.00 = £12.00; £6.00 + £12.00 = £18.00; 52 h; −1; 8 → 6, not 4).
+- `test-design-techniques/SKILL.md`: four selection-matrix rows, the recipe tail and a round-trip line; net +467 characters.
+- `.claude-plugin/marketplace.json`: `./qa/manual/cross-feature-test-design` after `./qa/manual/test-design-techniques` in `qa-java` (:206), `qa-dotnet` (:342) and `qa-typescript` (:424).
+- Unverified: no checker was run. Sizes are counted with `wc`. The id cross-check (§11 step 6) was done by reading, not by script, and the case-numbering `TC-CANCEL-nnn` is new.
 
 ### Q2 — qa/manual: the suite and the two agents
 
@@ -1194,56 +1214,9 @@ in the checkout you are given, commit there, and never create a branch.
 | A3 | `docs` | `general-purpose` | A1, A2, Q2, Q1, D1, K1 | ~125k |
 | H1 | `human` | **the user** | A3 | one real feature |
 
-Six blocks are live. K1 and D1 have landed (their blocks are deleted).
+Five blocks are live. K1, D1 and Q1 have landed (their blocks are deleted).
 
 ---
-
-### Q1 — qa/manual: the Connections basis section and the cross-feature test-design skill (general-purpose, docs)
-
-````
-You are a general-purpose agent working in the SkillsLibrary repo. Task Q1 of
-docs/plans/005-cross-feature-test-design.md: the test basis gains a §8 Connections section built from
-the KB slice, a code trace or the docs; schema constraints move to the data dictionary; a new
-`cross-feature-test-design` skill turns §8 into coverage items, with a golden example.
-
-Read, in this order:
-1. CLAUDE.md (Test code rules — especially "one expected condition, never an OR" — Simplicity, Comments)
-   and CONTRIBUTING.md "SKILL.md structure", "Writing a good description".
-2. The plan: §2, §5, §6 (all), §7.1, §7.2, §9 (all), §10, D5, D6, D8, D12, task Q1 and the As built
-   notes of K1 and D1, and "Close-out — every task".
-3. business-analysis/skills/ba-dependency-map/SKILL.md + references/example-dependency-map.md, and the
-   "Feature slice" section of business-analysis/skills/ba-project-memory/SKILL.md — the files your
-   reading guide reads as data.
-4. backend/_shared/feature-trace/SKILL.md — only "7. Edges" and the trace record shape.
-5. qa/manual/requirements-breakdown/SKILL.md and qa/manual/test-design-techniques/SKILL.md.
-6. backend/_shared/business-documentation/references/example-area.md — Ana's month (the numbers your
-   example must agree with).
-7. In .claude-plugin/marketplace.json, grep for "./qa/manual/test-design-techniques" (three plugins).
-
-Build (task Q1's bullets, in order): requirements-breakdown (input shapes, OpenAPI walk per §7.2, §4
-business validations only, §6 On violation, §8 per §7.1, procedure step, quality bar, intro "Steps 1–2",
-Example moved to references/example-promo-codes.md, handoff) · references/connections.md (the four
-parts) · cross-feature-test-design SKILL.md (description §6.4, ≤ 500 characters; §6.1–§6.3; sources
-cited) · references/example-cancel-booking.md (§9 end to end; full rows for cases 1, 8, 9) ·
-test-design-techniques (net ≤ 1,000 characters) · marketplace registration ×3.
-
-Traps:
-- QA reads docs/business-model/ and never writes it; new edges are "KB candidates" in §8 (D10).
-- An open question is an expected result, not an OR: cases 8, 11, 12 expect "open question: <the
-  question>", P1 where §6.2 says so. Never "credits returned or forfeited".
-- Every id in your example exists in K1's example or example-area.md; recompute every number
-  (30 Mar booking: 1 credit spent, 2 × £6.00 = £12.00; posting £6.00 + £12.00 = £18.00; 52 h notice).
-- The moved Example sections keep their content verbatim; the SKILL.md links to them.
-- requirements-breakdown must stay under 16,000 characters after adding §8 — that is why its Example moves.
-
-Gate: none — this plan gates once, in A3. Do not run `claude plugin validate`, the checkers,
-tools/token-audit.py or any script.
-
-Commit: `feat(qa): Connections basis section and cross-feature-test-design (005 Q1)` with the body line
-`BREAKING (format): basis §4 holds business validations only; schema constraints move to the data
-dictionary; new §8 Connections`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
 
 ### Q2 — qa/manual: the suite and the two agents (general-purpose, docs)
 
@@ -1276,6 +1249,10 @@ Traps:
   column.
 - One expected condition per case: a concurrency case whose outcome the spec does not pin expects the
   open question — never "A or B".
+- Q1's golden example already writes the §7.5 forms (`within 10 s (#assumption), <observable>`; the
+  duplicate-delivery *Environment needs* line; an `Expected: open question` row). Match them, or
+  change the example in the same commit. The depth gate accepts a `?` failure that became an open
+  question or a stated deferral naming the question and the missing hook.
 - A1–A3 automate the exact case forms you write. If your wording of "Environment needs", the async
   expected result or the concurrency form differs from §7.5, rewrite the A1–A3 blocks below to match.
 
