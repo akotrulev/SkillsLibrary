@@ -35,8 +35,8 @@ Versions are pinned **once** in `Directory.Packages.props` (CPM) — each `.cspr
 | HTTP client | `RestSharp` | **112.1.0** | Post-v107 async-first fluent API (`RestClient` + `RestRequest`); no legacy `IRestResponse`. |
 | Assertions | `FluentAssertions` | **6.12.1** | **Deliberately pinned to 6.12.x** — the last pre-commercial-license line (v8 requires a paid license for commercial use). Do **not** bump to 7.x/8.x without a license review. |
 | JSON | `System.Text.Json` | **matches TFM** | Ships in the shared framework — reference explicitly only if a transitive pin is needed (`10.0.0` on net10, `8.0.5` on net8). Default serializer; no Newtonsoft unless a spec forces it. |
-| Reporting | `Allure.NUnit` | **2.12.1** | Wiring owned by `qa-reporting-dotnet`; this scaffold only leaves the per-project `allureConfig.json` hook. |
-| Allure CLI | `allure` tool | **local tool** | `dotnet tool install allure` in `.config/dotnet-tools.json`. |
+| Reporting | `Allure.NUnit` | **2.15.0** | Wiring owned by `qa-reporting-dotnet`; this scaffold only leaves the per-project `allureConfig.json` hook. |
+| Allure CLI | not a NuGet tool | — | Installed and pinned by `qa/reporting/dotnet/skills/test-reports`; this scaffold installs none. |
 
 Optional, add only when the spec demands it: `Testcontainers.PostgreSql` 4.1.0 (real-DB verification), `PactNet` (contracts), gRPC (`Grpc.Net.Client` 2.66.0), GraphQL.
 
@@ -45,7 +45,7 @@ Optional, add only when the spec demands it: `Testcontainers.PostgreSql` 4.1.0 (
 ```bash
 dotnet --version            # expect 10.0.x (or the repo's pinned 8.0.x / 9.0.x)
 docker --version            # only if you add Testcontainers-backed DB verification
-# Allure CLI installed as a repo-local tool in the create steps; or: brew install allure
+# Allure CLI: see qa/reporting/dotnet/skills/test-reports
 ```
 
 No browsers or device emulators are needed for an API suite — the cheapest module to stand up.
@@ -60,8 +60,7 @@ No browsers or device emulators are needed for an API suite — the cheapest mod
 │                                       #   langversion, analyzers │ shared by every project
 ├── Directory.Packages.props            # CPM: every <PackageVersion> (the version table) │
 ├── nuget.config                        # single package source │
-├── .editorconfig                       #                        │
-├── .config/dotnet-tools.json           # allure local tool      ┘
+├── .editorconfig                       #                        ┘
 ├── .gitignore
 ├── TestCore/                           # ← shared library (composition seam)
 │   ├── Configuration/                  # env config binding, TestSettings
@@ -103,9 +102,6 @@ dotnet new nunit    -o ApiTests -f net10.0
 dotnet sln add TestCore ApiTests
 dotnet add ApiTests reference TestCore
 
-dotnet new tool-manifest
-dotnet tool install allure
-
 # Turn on CPM first (create Directory.Packages.props — see below), THEN add packages.
 # With CPM on, `dotnet add package` writes the version to Directory.Packages.props
 # and a versionless <PackageReference> to the csproj automatically.
@@ -135,7 +131,7 @@ dotnet build         # exit gate: 0 errors, 0 warnings
     <PackageVersion Include="FluentAssertions" Version="6.12.1" />
     <!-- System.Text.Json ships in the shared framework; pin explicitly only for a transitive fix (10.0.0 on net10, 8.0.5 on net8). -->
     <PackageVersion Include="System.Text.Json" Version="10.0.0" />
-    <PackageVersion Include="Allure.NUnit" Version="2.12.1" />
+    <PackageVersion Include="Allure.NUnit" Version="2.15.0" />
   </ItemGroup>
 </Project>
 ```
@@ -173,7 +169,6 @@ Each project then references only what it needs, versionless, e.g. `ApiTests.csp
 dotnet test                                   # all API tests
 dotnet test --filter "FullyQualifiedName~Orders"
 ASPNETCORE_ENVIRONMENT=test dotnet test       # pick env overrides (appsettings.test.json)
-allure serve allure-results
 ```
 
 ## Conventions (the shell only)
@@ -190,7 +185,7 @@ DTO shapes, typed-client structure, test naming, builders, and deep verification
 Flat solution + shared `TestCore` + CPM make this purely additive. To add a sibling module (e.g. **api + ui**):
 
 1. Install the sibling plugin (`qa-ui-dotnet`) and run its scaffold **inside this repo**, skipping `global.json`, `Directory.Build.props`, `Directory.Packages.props`, `.config`, the `.sln`, and `TestCore` — they already exist.
-2. Add only the sibling's project: `dotnet new nunit -o PlaywrightTests`, `dotnet sln add PlaywrightTests`, `dotnet add PlaywrightTests reference TestCore`, then its packages (Playwright, etc.) — which append their `<PackageVersion>` to the existing `Directory.Packages.props`. The sibling keeps its **own** `appsettings`/`allureConfig`/`Dockerfile`, so there is nothing to merge.
+2. Add only the sibling's project: `dotnet new nunit -o UiTests`, `dotnet sln add UiTests`, `dotnet add UiTests reference TestCore`, then its packages (Playwright, etc.) — which append their `<PackageVersion>` to the existing `Directory.Packages.props`. The sibling keeps its **own** `appsettings`/`allureConfig`/`Dockerfile`, so there is nothing to merge.
 3. Promote anything both modules need (env config binding, auth-token helper, Allure setup) **up into `TestCore`**. Keep discipline-specific helpers (RestClient factory, page-object base) in their own project.
 4. `dotnet test` runs every test project; `dotnet test ApiTests` runs one. Add a `.slnf` solution filter per discipline (`api.slnf`, `ui.slnf`) for focused IDE load / CI sharding instead of splitting into multiple solutions.
 
@@ -203,6 +198,5 @@ The same recipe folds in `AppiumTests` (Appium) and a `PerfTests` console projec
 - [ ] `Directory.Build.props` carries settings only (`Nullable`/`TreatWarningsAsErrors` on)
 - [ ] `TestCore` exists as a shared library; `ApiTests` references it
 - [ ] Per-project `appsettings.json`/`appsettings.test.json`/`allureConfig.json`/`Dockerfile`/`README.md` present
-- [ ] Allure local tool installed (`.config/dotnet-tools.json`)
 - [ ] No secrets in `appsettings*.json`; secrets via env vars
 - [ ] `dotnet build` → 0 errors / 0 warnings; `dotnet test` discovers the placeholder. Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run".

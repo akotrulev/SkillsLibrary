@@ -112,7 +112,6 @@ Choose devices by intent (a vendor skin, an old OS, a layout-breaking screen), a
 Static features are capabilities at session start; dynamic ones flip mid-session through `browserstack_executor`.
 
 ```typescript
-import type { Options } from '@wdio/types';
 import { config as localConfig } from './wdio.conf.js';
 import { afterTest as recordEvidence } from './BaseTest.js';
 import { requiredEnv } from './env.js';
@@ -143,7 +142,7 @@ function realDeviceCapabilities(device: TargetDevice) {
   };
 }
 
-export const config: Options.Testrunner = {
+export const config: WebdriverIO.Config = {
   ...localConfig,
   user: requiredEnv('BROWSERSTACK_USERNAME'),
   key: requiredEnv('BROWSERSTACK_ACCESS_KEY'),

@@ -207,10 +207,9 @@ The pins are exact. Install only the driver for the platform under test, and kee
 ### `wdio.conf.ts`
 
 ```typescript
-import type { Options } from '@wdio/types';
 import { requiredEnv } from './env.js';
 
-export const config: Options.Testrunner = {
+export const config: WebdriverIO.Config = {
   runner: 'local',
   framework: 'cucumber',
   specs: ['./features/**/*.feature'],

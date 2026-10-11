@@ -182,4 +182,3 @@ ZAP **baseline**. Add the active layers (ZAP-AF, fuzzing, Nuclei) on a safe env 
 - `qa/<stack>/skills/security-testing/{permission-testing,dependency-scan,passive-scan}` — stack-native.
 - `qa/_shared/agents/qa-security.md` — the orchestrator.
 - `qa/<stack>/skills/{test-login-tokens,api-client-writer,api-models}`, `qa/cicd/<stack>/skills/ci-pipelines`, `qa/reporting/<stack>/skills/test-reports` + `qa/cicd/ci-conventions` — the supporting setup.
-</content>

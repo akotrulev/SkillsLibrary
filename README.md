@@ -34,7 +34,7 @@ The repo is a Claude Code plugin marketplace. Add it once, then install the one 
 - **CI/CD** — the stack's `ci-pipelines` skill (GitHub Actions / Azure Pipelines / GitLab CI), the language-agnostic `ci-conventions`, and the `qa-cicd-<stack>` agent.
 - **Reporting** — Allure results wiring + flaky-test detection/quarantine and the `qa-reporting-<stack>` agent.
 
-So installing a single plugin gives you the stack's authoring/verification skills, its api/ui/mobile/performance/llm/bdd agents, and the manual / security / cicd / reporting skills and agents — no peer plugins to add. (.NET additionally ships `*-project-setup` skills that stand up a complete runnable .NET 10 test solution from zero (8/9 supported).)
+So installing a single plugin gives you the stack's authoring/verification skills, its api/ui/mobile/performance/llm/bdd agents, and the manual / security / cicd / reporting skills and agents — no peer plugins to add. (Each stack ships `mobile-project-setup`, which stands up a runnable Appium 3 test project from zero; .NET additionally ships `*-project-setup` skills for a complete runnable .NET 10 test solution (8/9 supported).)
 
 **The other plugins:**
 
@@ -256,11 +256,15 @@ The `qa/` section is the most fully built-out part of the library. Most code-pro
 | `api-test-author/reviewer` | java · dotnet · typescript | Review API tests for design/correctness |
 | `api-client-writer` | java · dotnet · typescript | Scaffold typed API clients |
 | `api-models` | java · dotnet · typescript | Generate request/response DTOs |
-| `ui-test-author/playwright` | java · dotnet · typescript | Author Playwright UI tests |
+| `ui-test-author/playwright` | java · dotnet · typescript | Author Playwright UI tests (1.64 on TypeScript, 1.63 on Java and .NET) — locators, assertions, emulation, one failure-evidence base test |
 | `ui-test-author/selenium` | java · dotnet · typescript | Author Selenium UI tests |
-| `ui-test-author/appium` | java · dotnet · typescript | Author Appium mobile tests |
-| `ui-test-author/reviewer` | java · dotnet · typescript | Review UI tests |
+| `ui-test-author/appium` | java · dotnet · typescript | Author Appium 3 mobile tests (java-client 11 · Appium.WebDriver 9 · WebdriverIO 10) on compilable assets |
+| `ui-test-author/maestro` | typescript | Author Maestro mobile flows (`.maestro/` flows, subflows, `config.yaml`) — the alternative to Appium for Expo / React Native projects |
+| `ui-test-author/review` | java · dotnet · typescript | Review UI tests |
 | `page-object-design` | java · dotnet · typescript | Page-object architecture (intent-revealing) |
+| `evidence-capture` | java · dotnet · typescript | Screenshots, video, screencast, trace and HAR for Playwright, and screenshot / page source / device log / recording for Appium — what a failed test keeps and where CI finds it |
+| `mobile-project-setup` | java · dotnet · typescript | Stand up a runnable Appium 3 test project from zero (server, drivers, emulator, capabilities from the environment, a first smoke) |
+| `webmcp-testing` | _shared | Test pages that register WebMCP tools — `page.webmcp` on Playwright 1.64, an `evaluate` helper on 1.63 |
 | `api-contract-testing` | java · dotnet · typescript | Consumer/provider contract tests with Pact |
 | `contract-testing-pact` | _shared | Pact rules every stack's `api-contract-testing` references |
 | `load-testing` | java · dotnet · typescript | Load tests — Gatling (java) · NBomber (dotnet) · k6 (typescript) |
@@ -331,7 +335,7 @@ See [`CONTRIBUTING.md`](CONTRIBUTING.md) and the templates in [`.skill-template/
 | auth                  | scaffolding |
 | devops                | authored + shipped — 9 cloud/CI-keyed skills (docker, kubernetes, infrastructure-as-code, aws-deployment, azure-deployment, github-actions, gitlab-ci, azure-pipelines, environment-config) + the `devops-engineer` (build) and `devops-auditor` (read-only conformance audit, `/devops-auditor`) agents, both gated on a tool-stack confirmation before any skill loads; `devops` plugin |
 | observability         | authored + shipped — 6 skills (per-stack `opentelemetry-*` / `structured-logging-*` + stack-agnostic loki-tempo, prometheus-mimir, queries, dashboards) + `observability-engineer-{dotnet,java,node}` agents; bundled into the `be-*` plugins |
-| qa                    | authored — 30 code-producing nodes (mostly ×3 stacks) + 7 process skills. `qa-dotnet` additionally ships the `standards-audit` self-audit skill + `/qa-dotnet-audit` |
+| qa                    | authored — 34 code-producing nodes (mostly ×3 stacks; Playwright 1.64 on TypeScript and 1.63 on Java / .NET / Python, Appium 3, plus a TypeScript-only Maestro lane) + 7 process skills. Unverified: no Appium or Maestro flow has run on a device or emulator, and no WebMCP test has run against a site that registers tools. `qa-dotnet` additionally ships the `standards-audit` self-audit skill + `/qa-dotnet-audit` |
 | engineering-practices | imported from obra/superpowers |
 | meta                  | imported (writing-skills, skill-creator) |
 | documents             | imported from anthropics/skills |

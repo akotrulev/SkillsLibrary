@@ -1,4 +1,3 @@
-import type { Options } from '@wdio/types';
 import { afterTest, beforeTest } from './BaseTest.js';
 import { requiredEnv } from './env.js';
 
@@ -30,7 +29,7 @@ function capabilitiesFor(platform: string) {
   throw new Error(`PLATFORM must be android or ios, got ${platform}`);
 }
 
-export const config: Options.Testrunner = {
+export const config: WebdriverIO.Config = {
   runner: 'local',
   framework: 'mocha',
   specs: ['./*.spec.ts'],

@@ -36,7 +36,7 @@ reference shards the same way, per `qa/cicd/ci-conventions` ("membership is comp
 1. A **plan job** builds the test project, lists its tests once, splits the **test classes** into N groups
    and publishes one filter file per shard as an artifact (`<dir>/<i>.filter`, 1-based).
 2. Each **shard job** reads `<dir>/<index>.filter` and runs `dotnet test --filter "(<filter>)"` — for UI,
-   `--filter "(<filter>)&TestCategory!=Flaky"` (`qa/reporting/dotnet/skills/flaky-test-quarantine`).
+   `--filter "(<filter>)&TestCategory!=Flaky&TestCategory!=visual&TestCategory!=lighthouse&TestCategory!=grid"` — the nightly-only visual and Lighthouse categories and the cloud-grid fixtures stay out of the PR gate (`qa/reporting/dotnet/skills/flaky-test-quarantine` for `Flaky`).
 
 `ci/nunit-shards.sh <project> <shards> <dir>`, committed in the repo and run with `bash`:
 

@@ -6,12 +6,12 @@ namespace AppiumTests.Support;
 public static class GestureExtensions
 {
     public static bool ScrollGesture(this AppiumDriver driver, AppiumElement container, string direction = "down", double percent = 0.75) =>
-        (bool)driver.ExecuteScript("mobile: scrollGesture", new Dictionary<string, object>
+        driver.ExecuteScript("mobile: scrollGesture", new Dictionary<string, object>
         {
             ["elementId"] = container.Id,
             ["direction"] = direction,
             ["percent"] = percent,
-        });
+        }) is true;
 
     public static void LongPress(this AppiumDriver driver, AppiumElement element, int durationMs = 1500) =>
         driver.ExecuteScript("mobile: longClickGesture", new Dictionary<string, object>

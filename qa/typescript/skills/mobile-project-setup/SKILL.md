@@ -30,6 +30,7 @@ The table is the **Versions** table of `ui-test-author/appium/SKILL.md`, and `as
 | Language | `typescript` | **5.9.3** | `strict: true`, `noUncheckedIndexedAccess`, `module: NodeNext` |
 | Automation | `webdriverio` · `@wdio/cli` · `@wdio/globals` · `@wdio/appium-service` | **10.0.2** | Needs Appium 3 |
 | Runner pieces | `@wdio/mocha-framework` · `@wdio/types` | **10.0.1** | Mocha is the framework; WDIO has no Vitest framework |
+| Matchers, logger | `expect-webdriverio` · `@wdio/logger` | **8.0.0** · **10.0.0** | `expect-webdriverio` is a required peer of `@wdio/globals`; `BaseTest.ts` imports the logger |
 | Reporting | `@wdio/allure-reporter` | **10.0.1** | Writes `allure-results/` |
 | Appium server | `appium` | **3.8.0** | Needs Node ^20.19 \|\| ^22.12 \|\| ≥ 24 |
 | Android driver | `appium-uiautomator2-driver` | **8.7.0** | Majors ≥ 5 need Appium 3 |

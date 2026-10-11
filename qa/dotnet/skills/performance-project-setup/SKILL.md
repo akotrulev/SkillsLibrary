@@ -133,7 +133,7 @@ Flat solution + shared `TestCore` + CPM make this purely additive. The most comm
 1. Install `qa-api-dotnet` and run its scaffold **inside this repo**, skipping `global.json`, `Directory.Build.props`, `Directory.Packages.props`, `.config`, the `.sln`, and `TestCore` (already present).
 2. Add the API test project (`dotnet new nunit -o ApiTests`, `dotnet sln add ApiTests`, `dotnet add ApiTests reference TestCore`) and its packages. The API project references NUnit/test-host; **`PerfTests` still must not** — that separation is per-project, so there is nothing to scope or merge.
 3. Promote the typed clients + auth/config into `TestCore`; both the perf scenarios and the API tests consume them.
-4. `dotnet run --project PerfTests` runs load; `dotnet test` runs the functional suites. Add `.slnf` filters per discipline. UI (`PlaywrightTests`) and mobile (`AppiumTests`) fold in the same way (each its own NUnit project with its own config).
+4. `dotnet run --project PerfTests` runs load; `dotnet test` runs the functional suites. Add `.slnf` filters per discipline. UI (`UiTests`) and mobile (`AppiumTests`) fold in the same way (each its own NUnit project with its own config).
 
 ## Setup checklist
 

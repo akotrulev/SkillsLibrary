@@ -232,7 +232,7 @@ ui-tests:
     - dotnet build UiTests/UiTests.csproj -c "$BUILD_CONFIGURATION"
     - >
       dotnet test UiTests/UiTests.csproj --no-build -c "$BUILD_CONFIGURATION"
-      --filter "($SHARD_FILTER)&TestCategory!=Flaky"
+      --filter "($SHARD_FILTER)&TestCategory!=Flaky&TestCategory!=visual&TestCategory!=lighthouse&TestCategory!=grid"
       --logger "junit;LogFilePath=$CI_PROJECT_DIR/reports/junit-ui-$CI_NODE_INDEX.xml"
   artifacts:
     when: always

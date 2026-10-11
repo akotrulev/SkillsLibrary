@@ -292,7 +292,7 @@ The k6 image tag is pinned; upgrade it in a dedicated MR.
 
 ### Triggers
 - `workflow:rules` allowing `merge_request_event` + default branch + `schedule`. Create the nightly run in **CI/CD → Schedules** (it runs on the default branch).
-- MR pipelines stay under 15 min by gating perf and visual-regression to `schedule` (`rules: - if: $CI_PIPELINE_SOURCE == "schedule"`).
+- MR pipelines stay under 15 min by gating perf and visual-regression to `schedule` (`rules: - if: $CI_PIPELINE_SOURCE == "schedule"`). The schedule-gated visual step runs `npx playwright test --project=visual` (the `visual` project has `default: false`, so a plain `npx playwright test` skips it) in `mcr.microsoft.com/playwright:v1.64.0-noble`.
 - Prefer MR pipelines over branch pipelines; avoid duplicate pipelines by not also matching `push` for branches that have an open MR.
 
 ### Cancel superseded

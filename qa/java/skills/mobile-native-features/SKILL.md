@@ -37,9 +37,8 @@ Appium tests for the **OS-level capabilities** a mobile app touches but a page-o
 - **AssertJ** for every assertion outside Appium; failure evidence is `BaseMobileTest`, and this skill adds no second hook
 - `WebDriverWait` and `ExpectedConditions` need `selenium-support`, which java-client 11 no longer pulls in
 - Helpers live in `src/test/java/.../support/nativefeatures/` (the package is `support.nativefeatures`; `native` is a reserved word, so `support/native/` cannot be a package)
-- The old location types `org.openqa.selenium.html5.Location` and `LocationContext` are gone (Selenium 4.35); geolocation is a `mobile:` command
 
-Appium 3 removed the old `/appium/*` routes, and java-client 11's driver methods call only `mobile:` extensions. Where this skill calls `executeScript("mobile: …")` directly, that is the same command with no wrapper in between.
+Appium 3 removed the old `/appium/*` routes; java-client 11's driver methods call only `mobile:` extensions, and geolocation is one of them.
 
 ## When to use
 
@@ -264,24 +263,18 @@ A camera, photo or file picker is an OS surface you cannot drive in CI. Seed the
 | Smell | Do instead |
 |---|---|
 | A page-object finder on the OS permission or biometric dialog | The capability, `mobile: changePermissions`, or the alert API |
-| Reaching a screen by tapping to test a deep link | `mobile: deepLink` → assert the destination page |
 | `Thread.sleep` after a background, an injection or a push | `WebDriverWait` on the restored, unlocked or routed screen |
-| A real fingerprint or camera | Inject the match; seed picker files with `pushFile` |
 | Only the approve path | Test the reject path too; reject is where apps crash |
 | Auto-granting permissions in every test | The capability for feature tests; the real dialog for the flow under test |
 | Hardcoded Springboard or `permissioncontroller` coordinates | The alert API and stable resource ids |
 | A raw `driver.findElement` or a wait inside a test body | An intent method on `NativeFeatures` |
 | Asserting a push was sent | Assert the app's reaction; delivery belongs to the provider's sandbox |
-| Rebuilding the driver factory or page objects here | Reuse `ui-test-author/appium`; add only `NativeFeatures` |
 
 ## Rules
 
 - **The OS surface is driven by device commands and `mobile:` extensions, never a page-object selector.** Assert the effect on your screen.
-- **Deep links are tested by routing**, and the https form proves the association.
-- **Permissions are deterministic by default, real only when the flow is the test**, and the deny path is exercised.
 - **Biometrics are injected on emulator or simulator only**; both approve and reject are tested, each with its own intent method (`approveFingerprint`, `rejectFingerprint`). Real-device injection belongs to `device-cloud`.
 - **Lifecycle events assert restored state on a bounded wait.** No `Thread.sleep` anywhere.
-- **Push tests assert the app's reaction**, not the send.
 - **Clipboard content is base64** in both directions.
 - Tests are `Should_X_When_Y`, assert with AssertJ and a subject (`.as(...)`), and never use `try`/`catch`. App ids and device settings come from env through `Env`; no secrets in code.
 
@@ -291,6 +284,4 @@ A camera, photo or file picker is an OS surface you cannot drive in CI. Seed the
 - **`qa/java/skills/device-cloud`** — where the tests run and how farm-side GPS, network and biometric are injected
 - **`qa/java/skills/evidence-capture`** — what a failed native flow keeps
 - **`qa/typescript/skills/mobile-native-features`**, **`qa/dotnet/skills/mobile-native-features`** — the sibling stacks
-- **`qa/java/skills/network-mocking/*`** — the requests an app makes
-- **`qa/java/skills/data-driven-testing`** — a device, permission or locale matrix, one case per row
 - **`qa/java/skills/test-login-tokens`** — token auth, the boundary with biometric unlock

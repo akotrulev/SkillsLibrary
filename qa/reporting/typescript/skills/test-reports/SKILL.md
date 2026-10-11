@@ -7,7 +7,7 @@ description: Use when setting up Allure reporting for a TypeScript test suite (V
 
 Wires Allure into a Node 24 + TypeScript test project — `allure-vitest`, `allure-playwright` (`@playwright/test` reporter), or `@wdio/allure-reporter`. Standardizes the runtime API (`allure-js-commons`), behavior-first hierarchy (`feature` / `story` / `severity`), CI publish, history, and triage categories.
 
-**Native Playwright evidence is not configured here.** Trace, video and screenshot modes, deliberate recordings and reading a trace belong to `qa/typescript/skills/evidence-capture`; the config that carries them is `qa/typescript/skills/ui-test-author/playwright/assets/playwright.config.ts`. This skill only maps that evidence into Allure.
+**Native Playwright evidence is not configured here.** Trace, video and screenshot modes and reading a trace belong to `qa/typescript/skills/evidence-capture`; the config that carries them is `qa/typescript/skills/ui-test-author/playwright/assets/playwright.config.ts`. This skill only maps that evidence into Allure.
 
 ## When to use
 
@@ -84,9 +84,8 @@ What `allure-playwright` maps from the runner, with no code:
 In `wdio.conf.ts`:
 
 ```ts
-import type { Options } from '@wdio/types';
 
-export const config: Options.Testrunner = {
+export const config: WebdriverIO.Config = {
   reporters: [
     'spec',
     ['allure', {
@@ -98,7 +97,7 @@ export const config: Options.Testrunner = {
 };
 ```
 
-Failure evidence for WebdriverIO and Appium (screenshot, page source, device logs, recording) is the base test's `afterTest` hook, explained in `qa/typescript/skills/evidence-capture` (its Appium reference). This skill adds no second failure hook.
+WebdriverIO and Appium failure evidence is the base test's `afterTest` hook (`qa/typescript/skills/evidence-capture`, Appium reference). This skill adds no second hook.
 
 ## Hierarchy: Feature → Story → Test
 

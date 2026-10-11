@@ -104,7 +104,7 @@ stages:
       - template: pipelines/templates/allure-publish.yml
 ```
 
-`qa-test-secrets` is a variable group backed by Key Vault through the OIDC service connection.
+The variable group qa-test-secrets is backed by Key Vault through the OIDC service connection.
 
 ### Sharded NUnit job — `pipelines/templates/api-tests.yml`
 
@@ -299,7 +299,7 @@ jobs:
           read -r SHARD_FILTER < "$(Pipeline.Workspace)/ui-shards/$(System.JobPositionInPhase).filter"
           dotnet test UiTests/UiTests.csproj \
             --no-build -c $(buildConfiguration) \
-            --filter "($SHARD_FILTER)&TestCategory!=Flaky" \
+            --filter "($SHARD_FILTER)&TestCategory!=Flaky&TestCategory!=visual&TestCategory!=lighthouse&TestCategory!=grid" \
             --logger "trx;LogFileName=ui-shard-$(System.JobPositionInPhase).trx" \
             --results-directory $(Agent.TempDirectory)/TestResults
         displayName: Run UI tests (shard $(System.JobPositionInPhase)/$(System.TotalJobsInPhase))
@@ -336,7 +336,7 @@ jobs:
 - `BASE_URL`, `E2E_USER` and `E2E_PASSWORD` come through OIDC: `BaseTest` throws without `BASE_URL`, and the root-namespace `AuthSetup` signs in once per shard before any fixture runs.
 - `playwright-artifacts-<n>` is published **on failure only** (`condition: failed()`): the screenshot, trace and video of each failed test plus any deliberate recording. A green run leaves the folder empty.
 - The quarantine lane is a second, non-gating job in this template — the same steps without `UiShards` and `strategy`, running `--filter "TestCategory=Flaky"` with `continueOnError: true` on its test step, per `qa/reporting/dotnet/skills/flaky-test-quarantine`.
-- **Running in the pinned image** instead of installing browsers — what visual baselines need (`qa/dotnet/skills/visual-regression`): give the job `container: mcr.microsoft.com/playwright/dotnet:v1.63.0-noble` and drop the install line; the image carries the .NET 10 SDK and the browsers. The tag must equal the Playwright version, and there is no `-jammy` .NET image since 1.60. `AzureCLI@2` runs inside the container, which has no Azure CLI, so a container job tests only pages that need no fetched credentials.
+- **Running in the pinned image** instead of installing browsers — what visual baselines need (`qa/dotnet/skills/visual-regression`): give the job `container: mcr.microsoft.com/playwright/dotnet:v1.63.0-noble` and drop the install line; the image carries the .NET 10 SDK and the browsers. The tag must equal the Playwright version, and there is no `-jammy` .NET image since 1.60. `AzureCLI@2` runs inside the container, which has no Azure CLI, so a container job tests only pages that need no fetched credentials. The visual job is not a container job: it is the `docker run` step in `qa/dotnet/skills/visual-regression/references/playwright-snapshots.md` §8.
 
 ### Allure publish with history — `pipelines/templates/allure-publish.yml`
 

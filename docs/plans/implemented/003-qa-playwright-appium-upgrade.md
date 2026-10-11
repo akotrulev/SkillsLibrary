@@ -7,123 +7,23 @@ and Python pin 1.63 until their 1.64 packages publish. Appium moves to 3. The pl
 trace, HAR — Playwright and Appium) and a shared `webmcp-testing` skill. It teaches locator scoping with
 `locator.within()`, and wires all of it into the `qa-ui-*`, `qa-bdd-*` and `qa-mobile-*` agents.
 
-**Status:** T1, J1, N1 and T2 landed 2026-10-10: the TypeScript Playwright 1.64 writer (SKILL.md, four
-references, six assets), the Java Playwright 1.63 writer (SKILL.md, four references, nine assets around one
-parallel-safe `BaseTest` on allure-java 3.0) and the .NET Playwright 1.63 writer (SKILL.md, four references,
-eight assets: CPM props, a versionless `UiTests.csproj`, `ui.runsettings`, `BaseTest : PageTest`, a
-root-namespace `AuthSetup`), each with its stack's `ui-test-author/review` and `page-object-design` aligned;
-.NET `ui-project-setup` now scaffolds from those assets with a v1.63.0-noble Dockerfile. T2 added
-`qa/typescript/skills/evidence-capture` (SKILL.md + `references/playwright.md`), loaded by `qa-ui-typescript`
-Step 1 / Mode A and `qa-bdd-typescript` Step 4, and put TS `test-reports`, `flaky-test-quarantine`,
-`ci-conventions` (one Allure CLI pin, `allure-commandline@2.46.1`) and the three TS CI references on the
-canonical config (D35–D37). J2 landed 2026-10-10: `qa/java/skills/evidence-capture` (SKILL.md +
-`references/playwright.md`), loaded by `qa-ui-java` Step 1 / Mode A and `qa-bdd-java` Step 4; Java
-`test-reports` on allure-java 3.0 deferring to `BaseTest`, `flaky-test-quarantine` on D7, and the three Java CI
-references with a Playwright UI job uploading `build/playwright-artifacts/` (Azure gained one). The one Allure
-CLI pin holds for Java, and J1's build now pins it (D38–D41). N2 landed 2026-10-10:
-`qa/dotnet/skills/evidence-capture` (SKILL.md + `references/playwright.md`), loaded by `qa-ui-dotnet` Step 1 /
-Mode A (its Step 0 gate now names the `BaseTest` asset) and `qa-bdd-dotnet` Step 4; .NET `test-reports`
-deferring to `BaseTest` with the byte-array `AttachBody` fix, `flaky-test-quarantine` on D7, and the three .NET
-CI references sharding by NUnit class filters from one `ci/nunit-shards.sh` (no `Playwright.Shard`), uploading
-`UiTests/bin/<cfg>/net10.0/playwright-artifacts/` on failure, GitLab in the v1.63.0-noble image (D42–D46;
-`BaseTest`'s three helpers are now protected). A1 landed 2026-10-10: the six `qa-ui-*` / `qa-bdd-*` agents
-grant exactly §5.2's 33 Playwright MCP tools; each `qa-ui-*` live-page workflow states §5.4's registration,
-names the `playwright-cli` fallback and follows R2; `page-objects-from-url` ×3 run on the current tools with a
-`playwright-cli` route; and `qa/_shared/webmcp-testing` (`qa-webmcp-testing-shared`: SKILL.md, three references,
-seven assets incl. a `ProductPage` per stack and `webmcp.runsettings`, D47–D48) ships in all three qa plugins
-and loads in every `qa-ui-*` Step 3. T3 landed 2026-10-10: TS `visual-regression`, `accessibility-testing` and
-`network-mocking` (three routers, eight references) on 1.64 — a nightly `visual` project, `page.clock` frozen
-time, WebP with the Allure caveat, fixtures for Percy, Eyes, axe (WCAG 2.2 AA) and Lighthouse, annotated
-no-assertion tests, headers/TLS at the routing layer, `page.requests()` for "not called", and a Vitest-fixture
-proxy (D49–D52). J3 landed 2026-10-11: Java `visual-regression`, `accessibility-testing` and `network-mocking`
-(three routers, eight references) on 1.63 — `locator.screenshot` plus `com.github.romankh3:image-comparison:4.4.0`
-against `src/test/resources/baselines/<os>-<browser>/`, with baselines and the nightly job in the v1.63.0-noble
-image through `docker run` (D53); every sample on `BaseTest`; axe 4.13.0 at WCAG 2.2 AA with attached
-incompletes; Lighthouse for public pages on `BaseTest`'s Chromium and a free port (D55); a held route instead of a
-handler sleep (D54); headers/TLS at the routing layer; per-class Applitools runners (D56); the archived BrowserUp
-kept with a warning (D57). N3 landed 2026-10-11: .NET `visual-regression`, `accessibility-testing` and
-`network-mocking` (three routers, eight references) on 1.63 — `Locator.ScreenshotAsync` plus
-`Codeuctivity.ImageSharpCompare` 4.1.390 (D58) against `UiTests/Baselines/<os>-<browser>/` found through
-`ProjectPaths.Root` (D59), shown with `AllureApi.AddScreenDiff`, baselines and the nightly job in the v1.63.0-noble
-image through `docker run` (D60); Percy linked with `AddLink`, a synchronous Eyes API gated in `[OneTimeTearDown]`
-with `AddGlobalAttachment`; axe on `RunAxe` (the .NET package has no `AxeBuilder`) at WCAG 2.2 AA; Lighthouse from a
-`PlaywrightTest` fixture on a persistent context and a free port, signed-in pages included (D61); a held route,
-headers/TLS at the routing layer, `PostDataJSON()` records, and a Titanium 7.0.22 proxy that never touches the OS
-trust store; §6.1's package check narrowed to the package id (D62). T4 landed 2026-10-11: the twelve remaining
-Playwright-bearing TS skills on 1.64 — responsive rows with `test.use({ viewport })` and a measuring `Layout`
-fixture (D63), realtime owning WebSocket mocking and browser SSE as a fixed event set plus `204` (D64), grid runs on
-`use.connectOptions` or a worker-scoped `browser` marking one verdict per session (D65), a token-seeding setup
-project on `context.setStorageState`, a frozen `page.clock` for locale formats, one generated test per data row,
-uptime probes keeping trace/video/screenshot on failure (D66) and loaded by `qa-api-typescript` Step 3, locator
-actions, a Mailpit suite with no global wipe, the 1.64 request-context options, and playwright-bdd 9.2.1 on 1.64.0.
-J4 landed 2026-10-11: the twelve remaining Java skills on `BaseTest` and 1.63 — a `newBrowser(Playwright)` hook added
-to J1's `BaseTest` for grid connects (D67), `@Factory` rows for responsive widths and locales (D68), one BrowserStack
-session per class marked once with the installed client version (D69), `WebSocketFrame.text()` and the fixed-event-set
-SSE mock, a token `AuthSetup` per lifecycle.md §6, an uptime probe that catches `AssertionError` and keeps
-trace/video/screenshot (D70) loaded by `qa-api-java` Step 3, locator actions, Awaitility mail polls, exact statuses
-without HttpComponents (`BaseApiTest` kept, D71), page objects on `Page` in the step glue, and a Cucumber 1.63
-scaffold with one discovery mechanism and `BaseTest`-shaped evidence hooks (D72); `qa/_shared/python-web-testing`
-rewritten to web-first waits on `playwright==1.63.0`; the six D12 files on allure-java 3.0.
-N4 landed 2026-10-11: the twelve remaining .NET skills on `BaseTest` and 1.63 — responsive widths and locales as
-NUnit fixture parameters amending `ContextOptions()` (D73), WebSocket frames through `Page.WebSocket` +
-`FrameReceived` + a `TaskCompletionSource` and the fixed-event-set SSE mock, grid fixtures overriding
-`BrowserTest.ConnectOptionsAsync()` in their own `TestCategory=grid` run (D74), a token body for `AuthSetup` at
-`BASE_URL`'s origin (D77), a `PlaywrightTest`-based API base with per-test contexts and a § Review that
-`qa-api-dotnet` Step 4 now loads (D75), an uptime probe catching only `PlaywrightException` and keeping
-trace/video/screenshot, run from the pinned image and loaded by `qa-api-dotnet` Step 3 (D76), locator actions and a
-`Regex` URL assertion, a `Given` that only acts, a Reqnroll scaffold on `Microsoft.Playwright.NUnit` 1.63.0 with
-`BaseTest`-shaped `[AfterScenario]` evidence (D78), the C-07 BDD review rows, and a conformance checklist whose E11
-matches R8 (D79) with fifteen new or reworded rows (A9, A10, E16, E17, F10, F11, I11–I13, K9, L4, L9, L14, M15, M16).
-M1 landed 2026-10-11: the TS mobile lane on Appium 3 / WebdriverIO 10 / Mocha — `qa-mobile-typescript` on §5.3's 28
-tools with the appium-mcp prerequisites and the evidence skill at Step 1; `ui-test-author/appium` with ten compilable
-assets (a `wdio.conf.ts`, a `BaseTest.ts` whose `afterTest` keeps a screenshot, page source, device log and a recording
-only on failure, a scoped `OrderRow`) and a per-platform test-id ladder with the id-prefix setting (D80); gestures,
-WebView and app state on WDIO 10's helpers and `mobile:` extensions; the farm through a second `wdio.conf.ts`
-(BrowserStack without a WDIO 10 service, D81; AWS `APPIUM_NODE`); Appium reference in `evidence-capture` (D82); and
-the screen, crawler, native-feature, review, BDD-scaffold and Cucumber files cleaned (D83).
-M2 landed 2026-10-11: the Java mobile lane on java-client 11 / Appium 3 / TestNG — `qa-mobile-java` on §5.3's 28
-tools with the appium-mcp prerequisites and the evidence skill at Step 1; `ui-test-author/appium` with eleven
-compilable assets (a `BaseMobileTest` whose `@AfterMethod` keeps a screenshot, page source, device log and a
-recording only on failure on allure-java 3.0, an `AppiumDriverFactory`, a scoped `OrderRow`, `testng.xml` on
-`parallel="classes"`) and the per-platform test-id ladder with the id-prefix setting (D84); W3C `PointerInput`
-gestures, WebView contexts and app state without `resetApp`; `NativeFeatures` on `mobile:` commands in
-`support.nativefeatures`; the farm with a presigned `PUT` that throws (D85) and a mobile Cucumber hook (D86);
-Appium reference in `evidence-capture`; and the screen, crawler, review, `browser-cloud-setup` and glue files
-cleaned. M3 landed 2026-10-11: the .NET mobile lane on Appium.WebDriver 9 / Appium 3 / NUnit 4.6.1 — `qa-mobile-dotnet` on §5.3's 28 tools with the appium-mcp prerequisites and the evidence skill at Step 1; `ui-test-author/appium` with thirteen assets (CPM props, a versionless csproj, `mobile.runsettings`, `Env`, `AppiumDriverFactory`, a `BaseMobileTest` whose `[TearDown]` keeps a screenshot, page source, device log and a recording only on failure with no catch (D88), `BaseAppiumPage`, `LoginPage`, `OrdersPage`, a scoped `OrderRow`, `OrdersTests`, `GestureExtensions` and a compiling `page_template.cs`) on `MobileBy` (D87) and the per-platform test-id ladder with the id-prefix setting; `mobile-native-features` on `mobile:` commands; `mobile-project-setup` on one `PLATFORM` mechanism; `device-cloud` without a Device Farm run (D89); the screen, crawler and review files cleaned; checklist rows C4, D12, E14 and K6 reworded and E18 and L15 added (D90); and `evidence-capture/references/appium.md`. S1 landed 2026-10-11: `qa/java/skills/mobile-project-setup` (`qa-mobile-project-setup-java`) and `qa/typescript/skills/mobile-project-setup` (`qa-mobile-project-setup-typescript`), each on Appium 3.8.0 with drivers 8.x / 12.x, one `PLATFORM` mechanism, a layout around its `ui-test-author/appium` assets and a `SmokeTest` / `smoke.spec.ts` first run, and a Step 0 row in `qa-mobile-java` and `qa-mobile-typescript`, in the marketplace and the catalog. X1 landed 2026-10-11: `docs/research/003-qa-playwright-appium/maestro.md` (CLI 2.11.0, every fact sourced), `ui-test-author/maestro` (`qa-ui-test-writer-maestro-typescript`, a `.maestro/` sample of one flow, one subflow and `config.yaml`), `qa-mobile-typescript` offering it at Step 2 with the five granted `mcp__maestro__*` tools (D91), six Maestro rows in the TS review skill, the `evidence-capture` route line, the marketplace entry and a catalog row. Next: G1. Built but unverified (X1): no Maestro flow ran and no `maestro` CLI was installed — the sample flows' YAML, the GitHub Actions emulator job (assembled from two documented pieces, never run), `maestro check-syntax` and the EAS `maestro` job's `flow_path`/`needs` shape are G1's or the user's. Built but unverified (S1): nothing compiled or ran — the three TS edits the folders need (specs glob, `../../` imports, tsconfig `include`), the Java smoke class and the `npx appium driver install` / `allowInsecure` service-arg spellings are G1's. Built but unverified (M3): nothing compiled or ran — the .NET Appium assets (`MobileBy`, `StartRecordingScreen` options, `WebDriverWait` from `Selenium.Support` 4.51.0, `AppiumElement.Rect`, `Manage().Logs.GetLog`) are G1's. Built but unverified (M2): nothing compiled or ran — the Java Appium assets (an `AppiumDriver`
-`switch` on `AndroidDriver` / `IOSDriver`, `UiAutomator2Options.amend`, `Allure.attachment` with a stream,
-`AndroidStartScreenRecordingOptions` / `IOSStartScreenRecordingOptions` spellings) are G1's. Built but unverified: no asset, workflow or pipeline has been
-compiled or run (G1 does that; D24's TS config import, the Java build on Allure Gradle plugin 4.3.0, the .NET
-build on NUnit3TestAdapter 6.3.1 / Test SDK 18.10.1, `dorny/test-reporter`'s `java-junit` parse, the trace CLI
-through the Java driver (D39) and through `playwright.ps1` (D43), the .NET shard script against a real
-`--list-tests` (D44), and the WebMCP assets' typings and the D48 scripts are the open risks; N2 had no web
-access, so its .NET spellings rest on the committed research; no WebMCP test has run against a site that
-registers tools; T3 had no web access either, so its Percy, Applitools, playwright-lighthouse, mockttp and
-Vitest-fixture spellings rest on the research and the old skill text, and the TS CI references do not yet run
-`--project=visual` — G1 reconciles that; J3 read its pins from Maven Central and npm and its spellings from the
-libraries' sources, but nothing ran: the comparator flow, the `docker run` visual job, Lighthouse attached to
-Playwright's Chromium, Applitools `BatchInfo.setId` / `getAllTestResults(boolean)` (no published sources) and
-BrowserUp on Java 21 are open, and J2's Java CI references still describe the visual container job — G1
-reconciles that too; N3 read its pins from NuGet and npm and its spellings from sources (the Eyes API from the
-assembly metadata, since it publishes none), but nothing ran: `VisualCheck`, the Eyes calls, `RunAxe` with an
-exclusion context, Lighthouse seeing a persistent context's sign-in, the `docker run` visual job and the Titanium
-proxy with Selenium are open, and N2's .NET CI references neither exclude the `visual` / `lighthouse` categories
-from the gate nor point at the `docker run` job — G1 reconciles that; T4 had no web access, so its `APIResponse.timing()` / cookie spellings, `npx checkly runtimes`,
-BrowserStack's `getSessionDetails`, Checkly honouring a spec's `test.use` evidence modes (D66) and `EventSource`
-stopping on a routed `204` (D64) rest on the research and memory — none of them is in a compiled asset; J4 had no
-web access either, so TestNG's per-instance `@BeforeClass` under `@Factory` (D68), the `IAlterSuiteListener`
-thread-count override and BrowserStack's `getSessionDetails` (D69), the Playwright jar's `pom.properties`,
-`StorageStateOptions.setIndexedDB`, Cucumber's `@After(order = 0)` running last and `Allure.attachment(String,
-String)` rest on sources read from memory — of J4's files only `BaseTest.java` is a compiled asset; N4 had no web
-access either, so `BrowserTest.ConnectOptionsAsync()`'s signature (D74), `IPage.WebSocket` firing before a socket's
-first frame, `IWebSocketRoute.Send` being synchronous, `SseItem<T>.EventId`, every .NET `Expect` failure being a
-`PlaywrightException` (D76), `TelemetryClient.FlushAsync(CancellationToken)`, Reqnroll's after-hook order, the
-`Allure.Reqnroll` package and `Allure.ReqnrollPlugin` assembly names (D78), Reqnroll 3.3.4 being current and
-`Assert.MultipleAsync` rest on memory — none of N4's files is a compiled asset, and the .NET UI gate filter does not
-yet exclude `TestCategory=grid` — G1 reconciles that with the `visual` / `lighthouse` exclusions); M1 read WDIO 10 types and commands from the packed 10.0.2 tarballs and its pins from npm, but nothing
-ran: the TS Appium assets are not type-checked, §6.3's TS Appium install line is too short (use
-`assets/package.json`), the `appium:settings[disableIdLocatorAutocompletion]` need for React Native ids and the
-device-farm facts (BrowserStack/Sauce Appium 3, Device Farm `APPIUM_NODE`) rest on READMEs and the research, and
-`browser-cloud-setup` still says a BrowserStack service sets the status).
+**Status:** Complete 2026-10-11 — all 20 tasks landed and G1 ran §6 once over the whole plan; the plan is filed in
+`docs/plans/implemented/`. Delivered: TypeScript on Playwright 1.64 and Java / .NET / Python on 1.63 (writer skills,
+locator / assertion / emulation references, one failure-evidence base test per stack); an `evidence-capture` skill per
+stack; the shared `webmcp-testing` skill; visual regression, accessibility and network mocking rewritten per stack; the
+remaining Playwright-bearing skills; Appium 3 lanes (java-client 11 / Appium.WebDriver 9 / WebdriverIO 10) with
+compilable assets and Appium evidence; `mobile-project-setup` for Java and TypeScript; a TypeScript Maestro lane; the
+`qa-ui-*` / `qa-bdd-*` / `qa-mobile-*` agent grants; `tools/qa-version-check.py`; README, CLAUDE.md and the catalog.
+Gate result (G1, 2026-10-11): marketplace parses; the library check prints `OK`; the version checker prints `OK`; every
+Playwright and Appium asset set compiles (TS `tsc` clean, Java `compileTestJava`, .NET `dotnet build` 0 errors) and the
+TS, Java and .NET evidence smoke leaves trace, video and screenshot for the failing test and nothing for the passing
+one; `token-audit` shows 0 description violations and 141 size violations (≤ 160). Built but **unverified**: no Appium
+flow ran on a device or emulator (every `mobile:` command, farm run and WebView flow is untested); no Maestro flow ran
+and the `maestro` CLI was never installed, so `maestro check-syntax` was not run (the three YAML files parse), and the
+EAS `maestro` job and the GitHub Actions emulator job are unrun; no WebMCP test ran against a site that registers tools;
+the D9 visual comparators are recommendations, not run; the Percy, Applitools, Lighthouse, mockttp, Titanium proxy,
+BrowserStack / Device Farm and Checkly spellings in prose and in non-asset code blocks rest on the research and on
+library sources, not on a run; `dorny/test-reporter`'s `java-junit` parse and the `docker run` visual jobs never ran.
 Planned 2026-10-10. The research behind it is committed with this plan:
 `docs/research/003-qa-playwright-appium/` (5 files). So is the read-only audit:
 `docs/audits/003-qa-playwright-appium/` (4 files). All open questions were answered on 2026-10-10:
@@ -134,8 +34,8 @@ Planned 2026-10-10. The research behind it is committed with this plan:
 - A Maestro lane is added (X1).
 - The newest Appium client majors are primary.
 
-Next: G1 (H1, the user's, blocks no task). The cost is 19 agent sessions on the subscription, each started by the user
-from Plan Queue. Nothing else is metered.
+Next: nothing in this plan (H1, the user's, blocks no task and is still the user's to run). The cost was 19 agent sessions on the
+subscription, each started by the user from Plan Queue, plus G1. Nothing else is metered.
 
 ## 1. What already exists, and what is missing
 
@@ -1345,6 +1245,34 @@ Reading A (the plan): add Maestro beside the existing wording. Reading B (built)
 16,023, lost five low-value rows (a lint nit, two nits, a second-assertion-library minor, a duplicated test-name
 minor) and some prose to make room for a six-row Maestro table (15,876 after). **Cost:** a reviewer no longer sees
 those five rows.
+
+**D93 — G1 fixed the M1 TypeScript Appium assets, and settled D39, D43 and D44 without a reversal (G1, 2026-10-11).**
+Reading A (the plan): the TS Appium assets compile as written, and the three trace/shard facts stay open risks.
+Reading B (built): `tsc --noEmit` failed on the M1 assets, so `assets/wdio.conf.ts` now types its config as
+`WebdriverIO.Config` (WDIO 10's `Options.Testrunner` has no `capabilities`; the same fix went into the config blocks of
+`device-cloud`, `bdd-project-scaffold` and `test-reports`), and `assets/package.json` gained `expect-webdriverio` 8.0.0
+(a required peer of `@wdio/globals`, the cause of `GlobalExpect` not being callable) and `@wdio/logger` 10.0.0
+(`BaseTest.ts` imports it); both Versions tables list them. D39 holds: the Java `playwright` task ran `trace open`,
+`actions`, `errors` and `close` against a kept trace (Playwright 1.63.0). D43 holds: the .NET `.playwright/package/cli.js`
+under the bundled node ran the same four. D44 holds: `ci/nunit-shards.sh` wrote one `FullyQualifiedName~Namespace.Class.`
+term per shard from `--list-tests`, and `dotnet test --no-build --filter` on each shard ran only its class (the first run
+failed once on a test-host assembly load and passed on every rerun, so the script stays as written). **Cost:** none for
+consumers; a plain `npm install` of the TS Appium assets fails on npm 10.9 (an `edgesOut` bug that npm 11, shipped with
+Node 24, does not have).
+
+**D94 — G1 trimmed two skills back under 16,000 characters (G1, 2026-10-11).**
+Reading A (the plan): every SKILL.md the plan rewrote is ≤ 16,000. Reading B (built): `qa/reporting/typescript/.../test-reports`
+(16,084 after T2) and `qa/java/skills/mobile-native-features` (16,881 after M2) were over, so two sentences were
+shortened in the first and seven duplicated rows / bullets (Rules, Anti-patterns, Stack, Cross-references) were cut
+from the second; the other SKILL.md files over 16,000 were already over before the plan touched them and were only
+cleaned (the plan counts them among the 141 body and agent violations). **Cost:** the Java native-features skill no
+longer repeats its rules as a list.
+
+**D95 — .NET `NativeFeatures.Clipboard()` takes a nullable script result, and `GestureExtensions.ScrollGesture` tests `is true` (G1, 2026-10-11).**
+Reading A (the plan): the .NET Appium assets and code blocks build clean. Reading B (built): the build warned (CS8605,
+CS8600/CS8604) on an unboxed or converted `ExecuteScript` result, so the asset returns `... is true` and the clipboard
+block reads `(string?)` with `?? string.Empty`. **Cost:** a missing clipboard value now reads as an empty string instead
+of throwing.
 
 ## Answered questions (2026-10-10)
 
@@ -3138,6 +3066,37 @@ then run) → §6.3 → §6.4 → §6.5. Fix what it finds; a failure may belong
 - `git mv` this plan to `docs/plans/implemented/`.
 - **Not in G1:** new content. If the gate shows a skill is missing a section, write the minimum, and
   record it as a dated decision.
+- **As built (2026-10-11):** §6 ran once, in order, on the whole plan.
+  - §6.1: marketplace parses; the library check (001 §7 plus this plan's `CHECKS`, `CODE_CHECKS`, the three MCP allowlists,
+    `test.each` and `Allure.addAttachment`; saved under `$TMPDIR`, nothing added to `ALLOW`) found three defects, all fixed:
+    a stray `</content>` at the end of `qa/_shared/security/SETUP.md`, the backticked group name `qa-test-secrets` read as an
+    unresolved skill name in the .NET `azure-pipelines.md` (:107), and three `.DS_Store` files under `qa/` (deleted; none tracked).
+  - §6.2: `tools/qa-version-check.py` written to §6.2 with §2.5's bump procedure as the end of its docstring; its one finding
+    (`pytest-playwright==0.10.0` read as a Playwright pin) was a regex bug, fixed with a lookbehind. It prints `OK`.
+  - §6.3: TS Playwright (`tsc` clean, 9 tests listed incl. WebMCP's five), TS Appium, Java Playwright, Java Appium, .NET
+    Playwright and .NET Appium all build; Maestro YAML parses (3 files, multi-document). Fixes: D93 (TS Appium assets), D95
+    (.NET nullable warnings). The Java `NativeFeatures` and the farm classes (`FarmCredentials`, `AppUploader`,
+    `DeviceMatrix`, `RealDeviceDriverFactory`, `DeviceFeatures`, `DeviceFarmRunner`) and the .NET `NativeFeatures` and farm
+    classes compile as code blocks in the Appium scratch projects; the two `BiometricLoginTest(s)` samples call app pages the
+    skills do not define, so they were left out. S1's `SmokeTest` compiles in the Java project and the three TS edits plus
+    `smoke.spec.ts` type-check in the TS one; both S1 Versions tables match §2.4. `maestro` is not installed, so
+    `maestro check-syntax` did not run.
+  - §6.4: TS, Java and .NET each left `.png`, `.zip` and `.webm` for the failing test, nothing for the passing one, and an
+    empty raw-video folder. D39, D43 and D44 are settled (D93).
+  - §6.5: 0 description violations; 141 body + agent violations (90 + 51); D94 trimmed two plan-rewritten skills under 16,000.
+  - Reconciliation: README (qa rows for `evidence-capture`, `mobile-project-setup`, `webmcp-testing`, `ui-test-author/maestro`,
+    the 1.64 / 1.63 and Appium 3 wording, the qa count 30 → 34 by adding the four new nodes, and the unverified line);
+    CLAUDE.md (one Playwright line, one Appium line); catalog (`ui-test-author/review`, `bdd-project-scaffold`, the
+    `inhouse-framework-conventions` row for all three stacks, `production-uptime-checks` dropped from the orphans line because
+    all three `qa-api-<stack>` agents load it; the T2 / J2 / N2 / A1 / S1 / X1 rows were already present); the D34 leftovers
+    (`UiTests` in `api-project-setup` and `performance-project-setup`, `Allure.NUnit` 2.15.0, no `dotnet tool install allure`);
+    the D49 `--project=visual` line in three TS CI references; the D53 / D60 pointers to the `docker run` visual job in five
+    Java / .NET CI references and the `!=visual&!=lighthouse&!=grid` gate filter in three .NET ones; "the hooks" in the Java
+    writer's SKILL.md.
+  - Environment notes (not repo changes): the .NET builds needed a locally signed arm64 `AspectInjector` because the
+    `Allure.NUnit` dependency hardcodes the osx-x64 binary and this machine has no Rosetta; the build output was otherwise
+    clean. Gradle 9.8.1 was used for both Java projects.
+  - Built but unverified: see the final Status.
 
 ## Close-out — every task
 
@@ -3193,163 +3152,6 @@ Run them in order, one session each, opened from Plan Queue. Each block is compl
 | X1 | `docs` | `general-purpose` | M1, S1, T2 | ~130k |
 | G1 | `docs` | `general-purpose` | all | ~145k |
 
-Landed: T1, J1, N1, T2, J2, N2, A1, T3 (2026-10-10), J3, N3, T4, J4, N4, M1, M2, M3, S1, X1 (2026-10-11). Every other block is live.
+Landed: T1, J1, N1, T2, J2, N2, A1, T3 (2026-10-10), J3, N3, T4, J4, N4, M1, M2, M3, S1, X1, G1 (2026-10-11). No block is live.
 
 ---
-
-### G1 — The gate, the docs reconciliation, and the close-out (general-purpose, docs)
-
-````
-You are `general-purpose`. Task G1 of docs/plans/003-qa-playwright-appium-upgrade.md: run the plan's only
-gate (§6) over everything T1–M3 landed, and fix what it finds. Write tools/qa-version-check.py, reconcile
-README, CLAUDE.md and the catalog, and file the plan.
-
-Read, in this order:
-1. CLAUDE.md.
-2. The plan: §2, §5, §6, Decisions (incl. any dated ones tasks appended), every task's As-built notes,
-   task G1, "Close-out — every task".
-3. docs/plans/implemented/001-library-conformance-sweep.md §7 (the library check script).
-4. Only when a check fails, the files it names.
-
-Build:
-- tools/qa-version-check.py per §6.2. The module docstring ends with §2.5's bump procedure.
-- Run §6, in order, from the repo root:
-  - §6.1: marketplace parse; the 001 script plus this plan's CHECKS, CODE_CHECKS (fenced code and
-    assets/ only) and allowlists, saved under $TMPDIR; no .DS_Store.
-  - §6.2: python3 tools/qa-version-check.py.
-  - §6.3: compile every asset set in scratch projects under $TMPDIR.
-  - §6.4: the evidence smoke in all three stacks.
-  - §6.5: python3 tools/token-audit.py.
-- Fix every failure at its source. Any task above may own it.
-- §6.3's Java Appium row: build the scratch project from qa/java/skills/ui-test-author/appium/assets/
-  (build.gradle.kts, settings.gradle.kts, testng.xml at the root; the .java files under src/test/java, packages
-  from their `package` lines; M2, D84). `gradle compileTestJava` succeeds; M2's As built lists its open typing
-  risks (the `amend` calls, the recorder `switch`, `Allure.attachment`). The NativeFeatures class in
-  mobile-native-features/SKILL.md and DeviceFarmRunner in device-cloud/references/aws-device-farm.md are code
-  blocks, not assets; compile them in the same scratch project when the check can.
-- §6.3's .NET Appium row: build the scratch project from qa/dotnet/skills/ui-test-author/appium/assets/ (M3, D90):
-  put Directory.Packages.props, AppiumTests.csproj and mobile.runsettings in one folder with all ten .cs files beside
-  them (the namespaces are AppiumTests.{Support,Pages,Tests}; page_template.cs compiles too). `dotnet build` → 0
-  errors. M3's As built lists its open typing risks (`WebDriverWait` from Selenium.Support 4.51.0, the recording-options
-  chain, `Manage().Logs.GetLog`, `AllureApi.AddAttachment` with bytes). The NativeFeatures class in
-  mobile-native-features/SKILL.md and the farm classes in device-cloud/references/details.md are code blocks, not
-  assets; compile them in the same scratch project when the check can (BrowserStackCredentials is in device-cloud/SKILL.md).
-- S1 wrote the two `mobile-project-setup` skills against the Appium assets without running them. §6.3's Java and TS Appium
-  scratch projects should also take the skills' own steps: the three TS edits (specs glob, `../../` imports, tsconfig
-  `include`) and the `SmokeTest` / `smoke.spec.ts` blocks. Compare the pins in both skills' Versions tables to §2.4.
-- X1 wrote the Maestro lane without running it. §6.3's Maestro row: parse every YAML under
-  qa/typescript/skills/ui-test-author/maestro/assets/ (multi-document aware); if `maestro` is installed, run
-  `maestro check-syntax <file>` on each flow and subflow (each prints `OK`; `maestro --help` should list it). §6.1's
-  allowlist check also covers `mcp__maestro__<name>` against §5.5 (D91). Sizes to hold: the Maestro skill 15,984
-  chars, the TS review skill 15,876, the agent description 647 of 650. The EAS `maestro` job and the GitHub Actions
-  emulator job in the Maestro skill are unrun; keep their caveat lines.
-- §6.3's TS Appium row installs too little. Build the scratch project from
-  qa/typescript/skills/ui-test-author/appium/assets/package.json and tsconfig.json (M1, D83): the assets
-  import @wdio/allure-reporter and need @types/mocha and @types/node. M1's As built lists its open typing risks
-  (the settings capability key, the reporter option, `.js` suffixes under NodeNext).
-- README.md: the qa rows for the 3 evidence-capture skills, webmcp-testing, the 2 new
-  mobile-project-setup skills and ui-test-author/maestro, and the counts.
-- CLAUDE.md version policy: one Playwright line (Node 1.64 / Java·.NET·Python 1.63; a 1.64-only API is
-  never taught on a 1.63 lane) and one Appium line (3 primary / 2 supported; java-client 11 /
-  Appium.WebDriver 9 / WebdriverIO 10).
-- docs/skills-catalog.md: ui-test-author/reviewer → review, bdd-project-setup → bdd-project-scaffold,
-  the inhouse row; check the rows T2, J2, N2, A1, S1 and X1 added. Its "Known orphans" line (:31) still lists
-  `production-uptime-checks-{dotnet,java,typescript}`: T4, J4 and N4 wire each into its `qa-api-<stack>` Step 3,
-  so drop the stacks whose agent now loads it (grep the three agents).
-- D34 leftovers no task owns: in qa/dotnet/skills/api-project-setup/SKILL.md (:193) and
-  performance-project-setup/SKILL.md (:136) the UI sibling is `UiTests`, not `PlaywrightTests`; drop
-  `dotnet tool install allure` from api-project-setup (:39, :107) — NuGet has no such tool — and point at
-  qa/reporting/dotnet/skills/test-reports for the Allure CLI. Skip whatever M3 or an earlier task already fixed.
-- D49 seam: T3's TS visual specs live in a `visual` project with `default: false`, so a nightly plain
-  `npx playwright test` skips them. In each of qa/cicd/typescript/skills/ci-pipelines/references/
-  {github-actions,gitlab-ci,azure-pipelines}.md, the schedule-gated visual step runs
-  `npx playwright test --project=visual` in mcr.microsoft.com/playwright:v1.64.0-noble (the minimum, one
-  step or one line each); skip whatever is already there.
-- D53 seam: the Java visual job is J3's `docker run` step (qa/java/skills/visual-regression/references/
-  playwright-snapshots.md §8), but the "Running in the pinned image" bullet of each
-  qa/cicd/java/skills/ci-pipelines/references/{github-actions,gitlab-ci,azure-pipelines}.md still describes a
-  container job. Point each bullet at §8 for the visual job (one line each); keep its description of the image.
-  Also: the Java `test` task in J1's assets/build.gradle.kts does not exclude the `visual` group; the visual
-  reference shows `excludeGroups("visual")` and a `visualTest` task as additions a project makes, so leave the
-  asset alone unless a check needs it.
-- D60 seam: the .NET visual job is N3's `docker run` step (qa/dotnet/skills/visual-regression/references/
-  playwright-snapshots.md §8). In qa/cicd/dotnet/skills/ci-pipelines/references/{github-actions,azure-pipelines}.md
-  the "Running in the pinned image" bullet still describes a container job; point each at that §8 for the visual
-  job (one line each; GitLab's job already runs in the image — leave it). In all three .NET CI references the UI
-  gate filter `($SHARD_FILTER)&TestCategory!=Flaky` becomes `…&TestCategory!=Flaky&TestCategory!=visual&TestCategory!=lighthouse&TestCategory!=grid`,
-  so the nightly-only categories N3 introduced and N4's cloud-grid fixtures (D74, their own `TestCategory=grid` run)
-  stay out of the PR gate.
-- J4 seams: J1's `BaseTest.java` now has `protected Browser newBrowser(Playwright)` (D67) — the Java build
-  compiles it with the rest. `qa/java/skills/ui-test-author/playwright/SKILL.md:83` still says "the two hooks";
-  lifecycle.md §3 now has three — make it "the hooks" (J4 could edit only `BaseTest.java` and lifecycle.md). `data-driven-testing/SKILL.md` is 21,967 chars, a pre-existing size violation J4 did
-  not rewrite (§6.5's 16,000 applies to files this plan rewrote; count it among the body violations). The D12 grep
-  left one code pin, `allure-testng:2.29.0` in `qa/java/skills/mobile-native-features/SKILL.md`; M2 removed it. `qa/_shared/python-web-testing` pins `playwright==1.63.0` (§6.2's
-  `python` stack).
-- The final Status names what is unverified: no Appium flow ran on a device or emulator; no Maestro flow
-  ran; no WebMCP test ran against a site that registers tools; the D9 comparators are recommendations. Then git mv the plan
-  to docs/plans/implemented/.
-
-Traps:
-- No pwsh on this machine. Install the browsers the 1.63 Java/.NET bindings need with
-  `npx playwright@1.63.0 install chromium`, which uses the same shared browser cache.
-- No gradle or mvn on this machine. Download a Gradle distribution into the scratch dir. Never add a
-  wrapper or build files to the repo.
-- WebMCP assets (A1, D47): each stack has a `ProductPage` beside its WebMCP test. TS: copy
-  qa/_shared/webmcp-testing/assets/webmcp.spec.ts and ProductPage.ts flat beside the writer's TS assets (the
-  spec imports ./fixtures and ./ProductPage, and needs no extra npm package); `npx playwright test --list`
-  shows its five tests under `chromium`. Leave both WebMCP test files out of every evidence-smoke run: they
-  need an app that registers tools (.NET: `--filter TestCategory!=webmcp`).
-- Java Playwright scratch project: build.gradle.kts, settings.gradle.kts and testng.xml go at the project
-  root (the build calls useTestNG { suites("testng.xml") }); each .java asset goes under src/test/java at
-  its package path (com/example/uitests/{support,pages,tests}/), WebMcpTest.java and the WebMCP
-  ProductPage.java (pages/) included. J1's
-  `installPlaywrightBrowsers` passes --with-deps, which needs sudo on Linux; the npx install above is
-  enough.
-- Java evidence smoke: BaseTest throws when BASE_URL is unset, so export one (http://localhost is enough
-  for data: pages). Put the two smoke tests in com.example.uitests.tests extending BaseTest, and remove
-  LoginTest and WebMcpTest from that scratch project (they need a real app). Pass condition: the failing
-  test leaves build/playwright-artifacts/<Class>.<method>.{png,zip,webm}, the passing test leaves nothing,
-  and build/playwright-videos/ is empty afterwards.
-- Settle D39 in the same scratch project: `gradle playwright --args="trace open build/playwright-artifacts/<Class>.<method>.zip"`,
-  then `--args="trace errors"` and `--args="trace close"`. If they fail, make the trace CLI Node-only in
-  qa/java/skills/evidence-capture (SKILL.md "Reading a failure", references/playwright.md §8) and in
-  qa/java/agents/qa-ui-java.md Mode A step 1, and record the reversal as a dated decision.
-- J1's build.gradle.kts sets `allure { version.set("2.46.1") }` (D38). `compileTestJava` does not download a
-  report runtime; do not run `allureReport`.
-- .NET Playwright scratch project: Directory.Packages.props, UiTests.csproj and ui.runsettings (the csproj's
-  RunSettingsFilePath points at it) in one folder, with all eight .cs assets (BaseTest, AuthSetup, LoginPage,
-  HomePage, LoginTests and the rest) plus WebMcpTests.cs, ProductPage.cs and webmcp.runsettings from
-  qa/_shared/webmcp-testing/assets/ beside them.
-  `dotnet build` → 0 errors.
-- .NET evidence smoke: BaseTest throws when BASE_URL is unset (http://localhost is enough for data: pages).
-  AuthSetup is a [SetUpFixture] in the root namespace Example.UiTests: it signs in against a real app before
-  every fixture under that namespace, and its failure fails them all. So declare the two smoke tests in a
-  namespace outside Example.UiTests (e.g. `Smoke`), deriving from Example.UiTests.Support.BaseTest, or
-  leave AuthSetup.cs, LoginTests.cs and WebMcpTests.cs out of the smoke project. Pass condition: the failing
-  test leaves bin/Debug/net10.0/playwright-artifacts/<Class>.<Test>.{zip,png,webm}, the passing test leaves
-  nothing, and bin/Debug/net10.0/playwright-videos/ is empty afterwards.
-- Settle D43 in the .NET scratch project without pwsh: `playwright.ps1` runs the node binary and
-  `package/cli.js` under bin/Debug/net10.0/.playwright/; call them directly with
-  `trace open bin/Debug/net10.0/playwright-artifacts/<Class>.<Test>.zip`, then `trace errors` and
-  `trace close`. If they fail, make the trace CLI Node-only in qa/dotnet/skills/evidence-capture (SKILL.md
-  "Reading a failure", references/playwright.md §8), the last bullet of
-  qa/dotnet/skills/ui-test-author/playwright/references/lifecycle.md §9 and qa/dotnet/agents/qa-ui-dotnet.md
-  Mode A, and record the reversal as a dated decision.
-- Settle D44 in the same project: save the `ci/nunit-shards.sh` block from
-  qa/cicd/dotnet/skills/ci-pipelines/SKILL.md under $TMPDIR, run it as
-  `bash nunit-shards.sh <scratch>/UiTests.csproj 2 <scratch>/shards` (the project needs two test classes; the
-  two smoke classes are enough), and check each `<i>.filter` holds `FullyQualifiedName~<Namespace>.<Class>.`
-  terms; then `dotnet test --no-build --filter "(<shard 1 filter>)"` runs only that shard's class. If
-  `NUnit.DisplayName=FullName` or the parsing misbehaves, fix the script in that SKILL.md (the three CI
-  references only call it). Running the script is part of this gate; nothing from it is committed.
-- tools/token-audit.py exits non-zero while any size violation exists. Read the counts (≤ 160 total, 0
-  description violations), not the exit code.
-- Scratch projects live under $TMPDIR and are deleted afterwards. Nothing from them is committed.
-
-Gate (this is the last task, so it carries the plan's only gate, in run order):
-  §6.1 → §6.2 (write, then run) → §6.3 → §6.4 → §6.5
-Fix what it finds — a failure may belong to any task above.
-
-Commit: `chore(qa): 003 gate — version checker, asset builds, evidence smoke, docs reconciled (003 G1)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````

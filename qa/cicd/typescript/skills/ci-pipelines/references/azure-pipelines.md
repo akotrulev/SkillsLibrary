@@ -321,7 +321,7 @@ jobs:
 ## Rules
 
 ### Triggers
-- `trigger: none` + explicit `pr:` branches. Nightly `schedules` for the full suite.
+- `trigger: none` + explicit `pr:` branches. Nightly `schedules` for the full suite. The schedule-gated visual step runs `npx playwright test --project=visual` (the `visual` project has `default: false`, so a plain `npx playwright test` skips it) in `mcr.microsoft.com/playwright:v1.64.0-noble`.
 
 ### Sharding
 - Playwright: `--shard=i/N`. Vitest 1.4+: `vitest run --shard=i/N`. Pre-computed bin file for uneven fixtures.

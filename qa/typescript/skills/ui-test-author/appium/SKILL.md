@@ -17,6 +17,7 @@ Scaffolds WebdriverIO + Appium page objects and Mocha mobile UI tests in TypeScr
 | `appium-uiautomator2-driver` / `appium-xcuitest-driver` | 8.7.0 / 12.17.1 | 4.x / 9.x |
 | `webdriverio`, `@wdio/cli`, `@wdio/appium-service`, `@wdio/globals` | **10.0.2** | 9.x |
 | `@wdio/mocha-framework` / `@wdio/types` / `@wdio/allure-reporter` | 10.0.1 | 9.x |
+| `expect-webdriverio` (the required peer of `@wdio/globals`) / `@wdio/logger` | 8.0.0 / 10.0.0 | 8.x / 9.x |
 | Node | 24 (WDIO 10 needs ≥ 22.19) | 22 |
 
 - **Detect the project's lane first** (`webdriverio` major in `package.json`, `appium -v`) and keep it. WDIO 10 refuses an Appium 2 server, so a project on a device cloud that still runs Appium 2 stays on WDIO 9 (`device-cloud` says how to check).

@@ -118,8 +118,8 @@ public sealed class NativeFeatures(AppiumDriver driver)
 
     public string Clipboard()
     {
-        var base64 = (string)driver.ExecuteScript("mobile: getClipboard", new Dictionary<string, object> { ["contentType"] = "plaintext" });
-        return Encoding.UTF8.GetString(Convert.FromBase64String(base64));
+        var base64 = (string?)driver.ExecuteScript("mobile: getClipboard", new Dictionary<string, object> { ["contentType"] = "plaintext" });
+        return Encoding.UTF8.GetString(Convert.FromBase64String(base64 ?? string.Empty));
     }
 
     public void DismissIosAlert() => driver.SwitchTo().Alert().Dismiss();

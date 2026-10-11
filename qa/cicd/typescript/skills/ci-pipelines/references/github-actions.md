@@ -443,7 +443,7 @@ jobs:
 
 ### Triggers
 - `pull_request: [main]` + nightly `schedule`. Add `workflow_dispatch` so a human can re-run on demand.
-- PR runs stay under 15 min by skipping perf and visual-regression (`if: github.event_name == 'schedule'`).
+- PR runs stay under 15 min by skipping perf and visual-regression (`if: github.event_name == 'schedule'`). The schedule-gated visual step runs `npx playwright test --project=visual` (the `visual` project has `default: false`, so a plain `npx playwright test` skips it) in `mcr.microsoft.com/playwright:v1.64.0-noble`.
 - A `schedule` cron only fires on the **default branch** — don't expect it on PR branches.
 
 ### Concurrency
