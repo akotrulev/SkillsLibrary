@@ -32,6 +32,7 @@ The reactnative.dev `View` page says only that `testID` is "used to locate this 
 - The Android `resource-id` is the **bare `testID`** (`Login.Email`), **not** `com.example.app:id/Login.Email` — RN writes the string as given. A locator written as `<package>:id/<name>` finds nothing.
 - On **iOS**, `testID` is the `name` attribute in the XCUITest source and the Appium accessibility id (`~`). On **Android**, `~` (accessibility id) resolves `content-desc` and therefore does **not** reach a `testID`; use the `id` strategy or a UiSelector `resourceId`. One id, two locator strategies by platform.
 - Because an unset `accessibilityLabel` falls back to a different `name` on iOS, a missing `testID` can look present in the iOS source (`name` = the label). Check the **attribute**, not just that something has a name.
+- **What a test reads back** (verified on device 2026-10-20): XCUITest `getText()` and VoiceOver return the iOS `label`, i.e. `accessibilityLabel`; UiAutomator2 returns the TextView's own text. Any `accessibilityLabel` on a `Text` replaces its readable value on iOS only.
 
 ### Which identifier Maestro's `id:` matches — verified 2026-10-10
 
@@ -63,6 +64,12 @@ So **one `testID` serves Appium and Maestro**: Maestro `id: "Login.Email"`; Appi
 ## Output format
 
 One prop only: `testID="…"`. **Never `accessibilityLabel` (or `aria-label`, `accessibilityHint`) as an identifier, and never a label copied into `testID`.** A label is for a person, is translated ([`languages`](../languages/SKILL.md)), changes with copy edits, and is read aloud; an id is for a machine, is never translated and never spoken. Do not mirror one into the other. Always PascalCase, dot-separated segments.
+
+**Brownfield: a house rule that mirrors `testID` into `accessibilityLabel`** (so Android `~` selectors hit `content-desc`) must exempt text. On iOS every tagged `Text` would read back its id (`TradeForm.TimeInForce.Value`, not "Good for day"). Until the convention is retired, the shared `Text` sets the label on Android only, after any props spread; TalkBack still speaks the id there.
+
+```tsx
+<RNText {...rest} testID={testID} accessibilityLabel={Platform.OS === 'android' ? testID : undefined} />
+```
 
 ## The rules
 
@@ -120,6 +127,8 @@ The caller passes the **prefix only**: `<StatusBadge testId="Orders.Detail.Heade
 Tag: every interactive element (`Pressable`, `TextInput`, `Switch`, tab triggers, menu items, sheet actions), every list / grid container, and the read anchors a test asserts — totals, status text, banners, empty states. Tag the **states of every data region and the error banner**: `<Region>.Loading`, `<Region>.Error`, `<Region>.Retry`, `<Region>.Empty`, `<Region>.Stale`, `Notifications.Banner`, `Notifications.Banner.Close` — so a test can tell a **failed** region from an **empty** one and see the offline state ([`error-handling`](../error-handling/SKILL.md)). Tag the permission primer and denied screens ([`device-features`](../device-features/SKILL.md)).
 
 Skip layout `View`s, decorative icons and wrappers — each tag disables the layout-only optimisation.
+
+Text drawn on a canvas (react-native-skia, Reanimated-driven live text) has no native text node, so neither platform can read its value: expose it via `accessibilityValue` (re-renders as it ticks) or assert it elsewhere.
 
 ### 6. List rows: one static locator, addressed by index
 
@@ -187,6 +196,7 @@ QA's `mobile-screen-explorer` writes, per screen:
 |---|---|
 | `testID={`Row.${order.id}`}` | Static `Orders.Row` (rule 6) |
 | `accessibilityLabel="Login.EmailField"` or label text used as the id | `testID`; the label stays human copy |
+| `accessibilityLabel={testID}` on a `Text` | iOS reads back the id; drop it, or Android-only (Output format) |
 | Locating on Android by `~` / `content-desc` to reach a `testID` | `id=` / `resourceId`; `~` is the label |
 | `testID` on every layout `View` | Remove — it defeats view flattening |
 | `Record<Enum, string>` id map | Interpolate from the value (rule 7) |
