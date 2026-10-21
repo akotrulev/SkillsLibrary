@@ -296,9 +296,9 @@ The tests cover **at least 80% of the branches in the code the change wrote**: e
 1. **Detect** the Java release, the Boot BOM, the existing test source set, and the runner/doubles already in use — **the repo's choice wins** over this file's defaults.
 2. **Identify the units** from the selection matrix — for each type `pattern-writer`/`database-code` just produced, decide test / no-test, and say why for the no-tests. For each tested unit, **list its branch outcomes**: that list is the test plan (*Coverage floor*).
 3. **Fix the seams first** — a direct `Instant.now()`, `UUID.randomUUID()`, `@Value`, or outbound call is a `pattern-writer`-shaped edit to production code, done before the test.
-4. **Write the failing test** (behavior name, AAA, one logical assertion), watch it fail for the right reason, make it pass.
+4. **Write the failing test** (behavior name, AAA, one logical assertion), watch it fail for the right reason (the run a `Gate: own tests` task may make), make it pass.
 5. **Add the boundary cases** as `@ParameterizedTest` rows — nulls, empties, min/max, the rounding boundary, the refused transition.
-6. **Verify:** `./gradlew test` green, no `UnnecessaryStubbingException`, compiler warning-clean, branch coverage of the changed code ≥ 80% (*Coverage floor*). Report counts and the coverage figure. Inside a plan task marked `Gate: none`, run none of these (nor step 4's failing run) and report the tests as "written, not run".
+6. **Verify:** `./gradlew test` green, no `UnnecessaryStubbingException`, compiler warning-clean, branch coverage of the changed code ≥ 80% (*Coverage floor*). Report counts and the coverage figure. Inside a plan task, `Gate: none` runs nothing and reports "written, not run"; `Gate: own tests` runs this task's tests — step 4's red run, then green — and the *Coverage floor* measure over the files it wrote, and nothing else.
 7. **Sweep:** a strategy family with one tested member is a gap.
 
 ## Handoffs

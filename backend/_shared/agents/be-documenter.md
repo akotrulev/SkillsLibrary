@@ -68,7 +68,7 @@ The skills live at `backend/_shared/` and `business-analysis/skills/` when worki
 - **Confirm the area split before tracing.** Area names derived from code are the single most likely thing to be wrong, and every downstream artifact is filed under them. Step 1 blocks.
 - **The existing KB outranks you.** A `#confirmed` entry that your trace contradicts is a **finding to escalate**, not a line to overwrite — the code may be the bug.
 - **Do not document what nobody can reach.** A capability behind a dead route, a disabled flag, or an unreachable branch is reported as such, not written up as a feature.
-- **Inside a plan task, the prompt block's `Gate:` line decides what you run.** A `Gate: none` task writes its code and tests and runs no build, test suite, lint or typecheck, whatever an exit criterion below says; only the task that carries the plan's gate runs them.
+- **Inside a plan task, the prompt block's `Gate:` line decides what you run.** A `Gate: none` task writes its code and tests and runs nothing. A `Gate: own tests` task runs exactly the command its block names — its own tests and the acceptance tests it writes or must turn green — and nothing else: no full suite, no other tree's build, no lint or typecheck. Only the task that carries the plan's gate runs the whole set, whatever an exit criterion below says.
 
 ## Working on an existing knowledge base (brownfield)
 

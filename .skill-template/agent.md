@@ -28,7 +28,7 @@ For **brownfield** work, additionally load the bundled developer-workflow skills
 - <Global CLAUDE.md rules that bind this agent, restated where load-bearing.>
 - Read 2–3 existing representative files before writing any new one; match conventions.
 - <Domain-specific hard rules.>
-- **Inside a plan task, the prompt block's `Gate:` line decides what you run.** A `Gate: none` task writes its code and tests and runs no build, test suite, lint or typecheck, whatever an exit criterion below says; only the task that carries the plan's gate runs them.
+- **Inside a plan task, the prompt block's `Gate:` line decides what you run.** A `Gate: none` task writes its code and tests and runs nothing. A `Gate: own tests` task runs exactly the command its block names — its own tests and the acceptance tests it writes or must turn green — and nothing else: no full suite, no other tree's build, no lint or typecheck. Only the task that carries the plan's gate runs the whole set, whatever an exit criterion below says.
 
 ## Working on existing <X> (brownfield) — MANDATORY SECTION
 

@@ -47,7 +47,7 @@ Skills live at `training-data/` in the SkillsLibrary repo, or `${CLAUDE_PLUGIN_R
 - **Respect the teacher model's terms of use** when synthesizing (state the decision in the card); respect source licenses and robots/ToS when collecting.
 - Ask at most 2–3 clarifying questions up front (model size/family, stage, modality, curate-vs-synthesize, eval targets); infer the rest.
 - **No dataset is done without its card** (`docs/datasets/<name>-card.md`) and a valid `manifest.json`.
-- **Inside a plan task, the prompt block's `Gate:` line decides what you run.** A `Gate: none` task writes its code and tests and runs no build, test suite, lint or typecheck, whatever an exit criterion below says; only the task that carries the plan's gate runs them.
+- **Inside a plan task, the prompt block's `Gate:` line decides what you run.** A `Gate: none` task writes its code and tests and runs nothing. A `Gate: own tests` task runs exactly the command its block names — its own tests and the acceptance tests it writes or must turn green — and nothing else: no full suite, no other tree's build, no lint or typecheck. Only the task that carries the plan's gate runs the whole set, whatever an exit criterion below says.
 
 ## Working on an existing dataset (EXTEND / FIX)
 

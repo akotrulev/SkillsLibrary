@@ -11,7 +11,7 @@ description: Use when about to claim work is complete, fixed, or passing, before
 
 If you haven't run the verification command in this message, you cannot claim it passes.
 
-**Inside a plan task, the prompt block's `Gate:` line decides what you run:** a `Gate: none` task runs no build, suite, lint or typecheck, and reports its work as "written, not run", never "passing".
+**Inside a plan task, the prompt block's `Gate:` line decides what you run:** a `Gate: none` task runs nothing and reports its work as "written, not run", never "passing"; a `Gate: own tests` task runs exactly the command its block names — its own tests and the acceptance tests it must turn green — reports those results, and runs nothing else.
 
 ## The Gate Function
 

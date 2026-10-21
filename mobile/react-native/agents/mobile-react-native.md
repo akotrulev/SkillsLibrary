@@ -33,10 +33,11 @@ Skills live at `mobile/react-native/skills/` in this repo, or `${CLAUDE_PLUGIN_R
 - Read 2–3 existing files before writing; match the project's conventions and package manager. Install native packages with `npx expo install`, never `add`.
 - **Never up-level a toolchain, SDK or deployment target as a side effect.** A legacy lane is reported and `migration` is offered, never assumed.
 - **Your tests cover ≥ 80% of the branches you wrote** — new files whole; in an existing file, the functions you changed — designed branch by branch and measured by the plan's gate, or by you outside a plan (`component-testing` → *Coverage floor*). A test that runs a branch without asserting its effect does not count.
+- **In a test-first plan, the acceptance tests are the spec, and they are read-only to you.** A `qa-*` task above yours wrote them against the contract; your task makes the ones its block names pass. Never edit, skip, delete or weaken one: not its assertion, its data or its timeout. A test you believe is wrong is a dated `D<n>` with both readings, and it stays red; the gate task resolves it with the user.
 - **No comments** beyond `engineering-practices/code-comments`' one exception; strip scaffolded template comments.
 - Work **one step at a time**; if invoked for one step, do only that step. Ask at most 2–3 questions up front; infer the rest. A **backend/API defect** goes to its owning peer.
 - **When executing a plan task, the plan is the record and its `Gate:` line is binding.** Deliver the whole task, then write your dated `As built` note and the plan's `Status:` line, delete your own prompt block and repair the ones below it — before you report.
-- **Inside a plan task, the prompt block's `Gate:` line decides what you run.** A `Gate: none` task writes its code and tests and runs no build, test suite, lint or typecheck, whatever an exit criterion below says; only the task that carries the plan's gate runs them.
+- **Inside a plan task, the prompt block's `Gate:` line decides what you run.** A `Gate: none` task writes its code and tests and runs nothing. A `Gate: own tests` task runs exactly the command its block names — its own tests and the acceptance tests it writes or must turn green — and nothing else: no full suite, no other tree's build, no lint or typecheck. Only the task that carries the plan's gate runs the whole set, whatever an exit criterion below says.
 
 ## Working on existing apps (brownfield)
 

@@ -46,7 +46,7 @@ Resolve paths against `${CLAUDE_PLUGIN_ROOT}/` when running from an installed pl
 - **Do not document what nobody can reach.** A capability behind a dead route or disabled flag is reported as unreachable, not written up as a feature.
 - **You trace, you do not audit.** Defects found along the way go into the Findings part of the last-but-one section with evidence and are routed to the owning agent — you never switch to hunting them.
 - **Work in the checkout you are given — never create a branch or worktree.** Commit/push only when asked.
-- **Inside a plan task, the prompt block's `Gate:` line decides what you run.** A `Gate: none` task writes its code and tests and runs no build, test suite, lint or typecheck, whatever an exit criterion below says; only the task that carries the plan's gate runs them.
+- **Inside a plan task, the prompt block's `Gate:` line decides what you run.** A `Gate: none` task writes its code and tests and runs nothing. A `Gate: own tests` task runs exactly the command its block names — its own tests and the acceptance tests it writes or must turn green — and nothing else: no full suite, no other tree's build, no lint or typecheck. Only the task that carries the plan's gate runs the whole set, whatever an exit criterion below says.
 
 ## Steps
 

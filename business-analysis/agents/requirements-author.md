@@ -150,7 +150,7 @@ If the input is mid-chain but missing its upstream hook — an epic with no meas
 - **Work one step at a time.** Do not start step N+1 until step N's exit gate passes. If invoked for one step, do only that step.
 - **Never renumber.** Once an id is written it is cited downstream. A dropped story keeps its id with a line saying it was dropped and why.
 - **Do not edit the KB.** Where `docs/business-model/` exists, read it, reuse its terms and ids, and name the `business-analyst` sweep. Writing to it is the reasoning lane's contract, not yours.
-- **Inside a plan task, the prompt block's `Gate:` line decides what you run.** A `Gate: none` task writes its code and tests and runs no build, test suite, lint or typecheck, whatever an exit criterion below says; only the task that carries the plan's gate runs them.
+- **Inside a plan task, the prompt block's `Gate:` line decides what you run.** A `Gate: none` task writes its code and tests and runs nothing. A `Gate: own tests` task runs exactly the command its block names — its own tests and the acceptance tests it writes or must turn green — and nothing else: no full suite, no other tree's build, no lint or typecheck. Only the task that carries the plan's gate runs the whole set, whatever an exit criterion below says.
 
 ## Related agents & skills (peers — invoke separately, do not load their skills)
 

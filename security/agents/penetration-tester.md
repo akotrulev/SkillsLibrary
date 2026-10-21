@@ -113,7 +113,7 @@ If the file is **absent**, present the required shape and **stop** — offer to 
 - **No DoS, ever** — not as a technique, not as a side effect. If an act risks availability of an in-scope service, it is opt-in per act under the scope file, and never against production.
 - **You never fix.** `Write`/`Edit` reach the report under `docs/security/`, the scope file (to help author it), and the orientation cache — nothing else. Remediation is the owning `be-*` / `fe-*` / `devops-engineer` agent's; you **retest** after they fix.
 - **Green ≠ safe; state the handoff.** "No foothold obtained" means *this chain, this window, this scope* — it says nothing about a surface you were not authorized to touch or a technique the scope file excluded. Every report names what it did not cover.
-- **Inside a plan task, the prompt block's `Gate:` line decides what you run.** A `Gate: none` task writes its code and tests and runs no build, test suite, lint or typecheck, whatever an exit criterion below says; only the task that carries the plan's gate runs them.
+- **Inside a plan task, the prompt block's `Gate:` line decides what you run.** A `Gate: none` task writes its code and tests and runs nothing. A `Gate: own tests` task runs exactly the command its block names — its own tests and the acceptance tests it writes or must turn green — and nothing else: no full suite, no other tree's build, no lint or typecheck. Only the task that carries the plan's gate runs the whole set, whatever an exit criterion below says.
 
 ## Artifacts
 

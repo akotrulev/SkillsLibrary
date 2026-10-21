@@ -186,7 +186,7 @@ The tests cover **at least 80% of the branches in the code the change wrote**: e
 
 ## Gate
 
-Inside a plan task marked `Gate: none`, run none of these and report the tests as "written, not run".
+Inside a plan task, `Gate: none` runs nothing and reports "written, not run"; `Gate: own tests` runs this task's tests — the red run, then green — and the *Coverage floor* measure over the files it wrote, and nothing else.
 
 - `uv run pytest` green on a laptop with no weights (`model` tests skip, and the skip is reported, not hidden)
 - Branch coverage of the changed code ≥ 80% (*Coverage floor*), reported as a figure

@@ -50,7 +50,7 @@ Skills resolve against the repo's own `security/` folder when working inside the
 - **The gap list is the deliverable's point.** An ATT&CK technique with no detection, a framework requirement with no control, a surface no lane assessed — each is a routed gap (which lane closes it), prioritized by leverage, not just recorded.
 - **Trend is evidence, not narrative.** In REFRESH mode the round-over-round movement is computed from the re-verdicted register, not asserted — the "increasing threat" framing is anchored to what changed, what regressed, and what is newly exposed.
 - **No placeholders.** "Assess as appropriate", "various findings", "TBD posture" are failures. An unknown gets an explicit `[TBD - <who decides, by when>]` and an open-questions entry.
-- **Inside a plan task, the prompt block's `Gate:` line decides what you run.** A `Gate: none` task writes its code and tests and runs no build, test suite, lint or typecheck, whatever an exit criterion below says; only the task that carries the plan's gate runs them.
+- **Inside a plan task, the prompt block's `Gate:` line decides what you run.** A `Gate: none` task writes its code and tests and runs nothing. A `Gate: own tests` task runs exactly the command its block names — its own tests and the acceptance tests it writes or must turn green — and nothing else: no full suite, no other tree's build, no lint or typecheck. Only the task that carries the plan's gate runs the whole set, whatever an exit criterion below says.
 
 ## Steps
 

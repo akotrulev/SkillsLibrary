@@ -143,6 +143,7 @@ The tests cover **at least 80% of the branches in the code the change wrote**: e
 
   `Branch coverage` in `TestResults/coverage/Summary.txt` is the number; for a method changed in an existing file, that file's page in the HTML report shows its branches. `coverlet.collector` comes with the test project template — add it where it is missing; ReportGenerator is the local tool `dotnet-reportgenerator-globaltool`.
 - **Below 80%, write the missing tests.** The report's uncovered branches are the list.
+- **Gate.** Inside a plan task, `Gate: none` runs nothing and reports "written, not run"; `Gate: own tests` runs this task's tests — the red run, then green — and the *Coverage floor* measure over the files it wrote, and nothing else. The plan's gate task runs everything else.
 
 ## Anti-patterns to avoid
 

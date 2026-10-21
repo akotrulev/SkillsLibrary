@@ -220,7 +220,7 @@ The tests cover **at least 80% of the branches in the code the change wrote**: e
 
 ## Validation
 
-Inside a `Gate: none` plan task, run none of these and report "written, not run"; the plan's gate task runs them.
+Inside a plan task, `Gate: none` runs nothing and reports "written, not run"; `Gate: own tests` runs this task's tests — the red run, then green — and the *Coverage floor* measure over the files it wrote, and nothing else. The plan's gate task runs everything else.
 
 - Every `render` / `fireEvent` / `act` / `renderHook` in the diff is preceded by `await`.
 - `npx jest` is green, with no "not wrapped in act" warnings and no open-handle warning.

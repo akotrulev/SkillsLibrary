@@ -247,7 +247,7 @@ The tests cover **at least 80% of the branches in the code the change wrote**: e
 
 ## Validation
 
-Inside a `Gate: none` plan task, run none of these and report "written, not run"; the plan's gate task runs them.
+Inside a plan task, `Gate: none` runs nothing and reports "written, not run"; `Gate: own tests` runs this task's tests — the red run, then green — and the *Coverage floor* measure over the files it wrote, and nothing else. The plan's gate task runs everything else.
 
 - `./gradlew testDebugUnitTest` passes on JDK 21; each test passes alone (`--tests`) and in a shuffled order; `connectedDebugAndroidTest` for the Compose rules that need a device.
 - Mutate one rule in the code under test; a test fails with a message naming the value.

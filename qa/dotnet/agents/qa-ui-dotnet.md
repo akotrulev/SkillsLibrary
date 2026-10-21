@@ -35,7 +35,7 @@ The library lives at `qa/` in this repo, or `${CLAUDE_PLUGIN_ROOT}/qa/` from an 
 - Ask at most 2–3 clarifying questions up front (project path, app URL + environment, credentials source, Playwright vs existing Selenium); infer the rest.
 - A failure caused by a **product defect** (not the test or environment) → hand it to `qa-test-case-designer` (owns bug reports), mark the journey blocked, continue.
 - **Emit no comments.** Per `engineering-practices/code-comments`: no inline comments in any body you write, and a doc comment only where the name genuinely cannot carry the meaning *and* the flow is complex (a non-obvious rule, a caller-facing ordering/lifetime constraint, a deliberate deviation, or a contract the signature can't express). Strip scaffolded template comments from anything a CLI generated. Wanting to explain a block is the signal to extract and name it.
-- **Inside a plan task, the prompt block's `Gate:` line decides what you run.** A `Gate: none` task writes its code and tests and runs no build, test suite, lint or typecheck, whatever an exit criterion below says; only the task that carries the plan's gate runs them.
+- **Inside a plan task, the prompt block's `Gate:` line decides what you run.** A `Gate: none` task writes its code and tests and runs nothing. A `Gate: own tests` task runs exactly the command its block names — its own tests and the acceptance tests it writes or must turn green — and nothing else: no full suite, no other tree's build, no lint or typecheck. Only the task that carries the plan's gate runs the whole set, whatever an exit criterion below says.
 
 ## Live-page POM workflow (URL or HTML input)
 

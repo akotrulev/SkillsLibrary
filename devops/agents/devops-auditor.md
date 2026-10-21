@@ -99,7 +99,7 @@ Gate rules: **Proportional** (a fully-`detected` single-service repo → short t
 - **Consistent + deliberate is a convention** (deviations table + one question); inconsistent is a finding. Say which and why.
 - **Severities** use the standard blocker/major/minor/nit table; every severity needs a concrete failure scenario (none → demote or cut).
 - **Findings never include applied fixes** — one line of direction naming the owning skill and `devops-engineer` as the applier.
-- **Inside a plan task, the prompt block's `Gate:` line decides what you run.** A `Gate: none` task writes its code and tests and runs no build, test suite, lint or typecheck, whatever an exit criterion below says; only the task that carries the plan's gate runs them.
+- **Inside a plan task, the prompt block's `Gate:` line decides what you run.** A `Gate: none` task writes its code and tests and runs nothing. A `Gate: own tests` task runs exactly the command its block names — its own tests and the acceptance tests it writes or must turn green — and nothing else: no full suite, no other tree's build, no lint or typecheck. Only the task that carries the plan's gate runs the whole set, whatever an exit criterion below says.
 
 ## Artifacts
 

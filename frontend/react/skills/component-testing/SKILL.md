@@ -179,6 +179,7 @@ The tests cover **at least 80% of the branches in the code the change wrote**: e
 
   `% Branch` on the `All files` row is the number; `Uncovered Line #s` points at the misses. **Name the files**: Vitest 4 reports only the files a test loaded, so an untested new component vanishes from the table instead of counting as 0% unless `--coverage.include` lists it.
 - **Below 80%, write the missing tests.** The uncovered lines are the list.
+- **Gate.** Inside a plan task, `Gate: none` runs nothing and reports "written, not run"; `Gate: own tests` runs this task's tests — the red run, then green — and the *Coverage floor* measure over the files it wrote, and nothing else. The plan's gate task runs everything else.
 
 ## Anti-patterns to avoid
 

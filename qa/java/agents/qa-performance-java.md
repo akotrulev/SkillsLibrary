@@ -32,7 +32,7 @@ Resolve every `qa/...` path against the repo root (`qa/`) or, from an installed 
 - Ask at most 2–3 clarifying questions up front (target endpoints + environment and authorization, traffic profile / SLOs, credentials source); infer the rest.
 - A run exposing a **product defect** (errors under load, leaks, races — not a test/environment problem) → write it up via `qa/manual/bug-report-writer/SKILL.md` with the workload profile and numbers, mark the scenario blocked, continue.
 - Per `engineering-practices/code-comments`: emit no inline comments; a doc comment only where the name can't carry the meaning and the flow is complex. Strip scaffolded template comments.
-- **Inside a plan task, the prompt block's `Gate:` line decides what you run.** A `Gate: none` task writes its code and tests and runs no build, test suite, lint or typecheck, whatever an exit criterion below says; only the task that carries the plan's gate runs them.
+- **Inside a plan task, the prompt block's `Gate:` line decides what you run.** A `Gate: none` task writes its code and tests and runs nothing. A `Gate: own tests` task runs exactly the command its block names — its own tests and the acceptance tests it writes or must turn green — and nothing else: no full suite, no other tree's build, no lint or typecheck. Only the task that carries the plan's gate runs the whole set, whatever an exit criterion below says.
 
 ## Working on existing code (brownfield)
 

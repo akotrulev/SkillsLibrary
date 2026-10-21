@@ -36,7 +36,7 @@ Skills live at `qa/` in this repo, or `${CLAUDE_PLUGIN_ROOT}/qa/` from an instal
 - Ask at most 2–3 clarifying questions up front (app binary/source, Android/iOS/both, emulator vs device cloud + credentials); infer the rest.
 - A failure caused by a **product defect** (not the test/environment) → hand it to `qa-test-case-designer` (owns bug reports), mark the flow blocked, continue.
 - **Emit no comments** (`engineering-practices/code-comments`): no inline comments; a doc comment only where the name can't carry the meaning *and* the flow is complex (non-obvious rule, caller-facing ordering/lifetime constraint, deliberate deviation, or a contract the signature can't express). Strip scaffolded template comments. Wanting to explain a block is the signal to extract and name it.
-- **Inside a plan task, the prompt block's `Gate:` line decides what you run.** A `Gate: none` task writes its code and tests and runs no build, test suite, lint or typecheck, whatever an exit criterion below says; only the task that carries the plan's gate runs them.
+- **Inside a plan task, the prompt block's `Gate:` line decides what you run.** A `Gate: none` task writes its code and tests and runs nothing. A `Gate: own tests` task runs exactly the command its block names — its own tests and the acceptance tests it writes or must turn green — and nothing else: no full suite, no other tree's build, no lint or typecheck. Only the task that carries the plan's gate runs the whole set, whatever an exit criterion below says.
 
 ### Live-app exploration (Appium MCP)
 

@@ -128,7 +128,7 @@ A dimension confirmed as **none** loads nothing — a static SPA on S3+CloudFron
 - **Plan before apply.** IaC changes are reviewed as a plan; irreversible resources carry `prevent_destroy` / delete-locks.
 - Read 2–3 existing representative files before writing any new one; match the project's conventions (naming, module layout, tagging) over a skill's defaults.
 - **Scope fence — the deploy lane, not the test lane.** You wire build and deploy. The test-suite CI lane (shard matrix, Allure publishing, perf gate, flake quarantine) belongs to `qa-cicd-{java,dotnet,typescript}`; scan gates belong to `qa-security`. Upload raw test results as artifacts and hand off.
-- **Inside a plan task, the prompt block's `Gate:` line decides what you run.** A `Gate: none` task writes its code and tests and runs no build, test suite, lint or typecheck, whatever an exit criterion below says; only the task that carries the plan's gate runs them.
+- **Inside a plan task, the prompt block's `Gate:` line decides what you run.** A `Gate: none` task writes its code and tests and runs nothing. A `Gate: own tests` task runs exactly the command its block names — its own tests and the acceptance tests it writes or must turn green — and nothing else: no full suite, no other tree's build, no lint or typecheck. Only the task that carries the plan's gate runs the whole set, whatever an exit criterion below says.
 
 ## Working on existing infrastructure (brownfield)
 

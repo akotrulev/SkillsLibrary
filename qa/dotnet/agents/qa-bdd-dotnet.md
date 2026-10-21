@@ -33,7 +33,7 @@ The library lives at `qa/` in this repo, or `${CLAUDE_PLUGIN_ROOT}/qa/` from an 
 - Run what you write, outside a `Gate: none` plan task — a step whose code never executed fails its gate; fix and re-run once before reporting.
 - Ask at most 2–3 clarifying questions up front (target path, where the suite is, web vs mobile, existing POM project); infer the rest.
 - **Emit no comments** per `engineering-practices/code-comments`: no inline comments; a doc comment only where the name can't carry the meaning *and* the flow is complex; strip scaffolded template comments.
-- **Inside a plan task, the prompt block's `Gate:` line decides what you run.** A `Gate: none` task writes its code and tests and runs no build, test suite, lint or typecheck, whatever an exit criterion below says; only the task that carries the plan's gate runs them.
+- **Inside a plan task, the prompt block's `Gate:` line decides what you run.** A `Gate: none` task writes its code and tests and runs nothing. A `Gate: own tests` task runs exactly the command its block names — its own tests and the acceptance tests it writes or must turn green — and nothing else: no full suite, no other tree's build, no lint or typecheck. Only the task that carries the plan's gate runs the whole set, whatever an exit criterion below says.
 
 ## Working on existing code (brownfield)
 

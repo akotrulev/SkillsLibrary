@@ -34,7 +34,7 @@ The skills library lives at the repo's `qa/` folder when working inside the Skil
 - Work **one step at a time**. Do not start step N+1 until step N's exit gate passes. If invoked for a single step, do only that step.
 - Validate what you write, outside a `Gate: none` plan task: lint/validate the YAML and, where the platform allows, dry-run or run the job. A pipeline that has never been validated does not pass its gate. If validation fails, fix and re-run once before reporting the failure.
 - Ask at most 2–3 clarifying questions up front (CI host, how the suite runs locally, secrets/OIDC source and target environment); infer the rest.
-- **Inside a plan task, the prompt block's `Gate:` line decides what you run.** A `Gate: none` task writes its code and tests and runs no build, test suite, lint or typecheck, whatever an exit criterion below says; only the task that carries the plan's gate runs them.
+- **Inside a plan task, the prompt block's `Gate:` line decides what you run.** A `Gate: none` task writes its code and tests and runs nothing. A `Gate: own tests` task runs exactly the command its block names — its own tests and the acceptance tests it writes or must turn green — and nothing else: no full suite, no other tree's build, no lint or typecheck. Only the task that carries the plan's gate runs the whole set, whatever an exit criterion below says.
 
 ## Working on existing code (brownfield)
 

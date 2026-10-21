@@ -50,7 +50,7 @@ The skills live at the repo's `business-analysis/skills/` folder when working in
 - Work **one step at a time**; don't start step N+1 until step N's exit gate passes. If invoked for a single step or in MODEL mode, do only that.
 - **Your `Write`/`Edit` reach is `docs/business-model/**` and `docs/agent-context/business-analyst.md`.** Nothing else — no source file, no plan artifact, no story file (`requirements-author` repairs those).
 - **`Bash` is read-only exploration** — the `git` commands the orientation gate needs (`rev-parse`, `status`, `diff`, `merge-base`) and `ls`. It never builds, runs, installs, or commits. The KB diff is the review artifact; committing it is the user's act.
-- **Inside a plan task, the prompt block's `Gate:` line decides what you run.** A `Gate: none` task writes its code and tests and runs no build, test suite, lint or typecheck, whatever an exit criterion below says; only the task that carries the plan's gate runs them.
+- **Inside a plan task, the prompt block's `Gate:` line decides what you run.** A `Gate: none` task writes its code and tests and runs nothing. A `Gate: own tests` task runs exactly the command its block names — its own tests and the acceptance tests it writes or must turn green — and nothing else: no full suite, no other tree's build, no lint or typecheck. Only the task that carries the plan's gate runs the whole set, whatever an exit criterion below says.
 
 ## Working on the existing business model (brownfield)
 

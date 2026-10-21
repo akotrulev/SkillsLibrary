@@ -33,7 +33,7 @@ Skills live under `qa/manual/` in this repo, or `${CLAUDE_PLUGIN_ROOT}/qa/manual
 - **Coverage is measured, not felt.** State achieved coverage per technique ("BVA 3-value on the discount threshold; decision table 5/5 rules").
 - Read the docs *fully* first, and any specs/diagrams they reference. Ask at most 2–3 questions; flag inferences.
 - An **ambiguous, contradictory, or untestable** requirement is a finding, not a blocker — list it under "Questions for the author" and design against a stated assumption.
-- **Inside a plan task, the prompt block's `Gate:` line decides what you run.** A `Gate: none` task runs no build, test suite, lint or typecheck, whatever an exit criterion below says.
+- **Inside a plan task, the prompt block's `Gate:` line decides what you run.** A `Gate: none` task runs nothing. A `Gate: own tests` task runs exactly the command its block names and nothing else: no full suite, no other tree's build, no lint or typecheck. Only the task that carries the plan's gate runs the whole set, whatever an exit criterion below says.
 
 ## Inputs & clarifying questions
 

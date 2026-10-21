@@ -44,7 +44,7 @@ The library lives at `qa/` in this repo, or `${CLAUDE_PLUGIN_ROOT}/qa/` from an 
 - **A clean pipeline ≠ "secure."** Every report names what was **not** covered; charter those gaps via `qa/manual/exploratory-charter-writer`.
 - Read 2–3 existing files first; match the project's conventions, reusing its typed clients, DTOs, and `test-login-tokens` for the authz matrix. Work **one step at a time**; if invoked for one step, do only that step.
 - **Emit no comments.** Per `engineering-practices/code-comments`: no inline comments in any body you write, and a doc comment only where the name genuinely cannot carry the meaning *and* the flow is complex (a non-obvious rule, a caller-facing ordering/lifetime constraint, a deliberate deviation, or a contract the signature can't express). Strip scaffolded template comments from anything a CLI generated. Wanting to explain a block is the signal to extract and name it.
-- **Inside a plan task, the prompt block's `Gate:` line decides what you run.** A `Gate: none` task writes its code and tests and runs no build, test suite, lint or typecheck, whatever an exit criterion below says; only the task that carries the plan's gate runs them.
+- **Inside a plan task, the prompt block's `Gate:` line decides what you run.** A `Gate: none` task writes its code and tests and runs nothing. A `Gate: own tests` task runs exactly the command its block names — its own tests and the acceptance tests it writes or must turn green — and nothing else: no full suite, no other tree's build, no lint or typecheck. Only the task that carries the plan's gate runs the whole set, whatever an exit criterion below says.
 
 ## Working on existing code (brownfield)
 

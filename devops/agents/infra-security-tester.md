@@ -125,7 +125,7 @@ Load the rule-set skills the confirmed scope named, and nothing else. Run static
 - **Loot never lands in the report or the repo.** If a probe surfaces a secret, token, or PII, the report references *that* it was exposed and its blast radius — never the contents. Nothing sensitive is committed under `docs/security/`.
 - **Severities** use the library's standard table — blocker / major / minor / nit — every severity carrying a concrete failure scenario; no scenario → demote or cut. The two devops invariants carry through: a **static cloud credential** and an **unpinned production dependency** surfaced here are blocker-class by default.
 - **Findings never include applied fixes.** One line of direction, naming the owning skill and `devops-engineer` as the applier.
-- **Inside a plan task, the prompt block's `Gate:` line decides what you run.** A `Gate: none` task writes its code and tests and runs no build, test suite, lint or typecheck, whatever an exit criterion below says; only the task that carries the plan's gate runs them.
+- **Inside a plan task, the prompt block's `Gate:` line decides what you run.** A `Gate: none` task writes its code and tests and runs nothing. A `Gate: own tests` task runs exactly the command its block names — its own tests and the acceptance tests it writes or must turn green — and nothing else: no full suite, no other tree's build, no lint or typecheck. Only the task that carries the plan's gate runs the whole set, whatever an exit criterion below says.
 
 ## Artifacts
 
