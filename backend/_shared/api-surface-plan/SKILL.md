@@ -81,6 +81,7 @@ One block per endpoint. The typed tables are the Swagger equivalent — enough t
 #### POST `/api/v1/orders` — Place order
 **Purpose:** creates a `pending` order from the caller's cart and reserves stock.
 **Auth:** `orders:write`; tenant taken from the token, never from the body.
+**Acceptance:** US7 AC1, US7 AC2
 **Idempotency:** `Idempotency-Key` header required; a repeat within 24h returns the original 201 body.
 
 **Request body**
@@ -116,6 +117,8 @@ One block per endpoint. The typed tables are the Swagger equivalent — enough t
 
 Rules:
 
+- **Every endpoint names the acceptance criteria it proves** on an `**Acceptance:**` line under `**Auth:**`, cited as `US7 AC2` from `stories.md`. Every AC with an outcome visible at the API lands on at least one endpoint; an endpoint with no AC is either a missing story or an endpoint nobody asked for. This is what a `Q` task writes its tests from.
+- **The `not-implemented` stub response (catalog V8.6) is never listed per endpoint.** It is part of the standard set and exists only while a contract-task stub does.
 - **"Standard set, plus —" is the required form.** Never re-list 401/403/404/400 per endpoint; state only what is *additional or different*. If an endpoint deliberately omits part of the standard set (a public health check has no 401), say so explicitly — that is a delta too.
 - **Every request field maps to something real** — a column in `data-model.md`, a computed value, or a named external input. A field that maps to nothing is either a missing table or a field nobody needs.
 - **Every screen data need maps to a response field** — walk `experience-plan.md` §4 line by line; a need with no field is a missing endpoint or a computed field you have not declared, and a response field no screen and no integration reads is a candidate for removal.

@@ -64,6 +64,7 @@ State transitions are actions on sub-paths (`/publish`, `/cancel`, `/attend`) �
 #### POST `/api/v1/sessions/{sessionId}/bookings` — Book a seat
 **Purpose:** books one seat on a published, future session for the calling member.
 **Auth:** `bookings:own`; the member is the caller — a `memberId` in the body would be ignored per the server-computed rule, so the body carries none.
+**Acceptance:** US7 AC1, US7 AC2, US7 AC3
 
 **Request body** — none. The path and the token carry everything; an empty body is a valid design outcome, stated rather than padded.
 
@@ -87,7 +88,7 @@ State transitions are actions on sub-paths (`/publish`, `/cancel`, `/attend`) �
 The capacity check is the DB-level guard from `data-model.md` §3 — the 409 comes from the constraint/lock, not from a count the request read earlier.
 
 #### The remaining nine endpoints — abbreviated in this example
-Each gets the same block: purpose, auth, request/response field tables, "standard set, plus —". Notable deltas: `PUT /sessions/{sessionId}` adds 412 `stale-resource`/428 (V6.2/V6.3) and 409 `capacity-below-bookings` (cannot set capacity under confirmed count); `/cancel` adds 409 `invalid-state` and computes `lateCancel` server-side per the blueprint's decision table.
+Each gets the same block: purpose, auth, acceptance, request/response field tables, "standard set, plus —". Notable deltas: `PUT /sessions/{sessionId}` adds 412 `stale-resource`/428 (V6.2/V6.3) and 409 `capacity-below-bookings` (cannot set capacity under confirmed count); `/cancel` adds 409 `invalid-state` and computes `lateCancel` server-side per the blueprint's decision table.
 
 ## 6. Pagination, filtering & sorting
 `page` (≥1, default 1) · `pageSize` (default 20, max 100, above-max → 400 — reject, matching V1.5's choice) · sort allowlisted per resource, always tie-broken on `id`. `GET /sessions` filters: `from`/`to` (date range, `from <= to` per V2.8), `workshopId`.

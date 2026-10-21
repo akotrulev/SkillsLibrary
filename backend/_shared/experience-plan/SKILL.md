@@ -61,9 +61,10 @@ One per primary task: the ordered screens, the action on each, and the endpoint 
 2. S3 Session detail — **Book seat** → `POST sessions/{id}/bookings`
 3. S3 (same screen) — confirmation inline, toast "Seat booked" with Undo → cancel path
 Failure: capacity reached → S3 shows the failed state with "Join waitlist" `[TBD - owner]` or "Pick another session"
+**Acceptance:** US7 AC1, US7 AC4
 ```
 
-Link to the blueprint's flow by id (`FLOW-nnn`) where a business-model KB exists.
+Link to the blueprint's flow by id (`FLOW-nnn`) where a business-model KB exists. **Every journey names the acceptance criteria it proves** on an `**Acceptance:**` line, cited as `US7 AC2` from `stories.md`; every AC with an outcome a person sees lands on at least one journey. A `qa-ui-<stack>` / `qa-mobile-<stack>` task writes the journey test from this line before the screens exist.
 
 ### Step 4 — Screen catalog
 
@@ -78,6 +79,7 @@ One block per screen, ids `S1…Sn`, in nav order. This is what the frontend tas
 **Regions:** header (title, starts-at, capacity left) · description · attendee list (staff only)
 **States:** loading skeleton · loaded · failed (region-scoped, retry) · empty attendee list — "No bookings yet"
 **Data needed:** session (title, startsAt, capacity, bookedCount, workshop title) · my booking on this session, if any · attendee list with member names (staff)
+**Test ids:** `SessionDetail.BookButton` · `SessionDetail.AttendeeList` · `SessionDetail.AttendedButton`
 **Serves:** U1, U3, U5 · **Journeys:** J1, J3
 ```
 
@@ -88,6 +90,7 @@ Rules:
 - **Every region names its four states.** A screen with a data region and no failed state is a plan defect, not a build detail.
 - **Data needed is written in the user's nouns**, resolved against `data-model.md` entities — this is the line `api-surface.md` turns into response fields, and the one place a screen can ask for an aggregate (`bookedCount`) the tables do not store, so the API step can decide computed-vs-stored deliberately.
 - **Role differences live on the screen block**, never as a duplicate screen.
+- **Every screen names its test ids** — the PascalCase dot-separated ids of its interactive elements and list containers (`SessionDetail.BookButton`, `SessionDetail.AttendeeList`), static and never carrying an index, id or state, per the stack's `test-ids` rules. The journey tests' page objects and the screen both bind to these names, which is what lets a journey test exist before its screen.
 
 ### Step 5 — Screen ↔ endpoint matrix
 
@@ -127,10 +130,10 @@ Once, at the end, from `ux-patterns` §5–§9: **density** (and why) · **accel
 |---|---|---|---|---|
 
 ## 3. Journeys
-<!-- one per primary task: numbered steps, screen + action + endpoint per step, step target, failure exit -->
+<!-- one per primary task: numbered steps, screen + action + endpoint per step, step target, failure exit, acceptance (the ACs it proves) -->
 
 ## 4. Screens
-<!-- one block per screen, S1…Sn, in nav order — route, nav, actors, page type, surface, primary action, regions, states, data needed, serves, journeys -->
+<!-- one block per screen, S1…Sn, in nav order — route, nav, actors, page type, surface, primary action, regions, states, data needed, test ids, serves, journeys -->
 
 ## 5. Screen ↔ endpoint matrix
 <!-- filled by the API step; every user-facing endpoint on ≥ 1 screen, every data need resolved -->
@@ -157,12 +160,14 @@ Once, at the end, from `ux-patterns` §5–§9: **density** (and why) · **accel
 - **Endpoint bodies** — `api-surface.md`; the plan says what the screen *needs*, in the user's nouns.
 - **A screen per role** — role differences are lines on one screen block.
 
+A test id is not a component name: `Test ids:` lines name the elements a person or a test touches, never the components that render them.
+
 ## Self-check
 
 1. Every *User-facing capability* in `blueprint.md` §2 maps to ≥ 1 task in §1; every task serves ≥ 1 screen; every primary task has a journey.
 2. The shell is decided once, with its rejected alternative; every top-ranked task is within one click of it, nothing is at depth three.
 3. Every screen block has route, page type, surface, primary action, regions with four states, and a data-needed line resolved against `data-model.md`.
-4. Every journey counts its steps against a stated target and names its failure exit.
+4. Every journey counts its steps against a stated target, names its failure exit and carries an `Acceptance:` line; every screen block carries a `Test ids:` line.
 5. After the API step: the matrix covers every user-facing endpoint and every data need — the two Step-7 coverage lines read `n/n`.
 6. No `[TBD]` without an owner; no colour, component or copy decision leaked in.
 

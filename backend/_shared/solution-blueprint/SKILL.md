@@ -98,6 +98,21 @@ State the decision, the reason it is **earned for this system**, and what you re
 
 Then, for each *pattern* in play, one line stating it is earned — CQRS, event sourcing, Saga, Outbox, Repository over the ORM. Load `backend/_shared/pattern-guide` for the concept card if the decision is live. **One pattern per problem**; a pattern with no stated reason is a finding against your own blueprint.
 
+**Propose the repository layout** beside the style. The default is **one repo per product**, because a plan runs in one worktree and a test-first plan keeps its contract, its acceptance tests and its code in one history:
+
+```
+<product>/
+  contracts/                OpenAPI and AsyncAPI documents: what every side binds to
+  services/<name>/          one deployable each, in its stack's native workspace
+  services/<name>/tests/    unit tests and the acceptance tests that drive its implementation
+  web/  mobile/             the clients, in the TypeScript workspace or their own native projects
+  e2e/                      journey suites that need several deployables running together
+  deploy/local/             the local Grafana stack, started with one command
+  docs/plans/               the plans
+```
+
+Mixed languages are fine: each stack keeps its native workspace in its own folder, with CI on path filters. **Multi-repo needs a stated reason** — independent teams or release cadences — and means one plan per repo, with the contract travelling as the OpenAPI asset.
+
 Include a Mermaid context diagram — the areas, the external systems, and the direction of every dependency:
 
 ````markdown
@@ -321,6 +336,7 @@ In `DETAIL` mode, where the human supplied the high-level plan, the gate is shor
 **Style:** <choice> — <why it is earned for this system>
 **Rejected:** <what you considered and why not>
 **Patterns in play:** <pattern — the reason it is earned. One line each.>
+**Repository layout:** <one repo per product — contracts/, services/<name>/ with its driving acceptance tests beside the code, web/ mobile/, e2e/, deploy/local/ — or multi-repo with the stated reason (independent teams or release cadences) and one plan per repo.>
 
 ```mermaid
 flowchart LR

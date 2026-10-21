@@ -170,6 +170,9 @@ Rules:
 | V8.3 | Dependency unavailable / circuit open | 503 + `Retry-After` | Ties to the resilience policy in `integrations.md` |
 | V8.4 | Upstream timed out | 504 | The timeout budget is stated in `integrations.md`, not invented per call site |
 | V8.5 | Shutting down / not ready | 503 | Readiness probe is separate from liveness |
+| V8.6 | Endpoint routed but not yet implemented (a contract-task stub) | 501 | `application/problem+json`, `type` slug `not-implemented`, `detail` naming the task that implements the endpoint (`"B3"`) |
+
+**V8.6 is the stub response, and a stub answers exactly this and nothing else.** It belongs to the standard set: it is never listed per endpoint, and it exists only while the stub does — the task that implements the endpoint removes it. The stub declares the endpoint's real response types, so the OpenAPI asset generated from it is complete. Acceptance tests written against a stub are red on this response and never assert it.
 
 **A validation failure is never a 500.** If an unmapped input can crash the handler, that is a missing rule from sections 1–2, not a server error.
 

@@ -40,11 +40,13 @@ Depth check: U1 is Schedule → Session detail → Book (one click to the list, 
 2. S2 Session detail — **Book seat** → `POST sessions/{id}/bookings`
 3. S2 (same screen) — booking shown inline under the header; toast "Seat booked" with **Undo** (→ cancel path, inside the 24 h window by construction)
 Failure: `capacity-reached` → S2 region shows the failed state "This session is full" with **Back to schedule**; waitlist is out of scope (blueprint §2). Back-button from S2 returns to S1 with the date range preserved (URL state).
+**Acceptance:** US7 AC1, US7 AC2, US7 AC4
 
 **J2 — U2/U3 See and cancel a booking** (target: 2 steps)
 1. S3 My bookings — upcoming first → `GET my/bookings`
 2. S3 row action **Cancel booking** → confirmation names the session and, past the 24 h window, states the late-cancel consequence (DEC-001) → `POST bookings/{id}/cancel`; row updates inline to "Cancelled"
 Failure: `invalid-state` (already cancelled elsewhere) → row refreshes to its real state, persistent notification explains.
+**Acceptance:** US8 AC1, US8 AC2
 
 **J3 — U5 Publish a workshop with sessions** (target: 4 steps)
 1. S4 Workshops — **New workshop** → S5
@@ -77,6 +79,7 @@ Failure: publish with zero sessions → the action is disabled with the reason "
 **Regions:** header (workshop title, starts-at, seats left, status chip) · description · my booking (member, when held) · attendee list (staff only)
 **States:** each region loading skeleton · loaded · failed with retry · attendee list empty "No bookings yet"
 **Data needed:** session with workshop title, description, startsAt, capacity, bookedCount · my booking on it, if any · attendees with member display name and attendance state (staff)
+**Test ids:** `SessionDetail.BookButton` · `SessionDetail.AttendeeList` · `SessionDetail.AttendedButton`
 **Serves:** U1, U6 · **Journeys:** J1, J4
 
 ### S3 — My bookings

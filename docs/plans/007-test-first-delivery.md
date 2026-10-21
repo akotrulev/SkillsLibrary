@@ -2,7 +2,7 @@
 
 **Goal:** Make test-first the library's default way to deliver a feature. A plan agrees the data model and the API contract, commits stubs that answer `501 not-implemented`, has `qa-*` agents write the acceptance tests against those stubs, and only then has the `be` / `fe` / `mobile` agents implement until the tests pass, with their own unit tests at the 80% branch floor. Implementers may run their own tests; the full gate still runs once. Two rules ride with it: the default architecture is a modular monolith **built to be split later** (§4.5), and every service is **observable from its first task** — logs, traces and metrics reach a local Grafana stack while the feature is being built, not after (§4.6). And every plan flags which of its tasks can run at the same time (§3.7).
 
-**Status:** Planned 2026-10-21; nothing built. Next: T1. The coverage floor this plan's gates keep landed separately in `0d9826a` (committed, not pushed). Before the first test-first plan runs in a project: T5, the push, and H1. Built but unverified: nothing yet.
+**Status:** Planned 2026-10-21. T1 landed 2026-10-21 (ungated): the format, the writing-plans skill, `CLAUDE.md` Planning and the design pack carry test-first. Next: T2, with T3 beside it. The coverage floor this plan's gates keep landed separately in `0d9826a` (committed, not pushed). Before the first test-first plan runs in a project: T5, the push, and H1. Built but unverified: T1's edits — no validator has run until T5.
 
 ## 1. What already exists, and what is missing
 
@@ -425,6 +425,7 @@ H1 replaces rules 5 and 6 of `~/.claude/CLAUDE.md` § "How features are broken d
 - `CLAUDE.md` Planning: §3.6.
 - §4.1 in the validation catalog's standard set; §4.2 in `api-surface-plan/SKILL.md` Step 3 and its example; §4.3 in `experience-plan/SKILL.md` Steps 3–4, its template, its Self-check and its example; §4.4 in `solution-blueprint/SKILL.md` Step 3 and the §3 template.
 - **Not in T1:** the delivery-plan, session-budget and solution-planner changes (T2), the QA skill (T3), the agents and testing skills (T4), the catalog, README and gate (T5).
+- **As built (2026-10-21):** all of §3.1–§3.6 and §4.1–§4.4 landed as specified, ungated. `plan-format.md`: the `Gate:` row (§4), the three-rule block and the verbatim read-only paragraph after the deliverable table (§4), the three-form table and its five bullets ahead of the coverage-floor paragraph (§5), and the four new lines in §9 with the build-or-suite line reworded; no section renumbered. The stub response is catalog entry `V8.6` in §8 (a row plus a note), so no section was renumbered there; the `Acceptance:` line sits under `**Auth:**` in the endpoint template and example; the experience example's test ids are on `S2` (not `S3`) and its `Acceptance:` lines on `J1` and `J2`. `writing-plans/SKILL.md`: Self-Review gained item 13 (acceptance-test order) as the new item, and items 5 and 10 were extended. Built but unverified: no validator, checker or token audit was run (T5).
 
 ### T2 — the planner writes test-first plans
 
@@ -576,58 +577,7 @@ Run them one session each, in the SkillsLibrary checkout on `master`; never crea
 | H1 | `human` | **the user** | T5 | — | five minutes |
 | H2 | `human` | **the user** | H1, the push, O4, O5 | — | one feature |
 
-No task has landed; every block below is live.
-
----
-
-### T1 — the format and the design pack specify test-first (general-purpose, docs)
-
-````
-Depends on: none
-
-You are `general-purpose`. Task T1 of docs/plans/007-test-first-delivery.md: write the rules a
-test-first plan follows (the `Gate: own tests` form, the `Q` family and its order, read-only
-acceptance tests, red for the right reason) and the design-pack lines `Q` tasks are written from.
-
-Read, in this order:
-1. CLAUDE.md, the Planning section.
-2. The plan: §1, §2, §2.1, §3.1–§3.6, §4.1–§4.4, D1–D8, task T1, and "Close-out — every task".
-3. engineering-practices/writing-plans/references/plan-format.md §4 (the task-block table), §5 —
-   including the coverage-floor paragraph and table that commit 0d9826a added — and §9.
-4. engineering-practices/writing-plans/SKILL.md: Steps 3, 5 and 6, and Self-Review.
-5. backend/_shared/api-surface-plan/references/validation-catalog.md (the standard set, §0–§8),
-   backend/_shared/api-surface-plan/SKILL.md Step 3, and its references/example-api-surface.md.
-6. backend/_shared/experience-plan/SKILL.md Steps 3–4, its template, "What NOT to put in an
-   experience plan" and Self-check, and references/example-experience-plan.md.
-7. backend/_shared/solution-blueprint/SKILL.md Step 3 and the §3 block of its template.
-
-Build:
-- plan-format.md: §3.1's three forms in §4's `Gate:` row and in §5, ahead of the coverage-floor
-  paragraph; §3.2's family, order and deliverable forms as §4 rules; §3.3 verbatim; §3.4; §3.5's
-  three lines in §9, rewording the existing build-or-suite line so a filtered own-tests run is not
-  a defect.
-- writing-plans/SKILL.md: Step 3's order; Step 5's read-back (10k for an own-tests task); Step 6's
-  gate rule; Self-Review items 5 and 10; one new item: every acceptance test precedes the tasks
-  that turn it green.
-- CLAUDE.md Planning: §3.6.
-- §4.1 in the validation catalog's standard set; §4.2 in api-surface-plan Step 3 and its example;
-  §4.3 in experience-plan Steps 3–4, its template, its Self-check and its example; §4.4 in
-  solution-blueprint Step 3 and the §3 template.
-
-Traps:
-- plan-format.md is cited by section number from three skills and every plan: add text inside the
-  existing sections, never renumber them.
-- A test id is not a component name. Keep "What NOT to put in an experience plan" as it is and add
-  one line saying so.
-- The `not-implemented` entry belongs to the standard set, is never listed per endpoint, and exists
-  only while a stub does. Do not add it to a single endpoint block in the example.
-
-Gate: none — this plan gates once, in T5. Do not run `claude plugin validate`, the tools/*.py
-checkers or the token audit.
-
-Commit: `docs(dev): test-first plans — own-tests gate, Q family, read-only acceptance tests (007 T1)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
+T1 has landed, and its prompt is deleted — a prompt for a finished task is a thing someone runs by mistake. Every block below is live.
 
 ---
 

@@ -119,7 +119,7 @@ the chat route's request shape and stream ~10k, writes ~40k, test output ~15k.
 | `**Deliverable:**` | **One** observable thing that exists when the task is done, stated as a fact about the world rather than as an activity, and checkable by someone who did not do the work. It is what `Done` means. Two deliverables is two tasks; no statable deliverable is a fragment of one |
 | `**Depends on:**` | The ids this task needs that are not immediately above it, each with what it provides — or `—`. Backwards only |
 | `**Budget:**` | `~<n>k` plus the **itemized drivers** — what the session actually loads: `CLAUDE.md`, the plan sections it reads, the files it must read as patterns, the files it writes, and the output it reads back. A bare `~140k` is unfalsifiable |
-| `**Gate:**` | `**Gate: none**` on every task but the last, naming the commands it must not run — see §5. The last task carries the whole gate, in run order |
+| `**Gate:**` | One of three forms — see §5. `**Gate: none**` naming the commands it must not run; `**Gate: own tests**` naming the one filtered command it runs (a `Q` task and the implementation tasks of a test-first plan); the whole gate, in run order, on the last task |
 | The bullets | **The work, in the order it is done**, with exact paths, exact names, exact commands, and the real values the code will use. This is the task's body; it replaces a step list |
 | `**Not in B2:**` | What belongs to another task or another agent, named. Mostly it keeps the executing agent out of a peer's lane. Where a stack-cut task cannot be demonstrated end to end on its own — a backend task whose screen arrives two tasks later — say so **here** rather than pretending the capability landed, and have the contract-first side return an explicit **not-implemented** response, never a fake success or an empty list |
 | `**As built:**` | **Written by the task when it lands**, dated: what actually happened where it differed from the plan, the ids and names it assigned, and what is built but unverified. It is the plan's durable record, and it is what makes a re-read of the plan worth more than a re-read of the diff. Never edited backwards |
@@ -133,17 +133,65 @@ the chat route's request shape and stream ~10k, writes ~40k, test output ~15k.
 | "Tests added" | "`OrderServiceTests` covers all four validation branches" |
 | "Migration work" | "`AddOrders` migration applied; `orders` and `order_lines` exist with their FKs" |
 
+**Test-first plans add three rules to the task block:**
+
+- **`Q` is the acceptance-test family:** ids `Q1…Qn`, stack `qa`, agent `qa-api-<stack>` / `qa-ui-<stack>` /
+  `qa-mobile-<stack>`, skills including `qa-<stack>:test-first`.
+- **Order:** everything both sides bind to — the schema, the contract, the shared types and **the
+  stubs** — then **the acceptance tests written against them**, then the backend tasks, the
+  shared-package tasks, and the frontend and mobile tasks.
+- **A `Q` task's deliverable names its tests and their red reason** — "every endpoint in
+  `api-surface.md` §5.2 and every AC of US7–US9 has an acceptance test in
+  `services/orders/tests/Orders.AcceptanceTests/`, and each fails on `501 not-implemented`." **An
+  implementation task's deliverable names the acceptance tests it turns green** — "the 14 Orders
+  acceptance tests from Q1 pass, and B3's unit tests cover ≥ 80% of its branches."
+
+**Acceptance tests are read-only to implementers.** A rule every implementation prompt repeats,
+verbatim:
+
+> The acceptance tests a `Q` task wrote are the spec, and they are **read-only** to every later task except the gate. Never edit, skip, delete or weaken one: not its assertion, its data or its timeout. A test you believe is wrong is a dated `D<n>` with both readings, and it stays red; the gate task resolves it with the user.
+
+**Red for the right reason.** A `Q` test is red **on the `not-implemented` stub** — in Arrange or in
+Act, since a setup call that reaches a stub is also the right reason — or, for a journey, **on the
+screen's placeholder**. A test that passes against a stub asserts nothing. A test that is red on a
+`404`, a compile error or a wrong URL has a wiring defect, which the `Q` task fixes before it stops.
+
 ## 5. The plan gates once, at the end
 
 **Every task but the last writes its code and its tests, commits, and stops.** No build, no test run,
 no lint, no format check, no typecheck, no eval, no integration suite, no e2e. Its `**Gate:**` line
-says so and names what not to run.
+says so and names what not to run. The one exception is a test-first plan's `Gate: own tests` task,
+below, which runs exactly its own filtered tests.
 
 **The last task runs the whole set, for every task in the plan together, and fixes what it finds rather
 than handing it back** — a failure there may belong to any task above it. The last task also carries the
 documentation and close-out work: it is the only session that knows what actually landed and what is
 built but unverified, and a session that only writes markdown is the wasted agent switch this rule
 exists to remove.
+
+**The `Gate:` line takes one of three forms:**
+
+| Form | On | Runs |
+|---|---|---|
+| `**Gate: none** — this plan gates once, in <id>. Do not run …` | contract tasks, docs tasks, journey tasks whose app cannot start in one command | nothing |
+| ``**Gate: own tests** — run only `<command>`; this plan gates once, in <id>. Do not run the full suite, another tree's build, lint or typecheck.`` | `Q` tasks and the implementation tasks of a test-first plan | exactly the command |
+| `**Gate (this is the last runnable task …):**` | the last runnable task | the whole set in run order, ending with the coverage floor |
+
+- **The planner writes the command, filtered by file or class**, never the unfiltered suite:
+  `dotnet test tests/Orders.AcceptanceTests --filter "FullyQualifiedName~Orders"`,
+  `./gradlew test --tests '*OrdersApiTest'`, `npx vitest run src/orders`,
+  `npx playwright test e2e/booking.spec.ts`.
+- **A `Q` task's command runs the tests it writes and expects red. An implementation task's command
+  runs its unit tests and the acceptance tests it must turn green, then the coverage-floor measure
+  over the files it wrote** (the table below, scoped to those files), so a shortfall is closed in the
+  session that wrote the code.
+- **When the acceptance tests need a running service**, the command starts it the project's own way
+  (a Testcontainers fixture, the compose file, Playwright's `webServer`), and the block says so. A
+  journey suite that cannot start its app in one command is `Gate: none`, and its red check moves to
+  the gate.
+- **A failure outside the task's own tests is not its to fix**; it is noted in `As built`.
+- **Every test-first plan restates the cost:** the tree is still not known to build at a task
+  boundary; only each task's own tests are known to pass.
 
 **The gate ends with the coverage floor** whenever the plan wrote code: unit tests cover **at least
 80% of the branches in the code the plan wrote** — every file it created, whole, and the methods it
@@ -353,7 +401,11 @@ These are plan failures, not style:
 - A `**Deliverable:**` naming an activity instead of a result
 - A task with no `**Agent:**` line, or one naming two agents; a task naming two stacks
 - A `**Budget:**` with no drivers behind it
-- A task with no `**Gate:**` line, or an intermediate task that runs the build or the suite
+- A task with no `**Gate:**` line, or an intermediate task that runs more than its own tests — the
+  build, the whole suite, lint or typecheck (a filtered `Gate: own tests` run is not a defect)
+- An implementation task that edits, skips or deletes an acceptance test
+- A `Gate: own tests` line with no command, or with an unfiltered one
+- A `Q` task that was allowed to run its tests and did not see them red on the stub
 - A plan that writes code whose gate does not end with the coverage floor (§5)
 - A prompt block that says "see the task", or one missing its reading list, its traps or its gate, or
   its close-out line; a plan with no `## Close-out — every task` section

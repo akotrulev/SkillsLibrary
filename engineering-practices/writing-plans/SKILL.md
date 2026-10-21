@@ -101,8 +101,11 @@ them — the sequence itself carries the ordering, and the third task is "the th
 - **Dependencies are stated, not implied.** Where a task needs an earlier one that is not immediately
   before it, say so: `**Depends on:** B1 (the ledger column)`. Adjacency is not a dependency claim, and
   a dependency on a later task is a defect in the ordering, not an exception to note.
-- **Everything both sides bind to comes first** — the API contract, the schema, the shared types — then
-  the backend tasks, then the shared-package tasks, then the frontend tasks.
+- **Everything both sides bind to comes first** — the API contract, the schema, the shared types and
+  the stubs that answer `not-implemented` — then **the acceptance tests written against them** (the `Q`
+  family: `qa-api-<stack>`, then `qa-ui-<stack>` / `qa-mobile-<stack>`), then the backend tasks, then
+  the shared-package tasks, then the frontend and mobile tasks. A plan with no API surface or journey
+  has no `Q` tasks and keeps the shorter order.
 - **Prerequisites a human must do come first**, as their own tasks with `Agent: human` and an
   `**Owner:**` line (an account to provision, an API key to request, a run only they can start), so
   nothing downstream stalls on them silently.
@@ -174,9 +177,9 @@ an input to how the task is written.
 | A file modified in place | 1.5k |
 | A registration, config key, or migration entry | 0.5k |
 
-**Per task, once:** the output it reads back, **6k** for an ungated task (its own commit and diff) or
-**12k** for the last task (the whole gate, the coverage floor included, and the fix loop it
-triggers); then **× 1.2** on the sum for conversation and tool churn.
+**Per task, once:** the output it reads back, **6k** for an ungated task (its own commit and diff),
+**10k** for an own-tests task (its commit and diff, plus the filtered runs) or **12k** for the last
+task (the whole gate, the coverage floor included, and the fix loop it triggers); then **× 1.2** on the sum for conversation and tool churn.
 
 `Budget = (floor + skills + sections + orientation + files + read-back) × 1.2`
 
@@ -209,7 +212,11 @@ none — it is a number someone will trust.
 Both shapes are specified in [`./references/plan-format.md`](./references/plan-format.md) §4 and §6.
 Three rules are easy to get wrong and expensive when you do:
 
-- **Every task but the last carries `**Gate: none**`**, naming the commands it must not run. The last
+- **Every task but the last carries `**Gate: none**`**, naming the commands it must not run — except,
+  in a test-first plan, the `Q` tasks and the implementation tasks, which carry `**Gate: own tests**`:
+  the one command, filtered by file or class, that runs the tests they write or must turn green (format
+  reference §5). A `Q` task expects red on the stub; an implementation task expects green, and the
+  acceptance tests are read-only to it (format reference §4). The last
   runnable task carries the whole gate, in run order, and **fixes what it finds rather than handing it
   back**. When the plan writes code, the gate ends with the **coverage floor** (format reference §5):
   ≥ 80% branch coverage of the code the plan wrote, short of which the gate task writes the missing tests.
@@ -248,6 +255,7 @@ After writing the complete plan, look at the spec with fresh eyes and check the 
    tasks define? A function called `clearLayers()` in B3 but `clearFullLayers()` in B7 is a bug.
 5. **Order check:** read the tasks in order and ask, at each one, "could I actually start this now?"
    Everything it needs must come from a task above it, and every `Depends on` must point backwards.
+   The contract, the schema and the stubs come before any `Q` task.
 6. **Deliverable check:** every task has one, and each states a result rather than an activity.
 7. **Stack check:** every task names exactly one of the eight — run it as a mechanical check on the
    files each task touches. A task whose files span two trees is two tasks, and the split is an
@@ -260,7 +268,9 @@ After writing the complete plan, look at the spec with fresh eyes and check the 
    either merged or left alone deliberately.
 10. **Gate check:** exactly one task carries the gate, it is the last runnable one, its commands are
     the project's own and in run order, it ends with the coverage floor (format reference §5) when the
-    plan writes code, and every other task says `**Gate: none**` with what not to run.
+    plan writes code, and every other task says `**Gate: none**` with what not to run, or
+    `**Gate: own tests**` with one filtered command (never the unfiltered suite) on `Q` and
+    implementation tasks.
     The ungated-boundary cost is stated in the plan.
 11. **Filing check:** where a blocked task will outlive the last runnable one, the last runnable block
     says the plan stays in `docs/plans/` until it clears; the plan's own number was taken from the high-water mark across both
@@ -270,6 +280,9 @@ After writing the complete plan, look at the spec with fresh eyes and check the 
     close-out line; `## Close-out — every task` is present verbatim. Read each block as if it were the
     only thing you had: if you would need the task above it to start, the block is incomplete. Every
     `Blocked on <id>` placeholder is matched by that task's duty to write it.
+13. **Acceptance-test order:** every acceptance test precedes the tasks that turn it green — each `Q`
+    task sits after the stubs it runs against and before the implementation its tests specify, and
+    every implementation deliverable names the acceptance tests it turns green.
 
 Fix what you find inline. No need to re-review — fix and move on. A spec requirement with no task gets
 a task.
