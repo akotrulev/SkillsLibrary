@@ -289,6 +289,7 @@ The `qa/` section is the most fully built-out part of the library. Most code-pro
 | `contract-testing-pact` | _shared | Pact rules every stack's `api-contract-testing` references |
 | `load-testing` | java · dotnet · typescript | Load tests — Gatling (java) · NBomber (dotnet) · k6 (typescript) |
 | `performance` | _shared | Workload modelling, SLOs, perf gates |
+| `test-first` | _shared | Write acceptance tests against `501 not-implemented` stubs, red for the right reason, before the implementation — cited as `qa-<stack>:test-first` |
 
 ### Verification inside tests
 
@@ -340,6 +341,28 @@ The `qa/` section is the most fully built-out part of the library. Most code-pro
 | `_shared/quality-metrics` | Quality metrics guidance |
 | `qa-<stack>:python-web-testing` | UI automation with Python — Playwright web-app testing toolkit (Anthropic-provided import) |
 
+## How a feature is built
+
+Test-first is the default for any plan that delivers an API surface or a journey.
+
+| # | Step | Who | Produces | Tests |
+|---|---|---|---|---|
+| 1 | Define the feature | `requirements-author` | `stories.md`, Gherkin ACs | — |
+| 2 | Agree the contracts | `solution-planner` | blueprint, data model, `api-surface.md`, `experience-plan.md`, `delivery-plan.md` | — |
+| 3 | Contract tasks `C` | `be-*`, `fe-*`, `observability-engineer-*` | schema, module folders, every endpoint answering `501 not-implemented`, telemetry base | nothing to run |
+| 4 | Acceptance tasks `Q` | `qa-api-*`, then `qa-ui-*` / `qa-mobile-*` | API and journey tests from the contract | **red** on `not-implemented` |
+| 5 | Implementation `B`, `F` | `be-*`, then `fe-*` / `mobile-*` | the logic, unit-tested to the 80% branch floor, instrumented | acceptance tests turn **green**, read-only |
+| 6 | The gate | last task | build, whole suite, lint, coverage, telemetry smoke | all green |
+
+- **The tests come from a different agent, from the contract, before the code exists.**
+- **The implementer cannot change them** — passing a test by editing it is how test-first fails with LLMs.
+
+One repo per product: `contracts/` (OpenAPI/AsyncAPI) · `services/<name>/{src/Modules,tests}` · `web/` · `mobile/` · `e2e/` · `deploy/local/` (Grafana stack) · `docs/plans/`.
+
+- **Built to be split later:** a module owns its schema, exposes one public surface, and an architecture test fails the build on a reach-in.
+- **Observable from the first task:** OpenTelemetry and the local Grafana stack land in the foundation; every task instruments what it builds.
+- **Parallel tasks:** every prompt block opens with `Depends on:`, so tasks that wait for nothing in common run together.
+
 ## Adding a new skill
 
 See [`CONTRIBUTING.md`](CONTRIBUTING.md) and the templates in [`.skill-template/`](.skill-template/).
@@ -356,7 +379,7 @@ See [`CONTRIBUTING.md`](CONTRIBUTING.md) and the templates in [`.skill-template/
 | auth                  | scaffolding |
 | devops                | authored + shipped — 9 cloud/CI-keyed skills (docker, kubernetes, infrastructure-as-code, aws-deployment, azure-deployment, github-actions, gitlab-ci, azure-pipelines, environment-config) + the `devops-engineer` (build) and `devops-auditor` (read-only conformance audit, `/devops:audit`) agents, both gated on a tool-stack confirmation before any skill loads; `devops` plugin |
 | observability         | authored + shipped — 6 skills (per-stack `opentelemetry-*` / `structured-logging-*` + stack-agnostic loki-tempo, prometheus-mimir, queries, dashboards) + `observability-engineer-{dotnet,java,node}` agents; bundled within the category into the `be-*` plugins |
-| qa                    | authored — 35 code-producing nodes (mostly ×3 stacks; Playwright 1.64 on TypeScript and 1.63 on Java / .NET / Python, Appium 3, plus a TypeScript-only Maestro lane) + 8 process skills (incl. `cross-feature-test-design`). Unverified: no `time-and-concurrency-testing` sample (any stack) has been compiled or run; no Appium or Maestro flow has run on a device or emulator, and no WebMCP test has run against a site that registers tools. `qa-dotnet` additionally ships the `standards-audit` self-audit skill + `/qa-dotnet:audit` |
+| qa                    | authored — 35 code-producing nodes (mostly ×3 stacks; Playwright 1.64 on TypeScript and 1.63 on Java / .NET / Python, Appium 3, plus a TypeScript-only Maestro lane) + 9 process skills (incl. `cross-feature-test-design`). Unverified: no `time-and-concurrency-testing` sample (any stack) has been compiled or run; no Appium or Maestro flow has run on a device or emulator, and no WebMCP test has run against a site that registers tools. `qa-dotnet` additionally ships the `standards-audit` self-audit skill + `/qa-dotnet:audit` |
 | engineering-practices | imported from obra/superpowers — registered in the `dev` plugin (3 internals are loaded by path only) |
 | meta                  | imported (writing-skills, skill-creator) |
 | documents             | imported from anthropics/skills |

@@ -2,7 +2,7 @@
 
 **Goal:** Make test-first the library's default way to deliver a feature. A plan agrees the data model and the API contract, commits stubs that answer `501 not-implemented`, has `qa-*` agents write the acceptance tests against those stubs, and only then has the `be` / `fe` / `mobile` agents implement until the tests pass, with their own unit tests at the 80% branch floor. Implementers may run their own tests; the full gate still runs once. Two rules ride with it: the default architecture is a modular monolith **built to be split later** (§4.5), and every service is **observable from its first task** — logs, traces and metrics reach a local Grafana stack while the feature is being built, not after (§4.6). And every plan flags which of its tasks can run at the same time (§3.7).
 
-**Status:** Planned 2026-10-21. T1, T2, M1, L1, P1, T3 and T4 landed 2026-10-21 (ungated): the format, the planner, the QA lane, the modular-monolith and observability rules, the parallel-task line, and now every agent's gate bullet (`Gate: own tests`), the read-only acceptance-test bullet in the ten implementing agents and the nine testing skills' run rules. Next: T5, the gate and close-out. The coverage floor this plan's gates keep landed separately in `0d9826a` (committed, not pushed). Before the first test-first plan runs in a project: T5, the push, and H1. Built but unverified: every edit of T1–T4 — no validator has run until T5.
+**Status:** Planned 2026-10-21. T1–T5 landed 2026-10-21: the format, the planner, the QA lane, the modular-monolith and observability rules, the parallel-task line, every agent's gate and read-only bullets, and now the catalog and README. The plan's only gate (§8 steps 1–11) passed at T5. H1 and H2 still hold blocks, so the plan stays in `docs/plans/`. Next: the push (`git push origin master`, nothing is pushed — the coverage floor in `0d9826a` and every 007 commit are local), then H1 (the user's `~/.claude/CLAUDE.md`), O4 and O5, then H2. Built but unverified: no test-first plan has run end to end (H2), and no telemetry smoke has run (no plan has built a service under the new rules).
 
 ## 1. What already exists, and what is missing
 
@@ -362,6 +362,8 @@ Cost: a missed overlap edge lets two agents edit one file at once, and the Self-
 
 **D15 — 57 agents carry the old gate bullet, not 58.** 2026-10-21, T4. §7.1, the T4 deliverable and §8 step 6 said 58. A count outside `docs/plans/` finds 57 files with the identical bullet, one of them the `.skill-template/agent.md` template (which must carry the new bullet so new agents do). Reading A (plan): 58. Reading B (built): 57, all replaced, none left behind; §8 step 6 now expects 59: the 57 plus the two `qa-manual` variants that reuse the sentence. Cost: the other plan figures that say "58" (§1, §7.1, T4's text) are left as written, as the record of what was predicted.
 
+**D16 — token-audit violations that predate the plan grew.** 2026-10-21, T5. §8 step 4: the audit lists no file this plan created. It lists 56 changed agent files (over 14000 chars) and the changed skills `delivery-plan`, `solution-blueprint`, `writing-plans`, `session-budget` and the unit/component-testing skills (over 16000) — every one already over budget at `f6780b5^`, each grew by the gate bullet, the read-only bullet or the test-first rules (`delivery-plan` 58095→69353, `solution-planner` 45309→49114). The six over-500 unit-testing descriptions did not change. Reading A: trim until none grows. Reading B (taken, as plan 006 D6 did): record it and trim nothing — the added text is the deliverable, and trimming unrelated text is out of scope. Cost: the budget debt of those files is a little larger; a later split of `delivery-plan` into references would pay it down.
+
 ## Answered questions (2026-10-21)
 
 **O1 — Do implementers run tests:** their own, filtered (D1).
@@ -533,6 +535,8 @@ H1 replaces rules 5 and 6 of `~/.claude/CLAUDE.md` § "How features are broken d
 - Run §8 and fix what it finds; a failure may belong to any task above.
 - Close out. H1 and H2 still hold blocks, so the plan does **not** move.
 
+- **As built (2026-10-21):** catalog and README landed; §8 steps 1–11 passed. `docs/skills-catalog.md` lists `test-first` in the `qa/_shared` bullet and carries a "Test-first is the default delivery flow (007)" paragraph in the planning lane (D4, D8–D11); `README.md` has "How a feature is built" (22 lines) and the `test-first` row in the QA Authoring table, process skills 8→9. Gate output: marketplace JSON exit 0; `claude plugin validate .` ✔ Validation passed; `plugin-surface-check` OK; token audit lists no created file (D16 for the grown ones); `qa-version-check` OK; step 6 counts 59 and 10, old bullet 0 hits; `test-first` registered in exactly `qa-java`, `qa-dotnet`, `qa-typescript`; step 8: `~4 functional areas` 0, blueprint "built to be split later" 1, ArchUnitNET / Spring Modulith / dependency-cruiser present, NetArchTest only as "do not use it"; step 9: no `Last` row names telemetry, three shapes carry the base, `be-{dotnet,java,node}` carry "Instrument what you build"; step 10 present in `plan-format.md` §4/§6/§7, the prompts template and `writing-plans` Self-Review; step 11 no `TODO`/`FIXME` added, no `file:line` citation in added text. **No gate failure needed a fix** — nothing belonged to T1–T4. Unverified: the plan's `file:line` citations in §1 describe the pre-plan files and were not re-pointed.
+
 ### H1 — the user's global task rules
 
 **Stack:** `human` · **Agent:** `human` · **Owner:** the user
@@ -571,9 +575,9 @@ Before you stop, in this order, in this file:
 
 ## Prompts — one per task
 
-Run them one session each, in the SkillsLibrary checkout on `master`; never create a branch. Each block is complete on its own. Only T5 runs the gate (§8). No prompt edits `~/.claude/CLAUDE.md`: that is H1, the user's.
+Run them one session each, in the SkillsLibrary checkout on `master`; never create a branch. Each block is complete on its own. T5 ran the gate (§8) and passed. No prompt edits `~/.claude/CLAUDE.md`: that is H1, the user's.
 
-**What runs together:** after T1, T3 runs beside T2 → M1 → L1 → P1 — their files are disjoint. T5 waits for T4, which has landed. Each block's first line is the `Depends on:` line Plan Queue schedules on. **While T3 runs beside another task,** each of them commits only its own files, by path (never `git add -A`), re-reads this plan immediately before its close-out, and edits only its own task block, its own prompt block and the landed line; `Status:` is left to T4.
+**What runs together:** after T1, T3 runs beside T2 → M1 → L1 → P1 — their files are disjoint. Each block's first line is the `Depends on:` line Plan Queue schedules on. **While T3 runs beside another task,** each of them commits only its own files, by path (never `git add -A`), re-reads this plan immediately before its close-out, and edits only its own task block, its own prompt block and the landed line; `Status:` is left to T4.
 
 **The cost, accepted and stated once:** T1–T4's commits are ungated, so the library is not known to validate until T5, and the plan cannot be stopped halfway and trusted.
 
@@ -591,51 +595,7 @@ Run them one session each, in the SkillsLibrary checkout on `master`; never crea
 | H1 | `human` | **the user** | T5 | — | five minutes |
 | H2 | `human` | **the user** | H1, the push, O4, O5 | — | one feature |
 
-T1, T2, M1, L1, P1 and T3 have landed, and their prompts are deleted — a prompt for a finished task is a thing someone runs by mistake. Every block below is live.
-
----
-
-### T5 — the gate: the catalog, the README and the close-out (general-purpose, docs)
-
-````
-Depends on: T4
-
-You are `general-purpose`. Task T5 of docs/plans/007-test-first-delivery.md: describe the test-first
-flow in the catalog and the README, run the plan's only gate, and close the work out. **You are the
-plan's gate and its close-out.**
-
-Read, in this order:
-1. CLAUDE.md.
-2. The plan: §2, §2.1, §4.5, §4.6, §8, D4 and D8–D11, every As built note, task T5, and "Close-out
-   — every task".
-3. docs/skills-catalog.md by grep, never whole (it is 186 KB): the qa/_shared skill list, the
-   planning-lane description, the per-plugin skill counts, the command tables.
-4. README.md by grep: the qa-* skill lists and where a "How a feature is built" section fits.
-
-Build:
-- Catalog: `test-first` in the qa/_shared skill list; the planning lane says test-first is the
-  default (D4), one repo per product is the default proposal (D8), the default architecture is
-  built to be split later (D9), the telemetry base comes first (D10), and every prompt names what
-  it waits for, so independent tasks run in parallel (D11); skill counts recounted.
-- README: "How a feature is built", at most 40 lines — §2's table, its two properties, §2.1's
-  layout, and one line each for §4.5, §4.6 and §3.7 — plus the new skill in the qa-* lists.
-
-Gate (this is the last runnable task, so it carries the plan's only gate, in run order):
-  §8 steps 1–11, from the SkillsLibrary root.
-**Fix what it finds rather than handing it back** — a failure may belong to any task above. Say in your
-As built which task each failure belonged to.
-
-Traps:
-- §8 step 4: the token audit may list a file this plan changed that was already over budget.
-  Compare with its size at this plan's first commit and record a D<n> if it grew, as plan 006 D6
-  did; do not trim unrelated text.
-- §8 step 6 counts must exclude docs/plans/, which quotes the old bullet.
-- H1 and H2 still hold blocks, so the plan does not move. Say so in Status, and name the push,
-  H1, O4 and O5 as what is next.
-
-Commit: `docs: test-first delivery in the catalog and README; gate passed (007 T5)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
+T1–T5 have landed, and their prompts are deleted — a prompt for a finished task is a thing someone runs by mistake. Every block below is live.
 
 ---
 
