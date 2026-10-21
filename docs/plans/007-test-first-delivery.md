@@ -2,7 +2,7 @@
 
 **Goal:** Make test-first the library's default way to deliver a feature. A plan agrees the data model and the API contract, commits stubs that answer `501 not-implemented`, has `qa-*` agents write the acceptance tests against those stubs, and only then has the `be` / `fe` / `mobile` agents implement until the tests pass, with their own unit tests at the 80% branch floor. Implementers may run their own tests; the full gate still runs once. Two rules ride with it: the default architecture is a modular monolith **built to be split later** (§4.5), and every service is **observable from its first task** — logs, traces and metrics reach a local Grafana stack while the feature is being built, not after (§4.6). And every plan flags which of its tasks can run at the same time (§3.7).
 
-**Status:** Planned 2026-10-21. T1–T5 landed 2026-10-21: the format, the planner, the QA lane, the modular-monolith and observability rules, the parallel-task line, every agent's gate and read-only bullets, and now the catalog and README. The plan's only gate (§8 steps 1–11) passed at T5. H1 and H2 still hold blocks, so the plan stays in `docs/plans/`. Next: the push (`git push origin master`, nothing is pushed — the coverage floor in `0d9826a` and every 007 commit are local), then H1 (the user's `~/.claude/CLAUDE.md`), O4 and O5, then H2. Built but unverified: no test-first plan has run end to end (H2), and no telemetry smoke has run (no plan has built a service under the new rules).
+**Status:** Planned 2026-10-21. T1–T5 and H1 landed 2026-10-21: the format, the planner, the QA lane, the modular-monolith and observability rules, the parallel-task line, every agent's gate and read-only bullets, the catalog and README, and the user's global rules 5–7 (D17). The plan's only gate (§8 steps 1–11) passed at T5. H2 still holds a block, so the plan stays in `docs/plans/`. Next: the push (`git push origin master`, nothing is pushed — the coverage floor in `0d9826a` and every 007 commit are local), then O4 and O5, then H2. Built but unverified: no test-first plan has run end to end (H2), and no telemetry smoke has run (no plan has built a service under the new rules).
 
 ## 1. What already exists, and what is missing
 
@@ -364,6 +364,8 @@ Cost: a missed overlap edge lets two agents edit one file at once, and the Self-
 
 **D16 — token-audit violations that predate the plan grew.** 2026-10-21, T5. §8 step 4: the audit lists no file this plan created. It lists 56 changed agent files (over 14000 chars) and the changed skills `delivery-plan`, `solution-blueprint`, `writing-plans`, `session-budget` and the unit/component-testing skills (over 16000) — every one already over budget at `f6780b5^`, each grew by the gate bullet, the read-only bullet or the test-first rules (`delivery-plan` 58095→69353, `solution-planner` 45309→49114). The six over-500 unit-testing descriptions did not change. Reading A: trim until none grows. Reading B (taken, as plan 006 D6 did): record it and trim nothing — the added text is the deliverable, and trimming unrelated text is out of scope. Cost: the budget debt of those files is a little larger; a later split of `delivery-plan` into references would pay it down.
 
+**D17 — rule 7 of the global rules was reworded too.** 2026-10-21, H1. §9 replaces rules 5 and 6 only. Rule 7 still said the gate is "per rule 5 … `**Gate: none**` for every task but the last", which the new rule 5 contradicts. Reading A (plan): leave rule 7 and let the two rules disagree. Reading B (built): rule 7 now reads "`**Gate: none**` or `**Gate: own tests**` for every task but the last". Cost: H1 touched one line outside §9.
+
 ## Answered questions (2026-10-21)
 
 **O1 — Do implementers run tests:** their own, filtered (D1).
@@ -544,6 +546,8 @@ H1 replaces rules 5 and 6 of `~/.claude/CLAUDE.md` § "How features are broken d
 **Depends on:** T5.
 **Gate:** the user reads the two rules back.
 
+- **As built (2026-10-21):** done, applied by a session at the user's request. `~/.claude/CLAUDE.md` rules 5 and 6 are §9's text verbatim; rule 7's gate clause gained `or **Gate: own tests**` (D17). The rules were read back in that session. The file is outside the repo, so this commit holds only the plan.
+
 ### H2 — one real feature, test-first
 
 **Stack:** `human` · **Agent:** `human` · **Owner:** the user
@@ -595,18 +599,7 @@ Run them one session each, in the SkillsLibrary checkout on `master`; never crea
 | H1 | `human` | **the user** | T5 | — | five minutes |
 | H2 | `human` | **the user** | H1, the push, O4, O5 | — | one feature |
 
-T1–T5 have landed, and their prompts are deleted — a prompt for a finished task is a thing someone runs by mistake. Every block below is live.
-
----
-
-### H1 — the user's global task rules (the user)
-
-H1 of docs/plans/007-test-first-delivery.md — your step.
-
-Replace rules 5 and 6 of ~/.claude/CLAUDE.md § "How features are broken down into tasks" with
-the text in the plan's §9: paste it yourself, or tell a session "apply plan 007 §9 to my global
-CLAUDE.md". Read the two rules back. Then tell a session in SkillsLibrary to record "done" as H1's
-As built and close out per the plan's "Close-out — every task".
+T1–T5 and H1 have landed, and their prompts are deleted — a prompt for a finished task is a thing someone runs by mistake. Every block below is live.
 
 ---
 
