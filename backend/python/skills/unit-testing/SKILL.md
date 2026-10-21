@@ -1,6 +1,6 @@
 ---
 name: unit-testing
-description: Use when Python worker or backend logic needs a dev-side pytest test — what deserves one, the seams to inject (time, model session, filesystem), self-proving hostile fixture builders (GPS JPEG, decompression bomb, polyglot, script SVG), rejection tables, the `model` marker. In-process only. Triggers "unit-test the validator", "build a hostile fixture". Do NOT use for the container-level contract the TypeScript side calls (`qa-api-typescript`) or image scanning (`qa-security`).
+description: Use when Python worker or backend logic needs a dev-side pytest test — what deserves one, the seams to inject (time, model session, filesystem), self-proving hostile fixture builders (GPS JPEG, decompression bomb, polyglot, script SVG), rejection tables, the `model` marker, the ≥ 80% branch-coverage floor on changed code. In-process only. Triggers "unit-test the validator", "build a hostile fixture". Do NOT use for the container-level contract the TypeScript side calls (`qa-api-typescript`) or image scanning (`qa-security`).
 ---
 
 # Python — Unit Testing (pytest)
@@ -167,11 +167,29 @@ def test_dpi_grade_is_monotonic_in_pixels(width: int, height: int, print_mm: flo
 
 Bounded strategies keep the run under a second; never generate images with hypothesis.
 
+## Coverage floor — ≥ 80% of the branches you wrote
+
+The tests cover **at least 80% of the branches in the code the change wrote**: every module it created, whole, and the functions it changed in a module that already existed. The scope is the change, never the repo.
+
+- **Design for every branch; 80% is what gets measured.** Before writing tests, list the branch outcomes in the code you wrote — each `if`/`elif`/`else` arm, `match` case including `case _`, `try`/`except` arm, early `return` or `raise`, a loop run zero times and many — and give each a test or a `parametrize` row that asserts its effect. coverage.py measures line-to-line arcs, so a one-line conditional expression or an `and`/`or` operand is invisible to it: list and test those anyway.
+- **Only an asserting test counts.** A test that runs a branch without asserting what it did is a **major** finding — it moves the number and catches nothing. Every `Rejected.reason` asserted as an expected value is the shape of a test that counts.
+- **Leave out what the matrix does not test here, by name.** `__main__` wiring and the container entrypoint stay out of the measured file list, and `RembgRemover` counts only in the CI job that runs the `model` lane; the report names each one left out. Never reach 80% by lowering the number or by `# pragma: no cover` on code that has behavior.
+- **Measure.** The plan's gate runs this; outside a plan, run it before you report:
+
+  ```bash
+  uv run pytest --cov=src --cov-branch --cov-report=
+  uv run coverage json --include="src/upload_worker/dpi.py,src/upload_worker/metadata.py" -o coverage.json
+  ```
+
+  `totals.covered_branches ÷ totals.num_branches` in `coverage.json` is the number — **not** `percent_covered`, which blends statements with branches and reads higher. `uv run coverage report --include=… --show-missing` lists the missed arcs (`40->45`). `pytest-cov` is already a dev dependency (`pattern-writer`).
+- **Below 80%, write the missing tests.** The missed arcs are the list.
+
 ## Gate
 
 Inside a plan task marked `Gate: none`, run none of these and report the tests as "written, not run".
 
 - `uv run pytest` green on a laptop with no weights (`model` tests skip, and the skip is reported, not hidden)
+- Branch coverage of the changed code ≥ 80% (*Coverage floor*), reported as a figure
 - `uv run pytest -m model` green in the CI job that has `U2NET_HOME`
 - `uv run mypy src tests` clean
 - Every `Rejected.reason` literal appears in at least one test's expected value — a rejection nobody can produce is dead contract

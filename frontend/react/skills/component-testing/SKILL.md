@@ -1,6 +1,6 @@
 ---
 name: component-testing
-description: Use when a component, custom hook, or any front-end logic needs a dev-side test — Vitest + React Testing Library for anything that renders, plain Vitest for anything that doesn't. Triggers "unit-test this component", "test my custom hook", "test my Zod schema", "test this formatter", "test my Zustand store", "an update was not wrapped in act". Not for E2E journeys (the `qa-ui-typescript` peer).
+description: Use when a component, custom hook, or any front-end logic needs a dev-side test — Vitest + React Testing Library for anything that renders, plain Vitest for anything that doesn't, to the ≥ 80% branch-coverage floor on changed code. Triggers "unit-test this component", "test my custom hook", "test my Zod schema", "test this formatter", "test my Zustand store", "an update was not wrapped in act". Not for E2E journeys (the `qa-ui-typescript` peer).
 ---
 
 # React — Component & Pure-Logic Testing (Vitest + React Testing Library)
@@ -161,6 +161,24 @@ Wrap state-mutating calls in `act(...)`; pass a `wrapper` for hooks that read co
 - **Fakes/stubs over mock-everything**; mock at the module boundary; MSW for network.
 - **Async via `findBy*`/`waitFor`**, never a timer.
 - Test **logic**, not markup: if deleting the assertion leaves a tautology, delete the test.
+- **≥ 80% of the branches you wrote are covered** — see *Coverage floor* below.
+
+## Coverage floor — ≥ 80% of the branches you wrote
+
+The tests cover **at least 80% of the branches in the code the change wrote**: every component, hook and module it created, whole, and the functions it changed in a file that already existed. The scope is the change, never the repo — a legacy area's low number is not the excuse, and the repo-wide number is not the target.
+
+- **Design for every branch; 80% is what gets measured.** Before writing tests, list the branch outcomes in the code you wrote — conditional rendering (`&&`, a ternary in JSX, an early `return null`), each region state (loading / loaded / failed / empty), event-handler `if`/`else`, reducer `switch` cases and their `default`, `??` and `?.`, a default prop value, a Zod refinement's pass and fail — and give each a test or an `it.each` row that asserts its effect. The slack under 100% is for branches no honest test reaches, such as the `never` default of an exhaustive `switch`.
+- **Only an asserting test counts.** A render that executes a branch without asserting what the user sees is a **major** finding — it moves the number and catches nothing. The tautology rule above applies.
+- **Leave out what the matrix says not to test, by name.** Markup-only components, type-only files, barrels, `*.stories.tsx` and generated API clients stay out of the measured file list, and the report names each one left out. Never reach 80% by lowering the number or by a `/* v8 ignore … */` hint over code that has behavior. An async Server Component is measured through the fetch extracted from it ([Pure-logic tests](#pure-logic-tests-no-renderer)).
+- **Measure.** The plan's gate runs this; outside a plan, run it before you report (with the project's package manager — `npx`, `pnpm exec`, `yarn`; install `@vitest/coverage-v8` at the Vitest major):
+
+  ```bash
+  npx vitest run --coverage --coverage.reporter=text \
+    --coverage.include=src/features/cart/CartSummary.tsx --coverage.include=src/features/cart/useCart.ts
+  ```
+
+  `% Branch` on the `All files` row is the number; `Uncovered Line #s` points at the misses. **Name the files**: Vitest 4 reports only the files a test loaded, so an untested new component vanishes from the table instead of counting as 0% unless `--coverage.include` lists it.
+- **Below 80%, write the missing tests.** The uncovered lines are the list.
 
 ## Anti-patterns to avoid
 

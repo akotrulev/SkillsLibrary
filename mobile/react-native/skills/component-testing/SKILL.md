@@ -1,6 +1,6 @@
 ---
 name: component-testing
-description: Use when a React Native component, hook or logic needs a dev-side test — Jest + jest-expo + React Native Testing Library 14 (async render/fireEvent/act) for anything that renders, plain Jest for anything that doesn't, native modules faked at the boundary. Triggers "unit-test this screen", "test my hook", "RNTL v14 migration", "jest can't find native module". Do NOT use for device journeys (`qa-mobile-typescript`) or Vitest (not viable in RN).
+description: Use when a React Native component, hook or logic needs a dev-side test — Jest + jest-expo + React Native Testing Library 14 (async render/fireEvent/act) for anything that renders, plain Jest for anything that doesn't, native modules faked at the boundary, the ≥ 80% branch-coverage floor on changed code. Triggers "unit-test this screen", "test my hook", "RNTL v14 migration", "jest can't find native module". Do NOT use for device journeys (`qa-mobile-typescript`) or Vitest (not viable in RN).
 ---
 
 # React Native — Component & Pure-Logic Testing (Jest + RNTL 14)
@@ -182,6 +182,23 @@ Pass a `wrapper` for hooks that read context; test the hook's contract, not its 
 - Fake timers, not sleeps; no `try` / `catch` and no `if` in a test body; one expected value per assertion.
 - Plain `*.test.ts` for logic that doesn't render; logic, not markup.
 - Device journeys go to `qa-mobile-typescript`.
+- **≥ 80% of the branches you wrote are covered** — see *Coverage floor* below.
+
+## Coverage floor — ≥ 80% of the branches you wrote
+
+The tests cover **at least 80% of the branches in the code the change wrote**: every component, hook and module it created, whole, and the functions it changed in a file that already existed. The scope is the change, never the repo.
+
+- **Design for every branch; 80% is what gets measured.** Before writing tests, list the branch outcomes in the code you wrote — conditional rendering, each region state (loading / loaded / failed / stale / offline), a `Platform.OS` fork, a permission granted and denied, event-handler `if`/`else`, reducer `switch` cases and their `default`, `??` and `?.` — and give each a test or an `it.each` row that asserts its effect. The slack under 100% is for branches no honest test reaches, such as the `never` default of an exhaustive `switch`.
+- **Only an asserting test counts.** A render that executes a branch without asserting what the user sees is a **major** finding — it moves the number and catches nothing.
+- **Leave out what the matrix says not to test, by name.** Markup-only components, type-only files, barrels and generated clients stay out of the measured file list, and the report names each one left out. Never reach 80% by lowering the number or by an `istanbul ignore` hint over code that has behavior.
+- **Measure.** The plan's gate runs this; outside a plan, run it before you report:
+
+  ```bash
+  npx jest --coverage --collectCoverageFrom='{src/features/cart/useCart.ts,src/features/cart/CartSummary.tsx}'
+  ```
+
+  `% Branch` on the `All files` row is the number; `Uncovered Line #s` points at the misses. `collectCoverageFrom` also counts a file no test imports, at 0% — which is why the changed files are named rather than left to what the tests happened to load.
+- **Below 80%, write the missing tests.** The uncovered lines are the list.
 
 ## What NOT to do
 
@@ -196,7 +213,7 @@ Pass a `wrapper` for hooks that read context; test the hook's contract, not its 
 ## Generation steps
 
 1. Detect RNTL, React and the preset; match the project's helper and matchers.
-2. Classify each unit: renders → RNTL; doesn't → plain Jest.
+2. Classify each unit: renders → RNTL; doesn't → plain Jest. List each unit's branch outcomes — that list is the test plan (*Coverage floor*).
 3. Add or extend `renderWithProviders` and the module fakes the unit needs.
 4. Write behaviour-named, awaited tests; one per behaviour.
 5. On a v13 project asked to move to 14, run the two codemods and read the diff.
@@ -207,6 +224,7 @@ Inside a `Gate: none` plan task, run none of these and report "written, not run"
 
 - Every `render` / `fireEvent` / `act` / `renderHook` in the diff is preceded by `await`.
 - `npx jest` is green, with no "not wrapped in act" warnings and no open-handle warning.
+- Branch coverage of the changed code ≥ 80% (*Coverage floor*), reported as a figure.
 - Break the implementation (flip a branch) → exactly the test for that behaviour fails.
 - No test imports `vitest`, `vi`, or touches the network.
 

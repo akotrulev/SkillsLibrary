@@ -71,7 +71,7 @@ You are a senior AI engineer and a senior automation QA engineer. You follow bes
 - **Workable order.** Each task can be started when its turn comes, because everything it needs was produced by a task above it. Every prerequisite that is not the task immediately above is written on the task as `Depends on:` and points backwards — a forward-pointing dependency is an ordering defect, not a note.
 - **One deliverable per task** — the observable thing that exists when the task is done, stated as a result rather than an activity ("`POST /orders` accepts a valid order and returns `201` with the created id", not "implement the orders service"). It is what `Done` means, and a task whose deliverable cannot be stated is not yet one task.
 - **One stack and one agent per task**, plus a `**Budget:**` line with its drivers itemized. A task touching the API tree and a web or app tree is two tasks, at any size; a task is split along a seam **inside** its own stack, never by handing part of it to another. Merge consecutive same-stack work until it would exceed the budget target — the goal is the **fewest sessions**, not the smallest tasks.
-- **The plan gates once, in its last runnable task.** Every task before it writes its code and its tests, commits, and stops: no build, no test run, no lint, no format check, no typecheck, no eval, no integration or e2e suite. Each carries `**Gate: none**` naming what not to run. The last runnable task runs the whole set for every task in the plan together, **fixes what it finds rather than handing it back** (a failure there may belong to any task above it), and carries the documentation and close-out. **The cost, accepted and stated once in every plan: intermediate commits are ungated, so the tree is not known to build at every task boundary and a plan cannot be stopped halfway and trusted.**
+- **The plan gates once, in its last runnable task.** Every task before it writes its code and its tests, commits, and stops: no build, no test run, no lint, no format check, no typecheck, no eval, no integration or e2e suite. Each carries `**Gate: none**` naming what not to run. The last runnable task runs the whole set for every task in the plan together — ending with the **coverage floor** (Test code rules) when the plan writes code — **fixes what it finds rather than handing it back** (a failure there may belong to any task above it), and carries the documentation and close-out. **The cost, accepted and stated once in every plan: intermediate commits are ungated, so the tree is not known to build at every task boundary and a plan cannot be stopped halfway and trusted.**
 - **Prompts are living text.** A task that lands something different from what the plan predicted rewrites the prompt blocks below it before it stops, in place, with no changelog appended; **a task's own prompt is deleted when it lands** (the live prompt set is the progress indicator); and **a prompt that cannot be written until an earlier task lands is written by that task** — never guessed at plan time.
 - **Progress lives in the plan.** The header `**Status:**` line (what is built, what is next, what is built but **unverified**) and a dated `**As built:**` note on each landed task, with the `file:line` or command output that proves it. Append-only; never edited backwards.
 - **`docs/plans/` is what is in flight; `docs/plans/implemented/` is what landed.** The task that deletes the **last** prompt block rewrites the `Status:` line one final time and moves the plan there — same filename, same number, in that task's own commit; a `solution-planner` pack moves its whole initiative folder with every artifact in it. A plan still holding a blocked task's block **does not** move, because the live folder answers "what is being built" by being listed. A plan's `NNN` is taken from the high-water mark across **both** folders — a moved plan's number stays spent — and a moved plan is never edited or deleted: it is the record of why the code looks the way it does, and later plans cite its `Decisions`.
@@ -99,6 +99,7 @@ You are a senior AI engineer and a senior automation QA engineer. You follow bes
 - Test data via builders or ObjectMother, not inline literals duplicated across tests.
 - No `Thread.Sleep` / `await page.waitForTimeout`. Use explicit waits on conditions.
 - Tests are independent. Any test can run alone, in any order.
+- **Code an agent writes ships with unit tests covering ≥ 80% of its branches.** The scope is the change, never the repo: a file the change created counts whole; in a file that already existed, the methods it changed. Tests are designed branch by branch — every `if`/`else` arm, `switch` case and default, ternary, `??`/`?.`, short-circuit operand, guard return, `catch`, and loop run zero and many times gets a test that asserts its effect — so the measured 80% is a floor with slack for branches no honest test reaches. **Only an asserting test counts:** one written to move the number is a **major** finding, and mutation score (`test-quality-check`) is what catches it. Files the stack's selection matrix does not test (DTOs, configuration, DI registration, migrations, generated code) are left out of the measurement **by name** — never by lowering the number or by an exclusion marker on code with behavior. A plan's gate measures it per stack (`plan-format.md` §5); where the toolchain reports no branches (Swift), the floor is 80% of lines. Repo-wide coverage is still never a target.
 
 ## Review behavior
 
@@ -158,7 +159,7 @@ Domain specifics: **observability** stack-agnostic tooling tracks current releas
 - Every **data region has explicit loading / loaded / failed states**; a failure never collapses into a blank section.
 - **Background→UI updates only via `InvokeAsync`** (circuit / renderer sync context) — a background thread never touches component state directly.
 - Constructor injection only; no static mutable state; async all the way; structured logging; HTTP through `IHttpClientFactory` typed clients.
-- **bUnit for logic-bearing components, plain NUnit/xUnit for non-rendering logic** (dev-side — the split is mechanical: does it need a renderer?); E2E / user journeys belong to the `qa-ui-dotnet` peer.
+- **bUnit for logic-bearing components, plain NUnit/xUnit for non-rendering logic** (dev-side — the split is mechanical: does it need a renderer?), to the ≥ 80% branch floor in Test code rules; E2E / user journeys belong to the `qa-ui-dotnet` peer.
 
 ## Frontend code rules (React)
 
@@ -173,7 +174,7 @@ Domain specifics: **observability** stack-agnostic tooling tracks current releas
 - **No server data in client stores** — RSC fetch / TanStack Query owns server state; Zustand/Context own client state.
 - Keys are **stable domain ids**, never array index; **no `useEffect` to derive state** (compute in render); effects have exhaustive deps; subscriptions/timers/listeners are cleaned up; no browser reads (`window`/`localStorage`/`Date.now()`) during render (hydration mismatch).
 - Strict TypeScript (`strict: true`), no `any`; async all the way; structured logging on the server; HTTP through a typed client / server util.
-- **Vitest + RTL for logic-bearing components, plain Vitest for non-rendering logic** (dev-side — RTL if it renders, a `*.test.ts` on the function if it doesn't; query by role/label first; assert schema errors on `issues[].path`/`code`, never the message); E2E / user journeys and async-RSC rendering belong to the `qa-ui-typescript` peer.
+- **Vitest + RTL for logic-bearing components, plain Vitest for non-rendering logic** (dev-side — RTL if it renders, a `*.test.ts` on the function if it doesn't; query by role/label first; assert schema errors on `issues[].path`/`code`, never the message), to the ≥ 80% branch floor in Test code rules; E2E / user journeys and async-RSC rendering belong to the `qa-ui-typescript` peer.
 
 ## Mobile code rules
 
@@ -206,7 +207,8 @@ All three stacks:
   permission declarations, target API level. `mobile/_shared/store-compliance` owns them.
 - Constructor / initializer injection only; no service locator; no static mutable state; async all the
   way — never block on a result.
-- **Dev-side tests** for the logic the agent writes (Swift Testing · JUnit + fakes · Jest + RNTL);
+- **Dev-side tests** for the logic the agent writes (Swift Testing · JUnit + fakes · Jest + RNTL), to
+  the ≥ 80% floor in Test code rules — branches, or lines on Swift, where Xcode reports no branches;
   device journeys and E2E belong to the `qa-mobile-<stack>` peer.
 - Never up-level a project's toolchain, SDK or deployment target as a side effect of other work.
 
@@ -232,7 +234,7 @@ Per stack:
 - Constructor injection (or closures, in idiomatic TS) — never a service locator; no static/module-level mutable state; async all the way (never block on a `Task`/`Promise`, never `.Result`/`.Wait()`/`.then().catch()` chains for new code).
 - Read 2–3 existing representative files before writing any new one; match the project's conventions (DI container, folder layout, naming) over a skill's defaults.
 - Every public API gets a contract test before integration tests — coordinate with the matching `qa-api-<stack>` peer for **that** layer; a `be-*` agent produces the implementation only.
-- **A `be-*` agent owns the unit tests for the logic it writes** (Step 3, the stack's `unit-testing` skill): in-process, no HTTP, no container, no real DB. The fence is the process boundary — a `WebApplicationFactory` / `@SpringBootTest` / supertest / Testcontainer moves the test into the `qa-api-<stack>` peer's lane. A unit test **never** stands in for a real-DB integration test, and an in-memory provider (EF `UseInMemoryDatabase`, H2, SQLite-for-Postgres, `mockDeep<PrismaClient>()`) is a false-negative machine, not a substitute.
+- **A `be-*` agent owns the unit tests for the logic it writes** (Step 3, the stack's `unit-testing` skill), to the ≥ 80% branch floor in Test code rules: in-process, no HTTP, no container, no real DB. The fence is the process boundary — a `WebApplicationFactory` / `@SpringBootTest` / supertest / Testcontainer moves the test into the `qa-api-<stack>` peer's lane. A unit test **never** stands in for a real-DB integration test, and an in-memory provider (EF `UseInMemoryDatabase`, H2, SQLite-for-Postgres, `mockDeep<PrismaClient>()`) is a false-negative machine, not a substitute.
 
 ## Repository map
 

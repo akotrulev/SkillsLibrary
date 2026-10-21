@@ -1,6 +1,6 @@
 ---
 name: unit-testing
-description: Use when backend TypeScript logic needs a dev-side unit test — Vitest (Jest when the repo uses it): what deserves a test, the five untestable seams (time, id, randomness, config, outbound I/O), DI over `vi.mock`, both branches of every `Result<T,E>`, Zod schema tests. In-process, no HTTP, container, or real database. Triggers "unit-test this service", "test this Zod schema", "how do I fake the clock in Vitest". Do NOT use for supertest/HTTP-level or integration tests (`qa-api-typescript`).
+description: Use when backend TypeScript logic needs a dev-side unit test — Vitest (Jest when the repo uses it): what deserves a test, the five untestable seams (time, id, randomness, config, outbound I/O), DI over `vi.mock`, both branches of every `Result<T,E>`, Zod schema tests, the ≥ 80% branch-coverage floor on changed code. In-process, no HTTP, container, or real database. Triggers "unit-test this service", "test this Zod schema", "how do I fake the clock in Vitest". Do NOT use for supertest/HTTP-level or integration tests (`qa-api-typescript`).
 ---
 
 # Node — Unit Testing (Vitest + TypeScript strict)
@@ -270,7 +270,24 @@ const shipped = anOrder({ status: 'Shipped' });
 - The unit under test is real and constructed directly — never resolved from a DI container.
 - Verify RED once per new behavior.
 - `strict: true` applies; no `any`, no `as unknown as`.
-- No coverage-% gate here — assertion quality is a mutation-score question (see Handoffs).
+- **≥ 80% of the branches you wrote are covered** — see *Coverage floor* below. Assertion quality is still a mutation-score question (see Handoffs).
+
+## Coverage floor — ≥ 80% of the branches you wrote
+
+The tests cover **at least 80% of the branches in the code the change wrote**: every module it created, whole, and the functions it changed in a module that already existed. The scope is the change, never the repo — a legacy module's low number is not the excuse, and the repo-wide number is not the target.
+
+- **Design for every branch; 80% is what gets measured.** Before writing tests, list the branch outcomes in the code you wrote — each `if`/`else` arm, `switch` case and its `default`, ternary, `??` and `?.`, short-circuit `&&`/`||`, a default parameter value, guard-clause return, `catch`, a loop run zero times and many, **both `Result` branches** — and give each a test or an `it.each` row that asserts its effect. The slack under 100% is for branches no honest unit test reaches, such as the `never` default of an exhaustive `switch`.
+- **Only an asserting test counts.** A test that runs a branch without asserting what it did is a **major** finding — it moves the number and catches nothing. The tautology test applies; with no TypeScript mutation skill yet (Handoffs), it is this stack's only guard against hollow coverage.
+- **Leave out what the matrix says not to test, by name.** Type-only files, barrels, constants and generated clients stay out of the measured file list, and the report names each one left out. Never reach 80% by lowering the number or by a `/* v8 ignore … */` hint over code that has behavior.
+- **Measure.** The plan's gate runs this; outside a plan, run it before you report (with the project's package manager — `npx`, `pnpm exec`, `yarn`):
+
+  ```bash
+  npx vitest run --coverage --coverage.reporter=text \
+    --coverage.include=src/orders/place-order.ts --coverage.include=src/orders/pricing.ts
+  ```
+
+  `% Branch` on the `All files` row is the number; `Uncovered Line #s` points at the misses. **Name the files**: Vitest 4 reports only the files a test loaded, so an untested new module vanishes from the table instead of counting as 0% unless `--coverage.include` lists it. `@vitest/coverage-v8` matches the Vitest major.
+- **Below 80%, write the missing tests.** The uncovered lines are the list.
 
 ## What NOT to do
 
@@ -288,11 +305,11 @@ const shipped = anOrder({ status: 'Shipped' });
 ## Generation steps
 
 1. **Detect** the Node major, package manager, runner (Vitest/Jest), and existing test conventions — **the repo's choice wins**.
-2. **Identify the units** from the selection matrix — for each type `pattern-writer`/`database-code` just produced, decide test / no-test and say why for the no-tests.
+2. **Identify the units** from the selection matrix — for each type `pattern-writer`/`database-code` just produced, decide test / no-test and say why for the no-tests. For each tested unit, **list its branch outcomes**: that list is the test plan (*Coverage floor*).
 3. **Fix the seams first** — a direct `Date.now()`, `crypto.randomUUID()`, `process.env` read, or `fetch` call is a `pattern-writer`-shaped edit to production code, done before the test.
 4. **Write the failing test**, watch it fail for the right reason, make it pass.
 5. **Add the boundary cases** with `it.each` — nulls, empties, min/max, the rounding boundary, **both `Result` branches**, the refused transition.
-6. **Verify:** the project's test script green (from `package.json`, run with its `packageManager`), `tsc --noEmit` clean, lint clean. Report counts. Inside a plan task marked `Gate: none`, run none of these (nor step 4's failing run) and report the tests as "written, not run".
+6. **Verify:** the project's test script green (from `package.json`, run with its `packageManager`), `tsc --noEmit` clean, lint clean, branch coverage of the changed code ≥ 80% (*Coverage floor*). Report counts and the coverage figure. Inside a plan task marked `Gate: none`, run none of these (nor step 4's failing run) and report the tests as "written, not run".
 7. **Sweep:** a union whose members are handled in one place but tested in one case is a gap.
 
 ## Handoffs

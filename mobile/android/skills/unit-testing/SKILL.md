@@ -1,6 +1,6 @@
 ---
 name: unit-testing
-description: Use when Kotlin or Compose logic needs a dev-side test — JUnit 4 (JUnit 5 only where the mannodermaus plugin is present), fakes over mocks, runTest with StandardTestDispatcher, Turbine for Flow, ViewModel and region-state tests, MockWebServer, Robolectric, Compose UI test v2 (its dispatcher change), accessibility checks, Roborazzi. Triggers "unit-test this ViewModel", "my Compose test broke after v2". Do NOT use for device journeys (`qa-mobile-<stack>`).
+description: Use when Kotlin or Compose logic needs a dev-side test — JUnit 4 (JUnit 5 only where the mannodermaus plugin is present), fakes over mocks, runTest with StandardTestDispatcher, Turbine for Flow, ViewModel and region-state tests, MockWebServer, Robolectric, Compose UI test v2 (its dispatcher change), accessibility checks, Roborazzi, the ≥ 80% branch-coverage floor on changed code (Kover). Triggers "unit-test this ViewModel", "my Compose test broke after v2". Do NOT use for device journeys (`qa-mobile-<stack>`).
 ---
 
 # Android — Unit Testing (JUnit 4 + fakes)
@@ -190,6 +190,44 @@ When Robolectric earns its cost, the Roborazzi record / verify loop, builders an
 - `runTest` + `StandardTestDispatcher`; advance the clock explicitly; **no real sleep**; tests are independent and order-free.
 - Compose tests are v2, wait for idle before asserting launched work, and test one stateless screen with hand-built state.
 - Journeys, gestures and system dialogs go to `qa-mobile-<stack>`.
+- **≥ 80% of the branches you wrote are covered** — see *Coverage floor* below.
+
+## Coverage floor — ≥ 80% of the branches you wrote
+
+The tests cover **at least 80% of the branches in the code the change wrote**: every class it created, whole, and the functions it changed in a file that already existed. The scope is the change, never the repo.
+
+- **Design for every branch; 80% is what gets measured.** Before writing tests, list the branch outcomes in the code you wrote — each `if`/`else`, `when` arm including `else`, `?:` and `?.`, short-circuit `&&`/`||`, `try`/`catch`, a failing `require`/`check`, an early `return`, each region state (loading / loaded / failed / stale / offline), a loop run zero times and many — and give each a test or a parameterized row that asserts its effect. The slack under 100% is for branches no honest unit test reaches, such as the ones the compiler adds around coroutines and inline functions.
+- **Only an asserting test counts.** A test that runs a branch without asserting what it did is a **major** finding — it moves the number and catches nothing. *Validation*'s mutate-one-rule check is how hollow coverage gets caught.
+- **Leave out what *Test what has behaviour* does not test, by name.** Type-only files, constants, DAO interfaces, forwarding wrappers and generated code (`androidGeneratedClasses()`, plus KSP / Room / Hilt output) stay out of the measured class list, and the report names each one left out. Never reach 80% by lowering the number or by a Kover exclusion over code that has behavior.
+- **Measure** with Kover. The plan's gate runs this; outside a plan, run it before you report:
+
+  ```kotlin
+  // app/build.gradle.kts — once per module; the plugin is the `kover` alias in libs.versions.toml (0.9.x)
+  import kotlinx.kover.gradle.plugin.dsl.CoverageUnit
+  import kotlinx.kover.gradle.plugin.dsl.GroupingEntityType
+
+  plugins { alias(libs.plugins.kover) }
+
+  kover {
+      reports {
+          filters { excludes { androidGeneratedClasses() } }
+          variant("debug") {
+              log {
+                  groupBy = GroupingEntityType.CLASS
+                  coverageUnits = CoverageUnit.BRANCH
+                  format = "<entity> branch coverage: <value>%"
+              }
+          }
+      }
+  }
+  ```
+
+  ```bash
+  ./gradlew :app:koverLogDebug | grep -E 'CheckoutViewModel|CartMapper'
+  ```
+
+  One line per class is the number; `:app:koverHtmlReportDebug` shows the branches per function. Kover counts Kotlin's inline functions and coroutine state machines more faithfully than raw JaCoCo, which is why it is this lane's tool.
+- **Below 80%, write the missing tests.** The HTML report's missed branches are the list.
 
 ## What NOT to do
 
@@ -203,7 +241,7 @@ When Robolectric earns its cost, the Roborazzi record / verify loop, builders an
 ## Generation steps
 
 1. Read the target's constructors, existing fakes, `MainDispatcherRule`, runner and Compose-test version; match them.
-2. List the behaviours worth testing; add the missing seam to the constructor, not a global.
+2. List the behaviours worth testing and each one's branch outcomes — that list is the test plan (*Coverage floor*); add the missing seam to the constructor, not a global.
 3. Write each test as Arrange / Act / Assert with a behaviour name; parameterize variants; put shared fakes, fixtures and builders in test support.
 4. Leave journeys as a hand-off note naming the `testTag`s, for `qa-mobile-<stack>`.
 
@@ -213,6 +251,7 @@ Inside a `Gate: none` plan task, run none of these and report "written, not run"
 
 - `./gradlew testDebugUnitTest` passes on JDK 21; each test passes alone (`--tests`) and in a shuffled order; `connectedDebugAndroidTest` for the Compose rules that need a device.
 - Mutate one rule in the code under test; a test fails with a message naming the value.
+- Branch coverage of the changed code ≥ 80% (*Coverage floor*), reported as a figure.
 - No `Thread.sleep`, `runBlocking` or v1 Compose rule import in a test.
 
 ## Handoffs

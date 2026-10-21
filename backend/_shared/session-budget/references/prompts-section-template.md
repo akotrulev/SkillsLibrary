@@ -106,8 +106,12 @@ You are `<exact agent name>`. Task F3 of docs/plans/<NNN>-<initiative>/delivery-
 
 Gate (this is the last runnable task, so it carries the plan's only gate, in run order):
   <the project's own install, build, test, typecheck, lint and format commands>
+  <the coverage floor — plan-format.md §5: the changed-file list from git, then each stack's
+   coverage command; ≥ 80% of the branches the plan wrote (Swift: lines)>
 **Fix what it finds rather than handing it back** — a failure may belong to any task above you, and
 attributing it is part of this task. Say in your `As built` note which task each failure belonged to.
+A coverage shortfall is fixed by writing the missing tests — never by excluding a file that has logic
+or lowering the number; record the figure per stack and every file left out.
 
 Also write <the docs this plan owes> and the repository-state note. This block normally deletes the
 last one, so the close-out files the plan — the whole initiative folder. (If `<blocked id>` is still

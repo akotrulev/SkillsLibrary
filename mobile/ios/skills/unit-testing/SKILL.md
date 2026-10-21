@@ -1,6 +1,6 @@
 ---
 name: unit-testing
-description: Use when Swift logic needs a dev-side test — Swift Testing (@Test, #expect, #require, parameterized arguments, confirmation, traits) with fakes over mocks, clock and UUID seams, URLProtocol stubs, @Observable models, region states, snapshot tests of single views. XCTest only for UI automation, performance and Objective-C exceptions. Triggers "unit-test this model", "fake the clock", "test the 401 ladder". Do NOT use for device journeys (`qa-mobile-<stack>`).
+description: Use when Swift logic needs a dev-side test — Swift Testing (@Test, #expect, #require, parameterized arguments, confirmation, traits) with fakes over mocks, clock and UUID seams, URLProtocol stubs, @Observable models, region states, snapshot tests of single views, the ≥ 80% coverage floor on changed code (line coverage — Xcode reports no branches). XCTest only for UI automation, performance and Objective-C exceptions. Triggers "unit-test this model", "fake the clock", "test the 401 ladder". Do NOT use for device journeys (`qa-mobile-<stack>`).
 ---
 
 # iOS — Unit Testing (Swift Testing)
@@ -169,6 +169,26 @@ Only where the project already uses `swift-snapshot-testing`: **one reusable vie
 - Time, identity, randomness, configuration and I/O enter through the initializer; fakes over mocks; no protocol created only for a test.
 - No `Task.sleep` or timing in a test; tests are independent and order-free.
 - Journeys, gestures and system dialogs go to `qa-mobile-<stack>`.
+- **≥ 80% of the code you wrote is covered** — see *Coverage floor* below.
+
+## Coverage floor — ≥ 80% of the code you wrote
+
+The tests cover **at least 80% of the code the change wrote**: every type it created, whole, and the methods it changed in a file that already existed. The scope is the change, never the repo.
+
+- **Xcode reports line coverage, not branches** — so on this lane the measured floor is 80% of the changed **lines**, and the branch list below is still how the tests are designed: a line is covered when one of its two outcomes runs.
+- **Design for every branch.** Before writing tests, list the branch outcomes in the code you wrote — each `if`/`else` and `guard`, `switch` case including `default` and `@unknown default`, ternary, `??`, an `if let` / `guard let` that finds `nil`, each `catch` and each `throw`, each region state (loading / loaded / failed / stale / offline), a loop run zero times and many — and give each a test or an `arguments:` case that asserts its effect.
+- **Only an asserting test counts.** A test that runs code without an `#expect` on what it did is a **major** finding — it moves the number and catches nothing. *Validation*'s mutate-one-rule check is how hollow coverage gets caught.
+- **Leave out what *Test what has behaviour* does not test, by name.** View files (their model carries the tested logic), `#Preview` blocks, type-only files, constants, forwarding wrappers and generated code (SwiftGen, Sourcery output) stay out of the measured file list, and the report names each one left out. Never reach 80% by lowering the number.
+- **Measure.** The plan's gate runs this; outside a plan, run it before you report:
+
+  ```bash
+  xcodebuild test -scheme <Scheme> -testPlan Unit -destination 'platform=iOS Simulator,name=<Device>' \
+    -enableCodeCoverage YES -resultBundlePath build/Unit.xcresult
+  xcrun xccov view --report --json build/Unit.xcresult
+  ```
+
+  `lineCoverage` on the changed files (`targets[].files[]`) is the number. A Swift package: `swift test --enable-code-coverage`, then the JSON at `swift test --show-codecov-path`.
+- **Below 80%, write the missing tests.** The uncovered lines are the list.
 
 ## What NOT to do
 
@@ -182,7 +202,7 @@ Only where the project already uses `swift-snapshot-testing`: **one reusable vie
 ## Generation steps
 
 1. Read the target's initializers, existing fakes, test plans and the framework mix; match them.
-2. List the behaviours worth testing (the table above); add the missing seam to the initializer, not a global.
+2. List the behaviours worth testing (the table above) and each one's branch outcomes — that list is the test plan (*Coverage floor*); add the missing seam to the initializer, not a global.
 3. Write each test as Arrange / Act / Assert with a behaviour name; parameterize variants.
 4. Add the `URLProtocol` stub, the fixed clock and the builders once, in shared test support.
 5. Leave journeys as a hand-off note naming the identifiers, for `qa-mobile-<stack>`.
@@ -193,6 +213,7 @@ Inside a `Gate: none` plan task, run none of these and report "written, not run"
 
 - The unit test plan passes on a simulator and, for packages, `swift test` on the host; each test passes alone (`-only-testing`) and in a shuffled order.
 - Mutate one rule in the code under test; a test fails with a message naming the value.
+- Line coverage of the changed code ≥ 80% (*Coverage floor*), reported as a figure.
 - No `XCTAssert` in a Swift Testing file; no `try!`; no `sleep` or `Task.sleep`.
 
 ## Handoffs

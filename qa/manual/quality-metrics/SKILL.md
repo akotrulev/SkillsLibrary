@@ -97,7 +97,7 @@ These are useful as **signals**, never as goals:
 | **PR review latency** | Time to first review + time to merge | Pressure to merge without thoughtful review |
 | **Change-failure linked to test gap** | When a regression escaped, did a test exist for that path? | Requires post-incident discipline |
 
-**Coverage rule of thumb:** track it, alert on regression on *changed lines*, never set a global percentage target. 80% coverage of trivial getters is worse than 60% coverage of real behavior.
+**Coverage rule of thumb:** track it, gate it on *changed code*, never set a global percentage target. The library's one number is ≥ 80% branch coverage of the code a change wrote — the dev agents' coverage floor — measured with trivial code left out by name and paired with mutation score, because 80% coverage of trivial getters is worse than 60% coverage of real behavior.
 
 **Flake rule of thumb:** every flaky test gets a root-cause fix or a deletion with explicit retire-reason. "Quarantine indefinitely" is a graveyard, not a strategy.
 

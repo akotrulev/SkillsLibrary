@@ -175,8 +175,8 @@ an input to how the task is written.
 | A registration, config key, or migration entry | 0.5k |
 
 **Per task, once:** the output it reads back, **6k** for an ungated task (its own commit and diff) or
-**12k** for the last task (the whole gate and the fix loop it triggers); then **× 1.2** on the sum for
-conversation and tool churn.
+**12k** for the last task (the whole gate, the coverage floor included, and the fix loop it
+triggers); then **× 1.2** on the sum for conversation and tool churn.
 
 `Budget = (floor + skills + sections + orientation + files + read-back) × 1.2`
 
@@ -211,7 +211,10 @@ Three rules are easy to get wrong and expensive when you do:
 
 - **Every task but the last carries `**Gate: none**`**, naming the commands it must not run. The last
   runnable task carries the whole gate, in run order, and **fixes what it finds rather than handing it
-  back**.
+  back**. When the plan writes code, the gate ends with the **coverage floor** (format reference §5):
+  ≥ 80% branch coverage of the code the plan wrote, short of which the gate task writes the missing tests.
+  Every task before it designs its tests for that floor — each one's bullets name the branches its tests
+  must reach, as `OrderServiceTests` does in the format reference's deliverable table.
 - **A prompt you cannot write yet is not guessed.** Where a block genuinely depends on what an earlier
   task lands — the shape of a file it has not created, an id it will assign, a decision it will make —
   write `**Blocked on <id>** — <id> writes this prompt when it lands, from <what it will then know>.`
@@ -256,7 +259,8 @@ After writing the complete plan, look at the spec with fresh eyes and check the 
    task is one thing anyway; every one under ~80k was checked against the next same-stack task and
    either merged or left alone deliberately.
 10. **Gate check:** exactly one task carries the gate, it is the last runnable one, its commands are
-    the project's own and in run order, and every other task says `**Gate: none**` with what not to run.
+    the project's own and in run order, it ends with the coverage floor (format reference §5) when the
+    plan writes code, and every other task says `**Gate: none**` with what not to run.
     The ungated-boundary cost is stated in the plan.
 11. **Filing check:** where a blocked task will outlive the last runnable one, the last runnable block
     says the plan stays in `docs/plans/` until it clears; the plan's own number was taken from the high-water mark across both
@@ -286,7 +290,8 @@ worktree, one prompt block per session, in order, and each session closes out pe
 - Ground the plan in `## 1.`'s gap table, then decide the work in the numbered sections, then cut tasks
 - Tasks flat and ordered, ids prefixed by family — no slices, no phases, no grouping layer
 - One deliverable, one stack, one agent, one budget with drivers, one `Depends on` line per task
-- The plan gates once, in its last runnable task, and that task fixes what the gate finds
+- The plan gates once, in its last runnable task, and that task fixes what the gate finds — including
+  a branch-coverage shortfall under the 80% floor, which it closes by writing tests
 - One paste-ready prompt per task, rewritten in place by any task that changes what it assumes; a
   prompt that cannot be written yet is written by the task that unblocks it
 - A landed task's prompt is deleted; the live prompt set is the progress indicator, and the task that

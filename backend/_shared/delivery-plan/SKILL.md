@@ -268,7 +268,7 @@ commit and diff read-back 6k, churn ×1.2
 - Cross-tenant access returns 404, per the API's V5.3 disclosure choice.
 - Illegal state transitions return 409 naming the current and the allowed states.
 - Unit tests cover every validation branch and every state transition — in-process, no HTTP, no
-  container, no real DB.
+  container, no real DB — and together reach ≥ 80% of the branches B3 writes (the gate measures it).
 - **Not in B3:** the Orders screens (F2, stack `fe`, same epic — the endpoints are not reachable from
   the UI until it lands), contract/integration tests (`qa-api-dotnet`), the stock-reservation
   client (B5).
@@ -303,8 +303,10 @@ Rules:
 - **`Gate: none` on every task but the last runnable one**, naming the commands it must not run. The
   last runnable task carries the whole gate, in run order, with the project's own commands from the
   orientation pass — and it fixes what the gate finds rather than handing it back, because a failure
-  there may belong to any task above it. It also carries the close-out: the docs, the repository-state
-  note, and the honest list of what is built but unverified.
+  there may belong to any task above it. When the plan writes code, the gate ends with the **coverage
+  floor** (`plan-format.md` §5): ≥ 80% branch coverage of the code the plan wrote, closed by writing
+  the missing tests. It also carries the close-out: the docs, the repository-state note, and the honest
+  list of what is built but unverified.
 - **`As built`** is written by the task when it lands, dated: what differed from the plan, the ids and
   names it assigned, and what is built but unverified. It is the durable record, appended and never
   edited backwards.
@@ -455,7 +457,7 @@ file to keep in step with it. Three things carry the record, and every executing
 |---|---|
 | Finishing a task | A dated `**As built:**` note on the task block — what differed from the plan, the ids and names it assigned, what is built but unverified, and the `file:line` or command output that proves the deliverable exists. Then it **deletes its own prompt block**, and rewrites the prompt blocks below it wherever what it landed differs from what they assume |
 | Finishing a task another task's prompt was blocked on | The blocked prompt block itself, from what it now knows — that duty is a bullet on this task and a line in its own prompt |
-| Finishing the last runnable task | The gate, in run order, with the failures **fixed here** rather than handed back; then the close-out: the docs, the repository-state note, and the honest list of what is built but unverified |
+| Finishing the last runnable task | The gate, in run order, with the failures **fixed here** rather than handed back — a branch-coverage shortfall under the 80% floor included, closed by writing tests, and the figure recorded; then the close-out: the docs, the repository-state note, and the honest list of what is built but unverified |
 | Stopping mid-task | The header `**Status:**` line names the task and what remains; a `**Progress:**` line on the task block lists the bullets not yet done. The prompt block **stays** and gains a `Picking up from:` line |
 | Building it differently | Both readings on the task block, and the resolution appended to `## Decisions` as a dated `D<n>` once the human picks. A divergence is escalated, never absorbed |
 | Hitting a blocker | The `**Status:**` line and the task block name what it waits on and who owns it. The prompt block **stays** and names the blocker and its owner — deleting it loses the lane |
@@ -541,7 +543,8 @@ that lands anything.>
 > **For agentic workers:** the tasks below are one flat sequence — work them in order. Each names the
 > agent that should execute it, the skills to load, and the one deliverable that means it is done.
 > **This plan gates once, in <the last runnable task>:** every task before it writes its code and its
-> unit tests, commits, and stops — no build, no test run, no lint, no typecheck. The tree is therefore
+> unit tests — designed to cover ≥ 80% of the branches it writes — commits, and stops: no build, no test
+> run, no lint, no typecheck. The gate measures the coverage floor over the whole plan's change. The tree is therefore
 > not known to build at every task boundary, and the plan cannot be stopped halfway and trusted.
 > **Update this document as you work** — the dated `As built` note on your task, the `Status:` line
 > above, and `## Decisions` for anything you built differently — then **delete your own prompt block**
@@ -617,7 +620,8 @@ that lands anything.>
 10. Every task's bullets are checkable and cite the design pack by section.
 11. **Exactly one task carries the gate**, it is the last runnable one, its commands are the project's
     own from the orientation pass and in run order, and it is told to fix what the gate finds rather
-    than hand it back. Every other task says `Gate: none` and names what not to run. The
+    than hand it back; when the plan writes code, the gate ends with the coverage floor
+    (`plan-format.md` §5). Every other task says `Gate: none` and names what not to run. The
     ungated-boundary cost is stated in the header note.
 12. `## Prompts — one per task` exists inside this document, with one block per task that has not
     landed, each naming one task, an exact agent, exact skills, and pack **sections** rather than

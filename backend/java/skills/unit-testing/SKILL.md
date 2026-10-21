@@ -1,6 +1,6 @@
 ---
 name: unit-testing
-description: Use when backend Java logic needs a dev-side unit test — JUnit 5 + Mockito + AssertJ with no Spring context: what deserves a test, the five untestable seams (Clock, id, randomness, config, outbound I/O), fakes-over-mocks, parameterized cases, async. In-process, no container, no real database. Triggers "unit-test this service", "test this validator/calculator", "how do I fake the clock in a Java test". Do NOT use for anything that boots a Spring context — that's the `qa-api-java` peer's.
+description: Use when backend Java logic needs a dev-side unit test — JUnit 5 + Mockito + AssertJ with no Spring context: what deserves a test, the five untestable seams (Clock, id, randomness, config, outbound I/O), fakes-over-mocks, parameterized cases, async, the ≥ 80% branch-coverage floor on changed code. In-process, no container, no real database. Triggers "unit-test this service", "test this validator/calculator", "how do I fake the clock in a Java test". Do NOT use for anything that boots a Spring context — that's the `qa-api-java` peer's.
 ---
 
 # Java — Unit Testing (JUnit 5 + Mockito + AssertJ)
@@ -250,7 +250,33 @@ var order = anOrder().withStatus(SHIPPED).build();
 - The class under test is **real and constructed directly** — never resolved from a context.
 - Verify RED once per new behavior.
 - No `if`/`for` driving assertions; no `try/catch` standing in for `assertThatThrownBy`.
-- No coverage-% gate here — assertion quality is measured by mutation score (**peer** `qa-java:test-quality-check`, PIT).
+- **≥ 80% of the branches you wrote are covered** — see *Coverage floor* below. Assertion quality is still measured by mutation score (**peer** `qa-java:test-quality-check`, PIT).
+
+## Coverage floor — ≥ 80% of the branches you wrote
+
+The tests cover **at least 80% of the branches in the code the change wrote**: every class it created, whole, and the methods it changed in a class that already existed. The scope is the change, never the repo — a legacy module's low number is not the excuse, and the repo-wide number is not the target.
+
+- **Design for every branch; 80% is what gets measured.** Before writing tests, list the branch outcomes in the code you wrote — each `if`/`else` arm, `switch` arm and its `default` (a pattern-matching `switch` with its `case null` too), ternary, short-circuit `&&`/`||`, guard-clause return, `catch`, a loop run zero times and many — and give each a test or a `@ParameterizedTest` row that asserts its effect. The slack under 100% is for branches no honest unit test reaches: the synthetic ones JaCoCo does not filter, and a guard the types already exclude.
+- **Only an asserting test counts.** A test that runs a branch without asserting what it did is a **major** finding — it moves the number and catches nothing. The tautology test applies; mutation score is how hollow coverage gets caught.
+- **Leave out what the matrix says not to test, by name.** Records and DTOs with no behavior, entities without rules, `@Configuration` classes, Flyway migrations and generated code (MapStruct implementations, Lombok output) stay out of the measured class list, and the report names each one left out. Never reach 80% by lowering the number or by a JaCoCo exclusion over code that has behavior.
+- **Measure.** The plan's gate runs this; outside a plan, run it before you report:
+
+  ```kotlin
+  // build.gradle.kts — once per project
+  plugins { jacoco }
+  tasks.jacocoTestReport {
+      dependsOn(tasks.test)
+      reports { csv.required = true }
+  }
+  ```
+
+  ```bash
+  ./gradlew test jacocoTestReport
+  grep -E ',(PlaceOrderHandler|PricingStrategyResolver),' build/reports/jacoco/test/jacocoTestReport.csv
+  ```
+
+  Branch coverage is `BRANCH_COVERED ÷ (BRANCH_COVERED + BRANCH_MISSED)` — the CSV's 7th and 6th columns — summed over the changed classes; for a method changed in an existing class, the class's page under `build/reports/jacoco/test/html/` shows its branches. On Maven, `jacoco-maven-plugin` (`prepare-agent` + `report`) writes the same CSV to `target/site/jacoco/jacoco.csv`.
+- **Below 80%, write the missing tests.** The report's missed branches are the list.
 
 ## What NOT to do
 
@@ -268,11 +294,11 @@ var order = anOrder().withStatus(SHIPPED).build();
 ## Generation steps
 
 1. **Detect** the Java release, the Boot BOM, the existing test source set, and the runner/doubles already in use — **the repo's choice wins** over this file's defaults.
-2. **Identify the units** from the selection matrix — for each type `pattern-writer`/`database-code` just produced, decide test / no-test, and say why for the no-tests.
+2. **Identify the units** from the selection matrix — for each type `pattern-writer`/`database-code` just produced, decide test / no-test, and say why for the no-tests. For each tested unit, **list its branch outcomes**: that list is the test plan (*Coverage floor*).
 3. **Fix the seams first** — a direct `Instant.now()`, `UUID.randomUUID()`, `@Value`, or outbound call is a `pattern-writer`-shaped edit to production code, done before the test.
 4. **Write the failing test** (behavior name, AAA, one logical assertion), watch it fail for the right reason, make it pass.
 5. **Add the boundary cases** as `@ParameterizedTest` rows — nulls, empties, min/max, the rounding boundary, the refused transition.
-6. **Verify:** `./gradlew test` green, no `UnnecessaryStubbingException`, compiler warning-clean. Report counts. Inside a plan task marked `Gate: none`, run none of these (nor step 4's failing run) and report the tests as "written, not run".
+6. **Verify:** `./gradlew test` green, no `UnnecessaryStubbingException`, compiler warning-clean, branch coverage of the changed code ≥ 80% (*Coverage floor*). Report counts and the coverage figure. Inside a plan task marked `Gate: none`, run none of these (nor step 4's failing run) and report the tests as "written, not run".
 7. **Sweep:** a strategy family with one tested member is a gap.
 
 ## Handoffs

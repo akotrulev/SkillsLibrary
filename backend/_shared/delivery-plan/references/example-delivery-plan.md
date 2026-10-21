@@ -205,16 +205,20 @@ and 2 modified 15k, commit and diff read-back 6k, churn ×1.2
 
 **Epic:** `E0` Contract + foundations · **Story:** — · **Stack:** `be` · **Stream:** `foundations-api` · **Order:** 20
 **Agent:** `be-dotnet` · **Skills:** `be-dotnet:conventions-review`
-**Deliverable:** the whole solution builds, the whole suite passes, the format check is clean, and
-`docs/repository-state.md` says what is built and what is unverified.
+**Deliverable:** the whole solution builds, the whole suite passes, the format check is clean, unit
+tests cover ≥ 80% of the branches this plan wrote in each stack, and `docs/repository-state.md` says
+what is built and what is unverified.
 **Depends on:** every task above it — this is the plan's only gate
 **Budget:** ~140k — CLAUDE.md 25k, this plan 12k, the `As built` notes of 17 tasks 10k, the gate output
 and the fix loop 12k plus 4k per earlier task whose failures land here (~40k budgeted for six),
-the docs written 8k, churn ×1.2
+the coverage reports and the tests a shortfall needs ~10k, the docs written 8k, churn ×1.2
 **Gate (this is the last runnable task, so it carries the plan's only gate, in run order):**
 ```
 dotnet build   →  dotnet test   →  dotnet format --verify-no-changes
 pnpm install   →  pnpm build    →  pnpm test
+coverage floor (plan-format.md §5) over the files git lists since this plan's first commit:
+  dotnet test --collect:"XPlat Code Coverage"  →  dotnet tool run reportgenerator … -filefilters:<the .cs files>
+  pnpm vitest run --coverage --coverage.reporter=text --coverage.include=<each web file>
 ```
 **Fix what it finds rather than handing it back.** A failure may belong to any task above this one;
 attributing it is part of this task, and the `As built` note says which task each one belonged to.
@@ -225,6 +229,10 @@ attributing it is part of this task, and the `As built` note says which task eac
 
 - Run the gate in the order above. Do not reorder it: a format failure after a red build wastes the run.
 - Every failure is fixed here, and attributed in the `As built` note to the task that introduced it.
+- The coverage floor runs last: ≥ 80% of the branches the plan wrote, per stack. A shortfall is closed
+  by writing the missing tests in the owning task's test project and attributed like any failure; the
+  `As built` note records each stack's figure and names every file left out (DTOs, EF configurations,
+  the DI modules, migrations).
 - `docs/repository-state.md` names what is built, and separately what is **built but unverified** —
   at minimum: journey J2 has not been walked by a person, the concurrency race on the capacity guard
   has not been exercised, and no email has been sent (`B4` is blocked on `H2`).

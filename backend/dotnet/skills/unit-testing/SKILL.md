@@ -1,6 +1,6 @@
 ---
 name: unit-testing
-description: Use when backend C# logic needs a dev-side unit test — NUnit 4 + NSubstitute + FakeTimeProvider: the five untestable seams, fakes-over-mocks, async assertions. In-process, no HTTP, container, or real database. Triggers "unit-test this handler", "test this validator/calculator", "how do I fake the clock in a test". Do NOT use for contract/integration tests through the transport (`qa-api-dotnet`), mutation scoring (`qa-dotnet:test-quality-check`), or Blazor (`fe-blazor:component-testing`).
+description: Use when backend C# logic needs a dev-side unit test — NUnit 4 + NSubstitute + FakeTimeProvider: the five untestable seams, fakes-over-mocks, async assertions, the ≥ 80% branch-coverage floor on changed code. In-process, no HTTP, container, or real database. Triggers "unit-test this handler", "test this validator/calculator", "how do I fake the clock in a test". Do NOT use for contract/integration tests through the transport (`qa-api-dotnet`), mutation scoring (`qa-dotnet:test-quality-check`), or Blazor (`fe-blazor:component-testing`).
 ---
 
 # .NET — Unit Testing (NUnit 4 + NSubstitute)
@@ -227,7 +227,26 @@ var order = new OrderBuilder().WithStatus(OrderStatus.Shipped).Build();
 - Fake at the boundary you own; the class under test is real and constructed directly (`new`, never resolved from a container).
 - Every test the run generates must actually fail if the behavior breaks — verify RED at least once per new behavior.
 - No conditional logic, no loops driving assertions, no `try/catch` standing in for `Assert.Throws`.
-- No coverage-percentage gate here; whether the assertions are any good is measured by mutation score — **peer** `qa-dotnet:test-quality-check`.
+- **≥ 80% of the branches you wrote are covered** — see *Coverage floor* below. Whether the assertions are any good is still mutation score's question — **peer** `qa-dotnet:test-quality-check`.
+
+## Coverage floor — ≥ 80% of the branches you wrote
+
+The tests cover **at least 80% of the branches in the code the change wrote**: every file it created, whole, and the methods it changed in a file that already existed. The scope is the change, never the repo — a legacy module's low number is not the excuse, and the repo-wide number is not the target.
+
+- **Design for every branch; 80% is what gets measured.** Before writing tests, list the branch outcomes in the code you wrote — each `if`/`else` arm, `switch` arm and its default, ternary, `??` and `?.`, short-circuit `&&`/`||`, guard-clause return, `catch`, a loop run zero times and many — and give each a test or a `[TestCase]` row that asserts its effect. The slack under 100% is for branches no honest unit test reaches: compiler-generated ones (async state machines, record equality) and a guard the type system already excludes.
+- **Only an asserting test counts.** A test that runs a branch without asserting what it did is a **major** finding — it moves the number and catches nothing. The tautology test applies; mutation score is how hollow coverage gets caught.
+- **Leave out what the matrix says not to test, by name.** DTOs, EF configurations, DI registration, migrations and generated code stay out of the measured file list, and the report names each one left out. Never reach 80% by lowering the number or by putting `[ExcludeFromCodeCoverage]` on code that has behavior.
+- **Measure.** The plan's gate runs this; outside a plan, run it before you report:
+
+  ```bash
+  dotnet test --collect:"XPlat Code Coverage" --results-directory TestResults
+  dotnet tool run reportgenerator -reports:"TestResults/*/coverage.cobertura.xml" \
+    -targetdir:TestResults/coverage -reporttypes:"TextSummary;Html" \
+    -filefilters:"+*PlaceOrderHandler.cs;+*PricingStrategyResolver.cs"
+  ```
+
+  `Branch coverage` in `TestResults/coverage/Summary.txt` is the number; for a method changed in an existing file, that file's page in the HTML report shows its branches. `coverlet.collector` ships in the `dotnet new nunit` template — add it where the test project lacks it. ReportGenerator is the local tool `dotnet-reportgenerator-globaltool`.
+- **Below 80%, write the missing tests.** The report's uncovered branches are the list.
 
 ## What NOT to do
 
@@ -244,11 +263,11 @@ var order = new OrderBuilder().WithStatus(OrderStatus.Shipped).Build();
 ## Generation steps
 
 1. **Detect** the TFM, the existing test project (if any), its runner and doubles library — **the repo's existing choice wins** over this file's defaults.
-2. **Identify the units** from the selection matrix — for each type the `pattern-writer` / `database-code` run just produced, decide test / no-test and say why for the no-tests.
+2. **Identify the units** from the selection matrix — for each type the `pattern-writer` / `database-code` run just produced, decide test / no-test and say why for the no-tests. For each tested unit, **list its branch outcomes**: that list is the test plan (*Coverage floor*).
 3. **Fix the seams first** — if a unit reads the clock, a GUID, config, or does I/O directly, inject it (that's a `pattern-writer` edit, not a test edit) before writing the test.
 4. **Write the failing test** (behavior name, AAA, one logical assertion), watch it fail for the right reason, then make it pass.
 5. **Add the boundary cases** as `[TestCase]` rows — nulls, empties, min/max, the rounding boundary, the state that must be refused.
-6. **Verify:** `dotnet test` green, `dotnet build` 0 warnings, `dotnet format --verify-no-changes`. Report the counts. Inside a plan task marked `Gate: none`, run none of these (nor step 4's failing run) and report the tests as "written, not run".
+6. **Verify:** `dotnet test` green, `dotnet build` 0 warnings, `dotnet format --verify-no-changes`, branch coverage of the changed code ≥ 80% (*Coverage floor*). Report the counts and the coverage figure. Inside a plan task marked `Gate: none`, run none of these (nor step 4's failing run) and report the tests as "written, not run".
 7. **Sweep:** any sibling of the same shape left untested? A strategy family with one tested member is a gap.
 
 ## Handoffs

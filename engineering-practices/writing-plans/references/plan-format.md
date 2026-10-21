@@ -145,6 +145,36 @@ documentation and close-out work: it is the only session that knows what actuall
 built but unverified, and a session that only writes markdown is the wasted agent switch this rule
 exists to remove.
 
+**The gate ends with the coverage floor** whenever the plan wrote code: unit tests cover **at least
+80% of the branches in the code the plan wrote** — every file it created, whole, and the methods it
+changed in files that already existed. The scope is the plan's change, never the repo. The gate takes
+the file list from git, starting at the commit that added this plan (a `solution-planner` pack: its
+`delivery-plan.md`):
+
+```bash
+git diff --name-only "$(git log --diff-filter=A --format=%h -1 -- docs/plans/NNN-<slug>.md)" HEAD
+```
+
+It measures those files with each stack's tool and **writes the missing tests until the floor holds**
+— never by lowering the number, excluding a file that has logic, or marking code as excluded. Files the
+stack's selection matrix does not test (DTOs, configuration, DI registration, migrations, generated
+code) stay out of the measured list. The `As built` note records the figure per stack and names every
+file left out.
+
+| Stack | Collect, then read branch coverage for the changed files |
+|---|---|
+| .NET — NUnit / xUnit / bUnit | `dotnet test --collect:"XPlat Code Coverage" --results-directory TestResults`, then `dotnet tool run reportgenerator -reports:"TestResults/*/coverage.cobertura.xml" -targetdir:TestResults/coverage -reporttypes:"TextSummary;Html" -filefilters:"+*<File>.cs;+*<Component>.razor"` → `Branch coverage` in `Summary.txt` |
+| Java — JaCoCo | `./gradlew test jacocoTestReport` with the CSV report on → `BRANCH_COVERED ÷ (BRANCH_COVERED + BRANCH_MISSED)` over the changed classes' rows of `build/reports/jacoco/test/jacocoTestReport.csv` |
+| Kotlin / Android — Kover | `./gradlew :app:koverLogDebug`, its log grouped by class in branch units → the changed classes' lines |
+| TypeScript — Vitest | `npx vitest run --coverage --coverage.reporter=text --coverage.include=<file> …` (one `--coverage.include` per file) → `% Branch` |
+| React Native — Jest | `npx jest --coverage --collectCoverageFrom='{<file>,<file>}'` → `% Branch` |
+| Python — pytest-cov | `uv run pytest --cov=src --cov-branch --cov-report=`, then `uv run coverage json --include="<file>,<file>"` → `totals.covered_branches ÷ totals.num_branches` |
+| Swift — Xcode | `xcodebuild test … -enableCodeCoverage YES -resultBundlePath build/Unit.xcresult`, then `xcrun xccov view --report --json build/Unit.xcresult` → `lineCoverage` per file. **Xcode reports no branches, so the Swift floor is 80% of the changed lines** |
+
+Each stack's testing skill carries the one-time setup its row needs, under `## Coverage floor`. For a
+method changed in a file that already existed, read that file's page in the stack's HTML report rather
+than its whole-file total.
+
 **"The last task" means the last task that is not blocked.** Where a task waits on something outside
 the plan — a run the user starts, a credential, a decision — the gate belongs to the last task that can
 actually run, and the blocked tasks sit below it carrying their own gate for whenever they run.
@@ -324,6 +354,7 @@ These are plan failures, not style:
 - A task with no `**Agent:**` line, or one naming two agents; a task naming two stacks
 - A `**Budget:**` with no drivers behind it
 - A task with no `**Gate:**` line, or an intermediate task that runs the build or the suite
+- A plan that writes code whose gate does not end with the coverage floor (§5)
 - A prompt block that says "see the task", or one missing its reading list, its traps or its gate, or
   its close-out line; a plan with no `## Close-out — every task` section
 - A reference to a type, function, file or command that no section and no task defines
