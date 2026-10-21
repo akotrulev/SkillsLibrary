@@ -223,6 +223,30 @@ Each stack's testing skill carries the one-time setup its row needs, under `## C
 method changed in a file that already existed, read that file's page in the stack's HTML report rather
 than its whole-file total.
 
+**A plan that adds or changes a service's behaviour ends its gate with the telemetry smoke**, after the
+coverage floor: the signals the implementation tasks named must reach the local stack while the acceptance
+suite runs.
+
+1. Start the stack the foundation's telemetry-base task committed — `docker compose -f deploy/local/docker-compose.yml up -d`
+   (the OpenTelemetry Collector, Loki, Tempo, Prometheus and Grafana; the compose file belongs to the
+   target project, the library ships none).
+2. Run the service with `OTEL_EXPORTER_OTLP_ENDPOINT` pointing at the Collector, then run the
+   acceptance suite against it.
+3. Confirm, through Grafana's datasource proxy (`/api/datasources/proxy/uid/<uid>/…`, which works for five
+   containers or one all-in-one image alike) or the backends' own query APIs:
+
+| Signal | Backend | Query | Passes when |
+|---|---|---|---|
+| The spans the tasks named | Tempo | search by `service.name` and span name | each named span has a trace |
+| A log line carrying one of those traces' id | Loki | `{service_name="<service>"} \| json \| trace_id="<id>"` | at least one line returns |
+| The metrics the tasks named | Prometheus | `<metric>` instant query | each named metric has a series |
+
+4. The `As built` note records the trace id and the three queries. A missing signal is fixed in the task that
+   added it, like any gate failure.
+
+With no container runtime on the machine, or a service the gate cannot start, the smoke is recorded as
+**unverified** in `Status:` — never skipped silently.
+
 **"The last task" means the last task that is not blocked.** Where a task waits on something outside
 the plan — a run the user starts, a credential, a decision — the gate belongs to the last task that can
 actually run, and the blocked tasks sit below it carrying their own gate for whenever they run.

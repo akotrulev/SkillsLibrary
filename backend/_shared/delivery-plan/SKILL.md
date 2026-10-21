@@ -102,7 +102,7 @@ Do not brainstorm tasks. Read them out of the detail pack, in this order — the
 | `integrations.md` blocking unknowns | **Prerequisite tasks** — provisioning, accounts, sandbox access |
 | Behaviour the plan must keep, that no test pins (found in the orientation pass or the code) | **Pin tasks** — one per untested area the plan touches, before the first task that touches it: `qa-api-<stack>` pins what the API shows, the `be-<stack>` agent pins logic with unit tests. Deliverable: "the current behaviour of <area> is pinned by N tests, green on today's code." Behaviour the plan *changes* gets `Q` tests for the new behaviour instead, never a pin |
 | `data-model.md` migration sequence | One task per migration, in its stated order |
-| `blueprint.md` cross-cutting concerns | Auth wiring, error envelope, logging/telemetry, config validation |
+| `blueprint.md` cross-cutting concerns | Auth wiring, error envelope, config validation — and **the telemetry base**, one task right after the scaffold (`observability-engineer-<stack>`, stack `be`): the OpenTelemetry SDK, structured logging with the trace id on every line, the resource attributes, a RED dashboard per service, and the local Grafana stack in `deploy/local/` (Collector, Loki, Tempo, Prometheus, Grafana). Skipped only where a service already ships its signals |
 | `api-surface.md` shared schemas + section 4 | Shared DTOs and the validation/error middleware — **once**, before any endpoint |
 | `api-surface.md` endpoint blocks | One task per resource (not per endpoint — a resource's CRUD set is one coherent task). In a test-first plan, first **one stub task** routing every endpoint to the `501 not-implemented` response (validation catalog V8.6) with its real response types |
 | `api-surface.md` endpoint blocks + the validation catalog + the `Acceptance:` lines | **API acceptance tasks** (`Q`, `qa-api-<stack>`) — one per resource group that fits a session, after the stub task and before the resource tasks that turn them green |
@@ -160,10 +160,11 @@ The order must satisfy five things:
 |---|---|
 | First | Human-blocked provisioning the first capability needs — one task per provisioning track |
 | Then | Scaffold, layout, config + validation, CI skeleton, and the cross-cutting surfaces (auth, error envelope, shared DTOs) the first capability actually depends on — nothing speculative |
+| Then | **The telemetry base** — one `observability-engineer-<stack>` task, so every request any later task serves shows up in Grafana while it is being built |
 | Then | Capability A's whole set from Step 1, in its natural order: migration → its stubs and OpenAPI asset → its `Q` tasks → entities + rules → service → endpoint bodies → wiring → unit tests → its screens (the app-shell task precedes the first capability's `Q` journeys and screens) |
 | Then | Capability B's own set, plus only the foundations B is the first to need |
 | Then | One run of tasks per remaining capability, most valuable first |
-| Last | The OpenAPI asset's regeneration (test-first) or generation (test-after), telemetry, rate limiting, performance, docs |
+| Last | The OpenAPI asset's regeneration (test-first) or generation (test-after), business dashboards and alert rules, rate limiting, performance, docs |
 
 Test-first costs this shape two agent switches per capability (its `Q` tasks, then back to its implementation); a capability's last task still delivers it.
 
@@ -179,11 +180,12 @@ Three rules keep it honest:
 |---|---|
 | First | Human-blocked provisioning from `integrations.md` — unchanged, and still one task per provisioning track |
 | Then | **The contract wave** — one batch carrying everything both sides bind to, for the **whole initiative** rather than the first capability: the full migration sequence, the entity/model types, the shared DTOs and the error envelope, auth wiring, config keys, the typed endpoint signatures with their request/response contracts (stubbed where the behaviour lands later — a test-first plan routes every endpoint to the `501 not-implemented` stub and generates the OpenAPI asset from it), the generated or hand-written API client the frontend imports, and the app shell + nav map + route tree (a placeholder per screen route). Once this lands, no later batch waits on a different agent |
+| Then | **The telemetry base** — its own batch, because its agent is `observability-engineer-<stack>`: the SDK wiring, the local Grafana stack and the RED dashboard, on the contract wave's scaffold |
 | Then | **API acceptance batches** (`Q`, `qa-api-<stack>`) — one per resource group that fits a session, written against the stubs and red on them |
 | Then | **Journey batches** (`Q`, `qa-ui-<stack>` / `qa-mobile-<stack>`) — written against the agreed test ids and red on the placeholders |
 | Then | **Backend, one batch per module** — a module is a file tree one agent owns (`src/Booking/*`): its entities, domain rules, service, endpoint bodies, registration and unit tests, in a single task. Most-depended-on module first |
 | Then | **Frontend, one batch per screen area** — an area is one nav section of `experience-plan.md` §2 and the screens under it: their components, routes, states and wiring, in a single task, ordered by the nav map |
-| Last | The OpenAPI asset's regeneration, telemetry, rate limiting, docs — and the **verification batch**: the full build, the whole test run (old and new), the journeys and the coverage floor. The acceptance tests are no longer deferred to it: they ran red before the implementation |
+| Last | The OpenAPI asset's regeneration, business dashboards and alert rules, rate limiting, docs — and the **verification batch**: the full build, the whole test run (old and new), the journeys and the coverage floor. The acceptance tests are no longer deferred to it: they ran red before the implementation |
 
 **What may be merged into one batch — all four, or it stays separate:**
 
@@ -210,12 +212,13 @@ Three rules keep it honest:
 | First | Human-blocked provisioning from `integrations.md` |
 | Then | Scaffold, project layout, config + validation, CI skeleton |
 | Then | Migrations, in their stated order |
-| Then | Auth wiring, error middleware, shared DTOs, telemetry base — every later task depends on these |
+| Then | The telemetry base — SDK wiring, the local Grafana stack, a RED dashboard (`observability-engineer-<stack>`) |
+| Then | Auth wiring, error middleware, shared DTOs — every later task depends on these |
 | Then | Every endpoint routed as a `501 not-implemented` stub and the OpenAPI asset generated from it; the app shell with a placeholder per screen route, where there are screens |
 | Then | The `Q` tasks: API acceptance tests per resource group, journey tests per journey — red on the stubs |
 | Then | One task per resource: entity → persistence → service → endpoint bodies → unit tests, turning that resource's `Q` tests green |
 | Then | External clients, webhook handlers, background jobs — one per dependency |
-| Last | Rate limiting, observability, performance, docs |
+| Last | Rate limiting, business dashboards and alert rules, performance, docs |
 
 Test-first costs this shape one more layer before the first resource task: the stubs and the `Q` tasks.
 
@@ -284,7 +287,8 @@ or typecheck.
 ### B3 — Orders resource
 
 **Epic:** `E2` Ordering · **Story:** `US7` · **Stack:** `be` · **Stream:** `ordering-api` · **Order:** 12
-**Agent:** `be-dotnet` · **Skills:** `be-dotnet:patterns-apply`, `be-dotnet:persistence`, `be-dotnet:unit-testing`
+**Agent:** `be-dotnet` · **Skills:** `be-dotnet:patterns-apply`, `be-dotnet:persistence`, `be-dotnet:unit-testing`,
+`be-dotnet:opentelemetry`, `be-dotnet:structured-logging`
 **Deliverable:** the five Orders endpoints are live and reachable — a caller with the `orders:write`
 permission can place, cancel and close an order, and list or get their own — the 14 Orders acceptance
 tests from Q1 pass, and B3's unit tests cover ≥ 80% of its branches.
@@ -310,6 +314,9 @@ gates once, in F4. Do not run the full suite, another tree's build, lint or type
   `idempotency-conflict`, `currency-not-enabled`) return the documented `type` slugs.
 - Cross-tenant access returns 404, per the API's V5.3 disclosure choice.
 - Illegal state transitions return 409 naming the current and the allowed states.
+- Signals: a span `orders.place` / `orders.cancel` / `orders.close` carrying `order.id` and the outcome; a
+  log at each rejection (`insufficient-stock`, `idempotency-conflict`) and state change, ids as properties;
+  the metric `orders.placed{outcome}`. The gate's telemetry smoke looks for exactly these.
 - Unit tests cover every validation branch and every state transition — in-process, no HTTP, no
   container, no real DB — and together reach ≥ 80% of the branches B3 writes (the own-tests run measures
   it over `src/Ordering/*`).
@@ -411,6 +418,12 @@ Rules:
   suite, the journeys and any manual verification stay with the gate; starting servers does too, except
   where an own-tests command starts the service itself. Unit tests are part of the implementation
   task, not a separate one.
+- **An implementation task names its signals.** Where a `be` task adds an entry point, an outbound call, a
+  background job or a business event, one bullet lists the spans, the decision-point logs and the metrics it
+  adds: a span per business operation, a log per rejection or state change, a metric per business event
+  with low-cardinality labels. The telemetry base is the foundation's, so the
+  task never rebuilds the SDK, the exporters or the local stack, and the gate's telemetry smoke
+  (`plan-format.md` §5) queries the names the bullets carry.
 - **Test-first deliverables name the tests.** A `Q` task's deliverable names its tests and their red
   reason; an implementation task's deliverable names the `Q` tests it turns green. Every own-tests
   command is filtered by file or class — never the unfiltered suite — and the `Q` task's `As built`

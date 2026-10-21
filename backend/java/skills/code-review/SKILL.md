@@ -64,6 +64,7 @@ Detect the reviewed project's Java release and Spring Boot major first. Don't fl
 |---|---|---|
 | One pattern per problem | Repository + Specification + UoW + handler + decorator on a CRUD slice | major |
 | Modules reach each other only through the owner's public API (`<Module>Api`) | A module reading another module's table, entity or `internal` package — a cross-schema join, a `@ManyToOne` to a foreign entity, an import of another module's sub-package | major |
+| Instrumented as built | New behaviour (an entry point, an outbound call, a job, a business event) with no span, no log at its decision points or no business metric; a secret or personal data in a log line or span attribute | major; **blocker** for the secret or personal data |
 | Repository earns its keep | Spring Data interface that mirrors `JpaRepository` 1:1 | major |
 | CQRS justified | Lightweight CQRS for a 2-endpoint service with no read/write asymmetry | major |
 | Strategy / Factory replace `switch` chains | Repeated `switch (mode)` across services | major |

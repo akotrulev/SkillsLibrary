@@ -70,6 +70,7 @@ Reviews TypeScript code (strict mode) against the patterns in `backend/node/skil
 |---|---|---|
 | One pattern per problem | Repository + Service + Mapper + Mediator + Decorator on a CRUD slice | major |
 | Modules reach each other only through the owner's public API (the exported `index.ts` facade) | A module reading another module's table, entity or non-`index.ts` file — a cross-schema join, a deep import past `index.ts` | major |
+| Instrumented as built | New behaviour (an entry point, an outbound call, a job, a business event) with no span, no log at its decision points or no business metric; a secret or personal data in a log line or span attribute | major; **blocker** for the secret or personal data |
 | Repository earns its keep | Wrapping Prisma 1:1 with `find/save/delete` | major |
 | CQRS justified | Lightweight CQRS for a 2-endpoint service | major |
 | Class vs function appropriate | Class with no state / one method | minor |

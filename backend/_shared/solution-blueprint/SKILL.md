@@ -233,7 +233,7 @@ One line each: system, what it does for us, direction (we call it / it calls us 
 | Ordering domain + persistence | `be-dotnet` | `be-dotnet:patterns-apply`, `be-dotnet:persistence`, `be-dotnet:unit-testing` | Unit tests ship with the task, not after |
 | Schema, indexes, tenancy enforcement | `data-architect` | `data:postgresql`, `data:schema-design` | Beyond ORM mechanics |
 | Service-side auth | `be-dotnet` | `be-dotnet:auth0` | Frontend half is `fe-react` |
-| Telemetry | `observability-engineer-dotnet` | `be-dotnet:opentelemetry` | Runs after the first capability's tasks land |
+| Telemetry base | `observability-engineer-dotnet` | `be-dotnet:opentelemetry`, `be-dotnet:structured-logging` | Runs in the foundation, right after the scaffold, so every later task is observable while it is built; each `be` task then instruments what it builds |
 | Contract + integration tests | `qa-api-dotnet` | `qa-dotnet:api-tests` | Test basis is `api-surface.md` |
 | Access-control proof | `qa-security` | `qa-dotnet:permission-testing` | BOLA/IDOR over the auth column |
 | Image, IaC, pipeline, secrets | `devops-engineer` | `devops:docker`, `devops:environment-config` | |
@@ -352,7 +352,7 @@ In `DETAIL` mode, where the human supplied the high-level plan, the gate is shor
 flowchart LR
 ```
 
-**Cross-cutting concerns:** <auth, error handling, logging/telemetry, config, background work — one line each on the approach.>
+**Cross-cutting concerns:** <auth, error handling, logging/telemetry, config, background work — one line each on the approach. Telemetry names the local Grafana stack (`deploy/local/`: Collector, Loki, Tempo, Prometheus, Grafana) and says the telemetry base lands in the foundation.>
 
 ## 3b. Key flows & decisions
 <!-- One flowchart per primary business flow (named actors, every exit labeled incl. failure).

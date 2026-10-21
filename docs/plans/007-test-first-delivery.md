@@ -358,6 +358,8 @@ Cost: a missed overlap edge lets two agents edit one file at once, and the Self-
 
 **D13 — the examples were made consistent with the four rules, and the capacity guard moved inside the Booking schema.** 2026-10-21, M1. §4.5 named only `example-data-model.md:133` (the ownership line). The data-model example also held three cross-module foreign keys (`sessions.created_by → members`, `bookings.session_id → sessions`, `bookings.member_id → members ON DELETE CASCADE`) and an overbooking guard that locked a `scheduling` row from the Booking module — each breaks rule 1. Both readings: change only the ownership line and leave an example that teaches what the rule forbids (rejected), or drop the three foreign keys to plain id columns, route the GDPR hard delete through `IBookingApi`, and make the guard an advisory lock on the session id or a seat counter in the `booking` schema, with open question 1 and the `data-architect` row reworded to match. The delivery example's "exclusion constraint" wording became "capacity guard" (it no longer fits a cross-schema check), and its module names follow the example blueprint (`Membership`, matching `src/Membership` already in the epic map). Cost: the example's guard mechanism is still routed to `data-architect`, not decided. *(2026-10-21)*
 
+**D14 — the telemetry base is its own task in every shape, not part of the contract wave.** 2026-10-21, L1. §4.6's table said the example gets "a telemetry-base task in the contract wave". Under agent-batched sequencing a wave is one agent's batch and the base belongs to `observability-engineer-<stack>`, so it is the batch after the wave (the same agent-switch cost the `Q` batches carry); the example, being feature-complete, has it as `C9` after `C8`. Reading one: fold it into the contract wave and break the one-agent rule. Reading two: its own task, one more agent switch. Chosen: two, because the one-agent rule is the one a batch cannot relax.
+
 ## Answered questions (2026-10-21)
 
 **O1 — Do implementers run tests:** their own, filtered (D1).
@@ -473,6 +475,7 @@ H1 replaces rules 5 and 6 of `~/.claude/CLAUDE.md` § "How features are broken d
 
 - The telemetry smoke in `plan-format.md` §5, after the coverage-floor table: start the `deploy/local` stack, run the service with `OTEL_EXPORTER_OTLP_ENDPOINT` pointing at it, run the acceptance suite against it, then find the plan's named spans in Tempo, a log line in Loki that carries one of those traces' id, and the named metrics in Prometheus; record the trace id and the queries; with no container runtime, record the smoke as unverified in `Status:`.
 - **Not in L1:** a Python observability skill (O6); frontend real-user monitoring.
+- **As built (2026-10-21):** §4.6's table landed row by row, ungated. `delivery-plan/SKILL.md`: the cross-cutting row of Step 1 now yields the telemetry base (`observability-engineer-<stack>`, stack `be`, right after the scaffold); a "Then \| The telemetry base" row sits after the scaffold row in feature-complete, as its own batch after the contract wave in agent-batched (a different agent cannot join the wave — D14), and after the scaffold row in platform-first; no `Last` row names telemetry (they say business dashboards and alert rules); Step 4 gained the "An implementation task names its signals" rule and a Signals bullet plus the two observability skills on the SKILL-local `B3`. The example gained task `C9` (telemetry base, order 10; orders from `Q3` on moved up by one, the table and every `Order:` line), its stream line, gap rows and abbreviated note; `B6` is now the business dashboards and alert rules; the named signals went on `B2` (the example's backend block — §4.6's table said `B3`, the SKILL's Orders example, which carries them too); `B7`'s gate ends with the telemetry smoke. `solution-blueprint/SKILL.md` and its example: the routing-map row is "Telemetry base" in the foundation and the §3 cross-cutting line names `deploy/local/`. `solution-planner.md`: the observability line under Related agents and a new Step 9 item 21, "Signals named". `plan-format.md` §5: the telemetry smoke after the coverage-floor paragraph and its tool table — five steps' worth in a numbered list and a three-row table (Tempo, Loki, Prometheus), queried through Grafana's datasource proxy so it holds for five containers or one all-in-one image. The three `be-*` agents carry the §4.6 bullet verbatim apart from `<stack>`, directly after the unit-test and coverage-floor bullet (so T4's read-only bullet goes after the same one); `be-dotnet` also says `observability/…` is literal in its path shorthand, and `be-java`/`be-node` have a loading line and name the two skills in "Load only". Each `code-review` has one row, "Instrumented as built", after M1's modules row (untouched): **major**, **blocker** for a secret or personal data. Each `observability-engineer-*` has a plan bullet (first task = the telemetry base, written not run under `Gate: none`; business dashboards later). `CLAUDE.md` Backend code rules gained the one bullet. `be-python` untouched (O6). Built but unverified: no validator ran (T5); the compose file's contents are the target project's, so no image was checked — the smoke queries through Grafana for that reason.
 
 ### P1 — plans flag the tasks that can run at the same time
 
@@ -583,56 +586,7 @@ Run them one session each, in the SkillsLibrary checkout on `master`; never crea
 | H1 | `human` | **the user** | T5 | — | five minutes |
 | H2 | `human` | **the user** | H1, the push, O4, O5 | — | one feature |
 
-T1, T2 and M1 have landed, and their prompts are deleted — a prompt for a finished task is a thing someone runs by mistake. Every block below is live.
-
----
-
-### L1 — services are observable from their first task (general-purpose, docs)
-
-````
-Depends on: T1, T2, M1
-
-You are `general-purpose`. Task L1 of docs/plans/007-test-first-delivery.md: make services observable
-from their first task — the telemetry base in the foundation, every implementation task
-instrumenting what it builds, and a telemetry smoke at the gate.
-
-Read, in this order:
-1. CLAUDE.md: Stack defaults (Observability) and the Backend code rules.
-2. The plan: §4.6, D10, O6, the As built notes of T1, T2 and M1, task L1, and "Close-out — every
-   task".
-3. backend/_shared/delivery-plan/SKILL.md: the three shape tables (grep "telemetry"; T2 and M1
-   moved the lines) and Step 4's rules and its Q1 and B3 example blocks; references/example-delivery-plan.md's
-   contract tasks (C4, and C8, the stub task T2 added) and B2, its backend block — the SKILL's Orders B3
-   is a different, SKILL-local example.
-4. backend/_shared/solution-blueprint/SKILL.md: the routing example (grep "Telemetry") and the §3
-   template's cross-cutting line; backend/_shared/agents/solution-planner.md: the
-   observability-engineer line under Related agents, and the Step 9 checklist.
-5. engineering-practices/writing-plans/references/plan-format.md §5, as T1 left it.
-6. backend/{dotnet,java,node}/agents/be-*.md Operating rules; backend/{dotnet,java,node}/skills/
-   code-review/SKILL.md severity tables.
-7. observability/agents/observability-engineer-{dotnet,java,node}.md: the Steps table and the plan
-   execution rules; observability/opentelemetry-dotnet/SKILL.md and
-   observability/structured-logging-dotnet/SKILL.md as the naming reference.
-
-Build: §4.6's table, row by row; task L1's be-* bullet verbatim apart from `<stack>`; the telemetry
-smoke in plan-format.md §5, after the coverage-floor table.
-
-Traps:
-- The observability skills' choices win — Serilog on .NET, their sinks, their resource attributes.
-  This task changes *when* telemetry is built, not *how*.
-- The local stack is a compose file in the target project; the library ships none. Name what it
-  runs and what the gate queries. If you name a single all-in-one image, check that it exposes the
-  Tempo, Loki and Prometheus query APIs; otherwise query them through Grafana's API.
-- A be-* agent may load only the skills it names, so the bullet names both observability skills by
-  path.
-- be-python stays out (O6).
-- M1 added a "Modules reach each other only through the owner's public API" row to each code-review's Pattern application table; add the telemetry row beside it, and do not touch it.
-
-Gate: none — this plan gates once, in T5. Do not run the validators.
-
-Commit: `docs(dev, be, observability): services observable from their first task (007 L1)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
+T1, T2, M1 and L1 have landed, and their prompts are deleted — a prompt for a finished task is a thing someone runs by mistake. Every block below is live.
 
 ---
 

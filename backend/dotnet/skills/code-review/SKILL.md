@@ -64,6 +64,7 @@ Severity column maps directly to the output table.
 |---|---|---|
 | One pattern per problem — no stacking | Repository + UoW + Specification + Mediator + Decorator on a CRUD slice | major |
 | Modules reach each other only through the owner's public API (`I<Module>Api`) | A module reading another module's table, entity or `Internal` type — a cross-schema join, an `Include` across modules, a `using` of another module's `Internal` namespace | major |
+| Instrumented as built | New behaviour (an entry point, an outbound call, a job, a business event) with no span, no log at its decision points or no business metric; a secret or personal data in a log line or span attribute | major; **blocker** for the secret or personal data |
 | Repository earns its keep | `IFooRepository` that mirrors `DbSet<Foo>` 1:1 with `Get/Add/Update/Delete` | major |
 | CQRS justified | MediatR adopted on a service with one read + one write | major |
 | Strategy / Factory replace `switch` chains | `switch (type) { case ... }` repeated across the codebase | major |
