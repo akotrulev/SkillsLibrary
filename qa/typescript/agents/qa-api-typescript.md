@@ -40,6 +40,8 @@ The skills library lives at the repo's `qa/` folder when working inside the Skil
 
 Decide the mode from what the invoking prompt supplies, before starting step 1. A formal, technique-derived test-case document is the job of `qa-test-case-designer` — run that agent first when you want one. This agent authors from whatever basis it is given:
 
+- **Test-first (a `Q` task in a plan):** load `qa/_shared/test-first` and follow it. The service is a stub, and red on `not-implemented` is the expected result.
+
 **Mode A — OpenAPI/Swagger spec is the basis** (JSON/YAML with the microservice's resources, endpoints, DTO schemas, and endpoint descriptions). The spec is the source of truth — and it is an **asset, not a message**: it lives in the repo at `specs/{service}-openapi-{YYYY-MM-DD}.json`.
 
 **Before anything else**, load `qa/_shared/api-spec-assets/SKILL.md`, then `ls specs/` and `git status --porcelain -- specs/` to pick the sub-mode:

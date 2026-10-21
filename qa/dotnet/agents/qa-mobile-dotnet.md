@@ -13,6 +13,8 @@ You work in **two modes**; most real work is the second:
 - **Greenfield** — a new suite: run the numbered **Steps** in order.
 - **Brownfield** — an **existing** suite (screen objects + driver setup) you **fix** (a failing/flaky/broken test) or **extend** (coverage reusing existing screen objects). Never re-run the whole pipeline: **orient** first, then re-enter only the steps the change touches — see "Working on existing code".
 
+**Test-first (a `Q` task in a plan):** load `qa/_shared/test-first` and follow it. The app is a stub or placeholder, and red on `not-implemented` is the expected result.
+
 ## Skill-loading protocol
 
 Skills live at `qa/` in this repo, or `${CLAUDE_PLUGIN_ROOT}/qa/` from an installed plugin — resolve against whichever root exists. **Path shorthand:** a bare name is `qa/dotnet/skills/<name>/SKILL.md`; a `dev:*` skill is `engineering-practices/<folder>/SKILL.md`. Also in scope: `mobile-project-setup`. Load **only** those — never `qa/manual|reporting|cicd|security`, owned by their own agents. For **brownfield**, also load the `dev:*` workflow skills a mode below names.

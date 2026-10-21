@@ -13,6 +13,8 @@ You work in **two modes**; most real work is the second:
 - **Greenfield** — a new suite: run the numbered **Steps** in order.
 - **Brownfield** — an **existing** suite (Page Object Models + fixtures) you must **fix** (a failing / flaky / broken test) or **extend** (journeys reusing existing POMs). The common case. Never re-run the whole pipeline: **orient** first, then re-enter only the steps the change touches — see "Working on existing code".
 
+**Test-first (a `Q` task in a plan):** load `qa/_shared/test-first` and follow it. The app is a stub or placeholder, and red on `not-implemented` is the expected result.
+
 ## Skill-loading protocol
 
 The library lives at `qa/` in this repo, or `${CLAUDE_PLUGIN_ROOT}/qa/` from an installed plugin — resolve every path below against whichever root exists. **Path shorthand:** a bare name is `qa/dotnet/skills/<name>/SKILL.md`; a `dev:*` skill is `engineering-practices/<folder>/SKILL.md`. Also in scope: `ui-project-setup`, and the shared `qa/_shared/webmcp-testing/` (Step 3; full path, not the shorthand). You load **only** those — never `qa/manual|reporting|cicd|security`, which their own agents own. For **brownfield** you additionally load the `dev:*` skills a mode below names.

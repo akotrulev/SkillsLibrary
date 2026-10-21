@@ -503,6 +503,7 @@ H1 replaces rules 5 and 6 of `~/.claude/CLAUDE.md` § "How features are broken d
 - Register it beside `./qa/_shared/api-spec-assets` in the three `qa-*` plugin entries.
 - One line in each of the nine agents, per §6's last paragraph.
 - **Not in T3:** the gate bullet in the qa agents — T4 rewrites all 58 at once.
+- **As built (2026-10-21):** all three deliverables landed as specified, ungated. `qa/_shared/test-first/SKILL.md` (description 414 characters) has one section per row of §6's table plus an Inputs, Where and Never section in the same order; the tag table adds TestNG `groups`. Registered beside `./qa/_shared/api-spec-assets` in `qa-java`, `qa-dotnet` and `qa-typescript` (`.claude-plugin/marketplace.json`, three insertions; the file still parses). The nine agents gained one line each: the three `qa-api-*` as a bullet at the top of `## Input modes`, before Mode A; the six `qa-ui-*` / `qa-mobile-*` as a paragraph under the opening Greenfield/Brownfield list, before `## Skill-loading protocol`, since they have no `## Input modes`. The qa-ui and qa-mobile line says "The app is a stub or placeholder" where §6 says "The service is a stub". The Gate bullet in every agent is untouched. Built but unverified: no validator ran (T5), and the nine citations of the `test-first` heading names are for gate step 7 to check. Proof: `git show --stat HEAD`; `grep -l 'qa/_shared/test-first' qa/*/agents/*.md` lists nine files.
 
 ### T4 — the executing agents run their own tests and keep acceptance tests read-only
 
@@ -587,52 +588,7 @@ Run them one session each, in the SkillsLibrary checkout on `master`; never crea
 | H1 | `human` | **the user** | T5 | — | five minutes |
 | H2 | `human` | **the user** | H1, the push, O4, O5 | — | one feature |
 
-T1, T2, M1, L1 and P1 have landed, and their prompts are deleted — a prompt for a finished task is a thing someone runs by mistake. Every block below is live.
-
----
-
-### T3 — the QA lane writes acceptance tests first (general-purpose, docs)
-
-````
-Depends on: T1
-
-You are `general-purpose`. Task T3 of docs/plans/007-test-first-delivery.md: write the shared skill
-`qa/_shared/test-first`, register it in the three qa plugins, and have the nine qa-api, qa-ui and
-qa-mobile agents cite it.
-
-Read, in this order:
-1. CLAUDE.md, the Test code rules.
-2. The plan: §2.1, §3.3, §3.4, §4, §6, D5, D6, D8, T1's As built, task T3, and "Close-out — every
-   task".
-3. qa/_shared/api-spec-assets/SKILL.md — the shared-skill pattern, and the asset the Q tests take
-   their client from.
-4. qa/dotnet/agents/qa-api-dotnet.md `## Input modes`; then, by grep, the input or mode section of
-   qa-api-java, qa-api-typescript, qa-ui-{dotnet,java,typescript} and
-   qa-mobile-{dotnet,java,typescript}.
-5. .claude-plugin/marketplace.json, the three `./qa/_shared/api-spec-assets` lines (130, 265, 405)
-   and their plugin entries.
-
-Build:
-- qa/_shared/test-first/SKILL.md per §6's table. Frontmatter `name: test-first`; a description of
-  at most 500 characters with triggers ("write the acceptance tests before the implementation",
-  "a Q task") and fences (tests of built code → the agent's own modes; unit tests → the be, fe and
-  mobile testing skills).
-- Register it beside ./qa/_shared/api-spec-assets in the qa-java, qa-dotnet and qa-typescript
-  entries.
-- One line in each of the nine agents where it decides what to build from — §6's last paragraph.
-
-Traps:
-- The tests assert the contract's behaviour. `501` is only the red reason, and asserting it is on
-  the skill's "Never" list.
-- The qa-ui and qa-mobile agents have no `## Input modes`; their Mode A/B are brownfield fix and
-  extend. Put the line where the agent reads its basis, not inside those modes.
-- Do not touch the shared Gate bullet in any agent; T4 rewrites all 58 with one script.
-
-Gate: none — this plan gates once, in T5. Do not run the validators.
-
-Commit: `feat(qa): test-first — acceptance tests written against stubs, before the implementation (007 T3)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
+T1, T2, M1, L1, P1 and T3 have landed, and their prompts are deleted — a prompt for a finished task is a thing someone runs by mistake. Every block below is live.
 
 ---
 

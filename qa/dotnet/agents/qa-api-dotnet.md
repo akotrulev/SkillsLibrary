@@ -34,6 +34,8 @@ The library lives at `qa/` in this repo, or `${CLAUDE_PLUGIN_ROOT}/qa/` from an 
 
 Decide the mode from what the invoking prompt supplies, before step 1. A formal technique-derived test-case document is `qa-test-case-designer`'s job — run it first if you want one.
 
+- **Test-first (a `Q` task in a plan):** load `qa/_shared/test-first` and follow it. The service is a stub, and red on `not-implemented` is the expected result.
+
 **Mode A — OpenAPI/Swagger spec is the basis.** The spec is the source of truth and an **asset, not a message**: it lives at `ApiTests/Specs/{service}-openapi-{YYYY-MM-DD}.json`. **Before anything else, load `qa/_shared/api-spec-assets`, then `ls ApiTests/Specs/` and `git status --porcelain -- ApiTests/Specs/` to pick the sub-mode:**
 
 | What you find | Sub-mode | The spec-asset step | You then process |
