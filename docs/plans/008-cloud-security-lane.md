@@ -7,9 +7,12 @@ AWS/Azure/GCP exploitation), one new defensive skill (cloud incident response + 
 references), and a wiring + cross-reference pass that teaches the existing agents and skills the new
 lane exists.
 
-**Status:** Not started. Next: C1 (the shared cloud-recon entry skill the three provider skills bind
-to). Built but unverified: nothing yet. No new commands ship — every new skill is agent-reached, so the
-catalog's 65-command surface is unchanged; the skill inventory and two plugin descriptions do change.
+**Status:** C1 landed (2026-10-21): `security/cloud-recon-enumeration` exists with its four references.
+Next: A1, A2, A3, B1 (independent of each other, each depends on C1 except B1 which is independent).
+Built but unverified: C1's content is written and internally consistent but not yet cross-checked against
+A1–A3 once those land (the §5a gate, which runs once in G1, is the first point anything is verified
+end to end). No new commands ship — every new skill is agent-reached, so the catalog's 65-command
+surface is unchanged; the skill inventory and two plugin descriptions do change.
 
 ---
 
@@ -175,6 +178,22 @@ references) ~30k.
 - Name the handoff: consumes `cloud-posture` findings as leads; hands enumerated reachability to the
   provider skills.
 - **Not in C1:** provider-specific exploitation (A1–A3); marketplace registration + agent routing (W1).
+
+**As built (2026-10-21):** Landed exactly as planned — no divergence. `security/cloud-recon-enumeration/SKILL.md`
+(`file:1`) carries the frontmatter (`name: cloud-recon-enumeration`, triggers + "Not for …" fences vs
+`recon-enumeration`/`cloud-posture`/the three provider skills), the §2 safety gate (cloud scope file +
+`#volatile` authorization line, owned/lab-only, loot redaction), and the teaching body: enumeration
+posture (anonymous→authenticated), public-asset/storage discovery, the full IMDSv1/v2 + hop-limit +
+dual-accept detail (`T1552.005`), IAM/principal/permission enumeration (`T1087.004`), and OIDC/federation
+trust enumeration (incl. the cross-tenant "Sub:jugation" red line) — each mapped to its ATT&CK **Cloud**
+id (T1580/T1526/T1619/T1552.005/T1087.004), confirmed not Enterprise. Four references written exactly as
+named: `references/scoutsuite.md`, `references/cloud-enum.md`, `references/metadata-service.md`,
+`references/enumerate-iam.md` — each one tool family, invocation, what it answers, and an explicit "how
+it feeds the provider skills" section for A1–A3 to bind against. The posture↔exploitation handoff with
+`devops:cloud-posture` is named in both the SKILL.md body and its cross-references section. No prompt
+below (A1/A2/A3/B1/W1/G1) needed rewriting — every name/path this task produced (`cloud-recon-enumeration`,
+the four reference filenames, the ATT&CK Cloud ids) matches what those prompts already assumed. Verified
+by reading the written files back; no gate run (per `Gate: none`).
 
 ---
 
@@ -436,48 +455,6 @@ landed yet).
 | G1 | `docs` | `general-purpose` | W1 | ~120k |
 
 ---
-
-### C1 — `cloud-recon-enumeration` (general-purpose, docs)
-
-````
-You are authoring a skill (docs). Task C1 of docs/plans/008-cloud-security-lane.md: write
-`security/cloud-recon-enumeration/SKILL.md` + its four references — the shared cloud-pentest entry skill
-the AWS/Azure/GCP exploitation skills will bind to.
-
-Read, in this order:
-1. CLAUDE.md (global rules — comments, simplicity, version policy).
-2. The plan: §2 (design principles — the safety gate you must open with), §3.1 (the skill table),
-   §5a (the gate — you do NOT run it), task C1, and "Close-out — every task".
-3. `security/recon-enumeration/SKILL.md` — the FORMAT pattern (frontmatter idiom, the opening
-   authorization gate, references routing). Yours is the cloud analogue of this.
-4. `security/atomic-simulation/SKILL.md` — for the cloud + MITRE ATT&CK-Cloud idiom already in the repo
-   (Stratus, cloud matrix).
-5. `devops/cloud-posture/SKILL.md` §intro — so you name the posture↔exploitation handoff correctly.
-6. `docs/research/cloud-security/02-pentest-methodology-recon.md` — the research corpus for THIS skill
-   (methodology, metadata-service detail, the multi-cloud tools table → your four reference files). Lift
-   facts from it; also skim `docs/research/cloud-security/README.md` currency ledger (IMDSv2 hop-limit,
-   OIDC "Sub:jugation", lab attributions).
-
-Write:
-- `security/cloud-recon-enumeration/SKILL.md`: frontmatter (`name: cloud-recon-enumeration`, a
-  description with triggers + "Not for …" fences vs recon-enumeration/cloud-posture/the provider skills);
-  then the §2 safety gate (committed cloud scope file, #volatile expiring authorization, owned/lab
-  accounts only, loot redaction); then the teaching body — enumeration posture, public-asset + storage
-  discovery, the instance metadata service (IMDSv1/v2, SSRF→creds, T1552.005),
-  IAM/principal/permission + OIDC/federation enumeration — each mapped to its ATT&CK-Cloud id.
-- `references/scoutsuite.md`, `references/cloud-enum.md`, `references/metadata-service.md`,
-  `references/enumerate-iam.md` — one tool family each: invocation, what it answers, how it feeds A1–A3.
-
-Traps:
-- ATT&CK matrix is **Cloud** (IaaS/Identity Provider/SaaS), not Enterprise.
-- This skill is recon ONLY — no exploitation (that's A1–A3). State the handoff, don't do their job.
-- Comments rule: SKILL.md prose is fine; do not add code-comment noise to any example blocks.
-
-Gate: none — this plan gates once, in G1. Do not run the build, any linter, the §5a gate, or any tool.
-
-Commit: `feat(penetration-testing): cloud-recon-enumeration skill (cloud lane C1)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
 
 ### A1 — `cloud-attack-aws` (general-purpose, docs)
 
