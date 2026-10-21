@@ -1,6 +1,6 @@
-# 007 — Test-first delivery: the acceptance tests come before the implementation — plan (2026-10-21)
+# 007 — The delivery flow: test-first, built to be split, observable from the first task — plan (2026-10-21)
 
-**Goal:** Make test-first the library's default way to deliver a feature. A plan agrees the data model and the API contract, commits stubs that answer `501 not-implemented`, has `qa-*` agents write the acceptance tests against those stubs, and only then has the `be` / `fe` / `mobile` agents implement until the tests pass, with their own unit tests at the 80% branch floor. Implementers may run their own tests; the full gate still runs once.
+**Goal:** Make test-first the library's default way to deliver a feature. A plan agrees the data model and the API contract, commits stubs that answer `501 not-implemented`, has `qa-*` agents write the acceptance tests against those stubs, and only then has the `be` / `fe` / `mobile` agents implement until the tests pass, with their own unit tests at the 80% branch floor. Implementers may run their own tests; the full gate still runs once. Two rules ride with it: the default architecture is a modular monolith **built to be split later** (§4.5), and every service is **observable from its first task** — logs, traces and metrics reach a local Grafana stack while the feature is being built, not after (§4.6). And every plan flags which of its tasks can run at the same time (§3.7).
 
 **Status:** Planned 2026-10-21; nothing built. Next: T1. The coverage floor this plan's gates keep landed separately in `0d9826a` (committed, not pushed). Before the first test-first plan runs in a project: T5, the push, and H1. Built but unverified: nothing yet.
 
@@ -17,6 +17,9 @@
 | The QA agents can write tests against stubs | `qa-api-<stack>` Mode A builds from a spec and assumes a working service (`qa/dotnet/agents/qa-api-dotnet.md:37`); nothing expects red | A shared `qa/_shared/test-first` skill the nine qa-api/ui/mobile agents cite (§6, D5) |
 | Behaviour a change must keep is pinned before the change | Only the unit-level re-entry "the logic is right, the tests are missing" (`backend/dotnet/agents/be-dotnet.md:55`) | A pin task ahead of any change to behaviour no test pins (§5.3, D7) |
 | A plan's tests and code share one worktree | Plan Queue makes one worktree per plan, of one repo; the coverage floor diffs one repo's history (`plan-format.md` §5); the blueprint says nothing about repo layout (`backend/_shared/solution-blueprint/SKILL.md` §3) | A repository-layout line in the blueprint, and test-first plans that stay inside one repo (§2.1, D8) |
+| The default architecture stays cheap to split | The blueprint's default is a modular monolith whose stated cost is "module boundaries need discipline to survive" (`solution-blueprint/SKILL.md:94`), with no rule or test enforcing them; the data model skips the ownership map for a monolith (`data-model-plan/SKILL.md` Step 6); the planner says "under ~4 functional areas" (`solution-planner.md:88`) where the blueprint says "< ~6" | Four boundary rules, an architecture test and the split triggers (§4.5, D9) |
+| Services are observable while they are built | The planner schedules telemetry last — "Last \| The OpenAPI asset, telemetry, …" (`delivery-plan/SKILL.md:161`, `:177`, `:206`) — and the blueprint's routing example runs it "after the first capability's tasks land" (`solution-blueprint/SKILL.md:212`); the `be-*` agents never instrument, the `observability-engineer-<stack>` peer does it afterwards | The telemetry base in the foundation, every implementation task instruments what it builds, and the gate proves the signals arrive (§4.6, D10) |
+| A plan says which tasks can run at the same time | `solution-planner` packs declare streams (`delivery-plan/SKILL.md` Step 3) on an epic map whose lanes share one working tree (`epic-map/SKILL.md:67`); every other plan — `plan-format.md` and `writing-plans`, i.e. every `/dev:plan-feature` plan — is one flat sequence, and its prompts table (`plan-format.md` §6) has no stream column | Streams in every plan, with the disjoint-files and build-tree rules and a close-out that is safe while another task runs (§3.7, D11) |
 | The user's global task rules agree | `~/.claude/CLAUDE.md` rule 5 forbids any test run before the last task; rule 6 orders contract → backend → frontend with no test step | H1 replaces both rules with §9's text |
 
 ## 2. The flow this plan builds
@@ -25,10 +28,10 @@
 |---|---|---|---|---|
 | 1 | Define the feature | `requirements-author` (`/dev:refine`) | `stories.md`: Gherkin ACs, cited `US7 AC2` | — |
 | 2 | Agree the contracts | `solution-planner` (`/dev:plan-system`) | approved `blueprint.md`; `data-model.md`; `api-surface.md` with `Acceptance:` per endpoint; `experience-plan.md` with `Test ids:` per screen and `Acceptance:` per journey; `delivery-plan.md` in the test-first order | — |
-| 3 | Contract tasks `C` | `be-<stack>`, plus `data-architect` for schema depth and `fe-<stack>` for the shell | schema and migrations, entities, DTOs, error envelope, auth wiring, **every endpoint routed and answering `501 not-implemented`**, the OpenAPI asset generated from the stubs, the app shell with a placeholder per screen route | compile; nothing to run |
+| 3 | Contract tasks `C` | `be-<stack>`, plus `data-architect` for schema depth, `fe-<stack>` for the shell, and `observability-engineer-<stack>` for the telemetry base | schema and migrations, the module folders with a schema each and the architecture test, entities, DTOs, error envelope, auth wiring, **every endpoint routed and answering `501 not-implemented`**, the OpenAPI asset generated from the stubs, the app shell with a placeholder per screen route, and **the telemetry base**: OpenTelemetry, structured logs carrying the trace id, the local Grafana stack | compile; nothing to run |
 | 4 | Acceptance tasks `Q` | `qa-api-<stack>`, then `qa-ui-<stack>` / `qa-mobile-<stack>` | API tests from the endpoint blocks, the validation catalog and the ACs; journey tests on the agreed test ids | **red**, each on `not-implemented` |
-| 5 | Implementation tasks `B`, `F` | `be-*`, then `fe-*` / `mobile-*` | the logic, with unit tests at the 80% branch floor | the task's acceptance tests turn **green**; they are read-only |
-| 6 | The gate | the last runnable task | build, the whole suite (old and new), lint, the coverage floor; fixes what it finds | all green |
+| 5 | Implementation tasks `B`, `F` | `be-*`, then `fe-*` / `mobile-*` | the logic, with unit tests at the 80% branch floor, **instrumented as it is built** — the spans, decision-point logs and business metrics its task names | the task's acceptance tests turn **green**; they are read-only |
+| 6 | The gate | the last runnable task | build, the whole suite (old and new), lint, the coverage floor, **the telemetry smoke**; fixes what it finds | all green, and the named signals found in Grafana's stores |
 
 Two properties make it hold up with LLM implementers:
 
@@ -46,14 +49,16 @@ A plan runs in one Plan Queue worktree, which is one repo, and the coverage floo
   contracts/                OpenAPI and AsyncAPI documents: what every side binds to
   services/<name>/          one deployable each, in its stack's native workspace:
                             .NET .slnx · Gradle multi-project · pnpm package · uv project
+  services/<name>/src/Modules/<Module>/   inside a modular monolith: one folder per module (§4.5)
   services/<name>/tests/    unit tests and the acceptance tests that drive its implementation
   web/  mobile/             the clients, in the TypeScript workspace or their own native projects
   e2e/                      journey suites that need several deployables running together
+  deploy/local/             the local Grafana stack, started with one command (§4.6)
   docs/plans/               the plans
 ```
 
 - **Mixed languages are fine in one repo.** No build tool spans them: each stack keeps its native workspace in its own folder, CI triggers on path filters, and a nested `CLAUDE.md` per folder carries that stack's conventions.
-- **Microservices fit the same layout.** A service is a folder with its own build, image and path-triggered pipeline, deployed on its own; cross-service APIs and events are agreed in `contracts/`, and consumer-driven contract tests between services are `Q` tasks. The blueprint's architecture rule is unchanged: a modular monolith stays the default proposal, and services need the reason Step 3 names.
+- **Microservices fit the same layout.** A service is a folder with its own build, image and path-triggered pipeline, deployed on its own; cross-service APIs and events are agreed in `contracts/`, and consumer-driven contract tests between services are `Q` tasks. The default proposal stays a modular monolith, now built to be split later (§4.5); a module becomes a service only on one of its split triggers.
 - **Multi-repo is supported with one plan per repo.** A plan cites another repo's plan by its `Depends on` line, and the contract travels as the OpenAPI asset through `qa/_shared/api-spec-assets`. Where a team keeps its suites in a separate QA repo, the acceptance tests that drive the implementation still live beside the service; the QA repo keeps the environment-level suites built from the same asset (O4).
 
 ## 3. The plan format
@@ -106,7 +111,20 @@ The existing line "an intermediate task that runs the build or the suite" is rew
 
 The gate-once bullet names the `own tests` form. One new bullet states the test-first order and the read-only rule, pointing at `plan-format.md` §5. The "In review" line drops "an intermediate task that runs the suite" for "an intermediate task that runs more than its own tests".
 
-## 4. The design pack
+### 3.7 Streams: which tasks run at the same time (D11)
+
+Every plan flags the tasks that can run at the same time, so the executor can run them in parallel instead of one after another.
+
+- **Every task carries `**Stream:** <name>`**, named after what it owns (`api`, `web`, `qa`). Tasks in one stream run in document order; tasks in different streams may run at the same time once their `Depends on` are met. A plan with one stream says so once in the preamble and omits the line.
+- **Two tasks may run at the same time only if** no `Depends on` path joins them, their `Files` are disjoint, and they build different trees. Two tasks inside one .NET solution, one Gradle build or one pnpm package graph share build output, so they stay in one stream. The plan document is the exception every task shares; the close-out rules below make that safe.
+- **The gate task joins every stream:** its `Depends on` names the last task of each.
+- **The prompts table gains a `Stream` column, and the preamble says in one line what runs together**, for example: "After C1, B1 → B2 (`api`) run alongside Q1 (`qa`); F1 waits for both; F2 is the gate."
+- **The close-out while another task may be running** (two additions to format §7): a task stages only its own files, by path, never `git add -A`; and it re-reads the plan immediately before its close-out edits, touching only its own task block, its own prompt block and the landed line. The `Status:` line is rewritten by the task that joins the streams.
+- **The executor decides how many streams run at once;** the plan only states which may.
+
+Files: `plan-format.md` §4 (the `Stream:` line and its table row), §6 (the column and the preamble line) and §7 (the two additions); `writing-plans/SKILL.md` (Step 2's file map feeds the streams, Step 3 declares them, Self-Review checks them, the handoff names what runs together); `delivery-plan/SKILL.md` Step 3 (its streams follow the same rule and gain the build-tree clause); the prompts template's preamble; `solution-planner.md` Step 9's parallelism check.
+
+## 4. The design pack and the architecture rules
 
 ### 4.1 The stub response — `api-surface-plan/references/validation-catalog.md` (D6)
 
@@ -125,6 +143,63 @@ Each endpoint block gains `**Acceptance:** US7 AC1, US7 AC2` under `**Auth:**`: 
 ### 4.4 `Repository layout:` — `solution-blueprint/SKILL.md` §3 (D8)
 
 The §3 template gains `**Repository layout:**` after `**Patterns in play:**`, with §2.1 as the default proposal: one repo per product, one folder per deployable in its native workspace, the driving acceptance tests beside the code. Multi-repo needs a stated reason (independent teams or release cadences) and means one plan per repo.
+
+### 4.5 Built to be split later (D9)
+
+The default proposal stays a modular monolith, now **built to be split later**: every boundary a service split needs exists from the first task, so splitting a module later is a move, not a redesign.
+
+**The four rules:**
+
+1. **A module owns its data.** Its tables live in its own schema. No other module reads or writes them: no cross-module join, no shared table, and no foreign key into another module's schema — another module holds the id.
+2. **Modules talk through a public surface.** Each module exposes one public API — a facade or interface shaped like the HTTP contract it would become, DTOs in and out, never an entity — and the events it publishes. Everything else is internal: `internal` in C#, an internal package under Spring Modulith, not exported from the module's `index.ts`.
+3. **An architecture test fails the build on a reach-in.** ArchUnitNET for .NET (NetArchTest.Rules has had no release since 2021); Spring Modulith's `ApplicationModules.verify()`, or ArchUnit, for Java; dependency-cruiser for TypeScript. It runs with the unit tests, so an agent cannot erode a boundary without turning the build red.
+4. **One folder per module**, mirrored by one schema, one DI registration and one test folder — one module per functional area in the blueprint.
+
+**The split triggers** are the only reasons a module becomes a service, and each is recorded as a dated decision when it is used:
+
+- it must scale apart from the rest;
+- another team will own it, on its own release schedule;
+- it needs isolation the process cannot give — untrusted input, or a compliance scope (the sandboxed upload worker is the house example);
+- it needs a different runtime.
+
+Size, tidiness and "we might need it later" are not triggers. Splitting a module means moving its folder into `services/<name>/`, giving its schema a database of its own, and replacing the in-process calls to its public API with a client generated from that same contract.
+
+| File | Change |
+|---|---|
+| `solution-blueprint/SKILL.md` Step 3 | The default row becomes "Modular monolith, built to be split later", with the four rules and the triggers under the table. The "+ extracted service" and "Services per area" rows cite the triggers as what earns them. The area count (`< ~6`) goes: the triggers decide. The §3 template gains `**Modules:**` (module → schema → owning area), and `references/example-blueprint.md` (`:36`) fills it in |
+| `data-model-plan/SKILL.md` Steps 3 and 6, template §6 | The owning-area column names the module's schema. Step 6 runs for a modular monolith too, recording each cross-module read and the public API it goes through; a cross-module join or write is a finding, as two services writing one table already is. `references/example-data-model.md` (`:133`) follows |
+| `solution-planner.md:88` | "under ~4 functional areas" goes; the rule cites the blueprint's default and its triggers |
+| `delivery-plan/SKILL.md` Step 1 | The scaffold row adds the module folders, a schema per module and the architecture test, written by the first contract task so that every later task is checked against it. The example's `C1` names the test |
+| `backend/{dotnet,java,node}/skills/pattern-writer/SKILL.md` | A "Module boundaries" section: the public surface, `internal` by default, a schema per module in the ORM mapping, a call or an event between two modules, and the stack's architecture test |
+| `backend/{dotnet,java,node}/skills/code-review/SKILL.md` | One row: a module reading another module's table, entity or internal type → **major**; the fix is the owner's public API |
+
+`be-python` is out of scope: the upload worker is a single-purpose service, not a modular monolith.
+
+### 4.6 Observable from the first task (D10)
+
+Today the planner puts telemetry after the features, and only the `observability-engineer-<stack>` peer instruments (§1). After this plan, three things change.
+
+1. **The telemetry base is foundation work.** One task right after the scaffold, run by `observability-engineer-<stack>`, wires the OpenTelemetry SDK (traces and metrics, OTLP export), structured logging with the trace id on every line, the resource attributes (`service.name`, `service.version`, `deployment.environment`), a per-service RED dashboard, and **the local Grafana stack**: a compose file under `deploy/local/` (Collector, Loki, Tempo, Prometheus, Grafana) that every developer and the gate start with one command. From then on, every request that any later task's code serves shows up in Grafana while the feature is still being built.
+2. **Every implementation task instruments what it builds.** The `be-{dotnet,java,node}` agents gain a rule, and load their bundled `structured-logging-<stack>` and `opentelemetry-<stack>` skills whenever a task adds an entry point, an outbound call, a background job or a business event:
+   - **logs** at the decision points (a rejection, a retry, a state change), written as message templates with the ids as properties and no secrets or personal data; an error is logged once, where it is handled, with its exception;
+   - **a span** around each business operation and around each outbound call that auto-instrumentation does not cover, with the ids and the outcome as attributes, and the trace context carried across queues and jobs;
+   - **a metric** per business event (`orders.placed{outcome}`), with low-cardinality labels only;
+   - the task's bullets name the signals it adds, so the gate can look for them.
+3. **The gate proves the signals arrive: the telemetry smoke.** A plan that adds or changes a service's behaviour ends its gate, after the coverage floor, with the local stack up while the acceptance suite runs against the service. It then confirms the named spans in Tempo, a log line in Loki carrying one of those traces' id, and the named metrics in Prometheus, and records the trace id and the queries in `As built`. With no container runtime on the machine, the smoke is recorded as unverified in `Status:`, never skipped silently.
+
+| File | Change |
+|---|---|
+| `delivery-plan/SKILL.md` | The telemetry base joins the foundation in all three shapes, after the scaffold and before the `Q` tasks. "Telemetry" leaves the `Last` rows (`:161`, `:177`, `:206`), which keep business dashboards and alert rules only. Step 4's rules: an implementation task's bullets name its signals |
+| `delivery-plan/references/example-delivery-plan.md` | A telemetry-base task in the contract wave (`observability-engineer-dotnet`), and named signals on `B3` |
+| `solution-blueprint/SKILL.md` | The routing example (`:212`) runs telemetry in the foundation; the §3 template's cross-cutting line names the local Grafana stack |
+| `solution-planner.md` | The observability peer runs in the foundation; Step 9 gains "every implementation task names its signals" |
+| `plan-format.md` §5 | The telemetry smoke, after the coverage floor |
+| `be-{dotnet,java,node}` agents | An "Instrument what you build, as you build it" bullet beside the coverage floor, naming the two bundled skills by path, so the skill-loading protocol permits them |
+| `be-{dotnet,java,node}` code-review skills | One row: new behaviour with no span, no decision-point log or no business metric → **major**; a secret or personal data in a log line or span attribute → **blocker** |
+| `observability/agents/observability-engineer-{dotnet,java,node}.md` | In a plan, its first task is the telemetry base — the SDK wiring, the local stack and the RED dashboard; business dashboards and alerts come in a later task |
+| `CLAUDE.md` Backend code rules | One bullet: instrument as you build, on a telemetry base that lands first |
+
+`be-python`'s upload worker has no observability skill in this library; that is O6, not this plan.
 
 ## 5. The planner
 
@@ -218,7 +293,10 @@ From the SkillsLibrary root, in order:
 5. `python3 tools/qa-version-check.py` reports OK.
 6. ``grep -rlF 'A `Gate: own tests` task runs exactly the command its block names' --include='*.md' . | grep -v docs/plans | wc -l`` is 58; `grep -rlF "the acceptance tests are the spec, and they are read-only to you" --include='*.md' . | grep -v docs/plans | wc -l` is 10; the old bullet's text appears nowhere outside `docs/plans/`.
 7. `qa/_shared/test-first` is registered in exactly the three `qa-*` plugins, and every citation of `qa-<stack>:test-first` or `qa/_shared/test-first` resolves.
-8. Format sweep over the changed files: no `TODO` or `FIXME`; every `file:line` this plan cites still points at the text it names.
+8. Built to be split (M1): `grep -c "~4 functional areas" backend/_shared/agents/solution-planner.md` prints 0; the blueprint's default row reads "built to be split later"; `backend/{dotnet,java,node}/skills/pattern-writer/SKILL.md` each have a module-boundaries section naming ArchUnitNET, Spring Modulith (or ArchUnit) and dependency-cruiser respectively, and none recommends NetArchTest.Rules.
+9. Observable from the first task (L1): no `Last` row in `delivery-plan/SKILL.md` names telemetry, and all three shapes carry the telemetry base in their foundation rows; `plan-format.md` §5 names the telemetry smoke; `grep -l "Instrument what you build" backend/{dotnet,java,node}/agents/be-*.md` lists three files.
+10. Streams (P1): `plan-format.md` §4 carries the `Stream:` line, §6 the `Stream` column and the preamble line, §7 the two concurrent close-out rules; `writing-plans/SKILL.md` Self-Review has the stream check; `delivery-plan/SKILL.md` Step 3 has the build-tree clause.
+11. Format sweep over the changed files: no `TODO` or `FIXME`; every `file:line` this plan cites still points at the text it names.
 
 ## Decisions
 
@@ -254,11 +332,36 @@ Cost: about 4k more read-back per own-tests task (10k instead of 6k). The tree i
 
 Cost: a team that keeps its suites in a separate QA repo moves the tests that drive implementation next to the service (O4).
 
+**D9 — The default architecture is a modular monolith built to be split later.** The user chose this over microservices as the default (2026-10-21).
+
+| Option | Verdict | Why |
+|---|---|---|
+| Modular monolith, built to be split later | **chosen** | Boundaries without network hops: a wrong boundary is a refactor, the compiler and the in-process tests guard every cross-module change, and a module becomes a service on a trigger, by a move |
+| Microservices as the default | rejected | Independent deploys, scaling and team autonomy pay off for several teams; for one team they add runtime-only contract failures, distributed transactions and heavier end-to-end tests — the regression surface this plan exists to shrink |
+| Modular monolith as today, rules unstated | rejected | "Module boundaries need discipline to survive" is a cost the blueprint names and nothing enforces; agents erode an unenforced boundary first |
+
+Cost: no foreign key across modules, so referential integrity between modules is the owning module's job; cross-module reads go through an API call instead of a join. An existing codebase keeps the architecture it has — the default applies to new systems only.
+
+**D10 — Services are observable from their first task, not after the features.** The user asked for this (2026-10-21): Grafana must have data while a feature is being developed. The telemetry base lands in the foundation, each implementation task instruments what it builds, and the gate's telemetry smoke proves the signals arrive. Cost: one more foundation task per plan that starts a service (an `observability-engineer-<stack>` session); about 2k more per implementation task for its spans, logs and metrics; and a gate that needs a container runtime, or records the smoke as unverified.
+
+**D11 — Every plan flags its parallel tasks as streams; the executor decides how many run at once.** The user asked for this (2026-10-21), to cut the wall-clock time of a plan.
+
+| Option | Verdict | Why |
+|---|---|---|
+| Streams in every plan, run in the plan's one working tree | **chosen** | It is the model the epic map and the delivery plan already assume ("concurrent lanes execute against a single working tree"); disjoint files make it safe, and the close-out rules cover the one shared file |
+| A worktree per stream, merged at the join | supported, if the executor prefers it | Full isolation, but every join merges the plan document, whose `Status:` and landed lines conflict each time |
+| No flags; the executor infers parallelism from `Depends on` | rejected | `Depends on` lists prerequisites, not file overlap: two tasks with no edge can still edit one file |
+
+Cost: a wrong stream split corrupts a working tree, which is why the disjoint-files and build-tree checks are hard rules; the close-out gains two rules; and the speed-up exists only once the executor runs streams concurrently (O9).
+
 ## Answered questions (2026-10-21)
 
 **O1 — Do implementers run tests:** their own, filtered (D1).
 **O2 — Who writes the acceptance tests:** the `qa-*` agents, before the implementation. The implementing agent writes only its unit tests.
 **O3 — Mixed languages and microservices:** both fit one repo — a native workspace per folder, path-filtered CI, services deployed on their own (§2.1).
+**O7 — Monolith or microservices by default:** a modular monolith built to be split later (D9).
+**O8 — When telemetry is built:** from the foundation on, with each task (D10).
+**O10 — Should plans say which tasks can run in parallel:** yes, as streams (D11).
 
 ## Open questions
 
@@ -266,6 +369,8 @@ Cost: a team that keeps its suites in a separate QA repo moves the tests that dr
 |---|---|---|---|---|
 | O4 | Your work repos keep suites in a separate QA repo. Where do the tests that drive implementation live there? | (a) beside the service, with the QA repo keeping the environment-level suites — recommended; (b) test-first is not used in those repos | H2's choice of project | the user |
 | O5 | Between a `Q` task and the task that turns its tests green, acceptance tests sit in the history red. Does Plan Queue merge a plan's commits into the main branch only after its gate? | (a) yes, so red never reaches main — recommended; (b) no, and CI must exclude the not-yet-green tests until the gate | H2 in a project whose CI runs on main | the user |
+| O6 | The Python upload worker has no observability skill. How do its signals reach Grafana? | (a) a follow-up plan adds `observability/opentelemetry-python` and `structured-logging-python` — recommended; (b) JSON logs to stdout only, collected from the container | nothing in this plan; a project with the worker | the user |
+| O9 | How will Plan Queue run a plan's streams? | (a) at the same time, in the plan's one worktree, with the close-out of §3.7 — recommended; (b) a worktree per stream, merged at the join task | nothing in the library; the speed-up, which needs executor support | the user |
 
 ## 9. The user's global task rules (H1)
 
@@ -280,20 +385,24 @@ H1 replaces rules 5 and 6 of `~/.claude/CLAUDE.md` § "How features are broken d
    earlier task says `**Gate: none**` and runs nothing: no build, no test run, no lint, no format
    check, no typecheck, no eval, no integration suite, no e2e. The last task — the close-out task,
    or the last task of a phase in a phased plan — runs the whole set for every task in the plan
-   together, ending with the coverage floor (≥ 80% of the branches the plan wrote), and **fixes
-   what it finds rather than handing it back**, because a failure there may belong to any task
-   before it. **The cost, accepted and stated once here: intermediate commits are not fully gated,
+   together, ending with the coverage floor (≥ 80% of the branches the plan wrote) and the
+   telemetry smoke (the plan's named spans, logs and metrics found in the local Grafana stack),
+   and **fixes what it finds rather than handing it back**, because a failure there may belong
+   to any task before it. **The cost, accepted and stated once here: intermediate commits are not fully gated,
    so the tree is not known to build at every task boundary and a plan cannot be stopped halfway
    and trusted.** Where a stack-cut task cannot be demonstrated end to end on its own — a backend
    task whose screen arrives two tasks later — say so in the plan rather than pretending the
    capability landed, and have the contract-first side return an explicit not-implemented
    response (`501`, problem type `not-implemented`), never a fake success.
 6. **Order: everything both sides bind to first** (the API contract, the schema, shared types,
-   and stubs that answer not-implemented), **then the acceptance tests written against them**
-   (`qa-*` tasks: API tests from the contract, journey tests from the experience plan — red on the
+   stubs that answer not-implemented, and the telemetry base — OpenTelemetry, structured logs
+   and the local Grafana stack), **then the acceptance tests written against them** (`qa-*`
+   tasks: API tests from the contract, journey tests from the experience plan — red on the
    stubs, and read-only to every later task except the gate), then the backend tasks, then the
    shared-package tasks, then the frontend and mobile tasks, each turning its acceptance tests
-   green. Behaviour a plan must keep, and that no test pins, gets a pin task first. **The
+   green and instrumenting what it builds. Behaviour a plan must keep, and that no test pins,
+   gets a pin task first. Tasks with disjoint files, separate build trees and no dependency
+   between them go in separate streams, and the plan says which run at the same time. **The
    documentation and close-out work rides with the last task** rather than taking a session of its
    own — that session is the only one that knows what actually landed and what is built but
    unverified, and a session that only writes markdown is the wasted agent switch this rule exists
@@ -304,8 +413,8 @@ H1 replaces rules 5 and 6 of `~/.claude/CLAUDE.md` § "How features are broken d
 
 ### T1 — the format and the design pack specify test-first
 
-**Stack:** `docs` · **Agent:** `general-purpose`
-**Deliverable:** `plan-format.md`, `writing-plans/SKILL.md` and `CLAUDE.md` define the `Gate: own tests` form, the `Q` family and its order, the read-only rule and red for the right reason (§3); the validation catalog, `api-surface-plan/SKILL.md`, `experience-plan/SKILL.md`, `solution-blueprint/SKILL.md` and their examples carry the stub response, the `Acceptance:` lines, the `Test ids:` line and the `Repository layout:` line (§4).
+**Stack:** `docs` · **Agent:** `general-purpose` · **Stream:** `format`
+**Deliverable:** `plan-format.md`, `writing-plans/SKILL.md` and `CLAUDE.md` define the `Gate: own tests` form, the `Q` family and its order, the read-only rule and red for the right reason (§3.1–§3.6); the validation catalog, `api-surface-plan/SKILL.md`, `experience-plan/SKILL.md`, `solution-blueprint/SKILL.md` and their examples carry the stub response, the `Acceptance:` lines, the `Test ids:` line and the `Repository layout:` line (§4.1–§4.4).
 **Depends on:** —
 **Budget:** ~130k — CLAUDE.md 25k, this plan §1–§4 and D1–D8 11k, `plan-format.md` 7k, `writing-plans/SKILL.md` 6k, `api-surface-plan/SKILL.md` + `validation-catalog.md` + example 11k, `experience-plan/SKILL.md` + example 7k, `solution-blueprint/SKILL.md` §3 and template 3k, edits ~28k, commit and diff read-back 6k, churn ×1.2. Natural split if it runs over: §4 into its own task.
 **Gate: none** — this plan gates once, in T5. Do not run `claude plugin validate`, the `tools/*.py` checkers or the token audit.
@@ -318,7 +427,7 @@ H1 replaces rules 5 and 6 of `~/.claude/CLAUDE.md` § "How features are broken d
 
 ### T2 — the planner writes test-first plans
 
-**Stack:** `docs` · **Agent:** `general-purpose`
+**Stack:** `docs` · **Agent:** `general-purpose` · **Stream:** `planning`
 **Deliverable:** `delivery-plan/SKILL.md`, its example, `session-budget/SKILL.md`, the prompts template and `solution-planner.md` produce test-first plans per §5: `Q` tasks after the contract tasks in every shape, own-tests gates on `Q` and implementation tasks, and pin tasks for untested behaviour.
 **Depends on:** T1 (the format sections it cites).
 **Budget:** ~130k — CLAUDE.md 25k, this plan §3, §5 and D1–D8 8k, `plan-format.md` §4–§5 as T1 left them 3k, `delivery-plan/SKILL.md` 17k, its example 9k, `session-budget/SKILL.md` 5k, the prompts template 4k, `solution-planner.md` 13k, edits ~19k, read-back 6k, churn ×1.2. Natural split if it runs over: `solution-planner.md` (§5.5) into its own task.
@@ -329,9 +438,49 @@ H1 replaces rules 5 and 6 of `~/.claude/CLAUDE.md` § "How features are broken d
 - §5.4 in `session-budget/SKILL.md` and the template.
 - §5.5 in `solution-planner.md`.
 
+### M1 — the modular monolith is built to be split later
+
+**Stack:** `docs` · **Agent:** `general-purpose` · **Stream:** `planning`
+**Deliverable:** the blueprint, the data-model plan, the planner and the delivery plan propose a modular monolith built to be split later — the four rules, the split triggers, and the architecture test in the first contract task (§4.5) — and the three `be-*` pattern-writer and code-review skills teach and check its boundaries.
+**Depends on:** T1 (the `Repository layout:` line that `Modules:` sits beside), T2 (the delivery-plan and example edits this task extends).
+**Budget:** ~125k — CLAUDE.md 25k, this plan §2.1, §4.5 and D9 5k, `solution-blueprint/SKILL.md` Step 3 and template 4k, `example-blueprint.md` 3k, `data-model-plan/SKILL.md` 4.5k and its example 2.5k, `solution-planner.md:88` and `delivery-plan/SKILL.md` Step 1 by grep 3k, the example's `C1` 2k, three pattern-writers 10k, three code-reviews 9k, edits ~28k, read-back 6k, churn ×1.2.
+**Gate: none** — this plan gates once, in T5. Do not run the validators.
+
+- §4.5's table, row by row.
+- Each pattern-writer's new section carries a short snippet of its stack's architecture test, checked against the tool's current documentation rather than written from memory: ArchUnitNET (`TngTech.ArchUnitNET` with its NUnit package); Spring Modulith's `ApplicationModules.of(Application.class).verify()`, on the Spring Modulith line that matches the project's Spring Boot major; and a dependency-cruiser `forbidden` rule that lets one module import another only through its `index.ts`.
+- **Not in M1:** observability (L1) and `be-python` (§4.5's last line).
+
+### L1 — services are observable from their first task
+
+**Stack:** `docs` · **Agent:** `general-purpose` · **Stream:** `planning`
+**Deliverable:** plans put the telemetry base in the foundation, every `be-{dotnet,java,node}` implementation task instruments what it builds, and the gate's telemetry smoke is defined (§4.6) — across the delivery plan and its example, the blueprint, the planner, `plan-format.md` §5, the three `be-*` agents and their code-review skills, the three `observability-engineer-*` agents and `CLAUDE.md`.
+**Depends on:** T1 (`plan-format.md` §5 as T1 left it), T2 and M1 (the delivery-plan shapes and the example's contract wave, which this task extends).
+**Budget:** ~140k — CLAUDE.md 25k, this plan §4.6 and D10 5k, `delivery-plan/SKILL.md` shape tables and Step 4 by grep 4k, the example's contract wave and `B3` 3k, the blueprint's routing example and template 2k, `solution-planner.md` by grep 1k, `plan-format.md` §5 2k, three `be-*` agents' operating rules 4.5k, three code-reviews 9k, three `observability-engineer-*` agents 14k, `structured-logging-dotnet` and `opentelemetry-dotnet` as the naming reference 7k, edits ~29k, read-back 6k, churn ×1.2. Natural split if it runs over: the three `observability-engineer-*` agents and the code-review rows into their own task.
+**Gate: none** — this plan gates once, in T5. Do not run the validators.
+
+- §4.6's table, row by row.
+- The `be-{dotnet,java,node}` bullet, verbatim apart from `<stack>`:
+
+  > - **Instrument what you build, as you build it.** When your task adds an entry point, an outbound call, a background job or a business event, load `observability/structured-logging-<stack>` and `observability/opentelemetry-<stack>` and add: a log at each decision point (a message template, ids as properties, no secrets or personal data; an error logged once, where it is handled), a span around the business operation and around any outbound call that auto-instrumentation misses, and a metric per business event with low-cardinality labels. Name the signals in your `As built` note; the plan's gate looks for them. The telemetry base — the SDK, the exporters, the local Grafana stack — belongs to the foundation task; never rebuild it.
+
+- The telemetry smoke in `plan-format.md` §5, after the coverage-floor table: start the `deploy/local` stack, run the service with `OTEL_EXPORTER_OTLP_ENDPOINT` pointing at it, run the acceptance suite against it, then find the plan's named spans in Tempo, a log line in Loki that carries one of those traces' id, and the named metrics in Prometheus; record the trace id and the queries; with no container runtime, record the smoke as unverified in `Status:`.
+- **Not in L1:** a Python observability skill (O6); frontend real-user monitoring.
+
+### P1 — plans flag the tasks that can run at the same time
+
+**Stack:** `docs` · **Agent:** `general-purpose` · **Stream:** `planning`
+**Deliverable:** every plan the library writes gives each task a stream, shows the streams in its prompts table and preamble, keeps tasks that run at the same time to disjoint files and build trees, and closes out safely while another task runs (§3.7) — in `plan-format.md`, `writing-plans/SKILL.md`, `delivery-plan/SKILL.md`, the prompts template and `solution-planner.md`.
+**Depends on:** T1 (`plan-format.md` §4, §6 and §7 as T1 left them).
+**Budget:** ~80k — CLAUDE.md 25k, this plan §3.7 and D11 4k, `plan-format.md` §4, §6 and §7 5k, `writing-plans/SKILL.md` Steps 2–3, Self-Review and the handoff 3k, `delivery-plan/SKILL.md` Step 3 2.5k, the prompts template's preamble 1.5k, `solution-planner.md` Step 9 1k, `epic-map/SKILL.md`'s file-set rule 1k, edits ~16k, read-back 6k, churn ×1.2. Left at the low mark on purpose: merged into L1 it would pass 150k, and T3 is another stream.
+**Gate: none** — this plan gates once, in T5. Do not run the validators.
+
+- §3.7, into each file it names.
+- The two close-out additions go into `plan-format.md` §7's fenced section, which every later plan copies. This plan's own `## Close-out — every task` stays as it is: a plan never edits its copy.
+- **Not in P1:** how Plan Queue runs streams (O9).
+
 ### T3 — the QA lane writes acceptance tests first
 
-**Stack:** `docs` · **Agent:** `general-purpose`
+**Stack:** `docs` · **Agent:** `general-purpose` · **Stream:** `qa`
 **Deliverable:** `qa/_shared/test-first/SKILL.md` exists per §6 and is registered in `qa-java`, `qa-dotnet` and `qa-typescript`, and the nine qa-api, qa-ui and qa-mobile agents cite it.
 **Depends on:** T1 (the stub response, the `Acceptance:` and `Test ids:` lines, red for the right reason).
 **Budget:** ~100k — CLAUDE.md 25k, this plan §2.1, §3.3–§3.4, §4 and §6 6k, `qa/_shared/api-spec-assets/SKILL.md` as the shared-skill pattern 6k, `qa-api-dotnet.md` input modes 5k, the other eight agents' mode sections by grep 6k, the marketplace `qa-*` entries 5k, the skill written ~8k, nine agent edits 14k, three registrations 2k, read-back 6k, churn ×1.2.
@@ -344,9 +493,9 @@ H1 replaces rules 5 and 6 of `~/.claude/CLAUDE.md` § "How features are broken d
 
 ### T4 — the executing agents run their own tests and keep acceptance tests read-only
 
-**Stack:** `docs` · **Agent:** `general-purpose`
+**Stack:** `docs` · **Agent:** `general-purpose` · **Stream:** `agents`
 **Deliverable:** the 58 agents carry §7.1's bullet verbatim, the three variants say the same, the ten implementing agents carry §7.2's bullet, the eight "Obey" bullets name `own tests`, and the nine testing skills carry §7.3.
-**Depends on:** T1 (the `Gate: own tests` definition the bullets point at).
+**Depends on:** T1 (the `Gate: own tests` definition the bullets point at); T3 and P1, the last tasks of the `qa` and `planning` streams — this task edits files both touched (the nine qa agents; the `be-*` agents and `solution-planner.md`).
 **Budget:** ~135k — CLAUDE.md 25k, this plan §7 4k, grep of the 58 + 3 + 8 sites 6k, the ten implementing agents' operating rules 15k, the nine testing skills' step and validation lines 9k, a scripted replacement for the 58 3k, the variants 4k, ten read-only bullets 15k, eight "Obey" edits 12k, nine skill edits 13k, read-back 6k, churn ×1.2.
 **Gate: none** — this plan gates once, in T5. Do not run the validators.
 
@@ -356,15 +505,15 @@ H1 replaces rules 5 and 6 of `~/.claude/CLAUDE.md` § "How features are broken d
 
 ### T5 — the catalog, the README, the gate and the close-out
 
-**Stack:** `docs` · **Agent:** `general-purpose`
-**Deliverable:** §8 passes, and `docs/skills-catalog.md` and `README.md` describe the test-first flow (§2, §2.1) and list `qa-<stack>:test-first`.
-**Depends on:** T1–T4.
-**Budget:** ~95k — CLAUDE.md 25k, this plan §2, §8 and the `As built` notes 8k, catalog sections (planning lane, `qa/_shared` skills, the command tables) 8k, README sections 6k, edits 8k, the gate output and fix loop 12k plus fixes ~10k, churn ×1.2.
-**Gate (this is the last runnable task, so it carries the plan's only gate, in run order):** §8, steps 1–8.
+**Stack:** `docs` · **Agent:** `general-purpose` · **Stream:** `close-out`
+**Deliverable:** §8 passes, and `docs/skills-catalog.md` and `README.md` describe the delivery flow (§2, §2.1, §3.7, §4.5, §4.6) and list `qa-<stack>:test-first`.
+**Depends on:** every task above; T4 joins the `planning` and `qa` streams.
+**Budget:** ~100k — CLAUDE.md 25k, this plan §2, §8 and the `As built` notes 10k, catalog sections (planning lane, `qa/_shared` skills, the command tables) 8k, README sections 6k, edits 9k, the gate output and fix loop 12k plus fixes ~10k, churn ×1.2.
+**Gate (this is the last runnable task, so it carries the plan's only gate, in run order):** §8, steps 1–11.
 
-- Catalog: `test-first` joins the `qa/_shared` skill list; the planning-lane description says test-first is the default (D4) and repos are one per product by default (D8); skill counts per plugin are recounted.
-- README: a "How a feature is built" section of at most 30 lines — §2's table, its two properties and §2.1's layout — plus the new skill in the `qa-*` lists.
-- Run §8 and fix what it finds; a failure may belong to T1–T4.
+- Catalog: `test-first` joins the `qa/_shared` skill list; the planning-lane description says test-first is the default (D4), repos are one per product by default (D8), the default architecture is built to be split later (D9), and the telemetry base comes first (D10); skill counts per plugin are recounted.
+- README: a "How a feature is built" section of at most 40 lines — §2's table, its two properties, §2.1's layout, and one line each for §4.5 and §4.6 — plus the new skill in the `qa-*` lists.
+- Run §8 and fix what it finds; a failure may belong to any task above.
 - Close out. H1 and H2 still hold blocks, so the plan does **not** move.
 
 ### H1 — the user's global task rules
@@ -377,7 +526,7 @@ H1 replaces rules 5 and 6 of `~/.claude/CLAUDE.md` § "How features are broken d
 ### H2 — one real feature, test-first
 
 **Stack:** `human` · **Agent:** `human` · **Owner:** the user
-**Deliverable:** H2's `As built` records whether one real feature went through §2 end to end: the `Q` tests were red on `not-implemented`, each implementation task turned its tests green without touching them, and the gate passed with the coverage floor.
+**Deliverable:** H2's `As built` records whether one real feature went through §2 end to end: the `Q` tests were red on `not-implemented`, each implementation task turned its tests green without touching them, Grafana showed the feature's traces, logs and metrics while it was being built, and the gate passed with the coverage floor and the telemetry smoke.
 **Depends on:** H1, the push (Status), and O4 and O5 answered.
 **Gate:** the checklist in H2's prompt block.
 
@@ -405,18 +554,25 @@ Before you stop, in this order, in this file:
 
 ## Prompts — one per task
 
-Run them in order, one session each, in the SkillsLibrary checkout on `master`; never create a branch. Each block is complete on its own. Only T5 runs the gate (§8). No prompt edits `~/.claude/CLAUDE.md`: that is H1, the user's. **The cost, accepted and stated once:** T1–T4's commits are ungated, so the library is not known to validate until T5, and the plan cannot be stopped halfway and trusted.
+Run them one session each, in the SkillsLibrary checkout on `master`; never create a branch. Each block is complete on its own. Only T5 runs the gate (§8). No prompt edits `~/.claude/CLAUDE.md`: that is H1, the user's.
 
-| # | Stack | Agent | Depends on | Budget |
-|---|---|---|---|---|
-| T1 | `docs` | `general-purpose` | — | ~130k |
-| T2 | `docs` | `general-purpose` | T1 | ~130k |
-| T3 | `docs` | `general-purpose` | T1 | ~100k |
-| T4 | `docs` | `general-purpose` | T1 | ~135k |
-| T5 | `docs` | `general-purpose` | T1–T4 | ~95k |
-| — | `git push origin master` | **the user** | T5 | — |
-| H1 | `human` | **the user** | T5 | five minutes |
-| H2 | `human` | **the user** | H1, the push, O4, O5 | one feature |
+**What can run at the same time:** after T1, the `planning` stream (T2 → M1 → L1 → P1) and the `qa` stream (T3) touch disjoint files, so T3 may run alongside them. T4 waits for both; T5 is the gate. Running everything in task order is also correct. **While T3 runs alongside the `planning` stream,** each running task stages only its own files, by path (never `git add -A`), re-reads this plan immediately before its close-out, and edits only its own task block, its own prompt block and the landed line; the `Status:` line is left to T4, which joins the streams.
+
+**The cost, accepted and stated once:** T1–T4's commits are ungated, so the library is not known to validate until T5, and the plan cannot be stopped halfway and trusted.
+
+| # | Stack | Agent | Stream | Depends on | Budget |
+|---|---|---|---|---|---|
+| T1 | `docs` | `general-purpose` | `format` | — | ~130k |
+| T2 | `docs` | `general-purpose` | `planning` | T1 | ~130k |
+| M1 | `docs` | `general-purpose` | `planning` | T1, T2 | ~125k |
+| L1 | `docs` | `general-purpose` | `planning` | T1, T2, M1 | ~140k |
+| P1 | `docs` | `general-purpose` | `planning` | T1 | ~80k |
+| T3 | `docs` | `general-purpose` | `qa` | T1 | ~100k |
+| T4 | `docs` | `general-purpose` | `agents` | T1, T3, P1 | ~135k |
+| T5 | `docs` | `general-purpose` | `close-out` | every task above | ~100k |
+| — | `git push origin master` | **the user** | — | T5 | — |
+| H1 | `human` | **the user** | — | T5 | five minutes |
+| H2 | `human` | **the user** | — | H1, the push, O4, O5 | one feature |
 
 No task has landed; every block below is live.
 
@@ -431,7 +587,7 @@ acceptance tests, red for the right reason) and the design-pack lines `Q` tasks 
 
 Read, in this order:
 1. CLAUDE.md, the Planning section.
-2. The plan: §1, §2, §2.1, §3, §4, D1–D8, task T1, and "Close-out — every task".
+2. The plan: §1, §2, §2.1, §3.1–§3.6, §4.1–§4.4, D1–D8, task T1, and "Close-out — every task".
 3. engineering-practices/writing-plans/references/plan-format.md §4 (the task-block table), §5 —
    including the coverage-floor paragraph and table that commit 0d9826a added — and §9.
 4. engineering-practices/writing-plans/SKILL.md: Steps 3, 5 and 6, and Self-Review.
@@ -480,7 +636,7 @@ own-tests gates on `Q` and implementation tasks, and pin tasks for behaviour no 
 
 Read, in this order:
 1. CLAUDE.md, the Planning section (T1 changed it).
-2. The plan: §3, §5, D1–D8, T1's As built, task T2, and "Close-out — every task".
+2. The plan: §3.1–§3.6, §5, D1–D8, T1's As built, task T2, and "Close-out — every task".
 3. engineering-practices/writing-plans/references/plan-format.md §4 and §5, as T1 left them.
 4. backend/_shared/delivery-plan/SKILL.md: Step 1's table (`:110`), Step 2's three shape tables
    (`:177`, `:191`), Step 4 (the B3 example and its rules, `:361`), the header note (`:543`) and
@@ -512,6 +668,126 @@ Traps:
 Gate: none — this plan gates once, in T5. Do not run the validators.
 
 Commit: `docs(dev): the planner writes test-first plans (007 T2)`.
+Close out per the plan's "Close-out — every task" before you stop.
+````
+
+---
+
+### M1 — the modular monolith is built to be split later (general-purpose, docs)
+
+````
+You are `general-purpose`. Task M1 of docs/plans/007-test-first-delivery.md: make the default
+architecture a modular monolith built to be split later — four boundary rules, the split triggers,
+and an architecture test that fails the build on a reach-in.
+
+Read, in this order:
+1. CLAUDE.md, the Backend code rules.
+2. The plan: §2.1, §4.5, D9, the As built notes of T1 and T2, task M1, and "Close-out — every
+   task".
+3. backend/_shared/solution-blueprint/SKILL.md Step 3 (the style table) and the §3 template, as T1
+   left them; references/example-blueprint.md §3.
+4. backend/_shared/data-model-plan/SKILL.md Steps 3 and 6 and template §6;
+   references/example-data-model.md (the ownership line near :133).
+5. backend/_shared/agents/solution-planner.md:88; backend/_shared/delivery-plan/SKILL.md Step 1's
+   scaffold row and references/example-delivery-plan.md's C1, as T2 left them.
+6. backend/{dotnet,java,node}/skills/pattern-writer/SKILL.md (Rules, Generation outputs) and
+   backend/{dotnet,java,node}/skills/code-review/SKILL.md (the severity table).
+
+Build: §4.5's table, row by row, and in each pattern-writer a "Module boundaries" section ending in
+its stack's architecture-test snippet.
+
+Traps:
+- Check each architecture-test tool against its current documentation before writing its snippet:
+  ArchUnitNET (`TngTech.ArchUnitNET` with its NUnit package), Spring Modulith (the line matching
+  the project's Spring Boot major — never up-level Boot to reach it), dependency-cruiser.
+  NetArchTest.Rules has had no release since 2021; do not recommend it.
+- The area count leaves both files — the blueprint's "< ~6" and the planner's "~4". The triggers
+  decide, so the example blueprint's "three areas" justification is rewritten around them.
+- KISS still holds: one public surface per module, no interface per class, and no message bus
+  between modules unless an event is earned.
+
+Gate: none — this plan gates once, in T5. Do not run the validators.
+
+Commit: `docs(dev, be): modular monolith built to be split later (007 M1)`.
+Close out per the plan's "Close-out — every task" before you stop.
+````
+
+---
+
+### L1 — services are observable from their first task (general-purpose, docs)
+
+````
+You are `general-purpose`. Task L1 of docs/plans/007-test-first-delivery.md: make services observable
+from their first task — the telemetry base in the foundation, every implementation task
+instrumenting what it builds, and a telemetry smoke at the gate.
+
+Read, in this order:
+1. CLAUDE.md: Stack defaults (Observability) and the Backend code rules.
+2. The plan: §4.6, D10, O6, the As built notes of T1, T2 and M1, task L1, and "Close-out — every
+   task".
+3. backend/_shared/delivery-plan/SKILL.md: the three shape tables (grep "telemetry"; T2 and M1
+   moved the lines) and Step 4's rules; references/example-delivery-plan.md's contract wave and B3.
+4. backend/_shared/solution-blueprint/SKILL.md: the routing example (grep "Telemetry") and the §3
+   template's cross-cutting line; backend/_shared/agents/solution-planner.md: the
+   observability-engineer line under Related agents, and the Step 9 checklist.
+5. engineering-practices/writing-plans/references/plan-format.md §5, as T1 left it.
+6. backend/{dotnet,java,node}/agents/be-*.md Operating rules; backend/{dotnet,java,node}/skills/
+   code-review/SKILL.md severity tables.
+7. observability/agents/observability-engineer-{dotnet,java,node}.md: the Steps table and the plan
+   execution rules; observability/opentelemetry-dotnet/SKILL.md and
+   observability/structured-logging-dotnet/SKILL.md as the naming reference.
+
+Build: §4.6's table, row by row; task L1's be-* bullet verbatim apart from `<stack>`; the telemetry
+smoke in plan-format.md §5, after the coverage-floor table.
+
+Traps:
+- The observability skills' choices win — Serilog on .NET, their sinks, their resource attributes.
+  This task changes *when* telemetry is built, not *how*.
+- The local stack is a compose file in the target project; the library ships none. Name what it
+  runs and what the gate queries. If you name a single all-in-one image, check that it exposes the
+  Tempo, Loki and Prometheus query APIs; otherwise query them through Grafana's API.
+- A be-* agent may load only the skills it names, so the bullet names both observability skills by
+  path.
+- be-python stays out (O6).
+
+Gate: none — this plan gates once, in T5. Do not run the validators.
+
+Commit: `docs(dev, be, observability): services observable from their first task (007 L1)`.
+Close out per the plan's "Close-out — every task" before you stop.
+````
+
+---
+
+### P1 — plans flag the tasks that can run at the same time (general-purpose, docs)
+
+````
+You are `general-purpose`. Task P1 of docs/plans/007-test-first-delivery.md: make every plan say which
+tasks can run at the same time — a stream on every task, the streams in the prompts table and the
+preamble, the disjoint-files and build-tree rules, and a close-out that is safe while another task
+runs.
+
+Read, in this order:
+1. CLAUDE.md, the Planning section.
+2. The plan: §3.7, D11, O9, task P1, and "Close-out — every task".
+3. engineering-practices/writing-plans/references/plan-format.md §4, §6 and §7, as T1 and L1 left
+   them.
+4. engineering-practices/writing-plans/SKILL.md: Steps 2 and 3, Self-Review, Execution Handoff.
+5. backend/_shared/delivery-plan/SKILL.md Step 3 (streams); backend/_shared/epic-map/SKILL.md's
+   file-set rule (:67); the prompts template's preamble; solution-planner.md's Step 9 item 11.
+
+Build: §3.7 into each file it names.
+
+Traps:
+- A stream is a lane on each task, not a grouping layer: no "phase", "wave" or "slice" vocabulary in
+  plan-format.md or writing-plans. The epic map's waves stay where they are.
+- The delivery plan already has `Stream:` and `Order:`. Align it with the new plan-format rule — add
+  the build-tree clause — rather than defining streams a second time.
+- §7's two additions go inside its fenced close-out section, which every later plan copies
+  verbatim. Do not edit this plan's own close-out copy.
+
+Gate: none — this plan gates once, in T5. Do not run the validators.
+
+Commit: `docs(dev): plans flag the tasks that can run at the same time (007 P1)`.
 Close out per the plan's "Close-out — every task" before you stop.
 ````
 
@@ -569,7 +845,9 @@ the nine testing skills' run rules.
 
 Read, in this order:
 1. CLAUDE.md, the Planning section (T1 changed it).
-2. The plan: §3.1, §3.3, §7, T1's and T3's As built, task T4, and "Close-out — every task".
+2. The plan: §3.1, §3.3, §7, the As built notes of T1, T3, L1 and P1, task T4, and "Close-out —
+   every task". T4 joins the `planning` and `qa` streams, so it also rewrites the `Status:` line
+   that the concurrent tasks left alone.
 3. By grep, not whole files:
    - the 58 sites of §7.1's old bullet:
      grep -rlF "A \`Gate: none\` task writes its code and tests and runs no build" --include='*.md' . | grep -v docs/plans
@@ -593,6 +871,9 @@ Traps:
 - docs/plans/ quotes the old bullet (this plan does, in §7.1). The script must skip it.
 - The be-* agents carry two gate rules — the shared bullet and "Obey your task's Gate: line" in
   their plan-execution section. Update both so they say the same thing.
+- L1 put an "Instrument what you build" bullet next to the coverage-floor bullet in the three be-*
+  agents. Put the read-only bullet in the same place relative to the coverage floor in all ten
+  agents.
 - The unit-testing skills' step 4 ("watch it fail for the right reason") is what `own tests` now
   allows. Say so in the step rather than adding a new step.
 
@@ -613,21 +894,23 @@ plan's gate and its close-out.**
 
 Read, in this order:
 1. CLAUDE.md.
-2. The plan: §2, §2.1, §8, D4, D8, every As built note (T1–T4), task T5, and "Close-out — every
-   task".
+2. The plan: §2, §2.1, §4.5, §4.6, §8, D4 and D8–D11, every As built note, task T5, and "Close-out
+   — every task".
 3. docs/skills-catalog.md by grep, never whole (it is 186 KB): the qa/_shared skill list, the
    planning-lane description, the per-plugin skill counts, the command tables.
 4. README.md by grep: the qa-* skill lists and where a "How a feature is built" section fits.
 
 Build:
 - Catalog: `test-first` in the qa/_shared skill list; the planning lane says test-first is the
-  default (D4) and one repo per product is the default proposal (D8); skill counts recounted.
-- README: "How a feature is built", at most 30 lines — §2's table, its two properties, §2.1's
-  layout — plus the new skill in the qa-* lists.
+  default (D4), one repo per product is the default proposal (D8), the default architecture is
+  built to be split later (D9), the telemetry base comes first (D10), and plans flag their streams
+  (D11); skill counts recounted.
+- README: "How a feature is built", at most 40 lines — §2's table, its two properties, §2.1's
+  layout, and one line each for §4.5, §4.6 and §3.7 — plus the new skill in the qa-* lists.
 
 Gate (this is the last runnable task, so it carries the plan's only gate, in run order):
-  §8 steps 1–8, from the SkillsLibrary root.
-**Fix what it finds rather than handing it back** — a failure may belong to T1–T4. Say in your
+  §8 steps 1–11, from the SkillsLibrary root.
+**Fix what it finds rather than handing it back** — a failure may belong to any task above. Say in your
 As built which task each failure belonged to.
 
 Traps:
@@ -668,14 +951,20 @@ H2 of docs/plans/007-test-first-delivery.md — your checklist.
    then `/dev:plan-system`. Check the delivery plan before queueing it:
    - the contract task stubs every endpoint with `501 not-implemented` and generates the OpenAPI
      asset from the stubs;
+   - the contract wave holds the module folders with the architecture test, and the telemetry
+     base with the local Grafana stack;
    - Q tasks sit between the contract and the implementation, with `Gate: own tests` expecting red;
-   - every implementation block carries the read-only line and a filtered own-tests command;
-   - the last task's gate ends with the coverage floor.
+   - every implementation block carries the read-only line, a filtered own-tests command and the
+     signals it adds;
+   - every task names its stream, and the preamble says what runs at the same time;
+   - the last task's gate ends with the coverage floor and the telemetry smoke.
 2. Queue it in Plan Queue. After each Q task: its As built shows every test red on
    not-implemented, with its red reason.
-3. After each implementation task: its own tests are green, and `git diff` for that task shows no
-   change under the acceptance-test paths.
-4. After the gate: the whole suite is green, the coverage floor is met, and the figures are in its
+3. After each implementation task: its own tests are green, `git diff` for that task shows no
+   change under the acceptance-test paths, and the local Grafana shows its requests as traces with
+   their logs attached.
+4. After the gate: the whole suite is green, the coverage floor is met, and the telemetry smoke
+   found the named spans, logs and metrics — the figures, the trace id and the queries are in its
    As built.
 5. Tell a session in SkillsLibrary to record your verdict as H2's As built (what worked, what an
    agent got wrong, which rule needs changing), then close out per the plan's "Close-out — every
