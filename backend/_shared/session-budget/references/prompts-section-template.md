@@ -17,6 +17,7 @@ they disagree, the `As built` notes are right.
 
 | Rule | Why |
 |---|---|
+| **A block opens with `Depends on: <ids>`** | Ids only, comma-separated, or `none` — a program starts the task when those are done. It holds the task's prerequisites and every earlier task it shares files or a build tree with (a stream task adds its stream predecessor and cross-stream edges); a missing line is never relied on |
 | **A block is a prompt, not a summary** | It is pasted verbatim into an empty session. Anything the session needs that is not in the block is something it will invent or go looking for |
 | **One block names one task** | A block handing over two tasks gets half-done, and the second half is re-derived from scratch by whoever picks it up |
 | **Sections, never whole artifacts** | `api-surface.md` §5.3, not `api-surface.md`. This is the single biggest lever on the budget holding — a session told to read the pack reads the pack |
@@ -44,13 +45,15 @@ skills, and the exact sections to read. **This plan gates once, in `<the last ru
 block before it says `Gate: none` and names what not to run. <Anything no prompt may do — "none of
 them may start a real run; the user starts it.">
 
+**What runs together:** <one line — "After C1, B1 → B2 run beside Q1; F1 waits for both; F2 is the gate." Tasks that run together share one working tree: each commits only its own files, by path, and re-reads the plan before its close-out edits.>
+
 **Gates run <where>.** <Where to commit, and whether to ask before pushing.>
 
-| # | Task | Epic | Story | Stack | Stream | Agent | Budget | Depends on |
-|---|---|---|---|---|---|---|---|---|
-| 1 | C1 | `E0` | — | `be` | `contract` | `be-dotnet` | ~120k | — |
-| 2 | B1 | `E1` | `US3` | `be` | `timetable-api` | `be-dotnet` | ~112k | C1 |
-| — | the sandbox credentials | — | — | `human` | — | **the user** | — | — |
+| # | Task | Epic | Story | Stack | Stream | Agent | Budget | Depends on | Runs beside |
+|---|---|---|---|---|---|---|---|---|---|
+| 1 | C1 | `E0` | — | `be` | `contract` | `be-dotnet` | ~120k | none | — |
+| 2 | B1 | `E1` | `US3` | `be` | `timetable-api` | `be-dotnet` | ~112k | C1 | — |
+| — | the sandbox credentials | — | — | `human` | — | **the user** | — | — | — |
 
 **`<ids>` have landed, and their prompts are deleted** — a prompt for a finished task is a thing
 someone runs by mistake. `<ids>` are live.
@@ -60,6 +63,8 @@ someone runs by mistake. `<ids>` are live.
 ### B1 — <title> (<agent>, <stack>)
 
 ````
+Depends on: <ids only, or none>
+
 You are `<exact agent name>`. Task B1 of docs/plans/<NNN>-<initiative>/delivery-plan.md:
 <the mission in one sentence>.
 
@@ -111,6 +116,8 @@ Close out per the plan's "Close-out — every task" before you stop.
 ### Q1 — <title> (<qa-api-stack | qa-ui-stack | qa-mobile-stack>, qa)
 
 ````
+Depends on: <ids only, or none>
+
 You are `<exact qa agent name>`. Task Q1 of docs/plans/<NNN>-<initiative>/delivery-plan.md: write the
 acceptance tests for <the resource group or journeys>, against the stubs, before the implementation.
 
@@ -158,11 +165,13 @@ Close out per the plan's "Close-out — every task" before you stop.
 
 ---
 
-### F3 — <title> (<agent>, <stack>) — the last runnable task, so it carries the gate
+### F3 — <title> (<agent>, <stack>)
 
 ````
+Depends on: <every task nothing else waits for>
+
 You are `<exact agent name>`. Task F3 of docs/plans/<NNN>-<initiative>/delivery-plan.md:
-<the mission>. **You are the plan's gate and its close-out.**
+<the mission>. **You are the last runnable task, so you carry the plan's gate and its close-out.**
 
 … (the same reading list / deliverable / build / traps shape) …
 
@@ -206,19 +215,20 @@ The **workshop-booking** pack, caught after the contract wave has landed (its
 `````markdown
 ## Prompts — one per task
 
-Run them in order, one session each. Every block is complete on its own. **This plan gates once, in
+Run them one session each. Every block is complete on its own and opens with its `Depends on:` line.
+B1 and B2 share the .NET solution, so B2 waits for B1 and nothing runs beside anything. **This plan gates once, in
 F4:** every block before it says `Gate: none`. No prompt may run `dotnet test` — F4 runs the suite for
 the whole plan and fixes what it catches.
 
 **Gates run locally.** Commit locally; ask before `git push`.
 
-| # | Task | Epic | Story | Stack | Stream | Agent | Budget | Depends on |
-|---|---|---|---|---|---|---|---|---|
-| 1 | H1 | — | — | `human` | — | **the user** | — | — |
-| 2 | C1 | `E0` | — | `be` | `contract` | `be-dotnet` | ~120k | — |
-| 3 | B1 | `E1` | `US3` | `be` | `timetable-api` | `be-dotnet` | ~112k | C1 |
-| 4 | B2 | `E3` | `US9` | `be` | `profile` | `be-dotnet` | ~95k | C1 |
-| 5 | F4 | `E1` | `US3` | `fe` | `timetable-ui` | `fe-react` | ~150k | B1, B2 |
+| # | Task | Epic | Story | Stack | Stream | Agent | Budget | Depends on | Runs beside |
+|---|---|---|---|---|---|---|---|---|---|
+| 1 | H1 | — | — | `human` | — | **the user** | — | none | — |
+| 2 | C1 | `E0` | — | `be` | `contract` | `be-dotnet` | ~120k | none | — |
+| 3 | B1 | `E1` | `US3` | `be` | `timetable-api` | `be-dotnet` | ~112k | C1 | — |
+| 4 | B2 | `E3` | `US9` | `be` | `profile` | `be-dotnet` | ~95k | C1 | — |
+| 5 | F4 | `E1` | `US3` | `fe` | `timetable-ui` | `fe-react` | ~150k | B1, B2 | — |
 
 **H1 and C1 have landed, and their prompts are deleted.** B1, B2 and F4 are live.
 
@@ -227,6 +237,8 @@ the whole plan and fixes what it catches.
 ### B1 — the Timetable resource (be-dotnet, be)
 
 ````
+Depends on: C1
+
 You are `be-dotnet`. Task B1 of docs/plans/003-workshop-booking/delivery-plan.md: implement the
 Workshops and Sessions resources so a studio admin can publish a workshop and add sessions to it.
 

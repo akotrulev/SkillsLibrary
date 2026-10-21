@@ -250,6 +250,8 @@ Rules:
 - **`order` is one sequence across the whole plan** — 1, 2, 3, … no repeats, no gaps. Within a stream it fixes execution sequence; across the plan it records the order you would have done the work in yourself, which is what decides who gets a slot when more lanes are eligible than the run allows to be concurrent.
 - **`Depends on` still points backwards in `order`.** Streams say "same lane, therefore sequential"; `dependsOn` says "across lanes, this waits on that". Both are needed and a task waits on both — but a dependency on a task with a *higher* order is a contradiction between the two, and it is reported as a defect rather than resolved.
 
+**The streams stay, and each prompt also carries a `Depends on:` line** (Step 6) — the ids Plan Queue schedules on. A task's line is its **stream predecessor** (the task just above it in its stream), its **cross-stream `dependsOn` edges**, and every earlier task whose `Files` overlap its own or that builds the same tree (one solution, one Gradle build, one pnpm graph); `Depends on: none` for the first task of a stream with no cross-stream edge. Streams are what Mission Control reads; the line is what Plan Queue reads, and the two must agree.
+
 Defend each lane concretely — "T10 touches `src/Scheduling/*`, T11 touches `src/Booking/*`, no shared file". The streams table is the load-bearing statement about what may run at the same time; there is no plan-level parallel-safety flag behind it.
 
 **Under agent-batched sequencing the lanes are the batches**: `contract` (the whole wave, one lane, everything downstream depends on it), one lane per backend module, one per frontend area, and `verification` last. They are still declared and still defended — a one-operator run executes them serially by choice, and the same document handed to Mission Control or to a second operator must still say truthfully which of them could run at the same time.
@@ -437,10 +439,10 @@ or a gap is visible without cross-reading the task blocks. `#` **is** the plan-w
 Control consumes; the task blocks repeat it as `Order:`, and the two must agree. The `Deliverable` cell
 is the block's deliverable line shortened to fit — same claim, fewer words:
 
-| # | Task | Epic | Story | Stack | Stream | Deliverable | Agent | Budget | Depends on |
-|---|---|---|---|---|---|---|---|---|---|
-| 12 | B3 | `E2` | `US7` | `be` | `ordering-api` | The five Orders endpoints are live and reachable | `be-dotnet` | ~110k | C1 |
-| — | the sandbox credentials | — | — | `human` | — | Stripe test keys in the team vault | **the user** | — | — |
+| # | Task | Epic | Story | Stack | Stream | Deliverable | Agent | Budget | Depends on | Runs beside |
+|---|---|---|---|---|---|---|---|---|---|---|
+| 12 | B3 | `E2` | `US7` | `be` | `ordering-api` | The five Orders endpoints are live and reachable | `be-dotnet` | ~110k | C1 | B4 |
+| — | the sandbox credentials | — | — | `human` | — | Stripe test keys in the team vault | **the user** | — | — | — |
 
 **Rows for the steps a person performs are in the table too**, with `the user` as the agent — a plan
 that hides the human step reads as a plan that runs itself.
@@ -455,6 +457,8 @@ is the progress indicator — what is left to run is exactly what is still writt
 **`dev:plan-session-budget` authors this section, inside this document.** What this skill owes it is
 what a block is built from: a task block with `Epic` / `Story` / `Stack` / `Agent` / `Skills` /
 `Files` / `Budget` / `Gate` filled in, and a streams table that says which lanes exist.
+
+**Every block's first line is `Depends on: <ids>`** — ids only, comma-separated, or `none` (`plan-format.md` §6) — derived from the task as Step 3 says: stream predecessor, cross-stream edges, file and build-tree overlaps. The gate task waits for every task nothing else waits for. The task table gains a `Runs beside` column naming, per task, the tasks it can run in parallel with (different streams, disjoint files, different trees), and the preamble says it in one line: "After C1, B1 → B2 run beside Q1; F1 waits for both; F2 is the gate."
 
 Close the header note by naming the two duties an executing agent has, so neither is a surprise: **the
 record goes into its task's `As built` note and the header `Status:` line; the next session's prompt is
@@ -653,8 +657,8 @@ that lands anything.>
      the line saying which prompts have been deleted, then one fenced block per live task, each
      ending with: Close out per the plan's "Close-out — every task" before you stop. -->
 
-| # | Task | Epic | Story | Stack | Stream | Deliverable | Agent | Budget | Depends on |
-|---|---|---|---|---|---|---|---|---|---|
+| # | Task | Epic | Story | Stack | Stream | Deliverable | Agent | Budget | Depends on | Runs beside |
+|---|---|---|---|---|---|---|---|---|---|---|
 
 ## For Mission Control
 <!-- ingestion note + blocking open questions -->
@@ -685,7 +689,8 @@ that lands anything.>
 8. Every `dependsOn` id exists, and every one points backwards in `order`.
 9. Every task names a declared stream and carries a unique `order`; every stream's row says why it is
    internally sequential; every pair of tasks whose `Files` overlap is ordered against each other — same
-   stream or a `dependsOn` edge between them. Every stream traces to an `epic-map.md` §2 lane (or to a
+   stream or a `dependsOn` edge between them; every prompt block opens with a `Depends on:` line of ids
+   only that covers its stream predecessor, its cross-stream edges and its overlaps. Every stream traces to an `epic-map.md` §2 lane (or to a
    stack split of one, recorded back into that document), and the order is a valid serialization of that
    document's dependency graph.
 10. Every task's bullets are checkable and cite the design pack by section.

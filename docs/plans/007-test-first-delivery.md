@@ -489,6 +489,7 @@ H1 replaces rules 5 and 6 of `~/.claude/CLAUDE.md` § "How features are broken d
 - The prompts template's gate heading (`### F3 — <title> (<agent>, <stack>) — the last runnable task, so it carries the gate`) puts text after the agent's parentheses; Plan Queue reads the agent from a heading's trailing parentheses, so the note moves before them.
 - The two close-out additions go into `plan-format.md` §7's fenced section, which every later plan copies. This plan's own `## Close-out — every task` stays as it is: a plan never edits its copy.
 - **Not in P1:** Plan Queue itself, which is being built in its own repo.
+- **As built (2026-10-21):** §3.7 landed in every file it names, ungated. `plan-format.md`: §4's `Depends on` row names overlap edges; §6's example table gained `Runs beside` (and `none` for a start-at-once task) with a paragraph saying parallel pairs need disjoint files and different trees and that the gate waits for every task nothing else waits for; a rule makes `Depends on: <ids>` the first line of every block (the B3 example opens with it); §7's fenced close-out gained the lead sentence (re-read the file; touch only your own task block, prompt block and the landed line), the Status deferral when a task runs beside you, and "only your own files, by path — never `git add -A`" on the commit step. `writing-plans/SKILL.md`: Step 2 notes files and build tree per task, Step 3 an overlap rule, Step 6 a fourth rule (the line, the column, the preamble sentence), Self-Review item 6 "Parallel check" (later items renumbered 7–14), the handoff paragraph and Remember. `delivery-plan/SKILL.md`: Step 3 derives each line from the stream predecessor, cross-stream edges and overlaps (streams stay), Step 5's table and the template table gained `Runs beside`, Step 6 states the rule, self-check item 9 checks it. `prompts-section-template.md`: contract row, preamble line, `Runs beside` column and `Depends on:` in every block, the filled example; the F3 heading is now `### F3 — <title> (<agent>, <stack>)` with the "last runnable task" note moved into the body. `session-budget/SKILL.md` Step 4 and `solution-planner.md` Step 9 item 11 carry the line. Not done: this plan's own `Close-out — every task` copy is untouched, as instructed; `Status:` is left to T4 because T3 may be running beside. Built but unverified: no validator ran (T5). Proof: `git show --stat HEAD`; `plan-format.md` §6 "The first line of every block".
 
 ### T3 — the QA lane writes acceptance tests first
 
@@ -586,49 +587,7 @@ Run them one session each, in the SkillsLibrary checkout on `master`; never crea
 | H1 | `human` | **the user** | T5 | — | five minutes |
 | H2 | `human` | **the user** | H1, the push, O4, O5 | — | one feature |
 
-T1, T2, M1 and L1 have landed, and their prompts are deleted — a prompt for a finished task is a thing someone runs by mistake. Every block below is live.
-
----
-
-### P1 — plans flag the tasks that can run at the same time (general-purpose, docs)
-
-````
-Depends on: T1, L1
-
-You are `general-purpose`. Task P1 of docs/plans/007-test-first-delivery.md: make every plan say which
-tasks can run in parallel — a `Depends on:` line in every prompt block that names its prerequisites
-and every earlier task it shares files or a build with, the `Runs beside` column and the
-runs-together line in the preamble, and a close-out that is safe while another task runs.
-
-Read, in this order:
-1. CLAUDE.md, the Planning section.
-2. The plan: §3.7, D11, task P1, and "Close-out — every task".
-3. engineering-practices/writing-plans/references/plan-format.md §4, §6 and §7, as T1 and L1 left
-   them.
-4. engineering-practices/writing-plans/SKILL.md: Steps 2 and 3, Self-Review, Execution Handoff.
-5. backend/_shared/delivery-plan/SKILL.md Steps 3 and 6 (streams, the prompts section); the prompts
-   template; solution-planner.md's Step 9 item 11.
-
-Build: §3.7 into each file it names.
-
-Traps:
-- The line is read by a program: ids only, comma-separated, or `none` when the task can start at
-  once. Prose on that line turns into ids nobody has.
-- Once the lines exist, position orders nothing. The overlap edges are the whole safety argument:
-  a task that shares a file or a build tree with an earlier one must name it.
-- solution-planner packs keep their streams, because Mission Control reads them; their prompts get
-  the line too, derived from each task's stream predecessor and its cross-stream edges.
-- §7's two additions go inside its fenced close-out section, which every later plan copies
-  verbatim. Do not edit this plan's own close-out copy.
-- A prompt heading ends with its agent in parentheses — `### F3 — <title> (<agent>, <stack>)` —
-  because that is where Plan Queue reads it. Fix the template's gate heading, which has text after
-  them.
-
-Gate: none — this plan gates once, in T5. Do not run the validators.
-
-Commit: `docs(dev): every prompt names what it waits for, so independent tasks run in parallel (007 P1)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
+T1, T2, M1, L1 and P1 have landed, and their prompts are deleted — a prompt for a finished task is a thing someone runs by mistake. Every block below is live.
 
 ---
 

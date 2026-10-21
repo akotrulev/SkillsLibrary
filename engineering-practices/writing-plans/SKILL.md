@@ -89,6 +89,9 @@ are both derived from.
 - In existing codebases, follow established patterns. If the codebase uses large files, don't
   unilaterally restructure — but if a file you're modifying has grown unwieldy, planning a split is
   reasonable.
+- **Note, per task, which files it writes and which build tree it sits in** (one .NET solution, one
+  Gradle build, one pnpm package graph). Step 3 turns every overlap into a `Depends on` edge: two
+  tasks that touch the same file or build the same tree cannot run beside each other.
 
 ## Step 3 — Put the tasks in workable order
 
@@ -101,6 +104,11 @@ them — the sequence itself carries the ordering, and the third task is "the th
 - **Dependencies are stated, not implied.** Where a task needs an earlier one that is not immediately
   before it, say so: `**Depends on:** B1 (the ledger column)`. Adjacency is not a dependency claim, and
   a dependency on a later task is a defect in the ordering, not an exception to note.
+- **Overlap is a dependency too.** A task also depends on every earlier task whose files overlap its
+  own or that builds the same tree, and names it in `**Depends on:**` with the overlap as the reason
+  (`B1 (same solution)`). Position orders nothing once each prompt carries its `Depends on:` line
+  (Step 6): a task that leaves out an overlapping predecessor runs beside it, in the same working tree.
+  Tasks with disjoint files and different trees are the ones that run in parallel.
 - **Everything both sides bind to comes first** — the API contract, the schema, the shared types and
   the stubs that answer `not-implemented` — then **the acceptance tests written against them** (the `Q`
   family: `qa-api-<stack>`, then `qa-ui-<stack>` / `qa-mobile-<stack>`), then the backend tasks, then
@@ -210,8 +218,14 @@ none — it is a number someone will trust.
 ## Step 6 — Write the task blocks and the prompts
 
 Both shapes are specified in [`./references/plan-format.md`](./references/plan-format.md) §4 and §6.
-Three rules are easy to get wrong and expensive when you do:
+Four rules are easy to get wrong and expensive when you do:
 
+- **Every prompt block's first line is `Depends on: <ids>`** — ids only, comma-separated, or
+  `Depends on: none` when the task can start at once (format reference §6). It is the task block's
+  `**Depends on:**` reduced to ids, overlap edges included; a program reads it, so no prose on that line.
+  The gate task waits for every task that nothing else waits for. The prompts table carries a
+  `Runs beside` column, and the preamble says what runs together in one line — "After C1, B1 → B2 run
+  beside Q1; F1 waits for both; F2 is the gate."
 - **Every task but the last carries `**Gate: none**`**, naming the commands it must not run — except,
   in a test-first plan, the `Q` tasks and the implementation tasks, which carry `**Gate: own tests**`:
   the one command, filtered by file or class, that runs the tests they write or must turn green (format
@@ -256,31 +270,35 @@ After writing the complete plan, look at the spec with fresh eyes and check the 
 5. **Order check:** read the tasks in order and ask, at each one, "could I actually start this now?"
    Everything it needs must come from a task above it, and every `Depends on` must point backwards.
    The contract, the schema and the stubs come before any `Q` task.
-6. **Deliverable check:** every task has one, and each states a result rather than an activity.
-7. **Stack check:** every task names exactly one of the eight — run it as a mechanical check on the
+6. **Parallel check:** every block opens with a `Depends on:` line of ids only, equal to its task
+   block's `**Depends on:**`; any two tasks whose `Files` overlap, or that build one tree, are ordered by
+   an edge; the `Runs beside` column lists only pairs with disjoint files and different trees; the gate
+   task waits for every task nothing else waits for.
+7. **Deliverable check:** every task has one, and each states a result rather than an activity.
+8. **Stack check:** every task names exactly one of the eight — run it as a mechanical check on the
    files each task touches. A task whose files span two trees is two tasks, and the split is an
    ordering, not a redesign.
-8. **Agent check:** every task names exactly one agent, it is an exact catalog name, and it matches the
+9. **Agent check:** every task names exactly one agent, it is an exact catalog name, and it matches the
    task's stack (a `be` task run by `fe-react` is a mis-cut).
-9. **Budget check:** every task carries a `**Budget:**` with itemized drivers, and the task table in
+10. **Budget check:** every task carries a `**Budget:**` with itemized drivers, and the task table in
    the prompts section agrees. Every estimate over ~150k names its natural split point or says why the
    task is one thing anyway; every one under ~80k was checked against the next same-stack task and
    either merged or left alone deliberately.
-10. **Gate check:** exactly one task carries the gate, it is the last runnable one, its commands are
+11. **Gate check:** exactly one task carries the gate, it is the last runnable one, its commands are
     the project's own and in run order, it ends with the coverage floor (format reference §5) when the
     plan writes code, and every other task says `**Gate: none**` with what not to run, or
     `**Gate: own tests**` with one filtered command (never the unfiltered suite) on `Q` and
     implementation tasks.
     The ungated-boundary cost is stated in the plan.
-11. **Filing check:** where a blocked task will outlive the last runnable one, the last runnable block
+12. **Filing check:** where a blocked task will outlive the last runnable one, the last runnable block
     says the plan stays in `docs/plans/` until it clears; the plan's own number was taken from the high-water mark across both
     folders.
-12. **Prompt check:** one block per task, in task order, each carrying the deliverable verbatim, an
+13. **Prompt check:** one block per task, in task order, each carrying the deliverable verbatim, an
     exact reading list with **sections** rather than artifacts, its traps, its gate line and its
     close-out line; `## Close-out — every task` is present verbatim. Read each block as if it were the
     only thing you had: if you would need the task above it to start, the block is incomplete. Every
     `Blocked on <id>` placeholder is matched by that task's duty to write it.
-13. **Acceptance-test order:** every acceptance test precedes the tasks that turn it green — each `Q`
+14. **Acceptance-test order:** every acceptance test precedes the tasks that turn it green — each `Q`
     task sits after the stubs it runs against and before the implementation its tests specify, and
     every implementation deliverable names the acceptance tests it turns green.
 
@@ -295,14 +313,16 @@ After saving the plan, hand off to execution.
 
 The plan file is the whole handoff. It is self-contained on purpose: Plan Queue runs it in its own
 worktree, one prompt block per session, in order, and each session closes out per the plan's
-`## Close-out — every task`.
+`## Close-out — every task`. Tasks whose `Depends on:` lines allow it run in parallel in that one
+working tree — the preamble's runs-together line says which — and each commits only its own files, by
+path, and re-reads the plan before its close-out edits.
 
 ## Remember
 
 - Read `./references/plan-format.md` before writing; it is the document contract
 - Ground the plan in `## 1.`'s gap table, then decide the work in the numbered sections, then cut tasks
 - Tasks flat and ordered, ids prefixed by family — no slices, no phases, no grouping layer
-- One deliverable, one stack, one agent, one budget with drivers, one `Depends on` line per task
+- One deliverable, one stack, one agent, one budget with drivers, one `Depends on` line per task and per prompt, overlap edges included
 - The plan gates once, in its last runnable task, and that task fixes what the gate finds — including
   a branch-coverage shortfall under the 80% floor, which it closes by writing tests
 - One paste-ready prompt per task, rewritten in place by any task that changes what it assumes; a

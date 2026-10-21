@@ -128,13 +128,16 @@ queued and handed over whole, so the prompts live in it — see
 `engineering-practices/writing-plans/references/plan-format.md` §6 for the section's shape, and
 `references/prompts-section-template.md` for the filled template.
 
-The section opens with a preamble — run them in order, one session each, each block complete on its
+The section opens with a preamble — run them one session each, in the order the `Depends on:` lines allow, each block complete on its
 own; where the gates run; and anything **no** prompt may do — then the task table, then the line saying
 which blocks have been deleted, then the blocks themselves.
 
 Each block is a **prompt, not a summary**. It is pasted verbatim into a fresh session, so it carries
 everything that session needs and names nothing it does not:
 
+- **`Depends on: <ids>` as its first line** — ids only, or `none`: the task's prerequisites and every
+  earlier task it shares files or a build tree with. The table gains a `Runs beside` column and the
+  preamble names what runs together (plan format §6).
 - The agent to adopt and the skills to load.
 - **The exact pack sections to read** — `api-surface.md` §5.3, not `api-surface.md`. This is the single
   biggest lever on the budget holding: a session told to read the whole pack reads the whole pack.

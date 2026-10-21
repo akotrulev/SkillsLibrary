@@ -117,7 +117,7 @@ the chat route's request shape and stream ~10k, writes ~40k, test output ~15k.
 | `**Stack:**` | **Exactly one** of `be` (backend, database, migrations) · `fe` (the web client) · `mobile` (the native or React Native client app) · `ts` (shared TypeScript packages — CLI, MCP, generated clients) · `data` · `infra` · `qa` · `docs` · `human`. **A task that touches both the API tree and the web tree is two tasks** — at any size, for any reason. No estimate justifies a mixed task |
 | `**Agent:**` | **Exactly one** exact catalog name — `be-dotnet`, `be-java`, `be-node`, `be-python`, `fe-react`, `fe-blazor`, `data-architect`, `devops-engineer`, `tooling-engineer`, `qa-api-<stack>`, … An invented agent name is the most damaging defect in a plan, because it is what an executing session binds on. A task whose agent you cannot name is a task whose stack you have not decided. `human` tasks name the person or role in an `**Owner:**` line |
 | `**Deliverable:**` | **One** observable thing that exists when the task is done, stated as a fact about the world rather than as an activity, and checkable by someone who did not do the work. It is what `Done` means. Two deliverables is two tasks; no statable deliverable is a fragment of one |
-| `**Depends on:**` | The ids this task needs that are not immediately above it, each with what it provides — or `—`. Backwards only |
+| `**Depends on:**` | The ids this task needs that are not immediately above it, each with what it provides — or `—`. Backwards only. **It also names every earlier task whose `Files` overlap this task's or that builds the same tree** — one .NET solution, one Gradle build or one pnpm package graph shares build output — with the overlap as the reason: once the prompts carry `Depends on:` lines (§6), position orders nothing, and a task that leaves an overlapping predecessor out runs beside it in the same working tree |
 | `**Budget:**` | `~<n>k` plus the **itemized drivers** — what the session actually loads: `CLAUDE.md`, the plan sections it reads, the files it must read as patterns, the files it writes, and the output it reads back. A bare `~140k` is unfalsifiable |
 | `**Gate:**` | One of three forms — see §5. `**Gate: none**` naming the commands it must not run; `**Gate: own tests**` naming the one filtered command it runs (a `Q` task and the implementation tasks of a test-first plan); the whole gate, in run order, on the last task |
 | The bullets | **The work, in the order it is done**, with exact paths, exact names, exact commands, and the real values the code will use. This is the task's body; it replaces a step list |
@@ -266,24 +266,33 @@ where the gates run; and anything **no** prompt may do ("none of them may start 
 starts it"). Then the task table:
 
 ```markdown
-| # | Stack | Agent | Depends on | Budget |
-|---|---|---|---|---|
-| B1 | `be` | `be-node` | — | ~70k |
-| B2 | `be` | `be-node` | B1 | ~140k |
-| B3 | `be` | `be-node` | B2 | ~85k |
-| — | the pilot, then the drop decision | **the user** | B3 | subscription usage |
-| P1 | `be` | `be-node` on **Opus 5** | the pilot and the choice | ~90k per round |
+| # | Stack | Agent | Depends on | Runs beside | Budget |
+|---|---|---|---|---|---|
+| B1 | `be` | `be-node` | none | — | ~70k |
+| B2 | `be` | `be-node` | B1 | Q1 | ~140k |
+| Q1 | `qa` | `qa-api-typescript` | B1 | B2 | ~90k |
+| B3 | `be` | `be-node` | B2, Q1 | — | ~85k |
+| — | the pilot, then the drop decision | **the user** | B3 | — | subscription usage |
+| P1 | `be` | `be-node` on **Opus 5** | the pilot and the choice | — | ~90k per round |
 ```
+
+**Which tasks run in parallel is written down, not inferred.** The preamble says it in one line — *"After
+B1, B2 runs beside Q1; B3 waits for both and is the gate."* — and the table's `Runs beside` column names,
+per task, the tasks it can run in parallel with (`—` for none). Tasks that run together share one working
+tree, so a pair may run beside each other only when their `Files` are disjoint and they build different
+trees. **The gate task waits for every task that nothing else waits for**, so it starts last.
 
 The table is the plan's index — it is how a reader sees the order, the routing and the cost without
 opening a block — and it includes rows for the steps **the user** performs, because a plan that hides
-the human step reads as a plan that runs itself. Then one line saying which prompts are live, then
-`---`, then the blocks:
+the human step reads as a plan that runs itself. Its `Depends on` cells are the same ids as each block's
+first line, below. Then one line saying which prompts are live, then `---`, then the blocks:
 
 `````markdown
 ### B3 — the report, the screenshots and the close-out (be-node, be)
 
 ````
+Depends on: B2, Q1
+
 You are `be-node`. Task B3 of docs/plans/030-agent-model-effort-benchmark.md: turn a recorded run
 into REPORT.md, with cost per quote first. Then close the work out.
 
@@ -317,6 +326,12 @@ Close out per the plan's "Close-out — every task" before you stop.
 
 Rules:
 
+- **The first line of every block is `Depends on: <ids>`** — ids only, comma-separated, or
+  `Depends on: none` when the task can start at once. A program reads it to start the task as soon as
+  those tasks are done, so prose on that line becomes ids nobody has, and a plan never relies on what a
+  missing line means. It names the task's **prerequisites** (the block's `**Depends on:**`) **and every
+  earlier task whose `Files` overlap its own or that builds the same tree** (§4); an edge already implied
+  through another task may be left out of both.
 - **Built from the task's own block, copied rather than paraphrased.** The deliverable, the files and
   the gate are the task's; the prompt adds only the **reading order** and the **traps** — the two to
   four things specific to that task: the convention that is easy to miss, the file that looks like the
@@ -356,7 +371,9 @@ section directly above the prompts, copied verbatim from here:
 ````markdown
 ## Close-out — every task
 
-Before you stop, in this order, in this file:
+Before you stop, in this order, in this file. Another task may be running in this working tree:
+re-read this file immediately before these edits, and touch only your own task block, your own prompt
+block and the line that says which have landed.
 
 1. **As built** — append a dated `**As built (YYYY-MM-DD):**` bullet to your task block: what differed
    from the plan, the ids and names you assigned, what is built but unverified, and the `file:line` or
@@ -370,11 +387,12 @@ Before you stop, in this order, in this file:
    Stopping mid-task: keep it, with a `Picking up from:` line. Blocked: keep it, naming the blocker and
    its owner.
 5. **Status** — rewrite the header `**Status:**` line: what is built, what is next, what is built but
-   unverified.
+   unverified. When a task is running beside you, leave it: the next task that waits for you rewrites it.
 6. **Filing** — if your deletion left no blocks, rewrite `**Status:**` one final time (what the plan
    delivered, what is still unverified) and `git mv` this plan into `docs/plans/implemented/`, same
    name and number — a `solution-planner` pack moves its whole initiative folder.
-7. **Commit** — the code, its tests and these plan edits together, in one commit.
+7. **Commit** — the code, its tests and these plan edits together, in one commit, adding only your own
+   files, by path — never `git add -A`.
 ````
 
 Every prompt block ends its reading list with this section and closes with the line
