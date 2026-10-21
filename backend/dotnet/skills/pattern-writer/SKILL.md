@@ -168,6 +168,45 @@ Inject as `IOptions<OrdersOptions>` (root scope), `IOptionsSnapshot<>` (per-scop
 
 For request preprocessing (auth → throttle → validate → handle): use ASP.NET Core middleware for HTTP-shaped pipelines, MediatR `IPipelineBehavior<,>` for command pipelines, or a hand-rolled chain for in-process stages. Don't reinvent middleware.
 
+## Module boundaries
+
+For a modular monolith built to be split later (blueprint `Modules:` line) — one folder per module, one schema, one public surface, one architecture test. An existing codebase keeps the architecture it has; apply this to new modules only where the project already has module folders.
+
+- **One public API per module.** `I<Module>Api` and its DTO records live in the module's root namespace (`Shop.Modules.Orders`); an entity never crosses it. Every other type is `internal` and sits in `Shop.Modules.Orders.Internal`. `internal` only stops a reach-in across assemblies, so a single-assembly monolith leans on the architecture test below; split a module into its own project when the compiler should enforce it.
+- **One schema and one `DbContext` per module.** `modelBuilder.HasDefaultSchema("orders")` and `o.MigrationsHistoryTable("__EFMigrationsHistory", "orders")`. A module holds another module's id as a plain column — no navigation property to a foreign entity, no foreign key into its schema, no `Include` across modules.
+- **A call between modules** is a constructor-injected `I<Other>Api`. **An event** is a record in the publisher's root namespace, raised through a plain in-process dispatcher, and only when a second consumer or "must not fail the publisher" earns it; no message bus.
+- **One DI extension per module** (`AddOrdersModule`) and one test folder per module.
+- **The architecture test** fails the build on a reach-in. It uses `TngTech.ArchUnitNET` with `TngTech.ArchUnitNET.NUnit`, loads the architecture once, and runs with the unit tests. (NetArchTest.Rules has had no release since 2021 — do not use it.) `ResideInNamespace` is shown with the full namespace; confirm in the installed ArchUnitNET version whether sub-namespaces match, which is why the internals stay in one flat `.Internal` namespace per module.
+
+```csharp
+using ArchUnitNET.Domain;
+using ArchUnitNET.Loader;
+using ArchUnitNET.NUnit;
+using static ArchUnitNET.Fluent.ArchRuleDefinition;
+
+[TestFixture]
+public sealed class ModuleBoundaryTests
+{
+    private static readonly Architecture Architecture =
+        new ArchLoader().LoadAssemblies(typeof(Program).Assembly).Build();
+
+    [TestCase("Billing", "Orders")]
+    [TestCase("Orders", "Billing")]
+    public void Should_NotDependOnInternals_When_ModuleCallsAnotherModule(string caller, string owner)
+    {
+        var callerTypes = Types().That().ResideInNamespace($"Shop.Modules.{caller}")
+            .Or().ResideInNamespace($"Shop.Modules.{caller}.Internal");
+        var ownerInternals = Types().That().ResideInNamespace($"Shop.Modules.{owner}.Internal");
+
+        Types().That().Are(callerTypes).Should().NotDependOnAny(ownerInternals)
+            .Because($"{caller} may use {owner} only through its public API")
+            .Check(Architecture);
+    }
+}
+```
+
+Add one `TestCase` per ordered module pair when a module is added; the first contract task writes the fixture, and a later task that needs a new dependency calls the owner's public API instead of editing the test.
+
 ## Rules
 
 - Constructor injection only — primary constructors (`public sealed class Foo(IDep dep)`, available since .NET 8) keep boilerplate down
@@ -200,6 +239,7 @@ For every pattern, produce:
 1. The contract (interface or abstract record) in `Domain/` or `Application/Contracts/`
 2. Concrete implementations one per file in the matching `Application/<Pattern>/` or `Infrastructure/`
 3. A DI extension `Add<Feature>(this IServiceCollection)` registering all of them
+   - **In a modular monolith** the first scaffold also produces the module folders, the `I<Module>Api` per module, a `DbContext` with its schema each, and the architecture-test fixture (Module boundaries)
 4. Unit-test fixture(s) for every logic-bearing type produced — **conventions, seams, and doubles policy live in `backend/dotnet/skills/unit-testing`** (NUnit 4 + NSubstitute, `Assert.That` + `Assert.Multiple`). Once the pattern is reachable over HTTP, the contract/integration layer is the **peer** `qa-api-dotnet`'s
 
 ## Validation

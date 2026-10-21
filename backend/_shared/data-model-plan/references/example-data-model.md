@@ -31,16 +31,16 @@ The filled example for `dev:plan-data-model`, from the **workshop-booking** toy 
 
 | Entity | Owning area | Purpose | Lifecycle states | Volume / growth | Notes |
 |---|---|---|---|---|---|
-| Member | Identity & access | Local profile for an Auth0 identity | active → deleted (hard) | ~500, slow | Auth0 `sub` is the join key |
-| Workshop | Scheduling | A bookable class type | draft → published → archived | ~30, slow | |
-| Session | Scheduling | One scheduled occurrence with capacity | scheduled → completed \| cancelled | ~40/month | The contended entity |
-| Booking | Booking | One member's seat in one session | confirmed → cancelled \| attended | ~30/session | One per member per session (Q1: A) |
+| Member | Identity & access · schema `membership` | Local profile for an Auth0 identity | active → deleted (hard) | ~500, slow | Auth0 `sub` is the join key |
+| Workshop | Scheduling · schema `scheduling` | A bookable class type | draft → published → archived | ~30, slow | |
+| Session | Scheduling · schema `scheduling` | One scheduled occurrence with capacity | scheduled → completed \| cancelled | ~40/month | The contended entity |
+| Booking | Booking · schema `booking` | One member's seat in one session | confirmed → cancelled \| attended | ~30/session | One per member per session (Q1: A) |
 
 Every blueprint area owns ≥1 entity ✓.
 
 ## 3. Tables
 
-### `sessions` — Scheduling area
+### `sessions` — Scheduling area (schema `scheduling`)
 Purpose: one scheduled occurrence of a workshop, with a seat capacity.
 Lifecycle: `scheduled → completed`; `scheduled → cancelled`.
 
@@ -53,7 +53,7 @@ Lifecycle: `scheduled → completed`; `scheduled → cancelled`.
 | `capacity` | int | no | — | CHECK `>= 1` |
 | `status` | text | no | `'scheduled'` | one of `scheduled,completed,cancelled` |
 | `version` | int | no | `0` | optimistic concurrency (staff edits vs bookings) |
-| `created_by` | uuid | no | — | FK → `members.id` (staff) ON DELETE RESTRICT — blocks the GDPR hard delete for a staff author; open question §8 |
+| `created_by` | uuid | no | — | the staff member's id, held without a foreign key — `members` belongs to the `membership` schema; open question §8 |
 | `created_at` / `updated_at` | timestamptz | no | `now()` | convention |
 
 **Keys & constraints**
@@ -67,15 +67,15 @@ Lifecycle: `scheduled → completed`; `scheduled → cancelled`.
 
 **Retention:** kept indefinitely — schedule history, no member PII beyond the staff author id. `#inferred`
 
-### `bookings` — Booking area
+### `bookings` — Booking area (schema `booking`)
 Purpose: one member's confirmed seat in one session.
 Lifecycle: `confirmed → cancelled`; `confirmed → attended`.
 
 | Column | Type | Null | Default | Constraint / note |
 |---|---|---|---|---|
 | `id` | uuid | no | uuidv7() | PK |
-| `session_id` | uuid | no | — | FK → `sessions.id` ON DELETE RESTRICT |
-| `member_id` | uuid | no | — | FK → `members.id` ON DELETE CASCADE — GDPR hard delete takes bookings with it `#confirmed` |
+| `session_id` | uuid | no | — | the session's id, held without a foreign key — `sessions` belongs to the `scheduling` schema; the Booking module reads capacity through `ISchedulingApi` |
+| `member_id` | uuid | no | — | the member's id, held without a foreign key — `members` belongs to the `membership` schema; a GDPR hard delete reaches bookings through `IBookingApi.DeleteForMemberAsync`, not a cascade `#confirmed` |
 | `status` | text | no | `'confirmed'` | one of `confirmed,cancelled,attended` |
 | `late_cancel` | bool | no | `false` | set when cancelled < 24h before start (blueprint DEC, R2) |
 | `cancelled_at` | timestamptz | yes | — | null until cancelled — a lifecycle fact, not an omission |
@@ -84,7 +84,7 @@ Lifecycle: `confirmed → cancelled`; `confirmed → attended`.
 **Keys & constraints**
 - PK `id`
 - UNIQUE (`session_id`, `member_id`) **WHERE status <> 'cancelled'** — one live seat per member per session (Q1: A); partial so a re-book after cancel works
-- **The overbooking guard is DB-level, not app-level:** bookings insert under `SELECT … FOR UPDATE` on the session row (or a `CHECK`-backed counter — decision routed to `data-architect`, see §9). An app-side count-then-insert is the race the blueprint's top risk names.
+- **The overbooking guard is DB-level, not app-level, and lives inside the `booking` schema:** bookings insert under a transaction-scoped advisory lock on the session id, or against a `CHECK`-backed seat counter the Booking module owns — never a lock on a `scheduling` row (decision routed to `data-architect`, see §9). An app-side count-then-insert is the race the blueprint's top risk names.
 
 **Indexes**
 | Index | Columns | Serves |
@@ -92,10 +92,10 @@ Lifecycle: `confirmed → cancelled`; `confirmed → attended`.
 | `ix_bookings_member` | (`member_id`, `created_at` DESC) | "my bookings" list |
 | `ix_bookings_session` | (`session_id`) WHERE `status = 'confirmed'` | the capacity count + staff attendance view |
 
-**Retention:** kept 2 years, then purged; a member GDPR hard delete cascades sooner (blueprint §7). `#confirmed`
+**Retention:** kept 2 years, then purged; a member GDPR hard delete removes them sooner, through the Booking module's API (blueprint §7). `#confirmed`
 
 ### `members`, `workshops` — abbreviated in this example
-A real artifact writes these in full. Shape notes only: `members` carries `auth0_sub` UNIQUE, `email` UNIQUE, `role` (`member|staff`); `workshops` carries `title`, `description`, `status` (`draft|published|archived`), `created_by`.
+A real artifact writes these in full. Shape notes only: `members` (schema `membership`) carries `auth0_sub` UNIQUE, `email` UNIQUE, `role` (`member|staff`); `workshops` (schema `scheduling`) carries `title`, `description`, `status` (`draft|published|archived`), `created_by`.
 
 ## 4. Reference & seed data
 
@@ -130,7 +130,15 @@ Every arrow **not** drawn is a 409 in `api-surface.md`: cancel an `attended` boo
 
 ## 6. Ownership map
 
-Omitted — modular monolith; owning module noted per table block.
+Runs for the modular monolith: each table sits in its module's schema, and every cross-module read goes through the owner's public API.
+
+| Table | Owner (module schema) | Reader | How it reads |
+|---|---|---|---|
+| `sessions` | `scheduling` | Booking | `ISchedulingApi` — a session's capacity and status, per booking attempt |
+| `members` | `membership` | Scheduling, Booking | `IMembershipApi` — resolve a member by Auth0 `sub`; confirm a staff role |
+| `bookings` | `booking` | Scheduling | `IBookingApi` — the confirmed count for a session, for the staff attendance view |
+
+No cross-module join, write or foreign key exists. A GDPR hard delete of a member is `IMembershipApi` deleting the profile, then calling `IBookingApi` to delete that member's bookings.
 
 ## 7. Migration sequence
 
@@ -144,7 +152,7 @@ Omitted — modular monolith; owning module noted per table block.
 
 | # | Question | Blocks | Owner |
 |---|---|---|---|
-| 1 | A departing staff member's authored sessions: reassign `created_by`, or SET NULL with an audit note? RESTRICT blocks the GDPR hard delete for staff authors today — the member CASCADE and the staff RESTRICT pull in opposite directions | GDPR delete of a staff account (not the v1 launch) | owner |
+| 1 | A departing staff member's authored sessions: reassign `created_by`, or keep the id and show "former staff"? With no foreign key, the hard delete is no longer blocked — the question is only what the staff view displays | GDPR delete of a staff account (not the v1 launch) | owner |
 
 Q-retention answered at blueprint (2 years, hard delete).
 
@@ -152,4 +160,4 @@ Q-retention answered at blueprint (2 years, hard delete).
 
 | Decision | Why it needs depth |
 |---|---|
-| Overbooking guard mechanism (`FOR UPDATE` vs counter + CHECK) | Correctness-under-concurrency choice with plan-analysis trade-offs |
+| Overbooking guard mechanism (advisory lock vs counter + CHECK, inside the `booking` schema) | Correctness-under-concurrency choice with plan-analysis trade-offs |

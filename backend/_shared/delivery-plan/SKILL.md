@@ -98,7 +98,7 @@ Do not brainstorm tasks. Read them out of the detail pack, in this order — the
 
 | Source | Produces |
 |---|---|
-| Blueprint tech stack + repo state | Scaffold / project structure / shared config tasks (only what does not exist) |
+| Blueprint tech stack + repo state | Scaffold / project structure / shared config tasks (only what does not exist). For a modular monolith the first contract task's scaffold also creates one folder per blueprint module, a schema per module, and the **architecture test** (the stack's `patterns-apply` "Module boundaries"), so every later task is checked against the boundaries |
 | `integrations.md` blocking unknowns | **Prerequisite tasks** — provisioning, accounts, sandbox access |
 | Behaviour the plan must keep, that no test pins (found in the orientation pass or the code) | **Pin tasks** — one per untested area the plan touches, before the first task that touches it: `qa-api-<stack>` pins what the API shows, the `be-<stack>` agent pins logic with unit tests. Deliverable: "the current behaviour of <area> is pinned by N tests, green on today's code." Behaviour the plan *changes* gets `Q` tests for the new behaviour instead, never a pin |
 | `data-model.md` migration sequence | One task per migration, in its stated order |

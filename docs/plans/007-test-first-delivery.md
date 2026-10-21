@@ -356,6 +356,8 @@ Cost: a missed overlap edge lets two agents edit one file at once, and the Self-
 
 **D12 — the example is feature-complete, so test-first sits per capability, and it gains a stub task `C8`.** 2026-10-21, T2. The plan's §5.2 called the example agent-batched; `example-delivery-plan.md` is feature-complete (workshop booking), so its `Q` tasks follow the contract tasks per capability — `C8` → `Q3` → `B1`, `Q2` → `F1`, `Q1` → `B2`, `Q4` → `B3` — not as two batches. §5.2 named `Q1` (Bookings API) and `Q2` (journeys J1–J2) only; the self-review rule "every endpoint is covered by a `Q` task" needed `Q3` (Workshops and Sessions) and `Q4` (Profile) too, abbreviated like the other non-showcase tasks. Both readings: add only `Q1` and `Q2` and leave the Timetable and Profile endpoints uncovered in the example (rejected: it would teach a plan that fails its own Self-check), or cover them. The stubs and the OpenAPI asset needed an owner before the `Q` tasks, so a contract task `C8` was added rather than overloading `C4` (one deliverable per task); `B5` now regenerates the asset and diffs it against `C8`'s. Ids were not renumbered; `Order` was, and the block `Order` values and the task table now agree (the old `B7` block said 20 where the table said 19). The Journey tests are `Gate: none` in the example, because J1 and J2 need the API, the database and the web app together — the §3.1 carve-out shown on purpose. Cost: the example has three more tasks than §5.2 asked for. *(2026-10-21)*
 
+**D13 — the examples were made consistent with the four rules, and the capacity guard moved inside the Booking schema.** 2026-10-21, M1. §4.5 named only `example-data-model.md:133` (the ownership line). The data-model example also held three cross-module foreign keys (`sessions.created_by → members`, `bookings.session_id → sessions`, `bookings.member_id → members ON DELETE CASCADE`) and an overbooking guard that locked a `scheduling` row from the Booking module — each breaks rule 1. Both readings: change only the ownership line and leave an example that teaches what the rule forbids (rejected), or drop the three foreign keys to plain id columns, route the GDPR hard delete through `IBookingApi`, and make the guard an advisory lock on the session id or a seat counter in the `booking` schema, with open question 1 and the `data-architect` row reworded to match. The delivery example's "exclusion constraint" wording became "capacity guard" (it no longer fits a cross-schema check), and its module names follow the example blueprint (`Membership`, matching `src/Membership` already in the epic map). Cost: the example's guard mechanism is still routed to `data-architect`, not decided. *(2026-10-21)*
+
 ## Answered questions (2026-10-21)
 
 **O1 — Do implementers run tests:** their own, filtered (D1).
@@ -454,6 +456,7 @@ H1 replaces rules 5 and 6 of `~/.claude/CLAUDE.md` § "How features are broken d
 - §4.5's table, row by row.
 - Each pattern-writer's new section carries a short snippet of its stack's architecture test, checked against the tool's current documentation rather than written from memory: ArchUnitNET (`TngTech.ArchUnitNET` with its NUnit package); Spring Modulith's `ApplicationModules.of(Application.class).verify()`, on the Spring Modulith line that matches the project's Spring Boot major; and a dependency-cruiser `forbidden` rule that lets one module import another only through its `index.ts`.
 - **Not in M1:** observability (L1) and `be-python` (§4.5's last line).
+- **As built (2026-10-21):** §4.5's table landed row by row, ungated. `solution-blueprint/SKILL.md` Step 3: the default row is "Modular monolith, built to be split later", the four rules and the split triggers sit under the table, `< ~6` is gone, and the §3 template has `**Modules:**` after `**Patterns in play:**`; its example fills it in (`Membership` / `Scheduling` / `Booking`, a schema and a public API each) and the "three areas" justification now rests on the triggers. `data-model-plan/SKILL.md`: Step 2 names the module's schema in the owning-area cell, Step 3's template block carries the schema, Step 6 runs for a monolith (cross-module join, write or foreign key is a finding), template §6 has a table, self-check item 1 extended; its example follows (§6 filled, cross-module foreign keys removed, see D13). `solution-planner.md:89` cites the default and the triggers. `delivery-plan/SKILL.md:101` scaffold row adds module folders, a schema per module and the architecture test; the example's `C1` row, gap row and a new abbreviated-notes bullet name the test. The three `pattern-writer`s have a "Module boundaries" section before `## Rules` ending in the architecture-test snippet, plus a Generation-outputs line; the three `code-review`s have one **major** row under Pattern application. Tools checked 2026-10-21: ArchUnitNET (`TngTech.ArchUnitNET` + `.NUnit`, README `LoadAssemblies(...).Build()` and `Types().That().Are(...).Should().NotDependOnAny(...).Check(Architecture)`), Spring Modulith (`ApplicationModules.of(Application.class).verify()`; 1.4 compiled against Boot 3.5, 2.x against Boot 4), dependency-cruiser (`from`/`to` with `$1` back-references). Built but unverified: no snippet was compiled or run; the ArchUnitNET docs do not say whether `ResideInNamespace` matches sub-namespaces, so the snippet filters on a flat `.Internal` namespace and says to confirm; the Modulith 2.x ↔ Boot 4 pairing comes from the compatibility appendix's snapshot row, not a GA row; dependency-cruiser's `depcruise` command line was not on the pages fetched. No validator ran (T5). Proof: `git show --stat HEAD` for this task; `backend/dotnet/skills/pattern-writer/SKILL.md` "## Module boundaries".
 
 ### L1 — services are observable from their first task
 
@@ -580,50 +583,7 @@ Run them one session each, in the SkillsLibrary checkout on `master`; never crea
 | H1 | `human` | **the user** | T5 | — | five minutes |
 | H2 | `human` | **the user** | H1, the push, O4, O5 | — | one feature |
 
-T1 and T2 have landed, and their prompts are deleted — a prompt for a finished task is a thing someone runs by mistake. Every block below is live.
-
----
-
-### M1 — the modular monolith is built to be split later (general-purpose, docs)
-
-````
-Depends on: T1, T2
-
-You are `general-purpose`. Task M1 of docs/plans/007-test-first-delivery.md: make the default
-architecture a modular monolith built to be split later — four boundary rules, the split triggers,
-and an architecture test that fails the build on a reach-in.
-
-Read, in this order:
-1. CLAUDE.md, the Backend code rules.
-2. The plan: §2.1, §4.5, D9, the As built notes of T1 and T2, task M1, and "Close-out — every
-   task".
-3. backend/_shared/solution-blueprint/SKILL.md Step 3 (the style table) and the §3 template, as T1
-   left them; references/example-blueprint.md §3.
-4. backend/_shared/data-model-plan/SKILL.md Steps 3 and 6 and template §6;
-   references/example-data-model.md (the ownership line near :133).
-5. backend/_shared/agents/solution-planner.md:88; backend/_shared/delivery-plan/SKILL.md Step 1's
-   scaffold row and references/example-delivery-plan.md's C1, as T2 left them.
-6. backend/{dotnet,java,node}/skills/pattern-writer/SKILL.md (Rules, Generation outputs) and
-   backend/{dotnet,java,node}/skills/code-review/SKILL.md (the severity table).
-
-Build: §4.5's table, row by row, and in each pattern-writer a "Module boundaries" section ending in
-its stack's architecture-test snippet.
-
-Traps:
-- Check each architecture-test tool against its current documentation before writing its snippet:
-  ArchUnitNET (`TngTech.ArchUnitNET` with its NUnit package), Spring Modulith (the line matching
-  the project's Spring Boot major — never up-level Boot to reach it), dependency-cruiser.
-  NetArchTest.Rules has had no release since 2021; do not recommend it.
-- The area count leaves both files — the blueprint's "< ~6" and the planner's "~4". The triggers
-  decide, so the example blueprint's "three areas" justification is rewritten around them.
-- KISS still holds: one public surface per module, no interface per class, and no message bus
-  between modules unless an event is earned.
-
-Gate: none — this plan gates once, in T5. Do not run the validators.
-
-Commit: `docs(dev, be): modular monolith built to be split later (007 M1)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
+T1, T2 and M1 have landed, and their prompts are deleted — a prompt for a finished task is a thing someone runs by mistake. Every block below is live.
 
 ---
 
@@ -666,6 +626,7 @@ Traps:
 - A be-* agent may load only the skills it names, so the bullet names both observability skills by
   path.
 - be-python stays out (O6).
+- M1 added a "Modules reach each other only through the owner's public API" row to each code-review's Pattern application table; add the telemetry row beside it, and do not touch it.
 
 Gate: none — this plan gates once, in T5. Do not run the validators.
 

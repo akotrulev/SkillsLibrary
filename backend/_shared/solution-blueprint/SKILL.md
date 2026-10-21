@@ -91,10 +91,19 @@ State the decision, the reason it is **earned for this system**, and what you re
 
 | Style | Earned when | Costs you should say out loud |
 |---|---|---|
-| **Modular monolith** (default proposal) | One team, one deployable, < ~6 functional areas, no independent scaling need | Module boundaries need discipline to survive; a shared DB tempts cross-module joins |
-| **Modular monolith + extracted service** | One area has a genuinely different scaling, availability, or compliance profile | A network hop, a second deployment, distributed failure modes for that seam only |
-| **Services per area** | Independent teams, independent release cadence, or hard isolation requirements | Distributed transactions, versioned contracts, per-service observability, N pipelines |
+| **Modular monolith, built to be split later** (default proposal) | One team, one deployable, and none of the split triggers below is met | A boundary costs a schema, a public API and an architecture test from the first task; no foreign key across modules, so the owning module keeps referential integrity; cross-module reads go through an API call, not a join |
+| **Modular monolith + extracted service** | One module meets a split trigger below | A network hop, a second deployment, distributed failure modes for that seam only |
+| **Services per area** | Several areas each meet a split trigger — independent teams on their own release cadence, or hard isolation requirements | Distributed transactions, versioned contracts, per-service observability, N pipelines |
 | **Event-driven core** | Fan-out to multiple consumers, or ordering/replay is a business requirement | A broker to run, idempotent consumers, eventual consistency the UI must reflect |
+
+**Built to be split later — four rules**, written into the blueprint and enforced from the first task:
+
+1. **A module owns its data.** Its tables live in its own schema. No other module reads or writes them: no cross-module join, no shared table, no foreign key into another module's schema — another module holds the id.
+2. **Modules talk through a public surface.** Each module exposes one public API — a facade or interface shaped like the HTTP contract it would become, DTOs in and out, never an entity — and the events it publishes. Everything else is internal.
+3. **An architecture test fails the build on a reach-in.** It runs with the unit tests; the first contract task writes it (`be-<stack>:patterns-apply`, "Module boundaries").
+4. **One folder per module**, mirrored by one schema, one DI registration and one test folder — one module per functional area.
+
+**Split triggers** — the only reasons a module becomes a service, each recorded as a dated decision when used: it must **scale apart** from the rest; **another team** will own it on its own release schedule; it needs **isolation the process cannot give** (untrusted input, a compliance scope — the sandboxed upload worker is the house example); it needs a **different runtime**. Size, tidiness and "we might need it later" are not triggers; the number of areas decides nothing. Splitting moves the module's folder to `services/<name>/`, gives its schema a database of its own, and replaces the in-process calls with a client generated from the same contract. An existing codebase keeps the architecture it has — this default is for new systems.
 
 Then, for each *pattern* in play, one line stating it is earned — CQRS, event sourcing, Saga, Outbox, Repository over the ORM. Load `backend/_shared/pattern-guide` for the concept card if the decision is live. **One pattern per problem**; a pattern with no stated reason is a finding against your own blueprint.
 
@@ -336,6 +345,7 @@ In `DETAIL` mode, where the human supplied the high-level plan, the gate is shor
 **Style:** <choice> — <why it is earned for this system>
 **Rejected:** <what you considered and why not>
 **Patterns in play:** <pattern — the reason it is earned. One line each.>
+**Modules:** <for a modular monolith: module → schema → owning functional area, one row each, and the split trigger (if any) that would make it a service. Omit for a service-based style.>
 **Repository layout:** <one repo per product — contracts/, services/<name>/ with its driving acceptance tests beside the code, web/ mobile/, e2e/, deploy/local/ — or multi-repo with the stated reason (independent teams or release cadences) and one plan per repo.>
 
 ```mermaid

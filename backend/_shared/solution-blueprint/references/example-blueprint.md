@@ -33,9 +33,18 @@ Each capability above becomes one step in `delivery-plan.md`, closing when a per
 
 ## 3. Architecture
 
-**Style:** Modular monolith — one team of two, three areas, one deployable, no independent scaling need. Earned by default; nothing here justifies more.
-**Rejected:** services per area (three network boundaries for a system with one consumer buys only operational cost).
+**Style:** Modular monolith, built to be split later — one team of two and one deployable, and none of the split triggers applies: nothing must scale apart, no second team owns an area, nothing needs isolation the process cannot give, and every module runs on .NET. Earned by default; nothing here justifies more.
+**Rejected:** services per area (no trigger is met, so three network boundaries for a system with one consumer buy only operational cost). Revisit a module only on a trigger, as a dated decision.
 **Patterns in play:** none beyond framework idioms. No CQRS (read and write shapes are identical), no outbox (the only event is a confirmation email, and a lost email is acceptable degradation — see §5).
+**Modules:**
+
+| Module | Schema | Owning area | Public surface | Split trigger |
+|---|---|---|---|---|
+| `Membership` | `membership` | Identity & access | `IMembershipApi` — resolve a member by Auth0 `sub` | none |
+| `Scheduling` | `scheduling` | Scheduling | `ISchedulingApi` — read a session and its capacity | none |
+| `Booking` | `booking` | Booking | `IBookingApi` — book, cancel, list a member's bookings | none |
+
+`Booking` holds a session id and a member id, never a foreign key into `scheduling` or `membership`; it reads capacity through `ISchedulingApi`. An architecture test in the first contract task fails the build on a reach-in.
 
 ```mermaid
 flowchart LR

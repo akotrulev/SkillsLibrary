@@ -271,6 +271,38 @@ export class OrderService {
 }
 ```
 
+## Module boundaries
+
+For a modular monolith built to be split later (blueprint `Modules:` line) — one folder per module, one schema, one public surface, one architecture test. An existing codebase keeps the architecture it has.
+
+- **One public API per module.** `src/modules/<name>/index.ts` exports the module's facade functions (or a Nest provider), its DTO types and the events it publishes; an entity or repository is never exported. Everything else is internal to the folder.
+- **One schema per module.** Set it in the ORM mapping — Drizzle `pgSchema('orders')`, Prisma `@@schema("orders")` with `multiSchema` — with migrations per module. A module holds another module's id as a plain column: no relation to a foreign table, no foreign key into its schema.
+- **A call between modules** imports the other module's `index.ts` and receives it through the constructor or a factory argument. **An event** is a type exported from the publisher's `index.ts`, delivered by a plain in-process emitter, and only when a second consumer or "must not fail the publisher" earns it; no bus.
+- **The architecture test** is dependency-cruiser, run with the unit tests (`"test:arch": "depcruise src --config .dependency-cruiser.cjs"`, called from the same script CI runs). The `forbidden` rule below lets one module import another only through its `index.ts`; a module's own files are free to import each other.
+
+```js
+module.exports = {
+  forbidden: [
+    {
+      name: 'module-reach-in',
+      comment: 'A module may import another module only through its index.ts',
+      severity: 'error',
+      from: { path: '^src/modules/([^/]+)/' },
+      to: {
+        path: '^src/modules/[^/]+/',
+        pathNot: '^src/modules/($1/|[^/]+/index\\.ts$)',
+      },
+    },
+  ],
+  options: {
+    tsConfig: { fileName: 'tsconfig.json' },
+    doNotFollow: { path: 'node_modules' },
+  },
+};
+```
+
+The first contract task writes the config and the script; a later task that needs a new dependency imports the owner's `index.ts` instead of editing the rule.
+
 ## Rules
 
 - TypeScript **strict** mode (`tsconfig`: `strict: true`, `noUncheckedIndexedAccess: true`, `exactOptionalPropertyTypes: true`)
@@ -305,7 +337,7 @@ For every pattern:
 1. The type definitions (`type Pricing = ...`, `interface OrderRepository`) under the feature's `domain/` or `shared/`
 2. The implementations under `feature/` / `infra/` as appropriate
 3. Unit tests for every logic-bearing unit produced — **conventions, seams, and doubles policy live in `backend/node/skills/unit-testing`** (Vitest, DI over `vi.mock`, **both branches of every `Result<T,E>`**). Once reachable over HTTP, the contract/integration layer is the **peer** `qa-api-typescript`'s
-4. A small `index.ts` barrel where the project uses them
+4. A small `index.ts` barrel where the project uses them — **in a modular monolith the module's `index.ts` is its one public surface**, written together with its schema and the dependency-cruiser config (Module boundaries)
 
 ## Validation
 

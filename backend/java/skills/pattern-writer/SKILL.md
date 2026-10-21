@@ -226,6 +226,38 @@ public class RequestPipeline {
 
 For HTTP, use Spring's existing `HandlerInterceptor` / `OncePerRequestFilter` — don't reinvent middleware.
 
+## Module boundaries
+
+For a modular monolith built to be split later (blueprint `Modules:` line) — one package per module, one schema, one public surface, one architecture test. An existing codebase keeps the architecture it has.
+
+- **One public API per module.** Spring Modulith treats each direct sub-package of the application's main package as a module (`com.shop.orders`). Types in that root package are the module's API — an `OrdersApi` interface, DTO records, published events; an entity never lives there. Everything else goes in a sub-package (`com.shop.orders.internal`), which other modules cannot reference.
+- **One schema per module.** `@Table(schema = "orders")` on its entities and its own Flyway location (`db/migration/orders`). A module holds another module's id as a plain column — no `@ManyToOne` to a foreign entity, no foreign key into its schema.
+- **A call between modules** is a constructor-injected `<Other>Api`. **An event** is a record in the publisher's root package, published with `ApplicationEventPublisher` and consumed with `@ApplicationModuleListener`, only when a second consumer or "must not fail the publisher" earns it; no broker.
+- **The architecture test** is Spring Modulith's `verify()`: no cycles between modules, and no reference to another module's internal package. Use the Spring Modulith line that matches the project's Spring Boot major — **1.4 for Spring Boot 3.x, 2.x for Spring Boot 4** — and never up-level Boot to reach it. Import its `spring-modulith-bom` and add `org.springframework.modulith:spring-modulith-starter-test` at test scope. A project that is not Spring Boot uses plain ArchUnit instead (second snippet).
+
+```java
+class ModularityTests {
+
+    @Test
+    void should_verify_module_boundaries_when_application_modules_are_built() {
+        ApplicationModules.of(Application.class).verify();
+    }
+}
+```
+
+```java
+@AnalyzeClasses(packages = "com.shop")
+class ModuleBoundaryArchTests {
+
+    @ArchTest
+    static final ArchRule billing_uses_orders_only_through_its_api =
+        noClasses().that().resideInAPackage("..billing..")
+            .should().dependOnClassesThat().resideInAPackage("..orders.internal..");
+}
+```
+
+Add one ArchUnit rule per ordered module pair when ArchUnit is the tool; Spring Modulith needs no list. The first contract task writes the test, and a later task that needs a new dependency calls the owner's public API instead of editing the test.
+
 ## Rules
 
 - **Constructor injection** only; never `@Autowired` on fields/setters
@@ -259,6 +291,7 @@ For every pattern:
 1. The contract (interface / sealed type / record) in the domain package
 2. Concrete implementations (one per file) under the matching package
 3. A `@Configuration` class registering the components (when not auto-component-scanned)
+   - **In a modular monolith** the first scaffold also produces the module packages, the `<Module>Api` per module, a schema and Flyway location each, and `ModularityTests` (Module boundaries)
 4. Unit tests for every logic-bearing type produced — **conventions, seams, and doubles policy live in `backend/java/skills/unit-testing`** (**JUnit 5** + Mockito + AssertJ, no Spring context; *not* TestNG, which is the QA suite's runner). Once the pattern is reachable over HTTP, the contract/integration layer is the **peer** `qa-api-java`'s
 
 ## Validation

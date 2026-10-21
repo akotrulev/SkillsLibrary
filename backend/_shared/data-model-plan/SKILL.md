@@ -57,6 +57,7 @@ One row per entity, derived from the blueprint's functional areas:
 | Entity | Owning area | Purpose | Lifecycle states | Volume / growth | Notes |
 |---|---|---|---|---|---|
 
+- **In a modular monolith the owning-area cell also names the module's schema** (`Booking · schema booking`), taken from the blueprint's `Modules:` line.
 - **Lifecycle states** matter more than they look: a column of `—` means the entity is created and never changes, which is worth confirming. Anything with real states gets its transitions drawn in Step 5, and those transitions become both `409` state-conflict validations in `api-surface.md` and state-transition test cases downstream.
 - **Every blueprint area must appear** as an owner of at least one entity. An area owning none is either a cross-cutting concern mislabeled as an area, or a gap — say which.
 - **Volume/growth** is what tells the reader whether an index matters. `[TBD - <owner>]` is fine; a guess presented as fact is not.
@@ -66,7 +67,7 @@ One row per entity, derived from the blueprint's functional areas:
 For every entity, one block. This is the level of detail that lets an implementer write the migration without a decision:
 
 ````markdown
-### `orders` — Ordering area
+### `orders` — Ordering area (schema `ordering`)
 Purpose: one customer purchase, from placement through fulfilment.
 Lifecycle: `pending → paid → fulfilled → closed`; `pending|paid → cancelled`.
 
@@ -142,9 +143,11 @@ stateDiagram-v2
 
 The state diagram is not decoration — every arrow that does *not* exist becomes a `409 illegal state transition` rule in `api-surface.md`. Where the project keeps a business-model KB, load `business-analysis:state-grid` and record the lifecycle there as an `ENT-nnn` state × event grid instead of drawing it twice — its `—` cells are exactly the refused transitions, and it forces you to say whether each is impossible, ignored, or an error.
 
-### Step 6 — Ownership map (multi-service systems only)
+### Step 6 — Ownership map
 
-If the blueprint chose services, state which service owns which table, and how the others read it: an API call, a replicated read model, or a shared database. **Two services writing one table is a finding**, not a design — call it out. Skip this section entirely for a modular monolith; a "which module owns it" note per table in Step 3 covers it.
+Runs for a modular monolith too. Each table belongs to one module's schema (or one service); say how every other module or service reads it: **an API call to the owner's public surface**, a replicated read model, or — services only — a shared database. Record each cross-module read as a row: reader, table, the public API it goes through.
+
+A **cross-module join, a cross-module write, or a foreign key into another module's schema is a finding**, not a design — the other module holds the id, and the owner keeps referential integrity. So is two services writing one table. Call each out and route it back to the blueprint's `Modules:` line.
 
 ### Step 7 — Migration sequence
 
@@ -199,7 +202,8 @@ Rules:
 <!-- ER diagram; state diagram per entity with a real lifecycle -->
 
 ## 6. Ownership map
-<!-- services only; omit for a modular monolith -->
+| Table | Owner (module schema or service) | Reader | How it reads |
+|---|---|---|---|
 
 ## 7. Migration sequence
 | # | Migration | Contains | Depends on | Delivery task | Online-safe? |
@@ -216,7 +220,7 @@ Rules:
 
 ## Self-check before handing off
 
-1. Every blueprint functional area owns at least one entity — or is reclassified as a cross-cutting concern.
+1. Every blueprint functional area owns at least one entity — or is reclassified as a cross-cutting concern. In a modular monolith, no table is read, written or referenced by foreign key from outside its module's schema.
 2. Every table has a PK, a stated tenancy position, and — if it has concurrent writers — a concurrency column.
 3. Every FK states its delete behavior. Every index names its query. Every enum column names its allowed values.
 4. Every entity with a lifecycle has a state diagram, and every impossible transition is listed for `api-surface.md` to turn into a `409`.

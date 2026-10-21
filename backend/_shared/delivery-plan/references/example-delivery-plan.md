@@ -65,10 +65,10 @@ grounding — every task below traces to a row, and a row with no task is someth
 
 | Need | Today | Gap |
 |---|---|---|
-| A solution that builds, with module boundaries | — | Scaffold + module layout (`C1`), config validation + CI skeleton (`C2`) |
+| A solution that builds, with module boundaries | — | Scaffold, the three module folders with a schema each, and the architecture test (`C1`), config validation + CI skeleton (`C2`) |
 | Authenticated requests with two permissions | — | Auth0 tenant and apps (`H1`), JWT bearer + policy wiring (`C3`) |
 | One error shape, one set of shared schemas, a route-registration seam | — | `C4`. Without the seam, `src/Scheduling` and `src/Booking` cannot be separate lanes |
-| Workshops, sessions and bookings in the database, with capacity enforced | — | Migrations 001–002 (`C5`), migration 003 + the exclusion constraint (`C7`), guard review (`DA1`) |
+| Workshops, sessions and bookings in the database, with capacity enforced | — | Migrations 001–002 (`C5`), migration 003 + the capacity guard (`C7`), guard review (`DA1`) |
 | A web shell a member can navigate, and a typed client | — | `C6` — the shell with a placeholder per screen route, the nav map, the route tree, `web/lib/api-client.ts` |
 | Every endpoint routed before it is implemented, and a spec the tests bind to | — | `C8` — every `api-surface.md` §5 endpoint answers `501 not-implemented`; the OpenAPI asset is generated from the stubs |
 | Acceptance tests that exist before the code | — | `Q3`, `Q1`, `Q4` (API tests per resource group, `qa-api-dotnet`) and `Q2` (journeys J1–J2, `qa-ui-typescript`), each red on the stubs |
@@ -301,6 +301,10 @@ attributing it is part of this task, and the `As built` note says which task eac
 Each gets the same block shape, deliverable first. `Gate: none` on every one except `Q3`, `Q4`, `B1` and
 `B3`, which say `Gate: own tests` with a filtered command like `Q1`'s and `B2`'s. Notable:
 
+- **`C1` writes the architecture test** (ArchUnitNET, per `be-dotnet:patterns-apply` "Module boundaries"):
+  a module may not depend on another module's `Internal` namespace, so every later task is checked
+  against the boundary from its first commit. It also gives each module its own EF `DbContext` with a
+  default schema (`membership`, `scheduling`, `booking`).
 - **`H1` and `H2` are human prerequisite tasks** from `integrations.md` §5 — `Agent: human`,
   `Stack: human`, each block carrying an `**Owner:**` line (`H1`: the studio owner's Auth0 admin;
   `H2`: the studio owner), exempt from catalog-name resolution and from budgeting.
@@ -404,7 +408,7 @@ are known to pass.
 |---|---|---|---|---|---|---|---|---|---|
 | 1 | H1 | `E0` | — | `human` | `foundations-api` | Dev and prod Auth0 apps exist; their domain + audience are in the config keys `C3` reads | **the user** | — | — |
 | 2 | H2 | `E0` | — | `human` | `email` | A verified sending domain and an API key `B4` can send with | **the user** | — | — |
-| 3 | C1 | `E0` | — | `be` | `foundations-api` | An empty solution with the four module projects in place | `be-dotnet` | ~60k | — |
+| 3 | C1 | `E0` | — | `be` | `foundations-api` | An empty solution with the three module folders (`Membership`, `Scheduling`, `Booking`), a schema each, and an architecture test that fails the build on a reach-in | `be-dotnet` | ~60k | — |
 | 4 | C2 | `E0` | — | `be` | `foundations-api` | The app refuses to start on missing/invalid config; CI runs build + test on every push | `be-dotnet` | ~75k | C1 |
 | 5 | C3 | `E0` | — | `be` | `foundations-api` | A request without a valid token gets 401; one without the permission gets 403 | `be-dotnet` | ~85k | C2, H1 |
 | 6 | C4 | `E0` | — | `be` | `foundations-api` | Every failure returns the documented envelope; a module self-registers its routes | `be-dotnet` | ~90k | C2 |
@@ -480,7 +484,7 @@ booking (B4, blocked on H2).
 Traps:
 - The Q1 tests were red on `501 not-implemented`. If one is still red after your endpoint answers, the
   endpoint is wrong, not the test — see the read-only rule above.
-- The capacity guard is the DB exclusion constraint from C7. Do not add an app-side count-then-insert
+- The capacity guard is the DB-level guard from C7, inside the `booking` schema. Do not add an app-side count-then-insert
   "for a nicer error" — catch the constraint violation and map it to `session-full`.
 - `lateCancel` is a server-side computation, not a client-supplied flag. The request body in §5.3 has
   no such field.
