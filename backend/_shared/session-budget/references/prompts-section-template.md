@@ -22,7 +22,8 @@ they disagree, the `As built` notes are right.
 | **Sections, never whole artifacts** | `api-surface.md` §5.3, not `api-surface.md`. This is the single biggest lever on the budget holding — a session told to read the pack reads the pack |
 | **Exact agent name, exact skill names** | The block is a binding, not a suggestion. An invented name is the most damaging defect here, same as in the plan |
 | **Every block carries its traps** | The two to four things specific to that task. This is what the prompt adds to the task block, and it is what earns it its place |
-| **Every block carries a gate line** | `Gate: none` with what not to run, on every block but the last runnable task's. That block carries the whole gate, in run order, and the instruction to fix what it finds |
+| **Every block carries a gate line** | `Gate: none` with what not to run, on every block but the last runnable task's — or, in a test-first plan, `Gate: own tests` with the one filtered command on a `Q` block (expecting red) and an implementation block (expecting green). The last block carries the whole gate, in run order, and the instruction to fix what it finds |
+| **An implementation block in a test-first plan repeats the read-only rule** | The acceptance tests are the spec; a block that omits the rule invites the session to pass a test by editing it |
 | **Every block ends with the close-out line** | `Close out per the plan's "Close-out — every task" before you stop.` — pointing at the section directly above this one, copied verbatim from plan format §7. Without it the section rots after the first session |
 | **A blocked task keeps its block** | It states its blocker and its owner. A deleted block reads as finished work — and it would file a plan that is still waiting |
 | **The block that deletes the last one files the plan** | Deleting it is what finishes the plan: `Status:` rewritten, then the plan moved to `docs/plans/implemented/`. Without that duty, finished plans sit in the live folder and it stops meaning anything |
@@ -86,11 +87,72 @@ Traps:
 
 Gate: none — this plan gates once, in `<the last runnable task>`. Do not run <the build, test, lint
 and typecheck commands>. Write the tests; leave running them to that task.
+<In a test-first plan, an implementation block instead names, under Deliverable, the `Q` tests it turns
+green and carries the read-only paragraph below, verbatim; its gate line becomes:>
+Gate: own tests — run only `<the filtered command>`, then read branch coverage over the files you wrote
+(plan-format.md §5) and write the tests a shortfall needs. This plan gates once, in `<the last runnable
+task>`. Do not run the full suite, another tree's build, lint or typecheck; a failure outside your own
+tests is not yours — note it in `As built`.
+
+The acceptance tests a `Q` task wrote are the spec, and they are **read-only** to every later task
+except the gate. Never edit, skip, delete or weaken one: not its assertion, its data or its timeout. A
+test you believe is wrong is a dated `D<n>` with both readings, and it stays red; the gate task
+resolves it with the user.
 
 Commit: `<the commit message>`.
 
 <Which block below binds to what you land.> Write `<Bn>`'s prompt block — it was left
 `Blocked on B1`. <What B1 will then know that it needs.>
+Close out per the plan's "Close-out — every task" before you stop.
+````
+
+---
+
+### Q1 — <title> (<qa-api-stack | qa-ui-stack | qa-mobile-stack>, qa)
+
+````
+You are `<exact qa agent name>`. Task Q1 of docs/plans/<NNN>-<initiative>/delivery-plan.md: write the
+acceptance tests for <the resource group or journeys>, against the stubs, before the implementation.
+
+Read your agent definition, then load exactly these skills: `<qa-stack>:test-first`,
+`<qa-stack>:api-spec-assets`.
+
+Read, in this order — these sections only, not the whole artifacts:
+1. CLAUDE.md, including the Test code rules.
+2. The plan: §3 task Q1; `api-surface.md` §<n.n> — the endpoint blocks this task tests; §4 — the
+   validation catalog's standard set (V8.6 is the stub response); `stories.md` <US ids> — the ACs
+   each test cites; for journeys, `experience-plan.md` <J ids> and the screens' `Test ids:` lines.
+3. The OpenAPI asset the contract task generated from the stubs — its path is in <the contract task>'s
+   `As built` note — and the existing acceptance-test project, if any, as the fixture pattern.
+4. The plan's "Close-out — every task".
+
+Deliverable: <copied verbatim from the task block — it names the tests and their red reason>.
+
+Build:
+- <the task's bullets, copied — one test per endpoint outcome and per AC, each carrying its AC id>
+
+Out of scope: <the implementation task that turns these green, with its id and agent>.
+
+Traps:
+- Red for the right reason: every test is red on `501 not-implemented` (in Arrange or in Act) or on the
+  screen's placeholder. A test red on a `404`, a compile error or a wrong URL has a wiring defect — fix it
+  before you stop. A test that passes against a stub asserts nothing.
+- Never assert the stub, `501` or the placeholder text: bind to the generated client, the documented
+  slugs and the agreed test ids, never to the service's code, which does not exist yet.
+- <the per-task trap: the fixture that needs a token, the setup call that reaches a stub, the AC with no
+  visible outcome on this surface>
+
+Gate: own tests — run only `<the filtered command that runs the tests this task writes>`; expect every
+test red, and record each one's red reason in `As built`. This plan gates once, in `<the last runnable
+task>`. Do not run the full suite, another tree's build, lint or typecheck.
+<A journey suite that cannot start its app in one command is `Gate: none`, and its red check moves to the
+gate task.>
+
+Commit: `<the commit message>`.
+
+Your `As built` note lists each AC with no test and why, and each implementation task's own-tests filter
+(the test classes or files per resource group or journey). Write those filters into the blocks of the
+tasks below — they were left unfilled for this reason.
 Close out per the plan's "Close-out — every task" before you stop.
 ````
 

@@ -78,10 +78,11 @@ Add up the lines that apply, then apply the churn multiplier. Everything is in t
 | Line | Estimate |
 |---|---|
 | The output the task reads back — its own commit and diff, on an ungated task | 6k |
+| The output the task reads back — its own commit and diff plus the filtered runs, on a `Gate: own tests` task (a `Q` task, or an implementation task in a test-first plan) | **10k** |
 | The **last runnable task only**: the whole gate, its output, and the fix loop it triggers across the plan | 12k, plus 4k per earlier task whose failures it may have to fix |
 | Conversation, tool churn, re-reads after edits | **× 1.2** on the sum of everything above |
 
-So: `Budget = (floor + skills + pack sections + orientation + files + read-back) × 1.2`.
+So: `Budget = (floor + skills + pack sections + orientation + files + read-back) × 1.2`, with read-back 6k on a `Gate: none` task and 10k on a `Gate: own tests` task.
 
 **The gate is budgeted once, on the task that runs it.** The plan gates in its last runnable task, so every earlier task pays 6k for its own diff rather than 12k for a verify loop it is told not to run — and the gate task pays for the whole plan's fallout, which is why it is usually the largest task in the plan and why it must not also carry a big build.
 
@@ -143,8 +144,19 @@ everything that session needs and names nothing it does not:
   file that looks like the pattern but is not, the migration that must run before the test, the
   down-level API that does not exist here. This is the part the prompt adds, and it is what earns it.
 - **The gate line.** `Gate: none — this plan gates once, in <the last runnable task>. Do not run <the
-  commands>.` on every block but the last; the last block carries the project's own commands in run
-  order, and the instruction to **fix what they find rather than hand it back**.
+  commands>.` on every block but the last — or, in a test-first plan, `Gate: own tests — run only
+  `<filtered command>`; …` on a `Q` block (expecting **red**) and on an implementation block (expecting
+  **green**, then the coverage-floor measure over the files it wrote). The last block carries the
+  project's own commands in run order, and the instruction to **fix what they find rather than hand it
+  back**.
+- **A `Q` block** reads the endpoint blocks it tests by section (`api-surface.md` §5.2, not §5), the
+  validation catalog's standard set, the ACs it proves (`stories.md` US7–US9), and the OpenAPI asset's
+  path from the contract task's `As built`. Its traps are red for the right reason — red on the
+  `not-implemented` stub or the screen's placeholder, never on a `404`, a compile error or a wrong URL —
+  never asserting the stub, and binding to the contract and the test ids, never to code.
+- **An implementation block in a test-first plan** carries the read-only rule verbatim (`plan-format.md`
+  §4), names the `Q` tests it turns green and the filter that runs them, and has `Gate: own tests`
+  expecting green.
 - **The close-out.** The reading list names the plan's `## Close-out — every task` last, and the
   block's final line is `Close out per the plan's "Close-out — every task" before you stop.` Only
   what is specific to this task goes above that line — which block below it binds to what it lands,
@@ -187,7 +199,7 @@ Two things stay this skill's to get right, because the close-out section cannot 
 - **The last block carries the filing duty.** Deleting it is what finishes the plan, so it says to
   rewrite `Status:` and move the plan into `docs/plans/implemented/`. A block that ends without it
   leaves finished plans sitting in the live folder, which is the one thing that folder is for.
-- **The gate is budgeted and written once**, on the last runnable task. A block that tells an intermediate task to run the build is the rule's most common violation and the most expensive: it pays 12k for a verify loop whose failures belong to tasks that have not been written yet.
+- **The gate is budgeted and written once**, on the last runnable task. A block that tells an intermediate task to run the build is the rule's most common violation and the most expensive: it pays 12k for a verify loop whose failures belong to tasks that have not been written yet. A `Gate: own tests` block is not that violation: it runs one filtered command, and its 4k of extra read-back is budgeted.
 - **The prompt names one task.** A block that hands over two tasks is a block that will get half-done and then re-derived from scratch.
 
 ## Anti-patterns
@@ -209,7 +221,7 @@ Two things stay this skill's to get right, because the close-out section cannot 
 3. No task was split or merged in a way that breaks one deliverable, one stack, one agent, or whole work at the boundary.
 4. `## Prompts — one per task` has one block per task that has not landed — no more (a landed task's block is deleted), no fewer (a task with no block is a session nobody knows they can start), and each `Blocked on <id>` placeholder is matched by a bullet on that task.
 5. Every block names one task, an exact agent, exact skills, and **sections** rather than artifacts, and carries its traps.
-6. Exactly one block carries the gate — the last runnable task's — with the project's own commands in run order and the instruction to fix what they find. Every other block says `Gate: none` and names what not to run.
+6. Exactly one block carries the gate — the last runnable task's — with the project's own commands in run order and the instruction to fix what they find. Every other block says `Gate: none` and names what not to run, or — a `Q` or implementation block in a test-first plan — `Gate: own tests` with one filtered command and the colour it expects. Every implementation block repeats the read-only rule.
 7. `## Close-out — every task` sits directly above `## Prompts — one per task`, verbatim from plan format §7; every block names it last in its reading list and ends with its close-out line; and the block that will delete the **last** one is the one the filing falls to.
 8. Blocked tasks appear with their blocker and its owner.
 

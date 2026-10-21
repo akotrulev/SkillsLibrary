@@ -100,14 +100,17 @@ Do not brainstorm tasks. Read them out of the detail pack, in this order — the
 |---|---|
 | Blueprint tech stack + repo state | Scaffold / project structure / shared config tasks (only what does not exist) |
 | `integrations.md` blocking unknowns | **Prerequisite tasks** — provisioning, accounts, sandbox access |
+| Behaviour the plan must keep, that no test pins (found in the orientation pass or the code) | **Pin tasks** — one per untested area the plan touches, before the first task that touches it: `qa-api-<stack>` pins what the API shows, the `be-<stack>` agent pins logic with unit tests. Deliverable: "the current behaviour of <area> is pinned by N tests, green on today's code." Behaviour the plan *changes* gets `Q` tests for the new behaviour instead, never a pin |
 | `data-model.md` migration sequence | One task per migration, in its stated order |
 | `blueprint.md` cross-cutting concerns | Auth wiring, error envelope, logging/telemetry, config validation |
 | `api-surface.md` shared schemas + section 4 | Shared DTOs and the validation/error middleware — **once**, before any endpoint |
-| `api-surface.md` endpoint blocks | One task per resource (not per endpoint — a resource's CRUD set is one coherent task) |
+| `api-surface.md` endpoint blocks | One task per resource (not per endpoint — a resource's CRUD set is one coherent task). In a test-first plan, first **one stub task** routing every endpoint to the `501 not-implemented` response (validation catalog V8.6) with its real response types |
+| `api-surface.md` endpoint blocks + the validation catalog + the `Acceptance:` lines | **API acceptance tasks** (`Q`, `qa-api-<stack>`) — one per resource group that fits a session, after the stub task and before the resource tasks that turn them green |
 | `integrations.md` dependency blocks | One client task per external system |
-| `experience-plan.md` §2 + §4 screen catalog | The **app-shell task** (shell, nav, home — once, bound to `fe-react` / `fe-blazor` with `design:app-structure`), then one frontend task per screen or per journey's screen set (a list and its detail are one coherent task), each after the endpoints it calls and citing its screen ids |
+| `experience-plan.md` §2 + §4 screen catalog | The **app-shell task** (shell, nav, home — once, bound to `fe-react` / `fe-blazor` with `design:app-structure`; in a test-first plan every screen route renders a placeholder), then one frontend task per screen or per journey's screen set (a list and its detail are one coherent task), each after the endpoints it calls and citing its screen ids |
+| `experience-plan.md` journeys + the `Test ids:` lines | **Journey tasks** (`Q`, `qa-ui-<stack>` / `qa-mobile-<stack>`) — after the app shell and the stubs, before the screens they specify; red on the screens' placeholders |
 | `api-surface.md` outbound webhooks + background work | Job/consumer tasks |
-| `api-surface.md` endpoint map (once the resource tasks exist) | **The OpenAPI-asset task** — one standard task, after the last endpoint task: the `be-<stack>` agent generates the spec from the implemented surface and commits it canonicalized as `{service}-openapi-YYYY-MM-DD.json`, so `qa/_shared/api-spec-assets` has its canonical input from day one and every later contract change flows through that skill's diff-driven lane instead of being reverse-engineered. Greenfield plans include it by default; skip only when the repo already keeps the asset |
+| `api-surface.md` endpoint map | **The OpenAPI-asset task** — one standard task. **Test-first:** the stub task generates the spec from the stubs, so the `Q` tasks have their typed client first; the asset is regenerated through `qa/_shared/api-spec-assets`' diff lane after the last endpoint task. **Test-after:** after the last endpoint task, the `be-<stack>` agent generates the spec from the implemented surface. Either way it is committed canonicalized as `{service}-openapi-YYYY-MM-DD.json`, so `qa/_shared/api-spec-assets` has its canonical input and every later contract change flows through that skill's diff-driven lane instead of being reverse-engineered. Greenfield plans include it by default; skip only when the repo already keeps the asset |
 
 Anything not traceable to a row above is either missing from the design pack (go add it there) or is not needed.
 
@@ -139,6 +142,8 @@ The order must satisfy five things:
 - **Dependencies point backwards, always.** A `Depends on` naming a task with a higher order is a contradiction, and it is reported as a plan defect rather than resolved by reordering the ids.
 - **Prerequisites first.** Human-blocked provisioning from `integrations.md` leads the sequence as its own tasks, so nothing downstream stalls on a credential nobody requested.
 
+**Test-first is an ordering rule inside every shape, not a shape of its own.** Wherever the plan delivers an API surface or a journey, the order is: **pin tasks first** (behaviour the plan must keep, untested), then everything both sides bind to — schema, shared types, **the stubs** answering `501 not-implemented` and the OpenAPI asset generated from them — then **the `Q` tasks** written against those stubs, then the implementation tasks that turn them green. A `Q` task never sits after the implementation it specifies. A plan with no external contract (an internal refactor, a tool) stays test-after; ask once, with the shape question, whether the user opts out, and record the answer beside it. Each shape below states what test-first costs it.
+
 **Then decide the sequencing shape**, because it changes what runs consecutively:
 
 | Shape | Use when | The order reads as |
@@ -155,10 +160,12 @@ The order must satisfy five things:
 |---|---|
 | First | Human-blocked provisioning the first capability needs — one task per provisioning track |
 | Then | Scaffold, layout, config + validation, CI skeleton, and the cross-cutting surfaces (auth, error envelope, shared DTOs) the first capability actually depends on — nothing speculative |
-| Then | Capability A's whole set from Step 1, in its natural order: migration → entities + rules → service → endpoints → wiring → unit tests → its screens (the app-shell task precedes the first capability's screens) |
+| Then | Capability A's whole set from Step 1, in its natural order: migration → its stubs and OpenAPI asset → its `Q` tasks → entities + rules → service → endpoint bodies → wiring → unit tests → its screens (the app-shell task precedes the first capability's `Q` journeys and screens) |
 | Then | Capability B's own set, plus only the foundations B is the first to need |
 | Then | One run of tasks per remaining capability, most valuable first |
-| Last | The OpenAPI asset, telemetry, rate limiting, performance, docs |
+| Last | The OpenAPI asset's regeneration (test-first) or generation (test-after), telemetry, rate limiting, performance, docs |
+
+Test-first costs this shape two agent switches per capability (its `Q` tasks, then back to its implementation); a capability's last task still delivers it.
 
 Three rules keep it honest:
 
@@ -171,10 +178,12 @@ Three rules keep it honest:
 | Order | Tasks |
 |---|---|
 | First | Human-blocked provisioning from `integrations.md` — unchanged, and still one task per provisioning track |
-| Then | **The contract wave** — one batch carrying everything both sides bind to, for the **whole initiative** rather than the first capability: the full migration sequence, the entity/model types, the shared DTOs and the error envelope, auth wiring, config keys, the typed endpoint signatures with their request/response contracts (stubbed where the behaviour lands later), the generated or hand-written API client the frontend imports, and the app shell + nav map + route tree. Once this lands, no later batch waits on a different agent |
+| Then | **The contract wave** — one batch carrying everything both sides bind to, for the **whole initiative** rather than the first capability: the full migration sequence, the entity/model types, the shared DTOs and the error envelope, auth wiring, config keys, the typed endpoint signatures with their request/response contracts (stubbed where the behaviour lands later — a test-first plan routes every endpoint to the `501 not-implemented` stub and generates the OpenAPI asset from it), the generated or hand-written API client the frontend imports, and the app shell + nav map + route tree (a placeholder per screen route). Once this lands, no later batch waits on a different agent |
+| Then | **API acceptance batches** (`Q`, `qa-api-<stack>`) — one per resource group that fits a session, written against the stubs and red on them |
+| Then | **Journey batches** (`Q`, `qa-ui-<stack>` / `qa-mobile-<stack>`) — written against the agreed test ids and red on the placeholders |
 | Then | **Backend, one batch per module** — a module is a file tree one agent owns (`src/Booking/*`): its entities, domain rules, service, endpoint bodies, registration and unit tests, in a single task. Most-depended-on module first |
 | Then | **Frontend, one batch per screen area** — an area is one nav section of `experience-plan.md` §2 and the screens under it: their components, routes, states and wiring, in a single task, ordered by the nav map |
-| Last | The OpenAPI asset, telemetry, rate limiting, docs — and the **verification batch**: the full build, the test run, and the QA pass the plan defers to the end |
+| Last | The OpenAPI asset's regeneration, telemetry, rate limiting, docs — and the **verification batch**: the full build, the whole test run (old and new), the journeys and the coverage floor. The acceptance tests are no longer deferred to it: they ran red before the implementation |
 
 **What may be merged into one batch — all four, or it stays separate:**
 
@@ -188,7 +197,8 @@ Three rules keep it honest:
 **What the shape costs, stated in the plan rather than discovered:**
 
 - **No capability is usable until both its batches have landed.** The plan says which capabilities become usable at which batch, and the frontend batch that completes each one still carries the behavioural deliverable — the sentence just arrives later than it would under feature-complete sequencing.
-- **Stubs must be unmistakable.** A contract-wave endpoint with no behaviour yet returns an explicit not-implemented response, never a fake success or an empty list, and the batch's `Out of scope` names the module batch that fills it. An indistinguishable stub is the failure mode of this shape.
+- **Test-first adds two agent switches** — the API batch and the journey batch — between the contract wave and the first module batch.
+- **Stubs must be unmistakable.** A contract-wave endpoint with no behaviour yet answers exactly the standard stub response — `501` `application/problem+json`, `type` slug `not-implemented`, `detail` naming the module batch that fills it (validation catalog V8.6) — never a fake success or an empty list, and the batch's `Out of scope` names that batch. An indistinguishable stub is the failure mode of this shape, and a `Q` test cannot be red for the right reason without one.
 - **Nothing about task discipline relaxes.** A batch *is* a task, so it states one deliverable, names one agent, and writes its own unit tests inside the batch that writes the code. What is deferred to the last runnable task is **running** them — the build, the suite, the lint and the typecheck for the whole plan at once, plus the live/integration/E2E pass. That is a deferred verification, not a licence to ship untested code: the tests are written, committed and read by the gate task, which fixes what they catch.
 
 **Where several plan packs are executed as one delivery** — three initiative folders that together make one working application — the shape is decided once across all of them and the batching is derived across the packs, not inside each: one contract wave covering every pack's schema and contracts, then the module batches, then the area batches. Tasks keep their own pack's ids and are cited as `<NNN-initiative>/T<n>`; the batch order lives in the pack that owns the contract wave, and the others' delivery plans point at it rather than restating it.
@@ -201,9 +211,13 @@ Three rules keep it honest:
 | Then | Scaffold, project layout, config + validation, CI skeleton |
 | Then | Migrations, in their stated order |
 | Then | Auth wiring, error middleware, shared DTOs, telemetry base — every later task depends on these |
-| Then | One task per resource: entity → persistence → service → endpoints → unit tests |
+| Then | Every endpoint routed as a `501 not-implemented` stub and the OpenAPI asset generated from it; the app shell with a placeholder per screen route, where there are screens |
+| Then | The `Q` tasks: API acceptance tests per resource group, journey tests per journey — red on the stubs |
+| Then | One task per resource: entity → persistence → service → endpoint bodies → unit tests, turning that resource's `Q` tests green |
 | Then | External clients, webhook handlers, background jobs — one per dependency |
 | Last | Rate limiting, observability, performance, docs |
+
+Test-first costs this shape one more layer before the first resource task: the stubs and the `Q` tasks.
 
 **What runs concurrently is decided in Step 3, not here.** The order is a single sequence — the one you would work through yourself, alone. Streams say which parts of it can be worked at the same time, and `Depends on` says what must not be.
 
@@ -242,17 +256,45 @@ Defend each lane concretely — "T10 touches `src/Scheduling/*`, T11 touches `sr
 The block is the plan format's task block (`plan-format.md` §4) plus the epic/story/stream binding:
 
 ```markdown
+### Q1 — Orders API acceptance tests
+
+**Epic:** `E2` Ordering · **Story:** `US7`–`US9` · **Stack:** `qa` · **Stream:** `ordering-api` · **Order:** 11
+**Agent:** `qa-api-dotnet` · **Skills:** `qa-dotnet:test-first`, `qa-dotnet:api-spec-assets`
+**Deliverable:** every Orders endpoint in `api-surface.md` §5.2 and every AC of US7–US9 has an
+acceptance test in `tests/Ordering.AcceptanceTests/`, and each fails on `501 not-implemented`.
+**Depends on:** C1 (the stubs and the OpenAPI asset generated from them)
+**Budget:** ~95k — CLAUDE.md 25k, `api-surface.md` §4 and §5.2 and `stories.md` US7–US9 8k, 2 skills 16k,
+the OpenAPI asset's typed client 4k, 5 test files created 10k, the filtered run's output 10k,
+commit and diff read-back 6k, churn ×1.2
+**Gate: own tests** — run only `dotnet test tests/Ordering.AcceptanceTests`; expect every test red on
+`not-implemented`. This plan gates once, in F4. Do not run the full suite, another tree's build, lint
+or typecheck.
+
+**Files:**
+- Create: `tests/Ordering.AcceptanceTests/PlaceOrderTests.cs`, `CancelOrderTests.cs`, `CloseOrderTests.cs`, `ListOrdersTests.cs`, `OrdersApiFixture.cs`
+
+- One test per endpoint outcome in `api-surface.md` §5.2 and per AC of US7–US9, each carrying its AC id
+  (`[Category("US7-AC2")]`); the three endpoint deltas assert their documented `type` slugs.
+- Every test is red on the `501` stub — in Arrange or in Act — and none asserts the stub itself; a test
+  red on a `404`, a compile error or a wrong URL is fixed before the task stops.
+- The `As built` note lists each implementation task's own-tests filter (`FullyQualifiedName~PlaceOrder`, …).
+- **Not in Q1:** the Orders implementation (B3), the screens' journeys (Q2), the full-suite run (F4).
+- **As built:** <written by Q1 when it lands>
+
 ### B3 — Orders resource
 
 **Epic:** `E2` Ordering · **Story:** `US7` · **Stack:** `be` · **Stream:** `ordering-api` · **Order:** 12
 **Agent:** `be-dotnet` · **Skills:** `be-dotnet:patterns-apply`, `be-dotnet:persistence`, `be-dotnet:unit-testing`
 **Deliverable:** the five Orders endpoints are live and reachable — a caller with the `orders:write`
-permission can place, cancel and close an order, and list or get their own.
-**Depends on:** C1 (schema, auth wiring, shared DTOs + error middleware)
+permission can place, cancel and close an order, and list or get their own — the 14 Orders acceptance
+tests from Q1 pass, and B3's unit tests cover ≥ 80% of its branches.
+**Depends on:** C1 (schema, auth wiring, shared DTOs + error middleware), Q1 (the acceptance tests it turns green)
 **Budget:** ~110k — CLAUDE.md 25k, `api-surface.md` §5 and two `data-model.md` entity blocks 6k,
 3 skills 24k, `src/Billing/*` as the module pattern ~14k, 6 files created and 1 modified 13.5k,
-commit and diff read-back 6k, churn ×1.2
-**Gate: none** — this plan gates once, in F4. Do not run `dotnet build`, `dotnet test` or `dotnet format`.
+commit and diff read-back 6k plus the filtered run 4k, churn ×1.2
+**Gate: own tests** — run only `dotnet test --filter "FullyQualifiedName~Orders" --collect:"XPlat Code Coverage"`,
+then read branch coverage over `src/Ordering/*` (`plan-format.md` §5); expect the Q1 tests green. This plan
+gates once, in F4. Do not run the full suite, another tree's build, lint or typecheck.
 
 **Files:**
 - Create: `src/Ordering/Domain/Order.cs`, `src/Ordering/Domain/OrderLine.cs`
@@ -262,15 +304,18 @@ commit and diff read-back 6k, churn ×1.2
 - Create: `tests/Ordering.Tests/OrderServiceTests.cs`
 - Modify: `src/Ordering/DependencyInjection.cs`
 
-- All five endpoints match `api-surface.md` §5 exactly: paths, request/response fields, status codes.
+- All five endpoints match `api-surface.md` §5 exactly: paths, request/response fields, status codes; each
+  replaces its `501` stub.
 - The standard validation set applies; the three endpoint-specific deltas (`insufficient-stock`,
   `idempotency-conflict`, `currency-not-enabled`) return the documented `type` slugs.
 - Cross-tenant access returns 404, per the API's V5.3 disclosure choice.
 - Illegal state transitions return 409 naming the current and the allowed states.
 - Unit tests cover every validation branch and every state transition — in-process, no HTTP, no
-  container, no real DB — and together reach ≥ 80% of the branches B3 writes (the gate measures it).
+  container, no real DB — and together reach ≥ 80% of the branches B3 writes (the own-tests run measures
+  it over `src/Ordering/*`).
+- The Q1 tests are the spec and read-only to B3; a test believed wrong is a dated `D<n>`, and stays red.
 - **Not in B3:** the Orders screens (F2, stack `fe`, same epic — the endpoints are not reachable from
-  the UI until it lands), contract/integration tests (`qa-api-dotnet`), the stock-reservation
+  the UI until it lands), the acceptance tests themselves (Q1), the stock-reservation
   client (B5).
 - **As built:** <written by B3 when it lands>
 ```
@@ -300,8 +345,10 @@ Rules:
   "Handles errors properly" is not a bullet; "returns the documented `type` slug for each of the three
   deltas" is. Where the task is a batch, the bullets **are** its per-piece breakdown — one per
   endpoint, per screen, per rule.
-- **`Gate: none` on every task but the last runnable one**, naming the commands it must not run. The
-  last runnable task carries the whole gate, in run order, with the project's own commands from the
+- **`Gate: none` on every task but the last runnable one — or `Gate: own tests`, on a test-first plan's
+  `Q` and implementation tasks** — naming the commands it must not run, or the one filtered command it
+  runs (`plan-format.md` §5). A journey suite that cannot start its app in one command is `Gate: none`.
+  The last runnable task carries the whole gate, in run order, with the project's own commands from the
   orientation pass — and it fixes what the gate finds rather than handing it back, because a failure
   there may belong to any task above it. When the plan writes code, the gate ends with the **coverage
   floor** (`plan-format.md` §5): ≥ 80% branch coverage of the code the plan wrote, closed by writing
@@ -358,9 +405,16 @@ Rules:
 - **`Not in <id>` per task** — mostly to keep the executing agent out of a peer's lane, and to name
   what a contract-first stub is waiting for. A stub with no behaviour yet returns an explicit
   not-implemented response, never a fake success or an empty list.
-- **Tasks are implementation.** Live/E2E/integration test runs, starting servers, and manual
-  verification belong to a separate QA pass owned by a `qa-*` peer. Unit tests are part of the
-  implementation task, not a separate one.
+- **Tasks are implementation, and `Q` tasks write the acceptance tests before it.** In a test-first plan
+  a `qa-*` task writes the API and journey acceptance tests against the stubs, before the implementation
+  they specify, and an implementation task turns the ones its deliverable names green. Running the whole
+  suite, the journeys and any manual verification stay with the gate; starting servers does too, except
+  where an own-tests command starts the service itself. Unit tests are part of the implementation
+  task, not a separate one.
+- **Test-first deliverables name the tests.** A `Q` task's deliverable names its tests and their red
+  reason; an implementation task's deliverable names the `Q` tests it turns green. Every own-tests
+  command is filtered by file or class — never the unfiltered suite — and the `Q` task's `As built`
+  lists the filter each implementation task uses.
 
 ### Step 5 — The task table
 
@@ -419,7 +473,8 @@ The task graph maps 1:1 — the streams in §2 become MC's lanes, each task keep
 `dependsOn`, and the open questions below carry their options. There is no grouping
 level: ordering is the `order` sequence, and every prerequisite is an explicit
 `dependsOn` edge. This plan gates once, in <the last runnable task> — the earlier
-tasks deliberately run no build or test command, so a lane that reports green
+tasks deliberately run no build or whole-suite command (a test-first plan's `Q` and
+implementation tasks run only their own filtered tests), so a lane that reports green
 without one is behaving as planned. MC's planner re-reads the target repo, so it may
 split a task it finds too large; that is expected and does not invalidate the
 sequence — the new pieces belong in the split task's own lane, and each needs its own
@@ -544,8 +599,11 @@ that lands anything.>
 > agent that should execute it, the skills to load, and the one deliverable that means it is done.
 > **This plan gates once, in <the last runnable task>:** every task before it writes its code and its
 > unit tests — designed to cover ≥ 80% of the branches it writes — commits, and stops: no build, no test
-> run, no lint, no typecheck. The gate measures the coverage floor over the whole plan's change. The tree is therefore
-> not known to build at every task boundary, and the plan cannot be stopped halfway and trusted.
+> run, no lint, no typecheck. In a test-first plan the `Q` tasks and the implementation tasks run exactly
+> the filtered command their `Gate: own tests` line names and nothing else, and the acceptance tests a
+> `Q` task wrote are read-only to every later task but the gate. The gate measures the coverage floor over
+> the whole plan's change. The tree is therefore not known to build at every task boundary — only each
+> task's own tests are known to pass — and the plan cannot be stopped halfway and trusted.
 > **Update this document as you work** — the dated `As built` note on your task, the `Status:` line
 > above, and `## Decisions` for anything you built differently — then **delete your own prompt block**
 > and rewrite the ones below yours wherever what you landed differs from what they assume.
@@ -621,7 +679,8 @@ that lands anything.>
 11. **Exactly one task carries the gate**, it is the last runnable one, its commands are the project's
     own from the orientation pass and in run order, and it is told to fix what the gate finds rather
     than hand it back; when the plan writes code, the gate ends with the coverage floor
-    (`plan-format.md` §5). Every other task says `Gate: none` and names what not to run. The
+    (`plan-format.md` §5). Every other task says `Gate: none` and names what not to run — or, on a
+    test-first plan's `Q` and implementation tasks, `Gate: own tests` with one **filtered** command. The
     ungated-boundary cost is stated in the header note.
 12. `## Prompts — one per task` exists inside this document, with one block per task that has not
     landed, each naming one task, an exact agent, exact skills, and pack **sections** rather than
@@ -631,7 +690,11 @@ that lands anything.>
 13. Every `As built` note carries `file:line` or command output read this session. §1, §2, §6 and the
     task table exist, §6 empty before execution starts.
 14. The header `Status:` line says what is built, what is next, and what is built but unverified.
-15. The prompt block that will delete the last block carries the filing duty — rewrite `Status:`, then move the whole initiative folder into `docs/plans/implemented/` — and this pack's `NNN` was taken from the high-water mark across `docs/plans/` **and** `docs/plans/implemented/`.
+15. **Test-first plans only:** every endpoint and every journey is covered by a `Q` task; every `Q` task
+    precedes the tasks that turn its tests green; every implementation deliverable names the acceptance
+    tests it turns green; every own-tests command is filtered; every behaviour the plan must keep, with no
+    test, has a pin task before the first task that touches it.
+16. The prompt block that will delete the last block carries the filing duty — rewrite `Status:`, then move the whole initiative folder into `docs/plans/implemented/` — and this pack's `NNN` was taken from the high-water mark across `docs/plans/` **and** `docs/plans/implemented/`.
 
 ## Handoffs
 

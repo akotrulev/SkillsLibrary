@@ -354,6 +354,8 @@ Cost: no foreign key across modules, so referential integrity between modules is
 
 Cost: a missed overlap edge lets two agents edit one file at once, and the Self-Review check is the only guard; the close-out gains two rules; and a plan's history interleaves the commits of tasks that ran together.
 
+**D12 — the example is feature-complete, so test-first sits per capability, and it gains a stub task `C8`.** 2026-10-21, T2. The plan's §5.2 called the example agent-batched; `example-delivery-plan.md` is feature-complete (workshop booking), so its `Q` tasks follow the contract tasks per capability — `C8` → `Q3` → `B1`, `Q2` → `F1`, `Q1` → `B2`, `Q4` → `B3` — not as two batches. §5.2 named `Q1` (Bookings API) and `Q2` (journeys J1–J2) only; the self-review rule "every endpoint is covered by a `Q` task" needed `Q3` (Workshops and Sessions) and `Q4` (Profile) too, abbreviated like the other non-showcase tasks. Both readings: add only `Q1` and `Q2` and leave the Timetable and Profile endpoints uncovered in the example (rejected: it would teach a plan that fails its own Self-check), or cover them. The stubs and the OpenAPI asset needed an owner before the `Q` tasks, so a contract task `C8` was added rather than overloading `C4` (one deliverable per task); `B5` now regenerates the asset and diffs it against `C8`'s. Ids were not renumbered; `Order` was, and the block `Order` values and the task table now agree (the old `B7` block said 20 where the table said 19). The Journey tests are `Gate: none` in the example, because J1 and J2 need the API, the database and the web app together — the §3.1 carve-out shown on purpose. Cost: the example has three more tasks than §5.2 asked for. *(2026-10-21)*
+
 ## Answered questions (2026-10-21)
 
 **O1 — Do implementers run tests:** their own, filtered (D1).
@@ -439,6 +441,7 @@ H1 replaces rules 5 and 6 of `~/.claude/CLAUDE.md` § "How features are broken d
 - §5.2 in the example.
 - §5.4 in `session-budget/SKILL.md` and the template.
 - §5.5 in `solution-planner.md`.
+- **As built (2026-10-21):** §5.1–§5.5 landed, ungated. `delivery-plan/SKILL.md`: Step 1 gained the pin row and the two `Q` rows, and the endpoint, shell and OpenAPI-asset rows now say stub, placeholder and generate-from-stubs; Step 2 gained the "test-first is an ordering rule inside every shape" paragraph and a cost line under each shape (no row added to the shape table); the stub bullet cites validation catalog V8.6; Step 4's block set is now `Q1` + `B3` with `Gate: own tests` on both, and the `Gate: none` and "Tasks are implementation" rules are reworded (the whole suite, the journeys and manual checks stay with the gate); the header note, the Mission Control note and Self-check item 11 name the own-tests form; Self-check item 15 is new (test-first coverage), so the filing item is now 16. `session-budget/SKILL.md`: 10k read-back for an own-tests task, the `Q` and implementation block shapes in Step 4, Self-check item 6. `prompts-section-template.md`: the contract rows, the own-tests variant and read-only paragraph in the `B1` block, and a new `Q1` block. `solution-planner.md`: the test-first operating rule, the routing map, the repository-layout mention, the gate-once rule, Step 7's exit gate, Step 9 item 13 and new items 19–20, and the qa line under Related agents (it now lists `qa-ui` and `qa-mobile` for all three stacks). `Status:` was left as it was, per the preamble's rule while T3 may run beside (T4 rewrites it); it still reads "Next: T2". Built but unverified: no validator ran (T5). **Not touched, left to their tasks:** the planner's gate bullet at `solution-planner.md:72` (T4), "under ~4 functional areas" (M1), the `Last` rows' telemetry (L1), the prompts template's `F3` heading and `Depends on:` lines (P1).
 
 ### M1 — the modular monolith is built to be split later
 
@@ -577,55 +580,7 @@ Run them one session each, in the SkillsLibrary checkout on `master`; never crea
 | H1 | `human` | **the user** | T5 | — | five minutes |
 | H2 | `human` | **the user** | H1, the push, O4, O5 | — | one feature |
 
-T1 has landed, and its prompt is deleted — a prompt for a finished task is a thing someone runs by mistake. Every block below is live.
-
----
-
-### T2 — the planner writes test-first plans (general-purpose, docs)
-
-````
-Depends on: T1
-
-You are `general-purpose`. Task T2 of docs/plans/007-test-first-delivery.md: make the planning
-skills produce test-first plans — `Q` tasks after the contract tasks in every sequencing shape,
-own-tests gates on `Q` and implementation tasks, and pin tasks for behaviour no test pins.
-
-Read, in this order:
-1. CLAUDE.md, the Planning section (T1 changed it).
-2. The plan: §3.1–§3.6, §5, D1–D8, T1's As built, task T2, and "Close-out — every task".
-3. engineering-practices/writing-plans/references/plan-format.md §4 and §5, as T1 left them.
-4. backend/_shared/delivery-plan/SKILL.md: Step 1's table (`:110`), Step 2's three shape tables
-   (`:177`, `:191`), Step 4 (the B3 example and its rules, `:361`), the header note (`:543`) and
-   Self-review.
-5. backend/_shared/delivery-plan/references/example-delivery-plan.md: the task table, §1, the C6
-   and B7 blocks.
-6. backend/_shared/session-budget/SKILL.md (the read-back table) and
-   backend/_shared/session-budget/references/prompts-section-template.md.
-7. backend/_shared/agents/solution-planner.md: Operating rules, the Steps table, the Step 9
-   checklist.
-
-Build:
-- §5.1 in delivery-plan/SKILL.md, and §5.3 in its Step 1 table (behaviour the plan must keep,
-  with no test → a pin task) and Step 2 (pins first).
-- §5.2 in the example.
-- §5.4 in session-budget/SKILL.md and the template.
-- §5.5 in solution-planner.md.
-
-Traps:
-- Test-first is an ordering rule inside each shape (D4), not a fourth shape. Do not add a row to
-  the shape table.
-- `:361` keeps its last point: running the whole suite, the journeys and any manual check stays
-  with the gate.
-- The example's `Order` column and its task table must agree after the Q tasks are inserted;
-  renumber `Order`, never task ids.
-- Line numbers above are as of commit 0d9826a; T1 did not touch these files, but check before
-  editing.
-
-Gate: none — this plan gates once, in T5. Do not run the validators.
-
-Commit: `docs(dev): the planner writes test-first plans (007 T2)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
+T1 and T2 have landed, and their prompts are deleted — a prompt for a finished task is a thing someone runs by mistake. Every block below is live.
 
 ---
 
@@ -686,7 +641,9 @@ Read, in this order:
 2. The plan: §4.6, D10, O6, the As built notes of T1, T2 and M1, task L1, and "Close-out — every
    task".
 3. backend/_shared/delivery-plan/SKILL.md: the three shape tables (grep "telemetry"; T2 and M1
-   moved the lines) and Step 4's rules; references/example-delivery-plan.md's contract wave and B3.
+   moved the lines) and Step 4's rules and its Q1 and B3 example blocks; references/example-delivery-plan.md's
+   contract tasks (C4, and C8, the stub task T2 added) and B2, its backend block — the SKILL's Orders B3
+   is a different, SKILL-local example.
 4. backend/_shared/solution-blueprint/SKILL.md: the routing example (grep "Telemetry") and the §3
    template's cross-cutting line; backend/_shared/agents/solution-planner.md: the
    observability-engineer line under Related agents, and the Step 9 checklist.
