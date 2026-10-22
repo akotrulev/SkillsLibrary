@@ -121,6 +121,7 @@ blind to logic flaws.**
 | Layer | Skill | Reads | OWASP |
 |-------|-------|-------|-------|
 | **SAST** | `_shared/security-testing/code-scan` | your source | A05/A06 |
+| **Source audit** *(periodic, not a PR gate)* | `_shared/security-testing/source-audit` | your source, read by agents | A01/A05/A06 |
 | **Secrets** | `_shared/security-testing/secrets-scan` | source + git history | A02/A07 |
 | **SCA** | `<stack>/skills/security-testing/dependency-scan` | dependency tree | **A03** |
 | **DAST (passive)** | `<stack>/skills/security-testing/passive-scan` | running app, no payloads | A02/A08 |
