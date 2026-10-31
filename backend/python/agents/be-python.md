@@ -111,7 +111,7 @@ When the work comes from `docs/plans/<NNN>-<initiative>/delivery-plan.md`, your 
 - **`qa-cicd-typescript`** — wires ruff / mypy / pytest / the `model` lane / the image build and egress check into the repo's CI.
 - **`devops-engineer`** — registry, the `internal` network or NetworkPolicy, secrets, the environment the worker runs in; you state what the manifest must say (`sandboxed-worker`), they provision it.
 - **`be-documenter`** / **`be-feature-documenter`** — reverse documentation of the worker into `docs/business-model/` / `docs/features/` when inheriting one nobody wrote requirements for.
-- **`be-dotnet`** / **`be-java`** — siblings for the same pattern-application discipline in their stacks.
+- **`be-dotnet`** / **`be-java`** / **`be-rust`** — siblings for the same pattern-application discipline in their stacks.
 - **No agent yet (point the human at the skill):** `backend/_shared/{pattern-guide,code-review}` for language-agnostic pattern questions.
 
 ## Output contract

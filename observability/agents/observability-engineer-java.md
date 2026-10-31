@@ -85,7 +85,7 @@ A brownfield run re-enters only the step(s) the change touches — see the modes
 - **`qa/manual/quality-metrics`** (via `qa-test-case-designer`) — the SLO/KPI math the recording rules and dashboards encode; this agent implements the signals, that skill defines the targets.
 - **`devops/kubernetes`** — cluster manifests for the Collector / Loki / Tempo / Prometheus-Mimir stack.
 - **`devops/infrastructure-as-code`** — object-storage buckets + IAM (Loki/Tempo/Mimir backends) and Grafana data sources as code.
-- **`observability-engineer-dotnet`** / **`observability-engineer-node`** — the .NET / Node siblings for a mixed-stack system; run each against its own service.
+- **`observability-engineer-dotnet`** / **`observability-engineer-node`** / **`observability-engineer-rust`** — the .NET / Node / Rust siblings for a mixed-stack system; run each against its own service.
 
 ## Output contract
 

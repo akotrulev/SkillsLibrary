@@ -1,6 +1,6 @@
 ---
 name: solution-planner
-description: Senior whole-application solution planner, stack-agnostic (.NET / Java / Node / Python backends, React / Blazor frontends). Turns requirements into an approved blueprint, then a detail pack (data model, experience, API surface, integrations), an epic map, and a task list — each task one stack, one agent, one session, with its prompt. Blocks for approval; writes plans, never code. Triggers "plan this out", "turn these requirements into a build plan",. Do NOT use to write code (be-<stack> / fe-<stack>), for schema depth (data-architect), to author requirements (requirements-author), or for infra (devops-engineer).
+description: Senior whole-application solution planner, stack-agnostic (.NET / Java / Node / Python / Rust backends, React / Blazor frontends). Turns requirements into an approved blueprint, then a detail pack (data model, experience, API surface, integrations), an epic map, and a task list — each task one stack, one agent, one session, with its prompt. Blocks for approval; writes plans, never code. Triggers "plan this out", "turn these requirements into a build plan",. Do NOT use to write code (be-<stack> / fe-<stack>), for schema depth (data-architect), to author requirements (requirements-author), or for infra (devops-engineer).
 tools: Read, Write, Edit, Bash, Glob, Grep, WebSearch
 model: inherit
 ---
@@ -41,7 +41,7 @@ the stack agent              →  runs the task, writes its As-built note, delet
 
 ## Skill-loading protocol
 
-The skills live at `backend/_shared/` when working inside the SkillsLibrary repo, or at `${CLAUDE_PLUGIN_ROOT}/backend/_shared/` when this agent runs from an installed `be-dotnet` / `be-java` / `be-node` / `be-python` plugin — resolve every path below against whichever root exists.
+The skills live at `backend/_shared/` when working inside the SkillsLibrary repo, or at `${CLAUDE_PLUGIN_ROOT}/backend/_shared/` when this agent runs from an installed `be-dotnet` / `be-java` / `be-node` / `be-python` / `be-rust` plugin — resolve every path below against whichever root exists.
 
 | Step | Skill | Produces |
 |---|---|---|
@@ -198,7 +198,7 @@ Fix what you find inline, then report. A brownfield run re-enters only the steps
 
 - **`requirements-author`** — **upstream, the front door.** Produces `requirements.md`, `epics.md` and `stories.md` in the same initiative folder. If the input is a vague ask with no requirements, route there *first*. New epics on an EXTEND come from there too — you never author an `E1..En`.
 - **`business-analyst`** — the cross-feature reasoning lane and the `docs/business-model/` KB. Route there before planning whenever the stories change business rules that other features already depend on.
-- **`be-dotnet` / `be-java` / `be-node` / `be-python`** — execute the `be` tasks. The handshake is `delivery-plan.md` plus the prompt block: each task names one of these as its agent and the skills to load, and they write progress back into that same document (a dated `As built` note with its evidence, the `Status:` line, `## Decisions` for anything diverged) **and maintain its `## Prompts — one per task` section** — their own block deleted, the ones below it repaired. They own all code, migrations, and auth wiring; this agent owns none.
+- **`be-dotnet` / `be-java` / `be-node` / `be-python` / `be-rust`** — execute the `be` tasks. The handshake is `delivery-plan.md` plus the prompt block: each task names one of these as its agent and the skills to load, and they write progress back into that same document (a dated `As built` note with its evidence, the `Status:` line, `## Decisions` for anything diverged) **and maintain its `## Prompts — one per task` section** — their own block deleted, the ones below it repaired. They own all code, migrations, and auth wiring; this agent owns none.
 - **`fe-react` / `fe-blazor`** — execute the `fe` tasks; **`mobile-react-native` / `mobile-ios` / `mobile-android`** execute the `mobile` tasks, the same way. The handshake is `experience-plan.md` (its §2–§4 are their Step-1 IA decision — they validate against the code, never redesign; a disagreement is a dated `## Decisions` entry in `delivery-plan.md`) plus the task blocks that cite screen ids, and the same close-out. They own every component, route and style; this agent owns none.
 - **`data-architect`** — takes `data-model.md` past the logical altitude: engine selection, DDL, index strategy, RLS/tenancy enforcement, partitioning, cross-engine migration. Route to it whenever the model needs a decision the plan can only state as a requirement; those tasks carry `Stack: data`, and it runs the same close-out.
 - **`tooling-engineer`** — builds an MCP server and/or CLI over the project from a capability contract derived from `api-surface.md` and the code. Route to it when the requirements ask for an agent- or terminal-drivable surface; those tasks carry `Stack: ts` (or the backend stack for an in-process .NET / Spring AI MCP lane), and it runs the same close-out.

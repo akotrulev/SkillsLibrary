@@ -6,7 +6,7 @@
     "email": "alexandur.kotrulev@gmail.com"
   },
   "metadata": {
-    "description": "Stack-first skills library covering QA, frontend, mobile, backend, data, DevOps, security and business analysis: install one plugin per category in a project. `qa-{java,dotnet,typescript}` bundle every QA discipline — API/UI/mobile/performance/LLM/BDD authoring and verification, manual-QA process, CI/CD, reporting, and OWASP-mapped security. `fe-{blazor,react}` and `mobile-{react-native,ios,android}` are step-by-step app dev-stack agents. `be-{dotnet,java,node}` are step-by-step backend dev-stack agents for design-pattern application, ORM persistence, observability and Auth0/Cognito service-side auth; `be-python` is the sandboxed upload-processing worker stack. `devops` ships the platform lane, `data` the database-engineering lane, `business-analysis` the cross-feature reasoning lane, and `tooling`, `training-data`, `penetration-testing` and `security-governance` the rest. Two shared layers arrive through plugin dependencies rather than copies: `dev` (developer workflow, planning, documentation and audits — a dependency of qa-*, fe-*, mobile-*, be-*, devops and business-analysis) and `design` (the design-craft layer — a dependency of fe-* and mobile-*).",
+    "description": "Stack-first skills library covering QA, frontend, mobile, backend, data, DevOps, security and business analysis: install one plugin per category in a project. `qa-{java,dotnet,typescript}` bundle every QA discipline — API/UI/mobile/performance/LLM/BDD authoring and verification, manual-QA process, CI/CD, reporting, and OWASP-mapped security. `fe-{blazor,react}` and `mobile-{react-native,ios,android}` are step-by-step app dev-stack agents. `be-{dotnet,java,node}` are step-by-step backend dev-stack agents for design-pattern application, ORM persistence, observability and Auth0/Cognito service-side auth; `be-python` is the sandboxed upload-processing worker stack; `be-rust` is the Rust (axum + tokio + sqlx) service and library stack with async, performance and observability depth. `devops` ships the platform lane, `data` the database-engineering lane, `business-analysis` the cross-feature reasoning lane, and `tooling`, `training-data`, `penetration-testing` and `security-governance` the rest. Two shared layers arrive through plugin dependencies rather than copies: `dev` (developer workflow, planning, documentation and audits — a dependency of qa-*, fe-*, mobile-*, be-*, devops and business-analysis) and `design` (the design-craft layer — a dependency of fe-* and mobile-*).",
     "version": "3.0.0"
   },
   "plugins": [
@@ -1074,6 +1074,55 @@
       ],
       "agents": [
         "./backend/python/agents/be-python.md"
+      ]
+    },
+    {
+      "name": "be-rust",
+      "description": "Self-contained senior Rust backend developer plugin (stable Rust, edition 2024 primary / 2021 supported) for axum + tokio services and library crates. Covers idiomatic design (ownership in signatures, enum vs generic vs trait-object dispatch, newtypes, typestate, thiserror vs anyhow), scaffolding a service (Cargo.toml with lints configured once, typed config with secrets wrapped, thiserror errors mapped once to RFC 9457 problem+json, AppState composition root, axum 0.8 handlers and tower-http layers, crate-per-module workspaces whose boundaries the compiler enforces), async correctness on tokio (task ownership with JoinSet / TaskTracker, cancellation and select! cancel safety, no lock across .await, blocking work off the runtime, bounded channels, timeouts, graceful shutdown), sqlx 0.9 persistence (compile-checked queries with offline metadata, migrations, transactions, optimistic concurrency, N+1 and UNNEST bulk fixes, dynamic SQL under SqlSafeStr), dev-side unit testing (cargo test / nextest, rstest, proptest, paused tokio time, fakes before mockall, the 80% branch floor measured with cargo-llvm-cov on nightly), performance work (criterion / divan / gungraun benchmarks, samply / perf / heaptrack / tokio-console profiling, allocation and hashing fixes, release-profile, PGO, allocator and compile-time tuning), and a reviewer whose checklist covers panics, error leaks, async hazards, casts and overflow, unsafe and secrets. Bundles the language-agnostic pattern reference/reviewer and the full observability toolkit (tracing + tracing-opentelemetry, OTLP traces/metrics/logs, JSON logs with trace ids, Loki/Tempo/Prometheus-Mimir backend, LogQL/PromQL, Grafana dashboards), plus the step-by-step be-rust orchestrator and observability-engineer-rust agents — install just this one plugin for a complete Rust backend toolkit. The developer-workflow skills and agents arrive through the `dev` plugin this one depends on: the whole-application solution-planner (/dev:plan-system), the be-documenter and be-feature-documenter reverse-documentation agents (/dev:document-system, /dev:document-feature) and the read-only code audit (/dev:audit).",
+      "source": "./",
+      "strict": false,
+      "author": {
+        "name": "Aleksandar Kotrulev",
+        "email": "alexandur.kotrulev@gmail.com"
+      },
+      "license": "MIT",
+      "keywords": [
+        "rust",
+        "axum",
+        "tokio",
+        "sqlx",
+        "backend",
+        "design-patterns",
+        "performance"
+      ],
+      "category": "development",
+      "dependencies": [
+        "dev"
+      ],
+      "skills": [
+        "./backend/rust/skills/pattern-guide",
+        "./backend/rust/skills/pattern-writer",
+        "./backend/rust/skills/async-concurrency",
+        "./backend/rust/skills/database-code",
+        "./backend/rust/skills/unit-testing",
+        "./backend/rust/skills/performance",
+        "./backend/rust/skills/code-review",
+        "./backend/_shared/pattern-guide",
+        "./backend/_shared/code-review",
+        "./observability/opentelemetry-rust",
+        "./observability/structured-logging-rust",
+        "./observability/logs-traces-setup",
+        "./observability/metrics-setup",
+        "./observability/queries",
+        "./observability/dashboards"
+      ],
+      "commands": [
+        "./backend/rust/commands/be-rust.md",
+        "./observability/commands/rust/observability.md"
+      ],
+      "agents": [
+        "./backend/rust/agents/be-rust.md",
+        "./observability/agents/observability-engineer-rust.md"
       ]
     },
     {

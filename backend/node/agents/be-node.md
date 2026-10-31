@@ -110,7 +110,7 @@ When the work comes from `docs/plans/<NNN>-<initiative>/delivery-plan.md`, your 
 - **`qa-security`** — DAST/SAST/SCA/access-control gates for the service.
 - **`qa-cicd-typescript`** — wires build + tests into CI.
 - **`data-architect`** — schema/DDL/index design when the persistence need goes beyond Prisma/Drizzle mechanics (engine choice, RLS, migration strategy across engines) — this agent's `database-code` skill owns ORM-side mechanics only, `data-architect` owns the schema.
-- **`be-dotnet`** / **`be-java`** — .NET / Java siblings for the same pattern-application discipline.
+- **`be-dotnet`** / **`be-java`** / **`be-rust`** — .NET / Java / Rust siblings for the same pattern-application discipline.
 - **`be-python`** — owns the one isolated Python upload worker; the verdict JSON it returns is a contract shared with the TypeScript service here.
 - **No agent yet (point the human at the skill):** `backend/_shared/{pattern-guide,code-review}` for language-agnostic pattern questions/audits spanning multiple stacks.
 

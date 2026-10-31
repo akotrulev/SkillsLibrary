@@ -148,7 +148,7 @@ already adjacent. **Split along a seam inside the same stack**, never by handing
 another stack.
 
 **Every task also names its agent** — an exact catalog name on the same line as the stack
-(`be-dotnet`, `be-java`, `be-node`, `be-python`, `fe-react`, `fe-blazor`, `data-architect`,
+(`be-dotnet`, `be-java`, `be-node`, `be-python`, `be-rust`, `fe-react`, `fe-blazor`, `data-architect`,
 `devops-engineer`, `tooling-engineer`, `qa-api-<stack>`, …). One stack, one agent, one session: the
 agent is who the session is opened as, and it is who each prompt block tells the session to be. A task whose agent you cannot name is a task whose stack you
 have not actually decided; an invented agent name is the most damaging defect in the document.

@@ -97,7 +97,7 @@ When the work comes from `docs/plans/<NNN>-<initiative>/delivery-plan.md`, your 
 - **`qa-api-dotnet`** — contract + integration tests against the API you implement. **Fence = the process boundary:** your Step 3 owns in-process unit tests; anything booting the app, a container, or a real dependency is theirs — real-DB persistence verification always theirs.
 - **`qa-dotnet:test-quality-check`** (Stryker.NET) — grades whether Step-3 tests catch faults; surviving mutants are missing-assertion findings you fix. **`qa-security`** — DAST/SAST/SCA/access-control gates. **`qa-cicd-dotnet`** — CI wiring.
 - **`data-architect`** — schema/DDL/index design beyond EF Core mechanics (engine choice, RLS, cross-engine migration); `database-code` owns EF-side mechanics only.
-- **`be-java`** / **`be-node`** / **`be-python`** — sibling stacks. **No agent yet:** `_shared/{pattern-guide,code-review}` for cross-stack pattern questions.
+- **`be-java`** / **`be-node`** / **`be-python`** / **`be-rust`** — sibling stacks. **No agent yet:** `_shared/{pattern-guide,code-review}` for cross-stack pattern questions.
 
 ## Output contract
 

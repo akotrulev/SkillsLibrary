@@ -723,7 +723,7 @@ that lands anything.>
   shape of the document, that reference wins; this skill owns only the additions above.
 - **→ `dev:plan-session-budget`** — sizes these tasks, writes the `Budget:` lines back onto them, and
   authors `## Prompts — one per task` inside this document.
-- **→ `be-dotnet` / `be-java` / `be-node` / `be-python` / `fe-react` / `fe-blazor`** — execute the
+- **→ `be-dotnet` / `be-java` / `be-node` / `be-python` / `be-rust` / `fe-react` / `fe-blazor`** — execute the
   tasks bound to them, write the `As built` note and the `Status:` line, delete their own prompt block
   and rewrite the ones below it.
 - **→ Mission Control** — paste the document, point at the repo.

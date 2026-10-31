@@ -242,7 +242,7 @@ One line each: system, what it does for us, direction (we call it / it calls us 
 
 | Domain | Agents |
 |---|---|
-| Backend build | `be-dotnet` · `be-java` · `be-node` · `be-python` (the isolated upload-processing worker only) |
+| Backend build | `be-dotnet` · `be-java` · `be-node` · `be-python` (the isolated upload-processing worker only) · `be-rust` |
 | Solution planning | `solution-planner` (this one) |
 | Data | `data-architect` |
 | Frontend | `fe-blazor` · `fe-react` |

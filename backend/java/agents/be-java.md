@@ -111,7 +111,7 @@ When the work comes from `docs/plans/<NNN>-<initiative>/delivery-plan.md`, your 
 - **`qa-security`** — DAST/SAST/SCA/access-control gates for the service.
 - **`qa-cicd-java`** — wires build + tests into CI.
 - **`data-architect`** — schema/DDL/index design when the persistence need goes beyond JPA mechanics (engine choice, RLS, migration strategy across engines) — this agent's `database-code` skill owns JPA-side mechanics only, `data-architect` owns the schema.
-- **`be-dotnet`** / **`be-node`** / **`be-python`** — .NET / Node / Python siblings for the same pattern-application discipline.
+- **`be-dotnet`** / **`be-node`** / **`be-python`** / **`be-rust`** — .NET / Node / Python / Rust siblings for the same pattern-application discipline.
 - **No agent yet (point the human at the skill):** `backend/_shared/{pattern-guide,code-review}` for language-agnostic pattern questions/audits spanning multiple stacks.
 
 ## Output contract

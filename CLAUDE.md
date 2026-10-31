@@ -15,8 +15,9 @@ You are a senior AI engineer and a senior automation QA engineer. You follow bes
 - **JVM backend**: Java 21 + Spring Boot 3.x
 - **Node backend**: Node 24 (active LTS; 22 maintenance — Node 20 is EOL since Apr 2026) + TypeScript + NestJS or Express
 - **Python worker**: Python 3.13 primary / 3.12 and 3.14 supported — only for the one isolated upload-processing worker (Pillow, rembg, VTracer); uv + ruff + mypy `--strict`, pydantic at the boundary
+- **Rust backend**: current stable Rust, edition 2024 (2021 supported) + tokio + axum + sqlx; `thiserror` in modules, `anyhow` only in `main`; lints configured once in `Cargo.toml`
 - **Mobile**: React Native + Expo primary (Expo Router, development builds, EAS) · Swift / SwiftUI (iOS) · Kotlin / Jetpack Compose (Android), with a Kotlin Multiplatform lane — each its own `mobile-*` plugin under `mobile/`
-- **Test runners**: NUnit (.NET), TestNG (Java), Vitest or Jest (TS), pytest (Python), Playwright (UI), Appium (mobile); dev-side in mobile apps — Swift Testing (iOS), JUnit 4 + Robolectric (Android), Jest + RNTL (React Native)
+- **Test runners**: NUnit (.NET), TestNG (Java), Vitest or Jest (TS), pytest (Python), `cargo test` / cargo-nextest (Rust), Playwright (UI), Appium (mobile); dev-side in mobile apps — Swift Testing (iOS), JUnit 4 + Robolectric (Android), Jest + RNTL (React Native)
 - **JVM build tool**: Gradle (Kotlin DSL) for new projects
 - **Auth**: Auth0 — Authorization Code + PKCE for SPAs, Client Credentials for service-to-service
 - **Cloud**: Azure DevOps for pipelines; AWS or Azure for hosting depending on project
@@ -100,7 +101,7 @@ You are a senior AI engineer and a senior automation QA engineer. You follow bes
 - Test data via builders or ObjectMother, not inline literals duplicated across tests.
 - No `Thread.Sleep` / `await page.waitForTimeout`. Use explicit waits on conditions.
 - Tests are independent. Any test can run alone, in any order.
-- **Code an agent writes ships with unit tests covering ≥ 80% of its branches.** The scope is the change, never the repo: a file the change created counts whole; in a file that already existed, the methods it changed. Tests are designed branch by branch — every `if`/`else` arm, `switch` case and default, ternary, `??`/`?.`, short-circuit operand, guard return, `catch`, and loop run zero and many times gets a test that asserts its effect — so the measured 80% is a floor with slack for branches no honest test reaches. **Only an asserting test counts:** one written to move the number is a **major** finding, and mutation score (`test-quality-check`) is what catches it. Files the stack's selection matrix does not test (DTOs, configuration, DI registration, migrations, generated code) are left out of the measurement **by name** — never by lowering the number or by an exclusion marker on code with behavior. A plan's gate measures it per stack (`plan-format.md` §5); where the toolchain reports no branches (Swift), the floor is 80% of lines. Repo-wide coverage is still never a target.
+- **Code an agent writes ships with unit tests covering ≥ 80% of its branches.** The scope is the change, never the repo: a file the change created counts whole; in a file that already existed, the methods it changed. Tests are designed branch by branch — every `if`/`else` arm, `switch` case and default, ternary, `??`/`?.`, short-circuit operand, guard return, `catch`, and loop run zero and many times gets a test that asserts its effect — so the measured 80% is a floor with slack for branches no honest test reaches. **Only an asserting test counts:** one written to move the number is a **major** finding, and mutation score (`test-quality-check`) is what catches it. Files the stack's selection matrix does not test (DTOs, configuration, DI registration, migrations, generated code) are left out of the measurement **by name** — never by lowering the number or by an exclusion marker on code with behavior. A plan's gate measures it per stack (`plan-format.md` §5); where the toolchain reports no branches (Swift, or Rust without a nightly toolchain for `cargo llvm-cov --branch`), the floor is 80% of lines. Repo-wide coverage is still never a target.
 
 ## Review behavior
 
@@ -137,6 +138,7 @@ Core stack versions:
 - **Java 21 LTS + Spring Boot 3.x.**
 - **Node 24 active LTS / 22 maintenance** — Node 20 is EOL since Apr 2026: flag it, don't target it.
 - **Python 3.13 primary / 3.12, 3.14 supported** — the ML worker stays on 3.13 until `uv lock` resolves every wheel (onnxruntime, rembg, vtracer) for 3.14; Pillow 12 primary / 11 supported. Never up-level `requires-python`.
+- **Rust: current stable (1.99, Oct 2026) primary; edition 2024 primary / 2021 supported** — read `rust-toolchain.toml`, `edition` and `rust-version`; never raise the edition, `rust-version` or the toolchain pin as a side effect, and never use an API newer than `rust-version`. tokio 1.x (LTS 1.51 / 1.53), axum 0.8, sqlx 0.9 (needs 1.94) / 0.8 supported; the `opentelemetry*` crates and `tracing-opentelemetry` move as one train.
 - **Playwright: Node 1.64 / Java, .NET and Python 1.63** (Java and .NET stay on 1.63 until their 1.64 packages publish; `tools/qa-version-check.py` enforces the pins). A 1.64-only API (`locator.within()`, `page.webmcp`, `getByRef`) is taught on the TypeScript lane only and is never taught on a 1.63 lane; the Java and .NET skills teach the 1.63 form plus a "from 1.64" line.
 - **Appium 3 primary / 2 supported** — Appium 3.8.0 with `java-client` 11 / `Appium.WebDriver` 9 / WebdriverIO 10 (Node ≥ 22.19); a device cloud still on Appium 2 stays on `java-client` 10.x, `Appium.WebDriver` 8.x or WebdriverIO 9.x. Maestro is a TypeScript-lane alternative to Appium.
 - **React 19 primary / 18 tagged fallback** (an 18 pattern is correct for 18, not obsolete); **Next.js 15 primary / 14 fallback** (App Router primary; Pages Router legacy; Vite SPA + React Router 7 is the non-RSC lane).
@@ -240,7 +242,7 @@ Per stack:
 
 ## Repository map
 
-Each top-level folder owns a domain, is **stack-first and domain-encapsulated** (a folder's skills are loaded only by its own agents), and ships as one or more marketplace plugins (21 in all). **Bundle within a category, depend across categories:** sharing inside `qa-*`, `fe-*`, `mobile-*` or `be-*` is bundled, and anything several categories use lives in one plugin they declare in `dependencies` (`dev`, `design`). Full per-skill detail is in [`docs/skills-catalog.md`](docs/skills-catalog.md).
+Each top-level folder owns a domain, is **stack-first and domain-encapsulated** (a folder's skills are loaded only by its own agents), and ships as one or more marketplace plugins (22 in all). **Bundle within a category, depend across categories:** sharing inside `qa-*`, `fe-*`, `mobile-*` or `be-*` is bundled, and anything several categories use lives in one plugin they declare in `dependencies` (`dev`, `design`). Full per-skill detail is in [`docs/skills-catalog.md`](docs/skills-catalog.md).
 
 | Folder | Domain | Plugin(s) |
 |---|---|---|
@@ -248,8 +250,8 @@ Each top-level folder owns a domain, is **stack-first and domain-encapsulated** 
 | `frontend/blazor/`, `frontend/react/` | Frontend dev stacks (+ `design/`, `auth/auth0-*`) | `fe-blazor` · `fe-react` |
 | `mobile/` | Mobile dev stacks — React Native (Expo), iOS (Swift), Android (Kotlin + KMP) + the shared store-compliance / security / release / observability / in-app-purchases layer (+ `design/`, `auth/auth0-{react-native,ios,android}`) | `mobile-react-native` · `mobile-ios` · `mobile-android` |
 | `design/` | Stack-agnostic aesthetic-craft layer | `design` (a dependency of `fe-*` and `mobile-*`) |
-| `backend/` | Design-pattern + persistence dev stacks; the sandboxed Python upload worker (`backend/python/`); planning (`solution-planner`) + reverse-docs (`be-documenter`) | `be-dotnet` · `be-java` · `be-node` · `be-python` |
-| `observability/` | OpenTelemetry → Grafana telemetry | bundled within the category into `be-dotnet` · `be-java` · `be-node` |
+| `backend/` | Design-pattern + persistence dev stacks; the sandboxed Python upload worker (`backend/python/`); Rust services and crates (`backend/rust/`); planning (`solution-planner`) + reverse-docs (`be-documenter`) | `be-dotnet` · `be-java` · `be-node` · `be-python` · `be-rust` |
+| `observability/` | OpenTelemetry → Grafana telemetry | bundled within the category into `be-dotnet` · `be-java` · `be-node` · `be-rust` |
 | `data/` | Database engineering (8 engines) | `data` |
 | `devops/` | Platform/delivery + infra-security | `devops` |
 | `security/` | Offensive (pentest + purple-team) and defensive/governance lanes | `penetration-testing` · `security-governance` |

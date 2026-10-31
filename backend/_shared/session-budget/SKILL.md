@@ -233,7 +233,7 @@ Two things stay this skill's to get right, because the close-out section cannot 
 - **← `dev:plan-feature`** — owns the plan document format these prompts live in (`engineering-practices/writing-plans/references/plan-format.md` §6). Where the two disagree on the shape, that reference wins.
 - **← `dev:plan-delivery`** — supplies the tasks, their files, their streams and their order. Sizing feeds straight back into how those tasks are written.
 - **← `dev:plan-epic-map`** — supplies the lanes and the current wave, which is what decides who gets a prompt block.
-- **→ `be-dotnet` / `be-java` / `be-node` / `be-python` / `fe-react` / `fe-blazor`** — consume the prompt blocks and run the plan's `## Close-out — every task` when their task lands.
+- **→ `be-dotnet` / `be-java` / `be-node` / `be-python` / `be-rust` / `fe-react` / `fe-blazor`** — consume the prompt blocks and run the plan's `## Close-out — every task` when their task lands.
 - **→ plan format §7** — the `## Close-out — every task` section every plan carries, copied verbatim by Step 5.
 - **→ `dev:plan-feature`** — uses Step 1 and Step 2 for the same sizing question on plans that never went through `solution-planner`.
 
