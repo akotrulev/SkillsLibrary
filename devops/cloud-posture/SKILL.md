@@ -243,6 +243,7 @@ jobs:
 - `devops:container-runtime-security` — kube-hunter/Falco runtime probing; the runtime sibling to this configuration-time scan.
 - `devops:supply-chain-security` · `devops:threat-modeling` · `devops:controls-validation` — the other infra-security skills the `infra-security-tester` agent orchestrates alongside this one.
 - `qa-<stack>:image-infra-scan` — Trivy for **image/OS-package CVEs, IaC-template CVEs, and SBOM** — a different surface (the artifact, not the account).
+- `security/cloud-recon-enumeration` + `security/cloud-attack-{aws,azure,gcp}` — the **offensive** counterpart (`penetration-testing` plugin). This skill scores the account's posture read-only; those skills exploit the same misconfigurations under an authorization gate. A CSPM finding here (over-permissive role, public bucket, disabled log) is the exact starting point an engagement enumerates and chains — the posture↔exploitation handoff.
 - `devops-auditor` — read-only **static** conformance: does a gate exist in the repo. **The fence:** the auditor reads repo files and never authenticates to the account; this skill reads the **live account** and never opens the repo's conformance rule set.
 - `infra-security-tester` (agent) — the step-by-step orchestrator that runs this as its **Step-4 cloud-posture & IAM** pass, under its scope/authorization gate.
 - `devops-engineer` — the remediation peer: this skill finds and retests, `devops-engineer` applies the fix.

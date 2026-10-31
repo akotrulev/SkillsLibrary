@@ -254,7 +254,7 @@ Each top-level folder owns a domain, is **stack-first and domain-encapsulated** 
 | `observability/` | OpenTelemetry → Grafana telemetry | bundled within the category into `be-dotnet` · `be-java` · `be-node` · `be-rust` |
 | `data/` | Database engineering (8 engines) | `data` |
 | `devops/` | Platform/delivery + infra-security | `devops` |
-| `security/` | Offensive (pentest + purple-team) and defensive/governance lanes | `penetration-testing` · `security-governance` |
+| `security/` | Offensive (pentest + purple-team + cloud-pentest: AWS/Azure/GCP) and defensive/governance lanes (incl. cloud incident response + BCDR) | `penetration-testing` · `security-governance` |
 | `business-analysis/` | Upstream requirements authoring + cross-feature reasoning | `business-analysis` |
 | `training-data/` | LLM/VLM training-data engineering | `training-data` |
 | `tooling/` | Agent-drivable surfaces over a project — capability contract → MCP server / CLI | `tooling` |

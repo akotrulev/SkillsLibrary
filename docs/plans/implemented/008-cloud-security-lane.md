@@ -7,12 +7,19 @@ AWS/Azure/GCP exploitation), one new defensive skill (cloud incident response + 
 references), and a wiring + cross-reference pass that teaches the existing agents and skills the new
 lane exists.
 
-**Status:** C1 landed (2026-10-21): `security/cloud-recon-enumeration` exists with its four references.
-Next: A1, A2, A3, B1 (independent of each other, each depends on C1 except B1 which is independent).
-Built but unverified: C1's content is written and internally consistent but not yet cross-checked against
-A1–A3 once those land (the §5a gate, which runs once in G1, is the first point anything is verified
-end to end). No new commands ship — every new skill is agent-reached, so the catalog's 65-command
-surface is unchanged; the skill inventory and two plugin descriptions do change.
+**Status:** DONE (2026-10-31) — all tasks landed and the plan is filed. **Delivered end to end:** the
+cloud security lane is complete and self-consistent. Five new skills exist on disk — `security/cloud-recon-enumeration`
+(C1) + the three `security/cloud-attack-{aws,azure,gcp}` provider skills (A1/A2/A3) + `security/cloud-incident-response`
+(B1) with its four references incl. `cloud-resilience.md` (BCDR); all are registered in `.claude-plugin/marketplace.json`,
+named in both plugin descriptions, and routed by the `penetration-tester` / `security-architect` /
+`security-test-planner` agents (W1); and the §4 cross-references are wired into the five existing skills —
+`devops/cloud-posture`, `devops/threat-modeling`, `devops/iac-security`, `security/detection-engineering`,
+`security/compliance-evidence-mapping` (incl. the BCDR crosswalk rows → `cloud-resilience.md`) (G1). The
+single §5a gate ran and is **green**: marketplace parses, all five skills carry `---` frontmatter, both
+descriptions name the lane, every intra-repo cross-ref resolves, catalog + `CLAUDE.md` reconcile with disk,
+command count still **65**. **Unverified:** nothing beyond the §5a docs/conformance gate — these are authored
+skills, never executed, so no skill was run against a live cloud account (by design; each carries its own
+`#volatile` authorization gate for when it is). No new commands ship (65-command surface unchanged).
 
 ---
 
@@ -223,6 +230,27 @@ practice lab — routing to its references.
   `cloud-incident-response` / `detection-engineering` (each finding implies a detection).
 - **Not in A1:** Azure (A2), GCP (A3), registration/routing (W1).
 
+**As built (2026-10-31):** Landed exactly as planned — no divergence. `security/cloud-attack-aws/SKILL.md`
+(`file:1`) carries the frontmatter (`name: cloud-attack-aws`, triggers + "Not for …" fences vs
+`cloud-recon-enumeration`/`cloud-attack-azure`/`cloud-attack-gcp`/`devops:cloud-posture`/`initial-access`/
+`atomic-simulation`), the §2 safety gate (cloud scope file + `#volatile` authorization line, owned/lab-only,
+loot redaction), and the teaching body: AWS target model (IAM-is-the-perimeter, PassRole pivot, STS graph),
+Step 1 enumeration (enumerate-iam/Pacu/CloudFox), Step 2 IAM privesc (the four families of the 21 Rhino
+paths, `T1098`/`T1098.001`/`T1548`/`T1078.004`), Step 3 service exploitation (EC2 IMDSv1/v2 + hop-limit +
+dual-accept + user-data + snapshot `T1552.005`/`T1578`/`T1537`, S3 `T1619`/`T1530`, RDS, Lambda/Secrets/SSM),
+and Step 4 CloudTrail/GuardDuty detection-surface awareness (D5 — what trips an alert, never evasion), each
+mapped to its ATT&CK **Cloud** (IaaS) id. Five references written exactly as named:
+`references/pacu.md` (Pacu + enumerate-iam), `references/cloudfox.md` (CloudFox + ScoutSuite),
+`references/pmapper.md` (the full 21-path table + graph queries), `references/s3-attacks.md`, and
+`references/lab-setup.md` (CloudGoat / flaws.cloud / IAM Vulnerable deploy+teardown in an owned account).
+Heeded the research corpus's verify-against-repo notes (Rhino count stated as **21**, not 41; roster
+"confirm against the repo at authoring time"), the IMDSv1-live-risk note (F5 March-2025 campaign, dual-accept,
+detect-don't-assume), and §2.5 loot redaction throughout. Handoffs named: `penetration-testing:reporting`
+(CVSS + ATT&CK-Cloud id), `cloud-incident-response`, `detection-engineering`, and the `cloud-posture`
+posture↔exploitation handoff both ways. No prompt below (A2/B1/W1/G1) needed rewriting — every name/path
+A2 binds to (`security/cloud-attack-aws/SKILL.md` as the just-landed sibling) matches what its prompt
+already assumes. Verified by reading the written files back; no gate run (per `Gate: none`).
+
 ---
 
 ### A2 — `cloud-attack-azure`: Entra ID + managed identity + Key Vault
@@ -246,6 +274,36 @@ cloud-pivot idiom ~7k, writes (SKILL.md + 5 references) ~45k.
   (stand up **AzureGoat** in an owned tenant: prerequisites, deploy, teardown).
 - **Not in A2:** AWS (A1), GCP (A3), registration/routing (W1).
 
+**As built (2026-10-31):** Landed exactly as planned — no divergence. A1 had already landed in this
+worktree, so `security/cloud-attack-azure/SKILL.md` (`file:1`) was patterned against
+`security/cloud-attack-aws/SKILL.md` as the just-landed sibling exactly as the prompt directed — same shape:
+frontmatter (`name: cloud-attack-azure`, triggers + "Not for …" fences vs `cloud-recon-enumeration`/
+`cloud-attack-aws`/`cloud-attack-gcp`/`devops:cloud-posture`/`initial-access`/`atomic-simulation`), the §2
+safety gate (cloud scope file + `#volatile` authorization line, owned/lab-only, loot redaction), ATT&CK
+**Cloud** framing, and the decision-matrix/anti-patterns/rules/cross-references sections. Teaching body:
+Azure target model (the **two-plane** Entra-ID↔Azure-RBAC model + the GA elevate-access bridge + the
+app-registration/SP/MI vocabulary), Step 1 Entra enumeration (`T1087.004`/`T1069.003`/`T1526`, ROADrecon +
+AzureHound), Step 2 identity abuse & token theft (MI IMDS `169.254.169.254` + `Metadata: true`,
+`T1552.005`→`T1078.004`; SP credential abuse; consent/credential-add `T1098.001`/`.003`; device-code/PRT
+awareness-only), Step 3 Key Vault data-plane testing (access-policy vs RBAC, the Key Vault Contributor
+privesc, `T1552`), Step 4 Azure RBAC privesc & service attacks (role-assignment abuse `T1098`, storage-key
+`listKeys` theft `T1552`/`T1537`, Run Command `T1651`, Automation/Hybrid-Worker), and Step 5
+Sentinel/Defender detection-surface awareness (D5 — table of log sources, both Log-Analytics and
+Defender-portal paths). Five references written exactly as named: `references/roadtools.md` (ROADrecon +
+GraphRunner), `references/azurehound.md` (AzureHound → BloodHound Azure edges), `references/microburst.md`,
+`references/azure-keyvault.md`, `references/lab-setup.md` (AzureGoat deploy+teardown in an owned
+subscription). Heeded every corpus currency note: **"Entra ID" used throughout, old "Azure AD" named once**;
+**ROADrecon `gather` broken → msgraph community fork**; **Stormspotter dormant → AzureHound+BloodHound
+primary** (Stormspotter named only as an anti-pattern); **Hybrid-Worker `ListKeys` partly mitigated →
+version-check, detect-don't-assume**; **Sentinel→Defender migration incomplete in 2026 → both paths**; D5
+awareness-not-evasion and §2.5 loot redaction throughout. Handoffs named: `cloud-recon-enumeration`
+(upstream), `devops:cloud-posture` (both ways), `initial-access`, `lateral-movement` (cloud pivot),
+`atomic-simulation`, `penetration-testing:reporting`, `cloud-incident-response`. No prompt below A2
+(B1/W1/G1) needed rewriting — every name/path they assume (`security/cloud-attack-azure/SKILL.md`, the five
+reference names) matches what this task produced. Verified by reading the written files back; no gate run
+(per `Gate: none`). Deliverable proof: `security/cloud-attack-azure/SKILL.md:1` plus the five
+`security/cloud-attack-azure/references/*.md`.
+
 ---
 
 ### A3 — `cloud-attack-gcp`: GCP IAM + service-account chains + storage
@@ -267,6 +325,26 @@ fundamentals, plus a `lab-setup.md` that bootstraps the owned practice lab — r
 - `references/`: `gcp-enum.md`, `gcp-privesc.md`, `gcp-bucket-brute.md`, `lab-setup.md` (stand up
   **GCPGoat** in an owned project: prerequisites, deploy, teardown).
 - **Not in A3:** AWS (A1), Azure (A2), registration/routing (W1).
+
+**As built (2026-10-31):** Landed with one divergence (see D7): A1/A2 had not yet landed when this task
+ran (plan order lets A1/A2/A3/B1 run in any order after C1), so `security/cloud-attack-gcp/SKILL.md`
+(`file:1`) was patterned against `security/cloud-recon-enumeration/SKILL.md` (C1 — frontmatter shape,
+`#volatile` authorization block, ATT&CK-Cloud framing, decision-matrix/anti-patterns/rules/cross-references
+sections) rather than A2's sibling file, which does not exist yet. Everything else landed exactly as
+planned: the §2 gate, lab target **GCPGoat**, and the full teaching body — GCP resource hierarchy + IAM
+inheritance + service-account model + metadata server (target-model section), IAM/resource enumeration
+(`T1580`/`T1526`), service-account impersonation & privilege escalation via the IAM Credentials API verbs
+(`T1078.004`/`T1098`/`T1098.001`/`T1548`, the Rhino ~20-method catalog split IAM/non-IAM with exact
+permissions), Cloud Storage bucket attacks (`T1619`/`T1530`), and Security Command Center detection-surface
+awareness framed as D5 (awareness, not evasion). The posture↔exploitation handoff with `devops:cloud-posture`
+is named explicitly in both the SKILL.md intro and its cross-references section, including the "this is the
+first skill that attacks GCP" framing the task required. The default-Compute-SA currency note (no longer
+auto-Editor on new projects — detect, don't assume) is carried into the target-model section and into a
+named anti-pattern. Four references written exactly as named: `references/gcp-enum.md`,
+`references/gcp-privesc.md`, `references/gcp-bucket-brute.md`, `references/lab-setup.md` (GCPGoat deploy +
+teardown in a throwaway owned project). No prompt below A3 needed rewriting — A1/A2/B1/W1's assumptions
+(file names, reference names, ATT&CK ids) all match what this task produced. Verified by reading the
+written files back; no gate run (per `Gate: none`).
 
 ---
 
@@ -294,6 +372,37 @@ references) ~35k.
   multi-region failover, backup-restore drills, framed for an increasing-threat environment).
 - **Not in B1:** the compliance crosswalk *row* into `compliance-evidence-mapping` (G1); registration /
   routing (W1).
+
+**As built (2026-10-31):** Landed exactly as planned — no divergence. `security/cloud-incident-response/SKILL.md`
+(`file:1`) carries the frontmatter (`name: cloud-incident-response`, triggers + "Not for …" fences vs
+`detection-engineering` (authors the rule) / `detection-validation` (asserts it fired) / `observability`
+(app telemetry) / `cloud-posture` (posture), and the explicit "owns RESPOND + RECOVER, not detect" line).
+Teaching body: the two framework anchors — **NIST SP 800-61r3** (final 2025-04-03, supersedes r2, CSF-2.0
+functions) **and SANS PICERL** — with a step→r3-function→PICERL-phase table; the "acquire before you destroy"
+rule + cloud-adapted order of volatility (RFC 3227); a "know your telemetry" per-cloud three-plane precondition
+table with the immutable/out-of-band retention requirement; the runbook (detect→triage→contain→eradicate→
+recover) with the identity-vs-host containment distinction; the three runbook skeletons (A credential / B
+instance / C exposure); a cloud-forensics chain-of-custody section; anti-patterns and hard rules. Both the
+**Sentinel/Log-Analytics (KQL)** and **Defender-portal** paths are named (migration-incomplete-in-2026 note).
+Four references written exactly as named: `references/aws-ir.md` (CloudTrail triage, EBS snapshot, SSM+LiME/
+WinPmem memory, Detective/Security Hub/Security Lake, libcloudforensics), `references/azure-ir.md` (Sentinel+
+Defender both paths, `az snapshot create`, Entra session/token revoke, Network Watcher), `references/gcp-ir.md`
+(SCC, `gcloud compute disks snapshot`, GRR, cloud-forensics-utils, the SA-as-identity-and-resource twist +
+default-Compute-SA detect-don't-assume note), and `references/cloud-resilience.md` (BCDR: RTO/RPO + BIA, the
+four DR patterns with the "same RPO, different RTO" rule, AZ-vs-region, 3-2-1-1-0 backup + immutability,
+multi-region failover, restore/DR drills, per-cloud service table, and the full BCDR→compliance crosswalk the
+G1 row will cite). Heeded the corpus currency notes: 800-61r3 anchored (r2 five-phase named only as an
+anti-pattern), CSF 2.0 RECOVER as RC.RP+RC.CO (two categories), ISO A.5.29/A.5.30 both new-in-2022,
+libcloudforensics 2024-10-18 + "verify verbs against the repo" caveats, Sentinel→Defender both paths,
+GCP global-VPC + SA-as-resource asymmetries not flattened, and loot redaction throughout. Fenced cleanly vs
+detection-engineering/detection-validation/observability/cloud-posture — this skill consumes the detection
+half and authors none. The BCDR crosswalk ROW into `compliance-evidence-mapping` is left for G1 (per the
+task's "Not in B1"); `cloud-resilience.md` holds the detail that row cites. No prompt block below B1 needed
+rewriting — W1 binds to `./security/cloud-incident-response` and the `cloud-incident-response` frontmatter
+name, and G1 points at `cloud-incident-response/references/cloud-resilience.md`; all three match what this
+task produced. Deliverable proof: `security/cloud-incident-response/SKILL.md:1` plus the four
+`security/cloud-incident-response/references/*.md`. Verified by reading the written files back; no gate run
+(per `Gate: none`).
 
 ---
 
@@ -324,6 +433,31 @@ sec-gov blocks ~12k, the three agent files ~18k, `docs/skills-catalog.md` releva
   the command count at 65 (no new commands).
 - **Not in W1:** cross-reference edits into the existing *skills* (G1); the gate (G1).
 
+**As built (2026-10-31):** all registrations landed as planned; no divergence worth a `D<n>` (the plan's
+"four cloud-attack skills" for `penetration-tester` is read, per §5's own wording, as the four *offensive
+cloud* skills — `cloud-recon-enumeration` + the three `cloud-attack-*` — matching the four paths added to
+`penetration-testing`'s `skills[]`). Edited files/blocks:
+- `.claude-plugin/marketplace.json` — `penetration-testing.skills[]` now lists the four offensive cloud
+  paths (`.claude-plugin/marketplace.json:1208-1211`), `security-governance.skills[]` adds
+  `./security/cloud-incident-response` (`.claude-plugin/marketplace.json:1248`); both plugin
+  **descriptions** extended with one dense cloud clause each (pen-test cloud lane at line 1182;
+  sec-gov "Five language-agnostic skills" + cloud-IR clause at line 1226). JSON validates.
+- `security/agents/penetration-tester.md` — cloud lane added to the skill-loading protocol (`:49`) and the
+  ATT&CK spine note keyed to Enterprise-vs-Cloud by surface (`:39`).
+- `security/agents/security-architect.md` — `cloud-incident-response` added to the governance skills
+  bullet ("Five governance skills", `:38`) and to Step 4's loads (`:63`).
+- `security/agents/security-test-planner.md` — routing catalog gains a "Cloud control-plane pentest" row
+  (executor `penetration-tester`, the four offensive cloud skills) and a "Cloud incident response" row
+  (executor `security-architect`, `cloud-incident-response`), and `cloud-incident-response` added to the
+  governance roll-up row (`:40-42`). All five names verified to resolve to on-disk skill dirs.
+- `docs/skills-catalog.md` — new "cloud offensive lane — 4 skills" paragraph after the 7-skills list,
+  penetration-tester "Loads" line updated, and `security-governance` paragraph bumped to "Five … a sixth"
+  with the `cloud-incident-response` clause.
+- `CLAUDE.md` — `security/` repository-map row now names the cloud-pentest + cloud-IR/BCDR lanes (`:257`).
+- Command count unchanged at 65 (no commands added); catalog's "65 command files, 73 registrations" line
+  left as-is. G1's prompt block needed no rewrite — its gate reads this note for the registered names and
+  all its assumptions (descriptions name the skills, catalog/CLAUDE.md reconcile with disk, count 65) hold.
+
 ---
 
 ### G1 — Cross-references into existing skills, the gate, and file the plan
@@ -350,6 +484,15 @@ name the new skills, `CLAUDE.md`/`docs/skills-catalog.md` reconcile with disk, c
 - Close out per "Close-out — every task": `As built`, delete prompts, rewrite `Status:`, `git mv` the
   plan to `docs/plans/implemented/008-cloud-security-lane.md`, one commit.
 - **Not in G1:** any new skill (C1–B1); registration/routing (W1).
+
+**As built (2026-10-31):** the five §4 cross-references are wired into the existing skills, each in that skill's own Cross-references voice:
+- `devops/cloud-posture/SKILL.md:245` — bullet pointing at `cloud-recon-enumeration` + `cloud-attack-{aws,azure,gcp}` as the offensive counterpart (posture↔exploitation handoff).
+- `devops/threat-modeling/SKILL.md:142` — bullet routing a high IaaS threat to `cloud-recon-enumeration` + the provider skills, as the exploitation counterpart to the posture pass.
+- `devops/iac-security/SKILL.md:480` — "Cloud application security (M12)" note (per research `06-devsecops-appsec.md` §6): this is the cloud-app-security IaC/config lane; image→`qa-*:image-infra-scan`, signing/SBOM/SLSA→`supply-chain-security`, SAST/DAST/SCA→`qa-*` lanes.
+- `security/detection-engineering/SKILL.md:128` — bullet naming `cloud-incident-response` as the consumer of this authoring half (cloud detections authored/tested here, validated by `purple-team-engineer`).
+- `security/compliance-evidence-mapping/SKILL.md:44-45` (two BCDR register rows) + `:84` (cross-ref pointer) — SOC 2 **A1.2/A1.3** · ISO 27001:2022 **A.5.29/A.5.30** · NIST CSF 2.0 **RECOVER (RC.RP/RC.CO)** → `security/cloud-incident-response/references/cloud-resilience.md`, wording from research `08-grc-bcdr.md` §"BCDR → compliance crosswalk".
+
+Gate (§5a) run and **green**: `marketplace.json` parses; all five skills have `SKILL.md` with `---` frontmatter; both plugin descriptions name the new skills; command count still **65**; all intra-repo cross-ref targets (incl. `cloud-resilience.md`) resolve; `CLAUDE.md:257` + `docs/skills-catalog.md` reconcile with the five `security/cloud-*` dirs on disk. **Nothing needed fixing** — all of C1–W1 landed consistent with the gate. One tooling note: the §5a loop's `grep -qx '---'` is rejected by BSD/macOS grep (reads `---` as flags); re-run with `grep -qxe '---'` it passes — a portability quirk in the gate snippet, not a skill defect.
 
 ---
 
@@ -393,6 +536,27 @@ deploy, teardown. The skill the lab belongs to owns its bootstrap; a standalone 
 one caller per provider (KISS, same reasoning as D2). Cost: bootstrap is discoverable only from inside
 the provider skill, not as a top-level skill; accepted.
 
+**D7 — A3 patterned against C1, not A2, because A2 had not landed yet (2026-10-31).** A1/A2/A3/B1 are
+independent of each other by design (each depends only on C1), so the queue is free to run them in any
+order; A3 ran before A1/A2. Its prompt named A2's SKILL.md as the sibling pattern to read, but that file
+did not exist at run time. A3 used `security/cloud-recon-enumeration/SKILL.md` (C1 — the one skill in the
+lane that had actually landed) as the sibling pattern instead, which already carries the frontmatter
+shape, the `#volatile` authorization block, and the ATT&CK-Cloud framing every provider skill shares.
+Cost: A3's prose was not cross-checked against A1/A2's actual phrasing for provider-specific idiom
+(e.g. how each skill names its own "Not in <task>" fence); accepted because the shared shape comes from
+C1 either way, and G1's §5a gate is the first point the three provider skills are cross-checked against
+each other regardless of authoring order.
+
+**D8 — BCDR crosswalk entered as two register rows, not one (2026-10-31).** §4 named "a BCDR crosswalk
+row"; G1 added **two** rows to `compliance-evidence-mapping`'s evidence register — A1.2 (recovery
+capability built) and A1.3 (recovery proved by drill). Reading: the research corpus (`08-grc-bcdr.md`
+§"BCDR → compliance crosswalk" and its notes) is explicit that A1.2/A1.3 stay two rows because "A1.2 =
+you built the recovery capability; A1.3 = you proved it works" and the drill (A1.3) is the row that
+generates audit exceptions — collapsing them would hide the gap the whole crosswalk exists to surface.
+Cost: one extra register row; accepted because it matches the research the §4 line summarized and keeps
+the `#partial`/`#gap` status tiering honest. ISO A.5.29/A.5.30 and NIST CSF RECOVER are carried across
+those two rows as §4 specified.
+
 ## Answered questions (2026-10-21)
 
 **O1 — How much of the curriculum? :** full parity — every one of the 14 modules has an owning skill or
@@ -435,259 +599,3 @@ Before you stop, in this order, in this file:
    name and number.
 7. **Commit** — the skill files and these plan edits together, in one commit.
 
----
-
-## Prompts — one per task
-
-Run them in order, one session each; each block is complete on its own. **No prompt runs the gate
-except G1** — C1, A1, A2, A3, B1 and W1 each carry `Gate: none`. No prompt stands up a real cloud
-account or runs any tool; these skills are authored, not executed. All prompts are live (nothing has
-landed yet).
-
-| # | Stack | Agent | Depends on | Budget |
-|---|---|---|---|---|
-| C1 | `docs` | `general-purpose` | — | ~95k |
-| A1 | `docs` | `general-purpose` | C1 | ~110k |
-| A2 | `docs` | `general-purpose` | C1 | ~105k |
-| A3 | `docs` | `general-purpose` | C1 | ~100k |
-| B1 | `docs` | `general-purpose` | — | ~100k |
-| W1 | `docs` | `general-purpose` | C1, A1, A2, A3, B1 | ~115k |
-| G1 | `docs` | `general-purpose` | W1 | ~120k |
-
----
-
-### A1 — `cloud-attack-aws` (general-purpose, docs)
-
-````
-You are authoring a skill (docs). Task A1 of docs/plans/008-cloud-security-lane.md: write
-`security/cloud-attack-aws/SKILL.md` + its four references — AWS exploitation (IAM privesc, EC2/S3/RDS,
-Pacu/ScoutSuite), binding to cloud-recon-enumeration for recon feedstock.
-
-Read, in this order:
-1. CLAUDE.md.
-2. The plan: §2, §3.1, task A1, "Close-out — every task".
-3. `security/cloud-recon-enumeration/SKILL.md` as C1 left it — the sibling pattern + the recon handoff
-   you consume. Match its frontmatter and safety-gate shape.
-4. `security/privilege-escalation/SKILL.md` — the privesc-chain idiom (enumerate → identify → exploit
-   least-risky path).
-5. `devops/aws-deployment/SKILL.md` + `devops/cloud-posture/SKILL.md` §intro — AWS-service context and
-   the posture handoff.
-6. `docs/research/cloud-security/03-aws.md` — the research corpus for THIS skill (the 21 Rhino privesc
-   paths with exact permissions, Pacu/CloudFox/PMapper, service exploitation, GuardDuty finding ids,
-   CloudGoat scenarios). Lift facts from it; heed its verify-against-repo and IMDSv1-live-risk notes, and
-   the README currency ledger.
-
-Write:
-- `security/cloud-attack-aws/SKILL.md`: frontmatter fenced vs C1/cloud-posture/initial-access/
-  atomic-simulation; the §2 gate; lab targets CloudGoat / flaws.cloud / IAM Vulnerable (owned-lab only);
-  teaching body — IAM privesc paths (T1098), EC2 metadata/user-data/snapshot, S3 abuse (T1619), RDS
-  testing, CloudTrail/GuardDuty detection-surface awareness (what trips an alert — NOT evasion, see D5).
-- `references/pacu.md`, `references/cloudfox.md`, `references/pmapper.md`, `references/s3-attacks.md`,
-  `references/lab-setup.md` (stand up CloudGoat / flaws.cloud / IAM Vulnerable in an OWNED account:
-  prerequisites, deploy, teardown — the owned-lab the skill practises against).
-
-Traps:
-- D5: teach detection *awareness*, never stealth/evasion-for-a-real-target.
-- Loot redaction (§2.5): a recovered key is reported as blast radius, never its value.
-- Name the handoff to pentest-reporting (CVSS + ATT&CK-Cloud id) and to cloud-incident-response.
-
-Gate: none — gates in G1. Do not run the build, any linter, the §5a gate, or any tool.
-
-Commit: `feat(penetration-testing): cloud-attack-aws skill (cloud lane A1)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
-
-### A2 — `cloud-attack-azure` (general-purpose, docs)
-
-````
-You are authoring a skill (docs). Task A2 of docs/plans/008-cloud-security-lane.md: write
-`security/cloud-attack-azure/SKILL.md` + its four references — Entra ID / managed-identity / Key Vault /
-Azure RBAC exploitation.
-
-Read, in this order:
-1. CLAUDE.md.
-2. The plan: §2, §3.1, task A2, "Close-out — every task".
-3. `security/cloud-attack-aws/SKILL.md` as A1 left it — the just-landed sibling; match its shape.
-4. `devops/azure-deployment/SKILL.md` §intro — Azure-service context.
-5. `security/lateral-movement/SKILL.md` — the cloud-pivot idiom.
-6. `docs/research/cloud-security/04-azure.md` — the research corpus for THIS skill (two-plane model,
-   Entra enumeration, managed-identity/Key Vault/RBAC privesc, detection surface). Heed its tooling
-   currency: ROADrecon `gather` is broken (needs the msgraph fork), Stormspotter is dormant (use
-   AzureHound+BloodHound), Hybrid-Worker ListKeys is partly mitigated — version-check before teaching.
-   Also the README currency ledger.
-
-Write:
-- `security/cloud-attack-azure/SKILL.md`: frontmatter fenced vs A1/A3/defensive lanes; §2 gate; lab
-  target AzureGoat; teaching body — Entra ID enumeration (T1087), managed-identity/service-principal
-  abuse (T1078.004), Key Vault access testing, Azure RBAC privesc, Sentinel/Defender detection-surface
-  awareness (D5).
-- `references/roadtools.md`, `references/azurehound.md`, `references/microburst.md`,
-  `references/azure-keyvault.md`, `references/lab-setup.md` (stand up AzureGoat in an OWNED tenant:
-  prerequisites, deploy, teardown).
-
-Traps:
-- "Azure AD" is now "Entra ID" — use the current name, note the old one once.
-- D5 (awareness not evasion); §2.5 loot redaction.
-
-Gate: none — gates in G1. Do not run the build, any linter, the §5a gate, or any tool.
-
-Commit: `feat(penetration-testing): cloud-attack-azure skill (cloud lane A2)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
-
-### A3 — `cloud-attack-gcp` (general-purpose, docs)
-
-````
-You are authoring a skill (docs). Task A3 of docs/plans/008-cloud-security-lane.md: write
-`security/cloud-attack-gcp/SKILL.md` + its three references — GCP IAM / service-account / storage
-exploitation. This is the first skill that ATTACKS GCP (cloud-posture only reads it).
-
-Read, in this order:
-1. CLAUDE.md.
-2. The plan: §2, §3.1, task A3, "Close-out — every task".
-3. `security/cloud-attack-azure/SKILL.md` as A2 left it — the sibling pattern.
-4. `devops/cloud-posture/SKILL.md` — name the GCP posture↔exploitation handoff.
-5. `docs/research/cloud-security/05-gcp.md` — the research corpus for THIS skill (SA-impersonation spine
-   via the IAM Credentials API verbs, the ~20 privesc methods split IAM/non-IAM with exact permissions,
-   GCS/metadata/Secret Manager, GCPGoat). Critical currency note it carries: the Compute default SA no
-   longer auto-gets Editor on new projects — DETECT, don't assume. Also the README currency ledger.
-
-Write:
-- `security/cloud-attack-gcp/SKILL.md`: frontmatter fenced vs A1/A2; §2 gate; lab target GCPGoat;
-  teaching body — GCP IAM/resource enumeration (T1580), service-account impersonation & key abuse
-  (T1078.004, privesc via iam.serviceAccounts.* chains), Cloud Storage bucket attacks (T1619), Security
-  Command Center detection-surface awareness (D5).
-- `references/gcp-enum.md`, `references/gcp-privesc.md`, `references/gcp-bucket-brute.md`,
-  `references/lab-setup.md` (stand up GCPGoat in an OWNED project: prerequisites, deploy, teardown).
-
-Traps:
-- GCP privesc is dominated by service-account impersonation chains — make that the spine.
-- D5 (awareness not evasion); §2.5 loot redaction.
-
-Gate: none — gates in G1. Do not run the build, any linter, the §5a gate, or any tool.
-
-Commit: `feat(penetration-testing): cloud-attack-gcp skill (cloud lane A3)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
-
-### B1 — `cloud-incident-response` (general-purpose, docs)
-
-````
-You are authoring a skill (docs). Task B1 of docs/plans/008-cloud-security-lane.md: write
-`security/cloud-incident-response/SKILL.md` + its four references — cloud IR runbook, cloud forensics,
-and BCDR (as cloud-resilience.md). Defensive, for the security-governance plugin.
-
-Read, in this order:
-1. CLAUDE.md.
-2. The plan: §2, §3.2, §4 (the BCDR crosswalk you set up here for G1 to wire), task B1,
-   "Close-out — every task".
-3. `security/detection-engineering/SKILL.md` + `security/detection-validation/SKILL.md` — the detection
-   half this skill CONSUMES (author → validate → respond). Fence against them cleanly.
-4. `security/compliance-evidence-mapping/SKILL.md` — for the BCDR crosswalk idiom (SOC 2 / ISO / NIST).
-5. `docs/research/cloud-security/07-secops-ir-forensics.md` (IR lifecycle, three-cloud log map, forensic
-   acquisition, runbooks) and `docs/research/cloud-security/08-grc-bcdr.md` §BCDR (→ your
-   `cloud-resilience.md`). Anchor to NIST SP 800-61r3 (CSF-2.0-aligned, 2025) AND PICERL; cover both the
-   Sentinel Log-Analytics and Defender-portal paths. Also the README currency ledger.
-
-Write:
-- `security/cloud-incident-response/SKILL.md`: frontmatter `name: cloud-incident-response`, fenced vs
-  detection-engineering (authors) / detection-validation (asserts fired) / observability (app telemetry)
-  / cloud-posture (posture). This skill owns RESPOND + RECOVER, not detect. Teaching body — the IR
-  lifecycle per cloud (detect→triage→contain→eradicate→recover), cloud forensic acquisition
-  (EC2/Azure-disk/GCP-disk snapshot, log-store pulls, chain-of-custody).
-- `references/aws-ir.md`, `references/azure-ir.md`, `references/gcp-ir.md`,
-  `references/cloud-resilience.md` (BCDR: RTO/RPO, multi-region failover, backup-restore drills).
-
-Traps:
-- Do NOT author or validate detections here — that's detection-engineering/detection-validation. You
-  consume their output and respond.
-- The BCDR crosswalk ROW into compliance-evidence-mapping is G1's job; here you just write
-  cloud-resilience.md so G1 can point at it.
-
-Gate: none — gates in G1. Do not run the build, any linter, the §5a gate, or any tool.
-
-Commit: `feat(security-governance): cloud-incident-response skill (cloud lane B1)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
-
-### W1 — register the skills + teach the agents (general-purpose, docs)
-
-````
-You are wiring the lane in (docs). Task W1 of docs/plans/008-cloud-security-lane.md: register the five
-new skills in marketplace.json, extend both plugin descriptions, teach three agents the lane, and update
-the catalog. No new commands.
-
-Read, in this order:
-1. CLAUDE.md.
-2. The plan: §3 (the skill tables), §4, the bookkeeping note at the end of §2, task W1,
-   "Close-out — every task".
-3. `.claude-plugin/marketplace.json` — the `penetration-testing` and `security-governance` blocks
-   (skills[], description).
-4. `security/agents/penetration-tester.md`, `security/agents/security-architect.md`,
-   `security/agents/security-test-planner.md` — where each lists/routes skills.
-5. The five new skills' frontmatter (C1, A1, A2, A3, B1) — for exact names.
-6. `docs/skills-catalog.md` — the `security/` inventory + scope list sections.
-
-Do:
-- marketplace.json: add the four `./security/cloud-*` offensive skill paths to penetration-testing's
-  `skills[]`; add `./security/cloud-incident-response` to security-governance's `skills[]`. Extend both
-  plugin descriptions with one dense clause each naming the new skills (match the existing style).
-- penetration-tester.md: add the four cloud-attack skills to its kill-chain / loadable set (cloud lane).
-- security-architect.md: add cloud-incident-response to the lanes it rolls up.
-- security-test-planner.md: add all five to its routing catalog by EXACT name; a cloud platform now
-  routes a cloud-pentest + cloud-IR phase. Verify every name resolves.
-- docs/skills-catalog.md + CLAUDE.md: add the lane to the security inventory / scope list. Command count
-  STAYS 65 (no new commands — D4).
-
-Traps:
-- An invented agent/skill name is the most damaging defect — copy names from the files, don't retype.
-- Do NOT edit the existing *skills'* bodies for cross-refs — that's G1. You touch marketplace.json, the
-  3 agents, and the 2 catalog files only.
-
-Gate: none — gates in G1. Do not run the §5a gate here.
-
-Commit: `feat(security): register cloud lane in marketplace + agents + catalog (cloud lane W1)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
-
-### G1 — cross-references, the gate, and file the plan (general-purpose, docs)
-
-````
-You are closing the plan out (docs). Task G1 of docs/plans/008-cloud-security-lane.md, the LAST task:
-wire the §4 cross-references into the existing skills, run the plan's only gate, and file the plan.
-
-Read, in this order:
-1. CLAUDE.md.
-2. The plan: §4 (the cross-reference table — exactly what to add where), §5a (the gate), task G1,
-   "Close-out — every task", and §8-equivalent filing in the close-out.
-3. The five existing skills that gain a cross-ref: `devops/cloud-posture/SKILL.md`,
-   `devops/threat-modeling/SKILL.md`, `devops/iac-security/SKILL.md`,
-   `security/detection-engineering/SKILL.md`, `security/compliance-evidence-mapping/SKILL.md`.
-4. W1's "As built" note in the plan — so you cross-ref the names W1 actually registered.
-5. `docs/research/cloud-security/06-devsecops-appsec.md` §6 (paste-ready cross-reference wording for the
-   DevSecOps/IaC lane) and `docs/research/cloud-security/08-grc-bcdr.md` §"BCDR → compliance crosswalk"
-   (the exact SOC 2 A1.2/A1.3 · ISO A.5.29/A.5.30 · NIST CSF RECOVER rows).
-
-Do:
-- Add the §4 cross-reference lines (one or two sentences each, in the existing voice):
-  cloud-posture → the offensive provider skills (posture↔exploitation handoff); threat-modeling →
-  cloud-recon-enumeration; iac-security + the DevSecOps lane → a "cloud-app-security" note;
-  detection-engineering → named as the authoring half cloud-incident-response consumes;
-  compliance-evidence-mapping → the BCDR crosswalk row (SOC 2 A1.2/A1.3 · ISO 27001:2022
-  A.5.29–A.5.30 · NIST CSF RC) pointing at cloud-incident-response/references/cloud-resilience.md.
-
-Gate (this is the last task — the plan's only gate, §5a):
-  python3 -c "import json;json.load(open('.claude-plugin/marketplace.json'))"
-  for s in security/cloud-recon-enumeration security/cloud-attack-aws security/cloud-attack-azure \
-           security/cloud-attack-gcp security/cloud-incident-response; do
-    test -f "$s/SKILL.md" && head -1 "$s/SKILL.md" | grep -qx '---' || echo "MISSING/BAD: $s"; done
-  Then by reading: no broken cross-ref link; both plugin descriptions name the new skills;
-  CLAUDE.md + docs/skills-catalog.md reconcile with the skills on disk; command count still 65.
-  Fix what it finds — a failure may belong to any task above (C1–W1), not only to you.
-
-Then file: rewrite Status: one final time, `git mv docs/plans/008-cloud-security-lane.md
-docs/plans/implemented/`, delete your prompt block (leaving none).
-
-Commit: `feat(security): cloud lane cross-references + gate; file plan 008 (cloud lane G1)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````

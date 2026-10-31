@@ -139,5 +139,6 @@ docs/security/threat-models/<NNN>-<system>.md
 - `security-test-planner` — consumes the register to sequence a platform's assessment across lanes.
 - `qa-security` — the app-layer executor for authz/authn/injection/exposure threats (`permission-testing`, the `_shared/security-testing/*` scanners, `exploit-validation`); the threat model this produces replaces its inline Step-1 model.
 - `penetration-tester` (`security/` domain) — the executor for threats whose real impact is a multi-stage chain.
+- `security/cloud-recon-enumeration` + the `security/cloud-attack-{aws,azure,gcp}` provider skills — for a cloud/IAM threat (an IaaS-platform ATT&CK row), the offensive lane that tests it: recon enumerates the account surface the DFD modelled, then the provider skill chains the privilege path. Route a high IaaS threat here as the exploitation counterpart to the `infra-security-tester` posture pass.
 - `data-architect` — owns the data-tier trust boundary and the cross-tenant leak test that proves a tenancy threat's mitigation holds.
 - `business-analysis:process-flow` / `business-analysis:decision-table` — the requirements-side flow/decision modelling; the fence is business process (theirs) vs security threats (this).
