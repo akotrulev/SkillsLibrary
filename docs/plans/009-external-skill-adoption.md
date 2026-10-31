@@ -180,6 +180,7 @@ ends in `## Provenance` naming `mattpocock/skills@<commit>` (MIT, adapted). Not 
 
 - Record the upstream commit. Adapt the technique, not the text.
 - **Not in S2:** the `brainstorming` pointer (W1).
+- **As built (2026-10-31):** `engineering-practices/decision-interview/SKILL.md` written, `name: decision-interview`, unregistered. Upstream `mattpocock/skills@a496f5513d4a4cf889bc48e189e579f4b0bdf6aa` (MIT), recorded in its closing `## Provenance`. Differs from upstream on purpose: upstream asks a whole frontier of numbered questions per round and dispatches sub-agents for facts; this skill asks one question per message, restates each answer with the branch it closes or opens, and looks facts up itself in the one session. Hands off to `/dev:design`'s approval gate or a plan's `## Answered questions`; sends loose asks to `/dev:refine`. Trigger phrases avoid the word "requirements" (it appears twice in the body, only to describe `/dev:refine`). Unverified in a real session; no build or test run (Gate: none).
 
 ### S3 — `test-audit`: a saved sweep for tests not worth their upkeep
 
@@ -412,40 +413,6 @@ Gate: none. This plan gates once, in W1. Do not run tools/plugin-surface-check.p
 
 Commit: `feat(dev): quality-constraints and source-grounding skills (009 S1)`.
 Put the upstream commit and both names in your As built note, since W1 reads them.
-Close out per the plan's "Close-out — every task" before you stop.
-````
-
-### S2 — `decision-interview` (general-purpose, docs)
-
-````
-Depends on: none
-
-You are a skill author. Task S2 of docs/plans/009-external-skill-adoption.md: write a new dev skill that
-closes every open branch of a design, one question at a time.
-
-Deliverable: engineering-practices/decision-interview/SKILL.md exists, saying what plan §3 requires, and
-ends in `## Provenance` naming `mattpocock/skills@<commit>` (MIT, adapted). Not registered.
-
-Read, in this order:
-1. CLAUDE.md: Comments, Planning.
-2. The plan: §1 (third row), §2, §3 (the table, plus "What each skill must say" → decision-interview),
-   and "Close-out — every task".
-3. .skill-template/reference.SKILL.md.
-4. engineering-practices/brainstorming/SKILL.md: the skill this one complements.
-5. business-analysis/agents/requirements-author.md: its interview step only. It is the /dev:refine front
-   door, and your skill must say when to send the user there instead.
-6. Upstream: clone github.com/mattpocock/skills, record `git rev-parse HEAD`, and read grilling and
-   grill-me.
-
-Traps:
-- One interactive session. Describe no subagents.
-- Do not use the word "requirements" in the name or the trigger phrases; that is /dev:refine's.
-- Do not edit brainstorming/SKILL.md. W1 adds the pointer.
-
-Gate: none. Gates in W1.
-
-Commit: `feat(dev): decision-interview skill (009 S2)`.
-Put the upstream commit in your As built note.
 Close out per the plan's "Close-out — every task" before you stop.
 ````
 
