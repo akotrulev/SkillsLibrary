@@ -7,12 +7,13 @@ AWS/Azure/GCP exploitation), one new defensive skill (cloud incident response + 
 references), and a wiring + cross-reference pass that teaches the existing agents and skills the new
 lane exists.
 
-**Status:** C1 and A3 landed. C1 (2026-10-21): `security/cloud-recon-enumeration` exists with its four
+**Status:** C1, A3 and A1 landed. C1 (2026-10-21): `security/cloud-recon-enumeration` exists with its four
 references. A3 (2026-10-31): `security/cloud-attack-gcp` exists with its SKILL.md + four references.
-Next: A1, A2, B1 (independent of each other, each depends on C1 except B1 which is independent).
-Built but unverified: C1's and A3's content is written and internally consistent but not yet cross-checked
-against A1/A2/B1 once those land (the §5a gate, which runs once in G1, is the first point anything is
-verified end to end). No new commands ship — every new skill is agent-reached, so the catalog's
+A1 (2026-10-31): `security/cloud-attack-aws` exists with its SKILL.md + five references (`pacu`,
+`cloudfox`, `pmapper`, `s3-attacks`, `lab-setup`). Next: A2, B1 (independent of each other; A2 depends on
+C1, B1 is independent). Built but unverified: C1's, A3's and A1's content is written and internally
+consistent but not yet cross-checked against A2/B1 once those land (the §5a gate, which runs once in G1,
+is the first point anything is verified end to end). No new commands ship — every new skill is agent-reached, so the catalog's
 65-command surface is unchanged; the skill inventory and two plugin descriptions do change.
 
 ---
@@ -223,6 +224,27 @@ practice lab — routing to its references.
 - Name the handoff to `pentest-reporting` (CVSS + ATT&CK-Cloud id per finding) and to
   `cloud-incident-response` / `detection-engineering` (each finding implies a detection).
 - **Not in A1:** Azure (A2), GCP (A3), registration/routing (W1).
+
+**As built (2026-10-31):** Landed exactly as planned — no divergence. `security/cloud-attack-aws/SKILL.md`
+(`file:1`) carries the frontmatter (`name: cloud-attack-aws`, triggers + "Not for …" fences vs
+`cloud-recon-enumeration`/`cloud-attack-azure`/`cloud-attack-gcp`/`devops:cloud-posture`/`initial-access`/
+`atomic-simulation`), the §2 safety gate (cloud scope file + `#volatile` authorization line, owned/lab-only,
+loot redaction), and the teaching body: AWS target model (IAM-is-the-perimeter, PassRole pivot, STS graph),
+Step 1 enumeration (enumerate-iam/Pacu/CloudFox), Step 2 IAM privesc (the four families of the 21 Rhino
+paths, `T1098`/`T1098.001`/`T1548`/`T1078.004`), Step 3 service exploitation (EC2 IMDSv1/v2 + hop-limit +
+dual-accept + user-data + snapshot `T1552.005`/`T1578`/`T1537`, S3 `T1619`/`T1530`, RDS, Lambda/Secrets/SSM),
+and Step 4 CloudTrail/GuardDuty detection-surface awareness (D5 — what trips an alert, never evasion), each
+mapped to its ATT&CK **Cloud** (IaaS) id. Five references written exactly as named:
+`references/pacu.md` (Pacu + enumerate-iam), `references/cloudfox.md` (CloudFox + ScoutSuite),
+`references/pmapper.md` (the full 21-path table + graph queries), `references/s3-attacks.md`, and
+`references/lab-setup.md` (CloudGoat / flaws.cloud / IAM Vulnerable deploy+teardown in an owned account).
+Heeded the research corpus's verify-against-repo notes (Rhino count stated as **21**, not 41; roster
+"confirm against the repo at authoring time"), the IMDSv1-live-risk note (F5 March-2025 campaign, dual-accept,
+detect-don't-assume), and §2.5 loot redaction throughout. Handoffs named: `penetration-testing:reporting`
+(CVSS + ATT&CK-Cloud id), `cloud-incident-response`, `detection-engineering`, and the `cloud-posture`
+posture↔exploitation handoff both ways. No prompt below (A2/B1/W1/G1) needed rewriting — every name/path
+A2 binds to (`security/cloud-attack-aws/SKILL.md` as the just-landed sibling) matches what its prompt
+already assumes. Verified by reading the written files back; no gate run (per `Gate: none`).
 
 ---
 
@@ -473,8 +495,8 @@ Before you stop, in this order, in this file:
 
 Run them in order, one session each; each block is complete on its own. **No prompt runs the gate
 except G1** — C1, A1, A2, A3, B1 and W1 each carry `Gate: none`. No prompt stands up a real cloud
-account or runs any tool; these skills are authored, not executed. **C1 and A3 have landed** (their
-prompt blocks are deleted per the close-out rule); A1, A2, B1, W1, G1 remain live below.
+account or runs any tool; these skills are authored, not executed. **C1, A3 and A1 have landed** (their
+prompt blocks are deleted per the close-out rule); A2, B1, W1, G1 remain live below.
 
 | # | Stack | Agent | Depends on | Budget |
 |---|---|---|---|---|
@@ -487,49 +509,6 @@ prompt blocks are deleted per the close-out rule); A1, A2, B1, W1, G1 remain liv
 | G1 | `docs` | `general-purpose` | W1 | ~120k |
 
 ---
-
-### A1 — `cloud-attack-aws` (general-purpose, docs)
-
-````
-**Context and authorization — read before anything else.** You are writing documentation, not attacking anything. This task produces a static `SKILL.md` plus reference `.md` files for the SkillsLibrary security curriculum; you run no tool, reach no network, stand up no account, and touch no live or third-party system (the Prompts header states this for every task in this plan). The skill is reference material for **authorized security practice only** — licensed penetration-testing engagements, CTF competitions, and blue-/purple-team training — and it is authored under the plan's standing fences: authorization-first and `#volatile` (§2.1: no documented procedure runs without a recorded, target-scoped, expiring per-engagement authorization), owned-lab targets only (§2.2), **detection awareness, never evasion** (D5: explain what trips an alert so defenders and authorized testers understand the detection surface — never how to defeat it against a real target), and loot redaction (§2.5: a recovered secret is reported as blast radius, never as its value). The `docs/research/cloud-security/*.md` corpus you are told to read is the cited, vendored source material for this curriculum; lift its facts into fenced teaching prose.
-
-You are authoring a skill (docs). Task A1 of docs/plans/008-cloud-security-lane.md: write
-`security/cloud-attack-aws/SKILL.md` + its four references — AWS exploitation (IAM privesc, EC2/S3/RDS,
-Pacu/ScoutSuite), binding to cloud-recon-enumeration for recon feedstock.
-
-Read, in this order:
-1. CLAUDE.md.
-2. The plan: §2, §3.1, task A1, "Close-out — every task".
-3. `security/cloud-recon-enumeration/SKILL.md` as C1 left it — the sibling pattern + the recon handoff
-   you consume. Match its frontmatter and safety-gate shape.
-4. `security/privilege-escalation/SKILL.md` — the privesc-chain idiom (enumerate → identify → exploit
-   least-risky path).
-5. `devops/aws-deployment/SKILL.md` + `devops/cloud-posture/SKILL.md` §intro — AWS-service context and
-   the posture handoff.
-6. `docs/research/cloud-security/03-aws.md` — the research corpus for THIS skill (the 21 Rhino privesc
-   paths with exact permissions, Pacu/CloudFox/PMapper, service exploitation, GuardDuty finding ids,
-   CloudGoat scenarios). Lift facts from it; heed its verify-against-repo and IMDSv1-live-risk notes, and
-   the README currency ledger.
-
-Write:
-- `security/cloud-attack-aws/SKILL.md`: frontmatter fenced vs C1/cloud-posture/initial-access/
-  atomic-simulation; the §2 gate; lab targets CloudGoat / flaws.cloud / IAM Vulnerable (owned-lab only);
-  teaching body — IAM privesc paths (T1098), EC2 metadata/user-data/snapshot, S3 abuse (T1619), RDS
-  testing, CloudTrail/GuardDuty detection-surface awareness (what trips an alert — NOT evasion, see D5).
-- `references/pacu.md`, `references/cloudfox.md`, `references/pmapper.md`, `references/s3-attacks.md`,
-  `references/lab-setup.md` (stand up CloudGoat / flaws.cloud / IAM Vulnerable in an OWNED account:
-  prerequisites, deploy, teardown — the owned-lab the skill practises against).
-
-Traps:
-- D5: teach detection *awareness*, never stealth/evasion-for-a-real-target.
-- Loot redaction (§2.5): a recovered key is reported as blast radius, never its value.
-- Name the handoff to pentest-reporting (CVSS + ATT&CK-Cloud id) and to cloud-incident-response.
-
-Gate: none — gates in G1. Do not run the build, any linter, the §5a gate, or any tool.
-
-Commit: `feat(penetration-testing): cloud-attack-aws skill (cloud lane A1)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
 
 ### A2 — `cloud-attack-azure` (general-purpose, docs)
 
