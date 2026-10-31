@@ -477,4 +477,5 @@ jobs:
   infrastructure (the library's auditor↔engineer handshake).
 - `devops/{github-actions,gitlab-ci,azure-pipelines}` — where the gate is wired (**deploy** pipeline, not
   `qa/cicd/*`), including OIDC for the plan credentials and the SARIF upload.
+- **Cloud application security (M12) — this is the cloud-app-security IaC/config lane.** Cloud-native IaC/config scanning is this skill (prefer `trivy config`; tfsec is folded into Trivy, legacy rule ids map to Trivy AVD; Checkov/Terrascan are the alternatives). Container/image scanning (base-image CVEs, baked-in secrets) is owned by `qa-{java,dotnet,typescript}:image-infra-scan`, not here; artifact signing, SBOM and SLSA provenance by `devops/supply-chain-security`. The rest of the DevSecOps lane maps out too: SAST → `qa-*:code-scan`, DAST → `qa-*:{active,passive}-scan`, SCA → `qa-*:dependency-scan`. No behaviour change — a pointer so the cloud-app-security reader lands on the existing owner.
 - `references/checkov.md` · `references/opa-conftest.md` · `references/other-scanners.md` — the deep dives.
