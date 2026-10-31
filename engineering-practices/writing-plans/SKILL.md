@@ -13,6 +13,8 @@ Document what they need: what exists today and what is missing, the decisions al
 they cost, which files each task touches, the real values the code will use, and the traps that
 specific task will hit. DRY. YAGNI. Frequent commits.
 
+A decision bound to a framework or version cites its official doc: see `source-grounding`.
+
 **The plan document format is a contract — read it before writing anything.** It is at
 [`./references/plan-format.md`](./references/plan-format.md): the header, the numbered sections, the
 task block's fields, the gate-once rule, and the `## Prompts — one per task` section. This skill is

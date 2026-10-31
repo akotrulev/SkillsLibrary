@@ -11,6 +11,8 @@ wrong, would a test fail?"** Coverage proves a line *executed*; it says nothing 
 calls the code and asserts nothing meaningful. Mutation testing is the only automated way to measure that
 gap. **PIT (pitest)** is the state-of-the-art mutation engine for the JVM and the tool for this stack.
 
+Mutation proves a test catches faults; `test-audit` proves it is worth keeping.
+
 > **Stack scope:** PIT operates on **JVM bytecode** (Java, Kotlin), so this skill is the Java-stack
 > implementation. The discipline is identical on other stacks but the tool changes — use the sibling skill,
 > don't force PIT:

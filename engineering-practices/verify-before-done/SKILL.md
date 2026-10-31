@@ -11,6 +11,8 @@ description: Use when about to claim work is complete, fixed, or passing, before
 
 If you haven't run the verification command in this message, you cannot claim it passes.
 
+`quality-constraints` is the during-work counterpart to this end-of-work evidence gate.
+
 **Inside a plan task, the prompt block's `Gate:` line decides what you run:** a `Gate: none` task runs nothing and reports its work as "written, not run", never "passing"; a `Gate: own tests` task runs exactly the command its block names — its own tests and the acceptance tests it must turn green — reports those results, and runs nothing else.
 
 ## The Gate Function

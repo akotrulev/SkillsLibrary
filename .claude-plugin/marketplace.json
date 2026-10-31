@@ -12,7 +12,7 @@
   "plugins": [
     {
       "name": "dev",
-      "description": "The developer-workflow layer every other plugin depends on: brainstorming into a design (/dev:design), implementation plans (/dev:plan-feature), systematic debugging, verify-before-done, spec-vs-code and feature audits, and the whole-application planning lane — solution blueprint, data-model, experience, API-surface and integration plans, epic map, delivery plan and session budget (/dev:plan-system). Ships the requirements-author front door (/dev:refine), the be-documenter and be-feature-documenter reverse-documentation agents (/dev:document-system, /dev:document-feature), and the read-only code-auditor engagement agent (/dev:audit) that saves versioned findings to docs/audits/. Installed automatically as a dependency of every qa-*, fe-*, mobile-*, be-* plugin, devops and business-analysis; install it on its own for planning, documentation and audits without a stack plugin.",
+      "description": "The developer-workflow layer every other plugin depends on: brainstorming into a design (/dev:design), implementation plans (/dev:plan-feature), systematic debugging, verify-before-done, spec-vs-code and feature audits, and the whole-application planning lane — solution blueprint, data-model, experience, API-surface and integration plans, epic map, delivery plan and session budget (/dev:plan-system). Ships the requirements-author front door (/dev:refine), the be-documenter and be-feature-documenter reverse-documentation agents (/dev:document-system, /dev:document-feature), and the read-only code-auditor engagement agent (/dev:audit) that saves versioned findings to docs/audits/. Also ships the working-discipline skills quality-constraints (the rules checked during the work), source-grounding (framework and version decisions cited to the version's official doc), decision-interview (one question at a time until no branch is open) and notebooklm (source-grounded answers from the user's own NotebookLM notebooks). Installed automatically as a dependency of every qa-*, fe-*, mobile-*, be-* plugin, devops and business-analysis; install it on its own for planning, documentation and audits without a stack plugin.",
       "source": "./",
       "strict": false,
       "author": {
@@ -33,6 +33,10 @@
         "./engineering-practices/writing-plans",
         "./engineering-practices/systematic-debugging",
         "./engineering-practices/verify-before-done",
+        "./engineering-practices/quality-constraints",
+        "./engineering-practices/source-grounding",
+        "./engineering-practices/decision-interview",
+        "./engineering-practices/notebooklm",
         "./engineering-practices/spec-vs-code-audit",
         "./engineering-practices/feature-audit",
         "./backend/_shared/solution-blueprint",
@@ -64,7 +68,7 @@
     },
     {
       "name": "design",
-      "description": "The stack-agnostic design-craft layer for web and mobile UIs: the vendored ui-ux-pro-max design-intelligence corpus (88 styles, 192 palettes, 74 font pairings, 119 UX guidelines, 105 icons, 34 landing patterns, 17 motion presets, 25 chart types and 22 stack files, searchable offline) that is the source of truth for every design fact, plus visual-identity, tokens, charts, brand-import, iconography, ux-patterns, landing-patterns, motion, ux-review, theme-presets, ux-writing, ui-code-audit, accessible-by-design, ethical-patterns and ai-experience, and the design-auditor agent (/design:audit) — a read-only design audit of an existing UI saved to docs/audits/. Installed automatically as a dependency of every fe-* and mobile-* plugin.",
+      "description": "The stack-agnostic design-craft layer for web and mobile UIs: the vendored ui-ux-pro-max design-intelligence corpus (88 styles, 192 palettes, 74 font pairings, 119 UX guidelines, 105 icons, 34 landing patterns, 17 motion presets, 25 chart types and 22 stack files, searchable offline) that is the source of truth for every design fact, plus visual-identity, tokens, charts, brand-import, iconography, ux-patterns, landing-patterns, motion, ux-review, theme-presets, ux-writing, ui-code-audit, accessible-by-design, ethical-patterns, ai-experience and html-video (render an HTML composition to MP4 via HyperFrames), and the design-auditor agent (/design:audit) — a read-only design audit of an existing UI saved to docs/audits/. Installed automatically as a dependency of every fe-* and mobile-* plugin.",
       "source": "./",
       "strict": false,
       "author": {
@@ -89,6 +93,7 @@
         "./design/iconography",
         "./design/landing-patterns",
         "./design/motion",
+        "./design/html-video",
         "./design/theme-presets",
         "./design/ui-code-audit",
         "./design/ui-ux-pro-max",
@@ -106,7 +111,7 @@
     },
     {
       "name": "qa-java",
-      "description": "Self-contained senior automation-QA plugin for Java 21 (RestAssured + TestNG, Selenium/Playwright/Appium, Gatling, Cucumber-JVM). Covers every discipline end-to-end: API/UI/mobile/performance/LLM test authoring and review, BDD living documentation, deep verification (DB, messaging, email, files, websockets), Pact contracts, chaos and feature-flag testing. Bundles the language-agnostic manual-QA process skills, CI/CD pipeline skills, test reporting (Allure + flaky-test quarantine), and the cross-stack OWASP-mapped security skills and qa-security agent — install just this one plugin for a complete Java QA toolkit.",
+      "description": "Self-contained senior automation-QA plugin for Java 21 (RestAssured + TestNG, Selenium/Playwright/Appium, Gatling, Cucumber-JVM). Covers every discipline end-to-end: API/UI/mobile/performance/LLM test authoring and review, BDD living documentation, deep verification (DB, messaging, email, files, websockets), Pact contracts, chaos and feature-flag testing. Bundles the language-agnostic manual-QA process skills, CI/CD pipeline skills, test reporting (Allure + flaky-test quarantine), and the cross-stack OWASP-mapped security skills and qa-security agent — a read-only test-suite audit (test-audit) that ranks tests by upkeep against protection — install just this one plugin for a complete Java QA toolkit.",
       "source": "./",
       "strict": false,
       "author": {
@@ -141,6 +146,7 @@
         "./qa/_shared/security-testing/exploit-validation",
         "./qa/_shared/security-testing/vuln-reachability",
         "./qa/_shared/security-testing/source-audit",
+        "./qa/_shared/test-audit",
         "./qa/_shared/security-testing/client-side-security",
         "./qa/_shared/security-testing/mobile-app-scan",
         "./qa/_shared/security-testing/mobile-runtime-testing",
@@ -243,7 +249,7 @@
     },
     {
       "name": "qa-dotnet",
-      "description": "Self-contained senior automation-QA plugin for .NET 10 / C#, 8-9 supported and version-aware (NUnit + RestSharp, Playwright/Selenium/Appium, NBomber, Reqnroll). Covers every discipline end-to-end: project scaffolding from zero (API/UI/mobile/performance/BDD), API/UI/mobile/performance/LLM test authoring and review, BDD living documentation, deep verification (DB, messaging, email, files, websockets), Pact contracts, chaos and feature-flag testing, mutation testing (Stryker.NET). Bundles the language-agnostic manual-QA process skills, CI/CD pipeline skills, test reporting (Allure + flaky-test quarantine), and the cross-stack OWASP-mapped security skills and qa-security agent, plus a one-call read-only conformance audit (/qa-dotnet:audit) that sweeps an existing test suite against every convention above into a saved, re-runnable findings report — install just this one plugin for a complete .NET QA toolkit.",
+      "description": "Self-contained senior automation-QA plugin for .NET 10 / C#, 8-9 supported and version-aware (NUnit + RestSharp, Playwright/Selenium/Appium, NBomber, Reqnroll). Covers every discipline end-to-end: project scaffolding from zero (API/UI/mobile/performance/BDD), API/UI/mobile/performance/LLM test authoring and review, BDD living documentation, deep verification (DB, messaging, email, files, websockets), Pact contracts, chaos and feature-flag testing, mutation testing (Stryker.NET). Bundles the language-agnostic manual-QA process skills, CI/CD pipeline skills, test reporting (Allure + flaky-test quarantine), and the cross-stack OWASP-mapped security skills and qa-security agent, plus a one-call read-only conformance audit (/qa-dotnet:audit) that sweeps an existing test suite against every convention above into a saved, re-runnable findings report, and a read-only test-suite audit (test-audit) that ranks tests by upkeep against protection — install just this one plugin for a complete .NET QA toolkit.",
       "source": "./",
       "strict": false,
       "author": {
@@ -278,6 +284,7 @@
         "./qa/_shared/security-testing/exploit-validation",
         "./qa/_shared/security-testing/vuln-reachability",
         "./qa/_shared/security-testing/source-audit",
+        "./qa/_shared/test-audit",
         "./qa/_shared/security-testing/client-side-security",
         "./qa/_shared/security-testing/mobile-app-scan",
         "./qa/_shared/security-testing/mobile-runtime-testing",
@@ -385,7 +392,7 @@
     },
     {
       "name": "qa-typescript",
-      "description": "Self-contained senior automation-QA plugin for TypeScript (Vitest + fetch + Zod, Playwright/Appium, k6, playwright-bdd / CucumberJS). Covers every discipline end-to-end: API/UI/mobile/performance/LLM test authoring and review, BDD living documentation, deep verification (DB, messaging, email, files, websockets), Pact contracts, chaos and feature-flag testing. Bundles the language-agnostic manual-QA process skills, CI/CD pipeline skills, test reporting (Allure + flaky-test quarantine), and the cross-stack OWASP-mapped security skills and qa-security agent — install just this one plugin for a complete TypeScript QA toolkit.",
+      "description": "Self-contained senior automation-QA plugin for TypeScript (Vitest + fetch + Zod, Playwright/Appium, k6, playwright-bdd / CucumberJS). Covers every discipline end-to-end: API/UI/mobile/performance/LLM test authoring and review, BDD living documentation, deep verification (DB, messaging, email, files, websockets), Pact contracts, chaos and feature-flag testing. Bundles the language-agnostic manual-QA process skills, CI/CD pipeline skills, test reporting (Allure + flaky-test quarantine), and the cross-stack OWASP-mapped security skills and qa-security agent — a read-only test-suite audit (test-audit) that ranks tests by upkeep against protection — install just this one plugin for a complete TypeScript QA toolkit.",
       "source": "./",
       "strict": false,
       "author": {
@@ -420,6 +427,7 @@
         "./qa/_shared/security-testing/exploit-validation",
         "./qa/_shared/security-testing/vuln-reachability",
         "./qa/_shared/security-testing/source-audit",
+        "./qa/_shared/test-audit",
         "./qa/_shared/security-testing/client-side-security",
         "./qa/_shared/security-testing/mobile-app-scan",
         "./qa/_shared/security-testing/mobile-runtime-testing",

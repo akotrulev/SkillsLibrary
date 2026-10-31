@@ -61,6 +61,7 @@ Skills and commands are `/<plugin>:<name>`. A bare `/<name>` works while only on
 **One self-contained plugin per language** — `qa-java`, `qa-dotnet`, `qa-typescript`. Each is a complete QA toolkit for its stack: it bundles every discipline (API / UI / mobile / performance / LLM authoring and review, BDD living documentation, deep verification, contracts, chaos, feature flags) **plus** the shared, cross-cutting capabilities that used to be separate peer plugins:
 
 - **Manual QA** — the language-agnostic `qa/manual` process skills and the `qa-test-case-designer`, `qa-test-planner` and `qa-feature-spec-writer` agents (test-basis analysis, ISTQB design techniques, cross-feature test design, test-case / test-plan / bug-report / charter writing).
+- **Test audit** — `test-audit`, a read-only sweep that ranks tests by upkeep against protection and saves findings to `docs/audits/`.
 - **Security** — the cross-stack, OWASP-mapped `qa/_shared` scanner gates (ZAP, SAST, secrets, container/IaC, API fuzzing, Nuclei, TLS), the agent-driven `source-audit` (Cloudflare's vendored `security-audit` workflow), the stack-native security skills (BOLA/IDOR/BFLA access-control matrix, ZAP baseline, SCA), and the `qa-security` orchestrator agent.
 - **CI/CD** — the stack's `ci-pipelines` skill (GitHub Actions / Azure Pipelines / GitLab CI), the language-agnostic `ci-conventions`, and the `qa-cicd-<stack>` agent.
 - **Reporting** — Allure results wiring + flaky-test detection/quarantine and the `qa-reporting-<stack>` agent.
@@ -85,7 +86,7 @@ So installing a single plugin gives you the stack's authoring/verification skill
 
 ### The `dev` plugin and the always-on internals
 
-`dev` registers 17 skills, 5 agents and 5 commands: the design-then-plan pair (`/dev:design`, `/dev:plan-feature`), `debugging`, `verify`, the spec-compliance / feature audit pair (`audit-spec`, `audit-feature`), the eleven `backend/_shared` planning and documentation skills (`plan-delivery`, `plan-data-model`, `doc-feature-trace`, …) and the agents `code-auditor`, `solution-planner`, `be-documenter`, `be-feature-documenter` and `requirements-author`.
+`dev` registers 21 skills, 5 agents and 5 commands: the design-then-plan pair (`/dev:design`, `/dev:plan-feature`), `debugging`, `verify`, the spec-compliance / feature audit pair (`audit-spec`, `audit-feature`), the eleven `backend/_shared` planning and documentation skills (`plan-delivery`, `plan-data-model`, `doc-feature-trace`, …), the working-discipline skills `quality-constraints`, `source-grounding`, `decision-interview` and `notebooklm` and the agents `code-auditor`, `solution-planner`, `be-documenter`, `be-feature-documenter` and `requirements-author`.
 
 Three skills are **unregistered and loaded by path only** — they never appear in `/`, and every agent that needs one loads it from the installed repo checkout:
 
@@ -131,7 +132,7 @@ The manual-QA writers (`qa-<stack>:test-case-writer`, `qa-<stack>:test-plan-writ
 | `/fe-react` | what to build, fix, or extend | the step-by-step React / Next.js UI workflow |
 | `/fe-react:audit` *(fe-react only)* | *(none — or a path/section limiter)* | read-only sweep of the repo against the `fe-react` conventions → findings report in `docs/audits/` |
 
-The 16 `design` craft skills (`/design:corpus` — **the source of truth for design facts** — `/design:visual-identity`, `/design:tokens`, `/design:app-structure`, `/design:ux-review`, …) arrive through the `design` dependency and are skills, invoked by name; `/design:audit` runs them all as one audit.
+The 17 `design` craft skills (`/design:corpus` — **the source of truth for design facts** — `/design:visual-identity`, `/design:tokens`, `/design:app-structure`, `/design:ux-review`, `/design:html-video`, …) arrive through the `design` dependency and are skills, invoked by name; `/design:audit` runs them all as one audit.
 
 **`mobile-react-native` · `mobile-ios` · `mobile-android`** — 2 commands each:
 
@@ -241,7 +242,7 @@ observability/          # Grafana, OpenTelemetry, structured logging
 security/               # Security domain in two lanes: pentest kill chain + purple-team validation (penetration-testing) and defensive/governance (security-governance) + 4 agents
 training-data/          # LLM/VLM training-data engineering: skills across 4 stages and 2 modalities + dataset-engineer & dataset-auditor agents
 qa/                     # Test authoring (API/UI/perf), DB/email/network verification, CI pipelines, reporting (see QA skills below)
-engineering-practices/  # planning, debugging, verification (from obra/superpowers), audits — ships as the `dev` plugin
+engineering-practices/  # planning, debugging, verification (from obra/superpowers), adopted skills (addyosmani, mattpocock, PleasePrompto), audits — ships as the `dev` plugin
 meta/                   # Authoring skills themselves (writing-skills, skill-creator)
 design/                 # Ships as the `design` plugin. Visual/UX: visual-identity, design:tokens, charts, brand-import, iconography, ux-review, theme-presets, ux-writing, ui-code-audit,
                         #   accessible-by-design (WCAG 2.2 design-time), ethical-patterns (dark patterns), ai-experience + design-auditor agent
@@ -380,10 +381,10 @@ See [`CONTRIBUTING.md`](CONTRIBUTING.md) and the templates in [`.skill-template/
 | devops                | authored + shipped — 9 cloud/CI-keyed skills (docker, kubernetes, infrastructure-as-code, aws-deployment, azure-deployment, github-actions, gitlab-ci, azure-pipelines, environment-config) + the `devops-engineer` (build) and `devops-auditor` (read-only conformance audit, `/devops:audit`) agents, both gated on a tool-stack confirmation before any skill loads; `devops` plugin |
 | observability         | authored + shipped — 6 skills (per-stack `opentelemetry-*` / `structured-logging-*` + stack-agnostic loki-tempo, prometheus-mimir, queries, dashboards) + `observability-engineer-{dotnet,java,node}` agents; bundled within the category into the `be-*` plugins |
 | qa                    | authored — 35 code-producing nodes (mostly ×3 stacks; Playwright 1.64 on TypeScript and 1.63 on Java / .NET / Python, Appium 3, plus a TypeScript-only Maestro lane) + 9 process skills (incl. `cross-feature-test-design`). Unverified: no `time-and-concurrency-testing` sample (any stack) has been compiled or run; no Appium or Maestro flow has run on a device or emulator, and no WebMCP test has run against a site that registers tools. `qa-dotnet` additionally ships the `standards-audit` self-audit skill + `/qa-dotnet:audit` |
-| engineering-practices | imported from obra/superpowers — registered in the `dev` plugin (3 internals are loaded by path only) |
+| engineering-practices | imported from obra/superpowers, plus `quality-constraints`/`source-grounding` (addyosmani/agent-skills), `decision-interview` (mattpocock/skills) and `notebooklm` (PleasePrompto/notebooklm-skill, vendored, archived) — registered in the `dev` plugin (3 internals and the vendored tree are loaded by path only) |
 | meta                  | imported (writing-skills, skill-creator) |
 | documents             | imported from anthropics/skills |
-| design                | imported (Anthropic + Vercel) — the `design` plugin, a dependency of `fe-*` and `mobile-*` |
+| design                | imported (Anthropic + Vercel), plus `html-video` routing to heygen-com/hyperframes — the `design` plugin, a dependency of `fe-*` and `mobile-*` |
 | communication         | imported + 3 authored (business-analysis, user-story-writer, stakeholder-updates) |
 | security              | authored + shipped — 13 language-agnostic skills in two lanes: 7 pentest + 2 purple-team (`penetration-testing` plugin) and 4 governance + the `security-governance:standards-audit` self-audit (`security-governance` plugin) + the `penetration-tester`, `security-test-planner`, `purple-team-engineer`, and `security-architect` agents |
 | training-data         | authored + shipped — 8 skills (3 `_shared` foundations + 5 stage lanes) + the `dataset-engineer` and `dataset-auditor` agents; `training-data` plugin |

@@ -10,7 +10,7 @@ wrong, would a test fail?"** Coverage proves a line *executed*; it says nothing 
 *asserted* on the result. A test suite can have 95% line coverage and 0% real fault-detection — every test
 calls the code and asserts nothing meaningful. Mutation testing is the only automated way to measure that
 gap. **Stryker.NET** (`dotnet stryker`) is the state-of-the-art mutation engine for .NET and the tool for
-this stack.
+this stack. Mutation proves a test catches faults; `test-audit` proves it is worth keeping.
 
 > **Stack scope:** Stryker.NET mutates **C# source** (Roslyn-based) and drives the **.NET test runner**, so
 > this skill is the .NET-stack implementation. The discipline is identical on other stacks but the tool
