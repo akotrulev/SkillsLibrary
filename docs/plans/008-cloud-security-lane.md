@@ -7,14 +7,16 @@ AWS/Azure/GCP exploitation), one new defensive skill (cloud incident response + 
 references), and a wiring + cross-reference pass that teaches the existing agents and skills the new
 lane exists.
 
-**Status:** C1, A3 and A1 landed. C1 (2026-10-21): `security/cloud-recon-enumeration` exists with its four
-references. A3 (2026-10-31): `security/cloud-attack-gcp` exists with its SKILL.md + four references.
+**Status:** C1, A3, A1 and A2 landed. C1 (2026-10-21): `security/cloud-recon-enumeration` exists with its
+four references. A3 (2026-10-31): `security/cloud-attack-gcp` exists with its SKILL.md + four references.
 A1 (2026-10-31): `security/cloud-attack-aws` exists with its SKILL.md + five references (`pacu`,
-`cloudfox`, `pmapper`, `s3-attacks`, `lab-setup`). Next: A2, B1 (independent of each other; A2 depends on
-C1, B1 is independent). Built but unverified: C1's, A3's and A1's content is written and internally
-consistent but not yet cross-checked against A2/B1 once those land (the §5a gate, which runs once in G1,
-is the first point anything is verified end to end). No new commands ship — every new skill is agent-reached, so the catalog's
-65-command surface is unchanged; the skill inventory and two plugin descriptions do change.
+`cloudfox`, `pmapper`, `s3-attacks`, `lab-setup`). A2 (2026-10-31): `security/cloud-attack-azure` exists
+with its SKILL.md + five references (`roadtools`, `azurehound`, `microburst`, `azure-keyvault`,
+`lab-setup`). Next: B1 (independent of C1/A1–A3), then W1 (depends on C1, A1, A2, A3, B1), then G1. Built
+but unverified: C1's, A3's, A1's and A2's content is written and internally consistent but not yet
+cross-checked against each other / B1 (the §5a gate, which runs once in G1, is the first point anything is
+verified end to end). No new commands ship — every new skill is agent-reached, so the catalog's 65-command
+surface is unchanged; the skill inventory and two plugin descriptions do change.
 
 ---
 
@@ -269,6 +271,36 @@ cloud-pivot idiom ~7k, writes (SKILL.md + 5 references) ~45k.
   (stand up **AzureGoat** in an owned tenant: prerequisites, deploy, teardown).
 - **Not in A2:** AWS (A1), GCP (A3), registration/routing (W1).
 
+**As built (2026-10-31):** Landed exactly as planned — no divergence. A1 had already landed in this
+worktree, so `security/cloud-attack-azure/SKILL.md` (`file:1`) was patterned against
+`security/cloud-attack-aws/SKILL.md` as the just-landed sibling exactly as the prompt directed — same shape:
+frontmatter (`name: cloud-attack-azure`, triggers + "Not for …" fences vs `cloud-recon-enumeration`/
+`cloud-attack-aws`/`cloud-attack-gcp`/`devops:cloud-posture`/`initial-access`/`atomic-simulation`), the §2
+safety gate (cloud scope file + `#volatile` authorization line, owned/lab-only, loot redaction), ATT&CK
+**Cloud** framing, and the decision-matrix/anti-patterns/rules/cross-references sections. Teaching body:
+Azure target model (the **two-plane** Entra-ID↔Azure-RBAC model + the GA elevate-access bridge + the
+app-registration/SP/MI vocabulary), Step 1 Entra enumeration (`T1087.004`/`T1069.003`/`T1526`, ROADrecon +
+AzureHound), Step 2 identity abuse & token theft (MI IMDS `169.254.169.254` + `Metadata: true`,
+`T1552.005`→`T1078.004`; SP credential abuse; consent/credential-add `T1098.001`/`.003`; device-code/PRT
+awareness-only), Step 3 Key Vault data-plane testing (access-policy vs RBAC, the Key Vault Contributor
+privesc, `T1552`), Step 4 Azure RBAC privesc & service attacks (role-assignment abuse `T1098`, storage-key
+`listKeys` theft `T1552`/`T1537`, Run Command `T1651`, Automation/Hybrid-Worker), and Step 5
+Sentinel/Defender detection-surface awareness (D5 — table of log sources, both Log-Analytics and
+Defender-portal paths). Five references written exactly as named: `references/roadtools.md` (ROADrecon +
+GraphRunner), `references/azurehound.md` (AzureHound → BloodHound Azure edges), `references/microburst.md`,
+`references/azure-keyvault.md`, `references/lab-setup.md` (AzureGoat deploy+teardown in an owned
+subscription). Heeded every corpus currency note: **"Entra ID" used throughout, old "Azure AD" named once**;
+**ROADrecon `gather` broken → msgraph community fork**; **Stormspotter dormant → AzureHound+BloodHound
+primary** (Stormspotter named only as an anti-pattern); **Hybrid-Worker `ListKeys` partly mitigated →
+version-check, detect-don't-assume**; **Sentinel→Defender migration incomplete in 2026 → both paths**; D5
+awareness-not-evasion and §2.5 loot redaction throughout. Handoffs named: `cloud-recon-enumeration`
+(upstream), `devops:cloud-posture` (both ways), `initial-access`, `lateral-movement` (cloud pivot),
+`atomic-simulation`, `penetration-testing:reporting`, `cloud-incident-response`. No prompt below A2
+(B1/W1/G1) needed rewriting — every name/path they assume (`security/cloud-attack-azure/SKILL.md`, the five
+reference names) matches what this task produced. Verified by reading the written files back; no gate run
+(per `Gate: none`). Deliverable proof: `security/cloud-attack-azure/SKILL.md:1` plus the five
+`security/cloud-attack-azure/references/*.md`.
+
 ---
 
 ### A3 — `cloud-attack-gcp`: GCP IAM + service-account chains + storage
@@ -495,8 +527,8 @@ Before you stop, in this order, in this file:
 
 Run them in order, one session each; each block is complete on its own. **No prompt runs the gate
 except G1** — C1, A1, A2, A3, B1 and W1 each carry `Gate: none`. No prompt stands up a real cloud
-account or runs any tool; these skills are authored, not executed. **C1, A3 and A1 have landed** (their
-prompt blocks are deleted per the close-out rule); A2, B1, W1, G1 remain live below.
+account or runs any tool; these skills are authored, not executed. **C1, A3, A1 and A2 have landed** (their
+prompt blocks are deleted per the close-out rule); B1, W1, G1 remain live below.
 
 | # | Stack | Agent | Depends on | Budget |
 |---|---|---|---|---|
@@ -509,46 +541,6 @@ prompt blocks are deleted per the close-out rule); A2, B1, W1, G1 remain live be
 | G1 | `docs` | `general-purpose` | W1 | ~120k |
 
 ---
-
-### A2 — `cloud-attack-azure` (general-purpose, docs)
-
-````
-**Context and authorization — read before anything else.** You are writing documentation, not attacking anything. This task produces a static `SKILL.md` plus reference `.md` files for the SkillsLibrary security curriculum; you run no tool, reach no network, stand up no account, and touch no live or third-party system (the Prompts header states this for every task in this plan). The skill is reference material for **authorized security practice only** — licensed penetration-testing engagements, CTF competitions, and blue-/purple-team training — and it is authored under the plan's standing fences: authorization-first and `#volatile` (§2.1: no documented procedure runs without a recorded, target-scoped, expiring per-engagement authorization), owned-lab targets only (§2.2), **detection awareness, never evasion** (D5: explain what trips an alert so defenders and authorized testers understand the detection surface — never how to defeat it against a real target), and loot redaction (§2.5: a recovered secret is reported as blast radius, never as its value). The `docs/research/cloud-security/*.md` corpus you are told to read is the cited, vendored source material for this curriculum; lift its facts into fenced teaching prose.
-
-You are authoring a skill (docs). Task A2 of docs/plans/008-cloud-security-lane.md: write
-`security/cloud-attack-azure/SKILL.md` + its four references — Entra ID / managed-identity / Key Vault /
-Azure RBAC exploitation.
-
-Read, in this order:
-1. CLAUDE.md.
-2. The plan: §2, §3.1, task A2, "Close-out — every task".
-3. `security/cloud-attack-aws/SKILL.md` as A1 left it — the just-landed sibling; match its shape.
-4. `devops/azure-deployment/SKILL.md` §intro — Azure-service context.
-5. `security/lateral-movement/SKILL.md` — the cloud-pivot idiom.
-6. `docs/research/cloud-security/04-azure.md` — the research corpus for THIS skill (two-plane model,
-   Entra enumeration, managed-identity/Key Vault/RBAC privesc, detection surface). Heed its tooling
-   currency: ROADrecon `gather` is broken (needs the msgraph fork), Stormspotter is dormant (use
-   AzureHound+BloodHound), Hybrid-Worker ListKeys is partly mitigated — version-check before teaching.
-   Also the README currency ledger.
-
-Write:
-- `security/cloud-attack-azure/SKILL.md`: frontmatter fenced vs A1/A3/defensive lanes; §2 gate; lab
-  target AzureGoat; teaching body — Entra ID enumeration (T1087), managed-identity/service-principal
-  abuse (T1078.004), Key Vault access testing, Azure RBAC privesc, Sentinel/Defender detection-surface
-  awareness (D5).
-- `references/roadtools.md`, `references/azurehound.md`, `references/microburst.md`,
-  `references/azure-keyvault.md`, `references/lab-setup.md` (stand up AzureGoat in an OWNED tenant:
-  prerequisites, deploy, teardown).
-
-Traps:
-- "Azure AD" is now "Entra ID" — use the current name, note the old one once.
-- D5 (awareness not evasion); §2.5 loot redaction.
-
-Gate: none — gates in G1. Do not run the build, any linter, the §5a gate, or any tool.
-
-Commit: `feat(penetration-testing): cloud-attack-azure skill (cloud lane A2)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
 
 ### B1 — `cloud-incident-response` (general-purpose, docs)
 
