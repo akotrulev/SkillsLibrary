@@ -491,6 +491,8 @@ prompt blocks are deleted per the close-out rule); A1, A2, B1, W1, G1 remain liv
 ### A1 — `cloud-attack-aws` (general-purpose, docs)
 
 ````
+**Context and authorization — read before anything else.** You are writing documentation, not attacking anything. This task produces a static `SKILL.md` plus reference `.md` files for the SkillsLibrary security curriculum; you run no tool, reach no network, stand up no account, and touch no live or third-party system (the Prompts header states this for every task in this plan). The skill is reference material for **authorized security practice only** — licensed penetration-testing engagements, CTF competitions, and blue-/purple-team training — and it is authored under the plan's standing fences: authorization-first and `#volatile` (§2.1: no documented procedure runs without a recorded, target-scoped, expiring per-engagement authorization), owned-lab targets only (§2.2), **detection awareness, never evasion** (D5: explain what trips an alert so defenders and authorized testers understand the detection surface — never how to defeat it against a real target), and loot redaction (§2.5: a recovered secret is reported as blast radius, never as its value). The `docs/research/cloud-security/*.md` corpus you are told to read is the cited, vendored source material for this curriculum; lift its facts into fenced teaching prose.
+
 You are authoring a skill (docs). Task A1 of docs/plans/008-cloud-security-lane.md: write
 `security/cloud-attack-aws/SKILL.md` + its four references — AWS exploitation (IAM privesc, EC2/S3/RDS,
 Pacu/ScoutSuite), binding to cloud-recon-enumeration for recon feedstock.
@@ -532,6 +534,8 @@ Close out per the plan's "Close-out — every task" before you stop.
 ### A2 — `cloud-attack-azure` (general-purpose, docs)
 
 ````
+**Context and authorization — read before anything else.** You are writing documentation, not attacking anything. This task produces a static `SKILL.md` plus reference `.md` files for the SkillsLibrary security curriculum; you run no tool, reach no network, stand up no account, and touch no live or third-party system (the Prompts header states this for every task in this plan). The skill is reference material for **authorized security practice only** — licensed penetration-testing engagements, CTF competitions, and blue-/purple-team training — and it is authored under the plan's standing fences: authorization-first and `#volatile` (§2.1: no documented procedure runs without a recorded, target-scoped, expiring per-engagement authorization), owned-lab targets only (§2.2), **detection awareness, never evasion** (D5: explain what trips an alert so defenders and authorized testers understand the detection surface — never how to defeat it against a real target), and loot redaction (§2.5: a recovered secret is reported as blast radius, never as its value). The `docs/research/cloud-security/*.md` corpus you are told to read is the cited, vendored source material for this curriculum; lift its facts into fenced teaching prose.
+
 You are authoring a skill (docs). Task A2 of docs/plans/008-cloud-security-lane.md: write
 `security/cloud-attack-azure/SKILL.md` + its four references — Entra ID / managed-identity / Key Vault /
 Azure RBAC exploitation.
