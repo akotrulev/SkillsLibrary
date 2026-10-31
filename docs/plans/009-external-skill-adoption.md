@@ -6,9 +6,8 @@ four workflow skills **adapted** (`quality-constraints`, `source-grounding`, `de
 framework **routed to** (`html-video`). Each comes with recorded provenance, registration and
 cross-references. Nothing is installed wholesale.
 
-**Status:** Not started. Next: S1–S5. They are independent, each creates only its own new folders, and
-they may run side by side. W1 waits for all five, then registers them, writes the provenance, runs the
-plan's only gate, and files the plan. After W1, **the user** runs the trigger smoke that CONTRIBUTING
+**Status:** S1–S5 built, each with an `As built` note (S5 2026-10-31). Next: W1 — registers the six skills,
+writes the provenance, runs the plan's only gate, and files the plan. After W1, **the user** runs the trigger smoke that CONTRIBUTING
 "Testing a new skill" requires. Until then, all six skills are **unverified in a real session**. No
 command ships, so the 65-command surface is unchanged. Two adoptions carry standing external risk:
 `notebooklm`'s upstream is archived (D5), and `html-video` needs a framework the user installs (D6).
@@ -166,6 +165,12 @@ consistent at any boundary before W1, and the plan cannot be stopped halfway and
 - Clone or fetch `addyosmani/agent-skills`, record the commit, and read the two upstream skills.
 - One upstream fetch serves both skills, which is why they share a session (D2).
 - **Not in S1:** registration, ATTRIBUTIONS and cross-references (W1).
+- **As built (2026-10-31):** both skills written as planned, no divergence. Upstream commit
+  `addyosmani/agent-skills@8bfcc1f9916f2eea55494d8c1fa7f4bde867dd9e` (both `## Provenance` lines carry the full
+  hash). Names: `quality-constraints`, `source-grounding`, each equal to its folder under
+  `engineering-practices/`. Neither is registered; unverified in a real session. Citations in
+  `source-grounding` go in output, not code, to follow the comment rules. Upstream's constraints-file name is kept
+  out of both files so §5a step 3's grep stays empty (it returned nothing at write time).
 
 ### S2 — `decision-interview`: closing every open branch, one question at a time
 
@@ -196,6 +201,7 @@ ends in `## Provenance` naming `mattpocock/skills@<commit>` (MIT, adapted). Not 
 
 - Stack-agnostic: it names each stack's test runner idioms only as examples and binds to no tool.
 - **Not in S3:** the two `test-quality-check` pointers and the three-plugin registration (W1).
+- **As built (2026-10-31):** `qa/_shared/test-audit/SKILL.md` written, `name: test-audit`, unregistered. Upstream `garrytan/gstack@5276afe3f2a09c2b8a83a4c15d87106b41e6e3c6` (MIT), recorded in its closing `## Provenance`. Read-only; report saved to `docs/audits/<NNN>-test-suite-audit-r<N>.md` (code-auditor's versioning); house review table; never edits a test. Dropped from upstream: the apply-an-approved-batch step, gstack preamble/telemetry/state paths. It names `test-quality-check` as the mutation complement in its body (Java and .NET; no TS sibling), so W1's two pointers go in the other direction. Trigger-smoke needs a known-bad suite (§6). Unverified in a real session; no build or test run (Gate: none).
 
 ### S4 — `notebooklm`: the vendored NotebookLM tool and its house wrapper
 
@@ -217,6 +223,8 @@ self-check ~15k.
   say so and tell the user where state lives. It does not patch the scripts (D5).
 - **Not in S4:** the root `.gitignore` lines and registration (W1).
 
+- **As built (2026-10-31):** `engineering-practices/vendor/notebooklm/` holds upstream `PleasePrompto/notebooklm-skill@c80722d3f27d65e06b6579add201bf69b99101d0` (MIT, 21 files incl. its own `.gitignore` and `LICENSE`), `diff -r` against the clone clean. `engineering-practices/notebooklm/SKILL.md` is the wrapper (`name: notebooklm`), unregistered, ending in `## Provenance`. **State lives inside the vendored folder**: `scripts/config.py:9-10` sets `SKILL_DIR = Path(__file__).parent.parent`, `DATA_DIR = SKILL_DIR / "data"`, and `scripts/run.py:16` puts `.venv/` there too, so an installed plugin keeps the Google session in the plugin cache and an update wipes it; the wrapper says so and corrects upstream's `~/.claude/skills/notebooklm/data/` claim. Beyond §3's five overrides it adds three: the follow-up loop is capped at the run budget, scripts run by absolute path (upstream's `python scripts/run.py` is skill-dir-relative), and the sensitivity question is asked once at `add`. W1: the `.gitignore` lines are `engineering-practices/vendor/notebooklm/data/` and `.venv/`; upstream's own `.gitignore` also covers them inside the folder. Unverified in a real session; no build, install or query (Gate: none).
+
 ### S5 — `html-video`: route to HyperFrames for markup → MP4
 
 **Stack:** `docs` · **Agent:** `general-purpose`
@@ -231,6 +239,7 @@ README and the `skills/` layout ~12k, the write ~18k, self-check ~14k.
 
 - Record the commit and confirm the license file says Apache-2.0.
 - **Not in S5:** the `design/motion` pointer and registration (W1).
+- **As built (2026-10-31):** `design/html-video/SKILL.md` written, `name: html-video`, unregistered, ending in `## Provenance`. Upstream `heygen-com/hyperframes@a04b45a6db0d1f724be9cf1985c3b13657195f0d` (HEAD at read time); `LICENSE` is the Apache License 2.0 (README badge agrees), linked at that commit. No divergence from §3: defers to an installed `/hyperframes`; otherwise `npx hyperframes skills update`, Node 22+, FFmpeg, `init` + `render --output out.mp4`, and the composition contract (`class="clip"` + `data-start`/`data-duration`, root `data-duration` sets length, one paused timeline in `window.__timelines["<data-composition-id>"]`) restated in own words from upstream's `/hyperframes` SKILL.md; then a "Stop here" naming upstream's other skills. Upstream now ships 7 skills (core four plus `/figma`, `/slideshow`, `/remotion-to-hyperframes`) and also offers a Claude Code plugin install; the skill gives only the `skills update` line. No code copied; nothing installed or rendered. W1: its `ATTRIBUTIONS` entry is Apache-2.0, routed, no NOTICE duty (D6). Unverified in a real session (Gate: none).
 
 ### W1 — Register, attribute, cross-reference, gate and file
 
@@ -362,7 +371,7 @@ block and the line that says which have landed.
 ## Prompts — one per task
 
 Run one session per block; each block is complete on its own. S1–S5 can start at once and run side by
-side, since their files are disjoint and none builds anything. W1 waits for all five and is the gate.
+side, since their files are disjoint and none builds anything. Landed (block deleted): S2, S3, S4. W1 waits for all five and is the gate.
 **No S prompt may edit a file outside its own new folders** apart from this plan's close-out edits. **No
 prompt installs or runs** NotebookLM or HyperFrames.
 
@@ -376,151 +385,9 @@ prompt installs or runs** NotebookLM or HyperFrames.
 | W1 | `docs` | `general-purpose` | S1, S2, S3, S4, S5 | — | ~130k |
 | — | trigger smoke (§6) | **the user** | W1 | — | — |
 
-All six prompts are live; none has landed.
+The W1 prompt is live.
 
 ---
-
-### S1 — `quality-constraints` + `source-grounding` (general-purpose, docs)
-
-````
-Depends on: none
-
-You are a skill author. Task S1 of docs/plans/009-external-skill-adoption.md: write two new dev skills,
-adapted from one upstream repo.
-
-Deliverable: engineering-practices/quality-constraints/SKILL.md and
-engineering-practices/source-grounding/SKILL.md exist, each saying what plan §3 requires of it, each
-ending in `## Provenance` naming `addyosmani/agent-skills@<commit>` (MIT, adapted). Neither is registered.
-
-Read, in this order:
-1. CLAUDE.md: Comments, Test code rules, Planning, Version policy.
-2. The plan: §1 (first two rows), §2, §3 (the table, plus "What each skill must say" for these two),
-   D1, D2, and "Close-out — every task".
-3. .skill-template/reference.SKILL.md: the frontmatter and section shape.
-4. engineering-practices/verify-before-done/SKILL.md: the register quality-constraints sits beside.
-5. Upstream: clone github.com/addyosmani/agent-skills, record `git rev-parse HEAD`, and read
-   constraint-driven-development and source-driven-development.
-
-Traps:
-- Adapt the idea; do not paste. Upstream's CONSTRAINTS.md artifact is not adopted (D1). The rules live
-  in CLAUDE.md and the plan's acceptance tests.
-- name: is topic-only and must equal the folder name. description: has trigger phrases and a
-  "Do NOT use for" clause naming the nearest sibling (dev:verify; design/ui-ux-pro-max).
-- Create only the two folders. No marketplace.json, catalog, README, ATTRIBUTIONS or cross-reference
-  edits: those are W1's.
-
-Gate: none. This plan gates once, in W1. Do not run tools/plugin-surface-check.py or any §5a step.
-
-Commit: `feat(dev): quality-constraints and source-grounding skills (009 S1)`.
-Put the upstream commit and both names in your As built note, since W1 reads them.
-Close out per the plan's "Close-out — every task" before you stop.
-````
-
-### S3 — `test-audit` (general-purpose, docs)
-
-````
-Depends on: none
-
-You are a skill author. Task S3 of docs/plans/009-external-skill-adoption.md: write a stack-agnostic qa
-skill that sweeps a suite for tests not worth their upkeep.
-
-Deliverable: qa/_shared/test-audit/SKILL.md exists, saying what plan §3 requires (read-only, saved to
-docs/audits/, house review table, never edits a test), and ends in `## Provenance` naming
-`garrytan/gstack@<commit>` (MIT, adapted). Not registered.
-
-Read, in this order:
-1. CLAUDE.md: Test code rules, Review behavior.
-2. The plan: §1 (fourth row), §2, §3 (the table, plus "What each skill must say" → test-audit), D4, and
-   "Close-out — every task".
-3. .skill-template/reviewer.SKILL.md.
-4. qa/java/skills/test-quality-check/SKILL.md: the mutation complement. There is no qa/_shared or TS
-   version.
-5. engineering-practices/agents/code-auditor.md: only how it names and versions files in docs/audits/.
-6. Upstream: clone github.com/garrytan/gstack, record `git rev-parse HEAD`, and read /test-audit.
-
-Traps:
-- "audit" in a name means a saved read-only sweep (CONTRIBUTING "Names and registration"). The skill
-  writes its report to docs/audits/ and changes no test.
-- Stack-agnostic: name runner idioms only as examples. Bind to no tool.
-- Do not edit either test-quality-check. W1 adds the pointers and the three-plugin registration.
-
-Gate: none. Gates in W1.
-
-Commit: `feat(qa): test-audit skill (009 S3)`.
-Put the upstream commit in your As built note.
-Close out per the plan's "Close-out — every task" before you stop.
-````
-
-### S4 — `notebooklm` (general-purpose, docs)
-
-````
-Depends on: none
-
-You are a skill author. Task S4 of docs/plans/009-external-skill-adoption.md: vendor the NotebookLM tool
-byte-for-byte and write the house wrapper, exactly as source-audit wraps the vendored security-audit.
-You author only. Never create .venv, pip install, sign in or query.
-
-Deliverable: engineering-practices/vendor/notebooklm/ holds the upstream tree byte-for-byte at a
-recorded commit (no data/, no .venv/), and engineering-practices/notebooklm/SKILL.md routes into it with
-the plan §3 overrides and ends in `## Provenance` naming `PleasePrompto/notebooklm-skill@<commit>` (MIT,
-archived, vendored). Neither is registered.
-
-Read, in this order:
-1. CLAUDE.md.
-2. The plan: §2, §3 (the table, plus "What each skill must say" → notebooklm), D5, and
-   "Close-out — every task".
-3. qa/_shared/security-testing/source-audit/SKILL.md: the pattern to copy (frontmatter, "Load order"
-   resolving ${CLAUDE_PLUGIN_ROOT}/…/vendor/…, then "Overrides").
-4. Upstream: clone github.com/PleasePrompto/notebooklm-skill, record `git rev-parse HEAD`, and read
-   SKILL.md, scripts/*.py, requirements.txt and AUTHENTICATION.md.
-
-Traps:
-- Copy the tree minus .git/, data/ and .venv/, and change nothing. W1 diffs it against upstream at your
-  commit.
-- Find where the scripts put data/ and .venv/. If that is under the skill directory, an installed plugin
-  keeps the Google session in the plugin cache and an update wipes it. Say so in the wrapper; do not
-  patch the scripts (D5).
-- Do not edit the root .gitignore; W1 adds the data/.venv lines. Do not register.
-
-Gate: none. Gates in W1.
-
-Commit: `feat(dev): vendor notebooklm-skill behind a house wrapper (009 S4)`.
-Put the upstream commit and where state lives in your As built note.
-Close out per the plan's "Close-out — every task" before you stop.
-````
-
-### S5 — `html-video` (general-purpose, docs)
-
-````
-Depends on: none
-
-You are a skill author. Task S5 of docs/plans/009-external-skill-adoption.md: write a thin design skill
-that routes markup→MP4 work to HyperFrames' own skills, with a minimal fallback. Copy no framework code.
-
-Deliverable: design/html-video/SKILL.md exists, saying what plan §3 requires (defer to an installed
-/hyperframes; otherwise install line, prerequisites, minimal composition and render, then stop), and ends
-in `## Provenance` naming `heygen-com/hyperframes@<commit>` (Apache-2.0, routed, no code copied). Not
-registered.
-
-Read, in this order:
-1. CLAUDE.md: Comments; "Design facts come from the vendored corpus".
-2. The plan: §2 (the Route row), §3 (the table, plus "What each skill must say" → html-video), D6, and
-   "Close-out — every task".
-3. design/motion/SKILL.md: the house register and the sibling it routes from.
-4. Upstream: github.com/heygen-com/hyperframes. Record the HEAD commit and read the README, the skills/
-   layout and LICENSE (confirm Apache-2.0).
-
-Traps:
-- Route, don't re-teach. No Studio, registry or Lambda content.
-- Copy no upstream file; link the license. The Apache NOTICE duty stays out of the repo (D6).
-- Do not edit design/motion/SKILL.md and do not register; both are W1's.
-
-Gate: none. Gates in W1. Do not install HyperFrames or render.
-
-Commit: `feat(design): html-video skill routing to HyperFrames (009 S5)`.
-Put the upstream commit and the confirmed license in your As built note.
-Close out per the plan's "Close-out — every task" before you stop.
-````
 
 ### W1 — register, attribute, cross-reference, gate, file (general-purpose, docs)
 
