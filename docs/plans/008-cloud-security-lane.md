@@ -7,12 +7,13 @@ AWS/Azure/GCP exploitation), one new defensive skill (cloud incident response + 
 references), and a wiring + cross-reference pass that teaches the existing agents and skills the new
 lane exists.
 
-**Status:** C1 landed (2026-10-21): `security/cloud-recon-enumeration` exists with its four references.
-Next: A1, A2, A3, B1 (independent of each other, each depends on C1 except B1 which is independent).
-Built but unverified: C1's content is written and internally consistent but not yet cross-checked against
-A1–A3 once those land (the §5a gate, which runs once in G1, is the first point anything is verified
-end to end). No new commands ship — every new skill is agent-reached, so the catalog's 65-command
-surface is unchanged; the skill inventory and two plugin descriptions do change.
+**Status:** C1 and A3 landed. C1 (2026-10-21): `security/cloud-recon-enumeration` exists with its four
+references. A3 (2026-10-31): `security/cloud-attack-gcp` exists with its SKILL.md + four references.
+Next: A1, A2, B1 (independent of each other, each depends on C1 except B1 which is independent).
+Built but unverified: C1's and A3's content is written and internally consistent but not yet cross-checked
+against A1/A2/B1 once those land (the §5a gate, which runs once in G1, is the first point anything is
+verified end to end). No new commands ship — every new skill is agent-reached, so the catalog's
+65-command surface is unchanged; the skill inventory and two plugin descriptions do change.
 
 ---
 
@@ -268,6 +269,26 @@ fundamentals, plus a `lab-setup.md` that bootstraps the owned practice lab — r
   **GCPGoat** in an owned project: prerequisites, deploy, teardown).
 - **Not in A3:** AWS (A1), Azure (A2), registration/routing (W1).
 
+**As built (2026-10-31):** Landed with one divergence (see D7): A1/A2 had not yet landed when this task
+ran (plan order lets A1/A2/A3/B1 run in any order after C1), so `security/cloud-attack-gcp/SKILL.md`
+(`file:1`) was patterned against `security/cloud-recon-enumeration/SKILL.md` (C1 — frontmatter shape,
+`#volatile` authorization block, ATT&CK-Cloud framing, decision-matrix/anti-patterns/rules/cross-references
+sections) rather than A2's sibling file, which does not exist yet. Everything else landed exactly as
+planned: the §2 gate, lab target **GCPGoat**, and the full teaching body — GCP resource hierarchy + IAM
+inheritance + service-account model + metadata server (target-model section), IAM/resource enumeration
+(`T1580`/`T1526`), service-account impersonation & privilege escalation via the IAM Credentials API verbs
+(`T1078.004`/`T1098`/`T1098.001`/`T1548`, the Rhino ~20-method catalog split IAM/non-IAM with exact
+permissions), Cloud Storage bucket attacks (`T1619`/`T1530`), and Security Command Center detection-surface
+awareness framed as D5 (awareness, not evasion). The posture↔exploitation handoff with `devops:cloud-posture`
+is named explicitly in both the SKILL.md intro and its cross-references section, including the "this is the
+first skill that attacks GCP" framing the task required. The default-Compute-SA currency note (no longer
+auto-Editor on new projects — detect, don't assume) is carried into the target-model section and into a
+named anti-pattern. Four references written exactly as named: `references/gcp-enum.md`,
+`references/gcp-privesc.md`, `references/gcp-bucket-brute.md`, `references/lab-setup.md` (GCPGoat deploy +
+teardown in a throwaway owned project). No prompt below A3 needed rewriting — A1/A2/B1/W1's assumptions
+(file names, reference names, ATT&CK ids) all match what this task produced. Verified by reading the
+written files back; no gate run (per `Gate: none`).
+
 ---
 
 ### B1 — `cloud-incident-response`: cloud IR runbook + forensics + BCDR references
@@ -393,6 +414,17 @@ deploy, teardown. The skill the lab belongs to owns its bootstrap; a standalone 
 one caller per provider (KISS, same reasoning as D2). Cost: bootstrap is discoverable only from inside
 the provider skill, not as a top-level skill; accepted.
 
+**D7 — A3 patterned against C1, not A2, because A2 had not landed yet (2026-10-31).** A1/A2/A3/B1 are
+independent of each other by design (each depends only on C1), so the queue is free to run them in any
+order; A3 ran before A1/A2. Its prompt named A2's SKILL.md as the sibling pattern to read, but that file
+did not exist at run time. A3 used `security/cloud-recon-enumeration/SKILL.md` (C1 — the one skill in the
+lane that had actually landed) as the sibling pattern instead, which already carries the frontmatter
+shape, the `#volatile` authorization block, and the ATT&CK-Cloud framing every provider skill shares.
+Cost: A3's prose was not cross-checked against A1/A2's actual phrasing for provider-specific idiom
+(e.g. how each skill names its own "Not in <task>" fence); accepted because the shared shape comes from
+C1 either way, and G1's §5a gate is the first point the three provider skills are cross-checked against
+each other regardless of authoring order.
+
 ## Answered questions (2026-10-21)
 
 **O1 — How much of the curriculum? :** full parity — every one of the 14 modules has an owning skill or
@@ -441,8 +473,8 @@ Before you stop, in this order, in this file:
 
 Run them in order, one session each; each block is complete on its own. **No prompt runs the gate
 except G1** — C1, A1, A2, A3, B1 and W1 each carry `Gate: none`. No prompt stands up a real cloud
-account or runs any tool; these skills are authored, not executed. All prompts are live (nothing has
-landed yet).
+account or runs any tool; these skills are authored, not executed. **C1 and A3 have landed** (their
+prompt blocks are deleted per the close-out rule); A1, A2, B1, W1, G1 remain live below.
 
 | # | Stack | Agent | Depends on | Budget |
 |---|---|---|---|---|
@@ -532,41 +564,6 @@ Traps:
 Gate: none — gates in G1. Do not run the build, any linter, the §5a gate, or any tool.
 
 Commit: `feat(penetration-testing): cloud-attack-azure skill (cloud lane A2)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
-
-### A3 — `cloud-attack-gcp` (general-purpose, docs)
-
-````
-You are authoring a skill (docs). Task A3 of docs/plans/008-cloud-security-lane.md: write
-`security/cloud-attack-gcp/SKILL.md` + its three references — GCP IAM / service-account / storage
-exploitation. This is the first skill that ATTACKS GCP (cloud-posture only reads it).
-
-Read, in this order:
-1. CLAUDE.md.
-2. The plan: §2, §3.1, task A3, "Close-out — every task".
-3. `security/cloud-attack-azure/SKILL.md` as A2 left it — the sibling pattern.
-4. `devops/cloud-posture/SKILL.md` — name the GCP posture↔exploitation handoff.
-5. `docs/research/cloud-security/05-gcp.md` — the research corpus for THIS skill (SA-impersonation spine
-   via the IAM Credentials API verbs, the ~20 privesc methods split IAM/non-IAM with exact permissions,
-   GCS/metadata/Secret Manager, GCPGoat). Critical currency note it carries: the Compute default SA no
-   longer auto-gets Editor on new projects — DETECT, don't assume. Also the README currency ledger.
-
-Write:
-- `security/cloud-attack-gcp/SKILL.md`: frontmatter fenced vs A1/A2; §2 gate; lab target GCPGoat;
-  teaching body — GCP IAM/resource enumeration (T1580), service-account impersonation & key abuse
-  (T1078.004, privesc via iam.serviceAccounts.* chains), Cloud Storage bucket attacks (T1619), Security
-  Command Center detection-surface awareness (D5).
-- `references/gcp-enum.md`, `references/gcp-privesc.md`, `references/gcp-bucket-brute.md`,
-  `references/lab-setup.md` (stand up GCPGoat in an OWNED project: prerequisites, deploy, teardown).
-
-Traps:
-- GCP privesc is dominated by service-account impersonation chains — make that the spine.
-- D5 (awareness not evasion); §2.5 loot redaction.
-
-Gate: none — gates in G1. Do not run the build, any linter, the §5a gate, or any tool.
-
-Commit: `feat(penetration-testing): cloud-attack-gcp skill (cloud lane A3)`.
 Close out per the plan's "Close-out — every task" before you stop.
 ````
 
