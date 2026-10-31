@@ -37,8 +37,10 @@ The lanes live at `security/`, `devops/`, and `qa/` when working inside the Skil
 | App-layer scanning + functional authz + exploit-validation + client-side | `qa-security` | the `_shared/security-testing/*` scanners · `permission-testing` · `exploit-validation` · `vuln-reachability` · `client-side-security` |
 | Mobile app security | `qa-security` (mobile lane) | `mobile-app-scan` · `mobile-runtime-testing` (MobSF / MASVS-MASTG) |
 | Full offensive kill chain | `penetration-tester` | `recon-enumeration` · `initial-access` · `privilege-escalation` · `lateral-movement` · `credential-attacks` · `post-exploitation` · `penetration-testing:reporting` |
+| Cloud control-plane pentest — recon then provider exploitation (AWS/Azure/GCP) | `penetration-tester` | `cloud-recon-enumeration` · `cloud-attack-aws` · `cloud-attack-azure` · `cloud-attack-gcp` |
 | Purple-team continuous validation | `purple-team-engineer` | `atomic-simulation` · `detection-validation` |
-| Governance roll-up (runs *after* the assessment) | `security-architect` | `detection-engineering` · `security-hardening` · `secrets-hardening` · `compliance-evidence-mapping` |
+| Cloud incident response — IR runbook, forensics, BCDR (runs *after* / on an incident) | `security-architect` | `cloud-incident-response` |
+| Governance roll-up (runs *after* the assessment) | `security-architect` | `detection-engineering` · `security-hardening` · `secrets-hardening` · `compliance-evidence-mapping` · `cloud-incident-response` |
 
 **Loaded when the input warrants it, not by default:**
 - `devops/threat-modeling` — as a **scoping aid** in Steps 0–1: STRIDE/DFD reasoning to decide which lanes a surface warrants and to sharpen the blueprint. Its output stays *advisory to the plan* — any threat content it surfaces is folded into the assessment-plan document, never written out as a standalone threat-register findings artifact (that is `infra-security-tester`'s Step-0 job, and this agent writes plans, never findings).

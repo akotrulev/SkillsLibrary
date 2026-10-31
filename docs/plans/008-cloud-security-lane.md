@@ -7,19 +7,18 @@ AWS/Azure/GCP exploitation), one new defensive skill (cloud incident response + 
 references), and a wiring + cross-reference pass that teaches the existing agents and skills the new
 lane exists.
 
-**Status:** C1, A3, A1, A2 and B1 landed — all five new skills now exist on disk. C1 (2026-10-21):
-`security/cloud-recon-enumeration` exists with its four references. A3 (2026-10-31): `security/cloud-attack-gcp`
-exists with its SKILL.md + four references. A1 (2026-10-31): `security/cloud-attack-aws` exists with its
-SKILL.md + five references (`pacu`, `cloudfox`, `pmapper`, `s3-attacks`, `lab-setup`). A2 (2026-10-31):
-`security/cloud-attack-azure` exists with its SKILL.md + five references (`roadtools`, `azurehound`,
-`microburst`, `azure-keyvault`, `lab-setup`). B1 (2026-10-31): `security/cloud-incident-response` exists with
-its SKILL.md + four references (`aws-ir`, `azure-ir`, `gcp-ir`, `cloud-resilience`). Next: W1 (register the
-five skills in marketplace.json + teach the three agents + catalog; depends on C1, A1, A2, A3, B1), then G1
-(cross-references + the single §5a gate + file the plan). Built but unverified: all five skills' content is
-written and internally consistent but not yet registered/routed (W1), cross-referenced into the existing
-skills (G1), or cross-checked against each other — the §5a gate, which runs once in G1, is the first point
-anything is verified end to end. No new commands ship — every new skill is agent-reached, so the catalog's
-65-command surface is unchanged; the skill inventory and two plugin descriptions do change.
+**Status:** C1, A3, A1, A2, B1 and W1 landed — all five new skills exist on disk and are now registered and
+routed. C1 (2026-10-21): `security/cloud-recon-enumeration` + four references. A3/A1/A2 (2026-10-31): the three
+`security/cloud-attack-{gcp,aws,azure}` provider skills + their references. B1 (2026-10-31):
+`security/cloud-incident-response` + four references (`aws-ir`, `azure-ir`, `gcp-ir`, `cloud-resilience`).
+W1 (2026-10-31): `.claude-plugin/marketplace.json` registers the four offensive cloud skills under
+`penetration-testing` and `cloud-incident-response` under `security-governance`, both plugin descriptions name
+the new skills, the three agents (`penetration-tester`, `security-architect`, `security-test-planner`) teach/route
+the lane, and `docs/skills-catalog.md` + `CLAUDE.md` carry the inventory — command count still 65.
+Next: **G1** (the §4 cross-references into the five existing skills + the single §5a gate + file the plan;
+depends on W1). Built but unverified: the five skills' content, the registrations and the agent routing are
+not yet cross-referenced into the existing skills (G1) or run through the §5a gate — G1, the last task, is the
+first point anything is verified end to end. No new commands ship (65-command surface unchanged).
 
 ---
 
@@ -433,6 +432,31 @@ sec-gov blocks ~12k, the three agent files ~18k, `docs/skills-catalog.md` releva
   the command count at 65 (no new commands).
 - **Not in W1:** cross-reference edits into the existing *skills* (G1); the gate (G1).
 
+**As built (2026-10-31):** all registrations landed as planned; no divergence worth a `D<n>` (the plan's
+"four cloud-attack skills" for `penetration-tester` is read, per §5's own wording, as the four *offensive
+cloud* skills — `cloud-recon-enumeration` + the three `cloud-attack-*` — matching the four paths added to
+`penetration-testing`'s `skills[]`). Edited files/blocks:
+- `.claude-plugin/marketplace.json` — `penetration-testing.skills[]` now lists the four offensive cloud
+  paths (`.claude-plugin/marketplace.json:1208-1211`), `security-governance.skills[]` adds
+  `./security/cloud-incident-response` (`.claude-plugin/marketplace.json:1248`); both plugin
+  **descriptions** extended with one dense cloud clause each (pen-test cloud lane at line 1182;
+  sec-gov "Five language-agnostic skills" + cloud-IR clause at line 1226). JSON validates.
+- `security/agents/penetration-tester.md` — cloud lane added to the skill-loading protocol (`:49`) and the
+  ATT&CK spine note keyed to Enterprise-vs-Cloud by surface (`:39`).
+- `security/agents/security-architect.md` — `cloud-incident-response` added to the governance skills
+  bullet ("Five governance skills", `:38`) and to Step 4's loads (`:63`).
+- `security/agents/security-test-planner.md` — routing catalog gains a "Cloud control-plane pentest" row
+  (executor `penetration-tester`, the four offensive cloud skills) and a "Cloud incident response" row
+  (executor `security-architect`, `cloud-incident-response`), and `cloud-incident-response` added to the
+  governance roll-up row (`:40-42`). All five names verified to resolve to on-disk skill dirs.
+- `docs/skills-catalog.md` — new "cloud offensive lane — 4 skills" paragraph after the 7-skills list,
+  penetration-tester "Loads" line updated, and `security-governance` paragraph bumped to "Five … a sixth"
+  with the `cloud-incident-response` clause.
+- `CLAUDE.md` — `security/` repository-map row now names the cloud-pentest + cloud-IR/BCDR lanes (`:257`).
+- Command count unchanged at 65 (no commands added); catalog's "65 command files, 73 registrations" line
+  left as-is. G1's prompt block needed no rewrite — its gate reads this note for the registered names and
+  all its assumptions (descriptions name the skills, catalog/CLAUDE.md reconcile with disk, count 65) hold.
+
 ---
 
 ### G1 — Cross-references into existing skills, the gate, and file the plan
@@ -561,8 +585,8 @@ Before you stop, in this order, in this file:
 
 Run them in order, one session each; each block is complete on its own. **No prompt runs the gate
 except G1** — C1, A1, A2, A3, B1 and W1 each carry `Gate: none`. No prompt stands up a real cloud
-account or runs any tool; these skills are authored, not executed. **C1, A3, A1, A2 and B1 have landed** (their
-prompt blocks are deleted per the close-out rule); W1, G1 remain live below.
+account or runs any tool; these skills are authored, not executed. **C1, A3, A1, A2, B1 and W1 have landed** (their
+prompt blocks are deleted per the close-out rule); G1 remains live below.
 
 | # | Stack | Agent | Depends on | Budget |
 |---|---|---|---|---|
@@ -575,46 +599,6 @@ prompt blocks are deleted per the close-out rule); W1, G1 remain live below.
 | G1 | `docs` | `general-purpose` | W1 | ~120k |
 
 ---
-
-### W1 — register the skills + teach the agents (general-purpose, docs)
-
-````
-You are wiring the lane in (docs). Task W1 of docs/plans/008-cloud-security-lane.md: register the five
-new skills in marketplace.json, extend both plugin descriptions, teach three agents the lane, and update
-the catalog. No new commands.
-
-Read, in this order:
-1. CLAUDE.md.
-2. The plan: §3 (the skill tables), §4, the bookkeeping note at the end of §2, task W1,
-   "Close-out — every task".
-3. `.claude-plugin/marketplace.json` — the `penetration-testing` and `security-governance` blocks
-   (skills[], description).
-4. `security/agents/penetration-tester.md`, `security/agents/security-architect.md`,
-   `security/agents/security-test-planner.md` — where each lists/routes skills.
-5. The five new skills' frontmatter (C1, A1, A2, A3, B1) — for exact names.
-6. `docs/skills-catalog.md` — the `security/` inventory + scope list sections.
-
-Do:
-- marketplace.json: add the four `./security/cloud-*` offensive skill paths to penetration-testing's
-  `skills[]`; add `./security/cloud-incident-response` to security-governance's `skills[]`. Extend both
-  plugin descriptions with one dense clause each naming the new skills (match the existing style).
-- penetration-tester.md: add the four cloud-attack skills to its kill-chain / loadable set (cloud lane).
-- security-architect.md: add cloud-incident-response to the lanes it rolls up.
-- security-test-planner.md: add all five to its routing catalog by EXACT name; a cloud platform now
-  routes a cloud-pentest + cloud-IR phase. Verify every name resolves.
-- docs/skills-catalog.md + CLAUDE.md: add the lane to the security inventory / scope list. Command count
-  STAYS 65 (no new commands — D4).
-
-Traps:
-- An invented agent/skill name is the most damaging defect — copy names from the files, don't retype.
-- Do NOT edit the existing *skills'* bodies for cross-refs — that's G1. You touch marketplace.json, the
-  3 agents, and the 2 catalog files only.
-
-Gate: none — gates in G1. Do not run the §5a gate here.
-
-Commit: `feat(security): register cloud lane in marketplace + agents + catalog (cloud lane W1)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
 
 ### G1 — cross-references, the gate, and file the plan (general-purpose, docs)
 
