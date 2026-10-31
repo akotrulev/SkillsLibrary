@@ -94,3 +94,17 @@ What was changed from upstream at import, and why:
 Refreshing is a snapshot operation: copy those upstream paths at a new pinned
 commit, run `python3 design/ui-ux-pro-max/scripts/validate_data.py`, and update
 the commit, release and date above.
+
+---
+
+## `html-video` — HyperFrames
+
+`html-video/SKILL.md` routes to the HyperFrames framework; no code or skill text is copied.
+
+- Upstream: `heygen-com/hyperframes`, `https://github.com/heygen-com/hyperframes`
+- Snapshot commit: `a04b45a6db0d1f724be9cf1985c3b13657195f0d` (2026-10-31)
+- Retrieved: **2026-10-31**
+- License: Apache-2.0 (`https://github.com/heygen-com/hyperframes/blob/a04b45a6db0d1f724be9cf1985c3b13657195f0d/LICENSE`).
+- Mode: **routed** — the skill defers to an installed `/hyperframes` and otherwise gives the install line, the
+  prerequisites, the minimal composition contract in its own words and the render command. No upstream file
+  is redistributed, so no `NOTICE` duty enters the repo.

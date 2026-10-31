@@ -4,3 +4,6 @@
 *.swp
 node_modules/tools/mission-control/
 .claude/settings.local.json
+
+engineering-practices/vendor/notebooklm/data/
+engineering-practices/vendor/notebooklm/.venv/

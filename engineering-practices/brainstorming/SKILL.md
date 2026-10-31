@@ -7,6 +7,8 @@ description: Use when turning an ad-hoc idea or one feature request into an appr
 
 Help turn ideas into fully formed designs and specs through natural collaborative dialogue.
 
+Open the space here; close each remaining branch with `decision-interview`.
+
 **Which front door.** The library has two, and they do not overlap:
 
 | | `/dev:design` (this skill) | `/dev:refine` (`requirements-author`) |

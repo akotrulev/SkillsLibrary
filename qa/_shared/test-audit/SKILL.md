@@ -1,6 +1,6 @@
 ---
 name: test-audit
-description: Use when the user asks to audit an existing test suite for tests not worth their upkeep — assertion-free tests, duplicates, brittle implementation-detail tests, tests that break the house test rules, and the test-only code they keep alive. Read-only sweep saved to `docs/audits/`; ranks candidates by upkeep against protection. Triggers: "audit the test suite", "find low-value tests", "which tests can we prune", "tests that protect nothing". Do NOT use to prove a test catches faults (`test-quality-check`, mutation testing), to write or fix tests, or to review a single new diff.
+description: Use when the user asks to audit an existing test suite for tests not worth their upkeep — assertion-free tests, duplicates, brittle implementation-detail tests, tests that break the house test rules, and the test-only code they keep alive. Read-only sweep saved to `docs/audits/`; ranks candidates by upkeep against protection. Triggers: "audit the test suite", "find low-value tests", "which tests can we prune", "tests that protect nothing". Do NOT use to prove a test catches faults (`test-quality-check`, mutation testing), to write or fix tests, to sweep a suite against every house convention (`/qa-dotnet:audit`), or to review a single new diff.
 ---
 
 # Test audit — a saved sweep for tests not worth their upkeep

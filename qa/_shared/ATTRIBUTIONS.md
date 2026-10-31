@@ -23,3 +23,15 @@ The whole of `qa/_shared/vendor/security-audit/` — `SKILL.md`, the phase and d
 out-trigger the house security skills. The house entry point is
 [`security-testing/source-audit`](security-testing/source-audit/SKILL.md), which routes into it and holds
 every library override in one table; that skill's last section is the refresh procedure.
+
+---
+
+## `test-audit` — gstack /test-audit
+
+- Upstream: `garrytan/gstack`, `https://github.com/garrytan/gstack`, command `/test-audit`
+- Snapshot commit: `5276afe3f2a09c2b8a83a4c15d87106b41e6e3c6` (2026-10-31)
+- Retrieved: **2026-10-31**
+- License: MIT at import time.
+- Mode: **adapted** — a read-only, stack-agnostic sweep saved to `docs/audits/<NNN>-test-suite-audit-r<N>.md`
+  in the house review table. It never edits or deletes a test; upstream's apply-an-approved-batch step and
+  its preamble, telemetry and state paths are dropped. `test-quality-check` is its mutation-score complement.

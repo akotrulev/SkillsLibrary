@@ -6,10 +6,11 @@ four workflow skills **adapted** (`quality-constraints`, `source-grounding`, `de
 framework **routed to** (`html-video`). Each comes with recorded provenance, registration and
 cross-references. Nothing is installed wholesale.
 
-**Status:** S1–S5 built, each with an `As built` note (S5 2026-10-31). Next: W1 — registers the six skills,
-writes the provenance, runs the plan's only gate, and files the plan. After W1, **the user** runs the trigger smoke that CONTRIBUTING
-"Testing a new skill" requires. Until then, all six skills are **unverified in a real session**. No
-command ships, so the 65-command surface is unchanged. Two adoptions carry standing external risk:
+**Status:** Delivered 2026-10-31. S1–S5 authored the six skills; W1 registered them (`dev`: `quality-constraints`,
+`source-grounding`, `decision-interview`, `notebooklm`; `design`: `html-video`; `qa-java`/`qa-dotnet`/`qa-typescript`:
+`test-audit`), recorded provenance, added the §4 pointers, and passed §5a. No command ships, so the 65-command
+surface is unchanged. **Built but unverified:** all six skills are unverified in a real session until the user runs
+the §6 trigger smoke (reinstall `dev`, `design` and one `qa-*` plugin). Two adoptions carry standing external risk:
 `notebooklm`'s upstream is archived (D5), and `html-video` needs a framework the user installs (D6).
 
 ---
@@ -266,6 +267,7 @@ Fix what it finds. A bad name, a stray upstream reference or a collision may bel
   entry): upstream, snapshot commit, retrieved date, license, and what the house file overrides.
 - Update the README provenance table (the `engineering-practices` row now names three more upstreams)
   and the catalog's "6 in-scope skills" and "17 `dev` skills" counts.
+- **As built (2026-10-31):** all six skills registered in exactly the plugins §3 names (`.claude-plugin/marketplace.json`: 4 paths added to `dev`, 1 to `design`, 1 to each `qa-*`; the five descriptions name them). `engineering-practices/vendor/notebooklm/` stays unregistered. `engineering-practices/ATTRIBUTIONS.md` is new; `qa/_shared/ATTRIBUTIONS.md` and `design/ATTRIBUTIONS.md` each gained their section. Root `.gitignore` excludes `engineering-practices/vendor/notebooklm/{data,.venv}/`. §4 pointers added in the seven target files. Counts bumped: `dev` 17→21, `design` 16→17, "6 in-scope skills"→10 (catalog, README). **Gate §5a:** (1) `python3 tools/plugin-surface-check.py` → `OK`; (2) every `name:` equals its folder, every description has triggers and a "Do NOT use" clause; (3) the upstream-reference grep returned nothing; (4) `LICENSE` present and `git check-ignore` succeeds for both paths; (5) `diff -r -x .git` of a fresh clone at `c80722d3f27d65e06b6579add201bf69b99101d0` against the vendored tree is empty; (6) all three ATTRIBUTIONS files carry every skill of their domain; (7) paper collision review done. One fix from step 7: `test-audit`'s description gained a "Do NOT use … `/qa-dotnet:audit`" clause, since `qa-dotnet` already has a whole-suite conformance audit. Snapshot dates in ATTRIBUTIONS come from the GitHub commit API. Unverified in a real session (§6).
 
 ---
 
@@ -371,7 +373,7 @@ block and the line that says which have landed.
 ## Prompts — one per task
 
 Run one session per block; each block is complete on its own. S1–S5 can start at once and run side by
-side, since their files are disjoint and none builds anything. Landed (block deleted): S2, S3, S4. W1 waits for all five and is the gate.
+side, since their files are disjoint and none builds anything. Landed (blocks deleted): S1–S5 and W1.
 **No S prompt may edit a file outside its own new folders** apart from this plan's close-out edits. **No
 prompt installs or runs** NotebookLM or HyperFrames.
 
@@ -385,53 +387,6 @@ prompt installs or runs** NotebookLM or HyperFrames.
 | W1 | `docs` | `general-purpose` | S1, S2, S3, S4, S5 | — | ~130k |
 | — | trigger smoke (§6) | **the user** | W1 | — | — |
 
-The W1 prompt is live.
+No prompt blocks remain: all six tasks landed and their blocks are deleted. The trigger smoke (§6) is the user's and has no block.
 
 ---
-
-### W1 — register, attribute, cross-reference, gate, file (general-purpose, docs)
-
-````
-Depends on: S1, S2, S3, S4, S5
-
-You are a skill author. Task W1 of docs/plans/009-external-skill-adoption.md: the six skills exist,
-unregistered. Register them, record provenance, add the pointers, run the plan's only gate, and file
-the plan.
-
-Deliverable: all six skills are registered as plan §3 says, with the matching edits:
-- marketplace.json lists each skill, and the dev, design and three qa-* descriptions name the new skills.
-- docs/skills-catalog.md and README.md list each skill, with every count that cites them bumped.
-- The three ATTRIBUTIONS.md carry one section per skill; engineering-practices/ATTRIBUTIONS.md is new.
-- The root .gitignore excludes engineering-practices/vendor/notebooklm/{data,.venv}/.
-- The §4 pointers are in place.
-§5a passes, and the plan is in docs/plans/implemented/.
-
-Read, in this order:
-1. CLAUDE.md, and CONTRIBUTING.md "Names and registration".
-2. The plan, whole. Above all §3, §4, §5a, §6, and every S task's As built note: the commits and the
-   final names.
-3. .claude-plugin/marketplace.json: the dev, design, qa-java, qa-dotnet and qa-typescript blocks. Match
-   the shape of their "skills" arrays. qa/_shared/security-testing/source-audit shows a qa/_shared skill
-   registered in all three.
-4. qa/_shared/ATTRIBUTIONS.md (the security-audit section is the entry shape) and design/ATTRIBUTIONS.md.
-5. docs/skills-catalog.md: the engineering-practices catalog (the "6 in-scope skills" and "17 dev
-   skills" counts), the qa _shared list and the design list. In README.md: the folder line for
-   engineering-practices and the provenance table row.
-6. The seven §4 target files.
-
-Gate (this is the last runnable task, so it carries the plan's only gate): §5a steps 1–7, in order.
-`python3 tools/plugin-surface-check.py` must print OK. Fix what the gate finds; a bad name, a stray
-upstream reference or a description collision may belong to any S task.
-
-Traps:
-- Register each skill in exactly the plugins §3 names. A skill folder is never registered by plugins of
-  two categories.
-- engineering-practices/vendor/notebooklm/ stays unregistered.
-- Step 5 needs a fresh clone of the upstream at S4's commit in a scratch directory, never inside the repo.
-
-Commit: `feat: register and attribute the six adopted skills; gate passed (009 W1)`.
-Finish by telling the user the §6 trigger smoke is theirs to run, naming the plugins to reinstall.
-Close out per the plan's "Close-out — every task" before you stop. Your deletion leaves no blocks, so
-rewrite Status one final time (all six unverified in a real session until §6) and git mv this plan into
-docs/plans/implemented/.
-````
