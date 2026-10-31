@@ -7,16 +7,19 @@ AWS/Azure/GCP exploitation), one new defensive skill (cloud incident response + 
 references), and a wiring + cross-reference pass that teaches the existing agents and skills the new
 lane exists.
 
-**Status:** C1, A3, A1 and A2 landed. C1 (2026-10-21): `security/cloud-recon-enumeration` exists with its
-four references. A3 (2026-10-31): `security/cloud-attack-gcp` exists with its SKILL.md + four references.
-A1 (2026-10-31): `security/cloud-attack-aws` exists with its SKILL.md + five references (`pacu`,
-`cloudfox`, `pmapper`, `s3-attacks`, `lab-setup`). A2 (2026-10-31): `security/cloud-attack-azure` exists
-with its SKILL.md + five references (`roadtools`, `azurehound`, `microburst`, `azure-keyvault`,
-`lab-setup`). Next: B1 (independent of C1/A1–A3), then W1 (depends on C1, A1, A2, A3, B1), then G1. Built
-but unverified: C1's, A3's, A1's and A2's content is written and internally consistent but not yet
-cross-checked against each other / B1 (the §5a gate, which runs once in G1, is the first point anything is
-verified end to end). No new commands ship — every new skill is agent-reached, so the catalog's 65-command
-surface is unchanged; the skill inventory and two plugin descriptions do change.
+**Status:** C1, A3, A1, A2 and B1 landed — all five new skills now exist on disk. C1 (2026-10-21):
+`security/cloud-recon-enumeration` exists with its four references. A3 (2026-10-31): `security/cloud-attack-gcp`
+exists with its SKILL.md + four references. A1 (2026-10-31): `security/cloud-attack-aws` exists with its
+SKILL.md + five references (`pacu`, `cloudfox`, `pmapper`, `s3-attacks`, `lab-setup`). A2 (2026-10-31):
+`security/cloud-attack-azure` exists with its SKILL.md + five references (`roadtools`, `azurehound`,
+`microburst`, `azure-keyvault`, `lab-setup`). B1 (2026-10-31): `security/cloud-incident-response` exists with
+its SKILL.md + four references (`aws-ir`, `azure-ir`, `gcp-ir`, `cloud-resilience`). Next: W1 (register the
+five skills in marketplace.json + teach the three agents + catalog; depends on C1, A1, A2, A3, B1), then G1
+(cross-references + the single §5a gate + file the plan). Built but unverified: all five skills' content is
+written and internally consistent but not yet registered/routed (W1), cross-referenced into the existing
+skills (G1), or cross-checked against each other — the §5a gate, which runs once in G1, is the first point
+anything is verified end to end. No new commands ship — every new skill is agent-reached, so the catalog's
+65-command surface is unchanged; the skill inventory and two plugin descriptions do change.
 
 ---
 
@@ -370,6 +373,37 @@ references) ~35k.
 - **Not in B1:** the compliance crosswalk *row* into `compliance-evidence-mapping` (G1); registration /
   routing (W1).
 
+**As built (2026-10-31):** Landed exactly as planned — no divergence. `security/cloud-incident-response/SKILL.md`
+(`file:1`) carries the frontmatter (`name: cloud-incident-response`, triggers + "Not for …" fences vs
+`detection-engineering` (authors the rule) / `detection-validation` (asserts it fired) / `observability`
+(app telemetry) / `cloud-posture` (posture), and the explicit "owns RESPOND + RECOVER, not detect" line).
+Teaching body: the two framework anchors — **NIST SP 800-61r3** (final 2025-04-03, supersedes r2, CSF-2.0
+functions) **and SANS PICERL** — with a step→r3-function→PICERL-phase table; the "acquire before you destroy"
+rule + cloud-adapted order of volatility (RFC 3227); a "know your telemetry" per-cloud three-plane precondition
+table with the immutable/out-of-band retention requirement; the runbook (detect→triage→contain→eradicate→
+recover) with the identity-vs-host containment distinction; the three runbook skeletons (A credential / B
+instance / C exposure); a cloud-forensics chain-of-custody section; anti-patterns and hard rules. Both the
+**Sentinel/Log-Analytics (KQL)** and **Defender-portal** paths are named (migration-incomplete-in-2026 note).
+Four references written exactly as named: `references/aws-ir.md` (CloudTrail triage, EBS snapshot, SSM+LiME/
+WinPmem memory, Detective/Security Hub/Security Lake, libcloudforensics), `references/azure-ir.md` (Sentinel+
+Defender both paths, `az snapshot create`, Entra session/token revoke, Network Watcher), `references/gcp-ir.md`
+(SCC, `gcloud compute disks snapshot`, GRR, cloud-forensics-utils, the SA-as-identity-and-resource twist +
+default-Compute-SA detect-don't-assume note), and `references/cloud-resilience.md` (BCDR: RTO/RPO + BIA, the
+four DR patterns with the "same RPO, different RTO" rule, AZ-vs-region, 3-2-1-1-0 backup + immutability,
+multi-region failover, restore/DR drills, per-cloud service table, and the full BCDR→compliance crosswalk the
+G1 row will cite). Heeded the corpus currency notes: 800-61r3 anchored (r2 five-phase named only as an
+anti-pattern), CSF 2.0 RECOVER as RC.RP+RC.CO (two categories), ISO A.5.29/A.5.30 both new-in-2022,
+libcloudforensics 2024-10-18 + "verify verbs against the repo" caveats, Sentinel→Defender both paths,
+GCP global-VPC + SA-as-resource asymmetries not flattened, and loot redaction throughout. Fenced cleanly vs
+detection-engineering/detection-validation/observability/cloud-posture — this skill consumes the detection
+half and authors none. The BCDR crosswalk ROW into `compliance-evidence-mapping` is left for G1 (per the
+task's "Not in B1"); `cloud-resilience.md` holds the detail that row cites. No prompt block below B1 needed
+rewriting — W1 binds to `./security/cloud-incident-response` and the `cloud-incident-response` frontmatter
+name, and G1 points at `cloud-incident-response/references/cloud-resilience.md`; all three match what this
+task produced. Deliverable proof: `security/cloud-incident-response/SKILL.md:1` plus the four
+`security/cloud-incident-response/references/*.md`. Verified by reading the written files back; no gate run
+(per `Gate: none`).
+
 ---
 
 ### W1 — Register the five skills and teach the agents the lane exists
@@ -527,8 +561,8 @@ Before you stop, in this order, in this file:
 
 Run them in order, one session each; each block is complete on its own. **No prompt runs the gate
 except G1** — C1, A1, A2, A3, B1 and W1 each carry `Gate: none`. No prompt stands up a real cloud
-account or runs any tool; these skills are authored, not executed. **C1, A3, A1 and A2 have landed** (their
-prompt blocks are deleted per the close-out rule); B1, W1, G1 remain live below.
+account or runs any tool; these skills are authored, not executed. **C1, A3, A1, A2 and B1 have landed** (their
+prompt blocks are deleted per the close-out rule); W1, G1 remain live below.
 
 | # | Stack | Agent | Depends on | Budget |
 |---|---|---|---|---|
@@ -541,46 +575,6 @@ prompt blocks are deleted per the close-out rule); B1, W1, G1 remain live below.
 | G1 | `docs` | `general-purpose` | W1 | ~120k |
 
 ---
-
-### B1 — `cloud-incident-response` (general-purpose, docs)
-
-````
-You are authoring a skill (docs). Task B1 of docs/plans/008-cloud-security-lane.md: write
-`security/cloud-incident-response/SKILL.md` + its four references — cloud IR runbook, cloud forensics,
-and BCDR (as cloud-resilience.md). Defensive, for the security-governance plugin.
-
-Read, in this order:
-1. CLAUDE.md.
-2. The plan: §2, §3.2, §4 (the BCDR crosswalk you set up here for G1 to wire), task B1,
-   "Close-out — every task".
-3. `security/detection-engineering/SKILL.md` + `security/detection-validation/SKILL.md` — the detection
-   half this skill CONSUMES (author → validate → respond). Fence against them cleanly.
-4. `security/compliance-evidence-mapping/SKILL.md` — for the BCDR crosswalk idiom (SOC 2 / ISO / NIST).
-5. `docs/research/cloud-security/07-secops-ir-forensics.md` (IR lifecycle, three-cloud log map, forensic
-   acquisition, runbooks) and `docs/research/cloud-security/08-grc-bcdr.md` §BCDR (→ your
-   `cloud-resilience.md`). Anchor to NIST SP 800-61r3 (CSF-2.0-aligned, 2025) AND PICERL; cover both the
-   Sentinel Log-Analytics and Defender-portal paths. Also the README currency ledger.
-
-Write:
-- `security/cloud-incident-response/SKILL.md`: frontmatter `name: cloud-incident-response`, fenced vs
-  detection-engineering (authors) / detection-validation (asserts fired) / observability (app telemetry)
-  / cloud-posture (posture). This skill owns RESPOND + RECOVER, not detect. Teaching body — the IR
-  lifecycle per cloud (detect→triage→contain→eradicate→recover), cloud forensic acquisition
-  (EC2/Azure-disk/GCP-disk snapshot, log-store pulls, chain-of-custody).
-- `references/aws-ir.md`, `references/azure-ir.md`, `references/gcp-ir.md`,
-  `references/cloud-resilience.md` (BCDR: RTO/RPO, multi-region failover, backup-restore drills).
-
-Traps:
-- Do NOT author or validate detections here — that's detection-engineering/detection-validation. You
-  consume their output and respond.
-- The BCDR crosswalk ROW into compliance-evidence-mapping is G1's job; here you just write
-  cloud-resilience.md so G1 can point at it.
-
-Gate: none — gates in G1. Do not run the build, any linter, the §5a gate, or any tool.
-
-Commit: `feat(security-governance): cloud-incident-response skill (cloud lane B1)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
 
 ### W1 — register the skills + teach the agents (general-purpose, docs)
 
